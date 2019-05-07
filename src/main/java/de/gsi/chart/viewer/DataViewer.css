@@ -1,0 +1,57 @@
+.xyz-view {
+	-fx-border-color: #22bad9;
+	-fx-border-width: 1.0;
+}
+
+.title-bar {
+   	-fx-background-color: yellow;
+	-fx-min-height: 20;
+	-fx-pref-height: 20; 
+	-fx-max-height: 20;
+	-fx-background-color: #22bad9;
+}
+
+.title-bar .name-label {
+	-fx-font-weight: bold;
+	-fx-font-size: 12;
+}
+
+.title-bar-button {
+    -fx-min-height: 16;
+    -fx-pref-height: 16; 
+    -fx-max-height: 16;
+}
+
+.restore-button {
+	-fx-min-height: 16;
+	-fx-pref-height: 16; 
+	-fx-max-height: 16;
+}
+
+.maximize-button {
+	-fx-min-height: 16;
+	-fx-pref-height: 16; 
+	-fx-max-height: 16;
+}
+
+.minimize-button {
+    -fx-min-height: 16;
+    -fx-pref-height: 16; 
+    -fx-max-height: 16;
+}
+
+.close-button {
+    -fx-min-height: 16;
+    -fx-pref-height: 16; 
+    -fx-max-height: 16;
+}
+
+.detach-button {
+    -fx-min-height: 16;
+    -fx-pref-height: 16; 
+    -fx-max-height: 16;
+}
+
+.minimizedviewer-pane {
+   
+}
