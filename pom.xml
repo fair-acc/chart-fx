@@ -1,175 +1,179 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <!-- For help regarding the pom.xml please have a look at: http://maven.apache.org/pom.html -->
-    <modelVersion>4.0.0</modelVersion>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<!-- For help regarding the pom.xml please have a look at: http://maven.apache.org/pom.html -->
+	<modelVersion>4.0.0</modelVersion>
 
-    <groupId>de.gsi</groupId>
-    <artifactId>app-common-chart</artifactId>
-    <name>performance improved JavaFX XYChart-based/derived charting library</name>
-    <!-- Major Version Number is linked to JDK Version, minor to feature changes, micro to bug-fixes -->
-    <version>8.0.0</version>
+	<groupId>de.gsi</groupId>
+	<artifactId>chart-fx</artifactId>
+	<name>performance improved JavaFX charting library</name>
+	<!-- N.B. convention: major version number is linked to the compatible JDK 
+		Version, minor version number to library feature/api changes, micro version 
+		number to bug-fixes -->
+	<version>8.0.0</version>
 
-    <!-- Adjust this to describe your project -->
-    <description>This charting library ${project.artifactId}-${project.version} is an extension 
-        in the spirit of Oracle's XYChart functionality. Emphasis was put on plotting performance 
-        with a large number of data points, error bar/surface plots, and other scientific plotting 
-        features (parameter measurements, fitting, multiple axes, zoom, ...). The library also contains
-        a small sett of math routines for fitting, computing spectra, linear algebra, FIR/IIR filtering, 
-        and other common signal processing functionality, ...
+	<description>This charting library ${project.artifactId}-${project.version} is an extension 
+        in the spirit of Oracle's XYChart and performance/time-proven JDataViewer charting functionalities. 
+        Emphasis was put on plotting performance for both large number of data points and real-time displays, 
+        as well as scientific accuracies leading to error bar/surface plots, and other scientific plotting 
+        features (parameter measurements, fitting, multiple axes, zoom, ...). 
+        The library also contains a small set of math routines that can operate directly on the DataSet primitive 
+        for fitting, computing spectra, linear algebra, FIR/IIR filtering, and other functionalities common to signal processing.
     </description>
 
-    <!-- Adjust this to point to your documentation webpage -->
-    <url>http://www-acc.gsi.de/</url>
+	<url>https://github.com/GSI-CS-CO/chartFx</url>
 
-    <properties>
-<!--         <exec.ClasspathScope>test</exec.ClasspathScope> -->
-        <bundle.mainClass>de.gsi.chart.RunDemos</bundle.mainClass>
+	<properties>
+		<!-- <exec.ClasspathScope>test</exec.ClasspathScope> -->
+		<bundle.mainClass>de.gsi.chart.RunDemos</bundle.mainClass>
 
-        <!-- Adjust this to point to your SVN repository where you want to share the project -->
-        <scm.repo>applications/common</scm.repo>
-        <scm.path>${project.artifactId}</scm.path>
-    </properties>
+		<!-- Adjust this to point to your SVN repository where you want to share 
+			the project -->
+		<scm.repo>applications/common</scm.repo>
+		<scm.path>${project.artifactId}</scm.path>
+	</properties>
 
-    <scm>
-        <connection>scm:svn:${svn.dev.url}/${scm.repo}/${scm.path}/trunk</connection>
-        <developerConnection>scm:svn:${svn.dev.url}/${scm.repo}/${scm.path}/trunk</developerConnection>
-        <url>${svn.view.url}/${scm.repo}/${scm.path}/trunk</url>
-    </scm>
+	<scm>
+		<connection>scm:svn:${svn.dev.url}/${scm.repo}/${scm.path}/trunk</connection>
+		<developerConnection>scm:svn:${svn.dev.url}/${scm.repo}/${scm.path}/trunk</developerConnection>
+		<url>${svn.view.url}/${scm.repo}/${scm.path}/trunk</url>
+	</scm>
 
-   <developers>
+	<developers>
 		<developer>
-            <id>hbraeun</id>
-            <name>Harald Brauening</name>
-            <email>H.Braeuning@gsi.de</email>
-            <url>https://www.gsi.de/en/work/project_management_fair/commons/beam_instrumentation.htm</url>
-            <timezone>+1</timezone>
-            <roles>
-                <role>owner</role>
-                <role>architect</role>
-                <role>developer</role>
-            </roles>
-         </developer>
-         <developer>
-            <id>rstein</id>
-            <name>Ralph J. Steinhagen</name>
-            <email>R.Steinhagen@gsi.de</email>
-            <url>https://fair-wiki.gsi.de/FC2WG</url>
-            <timezone>+1</timezone>
-            <roles>
-                <role>owner</role>
-                <role>architect</role>
-                <role>developer</role>
-            </roles>
-        </developer>
-    </developers>
+			<id>hbraeun</id>
+			<name>Harald Brauening</name>
+			<email>H.Braeuning@gsi.de</email>
+			<url>https://www.gsi.de/en/work/project_management_fair/commons/beam_instrumentation.htm</url>
+			<timezone>+1</timezone>
+			<roles>
+				<role>owner</role>
+				<role>architect</role>
+				<role>developer</role>
+			</roles>
+		</developer>
+		<developer>
+			<id>rstein</id>
+			<name>Ralph J. Steinhagen</name>
+			<email>R.Steinhagen@gsi.de</email>
+			<url>https://fair-wiki.gsi.de/FC2WG</url>
+			<timezone>+1</timezone>
+			<roles>
+				<role>owner</role>
+				<role>architect</role>
+				<role>developer</role>
+			</roles>
+		</developer>
+	</developers>
 
-  
-  <!-- Disable doclint due to errors in ws generated code -->  
-  <profiles>     
-    <profile>
-      <id>doclint-java8-disable</id>
-      <activation>
-        <jdk>[1.8,)</jdk>
-      </activation>
-      <properties>
-        <javadoc.opts>-Xdoclint:none</javadoc.opts>
-      </properties>
-    </profile>
-  </profiles>
 
-    <dependencies>       
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-math3</artifactId>
-            <version>3.6.1</version>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <version>1.7.9</version>
-        </dependency>
-        <dependency>
-            <groupId>org.jfxtras</groupId>
-            <artifactId>jfxtras-labs</artifactId>
-            <version>8.0-r5</version>
-        </dependency>
-        <dependency>
-            <groupId>org.controlsfx</groupId>
-            <artifactId>controlsfx</artifactId>
-            <version>8.40.14</version>
-        </dependency>  
-        <dependency>
-            <groupId>de.codecentric.centerdevice</groupId>
-            <artifactId>javafxsvg</artifactId>
-            <version>1.3.0</version>
-        </dependency>  
+	<!-- Disable doclint due to errors in ws generated code -->
+	<profiles>
+		<profile>
+			<id>doclint-java8-disable</id>
+			<activation>
+				<jdk>[1.8,)</jdk>
+			</activation>
+			<properties>
+				<javadoc.opts>-Xdoclint:none</javadoc.opts>
+			</properties>
+		</profile>
+	</profiles>
+
+	<dependencies>
 		<dependency>
-    		<groupId>com.ibm.icu</groupId>
-    		<artifactId>icu4j</artifactId>
-    		<version>63.1</version>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-math3</artifactId>
+			<version>3.6.1</version>
 		</dependency>
-    </dependencies>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>1.7.9</version>
+		</dependency>
+		<dependency>
+			<groupId>org.jfxtras</groupId>
+			<artifactId>jfxtras-labs</artifactId>
+			<version>8.0-r5</version>
+		</dependency>
+		<dependency>
+			<groupId>org.controlsfx</groupId>
+			<artifactId>controlsfx</artifactId>
+			<version>8.40.14</version>
+		</dependency>
+		<dependency>
+			<groupId>de.codecentric.centerdevice</groupId>
+			<artifactId>javafxsvg</artifactId>
+			<version>1.3.0</version>
+		</dependency>
+		<dependency>
+			<groupId>com.ibm.icu</groupId>
+			<artifactId>icu4j</artifactId>
+			<version>63.1</version>
+		</dependency>
+	</dependencies>
 
 
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-javadoc-plugin</artifactId>
-        <configuration>
-          <additionalparam>-Xdoclint:none</additionalparam>
-          <skip>true</skip>
-        </configuration>
-        <executions>
-          <execution>
-            <id>attach-javadocs</id>
-            <goals>
-              <goal>jar</goal>
-            </goals>
-            <configuration>
-              <additionalparam>-Xdoclint:none</additionalparam>
-              <skip>true</skip>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-    </plugins>
-  </build>
-  <reporting>
-    <plugins>
-      <!-- attach JavaDoc -->
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-javadoc-plugin</artifactId>
-        <configuration>
-          <additionalparam>-Xdoclint:none</additionalparam> 
-          <failOnError>false</failOnError>
-          <show>private</show>
-        </configuration>
-        <reportSets>
-          <reportSet>
-            <reports>
-              <report>javadoc</report>
-              <report>test-javadoc</report>
-            </reports>
-          </reportSet>
-        </reportSets>
-      </plugin>
-    <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-site-plugin</artifactId>
-        <configuration>
-          <reportPlugins>
-            <plugin>
-              <groupId>org.apache.maven.plugins</groupId>
-              <artifactId>maven-javadoc-plugin</artifactId>
-              <configuration>
-                <additionalparam>-Xdoclint:none</additionalparam>
-              </configuration>
-            </plugin>
-          </reportPlugins>
-        </configuration>
-      </plugin> 
-    </plugins>
-  </reporting>
-  
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<configuration>
+					<additionalparam>-Xdoclint:none</additionalparam>
+					<skip>true</skip>
+				</configuration>
+				<executions>
+					<execution>
+						<id>attach-javadocs</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+						<configuration>
+							<additionalparam>-Xdoclint:none</additionalparam>
+							<skip>true</skip>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+	<reporting>
+		<plugins>
+			<!-- attach JavaDoc -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<configuration>
+					<additionalparam>-Xdoclint:none</additionalparam>
+					<failOnError>false</failOnError>
+					<show>private</show>
+				</configuration>
+				<reportSets>
+					<reportSet>
+						<reports>
+							<report>javadoc</report>
+							<report>test-javadoc</report>
+						</reports>
+					</reportSet>
+				</reportSets>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-site-plugin</artifactId>
+				<configuration>
+					<reportPlugins>
+						<plugin>
+							<groupId>org.apache.maven.plugins</groupId>
+							<artifactId>maven-javadoc-plugin</artifactId>
+							<configuration>
+								<additionalparam>-Xdoclint:none</additionalparam>
+							</configuration>
+						</plugin>
+					</reportPlugins>
+				</configuration>
+			</plugin>
+		</plugins>
+	</reporting>
+
 </project>
