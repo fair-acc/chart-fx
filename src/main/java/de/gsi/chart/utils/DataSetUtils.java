@@ -1,6 +1,10 @@
 /*****************************************************************************
- * * Common Chart - static data set utilities * * modified: 2018-08-27 Harald Braeuning * modified: 2019-04-01 Ralph
- * Steinhagen - added CSV and error parsing routines *
+ * *
+ * Common Chart - static data set utilities *
+ * *
+ * modified: 2018-08-27 Harald Braeuning *
+ * modified: 2019-04-01 Ralph Steinhagen - added CSV and error parsing routines
+ * *
  ****************************************************************************/
 
 package de.gsi.chart.utils;
@@ -11,8 +15,12 @@ import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -26,6 +34,8 @@ import java.util.Map;
 import java.util.TimeZone;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,7 +55,6 @@ import de.gsi.math.TMath;
  * @author rstein
  */
 public class DataSetUtils {
-
     private static final Logger LOGGER = LoggerFactory.getLogger(DataSetUtils.class);
     private static final String DEFAULT_TIME_FORMAT = "yyyyMMdd_HHmmss";
     private static final String FILE_LOGGING_SUFFIX = ".csv";
@@ -202,19 +211,59 @@ public class DataSetUtils {
         return df.format(new Date(time));
     }
 
+    public enum Compression {
+        AUTO,
+        GZIP,
+        NONE
+    }
+
+    private static PrintWriter openPrintWriter(final File file, final Compression compression) throws Exception {
+        switch (compression) {
+        case NONE:
+            return new PrintWriter(file);
+        case GZIP:
+            return new PrintWriter(new GZIPOutputStream(new FileOutputStream(file)));
+        default:
+            throw new IllegalArgumentException("Unknown Compression format: " + compression.toString());
+        }
+    }
+
+    public static String writeDataSetToFile(final DataSet dataSet, final Path path, final String fileName,
+            final Compression compression) {
+        return writeDataSetToFile(dataSet, path, fileName, -1, null, compression);
+    }
+
     public static String writeDataSetToFile(final DataSet dataSet, final Path path, final String fileName) {
-        return writeDataSetToFile(dataSet, path, fileName, -1, null);
+        return writeDataSetToFile(dataSet, path, fileName, -1, null, Compression.AUTO);
+    }
+
+    public static String writeDataSetToFile(final DataSet dataSet, final Path path, final String fileName,
+            final long userTimeStampMillis, final Compression compression) {
+        return writeDataSetToFile(dataSet, path, fileName, userTimeStampMillis, null, compression);
     }
 
     public static String writeDataSetToFile(final DataSet dataSet, final Path path, final String fileName,
             final long userTimeStampMillis) {
-        return writeDataSetToFile(dataSet, path, fileName, userTimeStampMillis, null);
+        return writeDataSetToFile(dataSet, path, fileName, userTimeStampMillis, null, Compression.AUTO);
     }
 
     public static String writeDataSetToFile(final DataSet dataSet, final Path path, final String fileName,
             final long userTimeStampMillis, final String timeFormatString) {
+        return writeDataSetToFile(dataSet, path, fileName, userTimeStampMillis, timeFormatString, Compression.AUTO);
+    }
+
+    public static String writeDataSetToFile(final DataSet dataSet, final Path path, final String fileName,
+            final long userTimeStampMillis, final String timeFormatString, Compression compression) {
         final long now = System.currentTimeMillis();
         final long timeStampMillis = userTimeStampMillis <= 0 ? now : userTimeStampMillis;
+
+        if (compression == Compression.AUTO) {
+            if (fileName.toLowerCase().endsWith(".gz")) {
+                compression = Compression.GZIP;
+            } else {
+                compression = Compression.NONE;
+            }
+        }
 
         if (dataSet == null) {
             throw new IllegalArgumentException("dataSet must not be null or empty");
@@ -237,7 +286,7 @@ public class DataSetUtils {
             }
 
             // create PrintWriter
-            try (PrintWriter outputfile = new PrintWriter(file);) {
+            try (PrintWriter outputfile = openPrintWriter(file, compression);) {
                 dataSet.lock();
 
                 outputfile.write("#file producer : " + DataSetUtils.class.getCanonicalName());
@@ -258,6 +307,7 @@ public class DataSetUtils {
 
             Files.move(Paths.get(tempFileName), Paths.get(longFileName), REPLACE_EXISTING);
             LOGGER.debug("write data set '" + dataSet.getName() + "' to " + tempFileName + " -> " + longFileName);
+
             return longFileName;
         } catch (final Exception e) {
             LOGGER.error("could not write to file: '" + fileName + "'", e);
@@ -402,12 +452,36 @@ public class DataSetUtils {
     }
 
     public static DataSet readDataSetFromFile(final String fileName) {
+        return readDataSetFromFile(fileName, Compression.AUTO);
+    }
+
+    private static BufferedReader openBufferedReader(final String fileName, final Compression compression)
+            throws Exception {
+        switch (compression) {
+        case GZIP:
+            return new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(fileName))));
+        case NONE:
+            return new BufferedReader(new FileReader(fileName));
+        default:
+            throw new IllegalArgumentException("Unknown Compression format: " + compression.toString());
+        }
+    }
+
+    public static DataSet readDataSetFromFile(final String fileName, Compression compression) {
         if (fileName == null || fileName.isEmpty()) {
             throw new IllegalArgumentException("fileName must not be null or empty");
         }
+        if (compression == Compression.AUTO) {
+            if (fileName.toLowerCase().endsWith(".gz")) {
+                compression = Compression.GZIP;
+            } else {
+                compression = Compression.NONE;
+            }
+        }
         DoubleErrorDataSet dataSet = null;
         try {
-            try (BufferedReader inputFile = new BufferedReader(new FileReader(fileName))) {
+            final DataSetUtils x = new DataSetUtils();
+            try (BufferedReader inputFile = openBufferedReader(fileName, compression);) {
                 String dataSetName = "unknown data set";
                 int nDataCountEstimate = 0;
                 final ArrayList<String> info = new ArrayList<>();
@@ -458,11 +532,9 @@ public class DataSetUtils {
 
                 // automatically closing writer connection
             } catch (final IOException e) {
-                e.printStackTrace();
                 LOGGER.error("could not open/parse file: '" + fileName + "'", e);
             }
         } catch (final Exception e) {
-            e.printStackTrace();
             LOGGER.error("could not open/parse file: '" + fileName + "'", e);
             return dataSet;
         }
@@ -478,6 +550,7 @@ public class DataSetUtils {
                     continue;
                 }
 
+                final long index = Long.parseLong(parse[0]); // ignored only for cross-checks
                 final double x = Double.parseDouble(parse[1]);
                 final double y = Double.parseDouble(parse[2]);
                 final double eyn = parse.length <= 5 ? 0.0 : Double.parseDouble(parse[3]);
