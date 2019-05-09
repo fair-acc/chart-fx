@@ -34,6 +34,8 @@ import java.util.Map;
 import java.util.TimeZone;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
@@ -47,6 +49,7 @@ import de.gsi.chart.data.spi.AbstractDataSet;
 import de.gsi.chart.data.spi.DefaultDataSet;
 import de.gsi.chart.data.spi.DoubleDataSet;
 import de.gsi.chart.data.spi.DoubleErrorDataSet;
+import de.gsi.chart.utils.DataSetUtils.Compression;
 import de.gsi.math.DataSetMath;
 import de.gsi.math.TMath;
 
@@ -228,34 +231,27 @@ public class DataSetUtils {
         }
     }
 
-    public static String writeDataSetToFile(final DataSet dataSet, final Path path, final String fileName,
-            final Compression compression) {
-        return writeDataSetToFile(dataSet, path, fileName, -1, null, compression);
-    }
-
     public static String writeDataSetToFile(final DataSet dataSet, final Path path, final String fileName) {
-        return writeDataSetToFile(dataSet, path, fileName, -1, null, Compression.AUTO);
+        return writeDataSetToFile(dataSet, path, fileName, Compression.AUTO);
     }
 
+    /**
+     * Export the contents of the supplied dataSet to file as comma separated values with an additional comment header
+     * containing metaData if existent. The filename can contain placeholders of the form {metadatafield;type;format},
+     * where metadatafield references a field in the metadata as specified by the metaDataDataSet interface. The special
+     * field systemTime can be used to use the current system time. The optional type field supports "string", "date",
+     * "int" and "float", where "string" is the default. The optional format field can be used to provide format
+     * strings. The default for date is SimpleDateFormat "yyyyMMdd_HHmmss", for int and float it is printf's "%d" and
+     * "%e".
+     *
+     * @param dataSet The DataSet to export
+     * @param path Path to the location of the file
+     * @param fileName Filename (with "{metadatafield;type;format}" placeholders for variables)
+     * @param compression Compression method (GZIP or NONE)
+     * @return actual name of the file that was written or none in case of errors
+     */
     public static String writeDataSetToFile(final DataSet dataSet, final Path path, final String fileName,
-            final long userTimeStampMillis, final Compression compression) {
-        return writeDataSetToFile(dataSet, path, fileName, userTimeStampMillis, null, compression);
-    }
-
-    public static String writeDataSetToFile(final DataSet dataSet, final Path path, final String fileName,
-            final long userTimeStampMillis) {
-        return writeDataSetToFile(dataSet, path, fileName, userTimeStampMillis, null, Compression.AUTO);
-    }
-
-    public static String writeDataSetToFile(final DataSet dataSet, final Path path, final String fileName,
-            final long userTimeStampMillis, final String timeFormatString) {
-        return writeDataSetToFile(dataSet, path, fileName, userTimeStampMillis, timeFormatString, Compression.AUTO);
-    }
-
-    public static String writeDataSetToFile(final DataSet dataSet, final Path path, final String fileName,
-            final long userTimeStampMillis, final String timeFormatString, Compression compression) {
-        final long now = System.currentTimeMillis();
-        final long timeStampMillis = userTimeStampMillis <= 0 ? now : userTimeStampMillis;
+            Compression compression) {
 
         if (compression == Compression.AUTO) {
             if (fileName.toLowerCase().endsWith(".gz")) {
@@ -273,13 +269,50 @@ public class DataSetUtils {
         }
 
         try {
-            final String format = timeFormatString != null && !timeFormatString.isEmpty() ? timeFormatString
-                    : DEFAULT_TIME_FORMAT;
-            final String longFileName = userTimeStampMillis > 0 && format != null && !format.isEmpty()
-                    ? path.toFile() + String.format("/%s_%s%s", fileName.replaceAll(FILE_LOGGING_SUFFIX, ""),
-                            getISODate(timeStampMillis, format), FILE_LOGGING_SUFFIX)
-                    : path.toFile() + "/" + fileName;
-            final String tempFileName = longFileName + "_temp" + FILE_LOGGING_SUFFIX;
+            // Format Filename
+            final Pattern placeholder = Pattern.compile("\\{([^\\{\\}]*)\\}");
+            final Matcher matcher = placeholder.matcher(fileName);
+            final String realFileName = matcher.replaceAll(match -> {
+                final String[] substitutionparams = match.group(1).split(";");
+                if (substitutionparams.length == 0) {
+                    throw new IllegalArgumentException("fileName contains empty placeholder: " + match.group());
+                }
+                String value;
+                if (substitutionparams[0].equals("systemTime")) {
+                    value = Long.toString(System.currentTimeMillis());
+                } else {
+                    if (!(dataSet instanceof DataSetMetaData)) {
+                        throw new IllegalArgumentException(
+                                "fileName placeholder references meta data but dataSet is not instanceof DataSetMetaData");
+                    }
+                    final DataSetMetaData metaDataSet = (DataSetMetaData) dataSet;
+                    value = metaDataSet.getMetaInfo().get(substitutionparams[0]);
+                    if (value == null) {
+                        throw new IllegalArgumentException(
+                                "fileName placeholder references nonexisting metaData field: " + substitutionparams[0]);
+                    }
+                }
+                if (substitutionparams.length == 1 || substitutionparams[1].equals("string")) {
+                    return value;
+                }
+                String format;
+                switch (substitutionparams[1]) {
+                case "date":
+                    format = (substitutionparams.length < 3) ? DEFAULT_TIME_FORMAT : substitutionparams[2];
+                    return getISODate(Long.valueOf(value), format);
+                case "int":
+                    format = (substitutionparams.length < 3) ? "%d" : substitutionparams[2];
+                    return String.format(format, Long.valueOf(value));
+                case "float":
+                    format = (substitutionparams.length < 3) ? "%e" : substitutionparams[2];
+                    return String.format(format, Long.valueOf(value));
+                default:
+                    throw new IllegalArgumentException(
+                            "fileName contains placeholder with illegal type: " + substitutionparams[1]);
+                }
+            });
+            final String longFileName = path.toFile() + "/" + realFileName;
+            final String tempFileName = longFileName + ".tmp";
             final File file = new File(tempFileName);
             if (file.getParentFile().mkdirs()) {
                 LOGGER.info("needed to create directory for file: " + longFileName);

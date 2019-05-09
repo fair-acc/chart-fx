@@ -8,7 +8,6 @@ import de.gsi.chart.axes.spi.DefaultNumericAxis;
 import de.gsi.chart.data.DataSet;
 import de.gsi.chart.data.spi.DoubleDataSet;
 import de.gsi.chart.utils.DataSetUtils;
-import de.gsi.chart.utils.DataSetUtils.Compression;
 import de.gsi.chart.utils.PeriodicScreenCapture;
 import javafx.application.Application;
 import javafx.scene.Scene;
@@ -21,6 +20,8 @@ public class WriteDataSetToFileSample extends Application {
     private static final int N_SAMPLES = 100;
     private static final String CSV_FILE_NAME_1 = "test1.csv";
     private static final String CSV_FILE_NAME_2 = "test2.csv.gz";
+    private static final String CSV_FILE_NAME_1_timestamped = "test1_{acqTimeStamp;date}.csv";
+    private static final String CSV_FILE_NAME_2_timestamped = "test2_{acqTimeStamp;int}.csv.gz";
     private static final String PNG_FILE_NAME = "test.png";
     private static final int DEFAULT_DELAY = 2;
     private static final int DEFAULT_PERIOD = 5;
@@ -72,20 +73,18 @@ public class WriteDataSetToFileSample extends Application {
 
             // add some important meta data to dataSet1 (e.g. acquisition time stamp)
             dataSet1.getMetaInfo().put("acqTimeStamp", Long.toString(userTimeStampMillis));
-            dataSet1.getMetaInfo().put("acqTimeStamp", Long.toString(userTimeStampMillis));
+            dataSet2.getMetaInfo().put("acqTimeStamp", Long.toString(userTimeStampMillis));
 
-            final String actualFileName1 = DataSetUtils.writeDataSetToFile(dataSet1, path, CSV_FILE_NAME_1,
-                    userTimeStampMillis, Compression.NONE);
-            final String actualFileName2 = DataSetUtils.writeDataSetToFile(dataSet2, path, CSV_FILE_NAME_2,
-                    userTimeStampMillis, Compression.GZIP);
+            final String actualFileName1 = DataSetUtils.writeDataSetToFile(dataSet1, path, CSV_FILE_NAME_1_timestamped);
+            final String actualFileName2 = DataSetUtils.writeDataSetToFile(dataSet2, path, CSV_FILE_NAME_2_timestamped);
 
             System.out.println("write data time-stamped to directory = " + path);
             System.out.println("actualFileName1 = " + actualFileName1);
             System.out.println("actualFileName2 = " + actualFileName2);
 
             // recover written data sets
-            final DataSet recoveredDataSet1 = DataSetUtils.readDataSetFromFile(actualFileName1, Compression.NONE);
-            final DataSet recoveredDataSet2 = DataSetUtils.readDataSetFromFile(actualFileName2, Compression.GZIP);
+            final DataSet recoveredDataSet1 = DataSetUtils.readDataSetFromFile(actualFileName1);
+            final DataSet recoveredDataSet2 = DataSetUtils.readDataSetFromFile(actualFileName2);
 
             chart2.getDatasets().clear();
             if (recoveredDataSet1 != null) {
