@@ -13,7 +13,12 @@ import de.gsi.chart.data.DataSet;
 import de.gsi.chart.data.DataSetMetaData;
 import de.gsi.chart.data.testdata.spi.GaussFunction;
 import de.gsi.chart.data.testdata.spi.RandomWalkFunction;
+import de.gsi.chart.plugins.DataPointTooltip;
 import de.gsi.chart.plugins.EditAxis;
+import de.gsi.chart.plugins.EditDataSet;
+import de.gsi.chart.plugins.Panner;
+import de.gsi.chart.plugins.ParameterMeasurements;
+import de.gsi.chart.plugins.TableViewer;
 import de.gsi.chart.plugins.XRangeIndicator;
 import de.gsi.chart.plugins.Zoomer;
 import de.gsi.chart.renderer.Renderer;
@@ -36,7 +41,8 @@ import javafx.stage.Stage;
 
 public class MetaDataRendererSample extends Application {
 
-    private static final int N_SAMPLES = 10000; // default: 1000000
+    private static final int N_SAMPLES1 = 10000; // default: 1000000
+    private static final int N_SAMPLES2 = 50; // default: 1000000
     private static final int UPDATE_DELAY = 1000; // [ms]
     private static final int UPDATE_PERIOD = 1000; // [ms]
     private Timer timer;
@@ -53,13 +59,13 @@ public class MetaDataRendererSample extends Application {
         final BorderPane root = new BorderPane();
         final Scene scene = new Scene(root, 800, 600);
 
-        final DefaultNumericAxis xAxis1 = new DefaultNumericAxis("x axis", "");
-        final DefaultNumericAxis yAxis1 = new DefaultNumericAxis("y axis", "");
+        final DefaultNumericAxis xAxis1 = new DefaultNumericAxis("x axis", "samples");
+        final DefaultNumericAxis yAxis1 = new DefaultNumericAxis("y axis", "V");
         yAxis1.setAnimated(false);
         // padding is useful for showing error messages on top or bottom half
         // of canvas
         yAxis1.setAutoRangePadding(0.1);
-        final DefaultNumericAxis yAxis2 = new DefaultNumericAxis("y axis2", "");
+        final DefaultNumericAxis yAxis2 = new DefaultNumericAxis("y axis2", "A");
         yAxis2.setSide(Side.RIGHT);
         // padding is useful for showing error messages on top or bottom half
         // of canvas
@@ -85,10 +91,16 @@ public class MetaDataRendererSample extends Application {
 
         getTask(renderer1, renderer2).run();
 
+        chart.getPlugins().add(new ParameterMeasurements());
         final Zoomer zoom = new Zoomer();
         chart.getPlugins().add(zoom);
         final XRangeIndicator xRange = new XRangeIndicator(xAxis1, 50, 60);
-        chart.getPlugins().add(xRange);
+        chart.getPlugins().add(xRange);        
+        chart.getPlugins().add(new EditAxis());
+        chart.getPlugins().add(new Panner());
+        chart.getPlugins().add(new TableViewer());               
+        chart.getPlugins().add(new EditDataSet());
+        chart.getPlugins().add(new DataPointTooltip());
         chart.getPlugins().add(new EditAxis());
 
         chart.getAllDatasets().addListener((final ListChangeListener.Change<? extends DataSet> c) -> {
@@ -157,9 +169,9 @@ public class MetaDataRendererSample extends Application {
                     // setAll in order to implicitly clear previous list of
                     // 'old' data sets
                     renderer1.getDatasets()
-                            .setAll(new MetaInfoRandomWalkFunction("random walk", MetaDataRendererSample.N_SAMPLES));
+                            .setAll(new MetaInfoRandomWalkFunction("random walk", MetaDataRendererSample.N_SAMPLES1));
                     renderer2.getDatasets()
-                            .setAll(new MetaInfoGausFunction("gaussy", MetaDataRendererSample.N_SAMPLES));
+                            .setAll(new MetaInfoGausFunction("gaussy", MetaDataRendererSample.N_SAMPLES2, MetaDataRendererSample.N_SAMPLES1));
 
                     if (updateCount % 100 == 0) {
                         System.out.println("update iteration #" + updateCount);
@@ -211,10 +223,23 @@ public class MetaDataRendererSample extends Application {
     protected int counter2 = -1;
 
     class MetaInfoGausFunction extends GaussFunction implements DataSetMetaData {
-
-        public MetaInfoGausFunction(String name, int count) {
+    	private int range;
+        public MetaInfoGausFunction(String name, int count, int range2) {
             super(name, count);
             counter2++;
+            range = range2;
+            this.setStyle("fillColor=green");
+        }
+        
+        @Override
+        public double getX(final int index) {
+            return (double)index/((double)this.getDataCount())*range;
+        }
+
+        @Override
+        public double getY(final int index) {
+        	double x = getX(index);        	
+            return 1000*MetaInfoGausFunction.gauss(x, 0.5*range, 1000);
         }
 
         @Override

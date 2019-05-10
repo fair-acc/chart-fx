@@ -6,7 +6,7 @@
 
 	<groupId>de.gsi</groupId>
 	<artifactId>chart-fx</artifactId>
-	<name>performance improved JavaFX charting library</name>
+	<name>ChartFX</name>
 	<!-- N.B. convention: major version number is linked to the compatible JDK 
 		Version, minor version number to library feature/api changes, micro version 
 		number to bug-fixes -->
@@ -20,7 +20,12 @@
         The library also contains a small set of math routines that can operate directly on the DataSet primitive 
         for fitting, computing spectra, linear algebra, FIR/IIR filtering, and other functionalities common to signal processing.
     </description>
-
+    
+    <organization>
+		<name>GSI Helmholtzzentrum für Schwerionenforschung GmbH</name>
+		<url>http://www.gsi.de</url>
+	</organization>	
+	
 	<url>https://github.com/GSI-CS-CO/chartFx</url>
 
 	<properties>
@@ -175,5 +180,5 @@
 			</plugin>
 		</plugins>
 	</reporting>
-
+	
 </project>
