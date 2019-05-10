@@ -140,7 +140,7 @@ public class SimpleMeasurements extends ValueIndicator {
 
         final Node node = Borders.wrap(valueField).lineBorder().title(title).color(Color.BLACK).build().build();
         node.setMouseTransparent(true);
-        displayPane.setCenter(node);
+        displayPane.getChildren().add(node);
 
         sliderIndicator1.valueProperty().addListener((ch, oldValue, newValue) -> {
             if (oldValue != newValue) {
@@ -271,22 +271,28 @@ public class SimpleMeasurements extends ValueIndicator {
         }
 
         final Axis axis = measType.isVerticalMeasurement() ? chart.getYAxis() : chart.getXAxis();
+        final Axis altAxis = measType.isVerticalMeasurement() ? chart.getXAxis() : chart.getYAxis();
         axis.getLabel();
         // final String unit = axisLabel.substring(axisLabel.indexOf('[') + 1,
         // axisLabel.indexOf(']'));
-        final String unit = axis.getUnit() == null ? "a.u." : axis.getUnit();
+        final String unit = altAxis.getUnit() == null ? "a.u." : altAxis.getUnit();
         valueField.setUnit(unit);
 
-        if (measType == TRANSMISSION_ABS || measType == TRANSMISSION_REL) {
-            valueField.setUnit("%");
-        }
 
-        if (measType == INTEGRAL) {
-            final Axis altAxis = measType.isVerticalMeasurement() ? chart.getXAxis() : chart.getYAxis();
-            final String altAxisLabel = altAxis.getLabel();
-            final String unit2 = altAxisLabel.substring(altAxisLabel.indexOf('[') + 1, altAxisLabel.indexOf(']'));
-            valueField.setUnit(unit + "*" + unit2);
+        final String altAxisLabel = altAxis.getLabel();
+        switch (measType) {
+        case TRANSMISSION_ABS:
+        case TRANSMISSION_REL:
+        	valueField.setUnit("%");
+        	break;
+        default:
+        case INTEGRAL:
+        	final String unit2 = altAxisLabel.replaceAll("\\[", "").replaceAll("\\]","");
+            //valueField.setUnit(unit + "*" + unit2);
+        	//valueField.setUnit(unit);
+        	break;
         }
+ 
 
         // update label valueTextField
         String valueLabel;

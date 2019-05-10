@@ -92,6 +92,8 @@ public class CheckedValueField extends VBox {
             valueTextField.setFont(Font.font(CheckedValueField.DEFAULT_FONT, fontSizeLarge));
             unitTextField.setFont(Font.font(CheckedValueField.DEFAULT_UNIT_FONT, fontSizeSmall));
         });
+        
+        VBox.setVgrow(this, Priority.SOMETIMES);
     }
 
     private class MyHBox extends HBox {

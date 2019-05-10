@@ -84,7 +84,7 @@ public class ValueIndicator extends AbstractChartMeasurement {
     public void initialize() {
         final Node node = Borders.wrap(valueField).lineBorder().title(title).color(Color.BLACK).build().build();
         node.setMouseTransparent(true);
-        displayPane.setCenter(node);
+        displayPane.getChildren().add(node);
 
         sliderIndicator1.valueProperty().addListener((ch, oldValue, newValue) -> {
             if (oldValue != newValue) {

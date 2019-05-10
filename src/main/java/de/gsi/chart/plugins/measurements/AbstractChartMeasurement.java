@@ -33,7 +33,7 @@ public abstract class AbstractChartMeasurement implements InvalidationListener {
     protected final CheckedValueField valueField = new CheckedValueField();
     protected String title;
     private DataSet dataSet;
-    protected BorderPane displayPane = new BorderPane();
+    protected VBox displayPane = new VBox();
     protected final Alert alert;
     protected final ButtonType buttonOK = new ButtonType("OK", ButtonBar.ButtonData.OK_DONE);
     protected final ButtonType buttonDefault = new ButtonType("Defaults", ButtonBar.ButtonData.OK_DONE);
@@ -53,7 +53,7 @@ public abstract class AbstractChartMeasurement implements InvalidationListener {
         title = AbstractChartMeasurement.this.getClass().getSimpleName();
         dataSet = null;
         VBox.setMargin(displayPane, Insets.EMPTY);
-        chart.getMeasurementBar(chart.getMeasurementBarSide()).getChildren().add(displayPane);
+        chart.getMeasurementBar(chart.getMeasurementBarSide()).getChildren().addAll(displayPane, new Pane());
 
         alert = new Alert(AlertType.CONFIRMATION);
         alert.setTitle("Measurement Config Dialog");
