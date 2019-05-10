@@ -734,7 +734,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         final double tickMarkLength = isTickMarkVisible() && getTickLength() > 0 ? getTickLength() : 0;
         // calculate label height
         final double labelHeight = axisLabel.getText() == null || axisLabel.getText().isEmpty() ? 0
-                : axisLabel.prefHeight(-1) + getAxisLabelGap();
+                : axisLabel.prefHeight(-1) + 2*getAxisLabelGap();
         final double shiftedLabels = getOverlapPolicy() == AxisLabelOverlapPolicy.SHIFT_ALT && isLabelOverlapping()
                 || getOverlapPolicy() == AxisLabelOverlapPolicy.FORCED_SHIFT_ALT ? labelHeight : 0.0;
         return tickMarkLength + maxLabelHeightLocal + labelHeight + shiftedLabels;
@@ -777,7 +777,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         final double tickMarkLength = isTickMarkVisible() && getTickLength() > 0 ? getTickLength() : 0;
         // calculate label height
         final double labelHeight = axisLabel.getText() == null || axisLabel.getText().isEmpty() ? 0
-                : axisLabel.prefHeight(-1) + getAxisLabelGap();
+                : axisLabel.prefHeight(-1) + 2*getAxisLabelGap();
 
         final double shiftedLabels = getOverlapPolicy() == AxisLabelOverlapPolicy.SHIFT_ALT && isLabelOverlapping()
                 || getOverlapPolicy() == AxisLabelOverlapPolicy.FORCED_SHIFT_ALT ? labelHeight : 0.0;
