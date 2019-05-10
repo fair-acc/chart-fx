@@ -1,30 +1,23 @@
-/*****************************************************************************
- * *
- * Common Chart - static data set utilities *
- * *
- * modified: 2018-08-27 Harald Braeuning *
- * modified: 2019-04-01 Ralph Steinhagen - added CSV and error parsing routines
- * *
- ****************************************************************************/
+/********************************************************************************
+ * * Common Chart - static data set utilities *<br>
+ * modified: 2018-08-27 Harald Braeuning *<br>
+ * modified: 2019-04-01 Ralph Steinhagen - added CSV and error parsing routines *
+ ********************************************************************************/
 
 package de.gsi.chart.utils;
 
 import static de.gsi.chart.utils.DataSetUtils.ErrType.EYN;
 import static de.gsi.chart.utils.DataSetUtils.ErrType.EYP;
-import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -38,6 +31,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipException;
+import java.util.zip.ZipInputStream;
+import java.util.zip.ZipOutputStream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,18 +46,18 @@ import de.gsi.chart.data.spi.AbstractDataSet;
 import de.gsi.chart.data.spi.DefaultDataSet;
 import de.gsi.chart.data.spi.DoubleDataSet;
 import de.gsi.chart.data.spi.DoubleErrorDataSet;
-import de.gsi.chart.utils.DataSetUtils.Compression;
 import de.gsi.math.DataSetMath;
 import de.gsi.math.TMath;
 
 /**
  * @author braeun
  * @author rstein
+ * @author akrimm
  */
 public class DataSetUtils {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(DataSetUtils.class);
     private static final String DEFAULT_TIME_FORMAT = "yyyyMMdd_HHmmss";
-    private static final String FILE_LOGGING_SUFFIX = ".csv";
 
     private DataSetUtils() {
         // static class nothing to be initialised
@@ -106,26 +103,40 @@ public class DataSetUtils {
     }
 
     public enum ErrType {
+        /**
+         * Negative x error
+         */
         EXN,
+        /**
+         * Positive x error
+         */
         EXP,
+        /**
+         * Negative y error
+         */
         EYN,
+        /**
+         * Positive y error
+         */
         EYP;
     }
 
     /**
-     * convenience short-hand notation for getting error variables (if defined for dataset)
+     * convenience short-hand notation for getting error variable at a specific data point index. Returns 0.0 if no
+     * errors are defined.
      *
      * @param dataSet the source data set
      * @param eType the error type
      * @param index the data set index
-     * @return the given error
+     * @return the given error at data point "index"
      */
     public static double error(final DataSet dataSet, final ErrType eType, final int index) {
         return error(dataSet, eType, index, 0.0, false);
     }
 
     /**
-     * convenience short-hand notation for getting error variables (if defined for dataset)
+     * convenience short-hand notation for getting error variable at an exact x value. Returns 0.0 if no errors are
+     * defined.
      *
      * @param dataSet the source data set
      * @param eType the error type
@@ -136,7 +147,16 @@ public class DataSetUtils {
         return error(dataSet, eType, -1, x, true);
     }
 
-    // convenience short-hand notation for getting error variables (if defined for dataset)
+    /**
+     * convenience short-hand notation for getting error variables. Returns 0.0 if no errors are defined.
+     *
+     * @param dataSet the source data set
+     * @param eType the error type
+     * @param index the data set index
+     * @param x the data set x-value for which the error should be interpolated
+     * @param interpolate determines if the value at index or the interpolated value at x should be returned
+     * @return the given error
+     */
     protected static double error(final DataSet dataSet, final ErrType eType, final int index, final double x,
             final boolean interpolate) {
         if (!(dataSet instanceof DataSetError)) {
@@ -171,8 +191,14 @@ public class DataSetUtils {
         return 0;
     }
 
+    /**
+     * small helper routine to crop data array in case it's to long
+     *
+     * @param in input data array
+     * @param length length of output array
+     * @return cropped/zero-padded array of size length.
+     */
     protected static double[] cropToLength(final double[] in, final int length) {
-        // small helper routine to crop data array in case it's to long
         if (in.length == length) {
             return in;
         }
@@ -206,6 +232,13 @@ public class DataSetUtils {
         }
     }
 
+    /**
+     * Get ISO date from milliseconds since Jan 01, 1970
+     *
+     * @param time_ms
+     * @param format
+     * @return ISO formatted UTC datetime string
+     */
     public static String getISODate(final long time_ms, final String format) {
         final long time = TimeUnit.MILLISECONDS.toMillis(time_ms);
         final TimeZone tz = TimeZone.getTimeZone("UTC");
@@ -214,73 +247,124 @@ public class DataSetUtils {
         return df.format(new Date(time));
     }
 
+    /**
+     * Supported Compression Types
+     */
     public enum Compression {
+        /**
+         * Determine Compression from file extension
+         */
         AUTO,
+        /**
+         * GZIP compression
+         */
         GZIP,
+        /**
+         * ZIP compression. Allways reads from first entry in archive and writes to a new entry with same filename as
+         * achive minus zip extension.
+         */
+        ZIP,
+        /**
+         * Plaintext csv data
+         */
         NONE
     }
 
-    private static PrintWriter openPrintWriter(final File file, final Compression compression) throws Exception {
+    /**
+     * Open a PrintWriter that is backed by the appropriate compression and file handling streams.
+     *
+     * @param file File to open
+     * @param compression Compression method
+     * @return A ready-to-go writer that is agnostic to the underlying compression method
+     * @throws IOException
+     */
+    private static PrintWriter openPrintWriter(final File file, final Compression compression) throws IOException {
         switch (compression) {
         case NONE:
             return new PrintWriter(file);
         case GZIP:
             return new PrintWriter(new GZIPOutputStream(new FileOutputStream(file)));
+        case ZIP:
+            final ZipOutputStream zipOStream = new ZipOutputStream(new FileOutputStream(file));
+            final String filename = file.getName();
+            final String zipentryname = filename.toLowerCase().endsWith(".zip")
+                    ? filename.substring(0, filename.length() - 4)
+                    : filename;
+            zipOStream.putNextEntry(new ZipEntry(zipentryname));
+            return new PrintWriter(zipOStream);
         default:
             throw new IllegalArgumentException("Unknown Compression format: " + compression.toString());
         }
     }
 
-    public static String writeDataSetToFile(final DataSet dataSet, final Path path, final String fileName) {
-        return writeDataSetToFile(dataSet, path, fileName, Compression.AUTO);
+    /**
+     * Open a buffered Reader that is backed by the appropriate stream classes for the chosen compression method.
+     *
+     * @param fileName
+     * @param compression
+     * @return
+     * @throws IOException
+     */
+    private static BufferedReader openBufferedReader(final File file, final Compression compression)
+            throws IOException {
+        switch (compression) {
+        case ZIP:
+            final ZipInputStream zipIStream = new ZipInputStream(new FileInputStream(file));
+            if (zipIStream.getNextEntry() == null) {
+                throw new ZipException("Corrupt zip archive has no entries");
+            }
+            return new BufferedReader(new InputStreamReader(zipIStream));
+        case GZIP:
+            return new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(file))));
+        case NONE:
+            return new BufferedReader(new FileReader(file));
+        default:
+            throw new IOException("Unimplemented Compression");
+        }
     }
 
     /**
-     * Export the contents of the supplied dataSet to file as comma separated values with an additional comment header
-     * containing metaData if existent. The filename can contain placeholders of the form {metadatafield;type;format},
-     * where metadatafield references a field in the metadata as specified by the metaDataDataSet interface. The special
-     * field systemTime can be used to use the current system time. The optional type field supports "string", "date",
-     * "int" and "float", where "string" is the default. The optional format field can be used to provide format
+     * Produce a filename from a dataSet and a String that can contain {datafield;type;format} style placeholders.
+     * Datafield references a field in the metadata as specified by the metaDataDataSet interface. The special field
+     * "systemTime" can be used to use the current system time. Also the standard DataSet fields can be used
+     * ("dataSetName", "xMin", "xMax", "yMin", "yMax"). The optional type field supports "string", "date", "int/long"
+     * and "float/double", where "string" is the default. The optional format field can be used to provide format
      * strings. The default for date is SimpleDateFormat "yyyyMMdd_HHmmss", for int and float it is printf's "%d" and
      * "%e".
      *
-     * @param dataSet The DataSet to export
-     * @param path Path to the location of the file
+     * @param dataSet A dataSet containing all the data field referenced in the filename pattern
      * @param fileName Filename (with "{metadatafield;type;format}" placeholders for variables)
-     * @param compression Compression method (GZIP or NONE)
-     * @return actual name of the file that was written or none in case of errors
+     * @return The fielname with the placeholders replaced
      */
-    public static String writeDataSetToFile(final DataSet dataSet, final Path path, final String fileName,
-            Compression compression) {
-
-        if (compression == Compression.AUTO) {
-            if (fileName.toLowerCase().endsWith(".gz")) {
-                compression = Compression.GZIP;
-            } else {
-                compression = Compression.NONE;
+    public static String getFileName(final DataSet dataSet, final String fileName) {
+        final Pattern placeholder = Pattern.compile("\\{([^\\{\\}]*)\\}");
+        final Matcher matcher = placeholder.matcher(fileName);
+        return matcher.replaceAll(match -> {
+            final String[] substitutionparams = match.group(1).split(";");
+            if (substitutionparams.length == 0) {
+                throw new IllegalArgumentException("fileName contains empty placeholder: " + match.group());
             }
-        }
-
-        if (dataSet == null) {
-            throw new IllegalArgumentException("dataSet must not be null or empty");
-        }
-        if (fileName == null || fileName.isEmpty()) {
-            throw new IllegalArgumentException("fileName must not be null or empty");
-        }
-
-        try {
-            // Format Filename
-            final Pattern placeholder = Pattern.compile("\\{([^\\{\\}]*)\\}");
-            final Matcher matcher = placeholder.matcher(fileName);
-            final String realFileName = matcher.replaceAll(match -> {
-                final String[] substitutionparams = match.group(1).split(";");
-                if (substitutionparams.length == 0) {
-                    throw new IllegalArgumentException("fileName contains empty placeholder: " + match.group());
-                }
-                String value;
-                if (substitutionparams[0].equals("systemTime")) {
-                    value = Long.toString(System.currentTimeMillis());
-                } else {
+            String value;
+            if (substitutionparams[0].equals("systemTime")) {
+                value = Long.toString(System.currentTimeMillis());
+            } else {
+                switch (substitutionparams[0]) {
+                case "dataSetName":
+                    value = dataSet.getName();
+                    break;
+                case "xMin":
+                    value = Double.toString(dataSet.getXMin());
+                    break;
+                case "xMax":
+                    value = Double.toString(dataSet.getXMax());
+                    break;
+                case "yMin":
+                    value = Double.toString(dataSet.getYMin());
+                    break;
+                case "yMax":
+                    value = Double.toString(dataSet.getYMax());
+                    break;
+                default:
                     if (!(dataSet instanceof DataSetMetaData)) {
                         throw new IllegalArgumentException(
                                 "fileName placeholder references meta data but dataSet is not instanceof DataSetMetaData");
@@ -292,34 +376,110 @@ public class DataSetUtils {
                                 "fileName placeholder references nonexisting metaData field: " + substitutionparams[0]);
                     }
                 }
-                if (substitutionparams.length == 1 || substitutionparams[1].equals("string")) {
-                    return value;
-                }
-                String format;
-                switch (substitutionparams[1]) {
-                case "date":
-                    format = (substitutionparams.length < 3) ? DEFAULT_TIME_FORMAT : substitutionparams[2];
-                    return getISODate(Long.valueOf(value), format);
-                case "int":
-                    format = (substitutionparams.length < 3) ? "%d" : substitutionparams[2];
-                    return String.format(format, Long.valueOf(value));
-                case "float":
-                    format = (substitutionparams.length < 3) ? "%e" : substitutionparams[2];
-                    return String.format(format, Long.valueOf(value));
-                default:
-                    throw new IllegalArgumentException(
-                            "fileName contains placeholder with illegal type: " + substitutionparams[1]);
-                }
-            });
+            }
+            if (substitutionparams.length == 1 || substitutionparams[1].equals("string")) {
+                return value;
+            }
+            String format;
+            switch (substitutionparams[1]) {
+            case "date":
+                format = (substitutionparams.length < 3) ? DEFAULT_TIME_FORMAT : substitutionparams[2];
+                return getISODate(Long.valueOf(value), format);
+            case "int":
+            case "long":
+                format = (substitutionparams.length < 3) ? "%d" : substitutionparams[2];
+                return String.format(format, Long.valueOf(value));
+            case "float":
+            case "double":
+                format = (substitutionparams.length < 3) ? "%e" : substitutionparams[2];
+                return String.format(format, Double.valueOf(value));
+            default:
+                throw new IllegalArgumentException(
+                        "fileName contains placeholder with illegal type: " + substitutionparams[1]);
+            }
+        });
+    }
+
+    /**
+     * Determine the compression method from the file extension.
+     *
+     * @param fileName
+     * @return Compression Enum for the extension of the supplied filename. Defaults to Compression.NONE
+     */
+    private static Compression evaluateAutoCompression(final String fileName) {
+        if (fileName.toLowerCase().endsWith(".gz")) {
+            return Compression.GZIP;
+        }
+        if (fileName.toLowerCase().endsWith(".zip")) {
+            return Compression.ZIP;
+        }
+        return Compression.NONE;
+    }
+
+    /**
+     * Export the contents of the supplied dataSet to file as comma separated values with an additional comment header
+     * containing metaData if existent.<br>
+     * The filename can contain placeholders of the form {metadatafield;type;format}, where metadatafield references a
+     * field in the metadata as specified by the metaDataDataSet interface. The special field systemTime can be used to
+     * use the current system time. Also the standard DataSet fields can be used ("dataSetName", "xMin", "xMax", "yMin",
+     * "yMax"). The optional type field supports "string", "date", "int/long" and "float/double", where "string" is the
+     * default. The optional format field can be used to provide format strings. The default for date is
+     * SimpleDateFormat "yyyyMMdd_HHmmss", for int and float it is printf's "%d" and "%e".<br>
+     * The compression method is automatically determined from the file extension. <br>
+     * The data format is a custom extension of csv with an additional #-commented Metadata Header and a $-commented
+     * column header. Expects the following columns in this order to be present: index, x, y, eyn, eyp.
+     *
+     * @param fileName Path and name of file containing csv data.
+     * @param dataSet The DataSet to export
+     * @param path Path to the location of the file
+     * @param fileName Filename (with "{metadatafield;type;format}" placeholders for variables)
+     * @return actual name of the file that was written or none in case of errors
+     */
+    public static String writeDataSetToFile(final DataSet dataSet, final Path path, final String fileName) {
+        return writeDataSetToFile(dataSet, path, fileName, Compression.AUTO);
+    }
+
+    /**
+     * Export the contents of the supplied dataSet to file as comma separated values with an additional comment header
+     * containing metaData if existent.<br>
+     * The filename can contain placeholders of the form {metadatafield;type;format}, where metadatafield references a
+     * field in the metadata as specified by the metaDataDataSet interface. The special field systemTime can be used to
+     * use the current system time. Also the standard DataSet fields can be used ("dataSetName", "xMin", "xMax", "yMin",
+     * "yMax"). The optional type field supports "string", "date", "int/long" and "float/double", where "string" is the
+     * default. The optional format field can be used to provide format strings. The default for date is
+     * SimpleDateFormat "yyyyMMdd_HHmmss", for int and float it is printf's "%d" and "%e".<br>
+     * The data format is a custom extension of csv with an additional #-commented Metadata Header and a $-commented
+     * column header. Expects the following columns in this order to be present: index, x, y, eyn, eyp.
+     *
+     * @param dataSet The DataSet to export
+     * @param path Path to the location of the file
+     * @param fileName Filename (with "{metadatafield;type;format}" placeholders for variables)
+     * @param compression Compression of the file (GZIP, ZIP or NONE). Supply AUTO or ommit this value to use file
+     *            extension.
+     * @return actual name of the file that was written or none in case of errors
+     */
+    public static String writeDataSetToFile(final DataSet dataSet, final Path path, final String fileName,
+            Compression compression) {
+        if (compression == Compression.AUTO) {
+            compression = evaluateAutoCompression(fileName);
+        }
+        if (dataSet == null) {
+            throw new IllegalArgumentException("dataSet must not be null or empty");
+        }
+        if (fileName == null || fileName.isEmpty()) {
+            throw new IllegalArgumentException("fileName must not be null or empty");
+        }
+
+        try {
+            final String realFileName = getFileName(dataSet, fileName);
             final String longFileName = path.toFile() + "/" + realFileName;
-            final String tempFileName = longFileName + ".tmp";
-            final File file = new File(tempFileName);
+            final File file = new File(longFileName);
             if (file.getParentFile().mkdirs()) {
                 LOGGER.info("needed to create directory for file: " + longFileName);
             }
 
             // create PrintWriter
-            try (PrintWriter outputfile = openPrintWriter(file, compression);) {
+            try (PrintWriter outputfile = openPrintWriter(file, compression)) {
                 dataSet.lock();
 
                 outputfile.write("#file producer : " + DataSetUtils.class.getCanonicalName());
@@ -338,8 +498,7 @@ public class DataSetUtils {
                 dataSet.unlock();
             }
 
-            Files.move(Paths.get(tempFileName), Paths.get(longFileName), REPLACE_EXISTING);
-            LOGGER.debug("write data set '" + dataSet.getName() + "' to " + tempFileName + " -> " + longFileName);
+            LOGGER.debug("write data set '" + dataSet.getName() + "' to " + longFileName);
 
             return longFileName;
         } catch (final Exception e) {
@@ -484,37 +643,40 @@ public class DataSetUtils {
         return split[1];
     }
 
+    /**
+     * Read a Dataset from a file containing comma separated values.<br>
+     * Automatically determines compression from the file extension.<br>
+     * The data format is a custom extension of csv with an additional #-commented Metadata Header and a $-commented
+     * column header. Expects the following columns in this order to be present: index, x, y, eyn, eyp.
+     *
+     * @param fileName Path and name of file containing csv data.
+     * @return DataSet with the data and metadata read from the file
+     */
     public static DataSet readDataSetFromFile(final String fileName) {
         return readDataSetFromFile(fileName, Compression.AUTO);
     }
 
-    private static BufferedReader openBufferedReader(final String fileName, final Compression compression)
-            throws Exception {
-        switch (compression) {
-        case GZIP:
-            return new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(fileName))));
-        case NONE:
-            return new BufferedReader(new FileReader(fileName));
-        default:
-            throw new IllegalArgumentException("Unknown Compression format: " + compression.toString());
-        }
-    }
-
+    /**
+     * Read a Dataset from a file containing comma separated values.<br>
+     * The data format is a custom extension of csv with an additional #-commented Metadata Header and a $-commented
+     * column header. Expects the following columns in this order to be present: index, x, y, eyn, eyp.
+     *
+     * @param fileName Path and name of file containing csv data.
+     * @param compression Compression of the file (GZIP, ZIP or NONE). Supply AUTO or ommit this value to use file
+     *            extension.
+     * @return DataSet with the data and metadata read from the file
+     */
     public static DataSet readDataSetFromFile(final String fileName, Compression compression) {
         if (fileName == null || fileName.isEmpty()) {
             throw new IllegalArgumentException("fileName must not be null or empty");
         }
         if (compression == Compression.AUTO) {
-            if (fileName.toLowerCase().endsWith(".gz")) {
-                compression = Compression.GZIP;
-            } else {
-                compression = Compression.NONE;
-            }
+            compression = evaluateAutoCompression(fileName);
         }
         DoubleErrorDataSet dataSet = null;
         try {
-            final DataSetUtils x = new DataSetUtils();
-            try (BufferedReader inputFile = openBufferedReader(fileName, compression);) {
+            final File file = new File(fileName);
+            try (BufferedReader inputFile = openBufferedReader(file, compression);) {
                 String dataSetName = "unknown data set";
                 int nDataCountEstimate = 0;
                 final ArrayList<String> info = new ArrayList<>();
@@ -565,9 +727,11 @@ public class DataSetUtils {
 
                 // automatically closing writer connection
             } catch (final IOException e) {
+                e.printStackTrace();
                 LOGGER.error("could not open/parse file: '" + fileName + "'", e);
             }
         } catch (final Exception e) {
+            e.printStackTrace();
             LOGGER.error("could not open/parse file: '" + fileName + "'", e);
             return dataSet;
         }
