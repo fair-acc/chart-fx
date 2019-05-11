@@ -16,17 +16,22 @@ public class DefaultTimeTickUnitSupplier implements TickUnitSupplier {
      */
     public static final double[] TICK_UNIT_DEFAULTS = { // in units of
             // seconds
-            0.001, // 1 milli-second
-            0.010, // 100 milli-second
-            0.100, // 100 milli-second
+            0.001, // 1 milli-seconds
+            0.010, // 10 milli-seconds
+            0.100, // 100 milli-seconds
+            0.500, // 500 milli-seconds
             1.000, // 1 second
-            15.000, // 15 second
-            30.000, // 30 second
+            1.500, // 1.5 seconds
+            2.000, // 2 seconds
+            5.000, // 5 seconds
+            10.000, // 10 seconds
+            15.000, // 15 seconds
+            30.000, // 30 seconds
             60.000, // 1 minute
             900.000, // 15 minutes
             180.000, // 30 minutes
             3600.000, // 1 hour
-            5400.000, // 1.5 hour
+            5400.000, // 1.5 hours
             7200.000, // 2 hours
             900.000, // 2.5 hours
             10800.000, // 3 hours
