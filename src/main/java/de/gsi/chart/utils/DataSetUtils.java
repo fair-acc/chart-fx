@@ -334,70 +334,75 @@ public class DataSetUtils {
      *
      * @param dataSet A dataSet containing all the data field referenced in the filename pattern
      * @param fileName Filename (with "{metadatafield;type;format}" placeholders for variables)
-     * @return The fielname with the placeholders replaced
+     * @return The filename with the placeholders replaced
      */
     public static String getFileName(final DataSet dataSet, final String fileName) {
         final Pattern placeholder = Pattern.compile("\\{([^\\{\\}]*)\\}");
         final Matcher matcher = placeholder.matcher(fileName);
-        return matcher.replaceAll(match -> {
-            final String[] substitutionparams = match.group(1).split(";");
+        final StringBuffer result = new StringBuffer();
+        while (matcher.find()) {
+            final String[] substitutionparams = matcher.group(1).split(";");
             if (substitutionparams.length == 0) {
-                throw new IllegalArgumentException("fileName contains empty placeholder: " + match.group());
+                throw new IllegalArgumentException("fileName contains empty placeholder: " + matcher.group());
             }
             String value;
-            if (substitutionparams[0].equals("systemTime")) {
+            switch (substitutionparams[0]) {
+            case "systemTime":
                 value = Long.toString(System.currentTimeMillis());
-            } else {
-                switch (substitutionparams[0]) {
-                case "dataSetName":
-                    value = dataSet.getName();
-                    break;
-                case "xMin":
-                    value = Double.toString(dataSet.getXMin());
-                    break;
-                case "xMax":
-                    value = Double.toString(dataSet.getXMax());
-                    break;
-                case "yMin":
-                    value = Double.toString(dataSet.getYMin());
-                    break;
-                case "yMax":
-                    value = Double.toString(dataSet.getYMax());
-                    break;
-                default:
-                    if (!(dataSet instanceof DataSetMetaData)) {
-                        throw new IllegalArgumentException(
-                                "fileName placeholder references meta data but dataSet is not instanceof DataSetMetaData");
-                    }
-                    final DataSetMetaData metaDataSet = (DataSetMetaData) dataSet;
-                    value = metaDataSet.getMetaInfo().get(substitutionparams[0]);
-                    if (value == null) {
-                        throw new IllegalArgumentException(
-                                "fileName placeholder references nonexisting metaData field: " + substitutionparams[0]);
-                    }
+                break;
+            case "dataSetName":
+                value = dataSet.getName();
+                break;
+            case "xMin":
+                value = Double.toString(dataSet.getXMin());
+                break;
+            case "xMax":
+                value = Double.toString(dataSet.getXMax());
+                break;
+            case "yMin":
+                value = Double.toString(dataSet.getYMin());
+                break;
+            case "yMax":
+                value = Double.toString(dataSet.getYMax());
+                break;
+            default:
+                if (!(dataSet instanceof DataSetMetaData)) {
+                    throw new IllegalArgumentException(
+                            "fileName placeholder references meta data but dataSet is not instanceof DataSetMetaData");
+                }
+                final DataSetMetaData metaDataSet = (DataSetMetaData) dataSet;
+                value = metaDataSet.getMetaInfo().get(substitutionparams[0]);
+                if (value == null) {
+                    throw new IllegalArgumentException(
+                            "fileName placeholder references nonexisting metaData field: " + substitutionparams[0]);
                 }
             }
-            if (substitutionparams.length == 1 || substitutionparams[1].equals("string")) {
-                return value;
+            if ((substitutionparams.length != 1) && !substitutionparams[1].equals("string")) {
+                String format;
+                switch (substitutionparams[1]) {
+                case "date":
+                    format = (substitutionparams.length < 3) ? DEFAULT_TIME_FORMAT : substitutionparams[2];
+                    value = getISODate(Long.valueOf(value), format);
+                    break;
+                case "int":
+                case "long":
+                    format = (substitutionparams.length < 3) ? "%d" : substitutionparams[2];
+                    value = String.format(format, Long.valueOf(value));
+                    break;
+                case "float":
+                case "double":
+                    format = (substitutionparams.length < 3) ? "%e" : substitutionparams[2];
+                    value = String.format(format, Double.valueOf(value));
+                    break;
+                default:
+                    throw new IllegalArgumentException(
+                            "fileName contains placeholder with illegal type: " + substitutionparams[1]);
+                }
             }
-            String format;
-            switch (substitutionparams[1]) {
-            case "date":
-                format = (substitutionparams.length < 3) ? DEFAULT_TIME_FORMAT : substitutionparams[2];
-                return getISODate(Long.valueOf(value), format);
-            case "int":
-            case "long":
-                format = (substitutionparams.length < 3) ? "%d" : substitutionparams[2];
-                return String.format(format, Long.valueOf(value));
-            case "float":
-            case "double":
-                format = (substitutionparams.length < 3) ? "%e" : substitutionparams[2];
-                return String.format(format, Double.valueOf(value));
-            default:
-                throw new IllegalArgumentException(
-                        "fileName contains placeholder with illegal type: " + substitutionparams[1]);
-            }
-        });
+            matcher.appendReplacement(result, value);
+        }
+        matcher.appendTail(result);
+        return result.toString();
     }
 
     /**
@@ -466,7 +471,7 @@ public class DataSetUtils {
         if (dataSet == null) {
             throw new IllegalArgumentException("dataSet must not be null or empty");
         }
-        if (fileName == null || fileName.isEmpty()) {
+        if ((fileName == null) || fileName.isEmpty()) {
             throw new IllegalArgumentException("fileName must not be null or empty");
         }
 
@@ -667,7 +672,7 @@ public class DataSetUtils {
      * @return DataSet with the data and metadata read from the file
      */
     public static DataSet readDataSetFromFile(final String fileName, Compression compression) {
-        if (fileName == null || fileName.isEmpty()) {
+        if ((fileName == null) || fileName.isEmpty()) {
             throw new IllegalArgumentException("fileName must not be null or empty");
         }
         if (compression == Compression.AUTO) {
