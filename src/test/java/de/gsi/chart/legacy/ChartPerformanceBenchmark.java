@@ -57,8 +57,8 @@ public class ChartPerformanceBenchmark extends AbstractTestApplication {
     private final Node chart2 = chartTestCase2.getChart(nSamples);
     private final Node chart3 = chartTestCase3.getChart(nSamples);
     private final DoubleDataSet results1 = new DoubleDataSet("JavaFX Chart");
-    private final DoubleDataSet results2 = new DoubleDataSet("new Chart (ErrorDataSetRenderer)");
-    private final DoubleDataSet results3 = new DoubleDataSet("new Chart (ReducingLineRenderer)");
+    private final DoubleDataSet results2 = new DoubleDataSet("ChartFx (ErrorDataSetRenderer)");
+    private final DoubleDataSet results3 = new DoubleDataSet("ChartFx (ReducingLineRenderer)");
     // used to abort test for given chart implementation if FPS drops below 20Hz
     private final boolean[] compute = { true, true, true };
 
