@@ -162,7 +162,7 @@ public class CheckedValueField extends VBox {
     }
 
     public void setUnit(final String val) {
-        if (unitTextField.getText().equals(val)) {
+        if (unitTextField.getText() == null || unitTextField.getText().equals(val)) {
             return;
         }
         unitTextField.setText(val);

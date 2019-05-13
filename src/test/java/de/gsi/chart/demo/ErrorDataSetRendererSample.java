@@ -52,8 +52,12 @@ public class ErrorDataSetRendererSample extends Application {
         final Scene scene = new Scene(root, 800, 600);
         final XYChart chart = new XYChart(new DefaultNumericAxis(), new DefaultNumericAxis());
         chart.legendVisibleProperty().set(true);
-        chart.getXAxis().setLabel("time [us]");
-        chart.getYAxis().setLabel("y-axis [a.u.]");
+        chart.getXAxis().setLabel("time");
+        chart.getXAxis().setUnit("s");
+        chart.getXAxis().setAutoUnitScaling(true);
+        
+        chart.getYAxis().setLabel("y-axis");
+        chart.getYAxis().setAutoUnitScaling(true);
         chart.legendVisibleProperty().set(true);
         chart.getPlugins().add(new ParameterMeasurements());
         chart.getPlugins().add(new EditAxis());

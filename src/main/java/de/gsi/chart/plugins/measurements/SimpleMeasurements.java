@@ -19,6 +19,7 @@ import de.gsi.chart.XYChart;
 import de.gsi.chart.axes.AxisLabelFormatter;
 import de.gsi.chart.axes.AxisMode;
 import de.gsi.chart.axes.spi.DefaultNumericAxis;
+import de.gsi.chart.axes.spi.MetricPrefix;
 import de.gsi.chart.axes.Axis;
 import de.gsi.chart.data.DataSet;
 import de.gsi.chart.plugins.measurements.utils.SimpleDataSetEstimators;
@@ -65,13 +66,13 @@ public class SimpleMeasurements extends ValueIndicator {
                                 "Abs. Transmission"), TRANSMISSION_REL(true, ACC, "Rel. Transmission"),
 
         // horizontal-type measurements
-        EDGE_DETECT(true, HORIZONTAL, "Edge-Detect"), RISETIME(true, HORIZONTAL,
-                "20%-80% Rise-/Fall-Time\n (simple)"), FWHM(true, HORIZONTAL, "FWHM"), FWHM_INTERPOLATED(true,
+        EDGE_DETECT(false, HORIZONTAL, "Edge-Detect"), RISETIME(false, HORIZONTAL,
+                "20%-80% Rise-/Fall-Time\n (simple)"), FWHM(false, HORIZONTAL, "FWHM"), FWHM_INTERPOLATED(false,
                         HORIZONTAL,
-                        "FWHM (interp.)"), LOCATION_MAXIMUM(true, HORIZONTAL, "Loc. Maximum"), LOCATION_MAXIMUM_GAUSS(
-                                true, HORIZONTAL, "Loc. Maximum\n(Gauss-interp.)"), DUTY_CYCLE(true, HORIZONTAL,
+                        "FWHM (interp.)"), LOCATION_MAXIMUM(false, HORIZONTAL, "Loc. Maximum"), LOCATION_MAXIMUM_GAUSS(
+                                false, HORIZONTAL, "Loc. Maximum\n(Gauss-interp.)"), DUTY_CYCLE(false, HORIZONTAL,
                                         "Duty Cycle\n(10% hysteresis)"), PERIOD(true, HORIZONTAL,
-                                                "Period"), FREQUENCY(true, HORIZONTAL, "Frequency");
+                                                "Period"), FREQUENCY(false, HORIZONTAL, "Frequency");
 
         private String name;
         private MeasurementCategory category;
@@ -272,34 +273,23 @@ public class SimpleMeasurements extends ValueIndicator {
 
         final Axis axis = measType.isVerticalMeasurement() ? chart.getYAxis() : chart.getXAxis();
         final Axis altAxis = measType.isVerticalMeasurement() ? chart.getXAxis() : chart.getYAxis();
-        axis.getLabel();
-        // final String unit = axisLabel.substring(axisLabel.indexOf('[') + 1,
-        // axisLabel.indexOf(']'));
-        final String unit = altAxis.getUnit() == null ? "a.u." : altAxis.getUnit();
-        valueField.setUnit(unit);
+        
+        final String axisUnit = axis.getUnit();
+        final String unit = axisUnit == null ? "a.u." : axis.getUnit();        
 
+        final double unitScale = ((DefaultNumericAxis) axis).getUnitScaling();
 
-        final String altAxisLabel = altAxis.getLabel();
-        switch (measType) {
-        case TRANSMISSION_ABS:
-        case TRANSMISSION_REL:
-        	valueField.setUnit("%");
-        	break;
-        default:
-        case INTEGRAL:
-        	final String unit2 = altAxisLabel.replaceAll("\\[", "").replaceAll("\\]","");
-            //valueField.setUnit(unit + "*" + unit2);
-        	//valueField.setUnit(unit);
-        	break;
-        }
- 
+        final String axisPrefix = MetricPrefix.getShortPrefix(unitScale);
+
+        // convert value according to scale factor
+        final double scaledValue = val / unitScale;
 
         // update label valueTextField
-        String valueLabel;
-        if (axis instanceof DefaultNumericAxis) {
+        String valueLabel = Double.toString(scaledValue);
+        if (axis instanceof DefaultNumericAxis && axisUnit != null) {
+            valueField.setUnit(new StringBuilder().append(axisPrefix).append(unit).toString());
             final AxisLabelFormatter axisFormatter = ((DefaultNumericAxis) axis).getAxisLabelFormatter();
-
-            valueLabel = axisFormatter.toString(val);
+            valueLabel = axisFormatter.toString(scaledValue);
         } else {
             if (Math.abs(Math.log10(Math.abs(val))) < ValueIndicator.SMALL_FORMAT_THRESHOLD) {
                 formatter = formatterSmall;
@@ -307,9 +297,24 @@ public class SimpleMeasurements extends ValueIndicator {
                 formatter = formatterLarge;
             }
             valueLabel = formatter.format(val);
+            valueField.setUnit(unit);
         }
+
         valueField.setValue(val, valueLabel);
 
+        final String altAxisLabel = altAxis.getLabel();
+        switch (measType) {
+        case TRANSMISSION_ABS:
+        case TRANSMISSION_REL:
+            valueField.setUnit("%");
+            break;
+        default:
+        case INTEGRAL:
+            final String unit2 = altAxisLabel.replaceAll("\\[", "").replaceAll("\\]", "");
+            // valueField.setUnit(unit + "*" + unit2);
+            // valueField.setUnit(unit);
+            break;
+        }
     }
 
 }
