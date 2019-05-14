@@ -21,8 +21,7 @@ import javafx.css.CssMetaData;
 import javafx.css.SimpleStyleableDoubleProperty;
 import javafx.css.Styleable;
 import javafx.css.StyleableProperty;
-import javafx.scene.chart.NumberAxis;
-import javafx.scene.chart.ValueAxis;
+import javafx.scene.layout.Region;
 
 /**
  * A axis class that plots a range of numbers with major tick marks every
@@ -593,7 +592,7 @@ public final class NumericAxis extends AbstractAxis {
 
         static {
             final List<CssMetaData<? extends Styleable, ?>> styleables = new ArrayList<>(
-                    ValueAxis.getClassCssMetaData());
+                    Region.getClassCssMetaData());
             styleables.add(StyleableProperties.TICK_UNIT);
             STYLEABLES = Collections.unmodifiableList(styleables);
         }
