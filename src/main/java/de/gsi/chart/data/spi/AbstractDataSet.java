@@ -162,7 +162,7 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
     }
 
     public DataRange getYRange() {
-        if (!xRange.isDefined()) {
+        if (!yRange.isDefined()) {
             computeLimits();
         }
         return yRange;

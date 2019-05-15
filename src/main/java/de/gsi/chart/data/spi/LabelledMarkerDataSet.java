@@ -2,7 +2,7 @@
  *                                                                           *
  * Common Chart - data set for labeled markers                               *
  *                                                                           *
- * modified: 2018-11-13 Harald Braeuning                                     *
+ * modified: 2019-05-07 Harald Braeuning                                     *
  *                                                                           *
  ****************************************************************************/
 
@@ -20,7 +20,7 @@ import javafx.collections.ObservableList;
  * Minor extension to <code>DefaultDataSet</code> to easier handle labeled markers.
  * @author braeun
  */
-public class LabelledMarkerDataSet extends AbstractDataSet<DefaultDataSet> implements DataSet {
+public class LabelledMarkerDataSet extends AbstractDataSet<LabelledMarkerDataSet> implements DataSet {
 
   protected ObservableList<String> dataLabels = FXCollections.observableArrayList();
   protected ObservableList<String> dataStyles = FXCollections.observableArrayList();
@@ -48,7 +48,7 @@ public class LabelledMarkerDataSet extends AbstractDataSet<DefaultDataSet> imple
         return data.size();
     }
 
-    public DefaultDataSet clearData() {
+    public LabelledMarkerDataSet clearData() {
         lock().setAutoNotifaction(false);
 
         data.clear();
@@ -79,7 +79,7 @@ public class LabelledMarkerDataSet extends AbstractDataSet<DefaultDataSet> imple
     {
       data.add(new DoublePoint(marker.getX(),marker.getY()));
       xRange.add(marker.getX());
-      yRange.add(marker.getY());
+//      yRange.add(marker.getY());
       dataLabels.add(marker.getLabel());
       dataStyles.add(marker.getStyle());
     }
@@ -108,7 +108,7 @@ public class LabelledMarkerDataSet extends AbstractDataSet<DefaultDataSet> imple
         final double y = marker.getY();
         data.add(new DoublePoint(x,y));
         xRange.add(x);
-        yRange.add(y);
+//        yRange.add(y);
         dataLabels.add(marker.getLabel());
         dataStyles.add(marker.getStyle());
       }
@@ -136,7 +136,7 @@ public class LabelledMarkerDataSet extends AbstractDataSet<DefaultDataSet> imple
     {
       data.get(index).set(marker.getX(),marker.getY());
       xRange.add(marker.getX());
-      yRange.add(marker.getY());
+//      yRange.add(marker.getY());
       dataLabels.set(index,marker.getLabel());
       dataStyles.set(index,marker.getStyle());
     }
@@ -148,7 +148,7 @@ public class LabelledMarkerDataSet extends AbstractDataSet<DefaultDataSet> imple
     return this;
   }
 
-    public DefaultDataSet remove(final int fromIndex, final int toIndex) {
+    public LabelledMarkerDataSet remove(final int fromIndex, final int toIndex) {
         lock().setAutoNotifaction(false);
         AssertUtils.indexInBounds(fromIndex, getDataCount(), "fromIndex");
         AssertUtils.indexInBounds(toIndex, getDataCount(), "toIndex");
@@ -195,5 +195,28 @@ public class LabelledMarkerDataSet extends AbstractDataSet<DefaultDataSet> imple
         return dataStyles.get(index);
     }
 
+    
+    /**
+     * Computes limits (ranges) of this DataSet.
+   * @return 
+     */
+  @Override
+    protected LabelledMarkerDataSet computeLimits() {
+        lock();
+        // Clear previous ranges
+        xRange.empty();
+        yRange.empty();
+
+        final int dataCount = getDataCount();
+
+        for (int i = 0; i < dataCount; i++) {
+            xRange.add(getX(i));
+//            yRange.add(getY(i));
+        }
+
+        return unlock();
+    }
+
+    
 
 }
