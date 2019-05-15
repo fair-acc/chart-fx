@@ -56,7 +56,7 @@ public class RollingBufferSample extends Application {
         // for higher performance w/o error bars, enable this for comparing with
         // the standard JavaFX charting library (which does not support error
         // handling, etc.)
-        // eRenderer.setErrorType(ErrorStyle.NONE);
+        eRenderer.setErrorType(ErrorStyle.NONE);
         eRenderer.setDashSize(RollingBufferSample.MIN_PIXEL_DISTANCE); // plot
                                                                        // pixel-to-pixel
                                                                        // distance

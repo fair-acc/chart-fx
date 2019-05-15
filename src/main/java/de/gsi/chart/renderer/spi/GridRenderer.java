@@ -14,6 +14,7 @@ import de.gsi.chart.axes.spi.TickMark;
 import de.gsi.chart.data.DataSet;
 import de.gsi.chart.renderer.Renderer;
 import javafx.beans.property.BooleanProperty;
+import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.SetChangeListener;
@@ -104,6 +105,13 @@ public class GridRenderer extends Pane implements Renderer {
         horMinorGridStyleNode.getPseudoClassStates().addListener(listener);
         verMinorGridStyleNode.getPseudoClassStates().addListener(listener);
 
+        ChangeListener<? super Boolean> change = (ob, o, n) -> {
+            horMajorGridStyleNode.pseudoClassStateChanged(GridRenderer.SELECTED_PSEUDO_CLASS, horMinorGridStyleNode.isVisible());
+            verMajorGridStyleNode.pseudoClassStateChanged(GridRenderer.SELECTED_PSEUDO_CLASS, verMinorGridStyleNode.isVisible());
+        };
+        
+        horizontalGridLinesVisibleProperty().addListener(change);
+        verticalGridLinesVisibleProperty().addListener(change);
     }
 
     @Override
@@ -115,16 +123,11 @@ public class GridRenderer extends Pane implements Renderer {
         }
         final XYChart xyChart = (XYChart) chart;
         isPolarPlot = xyChart.isPolarPlot();
-
-        horMajorGridStyleNode.pseudoClassStateChanged(GridRenderer.SELECTED_PSEUDO_CLASS,
-                horMinorGridStyleNode.isVisible());
-        verMajorGridStyleNode.pseudoClassStateChanged(GridRenderer.SELECTED_PSEUDO_CLASS,
-                verMinorGridStyleNode.isVisible());
-
+      
         if (isPolarPlot) {
             drawPolarGrid(gc, xyChart);
         } else {
-            drawEuclideanGrid(gc, xyChart);
+            drawEuclideanGrid2(gc, xyChart);
         }
 
     }
@@ -297,6 +300,71 @@ public class GridRenderer extends Pane implements Renderer {
         }
         gc.restore();
     }
+    
+    protected void drawEuclideanGrid2(final GraphicsContext gc, XYChart xyChart) {
+        final Axis xAxis = xyChart.getXAxis();
+        final Axis yAxis = xyChart.getYAxis();
+        final double xAxisWidth = xyChart.getCanvas().getWidth();
+        final double xAxisWidthSnapped = snap(xAxisWidth);        
+        final double yAxisHeight = xyChart.getCanvas().getHeight();
+        final double yAxisHeightSnapped = snap(yAxisHeight);
+        final double zeroSnapped = snap(0);
+        if (xAxis instanceof Node) {
+            ((Node) xAxis).setVisible(true);
+        }
+
+        gc.save();
+        // draw vertical major grid lines
+        if (verMajorGridStyleNode.isVisible() || verMinorGridStyleNode.isVisible()) {
+            applyGraphicsStyleFromLineStyle(gc, verMajorGridStyleNode);
+            ObservableList<TickMark> tickMarks = xAxis.getTickMarks();
+            for (int i=0; i<tickMarks.size(); i++) {
+                double x = snap(xAxis.getDisplayPosition(tickMarks.get(i).getValue()));
+                if (x > 0 && x <= xAxisWidth) {
+                    gc.strokeLine(x, zeroSnapped, x, yAxisHeightSnapped);
+                }
+            }
+        }
+
+        // draw vertical minor grid lines
+        if (xAxis instanceof Axis && xAxis.isLogAxis() || verMinorGridStyleNode.isVisible()) {
+            applyGraphicsStyleFromLineStyle(gc, verMinorGridStyleNode);
+            ObservableList<TickMark> tickMarks = xAxis.getMinorTickMarks();
+            for (int i=0; i<tickMarks.size(); i++) {
+                double x = snap(xAxis.getDisplayPosition(tickMarks.get(i).getValue()));
+                if (x > 0 && x <= xAxisWidth) {
+                    gc.strokeLine(x, zeroSnapped, x, yAxisHeightSnapped);
+                }
+            }                       
+        }
+
+        // draw horizontal major grid lines
+        if (horMajorGridStyleNode.isVisible() || horMinorGridStyleNode.isVisible()) {
+            applyGraphicsStyleFromLineStyle(gc, horMajorGridStyleNode);
+            ObservableList<TickMark> tickMarks = yAxis.getTickMarks();
+            for (int i=0; i<tickMarks.size(); i++) {
+                double y = snap(yAxis.getDisplayPosition(tickMarks.get(i).getValue()));
+                if (y >= 0 && y < yAxisHeight) {
+                    gc.strokeLine(zeroSnapped, y, xAxisWidthSnapped, y);
+                }
+            }              
+
+        }
+
+        // draw horizontal minor grid lines
+        if (yAxis instanceof Axis && yAxis.isLogAxis() || horMinorGridStyleNode.isVisible()) {
+            applyGraphicsStyleFromLineStyle(gc, horMinorGridStyleNode);
+            ObservableList<TickMark> tickMarks = yAxis.getMinorTickMarks();
+            for (int i=0; i<tickMarks.size(); i++) {
+                double y = snap(yAxis.getDisplayPosition(tickMarks.get(i).getValue()));
+                if (y >= 0 && y < yAxisHeight) {
+                    gc.strokeLine(zeroSnapped, y, xAxisWidthSnapped, y);
+                }
+            }                      
+        }
+        gc.restore();
+    }
+
 
     /**
      * @return observable list of axes that are supposed to be used by the renderer
