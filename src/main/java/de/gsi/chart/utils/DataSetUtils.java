@@ -14,15 +14,22 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.io.FilterInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.io.PushbackInputStream;
+import java.nio.ByteBuffer;
+import java.nio.DoubleBuffer;
 import java.nio.file.Path;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 import java.util.concurrent.ConcurrentHashMap;
@@ -270,20 +277,101 @@ public class DataSetUtils {
         NONE
     }
 
+    private static class SplitCharByteInputStream extends FilterInputStream {
+        private final static byte marker = (byte) 0xFE;
+        private boolean binary = false;
+        private boolean hasMarker = false;
+        private final PushbackInputStream pbin;
+
+        public SplitCharByteInputStream(final PushbackInputStream in) {
+            super(in);
+            pbin = in;
+        }
+
+        @Override
+        public int read() throws IOException {
+            int b = in.read();
+            if (b == marker) {
+                pbin.unread(b);
+                b = -1;
+            }
+            return b;
+        }
+
+        @Override
+        public int read(final byte[] b) throws IOException {
+            int nread;
+            if (!hasMarker) {
+                nread = in.read(b, 0, b.length);
+                for (int i = 0; i < b.length; i++) {
+                    if (b[i] == marker) {
+                        pbin.unread(b, i + 1, nread - i - 1);
+                        hasMarker = true;
+                        return i;
+                    }
+                }
+            } else {
+                if (!binary) {
+                    return -1;
+                }
+                nread = in.read(b, 0, b.length);
+            }
+            return nread;
+        }
+
+        @Override
+        public int read(final byte[] b, final int off, final int len) throws IOException {
+            int nread;
+            if (!hasMarker) {
+                nread = in.read(b, off, len);
+                for (int i = off; i < (off + nread); i++) {
+                    if (b[i] == marker) {
+                        pbin.unread(b, i + 1, (off + nread) - i - 1);
+                        hasMarker = true;
+                        return i;
+                    }
+                }
+            } else {
+                if (!binary) {
+                    return -1;
+                }
+                nread = in.read(b, off, len);
+            }
+            return nread;
+        }
+
+        public boolean reachedSplit() {
+            return (hasMarker && !binary);
+        }
+
+        public void switchToBinary() {
+            if (hasMarker) {
+                if (!binary) {
+                    binary = true;
+                } else {
+                    LOGGER.warn("Allready in binary mode");
+                }
+            } else {
+            LOGGER.warn("Char/Byte split marker not reached yet");
+        }
+        }
+    }
+
     /**
-     * Open a PrintWriter that is backed by the appropriate compression and file handling streams.
+     * Open a OutputStream that is backed by the appropriate compression and file handling streams.
      *
      * @param file File to open
      * @param compression Compression method
      * @return A ready-to-go writer that is agnostic to the underlying compression method
      * @throws IOException
      */
-    private static PrintWriter openPrintWriter(final File file, final Compression compression) throws IOException {
+    private static OutputStream openDatasetFileOutput(final File file, final Compression compression)
+            throws IOException {
         switch (compression) {
         case NONE:
-            return new PrintWriter(file);
+            return new FileOutputStream(file);
         case GZIP:
-            return new PrintWriter(new GZIPOutputStream(new FileOutputStream(file)));
+            return new GZIPOutputStream(new FileOutputStream(file));
         case ZIP:
             final ZipOutputStream zipOStream = new ZipOutputStream(new FileOutputStream(file));
             final String filename = file.getName();
@@ -291,36 +379,42 @@ public class DataSetUtils {
                     ? filename.substring(0, filename.length() - 4)
                     : filename;
             zipOStream.putNextEntry(new ZipEntry(zipentryname));
-            return new PrintWriter(zipOStream);
+            return zipOStream;
         default:
             throw new IllegalArgumentException("Unknown Compression format: " + compression.toString());
         }
     }
 
     /**
-     * Open a buffered Reader that is backed by the appropriate stream classes for the chosen compression method.
+     * Open a InputStream that is backed by the appropriate stream classes for the chosen compression method.
      *
      * @param fileName
      * @param compression
      * @return
      * @throws IOException
      */
-    private static BufferedReader openBufferedReader(final File file, final Compression compression)
+    @SuppressWarnings("resource")
+    private static SplitCharByteInputStream openDatasetFileInput(final File file, final Compression compression)
             throws IOException {
+        InputStream istream;
         switch (compression) {
         case ZIP:
             final ZipInputStream zipIStream = new ZipInputStream(new FileInputStream(file));
             if (zipIStream.getNextEntry() == null) {
                 throw new ZipException("Corrupt zip archive has no entries");
             }
-            return new BufferedReader(new InputStreamReader(zipIStream));
+            istream = zipIStream;
+            break;
         case GZIP:
-            return new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(file))));
+            istream = new GZIPInputStream(new FileInputStream(file));
+            break;
         case NONE:
-            return new BufferedReader(new FileReader(file));
+            istream = new FileInputStream(file);
+            break;
         default:
             throw new IOException("Unimplemented Compression");
         }
+        return new SplitCharByteInputStream(new PushbackInputStream(istream, 8192));
     }
 
     /**
@@ -440,8 +534,18 @@ public class DataSetUtils {
      * @param fileName Filename (with "{metadatafield;type;format}" placeholders for variables)
      * @return actual name of the file that was written or none in case of errors
      */
+    public static String writeDataSetToFile(final DataSet dataSet, final Path path, final String fileName,
+            final boolean binary) {
+        return writeDataSetToFile(dataSet, path, fileName, Compression.AUTO, binary);
+    }
+
     public static String writeDataSetToFile(final DataSet dataSet, final Path path, final String fileName) {
-        return writeDataSetToFile(dataSet, path, fileName, Compression.AUTO);
+        return writeDataSetToFile(dataSet, path, fileName, Compression.AUTO, false);
+    }
+
+    public static String writeDataSetToFile(final DataSet dataSet, final Path path, final String fileName,
+            final Compression compression) {
+        return writeDataSetToFile(dataSet, path, fileName, compression, false);
     }
 
     /**
@@ -464,7 +568,7 @@ public class DataSetUtils {
      * @return actual name of the file that was written or none in case of errors
      */
     public static String writeDataSetToFile(final DataSet dataSet, final Path path, final String fileName,
-            Compression compression) {
+            Compression compression, final boolean binary) {
         if (compression == Compression.AUTO) {
             compression = evaluateAutoCompression(fileName);
         }
@@ -484,17 +588,22 @@ public class DataSetUtils {
             }
 
             // create PrintWriter
-            try (PrintWriter outputfile = openPrintWriter(file, compression)) {
+            try (OutputStream outputfile = openDatasetFileOutput(file, compression);
+                    final PrintWriter outputprinter = new PrintWriter(outputfile)) {
                 dataSet.lock();
 
-                outputfile.write("#file producer : " + DataSetUtils.class.getCanonicalName());
-                outputfile.write('\n');
+                outputprinter.write("#file producer : " + DataSetUtils.class.getCanonicalName());
+                outputprinter.write('\n');
 
-                writeHeaderDataToFile(outputfile, dataSet);
+                writeHeaderDataToFile(outputprinter, dataSet);
 
-                writeMetaDataToFile(outputfile, dataSet);
+                writeMetaDataToFile(outputprinter, dataSet);
 
-                writeNumericDataToFile(outputfile, dataSet);
+                if (binary) {
+                    writeNumericDataToBinaryFile(outputprinter, outputfile, dataSet);
+                } else {
+                    writeNumericDataToFile(outputprinter, dataSet);
+                }
 
                 // automatically closing writer connection
             } catch (final IOException e) {
@@ -509,6 +618,50 @@ public class DataSetUtils {
         } catch (final Exception e) {
             LOGGER.error("could not write to file: '" + fileName + "'", e);
             return null;
+        }
+    }
+
+    /**
+     * @param outputprinter
+     * @param outputfile
+     * @param dataSet
+     */
+    private static void writeNumericDataToBinaryFile(final PrintWriter outputprinter, final OutputStream outputfile,
+            final DataSet dataSet) {
+        final int nsamples = dataSet.getDataCount();
+
+        // write header with field sizes
+        outputprinter.println("$binary");
+        outputprinter.println("$x;float64[];" + Long.toString(nsamples));
+        outputprinter.println("$y;float64[];" + Long.toString(nsamples));
+        outputprinter.println("$eyn;float64[];" + Long.toString(nsamples));
+        outputprinter.println("$eyp;float64[];" + Long.toString(nsamples));
+        outputprinter.flush();
+
+        // Write binary data after separation character 0xFE
+        // this would be nicer, because it does not copy the byte array, but there is no way to get the byteBuffer
+        // from the DoubleBuffer: https://stackoverflow.com/questions/27492161/convert-floatbuffer-to-bytebuffer
+        //final DoubleBuffer doubleValues = DoubleBuffer.wrap(dataSet.getXValues());
+        final ByteBuffer xByte = ByteBuffer.allocate(Double.BYTES * nsamples);
+        final DoubleBuffer xDouble = xByte.asDoubleBuffer();
+        xDouble.put(dataSet.getXValues());
+        final ByteBuffer yByte = ByteBuffer.allocate(Double.BYTES * nsamples);
+        final DoubleBuffer yDouble = yByte.asDoubleBuffer();
+        yDouble.put(dataSet.getYValues());
+        final ByteBuffer eynByte = ByteBuffer.allocate(Double.BYTES * nsamples);
+        final DoubleBuffer eynDouble = eynByte.asDoubleBuffer();
+        eynDouble.put(errors(dataSet, EYN));
+        final ByteBuffer eypByte = ByteBuffer.allocate(Double.BYTES * nsamples);
+        final DoubleBuffer eypDouble = eypByte.asDoubleBuffer();
+        eypDouble.put(errors(dataSet, EYP));
+        try {
+            outputfile.write(0xFE); // magic byte to switch to binary data
+            outputfile.write(xByte.array());
+            outputfile.write(yByte.array());
+            outputfile.write(eynByte.array());
+            outputfile.write(eypByte.array());
+        } catch (final IOException e) {
+            LOGGER.error("WriteNumericDataToBinaryFile failed: ", e);
         }
     }
 
@@ -672,6 +825,7 @@ public class DataSetUtils {
      * @return DataSet with the data and metadata read from the file
      */
     public static DataSet readDataSetFromFile(final String fileName, Compression compression) {
+        boolean binary = false;
         if ((fileName == null) || fileName.isEmpty()) {
             throw new IllegalArgumentException("fileName must not be null or empty");
         }
@@ -681,7 +835,8 @@ public class DataSetUtils {
         DoubleErrorDataSet dataSet = null;
         try {
             final File file = new File(fileName);
-            try (BufferedReader inputFile = openBufferedReader(file, compression);) {
+            try (final SplitCharByteInputStream inputFile = openDatasetFileInput(file, compression);
+                    final BufferedReader inputReader = new BufferedReader(new InputStreamReader(inputFile))) {
                 String dataSetName = "unknown data set";
                 int nDataCountEstimate = 0;
                 final ArrayList<String> info = new ArrayList<>();
@@ -690,9 +845,12 @@ public class DataSetUtils {
                 final Map<String, String> metaInfoMap = new ConcurrentHashMap<>();
 
                 // skip first file format header
-                String line = inputFile.readLine();
-                for (; (line = inputFile.readLine()) != null;) {
+                String line = inputReader.readLine();
+                for (; (line = inputReader.readLine()) != null;) {
                     if (line.contains("$")) {
+                        if (line.startsWith("$binary")) {
+                            binary = true;
+                        }
                         break;
                     }
 
@@ -728,7 +886,11 @@ public class DataSetUtils {
 
                 dataSet.getInfoList();
 
-                readNumericDataFromFile(inputFile, dataSet);
+                if (binary) {
+                    readNumericDataFromBinaryFile(inputReader, inputFile, dataSet);
+                } else {
+                    readNumericDataFromFile(inputReader, dataSet);
+                }
 
                 // automatically closing writer connection
             } catch (final IOException e) {
@@ -741,6 +903,78 @@ public class DataSetUtils {
             return dataSet;
         }
         return dataSet;
+    }
+
+    /**
+     * @param inputReader
+     * @param inputFile
+     * @param dataSet
+     * @throws IOException
+     */
+    private static void readNumericDataFromBinaryFile(final BufferedReader inputReader, final SplitCharByteInputStream inputFile,
+            final DoubleErrorDataSet dataSet) throws IOException {
+        String line;
+        class DataEntry {
+            public String name;
+            public String type;
+            public int nsamples;
+            public DoubleBuffer data = null;
+        }
+        final List<DataEntry> toRead = new ArrayList<>();
+        while ((line = inputReader.readLine()) != null) {
+            final String[] tokens = line.substring(1).split(";");
+            toRead.add(new DataEntry() {
+                {
+                name = tokens[0];
+                type = tokens[1];
+                nsamples = Integer.valueOf(tokens[2]);
+                }
+            });
+        }
+        if (!inputFile.reachedSplit()) {
+            LOGGER.error("File seems to be corrupted, Split marker not found");
+        } else {
+            inputFile.switchToBinary();
+            final int valindex[] = {-1,-1,-1,-1};
+            for (int i = 0; i < toRead.size(); i++) {
+                final DataEntry dataentry = toRead.get(i);
+                LOGGER.debug("Read data: " + dataentry.name);
+                final ByteBuffer byteData = ByteBuffer.allocate(dataentry.nsamples*Double.BYTES);
+                dataentry.data = byteData.asDoubleBuffer();
+                int alreadyRead = 0;
+                while (alreadyRead < (dataentry.nsamples * Double.BYTES)) {
+                    alreadyRead += inputFile.read(byteData.array(), alreadyRead,
+                            (dataentry.nsamples * Double.BYTES) - alreadyRead);
+                }
+                switch (dataentry.name) {
+                case "x":
+                    valindex[0] = i;
+                    break;
+                case "y":
+                    valindex[1] = i;
+                    break;
+                case "eyn":
+                    valindex[2] = i;
+                    break;
+                case "eyp":
+                    valindex[3] = i;
+                    break;
+                default:
+                    LOGGER.debug("Got unused variable " + dataentry.name + " of type " + dataentry.type);
+                }
+
+            }
+            final double[] x = new double[toRead.get(valindex[0]).nsamples];
+            toRead.get(valindex[0]).data.get(x);
+            final double[] y = new double[toRead.get(valindex[1]).nsamples];
+            toRead.get(valindex[1]).data.get(y);
+            final double[] eyn = new double[toRead.get(valindex[2]).nsamples];
+            toRead.get(valindex[2]).data.get(eyn);
+            final double[] eyp = new double[toRead.get(valindex[3]).nsamples];
+            toRead.get(valindex[3]).data.get(eyp);
+
+            dataSet.set(x, y, eyn, eyp, false);
+        }
     }
 
     protected static void readNumericDataFromFile(final BufferedReader inputFile, final DoubleErrorDataSet dataSet) {
