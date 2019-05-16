@@ -953,13 +953,16 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
 
     protected void updateAxisLabelAndUnit() {
         final String axisPrimaryLabel = getLabel();
-        final String axisUnit = getUnit();
+        String axisUnit = getUnit();
         final boolean isAutoScaling = getAutoUnitScaling();
         if (isAutoScaling) {
             updateScaleAndUnitPrefix();
         }
 
         final String axisPrefix = MetricPrefix.getShortPrefix(getUnitScaling());
+        if ((axisUnit == null) && (axisPrefix != null)) {
+            axisUnit = " a.u.";
+        }
 
         if (axisUnit == null) {
             axisLabel.setText(axisPrimaryLabel);

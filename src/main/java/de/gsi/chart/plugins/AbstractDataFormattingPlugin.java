@@ -4,6 +4,7 @@ import de.gsi.chart.Chart;
 import de.gsi.chart.XYChart;
 import de.gsi.chart.axes.Axis;
 import de.gsi.chart.axes.spi.Axes;
+import de.gsi.chart.axes.spi.MetricPrefix;
 import de.gsi.chart.data.spi.Tuple;
 import de.gsi.chart.ui.geometry.Side;
 import javafx.beans.property.ObjectProperty;
@@ -139,25 +140,33 @@ public abstract class AbstractDataFormattingPlugin extends ChartPlugin {
         }
 
         // any other axes
-        String retVal = "";
+        final StringBuilder result = new StringBuilder();
         for (final Axis axis : chart.getAxes()) {
             final Side side = axis.getSide();
             if (side == null) {
                 continue;
             }
-            String unit = "";
-            if (axis instanceof Axis) {
-                final String axisUnit = axis.getUnit();
-                if (axisUnit != null) {
-                    unit += " [" + axis.getUnit() + "]";
+
+            final String axisPrimaryLabel = axis.getLabel();
+            String axisUnit = axis.getUnit();
+            final String axisPrefix = MetricPrefix.getShortPrefix(axis.getUnitScaling());
+            final boolean isAutoScaling = axis.getAutoUnitScaling();
+            if (isAutoScaling) {
+                if (axisUnit == null) {
+                    axisUnit = " a.u.";
                 }
             }
-            final String axisText = side.isHorizontal() ? getXValueFormatter(axis).toString(data.getXValue())
-                    : getYValueFormatter(axis).toString(data.getYValue());
-            retVal += axis.getLabel() + " = " + axisText + unit + "\n";
+
+            result.append(axisPrimaryLabel).append(" = ");
+            result.append(side.isHorizontal() ? getXValueFormatter(axis).toString(data.getXValue())
+                    : getYValueFormatter(axis).toString(data.getYValue()));
+            if (axisUnit != null) {
+                result.append(axisPrimaryLabel).append(" [").append(axisPrefix).append(axisUnit).append("]");
+            }
+            result.append("\n");
         }
 
-        return retVal;
+        return result.toString();
     }
 
     private StringConverter<Number> getXValueFormatter(final Axis xAxis) {

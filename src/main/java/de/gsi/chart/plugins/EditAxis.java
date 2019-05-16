@@ -1,5 +1,6 @@
 package de.gsi.chart.plugins;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -11,6 +12,7 @@ import de.gsi.chart.Chart;
 import de.gsi.chart.axes.Axis;
 import de.gsi.chart.axes.AxisMode;
 import de.gsi.chart.axes.spi.AbstractAxis;
+import de.gsi.chart.axes.spi.AbstractAxisParameter;
 import de.gsi.chart.axes.spi.DefaultNumericAxis;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
@@ -21,6 +23,7 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.event.EventHandler;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
@@ -37,6 +40,7 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.util.Duration;
+import javafx.util.converter.NumberStringConverter;
 
 /**
  * Allows editing of the chart axes (auto range, minimum/maximum range, etc.)
@@ -225,7 +229,7 @@ public class EditAxis extends ChartPlugin {
         private Axis axis = null;
 
         MyPopOver(final Axis axis, final boolean isHorizontal) {
-            super(new VBox(new Label("axis: " + axis.getLabel()), new AxisEditor(axis, isHorizontal)));
+            super(new AxisEditor(axis, isHorizontal));
             this.axis = axis;
             popOverShowStartTime = 0;
 
@@ -305,6 +309,7 @@ public class EditAxis extends ChartPlugin {
         AxisEditor(final Axis axis, final boolean isHorizontal) {
             super();
 
+            setTop(getLabelEditor(axis));
             final Pane box = isHorizontal ? new HBox() : new VBox();
             setCenter(box);
             if (isHorizontal) {
@@ -329,6 +334,25 @@ public class EditAxis extends ChartPlugin {
             box.getChildren().add(getBoundField(axis, !isHorizontal));
 
             box.getChildren().add(getMinMaxButtons(axis, isHorizontal, false));
+        }
+
+        /**
+         * Creates the header for the Axis Editor popup, allowing to configure axis label and unit
+         *
+         * @param axis The axis to be edited
+         * @return pane containing label, label editor and unit editor
+         */
+        private Node getLabelEditor(final Axis axis) {
+            final HBox header = new HBox(new Label("axis: "));
+            header.setAlignment(Pos.BASELINE_LEFT);
+            final TextField axisLabelTextField = new TextField(axis.getLabel());
+            axisLabelTextField.textProperty().bindBidirectional(axis.labelProperty());
+            axis.labelProperty().bind(axisLabelTextField.textProperty());
+            final TextField axisUnitTextField = new TextField(axis.getUnit());
+            axisUnitTextField.setPrefWidth(50.0);
+            axisUnitTextField.textProperty().bindBidirectional(axis.unitProperty());
+            header.getChildren().addAll(axisLabelTextField, axisUnitTextField);
+            return header;
         }
 
         private Pane getMinMaxButtons(final Axis axis, final boolean isHorizontal, final boolean isMin) {
@@ -401,9 +425,30 @@ public class EditAxis extends ChartPlugin {
                 timeAxis.selectedProperty().bindBidirectional(((DefaultNumericAxis) axis).timeAxisProperty());
             } else {
                 // TODO: consider adding an interface on whether
-                // invertedAxis is editable
+                // timeAxis is editable
                 timeAxis.setDisable(true);
             }
+
+            final Label unitScalingLabel = new Label("unit scale:");
+            final TextField unitScaling = new TextField();
+            unitScaling.setPrefWidth(80.0);
+            final CheckBox autoUnitScaling = new CheckBox("auto");
+
+            if (axis instanceof DefaultNumericAxis) {
+                autoUnitScaling.selectedProperty()
+                        .bindBidirectional(((DefaultNumericAxis) axis).autoUnitScalingProperty());
+                unitScaling.textProperty().bindBidirectional(((DefaultNumericAxis) axis).unitScalingProperty(),
+                        new NumberStringConverter(new DecimalFormat("0.0####E0")));
+                unitScaling.editableProperty().bind(autoUnitScaling.selectedProperty().not());
+            } else {
+                // TODO: consider adding an interface on whether
+                // autoUnitScaling is editable
+                autoUnitScaling.setDisable(true);
+                unitScaling.setDisable(true);
+            }
+            final HBox unitScalingBox = new HBox(unitScalingLabel, unitScaling, autoUnitScaling);
+            unitScalingBox.setAlignment(Pos.BASELINE_LEFT);
+            boxMax.getChildren().add(unitScalingBox);
 
             return boxMax;
         }
@@ -487,7 +532,7 @@ public class EditAxis extends ChartPlugin {
             // };
             // support.registerValidator(textField, true, validator);
 
-            Runnable lambda = () -> {
+            final Runnable lambda = () -> {
                 final double value;
                 final boolean isInverted = axis.isInvertedAxis();
                 if (isLowerBound) {
@@ -506,7 +551,7 @@ public class EditAxis extends ChartPlugin {
             textField.snappedBottomInset();
             // force the field to be numeric only
             textField.textProperty().addListener((observable, oldValue, newValue) -> {
-                if (newValue != null && !newValue.matches("\\d*")) {
+                if ((newValue != null) && !newValue.matches("\\d*")) {
                     final double val;
                     try {
                         val = Double.parseDouble(newValue);
@@ -516,7 +561,7 @@ public class EditAxis extends ChartPlugin {
                         return;
                     }
 
-                    if (axis.isLogAxis() && val <= 0) {
+                    if (axis.isLogAxis() && (val <= 0)) {
                         textField.setText(oldValue);
                         return;
                     }
@@ -585,7 +630,7 @@ public class EditAxis extends ChartPlugin {
                 minTickDistance *= 0.1;
             }
 
-            if (minTickDistance == Double.MAX_VALUE || minTickDistance <= 0) {
+            if ((minTickDistance == Double.MAX_VALUE) || (minTickDistance <= 0)) {
                 // default fall-back in case no minor tick have been defined for
                 // the axis
                 minTickDistance = 0.05 * Math.abs(axis.getUpperBound() - axis.getLowerBound());
