@@ -19,10 +19,10 @@ import javafx.stage.Stage;
 public class WriteDataSetToFileSample extends Application {
     private static final int N_SAMPLES = 100;
     private static final String CSV_FILE_NAME_1 = "{dataSetName}.csv.zip";
-    private static final String CSV_FILE_NAME_2 = "test2.csv.gz";
+    private static final String CSV_FILE_NAME_2 = "test2.dat.gz";
     private static final String CSV_FILE_NAME_SYSTEMTIME = "test_systemtime_{systemTime;date}_MagnetNr{magNr;int}.csv.gz";
     private static final String CSV_FILE_NAME_1_timestamped = "test1_{yMin;double}-{yMax;float;%.2e}_{acqTimeStamp;date}.csv.zip";
-    private static final String CSV_FILE_NAME_2_timestamped = "test2_{yMin}-{yMax;float;%.2f}_{acqTimeStamp;int}.csv.gz";
+    private static final String CSV_FILE_NAME_2_timestamped = "test2_{yMin}-{yMax;float;%.2f}_{acqTimeStamp;int}.dat.gz";
     private static final String PNG_FILE_NAME = "test.png";
     private static final int DEFAULT_DELAY = 2;
     private static final int DEFAULT_PERIOD = 5;
@@ -63,9 +63,9 @@ public class WriteDataSetToFileSample extends Application {
         final boolean addDateTimeToFileName = true;
 
         // write DataSet to File and recover
-        DataSetUtils.writeDataSetToFile(dataSet1, path, CSV_FILE_NAME_1);
-        DataSetUtils.writeDataSetToFile(dataSet2, path, CSV_FILE_NAME_2);
-        DataSetUtils.writeDataSetToFile(dataSet2, path, CSV_FILE_NAME_SYSTEMTIME);
+        DataSetUtils.writeDataSetToFile(dataSet1, path, CSV_FILE_NAME_1, false);
+        DataSetUtils.writeDataSetToFile(dataSet2, path, CSV_FILE_NAME_2, true);
+        DataSetUtils.writeDataSetToFile(dataSet2, path, CSV_FILE_NAME_SYSTEMTIME, false);
 
         // start periodic screen capture
         final PeriodicScreenCapture screenCapture = new PeriodicScreenCapture(path, fileName, scene, DEFAULT_DELAY,
@@ -78,8 +78,10 @@ public class WriteDataSetToFileSample extends Application {
             dataSet1.getMetaInfo().put("acqTimeStamp", Long.toString(userTimeStampMillis));
             dataSet2.getMetaInfo().put("acqTimeStamp", Long.toString(userTimeStampMillis));
 
-            final String actualFileName1 = DataSetUtils.writeDataSetToFile(dataSet1, path, CSV_FILE_NAME_1_timestamped);
-            final String actualFileName2 = DataSetUtils.writeDataSetToFile(dataSet2, path, CSV_FILE_NAME_2_timestamped);
+            final String actualFileName1 = DataSetUtils.writeDataSetToFile(dataSet1, path, CSV_FILE_NAME_1_timestamped,
+                    false);
+            final String actualFileName2 = DataSetUtils.writeDataSetToFile(dataSet2, path, CSV_FILE_NAME_2_timestamped,
+                    true);
 
             System.out.println("write data time-stamped to directory = " + path);
             System.out.println("actualFileName1 = " + actualFileName1);
@@ -116,7 +118,7 @@ public class WriteDataSetToFileSample extends Application {
         final double[] xValues = new double[N_SAMPLES];
         final double[] yValues = new double[N_SAMPLES];
         for (int n = 0; n < N_SAMPLES; n++) {
-            final double phase = Math.toRadians(10.0 * n + now / 1000.0);
+            final double phase = Math.toRadians((10.0 * n) + (now / 1000.0));
             xValues[n] = n;
             yValues[n] = isSine ? Math.sin(phase) : Math.cos(phase);
         }

@@ -20,6 +20,7 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
+import javafx.stage.Modality;
 
 /**
  * @author rstein
@@ -58,6 +59,7 @@ public abstract class AbstractChartMeasurement implements InvalidationListener {
         alert = new Alert(AlertType.CONFIRMATION);
         alert.setTitle("Measurement Config Dialog");
         alert.setHeaderText("Please, select data set and/or other parameters:");
+        alert.initModality(Modality.APPLICATION_MODAL);
 
         final DecorationPane decorationPane = new DecorationPane();
         decorationPane.getChildren().add(vBox);
