@@ -13,6 +13,7 @@ import de.gsi.chart.axes.Axis;
 import de.gsi.chart.axes.spi.TickMark;
 import de.gsi.chart.data.DataSet;
 import de.gsi.chart.renderer.Renderer;
+import de.gsi.chart.renderer.spi.utils.DashPatternStyle;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
@@ -127,6 +128,8 @@ public class GridRenderer extends Pane implements Renderer {
         if (isPolarPlot) {
             drawPolarGrid(gc, xyChart);
         } else {
+//        	 drawEuclideanGrid(gc, xyChart);
+        	// for testing
             drawEuclideanGrid2(gc, xyChart);
         }
 
@@ -321,7 +324,8 @@ public class GridRenderer extends Pane implements Renderer {
             for (int i=0; i<tickMarks.size(); i++) {
                 double x = snap(xAxis.getDisplayPosition(tickMarks.get(i).getValue()));
                 if (x > 0 && x <= xAxisWidth) {
-                    gc.strokeLine(x, zeroSnapped, x, yAxisHeightSnapped);
+//                    gc.strokeLine(x, zeroSnapped, x, yAxisHeightSnapped);
+                    DashPatternStyle.strokeDashedLine(gc, x, zeroSnapped, x, yAxisHeightSnapped);
                 }
             }
         }
@@ -333,7 +337,8 @@ public class GridRenderer extends Pane implements Renderer {
             for (int i=0; i<tickMarks.size(); i++) {
                 double x = snap(xAxis.getDisplayPosition(tickMarks.get(i).getValue()));
                 if (x > 0 && x <= xAxisWidth) {
-                    gc.strokeLine(x, zeroSnapped, x, yAxisHeightSnapped);
+//                    gc.strokeLine(x, zeroSnapped, x, yAxisHeightSnapped);
+                    DashPatternStyle.strokeDashedLine(gc, x, zeroSnapped, x, yAxisHeightSnapped);
                 }
             }                       
         }
@@ -345,7 +350,8 @@ public class GridRenderer extends Pane implements Renderer {
             for (int i=0; i<tickMarks.size(); i++) {
                 double y = snap(yAxis.getDisplayPosition(tickMarks.get(i).getValue()));
                 if (y >= 0 && y < yAxisHeight) {
-                    gc.strokeLine(zeroSnapped, y, xAxisWidthSnapped, y);
+//                    gc.strokeLine(zeroSnapped, y, xAxisWidthSnapped, y);
+                    DashPatternStyle.strokeDashedLine(gc, zeroSnapped, y, xAxisWidthSnapped, y);
                 }
             }              
 
@@ -358,7 +364,8 @@ public class GridRenderer extends Pane implements Renderer {
             for (int i=0; i<tickMarks.size(); i++) {
                 double y = snap(yAxis.getDisplayPosition(tickMarks.get(i).getValue()));
                 if (y >= 0 && y < yAxisHeight) {
-                    gc.strokeLine(zeroSnapped, y, xAxisWidthSnapped, y);
+                    //gc.strokeLine(zeroSnapped, y, xAxisWidthSnapped, y);
+                    DashPatternStyle.strokeDashedLine(gc, zeroSnapped, y, xAxisWidthSnapped, y);
                 }
             }                      
         }
