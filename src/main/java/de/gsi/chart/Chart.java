@@ -626,6 +626,14 @@ public abstract class Chart extends SidesPane implements Observable {
     protected Map<Side, Pane> parameterDisplayPane = new ConcurrentHashMap<>(4);
     {
         for (final Side side : Side.values()) {
+            // Stack multiple Measurements on top of each other by using a vertical FlowPane
+            if (side == Side.RIGHT) {
+                final FlowPane flowPane = new FlowPane(Orientation.VERTICAL);
+                flowPane.setAlignment(Pos.TOP_LEFT);
+                flowPane.setPrefSize(Region.USE_COMPUTED_SIZE, Region.USE_COMPUTED_SIZE);
+                parameterDisplayPane.put(side, flowPane);
+                continue;
+            }
             parameterDisplayPane.put(side, side.isVertical() ? new ChartHBox() : new ChartVBox());
         }
     }
