@@ -25,7 +25,7 @@ In order to provide some of the scenegraph-level functionality while using a 'Ca
 
 
 ## Examples
-### Simple ChartFx example
+### Simple example
 
 <img src="docs/pics/SimpleChartSample.png" width=800 alt="simple ChartFx example"/>
 
@@ -67,7 +67,7 @@ In order to provide some of the scenegraph-level functionality while using a 'Ca
 ```
 </details>
 
-### Other ChartFx examples
+### more examples
 
 <table>
 
@@ -84,7 +84,7 @@ In order to provide some of the scenegraph-level functionality while using a 'Ca
 </tr>
 
 <tr>
-<td><figure><img src="docs/pics/EditDataSample.png" alt="EditDataSample" width=300/><figcaption><a href="src/test/java/de/gsi/chart/demo/EditDataSample.java">EditDataSample.java</a></figcaption></figure></td>
+<td><figure><img src="docs/pics/EditDataSample.png" alt="EditDataSetSample" width=300/><figcaption><a href="src/test/java/de/gsi/chart/demo/EditDataSetSample.java">EditDataSetSample.java</a></figcaption></figure></td>
 <td><figure><img src="docs/pics/PolarPlotSample.png" alt="PolarPlotSample" width=300/><figcaption><a href="src/test/java/de/gsi/chart/demo/EditDataSample.java">PolarPlotSample.java</a></figcaption></figure></td>                
 <td><figure><img src="docs/pics/MetaDataRendererSample2.png" alt="EditDataSample" width=300/><figcaption><a href="src/test/java/de/gsi/chart/demo/MetaDataRendererSample.java">MetaDataRendererSample.java</a></figcaption></figure></td>
 </tr>
@@ -117,7 +117,7 @@ In order to provide some of the scenegraph-level functionality while using a 'Ca
 
 </table>
 
-### Math- & Signal-Processing related ChartFx examples
+### Math- & Signal-Processing related examples
 
 <table>
 <tr>
