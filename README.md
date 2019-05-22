@@ -8,7 +8,7 @@ The motivation for the re-design has been presented at [IPAC'19](https://ipac19.
 <figure>
   <img src="docs/pics/chartfx-example1.png" alt="ChartFx example" width=1200/>
   <figcaption>
-  Example showing error-bar and error-surface representations, display of mock meta-data, 'ChartPlugin' interactors and data parameter measurement indicators (here: '20%-80% rise-time' between 'Marker#0' and 'Marker#1'.
+  Example showing error-bar and error-surface representations, display of mock meta-data, 'ChartPlugin' interactors and data parameter measurement indicators (here: '20%-80% rise-time' between 'Marker#0' and 'Marker#1').
   </figcaption>
 </figure>
 
