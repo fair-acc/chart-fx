@@ -1497,7 +1497,6 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         } else {
             Platform.runLater(this::executeFireInvalidated);
         }
-        return;
     }
 
     protected void executeFireInvalidated() {
