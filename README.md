@@ -1,4 +1,3 @@
-
 # ChartFx
 
 ChartFx is scientific charting library developed at [GSI](https://www.gsi.de) for FAIR with focus on performance optimised real-time data visualisation at 25 Hz update rates for data sets with a few 10 thousand up to 5 million data points common in digital signal processing applications.
@@ -8,21 +7,20 @@ The motivation for the re-design has been presented at [IPAC'19](https://ipac19.
 <figure>
   <img src="docs/pics/chartfx-example1.png" alt="ChartFx example" width=1200/>
   <figcaption>
-  Example showing error-bar and error-surface representations, display of mock meta-data, 'ChartPlugin' interactors and data parameter measurement indicators (here: '20%-80% rise-time' between 'Marker#0' and 'Marker#1').
+  Example showing error-bar and error-surface representations, display of mock meta-data, `ChartPlugin` interactors and data parameter measurement indicators (here: '20%-80% rise-time' between 'Marker#0' and 'Marker#1').
   </figcaption>
 </figure>
 
 ## Functionalities and Features
 The library offers a wide variety of plot types common in the scientific signal processing field, a flexible plugin system as well as online parameter measurements commonly found in lab instrumentation. Some of its features include (see demos for more details):
-* 'DataSet': basic XY-type datasets, extendable by 'DataSetError' to account for measurement uncertainties, 'DataSetMetaData', 'EditableDataSet', 'Histogram', or 'DataSet3D' interfaces;
+* `DataSet`: basic XY-type datasets, extendable by `DataSetError` to account for measurement uncertainties, `DataSetMetaData`, `EditableDataSet`, `Histogram`, or `DataSet3D` interfaces;
 * math sub-library: FFTs, Wavelet and other spectral and linear algebra routines, numerically robust integration and differentiation, IIR- & FIR-type filtering, linear regression and non-linear chi-square-type function fitting;
-* 'Chart': providing euclidean, polar, or 2D projections of 3D data sets, and a configurable legend;
-* 'Axis': one or multiple axes that are linear, logarithmic, time-series, inverted, dynamic auto-(grow)-ranging, automatic range-based SI and time unit conversion;
-* 'Renderer': scatter-plot, poly-line, area-plot, error-bar and error-surfaces, vertical bar-plots, Bezier-curve, stair-case, 1D/2D histograms, mountain-range display, true contour plots, heatmaps, fading DataSet history, labelled chart range and indicator marker, hexagon-map, meta data (i.e. for indicating common measurement errors, warnings or infos such as over- or under-ranging, device or configuration errors etc.);
-* 'ChartPlugin': data zoomer with history, zoom-to-origin, and option to limit this to X and/or Y coordinates, panner, data value and range indicators, cross-hair indicator, data point tool-tip, 'DataSet' editing, table view, export to CSV and system clipboard, online axis editing, data set parameter measurement such as rise-time, min, max, rms, etc.
+* `Chart`: providing euclidean, polar, or 2D projections of 3D data sets, and a configurable legend;
+* `Axis`: one or multiple axes that are linear, logarithmic, time-series, inverted, dynamic auto-(grow)-ranging, automatic range-based SI and time unit conversion;
+* `Renderer`: scatter-plot, poly-line, area-plot, error-bar and error-surfaces, vertical bar-plots, Bezier-curve, stair-case, 1D/2D histograms, mountain-range display, true contour plots, heatmaps, fading DataSet history, labelled chart range and indicator marker, hexagon-map, meta data (i.e. for indicating common measurement errors, warnings or infos such as over- or under-ranging, device or configuration errors etc.);
+* `ChartPlugin`: data zoomer with history, zoom-to-origin, and option to limit this to X and/or Y coordinates, panner, data value and range indicators, cross-hair indicator, data point tool-tip, `DataSet` editing, table view, export to CSV and system clipboard, online axis editing, data set parameter measurement such as rise-time, min, max, rms, etc.
 
-In order to provide some of the scenegraph-level functionality while using a 'Canvas' as graphics backend, the functionality of each module was extended to be readily customized through direct API methods as well as through external CSS-type style sheets.
-
+In order to provide some of the scenegraph-level functionality while using a `Canvas` as graphics backend, the functionality of each module was extended to be readily customized through direct API methods as well as through external CSS-type style sheets.
 
 ## Examples
 ### Simple example
@@ -31,9 +29,9 @@ In order to provide some of the scenegraph-level functionality while using a 'Ca
 
 <details><summary>The corresponding source code (expand)</summary>
 
-```
+```Java
     private static final int N_SAMPLES = 100;
-    [..]
+    // [..]
     @Override
     public void start(final Stage primaryStage) {
         final StackPane root = new StackPane();
@@ -63,7 +61,7 @@ In order to provide some of the scenegraph-level functionality while using a 'Ca
         primaryStage.setOnCloseRequest(evt -> System.exit(0));
         primaryStage.show();
     }
-[..]
+    // [..]
 ```
 </details>
 
@@ -140,7 +138,7 @@ In order to provide some of the scenegraph-level functionality while using a 'Ca
 </table>
 
 ## Performance Comparison
-Besides the extended functionality outlined above, the ChartFx optimisation goal also included achieving real-time update rates of up to 25 Hz for data sets with a few 10k up to 5 million data points. In order to optimise and compare the performance with other charting libraries, especially those with only reduced functionality, a reduced simple oscilloscope-style test case has been chosen (see 'RollingBufferSample' in demos) that displays two curves with independent auto-ranging y-axes, common sliding time-series axis, and without further 'ChartPlugin's. The test-case and direct performance comparison between the ChartFx and JavaFX charting library for update rates at 25 Hz and 2 Hz is shown below.
+Besides the extended functionality outlined above, the ChartFx optimisation goal also included achieving real-time update rates of up to 25 Hz for data sets with a few 10k up to 5 million data points. In order to optimise and compare the performance with other charting libraries, especially those with only reduced functionality, a reduced simple oscilloscope-style test case has been chosen (see `RollingBufferSample` in demos) that displays two curves with independent auto-ranging y-axes, common sliding time-series axis, and without further `ChartPlugin`s. The test-case and direct performance comparison between the ChartFx and JavaFX charting library for update rates at 25 Hz and 2 Hz is shown below.
 
 <table style="width:100%">
 <tr><td colspan=2><figure>
@@ -162,11 +160,11 @@ While the ChartFx implementation already achieved a better functionality and a b
 <figure>
   <img src="docs/pics/chartfx-performance1.png" alt="ChartFx performance comparison" width=800/>
   <figcaption>
-  Chart performance comparison for popular JavaFX, Java-Swing, C++/Qt and WebAssembly-based implementations: <a href="https://github.com/extjfx/extjfx">ExtJFX</a>, <a href="https://github.com/GSI-CS-CO/chart-fx">ChartFx</a>, <a href="https://github.com/HanSolo/charts">HanSolo Charts</a>, <a href="http://www.jfree.org/jfreechart/">JFreeChart</a>, <a href="https://cds.cern.ch/record/1215878">JDataViewer</a>, <a href="https://www.qcustomplot.com/">QCustomPlot</a>, <a href="https://doc.qt.io/qt-5/qtcharts-index.html">Qt-Charts</a>, <a href="https://doc.qt.io/qt-5/wasm.html">WebAssembly</a>. The last 'Qt Charts' entries show results for 100k data points being updated at 25 Hz.
+  Chart performance comparison for popular JavaFX, Java-Swing, C++/Qt and WebAssembly-based implementations: <a href="https://github.com/extjfx/extjfx">ExtJFX</a>, <a href="https://github.com/GSI-CS-CO/chart-fx">ChartFx</a>, <a href="https://github.com/HanSolo/charts">HanSolo Charts</a>, <a href="http://www.jfree.org/jfreechart/">JFreeChart</a>, <a href="https://cds.cern.ch/record/1215878">JDataViewer</a>, <a href="https://www.qcustomplot.com/">QCustomPlot</a>, <a href="https://doc.qt.io/qt-5/qtcharts-index.html">Qt-Charts</a>, <a href="https://doc.qt.io/qt-5/wasm.html">WebAssembly</a>. The last `Qt Charts` entries show results for 100k data points being updated at 25 Hz.
   </figcaption>
 </figure>
 
-## Some thoughts....
+## Some thoughts
 While starting out to improve the JDK's JavaFX Chart functionality and performance through initially extending, then gradually replacing bottle-necks, and eventually re-designing and replacing the original implementations, the resulting ChartFx library provides a substantially larger functionality and achieved an about two orders of magnitude performance improvement. 
 Nevertheless, improved functionality aside, a direct performance comparison even for the best-case JavaFX scenario (static axes) with other non-JavaFX libraries demonstrated the raw JavaFX graphics performance -- despite the redesign -- being still behind the existing Java Swing-based JDataViewer and most noticeable the Qt Charts implementations. The library will continued to be maintained here at GitHub and further used for existing and future JavaFX-based control room UIs at GSI. 
 The gained experience and interfaces will provide a starting point for a planned C++-based counter-part implementation using Qt or another suitable low-level charting library.
