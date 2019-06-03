@@ -335,7 +335,6 @@ public class XYChart extends Chart {
             axis.invalidateRange(dataMinMax);
         }
         axis.setAutoNotifaction(oldFlag);
-        return;
     }
 
     @Override
