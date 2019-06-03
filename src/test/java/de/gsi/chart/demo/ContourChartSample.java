@@ -264,7 +264,7 @@ public class ContourChartSample extends Application {
 
     public DataSet3D readImage() {
         try (final BufferedReader reader = new BufferedReader(
-                new InputStreamReader(ContourChartSample.class.getResourceAsStream("/de/gsi/chart/demo/image.txt")))) {
+                new InputStreamReader(ContourChartSample.class.getResourceAsStream("./testdata/image.txt")))) {
             // final BufferedReader reader = new BufferedReader(new
             // InputStreamReader(
             // ContourChartSampleReference.class.getResourceAsStream("./testdata/image.txt")));
