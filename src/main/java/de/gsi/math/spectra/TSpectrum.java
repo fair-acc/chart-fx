@@ -133,8 +133,7 @@ public class TSpectrum {
         //      System.out.println("Search: Only implemented for 1-d histograms");
         //      return null;
         //   }
-        String opt = option;
-        opt.toLowerCase();
+        String opt = option.toLowerCase();
 
         //set options
 
@@ -224,17 +223,17 @@ public class TSpectrum {
             System.out.println("Search: threshold must 0<threshold<1, threshol=0.05 assumed");
             threshold = 0.05;
         }
-        String opt = option;
-        opt.toLowerCase();
+        String opt = option.toLowerCase();
+        
         boolean background = true;
         if (opt.indexOf("nobackground") >= 0) {
             background = false;
-            opt.replaceAll("nobackground", "");
+            opt = opt.replaceAll("nobackground", "");
         }
         boolean markov = true;
         if (opt.indexOf("nomarkov") >= 0) {
             markov = false;
-            opt.replaceAll("nomarkov", "");
+            opt = opt.replaceAll("nomarkov", "");
         }
         if (dimension == 1) {
             //TODO: update first last selection
