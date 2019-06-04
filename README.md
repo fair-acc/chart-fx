@@ -1,5 +1,4 @@
 [![Build Status](https://scan.coverity.com/projects/chart-fx)](https://scan.coverity.com/projects/chart-fx)
-
 # ChartFx
 
 ChartFx is scientific charting library developed at [GSI](https://www.gsi.de) for FAIR with focus on performance optimised real-time data visualisation at 25 Hz update rates for data sets with a few 10 thousand up to 5 million data points common in digital signal processing applications.
