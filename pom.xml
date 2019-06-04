@@ -36,6 +36,8 @@
 			the project -->
 		<scm.repo>applications/common</scm.repo>
 		<scm.path>${project.artifactId}</scm.path>
+		<maven.compiler.source>1.8</maven.compiler.source>
+    	<maven.compiler.target>1.8</maven.compiler.target>
 	</properties>
 
 	<scm>
