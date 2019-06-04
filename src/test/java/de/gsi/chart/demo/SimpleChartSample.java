@@ -13,15 +13,12 @@ import javafx.stage.Stage;
  * 
  * @author rstein
  */
-public class SimpleChartSample extends Application {
-    private static final int N_SAMPLES = 100;
+public class SimpleChartSample extends Application {   
+    private static final int N_SAMPLES = 100;  // default number of data points
 
     @Override
     public void start(final Stage primaryStage) {
-        final StackPane root = new StackPane();
-
         final XYChart chart = new XYChart(new DefaultNumericAxis(), new DefaultNumericAxis());
-        root.getChildren().add(chart);
 
         final DoubleDataSet dataSet1 = new DoubleDataSet("data set #1");
         final DoubleDataSet dataSet2 = new DoubleDataSet("data set #2");
@@ -39,10 +36,9 @@ public class SimpleChartSample extends Application {
         dataSet1.set(xValues, yValues1);
         dataSet2.set(xValues, yValues2);
 
-        final Scene scene = new Scene(root, 800, 600);
-        primaryStage.setTitle(this.getClass().getSimpleName());
+        final Scene scene = new Scene(new StackPane(chart), 800, 600);
+        primaryStage.setTitle(getClass().getSimpleName());
         primaryStage.setScene(scene);
-        primaryStage.setOnCloseRequest(evt -> System.exit(0));
         primaryStage.show();
     }
 
