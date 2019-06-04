@@ -5,9 +5,6 @@ import static de.gsi.chart.plugins.measurements.SimpleMeasurements.MeasurementCa
 import static de.gsi.chart.plugins.measurements.SimpleMeasurements.MeasurementCategory.HORIZONTAL;
 import static de.gsi.chart.plugins.measurements.SimpleMeasurements.MeasurementCategory.INDICATOR;
 import static de.gsi.chart.plugins.measurements.SimpleMeasurements.MeasurementCategory.VERTICAL;
-import static de.gsi.chart.plugins.measurements.SimpleMeasurements.MeasurementType.INTEGRAL;
-import static de.gsi.chart.plugins.measurements.SimpleMeasurements.MeasurementType.TRANSMISSION_ABS;
-import static de.gsi.chart.plugins.measurements.SimpleMeasurements.MeasurementType.TRANSMISSION_REL;
 import static de.gsi.chart.plugins.measurements.SimpleMeasurements.MeasurementType.VALUE_HOR;
 import static de.gsi.chart.plugins.measurements.SimpleMeasurements.MeasurementType.VALUE_VER;
 
@@ -16,11 +13,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.gsi.chart.XYChart;
+import de.gsi.chart.axes.Axis;
 import de.gsi.chart.axes.AxisLabelFormatter;
 import de.gsi.chart.axes.AxisMode;
 import de.gsi.chart.axes.spi.DefaultNumericAxis;
 import de.gsi.chart.axes.spi.MetricPrefix;
-import de.gsi.chart.axes.Axis;
 import de.gsi.chart.data.DataSet;
 import de.gsi.chart.plugins.measurements.utils.SimpleDataSetEstimators;
 import javafx.beans.Observable;
@@ -66,7 +63,8 @@ public class SimpleMeasurements extends ValueIndicator {
                                 "Abs. Transmission"), TRANSMISSION_REL(true, ACC, "Rel. Transmission"),
 
         // horizontal-type measurements
-        EDGE_DETECT(false, HORIZONTAL, "Edge-Detect"), RISETIME(false, HORIZONTAL,
+        EDGE_DETECT(false, HORIZONTAL, "Edge-Detect"), RISETIME_10_90(false, HORIZONTAL,
+                "10%-90% Rise-/Fall-Time\n (simple)"), RISETIME_20_80(false, HORIZONTAL,
                 "20%-80% Rise-/Fall-Time\n (simple)"), FWHM(false, HORIZONTAL, "FWHM"), FWHM_INTERPOLATED(false,
                         HORIZONTAL,
                         "FWHM (interp.)"), LOCATION_MAXIMUM(false, HORIZONTAL, "Loc. Maximum"), LOCATION_MAXIMUM_GAUSS(
@@ -104,14 +102,13 @@ public class SimpleMeasurements extends ValueIndicator {
     public SimpleMeasurements(final XYChart chart, final MeasurementType measType) {
         super(chart, AxisMode.X);
         this.measType = measType;
-        title = measType + " [#" + (AbstractChartMeasurement.markerCount - 1) + ", #"
-                + AbstractChartMeasurement.markerCount + "]";
+        title = new StringBuilder().append(measType).append(" [#").append(AbstractChartMeasurement.markerCount - 1).append(", #").append(AbstractChartMeasurement.markerCount)
+                .append("]").toString();
         valueField.setMinRange(SimpleMeasurements.DEFAULT_MIN).setMaxRange(SimpleMeasurements.DEFAULT_MAX);
 
         final Axis axis = axisMode == X ? chart.getXAxis() : chart.getYAxis();
         if (!(axis instanceof Axis)) {
-            SimpleMeasurements.LOGGER.warn("axis type " + axis.getClass().getSimpleName()
-                    + "not compatible with indicator (needs to derivce from Axis)");
+            LOGGER.warn(new StringBuilder().append("axis type ").append(axis.getClass().getSimpleName()).append("not compatible with indicator (needs to derivce from Axis)").toString());
             return;
         }
         final Axis numAxis = axis;
@@ -137,8 +134,6 @@ public class SimpleMeasurements extends ValueIndicator {
 
     @Override
     public void initialize() {
-        // super.initialize();
-
         final Node node = Borders.wrap(valueField).lineBorder().title(title).color(Color.BLACK).build().build();
         node.setMouseTransparent(true);
         displayPane.getChildren().add(node);
@@ -242,8 +237,11 @@ public class SimpleMeasurements extends ValueIndicator {
         case EDGE_DETECT:
             val = SimpleDataSetEstimators.getEdgeDetect(selectedDataSet, indexMin, indexMax);
             break;
-        case RISETIME:
-            val = SimpleDataSetEstimators.getSimpleRiseTime(selectedDataSet, indexMin, indexMax);
+        case RISETIME_10_90:
+            val = SimpleDataSetEstimators.getSimpleRiseTime1090(selectedDataSet, indexMin, indexMax);
+            break;
+        case RISETIME_20_80:
+            val = SimpleDataSetEstimators.getSimpleRiseTime2080(selectedDataSet, indexMin, indexMax);
             break;
         case FWHM:
             val = SimpleDataSetEstimators.getFullWidthHalfMaximum(selectedDataSet, indexMin, indexMax, false);
@@ -285,7 +283,7 @@ public class SimpleMeasurements extends ValueIndicator {
         final double scaledValue = val / unitScale;
 
         // update label valueTextField
-        String valueLabel = Double.toString(scaledValue);
+        String valueLabel;
         if (axis instanceof DefaultNumericAxis && axisUnit != null) {
             valueField.setUnit(new StringBuilder().append(axisPrefix).append(unit).toString());
             final AxisLabelFormatter axisFormatter = ((DefaultNumericAxis) axis).getAxisLabelFormatter();
@@ -308,8 +306,8 @@ public class SimpleMeasurements extends ValueIndicator {
         case TRANSMISSION_REL:
             valueField.setUnit("%");
             break;
-        default:
         case INTEGRAL:
+        default:        
             final String unit2 = altAxisLabel.replaceAll("\\[", "").replaceAll("\\]", "");
             // valueField.setUnit(unit + "*" + unit2);
             // valueField.setUnit(unit);

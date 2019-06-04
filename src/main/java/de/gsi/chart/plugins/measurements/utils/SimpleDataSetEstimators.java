@@ -236,14 +236,29 @@ public final class SimpleDataSetEstimators {
         }
         return stopTime - startTime;
     }
-
+    
     public static double getSimpleRiseTime(final DataSet dataSet, final int indexMin, final int indexMax) {
+        return getSimpleRiseTime2080(dataSet, indexMin, indexMax);
+    }
+    
+    public static double getSimpleRiseTime1090(final DataSet dataSet, final int indexMin, final int indexMax) {
+        return getSimpleRiseTime(dataSet, indexMin, indexMax, 0.1, 0.9);
+    }
+    
+    public static double getSimpleRiseTime2080(final DataSet dataSet, final int indexMin, final int indexMax) {
+        return getSimpleRiseTime(dataSet, indexMin, indexMax, 0.2, 0.9);
+    }
+
+    public static double getSimpleRiseTime(final DataSet dataSet, final int indexMin, final int indexMax, final double min, final double max) {
+        if (!Double.isFinite(min) || min < 0.0 || min >1.0 || !Double.isFinite(max) || max < 0.0 || max >1.0 || max<=min) {
+            throw new IllegalArgumentException(new StringBuilder().append("[min=").append(min).append(",max=").append(max).append("] must be within [0.0, 1.0]").toString());
+        }        
         final double minVal = SimpleDataSetEstimators.getMinimum(dataSet, indexMin, indexMax);
         final double maxVal = SimpleDataSetEstimators.getMaximum(dataSet, indexMin, indexMax);
         final double range = Math.abs(maxVal - minVal);
 
         final boolean inverted = dataSet.getY(indexMin) > dataSet.getY(indexMax);
-        // detect 20% and 80% change
+        // detect 'min' and 'max' level change
         double startTime = dataSet.getX(indexMin);
         double stopTime = dataSet.getX(indexMax);
         boolean foundStartRising = false;
@@ -252,13 +267,13 @@ public final class SimpleDataSetEstimators {
             for (int index = indexMin; index < indexMax; index++) {
                 final double actual = dataSet.getY(index);
                 if (Double.isFinite(actual)) {
-                    if (!foundStartRising && actual < maxVal - 0.2 * range) {
+                    if (!foundStartRising && actual < maxVal - min * range) {
                         startTime = dataSet.getX(index);
                         foundStartRising = true;
                         continue;
                     }
 
-                    if (foundStartRising && actual < maxVal - 0.8 * range) {
+                    if (foundStartRising && actual < maxVal - max * range) {
                         stopTime = dataSet.getX(index);
                         break;
                     }
@@ -269,13 +284,13 @@ public final class SimpleDataSetEstimators {
             for (int index = indexMin; index < indexMax; index++) {
                 final double actual = dataSet.getY(index);
                 if (Double.isFinite(actual)) {
-                    if (!foundStartRising && actual > minVal + 0.2 * range) {
+                    if (!foundStartRising && actual > minVal + min * range) {
                         startTime = dataSet.getX(index);
                         foundStartRising = true;
                         continue;
                     }
 
-                    if (foundStartRising && actual > minVal + 0.8 * range) {
+                    if (foundStartRising && actual > minVal + max * range) {
                         stopTime = dataSet.getX(index);
                         break;
                     }
@@ -291,9 +306,9 @@ public final class SimpleDataSetEstimators {
         for (int index = indexMin; index < indexMax; index++) {
             final double actual = dataSet.getY(index);
             if (Double.isFinite(actual) && actual > maxVal) {
-			    maxVal = actual;
-			    locMax = index;
-			}
+                maxVal = actual;
+                locMax = index;
+            }
         }
         return locMax;
     }
@@ -326,16 +341,15 @@ public final class SimpleDataSetEstimators {
      * @return location of the to be interpolated peak [bins]
      */
     public static double interpolateGaussian(final double[] data, final int data_length, final int index) {
-        if (index > 0 && index < data_length - 1) {
-            final double left = Math.pow(data[index - 1], 1);
-            final double center = Math.pow(data[index - 0], 1);
-            final double right = Math.pow(data[index + 1], 1);
-
-            double val = index;
-            val += 0.5 * Math.log(right / left) / Math.log(Math.pow(center, 2) / (left * right));
-            return val;
+        if (!(index > 0 && index < data_length - 1)) {
+            return index;
         }
-        return index;
+        final double left = Math.pow(data[index - 1], 1);
+        final double center = Math.pow(data[index - 0], 1);
+        final double right = Math.pow(data[index + 1], 1);
+        double val = index;
+        val += 0.5 * Math.log(right / left) / Math.log(Math.pow(center, 2) / (left * right));
+        return val;
     }
 
     public static double linearInterpolate(final double x0, final double x1, final double y0, final double y1,
@@ -351,20 +365,19 @@ public final class SimpleDataSetEstimators {
      * @return FWHM estimate [bins]
      */
     public static double computeFWHM(final double[] data, final int data_length, final int index) {
-        if (index > 0 && index < data_length - 1) {
-            final double maxHalf = 0.5 * data[index];
-            int lowerLimit;
-            int upperLimit;
-            for (upperLimit = index; upperLimit < data_length && data[upperLimit] > maxHalf; upperLimit++) {
-                // computation done in the abort condition
-            }
-            for (lowerLimit = index; lowerLimit > 0 && data[lowerLimit] > maxHalf; lowerLimit--) {
-                // computation done in the abort condition
-            }
-
-            return upperLimit - lowerLimit;
+        if (!(index > 0 && index < data_length - 1)) {
+            return 1.0f;
         }
-        return 1.0f;
+        final double maxHalf = 0.5 * data[index];
+        int lowerLimit;
+        int upperLimit;
+        for (upperLimit = index; upperLimit < data_length && data[upperLimit] > maxHalf; upperLimit++) {
+            // computation done in the abort condition
+        }
+        for (lowerLimit = index; lowerLimit > 0 && data[lowerLimit] > maxHalf; lowerLimit--) {
+            // computation done in the abort condition
+        }
+        return upperLimit - lowerLimit;
     }
 
     /**
@@ -375,25 +388,23 @@ public final class SimpleDataSetEstimators {
      * @return FWHM estimate [bins]
      */
     public static double computeInterpolatedFWHM(final double[] data, final int data_length, final int index) {
-        if (index > 0 && index < data_length - 1) {
-            final double maxHalf = 0.5 * data[index];
-            int lowerLimit;
-            int upperLimit;
-            for (upperLimit = index; upperLimit < data_length && data[upperLimit] > maxHalf; upperLimit++) {
-                // computation done in the abort condition
-            }
-            for (lowerLimit = index; lowerLimit > 0 && data[lowerLimit] > maxHalf; lowerLimit--) {
-                // computation done in the abort condition
-            }
-
-            final double lowerLimitRefined = SimpleDataSetEstimators.linearInterpolate(lowerLimit, lowerLimit + 1.0, data[lowerLimit],
-                    data[lowerLimit + 1], maxHalf);
-            final double upperLimitRefined = SimpleDataSetEstimators.linearInterpolate(upperLimit - 1.0, upperLimit, data[upperLimit - 1],
-                    data[upperLimit], maxHalf);
-
-            return upperLimitRefined - lowerLimitRefined;
+        if (!(index > 0 && index < data_length - 1)) {
+            return 1.0f;
         }
-        return 1.0f;
+        final double maxHalf = 0.5 * data[index];
+        int lowerLimit;
+        int upperLimit;
+        for (upperLimit = index; upperLimit < data_length && data[upperLimit] > maxHalf; upperLimit++) {
+            // computation done in the abort condition
+        }
+        for (lowerLimit = index; lowerLimit > 0 && data[lowerLimit] > maxHalf; lowerLimit--) {
+            // computation done in the abort condition
+        }
+        final double lowerLimitRefined = SimpleDataSetEstimators.linearInterpolate(lowerLimit, lowerLimit + 1.0, data[lowerLimit],
+                data[lowerLimit + 1], maxHalf);
+        final double upperLimitRefined = SimpleDataSetEstimators.linearInterpolate(upperLimit - 1.0, upperLimit, data[upperLimit - 1],
+                data[upperLimit], maxHalf);
+        return upperLimitRefined - lowerLimitRefined;
     }
 
     public static double getFullWidthHalfMaximum(final DataSet dataSet, final int indexMin, final int indexMax,
@@ -475,20 +486,20 @@ public final class SimpleDataSetEstimators {
                     }
                 }
             } else // last sample was below zero line
-			if (actual < thresholdMin) {
-			    // detected falling edge
-			    actualState = 0.0;
-			    final double time = dataSet.getX(index);
+            if (actual < thresholdMin) {
+                // detected falling edge
+                actualState = 0.0;
+                final double time = dataSet.getX(index);
 
-			    if (Double.isFinite(startFallingEdge)) {
-			        final double period = time - startFallingEdge;
-			        startFallingEdge = time;
-			        avgPeriod += period;
-			        avgPeriodCount++;
-			    } else {
-			        startFallingEdge = time;
-			    }
-			}
+                if (Double.isFinite(startFallingEdge)) {
+                    final double period = time - startFallingEdge;
+                    startFallingEdge = time;
+                    avgPeriod += period;
+                    avgPeriodCount++;
+                } else {
+                    startFallingEdge = time;
+                }
+            }
         }
         if (avgPeriodCount == 0) {
             return Double.NaN;
