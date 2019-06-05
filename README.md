@@ -1,4 +1,4 @@
-[![Build Status](https://scan.coverity.com/projects/chart-fx)](https://scan.coverity.com/projects/chart-fx)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/19bab6e7f156442c912bb742d494c0c0)](https://www.codacy.com/app/GSI/chart-fx?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=GSI-CS-CO/chart-fx&amp;utm_campaign=Badge_Grade)[![Build Status](https://scan.coverity.com/projects/chart-fx)](https://scan.coverity.com/projects/chart-fx)
 # ChartFx
 
 ChartFx is scientific charting library developed at [GSI](https://www.gsi.de) for FAIR with focus on performance optimised real-time data visualisation at 25 Hz update rates for data sets with a few 10 thousand up to 5 million data points common in digital signal processing applications.
