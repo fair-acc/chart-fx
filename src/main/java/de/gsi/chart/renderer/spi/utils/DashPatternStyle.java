@@ -16,7 +16,8 @@ import javafx.scene.shape.Line;
 
 
 /**
- * Workaround for dashed line JavaFX performance bottleneck for strictly horizontal and vertical lines as used in the GrudRenderer
+ * Workaround for dashed line JavaFX performance bottleneck for strictly horizontal and vertical lines 
+ * as used in the GridRenderer
  * 
  * see e.g. option 3 in:
  * https://stackoverflow.com/questions/47102734/performances-issue-when-drawing-dashed-line-in-java/47166129#47166129
@@ -25,8 +26,12 @@ import javafx.scene.shape.Line;
  *
  */
 public final class DashPatternStyle {
-	
+	    
 	protected static WeakHashMap<Integer, ImagePattern> dashHashMap = new WeakHashMap<>();
+	
+	private DashPatternStyle() {
+	    // empty definition for utility class
+	}
 	
 	private static double getPatternLength(final double[] pattern) {
 		if (pattern == null || pattern.length<=1) {
@@ -39,11 +44,11 @@ public final class DashPatternStyle {
 		return ret;
 	}
 	
-	private static Integer computeHash(final Paint color, final double strokeWidth, boolean isHorizontal, double[] pattern) {
+	private static Integer computeHash(final Paint color, final double strokeWidth, final boolean isHorizontal, final double[] pattern) {
 		int hash = 7;
 		hash = 31 * hash + color.hashCode();
-		hash = 31 * hash + new Double(strokeWidth).hashCode();	
-		hash = 31 * hash + new Boolean(isHorizontal).hashCode();
+		hash = 31 * hash + Double.hashCode(strokeWidth);
+		hash = 31 * hash + Boolean.hashCode(isHorizontal);
 	
 		if (pattern==null) {
 			hash = 31 * hash + 3141;
@@ -51,18 +56,19 @@ public final class DashPatternStyle {
 			hash = 31 * hash + Arrays.hashCode(pattern);
 		}
 				
-		return new Integer(hash);		
+		return hash;		
 	}
 	
-	private static ImagePattern createDefaultHatch(final Paint color, final double strokeWidth, boolean isHorizontal, double[] pattern) {
-		Integer hash = computeHash(color, strokeWidth, isHorizontal, pattern);
+	private static ImagePattern createDefaultHatch(final Paint color, final double strokeWidth, final boolean isHorizontal, 
+	        final double[] pattern) {
+		final Integer hash = computeHash(color, strokeWidth, isHorizontal, pattern);
 		
         return DashPatternStyle.dashHashMap.computeIfAbsent(hash, t -> {
         // need to recompute hatch pattern image
         final double dashPatternLength = getPatternLength(pattern);
-        double width = isHorizontal ? dashPatternLength : strokeWidth;
-        double height = isHorizontal ? strokeWidth: dashPatternLength; 
-        double middle = (int) (strokeWidth / 2.0);
+        final double width = isHorizontal ? dashPatternLength : strokeWidth;
+        final double height = isHorizontal ? strokeWidth: dashPatternLength; 
+        final double middle = (int) (strokeWidth / 2.0);
         
         final Pane pane = new Pane();
         pane.setPrefSize(width, height);
@@ -70,10 +76,10 @@ public final class DashPatternStyle {
         
         fw.setSmooth(false);
         fw.setStroke(color);
-        if (pattern != null) {
-        	fw.getStrokeDashArray().setAll(DoubleStream.of(pattern).boxed().collect(Collectors.toList()));	
+        if (pattern == null) {
+            fw.getStrokeDashArray().setAll(dashPatternLength);            	
         } else {
-        	fw.getStrokeDashArray().setAll(new Double(dashPatternLength));
+            fw.getStrokeDashArray().setAll(DoubleStream.of(pattern).boxed().collect(Collectors.toList()));
         }
         fw.setStrokeWidth(strokeWidth);
         

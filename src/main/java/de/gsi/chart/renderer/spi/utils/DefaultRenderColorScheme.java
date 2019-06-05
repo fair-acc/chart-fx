@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -23,8 +24,6 @@ public final class DefaultRenderColorScheme {
     public static final String DEFAULT_FONT = "Helvetia";
     public static final int DEFAULT_FONT_SIZE = 18;
 
-    // private static final Color[] STARTER = { Color.BLUE, Color.GREEN,
-    // Color.DARKRED, Color.BLACK};
     public static final Color[] MISC = { Color.valueOf("#5DA5DA"), // (blue)
             Color.valueOf("#F15854"), // (red)
             Color.valueOf("#FAA43A"), // (orange)
@@ -64,9 +63,9 @@ public final class DefaultRenderColorScheme {
     // DELL
     // Duolingo (not bad)
 
-    static private final Color[] COLORS = DefaultRenderColorScheme.TUNEVIEWER;
+    private static final Color[] COLORS = DefaultRenderColorScheme.TUNEVIEWER;
 
-    static private Paint[] fillStyles;
+    private static Paint[] fillStyles;
     private static double defaultLineWidth = 0.5;
     private static double lineWidth = 1.5;
     private static double hatchShiftByIndex = 1.5;
@@ -89,15 +88,14 @@ public final class DefaultRenderColorScheme {
     private static Color getColorModifier(final Map<String, List<String>> parameterMap, final Color orignalColor) {
         Color color = orignalColor;
 
-        if (parameterMap.containsKey(XYChartCss.DATASET_INTENSITY.toLowerCase())) {
-            double intensity = 100.0;
+        final List<String> intensityModifier = parameterMap.get(XYChartCss.DATASET_INTENSITY.toLowerCase(Locale.UK));
+        if (color != null && intensityModifier != null && !intensityModifier.isEmpty()) {            
             try {
-                intensity = Double.parseDouble(parameterMap.get(XYChartCss.DATASET_INTENSITY.toLowerCase()).get(0));
+                final double intensity = Double.parseDouble(intensityModifier.get(0));
+                color = color.deriveColor(0, intensity / 100, 1.0, intensity / 100);
             } catch (final NumberFormatException e) {
-                // can safely ignore this since we have a default value
-            }
-
-            color = color.deriveColor(0, intensity / 100, 1.0, intensity / 100);
+                // re-use unmodified original color              
+            }            
         }
 
         return color;
@@ -116,7 +114,7 @@ public final class DefaultRenderColorScheme {
     }
 
     public static void setGraphicsContextAttributes(final GraphicsContext gc, final String style) {
-        if (style == null) {
+        if (gc == null || style == null) {
             return;
         }
 
@@ -151,11 +149,9 @@ public final class DefaultRenderColorScheme {
         AssertUtils.gtEqThanZero("setLineScheme dsIndex", dsIndex);
         DefaultRenderColorScheme.init();
         final Map<String, List<String>> map = DefaultRenderColorScheme.splitQuery(defaultStyle);
-        Color rawColor = DefaultRenderColorScheme.getColor(dsIndex);
+        
         final Color lineColor = StyleParser.getColorPropertyValue(defaultStyle, XYChartCss.DATASET_STROKE_COLOR);
-        if (lineColor != null) {
-            rawColor = lineColor;
-        }
+        final Color rawColor = lineColor == null ? DefaultRenderColorScheme.getColor(dsIndex) : lineColor;
 
         gc.setLineWidth(DefaultRenderColorScheme.lineWidth);
         gc.setFill(DefaultRenderColorScheme.getFill(dsIndex));
@@ -165,21 +161,18 @@ public final class DefaultRenderColorScheme {
     public static void setFillScheme(final GraphicsContext gc, final String defaultStyle, final int dsIndex) {
         AssertUtils.gtEqThanZero("setFillScheme dsIndex", dsIndex);
         final Map<String, List<String>> map = DefaultRenderColorScheme.splitQuery(defaultStyle);
-
-        Color rawColor = DefaultRenderColorScheme.getColor(dsIndex);
+        
         final Color fillColor = StyleParser.getColorPropertyValue(defaultStyle, XYChartCss.FILL_COLOR);
-        if (fillColor != null) {
-            rawColor = fillColor;
-        }
+        final Color rawColor = fillColor == null ? DefaultRenderColorScheme.getColor(dsIndex) : fillColor;
 
         final Color color = DefaultRenderColorScheme.getColorModifier(map, rawColor);
+        if (color == null) {
+            return;
+        }
 
         final ImagePattern hatch = FillPatternStyle.getDefaultHatch(color.brighter(),
                 dsIndex * DefaultRenderColorScheme.hatchShiftByIndex);
 
-        // gc.setLineWidth(defaultLineWidth);
-        // gc.setStroke(color);
-        // gc.setFill(getFill(dsIndex));
         gc.setFill(hatch);
     }
 
@@ -198,6 +191,7 @@ public final class DefaultRenderColorScheme {
         if (styleString == null || styleString.isEmpty()) {
             return Collections.emptyMap();
         }
+        
         return Arrays.stream(styleString.split(";")).map(DefaultRenderColorScheme.SELF::splitQueryParameter)
                 .collect(Collectors.groupingBy(SimpleImmutableEntry::getKey, LinkedHashMap::new,
                         Collectors.mapping(Map.Entry::getValue, Collectors.toList())));
