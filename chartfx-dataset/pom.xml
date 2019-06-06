@@ -1,0 +1,20 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>de.gsi</groupId>
+        <artifactId>chartfx</artifactId>
+        <version>${revision}${sha1}${changelist}</version>
+        <relativePath>..</relativePath>
+    </parent>
+    <groupId>de.gsi.dataset</groupId>
+    <artifactId>chartfx-dataset</artifactId>
+    <name>dataset</name>
+
+    <description>
+		Container for handling different types of datasets with metadata, uncertainties, etc.
+		Provides interfaces for the charting and math library to use.
+	</description>
+
+</project>
