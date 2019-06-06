@@ -1,4 +1,9 @@
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/19bab6e7f156442c912bb742d494c0c0)](https://www.codacy.com/app/GSI/chart-fx?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=GSI-CS-CO/chart-fx&amp;utm_campaign=Badge_Grade)[![Build Status](https://scan.coverity.com/projects/chart-fx)](https://scan.coverity.com/projects/chart-fx)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/19bab6e7f156442c912bb742d494c0c0)](https://www.codacy.com/app/GSI/chart-fx?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=GSI-CS-CO/chart-fx&amp;utm_campaign=Badge_Grade)
+[![Coverity Build Status](https://scan.coverity.com/projects/chart-fx/badge.svg)](https://scan.coverity.com/projects/chart-fx)
+[![travis-ci Build Status JDK8](https://img.shields.io/travis/GSI-CS-CO/chart-fx/JDK8.svg?label=build%20JDK8)](https://travis-ci.org/GSI-CS-CO/chart-fx)
+[![travis-ci Build Status OpenJDK11](https://img.shields.io/travis/GSI-CS-CO/chart-fx/master.svg?label=build%20JDK11)](https://travis-ci.org/GSI-CS-CO/chart-fx)
+[![Maven Central](https://img.shields.io/maven-central/v/de.gsi.chart-fx/chart-fx.svg)](https://search.maven.org/artifact/de.gsi.chart-fx/chartfx-chart)
+
 # ChartFx
 
 ChartFx is scientific charting library developed at [GSI](https://www.gsi.de) for FAIR with focus on performance optimised real-time data visualisation at 25 Hz update rates for data sets with a few 10 thousand up to 5 million data points common in digital signal processing applications.
