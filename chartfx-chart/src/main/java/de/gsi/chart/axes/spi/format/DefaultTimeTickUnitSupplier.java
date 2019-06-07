@@ -80,9 +80,14 @@ public class DefaultTimeTickUnitSupplier implements TickUnitSupplier {
             // high-resolution
             // timer
             DefaultTimeTickUnitSupplier.HIGHRES_MODE, // 1 milli-second
+            DefaultTimeTickUnitSupplier.HIGHRES_MODE, // 10 milli-second
             DefaultTimeTickUnitSupplier.HIGHRES_MODE, // 100 milli-second
-            DefaultTimeTickUnitSupplier.HIGHRES_MODE, // 100 milli-second
+            DefaultTimeTickUnitSupplier.HIGHRES_MODE, // 500 milli-second
             "HH:mm:ss.SSS", // 1 second
+            "HH:mm:ss.SSS", // 1.5 seconds
+            "HH:mm:ss.SSS", // 2 seconds
+            "HH:mm:ss", // 5 seconds
+            "HH:mm:ss", // 10 seconds
             "HH:mm:ss", // 15 second
             "HH:mm:ss", // 30 second
             "HH:mm:ss", // 1 minute
