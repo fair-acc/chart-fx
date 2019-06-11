@@ -19,7 +19,7 @@ import de.gsi.dataset.utils.AssertUtils;
  * User provides X and Y coordinates or only Y coordinates. In the former case X
  * coordinates have value of data point index. This version being optimised for
  * native double arrays.
- * 
+ *
  * @see DoubleDataSet for an equivalent implementation without errors
  *
  * @author rstein
@@ -163,7 +163,7 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
     }
 
     /**
-     * 
+     *
      * @return data label map for given data point
      */
     public Map<Integer, String> getDataLabelMap() {
@@ -171,7 +171,7 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
     }
 
     /**
-     * 
+     *
      * @return data style map (CSS-styling)
      */
     public Map<Integer, String> getDataStyleMap() {
@@ -321,8 +321,8 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
 
         xValues[dataMaxIndex] = x;
         yValues[dataMaxIndex] = y;
-        yErrorsPos[dataMaxIndex] = yErrorNeg;
-        yErrorsNeg[dataMaxIndex] = yErrorPos;
+        yErrorsPos[dataMaxIndex] = yErrorPos;
+        yErrorsNeg[dataMaxIndex] = yErrorNeg;
         dataMaxIndex++;
 
         xRange.add(x);
@@ -552,7 +552,7 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
      */
     public String addDataLabel(final int index, final String label) {
         final String retVal = dataLabels.put(index, label);
-        this.fireInvalidated(new UpdatedMetaDataEvent(this, "added label"));
+        fireInvalidated(new UpdatedMetaDataEvent(this, "added label"));
         return retVal;
     }
 
@@ -568,7 +568,7 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
      */
     public String removeDataLabel(final int index) {
         final String retVal = dataLabels.remove(index);
-        this.fireInvalidated(new UpdatedMetaDataEvent(this, "removed label"));        
+        fireInvalidated(new UpdatedMetaDataEvent(this, "removed label"));
         return retVal;
     }
 
@@ -600,8 +600,8 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
      */
     public String addDataStyle(final int index, final String style) {
         final String retVal = dataStyles.put(index, style);
-        this.fireInvalidated(new UpdatedMetaDataEvent(this, "added style"));
-        return retVal;        
+        fireInvalidated(new UpdatedMetaDataEvent(this, "added style"));
+        return retVal;
     }
 
     /**
@@ -614,7 +614,7 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
      */
     public String removeStyle(final int index) {
         final String retVal = dataStyles.remove(index);
-        this.fireInvalidated(new UpdatedMetaDataEvent(this, "removed style"));        
+        fireInvalidated(new UpdatedMetaDataEvent(this, "removed style"));
         return retVal;
     }
 

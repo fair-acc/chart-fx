@@ -10,6 +10,8 @@ import static de.gsi.dataset.utils.DataSetUtils.ErrType.EYN;
 import static de.gsi.dataset.utils.DataSetUtils.ErrType.EYP;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -18,11 +20,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.PrintWriter;
 import java.io.PushbackInputStream;
 import java.nio.ByteBuffer;
 import java.nio.DoubleBuffer;
 import java.nio.file.Path;
+import java.security.InvalidParameterException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -60,6 +62,7 @@ import de.gsi.dataset.spi.DoubleErrorDataSet;
  */
 public class DataSetUtils {
 
+    private static final int SWITCH_TO_BINARY_KEY = 0xFE;
     private static final Logger LOGGER = LoggerFactory.getLogger(DataSetUtils.class);
     private static final String DEFAULT_TIME_FORMAT = "yyyyMMdd_HHmmss";
 
@@ -306,7 +309,7 @@ public class DataSetUtils {
     }
 
     private static class SplitCharByteInputStream extends FilterInputStream {
-        private final static byte marker = (byte) 0xFE;
+        private static final byte MARKER = (byte) SWITCH_TO_BINARY_KEY;
         private boolean binary = false;
         private boolean hasMarker = false;
         private final PushbackInputStream pbin;
@@ -319,7 +322,7 @@ public class DataSetUtils {
         @Override
         public int read() throws IOException {
             int b = in.read();
-            if (b == marker) {
+            if (b == MARKER) {
                 pbin.unread(b);
                 b = -1;
             }
@@ -332,7 +335,7 @@ public class DataSetUtils {
             if (!hasMarker) {
                 nread = in.read(b, 0, b.length);
                 for (int i = 0; i < b.length; i++) {
-                    if (b[i] == marker) {
+                    if (b[i] == MARKER) {
                         pbin.unread(b, i + 1, nread - i - 1);
                         hasMarker = true;
                         return i;
@@ -353,7 +356,7 @@ public class DataSetUtils {
             if (!hasMarker) {
                 nread = in.read(b, off, len);
                 for (int i = off; i < (off + nread); i++) {
-                    if (b[i] == marker) {
+                    if (b[i] == MARKER) {
                         pbin.unread(b, i + 1, (off + nread) - i - 1);
                         hasMarker = true;
                         return i;
@@ -393,7 +396,7 @@ public class DataSetUtils {
      *            File to open
      * @param compression
      *            Compression method
-     * @return A ready-to-go writer that is agnostic to the underlying
+     * @return A ready-to-go OutputStream that is agnostic to the underlying
      *         compression method
      * @throws IOException in case of IO problems
      */
@@ -419,8 +422,8 @@ public class DataSetUtils {
     /**
      * Open a InputStream that is backed by the appropriate stream classes for
      * the chosen compression method.
-     * 
-     * @param file file descriptior
+     *
+     * @param file file descriptor
      * @param compression @see Compression
      * @return SplitCharByteInputStream
      * @throws IOException in case of IO problems
@@ -688,7 +691,7 @@ public class DataSetUtils {
      *            variables)
      * @param compression
      *            Compression of the file (GZIP, ZIP or NONE). Supply AUTO or
-     *            ommit this value to use file extension.
+     *            omit this value to use file extension.
      * @param binary true: whether to store data as binary or string
      * @return actual name of the file that was written or none in case of
      *         errors
@@ -713,29 +716,18 @@ public class DataSetUtils {
                 LOGGER.info("needed to create directory for file: " + longFileName);
             }
 
-            // create PrintWriter
-            try (OutputStream outputfile = openDatasetFileOutput(file, compression);
-                    final PrintWriter outputprinter = new PrintWriter(outputfile)) {
-                dataSet.lock();
+            // create OutputStream
+            final ByteArrayOutputStream byteOutput = new ByteArrayOutputStream(8192);
+            //TODO: cache ByteArrayOutputStream
+            try (OutputStream outputfile = openDatasetFileOutput(file, compression);) {
 
-                outputprinter.write("#file producer : " + DataSetUtils.class.getCanonicalName());
-                outputprinter.write('\n');
+                writeDataSetToByteArray(dataSet, byteOutput, binary);
 
-                writeHeaderDataToFile(outputprinter, dataSet);
-
-                writeMetaDataToFile(outputprinter, dataSet);
-
-                if (binary) {
-                    writeNumericDataToBinaryFile(outputprinter, outputfile, dataSet);
-                } else {
-                    writeNumericDataToFile(outputprinter, dataSet);
-                }
+                byteOutput.writeTo(outputfile);
 
                 // automatically closing writer connection
             } catch (final IOException e) {
                 LOGGER.error("could not write to file: '" + fileName + "'", e);
-            } finally {
-                dataSet.unlock();
             }
 
             LOGGER.debug("write data set '" + dataSet.getName() + "' to " + longFileName);
@@ -748,21 +740,70 @@ public class DataSetUtils {
     }
 
     /**
-     * @param outputprinter printer to write strings into
-     * @param outputfile stream to write binary data into
+     * Write data set into byte buffer.
+     *
+     * @param dataSet
+     *            The DataSet to export
+     * @param byteOutput
+     *            byte output stream (N.B. keep caching this object)
+     * @param binary
+     *            {@code true}: encode data as binary (smaller size,
+     *            performance), or {@code false} as string (human readable,
+     *            easier debugging)
+     */
+    public static void writeDataSetToByteArray(final DataSet dataSet, final ByteArrayOutputStream byteOutput,
+            final boolean binary) {
+        if (dataSet == null) {
+            throw new IllegalArgumentException("dataSet must not be null or empty");
+        }
+        if (byteOutput == null) {
+            throw new IllegalArgumentException("byteOutput must not be null or empty");
+        }
+
+        byteOutput.reset();
+        try {
+            dataSet.lock();
+
+            byteOutput.write(("#file producer : " + DataSetUtils.class.getCanonicalName() + "\n").getBytes());
+
+            writeHeaderDataToStream(byteOutput, dataSet);
+
+            writeMetaDataToStream(byteOutput, dataSet);
+
+            if (binary) {
+                writeNumericBinaryDataToStream(byteOutput, dataSet);
+            } else {
+                writeNumericDataToStream(byteOutput, dataSet);
+            }
+        } catch (final IOException e) {
+            LOGGER.error("could not write to ByteArrayOutputStream", e);
+            byteOutput.reset();
+        } finally {
+            dataSet.unlock();
+        }
+    }
+
+    /**
+     * @param outputStream stream to write binary data into
      * @param dataSet to be exported
      */
-    private static void writeNumericDataToBinaryFile(final PrintWriter outputprinter, final OutputStream outputfile,
+    private static void writeNumericBinaryDataToStream(final OutputStream outputStream,
             final DataSet dataSet) {
         final int nsamples = dataSet.getDataCount();
 
         // write header with field sizes
-        outputprinter.println("$binary");
-        outputprinter.println("$x;float64[];" + Long.toString(nsamples));
-        outputprinter.println("$y;float64[];" + Long.toString(nsamples));
-        outputprinter.println("$eyn;float64[];" + Long.toString(nsamples));
-        outputprinter.println("$eyp;float64[];" + Long.toString(nsamples));
-        outputprinter.flush();
+        final StringBuffer buffer = new StringBuffer();
+
+        buffer.append("$binary").append("\n");
+        buffer.append("$x;float64[];").append(Long.toString(nsamples)).append("\n");
+        buffer.append("$y;float64[];").append(Long.toString(nsamples)).append("\n");
+        buffer.append("$eyn;float64[];").append(Long.toString(nsamples)).append("\n");
+        buffer.append("$eyp;float64[];").append(Long.toString(nsamples)).append("\n");
+        try {
+            outputStream.write(buffer.toString().getBytes());
+        } catch (final IOException e) {
+            LOGGER.error("WriteNumericDataToBinaryFile failed to write header description: ", e);
+        }
 
         // Write binary data after separation character 0xFE
         // this would be nicer, because it does not copy the byte array, but
@@ -784,64 +825,44 @@ public class DataSetUtils {
         final DoubleBuffer eypDouble = eypByte.asDoubleBuffer();
         eypDouble.put(errors(dataSet, EYP));
         try {
-            outputfile.write(0xFE); // magic byte to switch to binary data
-            outputfile.write(xByte.array());
-            outputfile.write(yByte.array());
-            outputfile.write(eynByte.array());
-            outputfile.write(eypByte.array());
+            outputStream.write(SWITCH_TO_BINARY_KEY); // magic byte to switch to binary data
+            outputStream.write(xByte.array());
+            outputStream.write(yByte.array());
+            outputStream.write(eynByte.array());
+            outputStream.write(eypByte.array());
         } catch (final IOException e) {
-            LOGGER.error("WriteNumericDataToBinaryFile failed: ", e);
+            LOGGER.error("WriteNumericDataToBinaryFile failed to write binary body: ", e);
         }
     }
 
-    protected static void writeHeaderDataToFile(final PrintWriter outputFile, final DataSet dataSet) {
+    protected static void writeHeaderDataToStream(final OutputStream outputStream, final DataSet dataSet) {
         try {
             // common header data
             final StringBuffer buffer = new StringBuffer();
 
-            buffer.append("#dataSetName : ");
-            buffer.append(dataSet.getName());
-            buffer.append('\n');
-
-            buffer.append("#xMin : ");
-            buffer.append(dataSet.getXMin());
-            buffer.append('\n');
-
-            buffer.append("#xMax : ");
-            buffer.append(dataSet.getXMax());
-            buffer.append('\n');
-
-            buffer.append("#yMin : ");
-            buffer.append(dataSet.getYMin());
-            buffer.append('\n');
-
-            buffer.append("#yMax : ");
-            buffer.append(dataSet.getYMax());
-            buffer.append('\n');
+            buffer.append("#dataSetName : ").append(dataSet.getName()).append('\n');
+            buffer.append("#xMin : ").append(dataSet.getXMin()).append('\n');
+            buffer.append("#xMax : ").append(dataSet.getXMax()).append('\n');
+            buffer.append("#yMin : ").append(dataSet.getYMin()).append('\n');
+            buffer.append("#yMax : ").append(dataSet.getYMax()).append('\n');
 
             try {
-                buffer.append("#integral : ");
-                buffer.append(integralSimple(dataSet));
-                buffer.append('\n');
-
-                buffer.append("#mean : ");
-                buffer.append(mean(dataSet.getYValues()));
-                buffer.append('\n');
-
-                buffer.append("#rms : ");
-                buffer.append(rootMeanSquare(dataSet.getYValues()));
-                buffer.append('\n');
+                // write some statistics for the human readable benefit when opening the
+                // file with standard text-based viewers
+                buffer.append("#integral : ").append(integralSimple(dataSet)).append('\n');
+                buffer.append("#mean : ").append(mean(dataSet.getYValues())).append('\n');
+                buffer.append("#rms : ").append(rootMeanSquare(dataSet.getYValues())).append('\n');
             } catch (final Exception e) {
                 LOGGER.error("writeHeaderDataToFile - compute Math error for dataSet = '" + dataSet.getName() + "'", e);
             }
 
-            outputFile.print(buffer.toString());
+            outputStream.write(buffer.toString().getBytes());
         } catch (final Exception e) {
             LOGGER.error("writeHeaderDataToFile - error for dataSet = '" + dataSet.getName() + "'", e);
         }
     }
 
-    protected static void writeMetaDataToFile(final PrintWriter outputFile, final DataSet dataSet) {
+    protected static void writeMetaDataToStream(final OutputStream outputStream, final DataSet dataSet) {
         if (!(dataSet instanceof DataSetMetaData)) {
             return;
         }
@@ -850,47 +871,39 @@ public class DataSetUtils {
             final StringBuffer buffer = new StringBuffer();
 
             for (final String info : metaDataSet.getInfoList()) {
-                buffer.append("#info : ");
-                buffer.append(info);
-                buffer.append('\n');
+                buffer.append("#info : ").append(info).append('\n');
             }
 
             for (final String warning : metaDataSet.getWarningList()) {
-                buffer.append("#warning : ");
-                buffer.append(warning);
-                buffer.append('\n');
+                buffer.append("#warning : ").append(warning).append('\n');
             }
 
             for (final String error : metaDataSet.getErrorList()) {
-                buffer.append("#error : ");
-                buffer.append(error);
-                buffer.append('\n');
+                buffer.append("#error : ").append(error).append('\n');
             }
 
             final Map<String, String> map = metaDataSet.getMetaInfo();
             for (final String key : metaDataSet.getMetaInfo().keySet()) {
-                buffer.append("#metaKey -");
-                buffer.append(key);
-                buffer.append(" : ");
-                buffer.append(map.get(key));
-                buffer.append('\n');
+                buffer.append("#metaKey -").append(key).append(" : ").append(map.get(key)).append('\n');
             }
 
-            outputFile.print(buffer.toString());
+            outputStream.write(buffer.toString().getBytes());
         } catch (final Exception e) {
             LOGGER.error("writeMetaDataToFile - error for dataSet = '" + dataSet.getName() + "'", e);
         }
     }
 
-    protected static void writeNumericDataToFile(final PrintWriter outputFile, final DataSet dataSet) {
+    protected static void writeNumericDataToStream(final OutputStream outputFile, final DataSet dataSet) {
         try {
             // formatter definition, we always write the y errors to file
             final int nSamples = dataSet.getDataCount();
-            outputFile.println("#nSamples : " + nSamples);
+            final StringBuffer buffer = new StringBuffer();
+            buffer.append("#nSamples : " + nSamples).append("\n");
             // use '$' sign as special indicator that from now on only numeric
             // data is to be expected
-            outputFile.println("$index, x, y, eyn, eyp");
-            final StringBuffer buffer = new StringBuffer();
+            buffer.append("$index, x, y, eyn, eyp");
+            buffer.append("\n");
+
             for (int i = 0; i < nSamples; i++) {
                 buffer.append(i); // data index
                 buffer.append(',');
@@ -903,7 +916,7 @@ public class DataSetUtils {
                 buffer.append(error(dataSet, EYP, i)); // positive error in y
                 buffer.append('\n');
             }
-            outputFile.print(buffer.toString());
+            outputFile.write(buffer.toString().getBytes());
         } catch (final Exception e) {
             LOGGER.error("writeNumericDataToFile - error for dataSet = '" + dataSet.getName() + "'", e);
         }
@@ -956,11 +969,10 @@ public class DataSetUtils {
      *            Path and name of file containing csv data.
      * @param compression
      *            Compression of the file (GZIP, ZIP or NONE). Supply AUTO or
-     *            ommit this value to use file extension.
+     *            omit this value to use file extension.
      * @return DataSet with the data and metadata read from the file
      */
     public static DataSet readDataSetFromFile(final String fileName, Compression compression) {
-        boolean binary = false;
         if ((fileName == null) || fileName.isEmpty()) {
             throw new IllegalArgumentException("fileName must not be null or empty");
         }
@@ -970,69 +982,129 @@ public class DataSetUtils {
         DoubleErrorDataSet dataSet = null;
         try {
             final File file = new File(fileName);
-            try (final SplitCharByteInputStream inputFile = openDatasetFileInput(file, compression);
-                    final BufferedReader inputReader = new BufferedReader(new InputStreamReader(inputFile))) {
-                String dataSetName = "unknown data set";
-                int nDataCountEstimate = 0;
-                final ArrayList<String> info = new ArrayList<>();
-                final ArrayList<String> warning = new ArrayList<>();
-                final ArrayList<String> error = new ArrayList<>();
-                final Map<String, String> metaInfoMap = new ConcurrentHashMap<>();
+            try (final SplitCharByteInputStream inputFile = openDatasetFileInput(file, compression)) {
 
-                // skip first file format header
-                String line = inputReader.readLine();
-                for (; (line = inputReader.readLine()) != null;) {
-                    if (line.contains("$")) {
-                        if (line.startsWith("$binary")) {
-                            binary = true;
-                        }
-                        break;
-                    }
+            dataSet = readDataSetFromStream(inputFile);
 
-                    if (line.contains("#dataSetName")) {
-                        dataSetName = getValue(line);
-                    }
-
-                    if (line.contains("#nSamples")) {
-                        nDataCountEstimate = Integer.parseInt(getValue(line));
-                    }
-
-                    if (line.contains("#info")) {
-                        info.add(getValue(line));
-                    }
-
-                    if (line.contains("#warning")) {
-                        warning.add(getValue(line));
-                    }
-
-                    if (line.contains("#error")) {
-                        error.add(getValue(line));
-                    }
-
-                    if (line.contains("#metaKey -")) {
-                        final String key = getKey(line, "#metaKey -");
-                        final String value = getValue(line);
-                        metaInfoMap.put(key, value);
-                    }
-
-                }
-                dataSet = new DoubleErrorDataSet(dataSetName, nDataCountEstimate);
-                dataSet.getMetaInfo().putAll(metaInfoMap);
-
-                dataSet.getInfoList();
-
-                if (binary) {
-                    readNumericDataFromBinaryFile(inputReader, inputFile, dataSet);
-                } else {
-                    readNumericDataFromFile(inputReader, dataSet);
-                }
-
-                // automatically closing writer connection
             } catch (final IOException e) {
                 LOGGER.error("could not open/parse file: '" + fileName + "'", e);
             }
         } catch (final Exception e) {
             LOGGER.error("could not open/parse file: '" + fileName + "'", e);
+            return dataSet;
+        }
+        return dataSet;
+    }
+
+    /**
+     * Read a Dataset from a byte array containing comma separated values.<br>
+     * The data format is a custom extension of csv with an additional
+     * #-commented Metadata Header and a $-commented column header. Expects the
+     * following columns in this order to be present: index, x, y, eyn, eyp.
+     *
+     * @param byteArray
+     *            byte array.
+     * @return DataSet with the data and metadata read from the file
+     */
+    public static DoubleErrorDataSet readDataSetFromByteArray(final byte[] byteArray) {
+        if ((byteArray == null) || (byteArray.length == 0)) {
+            throw new InvalidParameterException("null byteArray");
+
+        }
+        if (byteArray.length == 0) {
+            throw new InvalidParameterException("byteArray with zero length");
+
+        }
+        DoubleErrorDataSet dataSet = null;
+        try {
+            final ByteArrayInputStream istream = new ByteArrayInputStream(byteArray);
+            try (final SplitCharByteInputStream inputFile = new SplitCharByteInputStream(new PushbackInputStream(istream, 8192))) {
+
+            dataSet = readDataSetFromStream(inputFile);
+
+            } catch (final IOException e) {
+                LOGGER.error("could not open/parse byte array size = " + byteArray.length, e);
+            }
+        } catch (final Exception e) {
+            LOGGER.error("could not open/parse byte array size = " + byteArray.length, e);
+            return dataSet;
+        }
+        return dataSet;
+    }
+
+    /**
+     * Read a Dataset from a stream containing comma separated values.<br>
+     * The data format is a custom extension of csv with an additional
+     * #-commented Metadata Header and a $-commented column header. Expects the
+     * following columns in this order to be present: index, x, y, eyn, eyp.
+     *
+     * @param inputStream
+     *            Path and name of file containing csv data.
+     * @return DataSet with the data and metadata read from the file
+     */
+    public static DoubleErrorDataSet readDataSetFromStream(final SplitCharByteInputStream inputStream) {
+        boolean binary = false;
+
+        DoubleErrorDataSet dataSet = null;
+        try (final BufferedReader inputReader = new BufferedReader(new InputStreamReader(inputStream))) {
+            String dataSetName = "unknown data set";
+            int nDataCountEstimate = 0;
+            final ArrayList<String> info = new ArrayList<>();
+            final ArrayList<String> warning = new ArrayList<>();
+            final ArrayList<String> error = new ArrayList<>();
+            final Map<String, String> metaInfoMap = new ConcurrentHashMap<>();
+
+            // skip first file format header
+            String line = inputReader.readLine();
+            for (; (line = inputReader.readLine()) != null;) {
+                if (line.contains("$")) {
+                    if (line.startsWith("$binary")) {
+                        binary = true;
+                    }
+                    break;
+                }
+
+                if (line.contains("#dataSetName")) {
+                    dataSetName = getValue(line);
+                }
+
+                if (line.contains("#nSamples")) {
+                    nDataCountEstimate = Integer.parseInt(getValue(line));
+                }
+
+                if (line.contains("#info")) {
+                    info.add(getValue(line));
+                }
+
+                if (line.contains("#warning")) {
+                    warning.add(getValue(line));
+                }
+
+                if (line.contains("#error")) {
+                    error.add(getValue(line));
+                }
+
+                if (line.contains("#metaKey -")) {
+                    final String key = getKey(line, "#metaKey -");
+                    final String value = getValue(line);
+                    metaInfoMap.put(key, value);
+                }
+
+            }
+            dataSet = new DoubleErrorDataSet(dataSetName, nDataCountEstimate);
+            dataSet.getMetaInfo().putAll(metaInfoMap);
+
+            dataSet.getInfoList();
+
+            if (binary) {
+                readNumericDataFromBinaryFile(inputReader, inputStream, dataSet);
+            } else {
+                readNumericDataFromFile(inputReader, dataSet);
+            }
+
+            // automatically closing reader connection
+        } catch (final IOException e) {
+            LOGGER.error("could not open/parse inputStream", e);
             return dataSet;
         }
         return dataSet;
@@ -1112,8 +1184,8 @@ public class DataSetUtils {
 
     protected static void readNumericDataFromFile(final BufferedReader inputFile, final DoubleErrorDataSet dataSet) {
         try {
-            String line = inputFile.readLine();
-            for (; (line = inputFile.readLine()) != null;) {
+
+            for (String line = inputFile.readLine(); line != null; line = inputFile.readLine()) {
                 final String[] parse = line.split(",");
                 if (parse.length == 0) {
                     continue;
@@ -1123,8 +1195,8 @@ public class DataSetUtils {
                                                              // cross-checks
                 final double x = Double.parseDouble(parse[1]);
                 final double y = Double.parseDouble(parse[2]);
-                final double eyn = parse.length <= 5 ? 0.0 : Double.parseDouble(parse[3]);
-                final double eyp = parse.length <= 5 ? 0.0 : Double.parseDouble(parse[4]);
+                final double eyn = parse.length < 5 ? 0.0 : Double.parseDouble(parse[3]);
+                final double eyp = parse.length < 5 ? 0.0 : Double.parseDouble(parse[4]);
                 dataSet.add(x, y, eyn, eyp);
             }
         } catch (
@@ -1157,11 +1229,11 @@ public class DataSetUtils {
      *            the input vector
      * @return average of vector elements
      */
-    protected static synchronized double mean(double[] data) {
+    protected static synchronized double mean(final double[] data) {
         if (data.length <= 0) {
             return Double.NaN;
         }
-        double norm = 1.0 / (data.length);
+        final double norm = 1.0 / (data.length);
         double val = 0.0;
         for (int i = 0; i < data.length; i++) {
             val += norm * data[i];
@@ -1174,12 +1246,12 @@ public class DataSetUtils {
      *            the input vector
      * @return un-biased r.m.s. of vector elements
      */
-    protected static synchronized double rootMeanSquare(double[] data) {
+    protected static synchronized double rootMeanSquare(final double[] data) {
         if (data.length <= 0) {
             return Double.NaN;
         }
 
-        double norm = 1.0 / (data.length);
+        final double norm = 1.0 / (data.length);
         double val1 = 0.0;
         double val2 = 0.0;
         for (int i = 0; i < data.length; i++) {
@@ -1190,7 +1262,7 @@ public class DataSetUtils {
         val1 *= norm;
         val2 *= norm;
         // un-biased rms!
-        return Math.sqrt(Math.abs(val2 - val1 * val1));
+        return Math.sqrt(Math.abs(val2 - (val1 * val1)));
     }
 
 }
