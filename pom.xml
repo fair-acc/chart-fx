@@ -24,12 +24,6 @@
         <module>chartfx-samples</module>
     </modules>
 
-    <organization>
-        <name>GSI Helmholtzzentrum für Schwerionenforschung GmbH</name>
-        <url>http://www.gsi.de</url>
-    </organization>
-    <url>https://github.com/GSI-CS-CO/chart-fx</url>
-
     <properties>
         <revision>8.0.0</revision>
         <changelist>-SNAPSHOT</changelist>
@@ -38,6 +32,19 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
     </properties>
+
+    <licenses>
+        <license>
+            <name>GPL-v3.0</name>
+            <url>http://www.gnu.org/licenses/gpl-3.0.txt</url>
+        </license>
+    </licenses>
+
+    <organization>
+        <name>GSI Helmholtzzentrum für Schwerionenforschung GmbH</name>
+        <url>http://www.gsi.de</url>
+    </organization>
+    <url>https://github.com/GSI-CS-CO/chart-fx</url>
 
     <developers>
         <developer>
