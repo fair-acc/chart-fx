@@ -1,0 +1,44 @@
+package de.gsi.dataset.testdata;
+
+import de.gsi.dataset.DataSet;
+import de.gsi.dataset.event.UpdateEvent;
+
+/**
+ * Standard interface for test data set
+ *
+ * @author rstein
+ * @param <D> generics for fluent design
+ */
+public interface TestDataSet<D extends TestDataSet<D>> extends DataSet {
+
+    /**
+     * generate a new set of numbers
+     * @return itself (fluent design)
+     */
+    D update();
+
+    /**
+     * generate test data set
+     *
+     * @param count
+     *            number of bins
+     * @return the generated array
+     */
+    double[] generateX(final int count);
+
+    /**
+     * generate test data set
+     *
+     * @param count
+     *            number of bins
+     * @return the generated array
+     */
+    double[] generateY(final int count);
+
+    /**
+     * notify listener with given event that the data set has changed
+     * @param evt the modification event
+     * @return itself (fluent design)
+     */
+    D fireInvalidated(UpdateEvent evt);
+}

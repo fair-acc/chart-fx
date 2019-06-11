@@ -1,0 +1,24 @@
+language: java
+sudo: false
+jdk:
+        - oraclejdk8
+
+# setup pgp signing key
+before_install:
+        - echo $GPG_KEY | base64 --decode | $GPG_EXECUTABLE --import
+        - echo $GPG_OWNERTRUST | base64 --decode | $GPG_EXECUTABLE --import-ownertrust
+        - if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then export REVISION=${TRAVIS_BRANCH}; else export REVISION=${TRAVIS_BRANCH}PR${TRAVIS_PULL_REQUEST}; fi
+        - if [ -z "$TRAVIS_TAG" ]; then export CHANGELIST=-SNAPSHOT; fi
+
+# Install dependencies and output maven version information
+install:
+        - mvn --settings .maven.xml install -Dgpg.skip=true -Dmaven.javadoc.skip=true -B -V -Drevision=${REVISION} -Dchangelist=${CHANGELIST}
+
+# compile and deploy maven project
+script:
+        - mvn clean deploy --settings .maven.xml -Prelease -Drevision=${REVISION} -Dchangelist=${CHANGELIST}
+
+# cache maven artifacts
+cache:
+        directories:
+                - ~/.m2

@@ -1,4 +1,9 @@
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/19bab6e7f156442c912bb742d494c0c0)](https://www.codacy.com/app/GSI/chart-fx?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=GSI-CS-CO/chart-fx&amp;utm_campaign=Badge_Grade)[![Build Status](https://scan.coverity.com/projects/chart-fx)](https://scan.coverity.com/projects/chart-fx)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/19bab6e7f156442c912bb742d494c0c0)](https://www.codacy.com/app/GSI/chart-fx?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=GSI-CS-CO/chart-fx&amp;utm_campaign=Badge_Grade)
+[![Coverity Build Status](https://scan.coverity.com/projects/chart-fx/badge.svg)](https://scan.coverity.com/projects/chart-fx)
+[![travis-ci Build Status JDK8](https://img.shields.io/travis/GSI-CS-CO/chart-fx/JDK8.svg?label=build%20JDK8)](https://travis-ci.org/GSI-CS-CO/chart-fx)
+[![travis-ci Build Status OpenJDK11](https://img.shields.io/travis/GSI-CS-CO/chart-fx/master.svg?label=build%20JDK11)](https://travis-ci.org/GSI-CS-CO/chart-fx)
+[![Maven Central](https://img.shields.io/maven-central/v/de.gsi.chart-fx/chart-fx.svg)](https://search.maven.org/artifact/de.gsi.chart-fx/chartfx-chart)
+
 # ChartFx
 
 ChartFx is scientific charting library developed at [GSI](https://www.gsi.de) for FAIR with focus on performance optimised real-time data visualisation at 25 Hz update rates for data sets with a few 10 thousand up to 5 million data points common in digital signal processing applications.
@@ -71,46 +76,46 @@ In order to provide some of the scenegraph-level functionality while using a `Ca
 <table>
 
 <tr>
-<td><figure><img src="docs/pics/CategoryAxisSample.png" alt="CategoryAxisSample" width=300/><figcaption><a href="src/test/java/de/gsi/chart/demo/CategoryAxisSample.java">CategoryAxisSample.java</a></figcaption></figure></td>
-<td><figure><img src="docs/pics/MultipleAxesSample.png" alt="MultipleAxesSample" width=300/><figcaption><a href="src/test/java/de/gsi/chart/demo/MultipleAxesSample.java">MultipleAxesSample.java</a></figcaption></figure></td>
-<td><figure><img src="docs/pics/TimeAxisSample.png" alt="TimeAxisSample" width=300/><figcaption><a href="src/test/java/de/gsi/chart/demo/TimeAxisSample.java">TimeAxisSample.java</a></figcaption></figure></td>                         
+<td><figure><img src="docs/pics/CategoryAxisSample.png" alt="CategoryAxisSample" width=300/><figcaption><a href="chartfx-samples/src/main/java/de/gsi/chart/samples/CategoryAxisSample.java">CategoryAxisSample.java</a></figcaption></figure></td>
+<td><figure><img src="docs/pics/MultipleAxesSample.png" alt="MultipleAxesSample" width=300/><figcaption><a href="chartfx-samples/src/main/java/de/gsi/chart/samples/MultipleAxesSample.java">MultipleAxesSample.java</a></figcaption></figure></td>
+<td><figure><img src="docs/pics/TimeAxisSample.png" alt="TimeAxisSample" width=300/><figcaption><a href="chartfx-samples/src/main/java/de/gsi/chart/samples/TimeAxisSample.java">TimeAxisSample.java</a></figcaption></figure></td>                         
 </tr>
 
 <tr>
-<td><figure><img src="docs/pics/LogAxisSample.png" alt="LogAxisSample" width=300/><figcaption><a href="src/test/java/de/gsi/chart/demo/LogAxisSample.java">LogAxisSample.java</a></figcaption></figure></td>
-<td><figure><img src="docs/pics/HistogramSample.png" alt="HistogramSample" width=300/><figcaption><a href="src/test/java/de/gsi/chart/demo/HistogramSample.java">HistogramSample.java</a></figcaption></figure></td>
-<td><figure><img src="docs/pics/Histogram2DimSample.png" alt="Histogram2DimSample" width=300/><figcaption><a href="src/test/java/de/gsi/chart/demo/Histogram2DimSample.java">Histogram2DimSample.java</a></figcaption></figure></td>
+<td><figure><img src="docs/pics/LogAxisSample.png" alt="LogAxisSample" width=300/><figcaption><a href="chartfx-samples/src/main/java/de/gsi/chart/samples/LogAxisSample.java">LogAxisSample.java</a></figcaption></figure></td>
+<td><figure><img src="docs/pics/HistogramSample.png" alt="HistogramSample" width=300/><figcaption><a href="chartfx-samples/src/main/java/de/gsi/chart/samples/HistogramSample.java">HistogramSample.java</a></figcaption></figure></td>
+<td><figure><img src="docs/pics/Histogram2DimSample.png" alt="Histogram2DimSample" width=300/><figcaption><a href="chartfx-samples/src/main/java/de/gsi/chart/samples/Histogram2DimSample.java">Histogram2DimSample.java</a></figcaption></figure></td>
 </tr>
 
 <tr>
-<td><figure><img src="docs/pics/EditDataSample.png" alt="EditDataSetSample" width=300/><figcaption><a href="src/test/java/de/gsi/chart/demo/EditDataSetSample.java">EditDataSetSample.java</a></figcaption></figure></td>
-<td><figure><img src="docs/pics/PolarPlotSample.png" alt="PolarPlotSample" width=300/><figcaption><a href="src/test/java/de/gsi/chart/demo/EditDataSample.java">PolarPlotSample.java</a></figcaption></figure></td>                
-<td><figure><img src="docs/pics/MetaDataRendererSample2.png" alt="EditDataSample" width=300/><figcaption><a href="src/test/java/de/gsi/chart/demo/MetaDataRendererSample.java">MetaDataRendererSample.java</a></figcaption></figure></td>
+<td><figure><img src="docs/pics/EditDataSample.png" alt="EditDataSetSample" width=300/><figcaption><a href="chartfx-samples/src/main/java/de/gsi/chart/samples/EditDataSetSample.java">EditDataSetSample.java</a></figcaption></figure></td>
+<td><figure><img src="docs/pics/PolarPlotSample.png" alt="PolarPlotSample" width=300/><figcaption><a href="chartfx-samples/src/main/java/de/gsi/chart/samples/PolarPlotSample.java">PolarPlotSample.java</a></figcaption></figure></td>                
+<td><figure><img src="docs/pics/MetaDataRendererSample2.png" alt="EditDataSample" width=300/><figcaption><a href="chartfx-samples/src/main/java/de/gsi/chart/samples/MetaDataRendererSample.java">MetaDataRendererSample.java</a></figcaption></figure></td>
 </tr>
 
 <tr>
-<td><figure><img src="docs/pics/HistoryDataSetRendererSample.png" alt="HistoryDataSetRendererSample" width=300/><figcaption><a href="src/test/java/de/gsi/chart/demo/HistoryDataSetRendererSample.java">HistoryDataSetRendererSample.java</a></figcaption></figure></td>
-<td><figure><img src="docs/pics/MountainRangeRendererSample.png" alt="MountainRangeRendererSample" width=300/><figcaption><a href="src/test/java/de/gsi/chart/demo/MountainRangeRendererSample.java">MountainRangeRendererSample.java</a></figcaption></figure></td>
-<td><figure><img src="docs/pics/ChartAnatomySample.png" alt="ChartAnatomySample" width=300/><figcaption><a href="src/test/java/de/gsi/chart/demo/ChartAnatomySample.java">ChartAnatomySample.java</a></figcaption></figure></td>
+<td><figure><img src="docs/pics/HistoryDataSetRendererSample.png" alt="HistoryDataSetRendererSample" width=300/><figcaption><a href="chartfx-samples/src/main/java/de/gsi/chart/samples/HistoryDataSetRendererSample.java">HistoryDataSetRendererSample.java</a></figcaption></figure></td>
+<td><figure><img src="docs/pics/MountainRangeRendererSample.png" alt="MountainRangeRendererSample" width=300/><figcaption><a href="chartfx-samples/src/main/java/de/gsi/chart/samples/MountainRangeRendererSample.java">MountainRangeRendererSample.java</a></figcaption></figure></td>
+<td><figure><img src="docs/pics/ChartAnatomySample.png" alt="ChartAnatomySample" width=300/><figcaption><a href="chartfx-samples/src/main/java/de/gsi/chart/samples/ChartAnatomySample.java">ChartAnatomySample.java</a></figcaption></figure></td>
 </tr>
 
 <tr>
-<td><figure><img src="docs/pics/ErrorDataSetRendererStylingSample1.png" alt="ErrorDataSetRendererStylingSample1" width=300/><figcaption><a href="src/test/java/de/gsi/chart/demo/ErrorDataSetRendererStylingSample1.java">ErrorDataSetRendererStylingSample.java</a></figcaption></figure></td>
-<td><figure><img src="docs/pics/ErrorDataSetRendererStylingSample2.png" alt="ErrorDataSetRendererStylingSample2" width=300/><figcaption><a href="src/test/java/de/gsi/chart/demo/ErrorDataSetRendererStylingSample.java">ErrorDataSetRendererStylingSample.java</a></figcaption></figure></td>
-<td><figure><img src="docs/pics/LabelledMarkerSample.png" alt="LabelledMarkerSample" width=300/><figcaption><a href="src/test/java/de/gsi/chart/demo/LabelledMarkerSample.java">LabelledMarkerSample.java</a></figcaption></figure></td>
+<td><figure><img src="docs/pics/ErrorDataSetRendererStylingSample1.png" alt="ErrorDataSetRendererStylingSample1" width=300/><figcaption><a href="chartfx-samples/src/main/java/de/gsi/chart/samples/ErrorDataSetRendererStylingSample.java">ErrorDataSetRendererStylingSample.java</a></figcaption></figure></td>
+<td><figure><img src="docs/pics/ErrorDataSetRendererStylingSample2.png" alt="ErrorDataSetRendererStylingSample2" width=300/><figcaption><a href="chartfx-samples/src/main/java/de/gsi/chart/samples/ErrorDataSetRendererStylingSample.java">ErrorDataSetRendererStylingSample.java</a></figcaption></figure></td>
+<td><figure><img src="docs/pics/LabelledMarkerSample.png" alt="LabelledMarkerSample" width=300/><figcaption><a href="chartfx-samples/src/main/java/de/gsi/chart/samples/LabelledMarkerSample.java">LabelledMarkerSample.java</a></figcaption></figure></td>
 </tr>
 
 <tr>
-<td colspan=2><figure><img src="docs/pics/ContourChartSample1.png" alt="ContourChartSample1" width=600/><figcaption><a href="src/test/java/de/gsi/chart/demo/ContourChartSample.java">ContourChartSample.java</a></figcaption></figure></td>
+<td colspan=2><figure><img src="docs/pics/ContourChartSample1.png" alt="ContourChartSample1" width=600/><figcaption><a href="chartfx-samples/src/main/java/de/gsi/chart/samples/ContourChartSample.java">ContourChartSample.java</a></figcaption></figure></td>
 <td></td>
 </tr>
 <tr>
-<td colspan=2><figure><img src="docs/pics/ContourChartSample2.png" alt="ContourChartSample" width=600/><figcaption><a href="src/test/java/de/gsi/chart/demo/ContourChartSample.java">ContourChartSample.java</a></figcaption></figure></td>
+<td colspan=2><figure><img src="docs/pics/ContourChartSample2.png" alt="ContourChartSample" width=600/><figcaption><a href="chartfx-samples/src/main/java/de/gsi/chart/samples/ContourChartSample.java">ContourChartSample.java</a></figcaption></figure></td>
 <td></td>
 </tr>
 
 <tr>
-<td colspan=2><figure><img src="docs/pics/ChartIndicatorSample.png" alt="ChartIndicatorSample" width=600/><figcaption><a href="src/test/java/de/gsi/chart/demo/ChartIndicatorSample.java">ChartIndicatorSample.java</a></figcaption></figure></td>         
+<td colspan=2><figure><img src="docs/pics/ChartIndicatorSample.png" alt="ChartIndicatorSample" width=600/><figcaption><a href="chartfx-samples/src/main/java/de/gsi/chart/samples/ChartIndicatorSample.java">ChartIndicatorSample.java</a></figcaption></figure></td>         
 <td></td>
 </tr>
 
@@ -120,21 +125,21 @@ In order to provide some of the scenegraph-level functionality while using a `Ca
 
 <table>
 <tr>
-<td><figure><img src="docs/pics/DataSetAverageSample.png" alt="DataSetAverageSample" width=300/><figcaption><a href="src/test/java/de/gsi/math/demo/ContourChartSample.java">DataSetAverageSample.java</a></figcaption></figure></td>
-<td><figure><img src="docs/pics/DataSetFilterSample.png" alt="DataSetFilterSample" width=300/><figcaption><a href="src/test/java/de/gsi/math/demo/ContourChartSample.java">DataSetFilterSample.java</a></figcaption></figure></td>
-<td><figure><img src="docs/pics/DataSetIntegrateDifferentiateSample.png" alt="DataSetIntegrateDifferentiateSample" width=300/><figcaption><a href="src/test/java/de/gsi/math/demo/ContourChartSample.java">DataSetIntegrateDifferentiateSample.java</a></figcaption></figure></td>
+<td><figure><img src="docs/pics/DataSetAverageSample.png" alt="DataSetAverageSample" width=300/><figcaption><a href="chartfx-samples/src/main/java/de/gsi/math/samples/DataSetAverageSample.java">DataSetAverageSample.java</a></figcaption></figure></td>
+<td><figure><img src="docs/pics/DataSetFilterSample.png" alt="DataSetFilterSample" width=300/><figcaption><a href="chartfx-samples/src/main/java/de/gsi/math/samples/DataSetFilterSample.java">DataSetFilterSample.java</a></figcaption></figure></td>
+<td><figure><img src="docs/pics/DataSetIntegrateDifferentiateSample.png" alt="DataSetIntegrateDifferentiateSample" width=300/><figcaption><a href="chartfx-samples/src/main/java/de/gsi/math/samples/DataSetIntegrateDifferentiateSample.java">DataSetIntegrateDifferentiateSample.java</a></figcaption></figure></td>
 </tr>
 
 <tr>
-<td><figure><img src="docs/pics/DataSetSpectrumSample.png" alt="DataSetSpectrumSample" width=300/><figcaption><a href="src/test/java/de/gsi/math/demo/ContourChartSample.java">DataSetSpectrumSample.java</a></figcaption></figure></td>
-<td><figure><img src="docs/pics/FourierSample.png" alt="FourierSample" width=300/><figcaption><a href="src/test/java/de/gsi/math/demo/ContourChartSample.java">FourierSample.java</a></figcaption></figure></td>
-<td><figure><img src="docs/pics/FrequencyFilterSample.png" alt="FrequencyFilterSample" width=300/><figcaption><a href="src/test/java/de/gsi/math/demo/ContourChartSample.java">FrequencyFilterSample.java</a></figcaption></figure></td>
+<td><figure><img src="docs/pics/DataSetSpectrumSample.png" alt="DataSetSpectrumSample" width=300/><figcaption><a href="chartfx-samples/src/main/java/de/gsi/math/samples/DataSetSpectrumSample.java">DataSetSpectrumSample.java</a></figcaption></figure></td>
+<td><figure><img src="docs/pics/FourierSample.png" alt="FourierSample" width=300/><figcaption><a href="chartfx-samples/src/main/java/de/gsi/math/samples/FourierSample.java">FourierSample.java</a></figcaption></figure></td>
+<td><figure><img src="docs/pics/FrequencyFilterSample.png" alt="FrequencyFilterSample" width=300/><figcaption><a href="chartfx-samples/src/main/java/de/gsi/math/samples/FrequencyFilterSample.java">FrequencyFilterSample.java</a></figcaption></figure></td>
 </tr>
 
 <tr>
-<td><figure><img src="docs/pics/GaussianFitSample.png" alt="GaussianFitSample" width=300/><figcaption><a href="src/test/java/de/gsi/math/demo/ContourChartSample.java">GaussianFitSample.java</a></figcaption></figure></td>
-<td><figure><img src="docs/pics/IIRFilterSample.png" alt="IIRFilterSample" width=300/><figcaption><a href="src/test/java/de/gsi/math/demo/ContourChartSample.java">IIRFilterSample.java</a></figcaption></figure></td>
-<td><figure><img src="docs/pics/WaveletScalogram.png" alt="WaveletScalogram" width=300/><figcaption><a href="src/test/java/de/gsi/math/demo/ContourChartSample.java">WaveletScalogram.java</a></figcaption></figure></td>
+<td><figure><img src="docs/pics/GaussianFitSample.png" alt="GaussianFitSample" width=300/><figcaption><a href="chartfx-samples/src/main/java/de/gsi/math/samples/GaussianFitSample.java">GaussianFitSample.java</a></figcaption></figure></td>
+<td><figure><img src="docs/pics/IIRFilterSample.png" alt="IIRFilterSample" width=300/><figcaption><a href="chartfx-samples/src/main/java/de/gsi/math/samples/IIRFilterSample.java">IIRFilterSample.java</a></figcaption></figure></td>
+<td><figure><img src="docs/pics/WaveletScalogram.png" alt="WaveletScalogram" width=300/><figcaption><a href="chartfx-samples/src/main/java/de/gsi/math/samples/WaveletScalogram.java">WaveletScalogram.java</a></figcaption></figure></td>
 </tr>
 </table>
 
