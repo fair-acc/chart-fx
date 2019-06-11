@@ -12,6 +12,8 @@ import static de.gsi.dataset.utils.DataSetUtils.ErrType.EYP;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -23,6 +25,7 @@ import java.io.OutputStream;
 import java.io.PushbackInputStream;
 import java.nio.ByteBuffer;
 import java.nio.DoubleBuffer;
+import java.nio.FloatBuffer;
 import java.nio.file.Path;
 import java.security.InvalidParameterException;
 import java.text.DateFormat;
@@ -60,11 +63,11 @@ import de.gsi.dataset.spi.DoubleErrorDataSet;
  * @author rstein
  * @author akrimm
  */
-public class DataSetUtils {
-
+public class DataSetUtils extends DataSetUtilsHelper {    
     private static final int SWITCH_TO_BINARY_KEY = 0xFE;
     private static final Logger LOGGER = LoggerFactory.getLogger(DataSetUtils.class);
     private static final String DEFAULT_TIME_FORMAT = "yyyyMMdd_HHmmss";
+    public static boolean USE_FLOAT32_BINARY_STANDARD = true;
 
     private DataSetUtils() {
         // static class nothing to be initialised
@@ -721,7 +724,7 @@ public class DataSetUtils {
             //TODO: cache ByteArrayOutputStream
             try (OutputStream outputfile = openDatasetFileOutput(file, compression);) {
 
-                writeDataSetToByteArray(dataSet, byteOutput, binary);
+                writeDataSetToByteArray(dataSet, byteOutput, binary, USE_FLOAT32_BINARY_STANDARD );
 
                 byteOutput.writeTo(outputfile);
 
@@ -750,9 +753,12 @@ public class DataSetUtils {
      *            {@code true}: encode data as binary (smaller size,
      *            performance), or {@code false} as string (human readable,
      *            easier debugging)
+     * @param asFloat
+     *            {@code true}: encode data as binary floats (smaller size,
+     *            performance), or {@code false} as double (better precision)
      */
     public static void writeDataSetToByteArray(final DataSet dataSet, final ByteArrayOutputStream byteOutput,
-            final boolean binary) {
+            final boolean binary, final boolean asFloat) {
         if (dataSet == null) {
             throw new IllegalArgumentException("dataSet must not be null or empty");
         }
@@ -771,7 +777,7 @@ public class DataSetUtils {
             writeMetaDataToStream(byteOutput, dataSet);
 
             if (binary) {
-                writeNumericBinaryDataToStream(byteOutput, dataSet);
+                writeNumericBinaryDataToStream(byteOutput, dataSet, asFloat);
             } else {
                 writeNumericDataToStream(byteOutput, dataSet);
             }
@@ -784,26 +790,39 @@ public class DataSetUtils {
     }
 
     /**
-     * @param outputStream stream to write binary data into
-     * @param dataSet to be exported
+     * @param outputStream
+     *            stream to write binary data into
+     * @param dataSet
+     *            to be exported
+     * @param asFloat
+     *            {@code true} use 32-bit floats (less memory, faster transfer)
+     *            instead of 64-bit doubles (DataSet default, higher precision)
      */
-    private static void writeNumericBinaryDataToStream(final OutputStream outputStream,
-            final DataSet dataSet) {
+    private static void writeNumericBinaryDataToStream(final OutputStream outputStream, final DataSet dataSet,
+            final boolean asFloat) {
         final int nsamples = dataSet.getDataCount();
 
         // write header with field sizes
-        final StringBuffer buffer = new StringBuffer();
+        final StringBuilder buffer = getCachedStringBuilder("binaryDataCacheBuilder", 250);
 
         buffer.append("$binary").append("\n");
-        buffer.append("$x;float64[];").append(Long.toString(nsamples)).append("\n");
-        buffer.append("$y;float64[];").append(Long.toString(nsamples)).append("\n");
-        buffer.append("$eyn;float64[];").append(Long.toString(nsamples)).append("\n");
-        buffer.append("$eyp;float64[];").append(Long.toString(nsamples)).append("\n");
+        if (asFloat) {
+            buffer.append("$x;float32[];").append(Long.toString(nsamples)).append("\n");
+            buffer.append("$y;float32[];").append(Long.toString(nsamples)).append("\n");
+            buffer.append("$eyn;float32[];").append(Long.toString(nsamples)).append("\n");
+            buffer.append("$eyp;float32[];").append(Long.toString(nsamples)).append("\n");
+        } else {
+            buffer.append("$x;float64[];").append(Long.toString(nsamples)).append("\n");
+            buffer.append("$y;float64[];").append(Long.toString(nsamples)).append("\n");
+            buffer.append("$eyn;float64[];").append(Long.toString(nsamples)).append("\n");
+            buffer.append("$eyp;float64[];").append(Long.toString(nsamples)).append("\n");
+        }
         try {
             outputStream.write(buffer.toString().getBytes());
         } catch (final IOException e) {
             LOGGER.error("WriteNumericDataToBinaryFile failed to write header description: ", e);
         }
+        release("binaryDataCacheBuilder", buffer);
 
         // Write binary data after separation character 0xFE
         // this would be nicer, because it does not copy the byte array, but
@@ -812,24 +831,34 @@ public class DataSetUtils {
         // https://stackoverflow.com/questions/27492161/convert-floatbuffer-to-bytebuffer
         // final DoubleBuffer doubleValues =
         // DoubleBuffer.wrap(dataSet.getXValues());
-        final ByteBuffer xByte = ByteBuffer.allocate(Double.BYTES * nsamples);
-        final DoubleBuffer xDouble = xByte.asDoubleBuffer();
-        xDouble.put(dataSet.getXValues());
-        final ByteBuffer yByte = ByteBuffer.allocate(Double.BYTES * nsamples);
-        final DoubleBuffer yDouble = yByte.asDoubleBuffer();
-        yDouble.put(dataSet.getYValues());
-        final ByteBuffer eynByte = ByteBuffer.allocate(Double.BYTES * nsamples);
-        final DoubleBuffer eynDouble = eynByte.asDoubleBuffer();
-        eynDouble.put(errors(dataSet, EYN));
-        final ByteBuffer eypByte = ByteBuffer.allocate(Double.BYTES * nsamples);
-        final DoubleBuffer eypDouble = eypByte.asDoubleBuffer();
-        eypDouble.put(errors(dataSet, EYP));
         try {
-            outputStream.write(SWITCH_TO_BINARY_KEY); // magic byte to switch to binary data
-            outputStream.write(xByte.array());
-            outputStream.write(yByte.array());
-            outputStream.write(eynByte.array());
-            outputStream.write(eypByte.array());
+            outputStream.write(SWITCH_TO_BINARY_KEY); // magic byte to switch to
+                                                      // binary data
+
+            if (asFloat) {
+                //TODO: check performance w.r.t. using 'DataOutputStream' directly
+                final ByteBuffer byteBuffer = getCachedDoubleArray("writeByteBuffer", Float.BYTES * nsamples);
+                writeDoubleArrayAsFloatToByteBuffer(byteBuffer, dataSet.getXValues());
+                outputStream.write(byteBuffer.array());
+                writeDoubleArrayAsFloatToByteBuffer(byteBuffer, dataSet.getYValues());
+                outputStream.write(byteBuffer.array());
+                writeDoubleArrayAsFloatToByteBuffer(byteBuffer, errors(dataSet, EYN));
+                outputStream.write(byteBuffer.array());
+                writeDoubleArrayAsFloatToByteBuffer(byteBuffer, errors(dataSet, EYP));
+                outputStream.write(byteBuffer.array());
+                release("writeByteBuffer", byteBuffer);                
+            } else {
+                final ByteBuffer byteBuffer = getCachedDoubleArray("writeByteBuffer", Double.BYTES * nsamples);
+                writeDoubleArrayToByteBuffer(byteBuffer, dataSet.getXValues());
+                outputStream.write(byteBuffer.array());
+                writeDoubleArrayToByteBuffer(byteBuffer, dataSet.getYValues());
+                outputStream.write(byteBuffer.array());
+                writeDoubleArrayToByteBuffer(byteBuffer, errors(dataSet, EYN));
+                outputStream.write(byteBuffer.array());
+                writeDoubleArrayToByteBuffer(byteBuffer, errors(dataSet, EYP));
+                outputStream.write(byteBuffer.array());
+                release("writeByteBuffer", byteBuffer);
+            }
         } catch (final IOException e) {
             LOGGER.error("WriteNumericDataToBinaryFile failed to write binary body: ", e);
         }
@@ -838,7 +867,7 @@ public class DataSetUtils {
     protected static void writeHeaderDataToStream(final OutputStream outputStream, final DataSet dataSet) {
         try {
             // common header data
-            final StringBuffer buffer = new StringBuffer();
+            final StringBuilder buffer = getCachedStringBuilder("headerDataCacheBuilder", 250);
 
             buffer.append("#dataSetName : ").append(dataSet.getName()).append('\n');
             buffer.append("#xMin : ").append(dataSet.getXMin()).append('\n');
@@ -857,6 +886,8 @@ public class DataSetUtils {
             }
 
             outputStream.write(buffer.toString().getBytes());
+            
+            release("headerDataCacheBuilder", buffer);
         } catch (final Exception e) {
             LOGGER.error("writeHeaderDataToFile - error for dataSet = '" + dataSet.getName() + "'", e);
         }
@@ -868,7 +899,7 @@ public class DataSetUtils {
         }
         final DataSetMetaData metaDataSet = (DataSetMetaData) dataSet;
         try {
-            final StringBuffer buffer = new StringBuffer();
+            final StringBuilder buffer = getCachedStringBuilder("metaDataCacheBuilder",1000);
 
             for (final String info : metaDataSet.getInfoList()) {
                 buffer.append("#info : ").append(info).append('\n');
@@ -888,6 +919,8 @@ public class DataSetUtils {
             }
 
             outputStream.write(buffer.toString().getBytes());
+            
+            release("metaDataCacheBuilder", buffer);
         } catch (final Exception e) {
             LOGGER.error("writeMetaDataToFile - error for dataSet = '" + dataSet.getName() + "'", e);
         }
@@ -897,7 +930,7 @@ public class DataSetUtils {
         try {
             // formatter definition, we always write the y errors to file
             final int nSamples = dataSet.getDataCount();
-            final StringBuffer buffer = new StringBuffer();
+            final StringBuilder buffer = getCachedStringBuilder("numericDataCacheBuilder", nSamples * 45);
             buffer.append("#nSamples : " + nSamples).append("\n");
             // use '$' sign as special indicator that from now on only numeric
             // data is to be expected
@@ -917,6 +950,8 @@ public class DataSetUtils {
                 buffer.append('\n');
             }
             outputFile.write(buffer.toString().getBytes());
+
+            release("numericDataCacheBuilder", buffer);
         } catch (final Exception e) {
             LOGGER.error("writeNumericDataToFile - error for dataSet = '" + dataSet.getName() + "'", e);
         }
@@ -1111,10 +1146,14 @@ public class DataSetUtils {
     }
 
     /**
-     * @param inputReader input reader for string data
-     * @param inputFile input stream for binary data
-     * @param dataSet used to store the read data
-     * @throws IOException in case of IO problems
+     * @param inputReader
+     *            input reader for string data
+     * @param inputFile
+     *            input stream for binary data
+     * @param dataSet
+     *            used to store the read data
+     * @throws IOException
+     *             in case of IO problems
      */
     private static void readNumericDataFromBinaryFile(final BufferedReader inputReader,
             final SplitCharByteInputStream inputFile, final DoubleErrorDataSet dataSet) throws IOException {
@@ -1123,7 +1162,8 @@ public class DataSetUtils {
             public String name;
             public String type;
             public int nsamples;
-            public DoubleBuffer data = null;
+            public FloatBuffer data32 = null;
+            public DoubleBuffer data64 = null;
         }
         final List<DataEntry> toRead = new ArrayList<>();
         while ((line = inputReader.readLine()) != null) {
@@ -1140,16 +1180,27 @@ public class DataSetUtils {
             LOGGER.error("File seems to be corrupted, Split marker not found");
         } else {
             inputFile.switchToBinary();
-            final int valindex[] = { -1, -1, -1, -1 };
+            final int[] valindex = { -1, -1, -1, -1 };
             for (int i = 0; i < toRead.size(); i++) {
                 final DataEntry dataentry = toRead.get(i);
                 LOGGER.debug("Read data: " + dataentry.name);
-                final ByteBuffer byteData = ByteBuffer.allocate(dataentry.nsamples * Double.BYTES);
-                dataentry.data = byteData.asDoubleBuffer();
+                boolean isFloat32 = dataentry.type.toLowerCase().contains("float32");
+
+                final ByteBuffer byteData = isFloat32 ? ByteBuffer.allocate(dataentry.nsamples * Float.BYTES)
+                        : ByteBuffer.allocate(dataentry.nsamples * Double.BYTES);
                 int alreadyRead = 0;
-                while (alreadyRead < (dataentry.nsamples * Double.BYTES)) {
-                    alreadyRead += inputFile.read(byteData.array(), alreadyRead,
-                            (dataentry.nsamples * Double.BYTES) - alreadyRead);
+                if (isFloat32) {
+                    dataentry.data32 = byteData.asFloatBuffer();
+                    while (alreadyRead < (dataentry.nsamples * Float.BYTES)) {
+                        alreadyRead += inputFile.read(byteData.array(), alreadyRead,
+                                (dataentry.nsamples * Float.BYTES) - alreadyRead);
+                    }
+                } else {
+                    dataentry.data64 = byteData.asDoubleBuffer();
+                    while (alreadyRead < (dataentry.nsamples * Double.BYTES)) {
+                        alreadyRead += inputFile.read(byteData.array(), alreadyRead,
+                                (dataentry.nsamples * Double.BYTES) - alreadyRead);
+                    }
                 }
                 switch (dataentry.name) {
                 case "x":
@@ -1169,19 +1220,19 @@ public class DataSetUtils {
                 }
 
             }
-            final double[] x = new double[toRead.get(valindex[0]).nsamples];
-            toRead.get(valindex[0]).data.get(x);
-            final double[] y = new double[toRead.get(valindex[1]).nsamples];
-            toRead.get(valindex[1]).data.get(y);
-            final double[] eyn = new double[toRead.get(valindex[2]).nsamples];
-            toRead.get(valindex[2]).data.get(eyn);
-            final double[] eyp = new double[toRead.get(valindex[3]).nsamples];
-            toRead.get(valindex[3]).data.get(eyp);
+            final double[] x = readDoubleArrayFromBuffer(toRead.get(valindex[0]).data32,
+                    toRead.get(valindex[0]).data64);
+            final double[] y = readDoubleArrayFromBuffer(toRead.get(valindex[1]).data32,
+                    toRead.get(valindex[1]).data64);
+            final double[] eyn = readDoubleArrayFromBuffer(toRead.get(valindex[2]).data32,
+                    toRead.get(valindex[2]).data64);
+            final double[] eyp = readDoubleArrayFromBuffer(toRead.get(valindex[3]).data32,
+                    toRead.get(valindex[3]).data64);
 
             dataSet.set(x, y, eyn, eyp, false);
         }
     }
-
+   
     protected static void readNumericDataFromFile(final BufferedReader inputFile, final DoubleErrorDataSet dataSet) {
         try {
 
@@ -1204,65 +1255,6 @@ public class DataSetUtils {
         final Exception e) {
             LOGGER.error("readNumericDataFromFile could not parse numeric data for: '" + dataSet.getName() + "'", e);
         }
-    }
-
-    protected static double integralSimple(final DataSet function) {
-        double integral1 = 0.0;
-        double integral2 = 0.0;
-
-        if (function.getDataCount() <= 1) {
-            return 0.0;
-        }
-        for (int i = 1; i < function.getDataCount(); i++) {
-            final double step = function.getX(i) - function.getX(i - 1);
-            final double val1 = function.getY(i - 1);
-            final double val2 = function.getY(i);
-
-            integral1 += step * val1;
-            integral2 += step * val2;
-        }
-        return 0.5 * (integral1 + integral2);
-    }
-
-    /**
-     * @param data
-     *            the input vector
-     * @return average of vector elements
-     */
-    protected static synchronized double mean(final double[] data) {
-        if (data.length <= 0) {
-            return Double.NaN;
-        }
-        final double norm = 1.0 / (data.length);
-        double val = 0.0;
-        for (int i = 0; i < data.length; i++) {
-            val += norm * data[i];
-        }
-        return val;
-    }
-
-    /**
-     * @param data
-     *            the input vector
-     * @return un-biased r.m.s. of vector elements
-     */
-    protected static synchronized double rootMeanSquare(final double[] data) {
-        if (data.length <= 0) {
-            return Double.NaN;
-        }
-
-        final double norm = 1.0 / (data.length);
-        double val1 = 0.0;
-        double val2 = 0.0;
-        for (int i = 0; i < data.length; i++) {
-            val1 += data[i];
-            val2 += data[i] * data[i];
-        }
-
-        val1 *= norm;
-        val2 *= norm;
-        // un-biased rms!
-        return Math.sqrt(Math.abs(val2 - (val1 * val1)));
     }
 
 }
