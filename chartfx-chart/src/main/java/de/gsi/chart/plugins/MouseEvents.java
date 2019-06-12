@@ -14,23 +14,23 @@ import javafx.scene.input.MouseEvent;
  */
 public class MouseEvents {
 
-    static boolean isOnlyPrimaryButtonDown(final MouseEvent event) {
+    public static boolean isOnlyPrimaryButtonDown(final MouseEvent event) {
         return event.getButton() == PRIMARY && !event.isMiddleButtonDown() && !event.isSecondaryButtonDown();
     }
 
-    static boolean isOnlySecondaryButtonDown(final MouseEvent event) {
+    public static boolean isOnlySecondaryButtonDown(final MouseEvent event) {
         return event.getButton() == SECONDARY && !event.isPrimaryButtonDown() && !event.isMiddleButtonDown();
     }
 
-    static boolean isOnlyMiddleButtonDown(final MouseEvent event) {
+    public static boolean isOnlyMiddleButtonDown(final MouseEvent event) {
         return event.isMiddleButtonDown() && !event.isPrimaryButtonDown() && !event.isSecondaryButtonDown();
     }
 
-    static boolean isOnlyCtrlModifierDown(final MouseEvent event) {
+    public static boolean isOnlyCtrlModifierDown(final MouseEvent event) {
         return event.isControlDown() && !event.isAltDown() && !event.isMetaDown() && !event.isShiftDown();
     }
 
-    static boolean modifierKeysUp(final MouseEvent event) {
+    public static boolean modifierKeysUp(final MouseEvent event) {
         return !event.isAltDown() && !event.isControlDown() && !event.isMetaDown() && !event.isShiftDown();
     }
 
