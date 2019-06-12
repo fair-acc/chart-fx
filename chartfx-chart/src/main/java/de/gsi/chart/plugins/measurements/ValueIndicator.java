@@ -17,9 +17,11 @@ import de.gsi.chart.axes.spi.DefaultNumericAxis;
 import de.gsi.chart.plugins.AbstractSingleValueIndicator;
 import de.gsi.chart.plugins.XValueIndicator;
 import de.gsi.chart.plugins.YValueIndicator;
+import de.gsi.chart.utils.FXUtilities;
 import de.gsi.dataset.DataSet;
 import de.gsi.dataset.event.UpdateEvent;
 import javafx.scene.Node;
+import javafx.application.Platform;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
@@ -88,12 +90,20 @@ public class ValueIndicator extends AbstractChartMeasurement {
 
         sliderIndicator1.valueProperty().addListener((ch, oldValue, newValue) -> {
             if (oldValue != newValue) {
-                handle(null);
+            	if (Platform.isFxApplicationThread()) {
+            		handle(null);
+            	} else {
+            		Platform.runLater(() -> handle(null));
+            	}
             }
         });
         // chartPane.addListener(e -> invalidated(null));
         super.showConfigDialogue();
-        handle(null);
+        if (Platform.isFxApplicationThread()) {
+    		handle(null);
+    	} else {
+    		Platform.runLater(() -> handle(null));
+    	}
         chart.requestLayout();
     }
 
@@ -117,6 +127,10 @@ public class ValueIndicator extends AbstractChartMeasurement {
 
     @Override
     public void handle(final UpdateEvent observable) {
+    	if (Platform.isFxApplicationThread()) {
+    		Platform.runLater(() -> handle(observable));
+    	    return;
+    	}
         double val;
         final DataSet selectedDataSet = getDataSet();
         final Axis axis;

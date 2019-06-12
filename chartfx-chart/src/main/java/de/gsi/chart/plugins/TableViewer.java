@@ -20,6 +20,7 @@ import org.controlsfx.glyphfont.Glyph;
 
 import de.gsi.chart.Chart;
 import de.gsi.chart.renderer.Renderer;
+import de.gsi.chart.utils.FXUtilities;
 import de.gsi.dataset.DataSet;
 import de.gsi.dataset.DataSetError;
 import de.gsi.dataset.event.EventListener;
@@ -67,7 +68,7 @@ public class TableViewer extends ChartPlugin {
     private final Glyph clipBoardIcon = new Glyph(FONT_AWESOME, FontAwesome.Glyph.CLIPBOARD).size(FONT_SIZE);
     private final ListChangeListener<Renderer> rendererChangeListener = this::rendererChanged;
     private final ListChangeListener<DataSet> datasetChangeListener = this::datasetsChanged;
-    private final EventListener dataSetDataUpdateListener = obs -> refreshTable();
+    private final EventListener dataSetDataUpdateListener = obs -> FXUtilities.runFX(this::refreshTable);
     private final HBox interactorButtons = getInteractorBar();
     // private Pane table = new Pane();
     private final MySpreadsheetView table = new MySpreadsheetView();

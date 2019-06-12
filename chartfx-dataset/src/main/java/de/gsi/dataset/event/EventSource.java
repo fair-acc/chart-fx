@@ -1,7 +1,15 @@
 package de.gsi.dataset.event;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+
+import de.gsi.dataset.spi.AbstractDataSet;
 
 /**
  * 
@@ -75,29 +83,42 @@ public interface EventSource {
      * 
      */
     default void invokeListener() {
-        synchronized (updateEventListener()) {
-            final UpdateEvent updateEvent = new UpdateEvent(this);
-            for (EventListener listener : updateEventListener()) {
-                listener.handle(updateEvent);
-            }
-        }
+    	invokeListener(null);
     }
 
-    /**
-     * invoke object within update listener list
-     * 
-     * @param updateEvent
-     *            the event the listeners are notified with
-     */
-    default void invokeListener(UpdateEvent updateEvent) {
-        if (updateEvent == null) {
-            invokeListener();
-            return;
-        }
-        synchronized (updateEventListener()) {
-            for (EventListener listener : updateEventListener()) {
-                listener.handle(updateEvent);
-            }
-        }
-    }
+	/**
+	 * invoke object within update listener list
+	 * 
+	 * @param updateEvent the event the listeners are notified with
+	 */
+	default void invokeListener(final UpdateEvent updateEvent) {
+		synchronized (updateEventListener()) {
+			final UpdateEvent event = updateEvent == null ? new UpdateEvent(this) : updateEvent;
+
+			final List<Callable<Boolean>> workers = new ArrayList<>();
+			for (EventListener listener : updateEventListener()) {
+				workers.add(() -> {
+					listener.handle(event);
+					return Boolean.TRUE;
+				});
+			}
+
+			try {
+				final List<Future<Boolean>> jobs = EventThreadHelper.getExecutorService().invokeAll(workers);
+				for (final Future<Boolean> future : jobs) {
+					final Boolean execstate = future.get();
+					if (!execstate) {
+						throw new IllegalStateException("one parallel worker thread finished execution with error");
+					}
+				}
+			} catch (final InterruptedException | ExecutionException e) {
+				throw new IllegalStateException("one parallel worker thread finished execution with error", e);
+			}
+		}
+
+		// alt implementation:
+		// for (EventListener listener : updateEventListener()) {
+		// listener.handle(updateEvent);
+		// }
+	}
 }

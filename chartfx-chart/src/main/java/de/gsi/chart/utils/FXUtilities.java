@@ -43,6 +43,19 @@ public final class FXUtilities {
             Platform.runLater(run);
         }
     }
+    
+    public static void runFX(final Runnable run) {
+        FXUtilities.keepJavaFxAlive();
+        if (Platform.isFxApplicationThread()) {
+            try {
+                run.run();
+            } catch (final Exception e) {
+                throw new IllegalStateException(e);
+            }
+        } else {
+            Platform.runLater(run);
+        }
+    }
 
     /**
      * Invokes a Runnable in JFX Thread and waits while it's finished. Like

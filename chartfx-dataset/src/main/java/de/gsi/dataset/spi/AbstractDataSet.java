@@ -12,9 +12,8 @@ import org.slf4j.LoggerFactory;
 
 import de.gsi.dataset.DataSet;
 import de.gsi.dataset.DataSetMetaData;
-import de.gsi.dataset.event.UpdateEvent;
 import de.gsi.dataset.event.EventListener;
-import javafx.application.Platform;
+import de.gsi.dataset.event.UpdateEvent;
 
 /**
  * <p>
@@ -33,7 +32,7 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
         implements DataSet, DataSetMetaData {
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractDataSet.class);
     protected String name;
-    protected final List<EventListener> updateListeners = new LinkedList<>();
+    protected final List<EventListener> updateListeners = new LinkedList<>();    
     protected final ReentrantLock lock = new ReentrantLock();
     boolean autoNotification = true;
     protected DataRange xRange = new DataRange();
@@ -357,31 +356,36 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
         return searchIndex;
     }
 
-    /**
-     * Notifies listeners that the data has been invalidated. If the data is added to the chart, it triggers repaint.
-     * @param event the change event
-     *
-     * @return itself (fluent design)
-     */
-    public D fireInvalidated(final UpdateEvent event) {
-        if (!autoNotification || updateEventListener().isEmpty()) {
-            return getThis();
-        }
+	/**
+	 * Notifies listeners that the data has been invalidated. If the data is added
+	 * to the chart, it triggers repaint.
+	 * 
+	 * @param event the change event
+	 *
+	 * @return itself (fluent design)
+	 */
+	public D fireInvalidated(final UpdateEvent event) {
+		if (!autoNotification || updateEventListener().isEmpty()) {
+			return getThis();
+		}
 
-        if (!xRange.isDefined() || !yRange.isDefined()) {
-            computeLimits();
-        }
+		if (!xRange.isDefined() || !yRange.isDefined()) {
+			computeLimits();
+		}
 
-        // TODO: check whether Platform is proper usage within DataSet
-        //executeFireInvalidated();
-        
-        if (Platform.isFxApplicationThread()) {
-            invokeListener(event);
-        } else {
-            Platform.runLater(() -> invokeListener(event));
-        }
-        return getThis();
-    }
+		// TODO: check whether Platform is proper usage within DataSet
+		// executeFireInvalidated();
+
+//        if (Platform.isFxApplicationThread()) {
+//        	invokeListener(event);
+//        } else {
+//            Platform.runLater(() -> invokeListener(event));
+//        }
+
+		invokeListener(event);
+
+		return getThis();
+	}
 
     /**
      * Returns label of a data point specified by the index. The label can be used as a category name if

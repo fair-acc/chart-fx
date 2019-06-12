@@ -15,6 +15,7 @@ import de.gsi.dataset.DataSet;
 import de.gsi.dataset.EditConstraints;
 import de.gsi.dataset.EditableDataSet;
 import de.gsi.chart.renderer.Renderer;
+import de.gsi.chart.utils.FXUtilities;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;
@@ -715,7 +716,7 @@ public class EditDataSet extends TableViewer {
 
             xAxis.addListener(evt -> this.setCenterX(getX()));
             yAxis.addListener(evt -> this.setCenterY(getY()));
-            dataSet.addListener(e -> update());
+            dataSet.addListener(e -> FXUtilities.runFX(this::update));
         }
 
         public EditableDataSet getDataSet() {
