@@ -4,8 +4,6 @@
 
 package de.gsi.chart.axes;
 
-import de.gsi.chart.axes.spi.DefaultNumericAxis;
-
 /**
  * Supplier of Axis tick units that is expected to compute a tick unit that is equal or greater than the one given as
  * argument. In case the calculated tick labels don't fit on the axis, the {@link #computeTickUnit(double)} method is

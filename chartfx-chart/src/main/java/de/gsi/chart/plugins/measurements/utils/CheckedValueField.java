@@ -23,9 +23,9 @@ public class CheckedValueField extends VBox {
     private static final int DEFAULT_MIN_FONT_SIZE = 18;
     private static final int DEFAULT_MIN_UNIT_FONT_SIZE = 14;
 
-    final Label valueTextField = new Label();
-    final Label unitTextField = new Label();
-    final Label dataSetNameField = new Label();
+    protected final Label valueTextField = new Label();
+    protected final Label unitTextField = new Label();
+    protected final Label dataSetNameField = new Label();
     protected double minRange = Double.NEGATIVE_INFINITY;
     protected double maxRange = Double.POSITIVE_INFINITY;
     protected CheckedNumberTextField dataRangeMin = new CheckedNumberTextField(minRange);

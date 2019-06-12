@@ -48,11 +48,11 @@ public class RunChartSamples extends Application {
 
     private static final int DEFAULT_DELAY = 2;
     private static final int DEFAULT_PERIOD = 5;
-    final String userHome = System.getProperty("user.home");
-    final Path path = Paths.get(userHome + "/ChartSamples");
+    private final String userHome = System.getProperty("user.home");
+    private final Path path = Paths.get(userHome + "/ChartSamples");
 
-    Stage stage = new Stage();
-    CheckBox makeScreenShot = new CheckBox("make screenshot to home directory");
+    private Stage stage = new Stage();
+    private CheckBox makeScreenShot = new CheckBox("make screenshot to home directory");
 
     @Override
     public void start(final Stage primaryStage) {

@@ -354,7 +354,7 @@ public abstract class AbstractValueIndicator extends ChartPlugin {
         addChildNodeIfNotPresent(label);
     }
 
-    void addChildNodeIfNotPresent(final Node node) {
+    protected void addChildNodeIfNotPresent(final Node node) {
         if (!getChartChildren().contains(node)) {
             getChartChildren().add(node);
         }

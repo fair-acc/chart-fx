@@ -54,7 +54,7 @@ public class XYChart extends Chart {
     private final GridRenderer gridRenderer = new GridRenderer(this);
     private long lastCanvasUpdate = 0;
     private boolean callCanvasUpdateLater = false;
-    final ChangeListener<Side> axisSideChangeListener = this::axisSideChanged;
+    private final ChangeListener<Side> axisSideChangeListener = this::axisSideChanged;
 
     public XYChart() {
         this(new DefaultNumericAxis(), new DefaultNumericAxis());

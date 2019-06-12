@@ -29,12 +29,12 @@ import org.apache.commons.math3.complex.ComplexUtils;
  */
 public class Biquad {
 
-    double m_a0;
-    double m_a1;
-    double m_a2;
-    double m_b1;
-    double m_b2;
-    double m_b0;
+    public double m_a0;
+    public double m_a1;
+    public double m_a2;
+    public double m_b1;
+    public double m_b2;
+    public double m_b0;
 
     public double getA0() {
         return m_a0;

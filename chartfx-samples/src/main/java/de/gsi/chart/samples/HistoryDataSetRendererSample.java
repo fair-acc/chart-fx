@@ -31,7 +31,8 @@ public class HistoryDataSetRendererSample extends Application {
     private static final int N_SAMPLES = 10000; // default: 10000
     private static final int UPDATE_DELAY = 1000; // [ms]
     private static final int UPDATE_PERIOD = 100; // [ms]
-    Timer timer;
+    private Timer timer;
+    private double updateIteration = 0;
 
     @Override
     public void start(final Stage primaryStage) {
@@ -128,8 +129,6 @@ public class HistoryDataSetRendererSample extends Application {
             }
         };
     }
-
-    double updateIteration = 0;
 
     private void generateData(final XYChart chart) {
         final DoubleErrorDataSet dataSet = new DoubleErrorDataSet("TestData", HistoryDataSetRendererSample.N_SAMPLES);

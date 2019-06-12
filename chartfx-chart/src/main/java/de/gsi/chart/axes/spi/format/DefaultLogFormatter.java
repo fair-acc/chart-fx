@@ -75,7 +75,7 @@ public class DefaultLogFormatter extends AbstractFormatter {
     }
 
     private class MyDecimalFormat extends StringConverter<Number> implements NumberFormatter {
-        DecimalFormat formatter;
+        private DecimalFormat formatter;
 
         public MyDecimalFormat(final DecimalFormat formatter) {
             super();

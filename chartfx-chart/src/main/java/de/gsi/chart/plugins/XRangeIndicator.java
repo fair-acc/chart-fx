@@ -45,7 +45,7 @@ public class XRangeIndicator extends AbstractRangeValueIndicator {
     }
 
     @Override
-    void updateStyleClass() {
+    public void updateStyleClass() {
         setStyleClasses(label, "x-", AbstractRangeValueIndicator.STYLE_CLASS_LABEL);
         setStyleClasses(rectangle, "x-", AbstractRangeValueIndicator.STYLE_CLASS_RECT);
     }

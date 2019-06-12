@@ -17,7 +17,7 @@ import javafx.scene.text.Text;
  */
 public class Hexagon extends Polygon {
 
-    final GridPosition position;
+    public final GridPosition position;
     private HexagonMap map;
     private boolean isVisualObstacle;
     private boolean isBlockingPath;
@@ -40,7 +40,7 @@ public class Hexagon extends Polygon {
         setFill(Color.GREY);
     }
 
-    void init() {
+    public void init() {
         for (final double p : calculatePolygonPoints()) {
             getPoints().add(p);
         }

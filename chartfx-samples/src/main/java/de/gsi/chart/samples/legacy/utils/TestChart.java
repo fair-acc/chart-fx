@@ -14,8 +14,8 @@ import javafx.scene.Node;
 public class TestChart extends AbstractTestApplication implements ChartTestCase {
     protected int nSamples = MAX_DATA_POINTS_1HZ;
     protected final XYChart chart;
-    final DefaultNumericAxis xAxis = new DefaultNumericAxis();
-    final DefaultNumericAxis yAxis = new DefaultNumericAxis("irrelevant y-axis test case 2", -1.1, +1.1, 0.2);
+    protected final DefaultNumericAxis xAxis = new DefaultNumericAxis();
+    protected final DefaultNumericAxis yAxis = new DefaultNumericAxis("irrelevant y-axis test case 2", -1.1, +1.1, 0.2);
     protected SineFunction testFunction = new SineFunction("test", nSamples, true);
     protected final DoubleDataSet dataSet = new DoubleDataSet("test");
 
