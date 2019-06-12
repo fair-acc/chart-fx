@@ -33,6 +33,7 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
@@ -308,7 +309,7 @@ public class EditAxis extends ChartPlugin {
         AxisEditor(final Axis axis, final boolean isHorizontal) {
             super();
 
-            setTop(getLabelEditor(axis));
+            setTop(getLabelEditor(axis, isHorizontal));
             final Pane box = isHorizontal ? new HBox() : new VBox();
             setCenter(box);
             if (isHorizontal) {
@@ -341,16 +342,36 @@ public class EditAxis extends ChartPlugin {
          * @param axis The axis to be edited
          * @return pane containing label, label editor and unit editor
          */
-        private Node getLabelEditor(final Axis axis) {
-            final HBox header = new HBox(new Label("axis: "));
+        private Node getLabelEditor(final Axis axis, final boolean isHorizontal) {
+            final GridPane header = new GridPane();
             header.setAlignment(Pos.BASELINE_LEFT);
             final TextField axisLabelTextField = new TextField(axis.getLabel());
             axisLabelTextField.textProperty().bindBidirectional(axis.labelProperty());
-            axis.labelProperty().bind(axisLabelTextField.textProperty());
+            header.addRow(0, new Label(" axis label: "), axisLabelTextField);
+
             final TextField axisUnitTextField = new TextField(axis.getUnit());
             axisUnitTextField.setPrefWidth(50.0);
             axisUnitTextField.textProperty().bindBidirectional(axis.unitProperty());
-            header.getChildren().addAll(axisLabelTextField, axisUnitTextField);
+            header.addRow(isHorizontal ? 0 : 1, new Label(" unit: "), axisUnitTextField);
+
+            final TextField unitScaling = new TextField();
+            unitScaling.setPrefWidth(80.0);
+            final CheckBox autoUnitScaling = new CheckBox(" auto");
+            if (axis instanceof DefaultNumericAxis) {
+                autoUnitScaling.selectedProperty()
+                        .bindBidirectional(((DefaultNumericAxis) axis).autoUnitScalingProperty());
+                unitScaling.textProperty().bindBidirectional(((DefaultNumericAxis) axis).unitScalingProperty(),
+                        new NumberStringConverter(new DecimalFormat("0.0####E0")));
+                unitScaling.disableProperty().bind(autoUnitScaling.selectedProperty());
+            } else {
+                // TODO: consider adding an interface on whether
+                // autoUnitScaling is editable
+                autoUnitScaling.setDisable(true);
+                unitScaling.setDisable(true);
+            }
+            final HBox unitScalingBox = new HBox(unitScaling, autoUnitScaling);
+            unitScalingBox.setAlignment(Pos.BASELINE_LEFT);
+            header.addRow(isHorizontal ? 0 : 2, new Label(" unit scale:"), unitScalingBox);
             return header;
         }
 
@@ -427,27 +448,6 @@ public class EditAxis extends ChartPlugin {
                 // timeAxis is editable
                 timeAxis.setDisable(true);
             }
-
-            final Label unitScalingLabel = new Label("unit scale:");
-            final TextField unitScaling = new TextField();
-            unitScaling.setPrefWidth(80.0);
-            final CheckBox autoUnitScaling = new CheckBox("auto");
-
-            if (axis instanceof DefaultNumericAxis) {
-                autoUnitScaling.selectedProperty()
-                        .bindBidirectional(((DefaultNumericAxis) axis).autoUnitScalingProperty());
-                unitScaling.textProperty().bindBidirectional(((DefaultNumericAxis) axis).unitScalingProperty(),
-                        new NumberStringConverter(new DecimalFormat("0.0####E0")));
-                unitScaling.editableProperty().bind(autoUnitScaling.selectedProperty().not());
-            } else {
-                // TODO: consider adding an interface on whether
-                // autoUnitScaling is editable
-                autoUnitScaling.setDisable(true);
-                unitScaling.setDisable(true);
-            }
-            final HBox unitScalingBox = new HBox(unitScalingLabel, unitScaling, autoUnitScaling);
-            unitScalingBox.setAlignment(Pos.BASELINE_LEFT);
-            boxMax.getChildren().add(unitScalingBox);
 
             return boxMax;
         }
