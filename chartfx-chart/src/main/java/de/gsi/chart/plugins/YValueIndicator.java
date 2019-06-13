@@ -103,7 +103,7 @@ public class YValueIndicator extends AbstractSingleValueIndicator {
             getChartChildren().clear();
         } else {
             layoutLine(minX, yPos, maxX, yPos);
-            layoutMarker(maxX - 1.5 * AbstractSingleValueIndicator.TRIANGLE_HALF_WIDTH, yPos, minX, yPos); // +
+            layoutMarker(maxX - 1.5 * AbstractSingleValueIndicator.triangleHalfWidth, yPos, minX, yPos); // +
                                                                                                            // 1.5*TRIANGLE_HALF_WIDTH
             layoutLabel(new BoundingBox(minX, yPos, maxX - minX, 0), getLabelPosition(),
                     AbstractSingleValueIndicator.MIDDLE_POSITION);

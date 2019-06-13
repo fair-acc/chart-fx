@@ -9,7 +9,7 @@ import javafx.scene.chart.ValueAxis;
  *
  * @author Grzegorz Kruk
  */
-public final class Axes {
+public final class Axes { // NOPMD nomen est omen et fix
 
     private Axes() {
         //

@@ -116,7 +116,7 @@ public class ColorGradient {
      */
     public ColorGradient(final String name, final Stop... stops) {
         // Use LinearGradient to normalize stops
-        this.stops = new LinearGradient(0, 0, 0, 0, false, CycleMethod.NO_CYCLE, stops).getStops();
+        this.stops = new LinearGradient(0, 0, 0, 0, false, CycleMethod.NO_CYCLE, stops).getStops(); // NOPMD
         this.name = name;
     }
 
@@ -146,7 +146,7 @@ public class ColorGradient {
      */
     public ColorGradient(final String name, final List<Stop> stops) {
         // Use LinearGradient to normalize stops
-        this.stops = new LinearGradient(0, 0, 0, 0, false, CycleMethod.NO_CYCLE, stops).getStops();
+        this.stops = new LinearGradient(0, 0, 0, 0, false, CycleMethod.NO_CYCLE, stops).getStops(); // NOPMD
         this.name = name;
     }
 

@@ -24,192 +24,198 @@ import javafx.scene.layout.VBox;
  * @author rstein
  */
 public class WaveletDenoising extends AbstractDemoApplication {
+	private static final int MAX_POINTS = 512;
+	private static final boolean LOAD_EXAMPLE_DATA = false;
+	private DataSet fraw;
+	private DataSet fdata;
+	private DataSet freconstructed;
+	private DataSet fspectraModel;
+	private DataSet fspectra;
+	private DataSet fspectraFit;
 
-    private final int MAX_POINTS = 512;
-    public static boolean LOAD_EXAMPLE_DATA = false;
-    private DataSet fraw;
-    private DataSet fdata;
-    private DataSet freconstructed;
-    private DataSet fspectraModel, fspectra, fspectraFit;
+	private void initData() {
+		// third order polynomial function
+		RandomWalkFunction func = new RandomWalkFunction("rand1", 0.1);
 
-    private void initData() {
-        // third order polynomial function
-        RandomWalkFunction func = new RandomWalkFunction("rand1", 0.1);
+		double[] xValues;
+		double[] yValues;
+		double[] yModel;
 
-        double[] xValues, yValues, yModel;
+		if (LOAD_EXAMPLE_DATA) {
+			double[][] data = readDemoData();
+			xValues = data[0];
+			yValues = data[1];
+			yModel = Arrays.copyOf(yValues, yValues.length);		
+		} else {
+			xValues = new double[MAX_POINTS];
+			yValues = new double[MAX_POINTS];
+			yModel = new double[MAX_POINTS];
 
-        if (!LOAD_EXAMPLE_DATA) {
-            xValues = new double[MAX_POINTS];
-            yValues = new double[MAX_POINTS];
-            yModel = new double[MAX_POINTS];
+			Random rnd = new Random();
+			for (int i = 0; i < xValues.length; i++) {
+				double x = i;
+				double offset = 0;
+				double error = 0.2 * rnd.nextGaussian();
+				if (i > xValues.length / 2) {
+					offset = -0.05;
+				}
+				xValues[i] = x;
+				yValues[i] = func.getValue(0);
+				yModel[i] = Math.sin(TMathConstants.TwoPi() * 3e-4 * x * (x + offset));
+				yModel[i] = Math.sin(TMathConstants.TwoPi() * 0.05 * x);
 
-            Random rnd = new Random();
-            for (int i = 0; i < xValues.length; i++) {
-                double x = i;
-                double offset = 0;
-                double error = 0.2 * rnd.nextGaussian();
-                if (i > xValues.length / 2) {
-                    offset = -0.05;
-                }
-                xValues[i] = x;
-                yValues[i] = func.getValue(0);
-                yModel[i] = Math.sin(TMathConstants.TwoPi() * 3e-4 * x * (x + offset));
-                yModel[i] = Math.sin(TMathConstants.TwoPi() * 0.05 * x);
+				if (i < 100 || i > 400) {
+					yModel[i] = 0;
+				}
 
-                if (true)
-                    if (i < 100 || i > 400) {
-                        yModel[i] = 0;
-                    }
+				yValues[i] = yModel[i] + 0 * error;
+			}
+		}
 
-                yValues[i] = yModel[i] + 0 * error;
-            }
+		CDFWavelet wvTrafo1 = new CDFWavelet();
+		FastWaveletTransform wvTrafo3 = new FastWaveletTransform();
+		boolean trafo1 = false;
 
-        } else {
-            double[][] data = readDemoData();
-            xValues = data[0];
-            yValues = data[1];
-            yModel = Arrays.copyOf(yValues, yValues.length);
-        }
+		double[] ySmooth = Arrays.copyOf(yValues, yValues.length);
+		double[] ySModel = Arrays.copyOf(yModel, yModel.length);
 
-        CDFWavelet wvTrafo1 = new CDFWavelet();
-        FastWaveletTransform wvTrafo3 = new FastWaveletTransform();
-        boolean trafo1 = false;
+		if (trafo1) {
+			wvTrafo1.fwt97(ySmooth, ySmooth.length);
+			wvTrafo1.fwt97(ySModel, ySModel.length);
+		} else {
+			// wvTrafo1.fwt53(ySmooth, ySmooth.length);
+			// wvTrafo1.fwt53(ySModel, ySModel.length);
+			wvTrafo3.transform(ySmooth);
+			// wvTrafo3.daubTrans(ySModel);
+			wvTrafo3.transform(ySModel);
+		}
 
-        double[] ySmooth = Arrays.copyOf(yValues, yValues.length);
-        double[] ySModel = Arrays.copyOf(yModel, yModel.length);
+		double[] recon = Arrays.copyOf(ySmooth, yValues.length);
+		double[] reconAbs = Arrays.copyOf(ySmooth, yValues.length);
+		for (int i = 0; i < reconAbs.length; i++) {
+			reconAbs[i] = Math.abs(recon[i]);
+		}
 
-        if (trafo1) {
-            wvTrafo1.fwt97(ySmooth, ySmooth.length);
-            wvTrafo1.fwt97(ySModel, ySModel.length);
-        } else {
-            // wvTrafo1.fwt53(ySmooth, ySmooth.length);
-            // wvTrafo1.fwt53(ySModel, ySModel.length);
-            wvTrafo3.transform(ySmooth);
-            // wvTrafo3.daubTrans(ySModel);
-            wvTrafo3.transform(ySModel);
-        }
+		// double max = TMath.Maximum(reconAbs);
+		// double min = TMath.Minimum(reconAbs);
+		// double median = TMath.Median(reconAbs);
 
-        double[] recon = Arrays.copyOf(ySmooth, yValues.length);
-        double[] reconAbs = Arrays.copyOf(ySmooth, yValues.length);
-        for (int i = 0; i < reconAbs.length; i++) {
-            reconAbs[i] = Math.abs(recon[i]);
-        }
+		// Percival and Walden, "Wavelet Methods for Time Series Analysis",
+		// Cambridge University Press, 2006, Section 10.5
+		// David L. Donoho and Iain M. Johnstone, "Minimax Estimation via
+		// Wavelet Shrinkage", The Annals of Statistics, 1998, Vol. 26, No. 3,
+		// 879 921
 
-        //        double max = TMath.Maximum(reconAbs);
-        //        double min = TMath.Minimum(reconAbs);
-        //        double median = TMath.Median(reconAbs);
+		// classic implementation
+		// double lambda = median / 0.6745 * Math.sqrt(Math.log(recon.length));
+		// double norm = 1.0 / (1.0 - lambda);
+		// for (int i = 0; i < xValues.length; i++) {
+		// double val = recon[i];
+		//
+		// // hard threshold
+		// if (true)
+		// if (Math.abs(val) < lambda) {
+		// recon[i] = 0.0;
+		// }
+		//
+		// // soft threshold
+		// if (false)
+		// if (Math.abs(val) < lambda) {
+		// recon[i] = 0.0;
+		// } else {
+		// recon[i] -= Math.signum(val) * lambda;
+		// recon[i] *= norm;
+		// }
+		// }
 
-        // Percival and Walden, "Wavelet Methods for Time Series Analysis",
-        // Cambridge University Press, 2006, Section 10.5
-        // David L. Donoho and Iain M. Johnstone, "Minimax Estimation via
-        // Wavelet Shrinkage", The Annals of Statistics, 1998, Vol. 26, No. 3,
-        // 879 921
+		// test
+		// for (int i = 0; i < xValues.length / 2; i++) {
+		// final double val = Math.abs(recon[i]);
+		// final double err = Math.abs(recon[xValues.length / 2 + i]);
+		//
+		// if (val < lambda) {
+		// recon[i] = 0.0;
+		// recon[xValues.length / 2 + i] = 0.0;
+		// } else if (val != 0 && err < val && (err / val < lambda)) {
+		// recon[xValues.length / 2 + i] = 0.0;
+		// } else if (val != 0 && err > val && (val / err < lambda)) {
+		// recon[i] = 0.0;
+		// }
+		//
+		// }
 
-        // classic implementation
-        // double lambda = median / 0.6745 * Math.sqrt(Math.log(recon.length));
-        // double norm = 1.0 / (1.0 - lambda);
-        //            for (int i = 0; i < xValues.length; i++) {
-        //                double val = recon[i];
-        //
-        //                // hard threshold
-        //                if (true)
-        //                    if (Math.abs(val) < lambda) {
-        //                        recon[i] = 0.0;
-        //                    }
-        //
-        //                // soft threshold
-        //                if (false)
-        //                    if (Math.abs(val) < lambda) {
-        //                        recon[i] = 0.0;
-        //                    } else {
-        //                        recon[i] -= Math.signum(val) * lambda;
-        //                        recon[i] *= norm;
-        //                    }
-        //            }
+		for (int i = 0; i < 0; i++) {
+			recon[i] = 0.0;
+		}
 
-        // test
-        //            for (int i = 0; i < xValues.length / 2; i++) {
-        //                final double val = Math.abs(recon[i]);
-        //                final double err = Math.abs(recon[xValues.length / 2 + i]);
-        //
-        //                if (val < lambda) {
-        //                    recon[i] = 0.0;
-        //                    recon[xValues.length / 2 + i] = 0.0;
-        //                } else if (val != 0 && err < val && (err / val < lambda)) {
-        //                    recon[xValues.length / 2 + i] = 0.0;
-        //                } else if (val != 0 && err > val && (val / err < lambda)) {
-        //                    recon[i] = 0.0;
-        //                }
-        //
-        //            }
+		fspectraModel = new DefaultErrorDataSet("model", xValues, ySModel);
+		fspectra = new DefaultErrorDataSet("raw data", xValues, ySmooth);
+		fspectraFit = new DefaultErrorDataSet("reconstructed", xValues, Arrays.copyOf(recon, recon.length));
 
-        for (int i = 0; i < 0; i++) {
-            recon[i] = 0.0;
-        }
+		if (trafo1) {
+			wvTrafo1.iwt97(recon, recon.length);
+		} else {
+			// wvTrafo1.iwt53(recon, recon.length);
+			wvTrafo3.invTransform(recon);
+		}
 
-        fspectraModel = new DefaultErrorDataSet("model", xValues, ySModel);
-        fspectra = new DefaultErrorDataSet("raw data", xValues, ySmooth);
-        fspectraFit = new DefaultErrorDataSet("reconstructed", xValues, Arrays.copyOf(recon, recon.length));
+		double error1 = TMath.RMS(TMath.Difference(yValues, yModel));
+		double error2 = TMath.RMS(TMath.Difference(recon, yModel));
+		if (error1 > error2) {
+			System.out.printf("improved noise floor from %f \t-> %f \t(%f %%)\n", error1, error2,
+					(error1 - error2) / error1 * 100);
+		} else {
+			System.err.printf("deteriorated noise floor from %f \t-> %f \t(%f %%)\n", error1, error2,
+					(error1 - error2) / error1 * 100);
+		}
 
-        if (trafo1) {
-            wvTrafo1.iwt97(recon, recon.length);
-        } else {
-            // wvTrafo1.iwt53(recon, recon.length);
-            wvTrafo3.invTransform(recon);
-        }
+		fdata = new DefaultErrorDataSet("model ", xValues, yModel);
+		fraw = new DefaultErrorDataSet("raw data", xValues, yValues);
+		freconstructed = new DefaultErrorDataSet("reconstructed", xValues, recon);
+	}
 
-        double error1 = TMath.RMS(TMath.Difference(yValues, yModel));
-        double error2 = TMath.RMS(TMath.Difference(recon, yModel));
-        if (error1 > error2) {
-            System.out.printf("improved noise floor from %f \t-> %f \t(%f %%)\n", error1, error2,
-                    (error1 - error2) / error1 * 100);
-        } else {
-            System.err.printf("deteriorated noise floor from %f \t-> %f \t(%f %%)\n", error1, error2,
-                    (error1 - error2) / error1 * 100);
-        }
+	@Override
+	public Node getContent() {
+		initData();
 
-        fdata = new DefaultErrorDataSet("model ", xValues, yModel);
-        fraw = new DefaultErrorDataSet("raw data", xValues, yValues);
-        freconstructed = new DefaultErrorDataSet("reconstructed", xValues, recon);
-    }
+		DemoChart chart1 = new DemoChart();
+		chart1.getXAxis().setLabel("time");
+		chart1.getDatasets().addAll(fdata, fraw, freconstructed);
 
-    @Override
-    public Node getContent() {
-        initData();
+		DemoChart chart2 = new DemoChart();
+		chart2.getXAxis().setLabel("frequency");
+		chart2.getDatasets().addAll(fspectraModel, fspectra, fspectraFit);
 
-        DemoChart chart1 = new DemoChart();
-        chart1.getXAxis().setLabel("time");
-        chart1.getDatasets().addAll(fdata, fraw, freconstructed);
+		return new VBox(chart1, chart2);
+	}
 
-        DemoChart chart2 = new DemoChart();
-        chart2.getXAxis().setLabel("frequency");
-        chart2.getDatasets().addAll(fspectraModel, fspectra, fspectraFit);
+	private double[][] readDemoData() {
+		final String fileName = "./BBQSpectra.dat";
+		try (BufferedReader reader = new BufferedReader(
+				new InputStreamReader(WaveletScalogram.class.getResourceAsStream(fileName)))) {
 
-        return new VBox(chart1, chart2);
-    }
+			String line = reader.readLine();
+			int nDim = line == null ? 0 : Integer.parseInt(line);
+			double[][] ret = new double[2][nDim];
+			for (int i = 0; i < nDim; i++) {
+				line = reader.readLine();
+				if (line == null) {
+					break;
+				}
+				String[] x = line.split("\t");
+				ret[0][i] = Double.parseDouble(x[0]);
+				ret[1][i] = Double.parseDouble(x[1]);
+			}
 
-    private double[][] readDemoData() {
-        try {
-            BufferedReader reader = new BufferedReader(
-                    new InputStreamReader(WaveletScalogram.class.getResourceAsStream("./BBQSpectra.dat")));
+			return ret;
 
-            int nDim = Integer.parseInt(reader.readLine());
-            double[][] ret = new double[2][nDim];
-            for (int i = 0; i < nDim; i++) {
-                String[] x = reader.readLine().split("\t");
-                ret[0][i] = Double.parseDouble(x[0]);
-                ret[1][i] = Double.parseDouble(x[1]);
-            }
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return new double[10][10];
+	}
 
-            return ret;
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    public static void main(final String[] args) {
-        Application.launch(args);
-    }
+	public static void main(final String[] args) {
+		Application.launch(args);
+	}
 }

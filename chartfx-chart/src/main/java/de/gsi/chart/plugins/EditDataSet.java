@@ -15,7 +15,7 @@ import de.gsi.dataset.DataSet;
 import de.gsi.dataset.EditConstraints;
 import de.gsi.dataset.EditableDataSet;
 import de.gsi.chart.renderer.Renderer;
-import de.gsi.chart.utils.FXUtilities;
+import de.gsi.chart.utils.FXUtils;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;
@@ -69,7 +69,7 @@ public class EditDataSet extends TableViewer {
     private static boolean isControlDown;
     private boolean isPointDragActive;
     // Default mouse select filter: left mouse- and control-button down (only).
-    private final Predicate<MouseEvent> defaultSelectFilter = event -> MouseEvents.isOnlyPrimaryButtonDown(event)
+    private final Predicate<MouseEvent> defaultSelectFilter = event -> MouseEventsHelper.isOnlyPrimaryButtonDown(event)
             && event.isControlDown() && isMouseEventWithinCanvas(event) && !isPointDragActive;
 
     protected ConcurrentHashMap<EditableDataSet, ConcurrentHashMap<Integer, SelectedDataPoint>> markedPoints = new ConcurrentHashMap<>();
@@ -664,7 +664,7 @@ public class EditDataSet extends TableViewer {
         this.updateMarker();
     }
 
-    private static PseudoClass NOEDIT_PSEUDO_CLASS = PseudoClass.getPseudoClass("noEdit");
+    private static final PseudoClass NOEDIT_PSEUDO_CLASS = PseudoClass.getPseudoClass("noEdit");
 
     protected class SelectedDataPoint extends Circle {
 
@@ -695,8 +695,8 @@ public class EditDataSet extends TableViewer {
             this.dataSet = dataSet;
             this.xValue = dataSet.getX(index);
             this.yValue = dataSet.getY(index);
-            this.setCenterX(getX());
-            this.setCenterY(getY());
+            this.setCenterX(getX()); // NOPMD by rstein on 13/06/19 14:14
+            this.setCenterY(getY()); // NOPMD by rstein on 13/06/19 14:14
             this.setRadius(DEFAULT_MARKER_RADIUS);
 
             final EventHandler<? super InputEvent> dragOver = e -> {
@@ -716,7 +716,7 @@ public class EditDataSet extends TableViewer {
 
             xAxis.addListener(evt -> this.setCenterX(getX()));
             yAxis.addListener(evt -> this.setCenterY(getY()));
-            dataSet.addListener(e -> FXUtilities.runFX(this::update));
+            dataSet.addListener(e -> FXUtils.runFX(this::update));
         }
 
         public EditableDataSet getDataSet() {

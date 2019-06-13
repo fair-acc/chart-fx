@@ -149,7 +149,7 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V>
      */
     public IndexedTreeMap(Map<? extends K, ? extends V> m) {
         comparator = null;
-        putAll(m);
+        putAll(m); // NOPMD
     }
 
     /**
@@ -301,7 +301,7 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V>
             return getEntryUsingComparator(key);
         }
         if (key == null) {
-            throw new NullPointerException();
+            throw new IllegalStateException("key is null");
         }
         final Comparable<? super K> k = (Comparable<? super K>) key;
         Entry<K, V> p = root;
@@ -426,7 +426,7 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V>
             //            String r = e.right == null ? "null" : "   " + e.right.key.toString();
             //            System.out.println(e.key + ":" + l + ":" + r + ":" + e.weight);
             if (e.weight != e.sumup()) {
-                throw new Exception("Weight is incorrect:" + e.weight + "!=" + e.sumup() + " for " + e.key);
+                throw new IllegalStateException("Weight is incorrect:" + e.weight + "!=" + e.sumup() + " for " + e.key);
             }
             e = IndexedTreeMap.successor(e);
         }
@@ -553,7 +553,7 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V>
             } while (t != null);
         } else {
             if (key == null) {
-                throw new NullPointerException();
+                throw new IllegalStateException("key is null");
             }
             final Comparable<? super K> k = (Comparable<? super K>) key;
             do {
@@ -806,11 +806,11 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V>
     @Override
     public int keyIndex(K key) {
         if (key == null) {
-            throw new NullPointerException();
+            throw new IllegalStateException("key should be non-null");
         }
         final Entry<K, V> e = getEntry(key);
         if (e == null) {
-            throw new NullPointerException();
+            throw new IllegalStateException("element is null for key = " + key);
         }
         if (e == root) {
             return IndexedTreeMap.getWeight(e) - IndexedTreeMap.getWeight(e.right) - 1;//index to return

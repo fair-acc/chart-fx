@@ -13,9 +13,9 @@ import javafx.application.Platform;
  *
  * @author rstein
  */
-public final class FXUtilities {
+public final class FXUtils {
 
-    private FXUtilities() {
+    private FXUtils() {
         throw new UnsupportedOperationException("don't use this in a non-static context");
     }
 
@@ -32,7 +32,7 @@ public final class FXUtilities {
     }
 
     public static void runLater(final Runnable run) throws ExecutionException {
-        FXUtilities.keepJavaFxAlive();
+        FXUtils.keepJavaFxAlive();
         if (Platform.isFxApplicationThread()) {
             try {
                 run.run();
@@ -45,7 +45,7 @@ public final class FXUtilities {
     }
     
     public static void runFX(final Runnable run) {
-        FXUtilities.keepJavaFxAlive();
+        FXUtils.keepJavaFxAlive();
         if (Platform.isFxApplicationThread()) {
             try {
                 run.run();
@@ -70,7 +70,7 @@ public final class FXUtilities {
      *             if a exception is occurred in the run method of the Runnable
      */
     public static void runAndWait(final Runnable run) throws InterruptedException, ExecutionException {
-        FXUtilities.keepJavaFxAlive();
+        FXUtils.keepJavaFxAlive();
         if (Platform.isFxApplicationThread()) {
             try {
                 run.run();

@@ -203,7 +203,7 @@ public class SimplePerformanceMeter extends AnimationTimer {
             @Override
             public void run() {
                 try {
-                    FXUtilities.runLater(SimplePerformanceMeter.this::updateProperties);
+                    FXUtils.runLater(SimplePerformanceMeter.this::updateProperties);
                 } catch (ExecutionException e) {
                     // not of concern
                 }

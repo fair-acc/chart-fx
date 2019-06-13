@@ -459,23 +459,26 @@ public class ContourDataSetRenderer extends AbstractDataSetManagement<ContourDat
     }
 
     private Image resample(Image input, int targetWidth, int targetHeight) {
-        final int W = (int) input.getWidth();
-        final int H = (int) input.getHeight();
-        final double Sx = targetWidth / W;
-        final double Sy = targetHeight / H;
+    	if (input.getWidth() == 0 || input.getHeight() == 0) {
+    		return input;
+    	}
+        final int width = (int) input.getWidth();
+        final int height = (int) input.getHeight();
+        final double scalingX = targetWidth / width;
+        final double scalingY = targetHeight / height;
 
-        final WritableImage output = new WritableImage((int) (W * Sx), (int) (H * Sy));
+        final WritableImage output = new WritableImage((int) (width * scalingX), (int) (height * scalingY));
 
         final PixelReader reader = input.getPixelReader();
         final PixelWriter writer = output.getPixelWriter();
 
-        for (int y = 0; y < H; y++) {
-            for (int x = 0; x < W; x++) {
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
                 final int argb = reader.getArgb(x, y);
-                for (int dy = 0; dy < Sy; dy++) {
-                    for (int dx = 0; dx < Sx; dx++) {
-                        final int targetX = (int) (x * Sx + dx);
-                        final int targetY = (int) (y * Sy + dy);
+                for (int dy = 0; dy < scalingY; dy++) {
+                    for (int dx = 0; dx < scalingX; dx++) {
+                        final int targetX = (int) (x * scalingX + dx);
+                        final int targetY = (int) (y * scalingY + dy);
                         writer.setArgb(targetX, targetY, argb);
                     }
                 }
@@ -769,14 +772,14 @@ public class ContourDataSetRenderer extends AbstractDataSetManagement<ContourDat
             final double zMax, final double level) {
         final int width = input.length;
         final int height = input[0].length;
-        final double[][] Gx = new double[width][height];
-        final double[][] Gy = new double[width][height];
+        final double[][] gX = new double[width][height];
+        final double[][] gY = new double[width][height];
 
         final double[][] pixelMatrix = new double[3][3];
         for (int i = 0; i < width; i++) {
             for (int j = 0; j < height; j++) {
                 if (i == 0 || i == width - 1 || j == 0 || j == height - 1) {
-                    Gx[i][j] = Gy[i][j] = output[i][j] = 0;
+                    gX[i][j] = gY[i][j] = output[i][j] = 0;
                 } else {
                     // Gx[i][j] = input[i + 1][j - 1] + 2 * input[i + 1][j] +
                     // input[i + 1][j + 1];
@@ -788,13 +791,13 @@ public class ContourDataSetRenderer extends AbstractDataSetManagement<ContourDat
                     // input[i + 1][j - 1];
 
                     // Roberts Cross
-                    Gx[i][j] = -1.0 * input[i][j - 1] - 0.0 * input[i][j] + 0.0 * input[i][j + 1];
-                    Gx[i][j] += 0.0 * input[i][j - 1] + 1.0 * input[i][j] + 0.0 * input[i + 1][j + 1];
+                    gX[i][j] = -1.0 * input[i][j - 1] - 0.0 * input[i][j] + 0.0 * input[i][j + 1];
+                    gX[i][j] += 0.0 * input[i][j - 1] + 1.0 * input[i][j] + 0.0 * input[i + 1][j + 1];
 
-                    Gy[i][j] = 0.0 * input[i][j - 1] - 1.0 * input[i][j] + 0.0 * input[i][j + 1];
-                    Gy[i][j] += 1.0 * input[i][j - 1] - 0.0 * input[i][j] + 0.0 * input[i + 1][j + 1];
+                    gY[i][j] = 0.0 * input[i][j - 1] - 1.0 * input[i][j] + 0.0 * input[i][j + 1];
+                    gY[i][j] += 1.0 * input[i][j - 1] - 0.0 * input[i][j] + 0.0 * input[i + 1][j + 1];
 
-                    double zNorm = Math.abs(Gx[i][j]) + Math.abs(Gy[i][j]);// -
+                    double zNorm = Math.abs(gX[i][j]) + Math.abs(gY[i][j]);// -
                                                                            // zMin)
                                                                            // /
                                                                            // (zMax
@@ -823,14 +826,14 @@ public class ContourDataSetRenderer extends AbstractDataSetManagement<ContourDat
             final double zMax, final double level) {
         final int width = input.length;
         final int height = input[0].length;
-        final double[][] Gx = new double[width][height];
-        final double[][] Gy = new double[width][height];
+        final double[][] gX = new double[width][height];
+        final double[][] gY = new double[width][height];
 
         final double[][] pixelMatrix = new double[3][3];
         for (int i = 0; i < width; i++) {
             for (int j = 0; j < height; j++) {
                 if (i == 0 || i == width - 1 || j == 0 || j == height - 1) {
-                    Gx[i][j] = Gy[i][j] = output[i][j] = 0;
+                    gX[i][j] = gY[i][j] = output[i][j] = 0;
                 } else {
                     pixelMatrix[0][0] = input[i - 1][j - 1] > level ? 1.0 : 0.0;
                     pixelMatrix[0][1] = input[i - 1][j] > level ? 1.0 : 0.0;

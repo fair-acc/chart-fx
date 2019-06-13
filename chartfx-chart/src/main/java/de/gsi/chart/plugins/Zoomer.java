@@ -88,21 +88,21 @@ public class Zoomer extends ChartPlugin {
     /**
      * Default zoom-in mouse filter passing on left mouse button (only).
      */
-    public final Predicate<MouseEvent> DEFAULT_ZOOM_IN_MOUSE_FILTER = event -> MouseEvents
-            .isOnlyPrimaryButtonDown(event) && MouseEvents.modifierKeysUp(event) && isMouseEventWithinCanvas(event);
+    public final Predicate<MouseEvent> defaultZoomInMouseFilter = event -> MouseEventsHelper
+            .isOnlyPrimaryButtonDown(event) && MouseEventsHelper.modifierKeysUp(event) && isMouseEventWithinCanvas(event);
 
     /**
      * Default zoom-out mouse filter passing on right mouse button (only).
      */
-    public final Predicate<MouseEvent> DEFAULT_ZOOM_OUT_MOUSE_FILTER = event -> MouseEvents
-            .isOnlySecondaryButtonDown(event) && MouseEvents.modifierKeysUp(event) && isMouseEventWithinCanvas(event);
+    public final Predicate<MouseEvent> defaultZoomOutMouseFilter = event -> MouseEventsHelper
+            .isOnlySecondaryButtonDown(event) && MouseEventsHelper.modifierKeysUp(event) && isMouseEventWithinCanvas(event);
 
     /**
      * Default zoom-origin mouse filter passing on right mouse button with
      * {@link MouseEvent#isControlDown() control key down}.
      */
-    public final Predicate<MouseEvent> DEFAULT_ZOOM_ORIGIN_MOUSE_FILTER = event -> MouseEvents
-            .isOnlySecondaryButtonDown(event) && MouseEvents.isOnlyCtrlModifierDown(event)
+    public final Predicate<MouseEvent> defaultZoomOriginFilter = event -> MouseEventsHelper
+            .isOnlySecondaryButtonDown(event) && MouseEventsHelper.isOnlyCtrlModifierDown(event)
             && isMouseEventWithinCanvas(event);
 
     /**
@@ -110,12 +110,12 @@ public class Zoomer extends ChartPlugin {
      * key down}.
      * 
      */
-    public final Predicate<ScrollEvent> DEFAULT_SCROLL_FILTER = event -> isMouseEventWithinCanvas(event);
+    public final Predicate<ScrollEvent> defaultScrollFilter = event -> isMouseEventWithinCanvas(event);
 
-    private Predicate<MouseEvent> zoomInMouseFilter = DEFAULT_ZOOM_IN_MOUSE_FILTER;
-    private Predicate<MouseEvent> zoomOutMouseFilter = DEFAULT_ZOOM_OUT_MOUSE_FILTER;
-    private Predicate<MouseEvent> zoomOriginMouseFilter = DEFAULT_ZOOM_ORIGIN_MOUSE_FILTER;
-    private Predicate<ScrollEvent> zoomScrollFilter = DEFAULT_SCROLL_FILTER;
+    private Predicate<MouseEvent> zoomInMouseFilter = defaultZoomInMouseFilter;
+    private Predicate<MouseEvent> zoomOutMouseFilter = defaultZoomOutMouseFilter;
+    private Predicate<MouseEvent> zoomOriginMouseFilter = defaultZoomOriginFilter;
+    private Predicate<ScrollEvent> zoomScrollFilter = defaultScrollFilter;
 
     private final Rectangle zoomRectangle = new Rectangle();
     private Point2D zoomStartPoint = null;
@@ -251,7 +251,7 @@ public class Zoomer extends ChartPlugin {
      * @param zoomInMouseFilter
      *            the filter to accept zoom-in mouse event. If {@code null} then
      *            any DRAG_DETECTED event will start zoom-in operation. By
-     *            default it's set to {@link #DEFAULT_ZOOM_IN_MOUSE_FILTER}.
+     *            default it's set to {@link #defaultZoomInMouseFilter}.
      * @see #getZoomInMouseFilter()
      */
     public void setZoomInMouseFilter(final Predicate<MouseEvent> zoomInMouseFilter) {
@@ -275,7 +275,7 @@ public class Zoomer extends ChartPlugin {
      * @param zoomOutMouseFilter
      *            the filter to accept zoom-out mouse event. If {@code null}
      *            then any MOUSE_CLICKED event will start zoom-out operation. By
-     *            default it's set to {@link #DEFAULT_ZOOM_OUT_MOUSE_FILTER}.
+     *            default it's set to {@link #defaultZoomOutMouseFilter}.
      * @see #getZoomOutMouseFilter()
      */
     public void setZoomOutMouseFilter(final Predicate<MouseEvent> zoomOutMouseFilter) {
@@ -300,7 +300,7 @@ public class Zoomer extends ChartPlugin {
      *            the filter to accept zoom-origin mouse event. If {@code null}
      *            then any MOUSE_CLICKED event will start zoom-origin operation.
      *            By default it's set to
-     *            {@link #DEFAULT_ZOOM_ORIGIN_MOUSE_FILTER}.
+     *            {@link #defaultZoomOriginFilter}.
      * @see #getZoomOriginMouseFilter()
      */
     public void setZoomOriginMouseFilter(final Predicate<MouseEvent> zoomOriginMouseFilter) {

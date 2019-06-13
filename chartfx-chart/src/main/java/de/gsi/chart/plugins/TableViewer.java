@@ -3,9 +3,12 @@ package de.gsi.chart.plugins;
 import static impl.org.controlsfx.i18n.Localization.asKey;
 import static impl.org.controlsfx.i18n.Localization.localize;
 
+import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,7 +23,7 @@ import org.controlsfx.glyphfont.Glyph;
 
 import de.gsi.chart.Chart;
 import de.gsi.chart.renderer.Renderer;
-import de.gsi.chart.utils.FXUtilities;
+import de.gsi.chart.utils.FXUtils;
 import de.gsi.dataset.DataSet;
 import de.gsi.dataset.DataSetError;
 import de.gsi.dataset.event.EventListener;
@@ -68,7 +71,7 @@ public class TableViewer extends ChartPlugin {
     private final Glyph clipBoardIcon = new Glyph(FONT_AWESOME, FontAwesome.Glyph.CLIPBOARD).size(FONT_SIZE);
     private final ListChangeListener<Renderer> rendererChangeListener = this::rendererChanged;
     private final ListChangeListener<DataSet> datasetChangeListener = this::datasetsChanged;
-    private final EventListener dataSetDataUpdateListener = obs -> FXUtilities.runFX(this::refreshTable);
+    private final EventListener dataSetDataUpdateListener = obs -> FXUtils.runFX(this::refreshTable);
     private final HBox interactorButtons = getInteractorBar();
     // private Pane table = new Pane();
     private final MySpreadsheetView table = new MySpreadsheetView();
@@ -278,7 +281,8 @@ public class TableViewer extends ChartPlugin {
             return;
         }
         List<String> stringRows = getGridStringRepresentation();
-        try (FileWriter writer = new FileWriter(save.getPath() + ".csv")) {
+        
+        try (BufferedWriter writer = Files.newBufferedWriter(Paths.get(save.getPath() + ".csv"), StandardCharsets.UTF_8)) {
             for (String str : stringRows) {
                 writer.write(str);
             }

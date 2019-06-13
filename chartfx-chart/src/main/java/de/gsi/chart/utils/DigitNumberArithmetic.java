@@ -5,7 +5,7 @@ import java.util.WeakHashMap;
 
 import de.gsi.dataset.spi.utils.Tuple;
 
-public class DigitNumberArithmetic {
+public final class DigitNumberArithmetic {
 
     private DigitNumberArithmetic() {
     }

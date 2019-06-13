@@ -25,9 +25,9 @@ import javafx.scene.layout.VBox;
  */
 public class FourierSample extends AbstractDemoApplication {
 
-    private final int MAX_POINTS = 512;
+    private static final int MAX_POINTS = 512;
     private DataSet fraw, fspectra1, fspectra2, fspectra3, fspectra4;
-    private TRandom rnd = new TRandom(0);
+    private final TRandom rnd = new TRandom(0);
 
     private double computeSignal(double t) {
         double val = 0.0;
@@ -74,13 +74,13 @@ public class FourierSample extends AbstractDemoApplication {
         }
 
         LombPeriodogram lombTrafo = new LombPeriodogram();
-        DiscreteTimeFourierTransform DTFT = new DiscreteTimeFourierTransform();
+        DiscreteTimeFourierTransform trafoDTFT = new DiscreteTimeFourierTransform();
         DoubleFFT_1D fastFourierTrafo = new DoubleFFT_1D(yValues.length);
 
         System.err.printf("compute spectrum for %d test frequencies\n", frequency1.length);
         double[] lomb = lombTrafo.computePeridodogram(xValues, yValues, frequency2);
-        double[] dtft1 = DTFT.computeMagnitudeSpectrum(xValues, yValues, frequency1);
-        double[] dtft2 = DTFT.computeMagnitudeSpectrum(xValues, yValues, frequency2);
+        double[] dtft1 = trafoDTFT.computeMagnitudeSpectrum(xValues, yValues, frequency1);
+        double[] dtft2 = trafoDTFT.computeMagnitudeSpectrum(xValues, yValues, frequency2);
 
         // N.B. since realForward computes the FFT in-place -> generate a copy
         double[] fftSpectra = Arrays.copyOf(yValues, yValues.length);

@@ -5,7 +5,7 @@ package de.gsi.chart;
  *
  * @author rstein
  */
-public final class XYChartCss {
+public final class XYChartCss { // NOPMD decide not to rename it for the time being
     public static final String DATASET_LAYOUT_OFFSET = "dsLayoutOffset";
     public static final String DATASET_INDEX = "dsIndex";
     public static final String DATASET_INTENSITY = "intensity";

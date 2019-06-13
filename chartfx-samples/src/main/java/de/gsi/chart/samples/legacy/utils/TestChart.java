@@ -72,7 +72,7 @@ public class TestChart extends AbstractTestApplication implements ChartTestCase 
         }
 
         setNumberOfSamples(MAX_DATA_POINTS_25HZ);
-        updateDataSet();
+        updateDataSet(); // NOPMD
     }
 
     @Override

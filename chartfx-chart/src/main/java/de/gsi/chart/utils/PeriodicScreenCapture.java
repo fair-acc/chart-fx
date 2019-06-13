@@ -128,8 +128,8 @@ public class PeriodicScreenCapture implements Observable {
         return isoDateTimeFormatString;
     }
 
-    protected static String getISODate(final long time_ms, final String format) {
-        final long time = TimeUnit.MILLISECONDS.toMillis(time_ms);
+    protected static String getISODate(final long timeMillis, final String format) {
+        final long time = TimeUnit.MILLISECONDS.toMillis(timeMillis);
         final TimeZone tz = TimeZone.getTimeZone("UTC");
         final DateFormat df = new SimpleDateFormat(format);
         df.setTimeZone(tz);

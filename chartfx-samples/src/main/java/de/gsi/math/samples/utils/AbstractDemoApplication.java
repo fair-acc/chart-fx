@@ -9,7 +9,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 
 public abstract class AbstractDemoApplication extends Application {
-    protected static final Random random = new Random(System.currentTimeMillis());
+    protected static final Random RANDOM = new Random(System.currentTimeMillis());
     protected static final double DEFAULT_SCENE_WIDTH = 800;
     protected static final double DEFAULT_SCENE_HEIGTH = 800;
     protected double sceneWidth = 800;

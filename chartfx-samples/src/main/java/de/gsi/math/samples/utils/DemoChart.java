@@ -46,7 +46,7 @@ public class DemoChart extends XYChart {
         renderer.add(defaultRenderer);
 
         getYAxis().setAutoRangePadding(0.05);
-        yAxes.add(getYAxis());
+        yAxes.add(getYAxis()); // NOPMD by rstein on 13/06/19 11:25
 
         for (int i = 1; i < nAxes; i++) {
             DefaultNumericAxis yAxis = new DefaultNumericAxis("y-axis" + i);
@@ -55,7 +55,7 @@ public class DemoChart extends XYChart {
             yAxes.add(yAxis);
 
             ErrorDataSetRenderer newRenderer = new ErrorDataSetRenderer();
-            newRenderer.getAxes().addAll(getXAxis(), yAxis);
+            newRenderer.getAxes().addAll(getXAxis(), yAxis); // NOPMD by rstein on 13/06/19 11:24
             getRenderers().add(newRenderer);
             renderer.add(newRenderer);
         }

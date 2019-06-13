@@ -17,7 +17,7 @@ import de.gsi.dataset.DataSet;
 import de.gsi.dataset.EditableDataSet;
 import de.gsi.dataset.utils.ProcessingProfiler;
 import de.gsi.chart.renderer.Renderer;
-import de.gsi.chart.utils.FXUtilities;
+import de.gsi.chart.utils.FXUtils;
 import de.gsi.chart.utils.StyleParser;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
@@ -182,7 +182,7 @@ public class HistoryDataSetRenderer extends ErrorDataSetRenderer implements Rend
         final ObservableList<DataSet> oldDataSetsToRemove = renderers.get(nRenderer - 1).getDatasets();
         if (!oldDataSetsToRemove.isEmpty()) {
             try {
-                FXUtilities.runAndWait(() -> getDatasets().removeAll(oldDataSetsToRemove));
+                FXUtils.runAndWait(() -> getDatasets().removeAll(oldDataSetsToRemove));
             } catch (InterruptedException | ExecutionException e) {
                 HistoryDataSetRenderer.LOGGER.error("remove oldDataSetsToRemove ", e);
             }
@@ -214,7 +214,7 @@ public class HistoryDataSetRenderer extends ErrorDataSetRenderer implements Rend
 
                 if (!getDatasets().contains(ds)) {
                     try {
-                        FXUtilities.runAndWait(() -> getDatasets().add(ds));
+                        FXUtils.runAndWait(() -> getDatasets().add(ds));
                     } catch (InterruptedException | ExecutionException e) {
                         HistoryDataSetRenderer.LOGGER.error("add missing dataset", e);
                     }
@@ -222,7 +222,7 @@ public class HistoryDataSetRenderer extends ErrorDataSetRenderer implements Rend
             }
 
             try {
-                FXUtilities.runAndWait(() -> renderer.getDatasets().setAll(copyList));
+                FXUtils.runAndWait(() -> renderer.getDatasets().setAll(copyList));
             } catch (InterruptedException | ExecutionException e) {
                 HistoryDataSetRenderer.LOGGER.error("add new copied dataset to getDatasets()", e);
             }
@@ -242,7 +242,7 @@ public class HistoryDataSetRenderer extends ErrorDataSetRenderer implements Rend
     public void clearHistory() {
         for (final Renderer renderer : renderers) {
             try {
-                FXUtilities.runAndWait(() -> {
+                FXUtils.runAndWait(() -> {
                     super.getDatasets().removeAll(renderer.getDatasets());
                     renderer.getDatasets().clear();
                 });

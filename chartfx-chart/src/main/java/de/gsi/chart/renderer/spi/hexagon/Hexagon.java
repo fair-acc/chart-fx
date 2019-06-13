@@ -173,7 +173,7 @@ public class Hexagon extends Polygon {
      */
     public List<Hexagon> getHexagonsOnRingEdge(final int radius) {
         checkMap();
-        return Calculations.getHexagonsOnRingEdge(this, radius, map);
+        return GridCalculationsHelper.getHexagonsOnRingEdge(this, radius, map);
     }
 
     /**
@@ -183,7 +183,7 @@ public class Hexagon extends Polygon {
      */
     public List<Hexagon> getHexagonsInRingArea(final int radius) {
         checkMap();
-        return Calculations.getHexagonsInRingArea(this, radius, map);
+        return GridCalculationsHelper.getHexagonsInRingArea(this, radius, map);
     }
 
     private void checkMap() {
@@ -231,7 +231,7 @@ public class Hexagon extends Polygon {
     public List<Hexagon> getPathTo(final Hexagon destination, final IPathInfoSupplier pathInfoSupplier)
             throws NoPathFoundException {
         checkMap();
-        return Calculations.getPathBetween(this, destination, pathInfoSupplier);
+        return GridCalculationsHelper.getPathBetween(this, destination, pathInfoSupplier);
     }
 
     /**
@@ -244,7 +244,7 @@ public class Hexagon extends Polygon {
      */
     public List<Hexagon> getPathTo(final Hexagon destination) throws NoPathFoundException {
         checkMap();
-        return Calculations.getPathBetween(this, destination, new HexagonMap.DefaultPathInfoSupplier());
+        return GridCalculationsHelper.getPathBetween(this, destination, new HexagonMap.DefaultPathInfoSupplier());
     }
 
     /**
@@ -255,7 +255,7 @@ public class Hexagon extends Polygon {
      */
     public List<Hexagon> getLine(final Hexagon origin, final Hexagon destination) {
         checkMap();
-        return Calculations.getLine(origin.position, destination.position, map);
+        return GridCalculationsHelper.getLine(origin.position, destination.position, map);
     }
 
     /**
@@ -267,7 +267,7 @@ public class Hexagon extends Polygon {
      */
     public List<Hexagon> getVisibleHexes(final int visibleRange) {
         checkMap();
-        return Calculations.getVisibleHexes(this, visibleRange, map);
+        return GridCalculationsHelper.getVisibleHexes(this, visibleRange, map);
     }
 
     /**

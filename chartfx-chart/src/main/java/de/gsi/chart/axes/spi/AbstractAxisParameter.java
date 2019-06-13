@@ -1156,7 +1156,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
         upperBoundProperty().addListener(autoRangeChangeListener);
         lowerBoundProperty().addListener(autoRangeChangeListener);
 
-        axisLabel.textAlignmentProperty().bindBidirectional(this.axisLabelTextAlignmentProperty());
+        axisLabel.textAlignmentProperty().bindBidirectional(this.axisLabelTextAlignmentProperty()); // NOPMD
 
         // bind limits to user-specified axis range
         // userRange.set

@@ -2,8 +2,9 @@ package de.gsi.chart.renderer.spi.hexagon;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
-class Calculations {
+class GridCalculationsHelper {
     static ArrayList<Hexagon> getPathBetween(final Hexagon start, final Hexagon destination,
             final IPathInfoSupplier pathInfoSupplier) throws NoPathFoundException {
         final ArrayList<Hexagon> closedSet = new ArrayList<>(); // The set of nodes already evaluated
@@ -14,23 +15,23 @@ class Calculations {
         start.aStarFscore = start.aStarGscore + GridPosition.getDistance(start.position, destination.position);
 
         Hexagon currentHexagon;
-        int tentative_g_score;
+        int tentativeGscore;
         while (!openSet.isEmpty()) {
-            currentHexagon = Calculations.findHexagonWithLowestFscore(openSet);
+            currentHexagon = GridCalculationsHelper.findHexagonWithLowestFscore(openSet);
             if (currentHexagon.position.equals(destination.position)) {
-                return Calculations.reconstruct_path(start, destination);
+                return GridCalculationsHelper.reconstructPath(start, destination);
             }
             openSet.remove(currentHexagon);
             closedSet.add(currentHexagon);
 
             for (final Hexagon neighbour : currentHexagon.getNeighbours()) {
                 if ((!pathInfoSupplier.isBlockingPath(neighbour) || destination.equals(neighbour)) && !closedSet.contains(neighbour)) {
-				    tentative_g_score = currentHexagon.aStarGscore
+				    tentativeGscore = currentHexagon.aStarGscore
 				            + pathInfoSupplier.getMovementCost(currentHexagon, neighbour);
 
-				    if (!openSet.contains(neighbour) || tentative_g_score < neighbour.aStarGscore) {
+				    if (!openSet.contains(neighbour) || tentativeGscore < neighbour.aStarGscore) {
 				        neighbour.aStarCameFrom = currentHexagon;
-				        neighbour.aStarGscore = tentative_g_score;
+				        neighbour.aStarGscore = tentativeGscore;
 				        neighbour.aStarFscore = neighbour.aStarGscore
 				                + GridPosition.getDistance(neighbour.position, destination.position);
 
@@ -66,7 +67,7 @@ class Calculations {
         return hexagonWithLowestFscore;
     }
 
-    private static ArrayList<Hexagon> reconstruct_path(final Hexagon start, final Hexagon goal) {
+    private static ArrayList<Hexagon> reconstructPath(final Hexagon start, final Hexagon goal) {
         final ArrayList<Hexagon> path = new ArrayList<>();
         Hexagon currentHexagon = goal;
         while (currentHexagon != start) {
@@ -77,10 +78,10 @@ class Calculations {
         return path;
     }
 
-    static ArrayList<Hexagon> getLine(final GridPosition origin, final GridPosition destination, final HexagonMap map) {
+    public static List<Hexagon> getLine(final GridPosition origin, final GridPosition destination, final HexagonMap map) {
         Hexagon h;
-        final ArrayList<Hexagon> result = new ArrayList<>();
-        final ArrayList<GridPosition> positions = origin.line(destination);
+        final List<Hexagon> result = new ArrayList<>();
+        final List<GridPosition> positions = origin.line(destination);
 
         for (final GridPosition position : positions) {
             h = map.getHexagon(position);
@@ -91,12 +92,12 @@ class Calculations {
         return result;
     }
 
-    static ArrayList<Hexagon> getVisibleHexes(final Hexagon origin, final int visibleRange, final HexagonMap map) {
-        final ArrayList<GridPosition> ringMembers = origin.position.getPositionsOnCircleEdge(visibleRange);
-        final ArrayList<Hexagon> result = new ArrayList<>();
-        ArrayList<Hexagon> line;
+    static List<Hexagon> getVisibleHexes(final Hexagon origin, final int visibleRange, final HexagonMap map) {
+        final List<GridPosition> ringMembers = origin.position.getPositionsOnCircleEdge(visibleRange);
+        final List<Hexagon> result = new ArrayList<>();
+        List<Hexagon> line;
         for (final GridPosition ringMemberPosition : ringMembers) {
-            line = Calculations.getLine(origin.position, ringMemberPosition, map);
+            line = GridCalculationsHelper.getLine(origin.position, ringMemberPosition, map);
             for (final Hexagon hexagonInLine : line) {
                 result.add(hexagonInLine);
                 if (hexagonInLine.isVisualObstacle()) {

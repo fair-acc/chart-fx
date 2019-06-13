@@ -18,7 +18,7 @@ import javafx.scene.layout.VBox;
 
 public class IIRFilterSample extends AbstractDemoApplication {
 
-    private final int ORDER = 32;
+    private static final int ORDER = 32;
     private final double sampling = 100e6;
     private final double center = 28e6;
     private final double width = 0.5e6;

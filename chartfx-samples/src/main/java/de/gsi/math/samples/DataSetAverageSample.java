@@ -42,7 +42,7 @@ public class DataSetAverageSample extends AbstractDemoApplication {
             SigmoidFunction sigmoidFunction = new SigmoidFunction("sigmoid") {
                 @Override
                 public double getValue(final double x) {
-                    return 10.0 + super.getValue(x) + 0.05 * random.nextGaussian();
+                    return 10.0 + super.getValue(x) + 0.05 * RANDOM.nextGaussian();
                 }
             };
 

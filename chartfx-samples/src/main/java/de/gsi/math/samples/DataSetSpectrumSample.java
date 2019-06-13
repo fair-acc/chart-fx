@@ -24,7 +24,7 @@ import javafx.scene.layout.VBox;
  */
 public class DataSetSpectrumSample extends AbstractDemoApplication {
     private static final int N_SAMPLES = 200;
-    private static boolean unequalSampling = false;
+    private static boolean unequalSampling;
 
     @Override
     public Node getContent() {
@@ -36,7 +36,7 @@ public class DataSetSpectrumSample extends AbstractDemoApplication {
         TrigSineFunction sineFunction = new TrigSineFunction("sine") {
             @Override
             public double getValue(final double x) {
-                return super.getValue(x) + 0.001 * random.nextGaussian();
+                return super.getValue(x) + 0.001 * RANDOM.nextGaussian();
             }
         };
         sineFunction.setParameterValue(1, 1); // frequency

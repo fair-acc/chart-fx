@@ -53,8 +53,8 @@ public class ErrorDataSetRendererStylingSample extends Application {
     private static final int DEFAULT_HEIGHT = 600;
     private static final int UPDATE_DELAY = 1000; // [ms]
     private static final int UPDATE_PERIOD = 40; // [ms]
-    private static double N_MAX_SAMPLES = 10000;
-    DataSetType dataSetType = DataSetType.RandomWalk;
+    private static final double N_MAX_SAMPLES = 10000;
+    DataSetType dataSetType = DataSetType.RANDOM_WALK;
     GridPane parameterGrid = new GridPane();
     private int nSamples = 400;
     Timer timer;
@@ -239,14 +239,14 @@ public class ErrorDataSetRendererStylingSample extends Application {
     }
 
     public enum DataSetType {
-        RandomWalk,
-        Outlier,
-        Step,
-        Sinc,
-        Gauss,
-        Sine,
-        Cosine,
-        Mix_Trig;
+        RANDOM_WALK,
+        OUTLIER,
+        STEP,
+        SINC,
+        GAUSS,
+        SINE,
+        COSINE,
+        MIX_TRIGONOMETRIC;
     }
 
     private void generateData(final XYChart chart) {
@@ -254,31 +254,31 @@ public class ErrorDataSetRendererStylingSample extends Application {
         long startTime = ProcessingProfiler.getTimeStamp();
         final List<DataSetError> dataSet = new ArrayList<>();
         switch (dataSetType) {
-        case Outlier:
+        case OUTLIER:
             dataSet.add(new SingleOutlierFunction("function with single outlier", nSamples));
             break;
-        case Step:
+        case STEP:
             dataSet.add(new RandomStepFunction("random step function", nSamples));
             break;
-        case Sinc:
+        case SINC:
             dataSet.add(new SincFunction("sinc function", nSamples));
             break;
-        case Gauss:
+        case GAUSS:
             dataSet.add(new GaussFunction("gauss function", nSamples));
             break;
-        case Sine:
+        case SINE:
             dataSet.add(new SineFunction("sine function", nSamples));
             break;
-        case Cosine:
+        case COSINE:
             dataSet.add(new CosineFunction("cosine function", nSamples));
             break;
-        case Mix_Trig:
+        case MIX_TRIGONOMETRIC:
             dataSet.add(new SineFunction("dyn. sine function", nSamples, true));
             dataSet.add(new CosineFunction("dyn. cosine function", nSamples, true));
             break;
 
         default:
-        case RandomWalk:
+        case RANDOM_WALK:
             dataSet.add(new RandomWalkFunction("random walk data", nSamples));
             break;
         }

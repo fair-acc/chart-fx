@@ -144,9 +144,9 @@ public class DataSetToByteArraySample {
             final double x = n;
             oldY += RandomDataGenerator.random() - 0.5;
             final double y = oldY + (n == 500000 ? 500.0 : 0);
-            final double ey_neg = 0.1;
-            final double ey_pos = 10;
-            dataSet.set(n, x, y, ey_neg, ey_pos);
+            final double eyNeg = 0.1;
+            final double eyPos = 10;
+            dataSet.set(n, x, y, eyNeg, eyPos);
 
             if (n == 500000) {
                 dataSet.getDataLabelMap().put(n, "special outlier");

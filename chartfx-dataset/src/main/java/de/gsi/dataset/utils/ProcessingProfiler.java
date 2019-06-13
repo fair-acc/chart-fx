@@ -11,24 +11,24 @@ import org.slf4j.LoggerFactory;
  * @author rstein
  *
  */
-public final class ProcessingProfiler {
+public final class ProcessingProfiler { // NOPMD nomen est omen et fix
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ProcessingProfiler.class);
     /**
      * boolean flag controlling whether diagnostics time-marks are taken or the
      * routine to be skipped
      */
-    protected static boolean debugState = false;
+    private static boolean debugState;
     /**
      * boolean flag controlling whether the statistics/time differences are
      * output to the logger/console or not
      */
-    protected static boolean verboseOutput = true;
+    private static boolean verboseOutput = true;
     /**
      * boolean flag controlling whether the statistics/time differences are
      * output to the logger/console or not
      */
-    protected static boolean loggerOutput = false;
+    private static boolean loggerOutput;
 
     private ProcessingProfiler() {
     }
@@ -142,7 +142,7 @@ public final class ProcessingProfiler {
         return compoundName;
     }
 
-    protected static String getCallingClassMethod(String msg) {
+    private static String getCallingClassMethod(String msg) {
         final StackTraceElement[] stacktrace = Thread.currentThread().getStackTrace();
         // this number needs to be corrected if this class is refactored
         final int nLast = msg == null ? 4 : 3;

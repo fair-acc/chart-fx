@@ -1,7 +1,9 @@
 package de.gsi.chart.renderer.spi.hexagon;
 
 import java.io.Serializable;
+import java.security.InvalidParameterException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -60,7 +62,7 @@ public class GridPosition implements Cloneable, Serializable {
      * @param radius circle radius
      * @return positions that are on the edge of a circle
      */
-    ArrayList<GridPosition> getPositionsOnCircleEdge(final int radius) {
+    public List<GridPosition> getPositionsOnCircleEdge(final int radius) {
         final ArrayList<GridPosition> result = new ArrayList<>();
         if (radius == 0) {
             result.add(this);
@@ -80,10 +82,10 @@ public class GridPosition implements Cloneable, Serializable {
         }
     }
 
-    ArrayList<GridPosition> getPositionsInCircleArea(final int radius) {
+    public List<GridPosition> getPositionsInCircleArea(final int radius) {
         final ArrayList<GridPosition> result = new ArrayList<>();
         for (int i = 0; i <= radius; i++) {
-            final ArrayList<GridPosition> positions = getPositionsOnCircleEdge(i);
+            final List<GridPosition> positions = getPositionsOnCircleEdge(i);
             result.addAll(positions);
         }
         return result;
@@ -104,7 +106,7 @@ public class GridPosition implements Cloneable, Serializable {
         case WEST:
             return 5;
         }
-        throw new RuntimeException();
+        throw new InvalidParameterException("direction unknown: " + direction);
     }
 
     static HexagonMap.Direction getDirectionFromNumber(final int i) {
@@ -122,7 +124,7 @@ public class GridPosition implements Cloneable, Serializable {
         case 5:
             return HexagonMap.Direction.WEST;
         }
-        throw new RuntimeException();
+        throw new InvalidParameterException("unknown direction: " + i);
     }
 
     String getCoordinates() {
@@ -146,13 +148,13 @@ public class GridPosition implements Cloneable, Serializable {
         long ry = Math.round(cubeY);
         long rz = Math.round(cubeZ);
 
-        final double x_diff = Math.abs(rx - cubeX);
-        final double y_diff = Math.abs(ry - cubeY);
-        final double z_diff = Math.abs(rz - cubeZ);
+        final double xDiff = Math.abs(rx - cubeX);
+        final double yDiff = Math.abs(ry - cubeY);
+        final double zDiff = Math.abs(rz - cubeZ);
 
-        if (x_diff > y_diff && x_diff > z_diff) {
+        if (xDiff > yDiff && xDiff > zDiff) {
             rx = -ry - rz;
-        } else if (y_diff > z_diff) {
+        } else if (yDiff > zDiff) {
             ry = -rx - rz;
         } else {
             rz = -rx - ry;
@@ -230,7 +232,7 @@ public class GridPosition implements Cloneable, Serializable {
                 return GridPosition.getDirectionFromNumber(i);
             }
         }
-        throw new RuntimeException();
+        throw new InvalidParameterException("unknown position: " + otherPosition);
     }
 
     /**
@@ -240,17 +242,17 @@ public class GridPosition implements Cloneable, Serializable {
      * @param destination destination grid position
      * @return an array positions
      */
-    public ArrayList<GridPosition> line(final GridPosition destination) {
+    public List<GridPosition> line(final GridPosition destination) {
         final ArrayList<GridPosition> result = new ArrayList<>();
         GridPosition p;
-        double q_calculated;
-        double r_calculated;
+        double qCalculated;
+        double rCalculated;
         final double n = GridPosition.getDistance(this, destination);
         for (int i = 0; i < n; i++) {
             final double j = i;
-            q_calculated = q * (1.0 - j / n) + destination.q * j / n;
-            r_calculated = r * (1.0 - j / n) + destination.r * j / n;
-            p = GridPosition.hexRound(q_calculated, r_calculated);
+            qCalculated = q * (1.0 - j / n) + destination.q * j / n;
+            rCalculated = r * (1.0 - j / n) + destination.r * j / n;
+            p = GridPosition.hexRound(qCalculated, rCalculated);
             result.add(p);
 
         }

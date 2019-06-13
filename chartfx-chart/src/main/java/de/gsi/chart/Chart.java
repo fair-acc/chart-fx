@@ -29,7 +29,7 @@ import de.gsi.chart.ui.css.StylishBooleanProperty;
 import de.gsi.chart.ui.css.StylishObjectProperty;
 import de.gsi.chart.ui.geometry.Corner;
 import de.gsi.chart.ui.geometry.Side;
-import de.gsi.chart.utils.FXUtilities;
+import de.gsi.chart.utils.FXUtils;
 import de.gsi.dataset.utils.AssertUtils;
 import de.gsi.dataset.utils.ProcessingProfiler;
 import javafx.animation.Animation;
@@ -1061,7 +1061,7 @@ public abstract class Chart extends SidesPane implements Observable {
         plugins.forEach(ChartPlugin::layoutChildren);
     }
 
-    protected final EventListener dataSetDataListener = obs -> FXUtilities.runFX(this::dataSetInvalidated);
+    protected final EventListener dataSetDataListener = obs -> FXUtils.runFX(this::dataSetInvalidated);
 
     protected void dataSetInvalidated() {
         // DataSet has notified and invalidate
