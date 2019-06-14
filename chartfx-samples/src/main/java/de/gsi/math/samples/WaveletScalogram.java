@@ -50,10 +50,9 @@ public class WaveletScalogram extends AbstractDemoApplication {
             // -> injection synchrotron oscillations are visible
             yValues = readDemoData(1);
         } else {
-            // synthetic data           
+            // synthetic data
             yValues = loadSyntheticData();
         }
-               
 
         // the wavelet scalogram computation
         final ContinuousWavelet wtrafo = new ContinuousWavelet();
@@ -67,7 +66,7 @@ public class WaveletScalogram extends AbstractDemoApplication {
         }.start();
 
         do {
-        	sleep(1000);
+            sleep(1000);
             int status = wtrafo.getStatus();
             if (status > 10) {
                 System.out.println(status + " % of computation done");
@@ -113,18 +112,18 @@ public class WaveletScalogram extends AbstractDemoApplication {
 
         return fdataset;
     }
-    
+
     private void sleep(int millis) {
-		try {
-			Thread.sleep(millis);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-			Thread.currentThread().interrupt();
-		}
-	}
-    
+        try {
+            Thread.sleep(millis);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+            Thread.currentThread().interrupt();
+        }
+    }
+
     private double[] loadSyntheticData() {
-    	// synthetic data        
+        // synthetic data
         final double[] yModel = new double[MAX_POINTS];
 
         Random rnd = new Random();
@@ -184,33 +183,33 @@ public class WaveletScalogram extends AbstractDemoApplication {
         return new VBox(chart1, chart2);
     }
 
-	private double[] readDemoData(int index) {
-		String fileName = index <= 1 ? "./rawDataCPS2.dat" : "./rawDataLHCInj.dat";
-		try {			
-			try (BufferedReader reader = new BufferedReader(
-					new InputStreamReader(EMDSample.class.getResourceAsStream(fileName)))) {
+    private double[] readDemoData(int index) {
+        String fileName = index <= 1 ? "./rawDataCPS2.dat" : "./rawDataLHCInj.dat";
+        try {
+            try (BufferedReader reader = new BufferedReader(
+                    new InputStreamReader(EMDSample.class.getResourceAsStream(fileName)))) {
 
-				String line = reader.readLine();
-				int nDim = line == null ? 0 : Integer.parseInt(line);
-				double[] ret = new double[nDim];
-				for (int i = 0; i < nDim; i++) {
-					line = reader.readLine();
-					if (line == null) {
-						break;
-					}
-					String[] x = line.split("\t");
-					ret[i] = Double.parseDouble(x[1]);
-				}
+                String line = reader.readLine();
+                int nDim = line == null ? 0 : Integer.parseInt(line);
+                double[] ret = new double[nDim];
+                for (int i = 0; i < nDim; i++) {
+                    line = reader.readLine();
+                    if (line == null) {
+                        break;
+                    }
+                    String[] x = line.split("\t");
+                    ret[i] = Double.parseDouble(x[1]);
+                }
 
-				return ret;
-			}
+                return ret;
+            }
 
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
-		return new double[1000];
-	}
+        return new double[1000];
+    }
 
     public static void main(final String[] args) {
         Application.launch(args);

@@ -23,7 +23,7 @@ public abstract class AbstractSingleValueIndicator extends AbstractValueIndicato
      * The default distance between the data point coordinates and mouse cursor
      * that triggers shifting the line.
      */
-	protected static final int DEFAULT_PICKING_DISTANCE = 30;
+    protected static final int DEFAULT_PICKING_DISTANCE = 30;
     protected static final double MIDDLE_POSITION = 0.5;
     protected static final String STYLE_CLASS_LABEL = "value-indicator-label";
     protected static final String STYLE_CLASS_LINE = "value-indicator-line";
