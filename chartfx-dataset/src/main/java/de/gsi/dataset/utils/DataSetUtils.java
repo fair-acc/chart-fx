@@ -13,8 +13,6 @@ import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -24,6 +22,7 @@ import java.io.PushbackInputStream;
 import java.nio.ByteBuffer;
 import java.nio.DoubleBuffer;
 import java.nio.FloatBuffer;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.InvalidParameterException;
 import java.text.DateFormat;
@@ -65,7 +64,7 @@ public class DataSetUtils extends DataSetUtilsHelper {
     private static final int SWITCH_TO_BINARY_KEY = 0xFE;
     private static final Logger LOGGER = LoggerFactory.getLogger(DataSetUtils.class);
     private static final String DEFAULT_TIME_FORMAT = "yyyyMMdd_HHmmss";
-    public static boolean USE_FLOAT32_BINARY_STANDARD = true;
+    public static boolean useFloat32BinaryStandard = true;
 
     private DataSetUtils() {
         // static class nothing to be initialised
@@ -274,12 +273,12 @@ public class DataSetUtils extends DataSetUtilsHelper {
     /**
      * Get ISO date from milliseconds since Jan 01, 1970
      *
-     * @param time_ms time to be converted
+     * @param timeMillis time to be converted
      * @param format time format string
      * @return ISO formatted UTC datetime string
      */
-    public static String getISODate(final long time_ms, final String format) {
-        final long time = TimeUnit.MILLISECONDS.toMillis(time_ms);
+    public static String getISODate(final long timeMillis, final String format) {
+        final long time = TimeUnit.MILLISECONDS.toMillis(timeMillis);
         final TimeZone tz = TimeZone.getTimeZone("UTC");
         final DateFormat df = new SimpleDateFormat(format);
         df.setTimeZone(tz);
@@ -405,11 +404,11 @@ public class DataSetUtils extends DataSetUtilsHelper {
             throws IOException {
         switch (compression) {
         case NONE:
-            return new FileOutputStream(file);
-        case GZIP:
-            return new GZIPOutputStream(new FileOutputStream(file));
+            return Files.newOutputStream(file.toPath());
+        case GZIP:        	
+            return new GZIPOutputStream(Files.newOutputStream(file.toPath()));
         case ZIP:
-            final ZipOutputStream zipOStream = new ZipOutputStream(new FileOutputStream(file));
+            final ZipOutputStream zipOStream = new ZipOutputStream(Files.newOutputStream(file.toPath()));
             final String filename = file.getName();
             final String zipentryname = filename.toLowerCase().endsWith(".zip")
                     ? filename.substring(0, filename.length() - 4) : filename;
@@ -435,17 +434,17 @@ public class DataSetUtils extends DataSetUtilsHelper {
         InputStream istream;
         switch (compression) {
         case ZIP:
-            final ZipInputStream zipIStream = new ZipInputStream(new FileInputStream(file));
+            final ZipInputStream zipIStream = new ZipInputStream(Files.newInputStream(file.toPath()));
             if (zipIStream.getNextEntry() == null) {
                 throw new ZipException("Corrupt zip archive has no entries");
             }
             istream = zipIStream;
             break;
         case GZIP:
-            istream = new GZIPInputStream(new FileInputStream(file));
+            istream = new GZIPInputStream(Files.newInputStream(file.toPath()));
             break;
         case NONE:
-            istream = new FileInputStream(file);
+            istream = Files.newInputStream(file.toPath());
             break;
         default:
             throw new IOException("Unimplemented Compression");
@@ -714,7 +713,9 @@ public class DataSetUtils extends DataSetUtilsHelper {
             final String longFileName = path.toFile() + "/" + realFileName;
             final File file = new File(longFileName);
             if (file.getParentFile().mkdirs()) {
-                LOGGER.info("needed to create directory for file: " + longFileName);
+            	if (LOGGER.isInfoEnabled()) {
+            		LOGGER.info("needed to create directory for file: " + longFileName);
+            	}
             }
 
             // create OutputStream
@@ -722,20 +723,26 @@ public class DataSetUtils extends DataSetUtilsHelper {
             //TODO: cache ByteArrayOutputStream
             try (OutputStream outputfile = openDatasetFileOutput(file, compression);) {
 
-                writeDataSetToByteArray(dataSet, byteOutput, binary, USE_FLOAT32_BINARY_STANDARD );
+                writeDataSetToByteArray(dataSet, byteOutput, binary, useFloat32BinaryStandard );
 
                 byteOutput.writeTo(outputfile);
 
                 // automatically closing writer connection
             } catch (final IOException e) {
-                LOGGER.error("could not write to file: '" + fileName + "'", e);
+            	if (LOGGER.isErrorEnabled()) {
+            		LOGGER.error("could not write to file: '" + fileName + "'", e);
+            	}
             }
 
-            LOGGER.debug("write data set '" + dataSet.getName() + "' to " + longFileName);
+            if (LOGGER.isDebugEnabled()) {
+            	LOGGER.debug("write data set '" + dataSet.getName() + "' to " + longFileName);
+            }
 
             return longFileName;
         } catch (final Exception e) {
-            LOGGER.error("could not write to file: '" + fileName + "'", e);
+        	if (LOGGER.isErrorEnabled()) {
+        		LOGGER.error("could not write to file: '" + fileName + "'", e);
+        	}
             return null;
         }
     }
@@ -880,14 +887,18 @@ public class DataSetUtils extends DataSetUtilsHelper {
                 buffer.append("#mean : ").append(mean(dataSet.getYValues())).append('\n');
                 buffer.append("#rms : ").append(rootMeanSquare(dataSet.getYValues())).append('\n');
             } catch (final Exception e) {
-                LOGGER.error("writeHeaderDataToFile - compute Math error for dataSet = '" + dataSet.getName() + "'", e);
+            	if (LOGGER.isErrorEnabled()) {
+            		LOGGER.error("writeHeaderDataToFile - compute Math error for dataSet = '" + dataSet.getName() + "'", e);
+            	}
             }
 
             outputStream.write(buffer.toString().getBytes());
             
             release("headerDataCacheBuilder", buffer);
         } catch (final Exception e) {
-            LOGGER.error("writeHeaderDataToFile - error for dataSet = '" + dataSet.getName() + "'", e);
+        	if (LOGGER.isErrorEnabled()) {
+        		LOGGER.error("writeHeaderDataToFile - error for dataSet = '" + dataSet.getName() + "'", e);
+        	}
         }
     }
 
@@ -920,7 +931,9 @@ public class DataSetUtils extends DataSetUtilsHelper {
             
             release("metaDataCacheBuilder", buffer);
         } catch (final Exception e) {
-            LOGGER.error("writeMetaDataToFile - error for dataSet = '" + dataSet.getName() + "'", e);
+        	if (LOGGER.isErrorEnabled()) {
+        		LOGGER.error("writeMetaDataToFile - error for dataSet = '" + dataSet.getName() + "'", e);
+        	}
         }
     }
 
@@ -951,7 +964,9 @@ public class DataSetUtils extends DataSetUtilsHelper {
 
             release("numericDataCacheBuilder", buffer);
         } catch (final Exception e) {
-            LOGGER.error("writeNumericDataToFile - error for dataSet = '" + dataSet.getName() + "'", e);
+        	if (LOGGER.isErrorEnabled()) {
+        		LOGGER.error("writeNumericDataToFile - error for dataSet = '" + dataSet.getName() + "'", e);
+        	}
         }
     }
 
@@ -1020,10 +1035,14 @@ public class DataSetUtils extends DataSetUtilsHelper {
             dataSet = readDataSetFromStream(inputFile);
 
             } catch (final IOException e) {
-                LOGGER.error("could not open/parse file: '" + fileName + "'", e);
+            	if (LOGGER.isErrorEnabled()) {
+            		LOGGER.error("could not open/parse file: '" + fileName + "'", e);
+            	}
             }
         } catch (final Exception e) {
-            LOGGER.error("could not open/parse file: '" + fileName + "'", e);
+        	if (LOGGER.isErrorEnabled()) {
+        		LOGGER.error("could not open/parse file: '" + fileName + "'", e);
+        	}
             return dataSet;
         }
         return dataSet;
@@ -1056,10 +1075,14 @@ public class DataSetUtils extends DataSetUtilsHelper {
             dataSet = readDataSetFromStream(inputFile);
 
             } catch (final IOException e) {
-                LOGGER.error("could not open/parse byte array size = " + byteArray.length, e);
+            	if (LOGGER.isErrorEnabled()) {
+            		LOGGER.error("could not open/parse byte array size = " + byteArray.length, e);
+            	}
             }
         } catch (final Exception e) {
-            LOGGER.error("could not open/parse byte array size = " + byteArray.length, e);
+        	if (LOGGER.isErrorEnabled()) {
+        		LOGGER.error("could not open/parse byte array size = " + byteArray.length, e);
+        	}
             return dataSet;
         }
         return dataSet;
@@ -1181,7 +1204,9 @@ public class DataSetUtils extends DataSetUtilsHelper {
             final int[] valindex = { -1, -1, -1, -1 };
             for (int i = 0; i < toRead.size(); i++) {
                 final DataEntry dataentry = toRead.get(i);
-                LOGGER.debug("Read data: " + dataentry.name);
+                if (LOGGER.isDebugEnabled()) {
+                	LOGGER.debug("Read data: " + dataentry.name);
+                }
                 boolean isFloat32 = dataentry.type.toLowerCase().contains("float32");
 
                 final ByteBuffer byteData = isFloat32 ? ByteBuffer.allocate(dataentry.nsamples * Float.BYTES)
@@ -1214,7 +1239,9 @@ public class DataSetUtils extends DataSetUtilsHelper {
                     valindex[3] = i;
                     break;
                 default:
-                    LOGGER.debug("Got unused variable " + dataentry.name + " of type " + dataentry.type);
+                	if (LOGGER.isDebugEnabled()) {
+                		LOGGER.debug("Got unused variable " + dataentry.name + " of type " + dataentry.type);
+                	}
                 }
 
             }
@@ -1248,10 +1275,10 @@ public class DataSetUtils extends DataSetUtilsHelper {
                 final double eyp = parse.length < 5 ? 0.0 : Double.parseDouble(parse[4]);
                 dataSet.add(x, y, eyn, eyp);
             }
-        } catch (
-
-        final Exception e) {
-            LOGGER.error("readNumericDataFromFile could not parse numeric data for: '" + dataSet.getName() + "'", e);
+        } catch (final Exception e) {
+        	if (LOGGER.isErrorEnabled()) {
+        		LOGGER.error("readNumericDataFromFile could not parse numeric data for: '" + dataSet.getName() + "'", e);
+        	}
         }
     }
 

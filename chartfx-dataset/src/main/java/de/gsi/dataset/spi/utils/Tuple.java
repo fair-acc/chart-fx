@@ -6,8 +6,8 @@ package de.gsi.dataset.spi.utils;
  * @param <Y> the y coordinate (usually a Number but may be also a String etc.)
  */
 public class Tuple<X, Y> {
-    protected X x;
-    protected Y y;
+    protected transient X x;
+    protected transient Y y;
 
     /**
      * 

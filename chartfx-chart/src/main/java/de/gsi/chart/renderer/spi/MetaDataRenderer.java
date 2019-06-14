@@ -56,7 +56,7 @@ public class MetaDataRenderer extends AbstractMetaDataRendererParameter<MetaData
         chart.getCanvas().widthProperty().addListener(canvasChange);
         chart.getCanvas().heightProperty().addListener(canvasChange);
 
-        setInfoBoxSide(Side.TOP);
+        setInfoBoxSide(Side.TOP); // NOPMD by rstein on 13/06/19 14:25
 
         // SvgImageLoaderFactory.install();
         // // SvgImageLoaderFactory.install(new PrimitiveDimensionProvider());

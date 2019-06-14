@@ -162,7 +162,7 @@ public class IndexedTreeSet<E> extends java.util.AbstractSet<E>
      */
     public IndexedTreeSet(Collection<? extends E> c) {
         this();
-        addAll(c);
+        addAll(c);  // NOPMD by rstein on 13/06/19 14:50
     }
 
     /**
@@ -176,7 +176,7 @@ public class IndexedTreeSet<E> extends java.util.AbstractSet<E>
      */
     public IndexedTreeSet(SortedSet<E> s) {
         this(s.comparator());
-        addAll(s);
+        addAll(s); // NOPMD by rstein on 13/06/19 14:50
     }
 
     /**
@@ -621,7 +621,7 @@ public class IndexedTreeSet<E> extends java.util.AbstractSet<E>
             // e.right.key.toString();
             // System.out.println(e.key + ":" + l + ":" + r + ":" + e.weight);
             if (e.weight != e.sumup()) {
-                throw new Exception("Weight is incorrect:" + e.weight + "!=" + e.sumup() + " for " + e.key);
+                throw new IllegalStateException("Weight is incorrect:" + e.weight + "!=" + e.sumup() + " for " + e.key);
             }
             e = IndexedTreeMap.successor(e);
         }

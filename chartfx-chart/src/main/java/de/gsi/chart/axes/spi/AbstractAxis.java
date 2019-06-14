@@ -420,7 +420,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
      * function to be executed prior to drawing axis can be used to execute
      * user-specific code (e.g. modifying tick-marks) prior to drawing
      */
-    protected void drawAxisPre() {
+    protected void drawAxisPre() { // NOPMD by rstein function can but does not have to be overwritten
         // to be overwritten in derived classes
     }
 
@@ -428,7 +428,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
      * function to be executed after the axis has been drawn can be used to
      * execute user-specific code (e.g. update of other classes/properties)
      */
-    protected void drawAxisPost() {
+    protected void drawAxisPost() { // NOPMD by rstein function can but does not have to be overwritten
         // to be overwritten in derived classes
     }
 
@@ -436,7 +436,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
      * to be overwritten by derived class that want to cache variables for
      * efficiency reasons
      */
-    protected void updateCachedVariables() {
+    protected void updateCachedVariables() { // NOPMD by rstein function can but does not have to be overwritten
         // called once new axis parameters have been established
     }
 
@@ -788,7 +788,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
      * Called during layout if the tickmarks have been updated, allowing
      * subclasses to do anything they need to in reaction.
      */
-    protected void tickMarksUpdated() {
+    protected void tickMarksUpdated() { // NOPMD by rstein function can but does not have to be overwritten
     }
 
     /**

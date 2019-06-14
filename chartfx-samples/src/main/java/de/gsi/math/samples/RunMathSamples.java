@@ -4,18 +4,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import de.gsi.chart.utils.PeriodicScreenCapture;
-import de.gsi.math.samples.DataSetAverageSample;
-import de.gsi.math.samples.DataSetFilterSample;
-import de.gsi.math.samples.DataSetIntegrateDifferentiateSample;
-import de.gsi.math.samples.DataSetIntegrationWithLimitsSample;
-import de.gsi.math.samples.DataSetSpectrumSample;
-import de.gsi.math.samples.EMDSample;
-import de.gsi.math.samples.FourierSample;
-import de.gsi.math.samples.FrequencyFilterSample;
-import de.gsi.math.samples.GaussianFitSample;
-import de.gsi.math.samples.IIRFilterSample;
-import de.gsi.math.samples.WaveletDenoising;
-import de.gsi.math.samples.WaveletScalogram;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.geometry.Pos;

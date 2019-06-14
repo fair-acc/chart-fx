@@ -24,178 +24,183 @@ import javafx.scene.layout.VBox;
  * @author rstein TODO: some fixes in EMD necessary
  */
 public class EMDSample extends AbstractDemoApplication {
+	private static final int MAX_POINTS = 1024;
+	private static final boolean LOAD_EXAMPLE_DATA = true;
+	private DataSet3D dataset;
+	private DataSet[] fmodeDataSets = new DataSet[10];
+	private double[][] fmodeData = new double[10][];
+	private double[] yValues;
 
-    private final int MAX_POINTS = 1024;
-    public static boolean LOAD_EXAMPLE_DATA = true;
-    private DataSet3D dataset;
-    private DataSet fmodeDataSets[] = new DataSet[10];
-    private double[][] fmodeData = new double[10][];
-    private double[] yValues;
-    private double[] yModel;
+	public void initData() {
+		if (LOAD_EXAMPLE_DATA) {
+			// show-room data
+			// case 1: chirped CPS tune acquisition, the horizontal, cross-term
+			// tune,
+			// and a reference tone above 0.45 are visible
+			// case 2: LHC B2 horizontal injection oscillations,
+			// recommendation to choose nu == 30
+			// -> injection synchrotron oscillations are visible
+			yValues =readDemoData(1);
+		} else {
+			yValues = loadSyntheticData();
+		}
+		createModeDataSet();
+	}
 
-    public void initData() {
+	private double[] loadSyntheticData() {
+		// synthetic data
+		final double[] yModel = new double[MAX_POINTS];
 
-        if (LOAD_EXAMPLE_DATA) {
-            // show-room data
-            // case 1: chirped CPS tune acquisition, the horizontal, cross-term
-            // tune,
-            // and a reference tone above 0.45 are visible
-            // case 2: LHC B2 horizontal injection oscillations,
-            // recommendation to choose nu == 30
-            // -> injection synchrotron oscillations are visible
-            yModel = readDemoData(1);
-            yValues = Arrays.copyOf(yModel, yModel.length);
-        } else {
-            // synthetic data
-            yValues = new double[MAX_POINTS];
-            yModel = new double[MAX_POINTS];
+		for (int i = 0; i < yValues.length; i++) {
+			final double x = i;
+			double offset = 0;
+			double error = 0.1 * RANDOM.nextGaussian();
 
-            for (int i = 0; i < yValues.length; i++) {
-                double x = i;
-                double offset = 0;
-                double error = 0.1 * random.nextGaussian();
+			// linear chirp with discontinuity
+			offset = (i > 500) ? -20 : 0;
+			yModel[i] = (i > 100 && i < 700) ? 0.7 * Math.sin(TMath.TwoPi() * 2e-4 * x * (x + offset)) : 0;
 
-                // linear chirp with discontinuity
-                offset = (i > 500) ? -20 : 0;
-                yModel[i] = (i > 100 && i < 700) ? 0.7 * Math.sin(TMath.TwoPi() * 2e-4 * x * (x + offset)) : 0;
+			// single tone at 0.25
+			yModel[i] += (i > 50 && i < 500) ? 1.0 * Math.sin(TMath.TwoPi() * 0.25 * x) : 0;
+			// yModel[i] = Math.sin(TMath.TwoPi() * 0.3* x);
 
-                // single tone at 0.25
-                yModel[i] += (i > 50 && i < 500) ? 1.0 * Math.sin(TMath.TwoPi() * 0.25 * x) : 0;
-                // yModel[i] = Math.sin(TMath.TwoPi() * 0.3* x);
+			// modulation around 0.4
+			double mod = Math.cos(TMath.TwoPi() * 0.01 * x);
+			if (i < 470) {
+				mod = 0.0;
+			}
+			yModel[i] += (i > 300 && i < 900) ? 1.0 * Math.sin(TMath.TwoPi() * (0.4 - 5e-4 * mod) * x) : 0;
 
-                // modulation around 0.4
-                double mod = Math.cos(TMath.TwoPi() * 0.01 * x);
-                if (i < 470) {
-                    mod = 0.0;
-                }
-                yModel[i] += (i > 300 && i < 900) ? 1.0 * Math.sin(TMath.TwoPi() * (0.4 - 5e-4 * mod) * x) : 0;
+			// quadratic chirp starting at 0.1
+			yModel[i] += 0.5 * Math.sin(TMath.TwoPi() * ((0.1 + 5e-8 * x * x) * x));
 
-                // quadratic chirp starting at 0.1
-                yModel[i] += 0.5 * Math.sin(TMath.TwoPi() * ((0.1 + 5e-8 * x * x) * x));
+			yModel[i] = yModel[i] + error;
+		}
+		return Arrays.copyOf(yModel, yModel.length);
+	}
 
-                yValues[i] = yModel[i] + error;
-            }
+	private void sleep(int millis) {
+		try {
+			Thread.sleep(millis);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+			Thread.currentThread().interrupt();
+		}
+	}
 
-        }
-        createModeDataSet();
-    }
+	private DataSet3D createDataSet() {
+		final int nQuantx = 1024;
+		final int nQuanty = 1024;
 
-    private DataSet3D createDataSet() {
-        final int nQuantx = 1024;
-        final int nQuanty = 1024;
+		// the empirical-mode-decomposition (EEMD) computation
+		final EEMD trafoHHT = new EEMD();
 
-        // the empirical-mode-decomposition (EEMD) computation
-        final EEMD HHTtrafo = new EEMD();
+		new Thread() {
+			@Override
+			public void run() {
+				dataset = trafoHHT.getScalogram(yValues, nQuantx, nQuanty);
+			}
+		}.start();
 
-        new Thread() {
+		try {
+			do {
+				sleep(100);
+				int status = trafoHHT.getStatus();
+				if (status > 10) {
+					System.out.println(status + " % of computation done");
+				}
+			} while (trafoHHT.isBusy());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 
-            @Override
-            public void run() {
-                dataset = HHTtrafo.getScalogram(yValues, nQuantx, nQuanty);
-            }
-        }.start();
+		return dataset;
+	}
 
-        try {
-            do {
-                try {
-                    Thread.sleep(100);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                int status = HHTtrafo.getStatus();
-                if (status > 10) {
-                    System.out.println(status + " % of computation done");
-                }
-            } while (HHTtrafo.isBusy());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+	private void createModeDataSet() {
+		final EEMD trafoHHT = new EEMD();
+		MatrixD emd = trafoHHT.eemd(yValues, 0, 1.0);
 
-        return dataset;
-    }
+		double[] time = new double[yValues.length];
+		for (int i = 0; i < time.length; i++) {
+			time[i] = i;
+		}
 
-    private void createModeDataSet() {
-        final EEMD HHTtrafo = new EEMD();
-        MatrixD emd = HHTtrafo.eemd(yValues, 0, 1.0);
+		for (int nmode = 0; nmode < (emd.getColumnDimension() - 1); nmode++) {
+			String name = (nmode == 0) ? "raw" : ("mode" + nmode);
+			if (nmode < fmodeDataSets.length) {
+				fmodeData[nmode] = new double[time.length];
+				for (int j = 0; j < fmodeData[nmode].length; j++) {
+					fmodeData[nmode][j] = emd.get(j, nmode) - 5 * nmode;
+				}
+				System.out.printf("%s mean = %f\n", name,
+						(TMath.Mean(fmodeData[nmode]) + 2 * nmode) / TMath.PeakToPeak(fmodeData[nmode]));
+				fmodeDataSets[nmode] = new DefaultErrorDataSet(name, time, fmodeData[nmode]);
+			}
+		}
+	}
 
-        double[] time = new double[yValues.length];
-        for (int i = 0; i < time.length; i++) {
-            time[i] = i;
-        }
+	@Override
+	public Node getContent() {
+		initData();
 
-        for (int nmode = 0; nmode < (emd.getColumnDimension() - 1); nmode++) {
-            String name = (nmode == 0) ? "raw" : ("mode" + nmode);
-            if (nmode < fmodeDataSets.length) {
-                fmodeData[nmode] = new double[time.length];
-                for (int j = 0; j < fmodeData[nmode].length; j++) {
-                    fmodeData[nmode][j] = emd.get(j, nmode) - 5 * nmode;
-                }
-                System.out.printf("%s mean = %f\n", name,
-                        (TMath.Mean(fmodeData[nmode]) + 2 * nmode) / TMath.PeakToPeak(fmodeData[nmode]));
-                fmodeDataSets[nmode] = new DefaultErrorDataSet(name, time, fmodeData[nmode]);
-            }
-        }
-    }
+		final DemoChart chart1 = new DemoChart();
+		chart1.getXAxis().setLabel("time");
+		chart1.getXAxis().setUnit("turns");
+		chart1.getYAxis().setLabel("frequency");
+		chart1.getYAxis().setUnit("fs");
+		ContourDataSetRenderer contourChartRenderer = new ContourDataSetRenderer();
+		chart1.getRenderers().set(0, contourChartRenderer);
+		contourChartRenderer.setColorGradient(ColorGradient.RAINBOW);
+		// contourChartRenderer.setColorGradient(ColorGradient.JET);
+		// contourChartRenderer.setColorGradient(ColorGradient.TOPO_EXT);
 
-    @Override
-    public Node getContent() {
-        initData();
+		contourChartRenderer.getDatasets().add(createDataSet());
 
-        DemoChart chart1 = new DemoChart();
-        chart1.getXAxis().setLabel("time");
-        chart1.getXAxis().setUnit("turns");
-        chart1.getYAxis().setLabel("frequency");
-        chart1.getYAxis().setUnit("fs");
-        ContourDataSetRenderer contourChartRenderer = new ContourDataSetRenderer();
-        chart1.getRenderers().set(0, contourChartRenderer);
-        contourChartRenderer.setColorGradient(ColorGradient.RAINBOW);
-        // contourChartRenderer.setColorGradient(ColorGradient.JET);
-        // contourChartRenderer.setColorGradient(ColorGradient.TOPO_EXT);
+		final DemoChart chart2 = new DemoChart();
+		chart2.getXAxis().setLabel("time");
+		chart2.getXAxis().setUnit("turns");
+		chart2.getYAxis().setLabel("amplitude");
+		chart2.getYAxis().setUnit("[a.u.]");
+		for (int i = 0; i < fmodeDataSets.length; i++) {
+			if (fmodeDataSets[i] != null) {
+				chart2.getDatasets().add(fmodeDataSets[i]);
+			}
+		}
 
-        contourChartRenderer.getDatasets().add(createDataSet());
+		return new VBox(chart1, chart2);
+	}
 
-        DemoChart chart2 = new DemoChart();
-        chart2.getXAxis().setLabel("time");
-        chart2.getXAxis().setUnit("turns");
-        chart2.getYAxis().setLabel("amplitude");
-        chart2.getYAxis().setUnit("[a.u.]");
-        for (int i = 0; i < fmodeDataSets.length; i++) {
-            if (fmodeDataSets[i] != null) {
-                chart2.getDatasets().add(fmodeDataSets[i]);
-            }
-        }
+	private double[] readDemoData(int index) {
+		String fileName = index <= 1 ? "./rawDataCPS2.dat" : "./rawDataLHCInj.dat";
+		try {			
+			try (BufferedReader reader = new BufferedReader(
+					new InputStreamReader(EMDSample.class.getResourceAsStream(fileName)))) {
 
-        return new VBox(chart1, chart2);
-    }
+				String line = reader.readLine();
+				int nDim = line == null ? 0 : Integer.parseInt(line);
+				double[] ret = new double[nDim];
+				for (int i = 0; i < nDim; i++) {
+					line = reader.readLine();
+					if (line == null) {
+						break;
+					}
+					String[] x = line.split("\t");
+					ret[i] = Double.parseDouble(x[1]);
+				}
 
-    private double[] readDemoData(int index) {
-        try {
-            BufferedReader reader;
+				return ret;
+			}
 
-            if (index <= 1) {
-                reader = new BufferedReader(
-                        new InputStreamReader(EMDSample.class.getResourceAsStream("./rawDataCPS2.dat")));
-            } else {
-                reader = new BufferedReader(
-                        new InputStreamReader(EMDSample.class.getResourceAsStream("./rawDataLHCInj.dat")));
-            }
-            int nDim = Integer.parseInt(reader.readLine());
-            double[] ret = new double[nDim];
-            for (int i = 0; i < nDim; i++) {
-                String[] x = reader.readLine().split("\t");
-                ret[i] = Double.parseDouble(x[1]);
-            }
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 
-            return ret;
+		return new double[1000];
+	}
 
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    public static void main(final String[] args) {
-        Application.launch(args);
-    }
+	public static void main(final String[] args) {
+		Application.launch(args);
+	}
 
 }

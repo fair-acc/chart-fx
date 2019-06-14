@@ -4,7 +4,7 @@ import de.codecentric.centerdevice.javafxsvg.SvgImageLoaderFactory;
 import de.gsi.chart.XYChart;
 import javafx.scene.image.Image;
 
-public final class ChartIconFactory {
+public final class ChartIconFactory { // NOPMD
 
     private static final String ICON_INFO = XYChart.class.getResource("icons/info_icon.svg").toString();
     private static final String ICON_WARN = XYChart.class.getResource("icons/warn_icon.svg").toString();

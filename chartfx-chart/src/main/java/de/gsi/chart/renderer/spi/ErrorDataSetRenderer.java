@@ -47,7 +47,7 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
     private static final int MAX_THREADS = Math.max(4, Runtime.getRuntime().availableProcessors());
     // private static final ExecutorService executorService =
     // Executors.newCachedThreadPool();
-    private static final ExecutorService executorService = Executors.newFixedThreadPool(2 * MAX_THREADS);
+    private static final ExecutorService EXECUTOR_SERVICE = Executors.newFixedThreadPool(2 * MAX_THREADS);
 
     protected Cache cache = new Cache();
     private Marker marker; // TODO: generate marker
@@ -998,7 +998,7 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
                 }
 
                 try {
-                    final List<Future<Boolean>> jobs = ErrorDataSetRenderer.executorService.invokeAll(workers);
+                    final List<Future<Boolean>> jobs = ErrorDataSetRenderer.EXECUTOR_SERVICE.invokeAll(workers);
                     for (final Future<Boolean> future : jobs) {
                         final Boolean r = future.get();
                         if (!r) {

@@ -40,7 +40,7 @@ public class LabelledMarkerRenderer extends AbstractDataSetManagement<LabelledMa
 
     public LabelledMarkerRenderer() {
         super();
-        updateCSS();
+        updateCSS(); // NOPMD by rstein on 13/06/19 14:25
         setShowInLegend(false);
     }
 

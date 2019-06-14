@@ -7,7 +7,7 @@ import de.gsi.dataset.DataSet;
  *
  * @author rstein
  */
-public final class SimpleDataSetEstimators {
+public final class SimpleDataSetEstimators { // NOPMD name is as is (ie. no Helper/Utils ending
 
     private SimpleDataSetEstimators() {
         // this is a static class
@@ -138,7 +138,7 @@ public final class SimpleDataSetEstimators {
      * @param length <= data.length elements to be used
      * @return un-biased r.m.s. of vector elements
      */
-    private static synchronized double rootMeanSquare(final double[] data, final int length) {
+    private static double rootMeanSquare(final double[] data, final int length) {
         if (length <= 0) {
             return -1;
         }
@@ -337,12 +337,12 @@ public final class SimpleDataSetEstimators {
      * interpolation using a Gaussian interpolation
      *
      * @param data data array
-     * @param data_length length of data arrays
+     * @param length length of data arrays
      * @param index 0&lt; index &lt; data.length
      * @return location of the to be interpolated peak [bins]
      */
-    public static double interpolateGaussian(final double[] data, final int data_length, final int index) {
-        if (!(index > 0 && index < data_length - 1)) {
+    public static double interpolateGaussian(final double[] data, final int length, final int index) {
+        if (!(index > 0 && index < length - 1)) {
             return index;
         }
         final double left = Math.pow(data[index - 1], 1);
@@ -362,18 +362,18 @@ public final class SimpleDataSetEstimators {
      * compute simple Full-Width-Half-Maximum (no inter-bin interpolation)
      *
      * @param data data array
-     * @param data_length of data array
+     * @param length of data array
      * @param index 0&lt; index &lt; data.length
      * @return FWHM estimate [bins]
      */
-    public static double computeFWHM(final double[] data, final int data_length, final int index) {
-        if (!(index > 0 && index < data_length - 1)) {
+    public static double computeFWHM(final double[] data, final int length, final int index) {
+        if (!(index > 0 && index < length - 1)) {
             return 1.0f;
         }
         final double maxHalf = 0.5 * data[index];
         int lowerLimit;
         int upperLimit;
-        for (upperLimit = index; upperLimit < data_length && data[upperLimit] > maxHalf; upperLimit++) {
+        for (upperLimit = index; upperLimit < length && data[upperLimit] > maxHalf; upperLimit++) {
             // computation done in the abort condition
         }
         for (lowerLimit = index; lowerLimit > 0 && data[lowerLimit] > maxHalf; lowerLimit--) {
@@ -386,18 +386,18 @@ public final class SimpleDataSetEstimators {
      * compute interpolated Full-Width-Half-Maximum
      *
      * @param data data array
-     * @param data_length of data array
+     * @param length of data array
      * @param index 0&lt; index &lt; data.length
      * @return FWHM estimate [bins]
      */
-    public static double computeInterpolatedFWHM(final double[] data, final int data_length, final int index) {
-        if (!(index > 0 && index < data_length - 1)) {
+    public static double computeInterpolatedFWHM(final double[] data, final int length, final int index) {
+        if (!(index > 0 && index < length - 1)) {
             return 1.0f;
         }
         final double maxHalf = 0.5 * data[index];
         int lowerLimit;
         int upperLimit;
-        for (upperLimit = index; upperLimit < data_length && data[upperLimit] > maxHalf; upperLimit++) {
+        for (upperLimit = index; upperLimit < length && data[upperLimit] > maxHalf; upperLimit++) {
             // computation done in the abort condition
         }
         for (lowerLimit = index; lowerLimit > 0 && data[lowerLimit] > maxHalf; lowerLimit--) {

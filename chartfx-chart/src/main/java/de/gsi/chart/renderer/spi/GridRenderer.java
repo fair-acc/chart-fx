@@ -55,7 +55,7 @@ public class GridRenderer extends Pane implements Renderer {
         STYLEABLES = Collections.unmodifiableList(styleables);
     }
 
-    private final double[] DEFAULT_GRID_DASH_PATTERM = { 4.5, 2.5 };
+    private static final double[] DEFAULT_GRID_DASH_PATTERM = { 4.5, 2.5 };
     protected final Chart baseChart;
     protected final BooleanProperty drawGridOnTop = new SimpleStyleableBooleanProperty(StyleableProperties.GRID_ON_TOP,
             this, "drawGridOnTop", true);

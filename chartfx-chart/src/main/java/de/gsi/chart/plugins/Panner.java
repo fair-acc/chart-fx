@@ -37,7 +37,7 @@ public class Panner extends ChartPlugin {
     public static final Predicate<MouseEvent> DEFAULT_MOUSE_FILTER = event ->
     // MouseEvents.isOnlyPrimaryButtonDown(event) &&
     // MouseEvents.isOnlyCtrlModifierDown(event) ||
-    MouseEvents.isOnlyMiddleButtonDown(event);
+    MouseEventsHelper.isOnlyMiddleButtonDown(event);
 
     private Predicate<MouseEvent> mouseFilter = Panner.DEFAULT_MOUSE_FILTER;
     private Point2D previousMouseLocation = null;

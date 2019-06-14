@@ -28,7 +28,7 @@ public class DataSetIntegrationWithLimitsSample extends AbstractDemoApplication 
         GaussianFunction gaussFunction = new GaussianFunction("gauss") {
             @Override
             public double getValue(final double x) {
-                return super.getValue(x) + 0 * 0.005 * random.nextGaussian();
+                return super.getValue(x) + 0 * 0.005 * RANDOM.nextGaussian();
                 // return 1.0;
             }
         };

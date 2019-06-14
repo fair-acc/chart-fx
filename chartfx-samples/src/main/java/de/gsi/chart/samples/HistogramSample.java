@@ -30,7 +30,7 @@ public class HistogramSample extends Application {
     private static final int UPDATE_DELAY = 1000; // [ms]
     private static final int UPDATE_PERIOD = 20; // [ms]
     private static final int N_BINS = 30;
-    final static SplittableRandom rnd = new SplittableRandom(System.currentTimeMillis());
+    final static SplittableRandom RND = new SplittableRandom(System.currentTimeMillis());
     double[] xBins = { 0.0, 0.1, 0.2, 0.3, 1.0, 2.0, 3.0, 4.0, 5.0, 10.0, 15.0, 16.0, 17.0, 18.0, 19.0, 19.7, 19.8,
             19.9, 20.0 };
     private final Histogram dataSet1 = new Histogram("myHistogram1", HistogramSample.N_BINS, 0.0, 20.0);
@@ -115,11 +115,11 @@ public class HistogramSample extends Application {
     }
 
     private void fillDemoData() {
-        double W = 0;
+        double randomData = 0;
         for (int n = 0; n < HistogramSample.N_BINS; n++) {
             final double x = n;
-            W += RandomDataGenerator.random() - 0.5;
-            dataSet1.fill(x, W);
+            randomData += RandomDataGenerator.random() - 0.5;
+            dataSet1.fill(x, randomData);
             dataSet1.addDataLabel(n, "SpecialCategory#" + n);
         }
     }

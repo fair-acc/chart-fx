@@ -12,7 +12,7 @@ import javafx.scene.input.MouseEvent;
  * @author Grzegorz Kruk
  * @author braeun
  */
-public class MouseEvents {
+public class MouseEventsHelper {
 
     public static boolean isOnlyPrimaryButtonDown(final MouseEvent event) {
         return event.getButton() == PRIMARY && !event.isMiddleButtonDown() && !event.isSecondaryButtonDown();

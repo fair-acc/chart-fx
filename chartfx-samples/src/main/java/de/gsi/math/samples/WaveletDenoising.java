@@ -24,21 +24,29 @@ import javafx.scene.layout.VBox;
  * @author rstein
  */
 public class WaveletDenoising extends AbstractDemoApplication {
-
-    private final int MAX_POINTS = 512;
-    public static boolean LOAD_EXAMPLE_DATA = false;
+    private static final int MAX_POINTS = 512;
+    private static final boolean LOAD_EXAMPLE_DATA = false;
     private DataSet fraw;
     private DataSet fdata;
     private DataSet freconstructed;
-    private DataSet fspectraModel, fspectra, fspectraFit;
+    private DataSet fspectraModel;
+    private DataSet fspectra;
+    private DataSet fspectraFit;
 
     private void initData() {
         // third order polynomial function
         RandomWalkFunction func = new RandomWalkFunction("rand1", 0.1);
 
-        double[] xValues, yValues, yModel;
+        double[] xValues;
+        double[] yValues;
+        double[] yModel;
 
-        if (!LOAD_EXAMPLE_DATA) {
+        if (LOAD_EXAMPLE_DATA) {
+            double[][] data = readDemoData();
+            xValues = data[0];
+            yValues = data[1];
+            yModel = Arrays.copyOf(yValues, yValues.length);
+        } else {
             xValues = new double[MAX_POINTS];
             yValues = new double[MAX_POINTS];
             yModel = new double[MAX_POINTS];
@@ -56,19 +64,12 @@ public class WaveletDenoising extends AbstractDemoApplication {
                 yModel[i] = Math.sin(TMathConstants.TwoPi() * 3e-4 * x * (x + offset));
                 yModel[i] = Math.sin(TMathConstants.TwoPi() * 0.05 * x);
 
-                if (true)
-                    if (i < 100 || i > 400) {
-                        yModel[i] = 0;
-                    }
+                if (i < 100 || i > 400) {
+                    yModel[i] = 0;
+                }
 
                 yValues[i] = yModel[i] + 0 * error;
             }
-
-        } else {
-            double[][] data = readDemoData();
-            xValues = data[0];
-            yValues = data[1];
-            yModel = Arrays.copyOf(yValues, yValues.length);
         }
 
         CDFWavelet wvTrafo1 = new CDFWavelet();
@@ -95,9 +96,9 @@ public class WaveletDenoising extends AbstractDemoApplication {
             reconAbs[i] = Math.abs(recon[i]);
         }
 
-        //        double max = TMath.Maximum(reconAbs);
-        //        double min = TMath.Minimum(reconAbs);
-        //        double median = TMath.Median(reconAbs);
+        // double max = TMath.Maximum(reconAbs);
+        // double min = TMath.Minimum(reconAbs);
+        // double median = TMath.Median(reconAbs);
 
         // Percival and Walden, "Wavelet Methods for Time Series Analysis",
         // Cambridge University Press, 2006, Section 10.5
@@ -108,40 +109,40 @@ public class WaveletDenoising extends AbstractDemoApplication {
         // classic implementation
         // double lambda = median / 0.6745 * Math.sqrt(Math.log(recon.length));
         // double norm = 1.0 / (1.0 - lambda);
-        //            for (int i = 0; i < xValues.length; i++) {
-        //                double val = recon[i];
+        // for (int i = 0; i < xValues.length; i++) {
+        // double val = recon[i];
         //
-        //                // hard threshold
-        //                if (true)
-        //                    if (Math.abs(val) < lambda) {
-        //                        recon[i] = 0.0;
-        //                    }
+        // // hard threshold
+        // if (true)
+        // if (Math.abs(val) < lambda) {
+        // recon[i] = 0.0;
+        // }
         //
-        //                // soft threshold
-        //                if (false)
-        //                    if (Math.abs(val) < lambda) {
-        //                        recon[i] = 0.0;
-        //                    } else {
-        //                        recon[i] -= Math.signum(val) * lambda;
-        //                        recon[i] *= norm;
-        //                    }
-        //            }
+        // // soft threshold
+        // if (false)
+        // if (Math.abs(val) < lambda) {
+        // recon[i] = 0.0;
+        // } else {
+        // recon[i] -= Math.signum(val) * lambda;
+        // recon[i] *= norm;
+        // }
+        // }
 
         // test
-        //            for (int i = 0; i < xValues.length / 2; i++) {
-        //                final double val = Math.abs(recon[i]);
-        //                final double err = Math.abs(recon[xValues.length / 2 + i]);
+        // for (int i = 0; i < xValues.length / 2; i++) {
+        // final double val = Math.abs(recon[i]);
+        // final double err = Math.abs(recon[xValues.length / 2 + i]);
         //
-        //                if (val < lambda) {
-        //                    recon[i] = 0.0;
-        //                    recon[xValues.length / 2 + i] = 0.0;
-        //                } else if (val != 0 && err < val && (err / val < lambda)) {
-        //                    recon[xValues.length / 2 + i] = 0.0;
-        //                } else if (val != 0 && err > val && (val / err < lambda)) {
-        //                    recon[i] = 0.0;
-        //                }
+        // if (val < lambda) {
+        // recon[i] = 0.0;
+        // recon[xValues.length / 2 + i] = 0.0;
+        // } else if (val != 0 && err < val && (err / val < lambda)) {
+        // recon[xValues.length / 2 + i] = 0.0;
+        // } else if (val != 0 && err > val && (val / err < lambda)) {
+        // recon[i] = 0.0;
+        // }
         //
-        //            }
+        // }
 
         for (int i = 0; i < 0; i++) {
             recon[i] = 0.0;
@@ -189,14 +190,19 @@ public class WaveletDenoising extends AbstractDemoApplication {
     }
 
     private double[][] readDemoData() {
-        try {
-            BufferedReader reader = new BufferedReader(
-                    new InputStreamReader(WaveletScalogram.class.getResourceAsStream("./BBQSpectra.dat")));
+        final String fileName = "./BBQSpectra.dat";
+        try (BufferedReader reader = new BufferedReader(
+                new InputStreamReader(WaveletScalogram.class.getResourceAsStream(fileName)))) {
 
-            int nDim = Integer.parseInt(reader.readLine());
+            String line = reader.readLine();
+            int nDim = line == null ? 0 : Integer.parseInt(line);
             double[][] ret = new double[2][nDim];
             for (int i = 0; i < nDim; i++) {
-                String[] x = reader.readLine().split("\t");
+                line = reader.readLine();
+                if (line == null) {
+                    break;
+                }
+                String[] x = line.split("\t");
                 ret[0][i] = Double.parseDouble(x[0]);
                 ret[1][i] = Double.parseDouble(x[1]);
             }
@@ -206,7 +212,7 @@ public class WaveletDenoising extends AbstractDemoApplication {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return null;
+        return new double[10][10];
     }
 
     public static void main(final String[] args) {

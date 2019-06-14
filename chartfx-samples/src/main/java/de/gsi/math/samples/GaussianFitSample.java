@@ -18,7 +18,7 @@ import javafx.scene.Node;
  */
 public class GaussianFitSample extends AbstractDemoApplication {
 
-    private final int MAX_POINTS = 101;
+    private static final int MAX_POINTS = 101;
     private DataSet fmodel;
     private DataSet fdataOrig;
     private DataSet fdataFitted;
@@ -37,7 +37,7 @@ public class GaussianFitSample extends AbstractDemoApplication {
         double[] yErrors = new double[MAX_POINTS];
 
         for (int i = 0; i < xValues.length; i++) {
-            double error = 0.5 * random.nextGaussian();
+            double error = 0.5 * RANDOM.nextGaussian();
             xValues[i] = (i - xValues.length / 2.0) * 30.0 / MAX_POINTS; // equidistant
                                                                          // sampling
 

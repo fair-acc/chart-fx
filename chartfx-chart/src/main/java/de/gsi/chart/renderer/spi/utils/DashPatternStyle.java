@@ -25,9 +25,9 @@ import javafx.scene.shape.Line;
  * @author rstein
  *
  */
-public final class DashPatternStyle {
+public final class DashPatternStyle { // NOPMD nomen est omen
 	    
-	protected static WeakHashMap<Integer, ImagePattern> dashHashMap = new WeakHashMap<>();
+	private static WeakHashMap<Integer, ImagePattern> dashHashMap = new WeakHashMap<>();
 	
 	private DashPatternStyle() {
 	    // empty definition for utility class
@@ -38,7 +38,7 @@ public final class DashPatternStyle {
 			return 1.0;
 		}
 		double ret = 0;
-		for (int i=0; i < pattern.length; i++) {
+		for (int i=0; i < pattern.length; i++) { // NOPMD for loop is faster than forEach
 			ret += pattern[i];
 		}
 		return ret;

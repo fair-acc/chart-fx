@@ -55,7 +55,7 @@ public class JavaFXTestChart extends AbstractTestApplication implements ChartTes
         lineChart.setLegendVisible(false);
 
         setNumberOfSamples(MAX_DATA_POINTS_25HZ);
-        updateDataSet();
+        updateDataSet(); // NOPMD
     }
 
     @Override

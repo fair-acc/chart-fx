@@ -16,24 +16,24 @@ import de.gsi.dataset.DataSet;
  *
  */
 public class DataSetUtilsHelper {
-    protected static final ReentrantLock byteArrayCacheLock = new ReentrantLock();
+    protected static final ReentrantLock BYTE_ARRAY_CACHE_LOCK = new ReentrantLock();
     protected static WeakHashMap<String, WeakHashMap<Integer, ByteBuffer>> byteArrayCache = new WeakHashMap<>();
-    protected static final ReentrantLock stringBufferCacheLock = new ReentrantLock();
+    protected static final ReentrantLock STRING_BUFFER_CACHE_LOCK = new ReentrantLock();
     protected static WeakHashMap<String, WeakHashMap<Integer, StringBuilder>> stringBuilderCache = new WeakHashMap<>();
     
     protected static ByteBuffer getCachedDoubleArray(final String arrayName, final int size) {
-        byteArrayCacheLock.lock();
+        BYTE_ARRAY_CACHE_LOCK.lock();
         WeakHashMap<Integer, ByteBuffer> arrayMap = byteArrayCache.computeIfAbsent(arrayName,
                 name -> new WeakHashMap<>());
 
         ByteBuffer cachedArray = arrayMap.get(size);
         if (cachedArray == null) {
             cachedArray = ByteBuffer.allocate(size);
-//             System.err.println("cache missed for " + arrayName + " size = " + size);
+            // cache missed
         } else {
             byteArrayCache.get(arrayName).remove(cachedArray);
         }
-        byteArrayCacheLock.unlock();
+        BYTE_ARRAY_CACHE_LOCK.unlock();
         return cachedArray;
     }
 
@@ -41,25 +41,25 @@ public class DataSetUtilsHelper {
         if (cachedArray == null) {
             return;
         }
-        byteArrayCacheLock.lock();
+        BYTE_ARRAY_CACHE_LOCK.lock();
         byteArrayCache.get(arrayName).put(cachedArray.capacity(), cachedArray);
-        byteArrayCacheLock.unlock();
+        BYTE_ARRAY_CACHE_LOCK.unlock();
     }
     
     protected static StringBuilder getCachedStringBuilder(final String arrayName, final int size) {
-        stringBufferCacheLock.lock();
+        STRING_BUFFER_CACHE_LOCK.lock();
         WeakHashMap<Integer, StringBuilder> arrayMap = stringBuilderCache.computeIfAbsent(arrayName,
                 name -> new WeakHashMap<>());
 
         StringBuilder cachedArray = arrayMap.get(size);
         if (cachedArray == null) {
             cachedArray = new StringBuilder(size);
-//             System.err.println("cache missed for " + arrayName + " size = " + size);
+            // cache missed
         } else {
             stringBuilderCache.get(arrayName).remove(cachedArray);
         }
         cachedArray.delete(0, cachedArray.length());
-        stringBufferCacheLock.unlock();
+        STRING_BUFFER_CACHE_LOCK.unlock();
         return cachedArray;
     }
 
@@ -67,9 +67,9 @@ public class DataSetUtilsHelper {
         if (cachedArray == null) {
             return;
         }
-        stringBufferCacheLock.lock();
+        STRING_BUFFER_CACHE_LOCK.lock();
         stringBuilderCache.get(arrayName).put(cachedArray.capacity(), cachedArray);
-        stringBufferCacheLock.unlock();
+        STRING_BUFFER_CACHE_LOCK.unlock();
     }
     
     /**

@@ -86,7 +86,7 @@ public class XValueIndicator extends AbstractSingleValueIndicator {
             getChartChildren().clear();
         } else {
             layoutLine(xPos, minY, xPos, maxY);
-            layoutMarker(xPos, minY + 1.5 * AbstractSingleValueIndicator.TRIANGLE_HALF_WIDTH, xPos, maxY);
+            layoutMarker(xPos, minY + 1.5 * AbstractSingleValueIndicator.triangleHalfWidth, xPos, maxY);
             layoutLabel(new BoundingBox(xPos, minY, 0, maxY - minY), AbstractSingleValueIndicator.MIDDLE_POSITION,
                     getLabelPosition());
         }

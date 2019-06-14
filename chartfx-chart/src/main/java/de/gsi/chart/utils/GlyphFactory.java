@@ -24,16 +24,16 @@ import org.controlsfx.glyphfont.GlyphFontRegistry;
  *
  * @author Luca Molinari
  */
-public final class GlyphFactory {
-    private static GlyphFont FONT_AWESOME;
+public final class GlyphFactory { // NOPMD nomen est fix
+    private static GlyphFont fontAwesome;
 
     private GlyphFactory() {
     }
 
     static {
         try (InputStream is = GlyphFactory.class.getResourceAsStream("FONT_AWESOME-webfont")) {
-            GlyphFactory.FONT_AWESOME = new FontAwesome(is);
-            GlyphFontRegistry.register(GlyphFactory.FONT_AWESOME);
+            GlyphFactory.fontAwesome = new FontAwesome(is);
+            GlyphFontRegistry.register(GlyphFactory.fontAwesome);
         } catch (final IOException e) {
             e.printStackTrace();
         }
@@ -46,15 +46,15 @@ public final class GlyphFactory {
      * @return created glyph
      */
     public static synchronized Glyph create(final FontAwesome.Glyph icon) {
-        if (GlyphFactory.FONT_AWESOME == null) {
+        if (GlyphFactory.fontAwesome == null) {
             try (InputStream is = GlyphFactory.class.getResourceAsStream("FONT_AWESOME-webfont")) {
-                GlyphFactory.FONT_AWESOME = new FontAwesome(is);
-                GlyphFontRegistry.register(GlyphFactory.FONT_AWESOME);
+                GlyphFactory.fontAwesome = new FontAwesome(is);
+                GlyphFontRegistry.register(GlyphFactory.fontAwesome);
             } catch (final IOException e) {
                 e.printStackTrace();
             }
         }
-        return GlyphFactory.FONT_AWESOME.create(icon);
+        return GlyphFactory.fontAwesome.create(icon);
     }
 
 }

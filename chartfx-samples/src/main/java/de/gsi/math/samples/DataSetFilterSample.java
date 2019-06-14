@@ -29,8 +29,8 @@ public class DataSetFilterSample extends AbstractDemoApplication {
         GaussianFunction gaussFunction = new GaussianFunction("gauss") {
             @Override
             public double getValue(final double x) {
-                final double spike = random.nextDouble() > 0.98 ? 1.0 : 0.0;
-                return spike == 0 ? super.getValue(x) + 0.01 * random.nextGaussian() : spike;
+                final double spike = RANDOM.nextDouble() > 0.98 ? 1.0 : 0.0;
+                return spike == 0 ? super.getValue(x) + 0.01 * RANDOM.nextGaussian() : spike;
             }
         };
         gaussFunction.setParameterValue(0, 0.0); // mean

@@ -23,12 +23,12 @@ public abstract class AbstractSingleValueIndicator extends AbstractValueIndicato
      * The default distance between the data point coordinates and mouse cursor
      * that triggers shifting the line.
      */
-    public static final int DEFAULT_PICKING_DISTANCE = 30;
-    static final double MIDDLE_POSITION = 0.5;
-    static final String STYLE_CLASS_LABEL = "value-indicator-label";
-    static final String STYLE_CLASS_LINE = "value-indicator-line";
-    static final String STYLE_CLASS_MARKER = "value-indicator-marker";
-    protected static double TRIANGLE_HALF_WIDTH = 5.0;
+    protected static final int DEFAULT_PICKING_DISTANCE = 30;
+    protected static final double MIDDLE_POSITION = 0.5;
+    protected static final String STYLE_CLASS_LABEL = "value-indicator-label";
+    protected static final String STYLE_CLASS_LINE = "value-indicator-line";
+    protected static final String STYLE_CLASS_MARKER = "value-indicator-marker";
+    protected static double triangleHalfWidth = 5.0;
 
     /**
      * Line indicating the value.
@@ -134,7 +134,7 @@ public abstract class AbstractSingleValueIndicator extends AbstractValueIndicato
         triangle.visibleProperty().bind(editableIndicatorProperty());
         triangle.mouseTransparentProperty().bind(editableIndicatorProperty().not());
         triangle.setPickOnBounds(true);
-        final double a = AbstractSingleValueIndicator.TRIANGLE_HALF_WIDTH;
+        final double a = AbstractSingleValueIndicator.triangleHalfWidth;
         triangle.getPoints().setAll(-a, -a, -a, +a, +a, +a, +a, -a);
         triangle.setOnMousePressed(mouseEvent -> {
             /*
