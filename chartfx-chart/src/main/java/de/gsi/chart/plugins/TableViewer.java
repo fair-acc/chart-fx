@@ -1,119 +1,123 @@
 package de.gsi.chart.plugins;
 
-import static impl.org.controlsfx.i18n.Localization.asKey;
-import static impl.org.controlsfx.i18n.Localization.localize;
-
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.TreeSet;
+import java.util.concurrent.Callable;
 
-import org.controlsfx.control.spreadsheet.GridBase;
-import org.controlsfx.control.spreadsheet.SpreadsheetCell;
-import org.controlsfx.control.spreadsheet.SpreadsheetCellType;
-import org.controlsfx.control.spreadsheet.SpreadsheetCellType.DoubleType;
-import org.controlsfx.control.spreadsheet.SpreadsheetView;
-import org.controlsfx.control.spreadsheet.StringConverterWithFormat;
 import org.controlsfx.glyphfont.FontAwesome;
 import org.controlsfx.glyphfont.Glyph;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import de.gsi.chart.Chart;
 import de.gsi.chart.renderer.Renderer;
 import de.gsi.chart.utils.FXUtils;
 import de.gsi.dataset.DataSet;
 import de.gsi.dataset.DataSetError;
+import de.gsi.dataset.DataSetError.ErrorType;
+import de.gsi.dataset.EditConstraints;
+import de.gsi.dataset.EditableDataSet;
 import de.gsi.dataset.event.EventListener;
+import de.gsi.dataset.event.UpdateEvent;
+import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
+import javafx.collections.ObservableListBase;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.scene.control.Button;
-import javafx.scene.control.ContextMenu;
-import javafx.scene.control.MenuItem;
+import javafx.scene.control.SelectionMode;
 import javafx.scene.control.Separator;
+import javafx.scene.control.TableColumn;
 import javafx.scene.control.TablePosition;
+import javafx.scene.control.TableView;
+import javafx.scene.control.TableView.TableViewSelectionModel;
 import javafx.scene.control.Tooltip;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
+import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyCodeCombination;
-import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.HBox;
 import javafx.stage.FileChooser;
 import javafx.util.converter.DoubleStringConverter;
 
 /**
- * Displays the all visible data sets inside a table on demand. Implements copy-paste functionality into system
- * clip-board to allow further processing in other applications. Presently the display and max clip-board export is
- * limited to 10k data rows for performance reasons.
+ * Displays the all visible data sets inside a table on demand. Implements
+ * copy-paste functionality into system clip-board and *.csv file export to
+ * allow further processing in other applications. Also enables editing of
+ * values if the underlying DataSet allows it.
  * 
  * @author rstein
+ * @author akrimm
  */
 public class TableViewer extends ChartPlugin {
+    private static final Logger LOGGER = LoggerFactory.getLogger(TableViewer.class);
 
-    private static final int MAX_ROW_EXPORT_LIMIT = 10000;
     protected static final String FONT_AWESOME = "FontAwesome";
     protected static final int FONT_SIZE = 20;
-    private final Glyph tableView = new Glyph(FONT_AWESOME, "\uf0ce").size(FONT_SIZE);
-    private final Glyph graphView = new Glyph(FONT_AWESOME, "\uf201").size(FONT_SIZE);
+    private final Glyph tableView = new Glyph(FONT_AWESOME, FontAwesome.Glyph.TABLE).size(FONT_SIZE);
+    private final Glyph graphView = new Glyph(FONT_AWESOME, FontAwesome.Glyph.LINE_CHART).size(FONT_SIZE);
     private final Glyph saveIcon = new Glyph(FONT_AWESOME, "\uf0c7").size(FONT_SIZE);
-    // not a great icon \uf02e for clip board but another one wasn't available
-    // (\uf328)
     private final Glyph clipBoardIcon = new Glyph(FONT_AWESOME, FontAwesome.Glyph.CLIPBOARD).size(FONT_SIZE);
-    private final ListChangeListener<Renderer> rendererChangeListener = this::rendererChanged;
-    private final ListChangeListener<DataSet> datasetChangeListener = this::datasetsChanged;
-    private final EventListener dataSetDataUpdateListener = obs -> FXUtils.runFX(this::refreshTable);
     private final HBox interactorButtons = getInteractorBar();
-    // private Pane table = new Pane();
-    private final MySpreadsheetView table = new MySpreadsheetView();
+    private final TableView<DataSetsRow> table = new TableView<>();
+    private final DataSetsModel dsModel = new DataSetsModel();
+    protected boolean editable = false;
 
     /**
-     * Creates a new instance of DataSetTableViewer class.
+     * Creates a new instance of DataSetTableViewer class and setup the required
+     * listeners.
      */
     public TableViewer() {
         super();
+        table.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+        table.getSelectionModel().setCellSelectionEnabled(true);
+        table.setEditable(true); // Generally the TableView is editable, actual
+                                 // editability is configured column-wise
+        table.setItems(dsModel);
 
-        table.setStyle("-fx-background-color: -fx-focus-color, -fx-background; -fx-opacity = 0.5");
-        table.setStyle("-fx-background-color: #AAAAAAD0");
+        table.getColumns().addAll(dsModel.getColumns());
+        dsModel.getColumns().addListener((ListChangeListener<TableColumn<DataSetsRow, ?>>) (change -> table.getColumns()
+                .setAll(dsModel.getColumns())));
+        dsModel.setRefreshFunction(() -> {
+            // workaround: force table to acknowledge changed data (by setting
+            // to empty list and then back)
+            FXUtils.runFX(() -> {
+                ObservableList<DataSetsRow> tmp = table.getItems();
+                table.setItems(FXCollections.emptyObservableList());
+                table.setItems(tmp);
+            });
+            return null;
+        });
 
-        chartProperty().addListener((change, o, n) -> {
-            if (o != null) {
-                o.getToolBar().getChildren().remove(interactorButtons);
-                o.getPlotForeground().getChildren().remove(table);
-                o.getPlotArea().setBottom(null);
+        chartProperty().addListener((change, oldChart, newChart) -> {
+            if (oldChart != null) {
+                // plugin has already been initialised for old chart
+                oldChart.getToolBar().getChildren().remove(interactorButtons);
+                oldChart.getPlotForeground().getChildren().remove(table);
+                oldChart.getPlotArea().setBottom(null);
                 table.prefWidthProperty().unbind();
                 table.prefHeightProperty().unbind();
-
-                // de-register data set listener
-                o.getDatasets().removeListener(datasetChangeListener);
-                o.getRenderers().removeListener(rendererChangeListener);
-
             }
-            if (n != null) {
+            if (newChart != null) {
                 if (isAddButtonsToToolBar()) {
-                    n.getToolBar().getChildren().add(interactorButtons);
+                    newChart.getToolBar().getChildren().add(interactorButtons);
                 }
-                n.getPlotForeground().getChildren().add(table);
+                newChart.getPlotForeground().getChildren().add(table);
                 table.toFront();
-                table.setVisible(false);
-                table.prefWidthProperty().bind(n.getPlotForeground().widthProperty());
-                table.prefHeightProperty().bind(n.getPlotForeground().heightProperty());
-
-                // register data set listener
-                n.getDatasets().addListener(datasetChangeListener);
-                n.getDatasets().forEach(dataSet -> dataSet.addListener(dataSetDataUpdateListener));
-                n.getRenderers().addListener(rendererChangeListener);
-                n.getRenderers().forEach(renderer -> renderer.getDatasets().addListener(datasetChangeListener));
+                table.setVisible(false); // table is initially invisible above
+                                         // the chart
+                table.prefWidthProperty().bind(newChart.getPlotForeground().widthProperty());
+                table.prefHeightProperty().bind(newChart.getPlotForeground().heightProperty());
             }
+            dsModel.chartChanged(oldChart, newChart);
         });
 
         addButtonsToToolBarProperty().addListener((ch, o, n) -> {
@@ -129,7 +133,10 @@ public class TableViewer extends ChartPlugin {
         });
     }
 
-    public HBox getInteractorBar() {
+    /**
+     * Helper function to initialize the UI elements for the Interactor toolbar.
+     */
+    protected HBox getInteractorBar() {
         final Separator separator = new Separator();
         separator.setOrientation(Orientation.VERTICAL);
         final HBox buttonBar = new HBox();
@@ -140,8 +147,8 @@ public class TableViewer extends ChartPlugin {
 
         final Button copyToClipBoard = new Button(null, clipBoardIcon);
         copyToClipBoard.setPadding(new Insets(3, 3, 3, 3));
-        copyToClipBoard.setTooltip(new Tooltip("copy actively shown content top system clipboard"));
-        copyToClipBoard.setOnAction(e -> table.copyAllToClipboard());
+        copyToClipBoard.setTooltip(new Tooltip("copy selected content top system clipboard"));
+        copyToClipBoard.setOnAction(e -> this.copySelectedToClipboard());
 
         final Button saveTableView = new Button(null, saveIcon);
         saveTableView.setPadding(new Insets(3, 3, 3, 3));
@@ -151,403 +158,509 @@ public class TableViewer extends ChartPlugin {
         switchTableView.setOnAction(evt -> {
             switchTableView.setGraphic(table.isVisible() ? tableView : graphView);
             table.setVisible(!table.isVisible());
-            table.setMouseTransparent(!table.isVisible());
             getChart().getPlotForeground().setMouseTransparent(!table.isVisible());
-            table.setZoomFactor(1.0);
-            refreshTable();
+            table.setMouseTransparent(!table.isVisible());
+            dsModel.refresh();
         });
 
         buttonBar.getChildren().addAll(separator, switchTableView, copyToClipBoard, saveTableView);
         return buttonBar;
     }
 
-    protected void datasetsChanged(final ListChangeListener.Change<? extends DataSet> change) {
-        boolean dataSetChanges = false;
-
-        final List<DataSet> newDataSets = new ArrayList<>();
-        final List<DataSet> oldDataSets = new ArrayList<>();
-
-        while (change.next()) {
-            oldDataSets.addAll(change.getRemoved());
-            for (final DataSet set : change.getRemoved()) {
-                set.removeListener(dataSetDataUpdateListener);
-                dataSetChanges = true;
-            }
-
-            newDataSets.addAll(change.getAddedSubList());
-            for (final DataSet set : change.getAddedSubList()) {
-                set.addListener(dataSetDataUpdateListener);
-                dataSetChanges = true;
-            }
-        }
-
-        if (dataSetChanges) {
-            this.refreshTable();
-        }
-    }
-
-    protected void rendererChanged(final ListChangeListener.Change<? extends Renderer> change) {
-        boolean dataSetChanges = false;
-        while (change.next()) {
-            // handle added renderer
-            change.getAddedSubList().forEach(renderer -> renderer.getDatasets().addListener(datasetChangeListener));
-            if (!change.getAddedSubList().isEmpty()) {
-                dataSetChanges = true;
-            }
-
-            // handle removed renderer
-            change.getRemoved().forEach(renderer -> renderer.getDatasets().removeListener(datasetChangeListener));
-            if (!change.getRemoved().isEmpty()) {
-                dataSetChanges = true;
-            }
-        }
-
-        if (dataSetChanges) {
-            this.refreshTable();
-        }
-    }
-
-    public SpreadsheetView getTable() {
+    /**
+     * @return The TableView JavaFX control element
+     */
+    public TableView<?> getTable() {
         return table;
     }
 
-    private void refreshTable() {
-        if (getChart() == null || !table.isVisible()) {
-            return;
-        }
-        repopulateTable();
-    }
-
-    private void repopulateTable() {
-        ObservableList<DataSet> dataSets = getChart().getAllDatasets();
-
-        int nRowCount = 0;
-        int nColumnCount = 0;
-        for (DataSet ds : dataSets) {
-            nRowCount = Math.min(Math.max(nRowCount, ds.getDataCount()), MAX_ROW_EXPORT_LIMIT);
-            nColumnCount += 2;
-
-            if (ds instanceof DataSetError) {
-                DataSetError eDs = (DataSetError) ds;
-
-                switch (eDs.getErrorType()) {
-                case NO_ERROR:
-                    break;
-                case X:
-                case X_ASYMMETRIC:
-                case Y:
-                case Y_ASYMMETRIC:
-                    nColumnCount += 2;
-                    break;
-                case XY:
-                case XY_ASYMMETRIC:
-                default:
-                    nColumnCount += 2;
-                    break;
-                }
-            }
-        }
-
-        table.setGrid(new MyGrid(nRowCount, nColumnCount, dataSets));
-    }
-
-    public List<String> getGridStringRepresentation() {
-        ArrayList<String> stringRows = new ArrayList<>();
-        ObservableList<ObservableList<SpreadsheetCell>> rows = table.getGrid().getRows();
-        int countRow = 0;
-        for (ObservableList<SpreadsheetCell> row : rows) {
-            StringBuilder sb = new StringBuilder();
-            if (countRow < 2) {
-                sb.append("# ");
-            }
-            for (SpreadsheetCell cell : row) {
-                sb.append(cell.getText());
-                sb.append(',');
-            }
-            sb.append('\n');
-            stringRows.add(sb.toString());
-            countRow++;
-        }
-        return stringRows;
-    }
-
+    /**
+     * Show a FileChooser and export the (selected) Table Data to the choosen
+     * .csv File.
+     */
     public void exportGridToCSV() {
-        if (!table.isVisible()) {
-            repopulateTable();
-        }
-        FileChooser chooser = new FileChooser();
-        File save = chooser.showSaveDialog(getChart().getScene().getWindow());
+        final FileChooser chooser = new FileChooser();
+        final File save = chooser.showSaveDialog(getChart().getScene().getWindow());
         if (save == null) {
             return;
         }
-        List<String> stringRows = getGridStringRepresentation();
-        
-        try (BufferedWriter writer = Files.newBufferedWriter(Paths.get(save.getPath() + ".csv"), StandardCharsets.UTF_8)) {
-            for (String str : stringRows) {
-                writer.write(str);
-            }
-
+        final String data = dsModel.getSelectedData(table.getSelectionModel());
+        try (BufferedWriter writer = Files.newBufferedWriter(Paths.get(save.getPath() + ".csv"),
+                StandardCharsets.UTF_8)) {
+            writer.write(data);
         } catch (IOException ex) {
-            ex.printStackTrace();
+            LOGGER.error("error while exporting data to csv", ex);
         }
     }
 
-    private class MyGrid extends GridBase {
+    /**
+     * Copies the (selected) table data to the clipboard in csv Format.
+     */
+    public void copySelectedToClipboard() {
+        final ClipboardContent content = new ClipboardContent();
+        content.putString(dsModel.getSelectedData(table.getSelectionModel()));
+        Clipboard.getSystemClipboard().setContent(content);
+    }
 
-        public MyGrid(final int rowCount, final int columnCount, final List<DataSet> dataSets) {
-            super(rowCount, columnCount);
+    /**
+     * Model Abstraction to the DataSets of a chart as the backing for a JavaFX
+     * TableView. Only elements visible on screen are allocated and new elements
+     * are generated onDemand using Cell Factories. Also generates the column
+     * Objects for the TableView and subscribes Change Listeners to update the
+     * Table whenever the datasets change or new Datasets are added
+     * 
+     * @author akrimm
+     */
+    protected class DataSetsModel extends ObservableListBase<DataSetsRow> {
+        private int nRows = 0;
+        private final ObservableList<TableColumn<DataSetsRow, ?>> columns = FXCollections.observableArrayList();
+        private Callable<Void> refreshFunction;
 
-            initRowData(dataSets);
-        }
-
-        private void initRowData(List<DataSet> dataSets) {
-            final ObservableList<ObservableList<SpreadsheetCell>> rows = FXCollections.observableArrayList();
-
-            final ObservableList<SpreadsheetCell> dataSetNames = FXCollections.observableArrayList();
-            for (int c = 0; c < getColumnCount(); c++) {
-                dataSetNames.add(SpreadsheetCellType.STRING.createCell(0, c, 1, 1, ""));
-            }
-            rows.add(dataSetNames);
-
-            // DoubleType doubleCellConverter = SpreadsheetCellType.DOUBLE;
-            DoubleType doubleCellConverter = new DoubleType(
-                    new StringConverterWithFormat<Double>(new DoubleStringConverter()) {
-
-                        @Override
-                        public String toString(Double item) {
-                            return toStringFormat(item, "");
+        private final ListChangeListener<Renderer> rendererChangeListener = this::rendererChanged;
+        private final ListChangeListener<DataSet> datasetChangeListener = this::datasetsChanged;
+        private final EventListener dataSetDataUpdateListener = (UpdateEvent evt) -> {
+            nRows = 0;
+            for (TableColumn<DataSetsRow, ?> col : columns) {
+                if (col instanceof DataSetTableColumns) {
+                    DataSetTableColumns dataSetColumn = ((DataSetTableColumns) col);
+                    nRows = Math.max(nRows, dataSetColumn.dataSet.getDataCount());
+                    for (final TableColumn<DataSetsRow, ?> subColumn : dataSetColumn.getColumns()) {
+                        if (subColumn instanceof DataSetTableColumn) {
+                            ((DataSetTableColumn) subColumn).updateEditableState();
                         }
-
-                        @Override
-                        public Double fromString(String str) {
-                            if (str == null || str.isEmpty() || "NaN".equals(str)) {
-                                return Double.NaN;
-                            } else {
-                                return myConverter.fromString(str);
-                            }
-                        }
-
-                        @Override
-                        public String toStringFormat(Double item, String format) {
-                            try {
-                                if (item == null || Double.isNaN(item)) {
-                                    return "";
-                                } else {
-                                    return String.format("%f", item);
-                                }
-                            } catch (Exception ex) {
-                                return myConverter.toString(item);
-                            }
-                        }
-                    });
-
-            final ObservableList<SpreadsheetCell> dataSetVariables = FXCollections.observableArrayList();
-            rows.add(dataSetVariables);
-
-            int columnCountDataSetName = 0;
-            for (int row = 0; row < this.getRowCount(); row++) {
-                int column = 0;
-                final ObservableList<SpreadsheetCell> rowData = FXCollections.observableArrayList();
-                rows.add(rowData);
-                for (DataSet ds : dataSets) {
-                    int columnCount = 2;
-
-                    Double valueX = row < ds.getDataCount() ? ds.getX(row) : Double.NaN;
-                    Double valueY = row < ds.getDataCount() ? ds.getY(row) : Double.NaN;
-                    rowData.add(doubleCellConverter.createCell(row, column++, 1, 1, valueX));
-                    rowData.add(doubleCellConverter.createCell(row, column++, 1, 1, valueY));
-                    if (row == 0) {
-                        dataSetVariables.add(SpreadsheetCellType.STRING.createCell(row, column - 2, 1, 1, "X"));
-                        dataSetVariables.add(SpreadsheetCellType.STRING.createCell(row, column - 1, 1, 1, "Y"));
-                    }
-
-                    if (ds instanceof DataSetError) {
-                        DataSetError eDs = (DataSetError) ds;
-                        Double errorXN = row < ds.getDataCount() ? eDs.getXErrorNegative(row) : Double.NaN;
-                        Double errorXP = row < ds.getDataCount() ? eDs.getXErrorPositive(row) : Double.NaN;
-                        Double errorYN = row < ds.getDataCount() ? eDs.getYErrorNegative(row) : Double.NaN;
-                        Double errorYP = row < ds.getDataCount() ? eDs.getYErrorPositive(row) : Double.NaN;
-
-                        switch (eDs.getErrorType()) {
-                        case NO_ERROR:
-                            break;
-                        case X:
-                        case X_ASYMMETRIC:
-                            rowData.add(doubleCellConverter.createCell(row, column++, 1, 1, errorXN));
-                            rowData.add(doubleCellConverter.createCell(row, column++, 1, 1, errorXP));
-                            if (row == 0) {
-                                dataSetVariables
-                                        .add(SpreadsheetCellType.STRING.createCell(row, column - 2, 1, 1, "+ex"));
-                                dataSetVariables
-                                        .add(SpreadsheetCellType.STRING.createCell(row, column - 1, 1, 1, "-ex"));
-                            }
-                            columnCount = 4;
-                            break;
-                        case Y:
-                        case Y_ASYMMETRIC:
-                            rowData.add(doubleCellConverter.createCell(row, column++, 1, 1, errorYN));
-                            rowData.add(doubleCellConverter.createCell(row, column++, 1, 1, errorYP));
-                            if (row == 0) {
-                                dataSetVariables
-                                        .add(SpreadsheetCellType.STRING.createCell(row, column - 2, 1, 1, "+ey"));
-                                dataSetVariables
-                                        .add(SpreadsheetCellType.STRING.createCell(row, column - 1, 1, 1, "-ey"));
-                            }
-                            columnCount = 4;
-                            break;
-                        case XY:
-                        case XY_ASYMMETRIC:
-                        default:
-                            rowData.add(doubleCellConverter.createCell(row, column++, 1, 1, errorXN));
-                            rowData.add(doubleCellConverter.createCell(row, column++, 1, 1, errorXP));
-                            rowData.add(doubleCellConverter.createCell(row, column++, 1, 1, errorYN));
-                            rowData.add(doubleCellConverter.createCell(row, column++, 1, 1, errorYP));
-                            if (row == 0) {
-                                dataSetVariables
-                                        .add(SpreadsheetCellType.STRING.createCell(row, column - 4, 1, 1, "+ex"));
-                                dataSetVariables
-                                        .add(SpreadsheetCellType.STRING.createCell(row, column - 3, 1, 1, "-ex"));
-                                dataSetVariables
-                                        .add(SpreadsheetCellType.STRING.createCell(row, column - 2, 1, 1, "+ey"));
-                                dataSetVariables
-                                        .add(SpreadsheetCellType.STRING.createCell(row, column - 1, 1, 1, "-ey"));
-                            }
-                            columnCount = 6;
-                            break;
-                        }
-                    }
-
-                    if (row == 0) {
-                        dataSetNames.set(columnCountDataSetName, SpreadsheetCellType.STRING.createCell(0,
-                                columnCountDataSetName, 1, columnCount, ds.getName()));
-                        columnCountDataSetName++;
                     }
                 }
             }
+            refresh();
+        };
 
-            this.setRows(rows);
-        }
-
-        @Override
-        public ObservableList<String> getRowHeaders() {
-            final ObservableList<String> rowHeaders = FXCollections.observableArrayList();
-            for (int i = 0; i < getRowCount(); i++) {
-                rowHeaders.add(String.valueOf(i));
-            }
-            return rowHeaders;
-        }
-
-        @Override
-        public ObservableList<String> getColumnHeaders() {
-            final ObservableList<String> columnHeaders = FXCollections.observableArrayList();
-            for (int i = 0; i < getRowCount(); i++) {
-                columnHeaders.add(String.valueOf(i));
-            }
-            return columnHeaders;
-        }
-
-    }
-
-    private class MySpreadsheetView extends SpreadsheetView {
-
-        MySpreadsheetView() {
-            super();
-        }
-
-        public void copyAllToClipboard() {
-            if (!table.isVisible()) {
-                repopulateTable();
-            }
-            List<String> rows = TableViewer.this.getGridStringRepresentation();
-            StringBuilder sb = new StringBuilder();
-            rows.forEach(s -> sb.append(s));
-
-            final ClipboardContent content = new ClipboardContent();
-            content.putString(sb.toString());
-            Clipboard.getSystemClipboard().setContent(content);
+        public DataSetsModel() {
+            columns.add(new RowIndexHeaderTableColumn());
         }
 
         /**
-         * Put the current selection into the ClipBoard. This can be overridden by developers for custom behavior.
+         * @param refreshFunction the refreshFunction to set
          */
-        @Override
-        public void copyClipboard() {
-            super.copyClipboard();
+        public void setRefreshFunction(final Callable<Void> refreshFunction) {
+            this.refreshFunction = refreshFunction;
+        }
 
-            @SuppressWarnings("rawtypes")
-            final ObservableList<TablePosition> posList = getSelectionModel().getSelectedCells();
+        protected void datasetsChanged(final ListChangeListener.Change<? extends DataSet> change) {
+            boolean dataSetChanges = false;
 
-            int minRow = Integer.MAX_VALUE;
-            int maxRow = -1;
-            int minCol = Integer.MAX_VALUE;
-            int maxCol = -1;
-            for (final TablePosition<?, ?> p : posList) {
-                final int row = p.getRow();
-                final int col = p.getColumn();
-                minRow = Math.min(minRow, row);
-                maxRow = Math.max(maxRow, row);
-                minCol = Math.min(minCol, col);
-                maxCol = Math.max(maxCol, col);
-            }
-
-            if (maxCol < 0 || maxRow < 0 || minCol == Integer.MAX_VALUE || minRow == Integer.MAX_VALUE) {
-                // unsuported and/or no selection export whole table
-                this.copyAllToClipboard();
-                return;
-            }
-
-            // specific case of few selected fields
-            StringBuilder sb = new StringBuilder();
-            final int nRows = maxRow - minRow;
-            final int nCols = maxCol - minCol;
-            for (int row = minRow; row <= maxRow; row++) {
-                for (int col = minCol; col <= maxCol; col++) {
-                    SpreadsheetCell cell = getGrid().getRows().get(getModelRow(row)).get(getModelColumn(col));
-                    String cellString = cell.getItem().toString();
-                    sb.append(cellString);
-
-                    if (nCols > 1) {
-                        sb.append(',');
-                        // N.B. add trailing comma only if there is more than
-                        // one field in the line
+            while (change.next()) {
+                for (final DataSet set : change.getRemoved()) {
+                    set.removeListener(dataSetDataUpdateListener);
+                    columns.removeIf(
+                            col -> (col instanceof DataSetTableColumns && ((DataSetTableColumns) col).dataSet == set));
+                    nRows = 0;
+                    for (TableColumn<DataSetsRow, ?> col : columns) {
+                        if (col instanceof DataSetTableColumn) {
+                            nRows = Math.max(nRows, ((DataSetTableColumn) col).ds.getDataCount());
+                        }
                     }
+                    dataSetChanges = true;
                 }
-                if (nRows > 1) {
-                    sb.append('\n');
+
+                for (final DataSet set : change.getAddedSubList()) {
+                    set.addListener(dataSetDataUpdateListener);
+                    columns.add(new DataSetTableColumns(set));
+                    nRows = Math.max(nRows, set.getDataCount());
+                    dataSetChanges = true;
                 }
             }
-            final ClipboardContent content = new ClipboardContent();
-            content.putString(sb.toString());
-            Clipboard.getSystemClipboard().setContent(content);
+
+            if (dataSetChanges) {
+                this.refresh();
+            }
+        }
+
+        private void refresh() {
+            try {
+                refreshFunction.call();
+            } catch (Exception e) { // NOPMD 'call()' issues generic 'Exception'
+                LOGGER.error("Error refreshing table model", e);
+            }
         }
 
         /**
-         * Create a menu on rightClick with two options: Copy/Paste This can be overridden by developers for custom
-         * behavior.
+         * @param oldChart The old chart the plugin is operating on
+         * @param newChart The new chart the plugin is operating on
+         */
+        public void chartChanged(final Chart oldChart, final Chart newChart) {
+            if (oldChart != null) {
+                // de-register data set listeners
+                oldChart.getDatasets().removeListener(datasetChangeListener);
+                oldChart.getDatasets().forEach(dataSet -> dataSet.removeListener(dataSetDataUpdateListener));
+                oldChart.getRenderers().removeListener(rendererChangeListener);
+                newChart.getRenderers()
+                        .forEach(renderer -> renderer.getDatasets().removeListener(datasetChangeListener));
+            }
+            if (newChart != null) {
+                // register data set listeners
+                newChart.getDatasets().addListener(datasetChangeListener);
+                newChart.getDatasets().forEach(dataSet -> dataSet.addListener(dataSetDataUpdateListener));
+                newChart.getRenderers().addListener(rendererChangeListener);
+                newChart.getRenderers().forEach(renderer -> renderer.getDatasets().addListener(datasetChangeListener));
+            }
+        }
+
+        protected void rendererChanged(final ListChangeListener.Change<? extends Renderer> change) {
+            boolean dataSetChanges = false;
+            while (change.next()) {
+                // handle added renderer
+                change.getAddedSubList().forEach(renderer -> renderer.getDatasets().addListener(datasetChangeListener));
+                if (!change.getAddedSubList().isEmpty()) {
+                    dataSetChanges = true;
+                }
+
+                // handle removed renderer
+                change.getRemoved().forEach(renderer -> renderer.getDatasets().removeListener(datasetChangeListener));
+                if (!change.getRemoved().isEmpty()) {
+                    dataSetChanges = true;
+                }
+            }
+
+            if (dataSetChanges) {
+                this.refresh();
+            }
+        }
+
+        @Override
+        public DataSetsRow get(final int row) {
+            return new DataSetsRow(row, this);
+            // return getDataSetsRow(row);
+        }
+
+        @Override
+        public int size() {
+            return nRows;
+        }
+
+        @Override
+        public boolean isEmpty() {
+            return (nRows >= 0);
+        }
+
+        @Override
+        public boolean contains(final Object o) {
+            if (o instanceof DataSetsRow) {
+                return (nRows > ((DataSetsRow) o).getRow());
+            }
+            return false;
+        }
+
+        @Override
+        public int indexOf(final Object o) {
+            if (o instanceof DataSetsRow) {
+                final int row = ((DataSetsRow) o).row;
+                return row < nRows ? row : -1;
+            }
+            return -1;
+        }
+
+        public ObservableList<TableColumn<DataSetsRow, ?>> getColumns() {
+            return columns;
+        }
+
+        protected String getSelectedData(final TableViewSelectionModel<DataSetsRow> selModel) {
+            // Construct a sorted Set/Map with all the selected columns.
+            // This means, that if you select (1,1) and (4,5), (1,5) and (4,1)
+            // will also be exported.
+            // A better approach would be a custom Selection model, which also
+            // visualises this behaviour
+            @SuppressWarnings("rawtypes") // getSelectedCells returns raw type
+            final ObservableList<TablePosition> selected = selModel.getSelectedCells();
+            if (selected.isEmpty()) {
+                return getAllData();
+            }
+            final TreeSet<Integer> rows = new TreeSet<>();
+            final TreeMap<Integer, TableColumn<DataSetsRow, ?>> cols = new TreeMap<>();
+            for (final TablePosition<DataSetsRow, ?> cell : selected) {
+                cols.put(cell.getColumn(), cell.getTableColumn());
+                rows.add(cell.getRow());
+            }
+            // Generate a string from the selected data
+            StringBuilder sb = new StringBuilder();
+            sb.append('#');
+            for (final Map.Entry<Integer, TableColumn<DataSetsRow, ?>> col : cols.entrySet()) {
+                sb.append(col.getValue().getText()).append(", ");
+            }
+            sb.setCharAt(sb.length() - 2, '\n');
+            sb.deleteCharAt(sb.length() - 1);
+            for (final int r : rows) {
+                for (final Map.Entry<Integer, TableColumn<DataSetsRow, ?>> col : cols.entrySet()) {
+                    if (col.getValue() instanceof DataSetTableColumn) {
+                        sb.append(((DataSetTableColumn) col.getValue()).getValue(r)).append(", ");
+                    } else {
+                        sb.append(col.getValue().getCellData(r)).append(", ");
+                    }
+                }
+                sb.setCharAt(sb.length() - 2, '\n');
+                sb.deleteCharAt(sb.length() - 1);
+            }
+            return sb.toString();
+        }
+
+        protected String getAllData() {
+            final StringBuilder sb = new StringBuilder();
+            sb.append('#');
+            for (TableColumn<DataSetsRow, ?> col : columns) {
+                sb.append(col.getText()).append(", ");
+            }
+            sb.setCharAt(sb.length() - 2, '\n');
+            sb.deleteCharAt(sb.length() - 1);
+            for (int r = 0; r < nRows; r++) {
+                for (TableColumn<DataSetsRow, ?> col : columns) {
+                    if (col instanceof DataSetTableColumn) {
+                        sb.append(((DataSetTableColumn) col).getValue(r)).append(", ");
+                    } else {
+                        sb.append(col.getCellData(r)).append(", ");
+                    }
+                }
+                sb.setCharAt(sb.length() - 2, '\n');
+                sb.deleteCharAt(sb.length() - 1);
+            }
+            return sb.toString();
+        }
+
+        public double getValue(final int row, final DataSet ds, final ColumnType type) {
+            if (row >= ds.getDataCount()) {
+                return 0.0;
+            }
+            switch (type) {
+            case X:
+                return ds.getX(row);
+            case Y:
+                return ds.getY(row);
+            default:
+                if ((ds instanceof DataSetError)) {
+                    return 0.0;
+                }
+            }
+            DataSetError eds = (DataSetError) ds;
+            switch (type) {
+            case EXN:
+                return eds.getXErrorNegative(row);
+            case EXP:
+                return eds.getXErrorPositive(row);
+            case EYN:
+                return eds.getYErrorNegative(row);
+            case EYP:
+                return eds.getYErrorPositive(row);
+            default:
+                return 0.0;
+            }
+        }
+
+        /**
+         * A simple Column displaying the Table Row and styled like the Table
+         * Header, non editable
+         *
+         * @author akrimm
+         */
+        protected class RowIndexHeaderTableColumn extends TableColumn<DataSetsRow, Integer> {
+            public RowIndexHeaderTableColumn() {
+                super();
+                setCellValueFactory(dataSetsRow -> {
+                    return new ReadOnlyObjectWrapper<>(dataSetsRow.getValue().getRow());
+                });
+                getStyleClass().add("column-header"); // make the column look
+                                                      // like a header
+                setEditable(false);
+            }
+        }
+
+        /**
+         * Columns for a DataSet. Manages the the nested subcolumns for the
+         * actual data and handles updates of the DataSet.
          * 
-         * @return the ContextMenu to use.
+         * @author akrimm
          */
-        @Override
-        public ContextMenu getSpreadsheetViewContextMenu() {
-            final ContextMenu contextMenu = super.getSpreadsheetViewContextMenu();
+        protected class DataSetTableColumns extends TableColumn<DataSetsRow, Double> {
+            private final DataSet dataSet;
 
-            final MenuItem copyAllItem = new MenuItem(localize(asKey("spreadsheet.view.menu.copy")) + " all");
-            copyAllItem.setGraphic(
-                    new ImageView(new Image(SpreadsheetView.class.getResourceAsStream("copySpreadsheetView.png"))));
-            copyAllItem.setAccelerator(new KeyCodeCombination(KeyCode.A, KeyCombination.SHORTCUT_DOWN));
-            copyAllItem.setOnAction(new EventHandler<ActionEvent>() {
+            public DataSetTableColumns(final DataSet dataSet) {
+                super(dataSet.getName());
+                this.dataSet = dataSet;
+                addSubcolumns();
 
-                @Override
-                public void handle(ActionEvent e) {
-                    copyAllToClipboard();
+            }
+
+            private void addSubcolumns() {
+                getColumns().add(new DataSetTableColumn("x", dataSet, ColumnType.X));
+                getColumns().add(new DataSetTableColumn("y", dataSet, ColumnType.Y));
+
+                if (!(dataSet instanceof DataSetError)) {
+                    return;
                 }
-            });
+                DataSetError eDs = (DataSetError) dataSet;
 
-            contextMenu.getItems().add(0, copyAllItem);
-
-            return contextMenu;
+                if (eDs.getErrorType() == ErrorType.X || eDs.getErrorType() == ErrorType.XY) {
+                    getColumns().add(new DataSetTableColumn("e_x", dataSet, ColumnType.EXN));
+                }
+                if (eDs.getErrorType() == ErrorType.X_ASYMMETRIC || eDs.getErrorType() == ErrorType.XY_ASYMMETRIC) {
+                    getColumns().add(new DataSetTableColumn("-e_x", dataSet, ColumnType.EXN));
+                    getColumns().add(new DataSetTableColumn("+e_x", dataSet, ColumnType.EXP));
+                }
+                if (eDs.getErrorType() == ErrorType.Y || eDs.getErrorType() == ErrorType.XY) {
+                    getColumns().add(new DataSetTableColumn("e_y", dataSet, ColumnType.EYN));
+                }
+                if (eDs.getErrorType() == ErrorType.Y_ASYMMETRIC || eDs.getErrorType() == ErrorType.XY_ASYMMETRIC) {
+                    getColumns().add(new DataSetTableColumn("-e_y", dataSet, ColumnType.EYN));
+                    getColumns().add(new DataSetTableColumn("+e_y", dataSet, ColumnType.EYP));
+                }
+            }
         }
 
+        /**
+         * A Column representing an actual colum displaying Double values from a
+         * DataSet.
+         *
+         * @author akrimm
+         */
+        protected class DataSetTableColumn extends TableColumn<DataSetsRow, Double> {
+            private final DataSet ds;
+            private final ColumnType type;
+
+            /**
+             * Creates a TableColumn with the text set to the provided string,
+             * with default comparator. The cell factory and onEditCommit
+             * implementation facilitate editing of the DataSet column
+             * identified by the ds and type Parameter
+             * 
+             * @param text The string to show when the TableColumn is placed
+             *            within the TableView
+             * @param dataSet The dataset containing the column
+             * @param type The field of the data to be shown
+             */
+            public DataSetTableColumn(final String text, final DataSet dataSet, final ColumnType type) {
+                super(text);
+                this.ds = dataSet;
+                this.type = type;
+                this.setCellValueFactory(dataSetsRowFeature -> new ReadOnlyObjectWrapper<>(
+                        dataSetsRowFeature.getValue().getValue(ds, type)));
+
+                if (editable) {
+                    updateEditableState();
+                }
+            }
+
+            private void updateEditableState() {
+                this.setEditable(false);
+                this.setOnEditCommit(null);
+                if (!(ds instanceof EditableDataSet) || (type != ColumnType.X && type != ColumnType.Y)) {
+                    // can edit only 'EditableDataSet's and (X or Y) columns
+                    return;
+                }
+                final EditableDataSet editableDataSet = (EditableDataSet) ds;
+                final EditConstraints editConstraints = editableDataSet.getEditConstraints();
+
+                if (type == ColumnType.X && editConstraints != null && !editConstraints.isXEditable()) {
+                    // editing of x coordinate is excluded
+                    return;
+                }
+                if (type == ColumnType.Y && editConstraints != null && !editConstraints.isYEditable()) {
+                    // editing of y coordinate is excluded
+                    return;
+                }
+
+                // column can theoretically be edited as long as
+                // 'canChange(index)' is true for the selected index
+                // and isAcceptable(index, double, double) is also true
+                this.setEditable(true);
+                this.setCellFactory(TextFieldTableCell.forTableColumn(new DoubleStringConverter()));
+
+                this.setOnEditCommit(e -> {
+                    final int row = e.getRowValue().getRow();
+                    final double oldX = editableDataSet.getX(row);
+                    final double oldY = editableDataSet.getY(row);
+                    final double newVal = e.getNewValue();
+
+                    if (editConstraints != null && !editConstraints.canChange(row)) {
+                        // may not edit value, revert to old value (ie. via
+                        // rewriting old value)
+                        editableDataSet.set(row, oldX, oldY);
+                        return;
+                    }
+
+                    switch (type) {
+                    case X:
+                        if (editConstraints != null && !editConstraints.isAcceptable(row, newVal, oldY)) {
+                            // may not edit x
+                            editableDataSet.set(row, oldX, oldY);
+                            break;
+                        }
+                        editableDataSet.set(row, newVal, oldY);
+                        break;
+                    case Y:
+                        if (editConstraints != null && !editConstraints.isAcceptable(row, oldX, newVal)) {
+                            // may not edit y
+                            editableDataSet.set(row, oldX, oldY);
+                            break;
+                        }
+                        editableDataSet.set(row, oldX, newVal);
+                        break;
+                    default:
+                        // Errors are not editable, as there is no
+                        // interface for manipulating them
+                        editableDataSet.set(row, oldX, oldY);
+                        break;
+                    }
+                });
+            }
+
+            public double getValue(final int row) {
+                return dsModel.getValue(row, ds, type);
+            }
+        }
     }
 
+    protected enum ColumnType {
+        X,
+        Y,
+        EXN,
+        EXP,
+        EYN,
+        EYP
+    }
+
+    protected class DataSetsRow {
+        private int row = 0;
+        private DataSetsModel model;
+
+        @Override
+        public int hashCode() {
+            int hash = 7;
+            hash = 31 * hash + model.hashCode();
+            hash = 31 * hash + row;
+            return hash;
+        }
+
+        @Override
+        public boolean equals(final Object o) {
+            if (o instanceof DataSetsRow) {
+                final DataSetsRow dsr = (DataSetsRow) o;
+                return ((dsr.getRow() == row) && model.equals(dsr.getModel()));
+            }
+            return false;
+        }
+
+        private DataSetsRow(final int row, final DataSetsModel model) {
+            this.row = row;
+            this.model = model;
+        }
+
+        protected DataSetsModel getModel() {
+            return model;
+        }
+
+        public int getRow() {
+            return row;
+        }
+
+        public double getValue(final DataSet ds, final ColumnType type) {
+            return model.getValue(row, ds, type);
+        }
+    }
 }
