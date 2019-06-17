@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 import java.util.concurrent.ConcurrentHashMap;
@@ -60,18 +61,20 @@ import de.gsi.dataset.spi.DoubleErrorDataSet;
  * @author rstein
  * @author akrimm
  */
-public class DataSetUtils extends DataSetUtilsHelper {    
+public class DataSetUtils extends DataSetUtilsHelper {
     private static final int SWITCH_TO_BINARY_KEY = 0xFE;
     private static final Logger LOGGER = LoggerFactory.getLogger(DataSetUtils.class);
     private static final String DEFAULT_TIME_FORMAT = "yyyyMMdd_HHmmss";
     public static boolean useFloat32BinaryStandard = true;
 
     private DataSetUtils() {
+        super();
         // static class nothing to be initialised
     }
 
     /**
      * perform and return a deep copy of the data set
+     * 
      * @param ds data set to be copied
      * @return deep copy of data set
      */
@@ -117,6 +120,7 @@ public class DataSetUtils extends DataSetUtilsHelper {
 
     /**
      * Error type short handle
+     * 
      * @author rstein
      *
      */
@@ -143,12 +147,9 @@ public class DataSetUtils extends DataSetUtilsHelper {
      * convenience short-hand notation for getting error variable at a specific
      * data point index. Returns 0.0 if no errors are defined.
      *
-     * @param dataSet
-     *            the source data set
-     * @param eType
-     *            the error type
-     * @param index
-     *            the data set index
+     * @param dataSet the source data set
+     * @param eType the error type
+     * @param index the data set index
      * @return the given error at data point "index"
      */
     public static double error(final DataSet dataSet, final ErrType eType, final int index) {
@@ -159,13 +160,9 @@ public class DataSetUtils extends DataSetUtilsHelper {
      * convenience short-hand notation for getting error variable at an exact x
      * value. Returns 0.0 if no errors are defined.
      *
-     * @param dataSet
-     *            the source data set
-     * @param eType
-     *            the error type
-     * @param x
-     *            the data set x-value for which the error should be
-     *            interpolated
+     * @param dataSet the source data set
+     * @param eType the error type
+     * @param x the data set x-value for which the error should be interpolated
      * @return the given interpolated error
      */
     public static double error(final DataSet dataSet, final ErrType eType, final double x) {
@@ -176,18 +173,12 @@ public class DataSetUtils extends DataSetUtilsHelper {
      * convenience short-hand notation for getting error variables. Returns 0.0
      * if no errors are defined.
      *
-     * @param dataSet
-     *            the source data set
-     * @param eType
-     *            the error type
-     * @param index
-     *            the data set index
-     * @param x
-     *            the data set x-value for which the error should be
-     *            interpolated
-     * @param interpolate
-     *            determines if the value at index or the interpolated value at
-     *            x should be returned
+     * @param dataSet the source data set
+     * @param eType the error type
+     * @param index the data set index
+     * @param x the data set x-value for which the error should be interpolated
+     * @param interpolate determines if the value at index or the interpolated
+     *            value at x should be returned
      * @return the given error
      */
     protected static double error(final DataSet dataSet, final ErrType eType, final int index, final double x,
@@ -207,6 +198,7 @@ public class DataSetUtils extends DataSetUtilsHelper {
                 return ds.getYErrorNegative(x);
             case EYP:
                 return ds.getYErrorPositive(x);
+            default:
             }
         } else {
             switch (eType) {
@@ -218,6 +210,7 @@ public class DataSetUtils extends DataSetUtilsHelper {
                 return ds.getYErrorNegative(index);
             case EYP:
                 return ds.getYErrorPositive(index);
+            default:
             }
         }
 
@@ -227,10 +220,8 @@ public class DataSetUtils extends DataSetUtilsHelper {
     /**
      * small helper routine to crop data array in case it's to long
      *
-     * @param in
-     *            input data array
-     * @param length
-     *            length of output array
+     * @param in input data array
+     * @param length length of output array
      * @return cropped/zero-padded array of size length.
      */
     protected static double[] cropToLength(final double[] in, final int length) {
@@ -244,10 +235,8 @@ public class DataSetUtils extends DataSetUtilsHelper {
      * convenience short-hand notation for getting error variables (if defined
      * for dataset)
      *
-     * @param dataSet
-     *            the source data set
-     * @param eType
-     *            the error type
+     * @param dataSet the source data set
+     * @param eType the error type
      * @return the given error array (cropped to data set length if necessary)
      */
     public static double[] errors(final DataSet dataSet, final ErrType eType) {
@@ -310,8 +299,8 @@ public class DataSetUtils extends DataSetUtilsHelper {
 
     private static class SplitCharByteInputStream extends FilterInputStream {
         private static final byte MARKER = (byte) SWITCH_TO_BINARY_KEY;
-        private boolean binary = false;
-        private boolean hasMarker = false;
+        private boolean binary;
+        private boolean hasMarker;
         private final PushbackInputStream pbin;
 
         public SplitCharByteInputStream(final PushbackInputStream in) {
@@ -332,7 +321,12 @@ public class DataSetUtils extends DataSetUtilsHelper {
         @Override
         public int read(final byte[] b) throws IOException {
             int nread;
-            if (!hasMarker) {
+            if (hasMarker) {
+                if (!binary) {
+                    return -1;
+                }
+                nread = in.read(b, 0, b.length);
+            } else {
                 nread = in.read(b, 0, b.length);
                 for (int i = 0; i < b.length; i++) {
                     if (b[i] == MARKER) {
@@ -341,11 +335,6 @@ public class DataSetUtils extends DataSetUtilsHelper {
                         return i;
                     }
                 }
-            } else {
-                if (!binary) {
-                    return -1;
-                }
-                nread = in.read(b, 0, b.length);
             }
             return nread;
         }
@@ -353,7 +342,12 @@ public class DataSetUtils extends DataSetUtilsHelper {
         @Override
         public int read(final byte[] b, final int off, final int len) throws IOException {
             int nread;
-            if (!hasMarker) {
+            if (hasMarker) {
+                if (!binary) {
+                    return -1;
+                }
+                nread = in.read(b, off, len);
+            } else {
                 nread = in.read(b, off, len);
                 for (int i = off; i < (off + nread); i++) {
                     if (b[i] == MARKER) {
@@ -362,11 +356,6 @@ public class DataSetUtils extends DataSetUtilsHelper {
                         return i;
                     }
                 }
-            } else {
-                if (!binary) {
-                    return -1;
-                }
-                nread = in.read(b, off, len);
             }
             return nread;
         }
@@ -377,10 +366,11 @@ public class DataSetUtils extends DataSetUtilsHelper {
 
         public void switchToBinary() {
             if (hasMarker) {
-                if (!binary) {
-                    binary = true;
-                } else {
+                if (binary) {
                     LOGGER.warn("Allready in binary mode");
+                } else {
+                    binary = true;
+
                 }
             } else {
                 LOGGER.warn("Char/Byte split marker not reached yet");
@@ -392,10 +382,8 @@ public class DataSetUtils extends DataSetUtilsHelper {
      * Open a OutputStream that is backed by the appropriate compression and
      * file handling streams.
      *
-     * @param file
-     *            File to open
-     * @param compression
-     *            Compression method
+     * @param file File to open
+     * @param compression Compression method
      * @return A ready-to-go OutputStream that is agnostic to the underlying
      *         compression method
      * @throws IOException in case of IO problems
@@ -405,12 +393,12 @@ public class DataSetUtils extends DataSetUtilsHelper {
         switch (compression) {
         case NONE:
             return Files.newOutputStream(file.toPath());
-        case GZIP:        	
+        case GZIP:
             return new GZIPOutputStream(Files.newOutputStream(file.toPath()));
         case ZIP:
             final ZipOutputStream zipOStream = new ZipOutputStream(Files.newOutputStream(file.toPath()));
             final String filename = file.getName();
-            final String zipentryname = filename.toLowerCase().endsWith(".zip")
+            final String zipentryname = filename.toLowerCase(Locale.UK).endsWith(".zip")
                     ? filename.substring(0, filename.length() - 4) : filename;
             zipOStream.putNextEntry(new ZipEntry(zipentryname));
             return zipOStream;
@@ -424,7 +412,7 @@ public class DataSetUtils extends DataSetUtilsHelper {
      * the chosen compression method.
      *
      * @param file file descriptor
-     * @param compression @see Compression
+     * @param compression for more info @see Compression
      * @return SplitCharByteInputStream
      * @throws IOException in case of IO problems
      */
@@ -464,12 +452,10 @@ public class DataSetUtils extends DataSetUtilsHelper {
      * for date is SimpleDateFormat "yyyyMMdd_HHmmss", for int and float it is
      * printf's "%d" and "%e".
      *
-     * @param dataSet
-     *            A dataSet containing all the data field referenced in the
+     * @param dataSet A dataSet containing all the data field referenced in the
      *            filename pattern
-     * @param fileName
-     *            Filename (with "{metadatafield;type;format}" placeholders for
-     *            variables)
+     * @param fileName Filename (with "{metadatafield;type;format}" placeholders
+     *            for variables)
      * @return The filename with the placeholders replaced
      */
     public static String getFileName(final DataSet dataSet, final String fileName) {
@@ -549,10 +535,10 @@ public class DataSetUtils extends DataSetUtilsHelper {
      *         Defaults to Compression.NONE
      */
     private static Compression evaluateAutoCompression(final String fileName) {
-        if (fileName.toLowerCase().endsWith(".gz")) {
+        if (fileName.toLowerCase(Locale.UK).endsWith(".gz")) {
             return Compression.GZIP;
         }
-        if (fileName.toLowerCase().endsWith(".zip")) {
+        if (fileName.toLowerCase(Locale.UK).endsWith(".zip")) {
             return Compression.ZIP;
         }
         return Compression.NONE;
@@ -578,13 +564,10 @@ public class DataSetUtils extends DataSetUtilsHelper {
      * #-commented Metadata Header and a $-commented column header. Expects the
      * following columns in this order to be present: index, x, y, eyn, eyp.
      *
-     * @param dataSet
-     *            The DataSet to export
-     * @param path
-     *            Path to the location of the file
-     * @param fileName
-     *            Filename (with "{metadatafield;type;format}" placeholders for
-     *            variables)
+     * @param dataSet The DataSet to export
+     * @param path Path to the location of the file
+     * @param fileName Filename (with "{metadatafield;type;format}" placeholders
+     *            for variables)
      * @param binary true: whether to store data as binary or string
      * @return actual name of the file that was written or none in case of
      *         errors
@@ -614,13 +597,10 @@ public class DataSetUtils extends DataSetUtilsHelper {
      * #-commented Metadata Header and a $-commented column header. Expects the
      * following columns in this order to be present: index, x, y, eyn, eyp.
      *
-     * @param dataSet
-     *            The DataSet to export
-     * @param path
-     *            Path to the location of the file
-     * @param fileName
-     *            Filename (with "{metadatafield;type;format}" placeholders for
-     *            variables)
+     * @param dataSet The DataSet to export
+     * @param path Path to the location of the file
+     * @param fileName Filename (with "{metadatafield;type;format}" placeholders
+     *            for variables)
      * @return actual name of the file that was written or none in case of
      *         errors
      */
@@ -648,13 +628,10 @@ public class DataSetUtils extends DataSetUtilsHelper {
      * #-commented Metadata Header and a $-commented column header. Expects the
      * following columns in this order to be present: index, x, y, eyn, eyp.
      *
-     * @param dataSet
-     *            The DataSet to export
-     * @param path
-     *            Path to the location of the file
-     * @param fileName
-     *            Filename (with "{metadatafield;type;format}" placeholders for
-     *            variables)
+     * @param dataSet The DataSet to export
+     * @param path Path to the location of the file
+     * @param fileName Filename (with "{metadatafield;type;format}" placeholders
+     *            for variables)
      * @param compression compression type @see Compression
      * @return actual name of the file that was written or none in case of
      *         errors
@@ -682,25 +659,19 @@ public class DataSetUtils extends DataSetUtilsHelper {
      * #-commented Metadata Header and a $-commented column header. Expects the
      * following columns in this order to be present: index, x, y, eyn, eyp.
      *
-     * @param dataSet
-     *            The DataSet to export
-     * @param path
-     *            Path to the location of the file
-     * @param fileName
-     *            Filename (with "{metadatafield;type;format}" placeholders for
-     *            variables)
-     * @param compression
-     *            Compression of the file (GZIP, ZIP or NONE). Supply AUTO or
-     *            omit this value to use file extension.
+     * @param dataSet The DataSet to export
+     * @param path Path to the location of the file
+     * @param fileName Filename (with "{metadatafield;type;format}" placeholders
+     *            for variables)
+     * @param compression Compression of the file (GZIP, ZIP or NONE). Supply
+     *            AUTO or omit this value to use file extension.
      * @param binary true: whether to store data as binary or string
      * @return actual name of the file that was written or none in case of
      *         errors
      */
     public static String writeDataSetToFile(final DataSet dataSet, final Path path, final String fileName,
-            Compression compression, final boolean binary) {
-        if (compression == Compression.AUTO) {
-            compression = evaluateAutoCompression(fileName);
-        }
+            final Compression compression, final boolean binary) {
+
         if (dataSet == null) {
             throw new IllegalArgumentException("dataSet must not be null or empty");
         }
@@ -712,37 +683,36 @@ public class DataSetUtils extends DataSetUtilsHelper {
             final String realFileName = getFileName(dataSet, fileName);
             final String longFileName = path.toFile() + "/" + realFileName;
             final File file = new File(longFileName);
-            if (file.getParentFile().mkdirs()) {
-            	if (LOGGER.isInfoEnabled()) {
-            		LOGGER.info("needed to create directory for file: " + longFileName);
-            	}
+            if (file.getParentFile().mkdirs() && LOGGER.isInfoEnabled()) {
+                LOGGER.info("needed to create directory for file: " + longFileName);
             }
 
             // create OutputStream
             final ByteArrayOutputStream byteOutput = new ByteArrayOutputStream(8192);
-            //TODO: cache ByteArrayOutputStream
-            try (OutputStream outputfile = openDatasetFileOutput(file, compression);) {
+            // TODO: cache ByteArrayOutputStream
+            try (OutputStream outputfile = openDatasetFileOutput(file,
+                    compression == Compression.AUTO ? evaluateAutoCompression(fileName) : compression);) {
 
-                writeDataSetToByteArray(dataSet, byteOutput, binary, useFloat32BinaryStandard );
+                writeDataSetToByteArray(dataSet, byteOutput, binary, useFloat32BinaryStandard);
 
                 byteOutput.writeTo(outputfile);
 
                 // automatically closing writer connection
             } catch (final IOException e) {
-            	if (LOGGER.isErrorEnabled()) {
-            		LOGGER.error("could not write to file: '" + fileName + "'", e);
-            	}
+                if (LOGGER.isErrorEnabled()) {
+                    LOGGER.error("could not write to file: '" + fileName + "'", e);
+                }
             }
 
             if (LOGGER.isDebugEnabled()) {
-            	LOGGER.debug("write data set '" + dataSet.getName() + "' to " + longFileName);
+                LOGGER.debug("write data set '" + dataSet.getName() + "' to " + longFileName);
             }
 
             return longFileName;
         } catch (final Exception e) {
-        	if (LOGGER.isErrorEnabled()) {
-        		LOGGER.error("could not write to file: '" + fileName + "'", e);
-        	}
+            if (LOGGER.isErrorEnabled()) {
+                LOGGER.error("could not write to file: '" + fileName + "'", e);
+            }
             return null;
         }
     }
@@ -750,16 +720,12 @@ public class DataSetUtils extends DataSetUtilsHelper {
     /**
      * Write data set into byte buffer.
      *
-     * @param dataSet
-     *            The DataSet to export
-     * @param byteOutput
-     *            byte output stream (N.B. keep caching this object)
-     * @param binary
-     *            {@code true}: encode data as binary (smaller size,
+     * @param dataSet The DataSet to export
+     * @param byteOutput byte output stream (N.B. keep caching this object)
+     * @param binary {@code true}: encode data as binary (smaller size,
      *            performance), or {@code false} as string (human readable,
      *            easier debugging)
-     * @param asFloat
-     *            {@code true}: encode data as binary floats (smaller size,
+     * @param asFloat {@code true}: encode data as binary floats (smaller size,
      *            performance), or {@code false} as double (better precision)
      */
     public static void writeDataSetToByteArray(final DataSet dataSet, final ByteArrayOutputStream byteOutput,
@@ -795,32 +761,31 @@ public class DataSetUtils extends DataSetUtilsHelper {
     }
 
     /**
-     * @param outputStream
-     *            stream to write binary data into
-     * @param dataSet
-     *            to be exported
-     * @param asFloat
-     *            {@code true} use 32-bit floats (less memory, faster transfer)
-     *            instead of 64-bit doubles (DataSet default, higher precision)
+     * @param outputStream stream to write binary data into
+     * @param dataSet to be exported
+     * @param asFloat {@code true} use 32-bit floats (less memory, faster
+     *            transfer) instead of 64-bit doubles (DataSet default, higher
+     *            precision)
      */
     private static void writeNumericBinaryDataToStream(final OutputStream outputStream, final DataSet dataSet,
             final boolean asFloat) {
         final int nsamples = dataSet.getDataCount();
+        final String nSampleString = Long.toString(nsamples);
 
         // write header with field sizes
         final StringBuilder buffer = getCachedStringBuilder("binaryDataCacheBuilder", 250);
 
         buffer.append("$binary").append("\n");
         if (asFloat) {
-            buffer.append("$x;float32[];").append(Long.toString(nsamples)).append("\n");
-            buffer.append("$y;float32[];").append(Long.toString(nsamples)).append("\n");
-            buffer.append("$eyn;float32[];").append(Long.toString(nsamples)).append("\n");
-            buffer.append("$eyp;float32[];").append(Long.toString(nsamples)).append("\n");
+            buffer.append("$x;float32[];").append(nSampleString).append("\n");
+            buffer.append("$y;float32[];").append(nSampleString).append("\n");
+            buffer.append("$eyn;float32[];").append(nSampleString).append("\n");
+            buffer.append("$eyp;float32[];").append(nSampleString).append("\n");
         } else {
-            buffer.append("$x;float64[];").append(Long.toString(nsamples)).append("\n");
-            buffer.append("$y;float64[];").append(Long.toString(nsamples)).append("\n");
-            buffer.append("$eyn;float64[];").append(Long.toString(nsamples)).append("\n");
-            buffer.append("$eyp;float64[];").append(Long.toString(nsamples)).append("\n");
+            buffer.append("$x;float64[];").append(nSampleString).append("\n");
+            buffer.append("$y;float64[];").append(nSampleString).append("\n");
+            buffer.append("$eyn;float64[];").append(nSampleString).append("\n");
+            buffer.append("$eyp;float64[];").append(nSampleString).append("\n");
         }
         try {
             outputStream.write(buffer.toString().getBytes());
@@ -841,7 +806,8 @@ public class DataSetUtils extends DataSetUtilsHelper {
                                                       // binary data
 
             if (asFloat) {
-                //TODO: check performance w.r.t. using 'DataOutputStream' directly
+                // TODO: check performance w.r.t. using 'DataOutputStream'
+                // directly
                 final ByteBuffer byteBuffer = getCachedDoubleArray("writeByteBuffer", Float.BYTES * nsamples);
                 writeDoubleArrayAsFloatToByteBuffer(byteBuffer, dataSet.getXValues());
                 outputStream.write(byteBuffer.array());
@@ -851,7 +817,7 @@ public class DataSetUtils extends DataSetUtilsHelper {
                 outputStream.write(byteBuffer.array());
                 writeDoubleArrayAsFloatToByteBuffer(byteBuffer, errors(dataSet, EYP));
                 outputStream.write(byteBuffer.array());
-                release("writeByteBuffer", byteBuffer);                
+                release("writeByteBuffer", byteBuffer);
             } else {
                 final ByteBuffer byteBuffer = getCachedDoubleArray("writeByteBuffer", Double.BYTES * nsamples);
                 writeDoubleArrayToByteBuffer(byteBuffer, dataSet.getXValues());
@@ -881,24 +847,26 @@ public class DataSetUtils extends DataSetUtilsHelper {
             buffer.append("#yMax : ").append(dataSet.getYMax()).append('\n');
 
             try {
-                // write some statistics for the human readable benefit when opening the
+                // write some statistics for the human readable benefit when
+                // opening the
                 // file with standard text-based viewers
                 buffer.append("#integral : ").append(integralSimple(dataSet)).append('\n');
                 buffer.append("#mean : ").append(mean(dataSet.getYValues())).append('\n');
                 buffer.append("#rms : ").append(rootMeanSquare(dataSet.getYValues())).append('\n');
             } catch (final Exception e) {
-            	if (LOGGER.isErrorEnabled()) {
-            		LOGGER.error("writeHeaderDataToFile - compute Math error for dataSet = '" + dataSet.getName() + "'", e);
-            	}
+                if (LOGGER.isErrorEnabled()) {
+                    LOGGER.error("writeHeaderDataToFile - compute Math error for dataSet = '" + dataSet.getName() + "'",
+                            e);
+                }
             }
 
             outputStream.write(buffer.toString().getBytes());
-            
+
             release("headerDataCacheBuilder", buffer);
         } catch (final Exception e) {
-        	if (LOGGER.isErrorEnabled()) {
-        		LOGGER.error("writeHeaderDataToFile - error for dataSet = '" + dataSet.getName() + "'", e);
-        	}
+            if (LOGGER.isErrorEnabled()) {
+                LOGGER.error("writeHeaderDataToFile - error for dataSet = '" + dataSet.getName() + "'", e);
+            }
         }
     }
 
@@ -908,7 +876,7 @@ public class DataSetUtils extends DataSetUtilsHelper {
         }
         final DataSetMetaData metaDataSet = (DataSetMetaData) dataSet;
         try {
-            final StringBuilder buffer = getCachedStringBuilder("metaDataCacheBuilder",1000);
+            final StringBuilder buffer = getCachedStringBuilder("metaDataCacheBuilder", 1000);
 
             for (final String info : metaDataSet.getInfoList()) {
                 buffer.append("#info : ").append(info).append('\n');
@@ -928,12 +896,12 @@ public class DataSetUtils extends DataSetUtilsHelper {
             }
 
             outputStream.write(buffer.toString().getBytes());
-            
+
             release("metaDataCacheBuilder", buffer);
         } catch (final Exception e) {
-        	if (LOGGER.isErrorEnabled()) {
-        		LOGGER.error("writeMetaDataToFile - error for dataSet = '" + dataSet.getName() + "'", e);
-        	}
+            if (LOGGER.isErrorEnabled()) {
+                LOGGER.error("writeMetaDataToFile - error for dataSet = '" + dataSet.getName() + "'", e);
+            }
         }
     }
 
@@ -941,12 +909,12 @@ public class DataSetUtils extends DataSetUtilsHelper {
         try {
             // formatter definition, we always write the y errors to file
             final int nSamples = dataSet.getDataCount();
-            final StringBuilder buffer = getCachedStringBuilder("numericDataCacheBuilder", nSamples * 45);
-            buffer.append("#nSamples : " + nSamples).append("\n");
+            final StringBuilder buffer = getCachedStringBuilder("numericDataCacheBuilder",
+                    Math.max(100, nSamples * 45));
+            buffer.append("#nSamples : ").append(Integer.toString(nSamples)).append("\n");
             // use '$' sign as special indicator that from now on only numeric
             // data is to be expected
-            buffer.append("$index, x, y, eyn, eyp");
-            buffer.append("\n");
+            buffer.append("$index, x, y, eyn, eyp").append("\n");
 
             for (int i = 0; i < nSamples; i++) {
                 buffer.append(i); // data index
@@ -964,9 +932,9 @@ public class DataSetUtils extends DataSetUtilsHelper {
 
             release("numericDataCacheBuilder", buffer);
         } catch (final Exception e) {
-        	if (LOGGER.isErrorEnabled()) {
-        		LOGGER.error("writeNumericDataToFile - error for dataSet = '" + dataSet.getName() + "'", e);
-        	}
+            if (LOGGER.isErrorEnabled()) {
+                LOGGER.error("writeNumericDataToFile - error for dataSet = '" + dataSet.getName() + "'", e);
+            }
         }
     }
 
@@ -999,8 +967,7 @@ public class DataSetUtils extends DataSetUtilsHelper {
      * #-commented Metadata Header and a $-commented column header. Expects the
      * following columns in this order to be present: index, x, y, eyn, eyp.
      *
-     * @param fileName
-     *            Path and name of file containing csv data.
+     * @param fileName Path and name of file containing csv data.
      * @return DataSet with the data and metadata read from the file
      */
     public static DataSet readDataSetFromFile(final String fileName) {
@@ -1013,37 +980,33 @@ public class DataSetUtils extends DataSetUtilsHelper {
      * #-commented Metadata Header and a $-commented column header. Expects the
      * following columns in this order to be present: index, x, y, eyn, eyp.
      *
-     * @param fileName
-     *            Path and name of file containing csv data.
-     * @param compression
-     *            Compression of the file (GZIP, ZIP or NONE). Supply AUTO or
-     *            omit this value to use file extension.
+     * @param fileName Path and name of file containing csv data.
+     * @param compression Compression of the file (GZIP, ZIP or NONE). Supply
+     *            AUTO or omit this value to use file extension.
      * @return DataSet with the data and metadata read from the file
      */
-    public static DataSet readDataSetFromFile(final String fileName, Compression compression) {
+    public static DataSet readDataSetFromFile(final String fileName, final Compression compression) {
         if ((fileName == null) || fileName.isEmpty()) {
             throw new IllegalArgumentException("fileName must not be null or empty");
         }
-        if (compression == Compression.AUTO) {
-            compression = evaluateAutoCompression(fileName);
-        }
+
         DoubleErrorDataSet dataSet = null;
         try {
             final File file = new File(fileName);
-            try (final SplitCharByteInputStream inputFile = openDatasetFileInput(file, compression)) {
+            try (SplitCharByteInputStream inputFile = openDatasetFileInput(file,
+                    compression == Compression.AUTO ? evaluateAutoCompression(fileName) : compression)) {
 
-            dataSet = readDataSetFromStream(inputFile);
+                dataSet = readDataSetFromStream(inputFile);
 
             } catch (final IOException e) {
-            	if (LOGGER.isErrorEnabled()) {
-            		LOGGER.error("could not open/parse file: '" + fileName + "'", e);
-            	}
+                if (LOGGER.isErrorEnabled()) {
+                    LOGGER.error("could not open/parse file: '" + fileName + "'", e);
+                }
             }
         } catch (final Exception e) {
-        	if (LOGGER.isErrorEnabled()) {
-        		LOGGER.error("could not open/parse file: '" + fileName + "'", e);
-        	}
-            return dataSet;
+            if (LOGGER.isErrorEnabled()) {
+                LOGGER.error("could not open/parse file: '" + fileName + "'", e);
+            }
         }
         return dataSet;
     }
@@ -1054,8 +1017,7 @@ public class DataSetUtils extends DataSetUtilsHelper {
      * #-commented Metadata Header and a $-commented column header. Expects the
      * following columns in this order to be present: index, x, y, eyn, eyp.
      *
-     * @param byteArray
-     *            byte array.
+     * @param byteArray byte array.
      * @return DataSet with the data and metadata read from the file
      */
     public static DoubleErrorDataSet readDataSetFromByteArray(final byte[] byteArray) {
@@ -1070,19 +1032,20 @@ public class DataSetUtils extends DataSetUtilsHelper {
         DoubleErrorDataSet dataSet = null;
         try {
             final ByteArrayInputStream istream = new ByteArrayInputStream(byteArray);
-            try (final SplitCharByteInputStream inputFile = new SplitCharByteInputStream(new PushbackInputStream(istream, 8192))) {
+            try (SplitCharByteInputStream inputFile = new SplitCharByteInputStream(
+                    new PushbackInputStream(istream, 8192))) {
 
-            dataSet = readDataSetFromStream(inputFile);
+                dataSet = readDataSetFromStream(inputFile);
 
             } catch (final IOException e) {
-            	if (LOGGER.isErrorEnabled()) {
-            		LOGGER.error("could not open/parse byte array size = " + byteArray.length, e);
-            	}
+                if (LOGGER.isErrorEnabled()) {
+                    LOGGER.error("could not open/parse byte array size = " + byteArray.length, e);
+                }
             }
         } catch (final Exception e) {
-        	if (LOGGER.isErrorEnabled()) {
-        		LOGGER.error("could not open/parse byte array size = " + byteArray.length, e);
-        	}
+            if (LOGGER.isErrorEnabled()) {
+                LOGGER.error("could not open/parse byte array size = " + byteArray.length, e);
+            }
             return dataSet;
         }
         return dataSet;
@@ -1094,15 +1057,14 @@ public class DataSetUtils extends DataSetUtilsHelper {
      * #-commented Metadata Header and a $-commented column header. Expects the
      * following columns in this order to be present: index, x, y, eyn, eyp.
      *
-     * @param inputStream
-     *            Path and name of file containing csv data.
+     * @param inputStream Path and name of file containing csv data.
      * @return DataSet with the data and metadata read from the file
      */
     public static DoubleErrorDataSet readDataSetFromStream(final SplitCharByteInputStream inputStream) {
         boolean binary = false;
 
         DoubleErrorDataSet dataSet = null;
-        try (final BufferedReader inputReader = new BufferedReader(new InputStreamReader(inputStream))) {
+        try (BufferedReader inputReader = new BufferedReader(new InputStreamReader(inputStream))) {
             String dataSetName = "unknown data set";
             int nDataCountEstimate = 0;
             final ArrayList<String> info = new ArrayList<>();
@@ -1167,14 +1129,10 @@ public class DataSetUtils extends DataSetUtilsHelper {
     }
 
     /**
-     * @param inputReader
-     *            input reader for string data
-     * @param inputFile
-     *            input stream for binary data
-     * @param dataSet
-     *            used to store the read data
-     * @throws IOException
-     *             in case of IO problems
+     * @param inputReader input reader for string data
+     * @param inputFile input stream for binary data
+     * @param dataSet used to store the read data
+     * @throws IOException in case of IO problems
      */
     private static void readNumericDataFromBinaryFile(final BufferedReader inputReader,
             final SplitCharByteInputStream inputFile, final DoubleErrorDataSet dataSet) throws IOException {
@@ -1183,8 +1141,8 @@ public class DataSetUtils extends DataSetUtilsHelper {
             public String name;
             public String type;
             public int nsamples;
-            public FloatBuffer data32 = null;
-            public DoubleBuffer data64 = null;
+            public FloatBuffer data32;
+            public DoubleBuffer data64;
         }
         final List<DataEntry> toRead = new ArrayList<>();
         while ((line = inputReader.readLine()) != null) {
@@ -1197,17 +1155,15 @@ public class DataSetUtils extends DataSetUtilsHelper {
                 }
             });
         }
-        if (!inputFile.reachedSplit()) {
-            LOGGER.error("File seems to be corrupted, Split marker not found");
-        } else {
+        if (inputFile.reachedSplit()) {
             inputFile.switchToBinary();
             final int[] valindex = { -1, -1, -1, -1 };
             for (int i = 0; i < toRead.size(); i++) {
                 final DataEntry dataentry = toRead.get(i);
                 if (LOGGER.isDebugEnabled()) {
-                	LOGGER.debug("Read data: " + dataentry.name);
+                    LOGGER.debug("Read data: " + dataentry.name);
                 }
-                boolean isFloat32 = dataentry.type.toLowerCase().contains("float32");
+                boolean isFloat32 = dataentry.type.toLowerCase(Locale.UK).contains("float32");
 
                 final ByteBuffer byteData = isFloat32 ? ByteBuffer.allocate(dataentry.nsamples * Float.BYTES)
                         : ByteBuffer.allocate(dataentry.nsamples * Double.BYTES);
@@ -1216,13 +1172,13 @@ public class DataSetUtils extends DataSetUtilsHelper {
                     dataentry.data32 = byteData.asFloatBuffer();
                     while (alreadyRead < (dataentry.nsamples * Float.BYTES)) {
                         alreadyRead += inputFile.read(byteData.array(), alreadyRead,
-                                (dataentry.nsamples * Float.BYTES) - alreadyRead);
+                                dataentry.nsamples * Float.BYTES - alreadyRead);
                     }
                 } else {
                     dataentry.data64 = byteData.asDoubleBuffer();
                     while (alreadyRead < (dataentry.nsamples * Double.BYTES)) {
                         alreadyRead += inputFile.read(byteData.array(), alreadyRead,
-                                (dataentry.nsamples * Double.BYTES) - alreadyRead);
+                                dataentry.nsamples * Double.BYTES - alreadyRead);
                     }
                 }
                 switch (dataentry.name) {
@@ -1239,9 +1195,9 @@ public class DataSetUtils extends DataSetUtilsHelper {
                     valindex[3] = i;
                     break;
                 default:
-                	if (LOGGER.isDebugEnabled()) {
-                		LOGGER.debug("Got unused variable " + dataentry.name + " of type " + dataentry.type);
-                	}
+                    if (LOGGER.isDebugEnabled()) {
+                        LOGGER.debug("Got unused variable " + dataentry.name + " of type " + dataentry.type);
+                    }
                 }
 
             }
@@ -1255,9 +1211,11 @@ public class DataSetUtils extends DataSetUtilsHelper {
                     toRead.get(valindex[3]).data64);
 
             dataSet.set(x, y, eyn, eyp, false);
+        } else {
+            LOGGER.error("File seems to be corrupted, Split marker not found");
         }
     }
-   
+
     protected static void readNumericDataFromFile(final BufferedReader inputFile, final DoubleErrorDataSet dataSet) {
         try {
 
@@ -1267,8 +1225,6 @@ public class DataSetUtils extends DataSetUtilsHelper {
                     continue;
                 }
 
-                final long index = Long.parseLong(parse[0]); // ignored only for
-                                                             // cross-checks
                 final double x = Double.parseDouble(parse[1]);
                 final double y = Double.parseDouble(parse[2]);
                 final double eyn = parse.length < 5 ? 0.0 : Double.parseDouble(parse[3]);
@@ -1276,9 +1232,10 @@ public class DataSetUtils extends DataSetUtilsHelper {
                 dataSet.add(x, y, eyn, eyp);
             }
         } catch (final Exception e) {
-        	if (LOGGER.isErrorEnabled()) {
-        		LOGGER.error("readNumericDataFromFile could not parse numeric data for: '" + dataSet.getName() + "'", e);
-        	}
+            if (LOGGER.isErrorEnabled()) {
+                LOGGER.error("readNumericDataFromFile could not parse numeric data for: '" + dataSet.getName() + "'",
+                        e);
+            }
         }
     }
 

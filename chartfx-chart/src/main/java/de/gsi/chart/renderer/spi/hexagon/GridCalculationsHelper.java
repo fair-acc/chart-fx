@@ -5,7 +5,7 @@ import java.util.Collections;
 import java.util.List;
 
 class GridCalculationsHelper {
-    static ArrayList<Hexagon> getPathBetween(final Hexagon start, final Hexagon destination,
+    public static ArrayList<Hexagon> getPathBetween(final Hexagon start, final Hexagon destination,
             final IPathInfoSupplier pathInfoSupplier) throws NoPathFoundException {
         final ArrayList<Hexagon> closedSet = new ArrayList<>(); // The set of nodes already evaluated
         final ArrayList<Hexagon> openSet = new ArrayList<>(); // The set of tentative nodes to be evaluated, initially
@@ -92,7 +92,7 @@ class GridCalculationsHelper {
         return result;
     }
 
-    static List<Hexagon> getVisibleHexes(final Hexagon origin, final int visibleRange, final HexagonMap map) {
+    public static List<Hexagon> getVisibleHexes(final Hexagon origin, final int visibleRange, final HexagonMap map) {
         final List<GridPosition> ringMembers = origin.position.getPositionsOnCircleEdge(visibleRange);
         final List<Hexagon> result = new ArrayList<>();
         List<Hexagon> line;
@@ -108,7 +108,7 @@ class GridCalculationsHelper {
         return result;
     }
 
-    static ArrayList<Hexagon> getHexagonsOnRingEdge(final Hexagon center, final int radius, final HexagonMap map) {
+    public static ArrayList<Hexagon> getHexagonsOnRingEdge(final Hexagon center, final int radius, final HexagonMap map) {
         final ArrayList<Hexagon> result = new ArrayList<>();
         for (final GridPosition position : center.position.getPositionsOnCircleEdge(radius)) {
             final Hexagon hexagon = map.getHexagon(position);
@@ -119,7 +119,7 @@ class GridCalculationsHelper {
         return result;
     }
 
-    static ArrayList<Hexagon> getHexagonsInRingArea(final Hexagon center, final int radius, final HexagonMap map) {
+    public static ArrayList<Hexagon> getHexagonsInRingArea(final Hexagon center, final int radius, final HexagonMap map) {
         final ArrayList<Hexagon> result = new ArrayList<>();
         for (final GridPosition position : center.position.getPositionsInCircleArea(radius)) {
             final Hexagon hexagon = map.getHexagon(position);
