@@ -2,20 +2,19 @@ package de.gsi.dataset.spi;
 
 import java.util.Arrays;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import de.gsi.dataset.DataSet;
 import de.gsi.dataset.DataSetError;
+import de.gsi.dataset.EditableDataSet;
 import de.gsi.dataset.event.AddedDataEvent;
 import de.gsi.dataset.event.RemovedDataEvent;
 import de.gsi.dataset.event.UpdatedDataEvent;
-import de.gsi.dataset.event.UpdatedMetaDataEvent;
 import de.gsi.dataset.utils.AssertUtils;
 
 /**
- * Implementation of the <code>DataSetError</code> interface which stores x,y, +eyn, -eyn values
- * in separate double arrays. It provides methods allowing easily manipulate of
- * data points. <br>
+ * Implementation of the <code>DataSetError</code> interface which stores x,y,
+ * +eyn, -eyn values in separate double arrays. It provides methods allowing
+ * easily manipulate of data points. <br>
  * User provides X and Y coordinates or only Y coordinates. In the former case X
  * coordinates have value of data point index. This version being optimised for
  * native double arrays.
@@ -24,10 +23,8 @@ import de.gsi.dataset.utils.AssertUtils;
  *
  * @author rstein
  */
-public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet> implements DataSetError {
-
-    protected Map<Integer, String> dataLabels = new ConcurrentHashMap<>();
-    protected Map<Integer, String> dataStyles = new ConcurrentHashMap<>();
+public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
+        implements DataSetError, EditableDataSet {
     protected double[] xValues;
     protected double[] yValues;
     protected double[] yErrorsPos;
@@ -39,18 +36,20 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
      * Creates a new instance of <code>DoubleErrorDataSet</code>.
      *
      * @param name name of this DataSet.
-     * @throws IllegalArgumentException if <code>name</code> is <code>null</code>
+     * @throws IllegalArgumentException if <code>name</code> is
+     *             <code>null</code>
      */
     public DoubleErrorDataSet(final String name) {
         this(name, 0);
     }
-
+    
     /**
      * Creates a new instance of <code>DoubleErrorDataSet</code>.
      *
      * @param name name of this DataSet.
      * @param initalSize maximum capacity of buffer
-     * @throws IllegalArgumentException if <code>name</code> is <code>null</code>
+     * @throws IllegalArgumentException if <code>name</code> is
+     *             <code>null</code>
      */
     public DoubleErrorDataSet(final String name, final int initalSize) {
         super(name);
@@ -64,67 +63,17 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
     }
 
     /**
-     * Creates a new instance of <code>DoubleErrorDataSet</code>. X coordinates are equal to data points indices. <br>
+     * Creates a new instance of <code>DoubleDataSet</code> as copy of another
+     * (deep-copy).
      *
-     * @param name name of this data set.
-     * @param yValues Y coordinates
-     * @param nData how many data points are relevant to be taken
-     * @throws IllegalArgumentException if any of parameters is <code>null</code>
+     * @param another name of this DataSet.
      */
-    public DoubleErrorDataSet(final String name, final double[] yValues, final int nData) {
-        this(name, Math.min(yValues.length, nData));
-        dataMaxIndex = Math.min(yValues.length, nData);
-        System.arraycopy(yValues, 0, this.yValues, 0, dataMaxIndex);
-        for (Integer i = 0; i < dataMaxIndex; i++) {
-            xValues[i] = i;
-        }
-        computeLimits();
-    }
-
-    /**
-     * Creates a new instance of <code>DoubleErrorDataSet</code>. X coordinates are equal to data points indices. <br>
-     *
-     * @param name name of this data set.
-     * @param yValues Y coordinates
-     * @throws IllegalArgumentException if any of parameters is <code>null</code>
-     */
-    public DoubleErrorDataSet(final String name, final double[] yValues) {
-        this(name, yValues, yValues.length);
-    }
-
-    /**
-     * Creates a new instance of <code>DoubleErrorDataSet</code>. X coordinates are equal to data points indices. <br>
-     *
-     * @param name name of this data set.
-     * @param xValues x coordinates
-     * @param yValues Y coordinates
-     * @param nData how many data points are relevant to be taken
-     * @throws IllegalArgumentException if any of parameters is <code>null</code>
-     */
-    public DoubleErrorDataSet(final String name, final double[] xValues, final double[] yValues, final int nData) {
-        this(name, Math.min(xValues.length, Math.min(yValues.length, nData)));
-        AssertUtils.notNull("X data", xValues);
-        AssertUtils.notNull("Y data", yValues);
-        final int errorMin = Math.min(yErrorsPos.length, yErrorsNeg.length);
-        dataMaxIndex = Math.min(xValues.length, Math.min(yValues.length, errorMin));
-        AssertUtils.equalDoubleArrays(xValues, yValues, dataMaxIndex);
-        if (dataMaxIndex != 0) {
-            System.arraycopy(xValues, 0, this.xValues, 0, dataMaxIndex);
-            System.arraycopy(yValues, 0, this.yValues, 0, dataMaxIndex);
-        }
-        computeLimits();
-    }
-
-    /**
-     * Creates a new instance of <code>DoubleErrorDataSet</code>. X coordinates are equal to data points indices. <br>
-     *
-     * @param name name of this data set.
-     * @param xValues x coordinates
-     * @param yValues Y coordinates
-     * @throws IllegalArgumentException if any of parameters is <code>null</code>
-     */
-    public DoubleErrorDataSet(final String name, final double[] xValues, final double[] yValues) {
-        this(name, xValues, yValues, xValues.length);
+    public DoubleErrorDataSet(final DataSet another) {
+        this("");
+        another.lock();
+        this.setName(another.getName());
+        this.set(another); // NOPMD by rstein on 25/06/19 07:42
+        another.unlock();
     }
 
     /**
@@ -138,11 +87,13 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
      * @param yErrorsNeg Y negative coordinate error
      * @param yErrorsPos Y positive coordinate error
      * @param nData how many data points are relevant to be taken
-     * @throws IllegalArgumentException if any of parameters is <code>null</code> or if arrays with coordinates have
+     * @param deepCopy if true, the input array is copied
+     * @throws IllegalArgumentException if any of parameters is
+     *             <code>null</code> or if arrays with coordinates have
      *             different lengths
      */
     public DoubleErrorDataSet(final String name, final double[] xValues, final double[] yValues,
-            final double[] yErrorsNeg, final double[] yErrorsPos, final int nData) {
+            final double[] yErrorsNeg, final double[] yErrorsPos, final int nData, boolean deepCopy) {
         this(name, Math.min(xValues.length, Math.min(yValues.length, nData)));
         AssertUtils.notNull("X data", xValues);
         AssertUtils.notNull("Y data", yValues);
@@ -153,11 +104,16 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
         AssertUtils.equalDoubleArrays(xValues, yValues, dataMaxIndex);
         AssertUtils.equalDoubleArrays(xValues, yErrorsPos, dataMaxIndex);
         AssertUtils.equalDoubleArrays(xValues, yErrorsNeg, dataMaxIndex);
-        if (dataMaxIndex != 0) {
+        if (dataMaxIndex != 0 && deepCopy) {
             System.arraycopy(xValues, 0, this.xValues, 0, dataMaxIndex);
             System.arraycopy(yValues, 0, this.yValues, 0, dataMaxIndex);
             System.arraycopy(yErrorsPos, 0, this.yErrorsPos, 0, dataMaxIndex);
             System.arraycopy(yErrorsNeg, 0, this.yErrorsNeg, 0, dataMaxIndex);
+        } else {
+            this.xValues = xValues;
+            this.yValues = yValues;
+            this.yErrorsPos = yErrorsPos;
+            this.yErrorsNeg = yErrorsNeg;
         }
         computeLimits();
     }
@@ -205,6 +161,7 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
 
     /**
      * clears all data
+     * 
      * @return itself (fluent design)
      */
     public DoubleErrorDataSet clearData() {
@@ -221,9 +178,7 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
         xRange.empty();
         yRange.empty();
 
-        unlock();
-        fireInvalidated(new RemovedDataEvent(this, "clearData()"));
-        return this;
+        return unlock().fireInvalidated(new RemovedDataEvent(this, "clearData()"));
     }
 
     @Override
@@ -258,6 +213,21 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
 
     /**
      * replaces point coordinate of existing data point
+     * 
+     * @param index the index of the data point
+     * @param x new horizontal coordinate
+     * @param y new vertical coordinate N.B. errors are implicitly assumed to be
+     *            zero
+     * @return itself (fluent design)
+     */
+    @Override
+    public DoubleErrorDataSet set(int index, double x, double y) {
+        return set(index, x, y, 0.0, 0.0);
+    }
+
+    /**
+     * replaces point coordinate of existing data point
+     * 
      * @param index the index of the data point
      * @param x new horizontal coordinate
      * @param y new vertical coordinate
@@ -268,6 +238,8 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
     public DoubleErrorDataSet set(final int index, final double x, final double y, final double yErrorNeg,
             final double yErrorPos) {
         lock();
+        final boolean oldAuto = isAutoNotification();
+        setAutoNotifaction(false);
 
         try {
             if (index < dataMaxIndex) {
@@ -283,10 +255,22 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
             yRange.add(y - yErrorNeg);
             yRange.add(y + yErrorPos);
         } finally {
+            setAutoNotifaction(oldAuto);
             unlock();
         }
-        fireInvalidated(new UpdatedDataEvent(this));
-        return this;
+
+        return fireInvalidated(new UpdatedDataEvent(this));
+    }
+
+    /**
+     * Add point to the DoublePoints object. Errors in y are assumed 0.
+     *
+     * @param x the new x coordinate
+     * @param y the new y coordinate
+     * @return itself
+     */
+    public DoubleErrorDataSet add(final double x, final double y) {
+        return add(x, y, 0.0, 0.0);
     }
 
     /**
@@ -334,8 +318,14 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
         return this;
     }
 
+    @Override
+    public EditableDataSet remove(int index) {
+        return remove(index, index + 1);
+    }
+
     /**
      * remove sub-range of data points
+     * 
      * @param fromIndex start index
      * @param toIndex stop index
      * @return itself (fluent design)
@@ -372,9 +362,14 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
         xRange.empty();
         yRange.empty();
 
-        unlock();
-        fireInvalidated(new RemovedDataEvent(this));
+        unlock().fireInvalidated(new RemovedDataEvent(this));
         return this;
+    }
+
+    @Override
+    public EditableDataSet add(int index, double x, double y) {
+        // TODO Auto-generated method stub
+        return null;
     }
 
     /**
@@ -445,7 +440,8 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
      * @param yValues Y coordinates
      * @param yErrorsNeg the +dy errors
      * @param yErrorsPos the -dy errors
-     * @param copy true: makes an internal copy, false: use the pointer as is (saves memory allocation)
+     * @param copy true: makes an internal copy, false: use the pointer as is
+     *            (saves memory allocation)
      * @return itself (fluent design)
      */
     public DoubleErrorDataSet set(final double[] xValues, final double[] yValues, final double[] yErrorsNeg,
@@ -490,9 +486,7 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
 
         computeLimits();
 
-        unlock();
-        fireInvalidated(new UpdatedDataEvent(this));
-        return this;
+        return unlock().fireInvalidated(new UpdatedDataEvent(this));
     }
 
     /**
@@ -513,120 +507,44 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
     }
 
     /**
-     * replace/overwrite data points with those from another data set
+     * clear old data and overwrite with data from 'other' data set (deep copy)
+     * 
      * @param other the other data set
      * @return itself (fluent design)
      */
     public DoubleErrorDataSet set(final DataSet other) {
-        return set(other, true);
-    }
+        lock();
+        other.lock();
 
-    /**
-     * replace/overwrite data points with those from another data set
-     * @param other the other data set
-     * @param copy true: makes an internal copy, false: use the pointer as is (saves memory allocation)
-     * @return itself (fluent design)
-     */
-    public DoubleErrorDataSet set(final DataSet other, final boolean copy) {
+        // deep copy data point labels and styles
+        dataLabels.clear();
+        for (int index = 0; index < other.getDataCount(); index++) {
+            final String label = other.getDataLabel(index);
+            if (label != null && !label.isEmpty()) {
+                this.addDataLabel(index, label);
+            }
+        }
+        dataStyles.clear();
+        for (int index = 0; index < other.getDataCount(); index++) {
+            final String style = other.getStyle(index);
+            if (style != null && !style.isEmpty()) {
+                this.addDataStyle(index, style);
+            }
+        }
+
+        this.setStyle(other.getStyle());
+
+        // copy data
         if (other instanceof DataSetError) {
             this.set(other.getXValues(), other.getYValues(), ((DataSetError) other).getYErrorsNegative(),
-                    ((DataSetError) other).getYErrorsPositive(), copy);
+                    ((DataSetError) other).getYErrorsPositive(), true);
         } else {
             final int count = other.getDataCount();
-            this.set(other.getXValues(), other.getYValues(), new double[count], new double[count], copy);
-        }
-        return this;
-    }
-
-    /**
-     * adds a custom new data label for a point The label can be used as a
-     * category name if CategoryStepsDefinition is used or for annotations
-     * displayed for data points.
-     *
-     * @param index
-     *            of the data point
-     * @param label
-     *            for the data point specified by the index
-     * @return the previously set label or <code>null</code> if no label has
-     *         been specified
-     */
-    public String addDataLabel(final int index, final String label) {
-        final String retVal = dataLabels.put(index, label);
-        fireInvalidated(new UpdatedMetaDataEvent(this, "added label"));
-        return retVal;
-    }
-
-    /**
-     * remove a custom data label for a point The label can be used as a
-     * category name if CategoryStepsDefinition is used or for annotations
-     * displayed for data points.
-     *
-     * @param index
-     *            of the data point
-     * @return the previously set label or <code>null</code> if no label has
-     *         been specified
-     */
-    public String removeDataLabel(final int index) {
-        final String retVal = dataLabels.remove(index);
-        fireInvalidated(new UpdatedMetaDataEvent(this, "removed label"));
-        return retVal;
-    }
-
-    /**
-     * Returns label of a data point specified by the index. The label can be used as a category name if
-     * CategoryStepsDefinition is used or for annotations displayed for data points.
-     *
-     * @param index of the data label
-     * @return data point label specified by the index or <code>null</code> if no label has been specified
-     */
-    @Override
-    public String getDataLabel(final int index) {
-        final String dataLabel = dataLabels.get(index);
-        if (dataLabel != null) {
-            return dataLabel;
+            this.set(other.getXValues(), other.getYValues(), new double[count], new double[count], true);
         }
 
-        return super.getDataLabel(index);
+        other.unlock();
+        return unlock();
     }
 
-    /**
-     * A string representation of the CSS style associated with this specific
-     * {@code DataSet} data point. @see #getStyle()
-     *
-     * @param index
-     *            the index of the specific data point
-     * @param style of data point (CSS-styling)
-     * @return itself (fluent interface)
-     */
-    public String addDataStyle(final int index, final String style) {
-        final String retVal = dataStyles.put(index, style);
-        fireInvalidated(new UpdatedMetaDataEvent(this, "added style"));
-        return retVal;
-    }
-
-    /**
-     * A string representation of the CSS style associated with this specific
-     * {@code DataSet} data point. @see #getStyle()
-     *
-     * @param index
-     *            the index of the specific data point
-     * @return itself (fluent interface)
-     */
-    public String removeStyle(final int index) {
-        final String retVal = dataStyles.remove(index);
-        fireInvalidated(new UpdatedMetaDataEvent(this, "removed style"));
-        return retVal;
-    }
-
-    /**
-     * A string representation of the CSS style associated with this specific {@code DataSet} data point. @see
-     * #getStyle()
-     *
-     * @param index the index of the specific data point
-     * @return user-specific data set style description (ie. may be set by user)
-     */
-    @Override
-    public String getStyle(final int index) {
-        return dataStyles.get(index);
-    }
 }

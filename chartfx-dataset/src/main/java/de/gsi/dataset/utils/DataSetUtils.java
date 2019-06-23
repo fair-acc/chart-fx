@@ -53,7 +53,6 @@ import de.gsi.dataset.DataSetError;
 import de.gsi.dataset.DataSetMetaData;
 import de.gsi.dataset.spi.AbstractDataSet;
 import de.gsi.dataset.spi.DefaultDataSet;
-import de.gsi.dataset.spi.DoubleDataSet;
 import de.gsi.dataset.spi.DoubleErrorDataSet;
 
 /**
@@ -65,7 +64,7 @@ public class DataSetUtils extends DataSetUtilsHelper {
     private static final int SWITCH_TO_BINARY_KEY = 0xFE;
     private static final Logger LOGGER = LoggerFactory.getLogger(DataSetUtils.class);
     private static final String DEFAULT_TIME_FORMAT = "yyyyMMdd_HHmmss";
-    public static boolean useFloat32BinaryStandard = true;
+    public static boolean USE_FLOAT32_BINARY_STANDARD = true;
 
     private DataSetUtils() {
         super();
@@ -79,42 +78,8 @@ public class DataSetUtils extends DataSetUtilsHelper {
      * @return deep copy of data set
      */
     public static AbstractDataSet<?> copyDataSet(final DataSet ds) {
-        if (ds instanceof DoubleDataSet) {
-            final DoubleDataSet dds = (DoubleDataSet) ds;
-            final DoubleDataSet d = new DoubleDataSet(dds.getName(), dds.getXValues(), dds.getYValues(), true);
-            d.setStyle(dds.getStyle());
-            d.getDataLabelMap().putAll(dds.getDataLabelMap());
-            d.getDataStyleMap().putAll(dds.getDataStyleMap());
-            return d;
-        }
-        if (ds instanceof DefaultDataSet) {
-            final DefaultDataSet dds = (DefaultDataSet) ds;
-            final DefaultDataSet d = new DefaultDataSet(dds.getName());
-            d.setStyle(dds.getStyle());
-            d.getData().clear();
-            d.getData().addAll(dds.getData());
-            d.getDataLabelMap().putAll(dds.getDataLabelMap());
-            d.getDataStyleMap().putAll(dds.getDataStyleMap());
-            return d;
-        }
-        final double[] x = new double[ds.getDataCount()];
-        final double[] y = new double[ds.getDataCount()];
-        for (int i = 0; i < ds.getDataCount(); i++) {
-            x[i] = ds.getX(i);
-            y[i] = ds.getY(i);
-        }
-        final DoubleDataSet d = new DoubleDataSet(ds.getName(), x, y);
-        d.setStyle(ds.getStyle());
-        for (int i = 0; i < ds.getDataCount(); i++) {
-            final String style = ds.getStyle(i);
-            if (style != null) {
-                d.addDataStyle(i, style);
-            }
-            final String label = ds.getDataLabel(i);
-            if (label != null) {
-                d.addDataLabel(i, label);
-            }
-        }
+        final DefaultDataSet d = new DefaultDataSet(ds.getName());
+        d.set(ds);
         return d;
     }
 
@@ -690,10 +655,8 @@ public class DataSetUtils extends DataSetUtilsHelper {
             // create OutputStream
             final ByteArrayOutputStream byteOutput = new ByteArrayOutputStream(8192);
             // TODO: cache ByteArrayOutputStream
-            try (OutputStream outputfile = openDatasetFileOutput(file,
-                    compression == Compression.AUTO ? evaluateAutoCompression(fileName) : compression);) {
-
-                writeDataSetToByteArray(dataSet, byteOutput, binary, useFloat32BinaryStandard);
+            try (OutputStream outputfile = openDatasetFileOutput(file, compression);) {
+                writeDataSetToByteArray(dataSet, byteOutput, binary, USE_FLOAT32_BINARY_STANDARD);
 
                 byteOutput.writeTo(outputfile);
 
@@ -1032,7 +995,7 @@ public class DataSetUtils extends DataSetUtilsHelper {
         DoubleErrorDataSet dataSet = null;
         try {
             final ByteArrayInputStream istream = new ByteArrayInputStream(byteArray);
-            try (SplitCharByteInputStream inputFile = new SplitCharByteInputStream(
+            try (final SplitCharByteInputStream inputFile = new SplitCharByteInputStream(
                     new PushbackInputStream(istream, 8192))) {
 
                 dataSet = readDataSetFromStream(inputFile);

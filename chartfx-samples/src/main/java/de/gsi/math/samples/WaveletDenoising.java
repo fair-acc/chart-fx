@@ -6,12 +6,12 @@ import java.util.Arrays;
 import java.util.Random;
 
 import de.gsi.dataset.DataSet;
-import de.gsi.dataset.spi.DefaultErrorDataSet;
+import de.gsi.dataset.spi.DefaultDataSet;
 import de.gsi.math.TMath;
 import de.gsi.math.TMathConstants;
+import de.gsi.math.functions.RandomWalkFunction;
 import de.gsi.math.samples.utils.AbstractDemoApplication;
 import de.gsi.math.samples.utils.DemoChart;
-import de.gsi.math.functions.RandomWalkFunction;
 import de.gsi.math.spectra.wavelet.CDFWavelet;
 import de.gsi.math.spectra.wavelet.FastWaveletTransform;
 import javafx.application.Application;
@@ -35,14 +35,14 @@ public class WaveletDenoising extends AbstractDemoApplication {
 
     private void initData() {
         // third order polynomial function
-        RandomWalkFunction func = new RandomWalkFunction("rand1", 0.1);
+        final RandomWalkFunction func = new RandomWalkFunction("rand1", 0.1);
 
         double[] xValues;
         double[] yValues;
         double[] yModel;
 
         if (LOAD_EXAMPLE_DATA) {
-            double[][] data = readDemoData();
+            final double[][] data = readDemoData();
             xValues = data[0];
             yValues = data[1];
             yModel = Arrays.copyOf(yValues, yValues.length);
@@ -51,11 +51,11 @@ public class WaveletDenoising extends AbstractDemoApplication {
             yValues = new double[MAX_POINTS];
             yModel = new double[MAX_POINTS];
 
-            Random rnd = new Random();
+            final Random rnd = new Random();
             for (int i = 0; i < xValues.length; i++) {
-                double x = i;
+                final double x = i;
                 double offset = 0;
-                double error = 0.2 * rnd.nextGaussian();
+                final double error = 0.2 * rnd.nextGaussian();
                 if (i > xValues.length / 2) {
                     offset = -0.05;
                 }
@@ -72,12 +72,12 @@ public class WaveletDenoising extends AbstractDemoApplication {
             }
         }
 
-        CDFWavelet wvTrafo1 = new CDFWavelet();
-        FastWaveletTransform wvTrafo3 = new FastWaveletTransform();
-        boolean trafo1 = false;
+        final CDFWavelet wvTrafo1 = new CDFWavelet();
+        final FastWaveletTransform wvTrafo3 = new FastWaveletTransform();
+        final boolean trafo1 = false;
 
-        double[] ySmooth = Arrays.copyOf(yValues, yValues.length);
-        double[] ySModel = Arrays.copyOf(yModel, yModel.length);
+        final double[] ySmooth = Arrays.copyOf(yValues, yValues.length);
+        final double[] ySModel = Arrays.copyOf(yModel, yModel.length);
 
         if (trafo1) {
             wvTrafo1.fwt97(ySmooth, ySmooth.length);
@@ -90,8 +90,8 @@ public class WaveletDenoising extends AbstractDemoApplication {
             wvTrafo3.transform(ySModel);
         }
 
-        double[] recon = Arrays.copyOf(ySmooth, yValues.length);
-        double[] reconAbs = Arrays.copyOf(ySmooth, yValues.length);
+        final double[] recon = Arrays.copyOf(ySmooth, yValues.length);
+        final double[] reconAbs = Arrays.copyOf(ySmooth, yValues.length);
         for (int i = 0; i < reconAbs.length; i++) {
             reconAbs[i] = Math.abs(recon[i]);
         }
@@ -148,9 +148,10 @@ public class WaveletDenoising extends AbstractDemoApplication {
             recon[i] = 0.0;
         }
 
-        fspectraModel = new DefaultErrorDataSet("model", xValues, ySModel);
-        fspectra = new DefaultErrorDataSet("raw data", xValues, ySmooth);
-        fspectraFit = new DefaultErrorDataSet("reconstructed", xValues, Arrays.copyOf(recon, recon.length));
+        fspectraModel = new DefaultDataSet("model", xValues, ySModel, xValues.length, true);
+        fspectra = new DefaultDataSet("raw data", xValues, ySmooth, xValues.length, true);
+        fspectraFit = new DefaultDataSet("reconstructed", xValues, Arrays.copyOf(recon, recon.length), xValues.length,
+                true);
 
         if (trafo1) {
             wvTrafo1.iwt97(recon, recon.length);
@@ -159,8 +160,8 @@ public class WaveletDenoising extends AbstractDemoApplication {
             wvTrafo3.invTransform(recon);
         }
 
-        double error1 = TMath.RMS(TMath.Difference(yValues, yModel));
-        double error2 = TMath.RMS(TMath.Difference(recon, yModel));
+        final double error1 = TMath.RMS(TMath.Difference(yValues, yModel));
+        final double error2 = TMath.RMS(TMath.Difference(recon, yModel));
         if (error1 > error2) {
             System.out.printf("improved noise floor from %f \t-> %f \t(%f %%)\n", error1, error2,
                     (error1 - error2) / error1 * 100);
@@ -169,20 +170,20 @@ public class WaveletDenoising extends AbstractDemoApplication {
                     (error1 - error2) / error1 * 100);
         }
 
-        fdata = new DefaultErrorDataSet("model ", xValues, yModel);
-        fraw = new DefaultErrorDataSet("raw data", xValues, yValues);
-        freconstructed = new DefaultErrorDataSet("reconstructed", xValues, recon);
+        fdata = new DefaultDataSet("model ", xValues, yModel, xValues.length, true);
+        fraw = new DefaultDataSet("raw data", xValues, yValues, xValues.length, true);
+        freconstructed = new DefaultDataSet("reconstructed", xValues, recon, xValues.length, true);
     }
 
     @Override
     public Node getContent() {
         initData();
 
-        DemoChart chart1 = new DemoChart();
+        final DemoChart chart1 = new DemoChart();
         chart1.getXAxis().setLabel("time");
         chart1.getDatasets().addAll(fdata, fraw, freconstructed);
 
-        DemoChart chart2 = new DemoChart();
+        final DemoChart chart2 = new DemoChart();
         chart2.getXAxis().setLabel("frequency");
         chart2.getDatasets().addAll(fspectraModel, fspectra, fspectraFit);
 
@@ -195,14 +196,14 @@ public class WaveletDenoising extends AbstractDemoApplication {
                 new InputStreamReader(WaveletScalogram.class.getResourceAsStream(fileName)))) {
 
             String line = reader.readLine();
-            int nDim = line == null ? 0 : Integer.parseInt(line);
+            final int nDim = line == null ? 0 : Integer.parseInt(line);
             double[][] ret = new double[2][nDim];
             for (int i = 0; i < nDim; i++) {
                 line = reader.readLine();
                 if (line == null) {
                     break;
                 }
-                String[] x = line.split("\t");
+                final String[] x = line.split("\t");
                 ret[0][i] = Double.parseDouble(x[0]);
                 ret[1][i] = Double.parseDouble(x[1]);
             }

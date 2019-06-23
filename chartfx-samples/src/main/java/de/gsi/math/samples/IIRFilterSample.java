@@ -8,10 +8,9 @@ import java.util.zip.ZipInputStream;
 import de.gsi.dataset.DataSet;
 import de.gsi.dataset.spi.DoubleDataSet;
 import de.gsi.math.DataSetMath;
-import de.gsi.math.TRandom;
+import de.gsi.math.filter.iir.Butterworth;
 import de.gsi.math.samples.utils.AbstractDemoApplication;
 import de.gsi.math.samples.utils.DemoChart;
-import de.gsi.math.filter.iir.Butterworth;
 import javafx.application.Application;
 import javafx.scene.Node;
 import javafx.scene.layout.VBox;
@@ -22,9 +21,12 @@ public class IIRFilterSample extends AbstractDemoApplication {
     private final double sampling = 100e6;
     private final double center = 28e6;
     private final double width = 0.5e6;
-    private DataSet fraw, fraw1, fraw2;
-    private DataSet fspectra, fspectra1, fspectra2;
-    private final TRandom rnd = new TRandom(0);
+    private DataSet fraw;
+    private DataSet fraw1; 
+    private DataSet fraw2;
+    private DataSet fspectra;
+    private DataSet fspectra1; 
+    private DataSet fspectra2;
 
     private DataSet readDemoData(final int offset, final int nSamples) {
         final Butterworth bandPass = new Butterworth();

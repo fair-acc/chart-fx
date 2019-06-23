@@ -3,7 +3,7 @@ package de.gsi.math.functions;
 import java.security.InvalidParameterException;
 
 import de.gsi.dataset.DataSet;
-import de.gsi.dataset.spi.DoubleErrorDataSet;
+import de.gsi.dataset.spi.DefaultErrorDataSet;
 
 /**
  * generic one-dimensional function interface
@@ -12,7 +12,7 @@ import de.gsi.dataset.spi.DoubleErrorDataSet;
  */
 public interface Function1D extends Function {
 
-    double getValue(double x);
+    double getValue(final double x);
 
     default double[] getValues(final double[] x) {
         if (x == null) {
@@ -31,7 +31,7 @@ public interface Function1D extends Function {
      *            X coordinate for which the function should be evaluated
      */
     default DataSet getDataSetEstimate(final double[] xValues) {
-        return new DoubleErrorDataSet(getName(), xValues, getValues(xValues));
+        return new DefaultErrorDataSet(getName(), xValues, getValues(xValues), new double[xValues.length], new double[xValues.length], xValues.length, true);
     }
 
     /**

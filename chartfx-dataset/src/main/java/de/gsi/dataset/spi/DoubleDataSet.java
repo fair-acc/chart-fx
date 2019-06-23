@@ -2,15 +2,12 @@ package de.gsi.dataset.spi;
 
 import java.util.Arrays;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import de.gsi.dataset.DataSet;
-import de.gsi.dataset.EditConstraints;
 import de.gsi.dataset.EditableDataSet;
 import de.gsi.dataset.event.AddedDataEvent;
 import de.gsi.dataset.event.RemovedDataEvent;
 import de.gsi.dataset.event.UpdatedDataEvent;
-import de.gsi.dataset.event.UpdatedMetaDataEvent;
 import de.gsi.dataset.utils.AssertUtils;
 
 /**
@@ -21,40 +18,49 @@ import de.gsi.dataset.utils.AssertUtils;
  * coordinates have value of data point index. This version being optimised for
  * native double arrays.
  * 
- *  @see DoubleErrorDataSet for an equivalent implementation with asymmetric errors in Y
+ * @see DoubleErrorDataSet for an equivalent implementation with asymmetric
+ *      errors in Y
  *
  * @author rstein
  */
 public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements EditableDataSet {
-    protected Map<Integer, String> dataLabels = new ConcurrentHashMap<>();
-    protected Map<Integer, String> dataStyles = new ConcurrentHashMap<>();
-    protected EditConstraints editConstraints;
     protected double[] xValues;
     protected double[] yValues;
     protected int dataMaxIndex; // <= xValues.length, stores the actually used
     // data array size
 
     /**
-     * Creates a new instance of <code>DefaultDataSet</code>.
+     * Creates a new instance of <code>DoubleDataSet</code>.
      *
-     * @param name
-     *            name of this DataSet.
-     * @throws IllegalArgumentException
-     *             if <code>name</code> is <code>null</code>
+     * @param name name of this DataSet.
+     * @throws IllegalArgumentException if <code>name</code> is
+     *             <code>null</code>
      */
     public DoubleDataSet(final String name) {
         this(name, 0);
     }
 
     /**
-     * Creates a new instance of <code>DefaultDataSet</code>.
+     * Creates a new instance of <code>DoubleDataSet</code> as copy of another
+     * (deep-copy).
      *
-     * @param name
-     *            name of this DataSet.
-     * @param initalSize
-     *            initial buffer size
-     * @throws IllegalArgumentException
-     *             if <code>name</code> is <code>null</code>
+     * @param another name of this DataSet.
+     */
+    public DoubleDataSet(final DataSet another) {
+        this("");
+        another.lock();
+        this.setName(another.getName());
+        this.set(another); // NOPMD by rstein on 25/06/19 07:42
+        another.unlock();
+    }
+
+    /**
+     * Creates a new instance of <code>DoubleDataSet</code>.
+     *
+     * @param name name of this DataSet.
+     * @param initalSize initial buffer size
+     * @throws IllegalArgumentException if <code>name</code> is
+     *             <code>null</code>
      */
     public DoubleDataSet(final String name, final int initalSize) {
         super(name);
@@ -62,76 +68,6 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
         xValues = new double[initalSize];
         yValues = new double[initalSize];
         dataMaxIndex = 0;
-    }
-
-    /**
-     * Creates a new instance of <code>DoubleDataSet</code>. X coordinates are
-     * equal to data points indices. <br>
-     *
-     * @param name
-     *            name of this data set.
-     * @param yValues
-     *            Y coordinates
-     * @throws IllegalArgumentException
-     *             if any of parameters is <code>null</code>
-     */
-    public DoubleDataSet(final String name, final double[] yValues) {
-        this(name, yValues, true);
-    }
-
-    /**
-     * Creates a new instance of <code>DoubleDataSet</code>. X coordinates are
-     * equal to data points indices. <br>
-     * The user than specify via the copy parameter, whether the dataset
-     * operates directly on the input array itself or on a copy of the input
-     * array. If the dataset operates directly on the input array, this array
-     * must not be modified outside of this data set.
-     *
-     * @param name
-     *            name of this data set.
-     * @param yValues
-     *            Y coordinates
-     * @param copy
-     *            if true, the input array is copied
-     * @throws IllegalArgumentException
-     *             if any of parameters is <code>null</code>
-     */
-    public DoubleDataSet(final String name, final double[] yValues, final boolean copy) {
-        super(name);
-        AssertUtils.notNull("Y data", yValues);
-        if (copy) {
-            this.yValues = new double[yValues.length];
-            System.arraycopy(yValues, 0, this.yValues, 0, yValues.length);
-        } else {
-            this.yValues = yValues;
-        }
-        xValues = new double[yValues.length];
-        for (Integer i = 0; i < yValues.length; i++) {
-            xValues[i] = i;
-        }
-        dataMaxIndex = yValues.length;
-    }
-
-    /**
-     * <p>
-     * Creates a new instance of <code>DoubleDataSet</code>.
-     * </p>
-     * Note: The provided arrays are not copied (data set operates on specified
-     * array objects) thus these array should not be modified outside of this
-     * data set.
-     *
-     * @param name
-     *            name of this data set.
-     * @param xValues
-     *            X coordinates
-     * @param yValues
-     *            Y coordinates
-     * @throws IllegalArgumentException
-     *             if any of parameters is <code>null</code> or if arrays with
-     *             coordinates have different lengths
-     */
-    public DoubleDataSet(final String name, final double[] xValues, final double[] yValues) {
-        this(name, xValues, yValues, true);
     }
 
     /**
@@ -143,33 +79,30 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
      * input arrays. If the dataset operates directly on the input arrays, these
      * arrays must not be modified outside of this data set.
      *
-     * @param name
-     *            name of this data set.
-     * @param xValues
-     *            X coordinates
-     * @param yValues
-     *            Y coordinates
-     * @param copy
-     *            if true, the input array is copied
-     * @throws IllegalArgumentException
-     *             if any of parameters is <code>null</code> or if arrays with
-     *             coordinates have different lengths
+     * @param name name of this data set.
+     * @param xValues X coordinates
+     * @param yValues Y coordinates
+     * @param initalSize initial buffer size
+     * @param deepCopy if true, the input array is copied
+     * @throws IllegalArgumentException if any of parameters is
+     *             <code>null</code> or if arrays with coordinates have
+     *             different lengths
      */
-    public DoubleDataSet(final String name, final double[] xValues, final double[] yValues, final boolean copy) {
+    public DoubleDataSet(final String name, final double[] xValues, final double[] yValues, final int initalSize, final boolean deepCopy) {
         this(name);
         AssertUtils.notNull("X data", xValues);
         AssertUtils.notNull("Y data", yValues);
-        AssertUtils.equalDoubleArrays(xValues, yValues);
-        if (copy) {
-            this.xValues = new double[yValues.length];
-            this.yValues = new double[yValues.length];
-            System.arraycopy(xValues, 0, this.xValues, 0, xValues.length);
-            System.arraycopy(yValues, 0, this.yValues, 0, yValues.length);
+        dataMaxIndex = Math.min(xValues.length, Math.min(yValues.length, initalSize));
+        AssertUtils.equalDoubleArrays(xValues, yValues, initalSize);
+        if (deepCopy) {
+            this.xValues = new double[dataMaxIndex];
+            this.yValues = new double[dataMaxIndex];
+            System.arraycopy(xValues, 0, this.xValues, 0, Math.min(xValues.length, initalSize));
+            System.arraycopy(yValues, 0, this.yValues, 0, Math.min(yValues.length, initalSize));
         } else {
             this.xValues = xValues;
             this.yValues = yValues;
         }
-        dataMaxIndex = xValues.length;
     }
 
     /**
@@ -205,6 +138,7 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
 
     /**
      * clear all data points
+     * 
      * @return itself (fluent design)
      */
     public DoubleDataSet clearData() {
@@ -219,9 +153,7 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
         xRange.empty();
         yRange.empty();
 
-        unlock();
-        fireInvalidated(new RemovedDataEvent(this, "clearData()"));
-        return this;
+        return unlock().fireInvalidated(new RemovedDataEvent(this, "clearData()"));
     }
 
     @Override
@@ -247,33 +179,27 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
         } finally {
             unlock();
         }
-        fireInvalidated(new UpdatedDataEvent(this));
-        return this;
+
+        return fireInvalidated(new UpdatedDataEvent(this));
     }
 
     /**
      * Add point to the end of the data set
      *
-     * @param x
-     *            index
-     * @param y
-     *            index
+     * @param x index
+     * @param y index
      * @return itself
      */
     public DoubleDataSet add(final double x, final double y) {
-        this.add(this.getDataCount(), x, y, null);
-        return this;
+        return add(this.getDataCount(), x, y, null);
     }
 
     /**
      * Add point to the DoublePoints object
      *
-     * @param x
-     *            index
-     * @param y
-     *            index
-     * @param label
-     *            the data label
+     * @param x index
+     * @param y index
+     * @param label the data label
      * @return itself
      */
     public DoubleDataSet add(final double x, final double y, final String label) {
@@ -283,12 +209,9 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
     /**
      * add point to the data set
      *
-     * @param index
-     *            data point index at which the new data point should be added
-     * @param x
-     *            horizontal coordinate of the new data point
-     * @param y
-     *            vertical coordinate of the new data point
+     * @param index data point index at which the new data point should be added
+     * @param x horizontal coordinate of the new data point
+     * @param y vertical coordinate of the new data point
      * @return itself (fluent design)
      */
     @Override
@@ -299,12 +222,9 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
     /**
      * add point to the data set
      *
-     * @param index
-     *            data point index at which the new data point should be added
-     * @param x
-     *            horizontal coordinate of the new data point
-     * @param y
-     *            vertical coordinate of the new data point
+     * @param index data point index at which the new data point should be added
+     * @param x horizontal coordinate of the new data point
+     * @param y vertical coordinate of the new data point
      * @param label data point label (see CategoryAxis)
      * @return itself (fluent design)
      */
@@ -327,7 +247,7 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
             System.arraycopy(yValues, indexAt, yValuesNew, indexAt + 1, yValues.length - indexAt);
 
             // shift old label and style keys
-            for (int i = xValues.length; i > indexAt; i--) {
+            for (int i = xValues.length; i >= indexAt; i--) {
                 final String oldLabelData = dataLabels.get(i);
                 if (oldLabelData != null) {
                     dataLabels.put(i + 1, oldLabelData);
@@ -355,13 +275,12 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
         xRange.add(x);
         yRange.add(y);
 
-        unlock();
-        fireInvalidated(new AddedDataEvent(this));
-        return this;
+        return unlock().fireInvalidated(new AddedDataEvent(this));
     }
 
     /**
      * removes sub-range of data points
+     * 
      * @param fromIndex start index
      * @param toIndex stop index
      * @return itself (fluent design)
@@ -403,21 +322,17 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
         xRange.empty();
         yRange.empty();
 
-        unlock();
-        fireInvalidated(new RemovedDataEvent(this));
-        return this;
+        return unlock().fireInvalidated(new RemovedDataEvent(this));
     }
 
     /**
      * remove point from data set
      *
-     * @param index
-     *            data point which should be removed
+     * @param index data point which should be removed
      * @return itself (fluent design)
      */
     @Override
     public EditableDataSet remove(final int index) {
-
         return remove(index, index + 1);
     }
 
@@ -427,10 +342,8 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
      * </p>
      * Note: The method copies values from specified double arrays.
      *
-     * @param xValuesNew
-     *            X coordinates
-     * @param yValuesNew
-     *            Y coordinates
+     * @param xValuesNew X coordinates
+     * @param yValuesNew Y coordinates
      * @return itself
      */
     public DoubleDataSet add(final double[] xValuesNew, final double[] yValuesNew) {
@@ -460,8 +373,7 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
         dataMaxIndex = Math.max(0, dataMaxIndex + xValuesNew.length);
         computeLimits();
 
-        fireInvalidated(new AddedDataEvent(this));
-        return this;
+        return unlock().fireInvalidated(new AddedDataEvent(this));
     }
 
     /**
@@ -470,12 +382,9 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
      * </p>
      * Note: The method copies values from specified double arrays.
      *
-     * @param xValues
-     *            X coordinates
-     * @param yValues
-     *            Y coordinates
-     * @param copy
-     *            true: makes an internal copy, false: use the pointer as is
+     * @param xValues X coordinates
+     * @param yValues Y coordinates
+     * @param copy true: makes an internal copy, false: use the pointer as is
      *            (saves memory allocation
      * @return itself
      */
@@ -489,10 +398,9 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
             this.xValues = xValues;
             this.yValues = yValues;
             dataMaxIndex = xValues.length;
-            unlock();
             computeLimits();
-            fireInvalidated(new UpdatedDataEvent(this));
-            return this;
+
+            return unlock().fireInvalidated(new UpdatedDataEvent(this));
         }
 
         if (xValues.length == this.xValues.length) {
@@ -507,11 +415,9 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
             this.yValues = Arrays.copyOf(yValues, xValues.length);
         }
         dataMaxIndex = xValues.length;
-
-        unlock();
         computeLimits();
-        fireInvalidated(new UpdatedDataEvent(this));
-        return this;
+
+        return unlock().fireInvalidated(new UpdatedDataEvent(this));
     }
 
     /**
@@ -520,10 +426,8 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
      * </p>
      * Note: The method copies values from specified double arrays.
      *
-     * @param xValues
-     *            X coordinates
-     * @param yValues
-     *            Y coordinates
+     * @param xValues X coordinates
+     * @param yValues Y coordinates
      * @return itself
      */
     public DoubleDataSet set(final double[] xValues, final double[] yValues) {
@@ -531,130 +435,38 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
     }
 
     /**
-     * clear old data and overwrite with data from 'other' data set
+     * clear old data and overwrite with data from 'other' data set (deep copy)
+     * 
      * @param other the source data set
      * @return itself (fluent design)
      */
     public DoubleDataSet set(final DataSet other) {
-        return set(other, true);
-    }
+        lock();
+        other.lock();
+        final boolean oldAuto = isAutoNotification();
+        setAutoNotifaction(false);
 
-    /**
-     * clear old data and overwrite with data from 'other' data set
-     * @param other the source data set
-     * @param copy true: data is passed as a copy, false: data is passed by reference
-     * @return itself (fluent design)
-     */
-    public DoubleDataSet set(final DataSet other, final boolean copy) {
-        this.set(other.getXValues(), other.getYValues(), copy);
-        return this;
-    }
-
-    /**
-     * adds a custom new data label for a point The label can be used as a
-     * category name if CategoryStepsDefinition is used or for annotations
-     * displayed for data points.
-     *
-     * @param index
-     *            of the data point
-     * @param label
-     *            for the data point specified by the index
-     * @return the previously set label or <code>null</code> if no label has
-     *         been specified
-     */
-    public String addDataLabel(final int index, final String label) {
-        final String retVal = dataLabels.put(index, label);
-        this.fireInvalidated(new UpdatedMetaDataEvent(this, "added label"));
-        return retVal;
-    }
-
-    /**
-     * remove a custom data label for a point The label can be used as a
-     * category name if CategoryStepsDefinition is used or for annotations
-     * displayed for data points.
-     *
-     * @param index
-     *            of the data point
-     * @return the previously set label or <code>null</code> if no label has
-     *         been specified
-     */
-    public String removeDataLabel(final int index) {
-        final String retVal = dataLabels.remove(index);
-        this.fireInvalidated(new UpdatedMetaDataEvent(this, "removed label"));        
-        return retVal;
-    }
-
-    /**
-     * Returns label of a data point specified by the index. The label can be
-     * used as a category name if CategoryStepsDefinition is used or for
-     * annotations displayed for data points.
-     *
-     * @param index
-     *            of the data label
-     * @return data point label specified by the index or <code>null</code> if
-     *         no label has been specified
-     */
-    @Override
-    public String getDataLabel(final int index) {
-        final String dataLabel = dataLabels.get(index);
-        if (dataLabel != null) {
-            return dataLabel;
+        // deep copy data point labels and styles
+        dataLabels.clear();
+        for (int index = 0; index < other.getDataCount(); index++) {
+            final String label = other.getDataLabel(index);
+            if (label != null && !label.isEmpty()) {
+                this.addDataLabel(index, label);
+            }
         }
+        dataStyles.clear();
+        for (int index = 0; index < other.getDataCount(); index++) {
+            final String style = other.getStyle(index);
+            if (style != null && !style.isEmpty()) {
+                this.addDataStyle(index, style);
+            }
+        }
+        this.setStyle(other.getStyle());
 
-        return super.getDataLabel(index);
+        this.set(other.getXValues(), other.getYValues(), true);
+        setAutoNotifaction(oldAuto);
+        other.unlock();
+        return unlock().fireInvalidated(new UpdatedDataEvent(this));
     }
 
-    /**
-     * A string representation of the CSS style associated with this specific
-     * {@code DataSet} data point. @see #getStyle()
-     *
-     * @param index
-     *            the index of the specific data point
-     * @param style string for the data point specific CSS-styling
-     * @return itself (fluent interface)
-     */
-    public String addDataStyle(final int index, final String style) {
-        final String retVal = dataStyles.put(index, style);
-        this.fireInvalidated(new UpdatedMetaDataEvent(this, "added style"));
-        return retVal;        
-    }
-
-    /**
-     * A string representation of the CSS style associated with this specific
-     * {@code DataSet} data point. @see #getStyle()
-     *
-     * @param index
-     *            the index of the specific data point
-     * @return itself (fluent interface)
-     */
-    public String removeStyle(final int index) {
-        final String retVal = dataStyles.remove(index);
-        this.fireInvalidated(new UpdatedMetaDataEvent(this, "removed style"));        
-        return retVal;
-    }
-
-    /**
-     * A string representation of the CSS style associated with this specific
-     * {@code DataSet} data point. @see #getStyle()
-     *
-     * @param index
-     *            the index of the specific data point
-     * @return user-specific data set style description (ie. may be set by user)
-     */
-    @Override
-    public String getStyle(final int index) {
-        return dataStyles.get(index);
-    }
-
-    @Override
-    public EditConstraints getEditConstraints() {
-        return editConstraints;
-    }
-
-    @Override
-    public DoubleDataSet setEditConstraints(final EditConstraints constraints) {
-        editConstraints = constraints;
-
-        return this;
-    }
 }
