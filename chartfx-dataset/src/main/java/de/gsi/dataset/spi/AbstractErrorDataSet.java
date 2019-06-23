@@ -1,6 +1,7 @@
 package de.gsi.dataset.spi;
 
 import de.gsi.dataset.DataSetError;
+import de.gsi.dataset.event.UpdateEvent;
 
 /**
  * <p>
@@ -18,7 +19,7 @@ import de.gsi.dataset.DataSetError;
  * @author rstein
  * @param <D> java generics handling of DataSet for derived classes (needed for fluent design)
  */
-public abstract class AbstractErrorDataSet<D extends AbstractDataSet<D>> extends AbstractDataSet<D>
+public abstract class AbstractErrorDataSet<D extends AbstractErrorDataSet<D>> extends AbstractDataSet<D>
         implements DataSetError {
     private ErrorType errorType = ErrorType.NO_ERROR;
 
@@ -39,6 +40,24 @@ public abstract class AbstractErrorDataSet<D extends AbstractDataSet<D>> extends
     protected D getThis() {
         return (D) this;
     }
+    
+    @Override
+    public D lock() {
+        lock.lock();
+        return getThis();
+    }
+
+    @Override
+    public D unlock() {
+        lock.unlock();
+        return getThis();
+    }
+    
+    @Override
+	public D fireInvalidated(final UpdateEvent event) {
+		super.fireInvalidated(event);
+		return getThis();
+	}
 
     /**
      * return the DataSetError.ErrorType of the dataset

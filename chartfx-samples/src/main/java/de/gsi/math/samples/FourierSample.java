@@ -3,8 +3,7 @@ package de.gsi.math.samples;
 import java.util.Arrays;
 
 import de.gsi.dataset.DataSet;
-import de.gsi.dataset.spi.DefaultErrorDataSet;
-import de.gsi.dataset.spi.DoubleErrorDataSet;
+import de.gsi.dataset.spi.DefaultDataSet;
 import de.gsi.math.TMath;
 import de.gsi.math.TRandom;
 import de.gsi.math.samples.utils.AbstractDemoApplication;
@@ -18,20 +17,25 @@ import javafx.scene.Node;
 import javafx.scene.layout.VBox;
 
 /**
- * example illustrating the discrete time fourier transform and Fast-Fourier transform and spectral interpolation
- * methods. Zoom into the peaks to see the details
+ * example illustrating the discrete time fourier transform and Fast-Fourier
+ * transform and spectral interpolation methods. Zoom into the peaks to see the
+ * details
  * 
  * @author rstein
  */
 public class FourierSample extends AbstractDemoApplication {
 
     private static final int MAX_POINTS = 512;
-    private DataSet fraw, fspectra1, fspectra2, fspectra3, fspectra4;
+    private DataSet fraw; 
+    private DataSet fspectra1;
+    private DataSet fspectra2; 
+    private DataSet fspectra3; 
+    private DataSet fspectra4;
     private final TRandom rnd = new TRandom(0);
 
-    private double computeSignal(double t) {
+    private double computeSignal(final double t) {
         double val = 0.0;
-        double error = rnd.Gaus(0.0, 0.2);
+        final double error = rnd.Gaus(0.0, 0.2);
         val += TMath.Sin(TMath.TwoPi() * 0.22 * t);
         val += Math.sin(TMath.TwoPi() * 3e-4 * t * t);
         val += Math.sin(TMath.TwoPi() * 0.05 * t);
@@ -48,7 +52,7 @@ public class FourierSample extends AbstractDemoApplication {
             xValues[i] = i;
             yValues[i] = computeSignal(xValues[i]);
         }
-        fraw = new DoubleErrorDataSet("raw data", xValues, yValues);
+        fraw = new DefaultDataSet("raw data", xValues, yValues, xValues.length, true);
 
         // equal-distance frequency spacing (as in FFT)
         double[] frequency1 = new double[yValues.length / 2];
@@ -73,40 +77,40 @@ public class FourierSample extends AbstractDemoApplication {
             frequency3[i] = i * scaling3;
         }
 
-        LombPeriodogram lombTrafo = new LombPeriodogram();
-        DiscreteTimeFourierTransform trafoDTFT = new DiscreteTimeFourierTransform();
-        DoubleFFT_1D fastFourierTrafo = new DoubleFFT_1D(yValues.length);
+        final LombPeriodogram lombTrafo = new LombPeriodogram();
+        final DiscreteTimeFourierTransform trafoDTFT = new DiscreteTimeFourierTransform();
+        final DoubleFFT_1D fastFourierTrafo = new DoubleFFT_1D(yValues.length);
 
         System.err.printf("compute spectrum for %d test frequencies\n", frequency1.length);
-        double[] lomb = lombTrafo.computePeridodogram(xValues, yValues, frequency2);
-        double[] dtft1 = trafoDTFT.computeMagnitudeSpectrum(xValues, yValues, frequency1);
-        double[] dtft2 = trafoDTFT.computeMagnitudeSpectrum(xValues, yValues, frequency2);
+        final double[] lomb = lombTrafo.computePeridodogram(xValues, yValues, frequency2);
+        final double[] dtft1 = trafoDTFT.computeMagnitudeSpectrum(xValues, yValues, frequency1);
+        final double[] dtft2 = trafoDTFT.computeMagnitudeSpectrum(xValues, yValues, frequency2);
 
         // N.B. since realForward computes the FFT in-place -> generate a copy
         double[] fftSpectra = Arrays.copyOf(yValues, yValues.length);
         fastFourierTrafo.realForward(fftSpectra);
         fftSpectra = SpectrumTools.interpolateSpectrum(fftSpectra, nOverSampling2);
-        double[] mag = SpectrumTools.computeMagnitudeSpectrum(fftSpectra, true);
+        final double[] mag = SpectrumTools.computeMagnitudeSpectrum(fftSpectra, true);
 
-        fspectra1 = new DefaultErrorDataSet("Lomb-spectra equidistant sampling", frequency2, lomb);
+        fspectra1 = new DefaultDataSet("Lomb-spectra equidistant sampling", frequency2, lomb, frequency2.length, true);
         fspectra1.setStyle("strokeWidth=0.5");
-        fspectra2 = new DefaultErrorDataSet("DT-FourierTransform spectra", frequency1, dtft1);
-        fspectra3 = new DefaultErrorDataSet("int. DT-FourierTransform spectra", frequency2, dtft2);
+        fspectra2 = new DefaultDataSet("DT-FourierTransform spectra", frequency1, dtft1, frequency1.length, true);
+        fspectra3 = new DefaultDataSet("int. DT-FourierTransform spectra", frequency2, dtft2, frequency2.length, true);
         System.err.printf("dim %d vs %d\n", frequency2.length, mag.length);
-        fspectra4 = new DefaultErrorDataSet("interpolated FFT", frequency3, mag);
+        fspectra4 = new DefaultDataSet("interpolated FFT", frequency3, mag, frequency3.length, true);
     }
 
     @Override
     public Node getContent() {
         initData();
-        DemoChart chart1 = new DemoChart();
+        final DemoChart chart1 = new DemoChart();
         chart1.getXAxis().setLabel("time");
         chart1.getXAxis().setUnit("s");
         chart1.getYAxis().setLabel("magnitude");
         chart1.getYAxis().setUnit("a.u.");
         chart1.getDatasets().add(fraw);
 
-        DemoChart chart2 = new DemoChart();
+        final DemoChart chart2 = new DemoChart();
         chart2.getXAxis().setLabel("frequency [fs]");
         chart2.getXAxis().setUnit("fs");
         chart2.getYAxis().setLabel("magnitude");

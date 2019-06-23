@@ -156,14 +156,14 @@ public final class DataSetMath {
             }
 
             return new DoubleErrorDataSet(functionName, newDataSet.getXValues(), yValues, eyn, eyp,
-                    newDataSet.getDataCount());
+                    newDataSet.getDataCount(), true);
         }
 
         final DoubleErrorDataSet retFunction = prevAverage.getDataCount() == 0
                 ? new DoubleErrorDataSet(functionName, newDataSet.getXValues(), newDataSet.getYValues(),
-                        errors(newDataSet, EYN), errors(newDataSet, EYP), newDataSet.getDataCount())
+                        errors(newDataSet, EYN), errors(newDataSet, EYP), newDataSet.getDataCount(), true)
                 : new DoubleErrorDataSet(prevAverage.getName(), prevAverage.getXValues(), prevAverage.getYValues(),
-                        errors(prevAverage, EYN), errors(prevAverage, EYP), newDataSet.getDataCount());
+                        errors(prevAverage, EYN), errors(prevAverage, EYP), newDataSet.getDataCount(), true);
 
         final double alpha = 1.0 / (1.0 + nUpdates);
         final boolean avg2Empty = prevAverage2.getDataCount() == 0;
@@ -208,12 +208,12 @@ public final class DataSetMath {
             if (dataSets.get(0) instanceof DataSetError) {
                 final DataSetError newFunction = (DataSetError) dataSets.get(0);
                 return new DoubleErrorDataSet(functionName, newFunction.getXValues(), newFunction.getYValues(),
-                        newFunction.getYErrorsNegative(), newFunction.getYErrorsPositive(), newFunction.getDataCount());
+                        newFunction.getYErrorsNegative(), newFunction.getYErrorsPositive(), newFunction.getDataCount(), true);
             }
 
             final DataSet newFunction = dataSets.get(0);
-            return new DoubleErrorDataSet(functionName, newFunction.getXValues(), newFunction.getYValues(),
-                    newFunction.getDataCount());
+            return new DoubleErrorDataSet(functionName, newFunction.getXValues(), newFunction.getYValues(), new double[newFunction.getDataCount()], new double[newFunction.getDataCount()],
+                    newFunction.getDataCount(), true);
         }
 
         final int nAvg = Math.min(nUpdates, dataSets.size());
@@ -265,7 +265,7 @@ public final class DataSetMath {
         String newName = INTEGRAL_SYMBOL + "(" + functionName + ")dyn";
         if (nLength <= 0) {
             return new DoubleErrorDataSet(function.getName(), function.getXValues(),
-                    new double[function.getDataCount()]);
+                    new double[function.getDataCount()],new double[function.getDataCount()],new double[function.getDataCount()],function.getDataCount(), true);
         }
 
         double xMinLocal = function.getXMin();
@@ -508,14 +508,14 @@ public final class DataSetMath {
         // TODO: add error propagation to normalised function error estimate
         if (integral == 0) {
             return new DoubleErrorDataSet(function.getName(), function.getXValues(),
-                    new double[function.getDataCount()]);
+                    new double[function.getDataCount()],new double[function.getDataCount()],new double[function.getDataCount()],function.getDataCount(), true);
         }
         final double[] xValues = function.getXValues();
         final double[] yValues = ArrayMath.divide(function.getYValues(), integral);
         final double[] eyp = ArrayMath.divide(errors(function, EYN), integral);
         final double[] eyn = ArrayMath.divide(errors(function, EYP), integral);
 
-        return new DoubleErrorDataSet(function.getName(), xValues, yValues, eyp, eyn, function.getDataCount());
+        return new DoubleErrorDataSet(function.getName(), xValues, yValues, eyp, eyn, function.getDataCount(), true);
     }
 
     public enum Filter {
@@ -801,30 +801,30 @@ public final class DataSetMath {
         switch (op) {
         case ADD:
             return new DoubleErrorDataSet(functionName, function.getXValues(), ArrayMath.add(y, value), eyn, eyp,
-                    function.getDataCount());
+                    function.getDataCount(), true);
         case SUBTRACT:
             return new DoubleErrorDataSet(functionName, function.getXValues(), ArrayMath.subtract(y, value), eyn, eyp,
-                    function.getDataCount());
+                    function.getDataCount(), true);
         case MULTIPLY:
             return new DoubleErrorDataSet(functionName, function.getXValues(), ArrayMath.multiply(y, value),
-                    ArrayMath.multiply(eyn, value), ArrayMath.multiply(eyp, value), function.getDataCount());
+                    ArrayMath.multiply(eyn, value), ArrayMath.multiply(eyp, value), function.getDataCount(), true);
         case DIVIDE:
             return new DoubleErrorDataSet(functionName, function.getXValues(), ArrayMath.divide(y, value),
-                    ArrayMath.divide(eyn, value), ArrayMath.divide(eyp, value), function.getDataCount());
+                    ArrayMath.divide(eyn, value), ArrayMath.divide(eyp, value), function.getDataCount(), true);
         case SQR:
             for (int i = 0; i < eyn.length; i++) {
                 eyn[i] = 2 * Math.abs(y[i]) * eyn[i];
                 eyp[i] = 2 * Math.abs(y[i]) * eyp[i];
             }
             return new DoubleErrorDataSet(functionName, function.getXValues(), ArrayMath.sqr(y), eyn, eyp,
-                    function.getDataCount());
+                    function.getDataCount(), true);
         case SQRT:
             for (int i = 0; i < eyn.length; i++) {
                 eyn[i] = Math.sqrt(Math.abs(y[i])) * eyn[i];
                 eyp[i] = Math.sqrt(Math.abs(y[i])) * eyp[i];
             }
             return new DoubleErrorDataSet(functionName, function.getXValues(), ArrayMath.sqrt(y), eyn, eyp,
-                    function.getDataCount());
+                    function.getDataCount(), true);
         case LOG10:
             norm = 1.0 / Math.log(10);
             for (int i = 0; i < eyn.length; i++) {
@@ -832,7 +832,7 @@ public final class DataSetMath {
                 eyp[i] = y[i] > 0 ? norm / Math.abs(y[i]) * eyp[i] : Double.NaN;
             }
             return new DoubleErrorDataSet(functionName, function.getXValues(), ArrayMath.tenLog10(y), eyn, eyp,
-                    function.getDataCount());
+                    function.getDataCount(), true);
         case DB:
             norm = 20.0 / Math.log(10);
             for (int i = 0; i < eyn.length; i++) {
@@ -840,11 +840,11 @@ public final class DataSetMath {
                 eyp[i] = y[i] > 0 ? norm / Math.abs(y[i]) * eyp[i] : Double.NaN;
             }
             return new DoubleErrorDataSet(functionName, function.getXValues(), ArrayMath.decibel(y), eyn, eyp,
-                    function.getDataCount());
+                    function.getDataCount(), true);
         default:
             // return copy if nothing else matches
             return new DoubleErrorDataSet(functionName, function.getXValues(), function.getYValues(),
-                    errors(function, EYN), errors(function, EYP), function.getDataCount());
+                    errors(function, EYN), errors(function, EYP), function.getDataCount(), true);
         }
     }
 

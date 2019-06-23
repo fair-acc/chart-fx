@@ -17,10 +17,10 @@ import de.gsi.dataset.event.UpdatedDataEvent;
 public class FragmentedDataSet extends AbstractDataSet<FragmentedDataSet> {
 
     protected int dataCount;
-    //    protected double xmin;
-    //    protected double xmax;
-    //    protected double ymin;
-    //    protected double ymax;
+    // protected double xmin;
+    // protected double xmax;
+    // protected double ymin;
+    // protected double ymax;
     protected final ArrayList<DataSet> list = new ArrayList<>();
 
     /**
@@ -32,8 +32,8 @@ public class FragmentedDataSet extends AbstractDataSet<FragmentedDataSet> {
     }
 
     /**
-     * Returns a copy of the dataset. However, in contrast to a deep copy only the references to the contained dataset
-     * are copied.
+     * Returns a copy of the dataset. However, in contrast to a deep copy only
+     * the references to the contained dataset are copied.
      * 
      * @return copy of the dataset
      */
@@ -43,10 +43,10 @@ public class FragmentedDataSet extends AbstractDataSet<FragmentedDataSet> {
         d.dataCount = dataCount;
         d.xRange = xRange;
         d.yRange = yRange;
-        //    d.xmin = xmin;
-        //    d.xmax = xmax;
-        //    d.ymin = ymin;
-        //    d.ymax = ymax;
+        // d.xmin = xmin;
+        // d.xmax = xmax;
+        // d.ymin = ymin;
+        // d.ymax = ymax;
         d.list.addAll(list);
         return d;
     }
@@ -64,7 +64,7 @@ public class FragmentedDataSet extends AbstractDataSet<FragmentedDataSet> {
         try {
             dataCount = 0;
             list.clear();
-            fireInvalidated(new UpdatedDataEvent(this,"clear()"));
+            fireInvalidated(new UpdatedDataEvent(this, "clear()"));
         } finally {
             unlock();
         }
@@ -72,11 +72,15 @@ public class FragmentedDataSet extends AbstractDataSet<FragmentedDataSet> {
 
     /**
      * adds new custom x and y array values (internally generates a new DataSet)
+     * 
      * @param xValues new X coordinates
      * @param yValues new Y coordinates
      */
     public void add(final double[] xValues, final double[] yValues) {
-        final DoubleDataSet set = new DoubleDataSet(String.format("Fragement #%d", list.size() + 1), xValues, yValues);
+        // TODO: harald -> please check whether this is supposed to be deep copy
+        // (true) or by reference (false) hand over (assumption here is 'by reference/pointer' -> remove this comment once checked
+        final DoubleDataSet set = new DoubleDataSet(String.format("Fragement #%d", list.size() + 1), xValues, yValues,
+                xValues.length, false);
         add(set);
     }
 
@@ -95,7 +99,7 @@ public class FragmentedDataSet extends AbstractDataSet<FragmentedDataSet> {
             unlock();
         }
         computeLimits();
-        fireInvalidated(new AddedDataEvent(this,"added data set"));
+        fireInvalidated(new AddedDataEvent(this, "added data set"));
     }
 
     /**
@@ -211,104 +215,106 @@ public class FragmentedDataSet extends AbstractDataSet<FragmentedDataSet> {
         }
     }
 
-    //  @Override
-    //  public void opScale(double f)
-    //  {
-    //    lock();
-    //    try
-    //    {
-    //      for (AbstractTraceDataSet ds : list) ds.opScale(f);
-    //      updateLimits();
-    //      fireInvalidated();
-    //    }
-    //    finally
-    //    {
-    //      unlock();
-    //    }
-    //  }
+    // @Override
+    // public void opScale(double f)
+    // {
+    // lock();
+    // try
+    // {
+    // for (AbstractTraceDataSet ds : list) ds.opScale(f);
+    // updateLimits();
+    // fireInvalidated();
+    // }
+    // finally
+    // {
+    // unlock();
+    // }
+    // }
     //
-    //  @Override
-    //  public void opAdd(AbstractTraceDataSet ds)
-    //  {
-    //    if (!isCompatible(ds)) throw new IllegalArgumentException("Datasets do not match");
-    //    lock();
-    //    try
-    //    {
-    //      FragmentedDataSet fds = (FragmentedDataSet)ds;
-    //      for (int i=0;i<list.size();i++) list.get(i).opAdd(fds.list.get(i));
-    //      updateLimits();
-    //      fireInvalidated();
-    //    }
-    //    finally
-    //    {
-    //      unlock();
-    //    }
-    //  }
+    // @Override
+    // public void opAdd(AbstractTraceDataSet ds)
+    // {
+    // if (!isCompatible(ds)) throw new IllegalArgumentException("Datasets do
+    // not match");
+    // lock();
+    // try
+    // {
+    // FragmentedDataSet fds = (FragmentedDataSet)ds;
+    // for (int i=0;i<list.size();i++) list.get(i).opAdd(fds.list.get(i));
+    // updateLimits();
+    // fireInvalidated();
+    // }
+    // finally
+    // {
+    // unlock();
+    // }
+    // }
     //
-    //  @Override
-    //  public void opSub(AbstractTraceDataSet ds)
-    //  {
-    //    if (!isCompatible(ds)) throw new IllegalArgumentException("Datasets do not match");
-    //    lock();
-    //    try
-    //    {
-    //      FragmentedDataSet fds = (FragmentedDataSet)ds;
-    //      for (int i=0;i<list.size();i++) list.get(i).opSub(fds.list.get(i));
-    //      updateLimits();
-    //      fireInvalidated();
-    //    }
-    //    finally
-    //    {
-    //      unlock();
-    //    }
-    //  }
+    // @Override
+    // public void opSub(AbstractTraceDataSet ds)
+    // {
+    // if (!isCompatible(ds)) throw new IllegalArgumentException("Datasets do
+    // not match");
+    // lock();
+    // try
+    // {
+    // FragmentedDataSet fds = (FragmentedDataSet)ds;
+    // for (int i=0;i<list.size();i++) list.get(i).opSub(fds.list.get(i));
+    // updateLimits();
+    // fireInvalidated();
+    // }
+    // finally
+    // {
+    // unlock();
+    // }
+    // }
 
-    //  public AbstractDataSet subset(int from)
-    //  {
-    //    FragmentedDataSet d = new FragmentedDataSet(getName());
-    //    d.dataCount = 0;
-    ////    d.setXOffset(getXOffset()+from*getXScale());
-    ////    d.setXScale(getXScale());
-    //    d.xmin = xmin;
-    //    d.xmax = xmax;
-    //    d.ymin = ymin;
-    //    d.ymax = ymax;
-    //    for (AbstractDataSet set : list)
-    //    {
-    //      if (set.getDataCount() < from)
-    //      {
-    //        from -= set.getDataCount();
-    //      }
-    //      else
-    //      {
-    //        AbstractTraceDataSet ds = set.deepCopy();
-    //        if (from > 0)
-    //        {
-    //          ds = (AbstractTraceDataSet)ds.subset(from);
-    //          from = 0;
-    //        }
-    //        d.list.add(ds);
-    //        d.dataCount += set.getDataCount();
-    //      }
-    //    }
-    //    d.computeLimits();
-    //    return d;
-    //  }
+    // public AbstractDataSet subset(int from)
+    // {
+    // FragmentedDataSet d = new FragmentedDataSet(getName());
+    // d.dataCount = 0;
+    //// d.setXOffset(getXOffset()+from*getXScale());
+    //// d.setXScale(getXScale());
+    // d.xmin = xmin;
+    // d.xmax = xmax;
+    // d.ymin = ymin;
+    // d.ymax = ymax;
+    // for (AbstractDataSet set : list)
+    // {
+    // if (set.getDataCount() < from)
+    // {
+    // from -= set.getDataCount();
+    // }
+    // else
+    // {
+    // AbstractTraceDataSet ds = set.deepCopy();
+    // if (from > 0)
+    // {
+    // ds = (AbstractTraceDataSet)ds.subset(from);
+    // from = 0;
+    // }
+    // d.list.add(ds);
+    // d.dataCount += set.getDataCount();
+    // }
+    // }
+    // d.computeLimits();
+    // return d;
+    // }
 
-    //  public boolean isCompatible(AbstractDataSet ds)
-    //  {
-    //    if (!(ds instanceof FragmentedDataSet)) return false;
-    //    lock();
-    //    try
-    //    {
-    //      FragmentedDataSet fds = (FragmentedDataSet)ds;
-    //      if (list.size() != fds.list.size()) return false;
-    //      return true;
-    //    }
-    //    finally
-    //    {
-    //      unlock();
-    //    }
-    //  }
+    // public boolean isCompatible(AbstractDataSet ds)
+    // {
+    // if (!(ds instanceof FragmentedDataSet)) return false;
+    // lock();
+    // try
+    // {
+    // FragmentedDataSet fds = (FragmentedDataSet)ds;
+    // if (list.size() != fds.list.size()) return false;
+    // return true;
+    // }
+    // finally
+    // {
+    // unlock();
+    // }
+    // }
 
 }

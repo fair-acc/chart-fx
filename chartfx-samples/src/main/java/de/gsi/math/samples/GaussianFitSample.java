@@ -1,13 +1,13 @@
 package de.gsi.math.samples;
 
 import de.gsi.dataset.DataSet;
+import de.gsi.dataset.spi.DefaultDataSet;
 import de.gsi.dataset.spi.DefaultErrorDataSet;
-import de.gsi.dataset.spi.DoubleErrorDataSet;
 import de.gsi.math.TMath;
-import de.gsi.math.samples.utils.AbstractDemoApplication;
-import de.gsi.math.samples.utils.DemoChart;
 import de.gsi.math.fitter.NonLinearRegressionFitter;
 import de.gsi.math.functions.AbstractFunction1D;
+import de.gsi.math.samples.utils.AbstractDemoApplication;
+import de.gsi.math.samples.utils.DemoChart;
 import javafx.application.Application;
 import javafx.scene.Node;
 
@@ -17,7 +17,6 @@ import javafx.scene.Node;
  * @author rstein
  */
 public class GaussianFitSample extends AbstractDemoApplication {
-
     private static final int MAX_POINTS = 101;
     private DataSet fmodel;
     private DataSet fdataOrig;
@@ -27,7 +26,7 @@ public class GaussianFitSample extends AbstractDemoApplication {
         // user specific fitting function, here: normalised Gaussian Function
         // y := scale*1/sqrt(2*Pi*sigma^2)*exp(-0.5*(x-mu)^2/sigma^2)
         // ... MyGaussianFunction(name, double[]{mu, sigma, scale})
-        MyGaussianFunction func = new MyGaussianFunction("gauss1", new double[] { -3.0, 1.0, 10.0 });
+        final MyGaussianFunction func = new MyGaussianFunction("gauss1", new double[] { -3.0, 1.0, 10.0 });
         System.err.println("before fit");
         func.printParameters();
 
@@ -37,11 +36,11 @@ public class GaussianFitSample extends AbstractDemoApplication {
         double[] yErrors = new double[MAX_POINTS];
 
         for (int i = 0; i < xValues.length; i++) {
-            double error = 0.5 * RANDOM.nextGaussian();
+            final double error = 0.5 * RANDOM.nextGaussian();
             xValues[i] = (i - xValues.length / 2.0) * 30.0 / MAX_POINTS; // equidistant
                                                                          // sampling
 
-            double value = func.getValue(xValues[i]);
+            final double value = func.getValue(xValues[i]);
             // add some slope and offset to make the fit a bit more tricky
             // remember: in this example, the slope is not part of the fitting
             // check whether fit converged via chi^2
@@ -56,7 +55,7 @@ public class GaussianFitSample extends AbstractDemoApplication {
 
         }
 
-        NonLinearRegressionFitter fitter = new NonLinearRegressionFitter(xValues, yValues, yErrors);
+        final NonLinearRegressionFitter fitter = new NonLinearRegressionFitter(xValues, yValues, yErrors);
 
         // initial estimates
         double[] start = new double[3];
@@ -71,18 +70,18 @@ public class GaussianFitSample extends AbstractDemoApplication {
         step[2] = 0.1; // initial step size for scale
         fitter.simplex(func, start, step);
 
-        double[] fittedParameter = fitter.getBestEstimates();
-        double[] fittedParameterError = fitter.getBestEstimatesErrors();
+        final double[] fittedParameter = fitter.getBestEstimates();
+        final double[] fittedParameterError = fitter.getBestEstimatesErrors();
 
         func.setParameterValues(fittedParameter);
         for (int i = 0; i < func.getParameterCount(); i++) {
-            double value = fittedParameter[i];
-            double error = fittedParameterError[i];
+            final double value = fittedParameter[i];
+            final double error = fittedParameterError[i];
             func.setParameterRange(i, value - error, value + error);
         }
 
-        double[] yPredicted = func.getValues(xValues);
-        double[] yPredictedError = new double[yPredicted.length];
+        final double[] yPredicted = func.getValues(xValues);
+        final double[] yPredictedError = new double[yPredicted.length];
 
         System.err.println("after fit");
         func.printParameters();
@@ -93,9 +92,11 @@ public class GaussianFitSample extends AbstractDemoApplication {
                     fittedParameter[i], fittedParameterError[i]);
         }
 
-        fmodel = new DoubleErrorDataSet("design model", xValues, yModel);
-        fdataOrig = new DefaultErrorDataSet("data seed with errors", xValues, yValues, yErrors);
-        fdataFitted = new DefaultErrorDataSet("fitted model", xValues, yPredicted, yPredictedError);
+        fmodel = new DefaultDataSet("design model", xValues, yModel, xValues.length, true);
+        fdataOrig = new DefaultErrorDataSet("data seed with errors", xValues, yValues, yErrors, yErrors, xValues.length,
+                true);
+        fdataFitted = new DefaultErrorDataSet("fitted model", xValues, yPredicted, yPredictedError, yPredictedError,
+                xValues.length, true);
 
         // plot fitting results
         /*
@@ -111,18 +112,19 @@ public class GaussianFitSample extends AbstractDemoApplication {
     public Node getContent() {
         initData();
 
-        DemoChart chart = new DemoChart();
+        final DemoChart chart = new DemoChart();
         chart.getRenderer(0).getDatasets().addAll(fmodel, fdataOrig, fdataFitted);
 
         return chart;
     }
 
     /**
-     * example fitting function y = scale/(sqrt(2*pi*sigma)*exp(- 0.5*(x-mu)^2/sigma^2)
+     * example fitting function y = scale/(sqrt(2*pi*sigma)*exp(-
+     * 0.5*(x-mu)^2/sigma^2)
      */
-    class MyGaussianFunction extends AbstractFunction1D {
+    protected class MyGaussianFunction extends AbstractFunction1D {
 
-        public MyGaussianFunction(String name, double[] parameter) {
+        public MyGaussianFunction(final String name, final double[] parameter) {
             super(name, new double[3]);
             // declare parameter names
             this.setParameterName(0, "mu");
@@ -145,13 +147,12 @@ public class GaussianFitSample extends AbstractDemoApplication {
         }
 
         @Override
-        public double getValue(double x) {
-            double mu = fparameter[0];
-            double sigma = fparameter[1];
-            double scale = fparameter[2];
-            double y = scale * 1.0 / (Math.sqrt(TMath.TwoPi()) * sigma)
-                    * Math.exp(-0.5 * Math.pow((x - mu) / sigma, 2));
-            return y;
+        public double getValue(final double x) {
+            final double mu = fparameter[0];
+            final double sigma = fparameter[1];
+            final double scale = fparameter[2];
+
+            return scale * 1.0 / (Math.sqrt(TMath.TwoPi()) * sigma) * Math.exp(-0.5 * Math.pow((x - mu) / sigma, 2));
         }
     }
 

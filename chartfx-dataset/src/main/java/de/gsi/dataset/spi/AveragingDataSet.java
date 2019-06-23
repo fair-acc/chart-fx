@@ -216,7 +216,7 @@ public class AveragingDataSet extends AbstractDataSet<AveragingDataSet> {
     private class InternalDataSet extends DoubleDataSet {
 
         public InternalDataSet(DataSet ds) {
-            super(ds.getName(), ds.getXValues(), ds.getYValues(), true);
+            super(ds.getName(), ds.getXValues(), ds.getYValues(), ds.getDataCount(), true);
             //      xValues = new double[ds.getDataCount()];
             //      yValues = new double[ds.getDataCount()];
             //      for (int i=0;i<yValues.length;i++)

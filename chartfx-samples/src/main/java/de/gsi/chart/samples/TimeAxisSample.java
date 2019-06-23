@@ -71,7 +71,7 @@ public class TimeAxisSample extends Application {
         final long startTime = ProcessingProfiler.getTimeStamp();
 
         dataSet.setAutoNotifaction(false);
-        dataSet.getData().clear();
+        dataSet.clearData();
         final double now = System.currentTimeMillis() / 1000.0 + 1; // N.B. '+1'
                                                                     // to check
                                                                     // for

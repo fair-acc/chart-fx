@@ -67,7 +67,7 @@ public class WaveletScalogram extends AbstractDemoApplication {
 
         do {
             sleep(1000);
-            int status = wtrafo.getStatus();
+            final int status = wtrafo.getStatus();
             if (status > 10) {
                 System.out.println(status + " % of computation done");
             }
@@ -75,11 +75,11 @@ public class WaveletScalogram extends AbstractDemoApplication {
 
         sleep(1000);
 
-        DoubleFFT_1D fft = new DoubleFFT_1D(yValues.length);
-        double[] fftSpectra = Arrays.copyOf(yValues, yValues.length);
+        final DoubleFFT_1D fft = new DoubleFFT_1D(yValues.length);
+        final double[] fftSpectra = Arrays.copyOf(yValues, yValues.length);
         fft.realForward(fftSpectra);
-        double[] frequency1 = wtrafo.getScalogramFrequencyAxis(nQuantx, nQuanty, nu, fmin, fmax);
-        double[] magWavelet = new double[frequency1.length];
+        final double[] frequency1 = wtrafo.getScalogramFrequencyAxis(nQuantx, nQuanty, nu, fmin, fmax);
+        final double[] magWavelet = new double[frequency1.length];
         final int nboundary = fdataset.getXDataCount() / 20;
 
         for (int i = 0; i < fdataset.getYDataCount(); i++) {
@@ -93,22 +93,22 @@ public class WaveletScalogram extends AbstractDemoApplication {
             magWavelet[i] = val / count;
         }
 
-        double[] magFourier = SpectrumTools.computeMagnitudeSpectrum_dB(fftSpectra, true);
-        double[] frequency2 = SpectrumTools.computeFrequencyScale(fftSpectra.length / 2);
+        final double[] magFourier = SpectrumTools.computeMagnitudeSpectrum_dB(fftSpectra, true);
+        final double[] frequency2 = SpectrumTools.computeFrequencyScale(fftSpectra.length / 2);
 
         // normalise FFT and wavelet spectra for better comparison
-        double maxWavelet = TMath.Maximum(magWavelet);
+        final double maxWavelet = TMath.Maximum(magWavelet);
         for (int i = 0; i < magWavelet.length; i++) {
             magWavelet[i] -= maxWavelet;
         }
 
-        double maxFourier = TMath.Maximum(magFourier);
+        final double maxFourier = TMath.Maximum(magFourier);
         for (int i = 0; i < magFourier.length; i++) {
             magFourier[i] -= maxFourier;
         }
 
-        fwavelet = new DefaultDataSet("Wavelet magnitude", frequency1, magWavelet);
-        ffourier = new DefaultDataSet("Fourier magnitude", frequency2, magFourier);
+        fwavelet = new DefaultDataSet("Wavelet magnitude", frequency1, magWavelet, frequency1.length, true);
+        ffourier = new DefaultDataSet("Fourier magnitude", frequency2, magFourier, frequency2.length, true);
 
         return fdataset;
     }
@@ -126,11 +126,11 @@ public class WaveletScalogram extends AbstractDemoApplication {
         // synthetic data
         final double[] yModel = new double[MAX_POINTS];
 
-        Random rnd = new Random();
+        final Random rnd = new Random();
         for (int i = 0; i < yValues.length; i++) {
-            double x = i;
+            final double x = i;
             double offset = 0;
-            double error = 0.1 * rnd.nextGaussian();
+            final double error = 0.1 * rnd.nextGaussian();
 
             // linear chirp with discontinuity
             offset = (i > 500) ? -20 : 0;
@@ -140,7 +140,7 @@ public class WaveletScalogram extends AbstractDemoApplication {
             yModel[i] += (i > 50 && i < 500) ? 1.0 * Math.sin(TMath.TwoPi() * 0.25 * x) : 0;
 
             // modulation around 0.4
-            double mod = Math.cos(TMath.TwoPi() * 0.01 * x);
+            final double mod = Math.cos(TMath.TwoPi() * 0.01 * x);
             yModel[i] += (i > 300 && i < 900) ? 1.0 * Math.sin(TMath.TwoPi() * (0.4 - 5e-4 * mod) * x) : 0;
 
             // quadratic chirp starting at 0.1
@@ -154,21 +154,21 @@ public class WaveletScalogram extends AbstractDemoApplication {
     @Override
     public Node getContent() {
 
-        DemoChart chart1 = new DemoChart();
+        final DemoChart chart1 = new DemoChart();
         chart1.getXAxis().setLabel("time");
         chart1.getXAxis().setUnit("turns");
         chart1.getYAxis().setAutoRangeRounding(false);
         chart1.getYAxis().setAutoRangePadding(0.0);
         chart1.getYAxis().setLabel("frequency");
         chart1.getYAxis().setUnit("fs");
-        ContourDataSetRenderer contourChartRenderer = new ContourDataSetRenderer();
+        final ContourDataSetRenderer contourChartRenderer = new ContourDataSetRenderer();
         chart1.getRenderers().set(0, contourChartRenderer);
         contourChartRenderer.setColorGradient(ColorGradient.RAINBOW);
         // contourChartRenderer.setColorGradient(ColorGradient.JET);
         // contourChartRenderer.setColorGradient(ColorGradient.TOPO_EXT);
         contourChartRenderer.getDatasets().add(createDataSet());
 
-        DemoChart chart2 = new DemoChart();
+        final DemoChart chart2 = new DemoChart();
         chart2.getXAxis().setLabel("frequency");
         chart2.getXAxis().setUnit("fs");
         chart2.getYAxis().setLabel("magnitude");
@@ -176,7 +176,7 @@ public class WaveletScalogram extends AbstractDemoApplication {
         chart1.getXAxis().setAutoRangePadding(0.0);
         chart2.getDatasets().addAll(fwavelet, ffourier);
 
-        AxisSynchronizer sync = new AxisSynchronizer();
+        final AxisSynchronizer sync = new AxisSynchronizer();
         sync.add(chart2.getXAxis());
         sync.add(chart1.getYAxis());
 
@@ -184,20 +184,20 @@ public class WaveletScalogram extends AbstractDemoApplication {
     }
 
     private double[] readDemoData(int index) {
-        String fileName = index <= 1 ? "./rawDataCPS2.dat" : "./rawDataLHCInj.dat";
+        final String fileName = index <= 1 ? "./rawDataCPS2.dat" : "./rawDataLHCInj.dat";
         try {
             try (BufferedReader reader = new BufferedReader(
                     new InputStreamReader(EMDSample.class.getResourceAsStream(fileName)))) {
 
                 String line = reader.readLine();
-                int nDim = line == null ? 0 : Integer.parseInt(line);
+                final int nDim = line == null ? 0 : Integer.parseInt(line);
                 double[] ret = new double[nDim];
                 for (int i = 0; i < nDim; i++) {
                     line = reader.readLine();
                     if (line == null) {
                         break;
                     }
-                    String[] x = line.split("\t");
+                    final String[] x = line.split("\t");
                     ret[i] = Double.parseDouble(x[1]);
                 }
 

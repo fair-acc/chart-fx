@@ -2,13 +2,13 @@ package de.gsi.chart.samples;
 
 import de.gsi.chart.XYChart;
 import de.gsi.chart.axes.spi.DefaultNumericAxis;
-import de.gsi.dataset.spi.DefaultErrorDataSet;
-import de.gsi.dataset.spi.DoubleDataSet;
 import de.gsi.chart.plugins.EditAxis;
 import de.gsi.chart.plugins.Zoomer;
 import de.gsi.chart.renderer.PolarTickStep;
 import de.gsi.chart.renderer.datareduction.DefaultDataReducer;
 import de.gsi.chart.renderer.spi.ErrorDataSetRenderer;
+import de.gsi.dataset.spi.DefaultDataSet;
+import de.gsi.dataset.spi.DefaultErrorDataSet;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.layout.StackPane;
@@ -17,7 +17,7 @@ import javafx.stage.Stage;
 /**
  * small demo to experiment with polar plot geometries
  * 
- * @author steinhagen
+ * @author rstein
  */
 public class PolarPlotSample extends Application {
     private static final int N_SAMPLES = 10000;
@@ -52,7 +52,7 @@ public class PolarPlotSample extends Application {
         reducer.setMinPointPixelDistance(3);
 
         final DefaultErrorDataSet dataSet1 = new DefaultErrorDataSet("myData");
-        final DoubleDataSet dataSet2 = new DoubleDataSet("myData2");
+        final DefaultDataSet dataSet2 = new DefaultDataSet("myData2");
         renderer.getDatasets().addAll(dataSet1, dataSet2);
 
         for (int n = 0; n < PolarPlotSample.N_SAMPLES; n++) {
