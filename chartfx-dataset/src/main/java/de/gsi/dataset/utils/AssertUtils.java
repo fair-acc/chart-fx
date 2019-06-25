@@ -136,9 +136,37 @@ public final class AssertUtils {
      * @param array1 to be checked
      * @param array2 to be checked
      */
-    public static <T> void equalDoubleArrays(final T[] array1, final T[] array2) {
+    public static <T> void equalArrays(final T[] array1, final T[] array2) {
         if (array1.length != array2.length) {
             throw new IllegalArgumentException("The double arrays must have the same length!");
+        }
+    }
+    
+    /**
+     * Asserts that the specified arrays have the same length.
+     * @param array1 to be checked
+     * @param array2 to be checked
+     */
+    public static void equalFloatArrays(final float[] array1, final float[] array2) {
+        if (array1.length != array2.length) {
+            throw new IllegalArgumentException("The float arrays must have the same length! length1 = " + array1.length
+                    + " vs. length2 = " + array2.length);
+        }
+    }
+
+    /**
+     * Asserts that the specified arrays have the same length or are at least min size.
+     * 
+     * @param array1 to be checked
+     * @param array2 to be checked
+     * @param nMinSize minimum required size
+     */
+    public static void equalFloatArrays(final float[] array1, final float[] array2, final int nMinSize) {
+        final int length1 = Math.min(nMinSize, array1.length);
+        final int length2 = Math.min(nMinSize, array2.length);
+        if (length1 != length2) {
+            throw new IllegalArgumentException("The double arrays must have the same length! length1 = " + array1.length
+                    + " vs. length2 = " + array2.length + " (nMinSize = " + nMinSize + ")");
         }
     }
 
