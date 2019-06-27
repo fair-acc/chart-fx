@@ -16,5 +16,4 @@
 		Container for handling different types of datasets with metadata, uncertainties, etc.
 		Provides interfaces for the charting and math library to use.
 	</description>
-
 </project>

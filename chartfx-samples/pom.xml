@@ -23,4 +23,17 @@
             <version>${project.version}</version>
         </dependency>
     </dependencies>
+    
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <configuration>
+                    <skip>false</skip>
+                    <mainClass>de.gsi.samples.utils.LaunchJFX</mainClass>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>

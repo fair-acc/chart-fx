@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import com.sun.javafx.css.converters.BooleanConverter;
+import javafx.css.converter.BooleanConverter;
 
 import de.gsi.chart.Chart;
 import de.gsi.chart.XYChart;
@@ -99,7 +99,6 @@ public class GridRenderer extends Pane implements Renderer {
         final Scene scene = new Scene(this);
         scene.getStylesheets().add(GridRenderer.CHART_CSS);
         gridStyleNodes.applyCss();
-        impl_reapplyCSS();
         final SetChangeListener<? super PseudoClass> listener = evt -> gridStyleNodes.applyCss();
         horMajorGridStyleNode.getPseudoClassStates().addListener(listener);
         verMajorGridStyleNode.getPseudoClassStates().addListener(listener);

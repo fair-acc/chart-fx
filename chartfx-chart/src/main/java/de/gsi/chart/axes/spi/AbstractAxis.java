@@ -480,7 +480,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
                 // auto range
                 newAxisRange = autoRange(axisLength);
                 // set current range to new range
-                setRange(newAxisRange, getAnimated() && !isFirstPass && impl_isTreeVisible() && rangeInvalid);
+                setRange(newAxisRange, getAnimated() && !isFirstPass && rangeInvalid);
             } else {
                 newAxisRange = getAxisRange();
             }
@@ -658,7 +658,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
      * @return true if animations should happen
      */
     protected boolean shouldAnimate() {
-        return getAnimated() && impl_isTreeVisible() && getScene() != null;
+        return getAnimated() && getScene() != null;
     }
 
     /**

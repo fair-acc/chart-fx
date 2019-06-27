@@ -9,9 +9,9 @@ import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
-import com.sun.javafx.charts.ChartLayoutAnimator;
-import com.sun.javafx.css.converters.BooleanConverter;
-import com.sun.javafx.css.converters.EnumConverter;
+import de.gsi.chart.ui.ChartLayoutAnimator;
+import javafx.css.converter.BooleanConverter;
+import javafx.css.converter.EnumConverter;
 
 import de.gsi.chart.axes.Axis;
 import de.gsi.chart.axes.spi.DefaultNumericAxis;
@@ -1146,7 +1146,7 @@ public abstract class Chart extends SidesPane implements Observable {
      * @return true if should animate
      */
     protected final boolean shouldAnimate() {
-        return getAnimated() && impl_isTreeVisible() && getScene() != null;
+        return getAnimated() && getScene() != null;
     }
 
     // -------------- STYLESHEET HANDLING
