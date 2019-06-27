@@ -10,7 +10,7 @@ public interface EditableDataSet extends DataSet {
 	 * @param name the new data set name
 	 * @return itself (fluent design)
 	 */
-	public EditableDataSet setName(final String name);
+	EditableDataSet setName(final String name);
 
 	/**
 	 * modify point in the the data set
@@ -20,7 +20,7 @@ public interface EditableDataSet extends DataSet {
 	 * @param y     vertical coordinate of the new data point
 	 * @return itself (fluent design)
 	 */
-	public EditableDataSet set(final int index, final double x, final double y);
+	EditableDataSet set(final int index, final double x, final double y);
 
 	/**
 	 * add point to the data set
@@ -30,7 +30,7 @@ public interface EditableDataSet extends DataSet {
 	 * @param y     vertical coordinate of the new data point
 	 * @return itself (fluent design)
 	 */
-	public EditableDataSet add(final int index, final double x, final double y);
+	EditableDataSet add(final int index, final double x, final double y);
 
 	/**
 	 * remove point from data set
@@ -38,18 +38,18 @@ public interface EditableDataSet extends DataSet {
 	 * @param index data point which should be removed
 	 * @return itself (fluent design)
 	 */
-	public EditableDataSet remove(final int index);
+	EditableDataSet remove(final int index);
 
 	/**
 	 * 
 	 * @return edit constraints for data set
 	 */
-	public EditConstraints getEditConstraints();
+	EditConstraints getEditConstraints();
 
 	/**
 	 * 
 	 * @param constraints new edit constraints
 	 * @return itself (fluent design)
 	 */
-	public EditableDataSet setEditConstraints(final EditConstraints constraints);
+	EditableDataSet setEditConstraints(final EditConstraints constraints);
 }

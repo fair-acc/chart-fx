@@ -16,6 +16,7 @@ import de.gsi.dataset.EditConstraints;
 import de.gsi.dataset.event.EventListener;
 import de.gsi.dataset.event.UpdateEvent;
 import de.gsi.dataset.event.UpdatedMetaDataEvent;
+import de.gsi.dataset.spi.utils.StringHashMapList;
 
 /**
  * <p>
@@ -42,8 +43,8 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
     boolean autoNotification = true;
     protected DataRange xRange = new DataRange();
     protected DataRange yRange = new DataRange();
-    protected Map<Integer, String> dataLabels = new ConcurrentHashMap<>();
-    protected Map<Integer, String> dataStyles = new ConcurrentHashMap<>();
+    protected StringHashMapList dataLabels = new StringHashMapList();
+    protected StringHashMapList dataStyles = new StringHashMapList();
     protected EditConstraints editConstraints;
     protected final Map<String, String> metaInfoMap = new ConcurrentHashMap<>();
 
@@ -202,7 +203,7 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
             xRange.add(getX(i));
             yRange.add(getY(i));
         }
-
+        System.err.println("computeLimits() " + this.getName() + " -- range = " + yRange.toString() + " - dataCount = " + dataCount);
         return unlock();
     }
 
@@ -397,6 +398,23 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
     public String toString() {
         return getClass().getName() + " [dataCnt=" + getDataCount() + ", xRange=" + getXRange() + ", yRange="
                 + getYRange() + "]";
+    }
+    
+    
+    /**
+     * 
+     * @return data label map for given data point
+     */
+    public StringHashMapList getDataLabelMap() {
+        return dataLabels;
+    }
+
+    /**
+     * 
+     * @return data style map (CSS-styling)
+     */
+    public StringHashMapList getDataStyleMap() {
+        return dataStyles;
     }
 
     /**

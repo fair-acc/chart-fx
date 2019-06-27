@@ -21,11 +21,13 @@ import de.gsi.dataset.utils.AssertUtils;
  * User provides X and Y coordinates or only Y coordinates. In the former case X
  * coordinates have value of data point index.
  *
- * N.B. this is a classic list-based implementation. This is a "simple" implementation but 
- * has a poorer performance compared to Default- and Double-based DataSets @see DoubleDataSet 
+ * N.B. this is a classic list-based implementation. This is a "simple"
+ * implementation but has a poorer performance compared to Default- and
+ * Double-based DataSets @see DoubleDataSet
  *
  * @author rstein
- * @deprecated due to poorer CPU performance (this is kept for reference reasons)
+ * @deprecated due to poorer CPU performance (this is kept for reference
+ *             reasons)
  */
 public class ListDataSet extends AbstractDataSet<ListDataSet> implements DataSet {
     protected Map<Integer, String> dataLabels = new ConcurrentHashMap<>();
@@ -109,22 +111,6 @@ public class ListDataSet extends AbstractDataSet<ListDataSet> implements DataSet
 
     /**
      * 
-     * @return data label map for given data point
-     */
-    public Map<Integer, String> getDataLabelMap() {
-        return dataLabels;
-    }
-
-    /**
-     * 
-     * @return data style map (CSS-styling)
-     */
-    public Map<Integer, String> getDataStyleMap() {
-        return dataStyles;
-    }
-
-    /**
-     * 
      * @return list containing data point definition
      */
     public List<DoublePoint> getData() {
@@ -177,7 +163,7 @@ public class ListDataSet extends AbstractDataSet<ListDataSet> implements DataSet
 
         xRange.setMax(Double.NaN);
         yRange.setMax(Double.NaN);
-        
+
         computeLimits();
 
         return unlock().fireInvalidated(new UpdatedDataEvent(this));
