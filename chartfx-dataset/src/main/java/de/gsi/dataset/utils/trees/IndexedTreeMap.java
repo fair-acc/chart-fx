@@ -24,18 +24,18 @@ import java.util.SortedSet;
  * time, depending on which constructor is used.
  * </p>
  * <p>
- * This implementation provides guaranteed log(n) time cost for the <tt>containsKey</tt>, <tt>get</tt>, <tt>put</tt> and
- * <tt>remove</tt> operations. Algorithms are adaptations of those in Cormen, Leiserson, and Rivest's <I>Introduction to
+ * This implementation provides guaranteed log(n) time cost for the <code>containsKey</code>, <code>get</code>, <code>put</code> and
+ * <code>remove</code> operations. Algorithms are adaptations of those in Cormen, Leiserson, and Rivest's <I>Introduction to
  * Algorithms</I>.
  * </p>
  * <p>
  * Note that the ordering maintained by a sorted map (whether or not an explicit comparator is provided) must be
- * <i>consistent with equals</i> if this sorted map is to correctly implement the <tt>Map</tt> interface. (See
- * <tt>Comparable</tt> or <tt>Comparator</tt> for a precise definition of <i>consistent with equals</i>.) This is so
- * because the <tt>Map</tt> interface is defined in terms of the equals operation, but a map performs all key
- * comparisons using its <tt>compareTo</tt> (or <tt>compare</tt>) method, so two keys that are deemed equal by this
+ * <i>consistent with equals</i> if this sorted map is to correctly implement the <code>Map</code> interface. (See
+ * <code>Comparable</code> or <code>Comparator</code> for a precise definition of <i>consistent with equals</i>.) This is so
+ * because the <code>Map</code> interface is defined in terms of the equals operation, but a map performs all key
+ * comparisons using its <code>compareTo</code> (or <code>compare</code>) method, so two keys that are deemed equal by this
  * method are, from the standpoint of the sorted map, equal. The behaviour of a sorted map <i>is</i> well-defined even if
- * its ordering is inconsistent with equals; it just fails to obey the general contract of the <tt>Map</tt> interface.
+ * its ordering is inconsistent with equals; it just fails to obey the general contract of the <code>Map</code> interface.
  * </p>
  * <p>
  * <strong>Note that this implementation is not synchronised.</strong> If multiple threads access a map concurrently,
@@ -52,23 +52,23 @@ import java.util.SortedSet;
  * </pre>
  * 
  * <p>
- * The iterators returned by the <tt>iterator</tt> method of the collections returned by all of this class's "collection
+ * The iterators returned by the <code>iterator</code> method of the collections returned by all of this class's "collection
  * view methods" are <i>fail-fast</i>: if the map is structurally modified at any time after the iterator is created, in
- * any way except through the iterator's own <tt>remove</tt> method, the iterator will throw a
+ * any way except through the iterator's own <code>remove</code> method, the iterator will throw a
  * {@link java.util.ConcurrentModificationException}. Thus, in the face of concurrent modification, the iterator fails
  * quickly and cleanly, rather than risking arbitrary, non-deterministic behaviour at an undetermined time in the future.
  * </p>
  * <p>
  * Note that the fail-fast behaviour of an iterator cannot be guaranteed as it is, generally speaking, impossible to make
  * any hard guarantees in the presence of unsynchronised concurrent modification. Fail-fast iterators throw
- * <tt>ConcurrentModificationException</tt> on a best-effort basis. Therefore, it would be wrong to write a program that
+ * <code>ConcurrentModificationException</code> on a best-effort basis. Therefore, it would be wrong to write a program that
  * depended on this exception for its correctness: <i>the fail-fast behaviour of iterators should be used only to detect
  * bugs.</i>
  * </p>
  * <p>
- * All <tt>Map.Entry</tt> pairs returned by methods in this class and its views represent snapshots of mappings at the
- * time they were produced. They do <em>not</em> support the <tt>Entry.setValue</tt> method. (Note however that it is
- * possible to change mappings in the associated map using <tt>put</tt>.)
+ * All <code>Map.Entry</code> pairs returned by methods in this class and its views represent snapshots of mappings at the
+ * time they were produced. They do <em>not</em> support the <code>Entry.setValue</code> method. (Note however that it is
+ * possible to change mappings in the associated map using <code>put</code>.)
  * </p>
  * <p>
  * This class is a member of the <a href="{@docRoot}/../technotes/guides/collections/index.html"> Java Collections
@@ -113,10 +113,10 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V>
     /**
      * Constructs a new, empty tree map, using the natural ordering of its keys. All keys inserted into the map must
      * implement the {@link Comparable} interface. Furthermore, all such keys must be <i>mutually comparable</i>:
-     * <tt>k1.compareTo(k2)</tt> must not throw a <tt>ClassCastException</tt> for any keys <tt>k1</tt> and <tt>k2</tt>
+     * <code>k1.compareTo(k2)</code> must not throw a <code>ClassCastException</code> for any keys <code>k1</code> and <code>k2</code>
      * in the map. If the user attempts to put a key into the map that violates this constraint (for example, the user
-     * attempts to put a string key into a map whose keys are integers), the <tt>put(Object key, Object value)</tt> call
-     * will throw a <tt>ClassCastException</tt>.
+     * attempts to put a string key into a map whose keys are integers), the <code>put(Object key, Object value)</code> call
+     * will throw a <code>ClassCastException</code>.
      */
     public IndexedTreeMap() {
         comparator = null;
@@ -124,12 +124,12 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V>
 
     /**
      * Constructs a new, empty tree map, ordered according to the given comparator. All keys inserted into the map must
-     * be <i>mutually comparable</i> by the given comparator: <tt>comparator.compare(k1,
-     * k2)</tt> must not throw a <tt>ClassCastException</tt> for any keys <tt>k1</tt> and <tt>k2</tt> in the map. If the
-     * user attempts to put a key into the map that violates this constraint, the <tt>put(Object
-     * key, Object value)</tt> call will throw a <tt>ClassCastException</tt>.
+     * be <i>mutually comparable</i> by the given comparator: <code>comparator.compare(k1,
+     * k2)</code> must not throw a <code>ClassCastException</code> for any keys <code>k1</code> and <code>k2</code> in the map. If the
+     * user attempts to put a key into the map that violates this constraint, the <code>put(Object
+     * key, Object value)</code> call will throw a <code>ClassCastException</code>.
      *
-     * @param comparator the comparator that will be used to order this map. If <tt>null</tt>, the
+     * @param comparator the comparator that will be used to order this map. If <code>null</code>, the
      *            {@linkplain Comparable natural ordering} of the keys will be used.
      */
     public IndexedTreeMap(Comparator<? super K> comparator) {
@@ -139,8 +139,8 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V>
     /**
      * Constructs a new tree map containing the same mappings as the given map, ordered according to the <i>natural
      * ordering</i> of its keys. All keys inserted into the new map must implement the {@link Comparable} interface.
-     * Furthermore, all such keys must be <i>mutually comparable</i>: <tt>k1.compareTo(k2)</tt> must not throw a
-     * <tt>ClassCastException</tt> for any keys <tt>k1</tt> and <tt>k2</tt> in the map. This method runs in n*log(n)
+     * Furthermore, all such keys must be <i>mutually comparable</i>: <code>k1.compareTo(k2)</code> must not throw a
+     * <code>ClassCastException</code> for any keys <code>k1</code> and <code>k2</code> in the map. This method runs in n*log(n)
      * time.
      *
      * @param m the map whose mappings are to be placed in this map
@@ -182,10 +182,10 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V>
     }
 
     /**
-     * Returns <tt>true</tt> if this map contains a mapping for the specified key.
+     * Returns <code>true</code> if this map contains a mapping for the specified key.
      *
      * @param key key whose presence in this map is to be tested
-     * @return <tt>true</tt> if this map contains a mapping for the specified key
+     * @return <code>true</code> if this map contains a mapping for the specified key
      * @throws ClassCastException if the specified key cannot be compared with the keys currently in the map
      * @throws NullPointerException if the specified key is null and this map uses natural ordering, or its comparator
      *             does not permit null keys
@@ -196,13 +196,13 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V>
     }
 
     /**
-     * Returns <tt>true</tt> if this map maps one or more keys to the specified value. More formally, returns
-     * <tt>true</tt> if and only if this map contains at least one mapping to a value <tt>v</tt> such that
-     * <tt>(value==null ? v==null : value.equals(v))</tt>. This operation will probably require time linear in the map
+     * Returns <code>true</code> if this map maps one or more keys to the specified value. More formally, returns
+     * <code>true</code> if and only if this map contains at least one mapping to a value <code>v</code> such that
+     * <code>(value==null ? v==null : value.equals(v))</code>. This operation will probably require time linear in the map
      * size for most implementations.
      *
      * @param value value whose presence in this map is to be tested
-     * @return <tt>true</tt> if a mapping to <tt>value</tt> exists; <tt>false</tt> otherwise
+     * @return <code>true</code> if a mapping to <code>value</code> exists; <code>false</code> otherwise
      * @since 1.2
      */
     @Override
@@ -287,10 +287,10 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V>
     }
 
     /**
-     * Returns this map's entry for the given key, or <tt>null</tt> if the map does not contain an entry for the key.
+     * Returns this map's entry for the given key, or <code>null</code> if the map does not contain an entry for the key.
      * @param key key value
      *
-     * @return this map's entry for the given key, or <tt>null</tt> if the map does not contain an entry for the key
+     * @return this map's entry for the given key, or <code>null</code> if the map does not contain an entry for the key
      * @throws ClassCastException if the specified key cannot be compared with the keys currently in the map
      * @throws NullPointerException if the specified key is null and this map uses natural ordering, or its comparator
      *             does not permit null keys
@@ -346,7 +346,7 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V>
     /**
      * Gets the entry corresponding to the specified key; if no such entry exists, returns the entry for the least key
      * greater than the specified key; if no such entry exists (i.e., the greatest key in the Tree is less than the
-     * specified key), returns <tt>null</tt>.
+     * specified key), returns <code>null</code>.
      * @param key key value
      * @return entry
      */
@@ -381,7 +381,7 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V>
 
     /**
      * Gets the entry corresponding to the specified key; if no such entry exists, returns the entry for the greatest
-     * key less than the specified key; if no such entry exists, returns <tt>null</tt>.
+     * key less than the specified key; if no such entry exists, returns <code>null</code>.
      * @param key key value
      * @return entry
      */
@@ -447,7 +447,7 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V>
 
     /**
      * Gets the entry for the least key greater than the specified key; if no such entry exists, returns the entry for
-     * the least key greater than the specified key; if no such entry exists returns <tt>null</tt>.
+     * the least key greater than the specified key; if no such entry exists returns <code>null</code>.
      * @param key key value
      * @return entry
      */
@@ -478,7 +478,7 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V>
 
     /**
      * Returns the entry for the greatest key less than the specified key; if no such entry exists (i.e., the least key
-     * in the Tree is greater than the specified key), returns <tt>null</tt>.
+     * in the Tree is greater than the specified key), returns <code>null</code>.
      * @param key key value
      * @return entry
      */
@@ -513,9 +513,9 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V>
      *
      * @param key key with which the specified value is to be associated
      * @param value value to be associated with the specified key
-     * @return the previous value associated with <tt>key</tt>, or <tt>null</tt> if there was no mapping for
-     *         <tt>key</tt>. (A <tt>null</tt> return can also indicate that the map previously associated <tt>null</tt>
-     *         with <tt>key</tt>.)
+     * @return the previous value associated with <code>key</code>, or <code>null</code> if there was no mapping for
+     *         <code>key</code>. (A <code>null</code> return can also indicate that the map previously associated <code>null</code>
+     *         with <code>key</code>.)
      * @throws ClassCastException if the specified key cannot be compared with the keys currently in the map
      * @throws NullPointerException if the specified key is null and this map uses natural ordering, or its comparator
      *             does not permit null keys
@@ -586,9 +586,9 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V>
      * Removes the mapping for this key from this IndexedTreeMap if present.
      *
      * @param key key for which mapping should be removed
-     * @return the previous value associated with <tt>key</tt>, or <tt>null</tt> if there was no mapping for
-     *         <tt>key</tt>. (A <tt>null</tt> return can also indicate that the map previously associated <tt>null</tt>
-     *         with <tt>key</tt>.)
+     * @return the previous value associated with <code>key</code>, or <code>null</code> if there was no mapping for
+     *         <code>key</code>. (A <code>null</code> return can also indicate that the map previously associated <code>null</code>
+     *         with <code>key</code>.)
      * @throws ClassCastException if the specified key cannot be compared with the keys currently in the map
      * @throws NullPointerException if the specified key is null and this map uses natural ordering, or its comparator
      *             does not permit null keys
@@ -616,7 +616,7 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V>
     }
 
     /**
-     * Returns a shallow copy of this <tt>IndexedTreeMap</tt> instance. (The keys and values themselves are not cloned.)
+     * Returns a shallow copy of this <code>IndexedTreeMap</code> instance. (The keys and values themselves are not cloned.)
      *
      * @return a shallow copy of this map
      */
@@ -876,10 +876,10 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V>
      * Returns a {@link java.util.Set} view of the keys contained in this map. The set's iterator returns the keys in
      * ascending order. The set is backed by the map, so changes to the map are reflected in the set, and vice-versa. If
      * the map is modified while an iteration over the set is in progress (except through the iterator's own
-     * <tt>remove</tt> operation), the results of the iteration are undefined. The set supports element removal, which
-     * removes the corresponding mapping from the map, via the <tt>Iterator.remove</tt>, <tt>Set.remove</tt>,
-     * <tt>removeAll</tt>, <tt>retainAll</tt>, and <tt>clear</tt> operations. It does not support the <tt>add</tt> or
-     * <tt>addAll</tt> operations.
+     * <code>remove</code> operation), the results of the iteration are undefined. The set supports element removal, which
+     * removes the corresponding mapping from the map, via the <code>Iterator.remove</code>, <code>Set.remove</code>,
+     * <code>removeAll</code>, <code>retainAll</code>, and <code>clear</code> operations. It does not support the <code>add</code> or
+     * <code>addAll</code> operations.
      */
     @Override
     public Set<K> keySet() {
@@ -908,10 +908,10 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V>
      * Returns a {@link Collection} view of the values contained in this map. The collection's iterator returns the
      * values in ascending order of the corresponding keys. The collection is backed by the map, so changes to the map
      * are reflected in the collection, and vice-versa. If the map is modified while an iteration over the collection is
-     * in progress (except through the iterator's own <tt>remove</tt> operation), the results of the iteration are
+     * in progress (except through the iterator's own <code>remove</code> operation), the results of the iteration are
      * undefined. The collection supports element removal, which removes the corresponding mapping from the map, via the
-     * <tt>Iterator.remove</tt>, <tt>Collection.remove</tt>, <tt>removeAll</tt>, <tt>retainAll</tt> and <tt>clear</tt>
-     * operations. It does not support the <tt>add</tt> or <tt>addAll</tt> operations.
+     * <code>Iterator.remove</code>, <code>Collection.remove</code>, <code>removeAll</code>, <code>retainAll</code> and <code>clear</code>
+     * operations. It does not support the <code>add</code> or <code>addAll</code> operations.
      */
     @Override
     public Collection<V> values() {
@@ -923,10 +923,10 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V>
      * Returns a {@link Set} view of the mappings contained in this map. The set's iterator returns the entries in
      * ascending key order. The set is backed by the map, so changes to the map are reflected in the set, and
      * vice-versa. If the map is modified while an iteration over the set is in progress (except through the iterator's
-     * own <tt>remove</tt> operation, or through the <tt>setValue</tt> operation on a map entry returned by the
+     * own <code>remove</code> operation, or through the <code>setValue</code> operation on a map entry returned by the
      * iterator) the results of the iteration are undefined. The set supports element removal, which removes the
-     * corresponding mapping from the map, via the <tt>Iterator.remove</tt>, <tt>Set.remove</tt>, <tt>removeAll</tt>,
-     * <tt>retainAll</tt> and <tt>clear</tt> operations. It does not support the <tt>add</tt> or <tt>addAll</tt>
+     * corresponding mapping from the map, via the <code>Iterator.remove</code>, <code>Set.remove</code>, <code>removeAll</code>,
+     * <code>retainAll</code> and <code>clear</code> operations. It does not support the <code>add</code> or <code>addAll</code>
      * operations.
      */
     @Override
@@ -946,7 +946,7 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V>
 
     /**
      * @throws ClassCastException {@inheritDoc}
-     * @throws NullPointerException if <tt>fromKey</tt> or <tt>toKey</tt> is null and this map uses natural ordering, or
+     * @throws NullPointerException if <code>fromKey</code> or <code>toKey</code> is null and this map uses natural ordering, or
      *             its comparator does not permit null keys
      * @throws IllegalArgumentException {@inheritDoc}
      * @since 1.6
@@ -958,7 +958,7 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V>
 
     /**
      * @throws ClassCastException {@inheritDoc}
-     * @throws NullPointerException if <tt>toKey</tt> is null and this map uses natural ordering, or its comparator does
+     * @throws NullPointerException if <code>toKey</code> is null and this map uses natural ordering, or its comparator does
      *             not permit null keys
      * @throws IllegalArgumentException {@inheritDoc}
      * @since 1.6
@@ -970,7 +970,7 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V>
 
     /**
      * @throws ClassCastException {@inheritDoc}
-     * @throws NullPointerException if <tt>fromKey</tt> is null and this map uses natural ordering, or its comparator
+     * @throws NullPointerException if <code>fromKey</code> is null and this map uses natural ordering, or its comparator
      *             does not permit null keys
      * @throws IllegalArgumentException {@inheritDoc}
      * @since 1.6
@@ -982,7 +982,7 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V>
 
     /**
      * @throws ClassCastException {@inheritDoc}
-     * @throws NullPointerException if <tt>fromKey</tt> or <tt>toKey</tt> is null and this map uses natural ordering, or
+     * @throws NullPointerException if <code>fromKey</code> or <code>toKey</code> is null and this map uses natural ordering, or
      *             its comparator does not permit null keys
      * @throws IllegalArgumentException {@inheritDoc}
      */
@@ -993,7 +993,7 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V>
 
     /**
      * @throws ClassCastException {@inheritDoc}
-     * @throws NullPointerException if <tt>toKey</tt> is null and this map uses natural ordering, or its comparator does
+     * @throws NullPointerException if <code>toKey</code> is null and this map uses natural ordering, or its comparator does
      *             not permit null keys
      * @throws IllegalArgumentException {@inheritDoc}
      */
@@ -1004,7 +1004,7 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V>
 
     /**
      * @throws ClassCastException {@inheritDoc}
-     * @throws NullPointerException if <tt>fromKey</tt> is null and this map uses natural ordering, or its comparator
+     * @throws NullPointerException if <code>fromKey</code> is null and this map uses natural ordering, or its comparator
      *             does not permit null keys
      * @throws IllegalArgumentException {@inheritDoc}
      */
@@ -1371,7 +1371,7 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V>
     }
 
     /**
-     * Test two values for equality. Differs from o1.equals(o2) only in that it copes with <tt>null</tt> o1 properly.
+     * Test two values for equality. Differs from o1.equals(o2) only in that it copes with <code>null</code> o1 properly.
      * @param o1 object1 to be compared
      * @param o2 object2 to be compared
      * @return true if equal
@@ -2224,7 +2224,7 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V>
         }
 
         /**
-         * Make a new cell with given key, value, and parent, and with <tt>null</tt> child links, and BLACK color.
+         * Make a new cell with given key, value, and parent, and with <code>null</code> child links, and BLACK color.
          * @param key given key to be searched for
          * @param value of given key
          * @param parent of key
@@ -2673,7 +2673,7 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V>
     private static final long serialVersionUID = 919286545866124006L;
 
     /**
-     * Save the state of the <tt>IndexedTreeMap</tt> instance to a stream (i.e., serialize it).
+     * Save the state of the <code>IndexedTreeMap</code> instance to a stream (i.e., serialize it).
      * @param s output stream
      * @throws java.io.IOException in case of write errors
      *
@@ -2697,7 +2697,7 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V>
     }
 
     /**
-     * Reconstitute the <tt>IndexedTreeMap</tt> instance from a stream (i.e., deserialize it).
+     * Reconstitute the <code>IndexedTreeMap</code> instance from a stream (i.e., deserialize it).
      * @param s entry
      * @throws java.io.IOException in case of write errors
      * @throws ClassNotFoundException in case of class casting errors 
