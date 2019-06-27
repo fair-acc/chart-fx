@@ -135,6 +135,7 @@ public class TableViewer extends ChartPlugin {
 
     /**
      * Helper function to initialize the UI elements for the Interactor toolbar.
+     * @return HBox node with the toolbar elements
      */
     protected HBox getInteractorBar() {
         final Separator separator = new Separator();

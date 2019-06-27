@@ -27,8 +27,7 @@ import javafx.util.Duration;
  * pinned.
  * <h3>Screenshot</h3> The following screenshots shows the right side node
  * hovering over a table after it was made visible:
- * <center><img src="hiddenSidesPane.png" alt="Screenshot of HiddenSidesPane">
- * </center>
+ * <img src="hiddenSidesPane.png" alt="Screenshot of HiddenSidesPane">
  * <h3>Code Sample</h3>
  *
  * <pre>

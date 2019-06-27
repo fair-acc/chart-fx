@@ -32,7 +32,7 @@ import javafx.util.Duration;
  * disappear again as soon as the mouse cursor exits it. A hidden node / side can also be pinned by calling
  * {@link #setPinnedSide(Side)}. It will remain visible as long as it stays pinned.
  * <h3>Screenshot</h3> The following screenshots shows the right side node hovering over a table after it was made
- * visible: <center><img src="hiddenSidesPane.png" alt="Screenshot of HiddenSidesPane"> </center>
+ * visible: <img src="hiddenSidesPane.png" alt="Screenshot of HiddenSidesPane">
  * <h3>Code Sample</h3>
  *
  * <pre>
