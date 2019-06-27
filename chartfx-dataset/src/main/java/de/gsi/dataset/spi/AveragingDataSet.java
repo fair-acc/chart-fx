@@ -1,7 +1,6 @@
 package de.gsi.dataset.spi;
 
 import java.util.ArrayDeque;
-import java.util.Arrays;
 
 import de.gsi.dataset.DataSet;
 import de.gsi.dataset.event.AddedDataEvent;
@@ -235,11 +234,10 @@ public class AveragingDataSet extends AbstractDataSet<AveragingDataSet> {
             if (!isCompatible(d)) {
                 throw new IllegalArgumentException("Datasets do not match");
             }
-            if (yValues.length > d.getDataCount()) {
-                yValues = Arrays.copyOf(yValues, d.getDataCount());
-            }
-            for (int i = 0; i < yValues.length; i++) {
-                yValues[i] += d.getY(i);
+
+            yValues.size(d.getDataCount());
+            for (int i = 0; i < yValues.size(); i++) {
+                yValues.elements()[i] += d.getY(i);
             }
         }
 
@@ -247,17 +245,15 @@ public class AveragingDataSet extends AbstractDataSet<AveragingDataSet> {
             if (!isCompatible(d)) {
                 throw new IllegalArgumentException("Datasets do not match");
             }
-            if (yValues.length > d.getDataCount()) {
-                yValues = Arrays.copyOf(yValues, d.getDataCount());
-            }
-            for (int i = 0; i < yValues.length; i++) {
-                yValues[i] -= d.getY(i);
+            yValues.size(d.getDataCount());
+            for (int i = 0; i < yValues.size(); i++) {
+                yValues.elements()[i] -= d.getY(i);
             }
         }
 
         public void opScale(double f) {
-            for (int i = 0; i < yValues.length; i++) {
-                yValues[i] *= f;
+            for (int i = 0; i < yValues.size(); i++) {
+                yValues.elements()[i] *= f;
             }
         }
 

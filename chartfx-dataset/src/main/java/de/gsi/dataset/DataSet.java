@@ -131,13 +131,13 @@ public interface DataSet extends EventSource {
         final double y1 = getY(index1);
         int index2 = x1 < x ? index1 + 1 : index1 - 1;
         index2 = Math.max(0, Math.min(index2, this.getDataCount() - 1));
-        final double x2 = getX(index2);
         final double y2 = getY(index2);
         if (Double.isNaN(y1) || Double.isNaN(y2)) {
             // case where the function has a gap (y-coordinate equals to NaN
             return Double.NaN;
         }
 
+        final double x2 = getX(index2);
         if (x1 == x2) {
             return y1;
         }
