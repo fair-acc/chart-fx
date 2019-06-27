@@ -38,6 +38,7 @@ public class DataRange implements Cloneable {
     /**
      * Creates a new <code>DataRange</code> with the specified <code>min</code>
      * and <code>max</code> values.
+     * 
      * @param min the new min value
      * @param max the new max value
      */
@@ -47,6 +48,7 @@ public class DataRange implements Cloneable {
 
     /**
      * Creates a copy of the specified data range.
+     * 
      * @param range other {@code DataRange} object
      */
     public DataRange(final DataRange range) {
@@ -60,6 +62,7 @@ public class DataRange implements Cloneable {
     /**
      * Determines if this DataRange is defined - <code>min</code> and
      * <code>max</code> values are defined.
+     * 
      * @return true: range is defined
      */
     public boolean isDefined() {
@@ -68,6 +71,7 @@ public class DataRange implements Cloneable {
 
     /**
      * Determines if <code>min</code> value has been defined.
+     * 
      * @return true: min is defined
      */
     public boolean isMinDefined() {
@@ -76,6 +80,7 @@ public class DataRange implements Cloneable {
 
     /**
      * Determines if <code>max</code> value has been defined.
+     * 
      * @return true max is defined
      */
     public boolean isMaxDefined() {
@@ -95,6 +100,7 @@ public class DataRange implements Cloneable {
 
     /**
      * Sets <code>max</code> value for this range.
+     * 
      * @param max the new max value
      */
     public void setMax(final double max) {
@@ -114,6 +120,7 @@ public class DataRange implements Cloneable {
 
     /**
      * Sets <code>min</code> value for this range.
+     * 
      * @param min the new data range minimum
      */
     public void setMin(final double min) {
@@ -122,6 +129,7 @@ public class DataRange implements Cloneable {
 
     /**
      * Sets updates range to the specified one.
+     * 
      * @param range other {@code DataRange} object
      */
     public void set(final DataRange range) {
@@ -130,6 +138,7 @@ public class DataRange implements Cloneable {
 
     /**
      * Sets <code>min</code> and <code>max</code> values for this range.
+     * 
      * @param min new minimum of the range
      * @param max new maximum of the range
      */
@@ -154,13 +163,16 @@ public class DataRange implements Cloneable {
     /**
      * Adds value to this range.
      *
-     * @param value
-     *            value to be added
+     * @param value value to be added
      * @return <code>true</code> if the value becomes <code>min</code> or
      *         <code>max</code>.
      */
     public boolean add(final double value) {
         if (!Double.isFinite(value)) {
+            return false;
+        }
+
+        if (value > min && value < max) {
             return false;
         }
 
@@ -179,7 +191,36 @@ public class DataRange implements Cloneable {
     }
 
     /**
+     * Adds values to this range.
+     *
+     * @param values values to be added
+     * @return <code>true</code> if the value becomes <code>min</code> or
+     *         <code>max</code>.
+     */
+    public boolean add(final double[] values) {
+        return add(values, values.length);
+    }
+
+    /**
+     * Adds values to this range.
+     *
+     * @param values values to be added
+     * @param max the maximum array length that should be taken into account
+     * @return <code>true</code> if the value becomes <code>min</code> or
+     *         <code>max</code>.
+     */
+    public boolean add(final double[] values, final int max) {
+        boolean retVal = false;
+        for (int i = 0; i < max; i++) {
+            add(values[i]);
+        }
+
+        return retVal;
+    }
+
+    /**
      * Add the specified data range to this range.
+     * 
      * @param range other {@code DataRange}
      */
     public void add(final DataRange range) {
@@ -189,6 +230,7 @@ public class DataRange implements Cloneable {
 
     /**
      * Substracts the specified data range from this range.
+     * 
      * @param range other {@code DataRange}
      * @return new data Range
      */
@@ -226,6 +268,7 @@ public class DataRange implements Cloneable {
 
     /**
      * Examines if this range contains the specified value.
+     * 
      * @param value to be tested
      * @return true: data value is within range
      */

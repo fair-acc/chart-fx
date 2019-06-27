@@ -124,22 +124,6 @@ public abstract class AbstractHistogram extends AbstractDataSet3D<AbstractHistog
 		return valueRange;
 	}
 
-	/**
-	 * 
-	 * @return data labels for each bin
-	 */
-	public Map<Integer, String> getDataLabelMap() {
-		return dataLabels;
-	}
-
-	/**
-	 * 
-	 * @return data styling map (CSS-related)
-	 */
-	public Map<Integer, String> getDataStyleMap() {
-		return dataStyles;
-	}
-
     /**
      * A string representation of the CSS style associated with this specific
      * {@code DataSet} data point. @see #getStyle()
