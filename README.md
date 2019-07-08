@@ -8,7 +8,7 @@
 
 # ChartFx
 
-ChartFx is scientific charting library developed at [GSI](https://www.gsi.de) for FAIR with focus on performance optimised real-time data visualisation at 25 Hz update rates for data sets with a few 10 thousand up to 5 million data points common in digital signal processing applications.
+ChartFx is a scientific charting library developed at [GSI](https://www.gsi.de) for FAIR with focus on performance optimised real-time data visualisation at 25 Hz update rates for data sets with a few 10 thousand up to 5 million data points common in digital signal processing applications.
 Based on earlier Swing-based designs used at GSI and CERN, it is a re-write of JavaFX's default [Chart](https://docs.oracle.com/javase/8/javafx/api/javafx/scene/chart/Chart.html) implementation and aims to preserve the feature-rich and extensible functionality of earlier and other similar Swing-based libraries while addressing the performance bottlenecks and API issues. 
 The motivation for the re-design has been presented at [IPAC'19](https://ipac19.org/) ([paper](docs/THPRB028.pdf), [poster](docs/THPRB028_poster.pdf)).
 
@@ -35,11 +35,22 @@ In order to provide some of the scenegraph-level functionality while using a `Ca
 
 <img src="docs/pics/SimpleChartSample.png" width=800 alt="simple ChartFx example"/>
 
-<details><summary>The corresponding source code (expand)</summary>
+<details><summary>The corresponding source code `ChartFxSample.java` (expand)</summary>
 
 ```Java
+package com.example.chartfx;
+
+import de.gsi.chart.XYChart;
+import de.gsi.chart.axes.spi.DefaultNumericAxis;
+import de.gsi.dataset.spi.DoubleDataSet;
+import javafx.application.Application;
+import javafx.scene.Scene;
+import javafx.scene.layout.StackPane;
+import javafx.stage.Stage;
+
+public class SimpleChartSample extends Application {   
     private static final int N_SAMPLES = 100;
-    // [..]
+    
     @Override
     public void start(final Stage primaryStage) {
         final StackPane root = new StackPane();
@@ -69,11 +80,50 @@ In order to provide some of the scenegraph-level functionality while using a `Ca
         primaryStage.setOnCloseRequest(evt -> System.exit(0));
         primaryStage.show();
     }
-    // [..]
+    public static void main(final String[] args) {
+        Application.launch(args);
+    }
+}
 ```
+</details><details><summary>And the corresponding build specification(expand)</summary>
+pom.xml:
+
+```Maven POM
+<project>
+<groupId>com.example.chartfx</groupId>
+<artifactId>chartfx-sample</artifactId>
+<name>chart-fx Sample</name>
+<dependencies>
+  <dependency>
+    <groupId>de.gsi.chart</groupId>
+    <artifactId>chartfx-chart</artifactId>
+    <version>11.0.0</version>
+  </dependency>
+</dependencies>
+</project>
+```
+To use different buildsystems or library versions, have a look at the snippets on [maven central](https://search.maven.org/search?q=g:de.gsi.chart%20AND%20a:chartfx-chart&core=gav).
+</details>
+</details><details><summary>run with (expand)</summary>
+
+```bash
+mvn compile
+mvn exec:java -Dproject.mainClass=com.example.chartfx.ChartFxSample
+```
+
+```bash
+mvn compile
+mvn exec:java -Dproject.mainClass=com.example.chartfx.ChartFxSample
+```
+
 </details>
 
 ### more examples
+If you want to try them yourself run:
+
+```bash
+mvn exec:java -Dproject.mainClass=de.gsi.chart.samples.RunChartSamples
+```
 
 <table>
 
@@ -124,6 +174,11 @@ In order to provide some of the scenegraph-level functionality while using a `Ca
 </table>
 
 ### Math- & Signal-Processing related examples
+If you want to try them yourself run:
+
+```bash
+mvn exec:java -Dproject.mainClass=de.gsi.chart.samples.RunMathSamples
+```
 
 <table>
 <tr>
@@ -177,5 +232,66 @@ While starting out to improve the JDK's JavaFX Chart functionality and performan
 Nevertheless, improved functionality aside, a direct performance comparison even for the best-case JavaFX scenario (static axes) with other non-JavaFX libraries demonstrated the raw JavaFX graphics performance -- despite the redesign -- being still behind the existing Java Swing-based JDataViewer and most noticeable the Qt Charts implementations. The library will continued to be maintained here at GitHub and further used for existing and future JavaFX-based control room UIs at GSI. 
 The gained experience and interfaces will provide a starting point for a planned C++-based counter-part implementation using Qt or another suitable low-level charting library.
 
-## Acknowledgements
+## Working on the source
+If you want to work on the chart-fx sourcecode, either to play with the samples or to contribute some improvements to chartFX here are some instructions how to obtain the source and compile it using maven on the command line or using eclipse.
+
+### Maven on the command line
+Just clone the repository and run maven from the top level directory. The `exec:java` target can be used to ececute the samples.
+Maven calls java with the corresponding options so that JavaFX is working. Because of the way the project is set up, only classes in the chartfx-samples project can be started this way.
+
+
+```sh
+git clone
+cd chart-fx
+mvn compile
+mvn exec:java -Dproject.mainClass=de.gsi.chart.samples.RunChartSamples
+```
+
+### Eclipse
+The following has been tested with eclipse-2019-03 and uses the m2e Maven Plugin. Other versions or IDEs might work simillar.
+Import the repository using `Import -> Existing Maven Project`.
+This should import the parent project and the four subprojects.
+Unfortunately, since chartfx does not use the jigsaw module system, but javafx does, running the samples using 'run as Java Application' will result in an error complaining about the missing JavaFX runtime.
+As a workaround we include a small helper class `de.gsi.samples.util.LaunchJFX`, which can be called with 'run as Java Application' and which launches the sample application.
+It accepts a class name as an argument, so if you edit the run configuration and put `${java_type_name}` as the argument, it will try to start the class selected in the project explorer as a JavaFX application.
+
+### JavaFX jvm command line options
+
+If you cannot use the 2 previous methods it is also possible to manually specify the access rules to the module system
+as jvm flags. Adding the following to the java command line call or your IDEs run configuration makes the required
+modules available and accessible to chartfx:
+
+```
+--add-modules=javafx.swing,javafx.graphics,javafx.fxml,javafx.media,javafx.web
+--add-reads javafx.graphics=ALL-UNNAMED
+--add-opens javafx.controls/com.sun.javafx.charts=ALL-UNNAMED
+--add-opens javafx.graphics/com.sun.javafx.iio=ALL-UNNAMED
+--add-opens javafx.graphics/com.sun.javafx.iio.common=ALL-UNNAMED
+--add-opens javafx.graphics/com.sun.javafx.css=ALL-UNNAMED
+--add-opens javafx.base/com.sun.javafx.runtime=ALL-UNNAMED`
+```
+
+
+### Extending chartfx
+If you find yourself missing some feature or not being able to access specific chart interna, the way to go is often to
+implement a custom plugin or renderer.
+
+Plugins are a simple way to add new visualisation and interaction capabilities to chart-fx. In fact a lot of chart-fx' own features (e.g. zoom, data editing, measurements) are implemented as plugins, as you can see in the sample applications.
+Your plugin can directly extend ChartPlugin or extend any of the builtin plugins.
+The Plugin Base class provides you with access to the chart object using `getChart()`.
+Your plugin should always add a Listener to the chartProperty, because when it is created there will not be an accociated
+chart, so at creation time, calls to e.g. `getChart()` will return null.
+Using a custom plugin boils down to adding it to the chart by doing `chart.getPlugins().add(new MyPlugin())`.
+If you wrote a plugin which might be useful for other users of chart-fx please consider doing a pull request against chart-fx. 
+
+Renderers are the components which do the actual heavy lifting in drawing the components of the graph to the canvas.
+A chart can have multiple renderers added using `chart.getRenderers().add(...)`
+There are renderers which visualise actual data like the `ErrorDataSetRenderer` which is also the renderer added
+to new charts by default.
+These Renderers operate on all DatasSets added to the chart (`chart.getDatasets.add(...)`) as well as on the ones added
+to the renderer itself.
+As a rule of thumb, you need to implement a custom renderer if you need to visualize lots of datapoints or if you want
+to draw something behind the chart itself.
+
+### Acknowledgements
 We express our thanks and gratitude to the JavaFX community, in particular to @GregKrug and Vito Baggiolini at CERN for their valuable insights, discussions and feedback on this topic.
