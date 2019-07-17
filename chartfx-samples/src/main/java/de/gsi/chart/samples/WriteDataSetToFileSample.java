@@ -7,7 +7,9 @@ import de.gsi.chart.XYChart;
 import de.gsi.chart.axes.spi.DefaultNumericAxis;
 import de.gsi.dataset.DataSet;
 import de.gsi.dataset.spi.DoubleDataSet;
+import de.gsi.dataset.utils.DataSetSerialiser;
 import de.gsi.dataset.utils.DataSetUtils;
+import de.gsi.dataset.utils.serializer.FastByteBuffer;
 import de.gsi.chart.utils.PeriodicScreenCapture;
 import javafx.application.Application;
 import javafx.scene.Scene;
@@ -29,6 +31,7 @@ public class WriteDataSetToFileSample extends Application {
     private static long now = System.currentTimeMillis();
     private static DoubleDataSet dataSet1;
     private static DoubleDataSet dataSet2;
+    private static FastByteBuffer fastByteBuffer = new FastByteBuffer();
 
     @Override
     public void start(final Stage primaryStage) {
@@ -74,7 +77,8 @@ public class WriteDataSetToFileSample extends Application {
         screenCapture.addListener(obs -> {
             final long userTimeStampMillis = System.currentTimeMillis();
 
-            // add some important meta data to dataSet1 (e.g. acquisition time stamp)
+            // add some important meta data to dataSet1 (e.g. acquisition time
+            // stamp)
             dataSet1.getMetaInfo().put("acqTimeStamp", Long.toString(userTimeStampMillis));
             dataSet2.getMetaInfo().put("acqTimeStamp", Long.toString(userTimeStampMillis));
 
@@ -83,6 +87,17 @@ public class WriteDataSetToFileSample extends Application {
             final String actualFileName2 = DataSetUtils.writeDataSetToFile(dataSet2, path, CSV_FILE_NAME_2_TIMESTAMED,
                     true);
 
+            
+            // to suppress serialising the meta-data, default: true
+            // DataSetSerialiser.setMetaDataSerialised(false); // uncomment
+            // to suppress serialising data labels and styles, default: true
+            // DataSetSerialiser.setDataLablesSerialised(false); // uncomment
+            boolean asFloat = true;
+            fastByteBuffer.reset(); // '0' writing at start of buffer
+            DataSetSerialiser.writeDataSetToByteArray(dataSet2, fastByteBuffer, asFloat);
+            System.out.println("written bytes to byte buffer = " + fastByteBuffer.getPosition());
+            fastByteBuffer.reset(); // return read position to '0'
+
             System.out.println("write data time-stamped to directory = " + path);
             System.out.println("actualFileName1 = " + actualFileName1);
             System.out.println("actualFileName2 = " + actualFileName2);
@@ -90,6 +105,7 @@ public class WriteDataSetToFileSample extends Application {
             // recover written data sets
             final DataSet recoveredDataSet1 = DataSetUtils.readDataSetFromFile(actualFileName1);
             final DataSet recoveredDataSet2 = DataSetUtils.readDataSetFromFile(actualFileName2);
+            final DataSet recoveredDataSet3 = DataSetSerialiser.readDataSetFromByteArray(fastByteBuffer);
 
             chart2.getDatasets().clear();
             if (recoveredDataSet1 != null) {
@@ -98,6 +114,10 @@ public class WriteDataSetToFileSample extends Application {
 
             if (recoveredDataSet2 != null) {
                 chart2.getDatasets().add(recoveredDataSet2);
+            }
+
+            if (recoveredDataSet3 != null) {
+                chart2.getDatasets().add(recoveredDataSet3);
             }
 
             // generate new data sets
@@ -128,8 +148,7 @@ public class WriteDataSetToFileSample extends Application {
     }
 
     /**
-     * @param args
-     *            the command line arguments
+     * @param args the command line arguments
      */
     public static void main(final String[] args) {
         Application.launch(args);
