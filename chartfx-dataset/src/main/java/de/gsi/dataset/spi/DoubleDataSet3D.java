@@ -127,7 +127,7 @@ public class DoubleDataSet3D extends AbstractDataSet3D<DoubleDataSet3D> {
         }
         if (zValues[0].length != xValues.length) {
             final String msg = String.format("array dimension mismatch: zValues[0].length = %d != xValues.length = %d",
-                    zValues.length, yValues.length);
+                    zValues.length, xValues.length);
             throw new IllegalArgumentException(msg);
         }
     }

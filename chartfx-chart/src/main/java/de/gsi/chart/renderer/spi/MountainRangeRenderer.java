@@ -92,7 +92,7 @@ public class MountainRangeRenderer extends ErrorDataSetRenderer implements Rende
                 final int yCountMax = mData.getYDataCount();
                 checkAndRecreateRenderer(yCountMax);
 
-                for (int index = yCountMax - 1; index > 0; index--) {
+                for (int index = yCountMax - 1; index >= 0; index--) {
                     final MountainRangeRenderer.Demux3dTo2dDataSet dataSet2D = new Demux3dTo2dDataSet(mData, index);
                     renderers.get(index).getDatasets().setAll(dataSet2D);
                     renderers.get(index).render(gc, chart, 0, empty);
