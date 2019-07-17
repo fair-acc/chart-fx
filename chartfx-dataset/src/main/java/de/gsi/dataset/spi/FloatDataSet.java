@@ -133,6 +133,7 @@ public class FloatDataSet extends AbstractDataSet<FloatDataSet> implements Edita
         yValues.clear();
         dataLabels.clear();
         dataStyles.clear();
+        clearMetaInfo();
 
         xRange.empty();
         yRange.empty();

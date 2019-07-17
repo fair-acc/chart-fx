@@ -111,7 +111,6 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
             this.yErrorsPos = DoubleArrayList.wrap(yErrorsPos);
             this.yErrorsNeg = DoubleArrayList.wrap(yErrorsNeg);
         }
-        computeLimits();
     }
 
     @Override
@@ -153,6 +152,7 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
         yErrorsNeg.clear();
         dataLabels.clear();
         dataStyles.clear();
+        clearMetaInfo();
 
         xRange.empty();
         yRange.empty();
