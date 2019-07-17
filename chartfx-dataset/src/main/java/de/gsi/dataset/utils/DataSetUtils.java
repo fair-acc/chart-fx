@@ -663,7 +663,7 @@ public class DataSetUtils extends DataSetUtilsHelper {
             // create OutputStream
             final ByteArrayOutputStream byteOutput = new ByteArrayOutputStream(8192);
             // TODO: cache ByteArrayOutputStream
-            try (OutputStream outputfile = openDatasetFileOutput(file, compression);) {
+            try (OutputStream outputfile = openDatasetFileOutput(file, compression == Compression.AUTO ? evaluateAutoCompression(fileName) : compression);) {
                 writeDataSetToByteArray(dataSet, byteOutput, binary, useFloat32BinaryStandard());
 
                 byteOutput.writeTo(outputfile);
@@ -681,6 +681,7 @@ public class DataSetUtils extends DataSetUtilsHelper {
 
             return longFileName;
         } catch (final Exception e) {
+            e.printStackTrace(); //TODO: remove
             if (LOGGER.isErrorEnabled()) {
                 LOGGER.error("could not write to file: '" + fileName + "'", e);
             }
