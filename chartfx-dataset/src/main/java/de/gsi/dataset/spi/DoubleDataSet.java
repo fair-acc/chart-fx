@@ -91,7 +91,6 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
             this.xValues = DoubleArrayList.wrap(xValues);
             this.yValues = DoubleArrayList.wrap(yValues);
         }
-        computeLimits();
     }
 
     @Override
@@ -121,6 +120,7 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
         yValues.clear();
         dataLabels.clear();
         dataStyles.clear();
+        clearMetaInfo();
 
         xRange.empty();
         yRange.empty();
