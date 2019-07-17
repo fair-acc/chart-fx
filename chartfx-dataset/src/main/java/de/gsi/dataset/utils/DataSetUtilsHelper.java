@@ -149,14 +149,14 @@ public class DataSetUtilsHelper {
     protected static double[] readDoubleArrayFromBuffer(FloatBuffer floatBuffer, DoubleBuffer doubleBuffer) {
         double[] retArray;
         if (floatBuffer != null) {
-            retArray = new double[floatBuffer.capacity()];
+            retArray = new double[floatBuffer.limit()];
             for (int i = 0; i < retArray.length; i++) {
                 retArray[i] = floatBuffer.get(i);
             }
             return retArray;
         }
         if (doubleBuffer != null) {
-            retArray = new double[doubleBuffer.capacity()];
+            retArray = new double[doubleBuffer.limit()];
             for (int i = 0; i < retArray.length; i++) {
                 retArray[i] = doubleBuffer.get(i);
             }
