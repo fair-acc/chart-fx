@@ -199,7 +199,7 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
             xRange.add(getX(i));
             yRange.add(getY(i));
         }
-        System.err.println("computeLimits() " + this.getName() + " -- range = " + yRange.toString() + " - dataCount = " + dataCount);
+
         return unlock();
     }
 
@@ -395,8 +395,7 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
         return getClass().getName() + " [dataCnt=" + getDataCount() + ", xRange=" + getXRange() + ", yRange="
                 + getYRange() + "]";
     }
-    
-    
+
     /**
      * 
      * @return data label map for given data point
