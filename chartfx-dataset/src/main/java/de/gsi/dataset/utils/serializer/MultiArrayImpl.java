@@ -186,25 +186,22 @@ class MultiArrayImpl<T> implements MultiArray<T> {
     }
 
     @Override
-    public boolean equals(Object obj) { // NOPMD by rstein on 19/07/19 10:46
-        if (obj == null || this.elements.getClass() != obj.getClass()) {
-            // null object and/or different class type
-            return false;
-        }
+    public boolean equals(Object obj) {
+
         @SuppressWarnings("unchecked")
         MultiArrayImpl<T> other = (MultiArrayImpl<T>) obj;
 
+        if (other == null) {
+            return false;
+        }
+
         boolean retValue = false;
         try {
-            if (Arrays.equals((Object[]) other.elements, (Object[]) this.elements)) {
-                return true;
-            }
+            retValue = Arrays.equals((Object[]) other.elements, (Object[]) this.elements);
         } catch (Exception c) {// Cover all possibilities
         }
         try {
-            if (Arrays.equals((boolean[]) other.elements, (boolean[]) this.elements)) {
-                return true;
-            }
+            retValue = Arrays.equals((boolean[]) other.elements, (boolean[]) this.elements);
         } catch (Exception c) {// Cover all possibilities
         }
         try {
