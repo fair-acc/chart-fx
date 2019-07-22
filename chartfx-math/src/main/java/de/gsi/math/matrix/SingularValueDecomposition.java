@@ -903,7 +903,7 @@ public class SingularValueDecomposition {
                     testMatrix.set(i, j, testMatrix.get(i, j) - 1);
                 }
                 if (Math.abs(testMatrix.get(i, j)) > threshold) {
-                    LOGGER.warn("TestInvert()", "found that element (%d,%d) differs %e from zero!", i, j,
+                    LOGGER.warn("TestInvert() - found that element (%d,%d) differs %e from zero!", i, j,
                             testMatrix.get(i, j));
                     return false;
                 }
@@ -932,52 +932,52 @@ public class SingularValueDecomposition {
         MatrixD eigenvalues2 = null;
         final boolean useIntermediateSquareMatrix = true;
         if (svd.decompose(useIntermediateSquareMatrix)) {
-            LOGGER.info(String.format("decompose() - square intermediate matrix - successful"));
+            LOGGER.info("decompose() - square intermediate matrix - successful");
             eigenvalues1 = svd.getEigenValues();
         } else {
-            LOGGER.info(String.format("decompose() - failed"));
+            LOGGER.info("decompose() - failed");
         }
 
         if (svd.decompose(false)) {
-            LOGGER.info(String.format("decompose() - successful"));
+            LOGGER.info("decompose() - successful");
             eigenvalues2 = svd.getEigenValues();
         } else {
-            LOGGER.info(String.format("decompose() - failed"));
+            LOGGER.info("decompose() - failed");
         }
 
         if (eigenvalues1 != null && eigenvalues2 != null) {
             for (int i = 0; i < eigenvalues1.getRowDimension(); i++) {
-                LOGGER.info(String.format("eigenvalue(%2d) = %+e vs %+e   diff = %+e", i, eigenvalues1.get(i, i),
-                        eigenvalues2.get(i, i), eigenvalues1.get(i, i) - eigenvalues2.get(i, i)));
+                LOGGER.info("eigenvalue(%2d) = %+e vs %+e   diff = %+e", i, eigenvalues1.get(i, i),
+                        eigenvalues2.get(i, i), eigenvalues1.get(i, i) - eigenvalues2.get(i, i));
             }
         } else if (eigenvalues1 != null) {
             for (int i = 0; i < eigenvalues1.getRowDimension(); i++) {
-                LOGGER.info(String.format("eigenvalue(%2d) = %+e", i, eigenvalues1.get(i, i)));
+                LOGGER.info("eigenvalue(%2d) = %+e", i, eigenvalues1.get(i, i));
             }
         } else if (eigenvalues2 != null) {
             for (int i = 0; i < eigenvalues2.getRowDimension(); i++) {
-                LOGGER.info(String.format("eigenvalue(%2d) = %+e", i, eigenvalues2.get(i, i)));
+                LOGGER.info("eigenvalue(%2d) = %+e", i, eigenvalues2.get(i, i));
             }
         }
 
-        LOGGER.info("norm2 = " + svd.norm2());
-        LOGGER.info("cond = " + svd.cond());
-        LOGGER.info("rank = " + svd.rank());
+        LOGGER.info("norm2 = %lf", svd.norm2());
+        LOGGER.info("cond = %lf", svd.cond());
+        LOGGER.info("rank = %lf", svd.rank());
 
-        LOGGER.info(String.format("check - testSVD()"));
+        LOGGER.info("check - testSVD()");
         if (svd.testSVD()) {
-            LOGGER.info(String.format("testSVD() - passed"));
+            LOGGER.info("testSVD() - passed");
 
         } else {
-            LOGGER.warn(String.format("testSVD() - failed"));
+            LOGGER.warn("testSVD() - failed");
         }
 
-        LOGGER.info(String.format("check - testInvert()"));
+        LOGGER.info("check - testInvert()");
         if (svd.testInvert()) {
-            LOGGER.info(String.format("testInvert() - passed"));
+            LOGGER.info("testInvert() - passed");
 
         } else {
-            LOGGER.warn(String.format("testInvert() - failed"));
+            LOGGER.warn("testInvert() - failed");
 
             if (input.getRowDimension() < 20 && input.getColumnDimension() < 20) {
                 final MatrixD matS = svd.getEigenValues();
