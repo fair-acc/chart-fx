@@ -435,9 +435,7 @@ public class TableViewer extends ChartPlugin {
             case Y:
                 return ds.getY(row);
             default:
-                if ((ds instanceof DataSetError)) {
-                    return 0.0;
-                }
+                break;
             }
             DataSetError eds = (DataSetError) ds;
             switch (type) {
