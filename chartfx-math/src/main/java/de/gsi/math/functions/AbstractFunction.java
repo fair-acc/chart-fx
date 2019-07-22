@@ -1,6 +1,7 @@
 package de.gsi.math.functions;
 
 import java.security.InvalidParameterException;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Vector;
 
@@ -179,7 +180,6 @@ public abstract class AbstractFunction implements Function {
 
     /**
      * invoke object within update listener list
-     *
      */
     public void invokeListener() {
         synchronized (flistener) {
@@ -289,8 +289,8 @@ public abstract class AbstractFunction implements Function {
                 fparameter[i] = value[i];
             }
         } else {
-            throw new InvalidParameterException("AbstractFunction::setParameterValue(" + value.length + "," + value
-                    + "): invalid parameter index [0," + (fnbOfParameter - 1) + "}");
+            throw new InvalidParameterException("AbstractFunction::setParameterValue(" + value.length + ","
+                    + Arrays.toString(value) + "): invalid parameter index [0," + (fnbOfParameter - 1) + "}");
         }
     }
 
