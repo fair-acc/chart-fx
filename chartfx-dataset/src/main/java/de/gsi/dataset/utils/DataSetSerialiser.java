@@ -272,7 +272,7 @@ public class DataSetSerialiser extends DataSetUtilsHelper {
      * @param readBuffer FastByteBuffer (encapsulates byte array).
      * @return DataSet with the data and metadata read from the file
      */
-    public static DataSet readDataSetFromByteArray(final FastByteBuffer readBuffer) {
+    public static DataSet readDataSetFromByteArray(final FastByteBuffer readBuffer) { // NOPMD
         DataSetBuilder builder = new DataSetBuilder();
 
         HeaderInfo bufferHeader = BinarySerialiser.checkHeaderInfo(readBuffer);
