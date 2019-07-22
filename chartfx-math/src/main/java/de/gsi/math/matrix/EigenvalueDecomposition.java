@@ -438,7 +438,7 @@ public class EigenvalueDecomposition implements java.io.Serializable {
 
         double norm = 0.0;
         for (int i = 0; i < nn; i++) {
-            if (i < low | i > high) {
+            if (i < low || i > high) {
                 d[i] = H[i][i];
                 e[i] = 0.0;
             }
