@@ -145,11 +145,11 @@ public abstract class AbstractFunction implements Function {
      */
     public Function[] getFunctions() {
         synchronized (fallFunctions) {
-            if (fallFunctions.size() >= 0) {
-                return (Function[]) fallFunctions.toArray();
+            if (!fallFunctions.isEmpty()) {
+                return fallFunctions.toArray(new Function[0]);
             }
         }
-        return null;
+        return new Function[0];
     }
 
     /**
