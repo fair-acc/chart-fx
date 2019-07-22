@@ -50,7 +50,8 @@ public class EllipseFunction extends AbstractFunction implements FunctionND {
         final double sinbeta = Math.sin(beta);
         final double cosbeta = Math.cos(beta);
 
-        for (int i = 0; i < 360; i += 360 / steps) {
+        final int dsteps = (int)(360.0/steps);
+        for (int i = 0; i < 360; i += dsteps) {
             final double alpha = i * (Math.PI / 180);
             final double sinalpha = Math.sin(alpha);
             final double cosalpha = Math.cos(alpha);
