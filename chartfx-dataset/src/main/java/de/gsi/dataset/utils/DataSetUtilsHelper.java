@@ -31,7 +31,7 @@ public class DataSetUtilsHelper {
             cachedArray = ByteBuffer.allocate(size);
             // cache missed
         } else {
-            byteArrayCache.get(arrayName).remove(cachedArray);
+            byteArrayCache.get(arrayName).remove(size);
         }
         BYTE_ARRAY_CACHE_LOCK.unlock();
         return cachedArray;
@@ -56,7 +56,7 @@ public class DataSetUtilsHelper {
             cachedArray = new StringBuilder(size);
             // cache missed
         } else {
-            stringBuilderCache.get(arrayName).remove(cachedArray);
+            stringBuilderCache.get(arrayName).remove(size);
         }
         cachedArray.delete(0, cachedArray.length());
         STRING_BUFFER_CACHE_LOCK.unlock();
