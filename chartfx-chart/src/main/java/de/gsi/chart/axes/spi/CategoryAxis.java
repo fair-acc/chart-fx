@@ -20,7 +20,6 @@ public final class CategoryAxis extends DefaultNumericAxis {
 
     private boolean forceAxisCategories = false;
 
-    private final List<String> allDataCategories = new ArrayList<>();
     private boolean changeIsLocal = false;
 
     private final ObjectProperty<ObservableList<String>> categories = new ObjectPropertyBase<ObservableList<String>>() {
@@ -73,10 +72,6 @@ public final class CategoryAxis extends DefaultNumericAxis {
             }
         });
         categories.set(categoryList);
-        if (!changeIsLocal) {
-            allDataCategories.clear();
-            allDataCategories.addAll(getCategories());
-        }
 
         requestAxisLayout();
     }
