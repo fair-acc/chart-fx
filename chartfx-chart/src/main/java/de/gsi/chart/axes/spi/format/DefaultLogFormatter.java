@@ -48,13 +48,13 @@ public class DefaultLogFormatter extends AbstractFormatter {
 
         if (smallScale) {
             formatter.setFormatter(formatterSmall);
-            if (!formatter.equals(oldFormatter)) {
+            if (!formatter.getFormatter().equals(oldFormatter)) {
                 labelCache.clear();
             }
             return;
         }
         formatter.setFormatter(formatterLarge);
-        if (!formatter.equals(oldFormatter)) {
+        if (!formatter.getFormatter().equals(oldFormatter)) {
             labelCache.clear();
         }
     }
@@ -75,19 +75,19 @@ public class DefaultLogFormatter extends AbstractFormatter {
     }
 
     private class MyDecimalFormat extends StringConverter<Number> implements NumberFormatter {
-        private DecimalFormat formatter;
+        private DecimalFormat localFormatter;
 
         public MyDecimalFormat(final DecimalFormat formatter) {
             super();
-            this.formatter = formatter;
+            this.localFormatter = formatter;
         }
 
         private void setFormatter(final DecimalFormat formatter) {
-            this.formatter = formatter;
+            this.localFormatter = formatter;
         }
 
         private DecimalFormat getFormatter() {
-            return this.formatter;
+            return this.localFormatter;
         }
 
         @Override
@@ -112,18 +112,18 @@ public class DefaultLogFormatter extends AbstractFormatter {
 
         @Override
         public String toString(double val) {
-            return formatter.format(val);
+            return localFormatter.format(val);
         }
 
         @Override
         public String toString(Number object) {
-            return formatter.format(object.doubleValue());
+            return localFormatter.format(object.doubleValue());
         }
 
         @Override
         public Number fromString(String source) {
             try {
-                return formatter.parse(source);
+                return localFormatter.parse(source);
             } catch (ParseException e) {
                 return Double.NaN;
             }
