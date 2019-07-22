@@ -4279,8 +4279,8 @@ public class TMath extends TMathConstants {
         double[] ac = new double[14];
         double[] hc = new double[9];
 
-        int[] itype = new int[0];
-        int[] npt = new int[0];
+        int[] itype = new int[1];
+        int[] npt = new int[1];
         VavilovSet(kappa, beta2, false, null, ac, hc, itype, npt);
         double v = VavilovDenEval(x, ac, hc, itype[0]);
         ac = null;
