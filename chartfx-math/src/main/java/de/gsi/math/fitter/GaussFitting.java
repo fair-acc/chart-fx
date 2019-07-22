@@ -1,19 +1,15 @@
 package de.gsi.math.fitter;
 
-// import org.freehep.math.minuit.FunctionMinimum;
-// import org.freehep.math.minuit.MnMigrad;
-// import org.freehep.math.minuit.MnUserParameters;
-
 public class GaussFitting {
 
     private static double fmean = 1.0;
-    private static double fmean_error = 0.0;
+    private static double fmeanError = 0.0;
     private static double frms = 1.0;
-    private static double frms_error = 0.0;
+    private static double frmsError = 0.0;
     private static double farea = 0.0;
-    private static double farea_error = 0.0;
+    private static double fareaError = 0.0;
     private static double fconstant = 1.0;
-    private static double fconstant_error = 1.0;
+    private static double fconstantError = 1.0;
 
     /**
      * fit precise bunch width and location based on peak indication and width estimate
@@ -43,7 +39,7 @@ public class GaussFitting {
         double norm = 0.;
         double dx = slice_x[1] - slice_x[0];
         double area = 0.0;
-        double eq_area = 0.0;
+        double eqArea = 0.0;
         double[] pos = new double[2 * half_width + 2 * nadd];
         double[] meas = new double[2 * half_width + 2 * nadd];
         double[] var = new double[2 * half_width + 2 * nadd];
@@ -75,7 +71,7 @@ public class GaussFitting {
             x += (meas[i] * pos[i]);
             x2 += (meas[i] * pos[i] * pos[i]);
             area += dx * meas[i];
-            eq_area += meas[i];
+            eqArea += meas[i];
         }
 
         double mean = x / norm;
@@ -111,7 +107,7 @@ public class GaussFitting {
         fmean = mean;
         frms = rms;
         fconstant = area;
-        farea = eq_area;
+        farea = eqArea;
 
         // output
         //		System.out.println("minimum: " + min);	 
@@ -143,85 +139,81 @@ public class GaussFitting {
     }
 
     public static double getMeanError() {
-        return fmean_error;
+        return fmeanError;
     }
 
     public static double getRMSError() {
-        return frms_error;
+        return frmsError;
     }
 
     public static double getConstantError() {
-        return fconstant_error;
+        return fconstantError;
     }
 
     public static double getAreaError() {
-        return farea_error;
+        return fareaError;
     }
 
     public static void print() {
-        System.out.printf("mean    : %s \t+- %s\n" + "rms     : %s \t+- %s\n" + "constant: %s \t+- %s\n",
+        System.out.printf("mean    : %s \t+- %s%nrms     : %s \t+- %s%nconstant: %s \t+- %s%n",
                 "area    : %s \t+- %s\n", getMean(), getMeanError(), getRMS(), getRMSError(), getConstant(),
                 getConstantError(), getArea(), getAreaError());
     }
 
     public static void main(String[] args) {
         int n = 100;
-        double[] val_x = new double[n];
-        double[] val_y = new double[n];
+        double[] valX = new double[n];
+        double[] valY = new double[n];
         double mu = 3, sigma = 0.5;
         for (int i = 0; i < n; i++) {
-            val_x[i] = 0.1 * i;
-            val_y[i] = Math.exp(-0.5 * Math.pow((val_x[i] - mu) / sigma, 2)) / (Math.sqrt(2 * Math.PI) * sigma);
+            valX[i] = 0.1 * i;
+            valY[i] = Math.exp(-0.5 * Math.pow((valX[i] - mu) / sigma, 2)) / (Math.sqrt(2 * Math.PI) * sigma);
         }
-        GaussFitting.fitData(val_x, val_y, 40, 20, 20);
+        GaussFitting.fitData(valX, valY, 40, 20, 20);
 
         GaussFitting.print();
     }
 
-    public static int removeSpuriousBunches(double[] pos_x, double[] meas_y, double sigma) {
-        int npeaks = pos_x.length;
+    public static int removeSpuriousBunches(double[] posX, double[] measY, double sigma) {
+        int npeaks = posX.length;
 
         // quick (since only few peaks) bubble sorting of peaks
         for (int i = 0; i < npeaks; i++) {
             for (int j = i + 1; j < npeaks; j++) {
-                if (pos_x[i] >= pos_x[j]) {
-                    double temp_val;
-                    temp_val = pos_x[i];
-                    pos_x[i] = pos_x[j];
-                    pos_x[j] = temp_val;
-                    temp_val = meas_y[i];
-                    meas_y[i] = meas_y[j];
-                    meas_y[j] = temp_val;
+                if (posX[i] >= posX[j]) {
+                    double temp;
+                    temp = posX[i];
+                    posX[i] = posX[j];
+                    posX[j] = temp;
+                    temp = measY[i];
+                    measY[i] = measY[j];
+                    measY[j] = temp;
                 }
             }
         }
 
-        double[] temp_pos = new double[npeaks];
-        double[] temp_meas = new double[npeaks];
+        double[] tempPos = new double[npeaks];
+        double[] tempMeas = new double[npeaks];
         int npeaks_reduced = 0;
         // simple peak reduction by dropping peaks that are closer than one sigma
         double last = -1e99;
         for (int i = 0; i < npeaks; i++) {
-            if (pos_x[i] - last >= 6 * sigma) {
+            if (posX[i] - last >= 6 * sigma) {
                 // keep sample				
-                temp_pos[npeaks_reduced] = pos_x[i];
-                temp_meas[npeaks_reduced] = meas_y[i];
-                last = pos_x[i];
+                tempPos[npeaks_reduced] = posX[i];
+                tempMeas[npeaks_reduced] = measY[i];
+                last = posX[i];
                 npeaks_reduced++;
             } else {
                 // drop sample
             }
         }
-        pos_x = null;
-        meas_y = null;
-        pos_x = new double[npeaks_reduced];
-        meas_y = new double[npeaks_reduced];
+        posX = new double[npeaks_reduced];
+        measY = new double[npeaks_reduced];
         for (int i = 0; i < npeaks_reduced; i++) {
-            pos_x[i] = temp_pos[i];
-            meas_y[i] = temp_meas[i];
+            posX[i] = tempPos[i];
+            measY[i] = tempMeas[i];
         }
-        temp_pos = null;
-        temp_meas = null;
 
         return npeaks_reduced;
     }
