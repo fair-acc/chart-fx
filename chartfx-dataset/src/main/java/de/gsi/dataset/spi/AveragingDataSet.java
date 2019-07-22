@@ -227,7 +227,7 @@ public class AveragingDataSet extends AbstractDataSet<AveragingDataSet> {
         }
 
         public boolean isCompatible(DataSet d) {
-            return !(Math.abs(getDataCount() - d.getDataCount()) > fuzzyCount);
+            return Math.abs(super.getDataCount() - d.getDataCount()) <= fuzzyCount;
         }
 
         public void opAdd(DataSet d) {
