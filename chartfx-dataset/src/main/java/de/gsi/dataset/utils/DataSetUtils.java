@@ -95,7 +95,6 @@ public class DataSetUtils extends DataSetUtilsHelper {
      * Error type short handle
      * 
      * @author rstein
-     *
      */
     public enum ErrType {
         /**
@@ -663,7 +662,8 @@ public class DataSetUtils extends DataSetUtilsHelper {
             // create OutputStream
             final ByteArrayOutputStream byteOutput = new ByteArrayOutputStream(8192);
             // TODO: cache ByteArrayOutputStream
-            try (OutputStream outputfile = openDatasetFileOutput(file, compression == Compression.AUTO ? evaluateAutoCompression(fileName) : compression);) {
+            try (OutputStream outputfile = openDatasetFileOutput(file,
+                    compression == Compression.AUTO ? evaluateAutoCompression(fileName) : compression);) {
                 writeDataSetToByteArray(dataSet, byteOutput, binary, useFloat32BinaryStandard());
 
                 byteOutput.writeTo(outputfile);
@@ -1078,7 +1078,13 @@ public class DataSetUtils extends DataSetUtilsHelper {
             dataSet = new DoubleErrorDataSet(dataSetName, nDataCountEstimate);
             dataSet.getMetaInfo().putAll(metaInfoMap);
 
-            dataSet.getInfoList();
+            try {
+                dataSet.getInfoList().addAll(info);
+                dataSet.getWarningList().addAll(warning);
+                dataSet.getErrorList().addAll(error);
+            } catch (final Exception e) {
+                LOGGER.error("could not add meta info", e);
+            }
 
             if (binary) {
                 readNumericDataFromBinaryStream(inputReader, inputStream, dataSet);
@@ -1109,6 +1115,7 @@ public class DataSetUtils extends DataSetUtilsHelper {
             public final int nsamples;
             public FloatBuffer data32;
             public DoubleBuffer data64;
+
             DataEntry(final String name, final String type, final int nSamples) {
                 this.name = name;
                 this.type = type;
