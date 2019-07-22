@@ -61,7 +61,7 @@ public class ListDataSet extends AbstractDataSet<ListDataSet> implements DataSet
         this(name);
         AssertUtils.notNull("Y data", yValues);
 
-        for (Integer i = 0; i < yValues.length; i++) {
+        for (int i = 0; i < yValues.length; i++) {
             data.add(new DoublePoint((double) i, yValues[i]));
         }
     }
@@ -86,7 +86,7 @@ public class ListDataSet extends AbstractDataSet<ListDataSet> implements DataSet
         AssertUtils.notNull("X data", xValues);
         AssertUtils.notNull("Y data", yValues);
         AssertUtils.equalDoubleArrays(xValues, yValues);
-        for (Integer i = 0; i < yValues.length; i++) {
+        for (int i = 0; i < yValues.length; i++) {
             data.add(new DoublePoint(xValues[i], yValues[i]));
         }
     }
