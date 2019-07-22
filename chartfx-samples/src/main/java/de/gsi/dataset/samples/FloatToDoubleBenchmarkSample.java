@@ -71,7 +71,7 @@ public class FloatToDoubleBenchmarkSample {
             // swap input with output to avoid JIT optimisation
             vectorInD = vectorOutD;
         }
-        int rowSum = 0;
+        double rowSum = 0;
         for (int i = 0; i < N_DIM; i++) {
             rowSum += vectorOutD[i];
         }
@@ -92,7 +92,7 @@ public class FloatToDoubleBenchmarkSample {
             vectorInF = vectorOutF;
         }
 
-        int rowSum = 0;
+        double rowSum = 0;
         for (int i = 0; i < N_DIM; i++) {
             rowSum += vectorOutD[i];
         }
