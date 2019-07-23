@@ -1,6 +1,6 @@
 package de.gsi.dataset.spi;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -16,6 +16,7 @@ import de.gsi.dataset.EditConstraints;
 import de.gsi.dataset.event.EventListener;
 import de.gsi.dataset.event.UpdateEvent;
 import de.gsi.dataset.event.UpdatedMetaDataEvent;
+import de.gsi.dataset.spi.utils.StringHashMapList;
 
 /**
  * <p>
@@ -42,8 +43,11 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
     boolean autoNotification = true;
     protected DataRange xRange = new DataRange();
     protected DataRange yRange = new DataRange();
-    protected Map<Integer, String> dataLabels = new ConcurrentHashMap<>();
-    protected Map<Integer, String> dataStyles = new ConcurrentHashMap<>();
+    protected StringHashMapList dataLabels = new StringHashMapList();
+    protected StringHashMapList dataStyles = new StringHashMapList();
+    protected ArrayList<String> infoList = new ArrayList<>();
+    protected ArrayList<String> warningList = new ArrayList<>();
+    protected ArrayList<String> errorList = new ArrayList<>();
     protected EditConstraints editConstraints;
     protected final Map<String, String> metaInfoMap = new ConcurrentHashMap<>();
 
@@ -168,9 +172,6 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
      * @return horizontal range of data set
      */
     public DataRange getXRange() {
-        if (!xRange.isDefined()) {
-            computeLimits();
-        }
         return xRange;
     }
 
@@ -179,9 +180,6 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
      * @return vertical range of data set
      */
     public DataRange getYRange() {
-        if (!yRange.isDefined()) {
-            computeLimits();
-        }
         return yRange;
     }
 
@@ -400,6 +398,22 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
     }
 
     /**
+     * 
+     * @return data label map for given data point
+     */
+    public StringHashMapList getDataLabelMap() {
+        return dataLabels;
+    }
+
+    /**
+     * 
+     * @return data style map (CSS-styling)
+     */
+    public StringHashMapList getDataStyleMap() {
+        return dataStyles;
+    }
+
+    /**
      * adds a custom new data label for a point The label can be used as a
      * category name if CategoryStepsDefinition is used or for annotations
      * displayed for data points.
@@ -439,31 +453,21 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
      * used as a category name if CategoryStepsDefinition is used or for
      * annotations displayed for data points.
      *
-     * @param index data point index
-     * @return label of a data point specified by the index or <code>null</code>
-     *         if none label has been specified for this data point.
-     */
-    protected String getDefaultDataLabel(final int index) {
-        return getName() + "(" + index + "," + getX(index) + "," + getY(index) + ")";
-    }
-
-    /**
-     * Returns label of a data point specified by the index. The label can be
-     * used as a category name if CategoryStepsDefinition is used or for
-     * annotations displayed for data points.
-     *
      * @param index of the data label
      * @return data point label specified by the index or <code>null</code> if
      *         no label has been specified
      */
     @Override
     public String getDataLabel(final int index) {
-        final String dataLabel = dataLabels.get(index);
-        if (dataLabel != null) {
-            return dataLabel;
-        }
-
-        return getDefaultDataLabel(index);
+        // old implementation: caused issue/unnecessary copying of data
+        // moved to DataPointToolTip (better place)
+        // final String dataLabel = dataLabels.get(index);
+        // if (dataLabel != null) {
+        // return dataLabel;
+        // }
+        //
+        // return getDefaultDataLabel(index);
+        return dataLabels.get(index);
     }
 
     /**
@@ -524,18 +528,25 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
         return metaInfoMap;
     }
 
+    public D clearMetaInfo() {
+        infoList.clear();
+        warningList.clear();
+        errorList.clear();
+        return fireInvalidated(new UpdatedMetaDataEvent(this, "cleared meta data"));
+    }
+
     @Override
     public List<String> getInfoList() {
-        return Collections.<String>emptyList();
+        return infoList;
     }
 
     @Override
     public List<String> getWarningList() {
-        return Collections.<String>emptyList();
+        return warningList;
     }
 
     @Override
     public List<String> getErrorList() {
-        return Collections.<String>emptyList();
+        return errorList;
     }
 }

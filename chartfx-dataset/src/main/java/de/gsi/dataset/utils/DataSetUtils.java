@@ -64,11 +64,19 @@ public class DataSetUtils extends DataSetUtilsHelper {
     private static final int SWITCH_TO_BINARY_KEY = 0xFE;
     private static final Logger LOGGER = LoggerFactory.getLogger(DataSetUtils.class);
     private static final String DEFAULT_TIME_FORMAT = "yyyyMMdd_HHmmss";
-    public static boolean USE_FLOAT32_BINARY_STANDARD = true;
+    protected static boolean useFloat32BinaryStandard = true;
 
     private DataSetUtils() {
         super();
         // static class nothing to be initialised
+    }
+
+    public static boolean useFloat32BinaryStandard() {
+        return useFloat32BinaryStandard;
+    }
+
+    public static void setUseFloat32BinaryStandard(boolean state) {
+        useFloat32BinaryStandard = state;
     }
 
     /**
@@ -655,8 +663,8 @@ public class DataSetUtils extends DataSetUtilsHelper {
             // create OutputStream
             final ByteArrayOutputStream byteOutput = new ByteArrayOutputStream(8192);
             // TODO: cache ByteArrayOutputStream
-            try (OutputStream outputfile = openDatasetFileOutput(file, compression);) {
-                writeDataSetToByteArray(dataSet, byteOutput, binary, USE_FLOAT32_BINARY_STANDARD);
+            try (OutputStream outputfile = openDatasetFileOutput(file, compression == Compression.AUTO ? evaluateAutoCompression(fileName) : compression);) {
+                writeDataSetToByteArray(dataSet, byteOutput, binary, useFloat32BinaryStandard());
 
                 byteOutput.writeTo(outputfile);
 
@@ -673,6 +681,7 @@ public class DataSetUtils extends DataSetUtilsHelper {
 
             return longFileName;
         } catch (final Exception e) {
+            e.printStackTrace(); //TODO: remove
             if (LOGGER.isErrorEnabled()) {
                 LOGGER.error("could not write to file: '" + fileName + "'", e);
             }
@@ -874,10 +883,11 @@ public class DataSetUtils extends DataSetUtilsHelper {
             final int nSamples = dataSet.getDataCount();
             final StringBuilder buffer = getCachedStringBuilder("numericDataCacheBuilder",
                     Math.max(100, nSamples * 45));
-            buffer.append("#nSamples : ").append(Integer.toString(nSamples)).append("\n");
+
             // use '$' sign as special indicator that from now on only numeric
             // data is to be expected
-            buffer.append("$index, x, y, eyn, eyp").append("\n");
+            buffer.append("#nSamples : ").append(Integer.toString(nSamples)).append("\n")
+                    .append("$index, x, y, eyn, eyp").append("\n");
 
             for (int i = 0; i < nSamples; i++) {
                 buffer.append(i); // data index
@@ -993,23 +1003,16 @@ public class DataSetUtils extends DataSetUtilsHelper {
 
         }
         DoubleErrorDataSet dataSet = null;
-        try {
-            final ByteArrayInputStream istream = new ByteArrayInputStream(byteArray);
-            try (final SplitCharByteInputStream inputFile = new SplitCharByteInputStream(
-                    new PushbackInputStream(istream, 8192))) {
+        final ByteArrayInputStream istream = new ByteArrayInputStream(byteArray);
+        try (final SplitCharByteInputStream inputFile = new SplitCharByteInputStream(
+                new PushbackInputStream(istream, 8192))) {
 
-                dataSet = readDataSetFromStream(inputFile);
+            dataSet = readDataSetFromStream(inputFile);
 
-            } catch (final IOException e) {
-                if (LOGGER.isErrorEnabled()) {
-                    LOGGER.error("could not open/parse byte array size = " + byteArray.length, e);
-                }
-            }
         } catch (final Exception e) {
             if (LOGGER.isErrorEnabled()) {
                 LOGGER.error("could not open/parse byte array size = " + byteArray.length, e);
             }
-            return dataSet;
         }
         return dataSet;
     }
@@ -1078,9 +1081,9 @@ public class DataSetUtils extends DataSetUtilsHelper {
             dataSet.getInfoList();
 
             if (binary) {
-                readNumericDataFromBinaryFile(inputReader, inputStream, dataSet);
+                readNumericDataFromBinaryStream(inputReader, inputStream, dataSet);
             } else {
-                readNumericDataFromFile(inputReader, dataSet);
+                readNumericDataFromReader(inputReader, dataSet);
             }
 
             // automatically closing reader connection
@@ -1093,33 +1096,32 @@ public class DataSetUtils extends DataSetUtilsHelper {
 
     /**
      * @param inputReader input reader for string data
-     * @param inputFile input stream for binary data
+     * @param inputStream input stream for binary data
      * @param dataSet used to store the read data
      * @throws IOException in case of IO problems
      */
-    private static void readNumericDataFromBinaryFile(final BufferedReader inputReader,
-            final SplitCharByteInputStream inputFile, final DoubleErrorDataSet dataSet) throws IOException {
+    private static void readNumericDataFromBinaryStream(final BufferedReader inputReader,
+            final SplitCharByteInputStream inputStream, final DoubleErrorDataSet dataSet) throws IOException {
         String line;
         class DataEntry {
             public String name;
             public String type;
-            public int nsamples;
+            public final int nsamples;
             public FloatBuffer data32;
             public DoubleBuffer data64;
+            DataEntry(final String name, final String type, final int nSamples) {
+                this.name = name;
+                this.type = type;
+                this.nsamples = nSamples;
+            }
         }
         final List<DataEntry> toRead = new ArrayList<>();
         while ((line = inputReader.readLine()) != null) {
             final String[] tokens = line.substring(1).split(";");
-            toRead.add(new DataEntry() {
-                {
-                    name = tokens[0];
-                    type = tokens[1];
-                    nsamples = Integer.valueOf(tokens[2]);
-                }
-            });
+            toRead.add(new DataEntry(tokens[0], tokens[1], Integer.valueOf(tokens[2])));
         }
-        if (inputFile.reachedSplit()) {
-            inputFile.switchToBinary();
+        if (inputStream.reachedSplit()) {
+            inputStream.switchToBinary();
             final int[] valindex = { -1, -1, -1, -1 };
             for (int i = 0; i < toRead.size(); i++) {
                 final DataEntry dataentry = toRead.get(i);
@@ -1134,13 +1136,13 @@ public class DataSetUtils extends DataSetUtilsHelper {
                 if (isFloat32) {
                     dataentry.data32 = byteData.asFloatBuffer();
                     while (alreadyRead < (dataentry.nsamples * Float.BYTES)) {
-                        alreadyRead += inputFile.read(byteData.array(), alreadyRead,
+                        alreadyRead += inputStream.read(byteData.array(), alreadyRead,
                                 dataentry.nsamples * Float.BYTES - alreadyRead);
                     }
                 } else {
                     dataentry.data64 = byteData.asDoubleBuffer();
                     while (alreadyRead < (dataentry.nsamples * Double.BYTES)) {
-                        alreadyRead += inputFile.read(byteData.array(), alreadyRead,
+                        alreadyRead += inputStream.read(byteData.array(), alreadyRead,
                                 dataentry.nsamples * Double.BYTES - alreadyRead);
                     }
                 }
@@ -1179,10 +1181,11 @@ public class DataSetUtils extends DataSetUtilsHelper {
         }
     }
 
-    protected static void readNumericDataFromFile(final BufferedReader inputFile, final DoubleErrorDataSet dataSet) {
+    protected static void readNumericDataFromReader(final BufferedReader inputReader,
+            final DoubleErrorDataSet dataSet) {
         try {
 
-            for (String line = inputFile.readLine(); line != null; line = inputFile.readLine()) {
+            for (String line = inputReader.readLine(); line != null; line = inputReader.readLine()) {
                 final String[] parse = line.split(",");
                 if (parse.length == 0) {
                     continue;

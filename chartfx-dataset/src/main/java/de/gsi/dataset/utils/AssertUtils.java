@@ -1,8 +1,9 @@
 package de.gsi.dataset.utils;
 
 /**
- * Utility class used to examine function parameters. All the methods throw <code>IllegalArgumentException</code> if the
- * argument doesn't fulfil constraints.
+ * Utility class used to examine function parameters. All the methods throw
+ * <code>IllegalArgumentException</code> if the argument doesn't fulfil
+ * constraints.
  *
  * @author rstein
  */
@@ -15,6 +16,7 @@ public final class AssertUtils {
 
     /**
      * Checks if the object is not null.
+     * 
      * @param <T> generics object to be checked
      *
      * @param name name to be included in exception message.
@@ -27,7 +29,8 @@ public final class AssertUtils {
     }
 
     /**
-     * Checks if the index is  &gt;= 0 and &lt; bounds
+     * Checks if the index is &gt;= 0 and &lt; bounds
+     * 
      * @param index index to be checked
      * @param bounds maximum bound
      */
@@ -36,7 +39,8 @@ public final class AssertUtils {
     }
 
     /**
-     * Checks if the index is  &gt;= 0 and &lt; bounds
+     * Checks if the index is &gt;= 0 and &lt; bounds
+     * 
      * @param index index to be checked
      * @param bounds maximum bound
      * @param message exception message
@@ -66,7 +70,7 @@ public final class AssertUtils {
      * Checks if the index1 &lt;= index2
      *
      * @param index1 index1 to be checked
-     * @param index2 index1 to be checked  
+     * @param index2 index1 to be checked
      * @param msg exception message
      */
     public static void indexOrder(final int index1, final int index2, final String msg) {
@@ -76,7 +80,8 @@ public final class AssertUtils {
     }
 
     /**
-     * Checks if the value is  &gt;= 0
+     * Checks if the value is &gt;= 0
+     * 
      * @param <T> generics object to be checked
      *
      * @param name name to be included in the exception message
@@ -89,7 +94,8 @@ public final class AssertUtils {
     }
 
     /**
-     * Checks if the value is  &gt;= 0
+     * Checks if the value is &gt;= 0
+     * 
      * @param <T> generics object to be checked
      *
      * @param name name to be included in the exception message
@@ -103,6 +109,7 @@ public final class AssertUtils {
 
     /**
      * Asserts that the specified arrays have the same length.
+     * 
      * @param array1 to be checked
      * @param array2 to be checked
      */
@@ -114,7 +121,8 @@ public final class AssertUtils {
     }
 
     /**
-     * Asserts that the specified arrays have the same length or are at least min size.
+     * Asserts that the specified arrays have the same length or are at least
+     * min size.
      * 
      * @param array1 to be checked
      * @param array2 to be checked
@@ -131,6 +139,7 @@ public final class AssertUtils {
 
     /**
      * Asserts that the specified arrays have the same length.
+     * 
      * @param <T> generics object to be checked
      * 
      * @param array1 to be checked
@@ -141,9 +150,10 @@ public final class AssertUtils {
             throw new IllegalArgumentException("The double arrays must have the same length!");
         }
     }
-    
+
     /**
      * Asserts that the specified arrays have the same length.
+     * 
      * @param array1 to be checked
      * @param array2 to be checked
      */
@@ -155,7 +165,8 @@ public final class AssertUtils {
     }
 
     /**
-     * Asserts that the specified arrays have the same length or are at least min size.
+     * Asserts that the specified arrays have the same length or are at least
+     * min size.
      * 
      * @param array1 to be checked
      * @param array2 to be checked
@@ -190,6 +201,20 @@ public final class AssertUtils {
         }
     }
 
+    public static void nonEmptyArray(final String name, final float[] array) {
+        AssertUtils.notNull(name, array);
+        if (array.length == 0) {
+            throw new IllegalArgumentException("The " + name + MUST_BE_NON_EMPTY);
+        }
+    }
+
+    public static void nonEmptyArray(final String name, final byte[] array) {
+        AssertUtils.notNull(name, array);
+        if (array.length == 0) {
+            throw new IllegalArgumentException("The " + name + MUST_BE_NON_EMPTY);
+        }
+    }
+
     public static void nonEmptyArray(final String name, final int[] array) {
         AssertUtils.notNull(name, array);
         if (array.length == 0) {
@@ -215,6 +240,7 @@ public final class AssertUtils {
 
     /**
      * Asserts if the specified object is an instance of the specified type.
+     * 
      * @param obj to be checked
      * @param type required class type
      *
@@ -228,8 +254,10 @@ public final class AssertUtils {
     }
 
     /**
-     * The method returns true if both values area equal. The method differs from simple == compare because it takes
-     * into account that both values can be Double.NaN, in which case == operator returns <code>false</code>.
+     * The method returns true if both values area equal. The method differs
+     * from simple == compare because it takes into account that both values can
+     * be Double.NaN, in which case == operator returns <code>false</code>.
+     * 
      * @param v1 to be checked
      * @param v2 to be checked
      *
@@ -252,7 +280,7 @@ public final class AssertUtils {
     }
 
     /**
-     * Checks if the int value is  &gt;= 0
+     * Checks if the int value is &gt;= 0
      *
      * @param name name to be included in the exception message
      * @param value to be checked
@@ -264,7 +292,7 @@ public final class AssertUtils {
     }
 
     /**
-     * Checks if the int value is  &gt;= 0
+     * Checks if the int value is &gt;= 0
      *
      * @param name name to be included in the exception message
      * @param value to be checked
@@ -280,6 +308,22 @@ public final class AssertUtils {
         AssertUtils.nonEmptyArray(name, array);
         if (array.length != defaultLength) {
             throw new IllegalArgumentException("The " + name + " double array must have a length of " + defaultLength);
+        }
+    }
+
+    public static void checkArrayDimension(final String name, final float[] array, final int defaultLength) {
+        AssertUtils.notNull(name, array);
+        AssertUtils.nonEmptyArray(name, array);
+        if (array.length != defaultLength) {
+            throw new IllegalArgumentException("The " + name + " float array must have a length of " + defaultLength);
+        }
+    }
+
+    public static void checkArrayDimension(final String name, final byte[] array, final int defaultLength) {
+        AssertUtils.notNull(name, array);
+        AssertUtils.nonEmptyArray(name, array);
+        if (array.length != defaultLength) {
+            throw new IllegalArgumentException("The " + name + " byte array must have a length of " + defaultLength);
         }
     }
 

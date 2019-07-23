@@ -9,9 +9,8 @@ public interface Histogram2D {
 	/**
      * Increment bin with abscissa X, Y, and Z by 1.
      *
-     * if x is less than the low-edge of the first bin, the Underflow bin is incremented if x is equal to or greater than the upper edge of last bin, the Overflow bin is incremented
-     *
-     * The function returns the corresponding bin number which has its content incremented by 1
+     * if x is less than the low-edge of the first bin, the Underflow bin is incremented 
+     * if x is equal to or greater than the upper edge of last bin, the Overflow bin is incremented
      *
      * @param x new value to be added
 	 * @param y new value to be added
@@ -22,9 +21,8 @@ public interface Histogram2D {
 	/**
 	 * Increment bin with abscissa X by with a weight w.
      *
-     * if x is less than the low-edge of the first bin, the Underflow bin is incremented if x is equal to or greater than the upper edge of last bin, the Overflow bin is incremented
-     *
-     * The function returns the corresponding bin number which has its content incremented by 1
+     * if x is less than the low-edge of the first bin, the Underflow bin is incremented
+     * if x is equal to or greater than the upper edge of last bin, the Overflow bin is incremented
      *
      * @param x new value to be added
      * @param y new value to be added

@@ -3,6 +3,7 @@
  * Common Chart - axis synchronization                                       *
  *                                                                           *
  * modified: 2019-01-23 Harald Braeuning                                     *
+ * modified: 2019-07-19 rstein                                               *
  *                                                                           *
  ****************************************************************************/
 
@@ -10,7 +11,7 @@ package de.gsi.chart.utils;
 
 import java.util.ArrayList;
 
-import de.gsi.chart.axes.spi.AbstractAxis;
+import de.gsi.chart.axes.Axis;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 
@@ -22,26 +23,24 @@ import javafx.beans.value.ObservableValue;
 public class AxisSynchronizer {
 
     private boolean updating;
-    private final ArrayList<AbstractAxis> charts = new ArrayList<>();
+    private final ArrayList<Axis> axes = new ArrayList<>();
     private final ChangeListener<Number> upperBoundChangeListener = this::upperBoundChanged;
     private final ChangeListener<Number> lowerBoundChangeListener = this::lowerBoundChanged;
 
     public AxisSynchronizer() {
+        super();
     }
 
-    public void add(AbstractAxis axis) {
-        charts.add(axis);
-        // if (charts.size() > 1) axis.setAutoRanging(false);
+    public void add(Axis axis) {
+        axes.add(axis);
         axis.upperBoundProperty().addListener(upperBoundChangeListener);
         axis.lowerBoundProperty().addListener(lowerBoundChangeListener);
-        // axis.tickUnitProperty().bind(master.tickUnitProperty());
     }
 
-    public void remove(AbstractAxis axis) {
-        charts.remove(axis);
+    public void remove(Axis axis) {
+        axes.remove(axis);
         axis.upperBoundProperty().removeListener(upperBoundChangeListener);
         axis.lowerBoundProperty().removeListener(lowerBoundChangeListener);
-        // axis.tickUnitProperty().unbind();
         axis.setAutoRanging(true);
     }
 
@@ -51,11 +50,16 @@ public class AxisSynchronizer {
             if (Double.isNaN(value)) {
                 return;
             }
-            if (value == oldValue.doubleValue()) return;
+            if (value == oldValue.doubleValue())
+                return;
             updating = true;
-            final AbstractAxis sender = findAxis(property);
-            final double tickUnit = calculateTickUnit(sender);
-            for (final AbstractAxis axis : charts) {
+            final Axis sender = findAxis(property);
+            if (sender == null) {
+                updating = false;
+                return;
+            }
+            final double tickUnit = sender.getTickUnit();
+            for (final Axis axis : axes) {
                 if (axis != sender) {
                     axis.setAutoRanging(false);
                     axis.setUpperBound(value);
@@ -72,11 +76,16 @@ public class AxisSynchronizer {
             if (Double.isNaN(value)) {
                 return;
             }
-            if (value == oldValue.doubleValue()) return;
+            if (value == oldValue.doubleValue())
+                return;
             updating = true;
-            final AbstractAxis sender = findAxis(property);
-            final double tickUnit = calculateTickUnit(sender);
-            for (final AbstractAxis axis : charts) {
+            final Axis sender = findAxis(property);
+            if (sender == null) {
+                updating = false;
+                return;
+            }
+            final double tickUnit = sender.getTickUnit();
+            for (final Axis axis : axes) {
                 if (axis != sender) {
                     axis.setLowerBound(value);
                     axis.setAutoRanging(false);
@@ -87,8 +96,8 @@ public class AxisSynchronizer {
         }
     }
 
-    private AbstractAxis findAxis(ObservableValue<? extends Number> property) {
-        for (final AbstractAxis chart : charts) {
+    private Axis findAxis(ObservableValue<? extends Number> property) {
+        for (final Axis chart : axes) {
             if (property == chart.upperBoundProperty()) {
                 return chart;
             }
@@ -97,41 +106,6 @@ public class AxisSynchronizer {
             }
         }
         return null;
-    }
-
-    // private static final int MAX_TICK_COUNT = 20;
-
-    private double calculateTickUnit(AbstractAxis axis) {
-        return axis.computePreferredTickUnit(axis.getLength());
-        // final double labelSize = axis.getTickLabelFont().getSize() * 2;
-        // final double axisLength = Math.max(axis.getWidth(),axis.getHeight());
-        // final int numOfFittingLabels = (int) Math.floor(axisLength /
-        // labelSize);
-        // final int numOfTickMarks = Math.max(Math.min(numOfFittingLabels,
-        // MAX_TICK_COUNT), 2);
-        // double rawTickUnit = (axis.getUpperBound() - axis.getLowerBound()) /
-        // numOfTickMarks;
-        // if (rawTickUnit == 0 || Double.isNaN(rawTickUnit))
-        // {
-        // rawTickUnit = 1e-3;// TODO: remove hac
-        // }
-        // final TickUnitSupplier unitSupplier =
-        // axis.getDefaultAxisLabelFormatter().getTickUnitSupplier();
-        // if (unitSupplier == null)
-        // {
-        // // unitSupplier = DEFAULT_TICK_UNIT_SUPPLIER;
-        // throw new IllegalStateException("class defaults not properly
-        // initialised");
-        // }
-        // final double majorUnit = unitSupplier.computeTickUnit(rawTickUnit);
-        // if (majorUnit <= 0)
-        // {
-        // throw new IllegalArgumentException("The " +
-        // unitSupplier.getClass().getName()
-        // + " computed illegal unit value [" + majorUnit + "] for argument " +
-        // rawTickUnit);
-        // }
-        // return majorUnit;
     }
 
 }

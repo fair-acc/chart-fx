@@ -23,15 +23,18 @@ import javafx.scene.input.MouseEvent;
 import javafx.util.Pair;
 
 /**
- * A tool tip label appearing next to the mouse cursor when placed over a data point's symbol. If symbols are not
- * created/shown for given plot, the tool tip is shown for the closest data point that is within the
+ * A tool tip label appearing next to the mouse cursor when placed over a data
+ * point's symbol. If symbols are not created/shown for given plot, the tool tip
+ * is shown for the closest data point that is within the
  * {@link #pickingDistanceProperty()} from the mouse cursor.
  * <p>
  * CSS style class name: {@value #STYLE_CLASS_LABEL}
  *
- * @author Grzegorz Kruk TODO: extend so that label = new Label(); is a generic object and can also be overwritten with
- *         another implementation (&lt;-&gt; advanced interactor) additional add/remove listener are needed to edit/update the
- *         custom object based on DataPoint (for the time being private class)
+ * @author Grzegorz Kruk TODO: extend so that label = new Label(); is a generic
+ *         object and can also be overwritten with another implementation
+ *         (&lt;-&gt; advanced interactor) additional add/remove listener are
+ *         needed to edit/update the custom object based on DataPoint (for the
+ *         time being private class)
  */
 public class DataPointTooltip extends AbstractDataFormattingPlugin {
 
@@ -41,8 +44,8 @@ public class DataPointTooltip extends AbstractDataFormattingPlugin {
     public static final String STYLE_CLASS_LABEL = "chart-datapoint-tooltip-label";
 
     /**
-     * The default distance between the data point coordinates and mouse cursor that triggers showing the tool tip
-     * label.
+     * The default distance between the data point coordinates and mouse cursor
+     * that triggers showing the tool tip label.
      */
     public static final int DEFAULT_PICKING_DISTANCE = 5;
 
@@ -52,8 +55,9 @@ public class DataPointTooltip extends AbstractDataFormattingPlugin {
     private final Label label = new Label();
 
     /**
-     * Creates a new instance of DataPointTooltip class with {{@link #pickingDistanceProperty() picking distance}
-     * initialized to {@value #DEFAULT_PICKING_DISTANCE}.
+     * Creates a new instance of DataPointTooltip class with
+     * {{@link #pickingDistanceProperty() picking distance} initialized to
+     * {@value #DEFAULT_PICKING_DISTANCE}.
      */
     public DataPointTooltip() {
         label.getStyleClass().add(DataPointTooltip.STYLE_CLASS_LABEL);
@@ -63,7 +67,8 @@ public class DataPointTooltip extends AbstractDataFormattingPlugin {
     /**
      * Creates a new instance of DataPointTooltip class.
      *
-     * @param pickingDistance the initial value for the {@link #pickingDistanceProperty() pickingDistance} property
+     * @param pickingDistance the initial value for the
+     *            {@link #pickingDistanceProperty() pickingDistance} property
      */
     public DataPointTooltip(final double pickingDistance) {
         this();
@@ -82,8 +87,9 @@ public class DataPointTooltip extends AbstractDataFormattingPlugin {
     };
 
     /**
-     * Distance of the mouse cursor from the data point (expressed in display units) that should trigger showing the
-     * tool tip. By default initialized to {@value #DEFAULT_PICKING_DISTANCE}.
+     * Distance of the mouse cursor from the data point (expressed in display
+     * units) that should trigger showing the tool tip. By default initialized
+     * to {@value #DEFAULT_PICKING_DISTANCE}.
      *
      * @return the picking distance property
      */
@@ -187,7 +193,31 @@ public class DataPointTooltip extends AbstractDataFormattingPlugin {
     }
 
     /**
-     * Handles series that have data sorted or not sorted with respect to X coordinate.
+     * Returns label of a data point specified by the index. The label can be
+     * used as a category name if CategoryStepsDefinition is used or for
+     * annotations displayed for data points.
+     *
+     * @param index data point index
+     * @return label of a data point specified by the index or <code>null</code>
+     *         if none label has been specified for this data point.
+     */
+    protected String getDefaultDataLabel(final DataSet dataSet, final int index) {
+        return String.format("%s (%d, %s, %s)", dataSet.getName(), index, Double.toString(dataSet.getX(index)),
+                Double.toString(dataSet.getY(index)));
+    }
+
+    protected String getDataLabelSafe(final DataSet dataSet, final int index) {
+        String lable = dataSet.getDataLabel(index);
+        if (lable == null) {
+            return getDefaultDataLabel(dataSet, index);
+        }
+        return lable;
+    }
+
+    /**
+     * Handles series that have data sorted or not sorted with respect to X
+     * coordinate.
+     * 
      * @param dataSet data set
      * @param searchedX x coordinate
      * @return return neighouring data points
@@ -215,10 +245,10 @@ public class DataPointTooltip extends AbstractDataFormattingPlugin {
         }
         final DataPoint prevPoint = prevIndex == -1 ? null
                 : new DataPoint(getChart(), dataSet.getX(prevIndex), dataSet.getY(prevIndex),
-                        dataSet.getDataLabel(prevIndex));
+                        getDataLabelSafe(dataSet, prevIndex));
         final DataPoint nextPoint = nextIndex == -1 || nextIndex == prevIndex ? null
                 : new DataPoint(getChart(), dataSet.getX(nextIndex), dataSet.getY(nextIndex),
-                        dataSet.getDataLabel(nextIndex));
+                        getDataLabelSafe(dataSet, nextIndex));
 
         return new Pair<>(prevPoint, nextPoint);
     }
