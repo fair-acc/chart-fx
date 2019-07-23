@@ -62,7 +62,6 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     protected D getThis() {
         return (D) this;
     }

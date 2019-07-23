@@ -8,7 +8,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import de.gsi.dataset.utils.AssertUtils;
 
-public class BinarySerialiser {
+public class BinarySerialiser { // NOPMD - omen est omen
     private static final String READ_POSITION_AT_BUFFER_END = "read position at buffer end";
     public static final byte VERSION_MAJOR = 1;
     public static final byte VERSION_MINOR = 0;

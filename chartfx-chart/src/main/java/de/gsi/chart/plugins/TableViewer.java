@@ -435,9 +435,7 @@ public class TableViewer extends ChartPlugin {
             case Y:
                 return ds.getY(row);
             default:
-                if ((ds instanceof DataSetError)) {
-                    return 0.0;
-                }
+                break;
             }
             DataSetError eds = (DataSetError) ds;
             switch (type) {
@@ -489,8 +487,8 @@ public class TableViewer extends ChartPlugin {
             }
 
             private void addSubcolumns() {
-                getColumns().add(new DataSetTableColumn("x", dataSet, ColumnType.X));
-                getColumns().add(new DataSetTableColumn("y", dataSet, ColumnType.Y));
+                this.getColumns().add(new DataSetTableColumn("x", dataSet, ColumnType.X));
+                this.getColumns().add(new DataSetTableColumn("y", dataSet, ColumnType.Y));
 
                 if (!(dataSet instanceof DataSetError)) {
                     return;
@@ -498,18 +496,18 @@ public class TableViewer extends ChartPlugin {
                 DataSetError eDs = (DataSetError) dataSet;
 
                 if (eDs.getErrorType() == ErrorType.X || eDs.getErrorType() == ErrorType.XY) {
-                    getColumns().add(new DataSetTableColumn("e_x", dataSet, ColumnType.EXN));
+                    this.getColumns().add(new DataSetTableColumn("e_x", dataSet, ColumnType.EXN));
                 }
                 if (eDs.getErrorType() == ErrorType.X_ASYMMETRIC || eDs.getErrorType() == ErrorType.XY_ASYMMETRIC) {
-                    getColumns().add(new DataSetTableColumn("-e_x", dataSet, ColumnType.EXN));
-                    getColumns().add(new DataSetTableColumn("+e_x", dataSet, ColumnType.EXP));
+                    this.getColumns().add(new DataSetTableColumn("-e_x", dataSet, ColumnType.EXN));
+                    this.getColumns().add(new DataSetTableColumn("+e_x", dataSet, ColumnType.EXP));
                 }
                 if (eDs.getErrorType() == ErrorType.Y || eDs.getErrorType() == ErrorType.XY) {
-                    getColumns().add(new DataSetTableColumn("e_y", dataSet, ColumnType.EYN));
+                    this.getColumns().add(new DataSetTableColumn("e_y", dataSet, ColumnType.EYN));
                 }
                 if (eDs.getErrorType() == ErrorType.Y_ASYMMETRIC || eDs.getErrorType() == ErrorType.XY_ASYMMETRIC) {
-                    getColumns().add(new DataSetTableColumn("-e_y", dataSet, ColumnType.EYN));
-                    getColumns().add(new DataSetTableColumn("+e_y", dataSet, ColumnType.EYP));
+                    this.getColumns().add(new DataSetTableColumn("-e_y", dataSet, ColumnType.EYN));
+                    this.getColumns().add(new DataSetTableColumn("+e_y", dataSet, ColumnType.EYP));
                 }
             }
         }

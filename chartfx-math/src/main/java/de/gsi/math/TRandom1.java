@@ -157,7 +157,7 @@ public class TRandom1 extends TRandom {
 
         uni = fFloatSeedTable[fJlag] - fFloatSeedTable[fIlag] - fCarry;
         if (uni < 0.) {
-            uni += 1.0;
+            uni += 1.0f;
             fCarry = (float) fMantissaBit24;
         } else {
             fCarry = 0.f;
@@ -172,7 +172,7 @@ public class TRandom1 extends TRandom {
             fJlag = 23;
 
         if (uni < fMantissaBit12) {
-            uni += fMantissaBit24 * fFloatSeedTable[fJlag];
+            uni += (float)fMantissaBit24 * fFloatSeedTable[fJlag];
             if (uni == 0)
                 uni = (float) (fMantissaBit24 * fMantissaBit24);
         }
@@ -187,7 +187,7 @@ public class TRandom1 extends TRandom {
             for (i = 0; i != fNskip; i++) {
                 uni = fFloatSeedTable[fJlag] - fFloatSeedTable[fIlag] - fCarry;
                 if (uni < 0.) {
-                    uni += 1.0;
+                    uni += 1.0f;
                     fCarry = (float) fMantissaBit24;
                 } else {
                     fCarry = 0.f;
@@ -228,7 +228,7 @@ public class TRandom1 extends TRandom {
         for (index = 0; index < size; ++index) {
             uni = fFloatSeedTable[fJlag] - fFloatSeedTable[fIlag] - fCarry;
             if (uni < 0.) {
-                uni += 1.0;
+                uni += 1.0f;
                 fCarry = (float) fMantissaBit24;
             } else {
                 fCarry = 0.f;
@@ -259,7 +259,7 @@ public class TRandom1 extends TRandom {
                 for (i = 0; i != fNskip; i++) {
                     uni = fFloatSeedTable[fJlag] - fFloatSeedTable[fIlag] - fCarry;
                     if (uni < 0.) {
-                        uni += 1.0;
+                        uni += 1.0f;
                         fCarry = (float) fMantissaBit24;
                     } else {
                         fCarry = 0.f;

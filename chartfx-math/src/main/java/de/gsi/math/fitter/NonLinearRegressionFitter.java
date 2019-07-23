@@ -2377,7 +2377,7 @@ public class NonLinearRegressionFitter {
 
                 for (int i = 0; i < np; ++i) {
                     for (int j = 0; j < np; ++j) {
-                        if (coeffSd[i] != Double.NaN && coeffSd[j] != Double.NaN) {
+                        if (Double.isFinite(coeffSd[i]) && Double.isFinite(coeffSd[j])) {
                             corrCoeff[i][j] = covar[i][j] / (coeffSd[i] * coeffSd[j]);
                         } else {
                             corrCoeff[i][j] = Double.NaN;

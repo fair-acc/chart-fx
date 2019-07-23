@@ -300,9 +300,6 @@ public class HexagonMap {
                 final Hexagon hexagon = getHexagonContainingPixel(x, y);
                 if (hexagon != null) {
 
-                    if ((oldHexagon == null && hexagon != null || !hexagon.equals(oldHexagon)) && oldHexagon != null) {
-					    // System.err.println("left old hexagon " + oldHexagon);
-					}
                     if (oldHexagon != null) {
                         gc.save();
                         gc.setFill(oldHexagon.getFill());
