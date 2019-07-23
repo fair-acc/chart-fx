@@ -14,19 +14,16 @@ public final class Cache {
     protected WeakHashMap<String, WeakHashMap<Integer, String[]>> stringArrayCache = new WeakHashMap<>();
 
     public Cache() {
+        // cache is initialised via member fields
     }
 
     public synchronized double[] getCachedDoubleArray(final String arrayName, final int size) {
-        if (doubleArrayCache.get(arrayName) == null) {
-            doubleArrayCache.put(arrayName, new WeakHashMap<>());
-        }
-        double[] cachedArray = doubleArrayCache.get(arrayName).get(size);
+        WeakHashMap<Integer, double[]> nameHashMap = doubleArrayCache.computeIfAbsent(arrayName, key -> new WeakHashMap<>());
+        double[] cachedArray = nameHashMap.get(size);
         if (cachedArray == null) {
             cachedArray = new double[size];
-            // System.err.println("cache missed for " + arrayName + " size = " + size);
         } else {
-            doubleArrayCache.get(arrayName).remove(cachedArray);
-            // System.err.println("cache found for " + arrayName + " size = " + size);
+            doubleArrayCache.get(arrayName).remove(size);
         }
         return cachedArray;
     }
@@ -39,14 +36,12 @@ public final class Cache {
     }
 
     public synchronized int[] getCachedIntArray(final String arrayName, final int size) {
-        if (intArrayCache.get(arrayName) == null) {
-            intArrayCache.put(arrayName, new WeakHashMap<>());
-        }
-        int[] cachedArray = intArrayCache.get(arrayName).get(size);
+        WeakHashMap<Integer, int[]> nameHashMap = intArrayCache.computeIfAbsent(arrayName, key -> new WeakHashMap<>());
+        int[] cachedArray = nameHashMap.get(size);
         if (cachedArray == null) {
             cachedArray = new int[size];
         } else {
-            intArrayCache.get(arrayName).remove(cachedArray);
+            intArrayCache.get(arrayName).remove(size);
         }
         return cachedArray;
     }
@@ -59,15 +54,12 @@ public final class Cache {
     }
 
     public synchronized boolean[] getCachedBooleanArray(final String arrayName, final int size) {
-        if (booleanArrayCache.get(arrayName) == null) {
-            booleanArrayCache.put(arrayName, new WeakHashMap<>());
-        }
-        boolean[] cachedArray = booleanArrayCache.get(arrayName).get(size);
+        WeakHashMap<Integer, boolean[]> nameHashMap = booleanArrayCache.computeIfAbsent(arrayName, key -> new WeakHashMap<>());
+        boolean[] cachedArray = nameHashMap.get(size);
         if (cachedArray == null) {
             cachedArray = new boolean[size];
-            // System.err.println("cache missed for " + arrayName + " size = " + size);
         } else {
-            booleanArrayCache.get(arrayName).remove(cachedArray);
+            booleanArrayCache.get(arrayName).remove(size);
         }
         return cachedArray;
     }
@@ -80,15 +72,12 @@ public final class Cache {
     }
 
     public synchronized String[] getCachedStringArray(final String arrayName, final int size) {
-        if (stringArrayCache.get(arrayName) == null) {
-            stringArrayCache.put(arrayName, new WeakHashMap<>());
-        }
-        String[] cachedArray = stringArrayCache.get(arrayName).get(size);
+        WeakHashMap<Integer, String[]> nameHashMap = stringArrayCache.computeIfAbsent(arrayName, key -> new WeakHashMap<>());
+        String[] cachedArray = nameHashMap.get(size);
         if (cachedArray == null) {
             cachedArray = new String[size];
-            // System.err.println("cache missed for " + arrayName + " size = " + size);
         } else {
-            stringArrayCache.get(arrayName).remove(cachedArray);
+            stringArrayCache.get(arrayName).remove(size);
         }
         return cachedArray;
     }

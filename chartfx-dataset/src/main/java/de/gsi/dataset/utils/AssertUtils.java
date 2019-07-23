@@ -264,7 +264,7 @@ public final class AssertUtils {
      * @return <code>true</code> if v1 and v2 are Double.NaN or v1 == v2.
      */
     public static boolean areEqual(final double v1, final double v2) {
-        return ((v1 != v1) && (v2 != v2)) || (v1 == v2);
+        return (Double.isNaN(v1) && Double.isNaN(v2)) || (v1 == v2);
     }
 
     /**

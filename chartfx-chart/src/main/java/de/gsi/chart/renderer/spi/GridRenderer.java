@@ -107,10 +107,12 @@ public class GridRenderer extends Pane implements Renderer {
         verMinorGridStyleNode.getPseudoClassStates().addListener(listener);
 
         ChangeListener<? super Boolean> change = (ob, o, n) -> {
-            horMajorGridStyleNode.pseudoClassStateChanged(GridRenderer.SELECTED_PSEUDO_CLASS, horMinorGridStyleNode.isVisible());
-            verMajorGridStyleNode.pseudoClassStateChanged(GridRenderer.SELECTED_PSEUDO_CLASS, verMinorGridStyleNode.isVisible());
+            horMajorGridStyleNode.pseudoClassStateChanged(GridRenderer.SELECTED_PSEUDO_CLASS,
+                    horMinorGridStyleNode.isVisible());
+            verMajorGridStyleNode.pseudoClassStateChanged(GridRenderer.SELECTED_PSEUDO_CLASS,
+                    verMinorGridStyleNode.isVisible());
         };
-        
+
         horizontalGridLinesVisibleProperty().addListener(change);
         verticalGridLinesVisibleProperty().addListener(change);
     }
@@ -124,12 +126,12 @@ public class GridRenderer extends Pane implements Renderer {
         }
         final XYChart xyChart = (XYChart) chart;
         isPolarPlot = xyChart.isPolarPlot();
-      
+
         if (isPolarPlot) {
             drawPolarGrid(gc, xyChart);
         } else {
-//        	 drawEuclideanGrid(gc, xyChart);
-        	// for testing
+            //        	 drawEuclideanGrid(gc, xyChart);
+            // for testing
             drawEuclideanGrid2(gc, xyChart);
         }
 
@@ -173,28 +175,27 @@ public class GridRenderer extends Pane implements Renderer {
                 final double xl = xCentre + maxRadius * Math.sin(phi * GridRenderer.DEG_TO_RAD) * 1.05;
                 final double yl = yCentre - maxRadius * Math.cos(phi * GridRenderer.DEG_TO_RAD) * 1.05;
 
-                if (phi >= 0 && phi <= 360) {
-                    gc.strokeLine(xCentre, yCentre, x, y);
+                gc.strokeLine(xCentre, yCentre, x, y);
 
-                    gc.save();
-                    gc.setFont(yAxis.getTickLabelFont());
-                    gc.setStroke(yAxis.getTickLabelFill());
-                    gc.setLineDashes(null);
-                    gc.setTextBaseline(VPos.CENTER);
-                    if (phi < 350) {
-                        if (phi < 20) {
-                            gc.setTextAlign(TextAlignment.CENTER);
-                        } else if (phi <= 160) {
-                            gc.setTextAlign(TextAlignment.LEFT);
-                        } else if (phi <= 200) {
-                            gc.setTextAlign(TextAlignment.CENTER);
-                        } else {
-                            gc.setTextAlign(TextAlignment.RIGHT);
-                        }
-                        gc.strokeText(String.valueOf(phi), xl, yl);
+                gc.save();
+                gc.setFont(yAxis.getTickLabelFont());
+                gc.setStroke(yAxis.getTickLabelFill());
+                gc.setLineDashes(null);
+                gc.setTextBaseline(VPos.CENTER);
+                if (phi < 350) {
+                    if (phi < 20) {
+                        gc.setTextAlign(TextAlignment.CENTER);
+                    } else if (phi <= 160) {
+                        gc.setTextAlign(TextAlignment.LEFT);
+                    } else if (phi <= 200) {
+                        gc.setTextAlign(TextAlignment.CENTER);
+                    } else {
+                        gc.setTextAlign(TextAlignment.RIGHT);
                     }
-                    gc.restore();
+                    gc.strokeText(String.valueOf(phi), xl, yl);
                 }
+                gc.restore();
+
             }
 
             if (xAxis instanceof Axis && xAxis.isLogAxis() || verMinorGridStyleNode.isVisible()) {
@@ -303,12 +304,12 @@ public class GridRenderer extends Pane implements Renderer {
         }
         gc.restore();
     }
-    
+
     protected void drawEuclideanGrid2(final GraphicsContext gc, XYChart xyChart) {
         final Axis xAxis = xyChart.getXAxis();
         final Axis yAxis = xyChart.getYAxis();
         final double xAxisWidth = xyChart.getCanvas().getWidth();
-        final double xAxisWidthSnapped = snap(xAxisWidth);        
+        final double xAxisWidthSnapped = snap(xAxisWidth);
         final double yAxisHeight = xyChart.getCanvas().getHeight();
         final double yAxisHeightSnapped = snap(yAxisHeight);
         final double zeroSnapped = snap(0);
@@ -321,10 +322,10 @@ public class GridRenderer extends Pane implements Renderer {
         if (verMajorGridStyleNode.isVisible() || verMinorGridStyleNode.isVisible()) {
             applyGraphicsStyleFromLineStyle(gc, verMajorGridStyleNode);
             ObservableList<TickMark> tickMarks = xAxis.getTickMarks();
-            for (int i=0; i<tickMarks.size(); i++) {
+            for (int i = 0; i < tickMarks.size(); i++) {
                 double x = snap(xAxis.getDisplayPosition(tickMarks.get(i).getValue()));
                 if (x > 0 && x <= xAxisWidth) {
-//                    gc.strokeLine(x, zeroSnapped, x, yAxisHeightSnapped);
+                    //                    gc.strokeLine(x, zeroSnapped, x, yAxisHeightSnapped);
                     DashPatternStyle.strokeDashedLine(gc, x, zeroSnapped, x, yAxisHeightSnapped);
                 }
             }
@@ -334,26 +335,26 @@ public class GridRenderer extends Pane implements Renderer {
         if (xAxis instanceof Axis && xAxis.isLogAxis() || verMinorGridStyleNode.isVisible()) {
             applyGraphicsStyleFromLineStyle(gc, verMinorGridStyleNode);
             ObservableList<TickMark> tickMarks = xAxis.getMinorTickMarks();
-            for (int i=0; i<tickMarks.size(); i++) {
+            for (int i = 0; i < tickMarks.size(); i++) {
                 double x = snap(xAxis.getDisplayPosition(tickMarks.get(i).getValue()));
                 if (x > 0 && x <= xAxisWidth) {
-//                    gc.strokeLine(x, zeroSnapped, x, yAxisHeightSnapped);
+                    //                    gc.strokeLine(x, zeroSnapped, x, yAxisHeightSnapped);
                     DashPatternStyle.strokeDashedLine(gc, x, zeroSnapped, x, yAxisHeightSnapped);
                 }
-            }                       
+            }
         }
 
         // draw horizontal major grid lines
         if (horMajorGridStyleNode.isVisible() || horMinorGridStyleNode.isVisible()) {
             applyGraphicsStyleFromLineStyle(gc, horMajorGridStyleNode);
             ObservableList<TickMark> tickMarks = yAxis.getTickMarks();
-            for (int i=0; i<tickMarks.size(); i++) {
+            for (int i = 0; i < tickMarks.size(); i++) {
                 double y = snap(yAxis.getDisplayPosition(tickMarks.get(i).getValue()));
                 if (y >= 0 && y < yAxisHeight) {
-//                    gc.strokeLine(zeroSnapped, y, xAxisWidthSnapped, y);
+                    //                    gc.strokeLine(zeroSnapped, y, xAxisWidthSnapped, y);
                     DashPatternStyle.strokeDashedLine(gc, zeroSnapped, y, xAxisWidthSnapped, y);
                 }
-            }              
+            }
 
         }
 
@@ -361,17 +362,16 @@ public class GridRenderer extends Pane implements Renderer {
         if (yAxis instanceof Axis && yAxis.isLogAxis() || horMinorGridStyleNode.isVisible()) {
             applyGraphicsStyleFromLineStyle(gc, horMinorGridStyleNode);
             ObservableList<TickMark> tickMarks = yAxis.getMinorTickMarks();
-            for (int i=0; i<tickMarks.size(); i++) {
+            for (int i = 0; i < tickMarks.size(); i++) {
                 double y = snap(yAxis.getDisplayPosition(tickMarks.get(i).getValue()));
                 if (y >= 0 && y < yAxisHeight) {
                     //gc.strokeLine(zeroSnapped, y, xAxisWidthSnapped, y);
                     DashPatternStyle.strokeDashedLine(gc, zeroSnapped, y, xAxisWidthSnapped, y);
                 }
-            }                      
+            }
         }
         gc.restore();
     }
-
 
     /**
      * @return observable list of axes that are supposed to be used by the renderer
