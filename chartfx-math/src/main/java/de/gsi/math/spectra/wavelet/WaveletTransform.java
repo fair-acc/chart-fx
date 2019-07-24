@@ -980,10 +980,6 @@ public class WaveletTransform extends WaveletCoefficients {
         filter_even = new double[F_2];
         filter_odd = new double[F_2];
 
-        if (filter_odd == null || filter_odd == null) {
-            return -1;
-        }
-
         // split filter to even and odd values
         for (i = 0; i < F_2; ++i) {
             filter_even[i] = filter[i << 1];

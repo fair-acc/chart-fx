@@ -60,7 +60,7 @@ public class Convolution {
                 if (i < offset) {
                     // match ZOH at lower boundary
                     fdata[i] = data[0];
-                } else if (i >= offset && i < offset + data.length) {
+                } else if (i < offset + data.length) {
                     fdata[i] = data[i - offset];
                 } else if (i > offset + data.length) {
                     // match ZOH at upper boundary
@@ -77,9 +77,8 @@ public class Convolution {
 
         if (cyclicBoundary) {
             return fdata.length != data.length ? Arrays.copyOf(fdata, data.length) : fdata;
-        } else {
-            return Arrays.copyOfRange(fdata, offset, offset + data.length);
         }
+        return Arrays.copyOfRange(fdata, offset, offset + data.length);
     }
 
     /**
@@ -119,7 +118,7 @@ public class Convolution {
                 if (i < offset) {
                     // match ZOH at lower boundary
                     fdata[i] = data[0];
-                } else if (i >= offset && i < offset + data.length) {
+                } else if (i < offset + data.length) {
                     fdata[i] = data[i - offset];
                 } else if (i > offset + data.length) {
                     // match ZOH at upper boundary
@@ -128,22 +127,21 @@ public class Convolution {
             }
         }
 
-        final double[] fdata_full = new double[2 * fft_samples];
+        final double[] fdataFull = new double[2 * fft_samples];
         for (int i = 0; i < fft_samples; i++) {
-            fdata_full[i << 1] = fdata[i];
+            fdataFull[i << 1] = fdata[i];
         }
 
-        f1dFFT.complexForward(fdata_full);
+        f1dFFT.complexForward(fdataFull);
 
-        complexMultiply(fdata_full, filter);
+        complexMultiply(fdataFull, filter);
 
-        f1dFFT.complexInverse(fdata_full, true);
+        f1dFFT.complexInverse(fdataFull, true);
 
         if (cyclicBoundary) {
-            return fdata_full;
-        } else {
-            return Arrays.copyOfRange(fdata_full, 2 * offset, 2 * offset + 2 * data.length);
+            return fdataFull;
         }
+        return Arrays.copyOfRange(fdataFull, 2 * offset, 2 * offset + 2 * data.length);
     }
 
     public static void complexMultiply(final double[] data1, final double[] data2) {
