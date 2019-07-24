@@ -261,6 +261,7 @@ public class FloatDataSet extends AbstractDataSet<FloatDataSet> implements Edita
      * @return itself
      */
     public FloatDataSet add(final float x, final float y, final String label) {
+        lock();
         xValues.add(x);
         yValues.add(y);
 
@@ -271,7 +272,7 @@ public class FloatDataSet extends AbstractDataSet<FloatDataSet> implements Edita
         xRange.add(x);
         yRange.add(y);
 
-        return getThis();
+        return unlock().fireInvalidated(new AddedDataEvent(this));
     }
 
     /**
