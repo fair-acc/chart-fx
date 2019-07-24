@@ -29,71 +29,71 @@ import org.apache.commons.math3.complex.Complex;
  */
 public class LayoutBase {
 
-    private int m_numPoles;
-    private PoleZeroPair[] m_pair;
-    private double m_normalW;
-    private double m_normalGain;
+    private int mNumPoles;
+    private PoleZeroPair[] mPair;
+    private double mNormalW;
+    private double mNormalGain;
 
     public LayoutBase(final PoleZeroPair[] pairs) {
-        m_numPoles = pairs.length * 2;
-        m_pair = pairs;
+        mNumPoles = pairs.length * 2;
+        mPair = pairs;
     }
 
     public LayoutBase(final int numPoles) {
-        m_numPoles = 0;
+        mNumPoles = 0;
         if (numPoles % 2 == 1) {
-            m_pair = new PoleZeroPair[numPoles / 2 + 1];
+            mPair = new PoleZeroPair[numPoles / 2 + 1];
         } else {
-            m_pair = new PoleZeroPair[numPoles / 2];
+            mPair = new PoleZeroPair[numPoles / 2];
         }
     }
 
     public void reset() {
-        m_numPoles = 0;
+        mNumPoles = 0;
     }
 
     public int getNumPoles() {
-        return m_numPoles;
+        return mNumPoles;
     }
 
     public void add(final Complex pole, final Complex zero) {
-        m_pair[m_numPoles / 2] = new PoleZeroPair(pole, zero);
-        ++m_numPoles;
+        mPair[mNumPoles / 2] = new PoleZeroPair(pole, zero);
+        ++mNumPoles;
     }
 
     public void addPoleZeroConjugatePairs(final Complex pole, final Complex zero) {
         if (pole == null) {
-            System.out.println("LayoutBase addConj() pole == null");
+            throw new IllegalArgumentException("LayoutBase addConj() pole == null");
         }
         if (zero == null) {
-            System.out.println("LayoutBase addConj() zero == null");
+            throw new IllegalArgumentException("LayoutBase addConj() zero == null");
         }
-        if (m_pair == null) {
-            System.out.println("LayoutBase addConj() m_pair == null");
+        if (mPair == null) {
+            throw new IllegalArgumentException("LayoutBase addConj() m_pair == null");
         }
-        m_pair[m_numPoles / 2] = new PoleZeroPair(pole, zero, pole.conjugate(), zero.conjugate());
-        m_numPoles += 2;
+        mPair[mNumPoles / 2] = new PoleZeroPair(pole, zero, pole.conjugate(), zero.conjugate());
+        mNumPoles += 2;
     }
 
     public void add(final ComplexPair poles, final ComplexPair zeros) {
-        m_pair[m_numPoles / 2] = new PoleZeroPair(poles.first, zeros.first, poles.second, zeros.second);
-        m_numPoles += 2;
+        mPair[mNumPoles / 2] = new PoleZeroPair(poles.first, zeros.first, poles.second, zeros.second);
+        mNumPoles += 2;
     }
 
     public PoleZeroPair getPair(final int pairIndex) {
-        return m_pair[pairIndex];
+        return mPair[pairIndex];
     }
 
     public double getNormalW() {
-        return m_normalW;
+        return mNormalW;
     }
 
     public double getNormalGain() {
-        return m_normalGain;
+        return mNormalGain;
     }
 
     public void setNormal(final double w, final double g) {
-        m_normalW = w;
-        m_normalGain = g;
+        mNormalW = w;
+        mNormalGain = g;
     }
-};
+}
