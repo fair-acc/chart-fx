@@ -1,6 +1,6 @@
 package de.gsi.math.fitter;
 
-public class GaussFitting {
+public class GaussFitting { // NOPMD - nomen est omen
 
     private static double fmean = 1.0;
     private static double fmeanError = 0.0;
@@ -12,53 +12,53 @@ public class GaussFitting {
     private static double fconstantError = 1.0;
 
     /**
-     * fit precise bunch width and location based on peak indication and width estimate
-     * @param slice_x horizontal slice
-     * @param slice_y vertical slice
-     * @param mean_indication initial mean estimate
-     * @param sigma_n initial sigma estimate
-     * @param nsigma n-sigma definition to be used 
+     * fit precise Gaussian curve width and location based on peak indication and width estimate
+     * 
+     * @param sliceX horizontal slice
+     * @param sliceY vertical slice
+     * @param meanEstimate initial mean estimate
+     * @param sigma initial sigma estimate
+     * @param nSigma n-sigma definition to be used
      */
-    public static void fitData(double[] slice_x, double[] slice_y, double mean_indication, double sigma_n,
-            double nsigma) {
+    public static void fitData(double[] sliceX, double[] sliceY, double meanEstimate, double sigma, double nSigma) {
         int tmin = 0;
-        int tmax = slice_x.length - 1;
-        int center = (int) mean_indication;
+        int tmax = sliceX.length - 1;
+        int center = (int) meanEstimate;
         int nadd = 100;
         // for zero padding at the front and end of the measurements to simplify the fit
 
-        int half_width = (int) (nsigma * sigma_n);
-        if (center - tmin < half_width)
-            half_width = center - tmin;
-        if (tmax - center < half_width)
-            half_width = tmax - center;
+        int halfWidth = (int) (nSigma * sigma);
+        if (center - tmin < halfWidth)
+            halfWidth = center - tmin;
+        if (tmax - center < halfWidth)
+            halfWidth = tmax - center;
 
         // create initial starting values for parameters
         double x = 0.;
         double x2 = 0.;
         double norm = 0.;
-        double dx = slice_x[1] - slice_x[0];
+        double dx = sliceX[1] - sliceX[0];
         double area = 0.0;
         double eqArea = 0.0;
-        double[] pos = new double[2 * half_width + 2 * nadd];
-        double[] meas = new double[2 * half_width + 2 * nadd];
-        double[] var = new double[2 * half_width + 2 * nadd];
+        double[] pos = new double[2 * halfWidth + 2 * nadd];
+        double[] meas = new double[2 * halfWidth + 2 * nadd];
+        double[] var = new double[2 * halfWidth + 2 * nadd];
         //		GaussFcn theFCN = new GaussFcn(meas, pos, var);
 
         // copy data
-        for (int i = 0; i < 2 * half_width; i++) {
-            double val_x = slice_x[center - half_width + i];
-            double val_y = slice_y[center - half_width + i];
-            pos[i + nadd] = val_x;
-            meas[i + nadd] = val_y;
+        for (int i = 0; i < 2 * halfWidth; i++) {
+            double valX = sliceX[center - halfWidth + i];
+            double valY = sliceY[center - halfWidth + i];
+            pos[i + nadd] = valX;
+            meas[i + nadd] = valY;
         }
 
         //zero padding at the begin and end of the data sample
         for (int i = 0; i < nadd; i++) {
             pos[nadd - i] = pos[nadd] - dx * i;
-            pos[nadd + 2 * half_width + i] = pos[nadd + 2 * half_width - 1] + dx * i;
+            pos[nadd + 2 * halfWidth + i] = pos[nadd + 2 * halfWidth - 1] + dx * i;
             meas[i] = 0.0;
-            meas[nadd + 2 * half_width + i] = 0.0;
+            meas[nadd + 2 * halfWidth + i] = 0.0;
         }
 
         for (int i = 0; i < meas.length; i++) {
@@ -155,9 +155,9 @@ public class GaussFitting {
     }
 
     public static void print() {
-        System.out.printf("mean    : %s \t+- %s%nrms     : %s \t+- %s%nconstant: %s \t+- %s%n",
-                "area    : %s \t+- %s\n", getMean(), getMeanError(), getRMS(), getRMSError(), getConstant(),
-                getConstantError(), getArea(), getAreaError());
+        System.out.printf("mean    : %s \t+- %s%nrms     : %s \t+- %s%nconstant: %s \t+- %s%narea    : %s \t+- %s\n", //  NOPMD -- acceptable debugging use
+                getMean(), getMeanError(), getRMS(), getRMSError(), getConstant(), getConstantError(), getArea(),
+                getAreaError());
     }
 
     public static void main(String[] args) {
@@ -174,48 +174,48 @@ public class GaussFitting {
         GaussFitting.print();
     }
 
-    public static int removeSpuriousBunches(double[] posX, double[] measY, double sigma) {
-        int npeaks = posX.length;
-
-        // quick (since only few peaks) bubble sorting of peaks
-        for (int i = 0; i < npeaks; i++) {
-            for (int j = i + 1; j < npeaks; j++) {
-                if (posX[i] >= posX[j]) {
-                    double temp;
-                    temp = posX[i];
-                    posX[i] = posX[j];
-                    posX[j] = temp;
-                    temp = measY[i];
-                    measY[i] = measY[j];
-                    measY[j] = temp;
-                }
-            }
-        }
-
-        double[] tempPos = new double[npeaks];
-        double[] tempMeas = new double[npeaks];
-        int npeaks_reduced = 0;
-        // simple peak reduction by dropping peaks that are closer than one sigma
-        double last = -1e99;
-        for (int i = 0; i < npeaks; i++) {
-            if (posX[i] - last >= 6 * sigma) {
-                // keep sample				
-                tempPos[npeaks_reduced] = posX[i];
-                tempMeas[npeaks_reduced] = measY[i];
-                last = posX[i];
-                npeaks_reduced++;
-            } else {
-                // drop sample
-            }
-        }
-        posX = new double[npeaks_reduced];
-        measY = new double[npeaks_reduced];
-        for (int i = 0; i < npeaks_reduced; i++) {
-            posX[i] = tempPos[i];
-            measY[i] = tempMeas[i];
-        }
-
-        return npeaks_reduced;
-    }
+//    public static int removeSpuriousPeaks(double[] posX, double[] measY, double sigma) {
+//        int npeaks = posX.length;
+//
+//        // quick (since only few peaks) bubble sorting of peaks
+//        for (int i = 0; i < npeaks; i++) {
+//            for (int j = i + 1; j < npeaks; j++) {
+//                if (posX[i] >= posX[j]) {
+//                    double temp;
+//                    temp = posX[i];
+//                    posX[i] = posX[j];
+//                    posX[j] = temp;
+//                    temp = measY[i];
+//                    measY[i] = measY[j];
+//                    measY[j] = temp;
+//                }
+//            }
+//        }
+//
+//        double[] tempPos = new double[npeaks];
+//        double[] tempMeas = new double[npeaks];
+//        int nPeaksReduced = 0;
+//        // simple peak reduction by dropping peaks that are closer than one sigma
+//        double last = -1e99;
+//        for (int i = 0; i < npeaks; i++) {
+//            if (posX[i] - last >= 6 * sigma) {
+//                // keep sample				
+//                tempPos[nPeaksReduced] = posX[i];
+//                tempMeas[nPeaksReduced] = measY[i];
+//                last = posX[i];
+//                nPeaksReduced++;
+//            } else {
+//                // drop sample
+//            }
+//        }
+//        posX = new double[nPeaksReduced];
+//        measY = new double[nPeaksReduced];
+//        for (int i = 0; i < nPeaksReduced; i++) {
+//            posX[i] = tempPos[i];
+//            measY[i] = tempMeas[i];
+//        }
+//
+//        return nPeaksReduced;
+//    }
 
 }

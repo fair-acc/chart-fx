@@ -213,7 +213,7 @@ public class NonLinearRegressionFitter2 {
         int nZeros = 0;
 
         if (weights == null) {
-            System.err.println("weights are null");
+            throw new IllegalArgumentException("weights are null");
         }
 
         // count number of zeros

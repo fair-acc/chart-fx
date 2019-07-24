@@ -215,24 +215,27 @@ public class DataSetBuilder {
     }
 
     protected DataSet buildRawDataSet(final String dsName) {
-        DataSet dataSet;
         if (xValues == null && yValues == null) {
             // no X/Y arrays provided
-            dataSet = new DefaultDataSet(dsName, Math.max(initialCapacity, 0));
-        } else if (xValues == null) {
+            return new DefaultDataSet(dsName, Math.max(initialCapacity, 0));
+        }
+
+        if (xValues == null) {
             // no X array provided
-            dataSet = buildWithYArrayOnly(dsName);
-        } else if (yErrorsNeg == null && yErrorsPos == null) {
+            return buildWithYArrayOnly(dsName);
+        }
+
+        final int minArrays = Math.min(xValues.length, yValues.length);
+        final int size = initialCapacity < 0 ? minArrays : Math.min(minArrays, initialCapacity);
+        DataSet dataSet;
+        if (yErrorsNeg == null && yErrorsPos == null) {
             // no error arrays -> build non-error data set
-            final int minArrays = Math.min(xValues.length, yValues.length);
-            final int size = initialCapacity < 0 ? minArrays : Math.min(minArrays, initialCapacity);
             dataSet = new DefaultDataSet(dsName, xValues, yValues, size, false);
         } else {
             // at least one error array has been provided
-            final int minArrays = Math.min(xValues.length, yValues.length);
-            final int size = initialCapacity < 0 ? minArrays : Math.min(minArrays, initialCapacity);
             dataSet = buildWithYErrors(dsName, size);
         }
+
         return dataSet;
     }
 

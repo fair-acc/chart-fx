@@ -1109,7 +1109,7 @@ public strictfp class FloatFFT_1D {
         int nthreads = ConcurrencyUtils.getNumberOfThreads();
         if (nthreads > 1 && n > ConcurrencyUtils.getThreadsBeginN_1D_FFT_2Threads()) {
             nthreads = 2;
-            if (nthreads >= 4 && n > ConcurrencyUtils.getThreadsBeginN_1D_FFT_4Threads()) {
+            if (n > ConcurrencyUtils.getThreadsBeginN_1D_FFT_4Threads()) {
                 nthreads = 4;
             }
             final Future<?>[] futures = new Future[nthreads];
@@ -1276,7 +1276,7 @@ public strictfp class FloatFFT_1D {
         int nthreads = ConcurrencyUtils.getNumberOfThreads();
         if (nthreads > 1 && n > ConcurrencyUtils.getThreadsBeginN_1D_FFT_2Threads()) {
             nthreads = 2;
-            if (nthreads >= 4 && n > ConcurrencyUtils.getThreadsBeginN_1D_FFT_4Threads()) {
+            if (n > ConcurrencyUtils.getThreadsBeginN_1D_FFT_4Threads()) {
                 nthreads = 4;
             }
             final Future<?>[] futures = new Future[nthreads];
@@ -1432,7 +1432,7 @@ public strictfp class FloatFFT_1D {
         int nthreads = ConcurrencyUtils.getNumberOfThreads();
         if (nthreads > 1 && n > ConcurrencyUtils.getThreadsBeginN_1D_FFT_2Threads()) {
             nthreads = 2;
-            if (nthreads >= 4 && n > ConcurrencyUtils.getThreadsBeginN_1D_FFT_4Threads()) {
+            if (n > ConcurrencyUtils.getThreadsBeginN_1D_FFT_4Threads()) {
                 nthreads = 4;
             }
             final Future<?>[] futures = new Future[nthreads];
@@ -1583,7 +1583,7 @@ public strictfp class FloatFFT_1D {
         int nthreads = ConcurrencyUtils.getNumberOfThreads();
         if (nthreads > 1 && n > ConcurrencyUtils.getThreadsBeginN_1D_FFT_2Threads()) {
             nthreads = 2;
-            if (nthreads >= 4 && n > ConcurrencyUtils.getThreadsBeginN_1D_FFT_4Threads()) {
+            if (n > ConcurrencyUtils.getThreadsBeginN_1D_FFT_4Threads()) {
                 nthreads = 4;
             }
             final Future<?>[] futures = new Future[nthreads];
@@ -1650,7 +1650,7 @@ public strictfp class FloatFFT_1D {
         int nthreads = ConcurrencyUtils.getNumberOfThreads();
         if (nthreads > 1 && n > ConcurrencyUtils.getThreadsBeginN_1D_FFT_2Threads()) {
             nthreads = 2;
-            if (nthreads >= 4 && n > ConcurrencyUtils.getThreadsBeginN_1D_FFT_4Threads()) {
+            if (n > ConcurrencyUtils.getThreadsBeginN_1D_FFT_4Threads()) {
                 nthreads = 4;
             }
             final Future<?>[] futures = new Future[nthreads];
