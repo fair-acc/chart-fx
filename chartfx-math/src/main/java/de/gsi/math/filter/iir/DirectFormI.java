@@ -26,33 +26,32 @@ package de.gsi.math.filter.iir;
  * are supplied from the outside.
  */
 public class DirectFormI extends DirectFormAbstract {
+    public double mX2; // x[n-2]
+    public double mY2; // y[n-2]
+    public double mX1; // x[n-1]
+    public double mY1; // y[n-1]
 
     public DirectFormI() {
         reset();
     }
 
     @Override
-    public void reset() {
-        m_x1 = 0;
-        m_x2 = 0;
-        m_y1 = 0;
-        m_y2 = 0;
+    public final void reset() {
+        mX1 = 0;
+        mX2 = 0;
+        mY1 = 0;
+        mY2 = 0;
     }
 
     @Override
-    public double process1(final double in, final Biquad s) {
+    public double process1(final double input, final Biquad s) {
 
-        final double out = s.m_b0 * in + s.m_b1 * m_x1 + s.m_b2 * m_x2 - s.m_a1 * m_y1 - s.m_a2 * m_y2;
-        m_x2 = m_x1;
-        m_y2 = m_y1;
-        m_x1 = in;
-        m_y1 = out;
+        final double output = s.mB0 * input + s.mB1 * mX1 + s.mB2 * mX2 - s.mA1 * mY1 - s.mA2 * mY2;
+        mX2 = mX1;
+        mY2 = mY1;
+        mX1 = input;
+        mY1 = output;
 
-        return out;
+        return output;
     }
-
-    double m_x2; // x[n-2]
-    double m_y2; // y[n-2]
-    double m_x1; // x[n-1]
-    double m_y1; // y[n-1]
-};
+}
