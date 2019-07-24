@@ -275,7 +275,7 @@ public class XYChart extends Chart {
     }
 
     protected void updateNumericAxis(final Axis axis, final List<DataSet> dataSets) {
-        if (dataSets != null && dataSets.isEmpty()) {
+        if (dataSets == null || dataSets.isEmpty()) {
             return;
         }
         final boolean oldFlag = axis.isAutoNotification();
