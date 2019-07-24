@@ -22,14 +22,19 @@
 package de.gsi.math.filter.iir;
 
 import org.apache.commons.math3.complex.Complex;
+import org.apache.commons.math3.util.FastMath;
 
 /**
  * User facing class which contains all the methods the user uses to create
  * ChebyshevI filters. This done in this way: ChebyshevI chebyshevI = new
  * ChebyshevI(); Then call one of the methods below to create low-,high-,band-,
- * or stopband filters. For example: chebyshevI.bandPass(2,250,50,5,0.5);
+ * or stop-band filters. For example: chebyshevI.bandPass(2,250,50,5,0.5);
  */
 public class ChebyshevI extends Cascade {
+    
+    public ChebyshevI() {
+        super();
+    }
 
     class AnalogLowPass extends LayoutBase {
 
@@ -46,8 +51,8 @@ public class ChebyshevI extends Cascade {
 
             reset();
 
-            final double eps = Math.sqrt(1. / Math.exp(-rippleDb * 0.1 * MathSupplement.doubleLn10) - 1);
-            final double v0 = MathSupplement.asinh(1 / eps) / nPoles;
+            final double eps = Math.sqrt(1. / Math.exp(-rippleDb * 0.1 * Math.log(10)) - 1);
+            final double v0 = FastMath.asinh(1 / eps) / nPoles;
             final double sinh_v0 = -Math.sinh(v0);
             final double cosh_v0 = Math.cosh(v0);
 

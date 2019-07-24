@@ -32,8 +32,6 @@ public class BandStopTransform {
     private double wc2;
     private final double a;
     private final double b;
-    private final double a2;
-    private final double b2;
 
     public BandStopTransform(final double fc, final double fw, final LayoutBase digital, final LayoutBase analog) {
         digital.reset();
@@ -53,8 +51,6 @@ public class BandStopTransform {
 
         a = Math.cos((wc + wc2) * .5) / Math.cos((wc - wc2) * .5);
         b = Math.tan((wc - wc2) * .5);
-        a2 = a * a;
-        b2 = b * b;
 
         final int numPoles = analog.getNumPoles();
         final int pairs = numPoles / 2;
@@ -87,23 +83,25 @@ public class BandStopTransform {
             c = new Complex(1).add(c).divide(new Complex(1).subtract(c)); // bilinear
         }
 
+        final double a2 = a * a;
+        final double b2 = b * b;
+
         Complex u = new Complex(0);
-        u = MathSupplement.addmul(u, 4 * (b2 + a2 - 1), c);
+        u = u.add(c.multiply(4 * (b2 + a2 - 1)));
         u = u.add(8 * (b2 - a2 + 1));
         u = u.multiply(c);
         u = u.add(4 * (a2 + b2 - 1));
         u = u.sqrt();
 
-        Complex v = u.multiply(-.5);
-        v = v.add(a);
-        v = MathSupplement.addmul(v, -a, c);
+        Complex v = u.multiply(-.5).add(a);
+        v = v.add(c.multiply(-a));
 
         u = u.multiply(.5);
         u = u.add(a);
-        u = MathSupplement.addmul(u, -a, c);
+        u = u.add(c.multiply(-a));
 
         Complex d = new Complex(b + 1);
-        d = MathSupplement.addmul(d, b - 1, c);
+        d = d.add(c.multiply(b - 1));
 
         return new ComplexPair(u.divide(d), v.divide(d));
     }

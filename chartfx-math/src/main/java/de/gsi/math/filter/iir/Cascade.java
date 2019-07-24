@@ -32,41 +32,39 @@ import org.apache.commons.math3.complex.ComplexUtils;
 public class Cascade {
 
     // coefficients
-    private Biquad[] m_biquads;
+    private Biquad[] mBiquads;
 
     // the states of the filters
-    private DirectFormAbstract[] m_states;
+    private DirectFormAbstract[] mStates;
 
     // number of biquads in the system
-    private int m_numBiquads;
-
-    private int numPoles;
+    private int mNumBiquads;
 
     public int getNumBiquads() {
-        return m_numBiquads;
+        return mNumBiquads;
     }
 
     public Biquad getBiquad(final int index) {
-        return m_biquads[index];
+        return mBiquads[index];
     }
 
     public Cascade() {
-        m_numBiquads = 0;
-        m_biquads = null;
-        m_states = null;
+        mNumBiquads = 0;
+        mBiquads = null;
+        mStates = null;
     }
 
     public void reset() {
-        for (int i = 0; i < m_numBiquads; i++) {
-            m_states[i].reset();
+        for (int i = 0; i < mNumBiquads; i++) {
+            mStates[i].reset();
         }
     }
 
     public double filter(final double in) {
         double out = in;
-        for (int i = 0; i < m_numBiquads; i++) {
-            if (m_states[i] != null) {
-                out = m_states[i].process1(out, m_biquads[i]);
+        for (int i = 0; i < mNumBiquads; i++) {
+            if (mStates[i] != null) {
+                out = mStates[i].process1(out, mBiquads[i]);
             }
         }
         return out;
@@ -79,14 +77,17 @@ public class Cascade {
         Complex ch = new Complex(1);
         Complex cbot = new Complex(1);
 
-        for (int i = 0; i < m_numBiquads; i++) {
-            final Biquad stage = m_biquads[i];
-            Complex cb = new Complex(1);
+        for (int i = 0; i < mNumBiquads; i++) {
+            final Biquad stage = mBiquads[i];
+
             Complex ct = new Complex(stage.getB0() / stage.getA0());
-            ct = MathSupplement.addmul(ct, stage.getB1() / stage.getA0(), czn1);
-            ct = MathSupplement.addmul(ct, stage.getB2() / stage.getA0(), czn2);
-            cb = MathSupplement.addmul(cb, stage.getA1() / stage.getA0(), czn1);
-            cb = MathSupplement.addmul(cb, stage.getA2() / stage.getA0(), czn2);
+            ct = ct.add(czn1.multiply(stage.getB1() / stage.getA0()));
+            ct = ct.add(czn2.multiply(stage.getB2() / stage.getA0()));
+
+            Complex cb = new Complex(1);
+            cb = cb.add(czn1.multiply(stage.getA1() / stage.getA0()));
+            cb = cb.add(czn2.multiply(stage.getA2() / stage.getA0()));
+
             ch = ch.multiply(ct);
             cbot = cbot.multiply(cb);
         }
@@ -97,34 +98,34 @@ public class Cascade {
     public void applyScale(final double scale) {
         // For higher order filters it might be helpful
         // to spread this factor between all the stages.
-        if (m_biquads.length > 0) {
-            m_biquads[0].applyScale(scale);
+        if (mBiquads.length > 0) {
+            mBiquads[0].applyScale(scale);
         }
     }
 
     public void setLayout(final LayoutBase proto, final int filterTypes) {
-        numPoles = proto.getNumPoles();
-        m_numBiquads = (numPoles + 1) / 2;
-        m_biquads = new Biquad[m_numBiquads];
+        final int numPoles = proto.getNumPoles();
+        mNumBiquads = (numPoles + 1) / 2;
+        mBiquads = new Biquad[mNumBiquads];
         switch (filterTypes) {
         case DirectFormAbstract.DIRECT_FORM_I:
-            m_states = new DirectFormI[m_numBiquads];
-            for (int i = 0; i < m_numBiquads; i++) {
-                m_states[i] = new DirectFormI();
+            mStates = new DirectFormI[mNumBiquads];
+            for (int i = 0; i < mNumBiquads; i++) {
+                mStates[i] = new DirectFormI();
             }
             break;
         case DirectFormAbstract.DIRECT_FORM_II:
         default:
-            m_states = new DirectFormII[m_numBiquads];
-            for (int i = 0; i < m_numBiquads; i++) {
-                m_states[i] = new DirectFormII();
+            mStates = new DirectFormII[mNumBiquads];
+            for (int i = 0; i < mNumBiquads; i++) {
+                mStates[i] = new DirectFormII();
             }
             break;
         }
-        for (int i = 0; i < m_numBiquads; ++i) {
+        for (int i = 0; i < mNumBiquads; ++i) {
             final PoleZeroPair p = proto.getPair(i);
-            m_biquads[i] = new Biquad();
-            m_biquads[i].setPoleZeroPair(p);
+            mBiquads[i] = new Biquad();
+            mBiquads[i].setPoleZeroPair(p);
         }
         applyScale(proto.getNormalGain() / response(proto.getNormalW() / (2 * Math.PI)).abs());
     }
