@@ -12,14 +12,11 @@ package de.gsi.math.spectra;
  * gamma-ray spectra decomposition. Nuclear Instruments and Methods in Physics Research A 401 (1997) 385-408. [3]
  * M.Morhac et al.: Identification of peaks in multidimensional coincidence gamma-ray spectra. Nuclear Instruments and
  * Methods in Research Physics A 443(2000), 108-125. These NIM papers are also available as doc or ps files from:
- * 
  * ftp://root.cern.ch/root/Spectrum.doc
- * 
  * <p>
  * ftp://root.cern.ch/root/SpectrumDec.ps.gz
  * ftp://root.cern.ch/root/SpectrumSrc.ps.gz
  * ftp://root.cern.ch/root/SpectrumBck.ps.gz
- * 
  * The original source documentation as well as examples can be found at http://root.cern.ch/
  */
 
@@ -199,17 +196,20 @@ public class TSpectrum {
      * ONE-DIMENSIONAL PEAK SEARCH FUNCTION This function searches for peaks in source spectrum in hin The number of
      * found peaks and their positions are written into the members fNpeaks and fPositionX. The search is performed in
      * the current histogram range. Function parameters:
+     * 
      * @param hinX histogram x of source spectrum
      * @param hinY histogram Y of source spectrum
      * @param houtX out histogram of source spectrum
      * @param houtY out histogram of source spectrum
      * @param sigma sigma of searched peaks, for details we refer to manual
-     * @param option string options passed to the algorithms 
+     * @param option string options passed to the algorithms
      * @param threshold (default=0.05) peaks with amplitude less than threshold*highest_peak are discarded.
-     *         0 &lt; threshold &lt;1 By default, the background is removed before deconvolution. Specify the option
-     *         "nobackground" to not remove the background. By default the "Markov" chain algorithm is used. Specify the
-     *         option "noMarkov" to disable this algorithm Note that by default the source spectrum is replaced by a new
-     *         spectrum
+     *            0 &lt; threshold &lt;1 By default, the background is removed before deconvolution. Specify the option
+     *            "nobackground" to not remove the background. By default the "Markov" chain algorithm is used. Specify
+     *            the
+     *            option "noMarkov" to disable this algorithm Note that by default the source spectrum is replaced by a
+     *            new
+     *            spectrum
      * @return number of found peaks
      */
     public int Search(double[] hinX, double[] hinY, double[] houtX, double[] houtY, double sigma, String option,
@@ -228,7 +228,7 @@ public class TSpectrum {
             threshold = 0.05;
         }
         String opt = option.toLowerCase();
-        
+
         boolean background = true;
         if (opt.indexOf("nobackground") >= 0) {
             background = false;
@@ -239,55 +239,52 @@ public class TSpectrum {
             markov = false;
             opt = opt.replaceAll("nomarkov", "");
         }
-        if (dimension == 1) {
-            //TODO: update first last selection
-            //      int first = hin.GetXaxis().GetFirst();
-            //      int last  = hin.GetXaxis().GetLast();
-            int first = 0;
-            int last = hinX.length - 1;
-            int size = last - first + 1;
-            double[] source = new double[size];
-            double[] dest = new double[size];
-            for (int i = 0; i < size - 1; i++) {
-                source[i] = hinY[i + first];
-            }
-            if (sigma <= 1) {
-                sigma = size / fMaxPeaks;
-                if (sigma < 1)
-                    sigma = 1;
-                if (sigma > 8)
-                    sigma = 8;
-            }
-
-            int npeaks = SearchHighRes(source, dest, size, sigma, 100 * threshold, background, fgIterations, markov,
-                    fgAverageWindow);
-
-            System.out.println("N peaks is: " + npeaks);
-
-            //      hout.clear();
-            houtX = new double[fPositionX.length];
-            houtY = new double[fPositionY.length];
-            for (int i = 0; i < npeaks; i++) {
-                int bin = first + (int) (fPositionX[i] + 0.5);
-                bin = bin - 1;
-                fPositionX[i] = hinX[bin];
-                fPositionY[i] = hinY[bin];
-                houtX[i] = fPositionX[i];
-                houtY[i] = fPositionY[i];
-            }
-
-            source = null;
-            dest = null;
-
-            if (opt.indexOf("goff") >= 0)
-                return npeaks;
-
-            if (npeaks == 0)
-                return 0;
-
-            return npeaks;
+        //TODO: update first last selection
+        //      int first = hin.GetXaxis().GetFirst();
+        //      int last  = hin.GetXaxis().GetLast();
+        int first = 0;
+        int last = hinX.length - 1;
+        int size = last - first + 1;
+        double[] source = new double[size];
+        double[] dest = new double[size];
+        for (int i = 0; i < size - 1; i++) {
+            source[i] = hinY[i + first];
         }
-        return 0;
+        if (sigma <= 1) {
+            sigma = size / fMaxPeaks;
+            if (sigma < 1)
+                sigma = 1;
+            if (sigma > 8)
+                sigma = 8;
+        }
+
+        int npeaks = SearchHighRes(source, dest, size, sigma, 100 * threshold, background, fgIterations, markov,
+                fgAverageWindow);
+
+        System.out.println("N peaks is: " + npeaks);
+
+        //      hout.clear();
+        houtX = new double[fPositionX.length];
+        houtY = new double[fPositionY.length];
+        for (int i = 0; i < npeaks; i++) {
+            int bin = first + (int) (fPositionX[i] + 0.5);
+            bin = bin - 1;
+            fPositionX[i] = hinX[bin];
+            fPositionY[i] = hinY[bin];
+            houtX[i] = fPositionX[i];
+            houtY[i] = fPositionY[i];
+        }
+
+        source = null;
+        dest = null;
+
+        if (opt.indexOf("goff") >= 0)
+            return npeaks;
+
+        if (npeaks == 0)
+            return 0;
+
+        return npeaks;
     }
 
     /**
@@ -1374,7 +1371,7 @@ public class TSpectrum {
             return "Number of iterations must be positive";
         double[] working_space = new double[ssizex * ssizey + 2 * ssizey * ssizey + 4 * ssizex];
 
-        /*read response matrix*/
+        /* read response matrix */
         for (j = 0; j < ssizey && lhx != -1; j++) {
             area = 0;
             lhx = -1;
@@ -1395,11 +1392,11 @@ public class TSpectrum {
         if (lhx == -1)
             return ("ZERO COLUMN IN RESPONSE MATRIX");
 
-        /*read source vector*/
+        /* read source vector */
         for (i = 0; i < ssizex; i++)
             working_space[ssizex * ssizey + 2 * ssizey * ssizey + 2 * ssizex + i] = source[i];
 
-        /*create matrix at*a + at*y */
+        /* create matrix at*a + at*y */
         for (i = 0; i < ssizey; i++) {
             for (j = 0; j < ssizey; j++) {
                 lda = 0;
@@ -1419,12 +1416,12 @@ public class TSpectrum {
             working_space[ssizex * ssizey + 2 * ssizey * ssizey + 3 * ssizex + i] = lda;
         }
 
-        /*move vector at*y*/
+        /* move vector at*y */
         for (i = 0; i < ssizey; i++)
             working_space[ssizex * ssizey + 2 * ssizey * ssizey + 2 * ssizex + i] = working_space[ssizex * ssizey
                     + 2 * ssizey * ssizey + 3 * ssizex + i];
 
-        /*create matrix at*a*at*a + vector at*a*at*y */
+        /* create matrix at*a*at*a + vector at*a*at*y */
         for (i = 0; i < ssizey; i++) {
             for (j = 0; j < ssizey; j++) {
                 lda = 0;
@@ -1444,12 +1441,12 @@ public class TSpectrum {
             working_space[ssizex * ssizey + 2 * ssizey * ssizey + 3 * ssizex + i] = lda;
         }
 
-        /*move at*a*at*y*/
+        /* move at*a*at*y */
         for (i = 0; i < ssizey; i++)
             working_space[ssizex * ssizey + 2 * ssizey * ssizey + 2 * ssizex + i] = working_space[ssizex * ssizey
                     + 2 * ssizey * ssizey + 3 * ssizex + i];
 
-        /*initialization in resulting vector */
+        /* initialization in resulting vector */
         for (i = 0; i < ssizey; i++)
             working_space[ssizex * ssizey + 2 * ssizey * ssizey + i] = 1;
 
@@ -1485,7 +1482,7 @@ public class TSpectrum {
             }
         }
 
-        /*write back resulting spectrum*/
+        /* write back resulting spectrum */
         for (i = 0; i < ssizex; i++) {
             if (i < ssizey)
                 source[i] = working_space[ssizex * ssizey + 2 * ssizey * ssizey + i];
@@ -1979,17 +1976,20 @@ public class TSpectrum {
 
     /**
      * static function, interface to TSpectrum::Search
+     * 
      * @param histX histogram x of source spectrum
      * @param histY histogram Y of source spectrum
      * @param houtX out histogram of source spectrum
      * @param houtY out histogram of source spectrum
      * @param sigma sigma of searched peaks, for details we refer to manual
-     * @param option string options passed to the algorithms 
+     * @param option string options passed to the algorithms
      * @param threshold (default=0.05) peaks with amplitude less than threshold*highest_peak are discarded.
-     *         0<threshold<1 By default, the background is removed before deconvolution. Specify the option
-     *         "nobackground" to not remove the background. By default the "Markov" chain algorithm is used. Specify the
-     *         option "noMarkov" to disable this algorithm Note that by default the source spectrum is replaced by a new
-     *         spectrum
+     *            0<threshold<1 By default, the background is removed before deconvolution. Specify the option
+     *            "nobackground" to not remove the background. By default the "Markov" chain algorithm is used. Specify
+     *            the
+     *            option "noMarkov" to disable this algorithm Note that by default the source spectrum is replaced by a
+     *            new
+     *            spectrum
      * @return number of found peaks
      */
     int StaticSearch(double[] histX, double[] histY, double[] houtX, double[] houtY, double sigma, String option,
