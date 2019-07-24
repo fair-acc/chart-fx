@@ -32,32 +32,36 @@ import org.apache.commons.math3.complex.Complex;
  */
 public class Bessel extends Cascade {
 
-    // returns fact(n) = n!
-    private double fact(final int n) {
-        if (n == 0) {
-            return 1;
-        }
-
-        double y = n;
-        for (double m = n - 1; m > 0; m--) {
-            y = y * m;
-        }
-
-        return y;
+    public Bessel() {
+        super();
     }
 
     class AnalogLowPass extends LayoutBase {
 
         int degree;
 
-        double[] m_a;
-        Complex[] m_root;
+        double[] mA;
+        Complex[] mRoot;
 
         // returns the k-th zero based coefficient of the reverse bessel
         // polynomial of degree n
         private double reversebessel(final int k, final int n) {
-            final double result = fact(2 * n - k) / (fact(n - k) * fact(k) * Math.pow(2., n - k));
-            return result;
+            final int diff = n - k;
+            return factorial(2 * n - k) / (factorial(diff) * factorial(k) * Math.pow(2.0, diff));
+        }
+
+        // returns fact(n) = n!
+        private double factorial(final int n) {
+            if (n == 0) {
+                return 1;
+            }
+
+            double y = n;
+            for (double m = n - 1.0; m > 0; m--) {
+                y = y * m;
+            }
+
+            return y;
         }
 
         // ------------------------------------------------------------------------------
@@ -65,8 +69,8 @@ public class Bessel extends Cascade {
         public AnalogLowPass(final int _degree) {
             super(_degree);
             degree = _degree;
-            m_a = new double[degree + 1]; // input coefficients (degree+1 elements)
-            m_root = new Complex[degree]; // array of roots (degree elements)
+            mA = new double[degree + 1]; // input coefficients (degree+1 elements)
+            mRoot = new Complex[degree]; // array of roots (degree elements)
             setNormal(0, 1);
         }
 
@@ -74,22 +78,22 @@ public class Bessel extends Cascade {
             reset();
 
             for (int i = 0; i < degree + 1; ++i) {
-                m_a[i] = reversebessel(i, degree);
+                mA[i] = reversebessel(i, degree);
             }
 
             final LaguerreSolver laguerreSolver = new LaguerreSolver();
 
-            m_root = laguerreSolver.solveAllComplex(m_a, 0.0);
+            mRoot = laguerreSolver.solveAllComplex(mA, 0.0);
 
             final Complex inf = Complex.INF;
             final int pairs = degree / 2;
             for (int i = 0; i < pairs; ++i) {
-                final Complex c = m_root[i];
+                final Complex c = mRoot[i];
                 addPoleZeroConjugatePairs(c, inf);
             }
 
             if ((degree & 1) == 1) {
-                add(new Complex(m_root[pairs].getReal()), inf);
+                add(new Complex(mRoot[pairs].getReal()), inf);
             }
         }
 

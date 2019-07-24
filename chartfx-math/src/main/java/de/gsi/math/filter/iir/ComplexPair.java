@@ -54,12 +54,11 @@ public class ComplexPair {
     boolean isMatchedPair() {
         if (first.getImaginary() != 0) {
             return second.equals(first.conjugate());
-        } else {
-            return second.getImaginary() == 0 && second.getReal() != 0 && first.getReal() != 0;
         }
+        return second.getImaginary() == 0 && second.getReal() != 0 && first.getReal() != 0;
     }
 
-    boolean is_nan() {
+    boolean isNaN() {
         return first.isNaN() || second.isNaN();
     }
-};
+}

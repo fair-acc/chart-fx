@@ -29,35 +29,35 @@ import org.apache.commons.math3.complex.ComplexUtils;
  */
 public class Biquad {
 
-    public double m_a0;
-    public double m_a1;
-    public double m_a2;
-    public double m_b1;
-    public double m_b2;
-    public double m_b0;
+    public double mA0;
+    public double mA1;
+    public double mA2;
+    public double mB1;
+    public double mB2;
+    public double mB0;
 
     public double getA0() {
-        return m_a0;
+        return mA0;
     }
 
     public double getA1() {
-        return m_a1 * m_a0;
+        return mA1 * mA0;
     }
 
     public double getA2() {
-        return m_a2 * m_a0;
+        return mA2 * mA0;
     }
 
     public double getB0() {
-        return m_b0 * m_a0;
+        return mB0 * mA0;
     }
 
     public double getB1() {
-        return m_b1 * m_a0;
+        return mB1 * mA0;
     }
 
     public double getB2() {
-        return m_b2 * m_a0;
+        return mB2 * mA0;
     }
 
     public Complex response(final double normalizedFrequency) {
@@ -75,11 +75,14 @@ public class Biquad {
         Complex cbot = new Complex(1);
 
         Complex ct = new Complex(b0 / a0);
+
+        ct = ct.add(czn1.multiply(b1 / a0));
+        ct = ct.add(czn2.multiply(b2 / a0));
+
         Complex cb = new Complex(1);
-        ct = MathSupplement.addmul(ct, b1 / a0, czn1);
-        ct = MathSupplement.addmul(ct, b2 / a0, czn2);
-        cb = MathSupplement.addmul(cb, a1 / a0, czn1);
-        cb = MathSupplement.addmul(cb, a2 / a0, czn2);
+        cb = cb.add(czn1.multiply(a1 / a0));
+        cb = cb.add(czn2.multiply(a2 / a0));
+
         ch = ch.multiply(ct);
         cbot = cbot.multiply(cb);
 
@@ -88,12 +91,12 @@ public class Biquad {
 
     public void setCoefficients(final double a0, final double a1, final double a2, final double b0, final double b1,
             final double b2) {
-        m_a0 = a0;
-        m_a1 = a1 / a0;
-        m_a2 = a2 / a0;
-        m_b0 = b0 / a0;
-        m_b1 = b1 / a0;
-        m_b2 = b2 / a0;
+        mA0 = a0;
+        mA1 = a1 / a0;
+        mA2 = a2 / a0;
+        mB0 = b0 / a0;
+        mB1 = b1 / a0;
+        mB2 = b2 / a0;
     }
 
     public void setOnePole(final Complex pole, final Complex zero) {
@@ -148,9 +151,9 @@ public class Biquad {
     }
 
     public void applyScale(final double scale) {
-        m_b0 *= scale;
-        m_b1 *= scale;
-        m_b2 *= scale;
+        mB0 *= scale;
+        mB1 *= scale;
+        mB2 *= scale;
     }
 
     public void setPoleZeroPair(final PoleZeroPair pair) {
