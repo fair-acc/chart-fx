@@ -448,7 +448,9 @@ public final class SimpleDataSetEstimators { // NOPMD name is as is (ie. no Help
                 }
             }
         }
-
+        if ((countLow + countHigh) == 0) {
+            return Double.NaN;
+        }
         return (double) countHigh / (double) (countLow + countHigh);
     }
 
