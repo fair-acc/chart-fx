@@ -151,3 +151,4 @@ $RECYCLE.BIN/
 *.lnk
 
 # End of https://www.gitignore.io/api/vim,java,linux,maven,windows,eclipse
+.flattened-pom.xml
