@@ -32,10 +32,6 @@ public class BandPassTransform {
     private double wc;
     private final double a;
     private final double b;
-    private final double a2;
-    private final double b2;
-    private final double ab;
-    private final double ab2;
 
     public BandPassTransform(final double fc, final double fw, final LayoutBase digital, final LayoutBase analog) {
 
@@ -57,10 +53,6 @@ public class BandPassTransform {
 
         a = Math.cos((wc + wc2) * 0.5) / Math.cos((wc - wc2) * 0.5);
         b = 1 / Math.tan((wc - wc2) * 0.5);
-        a2 = a * a;
-        b2 = b * b;
-        ab = a * b;
-        ab2 = 2 * ab;
 
         final int numPoles = analog.getNumPoles();
         final int pairs = numPoles / 2;
@@ -106,7 +98,7 @@ public class BandPassTransform {
 
         v = v.add(c.multiply(ab_2)).add(ab_2);
 
-        Complex d = new Complex(0).add(c.multiply( 2 * (b - 1))).add(2 * (1 + b));
+        Complex d = new Complex(0).add(c.multiply(2 * (b - 1))).add(2 * (1 + b));
 
         return new ComplexPair(u.divide(d), v.divide(d));
     }

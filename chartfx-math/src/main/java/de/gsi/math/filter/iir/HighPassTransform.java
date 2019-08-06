@@ -24,7 +24,7 @@ package de.gsi.math.filter.iir;
 import org.apache.commons.math3.complex.Complex;
 
 /**
- * Transforms from an analogue lowpass filter to a digital highpass filter
+ * Transforms from an analogue low-pass filter to a digital high-pass filter
  */
 public class HighPassTransform {
 
@@ -33,7 +33,7 @@ public class HighPassTransform {
     public HighPassTransform(final double fc, final LayoutBase digital, final LayoutBase analog) {
         digital.reset();
 
-        // prewarp
+        // pre-warp
         f = 1. / Math.tan(Math.PI * fc);
 
         final int numPoles = analog.getNumPoles();

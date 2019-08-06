@@ -129,5 +129,4 @@ public class Cascade {
         }
         applyScale(proto.getNormalGain() / response(proto.getNormalW() / (2 * Math.PI)).abs());
     }
-
-};
+}

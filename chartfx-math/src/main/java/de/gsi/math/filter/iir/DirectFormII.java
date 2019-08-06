@@ -29,7 +29,7 @@ package de.gsi.math.filter.iir;
 public class DirectFormII extends DirectFormAbstract {
     public double mV1; // v[-1]
     public double mV2; // v[-2]
-    
+
     public DirectFormII() {
         reset();
     }

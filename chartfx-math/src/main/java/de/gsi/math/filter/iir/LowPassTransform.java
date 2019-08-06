@@ -47,7 +47,7 @@ public class LowPassTransform {
     public LowPassTransform(final double fc, final LayoutBase digital, final LayoutBase analog) {
         digital.reset();
 
-        // prewarp
+        // pre-warp
         f = Math.tan(Math.PI * fc);
 
         final int numPoles = analog.getNumPoles();
