@@ -27,6 +27,7 @@ import org.apache.commons.math3.complex.Complex;
  * PoleZeroPair with gain factor
  */
 public class BiquadPoleState extends PoleZeroPair {
+    public double gain = 1.0;
 
     public BiquadPoleState(final Complex p, final Complex z) {
         super(p, z);
@@ -35,7 +36,4 @@ public class BiquadPoleState extends PoleZeroPair {
     public BiquadPoleState(final Complex p1, final Complex z1, final Complex p2, final Complex z2) {
         super(p1, z1, p2, z2);
     }
-
-    double gain;
-
 }
