@@ -1,7 +1,6 @@
 package de.gsi.dataset.spi;
 
 import de.gsi.dataset.DataSetError;
-import de.gsi.dataset.event.AddedDataEvent;
 import de.gsi.dataset.event.InvalidatedEvent;
 import de.gsi.dataset.utils.AssertUtils;
 import de.gsi.dataset.utils.CircularBuffer;
@@ -168,6 +167,7 @@ public class CircularDoubleErrorDataSet extends AbstractErrorDataSet<DoubleError
 
     /**
      * resets all data
+     * 
      * @return itself (fluent design)
      */
     public CircularDoubleErrorDataSet reset() {

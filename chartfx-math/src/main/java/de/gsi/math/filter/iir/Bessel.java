@@ -32,16 +32,11 @@ import org.apache.commons.math3.complex.Complex;
  */
 public class Bessel extends Cascade {
 
-    public Bessel() {
-        super();
-    }
-
     class AnalogLowPass extends LayoutBase {
 
-        int degree;
-
-        double[] mA;
-        Complex[] mRoot;
+        private int degree;
+        private double[] mA;
+        private Complex[] mRoot;
 
         // returns the k-th zero based coefficient of the reverse bessel
         // polynomial of degree n
@@ -102,15 +97,15 @@ public class Bessel extends Cascade {
     private void setupLowPass(final int order, final double sampleRate, final double cutoffFrequency,
             final int directFormType) {
 
-        final AnalogLowPass m_analogProto = new AnalogLowPass(order);
+        final AnalogLowPass analogProto = new AnalogLowPass(order);
 
-        m_analogProto.design();
+        analogProto.design();
 
-        final LayoutBase m_digitalProto = new LayoutBase(order);
+        final LayoutBase digitalProto = new LayoutBase(order);
 
-        new LowPassTransform(cutoffFrequency / sampleRate, m_digitalProto, m_analogProto);
+        new LowPassTransform(cutoffFrequency / sampleRate, digitalProto, analogProto);
 
-        setLayout(m_digitalProto, directFormType);
+        setLayout(digitalProto, directFormType);
     }
 
     /**

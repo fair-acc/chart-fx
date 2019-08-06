@@ -27,38 +27,38 @@ import org.apache.commons.math3.complex.Complex;
  * A complex pair
  */
 public class ComplexPair {
-
     public Complex first;
     public Complex second;
 
-    ComplexPair(final Complex c1, final Complex c2) {
+    public ComplexPair(final Complex c1, final Complex c2) {
         first = c1;
         second = c2;
     }
 
-    ComplexPair(final Complex c1) {
+    public ComplexPair(final Complex c1) {
         first = c1;
         second = new Complex(0, 0);
     }
 
-    boolean isConjugate() {
+    public boolean isConjugate() {
         return second.equals(first.conjugate());
     }
 
-    boolean isReal() {
+    public boolean isReal() {
         return first.getImaginary() == 0 && second.getImaginary() == 0;
     }
 
-    // Returns true if this is either a conjugate pair,
-    // or a pair of reals where neither is zero.
-    boolean isMatchedPair() {
+    /**
+     * @return true if this is either a conjugate pair, or a pair of reals where neither is zero.
+     */
+    public boolean isMatchedPair() {
         if (first.getImaginary() != 0) {
             return second.equals(first.conjugate());
         }
         return second.getImaginary() == 0 && second.getReal() != 0 && first.getReal() != 0;
     }
 
-    boolean isNaN() {
+    public boolean isNaN() {
         return first.isNaN() || second.isNaN();
     }
 }
