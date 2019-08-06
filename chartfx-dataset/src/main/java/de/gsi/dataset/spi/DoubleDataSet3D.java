@@ -2,6 +2,7 @@ package de.gsi.dataset.spi;
 
 import de.gsi.dataset.event.RemovedDataEvent;
 import de.gsi.dataset.utils.AssertUtils;
+import java.util.Arrays;
 
 /**
  * Implementation of a AbstractDataSet3D backed by arrays. The z-values are
@@ -226,10 +227,20 @@ public class DoubleDataSet3D extends AbstractDataSet3D<DoubleDataSet3D> {
     public double getX(final int i) {
         return xValues[i];
     }
+    
+    @Override
+    public double[] getXValues() {
+      return Arrays.copyOf(xValues,xValues.length);
+    }
 
     @Override
     public double getY(final int i) {
         return yValues[i];
+    }
+
+    @Override
+    public double[] getYValues() {
+      return Arrays.copyOf(yValues,yValues.length);
     }
 
     @Override
