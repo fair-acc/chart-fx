@@ -485,6 +485,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
                 newAxisRange = getAxisRange();
             }
 
+            setTickUnit(computePreferredTickUnit(getLength()));
             recomputeTickMarks(newAxisRange);
             // mark all done
             oldAxisLength = axisLength;
@@ -734,7 +735,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         final double tickMarkLength = isTickMarkVisible() && getTickLength() > 0 ? getTickLength() : 0;
         // calculate label height
         final double labelHeight = axisLabel.getText() == null || axisLabel.getText().isEmpty() ? 0
-                : axisLabel.prefHeight(-1) + 2*getAxisLabelGap();
+                : axisLabel.prefHeight(-1) + 2 * getAxisLabelGap();
         final double shiftedLabels = getOverlapPolicy() == AxisLabelOverlapPolicy.SHIFT_ALT && isLabelOverlapping()
                 || getOverlapPolicy() == AxisLabelOverlapPolicy.FORCED_SHIFT_ALT ? labelHeight : 0.0;
         return tickMarkLength + maxLabelHeightLocal + labelHeight + shiftedLabels;
@@ -777,7 +778,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         final double tickMarkLength = isTickMarkVisible() && getTickLength() > 0 ? getTickLength() : 0;
         // calculate label height
         final double labelHeight = axisLabel.getText() == null || axisLabel.getText().isEmpty() ? 0
-                : axisLabel.prefHeight(-1) + 2*getAxisLabelGap();
+                : axisLabel.prefHeight(-1) + 2 * getAxisLabelGap();
 
         final double shiftedLabels = getOverlapPolicy() == AxisLabelOverlapPolicy.SHIFT_ALT && isLabelOverlapping()
                 || getOverlapPolicy() == AxisLabelOverlapPolicy.FORCED_SHIFT_ALT ? labelHeight : 0.0;
@@ -1532,8 +1533,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         if (0 < getLowerBound() || 0 > getUpperBound()) {
             return Double.NaN;
         }
-        // noinspection unchecked
-        return getDisplayPosition(Double.valueOf(0));
+        return getDisplayPosition(0.0);
     }
 
     @Override
