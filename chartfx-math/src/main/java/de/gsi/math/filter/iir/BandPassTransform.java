@@ -24,15 +24,14 @@ package de.gsi.math.filter.iir;
 import org.apache.commons.math3.complex.Complex;
 
 /**
- * Transforms from an analogue bandpass filter to a digital bandstop filter
+ * Transforms from an analogue bandpass filter to a digital band-stop filter
  */
 public class BandPassTransform {
 
     private double wc2;
     private double wc;
-    private final double a, b;
-    private final double a2, b2;
-    private final double ab, ab_2;
+    private final double a;
+    private final double b;
 
     public BandPassTransform(final double fc, final double fw, final LayoutBase digital, final LayoutBase analog) {
 
@@ -54,10 +53,6 @@ public class BandPassTransform {
 
         a = Math.cos((wc + wc2) * 0.5) / Math.cos((wc - wc2) * 0.5);
         b = 1 / Math.tan((wc - wc2) * 0.5);
-        a2 = a * a;
-        b2 = b * b;
-        ab = a * b;
-        ab_2 = 2 * ab;
 
         final int numPoles = analog.getNumPoles();
         final int pairs = numPoles / 2;
@@ -89,22 +84,21 @@ public class BandPassTransform {
 
         c = new Complex(1).add(c).divide(new Complex(1).subtract(c)); // bilinear
 
-        Complex v = new Complex(0);
-        v = MathSupplement.addmul(v, 4 * (b2 * (a2 - 1) + 1), c);
+        final double a2 = a * a;
+        final double b2 = b * b;
+        final double ab = a * b;
+        final double ab_2 = 2 * ab;
+        Complex v = new Complex(0).add(c.multiply(4 * (b2 * (a2 - 1) + 1)));
         v = v.add(8 * (b2 * (a2 - 1) - 1));
         v = v.multiply(c);
         v = v.add(4 * (b2 * (a2 - 1) + 1));
         v = v.sqrt();
 
-        Complex u = v.multiply(-1);
-        u = MathSupplement.addmul(u, ab_2, c);
-        u = u.add(ab_2);
+        Complex u = v.multiply(-1).add(c.multiply(ab_2)).add(ab_2);
 
-        v = MathSupplement.addmul(v, ab_2, c);
-        v = v.add(ab_2);
+        v = v.add(c.multiply(ab_2)).add(ab_2);
 
-        Complex d = new Complex(0);
-        d = MathSupplement.addmul(d, 2 * (b - 1), c).add(2 * (1 + b));
+        Complex d = new Complex(0).add(c.multiply(2 * (b - 1))).add(2 * (1 + b));
 
         return new ComplexPair(u.divide(d), v.divide(d));
     }

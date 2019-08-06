@@ -38,4 +38,4 @@ public abstract class DirectFormAbstract {
     public static final int DIRECT_FORM_I = 0;
     public static final int DIRECT_FORM_II = 1;
 
-};
+}

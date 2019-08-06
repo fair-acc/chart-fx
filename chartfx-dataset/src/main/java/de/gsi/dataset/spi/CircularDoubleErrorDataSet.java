@@ -135,29 +135,29 @@ public class CircularDoubleErrorDataSet extends AbstractErrorDataSet<DoubleError
      * </p>
      * Note: The method copies values from specified double arrays.
      *
-     * @param xValues the new x coordinates
-     * @param yValues the new y coordinates
-     * @param yErrorsNeg the +dy errors
-     * @param yErrorsPos the -dy errors
+     * @param xVals the new x coordinates
+     * @param yVals the new y coordinates
+     * @param yErrNeg the +dy errors
+     * @param yErrPos the -dy errors
      * @return itself
      */
-    public CircularDoubleErrorDataSet add(final double[] xValues, final double[] yValues, final double[] yErrorsNeg,
-            final double[] yErrorsPos) {
+    public CircularDoubleErrorDataSet add(final double[] xVals, final double[] yVals, final double[] yErrNeg,
+            final double[] yErrPos) {
         lock();
-        AssertUtils.notNull("X coordinates", xValues);
-        AssertUtils.notNull("Y coordinates", yValues);
-        AssertUtils.notNull("Y error neg", yErrorsNeg);
-        AssertUtils.notNull("Y error pos", yErrorsPos);
-        AssertUtils.equalDoubleArrays(xValues, yValues);
-        AssertUtils.equalDoubleArrays(xValues, yErrorsNeg);
-        AssertUtils.equalDoubleArrays(xValues, yErrorsPos);
+        AssertUtils.notNull("X coordinates", xVals);
+        AssertUtils.notNull("Y coordinates", yVals);
+        AssertUtils.notNull("Y error neg", yErrNeg);
+        AssertUtils.notNull("Y error pos", yErrPos);
+        AssertUtils.equalDoubleArrays(xVals, yVals);
+        AssertUtils.equalDoubleArrays(xVals, yErrNeg);
+        AssertUtils.equalDoubleArrays(xVals, yErrPos);
 
-        this.xValues.put(xValues, xValues.length);
-        this.yValues.put(yValues, yValues.length);
-        this.yErrorsNeg.put(yErrorsNeg, yErrorsNeg.length);
-        this.yErrorsPos.put(yErrorsPos, yErrorsPos.length);
-        dataTag.put(new String[yErrorsPos.length], yErrorsPos.length);
-        dataStyles.put(new String[yErrorsPos.length], yErrorsPos.length);
+        this.xValues.put(xVals, xVals.length);
+        this.yValues.put(yVals, yVals.length);
+        this.yErrorsNeg.put(yErrNeg, yErrNeg.length);
+        this.yErrorsPos.put(yErrPos, yErrPos.length);
+        dataTag.put(new String[yErrPos.length], yErrPos.length);
+        dataStyles.put(new String[yErrPos.length], yErrPos.length);
 
         computeLimits();
         unlock();
@@ -167,10 +167,11 @@ public class CircularDoubleErrorDataSet extends AbstractErrorDataSet<DoubleError
 
     /**
      * resets all data
+     * 
      * @return itself (fluent design)
      */
     public CircularDoubleErrorDataSet reset() {
-
+        lock();
         xValues.reset();
         yValues.reset();
         yErrorsNeg.reset();
@@ -180,6 +181,8 @@ public class CircularDoubleErrorDataSet extends AbstractErrorDataSet<DoubleError
         xRange.empty();
         yRange.empty();
 
+        unlock();
+        fireInvalidated(new InvalidatedEvent(this));
         return this;
     }
 

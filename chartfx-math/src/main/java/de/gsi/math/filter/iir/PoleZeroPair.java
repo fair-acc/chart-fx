@@ -27,7 +27,6 @@ import org.apache.commons.math3.complex.Complex;
  * It's written on the tin.
  */
 public class PoleZeroPair {
-
     public ComplexPair poles;
     public ComplexPair zeros;
 
@@ -47,7 +46,7 @@ public class PoleZeroPair {
         return poles.second.equals(new Complex(0, 0)) && zeros.second.equals(new Complex(0, 0));
     }
 
-    public boolean is_nan() {
-        return poles.is_nan() || zeros.is_nan();
+    public boolean isNaN() {
+        return poles.isNaN() || zeros.isNaN();
     }
-};
+}

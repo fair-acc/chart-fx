@@ -266,20 +266,20 @@ public class EEMD {
 
             for (int j = 0; j < nsamples; j++) {
 
-                if (j >= 1 && j < nsamples) {
+                if (j < nsamples) {
 
-                    int y_index = (int) (frequency_filtered[j] * nsamples);
+                    int yIndex = (int) (frequency_filtered[j] * nsamples);
 
-                    if (y_index < 0) {
-                        y_index = 0;
-                    } else if (y_index >= nsamples / 2) {
-                        y_index = nsamples / 2 - 1;
+                    if (yIndex < 0) {
+                        yIndex = 0;
+                    } else if (yIndex >= nsamples / 2) {
+                        yIndex = nsamples / 2 - 1;
                     }
 
                     // ret[j][y_index] = Math.log(amplitude);
-                    ret[y_index][j] = 10 * Math.log(amplitude_filtered[j]);
-                    if (ret[y_index][j] < -10 || ret[y_index][j] > 10) {
-                        ret[y_index][j] = Double.NaN;
+                    ret[yIndex][j] = 10 * Math.log(amplitude_filtered[j]);
+                    if (ret[yIndex][j] < -10 || ret[yIndex][j] > 10) {
+                        ret[yIndex][j] = Double.NaN;
                         // ret[j][y_index] = TMath.Sqr(amplitude);
                     }
                 }

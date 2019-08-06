@@ -103,8 +103,6 @@ public class DoubleFFT_3D {
             }
             if (2 * columns == 4) {
                 nt >>= 1;
-            } else if (2 * columns < 4) {
-                nt >>= 2;
             }
             t = new double[nt];
         }

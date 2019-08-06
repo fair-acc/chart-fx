@@ -27,32 +27,30 @@ package de.gsi.math.filter.iir;
  */
 
 public class DirectFormII extends DirectFormAbstract {
+    public double mV1; // v[-1]
+    public double mV2; // v[-2]
 
     public DirectFormII() {
         reset();
     }
 
     @Override
-    public void reset() {
-        m_v1 = 0;
-        m_v2 = 0;
+    public final void reset() {
+        mV1 = 0;
+        mV2 = 0;
     }
 
     @Override
     public double process1(final double in, final Biquad s) {
         if (s != null) {
-            final double w = in - s.m_a1 * m_v1 - s.m_a2 * m_v2;
-            final double out = s.m_b0 * w + s.m_b1 * m_v1 + s.m_b2 * m_v2;
+            final double w = in - s.mA1 * mV1 - s.mA2 * mV2;
+            final double out = s.mB0 * w + s.mB1 * mV1 + s.mB2 * mV2;
 
-            m_v2 = m_v1;
-            m_v1 = w;
+            mV2 = mV1;
+            mV1 = w;
 
             return out;
-        } else {
-            return in;
         }
+        return in;
     }
-
-    double m_v1; // v[-1]
-    double m_v2; // v[-2]
 }
