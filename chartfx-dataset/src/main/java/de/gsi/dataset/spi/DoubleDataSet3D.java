@@ -248,4 +248,8 @@ public class DoubleDataSet3D extends AbstractDataSet3D<DoubleDataSet3D> {
         return null;
     }
 
+    public double[][] getZValues() {
+      return zValues;
+    }
+    
 }
