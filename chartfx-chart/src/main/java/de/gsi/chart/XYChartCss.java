@@ -13,6 +13,9 @@ public final class XYChartCss { // NOPMD decide not to rename it for the time be
     public static final String DATASET_STROKE_COLOR = "strokeColor";
     public static final String DATASET_FILL_COLOR = "fillColor";
 
+    public static final String MARKER_TYPE = "markerType";
+    public static final String MARKER_SIZE = "markerSize";
+    public static final String MARKER_COLOR = "markerColor";
     public static final String STROKE_COLOR = "strokeColor";
     public static final String STROKE_WIDTH = "strokeWidth";
     public static final String STROKE_DASH_PATTERN = "strokeDashPattern";

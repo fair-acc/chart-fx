@@ -159,11 +159,11 @@ mvn exec:java -Dproject.mainClass=de.gsi.chart.samples.RunChartSamples
 
 <tr>
 <td colspan=2><figure><img src="docs/pics/ContourChartSample1.png" alt="ContourChartSample1" width=600/><figcaption><a href="chartfx-samples/src/main/java/de/gsi/chart/samples/ContourChartSample.java">ContourChartSample.java</a></figcaption></figure></td>
-<td></td>
+<td><figure><img src="docs/pics/ScatterAndBubbleRendererSample1.png" alt="ScatterAndBubbleRendererSample" width=300/><figcaption><a href="chartfx-samples/src/main/java/de/gsi/chart/samples/ScatterAndBubbleRendererSample.java">ScatterAndBubbleRendererSample.java</a></figcaption></figure></td>
 </tr>
 <tr>
 <td colspan=2><figure><img src="docs/pics/ContourChartSample2.png" alt="ContourChartSample" width=600/><figcaption><a href="chartfx-samples/src/main/java/de/gsi/chart/samples/ContourChartSample.java">ContourChartSample.java</a></figcaption></figure></td>
-<td></td>
+<td><figure><img src="docs/pics/ScatterAndBubbleRendererSample2.png" alt="ScatterAndBubbleRendererSample" width=300/><figcaption><a href="chartfx-samples/src/main/java/de/gsi/chart/samples/ScatterAndBubbleRendererSample.java">ScatterAndBubbleRendererSample.java</a></figcaption></figure></td>
 </tr>
 
 <tr>

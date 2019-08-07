@@ -1,5 +1,6 @@
 package de.gsi.chart.utils;
 
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -37,7 +38,7 @@ public final class StyleParser {
         if (style == null) {
             return retVal;
         }
-        final String[] keyVals = style.toLowerCase().replaceAll("\\s+", "").split("[;,]");
+        final String[] keyVals = style.toLowerCase(Locale.UK).replaceAll("\\s+", "").split("[;,]");
         for (final String keyVal : keyVals) {
             final String[] parts = keyVal.split("[=:]", 2);
             if (parts == null || parts[0] == null || parts.length <= 1) {
@@ -52,9 +53,9 @@ public final class StyleParser {
 
     public static String mapToString(final Map<String, String> map) {
         String ret = "";
-        for (Map.Entry<String, String> entry : map.entrySet()) {
-            String key = entry.getKey();
-			final String value = entry.getValue();
+        for (final Map.Entry<String, String> entry : map.entrySet()) {
+            final String key = entry.getKey();
+            final String value = entry.getValue();
             if (value != null) {
                 ret = ret.concat(key).concat("=").concat(value).concat(";");
             }
@@ -69,7 +70,7 @@ public final class StyleParser {
 
         final Map<String, String> map = StyleParser.splitIntoMap(style);
 
-        return map.get(key.toLowerCase());
+        return map.get(key.toLowerCase(Locale.UK));
     }
 
     public static Color getColorPropertyValue(final String style, final String key) {
@@ -78,7 +79,7 @@ public final class StyleParser {
         }
 
         final Map<String, String> map = StyleParser.splitIntoMap(style);
-        final String value = map.get(key.toLowerCase());
+        final String value = map.get(key.toLowerCase(Locale.UK));
         if (value == null) {
             return null;
         }
@@ -86,7 +87,10 @@ public final class StyleParser {
         try {
             return Color.web(value);
         } catch (final IllegalArgumentException ex) {
-            StyleParser.LOGGER.error("could not parse color description for '" + key + "'='" + value + "' returning null", ex);
+            if (LOGGER.isErrorEnabled()) {
+                StyleParser.LOGGER.error(
+                        "could not parse color description for '" + key + "'='" + value + "' returning null", ex);
+            }
             return null;
         }
     }
@@ -97,7 +101,7 @@ public final class StyleParser {
         }
 
         final Map<String, String> map = StyleParser.splitIntoMap(style);
-        final String value = map.get(key.toLowerCase());
+        final String value = map.get(key.toLowerCase(Locale.UK));
         if (value == null) {
             return null;
         }
@@ -105,7 +109,10 @@ public final class StyleParser {
         try {
             return Integer.decode(value);
         } catch (final NumberFormatException ex) {
-            StyleParser.LOGGER.error("could not parse integer description for '" + key + "'='" + value + "' returning null", ex);
+            if (LOGGER.isErrorEnabled()) {
+                StyleParser.LOGGER.error(
+                        "could not parse integer description for '" + key + "'='" + value + "' returning null", ex);
+            }
             return null;
         }
     }
@@ -116,7 +123,7 @@ public final class StyleParser {
         }
 
         final Map<String, String> map = StyleParser.splitIntoMap(style);
-        final String value = map.get(key.toLowerCase());
+        final String value = map.get(key.toLowerCase(Locale.UK));
         if (value == null) {
             return null;
         }
@@ -124,7 +131,10 @@ public final class StyleParser {
         try {
             return Double.parseDouble(value);
         } catch (final NumberFormatException ex) {
-            StyleParser.LOGGER.error("could not parse integer description for '" + key + "'='" + value + "' returning null", ex);
+            if (LOGGER.isErrorEnabled()) {
+                StyleParser.LOGGER.error(
+                        "could not parse integer description for '" + key + "'='" + value + "' returning null", ex);
+            }
             return null;
         }
     }
@@ -135,7 +145,7 @@ public final class StyleParser {
         }
 
         final Map<String, String> map = StyleParser.splitIntoMap(style);
-        final String value = map.get(key.toLowerCase());
+        final String value = map.get(key.toLowerCase(Locale.UK));
         if (value == null) {
             return null;
         }
@@ -151,7 +161,10 @@ public final class StyleParser {
             }
             return retArray;
         } catch (final NumberFormatException ex) {
-            StyleParser.LOGGER.error("could not parse integer description for '" + key + "'='" + value + "' returning null", ex);
+            if (LOGGER.isErrorEnabled()) {
+                StyleParser.LOGGER.error(
+                        "could not parse integer description for '" + key + "'='" + value + "' returning null", ex);
+            }
             return null;
         }
     }
@@ -162,7 +175,7 @@ public final class StyleParser {
         }
 
         final Map<String, String> map = StyleParser.splitIntoMap(style);
-        final String value = map.get(key.toLowerCase());
+        final String value = map.get(key.toLowerCase(Locale.UK));
         if (value == null) {
             return null;
         }
@@ -170,7 +183,10 @@ public final class StyleParser {
         try {
             return Boolean.parseBoolean(value);
         } catch (final NumberFormatException ex) {
-            StyleParser.LOGGER.error("could not parse boolean description for '" + key + "'='" + value + "' returning null", ex);
+            if (LOGGER.isErrorEnabled()) {
+                StyleParser.LOGGER.error(
+                        "could not parse boolean description for '" + key + "'='" + value + "' returning null", ex);
+            }
             return null;
         }
     }
@@ -207,7 +223,10 @@ public final class StyleParser {
             return Font.font(font, fontWeight, fontPosture, fontSize);
 
         } catch (final NumberFormatException ex) {
-            StyleParser.LOGGER.error("could not parse font description style='" + style + "' returning default font", ex);
+            if (LOGGER.isErrorEnabled()) {
+                StyleParser.LOGGER
+                        .error("could not parse font description style='" + style + "' returning default font", ex);
+            }
             return Font.font(StyleParser.DEFAULT_FONT, StyleParser.DEFAULT_FONT_SIZE);
         }
     }
@@ -216,14 +235,15 @@ public final class StyleParser {
      * @param args the command line arguments
      */
     public static void main(final String[] args) {
-        final String testStyle = " color1 = blue; stroke= 0; bool1=true; color2 = red2, unclean=\"a\', index1=2,index2=0xFE, float1=10e7, float2=10.333";
-
-        System.out.println("colour parser1 = " + StyleParser.getPropertyValue(testStyle, "color1"));
-        System.out.println("colour parser2 = " + StyleParser.getColorPropertyValue(testStyle, "color2"));
-        System.out.println("int parser1 = " + StyleParser.getIntegerPropertyValue(testStyle, "index1"));
-        System.out.println("int parser2 = " + StyleParser.getIntegerPropertyValue(testStyle, "index2"));
-        System.out.println("float parser1 = " + StyleParser.getFloatingDecimalPropertyValue(testStyle, "float1"));
-        System.out.println("float parser2 = " + StyleParser.getFloatingDecimalPropertyValue(testStyle, "float2"));
-        System.out.println("boolean parser1 = " + StyleParser.getBooleanPropertyValue(testStyle, "bool1"));
+        //TODO: move this to a unit test
+        //        final String testStyle = " color1 = blue; stroke= 0; bool1=true; color2 = red2, unclean=\"a\', index1=2,index2=0xFE, float1=10e7, float2=10.333";
+        //
+        //        System.out.println("colour parser1 = " + StyleParser.getPropertyValue(testStyle, "color1"));
+        //        System.out.println("colour parser2 = " + StyleParser.getColorPropertyValue(testStyle, "color2"));
+        //        System.out.println("int parser1 = " + StyleParser.getIntegerPropertyValue(testStyle, "index1"));
+        //        System.out.println("int parser2 = " + StyleParser.getIntegerPropertyValue(testStyle, "index2"));
+        //        System.out.println("float parser1 = " + StyleParser.getFloatingDecimalPropertyValue(testStyle, "float1"));
+        //        System.out.println("float parser2 = " + StyleParser.getFloatingDecimalPropertyValue(testStyle, "float2"));
+        //        System.out.println("boolean parser1 = " + StyleParser.getBooleanPropertyValue(testStyle, "bool1"));
     }
 }
