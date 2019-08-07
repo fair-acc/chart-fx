@@ -1,7 +1,5 @@
 package de.gsi.chart.renderer.spi;
 
-import java.security.InvalidParameterException;
-
 import de.gsi.chart.axes.Axis;
 import de.gsi.chart.renderer.ErrorStyle;
 import de.gsi.chart.renderer.LineStyle;
@@ -28,34 +26,35 @@ import javafx.collections.ListChangeListener;
  * @author rstein
  * @param <R> generic object type for renderer parameter
  */
+@SuppressWarnings({ "PMD.TooManyMethods", "PMD.TooManyFields", "PMD.ExcessivePublicCount" }) // designated purpose of this class
 public abstract class AbstractErrorDataSetRendererParameter<R extends AbstractErrorDataSetRendererParameter<R>>
         extends AbstractDataSetManagement<R> {
 
-    protected static final double DEFAULT_HISTORY_INTENSITY_FADING = 0.65; // intensity
-                                                                           // fading
-                                                                           // factor
-                                                                           // per
-                                                                           // stage
+    // intensity fading factor per stage
+    protected static final double DEFAULT_HISTORY_INTENSITY_FADING = 0.65;
     private final ObjectProperty<ErrorStyle> errorStyle = new SimpleObjectProperty<>(this, "errorStyle",
             ErrorStyle.ERRORCOMBO);
     private final ObjectProperty<RendererDataReducer> rendererDataReducer = new SimpleObjectProperty<>(this,
             "rendererDataReducer", new DefaultDataReducer());
-    private BooleanProperty pointReduction = new SimpleBooleanProperty(this, "pointReduction", true);
-    private IntegerProperty dashSize = new SimpleIntegerProperty(this, "dashSize", 3);
-    private IntegerProperty minRequiredReductionSize = new SimpleIntegerProperty(this, "minRequiredReductionSize", 5);
-    private DoubleProperty markerSize = new SimpleDoubleProperty(this, "markerSize", 1.5);
-    private BooleanProperty drawMarker = new SimpleBooleanProperty(this, "drawMarker", true);
+    private final BooleanProperty pointReduction = new SimpleBooleanProperty(this, "pointReduction", true);
+    private final IntegerProperty dashSize = new SimpleIntegerProperty(this, "dashSize", 3);
+    private final IntegerProperty minRequiredReductionSize = new SimpleIntegerProperty(this, "minRequiredReductionSize",
+            5);
+    private final DoubleProperty markerSize = new SimpleDoubleProperty(this, "markerSize", 1.5);
+    private final BooleanProperty drawMarker = new SimpleBooleanProperty(this, "drawMarker", true);
     private final ObjectProperty<LineStyle> polyLineStyle = new SimpleObjectProperty<>(this, "polyLineStyle",
             LineStyle.NORMAL);
-    private BooleanProperty drawBars = new SimpleBooleanProperty(this, "drawBars", false);
-    private BooleanProperty shiftBar = new SimpleBooleanProperty(this, "shiftBar", true);
-    private IntegerProperty shiftBarOffset = new SimpleIntegerProperty(this, "shiftBarOffset", 3);
-    private BooleanProperty dynamicBarWidth = new SimpleBooleanProperty(this, "dynamicBarWidth", true);
-    private DoubleProperty barWidthPercentage = new SimpleDoubleProperty(this, "barWidthPercentage", 70.0);
-    private IntegerProperty barWidth = new SimpleIntegerProperty(this, "barWidth", 5);
-    private BooleanProperty parallelImplementation = new SimpleBooleanProperty(this, "parallelImplementation", false);
-    private DoubleProperty intensityFading = new SimpleDoubleProperty(this, "intensityFading",
+    private final BooleanProperty drawBars = new SimpleBooleanProperty(this, "drawBars", false);
+    private final BooleanProperty shiftBar = new SimpleBooleanProperty(this, "shiftBar", true);
+    private final IntegerProperty shiftBarOffset = new SimpleIntegerProperty(this, "shiftBarOffset", 3);
+    private final BooleanProperty dynamicBarWidth = new SimpleBooleanProperty(this, "dynamicBarWidth", true);
+    private final DoubleProperty barWidthPercentage = new SimpleDoubleProperty(this, "barWidthPercentage", 70.0);
+    private final IntegerProperty barWidth = new SimpleIntegerProperty(this, "barWidth", 5);
+    private final BooleanProperty parallelImplementation = new SimpleBooleanProperty(this, "parallelImplementation",
+            false);
+    private final DoubleProperty intensityFading = new SimpleDoubleProperty(this, "intensityFading",
             AbstractErrorDataSetRendererParameter.DEFAULT_HISTORY_INTENSITY_FADING);
+    private final BooleanProperty drawBubbles = new SimpleBooleanProperty(this, "drawBubbles", false);
 
     /**
      * @return the instance of this AbstractErrorDataSetRendererParameter.
@@ -72,6 +71,7 @@ public abstract class AbstractErrorDataSetRendererParameter<R extends AbstractEr
         drawMarkerProperty().bind(other.drawMarkerProperty());
         polyLineStyleProperty().bind(other.polyLineStyleProperty());
         drawBarsProperty().bind(other.drawBarsProperty());
+        drawBubblesProperty().bind(other.drawBubblesProperty());
         shiftBarProperty().bind(other.shiftBarProperty());
         shiftBarOffsetProperty().bind(other.shiftBarOffsetProperty());
         dynamicBarWidthProperty().bind(other.dynamicBarWidthProperty());
@@ -100,6 +100,7 @@ public abstract class AbstractErrorDataSetRendererParameter<R extends AbstractEr
         drawMarkerProperty().unbind();
         polyLineStyleProperty().unbind();
         drawBarsProperty().unbind();
+        drawBubblesProperty().unbind();
         shiftBarProperty().unbind();
         shiftBarOffsetProperty().unbind();
         dynamicBarWidthProperty().unbind();
@@ -143,8 +144,7 @@ public abstract class AbstractErrorDataSetRendererParameter<R extends AbstractEr
     }
 
     /**
-     * sets the data reduction algorithm: possibly implementations are<br> 
-     * 
+     * sets the data reduction algorithm: possibly implementations are<br>
      * <ul>
      * <li>{@link DefaultDataReducer} (default)</li>
      * <li>{@link MaxDataReducer} (a simple down-sampling algorithm, returning fixed number of max. 1000 points)</li>
@@ -526,77 +526,26 @@ public abstract class AbstractErrorDataSetRendererParameter<R extends AbstractEr
         return polyLineStyle;
     }
 
-    // 2nd algorithm
-
-    private boolean xsalgorithmChoice; // shadow field
-    protected BooleanProperty algorithmChoice;
-
-    public boolean getAlgorithmChoice() {
-        return algorithmChoice == null ? xsalgorithmChoice : algorithmChoice.get();
-    }
-
-    public R setAlgorithmChoice(final boolean value) {
-        if (algorithmChoice == null) {
-            xsalgorithmChoice = value;
-        } else {
-            algorithmChoice.set(value);
-        }
-        return getThis();
-    }
-
     /**
-     * Sets whether superfluous points, otherwise drawn on the same pixel area, are merged and represented by the
-     * multiple point average.
-     *
-     * @return algorithm choice
+     * @return true if bubbles shall be draw
      */
-    public BooleanProperty algorithmChoiceProperty() {
-        if (algorithmChoice == null) {
-            /// !!!! pass shadow field to constructor
-            algorithmChoice = new SimpleBooleanProperty(this, "algorithmChoice", xsalgorithmChoice);
-            /// !!!! clear shadow reference
-            // xsalgorithmChoice = null; // not needed for boolean
-        }
-        return algorithmChoice;
-    }
-
-    private int xsnumberOfPoints = 57;
-    protected IntegerProperty numberOfPoints;
-
-    /**
-     * Returns the <code>numberOfPoint</code>.
-     *
-     * @return the <code>numberOfPoint</code>.
-     */
-    public int getNumberOfPoints() {
-        return numberOfPoints == null ? xsnumberOfPoints : numberOfPoints.get();
+    public boolean isDrawBubbles() {
+        return drawBubbles.get();
     }
 
     /**
-     * Sets the <code>numberOfPoint</code> to the specified value.
-     *
-     * @param numberOfPoint the <code>numberOfPoint</code> to set.
+     * @param state true if bubbles shall be draw
      * @return itself (fluent design)
      */
-    public R setNumberOfPoints(final int numberOfPoint) {
-        if (numberOfPoint < 0) {
-            throw new InvalidParameterException("dash size " + numberOfPoint + " must be greater than zero");
-        }
-        if (numberOfPoints == null) {
-            xsnumberOfPoints = numberOfPoint;
-        } else {
-            numberOfPoints.setValue(numberOfPoint);
-        }
+    public R setDrawBubbles(final boolean state) {
+        drawBubbles.set(state);
         return getThis();
     }
 
-    public IntegerProperty numberOfPointsProperty() {
-        if (numberOfPoints == null) {
-            /// !!!! pass shadow field to constructor
-            numberOfPoints = new SimpleIntegerProperty(this, "numberOfPoint", xsnumberOfPoints);
-            /// !!!! clear shadow reference
-            // xsnumberOfPoint = null; // not needed for boolean property
-        }
-        return numberOfPoints;
+    /**
+     * @return the drawBubbles property
+     */
+    public BooleanProperty drawBubblesProperty() {
+        return drawBubbles;
     }
 }

@@ -3,31 +3,29 @@ package de.gsi.chart.renderer.spi;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.util.Locale;
+import java.util.Map;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import de.gsi.chart.Chart;
 import de.gsi.chart.XYChart;
 import de.gsi.chart.XYChartCss;
 import de.gsi.chart.axes.Axis;
 import de.gsi.chart.axes.spi.CategoryAxis;
-import de.gsi.dataset.DataSet;
-import de.gsi.dataset.DataSet3D;
-import de.gsi.dataset.DataSetError;
-import de.gsi.dataset.DataSetError.ErrorType;
-import de.gsi.dataset.utils.ProcessingProfiler;
+import de.gsi.chart.marker.DefaultMarker;
 import de.gsi.chart.marker.Marker;
 import de.gsi.chart.renderer.ErrorStyle;
 import de.gsi.chart.renderer.Renderer;
-import de.gsi.chart.renderer.RendererDataReducer;
 import de.gsi.chart.renderer.spi.utils.BezierCurve;
 import de.gsi.chart.renderer.spi.utils.Cache;
 import de.gsi.chart.renderer.spi.utils.DefaultRenderColorScheme;
 import de.gsi.chart.utils.StyleParser;
-import de.gsi.math.ArrayUtils;
+import de.gsi.dataset.DataSet;
+import de.gsi.dataset.DataSetError.ErrorType;
+import de.gsi.dataset.spi.utils.Triple;
+import de.gsi.dataset.utils.ProcessingProfiler;
 import javafx.collections.ObservableList;
 import javafx.geometry.Orientation;
 import javafx.scene.canvas.Canvas;
@@ -36,22 +34,35 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.FillRule;
 
 /**
- * Renders data points with error bars. It can be used e.g. to render horizontal and/or vertical errors
+ * Renders data points with error bars and/or error surfaces 
+ * It can be used e.g. to render horizontal and/or vertical errors
+ * 
+ * additional functionality:
+ * <ul>
+ * <li> bar-type plot
+ * <li> polar-axis plotting
+ * <li> scatter and/or bubble-chart-type plots
+ * </ul>
  *
  * @author R.J. Steinhagen
  */
+@SuppressWarnings({ "PMD.LongVariable", "PMD.ShortVariable" }) // short variables like x, y are perfectly fine, as well as descriptive long ones
 public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<ErrorDataSetRenderer>
         implements Renderer {
-
-    private static final double DEG_TO_RAD = Math.PI / 180.0;
-    private static final int MAX_THREADS = Math.max(4, Runtime.getRuntime().availableProcessors());
-    // private static final ExecutorService executorService =
-    // Executors.newCachedThreadPool();
-    private static final ExecutorService EXECUTOR_SERVICE = Executors.newFixedThreadPool(2 * MAX_THREADS);
-
-    protected Cache cache = new Cache();
-    private Marker marker; // TODO: generate marker
-    private boolean isPolarPlot = false;
+    private static final Logger LOGGER = LoggerFactory.getLogger(ErrorDataSetRenderer.class);
+    private static final String Y_BEZIER_SECOND_CONTROL_POINT = "yBezierSecondControlPoint";
+    private static final String X_BEZIER_SECOND_CONTROL_POINT = "xBezierSecondControlPoint";
+    private static final String Y_BEZIER_FIRST_CONTROL_POINT = "yBezierFirstControlPoint";
+    private static final String X_BEZIER_FIRST_CONTROL_POINT = "xBezierFirstControlPoint";
+    private static final String Y_DRAW_POLY_LINE_STAIR_CASE = "yDrawPolyLineStairCase";
+    private static final String X_DRAW_POLY_LINE_STAIR_CASE = "xDrawPolyLineStairCase";
+    private static final String Y_DRAW_POLY_LINE_AREA = "yDrawPolyLineArea";
+    private static final String X_DRAW_POLY_LINE_AREA = "xDrawPolyLineArea";
+    private static final String Y_VALUES_SURFACE = "yValuesSurface";
+    private static final String X_VALUES_SURFACE = "xValuesSurface";
+    private static final String Y_DRAW_POLY_LINE_HISTOGRAM = "yDrawPolyLineHistogram";
+    private static final String X_DRAW_POLY_LINE_HISTOGRAM = "xDrawPolyLineHistogram";
+    private Marker marker = DefaultMarker.RECTANGLE; // default: rectangle
 
     /**
      * Creates new <code>ErrorDataSetRenderer</code>.
@@ -63,7 +74,7 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
     /**
      * Creates new <code>ErrorDataSetRenderer</code>.
      *
-     * @param dashSize the initial size (top/bottom cap) of the dash on top of the error bars
+     * @param dashSize initial size (top/bottom cap) on top of the error bars
      */
     public ErrorDataSetRenderer(final int dashSize) {
         super();
@@ -73,13 +84,10 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
     @Override
     public void render(final GraphicsContext gc, final Chart chart, final int dataSetOffset,
             final ObservableList<DataSet> datasets) {
-        final long start = ProcessingProfiler.getTimeStamp();
         if (!(chart instanceof XYChart)) {
             throw new InvalidParameterException(
                     "must be derivative of XYChart for renderer - " + this.getClass().getSimpleName());
         }
-        final XYChart xyChart = (XYChart) chart;
-        isPolarPlot = xyChart.isPolarPlot();
 
         // make local copy and add renderer specific data sets
         final List<DataSet> localDataSetList = new ArrayList<>(datasets);
@@ -90,25 +98,15 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
             return;
         }
 
-        if (getFirstAxis(Orientation.HORIZONTAL) == null) {
+        final Axis xAxis = getFirstAxis(Orientation.HORIZONTAL);
+        if (xAxis == null) {
             throw new InvalidParameterException("x-Axis must not be null - axesList() = " + getAxes());
         }
-
-        if (getFirstAxis(Orientation.VERTICAL) == null) {
+        final Axis yAxis = getFirstAxis(Orientation.VERTICAL);
+        if (yAxis == null) {
             throw new InvalidParameterException("y-Axis must not be null - axesList() = " + getAxes());
         }
-
-        if (!(getFirstAxis(Orientation.HORIZONTAL) instanceof Axis)) {
-            throw new InvalidParameterException("x-Axis must be a derivative of Axis, axis is = "
-                    + getFirstAxis(Orientation.HORIZONTAL).getClass().getSimpleName());
-        }
-
-        if (!(getFirstAxis(Orientation.VERTICAL) instanceof Axis)) {
-            throw new InvalidParameterException("y-Axis must be a derivative of Axis, axis is = "
-                    + getFirstAxis(Orientation.VERTICAL).getClass().getSimpleName());
-        }
-
-        final Axis xAxis = getFirstAxis(Orientation.HORIZONTAL);
+        final long start = ProcessingProfiler.getTimeStamp();
         final double xAxisWidth = xAxis.getWidth();
         final double xMin = xAxis.getValueForDisplay(0);
         final double xMax = xAxis.getValueForDisplay(xAxisWidth);
@@ -118,20 +116,11 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
         for (int dataSetIndex = localDataSetList.size() - 1; dataSetIndex >= 0; dataSetIndex--) {
             long stop = ProcessingProfiler.getTimeStamp();
             final DataSet dataSet = localDataSetList.get(dataSetIndex);
-            if (dataSet instanceof DataSet3D) {
-                // this renderer cannot use 3D data sets directly, use
-                // MountainRangeRenderer instead
-                // continue;
-            }
-
             // N.B. print out for debugging purposes, please keep (used for
             // detecting redundant or too frequent render updates)
             // System.err.println(
             // String.format("render for range [%f,%f] and dataset = '%s'",
             // xMin, xMax, dataSet.getName()));
-
-            dataSet.lock();
-            stop = ProcessingProfiler.getTimeDiff(stop, "dataSet.lock()");
 
             // update categories in case of category axes for the first (index
             // == '0') indexed data set
@@ -159,8 +148,7 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
             }
 
             if (indexMax - indexMin <= 0) {
-                // zero length/range data set -> nothing to be drawn
-                dataSet.unlock();
+                // zero length/range data set -> nothing to be drawn                
                 continue;
             }
 
@@ -172,19 +160,23 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
             stop = ProcessingProfiler.getTimeDiff(stop, "get CachedPoints");
 
             // compute local screen coordinates
-            localCachedPoints.computeScreenCoordinates(chart, dataSet, dataSetOffset + dataSetIndex, indexMin,
-                    indexMax);
+            final boolean isPolarPlot = ((XYChart) chart).isPolarPlot();
+            if (isParallelImplementation()) {
+                localCachedPoints.computeScreenCoordinates(xAxis, yAxis, dataSet, dataSetOffset + dataSetIndex,
+                        indexMin, indexMax, getErrorType(), isPolarPlot);
+            } else {
+                localCachedPoints.computeScreenCoordinatesInParallel(xAxis, yAxis, dataSet,
+                        dataSetOffset + dataSetIndex, indexMin, indexMax, getErrorType(), isPolarPlot);
+            }
             stop = ProcessingProfiler.getTimeDiff(stop, "computeScreenCoordinates()");
-            dataSet.unlock();
-            stop = ProcessingProfiler.getTimeDiff(stop, "dataSet.unlock()");
 
             // invoke data reduction algorithm
-            localCachedPoints.reduce();
+            localCachedPoints.reduce(rendererDataReducerProperty().get(), isReducePoints(),
+                    getMinRequiredReductionSize());
 
-            synchronized (gc) {
-                // draw individual plot components
-                drawChartCompontents(gc, localCachedPoints);
-            }
+            // draw individual plot components
+            drawChartCompontents(gc, localCachedPoints);
+
             stop = ProcessingProfiler.getTimeStamp();
 
             localCachedPoints.release();
@@ -218,7 +210,7 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
     }
 
     /**
-     * @param dataSet the data set for which the representative icon should be generated
+     * @param dataSet for which the representative icon should be generated
      * @param dsIndex index within renderer set
      * @param width requested width of the returning Canvas
      * @param height requested height of the returning Canvas
@@ -243,12 +235,6 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
         DefaultRenderColorScheme.setLineScheme(gc, dataSet.getStyle(), plotingIndex);
         DefaultRenderColorScheme.setGraphicsContextAttributes(gc, dataSet.getStyle());
         DefaultRenderColorScheme.setFillScheme(gc, dataSet.getStyle(), plotingIndex);
-        // DefaultRenderColorScheme.setLineScheme(gc, dataSet.getStyle(),
-        // plotingIndex);
-        // DefaultRenderColorScheme.setLineScheme(gc, dataSet.getStyle(),
-        // plotingIndex);
-        // DefaultRenderColorScheme.setLineScheme(gc, dataSet.getStyle(),
-        // plotingIndex);
         if (getErrorType() == ErrorStyle.ERRORBARS) {
             final double x = width / 2.0;
             final double y = height / 2.0;
@@ -257,20 +243,10 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
                 gc.strokeLine(x - 1.0, height - 2.0, x + 1.0, height - 2.0);
                 gc.strokeLine(x, 1.0, x, height - 2.0);
             }
-
-            // DefaultRenderColorScheme.setLineScheme(gc, dataSet.getStyle(),
-            // plotingIndex);
             gc.strokeLine(1, y, width, y);
-        } else if (getErrorType() == ErrorStyle.ERRORSURFACE) {
+        } else if (getErrorType() == ErrorStyle.ERRORSURFACE || getErrorType() == ErrorStyle.ERRORCOMBO) {
             final double y = height / 2.0;
             gc.fillRect(1, 1, width - 2.0, height - 2.0);
-            gc.strokeLine(1, y, width - 2.0, y);
-        } else if (getErrorType() == ErrorStyle.ERRORCOMBO) {
-            final double y = height / 2.0;
-            gc.fillRect(1, 1, width - 2.0, height - 2.0);
-
-            // DefaultRenderColorScheme.setLineScheme(gc, dataSet.getStyle(),
-            // plotingIndex);
             gc.strokeLine(1, y, width - 2.0, y);
         } else {
             final double x = width / 2.0;
@@ -280,9 +256,6 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
                 gc.strokeLine(x - 1.0, height - 2.0, x + 1, height - 2.0);
                 gc.strokeLine(x, 1.0, x, height - 2.0);
             }
-
-            // DefaultRenderColorScheme.setLineScheme(gc, dataSet.getStyle(),
-            // plotingIndex);
             gc.strokeLine(1, y, width - 2.0, y);
         }
         gc.restore();
@@ -294,11 +267,10 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
      * @param localCachedPoints reference to local cached data point object
      */
     protected void drawDefaultNoErrors(final GraphicsContext gc, final CachedDataPoints localCachedPoints) {
-
         drawBars(gc, localCachedPoints);
         drawPolyLine(gc, localCachedPoints);
         drawMarker(gc, localCachedPoints);
-
+        drawBubbles(gc, localCachedPoints);
     }
 
     /**
@@ -332,7 +304,7 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
         }
     }
 
-    protected void drawPolyLineLine(final GraphicsContext gc, final CachedDataPoints localCachedPoints) {
+    protected static void drawPolyLineLine(final GraphicsContext gc, final CachedDataPoints localCachedPoints) {
         gc.save();
         DefaultRenderColorScheme.setLineScheme(gc, localCachedPoints.defaultStyle,
                 localCachedPoints.dataSetIndex + localCachedPoints.dataSetStyleIndex);
@@ -364,17 +336,17 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
         gc.restore();
     }
 
-    protected void drawPolyLineArea(final GraphicsContext gc, final CachedDataPoints localCachedPoints) {
-        final double zero = localCachedPoints.yZero;
+    protected static void drawPolyLineArea(final GraphicsContext gc, final CachedDataPoints localCachedPoints) {
         final int n = localCachedPoints.actualDataCount;
         if (n == 0) {
             return;
         }
 
         // need to allocate new array :-(
-        final double[] newX = cache.getCachedDoubleArray("xDrawPolyLineArea", n + 2);
-        final double[] newY = cache.getCachedDoubleArray("yDrawPolyLineArea", n + 2);
+        final double[] newX = Cache.getCachedDoubleArray(X_DRAW_POLY_LINE_AREA, n + 2);
+        final double[] newY = Cache.getCachedDoubleArray(Y_DRAW_POLY_LINE_AREA, n + 2);
 
+        final double zero = localCachedPoints.yZero;
         System.arraycopy(localCachedPoints.xValues, 0, newX, 0, n);
         System.arraycopy(localCachedPoints.yValues, 0, newY, 0, n);
         newX[n] = localCachedPoints.xValues[n - 1];
@@ -392,19 +364,19 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
         gc.restore();
 
         // release arrays to cache
-        cache.release("xDrawPolyLineArea", newX);
-        cache.release("yDrawPolyLineArea", newY);
+        Cache.release(X_DRAW_POLY_LINE_AREA, newX);
+        Cache.release(Y_DRAW_POLY_LINE_AREA, newY);
     }
 
-    protected void drawPolyLineStairCase(final GraphicsContext gc, final CachedDataPoints localCachedPoints) {
+    protected static void drawPolyLineStairCase(final GraphicsContext gc, final CachedDataPoints localCachedPoints) {
         final int n = localCachedPoints.actualDataCount;
         if (n == 0) {
             return;
         }
 
         // need to allocate new array :-(
-        final double[] newX = cache.getCachedDoubleArray("xDrawPolyLineStairCase", 2 * n);
-        final double[] newY = cache.getCachedDoubleArray("yDrawPolyLineStairCase", 2 * n);
+        final double[] newX = Cache.getCachedDoubleArray(X_DRAW_POLY_LINE_STAIR_CASE, 2 * n);
+        final double[] newY = Cache.getCachedDoubleArray(Y_DRAW_POLY_LINE_STAIR_CASE, 2 * n);
 
         for (int i = 0; i < n - 1; i++) {
             newX[2 * i] = localCachedPoints.xValues[i];
@@ -435,19 +407,19 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
         gc.restore();
 
         // release arrays to cache
-        cache.release("xDrawPolyLineStairCase", newX);
-        cache.release("yDrawPolyLineStairCase", newY);
+        Cache.release(X_DRAW_POLY_LINE_STAIR_CASE, newX);
+        Cache.release(Y_DRAW_POLY_LINE_STAIR_CASE, newY);
     }
 
-    protected void drawPolyLineHistogram(final GraphicsContext gc, final CachedDataPoints localCachedPoints) {
+    protected static void drawPolyLineHistogram(final GraphicsContext gc, final CachedDataPoints localCachedPoints) {
         final int n = localCachedPoints.actualDataCount;
         if (n == 0) {
             return;
         }
 
         // need to allocate new array :-(
-        final double[] newX = cache.getCachedDoubleArray("xDrawPolyLineHistogram", 2 * (n + 1));
-        final double[] newY = cache.getCachedDoubleArray("yDrawPolyLineHistogram", 2 * (n + 1));
+        final double[] newX = Cache.getCachedDoubleArray(X_DRAW_POLY_LINE_HISTOGRAM, 2 * (n + 1));
+        final double[] newY = Cache.getCachedDoubleArray(Y_DRAW_POLY_LINE_HISTOGRAM, 2 * (n + 1));
 
         final double xRange = localCachedPoints.xMax - localCachedPoints.xMin;
         double diffLeft;
@@ -474,7 +446,6 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
         DefaultRenderColorScheme.setLineScheme(gc, localCachedPoints.defaultStyle,
                 localCachedPoints.dataSetIndex + localCachedPoints.dataSetStyleIndex);
         DefaultRenderColorScheme.setGraphicsContextAttributes(gc, localCachedPoints.defaultStyle);
-        // gc.strokePolyline(newX, newY, 2*(n+1));
 
         for (int i = 0; i < 2 * (n + 1) - 1; i++) {
             final double x1 = newX[i];
@@ -487,19 +458,20 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
         gc.restore();
 
         // release arrays to cache
-        cache.release("xDrawPolyLineHistogram", newX);
-        cache.release("yDrawPolyLineHistogram", newY);
+        Cache.release(X_DRAW_POLY_LINE_HISTOGRAM, newX);
+        Cache.release(Y_DRAW_POLY_LINE_HISTOGRAM, newY);
     }
 
-    protected void drawPolyLineHistogramFilled(final GraphicsContext gc, final CachedDataPoints localCachedPoints) {
+    protected static void drawPolyLineHistogramFilled(final GraphicsContext gc,
+            final CachedDataPoints localCachedPoints) {
         final int n = localCachedPoints.actualDataCount;
         if (n == 0) {
             return;
         }
 
         // need to allocate new array :-(
-        final double[] newX = cache.getCachedDoubleArray("xDrawPolyLineHistogram", 2 * (n + 1));
-        final double[] newY = cache.getCachedDoubleArray("yDrawPolyLineHistogram", 2 * (n + 1));
+        final double[] newX = Cache.getCachedDoubleArray(X_DRAW_POLY_LINE_HISTOGRAM, 2 * (n + 1));
+        final double[] newY = Cache.getCachedDoubleArray(Y_DRAW_POLY_LINE_HISTOGRAM, 2 * (n + 1));
 
         final double xRange = localCachedPoints.xMax - localCachedPoints.xMin;
         double diffLeft;
@@ -532,11 +504,12 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
         gc.restore();
 
         // release arrays to cache
-        cache.release("xDrawPolyLineHistogram", newX);
-        cache.release("yDrawPolyLineHistogram", newY);
+        Cache.release(X_DRAW_POLY_LINE_HISTOGRAM, newX);
+        Cache.release(Y_DRAW_POLY_LINE_HISTOGRAM, newY);
     }
 
-    protected void drawPolyLineHistogramBezier(final GraphicsContext gc, final CachedDataPoints localCachedPoints) {
+    protected static void drawPolyLineHistogramBezier(final GraphicsContext gc,
+            final CachedDataPoints localCachedPoints) {
         final int n = localCachedPoints.actualDataCount;
         if (n < 2) {
             drawPolyLineLine(gc, localCachedPoints);
@@ -544,10 +517,10 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
         }
 
         // need to allocate new array :-(
-        final double[] xCp1 = cache.getCachedDoubleArray("xBezierFirstControlPoint", n);
-        final double[] yCp1 = cache.getCachedDoubleArray("yBezierFirstControlPoint", n);
-        final double[] xCp2 = cache.getCachedDoubleArray("xBezierSecondControlPoint", n);
-        final double[] yCp2 = cache.getCachedDoubleArray("yBezierSecondControlPoint", n);
+        final double[] xCp1 = Cache.getCachedDoubleArray(X_BEZIER_FIRST_CONTROL_POINT, n);
+        final double[] yCp1 = Cache.getCachedDoubleArray(Y_BEZIER_FIRST_CONTROL_POINT, n);
+        final double[] xCp2 = Cache.getCachedDoubleArray(X_BEZIER_SECOND_CONTROL_POINT, n);
+        final double[] yCp2 = Cache.getCachedDoubleArray(Y_BEZIER_SECOND_CONTROL_POINT, n);
 
         BezierCurve.calcCurveControlPoints(localCachedPoints.xValues, localCachedPoints.yValues, xCp1, yCp1, xCp2, yCp2,
                 localCachedPoints.actualDataCount);
@@ -580,11 +553,11 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
         gc.stroke();
         gc.restore();
 
-        // release arrays to cache
-        cache.release("xBezierFirstControlPoint", xCp1);
-        cache.release("yBezierFirstControlPoint", yCp1);
-        cache.release("xBezierSecondControlPoint", xCp2);
-        cache.release("yBezierSecondControlPoint", yCp2);
+        // release arrays to Cache
+        Cache.release(X_BEZIER_FIRST_CONTROL_POINT, xCp1);
+        Cache.release(Y_BEZIER_FIRST_CONTROL_POINT, yCp1);
+        Cache.release(X_BEZIER_SECOND_CONTROL_POINT, xCp2);
+        Cache.release(Y_BEZIER_SECOND_CONTROL_POINT, yCp2);
     }
 
     /**
@@ -599,30 +572,87 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
         DefaultRenderColorScheme.setMarkerScheme(gc, localCachedPoints.defaultStyle,
                 localCachedPoints.dataSetIndex + localCachedPoints.dataSetStyleIndex);
 
-        // N.B. the markers are drawn in the same colour as the polyline (ie.
-        // not the fillColor)
-        final Color fillColor = StyleParser.getColorPropertyValue(localCachedPoints.defaultStyle,
-                XYChartCss.STROKE_COLOR);
-        if (fillColor != null) {
-            gc.setFill(fillColor);
+        final Triple<Marker, Color, Double> markerTypeColorAndSize = getDefaultMarker(localCachedPoints.defaultStyle);
+        final Marker defaultMarker = markerTypeColorAndSize.getFirst();
+        final Color defaultMarkerColor = markerTypeColorAndSize.getSecond();
+        final double defaultMarkerSize = markerTypeColorAndSize.getThird();
+        if (defaultMarkerColor != null) {
+            gc.setFill(defaultMarkerColor);
         }
-
-        // TODO check how-to draw marker
-        // final Marker marker = getMarker();
-        // if (marker == null) {
-        // // marker = MarkerFactory.getMarker(Marker.CIRCLE);
-        // }
-
         for (int i = 0; i < localCachedPoints.actualDataCount; i++) {
-            // marker.draw(gc, localCachedPoints.xValues[i],
-            // localCachedPoints.yValues[i],
-            // getMarkerSize(), style[i], localCachedPoints.selected[i]);
-            final double mSize = getMarkerSize();
-            gc.fillRect(localCachedPoints.xValues[i] - mSize, localCachedPoints.yValues[i] - mSize, 2 * mSize,
-                    2 * mSize);
+            final double x = localCachedPoints.xValues[i];
+            final double y = localCachedPoints.yValues[i];
+            if (localCachedPoints.styles[i] == null) {
+                defaultMarker.draw(gc, x, y, defaultMarkerSize);
+            } else {
+                final Triple<Marker, Color, Double> markerForPoint = getDefaultMarker(
+                        localCachedPoints.defaultStyle + localCachedPoints.styles[i]);
+                gc.save();
+                if (markerForPoint.getSecond() != null) {
+                    gc.setFill(markerForPoint.getSecond());
+                }
+                final Marker pointMarker = markerForPoint.getFirst() == null ? defaultMarker : markerForPoint.getFirst();
+                pointMarker.draw(gc, x, y, markerForPoint.getThird());
+                gc.restore();
+            }
         }
 
         gc.restore();
+    }
+
+    protected Triple<Marker, Color, Double> getDefaultMarker(final String dataSetStyle) {
+        Marker defaultMarker = getMarker();
+        // N.B. the markers are drawn in the same colour
+        // as the polyline (ie. stroke color)
+        Color defaultMarkerColor = StyleParser.getColorPropertyValue(dataSetStyle, XYChartCss.STROKE_COLOR);
+        double defaultMarkerSize = getMarkerSize();
+
+        if (dataSetStyle == null) {
+            return new Triple<>(defaultMarker, defaultMarkerColor, defaultMarkerSize);
+        }
+
+        // parse style:
+        final Map<String, String> map = StyleParser.splitIntoMap(dataSetStyle);
+
+        final String markerType = map.get(XYChartCss.MARKER_TYPE.toLowerCase(Locale.UK));
+        if (markerType != null) {
+            try {
+                final Marker tempType = DefaultMarker.get(markerType);
+                defaultMarker = tempType;
+            } catch (final IllegalArgumentException ex) {
+                if (LOGGER.isErrorEnabled()) {
+                LOGGER.error("could not parse marker type description for '" + XYChartCss.MARKER_TYPE + "'='"
+                        + markerType + "'", ex);
+                }
+            }
+        }
+        final String markerSize = map.get(XYChartCss.MARKER_SIZE.toLowerCase(Locale.UK));
+        if (markerSize != null) {
+            try {
+                final double tempSize = Double.parseDouble(markerSize);
+                defaultMarkerSize = tempSize;
+            } catch (final NumberFormatException ex) {
+                if (LOGGER.isErrorEnabled()) {
+                LOGGER.error("could not parse marker size description for '" + XYChartCss.MARKER_SIZE + "'='"
+                        + markerSize + "'", ex);
+                }
+            }
+        }
+
+        final String markerColor = map.get(XYChartCss.MARKER_COLOR.toLowerCase(Locale.UK));
+        if (markerColor != null) {
+            try {
+                final Color tempColor = Color.web(markerColor);
+                defaultMarkerColor = tempColor;
+            } catch (final IllegalArgumentException ex) {
+                if (LOGGER.isErrorEnabled()) {
+                LOGGER.error("could not parse marker color description for '" + XYChartCss.MARKER_COLOR + "'='"
+                        + markerColor + "'", ex);
+                }
+            }
+        }
+
+        return new Triple<>(defaultMarker, defaultMarkerColor, defaultMarkerSize);
     }
 
     /**
@@ -743,6 +773,7 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
 
         drawPolyLine(gc, lCacheP);
         drawMarker(gc, lCacheP);
+        drawBubbles(gc, lCacheP);
 
         ProcessingProfiler.getTimeDiff(start);
     }
@@ -759,8 +790,8 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
 
         final int nDataCount = localCachedPoints.actualDataCount;
         final int nPolygoneEdges = 2 * nDataCount;
-        final double[] xValuesSurface = cache.getCachedDoubleArray("xValuesSurface", nPolygoneEdges);
-        final double[] yValuesSurface = cache.getCachedDoubleArray("yValuesSurface", nPolygoneEdges);
+        final double[] xValuesSurface = Cache.getCachedDoubleArray(X_VALUES_SURFACE, nPolygoneEdges);
+        final double[] yValuesSurface = Cache.getCachedDoubleArray(Y_VALUES_SURFACE, nPolygoneEdges);
 
         final int xend = nPolygoneEdges - 1;
         for (int i = 0; i < nDataCount; i++) {
@@ -782,11 +813,82 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
         drawPolyLine(gc, localCachedPoints);
         drawBars(gc, localCachedPoints);
         drawMarker(gc, localCachedPoints);
+        drawBubbles(gc, localCachedPoints);
 
-        cache.release("xValuesSurface", xValuesSurface);
-        cache.release("yValuesSurface", yValuesSurface);
+        Cache.release(X_VALUES_SURFACE, xValuesSurface);
+        Cache.release(Y_VALUES_SURFACE, yValuesSurface);
 
         ProcessingProfiler.getTimeDiff(start);
+    }
+
+    /**
+     * @param gc the graphics context from the Canvas parent
+     * @param localCachedPoints reference to local cached data point object
+     */
+    protected void drawBubbles(final GraphicsContext gc, final CachedDataPoints localCachedPoints) {
+        if (!isDrawBubbles()) {
+            return;
+        }
+        gc.save();
+        DefaultRenderColorScheme.setMarkerScheme(gc, localCachedPoints.defaultStyle,
+                localCachedPoints.dataSetIndex + localCachedPoints.dataSetStyleIndex);
+
+        // N.B. bubbles are drawn with the same colour as polyline (ie. not the fillColor)
+        final Color fillColor = StyleParser.getColorPropertyValue(localCachedPoints.defaultStyle,
+                XYChartCss.STROKE_COLOR);
+        if (fillColor != null) {
+            gc.setFill(fillColor);
+        }
+
+        final double minSize = getMarkerSize();
+        switch (localCachedPoints.errorType) {
+        case X:
+        case X_ASYMMETRIC:
+            for (int i = 0; i < localCachedPoints.actualDataCount; i++) {
+                final double radius = Math.max(minSize,
+                        localCachedPoints.errorXPos[i] - localCachedPoints.errorXNeg[i]);
+                final double x = localCachedPoints.xValues[i] - radius;
+                final double y = localCachedPoints.yValues[i] - radius;
+
+                gc.fillOval(x, y, 2 * radius, 2 * radius);
+            }
+            break;
+        case Y:
+        case Y_ASYMMETRIC:
+            for (int i = 0; i < localCachedPoints.actualDataCount; i++) {
+                final double radius = Math.max(minSize,
+                        localCachedPoints.errorYNeg[i] - localCachedPoints.errorYPos[i]);
+                final double x = localCachedPoints.xValues[i] - radius;
+                final double y = localCachedPoints.yValues[i] - radius;
+
+                gc.fillOval(x, y, 2 * radius, 2 * radius);
+            }
+            break;
+        case XY:
+        case XY_ASYMMETRIC:
+            for (int i = 0; i < localCachedPoints.actualDataCount; i++) {
+                final double width = Math.max(minSize, localCachedPoints.errorXPos[i] - localCachedPoints.errorXNeg[i]);
+                final double height = Math.max(minSize,
+                        localCachedPoints.errorYNeg[i] - localCachedPoints.errorYPos[i]);
+                final double x = localCachedPoints.xValues[i] - width;
+                final double y = localCachedPoints.yValues[i] - height;
+
+                gc.fillOval(x, y, 2 * width, 2 * height);
+            }
+            break;
+        case NO_ERROR:
+        default:
+            for (int i = 0; i < localCachedPoints.actualDataCount; i++) {
+                final double radius = minSize;
+                final double x = localCachedPoints.xValues[i] - radius;
+                final double y = localCachedPoints.yValues[i] - radius;
+
+                gc.fillOval(x, y, 2 * radius, 2 * radius);
+            }
+            break;
+        }
+
+        gc.restore();
     }
 
     /**
@@ -814,468 +916,4 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
     public void setMarker(final Marker marker) {
         this.marker = marker;
     }
-
-    /********************************************************************
-     ******* private class implementation (data point caching) **********
-     *******************************************************************/
-
-    /**
-     * local screen data point cache (minimises re-allocation/garbage collection)
-     */
-    protected class CachedDataPoints {
-
-        protected double[] xValues;
-        protected double[] yValues;
-        protected double[] errorXNeg;
-        protected double[] errorXPos;
-        protected double[] errorYNeg;
-        protected double[] errorYPos;
-        protected boolean[] selected;
-        protected String[] styles;
-        protected boolean xAxisInverted;
-        protected boolean yAxisInverted;
-        protected String defaultStyle;
-        protected int dataSetIndex;
-        protected int dataSetStyleIndex;
-        protected ErrorType errorType;
-        protected int indexMin;
-        protected int indexMax;
-        protected int minDistanceX = +Integer.MAX_VALUE;
-        protected double xZero; // reference zero 'x' axis coordinate
-        protected double yZero; // reference zero 'y' axis coordinate
-        protected double yMin;
-        protected double yMax;
-        protected double xMin;
-        protected double xMax;
-        protected boolean polarPlot;
-        protected double xRange;
-        protected double yRange;
-        protected double maxRadius;
-        protected int maxDataCount;
-        protected int actualDataCount; // number of data points that remain
-                                       // after data reduction
-
-        public CachedDataPoints(final int indexMin, final int indexMax, final int dataLength, final boolean full) {
-            maxDataCount = dataLength;
-            xValues = cache.getCachedDoubleArray("xValues", maxDataCount);
-            yValues = cache.getCachedDoubleArray("yValues", maxDataCount);
-            styles = cache.getCachedStringArray("styles", dataLength);
-            this.indexMin = indexMin;
-            this.indexMax = indexMax;
-            errorYNeg = cache.getCachedDoubleArray("errorYNeg", maxDataCount);
-            errorYPos = cache.getCachedDoubleArray("errorYPos", maxDataCount);
-            if (full) {
-                errorXNeg = cache.getCachedDoubleArray("errorXNeg", maxDataCount);
-                errorXPos = cache.getCachedDoubleArray("errorXPos", maxDataCount);
-            }
-            selected = cache.getCachedBooleanArray("selected", dataLength);
-            // ArrayUtils.fillArray(selected, true);
-            ArrayUtils.fillArray(styles, null);
-        }
-
-        /**
-         * computes the minimum distance in between data points N.B. assumes sorted data set points
-         * 
-         * @return min distance
-         */
-        private int getMinXDistance() {
-            if (minDistanceX < Integer.MAX_VALUE) {
-                return minDistanceX;
-            }
-
-            if (indexMin >= indexMax) {
-                minDistanceX = 1;
-                return minDistanceX;
-            }
-
-            minDistanceX = Integer.MAX_VALUE;
-            for (int i = 1; i < actualDataCount; i++) {
-                final double x0 = xValues[i - 1];
-                final double x1 = xValues[i];
-                minDistanceX = Math.min(minDistanceX, (int) Math.abs(x1 - x0));
-            }
-            return minDistanceX;
-        }
-
-        private void computeScreenCoordinates(final Chart chart, final DataSet dataSet, final int dsIndex,
-                final int min, final int max) {
-            if (!(getFirstAxis(Orientation.HORIZONTAL) instanceof Axis)) {
-                throw new InvalidParameterException(
-                        "x Axis not a Axis derivative, xAxis = " + getFirstAxis(Orientation.HORIZONTAL));
-            }
-            if (!(getFirstAxis(Orientation.VERTICAL) instanceof Axis)) {
-                throw new InvalidParameterException(
-                        "y Axis not a Axis derivative, yAxis = " + getFirstAxis(Orientation.VERTICAL));
-            }
-            final Axis xAxis = getFirstAxis(Orientation.HORIZONTAL);
-            final Axis yAxis = getFirstAxis(Orientation.VERTICAL);
-            xAxisInverted = xAxis.isInvertedAxis();
-            yAxisInverted = yAxis.isInvertedAxis();
-
-            indexMin = min;
-            indexMax = max;
-
-            // compute cached axis variables ... about 50% faster than the
-            // generic template based version from
-            // ValueAxsis<Number>
-            if (xAxis.isLogAxis()) {
-                xZero = xAxis.getDisplayPosition(xAxis.getLowerBound());
-            } else {
-                xZero = xAxis.getDisplayPosition(0);
-            }
-            if (yAxis.isLogAxis()) {
-                yZero = yAxis.getDisplayPosition(yAxis.getLowerBound());
-            } else {
-                yZero = yAxis.getDisplayPosition(0);
-            }
-
-            polarPlot = isPolarPlot;
-
-            yMin = yAxis.getDisplayPosition(yAxis.getLowerBound());
-            yMax = yAxis.getDisplayPosition(yAxis.getUpperBound());
-            xMin = xAxis.getDisplayPosition(xAxis.getLowerBound());
-            xMax = xAxis.getDisplayPosition(xAxis.getUpperBound());
-
-            defaultStyle = dataSet.getStyle();
-
-            xRange = Math.abs(xMax - xMin);
-            yRange = Math.abs(yMax - yMin);
-            maxRadius = 0.5 * Math.max(Math.min(xRange, yRange), 20) * 0.9;
-            // TODO: parameterise '0.9' -> radius axis fills 90% of min canvas
-            // axis
-            if (polarPlot) {
-                xZero = 0.5 * xRange;
-                yZero = 0.5 * yRange;
-                // System.err.println("maxRadius = " + maxRadius + " range: yMin
-                // " + yMin + " yMax" + yMax);
-            }
-
-            final Integer layoutOffset = StyleParser.getIntegerPropertyValue(defaultStyle,
-                    XYChartCss.DATASET_LAYOUT_OFFSET);
-            final Integer dsIndexLocal = StyleParser.getIntegerPropertyValue(defaultStyle, XYChartCss.DATASET_INDEX);
-
-            dataSetStyleIndex = layoutOffset == null ? 0 : layoutOffset.intValue(); // TODO:
-                                                                                    // rationalise
-
-            dataSetIndex = dsIndexLocal == null ? dsIndex : dsIndexLocal.intValue();
-
-            // compute screen coordinates of other points
-            if (dataSet instanceof DataSetError) {
-                final DataSetError ds = (DataSetError) dataSet;
-                errorType = ds.getErrorType();
-            } else {
-                // fall-back for standard DataSet
-
-                // default: ErrorType=Y fall-back also for 'DataSet' without
-                // errors
-                // rationale: scientific honesty
-                // if data points are being compressed, the error of compression
-                // (e.g. due to local transients that are being suppressed) are
-                // nevertheless being computed and shown even if individual data
-                // points have no error
-                errorType = ErrorType.Y;
-            }
-
-            // special case where users does not want error bars
-            if (getErrorType() == ErrorStyle.NONE) {
-                errorType = ErrorType.NO_ERROR;
-            }
-
-            // ErrorDataSetRenderer.this.setParallelImplementation(false);
-            // compute data set to screen coordinates
-            if (isParallelImplementation()) {
-                final int minthreshold = 1000;
-                // Math.min(length / minthreshold, MAX_THREADS);
-                int divThread = (int) Math.ceil(Math.abs(max - min) / (double) MAX_THREADS);
-                int stepSize = Math.max(divThread, minthreshold);
-                final List<Callable<Boolean>> workers = new ArrayList<>();
-                for (int i = min; i < max; i += stepSize) {
-                    final int start = i;
-                    workers.add(() -> {
-                        computeScreenCoordinates(xAxis, yAxis, dataSet, start, Math.min(max, start + stepSize));
-                        return Boolean.TRUE;
-                    });
-                }
-
-                try {
-                    final List<Future<Boolean>> jobs = ErrorDataSetRenderer.EXECUTOR_SERVICE.invokeAll(workers);
-                    for (final Future<Boolean> future : jobs) {
-                        final Boolean r = future.get();
-                        if (!r) {
-                            throw new IllegalStateException("one parallel worker thread finished execution with error");
-                        }
-                    }
-                } catch (final InterruptedException | ExecutionException e) {
-                    throw new IllegalStateException("one parallel worker thread finished execution with error", e);
-                }
-            } else {
-                computeScreenCoordinates(xAxis, yAxis, dataSet, min, max);
-            }
-
-        }
-
-        private void computeScreenCoordinates(final Axis xAxis, final Axis yAxis, final DataSet dataSet, final int min,
-                final int max) {
-            switch (errorType) {
-            case NO_ERROR: // no error attached
-                if (!polarPlot) {
-                    for (int index = min; index < max; index++) {
-                        final double x = dataSet.getX(index);
-                        final double y = dataSet.getY(index);
-                        // check if error should be surrounded by Math.abs(..)
-                        // to ensure that they are always positive
-                        xValues[index] = xAxis.getDisplayPosition(x);
-                        yValues[index] = yAxis.getDisplayPosition(y);
-                        if (!Double.isFinite(yValues[index])) {
-                            yValues[index] = yMin;
-                        }
-                    }
-                } else {
-                    // experimental transform euclidean to polar coordinates
-
-                    for (int index = min; index < max; index++) {
-                        final double x = dataSet.getX(index);
-                        final double y = dataSet.getY(index);
-                        // check if error should be surrounded by Math.abs(..)
-                        // to ensure that they are always positive
-                        final double phi = x * ErrorDataSetRenderer.DEG_TO_RAD;
-                        final double r = maxRadius * Math.abs(1 - yAxis.getDisplayPosition(y) / yRange);
-                        xValues[index] = xZero + r * Math.cos(phi);
-                        yValues[index] = yZero + r * Math.sin(phi);
-
-                        if (!Double.isFinite(yValues[index])) {
-                            yValues[index] = yZero;
-                        }
-                    }
-                }
-
-                return;
-            case Y: // only symmetric errors around y
-            case Y_ASYMMETRIC: // asymmetric errors around y
-                if (!polarPlot) {
-                    if (dataSet instanceof DataSetError) {
-                        final DataSetError ds = (DataSetError) dataSet;
-
-                        for (int index = min; index < max; index++) {
-                            final double x = dataSet.getX(index);
-                            final double y = dataSet.getY(index);
-                            // check if error should be surrounded by
-                            // Math.abs(..)
-                            // to ensure that they are always positive
-                            xValues[index] = xAxis.getDisplayPosition(x);
-                            yValues[index] = yAxis.getDisplayPosition(y);
-                            if (Double.isFinite(yValues[index])) {
-                                errorYNeg[index] = yAxis.getDisplayPosition(y - ds.getYErrorNegative(index));
-                                errorYPos[index] = yAxis.getDisplayPosition(y + ds.getYErrorPositive(index));
-                            } else {
-                                yValues[index] = yMin;
-                                errorYNeg[index] = yMin;
-                                errorYPos[index] = yMin;
-                            }
-                        }
-                        return;
-                    }
-
-                    // default dataset
-                    for (int index = min; index < max; index++) {
-                        final double x = dataSet.getX(index);
-                        final double y = dataSet.getY(index);
-                        // check if error should be surrounded by Math.abs(..)
-                        // to ensure that they are always positive
-                        xValues[index] = xAxis.getDisplayPosition(x);
-                        yValues[index] = yAxis.getDisplayPosition(y);
-
-                        if (!Double.isFinite(xValues[index])) {
-                            xValues[index] = xMin;
-                        }
-                        if (Double.isFinite(yValues[index])) {
-                            errorYNeg[index] = yValues[index];
-                            errorYPos[index] = yValues[index];
-                        } else {
-                            yValues[index] = yMin;
-                            errorYNeg[index] = yMin;
-                            errorYPos[index] = yMin;
-                        }
-                    }
-                } else {
-                    for (int index = min; index < max; index++) {
-                        final double x = dataSet.getX(index);
-                        final double y = dataSet.getY(index);
-                        // check if error should be surrounded by Math.abs(..)
-                        // to ensure that they are always positive
-                        final double phi = x * ErrorDataSetRenderer.DEG_TO_RAD;
-                        final double r = maxRadius * Math.abs(1 - yAxis.getDisplayPosition(y) / yRange);
-                        xValues[index] = xZero + r * Math.cos(phi);
-                        yValues[index] = yZero + r * Math.sin(phi);
-
-                        // ignore errors (for now) -> TODO: add proper
-                        // transformation
-                        errorXNeg[index] = 0.0;
-                        errorXPos[index] = 0.0;
-                        errorYNeg[index] = 0.0;
-                        errorYPos[index] = 0.0;
-
-                        if (!Double.isFinite(yValues[index])) {
-                            yValues[index] = yZero;
-                        }
-                    }
-                }
-                return;
-            case X: // only symmetric errors around x
-            case X_ASYMMETRIC: // asymmetric errors around x
-            case XY: // symmetric errors around x and y
-            case XY_ASYMMETRIC: // asymmetric errors around x and y
-            default:
-                if (!(dataSet instanceof DataSetError)) {
-                    throw new IllegalStateException("dataSet may not be non-DataSetError at this stage, dataSet = "
-                            + dataSet.getName() + " errorType = " + errorType);
-                }
-                final DataSetError ds = (DataSetError) dataSet;
-
-                if (!polarPlot) {
-                    for (int index = min; index < max; index++) {
-                        final double x = dataSet.getX(index);
-                        final double y = dataSet.getY(index);
-                        // check if error should be surrounded by
-                        // Math.abs(..) to ensure that they are always positive
-                        xValues[index] = xAxis.getDisplayPosition(x);
-                        yValues[index] = yAxis.getDisplayPosition(y);
-
-                        if (Double.isFinite(xValues[index])) {
-                            errorXNeg[index] = xAxis.getDisplayPosition(x - ds.getXErrorNegative(index));
-                            errorXPos[index] = xAxis.getDisplayPosition(x + ds.getXErrorPositive(index));
-                        } else {
-                            xValues[index] = xMin;
-                            errorXNeg[index] = xMin;
-                            errorXPos[index] = xMin;
-                        }
-
-                        if (Double.isFinite(yValues[index])) {
-                            errorYNeg[index] = yAxis.getDisplayPosition(y - ds.getYErrorNegative(index));
-                            errorYPos[index] = yAxis.getDisplayPosition(y + ds.getYErrorPositive(index));
-                        } else {
-                            yValues[index] = yMin;
-                            errorYNeg[index] = yMin;
-                            errorYPos[index] = yMin;
-                        }
-                    }
-                } else {
-                    for (int index = min; index < max; index++) {
-                        final double x = dataSet.getX(index);
-                        final double y = dataSet.getY(index);
-                        // check if error should be surrounded by Math.abs(..)
-                        // to ensure that they are always positive
-                        final double phi = x * ErrorDataSetRenderer.DEG_TO_RAD;
-                        final double r = maxRadius * Math.abs(1 - yAxis.getDisplayPosition(y) / yRange);
-                        // double r = maxRadius * Math.abs(-y /
-                        // (dataSet.getYMax()-dataSet.getYMin()));
-                        xValues[index] = xZero + r * Math.cos(phi);
-                        yValues[index] = yZero + r * Math.sin(phi);
-
-                        // ignore errors (for now) -> TODO: add proper
-                        // transformation
-                        errorXNeg[index] = 0.0;
-                        errorXPos[index] = 0.0;
-                        errorYNeg[index] = 0.0;
-                        errorYPos[index] = 0.0;
-
-                        if (!Double.isFinite(yValues[index])) {
-                            yValues[index] = yZero;
-                        }
-                    }
-                }
-                return;
-            }
-        }
-
-        private int minDataPointDistanceX() {
-            if (actualDataCount <= 1) {
-                minDistanceX = 1;
-                return minDistanceX;
-            }
-            minDistanceX = Integer.MAX_VALUE;
-            for (int i = 1; i < actualDataCount; i++) {
-                final double x0 = xValues[i - 1];
-                final double x1 = xValues[i];
-                minDistanceX = Math.min(minDistanceX, (int) Math.abs(x1 - x0));
-            }
-            return minDistanceX;
-        }
-
-        protected void reduce() {
-            final long startTimeStamp = ProcessingProfiler.getTimeStamp();
-            actualDataCount = 1;
-
-            if (!isReducePoints() || Math.abs(indexMax - indexMin) < getMinRequiredReductionSize()) {
-                actualDataCount = indexMax - indexMin;
-                System.arraycopy(xValues, indexMin, xValues, 0, actualDataCount);
-                System.arraycopy(yValues, indexMin, yValues, 0, actualDataCount);
-                System.arraycopy(selected, indexMin, selected, 0, actualDataCount);
-                switch (errorType) {
-                case NO_ERROR: // no error attached
-                    break;
-                case Y: // only symmetric errors around y
-                case Y_ASYMMETRIC: // asymmetric errors around y
-                    System.arraycopy(errorYNeg, indexMin, errorYNeg, 0, actualDataCount);
-                    System.arraycopy(errorYPos, indexMin, errorYPos, 0, actualDataCount);
-                    break;
-                case XY: // symmetric errors around x and y
-                case X: // only symmetric errors around x
-                case X_ASYMMETRIC: // asymmetric errors around x
-                default:
-                    System.arraycopy(errorXNeg, indexMin, errorXNeg, 0, actualDataCount);
-                    System.arraycopy(errorXPos, indexMin, errorXPos, 0, actualDataCount);
-                    System.arraycopy(errorYNeg, indexMin, errorYNeg, 0, actualDataCount);
-                    System.arraycopy(errorYPos, indexMin, errorYPos, 0, actualDataCount);
-                    break;
-                }
-
-                ProcessingProfiler.getTimeDiff(startTimeStamp,
-                        String.format("no data reduction (%d)", actualDataCount));
-                return;
-            }
-
-            final RendererDataReducer cruncher = rendererDataReducerProperty().get();
-
-            if (!isReducePoints()) {
-
-            }
-
-            switch (errorType) {
-            case NO_ERROR: // see comment above
-            case Y:
-                actualDataCount = cruncher.reducePoints(xValues, yValues, null, null, errorYPos, errorYNeg, styles,
-                        selected, indexMin, indexMax);
-                minDataPointDistanceX();
-                break;
-            case X:
-            case XY:
-            default:
-                actualDataCount = cruncher.reducePoints(xValues, yValues, errorXPos, errorXNeg, errorYPos, errorYNeg,
-                        styles, selected, indexMin, indexMax);
-
-                minDataPointDistanceX();
-                break;
-            }
-            // ProcessingProfiler.getTimeDiff(startTimeStamp,
-        }
-
-        @Override
-        protected void finalize() throws Throwable {
-            release();
-            super.finalize();
-        }
-
-        public void release() {
-            cache.release("xValues", xValues);
-            cache.release("yValues", yValues);
-            cache.release("errorYNeg", errorYNeg);
-            cache.release("errorYPos", errorYPos);
-            cache.release("errorXNeg", errorXNeg);
-            cache.release("errorXPos", errorXPos);
-            cache.release("selected", selected);
-            cache.release("styles", styles);
-        }
-    }
-
 }
