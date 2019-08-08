@@ -5,9 +5,11 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 import de.gsi.chart.Chart;
 import de.gsi.chart.XYChart;
@@ -28,7 +30,7 @@ import javafx.scene.layout.Priority;
 import javafx.stage.Stage;
 
 /**
- * example to illustrate bubble- and scatter-type plot 
+ * example to illustrate bubble- and scatter-type plot
  * using either the DataSetError interface or (more customisable) DataStyle Marker interface.
  *
  * @author rstein
@@ -56,8 +58,12 @@ public class ScatterAndBubbleRendererSample extends Application {
         DefaultDataSet bubbleDataSet2a = new DefaultDataSet("women");
         DefaultDataSet bubbleDataSet2b = new DefaultDataSet("men");
 
+        Map<String, Double> sortedGDP = gdpPerCapita.entrySet().stream().sorted(Entry.comparingByValue())
+                .collect(Collectors.toMap(Entry::getKey, Entry::getValue, (e1, e2) -> e2, LinkedHashMap::new));
+        // N.B. for the time the being the Zoomer plugin and Data reduction algorithm require 
+        // DataSets to be sorted along the x coordinate
         int count = 0;
-        for (Entry<String, Double> entry : gdpPerCapita.entrySet()) {
+        for (Entry<String, Double> entry : sortedGDP.entrySet()) {
             final String country = entry.getKey();
             final double gdp = entry.getValue();
             final double popSize = 0.2 * population.get(country) / maxPopulation;
@@ -71,15 +77,15 @@ public class ScatterAndBubbleRendererSample extends Application {
             bubbleDataSet2a.add(gdp, lifeExpectancyWomen.get(country), country);
             bubbleDataSet2b.add(gdp, lifeExpectancyMen.get(country), country);
             // N.B. markerSize is in pixel regardless of the xAxis or yAxis scale
-            String markerSize = "markerSize=" + 40 * Math.sqrt(population.get(country) / maxPopulation) + ";";
+            String markerSize = "markerSize=" + 40 * Math.sqrt(population.get(country) / maxPopulation) + "; index="+count+";";
             bubbleDataSet2a.addDataStyle(count, markerSize);
             bubbleDataSet2b.addDataStyle(count, markerSize);
             if (country.equals("FRA")) {
                 bubbleDataSet2a.addDataStyle(count, markerSize + "markerColor=darkblue; markerType=circle2;");
                 bubbleDataSet2b.addDataStyle(count, markerSize + "markerColor=darkred; markerType=circle2;");
             } else if (country.equals("JPN")) {
-                bubbleDataSet2a.addDataStyle(count, markerSize + "markerColor=darkblue; markerType=diamond;");
-                bubbleDataSet2b.addDataStyle(count, markerSize + "markerColor=darkred; markerType=diamond;");
+                bubbleDataSet2a.addDataStyle(count, markerSize + "markerColor=green; markerType=diamond;");
+                bubbleDataSet2b.addDataStyle(count, markerSize + "markerColor=lightgreen; markerType=diamond;");
             }
             // for more marker types see DefaultMarker 
 
@@ -89,7 +95,6 @@ public class ScatterAndBubbleRendererSample extends Application {
         Chart chart1 = getDefaultChart("Bubble-Chart via DataSetError interface");
         final ErrorDataSetRenderer errorRenderer1 = new ErrorDataSetRenderer();
         errorRenderer1.setMarkerSize(1);
-        errorRenderer1.setPointReduction(false);
         errorRenderer1.setPolyLineStyle(LineStyle.NONE);
         errorRenderer1.setErrorType(ErrorStyle.ERRORBARS);
         errorRenderer1.setDrawMarker(false);
@@ -108,7 +113,6 @@ public class ScatterAndBubbleRendererSample extends Application {
         Chart chart2 = getDefaultChart("Scatter-Chart via addDataStyle(<index>, <String>) interface");
         final ErrorDataSetRenderer errorRenderer2 = new ErrorDataSetRenderer();
         errorRenderer2.setMarkerSize(5);
-        errorRenderer2.setPointReduction(false);
         errorRenderer2.setPolyLineStyle(LineStyle.NONE);
         errorRenderer2.setErrorType(ErrorStyle.NONE);
         errorRenderer2.setDrawMarker(true);
