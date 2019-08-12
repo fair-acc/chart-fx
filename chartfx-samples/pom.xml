@@ -31,7 +31,7 @@
                 <artifactId>exec-maven-plugin</artifactId>
                 <configuration>
                     <skip>false</skip>
-                    <mainClass>de.gsi.samples.utils.LaunchJFX</mainClass>
+                    <mainClass>de.gsi.chart.samples.RunChartSamples</mainClass>
                 </configuration>
             </plugin>
         </plugins>

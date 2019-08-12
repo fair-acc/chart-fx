@@ -244,7 +244,7 @@ Maven calls java with the corresponding options so that JavaFX is working. Becau
 git clone
 cd chart-fx
 mvn compile
-mvn exec:java -Dproject.mainClass=de.gsi.chart.samples.RunChartSamples
+mvn exec:java -Dexec.mainClass=de.gsi.chart.samples.RunChartSamples
 ```
 
 ### Eclipse
