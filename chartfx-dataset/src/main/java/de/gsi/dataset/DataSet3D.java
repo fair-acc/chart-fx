@@ -7,7 +7,7 @@ package de.gsi.dataset;
  * @author rstein
  * @deprecated No need to implement this anymore as the DataSet interface was generalized to multiple dimensions.
  */
-@Deprecated(since = "11.1.4", forRemoval = true)
+@Deprecated
 public interface DataSet3D extends DataSet2D {
     @Override
     default int getDimension() {

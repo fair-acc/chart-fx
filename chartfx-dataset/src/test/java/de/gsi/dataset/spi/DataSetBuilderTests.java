@@ -11,7 +11,9 @@ import static de.gsi.dataset.DataSet.DIM_X;
 import static de.gsi.dataset.DataSet.DIM_Y;
 import static de.gsi.dataset.DataSet.DIM_Z;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -49,7 +51,7 @@ public class DataSetBuilderTests {
                                         .setMetaErrorList(new String[] { "no connection to device", "error reading config" })
                                         .setMetaInfoList(new String[0])
                                         .setMetaWarningList(new String[] { "overrange" })
-                                        .setMetaInfoMap(Map.of("someParameter", "5"))
+                                        .setMetaInfoMap(Mapof("someParameter", "5"))
                                         .build();
         assertEquals("testdataset", dataset.getName());
         assertEquals(3, dataset.getDataCount());
@@ -72,7 +74,7 @@ public class DataSetBuilderTests {
         assertEquals("error reading config", metaDataSet.getErrorList().get(1));
         assertEquals("overrange", metaDataSet.getWarningList().get(0));
         assertEquals(0, metaDataSet.getInfoList().size());
-        assertEquals(Map.of("someParameter", "5"), metaDataSet.getMetaInfo());
+        assertEquals(Mapof("someParameter", "5"), metaDataSet.getMetaInfo());
         assertEquals("awesomeness", dataset.getAxisDescription(DIM_Y).getName());
         assertEquals("%", dataset.getAxisDescription(DIM_X).getUnit());
         assertEquals(-2, dataset.getAxisDescription(DIM_Y).getMin());
@@ -241,8 +243,8 @@ public class DataSetBuilderTests {
                 .setAxisUnit(DIM_X, "%") //
                 .setAxisName(DIM_Y, "awesomeness") //
                 .setAxisUnit(DIM_Y, "norris") //
-                .setDataLabelMap(Map.of(1, "foo", 2, "bar")) //
-                .setDataStyleMap(Map.of(0, "color:red", 2, "bar"));
+                .setDataLabelMap(Mapof(1, "foo", 2, "bar")) //
+                .setDataStyleMap(Mapof(0, "color:red", 2, "bar"));
         final DataSet dataset = dataSetBuilder.build();
         assertEquals("testdataset", dataset.getName());
         assertArrayEquals(new double[] { 1, 2, 3 }, dataset.getValues(DIM_X));
@@ -405,7 +407,7 @@ public class DataSetBuilderTests {
             final DataSetBuilder builder = new DataSetBuilder("foo");
             DataSet test0 = new MinimalDataSet();
             builder.addMetaData(test0);
-            builder.setMetaErrorList("foo").setMetaInfoList("asdf", "qwert").setMetaWarningList("123", "321").setMetaInfoMap(Map.of("key", "value"));
+            builder.setMetaErrorList("foo").setMetaInfoList("asdf", "qwert").setMetaWarningList("123", "321").setMetaInfoMap(Mapof("key", "value"));
             DoubleErrorDataSet test1 = new DoubleErrorDataSet("test");
             builder.addMetaData(test1);
             builder.addMetaData(test0);
@@ -414,7 +416,7 @@ public class DataSetBuilderTests {
             final DataSetBuilder builder = new DataSetBuilder("foo");
             DataSet test0 = new MinimalDataSet();
             builder.addDataLabelStyleMap(test0);
-            builder.setDataLabelMap(Map.of(1, "test", 2, "label")).setDataStyleMap(Map.of(1, "color:red"));
+            builder.setDataLabelMap(Mapof(1, "test", 2, "label")).setDataStyleMap(Mapof(1, "color:red"));
             DoubleErrorDataSet test1 = new DoubleErrorDataSet("test", 2);
             builder.addDataLabelStyleMap(test1);
             builder.addDataLabelStyleMap(test0);
@@ -445,7 +447,7 @@ public class DataSetBuilderTests {
 
         @Override
         public List<AxisDescription> getAxisDescriptions() {
-            return List.of(new DefaultAxisDescription(this, "x Axis", "", 0.0, 9.0),
+            return Listof(new DefaultAxisDescription(this, "x Axis", "", 0.0, 9.0),
                     new DefaultAxisDescription(this, "y Axis", "", 0.0, 90.0));
         }
 
@@ -504,5 +506,29 @@ public class DataSetBuilderTests {
         public DataSet setStyle(String style) {
             return null;
         }
+    }
+    
+ // needed for JDK8 backward compatibility
+    private static <K,V> Map<K,V> Mapof(final K k1, final V v1) {
+        final HashMap<K,V> map = new HashMap<K,V>();
+        map.put(k1, v1);
+        return map;
+    }
+    
+ // needed for JDK8 backward compatibility
+    private static <K,V> Map<K,V> Mapof(final K k1, final V v1, final K k2, final V v2) {
+        final HashMap<K,V> map = new HashMap<K,V>();
+        map.put(k1, v1);
+        map.put(k2, v2);
+        return map;
+    }
+    
+    // for JDK8 backward compatibility
+    private static <E> List<E> Listof(final E... input) {
+        final ArrayList<E> list = new ArrayList<E>();
+        for (E item : input) {
+            list.add(item);
+        }
+        return list;
     }
 }

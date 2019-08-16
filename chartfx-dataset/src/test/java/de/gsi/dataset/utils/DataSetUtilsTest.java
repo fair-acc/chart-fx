@@ -15,7 +15,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PushbackInputStream;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
@@ -78,7 +80,7 @@ public class DataSetUtilsTest {
                                   .setAxisUnit(DIM_X, "") //
                                   .setAxisName(DIM_Y, "Voltage")
                                   .setAxisUnit(DIM_Y, "V") //
-                                  .setMetaInfoMap(Map.of("test", "asdf", "testval", "5.24532")) //
+                                  .setMetaInfoMap(Mapof("test", "asdf", "testval", "5.24532")) //
                                   .setMetaWarningList("testWarning") //
                                   .setMetaInfoList("testInfo") //
                                   .setMetaErrorList("testError") //
@@ -141,7 +143,7 @@ public class DataSetUtilsTest {
                                   .setAxisUnit(DIM_X, "") //
                                   .setAxisName(DIM_Y, "Voltage")
                                   .setAxisUnit(DIM_Y, "V") //
-                                  .setMetaInfoMap(Map.of("test", "asdf", "testval", "5.24532")) //
+                                  .setMetaInfoMap(Mapof("test", "asdf", "testval", "5.24532")) //
                                   .setMetaWarningList("testWarning") //
                                   .setMetaInfoList("testInfo") //
                                   .setMetaErrorList("testError") //
@@ -178,9 +180,9 @@ public class DataSetUtilsTest {
         assertThrows(IllegalArgumentException.class,
                 () -> DataSetUtils.writeDataSetToFile(new DefaultDataSet("test"), null, null));
         assertThrows(IllegalArgumentException.class,
-                () -> DataSetUtils.writeDataSetToFile(new DefaultDataSet("test"), Path.of("/tmp"), ""));
+                () -> DataSetUtils.writeDataSetToFile(new DefaultDataSet("test"), Paths.get("/tmp"), ""));
         assertThrows(IllegalArgumentException.class,
-                () -> DataSetUtils.writeDataSetToFile(new DefaultDataSet("test"), Path.of("/tmp"), null));
+                () -> DataSetUtils.writeDataSetToFile(new DefaultDataSet("test"), Paths.get("/tmp"), null));
     }
 
     @Test
@@ -260,7 +262,7 @@ public class DataSetUtilsTest {
         final DataSet dataSet = new DataSetBuilder("dsName") //
                                         .setValuesNoCopy(DIM_X, new double[] { 1, 2, 3 }) //
                                         .setValuesNoCopy(DIM_Y, new double[] { 9, 7, 8 }) //
-                                        .setMetaInfoMap(Map.of("metaInt", "1337", "metaString", "testMetaInfo", "metaDouble", "1.337",
+                                        .setMetaInfoMap(Mapof("metaInt", "1337", "metaString", "testMetaInfo", "metaDouble", "1.337",
                                                 "metaEng", "1.33e-7", "acqStamp", Long.toString(acqStamp)))
                                         .build();
         assertEquals("file.bin.gz", DataSetUtils.getFileName(dataSet, "file.bin.gz"));
@@ -295,5 +297,24 @@ public class DataSetUtilsTest {
     @BeforeAll
     public static void resetLocalization() {
         Locale.setDefault(Locale.US);
+    }
+    
+    // needed for JDK8 backward compatibility
+    private static <K,V> Map<K,V> Mapof(final K k1, final V v1, final K k2, final V v2) {
+        final HashMap<K,V> map = new HashMap<K,V>();
+        map.put(k1, v1);
+        map.put(k2, v2);
+        return map;
+    }
+    
+ // needed for JDK8 backward compatibility
+    private static <K,V> Map<K,V> Mapof(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5, final V v5) {
+        final HashMap<K,V> map = new HashMap<K,V>();
+        map.put(k1, v1);
+        map.put(k2, v2);
+        map.put(k3, v3);
+        map.put(k4, v4);
+        map.put(k5, v5);
+        return map;
     }
 }

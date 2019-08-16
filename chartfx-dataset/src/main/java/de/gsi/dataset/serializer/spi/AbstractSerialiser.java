@@ -147,7 +147,7 @@ public abstract class AbstractSerialiser {
         if (isClassKnown(fieldClass, fieldGenericTypes) && recursionDepth != 0) {
             // serialise known class object
             final Optional<FieldSerialiser> serialiser = findFieldSerialiserForKnownClassOrInterface(fieldClass, root.getActualTypeArguments());
-            if (serialiser.isEmpty()) {
+            if (!serialiser.isPresent()) {
                 // should not happen (because of 'isClassKnown')
                 throw new IllegalStateException("should not happen -- cannot serialise field - " + root.getFieldNameRelative() + " - class type = " + root.getTypeName());
             }

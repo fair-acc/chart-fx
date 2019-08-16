@@ -1,4 +1,4 @@
-package de.gsi.dataset.serializer.spi;
+package de.gsi.dataset.utils.serializer;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -10,6 +10,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.gsi.dataset.serializer.IoBuffer;
+import de.gsi.dataset.serializer.spi.ByteBuffer;
+import de.gsi.dataset.serializer.spi.FastByteBuffer;
+import de.gsi.dataset.utils.serializer.helper.ArrayHelper;
 
 /**
  * @author rstein
@@ -23,10 +26,10 @@ public class FastByteBufferTests {
     protected static final long[] longTestArrray = { Integer.MAX_VALUE, Integer.MAX_VALUE + 1, -Integer.MAX_VALUE - 2 };
     protected static final float[] floatTestArrray = { 1.1e9f, 1.2e9f, 1.3e9f, -1.1e9f, -1.2e9f, -1.3e9f };
     protected static final double[] doubleTestArrray = { Float.MAX_VALUE + 1.1e9, Float.MAX_VALUE + 1.2e9,
-        Float.MAX_VALUE + 1.3e9f, -Float.MAX_VALUE - 1.1e9f, -Float.MAX_VALUE - 1.2e9f, Float.MAX_VALUE - 1.3e9f };
+            Float.MAX_VALUE + 1.3e9f, -Float.MAX_VALUE - 1.1e9f, -Float.MAX_VALUE - 1.2e9f, Float.MAX_VALUE - 1.3e9f };
     protected static final char[] charTestArrray = { 'a', 'b', 'c', 'd' };
     protected static final String[] stringTestArrray = { "Is", "this", "the", "real", "life?", "Is", "this", "just",
-        "fantasy?" };
+            "fantasy?" };
 
     @Test
     public void testByteBufferMixed() {
@@ -38,7 +41,7 @@ public class FastByteBufferTests {
 
     @Test
     public void testByteBufferPrimitiveArrays() {
-        //assertTrue(testPrimitivesArrays(new ByteBuffer(2000)));
+        assertTrue(testPrimitivesArrays(new ByteBuffer(2000)));
         if (LOGGER.isDebugEnabled()) {
             LOGGER.atDebug().log("finished testByteBufferPrimitiveArrays(..)");
         }
@@ -54,6 +57,7 @@ public class FastByteBufferTests {
 
     @Test
     public void testFastByteBufferAllocators() {
+
         {
             FastByteBuffer buffer = new FastByteBuffer();
             assertTrue(buffer.capacity() > 0);
@@ -95,7 +99,7 @@ public class FastByteBufferTests {
 
     @Test
     public void testFastByteBufferPrimitiveArrays() {
-        //assertTrue(testPrimitivesArrays(new FastByteBuffer(2000)));
+        assertTrue(testPrimitivesArrays(new FastByteBuffer(2000)));
         if (LOGGER.isDebugEnabled()) {
             LOGGER.atDebug().log("finished testFastByteBufferPrimitiveArrays(..)");
         }
@@ -111,6 +115,7 @@ public class FastByteBufferTests {
 
     @Test
     public void testFastByteBufferResizing() {
+
         {
             FastByteBuffer buffer = new FastByteBuffer(300);
             assertEquals(buffer.capacity(), 300);
@@ -157,8 +162,8 @@ public class FastByteBufferTests {
         }
     }
 
-    /* test disabled because being available in JDK11 and required functionality unavaiable in JDK8
     private static boolean testPrimitivesArrays(IoBuffer buffer) {
+
         {
             buffer.reset();
             buffer.putBooleanArray(booleanTestArrray);
@@ -167,7 +172,7 @@ public class FastByteBufferTests {
             buffer.reset();
             final int length = booleanTestArrray.length;
             final boolean[] arrayToBeTested = buffer.getBooleanArray(new boolean[length + 2], 2, length);
-            assertTrue(Arrays.equals(booleanTestArrray, 0, length, arrayToBeTested, 2, length + 2));
+            assertTrue(ArrayHelper.equals(booleanTestArrray, 0, length, arrayToBeTested, 2, length + 2));
         }
 
         {
@@ -178,7 +183,7 @@ public class FastByteBufferTests {
             buffer.reset();
             final int length = byteTestArrray.length;
             final byte[] arrayToBeTested = buffer.getByteArray(new byte[length + 2], 2, length);
-            assertTrue(Arrays.equals(byteTestArrray, 0, length, arrayToBeTested, 2, length + 2));
+            assertTrue(ArrayHelper.equals(byteTestArrray, 0, length, arrayToBeTested, 2, length + 2));
         }
 
         {
@@ -189,7 +194,7 @@ public class FastByteBufferTests {
             buffer.reset();
             final int length = shortTestArrray.length;
             final short[] arrayToBeTested = buffer.getShortArray(new short[length + 2], 2, length);
-            assertTrue(Arrays.equals(shortTestArrray, 0, length, arrayToBeTested, 2, length + 2));
+            assertTrue(ArrayHelper.equals(shortTestArrray, 0, length, arrayToBeTested, 2, length + 2));
         }
 
         {
@@ -200,7 +205,7 @@ public class FastByteBufferTests {
             buffer.reset();
             final int length = intTestArrray.length;
             final int[] arrayToBeTested = buffer.getIntArray(new int[length + 2], 2, length);
-            assertTrue(Arrays.equals(intTestArrray, 0, length, arrayToBeTested, 2, length + 2));
+            assertTrue(ArrayHelper.equals(intTestArrray, 0, length, arrayToBeTested, 2, length + 2));
         }
 
         {
@@ -211,7 +216,7 @@ public class FastByteBufferTests {
             buffer.reset();
             final int length = longTestArrray.length;
             final long[] arrayToBeTested = buffer.getLongArray(new long[length + 2], 2, length);
-            assertTrue(Arrays.equals(longTestArrray, 0, length, arrayToBeTested, 2, length + 2));
+            assertTrue(ArrayHelper.equals(longTestArrray, 0, length, arrayToBeTested, 2, length + 2));
         }
 
         {
@@ -222,7 +227,7 @@ public class FastByteBufferTests {
             buffer.reset();
             final int length = floatTestArrray.length;
             final float[] arrayToBeTested = buffer.getFloatArray(new float[length + 2], 2, length);
-            assertTrue(Arrays.equals(floatTestArrray, 0, length, arrayToBeTested, 2, length + 2));
+            assertTrue(ArrayHelper.equals(floatTestArrray, 0, length, arrayToBeTested, 2, length + 2));
         }
 
         {
@@ -233,7 +238,7 @@ public class FastByteBufferTests {
             buffer.reset();
             final int length = doubleTestArrray.length;
             final double[] arrayToBeTested = buffer.getDoubleArray(new double[length + 2], 2, length);
-            assertTrue(Arrays.equals(doubleTestArrray, 0, length, arrayToBeTested, 2, length + 2));
+            assertTrue(ArrayHelper.equals(doubleTestArrray, 0, length, arrayToBeTested, 2, length + 2));
         }
 
         // {
@@ -244,7 +249,7 @@ public class FastByteBufferTests {
         // buffer.reset();
         // final int length = charTestArrray.length;
         // final char[] arrayToBeTested = buffer.getCharArray(new char[length + 2], 2, length);
-        // assertTrue(Arrays.equals(doubleTestArrray, 0, length, arrayToBeTested, 2, length + 2);
+        // assertTrue(ArrayHelper.equals(doubleTestArrray, 0, length, arrayToBeTested, 2, length + 2);
         // }
 
         {
@@ -255,12 +260,11 @@ public class FastByteBufferTests {
             buffer.reset();
             final int length = stringTestArrray.length;
             final String[] arrayToBeTested = buffer.getStringArray(new String[length + 2], 2, length);
-            assertTrue(Arrays.equals(stringTestArrray, 0, length, arrayToBeTested, 2, length + 2));
+            assertTrue(ArrayHelper.equals(stringTestArrray, 0, length, arrayToBeTested, 2, length + 2));
         }
 
         return true;
     }
-    */
 
     private static boolean testPrimitivesMixed(IoBuffer buffer) {
         final long largeLong = (long) Integer.MAX_VALUE + (long) 10;
@@ -298,6 +302,7 @@ public class FastByteBufferTests {
     }
 
     private static boolean testPrimitivesSimple(IoBuffer buffer) {
+
         buffer.reset();
         buffer.putBoolean(true);
         buffer.reset();
@@ -356,4 +361,5 @@ public class FastByteBufferTests {
 
         return true;
     }
+
 }

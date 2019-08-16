@@ -178,7 +178,9 @@ public final class WriteFxImage {
                 }
             }
             png.end();
-            return os.buffer().flip();
+            final ByteBuffer ret = os.buffer();
+            ret.flip();
+            return ret;
         } catch (IOException e) {
             LOGGER.atError().setCause(e).log("buffer couldn't be closes");
         }
@@ -296,7 +298,9 @@ public final class WriteFxImage {
             pngWriter.end();
             ArrayCache.release(INTERNAL_ARRAY_CACHE_NAME, uncompressedImageData);
             ArrayCache.release(INTERNAL_LINE_ARRAY_CACHE_NAME, lineArray);
-            return os.buffer().flip();
+            final ByteBuffer ret = os.buffer();
+            ret.flip();
+            return ret;
         } catch (IOException e) {
             LOGGER.atError().setCause(e).log("buffer couldn't be closed");
         }
@@ -459,7 +463,7 @@ public final class WriteFxImage {
         outputByteBuffer.putInt(0); // zero size, will later be overwritten when we know the size
         outputByteBuffer.put("IDAT".getBytes());
         compressor.finish();
-        compressor.deflate(outputByteBuffer, Deflater.FULL_FLUSH);
+        compressor.deflate(outputByteBuffer.array());
         outputByteBuffer.limit(outputByteBuffer.position());
         outputByteBuffer.reset();
         outputByteBuffer.putInt(compressor.getTotalOut());

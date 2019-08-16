@@ -14,6 +14,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Deque;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -381,7 +382,7 @@ public class BinarySerialiserTests {
         positionAfter.add(buffer.position());
 
         // add Collection - Set<E>
-        final Set<Integer> set = Set.of(1, 2, 3);
+        final Set<Integer> set = Setof(1, 2, 3);
         positionBefore.add(buffer.position());
         BinarySerialiser.put(buffer, "set", set);
         positionAfter.add(buffer.position());
@@ -636,7 +637,7 @@ public class BinarySerialiserTests {
         final List<Integer> list = Arrays.asList(1, 2, 3);
         BinarySerialiser.put(buffer, "list", list); // add Collection - List<E>
 
-        final Set<Integer> set = Set.of(1, 2, 3);
+        final Set<Integer> set = Setof(1, 2, 3);
         BinarySerialiser.put(buffer, "set", set); // add Collection - Set<E>
 
         final Queue<Integer> queue = new LinkedList<>(Arrays.asList(1, 2, 3));
@@ -760,5 +761,14 @@ public class BinarySerialiserTests {
 
         assertDoesNotThrow(() -> BinarySerialiser.getNumberOfElements(new int[] { 1, 2, 3 }));
         assertEquals(1000, BinarySerialiser.getNumberOfElements(new int[] { 10, 10, 10 }));
+    }
+    
+    // required for JDK8 backward compatibility
+    private static <E> Set<E> Setof(E... data) {
+        final HashSet<E> set = new HashSet<E>();
+        for (E item: data) {
+            set.add(item);
+        }
+        return set;
     }
 }

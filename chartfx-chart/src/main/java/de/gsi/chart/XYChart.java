@@ -372,10 +372,10 @@ public class XYChart extends Chart {
             Optional<Axis> yAxis = renderer.getAxes().stream().filter(a -> a.getSide().isVertical()).findFirst();
 
             // search for horizontal/vertical axes in Chart (which creates one if missing) and add to renderer
-            if (xAxis.isEmpty()) {
+            if (!xAxis.isPresent()) {
                 renderer.getAxes().add(getFirstAxis(Orientation.HORIZONTAL));
             }
-            if (yAxis.isEmpty()) {
+            if (!yAxis.isPresent()) {
                 // search for horizontal axis in Chart (which creates one if missing) and add to renderer
                 renderer.getAxes().add(getFirstAxis(Orientation.VERTICAL));
             }

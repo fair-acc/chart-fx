@@ -23,7 +23,7 @@ import org.controlsfx.glyphfont.Glyph;
 public class TilingPane extends GridPane {
     protected static final String FONT_AWESOME = "FontAwesome";
     protected static final int FONT_SIZE = 20;
-    private final ObjectProperty<Layout> layout = new SimpleObjectProperty<>(this, "layout", Layout.GRID) {
+    private final ObjectProperty<Layout> layout = new SimpleObjectProperty<Layout>(this, "layout", Layout.GRID) {
         @Override
         public void set(final Layout newLayout) {
             if (newLayout == null) {

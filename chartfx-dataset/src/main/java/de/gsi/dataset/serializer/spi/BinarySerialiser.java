@@ -517,7 +517,7 @@ public class BinarySerialiser { // NOPMD - omen est omen
                     throw new IllegalStateException("reached end marker, mismatched value '" + markerValue + "' vs. should '" + DataType.END_MARKER.getAsByte() + "'");
                 }
 
-                if (superParent.isEmpty()) {
+                if (!superParent.isPresent()) {
                     fieldRoot.getChildren().add(fieldHeader);
                 } else {
                     superParent.get().getChildren().add(fieldHeader);

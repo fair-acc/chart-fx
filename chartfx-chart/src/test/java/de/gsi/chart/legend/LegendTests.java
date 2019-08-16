@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -158,36 +159,36 @@ public class LegendTests {
 
         legend.getItems().clear();
         assertTrue(legend.getItems().isEmpty());
-        legend.updateLegend(List.of(testDataSet), List.of(testRenderer), false);
+        legend.updateLegend(Listof(testDataSet), Listof(testRenderer), false);
         assertFalse(legend.getItems().isEmpty());
         assertEquals("sine", legend.getItems().get(0).getText());
         assertTrue(legend.getItems().get(0).getSymbol() instanceof Canvas);
 
-        legend.updateLegend(List.of(testDataSet, testDataSet), List.of(testRenderer), false);
+        legend.updateLegend(Listof(testDataSet, testDataSet), Listof(testRenderer), false);
         assertEquals(1, legend.getItems().size());
 
-        legend.updateLegend(List.of(testDataSet), List.of(testRenderer, testRenderer), false);
+        legend.updateLegend(Listof(testDataSet), Listof(testRenderer, testRenderer), false);
         assertEquals(1, legend.getItems().size());
 
         testDataSet.setStyle(XYChartCss.DATASET_SHOW_IN_LEGEND + "=false;");
-        legend.updateLegend(List.of(testDataSet), List.of(testRenderer), true);
+        legend.updateLegend(Listof(testDataSet), Listof(testRenderer), true);
         assertEquals(0, legend.getItems().size());
         testDataSet.setStyle(XYChartCss.DATASET_SHOW_IN_LEGEND + "=true;");
-        legend.updateLegend(List.of(testDataSet), List.of(testRenderer), true);
+        legend.updateLegend(Listof(testDataSet), Listof(testRenderer), true);
         assertEquals(1, legend.getItems().size());
 
-        legend.updateLegend(List.of(testDataSet), Collections.emptyList(), true);
+        legend.updateLegend(Listof(testDataSet), Collections.emptyList(), true);
         assertEquals(0, legend.getItems().size());
 
         testRenderer.setShowInLegend(false);
-        legend.updateLegend(List.of(testDataSet), List.of(testRenderer), true);
+        legend.updateLegend(Listof(testDataSet), Listof(testRenderer), true);
         assertEquals(0, legend.getItems().size());
 
         testRenderer.setShowInLegend(true);
-        legend.updateLegend(List.of(testDataSet), List.of(testRenderer), true);
+        legend.updateLegend(Listof(testDataSet), Listof(testRenderer), true);
         assertEquals(1, legend.getItems().size());
 
-        legend.updateLegend(List.of(testDataSetAlt), List.of(testRenderer), false);
+        legend.updateLegend(Listof(testDataSetAlt), Listof(testRenderer), false);
         assertEquals(2, legend.getItems().size());
     }
 
@@ -240,5 +241,14 @@ public class LegendTests {
         public BooleanProperty showInLegendProperty() {
             return showInLegend;
         }
+    }
+    
+    // for JDK8 backward compatibility
+    private static <E> List<E> Listof(final E... input) {
+        final ArrayList<E> list = new ArrayList<E>();
+        for (E item : input) {
+            list.add(item);
+        }
+        return list;
     }
 }

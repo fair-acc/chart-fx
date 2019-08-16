@@ -14,7 +14,7 @@ import de.gsi.dataset.utils.AssertUtils;
  * @deprecated Not very efficient due to the nested array storage of the data, consider using the generic
  *             MultiDimDataSet or implement a custom data set. Will be removed in a future release.
  */
-@Deprecated(since = "11.1.4", forRemoval = true)
+@Deprecated
 public class DoubleDataSet3D extends AbstractDataSet3D<DoubleDataSet3D> {
     private static final long serialVersionUID = 1289344630607938420L;
     private double[] xValues;

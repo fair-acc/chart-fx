@@ -19,7 +19,7 @@ import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
-import javafx.scene.image.PixelBuffer;
+// import javafx.scene.image.PixelBuffer; // not available in JDK8
 import javafx.scene.image.PixelFormat;
 import javafx.scene.image.WritableImage;
 import javafx.scene.paint.Color;
@@ -42,42 +42,42 @@ public class WriteFxImageBenchmark {
     private static final int w = 333;
     private static final int h = 777;
     private static ByteBuffer noisePixels;
-    private static PixelBuffer<ByteBuffer> noiseBuffer;
+    //private static PixelBuffer<ByteBuffer> noiseBuffer;
     private static WritableImage testimage; // test image with noise (N.B. hard to compress)
     private static final int w2 = 777;
     private static final int h2 = 333;
     private static Image testimage2; // test image with shapes (N.B. easy to compress
     private static final AtomicBoolean initialized = new AtomicBoolean(false);
 
-    public static void initalizeImage() {
-        noisePixels = ByteBuffer.allocate(w * h * 4);
-        noiseBuffer = new PixelBuffer<>(w, h, noisePixels, PixelFormat.getByteBgraPreInstance());
-        testimage = new WritableImage(noiseBuffer);
-        final Canvas noiseCanvas = new Canvas(w, h);
-        final GraphicsContext noiseContext = noiseCanvas.getGraphicsContext2D();
-        final byte[] randomArray = new byte[w * h * 4];
-        new Random().nextBytes(randomArray);
-        noiseContext.getPixelWriter().setPixels(0, 0, w, h, PixelFormat.getByteBgraInstance(), randomArray, 0, w);
-        noiseCanvas.snapshot(null, testimage);
-
-        final Canvas easyCanvas = new Canvas(w2, h2);
-        final GraphicsContext easyContext = easyCanvas.getGraphicsContext2D();
-        easyContext.setStroke(Color.BLUE);
-        easyContext.strokeOval(20, 30, 40, 50);
-        easyContext.setStroke(Color.RED);
-        easyContext.strokeOval(30, 40, 50, 60);
-        easyContext.setStroke(Color.GREEN);
-        easyContext.strokeOval(40, 50, 60, 70);
-        easyContext.setStroke(Color.ORANGE);
-        easyContext.strokeRect(0, 0, w2, h2);
-        testimage2 = easyCanvas.snapshot(null, null);
-
-        initialized.set(true);
-    }
+//    public static void initalizeImage() {
+//        noisePixels = ByteBuffer.allocate(w * h * 4);
+//        noiseBuffer = new PixelBuffer<>(w, h, noisePixels, PixelFormat.getByteBgraPreInstance());
+//        testimage = new WritableImage(noiseBuffer);
+//        final Canvas noiseCanvas = new Canvas(w, h);
+//        final GraphicsContext noiseContext = noiseCanvas.getGraphicsContext2D();
+//        final byte[] randomArray = new byte[w * h * 4];
+//        new Random().nextBytes(randomArray);
+//        noiseContext.getPixelWriter().setPixels(0, 0, w, h, PixelFormat.getByteBgraInstance(), randomArray, 0, w);
+//        noiseCanvas.snapshot(null, testimage);
+//
+//        final Canvas easyCanvas = new Canvas(w2, h2);
+//        final GraphicsContext easyContext = easyCanvas.getGraphicsContext2D();
+//        easyContext.setStroke(Color.BLUE);
+//        easyContext.strokeOval(20, 30, 40, 50);
+//        easyContext.setStroke(Color.RED);
+//        easyContext.strokeOval(30, 40, 50, 60);
+//        easyContext.setStroke(Color.GREEN);
+//        easyContext.strokeOval(40, 50, 60, 70);
+//        easyContext.setStroke(Color.ORANGE);
+//        easyContext.strokeRect(0, 0, w2, h2);
+//        testimage2 = easyCanvas.snapshot(null, null);
+//
+//        initialized.set(true);
+//    }
 
     public static void main(String[] args) throws IOException {
         // get the image on the javafx application thread for snapshot to work
-        Platform.startup(WriteFxImageBenchmark::initalizeImage);
+        //Platform.startup(WriteFxImageBenchmark::initalizeImage);
         while (!initialized.get()) {
             //
         }

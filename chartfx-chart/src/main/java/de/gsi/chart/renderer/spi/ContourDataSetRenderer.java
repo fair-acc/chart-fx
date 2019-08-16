@@ -154,7 +154,7 @@ public class ContourDataSetRenderer extends AbstractContourDataSetRendererParame
         final double zMax = axisTransform.forward(lCache.zMax);
 
         // N.B. works only since OpenJFX 12!! fall-back for JDK8 is the old implementation
-        gc.setImageSmoothing(isSmooth());
+        // gc.setImageSmoothing(isSmooth());
 
         getNumberQuantisationLevels();
 
@@ -215,7 +215,7 @@ public class ContourDataSetRenderer extends AbstractContourDataSetRendererParame
         final long start = ProcessingProfiler.getTimeStamp();
 
         // N.B. works only since OpenJFX 12!! fall-back for JDK8 is the old implementation
-        gc.setImageSmoothing(isSmooth());
+        // gc.setImageSmoothing(isSmooth());
 
         // process z quantisation to colour transform
         final WritableImage image = localCache.convertDataArrayToImage(lCache.reduced, lCache.xSize, lCache.ySize, getColorGradient());

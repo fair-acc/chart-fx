@@ -9,9 +9,6 @@ import javafx.scene.shape.LineTo;
 import javafx.scene.shape.MoveTo;
 import javafx.scene.shape.Path;
 
-import com.sun.javafx.scene.DirtyBits;
-import com.sun.javafx.scene.NodeHelper;
-
 /**
  * Basic implementation of a fractal Koch snowflake.
  * For details see: https://en.wikipedia.org/wiki/Koch_snowflake
@@ -21,56 +18,40 @@ import com.sun.javafx.scene.NodeHelper;
 public class SnowFlake extends Path {
     /**
      * Defines the horizontal position of the center of the circle in pixels.
-     *
-     * @defaultValue 0.0
      */
     private final DoubleProperty centerX = new SimpleDoubleProperty(this, "centerX", 0.0) {
         @Override
         public void invalidated() {
-            NodeHelper.markDirty(SnowFlake.this, DirtyBits.NODE_GEOMETRY);
-            NodeHelper.geomChanged(SnowFlake.this);
             setTranslateX(get() - radius.get());
         }
     };
 
     /**
      * Defines the vertical position of the center of the circle in pixels.
-     *
-     * @defaultValue 0.0
      */
     private final DoubleProperty centerY = new SimpleDoubleProperty(this, "centerY", 0.0) {
         @Override
         public void invalidated() {
-            NodeHelper.markDirty(SnowFlake.this, DirtyBits.NODE_GEOMETRY);
-            NodeHelper.geomChanged(SnowFlake.this);
             setTranslateX(get() - radius.get());
         }
     };
 
     /**
      * Defines the radius of the circle in pixels.
-     *
-     * @defaultValue 5.0
      */
     private final DoubleProperty radius = new SimpleDoubleProperty(this, "radius", 5.0) {
         @Override
         public void invalidated() {
-            NodeHelper.markDirty(SnowFlake.this, DirtyBits.NODE_GEOMETRY);
-            NodeHelper.geomChanged(SnowFlake.this);
             updatePath();
         }
     };
 
     /**
      * Defines the number of recursive iterations for Koch's snowflake
-     *
-     * @defaultValue 3
      */
     private final IntegerProperty nIterations = new SimpleIntegerProperty(this, "nIterations", 3) {
         @Override
         public void invalidated() {
-            NodeHelper.markDirty(SnowFlake.this, DirtyBits.NODE_GEOMETRY);
-            NodeHelper.geomChanged(SnowFlake.this);
             updatePath();
         }
     };

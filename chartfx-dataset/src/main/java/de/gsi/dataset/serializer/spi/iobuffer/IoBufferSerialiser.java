@@ -126,7 +126,7 @@ public class IoBufferSerialiser extends AbstractSerialiser {
 
         final Optional<FieldSerialiser> serialiser = findFieldSerialiserForKnownClassOrInterface(fieldClass, classFieldDescription.getActualTypeArguments());
 
-        if (serialiser.isEmpty()) {
+        if (!serialiser.isPresent()) {
             final Object ref = classFieldDescription.getField().get(obj);
             final Object subRef;
             if (ref == null) {

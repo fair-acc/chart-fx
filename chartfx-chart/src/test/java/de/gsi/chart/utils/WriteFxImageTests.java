@@ -32,6 +32,7 @@ import javafx.scene.image.PixelFormat;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
@@ -54,6 +55,7 @@ import ar.com.hjg.pngj.FilterType;
  * @author Alexander Krimm
  */
 
+@Disabled //tested in master (JDK11) branch, some features are not available in JDK8
 @ExtendWith(ApplicationExtension.class)
 public class WriteFxImageTests {
     private static final Logger LOGGER = LoggerFactory.getLogger(WriteFxImageBenchmark.class);

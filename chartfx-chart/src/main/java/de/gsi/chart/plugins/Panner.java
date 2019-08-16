@@ -38,7 +38,8 @@ public class Panner extends ChartPlugin {
     private Predicate<MouseEvent> mouseFilter = Panner.DEFAULT_MOUSE_FILTER;
     private Point2D previousMouseLocation = null;
 
-    private final ObjectProperty<AxisMode> axisMode = new SimpleObjectProperty<>(this, "axisMode", AxisMode.XY) {
+    private final ObjectProperty<AxisMode> axisMode = new SimpleObjectProperty<AxisMode>(this, "axisMode",
+            AxisMode.XY) {
         @Override
         protected void invalidated() {
             Objects.requireNonNull(get(), "The " + getName() + " must not be null");
