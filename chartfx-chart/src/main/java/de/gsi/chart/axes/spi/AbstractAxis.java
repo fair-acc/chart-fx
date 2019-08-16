@@ -148,13 +148,9 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
                 canvas.resize(getWidth() + 2 * padding, getHeight());
                 canvas.setLayoutX(-padding);
             } else {
-                canvas.resize(getWidth() + 2 * padding, getHeight() + 2 * padding);
+                canvas.resize(getWidth(), getHeight() + 2 * padding);
                 canvas.setLayoutY(-padding);
             }
-            // canvas.resize(getWidth() + 2 * padding, getHeight() + 2 *
-            // padding);
-            // canvas.setLayoutX(-padding);
-            // canvas.setLayoutY(-padding);
         };
 
         this.axisPaddingProperty().addListener((ch, o, n) -> {
