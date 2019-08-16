@@ -1,8 +1,8 @@
 language: java
 sudo: false
-dist: xenial
+dist: trusty
 jdk:
-        - openjdk11
+        - oraclejdk8
 
 # setup pgp signing key
 before_install:

@@ -56,7 +56,8 @@ public class DataView extends VBox {
             .observableList(new NoDuplicatesList<DataViewWindow>());
     private final ObservableList<DataViewWindow> undockedChildren = FXCollections
             .observableList(new NoDuplicatesList<DataViewWindow>());
-    private final ObjectProperty<DataViewWindow> maximizedChild = new SimpleObjectProperty<>(this, "maximizedView") {
+    private final ObjectProperty<DataViewWindow> maximizedChild = new SimpleObjectProperty<DataViewWindow>(this,
+            "maximizedView") {
         private Optional<DataView> lastActiveView = Optional.empty();
 
         @Override
@@ -69,7 +70,7 @@ public class DataView extends VBox {
                 }
                 lastActiveView = Optional.empty();
             } else {
-                if (lastActiveView.isEmpty()) {
+                if (!lastActiveView.isPresent()) {
                     lastActiveView = Optional.of(activeSubView.get());
                 }
                 setNodeLayout(Layout.MAXIMISE);
@@ -294,7 +295,7 @@ public class DataView extends VBox {
         }
         final Optional<DataView> match = getSubDataViews().stream().filter(c -> c.getName().equals(viewerPaneName))
                 .findFirst();
-        if (match.isEmpty()) {
+        if (!match.isPresent()) {
             LOGGER.atWarn().addArgument(viewerPaneName).log("no DataView for viewerPaneName '{}'");
             return;
         }

@@ -86,7 +86,7 @@ public class DataViewWindow extends BorderPane implements EventSource {
     private final BooleanProperty maximisedWindow = new SimpleBooleanProperty(this, "maximisedWindow", false);
     private final BooleanProperty restoredWindow = new SimpleBooleanProperty(this, "restoredWindow", true);
     private final BooleanProperty closedWindow = new SimpleBooleanProperty(this, "closedWindow", false);
-    private final ObjectProperty<WindowState> windowState = new SimpleObjectProperty<>(this, "windowState",
+    private final ObjectProperty<WindowState> windowState = new SimpleObjectProperty<WindowState>(this, "windowState",
             WindowState.WINDOW_RESTORED) {
         @Override
         public void set(final WindowState state) {

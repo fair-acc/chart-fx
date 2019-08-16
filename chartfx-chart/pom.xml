@@ -21,21 +21,6 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.openjfx</groupId>
-            <artifactId>javafx-base</artifactId>
-            <version>13.0.1</version> 
-        </dependency>
-        <dependency>
-            <groupId>org.openjfx</groupId>
-            <artifactId>javafx-controls</artifactId>
-            <version>13.0.1</version>
-        </dependency>
-        <dependency>
-            <groupId>org.openjfx</groupId>
-            <artifactId>javafx-swing</artifactId> <!-- needed to for saving images to file -->
-            <version>13.0.1</version>
-        </dependency>
-        <dependency>
             <groupId>de.gsi.dataset</groupId>
             <artifactId>chartfx-dataset</artifactId>
             <version>${project.version}</version>
@@ -48,13 +33,7 @@
         <dependency>
             <groupId>org.controlsfx</groupId>
             <artifactId>controlsfx</artifactId>
-            <version>11.0.0</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.openjfx</groupId>
-                    <artifactId>javafx-web</artifactId>
-                </exclusion>
-            </exclusions>
+            <version>8.40.14</version>
         </dependency>
         <dependency>
             <groupId>de.codecentric.centerdevice</groupId>
