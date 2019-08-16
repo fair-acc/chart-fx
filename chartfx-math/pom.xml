@@ -17,6 +17,12 @@
 		computing spectra, linear algebra, FIR/IIR filtering, and other functionalities common to signal processing.
 	</description>
 
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>de.gsi.dataset</groupId>

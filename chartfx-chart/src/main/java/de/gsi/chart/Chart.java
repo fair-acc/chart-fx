@@ -12,9 +12,9 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.gsi.chart.ui.ChartLayoutAnimator;
-import javafx.css.converter.BooleanConverter;
-import javafx.css.converter.EnumConverter;
+import com.sun.javafx.charts.ChartLayoutAnimator;
+import com.sun.javafx.css.converters.BooleanConverter;
+import com.sun.javafx.css.converters.EnumConverter;
 
 import de.gsi.chart.axes.Axis;
 import de.gsi.chart.axes.spi.DefaultNumericAxis;

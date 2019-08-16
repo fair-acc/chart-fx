@@ -4,10 +4,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import javafx.css.converter.BooleanConverter;
-import javafx.css.converter.EnumConverter;
-import javafx.css.converter.PaintConverter;
-import javafx.css.converter.SizeConverter;
+import com.sun.javafx.css.converters.BooleanConverter;
+import com.sun.javafx.css.converters.EnumConverter;
+import com.sun.javafx.css.converters.PaintConverter;
+import com.sun.javafx.css.converters.SizeConverter;
 
 import de.gsi.chart.Chart;
 import de.gsi.chart.axes.Axis;
@@ -1291,7 +1291,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
         };
 
         private static final CssMetaData<AbstractAxisParameter, String> AXIS_LABEL = new CssMetaData<AbstractAxisParameter, String>(
-                "-fx-axis-label", javafx.css.converter.StringConverter.getInstance()) {
+                "-fx-axis-label", com.sun.javafx.css.converters.StringConverter.getInstance()) {
 
             @SuppressWarnings("unchecked") // class type matched by design
             @Override

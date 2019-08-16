@@ -5,7 +5,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import javafx.css.converter.SizeConverter;
+import com.sun.javafx.css.converters.SizeConverter;
 
 import de.gsi.chart.axes.AxisTransform;
 import de.gsi.chart.axes.LogAxisType;

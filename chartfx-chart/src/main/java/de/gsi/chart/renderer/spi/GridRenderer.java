@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import javafx.css.converter.BooleanConverter;
+import com.sun.javafx.css.converters.BooleanConverter;
 
 import de.gsi.chart.Chart;
 import de.gsi.chart.XYChart;
