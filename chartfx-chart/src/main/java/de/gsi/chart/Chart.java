@@ -9,6 +9,11 @@ import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
+
+import com.sun.javafx.charts.ChartLayoutAnimator;
+import com.sun.javafx.css.converters.BooleanConverter;
+import com.sun.javafx.css.converters.EnumConverter;
+
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -33,8 +38,6 @@ import javafx.css.CssMetaData;
 import javafx.css.Styleable;
 import javafx.css.StyleableObjectProperty;
 import javafx.css.StyleableProperty;
-import javafx.css.converter.BooleanConverter;
-import javafx.css.converter.EnumConverter;
 import javafx.geometry.Bounds;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
@@ -70,7 +73,6 @@ import de.gsi.chart.legend.spi.DefaultLegend;
 import de.gsi.chart.plugins.ChartPlugin;
 import de.gsi.chart.renderer.Renderer;
 import de.gsi.chart.renderer.spi.LabelledMarkerRenderer;
-import de.gsi.chart.ui.ChartLayoutAnimator;
 import de.gsi.chart.ui.HiddenSidesPane;
 import de.gsi.chart.ui.ResizableCanvas;
 import de.gsi.chart.ui.ToolBarFlowPane;
@@ -251,7 +253,7 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
     /**
      * The side of the chart where the title is displayed default Side.TOP
      */
-    private final ObjectProperty<Side> measurementBarSide = new StyleableObjectProperty<>(Side.RIGHT) {
+    private final ObjectProperty<Side> measurementBarSide = new StyleableObjectProperty<Side>(Side.RIGHT) {
         @Override
         public Object getBean() {
             return Chart.this;
@@ -282,7 +284,7 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
     /**
      * The side of the chart where the legend should be displayed default value Side.BOTTOM
      */
-    private final ObjectProperty<Side> legendSide = new StylishObjectProperty<>(StyleableProperties.LEGEND_SIDE, this,
+    private final ObjectProperty<Side> legendSide = new StylishObjectProperty<Side>(StyleableProperties.LEGEND_SIDE, this,
             "legendSide", Side.BOTTOM, this::requestLayout) {
         @Override
         public void set(final Side side) {
@@ -306,7 +308,7 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
      * The node to display as the Legend. Subclasses can set a node here to be displayed on a side as the legend. If no
      * legend is wanted then this can be set to null
      */
-    private final ObjectProperty<Legend> legend = new SimpleObjectProperty<>(this, "legend", new DefaultLegend()) {
+    private final ObjectProperty<Legend> legend = new SimpleObjectProperty<Legend>(this, "legend", new DefaultLegend()) {
         private Legend oldLegend = get();
         {
             getMeasurementBar(getLegendSide()).getChildren().add(oldLegend.getNode());

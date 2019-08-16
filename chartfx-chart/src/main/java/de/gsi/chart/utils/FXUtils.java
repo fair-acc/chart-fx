@@ -122,7 +122,8 @@ public final class FXUtils {
     public static boolean waitForFxTicks(final Scene scene, final int nTicks, final long timeoutMillis) { // NOPMD
         if (Platform.isFxApplicationThread()) {
             for (int i = 0; i < nTicks; i++) {
-                Platform.requestNextPulse();
+                //Platform.requestNextPulse();
+                scene.getRoot().requestLayout();
             }
             return true;
         }
@@ -143,19 +144,22 @@ public final class FXUtils {
                     lock.unlock();
                 }
             }
-            Platform.requestNextPulse();
+            //Platform.requestNextPulse();
+            com.sun.javafx.tk.Toolkit.getToolkit().requestNextPulse();
         };
 
         lock.lock();
         try {
-            FXUtils.runAndWait(() -> scene.addPostLayoutPulseListener(tickListener));
+            FXUtils.runAndWait(() -> com.sun.javafx.tk.Toolkit.getToolkit().addSceneTkPulseListener(() -> tickListener.run()));
+//            FXUtils.runAndWait(() -> scene.addPostLayoutPulseListener(tickListener));
         } catch (InterruptedException | ExecutionException e) {
             if (LOGGER.isErrorEnabled()) {
                 LOGGER.atError().setCause(e).log("addPostLayoutPulseListener interrupted");
             }
         }
         try {
-            Platform.requestNextPulse();
+            //Platform.requestNextPulse();
+            com.sun.javafx.tk.Toolkit.getToolkit().requestNextPulse();
             if (timeoutMillis > 0) {
                 timer.schedule(new TimerTask() {
                     @Override
@@ -183,7 +187,8 @@ public final class FXUtils {
             timer.cancel();
         }
         try {
-            FXUtils.runAndWait(() -> scene.removePostLayoutPulseListener(tickListener));
+            FXUtils.runAndWait(() -> com.sun.javafx.tk.Toolkit.getToolkit().removeSceneTkPulseListener(() -> tickListener.run()));
+            //FXUtils.runAndWait(() -> scene.removePostLayoutPulseListener(tickListener));
         } catch (InterruptedException | ExecutionException e) {
             if (LOGGER.isErrorEnabled()) {
                 LOGGER.atError().setCause(e).log("removePostLayoutPulseListener interrupted");

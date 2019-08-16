@@ -197,8 +197,8 @@ public final class WriteFxImage {
         outputByteBuffer.putInt(0); // zero size, will later be overwritten when we know the size
         outputByteBuffer.put("IDAT".getBytes());
         compressor.finish();
-        compressor.deflate(outputByteBuffer, Deflater.FULL_FLUSH);
-        outputByteBuffer.limit(outputByteBuffer.position());
+        final int compressedBytes = compressor.deflate(outputByteBuffer.array(), outputByteBuffer.position(), outputByteBuffer.remaining(), Deflater.FULL_FLUSH);
+        outputByteBuffer.limit(outputByteBuffer.position() + compressedBytes);
         outputByteBuffer.reset();
         outputByteBuffer.putInt(compressor.getTotalOut());
         crc.reset();

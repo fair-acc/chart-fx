@@ -215,12 +215,12 @@ public class Screenshot extends ChartPlugin {
             } else {
                 initName = DataSetUtils.getFileName(getChart().getAllDatasets().get(0), getPattern());
             }
-        } else if (getChart().getTitle() != null && !getChart().getTitle().isBlank()) {
+        } else if (getChart().getTitle() != null && !"".equals(getChart().getTitle())) {
             initName = getChart().getTitle();
         } else if (!getChart().getAllDatasets().isEmpty() && getChart().getAllDatasets().get(0).getName() != null
-                   && !getChart().getAllDatasets().get(0).getName().isBlank()) {
+                   && !"".equals(getChart().getAllDatasets().get(0).getName())) {
             initName = getChart().getAllDatasets().get(0).getName();
-        } else if (getChart().getId() != null && !getChart().getId().isBlank()) {
+        } else if (getChart().getId() != null && !"".equals(getChart().getId())) {
             initName = getChart().getId();
         } else {
             initName = "UnknownChart";

@@ -9,6 +9,7 @@ import static de.gsi.dataset.DataSet.DIM_Y;
 
 import java.io.ByteArrayOutputStream;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -143,11 +144,14 @@ public class DataSetUtilsTest {
     private static DataSet getTestDataSet() {
         double[] xvalues = new double[] { 1.0, 2.0, 3.0, 4.0, 5.0 };
         double[] yvalues = new double[] { 1.3, 3.7, 4.2, 2.3, 1.8 };
+        Map<String, String> metaInfoMap = new HashMap<>();
+        metaInfoMap.put("test", "asdf");
+        metaInfoMap.put("testval", "5.24532");
         DataSet result = new DataSetBuilder() //
                                  .setName("TestSerialize") //
                                  .setXValues(xvalues) //
                                  .setYValues(yvalues) //
-                                 .setMetaInfoMap(Map.of("test", "asdf", "testval", "5.24532")) //
+                .setMetaInfoMap(metaInfoMap) //
                                  .build();
         result.getAxisDescription(DIM_X).set("index", "", 1.0, 5.0);
         result.getAxisDescription(DIM_Y).set("Voltage", "V", 1.3, 4.2);

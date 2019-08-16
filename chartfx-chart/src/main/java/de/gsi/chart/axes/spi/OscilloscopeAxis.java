@@ -7,11 +7,12 @@ import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import com.sun.javafx.css.converters.SizeConverter;
+
 import javafx.beans.property.DoubleProperty;
 import javafx.css.CssMetaData;
 import javafx.css.Styleable;
 import javafx.css.StyleableProperty;
-import javafx.css.converter.SizeConverter;
 import javafx.scene.layout.Region;
 
 import org.slf4j.Logger;
@@ -354,7 +355,7 @@ public class OscilloscopeAxis extends AbstractAxis implements Axis {
     }
 
     private static class StyleableProperties {
-        private static final CssMetaData<OscilloscopeAxis, Number> CENTER_AXIS_POSITION = new CssMetaData<>("-fx-centre-axis-zero-position", SizeConverter.getInstance(), 0.5) {
+        private static final CssMetaData<OscilloscopeAxis, Number> CENTER_AXIS_POSITION = new CssMetaData<OscilloscopeAxis, Number>("-fx-centre-axis-zero-position", SizeConverter.getInstance(), 0.5) {
             @SuppressWarnings("unchecked")
             @Override
             public StyleableProperty<Number> getStyleableProperty(final OscilloscopeAxis n) {
@@ -367,7 +368,7 @@ public class OscilloscopeAxis extends AbstractAxis implements Axis {
             }
         };
 
-        private static final CssMetaData<OscilloscopeAxis, Number> CENTER_AXIS_VALUE = new CssMetaData<>("-fx-centre-axis-zero-value", SizeConverter.getInstance(), 0.5) {
+        private static final CssMetaData<OscilloscopeAxis, Number> CENTER_AXIS_VALUE = new CssMetaData<OscilloscopeAxis, Number>("-fx-centre-axis-zero-value", SizeConverter.getInstance(), 0.5) {
             @SuppressWarnings("unchecked")
             @Override
             public StyleableProperty<Number> getStyleableProperty(final OscilloscopeAxis n) {

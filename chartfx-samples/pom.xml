@@ -18,11 +18,6 @@
 	</description>
 
     <dependencies>
-     	<dependency>
-            <groupId>org.openjfx</groupId>
-            <artifactId>javafx-fxml</artifactId>
-            <version>${chartfx.javafx.version}</version>
-        </dependency>
         <dependency>
             <groupId>de.gsi.chart</groupId>
             <artifactId>chartfx-chart</artifactId>

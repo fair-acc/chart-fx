@@ -33,15 +33,15 @@ public abstract class AbstractErrorDataSetRendererParameter<R extends AbstractEr
         extends AbstractPointReductionManagment<R> {
     // intensity fading factor per stage
     protected static final double DEFAULT_HISTORY_INTENSITY_FADING = 0.65;
-    private final ObjectProperty<ErrorStyle> errorStyle = new SimpleObjectProperty<>(this, "errorStyle",
+    private final ObjectProperty<ErrorStyle> errorStyle = new SimpleObjectProperty<ErrorStyle>(this, "errorStyle",
             ErrorStyle.ERRORCOMBO);
-    private final ObjectProperty<RendererDataReducer> rendererDataReducer = new SimpleObjectProperty<>(this,
+    private final ObjectProperty<RendererDataReducer> rendererDataReducer = new SimpleObjectProperty<RendererDataReducer>(this,
             "rendererDataReducer", new DefaultDataReducer());
 
     private final IntegerProperty dashSize = new SimpleIntegerProperty(this, "dashSize", 3);
     private final DoubleProperty markerSize = new SimpleDoubleProperty(this, "markerSize", 1.5);
     private final BooleanProperty drawMarker = new SimpleBooleanProperty(this, "drawMarker", true);
-    private final ObjectProperty<LineStyle> polyLineStyle = new SimpleObjectProperty<>(this, "polyLineStyle",
+    private final ObjectProperty<LineStyle> polyLineStyle = new SimpleObjectProperty<LineStyle>(this, "polyLineStyle",
             LineStyle.NORMAL);
     private final BooleanProperty drawChartDataSets = new SimpleBooleanProperty(this, "drawChartDataSets", true);
     private final BooleanProperty drawBars = new SimpleBooleanProperty(this, "drawBars", false);

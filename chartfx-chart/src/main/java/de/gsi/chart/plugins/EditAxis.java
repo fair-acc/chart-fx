@@ -66,7 +66,7 @@ public class EditAxis extends ChartPlugin {
     private final BooleanProperty animated = new SimpleBooleanProperty(this, "animated", false);
     protected final List<MyPopOver> popUpList = new ArrayList<>();
 
-    private final ObjectProperty<Duration> fadeDuration = new SimpleObjectProperty<>(this, "fadeDuration",
+    private final ObjectProperty<Duration> fadeDuration = new SimpleObjectProperty<Duration>(this, "fadeDuration",
             EditAxis.DEFAULT_ANIMATION_DURATION) {
         @Override
         protected void invalidated() {
@@ -75,7 +75,8 @@ public class EditAxis extends ChartPlugin {
         }
     };
 
-    private final ObjectProperty<AxisMode> axisMode = new SimpleObjectProperty<>(this, "axisMode", AxisMode.XY) {
+    private final ObjectProperty<AxisMode> axisMode = new SimpleObjectProperty<AxisMode>(this, "axisMode",
+            AxisMode.XY) {
         @Override
         protected void invalidated() {
             Objects.requireNonNull(get(),
