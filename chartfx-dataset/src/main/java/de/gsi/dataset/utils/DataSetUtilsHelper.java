@@ -7,7 +7,11 @@ import java.security.InvalidParameterException;
 import java.util.WeakHashMap;
 import java.util.concurrent.locks.ReentrantLock;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.gsi.dataset.DataSet;
+import de.gsi.dataset.DataSet3D;
 
 /**
  * Small static helper routines to ease the reading of the DataSetUtils class
@@ -16,6 +20,7 @@ import de.gsi.dataset.DataSet;
  *
  */
 public class DataSetUtilsHelper {
+    private static final Logger LOGGER = LoggerFactory.getLogger(DataSetUtilsHelper.class);
     protected static final ReentrantLock BYTE_ARRAY_CACHE_LOCK = new ReentrantLock();
     protected static WeakHashMap<String, WeakHashMap<Integer, ByteBuffer>> byteArrayCache = new WeakHashMap<>();
     protected static final ReentrantLock STRING_BUFFER_CACHE_LOCK = new ReentrantLock();
@@ -173,6 +178,10 @@ public class DataSetUtilsHelper {
         double integral2 = 0.0;
 
         if (function.getDataCount() <= 1) {
+            return 0.0;
+        }
+        if (function instanceof DataSet3D) {
+            LOGGER.warn("integral not implemented for DataSet3D");
             return 0.0;
         }
         for (int i = 1; i < function.getDataCount(); i++) {
