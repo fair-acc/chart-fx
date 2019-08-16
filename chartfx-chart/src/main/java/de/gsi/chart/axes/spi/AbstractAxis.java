@@ -65,7 +65,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
      */
     protected final DoubleProperty currentLowerBound = new SimpleDoubleProperty(this, "currentLowerBound");
 
-    private final ObjectProperty<AxisLabelFormatter> axisFormatter = new SimpleObjectProperty<>(this,
+    private final ObjectProperty<AxisLabelFormatter> axisFormatter = new SimpleObjectProperty<AxisLabelFormatter>(this,
             "axisLabelFormatter", null) {
         /**
          * default fall-back formatter in case no {@code axisFormatter} is specified (ie. 'null')

@@ -279,8 +279,11 @@ public abstract class AbstractContourDataSetRendererParameter<R extends Abstract
      * uniform color.
      * <p>
      * By default smoothing is disabled.
-     * </p>
-     *
+     * <p>
+     * The (faster) default implementation ignores this property on JDK8. If you really need plots without smoothing,
+     * use the (slower) {@link #altImplementation}
+     * <p>
+     * 
      * @return smooth property
      * @see ImageView#setFitWidth(double)
      * @see ImageView#setFitHeight(double)

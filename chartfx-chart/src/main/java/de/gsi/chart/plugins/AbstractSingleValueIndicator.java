@@ -179,6 +179,10 @@ public abstract class AbstractSingleValueIndicator extends AbstractValueIndicato
      * @param endY stop y coordinate
      */
     protected void layoutLine(final double startX, final double startY, final double endX, final double endY) {
+        // bugfix: jdk8's javaFx renderer hangs when it encounters NaN values
+        if (!Double.isFinite(startX) || !Double.isFinite(startY) || !Double.isFinite(endX) || !Double.isFinite(endX)) {
+            return;
+        }
         line.setStartX(startX);
         line.setStartY(startY);
         line.setEndX(endX);

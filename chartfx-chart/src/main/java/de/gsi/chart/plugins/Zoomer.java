@@ -148,7 +148,8 @@ public class Zoomer extends ChartPlugin {
     private boolean xRangeSliderInit;
     private final ObservableList<Axis> omitAxisZoom = FXCollections.observableArrayList();
 
-    private final ObjectProperty<AxisMode> axisMode = new SimpleObjectProperty<>(this, "axisMode", AxisMode.XY) {
+    private final ObjectProperty<AxisMode> axisMode = new SimpleObjectProperty<AxisMode>(this, "axisMode",
+            AxisMode.XY) {
         @Override
         protected void invalidated() {
             Objects.requireNonNull(get(), "The " + getName() + " must not be null");
@@ -162,7 +163,7 @@ public class Zoomer extends ChartPlugin {
 
     private final BooleanProperty animated = new SimpleBooleanProperty(this, "animated", false);
 
-    private final ObjectProperty<Duration> zoomDuration = new SimpleObjectProperty<>(this, "zoomDuration",
+    private final ObjectProperty<Duration> zoomDuration = new SimpleObjectProperty<Duration>(this, "zoomDuration",
             DEFAULT_ZOOM_DURATION) {
         @Override
         protected void invalidated() {

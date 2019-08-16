@@ -43,7 +43,7 @@ public class NotANumberSample extends Application {
         // enables NaN support (N.B. may have some impact on the plotting
         // performance for larger DataSets and/or high rate update (ie. 100 kPoints@25Hz)
         // N.B. this may make the system unresponsive for JDK8-type JVMs.
-        renderer.setAllowNaNs(true);
+        renderer.setAllowNaNs(false); // disabled for JDK8 branch
 
         final DoubleErrorDataSet dataSet1 = new DoubleErrorDataSet("data set #1");
         // the line dash pattern for DataSet 1

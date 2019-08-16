@@ -385,7 +385,7 @@ public class ClassFieldDescription implements Iterable<ClassFieldDescription> {
         if (field == null) {
             throw new IllegalArgumentException("field is null at hierarchyLevel = " + hierarchyLevel);
         }
-        if ((hierarchyLevel == 0) || field.getParent().isEmpty()) {
+        if ((hierarchyLevel == 0) || !field.getParent().isPresent()) {
             return field;
         }
         final Optional<ClassFieldDescription> localParent = field.getParent();
