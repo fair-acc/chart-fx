@@ -6,6 +6,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import com.sun.javafx.css.converters.BooleanConverter;
+import com.sun.javafx.css.converters.EnumConverter;
+import com.sun.javafx.css.converters.PaintConverter;
+import com.sun.javafx.css.converters.SizeConverter;
+
 import de.gsi.chart.Chart;
 import de.gsi.chart.axes.Axis;
 import de.gsi.chart.axes.AxisLabelOverlapPolicy;
@@ -39,10 +44,6 @@ import javafx.css.SimpleStyleableDoubleProperty;
 import javafx.css.Styleable;
 import javafx.css.StyleableObjectProperty;
 import javafx.css.StyleableProperty;
-import javafx.css.converter.BooleanConverter;
-import javafx.css.converter.EnumConverter;
-import javafx.css.converter.PaintConverter;
-import javafx.css.converter.SizeConverter;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
@@ -122,8 +123,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
      * The side of the plot which this axis is being drawn on default axis orientation is BOTTOM, can be set latter to
      * another side
      */
-    private final ObjectProperty<Side> side = new StyleableObjectProperty<>(Side.BOTTOM) {
-
+    private final ObjectProperty<Side> side = new StyleableObjectProperty<Side>(Side.BOTTOM) {
         @Override
         public Object getBean() {
             return AbstractAxisParameter.this;
@@ -155,7 +155,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     };
 
     /** The side of the plot which this axis is being drawn on */
-    private final ObjectProperty<AxisLabelOverlapPolicy> overlapPolicy = new StyleableObjectProperty<>(
+    private final ObjectProperty<AxisLabelOverlapPolicy> overlapPolicy = new StyleableObjectProperty<AxisLabelOverlapPolicy>(
             AxisLabelOverlapPolicy.SKIP_ALT) {
 
         @Override
@@ -315,7 +315,8 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     /**
      * StringConverter used to format tick mark labels. If null a default will be used
      */
-    private final ObjectProperty<StringConverter<Number>> tickLabelFormatter = new ObjectPropertyBase<>(null) {
+    private final ObjectProperty<StringConverter<Number>> tickLabelFormatter = new ObjectPropertyBase<StringConverter<Number>>(
+            null) {
 
         @Override
         public Object getBean() {
@@ -402,7 +403,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     private final DoubleProperty autoRangePadding = new SimpleDoubleProperty(0);
 
     /** The axis unit label */
-    private final ObjectProperty<String> axisUnit = new ObjectPropertyBase<>() {
+    private final ObjectProperty<String> axisUnit = new ObjectPropertyBase<String>() {
 
         @Override
         public Object getBean() {
@@ -857,7 +858,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
      * This is {@code true} when the axis labels and data point order should be inverted
      *
      * @param value {@code true} if axis shall be inverted (i.e. drawn from 'max-&gt;min', rather than the normal
-     *        'min-&gt;max')
+     *            'min-&gt;max')
      */
     @Override
     public void invertAxis(final boolean value) {
@@ -1376,8 +1377,8 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
      */
     private static class StyleableProperties {
 
-        private static final CssMetaData<AbstractAxisParameter, Side> SIDE = new CssMetaData<>("-fx-side",
-                new EnumConverter<>(Side.class)) {
+        private static final CssMetaData<AbstractAxisParameter, Side> SIDE = new CssMetaData<AbstractAxisParameter, Side>(
+                "-fx-side", new EnumConverter<>(Side.class)) {
 
             @SuppressWarnings("unchecked") // sideProperty() is
                                            // StyleableProperty<Side>
@@ -1392,7 +1393,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
             }
         };
 
-        private static final CssMetaData<AbstractAxisParameter, AxisLabelOverlapPolicy> OVERLAP_POLICY = new CssMetaData<>(
+        private static final CssMetaData<AbstractAxisParameter, AxisLabelOverlapPolicy> OVERLAP_POLICY = new CssMetaData<AbstractAxisParameter, AxisLabelOverlapPolicy>(
                 "-fx-overlap-policy", new EnumConverter<>(AxisLabelOverlapPolicy.class)) {
 
             @SuppressWarnings("unchecked") // sideProperty() is
@@ -1408,7 +1409,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
             }
         };
 
-        private static final CssMetaData<AbstractAxisParameter, TextAlignment> AXIS_LABEL_ALIGNMENT = new CssMetaData<>(
+        private static final CssMetaData<AbstractAxisParameter, TextAlignment> AXIS_LABEL_ALIGNMENT = new CssMetaData<AbstractAxisParameter, TextAlignment>(
                 "-fx-axis-label-alignment", new EnumConverter<>(TextAlignment.class)) {
 
             @SuppressWarnings("unchecked") // class type matched by design
@@ -1423,8 +1424,8 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
             }
         };
 
-        private static final CssMetaData<AbstractAxisParameter, String> AXIS_LABEL = new CssMetaData<>("-fx-axis-label",
-                javafx.css.converter.StringConverter.getInstance()) {
+        private static final CssMetaData<AbstractAxisParameter, String> AXIS_LABEL = new CssMetaData<AbstractAxisParameter, String>(
+                "-fx-axis-label", com.sun.javafx.css.converters.StringConverter.getInstance()) {
 
             @SuppressWarnings("unchecked") // class type matched by design
             @Override
@@ -1438,7 +1439,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
             }
         };
 
-        private static final CssMetaData<AbstractAxisParameter, Number> CENTER_AXIS_POSITION = new CssMetaData<>(
+        private static final CssMetaData<AbstractAxisParameter, Number> CENTER_AXIS_POSITION = new CssMetaData<AbstractAxisParameter, Number>(
                 "-fx-centre-axis-position", SizeConverter.getInstance(), 0.5) {
 
             @SuppressWarnings("unchecked")
@@ -1453,7 +1454,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
             }
         };
 
-        private static final CssMetaData<AbstractAxisParameter, Number> AXIS_PADDING = new CssMetaData<>(
+        private static final CssMetaData<AbstractAxisParameter, Number> AXIS_PADDING = new CssMetaData<AbstractAxisParameter, Number>(
                 "-fx-axis-padding", SizeConverter.getInstance(), 15.0) {
 
             @SuppressWarnings("unchecked")
@@ -1468,7 +1469,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
             }
         };
 
-        private static final CssMetaData<AbstractAxisParameter, Number> TICK_LENGTH = new CssMetaData<>(
+        private static final CssMetaData<AbstractAxisParameter, Number> TICK_LENGTH = new CssMetaData<AbstractAxisParameter, Number>(
                 "-fx-tick-length", SizeConverter.getInstance(), 8.0) {
 
             @SuppressWarnings("unchecked")
@@ -1483,7 +1484,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
             }
         };
 
-        private static final CssMetaData<AbstractAxisParameter, Font> TICK_LABEL_FONT = new FontCssMetaData<>(
+        private static final CssMetaData<AbstractAxisParameter, Font> TICK_LABEL_FONT = new FontCssMetaData<AbstractAxisParameter>(
                 "-fx-tick-label-font", Font.font("system", 8.0)) {
 
             @SuppressWarnings("unchecked") // tickLabelFontProperty() is
@@ -1499,7 +1500,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
             }
         };
 
-        private static final CssMetaData<AbstractAxisParameter, Paint> TICK_LABEL_FILL = new CssMetaData<>(
+        private static final CssMetaData<AbstractAxisParameter, Paint> TICK_LABEL_FILL = new CssMetaData<AbstractAxisParameter, Paint>(
                 "-fx-tick-label-fill", PaintConverter.getInstance(), Color.BLACK) {
 
             @SuppressWarnings("unchecked") // tickLabelFillProperty() is
@@ -1515,7 +1516,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
             }
         };
 
-        private static final CssMetaData<AbstractAxisParameter, Number> TICK_LABEL_TICK_GAP = new CssMetaData<>(
+        private static final CssMetaData<AbstractAxisParameter, Number> TICK_LABEL_TICK_GAP = new CssMetaData<AbstractAxisParameter, Number>(
                 "-fx-tick-label-gap", SizeConverter.getInstance(), 3.0) {
 
             @SuppressWarnings("unchecked")
@@ -1530,7 +1531,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
             }
         };
 
-        private static final CssMetaData<AbstractAxisParameter, Number> AXIS_LABEL_TICK_GAP = new CssMetaData<>(
+        private static final CssMetaData<AbstractAxisParameter, Number> AXIS_LABEL_TICK_GAP = new CssMetaData<AbstractAxisParameter, Number>(
                 "-fx-axis-label-gap", SizeConverter.getInstance(), 3.0) {
 
             @SuppressWarnings("unchecked")
@@ -1545,7 +1546,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
             }
         };
 
-        private static final CssMetaData<AbstractAxisParameter, Number> ANIMATION_DURATION = new CssMetaData<>(
+        private static final CssMetaData<AbstractAxisParameter, Number> ANIMATION_DURATION = new CssMetaData<AbstractAxisParameter, Number>(
                 "-fx-axis-animation-duration", SizeConverter.getInstance(), 250) {
 
             @SuppressWarnings("unchecked")
@@ -1560,7 +1561,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
             }
         };
 
-        private static final CssMetaData<AbstractAxisParameter, Boolean> TICK_MARK_VISIBLE = new CssMetaData<>(
+        private static final CssMetaData<AbstractAxisParameter, Boolean> TICK_MARK_VISIBLE = new CssMetaData<AbstractAxisParameter, Boolean>(
                 "-fx-tick-mark-visible", BooleanConverter.getInstance(), Boolean.TRUE) {
 
             @SuppressWarnings("unchecked")
@@ -1575,7 +1576,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
             }
         };
 
-        private static final CssMetaData<AbstractAxisParameter, Boolean> TICK_LABELS_VISIBLE = new CssMetaData<>(
+        private static final CssMetaData<AbstractAxisParameter, Boolean> TICK_LABELS_VISIBLE = new CssMetaData<AbstractAxisParameter, Boolean>(
                 "-fx-tick-labels-visible", BooleanConverter.getInstance(), Boolean.TRUE) {
 
             @SuppressWarnings("unchecked")
@@ -1590,8 +1591,8 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
             }
         };
 
-        private static final CssMetaData<DefaultNumericAxis, Number> TICK_UNIT = new CssMetaData<>("-fx-tick-unit",
-                SizeConverter.getInstance(), 5.0) {
+        private static final CssMetaData<DefaultNumericAxis, Number> TICK_UNIT = new CssMetaData<DefaultNumericAxis, Number>(
+                "-fx-tick-unit", SizeConverter.getInstance(), 5.0) {
 
             @SuppressWarnings("unchecked")
             @Override
@@ -1605,7 +1606,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
             }
         };
 
-        private static final CssMetaData<DefaultNumericAxis, Number> TICK_LABEL_ROTATION = new CssMetaData<>(
+        private static final CssMetaData<DefaultNumericAxis, Number> TICK_LABEL_ROTATION = new CssMetaData<DefaultNumericAxis, Number>(
                 "-fx-tick-rotation", SizeConverter.getInstance(), 0.0) {
 
             @SuppressWarnings("unchecked")
@@ -1620,7 +1621,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
             }
         };
 
-        private static final CssMetaData<AbstractAxisParameter, Number> MINOR_TICK_LENGTH = new CssMetaData<>(
+        private static final CssMetaData<AbstractAxisParameter, Number> MINOR_TICK_LENGTH = new CssMetaData<AbstractAxisParameter, Number>(
                 "-fx-minor-tick-length", SizeConverter.getInstance(), 5.0) {
 
             @SuppressWarnings("unchecked")
@@ -1635,7 +1636,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
             }
         };
 
-        private static final CssMetaData<AbstractAxisParameter, Number> MINOR_TICK_COUNT = new CssMetaData<>(
+        private static final CssMetaData<AbstractAxisParameter, Number> MINOR_TICK_COUNT = new CssMetaData<AbstractAxisParameter, Number>(
                 "-fx-minor-tick-count", SizeConverter.getInstance(), 5) {
 
             @SuppressWarnings("unchecked")
@@ -1650,7 +1651,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
             }
         };
 
-        private static final CssMetaData<AbstractAxisParameter, Boolean> MINOR_TICK_VISIBLE = new CssMetaData<>(
+        private static final CssMetaData<AbstractAxisParameter, Boolean> MINOR_TICK_VISIBLE = new CssMetaData<AbstractAxisParameter, Boolean>(
                 "-fx-minor-tick-visible", BooleanConverter.getInstance(), Boolean.TRUE) {
 
             @SuppressWarnings("unchecked")
@@ -1665,7 +1666,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
             }
         };
 
-        private static final CssMetaData<AbstractAxisParameter, Boolean> AUTO_RANGING = new CssMetaData<>(
+        private static final CssMetaData<AbstractAxisParameter, Boolean> AUTO_RANGING = new CssMetaData<AbstractAxisParameter, Boolean>(
                 "-fx-auto-ranging", BooleanConverter.getInstance(), Boolean.TRUE) {
 
             @SuppressWarnings("unchecked")
@@ -1680,7 +1681,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
             }
         };
 
-        private static final CssMetaData<AbstractAxisParameter, Boolean> AUTO_GROW_RANGING = new CssMetaData<>(
+        private static final CssMetaData<AbstractAxisParameter, Boolean> AUTO_GROW_RANGING = new CssMetaData<AbstractAxisParameter, Boolean>(
                 "-fx-auto-grow-ranging", BooleanConverter.getInstance(), Boolean.FALSE) {
 
             @SuppressWarnings("unchecked")
@@ -1695,7 +1696,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
             }
         };
 
-        private static final CssMetaData<AbstractAxisParameter, Boolean> AUTO_RANGE_ROUNDING = new CssMetaData<>(
+        private static final CssMetaData<AbstractAxisParameter, Boolean> AUTO_RANGE_ROUNDING = new CssMetaData<AbstractAxisParameter, Boolean>(
                 "-fx-auto-range-rounding", BooleanConverter.getInstance(), Boolean.FALSE) {
 
             @SuppressWarnings("unchecked")
@@ -1712,7 +1713,8 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
 
         private static final List<CssMetaData<? extends Styleable, ?>> STYLEABLES;
         static {
-            final List<CssMetaData<? extends Styleable, ?>> styleables = new ArrayList<>(Region.getClassCssMetaData());
+            final List<CssMetaData<? extends Styleable, ?>> styleables = new ArrayList<CssMetaData<? extends Styleable, ?>>(
+                    Region.getClassCssMetaData());
             styleables.add(StyleableProperties.SIDE);
             styleables.add(StyleableProperties.CENTER_AXIS_POSITION);
             styleables.add(StyleableProperties.AXIS_PADDING);

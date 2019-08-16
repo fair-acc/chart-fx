@@ -160,7 +160,7 @@ public class Zoomer extends ChartPlugin {
 
     private final BooleanProperty animated = new SimpleBooleanProperty(this, "animated", false);
 
-    private final ObjectProperty<Duration> zoomDuration = new SimpleObjectProperty<>(this, "zoomDuration",
+    private final ObjectProperty<Duration> zoomDuration = new SimpleObjectProperty<Duration>(this, "zoomDuration",
             DEFAULT_ZOOM_DURATION) {
         @Override
         protected void invalidated() {

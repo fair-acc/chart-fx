@@ -148,7 +148,7 @@ public class IoBufferSerialiser extends AbstractSerialiser {
         final Optional<FieldSerialiser> serialiser = findFieldSerialiserForKnownClassOrInterface(fieldClass,
                 firstMatchingField.getActualTypeArguments());
 
-        if (serialiser.isEmpty()) {
+        if (!serialiser.isPresent()) {
             // no specific serialiser present
             // check for potential inner fields
             for (final FieldHeader fieldHeader : fieldRoot.getChildren()) {

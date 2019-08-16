@@ -3,6 +3,8 @@ package de.gsi.chart.renderer.spi;
 import java.security.InvalidParameterException;
 import java.util.List;
 
+import com.sun.javafx.css.converters.BooleanConverter;
+
 import de.gsi.chart.Chart;
 import de.gsi.chart.XYChart;
 import de.gsi.chart.axes.Axis;
