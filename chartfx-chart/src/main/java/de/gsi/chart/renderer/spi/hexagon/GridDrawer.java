@@ -12,16 +12,16 @@ import javafx.scene.text.Text;
 public class GridDrawer {
 
     private final HexagonMap map;
-    private javafx.scene.text.Font font = new Font(13);
+    private Font font = new Font(13);
 
     /**
      * @param map the global hex map
      */
-    GridDrawer(final HexagonMap map) {
+    public GridDrawer(final HexagonMap map) {
         this.map = map;
     }
 
-    void draw(final Group root) {
+    public void draw(final Group root) {
         final Collection<Hexagon> hexagons = map.getAllHexagons();
         for (final Hexagon hexagon : hexagons) {
             hexagon.addEventFilter(MouseEvent.MOUSE_CLICKED, me -> {
@@ -90,7 +90,7 @@ public class GridDrawer {
 
 
 
-    void draw(final Canvas canvas) {
+    public void draw(final Canvas canvas) {
         //registerCanvasMouseLiner(canvas); // TODO move elsewhere
 
         final GraphicsContext gc = canvas.getGraphicsContext2D();
@@ -106,7 +106,7 @@ public class GridDrawer {
         }
     }
 
-    void drawContour(final Canvas canvas) {
+    public void drawContour(final Canvas canvas) {
         //registerCanvasMouseLiner(canvas); // TODO move elsewhere
 
         final GraphicsContext gc = canvas.getGraphicsContext2D();
@@ -140,7 +140,7 @@ public class GridDrawer {
         return GridPosition.hexRound(q, r);
     }
 
-    void setFont(final Font font) {
+    public void setFont(final Font font) {
         this.font = font;
     }
 
