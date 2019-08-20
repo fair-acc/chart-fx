@@ -10,16 +10,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.gsi.chart.axes.Axis;
-import de.gsi.chart.axes.spi.CategoryAxis;
 import de.gsi.chart.axes.spi.DefaultNumericAxis;
-import de.gsi.dataset.DataSet;
-import de.gsi.dataset.DataSet3D;
 import de.gsi.chart.renderer.PolarTickStep;
 import de.gsi.chart.renderer.Renderer;
 import de.gsi.chart.renderer.spi.ErrorDataSetRenderer;
 import de.gsi.chart.renderer.spi.GridRenderer;
 import de.gsi.chart.renderer.spi.LabelledMarkerRenderer;
 import de.gsi.chart.ui.geometry.Side;
+import de.gsi.dataset.DataSet;
+import de.gsi.dataset.DataSet3D;
 import de.gsi.dataset.utils.AssertUtils;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -56,8 +55,8 @@ public class XYChart extends Chart {
     protected BooleanProperty polarPlot = new SimpleBooleanProperty(this, "polarPlot", false);
     private final ObjectProperty<PolarTickStep> polarStepSize = new SimpleObjectProperty<>(PolarTickStep.THIRTY);
     private final GridRenderer gridRenderer = new GridRenderer(this);
-    private long lastCanvasUpdate = 0;
-    private boolean callCanvasUpdateLater = false;
+    private long lastCanvasUpdate;
+    private boolean callCanvasUpdateLater;
     private final ChangeListener<Side> axisSideChangeListener = this::axisSideChanged;
 
     public XYChart() {
@@ -71,6 +70,7 @@ public class XYChart extends Chart {
      * @param yAxis the axis to use as primary y-Axis
      */
     public XYChart(final Axis xAxis, final Axis yAxis) {
+        super();
         Objects.requireNonNull(xAxis, "X axis is required");
         Objects.requireNonNull(yAxis, "Y axis is required");
 
@@ -263,8 +263,6 @@ public class XYChart extends Chart {
             updateNumericAxis(chartAxis, dataSets);
             // chartAxis.requestAxisLayout();
         });
-
-        return;
     }
 
     protected List<DataSet> getDataSetForAxis(final Axis axis) {
@@ -446,8 +444,6 @@ public class XYChart extends Chart {
                 }
                 if (!getAxesPane(set.getSide()).getChildren().contains((Node) set)) {
                     getAxesPane(set.getSide()).getChildren().add((Node) set);
-                } else {
-                    // axis already added to correct axis pane
                 }
 
                 set.sideProperty().addListener(axisSideChangeListener);
