@@ -68,18 +68,6 @@ public class DataViewPane extends Window {
         detachButton.setOnAction(evt -> dialog.show(null));
         getLeftIcons().add(detachButton);
 
-        // setOnMouseClicked(mevt -> System.err.println("mouse clicked on window"));
-
-        // setOnDragDetected(mevt -> {
-        // if (isMinimized()) {
-        // return;
-        // }
-        // System.err.println("mouse drag detected 2");
-        // startFullDrag();
-        // });
-
-        // setOnMouseDragReleased(mevt -> System.err.println("mouse drag released"));
-
         setOnMouseReleased(mevt -> {
             final boolean isInMinimized = dataView.get().getMinimizedChildren().contains(DataViewPane.this);
             if (isMinimized() || isInMinimized) {
@@ -89,7 +77,7 @@ public class DataViewPane extends Window {
             final Point2D mouseLoc = new Point2D(mevt.getScreenX(), mevt.getScreenY());
             final Bounds screenBounds = localToScreen(getBoundsInLocal());
             if (!screenBounds.contains(mouseLoc)) {
-                System.err.println("mouse move outside window detected -- launch dialog");
+                // mouse move outside window detected -- launch dialog
                 // dropped outside of node window
                 if (!dialog.isShowing()) {
 
@@ -108,15 +96,14 @@ public class DataViewPane extends Window {
         });
 
         setOnMousePressed(event -> {
-		    System.err.println("setOnMousePressed dialogue");
-		    xOffset = event.getSceneX();
-		    yOffset = event.getSceneY();
-		});
+            xOffset = event.getSceneX();
+            yOffset = event.getSceneY();
+        });
         setOnMouseDragged(event -> {
-		    System.err.println("dragging dialogue");
-		    dialog.setX(event.getScreenX() - xOffset);
-		    dialog.setY(event.getScreenY() - yOffset);
-		});
+            // launch dragging dialogue
+            dialog.setX(event.getScreenX() - xOffset);
+            dialog.setY(event.getScreenY() - yOffset);
+        });
 
         chart.getPlugins().add(new ParameterMeasurements());
         chart.getPlugins().add(new Zoomer());
@@ -258,7 +245,7 @@ public class DataViewPane extends Window {
     };
 
     EventHandler<ActionEvent> closeButtonAction = event -> {
-        System.err.println("asked to remove pane");
+        // asked to remove pane
         if (dialog.isShowing()) {
             dialog.hide();
             return;
@@ -268,12 +255,7 @@ public class DataViewPane extends Window {
         if (maximized) {
             dataView.get().setMaximizedView(null);
         }
-        if (dataView.get().getMinimizedChildren() == null) {
-            System.err.println("getMinimizedChildren list is null");
-        }
-        if (dataView.get().getVisibleChildren() == null) {
-            System.err.println("getVisibleChildren list is null");
-        }
+
         dataView.get().getMinimizedChildren().remove(DataViewPane.this);
         dataView.get().getVisibleChildren().remove(DataViewPane.this);
         dataView.get().getChildren().remove(DataViewPane.this);
