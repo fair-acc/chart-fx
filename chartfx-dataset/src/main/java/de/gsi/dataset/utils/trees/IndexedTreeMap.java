@@ -188,6 +188,107 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V>
     }
 
     /**
+     * Return SimpleImmutableEntry for entry, or null if null
+     * @param e entry to be searched
+     * @param <K> key value type
+     * @param <V> value value type
+     * @return entry
+     */
+    public static <K, V> Map.Entry<K, V> exportEntry(IndexedTreeMap.Entry<K, V> e) {
+        return e == null ? null : new java.util.AbstractMap.SimpleImmutableEntry<>(e);
+    }
+
+    /**
+     * Returns the key corresponding to the specified Entry.
+     * @param e entry to be searched
+     * @param <K> key value type 
+     * @return key
+     *
+     * @throws NoSuchElementException if the Entry is null
+     */
+    public static <K> K key(Entry<K, ?> e) {
+        if (e == null) {
+            throw new NoSuchElementException();
+        }
+        return e.key;
+    }
+
+    /**
+     * Return key for entry, or null if null
+     * @param e entry to be searched
+     * @param <K> key value type 
+     * @param <V> value value type
+     * @return key
+     */
+    public static <K, V> K keyOrNull(IndexedTreeMap.Entry<K, V> e) {
+        return e == null ? null : e.key;
+    }
+
+    /**
+     * Returns the predecessor of the specified Entry, or null if no such.
+     * @param t entry
+     * @param <K> key value type
+     * @param <V> value type
+     * @return predecessor entry
+     */
+    public static <K, V> Entry<K, V> predecessor(Entry<K, V> t) {
+        if (t == null) {
+            return null;
+        } else if (t.left != null) {
+            Entry<K, V> p = t.left;
+            while (p.right != null) {
+                p = p.right;
+            }
+            return p;
+        } else {
+            Entry<K, V> p = t.parent;
+            Entry<K, V> ch = t;
+            while (p != null && ch == p.left) {
+                ch = p;
+                p = p.parent;
+            }
+            return p;
+        }
+    }
+
+    /**
+     * Returns the successor of the specified Entry, or null if no such.
+     * @param t entry
+     * @param <K> key value type
+     * @param <V> value type
+     * @return successor entry
+     */
+    public static <K, V> IndexedTreeMap.Entry<K, V> successor(Entry<K, V> t) {
+        if (t == null) {
+            return null;
+        } else if (t.right != null) {
+            Entry<K, V> p = t.right;
+            while (p.left != null) {
+                p = p.left;
+            }
+            return p;
+        } else {
+            Entry<K, V> p = t.parent;
+            Entry<K, V> ch = t;
+            while (p != null && ch == p.right) {
+                ch = p;
+                p = p.parent;
+            }
+            return p;
+        }
+    }
+
+    /**
+     * Test two values for equality. Differs from o1.equals(o2) only in that it copes with <code>null</code> o1 properly.
+     * @param o1 object1 to be compared
+     * @param o2 object2 to be compared
+     * @return true if equal
+     */
+    public static boolean valEquals(Object o1, Object o2) {
+        return o1 == null ? o2 == null : o1.equals(o2);
+    }
+
+    /**
      * Balancing operations.
      * 
      * <p>
@@ -242,107 +343,6 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V>
         if (p != null) {
             p.color = c;
         }
-    }
-
-    /**
-     * Return SimpleImmutableEntry for entry, or null if null
-     * @param e entry to be searched
-     * @param <K> key value type
-     * @param <V> value value type
-     * @return entry
-     */
-    static <K, V> Map.Entry<K, V> exportEntry(IndexedTreeMap.Entry<K, V> e) {
-        return e == null ? null : new java.util.AbstractMap.SimpleImmutableEntry<>(e);
-    }
-
-    /**
-     * Returns the key corresponding to the specified Entry.
-     * @param e entry to be searched
-     * @param <K> key value type 
-     * @return key
-     *
-     * @throws NoSuchElementException if the Entry is null
-     */
-    static <K> K key(Entry<K, ?> e) {
-        if (e == null) {
-            throw new NoSuchElementException();
-        }
-        return e.key;
-    }
-
-    /**
-     * Return key for entry, or null if null
-     * @param e entry to be searched
-     * @param <K> key value type 
-     * @param <V> value value type
-     * @return key
-     */
-    static <K, V> K keyOrNull(IndexedTreeMap.Entry<K, V> e) {
-        return e == null ? null : e.key;
-    }
-
-    /**
-     * Returns the predecessor of the specified Entry, or null if no such.
-     * @param t entry
-     * @param <K> key value type
-     * @param <V> value type
-     * @return predecessor entry
-     */
-    static <K, V> Entry<K, V> predecessor(Entry<K, V> t) {
-        if (t == null) {
-            return null;
-        } else if (t.left != null) {
-            Entry<K, V> p = t.left;
-            while (p.right != null) {
-                p = p.right;
-            }
-            return p;
-        } else {
-            Entry<K, V> p = t.parent;
-            Entry<K, V> ch = t;
-            while (p != null && ch == p.left) {
-                ch = p;
-                p = p.parent;
-            }
-            return p;
-        }
-    }
-
-    /**
-     * Returns the successor of the specified Entry, or null if no such.
-     * @param t entry
-     * @param <K> key value type
-     * @param <V> value type
-     * @return successor entry
-     */
-    static <K, V> IndexedTreeMap.Entry<K, V> successor(Entry<K, V> t) {
-        if (t == null) {
-            return null;
-        } else if (t.right != null) {
-            Entry<K, V> p = t.right;
-            while (p.left != null) {
-                p = p.left;
-            }
-            return p;
-        } else {
-            Entry<K, V> p = t.parent;
-            Entry<K, V> ch = t;
-            while (p != null && ch == p.right) {
-                ch = p;
-                p = p.parent;
-            }
-            return p;
-        }
-    }
-
-    /**
-     * Test two values for equality. Differs from o1.equals(o2) only in that it copes with <code>null</code> o1 properly.
-     * @param o1 object1 to be compared
-     * @param o2 object2 to be compared
-     * @return true if equal
-     */
-    static boolean valEquals(Object o1, Object o2) {
-        return o1 == null ? o2 == null : o1.equals(o2);
     }
 
     /**
@@ -1074,9 +1074,10 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V>
 
     /**
      * Delete node p, and then rebalance the tree.
-     * @param p entry
+     * @param noteToDelete entry
      */
-    private void deleteEntry(Entry<K, V> p) {
+    private void deleteEntry(final Entry<K, V> noteToDelete) {
+        Entry<K, V> p = noteToDelete;
         modCount++;
         size--;
 
