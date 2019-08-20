@@ -6,6 +6,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.gsi.chart.axes.Axis;
 import de.gsi.chart.axes.spi.CategoryAxis;
 import de.gsi.chart.axes.spi.DefaultNumericAxis;
@@ -40,14 +43,15 @@ import javafx.util.Duration;
  * the observable lists used by XYChart. Brief history: original design inspired by Oracle, extended by CERN (i.e.
  * plugin concept/zoomer), modified to mitigate JavaFX performance issues and extended renderer
  * concept/canvas-concept/interfaces/+more plugins by GSI. Refactored and re-write in 2018 to make it compatible with
- * GPLv3 which -- in the spirit of 'Ship of Theseus' -- makes it de-facto a new development. Contributions, bug-fixes,
+ * Apache 2.0 which -- in the spirit of 'Ship of Theseus' -- makes it de-facto a new development. Contributions,
+ * bug-fixes,
  * and modifications are welcome. Hope you find this library useful and enjoy!
  *
  * @author braeun
  * @author rstein
  */
 public class XYChart extends Chart {
-
+    private static final Logger LOGGER = LoggerFactory.getLogger(XYChart.class);
     protected static final int BURST_LIMIT_MS = 15;
     protected BooleanProperty polarPlot = new SimpleBooleanProperty(this, "polarPlot", false);
     private final ObjectProperty<PolarTickStep> polarStepSize = new SimpleObjectProperty<>(PolarTickStep.THIRTY);
@@ -339,8 +343,8 @@ public class XYChart extends Chart {
 
     @Override
     protected void redrawCanvas() {
-        if (DEBUG) {
-            System.err.println("   xychart redrawCanvas() - pre");
+        if (DEBUG && LOGGER.isDebugEnabled()) {
+            LOGGER.debug("   xychart redrawCanvas() - pre");
         }
         setAutoNotifaction(false);
 
@@ -350,23 +354,18 @@ public class XYChart extends Chart {
             if (!callCanvasUpdateLater) {
                 callCanvasUpdateLater = true;
                 // repaint 20 ms later in case this was just a burst operation
-                // final KeyFrame kf1 = new KeyFrame(Duration.millis(20), e ->
-                // redrawCanvas());
-                // final KeyFrame kf1 = new KeyFrame(Duration.millis(20), e ->
-                // layoutChildren());
                 final KeyFrame kf1 = new KeyFrame(Duration.millis(20), e -> requestLayout());
 
                 final Timeline timeline = new Timeline(kf1);
                 Platform.runLater(timeline::play);
             }
-            // System.err.println("XYChart burst diffMillisSinceLastUpdate = " +
-            // diffMillisSinceLastUpdate);
+
             return;
         }
-        if (DEBUG) {
-            System.err.println("   xychart redrawCanvas() - executing");
-            System.err.println("   xychart redrawCanvas() - canvas size = "
-                    + String.format("%fx%f", canvas.getWidth(), canvas.getHeight()));
+        if (DEBUG && LOGGER.isDebugEnabled()) {
+            LOGGER.debug("   xychart redrawCanvas() - executing");
+            LOGGER.debug("   xychart redrawCanvas() - canvas size = {}",
+                    String.format("%fx%f", canvas.getWidth(), canvas.getHeight()));
         }
 
         lastCanvasUpdate = now;
@@ -389,8 +388,8 @@ public class XYChart extends Chart {
             gridRenderer.render(gc, this, 0, null);
         }
         setAutoNotifaction(true);
-        if (DEBUG) {
-            System.err.println("   xychart redrawCanvas() - done");
+        if (DEBUG && LOGGER.isDebugEnabled()) {
+            LOGGER.debug("   xychart redrawCanvas() - done");
         }
     }
 
@@ -445,7 +444,7 @@ public class XYChart extends Chart {
                     throw new InvalidParameterException(new StringBuilder().append("axis '").append(set.getLabel())
                             .append("' has 'null' as side being set").toString());
                 }
-                if (!getAxesPane(set.getSide()).getChildren().contains(set)) {
+                if (!getAxesPane(set.getSide()).getChildren().contains((Node) set)) {
                     getAxesPane(set.getSide()).getChildren().add((Node) set);
                 } else {
                     // axis already added to correct axis pane
