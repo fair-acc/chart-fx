@@ -105,6 +105,14 @@ public abstract class Chart extends SidesPane implements Observable {
     protected BooleanBinding showingBinding;
     protected final BooleanProperty showingProperty = new SimpleBooleanProperty(this, "showing", false);
 
+    // isCanvasChangeRequested is a recursion guard to update canvas only once
+    protected boolean isCanvasChangeRequested = false; 
+    protected final ResizableCanvas canvas = new ResizableCanvas();
+
+    // contains axes (left, bottom, top, right) panes & HiddenSidePane with the
+    // Canvas at it's centre
+    protected final GridPane axesAndCanvasPane = new GridPane();
+
     /**
      * @return true: if chart is being visible in Scene/Window
      */
@@ -119,18 +127,12 @@ public abstract class Chart extends SidesPane implements Observable {
         return showingProperty;
     }
 
-    protected final ResizableCanvas canvas = new ResizableCanvas();
-
     /**
      * @return the actual canvas the data is being drawn upon
      */
     public Canvas getCanvas() {
         return canvas;
     }
-
-    // contains axes (left, bottom, top, right) panes & HiddenSidePane with the
-    // Canvas at it's centre
-    protected final GridPane axesAndCanvasPane = new GridPane();
 
     public GridPane getAxesAndCanvasPane() {
         return axesAndCanvasPane;
@@ -862,8 +864,13 @@ public abstract class Chart extends SidesPane implements Observable {
                 getCanvasForeground().resize(width, height);
             }
 
-            // this.setNeedsLayout(true);
-            requestLayout();
+            if (!isCanvasChangeRequested) {
+                isCanvasChangeRequested = true;
+                Platform.runLater(() -> {
+                    this.layoutChildren();
+                    isCanvasChangeRequested = false;
+                });
+            }
         };
         canvas.widthProperty().addListener(canvasSizeChangeListener);
         canvas.heightProperty().addListener(canvasSizeChangeListener);
