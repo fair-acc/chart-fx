@@ -88,10 +88,6 @@ public class XYChart extends Chart {
 
         getAxes().addAll(xAxis, yAxis);
 
-        // getDatasets().addListener(datasetChangeListener);
-
-        // initChartDataSetListener();
-
         getRenderers().add(new ErrorDataSetRenderer());
 
         setAnimated(false);
@@ -305,6 +301,9 @@ public class XYChart extends Chart {
 
     protected void axisSideChanged(final ObservableValue<? extends Side> change, final Side oldValue,
             final Side newValue) {
+        if (newValue != null && newValue.equals(oldValue)) {
+            return;
+        }
         // loop through all registered axis
         for (final Axis axis : axesList) {
 
@@ -314,7 +313,7 @@ public class XYChart extends Chart {
             }
 
             // check if axis is in correct pane
-            if (getAxesPane(axis.getSide()).getChildren().contains(axis)) {
+            if (getAxesPane(axis.getSide()).getChildren().contains((Node)axis)) {
                 // yes, it is continue with next axis
                 continue;
             }
@@ -391,7 +390,7 @@ public class XYChart extends Chart {
         }
     }
 
-    protected void updateNumericAxis(final Axis axis, final List<DataSet> dataSets) {
+    protected static void updateNumericAxis(final Axis axis, final List<DataSet> dataSets) {
         if (dataSets == null || dataSets.isEmpty()) {
             return;
         }
