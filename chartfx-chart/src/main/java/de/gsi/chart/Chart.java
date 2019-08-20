@@ -9,6 +9,9 @@ import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.gsi.chart.ui.ChartLayoutAnimator;
 import javafx.css.converter.BooleanConverter;
 import javafx.css.converter.EnumConverter;
@@ -97,16 +100,16 @@ import javafx.util.Duration;
  * @author hbraeun, rstein, major refactoring, re-implementation and re-design
  */
 public abstract class Chart extends SidesPane implements Observable {
-
+    private static final Logger LOGGER = LoggerFactory.getLogger(Chart.class);
     private static final String CHART_CSS = Chart.class.getResource("chart.css").toExternalForm();
     private static final int DEFAULT_TRIGGER_DISTANCE = 50;
-    protected static final boolean DEBUG = false; // for more verbose debugging
+    protected static boolean DEBUG = false; // for more verbose debugging
 
     protected BooleanBinding showingBinding;
     protected final BooleanProperty showingProperty = new SimpleBooleanProperty(this, "showing", false);
 
     // isCanvasChangeRequested is a recursion guard to update canvas only once
-    protected boolean isCanvasChangeRequested = false; 
+    protected boolean isCanvasChangeRequested = false;
     protected final ResizableCanvas canvas = new ResizableCanvas();
 
     // contains axes (left, bottom, top, right) panes & HiddenSidePane with the
@@ -327,11 +330,9 @@ public abstract class Chart extends SidesPane implements Observable {
             return;
         }
         isAxesUpdate = true;
-        if (DEBUG) {
-            System.err
-                    .println("chart axesInvalidated() - called by (1) " + ProcessingProfiler.getCallingClassMethod(1));
-            System.err
-                    .println("chart axesInvalidated() - called by (3) " + ProcessingProfiler.getCallingClassMethod(3));
+        if (DEBUG && LOGGER.isDebugEnabled()) {
+            LOGGER.debug("chart axesInvalidated() - called by (1) {}", ProcessingProfiler.getCallingClassMethod(1));
+            LOGGER.debug("chart axesInvalidated() - called by (3) {}", ProcessingProfiler.getCallingClassMethod(3));
         }
         requestLayout();
         isAxesUpdate = false;
@@ -432,7 +433,6 @@ public abstract class Chart extends SidesPane implements Observable {
 
     /**
      * The side of the chart where the title is displayed
-     *
      * default Side.TOP
      */
     private final ObjectProperty<Side> titleSide = new StylishObjectProperty<Side>(StyleableProperties.TITLE_SIDE, this,
@@ -464,7 +464,6 @@ public abstract class Chart extends SidesPane implements Observable {
 
     /**
      * The side of the chart where the title is displayed
-     *
      * default Side.TOP
      */
     private final ObjectProperty<Side> measurementBarSide = new StyleableObjectProperty<Side>(Side.RIGHT) {
@@ -565,7 +564,6 @@ public abstract class Chart extends SidesPane implements Observable {
 
     /**
      * The side of the chart where the legend should be displayed
-     *
      * default value Side.BOTTOM
      */
     private final ObjectProperty<Side> legendSide = new StylishObjectProperty<Side>(StyleableProperties.LEGEND_SIDE,
@@ -1019,14 +1017,14 @@ public abstract class Chart extends SidesPane implements Observable {
 
     @Override
     public void layoutChildren() {
-        if (DEBUG) {
-            System.err.println("chart layoutChildren() - pre");
+        if (DEBUG && LOGGER.isDebugEnabled()) {
+            LOGGER.debug("chart layoutChildren() - pre");
         }
         if (layoutOngoing) {
             return;
         }
-        if (DEBUG) {
-            System.err.println("chart layoutChildren() - execute");
+        if (DEBUG && LOGGER.isDebugEnabled()) {
+            LOGGER.debug("chart layoutChildren() - execute");
         }
         final long start = ProcessingProfiler.getTimeStamp();
         layoutOngoing = true;
@@ -1058,8 +1056,8 @@ public abstract class Chart extends SidesPane implements Observable {
         ProcessingProfiler.getTimeDiff(start, "end");
 
         layoutOngoing = false;
-        if (DEBUG) {
-            System.err.println("chart layoutChildren() - done");
+        if (DEBUG && LOGGER.isDebugEnabled()) {
+            LOGGER.debug("chart layoutChildren() - done");
         }
         fireInvalidated();
     }
@@ -1072,8 +1070,8 @@ public abstract class Chart extends SidesPane implements Observable {
 
     protected void dataSetInvalidated() {
         // DataSet has notified and invalidate
-        if (DEBUG) {
-            System.err.println("chart dataSetDataListener change notified");
+        if (DEBUG && LOGGER.isDebugEnabled()) {
+            LOGGER.debug("chart dataSetDataListener change notified");
         }
         // updateAxisRange();
         // TODO: check why the following does not always forces a layoutChildren
@@ -1096,8 +1094,8 @@ public abstract class Chart extends SidesPane implements Observable {
         }
 
         if (dataSetChanges) {
-            if (DEBUG) {
-                System.err.println("chart datasetsChanged(Change) - has dataset changes");
+            if (DEBUG && LOGGER.isDebugEnabled()) {
+                LOGGER.debug("chart datasetsChanged(Change) - has dataset changes");
             }
             // updateAxisRange();
             updateLegend(getDatasets(), getRenderers());
@@ -1136,6 +1134,7 @@ public abstract class Chart extends SidesPane implements Observable {
     /**
      * This is used to check if any given animation should run. It returns true if animation is enabled and the node is
      * visible and in a scene.
+     * 
      * @return true if should animate
      */
     protected final boolean shouldAnimate() {
@@ -1376,8 +1375,8 @@ public abstract class Chart extends SidesPane implements Observable {
 
     @Override
     public void requestLayout() {
-        if (DEBUG) {
-            System.err.println("chart requestLayout() - called by " + ProcessingProfiler.getCallingClassMethod(1));
+        if (DEBUG && LOGGER.isDebugEnabled()) {
+            LOGGER.debug("chart requestLayout() - called by {}", ProcessingProfiler.getCallingClassMethod(1));
         }
 
         // this.setNeedsLayout(true);
