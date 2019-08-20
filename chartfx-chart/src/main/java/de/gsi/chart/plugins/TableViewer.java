@@ -135,6 +135,7 @@ public class TableViewer extends ChartPlugin {
 
     /**
      * Helper function to initialize the UI elements for the Interactor toolbar.
+     * 
      * @return HBox node with the toolbar elements
      */
     protected HBox getInteractorBar() {
@@ -294,8 +295,10 @@ public class TableViewer extends ChartPlugin {
                 oldChart.getDatasets().removeListener(datasetChangeListener);
                 oldChart.getDatasets().forEach(dataSet -> dataSet.removeListener(dataSetDataUpdateListener));
                 oldChart.getRenderers().removeListener(rendererChangeListener);
-                newChart.getRenderers()
-                        .forEach(renderer -> renderer.getDatasets().removeListener(datasetChangeListener));
+                if (newChart != null) {
+                    newChart.getRenderers()
+                            .forEach(renderer -> renderer.getDatasets().removeListener(datasetChangeListener));
+                }
             }
             if (newChart != null) {
                 // register data set listeners
