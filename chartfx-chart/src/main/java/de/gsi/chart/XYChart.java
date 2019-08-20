@@ -440,11 +440,6 @@ public class XYChart extends Chart {
                 // if yes -&gt; throw an exception
                 AssertUtils.notNull("to be added axis is null", set);
 
-                if (!(set instanceof Axis) && !(set instanceof CategoryAxis)) {
-                    throw new InvalidParameterException(
-                            new StringBuilder().append("do not know what to do with axis ").append(set.getLabel())
-                                    .append(" type ").append(set.getClass().toGenericString()).toString());
-                }
                 final Side side = set.getSide();
                 if (side == null) {
                     throw new InvalidParameterException(new StringBuilder().append("axis '").append(set.getLabel())
