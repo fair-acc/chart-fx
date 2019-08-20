@@ -1,10 +1,12 @@
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/1cac6d33dc824411bb56f9c939d02121?branch=master)](https://www.codacy.com/app/GSI/chart-fx?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=GSI-CS-CO/chart-fx&amp;utm_campaign=Badge_Grade)
-[![Coverity Build Status](https://scan.coverity.com/projects/chart-fx/badge.svg)](https://scan.coverity.com/projects/chart-fx)
 [![travis-ci Build Status JDK8](https://img.shields.io/travis/GSI-CS-CO/chart-fx/JDK8.svg?label=build%20JDK8)](https://travis-ci.org/GSI-CS-CO/chart-fx)
 [![Maven Central](https://img.shields.io/maven-central/v/de.gsi.chart/chartfx-chart/8.svg)](https://search.maven.org/search?q=g:de.gsi.chart+AND+a:chartfx-chart+AND+v:8*)
 [![travis-ci Build Status OpenJDK11](https://img.shields.io/travis/GSI-CS-CO/chart-fx/master.svg?label=build%20JDK11)](https://travis-ci.org/GSI-CS-CO/chart-fx)
 [![Maven Central](https://img.shields.io/maven-central/v/de.gsi.chart/chartfx-chart/11.svg)](https://search.maven.org/artifact/de.gsi.chart/chartfx-chart)
+
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/1cac6d33dc824411bb56f9c939d02121?branch=master)](https://www.codacy.com/app/GSI/chart-fx?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=GSI-CS-CO/chart-fx&amp;utm_campaign=Badge_Grade)
+[![Language grade: Java](https://img.shields.io/lgtm/grade/java/g/GSI-CS-CO/chart-fx.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/GSI-CS-CO/chart-fx/context:java)
+[![Coverity Build Status](https://scan.coverity.com/projects/chart-fx/badge.svg)](https://scan.coverity.com/projects/chart-fx)
 
 # ChartFx
 
@@ -21,12 +23,12 @@ The motivation for the re-design has been presented at [IPAC'19](https://ipac19.
 
 ## Functionalities and Features
 The library offers a wide variety of plot types common in the scientific signal processing field, a flexible plugin system as well as online parameter measurements commonly found in lab instrumentation. Some of its features include (see demos for more details):
-*  `DataSet`: basic XY-type datasets, extendable by `DataSetError` to account for measurement uncertainties, `DataSetMetaData`, `EditableDataSet`, `Histogram`, or `DataSet3D` interfaces;
-*  math sub-library: FFTs, Wavelet and other spectral and linear algebra routines, numerically robust integration and differentiation, IIR- & FIR-type filtering, linear regression and non-linear chi-square-type function fitting;
-*  `Chart`: providing euclidean, polar, or 2D projections of 3D data sets, and a configurable legend;
-*  `Axis`: one or multiple axes that are linear, logarithmic, time-series, inverted, dynamic auto-(grow)-ranging, automatic range-based SI and time unit conversion;
-*  `Renderer`: scatter-plot, poly-line, area-plot, error-bar and error-surfaces, vertical bar-plots, Bezier-curve, stair-case, 1D/2D histograms, mountain-range display, true contour plots, heatmaps, fading DataSet history, labelled chart range and indicator marker, hexagon-map, meta data (i.e. for indicating common measurement errors, warnings or infos such as over- or under-ranging, device or configuration errors etc.);
-*  `ChartPlugin`: data zoomer with history, zoom-to-origin, and option to limit this to X and/or Y coordinates, panner, data value and range indicators, cross-hair indicator, data point tool-tip, `DataSet` editing, table view, export to CSV and system clipboard, online axis editing, data set parameter measurement such as rise-time, min, max, rms, etc.
+*   `DataSet`: basic XY-type datasets, extendable by `DataSetError` to account for measurement uncertainties, `DataSetMetaData`, `EditableDataSet`, `Histogram`, or `DataSet3D` interfaces;
+*   math sub-library: FFTs, Wavelet and other spectral and linear algebra routines, numerically robust integration and differentiation, IIR- & FIR-type filtering, linear regression and non-linear chi-square-type function fitting;
+*   `Chart`: providing euclidean, polar, or 2D projections of 3D data sets, and a configurable legend;
+*   `Axis`: one or multiple axes that are linear, logarithmic, time-series, inverted, dynamic auto-(grow)-ranging, automatic range-based SI and time unit conversion;
+*   `Renderer`: scatter-plot, poly-line, area-plot, error-bar and error-surfaces, vertical bar-plots, Bezier-curve, stair-case, 1D/2D histograms, mountain-range display, true contour plots, heatmaps, fading DataSet history, labelled chart range and indicator marker, hexagon-map, meta data (i.e. for indicating common measurement errors, warnings or infos such as over- or under-ranging, device or configuration errors etc.);
+*   `ChartPlugin`: data zoomer with history, zoom-to-origin, and option to limit this to X and/or Y coordinates, panner, data value and range indicators, cross-hair indicator, data point tool-tip, `DataSet` editing, table view, export to CSV and system clipboard, online axis editing, data set parameter measurement such as rise-time, min, max, rms, etc.
 
 In order to provide some of the scenegraph-level functionality while using a `Canvas` as graphics backend, the functionality of each module was extended to be readily customized through direct API methods as well as through external CSS-type style sheets.
 
