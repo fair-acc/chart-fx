@@ -1337,7 +1337,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
 
             @Override
             public boolean isSettable(final AbstractAxisParameter n) {
-                return n.tickLabelFill == null | !n.tickLabelFill.isBound();
+                return n.tickLabelFill == null || !n.tickLabelFill.isBound();
             }
 
             @SuppressWarnings("unchecked") // tickLabelFillProperty() is
