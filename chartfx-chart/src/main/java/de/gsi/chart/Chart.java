@@ -1083,17 +1083,12 @@ public abstract class Chart extends SidesPane implements Observable {
     protected void datasetsChanged(final ListChangeListener.Change<? extends DataSet> change) {
         boolean dataSetChanges = false;
 
-        final List<DataSet> newDataSets = new ArrayList<>();
-        final List<DataSet> oldDataSets = new ArrayList<>();
-
         while (change.next()) {
-            oldDataSets.addAll(change.getRemoved());
             for (final DataSet set : change.getRemoved()) {
                 set.removeListener(dataSetDataListener);
                 dataSetChanges = true;
             }
 
-            newDataSets.addAll(change.getAddedSubList());
             for (final DataSet set : change.getAddedSubList()) {
                 set.addListener(dataSetDataListener);
                 dataSetChanges = true;
@@ -1107,16 +1102,7 @@ public abstract class Chart extends SidesPane implements Observable {
             // updateAxisRange();
             updateLegend(getDatasets(), getRenderers());
             requestLayout();
-            // if (newDataSets.containsAll(oldDataSets) &&
-            // !oldDataSets.isEmpty()) {
-            // // old and new data sets are identical - suppress update
-            // this.requestLayout();
-            // } else {
-            // this.updateLegend();
-            // }
         }
-
-        // this.requestLayout();
     }
 
     protected void updateLegend(final List<DataSet> dataSets, final List<Renderer> renderers) {
