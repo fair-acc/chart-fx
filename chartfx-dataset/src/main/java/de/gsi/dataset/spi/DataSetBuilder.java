@@ -225,6 +225,10 @@ public class DataSetBuilder {
             return buildWithYArrayOnly(dsName);
         }
 
+        if (yValues == null) {
+            throw new IllegalStateException("yValues is null");
+        }
+
         final int minArrays = Math.min(xValues.length, yValues.length);
         final int size = initialCapacity < 0 ? minArrays : Math.min(minArrays, initialCapacity);
         DataSet dataSet;
