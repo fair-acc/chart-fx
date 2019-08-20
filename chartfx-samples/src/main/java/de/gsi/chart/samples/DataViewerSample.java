@@ -174,12 +174,10 @@ public class DataViewerSample extends Application {
         final UpdateTask updateTask1 = new UpdateTask(chart, dataset1);
         final UpdateTask updateTask2 = new UpdateTask(chart, dataset3);
         final Timer timer = new Timer();
-        if (DataViewerSample.UPDATE_PERIOD > 0) {
             // Start update in 2sec.
             timer.schedule(updateTask1, 2000, DataViewerSample.UPDATE_PERIOD);
             // Start update in 2sec.
             timer.schedule(updateTask2, 2000, DataViewerSample.UPDATE_PERIOD);
-        }
 
         return chart;
     }
