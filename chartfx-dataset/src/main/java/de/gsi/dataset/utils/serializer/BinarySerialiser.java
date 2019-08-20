@@ -473,6 +473,7 @@ public class BinarySerialiser { // NOPMD - omen est omen
             return dimensions;
         }
 
+        @Override
         public String toString() {
             if (dimensions.length == 1 && dimensions[0] == 1) {
                 return String.format("[fieldName=%s, fieldType=%s]", fieldName, dataType.getAsString());
@@ -483,7 +484,7 @@ public class BinarySerialiser { // NOPMD - omen est omen
                     .append('[');
             for (int i = 0; i < dimensions.length; i++) {
                 builder.append(dimensions[i]);
-                if (i <= dimensions.length - 1) {
+                if (i < dimensions.length - 1) {
                     builder.append(',');
                 }
             }
