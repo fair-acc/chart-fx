@@ -38,6 +38,43 @@ public class MetaDataRenderer extends AbstractMetaDataRendererParameter<MetaData
     protected HBox errorBox = new InfoHBox();
     protected Chart chart;
 
+    protected List<String> oldInfoMessages;
+    protected List<String> oldWarningMessages;
+    protected List<String> oldErrorMessages;
+
+    protected final BooleanProperty drawOnCanvas = new SimpleBooleanProperty(this, "drawOnCanvas", true) {
+        boolean oldValue = true;
+
+        @Override
+        public void set(boolean newValue) {
+            if (oldValue == newValue) {
+                return;
+            }
+            super.set(newValue);
+            oldValue = newValue;
+            updateInfoBoxLocation();
+        }
+    };
+
+    protected final ObjectProperty<Side> infoBoxSide = new SimpleObjectProperty<Side>(this, "infoBoxSide", Side.TOP) {
+        Side oldSide = null;
+
+        @Override
+        public void set(final Side side) {
+            if (side == null) {
+                throw new InvalidParameterException("side must not be null");
+            }
+
+            if (oldSide != null && oldSide == side) {
+                return;
+            }
+            super.set(side);
+            oldSide = side;
+
+            updateInfoBoxLocation();
+        }
+    };
+
     public MetaDataRenderer(final Chart chart) {
         super();
         this.chart = chart;
@@ -63,20 +100,38 @@ public class MetaDataRenderer extends AbstractMetaDataRendererParameter<MetaData
     }
 
     @Override
-    protected MetaDataRenderer getThis() {
-        return this;
+    public Canvas drawLegendSymbol(DataSet dataSet, int dsIndex, int width, int height) {
+        // not applicable for this class
+        return null;
     }
 
+    public BooleanProperty drawOnCanvasProperty() {
+        return drawOnCanvas;
+    }
+    @Override
+    public ObservableList<Axis> getAxes() {
+        return FXCollections.observableArrayList();
+    }
     public BorderPane getBorderPaneOnCanvas() {
         return borderPane;
     }
 
+    @Override
+    public ObservableList<DataSet> getDatasets() {
+        return FXCollections.observableArrayList();
+    }
+
+    @Override
+    public ObservableList<DataSet> getDatasetsCopy() {
+        return FXCollections.observableArrayList();
+    }
+
     /**
      *
-     * @return FlowPane containing the Info-, Warning- and Error-Boxes
+     * @return box that is being filled with Error messages
      */
-    public FlowPane getMessageBox() {
-        return messageBox;
+    public HBox getErrorBox() {
+        return errorBox;
     }
 
     /**
@@ -88,6 +143,25 @@ public class MetaDataRenderer extends AbstractMetaDataRendererParameter<MetaData
     }
 
     /**
+     * whether renderer should draw info box in Side side, ...
+     *
+     * @return Side
+     */
+    public final Side getInfoBoxSide() {
+        return infoBoxSideProperty().get();
+    }
+
+    // ******************************* class specific properties **********
+
+    /**
+     *
+     * @return FlowPane containing the Info-, Warning- and Error-Boxes
+     */
+    public FlowPane getMessageBox() {
+        return messageBox;
+    }
+
+    /**
      *
      * @return box that is being filled with Warning messages
      */
@@ -96,16 +170,17 @@ public class MetaDataRenderer extends AbstractMetaDataRendererParameter<MetaData
     }
 
     /**
+     * whether renderer should draw info box in Side side, ...
      *
-     * @return box that is being filled with Error messages
+     * @return property
      */
-    public HBox getErrorBox() {
-        return errorBox;
+    public final ObjectProperty<Side> infoBoxSideProperty() {
+        return infoBoxSide;
     }
 
-    protected List<String> oldInfoMessages;
-    protected List<String> oldWarningMessages;
-    protected List<String> oldErrorMessages;
+    public boolean isDrawOnCanvas() {
+        return drawOnCanvas.get();
+    }
 
     @Override
     public void render(final GraphicsContext gc, final Chart chart, final int dataSetOffset,
@@ -170,19 +245,35 @@ public class MetaDataRenderer extends AbstractMetaDataRendererParameter<MetaData
         ProcessingProfiler.getTimeDiff(start);
     }
 
-    protected class MetaLabel extends Label {
-
-        public MetaLabel(final String text) {
-            super(text);
-            setMouseTransparent(true);
-            setMinSize(100, 20);
-            setCache(true);
-        }
-
+    public void setDrawOnCanvas(boolean state) {
+        drawOnCanvas.set(state);
     }
 
-    protected enum MsgType {
-        INFO, WARNING, ERROR;
+    /**
+     * whether renderer should draw info box in Side side, ...
+     *
+     * @param side
+     *            the side to draw
+     * @return itself (fluent design)
+     */
+    public final MetaDataRenderer setInfoBoxSide(final Side side) {
+        infoBoxSideProperty().set(side);
+        return getThis();
+    }
+
+    @Override
+    public Renderer setShowInLegend(boolean state) {
+        return getThis();
+    }
+
+    @Override
+    public boolean showInLegend() {
+        return false;
+    }
+
+    @Override
+    public BooleanProperty showInLegendProperty() {
+        return null;
     }
 
     private List<String> extractMessages(List<DataSet> metaDataSets, boolean singleDS, MsgType msgType) {
@@ -236,52 +327,10 @@ public class MetaDataRenderer extends AbstractMetaDataRendererParameter<MetaData
         return list;
     }
 
-    // ******************************* class specific properties **********
-
-    protected final BooleanProperty drawOnCanvas = new SimpleBooleanProperty(this, "drawOnCanvas", true) {
-        boolean oldValue = true;
-
-        @Override
-        public void set(boolean newValue) {
-            if (oldValue == newValue) {
-                return;
-            }
-            super.set(newValue);
-            oldValue = newValue;
-            updateInfoBoxLocation();
-        }
-    };
-
-    public boolean isDrawOnCanvas() {
-        return drawOnCanvas.get();
+    @Override
+    protected MetaDataRenderer getThis() {
+        return this;
     }
-
-    public void setDrawOnCanvas(boolean state) {
-        drawOnCanvas.set(state);
-    }
-
-    public BooleanProperty drawOnCanvasProperty() {
-        return drawOnCanvas;
-    }
-
-    protected final ObjectProperty<Side> infoBoxSide = new SimpleObjectProperty<Side>(this, "infoBoxSide", Side.TOP) {
-        Side oldSide = null;
-
-        @Override
-        public void set(final Side side) {
-            if (side == null) {
-                throw new InvalidParameterException("side must not be null");
-            }
-
-            if (oldSide != null && oldSide == side) {
-                return;
-            }
-            super.set(side);
-            oldSide = side;
-
-            updateInfoBoxLocation();
-        }
-    };
 
     protected void updateInfoBoxLocation() {
         final Side side = getInfoBoxSide();
@@ -322,64 +371,19 @@ public class MetaDataRenderer extends AbstractMetaDataRendererParameter<MetaData
         // chart.requestLayout();
     }
 
-    /**
-     * whether renderer should draw info box in Side side, ...
-     *
-     * @return Side
-     */
-    public final Side getInfoBoxSide() {
-        return infoBoxSideProperty().get();
+    protected class MetaLabel extends Label {
+
+        public MetaLabel(final String text) {
+            super(text);
+            setMouseTransparent(true);
+            setMinSize(100, 20);
+            setCache(true);
+        }
+
     }
 
-    /**
-     * whether renderer should draw info box in Side side, ...
-     *
-     * @param side
-     *            the side to draw
-     * @return itself (fluent design)
-     */
-    public final MetaDataRenderer setInfoBoxSide(final Side side) {
-        infoBoxSideProperty().set(side);
-        return getThis();
-    }
-
-    /**
-     * whether renderer should draw info box in Side side, ...
-     *
-     * @return property
-     */
-    public final ObjectProperty<Side> infoBoxSideProperty() {
-        return infoBoxSide;
-    }
-
-    @Override
-    public ObservableList<DataSet> getDatasets() {
-        return FXCollections.observableArrayList();
-    }
-
-    @Override
-    public ObservableList<DataSet> getDatasetsCopy() {
-        return FXCollections.observableArrayList();
-    }
-
-    @Override
-    public BooleanProperty showInLegendProperty() {
-        return null;
-    }
-
-    @Override
-    public boolean showInLegend() {
-        return false;
-    }
-
-    @Override
-    public Renderer setShowInLegend(boolean state) {
-        return getThis();
-    }
-
-    @Override
-    public ObservableList<Axis> getAxes() {
-        return FXCollections.observableArrayList();
+    protected enum MsgType {
+        INFO, WARNING, ERROR;
     }
 
     class InfoHBox extends HBox {
@@ -400,11 +404,5 @@ public class MetaDataRenderer extends AbstractMetaDataRendererParameter<MetaData
                 }
             });
         }
-    }
-
-    @Override
-    public Canvas drawLegendSymbol(DataSet dataSet, int dsIndex, int width, int height) {
-        // not applicable for this class
-        return null;
     }
 }

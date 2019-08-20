@@ -97,27 +97,19 @@ public class ColorGradient {
 
     public static final ColorGradient VIRIDIS = ColorGradient.viridis();
 
-    public static List<ColorGradient> colorGradients() {
-        return Arrays.asList(ColorGradient.RAINBOW, ColorGradient.JET, ColorGradient.TOPO, ColorGradient.TOPO_EXT,
-                ColorGradient.WHITE_BLACK, ColorGradient.BLACK_WHITE, ColorGradient.HOT, ColorGradient.SUNRISE,
-                ColorGradient.VIRIDIS, ColorGradient.BLUERED, ColorGradient.PINK);
-    }
-
     private final List<Stop> stops;
-    private final String name;
 
+    private final String name;
     /**
-     * Creates a new instance of ColorGradient.
+     * Creates a new instance of ColorGradient.**
      *
-     * @param name name of gradient
-     * @param stops the gradient's color specification; should contain at least two stops with offsets between 0.0 and
-     *            1.0
+     * @param stops the gradient's color specification; should contain at least* two stops with offsets between 0.0 and
+     *            1.0*
      * @see #getStops()
      */
-    public ColorGradient(final String name, final Stop... stops) {
-        // Use LinearGradient to normalize stops
-        this.stops = new LinearGradient(0, 0, 0, 0, false, CycleMethod.NO_CYCLE, stops).getStops(); // NOPMD
-        this.name = name;
+
+    public ColorGradient(final List<Stop> stops) {
+        this("custom", stops);
     }
 
     /**
@@ -129,11 +121,6 @@ public class ColorGradient {
      */
     public ColorGradient(final Stop... stops) {
         this("custom", stops);
-    }
-
-    @Override
-    public String toString() {
-        return name;
     }
 
     /**
@@ -151,25 +138,23 @@ public class ColorGradient {
     }
 
     /**
-     * Creates a new instance of ColorGradient.**
+     * Creates a new instance of ColorGradient.
      *
-     * @param stops the gradient's color specification; should contain at least* two stops with offsets between 0.0 and
-     *            1.0*
+     * @param name name of gradient
+     * @param stops the gradient's color specification; should contain at least two stops with offsets between 0.0 and
+     *            1.0
      * @see #getStops()
      */
-
-    public ColorGradient(final List<Stop> stops) {
-        this("custom", stops);
+    public ColorGradient(final String name, final Stop... stops) {
+        // Use LinearGradient to normalize stops
+        this.stops = new LinearGradient(0, 0, 0, 0, false, CycleMethod.NO_CYCLE, stops).getStops(); // NOPMD
+        this.name = name;
     }
 
-    /**
-     * Returns the gradient stops.
-     *
-     * @return list of stop colours
-     * @see LinearGradient#getStops()
-     */
-    public List<Stop> getStops() {
-        return stops;
+    public static List<ColorGradient> colorGradients() {
+        return Arrays.asList(ColorGradient.RAINBOW, ColorGradient.JET, ColorGradient.TOPO, ColorGradient.TOPO_EXT,
+                ColorGradient.WHITE_BLACK, ColorGradient.BLACK_WHITE, ColorGradient.HOT, ColorGradient.SUNRISE,
+                ColorGradient.VIRIDIS, ColorGradient.BLUERED, ColorGradient.PINK);
     }
 
     private static final ColorGradient viridis() {
@@ -309,6 +294,21 @@ public class ColorGradient {
             stops.add(new Stop(i * delta, Color.color(vals[i][0], vals[i][1], vals[i][2], 1.0)));
         }
         return new ColorGradient("VIRIDIS", stops);
+    }
+
+    /**
+     * Returns the gradient stops.
+     *
+     * @return list of stop colours
+     * @see LinearGradient#getStops()
+     */
+    public List<Stop> getStops() {
+        return stops;
+    }
+
+    @Override
+    public String toString() {
+        return name;
     }
 
 }

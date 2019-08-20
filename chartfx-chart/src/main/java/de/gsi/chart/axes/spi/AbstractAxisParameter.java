@@ -110,11 +110,9 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     /** user-specified range (ie. limits based on [lower,upper]Bound) */
     protected AxisRange userRange = new AxisRange();
 
-    /** 
+    /**
      * The side of the plot which this axis is being drawn on
-     * 
-     * default axis orientation is BOTTOM, can be set latter to another side 
-     * 
+     * default axis orientation is BOTTOM, can be set latter to another side
      */
     private final ObjectProperty<Side> side = new StyleableObjectProperty<Side>(Side.BOTTOM) {
 
@@ -853,7 +851,8 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     /**
      * This is {@code true} when the axis labels and data point order should be inverted
      *
-     * @return {@code true} if axis shall be inverted (i.e. drawn from 'max-&gt;min', rather than the normal 'min-&gt;max')
+     * @return {@code true} if axis shall be inverted (i.e. drawn from 'max-&gt;min', rather than the normal
+     *         'min-&gt;max')
      */
     @Override
     public boolean isInvertedAxis() {
@@ -943,7 +942,8 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
         }
         autoGrowRanging.set(state);
     }
-                                              /**
+
+    /**
      * Sets the value of the {@link #autoRangePaddingProperty()}
      *
      * @param padding padding factor
@@ -960,7 +960,8 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     public void setAutoRangeRounding(final boolean round) {
         autoRangeRoundingProperty().set(round);
     }
-                                          @Override
+
+    @Override
     public void setAutoRanging(final boolean value) {
         autoRanging.set(value);
     }
@@ -1184,9 +1185,11 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     protected void invalidateRange() {
         rangeValid = false;
     }
+
     protected void setScale(final double scale) {
         this.scale.set(scale);
     }
+
     protected void updateAxisLabelAndUnit() {
         final String axisPrimaryLabel = getLabel();
         String axisUnit = getUnit();
@@ -1208,6 +1211,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
         }
         axisLabel.applyCss();
     }
+
     protected void updateScaleAndUnitPrefix() {
         final double range = Math.abs(getUpperBound() - getLowerBound());
         final double logRange = Math.log10(range);
@@ -1226,9 +1230,11 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
         setTickUnit(range / getMinorTickCount());
 
     }
+
     ReadOnlyDoubleWrapper scalePropertyImpl() {
         return scale;
     }
+
     /*
      * 
      * TODO: follow-up idea of simplifying CSS handling: add/make css collector
