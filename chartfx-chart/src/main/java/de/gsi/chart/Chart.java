@@ -133,7 +133,7 @@ public abstract class Chart extends SidesPane implements Observable {
     /**
      * @return the actual canvas the data is being drawn upon
      */
-    public Canvas getCanvas() {
+    public final Canvas getCanvas() {
         return canvas;
     }
 
@@ -179,7 +179,7 @@ public abstract class Chart extends SidesPane implements Observable {
         }
     }
 
-    public Pane getAxesPane(final Side side) {
+    public final Pane getAxesPane(final Side side) {
         return axesPane.get(side);
     }
 
@@ -204,7 +204,7 @@ public abstract class Chart extends SidesPane implements Observable {
         }
     }
 
-    public Pane getTitleLegendPane(final Side side) {
+    public final Pane getTitleLegendPane(final Side side) {
         return titleLegendPane.get(side);
     }
 
@@ -215,7 +215,7 @@ public abstract class Chart extends SidesPane implements Observable {
         }
     }
 
-    public StackPane getAxesCornerPane(final Corner corner) {
+    public final StackPane getAxesCornerPane(final Corner corner) {
         return axesCorner.get(corner);
     }
 
@@ -226,7 +226,7 @@ public abstract class Chart extends SidesPane implements Observable {
         }
     }
 
-    public StackPane getTitleLegendCornerPane(final Corner corner) {
+    public final StackPane getTitleLegendCornerPane(final Corner corner) {
         return titleLegendCorner.get(corner);
     }
 
@@ -277,19 +277,19 @@ public abstract class Chart extends SidesPane implements Observable {
     protected final Pane plotForeGround = new Pane();
     protected final Pane canvasForeground = new Pane();
 
-    public Pane getPlotBackground() {
+    public final Pane getPlotBackground() {
         return plotBackground;
     }
 
-    public Pane getPlotForeground() {
+    public final Pane getPlotForeground() {
         return plotForeGround;
     }
 
-    public Pane getCanvasForeground() {
+    public final Pane getCanvasForeground() {
         return canvasForeground;
     }
 
-    public HiddenSidesPane getPlotArea() {
+    public final HiddenSidesPane getPlotArea() {
         return hiddenPane;
     }
 
@@ -621,7 +621,7 @@ public abstract class Chart extends SidesPane implements Observable {
     protected final FlowPane toolBar = new FlowPane(); // containing the plugin
                                                        // handler/modifier
 
-    public FlowPane getToolBar() {
+    public final FlowPane getToolBar() {
         return toolBar;
     }
 
@@ -640,7 +640,7 @@ public abstract class Chart extends SidesPane implements Observable {
         }
     }
 
-    public Pane getMeasurementBar(final Side side) {
+    public final Pane getMeasurementBar(final Side side) {
         return parameterDisplayPane.get(side);
     }
 
@@ -997,7 +997,7 @@ public abstract class Chart extends SidesPane implements Observable {
         getStyleClass().add("chart");
         axesAndCanvasPane.getStyleClass().add("chart-content");
 
-        registerShowingListener();
+        registerShowingListener(); //NOPMD - unlikely but allowed override
     }
 
     // -------------- METHODS
