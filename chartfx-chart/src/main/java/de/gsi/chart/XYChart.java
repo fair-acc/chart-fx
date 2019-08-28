@@ -6,17 +6,19 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.gsi.chart.axes.Axis;
-import de.gsi.chart.axes.spi.CategoryAxis;
 import de.gsi.chart.axes.spi.DefaultNumericAxis;
-import de.gsi.dataset.DataSet;
-import de.gsi.dataset.DataSet3D;
 import de.gsi.chart.renderer.PolarTickStep;
 import de.gsi.chart.renderer.Renderer;
 import de.gsi.chart.renderer.spi.ErrorDataSetRenderer;
 import de.gsi.chart.renderer.spi.GridRenderer;
 import de.gsi.chart.renderer.spi.LabelledMarkerRenderer;
 import de.gsi.chart.ui.geometry.Side;
+import de.gsi.dataset.DataSet;
+import de.gsi.dataset.DataSet3D;
 import de.gsi.dataset.utils.AssertUtils;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -40,20 +42,21 @@ import javafx.util.Duration;
  * the observable lists used by XYChart. Brief history: original design inspired by Oracle, extended by CERN (i.e.
  * plugin concept/zoomer), modified to mitigate JavaFX performance issues and extended renderer
  * concept/canvas-concept/interfaces/+more plugins by GSI. Refactored and re-write in 2018 to make it compatible with
- * GPLv3 which -- in the spirit of 'Ship of Theseus' -- makes it de-facto a new development. Contributions, bug-fixes,
+ * Apache 2.0 which -- in the spirit of 'Ship of Theseus' -- makes it de-facto a new development. Contributions,
+ * bug-fixes,
  * and modifications are welcome. Hope you find this library useful and enjoy!
  *
  * @author braeun
  * @author rstein
  */
 public class XYChart extends Chart {
-
+    private static final Logger LOGGER = LoggerFactory.getLogger(XYChart.class);
     protected static final int BURST_LIMIT_MS = 15;
     protected BooleanProperty polarPlot = new SimpleBooleanProperty(this, "polarPlot", false);
     private final ObjectProperty<PolarTickStep> polarStepSize = new SimpleObjectProperty<>(PolarTickStep.THIRTY);
     private final GridRenderer gridRenderer = new GridRenderer(this);
-    private long lastCanvasUpdate = 0;
-    private boolean callCanvasUpdateLater = false;
+    private long lastCanvasUpdate;
+    private boolean callCanvasUpdateLater;
     private final ChangeListener<Side> axisSideChangeListener = this::axisSideChanged;
 
     public XYChart() {
@@ -67,6 +70,7 @@ public class XYChart extends Chart {
      * @param yAxis the axis to use as primary y-Axis
      */
     public XYChart(final Axis xAxis, final Axis yAxis) {
+        super();
         Objects.requireNonNull(xAxis, "X axis is required");
         Objects.requireNonNull(yAxis, "Y axis is required");
 
@@ -84,74 +88,11 @@ public class XYChart extends Chart {
 
         getAxes().addAll(xAxis, yAxis);
 
-        // getDatasets().addListener(datasetChangeListener);
-
-        // initChartDataSetListener();
-
         getRenderers().add(new ErrorDataSetRenderer());
 
         setAnimated(false);
         xAxis.setAnimated(false);
         yAxis.setAnimated(false);
-    }
-
-    /**
-     * whether renderer should use polar coordinates (x -&gt; interpreted as phi, y as radial coordinate)
-     *
-     * @return true if renderer is plotting in polar coordinates
-     */
-    public final boolean isPolarPlot() {
-        return polarPlotProperty().get();
-    }
-
-    /**
-     * Sets whether renderer should use polar coordinates (x -&gt; interpreted as phi, y as radial coordinate)
-     *
-     * @param state true if renderer is parallelising sub-functionalities
-     * @return itself (fluent design)
-     */
-    public final XYChart setPolarPlot(final boolean state) {
-        polarPlotProperty().set(state);
-        return this;
-    }
-
-    public ObjectProperty<PolarTickStep> polarStepSizeProperty() {
-        return polarStepSize;
-    }
-
-    public void setPolarStepSize(final PolarTickStep step) {
-        polarStepSizeProperty().set(step);
-    }
-
-    public PolarTickStep getPolarStepSize() {
-        return polarStepSizeProperty().get();
-    }
-
-    /**
-     * Sets whether renderer should use polar coordinates (x -&gt; interpreted as phi, y as radial coordinate)
-     *
-     * @return true if renderer is plotting in polar coordinates
-     */
-    public final BooleanProperty polarPlotProperty() {
-        return polarPlot;
-    }
-
-    /**
-     * Returns the x axis.
-     *
-     * @return x axis
-     */
-    public Axis getXAxis() {
-        return getFirstAxis(Orientation.HORIZONTAL);
-    }
-
-    /**
-     * Returns the y axis.
-     *
-     * @return y axis
-     */
-    public Axis getYAxis() {
-        return getFirstAxis(Orientation.VERTICAL);
     }
 
     /**
@@ -184,30 +125,32 @@ public class XYChart extends Chart {
     }
 
     /**
-     * Indicates whether vertical grid lines are visible or not.
-     *
-     * @return verticalGridLinesVisible property
+     * @return nomen est omen
      */
-    public final BooleanProperty verticalGridLinesVisibleProperty() {
-        return gridRenderer.verticalGridLinesVisibleProperty();
+    public GridRenderer getGridRenderer() {
+        return gridRenderer;
+    }
+
+    public PolarTickStep getPolarStepSize() {
+        return polarStepSizeProperty().get();
     }
 
     /**
-     * Indicates whether vertical grid lines are visible.
+     * Returns the x axis.
      *
-     * @return {@code true} if vertical grid lines are visible else {@code false}.
+     * @return x axis
      */
-    public final boolean isVerticalGridLinesVisible() {
-        return verticalGridLinesVisibleProperty().get();
+    public Axis getXAxis() {
+        return getFirstAxis(Orientation.HORIZONTAL);
     }
 
     /**
-     * Sets the value of the {@link #verticalGridLinesVisibleProperty()}.
+     * Returns the y axis.
      *
-     * @param value {@code true} to make vertical lines visible
+     * @return y axis
      */
-    public final void setVerticalGridLinesVisible(final boolean value) {
-        verticalGridLinesVisibleProperty().set(value);
+    public Axis getYAxis() {
+        return getFirstAxis(Orientation.VERTICAL);
     }
 
     /**
@@ -220,19 +163,43 @@ public class XYChart extends Chart {
     }
 
     /**
-     * @return nomen est omen
-     */
-    public GridRenderer getGridRenderer() {
-        return gridRenderer;
-    }
-
-    /**
      * Indicates whether horizontal grid lines are visible.
      *
      * @return {@code true} if horizontal grid lines are visible else {@code false}.
      */
     public final boolean isHorizontalGridLinesVisible() {
         return horizontalGridLinesVisibleProperty().get();
+    }
+
+    /**
+     * whether renderer should use polar coordinates (x -&gt; interpreted as phi, y as radial coordinate)
+     *
+     * @return true if renderer is plotting in polar coordinates
+     */
+    public final boolean isPolarPlot() {
+        return polarPlotProperty().get();
+    }
+
+    /**
+     * Indicates whether vertical grid lines are visible.
+     *
+     * @return {@code true} if vertical grid lines are visible else {@code false}.
+     */
+    public final boolean isVerticalGridLinesVisible() {
+        return verticalGridLinesVisibleProperty().get();
+    }
+
+    /**
+     * Sets whether renderer should use polar coordinates (x -&gt; interpreted as phi, y as radial coordinate)
+     *
+     * @return true if renderer is plotting in polar coordinates
+     */
+    public final BooleanProperty polarPlotProperty() {
+        return polarPlot;
+    }
+
+    public ObjectProperty<PolarTickStep> polarStepSizeProperty() {
+        return polarStepSize;
     }
 
     /**
@@ -244,8 +211,28 @@ public class XYChart extends Chart {
         horizontalGridLinesVisibleProperty().set(value);
     }
 
-    private boolean isDataEmpty() {
-        return getAllDatasets() == null || getAllDatasets().isEmpty();
+    /**
+     * Sets whether renderer should use polar coordinates (x -&gt; interpreted as phi, y as radial coordinate)
+     *
+     * @param state true if renderer is parallelising sub-functionalities
+     * @return itself (fluent design)
+     */
+    public final XYChart setPolarPlot(final boolean state) {
+        polarPlotProperty().set(state);
+        return this;
+    }
+
+    public void setPolarStepSize(final PolarTickStep step) {
+        polarStepSizeProperty().set(step);
+    }
+
+    /**
+     * Sets the value of the {@link #verticalGridLinesVisibleProperty()}.
+     *
+     * @param value {@code true} to make vertical lines visible
+     */
+    public final void setVerticalGridLinesVisible(final boolean value) {
+        verticalGridLinesVisibleProperty().set(value);
     }
 
     @Override
@@ -259,8 +246,85 @@ public class XYChart extends Chart {
             updateNumericAxis(chartAxis, dataSets);
             // chartAxis.requestAxisLayout();
         });
+    }
 
-        return;
+    /**
+     * Indicates whether vertical grid lines are visible or not.
+     *
+     * @return verticalGridLinesVisible property
+     */
+    public final BooleanProperty verticalGridLinesVisibleProperty() {
+        return gridRenderer.verticalGridLinesVisibleProperty();
+    }
+
+    private boolean isDataEmpty() {
+        return getAllDatasets() == null || getAllDatasets().isEmpty();
+    }
+
+    /**
+     * add XYChart specific axis handling (ie. placement around charts, add new DefaultNumericAxis if one is missing,
+     * etc.)
+     *
+     * @param change the new axis change that is being added
+     */
+    @Override
+    protected void axesChanged(final ListChangeListener.Change<? extends Axis> change) {
+        while (change.next()) {
+            change.getRemoved().forEach(set -> {
+                AssertUtils.notNull("to be removed axis is null", set);
+                // check if axis is associated with an existing renderer, if yes
+                // -&gt; throw an exception
+                // remove from axis.side property side listener
+                set.sideProperty().removeListener(axisSideChangeListener);
+            });
+            for (final Axis set : change.getAddedSubList()) {
+                // check if axis is associated with an existing renderer,
+                // if yes -&gt; throw an exception
+                AssertUtils.notNull("to be added axis is null", set);
+
+                final Side side = set.getSide();
+                if (side == null) {
+                    throw new InvalidParameterException(new StringBuilder().append("axis '").append(set.getLabel())
+                            .append("' has 'null' as side being set").toString());
+                }
+                if (!getAxesPane(set.getSide()).getChildren().contains((Node) set)) {
+                    getAxesPane(set.getSide()).getChildren().add((Node) set);
+                }
+
+                set.sideProperty().addListener(axisSideChangeListener);
+
+            }
+        }
+
+        requestLayout();
+    }
+
+    protected void axisSideChanged(final ObservableValue<? extends Side> change, final Side oldValue,
+            final Side newValue) {
+        if (newValue != null && newValue.equals(oldValue)) {
+            return;
+        }
+        // loop through all registered axis
+        for (final Axis axis : axesList) {
+
+            if (axis.getSide() == null) {
+                // remove axis from all axis panes
+                removeFromAllAxesPanes(axis);
+            }
+
+            // check if axis is in correct pane
+            if (getAxesPane(axis.getSide()).getChildren().contains((Node)axis)) {
+                // yes, it is continue with next axis
+                continue;
+            }
+            // axis needs to be moved to new pane location
+            // first: remove axis from all axis panes
+            removeFromAllAxesPanes(axis);
+
+            // second: add axis to correct axis pane
+            getAxesPane(axis.getSide()).getChildren().add((Node) axis);
+        }
+        requestLayout();
     }
 
     protected List<DataSet> getDataSetForAxis(final Axis axis) {
@@ -274,7 +338,59 @@ public class XYChart extends Chart {
         return retVal;
     }
 
-    protected void updateNumericAxis(final Axis axis, final List<DataSet> dataSets) {
+    @Override
+    protected void redrawCanvas() {
+        if (DEBUG && LOGGER.isDebugEnabled()) {
+            LOGGER.debug("   xychart redrawCanvas() - pre");
+        }
+        setAutoNotifaction(false);
+
+        final long now = System.nanoTime();
+        final double diffMillisSinceLastUpdate = TimeUnit.NANOSECONDS.toMillis(now - lastCanvasUpdate);
+        if (diffMillisSinceLastUpdate < XYChart.BURST_LIMIT_MS) {
+            if (!callCanvasUpdateLater) {
+                callCanvasUpdateLater = true;
+                // repaint 20 ms later in case this was just a burst operation
+                final KeyFrame kf1 = new KeyFrame(Duration.millis(20), e -> requestLayout());
+
+                final Timeline timeline = new Timeline(kf1);
+                Platform.runLater(timeline::play);
+            }
+
+            return;
+        }
+        if (DEBUG && LOGGER.isDebugEnabled()) {
+            LOGGER.debug("   xychart redrawCanvas() - executing");
+            LOGGER.debug("   xychart redrawCanvas() - canvas size = {}",
+                    String.format("%fx%f", canvas.getWidth(), canvas.getHeight()));
+        }
+
+        lastCanvasUpdate = now;
+        callCanvasUpdateLater = false;
+
+        final GraphicsContext gc = canvas.getGraphicsContext2D();
+        gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
+
+        if (!gridRenderer.isDrawOnTop()) {
+            gridRenderer.render(gc, this, 0, null);
+        }
+
+        int dataSetOffset = 0;
+        for (final Renderer renderer : getRenderers()) {
+            renderer.render(gc, this, dataSetOffset, getDatasets());
+            dataSetOffset += getDatasets().size() + renderer.getDatasets().size();
+        }
+
+        if (gridRenderer.isDrawOnTop()) {
+            gridRenderer.render(gc, this, 0, null);
+        }
+        setAutoNotifaction(true);
+        if (DEBUG && LOGGER.isDebugEnabled()) {
+            LOGGER.debug("   xychart redrawCanvas() - done");
+        }
+    }
+
+    protected static void updateNumericAxis(final Axis axis, final List<DataSet> dataSets) {
         if (dataSets == null || dataSets.isEmpty()) {
             return;
         }
@@ -335,133 +451,6 @@ public class XYChart extends Chart {
             axis.invalidateRange(dataMinMax);
         }
         axis.setAutoNotifaction(oldFlag);
-    }
-
-    @Override
-    protected void redrawCanvas() {
-        if (DEBUG) {
-            System.err.println("   xychart redrawCanvas() - pre");
-        }
-        setAutoNotifaction(false);
-
-        final long now = System.nanoTime();
-        final double diffMillisSinceLastUpdate = TimeUnit.NANOSECONDS.toMillis(now - lastCanvasUpdate);
-        if (diffMillisSinceLastUpdate < XYChart.BURST_LIMIT_MS) {
-            if (!callCanvasUpdateLater) {
-                callCanvasUpdateLater = true;
-                // repaint 20 ms later in case this was just a burst operation
-                // final KeyFrame kf1 = new KeyFrame(Duration.millis(20), e ->
-                // redrawCanvas());
-                // final KeyFrame kf1 = new KeyFrame(Duration.millis(20), e ->
-                // layoutChildren());
-                final KeyFrame kf1 = new KeyFrame(Duration.millis(20), e -> requestLayout());
-
-                final Timeline timeline = new Timeline(kf1);
-                Platform.runLater(timeline::play);
-            }
-            // System.err.println("XYChart burst diffMillisSinceLastUpdate = " +
-            // diffMillisSinceLastUpdate);
-            return;
-        }
-        if (DEBUG) {
-            System.err.println("   xychart redrawCanvas() - executing");
-            System.err.println("   xychart redrawCanvas() - canvas size = "
-                    + String.format("%fx%f", canvas.getWidth(), canvas.getHeight()));
-        }
-
-        lastCanvasUpdate = now;
-        callCanvasUpdateLater = false;
-
-        final GraphicsContext gc = canvas.getGraphicsContext2D();
-        gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
-
-        if (!gridRenderer.isDrawOnTop()) {
-            gridRenderer.render(gc, this, 0, null);
-        }
-
-        int dataSetOffset = 0;
-        for (final Renderer renderer : getRenderers()) {
-            renderer.render(gc, this, dataSetOffset, getDatasets());
-            dataSetOffset += getDatasets().size() + renderer.getDatasets().size();
-        }
-
-        if (gridRenderer.isDrawOnTop()) {
-            gridRenderer.render(gc, this, 0, null);
-        }
-        setAutoNotifaction(true);
-        if (DEBUG) {
-            System.err.println("   xychart redrawCanvas() - done");
-        }
-    }
-
-    protected void axisSideChanged(final ObservableValue<? extends Side> change, final Side oldValue,
-            final Side newValue) {
-        // loop through all registered axis
-        for (final Axis axis : axesList) {
-
-            if (axis.getSide() == null) {
-                // remove axis from all axis panes
-                removeFromAllAxesPanes(axis);
-            }
-
-            // check if axis is in correct pane
-            if (getAxesPane(axis.getSide()).getChildren().contains(axis)) {
-                // yes, it is continue with next axis
-                continue;
-            }
-            // axis needs to be moved to new pane location
-            // first: remove axis from all axis panes
-            removeFromAllAxesPanes(axis);
-
-            // second: add axis to correct axis pane
-            getAxesPane(axis.getSide()).getChildren().add((Node) axis);
-        }
-        requestLayout();
-    }
-
-    /**
-     * add XYChart specific axis handling (ie. placement around charts, add new DefaultNumericAxis if one is missing,
-     * etc.)
-     *
-     * @param change the new axis change that is being added
-     */
-    @Override
-    protected void axesChanged(final ListChangeListener.Change<? extends Axis> change) {
-        while (change.next()) {
-            change.getRemoved().forEach(set -> {
-                AssertUtils.notNull("to be removed axis is null", set);
-                // check if axis is associated with an existing renderer, if yes
-                // -&gt; throw an exception
-                // remove from axis.side property side listener
-                set.sideProperty().removeListener(axisSideChangeListener);
-            });
-            for (final Axis set : change.getAddedSubList()) {
-                // check if axis is associated with an existing renderer,
-                // if yes -&gt; throw an exception
-                AssertUtils.notNull("to be added axis is null", set);
-
-                if (!(set instanceof Axis) && !(set instanceof CategoryAxis)) {
-                    throw new InvalidParameterException(
-                            new StringBuilder().append("do not know what to do with axis ").append(set.getLabel())
-                                    .append(" type ").append(set.getClass().toGenericString()).toString());
-                }
-                final Side side = set.getSide();
-                if (side == null) {
-                    throw new InvalidParameterException(new StringBuilder().append("axis '").append(set.getLabel())
-                            .append("' has 'null' as side being set").toString());
-                }
-                if (!getAxesPane(set.getSide()).getChildren().contains(set)) {
-                    getAxesPane(set.getSide()).getChildren().add((Node) set);
-                } else {
-                    // axis already added to correct axis pane
-                }
-
-                set.sideProperty().addListener(axisSideChangeListener);
-
-            }
-        }
-
-        requestLayout();
     }
 
 }

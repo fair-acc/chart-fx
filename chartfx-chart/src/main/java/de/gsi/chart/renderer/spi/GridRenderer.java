@@ -64,10 +64,10 @@ public class GridRenderer extends Pane implements Renderer {
     private final Line horMinorGridStyleNode;
     private final Line verMinorGridStyleNode;
     private final Group gridStyleNodes = new Group();
-    private boolean isPolarPlot = false;
     protected final ObservableList<Axis> axesList = FXCollections.observableArrayList();
 
     public GridRenderer(final XYChart chart) {
+        super();
         if (chart == null) {
             throw new InvalidParameterException("chart must not be null");
         }
@@ -116,6 +116,126 @@ public class GridRenderer extends Pane implements Renderer {
         verticalGridLinesVisibleProperty().addListener(change);
     }
 
+    public static List<CssMetaData<? extends Styleable, ?>> getClassCssMetaData() {
+        return GridRenderer.STYLEABLES;
+    }
+
+    private static double snap(final double value) {
+        return (int) value + 0.5;
+    }
+
+    protected static void applyGraphicsStyleFromLineStyle(final GraphicsContext gc, final Line style) {
+        gc.setStroke(style.getStroke());
+        gc.setLineWidth(style.getStrokeWidth());
+        if (style.getStrokeDashArray() == null || style.getStrokeDashArray().isEmpty()) {
+            gc.setLineDashes(DEFAULT_GRID_DASH_PATTERM);
+        } else {
+            final double[] dashes = style.getStrokeDashArray().stream().mapToDouble(d -> d).toArray();
+            gc.setLineDashes(dashes);
+        }
+    }
+
+    @Override
+    public Canvas drawLegendSymbol(DataSet dataSet, int dsIndex, int width, int height) {
+        // not applicable
+        return null;
+    }
+
+    /**
+     * Indicates whether grid lines should be drawn on top or beneath graphs
+     *
+     * @return drawOnTop property
+     */
+    public final BooleanProperty drawOnTopProperty() {
+        return drawGridOnTop;
+    }
+
+    /**
+     * @return observable list of axes that are supposed to be used by the renderer
+     */
+    @Override
+    public ObservableList<Axis> getAxes() {
+        return axesList;
+    }
+
+    @Override
+    public List<CssMetaData<? extends Styleable, ?>> getCssMetaData() {
+        return GridRenderer.getClassCssMetaData();
+    }
+
+    @Override
+    public ObservableList<DataSet> getDatasets() {
+        return null;
+    }
+
+    @Override
+    public ObservableList<DataSet> getDatasetsCopy() {
+        return null;
+    }
+
+    /**
+     * modify this to change drawing of horizontal major grid lines
+     *
+     * @return the Line node to be styled
+     */
+    public Line getHorizontalMajorGrid() {
+        return horMajorGridStyleNode;
+    }
+
+    /**
+     * modify this to change drawing of horizontal minor grid lines
+     *
+     * @return the Line node to be styled
+     */
+    public Line getHorizontalMinorGrid() {
+        return horMinorGridStyleNode;
+    }
+
+    /**
+     * modify this to change drawing of vertical major grid lines
+     *
+     * @return the Line node to be styled
+     */
+    public Line getVerticalMajorGrid() {
+        return verMajorGridStyleNode;
+    }
+
+    /**
+     * modify this to change drawing of vertical minor grid lines
+     *
+     * @return the Line node to be styled
+     */
+    public Line getVerticalMinorGrid() {
+        return verMinorGridStyleNode;
+    }
+
+    /**
+     * Indicates whether horizontal major grid lines are visible or not.
+     *
+     * @return verticalGridLinesVisible property
+     */
+    public final BooleanProperty horizontalGridLinesVisibleProperty() {
+        return horMajorGridStyleNode.visibleProperty();
+    }
+
+    /**
+     * Indicates whether horizontal minor grid lines are visible or not.
+     *
+     * @return verticalGridLinesVisible property
+     */
+    public final BooleanProperty horizontalMinorGridLinesVisibleProperty() {
+        return horMinorGridStyleNode.visibleProperty();
+    }
+
+    /**
+     * Indicates whether grid lines should be drawn on top or beneath graphs
+     *
+     * @return drawOnTop state
+     */
+    public final boolean isDrawOnTop() {
+        return drawGridOnTop.get();
+    }
+
     @Override
     public void render(final GraphicsContext gc, final Chart chart, final int dataSetOffset,
             final ObservableList<DataSet> datasets) {
@@ -124,31 +244,152 @@ public class GridRenderer extends Pane implements Renderer {
                     "must be derivative of XYChart for renderer - " + this.getClass().getSimpleName());
         }
         final XYChart xyChart = (XYChart) chart;
-        isPolarPlot = xyChart.isPolarPlot();
 
-        if (isPolarPlot) {
+        if (xyChart.isPolarPlot()) {
             drawPolarGrid(gc, xyChart);
         } else {
-            //        	 drawEuclideanGrid(gc, xyChart);
-            // for testing
-            drawEuclideanGrid2(gc, xyChart);
+            drawEuclideanGrid(gc, xyChart);
         }
 
     }
 
-    protected void applyGraphicsStyleFromLineStyle(final GraphicsContext gc, final Line style) {
-        gc.setStroke(style.getStroke());
-        gc.setLineWidth(style.getStrokeWidth());
-        if (style.getStrokeDashArray() != null && !style.getStrokeDashArray().isEmpty()) {
-            final double[] dashes = style.getStrokeDashArray().stream().mapToDouble(d -> d).toArray();
-            gc.setLineDashes(dashes);
-        } else {
-            gc.setLineDashes(DEFAULT_GRID_DASH_PATTERM);
+    /**
+     * Indicates whether grid lines should be drawn on top or beneath graphs
+     *
+     * @param state true: draw on top
+     */
+    public final void setDrawOnTop(boolean state) {
+        drawGridOnTop.set(state);
+    }
+
+    @Override
+    public Renderer setShowInLegend(final boolean state) {
+        return this;
+    }
+
+    @Override
+    public boolean showInLegend() {
+        return false;
+    }
+
+    @Override
+    public BooleanProperty showInLegendProperty() {
+        return null;
+    }
+
+    /**
+     * Indicates whether vertical major grid lines are visible or not.
+     *
+     * @return verticalGridLinesVisible property
+     */
+    public final BooleanProperty verticalGridLinesVisibleProperty() {
+        return verMajorGridStyleNode.visibleProperty();
+    }
+
+    /**
+     * Indicates whether vertical minor grid lines are visible or not.
+     *
+     * @return verticalGridLinesVisible property
+     */
+    public final BooleanProperty verticalMinorGridLinesVisibleProperty() {
+        return verMinorGridStyleNode.visibleProperty();
+    }
+
+    protected void drawEuclideanGrid(final GraphicsContext gc, XYChart xyChart) {
+        final Axis xAxis = xyChart.getXAxis();
+        final Axis yAxis = xyChart.getYAxis();
+        final double xAxisWidth = xyChart.getCanvas().getWidth();
+        final double xAxisWidthSnapped = snap(xAxisWidth);
+        final double yAxisHeight = xyChart.getCanvas().getHeight();
+        final double yAxisHeightSnapped = snap(yAxisHeight);
+        if (xAxis instanceof Node) {
+            ((Node) xAxis).setVisible(true);
+        }
+
+        gc.save();
+        drawVerticalMajorGridLines(gc, xAxis, xAxisWidth, yAxisHeightSnapped);
+        drawVerticalMinorGridLines(gc, xAxis, xAxisWidth, yAxisHeightSnapped);
+        drawHorizontalMajorGridLines(gc, yAxis, xAxisWidthSnapped, yAxisHeight);
+        drawHorizontalMinorGridLines(gc, yAxis, xAxisWidthSnapped, yAxisHeight);
+        gc.restore();
+    }
+
+    protected void drawHorizontalMajorGridLines(final GraphicsContext gc, final Axis yAxis,
+            final double xAxisWidthSnapped, final double yAxisHeight) {
+        if (!horMajorGridStyleNode.isVisible() && !horMinorGridStyleNode.isVisible()) {
+            return;
+        }
+        final double zeroSnapped = snap(0);
+        applyGraphicsStyleFromLineStyle(gc, horMajorGridStyleNode);
+        ObservableList<TickMark> tickMarks = yAxis.getTickMarks();
+        for (int i = 0; i < tickMarks.size(); i++) {
+            double y = snap(yAxis.getDisplayPosition(tickMarks.get(i).getValue()));
+            if (y >= 0 && y < yAxisHeight) {
+                // gc.strokeLine(zeroSnapped, y, xAxisWidthSnapped, y);
+                DashPatternStyle.strokeDashedLine(gc, zeroSnapped, y, xAxisWidthSnapped, y);
+            }
         }
     }
 
-    private double snap(final double value) {
-        return (int) value + 0.5;
+    protected void drawHorizontalMinorGridLines(final GraphicsContext gc, final Axis yAxis,
+            final double xAxisWidthSnapped, final double yAxisHeight) {
+        if (!yAxis.isLogAxis() && !horMinorGridStyleNode.isVisible()) {
+            return;
+        }
+        final double zeroSnapped = snap(0);
+        applyGraphicsStyleFromLineStyle(gc, horMinorGridStyleNode);
+        ObservableList<TickMark> tickMarks = yAxis.getMinorTickMarks();
+        for (int i = 0; i < tickMarks.size(); i++) {
+            double y = snap(yAxis.getDisplayPosition(tickMarks.get(i).getValue()));
+            if (y >= 0 && y < yAxisHeight) {
+                //gc.strokeLine(zeroSnapped, y, xAxisWidthSnapped, y);
+                DashPatternStyle.strokeDashedLine(gc, zeroSnapped, y, xAxisWidthSnapped, y);
+            }
+        }
+    }
+
+    protected void drawPolarCircle(final GraphicsContext gc, final Axis yAxis, final double yRange,
+            final double xCentre, final double yCentre, final double maxRadius) {
+        if (!horMajorGridStyleNode.isVisible() && !horMinorGridStyleNode.isVisible()) {
+            return;
+        }
+
+        applyGraphicsStyleFromLineStyle(gc, horMajorGridStyleNode);
+        final ObservableList<TickMark> yTickMarks = yAxis.getTickMarks();
+
+        gc.strokeOval(xCentre - maxRadius, yCentre - maxRadius, 2 * maxRadius, 2 * maxRadius);
+
+        // draw major tick circle
+        yTickMarks.forEach(tick -> {
+            final double yPos = yRange - yAxis.getDisplayPosition(tick.getValue());
+            final String label = yAxis.getTickMarkLabel(tick.getValue());
+            final double yNorm = yPos / yRange * maxRadius;
+
+            if (yNorm >= 0 && yNorm < maxRadius) {
+                gc.strokeOval(xCentre - yNorm, yCentre - yNorm, 2 * yNorm, 2 * yNorm);
+
+                gc.save();
+                gc.setFont(yAxis.getTickLabelFont());
+                gc.setStroke(yAxis.getTickLabelFill());
+                gc.setLineDashes(null);
+                gc.setTextBaseline(VPos.CENTER);
+                gc.strokeText(label, xCentre + (int) yAxis.getTickLabelGap(), yCentre - yNorm);
+                gc.restore();
+            }
+        });
+
+        if (!yAxis.isLogAxis() && !horMinorGridStyleNode.isVisible()) {
+            return;
+        }
+
+        // draw minor tick circle
+        applyGraphicsStyleFromLineStyle(gc, horMinorGridStyleNode);
+        yAxis.getMinorTickMarks().stream().mapToDouble(minorTick -> yRange - minorTick.getPosition()).forEach(yPos -> {
+            final double yNorm = yPos / yRange * maxRadius;
+            if (yNorm >= 0 && yNorm < maxRadius) {
+                gc.strokeOval(xCentre - yNorm, yCentre - yNorm, 2 * yNorm, 2 * yNorm);
+            }
+        });
     }
 
     protected void drawPolarGrid(final GraphicsContext gc, XYChart xyChart) {
@@ -197,7 +438,7 @@ public class GridRenderer extends Pane implements Renderer {
 
             }
 
-            if (xAxis instanceof Axis && xAxis.isLogAxis() || verMinorGridStyleNode.isVisible()) {
+            if (xAxis.isLogAxis() || verMinorGridStyleNode.isVisible()) {
                 applyGraphicsStyleFromLineStyle(gc, verMinorGridStyleNode);
                 xAxis.getMinorTickMarks().stream().mapToDouble(TickMark::getPosition).forEach(xPos -> {
                     if (xPos > 0 && xPos <= xAxisWidth) {
@@ -207,310 +448,43 @@ public class GridRenderer extends Pane implements Renderer {
             }
         }
 
-        if (horMajorGridStyleNode.isVisible() || horMinorGridStyleNode.isVisible()) {
-            applyGraphicsStyleFromLineStyle(gc, horMajorGridStyleNode);
-            final ObservableList<TickMark> yTickMarks = yAxis.getTickMarks();
-
-            gc.strokeOval(xCentre - maxRadius, yCentre - maxRadius, 2 * maxRadius, 2 * maxRadius);
-
-            yTickMarks.forEach(tick -> {
-                final double yPos = yRange - yAxis.getDisplayPosition(tick.getValue());
-                final String label = yAxis.getTickMarkLabel(tick.getValue());
-                final double yNorm = yPos / yRange * maxRadius;
-
-                if (yNorm >= 0 && yNorm < maxRadius) {
-                    gc.strokeOval(xCentre - yNorm, yCentre - yNorm, 2 * yNorm, 2 * yNorm);
-
-                    gc.save();
-                    gc.setFont(yAxis.getTickLabelFont());
-                    gc.setStroke(yAxis.getTickLabelFill());
-                    gc.setLineDashes(null);
-                    gc.setTextBaseline(VPos.CENTER);
-                    gc.strokeText(label, xCentre + (int) yAxis.getTickLabelGap(), yCentre - yNorm);
-                    gc.restore();
-                }
-            });
-
-            if (yAxis instanceof Axis && yAxis.isLogAxis() || horMinorGridStyleNode.isVisible()) {
-                applyGraphicsStyleFromLineStyle(gc, horMinorGridStyleNode);
-
-                yAxis.getMinorTickMarks().stream().mapToDouble(minorTick -> yRange - minorTick.getPosition())
-                        .forEach(yPos -> {
-                            final double yNorm = yPos / yRange * maxRadius;
-                            if (yNorm >= 0 && yNorm < maxRadius) {
-                                gc.strokeOval(xCentre - yNorm, yCentre - yNorm, 2 * yNorm, 2 * yNorm);
-                            }
-                        });
-            }
-        }
+        drawPolarCircle(gc, yAxis, yRange, xCentre, yCentre, maxRadius);
 
         gc.restore();
     }
 
-    protected void drawEuclideanGrid(final GraphicsContext gc, XYChart xyChart) {
-        final Axis xAxis = xyChart.getXAxis();
-        final Axis yAxis = xyChart.getYAxis();
-        final double xAxisWidth = xyChart.getCanvas().getWidth();
-        final double yAxisHeight = xyChart.getCanvas().getHeight();
-        if (xAxis instanceof Node) {
-            ((Node) xAxis).setVisible(true);
+    protected void drawVerticalMajorGridLines(final GraphicsContext gc, final Axis xAxis, final double xAxisWidth,
+            final double yAxisHeightSnapped) {
+        if (!verMajorGridStyleNode.isVisible() && !verMinorGridStyleNode.isVisible()) {
+            return;
         }
-
-        gc.save();
-        // draw vertical major grid lines
-        if (verMajorGridStyleNode.isVisible() || verMinorGridStyleNode.isVisible()) {
-            applyGraphicsStyleFromLineStyle(gc, verMajorGridStyleNode);
-            xAxis.getTickMarks().stream().mapToDouble(tick -> xAxis.getDisplayPosition(tick.getValue()))
-                    .forEach(xPos -> {
-                        if (xPos > 0 && xPos <= xAxisWidth) {
-                            gc.strokeLine(snap(xPos), snap(0), snap(xPos), snap(yAxisHeight));
-                        }
-                    });
-        }
-
-        // draw vertical minor grid lines
-        if (xAxis instanceof Axis && xAxis.isLogAxis() || verMinorGridStyleNode.isVisible()) {
-            applyGraphicsStyleFromLineStyle(gc, verMinorGridStyleNode);
-
-            xAxis.getMinorTickMarks().stream().mapToDouble(TickMark::getPosition).forEach(xPos -> {
-                if (xPos > 0 && xPos <= xAxisWidth) {
-                    gc.strokeLine(snap(xPos), snap(0), snap(xPos), snap(yAxisHeight));
-                }
-            });
-        }
-
-        // draw horizontal major grid lines
-        if (horMajorGridStyleNode.isVisible() || horMinorGridStyleNode.isVisible()) {
-            applyGraphicsStyleFromLineStyle(gc, horMajorGridStyleNode);
-
-            yAxis.getTickMarks().stream().mapToDouble(tick -> yAxis.getDisplayPosition(tick.getValue()))
-                    .forEach(yPos -> {
-                        if (yPos >= 0 && yPos < yAxisHeight) {
-                            gc.strokeLine(snap(0), snap(yPos), snap(xAxisWidth), snap(yPos));
-                        }
-                    });
-        }
-
-        // draw horizontal minor grid lines
-        if (yAxis instanceof Axis && yAxis.isLogAxis() || horMinorGridStyleNode.isVisible()) {
-            applyGraphicsStyleFromLineStyle(gc, horMinorGridStyleNode);
-
-            yAxis.getMinorTickMarks().stream().mapToDouble(TickMark::getPosition).forEach(yPos -> {
-                if (yPos >= 0 && yPos < yAxisHeight) {
-                    gc.strokeLine(snap(0), snap(yPos), snap(xAxisWidth), snap(yPos));
-                }
-            });
-        }
-        gc.restore();
-    }
-
-    protected void drawEuclideanGrid2(final GraphicsContext gc, XYChart xyChart) {
-        final Axis xAxis = xyChart.getXAxis();
-        final Axis yAxis = xyChart.getYAxis();
-        final double xAxisWidth = xyChart.getCanvas().getWidth();
-        final double xAxisWidthSnapped = snap(xAxisWidth);
-        final double yAxisHeight = xyChart.getCanvas().getHeight();
-        final double yAxisHeightSnapped = snap(yAxisHeight);
         final double zeroSnapped = snap(0);
-        if (xAxis instanceof Node) {
-            ((Node) xAxis).setVisible(true);
-        }
-
-        gc.save();
-        // draw vertical major grid lines
-        if (verMajorGridStyleNode.isVisible() || verMinorGridStyleNode.isVisible()) {
-            applyGraphicsStyleFromLineStyle(gc, verMajorGridStyleNode);
-            ObservableList<TickMark> tickMarks = xAxis.getTickMarks();
-            for (int i = 0; i < tickMarks.size(); i++) {
-                double x = snap(xAxis.getDisplayPosition(tickMarks.get(i).getValue()));
-                if (x > 0 && x <= xAxisWidth) {
-                    //                    gc.strokeLine(x, zeroSnapped, x, yAxisHeightSnapped);
-                    DashPatternStyle.strokeDashedLine(gc, x, zeroSnapped, x, yAxisHeightSnapped);
-                }
+        applyGraphicsStyleFromLineStyle(gc, verMajorGridStyleNode);
+        ObservableList<TickMark> tickMarks = xAxis.getTickMarks();
+        for (int i = 0; i < tickMarks.size(); i++) {
+            double x = snap(xAxis.getDisplayPosition(tickMarks.get(i).getValue()));
+            if (x > 0 && x <= xAxisWidth) {
+                // gc.strokeLine(x, zeroSnapped, x, yAxisHeightSnapped);
+                DashPatternStyle.strokeDashedLine(gc, x, zeroSnapped, x, yAxisHeightSnapped);
             }
         }
+    }
 
-        // draw vertical minor grid lines
-        if (xAxis instanceof Axis && xAxis.isLogAxis() || verMinorGridStyleNode.isVisible()) {
-            applyGraphicsStyleFromLineStyle(gc, verMinorGridStyleNode);
-            ObservableList<TickMark> tickMarks = xAxis.getMinorTickMarks();
-            for (int i = 0; i < tickMarks.size(); i++) {
-                double x = snap(xAxis.getDisplayPosition(tickMarks.get(i).getValue()));
-                if (x > 0 && x <= xAxisWidth) {
-                    //                    gc.strokeLine(x, zeroSnapped, x, yAxisHeightSnapped);
-                    DashPatternStyle.strokeDashedLine(gc, x, zeroSnapped, x, yAxisHeightSnapped);
-                }
+    protected void drawVerticalMinorGridLines(final GraphicsContext gc, final Axis xAxis, final double xAxisWidth,
+            final double yAxisHeightSnapped) {
+        if (!xAxis.isLogAxis() && !verMinorGridStyleNode.isVisible()) {
+            return;
+        }
+        final double zeroSnapped = snap(0);
+        applyGraphicsStyleFromLineStyle(gc, verMinorGridStyleNode);
+        ObservableList<TickMark> tickMarks = xAxis.getMinorTickMarks();
+        for (int i = 0; i < tickMarks.size(); i++) {
+            double x = snap(xAxis.getDisplayPosition(tickMarks.get(i).getValue()));
+            if (x > 0 && x <= xAxisWidth) {
+                // gc.strokeLine(x, zeroSnapped, x, yAxisHeightSnapped);
+                DashPatternStyle.strokeDashedLine(gc, x, zeroSnapped, x, yAxisHeightSnapped);
             }
         }
-
-        // draw horizontal major grid lines
-        if (horMajorGridStyleNode.isVisible() || horMinorGridStyleNode.isVisible()) {
-            applyGraphicsStyleFromLineStyle(gc, horMajorGridStyleNode);
-            ObservableList<TickMark> tickMarks = yAxis.getTickMarks();
-            for (int i = 0; i < tickMarks.size(); i++) {
-                double y = snap(yAxis.getDisplayPosition(tickMarks.get(i).getValue()));
-                if (y >= 0 && y < yAxisHeight) {
-                    //                    gc.strokeLine(zeroSnapped, y, xAxisWidthSnapped, y);
-                    DashPatternStyle.strokeDashedLine(gc, zeroSnapped, y, xAxisWidthSnapped, y);
-                }
-            }
-
-        }
-
-        // draw horizontal minor grid lines
-        if (yAxis instanceof Axis && yAxis.isLogAxis() || horMinorGridStyleNode.isVisible()) {
-            applyGraphicsStyleFromLineStyle(gc, horMinorGridStyleNode);
-            ObservableList<TickMark> tickMarks = yAxis.getMinorTickMarks();
-            for (int i = 0; i < tickMarks.size(); i++) {
-                double y = snap(yAxis.getDisplayPosition(tickMarks.get(i).getValue()));
-                if (y >= 0 && y < yAxisHeight) {
-                    //gc.strokeLine(zeroSnapped, y, xAxisWidthSnapped, y);
-                    DashPatternStyle.strokeDashedLine(gc, zeroSnapped, y, xAxisWidthSnapped, y);
-                }
-            }
-        }
-        gc.restore();
-    }
-
-    /**
-     * @return observable list of axes that are supposed to be used by the renderer
-     */
-    @Override
-    public ObservableList<Axis> getAxes() {
-        return axesList;
-    }
-
-    /**
-     * Indicates whether vertical major grid lines are visible or not.
-     *
-     * @return verticalGridLinesVisible property
-     */
-    public final BooleanProperty verticalGridLinesVisibleProperty() {
-        return verMajorGridStyleNode.visibleProperty();
-    }
-
-    /**
-     * Indicates whether horizontal major grid lines are visible or not.
-     *
-     * @return verticalGridLinesVisible property
-     */
-    public final BooleanProperty horizontalGridLinesVisibleProperty() {
-        return horMajorGridStyleNode.visibleProperty();
-    }
-
-    /**
-     * Indicates whether vertical minor grid lines are visible or not.
-     *
-     * @return verticalGridLinesVisible property
-     */
-    public final BooleanProperty verticalMinorGridLinesVisibleProperty() {
-        return verMinorGridStyleNode.visibleProperty();
-    }
-
-    /**
-     * Indicates whether horizontal minor grid lines are visible or not.
-     *
-     * @return verticalGridLinesVisible property
-     */
-    public final BooleanProperty horizontalMinorGridLinesVisibleProperty() {
-        return horMinorGridStyleNode.visibleProperty();
-    }
-
-    /**
-     * Indicates whether grid lines should be drawn on top or beneath graphs
-     *
-     * @return drawOnTop property
-     */
-    public final BooleanProperty drawOnTopProperty() {
-        return drawGridOnTop;
-    }
-
-    /**
-     * Indicates whether grid lines should be drawn on top or beneath graphs
-     *
-     * @return drawOnTop state
-     */
-    public final boolean isDrawOnTop() {
-        return drawGridOnTop.get();
-    }
-
-    /**
-     * Indicates whether grid lines should be drawn on top or beneath graphs
-     *
-     * @param state true: draw on top
-     */
-    public final void setDrawOnTop(boolean state) {
-        drawGridOnTop.set(state);
-    }
-
-    @Override
-    public ObservableList<DataSet> getDatasets() {
-        return null;
-    }
-
-    @Override
-    public ObservableList<DataSet> getDatasetsCopy() {
-        return null;
-    }
-
-    @Override
-    public BooleanProperty showInLegendProperty() {
-        return null;
-    }
-
-    @Override
-    public boolean showInLegend() {
-        return false;
-    }
-
-    @Override
-    public Renderer setShowInLegend(final boolean state) {
-        return this;
-    }
-
-    /**
-     * modify this to change drawing of horizontal major grid lines
-     *
-     * @return the Line node to be styled
-     */
-    public Line getHorizontalMajorGrid() {
-        return horMajorGridStyleNode;
-    }
-
-    /**
-     * modify this to change drawing of vertical major grid lines
-     *
-     * @return the Line node to be styled
-     */
-    public Line getVerticalMajorGrid() {
-        return verMajorGridStyleNode;
-    }
-
-    /**
-     * modify this to change drawing of horizontal minor grid lines
-     *
-     * @return the Line node to be styled
-     */
-    public Line getHorizontalMinorGrid() {
-        return horMinorGridStyleNode;
-    }
-
-    /**
-     * modify this to change drawing of vertical minor grid lines
-     *
-     * @return the Line node to be styled
-     */
-    public Line getVerticalMinorGrid() {
-        return verMinorGridStyleNode;
-    }
-
-    public static List<CssMetaData<? extends Styleable, ?>> getClassCssMetaData() {
-        return GridRenderer.STYLEABLES;
-    }
-
-    @Override
-    public List<CssMetaData<? extends Styleable, ?>> getCssMetaData() {
-        return GridRenderer.getClassCssMetaData();
     }
 
     private static class StyleableProperties {
@@ -518,22 +492,16 @@ public class GridRenderer extends Pane implements Renderer {
         private static final CssMetaData<GridRenderer, Boolean> GRID_ON_TOP = new CssMetaData<GridRenderer, Boolean>(
                 "-fx-grid-on-top", BooleanConverter.getInstance(), Boolean.TRUE, false) {
 
-            @Override
-            public boolean isSettable(final GridRenderer node) {
-                return node.drawGridOnTop == null || !node.drawGridOnTop.isBound();
-            }
-
             @SuppressWarnings("unchecked")
             @Override
             public StyleableProperty<Boolean> getStyleableProperty(final GridRenderer node) {
                 return (StyleableProperty<Boolean>) node.drawGridOnTop;
             }
-        };
-    }
 
-    @Override
-    public Canvas drawLegendSymbol(DataSet dataSet, int dsIndex, int width, int height) {
-        // not applicable
-        return null;
+            @Override
+            public boolean isSettable(final GridRenderer node) {
+                return node.drawGridOnTop == null || !node.drawGridOnTop.isBound();
+            }
+        };
     }
 }

@@ -28,6 +28,10 @@ public class SidesPaneSkin extends SkinBase<SidesPane> {
     private final EventHandler<MouseEvent> exitedHandler;
     private boolean mousePressed;
 
+    private final DoubleProperty[] visibility = new SimpleDoubleProperty[Side.values().length];
+    private final Timeline[] showTimeline = new Timeline[Side.values().length];
+    private final Timeline[] hideTimeline = new Timeline[Side.values().length];
+
     public SidesPaneSkin(final SidesPane pane) {
         super(pane);
 
@@ -111,19 +115,52 @@ public class SidesPaneSkin extends SkinBase<SidesPane> {
         getSkinnable().setClip(clip);
     }
 
-    private boolean isMouseMovedOutsideSides(final MouseEvent event) {
-        return !(getSkinnable().getLeft() != null
-                && getSkinnable().getLeft().getBoundsInParent().contains(event.getX(), event.getY()))
-                && (!(getSkinnable().getTop() != null
-                        && getSkinnable().getTop().getBoundsInParent().contains(event.getX(), event.getY()))
-                        && (!(getSkinnable().getRight() != null
-                                && getSkinnable().getRight().getBoundsInParent().contains(event.getX(), event.getY()))
-                                && !(getSkinnable().getBottom() != null && getSkinnable().getBottom()
-                                        .getBoundsInParent().contains(event.getX(), event.getY()))));
+    /**
+     * Sets the preferred height of the generic node object by casting it onto
+     * the known Region, ... object
+     *
+     * @param node
+     *            the node to be adapted
+     * @param prefHeight
+     *            the desired preferred height
+     */
+    private static void setPrefHeight(final Node node, final double prefHeight) {
+        if (node instanceof Region) {
+            ((Region) node).setPrefHeight(prefHeight);
+            return;
+        } else if (node instanceof Canvas) {
+            ((Canvas) node).setHeight(prefHeight);
+            return;
+        } else if (node instanceof WebView) {
+            ((WebView) node).setPrefHeight(prefHeight);
+            return;
+        }
+        // add other derivative of 'Node'
+        throw new InvalidParameterException("no prefHeight for class type:" + node.getClass().getCanonicalName());
     }
 
-    private boolean isMouseEnabled() {
-        return getSkinnable().getTriggerDistance() > 0;
+    /**
+     * Sets the preferred width of the generic node object by casting it onto
+     * the known Region, ... object
+     *
+     * @param node
+     *            the node to be adapted
+     * @param prefWidth
+     *            the desired preferred height
+     */
+    private static void setPrefWidth(final Node node, final double prefWidth) {
+        if (node instanceof Region) {
+            ((Region) node).setPrefWidth(prefWidth);
+            return;
+        } else if (node instanceof Canvas) {
+            ((Canvas) node).setWidth(prefWidth);
+            return;
+        } else if (node instanceof WebView) {
+            ((WebView) node).setPrefWidth(prefWidth);
+            return;
+        }
+        // add other derivative of 'Node'
+        throw new InvalidParameterException("no prefWidth for class type:" + node.getClass().getCanonicalName());
     }
 
     private Side getSide(final MouseEvent evt) {
@@ -144,36 +181,6 @@ public class SidesPaneSkin extends SkinBase<SidesPane> {
 
         return null;
     }
-
-    private final DoubleProperty[] visibility = new SimpleDoubleProperty[Side.values().length];
-
-    private final Timeline showTimeline[] = new Timeline[Side.values().length];
-
-    private void show(final Side side) {
-        if (hideTimeline[side.ordinal()] != null) {
-            hideTimeline[side.ordinal()].stop();
-        }
-
-        if (showTimeline[side.ordinal()] != null && showTimeline[side.ordinal()].getStatus() == Status.RUNNING) {
-            return;
-        }
-
-        final KeyValue[] keyValues = new KeyValue[Side.values().length];
-
-        keyValues[side.ordinal()] = new KeyValue(visibility[side.ordinal()], 1);
-
-        final Duration delay = getSkinnable().getAnimationDelay() != null ? getSkinnable().getAnimationDelay()
-                : Duration.millis(300);
-        final Duration duration = getSkinnable().getAnimationDuration() != null ? getSkinnable().getAnimationDuration()
-                : Duration.millis(200);
-
-        final KeyFrame keyFrame = new KeyFrame(duration, keyValues);
-        showTimeline[side.ordinal()] = new Timeline(keyFrame);
-        showTimeline[side.ordinal()].setDelay(delay);
-        showTimeline[side.ordinal()].play();
-    }
-
-    private final Timeline hideTimeline[] = new Timeline[Side.values().length];
 
     private void hide(final Side side) {
         if (showTimeline[side.ordinal()] != null) {
@@ -202,6 +209,45 @@ public class SidesPaneSkin extends SkinBase<SidesPane> {
         hideTimeline[side.ordinal()] = new Timeline(keyFrame);
         hideTimeline[side.ordinal()].setDelay(delay);
         hideTimeline[side.ordinal()].play();
+    }
+
+    private boolean isMouseEnabled() {
+        return getSkinnable().getTriggerDistance() > 0;
+    }
+
+    private boolean isMouseMovedOutsideSides(final MouseEvent event) {
+        return !(getSkinnable().getLeft() != null
+                && getSkinnable().getLeft().getBoundsInParent().contains(event.getX(), event.getY()))
+                && (!(getSkinnable().getTop() != null
+                        && getSkinnable().getTop().getBoundsInParent().contains(event.getX(), event.getY()))
+                        && (!(getSkinnable().getRight() != null
+                                && getSkinnable().getRight().getBoundsInParent().contains(event.getX(), event.getY()))
+                                && !(getSkinnable().getBottom() != null && getSkinnable().getBottom()
+                                        .getBoundsInParent().contains(event.getX(), event.getY()))));
+    }
+
+    private void show(final Side side) {
+        if (hideTimeline[side.ordinal()] != null) {
+            hideTimeline[side.ordinal()].stop();
+        }
+
+        if (showTimeline[side.ordinal()] != null && showTimeline[side.ordinal()].getStatus() == Status.RUNNING) {
+            return;
+        }
+
+        final KeyValue[] keyValues = new KeyValue[Side.values().length];
+
+        keyValues[side.ordinal()] = new KeyValue(visibility[side.ordinal()], 1);
+
+        final Duration delay = getSkinnable().getAnimationDelay() != null ? getSkinnable().getAnimationDelay()
+                : Duration.millis(300);
+        final Duration duration = getSkinnable().getAnimationDuration() != null ? getSkinnable().getAnimationDuration()
+                : Duration.millis(200);
+
+        final KeyFrame keyFrame = new KeyFrame(duration, keyValues);
+        showTimeline[side.ordinal()] = new Timeline(keyFrame);
+        showTimeline[side.ordinal()].setDelay(delay);
+        showTimeline[side.ordinal()].play();
     }
 
     private void updateBorderPane() {
@@ -292,53 +338,5 @@ public class SidesPaneSkin extends SkinBase<SidesPane> {
             top.setClip(new Rectangle(contentWidth, offset));
             SidesPaneSkin.setPrefHeight(top, offset);
         }
-    }
-
-    /**
-     * Sets the preferred height of the generic node object by casting it onto
-     * the known Region, ... object
-     *
-     * @param node
-     *            the node to be adapted
-     * @param prefHeight
-     *            the desired preferred height
-     */
-    private static void setPrefHeight(final Node node, final double prefHeight) {
-        if (node instanceof Region) {
-            ((Region) node).setPrefHeight(prefHeight);
-            return;
-        } else if (node instanceof Canvas) {
-            ((Canvas) node).setHeight(prefHeight);
-            return;
-        } else if (node instanceof WebView) {
-            ((WebView) node).setPrefHeight(prefHeight);
-            return;
-        }
-        // add other derivative of 'Node'
-        throw new InvalidParameterException("no prefHeight for class type:" + node.getClass().getCanonicalName());
-    }
-
-    /**
-     * Sets the preferred width of the generic node object by casting it onto
-     * the known Region, ... object
-     *
-     * @param node
-     *            the node to be adapted
-     * @param prefWidth
-     *            the desired preferred height
-     */
-    private static void setPrefWidth(final Node node, final double prefWidth) {
-        if (node instanceof Region) {
-            ((Region) node).setPrefWidth(prefWidth);
-            return;
-        } else if (node instanceof Canvas) {
-            ((Canvas) node).setWidth(prefWidth);
-            return;
-        } else if (node instanceof WebView) {
-            ((WebView) node).setPrefWidth(prefWidth);
-            return;
-        }
-        // add other derivative of 'Node'
-        throw new InvalidParameterException("no prefWidth for class type:" + node.getClass().getCanonicalName());
     }
 }

@@ -4652,6 +4652,9 @@ public class TMath extends TMathConstants {
             return;
         //
         x = AC[0];
+        if (WCM == null || WCM.length == 0) {
+            throw new IllegalArgumentException("WCM must not be null or zero-length");
+        }
         WCM[0] = 0;
         double fl, fu;
         int k;

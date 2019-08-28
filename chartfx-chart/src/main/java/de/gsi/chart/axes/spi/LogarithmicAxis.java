@@ -40,6 +40,32 @@ public class LogarithmicAxis extends AbstractAxis {
 
     private boolean isUpdating = true;
 
+    private final SimpleStyleableDoubleProperty tickUnit = new SimpleStyleableDoubleProperty(
+            StyleableProperties.TICK_UNIT, this, "tickUnit", 5d) {
+        @Override
+        protected void invalidated() {
+            if (!(isAutoRanging() || isAutoGrowRanging())) {
+                invalidateRange();
+                requestAxisLayout();
+            }
+        }
+    };
+
+    private final ObjectProperty<TickUnitSupplier> tickUnitSupplier = new SimpleObjectProperty<>(this,
+            "tickUnitSupplier", LogarithmicAxis.DEFAULT_TICK_UNIT_SUPPLIER);
+
+    private final DoubleProperty logarithmBase = new SimpleDoubleProperty(this, "logarithmBase",
+            LogarithmicAxis.DEFAULT_LOGARITHM_BASE) {
+        @Override
+        protected void invalidated() {
+            if (get() <= 1) {
+                throw new IllegalArgumentException("logarithmBase must be grater than 1");
+            }
+            invalidateRange();
+            requestAxisLayout();
+        }
+    };
+
     /**
      * Creates an {@link #autoRangingProperty() auto-ranging}
      * LogarithmicAxis.
@@ -96,26 +122,67 @@ public class LogarithmicAxis extends AbstractAxis {
         isUpdating = false;
     }
 
-    private final SimpleStyleableDoubleProperty tickUnit = new SimpleStyleableDoubleProperty(
-            StyleableProperties.TICK_UNIT, this, "tickUnit", 5d) {
-        @Override
-        protected void invalidated() {
-            if (!(isAutoRanging() || isAutoGrowRanging())) {
-                invalidateRange();
-                requestAxisLayout();
-            }
-        }
-    };
+    public static List<CssMetaData<? extends Styleable, ?>> getClassCssMetaData() {
+        return StyleableProperties.STYLEABLES;
+    }
 
     /**
-     * The value between each major tick mark in data units. This is
-     * automatically set if we are auto-ranging.
-     *
-     * @return tickUnit property
+     * Computes the preferred tick unit based on the upper/lower bounds and the
+     * length of the axis in screen coordinates.
+     * 
+     * @param axisLength
+     *            the length in screen coordinates
+     * @return the tick unit
      */
     @Override
-    public DoubleProperty tickUnitProperty() {
-        return tickUnit;
+    public double computePreferredTickUnit(final double axisLength) {
+        return tickUnit.get();
+    }
+
+    @Override
+    public AxisTransform getAxisTransform() {
+        return null;
+    }
+
+    @Override
+    public List<CssMetaData<? extends Styleable, ?>> getCssMetaData() {
+        return LogarithmicAxis.getClassCssMetaData();
+    }
+
+    /**
+     * Get the display position along this axis for a given value. If the value
+     * is not in the current range, the returned value will be an extrapolation
+     * of the display position. -- cached double optimised version (shaves of
+     * 50% on delays)
+     *
+     * @param value
+     *            The data value to work out display position for
+     * @return display position
+     */
+    @Override
+    public double getDisplayPosition(final double value) {
+        final double valueLogOffset = log(value) - cache.lowerBoundLog;
+        if (cache.isVerticalAxis) {
+            return cache.axisHeight - valueLogOffset * cache.logScaleLengthInv;
+        }
+        return valueLogOffset * cache.logScaleLengthInv;
+    }
+
+    /**
+     * Returns the value of the {@link #logarithmBaseProperty()}.
+     *
+     * @return base of the logarithm
+     */
+    public double getLogarithmBase() {
+        return logarithmBaseProperty().get();
+    }
+
+    /**
+     * @return the log axis Type @see LogAxisType
+     */
+    @Override
+    public LogAxisType getLogAxisType() {
+        return LogAxisType.LINEAR_SCALE;
     }
 
     /**
@@ -129,6 +196,95 @@ public class LogarithmicAxis extends AbstractAxis {
     }
 
     /**
+     * Returns the value of the {@link #tickUnitSupplierProperty()}.
+     *
+     * @return the TickUnitSupplier
+     */
+    public TickUnitSupplier getTickUnitSupplier() {
+        return tickUnitSupplierProperty().get();
+    }
+
+    /**
+     * Get the data value for the given display position on this axis. If the
+     * axis is a CategoryAxis this will be the nearest value. -- cached double
+     * optimised version (shaves of 50% on delays)
+     *
+     * @param displayPosition
+     *            A pixel position on this axis
+     * @return the nearest data value to the given pixel position or null if not
+     *         on axis;
+     */
+    @Override
+    public double getValueForDisplay(final double displayPosition) {
+        if (cache.isVerticalAxis) {
+            final double height = cache.axisHeight;
+            return pow(cache.lowerBoundLog + (height - displayPosition) / height * cache.logScaleLength);
+        }
+
+        return pow(cache.lowerBoundLog + displayPosition / cache.axisWidth * cache.logScaleLength);
+    }
+
+    /**
+     * Get the display position of the zero line along this axis.
+     *
+     * @return display position or Double.NaN if zero is not in current range;
+     */
+    @Override
+    public double getZeroPosition() {
+        return getDisplayPosition(cache.localCurrentLowerBound);
+    }
+
+    /**
+     * @return {@code true} if logarithmic axis, {@code false} otherwise
+     */
+    @Override
+    public boolean isLogAxis() {
+        return true;
+    }
+
+    /**
+     * Checks if the given value is plottable on this axis
+     *
+     * @param value
+     *            The value to check if its on axis
+     * @return true if the given value is plottable on this axis
+     */
+    @Override
+    public boolean isValueOnAxis(final double value) {
+        return value >= getLowerBound() && value <= getUpperBound();
+    }
+
+    /**
+     * Base of the logarithm used by the axis, must be grater than 1.
+     * <p>
+     * <b>Default value: 10</b>
+     * </p>
+     *
+     * @return base of the logarithm
+     */
+    public DoubleProperty logarithmBaseProperty() {
+        return logarithmBase;
+    }
+
+    @Override
+    public void requestAxisLayout() {
+        if (isUpdating) {
+            return;
+        }
+        super.requestAxisLayout();
+    }
+
+    /**
+     * Sets value of the {@link #logarithmBaseProperty()}.
+     *
+     * @param value
+     *            base of the logarithm, value &gt; 1
+     */
+    public void setLogarithmBase(final double value) {
+        logarithmBaseProperty().set(value);
+    }
+
+    /**
      * Sets the value of the {@link #tickUnitProperty()}.
      *
      * @param unit
@@ -139,8 +295,27 @@ public class LogarithmicAxis extends AbstractAxis {
         tickUnitProperty().set(unit);
     }
 
-    private final ObjectProperty<TickUnitSupplier> tickUnitSupplier = new SimpleObjectProperty<>(this,
-            "tickUnitSupplier", LogarithmicAxis.DEFAULT_TICK_UNIT_SUPPLIER);
+    /**
+     * Sets the value of the {@link #tickUnitSupplierProperty()}.
+     *
+     * @param supplier
+     *            the tick unit supplier. If {@code null}, the default one will
+     *            be used
+     */
+    public void setTickUnitSupplier(final TickUnitSupplier supplier) {
+        tickUnitSupplierProperty().set(supplier);
+    }
+
+    /**
+     * The value between each major tick mark in data units. This is
+     * automatically set if we are auto-ranging.
+     *
+     * @return tickUnit property
+     */
+    @Override
+    public DoubleProperty tickUnitProperty() {
+        return tickUnit;
+    }
 
     /**
      * Strategy to compute major tick unit when auto-range is on or when axis
@@ -156,85 +331,6 @@ public class LogarithmicAxis extends AbstractAxis {
         return tickUnitSupplier;
     }
 
-    /**
-     * Returns the value of the {@link #tickUnitSupplierProperty()}.
-     *
-     * @return the TickUnitSupplier
-     */
-    public TickUnitSupplier getTickUnitSupplier() {
-        return tickUnitSupplierProperty().get();
-    }
-
-    /**
-     * Sets the value of the {@link #tickUnitSupplierProperty()}.
-     *
-     * @param supplier
-     *            the tick unit supplier. If {@code null}, the default one will
-     *            be used
-     */
-    public void setTickUnitSupplier(final TickUnitSupplier supplier) {
-        tickUnitSupplierProperty().set(supplier);
-    }
-
-    /**
-     * @return {@code true} if logarithmic axis, {@code false} otherwise
-     */
-    @Override
-    public boolean isLogAxis() {
-        return true;
-    }
-
-    /**
-     * @return the log axis Type @see LogAxisType
-     */
-    @Override
-    public LogAxisType getLogAxisType() {
-        return LogAxisType.LINEAR_SCALE;
-    }
-
-    private final DoubleProperty logarithmBase = new SimpleDoubleProperty(this, "logarithmBase",
-            LogarithmicAxis.DEFAULT_LOGARITHM_BASE) {
-        @Override
-        protected void invalidated() {
-            if (get() <= 1) {
-                throw new IllegalArgumentException("logarithmBase must be grater than 1");
-            }
-            invalidateRange();
-            requestAxisLayout();
-        }
-    };
-
-    /**
-     * Base of the logarithm used by the axis, must be grater than 1.
-     * <p>
-     * <b>Default value: 10</b>
-     * </p>
-     *
-     * @return base of the logarithm
-     */
-    public DoubleProperty logarithmBaseProperty() {
-        return logarithmBase;
-    }
-
-    /**
-     * Returns the value of the {@link #logarithmBaseProperty()}.
-     *
-     * @return base of the logarithm
-     */
-    public double getLogarithmBase() {
-        return logarithmBaseProperty().get();
-    }
-
-    /**
-     * Sets value of the {@link #logarithmBaseProperty()}.
-     *
-     * @param value
-     *            base of the logarithm, value &gt; 1
-     */
-    public void setLogarithmBase(final double value) {
-        logarithmBaseProperty().set(value);
-    }
-
     private double log(final double value) {
         if (value <= 0) {
             return Double.NaN;
@@ -247,10 +343,28 @@ public class LogarithmicAxis extends AbstractAxis {
     }
 
     @Override
-    protected void setRange(final AxisRange range, final boolean animate) {
-        super.setRange(range, animate);
-        setTickUnit(range.getTickUnit());
+    protected AxisRange autoRange(final double minValue, final double maxValue, final double length,
+            final double labelSize) {
+        double min = minValue;
+        final double max = maxValue;
+
+        // sanitise range if < 0
+        if (min <= 0) {
+            min = LogarithmicAxis.DEFAULT_LOG_MIN_VALUE;
+            isUpdating = true;
+            setLowerBound(LogarithmicAxis.DEFAULT_LOG_MIN_VALUE);
+            isUpdating = false;
+        }
+
+        final double paddingScale = 1.0 + getAutoRangePadding();
+        final double paddedMin = min / paddingScale;
+        final double paddedMax = max * paddingScale;
+
+        return computeRange(paddedMin, paddedMax, length, labelSize);
     }
+
+    // -------------- STYLESHEET HANDLING
+    // ------------------------------------------------------------------------------
 
     @Override
     protected List<Double> calculateMajorTickValues(final double axisLength, final AxisRange range) {
@@ -295,27 +409,6 @@ public class LogarithmicAxis extends AbstractAxis {
     }
 
     @Override
-    protected AxisRange autoRange(final double minValue, final double maxValue, final double length,
-            final double labelSize) {
-        double min = minValue;
-        final double max = maxValue;
-
-        // sanitise range if < 0
-        if (min <= 0) {
-            min = LogarithmicAxis.DEFAULT_LOG_MIN_VALUE;
-            isUpdating = true;
-            setLowerBound(LogarithmicAxis.DEFAULT_LOG_MIN_VALUE);
-            isUpdating = false;
-        }
-
-        final double paddingScale = 1.0 + getAutoRangePadding();
-        final double paddedMin = min / paddingScale;
-        final double paddedMax = max * paddingScale;
-
-        return computeRange(paddedMin, paddedMax, length, labelSize);
-    }
-
-    @Override
     protected AxisRange computeRange(final double min, final double max, final double axisLength,
             final double labelSize) {
         double minValue = min;
@@ -329,100 +422,25 @@ public class LogarithmicAxis extends AbstractAxis {
         return new AxisRange(minValue, maxValue, axisLength, newScale, tickUnit.get());
     }
 
-    /**
-     * Computes the preferred tick unit based on the upper/lower bounds and the
-     * length of the axis in screen coordinates.
-     * 
-     * @param axisLength
-     *            the length in screen coordinates
-     * @return the tick unit
-     */
     @Override
-    public double computePreferredTickUnit(final double axisLength) {
-        return tickUnit.get();
+    protected void setRange(final AxisRange range, final boolean animate) {
+        super.setRange(range, animate);
+        setTickUnit(range.getTickUnit());
     }
-
-    /**
-     * Get the display position along this axis for a given value. If the value
-     * is not in the current range, the returned value will be an extrapolation
-     * of the display position. -- cached double optimised version (shaves of
-     * 50% on delays)
-     *
-     * @param value
-     *            The data value to work out display position for
-     * @return display position
-     */
-    @Override
-    public double getDisplayPosition(final double value) {
-        final double valueLogOffset = log(value) - cache.lowerBoundLog;
-        if (cache.isVerticalAxis) {
-            return cache.axisHeight - valueLogOffset * cache.logScaleLengthInv;
-        }
-        return valueLogOffset * cache.logScaleLengthInv;
-    }
-
-    /**
-     * Get the data value for the given display position on this axis. If the
-     * axis is a CategoryAxis this will be the nearest value. -- cached double
-     * optimised version (shaves of 50% on delays)
-     *
-     * @param displayPosition
-     *            A pixel position on this axis
-     * @return the nearest data value to the given pixel position or null if not
-     *         on axis;
-     */
-    @Override
-    public double getValueForDisplay(final double displayPosition) {
-        if (cache.isVerticalAxis) {
-            final double height = cache.axisHeight;
-            return pow(cache.lowerBoundLog + (height - displayPosition) / height * cache.logScaleLength);
-        }
-
-        return pow(cache.lowerBoundLog + displayPosition / cache.axisWidth * cache.logScaleLength);
-    }
-
-    /**
-     * Get the display position of the zero line along this axis.
-     *
-     * @return display position or Double.NaN if zero is not in current range;
-     */
-    @Override
-    public double getZeroPosition() {
-        return getDisplayPosition(cache.localCurrentLowerBound);
-    }
-
-    /**
-     * Checks if the given value is plottable on this axis
-     *
-     * @param value
-     *            The value to check if its on axis
-     * @return true if the given value is plottable on this axis
-     */
-    @Override
-    public boolean isValueOnAxis(final double value) {
-        return value >= getLowerBound() && value <= getUpperBound();
-    }
-
-    // -------------- STYLESHEET HANDLING
-    // ------------------------------------------------------------------------------
 
     private static class StyleableProperties {
-        private StyleableProperties() {
-
-        }
-
         private static final CssMetaData<LogarithmicAxis, Number> TICK_UNIT = new CssMetaData<LogarithmicAxis, Number>(
                 "-fx-tick-unit", SizeConverter.getInstance(), 5.0) {
-
-            @Override
-            public boolean isSettable(final LogarithmicAxis axis) {
-                return axis.tickUnit == null || !axis.tickUnit.isBound();
-            }
 
             @SuppressWarnings("unchecked")
             @Override
             public StyleableProperty<Number> getStyleableProperty(final LogarithmicAxis axis) {
                 return (StyleableProperty<Number>) axis.tickUnitProperty();
+            }
+
+            @Override
+            public boolean isSettable(final LogarithmicAxis axis) {
+                return axis.tickUnit == null || !axis.tickUnit.isBound();
             }
         };
 
@@ -434,23 +452,10 @@ public class LogarithmicAxis extends AbstractAxis {
             styleables.add(StyleableProperties.TICK_UNIT);
             STYLEABLES = Collections.unmodifiableList(styleables);
         }
-    }
 
-    public static List<CssMetaData<? extends Styleable, ?>> getClassCssMetaData() {
-        return StyleableProperties.STYLEABLES;
-    }
+        private StyleableProperties() {
 
-    @Override
-    public List<CssMetaData<? extends Styleable, ?>> getCssMetaData() {
-        return LogarithmicAxis.getClassCssMetaData();
-    }
-
-    @Override
-    public void requestAxisLayout() {
-        if (isUpdating) {
-            return;
         }
-        super.requestAxisLayout();
     }
 
     protected class Cache {
@@ -487,10 +492,5 @@ public class LogarithmicAxis extends AbstractAxis {
 
             logBase = Math.log10(getLogarithmBase());
         }
-    }
-
-    @Override
-    public AxisTransform getAxisTransform() {
-        return null;
     }
 }

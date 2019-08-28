@@ -123,9 +123,7 @@ public abstract class AbstractMetaDataRendererParameter <R extends AbstractMetaD
         strokeLineWidthMarker = AbstractMetaDataRendererParameter.DEFAULT_GRID_LINE_WIDTH;
         strokeDashPattern = AbstractMetaDataRendererParameter.DEFAULT_GRID_DASH_PATTERM;
 
-        if (getStyle() != null) {
-            // parse user-specified marker
-        }
+        // hint (getStyle() != null) -> parse user-specified marker
 
         return getThis();
     }

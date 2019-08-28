@@ -7,6 +7,8 @@ import java.util.Objects;
 
 import org.controlsfx.control.PopOver;
 import org.controlsfx.glyphfont.Glyph;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import de.gsi.chart.Chart;
 import de.gsi.chart.axes.Axis;
@@ -49,7 +51,7 @@ import javafx.util.converter.NumberStringConverter;
  * @author rstein
  */
 public class EditAxis extends ChartPlugin {
-
+    private static final Logger LOGGER = LoggerFactory.getLogger(EditAxis.class);
     private static final String FONT_AWESOME = "FontAwesome";
     public static final String STYLE_CLASS_AXIS_EDITOR = "chart-axis-editor";
     protected static final int DEFAULT_SHUTDOWN_PERIOD = 5000; // [ms]
@@ -581,8 +583,10 @@ public class EditAxis extends ChartPlugin {
                     if (axis instanceof AbstractAxis) {
                         // ((AbstractAxis) axis).recomputeTickMarks();
                         axis.setTickUnit(((AbstractAxis) axis).computePreferredTickUnit(axis.getLength()));
-                        System.err.println("recompute axis tick unit to "
-                                + ((AbstractAxis) axis).computePreferredTickUnit(axis.getLength()));
+                        if (LOGGER.isDebugEnabled()) {
+                            LOGGER.debug("recompute axis tick unit to {}",
+                                    ((AbstractAxis) axis).computePreferredTickUnit(axis.getLength()));
+                        }
                     }
 
                 }

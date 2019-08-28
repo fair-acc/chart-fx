@@ -8,6 +8,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -28,7 +31,7 @@ import javafx.scene.layout.VBox;
  *
  */
 public class DataViewer extends BorderPane {
-
+    private static final Logger LOGGER = LoggerFactory.getLogger(DataViewer.class);
     private final ObservableList<DataView> views = FXCollections.observableArrayList();
     private final VisibleViewerPane visibleViewerPane = new VisibleViewerPane();
     private final MinimizedViewerPane minimizedViewerPane = new MinimizedViewerPane();
@@ -36,6 +39,17 @@ public class DataViewer extends BorderPane {
 
     //    private final SplitPane splitPane = new SplitPane();
     //    private final TreeView<Node> explorerTreeView = new TreeView<>();
+
+    private final BooleanProperty explorerVisible = new SimpleBooleanProperty(false);
+
+    private final ObjectProperty<DataView> selectedView = new SimpleObjectProperty<DataView>(this, "selectedView") {
+
+        @Override
+        protected void invalidated() {
+            visibleViewerPane.getChildren().setAll(getValue().getChildren());
+            requestLayout();
+        }
+    };
 
     public DataViewer() {
         super();
@@ -49,7 +63,9 @@ public class DataViewer extends BorderPane {
 
         final ListChangeListener<? super DataViewPane> childChangeListener = (
                 final Change<? extends DataViewPane> c) -> {
-            System.err.println("added child -> update pane");
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("added child -> update pane");
+            }
             //requestLayout();
             layout();
         };
@@ -88,7 +104,9 @@ public class DataViewer extends BorderPane {
                 oldView.maximizedViewProperty().removeListener(maximizedViewPropertyListner);
                 oldView.getMinimizedChildren().removeListener(minimizedViewPropertyListner);
                 oldView.getVisibleChildren().removeListener(visibleViewPropertyListner);
-                System.err.println("old view");
+                if (LOGGER.isDebugEnabled()) {
+                    LOGGER.debug("old view");
+                }
             }
 
             if (newView != null) {
@@ -96,11 +114,31 @@ public class DataViewer extends BorderPane {
                 newView.maximizedViewProperty().addListener(maximizedViewPropertyListner);
                 newView.getMinimizedChildren().addListener(minimizedViewPropertyListner);
                 newView.getVisibleChildren().addListener(visibleViewPropertyListner);
-                System.err.println("new view");
+                if (LOGGER.isDebugEnabled()) {
+                    LOGGER.debug("new view");
+                }
             }
             requestLayout();
         });
         requestLayout();
+    }
+
+    private static <T> boolean listEqualsIgnoreOrder(final ObservableList<Node> observableList,
+            final ObservableList<DataViewPane> observableList2) {
+        return new HashSet<>(observableList).equals(new HashSet<>(observableList2));
+    }
+
+    /**
+     * Determines if the explorer view is visible.
+     * 
+     * @return boolean property (true: visible)
+     */
+    public final BooleanProperty explorerVisibleProperty() {
+        return explorerVisible;
+    }
+
+    public final DataView getSelectedView() {
+        return selectedViewProperty().get();
     }
 
     /**
@@ -112,16 +150,6 @@ public class DataViewer extends BorderPane {
         return views;
     }
 
-    private final BooleanProperty explorerVisible = new SimpleBooleanProperty(false);
-
-    /**
-     * Determines if the explorer view is visible.
-     * @return boolean property (true: visible)
-     */
-    public final BooleanProperty explorerVisibleProperty() {
-        return explorerVisible;
-    }
-
     /**
      * Returns the value of the {@link #explorerVisibleProperty()}.
      *
@@ -129,6 +157,10 @@ public class DataViewer extends BorderPane {
      */
     public final boolean isExplorerVisible() {
         return explorerVisibleProperty().get();
+    }
+
+    public final ObjectProperty<DataView> selectedViewProperty() {
+        return selectedView;
     }
 
     /**
@@ -140,29 +172,8 @@ public class DataViewer extends BorderPane {
         explorerVisibleProperty().set(value);
     }
 
-    private final ObjectProperty<DataView> selectedView = new SimpleObjectProperty<DataView>(this, "selectedView") {
-
-        @Override
-        protected void invalidated() {
-            visibleViewerPane.getChildren().setAll(getValue().getChildren());
-            requestLayout();
-        }
-    };
-
-    public final ObjectProperty<DataView> selectedViewProperty() {
-        return selectedView;
-    }
-
-    public final DataView getSelectedView() {
-        return selectedViewProperty().get();
-    }
-
     public final void setSelectedView(final DataView selectedView) {
         selectedViewProperty().set(selectedView);
-    }
-
-    public void sort() {
-        visibleViewerPane.sort();
     }
 
     // @Override
@@ -171,9 +182,68 @@ public class DataViewer extends BorderPane {
     // // mainPane.resizeRelocate(0, 0, getWidth(), getHeight());
     // }
 
-    private static <T> boolean listEqualsIgnoreOrder(final ObservableList<Node> observableList,
-            final ObservableList<DataViewPane> observableList2) {
-        return new HashSet<>(observableList).equals(new HashSet<>(observableList2));
+    public void sort() {
+        visibleViewerPane.sort();
+    }
+
+    private class MinimizedViewerPane extends GridPane {
+
+        MinimizedViewerPane() {
+            getStyleClass().add("minimizedviewer-pane");
+        }
+
+        private void removeOldChildren(final DataView view) {
+            final ObservableList<Node> existingChildren = getChildren();
+            for (final Node child : existingChildren) {
+                if (child instanceof DataViewPane) {
+                    final DataViewPane addedPane = (DataViewPane) child;
+                    if (!view.getMinimizedChildren().contains(addedPane)) {
+                        getChildren().remove(addedPane);
+                    }
+                }
+            }
+        }
+
+        @Override
+        protected void layoutChildren() {
+            super.layoutChildren();
+            final DataView view = getSelectedView();
+            if (view == null) {
+                return;
+            }
+
+            removeOldChildren(view);
+
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("layout minimized view");
+            }
+
+            int countX = 0;
+            int countY = 0;
+            for (final DataViewPane child : view.getMinimizedChildren()) {
+                child.setVisible(true);
+                GridPane.setColumnIndex(child, countX);
+                GridPane.setRowIndex(child, countY);
+                GridPane.setFillWidth(child, true);
+                if (!MinimizedViewerPane.this.getChildren().contains(child)) {
+                    if (LOGGER.isDebugEnabled()) {
+                        LOGGER.debug("minimized added child = " + child);
+                    }
+                    MinimizedViewerPane.this.getChildren().add(child);
+                }
+
+                // child.resize(200, 20);
+                // child.resizeRelocate(countX, countY, getPrefTileWidth(), getPrefTileHeight());
+                countX++;
+                if (countX > 3) {
+                    countY++;
+                    countX = 0;
+                }
+
+            }
+            // TODO: relayout super Vbox
+            viewerPane.requestLayout();
+        }
     }
 
     private class VisibleViewerPane extends GridPane {
@@ -186,73 +256,32 @@ public class DataViewer extends BorderPane {
 
         }
 
-        private void sort() {
-            final DataView view = getSelectedView();
-            final ObservableList<DataViewPane> workingCollection = FXCollections
-                    .observableArrayList(view.getVisibleChildren());
-            Collections.sort(workingCollection, (o1, o2) -> {
-                if (o1 == null && o2 == null) {
-                    return 0;
-                }
-                if (o1 == null) {
-                    return -1;
-                }
-                if (o2 == null) {
+        private int getColumnsCount(final DataView.Layout layout, final int childCount) {
+            switch (layout) {
+            case HBOX:
+                return childCount;
+            case VBOX:
+                return 1;
+            case GRID:
+            default:
+                if (childCount < 4) {
                     return 1;
                 }
-
-                return o1.titleProperty().getValue().compareTo(o2.titleProperty().getValue());
-            });
-            view.getVisibleChildren().setAll(workingCollection);
-            layoutChildren();
-        }
-
-        @Override
-        protected void layoutChildren() {
-            super.layoutChildren();
-            // System.err.println(String.format("layout visible -> size %d x %d", (int) getWidth(), (int) getHeight()));
-            final DataView view = getSelectedView();
-            if (view == null) {
-                return;
+                int ncols = (int) Math.ceil(Math.sqrt(childCount));
+                if (ncols == 0) {
+                    ncols = 1;
+                }
+                return ncols;
             }
-
-            removeOldChildren(view);
-
-            if (view.getMaximizedView() == null) {
-                layoutNormal(view);
-            } else {
-                layoutMaximized(view);
-            }
-        }
-
-        private void removeOldChildren(final DataView view) {
-
-            // getChildren().setAll(view.getVisibleChildren());
-            // for (int index = 0; index < getChildren().size(); index++) {
-            // final Node child = getChildren().get(index);
-            // if (child instanceof DataViewPane) {
-            // final DataViewPane addedPane = (DataViewPane) child;
-            // if (!view.getVisibleChildren().contains(addedPane)) {
-            // getChildren().remove(addedPane);
-            // }
-            // }
-            // }
-            //
-            //
-            // for (final DataViewPane child : view.getVisibleChildren()) {
-            // if (!VisibleViewerPane.this.getChildren().contains(child)) {
-            // System.err.println("visible added child = " + child);
-            // // getChildren().add(child);
-            // }
-            // }
-
         }
 
         private void layoutMaximized(final DataView view) {
             for (final DataViewPane child : view.getVisibleChildren()) {
                 if (child == view.getMaximizedView()) {
                     if (!getChildren().contains(child)) {
-                        System.err.println("maximized added child = " + child);
+                        if (LOGGER.isDebugEnabled()) {
+                            LOGGER.debug("maximized added child = " + child);
+                        }
                         getChildren().add(child);
                     }
                     child.resizeRelocate(0, 0, getWidth(), getHeight());
@@ -281,12 +310,16 @@ public class DataViewer extends BorderPane {
 
                 getColumnConstraints().clear();
                 getColumnConstraints().addAll(colConstraintList);
-                System.err.println("update column constraints");
+                if (LOGGER.isDebugEnabled()) {
+                    LOGGER.debug("update column constraints");
+                }
                 oldColsCount = colsCount;
             }
 
             if (!DataViewer.listEqualsIgnoreOrder(getChildren(), view.getVisibleChildren())) {
-                System.err.println("cleared dataset");
+                if (LOGGER.isDebugEnabled()) {
+                    LOGGER.debug("cleared dataset");
+                }
                 getChildren().clear();
             }
             int rowIndex = 0;
@@ -303,9 +336,6 @@ public class DataViewer extends BorderPane {
                 if (!VisibleViewerPane.this.getChildren().contains(child)) {
                     VisibleViewerPane.this.getChildren().add(child);
                 }
-                // System.out.println(String.format("add (layout=%s) child %s at %dx%d", layout, child.getName(),
-                // rowIndex,
-                // colIndex));
 
                 colIndex++;
                 if (colIndex >= colsCount) {
@@ -319,30 +349,39 @@ public class DataViewer extends BorderPane {
             }
         }
 
-        private int getColumnsCount(final DataView.Layout layout, final int childCount) {
-            switch (layout) {
-            case HBOX:
-                return childCount;
-            case VBOX:
-                return 1;
-            case GRID:
-            default:
-                if (childCount < 4) {
+        private void removeOldChildren(final DataView view) {
+
+            // getChildren().setAll(view.getVisibleChildren());
+            // for (int index = 0; index < getChildren().size(); index++) {
+            // final Node child = getChildren().get(index);
+            // if (child instanceof DataViewPane) {
+            // final DataViewPane addedPane = (DataViewPane) child;
+            // if (!view.getVisibleChildren().contains(addedPane)) {
+            // getChildren().remove(addedPane);
+            // }
+            // }
+            // }
+        }
+
+        private void sort() {
+            final DataView view = getSelectedView();
+            final ObservableList<DataViewPane> workingCollection = FXCollections
+                    .observableArrayList(view.getVisibleChildren());
+            Collections.sort(workingCollection, (o1, o2) -> {
+                if (o1 == null && o2 == null) {
+                    return 0;
+                }
+                if (o1 == null) {
+                    return -1;
+                }
+                if (o2 == null) {
                     return 1;
                 }
-                int ncols = (int) Math.ceil(Math.sqrt(childCount));
-                if (ncols == 0) {
-                    ncols = 1;
-                }
-                return ncols;
-            }
-        }
-    }
 
-    private class MinimizedViewerPane extends GridPane {
-
-        MinimizedViewerPane() {
-            getStyleClass().add("minimizedviewer-pane");
+                return o1.titleProperty().getValue().compareTo(o2.titleProperty().getValue());
+            });
+            view.getVisibleChildren().setAll(workingCollection);
+            layoutChildren();
         }
 
         @Override
@@ -355,42 +394,10 @@ public class DataViewer extends BorderPane {
 
             removeOldChildren(view);
 
-            // System.err.println("layout minimized view");
-
-            int countX = 0;
-            int countY = 0;
-            for (final DataViewPane child : view.getMinimizedChildren()) {
-                child.setVisible(true);
-                GridPane.setColumnIndex(child, countX);
-                GridPane.setRowIndex(child, countY);
-                GridPane.setFillWidth(child, true);
-                if (!MinimizedViewerPane.this.getChildren().contains(child)) {
-                    System.err.println("minimized added child = " + child);
-                    MinimizedViewerPane.this.getChildren().add(child);
-                }
-
-                // child.resize(200, 20);
-                // child.resizeRelocate(countX, countY, getPrefTileWidth(), getPrefTileHeight());
-                countX++;
-                if (countX > 3) {
-                    countY++;
-                    countX = 0;
-                }
-
-            }
-            // TODO: relayout super Vbox
-            viewerPane.requestLayout();
-        }
-
-        private void removeOldChildren(final DataView view) {
-            final ObservableList<Node> existingChildren = getChildren();
-            for (final Node child : existingChildren) {
-                if (child instanceof DataViewPane) {
-                    final DataViewPane addedPane = (DataViewPane) child;
-                    if (!view.getMinimizedChildren().contains(addedPane)) {
-                        getChildren().remove(addedPane);
-                    }
-                }
+            if (view.getMaximizedView() == null) {
+                layoutNormal(view);
+            } else {
+                layoutMaximized(view);
             }
         }
     }

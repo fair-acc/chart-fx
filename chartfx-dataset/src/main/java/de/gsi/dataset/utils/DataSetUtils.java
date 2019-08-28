@@ -282,7 +282,7 @@ public class DataSetUtils extends DataSetUtilsHelper {
 
         @Override
         public int read() throws IOException {
-            int b = in.read();
+            byte b = (byte)in.read();
             if (b == MARKER) {
                 pbin.unread(b);
                 b = -1;
@@ -994,7 +994,7 @@ public class DataSetUtils extends DataSetUtilsHelper {
      * @return DataSet with the data and metadata read from the file
      */
     public static DoubleErrorDataSet readDataSetFromByteArray(final byte[] byteArray) {
-        if ((byteArray == null) || (byteArray.length == 0)) {
+        if ((byteArray == null)) {
             throw new InvalidParameterException("null byteArray");
 
         }

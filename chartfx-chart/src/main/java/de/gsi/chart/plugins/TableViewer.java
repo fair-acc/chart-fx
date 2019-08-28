@@ -69,7 +69,7 @@ public class TableViewer extends ChartPlugin {
     private final HBox interactorButtons = getInteractorBar();
     private final TableView<DataSetsRow> table = new TableView<>();
     private final DataSetsModel dsModel = new DataSetsModel();
-    protected boolean editable = false;
+    protected boolean editable;
 
     /**
      * Creates a new instance of DataSetTableViewer class and setup the required
@@ -135,6 +135,7 @@ public class TableViewer extends ChartPlugin {
 
     /**
      * Helper function to initialize the UI elements for the Interactor toolbar.
+     * 
      * @return HBox node with the toolbar elements
      */
     protected HBox getInteractorBar() {
@@ -213,7 +214,7 @@ public class TableViewer extends ChartPlugin {
      * @author akrimm
      */
     protected class DataSetsModel extends ObservableListBase<DataSetsRow> {
-        private int nRows = 0;
+        private int nRows;
         private final ObservableList<TableColumn<DataSetsRow, ?>> columns = FXCollections.observableArrayList();
         private Callable<Void> refreshFunction;
 
@@ -236,6 +237,7 @@ public class TableViewer extends ChartPlugin {
         };
 
         public DataSetsModel() {
+            super();
             columns.add(new RowIndexHeaderTableColumn());
         }
 
@@ -265,7 +267,7 @@ public class TableViewer extends ChartPlugin {
 
                 for (final DataSet set : change.getAddedSubList()) {
                     set.addListener(dataSetDataUpdateListener);
-                    columns.add(new DataSetTableColumns(set));
+                    columns.add(new DataSetTableColumns(set)); // NOPMD - necessary for function
                     nRows = Math.max(nRows, set.getDataCount());
                     dataSetChanges = true;
                 }
@@ -294,8 +296,10 @@ public class TableViewer extends ChartPlugin {
                 oldChart.getDatasets().removeListener(datasetChangeListener);
                 oldChart.getDatasets().forEach(dataSet -> dataSet.removeListener(dataSetDataUpdateListener));
                 oldChart.getRenderers().removeListener(rendererChangeListener);
-                newChart.getRenderers()
-                        .forEach(renderer -> renderer.getDatasets().removeListener(datasetChangeListener));
+                if (newChart != null) {
+                    newChart.getRenderers()
+                            .forEach(renderer -> renderer.getDatasets().removeListener(datasetChangeListener));
+                }
             }
             if (newChart != null) {
                 // register data set listeners
@@ -574,7 +578,6 @@ public class TableViewer extends ChartPlugin {
                     final int row = e.getRowValue().getRow();
                     final double oldX = editableDataSet.getX(row);
                     final double oldY = editableDataSet.getY(row);
-                    final double newVal = e.getNewValue();
 
                     if (editConstraints != null && !editConstraints.canChange(row)) {
                         // may not edit value, revert to old value (ie. via
@@ -583,6 +586,7 @@ public class TableViewer extends ChartPlugin {
                         return;
                     }
 
+                    final double newVal = e.getNewValue();
                     switch (type) {
                     case X:
                         if (editConstraints != null && !editConstraints.isAcceptable(row, newVal, oldY)) {
@@ -625,8 +629,8 @@ public class TableViewer extends ChartPlugin {
     }
 
     protected class DataSetsRow {
-        private int row = 0;
-        private DataSetsModel model;
+        private final int row;
+        private final DataSetsModel model;
 
         @Override
         public int hashCode() {

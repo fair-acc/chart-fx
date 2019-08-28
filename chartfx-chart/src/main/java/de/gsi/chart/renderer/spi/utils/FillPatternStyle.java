@@ -16,23 +16,9 @@ public final class FillPatternStyle {
     private static int hatchSpacing = 10;
     private static int hatchAngle = 45;
 
-    public enum FillPattern {
-        SOLID,
-        HATCH,
-        HATCH0,
-        HATCH30,
-        HATCH45,
-        HATCH60,
-        HATCH90,
-        HATCHCROSS1,
-        HATCHCROSS2,
-    }
-
-    public static ImagePattern getHatch(final FillPattern fillPattern, final Paint color) {
-        return FillPatternStyle.getHatch(fillPattern, color, 1.0);
-    }
-
     protected static WeakHashMap<Color, ImagePattern> defaultHatchCache = new WeakHashMap<>();
+
+    protected static WeakHashMap<Paint, WeakHashMap<Double, Image>> defaultHatchCacheWithStrokeWidth = new WeakHashMap<>();
 
     public static ImagePattern getDefaultHatch(final Color color) {
         ImagePattern retVal = FillPatternStyle.defaultHatchCache.get(color);
@@ -44,22 +30,26 @@ public final class FillPatternStyle {
     }
 
     public static ImagePattern getDefaultHatch(final Paint color, final double xOffset) {
-        return new ImagePattern(FillPatternStyle.createDefaultHatch(color, 1.0), xOffset, xOffset, FillPatternStyle.HATCH_WINDOW_SIZE, FillPatternStyle.HATCH_WINDOW_SIZE,
-                false);
+        return new ImagePattern(FillPatternStyle.createDefaultHatch(color, 1.0), xOffset, xOffset,
+                FillPatternStyle.HATCH_WINDOW_SIZE, FillPatternStyle.HATCH_WINDOW_SIZE, false);
     }
 
-    public static ImagePattern getHatch(final FillPattern fillPattern, final Paint color, final double width) {
-        final Image hatch = FillPatternStyle.createHatch(fillPattern, color, width);
-        return new ImagePattern(hatch, 0, 0, FillPatternStyle.HATCH_WINDOW_SIZE, FillPatternStyle.HATCH_WINDOW_SIZE, false);
-    }
-
-    public static void setDefaultHatchSpacing(final int spacing) {
-        AssertUtils.gtEqThanZero("setDefaultHatchSpacing", spacing);
-        FillPatternStyle.hatchSpacing = spacing;
+    public static int getDefaultHatchAngle() {
+        return FillPatternStyle.hatchAngle;
     }
 
     public static int getDefaultHatchSpacing() {
         return FillPatternStyle.hatchSpacing;
+    }
+
+    public static ImagePattern getHatch(final FillPattern fillPattern, final Paint color) {
+        return FillPatternStyle.getHatch(fillPattern, color, 1.0);
+    }
+
+    public static ImagePattern getHatch(final FillPattern fillPattern, final Paint color, final double width) {
+        final Image hatch = FillPatternStyle.createHatch(fillPattern, color, width);
+        return new ImagePattern(hatch, 0, 0, FillPatternStyle.HATCH_WINDOW_SIZE, FillPatternStyle.HATCH_WINDOW_SIZE,
+                false);
     }
 
     public static void setDefaultHatchAngle(final int angle) {
@@ -67,11 +57,10 @@ public final class FillPatternStyle {
         FillPatternStyle.hatchAngle = angle;
     }
 
-    public static int getDefaultHatchAngle() {
-        return FillPatternStyle.hatchAngle;
+    public static void setDefaultHatchSpacing(final int spacing) {
+        AssertUtils.gtEqThanZero("setDefaultHatchSpacing", spacing);
+        FillPatternStyle.hatchSpacing = spacing;
     }
-
-    protected static WeakHashMap<Paint, WeakHashMap<Double, Image>> defaultHatchCacheWithStrokeWidth = new WeakHashMap<>();
 
     private static Image createDefaultHatch(final Paint color, final double strokeWidth) {
         WeakHashMap<Double, Image> checkCache = FillPatternStyle.defaultHatchCacheWithStrokeWidth.get(color);
@@ -120,8 +109,8 @@ public final class FillPatternStyle {
 
         final int hatchAngle = 45;
         final int windowSize = 5 * FillPatternStyle.HATCH_WINDOW_SIZE;
-        FillPatternStyle.drawHatching(pane, fillPattern, -windowSize, -windowSize, windowSize, windowSize, color, strokeWidth,
-                hatchAngle, FillPatternStyle.hatchSpacing);
+        FillPatternStyle.drawHatching(pane, fillPattern, -windowSize, -windowSize, windowSize, windowSize, color,
+                strokeWidth, hatchAngle, FillPatternStyle.hatchSpacing);
 
         final Scene scene = new Scene(pane);
         scene.setFill(Color.TRANSPARENT);
@@ -157,15 +146,15 @@ public final class FillPatternStyle {
             hatchAngle = 30;
             break;
         case HATCH45:
-		case HATCHCROSS1:
-			hatchAngle = 45;
+        case HATCHCROSS1:
+            hatchAngle = 45;
             break;
         case HATCH60:
             hatchAngle = 60;
             break;
         case HATCH90:
-		case HATCHCROSS2:
-			hatchAngle = 90;
+        case HATCHCROSS2:
+            hatchAngle = 90;
             break;
         default:
         }
@@ -210,46 +199,58 @@ public final class FillPatternStyle {
                 }
             }
         } else if (fillPattern == FillPattern.HATCHCROSS1) {
-		    hatchAngle = 45;
-		    final int diff = (maxy - miny) / 2;
-		    final int center = miny + diff;
-		    final double sin = Math.sin(Math.PI * hatchAngle / 180.0);
-		    final double cos = Math.cos(Math.PI * hatchAngle / 180.0);
-		    final int step = (int) (hatchSpacing / cos);
-		    final int dx = (int) (diff / cos);
-		    final int dy = (int) (diff / sin);
-		    for (int i = minx - dx; i < maxx + dx; i += step) {
-		        Line line = new Line(i - dx, center + dy, i + dx, center - dy);
-		        line.setStroke(color);
-		        line.setStrokeWidth(strokeWidth);
-		        pane.getChildren().add(line);
-		        line = new Line(i + dx, center + dy, i - dx, center - dy);
-		        line.setStroke(color);
-		        line.setStrokeWidth(strokeWidth);
-		        pane.getChildren().add(line);
-		    }
-		} else {
-		    hatchAngle = 0;
-		    final int step = hatchSpacing;
-		    final int diff = (maxy - miny) / 2;
-		    final int center = miny + diff;
+            hatchAngle = 45;
+            final int diff = (maxy - miny) / 2;
+            final int center = miny + diff;
+            final double sin = Math.sin(Math.PI * hatchAngle / 180.0);
+            final double cos = Math.cos(Math.PI * hatchAngle / 180.0);
+            final int step = (int) (hatchSpacing / cos);
+            final int dx = (int) (diff / cos);
+            final int dy = (int) (diff / sin);
+            for (int i = minx - dx; i < maxx + dx; i += step) {
+                Line line = new Line(i - dx, center + dy, i + dx, center - dy);
+                line.setStroke(color);
+                line.setStrokeWidth(strokeWidth);
+                pane.getChildren().add(line);
+                line = new Line(i + dx, center + dy, i - dx, center - dy);
+                line.setStroke(color);
+                line.setStrokeWidth(strokeWidth);
+                pane.getChildren().add(line);
+            }
+        } else {
+            hatchAngle = 0;
+            final int step = hatchSpacing;
+            final int diff = (maxy - miny) / 2;
+            final int center = miny + diff;
 
-		    final int y1 = center + diff;
-		    final int y2 = center - diff;
-		    for (int i = minx; i < maxx; i += step) {
-		        final Line line = new Line(i, y1, i, y2);
-		        line.setStroke(color);
-		        line.setStrokeWidth(strokeWidth);
-		    }
+            final int y1 = center + diff;
+            final int y2 = center - diff;
+            for (int i = minx; i < maxx; i += step) {
+                final Line line = new Line(i, y1, i, y2);
+                line.setStroke(color);
+                line.setStrokeWidth(strokeWidth);
+            }
 
-		    final int x1 = minx;
-		    final int x2 = maxx;
-		    for (int i = miny; i < maxy; i += step) {
-		        final Line line = new Line(x1, i, x2, i);
-		        line.setStroke(color);
-		        line.setStrokeWidth(strokeWidth);
-		    }
-		}
+            final int x1 = minx;
+            final int x2 = maxx;
+            for (int i = miny; i < maxy; i += step) {
+                final Line line = new Line(x1, i, x2, i);
+                line.setStroke(color);
+                line.setStrokeWidth(strokeWidth);
+            }
+        }
+    }
+
+    public enum FillPattern {
+        SOLID,
+        HATCH,
+        HATCH0,
+        HATCH30,
+        HATCH45,
+        HATCH60,
+        HATCH90,
+        HATCHCROSS1,
+        HATCHCROSS2,
     }
 
 }

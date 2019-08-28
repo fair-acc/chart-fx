@@ -30,13 +30,15 @@ import javafx.scene.layout.Pane;
  */
 public class ChartOverlay extends ChartPlugin {
 
-    /**
-     * Defines possible areas to be overlaid.
-     */
-    public enum OverlayArea {
-        CHART_PANE,
-        PLOT_AREA
-    }
+    private final ObjectProperty<Node> node = new SimpleObjectProperty<>(this, "node");
+
+    private final ObjectProperty<OverlayArea> overlayArea = new SimpleObjectProperty<OverlayArea>(this, "overlayArea") {
+
+        @Override
+        protected void invalidated() {
+            layoutChildren();
+        }
+    };
 
     /**
      * Creates a new, empty {@code ChartOverlay}, initialized to overlay the specified area.
@@ -65,17 +67,6 @@ public class ChartOverlay extends ChartPlugin {
         setNode(node);
     }
 
-    private final ObjectProperty<Node> node = new SimpleObjectProperty<>(this, "node");
-
-    /**
-     * The node to be overlaid on top of the {@link #overlayAreaProperty() overlay area}.
-     *
-     * @return the node property
-     */
-    public final ObjectProperty<Node> nodeProperty() {
-        return node;
-    }
-
     /**
      * Returns the value of the {@link #nodeProperty()}.
      *
@@ -86,47 +77,12 @@ public class ChartOverlay extends ChartPlugin {
     }
 
     /**
-     * Sets the value of the {@link #nodeProperty()}.
-     *
-     * @param newNode the node to overlaid
-     */
-    public final void setNode(final Node newNode) {
-        nodeProperty().set(newNode);
-    }
-
-    private final ObjectProperty<OverlayArea> overlayArea = new SimpleObjectProperty<OverlayArea>(this, "overlayArea") {
-
-        @Override
-        protected void invalidated() {
-            layoutChildren();
-        }
-    };
-
-    /**
-     * Specifies the {@link OverlayArea} to be covered by the {@link #nodeProperty() node}.
-     *
-     * @return overlayArea property
-     */
-    public final ObjectProperty<OverlayArea> overlayAreaProperty() {
-        return overlayArea;
-    }
-
-    /**
      * Returns the value of the {@link #overlayAreaProperty()}.
      *
      * @return the overlay area to be covered by the node
      */
     public final OverlayArea getOverlayArea() {
         return overlayAreaProperty().get();
-    }
-
-    /**
-     * Sets the value of the {@link #overlayAreaProperty()}.
-     *
-     * @param area the area to be covered
-     */
-    public final void setOverlayArea(final OverlayArea area) {
-        overlayAreaProperty().set(area);
     }
 
     @Override
@@ -141,5 +97,49 @@ public class ChartOverlay extends ChartPlugin {
             final Bounds plotArea = getChart().getBoundsInLocal();
             getNode().resizeRelocate(plotArea.getMinX(), plotArea.getMinY(), plotArea.getWidth(), plotArea.getHeight());
         }
+    }
+
+    /**
+     * The node to be overlaid on top of the {@link #overlayAreaProperty() overlay area}.
+     *
+     * @return the node property
+     */
+    public final ObjectProperty<Node> nodeProperty() {
+        return node;
+    }
+
+    /**
+     * Specifies the {@link OverlayArea} to be covered by the {@link #nodeProperty() node}.
+     *
+     * @return overlayArea property
+     */
+    public final ObjectProperty<OverlayArea> overlayAreaProperty() {
+        return overlayArea;
+    }
+
+    /**
+     * Sets the value of the {@link #nodeProperty()}.
+     *
+     * @param newNode the node to overlaid
+     */
+    public final void setNode(final Node newNode) {
+        nodeProperty().set(newNode);
+    }
+
+    /**
+     * Sets the value of the {@link #overlayAreaProperty()}.
+     *
+     * @param area the area to be covered
+     */
+    public final void setOverlayArea(final OverlayArea area) {
+        overlayAreaProperty().set(area);
+    }
+
+    /**
+     * Defines possible areas to be overlaid.
+     */
+    public enum OverlayArea {
+        CHART_PANE,
+        PLOT_AREA
     }
 }

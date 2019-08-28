@@ -63,8 +63,7 @@ public class ValueIndicator extends AbstractChartMeasurement {
         final double lower = numAxis.getLowerBound();
         final double upper = numAxis.getUpperBound();
         final double middle = 0.5 * Math.abs(upper - lower) + Math.min(lower, upper);
-        System.err.println(
-                "axis title = " + numAxis.getLabel() + " middle = " + middle + " min = " + numAxis.getUpperBound());
+
         if (axisMode == X) {
             sliderIndicator1 = new XValueIndicator(numAxis, middle);
             sliderIndicator2 = new XValueIndicator(numAxis, middle);
