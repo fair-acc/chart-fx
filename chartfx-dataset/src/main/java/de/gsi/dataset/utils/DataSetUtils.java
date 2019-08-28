@@ -813,7 +813,7 @@ public class DataSetUtils extends DataSetUtilsHelper {
                 int nY = dataSet3D.getYDataCount();
                 int nZ = dataSet3D.getDataCount();
 
-                final ByteBuffer byteBuffer = getCachedDoubleArray("writeByteBuffer", Float.BYTES * nX + nY + nZ);
+                final ByteBuffer byteBuffer = getCachedDoubleArray("writeByteBuffer", Float.BYTES * (nX + nY + nZ));
                 for (int ix = 0; ix < nX; ix++) {
                     byteBuffer.putFloat((float) dataSet3D.getX(ix));
                 }
@@ -825,6 +825,7 @@ public class DataSetUtils extends DataSetUtilsHelper {
                         byteBuffer.putFloat((float) dataSet3D.getZ(ix, iy));
                     }
                 }
+                outputStream.write(byteBuffer.array());
                 release("writeByteBuffer", byteBuffer);
             } else if (!asFloat && is3D) {
                 // TODO: efficient implementation using array access (needs API)
@@ -832,7 +833,7 @@ public class DataSetUtils extends DataSetUtilsHelper {
                 int nX = dataSet3D.getXDataCount();
                 int nY = dataSet3D.getYDataCount();
                 int nZ = dataSet3D.getDataCount();
-                final ByteBuffer byteBuffer = getCachedDoubleArray("writeByteBuffer", Double.BYTES * nX + nY + nZ);
+                final ByteBuffer byteBuffer = getCachedDoubleArray("writeByteBuffer", Double.BYTES * (nX + nY + nZ));
                 for (int ix = 0; ix < nX; ix++) {
                     byteBuffer.putDouble(dataSet3D.getX(ix));
                 }
@@ -844,6 +845,7 @@ public class DataSetUtils extends DataSetUtilsHelper {
                         byteBuffer.putDouble(dataSet3D.getZ(ix, iy));
                     }
                 }
+                outputStream.write(byteBuffer.array());
                 release("writeByteBuffer", byteBuffer);
             }
         } catch (final IOException e) {
@@ -1264,19 +1266,18 @@ public class DataSetUtils extends DataSetUtilsHelper {
                         toRead.get(valindex[0]).data64);
                 final double[] y = readDoubleArrayFromBuffer(toRead.get(valindex[1]).data32,
                         toRead.get(valindex[1]).data64);
-                final double[][] z = new double[x.length][];
-                for (int iX = 0; iX < x.length; iX++) {
-                    z[iX] = new double[y.length];
-                    for (int iY = 0; iY < y.length; iY++) {
+                final double[][] z = new double[y.length][];
+                for (int iY = 0; iY < y.length; iY++) {
+                    z[iY] = new double[x.length];
+                    for (int iX = 0; iX < x.length; iX++) {
                         if (toRead.get(valindex[4]).data32 == null) {
-                            z[iX][iY] = toRead.get(valindex[4]).data64.get(iX + iY * x.length);
+                            z[iY][iX] = toRead.get(valindex[4]).data64.get(iY + iX * y.length);
                         } else {
-                            z[iX][iY] = toRead.get(valindex[4]).data32.get(iY + iY * x.length);
+                            z[iY][iX] = toRead.get(valindex[4]).data32.get(iY + iX * y.length);
                         }
                     }
                 }
                 result = new DoubleDataSet3D(dataSetName, x, y, z);
-                LOGGER.warn("Reading 3D datasets not implemented, yet");
             } else { // 2D Dataset
                 final double[] x = readDoubleArrayFromBuffer(toRead.get(valindex[0]).data32,
                         toRead.get(valindex[0]).data64);
