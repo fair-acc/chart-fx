@@ -127,7 +127,7 @@ public class WaveletScalogram extends AbstractDemoApplication {
         final double[] yModel = new double[MAX_POINTS];
 
         final Random rnd = new Random();
-        for (int i = 0; i < yValues.length; i++) {
+        for (int i = 0; i < yModel.length; i++) {
             final double x = i;
             double offset = 0;
             final double error = 0.1 * rnd.nextGaussian();
