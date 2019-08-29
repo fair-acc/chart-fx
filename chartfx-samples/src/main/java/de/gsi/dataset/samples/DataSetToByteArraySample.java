@@ -47,8 +47,7 @@ public class DataSetToByteArraySample {
         final DataSet dataSet = DataSetUtils.readDataSetFromByteArray(byteOutput.toByteArray());
         
         if (! (dataSet instanceof DoubleErrorDataSet)) {
-            System.err.println("Data set is not DoubleErrorDataSet");
-            System.exit(1);
+            throw new IllegalStateException("DataSet is not not instanceof DoubleErrorDataSet, might be DataSet3D or DoubleDataSet");
         }
 
         testIdentityCore(binary, asFloat32, original, (DoubleErrorDataSet) dataSet);
