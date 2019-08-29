@@ -46,6 +46,7 @@ public class DataSetUtilsHelper {
         if (cachedArray == null) {
             return;
         }
+        cachedArray.clear();
         BYTE_ARRAY_CACHE_LOCK.lock();
         byteArrayCache.get(arrayName).put(cachedArray.capacity(), cachedArray);
         BYTE_ARRAY_CACHE_LOCK.unlock();
