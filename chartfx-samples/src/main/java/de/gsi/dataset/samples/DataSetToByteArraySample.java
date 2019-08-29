@@ -44,9 +44,14 @@ public class DataSetToByteArraySample {
 
     public void testDataSetUtilsIdentity(final boolean binary, final boolean asFloat32) {
         DataSetUtils.writeDataSetToByteArray(original, byteOutput, binary, asFloat32);
-        final DoubleErrorDataSet dataSet = DataSetUtils.readDataSetFromByteArray(byteOutput.toByteArray());
+        final DataSet dataSet = DataSetUtils.readDataSetFromByteArray(byteOutput.toByteArray());
+        
+        if (! (dataSet instanceof DoubleErrorDataSet)) {
+            System.err.println("Data set is not DoubleErrorDataSet");
+            System.exit(1);
+        }
 
-        testIdentityCore(binary, asFloat32, original, dataSet);
+        testIdentityCore(binary, asFloat32, original, (DoubleErrorDataSet) dataSet);
         // N.B. following tests fail for DataSetUtils (missing functionality)
         // testIdentityLabelsAndStyles(binary, asFloat32, original, dataSet);
         // testIdentityMetaData(binary, asFloat32, original, dataSet);
@@ -194,7 +199,7 @@ public class DataSetToByteArraySample {
 
         for (int i = 0; i < iterations; i++) {
             DataSetUtils.writeDataSetToByteArray(original, byteOutput, binary, asFloat32);
-            final DoubleErrorDataSet dataSet = DataSetUtils.readDataSetFromByteArray(byteOutput.toByteArray());
+            final DataSet dataSet = DataSetUtils.readDataSetFromByteArray(byteOutput.toByteArray());
             if (!original.getName().equals(dataSet.getName())) {
                 System.err.println("ERROR data set does not match -> potential streaming error at index = " + i);
                 break;
