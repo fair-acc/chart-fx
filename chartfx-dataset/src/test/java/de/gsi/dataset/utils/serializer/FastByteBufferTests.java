@@ -1,5 +1,8 @@
 package de.gsi.dataset.utils.serializer;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.util.Arrays;
 
 import org.junit.jupiter.api.Test;
@@ -24,258 +27,278 @@ public class FastByteBufferTests {
             "fantasy?" };
 
     @Test
-    public void TestFastByteBufferPrimitives() {
-        testPrimitivesSimple(new FastByteBuffer(1000));
+    public void testFastByteBufferPrimitives() {
+        assertTrue(testPrimitivesSimple(new FastByteBuffer(1000)));
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.atDebug().log("finished testFastByteBufferPrimitives(..)");
+        }
     }
 
     @Test
-    public void TestFastByteBufferPrimitiveArrays() {
-        testPrimitivesArrays(new FastByteBuffer(2000));
+    public void testFastByteBufferPrimitiveArrays() {
+        assertTrue(testPrimitivesArrays(new FastByteBuffer(2000)));
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.atDebug().log("finished testFastByteBufferPrimitiveArrays(..)");
+        }
     }
 
     @Test
-    public void TestFastByteBufferMixed() {
-        testPrimitivesMixed(new FastByteBuffer());
+    public void testFastByteBufferMixed() {
+        assertTrue(testPrimitivesMixed(new FastByteBuffer()));
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.atDebug().log("finished testFastByteBufferMixed(..)");
+        }
     }
 
     @Test
-    public void TestFastByteBufferAllocators() {
+    public void testFastByteBufferAllocators() {
 
         {
             FastByteBuffer buffer = new FastByteBuffer();
-            assert buffer.capacity() > 0;
-            assert buffer.position() == 0;
-            assert buffer.limit() == buffer.capacity();
+            assertTrue(buffer.capacity() > 0);
+            assertEquals(buffer.position(), 0);
+            assertEquals(buffer.limit(), buffer.capacity());
             buffer.limit(buffer.capacity() - 2);
-            assert buffer.limit() == (buffer.capacity() - 2);
-            assert buffer.isReadOnly() == false;
+            assertEquals(buffer.limit(), (buffer.capacity() - 2));
+            assertEquals(buffer.isReadOnly(), false);
         }
 
         {
             FastByteBuffer buffer = new FastByteBuffer(500);
-            assert buffer.capacity() == 500;
+            assertEquals(buffer.capacity(), 500);
         }
-        
+
         {
             FastByteBuffer buffer = new FastByteBuffer(new byte[1000], 500);
-            assert buffer.capacity() == 1000;
-            assert buffer.limit() == 500;
+            assertEquals(buffer.capacity(), 1000);
+            assertEquals(buffer.limit(), 500);
         }
-        
+
         {
             FastByteBuffer buffer = FastByteBuffer.wrap(byteTestArrray);
-            assert Arrays.equals(buffer.elements(), byteTestArrray);
+            assertTrue(Arrays.equals(buffer.elements(), byteTestArrray));
+        }
+
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.atDebug().log("finished testFastByteBufferAllocators(..)");
         }
     }
 
     @Test
-    public void TestFastByteBufferResizing() {
+    public void testFastByteBufferResizing() {
 
         {
             FastByteBuffer buffer = new FastByteBuffer(300);
-            assert buffer.capacity() == 300;
+            assertEquals(buffer.capacity(),  300);
 
             buffer.limit(200); //shift limit to index 200
-            assert buffer.remaining() == 200; // N.B. == 200 - pos (0);
+            assertEquals(buffer.remaining() , 200); // N.B. == 200 - pos (0);
 
             buffer.ensureAdditionalCapacity(200);
-            assert buffer.capacity() == 300;
+            assertEquals(buffer.capacity() , 300);
 
             buffer.ensureCapacity(400);
-            assert buffer.capacity() == 400;
+            assertEquals(buffer.capacity() , 400);
 
             buffer.putByteArray(new byte[100]);
             // N.B. int (4 bytes) for array size, n*4 Bytes for actual array
             final long sizeArray = (FastByteBuffer.SIZE_OF_INT + 100 * FastByteBuffer.SIZE_OF_BYTE);
-            assert buffer.position() == sizeArray;
+            assertEquals(buffer.position() , sizeArray);
 
-            assert buffer.capacity() == 400;
+            assertEquals(buffer.capacity() , 400);
             buffer.trim();
-            assert buffer.capacity() == buffer.position();
+            assertEquals(buffer.capacity() , buffer.position());
 
             buffer.ensureCapacity(500);
             buffer.trim(333);
-            assert buffer.capacity() == 333;
-            
+            assertEquals(buffer.capacity() , 333);
+
             buffer.position(0);
-            assert buffer.position() == 0;
-            
+            assertEquals(buffer.position() , 0);
+
             buffer.trim();
-            assert buffer.hasRemaining() == false;
+            assertEquals(buffer.hasRemaining() , false);
             buffer.ensureAdditionalCapacity(100);
-            assert buffer.hasRemaining() == true;
-            assert buffer.capacity() == 100;
-            
+            assertTrue(buffer.hasRemaining());
+            assertEquals(buffer.capacity() , 100);
+
             buffer.limit(50);
             buffer.clear();
-            assert buffer.position() == 0;
-            assert buffer.limit() == buffer.capacity();
+            assertEquals(buffer.position() , 0);
+            assertEquals(buffer.limit() , buffer.capacity());
+        }
+
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.atDebug().log("finished testFastByteBufferResizing(..)");
         }
     }
 
-    private static void testPrimitivesSimple(IoBuffer buffer) {
+    private static boolean testPrimitivesSimple(IoBuffer buffer) {
 
         buffer.reset();
         buffer.putBoolean(true);
         buffer.reset();
-        assert buffer.getBoolean() == true;
+        assertEquals(buffer.getBoolean(), true);
 
         buffer.reset();
         buffer.putBoolean(false);
         buffer.reset();
-        assert buffer.getBoolean() == false;
+        assertEquals(buffer.getBoolean() , false);
 
         buffer.reset();
         buffer.putByte((byte) 0xFE);
         buffer.reset();
-        assert buffer.getByte() == (byte) 0xFE;
+        assertEquals(buffer.getByte() , (byte) 0xFE);
 
         buffer.reset();
         buffer.putShort((short) 43);
         buffer.reset();
-        assert buffer.getShort() == (short) 43;
+        assertEquals(buffer.getShort() , (short) 43);
 
         buffer.reset();
         buffer.putInt(1025);
         buffer.reset();
-        assert buffer.getInt() == 1025;
+        assertEquals(buffer.getInt() , 1025);
 
         buffer.reset();
         final long largeLong = (long) Integer.MAX_VALUE + (long) 10;
         buffer.putLong(largeLong);
         buffer.reset();
-        assert buffer.getLong() == largeLong;
+        assertEquals(buffer.getLong() , largeLong);
 
         buffer.reset();
         buffer.putFloat(1.3e10f);
         buffer.reset();
-        assert buffer.getFloat() == 1.3e10f;
+        assertEquals(buffer.getFloat() , 1.3e10f);
 
         buffer.reset();
         buffer.putDouble(1.3e10f);
         buffer.reset();
-        assert buffer.getDouble() == 1.3e10f;
+        assertEquals(buffer.getDouble() , 1.3e10f);
 
         buffer.reset();
         buffer.putChar('@');
         buffer.reset();
-        assert '@' == buffer.getChar();
+        assertEquals('@' , buffer.getChar());
 
         buffer.reset();
         buffer.putChar((char) 513);
         buffer.reset();
-        assert (char) 513 == buffer.getChar();
+        assertEquals((char) 513 , buffer.getChar());
 
         buffer.reset();
         buffer.putString("Hello World!");
         buffer.reset();
-        assert "Hello World!".equals(buffer.getString());
+        assertTrue("Hello World!".equals(buffer.getString()));
+
+        return true;
     }
 
-    private static void testPrimitivesArrays(IoBuffer buffer) {
+    private static boolean testPrimitivesArrays(IoBuffer buffer) {
 
         {
             buffer.reset();
             buffer.putBooleanArray(booleanTestArrray);
             buffer.reset();
-            assert Arrays.equals(booleanTestArrray, buffer.getBooleanArray());
+            assertTrue(Arrays.equals(booleanTestArrray, buffer.getBooleanArray()));
             buffer.reset();
             final int length = booleanTestArrray.length;
             final boolean[] arrayToBeTested = buffer.getBooleanArray(new boolean[length + 2], 2, length);
-            assert Arrays.equals(booleanTestArrray, 0, length, arrayToBeTested, 2, length + 2);
+            assertTrue(Arrays.equals(booleanTestArrray, 0, length, arrayToBeTested, 2, length + 2));
         }
 
         {
             buffer.reset();
             buffer.putByteArray(byteTestArrray);
             buffer.reset();
-            assert Arrays.equals(byteTestArrray, buffer.getByteArray());
+            assertTrue(Arrays.equals(byteTestArrray, buffer.getByteArray()));
             buffer.reset();
             final int length = byteTestArrray.length;
             final byte[] arrayToBeTested = buffer.getByteArray(new byte[length + 2], 2, length);
-            assert Arrays.equals(byteTestArrray, 0, length, arrayToBeTested, 2, length + 2);
+            assertTrue(Arrays.equals(byteTestArrray, 0, length, arrayToBeTested, 2, length + 2));
         }
 
         {
             buffer.reset();
             buffer.putShortArray(shortTestArrray);
             buffer.reset();
-            assert Arrays.equals(shortTestArrray, buffer.getShortArray());
+            assertTrue(Arrays.equals(shortTestArrray, buffer.getShortArray()));
             buffer.reset();
             final int length = shortTestArrray.length;
             final short[] arrayToBeTested = buffer.getShortArray(new short[length + 2], 2, length);
-            assert Arrays.equals(shortTestArrray, 0, length, arrayToBeTested, 2, length + 2);
+            assertTrue(Arrays.equals(shortTestArrray, 0, length, arrayToBeTested, 2, length + 2));
         }
 
         {
             buffer.reset();
             buffer.putIntArray(intTestArrray);
             buffer.reset();
-            assert Arrays.equals(intTestArrray, buffer.getIntArray());
+            assertTrue(Arrays.equals(intTestArrray, buffer.getIntArray()));
             buffer.reset();
             final int length = intTestArrray.length;
             final int[] arrayToBeTested = buffer.getIntArray(new int[length + 2], 2, length);
-            assert Arrays.equals(intTestArrray, 0, length, arrayToBeTested, 2, length + 2);
+            assertTrue(Arrays.equals(intTestArrray, 0, length, arrayToBeTested, 2, length + 2));
         }
 
         {
             buffer.reset();
             buffer.putLongArray(longTestArrray);
             buffer.reset();
-            assert Arrays.equals(longTestArrray, buffer.getLongArray());
+            assertTrue(Arrays.equals(longTestArrray, buffer.getLongArray()));
             buffer.reset();
             final int length = longTestArrray.length;
             final long[] arrayToBeTested = buffer.getLongArray(new long[length + 2], 2, length);
-            assert Arrays.equals(longTestArrray, 0, length, arrayToBeTested, 2, length + 2);
+            assertTrue(Arrays.equals(longTestArrray, 0, length, arrayToBeTested, 2, length + 2));
         }
 
         {
             buffer.reset();
             buffer.putFloatArray(floatTestArrray);
             buffer.reset();
-            assert Arrays.equals(floatTestArrray, buffer.getFloatArray());
+            assertTrue(Arrays.equals(floatTestArrray, buffer.getFloatArray()));
             buffer.reset();
             final int length = floatTestArrray.length;
             final float[] arrayToBeTested = buffer.getFloatArray(new float[length + 2], 2, length);
-            assert Arrays.equals(floatTestArrray, 0, length, arrayToBeTested, 2, length + 2);
+            assertTrue(Arrays.equals(floatTestArrray, 0, length, arrayToBeTested, 2, length + 2));
         }
 
         {
             buffer.reset();
             buffer.putDoubleArray(doubleTestArrray);
             buffer.reset();
-            assert Arrays.equals(doubleTestArrray, buffer.getDoubleArray());
+            assertTrue(Arrays.equals(doubleTestArrray, buffer.getDoubleArray()));
             buffer.reset();
             final int length = doubleTestArrray.length;
             final double[] arrayToBeTested = buffer.getDoubleArray(new double[length + 2], 2, length);
-            assert Arrays.equals(doubleTestArrray, 0, length, arrayToBeTested, 2, length + 2);
+            assertTrue(Arrays.equals(doubleTestArrray, 0, length, arrayToBeTested, 2, length + 2));
         }
 
         //        {
         //            buffer.reset();
         //            buffer.putCharArray(charTestArrray);
         //            buffer.reset();
-        //            assert Arrays.equals(charTestArrray, buffer.getCharArray());
+        //            assertTrue(Arrays.equals(charTestArrray, buffer.getCharArray()));
         //            buffer.reset();
         //            final int length = charTestArrray.length;
         //            final char[] arrayToBeTested = buffer.getCharArray(new char[length + 2], 2, length);
-        //            assert Arrays.equals(doubleTestArrray, 0, length, arrayToBeTested, 2, length + 2);
+        //            assertTrue(Arrays.equals(doubleTestArrray, 0, length, arrayToBeTested, 2, length + 2);
         //        }
 
         {
             buffer.reset();
             buffer.putStringArray(stringTestArrray);
             buffer.reset();
-            assert Arrays.equals(stringTestArrray, buffer.getStringArray());
+            assertTrue(Arrays.equals(stringTestArrray, buffer.getStringArray()));
             buffer.reset();
             final int length = stringTestArrray.length;
             final String[] arrayToBeTested = buffer.getStringArray(new String[length + 2], 2, length);
-            assert Arrays.equals(stringTestArrray, 0, length, arrayToBeTested, 2, length + 2);
+            assertTrue(Arrays.equals(stringTestArrray, 0, length, arrayToBeTested, 2, length + 2));
         }
 
+        return true;
     }
 
-    private static void testPrimitivesMixed(IoBuffer buffer) {
+    private static boolean testPrimitivesMixed(IoBuffer buffer) {
         final long largeLong = (long) Integer.MAX_VALUE + (long) 10;
 
         buffer.reset();
@@ -294,18 +317,20 @@ public class FastByteBufferTests {
 
         // return to start position
         buffer.reset();
-        assert buffer.getBoolean() == true;
-        assert buffer.getBoolean() == false;
-        assert buffer.getByte() == (byte) 0xFE;
-        assert buffer.getShort() == (short) 43;
-        assert buffer.getInt() == 1025;
-        assert buffer.getLong() == largeLong;
-        assert buffer.getFloat() == 1.3e10f;
-        assert buffer.getDouble() == 1.3e10f;
-        assert '@' == buffer.getChar();
-        assert (char) 513 == buffer.getChar();
-        assert "Hello World!".equals(buffer.getString());
-        assert buffer.position() == position;
+        assertEquals(buffer.getBoolean(), true);
+        assertEquals(buffer.getBoolean() , false);
+        assertEquals(buffer.getByte() , (byte) 0xFE);
+        assertEquals(buffer.getShort() , (short) 43);
+        assertEquals(buffer.getInt() , 1025);
+        assertEquals(buffer.getLong() , largeLong);
+        assertEquals(buffer.getFloat() , 1.3e10f);
+        assertEquals(buffer.getDouble() , 1.3e10f);
+        assertEquals('@' , buffer.getChar());
+        assertEquals((char) 513 , buffer.getChar());
+        assertEquals("Hello World!", buffer.getString());
+        assertEquals(buffer.position() , position);
+
+        return true;
     }
 
 }
