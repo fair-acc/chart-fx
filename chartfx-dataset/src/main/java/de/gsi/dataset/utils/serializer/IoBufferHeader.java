@@ -43,15 +43,6 @@ import java.util.concurrent.locks.ReadWriteLock;
 public interface IoBufferHeader<C extends IoBufferHeader<C>> {
 
     /**
-     * For efficiency/performance reasons the buffer implementation is not required to safe-guard each put/get method
-     * independently.
-     * Thus the user-code should acquire the given lock around a set of put/get appropriately.
-     * 
-     * @return the read-write lock
-     */
-    ReadWriteLock lock();
-
-    /**
      * @return the capacity of this buffer
      */
     int capacity();
@@ -119,6 +110,15 @@ public interface IoBufferHeader<C extends IoBufferHeader<C>> {
      * @return itself (fluent design)
      */
     C limit(final int newLimit);
+
+    /**
+     * For efficiency/performance reasons the buffer implementation is not required to safe-guard each put/get method
+     * independently.
+     * Thus the user-code should acquire the given lock around a set of put/get appropriately.
+     * 
+     * @return the read-write lock
+     */
+    ReadWriteLock lock();
 
     /**
      * @return the position of this buffer

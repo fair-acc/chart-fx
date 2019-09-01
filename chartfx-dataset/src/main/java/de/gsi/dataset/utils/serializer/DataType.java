@@ -44,69 +44,13 @@ public enum DataType {
     private final Class<?> classType;
     private final boolean scalar;
 
-    DataType(final int byteValue, final String stringValue, final long primitiveSize, Class<?> classType, boolean isScalar) {
+    DataType(final int byteValue, final String stringValue, final long primitiveSize, Class<?> classType,
+            boolean isScalar) {
         this.byteValue = (byte) byteValue;
         this.stringValue = stringValue;
         this.primitiveSize = primitiveSize;
         this.classType = classType;
         this.scalar = isScalar;
-    }
-
-    /**
-     * Returns the byte representation of the data type.
-     * 
-     * @return the byte representation
-     */
-    public byte getAsByte() {
-        return this.byteValue;
-    }
-
-    public long getPrimitiveSize() {
-        return primitiveSize;
-    }
-    
-
-    /**
-     * Returns the corresponding java class type matching the given data type
-     * 
-     * @return the matching java class type
-     */
-    public Class<?> getClassType() {
-        return classType;
-    }
-
-    public boolean isScalar() {
-        return scalar;
-    }
-
-    /**
-     * Returns the string representation of the data type.
-     * 
-     * @return the string representation
-     */
-    public String getAsString() {
-        return this.stringValue;
-    }
-
-    @Override
-    public String toString() {
-        return this.stringValue;
-    }
-
-    /**
-     * Returns the data type matching the given string representation, if any.
-     * 
-     * @param str the string to be searched
-     * 
-     * @return the matching data type
-     */
-    public static DataType fromString(String str) {
-        for (DataType type : DataType.values()) {
-            if (type.stringValue.equals(str)) {
-                return type;
-            }
-        }
-        throw new IllegalArgumentException("Entry type '" + str + "' is not supported");
     }
 
     /**
@@ -138,6 +82,61 @@ public enum DataType {
         }
 
         throw new IllegalArgumentException("data type not implemented " + classType.getSimpleName());
+    }
+
+    /**
+     * Returns the data type matching the given string representation, if any.
+     * 
+     * @param str the string to be searched
+     * @return the matching data type
+     */
+    public static DataType fromString(String str) {
+        for (DataType type : DataType.values()) {
+            if (type.stringValue.equals(str)) {
+                return type;
+            }
+        }
+        throw new IllegalArgumentException("Entry type '" + str + "' is not supported");
+    }
+
+    /**
+     * Returns the byte representation of the data type.
+     * 
+     * @return the byte representation
+     */
+    public byte getAsByte() {
+        return this.byteValue;
+    }
+
+    /**
+     * Returns the string representation of the data type.
+     * 
+     * @return the string representation
+     */
+    public String getAsString() {
+        return this.stringValue;
+    }
+
+    /**
+     * Returns the corresponding java class type matching the given data type
+     * 
+     * @return the matching java class type
+     */
+    public Class<?> getClassType() {
+        return classType;
+    }
+
+    public long getPrimitiveSize() {
+        return primitiveSize;
+    }
+
+    public boolean isScalar() {
+        return scalar;
+    }
+
+    @Override
+    public String toString() {
+        return this.stringValue;
     }
 
 }
