@@ -10,6 +10,7 @@ package de.gsi.dataset.utils.serializer;
 public class BinaryArrayFactory extends BinarySerialiser {
 
     protected BinaryArrayFactory() {
+        super();
     }
 
     //
@@ -38,7 +39,7 @@ public class BinaryArrayFactory extends BinarySerialiser {
     // -- READ OPERATIONS --------------------------------------------
     //
 
-    public static double[][] readDoubleMatrix(final FastByteBuffer buffer, final FieldHeader fieldHeader) {
+    public static double[][] readDoubleMatrix(final IoBuffer buffer, final FieldHeader fieldHeader) {
         if (fieldHeader.getDataDimension() != 2) {
             throw new IllegalArgumentException("2-dim array required, field is for n-dim="+fieldHeader.getDataDimension());
         }

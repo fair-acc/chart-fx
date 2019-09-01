@@ -231,7 +231,7 @@ public class DataSetToByteArraySample {
         final long stopTime = ProcessingProfiler.getTimeDiff(startTime, "generating data DataSet");
 
         final double diffMillis = TimeUnit.NANOSECONDS.toMillis(stopTime - startTime);
-        final double byteCount = iterations * ((byteBuffer.getPosition() / diffMillis) * 1e3);
+        final double byteCount = iterations * ((byteBuffer.position() / diffMillis) * 1e3);
         System.err.printf("average %s-bit binary-encoded DataSetSerialiser throughput %s meta infos = %s/s%n",
                 asFloat32 ? "32" : "64", withMetaInfos ? "with" : "w/o",
                 humanReadableByteCount((long) byteCount, true));
