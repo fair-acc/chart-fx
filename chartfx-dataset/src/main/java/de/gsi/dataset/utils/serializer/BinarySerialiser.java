@@ -19,6 +19,7 @@ public class BinarySerialiser { // NOPMD - omen est omen
     private static int bufferIncrements;
 
     protected BinarySerialiser() {
+        super();
     }
 
     public static int getBufferIncrements() {
@@ -39,7 +40,7 @@ public class BinarySerialiser { // NOPMD - omen est omen
      * 
      * @param buffer to use for serialisation
      */
-    public static void putHeaderInfo(FastByteBuffer buffer) {
+    public static void putHeaderInfo(IoBuffer buffer) {
         AssertUtils.notNull("buffer", buffer);
         buffer.putString("#file producer : ");
         buffer.putString(BinarySerialiser.class.getCanonicalName());
@@ -49,11 +50,11 @@ public class BinarySerialiser { // NOPMD - omen est omen
         buffer.putByte(VERSION_MICRO);
     }
 
-    protected static void putFieldHeader(final FastByteBuffer buffer, final String fieldName, final DataType dataType) {
+    protected static void putFieldHeader(final IoBuffer buffer, final String fieldName, final DataType dataType) {
         putFieldHeader(buffer, fieldName, dataType, 0);
     }
 
-    protected static void putFieldHeader(final FastByteBuffer buffer, final String fieldName, final DataType dataType,
+    protected static void putFieldHeader(final IoBuffer buffer, final String fieldName, final DataType dataType,
             final int additionalSize) {
         AssertUtils.notNull("buffer", buffer);
         AssertUtils.notNull("fieldName", fieldName);
@@ -63,47 +64,47 @@ public class BinarySerialiser { // NOPMD - omen est omen
         buffer.putByte(dataType.getAsByte());
     }
 
-    public static void putEndMarker(final FastByteBuffer buffer) {
+    public static void putEndMarker(final IoBuffer buffer) {
         putFieldHeader(buffer, DataType.END_MARKER.getAsString(), DataType.END_MARKER);
         buffer.putByte(DataType.END_MARKER.getAsByte());
     }
 
-    public static void put(FastByteBuffer buffer, final String fieldName, final boolean value) {
+    public static void put(IoBuffer buffer, final String fieldName, final boolean value) {
         putFieldHeader(buffer, fieldName, DataType.BOOL);
         buffer.putBoolean(value);
     }
 
-    public static void put(FastByteBuffer buffer, final String fieldName, final byte value) {
+    public static void put(IoBuffer buffer, final String fieldName, final byte value) {
         putFieldHeader(buffer, fieldName, DataType.BYTE);
         buffer.putByte(value);
     }
 
-    public static void put(FastByteBuffer buffer, final String fieldName, final short value) { // NOPMD
+    public static void put(IoBuffer buffer, final String fieldName, final short value) { // NOPMD
         putFieldHeader(buffer, fieldName, DataType.SHORT);
         buffer.putShort(value);
     }
 
-    public static void put(FastByteBuffer buffer, final String fieldName, final int value) {
+    public static void put(IoBuffer buffer, final String fieldName, final int value) {
         putFieldHeader(buffer, fieldName, DataType.INT);
         buffer.putInt(value);
     }
 
-    public static void put(FastByteBuffer buffer, final String fieldName, final long value) {
+    public static void put(IoBuffer buffer, final String fieldName, final long value) {
         putFieldHeader(buffer, fieldName, DataType.LONG);
         buffer.putLong(value);
     }
 
-    public static void put(FastByteBuffer buffer, final String fieldName, final float value) {
+    public static void put(IoBuffer buffer, final String fieldName, final float value) {
         putFieldHeader(buffer, fieldName, DataType.FLOAT);
         buffer.putFloat(value);
     }
 
-    public static void put(FastByteBuffer buffer, final String fieldName, final double value) {
+    public static void put(IoBuffer buffer, final String fieldName, final double value) {
         putFieldHeader(buffer, fieldName, DataType.DOUBLE);
         buffer.putDouble(value);
     }
 
-    public static void put(final FastByteBuffer buffer, final String fieldName, final String value) {
+    public static void put(final IoBuffer buffer, final String fieldName, final String value) {
         putFieldHeader(buffer, fieldName, DataType.STRING, (value == null ? 1 : value.length()) + 1);
         buffer.putString(value == null ? "" : value);
     }
@@ -119,7 +120,7 @@ public class BinarySerialiser { // NOPMD - omen est omen
         return ret;
     }
 
-    protected static int putArrayHeader(final FastByteBuffer buffer, final String fieldName, final DataType dataType,
+    protected static int putArrayHeader(final IoBuffer buffer, final String fieldName, final DataType dataType,
             final int[] dims) {
         AssertUtils.notNull("dims", dims);
         final int nElements = getNumberOfElements(dims);
@@ -133,82 +134,76 @@ public class BinarySerialiser { // NOPMD - omen est omen
         return nElements;
     }
 
-    public static void put(final FastByteBuffer buffer, final String fieldName, final boolean[] arrayValue) {
+    public static void put(final IoBuffer buffer, final String fieldName, final boolean[] arrayValue) {
         put(buffer, fieldName, arrayValue, new int[] { arrayValue.length });
     }
 
-    public static void put(final FastByteBuffer buffer, final String fieldName, final boolean[] arrayValue,
+    public static void put(final IoBuffer buffer, final String fieldName, final boolean[] arrayValue,
             final int[] dims) {
         final int nElements = putArrayHeader(buffer, fieldName, DataType.BOOL_ARRAY, dims);
         buffer.putBooleanArray(arrayValue, Math.min(nElements, arrayValue.length));
     }
 
-    public static void put(final FastByteBuffer buffer, final String fieldName, final byte[] arrayValue) {
+    public static void put(final IoBuffer buffer, final String fieldName, final byte[] arrayValue) {
         put(buffer, fieldName, arrayValue, new int[] { arrayValue.length });
     }
 
-    public static void put(final FastByteBuffer buffer, final String fieldName, final byte[] arrayValue,
-            final int[] dims) {
+    public static void put(final IoBuffer buffer, final String fieldName, final byte[] arrayValue, final int[] dims) {
         final int nElements = putArrayHeader(buffer, fieldName, DataType.BYTE_ARRAY, dims);
         buffer.putByteArray(arrayValue, Math.min(nElements, arrayValue.length));
     }
 
-    public static void put(final FastByteBuffer buffer, final String fieldName, final short[] arrayValue) { // NOPMD
+    public static void put(final IoBuffer buffer, final String fieldName, final short[] arrayValue) { // NOPMD
         put(buffer, fieldName, arrayValue, new int[] { arrayValue.length });
     }
 
-    public static void put(final FastByteBuffer buffer, final String fieldName, final short[] arrayValue, // NOPMD
+    public static void put(final IoBuffer buffer, final String fieldName, final short[] arrayValue, // NOPMD
             final int[] dims) {
         final int nElements = putArrayHeader(buffer, fieldName, DataType.SHORT_ARRAY, dims);
         buffer.putShortArray(arrayValue, Math.min(nElements, arrayValue.length));
     }
 
-    public static void put(final FastByteBuffer buffer, final String fieldName, final int[] arrayValue) {
+    public static void put(final IoBuffer buffer, final String fieldName, final int[] arrayValue) {
         put(buffer, fieldName, arrayValue, new int[] { arrayValue.length });
     }
 
-    public static void put(final FastByteBuffer buffer, final String fieldName, final int[] arrayValue,
-            final int[] dims) {
+    public static void put(final IoBuffer buffer, final String fieldName, final int[] arrayValue, final int[] dims) {
         final int nElements = putArrayHeader(buffer, fieldName, DataType.INT_ARRAY, dims);
         buffer.putIntArray(arrayValue, Math.min(nElements, arrayValue.length));
     }
 
-    public static void put(final FastByteBuffer buffer, final String fieldName, final long[] arrayValue) {
+    public static void put(final IoBuffer buffer, final String fieldName, final long[] arrayValue) {
         put(buffer, fieldName, arrayValue, new int[] { arrayValue.length });
     }
 
-    public static void put(final FastByteBuffer buffer, final String fieldName, final long[] arrayValue,
-            final int[] dims) {
+    public static void put(final IoBuffer buffer, final String fieldName, final long[] arrayValue, final int[] dims) {
         final int nElements = putArrayHeader(buffer, fieldName, DataType.LONG_ARRAY, dims);
         buffer.putLongArray(arrayValue, Math.min(nElements, arrayValue.length));
     }
 
-    public static void put(final FastByteBuffer buffer, final String fieldName, final float[] arrayValue) {
+    public static void put(final IoBuffer buffer, final String fieldName, final float[] arrayValue) {
         put(buffer, fieldName, arrayValue, new int[] { arrayValue.length });
     }
 
-    public static void put(final FastByteBuffer buffer, final String fieldName, final float[] arrayValue,
-            final int[] dims) {
+    public static void put(final IoBuffer buffer, final String fieldName, final float[] arrayValue, final int[] dims) {
         final int nElements = putArrayHeader(buffer, fieldName, DataType.FLOAT_ARRAY, dims);
         buffer.putFloatArray(arrayValue, Math.min(nElements, arrayValue.length));
     }
 
-    public static void put(final FastByteBuffer buffer, final String fieldName, final double[] arrayValue) {
+    public static void put(final IoBuffer buffer, final String fieldName, final double[] arrayValue) {
         put(buffer, fieldName, arrayValue, new int[] { arrayValue.length });
     }
 
-    public static void put(final FastByteBuffer buffer, final String fieldName, final double[] arrayValue,
-            final int[] dims) {
+    public static void put(final IoBuffer buffer, final String fieldName, final double[] arrayValue, final int[] dims) {
         final int nElements = putArrayHeader(buffer, fieldName, DataType.DOUBLE_ARRAY, dims);
         buffer.putDoubleArray(arrayValue, Math.min(nElements, arrayValue.length));
     }
 
-    public static void put(final FastByteBuffer buffer, final String fieldName, final String[] arrayValue) {
+    public static void put(final IoBuffer buffer, final String fieldName, final String[] arrayValue) {
         put(buffer, fieldName, arrayValue, new int[] { arrayValue.length });
     }
 
-    public static void put(final FastByteBuffer buffer, final String fieldName, final String[] arrayValue,
-            final int[] dims) {
+    public static void put(final IoBuffer buffer, final String fieldName, final String[] arrayValue, final int[] dims) {
         if (arrayValue == null || arrayValue.length == 0) {
             return;
         }
@@ -216,11 +211,10 @@ public class BinarySerialiser { // NOPMD - omen est omen
         buffer.putStringArray(arrayValue, Math.min(nElements, arrayValue.length));
     }
 
-    protected static void putGenericArrayAsPrimitive(FastByteBuffer buffer, DataType dataType, Object[] data,
-            int nToCopy) {
+    protected static void putGenericArrayAsPrimitive(IoBuffer buffer, DataType dataType, Object[] data, int nToCopy) {
         // @formatter:off
         switch (dataType) {
-        case BOOL:   buffer.putBooleanArray(GenericsHelper.toBoolPrimitive((Boolean[]) data), nToCopy); break;
+        case BOOL:   buffer.putBooleanArray(GenericsHelper.toBoolPrimitive(data), nToCopy); break;
         case BYTE:   buffer.putByteArray(GenericsHelper.toBytePrimitive(data), nToCopy); break;
         case SHORT:  buffer.putShortArray(GenericsHelper.toShortPrimitive(data), nToCopy); break;
         case INT:    buffer.putIntArray(GenericsHelper.toIntegerPrimitive(data), nToCopy); break;
@@ -234,7 +228,7 @@ public class BinarySerialiser { // NOPMD - omen est omen
         }
     }
 
-    public static <K, V> void put(final FastByteBuffer buffer, final String fieldName, final Map<K, V> map) {
+    public static <K, V> void put(final IoBuffer buffer, final String fieldName, final Map<K, V> map) {
         if (map == null || map.isEmpty()) {
             return;
         }
@@ -263,7 +257,7 @@ public class BinarySerialiser { // NOPMD - omen est omen
     // -- READ OPERATIONS --------------------------------------------
     //
 
-    public static HeaderInfo checkHeaderInfo(final FastByteBuffer readBuffer) {
+    public static HeaderInfo checkHeaderInfo(final IoBuffer readBuffer) {
         AssertUtils.notNull("readBuffer", readBuffer);
         readBuffer.getString(); // should read "#file producer : "
         // -- but not explicitly checked
@@ -280,11 +274,10 @@ public class BinarySerialiser { // NOPMD - omen est omen
                     header.toString(), headerThis.toString());
             throw new IllegalStateException(msg);
         }
-
         return header;
     }
 
-    public static FieldHeader getFieldHeader(final FastByteBuffer readBuffer) {
+    public static FieldHeader getFieldHeader(final IoBuffer readBuffer) {
         final String fieldName = readBuffer.getString();
         final byte dataTypeByte = readBuffer.getByte();
         final DataType dataType = DataType.fromByte(dataTypeByte);
@@ -305,63 +298,63 @@ public class BinarySerialiser { // NOPMD - omen est omen
         return SELF.new FieldHeader(fieldName, dataType, dims);
     }
 
-    public static boolean getBoolean(final FastByteBuffer readBuffer) {
-        if (readBuffer.verifySize()) {
+    public static boolean getBoolean(final IoBuffer readBuffer) {
+        if (readBuffer.hasRemaining()) {
             return readBuffer.getBoolean();
         }
         throw new IndexOutOfBoundsException(READ_POSITION_AT_BUFFER_END);
     }
 
-    public static byte getByte(final FastByteBuffer readBuffer) {
-        if (readBuffer.verifySize()) {
+    public static byte getByte(final IoBuffer readBuffer) {
+        if (readBuffer.hasRemaining()) {
             return readBuffer.getByte();
         }
         throw new IndexOutOfBoundsException(READ_POSITION_AT_BUFFER_END);
     }
 
-    public static short getShort(final FastByteBuffer readBuffer) { // NOPMD
-        if (readBuffer.verifySize()) {
+    public static short getShort(final IoBuffer readBuffer) { // NOPMD
+        if (readBuffer.hasRemaining()) {
             return readBuffer.getShort();
         }
         throw new IndexOutOfBoundsException(READ_POSITION_AT_BUFFER_END);
     }
 
-    public static int getInteger(final FastByteBuffer readBuffer) {
-        if (readBuffer.verifySize()) {
+    public static int getInteger(final IoBuffer readBuffer) {
+        if (readBuffer.hasRemaining()) {
             return readBuffer.getInt();
         }
         throw new IndexOutOfBoundsException(READ_POSITION_AT_BUFFER_END);
     }
 
-    public static long getLong(final FastByteBuffer readBuffer) {
-        if (readBuffer.verifySize()) {
+    public static long getLong(final IoBuffer readBuffer) {
+        if (readBuffer.hasRemaining()) {
             return readBuffer.getLong();
         }
         throw new IndexOutOfBoundsException(READ_POSITION_AT_BUFFER_END);
     }
 
-    public static float getFloat(final FastByteBuffer readBuffer) {
-        if (readBuffer.verifySize()) {
+    public static float getFloat(final IoBuffer readBuffer) {
+        if (readBuffer.hasRemaining()) {
             return readBuffer.getFloat();
         }
         throw new IndexOutOfBoundsException(READ_POSITION_AT_BUFFER_END);
     }
 
-    public static double getDouble(final FastByteBuffer readBuffer) {
-        if (readBuffer.verifySize()) {
+    public static double getDouble(final IoBuffer readBuffer) {
+        if (readBuffer.hasRemaining()) {
             return readBuffer.getDouble();
         }
         throw new IndexOutOfBoundsException(READ_POSITION_AT_BUFFER_END);
     }
 
-    public static String getString(final FastByteBuffer readBuffer) {
-        if (readBuffer.verifySize()) {
+    public static String getString(final IoBuffer readBuffer) {
+        if (readBuffer.hasRemaining()) {
             return readBuffer.getString();
         }
         return null;
     }
 
-    public static int[] getArrayDimensions(final FastByteBuffer readBuffer) {
+    public static int[] getArrayDimensions(final IoBuffer readBuffer) {
         final int arrayDims = readBuffer.getInt(); // array dimensions
         final int[] dims = new int[arrayDims];
         for (int i = 0; i < arrayDims; ++i) {
@@ -370,39 +363,39 @@ public class BinarySerialiser { // NOPMD - omen est omen
         return dims;
     }
 
-    public static boolean[] getBooleanArray(final FastByteBuffer readBuffer) {
+    public static boolean[] getBooleanArray(final IoBuffer readBuffer) {
         return readBuffer.getBooleanArray();
     }
 
-    public static byte[] getByteArray(final FastByteBuffer readBuffer) {
+    public static byte[] getByteArray(final IoBuffer readBuffer) {
         return readBuffer.getByteArray();
     }
 
-    public static short[] getShortArray(final FastByteBuffer readBuffer) { // NOPMD
+    public static short[] getShortArray(final IoBuffer readBuffer) { // NOPMD
         return readBuffer.getShortArray();
     }
 
-    public static int[] getIntArray(final FastByteBuffer readBuffer) {
+    public static int[] getIntArray(final IoBuffer readBuffer) {
         return readBuffer.getIntArray();
     }
 
-    public static long[] getLongArray(final FastByteBuffer readBuffer) {
+    public static long[] getLongArray(final IoBuffer readBuffer) {
         return readBuffer.getLongArray();
     }
 
-    public static float[] getFloatArray(final FastByteBuffer readBuffer) {
+    public static float[] getFloatArray(final IoBuffer readBuffer) {
         return readBuffer.getFloatArray();
     }
 
-    public static double[] getDoubleArray(final FastByteBuffer readBuffer) {
+    public static double[] getDoubleArray(final IoBuffer readBuffer) {
         return readBuffer.getDoubleArray();
     }
 
-    public static String[] getStringArray(final FastByteBuffer readBuffer) {
+    public static String[] getStringArray(final IoBuffer readBuffer) {
         return readBuffer.getStringArray();
     }
 
-    protected static Object[] getGenericArrayAsPrimitive(FastByteBuffer readBuffer, DataType dataType) {
+    protected static Object[] getGenericArrayAsPrimitive(IoBuffer readBuffer, DataType dataType) {
         Object[] retVal;
         // @formatter:off
         switch (dataType) {
@@ -421,7 +414,7 @@ public class BinarySerialiser { // NOPMD - omen est omen
         return retVal;
     }
 
-    public static <K, V> Map<K, V> getMap(final FastByteBuffer readBuffer, Map<K, V> map) {
+    public static <K, V> Map<K, V> getMap(final IoBuffer readBuffer, final Map<K, V> map) {
         // convert into two linear arrays one of K and the other for V
         // streamer encoding as
         // <1 (int)><n_map (int)><type K (byte)<type V (byte)>
@@ -432,14 +425,12 @@ public class BinarySerialiser { // NOPMD - omen est omen
         // read key and value vector
         Object[] keys = getGenericArrayAsPrimitive(readBuffer, keyDataType);
         Object[] values = getGenericArrayAsPrimitive(readBuffer, valueDataType);
-        if (map == null) {
-            map = new ConcurrentHashMap<>();
-        }
+        final Map<K, V> retMap = map == null ? new ConcurrentHashMap<>() : map;
         for (int i = 0; i < keys.length; i++) {
-            map.put((K) keys[i], (V) values[i]);
+            retMap.put((K) keys[i], (V) values[i]);
         }
 
-        return map;
+        return retMap;
     }
 
     //
@@ -526,6 +517,7 @@ public class BinarySerialiser { // NOPMD - omen est omen
             return getVersionMajor() <= VERSION_MAJOR;
         }
 
+        @Override
         public String toString() {
             return String.format("%s-v%d.%d.%d", getProducerName(), getVersionMajor(), getVersionMinor(),
                     getVersionMicro());

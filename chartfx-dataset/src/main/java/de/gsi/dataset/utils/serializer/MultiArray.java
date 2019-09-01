@@ -16,28 +16,6 @@ package de.gsi.dataset.utils.serializer;
 public interface MultiArray<T> {
 
     /**
-     * Returns the array of all elements of multi-dimensional array.
-     * 
-     * @return the array of all elements
-     */
-    T getElements();
-
-    /**
-     * Returns the number of elements in the multi-dimensional array.
-     * 
-     * @return the number of elements
-     */
-    int getElementsCount();
-
-    /**
-     * Returns the element at given indices.
-     * 
-     * @param indices position of the element in the multi-dimensional array
-     * @return index for the one-dimensional array
-     */
-    int getIndex(final int[] indices);
-
-    /**
      * Returns the element at a given indices.
      * 
      * @param index the indices
@@ -70,12 +48,49 @@ public interface MultiArray<T> {
     byte getByte(final int[] indices);
 
     /**
+     * Returns the dimensions of the array.
+     * 
+     * @return the dimensions
+     */
+    int[] getDimensions();
+
+    /**
      * Returns the element at given indices.
      * 
      * @param indices position of the element in the multi-dimensional array
      * @return the primitive element
      */
-    short getShort(final int[] indices); // NOPMD
+    double getDouble(final int[] indices);
+
+    /**
+     * Returns the array of all elements of multi-dimensional array.
+     * 
+     * @return the array of all elements
+     */
+    T getElements();
+
+    /**
+     * Returns the number of elements in the multi-dimensional array.
+     * 
+     * @return the number of elements
+     */
+    int getElementsCount();
+
+    /**
+     * Returns the element at given indices.
+     * 
+     * @param indices position of the element in the multi-dimensional array
+     * @return the primitive element
+     */
+    float getFloat(final int[] indices);
+
+    /**
+     * Returns the element at given indices.
+     * 
+     * @param indices position of the element in the multi-dimensional array
+     * @return index for the one-dimensional array
+     */
+    int getIndex(final int[] indices);
 
     /**
      * Returns the element at given indices.
@@ -99,15 +114,7 @@ public interface MultiArray<T> {
      * @param indices position of the element in the multi-dimensional array
      * @return the primitive element
      */
-    float getFloat(final int[] indices);
-
-    /**
-     * Returns the element at given indices.
-     * 
-     * @param indices position of the element in the multi-dimensional array
-     * @return the primitive element
-     */
-    double getDouble(final int[] indices);
+    short getShort(final int[] indices); // NOPMD
 
     /**
      * Returns the element at given indices.
@@ -116,11 +123,4 @@ public interface MultiArray<T> {
      * @return the element
      */
     String getString(final int[] indices);
-
-    /**
-     * Returns the dimensions of the array.
-     * 
-     * @return the dimensions
-     */
-    int[] getDimensions();
 }

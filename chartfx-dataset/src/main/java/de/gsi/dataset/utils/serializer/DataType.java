@@ -18,7 +18,8 @@ public enum DataType {
     LONG                     (4     ,"long"                    , 8, Long.class, true),
     FLOAT                    (5     ,"float"                   , 4, Float.class, true),
     DOUBLE                   (6     ,"double"                  , 8, Double.class, true),
-    STRING                   (7     ,"string"                  , 1, String.class, true),
+    CHAR                     (7     ,"char"                    , 2, Character.class, true),
+    STRING                   (8     ,"string"                  , 1, String.class, true),
 
     // array of primitive types
     BOOL_ARRAY               (100   ,"bool_array"              , 1, Boolean[].class, false),
@@ -28,7 +29,8 @@ public enum DataType {
     LONG_ARRAY               (104   ,"long_array"              , 8, Long[].class, false),
     FLOAT_ARRAY              (105   ,"float_array"             , 4, Float[].class, false),
     DOUBLE_ARRAY             (106   ,"double_array"            , 8, Double[].class, false),
-    STRING_ARRAY             (107   ,"string_array"            , 1, String[].class, false),
+    CHAR_ARRAY               (107   ,"char"                    , 2, Character[].class, true),
+    STRING_ARRAY             (108   ,"string_array"            , 1, String[].class, false),
 
     // complex objects
     MAP                      (200   ,"map"                     , 1, Map.class, false),
@@ -42,7 +44,7 @@ public enum DataType {
     private final Class<?> classType;
     private final boolean scalar;
 
-    private DataType(final int byteValue, final String stringValue, final long primitiveSize, Class<?> classType, boolean isScalar) {
+    DataType(final int byteValue, final String stringValue, final long primitiveSize, Class<?> classType, boolean isScalar) {
         this.byteValue = (byte) byteValue;
         this.stringValue = stringValue;
         this.primitiveSize = primitiveSize;

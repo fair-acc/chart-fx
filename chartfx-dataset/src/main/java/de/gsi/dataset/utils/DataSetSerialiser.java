@@ -15,7 +15,7 @@ import de.gsi.dataset.utils.serializer.BinarySerialiser;
 import de.gsi.dataset.utils.serializer.BinarySerialiser.FieldHeader;
 import de.gsi.dataset.utils.serializer.BinarySerialiser.HeaderInfo;
 import de.gsi.dataset.utils.serializer.DataType;
-import de.gsi.dataset.utils.serializer.FastByteBuffer;
+import de.gsi.dataset.utils.serializer.IoBuffer;
 
 /**
  * Class to efficiently serialise and de-serialise DataSet objects into binary
@@ -86,7 +86,7 @@ public class DataSetSerialiser extends DataSetUtilsHelper {
      * @param asFloat {@code true}: encode data as binary floats (smaller size,
      *            performance), or {@code false} as double (better precision)
      */
-    public static void writeDataSetToByteArray(final DataSet dataSet, final FastByteBuffer buffer,
+    public static void writeDataSetToByteArray(final DataSet dataSet, final IoBuffer buffer,
             final boolean asFloat) {
         AssertUtils.notNull("dataSet", dataSet);
         AssertUtils.notNull("buffer", buffer);
@@ -110,7 +110,7 @@ public class DataSetSerialiser extends DataSetUtilsHelper {
         BinarySerialiser.putEndMarker(buffer);
     }
 
-    protected static void writeHeaderDataToStream(final FastByteBuffer buffer, final DataSet dataSet) {
+    protected static void writeHeaderDataToStream(final IoBuffer buffer, final DataSet dataSet) {
         // common header data
         BinarySerialiser.put(buffer, DATA_SET_NAME, dataSet.getName());
         BinarySerialiser.put(buffer, X_MIN, dataSet.getXMin());
@@ -126,7 +126,7 @@ public class DataSetSerialiser extends DataSetUtilsHelper {
         BinarySerialiser.put(buffer, VAL_RMS, rootMeanSquare(dataSet.getYValues()));
     }
 
-    protected static void writeMetaDataToStream(final FastByteBuffer buffer, final DataSet dataSet) {
+    protected static void writeMetaDataToStream(final IoBuffer buffer, final DataSet dataSet) {
         if (!(dataSet instanceof DataSetMetaData)) {
             return;
         }
@@ -138,7 +138,7 @@ public class DataSetSerialiser extends DataSetUtilsHelper {
         BinarySerialiser.put(buffer, META_INFO, metaDataSet.getMetaInfo());
     }
 
-    protected static void writeDataLabelsToStream(final FastByteBuffer buffer, final DataSet dataSet) {
+    protected static void writeDataLabelsToStream(final IoBuffer buffer, final DataSet dataSet) {
         final int dataCount = dataSet.getDataCount();
         Map<Integer, String> labelMap = new ConcurrentHashMap<>();
         for (int index = 0; index < dataCount; index++) {
@@ -164,13 +164,13 @@ public class DataSetSerialiser extends DataSetUtilsHelper {
     }
 
     /**
-     * @param buffer FastByteBuffer to write binary data into
+     * @param buffer IoBuffer to write binary data into
      * @param dataSet to be exported
      * @param asFloat {@code true} use 32-bit floats (less memory, faster
      *            transfer) instead of 64-bit doubles (DataSet default, higher
      *            precision)
      */
-    protected static void writeNumericBinaryDataToBuffer(final FastByteBuffer buffer, final DataSet dataSet,
+    protected static void writeNumericBinaryDataToBuffer(final IoBuffer buffer, final DataSet dataSet,
             final boolean asFloat) {
         final int nsamples = dataSet.getDataCount();
 
@@ -269,10 +269,10 @@ public class DataSetSerialiser extends DataSetUtilsHelper {
      * #-commented Metadata Header and a $-commented column header. Expects the
      * following columns in this order to be present: index, x, y, eyn, eyp.
      *
-     * @param readBuffer FastByteBuffer (encapsulates byte array).
+     * @param readBuffer IoBuffer (encapsulates byte array).
      * @return DataSet with the data and metadata read from the file
      */
-    public static DataSet readDataSetFromByteArray(final FastByteBuffer readBuffer) { // NOPMD
+    public static DataSet readDataSetFromByteArray(final IoBuffer readBuffer) { // NOPMD
         DataSetBuilder builder = new DataSetBuilder();
 
         HeaderInfo bufferHeader = BinarySerialiser.checkHeaderInfo(readBuffer);
@@ -440,7 +440,7 @@ public class DataSetSerialiser extends DataSetUtilsHelper {
         return builder.build();
     }
 
-    protected static void swallowRest(final FastByteBuffer readBuffer, final FieldHeader fieldHeader) {
+    protected static void swallowRest(final IoBuffer readBuffer, final FieldHeader fieldHeader) {
         // parse whatever is left
         // N.B. this is/should be the only place where 'Object' is used
         // since the JVM will perform boxing of primitive types

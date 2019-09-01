@@ -95,7 +95,7 @@ public class WriteDataSetToFileSample extends Application {
             boolean asFloat = true;
             fastByteBuffer.reset(); // '0' writing at start of buffer
             DataSetSerialiser.writeDataSetToByteArray(dataSet2, fastByteBuffer, asFloat);
-            System.out.println("written bytes to byte buffer = " + fastByteBuffer.getPosition());
+            System.out.println("written bytes to byte buffer = " + fastByteBuffer.position());
             fastByteBuffer.reset(); // return read position to '0'
 
             System.out.println("write data time-stamped to directory = " + path);
