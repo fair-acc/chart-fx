@@ -89,47 +89,71 @@ public class FastByteBufferTests {
 
         {
             FastByteBuffer buffer = new FastByteBuffer(300);
-            assertEquals(buffer.capacity(),  300);
+            assertEquals(buffer.capacity(), 300);
 
             buffer.limit(200); //shift limit to index 200
-            assertEquals(buffer.remaining() , 200); // N.B. == 200 - pos (0);
+            assertEquals(buffer.remaining(), 200); // N.B. == 200 - pos (0);
 
             buffer.ensureAdditionalCapacity(200);
-            assertEquals(buffer.capacity() , 300);
+            assertEquals(buffer.capacity(), 300);
 
             buffer.ensureCapacity(400);
-            assertEquals(buffer.capacity() , 400);
+            assertEquals(buffer.capacity(), 400);
 
             buffer.putByteArray(new byte[100]);
             // N.B. int (4 bytes) for array size, n*4 Bytes for actual array
             final long sizeArray = (FastByteBuffer.SIZE_OF_INT + 100 * FastByteBuffer.SIZE_OF_BYTE);
-            assertEquals(buffer.position() , sizeArray);
+            assertEquals(buffer.position(), sizeArray);
 
-            assertEquals(buffer.capacity() , 400);
+            assertEquals(buffer.capacity(), 400);
             buffer.trim();
-            assertEquals(buffer.capacity() , buffer.position());
+            assertEquals(buffer.capacity(), buffer.position());
 
             buffer.ensureCapacity(500);
             buffer.trim(333);
-            assertEquals(buffer.capacity() , 333);
+            assertEquals(buffer.capacity(), 333);
 
             buffer.position(0);
-            assertEquals(buffer.position() , 0);
+            assertEquals(buffer.position(), 0);
 
             buffer.trim();
-            assertEquals(buffer.hasRemaining() , false);
+            assertEquals(buffer.hasRemaining(), false);
             buffer.ensureAdditionalCapacity(100);
             assertTrue(buffer.hasRemaining());
-            assertEquals(buffer.capacity() , 100);
+            assertEquals(buffer.capacity(), 100);
 
             buffer.limit(50);
             buffer.clear();
-            assertEquals(buffer.position() , 0);
-            assertEquals(buffer.limit() , buffer.capacity());
+            assertEquals(buffer.position(), 0);
+            assertEquals(buffer.limit(), buffer.capacity());
         }
 
         if (LOGGER.isDebugEnabled()) {
             LOGGER.atDebug().log("finished testFastByteBufferResizing(..)");
+        }
+    }
+
+    @Test
+    public void testByteBufferPrimitives() {
+        assertTrue(testPrimitivesSimple(new ByteBuffer(1000)));
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.atDebug().log("finished testByteBufferPrimitives(..)");
+        }
+    }
+
+    @Test
+    public void testByteBufferPrimitiveArrays() {
+        assertTrue(testPrimitivesArrays(new ByteBuffer(2000)));
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.atDebug().log("finished testByteBufferPrimitiveArrays(..)");
+        }
+    }
+
+    @Test
+    public void testByteBufferMixed() {
+        assertTrue(testPrimitivesMixed(new ByteBuffer()));
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.atDebug().log("finished testByteBufferMixed(..)");
         }
     }
 
@@ -143,48 +167,48 @@ public class FastByteBufferTests {
         buffer.reset();
         buffer.putBoolean(false);
         buffer.reset();
-        assertEquals(buffer.getBoolean() , false);
+        assertEquals(buffer.getBoolean(), false);
 
         buffer.reset();
         buffer.putByte((byte) 0xFE);
         buffer.reset();
-        assertEquals(buffer.getByte() , (byte) 0xFE);
+        assertEquals(buffer.getByte(), (byte) 0xFE);
 
         buffer.reset();
         buffer.putShort((short) 43);
         buffer.reset();
-        assertEquals(buffer.getShort() , (short) 43);
+        assertEquals(buffer.getShort(), (short) 43);
 
         buffer.reset();
         buffer.putInt(1025);
         buffer.reset();
-        assertEquals(buffer.getInt() , 1025);
+        assertEquals(buffer.getInt(), 1025);
 
         buffer.reset();
         final long largeLong = (long) Integer.MAX_VALUE + (long) 10;
         buffer.putLong(largeLong);
         buffer.reset();
-        assertEquals(buffer.getLong() , largeLong);
+        assertEquals(buffer.getLong(), largeLong);
 
         buffer.reset();
         buffer.putFloat(1.3e10f);
         buffer.reset();
-        assertEquals(buffer.getFloat() , 1.3e10f);
+        assertEquals(buffer.getFloat(), 1.3e10f);
 
         buffer.reset();
         buffer.putDouble(1.3e10f);
         buffer.reset();
-        assertEquals(buffer.getDouble() , 1.3e10f);
+        assertEquals(buffer.getDouble(), 1.3e10f);
 
         buffer.reset();
         buffer.putChar('@');
         buffer.reset();
-        assertEquals('@' , buffer.getChar());
+        assertEquals('@', buffer.getChar());
 
         buffer.reset();
         buffer.putChar((char) 513);
         buffer.reset();
-        assertEquals((char) 513 , buffer.getChar());
+        assertEquals((char) 513, buffer.getChar());
 
         buffer.reset();
         buffer.putString("Hello World!");
@@ -318,17 +342,17 @@ public class FastByteBufferTests {
         // return to start position
         buffer.reset();
         assertEquals(buffer.getBoolean(), true);
-        assertEquals(buffer.getBoolean() , false);
-        assertEquals(buffer.getByte() , (byte) 0xFE);
-        assertEquals(buffer.getShort() , (short) 43);
-        assertEquals(buffer.getInt() , 1025);
-        assertEquals(buffer.getLong() , largeLong);
-        assertEquals(buffer.getFloat() , 1.3e10f);
-        assertEquals(buffer.getDouble() , 1.3e10f);
-        assertEquals('@' , buffer.getChar());
-        assertEquals((char) 513 , buffer.getChar());
+        assertEquals(buffer.getBoolean(), false);
+        assertEquals(buffer.getByte(), (byte) 0xFE);
+        assertEquals(buffer.getShort(), (short) 43);
+        assertEquals(buffer.getInt(), 1025);
+        assertEquals(buffer.getLong(), largeLong);
+        assertEquals(buffer.getFloat(), 1.3e10f);
+        assertEquals(buffer.getDouble(), 1.3e10f);
+        assertEquals('@', buffer.getChar());
+        assertEquals((char) 513, buffer.getChar());
         assertEquals("Hello World!", buffer.getString());
-        assertEquals(buffer.position() , position);
+        assertEquals(buffer.position(), position);
 
         return true;
     }
