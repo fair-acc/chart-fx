@@ -186,7 +186,7 @@ public class FastByteBuffer implements IoBuffer {
     @Override
     public boolean[] getBooleanArray(final boolean[] dst, final long offset, final int length) {
         int arraySize = getInt();
-        boolean[] values = dst == null ? new boolean[arraySize] : dst;
+        boolean[] values = dst == null ? new boolean[arraySize + (int) offset] : dst;
 
         long bytesToCopy = (dst == null ? arraySize : Math.min(arraySize, length));
         copyMemory(this.buffer, ARRAY_BYTE_BASE_OFFSET + this.position, values, ARRAY_BOOLEAN_BASE_OFFSET + offset,
@@ -207,7 +207,7 @@ public class FastByteBuffer implements IoBuffer {
     @Override
     public byte[] getByteArray(final byte[] dst, final long offset, final int length) {
         int arraySize = getInt();
-        byte[] values = dst == null ? new byte[arraySize] : dst;
+        byte[] values = dst == null ? new byte[arraySize+ (int) offset] : dst;
 
         long bytesToCopy = (dst == null ? arraySize : Math.min(arraySize, length));
         copyMemory(this.buffer, ARRAY_BYTE_BASE_OFFSET + this.position, values, ARRAY_BYTE_BASE_OFFSET + offset,
@@ -236,7 +236,7 @@ public class FastByteBuffer implements IoBuffer {
     @Override
     public double[] getDoubleArray(final double[] dst, final long offset, final int length) {
         int arraySize = getInt();
-        double[] values = dst == null ? new double[arraySize] : dst;
+        double[] values = dst == null ? new double[arraySize+ (int) offset] : dst;
 
         long bytesToCopy = (dst == null ? arraySize : Math.min(arraySize, length)) * SIZE_OF_DOUBLE;
         copyMemory(this.buffer, ARRAY_BYTE_BASE_OFFSET + this.position, values,
@@ -257,7 +257,7 @@ public class FastByteBuffer implements IoBuffer {
     @Override
     public float[] getFloatArray(final float[] dst, final long offset, final int length) {
         int arraySize = getInt();
-        float[] values = dst == null ? new float[arraySize] : dst;
+        float[] values = dst == null ? new float[arraySize+ (int) offset] : dst;
 
         long bytesToCopy = (dst == null ? arraySize : Math.min(arraySize, length)) * SIZE_OF_FLOAT;
         copyMemory(this.buffer, ARRAY_BYTE_BASE_OFFSET + this.position, values,
@@ -278,7 +278,7 @@ public class FastByteBuffer implements IoBuffer {
     @Override
     public int[] getIntArray(final int[] dst, final long offset, final int length) {
         int arraySize = getInt();
-        int[] values = dst == null ? new int[arraySize] : dst;
+        int[] values = dst == null ? new int[arraySize+ (int) offset] : dst;
 
         long bytesToCopy = (dst == null ? arraySize : Math.min(arraySize, length)) * SIZE_OF_INT;
         copyMemory(this.buffer, ARRAY_BYTE_BASE_OFFSET + this.position, values,
@@ -299,7 +299,7 @@ public class FastByteBuffer implements IoBuffer {
     @Override
     public long[] getLongArray(final long[] dst, final long offset, final int length) {
         int arraySize = getInt();
-        long[] values = dst == null ? new long[arraySize] : dst;
+        long[] values = dst == null ? new long[arraySize+ (int) offset] : dst;
 
         long bytesToCopy = (dst == null ? arraySize : Math.min(arraySize, length)) * SIZE_OF_LONG;
         copyMemory(this.buffer, ARRAY_BYTE_BASE_OFFSET + this.position, values,
@@ -320,7 +320,7 @@ public class FastByteBuffer implements IoBuffer {
     @Override
     public short[] getShortArray(final short[] dst, final long offset, final int length) { // NOPMD by rstein
         int arraySize = getInt();
-        short[] values = dst == null ? new short[arraySize] : dst; // NOPMD by rstein
+        short[] values = dst == null ? new short[arraySize+ (int) offset] : dst; // NOPMD by rstein
 
         long bytesToCopy = (dst == null ? arraySize : Math.min(arraySize, length)) * SIZE_OF_SHORT;
         copyMemory(this.buffer, ARRAY_BYTE_BASE_OFFSET + this.position, values,
@@ -344,7 +344,7 @@ public class FastByteBuffer implements IoBuffer {
     @Override
     public String[] getStringArray(final String[] dst, final long offset, final int length) {
         int arraySize = getInt();
-        String[] ret = dst == null ? new String[arraySize] : dst;
+        String[] ret = dst == null ? new String[arraySize+ (int) offset] : dst;
         final int size = dst == null ? arraySize : Math.min(arraySize, length);
         for (int k = 0; k < size; k++) {
             ret[k + (int) offset] = getString();
