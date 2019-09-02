@@ -15,12 +15,24 @@ import javafx.application.Application;
 import javafx.scene.Node;
 import javafx.scene.layout.VBox;
 
+/**
+ * Reads schottky measurement data and downmixes it with the following algorithm:
+ * * apply band-pass arround the relevant band
+ * * multiply with 28 MHz sine signal
+ * * low-pass filter
+ * * downsampling
+ * Then applies different IIR Filters to the signal
+ * @author rstein
+ */
 public class IIRFilterSample extends AbstractDemoApplication {
 
-    private static final int ORDER = 32;
-    private final double sampling = 100e6;
-    private final double center = 28e6;
-    private final double width = 0.5e6;
+    private static final int ORDER = 32;      // Order of filters
+    
+    private final double sampling = 100e6;    // Sampling Rate:    100 MS/s
+    private final double center = 28e6;       // Center Frequency:  28 MHz
+    private final double width = 0.5e6;       // Signal Bandwidth: 0.5 MHz
+    private final int decimationFactor = 100;
+    
     private DataSet fraw;
     private DataSet fraw1; 
     private DataSet fraw2;
@@ -29,11 +41,15 @@ public class IIRFilterSample extends AbstractDemoApplication {
     private DataSet fspectra2;
 
     private DataSet readDemoData(final int offset, final int nSamples) {
+        // setup Bandpass to capture Signal
         final Butterworth bandPass = new Butterworth();
         bandPass.bandPass(ORDER, sampling, center, width);
+        // setup lowPass
         final Butterworth lowPass = new Butterworth();
         lowPass.lowPass(ORDER, sampling, width);
+        // initalise return data set
         final DoubleDataSet ret = new DoubleDataSet("raw data@" + offset);
+        // read measurement data: 400 000 samples, 1MS/s
         InputStream inputStream = IIRFilterSample.class.getResourceAsStream("./20190319_Schottky_SumX.csv.zip");
         try (ZipInputStream zipStream = new ZipInputStream(inputStream)) {
             while (zipStream.getNextEntry() != null) {
@@ -46,13 +62,14 @@ public class IIRFilterSample extends AbstractDemoApplication {
                     int count = 0;
                     int n = 0;
                     System.err.println("start reading from " + offset);
-                    for (String line = reader.readLine(); (line = reader.readLine()) != null;) {
+                    for (String line = reader.readLine(); line != null; line = reader.readLine()) {
                         final String[] str = line.split(",");
                         final double s = Math.sin(2 * Math.PI * (sampling - width) * count);
                         final double y = lowPass.filter(s * bandPass.filter(Double.parseDouble(str[1])));
                         if (count >= offset && n < nSamples) {
-                            if (count % 100 == 0) {
-                                ret.add(n / 100e6, y);
+                            // actual downsampling
+                            if (count % decimationFactor == 0) {
+                                ret.add(n / sampling, y);
                                 n++;
                             }
                         }
@@ -77,15 +94,6 @@ public class IIRFilterSample extends AbstractDemoApplication {
     private void initData() {
         final double fs = 100e6;
         final int nBins = 4 * 8192;
-        // double[] xValues = new double[MAX_POINTS];
-        // double[] yValues = new double[MAX_POINTS];
-
-        // double x = 0;
-        // for (int i = 0; i < xValues.length; i++) {
-        // xValues[i] = i;
-        // yValues[i] = readSignal(xValues[i]);
-        // }
-        // fraw = new DoubleErrorDataSet("raw data", xValues, yValues);
         fraw = readDemoData(27500, nBins);
         fraw1 = readDemoData(27500 + (int) (0.5e-3 * fs), nBins);
         fraw2 = readDemoData(27500 + (int) (1.5e-3 * fs), nBins);
