@@ -191,7 +191,7 @@ public interface IoBuffer extends IoBufferHeader<IoBuffer> {
         return putShortArray(src, 0, nToCopy);
     }
 
-    IoBuffer putShortArray(final short[] src, final long offset, final int nToCopyy); // NOPMD by rstein
+    IoBuffer putShortArray(final short[] src, final long offset, final int nToCopy); // NOPMD by rstein
 
     IoBuffer putString(String string);
 
