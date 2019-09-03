@@ -1,11 +1,13 @@
-package de.gsi.dataset.utils.serializer;
+package de.gsi.dataset.serializer.spi;
 
-import static de.gsi.dataset.utils.serializer.FastByteBuffer.SIZE_OF_BYTE;
-import static de.gsi.dataset.utils.serializer.FastByteBuffer.SIZE_OF_INT;
+import static de.gsi.dataset.serializer.spi.FastByteBuffer.SIZE_OF_BYTE;
+import static de.gsi.dataset.serializer.spi.FastByteBuffer.SIZE_OF_INT;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import de.gsi.dataset.serializer.DataType;
+import de.gsi.dataset.serializer.IoBuffer;
 import de.gsi.dataset.utils.AssertUtils;
 
 public class BinarySerialiser { // NOPMD - omen est omen

@@ -1,8 +1,9 @@
-package de.gsi.dataset.utils.serializer;
+package de.gsi.dataset.serializer.spi;
 
 import java.lang.reflect.Array;
 import java.util.Arrays;
 
+import de.gsi.dataset.serializer.MultiArray;
 import de.gsi.dataset.utils.AssertUtils;
 
 /**
