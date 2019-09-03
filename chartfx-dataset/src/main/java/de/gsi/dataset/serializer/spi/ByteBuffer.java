@@ -1,7 +1,9 @@
-package de.gsi.dataset.utils.serializer;
+package de.gsi.dataset.serializer.spi;
 
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+
+import de.gsi.dataset.serializer.IoBuffer;
 
 /**
  * @author rstein

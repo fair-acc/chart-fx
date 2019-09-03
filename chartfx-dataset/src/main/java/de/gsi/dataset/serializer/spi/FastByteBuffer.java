@@ -1,9 +1,10 @@
-package de.gsi.dataset.utils.serializer;
+package de.gsi.dataset.serializer.spi;
 
 import java.lang.reflect.Field;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+import de.gsi.dataset.serializer.IoBuffer;
 import de.gsi.dataset.utils.AssertUtils;
 import sun.misc.Unsafe; // NOPMD by rstein
 // import jdk.internal.misc.Unsafe; // NOPMD by rstein TODO replaces sun in JDK11

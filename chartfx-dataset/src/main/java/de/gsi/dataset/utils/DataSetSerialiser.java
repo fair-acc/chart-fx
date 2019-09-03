@@ -10,12 +10,12 @@ import org.slf4j.LoggerFactory;
 import de.gsi.dataset.DataSet;
 import de.gsi.dataset.DataSetError;
 import de.gsi.dataset.DataSetMetaData;
+import de.gsi.dataset.serializer.DataType;
+import de.gsi.dataset.serializer.IoBuffer;
+import de.gsi.dataset.serializer.spi.BinarySerialiser;
+import de.gsi.dataset.serializer.spi.BinarySerialiser.FieldHeader;
+import de.gsi.dataset.serializer.spi.BinarySerialiser.HeaderInfo;
 import de.gsi.dataset.spi.DataSetBuilder;
-import de.gsi.dataset.utils.serializer.BinarySerialiser;
-import de.gsi.dataset.utils.serializer.BinarySerialiser.FieldHeader;
-import de.gsi.dataset.utils.serializer.BinarySerialiser.HeaderInfo;
-import de.gsi.dataset.utils.serializer.DataType;
-import de.gsi.dataset.utils.serializer.IoBuffer;
 
 /**
  * Class to efficiently serialise and de-serialise DataSet objects into binary

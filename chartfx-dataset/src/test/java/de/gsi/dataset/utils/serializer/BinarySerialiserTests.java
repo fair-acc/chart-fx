@@ -6,7 +6,9 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.gsi.dataset.utils.serializer.BinarySerialiser.FieldHeader;
+import de.gsi.dataset.serializer.spi.BinarySerialiser;
+import de.gsi.dataset.serializer.spi.FastByteBuffer;
+import de.gsi.dataset.serializer.spi.BinarySerialiser.FieldHeader;
 
 
 /**

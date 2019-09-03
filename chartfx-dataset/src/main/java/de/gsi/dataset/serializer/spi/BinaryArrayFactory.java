@@ -1,4 +1,6 @@
-package de.gsi.dataset.utils.serializer;
+package de.gsi.dataset.serializer.spi;
+
+import de.gsi.dataset.serializer.IoBuffer;
 
 /**
  * Helper class to convert serialised one-dimensional arrays into the

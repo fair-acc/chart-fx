@@ -1,4 +1,4 @@
-package de.gsi.dataset.utils.serializer;
+package de.gsi.dataset.serializer.spi;
 
 /**
  * Helper class to convert between boxed and primitive data types. Lot's of

@@ -1,4 +1,4 @@
-package de.gsi.dataset.utils.serializer;
+package de.gsi.dataset.serializer;
 
 import java.util.Map;
 
