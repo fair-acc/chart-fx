@@ -4,12 +4,12 @@ import java.io.ByteArrayOutputStream;
 import java.util.concurrent.TimeUnit;
 
 import de.gsi.dataset.DataSet;
+import de.gsi.dataset.serializer.spi.FastByteBuffer;
 import de.gsi.dataset.spi.DoubleErrorDataSet;
 import de.gsi.dataset.testdata.spi.RandomDataGenerator;
 import de.gsi.dataset.utils.DataSetSerialiser;
 import de.gsi.dataset.utils.DataSetUtils;
 import de.gsi.dataset.utils.ProcessingProfiler;
-import de.gsi.dataset.utils.serializer.FastByteBuffer;
 
 public class DataSetToByteArraySample {
     private static final int N_SAMPLES = 100000; // default: 100000
