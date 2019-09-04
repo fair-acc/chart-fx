@@ -41,6 +41,83 @@ public class DataViewPane extends Window {
     private double yOffset = 0;
     private XYChart chart;
 
+    private final StringProperty name = new SimpleStringProperty(this, "name");
+
+    private final ObjectProperty<Node> graphic = new SimpleObjectProperty<>(this, "graphic");
+
+    private final ObjectProperty<DataView> dataView = new SimpleObjectProperty<>(this, "dataView");
+
+    protected EventHandler<ActionEvent> maximizeButtonAction = event -> {
+        if (dialog.isShowing()) {
+            // enlarge to maximum screen size
+            dialog.maximizeRestore();
+            if (!dialog.isMaximized) {
+                maximizeRestoreButton.getStyleClass().setAll("window-maximize-icon");
+            } else {
+                maximizeRestoreButton.getStyleClass().setAll("window-restore-icon");
+            }
+            return;
+        }
+
+        final boolean maximized = dataView.get().getMaximizedView() == DataViewPane.this;
+
+        if (!dataView.get().getVisibleChildren().contains(DataViewPane.this)) {
+            // DataViewPane is minimised
+            dataView.get().getMinimizedChildren().remove(DataViewPane.this);
+            DataViewPane.this.setMinimized(false);
+            dataView.get().getVisibleChildren().add(DataViewPane.this);
+            minimizeButton.setDisable(false);
+            return;
+        }
+
+        // DataViewPane is already shown in the regular pane
+        // TODO: change
+        if (maximized) {
+            maximizeRestoreButton.getStyleClass().setAll("window-maximize-icon");
+        } else {
+            maximizeRestoreButton.getStyleClass().setAll("window-restore-icon");
+        }
+        // maximizeRestoreButton.setGraphic(maximized ? maximizeGraphicIcon :
+        // restoreGraphicIcon);
+        dataView.get().setMaximizedView(maximized ? null : DataViewPane.this);
+    };
+
+    protected EventHandler<ActionEvent> minimizeButtonAction = event -> {
+        if (dialog.isShowing()) {
+            dialog.hide();
+            maximizeRestoreButton.getStyleClass().setAll("window-maximize-icon");
+            return;
+        }
+
+        final boolean maximized = dataView.get().getMaximizedView() == DataViewPane.this;
+        if (!maximized) {
+            maximizeRestoreButton.getStyleClass().setAll("window-maximize-icon");
+        } else {
+            dataView.get().setMaximizedView(null);
+        }
+        DataViewPane.this.setMinimized(true);
+        dataView.get().getMinimizedChildren().add(DataViewPane.this);
+        dataView.get().getVisibleChildren().remove(DataViewPane.this);
+        minimizeButton.setDisable(true);
+    };
+
+    protected EventHandler<ActionEvent> closeButtonAction = event -> {
+        // asked to remove pane
+        if (dialog.isShowing()) {
+            dialog.hide();
+            return;
+        }
+
+        final boolean maximized = dataView.get().getMaximizedView() == DataViewPane.this;
+        if (maximized) {
+            dataView.get().setMaximizedView(null);
+        }
+
+        dataView.get().getMinimizedChildren().remove(DataViewPane.this);
+        dataView.get().getVisibleChildren().remove(DataViewPane.this);
+        dataView.get().getChildren().remove(DataViewPane.this);
+    };
+
     public DataViewPane(final String name, final XYChart chart) {
         super(name);
         setName(name);
@@ -133,6 +210,38 @@ public class DataViewPane extends Window {
 
     }
 
+    public final Node getGraphic() {
+        return graphicProperty().get();
+    }
+
+    public final String getName() {
+        return nameProperty().get();
+    }
+
+    public final ObjectProperty<Node> graphicProperty() {
+        return graphic;
+    }
+
+    public final StringProperty nameProperty() {
+        return name;
+    }
+
+    public final void setDataView(final DataView value) {
+        dataView.set(value);
+    }
+
+    public final void setGraphic(final Node graphic) {
+        graphicProperty().set(graphic);
+    }
+
+    public final void setName(final String name) {
+        nameProperty().set(name);
+    }
+
+    public void switchToChartView() {
+        // mainPane.setCenter(new Pane(chartPane));
+    }
+
     // TODO: The two methods should be private and be called when we change the
     // view type in the toolbar
     public void switchToTableView() {
@@ -145,121 +254,12 @@ public class DataViewPane extends Window {
         // mainPane.setCenter(tableView);
     }
 
-    public void switchToChartView() {
-        // mainPane.setCenter(new Pane(chartPane));
-    }
-
-    private final StringProperty name = new SimpleStringProperty(this, "name");
-
-    public final StringProperty nameProperty() {
-        return name;
-    }
-
-    public final String getName() {
-        return nameProperty().get();
-    }
-
-    public final void setName(final String name) {
-        nameProperty().set(name);
-    }
-
-    private final ObjectProperty<Node> graphic = new SimpleObjectProperty<>(this, "graphic");
-
-    public final ObjectProperty<Node> graphicProperty() {
-        return graphic;
-    }
-
-    public final Node getGraphic() {
-        return graphicProperty().get();
-    }
-
-    public final void setGraphic(final Node graphic) {
-        graphicProperty().set(graphic);
-    }
-
-    private final ObjectProperty<DataView> dataView = new SimpleObjectProperty<>(this, "dataView");
-
-    public final void setDataView(final DataView value) {
-        dataView.set(value);
-    }
-
     @Override
     protected void layoutChildren() {
         final long start = ProcessingProfiler.getTimeStamp();
         super.layoutChildren();
         ProcessingProfiler.getTimeDiff(start, "pane updated with data set = " + chart.getDatasets().get(0).getName());
     }
-
-    protected EventHandler<ActionEvent> maximizeButtonAction = event -> {
-        if (dialog.isShowing()) {
-            // enlarge to maximum screen size
-            dialog.maximizeRestore();
-            if (!dialog.isMaximized) {
-                maximizeRestoreButton.getStyleClass().setAll("window-maximize-icon");
-            } else {
-                maximizeRestoreButton.getStyleClass().setAll("window-restore-icon");
-            }
-            return;
-        }
-
-        final boolean maximized = dataView.get().getMaximizedView() == DataViewPane.this;
-
-        if (!dataView.get().getVisibleChildren().contains(DataViewPane.this)) {
-            // DataViewPane is minimised
-            dataView.get().getMinimizedChildren().remove(DataViewPane.this);
-            DataViewPane.this.setMinimized(false);
-            dataView.get().getVisibleChildren().add(DataViewPane.this);
-            minimizeButton.setDisable(false);
-            return;
-        }
-
-        // DataViewPane is already shown in the regular pane
-        // TODO: change
-        if (maximized) {
-            maximizeRestoreButton.getStyleClass().setAll("window-maximize-icon");
-        } else {
-            maximizeRestoreButton.getStyleClass().setAll("window-restore-icon");
-        }
-        // maximizeRestoreButton.setGraphic(maximized ? maximizeGraphicIcon :
-        // restoreGraphicIcon);
-        dataView.get().setMaximizedView(maximized ? null : DataViewPane.this);
-    };
-
-    protected EventHandler<ActionEvent> minimizeButtonAction = event -> {
-        if (dialog.isShowing()) {
-            dialog.hide();
-            maximizeRestoreButton.getStyleClass().setAll("window-maximize-icon");
-            return;
-        }
-
-        final boolean maximized = dataView.get().getMaximizedView() == DataViewPane.this;
-        if (!maximized) {
-            maximizeRestoreButton.getStyleClass().setAll("window-maximize-icon");
-        } else {
-            dataView.get().setMaximizedView(null);
-        }
-        DataViewPane.this.setMinimized(true);
-        dataView.get().getMinimizedChildren().add(DataViewPane.this);
-        dataView.get().getVisibleChildren().remove(DataViewPane.this);
-        minimizeButton.setDisable(true);
-    };
-
-    protected EventHandler<ActionEvent> closeButtonAction = event -> {
-        // asked to remove pane
-        if (dialog.isShowing()) {
-            dialog.hide();
-            return;
-        }
-
-        final boolean maximized = dataView.get().getMaximizedView() == DataViewPane.this;
-        if (maximized) {
-            dataView.get().setMaximizedView(null);
-        }
-
-        dataView.get().getMinimizedChildren().remove(DataViewPane.this);
-        dataView.get().getVisibleChildren().remove(DataViewPane.this);
-        dataView.get().getChildren().remove(DataViewPane.this);
-    };
 
     protected class MyDialog extends Stage {
         private final BorderPane dialogContent = new BorderPane();

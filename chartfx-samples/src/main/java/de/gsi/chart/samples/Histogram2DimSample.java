@@ -6,7 +6,6 @@ import java.util.TimerTask;
 
 import de.gsi.chart.XYChart;
 import de.gsi.chart.axes.spi.DefaultNumericAxis;
-import de.gsi.dataset.spi.Histogram2;
 import de.gsi.chart.plugins.EditAxis;
 import de.gsi.chart.plugins.ParameterMeasurements;
 import de.gsi.chart.plugins.Zoomer;
@@ -15,6 +14,7 @@ import de.gsi.chart.renderer.spi.ContourDataSetRenderer;
 import de.gsi.chart.renderer.spi.ErrorDataSetRenderer;
 import de.gsi.chart.renderer.spi.MetaDataRenderer;
 import de.gsi.chart.ui.geometry.Side;
+import de.gsi.dataset.spi.Histogram2;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.layout.StackPane;
@@ -31,6 +31,17 @@ public class Histogram2DimSample extends Application {
             Histogram2DimSample.N_BINS_Y, 0.0, 30.0);
     private final Histogram2 histogram2 = new Histogram2("hist2", Histogram2DimSample.N_BINS_X, 0.0, 20.0,
             Histogram2DimSample.N_BINS_Y, 0.0, 30.0);
+
+    private int counter = 0;
+
+    private Random rnd = new Random();
+    /**
+     * @param args
+     *            the command line arguments
+     */
+    public static void main(final String[] args) {
+        Application.launch(args);
+    }
 
     @Override
     public void start(final Stage primaryStage) {
@@ -130,9 +141,6 @@ public class Histogram2DimSample extends Application {
         }, Histogram2DimSample.UPDATE_DELAY, Histogram2DimSample.UPDATE_PERIOD);
     }
 
-    private int counter = 0;
-    private Random rnd = new Random();
-
     private void fillData() {
         counter++;
         histogram1.setAutoNotifaction(false);
@@ -160,13 +168,5 @@ public class Histogram2DimSample extends Application {
             histogram2.reset();
         }
 
-    }
-
-    /**
-     * @param args
-     *            the command line arguments
-     */
-    public static void main(final String[] args) {
-        Application.launch(args);
     }
 }
