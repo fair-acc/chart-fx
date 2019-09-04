@@ -24,9 +24,9 @@ public class Hexagon extends Polygon {
     private HexagonMap map;
     private boolean isVisualObstacle;
     private boolean isBlockingPath;
-    int aStarGscore; // Variables for the A* pathfinding algorithm.
-    int aStarFscore;
-    Hexagon aStarCameFrom;
+    public int aStarGscore; // Variables for the A* pathfinding algorithm.
+    public int aStarFscore;
+    public Hexagon aStarCameFrom;
 
     private int graphicsXoffset;
 

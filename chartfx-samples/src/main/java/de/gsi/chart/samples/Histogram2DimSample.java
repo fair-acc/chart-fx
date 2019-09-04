@@ -130,8 +130,8 @@ public class Histogram2DimSample extends Application {
         }, Histogram2DimSample.UPDATE_DELAY, Histogram2DimSample.UPDATE_PERIOD);
     }
 
-    int counter = 0;
-    Random rnd = new Random();
+    private int counter = 0;
+    private Random rnd = new Random();
 
     private void fillData() {
         counter++;

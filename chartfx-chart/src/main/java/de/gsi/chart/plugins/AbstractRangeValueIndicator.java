@@ -13,9 +13,8 @@ import javafx.scene.shape.Rectangle;
  * @author mhrabia
  */
 public abstract class AbstractRangeValueIndicator extends AbstractValueIndicator {
-
-    static final String STYLE_CLASS_LABEL = "range-indicator-label";
-    static final String STYLE_CLASS_RECT = "range-indicator-rect";
+    protected static final String STYLE_CLASS_LABEL = "range-indicator-label";
+    protected static final String STYLE_CLASS_RECT = "range-indicator-rect";
 
     /**
      * Rectangle indicating the range.

@@ -119,7 +119,6 @@ public class DataPointTooltip extends AbstractDataFormattingPlugin {
 
     private void updateToolTip(final MouseEvent event) {
         final Bounds plotAreaBounds = getChart().getPlotArea().getBoundsInLocal();
-        // final Bounds plotAreaBounds = getChartPane().getPlotAreaBounds();
         final DataPoint dataPoint = findDataPoint(event, plotAreaBounds);
 
         if (dataPoint == null) {
@@ -291,13 +290,13 @@ public class DataPointTooltip extends AbstractDataFormattingPlugin {
 
     protected class DataPoint {
 
-        final Chart chart;
-        final double x;
-        final double y;
-        final String label;
-        double distanceFromMouse;
+        protected final Chart chart;
+        protected final double x;
+        protected final double y;
+        protected final String label;
+        protected double distanceFromMouse;
 
-        DataPoint(final Chart chart, final double x, final double y, final String label) {
+        protected DataPoint(final Chart chart, final double x, final double y, final String label) {
             this.chart = chart;
             this.x = x;
             this.y = y;

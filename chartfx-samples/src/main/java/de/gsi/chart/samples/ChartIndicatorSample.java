@@ -54,7 +54,7 @@ public class ChartIndicatorSample extends Application {
             ChartIndicatorSample.BUFFER_CAPACITY, ChartIndicatorSample.MAX_DISTANCE);
     public final FifoDoubleErrorDataSet rollingBufferBeamIntensity = new FifoDoubleErrorDataSet("beam intensity [ppp]",
             ChartIndicatorSample.BUFFER_CAPACITY, ChartIndicatorSample.MAX_DISTANCE);
-    final FifoDoubleErrorDataSet rollingSine = new FifoDoubleErrorDataSet("sine [A]",
+    private final FifoDoubleErrorDataSet rollingSine = new FifoDoubleErrorDataSet("sine [A]",
             ChartIndicatorSample.BUFFER_CAPACITY, ChartIndicatorSample.MAX_DISTANCE);
     private final ErrorDataSetRenderer beamIntensityRenderer = new ErrorDataSetRenderer();
     private final ErrorDataSetRenderer dipoleCurrentRenderer = new ErrorDataSetRenderer();

@@ -67,19 +67,22 @@ public class GridPosition implements Cloneable, Serializable {
         if (radius == 0) {
             result.add(this);
             return result;
-        } else {
-            GridPosition h = this;
-            for (int i = 0; i < radius; i++) {
-                h = h.getNeighborPosition(HexagonMap.Direction.SOUTHWEST);
-            }
-            for (int i = 0; i < 6; i++) {
-                for (int j = 0; j < radius; j++) {
-                    result.add(h.clone());
-                    h = h.getNeighborPosition(GridPosition.getDirectionFromNumber(i));
-                }
-            }
-            return result;
         }
+        GridPosition h = this;
+        for (int i = 0; i < radius; i++) {
+            h = h.getNeighborPosition(HexagonMap.Direction.SOUTHWEST);
+        }
+        for (int i = 0; i < 6; i++) {
+            for (int j = 0; j < radius; j++) {
+                try {
+                    result.add(h.clone());
+                } catch (final CloneNotSupportedException ex) {
+                    Logger.getLogger(GridPosition.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                h = h.getNeighborPosition(GridPosition.getDirectionFromNumber(i));
+            }
+        }
+        return result;
     }
 
     public List<GridPosition> getPositionsInCircleArea(final int radius) {
@@ -109,7 +112,7 @@ public class GridPosition implements Cloneable, Serializable {
         throw new InvalidParameterException("direction unknown: " + direction);
     }
 
-    static HexagonMap.Direction getDirectionFromNumber(final int i) {
+    public static HexagonMap.Direction getDirectionFromNumber(final int i) {
         switch (i) {
         case 0:
             return HexagonMap.Direction.NORTHWEST;
@@ -123,11 +126,12 @@ public class GridPosition implements Cloneable, Serializable {
             return HexagonMap.Direction.SOUTHWEST;
         case 5:
             return HexagonMap.Direction.WEST;
+        default:
         }
         throw new InvalidParameterException("unknown direction: " + i);
     }
 
-    String getCoordinates() {
+    public String getCoordinates() {
         final String s = q + ", " + r;
         return s;
     }
@@ -163,7 +167,7 @@ public class GridPosition implements Cloneable, Serializable {
     }
 
     @Override
-    protected GridPosition clone() {
+    public GridPosition clone() throws CloneNotSupportedException {
         try {
             return (GridPosition) super.clone();
         } catch (final CloneNotSupportedException ex) {

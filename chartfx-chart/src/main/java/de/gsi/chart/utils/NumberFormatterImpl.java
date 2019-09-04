@@ -7,7 +7,7 @@ import javafx.util.StringConverter;
 public class NumberFormatterImpl extends StringConverter<Number> implements NumberFormatter {
     public final static char DEFAULT_DECIMAL_SEPARATOR = ' ';
     // com.ibm.icu.text.DecimalFormat
-    DecimalFormat formatter = new DecimalFormat();
+    protected DecimalFormat formatter = new DecimalFormat();
 
     public NumberFormatterImpl() {
         super();

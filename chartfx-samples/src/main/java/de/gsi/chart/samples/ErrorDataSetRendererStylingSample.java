@@ -54,10 +54,9 @@ public class ErrorDataSetRendererStylingSample extends Application {
     private static final int UPDATE_DELAY = 1000; // [ms]
     private static final int UPDATE_PERIOD = 40; // [ms]
     private static final double N_MAX_SAMPLES = 10000;
-    DataSetType dataSetType = DataSetType.RANDOM_WALK;
-    GridPane parameterGrid = new GridPane();
+    private DataSetType dataSetType = DataSetType.RANDOM_WALK;
     private int nSamples = 400;
-    Timer timer;
+    private Timer timer;
 
     @Override
     public void start(final Stage primaryStage) {
@@ -478,8 +477,8 @@ public class ErrorDataSetRendererStylingSample extends Application {
     }
 
     class ParameterTab extends Tab {
-        GridPane parameterGrid = new GridPane();
-        int rowIndex = 0;
+        private GridPane parameterGrid = new GridPane();
+        private int rowIndex = 0;
 
         public ParameterTab(final String tabName) {
             super(tabName);

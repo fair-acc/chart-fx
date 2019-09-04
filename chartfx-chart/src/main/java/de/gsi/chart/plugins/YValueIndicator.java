@@ -80,7 +80,7 @@ public class YValueIndicator extends AbstractSingleValueIndicator {
     }
 
     @Override
-    void updateStyleClass() {
+    public void updateStyleClass() {
         setStyleClasses(label, "y-", AbstractSingleValueIndicator.STYLE_CLASS_LABEL);
         setStyleClasses(line, "y-", AbstractSingleValueIndicator.STYLE_CLASS_LINE);
         setStyleClasses(triangle, "x-", AbstractSingleValueIndicator.STYLE_CLASS_MARKER);

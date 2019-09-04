@@ -522,6 +522,7 @@ public class LimitedIndexedTreeDataSet extends AbstractErrorDataSet<LimitedIndex
      * @return the previously set label or <code>null</code> if no label has
      *         been specified
      */
+    @Override
     public String addDataLabel(final int index, final String label) {
         final String old = data.get(index).dataLabel;
         data.get(index).dataLabel = label;
@@ -538,9 +539,10 @@ public class LimitedIndexedTreeDataSet extends AbstractErrorDataSet<LimitedIndex
      * @return the previously set label or <code>null</code> if no label has
      *         been specified
      */
+    @Override
     public String removeDataLabel(final int index) {
         final String old = data.get(index).dataLabel;
-        data.get(index).dataLabel = null;
+        data.get(index).dataLabel = "";
         return old;
     }
 
@@ -574,6 +576,7 @@ public class LimitedIndexedTreeDataSet extends AbstractErrorDataSet<LimitedIndex
      * @return the previously set style or <code>null</code> if no label has
      *         been specified
      */
+    @Override
     public String addDataStyle(final int index, final String style) {
         final String old = data.get(index).dataStyle;
         data.get(index).dataStyle = style;
@@ -589,9 +592,10 @@ public class LimitedIndexedTreeDataSet extends AbstractErrorDataSet<LimitedIndex
      * @return the previously set style or <code>null</code> if no label has
      *         been specified
      */
+    @Override
     public String removeStyle(final int index) {
         final String old = data.get(index).dataStyle;
-        data.get(index).dataStyle = null;
+        data.get(index).dataStyle = "";
         return old;
     }
 
@@ -617,41 +621,41 @@ public class LimitedIndexedTreeDataSet extends AbstractErrorDataSet<LimitedIndex
         protected String dataLabel;
         protected String dataStyle;
 
-        DataAtom(final double x, final double y, final double ex, final double ey) {
+        protected DataAtom(final double x, final double y, final double ex, final double ey) {
             this.x = x;
             this.y = y;
             this.ex = ex;
             this.ey = ey;
         }
 
-        void set(final double x, final double y, final double ex, final double ey) {
+        protected void set(final double x, final double y, final double ex, final double ey) {
             this.x = x;
             this.y = y;
             this.ex = ex;
             this.ey = ey;
         }
 
-        double getX() {
+        protected double getX() {
             return x;
         }
 
-        double getY() {
+        protected double getY() {
             return y;
         }
 
-        double getErrorX() {
+        protected double getErrorX() {
             return ex;
         }
 
-        double getErrorY() {
+        protected double getErrorY() {
             return ey;
         }
 
-        String getLabel() {
+        protected String getLabel() {
             return dataLabel;
         }
 
-        String getStyle() {
+        protected String getStyle() {
             return dataStyle;
         }
 

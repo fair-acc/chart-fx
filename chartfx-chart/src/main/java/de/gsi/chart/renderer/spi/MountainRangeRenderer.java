@@ -26,11 +26,9 @@ import javafx.scene.canvas.GraphicsContext;
  * @author rstein
  */
 public class MountainRangeRenderer extends ErrorDataSetRenderer implements Renderer {
-
-    //private static final Logger LOGGER = LoggerFactory.getLogger(MountainRangeRenderer.class);
     protected DoubleProperty mountainRangeOffset = new SimpleDoubleProperty(this, "mountainRangeOffset", 0.5);
     private final ObservableList<ErrorDataSetRenderer> renderers = FXCollections.observableArrayList();
-    final ObservableList<DataSet> empty = FXCollections.observableArrayList();
+    private final ObservableList<DataSet> empty = FXCollections.observableArrayList();
     private final WeakHashMap<Double, Integer> xWeakIndexMap = new WeakHashMap<>();
     private final WeakHashMap<Double, Integer> yWeakIndexMap = new WeakHashMap<>();
     private double zRangeMin = 0.0;
@@ -44,7 +42,6 @@ public class MountainRangeRenderer extends ErrorDataSetRenderer implements Rende
 
     public MountainRangeRenderer() {
         super();
-        // renderers.add(this);
         setDrawMarker(false);
         setDrawBars(false);
         setErrorType(ErrorStyle.NONE);
@@ -165,7 +162,7 @@ public class MountainRangeRenderer extends ErrorDataSetRenderer implements Rende
         private final int yIndex;
         private final int yMax;
         private double yShift;
-        private List<EventListener> updateListener = new ArrayList<>();
+        private final List<EventListener> updateListener = new ArrayList<>();
 
         public Demux3dTo2dDataSet(final DataSet3D sourceDataSet, final int selectedYIndex) {
             super();

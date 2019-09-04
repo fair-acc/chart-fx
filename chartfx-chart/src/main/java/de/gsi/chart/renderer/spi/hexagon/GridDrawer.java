@@ -130,12 +130,12 @@ public class GridDrawer {
      * @param yPadding y-padding between tiles
      * @return the GridPosition that contains that pixel
      */
-    public static GridPosition pixelToPosition(int x, int y, final int hexagonHeight, final int xPadding,
+    public static GridPosition pixelToPosition(final int x, final int y, final int hexagonHeight, final int xPadding,
             final int yPadding) {
-        x = x - xPadding;
-        y = y - yPadding;
+        int xLocal = x - xPadding;
+        int yLocal = y - yPadding;
         final double hexagonRadius = (double) hexagonHeight / 2;
-        final double q = (1.0 / 3.0 * Math.sqrt(3.0) * x - 1.0 / 3.0 * y) / hexagonRadius;
+        final double q = (1.0 / 3.0 * Math.sqrt(3.0) * xLocal - 1.0 / 3.0 * yLocal) / hexagonRadius;
         final double r = 2.0 / 3.0 * y / hexagonRadius;
         return GridPosition.hexRound(q, r);
     }
