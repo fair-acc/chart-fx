@@ -202,9 +202,10 @@ public class PathGenerator {
      * @param c column index of the start Cell.
      * @param path a non-null GeneralPath instance to update.
      */
-    private void update(final Grid grid, int r, int c, final GeneralPath path) {
+    private void update(final Grid grid, final int rowIndex, final int clumnIndex, final GeneralPath path) {
         Side prevSide = null; // was: NONE
-
+        int r = rowIndex;
+        int c = clumnIndex;
         final Cell start = grid.getCellAt(r, c);
         float[] pt = start.getXY(PathGenerator.firstSide(start, prevSide));
         float x = c + pt[0]; // may throw NPE

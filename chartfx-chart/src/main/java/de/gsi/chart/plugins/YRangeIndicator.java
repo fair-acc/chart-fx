@@ -46,7 +46,7 @@ public class YRangeIndicator extends AbstractRangeValueIndicator {
     }
 
     @Override
-    void updateStyleClass() {
+    public void updateStyleClass() {
         setStyleClasses(label, "y-", AbstractRangeValueIndicator.STYLE_CLASS_LABEL);
         setStyleClasses(rectangle, "y-", AbstractRangeValueIndicator.STYLE_CLASS_RECT);
     }

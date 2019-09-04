@@ -63,7 +63,7 @@ public class XValueIndicator extends AbstractSingleValueIndicator {
     }
 
     @Override
-    void updateStyleClass() {
+    public void updateStyleClass() {
         setStyleClasses(label, "x-", AbstractSingleValueIndicator.STYLE_CLASS_LABEL);
         setStyleClasses(line, "x-", AbstractSingleValueIndicator.STYLE_CLASS_LINE);
         setStyleClasses(triangle, "x-", AbstractSingleValueIndicator.STYLE_CLASS_MARKER);

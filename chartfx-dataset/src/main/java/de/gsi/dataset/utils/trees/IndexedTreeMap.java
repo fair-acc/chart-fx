@@ -1420,7 +1420,7 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V>
      * @param set ???
      * @param defaultVal ???
      */
-    void addAllForTreeSet(SortedSet<? extends K> set, V defaultVal) {
+    public void addAllForTreeSet(SortedSet<? extends K> set, V defaultVal) {
         try {
             buildFromSorted(set.size(), set.iterator(), null, defaultVal);
         } catch (final java.io.IOException | ClassNotFoundException cannotHappen) {}
@@ -1432,11 +1432,11 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V>
      * @param k2 object2 to be compared
      * @return true if equal
      */
-    final int compare(Object k1, Object k2) {
+    public final int compare(Object k1, Object k2) {
         return comparator == null ? ((Comparable<? super K>) k1).compareTo((K) k2) : comparator.compare((K) k1, (K) k2);
     }
 
-    Iterator<K> descendingKeyIterator() {
+    public Iterator<K> descendingKeyIterator() {
         return new DescendingKeyIterator(getLastEntry());
     }
 
@@ -1447,7 +1447,7 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V>
      * @param key key value
      * @return entry
      */
-    final Entry<K, V> getCeilingEntry(K key) {
+    public final Entry<K, V> getCeilingEntry(K key) {
         Entry<K, V> p = root;
         while (p != null) {
             final int cmp = compare(key, p.key);
@@ -1485,7 +1485,7 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V>
      * @throws NullPointerException if the specified key is null and this map uses natural ordering, or its comparator
      *             does not permit null keys
      */
-    final Entry<K, V> getEntry(K key) {
+    public final Entry<K, V> getEntry(K key) {
         // Offload comparator-based version for sake of performance
         if (comparator != null) {
             return getEntryUsingComparator(key);
@@ -1514,7 +1514,7 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V>
      * @param key key value
      * @return entry
      */
-    final Entry<K, V> getEntryUsingComparator(K key) {
+    public final Entry<K, V> getEntryUsingComparator(K key) {
         final K k = key;
         final Comparator<? super K> cpr = comparator;
         if (cpr != null) {
@@ -1538,7 +1538,7 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V>
      * if the IndexedTreeMap is empty.
      * @return entry
      */
-    final Entry<K, V> getFirstEntry() {
+    public final Entry<K, V> getFirstEntry() {
         Entry<K, V> p = root;
         if (p != null) {
             while (p.left != null) {
@@ -1554,7 +1554,7 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V>
      * @param key key value
      * @return entry
      */
-    final Entry<K, V> getFloorEntry(K key) {
+    public final Entry<K, V> getFloorEntry(K key) {
         Entry<K, V> p = root;
         while (p != null) {
             final int cmp = compare(key, p.key);
@@ -1590,7 +1590,7 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V>
      * @param key key value
      * @return entry
      */
-    final Entry<K, V> getHigherEntry(K key) {
+    public final Entry<K, V> getHigherEntry(K key) {
         Entry<K, V> p = root;
         while (p != null) {
             final int cmp = compare(key, p.key);
@@ -1620,7 +1620,7 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V>
      * if the IndexedTreeMap is empty.
      * @return entry
      */
-    final Entry<K, V> getLastEntry() {
+    public final Entry<K, V> getLastEntry() {
         Entry<K, V> p = root;
         if (p != null) {
             while (p.right != null) {
@@ -1636,7 +1636,7 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V>
      * @param key key value
      * @return entry
      */
-    final Entry<K, V> getLowerEntry(K key) {
+    public final Entry<K, V> getLowerEntry(K key) {
         Entry<K, V> p = root;
         while (p != null) {
             final int cmp = compare(key, p.key);
@@ -1661,7 +1661,7 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V>
         return null;
     }
 
-    Iterator<K> keyIterator() {
+    public Iterator<K> keyIterator() {
         return new KeyIterator(getFirstEntry());
     }
 
@@ -1673,7 +1673,7 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V>
      * @throws java.io.IOException in case of write errors
      * @throws ClassNotFoundException in case of class casting errors 
      */
-    void readTreeSet(int size, java.io.ObjectInputStream s, V defaultVal)
+    public void readTreeSet(int size, java.io.ObjectInputStream s, V defaultVal)
             throws java.io.IOException, ClassNotFoundException {
         buildFromSorted(size, null, s, defaultVal);
         if (root != null) {
@@ -1686,7 +1686,7 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V>
      * @param <V> value value type
      * @serial include
      */
-    static final class AscendingSubMap<K, V> extends NavigableSubMap<K, V> {
+    protected static final class AscendingSubMap<K, V> extends NavigableSubMap<K, V> {
 
         private static final long serialVersionUID = 912986545866124060L;
 
@@ -1742,46 +1742,46 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V>
         }
 
         @Override
-        Iterator<K> descendingKeyIterator() {
+        public Iterator<K> descendingKeyIterator() {
             return new DescendingSubMapKeyIterator(absHighest(), absLowFence());
         }
 
         @Override
-        Iterator<K> keyIterator() {
+        public Iterator<K> keyIterator() {
             return new SubMapKeyIterator(absLowest(), absHighFence());
         }
 
         @Override
-        IndexedTreeMap.Entry<K, V> subCeiling(K key) {
+        public IndexedTreeMap.Entry<K, V> subCeiling(K key) {
             return absCeiling(key);
         }
 
         @Override
-        IndexedTreeMap.Entry<K, V> subFloor(K key) {
+        public IndexedTreeMap.Entry<K, V> subFloor(K key) {
             return absFloor(key);
         }
 
         @Override
-        IndexedTreeMap.Entry<K, V> subHigher(K key) {
+        public IndexedTreeMap.Entry<K, V> subHigher(K key) {
             return absHigher(key);
         }
 
         @Override
-        IndexedTreeMap.Entry<K, V> subHighest() {
+        public IndexedTreeMap.Entry<K, V> subHighest() {
             return absHighest();
         }
 
         @Override
-        IndexedTreeMap.Entry<K, V> subLower(K key) {
+        public IndexedTreeMap.Entry<K, V> subLower(K key) {
             return absLower(key);
         }
 
         @Override
-        IndexedTreeMap.Entry<K, V> subLowest() {
+        public IndexedTreeMap.Entry<K, V> subLowest() {
             return absLowest();
         }
 
-        final class AscendingEntrySetView extends EntrySetView {
+        protected final class AscendingEntrySetView extends EntrySetView {
 
             @Override
             public Iterator<Map.Entry<K, V>> iterator() {
@@ -1865,46 +1865,46 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V>
         }
 
         @Override
-        Iterator<K> descendingKeyIterator() {
+        public Iterator<K> descendingKeyIterator() {
             return new SubMapKeyIterator(absLowest(), absHighFence());
         }
 
         @Override
-        Iterator<K> keyIterator() {
+        public Iterator<K> keyIterator() {
             return new DescendingSubMapKeyIterator(absHighest(), absLowFence());
         }
 
         @Override
-        IndexedTreeMap.Entry<K, V> subCeiling(K key) {
+        public IndexedTreeMap.Entry<K, V> subCeiling(K key) {
             return absFloor(key);
         }
 
         @Override
-        IndexedTreeMap.Entry<K, V> subFloor(K key) {
+        public IndexedTreeMap.Entry<K, V> subFloor(K key) {
             return absCeiling(key);
         }
 
         @Override
-        IndexedTreeMap.Entry<K, V> subHigher(K key) {
+        public IndexedTreeMap.Entry<K, V> subHigher(K key) {
             return absLower(key);
         }
 
         @Override
-        IndexedTreeMap.Entry<K, V> subHighest() {
+        public IndexedTreeMap.Entry<K, V> subHighest() {
             return absLowest();
         }
 
         @Override
-        IndexedTreeMap.Entry<K, V> subLower(K key) {
+        public IndexedTreeMap.Entry<K, V> subLower(K key) {
             return absHigher(key);
         }
 
         @Override
-        IndexedTreeMap.Entry<K, V> subLowest() {
+        public IndexedTreeMap.Entry<K, V> subLowest() {
             return absHighest();
         }
 
-        final class DescendingEntrySetView extends EntrySetView {
+        protected final class DescendingEntrySetView extends EntrySetView {
 
             @Override
             public Iterator<Map.Entry<K, V>> iterator() {
@@ -1918,15 +1918,15 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V>
      * @param <K> key value type
      * @param <V> value value type
      */
-    static final class Entry<K, V> implements Map.Entry<K, V> {
+    protected static final class Entry<K, V> implements Map.Entry<K, V> {
 
-        K key;
-        V value;
-        Entry<K, V> left = null;
-        Entry<K, V> right = null;
-        Entry<K, V> parent;
-        boolean color = IndexedTreeMap.BLACK;
-        int weight = 0;
+        protected K key;
+        protected V value;
+        protected Entry<K, V> left = null;
+        protected Entry<K, V> right = null;
+        protected Entry<K, V> parent;
+        protected boolean color = IndexedTreeMap.BLACK;
+        protected int weight = 0;
 
         /**
          * Make a new cell with given key, value, and parent, and with <code>null</code> child links, and BLACK color.
@@ -1934,7 +1934,7 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V>
          * @param value of given key
          * @param parent of key
          */
-        Entry(K key, V value, Entry<K, V> parent) {
+        protected Entry(K key, V value, Entry<K, V> parent) {
             this.key = key;
             this.value = value;
             this.parent = parent;
@@ -1994,13 +1994,13 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V>
             return key + "=" + value;
         }
 
-        int sumup() {
+        public int sumup() {
             final int left = this.left == null ? 0 : this.left.sumup();
             final int right = this.right == null ? 0 : this.right.sumup();
             return left + right + 1;
         }
 
-        void updateWeight(int delta) {
+        public void updateWeight(int delta) {
             weight += delta;
             Entry<K, V> p = parent;
             while (p != null) {
@@ -2010,9 +2010,9 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V>
         }
     }
 
-    final class EntryIterator extends PrivateEntryIterator<Map.Entry<K, V>> {
+    protected final class EntryIterator extends PrivateEntryIterator<Map.Entry<K, V>> {
 
-        EntryIterator(Entry<K, V> first) {
+        protected EntryIterator(Entry<K, V> first) {
             super(first);
         }
 
@@ -2227,7 +2227,7 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V>
         /**
          * The backing map.
          */
-        final IndexedTreeMap<K, V> m;
+        protected final IndexedTreeMap<K, V> m;
 
         /**
          * Endpoints are represented as triples (fromStart, lo, loInclusive) and (toEnd, hi, hiInclusive). If fromStart
@@ -2235,7 +2235,7 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V>
          * Otherwise, if loInclusive is true, lo is the inclusive bound, else lo is the exclusive bound. Similarly for
          * the upper bound.
          */
-        final K lo;
+        protected final K lo;
 
         /**
          * Endpoints are represented as triples (fromStart, lo, loInclusive) and (toEnd, hi, hiInclusive). If fromStart
@@ -2243,24 +2243,24 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V>
          * Otherwise, if loInclusive is true, lo is the inclusive bound, else lo is the exclusive bound. Similarly for
          * the upper bound.
          */
-        final K hi;
-        final boolean fromStart;
+        protected final K hi;
+        protected final boolean fromStart;
 
-        final boolean toEnd;
-        final boolean loInclusive;
+        protected final boolean toEnd;
+        protected final boolean loInclusive;
 
-        final boolean hiInclusive;
+        protected final boolean hiInclusive;
 
         // Views
-        transient NavigableMap<K, V> descendingMapView = null;
+        protected transient NavigableMap<K, V> descendingMapView = null;
 
         // internal utilities
 
-        transient EntrySetView entrySetView = null;
+        protected transient EntrySetView entrySetView = null;
 
-        transient KeySet<K> navigableKeySetView = null;
+        protected transient KeySet<K> navigableKeySetView = null;
 
-        NavigableSubMap(IndexedTreeMap<K, V> m, boolean fromStart, K lo, boolean loInclusive, boolean toEnd, K hi,
+        protected NavigableSubMap(IndexedTreeMap<K, V> m, boolean fromStart, K lo, boolean loInclusive, boolean toEnd, K hi,
                 boolean hiInclusive) {
             if (!fromStart && !toEnd) {
                 if (m.compare(lo, hi) > 0) {
@@ -2440,7 +2440,7 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V>
             return tailMap(fromKey, true);
         }
 
-        final IndexedTreeMap.Entry<K, V> absCeiling(K key) {
+        public final IndexedTreeMap.Entry<K, V> absCeiling(K key) {
             if (tooLow(key)) {
                 return absLowest();
             }
@@ -2448,7 +2448,7 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V>
             return e == null || tooHigh(e.key) ? null : e;
         }
 
-        final IndexedTreeMap.Entry<K, V> absFloor(K key) {
+        public final IndexedTreeMap.Entry<K, V> absFloor(K key) {
             if (tooHigh(key)) {
                 return absHighest();
             }
@@ -2456,7 +2456,7 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V>
             return e == null || tooLow(e.key) ? null : e;
         }
 
-        final IndexedTreeMap.Entry<K, V> absHigher(K key) {
+        public final IndexedTreeMap.Entry<K, V> absHigher(K key) {
             if (tooLow(key)) {
                 return absLowest();
             }
@@ -2464,7 +2464,7 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V>
             return e == null || tooHigh(e.key) ? null : e;
         }
 
-        final IndexedTreeMap.Entry<K, V> absHighest() {
+        public final IndexedTreeMap.Entry<K, V> absHighest() {
             final IndexedTreeMap.Entry<K, V> e = toEnd ? m.getLastEntry()
                     : hiInclusive ? m.getFloorEntry(hi) : m.getLowerEntry(hi);
             return e == null || tooLow(e.key) ? null : e;
@@ -2474,11 +2474,11 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V>
          * Returns the absolute high fence for ascending traversal
          * @return entry
          */
-        final IndexedTreeMap.Entry<K, V> absHighFence() {
+        public final IndexedTreeMap.Entry<K, V> absHighFence() {
             return toEnd ? null : hiInclusive ? m.getHigherEntry(hi) : m.getCeilingEntry(hi);
         }
 
-        final IndexedTreeMap.Entry<K, V> absLower(K key) {
+        public final IndexedTreeMap.Entry<K, V> absLower(K key) {
             if (tooHigh(key)) {
                 return absHighest();
             }
@@ -2486,7 +2486,7 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V>
             return e == null || tooLow(e.key) ? null : e;
         }
 
-        final IndexedTreeMap.Entry<K, V> absLowest() {
+        public final IndexedTreeMap.Entry<K, V> absLowest() {
             final IndexedTreeMap.Entry<K, V> e = fromStart ? m.getFirstEntry()
                     : loInclusive ? m.getCeilingEntry(lo) : m.getHigherEntry(lo);
             return e == null || tooHigh(e.key) ? null : e;
@@ -2496,43 +2496,43 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V>
          * Return the absolute low fence for descending traversal
          * @return entry
          */
-        final IndexedTreeMap.Entry<K, V> absLowFence() {
+        public final IndexedTreeMap.Entry<K, V> absLowFence() {
             return fromStart ? null : loInclusive ? m.getLowerEntry(lo) : m.getFloorEntry(lo);
         }
 
         /**
          * @return descending iterator from the perspective of this sub-map
          */
-        abstract Iterator<K> descendingKeyIterator();
+        protected abstract Iterator<K> descendingKeyIterator();
 
-        final boolean inClosedRange(Object key) {
+        public final boolean inClosedRange(Object key) {
             return (fromStart || m.compare(key, lo) >= 0) && (toEnd || m.compare(hi, key) >= 0);
         }
 
-        final boolean inRange(Object key) {
+        public final boolean inRange(Object key) {
             return !tooLow(key) && !tooHigh(key);
         }
 
-        final boolean inRange(Object key, boolean inclusive) {
+        public final boolean inRange(Object key, boolean inclusive) {
             return inclusive ? inRange(key) : inClosedRange(key);
         }
 
         /**
          * @return ascending iterator from the perspective of this sub-map
          */
-        abstract Iterator<K> keyIterator();
-        abstract IndexedTreeMap.Entry<K, V> subCeiling(K key);
-        abstract IndexedTreeMap.Entry<K, V> subFloor(K key);
+        protected abstract Iterator<K> keyIterator();
+        protected abstract IndexedTreeMap.Entry<K, V> subCeiling(K key);
+        protected abstract IndexedTreeMap.Entry<K, V> subFloor(K key);
 
-        abstract IndexedTreeMap.Entry<K, V> subHigher(K key);
+        protected abstract IndexedTreeMap.Entry<K, V> subHigher(K key);
 
-        abstract IndexedTreeMap.Entry<K, V> subHighest();
+        protected abstract IndexedTreeMap.Entry<K, V> subHighest();
 
-        abstract IndexedTreeMap.Entry<K, V> subLower(K key);
+        protected abstract IndexedTreeMap.Entry<K, V> subLower(K key);
 
-        abstract IndexedTreeMap.Entry<K, V> subLowest();
+        protected abstract IndexedTreeMap.Entry<K, V> subLowest();
 
-        final boolean tooHigh(Object key) {
+        public final boolean tooHigh(Object key) {
             if (!toEnd) {
                 final int c = m.compare(key, hi);
                 if (c > 0 || c == 0 && !hiInclusive) {
@@ -2542,7 +2542,7 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V>
             return false;
         }
 
-        final boolean tooLow(Object key) {
+        public final boolean tooLow(Object key) {
             if (!fromStart) {
                 final int c = m.compare(key, lo);
                 if (c < 0 || c == 0 && !loInclusive) {
@@ -2554,7 +2554,7 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V>
 
         // View classes
 
-        final class DescendingSubMapEntryIterator extends SubMapIterator<Map.Entry<K, V>> {
+        protected final class DescendingSubMapEntryIterator extends SubMapIterator<Map.Entry<K, V>> {
 
             DescendingSubMapEntryIterator(IndexedTreeMap.Entry<K, V> last, IndexedTreeMap.Entry<K, V> fence) {
                 super(last, fence);
@@ -2571,7 +2571,7 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V>
             }
         }
 
-        final class DescendingSubMapKeyIterator extends SubMapIterator<K> {
+        protected final class DescendingSubMapKeyIterator extends SubMapIterator<K> {
 
             DescendingSubMapKeyIterator(IndexedTreeMap.Entry<K, V> last, IndexedTreeMap.Entry<K, V> fence) {
                 super(last, fence);
@@ -2588,7 +2588,7 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V>
             }
         }
 
-        abstract class EntrySetView extends AbstractSet<Map.Entry<K, V>> {
+        protected abstract class EntrySetView extends AbstractSet<Map.Entry<K, V>> {
 
             private transient int size = -1;
             private transient int sizeModCount;
@@ -2649,7 +2649,7 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V>
             }
         }
 
-        final class SubMapEntryIterator extends SubMapIterator<Map.Entry<K, V>> {
+        protected final class SubMapEntryIterator extends SubMapIterator<Map.Entry<K, V>> {
 
             SubMapEntryIterator(IndexedTreeMap.Entry<K, V> first, IndexedTreeMap.Entry<K, V> fence) {
                 super(first, fence);
@@ -2670,14 +2670,14 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V>
          * Iterators for SubMaps
          * @param <T> iterator generics type
          */
-        abstract class SubMapIterator<T> implements Iterator<T> {
+        protected abstract class SubMapIterator<T> implements Iterator<T> {
 
-            IndexedTreeMap.Entry<K, V> lastReturned;
-            IndexedTreeMap.Entry<K, V> next;
-            final K fenceKey;
-            int expectedModCount;
+            protected IndexedTreeMap.Entry<K, V> lastReturned;
+            protected IndexedTreeMap.Entry<K, V> next;
+            protected final K fenceKey;
+            protected int expectedModCount;
 
-            SubMapIterator(IndexedTreeMap.Entry<K, V> first, IndexedTreeMap.Entry<K, V> fence) {
+            protected SubMapIterator(IndexedTreeMap.Entry<K, V> first, IndexedTreeMap.Entry<K, V> fence) {
                 expectedModCount = m.modCount;
                 lastReturned = null;
                 next = first;
@@ -2689,7 +2689,7 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V>
                 return next != null && next.key != fenceKey;
             }
 
-            final IndexedTreeMap.Entry<K, V> nextEntry() {
+            public final IndexedTreeMap.Entry<K, V> nextEntry() {
                 final IndexedTreeMap.Entry<K, V> e = next;
                 if (e == null || e.key == fenceKey) {
                     throw new NoSuchElementException();
@@ -2702,7 +2702,7 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V>
                 return e;
             }
 
-            final IndexedTreeMap.Entry<K, V> prevEntry() {
+            public final IndexedTreeMap.Entry<K, V> prevEntry() {
                 final IndexedTreeMap.Entry<K, V> e = next;
                 if (e == null || e.key == fenceKey) {
                     throw new NoSuchElementException();
@@ -2715,7 +2715,7 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V>
                 return e;
             }
 
-            final void removeAscending() {
+            public final void removeAscending() {
                 if (lastReturned == null) {
                     throw new IllegalStateException();
                 }
@@ -2731,7 +2731,7 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V>
                 expectedModCount = m.modCount;
             }
 
-            final void removeDescending() {
+            public final void removeDescending() {
                 if (lastReturned == null) {
                     throw new IllegalStateException();
                 }
@@ -2745,9 +2745,9 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V>
 
         }
 
-        final class SubMapKeyIterator extends SubMapIterator<K> {
+        protected final class SubMapKeyIterator extends SubMapIterator<K> {
 
-            SubMapKeyIterator(IndexedTreeMap.Entry<K, V> first, IndexedTreeMap.Entry<K, V> fence) {
+            protected SubMapKeyIterator(IndexedTreeMap.Entry<K, V> first, IndexedTreeMap.Entry<K, V> fence) {
                 super(first, fence);
             }
 
@@ -2767,13 +2767,13 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V>
      * Base class for IndexedTreeMap Iterators
      * @param <T> iterator generics
      */
-    abstract class PrivateEntryIterator<T> implements Iterator<T> {
+    protected abstract class PrivateEntryIterator<T> implements Iterator<T> {
 
-        Entry<K, V> next;
-        Entry<K, V> lastReturned;
-        int expectedModCount;
+        protected Entry<K, V> next;
+        protected Entry<K, V> lastReturned;
+        protected int expectedModCount;
 
-        PrivateEntryIterator(Entry<K, V> first) {
+        protected PrivateEntryIterator(Entry<K, V> first) {
             expectedModCount = modCount;
             lastReturned = null;
             next = first;
@@ -2801,7 +2801,7 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V>
             lastReturned = null;
         }
 
-        final Entry<K, V> nextEntry() {
+        public final Entry<K, V> nextEntry() {
             final Entry<K, V> e = next;
             if (e == null) {
                 throw new NoSuchElementException();
@@ -2814,7 +2814,7 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V>
             return e;
         }
 
-        final Entry<K, V> prevEntry() {
+        public final Entry<K, V> prevEntry() {
             final Entry<K, V> e = next;
             if (e == null) {
                 throw new NoSuchElementException();
@@ -2828,7 +2828,7 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V>
         }
     }
 
-    final class ValueIterator extends PrivateEntryIterator<V> {
+    protected final class ValueIterator extends PrivateEntryIterator<V> {
 
         ValueIterator(Entry<K, V> first) {
             super(first);

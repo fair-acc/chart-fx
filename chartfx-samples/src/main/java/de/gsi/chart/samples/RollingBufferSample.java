@@ -47,8 +47,8 @@ public class RollingBufferSample extends Application {
             "beam intensity [ppp]", RollingBufferSample.BUFFER_CAPACITY);
     private final ErrorDataSetRenderer beamIntensityRenderer = new ErrorDataSetRenderer();
     private final ErrorDataSetRenderer dipoleCurrentRenderer = new ErrorDataSetRenderer();
-    final DefaultNumericAxis yAxis1 = new DefaultNumericAxis("beam intensity", "ppp");
-    final DefaultNumericAxis yAxis2 = new DefaultNumericAxis("dipole current", "A");
+    private final DefaultNumericAxis yAxis1 = new DefaultNumericAxis("beam intensity", "ppp");
+    private final DefaultNumericAxis yAxis2 = new DefaultNumericAxis("dipole current", "A");
     protected Timer timer;
 
     protected void initErrorDataSetRenderer(final ErrorDataSetRenderer eRenderer) {

@@ -179,7 +179,7 @@ public class DataViewPane extends Window {
 
     private final ObjectProperty<DataView> dataView = new SimpleObjectProperty<>(this, "dataView");
 
-    final void setDataView(final DataView value) {
+    public final void setDataView(final DataView value) {
         dataView.set(value);
     }
 
@@ -190,7 +190,7 @@ public class DataViewPane extends Window {
         ProcessingProfiler.getTimeDiff(start, "pane updated with data set = " + chart.getDatasets().get(0).getName());
     }
 
-    EventHandler<ActionEvent> maximizeButtonAction = event -> {
+    protected EventHandler<ActionEvent> maximizeButtonAction = event -> {
         if (dialog.isShowing()) {
             // enlarge to maximum screen size
             dialog.maximizeRestore();
@@ -225,7 +225,7 @@ public class DataViewPane extends Window {
         dataView.get().setMaximizedView(maximized ? null : DataViewPane.this);
     };
 
-    EventHandler<ActionEvent> minimizeButtonAction = event -> {
+    protected EventHandler<ActionEvent> minimizeButtonAction = event -> {
         if (dialog.isShowing()) {
             dialog.hide();
             maximizeRestoreButton.getStyleClass().setAll("window-maximize-icon");
@@ -244,7 +244,7 @@ public class DataViewPane extends Window {
         minimizeButton.setDisable(true);
     };
 
-    EventHandler<ActionEvent> closeButtonAction = event -> {
+    protected EventHandler<ActionEvent> closeButtonAction = event -> {
         // asked to remove pane
         if (dialog.isShowing()) {
             dialog.hide();
@@ -261,7 +261,7 @@ public class DataViewPane extends Window {
         dataView.get().getChildren().remove(DataViewPane.this);
     };
 
-    class MyDialog extends Stage {
+    protected class MyDialog extends Stage {
         private final BorderPane dialogContent = new BorderPane();
         private final Scene scene = new Scene(dialogContent, 640, 480);
         private double posX = 640;

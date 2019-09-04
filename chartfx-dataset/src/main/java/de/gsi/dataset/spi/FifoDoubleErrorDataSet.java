@@ -3,9 +3,6 @@ package de.gsi.dataset.spi;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import de.gsi.dataset.DataSetError;
 import de.gsi.dataset.event.AddedDataEvent;
 import de.gsi.dataset.event.RemovedDataEvent;
@@ -15,8 +12,6 @@ import de.gsi.dataset.spi.utils.DoublePointError;
  * @author rstein
  */
 public class FifoDoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet> implements DataSetError {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(FifoDoubleErrorDataSet.class);
     protected LimitedQueue<DataBlob> data;
     protected double maxDistance = Double.MAX_VALUE;
 
@@ -53,17 +48,17 @@ public class FifoDoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorData
 
     protected class DataBlob extends DoublePointError {
 
-        String style;
-        String tag;
+        protected String style;
+        protected String tag;
 
-        DataBlob(final double x, final double y, final double errorX, final double errorY, final String tag,
+        protected DataBlob(final double x, final double y, final double errorX, final double errorY, final String tag,
                 final String style) {
             super(x, y, errorX, errorY);
             this.tag = tag;
             this.style = style;
         }
 
-        DataBlob(final double x, final double y, final double errorX, final double errorY) {
+        protected DataBlob(final double x, final double y, final double errorX, final double errorY) {
             this(x, y, errorX, errorY, null, null);
         }
 

@@ -160,9 +160,9 @@ public abstract class AbstractValueIndicator extends ChartPlugin {
      * for each, so whenever the list of plugins changes, this method should
      * update name of it's CSS class.
      */
-    abstract void updateStyleClass();
+    public abstract void updateStyleClass();
 
-    void setStyleClasses(final Node node, final String prefix, final String root) {
+    public void setStyleClasses(final Node node, final String prefix, final String root) {
         node.getStyleClass().setAll(root, prefix + root, prefix + root + getIndicatorInstanceIndex());
     }
 

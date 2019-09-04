@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import javafx.event.EventHandler;
@@ -17,17 +18,17 @@ import javafx.scene.text.Font;
 
 public class HexagonMap {
 
-    final int hexagonSize;
-    int graphicsXpadding = 0;
-    int graphicsYpadding = 0;
+    public final int hexagonSize;
+    public int graphicsXpadding = 0;
+    public int graphicsYpadding = 0;
     private MapGenerator mapGenerator;
-    boolean renderCoordinates = false;
+    public boolean renderCoordinates = false;
     private final GridDrawer gridDrawer = new GridDrawer(this);
-    private final HashMap<GridPosition, Hexagon> hexagons = new HashMap<>();
+    private final Map<GridPosition, Hexagon> hexagons = new HashMap<>();
     // TODO consider JavaFX property model
-    List<HexagonCallback> onHexClickedCallback = new LinkedList<>();
-    List<HexagonCallback> onHexEnteredCallback = new LinkedList<>();
-    List<HexagonCallback> onHexExitCallback = new LinkedList<>();
+    public List<HexagonCallback> onHexClickedCallback = new LinkedList<>();
+    public List<HexagonCallback> onHexEnteredCallback = new LinkedList<>();
+    public List<HexagonCallback> onHexExitCallback = new LinkedList<>();
 
     public enum Direction {
         NORTHWEST,
@@ -173,11 +174,11 @@ public class HexagonMap {
         return result;
     }
 
-    Hexagon getHexagon(final GridPosition position) {
+    public Hexagon getHexagon(final GridPosition position) {
         return getHexagon(position.q, position.r);
     }
 
-    Hexagon getHexagonByCube(final int x, final int y, final int z) {
+    public Hexagon getHexagonByCube(final int x, final int y, final int z) {
         return getHexagon(x, z);
     }
 
@@ -289,7 +290,7 @@ public class HexagonMap {
     public void registerCanvasMouseLiner(final Canvas canvas) {
 
         canvas.addEventFilter(MouseEvent.MOUSE_MOVED, new EventHandler<MouseEvent>() {
-            Hexagon oldHexagon = null;
+            private Hexagon oldHexagon = null;
 
             @Override
             public void handle(final MouseEvent me) {

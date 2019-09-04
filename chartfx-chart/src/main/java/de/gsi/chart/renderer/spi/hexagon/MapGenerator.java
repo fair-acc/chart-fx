@@ -23,18 +23,18 @@ class MapGenerator {
      * @param image source image
      * @param mapWidthInHexes desired map width in hex grid quantas
      */
-    MapGenerator(HexagonMap map, Image image, int mapWidthInHexes) {
+    public MapGenerator(HexagonMap map, Image image, int mapWidthInHexes) {
         this.map = map;
         this.image = image;
         mapWidth = mapWidthInHexes;
     }
 
-    Optional<Double> getHorizontalRelation() {
+    public Optional<Double> getHorizontalRelation() {
         return horizontalRelation == null ? Optional.empty() : Optional.of(horizontalRelation);
     }
 
 
-    Optional<Double> getVerticalRelation() {
+    public Optional<Double> getVerticalRelation() {
         return verticalRelation == null ? Optional.empty() : Optional.of(verticalRelation);
     }
 
