@@ -63,37 +63,7 @@ public class EditAxis extends ChartPlugin {
     private final BooleanProperty animated = new SimpleBooleanProperty(this, "animated", false);
     private final List<MyPopOver> popUpList = new ArrayList<>();
 
-    /**
-     * When {@code true} zooming will be animated. By default it's {@code false}.
-     *
-     * @return the animated property
-     * @see #zoomDurationProperty()
-     */
-    public final BooleanProperty animatedProperty() {
-        return animated;
-    }
-
-    /**
-     * Sets the value of the {@link #animatedProperty()}.
-     *
-     * @param value if {@code true} zoom will be animated
-     * @see #setZoomDuration(Duration)
-     */
-    public final void setAnimated(final boolean value) {
-        animatedProperty().set(value);
-    }
-
-    /**
-     * Returns the value of the {@link #animatedProperty()}.
-     *
-     * @return {@code true} if zoom is animated, {@code false} otherwise
-     * @see #getZoomDuration()
-     */
-    public final boolean isAnimated() {
-        return animatedProperty().get();
-    }
-
-    private final ObjectProperty<Duration> fadeDuration = new SimpleObjectProperty<Duration>(this, "fadeDuration",
+    private final ObjectProperty<Duration> fadeDuration = new SimpleObjectProperty<>(this, "fadeDuration",
             EditAxis.DEFAULT_ANIMATION_DURATION) {
 
         @Override
@@ -103,35 +73,7 @@ public class EditAxis extends ChartPlugin {
         }
     };
 
-    /**
-     * Duration of the animated fade (in and out). Used only when {@link #animatedProperty()} is set to {@code true}. By
-     * default initialized to 500ms.
-     *
-     * @return the zoom duration property
-     */
-    public final ObjectProperty<Duration> zoomDurationProperty() {
-        return fadeDuration;
-    }
-
-    /**
-     * Sets the value of the {@link #zoomDurationProperty()}.
-     *
-     * @param duration duration of the zoom
-     */
-    public final void setZoomDuration(final Duration duration) {
-        zoomDurationProperty().set(duration);
-    }
-
-    /**
-     * Returns the value of the {@link #zoomDurationProperty()}.
-     *
-     * @return the current zoom duration
-     */
-    public final Duration getZoomDuration() {
-        return zoomDurationProperty().get();
-    }
-
-    private final ObjectProperty<AxisMode> axisMode = new SimpleObjectProperty<AxisMode>(this, "axisMode",
+    private final ObjectProperty<AxisMode> axisMode = new SimpleObjectProperty<>(this, "axisMode",
             AxisMode.XY) {
 
         @Override
@@ -140,33 +82,6 @@ public class EditAxis extends ChartPlugin {
                     new StringBuilder().append("The ").append(getName()).append(" must not be null").toString());
         }
     };
-
-    /**
-     * The mode defining axis along which the zoom can be performed. By default initialized to {@link AxisMode#XY}.
-     *
-     * @return the axis mode property
-     */
-    public final ObjectProperty<AxisMode> axisModeProperty() {
-        return axisMode;
-    }
-
-    /**
-     * Sets the value of the {@link #axisModeProperty()}.
-     *
-     * @param mode the mode to be used
-     */
-    public final void setAxisMode(final AxisMode mode) {
-        axisModeProperty().set(mode);
-    }
-
-    /**
-     * Returns the value of the {@link #axisModeProperty()}.
-     *
-     * @return current mode
-     */
-    public final AxisMode getAxisMode() {
-        return axisModeProperty().get();
-    }
 
     /**
      * Creates a new instance of EditAxis with animation disabled and with {@link #axisModeProperty() editMode}
@@ -183,15 +98,6 @@ public class EditAxis extends ChartPlugin {
      */
     public EditAxis(final AxisMode editMode) {
         this(editMode, false);
-    }
-
-    /**
-     * Creates a new instance of EditAxis with {@link #axisModeProperty() editMode} initialized to {@link AxisMode#XY}.
-     *
-     * @param animated initial value of {@link #animatedProperty() animated} property
-     */
-    public EditAxis(final boolean animated) {
-        this(AxisMode.XY, animated);
     }
 
     /**
@@ -213,6 +119,100 @@ public class EditAxis extends ChartPlugin {
         });
     }
 
+    /**
+     * Creates a new instance of EditAxis with {@link #axisModeProperty() editMode} initialized to {@link AxisMode#XY}.
+     *
+     * @param animated initial value of {@link #animatedProperty() animated} property
+     */
+    public EditAxis(final boolean animated) {
+        this(AxisMode.XY, animated);
+    }
+
+    /**
+     * When {@code true} zooming will be animated. By default it's {@code false}.
+     *
+     * @return the animated property
+     * @see #zoomDurationProperty()
+     */
+    public final BooleanProperty animatedProperty() {
+        return animated;
+    }
+
+    /**
+     * The mode defining axis along which the zoom can be performed. By default initialized to {@link AxisMode#XY}.
+     *
+     * @return the axis mode property
+     */
+    public final ObjectProperty<AxisMode> axisModeProperty() {
+        return axisMode;
+    }
+
+    /**
+     * Returns the value of the {@link #axisModeProperty()}.
+     *
+     * @return current mode
+     */
+    public final AxisMode getAxisMode() {
+        return axisModeProperty().get();
+    }
+
+    /**
+     * Returns the value of the {@link #zoomDurationProperty()}.
+     *
+     * @return the current zoom duration
+     */
+    public final Duration getZoomDuration() {
+        return zoomDurationProperty().get();
+    }
+
+    /**
+     * Returns the value of the {@link #animatedProperty()}.
+     *
+     * @return {@code true} if zoom is animated, {@code false} otherwise
+     * @see #getZoomDuration()
+     */
+    public final boolean isAnimated() {
+        return animatedProperty().get();
+    }
+
+    /**
+     * Sets the value of the {@link #animatedProperty()}.
+     *
+     * @param value if {@code true} zoom will be animated
+     * @see #setZoomDuration(Duration)
+     */
+    public final void setAnimated(final boolean value) {
+        animatedProperty().set(value);
+    }
+
+    /**
+     * Sets the value of the {@link #axisModeProperty()}.
+     *
+     * @param mode the mode to be used
+     */
+    public final void setAxisMode(final AxisMode mode) {
+        axisModeProperty().set(mode);
+    }
+
+    /**
+     * Sets the value of the {@link #zoomDurationProperty()}.
+     *
+     * @param duration duration of the zoom
+     */
+    public final void setZoomDuration(final Duration duration) {
+        zoomDurationProperty().set(duration);
+    }
+
+    /**
+     * Duration of the animated fade (in and out). Used only when {@link #animatedProperty()} is set to {@code true}. By
+     * default initialized to 500ms.
+     *
+     * @return the zoom duration property
+     */
+    public final ObjectProperty<Duration> zoomDurationProperty() {
+        return fadeDuration;
+    }
+
     private void addMouseEventHandlers(final Chart newChart) {
         newChart.getAxes().forEach(axis -> popUpList.add(new MyPopOver(axis, axis.getSide().isHorizontal())));
     }
@@ -222,88 +222,6 @@ public class EditAxis extends ChartPlugin {
             popOver.deregisterMouseEvents();
             popUpList.remove(popOver);
         });
-    }
-
-    private class MyPopOver extends PopOver {
-
-        private long popOverShowStartTime;
-        private boolean isMouseInPopOver;
-        private Axis axis = null;
-
-        MyPopOver(final Axis axis, final boolean isHorizontal) {
-            super(new AxisEditor(axis, isHorizontal));
-            this.axis = axis;
-            popOverShowStartTime = 0;
-
-            super.setAutoHide(true);
-            super.setAnimated(true);
-            setFadeInDuration(Duration.millis(1000));
-            setFadeOutDuration(Duration.millis(500));
-            switch (axis.getSide()) {
-            case TOP:
-                setArrowLocation(ArrowLocation.TOP_CENTER);
-                break;
-            case LEFT:
-                setArrowLocation(ArrowLocation.LEFT_CENTER);
-                break;
-            case RIGHT:
-                setArrowLocation(ArrowLocation.RIGHT_CENTER);
-                break;
-            case BOTTOM:
-            default:
-                setArrowLocation(ArrowLocation.BOTTOM_CENTER);
-                break;
-            }
-
-            setOpacity(0.0);
-            getRoot().setBackground(Background.EMPTY);
-            // getRoot().setStyle("-fx-background-color: rgba(0, 255, 0, 1);");
-
-            getScene().getStylesheets().add("plugin/editaxis.css");
-            getStyleClass().add("axis-editor-view-pane");
-
-            final Timeline checkMouseInsidePopUp = new Timeline(
-                    new KeyFrame(Duration.millis(EditAxis.DEFAULT_UPDATE_PERIOD), event -> {
-                        if (!MyPopOver.this.isShowing()) {
-                            return;
-                        }
-
-                        final long now = System.currentTimeMillis();
-                        if (isMouseInPopOver) {
-                            popOverShowStartTime = System.currentTimeMillis();
-                        }
-                        if (Math.abs(now - popOverShowStartTime) > EditAxis.DEFAULT_SHUTDOWN_PERIOD) {
-                            MyPopOver.this.hide();
-                        }
-                    }));
-            checkMouseInsidePopUp.setCycleCount(Animation.INDEFINITE);
-            checkMouseInsidePopUp.play();
-
-            registerMouseEvents();
-        }
-
-        private final EventHandler<? super MouseEvent> axisClickEventHandler = evt -> {
-            if (evt.getButton() == MouseButton.SECONDARY) {
-                final double x = evt.getScreenX();
-                final double y = evt.getScreenY();
-                if (axis != null) {
-                    show((Node) axis, x, y);
-                }
-            }
-
-        };
-
-        public final void registerMouseEvents() {
-            setOnShowing(evt -> popOverShowStartTime = System.currentTimeMillis());
-            getContentNode().setOnMouseEntered(mevt -> isMouseInPopOver = true);
-            getContentNode().setOnMouseExited(mevt -> isMouseInPopOver = false);
-
-            ((Node) axis).setOnMouseClicked(axisClickEventHandler);
-        }
-
-        public void deregisterMouseEvents() {
-            ((Node) axis).removeEventHandler(MouseEvent.MOUSE_CLICKED, axisClickEventHandler);
-        }
     }
 
     private class AxisEditor extends BorderPane {
@@ -338,120 +256,77 @@ public class EditAxis extends ChartPlugin {
             box.getChildren().add(getMinMaxButtons(axis, isHorizontal, false));
         }
 
-        /**
-         * Creates the header for the Axis Editor popup, allowing to configure axis label and unit
-         *
-         * @param axis The axis to be edited
-         * @return pane containing label, label editor and unit editor
-         */
-        private Node getLabelEditor(final Axis axis, final boolean isHorizontal) {
-            final GridPane header = new GridPane();
-            header.setAlignment(Pos.BASELINE_LEFT);
-            final TextField axisLabelTextField = new TextField(axis.getLabel());
-            axisLabelTextField.textProperty().bindBidirectional(axis.labelProperty());
-            header.addRow(0, new Label(" axis label: "), axisLabelTextField);
+        private void changeAxisRange(final Axis axis, final boolean isIncrease) {
+            final double width = Math.abs(axis.getUpperBound() - axis.getLowerBound());
 
-            final TextField axisUnitTextField = new TextField(axis.getUnit());
-            axisUnitTextField.setPrefWidth(50.0);
-            axisUnitTextField.textProperty().bindBidirectional(axis.unitProperty());
-            header.addRow(isHorizontal ? 0 : 1, new Label(" unit: "), axisUnitTextField);
-
-            final TextField unitScaling = new TextField();
-            unitScaling.setPrefWidth(80.0);
-            final CheckBox autoUnitScaling = new CheckBox(" auto");
-            if (axis instanceof DefaultNumericAxis) {
-                autoUnitScaling.selectedProperty()
-                        .bindBidirectional(((DefaultNumericAxis) axis).autoUnitScalingProperty());
-                unitScaling.textProperty().bindBidirectional(((DefaultNumericAxis) axis).unitScalingProperty(),
-                        new NumberStringConverter(new DecimalFormat("0.0####E0")));
-                unitScaling.disableProperty().bind(autoUnitScaling.selectedProperty());
-            } else {
-                // TODO: consider adding an interface on whether
-                // autoUnitScaling is editable
-                autoUnitScaling.setDisable(true);
-                unitScaling.setDisable(true);
-            }
-            final HBox unitScalingBox = new HBox(unitScaling, autoUnitScaling);
-            unitScalingBox.setAlignment(Pos.BASELINE_LEFT);
-            header.addRow(isHorizontal ? 0 : 2, new Label(" unit scale:"), unitScalingBox);
-            return header;
+            // TODO: check for linear and logarithmic axis
+            changeAxisRangeLinearScale(width, axis.lowerBoundProperty(), !isIncrease);
+            changeAxisRangeLinearScale(width, axis.upperBoundProperty(), isIncrease);
         }
 
-        private Pane getMinMaxButtons(final Axis axis, final boolean isHorizontal, final boolean isMin) {
-            final Button incMaxButton = new Button("", new Glyph(EditAxis.FONT_AWESOME, "\uf077"));
-            incMaxButton.setMaxWidth(Double.MAX_VALUE);
-            VBox.setVgrow(incMaxButton, Priority.ALWAYS);
-            HBox.setHgrow(incMaxButton, Priority.ALWAYS);
-            incMaxButton.setOnAction(evt -> {
-                axis.setAutoRanging(false);
-                changeAxisRangeLimit(axis, isHorizontal ? isMin : !isMin, true);
-            });
+        private void changeAxisRangeLimit(final Axis axis, final boolean isHorizontal, final boolean isIncrease) {
 
-            final Button decMaxButton = new Button("", new Glyph(EditAxis.FONT_AWESOME, "\uf078"));
-            decMaxButton.setMaxWidth(Double.MAX_VALUE);
-            VBox.setVgrow(decMaxButton, Priority.ALWAYS);
-            HBox.setHgrow(decMaxButton, Priority.ALWAYS);
+            final boolean isInverted = axis.isInvertedAxis();
+            DoubleProperty prop;
+            if (isHorizontal) {
+                prop = isInverted ? axis.upperBoundProperty() : axis.lowerBoundProperty();
+            } else {
+                prop = isInverted ? axis.lowerBoundProperty() : axis.upperBoundProperty();
+            }
 
-            decMaxButton.setOnAction(evt -> {
-                axis.setAutoRanging(false);
-                changeAxisRangeLimit(axis, isHorizontal ? isMin : !isMin, false);
-            });
-            final Pane box = isHorizontal ? new VBox() : new HBox();
-            box.getChildren().addAll(incMaxButton, decMaxButton);
+            double minTickDistance = Double.MAX_VALUE;
+            final List<Number> tickList = new ArrayList<>();
+            axis.getTickMarks().forEach(tickMark -> tickList.add(tickMark.getValue()));
 
-            return box;
+            if (!axis.isLogAxis()) {
+                axis.getMinorTickMarks().forEach(minorTick -> tickList.add(Double.valueOf(minorTick.getPosition())));
+            }
+
+            for (final Number check1 : tickList) {
+                for (final Number check2 : tickList) {
+                    minTickDistance = Math.min(Math.abs(check1.doubleValue() - check2.doubleValue()), minTickDistance);
+                }
+            }
+            if (axis.isLogAxis()) {
+                minTickDistance *= 0.1;
+            }
+
+            if ((minTickDistance == Double.MAX_VALUE) || (minTickDistance <= 0)) {
+                // default fall-back in case no minor tick have been defined for
+                // the axis
+                minTickDistance = 0.05 * Math.abs(axis.getUpperBound() - axis.getLowerBound());
+            }
+
+            if (axis.getTickUnit() > 0) {
+                minTickDistance = axis.getTickUnit();
+            }
+
+            // TODO: check for linear and logarithmic axis
+            changeAxisRangeLinearScale(minTickDistance, prop, isIncrease);
+
+            if (axis instanceof AbstractAxis) {
+                // ((AbstractAxis) axis).recomputeTickMarks();
+                axis.setTickUnit(((AbstractAxis) axis).computePreferredTickUnit(axis.getLength()));
+            }
         }
 
-        private Pane getLogCheckBoxes(final Axis axis) {
-            final Pane boxMax = new VBox();
-            VBox.setVgrow(boxMax, Priority.ALWAYS);
-
-            final CheckBox logAxis = new CheckBox("log axis");
-            HBox.setHgrow(logAxis, Priority.ALWAYS);
-            VBox.setVgrow(logAxis, Priority.ALWAYS);
-            logAxis.setMaxWidth(Double.MAX_VALUE);
-            logAxis.setSelected(axis.isLogAxis());
-            boxMax.getChildren().add(logAxis);
-
-            if (axis instanceof DefaultNumericAxis) {
-                logAxis.selectedProperty().bindBidirectional(((DefaultNumericAxis) axis).logAxisProperty());
+        private void changeAxisRangeLinearScale(final double minTickDistance, final DoubleProperty property,
+                final boolean isIncrease) {
+            final double value = property.doubleValue();
+            final double diff = minTickDistance;
+            if (isIncrease) {
+                property.set(value + diff);
             } else {
-                // TODO: consider adding an interface on whether log/non-log
-                // is editable
-                logAxis.setDisable(true);
+                property.set(value - diff);
             }
+        }
 
-            final CheckBox invertedAxis = new CheckBox("inverted");
-            HBox.setHgrow(invertedAxis, Priority.ALWAYS);
-            VBox.setVgrow(invertedAxis, Priority.ALWAYS);
-            invertedAxis.setMaxWidth(Double.MAX_VALUE);
-            invertedAxis.setSelected(axis.isInvertedAxis());
-            boxMax.getChildren().add(invertedAxis);
-
-            if (axis instanceof DefaultNumericAxis) {
-                invertedAxis.selectedProperty().bindBidirectional(((DefaultNumericAxis) axis).invertAxisProperty());
-            } else {
-                // TODO: consider adding an interface on whether
-                // invertedAxis is editable
-                invertedAxis.setDisable(true);
-            }
-
-            final CheckBox timeAxis = new CheckBox("time axis");
-            HBox.setHgrow(timeAxis, Priority.ALWAYS);
-            VBox.setVgrow(timeAxis, Priority.ALWAYS);
-            timeAxis.setMaxWidth(Double.MAX_VALUE);
-            timeAxis.setSelected(axis.isTimeAxis());
-            boxMax.getChildren().add(timeAxis);
-
-            if (axis instanceof DefaultNumericAxis) {
-                timeAxis.selectedProperty().bindBidirectional(((DefaultNumericAxis) axis).timeAxisProperty());
-            } else {
-                // TODO: consider adding an interface on whether
-                // timeAxis is editable
-                timeAxis.setDisable(true);
-            }
-
-            return boxMax;
+        private Node createSpacer() {
+            final Region spacer = new Region();
+            // Make it always grow or shrink according to the available space
+            VBox.setVgrow(spacer, Priority.ALWAYS);
+            HBox.setHgrow(spacer, Priority.ALWAYS);
+            return spacer;
         }
 
         private Pane getAutoRangeCheckBoxes(final Axis axis) {
@@ -475,39 +350,6 @@ public class EditAxis extends ChartPlugin {
             boxMax.getChildren().add(autoGrow);
 
             return boxMax;
-        }
-
-        private Pane getRangeChangeButtons(final Axis axis, final boolean isHorizontal) {
-            final Button incMaxButton = new Button("", new Glyph(EditAxis.FONT_AWESOME, "expand"));
-            incMaxButton.setMaxWidth(Double.MAX_VALUE);
-            VBox.setVgrow(incMaxButton, Priority.NEVER);
-            HBox.setHgrow(incMaxButton, Priority.NEVER);
-            incMaxButton.setOnAction(evt -> {
-                axis.setAutoRanging(false);
-                changeAxisRange(axis, true);
-            });
-
-            final Button decMaxButton = new Button("", new Glyph(EditAxis.FONT_AWESOME, "compress"));
-            decMaxButton.setMaxWidth(Double.MAX_VALUE);
-            VBox.setVgrow(decMaxButton, Priority.NEVER);
-            HBox.setHgrow(decMaxButton, Priority.NEVER);
-
-            decMaxButton.setOnAction(evt -> {
-                axis.setAutoRanging(false);
-                changeAxisRange(axis, false);
-            });
-            final Pane boxMax = isHorizontal ? new VBox() : new HBox();
-            boxMax.getChildren().addAll(incMaxButton, decMaxButton);
-
-            return boxMax;
-        }
-
-        private Node createSpacer() {
-            final Region spacer = new Region();
-            // Make it always grow or shrink according to the available space
-            VBox.setVgrow(spacer, Priority.ALWAYS);
-            HBox.setHgrow(spacer, Priority.ALWAYS);
-            return spacer;
         }
 
         private final TextField getBoundField(final Axis axis, final boolean isLowerBound) {
@@ -598,70 +440,228 @@ public class EditAxis extends ChartPlugin {
             return textField;
         }
 
-        private void changeAxisRange(final Axis axis, final boolean isIncrease) {
-            final double width = Math.abs(axis.getUpperBound() - axis.getLowerBound());
+        /**
+         * Creates the header for the Axis Editor popup, allowing to configure axis label and unit
+         *
+         * @param axis The axis to be edited
+         * @return pane containing label, label editor and unit editor
+         */
+        private Node getLabelEditor(final Axis axis, final boolean isHorizontal) {
+            final GridPane header = new GridPane();
+            header.setAlignment(Pos.BASELINE_LEFT);
+            final TextField axisLabelTextField = new TextField(axis.getLabel());
+            axisLabelTextField.textProperty().bindBidirectional(axis.labelProperty());
+            header.addRow(0, new Label(" axis label: "), axisLabelTextField);
 
-            // TODO: check for linear and logarithmic axis
-            changeAxisRangeLinearScale(width, axis.lowerBoundProperty(), !isIncrease);
-            changeAxisRangeLinearScale(width, axis.upperBoundProperty(), isIncrease);
+            final TextField axisUnitTextField = new TextField(axis.getUnit());
+            axisUnitTextField.setPrefWidth(50.0);
+            axisUnitTextField.textProperty().bindBidirectional(axis.unitProperty());
+            header.addRow(isHorizontal ? 0 : 1, new Label(" unit: "), axisUnitTextField);
+
+            final TextField unitScaling = new TextField();
+            unitScaling.setPrefWidth(80.0);
+            final CheckBox autoUnitScaling = new CheckBox(" auto");
+            if (axis instanceof DefaultNumericAxis) {
+                autoUnitScaling.selectedProperty()
+                        .bindBidirectional(((DefaultNumericAxis) axis).autoUnitScalingProperty());
+                unitScaling.textProperty().bindBidirectional(((DefaultNumericAxis) axis).unitScalingProperty(),
+                        new NumberStringConverter(new DecimalFormat("0.0####E0")));
+                unitScaling.disableProperty().bind(autoUnitScaling.selectedProperty());
+            } else {
+                // TODO: consider adding an interface on whether
+                // autoUnitScaling is editable
+                autoUnitScaling.setDisable(true);
+                unitScaling.setDisable(true);
+            }
+            final HBox unitScalingBox = new HBox(unitScaling, autoUnitScaling);
+            unitScalingBox.setAlignment(Pos.BASELINE_LEFT);
+            header.addRow(isHorizontal ? 0 : 2, new Label(" unit scale:"), unitScalingBox);
+            return header;
         }
 
-        private void changeAxisRangeLimit(final Axis axis, final boolean isHorizontal, final boolean isIncrease) {
+        private Pane getLogCheckBoxes(final Axis axis) {
+            final Pane boxMax = new VBox();
+            VBox.setVgrow(boxMax, Priority.ALWAYS);
 
-            final boolean isInverted = axis.isInvertedAxis();
-            DoubleProperty prop;
-            if (isHorizontal) {
-                prop = isInverted ? axis.upperBoundProperty() : axis.lowerBoundProperty();
+            final CheckBox logAxis = new CheckBox("log axis");
+            HBox.setHgrow(logAxis, Priority.ALWAYS);
+            VBox.setVgrow(logAxis, Priority.ALWAYS);
+            logAxis.setMaxWidth(Double.MAX_VALUE);
+            logAxis.setSelected(axis.isLogAxis());
+            boxMax.getChildren().add(logAxis);
+
+            if (axis instanceof DefaultNumericAxis) {
+                logAxis.selectedProperty().bindBidirectional(((DefaultNumericAxis) axis).logAxisProperty());
             } else {
-                prop = isInverted ? axis.lowerBoundProperty() : axis.upperBoundProperty();
+                // TODO: consider adding an interface on whether log/non-log
+                // is editable
+                logAxis.setDisable(true);
             }
 
-            double minTickDistance = Double.MAX_VALUE;
-            final List<Number> tickList = new ArrayList<>();
-            axis.getTickMarks().forEach(tickMark -> tickList.add(tickMark.getValue()));
+            final CheckBox invertedAxis = new CheckBox("inverted");
+            HBox.setHgrow(invertedAxis, Priority.ALWAYS);
+            VBox.setVgrow(invertedAxis, Priority.ALWAYS);
+            invertedAxis.setMaxWidth(Double.MAX_VALUE);
+            invertedAxis.setSelected(axis.isInvertedAxis());
+            boxMax.getChildren().add(invertedAxis);
 
-            if (!axis.isLogAxis()) {
-                axis.getMinorTickMarks().forEach(minorTick -> tickList.add(Double.valueOf(minorTick.getPosition())));
+            if (axis instanceof DefaultNumericAxis) {
+                invertedAxis.selectedProperty().bindBidirectional(((DefaultNumericAxis) axis).invertAxisProperty());
+            } else {
+                // TODO: consider adding an interface on whether
+                // invertedAxis is editable
+                invertedAxis.setDisable(true);
             }
 
-            for (final Number check1 : tickList) {
-                for (final Number check2 : tickList) {
-                    minTickDistance = Math.min(Math.abs(check1.doubleValue() - check2.doubleValue()), minTickDistance);
+            final CheckBox timeAxis = new CheckBox("time axis");
+            HBox.setHgrow(timeAxis, Priority.ALWAYS);
+            VBox.setVgrow(timeAxis, Priority.ALWAYS);
+            timeAxis.setMaxWidth(Double.MAX_VALUE);
+            timeAxis.setSelected(axis.isTimeAxis());
+            boxMax.getChildren().add(timeAxis);
+
+            if (axis instanceof DefaultNumericAxis) {
+                timeAxis.selectedProperty().bindBidirectional(((DefaultNumericAxis) axis).timeAxisProperty());
+            } else {
+                // TODO: consider adding an interface on whether
+                // timeAxis is editable
+                timeAxis.setDisable(true);
+            }
+
+            return boxMax;
+        }
+
+        private Pane getMinMaxButtons(final Axis axis, final boolean isHorizontal, final boolean isMin) {
+            final Button incMaxButton = new Button("", new Glyph(EditAxis.FONT_AWESOME, "\uf077"));
+            incMaxButton.setMaxWidth(Double.MAX_VALUE);
+            VBox.setVgrow(incMaxButton, Priority.ALWAYS);
+            HBox.setHgrow(incMaxButton, Priority.ALWAYS);
+            incMaxButton.setOnAction(evt -> {
+                axis.setAutoRanging(false);
+                changeAxisRangeLimit(axis, isHorizontal ? isMin : !isMin, true);
+            });
+
+            final Button decMaxButton = new Button("", new Glyph(EditAxis.FONT_AWESOME, "\uf078"));
+            decMaxButton.setMaxWidth(Double.MAX_VALUE);
+            VBox.setVgrow(decMaxButton, Priority.ALWAYS);
+            HBox.setHgrow(decMaxButton, Priority.ALWAYS);
+
+            decMaxButton.setOnAction(evt -> {
+                axis.setAutoRanging(false);
+                changeAxisRangeLimit(axis, isHorizontal ? isMin : !isMin, false);
+            });
+            final Pane box = isHorizontal ? new VBox() : new HBox();
+            box.getChildren().addAll(incMaxButton, decMaxButton);
+
+            return box;
+        }
+
+        private Pane getRangeChangeButtons(final Axis axis, final boolean isHorizontal) {
+            final Button incMaxButton = new Button("", new Glyph(EditAxis.FONT_AWESOME, "expand"));
+            incMaxButton.setMaxWidth(Double.MAX_VALUE);
+            VBox.setVgrow(incMaxButton, Priority.NEVER);
+            HBox.setHgrow(incMaxButton, Priority.NEVER);
+            incMaxButton.setOnAction(evt -> {
+                axis.setAutoRanging(false);
+                changeAxisRange(axis, true);
+            });
+
+            final Button decMaxButton = new Button("", new Glyph(EditAxis.FONT_AWESOME, "compress"));
+            decMaxButton.setMaxWidth(Double.MAX_VALUE);
+            VBox.setVgrow(decMaxButton, Priority.NEVER);
+            HBox.setHgrow(decMaxButton, Priority.NEVER);
+
+            decMaxButton.setOnAction(evt -> {
+                axis.setAutoRanging(false);
+                changeAxisRange(axis, false);
+            });
+            final Pane boxMax = isHorizontal ? new VBox() : new HBox();
+            boxMax.getChildren().addAll(incMaxButton, decMaxButton);
+
+            return boxMax;
+        }
+
+    }
+
+    private class MyPopOver extends PopOver {
+
+        private long popOverShowStartTime;
+        private boolean isMouseInPopOver;
+        private Axis axis = null;
+
+        private final EventHandler<? super MouseEvent> axisClickEventHandler = evt -> {
+            if (evt.getButton() == MouseButton.SECONDARY) {
+                final double x = evt.getScreenX();
+                final double y = evt.getScreenY();
+                if (axis != null) {
+                    show((Node) axis, x, y);
                 }
             }
-            if (axis.isLogAxis()) {
-                minTickDistance *= 0.1;
+
+        };
+
+        MyPopOver(final Axis axis, final boolean isHorizontal) {
+            super(new AxisEditor(axis, isHorizontal));
+            this.axis = axis;
+            popOverShowStartTime = 0;
+
+            super.setAutoHide(true);
+            super.setAnimated(true);
+            setFadeInDuration(Duration.millis(1000));
+            setFadeOutDuration(Duration.millis(500));
+            switch (axis.getSide()) {
+            case TOP:
+                setArrowLocation(ArrowLocation.TOP_CENTER);
+                break;
+            case LEFT:
+                setArrowLocation(ArrowLocation.LEFT_CENTER);
+                break;
+            case RIGHT:
+                setArrowLocation(ArrowLocation.RIGHT_CENTER);
+                break;
+            case BOTTOM:
+            default:
+                setArrowLocation(ArrowLocation.BOTTOM_CENTER);
+                break;
             }
 
-            if ((minTickDistance == Double.MAX_VALUE) || (minTickDistance <= 0)) {
-                // default fall-back in case no minor tick have been defined for
-                // the axis
-                minTickDistance = 0.05 * Math.abs(axis.getUpperBound() - axis.getLowerBound());
-            }
+            setOpacity(0.0);
+            getRoot().setBackground(Background.EMPTY);
+            // getRoot().setStyle("-fx-background-color: rgba(0, 255, 0, 1);");
 
-            if (axis.getTickUnit() > 0) {
-                minTickDistance = axis.getTickUnit();
-            }
+            getScene().getStylesheets().add("plugin/editaxis.css");
+            getStyleClass().add("axis-editor-view-pane");
 
-            // TODO: check for linear and logarithmic axis
-            changeAxisRangeLinearScale(minTickDistance, prop, isIncrease);
+            final Timeline checkMouseInsidePopUp = new Timeline(
+                    new KeyFrame(Duration.millis(EditAxis.DEFAULT_UPDATE_PERIOD), event -> {
+                        if (!MyPopOver.this.isShowing()) {
+                            return;
+                        }
 
-            if (axis instanceof AbstractAxis) {
-                // ((AbstractAxis) axis).recomputeTickMarks();
-                axis.setTickUnit(((AbstractAxis) axis).computePreferredTickUnit(axis.getLength()));
-            }
+                        final long now = System.currentTimeMillis();
+                        if (isMouseInPopOver) {
+                            popOverShowStartTime = System.currentTimeMillis();
+                        }
+                        if (Math.abs(now - popOverShowStartTime) > EditAxis.DEFAULT_SHUTDOWN_PERIOD) {
+                            MyPopOver.this.hide();
+                        }
+                    }));
+            checkMouseInsidePopUp.setCycleCount(Animation.INDEFINITE);
+            checkMouseInsidePopUp.play();
+
+            registerMouseEvents();
         }
 
-        private void changeAxisRangeLinearScale(final double minTickDistance, final DoubleProperty property,
-                final boolean isIncrease) {
-            final double value = property.doubleValue();
-            final double diff = minTickDistance;
-            if (isIncrease) {
-                property.set(value + diff);
-            } else {
-                property.set(value - diff);
-            }
+        public void deregisterMouseEvents() {
+            ((Node) axis).removeEventHandler(MouseEvent.MOUSE_CLICKED, axisClickEventHandler);
         }
 
+        public final void registerMouseEvents() {
+            setOnShowing(evt -> popOverShowStartTime = System.currentTimeMillis());
+            getContentNode().setOnMouseEntered(mevt -> isMouseInPopOver = true);
+            getContentNode().setOnMouseExited(mevt -> isMouseInPopOver = false);
+
+            ((Node) axis).setOnMouseClicked(axisClickEventHandler);
+        }
     }
 }
