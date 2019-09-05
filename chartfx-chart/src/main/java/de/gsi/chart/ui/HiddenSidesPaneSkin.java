@@ -199,7 +199,7 @@ public class HiddenSidesPaneSkin extends SkinBase<HiddenSidesPane> {
 
         final KeyValue[] keyValues = new KeyValue[Side.values().length];
         for (final Side s : Side.values()) {
-            keyValues[s.ordinal()] = new KeyValue(visibility[s.ordinal()], s == side ? 1 : 0);
+            keyValues[s.ordinal()] = new KeyValue(visibility[s.ordinal()], s.equals(side) ? 1 : 0);
         }
 
         final Duration delay = getSkinnable().getAnimationDelay() != null ? getSkinnable().getAnimationDelay()
