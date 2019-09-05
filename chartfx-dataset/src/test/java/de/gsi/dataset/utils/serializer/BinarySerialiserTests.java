@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory;
 
 import de.gsi.dataset.serializer.spi.BinarySerialiser;
 import de.gsi.dataset.serializer.spi.FastByteBuffer;
-import de.gsi.dataset.serializer.spi.BinarySerialiser.FieldHeader;
+import de.gsi.dataset.serializer.spi.FieldHeader;
 
 
 /**

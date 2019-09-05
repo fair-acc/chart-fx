@@ -6,7 +6,7 @@ package de.gsi.dataset.serializer;
  * array, because of 2 reasons: - we always want to support only rectangle
  * arrays (not arbitrary row length) - it corresponds to C++ implementation,
  * where 1D array is used as well (to support static multi-dimensional arrays)
- * 
+ *
  * @author Ilia Yastrebov, CERN
  * @author Joel Lauener, CERN
  * @author rstein
@@ -16,7 +16,7 @@ public interface MultiArray<T> {
 
     /**
      * Returns the element at a given indices.
-     * 
+     *
      * @param index the indices
      * @return the element
      */
@@ -24,7 +24,7 @@ public interface MultiArray<T> {
 
     /**
      * Returns the element at given indices.
-     * 
+     *
      * @param indices position of the element in the multi-dimensional array
      * @return the element
      */
@@ -32,7 +32,7 @@ public interface MultiArray<T> {
 
     /**
      * Returns the element at given indices.
-     * 
+     *
      * @param indices position of the element in the multi-dimensional array
      * @return the primitive element
      */
@@ -40,7 +40,7 @@ public interface MultiArray<T> {
 
     /**
      * Returns the element at given indices.
-     * 
+     *
      * @param indices position of the element in the multi-dimensional array
      * @return the primitive element
      */
@@ -48,14 +48,14 @@ public interface MultiArray<T> {
 
     /**
      * Returns the dimensions of the array.
-     * 
+     *
      * @return the dimensions
      */
     int[] getDimensions();
 
     /**
      * Returns the element at given indices.
-     * 
+     *
      * @param indices position of the element in the multi-dimensional array
      * @return the primitive element
      */
@@ -63,21 +63,21 @@ public interface MultiArray<T> {
 
     /**
      * Returns the array of all elements of multi-dimensional array.
-     * 
+     *
      * @return the array of all elements
      */
     T getElements();
 
     /**
      * Returns the number of elements in the multi-dimensional array.
-     * 
+     *
      * @return the number of elements
      */
     int getElementsCount();
 
     /**
      * Returns the element at given indices.
-     * 
+     *
      * @param indices position of the element in the multi-dimensional array
      * @return the primitive element
      */
@@ -85,7 +85,7 @@ public interface MultiArray<T> {
 
     /**
      * Returns the element at given indices.
-     * 
+     *
      * @param indices position of the element in the multi-dimensional array
      * @return index for the one-dimensional array
      */
@@ -93,7 +93,7 @@ public interface MultiArray<T> {
 
     /**
      * Returns the element at given indices.
-     * 
+     *
      * @param indices position of the element in the multi-dimensional array
      * @return the primitive element
      */
@@ -101,7 +101,7 @@ public interface MultiArray<T> {
 
     /**
      * Returns the element at given indices.
-     * 
+     *
      * @param indices position of the element in the multi-dimensional array
      * @return the primitive element
      */
@@ -109,7 +109,7 @@ public interface MultiArray<T> {
 
     /**
      * Returns the element at given indices.
-     * 
+     *
      * @param indices position of the element in the multi-dimensional array
      * @return the primitive element
      */
@@ -117,7 +117,7 @@ public interface MultiArray<T> {
 
     /**
      * Returns the element at given indices.
-     * 
+     *
      * @param indices position of the element in the multi-dimensional array
      * @return the element
      */
