@@ -35,7 +35,7 @@ import java.util.concurrent.locks.ReadWriteLock;
  * <i>limit</i> {@code <=}
  * <i>capacity</i>
  * </blockquote>
- * 
+ *
  * @author rstein
  * @param <C> generic type for inheriting self (fluent-design)
  */
@@ -54,12 +54,12 @@ public interface IoBufferHeader<C extends IoBufferHeader<C>> {
      * Invoke this method before using a sequence of channel-read or
      * <i>put</i> operations to fill this buffer. For example:
      * <blockquote>
-     * 
+     *
      * <pre>
      * buf.clear(); // Prepare buffer for reading
      * in.read(buf); // Read data
      * </pre>
-     * 
+     *
      * </blockquote>
      * <p>
      * This method does not actually erase the data in the buffer, but it
@@ -115,7 +115,7 @@ public interface IoBufferHeader<C extends IoBufferHeader<C>> {
      * For efficiency/performance reasons the buffer implementation is not required to safe-guard each put/get method
      * independently.
      * Thus the user-code should acquire the given lock around a set of put/get appropriately.
-     * 
+     *
      * @return the read-write lock
      */
     ReadWriteLock lock();
@@ -141,7 +141,7 @@ public interface IoBufferHeader<C extends IoBufferHeader<C>> {
 
     /**
      * resets the buffer read/write position to zero
-     * 
+     *
      * @return itself (fluent design)
      */
     C reset();
