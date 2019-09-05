@@ -323,6 +323,15 @@ public class MountainRangeRenderer extends ErrorDataSetRenderer implements Rende
             return null;
         }
 
+        @Override
+        public String getAxisName(int dim) {
+            return dataSet.getAxisName(dim);
+        }
+
+        @Override
+        public String getAxisUnit(int dim) {
+            return dataSet.getAxisUnit(dim);
+        }
     }
 
 }
