@@ -15,6 +15,7 @@ import de.gsi.dataset.DataSetMetaData;
 import de.gsi.dataset.EditConstraints;
 import de.gsi.dataset.event.EventListener;
 import de.gsi.dataset.event.UpdateEvent;
+import de.gsi.dataset.event.UpdatedAxisDataEvent;
 import de.gsi.dataset.event.UpdatedMetaDataEvent;
 import de.gsi.dataset.spi.utils.StringHashMapList;
 
@@ -29,6 +30,7 @@ import de.gsi.dataset.spi.utils.StringHashMapList;
  * can be used to dispatch DataSetEvent events.
  * <li>It maintains ranges of X and Y values.
  * <li>It gives a possibility to specify an undefined value.
+ * <li>It maintains the names and units for the axes
  * </ul>
  * 
  * @param <D> java generics handling of DataSet for derived classes (needed for
@@ -50,6 +52,8 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
     protected ArrayList<String> errorList = new ArrayList<>();
     protected EditConstraints editConstraints;
     protected final Map<String, String> metaInfoMap = new ConcurrentHashMap<>();
+    protected List<String> axesNames = new ArrayList<>();
+    protected List<String> axesUnits = new ArrayList<>();
 
     /**
      * default constructor
@@ -94,6 +98,7 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
         return getThis();
     }
 
+    @Override
     public List<EventListener> updateEventListener() {
         return updateListeners;
     }
@@ -507,6 +512,7 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
      * @param index the index of the specific data point
      * @return user-specific data set style description (ie. may be set by user)
      */
+    @Override
     public String getStyle(final int index) {
         return dataStyles.get(index);
     }
@@ -547,5 +553,25 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
     @Override
     public List<String> getErrorList() {
         return errorList;
+    }
+
+    @Override
+    public String getAxisName(int dim) {
+        return (axesNames.size() > dim) ? axesNames.get(dim) : "";
+    }
+    
+    @Override
+    public String getAxisUnit(int dim) {
+        return (axesNames.size() > dim) ? axesUnits.get(dim) : "";
+    }
+    
+    public void setAxisDescription(int dim, String name, String... unit) {
+        if (dim < 0) throw new IllegalArgumentException("Negative dimension index not allowed");
+        if (unit.length > 1) throw new IllegalArgumentException("More than one unit is not allowed");
+        while (axesNames.size() <= dim) axesNames.add("");
+        while (axesUnits.size() <= dim) axesUnits.add("");
+        axesNames.set(dim, name);
+        if (unit.length == 1) axesUnits.set(dim, unit[0]);
+        fireInvalidated(new UpdatedAxisDataEvent(this, "Updated Axis Data", dim));
     }
 }

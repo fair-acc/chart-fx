@@ -244,5 +244,47 @@ public interface DataSet extends EventSource {
      * @return itself (fluent interface)
      */
     DataSet setStyle(String style);
+    
+    
+    /**
+     * Return the name of the i-th axis.
+     * @param dim 0: X-Axis, 1: Y-Axis, ...
+     * @return Axis Label
+     */
+    String getAxisName(int dim);
 
+    /**
+     * @return X-Axis name
+     */
+    default String getXAxisName() {
+        return getAxisName(0);
+    }
+    
+    /**
+     * @return Y-Axis name
+     */
+    default String getYAxisName() {
+        return getAxisName(1);
+    }
+    
+    /**
+     * Return the unit for the i-th axis.
+     * @param dim 0: X-Axis, 1: Y-Axis, ...
+     * @return Axis unit
+     */
+    String getAxisUnit(int dim);
+
+    /**
+     * @return X-Axis unit
+     */
+    default String getXAxisUnit() {
+        return getAxisUnit(0);
+    }
+    
+    /**
+     * @return Y-Axis unit
+     */
+    default String getYAxisUnit() {
+        return getAxisUnit(1);
+    }
 }
