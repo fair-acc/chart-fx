@@ -2,13 +2,13 @@ package de.gsi.chart.samples;
 
 import de.gsi.chart.XYChart;
 import de.gsi.chart.axes.spi.DefaultNumericAxis;
-import de.gsi.dataset.EditConstraints;
-import de.gsi.dataset.spi.DoubleDataSet;
 import de.gsi.chart.plugins.DataPointTooltip;
 import de.gsi.chart.plugins.EditAxis;
 import de.gsi.chart.plugins.EditDataSet;
 import de.gsi.chart.plugins.Panner;
 import de.gsi.chart.plugins.Zoomer;
+import de.gsi.dataset.EditConstraints;
+import de.gsi.dataset.spi.DoubleDataSet;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.layout.StackPane;
@@ -35,7 +35,11 @@ public class EditDataSetSample extends Application {
         root.getChildren().add(chart);
 
         final DoubleDataSet dataSet1 = new DoubleDataSet("data set #1 (full change)");
+        dataSet1.setAxisDescription(0, "time", "s");
+        dataSet1.setAxisDescription(1, "Voltage", "V");
         final DoubleDataSet dataSet2 = new DoubleDataSet("data set #2 (modify y-only)");
+        dataSet2.setAxisDescription(0, "time", "s");
+        dataSet2.setAxisDescription(1, "Current", "A");
         // lineChartPlot.getDatasets().add(dataSet1); // for single data set
         chart.getDatasets().addAll(dataSet1, dataSet2); // two data sets
 
