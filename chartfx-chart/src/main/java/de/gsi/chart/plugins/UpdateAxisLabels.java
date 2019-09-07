@@ -50,7 +50,7 @@ public class UpdateAxisLabels extends ChartPlugin {
                 for (Renderer renderer : renderersChange.getAddedSubList()) {
                     ListChangeListener<DataSet> dataSetsListener = (
                             ListChangeListener.Change<? extends DataSet> dataSetsChange) -> {
-                        DataSetsChanged(dataSetsChange, renderer);
+                        dataSetsChanged(dataSetsChange, renderer);
                     };
                     renderer.getDatasets().addListener(dataSetsListener);
                     renderersListeners.put(renderer, dataSetsListener);
@@ -105,7 +105,7 @@ public class UpdateAxisLabels extends ChartPlugin {
         }
 
         ListChangeListener<DataSet> rendererListener = (ListChangeListener.Change<? extends DataSet> change) -> {
-            DataSetsChanged(change, renderer);
+            dataSetsChanged(change, renderer);
         };
         dataSets.addListener(rendererListener);
         renderersListeners.put(renderer, rendererListener);
@@ -141,7 +141,7 @@ public class UpdateAxisLabels extends ChartPlugin {
         });
     }
 
-    private void DataSetsChanged(ListChangeListener.Change<? extends DataSet> change, Renderer renderer) {
+    private void dataSetsChanged(ListChangeListener.Change<? extends DataSet> change, Renderer renderer) {
         Map<DataSet, EventListener> dataSetListeners;
         if (renderer == null) {
             dataSetListeners = chartDataSetsListeners;
