@@ -52,17 +52,6 @@ public enum DataType {
     END_MARKER               (0xFE, "end_marker",    "",                    1, Byte.class, Cat.PRIMITIVE);
     // @formatter:on
 
-    /**
-     * private type categories
-     * 
-     * @author rstein
-     */
-    private enum Cat {
-        PRIMITIVE,
-        ARRAY,
-        OBJECT;
-    }
-
     private final byte byteValue;
     private final long primitiveSize;
     private final String stringValue;
