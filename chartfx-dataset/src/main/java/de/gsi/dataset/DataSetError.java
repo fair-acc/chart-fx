@@ -12,7 +12,7 @@ package de.gsi.dataset;
  */
 public interface DataSetError extends DataSet {
 
-    public enum ErrorType {
+    enum ErrorType {
         NO_ERROR, // no error attached
         X, // only symmetric errors around x
         Y, // only symmetric errors around y

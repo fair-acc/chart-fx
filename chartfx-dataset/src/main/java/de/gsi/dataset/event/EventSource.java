@@ -6,19 +6,12 @@ import java.util.Objects;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * 
  * @author rstein
- *
  */
 public interface EventSource {
-
-    /**
-     * @return list containing all update event listener (needs to be provided
-     *         by implementing class)
-     */
-    List<EventListener> updateEventListener();
 
     /**
      * Adds an {@link EventListener} which will be notified whenever the
@@ -34,7 +27,6 @@ public interface EventSource {
      * a memory leak.
      *
      * @see #removeListener(EventListener)
-     *
      * @param listener
      *            The listener to register
      * @throws NullPointerException
@@ -49,6 +41,63 @@ public interface EventSource {
         }
     }
 
+    AtomicBoolean autoNotification();
+
+    /**
+     * invoke object within update listener list
+     */
+    default void invokeListener() {
+        invokeListener(null);
+    }
+
+    /**
+     * invoke object within update listener list
+     * 
+     * @param updateEvent the event the listeners are notified with
+     */
+    default void invokeListener(final UpdateEvent updateEvent) {
+        if (updateEventListener() == null || !isAutoNotification()) {
+            return;
+        }
+        synchronized (updateEventListener()) {
+            final UpdateEvent event = updateEvent == null ? new UpdateEvent(this) : updateEvent;
+
+            final List<Callable<Boolean>> workers = new ArrayList<>();
+            for (EventListener listener : updateEventListener()) {
+                workers.add(() -> {
+                    listener.handle(event);
+                    return Boolean.TRUE;
+                });
+            }
+
+            try {
+                final List<Future<Boolean>> jobs = EventThreadHelper.getExecutorService().invokeAll(workers);
+                for (final Future<Boolean> future : jobs) {
+                    final Boolean execstate = future.get();
+                    if (!execstate) {
+                        throw new IllegalStateException("one parallel worker thread finished execution with error");
+                    }
+                }
+            } catch (final InterruptedException | ExecutionException e) {
+                throw new IllegalStateException("one parallel worker thread finished execution with error", e);
+            }
+        }
+
+        // alt implementation:
+        // for (EventListener listener : updateEventListener()) {
+        // listener.handle(updateEvent);
+        // }
+    }
+
+    /**
+     * Checks it automatic notification is enabled.
+     *
+     * @return <code>true</code> if automatic notification is enabled
+     */
+    default boolean isAutoNotification() {
+        return autoNotification().get();
+    }
+
     /**
      * Removes the given listener from the list of listeners, that are notified
      * whenever the value of the {@code UpdateSource} becomes invalid.
@@ -59,7 +108,6 @@ public interface EventSource {
      * only the first occurrence will be removed.
      *
      * @see #addListener(EventListener)
-     *
      * @param listener
      *            The listener to remove
      * @throws NullPointerException
@@ -75,46 +123,24 @@ public interface EventSource {
     }
 
     /**
-     * invoke object within update listener list
-     * 
+     * Set the automatic notification of invalidation listeners. In general,
+     * data sets should notify registered invalidation listeners, if the data in
+     * the data set has changed. Charts usually register an invalidation
+     * listener with the data set to be notified of any changes and update the
+     * charts. Setting the automatic notification to false, allows applications
+     * to prevent this behaviour, in case data sets are updated multiple times
+     * during an acquisition cycle but the chart update is only required at the
+     * end of the cycle.
+     *
+     * @param flag <code>true</code> for automatic notification
      */
-    default void invokeListener() {
-    	invokeListener(null);
+    default void setAutoNotifaction(boolean flag) {
+        autoNotification().set(flag);
     }
 
-	/**
-	 * invoke object within update listener list
-	 * 
-	 * @param updateEvent the event the listeners are notified with
-	 */
-	default void invokeListener(final UpdateEvent updateEvent) {
-		synchronized (updateEventListener()) {
-			final UpdateEvent event = updateEvent == null ? new UpdateEvent(this) : updateEvent;
-
-			final List<Callable<Boolean>> workers = new ArrayList<>();
-			for (EventListener listener : updateEventListener()) {
-				workers.add(() -> {
-					listener.handle(event);
-					return Boolean.TRUE;
-				});
-			}
-
-			try {
-				final List<Future<Boolean>> jobs = EventThreadHelper.getExecutorService().invokeAll(workers);
-				for (final Future<Boolean> future : jobs) {
-					final Boolean execstate = future.get();
-					if (!execstate) {
-						throw new IllegalStateException("one parallel worker thread finished execution with error");
-					}
-				}
-			} catch (final InterruptedException | ExecutionException e) {
-				throw new IllegalStateException("one parallel worker thread finished execution with error", e);
-			}
-		}
-
-		// alt implementation:
-		// for (EventListener listener : updateEventListener()) {
-		// listener.handle(updateEvent);
-		// }
-	}
+    /**
+     * @return list containing all update event listener (needs to be provided
+     *         by implementing class)
+     */
+    List<EventListener> updateEventListener();
 }

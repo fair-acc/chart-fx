@@ -1,5 +1,7 @@
 package de.gsi.dataset;
 
+import java.util.List;
+
 import de.gsi.dataset.event.EventSource;
 
 /**
@@ -12,49 +14,19 @@ import de.gsi.dataset.event.EventSource;
 public interface DataSet extends EventSource {
 
     /**
-     * Gets the name of the data set.
-     *
-     * @return the name of the DataSet
+     * Return the axis description of the i-th axis.
+     * 
+     * @param dim 0: X-Axis, 1: Y-Axis, ...
+     * @return Axis Label
      */
-    String getName();
+    default AxisDescription getAxisDescription(int dim) {
+        return getAxisDescriptions().get(dim);
+    }
 
     /**
-     * Locks access to the data set. Multi-threaded applications should lock the
-     * data set before setting the data.
-     *
-     * @return itself (fluent interface)
+     * @return axis descriptions of the primary and secondary axes
      */
-    DataSet lock();
-
-    /**
-     * Unlock the data set.
-     *
-     * @return itself (fluent interface)
-     */
-    DataSet unlock();
-
-    /**
-     * Set the automatic notification of invalidation listeners. In general,
-     * data sets should notify registered invalidation listeners, if the data in
-     * the data set has changed. Charts usually register an invalidation
-     * listener with the data set to be notified of any changes and update the
-     * charts. Setting the automatic notification to false, allows applications
-     * to prevent this behaviour, in case data sets are updated multiple times
-     * during an acquisition cycle but the chart update is only required at the
-     * end of the cycle.
-     *
-     * @param flag
-     *            true for automatic notification
-     * @return itself (fluent interface)
-     */
-    DataSet setAutoNotifaction(boolean flag);
-
-    /**
-     * Checks it automatic notification is enabled.
-     *
-     * @return true if automatic notification is enabled
-     */
-    boolean isAutoNotification();
+    List<AxisDescription> getAxisDescriptions();
 
     /**
      * Get the number of data points in the data set
@@ -66,57 +38,50 @@ public interface DataSet extends EventSource {
     /**
      * Gets the number of data points in the range xmin to xmax.
      *
-     * @param xmin
-     *            the lower end of the range
-     * @param xmax
-     *            the upper end of the range
+     * @param xmin the lower end of the range
+     * @param xmax the upper end of the range
      * @return the number of data points
      */
     int getDataCount(double xmin, double xmax);
 
     /**
-     * Gets the x value of the data point with the index i
+     * Returns label of a data point specified by the index. The label can be
+     * used as a category name if CategoryStepsDefinition is used or for
+     * annotations displayed for data points.
      *
-     * @param i
-     *            the index of the data point
-     * @return the x value
+     * @param index
+     *            the data index
+     * @return label of a data point specified by the index or <code>null</code>
+     *         if none label has been specified for this data point.
      */
-    double getX(int i);
+    String getDataLabel(int index);
 
     /**
-     * Gets the y value of the data point with the index i
+     * Gets the name of the data set.
      *
-     * @param i
-     *            the index of the data point
-     * @return the y value
+     * @return the name of the DataSet
      */
-    double getY(int i);
+    String getName();
 
     /**
-     *     
-     * @return the x value array
+     * A string representation of the CSS style associated with this specific
+     * {@code DataSet}. This is analogous to the "style" attribute of an HTML
+     * element. Note that, like the HTML style attribute, this variable contains
+     * style properties and values and not the selector portion of a style rule.
+     *
+     * @return user-specific data set style description (ie. may be set by user)
      */
-    default double[] getXValues() {
-        final int n = getDataCount();
-        final double[] retValues = new double[n];
-        for (int i = 0; i < n; i++) {
-            retValues[i] = getX(i);
-        }
-        return retValues;
-    }
+    String getStyle();
 
     /**
-     *     
-     * @return the y value array
+     * A string representation of the CSS style associated with this specific
+     * {@code DataSet} data point. @see #getStyle()
+     *
+     * @param index
+     *            the index of the specific data point
+     * @return user-specific data set style description (ie. may be set by user)
      */
-    default double[] getYValues() {
-        final int n = getDataCount();
-        final double[] retValues = new double[n];
-        for (int i = 0; i < n; i++) {
-            retValues[i] = getY(i);
-        }
-        return retValues;
-    }
+    String getStyle(int index);
 
     /**
      * Gets the interpolated y value of the data point for given x coordinate
@@ -146,11 +111,13 @@ public interface DataSet extends EventSource {
     }
 
     /**
-     * Returns the value for undefined data points.
+     * Gets the x value of the data point with the index i
      *
-     * @return the value indicating undefined data points
+     * @param i
+     *            the index of the data point
+     * @return the x value
      */
-    Double getUndefValue();
+    double getX(int i);
 
     /**
      * Gets the index of the data point closest to the given x coordinate. The
@@ -165,6 +132,27 @@ public interface DataSet extends EventSource {
     int getXIndex(double x);
 
     /**
+     * @return the x value array
+     */
+    default double[] getXValues() {
+        final int n = getDataCount();
+        final double[] retValues = new double[n];
+        for (int i = 0; i < n; i++) {
+            retValues[i] = getX(i);
+        }
+        return retValues;
+    }
+
+    /**
+     * Gets the y value of the data point with the index i
+     *
+     * @param i
+     *            the index of the data point
+     * @return the y value
+     */
+    double getY(int i);
+
+    /**
      * Gets the first index of the data point closest to the given y coordinate.
      *
      * @param y
@@ -174,64 +162,26 @@ public interface DataSet extends EventSource {
     int getYIndex(double y);
 
     /**
-     * Gets the minimum x value of the data set.
-     *
-     * @return minimum x value
+     * @return the y value array
      */
-    double getXMin();
+    default double[] getYValues() {
+        final int n = getDataCount();
+        final double[] retValues = new double[n];
+        for (int i = 0; i < n; i++) {
+            retValues[i] = getY(i);
+        }
+        return retValues;
+    }
 
     /**
-     * Gets the maximum x value of the data set.
+     * Locks access to the data set. Multi-threaded applications should lock the
+     * data set before setting the data.
      *
-     * @return maximum x value
+     * @return itself (fluent interface)
      */
-    double getXMax();
+    DataSet lock();
 
-    /**
-     * Gets the minimum y value of the data set.
-     *
-     * @return minimum y value
-     */
-    double getYMin();
-
-    /**
-     * Gets the maximum y value of the data set.
-     *
-     * @return maximum y value
-     */
-    double getYMax();
-
-    /**
-     * Returns label of a data point specified by the index. The label can be
-     * used as a category name if CategoryStepsDefinition is used or for
-     * annotations displayed for data points.
-     *
-     * @param index
-     *            the data index
-     * @return label of a data point specified by the index or <code>null</code>
-     *         if none label has been specified for this data point.
-     */
-    String getDataLabel(int index);
-
-    /**
-     * A string representation of the CSS style associated with this specific
-     * {@code DataSet}. This is analogous to the "style" attribute of an HTML
-     * element. Note that, like the HTML style attribute, this variable contains
-     * style properties and values and not the selector portion of a style rule.
-     *
-     * @return user-specific data set style description (ie. may be set by user)
-     */
-    String getStyle();
-
-    /**
-     * A string representation of the CSS style associated with this specific
-     * {@code DataSet} data point. @see #getStyle()
-     *
-     * @param index
-     *            the index of the specific data point
-     * @return user-specific data set style description (ie. may be set by user)
-     */
-    String getStyle(int index);
+    DataSet recomputeLimits(final int dimension);
 
     /**
      * A string representation of the CSS style associated with this specific
@@ -244,47 +194,11 @@ public interface DataSet extends EventSource {
      * @return itself (fluent interface)
      */
     DataSet setStyle(String style);
-    
-    
-    /**
-     * Return the name of the i-th axis.
-     * @param dim 0: X-Axis, 1: Y-Axis, ...
-     * @return Axis Label
-     */
-    String getAxisName(int dim);
 
     /**
-     * @return X-Axis name
+     * Unlock the data set.
+     *
+     * @return itself (fluent interface)
      */
-    default String getXAxisName() {
-        return getAxisName(0);
-    }
-    
-    /**
-     * @return Y-Axis name
-     */
-    default String getYAxisName() {
-        return getAxisName(1);
-    }
-    
-    /**
-     * Return the unit for the i-th axis.
-     * @param dim 0: X-Axis, 1: Y-Axis, ...
-     * @return Axis unit
-     */
-    String getAxisUnit(int dim);
-
-    /**
-     * @return X-Axis unit
-     */
-    default String getXAxisUnit() {
-        return getAxisUnit(0);
-    }
-    
-    /**
-     * @return Y-Axis unit
-     */
-    default String getYAxisUnit() {
-        return getAxisUnit(1);
-    }
+    DataSet unlock();
 }

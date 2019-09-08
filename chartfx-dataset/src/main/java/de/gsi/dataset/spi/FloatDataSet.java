@@ -1,5 +1,6 @@
 package de.gsi.dataset.spi;
 
+import de.gsi.dataset.AxisDescription;
 import de.gsi.dataset.DataSet;
 import de.gsi.dataset.EditableDataSet;
 import de.gsi.dataset.event.AddedDataEvent;
@@ -18,7 +19,6 @@ import it.unimi.dsi.fastutil.floats.FloatArrayList;
  * 
  * @see DoubleErrorDataSet for an equivalent implementation with asymmetric
  *      errors in Y
- *
  * @author rstein
  */
 public class FloatDataSet extends AbstractDataSet<FloatDataSet> implements EditableDataSet {
@@ -135,14 +135,12 @@ public class FloatDataSet extends AbstractDataSet<FloatDataSet> implements Edita
         dataStyles.clear();
         clearMetaInfo();
 
-        xRange.empty();
-        yRange.empty();
+        getAxisDescriptions().forEach(AxisDescription::empty);
 
         return unlock().fireInvalidated(new RemovedDataEvent(this, "clearData()"));
     }
 
     /**
-     * 
      * @return storage capacity of dataset
      */
     public int getCapacity() {
@@ -150,7 +148,6 @@ public class FloatDataSet extends AbstractDataSet<FloatDataSet> implements Edita
     }
 
     /**
-     * 
      * @param amount storage capacity increase
      * @return itself (fluent design)
      */
@@ -213,8 +210,8 @@ public class FloatDataSet extends AbstractDataSet<FloatDataSet> implements Edita
 
             // invalidate ranges
             // -> fireInvalidated calls computeLimits for autoNotification
-            xRange.empty();
-            yRange.empty();
+            getAxisDescriptions().forEach(AxisDescription::empty);
+
         } finally {
             unlock();
         }
@@ -224,6 +221,9 @@ public class FloatDataSet extends AbstractDataSet<FloatDataSet> implements Edita
 
     public FloatDataSet set(final int index, final double[] x, final double[] y) {
         lock();
+        final boolean oldAutoNotification = this.isAutoNotification();
+        setAutoNotifaction(false);
+
         try {
             xValues.size(index + x.length);
             System.arraycopy(x, 0, xValues.elements(), index, x.length);
@@ -232,9 +232,10 @@ public class FloatDataSet extends AbstractDataSet<FloatDataSet> implements Edita
 
             // invalidate ranges
             // -> fireInvalidated calls computeLimits for autoNotification
-            xRange.empty();
-            yRange.empty();
+            getAxisDescriptions().forEach(AxisDescription::empty);
+
         } finally {
+            setAutoNotifaction(oldAutoNotification);
             unlock();
         }
 
@@ -269,8 +270,8 @@ public class FloatDataSet extends AbstractDataSet<FloatDataSet> implements Edita
             addDataLabel(xValues.size() - 1, label);
         }
 
-        xRange.add(x);
-        yRange.add(y);
+        getAxisDescription(0).add(x);
+        getAxisDescription(1).add(y);
 
         return unlock().fireInvalidated(new AddedDataEvent(this));
     }
@@ -305,8 +306,8 @@ public class FloatDataSet extends AbstractDataSet<FloatDataSet> implements Edita
         yValues.add(indexAt, y);
         dataLabels.addValueAndShiftKeys(indexAt, xValues.size(), label);
         dataStyles.shiftKeys(indexAt, xValues.size());
-        xRange.add(x);
-        yRange.add(y);
+        getAxisDescription(0).add(x);
+        getAxisDescription(1).add(y);
 
         return unlock().fireInvalidated(new AddedDataEvent(this));
     }
@@ -326,17 +327,21 @@ public class FloatDataSet extends AbstractDataSet<FloatDataSet> implements Edita
         final int min = Math.min(x.length, y.length);
         AssertUtils.equalFloatArrays(x, y, min);
 
+        final boolean oldAutoNotification = this.isAutoNotification();
+        setAutoNotifaction(false);
+
         final int indexAt = Math.max(0, Math.min(index, getDataCount() + 1));
         xValues.addElements(indexAt, x, 0, min);
         yValues.addElements(indexAt, y, 0, min);
         for (int i = 0; i < min; i++) {
-            xRange.add(x[i]);
-            yRange.add(y[i]);
+            getAxisDescription(0).add(x[i]);
+            getAxisDescription(1).add(y[i]);
         }
 
         dataLabels.shiftKeys(indexAt, xValues.size());
         dataStyles.shiftKeys(indexAt, xValues.size());
 
+        setAutoNotifaction(oldAutoNotification);
         return unlock().fireInvalidated(new AddedDataEvent(this));
     }
 
@@ -362,8 +367,7 @@ public class FloatDataSet extends AbstractDataSet<FloatDataSet> implements Edita
 
         // invalidate ranges
         // -> fireInvalidated calls computeLimits for autoNotification
-        xRange.empty();
-        yRange.empty();
+        this.getAxisDescriptions().forEach(AxisDescription::empty);
 
         return unlock().fireInvalidated(new RemovedDataEvent(this));
     }
@@ -395,16 +399,20 @@ public class FloatDataSet extends AbstractDataSet<FloatDataSet> implements Edita
         AssertUtils.notNull("Y coordinates", yValuesNew);
         AssertUtils.equalFloatArrays(xValuesNew, yValuesNew);
 
+        final boolean oldAutoNotification = this.isAutoNotification();
+        setAutoNotifaction(false);
+
         xValues.addElements(xValues.size(), xValuesNew);
         yValues.addElements(yValues.size(), yValuesNew);
 
         for (int i = 0; i < xValuesNew.length; i++) {
-            xRange.add(xValuesNew[i]);
+            getAxisDescription(0).add(xValuesNew[i]);
         }
         for (int i = 0; i < yValuesNew.length; i++) {
-            yRange.add(yValuesNew[i]);
+            getAxisDescription(1).add(yValuesNew[i]);
         }
 
+        setAutoNotifaction(oldAutoNotification);
         return unlock().fireInvalidated(new AddedDataEvent(this));
     }
 
@@ -426,14 +434,19 @@ public class FloatDataSet extends AbstractDataSet<FloatDataSet> implements Edita
         AssertUtils.notNull("Y coordinates", yValues);
         AssertUtils.equalFloatArrays(xValues, yValues);
 
+        final boolean oldAutoNotification = this.isAutoNotification();
+        setAutoNotifaction(false);
+
         if (!copy) {
             dataLabels.clear();
             dataStyles.clear();
             this.xValues = FloatArrayList.wrap(xValues);
             this.yValues = FloatArrayList.wrap(yValues);
 
-            computeLimits();
+            recomputeLimits(0);
+            recomputeLimits(1);
 
+            setAutoNotifaction(oldAutoNotification);
             return unlock().fireInvalidated(new UpdatedDataEvent(this));
         }
 
@@ -442,8 +455,10 @@ public class FloatDataSet extends AbstractDataSet<FloatDataSet> implements Edita
         this.yValues.size(0);
         this.yValues.addElements(0, yValues);
 
-        computeLimits();
+        recomputeLimits(0);
+        recomputeLimits(1);
 
+        setAutoNotifaction(oldAutoNotification);
         return unlock().fireInvalidated(new UpdatedDataEvent(this));
     }
 

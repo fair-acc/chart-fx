@@ -1,8 +1,8 @@
 package de.gsi.dataset.samples.legacy;
 
 import java.util.Arrays;
-import java.util.Map;
 
+import de.gsi.dataset.AxisDescription;
 import de.gsi.dataset.DataSet;
 import de.gsi.dataset.DataSetError;
 import de.gsi.dataset.EditableDataSet;
@@ -118,7 +118,8 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
             this.yErrorsPos = yErrorsPos;
             this.yErrorsNeg = yErrorsNeg;
         }
-        computeLimits();
+        recomputeLimits(0);
+        recomputeLimits(1);
     }
 
     @Override
@@ -162,8 +163,8 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
         dataLabels.isEmpty();
         dataStyles.isEmpty();
 
-        xRange.empty();
-        yRange.empty();
+        getAxisDescription(0).empty();
+        getAxisDescription(1).empty();
 
         return unlock().fireInvalidated(new RemovedDataEvent(this, "clearData()"));
     }
@@ -238,9 +239,9 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
                 this.add(x, y, yErrorNeg, yErrorPos);
             }
 
-            xRange.add(x);
-            yRange.add(y - yErrorNeg);
-            yRange.add(y + yErrorPos);
+            getAxisDescription(0).add(x);
+            getAxisDescription(1).add(y - yErrorNeg);
+            getAxisDescription(1).add(y + yErrorPos);
         } finally {
             setAutoNotifaction(oldAuto);
             unlock();
@@ -296,9 +297,9 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
         yErrorsNeg[dataMaxIndex] = yErrorNeg;
         dataMaxIndex++;
 
-        xRange.add(x);
-        yRange.add(y - yErrorNeg);
-        yRange.add(y + yErrorPos);
+        getAxisDescription(0).add(x);
+        getAxisDescription(1).add(y - yErrorNeg);
+        getAxisDescription(1).add(y + yErrorPos);
 
         unlock();
         fireInvalidated(new AddedDataEvent(this));
@@ -346,8 +347,7 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
         yErrorsNeg = yErrorsNegNew;
         dataMaxIndex = Math.max(0, dataMaxIndex - diffLength);
 
-        xRange.empty();
-        yRange.empty();
+        getAxisDescriptions().forEach(AxisDescription::empty);
 
         unlock().fireInvalidated(new RemovedDataEvent(this));
         return this;
@@ -410,7 +410,8 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
         System.arraycopy(yErrorsPos, 0, this.yErrorsPos, getDataCount(), newLength - getDataCount());
 
         dataMaxIndex = Math.max(0, dataMaxIndex + xValues.length);
-        computeLimits();
+        recomputeLimits(0);
+        recomputeLimits(1);
 
         unlock();
         fireInvalidated(new AddedDataEvent(this));
@@ -449,7 +450,8 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
             this.yValues = yValues;
             this.yErrorsNeg = yErrorsNeg;
             this.yErrorsPos = yErrorsPos;
-            computeLimits();
+            recomputeLimits(0);
+            recomputeLimits(1);
             unlock();
             fireInvalidated(new UpdatedDataEvent(this));
             return this;
@@ -471,7 +473,8 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
             this.yErrorsPos = Arrays.copyOf(yErrorsPos, xValues.length);
         }
 
-        computeLimits();
+        recomputeLimits(0);
+        recomputeLimits(1);
 
         return unlock().fireInvalidated(new UpdatedDataEvent(this));
     }

@@ -73,7 +73,7 @@ public class Histogram2DimSample extends Application {
         yAxis1.setAutoGrowRanging(true);
         yAxis1.setSide(Side.RIGHT);
         yAxis1.upperBoundProperty().addListener((ch, o, n) -> System.err.println("x-projection upper bound = " + n
-                + " vs " + histogram1.getProjectionX().getYMax() + "  " + histogram2.getProjectionX().getYMax()));
+                + " vs " + histogram1.getProjectionX().getAxisDescription(1).getMax() + "  " + histogram2.getProjectionX().getAxisDescription(1).getMax()));
 
         final DefaultNumericAxis xAxis1 = new DefaultNumericAxis("x-Axis y-Projection", -1, 1000, 10);
         xAxis1.setLogAxis(false);
@@ -84,7 +84,7 @@ public class Histogram2DimSample extends Application {
         xAxis1.setAutoGrowRanging(true);
         xAxis1.setSide(Side.TOP);
         xAxis1.upperBoundProperty().addListener((ch, o, n) -> System.err.println("y-projection upper bound = " + n
-                + " vs " + histogram1.getProjectionY().getYMax() + "  " + histogram2.getProjectionY().getYMax()));
+                + " vs " + histogram1.getProjectionY().getAxisDescription(1).getMax() + "  " + histogram2.getProjectionY().getAxisDescription(1).getMax()));
 
         final XYChart chart = new XYChart(xAxis, yAxis);
         chart.setAnimated(false);

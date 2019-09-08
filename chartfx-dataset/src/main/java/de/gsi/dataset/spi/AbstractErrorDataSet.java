@@ -1,5 +1,6 @@
 package de.gsi.dataset.spi;
 
+import de.gsi.dataset.AxisDescription;
 import de.gsi.dataset.DataSetError;
 import de.gsi.dataset.event.UpdateEvent;
 
@@ -85,101 +86,93 @@ public abstract class AbstractErrorDataSet<D extends AbstractErrorDataSet<D>> ex
      * Computes limits (ranges) of this DataSet including data point errors.
      */
     @Override
-    protected D computeLimits() {
+    public D recomputeLimits(final int dimension) {
+        // presently always computes both dimensions
+        if (dimension == 1) {
+            //TODO: find cleaner solution
+            return getThis();
+        }
         lock();
-        // Clear previous ranges
-        xRange.empty();
-        yRange.empty();
-        final int dataCount = getDataCount();
+        final boolean oldAutoNotification = this.isAutoNotification();
+        setAutoNotifaction(false);
 
-        // a getUndefValue() is not specified
+        // Clear previous ranges
+        getAxisDescriptions().forEach(AxisDescription::empty);
+        final int dataCount = getDataCount();
 
         // following sections implements separate handling
         // of the each given error type cases also to avoid
         // redundant invocation of the error retrieval interfaces
         // that may hide or abstract given algorithms that may
         // (re-) calculate the errors in place.
-
-        double xData;
-        double yData;
-        double xDataError;
-        double yDataError;
         switch (getErrorType()) {
         case NO_ERROR:
-            for (int i = 0; i < dataCount; i++) {
-                xData = getX(i);
-                yData = getY(i);
-                xRange.add(xData);
-                yRange.add(yData);
-            }
+            super.recomputeLimits(0);
+            super.recomputeLimits(1);
             break;
         case X:
             for (int i = 0; i < dataCount; i++) {
-                xData = getX(i);
-                yData = getY(i);
-                xDataError = getXErrorPositive(i);
-                xRange.add(xData - xDataError);
-                xRange.add(xData + xDataError);
-                yRange.add(yData);
+                final double xData = getX(i);
+                final double yData = getY(i);
+                final double xDataError = getXErrorPositive(i);
+                getAxisDescription(0).add(xData - xDataError);
+                getAxisDescription(0).add(xData + xDataError);
+                getAxisDescription(1).add(yData);
             }
             break;
         case Y:
             for (int i = 0; i < dataCount; i++) {
-                xData = getX(i);
-                yData = getY(i);
-                yDataError = getYErrorPositive(i);
-                xRange.add(xData);
-                yRange.add(yData - yDataError);
-                yRange.add(yData + yDataError);
+                final double xData = getX(i);
+                final double yData = getY(i);
+                final double yDataError = getYErrorPositive(i);
+                getAxisDescription(0).add(xData);
+                getAxisDescription(1).add(yData - yDataError);
+                getAxisDescription(1).add(yData + yDataError);
             }
             break;
         case XY:
             for (int i = 0; i < dataCount; i++) {
-                xData = getX(i);
-                yData = getY(i);
-                xDataError = getXErrorPositive(i);
-                yDataError = getYErrorPositive(i);
-                xRange.add(xData - xDataError);
-                xRange.add(xData + xDataError);
-                yRange.add(yData - yDataError);
-                yRange.add(yData + yDataError);
+                final double xData = getX(i);
+                final double yData = getY(i);
+                final double xDataError = getXErrorPositive(i);
+                final double yDataError = getYErrorPositive(i);
+                getAxisDescription(0).add(xData - xDataError);
+                getAxisDescription(0).add(xData + xDataError);
+                getAxisDescription(1).add(yData - yDataError);
+                getAxisDescription(1).add(yData + yDataError);
             }
             break;
         case X_ASYMMETRIC:
             for (int i = 0; i < dataCount; i++) {
-                xData = getX(i);
-                yData = getY(i);
-                xRange.add(xData - getXErrorNegative(i));
-                xRange.add(xData + getXErrorPositive(i));
-                yRange.add(yData);
+                final double xData = getX(i);
+                final double yData = getY(i);
+                getAxisDescription(0).add(xData - getXErrorNegative(i));
+                getAxisDescription(0).add(xData + getXErrorPositive(i));
+                getAxisDescription(1).add(yData);
             }
             break;
         case Y_ASYMMETRIC:
             for (int i = 0; i < dataCount; i++) {
-                xData = getX(i);
-                yData = getY(i);
-                xRange.add(xData);
-                yRange.add(yData - getYErrorNegative(i));
-                yRange.add(yData + getYErrorPositive(i));
+                final double xData = getX(i);
+                final double yData = getY(i);
+                getAxisDescription(0).add(xData);
+                getAxisDescription(1).add(yData - getYErrorNegative(i));
+                getAxisDescription(1).add(yData + getYErrorPositive(i));
             }
             break;
         case XY_ASYMMETRIC:
         default:
             for (int i = 0; i < dataCount; i++) {
-                xData = getX(i);
-                yData = getY(i);
-                xRange.add(xData - getXErrorNegative(i));
-                xRange.add(xData + getXErrorPositive(i));
-                yRange.add(yData - getYErrorNegative(i));
-                yRange.add(yData + getYErrorPositive(i));
+                final double xData = getX(i);
+                final double yData = getY(i);
+                getAxisDescription(0).add(xData - getXErrorNegative(i));
+                getAxisDescription(0).add(xData + getXErrorPositive(i));
+                getAxisDescription(1).add(yData - getYErrorNegative(i));
+                getAxisDescription(1).add(yData + getYErrorPositive(i));
             }
         }
 
-        // final double min = yRange.getMin();
-        // final double max = yRange.getMax();
-        // add a bit of margin in the vertical plane (beautifies the plots.. ;-)
-        // yRange.set(min < 0 ? min * 1.05 : min * 0.95, max < 0 ? max * 0.95 :
-        // max * 1.05);
+        setAutoNotifaction(oldAutoNotification);
         unlock();
 
         return getThis();

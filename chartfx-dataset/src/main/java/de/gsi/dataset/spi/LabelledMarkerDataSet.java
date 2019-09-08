@@ -1,9 +1,9 @@
 /*****************************************************************************
- *                                                                           *
- * Common Chart - data set for labeled markers                               *
- *                                                                           *
- * modified: 2019-05-07 Harald Braeuning                                     *
- *                                                                           *
+ * *
+ * Common Chart - data set for labeled markers *
+ * *
+ * modified: 2019-05-07 Harald Braeuning *
+ * *
  ****************************************************************************/
 
 package de.gsi.dataset.spi;
@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import de.gsi.dataset.AxisDescription;
 import de.gsi.dataset.DataSet;
 import de.gsi.dataset.event.AddedDataEvent;
 import de.gsi.dataset.event.RemovedDataEvent;
@@ -40,7 +41,6 @@ public class LabelledMarkerDataSet extends AbstractDataSet<LabelledMarkerDataSet
     }
 
     /**
-     * 
      * @return data point labels
      */
     public List<String> getDataLabels() {
@@ -48,7 +48,6 @@ public class LabelledMarkerDataSet extends AbstractDataSet<LabelledMarkerDataSet
     }
 
     /**
-     * 
      * @return data point styles
      */
     public List<String> getDataStyles() {
@@ -56,7 +55,6 @@ public class LabelledMarkerDataSet extends AbstractDataSet<LabelledMarkerDataSet
     }
 
     /**
-     * 
      * @return list containing data point values
      */
     public List<DoublePoint> getData() {
@@ -69,7 +67,6 @@ public class LabelledMarkerDataSet extends AbstractDataSet<LabelledMarkerDataSet
     }
 
     /**
-     * 
      * @return remove all data points
      */
     public LabelledMarkerDataSet clearData() {
@@ -79,10 +76,10 @@ public class LabelledMarkerDataSet extends AbstractDataSet<LabelledMarkerDataSet
         dataLabels.clear();
         dataStyles.clear();
 
-        xRange.empty();
-        yRange.empty();
+        getAxisDescriptions().forEach(AxisDescription::empty);
 
-        return setAutoNotifaction(true).unlock().fireInvalidated(new RemovedDataEvent(this, "clear"));
+        setAutoNotifaction(true);
+        return unlock().fireInvalidated(new RemovedDataEvent(this, "clear"));
     }
 
     @Override
@@ -96,7 +93,6 @@ public class LabelledMarkerDataSet extends AbstractDataSet<LabelledMarkerDataSet
     }
 
     /**
-     * 
      * @param marker
      *            new marker
      * @return itself (fluent design)
@@ -106,7 +102,7 @@ public class LabelledMarkerDataSet extends AbstractDataSet<LabelledMarkerDataSet
         lock();
         try {
             data.add(new DoublePoint(marker.getX(), marker.getY()));
-            xRange.add(marker.getX());
+            getAxisDescription(0).add(marker.getX());
             // yRange.add(marker.getY());
             dataLabels.add(marker.getLabel());
             dataStyles.add(marker.getStyle());
@@ -119,6 +115,7 @@ public class LabelledMarkerDataSet extends AbstractDataSet<LabelledMarkerDataSet
 
     /**
      * replaces existing with new marker values
+     * 
      * @param markers new marker values
      * @return itself (fluent design)
      */
@@ -130,13 +127,12 @@ public class LabelledMarkerDataSet extends AbstractDataSet<LabelledMarkerDataSet
             data.clear();
             dataLabels.clear();
             dataStyles.clear();
-            xRange.empty();
-            yRange.empty();
+            getAxisDescriptions().forEach(AxisDescription::empty);
             for (LabelledMarker marker : markers) {
                 final double x = marker.getX();
                 final double y = marker.getY();
                 data.add(new DoublePoint(x, y));
-                xRange.add(x);
+                getAxisDescription(0).add(x);
                 // yRange.add(y);
                 dataLabels.add(marker.getLabel());
                 dataStyles.add(marker.getStyle());
@@ -151,6 +147,7 @@ public class LabelledMarkerDataSet extends AbstractDataSet<LabelledMarkerDataSet
 
     /**
      * replaces existing with new marker values
+     * 
      * @param markers new marker values
      * @return itself (fluent design)
      */
@@ -161,6 +158,7 @@ public class LabelledMarkerDataSet extends AbstractDataSet<LabelledMarkerDataSet
 
     /**
      * replaces existing data marker with new marker value
+     * 
      * @param index index of existing point
      * @param marker new marker value
      * @return itself (fluent design)
@@ -170,7 +168,7 @@ public class LabelledMarkerDataSet extends AbstractDataSet<LabelledMarkerDataSet
         lock();
         try {
             data.get(index).set(marker.getX(), marker.getY());
-            xRange.add(marker.getX());
+            getAxisDescription(0).add(marker.getX());
             // yRange.add(marker.getY());
             dataLabels.set(index, marker.getLabel());
             dataStyles.set(index, marker.getStyle());
@@ -183,6 +181,7 @@ public class LabelledMarkerDataSet extends AbstractDataSet<LabelledMarkerDataSet
 
     /**
      * remove sub-range of data (marker) points
+     * 
      * @param fromIndex start index
      * @param toIndex stop index
      * @return itself (fluent design)
@@ -197,10 +196,10 @@ public class LabelledMarkerDataSet extends AbstractDataSet<LabelledMarkerDataSet
         dataLabels.subList(fromIndex, toIndex).clear();
         dataStyles.subList(fromIndex, toIndex).clear();
 
-        xRange.empty();
-        yRange.empty();
+        getAxisDescriptions().forEach(AxisDescription::empty);
 
-        return setAutoNotifaction(true).unlock().fireInvalidated(new RemovedDataEvent(this));
+        setAutoNotifaction(true);
+        return unlock().fireInvalidated(new RemovedDataEvent(this));
     }
 
     /**
@@ -236,26 +235,25 @@ public class LabelledMarkerDataSet extends AbstractDataSet<LabelledMarkerDataSet
         return dataStyles.get(index);
     }
 
-    /**
-     * Computes limits (ranges) of this DataSet.
-     * 
-     * @return itself (fluent design)
-     */
-    @Override
-    protected LabelledMarkerDataSet computeLimits() {
-        lock();
-        // Clear previous ranges
-        xRange.empty();
-        yRange.empty();
-
-        final int dataCount = getDataCount();
-
-        for (int i = 0; i < dataCount; i++) {
-            xRange.add(getX(i));
-            // yRange.add(getY(i));
-        }
-
-        return unlock();
-    }
+    //    /**
+    //     * Computes limits (ranges) of this DataSet.
+    //     * 
+    //     * @return itself (fluent design)
+    //     */
+    //    @Override
+    //    protected LabelledMarkerDataSet computeLimits() {
+    //        lock();
+    //        // Clear previous ranges
+    //        getAxisDescriptions().forEach(AxisDescription::empty);
+    //
+    //        final int dataCount = getDataCount();
+    //
+    //        for (int i = 0; i < dataCount; i++) {
+    //            getAxisDescription(0).add(getX(i));
+    //            // getAxisDescription(1).add(getY(i));
+    //        }
+    //
+    //        return unlock();
+    //    }
 
 }

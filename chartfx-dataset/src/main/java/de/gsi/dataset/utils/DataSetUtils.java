@@ -453,16 +453,16 @@ public class DataSetUtils extends DataSetUtilsHelper {
                 value = dataSet.getName();
                 break;
             case "xMin":
-                value = Double.toString(dataSet.getXMin());
+                value = Double.toString(dataSet.getAxisDescription(0).getMin());
                 break;
             case "xMax":
-                value = Double.toString(dataSet.getXMax());
+                value = Double.toString(dataSet.getAxisDescription(0).getMax());
                 break;
             case "yMin":
-                value = Double.toString(dataSet.getYMin());
+                value = Double.toString(dataSet.getAxisDescription(1).getMin());
                 break;
             case "yMax":
-                value = Double.toString(dataSet.getYMax());
+                value = Double.toString(dataSet.getAxisDescription(1).getMax());
                 break;
             default:
                 if (!(dataSet instanceof DataSetMetaData)) {
@@ -864,10 +864,10 @@ public class DataSetUtils extends DataSetUtilsHelper {
             final StringBuilder buffer = getCachedStringBuilder("headerDataCacheBuilder", 250);
 
             buffer.append("#dataSetName : ").append(dataSet.getName()) //
-                    .append("\n#xMin : ").append(dataSet.getXMin()) //
-                    .append("\n#xMax : ").append(dataSet.getXMax()) //
-                    .append("\n#yMin : ").append(dataSet.getYMin()) //
-                    .append("\n#yMax : ").append(dataSet.getYMax()).append('\n');
+                    .append("\n#xMin : ").append(dataSet.getAxisDescription(0).getMin()) //
+                    .append("\n#xMax : ").append(dataSet.getAxisDescription(0).getMax()) //
+                    .append("\n#yMin : ").append(dataSet.getAxisDescription(1).getMin()) //
+                    .append("\n#yMax : ").append(dataSet.getAxisDescription(1).getMax()).append('\n');
 
             if (dataSet instanceof DataSet3D) {
                 buffer.append("## statistics disabled for DataSet3D, not yet implemented\n");

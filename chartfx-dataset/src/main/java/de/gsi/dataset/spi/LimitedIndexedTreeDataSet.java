@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 
+import de.gsi.dataset.AxisDescription;
 import de.gsi.dataset.DataSetError;
 import de.gsi.dataset.event.AddedDataEvent;
 import de.gsi.dataset.event.RemovedDataEvent;
@@ -60,7 +61,6 @@ public class LimitedIndexedTreeDataSet extends AbstractErrorDataSet<LimitedIndex
     }
 
     /**
-     * 
      * @return maximum number of data points before points are getting dropped
      */
     public int getMaxQueueSize() {
@@ -68,7 +68,6 @@ public class LimitedIndexedTreeDataSet extends AbstractErrorDataSet<LimitedIndex
     }
 
     /**
-     * 
      * @param maxQueueSize maximum number of data points before points are getting dropped
      * @return itself (fluent design)
      */
@@ -78,7 +77,6 @@ public class LimitedIndexedTreeDataSet extends AbstractErrorDataSet<LimitedIndex
     }
 
     /**
-     * 
      * @return maximum X range before points are getting dropped
      */
     public double getMaxLength() {
@@ -86,7 +84,6 @@ public class LimitedIndexedTreeDataSet extends AbstractErrorDataSet<LimitedIndex
     }
 
     /**
-     * 
      * @param maxLength maximum X range before points are getting dropped
      * @return itself (fluent design)
      */
@@ -97,6 +94,7 @@ public class LimitedIndexedTreeDataSet extends AbstractErrorDataSet<LimitedIndex
 
     /**
      * removes all data points
+     * 
      * @return itself (fluent design)
      */
     public LimitedIndexedTreeDataSet reset() {
@@ -108,6 +106,7 @@ public class LimitedIndexedTreeDataSet extends AbstractErrorDataSet<LimitedIndex
 
     /**
      * checks X data range and removes old data points if they exceed the maximum data range
+     * 
      * @see #setMaxLength
      */
     public void expire() {
@@ -116,11 +115,11 @@ public class LimitedIndexedTreeDataSet extends AbstractErrorDataSet<LimitedIndex
         unlock();
     }
 
-    /** 
+    /**
      * checks X data range and removes old data points if they exceed the maximum data range
+     * 
      * @see #setMaxLength
-     *
-     * @param now actual time stamp to be taken as a 't0' reference 
+     * @param now actual time stamp to be taken as a 't0' reference
      */
     public void expire(final double now) {
         lock();
@@ -132,7 +131,8 @@ public class LimitedIndexedTreeDataSet extends AbstractErrorDataSet<LimitedIndex
             for (; data.size() > maxQueueSize || now - first.getX() > maxLength; first = data.first()) {
                 data.remove(first);
             }
-            computeLimits();
+            recomputeLimits(0);
+            recomputeLimits(1);
         } catch (final NoSuchElementException cannotDoAnythingHere) {
             // cannot do anything here
         } finally {
@@ -141,7 +141,6 @@ public class LimitedIndexedTreeDataSet extends AbstractErrorDataSet<LimitedIndex
     }
 
     /**
-     * 
      * @return data container
      */
     public IndexedNavigableSet<DataAtom> getData() {
@@ -222,16 +221,17 @@ public class LimitedIndexedTreeDataSet extends AbstractErrorDataSet<LimitedIndex
 
     /**
      * remove all data points
+     * 
      * @return itself (fluent design)
      */
     public LimitedIndexedTreeDataSet clearData() {
         lock().setAutoNotifaction(false);
 
         data.clear();
-        xRange.empty();
-        yRange.empty();
+        getAxisDescriptions().forEach(AxisDescription::empty);
 
-        return setAutoNotifaction(true).unlock().fireInvalidated(new RemovedDataEvent(this, "clear"));
+        setAutoNotifaction(true);
+        return unlock().fireInvalidated(new RemovedDataEvent(this, "clear"));
     }
 
     /**
@@ -254,10 +254,10 @@ public class LimitedIndexedTreeDataSet extends AbstractErrorDataSet<LimitedIndex
         lock();
         data.get(index).set(x, y, dy, dy);
 
-        xRange.add(x - dx);
-        xRange.add(x + dx);
-        yRange.add(y - dy);
-        yRange.add(y + dy);
+        getAxisDescription(0).add(x - dx);
+        getAxisDescription(0).add(x + dx);
+        getAxisDescription(1).add(y - dy);
+        getAxisDescription(1).add(y + dy);
         expire();
 
         return unlock().fireInvalidated(new UpdatedDataEvent(this));
@@ -297,15 +297,16 @@ public class LimitedIndexedTreeDataSet extends AbstractErrorDataSet<LimitedIndex
             final double y = yValues[i];
             final double dx = xErrors[i];
             final double dy = yValues[i];
-            xRange.add(x - dx);
-            xRange.add(x + dx);
-            yRange.add(y - dy);
-            yRange.add(y + dy);
+            getAxisDescription(0).add(x - dx);
+            getAxisDescription(0).add(x + dx);
+            getAxisDescription(1).add(y - dy);
+            getAxisDescription(1).add(y + dy);
             data.add(new DataAtom(x, y, dx, dy));
         }
         expire();
 
-        return setAutoNotifaction(true).unlock().fireInvalidated(new UpdatedDataEvent(this));
+        setAutoNotifaction(true);
+        return unlock().fireInvalidated(new UpdatedDataEvent(this));
     }
 
     /**
@@ -393,10 +394,10 @@ public class LimitedIndexedTreeDataSet extends AbstractErrorDataSet<LimitedIndex
         lock();
 
         data.add(new DataAtom(x, y, ex, ey));
-        xRange.add(x - ex);
-        xRange.add(x + ex);
-        yRange.add(y - ey);
-        yRange.add(y + ey);
+        getAxisDescription(0).add(x - ex);
+        getAxisDescription(0).add(x + ex);
+        getAxisDescription(1).add(y - ey);
+        getAxisDescription(1).add(y + ey);
         expire();
 
         return unlock().fireInvalidated(new AddedDataEvent(this));
@@ -449,18 +450,20 @@ public class LimitedIndexedTreeDataSet extends AbstractErrorDataSet<LimitedIndex
             final double ey = yErrors[i];
             data.add(new DataAtom(x, y, ex, ey));
 
-            xRange.add(x - ex);
-            xRange.add(x + ex);
-            yRange.add(y - ey);
-            yRange.add(y + ey);
+            getAxisDescription(0).add(x - ex);
+            getAxisDescription(0).add(x + ex);
+            getAxisDescription(1).add(y - ey);
+            getAxisDescription(1).add(y + ey);
         }
         expire();
 
-        return setAutoNotifaction(true).unlock().fireInvalidated(new AddedDataEvent(this));
+        setAutoNotifaction(true);
+        return unlock().fireInvalidated(new AddedDataEvent(this));
     }
 
     /**
      * remove sub-range of data points
+     * 
      * @param fromIndex starting index
      * @param toIndex stopping index
      * @return itself (fluent design)
@@ -477,10 +480,11 @@ public class LimitedIndexedTreeDataSet extends AbstractErrorDataSet<LimitedIndex
         }
         data.removeAll(toRemove);
 
-        xRange.setMax(Double.NaN);
-        yRange.setMax(Double.NaN);
+        getAxisDescription(0).setMax(Double.NaN);
+        getAxisDescription(1).setMax(Double.NaN);
 
-        return setAutoNotifaction(true).unlock().fireInvalidated(new RemovedDataEvent(this));
+        setAutoNotifaction(true);
+        return unlock().fireInvalidated(new RemovedDataEvent(this));
     }
 
     /**
@@ -503,11 +507,13 @@ public class LimitedIndexedTreeDataSet extends AbstractErrorDataSet<LimitedIndex
         }
         data.removeAll(tupleTobeRemovedReferences);
 
-        xRange.setMax(Double.NaN);
-        yRange.setMax(Double.NaN);
-        super.computeLimits();
+        getAxisDescription(0).setMax(Double.NaN);
+        getAxisDescription(1).setMax(Double.NaN);
+        recomputeLimits(0);
+        recomputeLimits(1);
 
-        return setAutoNotifaction(true).unlock().fireInvalidated(new RemovedDataEvent(this));
+        setAutoNotifaction(true);
+        return unlock().fireInvalidated(new RemovedDataEvent(this));
     }
 
     /**

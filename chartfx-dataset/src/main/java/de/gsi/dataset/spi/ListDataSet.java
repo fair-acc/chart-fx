@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import de.gsi.dataset.AxisDescription;
 import de.gsi.dataset.DataSet;
 import de.gsi.dataset.event.AddedDataEvent;
 import de.gsi.dataset.event.RemovedDataEvent;
@@ -32,7 +33,7 @@ import de.gsi.dataset.utils.AssertUtils;
 public class ListDataSet extends AbstractDataSet<ListDataSet> implements DataSet {
     protected Map<Integer, String> dataLabels = new ConcurrentHashMap<>();
     protected Map<Integer, String> dataStyles = new ConcurrentHashMap<>();
-    protected ArrayList<DoublePoint> data = new ArrayList<>();
+    protected List<DoublePoint> data = new ArrayList<>();
 
     /**
      * Creates a new instance of <code>CustomDataSet</code>.
@@ -132,8 +133,7 @@ public class ListDataSet extends AbstractDataSet<ListDataSet> implements DataSet
 
         data.clear();
 
-        xRange.empty();
-        yRange.empty();
+        getAxisDescriptions().forEach(AxisDescription::empty);
 
         return unlock().fireInvalidated(new RemovedDataEvent(this, "clearData()"));
     }
@@ -161,10 +161,8 @@ public class ListDataSet extends AbstractDataSet<ListDataSet> implements DataSet
         data.clear();
         data.addAll(values);
 
-        xRange.setMax(Double.NaN);
-        yRange.setMax(Double.NaN);
-
-        computeLimits();
+        recomputeLimits(0);
+        recomputeLimits(1);
 
         return unlock().fireInvalidated(new UpdatedDataEvent(this));
     }
@@ -182,8 +180,8 @@ public class ListDataSet extends AbstractDataSet<ListDataSet> implements DataSet
         AssertUtils.indexInBounds(index, getDataCount());
         data.get(index).set(x, y);
 
-        xRange.add(x);
-        yRange.add(y);
+        getAxisDescription(0).add(x);
+        getAxisDescription(1).add(y);
 
         return unlock().fireInvalidated(new UpdatedDataEvent(this));
     }
@@ -199,8 +197,8 @@ public class ListDataSet extends AbstractDataSet<ListDataSet> implements DataSet
         lock();
         data.add(new DoublePoint(x, y));
 
-        xRange.add(x);
-        yRange.add(y);
+        getAxisDescription(0).add(x);
+        getAxisDescription(1).add(y);
 
         return unlock().fireInvalidated(new AddedDataEvent(this));
     }
@@ -220,8 +218,8 @@ public class ListDataSet extends AbstractDataSet<ListDataSet> implements DataSet
 
         data.subList(fromIndex, toIndex).clear();
 
-        xRange.setMax(Double.NaN);
-        yRange.setMax(Double.NaN);
+        getAxisDescription(0).setMax(Double.NaN);
+        getAxisDescription(1).setMax(Double.NaN);
 
         return unlock().fireInvalidated(new RemovedDataEvent(this));
     }
@@ -245,9 +243,8 @@ public class ListDataSet extends AbstractDataSet<ListDataSet> implements DataSet
         }
         data.removeAll(tupleTobeRemovedReferences);
 
-        xRange.setMax(Double.NaN);
-        yRange.setMax(Double.NaN);
-        super.computeLimits();
+        recomputeLimits(0);
+        recomputeLimits(1);
 
         return unlock().fireInvalidated(new UpdatedDataEvent(this));
     }
@@ -269,15 +266,16 @@ public class ListDataSet extends AbstractDataSet<ListDataSet> implements DataSet
         AssertUtils.equalDoubleArrays(xValues, yValues);
 
         data.clear();
-        xRange.setMax(Double.NaN);
-        yRange.setMax(Double.NaN);
+        getAxisDescription(0).setMax(Double.NaN);
+        getAxisDescription(1).setMax(Double.NaN);
         for (int i = 0; i < xValues.length; i++) {
             data.add(new DoublePoint(xValues[i], yValues[i]));
-            xRange.add(xValues[i]);
-            yRange.add(yValues[i]);
+            getAxisDescription(0).add(xValues[i]);
+            getAxisDescription(1).add(yValues[i]);
         }
 
-        return setAutoNotifaction(true).unlock().fireInvalidated(new AddedDataEvent(this));
+        setAutoNotifaction(true);
+        return unlock().fireInvalidated(new AddedDataEvent(this));
     }
 
     /**
@@ -290,6 +288,7 @@ public class ListDataSet extends AbstractDataSet<ListDataSet> implements DataSet
      * @return the previously set label or <code>null</code> if no label has
      *         been specified
      */
+    @Override
     public String addDataLabel(final int index, final String label) {
         lock();
         final String retVal = dataLabels.put(index, label);
@@ -306,6 +305,7 @@ public class ListDataSet extends AbstractDataSet<ListDataSet> implements DataSet
      * @return the previously set label or <code>null</code> if no label has
      *         been specified
      */
+    @Override
     public String removeDataLabel(final int index) {
         lock();
         final String retVal = dataLabels.remove(index);
@@ -340,6 +340,7 @@ public class ListDataSet extends AbstractDataSet<ListDataSet> implements DataSet
      * @param style for the given data point (CSS-styling)
      * @return itself (fluent interface)
      */
+    @Override
     public String addDataStyle(final int index, final String style) {
         lock();
         final String retVal = dataStyles.put(index, style);
@@ -354,6 +355,7 @@ public class ListDataSet extends AbstractDataSet<ListDataSet> implements DataSet
      * @param index the index of the specific data point
      * @return itself (fluent interface)
      */
+    @Override
     public String removeStyle(final int index) {
         lock();
         final String retVal = dataStyles.remove(index);

@@ -3,6 +3,7 @@ package de.gsi.dataset.spi;
 import java.util.ArrayList;
 import java.util.List;
 
+import de.gsi.dataset.AxisDescription;
 import de.gsi.dataset.DataSetError;
 import de.gsi.dataset.event.AddedDataEvent;
 import de.gsi.dataset.event.RemovedDataEvent;
@@ -214,9 +215,10 @@ public class FifoDoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorData
         expire(x);
 
         setAutoNotifaction(notifyState);
-        computeLimits();
-        unlock();
-        fireInvalidated(new AddedDataEvent(this));
+        recomputeLimits(0);
+        recomputeLimits(1);
+        unlock().fireInvalidated(new AddedDataEvent(this));
+        
         return this;
     }
 
@@ -256,8 +258,8 @@ public class FifoDoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorData
      */
     public int expire(final double now) {
         lock();
-        xRange.empty();
-        yRange.empty();
+        getAxisDescriptions().forEach(AxisDescription::empty);
+
         final List<DataBlob> toRemoveList = new ArrayList<>();
         // for (final DataBlob blob : (LimitedQueue<DataBlob>) data.clone()) {
         for (final DataBlob blob : data) {
@@ -270,10 +272,10 @@ public class FifoDoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorData
                     toRemoveList.add(blob);
                 } else {
 
-                    xRange.add(x + blob.getErrorX());
-                    xRange.add(x - blob.getErrorX());
-                    xRange.add(y + blob.getErrorY());
-                    xRange.add(y - blob.getErrorY());
+                    getAxisDescription(0).add(x + blob.getErrorX());
+                    getAxisDescription(0).add(x - blob.getErrorX());
+                    getAxisDescription(1).add(y + blob.getErrorY());
+                    getAxisDescription(1).add(y - blob.getErrorY());
                 }
             } else {
                 // data.remove(blob);
@@ -282,7 +284,8 @@ public class FifoDoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorData
         }
 
         data.removeAll(toRemoveList);
-        computeLimits();
+        recomputeLimits(0);
+        recomputeLimits(1);
         // computeLimits(); // N.B. already computed above
         final int dataPointsToRemove = toRemoveList.size();
         unlock();

@@ -24,36 +24,10 @@ public class FragmentedDataSet extends AbstractDataSet<FragmentedDataSet> {
     protected final ArrayList<DataSet> list = new ArrayList<>();
 
     /**
-     * 
      * @param name data set name
      */
     public FragmentedDataSet(final String name) {
         super(name);
-    }
-
-    /**
-     * Returns a copy of the dataset. However, in contrast to a deep copy only
-     * the references to the contained dataset are copied.
-     * 
-     * @return copy of the dataset
-     */
-    @Deprecated
-    public AbstractDataSet<?> shallowCopy() {
-        final FragmentedDataSet d = new FragmentedDataSet(getName());
-        d.dataCount = dataCount;
-        d.xRange = xRange;
-        d.yRange = yRange;
-        // d.xmin = xmin;
-        // d.xmax = xmax;
-        // d.ymin = ymin;
-        // d.ymax = ymax;
-        d.list.addAll(list);
-        return d;
-    }
-
-    @Override
-    public String toString() {
-        return "FragmentedDataSet " + getXRange() + " " + getYRange() + " [" + dataCount + "]";
     }
 
     /**
@@ -85,7 +59,6 @@ public class FragmentedDataSet extends AbstractDataSet<FragmentedDataSet> {
     }
 
     /**
-     * 
      * @param set new data set to be added to list
      */
     public void add(final DataSet set) {
@@ -93,17 +66,18 @@ public class FragmentedDataSet extends AbstractDataSet<FragmentedDataSet> {
         try {
             list.add(set);
             /* Trace data is expected to be sorted in ascending order */
-            Collections.sort(list, (o1, o2) -> Double.compare(o1.getXMin(), o2.getXMin()));
+            Collections.sort(list,
+                    (o1, o2) -> Double.compare(o1.getAxisDescription(0).getMin(), o2.getAxisDescription(0).getMin()));
             dataCount += set.getDataCount();
         } finally {
             unlock();
         }
-        computeLimits();
+        recomputeLimits(0);
+        recomputeLimits(1);
         fireInvalidated(new AddedDataEvent(this, "added data set"));
     }
 
     /**
-     * 
      * @return number of sub-datasets
      */
     public int getDatasetCount() {
@@ -199,12 +173,12 @@ public class FragmentedDataSet extends AbstractDataSet<FragmentedDataSet> {
     public int getXIndex(double x) {
         lock();
         try {
-            if (x < getXMin()) {
+            if (x < getAxisDescription(0).getMin()) {
                 return 0;
             }
             int index = 0;
             for (final DataSet dataset : list) {
-                if (x >= dataset.getXMin() && x <= dataset.getXMax()) {
+                if (x >= dataset.getAxisDescription(0).getMin() && x <= dataset.getAxisDescription(0).getMax()) {
                     return index + dataset.getXIndex(x);
                 }
                 index += dataset.getDataCount();

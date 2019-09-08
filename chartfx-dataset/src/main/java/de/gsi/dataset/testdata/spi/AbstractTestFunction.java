@@ -34,8 +34,10 @@ public abstract class AbstractTestFunction<D extends AbstractTestFunction<D>> ex
         synchronized (dataLock) {
             data = generateY(data.length);
         }
-        computeLimits();
-        return setAutoNotifaction(true).unlock().fireInvalidated(new UpdatedDataEvent(this));
+        recomputeLimits(0);
+        recomputeLimits(1);
+        setAutoNotifaction(true);
+        return unlock().fireInvalidated(new UpdatedDataEvent(this));
     }
 
     @Override
@@ -56,7 +58,7 @@ public abstract class AbstractTestFunction<D extends AbstractTestFunction<D>> ex
         // include for example dimension sanity checks
         synchronized (dataLock) {
             if (index < 0 || index >= getDataCount()) {
-                return getUndefValue();
+                return Double.NaN;
             }
 
             return data[index];

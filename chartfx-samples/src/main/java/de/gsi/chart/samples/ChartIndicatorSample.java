@@ -128,12 +128,12 @@ public class ChartIndicatorSample extends Application {
         zoom.setSliderVisible(false);
         chart.getPlugins().add(zoom);
 
-        final double minX = rollingBufferDipoleCurrent.getXMin();
-        final double maxX = rollingBufferDipoleCurrent.getXMax();
-        final double minY1 = rollingBufferBeamIntensity.getYMin();
-        final double maxY1 = rollingBufferBeamIntensity.getYMax();
-        final double minY2 = rollingBufferDipoleCurrent.getYMin();
-        final double maxY2 = rollingBufferDipoleCurrent.getYMax();
+        final double minX = rollingBufferDipoleCurrent.getAxisDescription(0).getMin();
+        final double maxX = rollingBufferDipoleCurrent.getAxisDescription(0).getMax();
+        final double minY1 = rollingBufferBeamIntensity.getAxisDescription(1).getMin();
+        final double maxY1 = rollingBufferBeamIntensity.getAxisDescription(1).getMax();
+        final double minY2 = rollingBufferDipoleCurrent.getAxisDescription(1).getMin();
+        final double maxY2 = rollingBufferDipoleCurrent.getAxisDescription(1).getMax();
         final double rangeX = maxX - minX;
         final double rangeY1 = maxY1 - minY1;
         final double rangeY2 = maxY2 - minY2;

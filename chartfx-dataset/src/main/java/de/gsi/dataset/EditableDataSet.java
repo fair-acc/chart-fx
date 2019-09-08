@@ -52,14 +52,5 @@ public interface EditableDataSet extends DataSet {
 	 * @return itself (fluent design)
 	 */
 	EditableDataSet setEditConstraints(final EditConstraints constraints);
-    
-    /**
-     * Set the name and optionally the unit for the i-th axis.
-     * All axis names and units default to the empty String.
-     * @param dim 0: X-Axis, 1: Y-Axis, ...
-     * @param name Axis name (shown as axis label)
-     * @param unit optional: Axis unit (shown in axis label)
-     */
-    void setAxisDescription(int dim, String name, String... unit);
 
 }

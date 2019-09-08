@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import de.gsi.dataset.AxisDescription;
 import de.gsi.dataset.DataSetError;
 import de.gsi.dataset.event.AddedDataEvent;
 import de.gsi.dataset.event.RemovedDataEvent;
@@ -18,20 +19,19 @@ import de.gsi.dataset.utils.AssertUtils;
  * interface. User provides X and Y coordinates or only Y coordinates. In the
  * former case X coordinates have value of data point index. Symmetric errors in
  * X and Y are implemented
- * 
  * N.B. this is a classic list-based implementation. This is a "simple"
  * implementation but has a poorer performance compared to Default- and
  * Double-based DataSets @see DoubleDataSet
- * 
+ *
  * @see DoubleErrorDataSet for the reference implementation
  * @see DoubleDataSet for an implementation without asymmetric error handling
- *
  * @see de.gsi.dataset.DataSet
  * @see de.gsi.dataset.DataSetError
  * @author rstein
  * @deprecated due to poorer CPU performance (this is kept for reference
  *             reasons)
  */
+@Deprecated
 public class ListErrorDataSet extends AbstractErrorDataSet<ListErrorDataSet> implements DataSetError {
     protected Map<Integer, String> dataLabels = new ConcurrentHashMap<>();
     protected Map<Integer, String> dataStyles = new ConcurrentHashMap<>();
@@ -161,7 +161,6 @@ public class ListErrorDataSet extends AbstractErrorDataSet<ListErrorDataSet> imp
     }
 
     /**
-     * 
      * @return list containing data point definition
      */
     public List<DoublePointError> getData() {
@@ -239,14 +238,13 @@ public class ListErrorDataSet extends AbstractErrorDataSet<ListErrorDataSet> imp
 
     /**
      * clears all data points
-     * 
+     *
      * @return itself (fluent design)
      */
     public ListErrorDataSet clearData() {
         lock();
         data.clear();
-        xRange.empty();
-        yRange.empty();
+        getAxisDescriptions().forEach(AxisDescription::empty);
 
         return unlock().fireInvalidated(new RemovedDataEvent(this, "clearData()"));
     }
@@ -265,10 +263,10 @@ public class ListErrorDataSet extends AbstractErrorDataSet<ListErrorDataSet> imp
         lock();
         data.get(index).set(x, y, dy, dy);
 
-        xRange.add(x - dx);
-        xRange.add(x + dx);
-        yRange.add(y - dy);
-        yRange.add(y + dy);
+        getAxisDescription(0).add(x - dx);
+        getAxisDescription(0).add(x + dx);
+        getAxisDescription(1).add(y - dy);
+        getAxisDescription(1).add(y + dy);
 
         return unlock().fireInvalidated(new UpdatedDataEvent(this));
     }
@@ -293,7 +291,8 @@ public class ListErrorDataSet extends AbstractErrorDataSet<ListErrorDataSet> imp
         AssertUtils.notNull("X coordinates", xValues);
         AssertUtils.notNull("Y coordinates", yValues);
 
-        if (xValues.length < count || yValues.length < count || xErrors.length < count || yErrors.length < count) {
+        if ((xValues.length < count) || (yValues.length < count) || (xErrors.length < count)
+                || (yErrors.length < count)) {
             throw new IllegalArgumentException("Arrays with coordinates must have length >= count!");
         }
 
@@ -302,10 +301,10 @@ public class ListErrorDataSet extends AbstractErrorDataSet<ListErrorDataSet> imp
             final double y = yValues[i];
             final double dx = xErrors[i];
             final double dy = yValues[i];
-            xRange.add(x - dx);
-            xRange.add(x + dx);
-            yRange.add(y - dy);
-            yRange.add(y + dy);
+            getAxisDescription(0).add(x - dx);
+            getAxisDescription(0).add(x + dx);
+            getAxisDescription(1).add(y - dy);
+            getAxisDescription(1).add(y + dy);
             data.add(new DoublePointError(x, y, dx, dy));
         }
 
@@ -382,10 +381,10 @@ public class ListErrorDataSet extends AbstractErrorDataSet<ListErrorDataSet> imp
         lock();
         data.add(new DoublePointError(x, y, ex, ey));
 
-        xRange.add(x - ex);
-        xRange.add(x + ex);
-        yRange.add(y - ey);
-        yRange.add(y + ey);
+        getAxisDescription(0).add(x - ex);
+        getAxisDescription(0).add(x + ex);
+        getAxisDescription(1).add(y - ey);
+        getAxisDescription(1).add(y + ey);
 
         return unlock().fireInvalidated(new AddedDataEvent(this));
     }
@@ -431,10 +430,10 @@ public class ListErrorDataSet extends AbstractErrorDataSet<ListErrorDataSet> imp
             final double ey = yErrors[i];
             data.add(new DoublePointError(x, y, ex, ey));
 
-            xRange.add(x - ex);
-            xRange.add(x + ex);
-            yRange.add(y - ey);
-            yRange.add(y + ey);
+            getAxisDescription(0).add(x - ex);
+            getAxisDescription(0).add(x + ex);
+            getAxisDescription(1).add(y - ey);
+            getAxisDescription(1).add(y + ey);
         }
 
         return unlock().fireInvalidated(new AddedDataEvent(this));
@@ -442,7 +441,7 @@ public class ListErrorDataSet extends AbstractErrorDataSet<ListErrorDataSet> imp
 
     /**
      * remove sub-range of data points
-     * 
+     *
      * @param fromIndex start index
      * @param toIndex stop index
      * @return itself (fluent design)
@@ -455,8 +454,8 @@ public class ListErrorDataSet extends AbstractErrorDataSet<ListErrorDataSet> imp
 
         data.subList(fromIndex, toIndex).clear();
 
-        xRange.setMax(Double.NaN);
-        yRange.setMax(Double.NaN);
+        getAxisDescription(0).add(Double.NaN);
+        getAxisDescription(1).add(Double.NaN);
 
         return unlock().fireInvalidated(new RemovedDataEvent(this));
     }
@@ -480,9 +479,10 @@ public class ListErrorDataSet extends AbstractErrorDataSet<ListErrorDataSet> imp
         }
         data.removeAll(tupleTobeRemovedReferences);
 
-        xRange.setMax(Double.NaN);
-        yRange.setMax(Double.NaN);
-        computeLimits();
+        getAxisDescription(0).add(Double.NaN);
+        getAxisDescription(1).add(Double.NaN);
+        recomputeLimits(0);
+        recomputeLimits(1);
 
         return unlock().fireInvalidated(new RemovedDataEvent(this));
     }
@@ -497,6 +497,7 @@ public class ListErrorDataSet extends AbstractErrorDataSet<ListErrorDataSet> imp
      * @return the previously set label or <code>null</code> if no label has
      *         been specified
      */
+    @Override
     public String addDataLabel(final int index, final String label) {
         lock();
         final String retVal = dataLabels.put(index, label);
@@ -513,6 +514,7 @@ public class ListErrorDataSet extends AbstractErrorDataSet<ListErrorDataSet> imp
      * @return the previously set label or <code>null</code> if no label has
      *         been specified
      */
+    @Override
     public String removeDataLabel(final int index) {
         lock();
         final String retVal = dataLabels.remove(index);
@@ -547,6 +549,7 @@ public class ListErrorDataSet extends AbstractErrorDataSet<ListErrorDataSet> imp
      * @param style of the given data point (CSS-styling)
      * @return itself (fluent interface)
      */
+    @Override
     public String addDataStyle(final int index, final String style) {
         lock();
         final String retVal = dataStyles.put(index, style);
@@ -561,6 +564,7 @@ public class ListErrorDataSet extends AbstractErrorDataSet<ListErrorDataSet> imp
      * @param index the index of the specific data point
      * @return itself (fluent interface)
      */
+    @Override
     public String removeStyle(final int index) {
         lock();
         final String retVal = dataStyles.remove(index);

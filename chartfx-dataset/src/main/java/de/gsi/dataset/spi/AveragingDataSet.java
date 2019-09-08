@@ -120,7 +120,8 @@ public class AveragingDataSet extends AbstractDataSet<AveragingDataSet> {
             deque.add(new InternalDataSet(ds));
             dataset.opScale(1.0 / deque.size());
         }
-        dataset.computeLimits();
+        dataset.recomputeLimits(0);
+        dataset.recomputeLimits(1);
         fireInvalidated(new AddedDataEvent(this));
     }
 
@@ -170,38 +171,6 @@ public class AveragingDataSet extends AbstractDataSet<AveragingDataSet> {
             return 0;
         }
         return dataset.getXIndex(x);
-    }
-
-    @Override
-    public double getXMin() {
-        if (dataset == null) {
-            return 0;
-        }
-        return dataset.getXMin();
-    }
-
-    @Override
-    public double getXMax() {
-        if (dataset == null) {
-            return 0;
-        }
-        return dataset.getXMax();
-    }
-
-    @Override
-    public double getYMin() {
-        if (dataset == null) {
-            return 0;
-        }
-        return dataset.getYMin();
-    }
-
-    @Override
-    public double getYMax() {
-        if (dataset == null) {
-            return 0;
-        }
-        return dataset.getYMax();
     }
 
     @Override

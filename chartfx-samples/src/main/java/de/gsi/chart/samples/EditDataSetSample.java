@@ -39,22 +39,24 @@ public class EditDataSetSample extends Application {
         root.getChildren().add(chart);
 
         final DoubleDataSet dataSet1 = new DoubleDataSet("data set #1 (full change)");
-        dataSet1.setAxisDescription(0, "time", "s");
-        dataSet1.setAxisDescription(1, "Voltage", "V");
+        //dataSet1.addListener(evt -> System.err.println("dataset1 event received " + evt.getClass().getSimpleName()));
+        dataSet1.getAxisDescription(0).set("time", "s");
+        dataSet1.getAxisDescription(1).set("Voltage", "V");
         final DoubleDataSet dataSet2 = new DoubleDataSet("data set #2 (modify y-only)");
-        dataSet2.setAxisDescription(0, "time", "s");
-        dataSet2.setAxisDescription(1, "Current", "A");
-//        chart.getDatasets().add(dataSet1); // for single data set
-//        chart.getDatasets().addAll(dataSet1, dataSet2); // two data sets
+        //dataSet1.addListener(evt -> System.err.println("dataset2 event received " + evt.getClass().getSimpleName()));
+        dataSet2.getAxisDescription(0).set("time", "s");
+        dataSet2.getAxisDescription(1).set("Current", "A");
+        //        chart.getDatasets().add(dataSet1); // for single data set
+        //        chart.getDatasets().addAll(dataSet1, dataSet2); // two data sets
 
         // Add data Sets to different Renderers to allow automatic axis names and units
         Renderer renderer1 = new ErrorDataSetRenderer();
         Renderer renderer2 = new ErrorDataSetRenderer();
-        renderer1.getDatasets().add(dataSet1);
+//        renderer1.getDatasets().add(dataSet1);
         renderer2.getDatasets().add(dataSet2);
         chart.getRenderers().addAll(renderer1, renderer2);
         
-        
+        renderer1.getDatasets().add(dataSet1);
 
         final double[] xValues = new double[N_SAMPLES];
         final double[] yValues1 = new double[N_SAMPLES];
