@@ -1,21 +1,23 @@
 package de.gsi.dataset.spi;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import de.gsi.dataset.AxisDescription;
 import de.gsi.dataset.DataSet;
 import de.gsi.dataset.DataSetMetaData;
 import de.gsi.dataset.EditConstraints;
 import de.gsi.dataset.event.EventListener;
 import de.gsi.dataset.event.UpdateEvent;
-import de.gsi.dataset.event.UpdatedAxisDataEvent;
 import de.gsi.dataset.event.UpdatedMetaDataEvent;
 import de.gsi.dataset.spi.utils.StringHashMapList;
 
@@ -39,21 +41,20 @@ import de.gsi.dataset.spi.utils.StringHashMapList;
 public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends AbstractStylable<D>
         implements DataSet, DataSetMetaData {
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractDataSet.class);
-    protected String name;
+    private transient AtomicBoolean autoNotification = new AtomicBoolean(true);
+    private String name;
+    private final List<AxisDescription> axesDescriptions = new ArrayList<>(Arrays.asList( // 
+            new DefaultAxisDescription(this, "x-Axis", "a.u."), // 
+            new DefaultAxisDescription(this, "y-Axis", "a.u.")));
     protected final List<EventListener> updateListeners = new LinkedList<>();
     protected final ReentrantLock lock = new ReentrantLock();
-    boolean autoNotification = true;
-    protected DataRange xRange = new DataRange();
-    protected DataRange yRange = new DataRange();
     protected StringHashMapList dataLabels = new StringHashMapList();
     protected StringHashMapList dataStyles = new StringHashMapList();
-    protected ArrayList<String> infoList = new ArrayList<>();
-    protected ArrayList<String> warningList = new ArrayList<>();
-    protected ArrayList<String> errorList = new ArrayList<>();
+    protected List<String> infoList = new ArrayList<>();
+    protected List<String> warningList = new ArrayList<>();
+    protected List<String> errorList = new ArrayList<>();
     protected EditConstraints editConstraints;
     protected final Map<String, String> metaInfoMap = new ConcurrentHashMap<>();
-    protected List<String> axesNames = new ArrayList<>();
-    protected List<String> axesUnits = new ArrayList<>();
 
     /**
      * default constructor
@@ -65,147 +66,75 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
         this.name = name;
     }
 
-    @Override
-    protected D getThis() {
-        return (D) this;
+    /**
+     * adds a custom new data label for a point The label can be used as a
+     * category name if CategoryStepsDefinition is used or for annotations
+     * displayed for data points.
+     *
+     * @param index of the data point
+     * @param label for the data point specified by the index
+     * @return the previously set label or <code>null</code> if no label has
+     *         been specified
+     */
+    public String addDataLabel(final int index, final String label) {
+        lock();
+        final String retVal = dataLabels.put(index, label);
+        unlock();
+        fireInvalidated(new UpdatedMetaDataEvent(this, "added label"));
+        return retVal;
     }
 
     /**
-     * Sets the name of data set (meta data)
-     * 
-     * @param name the new name
-     * @return itself (fluent design)
+     * A string representation of the CSS style associated with this specific
+     * {@code DataSet} data point. @see #getStyle()
+     *
+     * @param index the index of the specific data point
+     * @param style string for the data point specific CSS-styling
+     * @return itself (fluent interface)
      */
-    public D setName(final String name) {
-        this.name = name;
-        return getThis();
+    public String addDataStyle(final int index, final String style) {
+        lock();
+        final String retVal = dataStyles.put(index, style);
+        unlock();
+        fireInvalidated(new UpdatedMetaDataEvent(this, "added style"));
+        return retVal;
     }
 
     @Override
-    public String getName() {
-        return name;
-    }
-
-    @Override
-    public D lock() {
-        lock.lock();
-        return getThis();
-    }
-
-    @Override
-    public D unlock() {
-        lock.unlock();
-        return getThis();
-    }
-
-    @Override
-    public List<EventListener> updateEventListener() {
-        return updateListeners;
-    }
-
-    @Override
-    public D setAutoNotifaction(final boolean flag) {
-        autoNotification = flag;
-        return getThis();
-    }
-
-    @Override
-    public boolean isAutoNotification() {
+    public AtomicBoolean autoNotification() {
         return autoNotification;
     }
 
-    @Override
-    public Double getUndefValue() {
-        return Double.NaN;
+    public D clearMetaInfo() {
+        infoList.clear();
+        warningList.clear();
+        errorList.clear();
+        return fireInvalidated(new UpdatedMetaDataEvent(this, "cleared meta data"));
     }
 
     /**
-     * Gets the minimum x value of the data set.
-     *
-     * @return minimum x value
-     */
-    @Override
-    public double getXMin() {
-        if (!getXRange().isDefined()) {
-            computeLimits();
-        }
-        return getXRange().getMin();
-    }
-
-    /**
-     * Gets the maximum x value of the data set.
-     *
-     * @return maximum x value
-     */
-    @Override
-    public double getXMax() {
-        if (!getXRange().isDefined()) {
-            computeLimits();
-        }
-        return getXRange().getMax();
-    }
-
-    /**
-     * Gets the minimum y value of the data set.
-     *
-     * @return minimum y value
-     */
-    @Override
-    public double getYMin() {
-        if (!getYRange().isDefined()) {
-            computeLimits();
-        }
-        return getYRange().getMin();
-    }
-
-    /**
-     * Gets the maximum y value of the data set.
-     *
-     * @return maximum y value
-     */
-    @Override
-    public double getYMax() {
-        if (!getYRange().isDefined()) {
-            computeLimits();
-        }
-        return getYRange().getMax();
-    }
-
-    /**
+     * Notifies listeners that the data has been invalidated. If the data is
+     * added to the chart, it triggers repaint.
      * 
-     * @return horizontal range of data set
-     */
-    public DataRange getXRange() {
-        return xRange;
-    }
-
-    /**
-     * 
-     * @return vertical range of data set
-     */
-    public DataRange getYRange() {
-        return yRange;
-    }
-
-    /**
-     * Computes limits (ranges) of this DataSet.
-     * 
+     * @param event the change event
      * @return itself (fluent design)
      */
-    protected D computeLimits() {
-        lock();
-        // Clear previous ranges
-        xRange.empty();
-        yRange.empty();
-
-        final int dataCount = getDataCount();
-
-        for (int i = 0; i < dataCount; i++) {
-            xRange.add(getX(i));
-            yRange.add(getY(i));
+    public D fireInvalidated(final UpdateEvent event) {
+        if (!isAutoNotification() || updateEventListener().isEmpty()) {
+            return getThis();
         }
 
-        return unlock();
+        invokeListener(event);
+
+        return getThis();
+    }
+
+    /**
+     * @return axis descriptions of the primary and secondary axes
+     */
+    @Override
+    public List<AxisDescription> getAxisDescriptions() {
+        return axesDescriptions;
     }
 
     /**
@@ -230,6 +159,83 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
     }
 
     /**
+     * Returns label of a data point specified by the index. The label can be
+     * used as a category name if CategoryStepsDefinition is used or for
+     * annotations displayed for data points.
+     *
+     * @param index of the data label
+     * @return data point label specified by the index or <code>null</code> if
+     *         no label has been specified
+     */
+    @Override
+    public String getDataLabel(final int index) {
+        // old implementation: caused issue/unnecessary copying of data
+        // moved to DataPointToolTip (better place)
+        // final String dataLabel = dataLabels.get(index);
+        // if (dataLabel != null) {
+        // return dataLabel;
+        // }
+        //
+        // return getDefaultDataLabel(index);
+        return dataLabels.get(index);
+    }
+
+    /**
+     * @return data label map for given data point
+     */
+    public StringHashMapList getDataLabelMap() {
+        return dataLabels;
+    }
+
+    /**
+     * @return data style map (CSS-styling)
+     */
+    public StringHashMapList getDataStyleMap() {
+        return dataStyles;
+    }
+
+    public EditConstraints getEditConstraints() {
+        return editConstraints;
+    }
+
+    @Override
+    public List<String> getErrorList() {
+        return errorList;
+    }
+
+    @Override
+    public List<String> getInfoList() {
+        return infoList;
+    }
+
+    @Override
+    public Map<String, String> getMetaInfo() {
+        return metaInfoMap;
+    }
+
+    @Override
+    public String getName() {
+        return name;
+    }
+
+    /**
+     * A string representation of the CSS style associated with this specific
+     * {@code DataSet} data point. @see #getStyle()
+     *
+     * @param index the index of the specific data point
+     * @return user-specific data set style description (ie. may be set by user)
+     */
+    @Override
+    public String getStyle(final int index) {
+        return dataStyles.get(index);
+    }
+
+    @Override
+    public List<String> getWarningList() {
+        return warningList;
+    }
+
+    /**
      * Gets the index of the data point closest to the given x coordinate. The
      * index returned may be less then zero or larger the the number of data
      * points in the data set, if the x coordinate lies outside the range of the
@@ -248,12 +254,12 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
             return 0;
         }
 
-        if (x < this.getXMin()) {
+        if (x < this.getAxisDescription(0).getMin()) {
             return 0;
         }
 
         final int lastIndex = getDataCount() - 1;
-        if (x > this.getXMax()) {
+        if (x > this.getAxisDescription(0).getMax()) {
             return lastIndex;
         }
 
@@ -301,6 +307,111 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
         return getDataCount() - 1;
     }
 
+    @Override
+    public D lock() {
+        lock.lock();
+        return getThis();
+    }
+
+    /**
+     * Computes limits (ranges) of this DataSet.
+     * 
+     * @param dimension the chosen dimension
+     * @return itself (fluent design)
+     */
+    @Override
+    public D recomputeLimits(final int dimension) {
+        lock();
+
+        final boolean oldAutoNotification = this.isAutoNotification();
+        setAutoNotifaction(false);
+
+        // Clear previous ranges
+        getAxisDescription(dimension).empty();
+        final int dataCount = getDataCount();
+        if (dimension == 0) {
+            for (int i = 0; i < dataCount; i++) {
+                getAxisDescription(dimension).add(getX(i));
+
+            }
+        } else {
+            for (int i = 0; i < dataCount; i++) {
+                getAxisDescription(dimension).add(getY(i));
+            }
+        }
+
+        setAutoNotifaction(oldAutoNotification);
+        return unlock();
+    }
+
+    /**
+     * remove a custom data label for a point The label can be used as a
+     * category name if CategoryStepsDefinition is used or for annotations
+     * displayed for data points.
+     *
+     * @param index of the data point
+     * @return the previously set label or <code>null</code> if no label has
+     *         been specified
+     */
+    public String removeDataLabel(final int index) {
+        lock();
+        final String retVal = dataLabels.remove(index);
+        unlock();
+        fireInvalidated(new UpdatedMetaDataEvent(this, "removed label"));
+        return retVal;
+    }
+
+    /**
+     * A string representation of the CSS style associated with this specific
+     * {@code DataSet} data point. @see #getStyle()
+     *
+     * @param index the index of the specific data point
+     * @return itself (fluent interface)
+     */
+    public String removeStyle(final int index) {
+        lock();
+        final String retVal = dataStyles.remove(index);
+        lock();
+        fireInvalidated(new UpdatedMetaDataEvent(this, "removed style"));
+        return retVal;
+    }
+
+    public D setEditConstraints(final EditConstraints constraints) {
+        lock();
+        editConstraints = constraints;
+        unlock();
+        return fireInvalidated(new UpdatedMetaDataEvent(this, "new edit constraints"));
+    }
+
+    /**
+     * Sets the name of data set (meta data)
+     * 
+     * @param name the new name
+     * @return itself (fluent design)
+     */
+    public D setName(final String name) {
+        this.name = name;
+        return getThis();
+    }
+
+    @Override
+    public String toString() {
+        final String xRange = ((DefaultAxisDescription) getAxisDescription(0)).toString();
+        final String yRange = ((DefaultAxisDescription) getAxisDescription(0)).toString();
+        return getClass().getName() + " [dataCnt=" + getDataCount() + ", xRange=" + xRange + ", yRange=" + yRange + "]";
+    }
+
+    @Override
+    public D unlock() {
+        lock.unlock();
+        return getThis();
+    }
+
+    @Override
+    public List<EventListener> updateEventListener() {
+        return updateListeners;
+    }
+
     protected int binarySearchX(final double search, final int indexMin, final int indexMax) {
         if (indexMin == indexMax) {
             return indexMin;
@@ -343,6 +454,11 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
         return binarySearchY(search, middle, indexMax);
     }
 
+    @Override
+    protected D getThis() {
+        return (D) this;
+    }
+
     protected int minNeigbourSearchX(final double search, final int indexMin, final int indexMax) {
         double minAbsDiff = Double.MAX_VALUE;
         int searchIndex = indexMin;
@@ -371,207 +487,5 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
         LOGGER.error("- new searchIndex = " + searchIndex + " for " + minAbsDiff);
 
         return searchIndex;
-    }
-
-    /**
-     * Notifies listeners that the data has been invalidated. If the data is
-     * added to the chart, it triggers repaint.
-     * 
-     * @param event the change event
-     *
-     * @return itself (fluent design)
-     */
-    public D fireInvalidated(final UpdateEvent event) {
-        if (!autoNotification || updateEventListener().isEmpty()) {
-            return getThis();
-        }
-
-        if (!xRange.isDefined() || !yRange.isDefined()) {
-            computeLimits();
-        }
-
-        invokeListener(event);
-
-        return getThis();
-    }
-
-    @Override
-    public String toString() {
-        return getClass().getName() + " [dataCnt=" + getDataCount() + ", xRange=" + getXRange() + ", yRange="
-                + getYRange() + "]";
-    }
-
-    /**
-     * 
-     * @return data label map for given data point
-     */
-    public StringHashMapList getDataLabelMap() {
-        return dataLabels;
-    }
-
-    /**
-     * 
-     * @return data style map (CSS-styling)
-     */
-    public StringHashMapList getDataStyleMap() {
-        return dataStyles;
-    }
-
-    /**
-     * adds a custom new data label for a point The label can be used as a
-     * category name if CategoryStepsDefinition is used or for annotations
-     * displayed for data points.
-     *
-     * @param index of the data point
-     * @param label for the data point specified by the index
-     * @return the previously set label or <code>null</code> if no label has
-     *         been specified
-     */
-    public String addDataLabel(final int index, final String label) {
-        lock();
-        final String retVal = dataLabels.put(index, label);
-        unlock();
-        fireInvalidated(new UpdatedMetaDataEvent(this, "added label"));
-        return retVal;
-    }
-
-    /**
-     * remove a custom data label for a point The label can be used as a
-     * category name if CategoryStepsDefinition is used or for annotations
-     * displayed for data points.
-     *
-     * @param index of the data point
-     * @return the previously set label or <code>null</code> if no label has
-     *         been specified
-     */
-    public String removeDataLabel(final int index) {
-        lock();
-        final String retVal = dataLabels.remove(index);
-        unlock();
-        fireInvalidated(new UpdatedMetaDataEvent(this, "removed label"));
-        return retVal;
-    }
-
-    /**
-     * Returns label of a data point specified by the index. The label can be
-     * used as a category name if CategoryStepsDefinition is used or for
-     * annotations displayed for data points.
-     *
-     * @param index of the data label
-     * @return data point label specified by the index or <code>null</code> if
-     *         no label has been specified
-     */
-    @Override
-    public String getDataLabel(final int index) {
-        // old implementation: caused issue/unnecessary copying of data
-        // moved to DataPointToolTip (better place)
-        // final String dataLabel = dataLabels.get(index);
-        // if (dataLabel != null) {
-        // return dataLabel;
-        // }
-        //
-        // return getDefaultDataLabel(index);
-        return dataLabels.get(index);
-    }
-
-    /**
-     * A string representation of the CSS style associated with this specific
-     * {@code DataSet} data point. @see #getStyle()
-     *
-     * @param index the index of the specific data point
-     * @param style string for the data point specific CSS-styling
-     * @return itself (fluent interface)
-     */
-    public String addDataStyle(final int index, final String style) {
-        lock();
-        final String retVal = dataStyles.put(index, style);
-        unlock();
-        fireInvalidated(new UpdatedMetaDataEvent(this, "added style"));
-        return retVal;
-    }
-
-    /**
-     * A string representation of the CSS style associated with this specific
-     * {@code DataSet} data point. @see #getStyle()
-     *
-     * @param index the index of the specific data point
-     * @return itself (fluent interface)
-     */
-    public String removeStyle(final int index) {
-        lock();
-        final String retVal = dataStyles.remove(index);
-        lock();
-        fireInvalidated(new UpdatedMetaDataEvent(this, "removed style"));
-        return retVal;
-    }
-
-    /**
-     * A string representation of the CSS style associated with this specific
-     * {@code DataSet} data point. @see #getStyle()
-     *
-     * @param index the index of the specific data point
-     * @return user-specific data set style description (ie. may be set by user)
-     */
-    @Override
-    public String getStyle(final int index) {
-        return dataStyles.get(index);
-    }
-
-    public EditConstraints getEditConstraints() {
-        return editConstraints;
-    }
-
-    public D setEditConstraints(final EditConstraints constraints) {
-        lock();
-        editConstraints = constraints;
-        unlock();
-        return fireInvalidated(new UpdatedMetaDataEvent(this, "new edit constraints"));
-    }
-
-    @Override
-    public Map<String, String> getMetaInfo() {
-        return metaInfoMap;
-    }
-
-    public D clearMetaInfo() {
-        infoList.clear();
-        warningList.clear();
-        errorList.clear();
-        return fireInvalidated(new UpdatedMetaDataEvent(this, "cleared meta data"));
-    }
-
-    @Override
-    public List<String> getInfoList() {
-        return infoList;
-    }
-
-    @Override
-    public List<String> getWarningList() {
-        return warningList;
-    }
-
-    @Override
-    public List<String> getErrorList() {
-        return errorList;
-    }
-
-    @Override
-    public String getAxisName(int dim) {
-        return (axesNames.size() > dim) ? axesNames.get(dim) : "";
-    }
-    
-    @Override
-    public String getAxisUnit(int dim) {
-        return (axesNames.size() > dim) ? axesUnits.get(dim) : "";
-    }
-    
-    public void setAxisDescription(int dim, String name, String... unit) {
-        if (dim < 0) throw new IllegalArgumentException("Negative dimension index not allowed");
-        if (unit.length > 1) throw new IllegalArgumentException("More than one unit is not allowed");
-        while (axesNames.size() <= dim) axesNames.add("");
-        while (axesUnits.size() <= dim) axesUnits.add("");
-        axesNames.set(dim, name);
-        if (unit.length == 1) axesUnits.set(dim, unit[0]);
-        fireInvalidated(new UpdatedAxisDataEvent(this, "Updated Axis Data", dim));
     }
 }

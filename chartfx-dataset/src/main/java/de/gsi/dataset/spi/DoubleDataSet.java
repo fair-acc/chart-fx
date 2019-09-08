@@ -1,5 +1,6 @@
 package de.gsi.dataset.spi;
 
+import de.gsi.dataset.AxisDescription;
 import de.gsi.dataset.DataSet;
 import de.gsi.dataset.EditableDataSet;
 import de.gsi.dataset.event.AddedDataEvent;
@@ -14,7 +15,6 @@ import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
  * points.
  *
  * @see DoubleErrorDataSet for an implementation with asymmetric errors in Y
- *
  * @author rstein
  */
 @SuppressWarnings("PMD.TooManyMethods") // part of the flexible class nature
@@ -84,7 +84,7 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
             final int size = Math.min(dataMaxIndex, initalSize);
             this.xValues = new DoubleArrayList(initalSize);
             this.yValues = new DoubleArrayList(initalSize);
-            this.resize(initalSize);
+            resize(initalSize);
             System.arraycopy(xValues, 0, this.xValues.elements(), 0, size);
             System.arraycopy(yValues, 0, this.yValues.elements(), 0, size);
         } else {
@@ -110,7 +110,7 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
 
     /**
      * clear all data points
-     * 
+     *
      * @return itself (fluent design)
      */
     public DoubleDataSet clearData() {
@@ -122,14 +122,12 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
         dataStyles.clear();
         clearMetaInfo();
 
-        xRange.empty();
-        yRange.empty();
+        getAxisDescriptions().forEach(AxisDescription::empty);
 
         return unlock().fireInvalidated(new RemovedDataEvent(this, "clearData()"));
     }
 
     /**
-     * 
      * @return storage capacity of dataset
      */
     public int getCapacity() {
@@ -137,7 +135,6 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
     }
 
     /**
-     * 
      * @param amount storage capacity increase
      * @return itself (fluent design)
      */
@@ -145,16 +142,16 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
         lock();
         final int size = getDataCount();
         final boolean auto = isAutoNotification();
-        this.setAutoNotifaction(false);
-        resize(this.getCapacity() + amount);
+        setAutoNotifaction(false);
+        resize(getCapacity() + amount);
         resize(size);
-        this.setAutoNotifaction(auto);
+        setAutoNotifaction(auto);
         return unlock();
     }
 
     /**
      * ensures minimum size, enlarges if necessary
-     * 
+     *
      * @param size the actually used array lengths
      * @return itself (fluent design)
      */
@@ -212,12 +209,12 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
         xValues.add(x);
         yValues.add(y);
 
-        if (label != null && !label.isEmpty()) {
+        if ((label != null) && !label.isEmpty()) {
             addDataLabel(xValues.size() - 1, label);
         }
 
-        xRange.add(x);
-        yRange.add(y);
+        getAxisDescription(0).add(x);
+        getAxisDescription(1).add(y);
 
         return unlock().fireInvalidated(new UpdatedDataEvent(this, "add"));
     }
@@ -235,12 +232,16 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
         AssertUtils.notNull("Y coordinates", yValuesNew);
         AssertUtils.equalDoubleArrays(xValuesNew, yValuesNew);
 
+        final boolean oldAutoNotification = this.isAutoNotification();
+        setAutoNotifaction(false);
+
         xValues.addElements(xValues.size(), xValuesNew);
         yValues.addElements(yValues.size(), yValuesNew);
 
-        xRange.add(xValuesNew);
-        yRange.add(yValuesNew);
+        getAxisDescription(0).add(xValuesNew);
+        getAxisDescription(1).add(yValuesNew);
 
+        setAutoNotifaction(oldAutoNotification);
         return unlock().fireInvalidated(new AddedDataEvent(this));
     }
 
@@ -274,8 +275,8 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
         yValues.add(indexAt, y);
         dataLabels.addValueAndShiftKeys(indexAt, xValues.size(), label);
         dataStyles.shiftKeys(indexAt, xValues.size());
-        xRange.add(x);
-        yRange.add(y);
+        getAxisDescription(0).add(x);
+        getAxisDescription(1).add(y);
 
         return unlock().fireInvalidated(new AddedDataEvent(this));
     }
@@ -294,15 +295,19 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
         AssertUtils.notNull("Y coordinates", y);
         final int min = Math.min(x.length, y.length);
         AssertUtils.equalDoubleArrays(x, y, min);
+        
+        final boolean oldAutoNotification = this.isAutoNotification();
+        setAutoNotifaction(false);
 
         final int indexAt = Math.max(0, Math.min(index, getDataCount() + 1));
         xValues.addElements(indexAt, x, 0, min);
         yValues.addElements(indexAt, y, 0, min);
-        xRange.add(x, min);
-        yRange.add(y, min);
+        getAxisDescription(0).add(x, min);
+        getAxisDescription(0).add(y, min);
         dataLabels.shiftKeys(indexAt, xValues.size());
         dataStyles.shiftKeys(indexAt, xValues.size());
 
+        setAutoNotifaction(oldAutoNotification);
         return unlock().fireInvalidated(new AddedDataEvent(this));
     }
 
@@ -319,7 +324,7 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
 
     /**
      * removes sub-range of data points
-     * 
+     *
      * @param fromIndex start index
      * @param toIndex stop index
      * @return itself (fluent design)
@@ -339,15 +344,14 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
 
         // invalidate ranges
         // -> fireInvalidated calls computeLimits for autoNotification
-        xRange.empty();
-        yRange.empty();
+        getAxisDescriptions().forEach(AxisDescription::empty);
 
         return unlock().fireInvalidated(new RemovedDataEvent(this));
     }
 
     /**
      * replaces point coordinate of existing data point
-     * 
+     *
      * @param index the index of the data point
      * @param x new horizontal coordinate
      * @param y new vertical coordinate N.B. errors are implicitly assumed to be
@@ -368,8 +372,8 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
 
             // invalidate ranges
             // -> fireInvalidated calls computeLimits for autoNotification
-            xRange.empty();
-            yRange.empty();
+            getAxisDescriptions().forEach(AxisDescription::empty);
+
         } finally {
             unlock();
         }
@@ -395,6 +399,9 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
         final int dataMaxIndex = Math.min(xValues.length, yValues.length);
         AssertUtils.equalDoubleArrays(xValues, yValues, dataMaxIndex);
 
+        final boolean oldAutoNotification = this.isAutoNotification();
+        setAutoNotifaction(false);
+
         dataLabels.clear();
         dataStyles.clear();
         if (copy) {
@@ -406,8 +413,10 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
             this.yValues = DoubleArrayList.wrap(yValues);
         }
 
-        computeLimits();
+        recomputeLimits(0);
+        recomputeLimits(1);
 
+        setAutoNotifaction(oldAutoNotification);
         return unlock().fireInvalidated(new UpdatedDataEvent(this));
     }
 
@@ -427,6 +436,8 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
 
     public DoubleDataSet set(final int index, final double[] x, final double[] y) {
         lock();
+        final boolean oldAutoNotification = this.isAutoNotification();
+        setAutoNotifaction(false);
         try {
             resize(Math.max(index + x.length, xValues.size()));
             System.arraycopy(x, 0, xValues.elements(), index, x.length);
@@ -436,9 +447,10 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
 
             // invalidate ranges
             // -> fireInvalidated calls computeLimits for autoNotification
-            xRange.empty();
-            yRange.empty();
+            getAxisDescriptions().forEach(AxisDescription::empty);
+
         } finally {
+            setAutoNotifaction(oldAutoNotification);
             unlock();
         }
         return fireInvalidated(new UpdatedDataEvent(this, "set - via arrays"));
@@ -446,7 +458,7 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
 
     /**
      * clear old data and overwrite with data from 'other' data set (deep copy)
-     * 
+     *
      * @param other the source data set
      * @return itself (fluent design)
      */
@@ -460,18 +472,18 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
         dataLabels.clear();
         for (int index = 0; index < other.getDataCount(); index++) {
             final String label = other.getDataLabel(index);
-            if (label != null && !label.isEmpty()) {
-                this.addDataLabel(index, label);
+            if ((label != null) && !label.isEmpty()) {
+                addDataLabel(index, label);
             }
         }
         dataStyles.clear();
         for (int index = 0; index < other.getDataCount(); index++) {
             final String style = other.getStyle(index);
-            if (style != null && !style.isEmpty()) {
-                this.addDataStyle(index, style);
+            if ((style != null) && !style.isEmpty()) {
+                addDataStyle(index, style);
             }
         }
-        this.setStyle(other.getStyle());
+        setStyle(other.getStyle());
 
         // copy data
         this.set(other.getXValues(), other.getYValues(), true);

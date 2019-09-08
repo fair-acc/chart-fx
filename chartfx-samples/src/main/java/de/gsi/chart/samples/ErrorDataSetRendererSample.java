@@ -187,8 +187,8 @@ public class ErrorDataSetRendererSample extends Application {
             final double y = oldY + (n == 500000 ? 500.0 : 0);
             final double ex = 0.1;
             final double ey = 10;
-            dataSet.set(n, x, y, ex, ey);
-            dataSetNoErrors.set(n, x, y + 20);
+            dataSet.add(x, y, ex, ey);
+            dataSetNoErrors.add(x, y + 20);
 
             if (n == 500000) {
                 dataSet.getDataLabelMap().put(n, "special outlier");

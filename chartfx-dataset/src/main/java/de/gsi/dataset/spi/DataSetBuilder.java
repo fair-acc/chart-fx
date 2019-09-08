@@ -3,8 +3,10 @@ package de.gsi.dataset.spi;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import de.gsi.dataset.AxisDescription;
 import de.gsi.dataset.DataSet;
 import de.gsi.dataset.utils.AssertUtils;
 
@@ -16,12 +18,16 @@ public class DataSetBuilder {
     protected double[] xErrorsNeg;
     protected double[] yErrorsPos;
     protected double[] yErrorsNeg;
-    protected ArrayList<String> infoList = new ArrayList<>();
-    protected ArrayList<String> warningList = new ArrayList<>();
-    protected ArrayList<String> errorList = new ArrayList<>();
-    protected HashMap<String, String> metaInfoMap = new HashMap<>();
-    protected HashMap<Integer, String> dataLabels = new HashMap<>();
-    protected HashMap<Integer, String> dataStyles = new HashMap<>();
+    protected List<String> infoList = new ArrayList<>();
+    protected List<String> warningList = new ArrayList<>();
+    protected List<String> errorList = new ArrayList<>();
+    protected Map<String, String> metaInfoMap = new HashMap<>();
+    protected Map<Integer, String> dataLabels = new HashMap<>();
+    protected Map<Integer, String> dataStyles = new HashMap<>();
+    protected String xAxisName;
+    protected String yAxisName;
+    protected String xAxisUnit;
+    protected String yAxisUnit;
     protected double xMin = Double.NaN;
     protected double xMax = Double.NaN;
     protected double yMin = Double.NaN;
@@ -258,14 +264,14 @@ public class DataSetBuilder {
             return;
         }
         AbstractDataSet<?> ds = (AbstractDataSet<?>) dataSet;
-        ds.getXRange().set(xMin, xMax);
-        ds.getYRange().set(yMin, yMax);
+        ds.getAxisDescription(0).set(xAxisName, xAxisUnit, xMin, xMax);
+        ds.getAxisDescription(1).set(yAxisName, yAxisUnit, yMin, yMax);
 
-        // following triggers a re-computation of the ranges if necessary
-        if (ds.getXRange().isDefined() && ds.getYRange().isDefined()) {
-            return;
+        for (AxisDescription axis : ds.getAxisDescriptions()) {
+            if (!axis.isDefined()) {
+                ds.recomputeLimits(ds.getAxisDescriptions().indexOf(axis));
+            }
         }
-        ds.computeLimits();
     }
 
     protected void addDataLabelStyleMap(final DataSet dataSet) {

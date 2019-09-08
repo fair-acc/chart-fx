@@ -22,7 +22,7 @@ import de.gsi.math.spectra.fft.DoubleFFT_1D;
  *
  * @author rstein
  */
-public final class DataSetMath {
+public final class DataSetMath { // NOPMD - nomen est omen
 
     private static final char INFINITY_SYMBOL = 0x221E;
     private static final char INTEGRAL_SYMBOL = 0x222B;
@@ -104,7 +104,7 @@ public final class DataSetMath {
         return 0;
     }
 
-    protected static double[] cropToLength(final double[] in, final int length) {
+    private static double[] cropToLength(final double[] in, final int length) {
         // small helper routine to crop data array in case it's to long
         if (in.length == length) {
             return in;
@@ -268,8 +268,8 @@ public final class DataSetMath {
                     new double[function.getDataCount()],new double[function.getDataCount()],new double[function.getDataCount()],function.getDataCount(), true);
         }
 
-        double xMinLocal = function.getXMin();
-        double xMaxLocal = function.getXMax();
+        double xMinLocal = function.getAxisDescription(0).getMin();
+        double xMaxLocal = function.getAxisDescription(0).getMax();
         double sign = 1.0;
 
         if (Double.isFinite(xMin) && Double.isFinite(xMax)) {

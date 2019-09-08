@@ -1,7 +1,5 @@
 package de.gsi.dataset;
 
-import de.gsi.dataset.spi.DataRange;
-
 /**
  * A <code>DataSet</code> extension used to represent 3-dimensional data points.
  *
@@ -20,13 +18,6 @@ public interface DataSet3D extends DataSet {
      * @return Z coordinate
      */
     double getZ(int xIndex, int yIndex);
-
-    /**
-     * Returns data range of Z values.
-     *
-     * @return data range of Z values.
-     */
-    DataRange getZRange();
 
     /**
      * Changes a data point at specified index to new values.

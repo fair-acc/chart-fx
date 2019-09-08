@@ -1,5 +1,6 @@
 package de.gsi.dataset.spi;
 
+import de.gsi.dataset.AxisDescription;
 import de.gsi.dataset.DataSetError;
 import de.gsi.dataset.event.InvalidatedEvent;
 import de.gsi.dataset.utils.AssertUtils;
@@ -94,7 +95,8 @@ public class CircularDoubleErrorDataSet extends AbstractErrorDataSet<DoubleError
         dataTag.put(tag);
         dataStyles.put(style);
 
-        computeLimits();
+        recomputeLimits(0);
+        recomputeLimits(1);
         unlock();
         fireInvalidated(new InvalidatedEvent(this));
         return this;
@@ -159,7 +161,8 @@ public class CircularDoubleErrorDataSet extends AbstractErrorDataSet<DoubleError
         dataTag.put(new String[yErrPos.length], yErrPos.length);
         dataStyles.put(new String[yErrPos.length], yErrPos.length);
 
-        computeLimits();
+        recomputeLimits(0);
+        recomputeLimits(1);
         unlock();
         fireInvalidated(new InvalidatedEvent(this));
         return this;
@@ -178,8 +181,7 @@ public class CircularDoubleErrorDataSet extends AbstractErrorDataSet<DoubleError
         yErrorsPos.reset();
         dataTag.reset();
         dataStyles.reset();
-        xRange.empty();
-        yRange.empty();
+        getAxisDescriptions().forEach(AxisDescription::empty);
 
         unlock();
         fireInvalidated(new InvalidatedEvent(this));

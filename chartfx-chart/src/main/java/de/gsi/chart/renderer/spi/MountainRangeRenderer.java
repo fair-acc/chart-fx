@@ -2,18 +2,22 @@ package de.gsi.chart.renderer.spi;
 
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.WeakHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import de.gsi.chart.Chart;
 import de.gsi.chart.XYChart;
 import de.gsi.chart.axes.Axis;
 import de.gsi.chart.renderer.ErrorStyle;
 import de.gsi.chart.renderer.Renderer;
+import de.gsi.dataset.AxisDescription;
 import de.gsi.dataset.DataSet;
 import de.gsi.dataset.DataSet3D;
 import de.gsi.dataset.DataSetError;
 import de.gsi.dataset.event.EventListener;
+import de.gsi.dataset.spi.DefaultAxisDescription;
 import de.gsi.dataset.utils.AssertUtils;
 import de.gsi.dataset.utils.ProcessingProfiler;
 import javafx.beans.property.DoubleProperty;
@@ -35,11 +39,6 @@ public class MountainRangeRenderer extends ErrorDataSetRenderer implements Rende
     private double zRangeMax = 0.0;
     private double mountainRaingeExtra = 0.0;
 
-    public MountainRangeRenderer(final double mountainRangeOffset) {
-        this();
-        setMountainRangeOffset(mountainRangeOffset);
-    }
-
     public MountainRangeRenderer() {
         super();
         setDrawMarker(false);
@@ -47,6 +46,24 @@ public class MountainRangeRenderer extends ErrorDataSetRenderer implements Rende
         setErrorType(ErrorStyle.NONE);
         xWeakIndexMap.clear();
         yWeakIndexMap.clear();
+    }
+
+    public MountainRangeRenderer(final double mountainRangeOffset) {
+        this();
+        setMountainRangeOffset(mountainRangeOffset);
+    }
+
+    /**
+     * Returns the <code>mountainRangeOffset</code>.
+     *
+     * @return the <code>mountainRangeOffset</code>, i.e. vertical offset between subsequent data sets
+     */
+    public final double getMountainRangeOffset() {
+        return mountainRangeOffset.get();
+    }
+
+    public final DoubleProperty mountainRangeOffsetProperty() {
+        return mountainRangeOffset;
     }
 
     @Override
@@ -79,8 +96,8 @@ public class MountainRangeRenderer extends ErrorDataSetRenderer implements Rende
                 xWeakIndexMap.clear();
                 yWeakIndexMap.clear();
                 yAxis.setAutoGrowRanging(true);
-                zRangeMin = mData.getZRange().getMin();
-                zRangeMax = mData.getZRange().getMax();
+                zRangeMin = mData.getAxisDescription(2).getMin();
+                zRangeMax = mData.getAxisDescription(2).getMax();
                 mountainRaingeExtra = MountainRangeRenderer.this.getMountainRangeOffset();
                 yAxis.setLowerBound(zRangeMin);
                 yAxis.setUpperBound(zRangeMax * (1.0 + mountainRaingeExtra));
@@ -102,6 +119,19 @@ public class MountainRangeRenderer extends ErrorDataSetRenderer implements Rende
 
         // super.render(gc, chart, empty);
         ProcessingProfiler.getTimeDiff(start);
+    }
+
+    /**
+     * Sets the <code>dashSize</code> to the specified value. The dash is the horizontal line painted at the ends of the
+     * vertical line. It is not painted if set to 0.
+     *
+     * @param mountainRangeOffset t<code>mountainRangeOffset</code>, i.e. vertical offset between subsequent data sets
+     * @return itself (fluent design)
+     */
+    public final MountainRangeRenderer setMountainRangeOffset(final double mountainRangeOffset) {
+        AssertUtils.gtEqThanZero("mountainRangeOffset", mountainRangeOffset);
+        this.mountainRangeOffset.setValue(mountainRangeOffset);
+        return this;
     }
 
     private void checkAndRecreateRenderer(final int nRenderer) {
@@ -130,39 +160,16 @@ public class MountainRangeRenderer extends ErrorDataSetRenderer implements Rende
         }
     }
 
-    /**
-     * Returns the <code>mountainRangeOffset</code>.
-     *
-     * @return the <code>mountainRangeOffset</code>, i.e. vertical offset between subsequent data sets
-     */
-    public final double getMountainRangeOffset() {
-        return mountainRangeOffset.get();
-    }
-
-    /**
-     * Sets the <code>dashSize</code> to the specified value. The dash is the horizontal line painted at the ends of the
-     * vertical line. It is not painted if set to 0.
-     *
-     * @param mountainRangeOffset t<code>mountainRangeOffset</code>, i.e. vertical offset between subsequent data sets
-     * @return itself (fluent design)
-     */
-    public final MountainRangeRenderer setMountainRangeOffset(final double mountainRangeOffset) {
-        AssertUtils.gtEqThanZero("mountainRangeOffset", mountainRangeOffset);
-        this.mountainRangeOffset.setValue(mountainRangeOffset);
-        return this;
-    }
-
-    public final DoubleProperty mountainRangeOffsetProperty() {
-        return mountainRangeOffset;
-    }
-
     private class Demux3dTo2dDataSet implements DataSetError {
-
+        private final AtomicBoolean autoNotification = new AtomicBoolean(true);
         private final DataSet3D dataSet;
         private final int yIndex;
         private final int yMax;
         private double yShift;
         private final List<EventListener> updateListener = new ArrayList<>();
+        private final List<AxisDescription> axesDescriptions = new ArrayList<>(Arrays.asList( // 
+                new DefaultAxisDescription(Demux3dTo2dDataSet.this, "x-Axis", "a.u."), // 
+                new DefaultAxisDescription(Demux3dTo2dDataSet.this, "y-Axis", "a.u.")));
 
         public Demux3dTo2dDataSet(final DataSet3D sourceDataSet, final int selectedYIndex) {
             super();
@@ -170,42 +177,29 @@ public class MountainRangeRenderer extends ErrorDataSetRenderer implements Rende
             yIndex = selectedYIndex;
             yMax = dataSet.getYDataCount();
             yShift = 0.0; // just temporarily, will be recomputed
-            getYMax(); // #NOPMD locally needed to initialise, cannot be
-                       // overwritten by user
-        }       
 
-        @Override
-        public List<EventListener> updateEventListener() {
-            return updateListener;
-        }
-        
-        @Override
-        public String getName() {
-            return dataSet.getName() + ":slice#" + yIndex;
-        }
-
-        @Override
-        public DataSet lock() {
-            // empty implementation since the superordinate DataSet3D lock is
-            // being held/protecting this data set
-            return this;
+            // listener on axis
+            final AxisDescription xAxis = dataSet.getAxisDescription(0);
+            //            xAxis.addListener(evt -> Demux3dTo2dDataSet.this.getAxisDescription(0).set(xAxis.getName(), xAxis.getUnit(),
+            //                    xAxis.getMin(), xAxis.getMax()));
+            // map zAxis from 3D data set to y-axis of this data set
+            //dataSet.getAxisDescription(2).addListener(evt -> setYMax(dataSet.getAxisDescription(2)));
+            dataSet.addListener(evt -> {
+                Demux3dTo2dDataSet.this.getAxisDescription(0).set(xAxis.getName(), xAxis.getUnit(), xAxis.getMin(),
+                        xAxis.getMax());
+                setYMax(dataSet.getAxisDescription(2));
+            });
+            setYMax(dataSet.getAxisDescription(2)); // #NOPMD locally needed to initialise, cannot be overwritten by user
         }
 
         @Override
-        public DataSet unlock() {
-            // empty implementation since the superordinate DataSet3D lock is
-            // being held/protecting this data set
-            return this;
+        public AtomicBoolean autoNotification() {
+            return autoNotification;
         }
 
         @Override
-        public DataSet setAutoNotifaction(final boolean flag) {
-            return dataSet.setAutoNotifaction(flag);
-        }
-
-        @Override
-        public boolean isAutoNotification() {
-            return dataSet.isAutoNotification();
+        public List<AxisDescription> getAxisDescriptions() {
+            return axesDescriptions;
         }
 
         @Override
@@ -219,18 +213,43 @@ public class MountainRangeRenderer extends ErrorDataSetRenderer implements Rende
         }
 
         @Override
+        public String getDataLabel(final int index) {
+            return dataSet.getDataLabel(index);
+        }
+
+        @Override
+        public ErrorType getErrorType() {
+            return ErrorType.Y;
+        }
+
+        @Override
+        public String getName() {
+            return dataSet.getName() + ":slice#" + yIndex;
+        }
+
+        @Override
+        public String getStyle() {
+            return dataSet.getStyle();
+        }
+
+        @Override
+        public String getStyle(final int index) {
+            return null;
+        }
+
+        @Override
         public double getX(final int i) {
             return dataSet.getX(i);
         }
 
         @Override
-        public double getY(final int i) {
-            return dataSet.getZ(i, yIndex) + yShift;
+        public double getXErrorNegative(final int index) {
+            return 0;
         }
 
         @Override
-        public Double getUndefValue() {
-            return dataSet.getUndefValue();
+        public double getXErrorPositive(final int index) {
+            return 0;
         }
 
         @Override
@@ -246,66 +265,8 @@ public class MountainRangeRenderer extends ErrorDataSetRenderer implements Rende
         }
 
         @Override
-        public int getYIndex(final double y) {
-            // added computation of hash since this is recomputed quite often
-            // (and the same) for each slice
-            Integer ret = yWeakIndexMap.get(y);
-            if (ret == null) {
-                ret = dataSet.getYIndex(y);
-                yWeakIndexMap.put(y, ret);
-            }
-            return ret;
-        }
-
-        @Override
-        public double getXMin() {
-            return dataSet.getXMin();
-        }
-
-        @Override
-        public double getXMax() {
-            return dataSet.getXMax();
-        }
-
-        @Override
-        public double getYMin() {
-            return dataSet.getZRange().getMin();
-        }
-
-        @Override
-        public double getYMax() {
-            yShift = mountainRaingeExtra * zRangeMax * yIndex / yMax;
-            return zRangeMax * (1 + mountainRaingeExtra);
-        }
-
-        @Override
-        public String getDataLabel(final int index) {
-            return dataSet.getDataLabel(index);
-        }       
-
-        @Override
-        public String getStyle() {
-            return dataSet.getStyle();
-        }
-
-        @Override
-        public DataSet setStyle(final String style) {
-            return dataSet.setStyle(style);
-        }        
-
-        @Override
-        public ErrorType getErrorType() {
-            return ErrorType.Y;
-        }
-
-        @Override
-        public double getXErrorNegative(final int index) {
-            return 0;
-        }
-
-        @Override
-        public double getXErrorPositive(final int index) {
-            return 0;
+        public double getY(final int i) {
+            return dataSet.getZ(i, yIndex) + yShift;
         }
 
         @Override
@@ -319,18 +280,62 @@ public class MountainRangeRenderer extends ErrorDataSetRenderer implements Rende
         }
 
         @Override
-        public String getStyle(final int index) {
-            return null;
+        public int getYIndex(final double y) {
+            // added computation of hash since this is recomputed quite often
+            // (and the same) for each slice
+            Integer ret = yWeakIndexMap.get(y);
+            if (ret == null) {
+                ret = dataSet.getYIndex(y);
+                yWeakIndexMap.put(y, ret);
+            }
+            return ret;
         }
 
         @Override
-        public String getAxisName(int dim) {
-            return dataSet.getAxisName(dim);
+        public boolean isAutoNotification() {
+            return autoNotification.get();
         }
 
         @Override
-        public String getAxisUnit(int dim) {
-            return dataSet.getAxisUnit(dim);
+        public DataSet lock() {
+            // empty implementation since the superordinate DataSet3D lock is
+            // being held/protecting this data set
+            return this;
+        }
+
+        @Override
+        public DataSet recomputeLimits(int dimension) {
+            this.setYMax(dataSet.getAxisDescription(2));
+            return this;
+        }
+
+        @Override
+        public void setAutoNotifaction(final boolean flag) {
+            autoNotification.set(flag);
+        }
+
+        @Override
+        public DataSet setStyle(final String style) {
+            return dataSet.setStyle(style);
+        }
+
+        @Override
+        public DataSet unlock() {
+            // empty implementation since the superordinate DataSet3D lock is
+            // being held/protecting this data set
+            return this;
+        }
+
+        @Override
+        public List<EventListener> updateEventListener() {
+            return updateListener;
+        }
+
+        private final void setYMax(AxisDescription zAxis) {
+            yShift = mountainRaingeExtra * zAxis.getMax() * yIndex / yMax;
+
+            Demux3dTo2dDataSet.this.getAxisDescription(0).set(zAxis.getName(), zAxis.getUnit(), zAxis.getMin(),
+                    zRangeMax * (1 + mountainRaingeExtra));
         }
     }
 

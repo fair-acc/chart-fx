@@ -1,13 +1,17 @@
 /*****************************************************************************
- *                                                                           *
- * Chart Common - dataset wrapping another dataset                           *
- *                                                                           *
- * modified: 2019-01-23 Harald Braeuning                                     *
- *                                                                           *
+ * *
+ * Chart Common - dataset wrapping another dataset *
+ * *
+ * modified: 2019-01-23 Harald Braeuning *
+ * *
  ****************************************************************************/
 
 package de.gsi.dataset.spi;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import de.gsi.dataset.AxisDescription;
 import de.gsi.dataset.DataSet;
 import de.gsi.dataset.event.EventListener;
 import de.gsi.dataset.event.UpdatedDataEvent;
@@ -23,7 +27,6 @@ public class WrappedDataSet extends AbstractDataSet<WrappedDataSet> {
     private final EventListener listener = s -> datasetInvalidated();
 
     /**
-     * 
      * @param name data set name
      */
     public WrappedDataSet(final String name) {
@@ -33,17 +36,19 @@ public class WrappedDataSet extends AbstractDataSet<WrappedDataSet> {
     /**
      * Returns the name of the dataset. This will return the name of the wrapped
      * dataset. If no dataset is wrapped, the name of this object is returned.
+     * 
      * @return name of the dataset
      */
     @Override
-    public String getName()
-    {
-      if (dataset != null) return dataset.getName();
-      return super.getName();
+    public String getName() {
+        if (dataset != null)
+            return dataset.getName();
+        return super.getName();
     }
-    
+
     /**
      * update/overwrite internal data set with content from other data set
+     * 
      * @param dataset new data set
      */
     public void setDataset(final DataSet dataset) {
@@ -54,13 +59,12 @@ public class WrappedDataSet extends AbstractDataSet<WrappedDataSet> {
         if (this.dataset != null) {
             this.dataset.addListener(listener);
         }
-//        xRange.setMax(Double.NaN);
-//        yRange.setMax(Double.NaN);
+        //        xRange.setMax(Double.NaN);
+        //        yRange.setMax(Double.NaN);
         fireInvalidated(new UpdatedDataEvent(this));
     }
 
     /**
-     * 
      * @return wrapped internal data set
      */
     public DataSet getDataset() {
@@ -93,29 +97,13 @@ public class WrappedDataSet extends AbstractDataSet<WrappedDataSet> {
     }
 
     @Override
-    public double getXMin() {
-        return dataset == null ? 0 : dataset.getXMin();
-    }
-
-    @Override
-    public double getXMax() {
-        return dataset == null ? 0 : dataset.getXMax();
-    }
-
-    @Override
-    public double getYMin() {
-        return dataset == null ? 0 : dataset.getYMin();
-    }
-
-    @Override
-    public double getYMax() {
-        return dataset == null ? 0 : dataset.getYMax();
+    public List<AxisDescription> getAxisDescriptions() {
+        return dataset == null ? new ArrayList<>() : dataset.getAxisDescriptions();
     }
 
     private void datasetInvalidated() {
-//        xRange.setMax(Double.NaN);
-//        yRange.setMax(Double.NaN);
-        computeLimits();
+        recomputeLimits(0);
+        recomputeLimits(1);
         fireInvalidated(new UpdatedDataEvent(this));
     }
 

@@ -1,5 +1,6 @@
 package de.gsi.dataset.spi;
 
+import de.gsi.dataset.AxisDescription;
 import de.gsi.dataset.DataSet;
 import de.gsi.dataset.DataSetError;
 import de.gsi.dataset.EditableDataSet;
@@ -15,7 +16,6 @@ import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
  * easily manipulate of data points.
  *
  * @see DoubleDataSet for an implementation without errors
- *
  * @author rstein
  */
 @SuppressWarnings("PMD.TooManyMethods") // part of the flexible class nature
@@ -154,14 +154,12 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
         dataStyles.clear();
         clearMetaInfo();
 
-        xRange.empty();
-        yRange.empty();
+        getAxisDescriptions().forEach(AxisDescription::empty);
 
         return unlock().fireInvalidated(new RemovedDataEvent(this, "clearData()"));
     }
 
     /**
-     * 
      * @return storage capacity of dataset
      */
     public int getCapacity() {
@@ -169,7 +167,6 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
     }
 
     /**
-     * 
      * @param amount storage capacity increase
      * @return itself (fluent design)
      */
@@ -290,9 +287,9 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
             addDataLabel(xValues.size() - 1, label);
         }
 
-        xRange.add(x);
-        yRange.add(y - yErrorNeg);
-        yRange.add(y + yErrorPos);
+        getAxisDescription(0).add(x);
+        getAxisDescription(1).add(y - yErrorNeg);
+        getAxisDescription(1).add(y + yErrorPos);
 
         return unlock().fireInvalidated(new UpdatedDataEvent(this, "add"));
     }
@@ -312,15 +309,18 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
         AssertUtils.notNull("X coordinates", xValuesNew);
         AssertUtils.notNull("Y coordinates", yValuesNew);
         AssertUtils.equalDoubleArrays(xValuesNew, yValuesNew);
+        final boolean oldAutoNotification = this.isAutoNotification();
+        setAutoNotifaction(false);
 
         xValues.addElements(xValues.size(), xValuesNew);
         yValues.addElements(yValues.size(), yValuesNew);
         yErrorsNeg.addElements(yErrorsNeg.size(), yErrorsNegNew);
         yErrorsPos.addElements(yErrorsPos.size(), yErrorsPosNew);
 
-        xRange.add(xValuesNew);
-        yRange.add(yValuesNew);
+        getAxisDescription(0).add(xValuesNew);
+        getAxisDescription(1).add(yValuesNew);
 
+        setAutoNotifaction(oldAutoNotification);
         return unlock().fireInvalidated(new AddedDataEvent(this));
     }
 
@@ -373,9 +373,9 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
         yErrorsPos.add(indexAt, yErrorPos);
         dataLabels.addValueAndShiftKeys(indexAt, xValues.size(), label);
         dataStyles.shiftKeys(indexAt, xValues.size());
-        xRange.add(x);
-        yRange.add(y - yErrorNeg);
-        yRange.add(y + yErrorPos);
+        getAxisDescription(0).add(x);
+        getAxisDescription(1).add(y - yErrorNeg);
+        getAxisDescription(1).add(y + yErrorPos);
 
         return unlock().fireInvalidated(new AddedDataEvent(this));
     }
@@ -400,16 +400,19 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
         final int min = Math.min(x.length, y.length);
         AssertUtils.equalDoubleArrays(x, y, min);
 
+        final boolean oldAutoNotification = this.isAutoNotification();
+        setAutoNotifaction(false);
+
         final int indexAt = Math.max(0, Math.min(index, getDataCount() + 1));
         xValues.addElements(indexAt, x, 0, min);
         yValues.addElements(indexAt, y, 0, min);
         yErrorsNeg.addElements(indexAt, yErrorNeg, 0, min);
         yErrorsPos.addElements(indexAt, yErrorPos, 0, min);
-        xRange.add(x, min);
-        yRange.add(y, min);
+        getAxisDescriptions().forEach(AxisDescription::empty);
         dataLabels.shiftKeys(indexAt, xValues.size());
         dataStyles.shiftKeys(indexAt, xValues.size());
 
+        setAutoNotifaction(oldAutoNotification);
         return unlock().fireInvalidated(new AddedDataEvent(this));
     }
 
@@ -442,8 +445,7 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
 
         // invalidate ranges
         // -> fireInvalidated calls computeLimits for autoNotification
-        xRange.empty();
-        yRange.empty();
+        getAxisDescriptions().forEach(AxisDescription::empty);
 
         return unlock().fireInvalidated(new RemovedDataEvent(this));
     }
@@ -491,8 +493,8 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
 
             // invalidate ranges
             // -> fireInvalidated calls computeLimits for autoNotification
-            xRange.empty();
-            yRange.empty();
+            getAxisDescriptions().forEach(AxisDescription::empty);
+
         } finally {
             setAutoNotifaction(oldAuto);
             unlock();
@@ -504,6 +506,9 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
     public DoubleErrorDataSet set(final int index, final double[] x, final double[] y, final double[] yErrorNeg,
             final double[] yErrorPos) {
         lock();
+        final boolean oldAutoNotification = this.isAutoNotification();
+        setAutoNotifaction(false);
+
         try {
             resize(Math.max(index + x.length, xValues.size()));
             System.arraycopy(x, 0, xValues.elements(), index, x.length);
@@ -515,9 +520,10 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
 
             // invalidate ranges
             // -> fireInvalidated calls computeLimits for autoNotification
-            xRange.empty();
-            yRange.empty();
+            getAxisDescriptions().forEach(AxisDescription::empty);
+
         } finally {
+            setAutoNotifaction(oldAutoNotification);
             unlock();
         }
         return fireInvalidated(new UpdatedDataEvent(this, "set - via arrays"));
@@ -550,6 +556,9 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
         AssertUtils.equalDoubleArrays(xValues, yErrorsNeg, dataMaxIndex);
         AssertUtils.equalDoubleArrays(xValues, yErrorsPos, dataMaxIndex);
 
+        final boolean oldAutoNotification = this.isAutoNotification();
+        setAutoNotifaction(false);
+
         dataLabels.clear();
         dataStyles.clear();
         if (copy) {
@@ -565,8 +574,10 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
             this.yErrorsPos = DoubleArrayList.wrap(yErrorsPos);
         }
 
-        computeLimits();
+        recomputeLimits(0);
+        recomputeLimits(1);
 
+        setAutoNotifaction(oldAutoNotification);
         return unlock().fireInvalidated(new UpdatedDataEvent(this));
     }
 

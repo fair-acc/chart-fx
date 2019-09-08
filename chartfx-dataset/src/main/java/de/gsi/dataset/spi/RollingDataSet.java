@@ -71,8 +71,9 @@ public class RollingDataSet extends FragmentedDataSet {
         }
         list.add(new InternalDataSet(set));
         dataCount += set.getDataCount();
-        lastLength = set.getXMax();
-        computeLimits();
+        lastLength = set.getAxisDescription(0).getMax();
+        recomputeLimits(0);
+        recomputeLimits(1);
         fireInvalidated(new AddedDataEvent(this));
     }
 
@@ -104,7 +105,8 @@ public class RollingDataSet extends FragmentedDataSet {
 
         public InternalDataSet(DataSet ds) {
             super(ds);
-            computeLimits();
+            recomputeLimits(0);
+            recomputeLimits(1);
         }
 
         public void shift(double value) {

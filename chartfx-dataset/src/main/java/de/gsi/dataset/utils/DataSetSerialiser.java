@@ -172,27 +172,34 @@ public class DataSetSerialiser extends DataSetUtilsHelper {
 		// read numeric data
 		
 		Optional<FieldHeader> header;
-		if ((header = checkFieldCompatibility(readBuffer, fieldHeaderList, X_ARRAY_NAME, DataType.DOUBLE_ARRAY, DataType.FLOAT_ARRAY)).isPresent()) {
+		
+		header = checkFieldCompatibility(readBuffer, fieldHeaderList, X_ARRAY_NAME, DataType.DOUBLE_ARRAY, DataType.FLOAT_ARRAY);
+		if (header.isPresent()) {
 			builder.setXValues(BinarySerialiser.getDoubleArray(readBuffer, header.get().getDataType()));
 		}
 		
-		if ((header = checkFieldCompatibility(readBuffer, fieldHeaderList, Y_ARRAY_NAME, DataType.DOUBLE_ARRAY, DataType.FLOAT_ARRAY)).isPresent()) {
+		header = checkFieldCompatibility(readBuffer, fieldHeaderList, Y_ARRAY_NAME, DataType.DOUBLE_ARRAY, DataType.FLOAT_ARRAY);
+		if (header.isPresent()) {
 			builder.setYValues(BinarySerialiser.getDoubleArray(readBuffer, header.get().getDataType()));
 		}
 		
-		if ((header = checkFieldCompatibility(readBuffer, fieldHeaderList, XEN, DataType.DOUBLE_ARRAY, DataType.FLOAT_ARRAY)).isPresent()) {
+		header = checkFieldCompatibility(readBuffer, fieldHeaderList, XEN, DataType.DOUBLE_ARRAY, DataType.FLOAT_ARRAY);
+		if (header.isPresent()) {
 			builder.setXNegErrorNoCopy(BinarySerialiser.getDoubleArray(readBuffer, header.get().getDataType()));
 		}
 		
-		if ((header = checkFieldCompatibility(readBuffer, fieldHeaderList, XEP, DataType.DOUBLE_ARRAY, DataType.FLOAT_ARRAY)).isPresent()) {
+		header = checkFieldCompatibility(readBuffer, fieldHeaderList, XEP, DataType.DOUBLE_ARRAY, DataType.FLOAT_ARRAY);
+		if (header.isPresent()) {
 			builder.setXPosErrorNoCopy(BinarySerialiser.getDoubleArray(readBuffer, header.get().getDataType()));
 		}
 		
-		if ((header = checkFieldCompatibility(readBuffer, fieldHeaderList, YEN, DataType.DOUBLE_ARRAY, DataType.FLOAT_ARRAY)).isPresent()) {
+		header = checkFieldCompatibility(readBuffer, fieldHeaderList, YEN, DataType.DOUBLE_ARRAY, DataType.FLOAT_ARRAY);
+		if (header.isPresent()) {
 			builder.setYNegErrorNoCopy(BinarySerialiser.getDoubleArray(readBuffer, header.get().getDataType()));
 		}
 		
-		if ((header = checkFieldCompatibility(readBuffer, fieldHeaderList, YEP, DataType.DOUBLE_ARRAY, DataType.FLOAT_ARRAY)).isPresent()) {
+		header = checkFieldCompatibility(readBuffer, fieldHeaderList, YEP, DataType.DOUBLE_ARRAY, DataType.FLOAT_ARRAY);
+		if (header.isPresent()) {
 			builder.setYNegErrorNoCopy(BinarySerialiser.getDoubleArray(readBuffer, header.get().getDataType()));
 		}
 	}
@@ -405,10 +412,10 @@ public class DataSetSerialiser extends DataSetUtilsHelper {
 	protected static void writeHeaderDataToStream(final IoBuffer buffer, final DataSet dataSet) {
 		// common header data
 		BinarySerialiser.put(buffer, DATA_SET_NAME, dataSet.getName());
-		BinarySerialiser.put(buffer, X_MIN, dataSet.getXMin());
-		BinarySerialiser.put(buffer, X_MAX, dataSet.getXMax());
-		BinarySerialiser.put(buffer, Y_MIN, dataSet.getYMin());
-		BinarySerialiser.put(buffer, Y_MAX, dataSet.getYMax());
+		BinarySerialiser.put(buffer, X_MIN, dataSet.getAxisDescription(0).getMin());
+		BinarySerialiser.put(buffer, X_MAX, dataSet.getAxisDescription(0).getMax());
+		BinarySerialiser.put(buffer, Y_MIN, dataSet.getAxisDescription(1).getMin());
+		BinarySerialiser.put(buffer, Y_MAX, dataSet.getAxisDescription(1).getMax());
 
 		// write some statistics for the human readable benefit when
 		// opening the

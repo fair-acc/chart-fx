@@ -21,6 +21,7 @@ public class SimpleChartSample extends Application {
         final XYChart chart = new XYChart(new DefaultNumericAxis(), new DefaultNumericAxis());
 
         final DoubleDataSet dataSet1 = new DoubleDataSet("data set #1");
+        dataSet1.addListener(evt -> System.err.println("dataset1 received " + evt.getClass().getSimpleName()));
         final DoubleDataSet dataSet2 = new DoubleDataSet("data set #2");
         // lineChartPlot.getDatasets().add(dataSet1); // for single data set
         chart.getDatasets().addAll(dataSet1, dataSet2); // two data sets
@@ -33,8 +34,10 @@ public class SimpleChartSample extends Application {
             yValues1[n] = Math.cos(Math.toRadians(10.0 * n));
             yValues2[n] = Math.sin(Math.toRadians(10.0 * n));
         }
+        System.err.println("xRange before = " + dataSet1.getAxisDescription(0).toString());
         dataSet1.set(xValues, yValues1);
         dataSet2.set(xValues, yValues2);
+        System.err.println("xRange after = " + dataSet1.getAxisDescription(0).toString());
 
         final Scene scene = new Scene(new StackPane(chart), 800, 600);
         primaryStage.setTitle(getClass().getSimpleName());

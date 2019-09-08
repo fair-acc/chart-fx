@@ -17,6 +17,7 @@ import de.gsi.chart.renderer.spi.ErrorDataSetRenderer;
 import de.gsi.chart.renderer.spi.GridRenderer;
 import de.gsi.chart.renderer.spi.LabelledMarkerRenderer;
 import de.gsi.chart.ui.geometry.Side;
+import de.gsi.dataset.AxisDescription;
 import de.gsi.dataset.DataSet;
 import de.gsi.dataset.DataSet3D;
 import de.gsi.dataset.utils.AssertUtils;
@@ -402,13 +403,18 @@ public class XYChart extends Chart {
         final Side side = axis.getSide();
         axis.getAutoRange().empty();
         dataSets.forEach(dataset -> {
+            for (AxisDescription axisDescription : dataset.getAxisDescriptions()) {
+                if (!axisDescription.isDefined()) {
+                    dataset.recomputeLimits(dataset.getAxisDescriptions().indexOf(axisDescription));
+                }
+            }
             if (dataset instanceof DataSet3D && (side == Side.RIGHT || side == Side.TOP)) {
                 final DataSet3D mDataSet = (DataSet3D) dataset;
-                axis.getAutoRange().add(mDataSet.getZRange().getMin());
-                axis.getAutoRange().add(mDataSet.getZRange().getMax());
+                axis.getAutoRange().add(mDataSet.getAxisDescription(2).getMin());
+                axis.getAutoRange().add(mDataSet.getAxisDescription(2).getMax());
             } else {
-                axis.getAutoRange().add(isHorizontal ? dataset.getXMin() : dataset.getYMin());
-                axis.getAutoRange().add(isHorizontal ? dataset.getXMax() : dataset.getYMax());
+                axis.getAutoRange().add(dataset.getAxisDescription(isHorizontal ? 0:1).getMin());
+                axis.getAutoRange().add(dataset.getAxisDescription(isHorizontal ? 0:1).getMax());
             }
         });
         axis.getAutoRange().setAxisLength(axis.getLength() == 0 ? 1 : axis.getLength(), side);
@@ -421,13 +427,18 @@ public class XYChart extends Chart {
 
         final List<Number> dataMinMax = new ArrayList<>();
         dataSets.forEach(dataset -> {
+//            for (AxisDescription axisDescription : dataset.getAxisDescriptions()) {
+//                if (!axisDescription.isDefined()) {
+//                    dataset.recomputeLimits(dataset.getAxisDescriptions().indexOf(axisDescription));
+//                }
+//            }
             if (dataset instanceof DataSet3D && (side == Side.RIGHT || side == Side.TOP)) {
                 final DataSet3D mDataSet = (DataSet3D) dataset;
-                dataMinMax.add(mDataSet.getZRange().getMin());
-                dataMinMax.add(mDataSet.getZRange().getMax());
+                dataMinMax.add(mDataSet.getAxisDescription(2).getMin());
+                dataMinMax.add(mDataSet.getAxisDescription(2).getMax());
             } else {
-                dataMinMax.add(isHorizontal ? dataset.getXMin() : dataset.getYMin());
-                dataMinMax.add(isHorizontal ? dataset.getXMax() : dataset.getYMax());
+                dataMinMax.add(dataset.getAxisDescription(isHorizontal ? 0:1).getMin());
+                dataMinMax.add(dataset.getAxisDescription(isHorizontal ? 0:1).getMax());
             }
         });
 
