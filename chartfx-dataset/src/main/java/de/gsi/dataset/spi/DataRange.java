@@ -10,22 +10,18 @@ package de.gsi.dataset.spi;
 import java.util.Objects;
 
 /**
- * <p>
- * Defines range (limits) of data.
- * </p>
+ * Defines min/max (limits) used for DataSet and Axis range definitions.
  *
- * @version $Id: DataRange.java,v 1.7 2006-06-22 12:09:30 gkruk Exp $
+ * @author gkruk, CERN
+ * @author rstein
  */
-public class DataRange implements Cloneable {
+public class DataRange {
     private static final double MIN_VALUE = -Double.MAX_VALUE;
     private static final double MAX_VALUE = Double.MAX_VALUE;
 
-    protected double min = 0;
-    protected double max = 0;
+    protected double min;
+    protected double max;
 
-    //
-    // -- CONSTRUCTORS -----------------------------------------------
-    //
     /**
      * Creates a new <code>DataRange</code> that is not defined.
      *
@@ -36,9 +32,18 @@ public class DataRange implements Cloneable {
     }
 
     /**
+     * Creates a copy of the specified data range.
+     *
+     * @param range other {@code DataRange} object
+     */
+    public DataRange(final DataRange range) {
+        set(range.min, range.max);
+    }
+
+    /**
      * Creates a new <code>DataRange</code> with the specified <code>min</code>
      * and <code>max</code> values.
-     * 
+     *
      * @param min the new min value
      * @param max the new max value
      */
@@ -47,117 +52,15 @@ public class DataRange implements Cloneable {
     }
 
     /**
-     * Creates a copy of the specified data range.
-     * 
-     * @param range other {@code DataRange} object
-     */
-    public DataRange(final DataRange range) {
-        set(range.min, range.max);
-    }
-
-    //
-    // -- PUBLIC METHODS -----------------------------------------------
-    //
-
-    /**
-     * Determines if this DataRange is defined - <code>min</code> and
-     * <code>max</code> values are defined.
-     * 
-     * @return true: range is defined
-     */
-    public boolean isDefined() {
-        return isMinDefined() && isMaxDefined();
-    }
-
-    /**
-     * Determines if <code>min</code> value has been defined.
-     * 
-     * @return true: min is defined
-     */
-    public boolean isMinDefined() {
-        return min < DataRange.MAX_VALUE;
-    }
-
-    /**
-     * Determines if <code>max</code> value has been defined.
-     * 
-     * @return true max is defined
-     */
-    public boolean isMaxDefined() {
-        return max > DataRange.MIN_VALUE;
-    }
-
-    /**
-     * @return Returns the max.
-     */
-    public double getMax() {
-        if (isMaxDefined()) {
-            return max;
-        } else {
-            return Double.NaN;
-        }
-    }
-
-    /**
-     * Sets <code>max</code> value for this range.
-     * 
-     * @param max the new max value
-     */
-    public void setMax(final double max) {
-        this.max = max;
-    }
-
-    /**
-     * @return the minimum of the range
-     */
-    public double getMin() {
-        if (isMinDefined()) {
-            return min;
-        } else {
-            return Double.NaN;
-        }
-    }
-
-    /**
-     * Sets <code>min</code> value for this range.
-     * 
-     * @param min the new data range minimum
-     */
-    public void setMin(final double min) {
-        this.min = min;
-    }
-
-    /**
-     * Sets updates range to the specified one.
-     * 
-     * @param range other {@code DataRange} object
-     */
-    public void set(final DataRange range) {
-        set(range.min, range.max);
-    }
-
-    /**
-     * Sets <code>min</code> and <code>max</code> values for this range.
-     * 
-     * @param min new minimum of the range
-     * @param max new maximum of the range
-     */
-    public void set(final double min, final double max) {
-        this.min = min;
-        this.max = max;
-    }
-
-    /**
-     * Returns length of this range (max - min).
+     * Add the specified data range to this range.
      *
-     * @return max - min or 0.0 if the range is not defined.
+     * @param range other {@code DataRange}
+     * @return <code>true</code> if the value becomes <code>min</code> or <code>max</code>.
      */
-    public double getLength() {
-        if (isDefined()) {
-            return max - min;
-        }
-
-        return 0.0;
+    public boolean add(final DataRange range) {
+        final boolean a = add(range.min);
+        final boolean b = add(range.max);
+        return a || b;
     }
 
     /**
@@ -172,7 +75,7 @@ public class DataRange implements Cloneable {
             return false;
         }
 
-        if (value > min && value < max) {
+        if ((value > min) && (value < max)) {
             return false;
         }
 
@@ -194,8 +97,7 @@ public class DataRange implements Cloneable {
      * Adds values to this range.
      *
      * @param values values to be added
-     * @return <code>true</code> if the value becomes <code>min</code> or
-     *         <code>max</code>.
+     * @return <code>true</code> if the value becomes <code>min</code> or <code>max</code>.
      */
     public boolean add(final double[] values) {
         return add(values, values.length);
@@ -205,55 +107,28 @@ public class DataRange implements Cloneable {
      * Adds values to this range.
      *
      * @param values values to be added
-     * @param max the maximum array length that should be taken into account
-     * @return <code>true</code> if the value becomes <code>min</code> or
-     *         <code>max</code>.
+     * @param nLength the maximum array length that should be taken into account
+     * @return <code>true</code> if the value becomes <code>min</code> or <code>max</code>.
      */
-    public boolean add(final double[] values, final int max) {
+    public boolean add(final double[] values, final int nLength) {
         boolean retVal = false;
-        for (int i = 0; i < max; i++) {
-            add(values[i]);
+        for (int i = 0; i < nLength; i++) {
+            if (add(values[i])) {
+                retVal = true;
+            }
         }
 
         return retVal;
     }
 
     /**
-     * Add the specified data range to this range.
-     * 
-     * @param range other {@code DataRange}
-     */
-    public void add(final DataRange range) {
-        add(range.min);
-        add(range.max);
-    }
-
-    /**
-     * Substracts the specified data range from this range.
-     * 
-     * @param range other {@code DataRange}
-     * @return new data Range
-     */
-    public DataRange substract(final DataRange range) {
-        if (range.min > max || range.max < min) {
-            return range;
-        }
-
-        return new DataRange(min, range.max);
-    }
-
-    /**
-     * Expands this data set by the given value.
+     * Examines if this range contains the specified value.
      *
-     * @param value range to expand to
+     * @param value to be tested
+     * @return true: data value is within range
      */
-    public void expand(final double value) {
-        if (!isDefined()) {
-            throw new UnsupportedOperationException("Cannot expand not defined data range!");
-        }
-
-        add(getMin() - value / 2);
-        add(getMax() + value / 2);
+    public boolean contains(final double value) {
+        return isDefined() && ((value <= max) && (value >= min));
     }
 
     /**
@@ -266,21 +141,6 @@ public class DataRange implements Cloneable {
         set(DataRange.MAX_VALUE, DataRange.MIN_VALUE);
     }
 
-    /**
-     * Examines if this range contains the specified value.
-     * 
-     * @param value to be tested
-     * @return true: data value is within range
-     */
-    public boolean contains(final double value) {
-        return isDefined() && (value <= max && value >= min);
-    }
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.lang.Object#equals(java.lang.Object)
-     */
     @Override
     public boolean equals(final Object obj) {
         if (!(obj instanceof DataRange)) {
@@ -288,49 +148,133 @@ public class DataRange implements Cloneable {
         }
         final DataRange range = (DataRange) obj;
 
-        return range.hashCode() == this.hashCode();
+        return range.hashCode() == hashCode();
     }
 
-    /*
-     * (non-Javadoc)
+    /**
+     * Returns length of this range (max - min).
      *
-     * @see java.lang.Object#hashCode()
+     * @return max - min or 0.0 if the range is not defined.
      */
+    public double getLength() {
+        if (isDefined()) {
+            return max - min;
+        }
+
+        return 0.0;
+    }
+
+    /**
+     * @return Returns the max.
+     */
+    public double getMax() {
+        if (isMaxDefined()) {
+            return max;
+        }
+        return Double.NaN;
+    }
+
+    /**
+     * @return the minimum of the range
+     */
+    public double getMin() {
+        if (isMinDefined()) {
+            return min;
+        }
+        return Double.NaN;
+    }
+
     @Override
     public int hashCode() {
         return Objects.hash(min, max);
-
-        // if performance is an issue, use
-        // return 0;
     }
 
-    /*
-     * (non-Javadoc)
+    /**
+     * Determines if this DataRange is defined - <code>min</code> and
+     * <code>max</code> values are defined.
      *
-     * @see java.lang.Object#toString()
+     * @return true: range is defined
      */
+    public boolean isDefined() {
+        return isMinDefined() && isMaxDefined();
+    }
+
+    /**
+     * Determines if <code>max</code> value has been defined.
+     *
+     * @return true max is defined
+     */
+    public boolean isMaxDefined() {
+        return max > DataRange.MIN_VALUE;
+    }
+
+    /**
+     * Determines if <code>min</code> value has been defined.
+     *
+     * @return true: min is defined
+     */
+    public boolean isMinDefined() {
+        return min < DataRange.MAX_VALUE;
+    }
+
+    /**
+     * Sets updates range to the specified one.
+     *
+     * @param range other {@code DataRange} object
+     * @return <code>true</code> if the value becomes <code>min</code> or <code>max</code>.
+     */
+    public boolean set(final DataRange range) {
+        return set(range.min, range.max);
+    }
+
+    /**
+     * Sets <code>min</code> and <code>max</code> values for this range.
+     *
+     * @param min new minimum of the range
+     * @param max new maximum of the range
+     * @return <code>true</code> if the values becomes the new <code>min</code> or <code>max</code>.
+     */
+    public boolean set(final double min, final double max) {
+        final boolean a = setMin(min);
+        final boolean b = setMax(max);
+        return a || b;
+    }
+
+    /**
+     * Sets <code>max</code> value for this range.
+     *
+     * @param max the new max value
+     * @return <code>true</code> if the value becomes the new <code>max</code>.
+     */
+    public boolean setMax(final double max) {
+        if (this.max == max) {
+            return false;
+        }
+        this.max = max;
+        return true;
+    }
+
+    /**
+     * Sets <code>min</code> value for this range.
+     *
+     * @param min the new data range minimum
+     * @return <code>true</code> if the value becomes the new <code>min</code>.
+     */
+    public boolean setMin(final double min) {
+        if (this.min == min) {
+            return false;
+        }
+        this.min = min;
+        return true;
+    }
+
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("DataRange [min=");
-        if (isMinDefined()) {
-            sb.append(getMin());
-        } else {
-            sb.append("NotDefined");
-        }
-        sb.append(", max=");
-
-        if (isMaxDefined()) {
-            sb.append(getMax());
-        } else {
-            sb.append("NotDefined");
-        }
-        sb.append("]");
-
+        final StringBuilder sb = new StringBuilder(50);
+        sb.append(this.getClass().getSimpleName()) //
+                .append(" [min=").append(isMinDefined() ? getMin() : "NotDefined") //
+                .append(", max=").append(isMaxDefined() ? getMax() : "NotDefined").append(']');
         return sb.toString();
     }
 
-    @Override
-    public Object clone() throws CloneNotSupportedException {
-        return super.clone();
-    }
 }
