@@ -948,9 +948,9 @@ public class DataSetUtils extends DataSetUtilsHelper {
                         // data is to be expected
                         .append("\n$index, x, y, z\n");
 
-                for (int iX = 0; iX < nX; iX++) {
-                    for (int iY = 0; iY < nY; iY++) {
-                        buffer.append(iX * nX + iY); // data index
+                for (int iY = 0; iY < nY; iY++) {
+                    for (int iX = 0; iX < nX; iX++) {
+                        buffer.append(iY * nX + iX); // data index
                         buffer.append(',');
                         buffer.append(dataSet.getX(iX)); // x-coordinate
                         buffer.append(',');
@@ -1324,12 +1324,15 @@ public class DataSetUtils extends DataSetUtilsHelper {
                     i++;
                 }
                 double[] xArray = new double[x.position()];
+                x.position(0);
                 x.get(xArray);
                 double[] yArray = new double[y.position()];
+                y.position(0);
                 y.get(yArray);
-                double[][] zArray = new double[x.position()][y.position()];
+                double[][] zArray = new double[yArray.length][xArray.length];
+                z.position(0);
                 for (i = 0; i < zArray.length; i++) {
-                    z.get(zArray[i], i * zArray[i].length, zArray[i].length);
+                    z.get(zArray[i]);
                 }
                 result = new DoubleDataSet3D(dataSetName, xArray, yArray, zArray);
             } else {

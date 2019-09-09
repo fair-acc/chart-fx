@@ -257,6 +257,7 @@ public class DataSetBuilder {
         ds.getInfoList().addAll(infoList);
         ds.getWarningList().addAll(warningList);
         ds.getErrorList().addAll(errorList);
+        ds.getMetaInfo().putAll(metaInfoMap);
     }
 
     protected void addDataRanges(final DataSet dataSet) {
