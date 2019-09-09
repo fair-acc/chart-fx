@@ -3,8 +3,11 @@ package de.gsi.dataset.locks;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.concurrent.TimeUnit;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,6 +30,7 @@ public class DataSetLockTest {
 	 */
 	@Test
 	@DisplayName("Tests DataSet lock default implementation")
+	@Timeout(value = 5, unit = TimeUnit.SECONDS)
 	public void testDataSetLock() {
 		DefaultDataSet dataSet = new DefaultDataSet("test");
 		DefaultDataSetLock<DefaultDataSet> myLockImpl = new DefaultDataSetLock<>(dataSet);
