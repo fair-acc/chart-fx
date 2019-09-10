@@ -174,23 +174,21 @@ class CachedDataPoints {
     }
 
     protected void setStyleVariable(final DataSet dataSet, final int dsIndex) {
-        dataSet.lock();
-        defaultStyle = dataSet.getStyle();
+        dataSet.lock().readLockGuard(() -> defaultStyle = dataSet.getStyle());
         final Integer layoutOffset = StyleParser.getIntegerPropertyValue(defaultStyle,
                 XYChartCss.DATASET_LAYOUT_OFFSET);
         final Integer dsIndexLocal = StyleParser.getIntegerPropertyValue(defaultStyle, XYChartCss.DATASET_INDEX);
 
         dataSetStyleIndex = layoutOffset == null ? 0 : layoutOffset.intValue();
         dataSetIndex = dsIndexLocal == null ? dsIndex : dsIndexLocal.intValue();
-        dataSet.unlock();
     }
 
     protected void setErrorType(final DataSet dataSet, final ErrorStyle errorStyle) {
-        dataSet.lock();
+
         // compute screen coordinates of other points
         if (dataSet instanceof DataSetError) {
             final DataSetError ds = (DataSetError) dataSet;
-            errorType = ds.getErrorType();
+            errorType = dataSet.lock().readLockGuard(ds::getErrorType);
         } else {
             // fall-back for standard DataSet
 
@@ -208,7 +206,6 @@ class CachedDataPoints {
         if (errorStyle == ErrorStyle.NONE) {
             errorType = ErrorType.NO_ERROR;
         }
-        dataSet.unlock();
     }
 
     protected void computeScreenCoordinatesParallel(final Axis xAxis, final Axis yAxis, final DataSet dataSet,
@@ -254,58 +251,85 @@ class CachedDataPoints {
     private void computeNoError(final Axis xAxis, final Axis yAxis, final DataSet dataSet, final int min,
             final int max) {
         // no error attached
-        dataSet.lock();
-        for (int index = min; index < max; index++) {
-            final double x = dataSet.getX(index);
-            final double y = dataSet.getY(index);
-            // check if error should be surrounded by Math.abs(..)
-            // to ensure that they are always positive
-            xValues[index] = xAxis.getDisplayPosition(x);
-            yValues[index] = yAxis.getDisplayPosition(y);
-            if (!Double.isFinite(yValues[index])) {
-                yValues[index] = yMin;
+        dataSet.lock().readLockGuard(() -> {
+            for (int index = min; index < max; index++) {
+                final double x = dataSet.getX(index);
+                final double y = dataSet.getY(index);
+                // check if error should be surrounded by Math.abs(..)
+                // to ensure that they are always positive
+                xValues[index] = xAxis.getDisplayPosition(x);
+                yValues[index] = yAxis.getDisplayPosition(y);
+                if (!Double.isFinite(yValues[index])) {
+                    yValues[index] = yMin;
+                }
+                styles[index] = dataSet.getStyle(index);
             }
-            styles[index] = dataSet.getStyle(index);
-        }
-        dataSet.unlock();
+        });
     }
 
     private void computeNoErrorPolar(final Axis yAxis, final DataSet dataSet, final int min, final int max) {
         // experimental transform euclidean to polar coordinates
-        dataSet.lock();
-        for (int index = min; index < max; index++) {
-            final double x = dataSet.getX(index);
-            final double y = dataSet.getY(index);
-            // check if error should be surrounded by Math.abs(..)
-            // to ensure that they are always positive
-            final double phi = x * DEG_TO_RAD;
-            final double r = maxRadius * Math.abs(1 - yAxis.getDisplayPosition(y) / yRange);
-            xValues[index] = xZero + r * Math.cos(phi);
-            yValues[index] = yZero + r * Math.sin(phi);
+        dataSet.lock().readLockGuard(() -> {
+            for (int index = min; index < max; index++) {
+                final double x = dataSet.getX(index);
+                final double y = dataSet.getY(index);
+                // check if error should be surrounded by Math.abs(..)
+                // to ensure that they are always positive
+                final double phi = x * DEG_TO_RAD;
+                final double r = maxRadius * Math.abs(1 - yAxis.getDisplayPosition(y) / yRange);
+                xValues[index] = xZero + r * Math.cos(phi);
+                yValues[index] = yZero + r * Math.sin(phi);
 
-            if (!Double.isFinite(yValues[index])) {
-                yValues[index] = yZero;
+                if (!Double.isFinite(yValues[index])) {
+                    yValues[index] = yZero;
+                }
+                styles[index] = dataSet.getStyle(index);
             }
-            styles[index] = dataSet.getStyle(index);
-        }
-        dataSet.unlock();
+        });
     }
 
     private void computeYonly(final Axis xAxis, final Axis yAxis, final DataSet dataSet, final int min, final int max) {
         if (dataSet instanceof DataSetError) {
             final DataSetError ds = (DataSetError) dataSet;
-            dataSet.lock();
+            dataSet.lock().readLockGuard(() -> {
+                for (int index = min; index < max; index++) {
+                    final double x = dataSet.getX(index);
+                    final double y = dataSet.getY(index);
+                    // check if error should be surrounded by
+                    // Math.abs(..)
+                    // to ensure that they are always positive
+                    xValues[index] = xAxis.getDisplayPosition(x);
+                    yValues[index] = yAxis.getDisplayPosition(y);
+                    if (Double.isFinite(yValues[index])) {
+                        errorYNeg[index] = yAxis.getDisplayPosition(y - ds.getYErrorNegative(index));
+                        errorYPos[index] = yAxis.getDisplayPosition(y + ds.getYErrorPositive(index));
+                    } else {
+                        yValues[index] = yMin;
+                        errorYNeg[index] = yMin;
+                        errorYPos[index] = yMin;
+                    }
+                    styles[index] = dataSet.getStyle(index);
+                }
+            });
+            return;
+        }
+
+        // default dataset
+        dataSet.lock().readLockGuard(() -> {
             for (int index = min; index < max; index++) {
                 final double x = dataSet.getX(index);
                 final double y = dataSet.getY(index);
-                // check if error should be surrounded by
-                // Math.abs(..)
+                // check if error should be surrounded by Math.abs(..)
                 // to ensure that they are always positive
                 xValues[index] = xAxis.getDisplayPosition(x);
                 yValues[index] = yAxis.getDisplayPosition(y);
+
+                if (!Double.isFinite(xValues[index])) {
+                    xValues[index] = xMin;
+                }
                 if (Double.isFinite(yValues[index])) {
-                    errorYNeg[index] = yAxis.getDisplayPosition(y - ds.getYErrorNegative(index));
-                    errorYPos[index] = yAxis.getDisplayPosition(y + ds.getYErrorPositive(index));
+                    errorYNeg[index] = yValues[index];
+                    errorYPos[index] = yValues[index];
                 } else {
                     yValues[index] = yMin;
                     errorYNeg[index] = yMin;
@@ -313,121 +337,94 @@ class CachedDataPoints {
                 }
                 styles[index] = dataSet.getStyle(index);
             }
-            dataSet.unlock();
-            return;
-        }
-
-        // default dataset
-        dataSet.lock();
-        for (int index = min; index < max; index++) {
-            final double x = dataSet.getX(index);
-            final double y = dataSet.getY(index);
-            // check if error should be surrounded by Math.abs(..)
-            // to ensure that they are always positive
-            xValues[index] = xAxis.getDisplayPosition(x);
-            yValues[index] = yAxis.getDisplayPosition(y);
-
-            if (!Double.isFinite(xValues[index])) {
-                xValues[index] = xMin;
-            }
-            if (Double.isFinite(yValues[index])) {
-                errorYNeg[index] = yValues[index];
-                errorYPos[index] = yValues[index];
-            } else {
-                yValues[index] = yMin;
-                errorYNeg[index] = yMin;
-                errorYPos[index] = yMin;
-            }
-            styles[index] = dataSet.getStyle(index);
-        }
-        dataSet.unlock();
+        });
     }
 
     private void computeYonlyPolar(final Axis yAxis, final DataSet dataSet, final int min, final int max) {
 
-        dataSet.lock();
-        for (int index = min; index < max; index++) {
-            final double x = dataSet.getX(index);
-            final double y = dataSet.getY(index);
-            // check if error should be surrounded by Math.abs(..)
-            // to ensure that they are always positive
-            final double phi = x * DEG_TO_RAD;
-            final double r = maxRadius * Math.abs(1 - yAxis.getDisplayPosition(y) / yRange);
-            xValues[index] = xZero + r * Math.cos(phi);
-            yValues[index] = yZero + r * Math.sin(phi);
+        dataSet.lock().readLockGuard(() -> {
+            for (int index = min; index < max; index++) {
+                final double x = dataSet.getX(index);
+                final double y = dataSet.getY(index);
+                // check if error should be surrounded by Math.abs(..)
+                // to ensure that they are always positive
+                final double phi = x * DEG_TO_RAD;
+                final double r = maxRadius * Math.abs(1 - yAxis.getDisplayPosition(y) / yRange);
+                xValues[index] = xZero + r * Math.cos(phi);
+                yValues[index] = yZero + r * Math.sin(phi);
 
-            // ignore errors (for now) -> TODO: add proper transformation
-            errorXNeg[index] = 0.0;
-            errorXPos[index] = 0.0;
-            errorYNeg[index] = 0.0;
-            errorYPos[index] = 0.0;
+                // ignore errors (for now) -> TODO: add proper transformation
+                errorXNeg[index] = 0.0;
+                errorXPos[index] = 0.0;
+                errorYNeg[index] = 0.0;
+                errorYPos[index] = 0.0;
 
-            if (!Double.isFinite(yValues[index])) {
-                yValues[index] = yZero;
+                if (!Double.isFinite(yValues[index])) {
+                    yValues[index] = yZero;
+                }
+                styles[index] = dataSet.getStyle(index);
             }
-            styles[index] = dataSet.getStyle(index);
-        }
-        dataSet.unlock();
+        });
     }
 
     private void computeFull(final Axis xAxis, final Axis yAxis, final DataSetError dataSet, final int min,
             final int max) {
-        dataSet.lock();
-        for (int index = min; index < max; index++) {
-            final double x = dataSet.getX(index);
-            final double y = dataSet.getY(index);
-            // check if error should be surrounded by
-            // Math.abs(..) to ensure that they are always positive
-            xValues[index] = xAxis.getDisplayPosition(x);
-            yValues[index] = yAxis.getDisplayPosition(y);
+        dataSet.lock().readLockGuard(() -> {
+            for (int index = min; index < max; index++) {
+                final double x = dataSet.getX(index);
+                final double y = dataSet.getY(index);
+                // check if error should be surrounded by
+                // Math.abs(..) to ensure that they are always positive
+                xValues[index] = xAxis.getDisplayPosition(x);
+                yValues[index] = yAxis.getDisplayPosition(y);
 
-            if (Double.isFinite(xValues[index])) {
-                errorXNeg[index] = xAxis.getDisplayPosition(x - dataSet.getXErrorNegative(index));
-                errorXPos[index] = xAxis.getDisplayPosition(x + dataSet.getXErrorPositive(index));
-            } else {
-                xValues[index] = xMin;
-                errorXNeg[index] = xMin;
-                errorXPos[index] = xMin;
-            }
+                if (Double.isFinite(xValues[index])) {
+                    errorXNeg[index] = xAxis.getDisplayPosition(x - dataSet.getXErrorNegative(index));
+                    errorXPos[index] = xAxis.getDisplayPosition(x + dataSet.getXErrorPositive(index));
+                } else {
+                    xValues[index] = xMin;
+                    errorXNeg[index] = xMin;
+                    errorXPos[index] = xMin;
+                }
 
-            if (Double.isFinite(yValues[index])) {
-                errorYNeg[index] = yAxis.getDisplayPosition(y - dataSet.getYErrorNegative(index));
-                errorYPos[index] = yAxis.getDisplayPosition(y + dataSet.getYErrorPositive(index));
-            } else {
-                yValues[index] = yMin;
-                errorYNeg[index] = yMin;
-                errorYPos[index] = yMin;
+                if (Double.isFinite(yValues[index])) {
+                    errorYNeg[index] = yAxis.getDisplayPosition(y - dataSet.getYErrorNegative(index));
+                    errorYPos[index] = yAxis.getDisplayPosition(y + dataSet.getYErrorPositive(index));
+                } else {
+                    yValues[index] = yMin;
+                    errorYNeg[index] = yMin;
+                    errorYPos[index] = yMin;
+                }
+                styles[index] = dataSet.getStyle(index);
             }
-            styles[index] = dataSet.getStyle(index);
-        }
-        dataSet.unlock();
+        });
     }
 
     private void computeFullPolar(final Axis yAxis, final DataSetError dataSet, final int min, final int max) {
-        dataSet.lock();
-        for (int index = min; index < max; index++) {
-            final double x = dataSet.getX(index);
-            final double y = dataSet.getY(index);
-            // check if error should be surrounded by Math.abs(..)
-            // to ensure that they are always positive
-            final double phi = x * DEG_TO_RAD;
-            final double r = maxRadius * Math.abs(1 - yAxis.getDisplayPosition(y) / yRange);
-            xValues[index] = xZero + r * Math.cos(phi);
-            yValues[index] = yZero + r * Math.sin(phi);
+        dataSet.lock().readLockGuard(() -> {
+            for (int index = min; index < max; index++) {
+                final double x = dataSet.getX(index);
+                final double y = dataSet.getY(index);
+                // check if error should be surrounded by Math.abs(..)
+                // to ensure that they are always positive
+                final double phi = x * DEG_TO_RAD;
+                final double r = maxRadius * Math.abs(1 - yAxis.getDisplayPosition(y) / yRange);
+                xValues[index] = xZero + r * Math.cos(phi);
+                yValues[index] = yZero + r * Math.sin(phi);
 
-            // ignore errors (for now) -> TODO: add proper
-            // transformation
-            errorXNeg[index] = 0.0;
-            errorXPos[index] = 0.0;
-            errorYNeg[index] = 0.0;
-            errorYPos[index] = 0.0;
+                // ignore errors (for now) -> TODO: add proper
+                // transformation
+                errorXNeg[index] = 0.0;
+                errorXPos[index] = 0.0;
+                errorYNeg[index] = 0.0;
+                errorYPos[index] = 0.0;
 
-            if (!Double.isFinite(yValues[index])) {
-                yValues[index] = yZero;
+                if (!Double.isFinite(yValues[index])) {
+                    yValues[index] = yZero;
+                }
+                styles[index] = dataSet.getStyle(index);
             }
-            styles[index] = dataSet.getStyle(index);
-        }
-        dataSet.unlock();
+        });
     }
 
     private void computeScreenCoordinatesEuclidean(final Axis xAxis, final Axis yAxis, final DataSet dataSet,

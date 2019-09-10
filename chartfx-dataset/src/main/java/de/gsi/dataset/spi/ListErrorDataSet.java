@@ -33,6 +33,7 @@ import de.gsi.dataset.utils.AssertUtils;
  */
 @Deprecated
 public class ListErrorDataSet extends AbstractErrorDataSet<ListErrorDataSet> implements DataSetError {
+    private static final long serialVersionUID = -7853762711615967319L;
     protected Map<Integer, String> dataLabels = new ConcurrentHashMap<>();
     protected Map<Integer, String> dataStyles = new ConcurrentHashMap<>();
     protected ArrayList<DoublePointError> data = new ArrayList<>();
@@ -242,11 +243,11 @@ public class ListErrorDataSet extends AbstractErrorDataSet<ListErrorDataSet> imp
      * @return itself (fluent design)
      */
     public ListErrorDataSet clearData() {
-        lock();
-        data.clear();
-        getAxisDescriptions().forEach(AxisDescription::empty);
-
-        return unlock().fireInvalidated(new RemovedDataEvent(this, "clearData()"));
+        lock().writeLockGuard(() -> {
+            data.clear();
+            getAxisDescriptions().forEach(AxisDescription::empty);
+        });
+        return fireInvalidated(new RemovedDataEvent(this, "clearData()"));
     }
 
     /**
@@ -260,15 +261,15 @@ public class ListErrorDataSet extends AbstractErrorDataSet<ListErrorDataSet> imp
      * @return itself
      */
     public ListErrorDataSet set(final int index, final double x, final double y, final double dx, final double dy) {
-        lock();
-        data.get(index).set(x, y, dy, dy);
+        lock().writeLockGuard(() -> {
+            data.get(index).set(x, y, dy, dy);
 
-        getAxisDescription(0).add(x - dx);
-        getAxisDescription(0).add(x + dx);
-        getAxisDescription(1).add(y - dy);
-        getAxisDescription(1).add(y + dy);
-
-        return unlock().fireInvalidated(new UpdatedDataEvent(this));
+            getAxisDescription(0).add(x - dx);
+            getAxisDescription(0).add(x + dx);
+            getAxisDescription(1).add(y - dy);
+            getAxisDescription(1).add(y + dy);
+        });
+        return fireInvalidated(new UpdatedDataEvent(this));
     }
 
     /**
@@ -286,29 +287,27 @@ public class ListErrorDataSet extends AbstractErrorDataSet<ListErrorDataSet> imp
      */
     public ListErrorDataSet set(final double[] xValues, final double[] yValues, final double[] xErrors,
             final double[] yErrors, final int count) {
-        lock();
-
         AssertUtils.notNull("X coordinates", xValues);
         AssertUtils.notNull("Y coordinates", yValues);
-
         if ((xValues.length < count) || (yValues.length < count) || (xErrors.length < count)
                 || (yErrors.length < count)) {
             throw new IllegalArgumentException("Arrays with coordinates must have length >= count!");
         }
 
-        for (int i = 0; i < xValues.length; i++) {
-            final double x = xValues[i];
-            final double y = yValues[i];
-            final double dx = xErrors[i];
-            final double dy = yValues[i];
-            getAxisDescription(0).add(x - dx);
-            getAxisDescription(0).add(x + dx);
-            getAxisDescription(1).add(y - dy);
-            getAxisDescription(1).add(y + dy);
-            data.add(new DoublePointError(x, y, dx, dy));
-        }
-
-        return unlock().fireInvalidated(new UpdatedDataEvent(this));
+        lock().writeLockGuard(() -> {
+            for (int i = 0; i < xValues.length; i++) {
+                final double x = xValues[i];
+                final double y = yValues[i];
+                final double dx = xErrors[i];
+                final double dy = yValues[i];
+                getAxisDescription(0).add(x - dx);
+                getAxisDescription(0).add(x + dx);
+                getAxisDescription(1).add(y - dy);
+                getAxisDescription(1).add(y + dy);
+                data.add(new DoublePointError(x, y, dx, dy));
+            }
+        });
+        return fireInvalidated(new UpdatedDataEvent(this));
     }
 
     /**
@@ -378,15 +377,15 @@ public class ListErrorDataSet extends AbstractErrorDataSet<ListErrorDataSet> imp
      * @return itself
      */
     public ListErrorDataSet add(final double x, final double y, final double ex, final double ey) {
-        lock();
-        data.add(new DoublePointError(x, y, ex, ey));
+        lock().writeLockGuard(() -> {
+            data.add(new DoublePointError(x, y, ex, ey));
 
-        getAxisDescription(0).add(x - ex);
-        getAxisDescription(0).add(x + ex);
-        getAxisDescription(1).add(y - ey);
-        getAxisDescription(1).add(y + ey);
-
-        return unlock().fireInvalidated(new AddedDataEvent(this));
+            getAxisDescription(0).add(x - ex);
+            getAxisDescription(0).add(x + ex);
+            getAxisDescription(1).add(y - ey);
+            getAxisDescription(1).add(y + ey);
+        });
+        return fireInvalidated(new AddedDataEvent(this));
     }
 
     /**
@@ -417,26 +416,26 @@ public class ListErrorDataSet extends AbstractErrorDataSet<ListErrorDataSet> imp
      */
     public ListErrorDataSet add(final double[] xValues, final double[] yValues, final double[] xErrors,
             final double[] yErrors) {
-        lock();
         AssertUtils.notNull("X data", xValues);
         AssertUtils.notNull("X error data", xErrors);
         AssertUtils.notNull("Y data", yValues);
         AssertUtils.notNull("Y error data", yValues);
 
-        for (int i = 0; i < xValues.length; i++) {
-            final double x = xValues[i];
-            final double y = yValues[i];
-            final double ex = xErrors[i];
-            final double ey = yErrors[i];
-            data.add(new DoublePointError(x, y, ex, ey));
+        lock().writeLockGuard(() -> {
+            for (int i = 0; i < xValues.length; i++) {
+                final double x = xValues[i];
+                final double y = yValues[i];
+                final double ex = xErrors[i];
+                final double ey = yErrors[i];
+                data.add(new DoublePointError(x, y, ex, ey));
 
-            getAxisDescription(0).add(x - ex);
-            getAxisDescription(0).add(x + ex);
-            getAxisDescription(1).add(y - ey);
-            getAxisDescription(1).add(y + ey);
-        }
-
-        return unlock().fireInvalidated(new AddedDataEvent(this));
+                getAxisDescription(0).add(x - ex);
+                getAxisDescription(0).add(x + ex);
+                getAxisDescription(1).add(y - ey);
+                getAxisDescription(1).add(y + ey);
+            }
+        });
+        return fireInvalidated(new AddedDataEvent(this));
     }
 
     /**
@@ -447,17 +446,17 @@ public class ListErrorDataSet extends AbstractErrorDataSet<ListErrorDataSet> imp
      * @return itself (fluent design)
      */
     public ListErrorDataSet remove(final int fromIndex, final int toIndex) {
-        lock();
-        AssertUtils.indexInBounds(fromIndex, getDataCount(), "fromIndex");
-        AssertUtils.indexInBounds(toIndex, getDataCount(), "toIndex");
-        AssertUtils.indexOrder(fromIndex, "fromIndex", toIndex, "toIndex");
+        lock().writeLockGuard(() -> {
+            AssertUtils.indexInBounds(fromIndex, getDataCount(), "fromIndex");
+            AssertUtils.indexInBounds(toIndex, getDataCount(), "toIndex");
+            AssertUtils.indexOrder(fromIndex, "fromIndex", toIndex, "toIndex");
 
-        data.subList(fromIndex, toIndex).clear();
+            data.subList(fromIndex, toIndex).clear();
 
-        getAxisDescription(0).add(Double.NaN);
-        getAxisDescription(1).add(Double.NaN);
-
-        return unlock().fireInvalidated(new RemovedDataEvent(this));
+            getAxisDescription(0).add(Double.NaN);
+            getAxisDescription(1).add(Double.NaN);
+        });
+        return fireInvalidated(new RemovedDataEvent(this));
     }
 
     /**
@@ -467,24 +466,24 @@ public class ListErrorDataSet extends AbstractErrorDataSet<ListErrorDataSet> imp
      * @return itself
      */
     public ListErrorDataSet remove(final int[] indices) {
-        lock();
         AssertUtils.notNull("Indices array", indices);
         if (indices.length == 0) {
-            return unlock();
+            return getThis();
         }
 
-        final List<DoublePointError> tupleTobeRemovedReferences = new ArrayList<>();
-        for (final int indexToRemove : indices) {
-            tupleTobeRemovedReferences.add(data.get(indexToRemove));
-        }
-        data.removeAll(tupleTobeRemovedReferences);
+        lock().writeLockGuard(() -> {
+            final List<DoublePointError> tupleTobeRemovedReferences = new ArrayList<>();
+            for (final int indexToRemove : indices) {
+                tupleTobeRemovedReferences.add(data.get(indexToRemove));
+            }
+            data.removeAll(tupleTobeRemovedReferences);
 
-        getAxisDescription(0).add(Double.NaN);
-        getAxisDescription(1).add(Double.NaN);
-        recomputeLimits(0);
-        recomputeLimits(1);
-
-        return unlock().fireInvalidated(new RemovedDataEvent(this));
+            getAxisDescription(0).add(Double.NaN);
+            getAxisDescription(1).add(Double.NaN);
+            recomputeLimits(0);
+            recomputeLimits(1);
+        });
+        return fireInvalidated(new RemovedDataEvent(this));
     }
 
     /**
@@ -498,10 +497,9 @@ public class ListErrorDataSet extends AbstractErrorDataSet<ListErrorDataSet> imp
      *         been specified
      */
     @Override
-    public String addDataLabel(final int index, final String label) {
-        lock();
-        final String retVal = dataLabels.put(index, label);
-        unlock().fireInvalidated(new UpdatedMetaDataEvent(this, "added label"));
+    public String addDataLabel(final int index, final String label) {        
+        final String retVal = lock().writeLockGuard(() -> dataLabels.put(index, label));
+        fireInvalidated(new UpdatedMetaDataEvent(this, "added label"));
         return retVal;
     }
 
@@ -516,9 +514,8 @@ public class ListErrorDataSet extends AbstractErrorDataSet<ListErrorDataSet> imp
      */
     @Override
     public String removeDataLabel(final int index) {
-        lock();
-        final String retVal = dataLabels.remove(index);
-        unlock().fireInvalidated(new UpdatedMetaDataEvent(this, "removed label"));
+        final String retVal = lock().writeLockGuard(() -> dataLabels.remove(index));
+        fireInvalidated(new UpdatedMetaDataEvent(this, "removed label"));
         return retVal;
     }
 
@@ -533,12 +530,12 @@ public class ListErrorDataSet extends AbstractErrorDataSet<ListErrorDataSet> imp
      */
     @Override
     public String getDataLabel(final int index) {
-        final String dataLabel = dataLabels.get(index);
+        final String dataLabel = lock().readLockGuard(() -> dataLabels.get(index));
         if (dataLabel != null) {
             return dataLabel;
         }
 
-        return super.getDataLabel(index);
+        return lock().readLockGuard(() -> super.getDataLabel(index));
     }
 
     /**
@@ -551,9 +548,8 @@ public class ListErrorDataSet extends AbstractErrorDataSet<ListErrorDataSet> imp
      */
     @Override
     public String addDataStyle(final int index, final String style) {
-        lock();
-        final String retVal = dataStyles.put(index, style);
-        unlock().fireInvalidated(new UpdatedMetaDataEvent(this, "added style"));
+        final String retVal = lock().writeLockGuard(() -> dataStyles.put(index, style));
+        fireInvalidated(new UpdatedMetaDataEvent(this, "added style"));
         return retVal;
     }
 
@@ -565,10 +561,9 @@ public class ListErrorDataSet extends AbstractErrorDataSet<ListErrorDataSet> imp
      * @return itself (fluent interface)
      */
     @Override
-    public String removeStyle(final int index) {
-        lock();
-        final String retVal = dataStyles.remove(index);
-        unlock().fireInvalidated(new UpdatedMetaDataEvent(this, "removed style"));
+    public String removeStyle(final int index) {        
+        final String retVal = lock().writeLockGuard(() -> dataStyles.remove(index));
+        fireInvalidated(new UpdatedMetaDataEvent(this, "removed style"));
         return retVal;
     }
 
@@ -581,7 +576,7 @@ public class ListErrorDataSet extends AbstractErrorDataSet<ListErrorDataSet> imp
      */
     @Override
     public String getStyle(final int index) {
-        return dataStyles.get(index);
+        return lock().readLockGuard(() -> dataStyles.get(index));
     }
 
 }

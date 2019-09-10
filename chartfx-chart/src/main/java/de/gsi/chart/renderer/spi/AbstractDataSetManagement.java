@@ -15,9 +15,7 @@ import javafx.collections.ObservableList;
 import javafx.geometry.Orientation;
 
 /**
- * 
- * @author rstein 
- * 
+ * @author rstein
  * @param <R>
  *            renderer generics
  */
@@ -132,39 +130,37 @@ public abstract class AbstractDataSetManagement<R extends Renderer> implements R
         final int nLength = dataSet.getDataCount();
         final DoubleDataSet ret = new DoubleDataSet(dataSet.getName(), nLength);
 
-        ret.setAutoNotifaction(false);
-        dataSet.lock();
+        dataSet.lock().writeLockGuard(() -> {
 
-        if (dataSet instanceof DoubleDataSet) {
-            final DoubleDataSet doubleDataSet = (DoubleDataSet) dataSet;
-            // known data set implementation, may use faster array copy
+            if (dataSet instanceof DoubleDataSet) {
+                final DoubleDataSet doubleDataSet = (DoubleDataSet) dataSet;
+                // known data set implementation, may use faster array copy
 
-            final double[] xValues = doubleDataSet.getXValues();
-            final double[] yValues = doubleDataSet.getYValues();
-            ret.set(xValues, yValues);
+                final double[] xValues = doubleDataSet.getXValues();
+                final double[] yValues = doubleDataSet.getYValues();
+                ret.set(xValues, yValues);
 
-            ret.getDataLabelMap().putAll(doubleDataSet.getDataLabelMap());
-            ret.getDataStyleMap().putAll(doubleDataSet.getDataStyleMap());
-        } else {
-            // generic implementation that works with all DataSetError
-            // implementation
-            for (int i = 0; i < nLength; i++) {
-                ret.set(i, dataSet.getX(i), dataSet.getY(i));
+                ret.getDataLabelMap().putAll(doubleDataSet.getDataLabelMap());
+                ret.getDataStyleMap().putAll(doubleDataSet.getDataStyleMap());
+            } else {
+                // generic implementation that works with all DataSetError
+                // implementation
+                for (int i = 0; i < nLength; i++) {
+                    ret.set(i, dataSet.getX(i), dataSet.getY(i));
 
-                final String label = dataSet.getDataLabel(i);
-                if (label != null) {
-                    ret.getDataLabelMap().put(i, label);
-                }
-                final String style = ret.getDataLabel(i);
-                if (style != null) {
-                    ret.getDataStyleMap().put(i, style);
+                    final String label = dataSet.getDataLabel(i);
+                    if (label != null) {
+                        ret.getDataLabelMap().put(i, label);
+                    }
+                    final String style = ret.getDataLabel(i);
+                    if (style != null) {
+                        ret.getDataStyleMap().put(i, style);
+                    }
                 }
             }
-        }
-        AbstractDataSetManagement.copyMetaData(dataSet, ret);
-        dataSet.unlock();
+            AbstractDataSetManagement.copyMetaData(dataSet, ret);
+        });
         ret.fireInvalidated(new UpdatedDataEvent(dataSet, "copy"));
-        ret.setAutoNotifaction(true);
         return ret;
     }
 
@@ -172,39 +168,37 @@ public abstract class AbstractDataSetManagement<R extends Renderer> implements R
         final int nLength = dataSet.getDataCount();
         final DoubleErrorDataSet ret = new DoubleErrorDataSet(dataSet.getName(), nLength);
 
-        ret.setAutoNotifaction(false);
-        dataSet.lock();
-        if (dataSet instanceof DoubleErrorDataSet) {
-            final DoubleErrorDataSet doubleErrorDataSet = (DoubleErrorDataSet) dataSet;
-            // known data set implementation, may use faster array copy
+        dataSet.lock().writeLockGuard(() -> {
+            if (dataSet instanceof DoubleErrorDataSet) {
+                final DoubleErrorDataSet doubleErrorDataSet = (DoubleErrorDataSet) dataSet;
+                // known data set implementation, may use faster array copy
 
-            final double[] xValues = doubleErrorDataSet.getXValues();
-            final double[] yValues = doubleErrorDataSet.getYValues();
-            final double[] yErrorsNeg = doubleErrorDataSet.getYErrorsNegative();
-            final double[] yErrorsPos = doubleErrorDataSet.getYErrorsPositive();
-            ret.set(xValues, yValues, yErrorsNeg, yErrorsPos);
+                final double[] xValues = doubleErrorDataSet.getXValues();
+                final double[] yValues = doubleErrorDataSet.getYValues();
+                final double[] yErrorsNeg = doubleErrorDataSet.getYErrorsNegative();
+                final double[] yErrorsPos = doubleErrorDataSet.getYErrorsPositive();
+                ret.set(xValues, yValues, yErrorsNeg, yErrorsPos);
 
-            ret.getDataLabelMap().putAll(doubleErrorDataSet.getDataLabelMap());
-            ret.getDataStyleMap().putAll(doubleErrorDataSet.getDataStyleMap());
-        } else {
-            // generic implementation that works with all DataSetError
-            // implementation
-            for (int i = 0; i < nLength; i++) {
-                ret.set(i, dataSet.getX(i), dataSet.getY(i), dataSet.getYErrorNegative(i),
-                        dataSet.getYErrorPositive(i));
-                final String label = ret.getDataLabel(i);
-                if (label != null) {
-                    ret.getDataLabelMap().put(i, label);
-                }
-                final String style = ret.getDataLabel(i);
-                if (style != null) {
-                    ret.getDataStyleMap().put(i, style);
+                ret.getDataLabelMap().putAll(doubleErrorDataSet.getDataLabelMap());
+                ret.getDataStyleMap().putAll(doubleErrorDataSet.getDataStyleMap());
+            } else {
+                // generic implementation that works with all DataSetError
+                // implementation
+                for (int i = 0; i < nLength; i++) {
+                    ret.set(i, dataSet.getX(i), dataSet.getY(i), dataSet.getYErrorNegative(i),
+                            dataSet.getYErrorPositive(i));
+                    final String label = ret.getDataLabel(i);
+                    if (label != null) {
+                        ret.getDataLabelMap().put(i, label);
+                    }
+                    final String style = ret.getDataLabel(i);
+                    if (style != null) {
+                        ret.getDataStyleMap().put(i, style);
+                    }
                 }
             }
-        }
-        AbstractDataSetManagement.copyMetaData(dataSet, ret);
-        dataSet.unlock();
-        ret.setAutoNotifaction(true);
+            AbstractDataSetManagement.copyMetaData(dataSet, ret);
+        });
         ret.fireInvalidated(new UpdatedDataEvent(dataSet, "copy"));
 
         return ret;

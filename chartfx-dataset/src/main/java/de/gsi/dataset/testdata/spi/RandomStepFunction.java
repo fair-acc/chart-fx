@@ -11,6 +11,7 @@ import de.gsi.dataset.DataSetError;
  * @author rstein
  */
 public class RandomStepFunction extends AbstractTestFunction<RandomStepFunction> implements DataSetError {
+    private static final long serialVersionUID = -5338037806123143152L;
     protected static SplittableRandom rnd = new SplittableRandom(System.currentTimeMillis());
 
     /**

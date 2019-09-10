@@ -77,12 +77,11 @@ public class ReducingLineRenderer extends AbstractDataSetManagement<ReducingLine
         final double xmax = xAxis.getValueForDisplay(xAxisWidth);
         int index = 0;
         for (final DataSet dataset : localDataSetList) {
-            try {
-                dataset.lock();
-
+            final int lindex = index;
+            dataset.lock().readLockGuardOptimistic(() -> {
                 // update categories in case of category axes for the first
                 // (index == '0') indexed data set
-                if (index == 0) {
+                if (lindex == 0) {
                     if (xyChart.getXAxis() instanceof CategoryAxis) {
                         final CategoryAxis axis = (CategoryAxis) xyChart.getXAxis();
                         axis.updateCategories(dataset);
@@ -95,7 +94,7 @@ public class ReducingLineRenderer extends AbstractDataSetManagement<ReducingLine
                 }
 
                 gc.save();
-                DefaultRenderColorScheme.setLineScheme(gc, dataset.getStyle(), index);
+                DefaultRenderColorScheme.setLineScheme(gc, dataset.getStyle(), lindex);
                 DefaultRenderColorScheme.setGraphicsContextAttributes(gc, dataset.getStyle());
                 if (dataset.getDataCount() > 0) {
                     final int n = dataset.getDataCount(xmin, xmax);
@@ -151,9 +150,7 @@ public class ReducingLineRenderer extends AbstractDataSetManagement<ReducingLine
                     }
                 }
                 gc.restore();
-            } finally {
-                dataset.unlock();
-            }
+            });
             index++;
         }
         ProcessingProfiler.getTimeDiff(start);

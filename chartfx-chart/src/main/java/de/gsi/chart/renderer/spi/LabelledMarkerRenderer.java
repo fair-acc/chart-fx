@@ -84,29 +84,26 @@ public class LabelledMarkerRenderer extends AbstractDataSetManagement<LabelledMa
 
         for (int dataSetIndex = localDataSetList.size() - 1; dataSetIndex >= 0; dataSetIndex--) {
             final DataSet dataSet = localDataSetList.get(dataSetIndex);
-            dataSet.lock();
+            dataSet.lock().readLockGuardOptimistic(() -> {
+                // check for potentially reduced data range we are supposed to plot
+                final int indexMin = Math.max(0, dataSet.getXIndex(xMin));
+                final int indexMax = Math.min(dataSet.getXIndex(xMax) + 1, dataSet.getDataCount());
 
-            // check for potentially reduced data range we are supposed to plot
-            final int indexMin = Math.max(0, dataSet.getXIndex(xMin));
-            final int indexMax = Math.min(dataSet.getXIndex(xMax) + 1, dataSet.getDataCount());
+                // return if zero length data set
+                if (indexMax - indexMin <= 0) {
+                    return;
+                }
 
-            // return if zero length data set
-            if (indexMax - indexMin <= 0) {
-                dataSet.unlock();
-                continue;
-            }
+                if (horizontalMarker.get()) {
+                    // draw horizontal marker
+                    drawHorizontalLabelledMarker(gc, xyChart, dataSet, indexMin, indexMax);
+                }
 
-            if (horizontalMarker.get()) {
-                // draw horizontal marker
-                drawHorizontalLabelledMarker(gc, xyChart, dataSet, indexMin, indexMax);
-            }
-
-            if (verticalMarker.get()) {
-                // draw vertical marker
-                drawVerticalLabelledMarker(gc, xyChart, dataSet, indexMin, indexMax);
-            }
-
-            dataSet.unlock();
+                if (verticalMarker.get()) {
+                    // draw vertical marker
+                    drawVerticalLabelledMarker(gc, xyChart, dataSet, indexMin, indexMax);
+                }
+            });
 
         } // end of 'dataSetIndex' loop
 

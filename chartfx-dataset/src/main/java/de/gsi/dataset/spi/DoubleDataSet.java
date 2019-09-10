@@ -19,6 +19,7 @@ import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
  */
 @SuppressWarnings("PMD.TooManyMethods") // part of the flexible class nature
 public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements EditableDataSet {
+    private static final long serialVersionUID = -493232313124620828L;
     protected DoubleArrayList xValues; // way faster than java default lists
     protected DoubleArrayList yValues; // way faster than java default lists
 
@@ -114,17 +115,16 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
      * @return itself (fluent design)
      */
     public DoubleDataSet clearData() {
-        lock();
+        lock().writeLockGuard(() -> {
+            xValues.clear();
+            yValues.clear();
+            getDataLabelMap().clear();
+            getDataStyleMap().clear();
+            clearMetaInfo();
 
-        xValues.clear();
-        yValues.clear();
-        dataLabels.clear();
-        dataStyles.clear();
-        clearMetaInfo();
-
-        getAxisDescriptions().forEach(AxisDescription::empty);
-
-        return unlock().fireInvalidated(new RemovedDataEvent(this, "clearData()"));
+            getAxisDescriptions().forEach(AxisDescription::empty);
+        });
+        return fireInvalidated(new RemovedDataEvent(this, "clearData()"));
     }
 
     /**
@@ -139,14 +139,12 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
      * @return itself (fluent design)
      */
     public DoubleDataSet increaseCapacity(final int amount) {
-        lock();
-        final int size = getDataCount();
-        final boolean auto = isAutoNotification();
-        setAutoNotifaction(false);
-        resize(getCapacity() + amount);
-        resize(size);
-        setAutoNotifaction(auto);
-        return unlock();
+        lock().writeLockGuard(() -> {
+            final int size = getDataCount();
+            resize(getCapacity() + amount);
+            resize(size);
+        });
+        return getThis();
     }
 
     /**
@@ -156,10 +154,11 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
      * @return itself (fluent design)
      */
     public DoubleDataSet resize(final int size) {
-        lock();
-        xValues.size(size);
-        yValues.size(size);
-        return unlock().fireInvalidated(new UpdatedDataEvent(this, "increaseCapacity()"));
+        lock().writeLockGuard(() -> {
+            xValues.size(size);
+            yValues.size(size);
+        });
+        return fireInvalidated(new UpdatedDataEvent(this, "increaseCapacity()"));
     }
 
     /**
@@ -169,10 +168,11 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
      * @return itself (fluent design)
      */
     public DoubleDataSet trim() {
-        lock();
-        xValues.trim(0);
-        yValues.trim(0);
-        return unlock().fireInvalidated(new UpdatedDataEvent(this, "increaseCapacity()"));
+        lock().writeLockGuard(() -> {
+            xValues.trim(0);
+            yValues.trim(0);
+        });
+        return fireInvalidated(new UpdatedDataEvent(this, "increaseCapacity()"));
     }
 
     @Override
@@ -205,18 +205,18 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
      * @return itself (fluent design)
      */
     public DoubleDataSet add(final double x, final double y, final String label) {
-        lock();
-        xValues.add(x);
-        yValues.add(y);
+        lock().writeLockGuard(() -> {
+            xValues.add(x);
+            yValues.add(y);
 
-        if ((label != null) && !label.isEmpty()) {
-            addDataLabel(xValues.size() - 1, label);
-        }
+            if ((label != null) && !label.isEmpty()) {
+                addDataLabel(xValues.size() - 1, label);
+            }
 
-        getAxisDescription(0).add(x);
-        getAxisDescription(1).add(y);
-
-        return unlock().fireInvalidated(new UpdatedDataEvent(this, "add"));
+            getAxisDescription(0).add(x);
+            getAxisDescription(1).add(y);
+        });
+        return fireInvalidated(new UpdatedDataEvent(this, "add"));
     }
 
     /**
@@ -227,22 +227,19 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
      * @return itself
      */
     public DoubleDataSet add(final double[] xValuesNew, final double[] yValuesNew) {
-        lock();
         AssertUtils.notNull("X coordinates", xValuesNew);
         AssertUtils.notNull("Y coordinates", yValuesNew);
         AssertUtils.equalDoubleArrays(xValuesNew, yValuesNew);
 
-        final boolean oldAutoNotification = this.isAutoNotification();
-        setAutoNotifaction(false);
+        lock().writeLockGuard(() -> {
+            xValues.addElements(xValues.size(), xValuesNew);
+            yValues.addElements(yValues.size(), yValuesNew);
 
-        xValues.addElements(xValues.size(), xValuesNew);
-        yValues.addElements(yValues.size(), yValuesNew);
+            getAxisDescription(0).add(xValuesNew);
+            getAxisDescription(1).add(yValuesNew);
+        });
 
-        getAxisDescription(0).add(xValuesNew);
-        getAxisDescription(1).add(yValuesNew);
-
-        setAutoNotifaction(oldAutoNotification);
-        return unlock().fireInvalidated(new AddedDataEvent(this));
+        return fireInvalidated(new AddedDataEvent(this));
     }
 
     /**
@@ -268,17 +265,17 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
      * @return itself (fluent design)
      */
     public DoubleDataSet add(final int index, final double x, final double y, final String label) {
-        lock();
-        final int indexAt = Math.max(0, Math.min(index, getDataCount() + 1));
+        lock().writeLockGuard(() -> {
+            final int indexAt = Math.max(0, Math.min(index, getDataCount() + 1));
 
-        xValues.add(indexAt, x);
-        yValues.add(indexAt, y);
-        dataLabels.addValueAndShiftKeys(indexAt, xValues.size(), label);
-        dataStyles.shiftKeys(indexAt, xValues.size());
-        getAxisDescription(0).add(x);
-        getAxisDescription(1).add(y);
-
-        return unlock().fireInvalidated(new AddedDataEvent(this));
+            xValues.add(indexAt, x);
+            yValues.add(indexAt, y);
+            getDataLabelMap().addValueAndShiftKeys(indexAt, xValues.size(), label);
+            getDataStyleMap().shiftKeys(indexAt, xValues.size());
+            getAxisDescription(0).add(x);
+            getAxisDescription(1).add(y);
+        });
+        return fireInvalidated(new AddedDataEvent(this));
     }
 
     /**
@@ -290,25 +287,21 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
      * @return itself (fluent design)
      */
     public DoubleDataSet add(final int index, final double[] x, final double[] y) {
-        lock();
         AssertUtils.notNull("X coordinates", x);
         AssertUtils.notNull("Y coordinates", y);
         final int min = Math.min(x.length, y.length);
         AssertUtils.equalDoubleArrays(x, y, min);
-        
-        final boolean oldAutoNotification = this.isAutoNotification();
-        setAutoNotifaction(false);
 
-        final int indexAt = Math.max(0, Math.min(index, getDataCount() + 1));
-        xValues.addElements(indexAt, x, 0, min);
-        yValues.addElements(indexAt, y, 0, min);
-        getAxisDescription(0).add(x, min);
-        getAxisDescription(0).add(y, min);
-        dataLabels.shiftKeys(indexAt, xValues.size());
-        dataStyles.shiftKeys(indexAt, xValues.size());
-
-        setAutoNotifaction(oldAutoNotification);
-        return unlock().fireInvalidated(new AddedDataEvent(this));
+        lock().writeLockGuard(() -> {
+            final int indexAt = Math.max(0, Math.min(index, getDataCount() + 1));
+            xValues.addElements(indexAt, x, 0, min);
+            yValues.addElements(indexAt, y, 0, min);
+            getAxisDescription(0).add(x, min);
+            getAxisDescription(0).add(y, min);
+            getDataLabelMap().shiftKeys(indexAt, xValues.size());
+            getDataStyleMap().shiftKeys(indexAt, xValues.size());
+        });
+        return fireInvalidated(new AddedDataEvent(this));
     }
 
     /**
@@ -330,23 +323,23 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
      * @return itself (fluent design)
      */
     public DoubleDataSet remove(final int fromIndex, final int toIndex) {
-        lock();
-        AssertUtils.indexInBounds(fromIndex, getDataCount(), "fromIndex");
-        AssertUtils.indexInBounds(toIndex, getDataCount(), "toIndex");
-        AssertUtils.indexOrder(fromIndex, "fromIndex", toIndex, "toIndex");
+        lock().writeLockGuard(() -> {
+            AssertUtils.indexInBounds(fromIndex, getDataCount(), "fromIndex");
+            AssertUtils.indexInBounds(toIndex, getDataCount(), "toIndex");
+            AssertUtils.indexOrder(fromIndex, "fromIndex", toIndex, "toIndex");
 
-        xValues.removeElements(fromIndex, toIndex);
-        yValues.removeElements(fromIndex, toIndex);
+            xValues.removeElements(fromIndex, toIndex);
+            yValues.removeElements(fromIndex, toIndex);
 
-        // remove old label and style keys
-        dataLabels.remove(fromIndex, toIndex);
-        dataLabels.remove(fromIndex, toIndex);
+            // remove old label and style keys
+            getDataLabelMap().remove(fromIndex, toIndex);
+            getDataStyleMap().remove(fromIndex, toIndex);
 
-        // invalidate ranges
-        // -> fireInvalidated calls computeLimits for autoNotification
-        getAxisDescriptions().forEach(AxisDescription::empty);
-
-        return unlock().fireInvalidated(new RemovedDataEvent(this));
+            // invalidate ranges
+            // -> fireInvalidated calls computeLimits for autoNotification
+            getAxisDescriptions().forEach(AxisDescription::empty);
+        });
+        return fireInvalidated(new RemovedDataEvent(this));
     }
 
     /**
@@ -360,23 +353,19 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
      */
     @Override
     public DoubleDataSet set(final int index, final double x, final double y) {
-        lock();
-        try {
+        lock().writeLockGuard(() -> {
             final int dataCount = Math.max(index + 1, this.getDataCount());
             xValues.size(dataCount);
             yValues.size(dataCount);
             xValues.elements()[index] = x;
             yValues.elements()[index] = y;
-            dataLabels.remove(index);
-            dataStyles.remove(index);
+            getDataLabelMap().remove(index);
+            getDataStyleMap().remove(index);
 
             // invalidate ranges
             // -> fireInvalidated calls computeLimits for autoNotification
             getAxisDescriptions().forEach(AxisDescription::empty);
-
-        } finally {
-            unlock();
-        }
+        });
         return fireInvalidated(new UpdatedDataEvent(this, "set - single"));
     }
 
@@ -393,31 +382,27 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
      * @return itself
      */
     public DoubleDataSet set(final double[] xValues, final double[] yValues, final boolean copy) {
-        lock();
         AssertUtils.notNull("X coordinates", xValues);
         AssertUtils.notNull("Y coordinates", yValues);
         final int dataMaxIndex = Math.min(xValues.length, yValues.length);
         AssertUtils.equalDoubleArrays(xValues, yValues, dataMaxIndex);
 
-        final boolean oldAutoNotification = this.isAutoNotification();
-        setAutoNotifaction(false);
+        lock().writeLockGuard(() -> {
+            getDataLabelMap().clear();
+            getDataStyleMap().clear();
+            if (copy) {
+                resize(0);
+                this.xValues.addElements(0, xValues);
+                this.yValues.addElements(0, yValues);
+            } else {
+                this.xValues = DoubleArrayList.wrap(xValues);
+                this.yValues = DoubleArrayList.wrap(yValues);
+            }
 
-        dataLabels.clear();
-        dataStyles.clear();
-        if (copy) {
-            resize(0);
-            this.xValues.addElements(0, xValues);
-            this.yValues.addElements(0, yValues);
-        } else {
-            this.xValues = DoubleArrayList.wrap(xValues);
-            this.yValues = DoubleArrayList.wrap(yValues);
-        }
-
-        recomputeLimits(0);
-        recomputeLimits(1);
-
-        setAutoNotifaction(oldAutoNotification);
-        return unlock().fireInvalidated(new UpdatedDataEvent(this));
+            recomputeLimits(0);
+            recomputeLimits(1);
+        });
+        return fireInvalidated(new UpdatedDataEvent(this));
     }
 
     /**
@@ -435,24 +420,17 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
     }
 
     public DoubleDataSet set(final int index, final double[] x, final double[] y) {
-        lock();
-        final boolean oldAutoNotification = this.isAutoNotification();
-        setAutoNotifaction(false);
-        try {
+        lock().writeLockGuard(() -> {
             resize(Math.max(index + x.length, xValues.size()));
             System.arraycopy(x, 0, xValues.elements(), index, x.length);
             System.arraycopy(y, 0, yValues.elements(), index, y.length);
-            dataLabels.remove(index, index + x.length);
-            dataStyles.remove(index, index + x.length);
+            getDataLabelMap().remove(index, index + x.length);
+            getDataStyleMap().remove(index, index + x.length);
 
             // invalidate ranges
             // -> fireInvalidated calls computeLimits for autoNotification
             getAxisDescriptions().forEach(AxisDescription::empty);
-
-        } finally {
-            setAutoNotifaction(oldAutoNotification);
-            unlock();
-        }
+        });
         return fireInvalidated(new UpdatedDataEvent(this, "set - via arrays"));
     }
 
@@ -463,33 +441,30 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
      * @return itself (fluent design)
      */
     public DoubleDataSet set(final DataSet other) {
-        lock();
-        other.lock();
-        final boolean oldAuto = isAutoNotification();
-        setAutoNotifaction(false);
+        lock().writeLockGuard(() -> {
+            other.lock().writeLockGuard(() -> {
 
-        // deep copy data point labels and styles
-        dataLabels.clear();
-        for (int index = 0; index < other.getDataCount(); index++) {
-            final String label = other.getDataLabel(index);
-            if ((label != null) && !label.isEmpty()) {
-                addDataLabel(index, label);
-            }
-        }
-        dataStyles.clear();
-        for (int index = 0; index < other.getDataCount(); index++) {
-            final String style = other.getStyle(index);
-            if ((style != null) && !style.isEmpty()) {
-                addDataStyle(index, style);
-            }
-        }
-        setStyle(other.getStyle());
+                // deep copy data point labels and styles
+                getDataLabelMap().clear();
+                for (int index = 0; index < other.getDataCount(); index++) {
+                    final String label = other.getDataLabel(index);
+                    if ((label != null) && !label.isEmpty()) {
+                        addDataLabel(index, label);
+                    }
+                }
+                getDataStyleMap().clear();
+                for (int index = 0; index < other.getDataCount(); index++) {
+                    final String style = other.getStyle(index);
+                    if ((style != null) && !style.isEmpty()) {
+                        addDataStyle(index, style);
+                    }
+                }
+                setStyle(other.getStyle());
 
-        // copy data
-        this.set(other.getXValues(), other.getYValues(), true);
-
-        setAutoNotifaction(oldAuto);
-        other.unlock();
-        return unlock().fireInvalidated(new UpdatedDataEvent(this));
+                // copy data
+                this.set(other.getXValues(), other.getYValues(), true);
+            });
+        });
+        return fireInvalidated(new UpdatedDataEvent(this));
     }
 }

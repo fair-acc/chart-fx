@@ -17,6 +17,8 @@ import de.gsi.dataset.DataSet;
 import de.gsi.dataset.DataSet3D;
 import de.gsi.dataset.DataSetError;
 import de.gsi.dataset.event.EventListener;
+import de.gsi.dataset.locks.DataSetLock;
+import de.gsi.dataset.locks.DefaultDataSetLock;
 import de.gsi.dataset.spi.DefaultAxisDescription;
 import de.gsi.dataset.utils.AssertUtils;
 import de.gsi.dataset.utils.ProcessingProfiler;
@@ -91,28 +93,27 @@ public class MountainRangeRenderer extends ErrorDataSetRenderer implements Rende
 
             // detect and fish-out DataSet3D, ignore others
             if (dataSet instanceof DataSet3D) {
-                dataSet.lock();
-                final DataSet3D mData = (DataSet3D) dataSet;
-                xWeakIndexMap.clear();
-                yWeakIndexMap.clear();
-                yAxis.setAutoGrowRanging(true);
-                zRangeMin = mData.getAxisDescription(2).getMin();
-                zRangeMax = mData.getAxisDescription(2).getMax();
-                mountainRaingeExtra = MountainRangeRenderer.this.getMountainRangeOffset();
-                yAxis.setLowerBound(zRangeMin);
-                yAxis.setUpperBound(zRangeMax * (1.0 + mountainRaingeExtra));
-                yAxis.forceRedraw();
+                dataSet.lock().readLockGuardOptimistic(() -> {
+                    final DataSet3D mData = (DataSet3D) dataSet;
+                    xWeakIndexMap.clear();
+                    yWeakIndexMap.clear();
+                    yAxis.setAutoGrowRanging(true);
+                    zRangeMin = mData.getAxisDescription(2).getMin();
+                    zRangeMax = mData.getAxisDescription(2).getMax();
+                    mountainRaingeExtra = MountainRangeRenderer.this.getMountainRangeOffset();
+                    yAxis.setLowerBound(zRangeMin);
+                    yAxis.setUpperBound(zRangeMax * (1.0 + mountainRaingeExtra));
+                    yAxis.forceRedraw();
 
-                final int yCountMax = mData.getYDataCount();
-                checkAndRecreateRenderer(yCountMax);
+                    final int yCountMax = mData.getYDataCount();
+                    checkAndRecreateRenderer(yCountMax);
 
-                for (int index = yCountMax - 1; index >= 0; index--) {
-                    final MountainRangeRenderer.Demux3dTo2dDataSet dataSet2D = new Demux3dTo2dDataSet(mData, index);
-                    renderers.get(index).getDatasets().setAll(dataSet2D);
-                    renderers.get(index).render(gc, chart, 0, empty);
-                }
-
-                dataSet.unlock();
+                    for (int index = yCountMax - 1; index >= 0; index--) {
+                        final MountainRangeRenderer.Demux3dTo2dDataSet dataSet2D = new Demux3dTo2dDataSet(mData, index);
+                        renderers.get(index).getDatasets().setAll(dataSet2D);
+                        renderers.get(index).render(gc, chart, 0, empty);
+                    }
+                });
             }
 
         }
@@ -161,6 +162,8 @@ public class MountainRangeRenderer extends ErrorDataSetRenderer implements Rende
     }
 
     private class Demux3dTo2dDataSet implements DataSetError {
+        private static final long serialVersionUID = 3914728138839091421L;
+        private final transient DataSetLock lock = new DefaultDataSetLock(Demux3dTo2dDataSet.this);
         private final AtomicBoolean autoNotification = new AtomicBoolean(true);
         private final DataSet3D dataSet;
         private final int yIndex;
@@ -297,10 +300,10 @@ public class MountainRangeRenderer extends ErrorDataSetRenderer implements Rende
         }
 
         @Override
-        public DataSet lock() {
+        public DataSetLock lock() {
             // empty implementation since the superordinate DataSet3D lock is
             // being held/protecting this data set
-            return this;
+            return lock;
         }
 
         @Override
@@ -317,13 +320,6 @@ public class MountainRangeRenderer extends ErrorDataSetRenderer implements Rende
         @Override
         public DataSet setStyle(final String style) {
             return dataSet.setStyle(style);
-        }
-
-        @Override
-        public DataSet unlock() {
-            // empty implementation since the superordinate DataSet3D lock is
-            // being held/protecting this data set
-            return this;
         }
 
         @Override

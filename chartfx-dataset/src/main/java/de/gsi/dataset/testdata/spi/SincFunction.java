@@ -9,6 +9,7 @@ import de.gsi.dataset.DataSetError;
  * @author rstein
  */
 public class SincFunction extends AbstractTestFunction<SincFunction> implements DataSetError {
+    private static final long serialVersionUID = 8401471155758562066L;
 
     /**
      * 

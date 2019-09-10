@@ -1,8 +1,10 @@
 package de.gsi.dataset;
 
+import java.io.Serializable;
 import java.util.List;
 
 import de.gsi.dataset.event.EventSource;
+import de.gsi.dataset.locks.DataSetLock;
 
 /**
  * Basic interface for observable data sets.
@@ -11,7 +13,7 @@ import de.gsi.dataset.event.EventSource;
  * @author braeun
  * @author rstein
  */
-public interface DataSet extends EventSource {
+public interface DataSet extends EventSource, Serializable {
 
     /**
      * Return the axis description of the i-th axis.
@@ -174,12 +176,11 @@ public interface DataSet extends EventSource {
     }
 
     /**
-     * Locks access to the data set. Multi-threaded applications should lock the
-     * data set before setting the data.
-     *
-     * @return itself (fluent interface)
+     * 
+     * @return Read-Write Lock to guard the DataSet
+     * @see de.gsi.dataset.locks.DataSetLock
      */
-    DataSet lock();
+    <D extends DataSet> DataSetLock<D> lock();
 
     DataSet recomputeLimits(final int dimension);
 
@@ -195,10 +196,4 @@ public interface DataSet extends EventSource {
      */
     DataSet setStyle(String style);
 
-    /**
-     * Unlock the data set.
-     *
-     * @return itself (fluent interface)
-     */
-    DataSet unlock();
 }

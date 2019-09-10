@@ -22,12 +22,12 @@ import de.gsi.dataset.utils.AssertUtils;
  * 
  * @see DoubleErrorDataSet for an equivalent implementation with asymmetric
  *      errors in Y
- *
  * @author rstein
  * @deprecated this is kept for reference/performance comparisons only
  */
 @SuppressWarnings("PMD")
 public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements EditableDataSet {
+    private static final long serialVersionUID = 467969092912080826L;
     protected double[] xValues;
     protected double[] yValues;
     protected int dataMaxIndex; // <= xValues.length, stores the actually used
@@ -52,10 +52,12 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
      */
     public DoubleDataSet(final DataSet another) {
         this("");
-        another.lock();
-        this.setName(another.getName());
-        this.set(another); // NOPMD by rstein on 25/06/19 07:42
-        another.unlock();
+        lock().writeLockGuard(() -> {
+            another.lock().writeLockGuard(() -> {
+                this.setName(another.getName());
+                this.set(another); // NOPMD by rstein on 25/06/19 07:42
+            });
+        });
     }
 
     /**
@@ -92,7 +94,8 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
      *             <code>null</code> or if arrays with coordinates have
      *             different lengths
      */
-    public DoubleDataSet(final String name, final double[] xValues, final double[] yValues, final int initalSize, final boolean deepCopy) {
+    public DoubleDataSet(final String name, final double[] xValues, final double[] yValues, final int initalSize,
+            final boolean deepCopy) {
         this(name);
         AssertUtils.notNull("X data", xValues);
         AssertUtils.notNull("Y data", yValues);
@@ -130,17 +133,17 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
      * @return itself (fluent design)
      */
     public DoubleDataSet clearData() {
-        lock();
+        lock().writeLockGuard(() -> {
+            dataMaxIndex = 0;
+            Arrays.fill(xValues, 0.0);
+            Arrays.fill(yValues, 0.0);
+            getDataLabelMap().isEmpty();
+            getDataStyleMap().isEmpty();
 
-        dataMaxIndex = 0;
-        Arrays.fill(xValues, 0.0);
-        Arrays.fill(yValues, 0.0);
-        dataLabels.isEmpty();
-        dataStyles.isEmpty();
+            getAxisDescriptions().forEach(AxisDescription::empty);
+        });
 
-        getAxisDescriptions().forEach(AxisDescription::empty);
-
-        return unlock().fireInvalidated(new RemovedDataEvent(this, "clearData()"));
+        return fireInvalidated(new RemovedDataEvent(this, "clearData()"));
     }
 
     @Override
@@ -155,17 +158,13 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
 
     @Override
     public DoubleDataSet set(final int index, final double x, final double y) {
-        lock();
-        try {
+        lock().writeLockGuard(() -> {
             xValues[index] = x;
             yValues[index] = y;
             dataMaxIndex = Math.max(index, dataMaxIndex);
 
             getAxisDescriptions().forEach(AxisDescription::empty);
-        } finally {
-            unlock();
-        }
-
+        });
         return fireInvalidated(new UpdatedDataEvent(this));
     }
 
@@ -215,53 +214,53 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
      * @return itself (fluent design)
      */
     public DoubleDataSet add(final int index, final double x, final double y, final String label) {
-        lock();
-        final int indexAt = Math.max(0, Math.min(index, getDataCount() + 1));
+        lock().writeLockGuard(() -> {
+            final int indexAt = Math.max(0, Math.min(index, getDataCount() + 1));
 
-        // enlarge array if necessary
-        final int minArraySize = Math.min(xValues.length - 1, yValues.length - 1);
-        if (dataMaxIndex > minArraySize) {
-            final double[] xValuesNew = new double[dataMaxIndex + 1];
-            final double[] yValuesNew = new double[dataMaxIndex + 1];
+            // enlarge array if necessary
+            final int minArraySize = Math.min(xValues.length - 1, yValues.length - 1);
+            if (dataMaxIndex > minArraySize) {
+                final double[] xValuesNew = new double[dataMaxIndex + 1];
+                final double[] yValuesNew = new double[dataMaxIndex + 1];
 
-            // copy old data before required index
-            System.arraycopy(xValues, 0, xValuesNew, 0, indexAt);
-            System.arraycopy(yValues, 0, yValuesNew, 0, indexAt);
+                // copy old data before required index
+                System.arraycopy(xValues, 0, xValuesNew, 0, indexAt);
+                System.arraycopy(yValues, 0, yValuesNew, 0, indexAt);
 
-            // copy old data after required index
-            System.arraycopy(xValues, indexAt, xValuesNew, indexAt + 1, xValues.length - indexAt);
-            System.arraycopy(yValues, indexAt, yValuesNew, indexAt + 1, yValues.length - indexAt);
+                // copy old data after required index
+                System.arraycopy(xValues, indexAt, xValuesNew, indexAt + 1, xValues.length - indexAt);
+                System.arraycopy(yValues, indexAt, yValuesNew, indexAt + 1, yValues.length - indexAt);
 
-            // shift old label and style keys
-            for (int i = xValues.length; i >= indexAt; i--) {
-                final String oldLabelData = dataLabels.get(i);
-                if (oldLabelData != null) {
-                    dataLabels.put(i + 1, oldLabelData);
-                    dataLabels.remove(i);
+                // shift old label and style keys
+                for (int i = xValues.length; i >= indexAt; i--) {
+                    final String oldLabelData = getDataLabelMap().get(i);
+                    if (oldLabelData != null) {
+                        getDataLabelMap().put(i + 1, oldLabelData);
+                        getDataLabelMap().remove(i);
+                    }
+
+                    final String oldStyleData = getDataStyleMap().get(i);
+                    if (oldStyleData != null) {
+                        getDataStyleMap().put(i + 1, oldStyleData);
+                        getDataStyleMap().remove(i);
+                    }
                 }
 
-                final String oldStyleData = dataStyles.get(i);
-                if (oldStyleData != null) {
-                    dataStyles.put(i + 1, oldStyleData);
-                    dataStyles.remove(i);
-                }
+                xValues = xValuesNew;
+                yValues = yValuesNew;
             }
 
-            xValues = xValuesNew;
-            yValues = yValuesNew;
-        }
+            xValues[indexAt] = x;
+            yValues[indexAt] = y;
+            if (label != null && !label.isEmpty()) {
+                addDataLabel(indexAt, label);
+            }
+            dataMaxIndex++;
 
-        xValues[indexAt] = x;
-        yValues[indexAt] = y;
-        if (label != null && !label.isEmpty()) {
-            addDataLabel(indexAt, label);
-        }
-        dataMaxIndex++;
-
-        getAxisDescription(0).add(x);
-        getAxisDescription(1).add(y);
-
-        return unlock().fireInvalidated(new AddedDataEvent(this));
+            getAxisDescription(0).add(x);
+            getAxisDescription(1).add(y);
+        });
+        return fireInvalidated(new AddedDataEvent(this));
     }
 
     /**
@@ -272,42 +271,42 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
      * @return itself (fluent design)
      */
     public DoubleDataSet remove(final int fromIndex, final int toIndex) {
-        lock();
-        AssertUtils.indexInBounds(fromIndex, getDataCount(), "fromIndex");
-        AssertUtils.indexInBounds(toIndex, getDataCount(), "toIndex");
-        AssertUtils.indexOrder(fromIndex, "fromIndex", toIndex, "toIndex");
-        final int diffLength = toIndex - fromIndex;
-        final int newLength = xValues.length - diffLength;
-        final double[] xValuesNew = new double[newLength];
-        final double[] yValuesNew = new double[newLength];
+        lock().writeLockGuard(() -> {
+            AssertUtils.indexInBounds(fromIndex, getDataCount(), "fromIndex");
+            AssertUtils.indexInBounds(toIndex, getDataCount(), "toIndex");
+            AssertUtils.indexOrder(fromIndex, "fromIndex", toIndex, "toIndex");
+            final int diffLength = toIndex - fromIndex;
+            final int newLength = xValues.length - diffLength;
+            final double[] xValuesNew = new double[newLength];
+            final double[] yValuesNew = new double[newLength];
 
-        System.arraycopy(xValues, 0, xValuesNew, 0, fromIndex);
-        System.arraycopy(yValues, 0, yValuesNew, 0, fromIndex);
-        System.arraycopy(xValues, toIndex, xValuesNew, fromIndex, newLength - fromIndex);
-        System.arraycopy(yValues, toIndex, yValuesNew, fromIndex, newLength - fromIndex);
-        xValues = xValuesNew;
-        yValues = yValuesNew;
+            System.arraycopy(xValues, 0, xValuesNew, 0, fromIndex);
+            System.arraycopy(yValues, 0, yValuesNew, 0, fromIndex);
+            System.arraycopy(xValues, toIndex, xValuesNew, fromIndex, newLength - fromIndex);
+            System.arraycopy(yValues, toIndex, yValuesNew, fromIndex, newLength - fromIndex);
+            xValues = xValuesNew;
+            yValues = yValuesNew;
 
-        // remove old label and style keys
-        for (int i = 0; i < diffLength; i++) {
-            final String oldLabelData = dataLabels.get(toIndex + i);
-            if (oldLabelData != null) {
-                dataLabels.put(fromIndex + i, oldLabelData);
-                dataLabels.remove(toIndex + i);
+            // remove old label and style keys
+            for (int i = 0; i < diffLength; i++) {
+                final String oldLabelData = getDataLabelMap().get(toIndex + i);
+                if (oldLabelData != null) {
+                    getDataLabelMap().put(fromIndex + i, oldLabelData);
+                    getDataLabelMap().remove(toIndex + i);
+                }
+
+                final String oldStyleData = getDataStyleMap().get(toIndex + i);
+                if (oldStyleData != null) {
+                    getDataStyleMap().put(fromIndex + i, oldStyleData);
+                    getDataStyleMap().remove(toIndex + i);
+                }
             }
 
-            final String oldStyleData = dataStyles.get(toIndex + i);
-            if (oldStyleData != null) {
-                dataStyles.put(fromIndex + i, oldStyleData);
-                dataStyles.remove(toIndex + i);
-            }
-        }
+            dataMaxIndex = Math.max(0, dataMaxIndex - diffLength);
 
-        dataMaxIndex = Math.max(0, dataMaxIndex - diffLength);
-
-        getAxisDescriptions().forEach(AxisDescription::empty);
-
-        return unlock().fireInvalidated(new RemovedDataEvent(this));
+            getAxisDescriptions().forEach(AxisDescription::empty);
+        });
+        return fireInvalidated(new RemovedDataEvent(this));
     }
 
     /**
@@ -337,29 +336,30 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
         AssertUtils.notNull("Y coordinates", yValuesNew);
         AssertUtils.equalDoubleArrays(xValuesNew, yValuesNew);
 
-        final int newLength = this.getDataCount() + xValuesNew.length;
-        // need to allocate new memory
-        if (newLength > xValues.length) {
-            final double[] xValuesNewAlloc = new double[newLength];
-            final double[] yValuesNewAlloc = new double[newLength];
+        lock().writeLockGuard(() -> {
+            final int newLength = this.getDataCount() + xValuesNew.length;
+            // need to allocate new memory
+            if (newLength > xValues.length) {
+                final double[] xValuesNewAlloc = new double[newLength];
+                final double[] yValuesNewAlloc = new double[newLength];
 
-            // copy old data
-            System.arraycopy(xValues, 0, xValuesNewAlloc, 0, getDataCount());
-            System.arraycopy(yValues, 0, yValuesNewAlloc, 0, getDataCount());
+                // copy old data
+                System.arraycopy(xValues, 0, xValuesNewAlloc, 0, getDataCount());
+                System.arraycopy(yValues, 0, yValuesNewAlloc, 0, getDataCount());
 
-            xValues = xValuesNewAlloc;
-            yValues = yValuesNewAlloc;
-        }
+                xValues = xValuesNewAlloc;
+                yValues = yValuesNewAlloc;
+            }
 
-        // N.B. getDataCount() should equal dataMaxIndex here
-        System.arraycopy(xValuesNew, 0, xValues, getDataCount(), xValuesNew.length);
-        System.arraycopy(yValuesNew, 0, yValues, getDataCount(), xValuesNew.length);
+            // N.B. getDataCount() should equal dataMaxIndex here
+            System.arraycopy(xValuesNew, 0, xValues, getDataCount(), xValuesNew.length);
+            System.arraycopy(yValuesNew, 0, yValues, getDataCount(), xValuesNew.length);
 
-        dataMaxIndex = Math.max(0, dataMaxIndex + xValuesNew.length);
-        recomputeLimits(0);
-        recomputeLimits(1);
-
-        return unlock().fireInvalidated(new AddedDataEvent(this));
+            dataMaxIndex = Math.max(0, dataMaxIndex + xValuesNew.length);
+            recomputeLimits(0);
+            recomputeLimits(1);
+        });
+        return fireInvalidated(new AddedDataEvent(this));
     }
 
     /**
@@ -375,37 +375,37 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
      * @return itself
      */
     public DoubleDataSet set(final double[] xValues, final double[] yValues, final boolean copy) {
-        lock();
         AssertUtils.notNull("X coordinates", xValues);
         AssertUtils.notNull("Y coordinates", yValues);
         AssertUtils.equalDoubleArrays(xValues, yValues);
 
-        if (!copy) {
-            this.xValues = xValues;
-            this.yValues = yValues;
+        lock().writeLockGuard(() -> {
+            if (!copy) {
+                this.xValues = xValues;
+                this.yValues = yValues;
+                dataMaxIndex = xValues.length;
+                recomputeLimits(0);
+                recomputeLimits(1);
+                return;
+            }
+
+            if (xValues.length == this.xValues.length) {
+                System.arraycopy(xValues, 0, this.xValues, 0, getDataCount());
+                System.arraycopy(yValues, 0, this.yValues, 0, getDataCount());
+            } else {
+                /*
+                 * copy into new arrays, forcing array length equal to the xValues
+                 * length
+                 */
+                this.xValues = Arrays.copyOf(xValues, xValues.length);
+                this.yValues = Arrays.copyOf(yValues, xValues.length);
+            }
             dataMaxIndex = xValues.length;
             recomputeLimits(0);
             recomputeLimits(1);
+        });
 
-            return unlock().fireInvalidated(new UpdatedDataEvent(this));
-        }
-
-        if (xValues.length == this.xValues.length) {
-            System.arraycopy(xValues, 0, this.xValues, 0, getDataCount());
-            System.arraycopy(yValues, 0, this.yValues, 0, getDataCount());
-        } else {
-            /*
-             * copy into new arrays, forcing array length equal to the xValues
-             * length
-             */
-            this.xValues = Arrays.copyOf(xValues, xValues.length);
-            this.yValues = Arrays.copyOf(yValues, xValues.length);
-        }
-        dataMaxIndex = xValues.length;
-        recomputeLimits(0);
-        recomputeLimits(1);
-
-        return unlock().fireInvalidated(new UpdatedDataEvent(this));
+        return fireInvalidated(new UpdatedDataEvent(this));
     }
 
     /**
@@ -429,32 +429,29 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
      * @return itself (fluent design)
      */
     public DoubleDataSet set(final DataSet other) {
-        lock();
-        other.lock();
-        final boolean oldAuto = isAutoNotification();
-        setAutoNotifaction(false);
+        lock().writeLockGuard(() -> {
+            other.lock().writeLockGuard(() -> {
+                // deep copy data point labels and styles
+                getDataLabelMap().clear();
+                for (int index = 0; index < other.getDataCount(); index++) {
+                    final String label = other.getDataLabel(index);
+                    if (label != null && !label.isEmpty()) {
+                        this.addDataLabel(index, label);
+                    }
+                }
+                getDataStyleMap().clear();
+                for (int index = 0; index < other.getDataCount(); index++) {
+                    final String style = other.getStyle(index);
+                    if (style != null && !style.isEmpty()) {
+                        this.addDataStyle(index, style);
+                    }
+                }
+                this.setStyle(other.getStyle());
 
-        // deep copy data point labels and styles
-        dataLabels.clear();
-        for (int index = 0; index < other.getDataCount(); index++) {
-            final String label = other.getDataLabel(index);
-            if (label != null && !label.isEmpty()) {
-                this.addDataLabel(index, label);
-            }
-        }
-        dataStyles.clear();
-        for (int index = 0; index < other.getDataCount(); index++) {
-            final String style = other.getStyle(index);
-            if (style != null && !style.isEmpty()) {
-                this.addDataStyle(index, style);
-            }
-        }
-        this.setStyle(other.getStyle());
-
-        this.set(other.getXValues(), other.getYValues(), true);
-        setAutoNotifaction(oldAuto);
-        other.unlock();
-        return unlock().fireInvalidated(new UpdatedDataEvent(this));
+                this.set(other.getXValues(), other.getYValues(), true);
+            });
+        });
+        return fireInvalidated(new UpdatedDataEvent(this));
     }
 
 }

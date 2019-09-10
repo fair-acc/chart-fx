@@ -21,7 +21,6 @@ import de.gsi.dataset.utils.AssertUtils;
  * native double arrays.
  *
  * @see DoubleDataSet for an equivalent implementation without errors
- *
  * @author rstein
  * @deprecated this is kept for reference/performance comparisons only
  */
@@ -73,10 +72,12 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
      */
     public DoubleErrorDataSet(final DataSet another) {
         this("");
-        another.lock();
-        this.setName(another.getName());
-        this.set(another); // NOPMD by rstein on 25/06/19 07:42
-        another.unlock();
+        lock().writeLockGuard(() -> {
+            another.lock().writeLockGuard(() -> {
+                this.setName(another.getName());
+                this.set(another); // NOPMD by rstein on 25/06/19 07:42
+            });
+        });
     }
 
     /**
@@ -153,20 +154,19 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
      * @return itself (fluent design)
      */
     public DoubleErrorDataSet clearData() {
-        lock();
+        lock().writeLockGuard(() -> {
+            dataMaxIndex = 0;
+            Arrays.fill(xValues, 0.0);
+            Arrays.fill(yValues, 0.0);
+            Arrays.fill(yErrorsPos, 0.0);
+            Arrays.fill(yErrorsNeg, 0.0);
+            getDataLabelMap().isEmpty();
+            getDataStyleMap().isEmpty();
 
-        dataMaxIndex = 0;
-        Arrays.fill(xValues, 0.0);
-        Arrays.fill(yValues, 0.0);
-        Arrays.fill(yErrorsPos, 0.0);
-        Arrays.fill(yErrorsNeg, 0.0);
-        dataLabels.isEmpty();
-        dataStyles.isEmpty();
-
-        getAxisDescription(0).empty();
-        getAxisDescription(1).empty();
-
-        return unlock().fireInvalidated(new RemovedDataEvent(this, "clearData()"));
+            getAxisDescription(0).empty();
+            getAxisDescription(1).empty();
+        });
+        return fireInvalidated(new RemovedDataEvent(this, "clearData()"));
     }
 
     @Override
@@ -225,11 +225,7 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
      */
     public DoubleErrorDataSet set(final int index, final double x, final double y, final double yErrorNeg,
             final double yErrorPos) {
-        lock();
-        final boolean oldAuto = isAutoNotification();
-        setAutoNotifaction(false);
-
-        try {
+        lock().writeLockGuard(() -> {
             if (index < dataMaxIndex) {
                 xValues[index] = x;
                 yValues[index] = y;
@@ -242,11 +238,7 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
             getAxisDescription(0).add(x);
             getAxisDescription(1).add(y - yErrorNeg);
             getAxisDescription(1).add(y + yErrorPos);
-        } finally {
-            setAutoNotifaction(oldAuto);
-            unlock();
-        }
-
+        });
         return fireInvalidated(new UpdatedDataEvent(this));
     }
 
@@ -271,39 +263,36 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
      * @return itself
      */
     public DoubleErrorDataSet add(final double x, final double y, final double yErrorNeg, final double yErrorPos) {
-        lock();
+        lock().writeLockGuard(() -> {
+            // enlarge array if necessary
+            if (dataMaxIndex > (xValues.length - 1)) {
+                final double[] xValuesNew = new double[xValues.length + 1];
+                final double[] yValuesNew = new double[yValues.length + 1];
+                final double[] yErrorsNegNew = new double[yValues.length + 1];
+                final double[] yErrorsPosNew = new double[yValues.length + 1];
 
-        // enlarge array if necessary
-        if (dataMaxIndex > (xValues.length - 1)) {
-            final double[] xValuesNew = new double[xValues.length + 1];
-            final double[] yValuesNew = new double[yValues.length + 1];
-            final double[] yErrorsNegNew = new double[yValues.length + 1];
-            final double[] yErrorsPosNew = new double[yValues.length + 1];
+                System.arraycopy(xValues, 0, xValuesNew, 0, xValues.length);
+                System.arraycopy(yValues, 0, yValuesNew, 0, yValues.length);
+                System.arraycopy(yErrorsNeg, 0, yErrorsNegNew, 0, yValues.length);
+                System.arraycopy(yErrorsPos, 0, yErrorsPosNew, 0, yValues.length);
 
-            System.arraycopy(xValues, 0, xValuesNew, 0, xValues.length);
-            System.arraycopy(yValues, 0, yValuesNew, 0, yValues.length);
-            System.arraycopy(yErrorsNeg, 0, yErrorsNegNew, 0, yValues.length);
-            System.arraycopy(yErrorsPos, 0, yErrorsPosNew, 0, yValues.length);
+                xValues = xValuesNew;
+                yValues = yValuesNew;
+                yErrorsPos = yErrorsPosNew;
+                yErrorsNeg = yErrorsNegNew;
+            }
 
-            xValues = xValuesNew;
-            yValues = yValuesNew;
-            yErrorsPos = yErrorsPosNew;
-            yErrorsNeg = yErrorsNegNew;
-        }
+            xValues[dataMaxIndex] = x;
+            yValues[dataMaxIndex] = y;
+            yErrorsPos[dataMaxIndex] = yErrorPos;
+            yErrorsNeg[dataMaxIndex] = yErrorNeg;
+            dataMaxIndex++;
 
-        xValues[dataMaxIndex] = x;
-        yValues[dataMaxIndex] = y;
-        yErrorsPos[dataMaxIndex] = yErrorPos;
-        yErrorsNeg[dataMaxIndex] = yErrorNeg;
-        dataMaxIndex++;
-
-        getAxisDescription(0).add(x);
-        getAxisDescription(1).add(y - yErrorNeg);
-        getAxisDescription(1).add(y + yErrorPos);
-
-        unlock();
-        fireInvalidated(new AddedDataEvent(this));
-        return this;
+            getAxisDescription(0).add(x);
+            getAxisDescription(1).add(y - yErrorNeg);
+            getAxisDescription(1).add(y + yErrorPos);
+        });
+        return fireInvalidated(new AddedDataEvent(this));
     }
 
     @Override
@@ -319,38 +308,37 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
      * @return itself (fluent design)
      */
     public DoubleErrorDataSet remove(final int fromIndex, final int toIndex) {
-        lock();
-        AssertUtils.indexInBounds(fromIndex, getDataCount(), "fromIndex");
-        AssertUtils.indexInBounds(toIndex, getDataCount(), "toIndex");
-        AssertUtils.indexOrder(fromIndex, "fromIndex", toIndex, "toIndex");
-        final int diffLength = toIndex - fromIndex;
+        lock().writeLockGuard(() -> {
+            AssertUtils.indexInBounds(fromIndex, getDataCount(), "fromIndex");
+            AssertUtils.indexInBounds(toIndex, getDataCount(), "toIndex");
+            AssertUtils.indexOrder(fromIndex, "fromIndex", toIndex, "toIndex");
+            final int diffLength = toIndex - fromIndex;
 
-        // TODO: performance-critical memory/cpu tradeoff
-        // check whether this really needed (keeping the data and reducing just
-        // the dataMaxIndex costs some memory but saves new allocation
-        final int newLength = xValues.length - diffLength;
-        final double[] xValuesNew = new double[newLength];
-        final double[] yValuesNew = new double[newLength];
-        final double[] yErrorsNegNew = new double[newLength];
-        final double[] yErrorsPosNew = new double[newLength];
-        System.arraycopy(xValues, 0, xValuesNew, 0, fromIndex);
-        System.arraycopy(yValues, 0, yValuesNew, 0, fromIndex);
-        System.arraycopy(yErrorsNeg, 0, yErrorsNegNew, 0, fromIndex);
-        System.arraycopy(yErrorsPos, 0, yErrorsPosNew, 0, fromIndex);
-        System.arraycopy(xValues, toIndex, xValuesNew, fromIndex, newLength - fromIndex);
-        System.arraycopy(yValues, toIndex, yValuesNew, fromIndex, newLength - fromIndex);
-        System.arraycopy(yErrorsNeg, toIndex, yErrorsNegNew, fromIndex, newLength - fromIndex);
-        System.arraycopy(yErrorsPos, toIndex, yErrorsPosNew, fromIndex, newLength - fromIndex);
-        xValues = xValuesNew;
-        yValues = yValuesNew;
-        yErrorsPos = yErrorsPosNew;
-        yErrorsNeg = yErrorsNegNew;
-        dataMaxIndex = Math.max(0, dataMaxIndex - diffLength);
+            // TODO: performance-critical memory/cpu tradeoff
+            // check whether this really needed (keeping the data and reducing just
+            // the dataMaxIndex costs some memory but saves new allocation
+            final int newLength = xValues.length - diffLength;
+            final double[] xValuesNew = new double[newLength];
+            final double[] yValuesNew = new double[newLength];
+            final double[] yErrorsNegNew = new double[newLength];
+            final double[] yErrorsPosNew = new double[newLength];
+            System.arraycopy(xValues, 0, xValuesNew, 0, fromIndex);
+            System.arraycopy(yValues, 0, yValuesNew, 0, fromIndex);
+            System.arraycopy(yErrorsNeg, 0, yErrorsNegNew, 0, fromIndex);
+            System.arraycopy(yErrorsPos, 0, yErrorsPosNew, 0, fromIndex);
+            System.arraycopy(xValues, toIndex, xValuesNew, fromIndex, newLength - fromIndex);
+            System.arraycopy(yValues, toIndex, yValuesNew, fromIndex, newLength - fromIndex);
+            System.arraycopy(yErrorsNeg, toIndex, yErrorsNegNew, fromIndex, newLength - fromIndex);
+            System.arraycopy(yErrorsPos, toIndex, yErrorsPosNew, fromIndex, newLength - fromIndex);
+            xValues = xValuesNew;
+            yValues = yValuesNew;
+            yErrorsPos = yErrorsPosNew;
+            yErrorsNeg = yErrorsNegNew;
+            dataMaxIndex = Math.max(0, dataMaxIndex - diffLength);
 
-        getAxisDescriptions().forEach(AxisDescription::empty);
-
-        unlock().fireInvalidated(new RemovedDataEvent(this));
-        return this;
+            getAxisDescriptions().forEach(AxisDescription::empty);
+        });
+        return fireInvalidated(new RemovedDataEvent(this));
     }
 
     @Override
@@ -373,8 +361,6 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
      */
     public DoubleErrorDataSet add(final double[] xValues, final double[] yValues, final double[] yErrorsNeg,
             final double[] yErrorsPos) {
-        lock();
-
         AssertUtils.notNull("X coordinates", xValues);
         AssertUtils.notNull("Y coordinates", yValues);
         AssertUtils.notNull("Y error neg", yErrorsNeg);
@@ -382,40 +368,38 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
         AssertUtils.equalDoubleArrays(xValues, yValues);
         AssertUtils.equalDoubleArrays(xValues, yErrorsNeg);
         AssertUtils.equalDoubleArrays(xValues, yErrorsPos);
+        lock().writeLockGuard(() -> {
+            final int newLength = this.getDataCount() + xValues.length;
+            // need to allocate new memory
+            if (newLength > this.xValues.length) {
+                final double[] xValuesNew = new double[newLength];
+                final double[] yValuesNew = new double[newLength];
+                final double[] yErrorsNegNew = new double[newLength];
+                final double[] yErrorsPosNew = new double[newLength];
 
-        final int newLength = this.getDataCount() + xValues.length;
-        // need to allocate new memory
-        if (newLength > this.xValues.length) {
-            final double[] xValuesNew = new double[newLength];
-            final double[] yValuesNew = new double[newLength];
-            final double[] yErrorsNegNew = new double[newLength];
-            final double[] yErrorsPosNew = new double[newLength];
+                // copy old data
+                System.arraycopy(this.xValues, 0, xValuesNew, 0, getDataCount());
+                System.arraycopy(this.yValues, 0, yValuesNew, 0, getDataCount());
+                System.arraycopy(yErrorsNeg, 0, yErrorsNegNew, 0, getDataCount());
+                System.arraycopy(yErrorsPos, 0, yErrorsPosNew, 0, getDataCount());
 
-            // copy old data
-            System.arraycopy(this.xValues, 0, xValuesNew, 0, getDataCount());
-            System.arraycopy(this.yValues, 0, yValuesNew, 0, getDataCount());
-            System.arraycopy(yErrorsNeg, 0, yErrorsNegNew, 0, getDataCount());
-            System.arraycopy(yErrorsPos, 0, yErrorsPosNew, 0, getDataCount());
+                this.xValues = xValuesNew;
+                this.yValues = yValuesNew;
+                this.yErrorsNeg = yErrorsNegNew;
+                this.yErrorsPos = yErrorsPosNew;
+            }
 
-            this.xValues = xValuesNew;
-            this.yValues = yValuesNew;
-            this.yErrorsNeg = yErrorsNegNew;
-            this.yErrorsPos = yErrorsPosNew;
-        }
+            // N.B. getDataCount() should equal dataMaxIndex here
+            System.arraycopy(xValues, 0, this.xValues, getDataCount(), newLength - getDataCount());
+            System.arraycopy(yValues, 0, this.yValues, getDataCount(), newLength - getDataCount());
+            System.arraycopy(yErrorsNeg, 0, this.yErrorsNeg, getDataCount(), newLength - getDataCount());
+            System.arraycopy(yErrorsPos, 0, this.yErrorsPos, getDataCount(), newLength - getDataCount());
 
-        // N.B. getDataCount() should equal dataMaxIndex here
-        System.arraycopy(xValues, 0, this.xValues, getDataCount(), newLength - getDataCount());
-        System.arraycopy(yValues, 0, this.yValues, getDataCount(), newLength - getDataCount());
-        System.arraycopy(yErrorsNeg, 0, this.yErrorsNeg, getDataCount(), newLength - getDataCount());
-        System.arraycopy(yErrorsPos, 0, this.yErrorsPos, getDataCount(), newLength - getDataCount());
-
-        dataMaxIndex = Math.max(0, dataMaxIndex + xValues.length);
-        recomputeLimits(0);
-        recomputeLimits(1);
-
-        unlock();
-        fireInvalidated(new AddedDataEvent(this));
-        return this;
+            dataMaxIndex = Math.max(0, dataMaxIndex + xValues.length);
+            recomputeLimits(0);
+            recomputeLimits(1);
+        });
+        return fireInvalidated(new AddedDataEvent(this));
     }
 
     /**
@@ -434,7 +418,6 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
      */
     public DoubleErrorDataSet set(final double[] xValues, final double[] yValues, final double[] yErrorsNeg,
             final double[] yErrorsPos, final boolean copy) {
-        lock();
         AssertUtils.notNull("X coordinates", xValues);
         AssertUtils.notNull("Y coordinates", yValues);
         AssertUtils.notNull("Y error neg", yErrorsNeg);
@@ -445,38 +428,37 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
         AssertUtils.equalDoubleArrays(xValues, yErrorsNeg, dataMaxIndex);
         AssertUtils.equalDoubleArrays(xValues, yErrorsPos, dataMaxIndex);
 
-        if (!copy) {
-            this.xValues = xValues;
-            this.yValues = yValues;
-            this.yErrorsNeg = yErrorsNeg;
-            this.yErrorsPos = yErrorsPos;
+        lock().writeLockGuard(() -> {
+            if (!copy) {
+                this.xValues = xValues;
+                this.yValues = yValues;
+                this.yErrorsNeg = yErrorsNeg;
+                this.yErrorsPos = yErrorsPos;
+                recomputeLimits(0);
+                recomputeLimits(1);
+                return;
+            }
+
+            if (xValues.length == this.xValues.length) {
+                System.arraycopy(xValues, 0, this.xValues, 0, getDataCount());
+                System.arraycopy(yValues, 0, this.yValues, 0, getDataCount());
+                System.arraycopy(yErrorsNeg, 0, this.yErrorsNeg, 0, getDataCount());
+                System.arraycopy(yErrorsPos, 0, this.yErrorsPos, 0, getDataCount());
+            } else {
+                /*
+                 * copy into new arrays, forcing array length to be equal to the
+                 * xValues length
+                 */
+                this.xValues = Arrays.copyOf(xValues, xValues.length);
+                this.yValues = Arrays.copyOf(yValues, xValues.length);
+                this.yErrorsNeg = Arrays.copyOf(yErrorsNeg, xValues.length);
+                this.yErrorsPos = Arrays.copyOf(yErrorsPos, xValues.length);
+            }
+
             recomputeLimits(0);
             recomputeLimits(1);
-            unlock();
-            fireInvalidated(new UpdatedDataEvent(this));
-            return this;
-        }
-
-        if (xValues.length == this.xValues.length) {
-            System.arraycopy(xValues, 0, this.xValues, 0, getDataCount());
-            System.arraycopy(yValues, 0, this.yValues, 0, getDataCount());
-            System.arraycopy(yErrorsNeg, 0, this.yErrorsNeg, 0, getDataCount());
-            System.arraycopy(yErrorsPos, 0, this.yErrorsPos, 0, getDataCount());
-        } else {
-            /*
-             * copy into new arrays, forcing array length to be equal to the
-             * xValues length
-             */
-            this.xValues = Arrays.copyOf(xValues, xValues.length);
-            this.yValues = Arrays.copyOf(yValues, xValues.length);
-            this.yErrorsNeg = Arrays.copyOf(yErrorsNeg, xValues.length);
-            this.yErrorsPos = Arrays.copyOf(yErrorsPos, xValues.length);
-        }
-
-        recomputeLimits(0);
-        recomputeLimits(1);
-
-        return unlock().fireInvalidated(new UpdatedDataEvent(this));
+        });
+        return fireInvalidated(new UpdatedDataEvent(this));
     }
 
     /**
@@ -503,38 +485,37 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
      * @return itself (fluent design)
      */
     public DoubleErrorDataSet set(final DataSet other) {
-        lock();
-        other.lock();
+        lock().writeLockGuard(() -> {
+            other.lock().writeLockGuard(() -> {
+                // deep copy data point labels and styles
+                getDataLabelMap().clear();
+                for (int index = 0; index < other.getDataCount(); index++) {
+                    final String label = other.getDataLabel(index);
+                    if (label != null && !label.isEmpty()) {
+                        this.addDataLabel(index, label);
+                    }
+                }
+                getDataStyleMap().clear();
+                for (int index = 0; index < other.getDataCount(); index++) {
+                    final String style = other.getStyle(index);
+                    if (style != null && !style.isEmpty()) {
+                        this.addDataStyle(index, style);
+                    }
+                }
 
-        // deep copy data point labels and styles
-        dataLabels.clear();
-        for (int index = 0; index < other.getDataCount(); index++) {
-            final String label = other.getDataLabel(index);
-            if (label != null && !label.isEmpty()) {
-                this.addDataLabel(index, label);
-            }
-        }
-        dataStyles.clear();
-        for (int index = 0; index < other.getDataCount(); index++) {
-            final String style = other.getStyle(index);
-            if (style != null && !style.isEmpty()) {
-                this.addDataStyle(index, style);
-            }
-        }
+                this.setStyle(other.getStyle());
 
-        this.setStyle(other.getStyle());
-
-        // copy data
-        if (other instanceof DataSetError) {
-            this.set(other.getXValues(), other.getYValues(), ((DataSetError) other).getYErrorsNegative(),
-                    ((DataSetError) other).getYErrorsPositive(), true);
-        } else {
-            final int count = other.getDataCount();
-            this.set(other.getXValues(), other.getYValues(), new double[count], new double[count], true);
-        }
-
-        other.unlock();
-        return unlock();
+                // copy data
+                if (other instanceof DataSetError) {
+                    this.set(other.getXValues(), other.getYValues(), ((DataSetError) other).getYErrorsNegative(),
+                            ((DataSetError) other).getYErrorsPositive(), true);
+                } else {
+                    final int count = other.getDataCount();
+                    this.set(other.getXValues(), other.getYValues(), new double[count], new double[count], true);
+                }
+            });
+        });
+        return getThis();
     }
 
 }

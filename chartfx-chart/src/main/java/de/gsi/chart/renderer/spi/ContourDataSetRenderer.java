@@ -127,10 +127,6 @@ public class ContourDataSetRenderer extends AbstractDataSetManagement<ContourDat
             return;
         }
 
-        if (!(xyChart.getXAxis() instanceof Axis)) {
-            throw new InvalidParameterException("x-Axis must be a derivative of Axis, axis is = " + xyChart.getXAxis());
-        }
-
         final Axis xAxis = xyChart.getXAxis();
 
         // final Axis<X> xAxis = chart.getXAxis();
@@ -138,53 +134,67 @@ public class ContourDataSetRenderer extends AbstractDataSetManagement<ContourDat
         final double xMin = xAxis.getValueForDisplay(0);
         final double xMax = xAxis.getValueForDisplay(xAxisWidth);
 
-        long stop = ProcessingProfiler.getTimeDiff(start, "init");
+        long mid = ProcessingProfiler.getTimeDiff(start, "init");
         // N.B. importance of reverse order: start with last index, so that
         // most(-like) important DataSet is drawn on
         // top of the others
         for (int dataSetIndex = localDataSetList.size() - 1; dataSetIndex >= 0; dataSetIndex--) {
             final DataSet dataSet = localDataSetList.get(dataSetIndex);
-            dataSet.lock();
-            stop = ProcessingProfiler.getTimeDiff(stop, "dataSet.lock()");
+            final boolean result = dataSet.lock().readLockGuard(() -> {
+                long stop = ProcessingProfiler.getTimeDiff(mid, "dataSet.lock()");
 
-            // stop = ProcessingProfiler.getTimeStamp();
-            // check for potentially reduced data range we are supposed to plot
+                // stop = ProcessingProfiler.getTimeStamp();
+                // check for potentially reduced data range we are supposed to plot
 
-            final int indexMin = Math.max(0, dataSet.getXIndex(xMin));
-            final int indexMax = Math.min(dataSet.getXIndex(xMax), dataSet.getDataCount());
+                final int indexMin = Math.max(0, dataSet.getXIndex(xMin));
+                final int indexMax = Math.min(dataSet.getXIndex(xMax), dataSet.getDataCount());
 
-            // return if zero length data set
-            if (indexMax - indexMin <= 0) {
-                dataSet.unlock();
-                continue;
+                // return if zero length data set
+                if (indexMax - indexMin <= 0) {
+                    return false;
+                }
+                stop = ProcessingProfiler.getTimeDiff(stop,
+                        "get min/max" + String.format(" from:%d to:%d", indexMin, indexMax));
+
+                // final CachedDataPoints localCachedPoints = new
+                // CachedDataPoints(indexMin, indexMax,
+                // dataSet.getDataCount(),
+                // true);
+                stop = ProcessingProfiler.getTimeDiff(start, "get CachedPoints");
+
+                // compute local screen coordinates
+                // localCachedPoints.computeScreenCoordinates(chart, dataSet,
+                // dataSetIndex, indexMin, indexMax);
+                stop = ProcessingProfiler.getTimeDiff(stop, "computeScreenCoordinates()");
+
+                if (!(dataSet instanceof DataSet3D)) {
+                    return false;
+                }
+
+                final DataSet3D dataSet3D = (DataSet3D) dataSet;
+                if (dataSet3D.getXDataCount() == 0 || dataSet3D.getYDataCount() == 0) {
+                    return false;
+                }
+
+                updateCachedVariables(xyChart, dataSet);
+                return true;
+            });
+
+            if (result) {
+                // data reduction algorithm here
+                // localCachedPoints.reduce();
+                paintHeatChart(gc, xyChart, dataSet);
             }
-            stop = ProcessingProfiler.getTimeDiff(stop,
-                    "get min/max" + String.format(" from:%d to:%d", indexMin, indexMax));
 
-            // final CachedDataPoints localCachedPoints = new
-            // CachedDataPoints(indexMin, indexMax,
-            // dataSet.getDataCount(),
-            // true);
-            stop = ProcessingProfiler.getTimeDiff(start, "get CachedPoints");
+            ProcessingProfiler.getTimeDiff(mid, "finished drawing");
 
-            // compute local screen coordinates
-            // localCachedPoints.computeScreenCoordinates(chart, dataSet,
-            // dataSetIndex, indexMin, indexMax);
-            stop = ProcessingProfiler.getTimeDiff(stop, "computeScreenCoordinates()");
-
-            // data reduction algorithm here
-            // localCachedPoints.reduce();
-            paintHeatChart(gc, xyChart, dataSet);
-
-            dataSet.unlock();
-            ProcessingProfiler.getTimeDiff(stop, "finished drawing");
             // localCachedPoints.release();
         } // end of 'dataSetIndex' loop
 
         ProcessingProfiler.getTimeDiff(start);
     }
 
-    private void updateCachedVariables(final GraphicsContext gc, final XYChart chart, final DataSet dataSet) {
+    private void updateCachedVariables(final XYChart chart, final DataSet dataSet) {
         final Axis xAxis = chart.getXAxis();
         final Axis yAxis = chart.getYAxis();
         final Axis zAxis = getZAxis();
@@ -226,22 +236,6 @@ public class ContourDataSetRenderer extends AbstractDataSetManagement<ContourDat
     }
 
     private void paintHeatChart(final GraphicsContext gc, final XYChart chart, final DataSet dataSet) {
-        if (!(dataSet instanceof DataSet3D)) {
-            return;
-        }
-        if (!(chart.getXAxis() instanceof Axis)) {
-            throw new InvalidParameterException("x Axis not a Axis derivative, xAxis = " + chart.getXAxis());
-        }
-        if (!(chart.getYAxis() instanceof Axis)) {
-            throw new InvalidParameterException("y Axis not a Axis derivative, yAxis = " + chart.getYAxis());
-        }
-
-        final DataSet3D dataSet3D = (DataSet3D) dataSet;
-        if (dataSet3D.getXDataCount() == 0 || dataSet3D.getYDataCount() == 0) {
-            return;
-        }
-
-        updateCachedVariables(gc, chart, dataSet);
 
         if (localCache.xSize == 0 || localCache.ySize == 0) {
             return;
@@ -459,9 +453,9 @@ public class ContourDataSetRenderer extends AbstractDataSetManagement<ContourDat
     }
 
     private Image resample(Image input, int targetWidth, int targetHeight) {
-    	if (input.getWidth() == 0 || input.getHeight() == 0) {
-    		return input;
-    	}
+        if (input.getWidth() == 0 || input.getHeight() == 0) {
+            return input;
+        }
         final int width = (int) input.getWidth();
         final int height = (int) input.getHeight();
         final double scalingX = targetWidth / width;

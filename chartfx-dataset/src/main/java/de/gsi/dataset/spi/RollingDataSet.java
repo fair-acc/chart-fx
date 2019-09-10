@@ -1,10 +1,11 @@
-/** ***************************************************************************
- *                                                                            *
- * BI Common - Rolling data set                                               *
- *                                                                            *
- * modified: 2018-08-24 Harald Braeuning                                      *
- *                                                                            *
- **************************************************************************** */
+/**
+ * ***************************************************************************
+ * *
+ * BI Common - Rolling data set *
+ * *
+ * modified: 2018-08-24 Harald Braeuning *
+ * *
+ */
 package de.gsi.dataset.spi;
 
 import de.gsi.dataset.DataSet;
@@ -20,7 +21,6 @@ public class RollingDataSet extends FragmentedDataSet {
     private int depth = 0;
 
     /**
-     * 
      * @param name data set name
      */
     public RollingDataSet(final String name) {
@@ -78,7 +78,6 @@ public class RollingDataSet extends FragmentedDataSet {
     }
 
     /**
-     * 
      * @return distance to last data point
      */
     public double getLastLength() {
@@ -86,7 +85,6 @@ public class RollingDataSet extends FragmentedDataSet {
     }
 
     /**
-     * 
      * @param d maximum depth before points are being dropped
      */
     public void setDepth(final int d) {
@@ -94,7 +92,6 @@ public class RollingDataSet extends FragmentedDataSet {
     }
 
     /**
-     * 
      * @return maximum depth before points are being dropped
      */
     public int getDepth() {
@@ -110,11 +107,12 @@ public class RollingDataSet extends FragmentedDataSet {
         }
 
         public void shift(double value) {
-            lock();
-            for (int i = 0; i < xValues.size(); i++) {
-                this.getXValues()[i] += value;
-            }
-            unlock().fireInvalidated(new UpdatedDataEvent(this));
+            lock().writeLockGuard(() -> {
+                for (int i = 0; i < xValues.size(); i++) {
+                    this.getXValues()[i] += value;
+                }
+            });
+            fireInvalidated(new UpdatedDataEvent(this));
         }
 
     }

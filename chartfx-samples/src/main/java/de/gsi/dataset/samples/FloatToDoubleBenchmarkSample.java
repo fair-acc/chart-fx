@@ -164,18 +164,16 @@ public class FloatToDoubleBenchmarkSample {
         ProcessingProfiler.getTimeDiff(start, "testDoubleArray() result = " + doubleArray[0]);
     }
 
-    public void testDoubleDataSetOld1(final int nIterations, final boolean notify, final boolean lock) {
+    public void testDoubleDataSetOld1(final int nIterations, final boolean lock) {
         long start = ProcessingProfiler.getTimeStamp();
 
         if (lock) {
             // global lock, 'set' is already locked, so this should do nothing
             // in terms of thread-safety but is put in to assess the penalty of
             // locking
-            dataSet2.lock();
+            dataSet2.lock().writeLock();
         }
-        if (!notify) {
-            dataSet2.setAutoNotifaction(false);
-        }
+
         // reduce by x 2 since both X & Y are technically set
         // the other examples write/read only one value
         for (int iter = 0; iter < nIterations / 2; iter++) {
@@ -187,29 +185,24 @@ public class FloatToDoubleBenchmarkSample {
             }
             dataSet2.set(dataSet1.getDataCount() - 1, tempX, tempY);
         }
-        if (!notify) {
-            dataSet2.setAutoNotifaction(true);
-        }
         if (lock) {
-            dataSet2.unlock();
+            dataSet2.lock().writeUnLock();
         }
 
         // printout first element to avoid JIT optimisation
         ProcessingProfiler.getTimeDiff(start, "testDoubleDataSetOld1() result = " + dataSet2.getY(0));
     }
 
-    public void testDoubleDataSetOld2(final int nIterations, final boolean notify, final boolean lock) {
+    public void testDoubleDataSetOld2(final int nIterations, final boolean lock) {
         long start = ProcessingProfiler.getTimeStamp();
 
         if (lock) {
             // global lock, 'set' is already locked, so this should do nothing
             // in terms of thread-safety but is put in to assess the penalty of
             // locking
-            dataSet2.lock();
+            dataSet2.lock().writeLock();
         }
-        if (!notify) {
-            dataSet2.setAutoNotifaction(false);
-        }
+
         // reduce by x 2 since both X & Y are technically set
         // the other examples write/read only one value
         for (int iter = 0; iter < nIterations / 2; iter++) {
@@ -223,29 +216,25 @@ public class FloatToDoubleBenchmarkSample {
             dataSet2.getXValues()[N_DIM - 1] = tempX;
             dataSet2.getYValues()[N_DIM - 1] = tempY;
         }
-        if (!notify) {
-            dataSet2.setAutoNotifaction(true);
-        }
+ 
         if (lock) {
-            dataSet2.unlock();
+            dataSet2.lock().writeUnLock();
         }
 
         // printout first element to avoid JIT optimisation
         ProcessingProfiler.getTimeDiff(start, "testDoubleDataSetOld2() result = " + dataSet2.getY(0));
     }
 
-    public void testDoubleDataSetNew1(final int nIterations, final boolean notify, final boolean lock) {
+    public void testDoubleDataSetNew1(final int nIterations, final boolean lock) {
         long start = ProcessingProfiler.getTimeStamp();
 
         if (lock) {
             // global lock, 'set' is already locked, so this should do nothing
             // in terms of thread-safety but is put in to assess the penalty of
             // locking
-            dataSet1.lock();
+            dataSet1.lock().writeLock();
         }
-        if (!notify) {
-            dataSet1.setAutoNotifaction(false);
-        }
+
         // reduce by x 2 since both X & Y are technically set
         // the other examples write/read only one value
         for (int iter = 0; iter < nIterations / 2; iter++) {
@@ -257,29 +246,25 @@ public class FloatToDoubleBenchmarkSample {
             }
             dataSet1.set(dataSet1.getDataCount() - 1, tempX, tempY);
         }
-        if (!notify) {
-            dataSet1.setAutoNotifaction(true);
-        }
+
         if (lock) {
-            dataSet1.unlock();
+            dataSet1.lock().writeUnLock();
         }
 
         // printout first element to avoid JIT optimisation
         ProcessingProfiler.getTimeDiff(start, "testDoubleDataSetNew1() result = " + dataSet1.getY(0));
     }
 
-    public void testDoubleDataSetNew2(final int nIterations, final boolean notify, final boolean lock) {
+    public void testDoubleDataSetNew2(final int nIterations, final boolean lock) {
         long start = ProcessingProfiler.getTimeStamp();
 
         if (lock) {
             // global lock, 'set' is already locked, so this should do nothing
             // in terms of thread-safety but is put in to assess the penalty of
             // locking
-            dataSet1.lock();
+            dataSet1.lock().writeLock();
         }
-        if (!notify) {
-            dataSet1.setAutoNotifaction(false);
-        }
+
         // reduce by x 2 since both X & Y are technically set
         // the other examples write/read only one value
         for (int iter = 0; iter < nIterations / 2; iter++) {
@@ -293,11 +278,9 @@ public class FloatToDoubleBenchmarkSample {
             dataSet1.getXValues()[N_DIM - 1] = tempX;
             dataSet1.getYValues()[N_DIM - 1] = tempY;
         }
-        if (!notify) {
-            dataSet1.setAutoNotifaction(true);
-        }
+
         if (lock) {
-            dataSet1.unlock();
+            dataSet1.lock().writeUnLock();
         }
 
         // printout first element to avoid JIT optimisation
@@ -306,18 +289,16 @@ public class FloatToDoubleBenchmarkSample {
 
     //
 
-    public void testFloatDataSetNew1(final int nIterations, final boolean notify, final boolean lock) {
+    public void testFloatDataSetNew1(final int nIterations, final boolean lock) {
         long start = ProcessingProfiler.getTimeStamp();
 
         if (lock) {
             // global lock, 'set' is already locked, so this should do nothing
             // in terms of thread-safety but is put in to assess the penalty of
             // locking
-            dataSet3.lock();
+            dataSet3.lock().writeLock();
         }
-        if (!notify) {
-            dataSet3.setAutoNotifaction(false);
-        }
+
         // reduce by x 2 since both X & Y are technically set
         // the other examples write/read only one value
         for (int iter = 0; iter < nIterations / 2; iter++) {
@@ -329,29 +310,25 @@ public class FloatToDoubleBenchmarkSample {
             }
             dataSet3.set(dataSet3.getDataCount() - 1, tempX, tempY);
         }
-        if (!notify) {
-            dataSet3.setAutoNotifaction(true);
-        }
+
         if (lock) {
-            dataSet3.unlock();
+            dataSet3.lock().writeUnLock();
         }
 
         // printout first element to avoid JIT optimisation
         ProcessingProfiler.getTimeDiff(start, "testFloatDataSetNew1() result = " + dataSet3.getY(0));
     }
 
-    public void testFloatDataSetNew2(final int nIterations, final boolean notify, final boolean lock) {
+    public void testFloatDataSetNew2(final int nIterations, final boolean lock) {
         long start = ProcessingProfiler.getTimeStamp();
 
         if (lock) {
             // global lock, 'set' is already locked, so this should do nothing
             // in terms of thread-safety but is put in to assess the penalty of
             // locking
-            dataSet3.lock();
+            dataSet3.lock().writeLock();
         }
-        if (!notify) {
-            dataSet3.setAutoNotifaction(false);
-        }
+
         // reduce by x 2 since both X & Y are technically set
         // the other examples write/read only one value
         for (int iter = 0; iter < nIterations / 2; iter++) {
@@ -365,11 +342,9 @@ public class FloatToDoubleBenchmarkSample {
             dataSet3.getXFloatValues()[N_DIM - 1] = (float) tempX;
             dataSet3.getYFloatValues()[N_DIM - 1] = (float) tempY;
         }
-        if (!notify) {
-            dataSet3.setAutoNotifaction(true);
-        }
+
         if (lock) {
-            dataSet3.unlock();
+            dataSet3.lock().writeUnLock();
         }
 
         // printout first element to avoid JIT optimisation
@@ -395,36 +370,36 @@ public class FloatToDoubleBenchmarkSample {
         benchmark.testDoubleArrayList1(nMul * nIterations);
         benchmark.testDoubleArrayList2(nMul * nIterations);
         benchmark.testDoubleArrayPlain(nMul * nIterations);
-        benchmark.testDoubleDataSetOld1(nMul * nIterations, false, false);
-        benchmark.testDoubleDataSetOld2(nMul * nIterations, false, false);
-        benchmark.testDoubleDataSetNew1(nMul * nIterations, false, false);
-        benchmark.testDoubleDataSetNew2(nMul * nIterations, false, false);
-        benchmark.testFloatDataSetNew1(nMul * nIterations, false, false);
-        benchmark.testFloatDataSetNew2(nMul * nIterations, false, false);
+        benchmark.testDoubleDataSetOld1(nMul * nIterations,  false);
+        benchmark.testDoubleDataSetOld2(nMul * nIterations,  false);
+        benchmark.testDoubleDataSetNew1(nMul * nIterations,  false);
+        benchmark.testDoubleDataSetNew2(nMul * nIterations,  false);
+        benchmark.testFloatDataSetNew1(nMul * nIterations,  false);
+        benchmark.testFloatDataSetNew2(nMul * nIterations,  false);
         System.out.println("");
 
         benchmark.testDoubleListNative(nMul * nIterations); // repeat #1
         benchmark.testDoubleArrayList1(nMul * nIterations);
         benchmark.testDoubleArrayList2(nMul * nIterations);
         benchmark.testDoubleArrayPlain(nMul * nIterations);
-        benchmark.testDoubleDataSetOld1(nMul * nIterations, false, false);
-        benchmark.testDoubleDataSetOld2(nMul * nIterations, false, false);
-        benchmark.testDoubleDataSetNew1(nMul * nIterations, false, false);
-        benchmark.testDoubleDataSetNew2(nMul * nIterations, false, false);
-        benchmark.testFloatDataSetNew1(nMul * nIterations, false, false);
-        benchmark.testFloatDataSetNew2(nMul * nIterations, false, false);
+        benchmark.testDoubleDataSetOld1(nMul * nIterations,  false);
+        benchmark.testDoubleDataSetOld2(nMul * nIterations,  false);
+        benchmark.testDoubleDataSetNew1(nMul * nIterations,  false);
+        benchmark.testDoubleDataSetNew2(nMul * nIterations,  false);
+        benchmark.testFloatDataSetNew1(nMul * nIterations,  false);
+        benchmark.testFloatDataSetNew2(nMul * nIterations,  false);
 
         System.out.println("");
         benchmark.testDoubleListNative(nMul * nIterations); // repeat #2
         benchmark.testDoubleArrayList1(nMul * nIterations);
         benchmark.testDoubleArrayList2(nMul * nIterations);
         benchmark.testDoubleArrayPlain(nMul * nIterations);
-        benchmark.testDoubleDataSetOld1(nMul * nIterations, false, false);
-        benchmark.testDoubleDataSetOld2(nMul * nIterations, false, false);
-        benchmark.testDoubleDataSetNew1(nMul * nIterations, false, false);
-        benchmark.testDoubleDataSetNew2(nMul * nIterations, false, false);
-        benchmark.testFloatDataSetNew1(nMul * nIterations, false, false);
-        benchmark.testFloatDataSetNew2(nMul * nIterations, false, false);
+        benchmark.testDoubleDataSetOld1(nMul * nIterations,  false);
+        benchmark.testDoubleDataSetOld2(nMul * nIterations,  false);
+        benchmark.testDoubleDataSetNew1(nMul * nIterations,  false);
+        benchmark.testDoubleDataSetNew2(nMul * nIterations,  false);
+        benchmark.testFloatDataSetNew1(nMul * nIterations,  false);
+        benchmark.testFloatDataSetNew2(nMul * nIterations,  false);
 
     }
 
