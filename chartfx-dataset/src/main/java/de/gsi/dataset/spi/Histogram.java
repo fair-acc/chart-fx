@@ -14,6 +14,7 @@ import de.gsi.dataset.event.AddedDataEvent;
  * @author rstein
  */
 public class Histogram extends AbstractHistogram implements Histogram1D {
+    private static final long serialVersionUID = -8609726961834745312L;
     protected final boolean isHorizontal;
 
     /**
@@ -100,11 +101,14 @@ public class Histogram extends AbstractHistogram implements Histogram1D {
     }
 
     @Override
-    public int fill(double x, double w) {
-        final int bin = findBinX(x);
-        addBinContent(bin, w);
-        fireInvalidated(new AddedDataEvent(this, "fill"));
-        return bin;
+    public int fill(final double x, final double w) {
+        return lock().writeLockGuard(() -> {
+            final int bin = findBinX(x);
+            addBinContent(bin, w);
+            this.recomputeLimits(1);
+            fireInvalidated(new AddedDataEvent(this, "fill"));
+            return bin;
+        });
     }
 
     @Override
@@ -121,12 +125,11 @@ public class Histogram extends AbstractHistogram implements Histogram1D {
 
     @Override
     public void fillN(double[] x, double[] w, int stepSize) {
-        final boolean oldFlag = isAutoNotification();
-        setAutoNotifaction(false);
-        for (int i = 0; i < x.length; i++) {
-            this.fill(x[i], w[i]);
-        }
-        setAutoNotifaction(oldFlag);
+        lock().writeLockGuard(() -> {
+            for (int i = 0; i < x.length; i++) {
+                this.fill(x[i], w[i]);
+            }
+        });
         fireInvalidated(new AddedDataEvent(this, "fillN"));
     }
 
@@ -142,6 +145,21 @@ public class Histogram extends AbstractHistogram implements Histogram1D {
 
     @Override
     public Histogram recomputeLimits(int dimension) {
+        lock().writeLockGuard(() -> {
+            // Clear previous ranges
+            getAxisDescription(dimension).empty();
+            final int dataCount = getDataCount();
+            if (dimension == 0) {
+                for (int i = 0; i < dataCount; i++) {
+                    getAxisDescription(dimension).add(getX(i));
+
+                }
+            } else {
+                for (int i = 0; i < dataCount; i++) {
+                    getAxisDescription(dimension).add(getY(i));
+                }
+            }
+        });
         return this;
     }
 
