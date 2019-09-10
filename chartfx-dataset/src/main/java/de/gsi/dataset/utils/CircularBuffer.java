@@ -177,36 +177,4 @@ public class CircularBuffer<E extends Object> {
 
         return retVal;
     }
-
-    /**
-     * meant for testing/illustrating usage
-     *
-     * @param args the command line arguments
-     */
-    public static void main(final String[] args) {
-        final int bufferLength = 10;
-        final int fillBufferLength = 35;
-        final CircularBuffer<Double> buffer1 = new CircularBuffer<>(bufferLength);
-        final CircularBuffer<Double> buffer2 = new CircularBuffer<>(bufferLength);
-        final Double[] input = new Double[fillBufferLength];
-        final Double[] output = new Double[fillBufferLength];
-
-        buffer1.put(-2.0);
-        buffer1.put(-1.0);
-        buffer2.put(-2.0);
-        buffer2.put(-1.0);
-
-        for (int i = 0; i < fillBufferLength; i++) {
-            buffer1.put(Double.valueOf(i));
-            input[i] = (double) i;
-        }
-        buffer2.put(input, fillBufferLength);
-        buffer2.get(output, 10);
-
-        for (int i = 0; i < 30; i++) {
-            System.err.println(String.format("buffer[1,2].get(%d) = [%2.0f,%2.0f,%2.0f]", i, buffer1.get(i),
-                    buffer2.get(i), output[i]));
-        }
-    }
-
 }
