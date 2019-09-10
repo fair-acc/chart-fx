@@ -209,7 +209,8 @@ public class DataSetToByteArraySample {
 
         final double diffMillis = TimeUnit.NANOSECONDS.toMillis(stopTime - startTime);
         final double byteCount = iterations * ((byteOutput.size() / diffMillis) * 1e3);
-        System.err.printf("average %s-bit binary-encoded DataSetUtils throughput with partial meta infos = %s/s%n",
+        final String encoding = binary ? "binary" : "String";
+        System.err.printf("average %s-bit "+encoding+"-encoded DataSetUtils throughput with partial meta infos = %s/s%n",
                 asFloat32 ? "32" : "64", humanReadableByteCount((long) byteCount, true));
     }
 
