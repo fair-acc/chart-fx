@@ -48,11 +48,13 @@ import java.util.zip.ZipOutputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import de.gsi.dataset.AxisDescription;
 import de.gsi.dataset.DataSet;
 import de.gsi.dataset.DataSet3D;
 import de.gsi.dataset.DataSetError;
 import de.gsi.dataset.DataSetMetaData;
 import de.gsi.dataset.spi.AbstractDataSet;
+import de.gsi.dataset.spi.DefaultAxisDescription;
 import de.gsi.dataset.spi.DefaultDataSet;
 import de.gsi.dataset.spi.DoubleDataSet3D;
 import de.gsi.dataset.spi.DoubleErrorDataSet;
@@ -70,6 +72,12 @@ public class DataSetUtils extends DataSetUtilsHelper {
     private static final Logger LOGGER = LoggerFactory.getLogger(DataSetUtils.class);
     private static final String DEFAULT_TIME_FORMAT = "yyyyMMdd_HHmmss";
     protected static boolean useFloat32BinaryStandard = true;
+    // prefix for axis specific Metadata representation
+    private static final List<Character> axisId = Arrays.asList(//
+            'x', 'y', 'z', 'u', 'v', 'w', 'r', 's', 't', 'o', //
+            'p', 'q', 'l', 'm', 'n', 'i', 'j', 'k', 'f', 'g', //
+            'h', 'c', 'd', 'e', 'a', 'b' //
+    );
 
     private DataSetUtils() {
         super();
@@ -861,11 +869,15 @@ public class DataSetUtils extends DataSetUtilsHelper {
             // common header data
             final StringBuilder buffer = getCachedStringBuilder("headerDataCacheBuilder", 250);
 
-            buffer.append("#dataSetName : ").append(dataSet.getName()) //
-                    .append("\n#xMin : ").append(dataSet.getAxisDescription(0).getMin()) //
-                    .append("\n#xMax : ").append(dataSet.getAxisDescription(0).getMax()) //
-                    .append("\n#yMin : ").append(dataSet.getAxisDescription(1).getMin()) //
-                    .append("\n#yMax : ").append(dataSet.getAxisDescription(1).getMax()).append('\n');
+            buffer.append("#dataSetName : ").append(dataSet.getName()).append('\n');
+            int i = 0;
+            for (AxisDescription axisDesc : dataSet.getAxisDescriptions()) {
+                buffer.append('#').append(axisId.get(i)).append("Min : ").append(axisDesc.getMin()).append('\n');
+                buffer.append('#').append(axisId.get(i)).append("Max : ").append(axisDesc.getMax()).append('\n');
+                buffer.append('#').append(axisId.get(i)).append("Name : ").append(axisDesc.getName()).append('\n');
+                buffer.append('#').append(axisId.get(i)).append("Unit : ").append(axisDesc.getUnit()).append('\n');
+                i++;
+            }
 
             if (dataSet instanceof DataSet3D) {
                 buffer.append("## statistics disabled for DataSet3D, not yet implemented\n");
@@ -1117,6 +1129,7 @@ public class DataSetUtils extends DataSetUtilsHelper {
             final ArrayList<String> warning = new ArrayList<>();
             final ArrayList<String> error = new ArrayList<>();
             final Map<String, String> metaInfoMap = new ConcurrentHashMap<>();
+            final ArrayList<AxisDescription> axisDesc = new ArrayList<>();
             boolean is3D = false;
 
             // skip first file format header
@@ -1130,6 +1143,31 @@ public class DataSetUtils extends DataSetUtilsHelper {
                         is3D = true;
                     }
                     break;
+                }
+
+                if (line.matches("^#.Min.*")) {
+                    int dim = axisId.indexOf(line.charAt(1));
+                    while (axisDesc.size() < dim + 1)
+                        axisDesc.add(new DefaultAxisDescription());
+                    axisDesc.get(dim).setMin(Double.parseDouble(getValue(line)));
+                }
+                if (line.matches("^#.Max.*")) {
+                    int dim = axisId.indexOf(line.charAt(1));
+                    while (axisDesc.size() < dim + 1)
+                        axisDesc.add(new DefaultAxisDescription());
+                    axisDesc.get(dim).setMax(Double.parseDouble(getValue(line)));
+                }
+                if (line.matches("^#.Name.*")) {
+                    int dim = axisId.indexOf(line.charAt(1));
+                    while (axisDesc.size() < dim + 1)
+                        axisDesc.add(new DefaultAxisDescription());
+                    axisDesc.get(dim).set(getValue(line) == null ? "" : getValue(line));
+                }
+                if (line.matches("^#.Unit.*")) {
+                    int dim = axisId.indexOf(line.charAt(1));
+                    while (axisDesc.size() < dim + 1)
+                        axisDesc.add(new DefaultAxisDescription());
+                    axisDesc.get(dim).set(axisDesc.get(dim).getName(), getValue(line) == null ? "" : getValue(line));
                 }
 
                 if (line.contains("#dataSetName")) {
@@ -1172,6 +1210,8 @@ public class DataSetUtils extends DataSetUtilsHelper {
 
             ((DataSetMetaData) dataSet).getMetaInfo().putAll(metaInfoMap);
             ((DataSetMetaData) dataSet).getInfoList();
+            dataSet.getAxisDescriptions().clear();
+            dataSet.getAxisDescriptions().addAll(axisDesc);
 
             // automatically closing reader connection
         } catch (final IOException e) {

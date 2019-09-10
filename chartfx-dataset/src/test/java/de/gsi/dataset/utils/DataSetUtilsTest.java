@@ -29,21 +29,24 @@ import de.gsi.dataset.spi.DoubleErrorDataSet;
 public class DataSetUtilsTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(DataSetUtilsTest.class);
     private static final double EPSILON = 1e-6;
-    
+
     @BeforeAll
-    public static void resetLocalization(){
+    public static void resetLocalization() {
         Locale.setDefault(Locale.US);
     }
 
     private static DataSet getTestDataSet() {
         double[] xvalues = new double[] { 1.0, 2.0, 3.0, 4.0, 5.0 };
         double[] yvalues = new double[] { 1.3, 3.7, 4.2, 2.3, 1.8 };
-        return new DataSetBuilder() //
+        DataSet result = new DataSetBuilder() //
                 .setName("TestSerialize") //
                 .setXValues(xvalues) //
                 .setYValues(yvalues) //
                 .setMetaInfoMap(Map.of("test", "asdf", "testval", "5.24532")) //
                 .build();
+        result.getAxisDescription(0).set("index", "", 1.0, 5.0);
+        result.getAxisDescription(1).set("Voltage", "V", 1.3, 4.2);
+        return result;
     }
 
     @DisplayName("Serialize and Deserialize DefaultDataSet into StringBuffer and back")
@@ -61,7 +64,7 @@ public class DataSetUtilsTest {
         // assert that DataSet was written and read correctly
         assertTrue(dataSetRead instanceof DoubleErrorDataSet);
         assertEquals(dataSet.getDataCount(), dataSetRead.getDataCount());
-        assertEquals(dataSetRead.getName(), dataSet.getName());
+        assertEquals(dataSet.getName(), dataSetRead.getName());
         int dataCount = dataSet.getDataCount();
         assertArrayEquals( //
                 Arrays.copyOfRange(dataSet.getXValues(), 0, dataCount), //
@@ -72,6 +75,12 @@ public class DataSetUtilsTest {
                 Arrays.copyOfRange(dataSetRead.getYValues(), 0, dataCount), //
                 EPSILON);
         assertEquals("asdf", ((DoubleErrorDataSet) dataSetRead).getMetaInfo().get("test"));
+        for (int i = 0; i < 2; i++) {
+            assertEquals(dataSet.getAxisDescription(i).getName(), dataSetRead.getAxisDescription(i).getName());
+            assertEquals(dataSet.getAxisDescription(i).getUnit(), dataSetRead.getAxisDescription(i).getUnit());
+            assertEquals(dataSet.getAxisDescription(i).getMin(), dataSetRead.getAxisDescription(i).getMin(), EPSILON);
+            assertEquals(dataSet.getAxisDescription(i).getMax(), dataSetRead.getAxisDescription(i).getMax(), EPSILON);
+        }
     }
 
     @DisplayName("Serialize and Deserialize DataSet3D into StringBuffer and back")
@@ -86,6 +95,9 @@ public class DataSetUtilsTest {
         int n = 6;
         double[][] zvalues = new double[][] { { 1.3, 3.7, 4.2 }, { 2.3, 1.8, 5.0 } };
         DataSet3D dataSet = new DoubleDataSet3D("Test 3D Dataset", xvalues, yvalues, zvalues);
+        dataSet.getAxisDescription(0).set("U", "V", 1.0, 3.0);
+        dataSet.getAxisDescription(1).set("I", "A", 0.001, 4.2);
+        dataSet.getAxisDescription(2).set("P", "W", 1.3, 4.2);
         // assert that dataSet was created correctly
         assertArrayEquals(xvalues, dataSet.getXValues(), EPSILON);
         assertArrayEquals(yvalues, dataSet.getYValues(), EPSILON);
@@ -96,10 +108,10 @@ public class DataSetUtilsTest {
         // assert that DataSet was written and read correctly
         assertTrue(dataSetRead instanceof DataSet3D);
         DataSet3D dataSetRead3D = (DataSet3D) dataSetRead;
-        assertEquals(dataSetRead.getDataCount(), n);
-        assertEquals(dataSetRead.getName(), dataSet.getName());
-        assertEquals(dataSetRead3D.getXDataCount(), 3);
-        assertEquals(dataSetRead3D.getYDataCount(), 2);
+        assertEquals(n, dataSetRead.getDataCount());
+        assertEquals(dataSet.getName(), dataSetRead.getName());
+        assertEquals(3, dataSetRead3D.getXDataCount());
+        assertEquals(2, dataSetRead3D.getYDataCount());
         assertArrayEquals(xvalues, dataSetRead.getXValues(), EPSILON);
         assertArrayEquals(yvalues, dataSetRead.getYValues(), EPSILON);
         for (int ix = 1; ix < nx; ix++) {
@@ -107,16 +119,22 @@ public class DataSetUtilsTest {
                 assertEquals(zvalues[iy][ix], dataSetRead3D.getZ(ix, iy), EPSILON);
             }
         }
+        for (int i = 0; i < 3; i++) {
+            assertEquals(dataSet.getAxisDescription(i).getName(), dataSetRead.getAxisDescription(i).getName());
+            assertEquals(dataSet.getAxisDescription(i).getUnit(), dataSetRead.getAxisDescription(i).getUnit());
+            assertEquals(dataSet.getAxisDescription(i).getMin(), dataSetRead.getAxisDescription(i).getMin(), EPSILON);
+            assertEquals(dataSet.getAxisDescription(i).getMax(), dataSetRead.getAxisDescription(i).getMax(), EPSILON);
+        }
     }
 
     @ParameterizedTest()
     @CsvSource({ //
             "test.csv,               test.csv               ", // plain filename
             "test_{dataSetName}.csv, test_TestSerialize.csv ", // data Set name
-            "test_{xMin}-{xMax}.csv, test_1.0-5.0.csv ",       // x min/max
-            "test_{yMin}-{yMax}.csv, test_1.3-4.2.csv ",       // y min/max
-            "{test;string}.csv     , asdf.csv ",               // metadata field
-            "val_{testval;float;%.2f}.csv, val_5.25.csv ",      // metadata field with formated cast to double
+            "test_{xMin}-{xMax}.csv, test_1.0-5.0.csv ", // x min/max
+            "test_{yMin}-{yMax}.csv, test_1.3-4.2.csv ", // y min/max
+            "{test;string}.csv     , asdf.csv ", // metadata field
+            "val_{testval;float;%.2f}.csv, val_5.25.csv ", // metadata field with formated cast to double
     })
     @DisplayName("Test Filename Generation")
     public void getFileNameTest(String pattern, String fileName) {
