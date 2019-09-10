@@ -13,12 +13,12 @@ import de.gsi.dataset.spi.utils.DoublePointError;
  * @author rstein
  */
 public class FifoDoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet> implements DataSetError {
+    private static final long serialVersionUID = -7153702141838930486L;
     protected LimitedQueue<DataBlob> data;
     protected double maxDistance = Double.MAX_VALUE;
 
     /**
      * @author rstein
-     *
      * @param <E> generics template reference
      */
     public class LimitedQueue<E> extends ArrayList<E> {
@@ -105,7 +105,6 @@ public class FifoDoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorData
     }
 
     /**
-     * 
      * @return maximum range before data points are being dropped
      */
     public double getMaxDistance() {
@@ -113,7 +112,6 @@ public class FifoDoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorData
     }
 
     /**
-     * 
      * @param maxDistance maximum range before data points are being dropped
      */
     public void setMaxDistance(final double maxDistance) {
@@ -206,19 +204,16 @@ public class FifoDoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorData
      */
     public FifoDoubleErrorDataSet add(final double x, final double y, final double yErrorNeg, final double yErrorPos,
             final String tag, final String style) {
-        lock();
-        final boolean notifyState = isAutoNotification();
+        lock().writeLockGuard(() -> {
+            data.add(new DataBlob(x, y, yErrorNeg, yErrorPos, tag, style));
+            // remove old fields
+            expire(x);
 
-        setAutoNotifaction(false);
-        data.add(new DataBlob(x, y, yErrorNeg, yErrorPos, tag, style));
-        // remove old fields
-        expire(x);
+            recomputeLimits(0);
+            recomputeLimits(1);
+        });
+        fireInvalidated(new AddedDataEvent(this));
 
-        setAutoNotifaction(notifyState);
-        recomputeLimits(0);
-        recomputeLimits(1);
-        unlock().fireInvalidated(new AddedDataEvent(this));
-        
         return this;
     }
 
@@ -236,15 +231,11 @@ public class FifoDoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorData
      */
     public FifoDoubleErrorDataSet add(final double[] xValues, final double[] yValues, final double[] yErrorsNeg,
             final double[] yErrorsPos) {
-        lock();
-        final boolean notifyState = isAutoNotification();
-
-        setAutoNotifaction(!notifyState);
-        for (int i = 0; i < xValues.length; i++) {
-            this.add(xValues[i], yValues[i], yErrorsNeg[i], yErrorsPos[i]);
-        }
-        setAutoNotifaction(notifyState);
-        unlock();
+        lock().writeLockGuard(() -> {
+            for (int i = 0; i < xValues.length; i++) {
+                this.add(xValues[i], yValues[i], yErrorsNeg[i], yErrorsPos[i]);
+            }
+        });
         fireInvalidated(new AddedDataEvent(this));
         return this;
     }
@@ -257,38 +248,38 @@ public class FifoDoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorData
      * @return number of items that have been removed
      */
     public int expire(final double now) {
-        lock();
-        getAxisDescriptions().forEach(AxisDescription::empty);
+        final int dataPointsToRemove = lock().writeLockGuard(() -> {
+            getAxisDescriptions().forEach(AxisDescription::empty);
 
-        final List<DataBlob> toRemoveList = new ArrayList<>();
-        // for (final DataBlob blob : (LimitedQueue<DataBlob>) data.clone()) {
-        for (final DataBlob blob : data) {
-            final double x = blob.getX();
-            final double y = blob.getX();
+            final List<DataBlob> toRemoveList = new ArrayList<>();
+            // for (final DataBlob blob : (LimitedQueue<DataBlob>) data.clone()) {
+            for (final DataBlob blob : data) {
+                final double x = blob.getX();
+                final double y = blob.getX();
 
-            if (Double.isFinite(x) && Double.isFinite(y)) {
-                if (Math.abs(now - x) > maxDistance) {
+                if (Double.isFinite(x) && Double.isFinite(y)) {
+                    if (Math.abs(now - x) > maxDistance) {
+                        // data.remove(blob);
+                        toRemoveList.add(blob);
+                    } else {
+
+                        getAxisDescription(0).add(x + blob.getErrorX());
+                        getAxisDescription(0).add(x - blob.getErrorX());
+                        getAxisDescription(1).add(y + blob.getErrorY());
+                        getAxisDescription(1).add(y - blob.getErrorY());
+                    }
+                } else {
                     // data.remove(blob);
                     toRemoveList.add(blob);
-                } else {
-
-                    getAxisDescription(0).add(x + blob.getErrorX());
-                    getAxisDescription(0).add(x - blob.getErrorX());
-                    getAxisDescription(1).add(y + blob.getErrorY());
-                    getAxisDescription(1).add(y - blob.getErrorY());
                 }
-            } else {
-                // data.remove(blob);
-                toRemoveList.add(blob);
             }
-        }
 
-        data.removeAll(toRemoveList);
-        recomputeLimits(0);
-        recomputeLimits(1);
-        // computeLimits(); // N.B. already computed above
-        final int dataPointsToRemove = toRemoveList.size();
-        unlock();
+            data.removeAll(toRemoveList);
+            recomputeLimits(0);
+            recomputeLimits(1);
+            // computeLimits(); // N.B. already computed above
+            return toRemoveList.size();
+        });
         if (dataPointsToRemove != 0) {
             fireInvalidated(new RemovedDataEvent(this, "expired data"));
         }
@@ -301,5 +292,5 @@ public class FifoDoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorData
     public void reset() {
         data.clear();
         fireInvalidated(new RemovedDataEvent(this, "reset"));
-    }  
+    }
 }

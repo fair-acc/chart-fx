@@ -34,14 +34,11 @@ public class FragmentedDataSet extends AbstractDataSet<FragmentedDataSet> {
      * clears all sub-dataset references
      */
     public void clear() {
-        lock();
-        try {
+        lock().writeLockGuard(() -> {
             dataCount = 0;
             list.clear();
             fireInvalidated(new UpdatedDataEvent(this, "clear()"));
-        } finally {
-            unlock();
-        }
+        });
     }
 
     /**
@@ -62,16 +59,13 @@ public class FragmentedDataSet extends AbstractDataSet<FragmentedDataSet> {
      * @param set new data set to be added to list
      */
     public void add(final DataSet set) {
-        lock();
-        try {
+        lock().writeLockGuard(() -> {
             list.add(set);
             /* Trace data is expected to be sorted in ascending order */
             Collections.sort(list,
                     (o1, o2) -> Double.compare(o1.getAxisDescription(0).getMin(), o2.getAxisDescription(0).getMin()));
             dataCount += set.getDataCount();
-        } finally {
-            unlock();
-        }
+        });
         recomputeLimits(0);
         recomputeLimits(1);
         fireInvalidated(new AddedDataEvent(this, "added data set"));
@@ -86,8 +80,7 @@ public class FragmentedDataSet extends AbstractDataSet<FragmentedDataSet> {
 
     @Override
     public double[] getYValues() {
-        lock();
-        try {
+        return lock().writeLockGuard(() -> {
             final double[] tmp = new double[dataCount];
             int index = 0;
             for (final DataSet dataset : list) {
@@ -96,15 +89,12 @@ public class FragmentedDataSet extends AbstractDataSet<FragmentedDataSet> {
                 }
             }
             return tmp;
-        } finally {
-            unlock();
-        }
+        });
     }
 
     @Override
     public double[] getXValues() {
-        lock();
-        try {
+        return lock().writeLockGuard(() -> {
             final double[] tmp = new double[dataCount];
             int index = 0;
             for (final DataSet dataset : list) {
@@ -113,9 +103,7 @@ public class FragmentedDataSet extends AbstractDataSet<FragmentedDataSet> {
                 }
             }
             return tmp;
-        } finally {
-            unlock();
-        }
+        });
     }
 
     @Override
@@ -171,8 +159,7 @@ public class FragmentedDataSet extends AbstractDataSet<FragmentedDataSet> {
 
     @Override
     public int getXIndex(double x) {
-        lock();
-        try {
+        return lock().writeLockGuard(() -> {
             if (x < getAxisDescription(0).getMin()) {
                 return 0;
             }
@@ -184,9 +171,7 @@ public class FragmentedDataSet extends AbstractDataSet<FragmentedDataSet> {
                 index += dataset.getDataCount();
             }
             return getDataCount();
-        } finally {
-            unlock();
-        }
+        });
     }
 
     // @Override

@@ -9,7 +9,8 @@ import de.gsi.dataset.DataSetError;
  * @author rstein
  */
 public class SineFunction  extends AbstractTestFunction<SineFunction> implements DataSetError {
-	private final boolean useSystemTimeOffset;
+	private static final long serialVersionUID = -4573144986461354456L;
+    private final boolean useSystemTimeOffset;
 
 	/**
      * 

@@ -715,26 +715,24 @@ public class DataSetUtils extends DataSetUtilsHelper {
         }
 
         byteOutput.reset();
-        try {
-            dataSet.lock();
+        dataSet.lock().readLockGuard(() -> {
+            try {
+                byteOutput.write(("#file producer : " + DataSetUtils.class.getCanonicalName() + '\n').getBytes());
 
-            byteOutput.write(("#file producer : " + DataSetUtils.class.getCanonicalName() + '\n').getBytes());
+                writeHeaderDataToStream(byteOutput, dataSet);
 
-            writeHeaderDataToStream(byteOutput, dataSet);
+                writeMetaDataToStream(byteOutput, dataSet);
 
-            writeMetaDataToStream(byteOutput, dataSet);
-
-            if (binary) {
-                writeNumericBinaryDataToStream(byteOutput, dataSet, asFloat);
-            } else {
-                writeNumericDataToStream(byteOutput, dataSet);
+                if (binary) {
+                    writeNumericBinaryDataToStream(byteOutput, dataSet, asFloat);
+                } else {
+                    writeNumericDataToStream(byteOutput, dataSet);
+                }
+            } catch (final IOException e) {
+                LOGGER.error("could not write to ByteArrayOutputStream", e);
+                byteOutput.reset();
             }
-        } catch (final IOException e) {
-            LOGGER.error("could not write to ByteArrayOutputStream", e);
-            byteOutput.reset();
-        } finally {
-            dataSet.unlock();
-        }
+        });
     }
 
     /**

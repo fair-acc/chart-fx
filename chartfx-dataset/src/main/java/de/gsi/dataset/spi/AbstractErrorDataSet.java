@@ -3,6 +3,7 @@ package de.gsi.dataset.spi;
 import de.gsi.dataset.AxisDescription;
 import de.gsi.dataset.DataSetError;
 import de.gsi.dataset.event.UpdateEvent;
+import de.gsi.dataset.locks.DataSetLock;
 
 /**
  * <p>
@@ -22,6 +23,7 @@ import de.gsi.dataset.event.UpdateEvent;
  */
 public abstract class AbstractErrorDataSet<D extends AbstractErrorDataSet<D>> extends AbstractDataSet<D>
         implements DataSetError {
+    private static final long serialVersionUID = -5592816592868472957L;
     private ErrorType errorType = ErrorType.NO_ERROR;
 
     /**
@@ -41,24 +43,17 @@ public abstract class AbstractErrorDataSet<D extends AbstractErrorDataSet<D>> ex
     protected D getThis() {
         return (D) this;
     }
-    
+
     @Override
-    public D lock() {
-        lock.lock();
-        return getThis();
+    public DataSetLock<D> lock() {
+        return (DataSetLock<D>)super.lock();
     }
 
     @Override
-    public D unlock() {
-        lock.unlock();
+    public D fireInvalidated(final UpdateEvent event) {
+        super.fireInvalidated(event);
         return getThis();
     }
-    
-    @Override
-	public D fireInvalidated(final UpdateEvent event) {
-		super.fireInvalidated(event);
-		return getThis();
-	}
 
     /**
      * return the DataSetError.ErrorType of the dataset
@@ -92,89 +87,83 @@ public abstract class AbstractErrorDataSet<D extends AbstractErrorDataSet<D>> ex
             //TODO: find cleaner solution
             return getThis();
         }
-        lock();
-        final boolean oldAutoNotification = this.isAutoNotification();
-        setAutoNotifaction(false);
+        lock().writeLockGuard(() -> {
+            // Clear previous ranges
+            getAxisDescriptions().forEach(AxisDescription::empty);
+            final int dataCount = getDataCount();
 
-        // Clear previous ranges
-        getAxisDescriptions().forEach(AxisDescription::empty);
-        final int dataCount = getDataCount();
-
-        // following sections implements separate handling
-        // of the each given error type cases also to avoid
-        // redundant invocation of the error retrieval interfaces
-        // that may hide or abstract given algorithms that may
-        // (re-) calculate the errors in place.
-        switch (getErrorType()) {
-        case NO_ERROR:
-            super.recomputeLimits(0);
-            super.recomputeLimits(1);
-            break;
-        case X:
-            for (int i = 0; i < dataCount; i++) {
-                final double xData = getX(i);
-                final double yData = getY(i);
-                final double xDataError = getXErrorPositive(i);
-                getAxisDescription(0).add(xData - xDataError);
-                getAxisDescription(0).add(xData + xDataError);
-                getAxisDescription(1).add(yData);
+            // following sections implements separate handling
+            // of the each given error type cases also to avoid
+            // redundant invocation of the error retrieval interfaces
+            // that may hide or abstract given algorithms that may
+            // (re-) calculate the errors in place.
+            switch (getErrorType()) {
+            case NO_ERROR:
+                super.recomputeLimits(0);
+                super.recomputeLimits(1);
+                break;
+            case X:
+                for (int i = 0; i < dataCount; i++) {
+                    final double xData = getX(i);
+                    final double yData = getY(i);
+                    final double xDataError = getXErrorPositive(i);
+                    getAxisDescription(0).add(xData - xDataError);
+                    getAxisDescription(0).add(xData + xDataError);
+                    getAxisDescription(1).add(yData);
+                }
+                break;
+            case Y:
+                for (int i = 0; i < dataCount; i++) {
+                    final double xData = getX(i);
+                    final double yData = getY(i);
+                    final double yDataError = getYErrorPositive(i);
+                    getAxisDescription(0).add(xData);
+                    getAxisDescription(1).add(yData - yDataError);
+                    getAxisDescription(1).add(yData + yDataError);
+                }
+                break;
+            case XY:
+                for (int i = 0; i < dataCount; i++) {
+                    final double xData = getX(i);
+                    final double yData = getY(i);
+                    final double xDataError = getXErrorPositive(i);
+                    final double yDataError = getYErrorPositive(i);
+                    getAxisDescription(0).add(xData - xDataError);
+                    getAxisDescription(0).add(xData + xDataError);
+                    getAxisDescription(1).add(yData - yDataError);
+                    getAxisDescription(1).add(yData + yDataError);
+                }
+                break;
+            case X_ASYMMETRIC:
+                for (int i = 0; i < dataCount; i++) {
+                    final double xData = getX(i);
+                    final double yData = getY(i);
+                    getAxisDescription(0).add(xData - getXErrorNegative(i));
+                    getAxisDescription(0).add(xData + getXErrorPositive(i));
+                    getAxisDescription(1).add(yData);
+                }
+                break;
+            case Y_ASYMMETRIC:
+                for (int i = 0; i < dataCount; i++) {
+                    final double xData = getX(i);
+                    final double yData = getY(i);
+                    getAxisDescription(0).add(xData);
+                    getAxisDescription(1).add(yData - getYErrorNegative(i));
+                    getAxisDescription(1).add(yData + getYErrorPositive(i));
+                }
+                break;
+            case XY_ASYMMETRIC:
+            default:
+                for (int i = 0; i < dataCount; i++) {
+                    final double xData = getX(i);
+                    final double yData = getY(i);
+                    getAxisDescription(0).add(xData - getXErrorNegative(i));
+                    getAxisDescription(0).add(xData + getXErrorPositive(i));
+                    getAxisDescription(1).add(yData - getYErrorNegative(i));
+                    getAxisDescription(1).add(yData + getYErrorPositive(i));
+                }
             }
-            break;
-        case Y:
-            for (int i = 0; i < dataCount; i++) {
-                final double xData = getX(i);
-                final double yData = getY(i);
-                final double yDataError = getYErrorPositive(i);
-                getAxisDescription(0).add(xData);
-                getAxisDescription(1).add(yData - yDataError);
-                getAxisDescription(1).add(yData + yDataError);
-            }
-            break;
-        case XY:
-            for (int i = 0; i < dataCount; i++) {
-                final double xData = getX(i);
-                final double yData = getY(i);
-                final double xDataError = getXErrorPositive(i);
-                final double yDataError = getYErrorPositive(i);
-                getAxisDescription(0).add(xData - xDataError);
-                getAxisDescription(0).add(xData + xDataError);
-                getAxisDescription(1).add(yData - yDataError);
-                getAxisDescription(1).add(yData + yDataError);
-            }
-            break;
-        case X_ASYMMETRIC:
-            for (int i = 0; i < dataCount; i++) {
-                final double xData = getX(i);
-                final double yData = getY(i);
-                getAxisDescription(0).add(xData - getXErrorNegative(i));
-                getAxisDescription(0).add(xData + getXErrorPositive(i));
-                getAxisDescription(1).add(yData);
-            }
-            break;
-        case Y_ASYMMETRIC:
-            for (int i = 0; i < dataCount; i++) {
-                final double xData = getX(i);
-                final double yData = getY(i);
-                getAxisDescription(0).add(xData);
-                getAxisDescription(1).add(yData - getYErrorNegative(i));
-                getAxisDescription(1).add(yData + getYErrorPositive(i));
-            }
-            break;
-        case XY_ASYMMETRIC:
-        default:
-            for (int i = 0; i < dataCount; i++) {
-                final double xData = getX(i);
-                final double yData = getY(i);
-                getAxisDescription(0).add(xData - getXErrorNegative(i));
-                getAxisDescription(0).add(xData + getXErrorPositive(i));
-                getAxisDescription(1).add(yData - getYErrorNegative(i));
-                getAxisDescription(1).add(yData + getYErrorPositive(i));
-            }
-        }
-
-        setAutoNotifaction(oldAutoNotification);
-        unlock();
-
+        });
         return getThis();
     }
 

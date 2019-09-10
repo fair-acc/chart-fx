@@ -97,10 +97,10 @@ public class MetaDataRendererSample extends Application {
         final Zoomer zoom = new Zoomer();
         chart.getPlugins().add(zoom);
         final XRangeIndicator xRange = new XRangeIndicator(xAxis1, 50, 60);
-        chart.getPlugins().add(xRange);        
+        chart.getPlugins().add(xRange);
         chart.getPlugins().add(new EditAxis());
         chart.getPlugins().add(new Panner());
-        chart.getPlugins().add(new TableViewer());               
+        chart.getPlugins().add(new TableViewer());
         chart.getPlugins().add(new EditDataSet());
         chart.getPlugins().add(new DataPointTooltip());
         chart.getPlugins().add(new EditAxis());
@@ -172,8 +172,8 @@ public class MetaDataRendererSample extends Application {
                     // 'old' data sets
                     renderer1.getDatasets()
                             .setAll(new MetaInfoRandomWalkFunction("random walk", MetaDataRendererSample.N_SAMPLES1));
-                    renderer2.getDatasets()
-                            .setAll(new MetaInfoGausFunction("gaussy", MetaDataRendererSample.N_SAMPLES2, MetaDataRendererSample.N_SAMPLES1));
+                    renderer2.getDatasets().setAll(new MetaInfoGausFunction("gaussy", MetaDataRendererSample.N_SAMPLES2,
+                            MetaDataRendererSample.N_SAMPLES1));
 
                     if (updateCount % 100 == 0) {
                         System.out.println("update iteration #" + updateCount);
@@ -187,6 +187,7 @@ public class MetaDataRendererSample extends Application {
     protected int counter1 = -1;
 
     class MetaInfoRandomWalkFunction extends RandomWalkFunction implements DataSetMetaData {
+        private static final long serialVersionUID = -7647999890793017350L;
 
         public MetaInfoRandomWalkFunction(String name, int count) {
             super(name, count);
@@ -197,27 +198,24 @@ public class MetaDataRendererSample extends Application {
         public List<String> getErrorList() {
             if (counter1 % 3 == 0) {
                 return Arrays.asList(DataSetMetaData.TAG_OVERSHOOT, DataSetMetaData.TAG_UNDERSHOOT);
-            } else {
-                return Collections.<String> emptyList();
             }
+            return Collections.<String> emptyList();
         }
 
         @Override
         public List<String> getInfoList() {
             if (counter1 % 2 == 0) {
                 return Arrays.asList("info1", "info2");
-            } else {
-                return Collections.<String> emptyList();
             }
+            return Collections.<String> emptyList();
         }
 
         @Override
         public List<String> getWarningList() {
             if (counter1 % 2 == 0) {
                 return Arrays.asList(DataSetMetaData.TAG_GAIN_RANGE);
-            } else {
-                return Collections.<String> emptyList();
             }
+            return Collections.<String> emptyList();
         }
 
     }
@@ -225,50 +223,49 @@ public class MetaDataRendererSample extends Application {
     protected int counter2 = -1;
 
     class MetaInfoGausFunction extends GaussFunction implements DataSetMetaData {
-    	private int range;
+        private static final long serialVersionUID = -397052291718132117L;
+        private int range;
+
         public MetaInfoGausFunction(String name, int count, int range2) {
             super(name, count);
             counter2++;
             range = range2;
             this.setStyle("fillColor=green");
         }
-        
+
         @Override
         public double getX(final int index) {
-            return (double)index/((double)this.getDataCount())*range;
+            return (double) index / ((double) this.getDataCount()) * range;
         }
 
         @Override
         public double getY(final int index) {
-        	double x = getX(index);        	
-            return 1000*MetaInfoGausFunction.gauss(x, 0.5*range, 1000);
+            double x = getX(index);
+            return 1000 * MetaInfoGausFunction.gauss(x, 0.5 * range, 1000);
         }
 
         @Override
         public List<String> getErrorList() {
             if (counter2 % 2 == 0) {
                 return Arrays.asList(DataSetMetaData.TAG_OVERSHOOT);
-            } else {
-                return Collections.<String> emptyList();
             }
+            return Collections.<String> emptyList();
         }
 
         @Override
         public List<String> getInfoList() {
             if (counter1 % 4 == 0) {
                 return Arrays.asList("info1");
-            } else {
-                return Collections.<String> emptyList();
             }
+            return Collections.<String> emptyList();
         }
 
         @Override
         public List<String> getWarningList() {
             if (counter1 % 2 == 0) {
                 return Arrays.asList(DataSetMetaData.TAG_GAIN_RANGE);
-            } else {
-                return Collections.<String> emptyList();
             }
+            return Collections.<String> emptyList();
         }
 
     }

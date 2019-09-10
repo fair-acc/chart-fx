@@ -11,7 +11,7 @@ import de.gsi.dataset.utils.DoubleCircularBuffer;
  * @author rstein
  */
 public class CircularDoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet> implements DataSetError {
-
+    private static final long serialVersionUID = -8010355203980379253L;
     protected DoubleCircularBuffer xValues;
     protected DoubleCircularBuffer yValues;
     protected DoubleCircularBuffer yErrorsPos;
@@ -86,18 +86,17 @@ public class CircularDoubleErrorDataSet extends AbstractErrorDataSet<DoubleError
      */
     public CircularDoubleErrorDataSet add(final double x, final double y, final double yErrorNeg,
             final double yErrorPos, final String tag, final String style) {
-        lock();
+        lock().writeLockGuard(() -> {
+            xValues.put(x);
+            yValues.put(y);
+            yErrorsPos.put(yErrorPos);
+            yErrorsNeg.put(yErrorNeg);
+            dataTag.put(tag);
+            dataStyles.put(style);
 
-        xValues.put(x);
-        yValues.put(y);
-        yErrorsPos.put(yErrorPos);
-        yErrorsNeg.put(yErrorNeg);
-        dataTag.put(tag);
-        dataStyles.put(style);
-
-        recomputeLimits(0);
-        recomputeLimits(1);
-        unlock();
+            recomputeLimits(0);
+            recomputeLimits(1);
+        });
         fireInvalidated(new InvalidatedEvent(this));
         return this;
     }
@@ -145,7 +144,6 @@ public class CircularDoubleErrorDataSet extends AbstractErrorDataSet<DoubleError
      */
     public CircularDoubleErrorDataSet add(final double[] xVals, final double[] yVals, final double[] yErrNeg,
             final double[] yErrPos) {
-        lock();
         AssertUtils.notNull("X coordinates", xVals);
         AssertUtils.notNull("Y coordinates", yVals);
         AssertUtils.notNull("Y error neg", yErrNeg);
@@ -154,16 +152,17 @@ public class CircularDoubleErrorDataSet extends AbstractErrorDataSet<DoubleError
         AssertUtils.equalDoubleArrays(xVals, yErrNeg);
         AssertUtils.equalDoubleArrays(xVals, yErrPos);
 
-        this.xValues.put(xVals, xVals.length);
-        this.yValues.put(yVals, yVals.length);
-        this.yErrorsNeg.put(yErrNeg, yErrNeg.length);
-        this.yErrorsPos.put(yErrPos, yErrPos.length);
-        dataTag.put(new String[yErrPos.length], yErrPos.length);
-        dataStyles.put(new String[yErrPos.length], yErrPos.length);
+        lock().writeLockGuard(() -> {
+            this.xValues.put(xVals, xVals.length);
+            this.yValues.put(yVals, yVals.length);
+            this.yErrorsNeg.put(yErrNeg, yErrNeg.length);
+            this.yErrorsPos.put(yErrPos, yErrPos.length);
+            dataTag.put(new String[yErrPos.length], yErrPos.length);
+            dataStyles.put(new String[yErrPos.length], yErrPos.length);
 
-        recomputeLimits(0);
-        recomputeLimits(1);
-        unlock();
+            recomputeLimits(0);
+            recomputeLimits(1);
+        });
         fireInvalidated(new InvalidatedEvent(this));
         return this;
     }
@@ -174,16 +173,15 @@ public class CircularDoubleErrorDataSet extends AbstractErrorDataSet<DoubleError
      * @return itself (fluent design)
      */
     public CircularDoubleErrorDataSet reset() {
-        lock();
-        xValues.reset();
-        yValues.reset();
-        yErrorsNeg.reset();
-        yErrorsPos.reset();
-        dataTag.reset();
-        dataStyles.reset();
-        getAxisDescriptions().forEach(AxisDescription::empty);
-
-        unlock();
+        lock().writeLockGuard(() -> {
+            xValues.reset();
+            yValues.reset();
+            yErrorsNeg.reset();
+            yErrorsPos.reset();
+            dataTag.reset();
+            dataStyles.reset();
+            getAxisDescriptions().forEach(AxisDescription::empty);
+        });
         fireInvalidated(new InvalidatedEvent(this));
         return this;
     }

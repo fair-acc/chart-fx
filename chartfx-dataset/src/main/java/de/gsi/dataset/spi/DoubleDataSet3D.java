@@ -17,7 +17,6 @@ public class DoubleDataSet3D extends AbstractDataSet3D<DoubleDataSet3D> {
     private double[][] zValues;
 
     /**
-     * 
      * @param name of data set
      */
     public DoubleDataSet3D(final String name) {
@@ -28,7 +27,6 @@ public class DoubleDataSet3D extends AbstractDataSet3D<DoubleDataSet3D> {
     }
 
     /**
-     * 
      * @param name of data set
      * @param dimX horizontal binning dimension (equidistant model)
      * @param dimY vertical binning dimension (equidistant model)
@@ -51,7 +49,6 @@ public class DoubleDataSet3D extends AbstractDataSet3D<DoubleDataSet3D> {
     }
 
     /**
-     * 
      * @param name of data set
      * @param zValues array containing new X coordinates
      */
@@ -73,7 +70,6 @@ public class DoubleDataSet3D extends AbstractDataSet3D<DoubleDataSet3D> {
     }
 
     /**
-     * 
      * @param name of data set
      * @param xValues array containing new X coordinates
      * @param yValues array containing new X coordinates
@@ -89,7 +85,8 @@ public class DoubleDataSet3D extends AbstractDataSet3D<DoubleDataSet3D> {
     }
 
     /**
-     * overwrites/replaces data points with new coordinates 
+     * overwrites/replaces data points with new coordinates
+     * 
      * @param xValues array containing new X coordinates
      * @param yValues array containing new X coordinates
      * @param zValues array containing new X coordinates
@@ -164,14 +161,15 @@ public class DoubleDataSet3D extends AbstractDataSet3D<DoubleDataSet3D> {
 
     /**
      * clears all data points
+     * 
      * @return itself (fluent design)
      */
     public DoubleDataSet3D clearData() {
-        lock();
-        for (int i = 0; i < zValues.length; i++) {
-            fillArray(zValues[i], 0, zValues[i].length, 0.0);
-        }
-        unlock();
+        lock().writeLockGuard(() -> {
+            for (int i = 0; i < zValues.length; i++) {
+                fillArray(zValues[i], 0, zValues[i].length, 0.0);
+            }
+        });
         fireInvalidated(new RemovedDataEvent(this, "clearData()"));
         return this;
     }
@@ -185,7 +183,6 @@ public class DoubleDataSet3D extends AbstractDataSet3D<DoubleDataSet3D> {
     }
 
     /**
-     * 
      * @param xIndex index of the to be modified point
      * @param x new X coordinate
      */
@@ -194,7 +191,6 @@ public class DoubleDataSet3D extends AbstractDataSet3D<DoubleDataSet3D> {
     }
 
     /**
-     * 
      * @param yIndex index of the to be modified point
      * @param y new Y coordinate
      */
@@ -203,7 +199,6 @@ public class DoubleDataSet3D extends AbstractDataSet3D<DoubleDataSet3D> {
     }
 
     /**
-     * 
      * @param xIndex index of the to be modified point
      * @param yIndex index of the to be modified point
      * @param z new Z coordinate
@@ -227,10 +222,10 @@ public class DoubleDataSet3D extends AbstractDataSet3D<DoubleDataSet3D> {
     public double getX(final int i) {
         return xValues[i];
     }
-    
+
     @Override
     public double[] getXValues() {
-      return Arrays.copyOf(xValues,xValues.length);
+        return Arrays.copyOf(xValues, xValues.length);
     }
 
     @Override
@@ -240,7 +235,7 @@ public class DoubleDataSet3D extends AbstractDataSet3D<DoubleDataSet3D> {
 
     @Override
     public double[] getYValues() {
-      return Arrays.copyOf(yValues,yValues.length);
+        return Arrays.copyOf(yValues, yValues.length);
     }
 
     @Override
@@ -249,7 +244,7 @@ public class DoubleDataSet3D extends AbstractDataSet3D<DoubleDataSet3D> {
     }
 
     public double[][] getZValues() {
-      return zValues;
+        return zValues;
     }
-    
+
 }

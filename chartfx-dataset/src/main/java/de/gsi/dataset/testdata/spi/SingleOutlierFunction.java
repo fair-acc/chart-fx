@@ -11,6 +11,7 @@ import de.gsi.dataset.DataSetError;
  * @author rstein
  */
 public class SingleOutlierFunction extends AbstractTestFunction<SingleOutlierFunction> implements DataSetError {
+    private static final long serialVersionUID = -7456808511068971349L;
     protected static SplittableRandom rnd = new SplittableRandom(System.currentTimeMillis());
 
     /**

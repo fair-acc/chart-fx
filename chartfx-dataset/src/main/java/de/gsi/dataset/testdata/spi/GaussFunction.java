@@ -9,6 +9,7 @@ import de.gsi.dataset.DataSetError;
  * @author rstein
  */
 public class GaussFunction extends AbstractTestFunction<GaussFunction> implements DataSetError {
+    private static final long serialVersionUID = -2090964369869257806L;
 
     /**
      * 

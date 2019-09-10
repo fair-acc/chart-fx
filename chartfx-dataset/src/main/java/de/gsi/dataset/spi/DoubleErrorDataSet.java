@@ -21,6 +21,7 @@ import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
 @SuppressWarnings("PMD.TooManyMethods") // part of the flexible class nature
 public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
         implements DataSetError, EditableDataSet {
+    private static final long serialVersionUID = 8931518518245752926L;
     protected DoubleArrayList xValues; // way faster than java default lists
     protected DoubleArrayList yValues; // way faster than java default lists
     protected DoubleArrayList yErrorsPos;
@@ -144,19 +145,18 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
      * @return itself (fluent design)
      */
     public DoubleErrorDataSet clearData() {
-        lock();
+        lock().writeLockGuard(() -> {
+            xValues.clear();
+            yValues.clear();
+            yErrorsPos.clear();
+            yErrorsNeg.clear();
+            getDataLabelMap().clear();
+            getDataStyleMap().clear();
+            clearMetaInfo();
 
-        xValues.clear();
-        yValues.clear();
-        yErrorsPos.clear();
-        yErrorsNeg.clear();
-        dataLabels.clear();
-        dataStyles.clear();
-        clearMetaInfo();
-
-        getAxisDescriptions().forEach(AxisDescription::empty);
-
-        return unlock().fireInvalidated(new RemovedDataEvent(this, "clearData()"));
+            getAxisDescriptions().forEach(AxisDescription::empty);
+        });
+        return fireInvalidated(new RemovedDataEvent(this, "clearData()"));
     }
 
     /**
@@ -171,14 +171,12 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
      * @return itself (fluent design)
      */
     public DoubleErrorDataSet increaseCapacity(final int amount) {
-        lock();
-        final int size = getDataCount();
-        final boolean auto = isAutoNotification();
-        this.setAutoNotifaction(false);
-        resize(this.getCapacity() + amount);
-        resize(size);
-        this.setAutoNotifaction(auto);
-        return unlock();
+        lock().writeLockGuard(() -> {
+            final int size = getDataCount();
+            resize(this.getCapacity() + amount);
+            resize(size);
+        });
+        return getThis();
     }
 
     /**
@@ -188,12 +186,13 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
      * @return itself (fluent design)
      */
     public DoubleErrorDataSet resize(final int size) {
-        lock();
-        xValues.size(size);
-        yValues.size(size);
-        yErrorsPos.size(size);
-        yErrorsNeg.size(size);
-        return unlock().fireInvalidated(new UpdatedDataEvent(this, "increaseCapacity()"));
+        lock().writeLockGuard(() -> {
+            xValues.size(size);
+            yValues.size(size);
+            yErrorsPos.size(size);
+            yErrorsNeg.size(size);
+        });
+        return fireInvalidated(new UpdatedDataEvent(this, "increaseCapacity()"));
     }
 
     /**
@@ -203,12 +202,13 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
      * @return itself (fluent design)
      */
     public DoubleErrorDataSet trim() {
-        lock();
-        xValues.trim(0);
-        yValues.trim(0);
-        yErrorsPos.trim(0);
-        yErrorsNeg.trim(0);
-        return unlock().fireInvalidated(new UpdatedDataEvent(this, "increaseCapacity()"));
+        lock().writeLockGuard(() -> {
+            xValues.trim(0);
+            yValues.trim(0);
+            yErrorsPos.trim(0);
+            yErrorsNeg.trim(0);
+        });
+        return fireInvalidated(new UpdatedDataEvent(this, "increaseCapacity()"));
     }
 
     @Override
@@ -277,21 +277,21 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
      */
     public DoubleErrorDataSet add(final double x, final double y, final double yErrorNeg, final double yErrorPos,
             final String label) {
-        lock();
-        xValues.add(x);
-        yValues.add(y);
-        yErrorsNeg.add(yErrorNeg);
-        yErrorsPos.add(yErrorPos);
+        lock().writeLockGuard(() -> {
+            xValues.add(x);
+            yValues.add(y);
+            yErrorsNeg.add(yErrorNeg);
+            yErrorsPos.add(yErrorPos);
 
-        if (label != null && !label.isEmpty()) {
-            addDataLabel(xValues.size() - 1, label);
-        }
+            if (label != null && !label.isEmpty()) {
+                addDataLabel(xValues.size() - 1, label);
+            }
 
-        getAxisDescription(0).add(x);
-        getAxisDescription(1).add(y - yErrorNeg);
-        getAxisDescription(1).add(y + yErrorPos);
-
-        return unlock().fireInvalidated(new UpdatedDataEvent(this, "add"));
+            getAxisDescription(0).add(x);
+            getAxisDescription(1).add(y - yErrorNeg);
+            getAxisDescription(1).add(y + yErrorPos);
+        });
+        return fireInvalidated(new UpdatedDataEvent(this, "add"));
     }
 
     /**
@@ -305,23 +305,19 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
      */
     public DoubleErrorDataSet add(final double[] xValuesNew, final double[] yValuesNew, final double[] yErrorsNegNew,
             final double[] yErrorsPosNew) {
-        lock();
         AssertUtils.notNull("X coordinates", xValuesNew);
         AssertUtils.notNull("Y coordinates", yValuesNew);
         AssertUtils.equalDoubleArrays(xValuesNew, yValuesNew);
-        final boolean oldAutoNotification = this.isAutoNotification();
-        setAutoNotifaction(false);
+        lock().writeLockGuard(() -> {
+            xValues.addElements(xValues.size(), xValuesNew);
+            yValues.addElements(yValues.size(), yValuesNew);
+            yErrorsNeg.addElements(yErrorsNeg.size(), yErrorsNegNew);
+            yErrorsPos.addElements(yErrorsPos.size(), yErrorsPosNew);
 
-        xValues.addElements(xValues.size(), xValuesNew);
-        yValues.addElements(yValues.size(), yValuesNew);
-        yErrorsNeg.addElements(yErrorsNeg.size(), yErrorsNegNew);
-        yErrorsPos.addElements(yErrorsPos.size(), yErrorsPosNew);
-
-        getAxisDescription(0).add(xValuesNew);
-        getAxisDescription(1).add(yValuesNew);
-
-        setAutoNotifaction(oldAutoNotification);
-        return unlock().fireInvalidated(new AddedDataEvent(this));
+            getAxisDescription(0).add(xValuesNew);
+            getAxisDescription(1).add(yValuesNew);
+        });
+        return fireInvalidated(new AddedDataEvent(this));
     }
 
     /**
@@ -364,20 +360,20 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
      */
     public DoubleErrorDataSet add(final int index, final double x, final double y, final double yErrorNeg,
             final double yErrorPos, final String label) {
-        lock();
-        final int indexAt = Math.max(0, Math.min(index, getDataCount() + 1));
+        lock().writeLockGuard(() -> {
+            final int indexAt = Math.max(0, Math.min(index, getDataCount() + 1));
 
-        xValues.add(indexAt, x);
-        yValues.add(indexAt, y);
-        yErrorsNeg.add(indexAt, yErrorNeg);
-        yErrorsPos.add(indexAt, yErrorPos);
-        dataLabels.addValueAndShiftKeys(indexAt, xValues.size(), label);
-        dataStyles.shiftKeys(indexAt, xValues.size());
-        getAxisDescription(0).add(x);
-        getAxisDescription(1).add(y - yErrorNeg);
-        getAxisDescription(1).add(y + yErrorPos);
-
-        return unlock().fireInvalidated(new AddedDataEvent(this));
+            xValues.add(indexAt, x);
+            yValues.add(indexAt, y);
+            yErrorsNeg.add(indexAt, yErrorNeg);
+            yErrorsPos.add(indexAt, yErrorPos);
+            getDataLabelMap().addValueAndShiftKeys(indexAt, xValues.size(), label);
+            getDataStyleMap().shiftKeys(indexAt, xValues.size());
+            getAxisDescription(0).add(x);
+            getAxisDescription(1).add(y - yErrorNeg);
+            getAxisDescription(1).add(y + yErrorPos);
+        });
+        return fireInvalidated(new AddedDataEvent(this));
     }
 
     /**
@@ -392,7 +388,6 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
      */
     public DoubleErrorDataSet add(final int index, final double[] x, final double[] y, final double[] yErrorNeg,
             final double[] yErrorPos) {
-        lock();
         AssertUtils.notNull("X coordinates", x);
         AssertUtils.notNull("Y coordinates", y);
         AssertUtils.notNull("X coordinates", yErrorNeg);
@@ -400,20 +395,18 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
         final int min = Math.min(x.length, y.length);
         AssertUtils.equalDoubleArrays(x, y, min);
 
-        final boolean oldAutoNotification = this.isAutoNotification();
-        setAutoNotifaction(false);
+        lock().writeLockGuard(() -> {
+            final int indexAt = Math.max(0, Math.min(index, getDataCount() + 1));
+            xValues.addElements(indexAt, x, 0, min);
+            yValues.addElements(indexAt, y, 0, min);
+            yErrorsNeg.addElements(indexAt, yErrorNeg, 0, min);
+            yErrorsPos.addElements(indexAt, yErrorPos, 0, min);
+            getAxisDescriptions().forEach(AxisDescription::empty);
+            getDataLabelMap().shiftKeys(indexAt, xValues.size());
+            getDataStyleMap().shiftKeys(indexAt, xValues.size());
 
-        final int indexAt = Math.max(0, Math.min(index, getDataCount() + 1));
-        xValues.addElements(indexAt, x, 0, min);
-        yValues.addElements(indexAt, y, 0, min);
-        yErrorsNeg.addElements(indexAt, yErrorNeg, 0, min);
-        yErrorsPos.addElements(indexAt, yErrorPos, 0, min);
-        getAxisDescriptions().forEach(AxisDescription::empty);
-        dataLabels.shiftKeys(indexAt, xValues.size());
-        dataStyles.shiftKeys(indexAt, xValues.size());
-
-        setAutoNotifaction(oldAutoNotification);
-        return unlock().fireInvalidated(new AddedDataEvent(this));
+        });
+        return fireInvalidated(new AddedDataEvent(this));
     }
 
     @Override
@@ -429,25 +422,25 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
      * @return itself (fluent design)
      */
     public DoubleErrorDataSet remove(final int fromIndex, final int toIndex) {
-        lock();
-        AssertUtils.indexInBounds(fromIndex, getDataCount(), "fromIndex");
-        AssertUtils.indexInBounds(toIndex, getDataCount(), "toIndex");
-        AssertUtils.indexOrder(fromIndex, "fromIndex", toIndex, "toIndex");
+        lock().writeLockGuard(() -> {
+            AssertUtils.indexInBounds(fromIndex, getDataCount(), "fromIndex");
+            AssertUtils.indexInBounds(toIndex, getDataCount(), "toIndex");
+            AssertUtils.indexOrder(fromIndex, "fromIndex", toIndex, "toIndex");
 
-        xValues.removeElements(fromIndex, toIndex);
-        yValues.removeElements(fromIndex, toIndex);
-        yErrorsNeg.removeElements(fromIndex, toIndex);
-        yErrorsPos.removeElements(fromIndex, toIndex);
+            xValues.removeElements(fromIndex, toIndex);
+            yValues.removeElements(fromIndex, toIndex);
+            yErrorsNeg.removeElements(fromIndex, toIndex);
+            yErrorsPos.removeElements(fromIndex, toIndex);
 
-        // remove old label and style keys
-        dataLabels.remove(fromIndex, toIndex);
-        dataLabels.remove(fromIndex, toIndex);
+            // remove old label and style keys
+            getDataLabelMap().remove(fromIndex, toIndex);
+            getDataLabelMap().remove(fromIndex, toIndex);
 
-        // invalidate ranges
-        // -> fireInvalidated calls computeLimits for autoNotification
-        getAxisDescriptions().forEach(AxisDescription::empty);
-
-        return unlock().fireInvalidated(new RemovedDataEvent(this));
+            // invalidate ranges
+            // -> fireInvalidated calls computeLimits for autoNotification
+            getAxisDescriptions().forEach(AxisDescription::empty);
+        });
+        return fireInvalidated(new RemovedDataEvent(this));
     }
 
     /**
@@ -476,11 +469,7 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
      */
     public DoubleErrorDataSet set(final int index, final double x, final double y, final double yErrorNeg,
             final double yErrorPos) {
-        lock();
-        final boolean oldAuto = isAutoNotification();
-        setAutoNotifaction(false);
-
-        try {
+        lock().writeLockGuard(() -> {
             final int dataCount = Math.max(index + 1, this.getDataCount());
             xValues.size(dataCount);
             yValues.size(dataCount);
@@ -488,44 +477,32 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
             yValues.elements()[index] = y;
             yErrorsNeg.elements()[index] = yErrorNeg;
             yErrorsPos.elements()[index] = yErrorPos;
-            dataLabels.remove(index);
-            dataStyles.remove(index);
+            getDataLabelMap().remove(index);
+            getDataStyleMap().remove(index);
 
             // invalidate ranges
             // -> fireInvalidated calls computeLimits for autoNotification
             getAxisDescriptions().forEach(AxisDescription::empty);
-
-        } finally {
-            setAutoNotifaction(oldAuto);
-            unlock();
-        }
+        });
 
         return fireInvalidated(new UpdatedDataEvent(this, "set - single"));
     }
 
     public DoubleErrorDataSet set(final int index, final double[] x, final double[] y, final double[] yErrorNeg,
             final double[] yErrorPos) {
-        lock();
-        final boolean oldAutoNotification = this.isAutoNotification();
-        setAutoNotifaction(false);
-
-        try {
+        lock().writeLockGuard(() -> {
             resize(Math.max(index + x.length, xValues.size()));
             System.arraycopy(x, 0, xValues.elements(), index, x.length);
             System.arraycopy(y, 0, yValues.elements(), index, y.length);
             System.arraycopy(yErrorNeg, 0, yErrorsNeg.elements(), index, yErrorNeg.length);
             System.arraycopy(yErrorPos, 0, yErrorsPos.elements(), index, yErrorPos.length);
-            dataLabels.remove(index, index + x.length);
-            dataStyles.remove(index, index + x.length);
+            getDataLabelMap().remove(index, index + x.length);
+            getDataStyleMap().remove(index, index + x.length);
 
             // invalidate ranges
             // -> fireInvalidated calls computeLimits for autoNotification
             getAxisDescriptions().forEach(AxisDescription::empty);
-
-        } finally {
-            setAutoNotifaction(oldAutoNotification);
-            unlock();
-        }
+        });
         return fireInvalidated(new UpdatedDataEvent(this, "set - via arrays"));
     }
 
@@ -545,7 +522,6 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
      */
     public DoubleErrorDataSet set(final double[] xValues, final double[] yValues, final double[] yErrorsNeg,
             final double[] yErrorsPos, final boolean copy) {
-        lock();
         AssertUtils.notNull("X coordinates", xValues);
         AssertUtils.notNull("Y coordinates", yValues);
         AssertUtils.notNull("Y error neg", yErrorsNeg);
@@ -556,29 +532,26 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
         AssertUtils.equalDoubleArrays(xValues, yErrorsNeg, dataMaxIndex);
         AssertUtils.equalDoubleArrays(xValues, yErrorsPos, dataMaxIndex);
 
-        final boolean oldAutoNotification = this.isAutoNotification();
-        setAutoNotifaction(false);
+        lock().writeLockGuard(() -> {
+            getDataLabelMap().clear();
+            getDataStyleMap().clear();
+            if (copy) {
+                resize(0);
+                this.xValues.addElements(0, xValues);
+                this.yValues.addElements(0, yValues);
+                this.yErrorsNeg.addElements(0, yErrorsNeg);
+                this.yErrorsPos.addElements(0, yErrorsPos);
+            } else {
+                this.xValues = DoubleArrayList.wrap(xValues);
+                this.yValues = DoubleArrayList.wrap(yValues);
+                this.yErrorsNeg = DoubleArrayList.wrap(yErrorsNeg);
+                this.yErrorsPos = DoubleArrayList.wrap(yErrorsPos);
+            }
 
-        dataLabels.clear();
-        dataStyles.clear();
-        if (copy) {
-            resize(0);
-            this.xValues.addElements(0, xValues);
-            this.yValues.addElements(0, yValues);
-            this.yErrorsNeg.addElements(0, yErrorsNeg);
-            this.yErrorsPos.addElements(0, yErrorsPos);
-        } else {
-            this.xValues = DoubleArrayList.wrap(xValues);
-            this.yValues = DoubleArrayList.wrap(yValues);
-            this.yErrorsNeg = DoubleArrayList.wrap(yErrorsNeg);
-            this.yErrorsPos = DoubleArrayList.wrap(yErrorsPos);
-        }
-
-        recomputeLimits(0);
-        recomputeLimits(1);
-
-        setAutoNotifaction(oldAutoNotification);
-        return unlock().fireInvalidated(new UpdatedDataEvent(this));
+            recomputeLimits(0);
+            recomputeLimits(1);
+        });
+        return fireInvalidated(new UpdatedDataEvent(this));
     }
 
     /**
@@ -605,40 +578,36 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
      * @return itself (fluent design)
      */
     public DoubleErrorDataSet set(final DataSet other) {
-        lock();
-        other.lock();
-        final boolean oldAuto = isAutoNotification();
-        setAutoNotifaction(false);
+        lock().writeLockGuard(() -> {
+            other.lock().writeLockGuard(() -> {
+                // deep copy data point labels and styles
+                getDataLabelMap().clear();
+                for (int index = 0; index < other.getDataCount(); index++) {
+                    final String label = other.getDataLabel(index);
+                    if (label != null && !label.isEmpty()) {
+                        this.addDataLabel(index, label);
+                    }
+                }
+                getDataStyleMap().clear();
+                for (int index = 0; index < other.getDataCount(); index++) {
+                    final String style = other.getStyle(index);
+                    if (style != null && !style.isEmpty()) {
+                        this.addDataStyle(index, style);
+                    }
+                }
+                this.setStyle(other.getStyle());
 
-        // deep copy data point labels and styles
-        dataLabels.clear();
-        for (int index = 0; index < other.getDataCount(); index++) {
-            final String label = other.getDataLabel(index);
-            if (label != null && !label.isEmpty()) {
-                this.addDataLabel(index, label);
-            }
-        }
-        dataStyles.clear();
-        for (int index = 0; index < other.getDataCount(); index++) {
-            final String style = other.getStyle(index);
-            if (style != null && !style.isEmpty()) {
-                this.addDataStyle(index, style);
-            }
-        }
-        this.setStyle(other.getStyle());
-
-        // copy data
-        if (other instanceof DataSetError) {
-            this.set(other.getXValues(), other.getYValues(), ((DataSetError) other).getYErrorsNegative(),
-                    ((DataSetError) other).getYErrorsPositive(), true);
-        } else {
-            final int count = other.getDataCount();
-            this.set(other.getXValues(), other.getYValues(), new double[count], new double[count], true);
-        }
-
-        setAutoNotifaction(oldAuto);
-        other.unlock();
-        return unlock();
+                // copy data
+                if (other instanceof DataSetError) {
+                    this.set(other.getXValues(), other.getYValues(), ((DataSetError) other).getYErrorsNegative(),
+                            ((DataSetError) other).getYErrorsPositive(), true);
+                } else {
+                    final int count = other.getDataCount();
+                    this.set(other.getXValues(), other.getYValues(), new double[count], new double[count], true);
+                }
+            });
+        });
+        return getThis();
     }
 
 }

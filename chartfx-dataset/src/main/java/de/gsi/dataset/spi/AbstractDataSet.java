@@ -19,6 +19,8 @@ import de.gsi.dataset.EditConstraints;
 import de.gsi.dataset.event.EventListener;
 import de.gsi.dataset.event.UpdateEvent;
 import de.gsi.dataset.event.UpdatedMetaDataEvent;
+import de.gsi.dataset.locks.DataSetLock;
+import de.gsi.dataset.locks.DefaultDataSetLock;
 import de.gsi.dataset.spi.utils.StringHashMapList;
 
 /**
@@ -40,21 +42,22 @@ import de.gsi.dataset.spi.utils.StringHashMapList;
  */
 public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends AbstractStylable<D>
         implements DataSet, DataSetMetaData {
+    private static final long serialVersionUID = -7612136495756923417L;
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractDataSet.class);
     private transient AtomicBoolean autoNotification = new AtomicBoolean(true);
     private String name;
     private final List<AxisDescription> axesDescriptions = new ArrayList<>(Arrays.asList( // 
             new DefaultAxisDescription(this, "x-Axis", "a.u."), // 
             new DefaultAxisDescription(this, "y-Axis", "a.u.")));
-    protected final List<EventListener> updateListeners = new LinkedList<>();
-    protected final ReentrantLock lock = new ReentrantLock();
-    protected StringHashMapList dataLabels = new StringHashMapList();
-    protected StringHashMapList dataStyles = new StringHashMapList();
-    protected List<String> infoList = new ArrayList<>();
-    protected List<String> warningList = new ArrayList<>();
-    protected List<String> errorList = new ArrayList<>();
-    protected EditConstraints editConstraints;
-    protected final Map<String, String> metaInfoMap = new ConcurrentHashMap<>();
+    private final List<EventListener> updateListeners = new LinkedList<>();
+    private final transient DataSetLock<? extends DataSet> lock = new DefaultDataSetLock<>(this);
+    private StringHashMapList dataLabels = new StringHashMapList();
+    private StringHashMapList dataStyles = new StringHashMapList();
+    private List<String> infoList = new ArrayList<>();
+    private List<String> warningList = new ArrayList<>();
+    private List<String> errorList = new ArrayList<>();
+    private EditConstraints editConstraints;
+    private final Map<String, String> metaInfoMap = new ConcurrentHashMap<>();
 
     /**
      * default constructor
@@ -77,9 +80,7 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
      *         been specified
      */
     public String addDataLabel(final int index, final String label) {
-        lock();
-        final String retVal = dataLabels.put(index, label);
-        unlock();
+        final String retVal = lock().writeLockGuard(() -> dataLabels.put(index, label));
         fireInvalidated(new UpdatedMetaDataEvent(this, "added label"));
         return retVal;
     }
@@ -93,9 +94,7 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
      * @return itself (fluent interface)
      */
     public String addDataStyle(final int index, final String style) {
-        lock();
-        final String retVal = dataStyles.put(index, style);
-        unlock();
+        final String retVal = lock().writeLockGuard(() -> dataStyles.put(index, style));
         fireInvalidated(new UpdatedMetaDataEvent(this, "added style"));
         return retVal;
     }
@@ -146,16 +145,16 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
      */
     @Override
     public int getDataCount(final double xmin, final double xmax) {
-        lock();
-        int count = 0;
-        for (int i = 0; i < getDataCount(); i++) {
-            final double x = getX(i);
-            if (x >= xmin && x <= xmax) {
-                count++;
+        return lock().readLockGuard(() -> {
+            int count = 0;
+            for (int i = 0; i < getDataCount(); i++) {
+                final double x = getX(i);
+                if (x >= xmin && x <= xmax) {
+                    count++;
+                }
             }
-        }
-        unlock();
-        return count;
+            return count;
+        });
     }
 
     /**
@@ -308,9 +307,8 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
     }
 
     @Override
-    public D lock() {
-        lock.lock();
-        return getThis();
+    public DataSetLock<? extends DataSet> lock() {
+        return lock;
     }
 
     /**
@@ -321,27 +319,22 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
      */
     @Override
     public D recomputeLimits(final int dimension) {
-        lock();
+        lock().writeLockGuard(() -> {
+            // Clear previous ranges
+            getAxisDescription(dimension).empty();
+            final int dataCount = getDataCount();
+            if (dimension == 0) {
+                for (int i = 0; i < dataCount; i++) {
+                    getAxisDescription(dimension).add(getX(i));
 
-        final boolean oldAutoNotification = this.isAutoNotification();
-        setAutoNotifaction(false);
-
-        // Clear previous ranges
-        getAxisDescription(dimension).empty();
-        final int dataCount = getDataCount();
-        if (dimension == 0) {
-            for (int i = 0; i < dataCount; i++) {
-                getAxisDescription(dimension).add(getX(i));
-
+                }
+            } else {
+                for (int i = 0; i < dataCount; i++) {
+                    getAxisDescription(dimension).add(getY(i));
+                }
             }
-        } else {
-            for (int i = 0; i < dataCount; i++) {
-                getAxisDescription(dimension).add(getY(i));
-            }
-        }
-
-        setAutoNotifaction(oldAutoNotification);
-        return unlock();
+        });
+        return getThis();
     }
 
     /**
@@ -354,9 +347,7 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
      *         been specified
      */
     public String removeDataLabel(final int index) {
-        lock();
-        final String retVal = dataLabels.remove(index);
-        unlock();
+        final String retVal = lock().writeLockGuard(() -> dataLabels.remove(index));
         fireInvalidated(new UpdatedMetaDataEvent(this, "removed label"));
         return retVal;
     }
@@ -369,17 +360,13 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
      * @return itself (fluent interface)
      */
     public String removeStyle(final int index) {
-        lock();
-        final String retVal = dataStyles.remove(index);
-        lock();
+        final String retVal = lock().writeLockGuard(() -> dataStyles.remove(index));
         fireInvalidated(new UpdatedMetaDataEvent(this, "removed style"));
         return retVal;
     }
 
     public D setEditConstraints(final EditConstraints constraints) {
-        lock();
-        editConstraints = constraints;
-        unlock();
+        lock().writeLockGuard(() -> editConstraints = constraints);
         return fireInvalidated(new UpdatedMetaDataEvent(this, "new edit constraints"));
     }
 
@@ -399,12 +386,6 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
         final String xRange = ((DefaultAxisDescription) getAxisDescription(0)).toString();
         final String yRange = ((DefaultAxisDescription) getAxisDescription(0)).toString();
         return getClass().getName() + " [dataCnt=" + getDataCount() + ", xRange=" + xRange + ", yRange=" + yRange + "]";
-    }
-
-    @Override
-    public D unlock() {
-        lock.unlock();
-        return getThis();
     }
 
     @Override

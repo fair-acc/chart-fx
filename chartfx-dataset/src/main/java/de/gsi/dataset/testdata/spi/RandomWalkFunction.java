@@ -9,6 +9,7 @@ import de.gsi.dataset.DataSetError;
  * @author rstein
  */
 public class RandomWalkFunction extends AbstractTestFunction<RandomWalkFunction> implements DataSetError {
+    private static final long serialVersionUID = 5274313670852663800L;
 
     /**
      * 

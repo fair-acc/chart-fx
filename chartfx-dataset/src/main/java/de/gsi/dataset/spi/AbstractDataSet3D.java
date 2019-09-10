@@ -11,6 +11,7 @@ import de.gsi.dataset.DataSet3D;
  */
 public abstract class AbstractDataSet3D<D extends AbstractDataSet3D<D>> extends AbstractDataSet<D>
         implements DataSet3D {
+    private static final long serialVersionUID = 2766945109681463872L;
 
     /**
      * Creates a new <code>AbstractDataSet3D</code>.
@@ -45,37 +46,37 @@ public abstract class AbstractDataSet3D<D extends AbstractDataSet3D<D>> extends 
      */
     @Override
     public D recomputeLimits(final int dimension) {
-        lock();
-        // Clear previous ranges
-        getAxisDescription(dimension).empty();
+        lock().writeLockGuard(() -> {
+            // Clear previous ranges
+            getAxisDescription(dimension).empty();
 
-        if (dimension == 0) {
-            // x-range
-            final int dataCount = getXDataCount();
-            AxisDescription axisRange = getAxisDescription(dimension);
-            for (int i = 0; i < dataCount; i++) {
-                axisRange.add(getX(i));
-            }
-        } else if (dimension == 1) {
-            // x-range
-            final int dataCount = getYDataCount();
-            AxisDescription axisRange = getAxisDescription(dimension);
-            for (int i = 0; i < dataCount; i++) {
-                axisRange.add(getY(i));
-            }
-        } else {
-            // z-range
-            final int xDataCount = getXDataCount();
-            final int yDataCount = getYDataCount();
-            AxisDescription axisRange = getAxisDescription(dimension);
-            for (int i = 0; i < xDataCount; i++) {
-                for (int j = 0; j < yDataCount; j++) {
-                    axisRange.add(getZ(i, j));
+            if (dimension == 0) {
+                // x-range
+                final int dataCount = getXDataCount();
+                AxisDescription axisRange = getAxisDescription(dimension);
+                for (int i = 0; i < dataCount; i++) {
+                    axisRange.add(getX(i));
+                }
+            } else if (dimension == 1) {
+                // x-range
+                final int dataCount = getYDataCount();
+                AxisDescription axisRange = getAxisDescription(dimension);
+                for (int i = 0; i < dataCount; i++) {
+                    axisRange.add(getY(i));
+                }
+            } else {
+                // z-range
+                final int xDataCount = getXDataCount();
+                final int yDataCount = getYDataCount();
+                AxisDescription axisRange = getAxisDescription(dimension);
+                for (int i = 0; i < xDataCount; i++) {
+                    for (int j = 0; j < yDataCount; j++) {
+                        axisRange.add(getZ(i, j));
+                    }
                 }
             }
-        }
-
-        return unlock();
+        });
+        return getThis();
     }
 
     /**

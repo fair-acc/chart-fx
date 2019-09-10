@@ -10,7 +10,8 @@ import de.gsi.dataset.DataSetError;
  * @author rstein
  */
 public class CosineFunction  extends AbstractTestFunction<CosineFunction> implements DataSetError {
-	private final boolean useSystemTimeOffset;
+	private static final long serialVersionUID = -3391027911729531271L;
+    private final boolean useSystemTimeOffset;
 
     /**
      * 

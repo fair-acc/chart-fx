@@ -27,7 +27,7 @@ import de.gsi.dataset.utils.AssertUtils;
  * @author braeun
  */
 public class LabelledMarkerDataSet extends AbstractDataSet<LabelledMarkerDataSet> implements DataSet {
-
+    private static final long serialVersionUID = -3267447868117053651L;
     protected ArrayList<String> dataLabels = new ArrayList<>();
     protected ArrayList<String> dataStyles = new ArrayList<>();
     protected ArrayList<DoublePoint> data = new ArrayList<>();
@@ -70,16 +70,14 @@ public class LabelledMarkerDataSet extends AbstractDataSet<LabelledMarkerDataSet
      * @return remove all data points
      */
     public LabelledMarkerDataSet clearData() {
-        lock().setAutoNotifaction(false);
+        lock().writeLockGuard(() -> {
+            data.clear();
+            dataLabels.clear();
+            dataStyles.clear();
 
-        data.clear();
-        dataLabels.clear();
-        dataStyles.clear();
-
-        getAxisDescriptions().forEach(AxisDescription::empty);
-
-        setAutoNotifaction(true);
-        return unlock().fireInvalidated(new RemovedDataEvent(this, "clear"));
+            getAxisDescriptions().forEach(AxisDescription::empty);
+        });
+        return fireInvalidated(new RemovedDataEvent(this, "clear"));
     }
 
     @Override
@@ -99,16 +97,13 @@ public class LabelledMarkerDataSet extends AbstractDataSet<LabelledMarkerDataSet
      */
     public LabelledMarkerDataSet add(LabelledMarker marker) {
         AssertUtils.notNull("marker", marker);
-        lock();
-        try {
+        lock().writeLockGuard(() -> {
             data.add(new DoublePoint(marker.getX(), marker.getY()));
             getAxisDescription(0).add(marker.getX());
             // yRange.add(marker.getY());
             dataLabels.add(marker.getLabel());
             dataStyles.add(marker.getStyle());
-        } finally {
-            unlock();
-        }
+        });
         fireInvalidated(new AddedDataEvent(this));
         return this;
     }
@@ -121,9 +116,7 @@ public class LabelledMarkerDataSet extends AbstractDataSet<LabelledMarkerDataSet
      */
     public LabelledMarkerDataSet set(List<LabelledMarker> markers) {
         AssertUtils.notNull("markers", markers);
-        lock();
-        try {
-            setAutoNotifaction(false);
+        lock().writeLockGuard(() -> {
             data.clear();
             dataLabels.clear();
             dataStyles.clear();
@@ -137,10 +130,7 @@ public class LabelledMarkerDataSet extends AbstractDataSet<LabelledMarkerDataSet
                 dataLabels.add(marker.getLabel());
                 dataStyles.add(marker.getStyle());
             }
-            setAutoNotifaction(true);
-        } finally {
-            unlock();
-        }
+        });
         fireInvalidated(new UpdatedDataEvent(this, "fill"));
         return this;
     }
@@ -165,16 +155,13 @@ public class LabelledMarkerDataSet extends AbstractDataSet<LabelledMarkerDataSet
      */
     public LabelledMarkerDataSet set(int index, LabelledMarker marker) {
         AssertUtils.indexInBounds(index, getDataCount());
-        lock();
-        try {
+        lock().writeLockGuard(() -> {
             data.get(index).set(marker.getX(), marker.getY());
             getAxisDescription(0).add(marker.getX());
             // yRange.add(marker.getY());
             dataLabels.set(index, marker.getLabel());
             dataStyles.set(index, marker.getStyle());
-        } finally {
-            unlock();
-        }
+        });
         fireInvalidated(new UpdatedDataEvent(this));
         return this;
     }
@@ -187,19 +174,18 @@ public class LabelledMarkerDataSet extends AbstractDataSet<LabelledMarkerDataSet
      * @return itself (fluent design)
      */
     public LabelledMarkerDataSet remove(final int fromIndex, final int toIndex) {
-        lock().setAutoNotifaction(false);
-        AssertUtils.indexInBounds(fromIndex, getDataCount(), "fromIndex");
-        AssertUtils.indexInBounds(toIndex, getDataCount(), "toIndex");
-        AssertUtils.indexOrder(fromIndex, "fromIndex", toIndex, "toIndex");
+        lock().writeLockGuard(() -> {
+            AssertUtils.indexInBounds(fromIndex, getDataCount(), "fromIndex");
+            AssertUtils.indexInBounds(toIndex, getDataCount(), "toIndex");
+            AssertUtils.indexOrder(fromIndex, "fromIndex", toIndex, "toIndex");
 
-        data.subList(fromIndex, toIndex).clear();
-        dataLabels.subList(fromIndex, toIndex).clear();
-        dataStyles.subList(fromIndex, toIndex).clear();
+            data.subList(fromIndex, toIndex).clear();
+            dataLabels.subList(fromIndex, toIndex).clear();
+            dataStyles.subList(fromIndex, toIndex).clear();
 
-        getAxisDescriptions().forEach(AxisDescription::empty);
-
-        setAutoNotifaction(true);
-        return unlock().fireInvalidated(new RemovedDataEvent(this));
+            getAxisDescriptions().forEach(AxisDescription::empty);
+        });
+        return fireInvalidated(new RemovedDataEvent(this));
     }
 
     /**

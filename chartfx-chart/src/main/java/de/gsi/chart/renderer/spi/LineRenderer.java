@@ -48,12 +48,11 @@ public class LineRenderer extends AbstractDataSetManagement<LineRenderer> implem
         final double xmax = xAxis.getValueForDisplay(xAxisWidth);
         int index = 0;
         for (final DataSet dataset : datasets) {
-            try {
-                dataset.lock();
-
+            final int lindex = index;
+            index = dataset.lock().readLockGuard(() -> {
                 // update categories in case of category axes for the first
                 // (index == '0') indexed data set
-                if (index == 0) {
+                if (lindex == 0) {
                     if (xyChart.getXAxis() instanceof CategoryAxis) {
                         final CategoryAxis axis = (CategoryAxis) xyChart.getXAxis();
                         axis.updateCategories(dataset);
@@ -66,7 +65,7 @@ public class LineRenderer extends AbstractDataSetManagement<LineRenderer> implem
                 }
 
                 if (dataset.getDataCount() > 0) {
-                    gc.setStroke(LineRenderer.COLORS[index++ % 4]);
+                    gc.setStroke(LineRenderer.COLORS[(lindex + 1) % 4]);
                     int i = dataset.getXIndex(xmin);
                     if (i < 0) {
                         i = 0;
@@ -84,9 +83,8 @@ public class LineRenderer extends AbstractDataSetManagement<LineRenderer> implem
                         y0 = y1;
                     }
                 }
-            } finally {
-                dataset.unlock();
-            }
+                return lindex + 1;
+            });
         }
         ProcessingProfiler.getTimeDiff(start);
     }

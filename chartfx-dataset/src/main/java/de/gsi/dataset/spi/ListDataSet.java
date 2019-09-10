@@ -21,7 +21,6 @@ import de.gsi.dataset.utils.AssertUtils;
  * of data points. <br>
  * User provides X and Y coordinates or only Y coordinates. In the former case X
  * coordinates have value of data point index.
- *
  * N.B. this is a classic list-based implementation. This is a "simple"
  * implementation but has a poorer performance compared to Default- and
  * Double-based DataSets @see DoubleDataSet
@@ -31,6 +30,7 @@ import de.gsi.dataset.utils.AssertUtils;
  *             reasons)
  */
 public class ListDataSet extends AbstractDataSet<ListDataSet> implements DataSet {
+    private static final long serialVersionUID = -4444745436188783390L;
     protected Map<Integer, String> dataLabels = new ConcurrentHashMap<>();
     protected Map<Integer, String> dataStyles = new ConcurrentHashMap<>();
     protected List<DoublePoint> data = new ArrayList<>();
@@ -111,7 +111,6 @@ public class ListDataSet extends AbstractDataSet<ListDataSet> implements DataSet
     }
 
     /**
-     * 
      * @return list containing data point definition
      */
     public List<DoublePoint> getData() {
@@ -129,13 +128,11 @@ public class ListDataSet extends AbstractDataSet<ListDataSet> implements DataSet
      * @return itself (fluent design)
      */
     public ListDataSet clearData() {
-        lock().setAutoNotifaction(false);
-
-        data.clear();
-
-        getAxisDescriptions().forEach(AxisDescription::empty);
-
-        return unlock().fireInvalidated(new RemovedDataEvent(this, "clearData()"));
+        lock().writeLockGuard(() -> {
+            data.clear();
+            getAxisDescriptions().forEach(AxisDescription::empty);
+        });
+        return fireInvalidated(new RemovedDataEvent(this, "clearData()"));
     }
 
     @Override
@@ -156,15 +153,14 @@ public class ListDataSet extends AbstractDataSet<ListDataSet> implements DataSet
      */
     public ListDataSet set(final List<DoublePoint> values) {
         AssertUtils.notNull("values", values);
-        lock();
+        lock().writeLockGuard(() -> {
+            data.clear();
+            data.addAll(values);
 
-        data.clear();
-        data.addAll(values);
-
-        recomputeLimits(0);
-        recomputeLimits(1);
-
-        return unlock().fireInvalidated(new UpdatedDataEvent(this));
+            recomputeLimits(0);
+            recomputeLimits(1);
+        });
+        return fireInvalidated(new UpdatedDataEvent(this));
     }
 
     /**
@@ -176,14 +172,14 @@ public class ListDataSet extends AbstractDataSet<ListDataSet> implements DataSet
      * @return itself (fluent design)
      */
     public ListDataSet set(final int index, final double x, final double y) {
-        lock();
-        AssertUtils.indexInBounds(index, getDataCount());
-        data.get(index).set(x, y);
+        lock().writeLockGuard(() -> {
+            AssertUtils.indexInBounds(index, getDataCount());
+            data.get(index).set(x, y);
 
-        getAxisDescription(0).add(x);
-        getAxisDescription(1).add(y);
-
-        return unlock().fireInvalidated(new UpdatedDataEvent(this));
+            getAxisDescription(0).add(x);
+            getAxisDescription(1).add(y);
+        });
+        return fireInvalidated(new UpdatedDataEvent(this));
     }
 
     /**
@@ -194,13 +190,13 @@ public class ListDataSet extends AbstractDataSet<ListDataSet> implements DataSet
      * @return itself
      */
     public ListDataSet add(final double x, final double y) {
-        lock();
-        data.add(new DoublePoint(x, y));
+        lock().writeLockGuard(() -> {
+            data.add(new DoublePoint(x, y));
 
-        getAxisDescription(0).add(x);
-        getAxisDescription(1).add(y);
-
-        return unlock().fireInvalidated(new AddedDataEvent(this));
+            getAxisDescription(0).add(x);
+            getAxisDescription(1).add(y);
+        });
+        return fireInvalidated(new AddedDataEvent(this));
     }
 
     /**
@@ -211,17 +207,17 @@ public class ListDataSet extends AbstractDataSet<ListDataSet> implements DataSet
      * @return itself (fluent design)
      */
     public ListDataSet remove(final int fromIndex, final int toIndex) {
-        lock();
-        AssertUtils.indexInBounds(fromIndex, getDataCount(), "fromIndex");
-        AssertUtils.indexInBounds(toIndex, getDataCount(), "toIndex");
-        AssertUtils.indexOrder(fromIndex, "fromIndex", toIndex, "toIndex");
+        lock().writeLockGuard(() -> {
+            AssertUtils.indexInBounds(fromIndex, getDataCount(), "fromIndex");
+            AssertUtils.indexInBounds(toIndex, getDataCount(), "toIndex");
+            AssertUtils.indexOrder(fromIndex, "fromIndex", toIndex, "toIndex");
 
-        data.subList(fromIndex, toIndex).clear();
+            data.subList(fromIndex, toIndex).clear();
 
-        getAxisDescription(0).setMax(Double.NaN);
-        getAxisDescription(1).setMax(Double.NaN);
-
-        return unlock().fireInvalidated(new RemovedDataEvent(this));
+            getAxisDescription(0).setMax(Double.NaN);
+            getAxisDescription(1).setMax(Double.NaN);
+        });
+        return fireInvalidated(new RemovedDataEvent(this));
     }
 
     /**
@@ -231,22 +227,21 @@ public class ListDataSet extends AbstractDataSet<ListDataSet> implements DataSet
      * @return itself
      */
     public ListDataSet remove(final int[] indices) {
-        lock();
         AssertUtils.notNull("Indices array", indices);
         if (indices.length == 0) {
-            return unlock();
+            return this;
         }
+        lock().writeLockGuard(() -> {
+            final List<Tuple<Double, Double>> tupleTobeRemovedReferences = new ArrayList<>();
+            for (final int indexToRemove : indices) {
+                tupleTobeRemovedReferences.add(data.get(indexToRemove));
+            }
+            data.removeAll(tupleTobeRemovedReferences);
 
-        final List<Tuple<Double, Double>> tupleTobeRemovedReferences = new ArrayList<>();
-        for (final int indexToRemove : indices) {
-            tupleTobeRemovedReferences.add(data.get(indexToRemove));
-        }
-        data.removeAll(tupleTobeRemovedReferences);
-
-        recomputeLimits(0);
-        recomputeLimits(1);
-
-        return unlock().fireInvalidated(new UpdatedDataEvent(this));
+            recomputeLimits(0);
+            recomputeLimits(1);
+        });
+        return fireInvalidated(new UpdatedDataEvent(this));
     }
 
     /**
@@ -260,22 +255,21 @@ public class ListDataSet extends AbstractDataSet<ListDataSet> implements DataSet
      * @return itself
      */
     public ListDataSet add(final double[] xValues, final double[] yValues) {
-        lock().setAutoNotifaction(false);
         AssertUtils.notNull("X coordinates", xValues);
         AssertUtils.notNull("Y coordinates", yValues);
         AssertUtils.equalDoubleArrays(xValues, yValues);
 
-        data.clear();
-        getAxisDescription(0).setMax(Double.NaN);
-        getAxisDescription(1).setMax(Double.NaN);
-        for (int i = 0; i < xValues.length; i++) {
-            data.add(new DoublePoint(xValues[i], yValues[i]));
-            getAxisDescription(0).add(xValues[i]);
-            getAxisDescription(1).add(yValues[i]);
-        }
-
-        setAutoNotifaction(true);
-        return unlock().fireInvalidated(new AddedDataEvent(this));
+        lock().writeLockGuard(() -> {
+            data.clear();
+            getAxisDescription(0).setMax(Double.NaN);
+            getAxisDescription(1).setMax(Double.NaN);
+            for (int i = 0; i < xValues.length; i++) {
+                data.add(new DoublePoint(xValues[i], yValues[i]));
+                getAxisDescription(0).add(xValues[i]);
+                getAxisDescription(1).add(yValues[i]);
+            }
+        });
+        return fireInvalidated(new AddedDataEvent(this));
     }
 
     /**
@@ -290,9 +284,8 @@ public class ListDataSet extends AbstractDataSet<ListDataSet> implements DataSet
      */
     @Override
     public String addDataLabel(final int index, final String label) {
-        lock();
-        final String retVal = dataLabels.put(index, label);
-        unlock().fireInvalidated(new UpdatedMetaDataEvent(this, "added label"));
+        final String retVal = lock().writeLockGuard(() -> dataLabels.put(index, label));
+        fireInvalidated(new UpdatedMetaDataEvent(this, "added label"));
         return retVal;
     }
 
@@ -307,9 +300,8 @@ public class ListDataSet extends AbstractDataSet<ListDataSet> implements DataSet
      */
     @Override
     public String removeDataLabel(final int index) {
-        lock();
-        final String retVal = dataLabels.remove(index);
-        unlock().fireInvalidated(new UpdatedMetaDataEvent(this, "removed label"));
+        final String retVal = lock().writeLockGuard(() -> dataLabels.remove(index));
+        fireInvalidated(new UpdatedMetaDataEvent(this, "removed label"));
         return retVal;
     }
 
@@ -342,9 +334,8 @@ public class ListDataSet extends AbstractDataSet<ListDataSet> implements DataSet
      */
     @Override
     public String addDataStyle(final int index, final String style) {
-        lock();
-        final String retVal = dataStyles.put(index, style);
-        unlock().fireInvalidated(new UpdatedMetaDataEvent(this, "added style"));
+        final String retVal = lock().writeLockGuard(() -> dataStyles.put(index, style));
+        fireInvalidated(new UpdatedMetaDataEvent(this, "added style"));
         return retVal;
     }
 
@@ -357,9 +348,8 @@ public class ListDataSet extends AbstractDataSet<ListDataSet> implements DataSet
      */
     @Override
     public String removeStyle(final int index) {
-        lock();
-        final String retVal = dataStyles.remove(index);
-        unlock().fireInvalidated(new UpdatedMetaDataEvent(this, "removed style"));
+        final String retVal = lock().writeLockGuard(() -> dataStyles.remove(index));
+        fireInvalidated(new UpdatedMetaDataEvent(this, "removed style"));
         return retVal;
     }
 

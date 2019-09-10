@@ -22,6 +22,7 @@ import it.unimi.dsi.fastutil.floats.FloatArrayList;
  * @author rstein
  */
 public class FloatDataSet extends AbstractDataSet<FloatDataSet> implements EditableDataSet {
+    private static final long serialVersionUID = 7625465583757088697L;
     protected FloatArrayList xValues; // faster compared to java default
     protected FloatArrayList yValues; // faster compared to java default
 
@@ -127,17 +128,16 @@ public class FloatDataSet extends AbstractDataSet<FloatDataSet> implements Edita
      * @return itself (fluent design)
      */
     public FloatDataSet clearData() {
-        lock();
+        lock().writeLockGuard(() -> {
+            xValues.clear();
+            yValues.clear();
+            getDataLabelMap().clear();
+            getDataStyleMap().clear();
+            clearMetaInfo();
 
-        xValues.clear();
-        yValues.clear();
-        dataLabels.clear();
-        dataStyles.clear();
-        clearMetaInfo();
-
-        getAxisDescriptions().forEach(AxisDescription::empty);
-
-        return unlock().fireInvalidated(new RemovedDataEvent(this, "clearData()"));
+            getAxisDescriptions().forEach(AxisDescription::empty);
+        });
+        return fireInvalidated(new RemovedDataEvent(this, "clearData()"));
     }
 
     /**
@@ -152,14 +152,12 @@ public class FloatDataSet extends AbstractDataSet<FloatDataSet> implements Edita
      * @return itself (fluent design)
      */
     public FloatDataSet increaseCapacity(final int amount) {
-        lock();
-        final int size = getDataCount();
-        final boolean auto = isAutoNotification();
-        this.setAutoNotifaction(false);
-        resize(this.getCapacity() + amount);
-        resize(size);
-        this.setAutoNotifaction(auto);
-        return unlock();
+        lock().writeLockGuard(() -> {
+            final int size = getDataCount();
+            resize(this.getCapacity() + amount);
+            resize(size);
+        });
+        return getThis();
     }
 
     /**
@@ -169,10 +167,11 @@ public class FloatDataSet extends AbstractDataSet<FloatDataSet> implements Edita
      * @return itself (fluent design)
      */
     public FloatDataSet resize(final int size) {
-        lock();
-        xValues.size(size);
-        yValues.size(size);
-        return unlock().fireInvalidated(new UpdatedDataEvent(this, "increaseCapacity()"));
+        lock().writeLockGuard(() -> {
+            xValues.size(size);
+            yValues.size(size);
+        });
+        return fireInvalidated(new UpdatedDataEvent(this, "increaseCapacity()"));
     }
 
     /**
@@ -182,10 +181,11 @@ public class FloatDataSet extends AbstractDataSet<FloatDataSet> implements Edita
      * @return itself (fluent design)
      */
     public FloatDataSet trim() {
-        lock();
-        xValues.trim(0);
-        yValues.trim(0);
-        return unlock().fireInvalidated(new UpdatedDataEvent(this, "increaseCapacity()"));
+        lock().writeLockGuard(() -> {
+            xValues.trim(0);
+            yValues.trim(0);
+        });
+        return fireInvalidated(new UpdatedDataEvent(this, "increaseCapacity()"));
     }
 
     @Override
@@ -200,8 +200,7 @@ public class FloatDataSet extends AbstractDataSet<FloatDataSet> implements Edita
 
     @Override
     public FloatDataSet set(final int index, final double x, final double y) {
-        lock();
-        try {
+        lock().writeLockGuard(() -> {
             final int dataCount = Math.max(index + 1, this.getDataCount());
             xValues.size(dataCount);
             yValues.size(dataCount);
@@ -211,20 +210,13 @@ public class FloatDataSet extends AbstractDataSet<FloatDataSet> implements Edita
             // invalidate ranges
             // -> fireInvalidated calls computeLimits for autoNotification
             getAxisDescriptions().forEach(AxisDescription::empty);
-
-        } finally {
-            unlock();
-        }
+        });
 
         return fireInvalidated(new UpdatedDataEvent(this));
     }
 
     public FloatDataSet set(final int index, final double[] x, final double[] y) {
-        lock();
-        final boolean oldAutoNotification = this.isAutoNotification();
-        setAutoNotifaction(false);
-
-        try {
+        lock().writeLockGuard(() -> {
             xValues.size(index + x.length);
             System.arraycopy(x, 0, xValues.elements(), index, x.length);
             yValues.size(index + y.length);
@@ -234,11 +226,7 @@ public class FloatDataSet extends AbstractDataSet<FloatDataSet> implements Edita
             // -> fireInvalidated calls computeLimits for autoNotification
             getAxisDescriptions().forEach(AxisDescription::empty);
 
-        } finally {
-            setAutoNotifaction(oldAutoNotification);
-            unlock();
-        }
-
+        });
         return fireInvalidated(new UpdatedDataEvent(this));
     }
 
@@ -262,18 +250,18 @@ public class FloatDataSet extends AbstractDataSet<FloatDataSet> implements Edita
      * @return itself
      */
     public FloatDataSet add(final float x, final float y, final String label) {
-        lock();
-        xValues.add(x);
-        yValues.add(y);
+        lock().writeLockGuard(() -> {
+            xValues.add(x);
+            yValues.add(y);
 
-        if (label != null && !label.isEmpty()) {
-            addDataLabel(xValues.size() - 1, label);
-        }
+            if (label != null && !label.isEmpty()) {
+                addDataLabel(xValues.size() - 1, label);
+            }
 
-        getAxisDescription(0).add(x);
-        getAxisDescription(1).add(y);
-
-        return unlock().fireInvalidated(new AddedDataEvent(this));
+            getAxisDescription(0).add(x);
+            getAxisDescription(1).add(y);
+        });
+        return fireInvalidated(new AddedDataEvent(this));
     }
 
     /**
@@ -299,17 +287,17 @@ public class FloatDataSet extends AbstractDataSet<FloatDataSet> implements Edita
      * @return itself (fluent design)
      */
     public FloatDataSet add(final int index, final float x, final float y, final String label) {
-        lock();
-        final int indexAt = Math.max(0, Math.min(index, getDataCount() + 1));
+        lock().writeLockGuard(() -> {
+            final int indexAt = Math.max(0, Math.min(index, getDataCount() + 1));
 
-        xValues.add(indexAt, x);
-        yValues.add(indexAt, y);
-        dataLabels.addValueAndShiftKeys(indexAt, xValues.size(), label);
-        dataStyles.shiftKeys(indexAt, xValues.size());
-        getAxisDescription(0).add(x);
-        getAxisDescription(1).add(y);
-
-        return unlock().fireInvalidated(new AddedDataEvent(this));
+            xValues.add(indexAt, x);
+            yValues.add(indexAt, y);
+            getDataLabelMap().addValueAndShiftKeys(indexAt, xValues.size(), label);
+            getDataStyleMap().shiftKeys(indexAt, xValues.size());
+            getAxisDescription(0).add(x);
+            getAxisDescription(1).add(y);
+        });
+        return fireInvalidated(new AddedDataEvent(this));
     }
 
     /**
@@ -321,28 +309,24 @@ public class FloatDataSet extends AbstractDataSet<FloatDataSet> implements Edita
      * @return itself (fluent design)
      */
     public FloatDataSet add(final int index, final float[] x, final float[] y) {
-        lock();
         AssertUtils.notNull("X coordinates", x);
         AssertUtils.notNull("Y coordinates", y);
         final int min = Math.min(x.length, y.length);
         AssertUtils.equalFloatArrays(x, y, min);
 
-        final boolean oldAutoNotification = this.isAutoNotification();
-        setAutoNotifaction(false);
+        lock().writeLockGuard(() -> {
+            final int indexAt = Math.max(0, Math.min(index, getDataCount() + 1));
+            xValues.addElements(indexAt, x, 0, min);
+            yValues.addElements(indexAt, y, 0, min);
+            for (int i = 0; i < min; i++) {
+                getAxisDescription(0).add(x[i]);
+                getAxisDescription(1).add(y[i]);
+            }
 
-        final int indexAt = Math.max(0, Math.min(index, getDataCount() + 1));
-        xValues.addElements(indexAt, x, 0, min);
-        yValues.addElements(indexAt, y, 0, min);
-        for (int i = 0; i < min; i++) {
-            getAxisDescription(0).add(x[i]);
-            getAxisDescription(1).add(y[i]);
-        }
-
-        dataLabels.shiftKeys(indexAt, xValues.size());
-        dataStyles.shiftKeys(indexAt, xValues.size());
-
-        setAutoNotifaction(oldAutoNotification);
-        return unlock().fireInvalidated(new AddedDataEvent(this));
+            getDataLabelMap().shiftKeys(indexAt, xValues.size());
+            getDataStyleMap().shiftKeys(indexAt, xValues.size());
+        });
+        return fireInvalidated(new AddedDataEvent(this));
     }
 
     /**
@@ -353,23 +337,23 @@ public class FloatDataSet extends AbstractDataSet<FloatDataSet> implements Edita
      * @return itself (fluent design)
      */
     public FloatDataSet remove(final int fromIndex, final int toIndex) {
-        lock();
-        AssertUtils.indexInBounds(fromIndex, getDataCount(), "fromIndex");
-        AssertUtils.indexInBounds(toIndex, getDataCount(), "toIndex");
-        AssertUtils.indexOrder(fromIndex, "fromIndex", toIndex, "toIndex");
+        lock().writeLockGuard(() -> {
+            AssertUtils.indexInBounds(fromIndex, getDataCount(), "fromIndex");
+            AssertUtils.indexInBounds(toIndex, getDataCount(), "toIndex");
+            AssertUtils.indexOrder(fromIndex, "fromIndex", toIndex, "toIndex");
 
-        xValues.removeElements(fromIndex, toIndex);
-        yValues.removeElements(fromIndex, toIndex);
+            xValues.removeElements(fromIndex, toIndex);
+            yValues.removeElements(fromIndex, toIndex);
 
-        // remove old label and style keys
-        dataLabels.remove(fromIndex, toIndex);
-        dataLabels.remove(fromIndex, toIndex);
+            // remove old label and style keys
+            getDataLabelMap().remove(fromIndex, toIndex);
+            getDataLabelMap().remove(fromIndex, toIndex);
 
-        // invalidate ranges
-        // -> fireInvalidated calls computeLimits for autoNotification
-        this.getAxisDescriptions().forEach(AxisDescription::empty);
-
-        return unlock().fireInvalidated(new RemovedDataEvent(this));
+            // invalidate ranges
+            // -> fireInvalidated calls computeLimits for autoNotification
+            this.getAxisDescriptions().forEach(AxisDescription::empty);
+        });
+        return fireInvalidated(new RemovedDataEvent(this));
     }
 
     /**
@@ -394,26 +378,22 @@ public class FloatDataSet extends AbstractDataSet<FloatDataSet> implements Edita
      * @return itself
      */
     public FloatDataSet add(final float[] xValuesNew, final float[] yValuesNew) {
-        lock();
         AssertUtils.notNull("X coordinates", xValuesNew);
         AssertUtils.notNull("Y coordinates", yValuesNew);
         AssertUtils.equalFloatArrays(xValuesNew, yValuesNew);
 
-        final boolean oldAutoNotification = this.isAutoNotification();
-        setAutoNotifaction(false);
+        lock().writeLockGuard(() -> {
+            xValues.addElements(xValues.size(), xValuesNew);
+            yValues.addElements(yValues.size(), yValuesNew);
 
-        xValues.addElements(xValues.size(), xValuesNew);
-        yValues.addElements(yValues.size(), yValuesNew);
-
-        for (int i = 0; i < xValuesNew.length; i++) {
-            getAxisDescription(0).add(xValuesNew[i]);
-        }
-        for (int i = 0; i < yValuesNew.length; i++) {
-            getAxisDescription(1).add(yValuesNew[i]);
-        }
-
-        setAutoNotifaction(oldAutoNotification);
-        return unlock().fireInvalidated(new AddedDataEvent(this));
+            for (int i = 0; i < xValuesNew.length; i++) {
+                getAxisDescription(0).add(xValuesNew[i]);
+            }
+            for (int i = 0; i < yValuesNew.length; i++) {
+                getAxisDescription(1).add(yValuesNew[i]);
+            }
+        });
+        return fireInvalidated(new AddedDataEvent(this));
     }
 
     /**
@@ -429,37 +409,31 @@ public class FloatDataSet extends AbstractDataSet<FloatDataSet> implements Edita
      * @return itself
      */
     public FloatDataSet set(final float[] xValues, final float[] yValues, final boolean copy) {
-        lock();
         AssertUtils.notNull("X coordinates", xValues);
         AssertUtils.notNull("Y coordinates", yValues);
         AssertUtils.equalFloatArrays(xValues, yValues);
 
-        final boolean oldAutoNotification = this.isAutoNotification();
-        setAutoNotifaction(false);
+        lock().writeLockGuard(() -> {
+            if (!copy) {
+                getDataLabelMap().clear();
+                getDataStyleMap().clear();
+                this.xValues = FloatArrayList.wrap(xValues);
+                this.yValues = FloatArrayList.wrap(yValues);
 
-        if (!copy) {
-            dataLabels.clear();
-            dataStyles.clear();
-            this.xValues = FloatArrayList.wrap(xValues);
-            this.yValues = FloatArrayList.wrap(yValues);
+                recomputeLimits(0);
+                recomputeLimits(1);
+                return;
+            }
+
+            this.xValues.size(0);
+            this.xValues.addElements(0, xValues);
+            this.yValues.size(0);
+            this.yValues.addElements(0, yValues);
 
             recomputeLimits(0);
             recomputeLimits(1);
-
-            setAutoNotifaction(oldAutoNotification);
-            return unlock().fireInvalidated(new UpdatedDataEvent(this));
-        }
-
-        this.xValues.size(0);
-        this.xValues.addElements(0, xValues);
-        this.yValues.size(0);
-        this.yValues.addElements(0, yValues);
-
-        recomputeLimits(0);
-        recomputeLimits(1);
-
-        setAutoNotifaction(oldAutoNotification);
-        return unlock().fireInvalidated(new UpdatedDataEvent(this));
+        });
+        return fireInvalidated(new UpdatedDataEvent(this));
     }
 
     /**
@@ -483,32 +457,29 @@ public class FloatDataSet extends AbstractDataSet<FloatDataSet> implements Edita
      * @return itself (fluent design)
      */
     public FloatDataSet set(final DataSet other) {
-        lock();
-        other.lock();
-        final boolean oldAuto = isAutoNotification();
-        setAutoNotifaction(false);
+        lock().writeLockGuard(() -> {
+            other.lock().writeLockGuard(() -> {
+                // deep copy data point labels and styles
+                getDataLabelMap().clear();
+                for (int index = 0; index < other.getDataCount(); index++) {
+                    final String label = other.getDataLabel(index);
+                    if (label != null && !label.isEmpty()) {
+                        this.addDataLabel(index, label);
+                    }
+                }
+                getDataStyleMap().clear();
+                for (int index = 0; index < other.getDataCount(); index++) {
+                    final String style = other.getStyle(index);
+                    if (style != null && !style.isEmpty()) {
+                        this.addDataStyle(index, style);
+                    }
+                }
+                this.setStyle(other.getStyle());
 
-        // deep copy data point labels and styles
-        dataLabels.clear();
-        for (int index = 0; index < other.getDataCount(); index++) {
-            final String label = other.getDataLabel(index);
-            if (label != null && !label.isEmpty()) {
-                this.addDataLabel(index, label);
-            }
-        }
-        dataStyles.clear();
-        for (int index = 0; index < other.getDataCount(); index++) {
-            final String style = other.getStyle(index);
-            if (style != null && !style.isEmpty()) {
-                this.addDataStyle(index, style);
-            }
-        }
-        this.setStyle(other.getStyle());
-
-        this.set(toFloats(other.getXValues()), toFloats(other.getYValues()), true);
-        setAutoNotifaction(oldAuto);
-        other.unlock();
-        return unlock().fireInvalidated(new UpdatedDataEvent(this));
+                this.set(toFloats(other.getXValues()), toFloats(other.getYValues()), true);
+            });
+        });
+        return fireInvalidated(new UpdatedDataEvent(this));
     }
 
     public static float[] toFloats(final double[] input) {

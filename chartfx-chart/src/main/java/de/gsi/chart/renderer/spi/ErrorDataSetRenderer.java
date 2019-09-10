@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,14 +35,13 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.FillRule;
 
 /**
- * Renders data points with error bars and/or error surfaces 
+ * Renders data points with error bars and/or error surfaces
  * It can be used e.g. to render horizontal and/or vertical errors
- * 
  * additional functionality:
  * <ul>
- * <li> bar-type plot
- * <li> polar-axis plotting
- * <li> scatter and/or bubble-chart-type plots
+ * <li>bar-type plot
+ * <li>polar-axis plotting
+ * <li>scatter and/or bubble-chart-type plots
  * </ul>
  *
  * @author R.J. Steinhagen
@@ -63,6 +63,7 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
     private static final String Y_DRAW_POLY_LINE_HISTOGRAM = "yDrawPolyLineHistogram";
     private static final String X_DRAW_POLY_LINE_HISTOGRAM = "xDrawPolyLineHistogram";
     private Marker marker = DefaultMarker.RECTANGLE; // default: rectangle
+    private long stopStamp;
 
     /**
      * Creates new <code>ErrorDataSetRenderer</code>.
@@ -114,7 +115,8 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
         ProcessingProfiler.getTimeDiff(start, "init");
 
         for (int dataSetIndex = localDataSetList.size() - 1; dataSetIndex >= 0; dataSetIndex--) {
-            long stop = ProcessingProfiler.getTimeStamp();
+            final int ldataSetIndex = dataSetIndex;
+            stopStamp = ProcessingProfiler.getTimeStamp();
             final DataSet dataSet = localDataSetList.get(dataSetIndex);
             // N.B. print out for debugging purposes, please keep (used for
             // detecting redundant or too frequent render updates)
@@ -127,62 +129,68 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
             if (dataSetIndex == 0) {
                 if (getFirstAxis(Orientation.HORIZONTAL) instanceof CategoryAxis) {
                     final CategoryAxis axis = (CategoryAxis) getFirstAxis(Orientation.HORIZONTAL);
-                    axis.updateCategories(dataSet);
+                    dataSet.lock().readLockGuard(() -> axis.updateCategories(dataSet));
                 }
 
                 if (getFirstAxis(Orientation.VERTICAL) instanceof CategoryAxis) {
                     final CategoryAxis axis = (CategoryAxis) getFirstAxis(Orientation.VERTICAL);
-                    axis.updateCategories(dataSet);
+                    dataSet.lock().readLockGuard(() -> axis.updateCategories(dataSet));
                 }
             }
 
             // check for potentially reduced data range we are supposed to plot
+            final Optional<CachedDataPoints> cachedPoints = dataSet.lock().readLockGuard(() -> {
+                int indexMin = Math.max(0, dataSet.getXIndex(xMin));
+                /* indexMax is excluded in the drawing */
+                int indexMax = Math.min(dataSet.getXIndex(xMax) + 1, dataSet.getDataCount());
+                if (xAxis.isInvertedAxis()) {
+                    final int temp = indexMin;
+                    indexMin = indexMax - 1;
+                    indexMax = temp + 1;
+                }
 
-            int indexMin = Math.max(0, dataSet.getXIndex(xMin));
-            /* indexMax is excluded in the drawing */
-            int indexMax = Math.min(dataSet.getXIndex(xMax) + 1, dataSet.getDataCount());
-            if (xAxis.isInvertedAxis()) {
-                final int temp = indexMin;
-                indexMin = indexMax - 1;
-                indexMax = temp + 1;
+                if (indexMax - indexMin <= 0) {
+                    // zero length/range data set -> nothing to be drawn                
+                    return Optional.empty();
+                }
+
+                stopStamp = ProcessingProfiler.getTimeDiff(stopStamp,
+                        "get min/max" + String.format(" from:%d to:%d", indexMin, indexMax));
+
+                final CachedDataPoints localCachedPoints = new CachedDataPoints(indexMin, indexMax,
+                        dataSet.getDataCount(), true);
+                stopStamp = ProcessingProfiler.getTimeDiff(stopStamp, "get CachedPoints");
+
+                // compute local screen coordinates
+                final boolean isPolarPlot = ((XYChart) chart).isPolarPlot();
+                if (isParallelImplementation()) {
+                	localCachedPoints.computeScreenCoordinatesInParallel(xAxis, yAxis, dataSet,
+                            dataSetOffset + ldataSetIndex, indexMin, indexMax, getErrorType(), isPolarPlot);
+                } else {
+                	localCachedPoints.computeScreenCoordinates(xAxis, yAxis, dataSet, dataSetOffset + ldataSetIndex,
+                            indexMin, indexMax, getErrorType(), isPolarPlot);
+                }
+                stopStamp = ProcessingProfiler.getTimeDiff(stopStamp, "computeScreenCoordinates()");
+                return Optional.of(localCachedPoints);
+            });
+
+            if (cachedPoints.isPresent()) {
+                // invoke data reduction algorithm
+                cachedPoints.get().reduce(rendererDataReducerProperty().get(), isReducePoints(),
+                        getMinRequiredReductionSize());
+
+                // draw individual plot components
+                drawChartCompontents(gc, cachedPoints.get());
+
+                cachedPoints.get().release();
             }
 
-            if (indexMax - indexMin <= 0) {
-                // zero length/range data set -> nothing to be drawn                
-                continue;
-            }
+            stopStamp = ProcessingProfiler.getTimeStamp();
 
-            stop = ProcessingProfiler.getTimeDiff(stop,
-                    "get min/max" + String.format(" from:%d to:%d", indexMin, indexMax));
-
-            final CachedDataPoints localCachedPoints = new CachedDataPoints(indexMin, indexMax, dataSet.getDataCount(),
-                    true);
-            stop = ProcessingProfiler.getTimeDiff(stop, "get CachedPoints");
-
-            // compute local screen coordinates
-            final boolean isPolarPlot = ((XYChart) chart).isPolarPlot();
-            if (isParallelImplementation()) {
-                localCachedPoints.computeScreenCoordinates(xAxis, yAxis, dataSet, dataSetOffset + dataSetIndex,
-                        indexMin, indexMax, getErrorType(), isPolarPlot);
-            } else {
-                localCachedPoints.computeScreenCoordinatesInParallel(xAxis, yAxis, dataSet,
-                        dataSetOffset + dataSetIndex, indexMin, indexMax, getErrorType(), isPolarPlot);
-            }
-            stop = ProcessingProfiler.getTimeDiff(stop, "computeScreenCoordinates()");
-
-            // invoke data reduction algorithm
-            localCachedPoints.reduce(rendererDataReducerProperty().get(), isReducePoints(),
-                    getMinRequiredReductionSize());
-
-            // draw individual plot components
-            drawChartCompontents(gc, localCachedPoints);
-
-            stop = ProcessingProfiler.getTimeStamp();
-
-            localCachedPoints.release();
-            ProcessingProfiler.getTimeDiff(stop, "localCachedPoints.release()");
+            ProcessingProfiler.getTimeDiff(stopStamp, "localCachedPoints.release()");
         } // end of 'dataSetIndex' loop
         ProcessingProfiler.getTimeDiff(start);
+
     }
 
     private void drawChartCompontents(final GraphicsContext gc, final CachedDataPoints localCachedPoints) {
@@ -591,7 +599,8 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
                 if (markerForPoint.getSecond() != null) {
                     gc.setFill(markerForPoint.getSecond());
                 }
-                final Marker pointMarker = markerForPoint.getFirst() == null ? defaultMarker : markerForPoint.getFirst();
+                final Marker pointMarker = markerForPoint.getFirst() == null ? defaultMarker
+                        : markerForPoint.getFirst();
                 pointMarker.draw(gc, x, y, markerForPoint.getThird());
                 gc.restore();
             }
@@ -621,8 +630,8 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
                 defaultMarker = tempType;
             } catch (final IllegalArgumentException ex) {
                 if (LOGGER.isErrorEnabled()) {
-                LOGGER.error("could not parse marker type description for '" + XYChartCss.MARKER_TYPE + "'='"
-                        + markerType + "'", ex);
+                    LOGGER.error("could not parse marker type description for '" + XYChartCss.MARKER_TYPE + "'='"
+                            + markerType + "'", ex);
                 }
             }
         }
@@ -633,8 +642,8 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
                 defaultMarkerSize = tempSize;
             } catch (final NumberFormatException ex) {
                 if (LOGGER.isErrorEnabled()) {
-                LOGGER.error("could not parse marker size description for '" + XYChartCss.MARKER_SIZE + "'='"
-                        + markerSize + "'", ex);
+                    LOGGER.error("could not parse marker size description for '" + XYChartCss.MARKER_SIZE + "'='"
+                            + markerSize + "'", ex);
                 }
             }
         }
@@ -646,8 +655,8 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
                 defaultMarkerColor = tempColor;
             } catch (final IllegalArgumentException ex) {
                 if (LOGGER.isErrorEnabled()) {
-                LOGGER.error("could not parse marker color description for '" + XYChartCss.MARKER_COLOR + "'='"
-                        + markerColor + "'", ex);
+                    LOGGER.error("could not parse marker color description for '" + XYChartCss.MARKER_COLOR + "'='"
+                            + markerColor + "'", ex);
                 }
             }
         }
