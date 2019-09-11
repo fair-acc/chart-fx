@@ -38,7 +38,7 @@ public final class StyleParser {
         if (style == null) {
             return retVal;
         }
-        final String[] keyVals = style.toLowerCase(Locale.UK).replaceAll("\\s+", "").split("[;,]");
+        final String[] keyVals = style.toLowerCase(Locale.UK).replaceAll("\\s+", "").split("[;]");
         for (final String keyVal : keyVals) {
             final String[] parts = keyVal.split("[=:]", 2);
             if (parts == null || parts[0] == null || parts.length <= 1) {
@@ -229,21 +229,5 @@ public final class StyleParser {
             }
             return Font.font(StyleParser.DEFAULT_FONT, StyleParser.DEFAULT_FONT_SIZE);
         }
-    }
-
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(final String[] args) {
-        //TODO: move this to a unit test
-        //        final String testStyle = " color1 = blue; stroke= 0; bool1=true; color2 = red2, unclean=\"a\', index1=2,index2=0xFE, float1=10e7, float2=10.333";
-        //
-        //        System.out.println("colour parser1 = " + StyleParser.getPropertyValue(testStyle, "color1"));
-        //        System.out.println("colour parser2 = " + StyleParser.getColorPropertyValue(testStyle, "color2"));
-        //        System.out.println("int parser1 = " + StyleParser.getIntegerPropertyValue(testStyle, "index1"));
-        //        System.out.println("int parser2 = " + StyleParser.getIntegerPropertyValue(testStyle, "index2"));
-        //        System.out.println("float parser1 = " + StyleParser.getFloatingDecimalPropertyValue(testStyle, "float1"));
-        //        System.out.println("float parser2 = " + StyleParser.getFloatingDecimalPropertyValue(testStyle, "float2"));
-        //        System.out.println("boolean parser1 = " + StyleParser.getBooleanPropertyValue(testStyle, "bool1"));
     }
 }
