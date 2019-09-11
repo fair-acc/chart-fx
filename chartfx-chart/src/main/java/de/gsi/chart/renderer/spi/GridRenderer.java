@@ -110,10 +110,12 @@ public class GridRenderer extends Pane implements Renderer {
                     horMinorGridStyleNode.isVisible());
             verMajorGridStyleNode.pseudoClassStateChanged(GridRenderer.SELECTED_PSEUDO_CLASS,
                     verMinorGridStyleNode.isVisible());
+            chart.requestLayout();
         };
 
         horizontalGridLinesVisibleProperty().addListener(change);
         verticalGridLinesVisibleProperty().addListener(change);
+        drawOnTopProperty().addListener(change);
     }
 
     public static List<CssMetaData<? extends Styleable, ?>> getClassCssMetaData() {

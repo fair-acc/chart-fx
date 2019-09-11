@@ -7,6 +7,16 @@ import java.util.TimerTask;
 
 import de.gsi.chart.XYChart;
 import de.gsi.chart.axes.spi.DefaultNumericAxis;
+import de.gsi.chart.plugins.DataPointTooltip;
+import de.gsi.chart.plugins.EditAxis;
+import de.gsi.chart.plugins.Panner;
+import de.gsi.chart.plugins.TableViewer;
+import de.gsi.chart.plugins.Zoomer;
+import de.gsi.chart.renderer.ErrorStyle;
+import de.gsi.chart.renderer.LineStyle;
+import de.gsi.chart.renderer.datareduction.DefaultDataReducer;
+import de.gsi.chart.renderer.spi.ErrorDataSetRenderer;
+import de.gsi.chart.utils.SimplePerformanceMeter;
 import de.gsi.dataset.DataSetError;
 import de.gsi.dataset.testdata.spi.CosineFunction;
 import de.gsi.dataset.testdata.spi.GaussFunction;
@@ -16,16 +26,6 @@ import de.gsi.dataset.testdata.spi.SincFunction;
 import de.gsi.dataset.testdata.spi.SineFunction;
 import de.gsi.dataset.testdata.spi.SingleOutlierFunction;
 import de.gsi.dataset.utils.ProcessingProfiler;
-import de.gsi.chart.plugins.DataPointTooltip;
-import de.gsi.chart.plugins.TableViewer;
-import de.gsi.chart.plugins.EditAxis;
-import de.gsi.chart.plugins.Panner;
-import de.gsi.chart.plugins.Zoomer;
-import de.gsi.chart.renderer.ErrorStyle;
-import de.gsi.chart.renderer.LineStyle;
-import de.gsi.chart.renderer.datareduction.DefaultDataReducer;
-import de.gsi.chart.renderer.spi.ErrorDataSetRenderer;
-import de.gsi.chart.utils.SimplePerformanceMeter;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.scene.Node;
@@ -139,6 +139,7 @@ public class ErrorDataSetRendererStylingSample extends Application {
         // organise parameter config according to tabs
         final TabPane tabPane = new TabPane();
 
+        tabPane.getTabs().add(getChartTab(chart));
         tabPane.getTabs().add(getRendererTab(chart, errorRenderer));
         tabPane.getTabs().add(getAxisTab("x-Axis", chart, xAxis));
         tabPane.getTabs().add(getAxisTab("y-Axis", chart, yAxis));
@@ -289,6 +290,23 @@ public class ErrorDataSetRendererStylingSample extends Application {
 
         });
         startTime = ProcessingProfiler.getTimeDiff(startTime, "adding data into DataSet");
+    }
+
+    private Tab getChartTab(XYChart chart) {
+        final ParameterTab pane = new ParameterTab("Chart");
+
+        final CheckBox gridVisible = new CheckBox("");
+        gridVisible.setSelected(true);
+        chart.horizontalGridLinesVisibleProperty().bindBidirectional(gridVisible.selectedProperty());
+        chart.verticalGridLinesVisibleProperty().bindBidirectional(gridVisible.selectedProperty());
+        pane.addToParameterPane("Show Grid: ", gridVisible);
+
+        final CheckBox gridOnTop = new CheckBox("");
+        gridOnTop.setSelected(true);
+        chart.getGridRenderer().drawOnTopProperty().bindBidirectional(gridOnTop.selectedProperty());
+        pane.addToParameterPane("Grid on top: ", gridOnTop);
+
+        return pane;
     }
 
     private ParameterTab getRendererTab(final XYChart chart, final ErrorDataSetRenderer errorRenderer) {
