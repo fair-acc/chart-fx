@@ -51,7 +51,7 @@ public abstract class AbstractErrorDataSetRendererParameter<R extends AbstractEr
     private final DoubleProperty barWidthPercentage = new SimpleDoubleProperty(this, "barWidthPercentage", 70.0);
     private final IntegerProperty barWidth = new SimpleIntegerProperty(this, "barWidth", 5);
     private final BooleanProperty parallelImplementation = new SimpleBooleanProperty(this, "parallelImplementation",
-            false);
+            true);
     private final DoubleProperty intensityFading = new SimpleDoubleProperty(this, "intensityFading",
             AbstractErrorDataSetRendererParameter.DEFAULT_HISTORY_INTENSITY_FADING);
     private final BooleanProperty drawBubbles = new SimpleBooleanProperty(this, "drawBubbles", false);
