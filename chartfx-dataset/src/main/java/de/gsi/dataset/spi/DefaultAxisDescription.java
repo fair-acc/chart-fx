@@ -38,6 +38,17 @@ public class DefaultAxisDescription extends DataRange implements AxisDescription
     }
 
     /**
+     * Copy constructor to generate axisDescriptions for datasets from existing Axis Descriptions
+     * @param dataSet for which the update events shall be registered
+     * @param axisDesc axis Description to copy all data except dataSet from
+     */
+    public DefaultAxisDescription(final DataSet dataSet, final AxisDescription axisDesc) {
+        super();
+        this.dataSet = dataSet;
+        this.set(axisDesc.getName(), axisDesc.getUnit(), axisDesc.getMin(), axisDesc.getMax());
+    }
+
+    /**
      * @param dataSet for which the update events shall be registered
      * @param axisName the new axis name
      * @param axisUnit the new axis unit
