@@ -55,7 +55,7 @@ public class ErrorDataSetRendererSample extends Application {
         chart.getXAxis().setLabel("time");
         chart.getXAxis().setUnit("s");
         chart.getXAxis().setAutoUnitScaling(true);
-        
+
         chart.getYAxis().setLabel("y-axis");
         chart.getYAxis().setAutoUnitScaling(true);
         chart.legendVisibleProperty().set(true);
@@ -176,28 +176,28 @@ public class ErrorDataSetRendererSample extends Application {
     private void generateData(final DoubleErrorDataSet dataSet, final DoubleDataSet dataSetNoErrors) {
         final long startTime = ProcessingProfiler.getTimeStamp();
 
-        dataSet.setAutoNotifaction(false);
-        dataSetNoErrors.setAutoNotifaction(false);
-        dataSet.clearData();
-        dataSetNoErrors.clearData();
-        double oldY = 0;
-        for (int n = 0; n < ErrorDataSetRendererSample.N_SAMPLES; n++) {
-            final double x = n;
-            oldY += RandomDataGenerator.random() - 0.5;
-            final double y = oldY + (n == 500000 ? 500.0 : 0);
-            final double ex = 0.1;
-            final double ey = 10;
-            dataSet.add(x, y, ex, ey);
-            dataSetNoErrors.add(x, y + 20);
+        dataSet.lock().writeLockGuard(() -> {
+            dataSetNoErrors.lock().writeLockGuard(() -> {
+                dataSet.clearData();
+                dataSetNoErrors.clearData();
+                double oldY = 0;
+                for (int n = 0; n < ErrorDataSetRendererSample.N_SAMPLES; n++) {
+                    final double x = n;
+                    oldY += RandomDataGenerator.random() - 0.5;
+                    final double y = oldY + (n == 500000 ? 500.0 : 0);
+                    final double ex = 0.1;
+                    final double ey = 10;
+                    dataSet.add(x, y, ex, ey);
+                    dataSetNoErrors.add(x, y + 20);
 
-            if (n == 500000) {
-                dataSet.getDataLabelMap().put(n, "special outlier");
-                dataSetNoErrors.getDataLabelMap().put(n, "special outlier");
-            }
-        }
+                    if (n == 500000) {
+                        dataSet.getDataLabelMap().put(n, "special outlier");
+                        dataSetNoErrors.getDataLabelMap().put(n, "special outlier");
+                    }
+                }
+            });
+        });
         ProcessingProfiler.getTimeDiff(startTime, "generating data DataSet");
-        dataSetNoErrors.setAutoNotifaction(true);
-        dataSet.setAutoNotifaction(true);
 
         dataSet.fireInvalidated(null);
         // Platform.runLater(() -> dataSetNoErrors.fireInvalidated());
