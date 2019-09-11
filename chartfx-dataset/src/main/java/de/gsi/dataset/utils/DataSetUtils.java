@@ -877,6 +877,11 @@ public class DataSetUtils extends DataSetUtilsHelper {
                 buffer.append('#').append(axisId.get(i)).append("Name : ").append(axisDesc.getName()).append('\n');
                 buffer.append('#').append(axisId.get(i)).append("Unit : ").append(axisDesc.getUnit()).append('\n');
                 i++;
+                if (i >= 26) {
+                    LOGGER.atWarn().log(
+                            "Writing Axis Metadata for more than 26 dimensional data is currently not supported, sorry");
+                    break;
+                }
             }
 
             if (dataSet instanceof DataSet3D) {
@@ -1147,47 +1152,64 @@ public class DataSetUtils extends DataSetUtilsHelper {
 
                 if (line.matches("^#.Min.*")) {
                     int dim = axisId.indexOf(line.charAt(1));
+                    if (dim < 0)
+                        LOGGER.atError().log("Axis index does not exist: {}", line.charAt(1));
                     while (axisDesc.size() < dim + 1)
                         axisDesc.add(new DefaultAxisDescription());
                     axisDesc.get(dim).setMin(Double.parseDouble(getValue(line)));
+                    continue;
                 }
                 if (line.matches("^#.Max.*")) {
                     int dim = axisId.indexOf(line.charAt(1));
+                    if (dim < 0)
+                        LOGGER.atError().log("Axis index does not exist: {}", line.charAt(1));
                     while (axisDesc.size() < dim + 1)
                         axisDesc.add(new DefaultAxisDescription());
                     axisDesc.get(dim).setMax(Double.parseDouble(getValue(line)));
+                    continue;
                 }
                 if (line.matches("^#.Name.*")) {
                     int dim = axisId.indexOf(line.charAt(1));
+                    if (dim < 0)
+                        LOGGER.atError().log("Axis index does not exist: {}", line.charAt(1));
                     while (axisDesc.size() < dim + 1)
                         axisDesc.add(new DefaultAxisDescription());
                     axisDesc.get(dim).set(getValue(line) == null ? "" : getValue(line));
+                    continue;
                 }
                 if (line.matches("^#.Unit.*")) {
                     int dim = axisId.indexOf(line.charAt(1));
+                    if (dim < 0)
+                        LOGGER.atError().log("Axis index does not exist: {}", line.charAt(1));
                     while (axisDesc.size() < dim + 1)
                         axisDesc.add(new DefaultAxisDescription());
                     axisDesc.get(dim).set(axisDesc.get(dim).getName(), getValue(line) == null ? "" : getValue(line));
+                    continue;
                 }
 
                 if (line.contains("#dataSetName")) {
                     dataSetName = getValue(line);
+                    continue;
                 }
 
                 if (line.contains("#nSamples")) {
                     nDataCountEstimate = Integer.parseInt(getValue(line));
+                    continue;
                 }
 
                 if (line.contains("#info")) {
                     info.add(getValue(line));
+                    continue;
                 }
 
                 if (line.contains("#warning")) {
                     warning.add(getValue(line));
+                    continue;
                 }
 
                 if (line.contains("#error")) {
                     error.add(getValue(line));
+                    continue;
                 }
 
                 if (line.contains("#metaKey -")) {
@@ -1198,6 +1220,7 @@ public class DataSetUtils extends DataSetUtilsHelper {
                     } else {
                         metaInfoMap.put(key, value);
                     }
+                    continue;
                 }
 
             }
