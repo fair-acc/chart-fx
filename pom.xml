@@ -121,6 +121,13 @@
                             </goals>
                             <phase>site</phase>
                         </execution>
+			<execution>
+                            <id>attach-javadocs</id>
+                            <goals>
+                                <goal>jar</goal>
+                            </goals>
+                            <!-- <configuration> <additionalparam>-Xdoclint:none</additionalparam> <skip>true</skip> </configuration> -->
+                        </execution>
                     </executions>
                 </plugin>
                 <plugin>
@@ -171,20 +178,6 @@
                         <goals>
                             <goal>jar-no-fork</goal>
                         </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-javadoc-plugin</artifactId>
-                <!-- <configuration> <additionalparam>-Xdoclint:none</additionalparam> <skip>true</skip> </configuration> -->
-                <executions>
-                    <execution>
-                        <id>attach-javadocs</id>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
-                        <!-- <configuration> <additionalparam>-Xdoclint:none</additionalparam> <skip>true</skip> </configuration> -->
                     </execution>
                 </executions>
             </plugin>
