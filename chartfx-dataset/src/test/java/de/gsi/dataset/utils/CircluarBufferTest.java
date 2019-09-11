@@ -32,7 +32,7 @@ class CircluarBufferTest {
      */
     @Test
     public void testCircularBuffer() {
-        //assertEquals(bufferLength, buffer1.remainingCapacity());
+        assertEquals(bufferLength, buffer1.remainingCapacity());
         assertEquals(0, buffer1.available());
         final Double[] input = new Double[fillBufferLength];
         final Double[] output = new Double[fillBufferLength];
@@ -45,7 +45,7 @@ class CircluarBufferTest {
         assertEquals(-1.0, buffer2.get(1));
         assertEquals(-2.0, buffer2.get());
 
-        //assertEquals(bufferLength-2, buffer1.remainingCapacity());
+        assertEquals(bufferLength-2, buffer1.remainingCapacity());
         assertEquals(2, buffer1.available());
 
         for (int i = 0; i < fillBufferLength; i++) {
@@ -53,12 +53,12 @@ class CircluarBufferTest {
             input[i] = (double) i;
         }
         
-        //assertEquals(0, buffer1.remainingCapacity());
+        assertEquals(0, buffer1.remainingCapacity());
         assertEquals(bufferLength, buffer1.available());
         
         buffer2.put(input, fillBufferLength);
         
-//        assertEquals(0, buffer2.remainingCapacity());
+        assertEquals(0, buffer2.remainingCapacity());
         assertEquals(bufferLength, buffer2.available());
 
         assertEquals(25.0, buffer2.get());
