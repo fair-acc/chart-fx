@@ -47,7 +47,7 @@ public class CircularBuffer<E extends Object> {
      * @return number of available buffer elements that can be written before buffer wraps-around
      */
     public int remainingCapacity() {
-        return available();
+        return capacity - available();
     }
 
     /**
