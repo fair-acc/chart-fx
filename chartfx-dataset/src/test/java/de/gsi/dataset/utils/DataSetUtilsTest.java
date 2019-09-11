@@ -8,6 +8,7 @@ import java.io.ByteArrayOutputStream;
 import java.util.Arrays;
 import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
@@ -18,6 +19,7 @@ import org.slf4j.LoggerFactory;
 
 import de.gsi.dataset.DataSet;
 import de.gsi.dataset.DataSet3D;
+import de.gsi.dataset.event.AxisNameChangeEvent;
 import de.gsi.dataset.spi.DataSetBuilder;
 import de.gsi.dataset.spi.DefaultDataSet;
 import de.gsi.dataset.spi.DoubleDataSet3D;
@@ -81,6 +83,17 @@ public class DataSetUtilsTest {
             assertEquals(dataSet.getAxisDescription(i).getMin(), dataSetRead.getAxisDescription(i).getMin(), EPSILON);
             assertEquals(dataSet.getAxisDescription(i).getMax(), dataSetRead.getAxisDescription(i).getMax(), EPSILON);
         }
+        // test notification
+        AtomicInteger notified = new AtomicInteger(0);
+        dataSetRead.addListener((change) -> {
+            if (change instanceof AxisNameChangeEvent) {
+                // Because the AxisDescription sends the event itself, it does not know its dimemnsion and sends -1
+                //assertEquals(1, ((AxisNameChangeEvent) change).getDimension());
+                notified.incrementAndGet();
+            }
+        });
+        dataSetRead.getAxisDescription(1).set("Test");
+        assertEquals(1, notified.get());
     }
 
     @DisplayName("Serialize and Deserialize DataSet3D into StringBuffer and back")

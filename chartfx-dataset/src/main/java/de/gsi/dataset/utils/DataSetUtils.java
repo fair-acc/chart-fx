@@ -1234,7 +1234,9 @@ public class DataSetUtils extends DataSetUtilsHelper {
             ((DataSetMetaData) dataSet).getMetaInfo().putAll(metaInfoMap);
             ((DataSetMetaData) dataSet).getInfoList();
             dataSet.getAxisDescriptions().clear();
-            dataSet.getAxisDescriptions().addAll(axisDesc);
+            for (AxisDescription a: axisDesc) {
+                dataSet.getAxisDescriptions().add(new DefaultAxisDescription(dataSet, a));
+            }
 
             // automatically closing reader connection
         } catch (final IOException e) {
