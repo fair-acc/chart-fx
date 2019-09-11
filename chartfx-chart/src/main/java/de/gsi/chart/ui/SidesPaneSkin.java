@@ -19,7 +19,6 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Region;
 import javafx.scene.shape.Rectangle;
-import javafx.scene.web.WebView;
 import javafx.util.Duration;
 
 public class SidesPaneSkin extends SkinBase<SidesPane> {
@@ -131,9 +130,6 @@ public class SidesPaneSkin extends SkinBase<SidesPane> {
         } else if (node instanceof Canvas) {
             ((Canvas) node).setHeight(prefHeight);
             return;
-        } else if (node instanceof WebView) {
-            ((WebView) node).setPrefHeight(prefHeight);
-            return;
         }
         // add other derivative of 'Node'
         throw new InvalidParameterException("no prefHeight for class type:" + node.getClass().getCanonicalName());
@@ -154,9 +150,6 @@ public class SidesPaneSkin extends SkinBase<SidesPane> {
             return;
         } else if (node instanceof Canvas) {
             ((Canvas) node).setWidth(prefWidth);
-            return;
-        } else if (node instanceof WebView) {
-            ((WebView) node).setPrefWidth(prefWidth);
             return;
         }
         // add other derivative of 'Node'
