@@ -5,6 +5,9 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.gsi.chart.axes.AxisTransform;
 import de.gsi.chart.axes.LogAxisType;
 import de.gsi.chart.axes.TickUnitSupplier;
@@ -35,6 +38,7 @@ import javafx.scene.chart.NumberAxis;
  * @author rstein
  */
 public class DefaultNumericAxis extends AbstractAxis {
+    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultNumericAxis.class);
     public static final double DEFAULT_LOG_MIN_VALUE = 1e-6;
     private static final int MAX_TICK_COUNT = 20;
     private static final int DEFAULT_RANGE_LENGTH = 2;
@@ -559,6 +563,10 @@ public class DefaultNumericAxis extends AbstractAxis {
 
         final double firstTick = DefaultNumericAxis.computeFistMajorTick(axisRange.getLowerBound(),
                 axisRange.getTickUnit());
+        if (firstTick + axisRange.getTickUnit() == firstTick) {
+            LOGGER.atDebug().log("major ticks numerically not resolvable");
+            return tickValues;
+        }
         for (double major = firstTick; major <= axisRange.getUpperBound(); major += axisRange.getTickUnit()) {
             tickValues.add(major);
         }
@@ -587,6 +595,10 @@ public class DefaultNumericAxis extends AbstractAxis {
                 final double nextMajorTick = axisTransform.backward(exp + 1);
                 final double minorUnit = (nextMajorTick - majorTick) / getMinorTickCount();
                 for (double minorTick = majorTick + minorUnit; minorTick < nextMajorTick; minorTick += minorUnit) {
+                    if (minorTick == majorTick) {
+                        LOGGER.atDebug().log("minor ticks numerically not possible");
+                        break;
+                    }
                     if (minorTick >= lowerBound && minorTick <= upperBound) {
                         minorTickMarks.add(minorTick);
                     }
@@ -597,8 +609,16 @@ public class DefaultNumericAxis extends AbstractAxis {
             final double minorUnit = majorUnit / getMinorTickCount();
 
             for (double majorTick = firstMajorTick - majorUnit; majorTick < upperBound; majorTick += majorUnit) {
+                if (majorTick + majorUnit == majorTick) {
+                    LOGGER.atDebug().log("major ticks numerically not resolvable");
+                    break;
+                }
                 final double nextMajorTick = majorTick + majorUnit;
                 for (double minorTick = majorTick + minorUnit; minorTick < nextMajorTick; minorTick += minorUnit) {
+                    if (minorTick == majorTick) {
+                        LOGGER.atDebug().log("minor ticks numerically not possible");
+                        break;
+                    }
                     if (minorTick >= lowerBound && minorTick <= upperBound) {
                         minorTickMarks.add(minorTick);
                     }

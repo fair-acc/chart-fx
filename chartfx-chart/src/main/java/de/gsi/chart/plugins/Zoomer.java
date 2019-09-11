@@ -10,6 +10,8 @@ import java.util.function.Predicate;
 
 import org.controlsfx.control.RangeSlider;
 import org.controlsfx.glyphfont.Glyph;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import de.gsi.chart.Chart;
 import de.gsi.chart.axes.Axis;
@@ -69,6 +71,7 @@ import javafx.util.Duration;
  *         events outside canvas, auto-ranging on zoom-out, scrolling, toolbar)
  */
 public class Zoomer extends ChartPlugin {
+    private static final Logger LOGGER = LoggerFactory.getLogger(Zoomer.class);
     private static final String FONT_AWESOME = "FontAwesome";
     private static final String ZOOMER_OMIT_AXIS = "OmitAxisZoom";
     /**
@@ -799,6 +802,11 @@ public class Zoomer extends ChartPlugin {
     private void performZoom(Entry<Axis, ZoomState> zoomStateEntry, final boolean isZoomIn) {
         Axis axis = zoomStateEntry.getKey();
         ZoomState zoomState = zoomStateEntry.getValue();
+
+        if (zoomState.zoomRangeMax - zoomState.zoomRangeMin == 0) {
+            LOGGER.atDebug().log("Cannot zoom in deeper than numerical precision");
+            return;
+        }
 
         if (isZoomIn && ((axis.getSide().isHorizontal() && getAxisMode().allowsX())
                 || (axis.getSide().isVertical() && getAxisMode().allowsY()))) {
