@@ -10,6 +10,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import de.gsi.dataset.AxisDescription;
 import de.gsi.dataset.DataSet;
 import de.gsi.dataset.DataSetError;
 import de.gsi.dataset.DataSetMetaData;
@@ -42,10 +43,11 @@ public class DataSetSerialiser extends DataSetUtilsHelper {
     private static final String XEP = "xep";
     private static final String YEP = "yep";
     private static final String YEN = "yen";
-    private static final String Y_MAX = "yMax";
-    private static final String Y_MIN = "yMin";
-    private static final String X_MAX = "xMax";
-    private static final String X_MIN = "xMin";
+    private static final String AXIS = "axis";
+    private static final String NAME = "name";
+    private static final String UNIT = "unit";
+    private static final String MIN = "Min";
+    private static final String MAX = "Max";
     private static final String META_INFO = "metaInfo";
     private static final String ERROR_LIST = "errorList";
     private static final String WARNING_LIST = "warningList";
@@ -77,7 +79,7 @@ public class DataSetSerialiser extends DataSetUtilsHelper {
                 throw new InputMismatchException(fieldName + " is type " + fieldHeader.get().getDataType()
                         + " vs. required type " + requireDataTypes);
             }
-            
+
             final long dataPosition = fieldHeader.get().getDataBufferPosition();
             buffer.position(dataPosition);
             return fieldHeader;
@@ -115,20 +117,21 @@ public class DataSetSerialiser extends DataSetUtilsHelper {
             builder.setName(BinarySerialiser.getString(readBuffer));
         }
 
-        // read doubles
-        if (checkFieldCompatibility(readBuffer, fieldHeaderList, X_MIN, DataType.DOUBLE).isPresent()) {
+        // check for axis descriptions
+        // TODO: match any field variable starting with 'axis<int>.XXXX'
+        if (checkFieldCompatibility(readBuffer, fieldHeaderList, "axis0.Min", DataType.DOUBLE).isPresent()) {
             builder.setXMin(BinarySerialiser.getDouble(readBuffer));
         }
 
-        if (checkFieldCompatibility(readBuffer, fieldHeaderList, X_MAX, DataType.DOUBLE).isPresent()) {
+        if (checkFieldCompatibility(readBuffer, fieldHeaderList, "axis0.Max", DataType.DOUBLE).isPresent()) {
             builder.setXMax(BinarySerialiser.getDouble(readBuffer));
         }
 
-        if (checkFieldCompatibility(readBuffer, fieldHeaderList, Y_MIN, DataType.DOUBLE).isPresent()) {
+        if (checkFieldCompatibility(readBuffer, fieldHeaderList, "axis1.Min", DataType.DOUBLE).isPresent()) {
             builder.setYMin(BinarySerialiser.getDouble(readBuffer));
         }
 
-        if (checkFieldCompatibility(readBuffer, fieldHeaderList, Y_MAX, DataType.DOUBLE).isPresent()) {
+        if (checkFieldCompatibility(readBuffer, fieldHeaderList, "axis1.Max", DataType.DOUBLE).isPresent()) {
             builder.setYMax(BinarySerialiser.getDouble(readBuffer));
         }
 
@@ -245,9 +248,13 @@ public class DataSetSerialiser extends DataSetUtilsHelper {
         // parsed until end of buffer
         parseHeader(readBuffer, builder, fieldHeaderList);
 
-        parseMetaData(readBuffer, builder, fieldHeaderList);
+        if (isMetaDataSerialised()) {
+            parseMetaData(readBuffer, builder, fieldHeaderList);
+        }
 
-        parseDataLabels(readBuffer, builder, fieldHeaderList);
+        if (isDataLablesSerialised()) {
+            parseDataLabels(readBuffer, builder, fieldHeaderList);
+        }
 
         parseNumericData(readBuffer, builder, fieldHeaderList);
 
@@ -415,10 +422,25 @@ public class DataSetSerialiser extends DataSetUtilsHelper {
     protected static void writeHeaderDataToStream(final IoBuffer buffer, final DataSet dataSet) {
         // common header data
         BinarySerialiser.put(buffer, DATA_SET_NAME, dataSet.getName());
-        BinarySerialiser.put(buffer, X_MIN, dataSet.getAxisDescription(0).getMin());
-        BinarySerialiser.put(buffer, X_MAX, dataSet.getAxisDescription(0).getMax());
-        BinarySerialiser.put(buffer, Y_MIN, dataSet.getAxisDescription(1).getMin());
-        BinarySerialiser.put(buffer, Y_MAX, dataSet.getAxisDescription(1).getMax());
+        final List<AxisDescription> axisDescriptions = dataSet.getAxisDescriptions();
+        StringBuilder builder = new StringBuilder(60);
+        for (int i = 0; i < axisDescriptions.size(); i++) {
+            builder.setLength(0);
+            final String prefix = builder.append(AXIS).append(Integer.toString(i)).append('.').toString();
+            builder.setLength(0);
+            final String name = builder.append(prefix).append(NAME).toString();
+            builder.setLength(0);
+            final String unit = builder.append(prefix).append(UNIT).toString();
+            builder.setLength(0);
+            final String minName = builder.append(prefix).append(MIN).toString();
+            builder.setLength(0);
+            final String maxName = builder.append(prefix).append(MAX).toString();
+
+            BinarySerialiser.put(buffer, name, dataSet.getAxisDescription(i).getName());
+            BinarySerialiser.put(buffer, unit, dataSet.getAxisDescription(i).getUnit());
+            BinarySerialiser.put(buffer, minName, dataSet.getAxisDescription(i).getMin());
+            BinarySerialiser.put(buffer, maxName, dataSet.getAxisDescription(i).getMax());
+        }
 
         // write some statistics for the human readable benefit when
         // opening the

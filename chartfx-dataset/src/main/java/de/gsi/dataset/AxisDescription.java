@@ -79,6 +79,16 @@ public interface AxisDescription {
     boolean isDefined();
 
     /**
+     * Sets updates this AxisDescription with the specified other one.
+     *
+     * @param range other {@code AxisDescription} object
+     * @return <code>true</code> if the value becomes <code>min</code> or <code>max</code>.
+     */
+    default boolean set(final AxisDescription range) {
+        return set(range.getName(), range.getUnit(), range.getMin(), range.getMax());
+    }
+
+    /**
      * Sets <code>min</code> and <code>max</code> values for this range.
      * 
      * @param min new minimum of the range
