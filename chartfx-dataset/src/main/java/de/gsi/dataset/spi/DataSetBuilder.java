@@ -24,6 +24,7 @@ public class DataSetBuilder {
     protected Map<String, String> metaInfoMap = new HashMap<>();
     protected Map<Integer, String> dataLabels = new HashMap<>();
     protected Map<Integer, String> dataStyles = new HashMap<>();
+    protected List<AxisDescription> axisDescription = new ArrayList<>();
     protected String xAxisName;
     protected String yAxisName;
     protected String xAxisUnit;
