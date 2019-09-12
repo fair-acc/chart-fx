@@ -107,7 +107,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-javadoc-plugin</artifactId>
-                    <version>3.1.1</version>
+                    <version>3.0.1</version>
                     <configuration>
                         <links>
                             <link>https://openjfx.io/javadoc/12/</link>
