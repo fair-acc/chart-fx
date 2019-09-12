@@ -4,9 +4,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.StampedLock;
 import java.util.function.Supplier;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import de.gsi.dataset.DataSet;
 
 /**
@@ -58,7 +55,6 @@ import de.gsi.dataset.DataSet;
 @SuppressWarnings({"PMD.DoNotUseThreads", "PMD.CommentSize"}) // Runnable used as functional interface
 public class DefaultDataSetLock<D extends DataSet> implements DataSetLock<D> {
 	private static final long serialVersionUID = 1L;
-	private static final Logger LOGGER = LoggerFactory.getLogger(DefaultDataSetLock.class);
 	private final transient StampedLock stampedLock = new StampedLock();
 	private transient long lastReadStamp;
 	private transient long lastWriteStamp;
@@ -75,10 +71,6 @@ public class DefaultDataSetLock<D extends DataSet> implements DataSetLock<D> {
 		this.dataSet = dataSet;
 		if (dataSet == null) {
 			throw new IllegalArgumentException("dataSet must not be null");
-		}
-
-		if (LOGGER.isDebugEnabled()) {
-			LOGGER.atDebug().log("init lock");
 		}
 	}
 
