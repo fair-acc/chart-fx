@@ -5,6 +5,7 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
+import java.util.Set;
 
 /**
  * Enum defining the data primitives that can be serialised. Arrays are always
@@ -44,7 +45,7 @@ public enum DataType {
     LIST                     (202, "list",           "",                    1, List.class, Cat.OBJECT),
     MAP                      (203, "map",            "",                    1, Map.class, Cat.OBJECT),
     QUEUE                    (204, "queue",          "",                    1, Queue.class, Cat.OBJECT),
-
+    SET                      (205, "set",            "",                    1, Set.class, Cat.OBJECT),
 
     // default for future extensions (e.g. moving to short
     OTHER                    (0xFD, "other",         "",                    1, Object.class, Cat.PRIMITIVE),
