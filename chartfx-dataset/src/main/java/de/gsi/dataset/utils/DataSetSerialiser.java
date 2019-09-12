@@ -246,7 +246,7 @@ public class DataSetSerialiser extends DataSetUtilsHelper {
 
 		final HeaderInfo bufferHeader = BinarySerialiser.checkHeaderInfo(readBuffer);
 		if (LOGGER.isDebugEnabled()) {
-			LOGGER.debug("read header = %s{}", bufferHeader);
+			LOGGER.atDebug().addArgument(bufferHeader).log("read header = {}");
 		}
 		final List<FieldHeader> fieldHeaderList = new ArrayList<>();
 
