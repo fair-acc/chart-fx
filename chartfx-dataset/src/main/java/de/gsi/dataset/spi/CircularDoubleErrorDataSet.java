@@ -2,7 +2,8 @@ package de.gsi.dataset.spi;
 
 import de.gsi.dataset.AxisDescription;
 import de.gsi.dataset.DataSetError;
-import de.gsi.dataset.event.InvalidatedEvent;
+import de.gsi.dataset.event.AddedDataEvent;
+import de.gsi.dataset.event.RemovedDataEvent;
 import de.gsi.dataset.utils.AssertUtils;
 import de.gsi.dataset.utils.CircularBuffer;
 import de.gsi.dataset.utils.DoubleCircularBuffer;
@@ -97,7 +98,7 @@ public class CircularDoubleErrorDataSet extends AbstractErrorDataSet<CircularDou
             recomputeLimits(0);
             recomputeLimits(1);
         });
-        fireInvalidated(new InvalidatedEvent(this));
+        fireInvalidated(new AddedDataEvent(this));
         return this;
     }
 
@@ -163,7 +164,7 @@ public class CircularDoubleErrorDataSet extends AbstractErrorDataSet<CircularDou
             recomputeLimits(0);
             recomputeLimits(1);
         });
-        fireInvalidated(new InvalidatedEvent(this));
+        fireInvalidated(new AddedDataEvent(this));
         return this;
     }
 
@@ -182,7 +183,7 @@ public class CircularDoubleErrorDataSet extends AbstractErrorDataSet<CircularDou
             dataStyles.reset();
             getAxisDescriptions().forEach(AxisDescription::empty);
         });
-        fireInvalidated(new InvalidatedEvent(this));
+        fireInvalidated(new RemovedDataEvent(this));
         return this;
     }
 
