@@ -12,30 +12,30 @@ import de.gsi.dataset.event.AxisRangeChangeEvent;
  * @author rstein
  */
 public class DefaultAxisDescription extends DataRange implements AxisDescription {
-    private final DataSet dataSet;
-    private String name;
-    private String unit;
+	private final DataSet dataSet;
+	private String name;
+	private String unit;
 
-    /**
-     * Default
-     */
-    public DefaultAxisDescription() {
-        super();
-        dataSet = null;
-        name = "unknown axis";
-        unit = "a.u.";
-    }
+	/**
+	 * Default
+	 */
+	public DefaultAxisDescription() {
+		super();
+		dataSet = null;
+		name = "unknown axis";
+		unit = "a.u.";
+	}
 
-    /**
-     * @param dataSet for which the update events shall be registered
-     * @param axisName the new axis name
-     * @param axisUnit the new axis unit
-     */
-    public DefaultAxisDescription(final DataSet dataSet, final String axisName, final String... axisUnit) {
-        super();
-        this.dataSet = dataSet;
-        this.set(axisName, axisUnit);
-    }
+	/**
+	 * @param dataSet  for which the update events shall be registered
+	 * @param axisName the new axis name
+	 * @param axisUnit the new axis unit
+	 */
+	public DefaultAxisDescription(final DataSet dataSet, final String axisName, final String... axisUnit) {
+		super();
+		this.dataSet = dataSet;
+		this.set(axisName, axisUnit);
+	}
 
     /**
      * Copy constructor to generate axisDescriptions for datasets from existing Axis Descriptions
@@ -48,220 +48,226 @@ public class DefaultAxisDescription extends DataRange implements AxisDescription
         this.set(axisDesc.getName(), axisDesc.getUnit(), axisDesc.getMin(), axisDesc.getMax());
     }
 
-    /**
-     * @param dataSet for which the update events shall be registered
-     * @param axisName the new axis name
-     * @param axisUnit the new axis unit
-     * @param rangeMin the user-provided new minimum value of the DataSet/Axis range
-     * @param rangeMax the user-provided new maximum value of the DataSet/Axis range
-     */
-    public DefaultAxisDescription(final DataSet dataSet, final String axisName, final String axisUnit,
-            final double rangeMin, final double rangeMax) {
-        super();
-        this.dataSet = dataSet;
-        this.set(axisName, axisUnit, rangeMin, rangeMax);
-    }
+	/**
+	 * @param dataSet  for which the update events shall be registered
+	 * @param axisName the new axis name
+	 * @param axisUnit the new axis unit
+	 * @param rangeMin the user-provided new minimum value of the DataSet/Axis range
+	 * @param rangeMax the user-provided new maximum value of the DataSet/Axis range
+	 */
+	public DefaultAxisDescription(final DataSet dataSet, final String axisName, final String axisUnit,
+			final double rangeMin, final double rangeMax) {
+		super();
+		this.dataSet = dataSet;
+		this.set(axisName, axisUnit, rangeMin, rangeMax);
+	}
 
-    /**
-     * @param axisName the new axis name
-     * @param axisUnit the new axis unit
-     */
-    public DefaultAxisDescription(final String axisName, final String... axisUnit) {
-        this(null, axisName, axisUnit);
-    }
+	/**
+	 * @param axisName the new axis name
+	 * @param axisUnit the new axis unit
+	 */
+	public DefaultAxisDescription(final String axisName, final String... axisUnit) {
+		this(null, axisName, axisUnit);
+	}
 
-    /**
-     * Adds value to this range.
-     *
-     * @param value value to be added
-     * @return <code>true</code> if the value becomes <code>min</code> or <code>max</code>.
-     */
-    @Override
-    public boolean add(final double value) {
-        if (!super.add(value)) {
-            return false;
-        }
+	/**
+	 * Adds value to this range.
+	 *
+	 * @param value value to be added
+	 * @return <code>true</code> if the value becomes <code>min</code> or
+	 *         <code>max</code>.
+	 */
+	@Override
+	public boolean add(final double value) {
+		if (!super.add(value)) {
+			return false;
+		}
 
-        notifyRangeChange();
-        return true;
-    }
+		notifyRangeChange();
+		return true;
+	}
 
-    /**
-     * Adds values to this range.
-     *
-     * @param values values to be added
-     * @param nlength the maximum array length that should be taken into account
-     * @return <code>true</code> if the value becomes <code>min</code> or
-     *         <code>max</code>.
-     */
-    @Override
-    public boolean add(final double[] values, final int nlength) {
-        if (!super.add(values, nlength)) {
-            return false;
-        }
-        //System.err.println("invoke event update after add (double[], int)");
+	/**
+	 * Adds values to this range.
+	 *
+	 * @param values  values to be added
+	 * @param nlength the maximum array length that should be taken into account
+	 * @return <code>true</code> if the value becomes <code>min</code> or
+	 *         <code>max</code>.
+	 */
+	@Override
+	public boolean add(final double[] values, final int nlength) {
+		if (!super.add(values, nlength)) {
+			return false;
+		}
+		// System.err.println("invoke event update after add (double[], int)");
 
-        notifyRangeChange();
-        return true;
-    }
+		notifyRangeChange();
+		return true;
+	}
 
-    //  private int counter = 0; // for debugging
-    /**
-     * Empties this DataRange. After calling this method this data range becomes
-     * undefined.
-     *
-     * @see #isDefined()
-     */
-    @Override
-    public void empty() {
-        super.empty();
-        //System.err.println("empty");
-        //        counter++;
-        //        if (counter > 1000) {
-        //            throw new IllegalStateException("autsch");
-        //        }
-    }
+	// private int counter = 0; // for debugging
+	/**
+	 * Empties this DataRange. After calling this method this data range becomes
+	 * undefined.
+	 *
+	 * @see #isDefined()
+	 */
+	@Override
+	public void empty() {
+		super.empty();
+		// System.err.println("empty");
+		// counter++;
+		// if (counter > 1000) {
+		// throw new IllegalStateException("autsch");
+		// }
+	}
 
-    @Override
-    public boolean equals(final Object obj) {
-        if (!(obj instanceof AxisDescription)) {
-            return false;
-        }
-        if (this == obj) {
-            return true;
-        }
+	@Override
+	public boolean equals(final Object obj) {
+		if (!(obj instanceof AxisDescription)) {
+			return false;
+		}
+		if (this == obj) {
+			return true;
+		}
 
-        final AxisDescription other = (AxisDescription) obj;
-        return hashCode() == other.hashCode();
-    }
+		final AxisDescription other = (AxisDescription) obj;
+		return hashCode() == other.hashCode();
+	}
 
-    @Override
-    public final String getName() {
-        return name;
-    }
+	@Override
+	public final String getName() {
+		return name;
+	}
 
-    @Override
-    public final String getUnit() {
-        return unit;
-    }
+	@Override
+	public final String getUnit() {
+		return unit;
+	}
 
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = super.hashCode();
-        result = (prime * result) + ((name == null) ? 0 : name.hashCode());
-        result = (prime * result) + ((unit == null) ? 0 : unit.hashCode());
-        result = (prime * result) + Double.hashCode(getMin());
-        result = (prime * result) + Double.hashCode(getMax());
-        return result;
-    }
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = (prime * result) + ((name == null) ? 0 : name.hashCode());
+		result = (prime * result) + ((unit == null) ? 0 : unit.hashCode());
+		result = (prime * result) + Double.hashCode(getMin());
+		result = (prime * result) + Double.hashCode(getMax());
+		return result;
+	}
 
-    @Override
-    public boolean set(final DataRange range) {
-        if (!super.set(range)) {
-            return false;
-        }
-        notifyRangeChange();
-        return true;
-    }
+	private final void notifyFullChange() {
+		if (dataSet == null || !dataSet.isAutoNotification()) {
+			return;
+		}
+		// System.err.println("update DataSet full axis description");
+		dataSet.invokeListener(new AxisChangeEvent(dataSet, "updated axis for '" + name + "' '[" + unit + "]'", -1));
+	}
 
-    @Override
-    public boolean set(final double min, final double max) {
-        if (super.set(min, max)) {
-            return false;
-        }
+	private final void notifyNameChange() {
+		if (dataSet == null || !dataSet.isAutoNotification()) {
+			return;
+		}
+		// System.err.println("update DataSet axis name and/or unit");
+		dataSet.invokeListener(
+				new AxisNameChangeEvent(dataSet, "updated axis names for '" + name + "' '[" + unit + "]'", -1));
+	}
 
-        notifyRangeChange();
-        return true;
-    }
+	private final void notifyRangeChange() {
+		if (dataSet == null || !dataSet.isAutoNotification()) {
+			return;
+		}
+		// System.err.println("update DataSet axis range");
+		dataSet.invokeListener(
+				new AxisRangeChangeEvent(dataSet, "updated axis range for '" + name + "' '[" + unit + "]'", -1));
+	}
 
-    @Override
-    public final boolean set(final String axisName, final String... axisUnit) {
-        boolean namesHaveChanged = !strEqual(name, axisName);
-        name = axisName;
-        if ((axisUnit != null) && (axisUnit.length > 0) && !strEqual(unit, axisUnit[0])) {
-            unit = axisUnit[0];
-            namesHaveChanged = true;
-            if (axisUnit.length > 1) {
-                throw new IllegalArgumentException("more than one unit is not allowed");
-            }
-        }
-        if (namesHaveChanged) {
-            notifyNameChange();
-        }
-        return false;
-    }
+	@Override
+	public boolean set(final DataRange range) {
+		if (!super.set(range)) {
+			return false;
+		}
+		notifyRangeChange();
+		return true;
+	}
 
-    @Override
-    public final boolean set(final String axisName, final String axisUnit, final double rangeMin,
-            final double rangeMax) {
-        final boolean namesHaveChanged = !strEqual(name, axisName) || !strEqual(unit, axisUnit);
-        name = axisName;
-        unit = axisUnit;
+	@Override
+	public boolean set(final double min, final double max) {
+		if (super.set(min, max)) {
+			return false;
+		}
 
-        boolean rangeHasChanged = false;
-        if ((getMin() != rangeMin) || (getMax() != rangeMax)) {
-            rangeHasChanged = true;
-            set(rangeMin, rangeMax);
-        }
+		notifyRangeChange();
+		return true;
+	}
 
-        if (namesHaveChanged && rangeHasChanged) {
-            notifyFullChange();
-        } else if (namesHaveChanged) {
-            notifyNameChange();
-        } else if (rangeHasChanged) {
-            notifyRangeChange();
-        }
-        return true;
-    }
+	@Override
+	public final boolean set(final String axisName, final String... axisUnit) {
+		boolean namesHaveChanged = !strEqual(name, axisName);
+		name = axisName;
+		if ((axisUnit != null) && (axisUnit.length > 0) && !strEqual(unit, axisUnit[0])) {
+			unit = axisUnit[0];
+			namesHaveChanged = true;
+			if (axisUnit.length > 1) {
+				throw new IllegalArgumentException("more than one unit is not allowed");
+			}
+		}
+		if (namesHaveChanged) {
+			notifyNameChange();
+		}
+		return false;
+	}
 
-    @Override
-    public boolean setMax(final double max) {
-        if (!super.setMax(max)) {
-            return false;
-        }
+	@Override
+	public final boolean set(final String axisName, final String axisUnit, final double rangeMin,
+			final double rangeMax) {
+		final boolean namesHaveChanged = !strEqual(name, axisName) || !strEqual(unit, axisUnit);
+		name = axisName;
+		unit = axisUnit;
 
-        notifyRangeChange();
-        return true;
-    }
+		boolean rangeHasChanged = false;
+		if ((getMin() != rangeMin) || (getMax() != rangeMax)) {
+			rangeHasChanged = true;
+			set(rangeMin, rangeMax);
+		}
 
-    @Override
-    public boolean setMin(final double min) {
-        if (!super.setMin(min)) {
-            return false;
-        }
+		if (namesHaveChanged && rangeHasChanged) {
+			notifyFullChange();
+		} else if (namesHaveChanged) {
+			notifyNameChange();
+		} else if (rangeHasChanged) {
+			notifyRangeChange();
+		}
+		return true;
+	}
 
-        notifyRangeChange();
-        return true;
-    }
+	@Override
+	public boolean setMax(final double max) {
+		if (!super.setMax(max)) {
+			return false;
+		}
 
-    private final void notifyFullChange() {
-        if (dataSet == null || !dataSet.isAutoNotification()) {
-            return;
-        }
-        //        System.err.println("update DataSet full axis description");
-        dataSet.invokeListener(new AxisChangeEvent(dataSet, "updated axis for '" + name + "' '[" + unit + "]'", -1));
-    }
+		notifyRangeChange();
+		return true;
+	}
 
-    private final void notifyNameChange() {
-        if (dataSet == null || !dataSet.isAutoNotification()) {
-            return;
-        }
-        //        System.err.println("update DataSet axis name and/or unit");
-        dataSet.invokeListener(
-                new AxisNameChangeEvent(dataSet, "updated axis names for '" + name + "' '[" + unit + "]'", -1));
-    }
+	@Override
+	public boolean setMin(final double min) {
+		if (!super.setMin(min)) {
+			return false;
+		}
 
-    private final void notifyRangeChange() {
-        if (dataSet == null || !dataSet.isAutoNotification()) {
-            return;
-        }
-        //        System.err.println("update DataSet axis range");
-        dataSet.invokeListener(
-                new AxisRangeChangeEvent(dataSet, "updated axis range for '" + name + "' '[" + unit + "]'", -1));
-    }
+		notifyRangeChange();
+		return true;
+	}
 
-    private static boolean strEqual(final String str1, final String str2) {
-        return ((str1 == str2) || ((str1 != null) && str1.equals(str2))); // NOPMD pointer address check is intended
-    }
+	@Override
+	public String toString() {
+		return super.toString() + ", axisName = '" + this.getName() + "', axisUnit = '" + this.getUnit() + "'";
+	}
+
+	private static boolean strEqual(final String str1, final String str2) {
+		return ((str1 == str2) || ((str1 != null) && str1.equals(str2))); // NOPMD pointer address check is intended
+	}
 }
