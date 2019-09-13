@@ -855,7 +855,7 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
         return measurementBarSide;
     }
 
-    public BooleanProperty ToolBarPinnedProperty() {
+    public BooleanProperty toolBarPinnedProperty() {
         return toolBarPinned;
     }
     public boolean getToolBarPinned() {
