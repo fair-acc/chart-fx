@@ -18,8 +18,6 @@ import javafx.css.converter.EnumConverter;
 
 import de.gsi.chart.axes.Axis;
 import de.gsi.chart.axes.spi.DefaultNumericAxis;
-import de.gsi.dataset.DataSet;
-import de.gsi.dataset.event.EventListener;
 import de.gsi.chart.legend.Legend;
 import de.gsi.chart.legend.spi.DefaultLegend;
 import de.gsi.chart.plugins.ChartPlugin;
@@ -27,12 +25,13 @@ import de.gsi.chart.renderer.Renderer;
 import de.gsi.chart.renderer.spi.LabelledMarkerRenderer;
 import de.gsi.chart.ui.HiddenSidesPane;
 import de.gsi.chart.ui.ResizableCanvas;
-import de.gsi.chart.ui.SidesPane;
 import de.gsi.chart.ui.css.StylishBooleanProperty;
 import de.gsi.chart.ui.css.StylishObjectProperty;
 import de.gsi.chart.ui.geometry.Corner;
 import de.gsi.chart.ui.geometry.Side;
 import de.gsi.chart.utils.FXUtils;
+import de.gsi.dataset.DataSet;
+import de.gsi.dataset.event.EventListener;
 import de.gsi.dataset.utils.AssertUtils;
 import de.gsi.dataset.utils.ProcessingProfiler;
 import javafx.animation.Animation;
@@ -69,11 +68,9 @@ import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.control.Label;
-import javafx.scene.layout.Border;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.BorderStroke;
-import javafx.scene.layout.BorderStrokeStyle;
-import javafx.scene.layout.BorderWidths;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.FlowPane;
@@ -99,7 +96,7 @@ import javafx.util.Duration;
  * @author original conceptual design by Oracle (2010, 2014)
  * @author hbraeun, rstein, major refactoring, re-implementation and re-design
  */
-public abstract class Chart extends SidesPane implements Observable {
+public abstract class Chart extends HiddenSidesPane implements Observable {
     private static final Logger LOGGER = LoggerFactory.getLogger(Chart.class);
     private static final String CHART_CSS = Chart.class.getResource("chart.css").toExternalForm();
     private static final int DEFAULT_TRIGGER_DISTANCE = 50;
@@ -145,6 +142,7 @@ public abstract class Chart extends SidesPane implements Observable {
     protected boolean isAxesUpdate = false;
     // containing the plugin handler/modifier
     protected final FlowPane toolBar = new FlowPane();
+    protected final BooleanProperty toolBarPinned = new SimpleBooleanProperty(this, "toolBarPinned", false);
 
     protected final HiddenSidesPane hiddenPane = new HiddenSidesPane();
     protected final Pane plotBackground = new Pane();
@@ -516,20 +514,34 @@ public abstract class Chart extends SidesPane implements Observable {
 
         // tool bar for plugins to add their controls (if necessary)
         toolBar.setPrefHeight(-1);
+        toolBar.setBackground(
+                new Background(new BackgroundFill(Color.web("#f4f4f4", 0.85).deriveColor(0, 1.0, .94, 1.0),
+                        new CornerRadii(0, 0, 10, 10, false), Insets.EMPTY)));
         toolBar.setMinHeight(0);
         toolBar.setPrefWidth(-1);
+        toolBar.setAlignment(Pos.TOP_CENTER);
         toolBar.setMinWidth(0);
-        toolBar.setPadding(new Insets(1, 1, 1, 1));
+        toolBar.setPadding(new Insets(1, 8, 6, 8));
         VBox.setVgrow(toolBar, Priority.ALWAYS);
-        setTop(getToolBar());
+        HBox topbox = new HBox();
+        topbox.setAlignment(Pos.TOP_CENTER);
+        topbox.getChildren().add(getToolBar());
+        HBox.setHgrow(toolBar, Priority.NEVER);
+        setTop(topbox);
         getToolBar().setOnMouseClicked(mevt -> {
-            final boolean isPinned = !isPinned(getToolBarSide());
-            setPinned(getToolBarSide(), isPinned);
-            if (isPinned) {
-                getToolBar().setBorder(new Border(new BorderStroke(Color.DARKBLUE, BorderStrokeStyle.SOLID,
-                        CornerRadii.EMPTY, BorderWidths.DEFAULT)));
+            toolBarPinned.set(!toolBarPinned.get());
+        });
+        toolBarPinned.addListener((obj, valOld, valNew) -> {
+            if (valNew) {
+                this.setPinnedSide(javafx.geometry.Side.TOP);
+                toolBar.setBackground(
+                        new Background(new BackgroundFill(Color.web("#f4f4f4", 0.85).deriveColor(0, 1.0, .92, 1.0),
+                                new CornerRadii(0, 0, 10, 10, false), Insets.EMPTY)));
             } else {
-                getToolBar().setBorder(null);
+                setPinnedSide(null);
+                toolBar.setBackground(
+                        new Background(new BackgroundFill(Color.web("#f4f4f4", 0.85).deriveColor(0, 1.0, .94, 1.0),
+                                new CornerRadii(0, 0, 10, 10, false), Insets.EMPTY)));
             }
             requestLayout();
         });
@@ -689,6 +701,7 @@ public abstract class Chart extends SidesPane implements Observable {
         }
         return null;
     }
+
     public final Legend getLegend() {
         return legend.getValue();
     }
@@ -840,6 +853,17 @@ public abstract class Chart extends SidesPane implements Observable {
 
     public final ObjectProperty<Side> measurementBarSideProperty() {
         return measurementBarSide;
+    }
+
+    public BooleanProperty ToolBarPinnedProperty() {
+        return toolBarPinned;
+    }
+    public boolean getToolBarPinned() {
+        return toolBarPinned.get();
+    }
+    public Chart setToolBarPinned(boolean value) {
+        toolBarPinned.set(value);
+        return this;
     }
 
     public boolean removeFromAllAxesPanes(final Axis node) {
