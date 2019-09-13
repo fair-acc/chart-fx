@@ -50,7 +50,7 @@ public class ParameterMeasurements extends ChartPlugin {
             }
             if (newChart != null) {
                 // add tool bar items
-            	parameterMenu = getMenuBar();
+                parameterMenu = getMenuBar();
                 newChart.getToolBar().getChildren().add(parameterMenu);
 
                 // add measurement display pane
@@ -66,6 +66,12 @@ public class ParameterMeasurements extends ChartPlugin {
 
         final MenuBar menuBar = new MenuBar();
         final Menu fileMenu = new Menu("Add Measurement:");
+        // Prevent the toolbar HiddenSidePane from vanishing when using the menu
+        fileMenu.setOnShown((evt) -> getChart().setPinnedSide(javafx.geometry.Side.TOP));
+        fileMenu.setOnHidden((evt) -> {
+            if (!getChart().getToolBarPinned())
+                getChart().setPinnedSide(null);
+        });
 
         // loop through category
         for (final MeasurementCategory category : MeasurementCategory.values()) {
@@ -78,7 +84,7 @@ public class ParameterMeasurements extends ChartPlugin {
                     continue;
                 }
                 final MenuItem newMeasurement = new MenuItem(measType.toString());
-                final XYChart xyChart = (XYChart)getChart();
+                final XYChart xyChart = (XYChart) getChart();
                 newMeasurement.setOnAction(evt -> new SimpleMeasurements(xyChart, measType).initialize());
                 newCategory.getItems().addAll(newMeasurement);
             }
@@ -89,7 +95,7 @@ public class ParameterMeasurements extends ChartPlugin {
         fileMenu.getItems().addAll(newCategory);
 
         final MenuItem newMeasurement1 = new MenuItem("Hor. Indicator");
-        final XYChart xyChart = (XYChart)getChart();
+        final XYChart xyChart = (XYChart) getChart();
         newMeasurement1.setOnAction(evt -> new ValueIndicator(xyChart, AxisMode.X).initialize());
         newCategory.getItems().addAll(newMeasurement1);
 
