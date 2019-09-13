@@ -10,7 +10,7 @@ import de.gsi.dataset.utils.DoubleCircularBuffer;
 /**
  * @author rstein
  */
-public class CircularDoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet> implements DataSetError {
+public class CircularDoubleErrorDataSet extends AbstractErrorDataSet<CircularDoubleErrorDataSet> implements DataSetError {
     private static final long serialVersionUID = -8010355203980379253L;
     protected DoubleCircularBuffer xValues;
     protected DoubleCircularBuffer yValues;
