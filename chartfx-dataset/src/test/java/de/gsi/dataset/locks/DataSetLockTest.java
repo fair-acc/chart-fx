@@ -25,8 +25,7 @@ public class DataSetLockTest {
 	private static final Logger LOGGER = LoggerFactory.getLogger(DataSetLockTest.class);
 
 	/**
-	 * coarse tests
-	 * N.B. to be refined
+	 * coarse tests N.B. to be refined
 	 */
 	@Test
 	@DisplayName("Tests DataSet lock default implementation")
@@ -42,14 +41,17 @@ public class DataSetLockTest {
 		assertEquals(0, myLockImpl.getReaderCount());
 		assertEquals(0, myLockImpl.getWriterCount());
 		assertTrue(dataSet.isAutoNotification());
-		
+
 		myLock.writeLock().getDataCount();
 		if (LOGGER.isDebugEnabled()) {
 			LOGGER.atDebug().log("WRITER: after first lock");
 		}
 		assertEquals(0, myLockImpl.getReaderCount());
 		assertEquals(1, myLockImpl.getWriterCount());
-		
+
+		if (LOGGER.isDebugEnabled()) {
+			LOGGER.atDebug().log("before having invoked first set of simple read[Lock,Unlock] threads");
+		}
 		final int nListener = 3;
 		Thread[] threads = new Thread[nListener];
 		for (int i = 0; i < 3; i++) {
@@ -71,9 +73,12 @@ public class DataSetLockTest {
 			threads[i].start();
 		}
 
-		//assertEquals(0, myLockImpl.getReaderCount());
+		// assertEquals(0, myLockImpl.getReaderCount());
 		assertEquals(1, myLockImpl.getWriterCount());
-		
+		if (LOGGER.isDebugEnabled()) {
+			LOGGER.atDebug().log("after having invoked first set of simple read[Lock,Unlock] threads");
+		}
+
 		Thread anotherWriterThread = new Thread(() -> {
 			if (LOGGER.isDebugEnabled()) {
 				LOGGER.atDebug().log("WRITER-#2: try to acquire write lock for another writer thread");
@@ -89,9 +94,9 @@ public class DataSetLockTest {
 			}
 		});
 		anotherWriterThread.start();
-		
+
 		assertEquals(1, myLockImpl.getWriterCount());
-		
+
 		myLock.writeLockGuard(() -> {
 			sleep(100);
 		});
@@ -117,6 +122,34 @@ public class DataSetLockTest {
 			LOGGER.atDebug().log("WRITER: after first un-lock");
 		}
 
+		{
+			// check read lockGuard
+			boolean testState = myLock.readLockGuard(() -> {
+				if (LOGGER.isDebugEnabled()) {
+					LOGGER.atDebug().log("READLOCKGUARD-#1 - single guard");
+				}
+				return true;
+			});
+			assertTrue(testState);
+			if (LOGGER.isDebugEnabled()) {
+				LOGGER.atDebug().log("after having invoked single read lock guard");
+			}
+
+			// check re-entrance of read lock guard
+			testState = myLock.readLockGuard(() -> {
+				if (LOGGER.isDebugEnabled()) {
+					LOGGER.atDebug().log("READLOCKGUARD-#1 -- 1st run");
+				}
+				return myLock.readLockGuard(() -> {
+					if (LOGGER.isDebugEnabled()) {
+						LOGGER.atDebug().log("\tREADLOCKGUARD-#2 -- 1st run");
+					}
+					return true;
+				});
+			});
+			assertTrue(testState);
+		}
+
 		// recursive read locks
 		myLock.readLock().getDataCount();
 		if (LOGGER.isDebugEnabled()) {
@@ -137,12 +170,37 @@ public class DataSetLockTest {
 		if (LOGGER.isDebugEnabled()) {
 			LOGGER.atDebug().log("READER: after first read unlock");
 		}
-		
+
+		{
+			// re-check read lockGuard
+			boolean testState = myLock.readLockGuard(() -> {
+				if (LOGGER.isDebugEnabled()) {
+					LOGGER.atDebug().log("READLOCKGUARD-#1 - single guard");
+				}
+				return true;
+			});
+			assertTrue(testState);
+
+			// check re-entrance of read lock guard
+			testState = myLock.readLockGuard(() -> {
+				if (LOGGER.isDebugEnabled()) {
+					LOGGER.atDebug().log("READLOCKGUARD-#1 -- 2nd run");
+				}
+				return myLock.readLockGuard(() -> {
+					if (LOGGER.isDebugEnabled()) {
+						LOGGER.atDebug().log("\tREADLOCKGUARD-#2 -- 2nd run");
+					}
+					return true;
+				});
+			});
+			assertTrue(testState);
+		}
+
 		sleep(1000);
 		assertEquals(0, myLockImpl.getReaderCount());
 		assertEquals(0, myLockImpl.getWriterCount());
 		assertTrue(dataSet.isAutoNotification());
-		
+
 		if (LOGGER.isDebugEnabled()) {
 			LOGGER.atDebug().log("finished - testDataSetLock()");
 		}
