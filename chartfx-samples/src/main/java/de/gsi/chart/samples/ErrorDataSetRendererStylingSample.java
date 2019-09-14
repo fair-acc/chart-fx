@@ -5,6 +5,9 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.gsi.chart.XYChart;
 import de.gsi.chart.axes.spi.DefaultNumericAxis;
 import de.gsi.chart.plugins.DataPointTooltip;
@@ -16,7 +19,6 @@ import de.gsi.chart.renderer.ErrorStyle;
 import de.gsi.chart.renderer.LineStyle;
 import de.gsi.chart.renderer.datareduction.DefaultDataReducer;
 import de.gsi.chart.renderer.spi.ErrorDataSetRenderer;
-import de.gsi.chart.utils.SimplePerformanceMeter;
 import de.gsi.dataset.DataSetError;
 import de.gsi.dataset.testdata.spi.CosineFunction;
 import de.gsi.dataset.testdata.spi.GaussFunction;
@@ -44,10 +46,10 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
-import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
 public class ErrorDataSetRendererStylingSample extends Application {
+    private static final Logger LOGGER = LoggerFactory.getLogger(RollingBufferSample.class);
     private static final int DEBUG_UPDATE_RATE = 1000;
     private static final int DEFAULT_WIDTH = 1200;
     private static final int DEFAULT_HEIGHT = 600;
@@ -124,7 +126,7 @@ public class ErrorDataSetRendererStylingSample extends Application {
                         ErrorDataSetRendererStylingSample.UPDATE_PERIOD);
             } else {
                 timer.cancel();
-                timer = null;
+                timer = null; // NOPMD
             }
         });
 
@@ -139,10 +141,10 @@ public class ErrorDataSetRendererStylingSample extends Application {
         // organise parameter config according to tabs
         final TabPane tabPane = new TabPane();
 
-        tabPane.getTabs().add(getChartTab(chart));
         tabPane.getTabs().add(getRendererTab(chart, errorRenderer));
         tabPane.getTabs().add(getAxisTab("x-Axis", chart, xAxis));
         tabPane.getTabs().add(getAxisTab("y-Axis", chart, yAxis));
+        tabPane.getTabs().add(getChartTab(chart));
 
         root.setLeft(tabPane);
 
@@ -179,7 +181,7 @@ public class ErrorDataSetRendererStylingSample extends Application {
                 timer.scheduleAtFixedRate(getTimerTask(chart), UPDATE_DELAY, UPDATE_PERIOD);
             } else {
                 timer.cancel();
-                timer = null;
+                timer = null; // NOPMD
             }
         });
 
@@ -196,42 +198,20 @@ public class ErrorDataSetRendererStylingSample extends Application {
         spacer.setMinWidth(Region.USE_PREF_SIZE);
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
-        // JavaFX and Chart Performance metrics
-        final SimplePerformanceMeter meter = new SimplePerformanceMeter(scene, DEBUG_UPDATE_RATE);
-
-        final Label fxFPS = new Label();
-        fxFPS.setFont(Font.font("Monospaced", 12));
-        final Label chartFPS = new Label();
-        chartFPS.setFont(Font.font("Monospaced", 12));
-        final Label cpuLoadProcess = new Label();
-        cpuLoadProcess.setFont(Font.font("Monospaced", 12));
-        final Label cpuLoadSystem = new Label();
-        cpuLoadSystem.setFont(Font.font("Monospaced", 12));
-        meter.fxFrameRateProperty().addListener((ch, o, n) -> {
-            final String fxRate = String.format("%4.1f", meter.getFxFrameRate());
-            final String actualRate = String.format("%4.1f", meter.getActualFrameRate());
-            final String cpuProcess = String.format("%5.1f", meter.getProcessCpuLoad());
-            final String cpuSystem = String.format("%5.1f", meter.getSystemCpuLoad());
-            fxFPS.setText(String.format("%-6s: %4s %s", "JavaFX", fxRate, "FPS, "));
-            chartFPS.setText(String.format("%-6s: %4s %s", "Actual", actualRate, "FPS, "));
-            cpuLoadProcess.setText(String.format("%-11s: %4s %s", "Process-CPU", cpuProcess, "%"));
-            cpuLoadSystem.setText(String.format("%-11s: %4s %s", "System -CPU", cpuSystem, "%"));
-        });
-
         return new HBox(new Label("Function Type: "), dataSetTypeSelector, newDataSet, startTimer, spacer,
-                new VBox(fxFPS, chartFPS), new VBox(cpuLoadProcess, cpuLoadSystem));
+                new ProfilerInfoBox(scene, DEBUG_UPDATE_RATE));
     }
 
     public TimerTask getTimerTask(final XYChart chart) {
         return new TimerTask() {
-            int updateCount = 0;
+            private int updateCount;
 
             @Override
             public void run() {
                 generateData(chart);
 
-                if (updateCount % 10 == 0) {
-                    System.out.println("update iteration #" + updateCount);
+                if (updateCount % 10 == 0 && LOGGER.isDebugEnabled()) {
+                    LOGGER.atDebug().addArgument(updateCount).log("update iteration #{}");
                 }
                 updateCount++;
             }
@@ -276,9 +256,8 @@ public class ErrorDataSetRendererStylingSample extends Application {
             dataSet.add(new SineFunction("dyn. sine function", nSamples, true));
             dataSet.add(new CosineFunction("dyn. cosine function", nSamples, true));
             break;
-
-        default:
         case RANDOM_WALK:
+        default:
             dataSet.add(new RandomWalkFunction("random walk data", nSamples));
             break;
         }
@@ -295,11 +274,15 @@ public class ErrorDataSetRendererStylingSample extends Application {
     private Tab getChartTab(XYChart chart) {
         final ParameterTab pane = new ParameterTab("Chart");
 
-        final CheckBox gridVisible = new CheckBox("");
-        gridVisible.setSelected(true);
-        chart.horizontalGridLinesVisibleProperty().bindBidirectional(gridVisible.selectedProperty());
-        chart.verticalGridLinesVisibleProperty().bindBidirectional(gridVisible.selectedProperty());
-        pane.addToParameterPane("Show Grid: ", gridVisible);
+        final CheckBox gridVisibleX = new CheckBox("");
+        gridVisibleX.setSelected(true);
+        chart.horizontalGridLinesVisibleProperty().bindBidirectional(gridVisibleX.selectedProperty());
+        pane.addToParameterPane("Show X-Grid: ", gridVisibleX);
+
+        final CheckBox gridVisibleY = new CheckBox("");
+        gridVisibleY.setSelected(true);
+        chart.verticalGridLinesVisibleProperty().bindBidirectional(gridVisibleY.selectedProperty());
+        pane.addToParameterPane("Show Y-Grid: ", gridVisibleY);
 
         final CheckBox gridOnTop = new CheckBox("");
         gridOnTop.setSelected(true);
@@ -494,9 +477,9 @@ public class ErrorDataSetRendererStylingSample extends Application {
         return pane;
     }
 
-    class ParameterTab extends Tab {
-        private GridPane parameterGrid = new GridPane();
-        private int rowIndex = 0;
+    private class ParameterTab extends Tab {
+        private final GridPane parameterGrid = new GridPane();
+        private int rowIndex;
 
         public ParameterTab(final String tabName) {
             super(tabName);
