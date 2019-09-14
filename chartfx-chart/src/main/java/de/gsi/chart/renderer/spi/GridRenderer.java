@@ -47,22 +47,18 @@ public class GridRenderer extends Pane implements Renderer {
     private static final String STYLE_CLASS_MINOR_GRID_LINE = "chart-minor-grid-lines";
     private static final String STYLE_CLASS_MINOR_GRID_LINE_H = "chart-minor-horizontal-lines";
     private static final String STYLE_CLASS_MINOR_GRID_LINE_V = "chart-minor-vertical-lines";
+    private static final String STYLE_CLASS_GRID_ON_TOP = "chart-grid-line-on-top";
     private static final PseudoClass SELECTED_PSEUDO_CLASS = PseudoClass.getPseudoClass("withMinor");
-    private static final List<CssMetaData<? extends Styleable, ?>> STYLEABLES;
-    static {
-        final List<CssMetaData<? extends Styleable, ?>> styleables = new ArrayList<>(Region.getClassCssMetaData());
-        styleables.add(StyleableProperties.GRID_ON_TOP);
-        STYLEABLES = Collections.unmodifiableList(styleables);
-    }
 
     private static final double[] DEFAULT_GRID_DASH_PATTERM = { 4.5, 2.5 };
     protected final Chart baseChart;
-    protected final BooleanProperty drawGridOnTop = new SimpleStyleableBooleanProperty(StyleableProperties.GRID_ON_TOP,
-            this, "drawGridOnTop", true);
+    //    protected final BooleanProperty drawGridOnTop = new SimpleStyleableBooleanProperty(StyleableProperties.GRID_ON_TOP,
+    //            this, "drawGridOnTop", true);
     private final Line horMajorGridStyleNode;
     private final Line verMajorGridStyleNode;
     private final Line horMinorGridStyleNode;
     private final Line verMinorGridStyleNode;
+    private final Line drawGridOnTopNode;
     private final Group gridStyleNodes = new Group();
     protected final ObservableList<Axis> axesList = FXCollections.observableArrayList();
 
@@ -92,8 +88,13 @@ public class GridRenderer extends Pane implements Renderer {
         verMinorGridStyleNode.getStyleClass().add(GridRenderer.STYLE_CLASS_MINOR_GRID_LINE_V);
         verMinorGridStyleNode.setVisible(false);
 
+        drawGridOnTopNode = new Line();
+        drawGridOnTopNode.getStyleClass().add(GridRenderer.STYLE_CLASS_GRID_ON_TOP);
+        drawGridOnTopNode.getStyleClass().add(GridRenderer.STYLE_CLASS_GRID_ON_TOP);
+        drawGridOnTopNode.setVisible(true);
+
         gridStyleNodes.getChildren().addAll(horMajorGridStyleNode, verMajorGridStyleNode, horMinorGridStyleNode,
-                verMinorGridStyleNode);
+                verMinorGridStyleNode, drawGridOnTopNode);
 
         getChildren().add(gridStyleNodes);
         final Scene scene = new Scene(this);
@@ -104,22 +105,21 @@ public class GridRenderer extends Pane implements Renderer {
         verMajorGridStyleNode.getPseudoClassStates().addListener(listener);
         horMinorGridStyleNode.getPseudoClassStates().addListener(listener);
         verMinorGridStyleNode.getPseudoClassStates().addListener(listener);
+        drawGridOnTopNode.getPseudoClassStates().addListener(listener);
 
         ChangeListener<? super Boolean> change = (ob, o, n) -> {
             horMajorGridStyleNode.pseudoClassStateChanged(GridRenderer.SELECTED_PSEUDO_CLASS,
                     horMinorGridStyleNode.isVisible());
             verMajorGridStyleNode.pseudoClassStateChanged(GridRenderer.SELECTED_PSEUDO_CLASS,
                     verMinorGridStyleNode.isVisible());
+            drawGridOnTopNode.pseudoClassStateChanged(GridRenderer.SELECTED_PSEUDO_CLASS,
+                    drawGridOnTopNode.isVisible());
             chart.requestLayout();
         };
 
         horizontalGridLinesVisibleProperty().addListener(change);
         verticalGridLinesVisibleProperty().addListener(change);
         drawOnTopProperty().addListener(change);
-    }
-
-    public static List<CssMetaData<? extends Styleable, ?>> getClassCssMetaData() {
-        return GridRenderer.STYLEABLES;
     }
 
     private static double snap(final double value) {
@@ -149,7 +149,7 @@ public class GridRenderer extends Pane implements Renderer {
      * @return drawOnTop property
      */
     public final BooleanProperty drawOnTopProperty() {
-        return drawGridOnTop;
+        return drawGridOnTopNode.visibleProperty();
     }
 
     /**
@@ -235,7 +235,7 @@ public class GridRenderer extends Pane implements Renderer {
      * @return drawOnTop state
      */
     public final boolean isDrawOnTop() {
-        return drawGridOnTop.get();
+        return drawGridOnTopNode.isVisible();
     }
 
     @Override
@@ -261,7 +261,7 @@ public class GridRenderer extends Pane implements Renderer {
      * @param state true: draw on top
      */
     public final void setDrawOnTop(boolean state) {
-        drawGridOnTop.set(state);
+        drawGridOnTopNode.setVisible(state);
     }
 
     @Override
@@ -489,21 +489,4 @@ public class GridRenderer extends Pane implements Renderer {
         }
     }
 
-    private static class StyleableProperties {
-
-        private static final CssMetaData<GridRenderer, Boolean> GRID_ON_TOP = new CssMetaData<GridRenderer, Boolean>(
-                "-fx-grid-on-top", BooleanConverter.getInstance(), Boolean.TRUE, false) {
-
-            @SuppressWarnings("unchecked")
-            @Override
-            public StyleableProperty<Boolean> getStyleableProperty(final GridRenderer node) {
-                return (StyleableProperty<Boolean>) node.drawGridOnTop;
-            }
-
-            @Override
-            public boolean isSettable(final GridRenderer node) {
-                return node.drawGridOnTop == null || !node.drawGridOnTop.isBound();
-            }
-        };
-    }
 }
