@@ -18,7 +18,7 @@ import javafx.scene.text.FontWeight;
  *
  * @author rstein
  */
-public final class StyleParser {
+public final class StyleParser { // NOPMD
     private static final Logger LOGGER = LoggerFactory.getLogger(StyleParser.class);
     private static final int DEFAULT_FONT_SIZE = 18;
     private static final String DEFAULT_FONT = "Helvetia";
