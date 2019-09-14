@@ -216,10 +216,9 @@ public class ChartPerformanceBenchmark extends AbstractTestApplication {
 
             timer = new Timer();
             final TimerTask updateTimerTask = new TimerTask() {
-
                 @Override
                 public void run() {
-                    Platform.runLater(testCase::updateDataSet);
+                    testCase.updateDataSet();
                 }
             };
             timer.scheduleAtFixedRate(updateTimerTask, 0, updatePeriod);
