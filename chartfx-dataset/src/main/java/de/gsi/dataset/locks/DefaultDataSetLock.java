@@ -51,7 +51,7 @@ import de.gsi.dataset.DataSet;
  * @param <D> generics reference, usually to
  *            <code>&lt;? extends DataSet&gt;</code>
  */
-@SuppressWarnings({ "PMD.DoNotUseThreads", "PMD.CommentSize" }) // Runnable used as functional interface
+@SuppressWarnings({ "PMD.DoNotUseThreads", "PMD.CommentSize", "PMD.TooManyMethods" }) // Runnable used as functional interface
 public class DefaultDataSetLock<D extends DataSet> implements DataSetLock<D> {
     private static final long serialVersionUID = 1L;
     private final transient StampedLock stampedLock = new StampedLock();
@@ -87,7 +87,7 @@ public class DefaultDataSetLock<D extends DataSet> implements DataSetLock<D> {
             throw new IllegalStateException("cannot downconvert lock - holding n writelocks = " + getWriterCount());
         }
         final long result = stampedLock.tryConvertToReadLock(lastWriteStamp);
-        if (result == 0l) {
+        if (result == 0l) { // NOPMD to be expected return value from 'tryConvertToReadLock'
             throw new IllegalStateException("cannot downconvert lock - tryConvertToReadLock return '0'");
         }
         this.readerCount.getAndIncrement();
