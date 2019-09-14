@@ -12,10 +12,6 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.gsi.chart.ui.ChartLayoutAnimator;
-import javafx.css.converter.BooleanConverter;
-import javafx.css.converter.EnumConverter;
-
 import de.gsi.chart.axes.Axis;
 import de.gsi.chart.axes.spi.DefaultNumericAxis;
 import de.gsi.chart.legend.Legend;
@@ -23,6 +19,7 @@ import de.gsi.chart.legend.spi.DefaultLegend;
 import de.gsi.chart.plugins.ChartPlugin;
 import de.gsi.chart.renderer.Renderer;
 import de.gsi.chart.renderer.spi.LabelledMarkerRenderer;
+import de.gsi.chart.ui.ChartLayoutAnimator;
 import de.gsi.chart.ui.HiddenSidesPane;
 import de.gsi.chart.ui.ResizableCanvas;
 import de.gsi.chart.ui.css.StylishBooleanProperty;
@@ -30,6 +27,7 @@ import de.gsi.chart.ui.css.StylishObjectProperty;
 import de.gsi.chart.ui.geometry.Corner;
 import de.gsi.chart.ui.geometry.Side;
 import de.gsi.chart.utils.FXUtils;
+import de.gsi.chart.utils.ToolBarShapeHelper;
 import de.gsi.dataset.DataSet;
 import de.gsi.dataset.event.EventListener;
 import de.gsi.dataset.utils.AssertUtils;
@@ -58,6 +56,8 @@ import javafx.css.CssMetaData;
 import javafx.css.Styleable;
 import javafx.css.StyleableObjectProperty;
 import javafx.css.StyleableProperty;
+import javafx.css.converter.BooleanConverter;
+import javafx.css.converter.EnumConverter;
 import javafx.geometry.Bounds;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
@@ -100,7 +100,7 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
     private static final Logger LOGGER = LoggerFactory.getLogger(Chart.class);
     private static final String CHART_CSS = Chart.class.getResource("chart.css").toExternalForm();
     private static final int DEFAULT_TRIGGER_DISTANCE = 50;
-    protected static boolean DEBUG = false; // for more verbose debugging
+    protected static boolean DEBUG; // for more verbose debugging
 
     protected BooleanBinding showingBinding;
     protected final BooleanProperty showing = new SimpleBooleanProperty(this, "showing", false);
@@ -119,9 +119,9 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
             });
 
     // isCanvasChangeRequested is a recursion guard to update canvas only once
-    protected boolean isCanvasChangeRequested = false;
+    protected boolean isCanvasChangeRequested;
     // layoutOngoing is a recursion guard to update canvas only once
-    protected boolean layoutOngoing = false;
+    protected boolean layoutOngoing;
     protected final ObservableList<Axis> axesList = FXCollections.observableArrayList();
     private final Map<ChartPlugin, Group> pluginGroups = new ConcurrentHashMap<>();
     private final ObservableList<ChartPlugin> plugins = FXCollections.observableList(new LinkedList<>());
@@ -139,7 +139,7 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
     protected final GridPane axesAndCanvasPane = new GridPane();
     protected final Group pluginsArea = Chart.createChildGroup();
 
-    protected boolean isAxesUpdate = false;
+    protected boolean isAxesUpdate;
     // containing the plugin handler/modifier
     protected final FlowPane toolBar = new FlowPane();
     protected final BooleanProperty toolBarPinned = new SimpleBooleanProperty(this, "toolBarPinned", false);
@@ -518,19 +518,27 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
                 new Background(new BackgroundFill(Color.web("#f4f4f4", 0.85).deriveColor(0, 1.0, .94, 1.0),
                         new CornerRadii(0, 0, 10, 10, false), Insets.EMPTY)));
         toolBar.setMinHeight(0);
+        final Insets toolBarPadding = new Insets(1, 12.5, 5, 12.5);
+        toolBar.setShape(ToolBarShapeHelper.getToolBarShape(toolBar.getWidth(), toolBar.getHeight(), 25));
+        ChangeListener<Number> toolBarSizeListener = (ch, o, n) -> {
+            if (n.equals(o)) {
+                return;
+            }
+            toolBar.setShape(ToolBarShapeHelper.getToolBarShape(toolBar.getWidth(), toolBar.getHeight(), 25));
+        };
+        toolBar.widthProperty().addListener(toolBarSizeListener);
+        toolBar.heightProperty().addListener(toolBarSizeListener);
         toolBar.setPrefWidth(-1);
         toolBar.setAlignment(Pos.TOP_CENTER);
         toolBar.setMinWidth(0);
-        toolBar.setPadding(new Insets(1, 8, 6, 8));
+        toolBar.setPadding(toolBarPadding);
         VBox.setVgrow(toolBar, Priority.ALWAYS);
         HBox topbox = new HBox();
         topbox.setAlignment(Pos.TOP_CENTER);
         topbox.getChildren().add(getToolBar());
         HBox.setHgrow(toolBar, Priority.NEVER);
         setTop(topbox);
-        getToolBar().setOnMouseClicked(mevt -> {
-            toolBarPinned.set(!toolBarPinned.get());
-        });
+        getToolBar().setOnMouseClicked(mevt -> toolBarPinned.set(!toolBarPinned.get()));
         toolBarPinned.addListener((obj, valOld, valNew) -> {
             if (valNew) {
                 this.setPinnedSide(javafx.geometry.Side.TOP);
@@ -858,9 +866,11 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
     public BooleanProperty toolBarPinnedProperty() {
         return toolBarPinned;
     }
-    public boolean getToolBarPinned() {
+
+    public boolean getToolBarPinned() { // NOPMD
         return toolBarPinned.get();
     }
+
     public Chart setToolBarPinned(boolean value) {
         toolBarPinned.set(value);
         return this;
@@ -1131,6 +1141,7 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
             }
             if (oldScene != null) {
                 // remove listener
+
             }
 
             if (newScene == null) {
@@ -1150,7 +1161,7 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
             });
         });
         showing.addListener((ch, o, n) -> {
-            if (o == n) {
+            if (n.equals(n)) {
                 return;
             }
             if (n) {
