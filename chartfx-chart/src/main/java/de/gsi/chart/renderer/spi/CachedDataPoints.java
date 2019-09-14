@@ -174,7 +174,7 @@ class CachedDataPoints {
     }
 
     protected void setStyleVariable(final DataSet dataSet, final int dsIndex) {
-        dataSet.lock().readLockGuard(() -> defaultStyle = dataSet.getStyle());
+        dataSet.lock().readLockGuardOptimistic(() -> defaultStyle = dataSet.getStyle());
         final Integer layoutOffset = StyleParser.getIntegerPropertyValue(defaultStyle,
                 XYChartCss.DATASET_LAYOUT_OFFSET);
         final Integer dsIndexLocal = StyleParser.getIntegerPropertyValue(defaultStyle, XYChartCss.DATASET_INDEX);
@@ -188,7 +188,7 @@ class CachedDataPoints {
         // compute screen coordinates of other points
         if (dataSet instanceof DataSetError) {
             final DataSetError ds = (DataSetError) dataSet;
-            errorType = dataSet.lock().readLockGuard(ds::getErrorType);
+            errorType = dataSet.lock().readLockGuardOptimistic(ds::getErrorType);
         } else {
             // fall-back for standard DataSet
 
@@ -290,8 +290,8 @@ class CachedDataPoints {
 
     private void computeYonly(final Axis xAxis, final Axis yAxis, final DataSet dataSet, final int min, final int max) {
         if (dataSet instanceof DataSetError) {
-            final DataSetError ds = (DataSetError) dataSet;
             dataSet.lock().readLockGuard(() -> {
+                final DataSetError ds = (DataSetError) dataSet;
                 for (int index = min; index < max; index++) {
                     final double x = dataSet.getX(index);
                     final double y = dataSet.getY(index);
@@ -341,7 +341,6 @@ class CachedDataPoints {
     }
 
     private void computeYonlyPolar(final Axis yAxis, final DataSet dataSet, final int min, final int max) {
-
         dataSet.lock().readLockGuard(() -> {
             for (int index = min; index < max; index++) {
                 final double x = dataSet.getX(index);

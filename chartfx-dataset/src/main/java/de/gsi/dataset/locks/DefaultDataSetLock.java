@@ -9,7 +9,6 @@ import de.gsi.dataset.DataSet;
 /**
  * A Simple ReadWriteLock for the DataSet interface and its fluent-design
  * approach
- * 
  * Some implementation recommendation: write lock guards behave the same as
  * ReentrantLock with the additional functionality, that a
  * <code>writeLock()</code> and subsequent <code>writeUnLock()</code> mute and,
@@ -52,212 +51,240 @@ import de.gsi.dataset.DataSet;
  * @param <D> generics reference, usually to
  *            <code>&lt;? extends DataSet&gt;</code>
  */
-@SuppressWarnings({"PMD.DoNotUseThreads", "PMD.CommentSize"}) // Runnable used as functional interface
+@SuppressWarnings({ "PMD.DoNotUseThreads", "PMD.CommentSize" }) // Runnable used as functional interface
 public class DefaultDataSetLock<D extends DataSet> implements DataSetLock<D> {
-	private static final long serialVersionUID = 1L;
-	private final transient StampedLock stampedLock = new StampedLock();
-	private transient long lastReadStamp;
-	private transient long lastWriteStamp;
-	private transient Thread writeLockThread; // NOPMD
-	private final transient AtomicInteger readerCount = new AtomicInteger(0);
-	private final transient AtomicInteger writerCount = new AtomicInteger(0);
-	private transient boolean autoNotifyState;
-	private final transient D dataSet;
+    private static final long serialVersionUID = 1L;
+    private final transient StampedLock stampedLock = new StampedLock();
+    private transient long lastReadStamp;
+    private transient long lastWriteStamp;
+    private transient Thread writeLockThread; // NOPMD
+    private final transient AtomicInteger readerCount = new AtomicInteger(0);
+    private final transient AtomicInteger writerCount = new AtomicInteger(0);
+    private transient boolean autoNotifyState;
+    private final transient D dataSet;
 
-	/**
-	 * @param dataSet dataSet this set is associate with
-	 */
-	public DefaultDataSetLock(final D dataSet) {
-		this.dataSet = dataSet;
-		if (dataSet == null) {
-			throw new IllegalArgumentException("dataSet must not be null");
-		}
-	}
+    /**
+     * @param dataSet dataSet this set is associate with
+     */
+    public DefaultDataSetLock(final D dataSet) {
+        this.dataSet = dataSet;
+        if (dataSet == null) {
+            throw new IllegalArgumentException("dataSet must not be null");
+        }
+    }
 
-	/**
-	 * @return last reader stamp
-	 * @see java.util.concurrent.locks.StampedLock
-	 */
-	public long getLastReadStamp() {
-		return lastReadStamp;
-	}
+    /**
+     * experimental down-grading of the writer lock
+     * 
+     * @return corresponding data set
+     * @deprecated do not use (yet)
+     */
+    public D downGradeWriteLock() {
+        if (!stampedLock.isWriteLocked()) {
+            throw new IllegalStateException("cannot downconvert lock - lock is not write locked");
+        }
+        if (getWriterCount() > 1) {
+            throw new IllegalStateException("cannot downconvert lock - holding n writelocks = " + getWriterCount());
+        }
+        final long result = stampedLock.tryConvertToReadLock(lastWriteStamp);
+        if (result == 0l) {
+            throw new IllegalStateException("cannot downconvert lock - tryConvertToReadLock return '0'");
+        }
+        this.readerCount.getAndIncrement();
+        this.writerCount.getAndDecrement();
+        if (lastReadStamp == 0 && stampedLock.isReadLocked() && getReaderCount() > 1) {
+            stampedLock.unlockRead(lastReadStamp);
+        }
+        lastReadStamp = result;
 
-	/**
-	 * @return the last stored auto-notification state
-	 */
-	public boolean getLastStoredAutoNotificationState() { // NOPMD
-		return autoNotifyState;
-	}
+        return dataSet;
+    }
 
-	/**
-	 * @return last writer stamp
-	 * @see java.util.concurrent.locks.StampedLock
-	 */
-	public long getLastWriteStamp() {
-		return lastWriteStamp;
-	}
+    /**
+     * @return last reader stamp
+     * @see java.util.concurrent.locks.StampedLock
+     */
+    public long getLastReadStamp() {
+        return lastReadStamp;
+    }
 
-	/**
-	 * @return the internal StampedLock object
-	 */
-	public StampedLock getLockObject() {
-		return stampedLock;
-	}
+    /**
+     * @return the last stored auto-notification state
+     */
+    public boolean getLastStoredAutoNotificationState() { // NOPMD
+        return autoNotifyState;
+    }
 
-	/**
-	 * @return number of readers presently locked on this data set
-	 */
-	public int getReaderCount() {
-		return readerCount.get();
-	}
+    /**
+     * @return last writer stamp
+     * @see java.util.concurrent.locks.StampedLock
+     */
+    public long getLastWriteStamp() {
+        return lastWriteStamp;
+    }
 
-	/**
-	 * @return number of writers presently locked on this data set (N.B. all from
-	 *         the same thread)
-	 */
-	public int getWriterCount() {
-		return writerCount.get();
-	}
+    /**
+     * @return the internal StampedLock object
+     */
+    public StampedLock getLockObject() {
+        return stampedLock;
+    }
 
-	@Override
-	public D readLock() {
-		if (readerCount.getAndIncrement() == 0) {
-			lastReadStamp = stampedLock.readLock();
-		}
+    /**
+     * @return number of readers presently locked on this data set
+     */
+    public int getReaderCount() {
+        return readerCount.get();
+    }
 
-		return dataSet;
-	}
+    /**
+     * @return number of writers presently locked on this data set (N.B. all from
+     *         the same thread)
+     */
+    public int getWriterCount() {
+        return writerCount.get();
+    }
 
-	@Override
-	public D readLockGuard(final Runnable reading) {
-		long stamp = stampedLock.readLock();
-		try {
-			reading.run();
-		} finally {
-			stampedLock.unlockRead(stamp);
-		}
-		return dataSet;
-	}
+    @Override
+    public D readLock() {
+        if (readerCount.getAndIncrement() == 0) {
+            lastReadStamp = stampedLock.readLock();
+        }
 
-	@Override
-	public <R> R readLockGuard(final Supplier<R> reading) {
-		long stamp = stampedLock.readLock();
-		R result;
-		try {
-			result = reading.get();
-		} finally {
-			stampedLock.unlockRead(stamp);
-		}
-		return result;
-	}
+        return dataSet;
+    }
 
-	@Override
-	public D readLockGuardOptimistic(final Runnable reading) { // NOPMD -- runnable not used in a thread context
-		long stamp = stampedLock.tryOptimisticRead();
-		reading.run();
-		if (!stampedLock.validate(stamp)) {
-			stamp = stampedLock.readLock();
-			try {
-				reading.run();
-			} finally {
-				stampedLock.unlockRead(stamp);
-			}
-		}
-		return dataSet;
-	}
+    @Override
+    public D readLockGuard(final Runnable reading) {
+        readLock();
+        try {
+            reading.run();
+        } finally {
+            readUnLock();
+        }
+        return dataSet;
+    }
 
-	@Override
-	public <R> R readLockGuardOptimistic(final Supplier<R> reading) {
-		long stamp = stampedLock.tryOptimisticRead();
-		R result = reading.get();
-		if (!stampedLock.validate(stamp)) {
-			stamp = stampedLock.readLock();
-			try {
-				result = reading.get();
-			} finally {
-				stampedLock.unlockRead(stamp);
-			}
-		}
-		return result;
-	}
+    @Override
+    public <R> R readLockGuard(final Supplier<R> reading) {
+        readLock();
+        R result;
+        try {
+            result = reading.get();
+        } finally {
+            readUnLock();
+        }
+        return result;
+    }
 
-	@Override
-	public D readUnLock() {
-		if (readerCount.decrementAndGet() == 0) {
-			stampedLock.unlockRead(lastReadStamp);
-		} else if (readerCount.get() < 0) {
-			throw new IllegalStateException("read lock alread unlocked");
-		}
+    @Override
+    public D readLockGuardOptimistic(final Runnable reading) { // NOPMD -- runnable not used in a thread context
+        long stamp = stampedLock.tryOptimisticRead();
+        reading.run();
+        if (!stampedLock.validate(stamp)) {
+            readLock();
+            try {
+                reading.run();
+            } finally {
+                readUnLock();
+            }
+        }
+        return dataSet;
+    }
 
-		return dataSet;
-	}
+    @Override
+    public <R> R readLockGuardOptimistic(final Supplier<R> reading) {
+        long stamp = stampedLock.tryOptimisticRead();
+        R result = reading.get();
+        if (!stampedLock.validate(stamp)) {
+            readLock();
+            try {
+                result = reading.get();
+            } finally {
+                readUnLock();
+            }
+        }
+        return result;
+    }
 
-	@Override
-	public D writeLock() {
-		if (!stampedLock.isWriteLocked()) {
-			lastWriteStamp = stampedLock.writeLock();
-			writeLockThread = Thread.currentThread();
-			// copy threadID
-		}
+    @Override
+    public D readUnLock() {
+        if (readerCount.decrementAndGet() == 0) {
+            stampedLock.unlockRead(lastReadStamp);
+            lastReadStamp = 0l;
+        } else if (readerCount.get() < 0) {
+            throw new IllegalStateException("read lock alread unlocked");
+        }
 
-		if (writeLockThread != Thread.currentThread()) {
-			lastWriteStamp = stampedLock.writeLock();
-			writeLockThread = Thread.currentThread();
-		}
+        return dataSet;
+    }
 
-		if (writerCount.getAndIncrement() == 0) {
-			// store present auto-notify state
-			autoNotifyState = dataSet.isAutoNotification();
-			dataSet.setAutoNotifaction(false);
-		}
+    @Override
+    public D writeLock() {
+        if (!stampedLock.isWriteLocked()) {
+            lastWriteStamp = stampedLock.writeLock();
+            writeLockThread = Thread.currentThread();
+            // copy threadID
+        }
 
-		return dataSet;
-	}
+        if (writeLockThread != Thread.currentThread()) {
+            lastWriteStamp = stampedLock.writeLock();
+            writeLockThread = Thread.currentThread();
+        }
 
-	@Override
-	public D writeLockGuard(final Runnable writing) { // NOPMD -- runnable not used in a thread context
-		writeLock();
-		final boolean oldAutoNotificationState = dataSet.isAutoNotification();
-		dataSet.setAutoNotifaction(false);
+        if (writerCount.getAndIncrement() == 0) {
+            // store present auto-notify state
+            autoNotifyState = dataSet.isAutoNotification();
+            dataSet.setAutoNotifaction(false);
+        }
 
-		try {
-			writing.run();
-		} finally {
-			dataSet.setAutoNotifaction(oldAutoNotificationState);
-			writeUnLock();
-		}
-		return dataSet;
-	}
+        return dataSet;
+    }
 
-	@Override
-	public <R> R writeLockGuard(final Supplier<R> writing) {
-		writeLock();
-		final boolean oldAutoNotificationState = dataSet.isAutoNotification();
-		dataSet.setAutoNotifaction(false);
+    @Override
+    public D writeLockGuard(final Runnable writing) { // NOPMD -- runnable not used in a thread context
+        writeLock();
+        final boolean oldAutoNotificationState = dataSet.isAutoNotification();
+        dataSet.setAutoNotifaction(false);
 
-		R result;
-		try {
-			result = writing.get();
-		} finally {
-			dataSet.setAutoNotifaction(oldAutoNotificationState);
-			writeUnLock();
-		}
-		return result;
-	}
+        try {
+            writing.run();
+        } finally {
+            dataSet.setAutoNotifaction(oldAutoNotificationState);
+            writeUnLock();
+        }
+        return dataSet;
+    }
 
-	@Override
-	public D writeUnLock() {
-		if (writerCount.decrementAndGet() == 0) {
-			// restore present auto-notify state
-			dataSet.setAutoNotifaction(autoNotifyState);
-			final long temp = lastWriteStamp;
-			lastWriteStamp = 0;
-			writeLockThread = null; // NOPMD
-			stampedLock.unlockWrite(temp);
+    @Override
+    public <R> R writeLockGuard(final Supplier<R> writing) {
+        writeLock();
+        final boolean oldAutoNotificationState = dataSet.isAutoNotification();
+        dataSet.setAutoNotifaction(false);
 
-		} else if (writerCount.get() < 0) {
-			throw new IllegalStateException("write lock alread unlocked");
-		}
-		return dataSet;
-	}
+        R result;
+        try {
+            result = writing.get();
+        } finally {
+            dataSet.setAutoNotifaction(oldAutoNotificationState);
+            writeUnLock();
+        }
+        return result;
+    }
+
+    @Override
+    public D writeUnLock() {
+        if (writerCount.decrementAndGet() == 0) {
+            // restore present auto-notify state
+            dataSet.setAutoNotifaction(autoNotifyState);
+            final long temp = lastWriteStamp;
+            lastWriteStamp = 0;
+            writeLockThread = null; // NOPMD
+            stampedLock.unlockWrite(temp);
+
+        } else if (writerCount.get() < 0) {
+            throw new IllegalStateException("write lock alread unlocked");
+        }
+        return dataSet;
+    }
 }

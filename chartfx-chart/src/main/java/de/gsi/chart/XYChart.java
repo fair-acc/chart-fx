@@ -20,6 +20,7 @@ import de.gsi.chart.ui.geometry.Side;
 import de.gsi.dataset.AxisDescription;
 import de.gsi.dataset.DataSet;
 import de.gsi.dataset.DataSet3D;
+import de.gsi.dataset.locks.DefaultDataSetLock;
 import de.gsi.dataset.utils.AssertUtils;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -242,11 +243,46 @@ public class XYChart extends Chart {
             return;
         }
 
-        getAxes().forEach(chartAxis -> {
-            final List<DataSet> dataSets = getDataSetForAxis(chartAxis);
-            updateNumericAxis(chartAxis, dataSets);
-            // chartAxis.requestAxisLayout();
-        });
+        // lock datasets to prevent writes while updating the axes
+        ObservableList<DataSet> dataSets = this.getAllDatasets();
+        // check that all registered data sets have proper ranges defined 
+        dataSets.parallelStream().forEach(dataset -> dataset.getAxisDescriptions().parallelStream()
+                .filter(axisD -> !axisD.isDefined()).forEach(axisDescription -> {
+                    final boolean oldAutoState = dataset.isAutoNotification();
+                    dataset.setAutoNotifaction(false);
+                    dataset.recomputeLimits(dataset.getAxisDescriptions().indexOf(axisDescription));
+                    dataset.setAutoNotifaction(oldAutoState);
+                }));
+
+        // N.B. possible race condition on this line -> for the future to solve
+        // recomputeLimits holds a writeLock the following sections need a read lock (for allowing parallel axis)
+        // there isn't an easy way to down-grade the established write locks into read locks (yet)
+        // Experimental version:
+        //        dataSets.forEach(dataset -> {
+        //            dataset.lock().writeLock();
+        //            dataset.getAxisDescriptions().parallelStream().filter(axisD -> !axisD.isDefined())
+        //                    .forEach(axisDescription -> {
+        //                        final boolean oldAutoState = dataset.isAutoNotification();
+        //                        dataset.setAutoNotifaction(false);
+        //                        dataset.recomputeLimits(dataset.getAxisDescriptions().indexOf(axisDescription));
+        //                        dataset.setAutoNotifaction(oldAutoState);
+        //                    });
+        //            DefaultDataSetLock<DataSet> myLock = (DefaultDataSetLock<DataSet>) dataset.lock();
+        //            myLock.downGradeWriteLock();
+        //        });
+
+        dataSets.forEach(ds -> ds.lock().readLock());
+        try {
+            getAxes().forEach(chartAxis -> {
+                final List<DataSet> dataSetForAxis = getDataSetForAxis(chartAxis);
+                updateNumericAxis(chartAxis, dataSetForAxis);
+                // chartAxis.requestAxisLayout();
+            });
+        } finally {
+            dataSets.forEach(ds -> ds.lock().readUnLock());
+        }
+
+        // unlock datasets again
     }
 
     /**
@@ -314,7 +350,7 @@ public class XYChart extends Chart {
             }
 
             // check if axis is in correct pane
-            if (getAxesPane(axis.getSide()).getChildren().contains((Node)axis)) {
+            if (getAxesPane(axis.getSide()).getChildren().contains((Node) axis)) {
                 // yes, it is continue with next axis
                 continue;
             }
@@ -403,18 +439,13 @@ public class XYChart extends Chart {
         final Side side = axis.getSide();
         axis.getAutoRange().empty();
         dataSets.forEach(dataset -> {
-            for (AxisDescription axisDescription : dataset.getAxisDescriptions()) {
-                if (!axisDescription.isDefined()) {
-                    dataset.recomputeLimits(dataset.getAxisDescriptions().indexOf(axisDescription));
-                }
-            }
             if (dataset instanceof DataSet3D && (side == Side.RIGHT || side == Side.TOP)) {
                 final DataSet3D mDataSet = (DataSet3D) dataset;
                 axis.getAutoRange().add(mDataSet.getAxisDescription(2).getMin());
                 axis.getAutoRange().add(mDataSet.getAxisDescription(2).getMax());
             } else {
-                axis.getAutoRange().add(dataset.getAxisDescription(isHorizontal ? 0:1).getMin());
-                axis.getAutoRange().add(dataset.getAxisDescription(isHorizontal ? 0:1).getMax());
+                axis.getAutoRange().add(dataset.getAxisDescription(isHorizontal ? 0 : 1).getMin());
+                axis.getAutoRange().add(dataset.getAxisDescription(isHorizontal ? 0 : 1).getMax());
             }
         });
         axis.getAutoRange().setAxisLength(axis.getLength() == 0 ? 1 : axis.getLength(), side);
@@ -427,18 +458,18 @@ public class XYChart extends Chart {
 
         final List<Number> dataMinMax = new ArrayList<>();
         dataSets.forEach(dataset -> {
-//            for (AxisDescription axisDescription : dataset.getAxisDescriptions()) {
-//                if (!axisDescription.isDefined()) {
-//                    dataset.recomputeLimits(dataset.getAxisDescriptions().indexOf(axisDescription));
-//                }
-//            }
+            //            for (AxisDescription axisDescription : dataset.getAxisDescriptions()) {
+            //                if (!axisDescription.isDefined()) {
+            //                    dataset.recomputeLimits(dataset.getAxisDescriptions().indexOf(axisDescription));
+            //                }
+            //            }
             if (dataset instanceof DataSet3D && (side == Side.RIGHT || side == Side.TOP)) {
                 final DataSet3D mDataSet = (DataSet3D) dataset;
                 dataMinMax.add(mDataSet.getAxisDescription(2).getMin());
                 dataMinMax.add(mDataSet.getAxisDescription(2).getMax());
             } else {
-                dataMinMax.add(dataset.getAxisDescription(isHorizontal ? 0:1).getMin());
-                dataMinMax.add(dataset.getAxisDescription(isHorizontal ? 0:1).getMax());
+                dataMinMax.add(dataset.getAxisDescription(isHorizontal ? 0 : 1).getMin());
+                dataMinMax.add(dataset.getAxisDescription(isHorizontal ? 0 : 1).getMax());
             }
         });
 
