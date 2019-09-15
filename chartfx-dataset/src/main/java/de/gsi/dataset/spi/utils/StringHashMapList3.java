@@ -1,7 +1,6 @@
 package de.gsi.dataset.spi.utils;
 
-public class StringHashMapList3 extends ObjectObjectMap<Integer, String> {
-	private static final long serialVersionUID = 8092212806952769843L;
+public class StringHashMapList3 extends IntStringMap {
 	private static final long PARALLELISM_THRESHOLD = 1000;
 	private static final int DEFAULT_SIZE = 1000;
 	private static final float DEFAULT_FILL_FACTOR = 0.1f;
