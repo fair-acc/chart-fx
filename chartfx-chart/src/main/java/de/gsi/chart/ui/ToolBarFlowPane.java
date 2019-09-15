@@ -1,0 +1,123 @@
+package de.gsi.chart.ui;
+
+import de.gsi.chart.Chart;
+import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.collections.ListChangeListener;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.Node;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundFill;
+import javafx.scene.layout.CornerRadii;
+import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
+
+/**
+ * tool bar for plugins to add their controls (if necessary)
+ * 
+ * @author rstein
+ */
+public class ToolBarFlowPane extends FlowPane {
+    private Color defaultColour = Color.web("#f4f4f4", 0.85).deriveColor(0, 1.0, .94, 1.0);
+    private Color selectedColour = Color.web("#f4f4f4", 0.85).deriveColor(0, 1.0, .92, 1.0);
+    private Insets toolBarPadding = new Insets(1, 12.5, 5, 12.5);
+    private final DoubleProperty cornerRadius = new SimpleDoubleProperty(this, "cornerRadius", 25.0);
+    private final Chart chart;
+
+    /**
+     * @param chart the associated chart pane
+     */
+    public ToolBarFlowPane(final Chart chart) {
+        super();
+        this.chart = chart;
+
+        this.setPrefHeight(-1);
+        this.setBackground(new Background(new BackgroundFill(defaultColour, CornerRadii.EMPTY, Insets.EMPTY)));
+        this.setMinHeight(0);
+
+        this.setShape(ToolBarShapeHelper.getToolBarShape(this.getWidth(), this.getHeight(), cornerRadius.get()));
+        this.setPrefWidth(-1);
+
+        this.setAlignment(Pos.TOP_CENTER);
+        this.setMinWidth(0);
+        this.setPadding(toolBarPadding);
+        VBox.setVgrow(this, Priority.ALWAYS);
+        HBox.setHgrow(this, Priority.NEVER);
+
+        ChangeListener<Number> toolBarSizeListener = (ch, o, n) -> {
+            if (n.equals(o)) {
+                return;
+            }
+            adjustToolBarWidth();
+        };
+
+        this.widthProperty().addListener(toolBarSizeListener);
+        this.heightProperty().addListener(toolBarSizeListener);
+        chart.getCanvas().widthProperty().addListener(toolBarSizeListener);
+        cornerRadius.addListener(toolBarSizeListener);
+    }
+
+    public DoubleProperty cornerRadiusProperty() {
+        return cornerRadius;
+    }
+
+    public Color getToolBarDefaultColor() {
+        return this.defaultColour;
+    }
+
+    public Insets getToolBarInsets() {
+        return toolBarPadding;
+    }
+
+    public Color getToolBarSelectedColor() {
+        return this.selectedColour;
+    }
+
+    public void registerListener() {
+        this.getChildren().addListener((ListChangeListener.Change<? extends Node> c) -> adjustToolBarWidth());
+
+        this.setOnMouseClicked(mevt -> chart.setToolBarPinned(!chart.isToolBarPinned()));
+        chart.toolBarPinnedProperty().addListener((obj, valOld, valNew) -> {
+            if (valNew) {
+                chart.setPinnedSide(javafx.geometry.Side.TOP);
+                this.setBackground(new Background(new BackgroundFill(selectedColour, CornerRadii.EMPTY, Insets.EMPTY)));
+            } else {
+                chart.setPinnedSide(null);
+                this.setBackground(new Background(new BackgroundFill(defaultColour, CornerRadii.EMPTY, Insets.EMPTY)));
+            }
+            chart.requestLayout();
+        });
+    }
+
+    public void setToolBarDefaultColor(final Color color) {
+        this.defaultColour = color;
+    }
+
+    public void setToolBarInsets(final Insets padding) {
+        toolBarPadding = padding;
+        this.setPadding(toolBarPadding);
+    }
+
+    public void setToolBarSelectedColor(final Color color) {
+        this.selectedColour = color;
+    }
+
+    private void adjustToolBarWidth() {
+        final double maxLength = 0.90 * chart.getCanvas().getWidth();
+        double length = 0.0;
+        for (Node node : this.getChildren()) {
+            length += node.prefWidth(-2);
+        }
+        length += 4 * cornerRadius.get();
+        final double wrapLength = Math.min(maxLength, Math.max(length, 50));
+
+        this.prefWrapLengthProperty().set(wrapLength);
+        this.setMaxWidth(maxLength);
+        this.setShape(ToolBarShapeHelper.getToolBarShape(wrapLength, this.getHeight(), cornerRadius.get()));
+    }
+}

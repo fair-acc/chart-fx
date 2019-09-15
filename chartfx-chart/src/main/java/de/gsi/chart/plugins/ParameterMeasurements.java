@@ -69,7 +69,7 @@ public class ParameterMeasurements extends ChartPlugin {
         // Prevent the toolbar HiddenSidePane from vanishing when using the menu
         fileMenu.setOnShown((evt) -> getChart().setPinnedSide(javafx.geometry.Side.TOP));
         fileMenu.setOnHidden((evt) -> {
-            if (!getChart().getToolBarPinned())
+            if (!getChart().isToolBarPinned())
                 getChart().setPinnedSide(null);
         });
 
