@@ -22,12 +22,12 @@ import de.gsi.chart.renderer.spi.LabelledMarkerRenderer;
 import de.gsi.chart.ui.ChartLayoutAnimator;
 import de.gsi.chart.ui.HiddenSidesPane;
 import de.gsi.chart.ui.ResizableCanvas;
+import de.gsi.chart.ui.ToolBarFlowPane;
 import de.gsi.chart.ui.css.StylishBooleanProperty;
 import de.gsi.chart.ui.css.StylishObjectProperty;
 import de.gsi.chart.ui.geometry.Corner;
 import de.gsi.chart.ui.geometry.Side;
 import de.gsi.chart.utils.FXUtils;
-import de.gsi.chart.utils.ToolBarShapeHelper;
 import de.gsi.dataset.DataSet;
 import de.gsi.dataset.event.EventListener;
 import de.gsi.dataset.utils.AssertUtils;
@@ -68,11 +68,8 @@ import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.control.Label;
-import javafx.scene.layout.Background;
-import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.ColumnConstraints;
-import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
@@ -82,7 +79,6 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.RowConstraints;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
 import javafx.util.Duration;
 
 /**
@@ -141,7 +137,7 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
 
     protected boolean isAxesUpdate;
     // containing the plugin handler/modifier
-    protected final FlowPane toolBar = new FlowPane();
+    protected final ToolBarFlowPane toolBar = new ToolBarFlowPane(this);
     protected final BooleanProperty toolBarPinned = new SimpleBooleanProperty(this, "toolBarPinned", false);
 
     protected final HiddenSidesPane hiddenPane = new HiddenSidesPane();
@@ -512,47 +508,13 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
         VBox.setVgrow(titleLabel, Priority.ALWAYS);
         titleLabel.focusTraversableProperty().bind(Platform.accessibilityActiveProperty());
 
-        // tool bar for plugins to add their controls (if necessary)
-        toolBar.setPrefHeight(-1);
-        toolBar.setBackground(
-                new Background(new BackgroundFill(Color.web("#f4f4f4", 0.85).deriveColor(0, 1.0, .94, 1.0),
-                        new CornerRadii(0, 0, 10, 10, false), Insets.EMPTY)));
-        toolBar.setMinHeight(0);
-        final Insets toolBarPadding = new Insets(1, 12.5, 5, 12.5);
-        toolBar.setShape(ToolBarShapeHelper.getToolBarShape(toolBar.getWidth(), toolBar.getHeight(), 25));
-        ChangeListener<Number> toolBarSizeListener = (ch, o, n) -> {
-            if (n.equals(o)) {
-                return;
-            }
-            toolBar.setShape(ToolBarShapeHelper.getToolBarShape(toolBar.getWidth(), toolBar.getHeight(), 25));
-        };
-        toolBar.widthProperty().addListener(toolBarSizeListener);
-        toolBar.heightProperty().addListener(toolBarSizeListener);
-        toolBar.setPrefWidth(-1);
-        toolBar.setAlignment(Pos.TOP_CENTER);
-        toolBar.setMinWidth(0);
-        toolBar.setPadding(toolBarPadding);
-        VBox.setVgrow(toolBar, Priority.ALWAYS);
-        HBox topbox = new HBox();
+        // register listener in tool bar FlowPane 
+        toolBar.registerListener();
+        HBox topbox = new HBox(getToolBar());
         topbox.setAlignment(Pos.TOP_CENTER);
-        topbox.getChildren().add(getToolBar());
-        HBox.setHgrow(toolBar, Priority.NEVER);
+//        getPlotArea().setTop(topbox);
         setTop(topbox);
-        getToolBar().setOnMouseClicked(mevt -> toolBarPinned.set(!toolBarPinned.get()));
-        toolBarPinned.addListener((obj, valOld, valNew) -> {
-            if (valNew) {
-                this.setPinnedSide(javafx.geometry.Side.TOP);
-                toolBar.setBackground(
-                        new Background(new BackgroundFill(Color.web("#f4f4f4", 0.85).deriveColor(0, 1.0, .92, 1.0),
-                                new CornerRadii(0, 0, 10, 10, false), Insets.EMPTY)));
-            } else {
-                setPinnedSide(null);
-                toolBar.setBackground(
-                        new Background(new BackgroundFill(Color.web("#f4f4f4", 0.85).deriveColor(0, 1.0, .94, 1.0),
-                                new CornerRadii(0, 0, 10, 10, false), Insets.EMPTY)));
-            }
-            requestLayout();
-        });
+
         getTitleLegendPane(Side.TOP).getChildren().add(titleLabel);
         setLegend(new DefaultLegend());
 
@@ -867,7 +829,7 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
         return toolBarPinned;
     }
 
-    public boolean getToolBarPinned() { // NOPMD
+    public boolean isToolBarPinned() {
         return toolBarPinned.get();
     }
 

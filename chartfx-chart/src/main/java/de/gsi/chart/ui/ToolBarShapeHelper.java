@@ -1,4 +1,4 @@
-package de.gsi.chart.utils;
+package de.gsi.chart.ui;
 
 import javafx.scene.shape.CubicCurveTo;
 import javafx.scene.shape.LineTo;
@@ -28,16 +28,16 @@ public final class ToolBarShapeHelper {
 
         // cubic sweep down
         path.getElements().add(new CubicCurveTo(// 
-                centreX - halfWidth - 0 * radii, centreY - halfHeight, // first control point 
-                centreX - halfWidth - 4 * radii, centreY + halfHeight, // second control point
+                centreX - halfWidth - 2 * radii, centreY - halfHeight, // first control point 
+                centreX - halfWidth - 2 * radii, centreY + halfHeight, // second control point
                 centreX - halfWidth + 0 * radii, centreY + halfHeight)); // to coordinate
         // line on bottom
         path.getElements().add(new LineTo(centreX + halfWidth, centreY + halfHeight));
 
         // cubic sweep up
         path.getElements().add(new CubicCurveTo(// 
-                centreX + halfWidth + 4 * radii, centreY + halfHeight, // first control point 
-                centreX + halfWidth + 0 * radii, centreY - halfHeight, // second control point
+                centreX + halfWidth + 2 * radii, centreY + halfHeight, // first control point 
+                centreX + halfWidth + 2 * radii, centreY - halfHeight, // second control point
                 centreX + halfWidth + 4 * radii, centreY - halfHeight)); // to coordinate
 
         // return to top left corner
