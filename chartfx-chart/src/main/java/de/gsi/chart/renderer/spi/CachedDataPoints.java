@@ -251,7 +251,7 @@ class CachedDataPoints {
     private void computeNoError(final Axis xAxis, final Axis yAxis, final DataSet dataSet, final int min,
             final int max) {
         // no error attached
-        dataSet.lock().readLockGuard(() -> {
+        dataSet.lock().readLockGuardOptimistic(() -> {
             for (int index = min; index < max; index++) {
                 final double x = dataSet.getX(index);
                 final double y = dataSet.getY(index);
@@ -269,7 +269,7 @@ class CachedDataPoints {
 
     private void computeNoErrorPolar(final Axis yAxis, final DataSet dataSet, final int min, final int max) {
         // experimental transform euclidean to polar coordinates
-        dataSet.lock().readLockGuard(() -> {
+        dataSet.lock().readLockGuardOptimistic(() -> {
             for (int index = min; index < max; index++) {
                 final double x = dataSet.getX(index);
                 final double y = dataSet.getY(index);
@@ -290,7 +290,7 @@ class CachedDataPoints {
 
     private void computeYonly(final Axis xAxis, final Axis yAxis, final DataSet dataSet, final int min, final int max) {
         if (dataSet instanceof DataSetError) {
-            dataSet.lock().readLockGuard(() -> {
+            dataSet.lock().readLockGuardOptimistic(() -> {
                 final DataSetError ds = (DataSetError) dataSet;
                 for (int index = min; index < max; index++) {
                     final double x = dataSet.getX(index);
@@ -315,7 +315,7 @@ class CachedDataPoints {
         }
 
         // default dataset
-        dataSet.lock().readLockGuard(() -> {
+        dataSet.lock().readLockGuardOptimistic(() -> {
             for (int index = min; index < max; index++) {
                 final double x = dataSet.getX(index);
                 final double y = dataSet.getY(index);
@@ -341,7 +341,7 @@ class CachedDataPoints {
     }
 
     private void computeYonlyPolar(final Axis yAxis, final DataSet dataSet, final int min, final int max) {
-        dataSet.lock().readLockGuard(() -> {
+        dataSet.lock().readLockGuardOptimistic(() -> {
             for (int index = min; index < max; index++) {
                 final double x = dataSet.getX(index);
                 final double y = dataSet.getY(index);
@@ -368,7 +368,7 @@ class CachedDataPoints {
 
     private void computeFull(final Axis xAxis, final Axis yAxis, final DataSetError dataSet, final int min,
             final int max) {
-        dataSet.lock().readLockGuard(() -> {
+        dataSet.lock().readLockGuardOptimistic(() -> {
             for (int index = min; index < max; index++) {
                 final double x = dataSet.getX(index);
                 final double y = dataSet.getY(index);
@@ -400,7 +400,7 @@ class CachedDataPoints {
     }
 
     private void computeFullPolar(final Axis yAxis, final DataSetError dataSet, final int min, final int max) {
-        dataSet.lock().readLockGuard(() -> {
+        dataSet.lock().readLockGuardOptimistic(() -> {
             for (int index = min; index < max; index++) {
                 final double x = dataSet.getX(index);
                 final double y = dataSet.getY(index);
