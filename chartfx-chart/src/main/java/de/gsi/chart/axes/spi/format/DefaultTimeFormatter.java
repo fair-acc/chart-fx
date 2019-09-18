@@ -121,8 +121,12 @@ public class DefaultTimeFormatter extends AbstractFormatter {
             return formatHighResString(utcValueSeconds);
         }
 
-        final long longUTCSeconds = utcValueSeconds.longValue();
-        final int longNanoSeconds = (int) ((utcValueSeconds.doubleValue() - longUTCSeconds) * 1e9);
+        long longUTCSeconds =  utcValueSeconds.longValue();
+        int longNanoSeconds = (int) ((utcValueSeconds.doubleValue() - longUTCSeconds) * 1e9);
+        if (longNanoSeconds< 0) { // Correctly Handle dates before EPOCH
+            longUTCSeconds -= 1;
+            longNanoSeconds += 1e9;
+        }
         final LocalDateTime dateTime = LocalDateTime.ofEpochSecond(longUTCSeconds, longNanoSeconds,
                 getTimeZoneOffset());
 
