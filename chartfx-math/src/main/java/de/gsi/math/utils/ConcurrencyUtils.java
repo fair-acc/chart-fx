@@ -58,7 +58,8 @@ public class ConcurrencyUtils {
 	private static int 		forceNThreads = 1;
 
 	private static class CustomExceptionHandler implements Thread.UncaughtExceptionHandler {
-		public void uncaughtException(Thread t, Throwable e) {
+		@Override
+        public void uncaughtException(Thread t, Throwable e) {
 			e.printStackTrace();
 		}
 	}
@@ -66,13 +67,18 @@ public class ConcurrencyUtils {
 	private static class CustomThreadFactory implements ThreadFactory {
 		private static final ThreadFactory	defaultFactory	= Executors.defaultThreadFactory();
 		private final Thread.UncaughtExceptionHandler	handler;
-
+		private static int threadCounter = 1;
+		
 		CustomThreadFactory(Thread.UncaughtExceptionHandler handler) {
 			this.handler = handler;
 		}
 
-		public Thread newThread(Runnable r) {
+		@Override
+        public Thread newThread(Runnable r) {
 			Thread t = defaultFactory.newThread(r);
+			t.setDaemon(true);
+			t.setName("daemonised_chartfx_math_thread"+threadCounter);
+			threadCounter++;
 			t.setUncaughtExceptionHandler(handler);
 			return t;
 		}

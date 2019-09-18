@@ -20,6 +20,7 @@ import de.gsi.dataset.spi.DoubleErrorDataSet;
 import de.gsi.dataset.testdata.spi.RandomDataGenerator;
 import de.gsi.dataset.utils.ProcessingProfiler;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.layout.BorderPane;
@@ -100,7 +101,7 @@ public class ErrorDataSetRendererSample extends Application {
         startTime = ProcessingProfiler.getTimeStamp();
         primaryStage.setTitle(this.getClass().getSimpleName());
         primaryStage.setScene(scene);
-        primaryStage.setOnCloseRequest(evt -> System.exit(0));
+        primaryStage.setOnCloseRequest(evt -> Platform.exit());
         primaryStage.show();
         ProcessingProfiler.getTimeDiff(startTime, "for showing");
 
