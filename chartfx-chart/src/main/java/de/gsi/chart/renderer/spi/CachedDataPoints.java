@@ -17,6 +17,7 @@ import de.gsi.chart.utils.StyleParser;
 import de.gsi.dataset.DataSet;
 import de.gsi.dataset.DataSetError;
 import de.gsi.dataset.DataSetError.ErrorType;
+import de.gsi.dataset.utils.CachedDaemonThreadFactory;
 import de.gsi.dataset.utils.ProcessingProfiler;
 import de.gsi.math.ArrayUtils;
 
@@ -38,7 +39,8 @@ class CachedDataPoints {
     private static final String X_VALUES = "xValues";
     private static final double DEG_TO_RAD = Math.PI / 180.0;
     private static final int MAX_THREADS = Math.max(4, Runtime.getRuntime().availableProcessors());
-    private static final ExecutorService EXECUTOR_SERVICE = Executors.newFixedThreadPool(2 * MAX_THREADS);
+    private static final ExecutorService EXECUTOR_SERVICE = Executors.newFixedThreadPool(2 * MAX_THREADS,
+            CachedDaemonThreadFactory.getInstance());
 
     protected double[] xValues;
     protected double[] yValues;

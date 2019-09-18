@@ -9,6 +9,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import de.gsi.dataset.utils.CachedDaemonThreadFactory;
 import de.gsi.dataset.utils.ProcessingProfiler;
 
 /**
@@ -18,7 +19,7 @@ import de.gsi.dataset.utils.ProcessingProfiler;
  * </p>
  */
 public class MarchingSquares {
-    private static final ExecutorService ES = Executors.newCachedThreadPool();
+    private static final ExecutorService ES = Executors.newCachedThreadPool(CachedDaemonThreadFactory.getInstance());
     private double[] isovalues;
 
     private static Grid contour(final double[][] data, final double isovalue) {
@@ -71,40 +72,40 @@ public class MarchingSquares {
                     float bottom = 0.5F;
                     switch (ndx) {
                     case 1:
-					case 14:
-						left = (float) ((isovalue - bl) / (tl - bl));
+                    case 14:
+                        left = (float) ((isovalue - bl) / (tl - bl));
                         bottom = (float) ((isovalue - bl) / (br - bl));
                         break;
                     case 2:
-					case 13:
-						bottom = (float) ((isovalue - bl) / (br - bl));
+                    case 13:
+                        bottom = (float) ((isovalue - bl) / (br - bl));
                         right = (float) ((isovalue - br) / (tr - br));
                         break;
                     case 3:
-					case 12:
-						left = (float) ((isovalue - bl) / (tl - bl));
+                    case 12:
+                        left = (float) ((isovalue - bl) / (tl - bl));
                         right = (float) ((isovalue - br) / (tr - br));
                         break;
                     case 4:
-					case 11:
-						top = (float) ((isovalue - tl) / (tr - tl));
+                    case 11:
+                        top = (float) ((isovalue - tl) / (tr - tl));
                         right = (float) ((isovalue - br) / (tr - br));
                         break;
                     case 5:
-					case 10:
-						left = (float) ((isovalue - bl) / (tl - bl));
+                    case 10:
+                        left = (float) ((isovalue - bl) / (tl - bl));
                         bottom = (float) ((isovalue - bl) / (br - bl));
                         top = (float) ((isovalue - tl) / (tr - tl));
                         right = (float) ((isovalue - br) / (tr - br));
                         break;
                     case 6:
-					case 9:
-						bottom = (float) ((isovalue - bl) / (br - bl));
+                    case 9:
+                        bottom = (float) ((isovalue - bl) / (br - bl));
                         top = (float) ((isovalue - tl) / (tr - tl));
                         break;
                     case 7:
-					case 8:
-						left = (float) ((isovalue - bl) / (tl - bl));
+                    case 8:
+                        left = (float) ((isovalue - bl) / (tl - bl));
                         top = (float) ((isovalue - tl) / (tr - tl));
                         break;
                     default: // shouldn't happen
