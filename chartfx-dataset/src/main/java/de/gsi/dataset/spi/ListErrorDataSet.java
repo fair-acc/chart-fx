@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import de.gsi.dataset.AxisDescription;
+import de.gsi.dataset.DataSet2D;
 import de.gsi.dataset.DataSetError;
 import de.gsi.dataset.event.AddedDataEvent;
 import de.gsi.dataset.event.RemovedDataEvent;
@@ -32,7 +33,7 @@ import de.gsi.dataset.utils.AssertUtils;
  *             reasons)
  */
 @Deprecated
-public class ListErrorDataSet extends AbstractErrorDataSet<ListErrorDataSet> implements DataSetError {
+public class ListErrorDataSet extends AbstractErrorDataSet<ListErrorDataSet> implements DataSet2D, DataSetError {
     private static final long serialVersionUID = -7853762711615967319L;
     protected Map<Integer, String> dataLabels = new ConcurrentHashMap<>();
     protected Map<Integer, String> dataStyles = new ConcurrentHashMap<>();
@@ -46,7 +47,7 @@ public class ListErrorDataSet extends AbstractErrorDataSet<ListErrorDataSet> imp
      *             <code>null</code>
      */
     public ListErrorDataSet(final String name) {
-        super(name);
+        super(name, 2);
         setErrorType(ErrorType.XY);
     }
 
@@ -117,7 +118,7 @@ public class ListErrorDataSet extends AbstractErrorDataSet<ListErrorDataSet> imp
      */
     public ListErrorDataSet(final String name, final double[] xValues, final double[] yValues, final double[] xErrors,
             final double[] yErrors) {
-        super(name);
+        super(name, 2);
         AssertUtils.notNull("X data", xValues);
         AssertUtils.notNull("Y data", yValues);
         AssertUtils.notNull("X error data", xErrors);
@@ -245,7 +246,7 @@ public class ListErrorDataSet extends AbstractErrorDataSet<ListErrorDataSet> imp
     public ListErrorDataSet clearData() {
         lock().writeLockGuard(() -> {
             data.clear();
-            getAxisDescriptions().forEach(AxisDescription::empty);
+            getAxisDescriptions().forEach(AxisDescription::clear);
         });
         return fireInvalidated(new RemovedDataEvent(this, "clearData()"));
     }

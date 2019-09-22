@@ -118,6 +118,7 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
             final int ldataSetIndex = dataSetIndex;
             stopStamp = ProcessingProfiler.getTimeStamp();
             final DataSet dataSet = localDataSetList.get(dataSetIndex);
+
             // N.B. print out for debugging purposes, please keep (used for
             // detecting redundant or too frequent render updates)
             // System.err.println(
@@ -140,9 +141,9 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
 
             // check for potentially reduced data range we are supposed to plot
             final Optional<CachedDataPoints> cachedPoints = dataSet.lock().readLockGuard(() -> {
-                int indexMin = Math.max(0, dataSet.getXIndex(xMin));
+                int indexMin = Math.max(0, dataSet.getIndex(DataSet.DIM_X, xMin));
                 /* indexMax is excluded in the drawing */
-                int indexMax = Math.min(dataSet.getXIndex(xMax) + 1, dataSet.getDataCount());
+                int indexMax = Math.min(dataSet.getIndex(DataSet.DIM_X, xMax) + 1, dataSet.getDataCount(DataSet.DIM_X));
                 if (xAxis.isInvertedAxis()) {
                     final int temp = indexMin;
                     indexMin = indexMax - 1;
@@ -158,7 +159,7 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
                         "get min/max" + String.format(" from:%d to:%d", indexMin, indexMax));
 
                 final CachedDataPoints localCachedPoints = new CachedDataPoints(indexMin, indexMax,
-                        dataSet.getDataCount(), true);
+                        dataSet.getDataCount(DataSet.DIM_X), true);
                 stopStamp = ProcessingProfiler.getTimeDiff(stopStamp, "get CachedPoints");
 
                 // compute local screen coordinates

@@ -29,13 +29,13 @@ public abstract class AbstractErrorDataSet<D extends AbstractErrorDataSet<D>> ex
     /**
      * Creates a new instance of <code>AbstractDataSet</code>.
      *
-     * @param name
-     *            of the DataSet
+     * @param name of the DataSet
+     * @param dimension dimension of data set
      * @throws IllegalArgumentException
      *             if <code>name</code> is <code>null</code>
      */
-    protected AbstractErrorDataSet(final String name) {
-        super(name);
+    protected AbstractErrorDataSet(final String name, final int dimension) {
+        super(name, dimension);
     }
 
     @Override
@@ -89,8 +89,8 @@ public abstract class AbstractErrorDataSet<D extends AbstractErrorDataSet<D>> ex
         }
         lock().writeLockGuard(() -> {
             // Clear previous ranges
-            getAxisDescriptions().forEach(AxisDescription::empty);
-            final int dataCount = getDataCount();
+            getAxisDescriptions().forEach(AxisDescription::clear);
+            final int dataCount = getDataCount(dimension);
 
             // following sections implements separate handling
             // of the each given error type cases also to avoid
@@ -104,8 +104,8 @@ public abstract class AbstractErrorDataSet<D extends AbstractErrorDataSet<D>> ex
                 break;
             case X:
                 for (int i = 0; i < dataCount; i++) {
-                    final double xData = getX(i);
-                    final double yData = getY(i);
+                    final double xData = get(DIM_X, i);
+                    final double yData = get(DIM_Y, i);
                     final double xDataError = getXErrorPositive(i);
                     getAxisDescription(0).add(xData - xDataError);
                     getAxisDescription(0).add(xData + xDataError);
@@ -114,8 +114,8 @@ public abstract class AbstractErrorDataSet<D extends AbstractErrorDataSet<D>> ex
                 break;
             case Y:
                 for (int i = 0; i < dataCount; i++) {
-                    final double xData = getX(i);
-                    final double yData = getY(i);
+                    final double xData = get(DIM_X, i);
+                    final double yData = get(DIM_Y, i);
                     final double yDataError = getYErrorPositive(i);
                     getAxisDescription(0).add(xData);
                     getAxisDescription(1).add(yData - yDataError);
@@ -124,8 +124,8 @@ public abstract class AbstractErrorDataSet<D extends AbstractErrorDataSet<D>> ex
                 break;
             case XY:
                 for (int i = 0; i < dataCount; i++) {
-                    final double xData = getX(i);
-                    final double yData = getY(i);
+                    final double xData = get(DIM_X, i);
+                    final double yData = get(DIM_Y, i);
                     final double xDataError = getXErrorPositive(i);
                     final double yDataError = getYErrorPositive(i);
                     getAxisDescription(0).add(xData - xDataError);
@@ -136,8 +136,8 @@ public abstract class AbstractErrorDataSet<D extends AbstractErrorDataSet<D>> ex
                 break;
             case X_ASYMMETRIC:
                 for (int i = 0; i < dataCount; i++) {
-                    final double xData = getX(i);
-                    final double yData = getY(i);
+                    final double xData = get(DIM_X, i);
+                    final double yData = get(DIM_Y, i);
                     getAxisDescription(0).add(xData - getXErrorNegative(i));
                     getAxisDescription(0).add(xData + getXErrorPositive(i));
                     getAxisDescription(1).add(yData);
@@ -145,8 +145,8 @@ public abstract class AbstractErrorDataSet<D extends AbstractErrorDataSet<D>> ex
                 break;
             case Y_ASYMMETRIC:
                 for (int i = 0; i < dataCount; i++) {
-                    final double xData = getX(i);
-                    final double yData = getY(i);
+                    final double xData = get(DIM_X, i);
+                    final double yData = get(DIM_Y, i);
                     getAxisDescription(0).add(xData);
                     getAxisDescription(1).add(yData - getYErrorNegative(i));
                     getAxisDescription(1).add(yData + getYErrorPositive(i));
@@ -155,8 +155,8 @@ public abstract class AbstractErrorDataSet<D extends AbstractErrorDataSet<D>> ex
             case XY_ASYMMETRIC:
             default:
                 for (int i = 0; i < dataCount; i++) {
-                    final double xData = getX(i);
-                    final double yData = getY(i);
+                    final double xData = get(DIM_X, i);
+                    final double yData = get(DIM_Y, i);
                     getAxisDescription(0).add(xData - getXErrorNegative(i));
                     getAxisDescription(0).add(xData + getXErrorPositive(i));
                     getAxisDescription(1).add(yData - getYErrorNegative(i));

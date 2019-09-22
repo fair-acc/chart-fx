@@ -4,13 +4,15 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
+import de.gsi.dataset.DataSet2D;
 import de.gsi.dataset.DataSetMetaData;
 import de.gsi.dataset.Histogram1D;
 import de.gsi.dataset.event.AddedDataEvent;
+import de.gsi.dataset.event.UpdatedDataEvent;
 
 /**
  * Class implements simple one dimensional binned histogram backed internally by double arrays
- * 
+ *
  * @author rstein
  */
 public class Histogram extends AbstractHistogram implements Histogram1D {
@@ -29,6 +31,26 @@ public class Histogram extends AbstractHistogram implements Histogram1D {
     public Histogram(String name, int nBins, double minX, double maxX, final boolean horizontal) {
         super(name, nBins, minX, maxX);
         isHorizontal = horizontal;
+    }
+
+    @Override
+    public void addBinContent(final int bin, final double w) {
+        lock().writeLockGuard(() -> {
+            data[bin] = data[bin] + w;
+            if (getDimension() == 2) {
+                // special handling for projected histograms
+                //this.getAxisDescription(isHorizontal ? DIM_Y : DIM_X).add(data[bin]);
+                if (isHorizontal) {
+                    this.getAxisDescription(DIM_Y).add(data[bin]);
+                } else {
+                    this.getAxisDescription(DIM_X).add(data[bin]);
+                }
+
+                return;
+            }
+            this.getAxisDescription(this.getDimension() - 1).add(data[bin]);
+        });
+        fireInvalidated(new UpdatedDataEvent(this, "addBinContent()"));
     }
 
     /**
@@ -65,34 +87,16 @@ public class Histogram extends AbstractHistogram implements Histogram1D {
         this(name, xBins, true);
     }
 
-    /**
-     * Get the number of data points in the data set
-     *
-     * @return the number of data points
-     */
     @Override
-    public int getDataCount() {
-        return getXDataCount();
-    }
+    public double get(final int dimIndex, final int index) {
+        if (dimIndex == DIM_X) {
+            return isHorizontal ? getBinCenter(DIM_X, index + 1) : getBinContent(index + 1);
+        }
 
-    @Override
-    public int getXDataCount() {
-        return getNBinsX() - 2;
-    }
-
-    @Override
-    public int getYDataCount() {
-        return 0;
-    }
-
-    @Override
-    public double getX(int i) {
-        return isHorizontal ? getBinCenterX(i + 1) : getBinContent(i + 1);
-    }
-
-    @Override
-    public double getY(int i) {
-        return isHorizontal ? getBinContent(i + 1) : getBinCenterX(i + 1);
+        if (dimIndex == DIM_Y) {
+            return isHorizontal ? getBinContent(index + 1) : getBinCenter(DIM_X, index + 1);
+        }
+        return dimIndex + 1 < this.getDimension() ? getBinCenter(DIM_X, index + 1) : getBinContent(index + 1);
     }
 
     @Override
@@ -102,13 +106,13 @@ public class Histogram extends AbstractHistogram implements Histogram1D {
 
     @Override
     public int fill(final double x, final double w) {
-        return lock().writeLockGuard(() -> {
-            final int bin = findBinX(x);
+        final int retVal = lock().writeLockGuard(() -> {
+            final int bin = findBin(isHorizontal ? DIM_X : DIM_Y, x);
             addBinContent(bin, w);
-            this.recomputeLimits(1);
-            fireInvalidated(new AddedDataEvent(this, "fill"));
             return bin;
         });
+        fireInvalidated(new AddedDataEvent(this, "fill(double x, double w)"));
+        return retVal;
     }
 
     @Override
@@ -134,33 +138,8 @@ public class Histogram extends AbstractHistogram implements Histogram1D {
     }
 
     @Override
-    public double getZ(int xIndex, int yIndex) {
-        return 0;
-    }
-
-    @Override
     public List<String> getInfoList() {
         return Collections.<String> emptyList();
-    }
-
-    @Override
-    public Histogram recomputeLimits(int dimension) {
-        lock().writeLockGuard(() -> {
-            // Clear previous ranges
-            getAxisDescription(dimension).empty();
-            final int dataCount = getDataCount();
-            if (dimension == 0) {
-                for (int i = 0; i < dataCount; i++) {
-                    getAxisDescription(dimension).add(getX(i));
-
-                }
-            } else {
-                for (int i = 0; i < dataCount; i++) {
-                    getAxisDescription(dimension).add(getY(i));
-                }
-            }
-        });
-        return this;
     }
 
     @Override
@@ -169,7 +148,7 @@ public class Histogram extends AbstractHistogram implements Histogram1D {
         if (getBinContent(0) > 0) {
             retVal.add(DataSetMetaData.TAG_UNDERSHOOT);
         }
-        if (getBinContent(getNBinsX() - 1) > 0) {
+        if (getBinContent(getDataCount(DIM_X) - 1) > 0) {
             retVal.add(DataSetMetaData.TAG_OVERSHOOT);
         }
         return retVal;
@@ -179,4 +158,31 @@ public class Histogram extends AbstractHistogram implements Histogram1D {
     public List<String> getErrorList() {
         return Collections.<String> emptyList();
     }
+
+    @Override
+    public int getIndex(int dimIndex, double value) {
+        return findBin(dimIndex, value);
+    }
+
+    @Override
+    public double getValue(int dimIndex, double x) {
+        final int index1 = getXIndex(x);
+        final double x1 = get(DIM_X, index1);
+        final double y1 = get(DIM_Y, index1);
+        int index2 = x1 < x ? index1 + 1 : index1 - 1;
+        index2 = Math.max(0, Math.min(index2, this.getDataCount(DIM_X) - 1));
+        final double y2 = get(DIM_Y, index2);
+        if (Double.isNaN(y1) || Double.isNaN(y2)) {
+            // case where the function has a gap (y-coordinate equals to NaN
+            return Double.NaN;
+        }
+
+        final double x2 = get(DIM_X, index2);
+        if (x1 == x2) {
+            return y1;
+        }
+
+        return y1 + (((y2 - y1) * (x - x1)) / (x2 - x1));
+    }
+
 }

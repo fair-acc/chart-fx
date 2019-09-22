@@ -2,6 +2,7 @@ package de.gsi.samples.util;
 
 import de.gsi.chart.samples.RunChartSamples;
 import javafx.application.Application;
+import javafx.application.Platform;
 
 /**
  * Helper class to launch JavaFX applications without manually adding modules and exports

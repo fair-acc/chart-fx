@@ -106,21 +106,15 @@ public class DefaultAxisDescription extends DataRange implements AxisDescription
 		return true;
 	}
 
-	// private int counter = 0; // for debugging
-	/**
-	 * Empties this DataRange. After calling this method this data range becomes
-	 * undefined.
-	 *
-	 * @see #isDefined()
-	 */
+    /**
+     * Empties this DataRange. After calling this method this data range becomes
+     * undefined.
+     * @return <code>true</code> if the values were valid before
+     * @see #isDefined()
+     */
 	@Override
-	public void empty() {
-		super.empty();
-		// System.err.println("empty");
-		// counter++;
-		// if (counter > 1000) {
-		// throw new IllegalStateException("autsch");
-		// }
+	public boolean clear() {
+	    return super.clear();
 	}
 
 	@Override

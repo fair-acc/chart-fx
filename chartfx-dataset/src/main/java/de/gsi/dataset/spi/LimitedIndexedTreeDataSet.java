@@ -5,13 +5,14 @@ import java.util.List;
 import java.util.NoSuchElementException;
 
 import de.gsi.dataset.AxisDescription;
+import de.gsi.dataset.DataSet2D;
 import de.gsi.dataset.DataSetError;
 import de.gsi.dataset.event.AddedDataEvent;
 import de.gsi.dataset.event.RemovedDataEvent;
 import de.gsi.dataset.event.UpdatedDataEvent;
+import de.gsi.dataset.utils.AssertUtils;
 import de.gsi.dataset.utils.trees.IndexedNavigableSet;
 import de.gsi.dataset.utils.trees.IndexedTreeSet;
-import de.gsi.dataset.utils.AssertUtils;
 
 /**
  * DataSet implementation based on a sorted indexed TreeDataSets.
@@ -23,7 +24,7 @@ import de.gsi.dataset.utils.AssertUtils;
  * @see de.gsi.dataset.DataSetError
  * @author rstein
  */
-public class LimitedIndexedTreeDataSet extends AbstractErrorDataSet<LimitedIndexedTreeDataSet> {
+public class LimitedIndexedTreeDataSet extends AbstractErrorDataSet<LimitedIndexedTreeDataSet> implements DataSet2D {
     private static final long serialVersionUID = -6372417982869679455L;
     protected IndexedNavigableSet<DataAtom> data = new IndexedTreeSet<>();
     protected int maxQueueSize = Integer.MAX_VALUE;
@@ -39,7 +40,7 @@ public class LimitedIndexedTreeDataSet extends AbstractErrorDataSet<LimitedIndex
      *             if <code>name</code> is <code>null</code>
      */
     public LimitedIndexedTreeDataSet(final String name, final int maxQueueSize) {
-        super(name);
+        super(name, 2);
         setErrorType(ErrorType.XY);
         this.maxQueueSize = maxQueueSize;
     }
@@ -55,7 +56,7 @@ public class LimitedIndexedTreeDataSet extends AbstractErrorDataSet<LimitedIndex
      *             if <code>name</code> is <code>null</code>
      */
     public LimitedIndexedTreeDataSet(final String name, final int maxQueueSize, final double maxLength) {
-        super(name);
+        super(name, 2);
         setErrorType(ErrorType.XY);
         this.maxQueueSize = maxQueueSize;
         this.maxLength = maxLength;
@@ -223,7 +224,7 @@ public class LimitedIndexedTreeDataSet extends AbstractErrorDataSet<LimitedIndex
     public LimitedIndexedTreeDataSet clearData() {
         lock().writeLockGuard(() -> {
             data.clear();
-            getAxisDescriptions().forEach(AxisDescription::empty);
+            getAxisDescriptions().forEach(AxisDescription::clear);
         });
         return fireInvalidated(new RemovedDataEvent(this, "clear"));
     }

@@ -1,11 +1,12 @@
 package de.gsi.chart.renderer.spi;
 
+import static de.gsi.dataset.DataSet.DIM_X;
+import static de.gsi.dataset.DataSet.DIM_Y;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import de.gsi.chart.XYChartCss;
@@ -15,6 +16,7 @@ import de.gsi.chart.renderer.RendererDataReducer;
 import de.gsi.chart.renderer.spi.utils.Cache;
 import de.gsi.chart.utils.StyleParser;
 import de.gsi.dataset.DataSet;
+import de.gsi.dataset.DataSet2D;
 import de.gsi.dataset.DataSetError;
 import de.gsi.dataset.DataSetError.ErrorType;
 import de.gsi.dataset.utils.CachedDaemonThreadFactory;
@@ -38,9 +40,6 @@ class CachedDataPoints {
     private static final String Y_VALUES = "yValues";
     private static final String X_VALUES = "xValues";
     private static final double DEG_TO_RAD = Math.PI / 180.0;
-    private static final int MAX_THREADS = Math.max(4, Runtime.getRuntime().availableProcessors());
-    private static final ExecutorService EXECUTOR_SERVICE = Executors.newFixedThreadPool(2 * MAX_THREADS,
-            CachedDaemonThreadFactory.getInstance());
 
     protected double[] xValues;
     protected double[] yValues;
@@ -213,7 +212,7 @@ class CachedDataPoints {
     protected void computeScreenCoordinatesParallel(final Axis xAxis, final Axis yAxis, final DataSet dataSet,
             final int min, final int max) {
         final int minthreshold = 1000;
-        int divThread = (int) Math.ceil(Math.abs(max - min) / (double) MAX_THREADS);
+        int divThread = (int) Math.ceil(Math.abs(max - min) / (double) CachedDaemonThreadFactory.getNumbersOfThreads());
         int stepSize = Math.max(divThread, minthreshold);
         final List<Callable<Boolean>> workers = new ArrayList<>();
         for (int i = min; i < max; i += stepSize) {
@@ -229,7 +228,7 @@ class CachedDataPoints {
         }
 
         try {
-            final List<Future<Boolean>> jobs = EXECUTOR_SERVICE.invokeAll(workers);
+            final List<Future<Boolean>> jobs = CachedDaemonThreadFactory.getCommonPool().invokeAll(workers);
             for (final Future<Boolean> future : jobs) {
                 final Boolean r = future.get();
                 if (!r) {
@@ -250,15 +249,14 @@ class CachedDataPoints {
         }
     }
 
-    private void computeNoError(final Axis xAxis, final Axis yAxis, final DataSet dataSet, final int min,
+    private void computeNoError(final Axis xAxis, final Axis yAxis, final DataSet2D dataSet, final int min,
             final int max) {
         // no error attached
         dataSet.lock().readLockGuardOptimistic(() -> {
             for (int index = min; index < max; index++) {
                 final double x = dataSet.getX(index);
                 final double y = dataSet.getY(index);
-                // check if error should be surrounded by Math.abs(..)
-                // to ensure that they are always positive
+
                 xValues[index] = xAxis.getDisplayPosition(x);
                 yValues[index] = yAxis.getDisplayPosition(y);
                 if (!Double.isFinite(yValues[index])) {
@@ -269,7 +267,37 @@ class CachedDataPoints {
         });
     }
 
-    private void computeNoErrorPolar(final Axis yAxis, final DataSet dataSet, final int min, final int max) {
+    private void computeWithNoError(final Axis xAxis, final DataSet dataSet, final int dimIndex, final int min,
+            final int max) {
+        // no error attached
+        dataSet.lock().readLockGuardOptimistic(() -> {
+            final double[] values = dimIndex == DIM_X ? xValues : yValues;
+            final double minValue = dimIndex == DIM_X ? xMin : yMin;
+            for (int index = min; index < max; index++) {
+                final double x = dataSet.get(dimIndex, index);
+
+                values[index] = xAxis.getDisplayPosition(x);
+
+                if (Double.isNaN(values[index])) {
+                    yValues[index] = minValue;
+                }
+                //                if (!Double.isFinite(values[index])) {
+                //                    yValues[index] = minValue;
+                //                }
+            }
+        });
+    }
+
+    private void computeErrorStyles(final DataSet dataSet, final int min, final int max) {
+        // no error attached
+        dataSet.lock().readLockGuardOptimistic(() -> {
+            for (int index = min; index < max; index++) {
+                styles[index] = dataSet.getStyle(index);
+            }
+        });
+    }
+
+    private void computeNoErrorPolar(final Axis yAxis, final DataSet2D dataSet, final int min, final int max) {
         // experimental transform euclidean to polar coordinates
         dataSet.lock().readLockGuardOptimistic(() -> {
             for (int index = min; index < max; index++) {
@@ -290,7 +318,8 @@ class CachedDataPoints {
         });
     }
 
-    private void computeYonly(final Axis xAxis, final Axis yAxis, final DataSet dataSet, final int min, final int max) {
+    private void computeYonly(final Axis xAxis, final Axis yAxis, final DataSet2D dataSet, final int min,
+            final int max) {
         if (dataSet instanceof DataSetError) {
             dataSet.lock().readLockGuardOptimistic(() -> {
                 final DataSetError ds = (DataSetError) dataSet;
@@ -342,7 +371,56 @@ class CachedDataPoints {
         });
     }
 
-    private void computeYonlyPolar(final Axis yAxis, final DataSet dataSet, final int min, final int max) {
+    private void computeWithError(final Axis yAxis, final DataSet dataSet, final int dimIndex, final int min,
+            final int max) {
+        if (dataSet instanceof DataSetError) {
+            dataSet.lock().readLockGuardOptimistic(() -> {
+                final double[] values = dimIndex == DIM_X ? xValues : yValues;
+                final double[] valuesEN = dimIndex == DIM_X ? errorXNeg : errorYNeg;
+                final double[] valuesEP = dimIndex == DIM_X ? errorXPos : errorYPos;
+                final double minValue = dimIndex == DIM_X ? xMin : yMin;
+                final DataSetError ds = (DataSetError) dataSet;
+                for (int index = min; index < max; index++) {
+                    final double y = dataSet.get(dimIndex, index);
+
+                    values[index] = yAxis.getDisplayPosition(y);
+
+                    if (!Double.isNaN(values[index])) {
+                        // if (Double.isFinite(values[index])) {
+                        valuesEN[index] = yAxis.getDisplayPosition(y - ds.getYErrorNegative(index));
+                        valuesEP[index] = yAxis.getDisplayPosition(y + ds.getYErrorPositive(index));
+                        continue;
+                    }
+                    values[index] = minValue;
+                    valuesEN[index] = minValue;
+                    valuesEP[index] = minValue;
+                }
+            });
+            return;
+        }
+
+        // default dataset
+        dataSet.lock().readLockGuardOptimistic(() -> {
+            final double[] values = dimIndex == DIM_X ? xValues : yValues;
+            final double[] valuesEN = dimIndex == DIM_X ? errorXNeg : errorYNeg;
+            final double[] valuesEP = dimIndex == DIM_X ? errorXPos : errorYPos;
+            final double minValue = dimIndex == DIM_X ? xMin : yMin;
+
+            for (int index = min; index < max; index++) {
+                values[index] = yAxis.getDisplayPosition(dataSet.get(dimIndex, index));
+                if (Double.isFinite(values[index])) {
+                    valuesEN[index] = values[index];
+                    valuesEP[index] = values[index];
+                } else {
+                    values[index] = minValue;
+                    valuesEN[index] = minValue;
+                    valuesEP[index] = minValue;
+                }
+            }
+        });
+    }
+
+    private void computeYonlyPolar(final Axis yAxis, final DataSet2D dataSet, final int min, final int max) {
         dataSet.lock().readLockGuardOptimistic(() -> {
             for (int index = min; index < max; index++) {
                 final double x = dataSet.getX(index);
@@ -372,8 +450,8 @@ class CachedDataPoints {
             final int max) {
         dataSet.lock().readLockGuardOptimistic(() -> {
             for (int index = min; index < max; index++) {
-                final double x = dataSet.getX(index);
-                final double y = dataSet.getY(index);
+                final double x = dataSet.get(DIM_X, index);
+                final double y = dataSet.get(DIM_Y, index);
                 // check if error should be surrounded by
                 // Math.abs(..) to ensure that they are always positive
                 xValues[index] = xAxis.getDisplayPosition(x);
@@ -404,8 +482,8 @@ class CachedDataPoints {
     private void computeFullPolar(final Axis yAxis, final DataSetError dataSet, final int min, final int max) {
         dataSet.lock().readLockGuardOptimistic(() -> {
             for (int index = min; index < max; index++) {
-                final double x = dataSet.getX(index);
-                final double y = dataSet.getY(index);
+                final double x = dataSet.get(DIM_X, index);
+                final double y = dataSet.get(DIM_Y, index);
                 // check if error should be surrounded by Math.abs(..)
                 // to ensure that they are always positive
                 final double phi = x * DEG_TO_RAD;
@@ -432,11 +510,21 @@ class CachedDataPoints {
             final int min, final int max) {
         switch (errorType) {
         case NO_ERROR:
-            computeNoError(xAxis, yAxis, dataSet, min, max);
+            //computeNoError(xAxis, yAxis, dataSet, min, max);
+
+            //TODO: consider parallelising this
+            computeWithNoError(xAxis, dataSet, DIM_X, min, max);
+            computeWithNoError(yAxis, dataSet, DIM_Y, min, max);
+            computeErrorStyles(dataSet, min, max);
             return;
         case Y:
         case Y_ASYMMETRIC:
-            computeYonly(xAxis, yAxis, dataSet, min, max);
+            // computeYonly(xAxis, yAxis, dataSet, min, max);
+
+            //TODO: consider parallelising this
+            computeWithNoError(xAxis, dataSet, DIM_X, min, max);
+            computeWithError(yAxis, dataSet, DIM_Y, min, max);
+            computeErrorStyles(dataSet, min, max);
             return;
         case X:
         case X_ASYMMETRIC:
@@ -445,19 +533,28 @@ class CachedDataPoints {
         default:
             // dataSet may not be non-DataSetError at this stage
             final DataSetError ds = (DataSetError) dataSet;
-            computeFull(xAxis, yAxis, ds, min, max);
+            // computeFull(xAxis, yAxis, ds, min, max);
+
+            //TODO: consider parallelising this
+            computeWithError(xAxis, dataSet, DIM_X, min, max);
+            computeWithError(yAxis, dataSet, DIM_Y, min, max);
+            computeErrorStyles(dataSet, min, max);
             return;
         }
     }
 
     private void computeScreenCoordinatesPolar(final Axis yAxis, final DataSet dataSet, final int min, final int max) {
+        if (!(dataSet instanceof DataSet2D)) {
+            throw new IllegalStateException("non-DataSet2D implementation not yet propagated");
+        }
+
         switch (errorType) {
         case NO_ERROR:
-            computeNoErrorPolar(yAxis, dataSet, min, max);
+            computeNoErrorPolar(yAxis, (DataSet2D) dataSet, min, max);
             return;
         case Y:
         case Y_ASYMMETRIC:
-            computeYonlyPolar(yAxis, dataSet, min, max);
+            computeYonlyPolar(yAxis, (DataSet2D) dataSet, min, max);
             return;
         case X:
         case X_ASYMMETRIC:

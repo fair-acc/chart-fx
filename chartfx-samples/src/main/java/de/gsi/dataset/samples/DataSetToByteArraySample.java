@@ -1,5 +1,8 @@
 package de.gsi.dataset.samples;
 
+import static de.gsi.dataset.DataSet.DIM_X;
+import static de.gsi.dataset.DataSet.DIM_Y;
+
 import java.io.ByteArrayOutputStream;
 import java.util.concurrent.TimeUnit;
 
@@ -7,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.gsi.dataset.DataSet;
+import de.gsi.dataset.DataSet2D;
 import de.gsi.dataset.DataSetError;
 import de.gsi.dataset.DataSetMetaData;
 import de.gsi.dataset.serializer.spi.FastByteBuffer;
@@ -95,9 +99,9 @@ public class DataSetToByteArraySample {
 	public void testIdentityCore(final boolean binary, final boolean asFloat32, final DataSetError originalDS,
 			final DataSetError testDS) {
 		// some checks
-		if (originalDS.getDataCount() != testDS.getDataCount()) {
+		if (originalDS.getDataCount(DIM_X) != testDS.getDataCount(DIM_X)) {
 			throw new IllegalStateException("data set counts do not match (" + encodingBinary(binary) + "): original = "
-					+ originalDS.getDataCount() + " vs. copy = " + testDS.getDataCount());
+					+ originalDS.getDataCount(DIM_X) + " vs. copy = " + testDS.getDataCount(DIM_X));
 		}
 
 		if (!originalDS.getName().equals(testDS.getName())) {
@@ -106,16 +110,16 @@ public class DataSetToByteArraySample {
 		}
 
 		// check for numeric value
-		for (int i = 0; i < originalDS.getDataCount(); i++) {
-			final double x0 = originalDS.getX(i);
-			final double y0 = originalDS.getY(i);
+		for (int i = 0; i < originalDS.getDataCount(DIM_X); i++) {
+			final double x0 = originalDS.get(DIM_X, i);
+			final double y0 = originalDS.get(DIM_Y, i);
 			final double exn0 = originalDS.getXErrorNegative(i);
 			final double exp0 = originalDS.getXErrorPositive(i);
 			final double eyn0 = originalDS.getYErrorNegative(i);
 			final double eyp0 = originalDS.getYErrorPositive(i);
 
-			final double x1 = testDS.getX(i);
-			final double y1 = testDS.getY(i);
+			final double x1 = testDS.get(DIM_X, i);
+			final double y1 = testDS.get(DIM_Y, i);
 			final double exn1 = testDS.getXErrorNegative(i);
 			final double exp1 = testDS.getXErrorPositive(i);
 			final double eyn1 = testDS.getYErrorNegative(i);
@@ -158,7 +162,7 @@ public class DataSetToByteArraySample {
 		return is32BitEncoding ? "32-bit" : "64-bit";
 	}
 
-	public void testIdentityLabelsAndStyles(final boolean binary, final boolean asFloat32, final DataSet originalDS,
+	public void testIdentityLabelsAndStyles(final boolean binary, final boolean asFloat32, final DataSet2D originalDS,
 			final DataSet testDS) {
 		// check for labels & styles
 		for (int i = 0; i < originalDS.getDataCount(); i++) {

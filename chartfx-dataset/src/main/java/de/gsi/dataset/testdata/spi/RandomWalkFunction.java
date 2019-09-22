@@ -1,14 +1,12 @@
 package de.gsi.dataset.testdata.spi;
 
-import de.gsi.dataset.DataSetError;
-
 /**
  * abstract error data set for graphical testing purposes
  * this implementation generates a random walk (Brownian noise) function.
  *
  * @author rstein
  */
-public class RandomWalkFunction extends AbstractTestFunction<RandomWalkFunction> implements DataSetError {
+public class RandomWalkFunction extends AbstractTestFunction<RandomWalkFunction> {
     private static final long serialVersionUID = 5274313670852663800L;
 
     /**

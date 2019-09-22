@@ -65,17 +65,16 @@ public class DataSetUtilsTest {
         DataSet dataSetRead = DataSetUtils.readDataSetFromByteArray(byteBuffer.toByteArray());
         // assert that DataSet was written and read correctly
         assertTrue(dataSetRead instanceof DoubleErrorDataSet);
-        assertEquals(dataSet.getDataCount(), dataSetRead.getDataCount());
-        assertEquals(dataSet.getName(), dataSetRead.getName());
-        int dataCount = dataSet.getDataCount();
-        assertArrayEquals( //
-                Arrays.copyOfRange(dataSet.getXValues(), 0, dataCount), //
-                Arrays.copyOfRange(dataSetRead.getXValues(), 0, dataCount), //
-                EPSILON);
-        assertArrayEquals( //
-                Arrays.copyOfRange(dataSet.getYValues(), 0, dataCount), //
-                Arrays.copyOfRange(dataSetRead.getYValues(), 0, dataCount), //
-                EPSILON);
+        for (int dim = 0; dim < dataSet.getDimension(); dim++) {
+            final String msg = "Dimension#" + dim;
+            assertEquals(dataSet.getDataCount(dim), dataSetRead.getDataCount(dim), msg);
+            assertEquals(dataSet.getName(), dataSetRead.getName(), msg);
+            int dataCount = dataSet.getDataCount(dim);
+            assertArrayEquals( //
+                    Arrays.copyOfRange(dataSet.getValues(dim), 0, dataCount), //
+                    Arrays.copyOfRange(dataSetRead.getValues(dim), 0, dataCount), //
+                    EPSILON, msg);
+        }
         assertEquals("asdf", ((DoubleErrorDataSet) dataSetRead).getMetaInfo().get("test"));
         for (int i = 0; i < 2; i++) {
             assertEquals(dataSet.getAxisDescription(i).getName(), dataSetRead.getAxisDescription(i).getName());
@@ -121,12 +120,12 @@ public class DataSetUtilsTest {
         // assert that DataSet was written and read correctly
         assertTrue(dataSetRead instanceof DataSet3D);
         DataSet3D dataSetRead3D = (DataSet3D) dataSetRead;
-        assertEquals(n, dataSetRead.getDataCount());
+        assertEquals(n, dataSetRead.getDataCount(DataSet.DIM_Z));
         assertEquals(dataSet.getName(), dataSetRead.getName());
-        assertEquals(3, dataSetRead3D.getXDataCount());
-        assertEquals(2, dataSetRead3D.getYDataCount());
-        assertArrayEquals(xvalues, dataSetRead.getXValues(), EPSILON);
-        assertArrayEquals(yvalues, dataSetRead.getYValues(), EPSILON);
+        assertEquals(3, dataSetRead3D.getDataCount(DataSet.DIM_X));
+        assertEquals(2, dataSetRead3D.getDataCount(DataSet.DIM_Y));
+        assertArrayEquals(xvalues, dataSetRead.getValues(DataSet.DIM_X), EPSILON);
+        assertArrayEquals(yvalues, dataSetRead.getValues(DataSet.DIM_Y), EPSILON);
         for (int ix = 1; ix < nx; ix++) {
             for (int iy = 1; iy < ny; iy++) {
                 assertEquals(zvalues[iy][ix], dataSetRead3D.getZ(ix, iy), EPSILON);

@@ -48,5 +48,16 @@ public interface Histogram2D {
 
 	//N.B. make projections
 		//Histogram1D fitSlices[X,Y,Z]
+	
+	 /**
+     * Returns Z coordinate for the specified data point.
+     *
+     * @param xIndex
+     *            index of X coordinate
+     * @param yIndex
+     *            index of Y coordinate
+     * @return Z coordinate
+     */
+    double getZ(int xIndex, int yIndex);
 
 }

@@ -26,15 +26,13 @@ public class Histogram2DimSample extends Application {
     private static final int UPDATE_N_SAMPLES = 10;
     private static final int N_BINS_X = 120;
     private static final int N_BINS_Y = 120;
+    private final Random rnd = new Random();
 
-    private final Histogram2 histogram1 = new Histogram2("hist1", Histogram2DimSample.N_BINS_X, 0.0, 20.0,
-            Histogram2DimSample.N_BINS_Y, 0.0, 30.0);
-    private final Histogram2 histogram2 = new Histogram2("hist2", Histogram2DimSample.N_BINS_X, 0.0, 20.0,
-            Histogram2DimSample.N_BINS_Y, 0.0, 30.0);
+    private final Histogram2 histogram1 = new Histogram2("hist1", N_BINS_X, 0.0, 20.0, N_BINS_Y, 0.0, 30.0);
+    private final Histogram2 histogram2 = new Histogram2("hist2", N_BINS_X, 0.0, 20.0, N_BINS_Y, 0.0, 30.0);
+    private int counter;
 
-    private int counter = 0;
 
-    private Random rnd = new Random();
     /**
      * @param args
      *            the command line arguments
@@ -63,28 +61,20 @@ public class Histogram2DimSample extends Application {
         zAxis.setAutoRanging(true);
         zAxis.setSide(Side.RIGHT);
 
-        final DefaultNumericAxis yAxis1 = new DefaultNumericAxis("y-Axis x-Projection", 0, 1000, 10);
+        final DefaultNumericAxis yAxis1 = new DefaultNumericAxis("y-Axis x-Projection");
         yAxis1.setLogAxis(false);
         yAxis1.setAnimated(false);
         yAxis1.setAutoRangeRounding(true);
-        yAxis1.setAutoRangePadding(0.05);
-        yAxis1.setForceZeroInRange(true);
-        yAxis1.setAutoRanging(false);
-        yAxis1.setAutoGrowRanging(true);
+        yAxis1.setAutoRangePadding(2.0);
+        yAxis1.setAutoRanging(true);
         yAxis1.setSide(Side.RIGHT);
-        yAxis1.upperBoundProperty().addListener((ch, o, n) -> System.err.println("x-projection upper bound = " + n
-                + " vs " + histogram1.getProjectionX().getAxisDescription(1).getMax() + "  " + histogram2.getProjectionX().getAxisDescription(1).getMax()));
 
-        final DefaultNumericAxis xAxis1 = new DefaultNumericAxis("x-Axis y-Projection", -1, 1000, 10);
+        final DefaultNumericAxis xAxis1 = new DefaultNumericAxis("x-Axis y-Projection");
         xAxis1.setLogAxis(false);
         xAxis1.setAutoRangeRounding(true);
-        xAxis1.setAutoRangePadding(0.05);
-        xAxis1.setForceZeroInRange(true);
-        xAxis1.setAutoRanging(false);
-        xAxis1.setAutoGrowRanging(true);
+        xAxis1.setAutoRangePadding(2.0);
+        xAxis1.setAutoRanging(true);
         xAxis1.setSide(Side.TOP);
-        xAxis1.upperBoundProperty().addListener((ch, o, n) -> System.err.println("y-projection upper bound = " + n
-                + " vs " + histogram1.getProjectionY().getAxisDescription(1).getMax() + "  " + histogram2.getProjectionY().getAxisDescription(1).getMax()));
 
         final XYChart chart = new XYChart(xAxis, yAxis);
         chart.setAnimated(false);

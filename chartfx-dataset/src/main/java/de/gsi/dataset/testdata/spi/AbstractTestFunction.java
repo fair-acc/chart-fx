@@ -1,5 +1,6 @@
 package de.gsi.dataset.testdata.spi;
 
+import de.gsi.dataset.DataSet2D;
 import de.gsi.dataset.event.UpdatedDataEvent;
 import de.gsi.dataset.spi.AbstractErrorDataSet;
 import de.gsi.dataset.testdata.TestDataSet;
@@ -11,7 +12,7 @@ import de.gsi.dataset.testdata.TestDataSet;
  * @param <D> generics for fluent design
  */
 public abstract class AbstractTestFunction<D extends AbstractTestFunction<D>> extends AbstractErrorDataSet<D>
-		implements TestDataSet<D> {
+		implements DataSet2D, TestDataSet<D> {
 	private static final long serialVersionUID = 3145097895719258628L;
 	private double[] data;
 
@@ -20,7 +21,7 @@ public abstract class AbstractTestFunction<D extends AbstractTestFunction<D>> ex
 	 * @param count number of samples
 	 */
 	public AbstractTestFunction(final String name, final int count) {
-		super(name);
+		super(name, 2);
 		// this part needs to be adjusted to you internal applications data
 		// transfer/management likings
 		data = generateY(count);
@@ -40,6 +41,11 @@ public abstract class AbstractTestFunction<D extends AbstractTestFunction<D>> ex
 	public int getDataCount() {
 		return data.length;
 	}
+	
+    @Override
+    public final double get(final int dimIndex, final int index) {
+        return dimIndex == DIM_X ? index : data[index];
+    }
 
 	@Override
 	public double getX(final int index) {
@@ -58,22 +64,22 @@ public abstract class AbstractTestFunction<D extends AbstractTestFunction<D>> ex
 	}
 
 	@Override
-	public double getXErrorNegative(final int index) {
+	public final double getXErrorNegative(final int index) {
 		return AbstractTestFunction.getXError();
 	}
 
 	@Override
-	public double getXErrorPositive(final int index) {
+	public final double getXErrorPositive(final int index) {
 		return AbstractTestFunction.getXError();
 	}
 
 	@Override
-	public double getYErrorNegative(final int index) {
+	public final double getYErrorNegative(final int index) {
 		return AbstractTestFunction.getYError();
 	}
 
 	@Override
-	public double getYErrorPositive(final int index) {
+	public final double getYErrorPositive(final int index) {
 		return AbstractTestFunction.getYError();
 	}
 
@@ -91,7 +97,7 @@ public abstract class AbstractTestFunction<D extends AbstractTestFunction<D>> ex
 	}
 
 	@Override
-	public String getStyle(final int index) { // NOPMD by steinhagen on 08/06/19 10:12
+	public final String getStyle(final int index) { // NOPMD by steinhagen on 08/06/19 10:12
 		return null;
 	}
 

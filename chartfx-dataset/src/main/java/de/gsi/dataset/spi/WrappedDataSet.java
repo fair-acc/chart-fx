@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import de.gsi.dataset.AxisDescription;
-import de.gsi.dataset.DataSet;
+import de.gsi.dataset.DataSet2D;
 import de.gsi.dataset.event.EventListener;
 import de.gsi.dataset.event.UpdatedDataEvent;
 
@@ -21,16 +21,16 @@ import de.gsi.dataset.event.UpdatedDataEvent;
  *
  * @author braeun
  */
-public class WrappedDataSet extends AbstractDataSet<WrappedDataSet> {
-
-    private DataSet dataset;
+public class WrappedDataSet extends AbstractDataSet<WrappedDataSet> implements DataSet2D {
+    private static final long serialVersionUID = -2324840899629186284L;
+    private DataSet2D dataset;
     private final EventListener listener = s -> datasetInvalidated();
 
     /**
      * @param name data set name
      */
     public WrappedDataSet(final String name) {
-        super(name);
+        super(name, 2);
     }
 
     /**
@@ -51,7 +51,7 @@ public class WrappedDataSet extends AbstractDataSet<WrappedDataSet> {
      * 
      * @param dataset new data set
      */
-    public void setDataset(final DataSet dataset) {
+    public void setDataset(final DataSet2D dataset) {
         if (this.dataset != null) {
             this.dataset.removeListener(listener);
         }
@@ -67,18 +67,13 @@ public class WrappedDataSet extends AbstractDataSet<WrappedDataSet> {
     /**
      * @return wrapped internal data set
      */
-    public DataSet getDataset() {
+    public DataSet2D getDataset() {
         return dataset;
     }
 
     @Override
     public int getDataCount() {
         return dataset == null ? 0 : dataset.getDataCount();
-    }
-
-    @Override
-    public int getDataCount(final double xmin, final double xmax) {
-        return dataset == null ? 0 : dataset.getDataCount(xmin, xmax);
     }
 
     @Override
@@ -110,6 +105,11 @@ public class WrappedDataSet extends AbstractDataSet<WrappedDataSet> {
     @Override
     public String getStyle(final int index) {
         return dataset == null ? null : dataset.getStyle(index);
+    }
+
+    @Override
+    public double get(int dimIndex, int index) {
+        return dimIndex == DIM_X ? getX(index) : getY(index);
     }
 
 }

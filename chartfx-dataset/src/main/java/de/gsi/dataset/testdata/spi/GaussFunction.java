@@ -1,14 +1,12 @@
 package de.gsi.dataset.testdata.spi;
 
-import de.gsi.dataset.DataSetError;
-
 /**
  * abstract error data set for graphical testing purposes
  * this implementation generates a Gaussian function
  *
  * @author rstein
  */
-public class GaussFunction extends AbstractTestFunction<GaussFunction> implements DataSetError {
+public class GaussFunction extends AbstractTestFunction<GaussFunction> {
     private static final long serialVersionUID = -2090964369869257806L;
 
     /**

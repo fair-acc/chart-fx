@@ -1,6 +1,6 @@
 package de.gsi.math.samples;
 
-import de.gsi.dataset.DataSet;
+import de.gsi.dataset.DataSet2D;
 import de.gsi.dataset.spi.DefaultDataSet;
 import de.gsi.math.DataSetMath;
 import de.gsi.math.filter.iir.Bessel;
@@ -30,7 +30,7 @@ public class IIRFrequencyFilterSample extends AbstractDemoApplication {
     private static final double F_CUT_HIGH = 0.3;
     private static final double ALLOWED_IN_BAND_RIPPLE_DB = 3;
     private static final double ALLOWED_OUT_OF_BAND_RIPPLE_DB = 20;
-    private final DataSet demoDataSet = generateDemoDataSet();
+    private final DataSet2D demoDataSet = generateDemoDataSet();
 
     public IIRFrequencyFilterSample() {
         super(2 * DEFAULT_SCENE_WIDTH, DEFAULT_SCENE_HEIGTH);
@@ -51,7 +51,7 @@ public class IIRFrequencyFilterSample extends AbstractDemoApplication {
         return flowPane;
     }
 
-    private static DataSet generateDemoDataSet() {
+    private static DataSet2D generateDemoDataSet() {
         // generate some random samples
         final double[] xValues = new double[N_SAMPLES];
         final double[] yValues = new double[N_SAMPLES];

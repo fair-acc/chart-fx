@@ -2,6 +2,7 @@ package de.gsi.dataset.spi;
 
 import de.gsi.dataset.AxisDescription;
 import de.gsi.dataset.DataSet;
+import de.gsi.dataset.DataSet2D;
 import de.gsi.dataset.DataSetError;
 import de.gsi.dataset.EditableDataSet;
 import de.gsi.dataset.event.AddedDataEvent;
@@ -45,7 +46,7 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
      * @throws IllegalArgumentException if {@code name} is {@code null}
      */
     public DoubleErrorDataSet(final String name, final int initalSize) {
-        super(name);
+        super(name, 2);
         AssertUtils.gtEqThanZero("initalSize", initalSize);
         xValues = new DoubleArrayList(initalSize);
         yValues = new DoubleArrayList(initalSize);
@@ -60,8 +61,8 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
      *
      * @param another name of this DataSet.
      */
-    public DoubleErrorDataSet(final DataSet another) {
-        super(another.getName());
+    public DoubleErrorDataSet(final DataSet2D another) {
+        super(another.getName(), another.getDimension());
         this.set(another); // NOPMD by rstein on 25/06/19 07:42
     }
 
@@ -84,7 +85,7 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
      */
     public DoubleErrorDataSet(final String name, final double[] xValues, final double[] yValues,
             final double[] yErrorsNeg, final double[] yErrorsPos, final int initalSize, boolean deepCopy) {
-        super(name);
+        super(name, 2);
         AssertUtils.notNull("X data", xValues);
         AssertUtils.notNull("Y data", yValues);
         AssertUtils.notNull("Y error pos", yErrorsPos);
@@ -123,6 +124,11 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
     public double[] getYValues() {
         return yValues.elements();
     }
+    
+    @Override
+    public final double[] getValues(final int dimIndex) {
+        return dimIndex == DataSet.DIM_X ? xValues.elements() : yValues.elements();
+    }
 
     @Override
     public double[] getYErrorsPositive() {
@@ -154,7 +160,7 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
             getDataStyleMap().clear();
             clearMetaInfo();
 
-            getAxisDescriptions().forEach(AxisDescription::empty);
+            getAxisDescriptions().forEach(AxisDescription::clear);
         });
         return fireInvalidated(new RemovedDataEvent(this, "clearData()"));
     }
@@ -209,6 +215,11 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
             yErrorsNeg.trim(0);
         });
         return fireInvalidated(new UpdatedDataEvent(this, "increaseCapacity()"));
+    }
+    
+    @Override
+    public final double get(final int dimIndex, final int index) {
+        return dimIndex == DataSet.DIM_X ? xValues.elements()[index] : yValues.elements()[index];
     }
 
     @Override
@@ -401,7 +412,7 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
             yValues.addElements(indexAt, y, 0, min);
             yErrorsNeg.addElements(indexAt, yErrorNeg, 0, min);
             yErrorsPos.addElements(indexAt, yErrorPos, 0, min);
-            getAxisDescriptions().forEach(AxisDescription::empty);
+            getAxisDescriptions().forEach(AxisDescription::clear);
             getDataLabelMap().shiftKeys(indexAt, xValues.size());
             getDataStyleMap().shiftKeys(indexAt, xValues.size());
 
@@ -438,7 +449,7 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
 
             // invalidate ranges
             // -> fireInvalidated calls computeLimits for autoNotification
-            getAxisDescriptions().forEach(AxisDescription::empty);
+            getAxisDescriptions().forEach(AxisDescription::clear);
         });
         return fireInvalidated(new RemovedDataEvent(this));
     }
@@ -482,7 +493,7 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
 
             // invalidate ranges
             // -> fireInvalidated calls computeLimits for autoNotification
-            getAxisDescriptions().forEach(AxisDescription::empty);
+            getAxisDescriptions().forEach(AxisDescription::clear);
         });
 
         return fireInvalidated(new UpdatedDataEvent(this, "set - single"));
@@ -501,7 +512,7 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
 
             // invalidate ranges
             // -> fireInvalidated calls computeLimits for autoNotification
-            getAxisDescriptions().forEach(AxisDescription::empty);
+            getAxisDescriptions().forEach(AxisDescription::clear);
         });
         return fireInvalidated(new UpdatedDataEvent(this, "set - via arrays"));
     }
@@ -577,7 +588,7 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
      * @param other the other data set
      * @return itself (fluent design)
      */
-    public DoubleErrorDataSet set(final DataSet other) {
+    public DoubleErrorDataSet set(final DataSet2D other) {
         lock().writeLockGuard(() -> {
             other.lock().writeLockGuard(() -> {
                 // deep copy data point labels and styles

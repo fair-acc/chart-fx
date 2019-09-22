@@ -1,8 +1,10 @@
 package de.gsi.dataset.spi;
 
+import java.util.Arrays;
+
+import de.gsi.dataset.DataSet;
 import de.gsi.dataset.event.RemovedDataEvent;
 import de.gsi.dataset.utils.AssertUtils;
-import java.util.Arrays;
 
 /**
  * Implementation of a AbstractDataSet3D backed by arrays. The z-values are
@@ -11,7 +13,7 @@ import java.util.Arrays;
  * @author braeun
  */
 public class DoubleDataSet3D extends AbstractDataSet3D<DoubleDataSet3D> {
-
+    private static final long serialVersionUID = 1289344630607938420L;
     private double[] xValues;
     private double[] yValues;
     private double[][] zValues;
@@ -174,7 +176,6 @@ public class DoubleDataSet3D extends AbstractDataSet3D<DoubleDataSet3D> {
         return this;
     }
 
-    @Override
     public void set(final int xIndex, final int yIndex, final double x, final double y, final double z) {
         xValues[xIndex] = x;
         yValues[yIndex] = y;
@@ -209,13 +210,13 @@ public class DoubleDataSet3D extends AbstractDataSet3D<DoubleDataSet3D> {
     }
 
     @Override
-    public int getXDataCount() {
-        return xValues.length;
-    }
-
-    @Override
-    public int getYDataCount() {
-        return yValues.length;
+    public int getDataCount(final int dimIndex) {
+        if (dimIndex == DataSet.DIM_X) {
+            return xValues.length;
+        } else if (dimIndex == DataSet.DIM_Y) {
+            return yValues.length;
+        }
+        return xValues.length * yValues.length;
     }
 
     @Override

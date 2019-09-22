@@ -2,15 +2,13 @@ package de.gsi.dataset.testdata.spi;
 
 import java.util.SplittableRandom;
 
-import de.gsi.dataset.DataSetError;
-
 /**
  * abstract error data set for graphical testing purposes this implementation
  * generates a function with a single random outlier
  *
  * @author rstein
  */
-public class SingleOutlierFunction extends AbstractTestFunction<SingleOutlierFunction> implements DataSetError {
+public class SingleOutlierFunction extends AbstractTestFunction<SingleOutlierFunction> {
     private static final long serialVersionUID = -7456808511068971349L;
     protected static SplittableRandom rnd = new SplittableRandom(System.currentTimeMillis());
 

@@ -4,7 +4,7 @@ package de.gsi.dataset;
  * @author rstein
  *
  */
-public interface EditableDataSet extends DataSet {
+public interface EditableDataSet extends DataSet2D {
 
 	/**
 	 * @param name the new data set name

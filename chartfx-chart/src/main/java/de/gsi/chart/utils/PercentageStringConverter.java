@@ -70,9 +70,9 @@ public class PercentageStringConverter extends StringConverter<Number> {
 
     private void buildFormat(final int precision) {
         final StringBuilder sb = new StringBuilder(32);
-        sb.append("0");
+        sb.append('0');
         if (precision > 0) {
-            sb.append(".");
+            sb.append('.');
             for (int i = 0; i < precision; i++) {
                 sb.append('0');
             }

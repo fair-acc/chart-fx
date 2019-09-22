@@ -129,19 +129,12 @@ public class ValueIndicator extends AbstractChartMeasurement {
     		Platform.runLater(() -> handle(observable));
     	    return;
     	}
-        double val;
         final DataSet selectedDataSet = getDataSet();
-        final Axis axis;
+        
         final double newValue = sliderIndicator1.getValue();
-        if (axisMode == X) {
-            final int index = selectedDataSet.getXIndex(newValue);
-            val = selectedDataSet.getY(index);
-            axis = chart.getYAxis();
-        } else {
-            final int index = selectedDataSet.getYIndex(newValue);
-            val = selectedDataSet.getX(index);
-            axis = chart.getXAxis();
-        }
+        final int index = selectedDataSet.getIndex(axisMode == X ? DataSet.DIM_X : DataSet.DIM_Y, newValue);
+        final double val = selectedDataSet.get(axisMode == X ? DataSet.DIM_Y : DataSet.DIM_X,index);
+        final Axis axis = axisMode == X ? chart.getYAxis() : chart.getXAxis();
 
         // update label unitTextField
         valueField.setUnit(axis.getUnit() == null ? "" : axis.getUnit());

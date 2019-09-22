@@ -1,5 +1,7 @@
 package de.gsi.chart.renderer.spi;
 
+import static de.gsi.dataset.DataSet.DIM_X;
+import static de.gsi.dataset.DataSet.DIM_Y;
 import static javafx.scene.paint.CycleMethod.NO_CYCLE;
 
 import java.security.InvalidParameterException;
@@ -12,9 +14,6 @@ import de.gsi.chart.XYChart;
 import de.gsi.chart.axes.Axis;
 import de.gsi.chart.axes.AxisTransform;
 import de.gsi.chart.axes.spi.DefaultNumericAxis;
-import de.gsi.dataset.DataSet;
-import de.gsi.dataset.DataSet3D;
-import de.gsi.dataset.utils.ProcessingProfiler;
 import de.gsi.chart.renderer.ContourType;
 import de.gsi.chart.renderer.Renderer;
 import de.gsi.chart.renderer.spi.hexagon.Hexagon;
@@ -24,6 +23,9 @@ import de.gsi.chart.renderer.spi.marchingsquares.GeneralPath;
 import de.gsi.chart.renderer.spi.marchingsquares.MarchingSquares;
 import de.gsi.chart.renderer.spi.utils.ColorGradient;
 import de.gsi.chart.ui.geometry.Side;
+import de.gsi.dataset.DataSet;
+import de.gsi.dataset.DataSet3D;
+import de.gsi.dataset.utils.ProcessingProfiler;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ObjectProperty;
@@ -146,8 +148,8 @@ public class ContourDataSetRenderer extends AbstractDataSetManagement<ContourDat
                 // stop = ProcessingProfiler.getTimeStamp();
                 // check for potentially reduced data range we are supposed to plot
 
-                final int indexMin = Math.max(0, dataSet.getXIndex(xMin));
-                final int indexMax = Math.min(dataSet.getXIndex(xMax), dataSet.getDataCount());
+                final int indexMin = Math.max(0, dataSet.getIndex(DIM_X, xMin));
+                final int indexMax = Math.min(dataSet.getIndex(DIM_X, xMax), dataSet.getDataCount(DIM_X));
 
                 // return if zero length data set
                 if (indexMax - indexMin <= 0) {
@@ -167,12 +169,7 @@ public class ContourDataSetRenderer extends AbstractDataSetManagement<ContourDat
                 // dataSetIndex, indexMin, indexMax);
                 stop = ProcessingProfiler.getTimeDiff(stop, "computeScreenCoordinates()");
 
-                if (!(dataSet instanceof DataSet3D)) {
-                    return false;
-                }
-
-                final DataSet3D dataSet3D = (DataSet3D) dataSet;
-                if (dataSet3D.getXDataCount() == 0 || dataSet3D.getYDataCount() == 0) {
+                if (dataSet.getDataCount(DIM_X) == 0 || dataSet.getDataCount(DIM_Y) == 0) {
                     return false;
                 }
 
@@ -198,31 +195,33 @@ public class ContourDataSetRenderer extends AbstractDataSetManagement<ContourDat
         final Axis xAxis = chart.getXAxis();
         final Axis yAxis = chart.getYAxis();
         final Axis zAxis = getZAxis();
+        if (!(dataSet instanceof DataSet3D)) {
+            return;
+        }
 
-        final DataSet3D dataSet3D = (DataSet3D) dataSet;
-        localCache.dataSet3D = dataSet3D;
+        localCache.dataSet3D = (DataSet3D)dataSet;
 
         localCache.xAxisWidth = xAxis.getWidth();
         localCache.xMin = xAxis.getValueForDisplay(0);
         localCache.xMax = xAxis.getValueForDisplay(localCache.xAxisWidth);
-        localCache.indexXMin = Math.max(0, dataSet3D.getXIndex(localCache.xMin));
-        localCache.indexXMax = Math.min(dataSet3D.getXIndex(localCache.xMax), dataSet3D.getXDataCount() - 1);
+        localCache.indexXMin = Math.max(0, dataSet.getIndex(DIM_X, localCache.xMin));
+        localCache.indexXMax = Math.min(dataSet.getIndex(DIM_X, localCache.xMax), dataSet.getDataCount(DIM_X) - 1);
 
         localCache.yAxisHeight = yAxis.getHeight();
         localCache.yMin = yAxis.getValueForDisplay(0);
         localCache.yMax = yAxis.getValueForDisplay(localCache.yAxisHeight);
-        localCache.indexYMin = Math.max(0, dataSet3D.getYIndex(localCache.yMax));
-        localCache.indexYMax = Math.min(dataSet3D.getYIndex(localCache.yMin), dataSet3D.getYDataCount() - 1);
+        localCache.indexYMin = Math.max(0, dataSet.getIndex(DIM_Y, localCache.yMax));
+        localCache.indexYMax = Math.min(dataSet.getIndex(DIM_Y, localCache.yMin), dataSet.getDataCount(DIM_Y) - 1);
 
         localCache.xSize = Math.abs(localCache.indexXMax - localCache.indexXMin);
         localCache.ySize = Math.abs(localCache.indexYMax - localCache.indexYMin);
 
         if (computeLocalRange()) {
-            ContourDataSetRenderer.computeZrange(zAxis, dataSet3D, localCache.indexXMin, localCache.indexXMax,
+            ContourDataSetRenderer.computeZrange(zAxis, (DataSet3D)dataSet, localCache.indexXMin, localCache.indexXMax,
                     localCache.indexYMin, localCache.indexYMax);
         } else {
-            ContourDataSetRenderer.computeZrange(zAxis, dataSet3D, 0, dataSet3D.getXDataCount() - 1, 0,
-                    dataSet3D.getYDataCount() - 1);
+            ContourDataSetRenderer.computeZrange(zAxis, (DataSet3D)dataSet, 0, dataSet.getDataCount(DIM_X) - 1, 0,
+                    dataSet.getDataCount(DIM_Y) - 1);
         }
 
         localCache.zMin = zAxis.getLowerBound();
