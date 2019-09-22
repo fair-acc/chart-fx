@@ -1,14 +1,12 @@
 package de.gsi.dataset.testdata.spi;
 
-import de.gsi.dataset.DataSetError;
-
 /**
  * abstract error data set for graphical testing purposes
  * this implementation generates a sine function
  *
  * @author rstein
  */
-public class SineFunction  extends AbstractTestFunction<SineFunction> implements DataSetError {
+public class SineFunction  extends AbstractTestFunction<SineFunction> {
 	private static final long serialVersionUID = -4573144986461354456L;
     private final boolean useSystemTimeOffset;
 

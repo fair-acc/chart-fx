@@ -12,7 +12,7 @@ import javafx.application.Application;
 import javafx.scene.Node;
 
 public class TestChart extends AbstractTestApplication implements ChartTestCase {
-    protected int nSamples = MAX_DATA_POINTS_1HZ;
+    protected int nSamples = MAX_DATA_POINTS_50K;
     protected final XYChart chart;
     protected final DefaultNumericAxis xAxis = new DefaultNumericAxis();
     protected final DefaultNumericAxis yAxis = new DefaultNumericAxis("irrelevant y-axis test case 2", -1.1, +1.1, 0.2);
@@ -71,7 +71,7 @@ public class TestChart extends AbstractTestApplication implements ChartTestCase 
             reducer.setMinPointPixelDistance(5);
         }
 
-        setNumberOfSamples(MAX_DATA_POINTS_25HZ);
+        setNumberOfSamples(MAX_DATA_POINTS_1K);
         updateDataSet(); // NOPMD
     }
 

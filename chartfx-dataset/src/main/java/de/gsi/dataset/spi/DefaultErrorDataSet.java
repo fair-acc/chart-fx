@@ -1,6 +1,6 @@
 package de.gsi.dataset.spi;
 
-import de.gsi.dataset.DataSet;
+import de.gsi.dataset.DataSet2D;
 
 /**
  * Redirect to the reference implementation declared as 'default'.
@@ -14,6 +14,7 @@ import de.gsi.dataset.DataSet;
  * @author rstein
  */
 public class DefaultErrorDataSet extends DoubleErrorDataSet {
+    private static final long serialVersionUID = -8703142598393329273L;
 
     /**
      * Creates a new instance of <code>DefaultErrorDataSet</code>.
@@ -42,7 +43,7 @@ public class DefaultErrorDataSet extends DoubleErrorDataSet {
      *
      * @param another name of this DataSet.
      */
-    public DefaultErrorDataSet(final DataSet another) {
+    public DefaultErrorDataSet(final DataSet2D another) {
         super(another);
     }
 

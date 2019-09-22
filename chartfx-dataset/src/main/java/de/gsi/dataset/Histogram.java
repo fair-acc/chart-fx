@@ -4,7 +4,7 @@ package de.gsi.dataset;
  * @author rstein
  *
  */
-public interface Histogram extends DataSet3D, DataSetMetaData{
+public interface Histogram extends DataSet, DataSetMetaData {
 
 	/**
 	 *
@@ -41,19 +41,6 @@ public interface Histogram extends DataSet3D, DataSetMetaData{
 	void addBinContent (int bin);
 
 	/**
-	 * 
-	 * @return minimum of histogram values
-	 */
-	double getMinimum();
-
-	/**
-     * 
-     * @return maximum of histogram values
-     */
-	double getMaximum();
-
-
-	/**
 	 * Increment bin content by a weight w. More...
 	 * @param bin global bin ID
 	 * @param w weight
@@ -61,10 +48,11 @@ public interface Histogram extends DataSet3D, DataSetMetaData{
 	void addBinContent(int bin, double w);
 
 	/**
-     * @param x spatial real-valued coordinate in X
+	 * @param dimIndex the dimension index
+     * @param x spatial real-valued coordinate for dimension dimIndex
      * @return bin index corresponding to spatial x and y coordinates
      */
-	int findBin(final double x);
+	int findBin(final int dimIndex, final double x);
 
 	/**
      * @param x spatial real-valued coordinate in X
@@ -83,46 +71,9 @@ public interface Histogram extends DataSet3D, DataSetMetaData{
 
 	/**
 	 *
-	 * @param binX index
-	 * @return bin centre for X axis
+	 * @param dimIndex the dimension index
+	 * @param binIndex index
+	 * @return bin centre for axis with dimIndex
 	 */
-	double getBinCenterX(int binX);
-
-	/**
-	 *
-	 * @param binY index
-	 * @return bin centre for Y axis
-	 */
-	double getBinCenterY(int binY);
-
-	/**
-	 *
-	 * @param binZ index
-	 * @return bin centre for Y axis
-	 */
-	double getBinCenterZ(int binZ);
-
-	/**
-	 * 
-	 * @return number of dimensions
-	 */
-	int getDimension();
-
-	/**
-	 * 
-	 * @return number of bin alongside X axis
-	 */
-	int getNBinsX();
-
-	/**
-     * 
-     * @return number of bin alongside Y axis
-     */
-	int getNBinsY();
-
-	/**
-     * 
-     * @return number of bin alongside Z axis
-     */
-	int getNBinsZ();
+	double getBinCenter(final int dimIndex, final int binIndex);
 }

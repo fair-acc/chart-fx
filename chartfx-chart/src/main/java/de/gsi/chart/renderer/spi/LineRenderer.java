@@ -64,21 +64,20 @@ public class LineRenderer extends AbstractDataSetManagement<LineRenderer> implem
                     }
                 }
 
-                if (dataset.getDataCount() > 0) {
+                if (dataset.getDataCount(DataSet.DIM_X) > 0) {
                     gc.setStroke(LineRenderer.COLORS[(lindex + 1) % 4]);
-                    int i = dataset.getXIndex(xmin);
+                    int i = dataset.getIndex(DataSet.DIM_X, xmin);
                     if (i < 0) {
                         i = 0;
                     }
-                    double x0 = xAxis.getDisplayPosition(dataset.getX(i));
-                    double y0 = yAxis.getDisplayPosition(dataset.getY(i));
+                    double x0 = xAxis.getDisplayPosition(dataset.get(DataSet.DIM_X, i));
+                    double y0 = yAxis.getDisplayPosition(dataset.get(DataSet.DIM_Y, i));
                     i++;
-                    final int maxIndex = Math.min(dataset.getXIndex(xmax) + 1, dataset.getDataCount());
+                    final int maxIndex = Math.min(dataset.getIndex(DataSet.DIM_X, xmax) + 1, dataset.getDataCount(DataSet.DIM_X));
                     for (; i < maxIndex; i++) {
-                        final double x1 = xAxis.getDisplayPosition(dataset.getX(i));
-                        final double y1 = yAxis.getDisplayPosition(dataset.getY(i));
+                        final double x1 = xAxis.getDisplayPosition(dataset.get(DataSet.DIM_X, i));
+                        final double y1 = yAxis.getDisplayPosition(dataset.get(DataSet.DIM_Y, i));
                         gc.strokeLine(x0, y0, x1, y1);
-                        // System.out.println(x0+" "+y0+" -> "+x1+" "+y1);
                         x0 = x1;
                         y0 = y1;
                     }

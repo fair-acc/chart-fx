@@ -1,6 +1,7 @@
 package de.gsi.dataset.spi;
 
 import de.gsi.dataset.AxisDescription;
+import de.gsi.dataset.DataSet2D;
 import de.gsi.dataset.DataSetError;
 import de.gsi.dataset.event.AddedDataEvent;
 import de.gsi.dataset.event.RemovedDataEvent;
@@ -11,7 +12,7 @@ import de.gsi.dataset.utils.DoubleCircularBuffer;
 /**
  * @author rstein
  */
-public class CircularDoubleErrorDataSet extends AbstractErrorDataSet<CircularDoubleErrorDataSet> implements DataSetError {
+public class CircularDoubleErrorDataSet extends AbstractErrorDataSet<CircularDoubleErrorDataSet> implements DataSet2D, DataSetError {
     private static final long serialVersionUID = -8010355203980379253L;
     protected DoubleCircularBuffer xValues;
     protected DoubleCircularBuffer yValues;
@@ -28,7 +29,7 @@ public class CircularDoubleErrorDataSet extends AbstractErrorDataSet<CircularDou
      * @throws IllegalArgumentException if <code>name</code> is <code>null</code>
      */
     public CircularDoubleErrorDataSet(final String name, final int initalSize) {
-        super(name);
+        super(name, 2);
         AssertUtils.gtEqThanZero("initalSize", initalSize);
         xValues = new DoubleCircularBuffer(initalSize);
         yValues = new DoubleCircularBuffer(initalSize);
@@ -181,7 +182,7 @@ public class CircularDoubleErrorDataSet extends AbstractErrorDataSet<CircularDou
             yErrorsPos.reset();
             dataTag.reset();
             dataStyles.reset();
-            getAxisDescriptions().forEach(AxisDescription::empty);
+            getAxisDescriptions().forEach(AxisDescription::clear);
         });
         fireInvalidated(new RemovedDataEvent(this));
         return this;

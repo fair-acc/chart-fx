@@ -11,7 +11,6 @@ import de.gsi.chart.Chart;
 import de.gsi.chart.XYChart;
 import de.gsi.chart.axes.Axis;
 import de.gsi.dataset.DataSet;
-import de.gsi.dataset.DataSet3D;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.event.EventHandler;
@@ -201,8 +200,8 @@ public class DataPointTooltip extends AbstractDataFormattingPlugin {
      *         if none label has been specified for this data point.
      */
     protected String getDefaultDataLabel(final DataSet dataSet, final int index) {
-        return String.format("%s (%d, %s, %s)", dataSet.getName(), index, Double.toString(dataSet.getX(index)),
-                Double.toString(dataSet.getY(index)));
+        return String.format("%s (%d, %s, %s)", dataSet.getName(), index, Double.toString(dataSet.get(DataSet.DIM_X, index)),
+                Double.toString(dataSet.get(DataSet.DIM_Y, index)));
     }
 
     protected String getDataLabelSafe(final DataSet dataSet, final int index) {
@@ -227,10 +226,9 @@ public class DataPointTooltip extends AbstractDataFormattingPlugin {
         double prevX = Double.MIN_VALUE;
         double nextX = Double.MAX_VALUE;
 
-        final int nDataCount = (dataSet instanceof DataSet3D) ? ((DataSet3D) dataSet).getXDataCount()
-                : dataSet.getDataCount();
+        final int nDataCount = dataSet.getDataCount(DataSet.DIM_X);
         for (int i = 0, size = nDataCount; i < size; i++) {
-            final double currentX = dataSet.getX(i);
+            final double currentX = dataSet.get(DataSet.DIM_X, i);
 
             if (currentX < searchedX) {
                 if (prevX < currentX) {
@@ -243,10 +241,10 @@ public class DataPointTooltip extends AbstractDataFormattingPlugin {
             }
         }
         final DataPoint prevPoint = prevIndex == -1 ? null
-                : new DataPoint(getChart(), dataSet.getX(prevIndex), dataSet.getY(prevIndex),
+                : new DataPoint(getChart(), dataSet.get(DataSet.DIM_X, prevIndex), dataSet.get(DataSet.DIM_Y, prevIndex),
                         getDataLabelSafe(dataSet, prevIndex));
         final DataPoint nextPoint = nextIndex == -1 || nextIndex == prevIndex ? null
-                : new DataPoint(getChart(), dataSet.getX(nextIndex), dataSet.getY(nextIndex),
+                : new DataPoint(getChart(), dataSet.get(DataSet.DIM_X, nextIndex), dataSet.get(DataSet.DIM_X, nextIndex),
                         getDataLabelSafe(dataSet, nextIndex));
 
         return new Pair<>(prevPoint, nextPoint);

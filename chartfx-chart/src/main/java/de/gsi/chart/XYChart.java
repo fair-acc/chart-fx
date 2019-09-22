@@ -435,7 +435,7 @@ public class XYChart extends Chart {
         // TODO: add new auto-ranging here
         final boolean isHorizontal = axis.getSide().isHorizontal();
         final Side side = axis.getSide();
-        axis.getAutoRange().empty();
+        axis.getAutoRange().clear();
         dataSets.forEach(dataset -> {
             if (dataset instanceof DataSet3D && (side == Side.RIGHT || side == Side.TOP)) {
                 final DataSet3D mDataSet = (DataSet3D) dataset;

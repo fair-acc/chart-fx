@@ -178,17 +178,17 @@ public class DataSetUtilsHelper {
         double integral1 = 0.0;
         double integral2 = 0.0;
 
-        if (function.getDataCount() <= 1) {
+        if (function.getDataCount(DataSet.DIM_X) <= 1) {
             return 0.0;
         }
         if (function instanceof DataSet3D) {
             LOGGER.warn("integral not implemented for DataSet3D");
             return 0.0;
         }
-        for (int i = 1; i < function.getDataCount(); i++) {
-            final double step = function.getX(i) - function.getX(i - 1);
-            final double val1 = function.getY(i - 1);
-            final double val2 = function.getY(i);
+        for (int i = 1; i < function.getDataCount(DataSet.DIM_X); i++) {
+            final double step = function.get(DataSet.DIM_X, i) - function.get(DataSet.DIM_X, i - 1);
+            final double val1 = function.get(DataSet.DIM_Y, i - 1);
+            final double val2 = function.get(DataSet.DIM_Y, i);
 
             integral1 += step * val1;
             integral2 += step * val2;

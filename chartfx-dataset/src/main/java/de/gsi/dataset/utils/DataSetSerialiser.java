@@ -388,7 +388,7 @@ public class DataSetSerialiser extends DataSetUtilsHelper {
 	}
 
 	protected static void writeDataLabelsToStream(final IoBuffer buffer, final DataSet dataSet) {
-		final int dataCount = dataSet.getDataCount();
+		final int dataCount = dataSet.getDataCount(DataSet.DIM_X);
 		final Map<Integer, String> labelMap = new ConcurrentHashMap<>();
 		for (int index = 0; index < dataCount; index++) {
 			final String label = dataSet.getDataLabel(index);
@@ -470,8 +470,8 @@ public class DataSetSerialiser extends DataSetUtilsHelper {
 		// opening the
 		// file with standard text-based viewers
 		BinarySerialiser.put(buffer, VAL_INTEGRAL, integralSimple(dataSet));
-		BinarySerialiser.put(buffer, VAL_MEAN, mean(dataSet.getYValues()));
-		BinarySerialiser.put(buffer, VAL_RMS, rootMeanSquare(dataSet.getYValues()));
+		BinarySerialiser.put(buffer, VAL_MEAN, mean(dataSet.getValues(DataSet.DIM_Y)));
+		BinarySerialiser.put(buffer, VAL_RMS, rootMeanSquare(dataSet.getValues(DataSet.DIM_Y)));
 	}
 
 	protected static void writeMetaDataToStream(final IoBuffer buffer, final DataSet dataSet) {
@@ -494,11 +494,11 @@ public class DataSetSerialiser extends DataSetUtilsHelper {
 	 */
 	protected static void writeNumericBinaryDataToBuffer(final IoBuffer buffer, final DataSet dataSet,
 			final boolean asFloat) {
-		final int nsamples = dataSet.getDataCount();
+		final int nsamples = dataSet.getDataCount(DataSet.DIM_X);
 
 		if (asFloat) {
-			BinarySerialiser.put(buffer, X_ARRAY_NAME, toFloats(dataSet.getXValues()), new int[] { nsamples });
-			BinarySerialiser.put(buffer, Y_ARRAY_NAME, toFloats(dataSet.getYValues()), new int[] { nsamples });
+			BinarySerialiser.put(buffer, X_ARRAY_NAME, toFloats(dataSet.getValues(DataSet.DIM_X)), new int[] { nsamples });
+			BinarySerialiser.put(buffer, Y_ARRAY_NAME, toFloats(dataSet.getValues(DataSet.DIM_Y)), new int[] { nsamples });
 			if (!(dataSet instanceof DataSetError)) {
 				// data set does not have any error definition
 				return;
@@ -534,8 +534,8 @@ public class DataSetSerialiser extends DataSetUtilsHelper {
 				break;
 			}
 		} else {
-			BinarySerialiser.put(buffer, X_ARRAY_NAME, dataSet.getXValues(), new int[] { nsamples });
-			BinarySerialiser.put(buffer, Y_ARRAY_NAME, dataSet.getYValues(), new int[] { nsamples });
+			BinarySerialiser.put(buffer, X_ARRAY_NAME, dataSet.getValues(DataSet.DIM_X), new int[] { nsamples });
+			BinarySerialiser.put(buffer, Y_ARRAY_NAME, dataSet.getValues(DataSet.DIM_Y), new int[] { nsamples });
 			if (!(dataSet instanceof DataSetError)) {
 				// data set does not have any error definition
 				return;

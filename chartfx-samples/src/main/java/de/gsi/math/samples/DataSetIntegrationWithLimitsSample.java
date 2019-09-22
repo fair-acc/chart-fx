@@ -1,12 +1,12 @@
 package de.gsi.math.samples;
 
+import de.gsi.chart.renderer.ErrorStyle;
 import de.gsi.dataset.DataSet;
 import de.gsi.dataset.spi.DoubleErrorDataSet;
-import de.gsi.chart.renderer.ErrorStyle;
 import de.gsi.math.DataSetMath;
+import de.gsi.math.functions.GaussianFunction;
 import de.gsi.math.samples.utils.AbstractDemoApplication;
 import de.gsi.math.samples.utils.DemoChart;
-import de.gsi.math.functions.GaussianFunction;
 import javafx.application.Application;
 import javafx.scene.Node;
 

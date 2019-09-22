@@ -33,9 +33,9 @@ public class HistogramSample extends Application {
     final static SplittableRandom RND = new SplittableRandom(System.currentTimeMillis());
     double[] xBins = { 0.0, 0.1, 0.2, 0.3, 1.0, 2.0, 3.0, 4.0, 5.0, 10.0, 15.0, 16.0, 17.0, 18.0, 19.0, 19.7, 19.8,
             19.9, 20.0 };
-    private final Histogram dataSet1 = new Histogram("myHistogram1", HistogramSample.N_BINS, 0.0, 20.0);
-    private final Histogram dataSet2 = new Histogram("myHistogram2", HistogramSample.N_BINS, 0.0, 20.0);
-    private final Histogram dataSet3 = new Histogram("myHistogram3", xBins); // custom, non-equidistance histogram
+    private final Histogram dataSet1 = new Histogram("myHistogram1", N_BINS, 0.0, 20.0);
+    private final Histogram dataSet2 = new Histogram("myHistogram2", N_BINS, 0.0, 20.0);
+    private final Histogram dataSet3 = new Histogram("myHistogram3", xBins); // custom, non-equidistant histogram
 
     @Override
     public void start(final Stage primaryStage) {
@@ -49,7 +49,7 @@ public class HistogramSample extends Application {
 
         final DefaultNumericAxis yAxis = new DefaultNumericAxis("y-Axis");
         yAxis.setAutoRangeRounding(true);
-        yAxis.setAutoRangePadding(0.05);
+        yAxis.setAutoRangePadding(0.2);
         yAxis.setForceZeroInRange(true);
 
         final XYChart chart = new XYChart(xAxis2, yAxis);

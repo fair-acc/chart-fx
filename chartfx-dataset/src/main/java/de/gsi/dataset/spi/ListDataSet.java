@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import de.gsi.dataset.AxisDescription;
-import de.gsi.dataset.DataSet;
+import de.gsi.dataset.DataSet2D;
 import de.gsi.dataset.event.AddedDataEvent;
 import de.gsi.dataset.event.RemovedDataEvent;
 import de.gsi.dataset.event.UpdatedDataEvent;
@@ -29,7 +29,7 @@ import de.gsi.dataset.utils.AssertUtils;
  * @deprecated due to poorer CPU performance (this is kept for reference
  *             reasons)
  */
-public class ListDataSet extends AbstractDataSet<ListDataSet> implements DataSet {
+public class ListDataSet extends AbstractDataSet<ListDataSet> implements DataSet2D {
     private static final long serialVersionUID = -4444745436188783390L;
     protected Map<Integer, String> dataLabels = new ConcurrentHashMap<>();
     protected Map<Integer, String> dataStyles = new ConcurrentHashMap<>();
@@ -43,7 +43,7 @@ public class ListDataSet extends AbstractDataSet<ListDataSet> implements DataSet
      *             <code>null</code>
      */
     public ListDataSet(final String name) {
-        super(name);
+        super(name, 2);
     }
 
     /**
@@ -130,7 +130,7 @@ public class ListDataSet extends AbstractDataSet<ListDataSet> implements DataSet
     public ListDataSet clearData() {
         lock().writeLockGuard(() -> {
             data.clear();
-            getAxisDescriptions().forEach(AxisDescription::empty);
+            getAxisDescriptions().forEach(AxisDescription::clear);
         });
         return fireInvalidated(new RemovedDataEvent(this, "clearData()"));
     }

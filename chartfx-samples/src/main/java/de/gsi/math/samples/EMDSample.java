@@ -4,15 +4,15 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.Arrays;
 
+import de.gsi.chart.renderer.spi.ContourDataSetRenderer;
+import de.gsi.chart.renderer.spi.utils.ColorGradient;
 import de.gsi.dataset.DataSet;
 import de.gsi.dataset.DataSet3D;
 import de.gsi.dataset.spi.DefaultErrorDataSet;
-import de.gsi.chart.renderer.spi.ContourDataSetRenderer;
-import de.gsi.chart.renderer.spi.utils.ColorGradient;
 import de.gsi.math.TMath;
+import de.gsi.math.matrix.MatrixD;
 import de.gsi.math.samples.utils.AbstractDemoApplication;
 import de.gsi.math.samples.utils.DemoChart;
-import de.gsi.math.matrix.MatrixD;
 import de.gsi.math.spectra.EEMD;
 import javafx.application.Application;
 import javafx.scene.Node;

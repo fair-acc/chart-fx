@@ -4,6 +4,7 @@ import java.util.Arrays;
 
 import de.gsi.dataset.AxisDescription;
 import de.gsi.dataset.DataSet;
+import de.gsi.dataset.DataSet2D;
 import de.gsi.dataset.EditableDataSet;
 import de.gsi.dataset.event.AddedDataEvent;
 import de.gsi.dataset.event.RemovedDataEvent;
@@ -50,7 +51,7 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
      *
      * @param another name of this DataSet.
      */
-    public DoubleDataSet(final DataSet another) {
+    public DoubleDataSet(final DataSet2D another) {
         this("");
         lock().writeLockGuard(() -> {
             another.lock().writeLockGuard(() -> {
@@ -69,7 +70,7 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
      *             <code>null</code>
      */
     public DoubleDataSet(final String name, final int initalSize) {
-        super(name);
+        super(name, 2);
         AssertUtils.gtEqThanZero("initalSize", initalSize);
         xValues = new double[initalSize];
         yValues = new double[initalSize];
@@ -140,7 +141,7 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
             getDataLabelMap().isEmpty();
             getDataStyleMap().isEmpty();
 
-            getAxisDescriptions().forEach(AxisDescription::empty);
+            getAxisDescriptions().forEach(AxisDescription::clear);
         });
 
         return fireInvalidated(new RemovedDataEvent(this, "clearData()"));
@@ -163,7 +164,7 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
             yValues[index] = y;
             dataMaxIndex = Math.max(index, dataMaxIndex);
 
-            getAxisDescriptions().forEach(AxisDescription::empty);
+            getAxisDescriptions().forEach(AxisDescription::clear);
         });
         return fireInvalidated(new UpdatedDataEvent(this));
     }
@@ -304,7 +305,7 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
 
             dataMaxIndex = Math.max(0, dataMaxIndex - diffLength);
 
-            getAxisDescriptions().forEach(AxisDescription::empty);
+            getAxisDescriptions().forEach(AxisDescription::clear);
         });
         return fireInvalidated(new RemovedDataEvent(this));
     }
@@ -428,7 +429,7 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
      * @param other the source data set
      * @return itself (fluent design)
      */
-    public DoubleDataSet set(final DataSet other) {
+    public DoubleDataSet set(final DataSet2D other) {
         lock().writeLockGuard(() -> {
             other.lock().writeLockGuard(() -> {
                 // deep copy data point labels and styles

@@ -8,6 +8,7 @@ import java.util.Random;
 import de.gsi.chart.renderer.spi.ContourDataSetRenderer;
 import de.gsi.chart.renderer.spi.utils.ColorGradient;
 import de.gsi.chart.utils.AxisSynchronizer;
+import de.gsi.dataset.DataSet;
 import de.gsi.dataset.DataSet3D;
 import de.gsi.dataset.spi.DefaultDataSet;
 import de.gsi.math.TMath;
@@ -80,13 +81,13 @@ public class WaveletScalogram extends AbstractDemoApplication {
         fft.realForward(fftSpectra);
         final double[] frequency1 = wtrafo.getScalogramFrequencyAxis(nQuantx, nQuanty, nu, fmin, fmax);
         final double[] magWavelet = new double[frequency1.length];
-        final int nboundary = fdataset.getXDataCount() / 20;
+        final int nboundary = fdataset.getDataCount(DataSet.DIM_X) / 20;
 
-        for (int i = 0; i < fdataset.getYDataCount(); i++) {
+        for (int i = 0; i < fdataset.getDataCount(DataSet.DIM_Y); i++) {
             double val = 0.0;
             int count = 0;
 
-            for (int j = nboundary; j < fdataset.getXDataCount() - nboundary; j++) {
+            for (int j = nboundary; j < fdataset.getDataCount(DataSet.DIM_X) - nboundary; j++) {
                 val += fdataset.getZ(j, i);
                 count++;
             }

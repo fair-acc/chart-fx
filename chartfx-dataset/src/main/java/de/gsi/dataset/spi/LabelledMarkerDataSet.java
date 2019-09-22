@@ -13,7 +13,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import de.gsi.dataset.AxisDescription;
-import de.gsi.dataset.DataSet;
+import de.gsi.dataset.DataSet2D;
 import de.gsi.dataset.event.AddedDataEvent;
 import de.gsi.dataset.event.RemovedDataEvent;
 import de.gsi.dataset.event.UpdatedDataEvent;
@@ -26,7 +26,7 @@ import de.gsi.dataset.utils.AssertUtils;
  * 
  * @author braeun
  */
-public class LabelledMarkerDataSet extends AbstractDataSet<LabelledMarkerDataSet> implements DataSet {
+public class LabelledMarkerDataSet extends AbstractDataSet<LabelledMarkerDataSet> implements DataSet2D {
     private static final long serialVersionUID = -3267447868117053651L;
     protected ArrayList<String> dataLabels = new ArrayList<>();
     protected ArrayList<String> dataStyles = new ArrayList<>();
@@ -37,7 +37,7 @@ public class LabelledMarkerDataSet extends AbstractDataSet<LabelledMarkerDataSet
      *            data set name
      */
     public LabelledMarkerDataSet(String name) {
-        super(name);
+        super(name, 2);
     }
 
     /**
@@ -75,7 +75,7 @@ public class LabelledMarkerDataSet extends AbstractDataSet<LabelledMarkerDataSet
             dataLabels.clear();
             dataStyles.clear();
 
-            getAxisDescriptions().forEach(AxisDescription::empty);
+            getAxisDescriptions().forEach(AxisDescription::clear);
         });
         return fireInvalidated(new RemovedDataEvent(this, "clear"));
     }
@@ -120,7 +120,7 @@ public class LabelledMarkerDataSet extends AbstractDataSet<LabelledMarkerDataSet
             data.clear();
             dataLabels.clear();
             dataStyles.clear();
-            getAxisDescriptions().forEach(AxisDescription::empty);
+            getAxisDescriptions().forEach(AxisDescription::clear);
             for (LabelledMarker marker : markers) {
                 final double x = marker.getX();
                 final double y = marker.getY();
@@ -183,7 +183,7 @@ public class LabelledMarkerDataSet extends AbstractDataSet<LabelledMarkerDataSet
             dataLabels.subList(fromIndex, toIndex).clear();
             dataStyles.subList(fromIndex, toIndex).clear();
 
-            getAxisDescriptions().forEach(AxisDescription::empty);
+            getAxisDescriptions().forEach(AxisDescription::clear);
         });
         return fireInvalidated(new RemovedDataEvent(this));
     }

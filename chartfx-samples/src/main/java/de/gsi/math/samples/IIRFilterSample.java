@@ -97,9 +97,9 @@ public class IIRFilterSample extends AbstractDemoApplication {
         fraw = readDemoData(27500, nBins);
         fraw1 = readDemoData(27500 + (int) (0.5e-3 * fs), nBins);
         fraw2 = readDemoData(27500 + (int) (1.5e-3 * fs), nBins);
-        System.err.println("length 0 = " + fraw.getDataCount());
-        System.err.println("length 1 = " + fraw1.getDataCount());
-        System.err.println("length 2 = " + fraw2.getDataCount());
+        System.err.println("length 0 = " + fraw.getDataCount(DataSet.DIM_X));
+        System.err.println("length 1 = " + fraw1.getDataCount(DataSet.DIM_X));
+        System.err.println("length 2 = " + fraw2.getDataCount(DataSet.DIM_X));
 
         fspectra = DataSetMath.magnitudeSpectrumDecibel(fraw);
         fspectra1 = DataSetMath.magnitudeSpectrumDecibel(fraw1);

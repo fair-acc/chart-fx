@@ -4,6 +4,7 @@ import java.util.Arrays;
 
 import de.gsi.dataset.AxisDescription;
 import de.gsi.dataset.DataSet;
+import de.gsi.dataset.DataSet2D;
 import de.gsi.dataset.DataSetError;
 import de.gsi.dataset.EditableDataSet;
 import de.gsi.dataset.event.AddedDataEvent;
@@ -54,7 +55,7 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
      *             <code>null</code>
      */
     public DoubleErrorDataSet(final String name, final int initalSize) {
-        super(name);
+        super(name, 2);
         AssertUtils.gtEqThanZero("initalSize", initalSize);
         xValues = new double[initalSize];
         yValues = new double[initalSize];
@@ -70,7 +71,7 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
      *
      * @param another name of this DataSet.
      */
-    public DoubleErrorDataSet(final DataSet another) {
+    public DoubleErrorDataSet(final DataSet2D another) {
         this("");
         lock().writeLockGuard(() -> {
             another.lock().writeLockGuard(() -> {
@@ -163,8 +164,8 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
             getDataLabelMap().isEmpty();
             getDataStyleMap().isEmpty();
 
-            getAxisDescription(0).empty();
-            getAxisDescription(1).empty();
+            getAxisDescription(0).clear();
+            getAxisDescription(1).clear();
         });
         return fireInvalidated(new RemovedDataEvent(this, "clearData()"));
     }
@@ -336,7 +337,7 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
             yErrorsNeg = yErrorsNegNew;
             dataMaxIndex = Math.max(0, dataMaxIndex - diffLength);
 
-            getAxisDescriptions().forEach(AxisDescription::empty);
+            getAxisDescriptions().forEach(AxisDescription::clear);
         });
         return fireInvalidated(new RemovedDataEvent(this));
     }
@@ -484,7 +485,7 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
      * @param other the other data set
      * @return itself (fluent design)
      */
-    public DoubleErrorDataSet set(final DataSet other) {
+    public DoubleErrorDataSet set(final DataSet2D other) {
         lock().writeLockGuard(() -> {
             other.lock().writeLockGuard(() -> {
                 // deep copy data point labels and styles

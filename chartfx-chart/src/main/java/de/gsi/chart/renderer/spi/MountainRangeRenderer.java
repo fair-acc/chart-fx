@@ -14,6 +14,7 @@ import de.gsi.chart.renderer.ErrorStyle;
 import de.gsi.chart.renderer.Renderer;
 import de.gsi.dataset.AxisDescription;
 import de.gsi.dataset.DataSet;
+import de.gsi.dataset.DataSet2D;
 import de.gsi.dataset.DataSet3D;
 import de.gsi.dataset.DataSetError;
 import de.gsi.dataset.event.EventListener;
@@ -105,7 +106,7 @@ public class MountainRangeRenderer extends ErrorDataSetRenderer implements Rende
                     yAxis.setUpperBound(zRangeMax * (1.0 + mountainRaingeExtra));
                     yAxis.forceRedraw();
 
-                    final int yCountMax = mData.getYDataCount();
+                    final int yCountMax = mData.getDataCount(DataSet.DIM_Y);
                     checkAndRecreateRenderer(yCountMax);
 
                     for (int index = yCountMax - 1; index >= 0; index--) {
@@ -161,15 +162,15 @@ public class MountainRangeRenderer extends ErrorDataSetRenderer implements Rende
         }
     }
 
-    private class Demux3dTo2dDataSet implements DataSetError {
+    private class Demux3dTo2dDataSet implements DataSet2D, DataSetError {
         private static final long serialVersionUID = 3914728138839091421L;
-        private final transient DataSetLock lock = new DefaultDataSetLock(Demux3dTo2dDataSet.this);
+        private final transient DataSetLock<Demux3dTo2dDataSet> lock = new DefaultDataSetLock<>(Demux3dTo2dDataSet.this);
         private final AtomicBoolean autoNotification = new AtomicBoolean(true);
         private final DataSet3D dataSet;
         private final int yIndex;
         private final int yMax;
         private double yShift;
-        private final List<EventListener> updateListener = new ArrayList<>();
+        private final transient List<EventListener> updateListener = new ArrayList<>();
         private final List<AxisDescription> axesDescriptions = new ArrayList<>(Arrays.asList( // 
                 new DefaultAxisDescription(Demux3dTo2dDataSet.this, "x-Axis", "a.u."), // 
                 new DefaultAxisDescription(Demux3dTo2dDataSet.this, "y-Axis", "a.u.")));
@@ -178,7 +179,7 @@ public class MountainRangeRenderer extends ErrorDataSetRenderer implements Rende
             super();
             dataSet = sourceDataSet;
             yIndex = selectedYIndex;
-            yMax = dataSet.getYDataCount();
+            yMax = dataSet.getDataCount(DataSet.DIM_Y);
             yShift = 0.0; // just temporarily, will be recomputed
 
             // listener on axis
@@ -207,12 +208,7 @@ public class MountainRangeRenderer extends ErrorDataSetRenderer implements Rende
 
         @Override
         public int getDataCount() {
-            return dataSet.getXDataCount();
-        }
-
-        @Override
-        public int getDataCount(final double xmin, final double xmax) {
-            return dataSet.getDataCount(xmin, xmax);
+            return dataSet.getDataCount(DataSet.DIM_X);
         }
 
         @Override
@@ -243,6 +239,11 @@ public class MountainRangeRenderer extends ErrorDataSetRenderer implements Rende
         @Override
         public double getX(final int i) {
             return dataSet.getX(i);
+        }
+        
+        @Override
+        public double get(final int dimIndex, final int i) {
+            return dataSet.get(dimIndex, i);
         }
 
         @Override
@@ -332,6 +333,11 @@ public class MountainRangeRenderer extends ErrorDataSetRenderer implements Rende
 
             Demux3dTo2dDataSet.this.getAxisDescription(0).set(zAxis.getName(), zAxis.getUnit(), zAxis.getMin(),
                     zRangeMax * (1 + mountainRaingeExtra));
+        }
+
+        @Override
+        public int getDataCount(int dimIndex) {
+            return this.getDataCount();
         }
     }
 

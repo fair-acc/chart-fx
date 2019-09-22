@@ -13,6 +13,7 @@ import de.gsi.chart.XYChart;
 import de.gsi.chart.axes.Axis;
 import de.gsi.chart.axes.spi.CategoryAxis;
 import de.gsi.dataset.DataSet;
+import de.gsi.dataset.DataSet2D;
 import de.gsi.dataset.utils.ProcessingProfiler;
 import de.gsi.chart.renderer.Renderer;
 import de.gsi.chart.renderer.spi.utils.DefaultRenderColorScheme;
@@ -76,7 +77,11 @@ public class ReducingLineRenderer extends AbstractDataSetManagement<ReducingLine
         final double xmin = xAxis.getValueForDisplay(0);
         final double xmax = xAxis.getValueForDisplay(xAxisWidth);
         int index = 0;
-        for (final DataSet dataset : localDataSetList) {
+        for (final DataSet ds : localDataSetList) {
+            if (!(ds instanceof DataSet2D)) {
+                continue;
+            }
+            final DataSet2D dataset = (DataSet2D)ds;
             final int lindex = index;
             dataset.lock().readLockGuardOptimistic(() -> {
                 // update categories in case of category axes for the first
@@ -97,7 +102,9 @@ public class ReducingLineRenderer extends AbstractDataSetManagement<ReducingLine
                 DefaultRenderColorScheme.setLineScheme(gc, dataset.getStyle(), lindex);
                 DefaultRenderColorScheme.setGraphicsContextAttributes(gc, dataset.getStyle());
                 if (dataset.getDataCount() > 0) {
-                    final int n = dataset.getDataCount(xmin, xmax);
+                    final int indexMin = Math.max(0, dataset.getXIndex(xmin));
+                    final int indexMax = Math.min(dataset.getXIndex(xmax) + 1, dataset.getDataCount());
+                    final int n = Math.abs(indexMax - indexMin);
                     final int d = n / maxPoints;
                     if (d <= 1) {
                         int i = dataset.getXIndex(xmin);

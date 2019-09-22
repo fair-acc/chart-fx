@@ -1,12 +1,16 @@
 package de.gsi.dataset.utils;
 
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.atomic.AtomicInteger;
 
-public class CachedDaemonThreadFactory implements ThreadFactory {
+public final class CachedDaemonThreadFactory implements ThreadFactory {
+    private static final int MAX_THREADS = Math.max(4, Runtime.getRuntime().availableProcessors());
     private static final ThreadFactory defaultFactory = Executors.defaultThreadFactory();
     private static final CachedDaemonThreadFactory SELF = new CachedDaemonThreadFactory();
-    private static int threadCounter = 1;
+    private static final ExecutorService COMMON_POOL = Executors.newFixedThreadPool(2 * MAX_THREADS, SELF);
+    private static final AtomicInteger threadCounter = new AtomicInteger();
 
     private CachedDaemonThreadFactory() {
         // helper class
@@ -16,11 +20,19 @@ public class CachedDaemonThreadFactory implements ThreadFactory {
         return SELF;
     }
 
+    public static int getNumbersOfThreads() {
+        return MAX_THREADS;
+    }
+
+    public static ExecutorService getCommonPool() {
+        return COMMON_POOL;
+    }
+
     @Override
     public Thread newThread(Runnable r) {
         Thread thread = defaultFactory.newThread(r);
-        thread.setName("daemonised_chartfx_thread_#" + threadCounter);
-        threadCounter++;
+        threadCounter.incrementAndGet();
+        thread.setName("daemonised_chartfx_thread_#" + threadCounter.intValue());
         thread.setDaemon(true);
         return thread;
     }

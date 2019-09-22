@@ -47,10 +47,17 @@ public interface AxisDescription {
     }
 
     /**
-     * Empties this axis range. After calling this method this data range becomes undefined.
+     * Empties this DataRange. After calling this method this data range becomes
+     * undefined.
+     * @return <code>true</code> if the values were valid before
+     * @see #isDefined()
      */
-    void empty();
+    public boolean clear();
 
+    public boolean contains(final double value);
+    
+    public double getLength();
+    
     /**
      * @return maximum value of the axis or DataSet
      */

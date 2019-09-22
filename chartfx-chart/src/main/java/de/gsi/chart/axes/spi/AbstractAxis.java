@@ -373,7 +373,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
             // Double.MIN_VALUE)
             // in order to find the maximum (positive or negative)
             dataMaxValue = -Double.MAX_VALUE;
-            autoRange.empty();
+            autoRange.clear();
         }
 
         for (final Number dataValue : data) {

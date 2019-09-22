@@ -14,6 +14,18 @@ import de.gsi.dataset.locks.DataSetLock;
  * @author rstein
  */
 public interface DataSet extends EventSource, Serializable {
+    final int DIM_X = 0;
+    final int DIM_Y = 1;
+    final int DIM_Z = 2;
+
+    /**
+     * Gets the x value of the data point with the index i
+     * 
+     * @param dimIndex the dimension index (ie. '0' equals 'X', '1' equals 'Y')
+     * @param index data point index
+     * @return the x value
+     */
+    double get(final int dimIndex, final int index);
 
     /**
      * Return the axis description of the i-th axis.
@@ -32,31 +44,39 @@ public interface DataSet extends EventSource, Serializable {
 
     /**
      * Get the number of data points in the data set
-     *
+     * 
+     * @param dimIndex the dimension index (ie. '0' equals 'X', '1' equals 'Y')
      * @return the number of data points
      */
-    int getDataCount();
-
-    /**
-     * Gets the number of data points in the range xmin to xmax.
-     *
-     * @param xmin the lower end of the range
-     * @param xmax the upper end of the range
-     * @return the number of data points
-     */
-    int getDataCount(double xmin, double xmax);
+    int getDataCount(final int dimIndex);
 
     /**
      * Returns label of a data point specified by the index. The label can be
      * used as a category name if CategoryStepsDefinition is used or for
      * annotations displayed for data points.
      *
-     * @param index
-     *            the data index
+     * @param index the data index
      * @return label of a data point specified by the index or <code>null</code>
      *         if none label has been specified for this data point.
      */
     String getDataLabel(int index);
+
+    /**
+     * @return number of dimensions
+     */
+    int getDimension();
+    
+    /**
+     * Gets the index of the data point closest to the given 'value' coordinate. The
+     * index returned may be less then zero or larger the the number of data
+     * points in the data set, if the x coordinate lies outside the range of the
+     * data set.
+     *
+     * @param dimIndex the dimension index (ie. '0' equals 'X', '1' equals 'Y')
+     * @param value the data point coordinate to search for
+     * @return the index of the data point
+     */
+    int getIndex(final int dimIndex, final double value);
 
     /**
      * Gets the name of the data set.
@@ -79,8 +99,7 @@ public interface DataSet extends EventSource, Serializable {
      * A string representation of the CSS style associated with this specific
      * {@code DataSet} data point. @see #getStyle()
      *
-     * @param index
-     *            the index of the specific data point
+     * @param index the specific data point index
      * @return user-specific data set style description (ie. may be set by user)
      */
     String getStyle(int index);
@@ -88,95 +107,26 @@ public interface DataSet extends EventSource, Serializable {
     /**
      * Gets the interpolated y value of the data point for given x coordinate
      *
-     * @param x
-     *            the new x coordinate
+     * @param dimIndex the dimension index (ie. '0' equals 'X', '1' equals 'Y')
+     * @param x the new x coordinate
      * @return the y value
      */
-    default double getValue(final double x) {
-        final int index1 = getXIndex(x);
-        final double x1 = getX(index1);
-        final double y1 = getY(index1);
-        int index2 = x1 < x ? index1 + 1 : index1 - 1;
-        index2 = Math.max(0, Math.min(index2, this.getDataCount() - 1));
-        final double y2 = getY(index2);
-        if (Double.isNaN(y1) || Double.isNaN(y2)) {
-            // case where the function has a gap (y-coordinate equals to NaN
-            return Double.NaN;
-        }
-
-        final double x2 = getX(index2);
-        if (x1 == x2) {
-            return y1;
-        }
-
-        return y1 + (((y2 - y1) * (x - x1)) / (x2 - x1));
-    }
+    double getValue(final int dimIndex, final double x);
 
     /**
-     * Gets the x value of the data point with the index i
-     *
-     * @param i
-     *            the index of the data point
-     * @return the x value
-     */
-    double getX(int i);
-
-    /**
-     * Gets the index of the data point closest to the given x coordinate. The
-     * index returned may be less then zero or larger the the number of data
-     * points in the data set, if the x coordinate lies outside the range of the
-     * data set.
-     *
-     * @param x
-     *            the x position of the data point
-     * @return the index of the data point
-     */
-    int getXIndex(double x);
-
-    /**
+     * @param dimIndex the dimension index (ie. '0' equals 'X', '1' equals 'Y')
      * @return the x value array
      */
-    default double[] getXValues() {
-        final int n = getDataCount();
+    default double[] getValues(final int dimIndex) {
+        final int n = getDataCount(dimIndex);
         final double[] retValues = new double[n];
         for (int i = 0; i < n; i++) {
-            retValues[i] = getX(i);
+            retValues[i] = get(dimIndex, i);
         }
         return retValues;
     }
 
     /**
-     * Gets the y value of the data point with the index i
-     *
-     * @param i
-     *            the index of the data point
-     * @return the y value
-     */
-    double getY(int i);
-
-    /**
-     * Gets the first index of the data point closest to the given y coordinate.
-     *
-     * @param y
-     *            the y position of the data point
-     * @return the index of the data point
-     */
-    int getYIndex(double y);
-
-    /**
-     * @return the y value array
-     */
-    default double[] getYValues() {
-        final int n = getDataCount();
-        final double[] retValues = new double[n];
-        for (int i = 0; i < n; i++) {
-            retValues[i] = getY(i);
-        }
-        return retValues;
-    }
-
-    /**
-     * 
      * @return Read-Write Lock to guard the DataSet
      * @see de.gsi.dataset.locks.DataSetLock
      */

@@ -57,10 +57,6 @@ public abstract class AbstractDataSetManagement<R extends Renderer> implements R
         return null;
     }
 
-    // public ObservableList<? extends DataSet> getDatasets() {
-    // return datasets;
-    // }
-
     /**
      * @return the instance of this AbstractDataSetManagement.
      */
@@ -127,7 +123,7 @@ public abstract class AbstractDataSetManagement<R extends Renderer> implements R
     }
 
     protected static final DoubleDataSet getDataSetCopy(final DataSet dataSet) {
-        final int nLength = dataSet.getDataCount();
+        final int nLength = dataSet.getDataCount(DataSet.DIM_X); //TODO: expand to n-dimensional DataSet
         final DoubleDataSet ret = new DoubleDataSet(dataSet.getName(), nLength);
 
         dataSet.lock().writeLockGuard(() -> {
@@ -146,7 +142,7 @@ public abstract class AbstractDataSetManagement<R extends Renderer> implements R
                 // generic implementation that works with all DataSetError
                 // implementation
                 for (int i = 0; i < nLength; i++) {
-                    ret.set(i, dataSet.getX(i), dataSet.getY(i));
+                    ret.set(i, dataSet.get(DataSet.DIM_X, i), dataSet.get(DataSet.DIM_Y, i));
 
                     final String label = dataSet.getDataLabel(i);
                     if (label != null) {
@@ -165,7 +161,7 @@ public abstract class AbstractDataSetManagement<R extends Renderer> implements R
     }
 
     protected static final DoubleErrorDataSet getErrorDataSetCopy(final DataSetError dataSet) {
-        final int nLength = dataSet.getDataCount();
+        final int nLength = dataSet.getDataCount(DataSet.DIM_X);
         final DoubleErrorDataSet ret = new DoubleErrorDataSet(dataSet.getName(), nLength);
 
         dataSet.lock().writeLockGuard(() -> {
@@ -185,7 +181,7 @@ public abstract class AbstractDataSetManagement<R extends Renderer> implements R
                 // generic implementation that works with all DataSetError
                 // implementation
                 for (int i = 0; i < nLength; i++) {
-                    ret.set(i, dataSet.getX(i), dataSet.getY(i), dataSet.getYErrorNegative(i),
+                    ret.set(i, dataSet.get(DataSet.DIM_X, i), dataSet.get(DataSet.DIM_Y, i), dataSet.getYErrorNegative(i),
                             dataSet.getYErrorPositive(i));
                     final String label = ret.getDataLabel(i);
                     if (label != null) {
