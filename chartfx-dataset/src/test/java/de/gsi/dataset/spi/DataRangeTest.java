@@ -256,7 +256,7 @@ public class DataRangeTest {
             assertFalse(test1.contains(1.5));
             assertFalse(test1.contains(-1.5));
 
-            test1.empty();
+            test1.clear();
             assertFalse(test1.isDefined());
         }
 

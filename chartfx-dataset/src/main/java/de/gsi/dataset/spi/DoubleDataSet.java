@@ -2,6 +2,7 @@ package de.gsi.dataset.spi;
 
 import de.gsi.dataset.AxisDescription;
 import de.gsi.dataset.DataSet;
+import de.gsi.dataset.DataSet2D;
 import de.gsi.dataset.EditableDataSet;
 import de.gsi.dataset.event.AddedDataEvent;
 import de.gsi.dataset.event.RemovedDataEvent;
@@ -41,7 +42,7 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
      * @throws IllegalArgumentException if {@code name} is {@code null}
      */
     public DoubleDataSet(final String name, final int initalSize) {
-        super(name);
+        super(name, 2);
         AssertUtils.gtEqThanZero("initalSize", initalSize);
         xValues = new DoubleArrayList(initalSize);
         yValues = new DoubleArrayList(initalSize);
@@ -53,8 +54,8 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
      *
      * @param another name of this DataSet.
      */
-    public DoubleDataSet(final DataSet another) {
-        super(another.getName());
+    public DoubleDataSet(final DataSet2D another) {
+        super(another.getName(), another.getDimension());
         this.set(another); // NOPMD by rstein on 25/06/19 07:42
     }
 
@@ -75,7 +76,7 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
      */
     public DoubleDataSet(final String name, final double[] xValues, final double[] yValues, final int initalSize,
             final boolean deepCopy) {
-        super(name);
+        super(name, 2);
         AssertUtils.notNull("X data", xValues);
         AssertUtils.notNull("Y data", yValues);
         final int dataMaxIndex = Math.min(xValues.length, Math.min(yValues.length, initalSize));
@@ -105,6 +106,11 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
     }
 
     @Override
+    public final double[] getValues(final int dimIndex) {
+        return dimIndex == DataSet.DIM_X ? xValues.elements() : yValues.elements();
+    }
+
+    @Override
     public int getDataCount() {
         return Math.min(xValues.size(), yValues.size());
     }
@@ -122,7 +128,7 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
             getDataStyleMap().clear();
             clearMetaInfo();
 
-            getAxisDescriptions().forEach(AxisDescription::empty);
+            getAxisDescriptions().forEach(AxisDescription::clear);
         });
         return fireInvalidated(new RemovedDataEvent(this, "clearData()"));
     }
@@ -173,6 +179,11 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
             yValues.trim(0);
         });
         return fireInvalidated(new UpdatedDataEvent(this, "increaseCapacity()"));
+    }
+    
+    @Override
+    public final double get(final int dimIndex, final int index) {
+        return dimIndex == DataSet.DIM_X ? xValues.elements()[index] : yValues.elements()[index];
     }
 
     @Override
@@ -337,7 +348,7 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
 
             // invalidate ranges
             // -> fireInvalidated calls computeLimits for autoNotification
-            getAxisDescriptions().forEach(AxisDescription::empty);
+            getAxisDescriptions().forEach(AxisDescription::clear);
         });
         return fireInvalidated(new RemovedDataEvent(this));
     }
@@ -364,7 +375,7 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
 
             // invalidate ranges
             // -> fireInvalidated calls computeLimits for autoNotification
-            getAxisDescriptions().forEach(AxisDescription::empty);
+            getAxisDescriptions().forEach(AxisDescription::clear);
         });
         return fireInvalidated(new UpdatedDataEvent(this, "set - single"));
     }
@@ -429,7 +440,7 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
 
             // invalidate ranges
             // -> fireInvalidated calls computeLimits for autoNotification
-            getAxisDescriptions().forEach(AxisDescription::empty);
+            getAxisDescriptions().forEach(AxisDescription::clear);
         });
         return fireInvalidated(new UpdatedDataEvent(this, "set - via arrays"));
     }
@@ -440,7 +451,7 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
      * @param other the source data set
      * @return itself (fluent design)
      */
-    public DoubleDataSet set(final DataSet other) {
+    public DoubleDataSet set(final DataSet2D other) {
         lock().writeLockGuard(() -> {
             other.lock().writeLockGuard(() -> {
 

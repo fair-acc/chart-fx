@@ -7,20 +7,23 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
+import de.gsi.dataset.DataSet3D;
 import de.gsi.dataset.DataSetMetaData;
 import de.gsi.dataset.Histogram1D;
 import de.gsi.dataset.Histogram2D;
+import de.gsi.dataset.event.UpdatedDataEvent;
 
 /**
  * @author rstein
- *
  */
-public class Histogram2 extends AbstractHistogram implements Histogram2D {
-	protected final Histogram xProjection;
-	protected final Histogram yProjection;
+public class Histogram2 extends AbstractHistogram implements Histogram2D, DataSet3D {
+    private static final long serialVersionUID = -5583974934398282519L;
+    protected final Histogram xProjection;
+    protected final Histogram yProjection;
 
-	/**
+    /**
      * Creates 2D histogram with name and ranges [minX, maxX] and [minY, maxY]
+     * 
      * @param name of the data sets
      * @param nBinsX number of horizontal bins
      * @param minX minimum of horizontal range
@@ -29,170 +32,162 @@ public class Histogram2 extends AbstractHistogram implements Histogram2D {
      * @param minY minimum of vertical range
      * @param maxY maximum of vertical range
      */
-	public Histogram2(String name, int nBinsX, double minX, double maxX, final int nBinsY, final double minY,
-			final double maxY) {
-		super(name, nBinsX, minX, maxX, nBinsY, minY, maxY);
+    public Histogram2(String name, int nBinsX, double minX, double maxX, final int nBinsY, final double minY,
+            final double maxY) {
+        super(name, nBinsX, minX, maxX, nBinsY, minY, maxY);
+        xProjection = new Histogram(name + "-Proj-X", nBinsX, minX, maxX, true);
+        yProjection = new Histogram(name + "-Proj-Y", nBinsY, minY, maxY, false);
+    }
 
-		xProjection = new Histogram(name + "-Proj-X", nBinsX, minX, maxX, true);
-		yProjection = new Histogram(name + "-Proj-Y", nBinsY, minY, maxY, false);
-	}
+    /**
+     * @return 1D histogram with projection in X
+     */
+    public Histogram1D getProjectionX() {
+        return xProjection;
+    }
 
-	/**
-	 * 
-	 * @return 1D histogram with projection in X
-	 */
-	public Histogram1D getProjectionX() {
-		return xProjection;
-	}
-
-	/**
-     * 
+    /**
      * @return 1D histogram with projection in Y
      */
-	public Histogram1D getProjectionY() {
-		return yProjection;
-	}
+    public Histogram1D getProjectionY() {
+        return yProjection;
+    }
 
-	@Override
-	public void reset() {
-		xProjection.reset();
-		yProjection.reset();
-		super.reset();
-	}
+    @Override
+    public void reset() {
+        xProjection.reset();
+        yProjection.reset();
+        super.reset();
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see de.gsi.dataset.DataSet3D#getZ(int, int)
-	 */
-	@Override
-	public double getZ(int xIndex, int yIndex) {
-		final int bin = (yIndex + 1) * getNBinsX() + xIndex + 1;
-		return super.getBinContent(bin);
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see de.gsi.dataset.DataSet3D#getZ(int, int)
+     */
+    @Override
+    public double getZ(int xIndex, int yIndex) {
+        final int bin = (yIndex + 1) * getDataCount(DIM_X) + xIndex + 1;
+        return super.getBinContent(bin);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see de.gsi.dataset.DataSet3D#getXDataCount()
-	 */
-	@Override
-	public int getXDataCount() {
-		return getNBinsX()-2;
-	}
+    //	/*
+    //	 * (non-Javadoc)
+    //	 *
+    //	 * @see de.gsi.dataset.DataSet#getX(int)
+    //	 */
+    //	@Override
+    //	public double getX(int i) {
+    //		return getBinCenter(DIM_X, i + 1);
+    //	}
+    //
+    //	/*
+    //	 * (non-Javadoc)
+    //	 *
+    //	 * @see de.gsi.dataset.DataSet#getY(int)
+    //	 */
+    //	@Override
+    //	public double getY(int i) {
+    //		return getBinCenter(DIM_Y, i + 1);
+    //	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see de.gsi.dataset.DataSet3D#getYDataCount()
-	 */
-	@Override
-	public int getYDataCount() {
-		return getNBinsY()-2;
-	}
+    @Override
+    public double get(final int dimIndex, final int binIndex) {
+        return getBinCenter(dimIndex, binIndex + 1);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see de.gsi.dataset.DataSet#getX(int)
-	 */
-	@Override
-	public double getX(int i) {
-		return getBinCenterX(i + 1);
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see de.gsi.dataset.Histogram2D#fill(double, double)
+     */
+    @Override
+    public int fill(double x, double y) {
+        return this.fill(x, y, 1.0);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see de.gsi.dataset.DataSet#getY(int)
-	 */
-	@Override
-	public double getY(int i) {
-		return getBinCenterY(i + 1);
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see de.gsi.dataset.Histogram2D#fill(double, double, double)
+     */
+    @Override
+    public int fill(double x, double y, double w) {
+        final int ret = lock().writeLockGuard(() -> {
+            xProjection.fill(x, w);
+            yProjection.fill(y, w);
+            final int bin = super.findBin(x, y);
+            super.addBinContent(bin, w);
+            return bin;
+        });
+        fireInvalidated(new UpdatedDataEvent(this, "fill()"));
+        return ret;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see de.gsi.dataset.Histogram2D#fill(double, double)
-	 */
-	@Override
-	public int fill(double x, double y) {
-		xProjection.fill(x);
-		yProjection.fill(y);
-		final int bin = super.findBin(x, y);
-		super.addBinContent(bin);
-		return bin;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see de.gsi.dataset.Histogram2D#findFirstBinAbove(double, double)
+     */
+    @Override
+    public int findFirstBinAbove(double x, double y) {
+        return findBin(x, y);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see de.gsi.dataset.Histogram2D#fill(double, double, double)
-	 */
-	@Override
-	public int fill(double x, double y, double w) {
-		xProjection.fill(x, w);
-		yProjection.fill(y, w);
-		final int bin = super.findBin(x, y);
-		super.addBinContent(bin, w);
-		return bin;
-	}
+    @Override
+    public List<String> getInfoList() {
+        return Collections.<String> emptyList();
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see de.gsi.dataset.Histogram2D#findFirstBinAbove(double, double)
-	 */
-	@Override
-	public int findFirstBinAbove(double x, double y) {
-		return findBin(x, y);
-	}
+    protected double getSum(final int dimIndex, int bin) {
+        double sum = 0.0;
+        if (dimIndex == DIM_X) {
+            for (int i = 0; i < getDataCount(dimIndex); i++) {
+                sum += getZ(i - 1, bin - 1);
+            }
+        } else {
+            for (int i = 0; i < getDataCount(DIM_Y); i++) {
+                sum += getZ(bin - 1, i - 1);
+            }
+        }
+        return sum;
+    }
 
-	@Override
-	public List<String> getInfoList() {
-		return Collections.<String>emptyList();
-	}
+    @Override
+    public List<String> getWarningList() {
+        final String[] axisPrefix = { "-x", "-y", "-z" };
+        final List<String> retVal = new LinkedList<>(super.getWarningList());
+        for (int dim = 0; dim < this.getDimension(); dim++) {
+            final String axisName = dim < axisPrefix.length ? axisPrefix[dim] : "-dim" + (dim + 1);
+            if (getSum(dim, 0) > 0) {
+                retVal.add(DataSetMetaData.TAG_UNDERSHOOT + axisName);
+            }
 
-	protected double getSumX(int bin) {
-		double sum = 0.0;
-		for (int i=0; i < getNBinsX(); i++) {
-			sum += getZ(i-1, bin-1);
-		}
-		return sum;
-	}
+            if (getSum(dim, getDataCount(DIM_X) - 1) > 0) {
+                retVal.add(DataSetMetaData.TAG_OVERSHOOT + axisName);
+            }
+        }
+        return retVal;
+    }
 
-	protected double getSumY(int bin) {
-		double sum = 0.0;
-		for (int i=0; i < getNBinsY(); i++) {
-			sum += getZ(bin-1,i-1);
-		}
-		return sum;
-	}
+    @Override
+    public List<String> getErrorList() {
+        return Collections.<String> emptyList();
+    }
 
-	@Override
-	public List<String> getWarningList() {
-		final List<String> retVal = new LinkedList<>();
-		if (getSumX(0) > 0) {
-			retVal.add(DataSetMetaData.TAG_UNDERSHOOT + "-x");
-		}
+    @Override
+    public int getIndex(int dimIndex, double value) {
+        return findBin(dimIndex, value);
+    }
 
-		if (getSumX(getNBinsX() -1) > 0) {
-			retVal.add(DataSetMetaData.TAG_OVERSHOOT + "-x");
-		}
+    @Override
+    public double getValue(int dimIndex, double x) {
+        // TODO Auto-generated method stub
+        return 0;
+    }
 
-		if (getSumY(0) > 0) {
-			retVal.add(DataSetMetaData.TAG_UNDERSHOOT + "-y");
-		}
-
-		if (getSumY(getNBinsY() - 1) > 0) {
-			retVal.add(DataSetMetaData.TAG_OVERSHOOT + "-y");
-		}
-		return retVal;
-	}
-
-	@Override
-	public List<String> getErrorList() {
-		return Collections.<String>emptyList();
-	}
+    @Override
+    public int getDataCount() {
+        return getDataCount(DIM_X);
+    }
 }

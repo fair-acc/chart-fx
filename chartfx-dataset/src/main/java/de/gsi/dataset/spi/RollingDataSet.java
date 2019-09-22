@@ -9,6 +9,7 @@
 package de.gsi.dataset.spi;
 
 import de.gsi.dataset.DataSet;
+import de.gsi.dataset.DataSet2D;
 import de.gsi.dataset.event.AddedDataEvent;
 import de.gsi.dataset.event.UpdatedDataEvent;
 
@@ -16,7 +17,7 @@ import de.gsi.dataset.event.UpdatedDataEvent;
  * @author braeun
  */
 public class RollingDataSet extends FragmentedDataSet {
-
+    private static final long serialVersionUID = -3110510420345581034L;
     private double lastLength;
     private int depth = 0;
 
@@ -61,9 +62,9 @@ public class RollingDataSet extends FragmentedDataSet {
     // }
 
     @Override
-    public void add(final DataSet set) {
+    public void add(final DataSet2D set) {
         while (list.size() >= depth) {
-            final DataSet ds = list.remove(0);
+            final DataSet2D ds = list.remove(0);
             dataCount -= ds.getDataCount();
         }
         for (final DataSet ds : list) {
@@ -100,7 +101,7 @@ public class RollingDataSet extends FragmentedDataSet {
 
     private class InternalDataSet extends DoubleDataSet {
 
-        public InternalDataSet(DataSet ds) {
+        public InternalDataSet(DataSet2D ds) {
             super(ds);
             recomputeLimits(0);
             recomputeLimits(1);

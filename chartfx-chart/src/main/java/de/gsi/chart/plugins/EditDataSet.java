@@ -871,8 +871,8 @@ public class EditDataSet extends TableViewer {
         double prevX = Double.MIN_VALUE;
         double nextX = Double.MAX_VALUE;
 
-        for (int i = 0; i < dataSet.getDataCount(); i++) {
-            final double currentX = dataSet.getX(i);
+        for (int i = 0; i < dataSet.getDataCount(DataSet.DIM_X); i++) {
+            final double currentX = dataSet.get(DataSet.DIM_X, i);
 
             if (currentX <= searchedX) {
                 if (prevX <= currentX) {
@@ -885,10 +885,10 @@ public class EditDataSet extends TableViewer {
             }
         }
         final DataPoint prevPoint = prevIndex == -1 ? null
-                : new DataPoint(getChart(), dataSet, prevIndex, dataSet.getX(prevIndex), dataSet.getY(prevIndex),
+                : new DataPoint(getChart(), dataSet, prevIndex, dataSet.get(DataSet.DIM_X, prevIndex), dataSet.get(DataSet.DIM_Y, prevIndex),
                         dataSet.getDataLabel(prevIndex));
         final DataPoint nextPoint = nextIndex == -1 || nextIndex == prevIndex ? null
-                : new DataPoint(getChart(), dataSet, nextIndex, dataSet.getX(nextIndex), dataSet.getY(nextIndex),
+                : new DataPoint(getChart(), dataSet, nextIndex, dataSet.get(DataSet.DIM_X, nextIndex), dataSet.get(DataSet.DIM_Y, nextIndex),
                         dataSet.getDataLabel(nextIndex));
 
         return new Pair<>(prevPoint, nextPoint);

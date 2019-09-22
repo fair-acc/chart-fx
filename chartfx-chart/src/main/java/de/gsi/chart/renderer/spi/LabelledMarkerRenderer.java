@@ -70,10 +70,6 @@ public class LabelledMarkerRenderer extends AbstractDataSetManagement<LabelledMa
             return;
         }
 
-        if (!(xyChart.getXAxis() instanceof Axis)) {
-            throw new InvalidParameterException("x-Axis must be a derivative of Axis, axis is = " + xyChart.getXAxis());
-        }
-
         final Axis xAxis = xyChart.getXAxis();
         final double xAxisWidth = xAxis.getWidth();
         final double xMin = xAxis.getValueForDisplay(0);
@@ -86,8 +82,8 @@ public class LabelledMarkerRenderer extends AbstractDataSetManagement<LabelledMa
             final DataSet dataSet = localDataSetList.get(dataSetIndex);
             dataSet.lock().readLockGuardOptimistic(() -> {
                 // check for potentially reduced data range we are supposed to plot
-                final int indexMin = Math.max(0, dataSet.getXIndex(xMin));
-                final int indexMax = Math.min(dataSet.getXIndex(xMax) + 1, dataSet.getDataCount());
+                final int indexMin = Math.max(0, dataSet.getIndex(DataSet.DIM_X, xMin));
+                final int indexMax = Math.min(dataSet.getIndex(DataSet.DIM_X, xMax) + 1, dataSet.getDataCount(DataSet.DIM_X));
 
                 // return if zero length data set
                 if (indexMax - indexMin <= 0) {
@@ -127,10 +123,6 @@ public class LabelledMarkerRenderer extends AbstractDataSetManagement<LabelledMa
      */
     protected void drawHorizontalLabelledMarker(final GraphicsContext gc, final XYChart chart, final DataSet dataSet,
             final int indexMin, final int indexMax) {
-
-        if (!(chart.getYAxis() instanceof Axis)) {
-            throw new InvalidParameterException("y Axis not a Axis derivative, yAxis = " + chart.getYAxis());
-        }
         final Axis yAxis = chart.getYAxis();
 
         gc.save();
@@ -141,7 +133,7 @@ public class LabelledMarkerRenderer extends AbstractDataSetManagement<LabelledMa
         double lastLabel = -Double.MAX_VALUE;
         double lastFontSize = 0;
         for (int i = indexMin; i < indexMax; i++) {
-            final double screenY = (int) yAxis.getDisplayPosition(dataSet.getY(i));
+            final double screenY = (int) yAxis.getDisplayPosition(dataSet.get(DataSet.DIM_Y, i));
             final String label = dataSet.getDataLabel(i);
 
             final String pointStyle = dataSet.getStyle(i);
@@ -186,10 +178,6 @@ public class LabelledMarkerRenderer extends AbstractDataSetManagement<LabelledMa
      */
     protected void drawVerticalLabelledMarker(final GraphicsContext gc, final XYChart chart, final DataSet dataSet,
             final int indexMin, final int indexMax) {
-
-        if (!(chart.getXAxis() instanceof Axis)) {
-            throw new InvalidParameterException("x Axis not a Axis derivative, xAxis = " + chart.getXAxis());
-        }
         final Axis xAxis = chart.getXAxis();
 
         gc.save();
@@ -200,7 +188,7 @@ public class LabelledMarkerRenderer extends AbstractDataSetManagement<LabelledMa
         double lastLabel = -Double.MAX_VALUE;
         double lastFontSize = 0;
         for (int i = indexMin; i < indexMax; i++) {
-            final double screenX = (int) xAxis.getDisplayPosition(dataSet.getX(i));
+            final double screenX = (int) xAxis.getDisplayPosition(dataSet.get(DataSet.DIM_X, i));
             final String label = dataSet.getDataLabel(i);
 
             final String pointStyle = dataSet.getStyle(i);

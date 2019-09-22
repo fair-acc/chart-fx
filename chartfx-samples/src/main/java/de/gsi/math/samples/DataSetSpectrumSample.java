@@ -1,12 +1,12 @@
 package de.gsi.math.samples;
 
-import de.gsi.dataset.DataSet;
 import de.gsi.chart.renderer.ErrorStyle;
+import de.gsi.dataset.DataSet;
 import de.gsi.math.DataSetMath;
-import de.gsi.math.samples.utils.AbstractDemoApplication;
-import de.gsi.math.samples.utils.DemoChart;
 import de.gsi.math.functions.TrigCosineFunction;
 import de.gsi.math.functions.TrigSineFunction;
+import de.gsi.math.samples.utils.AbstractDemoApplication;
+import de.gsi.math.samples.utils.DemoChart;
 import de.gsi.math.spectra.Apodization;
 import javafx.application.Application;
 import javafx.scene.Node;

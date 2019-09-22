@@ -13,14 +13,10 @@ public final class SimpleDataSetEstimators { // NOPMD name is as is (ie. no Help
         // this is a static class
     }
 
-    public static double getValue(final DataSet dataSet, final int indexMin, final boolean isHorizontal) {
-        return isHorizontal ? dataSet.getX(indexMin) : dataSet.getY(indexMin);
-    }
-
     public static double getMinimum(final DataSet dataSet, final int indexMin, final int indexMax) {
         double val = Double.MAX_VALUE;
         for (int index = indexMin; index < indexMax; index++) {
-            final double actual = dataSet.getY(index);
+            final double actual = dataSet.get(DataSet.DIM_Y, index);
             if (Double.isFinite(actual)) {
                 val = Math.min(val, actual);
             }
@@ -31,7 +27,7 @@ public final class SimpleDataSetEstimators { // NOPMD name is as is (ie. no Help
     public static double getMaximum(final DataSet dataSet, final int indexMin, final int indexMax) {
         double val = -1.0 * Double.MAX_VALUE;
         for (int index = indexMin; index < indexMax; index++) {
-            final double actual = dataSet.getY(index);
+            final double actual = dataSet.get(DataSet.DIM_Y, index);
             if (Double.isFinite(actual)) {
                 val = Math.max(val, actual);
             }
@@ -43,7 +39,7 @@ public final class SimpleDataSetEstimators { // NOPMD name is as is (ie. no Help
         double valMin = Double.MAX_VALUE;
         double valMax = -1.0 * Double.MAX_VALUE;
         for (int index = indexMin; index < indexMax; index++) {
-            final double actual = dataSet.getY(index);
+            final double actual = dataSet.get(DataSet.DIM_Y, index);
             if (Double.isFinite(actual)) {
                 valMax = Math.max(valMax, actual);
                 valMin = Math.min(valMin, actual);
@@ -56,7 +52,7 @@ public final class SimpleDataSetEstimators { // NOPMD name is as is (ie. no Help
         double val = 0.0;
         int count = 0;
         for (int index = indexMin; index < indexMax; index++) {
-            final double actual = dataSet.getY(index);
+            final double actual = dataSet.get(DataSet.DIM_Y, index);
             if (Double.isFinite(actual)) {
                 val += actual;
                 count++;
@@ -76,7 +72,7 @@ public final class SimpleDataSetEstimators { // NOPMD name is as is (ie. no Help
 
         int count = 0;
         for (int index = indexMin; index < indexMax; index++) {
-            final double actual = dataSet.getY(index);
+            final double actual = dataSet.get(DataSet.DIM_Y, index);
             ret[count] = actual;
             count++;
         }
@@ -110,10 +106,10 @@ public final class SimpleDataSetEstimators { // NOPMD name is as is (ie. no Help
 
         double integral = 0;
         for (int index = Math.min(indexMin, indexMax); index < Math.max(indexMin, indexMax) - 1; index++) {
-            final double x0 = dataSet.getX(index);
-            final double x1 = dataSet.getX(index + 1);
-            final double y0 = dataSet.getY(index);
-            final double y1 = dataSet.getY(index + 1);
+            final double x0 = dataSet.get(DataSet.DIM_X, index);
+            final double x1 = dataSet.get(DataSet.DIM_X, index + 1);
+            final double y0 = dataSet.get(DataSet.DIM_Y, index);
+            final double y1 = dataSet.get(DataSet.DIM_Y, index + 1);
 
             // algorithm here applies trapezoidal rule
             final double localIntegral = (x1 - x0) * 0.5 * (y0 + y1);
@@ -127,8 +123,8 @@ public final class SimpleDataSetEstimators { // NOPMD name is as is (ie. no Help
 
     public static double getTransmission(final DataSet dataSet, final int indexMin, final int indexMax,
             final boolean isAbsoluteTransmission) {
-        final double valRef = dataSet.getY(indexMin);
-        final double val = dataSet.getY(indexMax);
+        final double valRef = dataSet.get(DataSet.DIM_Y, indexMin);
+        final double val = dataSet.get(DataSet.DIM_Y, indexMax);
 
         return (isAbsoluteTransmission ? val : val - valRef) / valRef * 100.0; // in [%]
     }
@@ -201,8 +197,8 @@ public final class SimpleDataSetEstimators { // NOPMD name is as is (ie. no Help
 
     public static double getDistance(final DataSet dataSet, final int indexMin, final int indexMax,
             final boolean isHorizontal) {
-        return isHorizontal ? dataSet.getX(indexMax) - dataSet.getX(indexMin)
-                : dataSet.getY(indexMax) - dataSet.getY(indexMin);
+        return isHorizontal ? dataSet.get(DataSet.DIM_X, indexMax) - dataSet.get(DataSet.DIM_X, indexMin)
+                : dataSet.get(DataSet.DIM_Y, indexMax) - dataSet.get(DataSet.DIM_Y, indexMin);
     }
 
     public static double getEdgeDetect(final DataSet dataSet, final int indexMin, final int indexMax) {
@@ -210,25 +206,25 @@ public final class SimpleDataSetEstimators { // NOPMD name is as is (ie. no Help
         final double maxVal = SimpleDataSetEstimators.getMaximum(dataSet, indexMin, indexMax);
         final double range = SimpleDataSetEstimators.getMean(dataSet, indexMin, indexMax);
 
-        final boolean inverted = dataSet.getY(indexMin) > dataSet.getY(indexMax);
+        final boolean inverted = dataSet.get(DataSet.DIM_Y, indexMin) > dataSet.get(DataSet.DIM_Y, indexMax);
         // detect 20% and 80% change
-        final double startTime = dataSet.getX(indexMin);
-        double stopTime = dataSet.getX(indexMax);
+        final double startTime = dataSet.get(DataSet.DIM_X, indexMin);
+        double stopTime = dataSet.get(DataSet.DIM_X, indexMax);
         if (inverted) {
             // detect falling edge
             for (int index = indexMin; index < indexMax; index++) {
-                final double actual = dataSet.getY(index);
+                final double actual = dataSet.get(DataSet.DIM_Y, index);
                 if (Double.isFinite(actual) && actual < maxVal - 0.5 * range) {
-                    stopTime = dataSet.getX(index);
+                    stopTime = dataSet.get(DataSet.DIM_X, index);
                     break;
                 }
             }
         } else {
             // detect rising edge
             for (int index = indexMin; index < indexMax; index++) {
-                final double actual = dataSet.getY(index);
+                final double actual = dataSet.get(DataSet.DIM_Y, index);
                 if (Double.isFinite(actual) && actual > minVal + 0.5 * range) {
-                    stopTime = dataSet.getX(index);
+                    stopTime = dataSet.get(DataSet.DIM_X, index);
                     break;
 
                 }
@@ -257,24 +253,24 @@ public final class SimpleDataSetEstimators { // NOPMD name is as is (ie. no Help
         final double maxVal = SimpleDataSetEstimators.getMaximum(dataSet, indexMin, indexMax);
         final double range = Math.abs(maxVal - minVal);
 
-        final boolean inverted = dataSet.getY(indexMin) > dataSet.getY(indexMax);
+        final boolean inverted = dataSet.get(DataSet.DIM_Y, indexMin) > dataSet.get(DataSet.DIM_Y, indexMax);
         // detect 'min' and 'max' level change
-        double startTime = dataSet.getX(indexMin);
-        double stopTime = dataSet.getX(indexMax);
+        double startTime = dataSet.get(DataSet.DIM_X, indexMin);
+        double stopTime = dataSet.get(DataSet.DIM_X, indexMax);
         boolean foundStartRising = false;
         if (inverted) {
             // detect falling edge
             for (int index = indexMin; index < indexMax; index++) {
-                final double actual = dataSet.getY(index);
+                final double actual = dataSet.get(DataSet.DIM_Y, index);
                 if (Double.isFinite(actual)) {
                     if (!foundStartRising && actual < maxVal - min * range) {
-                        startTime = dataSet.getX(index);
+                        startTime = dataSet.get(DataSet.DIM_X, index);
                         foundStartRising = true;
                         continue;
                     }
 
                     if (foundStartRising && actual < maxVal - max * range) {
-                        stopTime = dataSet.getX(index);
+                        stopTime = dataSet.get(DataSet.DIM_X, index);
                         break;
                     }
                 }
@@ -282,16 +278,16 @@ public final class SimpleDataSetEstimators { // NOPMD name is as is (ie. no Help
         } else {
             // detect rising edge
             for (int index = indexMin; index < indexMax; index++) {
-                final double actual = dataSet.getY(index);
+                final double actual = dataSet.get(DataSet.DIM_Y, index);
                 if (Double.isFinite(actual)) {
                     if (!foundStartRising && actual > minVal + min * range) {
-                        startTime = dataSet.getX(index);
+                        startTime = dataSet.get(DataSet.DIM_X, index);
                         foundStartRising = true;
                         continue;
                     }
 
                     if (foundStartRising && actual > minVal + max * range) {
-                        stopTime = dataSet.getX(index);
+                        stopTime = dataSet.get(DataSet.DIM_X, index);
                         break;
                     }
                 }
@@ -304,7 +300,7 @@ public final class SimpleDataSetEstimators { // NOPMD name is as is (ie. no Help
         int locMax = -1;
         double maxVal = -Double.MAX_VALUE;
         for (int index = indexMin; index < indexMax; index++) {
-            final double actual = dataSet.getY(index);
+            final double actual = dataSet.get(DataSet.DIM_Y, index);
             if (Double.isFinite(actual) && actual > maxVal) {
                 maxVal = actual;
                 locMax = index;
@@ -326,8 +322,8 @@ public final class SimpleDataSetEstimators { // NOPMD name is as is (ie. no Help
 
         final double refinedValue = indexMin + SimpleDataSetEstimators.interpolateGaussian(data, data.length, locationMaximum - indexMin)
                 - locationMaximum;
-        final double valX0 = dataSet.getX(locationMaximum);
-        final double valX1 = dataSet.getX(locationMaximum + 1);
+        final double valX0 = dataSet.get(DataSet.DIM_X, locationMaximum);
+        final double valX1 = dataSet.get(DataSet.DIM_X, locationMaximum + 1);
         final double diff = valX1 - valX0;
 
         return valX0 + refinedValue * diff;
@@ -437,7 +433,7 @@ public final class SimpleDataSetEstimators { // NOPMD name is as is (ie. no Help
         final double thresholdMin = minVal + 0.45 * range; // includes 10% hysteresis
         final double thresholdMax = minVal + 0.55 * range; // includes 10% hysteresis
         for (int index = indexMin; index < indexMax; index++) {
-            final double actual = dataSet.getY(index);
+            final double actual = dataSet.get(DataSet.DIM_Y, index);
             if (Double.isFinite(actual)) {
                 if (actual < thresholdMin) {
                     countLow++;
@@ -468,7 +464,7 @@ public final class SimpleDataSetEstimators { // NOPMD name is as is (ie. no Help
         int avgPeriodCount = 0;
         double actualState = 0.0; // low assumes am below zero line
         for (int index = indexMin; index < indexMax; index++) {
-            final double actual = dataSet.getY(index);
+            final double actual = dataSet.get(DataSet.DIM_Y, index);
             if (!Double.isFinite(actual)) {
                 continue;
             }
@@ -479,7 +475,7 @@ public final class SimpleDataSetEstimators { // NOPMD name is as is (ie. no Help
                 if (actual > thresholdMax) {
                     // detected rising edge
                     actualState = 1.0;
-                    final double time = dataSet.getX(index);
+                    final double time = dataSet.get(DataSet.DIM_X, index);
 
                     if (Double.isFinite(startRisingEdge)) {
                         final double period = time - startRisingEdge;
@@ -494,7 +490,7 @@ public final class SimpleDataSetEstimators { // NOPMD name is as is (ie. no Help
             if (actual < thresholdMin) {
                 // detected falling edge
                 actualState = 0.0;
-                final double time = dataSet.getX(index);
+                final double time = dataSet.get(DataSet.DIM_X, index);
 
                 if (Double.isFinite(startFallingEdge)) {
                     final double period = time - startFallingEdge;

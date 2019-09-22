@@ -1,15 +1,12 @@
 package de.gsi.dataset.testdata.spi;
 
-import de.gsi.dataset.DataSetError;
-
-
 /**
  * abstract error data set for graphical testing purposes
  * this implementation generates a cosine function
  *
  * @author rstein
  */
-public class CosineFunction  extends AbstractTestFunction<CosineFunction> implements DataSetError {
+public class CosineFunction  extends AbstractTestFunction<CosineFunction> {
 	private static final long serialVersionUID = -3391027911729531271L;
     private final boolean useSystemTimeOffset;
 

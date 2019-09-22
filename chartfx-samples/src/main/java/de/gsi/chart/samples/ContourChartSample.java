@@ -5,6 +5,7 @@ import java.io.InputStreamReader;
 
 import de.gsi.chart.XYChart;
 import de.gsi.chart.axes.spi.DefaultNumericAxis;
+import de.gsi.dataset.DataSet;
 import de.gsi.dataset.DataSet3D;
 import de.gsi.dataset.spi.AbstractDataSet3D;
 import de.gsi.dataset.utils.ProcessingProfiler;
@@ -311,7 +312,6 @@ public class ContourChartSample extends Application {
             return zValues[xIndex][yIndex];
         }
 
-        @Override
         public void set(final int xIndex, final int yIndex, final double x, final double y, final double z) {
             xValues[xIndex] = x;
             yValues[yIndex] = y;
@@ -320,12 +320,10 @@ public class ContourChartSample extends Application {
         }
 
         @Override
-        public int getXDataCount() {
-            return xValues.length;
-        }
-
-        @Override
-        public int getYDataCount() {
+        public int getDataCount(final int dimIndex) {
+            if (dimIndex == DataSet.DIM_X) {
+                return xValues.length;
+            }
             return yValues.length;
         }
 

@@ -104,7 +104,7 @@ public class DefaultFormatter extends AbstractFormatter {
             final StringBuilder sb = new StringBuilder("%");
             sb.append(maxExp + maxFrac + 1);
             if (maxFrac > 0) {
-                sb.append(".");
+                sb.append('.');
                 sb.append(maxFrac);
             } else if (maxExp == 0 && maxFrac == 0) {
                 sb.append(".1");

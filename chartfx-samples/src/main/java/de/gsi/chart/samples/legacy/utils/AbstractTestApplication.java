@@ -19,10 +19,12 @@ import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
 public abstract class AbstractTestApplication extends Application {
-    protected final static int MAX_DATA_POINTS_25HZ = 1000;
-    protected final static int MAX_DATA_POINTS_1HZ = 50000;
-    protected final static int FPS_METER_PERIOD = 100;
-    protected final static int FPS_METER_AVERAGING_PERIOD = 20000;
+    protected static final int MAX_DATA_POINTS_1K = 1000;
+    protected static final int MAX_DATA_POINTS_10K = 10000;
+    protected static final int MAX_DATA_POINTS_50K = 50000;
+    protected static final int MAX_DATA_POINTS_500K = 500000;
+    protected static final int FPS_METER_PERIOD = 100;
+    protected static final int FPS_METER_AVERAGING_PERIOD = 20000;
     protected static ChartTestCase test;
     protected SimplePerformanceMeter meter;
     protected Timer timer;
@@ -41,7 +43,7 @@ public abstract class AbstractTestApplication extends Application {
 
         BorderPane root = new BorderPane();
         final Scene scene = new Scene(root, 1800, 400);
-        root.setCenter(test.getChart(MAX_DATA_POINTS_25HZ));
+        root.setCenter(test.getChart(MAX_DATA_POINTS_1K));
         root.setTop(getHeaderBar(scene));
 
         stage.setScene(scene);
@@ -51,19 +53,35 @@ public abstract class AbstractTestApplication extends Application {
 
     protected HBox getHeaderBar(final Scene scene) {
 
-        final Button newDataSet25Hz = new Button("1k points");
-        newDataSet25Hz.setTooltip(new Tooltip("update present data set with 1k data points"));
-        newDataSet25Hz.setMaxWidth(Double.MAX_VALUE);
-        newDataSet25Hz.setOnAction(evt -> {
-            test.setNumberOfSamples(MAX_DATA_POINTS_25HZ);
+        final Button newDataSet1k = new Button("1k");
+        newDataSet1k.setTooltip(new Tooltip("update present data set with 1k data points"));
+        newDataSet1k.setMaxWidth(Double.MAX_VALUE);
+        newDataSet1k.setOnAction(evt -> {
+            test.setNumberOfSamples(MAX_DATA_POINTS_1K);
             Platform.runLater(test::updateDataSet);
         });
 
-        final Button newDataSet1Hz = new Button("50k points");
-        newDataSet1Hz.setTooltip(new Tooltip("update present data set with 1k data points"));
-        newDataSet1Hz.setMaxWidth(Double.MAX_VALUE);
-        newDataSet1Hz.setOnAction(evt -> {
-            test.setNumberOfSamples(MAX_DATA_POINTS_1HZ);
+        final Button newDataSet50k = new Button("50k");
+        newDataSet50k.setTooltip(new Tooltip("update present data set with 50k data points"));
+        newDataSet50k.setMaxWidth(Double.MAX_VALUE);
+        newDataSet50k.setOnAction(evt -> {
+            test.setNumberOfSamples(MAX_DATA_POINTS_50K);
+            Platform.runLater(test::updateDataSet);
+        });
+
+        final Button newDataSet10k = new Button("10k");
+        newDataSet10k.setTooltip(new Tooltip("update present data set with 10k data points"));
+        newDataSet10k.setMaxWidth(Double.MAX_VALUE);
+        newDataSet10k.setOnAction(evt -> {
+            test.setNumberOfSamples(MAX_DATA_POINTS_10K);
+            Platform.runLater(test::updateDataSet);
+        });
+
+        final Button newDataSet500k = new Button("500k");
+        newDataSet500k.setTooltip(new Tooltip("update present data set with 500k data points"));
+        newDataSet500k.setMaxWidth(Double.MAX_VALUE);
+        newDataSet500k.setOnAction(evt -> {
+            test.setNumberOfSamples(MAX_DATA_POINTS_500K);
             Platform.runLater(test::updateDataSet);
         });
 
@@ -146,13 +164,14 @@ public abstract class AbstractTestApplication extends Application {
             fxFPS.setText(String.format("%-6s: %4s (%4s) %s", "JavaFX (avg)", fxRate, avgFxRate, "FPS, "));
             chartFPS.setText(String.format("%-6s: %4s (%4s) %s", "Actual (avg)", actualRate, avgActualRate, "FPS, "));
             cpuLoadProcess
-                    .setText(String.format("%-11s: %4s (%4s) %s", "Process-CPU (avg)", cpuProcess, avgCpuProcess, "%"));
+                    .setText(String.format("%-11s: %4s (%4s)%s", "Process-CPU (avg)", cpuProcess, avgCpuProcess, "%"));
             cpuLoadSystem
-                    .setText(String.format("%-11s: %4s (%4s) %s", "System -CPU (avg)", cpuSystem, avgCpuSystem, "%"));
+                    .setText(String.format("%-11s: %4s (%4s)%s", "System -CPU (avg)", cpuSystem, avgCpuSystem, "%"));
         });
 
-        return new HBox(new VBox(newDataSet25Hz, newDataSet1Hz), new VBox(startTimer25Hz, startTimer1Hz), spacer,
-                new VBox(fxFPS, chartFPS), new VBox(cpuLoadProcess, cpuLoadSystem));
+        return new HBox(new VBox(newDataSet1k, newDataSet50k), new VBox(newDataSet10k, newDataSet500k),
+                new VBox(startTimer25Hz, startTimer1Hz), spacer, new VBox(fxFPS, chartFPS),
+                new VBox(cpuLoadProcess, cpuLoadSystem));
     }
 
 }

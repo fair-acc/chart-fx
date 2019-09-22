@@ -2,15 +2,13 @@ package de.gsi.dataset.testdata.spi;
 
 import java.util.SplittableRandom;
 
-import de.gsi.dataset.DataSetError;
-
 /**
  * abstract error data set for graphical testing purposes this implementation
  * generates a random step function
  *
  * @author rstein
  */
-public class RandomStepFunction extends AbstractTestFunction<RandomStepFunction> implements DataSetError {
+public class RandomStepFunction extends AbstractTestFunction<RandomStepFunction> {
     private static final long serialVersionUID = -5338037806123143152L;
     protected static SplittableRandom rnd = new SplittableRandom(System.currentTimeMillis());
 

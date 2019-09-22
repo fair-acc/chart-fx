@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import de.gsi.dataset.AxisDescription;
+import de.gsi.dataset.DataSet2D;
 import de.gsi.dataset.DataSetError;
 import de.gsi.dataset.event.AddedDataEvent;
 import de.gsi.dataset.event.RemovedDataEvent;
@@ -12,7 +13,7 @@ import de.gsi.dataset.spi.utils.DoublePointError;
 /**
  * @author rstein
  */
-public class FifoDoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet> implements DataSetError {
+public class FifoDoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet> implements DataSet2D, DataSetError {
     private static final long serialVersionUID = -7153702141838930486L;
     protected LimitedQueue<DataBlob> data;
     protected double maxDistance = Double.MAX_VALUE;
@@ -93,7 +94,7 @@ public class FifoDoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorData
      * @throws IllegalArgumentException if <code>name</code> is <code>null</code>
      */
     public FifoDoubleErrorDataSet(final String name, final int initalSize, final double maxDistance) {
-        super(name);
+        super(name, 2);
         if (initalSize <= 0) {
             throw new IllegalArgumentException("negative or zero initalSize = " + initalSize);
         }
@@ -249,7 +250,7 @@ public class FifoDoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorData
      */
     public int expire(final double now) {
         final int dataPointsToRemove = lock().writeLockGuard(() -> {
-            getAxisDescriptions().forEach(AxisDescription::empty);
+            getAxisDescriptions().forEach(AxisDescription::clear);
 
             final List<DataBlob> toRemoveList = new ArrayList<>();
             // for (final DataBlob blob : (LimitedQueue<DataBlob>) data.clone()) {

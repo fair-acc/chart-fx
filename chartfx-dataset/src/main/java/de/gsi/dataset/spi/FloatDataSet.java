@@ -1,7 +1,7 @@
 package de.gsi.dataset.spi;
 
 import de.gsi.dataset.AxisDescription;
-import de.gsi.dataset.DataSet;
+import de.gsi.dataset.DataSet2D;
 import de.gsi.dataset.EditableDataSet;
 import de.gsi.dataset.event.AddedDataEvent;
 import de.gsi.dataset.event.RemovedDataEvent;
@@ -43,8 +43,8 @@ public class FloatDataSet extends AbstractDataSet<FloatDataSet> implements Edita
      *
      * @param another name of this DataSet.
      */
-    public FloatDataSet(final DataSet another) {
-        super(another.getName());
+    public FloatDataSet(final DataSet2D another) {
+        super(another.getName(), another.getDimension());
         this.set(another); // NOPMD by rstein on 25/06/19 07:42
     }
 
@@ -57,7 +57,7 @@ public class FloatDataSet extends AbstractDataSet<FloatDataSet> implements Edita
      *             <code>null</code>
      */
     public FloatDataSet(final String name, final int initalSize) {
-        super(name);
+        super(name, 2);
         AssertUtils.gtEqThanZero("initalSize", initalSize);
         xValues = new FloatArrayList(initalSize);
         yValues = new FloatArrayList(initalSize);
@@ -135,7 +135,7 @@ public class FloatDataSet extends AbstractDataSet<FloatDataSet> implements Edita
             getDataStyleMap().clear();
             clearMetaInfo();
 
-            getAxisDescriptions().forEach(AxisDescription::empty);
+            getAxisDescriptions().forEach(AxisDescription::clear);
         });
         return fireInvalidated(new RemovedDataEvent(this, "clearData()"));
     }
@@ -209,7 +209,7 @@ public class FloatDataSet extends AbstractDataSet<FloatDataSet> implements Edita
 
             // invalidate ranges
             // -> fireInvalidated calls computeLimits for autoNotification
-            getAxisDescriptions().forEach(AxisDescription::empty);
+            getAxisDescriptions().forEach(AxisDescription::clear);
         });
 
         return fireInvalidated(new UpdatedDataEvent(this));
@@ -224,7 +224,7 @@ public class FloatDataSet extends AbstractDataSet<FloatDataSet> implements Edita
 
             // invalidate ranges
             // -> fireInvalidated calls computeLimits for autoNotification
-            getAxisDescriptions().forEach(AxisDescription::empty);
+            getAxisDescriptions().forEach(AxisDescription::clear);
 
         });
         return fireInvalidated(new UpdatedDataEvent(this));
@@ -351,7 +351,7 @@ public class FloatDataSet extends AbstractDataSet<FloatDataSet> implements Edita
 
             // invalidate ranges
             // -> fireInvalidated calls computeLimits for autoNotification
-            this.getAxisDescriptions().forEach(AxisDescription::empty);
+            this.getAxisDescriptions().forEach(AxisDescription::clear);
         });
         return fireInvalidated(new RemovedDataEvent(this));
     }
@@ -456,7 +456,7 @@ public class FloatDataSet extends AbstractDataSet<FloatDataSet> implements Edita
      * @param other the source data set
      * @return itself (fluent design)
      */
-    public FloatDataSet set(final DataSet other) {
+    public FloatDataSet set(final DataSet2D other) {
         lock().writeLockGuard(() -> {
             other.lock().writeLockGuard(() -> {
                 // deep copy data point labels and styles

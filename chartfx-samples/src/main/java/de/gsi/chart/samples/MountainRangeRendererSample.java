@@ -5,6 +5,7 @@ import java.io.InputStreamReader;
 
 import de.gsi.chart.XYChart;
 import de.gsi.chart.axes.spi.DefaultNumericAxis;
+import de.gsi.dataset.DataSet;
 import de.gsi.dataset.DataSet3D;
 import de.gsi.dataset.spi.AbstractDataSet3D;
 import de.gsi.chart.plugins.EditAxis;
@@ -168,6 +169,7 @@ public class MountainRangeRendererSample extends Application {
     }
 
     public class DefaultData extends AbstractDataSet3D<DefaultData> {
+        private static final long serialVersionUID = 2094218221674496366L;
         private final Number[] xValues;
         private final Number[] yValues;
         private final double[][] zValues;
@@ -184,7 +186,6 @@ public class MountainRangeRendererSample extends Application {
             return zValues[xIndex][yIndex];
         }
 
-        @Override
         public void set(final int xIndex, final int yIndex, final double x, final double y, final double z) {
             xValues[xIndex] = x;
             yValues[yIndex] = y;
@@ -193,12 +194,10 @@ public class MountainRangeRendererSample extends Application {
         }
 
         @Override
-        public int getXDataCount() {
-            return xValues.length;
-        }
-
-        @Override
-        public int getYDataCount() {
+        public int getDataCount(final int dimIndex) {
+            if (dimIndex == DataSet.DIM_X) {
+                return xValues.length;
+            }
             return yValues.length;
         }
 
@@ -216,6 +215,17 @@ public class MountainRangeRendererSample extends Application {
         @Override
         public String getStyle(final int index) {
             return null;
+        }
+
+        @Override
+        public final double get(final int dimIndex, final int index) {
+            return dimIndex == DataSet.DIM_X ? xValues[index].doubleValue() : yValues[index].doubleValue();
+        }
+
+        @Override
+        public double getValue(int dimIndex, double x) {
+            // TODO Auto-generated method stub
+            return 0;
         }
     }
 

@@ -182,9 +182,9 @@ public abstract class AbstractDataFormattingPlugin extends ChartPlugin {
             result.append(side.isHorizontal() ? getXValueFormatter(axis).toString(data.getXValue())
                     : getYValueFormatter(axis).toString(data.getYValue()));
             if (axisUnit != null) {
-                result.append(axisPrimaryLabel).append(" [").append(axisPrefix).append(axisUnit).append("]");
+                result.append(axisPrimaryLabel).append(" [").append(axisPrefix).append(axisUnit).append(']');
             }
-            result.append("\n");
+            result.append('\n');
         }
 
         return result.toString();

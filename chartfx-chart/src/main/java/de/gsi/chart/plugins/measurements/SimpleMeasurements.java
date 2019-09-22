@@ -15,7 +15,6 @@ import org.slf4j.LoggerFactory;
 import de.gsi.chart.XYChart;
 import de.gsi.chart.axes.Axis;
 import de.gsi.chart.axes.AxisLabelFormatter;
-import de.gsi.chart.axes.AxisMode;
 import de.gsi.chart.axes.spi.DefaultNumericAxis;
 import de.gsi.chart.axes.spi.MetricPrefix;
 import de.gsi.chart.plugins.measurements.utils.SimpleDataSetEstimators;
@@ -36,8 +35,10 @@ public class SimpleMeasurements extends ValueIndicator {
     private static final double DEFAULT_MAX = Double.POSITIVE_INFINITY;
 
     public enum MeasurementCategory {
-        INDICATOR("Indicators"), VERTICAL("Vertical Measurements"), HORIZONTAL("Horizontal Measurements"), ACC(
-                "Accelerator Misc.");
+        INDICATOR("Indicators"),
+        VERTICAL("Vertical Measurements"),
+        HORIZONTAL("Horizontal Measurements"),
+        ACC("Accelerator Misc.");
 
         private String name;
 
@@ -53,24 +54,33 @@ public class SimpleMeasurements extends ValueIndicator {
 
     public enum MeasurementType {
         // indicators
-        VALUE_HOR(false, INDICATOR, "hor. value"), VALUE_VER(true, INDICATOR, "ver. value"), DISTANCE_HOR(false,
-                INDICATOR, "hor. distance"), DISTANCE_VER(true, INDICATOR, "ver. distance"),
+        VALUE_HOR(false, INDICATOR, "hor. value"),
+        VALUE_VER(true, INDICATOR, "ver. value"),
+        DISTANCE_HOR(false, INDICATOR, "hor. distance"),
+        DISTANCE_VER(true, INDICATOR, "ver. distance"),
 
         // vertical-type measurements
-        MINIMUM(true, VERTICAL, "Minimum"), MAXIMUM(true, VERTICAL, "Maximum"), RANGE(true, VERTICAL, "Range"), MEAN(
-                true, VERTICAL, "Mean"), RMS(true, VERTICAL, "R.M.S."), MEDIAN(true, VERTICAL, "Median"), INTEGRAL(true,
-                        VERTICAL, "Integral"), TRANSMISSION_ABS(true, ACC,
-                                "Abs. Transmission"), TRANSMISSION_REL(true, ACC, "Rel. Transmission"),
+        MINIMUM(true, VERTICAL, "Minimum"),
+        MAXIMUM(true, VERTICAL, "Maximum"),
+        RANGE(true, VERTICAL, "Range"),
+        MEAN(true, VERTICAL, "Mean"),
+        RMS(true, VERTICAL, "R.M.S."),
+        MEDIAN(true, VERTICAL, "Median"),
+        INTEGRAL(true, VERTICAL, "Integral"),
+        TRANSMISSION_ABS(true, ACC, "Abs. Transmission"),
+        TRANSMISSION_REL(true, ACC, "Rel. Transmission"),
 
         // horizontal-type measurements
-        EDGE_DETECT(false, HORIZONTAL, "Edge-Detect"), RISETIME_10_90(false, HORIZONTAL,
-                "10%-90% Rise-/Fall-Time\n (simple)"), RISETIME_20_80(false, HORIZONTAL,
-                "20%-80% Rise-/Fall-Time\n (simple)"), FWHM(false, HORIZONTAL, "FWHM"), FWHM_INTERPOLATED(false,
-                        HORIZONTAL,
-                        "FWHM (interp.)"), LOCATION_MAXIMUM(false, HORIZONTAL, "Loc. Maximum"), LOCATION_MAXIMUM_GAUSS(
-                                false, HORIZONTAL, "Loc. Maximum\n(Gauss-interp.)"), DUTY_CYCLE(false, HORIZONTAL,
-                                        "Duty Cycle\n(10% hysteresis)"), PERIOD(true, HORIZONTAL,
-                                                "Period"), FREQUENCY(false, HORIZONTAL, "Frequency");
+        EDGE_DETECT(false, HORIZONTAL, "Edge-Detect"),
+        RISETIME_10_90(false, HORIZONTAL, "10%-90% Rise-/Fall-Time\n (simple)"),
+        RISETIME_20_80(false, HORIZONTAL, "20%-80% Rise-/Fall-Time\n (simple)"),
+        FWHM(false, HORIZONTAL, "FWHM"),
+        FWHM_INTERPOLATED(false, HORIZONTAL, "FWHM (interp.)"),
+        LOCATION_MAXIMUM(false, HORIZONTAL, "Loc. Maximum"),
+        LOCATION_MAXIMUM_GAUSS(false, HORIZONTAL, "Loc. Maximum\n(Gauss-interp.)"),
+        DUTY_CYCLE(false, HORIZONTAL, "Duty Cycle\n(10% hysteresis)"),
+        PERIOD(true, HORIZONTAL, "Period"),
+        FREQUENCY(false, HORIZONTAL, "Frequency");
 
         private String name;
         private MeasurementCategory category;
@@ -100,17 +110,13 @@ public class SimpleMeasurements extends ValueIndicator {
     private final MeasurementType measType;
 
     public SimpleMeasurements(final XYChart chart, final MeasurementType measType) {
-        super(chart, AxisMode.X);
+        super(chart, X);
         this.measType = measType;
-        title = new StringBuilder().append(measType).append(" [#").append(AbstractChartMeasurement.markerCount - 1).append(", #").append(AbstractChartMeasurement.markerCount)
-                .append("]").toString();
+        title = new StringBuilder().append(measType).append(" [#").append(AbstractChartMeasurement.markerCount - 1)
+                .append(", #").append(AbstractChartMeasurement.markerCount).append("]").toString();
         valueField.setMinRange(SimpleMeasurements.DEFAULT_MIN).setMaxRange(SimpleMeasurements.DEFAULT_MAX);
 
         final Axis axis = axisMode == X ? chart.getXAxis() : chart.getYAxis();
-        if (!(axis instanceof Axis)) {
-            LOGGER.warn(new StringBuilder().append("axis type ").append(axis.getClass().getSimpleName()).append("not compatible with indicator (needs to derivce from Axis)").toString());
-            return;
-        }
         final Axis numAxis = axis;
 
         final double lower = numAxis.getLowerBound();
@@ -168,101 +174,95 @@ public class SimpleMeasurements extends ValueIndicator {
             return;
         }
         final DataSet selectedDataSet = getDataSet();
+        // final int nDim = selectedDataSet.getDimension();
         final double newValueMarker1 = sliderIndicator1.getValue();
         final double newValueMarker2 = sliderIndicator2.getValue();
 
-        final int index0 = selectedDataSet.getXIndex(newValueMarker1);
-        final int index1 = selectedDataSet.getXIndex(newValueMarker2);
+        final int index0 = selectedDataSet.getIndex(DataSet.DIM_X, newValueMarker1);
+        final int index1 = selectedDataSet.getIndex(DataSet.DIM_X, newValueMarker2);
         final int indexMin = Math.min(index0, index1);
         final int indexMax = Math.max(index0, index1);
+
+        DataSet ds = selectedDataSet;
 
         double val;
         switch (measType) {
         // indicators
         case VALUE_HOR:
-            val = SimpleDataSetEstimators.getValue(selectedDataSet, indexMin, true);
+            val = selectedDataSet.get(DataSet.DIM_X, indexMin);
             break;
         case VALUE_VER:
-            val = SimpleDataSetEstimators.getValue(selectedDataSet, indexMin, false);
+            val = selectedDataSet.get(DataSet.DIM_Y, indexMin);
             break;
         case DISTANCE_HOR:
-            val = SimpleDataSetEstimators.getDistance(selectedDataSet, indexMin, indexMax, true);
+            val = SimpleDataSetEstimators.getDistance(ds, indexMin, indexMax, true);
             break;
         case DISTANCE_VER:
-            val = SimpleDataSetEstimators.getDistance(selectedDataSet, indexMin, indexMax, false);
+            val = SimpleDataSetEstimators.getDistance(ds, indexMin, indexMax, false);
             break;
         // vertical measurements
         case MINIMUM:
-            val = SimpleDataSetEstimators.getMinimum(selectedDataSet, indexMin, indexMax);
+            val = SimpleDataSetEstimators.getMinimum(ds, indexMin, indexMax);
             break;
         case MAXIMUM:
-            val = SimpleDataSetEstimators.getMaximum(selectedDataSet, indexMin, indexMax);
+            val = SimpleDataSetEstimators.getMaximum(ds, indexMin, indexMax);
             break;
         case RANGE:
-            val = SimpleDataSetEstimators.getRange(selectedDataSet, indexMin, indexMax);
+            val = SimpleDataSetEstimators.getRange(ds, indexMin, indexMax);
             break;
         case MEAN:
-            val = SimpleDataSetEstimators.getMean(selectedDataSet, indexMin, indexMax);
+            val = SimpleDataSetEstimators.getMean(ds, indexMin, indexMax);
             break;
         case RMS:
-            val = SimpleDataSetEstimators.getRms(selectedDataSet, indexMin, indexMax);
+            val = SimpleDataSetEstimators.getRms(ds, indexMin, indexMax);
             break;
         case MEDIAN:
-            val = SimpleDataSetEstimators.getMedian(selectedDataSet, indexMin, indexMax);
+            val = SimpleDataSetEstimators.getMedian(ds, indexMin, indexMax);
             break;
         case INTEGRAL:
-            val = SimpleDataSetEstimators.getIntegral(selectedDataSet, index0, index1); // N.B.
-                                                                                        // use
-                                                                                        // of
-                                                                                        // non-sanitised
-                                                                                        // indices
-                                                                                        // index[0,1]
+            // N.B. use of non-sanitised indices index[0,1]
+            val = SimpleDataSetEstimators.getIntegral(ds, index0, index1);
             break;
         case TRANSMISSION_ABS:
-            val = SimpleDataSetEstimators.getTransmission(selectedDataSet, index0, index1, true); // N.B.
-                                                                                                  // use
-                                                                                                  // of
-                                                                                                  // non-sanitised
-                                                                                                  // index[0,1]
+            // N.B. use of non-sanitised indices index[0,1]
+            val = SimpleDataSetEstimators.getTransmission(ds, index0, index1, true);
             break;
         case TRANSMISSION_REL:
-            val = SimpleDataSetEstimators.getTransmission(selectedDataSet, index0, index1, false); // N.B.
-                                                                                                   // use
-                                                                                                   // of
-                                                                                                   // non-sanitised
-                                                                                                   // index[0,1]
+            // N.B. use of non-sanitised indices index[0,1]
+            val = SimpleDataSetEstimators.getTransmission(ds, index0, index1, false);
             break;
 
         // horizontal measurements
         case EDGE_DETECT:
-            val = SimpleDataSetEstimators.getEdgeDetect(selectedDataSet, indexMin, indexMax);
+            val = SimpleDataSetEstimators.getEdgeDetect(ds, indexMin, indexMax);
             break;
         case RISETIME_10_90:
-            val = SimpleDataSetEstimators.getSimpleRiseTime1090(selectedDataSet, indexMin, indexMax);
+            val = SimpleDataSetEstimators.getSimpleRiseTime1090(ds, indexMin, indexMax);
             break;
         case RISETIME_20_80:
-            val = SimpleDataSetEstimators.getSimpleRiseTime2080(selectedDataSet, indexMin, indexMax);
+            val = SimpleDataSetEstimators.getSimpleRiseTime2080(ds, indexMin, indexMax);
             break;
         case FWHM:
-            val = SimpleDataSetEstimators.getFullWidthHalfMaximum(selectedDataSet, indexMin, indexMax, false);
+            val = SimpleDataSetEstimators.getFullWidthHalfMaximum(ds, indexMin, indexMax, false);
             break;
         case FWHM_INTERPOLATED:
-            val = SimpleDataSetEstimators.getFullWidthHalfMaximum(selectedDataSet, indexMin, indexMax, true);
+            val = SimpleDataSetEstimators.getFullWidthHalfMaximum(ds, indexMin, indexMax, true);
             break;
         case LOCATION_MAXIMUM:
-            val = selectedDataSet.getX(SimpleDataSetEstimators.getLocationMaximum(selectedDataSet, indexMin, indexMax));
+            val = selectedDataSet.get(DataSet.DIM_X,
+                    SimpleDataSetEstimators.getLocationMaximum(ds, indexMin, indexMax));
             break;
         case LOCATION_MAXIMUM_GAUSS:
-            val = SimpleDataSetEstimators.getLocationMaximumGaussInterpolated(selectedDataSet, indexMin, indexMax);
+            val = SimpleDataSetEstimators.getLocationMaximumGaussInterpolated(ds, indexMin, indexMax);
             break;
         case DUTY_CYCLE:
-            val = SimpleDataSetEstimators.getDutyCycle(selectedDataSet, indexMin, indexMax);
+            val = SimpleDataSetEstimators.getDutyCycle(ds, indexMin, indexMax);
             break;
         case PERIOD:
-            val = 1.0 / SimpleDataSetEstimators.getFrequencyEstimate(selectedDataSet, indexMin, indexMax);
+            val = 1.0 / SimpleDataSetEstimators.getFrequencyEstimate(ds, indexMin, indexMax);
             break;
         case FREQUENCY:
-            val = SimpleDataSetEstimators.getFrequencyEstimate(selectedDataSet, indexMin, indexMax);
+            val = SimpleDataSetEstimators.getFrequencyEstimate(ds, indexMin, indexMax);
             break;
 
         default:
@@ -271,9 +271,9 @@ public class SimpleMeasurements extends ValueIndicator {
 
         final Axis axis = measType.isVerticalMeasurement() ? chart.getYAxis() : chart.getXAxis();
         final Axis altAxis = measType.isVerticalMeasurement() ? chart.getXAxis() : chart.getYAxis();
-        
+
         final String axisUnit = axis.getUnit();
-        final String unit = axisUnit == null ? "a.u." : axis.getUnit();        
+        final String unit = axisUnit == null ? "a.u." : axis.getUnit();
 
         final double unitScale = ((DefaultNumericAxis) axis).getUnitScaling();
 
@@ -307,7 +307,7 @@ public class SimpleMeasurements extends ValueIndicator {
             valueField.setUnit("%");
             break;
         case INTEGRAL:
-        default:        
+        default:
             final String unit2 = altAxisLabel.replaceAll("\\[", "").replaceAll("\\]", "");
             // valueField.setUnit(unit + "*" + unit2);
             // valueField.setUnit(unit);

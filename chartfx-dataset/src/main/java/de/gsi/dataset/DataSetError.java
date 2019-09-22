@@ -60,7 +60,7 @@ public interface DataSetError extends DataSet {
      * @return array containing negative X error
      */
     default double[] getXErrorsNegative() {
-        final int n = getDataCount();
+        final int n = getDataCount(DIM_X);
         final double[] retValues = new double[n];
         for (int i = 0; i < n; i++) {
             retValues[i] = getXErrorNegative(i);
@@ -85,7 +85,7 @@ public interface DataSetError extends DataSet {
      * @return array containing positive X error
      */
     default double[] getXErrorsPositive() {
-        final int n = getDataCount();
+        final int n = getDataCount(DIM_X);
         final double[] retValues = new double[n];
         for (int i = 0; i < n; i++) {
             retValues[i] = getXErrorPositive(i);
@@ -110,7 +110,7 @@ public interface DataSetError extends DataSet {
      * @return array containing negative Y error
      */
     default double[] getYErrorsNegative() {
-        final int n = getDataCount();
+        final int n = getDataCount(DIM_Y);
         final double[] retValues = new double[n];
         for (int i = 0; i < n; i++) {
             retValues[i] = getYErrorNegative(i);
@@ -135,7 +135,7 @@ public interface DataSetError extends DataSet {
      * @return array containing positive y error
      */
     default double[] getYErrorsPositive() {
-        final int n = getDataCount();
+        final int n = getDataCount(DIM_Y);
         final double[] retValues = new double[n];
         for (int i = 0; i < n; i++) {
             retValues[i] = getYErrorPositive(i);
@@ -152,19 +152,19 @@ public interface DataSetError extends DataSet {
      * @return negative X error
      */
     default double getXErrorNegative(final double x) {
-        final int index1 = getXIndex(x);
-        final double x1 = getX(index1);
-        final double y1 = getY(index1);
+        final int index1 = getIndex(DIM_X, x);
+        final double x1 = get(DIM_X, index1);
+        final double y1 = get(DIM_Y, index1);
         int index2 = x1 < x ? index1 + 1 : index1 - 1;
-        index2 = Math.max(0, Math.min(index2, this.getDataCount() - 1));
-        final double y2 = getY(index2);
+        index2 = Math.max(0, Math.min(index2, this.getDataCount(DIM_X) - 1));
+        final double y2 = get(DIM_Y, index2);
 
         if (Double.isNaN(y1) || Double.isNaN(y2)) {
             // case where the function has a gap (y-coordinate equals to NaN
             return Double.NaN;
         }
 
-        final double x2 = getX(index2);
+        final double x2 = get(DIM_X, index2);
         if (x1 == x2) {
             return getXErrorNegative(index1);
         }
@@ -182,19 +182,19 @@ public interface DataSetError extends DataSet {
      * @return positive X error
      */
     default double getXErrorPositive(final double x) {
-        final int index1 = getXIndex(x);
-        final double x1 = getX(index1);
-        final double y1 = getY(index1);
+        final int index1 = getIndex(DIM_X, x);
+        final double x1 = get(DIM_X, index1);
+        final double y1 = get(DIM_Y, index1);
         int index2 = x1 < x ? index1 + 1 : index1 - 1;
-        index2 = Math.max(0, Math.min(index2, this.getDataCount() - 1));
-        final double y2 = getY(index2);
+        index2 = Math.max(0, Math.min(index2, this.getDataCount(DIM_X) - 1));
+        final double y2 = get(DIM_Y, index2);
 
         if (Double.isNaN(y1) || Double.isNaN(y2)) {
             // case where the function has a gap (y-coordinate equals to NaN
             return Double.NaN;
         }
 
-        final double x2 = getX(index2);
+        final double x2 = get(DIM_X, index2);
         if (x1 == x2) {
             return getXErrorPositive(index1);
         }
@@ -212,19 +212,19 @@ public interface DataSetError extends DataSet {
      * @return negative Y error
      */
     default double getYErrorNegative(final double x) {
-        final int index1 = getXIndex(x);
-        final double x1 = getX(index1);
-        final double y1 = getY(index1);
+        final int index1 = getIndex(DIM_X, x);
+        final double x1 = get(DIM_X, index1);
+        final double y1 = get(DIM_Y, index1);
         int index2 = x1 < x ? index1 + 1 : index1 - 1;
-        index2 = Math.max(0, Math.min(index2, this.getDataCount() - 1));
-        final double y2 = getY(index2);
+        index2 = Math.max(0, Math.min(index2, this.getDataCount(DIM_Y) - 1));
+        final double y2 = get(DIM_Y, index2);
 
         if (Double.isNaN(y1) || Double.isNaN(y2)) {
             // case where the function has a gap (y-coordinate equals to NaN
             return Double.NaN;
         }
 
-        final double x2 = getX(index2);
+        final double x2 = get(DIM_X, index2);
         if (x1 == x2) {
             return getYErrorNegative(index1);
         }
@@ -242,19 +242,19 @@ public interface DataSetError extends DataSet {
      * @return positive Y error
      */
     default double getYErrorPositive(final double x) {
-        final int index1 = getXIndex(x);
-        final double x1 = getX(index1);
-        final double y1 = getY(index1);
+        final int index1 = getIndex(DIM_X, x);
+        final double x1 = get(DIM_X, index1);
+        final double y1 = get(DIM_X, index1);
         int index2 = x1 < x ? index1 + 1 : index1 - 1;
-        index2 = Math.max(0, Math.min(index2, this.getDataCount() - 1));
-        final double y2 = getY(index2);
+        index2 = Math.max(0, Math.min(index2, this.getDataCount(DIM_X) - 1));
+        final double y2 = get(DIM_Y, index2);
 
         if (Double.isNaN(y1) || Double.isNaN(y2)) {
             // case where the function has a gap (y-coordinate equals to NaN
             return Double.NaN;
         }
 
-        final double x2 = getX(index2);
+        final double x2 = get(DIM_X, index2);
         if (x1 == x2) {
             return getYErrorPositive(index1);
         }

@@ -135,7 +135,7 @@ public final class ProcessingProfiler { // NOPMD nomen est omen
             final int lineNumer = stackTraceElement.getLineNumber();
 
             strBuilder.append(simpleClassName).append("::").append(methodName).append("(line:").append(lineNumer)
-                    .append(")");
+                    .append(')');
             list.add(strBuilder.toString());
         }
 

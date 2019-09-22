@@ -6,7 +6,12 @@ package de.gsi.dataset;
  * @author gkruk
  * @author rstein
  */
-public interface DataSet3D extends DataSet {
+public interface DataSet3D extends DataSet2D {
+
+    @Override
+    default int getDimension() {
+        return 3; //TODO: get rid of this method
+    }
 
     /**
      * Returns Z coordinate for the specified data point.
@@ -18,35 +23,5 @@ public interface DataSet3D extends DataSet {
      * @return Z coordinate
      */
     double getZ(int xIndex, int yIndex);
-
-    /**
-     * Changes a data point at specified index to new values.
-     *
-     * @param xIndex
-     *            the x-axis coordinate index of the data point to be changed
-     * @param yIndex
-     *            the y-axis coordinate index of the data point to be changed
-     * @param x
-     *            X coordinate
-     * @param y
-     *            Y coordinate
-     * @param z
-     *            value on the z-axis
-     */
-    void set(int xIndex, int yIndex, double x, double y, double z);
-
-    /**
-     * Returns number of X coordinates.
-     *
-     * @return the number of y axis bins
-     */
-    int getXDataCount();
-
-    /**
-     * Returns number of Y coordinates.
-     *
-     * @return the number of y axis bins
-     */
-    int getYDataCount();
 
 }

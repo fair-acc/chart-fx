@@ -1,12 +1,12 @@
 package de.gsi.math.samples;
 
-import de.gsi.dataset.DataSet;
-import de.gsi.dataset.spi.DoubleErrorDataSet;
 import de.gsi.chart.renderer.ErrorStyle;
+import de.gsi.dataset.DataSet;
+import de.gsi.dataset.spi.DefaultErrorDataSet;
 import de.gsi.math.DataSetMath;
+import de.gsi.math.functions.GaussianFunction;
 import de.gsi.math.samples.utils.AbstractDemoApplication;
 import de.gsi.math.samples.utils.DemoChart;
-import de.gsi.math.functions.GaussianFunction;
 import javafx.application.Application;
 import javafx.scene.Node;
 
@@ -39,8 +39,8 @@ public class DataSetIntegrateDifferentiateSample extends AbstractDemoApplication
         DataSet dataSet = gaussFunction.getDataSetEstimate(-10.0, +10.0, N_SAMPLES);
         dataSet.setStyle("strokeColor=darkblue;fillColor=darkblue;strokeWidth=0.5");
         // add some errors
-        if (dataSet instanceof DoubleErrorDataSet) {
-            DoubleErrorDataSet ds = (DoubleErrorDataSet) dataSet;
+        if (dataSet instanceof DefaultErrorDataSet) {
+            DefaultErrorDataSet ds = (DefaultErrorDataSet) dataSet;
             for (int i = 0; i < ds.getDataCount(); i++) {
                 final double x = ds.getX(i);
                 final double y = ds.getY(i);
