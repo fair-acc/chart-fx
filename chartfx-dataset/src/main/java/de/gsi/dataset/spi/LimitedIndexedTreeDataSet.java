@@ -40,8 +40,7 @@ public class LimitedIndexedTreeDataSet extends AbstractErrorDataSet<LimitedIndex
      *             if <code>name</code> is <code>null</code>
      */
     public LimitedIndexedTreeDataSet(final String name, final int maxQueueSize) {
-        super(name, 2);
-        setErrorType(ErrorType.XY);
+        super(name, 2, ErrorType.XY);
         this.maxQueueSize = maxQueueSize;
     }
 
@@ -56,8 +55,7 @@ public class LimitedIndexedTreeDataSet extends AbstractErrorDataSet<LimitedIndex
      *             if <code>name</code> is <code>null</code>
      */
     public LimitedIndexedTreeDataSet(final String name, final int maxQueueSize, final double maxLength) {
-        super(name, 2);
-        setErrorType(ErrorType.XY);
+        super(name, 2, ErrorType.XY);
         this.maxQueueSize = maxQueueSize;
         this.maxLength = maxLength;
     }

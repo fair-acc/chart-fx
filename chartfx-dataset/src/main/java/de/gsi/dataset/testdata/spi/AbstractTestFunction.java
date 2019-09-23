@@ -21,7 +21,7 @@ public abstract class AbstractTestFunction<D extends AbstractTestFunction<D>> ex
 	 * @param count number of samples
 	 */
 	public AbstractTestFunction(final String name, final int count) {
-		super(name, 2);
+		super(name, 2, ErrorType.XY);
 		// this part needs to be adjusted to you internal applications data
 		// transfer/management likings
 		data = generateY(count);

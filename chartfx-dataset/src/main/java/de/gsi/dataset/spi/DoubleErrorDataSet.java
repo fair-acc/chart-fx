@@ -35,7 +35,7 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
      * @throws IllegalArgumentException if {@code name} is {@code null}
      */
     public DoubleErrorDataSet(final String name) {
-        this(name, 0);
+        this(name, 2);
     }
 
     /**
@@ -46,13 +46,12 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
      * @throws IllegalArgumentException if {@code name} is {@code null}
      */
     public DoubleErrorDataSet(final String name, final int initalSize) {
-        super(name, 2);
+        super(name, 2, ErrorType.Y_ASYMMETRIC);
         AssertUtils.gtEqThanZero("initalSize", initalSize);
         xValues = new DoubleArrayList(initalSize);
         yValues = new DoubleArrayList(initalSize);
         yErrorsPos = new DoubleArrayList(initalSize);
         yErrorsNeg = new DoubleArrayList(initalSize);
-        setErrorType(ErrorType.Y_ASYMMETRIC);
     }
 
     /**
@@ -62,7 +61,7 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
      * @param another name of this DataSet.
      */
     public DoubleErrorDataSet(final DataSet2D another) {
-        super(another.getName(), another.getDimension());
+        super(another.getName(), another.getDimension(), ErrorType.Y_ASYMMETRIC);
         this.set(another); // NOPMD by rstein on 25/06/19 07:42
     }
 
@@ -85,7 +84,7 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
      */
     public DoubleErrorDataSet(final String name, final double[] xValues, final double[] yValues,
             final double[] yErrorsNeg, final double[] yErrorsPos, final int initalSize, boolean deepCopy) {
-        super(name, 2);
+        super(name, 2, ErrorType.Y_ASYMMETRIC);
         AssertUtils.notNull("X data", xValues);
         AssertUtils.notNull("Y data", yValues);
         AssertUtils.notNull("Y error pos", yErrorsPos);
@@ -486,6 +485,8 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
             yValues.size(dataCount);
             xValues.elements()[index] = x;
             yValues.elements()[index] = y;
+            yErrorsNeg.size(dataCount);
+            yErrorsPos.size(dataCount);
             yErrorsNeg.elements()[index] = yErrorNeg;
             yErrorsPos.elements()[index] = yErrorPos;
             getDataLabelMap().remove(index);

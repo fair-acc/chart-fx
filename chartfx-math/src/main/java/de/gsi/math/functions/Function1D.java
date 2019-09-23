@@ -31,7 +31,8 @@ public interface Function1D extends Function {
      *            X coordinate for which the function should be evaluated
      */
     default DataSet getDataSetEstimate(final double[] xValues) {
-        return new DefaultErrorDataSet(getName(), xValues, getValues(xValues), new double[xValues.length], new double[xValues.length], xValues.length, true);
+        return new DefaultErrorDataSet(getName(), xValues, getValues(xValues), new double[xValues.length],
+                new double[xValues.length], xValues.length, true);
     }
 
     /**
