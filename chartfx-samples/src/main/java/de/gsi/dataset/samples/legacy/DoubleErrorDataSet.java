@@ -3,7 +3,6 @@ package de.gsi.dataset.samples.legacy;
 import java.util.Arrays;
 
 import de.gsi.dataset.AxisDescription;
-import de.gsi.dataset.DataSet;
 import de.gsi.dataset.DataSet2D;
 import de.gsi.dataset.DataSetError;
 import de.gsi.dataset.EditableDataSet;
@@ -55,13 +54,12 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
      *             <code>null</code>
      */
     public DoubleErrorDataSet(final String name, final int initalSize) {
-        super(name, 2);
+        super(name, 2, ErrorType.Y_ASYMMETRIC);
         AssertUtils.gtEqThanZero("initalSize", initalSize);
         xValues = new double[initalSize];
         yValues = new double[initalSize];
         yErrorsPos = new double[initalSize];
         yErrorsNeg = new double[initalSize];
-        setErrorType(ErrorType.Y_ASYMMETRIC);
         dataMaxIndex = 0;
     }
 

@@ -47,8 +47,7 @@ public class ListErrorDataSet extends AbstractErrorDataSet<ListErrorDataSet> imp
      *             <code>null</code>
      */
     public ListErrorDataSet(final String name) {
-        super(name, 2);
-        setErrorType(ErrorType.XY);
+        super(name, 2, ErrorType.XY);
     }
 
     /**
@@ -118,7 +117,7 @@ public class ListErrorDataSet extends AbstractErrorDataSet<ListErrorDataSet> imp
      */
     public ListErrorDataSet(final String name, final double[] xValues, final double[] yValues, final double[] xErrors,
             final double[] yErrors) {
-        super(name, 2);
+        super(name, 2, ErrorType.XY);
         AssertUtils.notNull("X data", xValues);
         AssertUtils.notNull("Y data", yValues);
         AssertUtils.notNull("X error data", xErrors);

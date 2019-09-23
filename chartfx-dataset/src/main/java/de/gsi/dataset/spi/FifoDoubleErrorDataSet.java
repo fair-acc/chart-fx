@@ -94,7 +94,7 @@ public class FifoDoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorData
      * @throws IllegalArgumentException if <code>name</code> is <code>null</code>
      */
     public FifoDoubleErrorDataSet(final String name, final int initalSize, final double maxDistance) {
-        super(name, 2);
+        super(name, 2, ErrorType.XY);
         if (initalSize <= 0) {
             throw new IllegalArgumentException("negative or zero initalSize = " + initalSize);
         }

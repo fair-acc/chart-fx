@@ -65,6 +65,7 @@ class CachedDataPoints {
     protected double xMin;
     protected double xMax;
     protected boolean polarPlot;
+    protected ErrorStyle rendererErrorStyle;
     protected double xRange;
     protected double yRange;
     protected double maxRadius;
@@ -115,30 +116,31 @@ class CachedDataPoints {
     }
 
     protected void computeScreenCoordinates(final Axis xAxis, final Axis yAxis, final DataSet dataSet,
-            final int dsIndex, final int min, final int max, final ErrorStyle errorStyle, final boolean isPolarPlot) {
-        setBoundaryConditions(xAxis, yAxis, dataSet, dsIndex, min, max, errorStyle, isPolarPlot);
+            final int dsIndex, final int min, final int max, final ErrorStyle rendererErrorStyle, final boolean isPolarPlot) {
+        setBoundaryConditions(xAxis, yAxis, dataSet, dsIndex, min, max, rendererErrorStyle, isPolarPlot);
 
         // compute data set to screen coordinates
         computeScreenCoordinatesNonThreaded(xAxis, yAxis, dataSet, min, max);
     }
 
     protected void computeScreenCoordinatesInParallel(final Axis xAxis, final Axis yAxis, final DataSet dataSet,
-            final int dsIndex, final int min, final int max, final ErrorStyle errorStyle, final boolean isPolarPlot) {
-        setBoundaryConditions(xAxis, yAxis, dataSet, dsIndex, min, max, errorStyle, isPolarPlot);
+            final int dsIndex, final int min, final int max, final ErrorStyle rendererErrorStyle, final boolean isPolarPlot) {
+        setBoundaryConditions(xAxis, yAxis, dataSet, dsIndex, min, max, rendererErrorStyle, isPolarPlot);
 
         // compute data set to screen coordinates       
         computeScreenCoordinatesParallel(xAxis, yAxis, dataSet, min, max);
     }
 
     private void setBoundaryConditions(final Axis xAxis, final Axis yAxis, final DataSet dataSet, final int dsIndex,
-            final int min, final int max, final ErrorStyle errorStyle, final boolean isPolarPlot) {
+            final int min, final int max, final ErrorStyle rendererErrorStyle, final boolean isPolarPlot) {
         indexMin = min;
         indexMax = max;
         polarPlot = isPolarPlot;
+        this.rendererErrorStyle = rendererErrorStyle;
 
         computeBoundaryVariables(xAxis, yAxis);
         setStyleVariable(dataSet, dsIndex);
-        setErrorType(dataSet, errorStyle);
+        setErrorType(dataSet, rendererErrorStyle);
     }
 
     protected void computeBoundaryVariables(final Axis xAxis, final Axis yAxis) {
@@ -278,12 +280,15 @@ class CachedDataPoints {
 
                 values[index] = xAxis.getDisplayPosition(x);
 
+                //if (!Double.isFinite(values[index])) {
                 if (Double.isNaN(values[index])) {
                     yValues[index] = minValue;
                 }
-                //                if (!Double.isFinite(values[index])) {
-                //                    yValues[index] = minValue;
-                //                }
+            }
+
+            if (dimIndex == DIM_Y && rendererErrorStyle != ErrorStyle.NONE) {
+                System.arraycopy(values, min, errorYNeg, min, max - min);
+                System.arraycopy(values, min, errorYPos, min, max - min);
             }
         });
     }
@@ -631,14 +636,7 @@ class CachedDataPoints {
             minDataPointDistanceX();
             break;
         }
-        // ProcessingProfiler.getTimeDiff(startTimeStamp,
     }
-
-    //    @Override
-    //    protected void finalize() throws Throwable {
-    //        release();
-    //        super.finalize();
-    //    }
 
     public void release() {
         Cache.release(X_VALUES, xValues);
