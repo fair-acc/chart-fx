@@ -15,16 +15,13 @@ public interface DataSet2D extends DataSet {
     }
 
     /**
-     * Get the number of data points in the data set
+     * Get the number of data points in the data set.
      *
      * @return the number of data points
      */
-//    default int getDataCount() {
-//        return getDataCount(DIM_X);
-//    }
-    
-    int getDataCount();
-    
+    @Override
+    int getDataCount(); // Force overriding default getDataCount() to prevent loop
+
     /**
      * Get the number of data points in the data set
      *
@@ -66,7 +63,7 @@ public interface DataSet2D extends DataSet {
     default double getValue(final int dimIndex, final double x) {
         return getValue(x);
     }
-    
+
     /**
      * Gets the interpolated y value of the data point for given x coordinate
      *

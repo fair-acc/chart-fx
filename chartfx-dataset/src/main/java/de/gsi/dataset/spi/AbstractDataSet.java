@@ -232,7 +232,7 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
      * @return the index of the data point
      */
     public int getXIndex(final double x) {
-        if (this.getDataCount(DIM_X) == 0) {
+        if (this.getDataCount() == 0) {
             return 0;
         }
 
@@ -244,7 +244,7 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
             return 0;
         }
 
-        final int lastIndex = getDataCount(DIM_X) - 1;
+        final int lastIndex = getDataCount() - 1;
         if (x > this.getAxisDescription(0).getMax()) {
             return lastIndex;
         }

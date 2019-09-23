@@ -99,9 +99,9 @@ public class DataSetToByteArraySample {
 	public void testIdentityCore(final boolean binary, final boolean asFloat32, final DataSetError originalDS,
 			final DataSetError testDS) {
 		// some checks
-		if (originalDS.getDataCount(DIM_X) != testDS.getDataCount(DIM_X)) {
+		if (originalDS.getDataCount() != testDS.getDataCount()) {
 			throw new IllegalStateException("data set counts do not match (" + encodingBinary(binary) + "): original = "
-					+ originalDS.getDataCount(DIM_X) + " vs. copy = " + testDS.getDataCount(DIM_X));
+					+ originalDS.getDataCount() + " vs. copy = " + testDS.getDataCount());
 		}
 
 		if (!originalDS.getName().equals(testDS.getName())) {
@@ -110,7 +110,7 @@ public class DataSetToByteArraySample {
 		}
 
 		// check for numeric value
-		for (int i = 0; i < originalDS.getDataCount(DIM_X); i++) {
+		for (int i = 0; i < originalDS.getDataCount(); i++) {
 			final double x0 = originalDS.get(DIM_X, i);
 			final double y0 = originalDS.get(DIM_Y, i);
 			final double exn0 = originalDS.getXErrorNegative(i);

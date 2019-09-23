@@ -123,7 +123,7 @@ public final class DataSetMath { // NOPMD - nomen est omen
      * @return the given error array (cropped to data set length if necessary)
      */
     public static double[] errors(final DataSet dataSet, final ErrType eType) {
-        final int nDim = dataSet.getDataCount(DIM_X);
+        final int nDim = dataSet.getDataCount();
         if (!(dataSet instanceof DataSetError)) {
             // data set does not have any error definition
             return new double[nDim];
@@ -145,8 +145,8 @@ public final class DataSetMath { // NOPMD - nomen est omen
     public static DataSet averageDataSetsIIR(final DataSet prevAverage, final DataSet prevAverage2,
             final DataSet newDataSet, final int nUpdates) {
         final String functionName = "LP(" + newDataSet.getName() + ", IIR)";
-        if (prevAverage == null || prevAverage2 == null || prevAverage.getDataCount(DIM_X) == 0
-                || prevAverage2.getDataCount(DIM_X) == 0) {
+        if (prevAverage == null || prevAverage2 == null || prevAverage.getDataCount() == 0
+                || prevAverage2.getDataCount() == 0) {
 
             final double[] yValues = values(DIM_Y, newDataSet);
             final double[] eyn = errors(newDataSet, EYN);
@@ -159,16 +159,16 @@ public final class DataSetMath { // NOPMD - nomen est omen
             }
 
             return new DoubleErrorDataSet(functionName, values(DIM_X, newDataSet), yValues, eyn, eyp,
-                    newDataSet.getDataCount(DIM_X), true);
+                    newDataSet.getDataCount(), true);
         }
-        final int dataCount1 = prevAverage.getDataCount(DIM_X);
-        final int dataCount2 = prevAverage2.getDataCount(DIM_X);
+        final int dataCount1 = prevAverage.getDataCount();
+        final int dataCount2 = prevAverage2.getDataCount();
 
         final DoubleErrorDataSet retFunction = dataCount1 == 0
                 ? new DoubleErrorDataSet(functionName, values(DIM_X, newDataSet), values(DIM_Y, newDataSet),
-                        errors(newDataSet, EYN), errors(newDataSet, EYP), newDataSet.getDataCount(DIM_X), true)
+                        errors(newDataSet, EYN), errors(newDataSet, EYP), newDataSet.getDataCount(), true)
                 : new DoubleErrorDataSet(prevAverage.getName(), values(DIM_X, prevAverage), values(DIM_Y, prevAverage),
-                        errors(prevAverage, EYN), errors(prevAverage, EYP), newDataSet.getDataCount(DIM_X), true);
+                        errors(prevAverage, EYN), errors(prevAverage, EYP), newDataSet.getDataCount(), true);
 
         final double alpha = 1.0 / (1.0 + nUpdates);
         final boolean avg2Empty = dataCount2 == 0;
@@ -213,10 +213,10 @@ public final class DataSetMath { // NOPMD - nomen est omen
             final DataSet newFunction = dataSets.get(0);
             if (newFunction instanceof DataSetError) {
                 return new DoubleErrorDataSet(functionName, values(DIM_X, newFunction), values(DIM_Y, newFunction),
-                        errors(newFunction, EYN), errors(newFunction, EYP), newFunction.getDataCount(DIM_X), true);
+                        errors(newFunction, EYN), errors(newFunction, EYP), newFunction.getDataCount(), true);
             }
 
-            final int ncount = newFunction.getDataCount(DIM_X);
+            final int ncount = newFunction.getDataCount();
             return new DoubleErrorDataSet(functionName, values(DIM_X, newFunction), values(DIM_Y, newFunction),
                     new double[ncount], new double[ncount], ncount, true);
         }
@@ -224,9 +224,9 @@ public final class DataSetMath { // NOPMD - nomen est omen
         final int nAvg = Math.min(nUpdates, dataSets.size());
         final DataSet newFunction = dataSets.get(dataSets.size() - 1);
         final DoubleErrorDataSet retFunction = new DoubleErrorDataSet(functionName,
-                newFunction.getDataCount(DIM_X) + 2);
+                newFunction.getDataCount() + 2);
 
-        for (int i = 0; i < newFunction.getDataCount(DIM_X); i++) {
+        for (int i = 0; i < newFunction.getDataCount(); i++) {
             final double newX = newFunction.get(DIM_X, i);
             double mean = 0.0;
             double var = 0.0;
@@ -266,12 +266,12 @@ public final class DataSetMath { // NOPMD - nomen est omen
     }
 
     public static DataSet integrateFunction(final DataSet function, final double xMin, final double xMax) {
-        final int nLength = function.getDataCount(DIM_X);
+        final int nLength = function.getDataCount();
         final String functionName = function.getName();
         String newName = INTEGRAL_SYMBOL + "(" + functionName + ")dyn";
         if (nLength <= 0) {
             if (function instanceof DataSet2D) {
-                final int ncount = function.getDataCount(DIM_X);
+                final int ncount = function.getDataCount();
                 final double[] emptyVector = new double[ncount];
                 return new DoubleErrorDataSet(functionName, values(DIM_X, function), emptyVector, emptyVector,
                         emptyVector, ncount, true);
@@ -396,7 +396,7 @@ public final class DataSetMath { // NOPMD - nomen est omen
 
     public static DoublePointError integral(final DataSet function) {
         final DataSet integratedFunction = integrateFunction(function);
-        final int lastPoint = integratedFunction.getDataCount(DIM_X) - 1;
+        final int lastPoint = integratedFunction.getDataCount() - 1;
         if (lastPoint <= 0) {
             return new DoublePointError(0.0, 0.0, 0.0, 0.0);
         }
@@ -411,7 +411,7 @@ public final class DataSetMath { // NOPMD - nomen est omen
 
     public static DoublePointError integral(final DataSet function, final double xMin, final double xMax) {
         final DataSet integratedFunction = integrateFunction(function, xMin, xMax);
-        final int lastPoint = integratedFunction.getDataCount(DIM_X) - 1;
+        final int lastPoint = integratedFunction.getDataCount() - 1;
         final double yen = error(integratedFunction, EYN, lastPoint);
         final double yep = error(integratedFunction, EYP, lastPoint);
         final double ye = 0.5 * (yen + yep);
@@ -423,7 +423,7 @@ public final class DataSetMath { // NOPMD - nomen est omen
     public static double integralSimple(final DataSet function) {
         double integral1 = 0.0;
         double integral2 = 0.0;
-        final int nCount = function.getDataCount(DIM_X);
+        final int nCount = function.getDataCount();
         if (nCount <= 1) {
             return 0.0;
         }
@@ -444,7 +444,7 @@ public final class DataSetMath { // NOPMD - nomen est omen
 
     public static DataSet derivativeFunction(final DataSet function, final double sign) {
         final String signAdd = sign == 1.0 ? "" : Double.toString(sign) + MULTIPLICATION_SYMBOL;
-        final int ncount = function.getDataCount(DIM_X);
+        final int ncount = function.getDataCount();
         final DoubleErrorDataSet retFunction = new DoubleErrorDataSet(
                 signAdd + DIFFERENTIAL + "(" + function.getName() + ")", ncount);
 
@@ -518,7 +518,7 @@ public final class DataSetMath { // NOPMD - nomen est omen
     public static DataSet normalisedFunction(final DataSet function, final double requiredIntegral) {
         final DoublePointError complexInt = integral(function);
         final double integral = complexInt.getY() / requiredIntegral;
-        final int ncount = function.getDataCount(DIM_X);
+        final int ncount = function.getDataCount();
         //final double integralErr = complexInt.getErrorY() / requiredIntegral;
         // TODO: add error propagation to normalised function error estimate
         if (integral == 0) {
@@ -582,7 +582,7 @@ public final class DataSetMath { // NOPMD - nomen est omen
     }
 
     public static DataSet filterFunction(final DataSet function, final double width, final Filter filterType) {
-        final int n = function.getDataCount(DIM_X);
+        final int n = function.getDataCount();
         final DoubleErrorDataSet filteredFunction = new DoubleErrorDataSet(
                 filterType.getTag() + "(" + function.getName() + "," + Double.toString(width) + ")", n);
         final double[] subArrayY = new double[n];
@@ -648,7 +648,7 @@ public final class DataSetMath { // NOPMD - nomen est omen
     }
 
     public static DataSet iirLowPassFilterFunction(final DataSet function, final double width) {
-        final int n = function.getDataCount(DIM_X);
+        final int n = function.getDataCount();
         final DoubleErrorDataSet filteredFunction = new DoubleErrorDataSet(
                 "iir" + Filter.MEAN.getTag() + "(" + function.getName() + "," + Double.toString(width) + ")", n);
         if (n <= 1) {
@@ -658,13 +658,13 @@ public final class DataSetMath { // NOPMD - nomen est omen
             }
             filteredFunction.set(values(DIM_X, function), values(DIM_Y, function), errors(function, EYN),
                     errors(function, EYP));
-            for (int index = 0; index < function.getDataCount(DIM_X); index++) {
+            for (int index = 0; index < function.getDataCount(); index++) {
                 final String label = function.getDataLabel(index);
                 if (label != null && !label.isEmpty()) {
                     filteredFunction.addDataLabel(index, label);
                 }
             }
-            for (int index = 0; index < function.getDataCount(DIM_X); index++) {
+            for (int index = 0; index < function.getDataCount(); index++) {
                 final String style = function.getStyle(index);
                 if (style != null && !style.isEmpty()) {
                     filteredFunction.addDataStyle(index, style);
@@ -831,7 +831,7 @@ public final class DataSetMath { // NOPMD - nomen est omen
         final double[] eyn = errors(function, EYN);
         final double[] eyp = errors(function, EYP);
         double norm;
-        final int ncount = function.getDataCount(DIM_X);
+        final int ncount = function.getDataCount();
         switch (op) {
         case ADD:
             return new DoubleErrorDataSet(functionName, values(DIM_X, function), ArrayMath.add(y, value), eyn, eyp,
@@ -884,9 +884,9 @@ public final class DataSetMath { // NOPMD - nomen est omen
 
     public static DataSet mathFunction(final DataSet function1, final DataSet function2, final MathOp op) {
         final DoubleErrorDataSet ret = new DoubleErrorDataSet(function1.getName() + op.getTag() + function2.getName(),
-                function1.getDataCount(DIM_X));
+                function1.getDataCount());
 
-        for (int i = 0; i < function1.getDataCount(DIM_X); i++) {
+        for (int i = 0; i < function1.getDataCount(); i++) {
             final double X1 = function1.get(DIM_X, i);
             final double X2 = function1.get(DIM_X, i);
             final boolean inter = X1 != X2;
@@ -972,7 +972,7 @@ public final class DataSetMath { // NOPMD - nomen est omen
 
     public static DataSet magnitudeSpectrum(final DataSet function, final Apodization apodization,
             final boolean dbScale, final boolean normalisedFrequency) {
-        final int n = function.getDataCount(DIM_X);
+        final int n = function.getDataCount();
 
         final DoubleFFT_1D fastFourierTrafo = new DoubleFFT_1D(n);
 
@@ -986,7 +986,7 @@ public final class DataSetMath { // NOPMD - nomen est omen
         fastFourierTrafo.realForward(fftSpectra);
         final double[] mag = dbScale ? SpectrumTools.computeMagnitudeSpectrum_dB(fftSpectra, true)
                 : SpectrumTools.computeMagnitudeSpectrum(fftSpectra, true);
-        final double dt = function.get(DIM_X, function.getDataCount(DIM_X) - 1) - function.get(DIM_X, 0);
+        final double dt = function.get(DIM_X, function.getDataCount() - 1) - function.get(DIM_X, 0);
         final double fsampling = normalisedFrequency || dt <= 0 ? 0.5 / mag.length : 1.0 / dt;
 
         final String functionName = "Mag" + (dbScale ? "[dB]" : "") + "(" + function.getName() + ")";
@@ -1002,7 +1002,7 @@ public final class DataSetMath { // NOPMD - nomen est omen
 
     public static EditableDataSet setFunction(final EditableDataSet function, final double value, final double xMin,
             final double xMax) {
-        final int nLength = function.getDataCount(DIM_X);
+        final int nLength = function.getDataCount();
         double xMinLocal = function.get(DIM_X, 0);
         double xMaxLocal = function.get(DIM_X, nLength - 1);
 
@@ -1029,7 +1029,7 @@ public final class DataSetMath { // NOPMD - nomen est omen
     }
 
     public static DataSet addGaussianNoise(final DataSet function, final double sigma) {
-        final int nLength = function.getDataCount(DIM_X);
+        final int nLength = function.getDataCount();
         final DoubleErrorDataSet ret = new DoubleErrorDataSet(function.getName() + "noise(" + sigma + ")", nLength);
 
         for (int i = 0; i < nLength; i++) {
@@ -1042,7 +1042,7 @@ public final class DataSetMath { // NOPMD - nomen est omen
     }
 
     public static DataSet getSubRange(final DataSet function, final double xMin, final double xMax) {
-        final int nLength = function.getDataCount(DIM_X);
+        final int nLength = function.getDataCount();
         final DoubleErrorDataSet ret = new DoubleErrorDataSet(
                 function.getName() + "subRange(" + xMin + ", " + xMax + ")", nLength);
 

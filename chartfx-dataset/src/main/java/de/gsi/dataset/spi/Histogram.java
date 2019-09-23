@@ -148,7 +148,7 @@ public class Histogram extends AbstractHistogram implements Histogram1D {
         if (getBinContent(0) > 0) {
             retVal.add(DataSetMetaData.TAG_UNDERSHOOT);
         }
-        if (getBinContent(getDataCount(DIM_X) - 1) > 0) {
+        if (getBinContent(getDataCount() - 1) > 0) {
             retVal.add(DataSetMetaData.TAG_OVERSHOOT);
         }
         return retVal;
@@ -170,7 +170,7 @@ public class Histogram extends AbstractHistogram implements Histogram1D {
         final double x1 = get(DIM_X, index1);
         final double y1 = get(DIM_Y, index1);
         int index2 = x1 < x ? index1 + 1 : index1 - 1;
-        index2 = Math.max(0, Math.min(index2, this.getDataCount(DIM_X) - 1));
+        index2 = Math.max(0, Math.min(index2, this.getDataCount() - 1));
         final double y2 = get(DIM_Y, index2);
         if (Double.isNaN(y1) || Double.isNaN(y2)) {
             // case where the function has a gap (y-coordinate equals to NaN
