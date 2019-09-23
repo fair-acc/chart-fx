@@ -24,18 +24,20 @@ import de.gsi.dataset.locks.DataSetLock;
 public abstract class AbstractErrorDataSet<D extends AbstractErrorDataSet<D>> extends AbstractDataSet<D>
         implements DataSetError {
     private static final long serialVersionUID = -5592816592868472957L;
-    private ErrorType errorType = ErrorType.NO_ERROR;
+    private ErrorType errorType;
 
     /**
      * Creates a new instance of <code>AbstractDataSet</code>.
      *
      * @param name of the DataSet
      * @param dimension dimension of data set
+     * @param errorType for possible enum options see {@linkplain de.gsi.dataset.DataSetError.ErrorType}
      * @throws IllegalArgumentException
      *             if <code>name</code> is <code>null</code>
      */
-    protected AbstractErrorDataSet(final String name, final int dimension) {
+    protected AbstractErrorDataSet(final String name, final int dimension, final ErrorType errorType) {
         super(name, dimension);
+        this.errorType = errorType;
     }
 
     @Override
