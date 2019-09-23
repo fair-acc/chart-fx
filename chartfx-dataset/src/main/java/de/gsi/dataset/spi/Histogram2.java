@@ -67,7 +67,7 @@ public class Histogram2 extends AbstractHistogram implements Histogram2D, DataSe
      */
     @Override
     public double getZ(int xIndex, int yIndex) {
-        final int bin = (yIndex + 1) * getDataCount(DIM_X) + xIndex + 1;
+        final int bin = (yIndex + 1) * getDataCount() + xIndex + 1;
         return super.getBinContent(bin);
     }
 
@@ -163,7 +163,7 @@ public class Histogram2 extends AbstractHistogram implements Histogram2D, DataSe
                 retVal.add(DataSetMetaData.TAG_UNDERSHOOT + axisName);
             }
 
-            if (getSum(dim, getDataCount(DIM_X) - 1) > 0) {
+            if (getSum(dim, getDataCount() - 1) > 0) {
                 retVal.add(DataSetMetaData.TAG_OVERSHOOT + axisName);
             }
         }
