@@ -149,7 +149,7 @@ public class ContourDataSetRenderer extends AbstractDataSetManagement<ContourDat
                 // check for potentially reduced data range we are supposed to plot
 
                 final int indexMin = Math.max(0, dataSet.getIndex(DIM_X, xMin));
-                final int indexMax = Math.min(dataSet.getIndex(DIM_X, xMax), dataSet.getDataCount(DIM_X));
+                final int indexMax = Math.min(dataSet.getIndex(DIM_X, xMax), dataSet.getDataCount());
 
                 // return if zero length data set
                 if (indexMax - indexMin <= 0) {

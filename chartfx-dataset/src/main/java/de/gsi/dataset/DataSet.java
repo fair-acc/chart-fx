@@ -43,7 +43,19 @@ public interface DataSet extends EventSource, Serializable {
     List<AxisDescription> getAxisDescriptions();
 
     /**
-     * Get the number of data points in the data set
+     * Get the number of data points in the data set.
+     * The default implementation is the number of points in the highest
+     * dimension.
+     *
+     * @return the number of data points
+     */
+    default int getDataCount() {
+        return getDataCount(getDimension() - 1);
+    }
+
+    /**
+     * Get the number of data points in the data set for a specific
+     * dimension.
      * 
      * @param dimIndex the dimension index (ie. '0' equals 'X', '1' equals 'Y')
      * @return the number of data points
@@ -65,7 +77,7 @@ public interface DataSet extends EventSource, Serializable {
      * @return number of dimensions
      */
     int getDimension();
-    
+
     /**
      * Gets the index of the data point closest to the given 'value' coordinate. The
      * index returned may be less then zero or larger the the number of data

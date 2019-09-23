@@ -148,7 +148,7 @@ public abstract class AbstractHistogram extends AbstractDataSet<AbstractHistogra
     public int findBin(final double x, final double y) {
         final int indexX = findBin(DIM_X, x);
         final int indexY = findBin(DIM_Y, y);
-        return (getDataCount(DIM_X) * indexY) + indexX;
+        return (getDataCount() * indexY) + indexX;
     }
 
     @Override
@@ -156,7 +156,7 @@ public abstract class AbstractHistogram extends AbstractDataSet<AbstractHistogra
         final int indexX = findBin(DIM_X, x);
         final int indexY = findBin(DIM_Y, y);
         final int indexZ = findBin(DIM_Z, z);
-        return (getDataCount(DIM_X) * (indexY + (getDataCount(DIM_Z) * indexZ))) + indexX;
+        return (getDataCount() * (indexY + (getDataCount(DIM_Z) * indexZ))) + indexX;
     }
 
     /**
