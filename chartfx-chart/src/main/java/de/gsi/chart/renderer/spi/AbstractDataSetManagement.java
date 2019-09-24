@@ -9,6 +9,7 @@ import de.gsi.dataset.DataSetError;
 import de.gsi.dataset.event.UpdatedDataEvent;
 import de.gsi.dataset.spi.DoubleDataSet;
 import de.gsi.dataset.spi.DoubleErrorDataSet;
+import de.gsi.dataset.utils.NoDuplicatesList;
 import de.gsi.dataset.utils.ProcessingProfiler;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -30,7 +31,7 @@ public abstract class AbstractDataSetManagement<R extends Renderer> implements R
         return datasets;
     }
 
-    private final ObservableList<Axis> axesList = FXCollections.observableArrayList();
+    private final ObservableList<Axis> axesList = FXCollections.observableList(new NoDuplicatesList<Axis>());
 
     @Override
     public ObservableList<Axis> getAxes() {
