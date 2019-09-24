@@ -470,9 +470,6 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V>
     public void debug() throws Exception {
         Entry<K, V> e = getFirstEntry();
         while (e != null) {
-            //            String l = e.left == null ? "null" : "   " + e.left.key.toString();
-            //            String r = e.right == null ? "null" : "   " + e.right.key.toString();
-            //            System.out.println(e.key + ":" + l + ":" + r + ":" + e.weight);
             if (e.weight != e.sumup()) {
                 throw new IllegalStateException("Weight is incorrect:" + e.weight + "!=" + e.sumup() + " for " + e.key);
             }
