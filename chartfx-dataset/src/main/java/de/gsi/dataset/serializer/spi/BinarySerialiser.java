@@ -559,7 +559,7 @@ public class BinarySerialiser { // NOPMD - omen est omen
 			final int[] dims, final int nElements) {
 		AssertUtils.notNull("dims", dims);
 		final int arrayByteSize = nElements * (int) dataType.getPrimitiveSize();
-		final int addBufferSize = 4 + ((dims.length + 1) * (int) SIZE_OF_INT) + arrayByteSize;
+		final int addBufferSize = ((dims.length + 6) * (int) SIZE_OF_INT) + arrayByteSize;
 		putFieldHeader(buffer, fieldName, dataType, addBufferSize);
 
 		final long sizeMarkerStart = buffer.position();
