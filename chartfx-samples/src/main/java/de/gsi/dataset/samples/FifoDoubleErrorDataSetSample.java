@@ -3,11 +3,17 @@ package de.gsi.dataset.samples;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.gsi.dataset.spi.CircularDoubleErrorDataSet;
 import de.gsi.dataset.spi.FifoDoubleErrorDataSet;
 import de.gsi.dataset.utils.ProcessingProfiler;
 
 public class FifoDoubleErrorDataSetSample {
+	private static final Logger LOGGER = LoggerFactory.getLogger(FifoDoubleErrorDataSetSample.class);
+	private static final int TEST_LENGTH_MILLIS = 30000;
+
 	/**
 	 * meant for testing/illustrating usage
 	 *
@@ -24,7 +30,7 @@ public class FifoDoubleErrorDataSetSample {
 			final double delta = i >= 13 ? 5 : 0;
 			final double t = i + delta;
 			if (i == 13) {
-				System.err.println("jump in time by +" + delta);
+				LOGGER.atInfo().log("jump in time by +" + delta);
 			}
 			buffer1.add(t, i, 0, 0);
 			buffer2.add(t, i, 0, 0);
@@ -33,13 +39,13 @@ public class FifoDoubleErrorDataSetSample {
 			final String msg = String.format("%2d - [ %2d vs. %2d , %2d vs. %2d] - length = %2d vs %2d", i,
 					(int) buffer1.getX(0), (int) buffer2.getX(0), (int) buffer1.getX(max1), (int) buffer2.getX(max2),
 					max1, max2);
-			System.err.println(msg);
+			LOGGER.atInfo().log(msg);
 		}
 
 		// some simple performance tests
 		ProcessingProfiler.setVerboseOutputState(true);
-        ProcessingProfiler.setLoggerOutputState(true);
-        ProcessingProfiler.setDebugState(true);
+		ProcessingProfiler.setLoggerOutputState(true);
+		ProcessingProfiler.setDebugState(true);
 
 		final long start = ProcessingProfiler.getTimeStamp();
 		final FifoDoubleErrorDataSet buffer3 = new FifoDoubleErrorDataSet("test", 1000, 100);
@@ -57,8 +63,11 @@ public class FifoDoubleErrorDataSetSample {
 				System.gc();
 			}
 		}, 5, 2000);
-		while (true) {
-			buffer3.add(System.currentTimeMillis() * 1e-3, 1.0, 0.0, 0.0);
+
+		long now = start;
+		while (Math.abs(now - start) < TEST_LENGTH_MILLIS) {
+			now = System.currentTimeMillis();
+			buffer3.add(now * 1e-3, 1.0, 0.0, 0.0);
 		}
 	}
 

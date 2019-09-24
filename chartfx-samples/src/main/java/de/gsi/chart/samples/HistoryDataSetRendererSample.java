@@ -3,6 +3,9 @@ package de.gsi.chart.samples;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.gsi.chart.XYChart;
 import de.gsi.chart.axes.spi.DefaultNumericAxis;
 import de.gsi.dataset.spi.DoubleDataSet;
@@ -28,6 +31,7 @@ import javafx.stage.Stage;
  * @author rstein
  */
 public class HistoryDataSetRendererSample extends Application {
+	private static final Logger LOGGER = LoggerFactory.getLogger(HistoryDataSetRendererSample.class);
     private static final int N_SAMPLES = 10000; // default: 10000
     private static final int UPDATE_DELAY = 1000; // [ms]
     private static final int UPDATE_PERIOD = 100; // [ms]
@@ -123,7 +127,7 @@ public class HistoryDataSetRendererSample extends Application {
                 generateData(chart);
 
                 if (updateCount % 100 == 0) {
-                    System.out.println("update iteration #" + updateCount);
+                	LOGGER.atInfo().log("update iteration #" + updateCount);
                 }
                 updateCount++;
             }

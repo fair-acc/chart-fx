@@ -5,6 +5,9 @@ import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.Random;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.gsi.dataset.DataSet;
 import de.gsi.dataset.spi.DefaultDataSet;
 import de.gsi.math.TMath;
@@ -24,6 +27,7 @@ import javafx.scene.layout.VBox;
  * @author rstein
  */
 public class WaveletDenoising extends AbstractDemoApplication {
+	private static final Logger LOGGER = LoggerFactory.getLogger(WaveletDenoising.class);
     private static final int MAX_POINTS = 512;
     private static final boolean LOAD_EXAMPLE_DATA = false;
     private DataSet fraw;
@@ -163,10 +167,10 @@ public class WaveletDenoising extends AbstractDemoApplication {
         final double error1 = TMath.RMS(TMath.Difference(yValues, yModel));
         final double error2 = TMath.RMS(TMath.Difference(recon, yModel));
         if (error1 > error2) {
-            System.out.printf("improved noise floor from %f \t-> %f \t(%f %%)\n", error1, error2,
+            LOGGER.atInfo().log("improved noise floor from %f \t-> %f \t(%f %%)\n", error1, error2,
                     (error1 - error2) / error1 * 100);
         } else {
-            System.err.printf("deteriorated noise floor from %f \t-> %f \t(%f %%)\n", error1, error2,
+        	LOGGER.atInfo().log("deteriorated noise floor from %f \t-> %f \t(%f %%)\n", error1, error2,
                     (error1 - error2) / error1 * 100);
         }
 
@@ -211,7 +215,9 @@ public class WaveletDenoising extends AbstractDemoApplication {
             return ret;
 
         } catch (Exception e) {
-            e.printStackTrace();
+        	if (LOGGER.isErrorEnabled()) {
+        		LOGGER.atError().setCause(e).log("read error");
+        	}
         }
         return new double[10][10];
     }

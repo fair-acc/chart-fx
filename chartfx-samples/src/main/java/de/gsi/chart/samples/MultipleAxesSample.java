@@ -5,6 +5,9 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.gsi.chart.Chart;
 import de.gsi.chart.XYChart;
 import de.gsi.chart.axes.Axis;
@@ -30,6 +33,8 @@ import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 
 public class MultipleAxesSample extends Application {
+	private static final Logger LOGGER = LoggerFactory.getLogger(MultipleAxesSample.class);
+	
     private static final int N_SAMPLES = 10000; // default: 10000
     private static final long UPDATE_DELAY = 1000; // [ms]
     private static final long UPDATE_PERIOD = 1000; // [ms]
@@ -133,7 +138,7 @@ public class MultipleAxesSample extends Application {
                     renderer3.getDatasets().setAll(new GaussFunction("gaussy", MultipleAxesSample.N_SAMPLES));
 
                     if (updateCount % 10 == 0) {
-                        System.out.println("update iteration #" + updateCount);
+                    	LOGGER.atInfo().log("update iteration #" + updateCount);
                     }
                     updateCount++;
                 });

@@ -2,6 +2,9 @@ package de.gsi.chart.samples;
 
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.gsi.chart.Chart;
 import de.gsi.chart.axes.Axis;
 import de.gsi.chart.axes.spi.DefaultNumericAxis;
@@ -28,6 +31,8 @@ import javafx.stage.Stage;
  * @author rstein
  */
 public class ChartAnatomySample extends Application {
+	private static final Logger LOGGER = LoggerFactory.getLogger(WriteDataSetToFileSample.class);
+
     @Override
     public void start(final Stage primaryStage) {
 
@@ -118,10 +123,10 @@ public class ChartAnatomySample extends Application {
         }
 
         chart.getCanvas().setMouseTransparent(false);
-        chart.getCanvas().setOnMouseClicked(mevt -> System.err.println("clicked on canvas"));
-        ((Node) chart.getAxes().get(0)).setOnMouseClicked(mevt -> System.err.println("clicked on xAxis"));
+        chart.getCanvas().setOnMouseClicked(mevt -> LOGGER.atInfo().log("clicked on canvas"));
+        ((Node) chart.getAxes().get(0)).setOnMouseClicked(mevt -> LOGGER.atInfo().log("clicked on xAxis"));
         chart.getCanvas().addEventHandler(MouseEvent.MOUSE_CLICKED,
-                mevt -> System.err.println("clicked on canvas - alt implementation"));
+                mevt -> LOGGER.atInfo().log("clicked on canvas - alt implementation"));
 
         root.getChildren().add(chart);
 

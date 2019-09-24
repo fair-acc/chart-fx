@@ -1,5 +1,8 @@
 package de.gsi.math.samples;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.gsi.chart.renderer.ErrorStyle;
 import de.gsi.chart.renderer.LineStyle;
 import de.gsi.dataset.DataSet;
@@ -19,6 +22,7 @@ import javafx.scene.Node;
  * @author rstein
  */
 public class DataSetAverageSample extends AbstractDemoApplication {
+	private static final Logger LOGGER = LoggerFactory.getLogger(DataSetAverageSample.class);
     private static final int N_GRAPHS = 20;
     private static final int N_SAMPLES = 100;
     private DataSet oldAverageDataSet;
@@ -60,7 +64,7 @@ public class DataSetAverageSample extends AbstractDemoApplication {
 
         chart.getRenderer(1).getDatasets().addAll(filteredFIR, oldAverageDataSet);
 
-        System.err.println("value at zero = " + filteredFIR.get(DataSet.DIM_Y, 0));
+        LOGGER.atInfo().log("value at zero = " + filteredFIR.get(DataSet.DIM_Y, 0));
 
         return chart;
     }

@@ -3,18 +3,21 @@ package de.gsi.chart.samples.legacy;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.gsi.chart.XYChart;
 import de.gsi.chart.axes.spi.DefaultNumericAxis;
-import de.gsi.dataset.spi.DoubleDataSet;
-import de.gsi.chart.samples.legacy.utils.AbstractTestApplication;
-import de.gsi.chart.samples.legacy.utils.ChartTestCase;
-import de.gsi.chart.samples.legacy.utils.JavaFXTestChart;
-import de.gsi.chart.samples.legacy.utils.TestChart;
 import de.gsi.chart.plugins.EditAxis;
 import de.gsi.chart.plugins.Panner;
 import de.gsi.chart.plugins.TableViewer;
 import de.gsi.chart.plugins.Zoomer;
 import de.gsi.chart.renderer.spi.ErrorDataSetRenderer;
+import de.gsi.chart.samples.legacy.utils.AbstractTestApplication;
+import de.gsi.chart.samples.legacy.utils.ChartTestCase;
+import de.gsi.chart.samples.legacy.utils.JavaFXTestChart;
+import de.gsi.chart.samples.legacy.utils.TestChart;
+import de.gsi.dataset.spi.DoubleDataSet;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
@@ -28,7 +31,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 public class ChartPerformanceBenchmark extends AbstractTestApplication {
-
+	private static final Logger LOGGER = LoggerFactory.getLogger(ChartPerformanceBenchmark.class);
     private static final int WAIT_PERIOD = 60 * 1000;
 
     private final int[] testSamples25Hz = { 1000, 10, 10, 10, 20, 30, 40, 50, 60, 70, 80, 90, // 10->100
@@ -131,7 +134,7 @@ public class ChartPerformanceBenchmark extends AbstractTestApplication {
                             for (int i = 0; i < nSamplesTest.length; i++) {
                                 final int samples = nSamplesTest[i];
                                 final int wait = i == 0 ? 2 * WAIT_PERIOD : WAIT_PERIOD;
-                                System.err.println("start test iteration for: " + samples + " samples");
+                                LOGGER.atInfo().log("start test iteration for: " + samples + " samples");
                                 if (samples > 10000) {
                                     // pre-emptively abort test JavaFX Chart
                                     // test case (too high memory/cpu
@@ -170,7 +173,9 @@ public class ChartPerformanceBenchmark extends AbstractTestApplication {
                                 }
                             }
                         } catch (final InterruptedException e) {
-                            e.printStackTrace();
+							if (LOGGER.isErrorEnabled()) {
+								LOGGER.atError().setCause(e).log("InterruptedException");
+							}
                         }
                     }
                 };
@@ -243,7 +248,7 @@ public class ChartPerformanceBenchmark extends AbstractTestApplication {
                     final double avgCPULoad = meter.getAverageProcessCpuLoad();
                     // result.add(nSamples, Math.min(avgCPULoad * 25.0 / avgFPS,
                     // 400));
-                    System.err.println("finished test case #" + caseNr + " and '" + nSamples
+                    LOGGER.atInfo().log("finished test case #" + caseNr + " and '" + nSamples
                             + "' samples and cpu load of " + avgCPULoad + " % and average fps = " + avgFPS);
 
                     if (avgFPS > ((20 * 40) / updatePeriod)) {
@@ -263,12 +268,18 @@ public class ChartPerformanceBenchmark extends AbstractTestApplication {
                 try {
                     Thread.sleep(1000);
                 } catch (final InterruptedException e) {
-                    e.printStackTrace();
+                	if (LOGGER.isErrorEnabled()) {
+                    	LOGGER.atError().setCause(e).log("InterruptedException");
+                    }
                 }
             }
             try {
                 Thread.sleep(1000);
-            } catch (final InterruptedException e) {}
+            } catch (final InterruptedException e) {
+            	if (LOGGER.isErrorEnabled()) {
+                	LOGGER.atError().setCause(e).log("InterruptedException");
+                }
+            }
         }
 
         @Override
