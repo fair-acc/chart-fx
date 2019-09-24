@@ -3,7 +3,6 @@ package de.gsi.dataset.samples.legacy;
 import java.util.Arrays;
 
 import de.gsi.dataset.AxisDescription;
-import de.gsi.dataset.DataSet;
 import de.gsi.dataset.DataSet2D;
 import de.gsi.dataset.EditableDataSet;
 import de.gsi.dataset.event.AddedDataEvent;
@@ -28,431 +27,424 @@ import de.gsi.dataset.utils.AssertUtils;
  */
 @SuppressWarnings("PMD")
 public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements EditableDataSet {
-    private static final long serialVersionUID = 467969092912080826L;
-    protected double[] xValues;
-    protected double[] yValues;
-    protected int dataMaxIndex; // <= xValues.length, stores the actually used
-    // data array size
+	private static final long serialVersionUID = 467969092912080826L;
+	protected double[] xValues;
+	protected double[] yValues;
+	protected int dataMaxIndex; // <= xValues.length, stores the actually used
+	// data array size
 
-    /**
-     * Creates a new instance of <code>DoubleDataSet</code>.
-     *
-     * @param name name of this DataSet.
-     * @throws IllegalArgumentException if <code>name</code> is
-     *             <code>null</code>
-     */
-    public DoubleDataSet(final String name) {
-        this(name, 0);
-    }
+	/**
+	 * Creates a new instance of <code>DoubleDataSet</code>.
+	 *
+	 * @param name name of this DataSet.
+	 * @throws IllegalArgumentException if <code>name</code> is <code>null</code>
+	 */
+	public DoubleDataSet(final String name) {
+		this(name, 0);
+	}
 
-    /**
-     * Creates a new instance of <code>DoubleDataSet</code> as copy of another
-     * (deep-copy).
-     *
-     * @param another name of this DataSet.
-     */
-    public DoubleDataSet(final DataSet2D another) {
-        this("");
-        lock().writeLockGuard(() -> {
-            another.lock().writeLockGuard(() -> {
-                this.setName(another.getName());
-                this.set(another); // NOPMD by rstein on 25/06/19 07:42
-            });
-        });
-    }
+	/**
+	 * Creates a new instance of <code>DoubleDataSet</code> as copy of another
+	 * (deep-copy).
+	 *
+	 * @param another name of this DataSet.
+	 */
+	public DoubleDataSet(final DataSet2D another) {
+		this("");
+		lock().writeLockGuard(() -> another.lock().writeLockGuard(() -> {
+			this.setName(another.getName());
+			this.set(another); // NOPMD by rstein on 25/06/19 07:42
+		}));
+	}
 
-    /**
-     * Creates a new instance of <code>DoubleDataSet</code>.
-     *
-     * @param name name of this DataSet.
-     * @param initalSize initial buffer size
-     * @throws IllegalArgumentException if <code>name</code> is
-     *             <code>null</code>
-     */
-    public DoubleDataSet(final String name, final int initalSize) {
-        super(name, 2);
-        AssertUtils.gtEqThanZero("initalSize", initalSize);
-        xValues = new double[initalSize];
-        yValues = new double[initalSize];
-        dataMaxIndex = 0;
-    }
+	/**
+	 * Creates a new instance of <code>DoubleDataSet</code>.
+	 *
+	 * @param name       name of this DataSet.
+	 * @param initalSize initial buffer size
+	 * @throws IllegalArgumentException if <code>name</code> is <code>null</code>
+	 */
+	public DoubleDataSet(final String name, final int initalSize) {
+		super(name, 2);
+		AssertUtils.gtEqThanZero("initalSize", initalSize);
+		xValues = new double[initalSize];
+		yValues = new double[initalSize];
+		dataMaxIndex = 0;
+	}
 
-    /**
-     * <p>
-     * Creates a new instance of <code>DoubleDataSet</code>.
-     * </p>
-     * The user than specify via the copy parameter, whether the dataset
-     * operates directly on the input arrays themselves or on a copies of the
-     * input arrays. If the dataset operates directly on the input arrays, these
-     * arrays must not be modified outside of this data set.
-     *
-     * @param name name of this data set.
-     * @param xValues X coordinates
-     * @param yValues Y coordinates
-     * @param initalSize initial buffer size
-     * @param deepCopy if true, the input array is copied
-     * @throws IllegalArgumentException if any of parameters is
-     *             <code>null</code> or if arrays with coordinates have
-     *             different lengths
-     */
-    public DoubleDataSet(final String name, final double[] xValues, final double[] yValues, final int initalSize,
-            final boolean deepCopy) {
-        this(name);
-        AssertUtils.notNull("X data", xValues);
-        AssertUtils.notNull("Y data", yValues);
-        dataMaxIndex = Math.min(xValues.length, Math.min(yValues.length, initalSize));
-        AssertUtils.equalDoubleArrays(xValues, yValues, initalSize);
-        if (deepCopy) {
-            this.xValues = new double[dataMaxIndex];
-            this.yValues = new double[dataMaxIndex];
-            System.arraycopy(xValues, 0, this.xValues, 0, Math.min(xValues.length, initalSize));
-            System.arraycopy(yValues, 0, this.yValues, 0, Math.min(yValues.length, initalSize));
-        } else {
-            this.xValues = xValues;
-            this.yValues = yValues;
-        }
-    }
+	/**
+	 * <p>
+	 * Creates a new instance of <code>DoubleDataSet</code>.
+	 * </p>
+	 * The user than specify via the copy parameter, whether the dataset operates
+	 * directly on the input arrays themselves or on a copies of the input arrays.
+	 * If the dataset operates directly on the input arrays, these arrays must not
+	 * be modified outside of this data set.
+	 *
+	 * @param name       name of this data set.
+	 * @param xValues    X coordinates
+	 * @param yValues    Y coordinates
+	 * @param initalSize initial buffer size
+	 * @param deepCopy   if true, the input array is copied
+	 * @throws IllegalArgumentException if any of parameters is <code>null</code> or
+	 *                                  if arrays with coordinates have different
+	 *                                  lengths
+	 */
+	public DoubleDataSet(final String name, final double[] xValues, final double[] yValues, final int initalSize,
+			final boolean deepCopy) {
+		this(name);
+		AssertUtils.notNull("X data", xValues);
+		AssertUtils.notNull("Y data", yValues);
+		dataMaxIndex = Math.min(xValues.length, Math.min(yValues.length, initalSize));
+		AssertUtils.equalDoubleArrays(xValues, yValues, initalSize);
+		if (deepCopy) {
+			this.xValues = new double[dataMaxIndex];
+			this.yValues = new double[dataMaxIndex];
+			System.arraycopy(xValues, 0, this.xValues, 0, Math.min(xValues.length, initalSize));
+			System.arraycopy(yValues, 0, this.yValues, 0, Math.min(yValues.length, initalSize));
+		} else {
+			this.xValues = xValues;
+			this.yValues = yValues;
+		}
+	}
 
-    @Override
-    public double[] getXValues() {
-        return xValues;
-    }
+	@Override
+	public double[] getXValues() {
+		return xValues;
+	}
 
-    @Override
-    public double[] getYValues() {
-        return yValues;
-    }
+	@Override
+	public double[] getYValues() {
+		return yValues;
+	}
 
-    @Override
-    public int getDataCount() {
-        return Math.min(dataMaxIndex, xValues.length);
-    }
+	@Override
+	public int getDataCount() {
+		return Math.min(dataMaxIndex, xValues.length);
+	}
 
-    /**
-     * clear all data points
-     * 
-     * @return itself (fluent design)
-     */
-    public DoubleDataSet clearData() {
-        lock().writeLockGuard(() -> {
-            dataMaxIndex = 0;
-            Arrays.fill(xValues, 0.0);
-            Arrays.fill(yValues, 0.0);
-            getDataLabelMap().isEmpty();
-            getDataStyleMap().isEmpty();
+	/**
+	 * clear all data points
+	 * 
+	 * @return itself (fluent design)
+	 */
+	public DoubleDataSet clearData() {
+		lock().writeLockGuard(() -> {
+			dataMaxIndex = 0;
+			Arrays.fill(xValues, 0.0);
+			Arrays.fill(yValues, 0.0);
+			getDataLabelMap().isEmpty();
+			getDataStyleMap().isEmpty();
 
-            getAxisDescriptions().forEach(AxisDescription::clear);
-        });
+			getAxisDescriptions().forEach(AxisDescription::clear);
+		});
 
-        return fireInvalidated(new RemovedDataEvent(this, "clearData()"));
-    }
+		return fireInvalidated(new RemovedDataEvent(this, "clearData()"));
+	}
 
-    @Override
-    public double getX(final int index) {
-        return xValues[index];
-    }
+	@Override
+	public double getX(final int index) {
+		return xValues[index];
+	}
 
-    @Override
-    public double getY(final int index) {
-        return yValues[index];
-    }
+	@Override
+	public double getY(final int index) {
+		return yValues[index];
+	}
 
-    @Override
-    public DoubleDataSet set(final int index, final double x, final double y) {
-        lock().writeLockGuard(() -> {
-            xValues[index] = x;
-            yValues[index] = y;
-            dataMaxIndex = Math.max(index, dataMaxIndex);
+	@Override
+	public DoubleDataSet set(final int index, final double x, final double y) {
+		lock().writeLockGuard(() -> {
+			xValues[index] = x;
+			yValues[index] = y;
+			dataMaxIndex = Math.max(index, dataMaxIndex);
 
-            getAxisDescriptions().forEach(AxisDescription::clear);
-        });
-        return fireInvalidated(new UpdatedDataEvent(this));
-    }
+			getAxisDescriptions().forEach(AxisDescription::clear);
+		});
+		return fireInvalidated(new UpdatedDataEvent(this));
+	}
 
-    /**
-     * Add point to the end of the data set
-     *
-     * @param x index
-     * @param y index
-     * @return itself
-     */
-    public DoubleDataSet add(final double x, final double y) {
-        return add(this.getDataCount(), x, y, null);
-    }
+	/**
+	 * Add point to the end of the data set
+	 *
+	 * @param x index
+	 * @param y index
+	 * @return itself
+	 */
+	public DoubleDataSet add(final double x, final double y) {
+		return add(this.getDataCount(), x, y, null);
+	}
 
-    /**
-     * Add point to the DoublePoints object
-     *
-     * @param x index
-     * @param y index
-     * @param label the data label
-     * @return itself
-     */
-    public DoubleDataSet add(final double x, final double y, final String label) {
-        return add(this.getDataCount(), x, y, label);
-    }
+	/**
+	 * Add point to the DoublePoints object
+	 *
+	 * @param x     index
+	 * @param y     index
+	 * @param label the data label
+	 * @return itself
+	 */
+	public DoubleDataSet add(final double x, final double y, final String label) {
+		return add(this.getDataCount(), x, y, label);
+	}
 
-    /**
-     * add point to the data set
-     *
-     * @param index data point index at which the new data point should be added
-     * @param x horizontal coordinate of the new data point
-     * @param y vertical coordinate of the new data point
-     * @return itself (fluent design)
-     */
-    @Override
-    public DoubleDataSet add(final int index, final double x, final double y) {
-        return add(index, x, y, null);
-    }
+	/**
+	 * add point to the data set
+	 *
+	 * @param index data point index at which the new data point should be added
+	 * @param x     horizontal coordinate of the new data point
+	 * @param y     vertical coordinate of the new data point
+	 * @return itself (fluent design)
+	 */
+	@Override
+	public DoubleDataSet add(final int index, final double x, final double y) {
+		return add(index, x, y, null);
+	}
 
-    /**
-     * add point to the data set
-     *
-     * @param index data point index at which the new data point should be added
-     * @param x horizontal coordinate of the new data point
-     * @param y vertical coordinate of the new data point
-     * @param label data point label (see CategoryAxis)
-     * @return itself (fluent design)
-     */
-    public DoubleDataSet add(final int index, final double x, final double y, final String label) {
-        lock().writeLockGuard(() -> {
-            final int indexAt = Math.max(0, Math.min(index, getDataCount() + 1));
+	/**
+	 * add point to the data set
+	 *
+	 * @param index data point index at which the new data point should be added
+	 * @param x     horizontal coordinate of the new data point
+	 * @param y     vertical coordinate of the new data point
+	 * @param label data point label (see CategoryAxis)
+	 * @return itself (fluent design)
+	 */
+	public DoubleDataSet add(final int index, final double x, final double y, final String label) {
+		lock().writeLockGuard(() -> {
+			final int indexAt = Math.max(0, Math.min(index, getDataCount() + 1));
 
-            // enlarge array if necessary
-            final int minArraySize = Math.min(xValues.length - 1, yValues.length - 1);
-            if (dataMaxIndex > minArraySize) {
-                final double[] xValuesNew = new double[dataMaxIndex + 1];
-                final double[] yValuesNew = new double[dataMaxIndex + 1];
+			// enlarge array if necessary
+			final int minArraySize = Math.min(xValues.length - 1, yValues.length - 1);
+			if (dataMaxIndex > minArraySize) {
+				final double[] xValuesNew = new double[dataMaxIndex + 1];
+				final double[] yValuesNew = new double[dataMaxIndex + 1];
 
-                // copy old data before required index
-                System.arraycopy(xValues, 0, xValuesNew, 0, indexAt);
-                System.arraycopy(yValues, 0, yValuesNew, 0, indexAt);
+				// copy old data before required index
+				System.arraycopy(xValues, 0, xValuesNew, 0, indexAt);
+				System.arraycopy(yValues, 0, yValuesNew, 0, indexAt);
 
-                // copy old data after required index
-                System.arraycopy(xValues, indexAt, xValuesNew, indexAt + 1, xValues.length - indexAt);
-                System.arraycopy(yValues, indexAt, yValuesNew, indexAt + 1, yValues.length - indexAt);
+				// copy old data after required index
+				System.arraycopy(xValues, indexAt, xValuesNew, indexAt + 1, xValues.length - indexAt);
+				System.arraycopy(yValues, indexAt, yValuesNew, indexAt + 1, yValues.length - indexAt);
 
-                // shift old label and style keys
-                for (int i = xValues.length; i >= indexAt; i--) {
-                    final String oldLabelData = getDataLabelMap().get(i);
-                    if (oldLabelData != null) {
-                        getDataLabelMap().put(i + 1, oldLabelData);
-                        getDataLabelMap().remove(i);
-                    }
+				// shift old label and style keys
+				for (int i = xValues.length; i >= indexAt; i--) {
+					final String oldLabelData = getDataLabelMap().get(i);
+					if (oldLabelData != null) {
+						getDataLabelMap().put(i + 1, oldLabelData);
+						getDataLabelMap().remove(i);
+					}
 
-                    final String oldStyleData = getDataStyleMap().get(i);
-                    if (oldStyleData != null) {
-                        getDataStyleMap().put(i + 1, oldStyleData);
-                        getDataStyleMap().remove(i);
-                    }
-                }
+					final String oldStyleData = getDataStyleMap().get(i);
+					if (oldStyleData != null) {
+						getDataStyleMap().put(i + 1, oldStyleData);
+						getDataStyleMap().remove(i);
+					}
+				}
 
-                xValues = xValuesNew;
-                yValues = yValuesNew;
-            }
+				xValues = xValuesNew;
+				yValues = yValuesNew;
+			}
 
-            xValues[indexAt] = x;
-            yValues[indexAt] = y;
-            if (label != null && !label.isEmpty()) {
-                addDataLabel(indexAt, label);
-            }
-            dataMaxIndex++;
+			xValues[indexAt] = x;
+			yValues[indexAt] = y;
+			if (label != null && !label.isEmpty()) {
+				addDataLabel(indexAt, label);
+			}
+			dataMaxIndex++;
 
-            getAxisDescription(0).add(x);
-            getAxisDescription(1).add(y);
-        });
-        return fireInvalidated(new AddedDataEvent(this));
-    }
+			getAxisDescription(0).add(x);
+			getAxisDescription(1).add(y);
+		});
+		return fireInvalidated(new AddedDataEvent(this));
+	}
 
-    /**
-     * removes sub-range of data points
-     * 
-     * @param fromIndex start index
-     * @param toIndex stop index
-     * @return itself (fluent design)
-     */
-    public DoubleDataSet remove(final int fromIndex, final int toIndex) {
-        lock().writeLockGuard(() -> {
-            AssertUtils.indexInBounds(fromIndex, getDataCount(), "fromIndex");
-            AssertUtils.indexInBounds(toIndex, getDataCount(), "toIndex");
-            AssertUtils.indexOrder(fromIndex, "fromIndex", toIndex, "toIndex");
-            final int diffLength = toIndex - fromIndex;
-            final int newLength = xValues.length - diffLength;
-            final double[] xValuesNew = new double[newLength];
-            final double[] yValuesNew = new double[newLength];
+	/**
+	 * removes sub-range of data points
+	 * 
+	 * @param fromIndex start index
+	 * @param toIndex   stop index
+	 * @return itself (fluent design)
+	 */
+	public DoubleDataSet remove(final int fromIndex, final int toIndex) {
+		lock().writeLockGuard(() -> {
+			AssertUtils.indexInBounds(fromIndex, getDataCount(), "fromIndex");
+			AssertUtils.indexInBounds(toIndex, getDataCount(), "toIndex");
+			AssertUtils.indexOrder(fromIndex, "fromIndex", toIndex, "toIndex");
+			final int diffLength = toIndex - fromIndex;
+			final int newLength = xValues.length - diffLength;
+			final double[] xValuesNew = new double[newLength];
+			final double[] yValuesNew = new double[newLength];
 
-            System.arraycopy(xValues, 0, xValuesNew, 0, fromIndex);
-            System.arraycopy(yValues, 0, yValuesNew, 0, fromIndex);
-            System.arraycopy(xValues, toIndex, xValuesNew, fromIndex, newLength - fromIndex);
-            System.arraycopy(yValues, toIndex, yValuesNew, fromIndex, newLength - fromIndex);
-            xValues = xValuesNew;
-            yValues = yValuesNew;
+			System.arraycopy(xValues, 0, xValuesNew, 0, fromIndex);
+			System.arraycopy(yValues, 0, yValuesNew, 0, fromIndex);
+			System.arraycopy(xValues, toIndex, xValuesNew, fromIndex, newLength - fromIndex);
+			System.arraycopy(yValues, toIndex, yValuesNew, fromIndex, newLength - fromIndex);
+			xValues = xValuesNew;
+			yValues = yValuesNew;
 
-            // remove old label and style keys
-            for (int i = 0; i < diffLength; i++) {
-                final String oldLabelData = getDataLabelMap().get(toIndex + i);
-                if (oldLabelData != null) {
-                    getDataLabelMap().put(fromIndex + i, oldLabelData);
-                    getDataLabelMap().remove(toIndex + i);
-                }
+			// remove old label and style keys
+			for (int i = 0; i < diffLength; i++) {
+				final String oldLabelData = getDataLabelMap().get(toIndex + i);
+				if (oldLabelData != null) {
+					getDataLabelMap().put(fromIndex + i, oldLabelData);
+					getDataLabelMap().remove(toIndex + i);
+				}
 
-                final String oldStyleData = getDataStyleMap().get(toIndex + i);
-                if (oldStyleData != null) {
-                    getDataStyleMap().put(fromIndex + i, oldStyleData);
-                    getDataStyleMap().remove(toIndex + i);
-                }
-            }
+				final String oldStyleData = getDataStyleMap().get(toIndex + i);
+				if (oldStyleData != null) {
+					getDataStyleMap().put(fromIndex + i, oldStyleData);
+					getDataStyleMap().remove(toIndex + i);
+				}
+			}
 
-            dataMaxIndex = Math.max(0, dataMaxIndex - diffLength);
+			dataMaxIndex = Math.max(0, dataMaxIndex - diffLength);
 
-            getAxisDescriptions().forEach(AxisDescription::clear);
-        });
-        return fireInvalidated(new RemovedDataEvent(this));
-    }
+			getAxisDescriptions().forEach(AxisDescription::clear);
+		});
+		return fireInvalidated(new RemovedDataEvent(this));
+	}
 
-    /**
-     * remove point from data set
-     *
-     * @param index data point which should be removed
-     * @return itself (fluent design)
-     */
-    @Override
-    public EditableDataSet remove(final int index) {
-        return remove(index, index + 1);
-    }
+	/**
+	 * remove point from data set
+	 *
+	 * @param index data point which should be removed
+	 * @return itself (fluent design)
+	 */
+	@Override
+	public EditableDataSet remove(final int index) {
+		return remove(index, index + 1);
+	}
 
-    /**
-     * <p>
-     * Initialises the data set with specified data.
-     * </p>
-     * Note: The method copies values from specified double arrays.
-     *
-     * @param xValuesNew X coordinates
-     * @param yValuesNew Y coordinates
-     * @return itself
-     */
-    public DoubleDataSet add(final double[] xValuesNew, final double[] yValuesNew) {
-        lock();
-        AssertUtils.notNull("X coordinates", xValuesNew);
-        AssertUtils.notNull("Y coordinates", yValuesNew);
-        AssertUtils.equalDoubleArrays(xValuesNew, yValuesNew);
+	/**
+	 * <p>
+	 * Initialises the data set with specified data.
+	 * </p>
+	 * Note: The method copies values from specified double arrays.
+	 *
+	 * @param xValuesNew X coordinates
+	 * @param yValuesNew Y coordinates
+	 * @return itself
+	 */
+	public DoubleDataSet add(final double[] xValuesNew, final double[] yValuesNew) {
+		lock();
+		AssertUtils.notNull("X coordinates", xValuesNew);
+		AssertUtils.notNull("Y coordinates", yValuesNew);
+		AssertUtils.equalDoubleArrays(xValuesNew, yValuesNew);
 
-        lock().writeLockGuard(() -> {
-            final int newLength = this.getDataCount() + xValuesNew.length;
-            // need to allocate new memory
-            if (newLength > xValues.length) {
-                final double[] xValuesNewAlloc = new double[newLength];
-                final double[] yValuesNewAlloc = new double[newLength];
+		lock().writeLockGuard(() -> {
+			final int newLength = this.getDataCount() + xValuesNew.length;
+			// need to allocate new memory
+			if (newLength > xValues.length) {
+				final double[] xValuesNewAlloc = new double[newLength];
+				final double[] yValuesNewAlloc = new double[newLength];
 
-                // copy old data
-                System.arraycopy(xValues, 0, xValuesNewAlloc, 0, getDataCount());
-                System.arraycopy(yValues, 0, yValuesNewAlloc, 0, getDataCount());
+				// copy old data
+				System.arraycopy(xValues, 0, xValuesNewAlloc, 0, getDataCount());
+				System.arraycopy(yValues, 0, yValuesNewAlloc, 0, getDataCount());
 
-                xValues = xValuesNewAlloc;
-                yValues = yValuesNewAlloc;
-            }
+				xValues = xValuesNewAlloc;
+				yValues = yValuesNewAlloc;
+			}
 
-            // N.B. getDataCount() should equal dataMaxIndex here
-            System.arraycopy(xValuesNew, 0, xValues, getDataCount(), xValuesNew.length);
-            System.arraycopy(yValuesNew, 0, yValues, getDataCount(), xValuesNew.length);
+			// N.B. getDataCount() should equal dataMaxIndex here
+			System.arraycopy(xValuesNew, 0, xValues, getDataCount(), xValuesNew.length);
+			System.arraycopy(yValuesNew, 0, yValues, getDataCount(), xValuesNew.length);
 
-            dataMaxIndex = Math.max(0, dataMaxIndex + xValuesNew.length);
-            recomputeLimits(0);
-            recomputeLimits(1);
-        });
-        return fireInvalidated(new AddedDataEvent(this));
-    }
+			dataMaxIndex = Math.max(0, dataMaxIndex + xValuesNew.length);
+			recomputeLimits(0);
+			recomputeLimits(1);
+		});
+		return fireInvalidated(new AddedDataEvent(this));
+	}
 
-    /**
-     * <p>
-     * Initialises the data set with specified data.
-     * </p>
-     * Note: The method copies values from specified double arrays.
-     *
-     * @param xValues X coordinates
-     * @param yValues Y coordinates
-     * @param copy true: makes an internal copy, false: use the pointer as is
-     *            (saves memory allocation
-     * @return itself
-     */
-    public DoubleDataSet set(final double[] xValues, final double[] yValues, final boolean copy) {
-        AssertUtils.notNull("X coordinates", xValues);
-        AssertUtils.notNull("Y coordinates", yValues);
-        AssertUtils.equalDoubleArrays(xValues, yValues);
+	/**
+	 * <p>
+	 * Initialises the data set with specified data.
+	 * </p>
+	 * Note: The method copies values from specified double arrays.
+	 *
+	 * @param xValues X coordinates
+	 * @param yValues Y coordinates
+	 * @param copy    true: makes an internal copy, false: use the pointer as is
+	 *                (saves memory allocation
+	 * @return itself
+	 */
+	public DoubleDataSet set(final double[] xValues, final double[] yValues, final boolean copy) {
+		AssertUtils.notNull("X coordinates", xValues);
+		AssertUtils.notNull("Y coordinates", yValues);
+		AssertUtils.equalDoubleArrays(xValues, yValues);
 
-        lock().writeLockGuard(() -> {
-            if (!copy) {
-                this.xValues = xValues;
-                this.yValues = yValues;
-                dataMaxIndex = xValues.length;
-                recomputeLimits(0);
-                recomputeLimits(1);
-                return;
-            }
+		lock().writeLockGuard(() -> {
+			if (!copy) {
+				this.xValues = xValues;
+				this.yValues = yValues;
+				dataMaxIndex = xValues.length;
+				recomputeLimits(0);
+				recomputeLimits(1);
+				return;
+			}
 
-            if (xValues.length == this.xValues.length) {
-                System.arraycopy(xValues, 0, this.xValues, 0, getDataCount());
-                System.arraycopy(yValues, 0, this.yValues, 0, getDataCount());
-            } else {
-                /*
-                 * copy into new arrays, forcing array length equal to the xValues
-                 * length
-                 */
-                this.xValues = Arrays.copyOf(xValues, xValues.length);
-                this.yValues = Arrays.copyOf(yValues, xValues.length);
-            }
-            dataMaxIndex = xValues.length;
-            recomputeLimits(0);
-            recomputeLimits(1);
-        });
+			if (xValues.length == this.xValues.length) {
+				System.arraycopy(xValues, 0, this.xValues, 0, getDataCount());
+				System.arraycopy(yValues, 0, this.yValues, 0, getDataCount());
+			} else {
+				/*
+				 * copy into new arrays, forcing array length equal to the xValues length
+				 */
+				this.xValues = Arrays.copyOf(xValues, xValues.length);
+				this.yValues = Arrays.copyOf(yValues, xValues.length);
+			}
+			dataMaxIndex = xValues.length;
+			recomputeLimits(0);
+			recomputeLimits(1);
+		});
 
-        return fireInvalidated(new UpdatedDataEvent(this));
-    }
+		return fireInvalidated(new UpdatedDataEvent(this));
+	}
 
-    /**
-     * <p>
-     * Initialises the data set with specified data.
-     * </p>
-     * Note: The method copies values from specified double arrays.
-     *
-     * @param xValues X coordinates
-     * @param yValues Y coordinates
-     * @return itself
-     */
-    public DoubleDataSet set(final double[] xValues, final double[] yValues) {
-        return set(xValues, yValues, true);
-    }
+	/**
+	 * <p>
+	 * Initialises the data set with specified data.
+	 * </p>
+	 * Note: The method copies values from specified double arrays.
+	 *
+	 * @param xValues X coordinates
+	 * @param yValues Y coordinates
+	 * @return itself
+	 */
+	public DoubleDataSet set(final double[] xValues, final double[] yValues) {
+		return set(xValues, yValues, true);
+	}
 
-    /**
-     * clear old data and overwrite with data from 'other' data set (deep copy)
-     * 
-     * @param other the source data set
-     * @return itself (fluent design)
-     */
-    public DoubleDataSet set(final DataSet2D other) {
-        lock().writeLockGuard(() -> {
-            other.lock().writeLockGuard(() -> {
-                // deep copy data point labels and styles
-                getDataLabelMap().clear();
-                for (int index = 0; index < other.getDataCount(); index++) {
-                    final String label = other.getDataLabel(index);
-                    if (label != null && !label.isEmpty()) {
-                        this.addDataLabel(index, label);
-                    }
-                }
-                getDataStyleMap().clear();
-                for (int index = 0; index < other.getDataCount(); index++) {
-                    final String style = other.getStyle(index);
-                    if (style != null && !style.isEmpty()) {
-                        this.addDataStyle(index, style);
-                    }
-                }
-                this.setStyle(other.getStyle());
+	/**
+	 * clear old data and overwrite with data from 'other' data set (deep copy)
+	 * 
+	 * @param other the source data set
+	 * @return itself (fluent design)
+	 */
+	public DoubleDataSet set(final DataSet2D other) {
+		lock().writeLockGuard(() -> other.lock().writeLockGuard(() -> {
+			// deep copy data point labels and styles
+			getDataLabelMap().clear();
+			for (int index = 0; index < other.getDataCount(); index++) {
+				final String label = other.getDataLabel(index);
+				if (label != null && !label.isEmpty()) {
+					this.addDataLabel(index, label);
+				}
+			}
+			getDataStyleMap().clear();
+			for (int index = 0; index < other.getDataCount(); index++) {
+				final String style = other.getStyle(index);
+				if (style != null && !style.isEmpty()) {
+					this.addDataStyle(index, style);
+				}
+			}
+			this.setStyle(other.getStyle());
 
-                this.set(other.getXValues(), other.getYValues(), true);
-            });
-        });
-        return fireInvalidated(new UpdatedDataEvent(this));
-    }
+			this.set(other.getXValues(), other.getYValues(), true);
+		}));
+		return fireInvalidated(new UpdatedDataEvent(this));
+	}
 
 }
