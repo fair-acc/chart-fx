@@ -108,7 +108,7 @@ public abstract class AbstractErrorDataSet<D extends AbstractErrorDataSet<D>> ex
                 for (int i = 0; i < dataCount; i++) {
                     final double xData = get(DIM_X, i);
                     final double yData = get(DIM_Y, i);
-                    final double xDataError = getXErrorPositive(i);
+                    final double xDataError = getErrorPositive(DIM_X, i);
                     getAxisDescription(0).add(xData - xDataError);
                     getAxisDescription(0).add(xData + xDataError);
                     getAxisDescription(1).add(yData);
@@ -118,7 +118,7 @@ public abstract class AbstractErrorDataSet<D extends AbstractErrorDataSet<D>> ex
                 for (int i = 0; i < dataCount; i++) {
                     final double xData = get(DIM_X, i);
                     final double yData = get(DIM_Y, i);
-                    final double yDataError = getYErrorPositive(i);
+                    final double yDataError = getErrorPositive(DIM_Y, i);
                     getAxisDescription(0).add(xData);
                     getAxisDescription(1).add(yData - yDataError);
                     getAxisDescription(1).add(yData + yDataError);
@@ -128,8 +128,8 @@ public abstract class AbstractErrorDataSet<D extends AbstractErrorDataSet<D>> ex
                 for (int i = 0; i < dataCount; i++) {
                     final double xData = get(DIM_X, i);
                     final double yData = get(DIM_Y, i);
-                    final double xDataError = getXErrorPositive(i);
-                    final double yDataError = getYErrorPositive(i);
+                    final double xDataError = getErrorPositive(DIM_X, i);
+                    final double yDataError = getErrorPositive(DIM_Y, i);
                     getAxisDescription(0).add(xData - xDataError);
                     getAxisDescription(0).add(xData + xDataError);
                     getAxisDescription(1).add(yData - yDataError);
@@ -140,8 +140,8 @@ public abstract class AbstractErrorDataSet<D extends AbstractErrorDataSet<D>> ex
                 for (int i = 0; i < dataCount; i++) {
                     final double xData = get(DIM_X, i);
                     final double yData = get(DIM_Y, i);
-                    getAxisDescription(0).add(xData - getXErrorNegative(i));
-                    getAxisDescription(0).add(xData + getXErrorPositive(i));
+                    getAxisDescription(0).add(xData - getErrorNegative(DIM_X, i));
+                    getAxisDescription(0).add(xData + getErrorPositive(DIM_X, i));
                     getAxisDescription(1).add(yData);
                 }
                 break;
@@ -150,8 +150,8 @@ public abstract class AbstractErrorDataSet<D extends AbstractErrorDataSet<D>> ex
                     final double xData = get(DIM_X, i);
                     final double yData = get(DIM_Y, i);
                     getAxisDescription(0).add(xData);
-                    getAxisDescription(1).add(yData - getYErrorNegative(i));
-                    getAxisDescription(1).add(yData + getYErrorPositive(i));
+                    getAxisDescription(1).add(yData - getErrorNegative(DIM_Y, i));
+                    getAxisDescription(1).add(yData + getErrorPositive(DIM_Y, i));
                 }
                 break;
             case XY_ASYMMETRIC:
@@ -159,10 +159,10 @@ public abstract class AbstractErrorDataSet<D extends AbstractErrorDataSet<D>> ex
                 for (int i = 0; i < dataCount; i++) {
                     final double xData = get(DIM_X, i);
                     final double yData = get(DIM_Y, i);
-                    getAxisDescription(0).add(xData - getXErrorNegative(i));
-                    getAxisDescription(0).add(xData + getXErrorPositive(i));
-                    getAxisDescription(1).add(yData - getYErrorNegative(i));
-                    getAxisDescription(1).add(yData + getYErrorPositive(i));
+                    getAxisDescription(0).add(xData - getErrorNegative(DIM_X, i));
+                    getAxisDescription(0).add(xData + getErrorPositive(DIM_X, i));
+                    getAxisDescription(1).add(yData - getErrorNegative(DIM_Y, i));
+                    getAxisDescription(1).add(yData + getErrorPositive(DIM_Y, i));
                 }
             }
         });

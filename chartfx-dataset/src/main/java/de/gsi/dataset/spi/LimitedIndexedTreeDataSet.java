@@ -163,40 +163,14 @@ public class LimitedIndexedTreeDataSet extends AbstractErrorDataSet<LimitedIndex
         return data.get(i).getY();
     }
 
-    /**
-     * @see DataSetError#getXErrorNegative(int)
-     * @return the negative error of the x coordinate
-     */
     @Override
-    public double getXErrorNegative(final int index) {
-        return data.get(index).getErrorX();
+    public double getErrorNegative(final int dimIndex, final int index) {
+        return dimIndex == DIM_X ? data.get(index).getErrorX() : data.get(index).getErrorY();
     }
 
-    /**
-     * @see DataSetError#getXErrorPositive(int)
-     * @return the positive error of the x coordinate
-     */
     @Override
-    public double getXErrorPositive(final int index) {
-        return data.get(index).getErrorX();
-    }
-
-    /**
-     * @see DataSetError#getYErrorNegative(int)
-     * @return the negative error of the y coordinate
-     */
-    @Override
-    public double getYErrorNegative(final int index) {
-        return data.get(index).getErrorY();
-    }
-
-    /**
-     * @see DataSetError#getYErrorPositive(int)
-     * @return the positive error of the y coordinate
-     */
-    @Override
-    public double getYErrorPositive(final int index) {
-        return data.get(index).getErrorY();
+    public double getErrorPositive(final int dimIndex, final int index) {
+    	return dimIndex == DIM_X ? data.get(index).getErrorX() : data.get(index).getErrorY();
     }
 
     /**

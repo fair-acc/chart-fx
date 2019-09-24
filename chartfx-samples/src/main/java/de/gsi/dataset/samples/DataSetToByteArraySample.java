@@ -113,17 +113,17 @@ public class DataSetToByteArraySample {
 		for (int i = 0; i < originalDS.getDataCount(); i++) {
 			final double x0 = originalDS.get(DIM_X, i);
 			final double y0 = originalDS.get(DIM_Y, i);
-			final double exn0 = originalDS.getXErrorNegative(i);
-			final double exp0 = originalDS.getXErrorPositive(i);
-			final double eyn0 = originalDS.getYErrorNegative(i);
-			final double eyp0 = originalDS.getYErrorPositive(i);
+			final double exn0 = originalDS.getErrorNegative(DIM_X, i);
+			final double exp0 = originalDS.getErrorPositive(DIM_X, i);
+			final double eyn0 = originalDS.getErrorNegative(DIM_Y, i);
+			final double eyp0 = originalDS.getErrorPositive(DIM_Y, i);
 
 			final double x1 = testDS.get(DIM_X, i);
 			final double y1 = testDS.get(DIM_Y, i);
-			final double exn1 = testDS.getXErrorNegative(i);
-			final double exp1 = testDS.getXErrorPositive(i);
-			final double eyn1 = testDS.getYErrorNegative(i);
-			final double eyp1 = testDS.getYErrorPositive(i);
+			final double exn1 = testDS.getErrorNegative(DIM_X, i);
+			final double exp1 = testDS.getErrorPositive(DIM_X, i);
+			final double eyn1 = testDS.getErrorNegative(DIM_Y, i);
+			final double eyp1 = testDS.getErrorPositive(DIM_Y, i);
 
 			if (asFloat32) {
 				if (!floatIdentity(x0, x1) || !floatIdentity(y0, y1) || !floatIdentity(exn0, exn1)
