@@ -1,10 +1,10 @@
 package de.gsi.dataset.spi;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
-import de.gsi.dataset.DataSet2D;
 import de.gsi.dataset.DataSetMetaData;
 import de.gsi.dataset.Histogram1D;
 import de.gsi.dataset.event.AddedDataEvent;
@@ -31,6 +31,10 @@ public class Histogram extends AbstractHistogram implements Histogram1D {
     public Histogram(String name, int nBins, double minX, double maxX, final boolean horizontal) {
         super(name, nBins, minX, maxX);
         isHorizontal = horizontal;
+        if (!isHorizontal) {
+            getAxisDescription(0).clear();
+            getAxisDescription(1).set(minX, maxX);
+        }
     }
 
     @Override
@@ -38,17 +42,10 @@ public class Histogram extends AbstractHistogram implements Histogram1D {
         lock().writeLockGuard(() -> {
             data[bin] = data[bin] + w;
             if (getDimension() == 2) {
-                // special handling for projected histograms
-                //this.getAxisDescription(isHorizontal ? DIM_Y : DIM_X).add(data[bin]);
-                if (isHorizontal) {
-                    this.getAxisDescription(DIM_Y).add(data[bin]);
-                } else {
-                    this.getAxisDescription(DIM_X).add(data[bin]);
-                }
-
-                return;
+                getAxisDescription(isHorizontal ? DIM_Y : DIM_X).add(data[bin]);
+            } else {
+                getAxisDescription(getDimension() - 1).add(data[bin]);
             }
-            this.getAxisDescription(this.getDimension() - 1).add(data[bin]);
         });
         fireInvalidated(new UpdatedDataEvent(this, "addBinContent()"));
     }
@@ -94,14 +91,9 @@ public class Histogram extends AbstractHistogram implements Histogram1D {
         }
 
         if (dimIndex == DIM_Y) {
-            return isHorizontal ? getBinContent(index + 1) : getBinCenter(DIM_X, index + 1);
+            return isHorizontal ? getBinContent(index + 1) : getBinCenter(DIM_Y, index + 1);
         }
         return dimIndex + 1 < this.getDimension() ? getBinCenter(DIM_X, index + 1) : getBinContent(index + 1);
-    }
-
-    @Override
-    public int fill(double x) {
-        return fill(x, 1.0);
     }
 
     @Override
@@ -116,15 +108,24 @@ public class Histogram extends AbstractHistogram implements Histogram1D {
     }
 
     @Override
-    public int fill(String name) {
-        // TODO Auto-generated method stub
-        return 0;
-    }
-
-    @Override
-    public int fill(String name, double w) {
-        // TODO Auto-generated method stub
-        return 0;
+    public int findBin(final int dimIndex, final double x) {
+        if (getAxisDescription(dimIndex).getLength() == 0.0) {
+            return 0;
+        }
+        if (!getAxisDescription(dimIndex).contains(x)) {
+            if (x < getAxisDescription(dimIndex).getMin()) {
+                return 0; // underflow bin
+            }
+            return getDataCount(dimIndex) - 1; // overflow bin
+        }
+        if (isEquiDistant()) {
+            final double diff = x - getAxisDescription(dimIndex).getMin();
+            final double len = getAxisDescription(dimIndex).getLength();
+            final int count = getDataCount(dimIndex);
+            final double delta = len / count;
+            return (int) Math.round(diff / delta);
+        }
+        return findNextLargerIndex(axisBins[0], x);
     }
 
     @Override
@@ -165,6 +166,19 @@ public class Histogram extends AbstractHistogram implements Histogram1D {
     }
 
     @Override
+    public void reset() {
+        Arrays.fill(data, 0.0);
+        getDataStyleMap().clear();
+        getDataLabelMap().clear();
+        if (getDimension() == 2) {
+            this.getAxisDescription(isHorizontal ? DIM_Y : DIM_X).clear();
+        } else {
+            this.getAxisDescription(this.getDimension() - 1).clear();
+        }
+
+    }
+
+    @Override
     public double getValue(int dimIndex, double x) {
         final int index1 = getXIndex(x);
         final double x1 = get(DIM_X, index1);
@@ -184,5 +198,4 @@ public class Histogram extends AbstractHistogram implements Histogram1D {
 
         return y1 + (((y2 - y1) * (x - x1)) / (x2 - x1));
     }
-
 }
