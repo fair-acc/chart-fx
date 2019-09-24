@@ -21,8 +21,8 @@ import javafx.stage.Stage;
 public abstract class AbstractTestApplication extends Application {
     protected static final int MAX_DATA_POINTS_1K = 1000;
     protected static final int MAX_DATA_POINTS_10K = 10000;
-    protected static final int MAX_DATA_POINTS_50K = 50000;
-    protected static final int MAX_DATA_POINTS_500K = 500000;
+    protected static final int MAX_DATA_POINTS_100K = 100000;
+    protected static final int MAX_DATA_POINTS_200K = 200000;
     protected static final int FPS_METER_PERIOD = 100;
     protected static final int FPS_METER_AVERAGING_PERIOD = 20000;
     protected static ChartTestCase test;
@@ -61,11 +61,11 @@ public abstract class AbstractTestApplication extends Application {
             Platform.runLater(test::updateDataSet);
         });
 
-        final Button newDataSet50k = new Button("50k");
-        newDataSet50k.setTooltip(new Tooltip("update present data set with 50k data points"));
-        newDataSet50k.setMaxWidth(Double.MAX_VALUE);
-        newDataSet50k.setOnAction(evt -> {
-            test.setNumberOfSamples(MAX_DATA_POINTS_50K);
+        final Button newDataSet100k = new Button("100k");
+        newDataSet100k.setTooltip(new Tooltip("update present data set with 100k data points"));
+        newDataSet100k.setMaxWidth(Double.MAX_VALUE);
+        newDataSet100k.setOnAction(evt -> {
+            test.setNumberOfSamples(MAX_DATA_POINTS_100K);
             Platform.runLater(test::updateDataSet);
         });
 
@@ -77,11 +77,11 @@ public abstract class AbstractTestApplication extends Application {
             Platform.runLater(test::updateDataSet);
         });
 
-        final Button newDataSet500k = new Button("500k");
-        newDataSet500k.setTooltip(new Tooltip("update present data set with 500k data points"));
-        newDataSet500k.setMaxWidth(Double.MAX_VALUE);
-        newDataSet500k.setOnAction(evt -> {
-            test.setNumberOfSamples(MAX_DATA_POINTS_500K);
+        final Button newDataSet200k = new Button("200k");
+        newDataSet200k.setTooltip(new Tooltip("update present data set with 200k data points"));
+        newDataSet200k.setMaxWidth(Double.MAX_VALUE);
+        newDataSet200k.setOnAction(evt -> {
+            test.setNumberOfSamples(MAX_DATA_POINTS_200K);
             Platform.runLater(test::updateDataSet);
         });
 
@@ -169,7 +169,7 @@ public abstract class AbstractTestApplication extends Application {
                     .setText(String.format("%-11s: %4s (%4s)%s", "System -CPU (avg)", cpuSystem, avgCpuSystem, "%"));
         });
 
-        return new HBox(new VBox(newDataSet1k, newDataSet50k), new VBox(newDataSet10k, newDataSet500k),
+        return new HBox(new VBox(newDataSet1k, newDataSet100k), new VBox(newDataSet10k, newDataSet200k),
                 new VBox(startTimer25Hz, startTimer1Hz), spacer, new VBox(fxFPS, chartFPS),
                 new VBox(cpuLoadProcess, cpuLoadSystem));
     }
