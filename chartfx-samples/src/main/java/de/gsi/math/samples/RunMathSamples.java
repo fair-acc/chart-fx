@@ -3,6 +3,9 @@ package de.gsi.math.samples;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.gsi.chart.utils.PeriodicScreenCapture;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -18,7 +21,7 @@ import javafx.stage.Stage;
  * @author rstein
  */
 public class RunMathSamples extends Application {
-
+	private static final Logger LOGGER = LoggerFactory.getLogger(RunMathSamples.class);
     private static final int DEFAULT_DELAY = 2;
     private static final int DEFAULT_PERIOD = 5;
     private final String userHome = System.getProperty("user.home");
@@ -78,7 +81,7 @@ public class RunMathSamples extends Application {
                                 try {
                                     Thread.sleep(2000);
                                     Platform.runLater(() -> {
-                                        System.err.println(
+                                        LOGGER.atInfo().log(
                                                 "make screen shot to file of " + run.getClass().getSimpleName());
                                         final PeriodicScreenCapture screenCapture = new PeriodicScreenCapture(path,
                                                 run.getClass().getSimpleName(), stage.getScene(), DEFAULT_DELAY,
@@ -86,14 +89,18 @@ public class RunMathSamples extends Application {
                                         screenCapture.performScreenCapture();
                                     });
                                 } catch (final InterruptedException e) {
-                                    e.printStackTrace();
+                                	if (LOGGER.isErrorEnabled()) {
+                                		LOGGER.atError().setCause(e).log("InterruptedException");
+                                	}
                                 }
                             }
                         }.start();
 
                     }
                 } catch (final Exception e1) {
-                    e1.printStackTrace();
+                	if (LOGGER.isErrorEnabled()) {
+                		LOGGER.atError().setCause(e1).log("InterruptedException");
+                	}
                 }
 
             });

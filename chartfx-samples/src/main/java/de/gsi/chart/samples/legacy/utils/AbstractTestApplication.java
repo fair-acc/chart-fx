@@ -142,7 +142,6 @@ public abstract class AbstractTestApplication extends Application {
         meter = new SimplePerformanceMeter(scene, FPS_METER_PERIOD);
         meter.averageFactorProperty()
                 .set((double) FPS_METER_PERIOD / ((double) (FPS_METER_PERIOD + FPS_METER_AVERAGING_PERIOD)));
-        System.err.println("alpha = " + meter.averageFactorProperty().get());
 
         meter.fxFrameRateProperty().addListener((ch, o, n) -> {
             downSampleCounter++;

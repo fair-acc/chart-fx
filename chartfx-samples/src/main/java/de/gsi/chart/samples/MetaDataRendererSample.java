@@ -6,14 +6,12 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.gsi.chart.Chart;
 import de.gsi.chart.XYChart;
 import de.gsi.chart.axes.spi.DefaultNumericAxis;
-import de.gsi.dataset.DataSet;
-import de.gsi.dataset.DataSetMetaData;
-import de.gsi.dataset.testdata.spi.GaussFunction;
-import de.gsi.dataset.testdata.spi.RandomWalkFunction;
-import de.gsi.dataset.utils.ProcessingProfiler;
 import de.gsi.chart.plugins.DataPointTooltip;
 import de.gsi.chart.plugins.EditAxis;
 import de.gsi.chart.plugins.EditDataSet;
@@ -26,6 +24,11 @@ import de.gsi.chart.renderer.Renderer;
 import de.gsi.chart.renderer.spi.ErrorDataSetRenderer;
 import de.gsi.chart.renderer.spi.MetaDataRenderer;
 import de.gsi.chart.ui.geometry.Side;
+import de.gsi.dataset.DataSet;
+import de.gsi.dataset.DataSetMetaData;
+import de.gsi.dataset.testdata.spi.GaussFunction;
+import de.gsi.dataset.testdata.spi.RandomWalkFunction;
+import de.gsi.dataset.utils.ProcessingProfiler;
 import javafx.application.Application;
 import javafx.application.ConditionalFeature;
 import javafx.application.Platform;
@@ -40,7 +43,7 @@ import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 
 public class MetaDataRendererSample extends Application {
-
+	private static final Logger LOGGER = LoggerFactory.getLogger(MetaDataRendererSample.class);
     private static final int N_SAMPLES1 = 10000; // default: 1000000
     private static final int N_SAMPLES2 = 50; // default: 1000000
     private static final int UPDATE_DELAY = 1000; // [ms]
@@ -176,7 +179,7 @@ public class MetaDataRendererSample extends Application {
                             MetaDataRendererSample.N_SAMPLES1));
 
                     if (updateCount % 100 == 0) {
-                        System.out.println("update iteration #" + updateCount);
+                        LOGGER.atInfo().log("update iteration #" + updateCount);
                     }
                     updateCount++;
                 });

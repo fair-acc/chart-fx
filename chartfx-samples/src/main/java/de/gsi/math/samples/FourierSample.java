@@ -2,6 +2,9 @@ package de.gsi.math.samples;
 
 import java.util.Arrays;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.gsi.dataset.DataSet;
 import de.gsi.dataset.spi.DefaultDataSet;
 import de.gsi.math.TMath;
@@ -24,7 +27,7 @@ import javafx.scene.layout.VBox;
  * @author rstein
  */
 public class FourierSample extends AbstractDemoApplication {
-
+	private static final Logger LOGGER = LoggerFactory.getLogger(FourierSample.class);
     private static final int MAX_POINTS = 512;
     private DataSet fraw; 
     private DataSet fspectra1;
@@ -81,7 +84,7 @@ public class FourierSample extends AbstractDemoApplication {
         final DiscreteTimeFourierTransform trafoDTFT = new DiscreteTimeFourierTransform();
         final DoubleFFT_1D fastFourierTrafo = new DoubleFFT_1D(yValues.length);
 
-        System.err.printf("compute spectrum for %d test frequencies\n", frequency1.length);
+        LOGGER.atInfo().log("compute spectrum for %d test frequencies\n", frequency1.length);
         final double[] lomb = lombTrafo.computePeridodogram(xValues, yValues, frequency2);
         final double[] dtft1 = trafoDTFT.computeMagnitudeSpectrum(xValues, yValues, frequency1);
         final double[] dtft2 = trafoDTFT.computeMagnitudeSpectrum(xValues, yValues, frequency2);
@@ -96,7 +99,7 @@ public class FourierSample extends AbstractDemoApplication {
         fspectra1.setStyle("strokeWidth=0.5");
         fspectra2 = new DefaultDataSet("DT-FourierTransform spectra", frequency1, dtft1, frequency1.length, true);
         fspectra3 = new DefaultDataSet("int. DT-FourierTransform spectra", frequency2, dtft2, frequency2.length, true);
-        System.err.printf("dim %d vs %d\n", frequency2.length, mag.length);
+        LOGGER.atInfo().log("dim %d vs %d\n", frequency2.length, mag.length);
         fspectra4 = new DefaultDataSet("interpolated FFT", frequency3, mag, frequency3.length, true);
     }
 

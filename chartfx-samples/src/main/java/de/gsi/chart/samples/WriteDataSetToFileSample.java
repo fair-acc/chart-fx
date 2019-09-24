@@ -3,14 +3,17 @@ package de.gsi.chart.samples;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.gsi.chart.XYChart;
 import de.gsi.chart.axes.spi.DefaultNumericAxis;
+import de.gsi.chart.utils.PeriodicScreenCapture;
 import de.gsi.dataset.DataSet;
 import de.gsi.dataset.serializer.spi.FastByteBuffer;
 import de.gsi.dataset.spi.DoubleDataSet;
 import de.gsi.dataset.utils.DataSetSerialiser;
 import de.gsi.dataset.utils.DataSetUtils;
-import de.gsi.chart.utils.PeriodicScreenCapture;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
@@ -19,6 +22,7 @@ import javafx.stage.Stage;
  * @author rstein
  */
 public class WriteDataSetToFileSample extends Application {
+	private static final Logger LOGGER = LoggerFactory.getLogger(WriteDataSetToFileSample.class);
     private static final int N_SAMPLES = 100;
     private static final String CSV_FILE_NAME_1 = "{dataSetName}.csv.zip";
     private static final String CSV_FILE_NAME_2 = "test2.dat.gz";
@@ -59,7 +63,7 @@ public class WriteDataSetToFileSample extends Application {
         primaryStage.show();
         secondaryStage.show();
 
-        System.err.println("userHome = " + userHome);
+        LOGGER.atInfo().log("userHome = " + userHome);
         final Path path = Paths.get(userHome + "/ChartSamples");
         final String fileName = PNG_FILE_NAME;
 
@@ -95,12 +99,12 @@ public class WriteDataSetToFileSample extends Application {
             boolean asFloat = true;
             fastByteBuffer.reset(); // '0' writing at start of buffer
             DataSetSerialiser.writeDataSetToByteArray(dataSet2, fastByteBuffer, asFloat);
-            System.out.println("written bytes to byte buffer = " + fastByteBuffer.position());
+            LOGGER.atInfo().log("written bytes to byte buffer = " + fastByteBuffer.position());
             fastByteBuffer.reset(); // return read position to '0'
 
-            System.out.println("write data time-stamped to directory = " + path);
-            System.out.println("actualFileName1 = " + actualFileName1);
-            System.out.println("actualFileName2 = " + actualFileName2);
+            LOGGER.atInfo().log("write data time-stamped to directory = " + path);
+            LOGGER.atInfo().log("actualFileName1 = " + actualFileName1);
+            LOGGER.atInfo().log("actualFileName2 = " + actualFileName2);
 
             // recover written data sets
             final DataSet recoveredDataSet1 = DataSetUtils.readDataSetFromFile(actualFileName1);

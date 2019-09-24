@@ -11,6 +11,9 @@ import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.gsi.chart.Chart;
 import de.gsi.chart.XYChart;
 import de.gsi.chart.axes.spi.DefaultNumericAxis;
@@ -36,6 +39,7 @@ import javafx.stage.Stage;
  * @author rstein
  */
 public class ScatterAndBubbleRendererSample extends Application {
+	private static final Logger LOGGER = LoggerFactory.getLogger(ScatterAndBubbleRendererSample.class);
     private static String demoDataFile = "testdata/2017_OECD_data.csv";
     private final Map<String, Double> lifeExpectancyWomen = new ConcurrentHashMap<>();
     private final Map<String, Double> lifeExpectancyMen = new ConcurrentHashMap<>();
@@ -168,7 +172,9 @@ public class ScatterAndBubbleRendererSample extends Application {
                 population.put(data[0], pop);
             }
         } catch (IOException | URISyntaxException e) {
-            e.printStackTrace(); // NOPMD
+        	if (LOGGER.isErrorEnabled()) {
+				LOGGER.atError().setCause(e).log("InterruptedException");
+			}
         }
 
     }

@@ -4,6 +4,9 @@ import java.time.ZoneOffset;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.gsi.chart.XYChart;
 import de.gsi.chart.axes.spi.DefaultNumericAxis;
 import de.gsi.chart.axes.spi.format.DefaultTimeFormatter;
@@ -32,6 +35,7 @@ import javafx.stage.Stage;
  * @author rstein
  */
 public class RollingBufferSortedTreeSample extends Application {
+	private static final Logger LOGGER = LoggerFactory.getLogger(RollingBufferSortedTreeSample.class);
     public final LimitedIndexedTreeDataSet rollingBufferDipoleCurrent = new LimitedIndexedTreeDataSet(
             "dipole current [A]", RollingBufferSample.BUFFER_CAPACITY);
     public final LimitedIndexedTreeDataSet rollingBufferBeamIntensity = new LimitedIndexedTreeDataSet(
@@ -184,7 +188,7 @@ public class RollingBufferSortedTreeSample extends Application {
                     generateData();
 
                     if (updateCount % 20 == 0) {
-                        System.out.println("update iteration #" + updateCount);
+                    	LOGGER.atInfo().log("update iteration #" + updateCount);
                     }
                     updateCount++;
                 });

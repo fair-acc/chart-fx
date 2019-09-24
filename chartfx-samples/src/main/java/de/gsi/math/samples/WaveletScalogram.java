@@ -5,6 +5,9 @@ import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.Random;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.gsi.chart.renderer.spi.ContourDataSetRenderer;
 import de.gsi.chart.renderer.spi.utils.ColorGradient;
 import de.gsi.chart.utils.AxisSynchronizer;
@@ -27,6 +30,7 @@ import javafx.scene.layout.VBox;
  * @author rstein
  */
 public class WaveletScalogram extends AbstractDemoApplication {
+	private static final Logger LOGGER = LoggerFactory.getLogger(WaveletScalogram.class);
     private static final int MAX_POINTS = 1024;
     public static final boolean LOAD_EXAMPLE_DATA = true;
     private DataSet3D fdataset;
@@ -70,7 +74,7 @@ public class WaveletScalogram extends AbstractDemoApplication {
             sleep(1000);
             final int status = wtrafo.getStatus();
             if (status > 10) {
-                System.out.println(status + " % of computation done");
+                LOGGER.atInfo().log(status + " % of computation done");
             }
         } while (wtrafo.isBusy());
 
@@ -118,7 +122,9 @@ public class WaveletScalogram extends AbstractDemoApplication {
         try {
             Thread.sleep(millis);
         } catch (InterruptedException e) {
-            e.printStackTrace();
+        	if (LOGGER.isErrorEnabled()) {
+        		LOGGER.atError().setCause(e).log("InterruptedException");
+        	}
             Thread.currentThread().interrupt();
         }
     }
@@ -206,7 +212,9 @@ public class WaveletScalogram extends AbstractDemoApplication {
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
+            if (LOGGER.isErrorEnabled()) {
+            	LOGGER.atError().setCause(e).log("read error");
+            }
         }
 
         return new double[1000];
