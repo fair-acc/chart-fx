@@ -33,7 +33,7 @@ import javafx.stage.Stage;
  * @author rstein
  */
 public class ErrorDataSetRendererSample extends Application {
-    private static final Logger LOGGER = LoggerFactory.getLogger(RollingBufferSample.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ErrorDataSetRendererSample.class);
     private static final int DEBUG_UPDATE_RATE = 500;
     private static final int N_SAMPLES = 1000000; // default: 1000000
     private static final int UPDATE_DELAY = 1000; // [ms]

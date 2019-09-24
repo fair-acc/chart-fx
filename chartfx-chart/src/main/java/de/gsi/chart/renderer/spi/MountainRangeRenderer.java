@@ -243,16 +243,16 @@ public class MountainRangeRenderer extends ErrorDataSetRenderer implements Rende
         
         @Override
         public double get(final int dimIndex, final int i) {
-            return dataSet.get(dimIndex, i);
+            return dimIndex == DIM_Y ? this.getY(i) : dataSet.get(dimIndex, i);
         }
 
         @Override
-        public double getXErrorNegative(final int index) {
+        public double getErrorNegative(final int dimIndex, final int index) {
             return 0;
         }
 
         @Override
-        public double getXErrorPositive(final int index) {
+        public double getErrorPositive(final int dimIndex, final int index) {
             return 0;
         }
 
@@ -271,16 +271,6 @@ public class MountainRangeRenderer extends ErrorDataSetRenderer implements Rende
         @Override
         public double getY(final int i) {
             return dataSet.getZ(i, yIndex) + yShift;
-        }
-
-        @Override
-        public double getYErrorNegative(final int index) {
-            return 0;
-        }
-
-        @Override
-        public double getYErrorPositive(final int index) {
-            return 0;
         }
 
         @Override
