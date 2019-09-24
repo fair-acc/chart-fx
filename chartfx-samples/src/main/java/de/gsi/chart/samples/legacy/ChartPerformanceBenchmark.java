@@ -16,6 +16,7 @@ import de.gsi.chart.plugins.TableViewer;
 import de.gsi.chart.plugins.Zoomer;
 import de.gsi.chart.renderer.spi.ErrorDataSetRenderer;
 import javafx.application.Platform;
+import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -100,6 +101,7 @@ public class ChartPerformanceBenchmark extends AbstractTestApplication {
 
     private Button switchToTestCase(final String label, final ChartTestCase testCase, final Node chart) {
         final Button button = new Button(label);
+        button.setPadding(new Insets(5, 5, 5, 5));
         button.setMaxHeight(Double.MAX_VALUE);
         VBox.setVgrow(button, Priority.ALWAYS);
         button.setOnAction(evt -> {

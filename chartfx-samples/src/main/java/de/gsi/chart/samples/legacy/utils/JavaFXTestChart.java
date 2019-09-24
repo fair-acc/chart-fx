@@ -13,7 +13,7 @@ import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 
 public class JavaFXTestChart extends AbstractTestApplication implements ChartTestCase {
-    protected int nSamples = MAX_DATA_POINTS_50K;
+    protected int nSamples = MAX_DATA_POINTS_100K;
     protected SineFunction testFunction = new SineFunction("test", nSamples, true);
     NumberAxis xAxis = new NumberAxis();
     NumberAxis yAxis = new NumberAxis("irrelevant y-axis - JavaFX Chart", -1.1, +1.1, 0.2);
