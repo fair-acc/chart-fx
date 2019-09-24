@@ -47,7 +47,8 @@ public class RunMathSamples extends Application {
         buttons.getChildren().add(new MyButton("FourierSample", new FourierSample()));
         buttons.getChildren().add(new MyButton("FrequencyFilterSample", new FrequencyFilterSample()));
         buttons.getChildren().add(new MyButton("GaussianFitSample", new GaussianFitSample()));
-        buttons.getChildren().add(new MyButton("IIRFilterSample", new IIRFilterSample()));
+        // buttons.getChildren().add(new MyButton("IIRFilterSample", new IIRFilterSample()));
+        buttons.getChildren().add(new MyButton("IIRFrequencyFilterSample", new IIRFrequencyFilterSample()));
         buttons.getChildren().add(new MyButton("WaveletDenoising", new WaveletDenoising()));
         buttons.getChildren().add(new MyButton("WaveletScalogram", new WaveletScalogram()));
 
