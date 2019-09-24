@@ -198,7 +198,10 @@ public class MountainRangeRendererSample extends Application {
             if (dimIndex == DataSet.DIM_X) {
                 return xValues.length;
             }
-            return yValues.length;
+            if (dimIndex == DataSet.DIM_Y) {
+                return yValues.length;
+            }
+            return xValues.length * yValues.length;
         }
 
         @Override
@@ -209,7 +212,6 @@ public class MountainRangeRendererSample extends Application {
         @Override
         public double getY(final int i) {
             return yValues[i].doubleValue();
-            // throw new IllegalArgumentException("should not call this");
         }
 
         @Override

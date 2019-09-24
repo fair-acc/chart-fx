@@ -100,7 +100,6 @@ public class DefaultAxisDescription extends DataRange implements AxisDescription
 		if (!super.add(values, nlength)) {
 			return false;
 		}
-		// System.err.println("invoke event update after add (double[], int)");
 
 		notifyRangeChange();
 		return true;
@@ -155,7 +154,6 @@ public class DefaultAxisDescription extends DataRange implements AxisDescription
 		if (dataSet == null || !dataSet.isAutoNotification()) {
 			return;
 		}
-		// System.err.println("update DataSet full axis description");
 		dataSet.invokeListener(new AxisChangeEvent(dataSet, "updated axis for '" + name + "' '[" + unit + "]'", -1));
 	}
 
@@ -163,7 +161,6 @@ public class DefaultAxisDescription extends DataRange implements AxisDescription
 		if (dataSet == null || !dataSet.isAutoNotification()) {
 			return;
 		}
-		// System.err.println("update DataSet axis name and/or unit");
 		dataSet.invokeListener(
 				new AxisNameChangeEvent(dataSet, "updated axis names for '" + name + "' '[" + unit + "]'", -1));
 	}
@@ -172,7 +169,6 @@ public class DefaultAxisDescription extends DataRange implements AxisDescription
 		if (dataSet == null || !dataSet.isAutoNotification()) {
 			return;
 		}
-		// System.err.println("update DataSet axis range");
 		dataSet.invokeListener(
 				new AxisRangeChangeEvent(dataSet, "updated axis range for '" + name + "' '[" + unit + "]'", -1));
 	}

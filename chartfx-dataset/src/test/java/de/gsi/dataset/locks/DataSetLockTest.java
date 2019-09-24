@@ -381,7 +381,6 @@ public class DataSetLockTest {
             if (LOGGER.isErrorEnabled()) {
                 LOGGER.atError().setCause(e).log("sleep error");
             }
-            e.printStackTrace();
         }
     }
 }
