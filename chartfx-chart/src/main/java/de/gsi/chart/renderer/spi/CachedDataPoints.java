@@ -275,6 +275,7 @@ class CachedDataPoints {
         dataSet.lock().readLockGuardOptimistic(() -> {
             final double[] values = dimIndex == DIM_X ? xValues : yValues;
             final double minValue = dimIndex == DIM_X ? xMin : yMin;
+            //System.err.println("index from " + min + " to " + max + " count = " + dataSet.getDataCount(DIM_X) + " x " + dataSet.getDataCount(DIM_Y) + " dimIndex = " + dimIndex);
             for (int index = min; index < max; index++) {
                 final double x = dataSet.get(dimIndex, index);
 
@@ -337,8 +338,8 @@ class CachedDataPoints {
                     xValues[index] = xAxis.getDisplayPosition(x);
                     yValues[index] = yAxis.getDisplayPosition(y);
                     if (Double.isFinite(yValues[index])) {
-                        errorYNeg[index] = yAxis.getDisplayPosition(y - ds.getYErrorNegative(index));
-                        errorYPos[index] = yAxis.getDisplayPosition(y + ds.getYErrorPositive(index));
+                        errorYNeg[index] = yAxis.getDisplayPosition(y - ds.getErrorNegative(DIM_Y, index));
+                        errorYPos[index] = yAxis.getDisplayPosition(y + ds.getErrorPositive(DIM_Y, index));
                     } else {
                         yValues[index] = yMin;
                         errorYNeg[index] = yMin;
@@ -392,8 +393,8 @@ class CachedDataPoints {
 
                     if (!Double.isNaN(values[index])) {
                         // if (Double.isFinite(values[index])) {
-                        valuesEN[index] = yAxis.getDisplayPosition(y - ds.getYErrorNegative(index));
-                        valuesEP[index] = yAxis.getDisplayPosition(y + ds.getYErrorPositive(index));
+                        valuesEN[index] = yAxis.getDisplayPosition(y - ds.getErrorNegative(dimIndex, index));
+                        valuesEP[index] = yAxis.getDisplayPosition(y + ds.getErrorPositive(dimIndex, index));
                         continue;
                     }
                     values[index] = minValue;
@@ -463,8 +464,8 @@ class CachedDataPoints {
                 yValues[index] = yAxis.getDisplayPosition(y);
 
                 if (Double.isFinite(xValues[index])) {
-                    errorXNeg[index] = xAxis.getDisplayPosition(x - dataSet.getXErrorNegative(index));
-                    errorXPos[index] = xAxis.getDisplayPosition(x + dataSet.getXErrorPositive(index));
+                    errorXNeg[index] = xAxis.getDisplayPosition(x - dataSet.getErrorNegative(DIM_X, index));
+                    errorXPos[index] = xAxis.getDisplayPosition(x + dataSet.getErrorPositive(DIM_X, index));
                 } else {
                     xValues[index] = xMin;
                     errorXNeg[index] = xMin;
@@ -472,8 +473,8 @@ class CachedDataPoints {
                 }
 
                 if (Double.isFinite(yValues[index])) {
-                    errorYNeg[index] = yAxis.getDisplayPosition(y - dataSet.getYErrorNegative(index));
-                    errorYPos[index] = yAxis.getDisplayPosition(y + dataSet.getYErrorPositive(index));
+                    errorYNeg[index] = yAxis.getDisplayPosition(y - dataSet.getErrorNegative(DIM_Y, index));
+                    errorYPos[index] = yAxis.getDisplayPosition(y + dataSet.getErrorPositive(DIM_Y, index));
                 } else {
                     yValues[index] = yMin;
                     errorYNeg[index] = yMin;

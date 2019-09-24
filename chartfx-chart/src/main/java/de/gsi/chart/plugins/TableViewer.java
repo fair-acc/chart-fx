@@ -1,5 +1,8 @@
 package de.gsi.chart.plugins;
 
+import static de.gsi.dataset.DataSet.DIM_X;
+import static de.gsi.dataset.DataSet.DIM_Y;
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
@@ -444,13 +447,13 @@ public class TableViewer extends ChartPlugin {
             DataSetError eds = (DataSetError) ds;
             switch (type) {
             case EXN:
-                return eds.getXErrorNegative(row);
+                return eds.getErrorNegative(DIM_X, row);
             case EXP:
-                return eds.getXErrorPositive(row);
+                return eds.getErrorPositive(DIM_X, row);
             case EYN:
-                return eds.getYErrorNegative(row);
+                return eds.getErrorNegative(DIM_Y, row);
             case EYP:
-                return eds.getYErrorPositive(row);
+                return eds.getErrorPositive(DIM_Y, row);
             default:
                 return 0.0;
             }

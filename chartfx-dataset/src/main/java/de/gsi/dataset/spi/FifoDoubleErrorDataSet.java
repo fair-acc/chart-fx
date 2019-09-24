@@ -135,23 +135,13 @@ public class FifoDoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorData
     }
 
     @Override
-    public double getXErrorNegative(final int index) {
-        return data.get(index).getErrorX();
+    public double getErrorNegative(final int dimIndex, final int index) {
+        return dimIndex == DIM_X ? data.get(index).getErrorX() : data.get(index).getErrorY();
     }
 
     @Override
-    public double getXErrorPositive(final int index) {
-        return data.get(index).getErrorX();
-    }
-
-    @Override
-    public double getYErrorNegative(final int index) {
-        return data.get(index).getErrorY();
-    }
-
-    @Override
-    public double getYErrorPositive(final int index) {
-        return data.get(index).getErrorY();
+    public double getErrorPositive(final int dimIndex, final int index) {
+    	return dimIndex == DIM_X ? data.get(index).getErrorX() : data.get(index).getErrorY();
     }
 
     @Override

@@ -55,23 +55,13 @@ public class CircularDoubleErrorDataSet extends AbstractErrorDataSet<CircularDou
     }
 
     @Override
-    public double getXErrorNegative(final int index) {
-        return 0;
+    public double getErrorNegative(final int dimIndex, final int index) {
+        return dimIndex == DIM_X ? 0.0 : yErrorsNeg.get(index);
     }
 
     @Override
-    public double getXErrorPositive(final int index) {
-        return 0;
-    }
-
-    @Override
-    public double getYErrorNegative(final int index) {
-        return yErrorsNeg.get(index);
-    }
-
-    @Override
-    public double getYErrorPositive(final int index) {
-        return yErrorsPos.get(index);
+    public double getErrorPositive(final int dimIndex, final int index) {
+    	return dimIndex == DIM_X ? 0.0 : yErrorsPos.get(index);
     }
 
     /**

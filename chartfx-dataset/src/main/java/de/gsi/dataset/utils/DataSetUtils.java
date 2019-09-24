@@ -6,6 +6,8 @@
 
 package de.gsi.dataset.utils;
 
+import static de.gsi.dataset.DataSet.DIM_X;
+import static de.gsi.dataset.DataSet.DIM_Y;
 import static de.gsi.dataset.utils.DataSetUtils.ErrType.EYN;
 import static de.gsi.dataset.utils.DataSetUtils.ErrType.EYP;
 
@@ -188,25 +190,25 @@ public class DataSetUtils extends DataSetUtilsHelper {
 		if (interpolate) {
 			switch (eType) {
 			case EXN:
-				return ds.getXErrorNegative(x);
+				return ds.getErrorNegative(DIM_X, x);
 			case EXP:
-				return ds.getXErrorPositive(x);
+				return ds.getErrorPositive(DIM_X, x);
 			case EYN:
-				return ds.getYErrorNegative(x);
+				return ds.getErrorNegative(DIM_Y, x);
 			case EYP:
-				return ds.getYErrorPositive(x);
+				return ds.getErrorPositive(DIM_Y, x);
 			default:
 			}
 		} else {
 			switch (eType) {
 			case EXN:
-				return ds.getXErrorNegative(index);
+				return ds.getErrorNegative(DIM_X, index);
 			case EXP:
-				return ds.getXErrorPositive(index);
+				return ds.getErrorPositive(DIM_X, index);
 			case EYN:
-				return ds.getYErrorNegative(index);
+				return ds.getErrorNegative(DIM_Y, index);
 			case EYP:
-				return ds.getYErrorPositive(index);
+				return ds.getErrorPositive(DIM_Y, index);
 			default:
 			}
 		}
@@ -245,14 +247,14 @@ public class DataSetUtils extends DataSetUtilsHelper {
 		final DataSetError ds = (DataSetError) dataSet;
 		switch (eType) {
 		case EXN:
-			return cropToLength(ds.getXErrorsNegative(), nDim);
+			return cropToLength(ds.getErrorsNegative(DIM_X), nDim);
 		case EXP:
-			return cropToLength(ds.getXErrorsPositive(), nDim);
+			return cropToLength(ds.getErrorsPositive(DIM_X), nDim);
 		case EYN:
-			return cropToLength(ds.getYErrorsNegative(), nDim);
+			return cropToLength(ds.getErrorsNegative(DIM_Y), nDim);
 		case EYP:
 		default:
-			return cropToLength(ds.getYErrorsPositive(), nDim);
+			return cropToLength(ds.getErrorsPositive(DIM_Y), nDim);
 		}
 	}
 
