@@ -12,6 +12,7 @@ import de.gsi.chart.XYChart;
 import de.gsi.chart.axes.Axis;
 import de.gsi.chart.axes.spi.TickMark;
 import de.gsi.dataset.DataSet;
+import de.gsi.dataset.utils.NoDuplicatesList;
 import de.gsi.chart.renderer.Renderer;
 import de.gsi.chart.renderer.spi.utils.DashPatternStyle;
 import javafx.beans.property.BooleanProperty;
@@ -60,7 +61,7 @@ public class GridRenderer extends Pane implements Renderer {
     private final Line verMinorGridStyleNode;
     private final Line drawGridOnTopNode;
     private final Group gridStyleNodes = new Group();
-    protected final ObservableList<Axis> axesList = FXCollections.observableArrayList();
+    protected final ObservableList<Axis> axesList = FXCollections.observableList(new NoDuplicatesList<Axis>());
 
     public GridRenderer(final XYChart chart) {
         super();
