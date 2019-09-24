@@ -11,7 +11,7 @@ import de.gsi.dataset.event.UpdatedDataEvent;
 public abstract class AbstractHistogram extends AbstractDataSet<AbstractHistogram> implements Histogram {
     private static final long serialVersionUID = -6455271782865323112L;
     protected final int[] nAxisBins;
-    private double[][] axisBins;
+    protected double[][] axisBins;
     private final boolean equidistant;
     protected final double[] data;
 
@@ -171,7 +171,7 @@ public abstract class AbstractHistogram extends AbstractDataSet<AbstractHistogra
         }
 
         if (isEquiDistant()) {
-            final double delta = getAxisDescription(dimIndex).getLength() / (getDataCount(dimIndex) - 2);
+            final double delta = getAxisDescription(dimIndex).getLength() / (getDataCount(dimIndex));
             return getAxisDescription(dimIndex).getMin() + ((binIndex - 1) * delta);
         }
 

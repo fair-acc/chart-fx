@@ -71,6 +71,7 @@ public class Histogram2DimSample extends Application {
 
         final DefaultNumericAxis xAxis1 = new DefaultNumericAxis("x-Axis y-Projection");
         xAxis1.setLogAxis(false);
+        yAxis1.setAnimated(false);
         xAxis1.setAutoRangeRounding(true);
         xAxis1.setAutoRangePadding(2.0);
         xAxis1.setAutoRanging(true);
@@ -85,8 +86,8 @@ public class Histogram2DimSample extends Application {
         chart.getRenderers().set(0, heatMap);
 
         final ErrorDataSetRenderer projectionRendererX = new ErrorDataSetRenderer();
-        projectionRendererX.getAxes().addAll(xAxis, yAxis1);
-        projectionRendererX.getDatasets().addAll(histogram1.getProjectionX(), histogram2.getProjectionX());
+        projectionRendererX.getAxes().setAll(xAxis, yAxis1);
+        projectionRendererX.getDatasets().setAll(histogram1.getProjectionX(), histogram2.getProjectionX());
         histogram1.getProjectionX().setStyle("dsIndex=0");
         histogram2.getProjectionX().setStyle("dsIndex=1");
         projectionRendererX.setPolyLineStyle(LineStyle.HISTOGRAM);
@@ -94,8 +95,8 @@ public class Histogram2DimSample extends Application {
         chart.getRenderers().add(projectionRendererX);
 
         final ErrorDataSetRenderer projectionRendererY = new ErrorDataSetRenderer();
-        projectionRendererY.getAxes().addAll(xAxis1, yAxis);
-        projectionRendererY.getDatasets().addAll(histogram1.getProjectionY(), histogram2.getProjectionY());
+        projectionRendererY.getAxes().setAll(xAxis1, yAxis);
+        projectionRendererY.getDatasets().setAll(histogram1.getProjectionY(), histogram2.getProjectionY());
         histogram1.getProjectionY().setStyle("dsIndex=0");
         histogram2.getProjectionY().setStyle("dsIndex=1");
         projectionRendererY.setPolyLineStyle(LineStyle.HISTOGRAM);
