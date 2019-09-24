@@ -110,6 +110,7 @@ public class MetaDataRenderer extends AbstractMetaDataRendererParameter<MetaData
     }
     @Override
     public ObservableList<Axis> getAxes() {
+    	// regenerate list... this renderer does not need to keep track of axes
         return FXCollections.observableArrayList();
     }
     public BorderPane getBorderPaneOnCanvas() {
