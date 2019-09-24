@@ -4,6 +4,9 @@ import java.time.ZoneOffset;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.gsi.chart.XYChart;
 import de.gsi.chart.axes.spi.DefaultNumericAxis;
 import de.gsi.chart.axes.spi.format.DefaultTimeFormatter;
@@ -38,6 +41,7 @@ import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
 public class ChartIndicatorSample extends Application {
+	private static final Logger LOGGER = LoggerFactory.getLogger(ChartIndicatorSample.class);
     private static final int DEBUG_UPDATE_RATE = 1000;
     private static final int MIN_PIXEL_DISTANCE = 0; // 0: just drop points that
                                                      // are drawn on the same
@@ -197,7 +201,7 @@ public class ChartIndicatorSample extends Application {
                     generateData();
 
                     if (updateCount % 20 == 0) {
-                        System.out.println("update iteration #" + updateCount);
+                        LOGGER.atInfo().log("update iteration #" + updateCount);
                     }
 
                     // if (updateCount % 40 == 0) {

@@ -1,5 +1,8 @@
 package de.gsi.math.samples;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.gsi.dataset.DataSet;
 import de.gsi.dataset.spi.DefaultDataSet;
 import de.gsi.dataset.spi.DefaultErrorDataSet;
@@ -17,6 +20,7 @@ import javafx.scene.Node;
  * @author rstein
  */
 public class GaussianFitSample extends AbstractDemoApplication {
+	private static final Logger LOGGER = LoggerFactory.getLogger(GaussianFitSample.class);
     private static final int MAX_POINTS = 101;
     private DataSet fmodel;
     private DataSet fdataOrig;
@@ -27,7 +31,7 @@ public class GaussianFitSample extends AbstractDemoApplication {
         // y := scale*1/sqrt(2*Pi*sigma^2)*exp(-0.5*(x-mu)^2/sigma^2)
         // ... MyGaussianFunction(name, double[]{mu, sigma, scale})
         final MyGaussianFunction func = new MyGaussianFunction("gauss1", new double[] { -3.0, 1.0, 10.0 });
-        System.err.println("before fit");
+        LOGGER.atInfo().log("before fit");
         func.printParameters();
 
         double[] xValues = new double[MAX_POINTS];
@@ -83,12 +87,12 @@ public class GaussianFitSample extends AbstractDemoApplication {
         final double[] yPredicted = func.getValues(xValues);
         final double[] yPredictedError = new double[yPredicted.length];
 
-        System.err.println("after fit");
+        LOGGER.atInfo().log("after fit");
         func.printParameters();
 
-        System.out.println("fit results chi^2 =" + fitter.getChiSquare() + ":");
+        LOGGER.atInfo().log("fit results chi^2 =" + fitter.getChiSquare() + ":");
         for (int i = 0; i < 3; i++) {
-            System.out.printf("fitted-parameter  '%s' = %f -> %f +- %f\n", func.getParameterName(i), start[i],
+        	LOGGER.atInfo().log("fitted-parameter  '%s' = %f -> %f +- %f\n", func.getParameterName(i), start[i],
                     fittedParameter[i], fittedParameterError[i]);
         }
 
@@ -101,7 +105,7 @@ public class GaussianFitSample extends AbstractDemoApplication {
         // plot fitting results
         /*
          * for (int i=0; i < func.getParameterCount(); i++) {
-         * System.out.printf("fitted parameter '%s': %f +- %f\n",
+         * LOGGER.atInfo().log("fitted parameter '%s': %f +- %f\n",
          * func.getParameterName(i), func.getParameterValue(i),
          * 0.5*(func.getParameterRangeMaximum(i)-func.getParameterRangeMinimum(i
          * ))); }

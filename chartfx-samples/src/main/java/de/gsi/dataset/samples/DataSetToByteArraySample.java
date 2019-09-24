@@ -295,7 +295,7 @@ public class DataSetToByteArraySample {
 	public void clearGarbage() {
 		System.gc();
 		System.gc();
-		System.err.println("");
+		LOGGER.atInfo().log("");
 	}
 
 	public static void main(final String[] args) {

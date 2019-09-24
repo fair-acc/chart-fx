@@ -1,5 +1,8 @@
 package de.gsi.chart.samples;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.gsi.chart.renderer.spi.hexagon.Hexagon;
 import de.gsi.chart.renderer.spi.hexagon.HexagonMap;
 import de.gsi.chart.renderer.spi.hexagon.NoPathFoundException;
@@ -14,6 +17,7 @@ import javafx.scene.paint.Paint;
 import javafx.stage.Stage;
 
 public class HexagonSamples extends Application {
+	private static final Logger LOGGER = LoggerFactory.getLogger(WriteDataSetToFileSample.class);
     private Paint oldHexColour = null;
 
     @Override
@@ -46,12 +50,12 @@ public class HexagonSamples extends Application {
                 hexagon.setFill(Color.RED);
             }
         } catch (final NoPathFoundException e) {
-            System.err.println("could not find path for given start/destination coordinates" + e);
+        	LOGGER.atInfo().log("could not find path for given start/destination coordinates" + e);
         }
 
         map.setOnHexagonClickedCallback(hexagon -> {
             hexagon.setBackgroundColor(Color.BLUE);
-            System.err.println("clicked on " + hexagon);
+            LOGGER.atInfo().log("clicked on " + hexagon);
         });
 
         map.setOnHexagonEnteredCallback(hexagon -> {

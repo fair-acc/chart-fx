@@ -12,6 +12,8 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import org.controlsfx.glyphfont.FontAwesome;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import de.gsi.chart.XYChart;
 import de.gsi.chart.axes.spi.DefaultNumericAxis;
@@ -43,6 +45,7 @@ import javafx.stage.Stage;
  * @author rstein
  */
 public class DataViewerSample extends Application {
+	private static final Logger LOGGER = LoggerFactory.getLogger(WriteDataSetToFileSample.class);
     private static final String TITLE = "DataViewer Sample";
     private static final int NUMBER_OF_POINTS = 10000; // default: 32000
     private static final int UPDATE_PERIOD = 1000; // [ms]
@@ -203,7 +206,7 @@ public class DataViewerSample extends Application {
             Platform.runLater(() -> {
                 if (count % 10 == 0) {
                     final long diff = System.currentTimeMillis() - start;
-                    System.out.println(String.format("update #%d took %d ms", count, diff));
+                    LOGGER.atInfo().log(String.format("update #%d took %d ms", count, diff));
                     // LOGGER.info("update #{} took {} ms", count, diff);
                 }
 

@@ -5,6 +5,9 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.zip.ZipInputStream;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.gsi.dataset.DataSet;
 import de.gsi.dataset.spi.DoubleDataSet;
 import de.gsi.math.DataSetMath;
@@ -25,7 +28,7 @@ import javafx.scene.layout.VBox;
  * @author rstein
  */
 public class IIRFilterSample extends AbstractDemoApplication {
-
+	private static final Logger LOGGER = LoggerFactory.getLogger(IIRFilterSample.class);
     private static final int ORDER = 32;      // Order of filters
     
     private final double sampling = 100e6;    // Sampling Rate:    100 MS/s
@@ -61,7 +64,7 @@ public class IIRFilterSample extends AbstractDemoApplication {
 
                     int count = 0;
                     int n = 0;
-                    System.err.println("start reading from " + offset);
+                    LOGGER.atInfo().log("start reading from " + offset);
                     for (String line = reader.readLine(); line != null; line = reader.readLine()) {
                         final String[] str = line.split(",");
                         final double s = Math.sin(2 * Math.PI * (sampling - width) * count);
@@ -76,17 +79,21 @@ public class IIRFilterSample extends AbstractDemoApplication {
 
                         count++;
                     }
-                    System.err.println("finished reading nSamples(total) = " + count);
+                    LOGGER.atInfo().log("finished reading nSamples(total) = " + count);
                     return ret;
 
                 } catch (final Exception e) {
-                    e.printStackTrace();
+                	if (LOGGER.isErrorEnabled()) {
+                		LOGGER.atError().setCause(e).log("read error");
+                	}
                 }
 
                 zipStream.closeEntry();
             }
         } catch (final Exception e) {
-            e.printStackTrace();
+        	if (LOGGER.isErrorEnabled()) {
+        		LOGGER.atError().setCause(e).log("read error");
+        	}
         }
         return null;
     }
@@ -97,9 +104,9 @@ public class IIRFilterSample extends AbstractDemoApplication {
         fraw = readDemoData(27500, nBins);
         fraw1 = readDemoData(27500 + (int) (0.5e-3 * fs), nBins);
         fraw2 = readDemoData(27500 + (int) (1.5e-3 * fs), nBins);
-        System.err.println("length 0 = " + fraw.getDataCount(DataSet.DIM_X));
-        System.err.println("length 1 = " + fraw1.getDataCount(DataSet.DIM_X));
-        System.err.println("length 2 = " + fraw2.getDataCount(DataSet.DIM_X));
+        LOGGER.atInfo().log("length 0 = " + fraw.getDataCount(DataSet.DIM_X));
+        LOGGER.atInfo().log("length 1 = " + fraw1.getDataCount(DataSet.DIM_X));
+        LOGGER.atInfo().log("length 2 = " + fraw2.getDataCount(DataSet.DIM_X));
 
         fspectra = DataSetMath.magnitudeSpectrumDecibel(fraw);
         fspectra1 = DataSetMath.magnitudeSpectrumDecibel(fraw1);

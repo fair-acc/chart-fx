@@ -3,6 +3,9 @@ package de.gsi.chart.samples;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.gsi.chart.XYChart;
 import de.gsi.chart.axes.spi.DefaultNumericAxis;
 import de.gsi.dataset.DataSet;
@@ -30,6 +33,7 @@ import javafx.stage.Stage;
  * @author rstein
  */
 public class ContourChartSample extends Application {
+	private static final Logger LOGGER = LoggerFactory.getLogger(ContourChartSample.class);
 
     @Override
     public void start(final Stage stage) {
@@ -289,7 +293,9 @@ public class ContourChartSample extends Application {
             return new DefaultData("contour data", xValues, yValues, zValues);
 
         } catch (final Exception e) {
-            e.printStackTrace();
+        	if (LOGGER.isErrorEnabled()) {
+				LOGGER.atError().setCause(e).log("data read error");
+			}
         }
         return null;
     }
