@@ -130,13 +130,13 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
     }
 
     @Override
-    public double[] getYErrorsPositive() {
-        return yErrorsPos.elements();
+    public double[] getErrorsPositive(final int dimIndex) {
+        return dimIndex == DIM_X ? super.getErrorsPositive(dimIndex) : yErrorsPos.elements();
     }
 
     @Override
-    public double[] getYErrorsNegative() {
-        return yErrorsNeg.elements();
+    public double[] getErrorsNegative(final int dimIndex) {
+    	return dimIndex == DIM_X ? super.getErrorsPositive(dimIndex) : yErrorsNeg.elements();
     }
 
     @Override
@@ -232,23 +232,13 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
     }
 
     @Override
-    public double getXErrorNegative(final int index) {
-        return 0;
+    public double getErrorNegative(final int dimIndex, final int index) {
+        return dimIndex == DIM_X ? 0.0 : yErrorsNeg.elements()[index];
     }
 
     @Override
-    public double getXErrorPositive(final int index) {
-        return 0;
-    }
-
-    @Override
-    public double getYErrorNegative(final int index) {
-        return yErrorsNeg.elements()[index];
-    }
-
-    @Override
-    public double getYErrorPositive(final int index) {
-        return yErrorsPos.elements()[index];
+    public double getErrorPositive(final int dimIndex, final int index) {
+    	return dimIndex == DIM_X ? 0.0 : yErrorsPos.elements()[index];
     }
 
     /**
@@ -611,8 +601,8 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
 
                 // copy data
                 if (other instanceof DataSetError) {
-                    this.set(other.getXValues(), other.getYValues(), ((DataSetError) other).getYErrorsNegative(),
-                            ((DataSetError) other).getYErrorsPositive(), true);
+                    this.set(other.getXValues(), other.getYValues(), ((DataSetError) other).getErrorsNegative(DIM_Y),
+                            ((DataSetError) other).getErrorsPositive(DIM_Y), true);
                 } else {
                     final int count = other.getDataCount();
                     this.set(other.getXValues(), other.getYValues(), new double[count], new double[count], true);

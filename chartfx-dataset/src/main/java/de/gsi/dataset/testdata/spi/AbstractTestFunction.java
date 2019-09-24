@@ -64,23 +64,13 @@ public abstract class AbstractTestFunction<D extends AbstractTestFunction<D>> ex
 	}
 
 	@Override
-	public final double getXErrorNegative(final int index) {
-		return AbstractTestFunction.getXError();
+	public final double getErrorNegative(final int dimIndex, final int index) {
+		return dimIndex == DIM_X ? AbstractTestFunction.getXError() : AbstractTestFunction.getYError();
 	}
 
 	@Override
-	public final double getXErrorPositive(final int index) {
-		return AbstractTestFunction.getXError();
-	}
-
-	@Override
-	public final double getYErrorNegative(final int index) {
-		return AbstractTestFunction.getYError();
-	}
-
-	@Override
-	public final double getYErrorPositive(final int index) {
-		return AbstractTestFunction.getYError();
+	public final double getErrorPositive(final int dimIndex, final int index) {
+		return dimIndex == DIM_X ? AbstractTestFunction.getXError() : AbstractTestFunction.getYError();
 	}
 
 	private static double getXError() {

@@ -1,5 +1,7 @@
 package de.gsi.chart.renderer.spi;
 
+import static de.gsi.dataset.DataSet.DIM_Y;
+
 import de.gsi.chart.axes.Axis;
 import de.gsi.chart.renderer.Renderer;
 import de.gsi.dataset.DataSet;
@@ -171,8 +173,8 @@ public abstract class AbstractDataSetManagement<R extends Renderer> implements R
 
                 final double[] xValues = doubleErrorDataSet.getXValues();
                 final double[] yValues = doubleErrorDataSet.getYValues();
-                final double[] yErrorsNeg = doubleErrorDataSet.getYErrorsNegative();
-                final double[] yErrorsPos = doubleErrorDataSet.getYErrorsPositive();
+                final double[] yErrorsNeg = doubleErrorDataSet.getErrorsNegative(DIM_Y);
+                final double[] yErrorsPos = doubleErrorDataSet.getErrorsPositive(DIM_Y);
                 ret.set(xValues, yValues, yErrorsNeg, yErrorsPos);
 
                 ret.getDataLabelMap().putAll(doubleErrorDataSet.getDataLabelMap());
@@ -181,8 +183,8 @@ public abstract class AbstractDataSetManagement<R extends Renderer> implements R
                 // generic implementation that works with all DataSetError
                 // implementation
                 for (int i = 0; i < nLength; i++) {
-                    ret.set(i, dataSet.get(DataSet.DIM_X, i), dataSet.get(DataSet.DIM_Y, i), dataSet.getYErrorNegative(i),
-                            dataSet.getYErrorPositive(i));
+                    ret.set(i, dataSet.get(DataSet.DIM_X, i), dataSet.get(DataSet.DIM_Y, i), dataSet.getErrorNegative(DIM_Y, i),
+                            dataSet.getErrorPositive(DIM_Y, i));
                     final String label = ret.getDataLabel(i);
                     if (label != null) {
                         ret.getDataLabelMap().put(i, label);
