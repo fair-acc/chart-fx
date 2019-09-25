@@ -228,7 +228,7 @@ public class TableViewer extends ChartPlugin {
             for (TableColumn<DataSetsRow, ?> col : columns) {
                 if (col instanceof DataSetTableColumns) {
                     DataSetTableColumns dataSetColumn = ((DataSetTableColumns) col);
-                    nRows = Math.max(nRows, dataSetColumn.dataSet.getDataCount(DataSet.DIM_X));
+                    nRows = Math.max(nRows, dataSetColumn.dataSet.getDataCount(DIM_X));
                     for (final TableColumn<DataSetsRow, ?> subColumn : dataSetColumn.getColumns()) {
                         if (subColumn instanceof DataSetTableColumn) {
                             ((DataSetTableColumn) subColumn).updateEditableState();
@@ -262,7 +262,7 @@ public class TableViewer extends ChartPlugin {
                     nRows = 0;
                     for (TableColumn<DataSetsRow, ?> col : columns) {
                         if (col instanceof DataSetTableColumn) {
-                            nRows = Math.max(nRows, ((DataSetTableColumn) col).ds.getDataCount(DataSet.DIM_X));
+                            nRows = Math.max(nRows, ((DataSetTableColumn) col).ds.getDataCount(DIM_X));
                         }
                     }
                     dataSetChanges = true;
@@ -271,7 +271,7 @@ public class TableViewer extends ChartPlugin {
                 for (final DataSet set : change.getAddedSubList()) {
                     set.addListener(dataSetDataUpdateListener);
                     columns.add(new DataSetTableColumns(set)); // NOPMD - necessary for function
-                    nRows = Math.max(nRows, set.getDataCount(DataSet.DIM_X));
+                    nRows = Math.max(nRows, set.getDataCount(DIM_X));
                     dataSetChanges = true;
                 }
             }
@@ -433,14 +433,14 @@ public class TableViewer extends ChartPlugin {
         }
 
         public double getValue(final int row, final DataSet ds, final ColumnType type) {
-            if (row >= ds.getDataCount(DataSet.DIM_X)) {
+            if (row >= ds.getDataCount(DIM_X)) {
                 return 0.0;
             }
             switch (type) {
             case X:
-                return ds.get(DataSet.DIM_X, row);
+                return ds.get(DIM_X, row);
             case Y:
-                return ds.get(DataSet.DIM_Y, row);
+                return ds.get(DIM_Y, row);
             default:
                 break;
             }

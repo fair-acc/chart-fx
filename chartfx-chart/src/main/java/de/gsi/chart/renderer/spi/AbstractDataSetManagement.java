@@ -1,5 +1,6 @@
 package de.gsi.chart.renderer.spi;
 
+import static de.gsi.dataset.DataSet.DIM_X;
 import static de.gsi.dataset.DataSet.DIM_Y;
 
 import de.gsi.chart.axes.Axis;
@@ -26,16 +27,21 @@ public abstract class AbstractDataSetManagement<R extends Renderer> implements R
     private final ObservableList<DataSet> datasets = FXCollections.observableArrayList();
     protected BooleanProperty showInLegend = new SimpleBooleanProperty(this, "showInLegend", true);
 
-    @Override
-    public ObservableList<DataSet> getDatasets() {
-        return datasets;
-    }
-
     private final ObservableList<Axis> axesList = FXCollections.observableList(new NoDuplicatesList<Axis>());
 
     @Override
     public ObservableList<Axis> getAxes() {
         return axesList;
+    }
+
+    @Override
+    public ObservableList<DataSet> getDatasets() {
+        return datasets;
+    }
+
+    @Override
+    public ObservableList<DataSet> getDatasetsCopy() {
+        return getDatasetsCopy(getDatasets());
     }
 
     public Axis getFirstAxis(final Orientation orientation) {
@@ -61,19 +67,17 @@ public abstract class AbstractDataSetManagement<R extends Renderer> implements R
     }
 
     /**
-     * @return the instance of this AbstractDataSetManagement.
-     */
-    protected abstract R getThis();
-
-    /**
      * Sets whether DataSets attached to this renderer shall be shown in the
      * legend
      *
-     * @return true (default) if data sets are supposed to be drawn
+     * @param state
+     *            true (default) if data sets are supposed to be drawn
+     * @return the renderer class
      */
     @Override
-    public final BooleanProperty showInLegendProperty() {
-        return showInLegend;
+    public R setShowInLegend(final boolean state) {
+        showInLegend.set(state);
+        return getThis();
     }
 
     /**
@@ -91,19 +95,11 @@ public abstract class AbstractDataSetManagement<R extends Renderer> implements R
      * Sets whether DataSets attached to this renderer shall be shown in the
      * legend
      *
-     * @param state
-     *            true (default) if data sets are supposed to be drawn
-     * @return the renderer class
+     * @return true (default) if data sets are supposed to be drawn
      */
     @Override
-    public R setShowInLegend(final boolean state) {
-        showInLegend.set(state);
-        return getThis();
-    }
-
-    @Override
-    public ObservableList<DataSet> getDatasetsCopy() {
-        return getDatasetsCopy(getDatasets());
+    public final BooleanProperty showInLegendProperty() {
+        return showInLegend;
     }
 
     protected ObservableList<DataSet> getDatasetsCopy(final ObservableList<DataSet> localDataSets) {
@@ -121,12 +117,17 @@ public abstract class AbstractDataSetManagement<R extends Renderer> implements R
         return dataSets;
     }
 
+    /**
+     * @return the instance of this AbstractDataSetManagement.
+     */
+    protected abstract R getThis();
+
     protected static void copyMetaData(final DataSet from, final DataSet to) {
         to.setStyle(from.getStyle());
     }
 
     protected static final DoubleDataSet getDataSetCopy(final DataSet dataSet) {
-        final int nLength = dataSet.getDataCount(DataSet.DIM_X); //TODO: expand to n-dimensional DataSet
+        final int nLength = dataSet.getDataCount(DIM_X); //TODO: expand to n-dimensional DataSet
         final DoubleDataSet ret = new DoubleDataSet(dataSet.getName(), nLength);
 
         dataSet.lock().writeLockGuard(() -> {
@@ -145,7 +146,7 @@ public abstract class AbstractDataSetManagement<R extends Renderer> implements R
                 // generic implementation that works with all DataSetError
                 // implementation
                 for (int i = 0; i < nLength; i++) {
-                    ret.set(i, dataSet.get(DataSet.DIM_X, i), dataSet.get(DataSet.DIM_Y, i));
+                    ret.set(i, dataSet.get(DIM_X, i), dataSet.get(DIM_Y, i));
 
                     final String label = dataSet.getDataLabel(i);
                     if (label != null) {
@@ -164,7 +165,7 @@ public abstract class AbstractDataSetManagement<R extends Renderer> implements R
     }
 
     protected static final DoubleErrorDataSet getErrorDataSetCopy(final DataSetError dataSet) {
-        final int nLength = dataSet.getDataCount(DataSet.DIM_X);
+        final int nLength = dataSet.getDataCount(DIM_X);
         final DoubleErrorDataSet ret = new DoubleErrorDataSet(dataSet.getName(), nLength);
 
         dataSet.lock().writeLockGuard(() -> {
@@ -184,7 +185,7 @@ public abstract class AbstractDataSetManagement<R extends Renderer> implements R
                 // generic implementation that works with all DataSetError
                 // implementation
                 for (int i = 0; i < nLength; i++) {
-                    ret.set(i, dataSet.get(DataSet.DIM_X, i), dataSet.get(DataSet.DIM_Y, i), dataSet.getErrorNegative(DIM_Y, i),
+                    ret.set(i, dataSet.get(DIM_X, i), dataSet.get(DIM_Y, i), dataSet.getErrorNegative(DIM_Y, i),
                             dataSet.getErrorPositive(DIM_Y, i));
                     final String label = ret.getDataLabel(i);
                     if (label != null) {
