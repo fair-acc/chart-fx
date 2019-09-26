@@ -50,9 +50,9 @@ import javafx.scene.Scene;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 
-public class SimpleChartSample extends Application {   
+public class SimpleChartSample extends Application {
     private static final int N_SAMPLES = 100;
-    
+
     @Override
     public void start(final Stage primaryStage) {
         final StackPane root = new StackPane();
@@ -100,6 +100,11 @@ pom.xml:
     <groupId>de.gsi.chart</groupId>
     <artifactId>chartfx-chart</artifactId>
     <version>11.0.0</version>
+  </dependency>
+  <dependency>
+    <groupId>org.slf4j</groupId>
+    <artifactId>slf4j-simple</artifactId>
+    <version>2.0.0-alpha0</version>
   </dependency>
 </dependencies>
 </project>
