@@ -50,7 +50,6 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
     protected boolean labelOverlap;
     protected double cachedOffset; // for caching
     protected final ReentrantLock lock = new ReentrantLock();
-    protected boolean autoNotification = true;
     protected double maxLabelHeight;
     protected double maxLabelWidth;
 
@@ -191,9 +190,9 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         drawAxisPre();
 
         // update CSS data
-        majorTickStyle.applyCss();
-        minorTickStyle.applyCss();
-        axisLabel.applyCss();
+//        majorTickStyle.applyCss();
+//        minorTickStyle.applyCss();
+//        axisLabel.applyCss();
         final double axisLength = getSide().isHorizontal() ? axisWidth : axisHeight;
 
         // draw dominant axis line
@@ -235,7 +234,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
      */
     @Override
     public void fireInvalidated() {
-        if (!autoNotification || updateEventListener().isEmpty()) {
+        if (!isAutoNotification() || updateEventListener().isEmpty()) {
             return;
         }
 
@@ -376,11 +375,6 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         invokeListener(new AxisChangeEvent(this));
     }
 
-    @Override
-    public boolean isAutoNotification() {
-        return autoNotification;
-    }
-
     public boolean isLabelOverlapping() {
         // needed for diagnostics purposes
         return labelOverlap;
@@ -413,11 +407,6 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
     @Override
     public void requestAxisLayout() {
         super.requestLayout();
-    }
-
-    @Override
-    public void setAutoNotifaction(final boolean flag) {
-        autoNotification = flag;
     }
 
     public void setAxisLabelFormatter(final AxisLabelFormatter value) {
