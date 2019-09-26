@@ -29,8 +29,8 @@ public class PolarPlotSample extends Application {
         final DefaultNumericAxis xAxis = new DefaultNumericAxis("phi");
 
         final DefaultNumericAxis yAxis = new DefaultNumericAxis("r");
-        yAxis.setLowerBound(1e-3);
-        yAxis.setUpperBound(1000);
+        yAxis.setMin(1e-3);
+        yAxis.setMax(1000);
         yAxis.setForceZeroInRange(true);
         yAxis.setLogAxis(true);
 

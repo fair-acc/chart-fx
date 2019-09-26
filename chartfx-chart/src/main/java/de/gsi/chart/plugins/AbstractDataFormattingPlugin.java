@@ -168,10 +168,10 @@ public abstract class AbstractDataFormattingPlugin extends ChartPlugin {
                 continue;
             }
 
-            final String axisPrimaryLabel = axis.getLabel();
+            final String axisPrimaryLabel = axis.getName();
             String axisUnit = axis.getUnit();
             final String axisPrefix = MetricPrefix.getShortPrefix(axis.getUnitScaling());
-            final boolean isAutoScaling = axis.getAutoUnitScaling();
+            final boolean isAutoScaling = axis.isAutoUnitScaling();
             if (isAutoScaling) {
                 if (axisUnit == null) {
                     axisUnit = " a.u.";

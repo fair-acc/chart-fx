@@ -81,7 +81,7 @@ public class TimeAxisRangeSample extends Application {
                 }
                 Platform.runLater(() -> {
                     final double range = DefaultTimeTickUnitSupplier.TICK_UNIT_DEFAULTS[counter];
-                    xAxisDyn.lowerBoundProperty().set(now - range);
+                    xAxisDyn.minProperty().set(now - range);
                     final String text = "actual range [s]: " + String.format("%#.3f", range) + " ("
                             + String.format("%#.1f", range / 3600 / 24) + " days)";
                     xAxisDyn.setTickUnit(range / 10);

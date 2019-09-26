@@ -154,9 +154,9 @@ public class EMDSample extends AbstractDemoApplication {
         initData();
 
         final DemoChart chart1 = new DemoChart();
-        chart1.getXAxis().setLabel("time");
+        chart1.getXAxis().setName("time");
         chart1.getXAxis().setUnit("turns");
-        chart1.getYAxis().setLabel("frequency");
+        chart1.getYAxis().setName("frequency");
         chart1.getYAxis().setUnit("fs");
         ContourDataSetRenderer contourChartRenderer = new ContourDataSetRenderer();
         chart1.getRenderers().set(0, contourChartRenderer);
@@ -167,9 +167,9 @@ public class EMDSample extends AbstractDemoApplication {
         contourChartRenderer.getDatasets().add(createDataSet());
 
         final DemoChart chart2 = new DemoChart();
-        chart2.getXAxis().setLabel("time");
+        chart2.getXAxis().setName("time");
         chart2.getXAxis().setUnit("turns");
-        chart2.getYAxis().setLabel("amplitude");
+        chart2.getYAxis().setName("amplitude");
         chart2.getYAxis().setUnit("[a.u.]");
         for (int i = 0; i < fmodeDataSets.length; i++) {
             if (fmodeDataSets[i] != null) {

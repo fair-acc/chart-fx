@@ -67,13 +67,13 @@ public class IIRFrequencyFilterSample extends AbstractDemoApplication {
     private DemoChart getDemoChart(final String title) {
         final DemoChart defaultChart = new DemoChart();
         defaultChart.setTitle(title);
-        defaultChart.getXAxis().setLabel("frequency");
-        defaultChart.getYAxis().setLabel("magnitude");
+        defaultChart.getXAxis().setName("frequency");
+        defaultChart.getYAxis().setName("magnitude");
         defaultChart.getYAxis().setUnit("dB");
         defaultChart.getRenderer(0).getDatasets().addAll(DataSetMath.normalisedMagnitudeSpectrumDecibel(demoDataSet));
         defaultChart.getYAxis().setAutoRanging(false);
-        defaultChart.getYAxis().setLowerBound(-35.0);
-        defaultChart.getYAxis().setUpperBound(+5.0);
+        defaultChart.getYAxis().setMin(-35.0);
+        defaultChart.getYAxis().setMax(+5.0);
         defaultChart.setPrefSize(DEFAULT_SCENE_WIDTH, 400);
         return defaultChart;
     }

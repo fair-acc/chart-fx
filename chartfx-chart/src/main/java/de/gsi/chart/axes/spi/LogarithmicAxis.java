@@ -80,9 +80,9 @@ public class LogarithmicAxis extends AbstractAxis {
      * unit.
      *
      * @param lowerBound
-     *            the {@link #lowerBoundProperty() lower bound} of the axis
+     *            the {@link #minProperty() lower bound} of the axis
      * @param upperBound
-     *            the {@link #upperBoundProperty() upper bound} of the axis
+     *            the {@link #maxProperty() upper bound} of the axis
      * @param tickUnit
      *            the tick unit, i.e. space between tick marks
      */
@@ -96,25 +96,25 @@ public class LogarithmicAxis extends AbstractAxis {
      * unit.
      *
      * @param axisLabel
-     *            the axis {@link #labelProperty() label}
+     *            the axis {@link #nameProperty() label}
      * @param lowerBound
-     *            the {@link #lowerBoundProperty() lower bound} of the axis
+     *            the {@link #minProperty() lower bound} of the axis
      * @param upperBound
-     *            the {@link #upperBoundProperty() upper bound} of the axis
+     *            the {@link #maxProperty() upper bound} of the axis
      * @param tickUnit
      *            the tick unit, i.e. space between tick marks
      */
     public LogarithmicAxis(final String axisLabel, final double lowerBound, final double upperBound,
             final double tickUnit) {
         super(lowerBound, upperBound);
-        this.setLabel(axisLabel);
+        this.setName(axisLabel);
         if (lowerBound >= upperBound || lowerBound == 0 && upperBound == 0) {
             setAutoRanging(true);
         }
         setTickUnit(tickUnit);
         setMinorTickCount(LogarithmicAxis.DEFAULT_TICK_COUNT);
         super.currentLowerBound.addListener((evt, o, n) -> cache.updateCachedAxisVariables());
-        super.upperBoundProperty().addListener((evt, o, n) -> cache.updateCachedAxisVariables());
+        super.maxProperty().addListener((evt, o, n) -> cache.updateCachedAxisVariables());
         super.scaleProperty().addListener((evt, o, n) -> cache.updateCachedAxisVariables());
         widthProperty().addListener((ch, o, n) -> cache.axisWidth = getWidth());
         heightProperty().addListener((ch, o, n) -> cache.axisHeight = getHeight());
@@ -251,7 +251,7 @@ public class LogarithmicAxis extends AbstractAxis {
      */
     @Override
     public boolean isValueOnAxis(final double value) {
-        return value >= getLowerBound() && value <= getUpperBound();
+        return value >= getMin() && value <= getMax();
     }
 
     /**
@@ -352,7 +352,7 @@ public class LogarithmicAxis extends AbstractAxis {
         if (min <= 0) {
             min = LogarithmicAxis.DEFAULT_LOG_MIN_VALUE;
             isUpdating = true;
-            setLowerBound(LogarithmicAxis.DEFAULT_LOG_MIN_VALUE);
+            setMin(LogarithmicAxis.DEFAULT_LOG_MIN_VALUE);
             isUpdating = false;
         }
 
@@ -391,8 +391,8 @@ public class LogarithmicAxis extends AbstractAxis {
         }
 
         final List<Double> minorTickMarks = new ArrayList<>();
-        final double lowerBound = getLowerBound();
-        final double upperBound = getUpperBound();
+        final double lowerBound = getMin();
+        final double upperBound = getMax();
 
         double exp = Math.floor(log(lowerBound));
         for (double majorTick = pow(exp); majorTick < upperBound; majorTick = pow(++exp)) {
@@ -473,9 +473,9 @@ public class LogarithmicAxis extends AbstractAxis {
 
         private void updateCachedAxisVariables() {
             localCurrentLowerBound = currentLowerBound.get();
-            localCurrentUpperBound = LogarithmicAxis.super.getUpperBound();
-            upperBoundLog = log(getUpperBound());
-            lowerBoundLog = log(getLowerBound());
+            localCurrentUpperBound = LogarithmicAxis.super.getMax();
+            upperBoundLog = log(getMax());
+            lowerBoundLog = log(getMin());
             logScaleLength = upperBoundLog - lowerBoundLog;
 
             logScaleLengthInv = 1.0 / logScaleLength;

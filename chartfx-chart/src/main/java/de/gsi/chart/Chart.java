@@ -181,7 +181,7 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
 		}
 	}
 
-	private final InvalidationListener axisChangeListener = this::axesInvalidated;
+	private final EventListener axisChangeListener = this::axesInvalidated;
 	protected final ListChangeListener<Axis> axesChangeListenerLocal = this::axesChangedLocal;
 	protected final ListChangeListener<Axis> axesChangeListener = this::axesChanged;
 	protected final ListChangeListener<DataSet> datasetChangeListener = this::datasetsChanged;
@@ -1186,7 +1186,7 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
 					renderer.getAxes().add(existingChartXAxis);
 				} else if (!rendererHasXAxis) {
 					final DefaultNumericAxis newAxis = new DefaultNumericAxis();
-					newAxis.setLabel("default x-axis");
+					newAxis.setName("default x-axis");
 					newAxis.setSide(Side.BOTTOM);
 					renderer.getAxes().add(newAxis);
 					getAxes().add(newAxis);
@@ -1197,7 +1197,7 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
 					renderer.getAxes().add(existingChartXYAxis);
 				} else if (!rendererHasYAxis) {
 					final DefaultNumericAxis newAxis = new DefaultNumericAxis();
-					newAxis.setLabel("default y-axis");
+					newAxis.setName("default y-axis");
 					newAxis.setSide(Side.LEFT);
 					renderer.getAxes().add(newAxis);
 					getAxes().add(newAxis);

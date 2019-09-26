@@ -38,8 +38,8 @@ public class TestChart extends AbstractTestApplication implements ChartTestCase 
         // chart.getDatasets().add(dataSet);
         chart.getDatasets().setAll(testFunction);
         if (altRenderer) {
-            xAxis.setLabel("x-axis (new Chart - ReducingLinerenderer)");
-            yAxis.setLabel("irrelevant y-axis - ReducingLinerenderer");
+            xAxis.setName("x-axis (new Chart - ReducingLinerenderer)");
+            yAxis.setName("irrelevant y-axis - ReducingLinerenderer");
             ReducingLineRenderer renderer = new ReducingLineRenderer();
             renderer.setMaxPoints(750);
             chart.getRenderers().set(0, renderer);
@@ -60,8 +60,8 @@ public class TestChart extends AbstractTestApplication implements ChartTestCase 
             // renderer.getRendererDataReducer();
             // reducer.setMinPointPixelDistance(5);
         } else {
-            xAxis.setLabel("x-axis (new Chart - ErrorDataSetRenderer)");
-            yAxis.setLabel("irrelevant y-axis - ErrorDataSetRenderer");
+            xAxis.setName("x-axis (new Chart - ErrorDataSetRenderer)");
+            yAxis.setName("irrelevant y-axis - ErrorDataSetRenderer");
             ErrorDataSetRenderer renderer = (ErrorDataSetRenderer) chart.getRenderers().get(0);
             renderer.setDrawBars(false);
             renderer.setDrawMarker(false);
@@ -95,8 +95,8 @@ public class TestChart extends AbstractTestApplication implements ChartTestCase 
         this.nSamples = nSamples;
         testFunction = new SineFunction("test", nSamples, true);
         chart.getDatasets().setAll(testFunction);
-        xAxis.setUpperBound(nSamples - 1.0);
-        xAxis.setLowerBound(0);
+        xAxis.setMax(nSamples - 1.0);
+        xAxis.setMin(0);
         xAxis.setTickUnit(nSamples / 20.0);
         updateDataSet();
     }

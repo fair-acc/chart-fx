@@ -1,5 +1,7 @@
 package de.gsi.chart;
 
+import static de.gsi.dataset.DataSet.DIM_Z;
+
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.List;
@@ -319,7 +321,7 @@ public class XYChart extends Chart {
 
                 final Side side = set.getSide();
                 if (side == null) {
-                    throw new InvalidParameterException(new StringBuilder().append("axis '").append(set.getLabel())
+                    throw new InvalidParameterException(new StringBuilder().append("axis '").append(set.getName())
                             .append("' has 'null' as side being set").toString());
                 }
                 if (!getAxesPane(set.getSide()).getChildren().contains((Node) set)) {
@@ -463,8 +465,8 @@ public class XYChart extends Chart {
             //            }
             if (dataset instanceof DataSet3D && (side == Side.RIGHT || side == Side.TOP)) {
                 final DataSet3D mDataSet = (DataSet3D) dataset;
-                dataMinMax.add(mDataSet.getAxisDescription(2).getMin());
-                dataMinMax.add(mDataSet.getAxisDescription(2).getMax());
+                dataMinMax.add(mDataSet.getAxisDescription(DIM_Z).getMin());
+                dataMinMax.add(mDataSet.getAxisDescription(DIM_Z).getMax());
             } else {
                 dataMinMax.add(dataset.getAxisDescription(isHorizontal ? 0 : 1).getMin());
                 dataMinMax.add(dataset.getAxisDescription(isHorizontal ? 0 : 1).getMax());
@@ -472,8 +474,8 @@ public class XYChart extends Chart {
         });
 
         if (axis.isAutoGrowRanging()) {
-            dataMinMax.add(axis.getLowerBound());
-            dataMinMax.add(axis.getUpperBound());
+            dataMinMax.add(axis.getMin());
+            dataMinMax.add(axis.getMax());
         }
 
         // work-around since we cannot overwrite the method 'autorange(min,max)'
@@ -485,8 +487,7 @@ public class XYChart extends Chart {
                 min = Math.min(min, val.doubleValue());
                 max = Math.max(max, val.doubleValue());
             }
-            axis.setLowerBound(min);
-            axis.setUpperBound(max);
+            axis.set(min, max);
         } else {
             axis.invalidateRange(dataMinMax);
         }

@@ -119,8 +119,8 @@ public class SimpleMeasurements extends ValueIndicator {
         final Axis axis = axisMode == X ? chart.getXAxis() : chart.getYAxis();
         final Axis numAxis = axis;
 
-        final double lower = numAxis.getLowerBound();
-        final double upper = numAxis.getUpperBound();
+        final double lower = numAxis.getMin();
+        final double upper = numAxis.getMax();
         final double middle = 0.5 * Math.abs(upper - lower);
         final double min = Math.min(lower, upper);
         sliderIndicator1.setValue(min + 0.5 * middle);
@@ -300,7 +300,7 @@ public class SimpleMeasurements extends ValueIndicator {
 
         valueField.setValue(val, valueLabel);
 
-        final String altAxisLabel = altAxis.getLabel();
+        final String altAxisLabel = altAxis.getName();
         switch (measType) {
         case TRANSMISSION_ABS:
         case TRANSMISSION_REL:

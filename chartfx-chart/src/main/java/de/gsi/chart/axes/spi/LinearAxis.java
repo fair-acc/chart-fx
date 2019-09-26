@@ -77,8 +77,8 @@ public class LinearAxis extends AbstractAxis {
      * Creates a {@link #autoRangingProperty() non-auto-ranging} LinearAxis with the given upper bound, lower bound and
      * tick unit.
      *
-     * @param lowerBound the {@link #lowerBoundProperty() lower bound} of the axis
-     * @param upperBound the {@link #upperBoundProperty() upper bound} of the axis
+     * @param lowerBound the {@link #minProperty() lower bound} of the axis
+     * @param upperBound the {@link #maxProperty() upper bound} of the axis
      * @param tickUnit the tick unit, i.e. space between tick marks
      */
     public LinearAxis(final double lowerBound, final double upperBound, final double tickUnit) {
@@ -89,21 +89,21 @@ public class LinearAxis extends AbstractAxis {
      * Create a {@link #autoRangingProperty() non-auto-ranging} Axis with the given upper bound, lower bound and tick
      * unit.
      *
-     * @param axisLabel the axis {@link #labelProperty() label}
-     * @param lowerBound the {@link #lowerBoundProperty() lower bound} of the axis
-     * @param upperBound the {@link #upperBoundProperty() upper bound} of the axis
+     * @param axisLabel the axis {@link #nameProperty() label}
+     * @param lowerBound the {@link #minProperty() lower bound} of the axis
+     * @param upperBound the {@link #maxProperty() upper bound} of the axis
      * @param tickUnit the tick unit, i.e. space between tick marks
      */
     public LinearAxis(final String axisLabel, final double lowerBound, final double upperBound, final double tickUnit) {
         super(lowerBound, upperBound);
-        this.setLabel(axisLabel);
+        this.setName(axisLabel);
         if (lowerBound >= upperBound || lowerBound == 0 && upperBound == 0) {
             setAutoRanging(true);
         }
         setTickUnit(tickUnit);
         setMinorTickCount(LinearAxis.DEFAULT_TICK_COUNT);
         super.currentLowerBound.addListener((evt, o, n) -> cache.updateCachedAxisVariables());
-        super.upperBoundProperty().addListener((evt, o, n) -> cache.updateCachedAxisVariables());
+        super.maxProperty().addListener((evt, o, n) -> cache.updateCachedAxisVariables());
         super.scaleProperty().addListener((evt, o, n) -> cache.updateCachedAxisVariables());
         widthProperty().addListener((ch, o, n) -> cache.axisWidth = getWidth());
         heightProperty().addListener((ch, o, n) -> cache.axisHeight = getHeight());
@@ -152,8 +152,8 @@ public class LinearAxis extends AbstractAxis {
         final double labelSize = getTickLabelFont().getSize() * 2;
         final int numOfFittingLabels = (int) Math.floor(axisLength / labelSize);
         final int numOfTickMarks = Math.max(Math.min(numOfFittingLabels, LinearAxis.MAX_TICK_COUNT), 2);
-        final double max = upperBoundProperty().get();
-        final double min = lowerBoundProperty().get();
+        final double max = maxProperty().get();
+        final double min = minProperty().get();
         double rawTickUnit = (max - min) / numOfTickMarks;
         double prevTickUnitRounded;
         double tickUnitRounded = Double.MIN_VALUE;
@@ -320,7 +320,7 @@ public class LinearAxis extends AbstractAxis {
      */
     @Override
     public boolean isValueOnAxis(final double value) {
-        return value >= getLowerBound() && value <= getUpperBound();
+        return value >= getMin() && value <= getMax();
     }
 
     @Override
@@ -502,8 +502,8 @@ public class LinearAxis extends AbstractAxis {
     protected List<Double> calculateMinorTickValues() {
 
         final List<Double> minorTickMarks = new ArrayList<>();
-        final double lowerBound = getLowerBound();
-        final double upperBound = getUpperBound();
+        final double lowerBound = getMin();
+        final double upperBound = getMax();
         final double majorUnit = getTickUnit();
         final double firstMajorTick = LinearAxis.computeFistMajorTick(lowerBound, majorUnit);
         final double minorUnit = majorUnit / getMinorTickCount();
@@ -590,7 +590,7 @@ public class LinearAxis extends AbstractAxis {
 
         private void updateCachedAxisVariables() {
             localCurrentLowerBound = currentLowerBound.get();
-            localCurrentUpperBound = LinearAxis.super.getUpperBound();
+            localCurrentUpperBound = LinearAxis.super.getMax();
             localScale = scaleProperty().get();
 
             final double zero = LinearAxis.super.getDisplayPosition(0);

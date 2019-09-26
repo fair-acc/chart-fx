@@ -141,8 +141,8 @@ public class ScatterAndBubbleRendererSample extends Application {
         xAxis.setAutoUnitScaling(true);
         xAxis.setAutoRangePadding(0.05);
         xAxis.setAutoRanging(false);
-        xAxis.setLowerBound(15000);
-        xAxis.setUpperBound(75000);
+        xAxis.setMin(15000);
+        xAxis.setMax(75000);
         DefaultNumericAxis yAxis = new DefaultNumericAxis("life-expectancy", "years");
         yAxis.setAutoRangePadding(0.05);
 

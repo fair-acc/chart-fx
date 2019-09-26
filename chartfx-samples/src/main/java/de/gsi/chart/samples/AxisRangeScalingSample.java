@@ -117,9 +117,9 @@ public class AxisRangeScalingSample extends Application {
                 }
                 Platform.runLater(() -> {
                     final double power = Math.pow(10, counter);
-                    xAxis9.upperBoundProperty().set(power);
-                    final String text = "actual SI range for dynamic axis: [" + xAxis9.getLowerBound() + " V, "
-                            + xAxis9.getUpperBound() + " V]";
+                    xAxis9.maxProperty().set(power);
+                    final String text = "actual SI range for dynamic axis: [" + xAxis9.getMin() + " V, "
+                            + xAxis9.getMax() + " V]";
                     xAxis9Text.setText(text);
                 });
                 if ((counter >= 9) || (counter <= -9)) {

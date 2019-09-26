@@ -135,14 +135,14 @@ public abstract class AbstractValueIndicator extends ChartPlugin {
 
     private void addAxisListener() {
         final Axis valueAxis = getNumericAxis();
-        valueAxis.lowerBoundProperty().addListener(axisBoundsListener);
-        valueAxis.upperBoundProperty().addListener(axisBoundsListener);
+        valueAxis.minProperty().addListener(axisBoundsListener);
+        valueAxis.maxProperty().addListener(axisBoundsListener);
     }
 
     private void removeAxisListener() {
         final Axis valueAxis = getNumericAxis();
-        valueAxis.lowerBoundProperty().removeListener(axisBoundsListener);
-        valueAxis.upperBoundProperty().removeListener(axisBoundsListener);
+        valueAxis.minProperty().removeListener(axisBoundsListener);
+        valueAxis.maxProperty().removeListener(axisBoundsListener);
     }
 
     private void addPluginsListListener(final Chart chart) {

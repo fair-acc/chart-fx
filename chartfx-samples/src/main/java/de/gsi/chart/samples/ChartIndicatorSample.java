@@ -115,9 +115,9 @@ public class ChartIndicatorSample extends Application {
         final XYChart chart = new XYChart(xAxis1, yAxis1);
         chart.legendVisibleProperty().set(true);
         chart.setAnimated(false);
-        chart.getXAxis().setLabel("time 1");
+        chart.getXAxis().setName("time 1");
         chart.getXAxis().setAutoRanging(true);
-        chart.getYAxis().setLabel("beam intensity");
+        chart.getYAxis().setName("beam intensity");
         chart.getYAxis().setAutoRanging(true);
         chart.getYAxis().setSide(Side.LEFT);
         chart.getRenderers().set(0, beamIntensityRenderer);
@@ -144,8 +144,8 @@ public class ChartIndicatorSample extends Application {
 
         final XRangeIndicator xRange = new XRangeIndicator(xAxis1, minX + 0.1 * rangeX, minX + 0.2 * rangeX, "range-X");
         chart.getPlugins().add(xRange);
-        xRange.upperBoundProperty().bind(xAxis1.upperBoundProperty().subtract(0.1));
-        xRange.lowerBoundProperty().bind(xAxis1.upperBoundProperty().subtract(1.0));
+        xRange.upperBoundProperty().bind(xAxis1.maxProperty().subtract(0.1));
+        xRange.lowerBoundProperty().bind(xAxis1.maxProperty().subtract(1.0));
 
         final YRangeIndicator yRange1 = new YRangeIndicator(yAxis1, minY1 + 0.1 * rangeY1, minY1 + 0.2 * rangeY1,
                 "range-Y1");

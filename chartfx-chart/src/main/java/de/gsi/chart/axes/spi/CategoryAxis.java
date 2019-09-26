@@ -106,7 +106,7 @@ public final class CategoryAxis extends DefaultNumericAxis {
         if (isLogAxis && minValue <= 0) {
             min = DefaultNumericAxis.DEFAULT_LOG_MIN_VALUE;
             isUpdating = true;
-            setLowerBound(DefaultNumericAxis.DEFAULT_LOG_MIN_VALUE);
+            setMin(DefaultNumericAxis.DEFAULT_LOG_MIN_VALUE);
             isUpdating = false;
         }
         final double max = maxValue < 0 && isForceZeroInRange() ? 0 : maxValue;
@@ -140,20 +140,20 @@ public final class CategoryAxis extends DefaultNumericAxis {
      * Create a {@link #autoRangingProperty() non-auto-ranging} Axis with the given upper bound, lower bound and tick
      * unit.
      *
-     * @param axisLabel the axis {@link #labelProperty() label}
+     * @param axisLabel the axis {@link #nameProperty() label}
      */
     public CategoryAxis(final String axisLabel) {
         super(axisLabel);
         this.setOverlapPolicy(AxisLabelOverlapPolicy.SHIFT_ALT);
-        lowerBoundProperty().addListener((ch, old, val) -> {
-            final double range = Math.abs(val.doubleValue() - CategoryAxis.this.getUpperBound());
+        minProperty().addListener((ch, old, val) -> {
+            final double range = Math.abs(val.doubleValue() - CategoryAxis.this.getMax());
             final double rangeInt = (int) range;
             final double scale = 0.5 / rangeInt;
             autoRangePaddingProperty().set(scale);
         });
 
-        upperBoundProperty().addListener((ch, old, val) -> {
-            final double range = Math.abs(CategoryAxis.this.getLowerBound() - val.doubleValue());
+        maxProperty().addListener((ch, old, val) -> {
+            final double range = Math.abs(CategoryAxis.this.getMin() - val.doubleValue());
             final double rangeInt = (int) range;
             final double scale = 0.5 / rangeInt;
             autoRangePaddingProperty().set(scale);
@@ -174,7 +174,7 @@ public final class CategoryAxis extends DefaultNumericAxis {
      * Create a {@link #autoRangingProperty() non-auto-ranging} Axis with the given upper bound, lower bound and tick
      * unit.
      *
-     * @param axisLabel the axis {@link #labelProperty() label}
+     * @param axisLabel the axis {@link #nameProperty() label}
      * @param categories List of the categories for this axis
      */
     public CategoryAxis(final String axisLabel, final ObservableList<String> categories) {

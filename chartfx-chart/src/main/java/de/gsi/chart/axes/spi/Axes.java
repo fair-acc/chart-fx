@@ -78,7 +78,7 @@ public final class Axes { // NOPMD nomen est omen et fix
      * @return {@code true} if either lower or upper bound is bound
      */
     public static boolean hasBoundedRange(final Axis axis) {
-        return axis.lowerBoundProperty().isBound() || axis.upperBoundProperty().isBound();
+        return axis.minProperty().isBound() || axis.maxProperty().isBound();
     }
 
     /**

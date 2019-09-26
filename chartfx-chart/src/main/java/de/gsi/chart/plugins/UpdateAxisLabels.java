@@ -183,11 +183,11 @@ public class UpdateAxisLabels extends ChartPlugin {
         if (renderer == null) { // dataset was added to / is registered at chart
             if (getChart().getDatasets().size() == 1) {
                 if (dim == -1 || dim == 0) {
-                    getChart().getFirstAxis(Orientation.HORIZONTAL).setLabel(dataSet.getAxisDescription(0).getName());
+                    getChart().getFirstAxis(Orientation.HORIZONTAL).setName(dataSet.getAxisDescription(0).getName());
                     getChart().getFirstAxis(Orientation.HORIZONTAL).setUnit(dataSet.getAxisDescription(0).getUnit());
                 }
                 if (dim == -1 || dim == 1) {
-                    getChart().getFirstAxis(Orientation.VERTICAL).setLabel(dataSet.getAxisDescription(1).getName());
+                    getChart().getFirstAxis(Orientation.VERTICAL).setName(dataSet.getAxisDescription(1).getName());
                     getChart().getFirstAxis(Orientation.VERTICAL).setUnit(dataSet.getAxisDescription(1).getUnit());
                 }
             } else {
@@ -226,7 +226,7 @@ public class UpdateAxisLabels extends ChartPlugin {
         final boolean oldAxisExists = oldAxis.isPresent();
 
         // determine if correct axis already exists
-        Axis result = axisUsage.keySet().stream().filter(a -> a.getLabel().equals(name))
+        Axis result = axisUsage.keySet().stream().filter(a -> a.getName().equals(name))
                 .filter(a -> a.getUnit().equals(unit)).filter(a -> (orientation == Orientation.HORIZONTAL)
                         ? a.getSide().isHorizontal() : a.getSide().isVertical())
                 .findFirst().orElseGet(() -> null);
@@ -257,7 +257,7 @@ public class UpdateAxisLabels extends ChartPlugin {
         // rename current axis if exclusively used, else create new one
         if (nOldAxis <= 1) {
             result = oldAxis.get();
-            result.setLabel(name);
+            result.setName(name);
             result.setUnit(unit);
         } else {
             if (oldAxis.get().getClass() == DefaultNumericAxis.class) {
@@ -266,13 +266,13 @@ public class UpdateAxisLabels extends ChartPlugin {
                 result = new CategoryAxis(name);
             } else if (oldAxis.get().getClass() == LinearAxis.class) {
                 result = new LinearAxis();
-                result.setLabel(name);
+                result.setName(name);
             } else if (oldAxis.get().getClass() == LogarithmicAxis.class) {
                 result = new LogarithmicAxis();
-                result.setLabel(name);
+                result.setName(name);
             } else if (oldAxis.get().getClass() == NumericAxis.class) {
                 result = new NumericAxis();
-                result.setLabel(name);
+                result.setName(name);
             } else {
                 LOGGER.warn("Unknown type of axis {}, using DefaultNumericAxis instead", oldAxis.get().getClass());
                 result = new DefaultNumericAxis(name);

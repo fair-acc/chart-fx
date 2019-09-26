@@ -111,10 +111,10 @@ public class MountainRangeRenderer extends ErrorDataSetRenderer implements Rende
 					final double min = zRangeMin;
 					final double max = zRangeMax * (1.0 + mountainRaingeExtra);
 					final boolean autoRange = yAxis.isAutoRanging();
-					if (autoRange && (min != yAxis.getLowerBound() || max != yAxis.getUpperBound())) {
+					if (autoRange && (min != yAxis.getMin() || max != yAxis.getMax())) {
 						yAxis.setAutoRanging(false);
-						yAxis.setLowerBound(min);
-						yAxis.setUpperBound(max);
+						yAxis.setMin(min);
+						yAxis.setMax(max);
 						yAxis.setTickUnit(Math.abs(max-min)/10.0);
 						yAxis.forceRedraw();
 					}

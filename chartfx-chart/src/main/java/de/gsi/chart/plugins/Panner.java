@@ -42,7 +42,7 @@ public class Panner extends ChartPlugin {
     private Predicate<MouseEvent> mouseFilter = Panner.DEFAULT_MOUSE_FILTER;
     private Point2D previousMouseLocation = null;
 
-    private final ObjectProperty<AxisMode> axisMode = new SimpleObjectProperty<AxisMode>(this, "axisMode",
+    private final ObjectProperty<AxisMode> axisMode = new SimpleObjectProperty<>(this, "axisMode",
             AxisMode.XY) {
         @Override
         protected void invalidated() {
@@ -248,11 +248,11 @@ public class Panner extends ChartPlugin {
      */
     private void shiftBounds(final Axis axis, final double offset) {
         if (offset < 0) {
-            axis.setLowerBound(axis.getLowerBound() + offset);
-            axis.setUpperBound(axis.getUpperBound() + offset);
+            axis.setMin(axis.getMin() + offset);
+            axis.setMax(axis.getMax() + offset);
         } else {
-            axis.setUpperBound(axis.getUpperBound() + offset);
-            axis.setLowerBound(axis.getLowerBound() + offset);
+            axis.setMax(axis.getMax() + offset);
+            axis.setMin(axis.getMin() + offset);
         }
     }
 

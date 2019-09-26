@@ -33,14 +33,14 @@ public class AxisSynchronizer {
 
     public void add(Axis axis) {
         axes.add(axis);
-        axis.upperBoundProperty().addListener(upperBoundChangeListener);
-        axis.lowerBoundProperty().addListener(lowerBoundChangeListener);
+        axis.maxProperty().addListener(upperBoundChangeListener);
+        axis.minProperty().addListener(lowerBoundChangeListener);
     }
 
     public void remove(Axis axis) {
         axes.remove(axis);
-        axis.upperBoundProperty().removeListener(upperBoundChangeListener);
-        axis.lowerBoundProperty().removeListener(lowerBoundChangeListener);
+        axis.maxProperty().removeListener(upperBoundChangeListener);
+        axis.minProperty().removeListener(lowerBoundChangeListener);
         axis.setAutoRanging(true);
     }
 
@@ -62,7 +62,7 @@ public class AxisSynchronizer {
             for (final Axis axis : axes) {
                 if (axis != sender) {
                     axis.setAutoRanging(false);
-                    axis.setUpperBound(value);
+                    axis.setMax(value);
                 }
                 axis.setTickUnit(tickUnit);
             }
@@ -87,7 +87,7 @@ public class AxisSynchronizer {
             final double tickUnit = sender.getTickUnit();
             for (final Axis axis : axes) {
                 if (axis != sender) {
-                    axis.setLowerBound(value);
+                    axis.setMin(value);
                     axis.setAutoRanging(false);
                 }
                 axis.setTickUnit(tickUnit);
@@ -98,10 +98,10 @@ public class AxisSynchronizer {
 
     private Axis findAxis(ObservableValue<? extends Number> property) {
         for (final Axis chart : axes) {
-            if (property == chart.upperBoundProperty()) {
+            if (property == chart.maxProperty()) {
                 return chart;
             }
-            if (property == chart.lowerBoundProperty()) {
+            if (property == chart.minProperty()) {
                 return chart;
             }
         }

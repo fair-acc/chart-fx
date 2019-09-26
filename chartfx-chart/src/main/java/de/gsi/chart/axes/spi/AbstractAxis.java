@@ -1,9 +1,7 @@
 package de.gsi.chart.axes.spi;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Objects;
 import java.util.WeakHashMap;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -15,12 +13,12 @@ import de.gsi.chart.axes.spi.format.DefaultLogFormatter;
 import de.gsi.chart.axes.spi.format.DefaultTimeFormatter;
 import de.gsi.chart.ui.ResizableCanvas;
 import de.gsi.chart.ui.geometry.Side;
+import de.gsi.dataset.event.AxisChangeEvent;
 import javafx.animation.FadeTransition;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
-import javafx.beans.InvalidationListener;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleDoubleProperty;
@@ -49,9 +47,8 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
     protected WeakHashMap<Number, Dimension2D> tickMarkSizeCache = new WeakHashMap<>();
     protected final Timeline animator = new Timeline();
     private final Canvas canvas = new ResizableCanvas();
-    protected boolean labelOverlap = false;
+    protected boolean labelOverlap;
     protected double cachedOffset; // for caching
-    protected final List<InvalidationListener> listeners = new LinkedList<>();
     protected final ReentrantLock lock = new ReentrantLock();
     protected boolean autoNotification = true;
     protected double maxLabelHeight;
@@ -64,7 +61,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
      */
     protected final DoubleProperty currentLowerBound = new SimpleDoubleProperty(this, "currentLowerBound");
 
-    private final ObjectProperty<AxisLabelFormatter> axisFormatter = new SimpleObjectProperty<AxisLabelFormatter>(this,
+    private final ObjectProperty<AxisLabelFormatter> axisFormatter = new SimpleObjectProperty<>(this,
             "axisLabelFormatter", null) {
         /**
          * default fall-back formatter in case no {@code axisFormatter} is
@@ -101,9 +98,6 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
             requestAxisLayout();
         }
     };
-
-    // -------------- PUBLIC PROPERTIES
-    // --------------------------------------------------------------------------------
 
     // cache for major tick marks
     protected WeakHashMap<String, TickMark> tickMarkStringCache = new WeakHashMap<>();
@@ -161,8 +155,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
 
     public AbstractAxis(final double lowerBound, final double upperBound) {
         this();
-        setLowerBound(lowerBound);
-        setUpperBound(upperBound);
+        set(lowerBound, upperBound);
         setAutoRanging(false);
     }
 
@@ -174,18 +167,6 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
     private static double snap(final double coordinate) {
         return Math.round(coordinate) + 0.5;
     }
-
-    @Override
-    public void addListener(final InvalidationListener listener) {
-        Objects.requireNonNull(listener, "InvalidationListener must not be null");
-        // N.B. suppress duplicates
-        if (!listeners.contains(listener)) {
-            listeners.add(listener);
-        }
-    }
-
-    // -------------- PROTECTED METHODS
-    // --------------------------------------------------------------------------------
 
     public ObjectProperty<AxisLabelFormatter> axisLabelFormatterProperty() {
         return axisFormatter;
@@ -230,7 +211,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
 
         // neededLength assumes tick-mark width of one, needed to suppress minor
         // ticks if tick-mark pixel are overlapping
-        final double neededLength = (getTickMarks().size() + minorTicks.size()) * 2;
+        final double neededLength = (getTickMarks().size() + minorTicks.size()) * 2.0;
         // Don't draw minor tick marks if there isn't enough space for them!
         if (isMinorTickVisible() && axisLength > neededLength) {
             drawTickMarks(gc, axisLength, axisWidth, axisHeight, minorTicks, getMinorTickLength(), getMinorTickStyle());
@@ -254,14 +235,14 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
      */
     @Override
     public void fireInvalidated() {
-        if (!autoNotification || listeners.isEmpty()) {
+        if (!autoNotification || updateEventListener().isEmpty()) {
             return;
         }
 
         if (Platform.isFxApplicationThread()) {
-            executeFireInvalidated();
+            this.invokeListener(new AxisChangeEvent(this), false);
         } else {
-            Platform.runLater(this::executeFireInvalidated);
+            Platform.runLater(() ->  this.invokeListener(new AxisChangeEvent(this), false));
         }
     }
 
@@ -273,6 +254,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
     public AxisLabelFormatter getAxisLabelFormatter() {
         return axisFormatter.get();
     }
+
     public Canvas getCanvas() {
         return canvas;
     }
@@ -343,7 +325,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
      */
     @Override
     public double getZeroPosition() {
-        if (0 < getLowerBound() || 0 > getUpperBound()) {
+        if (0 < getMin() || 0 > getMax()) {
             return Double.NaN;
         }
         return getDisplayPosition(0.0);
@@ -364,9 +346,9 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         double dataMaxValue;
         double dataMinValue;
         if (data.isEmpty()) {
-            dataMaxValue = getUpperBound();
-            dataMinValue = getLowerBound();
-            autoRange.set(getLowerBound(), getUpperBound());
+            dataMaxValue = getMax();
+            dataMinValue = getMin();
+            autoRange.set(getMin(), getMax());
         } else {
             dataMinValue = Double.MAX_VALUE;
             // We need to init to the lowest negative double (which is NOT
@@ -382,22 +364,16 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
             autoRange.add(dataValue.doubleValue());
         }
 
-        boolean change = false;
-        if (getLowerBound() != dataMinValue) {
-            setLowerBound(dataMinValue);
-            change = true;
-        }
-        if (getUpperBound() != dataMaxValue) {
-            setUpperBound(dataMaxValue);
-            change = true;
-        }
-
+        final boolean oldState = isAutoNotification();
+        setAutoNotifaction(false);
+        boolean change = set(dataMinValue, dataMaxValue);
         if (change) {
             data.clear();
             autoRange.setAxisLength(getLength() == 0 ? 1 : getLength(), getSide());
         }
+        setAutoNotifaction(oldState);
         invalidateRange();
-        requestAxisLayout();
+        invokeListener(new AxisChangeEvent(this));
     }
 
     @Override
@@ -419,16 +395,11 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
      */
     @Override
     public boolean isValueOnAxis(final double value) {
-        return Double.isFinite(value) && value >= getLowerBound() && value <= getUpperBound();
+        return Double.isFinite(value) && value >= getMin() && value <= getMax();
     }
 
     public void recomputeTickMarks() {
         recomputeTickMarks(getRange());
-    }
-
-    @Override
-    public void removeListener(final InvalidationListener listener) {
-        listeners.remove(listener);
     }
 
     /**
@@ -441,7 +412,6 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
      */
     @Override
     public void requestAxisLayout() {
-        // axisLabel.applyCss();
         super.requestLayout();
     }
 
@@ -455,25 +425,25 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
     }
 
     @Override
-    public void setLowerBound(final double value) {
+    public boolean setMin(final double value) {
         if (isLogAxis() && (value <= 0 || !Double.isFinite(value))) {
-            if (getUpperBound() > 0) {
-                super.setLowerBound(getUpperBound() / 1.0E6);
+            if (getMax() > 0) {
+                return super.setMin(getMax() / 1.0E6);
             }
-            return;
+            return false;
         }
-        super.setLowerBound(value);
+        return super.setMin(value);
     }
 
     @Override
-    public void setUpperBound(final double value) {
+    public boolean setMax(final double value) {
         if (isLogAxis() && (value <= 0 || !Double.isFinite(value))) {
-            if (getLowerBound() >= 0) {
-                super.setUpperBound(getLowerBound() * 1.0E6);
+            if (getMin() >= 0) {
+                return super.setMax(getMin() * 1.0E6);
             }
-            return;
+            return false;
         }
-        super.setUpperBound(value);
+        return super.setMax(value);
     }
 
     /**
@@ -585,7 +555,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
             cachedOffset = 0;
             newScale = upperBound - lowerBound == 0 ? length : length / diff;
         }
-        return newScale != 0 ? newScale : -1.0;
+        return newScale == 0 ? -1.0 : newScale;
     }
 
     protected void clearAxisCanvas(final GraphicsContext gc, final double width, final double height) {
@@ -1323,20 +1293,12 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         gc.restore();
     }
 
-    protected void executeFireInvalidated() {
-        // N.B. explicit copy of listeners to avoid multi-threading
-        // race-conditions
-        for (final InvalidationListener listener : new ArrayList<>(listeners)) {
-            listener.invalidated(this);
-        }
-    }
-
     /**
      * @return axsis range that is supposed to be shown
      */
     protected AxisRange getAxisRange() {
         // TODO: switch between auto-range and user-defined range here
-        return new AxisRange(getLowerBound(), getUpperBound(), getLength(), getScale(), getTickUnit());
+        return new AxisRange(getMin(), getMax(), getLength(), getScale(), getTickUnit());
     }
 
     protected double getMaxTickLabelHeight(final List<TickMark> tickMarks) {
@@ -1383,9 +1345,9 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         // if we are not auto ranging we need to calculate the new scale
         if (!isAutoRanging()) {
             // calculate new scale
-            setScale(calculateNewScale(axisLength, getLowerBound(), getUpperBound()));
+            setScale(calculateNewScale(axisLength, getMin(), getMax()));
             // update current lower bound
-            currentLowerBound.set(getLowerBound());
+            currentLowerBound.set(getMin());
         }
         boolean recomputedTicks = false;
 
@@ -1403,7 +1365,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
                 // auto range
                 newAxisRange = autoRange(axisLength);
                 // set current range to new range
-                setRange(newAxisRange, getAnimated() && !isFirstPass && rangeInvalid);
+                setRange(newAxisRange, isAnimated() && !isFirstPass && rangeInvalid);
             } else {
                 newAxisRange = getAxisRange();
             }
@@ -1496,7 +1458,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         majorTickMarks.setAll(computeTickMarks(range, true));
 
         // recalculate minor tick marks
-        minorTickMarkValues.setAll(computeTickMarks(range, false));
+        minorTickMarks.setAll(computeTickMarks(range, false));
         tickMarksUpdated();
     }
 
@@ -1506,13 +1468,8 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
             return;
         }
         final AxisRange range = rangeObj;
-        final double oldLowerBound = getLowerBound();
-        if (getLowerBound() != range.getLowerBound()) {
-            setLowerBound(range.getLowerBound());
-        }
-        if (getUpperBound() != range.getUpperBound()) {
-            setUpperBound(range.getUpperBound());
-        }
+        final double oldLowerBound = getMin();
+        set(range.getLowerBound(), range.getUpperBound());
 
         if (animate) {
             animator.stop();
@@ -1536,7 +1493,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
      * @return true if animations should happen
      */
     protected boolean shouldAnimate() {
-        return getAnimated() && getScene() != null;
+        return isAnimated() && getScene() != null;
     }
 
     /**

@@ -93,7 +93,7 @@ public class LogarithmicAxisTransform extends AbstractAxisTransform {
                     LogarithmicAxisTransform.class.getSimpleName(), val));
             return;
         }
-        axis.lowerBoundProperty().set(val);
+        axis.minProperty().set(val);
     }
 
     @Override
@@ -104,7 +104,7 @@ public class LogarithmicAxisTransform extends AbstractAxisTransform {
                     LogarithmicAxisTransform.class.getSimpleName(), val));
             return;
         }
-        axis.upperBoundProperty().set(val);
+        axis.maxProperty().set(val);
     }
 
     @Override

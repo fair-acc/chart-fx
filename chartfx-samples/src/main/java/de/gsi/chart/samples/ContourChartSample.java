@@ -122,19 +122,19 @@ public class ContourChartSample extends Application {
         final DefaultNumericAxis xAxis = new DefaultNumericAxis();
         xAxis.setAnimated(false);
         xAxis.setAutoRangeRounding(false);
-        xAxis.setLabel("X Position");
+        xAxis.setName("X Position");
         xAxis.setAutoRanging(true);
 
         final DefaultNumericAxis yAxis = new DefaultNumericAxis();
         yAxis.setAnimated(false);
         yAxis.setAutoRangeRounding(false);
-        yAxis.setLabel("Y Position");
+        yAxis.setName("Y Position");
         yAxis.setAutoRanging(true);
 
         final DefaultNumericAxis zAxis = new DefaultNumericAxis();
         zAxis.setAnimated(false);
         zAxis.setAutoRangeRounding(false);
-        zAxis.setLabel("z Amplitude");
+        zAxis.setName("z Amplitude");
         zAxis.setAutoRanging(true);
         zAxis.setSide(Side.RIGHT);
 
@@ -200,16 +200,16 @@ public class ContourChartSample extends Application {
         // yAxis2.setAutoRanging(false);
         xAxis1.autoRangingProperty().bindBidirectional(xAxis2.autoRangingProperty());
         yAxis1.autoRangingProperty().bindBidirectional(yAxis2.autoRangingProperty());
-        xAxis1.upperBoundProperty().bindBidirectional(xAxis2.upperBoundProperty());
-        yAxis1.upperBoundProperty().bindBidirectional(yAxis2.upperBoundProperty());
-        xAxis1.lowerBoundProperty().bindBidirectional(xAxis2.lowerBoundProperty());
-        yAxis1.lowerBoundProperty().bindBidirectional(yAxis2.lowerBoundProperty());
+        xAxis1.maxProperty().bindBidirectional(xAxis2.maxProperty());
+        yAxis1.maxProperty().bindBidirectional(yAxis2.maxProperty());
+        xAxis1.minProperty().bindBidirectional(xAxis2.minProperty());
+        yAxis1.minProperty().bindBidirectional(yAxis2.minProperty());
 
         zAxis1.autoRangingProperty().bindBidirectional(zAxis2.autoRangingProperty());
         zAxis1.autoGrowRangingProperty().bindBidirectional(zAxis2.autoGrowRangingProperty());
         zAxis1.invertAxisProperty().bindBidirectional(zAxis2.invertAxisProperty());
-        zAxis1.upperBoundProperty().bindBidirectional(zAxis2.upperBoundProperty());
-        zAxis1.lowerBoundProperty().bindBidirectional(zAxis2.lowerBoundProperty());
+        zAxis1.maxProperty().bindBidirectional(zAxis2.maxProperty());
+        zAxis1.minProperty().bindBidirectional(zAxis2.minProperty());
     }
 
     private DataSet3D createData() {

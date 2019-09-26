@@ -107,16 +107,16 @@ public class FourierSample extends AbstractDemoApplication {
     public Node getContent() {
         initData();
         final DemoChart chart1 = new DemoChart();
-        chart1.getXAxis().setLabel("time");
+        chart1.getXAxis().setName("time");
         chart1.getXAxis().setUnit("s");
-        chart1.getYAxis().setLabel("magnitude");
+        chart1.getYAxis().setName("magnitude");
         chart1.getYAxis().setUnit("a.u.");
         chart1.getDatasets().add(fraw);
 
         final DemoChart chart2 = new DemoChart();
-        chart2.getXAxis().setLabel("frequency [fs]");
+        chart2.getXAxis().setName("frequency [fs]");
         chart2.getXAxis().setUnit("fs");
-        chart2.getYAxis().setLabel("magnitude");
+        chart2.getYAxis().setName("magnitude");
         chart2.getYAxis().setUnit("a.u.");
         chart2.getDatasets().addAll(fspectra1, fspectra2, fspectra3, fspectra4);
 
