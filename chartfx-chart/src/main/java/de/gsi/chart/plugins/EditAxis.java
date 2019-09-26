@@ -257,11 +257,11 @@ public class EditAxis extends ChartPlugin {
         }
 
         private void changeAxisRange(final Axis axis, final boolean isIncrease) {
-            final double width = Math.abs(axis.getUpperBound() - axis.getLowerBound());
+            final double width = Math.abs(axis.getMax() - axis.getMin());
 
             // TODO: check for linear and logarithmic axis
-            changeAxisRangeLinearScale(width, axis.lowerBoundProperty(), !isIncrease);
-            changeAxisRangeLinearScale(width, axis.upperBoundProperty(), isIncrease);
+            changeAxisRangeLinearScale(width, axis.minProperty(), !isIncrease);
+            changeAxisRangeLinearScale(width, axis.maxProperty(), isIncrease);
         }
 
         private void changeAxisRangeLimit(final Axis axis, final boolean isHorizontal, final boolean isIncrease) {
@@ -269,9 +269,9 @@ public class EditAxis extends ChartPlugin {
             final boolean isInverted = axis.isInvertedAxis();
             DoubleProperty prop;
             if (isHorizontal) {
-                prop = isInverted ? axis.upperBoundProperty() : axis.lowerBoundProperty();
+                prop = isInverted ? axis.maxProperty() : axis.minProperty();
             } else {
-                prop = isInverted ? axis.lowerBoundProperty() : axis.upperBoundProperty();
+                prop = isInverted ? axis.minProperty() : axis.maxProperty();
             }
 
             double minTickDistance = Double.MAX_VALUE;
@@ -294,7 +294,7 @@ public class EditAxis extends ChartPlugin {
             if ((minTickDistance == Double.MAX_VALUE) || (minTickDistance <= 0)) {
                 // default fall-back in case no minor tick have been defined for
                 // the axis
-                minTickDistance = 0.05 * Math.abs(axis.getUpperBound() - axis.getLowerBound());
+                minTickDistance = 0.05 * Math.abs(axis.getMax() - axis.getMin());
             }
 
             if (axis.getTickUnit() > 0) {
@@ -379,16 +379,16 @@ public class EditAxis extends ChartPlugin {
                 final double value;
                 final boolean isInverted = axis.isInvertedAxis();
                 if (isLowerBound) {
-                    value = isInverted ? axis.getUpperBound() : axis.getLowerBound();
+                    value = isInverted ? axis.getMax() : axis.getMin();
                 } else {
-                    value = isInverted ? axis.getLowerBound() : axis.getUpperBound();
+                    value = isInverted ? axis.getMin() : axis.getMax();
                 }
                 textField.setText(Double.toString(value));
             };
 
             axis.invertAxisProperty().addListener((ch, o, n) -> lambda.run());
-            axis.lowerBoundProperty().addListener((ch, o, n) -> lambda.run());
-            axis.upperBoundProperty().addListener((ch, o, n) -> lambda.run());
+            axis.minProperty().addListener((ch, o, n) -> lambda.run());
+            axis.maxProperty().addListener((ch, o, n) -> lambda.run());
 
             textField.snappedTopInset();
             textField.snappedBottomInset();
@@ -416,9 +416,9 @@ public class EditAxis extends ChartPlugin {
                 if (ke.getCode().equals(KeyCode.ENTER)) {
                     final double presentValue = Double.parseDouble(textField.getText());
                     if (isLowerBound && !axis.isInvertedAxis()) {
-                        axis.setLowerBound(presentValue);
+                        axis.setMin(presentValue);
                     } else {
-                        axis.setUpperBound(presentValue);
+                        axis.setMax(presentValue);
                     }
                     axis.setAutoRanging(false);
 
@@ -449,8 +449,8 @@ public class EditAxis extends ChartPlugin {
         private Node getLabelEditor(final Axis axis, final boolean isHorizontal) {
             final GridPane header = new GridPane();
             header.setAlignment(Pos.BASELINE_LEFT);
-            final TextField axisLabelTextField = new TextField(axis.getLabel());
-            axisLabelTextField.textProperty().bindBidirectional(axis.labelProperty());
+            final TextField axisLabelTextField = new TextField(axis.getName());
+            axisLabelTextField.textProperty().bindBidirectional(axis.nameProperty());
             header.addRow(0, new Label(" axis label: "), axisLabelTextField);
 
             final TextField axisUnitTextField = new TextField(axis.getUnit());

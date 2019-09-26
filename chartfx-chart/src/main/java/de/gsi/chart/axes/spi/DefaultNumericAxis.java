@@ -75,9 +75,9 @@ public class DefaultNumericAxis extends AbstractAxis {
                     axisTransform = logTransform;
                     setMinorTickCount(AbstractAxisParameter.DEFAULT_MINOR_TICK_COUNT);
                 }
-                if (getLowerBound() <= 0) {
+                if (getMin() <= 0) {
                     isUpdating = true;
-                    setLowerBound(DefaultNumericAxis.DEFAULT_LOG_MIN_VALUE);
+                    setMin(DefaultNumericAxis.DEFAULT_LOG_MIN_VALUE);
                     isUpdating = false;
                 }
 
@@ -111,9 +111,9 @@ public class DefaultNumericAxis extends AbstractAxis {
      * given upper bound, lower bound and tick unit.
      *
      * @param lowerBound
-     *            the {@link #lowerBoundProperty() lower bound} of the axis
+     *            the {@link #minProperty() lower bound} of the axis
      * @param upperBound
-     *            the {@link #upperBoundProperty() upper bound} of the axis
+     *            the {@link #maxProperty() upper bound} of the axis
      * @param tickUnit
      *            the tick unit, i.e. space between tick marks
      */
@@ -125,7 +125,7 @@ public class DefaultNumericAxis extends AbstractAxis {
      * Creates an {@link #autoRangingProperty() auto-ranging} Axis.
      *
      * @param axisLabel
-     *            the axis {@link #labelProperty() label}
+     *            the axis {@link #nameProperty() label}
      */
     public DefaultNumericAxis(final String axisLabel) {
         this(axisLabel, 0.0, 0.0, 5.0);
@@ -136,18 +136,18 @@ public class DefaultNumericAxis extends AbstractAxis {
      * given upper bound, lower bound and tick unit.
      *
      * @param axisLabel
-     *            the axis {@link #labelProperty() label}
+     *            the axis {@link #nameProperty() label}
      * @param lowerBound
-     *            the {@link #lowerBoundProperty() lower bound} of the axis
+     *            the {@link #minProperty() lower bound} of the axis
      * @param upperBound
-     *            the {@link #upperBoundProperty() upper bound} of the axis
+     *            the {@link #maxProperty() upper bound} of the axis
      * @param tickUnit
      *            the tick unit, i.e. space between tick marks
      */
     public DefaultNumericAxis(final String axisLabel, final double lowerBound, final double upperBound,
             final double tickUnit) {
         super(lowerBound, upperBound);
-        this.setLabel(axisLabel);
+        this.setName(axisLabel);
         if (lowerBound >= upperBound || lowerBound == 0 && upperBound == 0) {
             setAutoRanging(true);
         }
@@ -161,7 +161,7 @@ public class DefaultNumericAxis extends AbstractAxis {
      * Creates an {@link #autoRangingProperty() auto-ranging} Axis.
      *
      * @param axisLabel
-     *            the axis {@link #labelProperty() label}
+     *            the axis {@link #nameProperty() label}
      * @param unit
      *            the unit of the axis axis {@link #unitProperty() label}
      */
@@ -209,7 +209,7 @@ public class DefaultNumericAxis extends AbstractAxis {
         final double labelSize = getTickLabelFont().getSize() * 2;
         final int numOfFittingLabels = (int) Math.floor(axisLength / labelSize);
         final int numOfTickMarks = Math.max(Math.min(numOfFittingLabels, DefaultNumericAxis.MAX_TICK_COUNT), 2);
-        double rawTickUnit = (getUpperBound() - getLowerBound()) / numOfTickMarks;
+        double rawTickUnit = (getMax() - getMin()) / numOfTickMarks;
         if (rawTickUnit == 0 || Double.isNaN(rawTickUnit)) {
             rawTickUnit = 1e-3;// TODO: remove this hack (eventually) ;-)
         }
@@ -345,7 +345,7 @@ public class DefaultNumericAxis extends AbstractAxis {
         // } else {
         // return value >= getLowerBound() && value <= getUpperBound();
         // }
-        return value >= getLowerBound() && value <= getUpperBound();
+        return value >= getMin() && value <= getMax();
     }
 
     /**
@@ -524,7 +524,7 @@ public class DefaultNumericAxis extends AbstractAxis {
             min = DefaultNumericAxis.DEFAULT_LOG_MIN_VALUE;
             isUpdating = true;
             // TODO: check w.r.t. inverted axis (lower <-> upper bound exchange)
-            setLowerBound(DefaultNumericAxis.DEFAULT_LOG_MIN_VALUE);
+            setMin(DefaultNumericAxis.DEFAULT_LOG_MIN_VALUE);
             isUpdating = false;
         }
         final double max = maxValue < 0 && isForceZeroInRange() ? 0 : maxValue;
@@ -584,8 +584,8 @@ public class DefaultNumericAxis extends AbstractAxis {
         }
 
         final List<Double> minorTickMarks = new ArrayList<>();
-        final double lowerBound = getLowerBound();
-        final double upperBound = getUpperBound();
+        final double lowerBound = getMin();
+        final double upperBound = getMax();
         final double majorUnit = getTickUnit();
 
         if (isLogAxis) {
@@ -694,10 +694,10 @@ public class DefaultNumericAxis extends AbstractAxis {
             axisWidth = getWidth();
             axisHeight = getHeight();
             localCurrentLowerBound = currentLowerBound.get();
-            localCurrentUpperBound = DefaultNumericAxis.super.getUpperBound();
+            localCurrentUpperBound = DefaultNumericAxis.super.getMax();
 
-            upperBoundLog = axisTransform.forward(getUpperBound());
-            lowerBoundLog = axisTransform.forward(getLowerBound());
+            upperBoundLog = axisTransform.forward(getMax());
+            lowerBoundLog = axisTransform.forward(getMin());
             logScaleLength = upperBoundLog - lowerBoundLog;
 
             logScaleLengthInv = 1.0 / logScaleLength;
@@ -720,4 +720,5 @@ public class DefaultNumericAxis extends AbstractAxis {
             offset = isVerticalAxis ? getHeight() : getWidth();
         }
     }
+
 }

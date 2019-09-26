@@ -58,11 +58,11 @@ public class DataSetSpectrumSample extends AbstractDemoApplication {
         final DemoChart chart2 = new DemoChart(2);
         chart2.getRenderer(0).setDrawMarker(true);
         chart2.getRenderer(0).setErrorType(ErrorStyle.ERRORSURFACE);
-        chart2.getXAxis().setLabel("frequency");
+        chart2.getXAxis().setName("frequency");
         chart2.getXAxis().setUnit(normaliseFrequency ? "fs" : "Hz");
-        chart2.getYAxis().setLabel("magnitude");
+        chart2.getYAxis().setName("magnitude");
         chart2.getYAxis().setUnit("a.u.");
-        chart2.getYAxis(1).setLabel("magnitude");
+        chart2.getYAxis(1).setName("magnitude");
         chart2.getYAxis(1).setUnit("dB");
         chart2.getYAxis().setLogAxis(true);
         chart2.getYAxis().setLogarithmBase(10);

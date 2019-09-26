@@ -25,8 +25,8 @@ public class MasterSlaveAxisSynchronizer {
 
     public MasterSlaveAxisSynchronizer(AbstractAxis master) {
         this.master = master;
-        master.upperBoundProperty().addListener((p, o, n) -> upperBoundChanged(n.doubleValue()));
-        master.lowerBoundProperty().addListener((p, o, n) -> lowerBoundChanged(n.doubleValue()));
+        master.maxProperty().addListener((p, o, n) -> upperBoundChanged(n.doubleValue()));
+        master.minProperty().addListener((p, o, n) -> lowerBoundChanged(n.doubleValue()));
     }
 
     public void add(AbstractAxis axis) {
@@ -46,7 +46,7 @@ public class MasterSlaveAxisSynchronizer {
             return;
         }
         for (final AbstractAxis slave : slaves) {
-            slave.setUpperBound(value);
+            slave.setMax(value);
             // slave.setTickUnit(master.getTickUnit());
         }
     }
@@ -56,7 +56,7 @@ public class MasterSlaveAxisSynchronizer {
             return;
         }
         for (final AbstractAxis slave : slaves) {
-            slave.setLowerBound(value);
+            slave.setMin(value);
             // slave.setTickUnit(master.getTickUnit());
         }
     }

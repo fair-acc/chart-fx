@@ -60,7 +60,7 @@ public class DataViewerSample extends Application {
         final XYChart energyChart = new XYChart(createXAxis(), createYAxis());
         energyChart.setAnimated(false);
         energyChart.setLegendVisible(true);
-        energyChart.getYAxis().setLabel("Energy");
+        energyChart.getYAxis().setName("Energy");
         energyChart.getDatasets().addAll(createSeries());
 
         final XYChart currentChart = new XYChart(createXAxis(), createYAxis());
@@ -71,7 +71,7 @@ public class DataViewerSample extends Application {
         currentChart.getRenderers().add(errorDataSetRenderer);
         // currentChart.getYAxis().setTickLabelFill(Color.GREEN);
         ((Region) currentChart.getYAxis()).lookup(".axis-label").setStyle("-fx-text-fill: green;");
-        currentChart.getYAxis().setLabel("Current");
+        currentChart.getYAxis().setName("Current");
         currentChart.getYAxis().setSide(Side.RIGHT);
         currentChart.getDatasets().addAll(createSeries());
 

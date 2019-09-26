@@ -34,8 +34,8 @@ public class FrequencyFilterSample extends AbstractDemoApplication {
         DefaultDataSet dataSet = new DefaultDataSet("dirac", xValues, yValues, xValues.length, true);
 
         final DemoChart chartLP = new DemoChart();
-        chartLP.getXAxis().setLabel("frequency");
-        chartLP.getYAxis().setLabel("magnitude");
+        chartLP.getXAxis().setName("frequency");
+        chartLP.getYAxis().setName("magnitude");
         chartLP.getYAxis().setUnit("dB");
         chartLP.getRenderer(0).getDatasets().addAll(DataSetMath.normalisedMagnitudeSpectrumDecibel(dataSet));
 
@@ -52,8 +52,8 @@ public class FrequencyFilterSample extends AbstractDemoApplication {
         chartLP.getRenderer(0).getDatasets().addAll(DataSetMath.normalisedMagnitudeSpectrumDecibel(butterWorthC));
 
         final DemoChart chartHP = new DemoChart();
-        chartHP.getXAxis().setLabel("frequency");
-        chartHP.getYAxis().setLabel("magnitude");
+        chartHP.getXAxis().setName("frequency");
+        chartHP.getYAxis().setName("magnitude");
         chartHP.getYAxis().setUnit("dB");
         chartHP.getRenderer(0).getDatasets().addAll(DataSetMath.normalisedMagnitudeSpectrumDecibel(dataSet));
 

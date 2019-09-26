@@ -14,8 +14,8 @@ public abstract class AbstractAxisTransform implements AxisTransform {
 
     protected AbstractAxisTransform(final Axis axis) {
         this.axis = axis;
-        axis.lowerBoundProperty().addListener((ch, o, n) -> rangeMin = n.doubleValue());
-        axis.upperBoundProperty().addListener((ch, o, n) -> rangeMax = n.doubleValue());
+        axis.minProperty().addListener((ch, o, n) -> rangeMin = n.doubleValue());
+        axis.maxProperty().addListener((ch, o, n) -> rangeMax = n.doubleValue());
 
     }
 
@@ -31,11 +31,11 @@ public abstract class AbstractAxisTransform implements AxisTransform {
 
     @Override
     public void setMinimumRange(final double val) {
-        axis.lowerBoundProperty().set(val);
+        axis.minProperty().set(val);
     }
 
     @Override
     public void setMaximumRange(final double val) {
-        axis.upperBoundProperty().set(val);
+        axis.maxProperty().set(val);
     }
 }

@@ -56,10 +56,27 @@ public interface EventSource {
      * @param updateEvent the event the listeners are notified with
      */
     default void invokeListener(final UpdateEvent updateEvent) {
+        invokeListener(updateEvent, true);
+    }
+
+    /**
+     * invoke object within update listener list
+     * 
+     * @param updateEvent the event the listeners are notified with
+     * @param executeParallel {@code true} execute event listener via parallel executor service
+     */
+    default void invokeListener(final UpdateEvent updateEvent, final boolean executeParallel) {
         if (updateEventListener() == null || !isAutoNotification()) {
             return;
         }
         synchronized (updateEventListener()) {
+            if (!executeParallel) {
+                // alt implementation:
+                for (EventListener listener : updateEventListener()) {
+                    listener.handle(updateEvent);
+                }
+                return;
+            }
             final UpdateEvent event = updateEvent == null ? new UpdateEvent(this) : updateEvent;
 
             final List<Callable<Boolean>> workers = new ArrayList<>();
@@ -82,11 +99,6 @@ public interface EventSource {
                 throw new IllegalStateException("one parallel worker thread finished execution with error", e);
             }
         }
-
-        // alt implementation:
-        // for (EventListener listener : updateEventListener()) {
-        // listener.handle(updateEvent);
-        // }
     }
 
     /**

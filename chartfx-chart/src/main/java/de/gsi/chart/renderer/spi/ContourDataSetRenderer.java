@@ -224,8 +224,8 @@ public class ContourDataSetRenderer extends AbstractDataSetManagement<ContourDat
                     dataSet.getDataCount(DIM_Y) - 1);
         }
 
-        localCache.zMin = zAxis.getLowerBound();
-        localCache.zMax = zAxis.getUpperBound();
+        localCache.zMin = zAxis.getMin();
+        localCache.zMax = zAxis.getMax();
         //        localCache.zMinTransformed = zAxis.getAxisTransform().forward(zAxis.getLowerBound());
         //        localCache.zMaxTransformed = zAxis.getAxisTransform().forward(zAxis.getUpperBound());
         //        localCache.xInverted = xAxis.isInvertedAxis();
@@ -747,13 +747,11 @@ public class ContourDataSetRenderer extends AbstractDataSetManagement<ContourDat
         }
 
         if (zAxis.isAutoRanging()) {
-            zAxis.setLowerBound(zMin);
-            zAxis.setUpperBound(zMax);
+            zAxis.set(zMin, zMax);
         }
 
         if (zAxis.isAutoGrowRanging()) {
-            zAxis.setLowerBound(Math.min(zMin, zAxis.getLowerBound()));
-            zAxis.setUpperBound(Math.max(zMax, zAxis.getUpperBound()));
+            zAxis.set(Math.min(zMin, zAxis.getMin()), Math.max(zMax, zAxis.getMax()));
         }
     }
 

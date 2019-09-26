@@ -78,8 +78,8 @@ public class ErrorDataSetRendererStylingSample extends Application {
         final DefaultNumericAxis yAxis = new DefaultNumericAxis();
         yAxis.setUnit("Coolness");
         final XYChart chart = new XYChart(xAxis, yAxis);
-        chart.getXAxis().setLabel("x axis");
-        chart.getYAxis().setLabel("y axis");
+        chart.getXAxis().setName("x axis");
+        chart.getYAxis().setName("y axis");
         chart.legendVisibleProperty().set(true);
         // set them false to make the plot faster
         chart.setAnimated(false);
@@ -426,16 +426,16 @@ public class ErrorDataSetRendererStylingSample extends Application {
         autogrowranging.selectedProperty().addListener((ch, old, selected) -> chart.requestLayout());
         pane.addToParameterPane("Auto-Grow-Ranging: ", autogrowranging);
 
-        final Spinner<Number> upperRange = new Spinner<>(-N_MAX_SAMPLES, +N_MAX_SAMPLES, axis.getLowerBound(), 0.1);
+        final Spinner<Number> upperRange = new Spinner<>(-N_MAX_SAMPLES, +N_MAX_SAMPLES, axis.getMin(), 0.1);
         upperRange.valueProperty().addListener((ch, old, value) -> {
-            axis.setUpperBound(value.doubleValue());
+            axis.setMax(value.doubleValue());
             chart.requestLayout();
         });
         pane.addToParameterPane("   Upper Bound): ", upperRange);
 
-        final Spinner<Number> lowerRange = new Spinner<>(-N_MAX_SAMPLES, +N_MAX_SAMPLES, axis.getLowerBound(), 0.1);
+        final Spinner<Number> lowerRange = new Spinner<>(-N_MAX_SAMPLES, +N_MAX_SAMPLES, axis.getMin(), 0.1);
         lowerRange.valueProperty().addListener((ch, old, value) -> {
-            axis.setLowerBound(value.doubleValue());
+            axis.setMin(value.doubleValue());
             chart.requestLayout();
         });
         pane.addToParameterPane("   Lower Bound): ", lowerRange);

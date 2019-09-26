@@ -60,8 +60,8 @@ public class ValueIndicator extends AbstractChartMeasurement {
                 new HBox(new Label("Min. Range: "), valueField.getMinRangeTextField()),
                 new HBox(new Label("Max. Range: "), valueField.getMaxRangeTextField()));
 
-        final double lower = numAxis.getLowerBound();
-        final double upper = numAxis.getUpperBound();
+        final double lower = numAxis.getMin();
+        final double upper = numAxis.getMax();
         final double middle = 0.5 * Math.abs(upper - lower) + Math.min(lower, upper);
 
         if (axisMode == X) {

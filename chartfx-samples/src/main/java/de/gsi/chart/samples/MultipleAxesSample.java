@@ -153,7 +153,7 @@ public class MultipleAxesSample extends Application {
          * @param axis to be synchronised
          */
         public MyZoomCheckBox(Zoomer zoom, Axis axis) {
-            super("enable zoom for axis '" + axis.getLabel() + "'");
+            super("enable zoom for axis '" + axis.getName() + "'");
             this.setSelected(!zoom.omitAxisZoomList().contains(axis) || Zoomer.isOmitZoom(axis));
             this.selectedProperty().addListener((obj, o, n) -> {
                 if (n.equals(o)) {

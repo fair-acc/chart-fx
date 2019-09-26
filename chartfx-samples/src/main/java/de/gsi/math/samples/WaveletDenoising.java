@@ -184,11 +184,11 @@ public class WaveletDenoising extends AbstractDemoApplication {
         initData();
 
         final DemoChart chart1 = new DemoChart();
-        chart1.getXAxis().setLabel("time");
+        chart1.getXAxis().setName("time");
         chart1.getDatasets().addAll(fdata, fraw, freconstructed);
 
         final DemoChart chart2 = new DemoChart();
-        chart2.getXAxis().setLabel("frequency");
+        chart2.getXAxis().setName("frequency");
         chart2.getDatasets().addAll(fspectraModel, fspectra, fspectraFit);
 
         return new VBox(chart1, chart2);

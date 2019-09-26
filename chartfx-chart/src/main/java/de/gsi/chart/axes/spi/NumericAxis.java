@@ -102,9 +102,9 @@ public final class NumericAxis extends AbstractAxis {
      * given upper bound, lower bound and tick unit.
      *
      * @param lowerBound
-     *            the {@link #lowerBoundProperty() lower bound} of the axis
+     *            the {@link #minProperty() lower bound} of the axis
      * @param upperBound
-     *            the {@link #upperBoundProperty() upper bound} of the axis
+     *            the {@link #maxProperty() upper bound} of the axis
      * @param tickUnit
      *            the tick unit, i.e. space between tick marks
      */
@@ -117,18 +117,18 @@ public final class NumericAxis extends AbstractAxis {
      * given upper bound, lower bound and tick unit.
      *
      * @param axisLabel
-     *            the axis {@link #labelProperty() label}
+     *            the axis {@link #nameProperty() label}
      * @param lowerBound
-     *            the {@link #lowerBoundProperty() lower bound} of the axis
+     *            the {@link #minProperty() lower bound} of the axis
      * @param upperBound
-     *            the {@link #upperBoundProperty() upper bound} of the axis
+     *            the {@link #maxProperty() upper bound} of the axis
      * @param tickUnit
      *            the tick unit, i.e. space between tick marks
      */
     public NumericAxis(final String axisLabel, final double lowerBound, final double upperBound,
             final double tickUnit) {
         super(lowerBound, upperBound);
-        this.setLabel(axisLabel);
+        this.setName(axisLabel);
         setTickUnit(tickUnit);
 
         super.currentLowerBound.addListener((evt, o, n) -> localCurrentLowerBound = currentLowerBound.get());
@@ -190,8 +190,8 @@ public final class NumericAxis extends AbstractAxis {
         final double labelSize = getTickLabelFont().getSize() * 2;
         final int numOfFittingLabels = (int) Math.floor(axisLength / labelSize);
         final int numOfTickMarks = Math.max(Math.min(numOfFittingLabels, NumericAxis.MAX_TICK_COUNT), 2);
-        final double max = upperBoundProperty().get();
-        final double min = lowerBoundProperty().get();
+        final double max = maxProperty().get();
+        final double min = minProperty().get();
         double rawTickUnit = (max - min) / numOfTickMarks;
         double prevTickUnitRounded;
         double tickUnitRounded = Double.MIN_VALUE;
@@ -338,7 +338,7 @@ public final class NumericAxis extends AbstractAxis {
      */
     @Override
     public double getZeroPosition() {
-        if (0 < getLowerBound() || 0 > getUpperBound()) {
+        if (0 < getMin() || 0 > getMax()) {
             return Double.NaN;
         }
         // noinspection unchecked
@@ -368,7 +368,7 @@ public final class NumericAxis extends AbstractAxis {
      */
     @Override
     public boolean isValueOnAxis(final double value) {
-        return value >= getLowerBound() && value <= getUpperBound();
+        return value >= getMin() && value <= getMax();
     }
 
     /**
@@ -551,8 +551,8 @@ public final class NumericAxis extends AbstractAxis {
         }
 
         final List<Double> minorTickMarks = new ArrayList<>();
-        final double lowerBound = getLowerBound();
-        final double upperBound = getUpperBound();
+        final double lowerBound = getMin();
+        final double upperBound = getMax();
         final double majorUnit = getTickUnit();
 
         final double firstMajorTick = NumericAxis.computeFistMajorTick(lowerBound, majorUnit);

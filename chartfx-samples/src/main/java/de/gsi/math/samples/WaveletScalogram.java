@@ -162,11 +162,11 @@ public class WaveletScalogram extends AbstractDemoApplication {
     public Node getContent() {
 
         final DemoChart chart1 = new DemoChart();
-        chart1.getXAxis().setLabel("time");
+        chart1.getXAxis().setName("time");
         chart1.getXAxis().setUnit("turns");
         chart1.getYAxis().setAutoRangeRounding(false);
         chart1.getYAxis().setAutoRangePadding(0.0);
-        chart1.getYAxis().setLabel("frequency");
+        chart1.getYAxis().setName("frequency");
         chart1.getYAxis().setUnit("fs");
         final ContourDataSetRenderer contourChartRenderer = new ContourDataSetRenderer();
         chart1.getRenderers().set(0, contourChartRenderer);
@@ -176,9 +176,9 @@ public class WaveletScalogram extends AbstractDemoApplication {
         contourChartRenderer.getDatasets().add(createDataSet());
 
         final DemoChart chart2 = new DemoChart();
-        chart2.getXAxis().setLabel("frequency");
+        chart2.getXAxis().setName("frequency");
         chart2.getXAxis().setUnit("fs");
-        chart2.getYAxis().setLabel("magnitude");
+        chart2.getYAxis().setName("magnitude");
         chart1.getXAxis().setAutoRangeRounding(false);
         chart1.getXAxis().setAutoRangePadding(0.0);
         chart2.getDatasets().addAll(fwavelet, ffourier);

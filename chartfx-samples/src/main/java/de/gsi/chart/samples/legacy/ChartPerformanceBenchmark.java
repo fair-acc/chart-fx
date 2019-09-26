@@ -291,14 +291,14 @@ public class ChartPerformanceBenchmark extends AbstractTestApplication {
 
     public XYChart getResultChart() {
         final DefaultNumericAxis xAxis = new DefaultNumericAxis();
-        xAxis.setLabel("number of samples");
+        xAxis.setName("number of samples");
         xAxis.setForceZeroInRange(true);
         // xAxis.setLogAxis(true);
         xAxis.setAutoRangeRounding(true);
         xAxis.setAutoRangePadding(0.05);
         xAxis.setLogAxis(true);
         final DefaultNumericAxis yAxis1 = new DefaultNumericAxis();
-        yAxis1.setLabel("CPU load");
+        yAxis1.setName("CPU load");
         yAxis1.setUnit("%");
         yAxis1.setForceZeroInRange(true);
         yAxis1.setAutoRangeRounding(true);

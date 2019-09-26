@@ -342,20 +342,20 @@ class CachedDataPoints {
         // compute cached axis variables ... about 50% faster than the
         // generic template based version from the original ValueAxis<Number>
         if (xAxis.isLogAxis()) {
-            xZero = xAxis.getDisplayPosition(xAxis.getLowerBound());
+            xZero = xAxis.getDisplayPosition(xAxis.getMin());
         } else {
             xZero = xAxis.getDisplayPosition(0);
         }
         if (yAxis.isLogAxis()) {
-            yZero = yAxis.getDisplayPosition(yAxis.getLowerBound());
+            yZero = yAxis.getDisplayPosition(yAxis.getMin());
         } else {
             yZero = yAxis.getDisplayPosition(0);
         }
 
-        yMin = yAxis.getDisplayPosition(yAxis.getLowerBound());
-        yMax = yAxis.getDisplayPosition(yAxis.getUpperBound());
-        xMin = xAxis.getDisplayPosition(xAxis.getLowerBound());
-        xMax = xAxis.getDisplayPosition(xAxis.getUpperBound());
+        yMin = yAxis.getDisplayPosition(yAxis.getMin());
+        yMax = yAxis.getDisplayPosition(yAxis.getMax());
+        xMin = xAxis.getDisplayPosition(xAxis.getMin());
+        xMax = xAxis.getDisplayPosition(xAxis.getMax());
 
         xRange = Math.abs(xMax - xMin);
         yRange = Math.abs(yMax - yMin);

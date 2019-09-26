@@ -36,8 +36,8 @@ public class DataSetAverageSample extends AbstractDemoApplication {
         chart.getRenderer(0).setErrorType(ErrorStyle.NONE);
         chart.getRenderer(1).setErrorType(ErrorStyle.ERRORSURFACE);
         chart.getYAxis(1).setAutoRanging(false);
-        chart.getYAxis().upperBoundProperty().bindBidirectional(chart.getYAxis(1).upperBoundProperty());
-        chart.getYAxis().lowerBoundProperty().bindBidirectional(chart.getYAxis(1).lowerBoundProperty());
+        chart.getYAxis().maxProperty().bindBidirectional(chart.getYAxis(1).maxProperty());
+        chart.getYAxis().minProperty().bindBidirectional(chart.getYAxis(1).minProperty());
         chart.getYAxis().tickUnitProperty().bindBidirectional(chart.getYAxis(1).tickUnitProperty());
 
         LimitedQueue<DataSet> lastDataSets = new LimitedQueue<>(N_GRAPHS);
