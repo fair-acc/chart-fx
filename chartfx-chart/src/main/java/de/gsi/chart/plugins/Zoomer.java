@@ -162,6 +162,7 @@ public class Zoomer extends ChartPlugin {
     private Cursor originalCursor;
 
     private final ObjectProperty<Cursor> dragCursor = new SimpleObjectProperty<>(this, "dragCursor");
+    private final ObjectProperty<Cursor> zoomCursor = new SimpleObjectProperty<>(this, "zoomCursor");
 
     private final BooleanProperty animated = new SimpleBooleanProperty(this, "animated", false);
 
@@ -266,8 +267,9 @@ public class Zoomer extends ChartPlugin {
         super();
         setAxisMode(zoomMode);
         setAnimated(animated);
-        setDragCursor(Cursor.CROSSHAIR);
-
+        setZoomCursor(Cursor.CROSSHAIR);
+        setDragCursor(Cursor.CLOSED_HAND);
+        
         zoomRectangle.setManaged(false);
         zoomRectangle.getStyleClass().add(STYLE_CLASS_ZOOM_RECT);
         getChartChildren().add(zoomRectangle);
@@ -416,6 +418,15 @@ public class Zoomer extends ChartPlugin {
     public final ObjectProperty<Cursor> dragCursorProperty() {
         return dragCursor;
     }
+    
+    /**
+     * Mouse cursor to be used during zoom operation.
+     *
+     * @return the mouse cursor property
+     */
+    public final ObjectProperty<Cursor> zoomCursorProperty() {
+        return zoomCursor;
+    }
 
     /**
      * Returns the value of the {@link #axisModeProperty()}.
@@ -433,6 +444,15 @@ public class Zoomer extends ChartPlugin {
      */
     public final Cursor getDragCursor() {
         return dragCursorProperty().get();
+    }
+    
+    /**
+     * Returns the value of the {@link #zoomCursorProperty()}
+     *
+     * @return the current cursor
+     */
+    public final Cursor getZoomCursor() {
+        return zoomCursorProperty().get();
     }
 
     public RangeSlider getRangeSlider() {
@@ -587,6 +607,16 @@ public class Zoomer extends ChartPlugin {
      */
     public final void setDragCursor(final Cursor cursor) {
         dragCursorProperty().set(cursor);
+    }
+    
+    /**
+     * Sets value of the {@link #zoomCursorProperty()}.
+     *
+     * @param cursor
+     *            the cursor to be used by the plugin
+     */
+    public final void setZoomCursor(final Cursor cursor) {
+        zoomCursorProperty().set(cursor);
     }
 
     /**
@@ -798,11 +828,19 @@ public class Zoomer extends ChartPlugin {
         return axisStateMap;
     }
 
-    private void installCursor() {
+    private void installDragCursor() {
         final Region chart = getChart();
         originalCursor = chart.getCursor();
         if (getDragCursor() != null) {
             chart.setCursor(getDragCursor());
+        }
+    }
+    
+    private void installZoomCursor() {
+        final Region chart = getChart();
+        originalCursor = chart.getCursor();
+        if (getDragCursor() != null) {
+            chart.setCursor(getZoomCursor());
         }
     }
 
@@ -1012,7 +1050,7 @@ public class Zoomer extends ChartPlugin {
         previousMouseLocation = getLocationInPlotArea(event);
         panShiftX = 0.0;
         panShiftY = 0.0;
-        installCursor();
+        installDragCursor();
         clearZoomStackIfAxisAutoRangingIsEnabled();
         pushCurrentZoomWindows();
     }
@@ -1085,7 +1123,7 @@ public class Zoomer extends ChartPlugin {
         zoomRectangle.setWidth(0);
         zoomRectangle.setHeight(0);
         zoomRectangle.setVisible(true);
-        installCursor();
+        installZoomCursor();
     }
 
     private boolean zoomOngoing() {
