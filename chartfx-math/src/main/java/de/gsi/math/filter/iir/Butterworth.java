@@ -67,7 +67,7 @@ public class Butterworth extends Cascade {
 
         final LayoutBase digitalProto = new LayoutBase(order);
 
-        new LowPassTransform(cutoffFrequency / sampleRate, digitalProto, analogProto);
+        LowPassTransform.transform(cutoffFrequency / sampleRate, digitalProto, analogProto);
 
         setLayout(digitalProto, directFormType);
     }
@@ -105,7 +105,7 @@ public class Butterworth extends Cascade {
 
         final LayoutBase digitalProto = new LayoutBase(order);
 
-        new HighPassTransform(cutoffFrequency / sampleRate, digitalProto, analogProto);
+        HighPassTransform.transform(cutoffFrequency / sampleRate, digitalProto, analogProto);
 
         setLayout(digitalProto, directFormType);
     }
@@ -142,7 +142,8 @@ public class Butterworth extends Cascade {
 
         final LayoutBase digitalProto = new LayoutBase(order * 2);
 
-        new BandStopTransform(centerFrequency / sampleRate, widthFrequency / sampleRate, digitalProto, analogProto);
+        BandStopTransform.transform(centerFrequency / sampleRate, widthFrequency / sampleRate, digitalProto,
+                analogProto);
 
         setLayout(digitalProto, directFormType);
     }
@@ -182,7 +183,8 @@ public class Butterworth extends Cascade {
 
         final LayoutBase digitalProto = new LayoutBase(order * 2);
 
-        new BandPassTransform(centerFrequency / sampleRate, widthFrequency / sampleRate, digitalProto, analogProto);
+        BandPassTransform.transform(centerFrequency / sampleRate, widthFrequency / sampleRate, digitalProto,
+                analogProto);
 
         setLayout(digitalProto, directFormType);
 

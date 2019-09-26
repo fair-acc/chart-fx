@@ -103,7 +103,7 @@ public class Bessel extends Cascade {
 
         final LayoutBase digitalProto = new LayoutBase(order);
 
-        new LowPassTransform(cutoffFrequency / sampleRate, digitalProto, analogProto);
+        LowPassTransform.transform(cutoffFrequency / sampleRate, digitalProto, analogProto);
 
         setLayout(digitalProto, directFormType);
     }
@@ -148,7 +148,7 @@ public class Bessel extends Cascade {
 
         final LayoutBase m_digitalProto = new LayoutBase(order);
 
-        new HighPassTransform(cutoffFrequency / sampleRate, m_digitalProto, m_analogProto);
+        HighPassTransform.transform(cutoffFrequency / sampleRate, m_digitalProto, m_analogProto);
 
         setLayout(m_digitalProto, directFormType);
     }
@@ -192,7 +192,8 @@ public class Bessel extends Cascade {
 
         final LayoutBase m_digitalProto = new LayoutBase(order * 2);
 
-        new BandStopTransform(centerFrequency / sampleRate, widthFrequency / sampleRate, m_digitalProto, m_analogProto);
+        BandStopTransform.transform(centerFrequency / sampleRate, widthFrequency / sampleRate, m_digitalProto,
+                m_analogProto);
 
         setLayout(m_digitalProto, directFormType);
     }
@@ -241,7 +242,8 @@ public class Bessel extends Cascade {
 
         final LayoutBase m_digitalProto = new LayoutBase(order * 2);
 
-        new BandPassTransform(centerFrequency / sampleRate, widthFrequency / sampleRate, m_digitalProto, m_analogProto);
+        BandPassTransform.transform(centerFrequency / sampleRate, widthFrequency / sampleRate, m_digitalProto,
+                m_analogProto);
 
         setLayout(m_digitalProto, directFormType);
 
