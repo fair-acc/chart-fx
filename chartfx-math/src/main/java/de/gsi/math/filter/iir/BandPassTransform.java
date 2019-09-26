@@ -28,12 +28,14 @@ import org.apache.commons.math3.complex.Complex;
  */
 public class BandPassTransform {
 
-    private double wc2;
-    private double wc;
-    private final double a;
-    private final double b;
+    private BandPassTransform() {
+    }
 
-    public BandPassTransform(final double fc, final double fw, final LayoutBase digital, final LayoutBase analog) {
+    public static void transform(final double fc, final double fw, final LayoutBase digital, final LayoutBase analog) {
+        double wc2;
+        double wc;
+        final double a;
+        final double b;
 
         digital.reset();
 
@@ -58,16 +60,16 @@ public class BandPassTransform {
         final int pairs = numPoles / 2;
         for (int i = 0; i < pairs; ++i) {
             final PoleZeroPair pair = analog.getPair(i);
-            final ComplexPair p1 = transform(pair.poles.first);
-            final ComplexPair z1 = transform(pair.zeros.first);
+            final ComplexPair p1 = transform(pair.poles.first, a, b);
+            final ComplexPair z1 = transform(pair.zeros.first, a, b);
 
             digital.addPoleZeroConjugatePairs(p1.first, z1.first);
             digital.addPoleZeroConjugatePairs(p1.second, z1.second);
         }
 
         if ((numPoles & 1) == 1) {
-            final ComplexPair poles = transform(analog.getPair(pairs).poles.first);
-            final ComplexPair zeros = transform(analog.getPair(pairs).zeros.first);
+            final ComplexPair poles = transform(analog.getPair(pairs).poles.first, a, b);
+            final ComplexPair zeros = transform(analog.getPair(pairs).zeros.first, a, b);
 
             digital.add(poles, zeros);
         }
@@ -77,12 +79,13 @@ public class BandPassTransform {
                 analog.getNormalGain());
     }
 
-    private ComplexPair transform(Complex c) {
-        if (c.isInfinite()) {
+    private static ComplexPair transform(final Complex in, final double a, final double b) {
+        Complex c;
+        if (in.isInfinite()) {
             return new ComplexPair(new Complex(-1), new Complex(1));
         }
 
-        c = new Complex(1).add(c).divide(new Complex(1).subtract(c)); // bilinear
+        c = new Complex(1).add(in).divide(new Complex(1).subtract(in)); // bilinear
 
         final double a2 = a * a;
         final double b2 = b * b;

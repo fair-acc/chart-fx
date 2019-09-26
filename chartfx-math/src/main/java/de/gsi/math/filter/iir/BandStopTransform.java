@@ -27,13 +27,15 @@ import org.apache.commons.math3.complex.Complex;
  * Transforms from an analogue lowpass filter to a digital bandstop filter
  */
 public class BandStopTransform {
+    private BandStopTransform() {
+    }
 
-    private double wc;
-    private double wc2;
-    private final double a;
-    private final double b;
+    public static void transform(final double fc, final double fw, final LayoutBase digital, final LayoutBase analog) {
+        double wc;
+        double wc2;
+        final double a;
+        final double b;
 
-    public BandStopTransform(final double fc, final double fw, final LayoutBase digital, final LayoutBase analog) {
         digital.reset();
 
         final double ww = 2 * Math.PI * fw;
@@ -56,15 +58,15 @@ public class BandStopTransform {
         final int pairs = numPoles / 2;
         for (int i = 0; i < pairs; i++) {
             final PoleZeroPair pair = analog.getPair(i);
-            final ComplexPair p = transform(pair.poles.first);
-            final ComplexPair z = transform(pair.zeros.first);
+            final ComplexPair p = transform(pair.poles.first, a, b);
+            final ComplexPair z = transform(pair.zeros.first, a, b);
             digital.addPoleZeroConjugatePairs(p.first, z.first);
             digital.addPoleZeroConjugatePairs(p.second, z.second);
         }
 
         if ((numPoles & 1) == 1) {
-            final ComplexPair poles = transform(analog.getPair(pairs).poles.first);
-            final ComplexPair zeros = transform(analog.getPair(pairs).zeros.first);
+            final ComplexPair poles = transform(analog.getPair(pairs).poles.first, a, b);
+            final ComplexPair zeros = transform(analog.getPair(pairs).zeros.first, a, b);
 
             digital.add(poles, zeros);
         }
@@ -76,11 +78,12 @@ public class BandStopTransform {
         }
     }
 
-    private ComplexPair transform(Complex c) {
-        if (c.isInfinite()) {
+    private static ComplexPair transform(final Complex in, final double a, final double b) {
+        Complex c;
+        if (in.isInfinite()) {
             c = new Complex(-1);
         } else {
-            c = new Complex(1).add(c).divide(new Complex(1).subtract(c)); // bilinear
+            c = new Complex(1).add(in).divide(new Complex(1).subtract(in)); // bilinear
         }
 
         final double a2 = a * a;

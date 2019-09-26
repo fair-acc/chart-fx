@@ -28,23 +28,12 @@ import org.apache.commons.math3.complex.Complex;
  */
 public class LowPassTransform {
 
-    private final double f;
+    private LowPassTransform() {
 
-    private Complex transform(Complex c) {
-        if (c.isInfinite()) {
-            return new Complex(-1, 0);
-        }
-
-        // frequency transform
-        c = c.multiply(f);
-
-        final Complex one = new Complex(1, 0);
-
-        // bilinear low pass transform
-        return one.add(c).divide(one.subtract(c));
     }
 
-    public LowPassTransform(final double fc, final LayoutBase digital, final LayoutBase analog) {
+    public static void transform(final double fc, final LayoutBase digital, final LayoutBase analog) {
+        final double f;
         digital.reset();
 
         // pre-warp
@@ -54,15 +43,29 @@ public class LowPassTransform {
         final int pairs = numPoles / 2;
         for (int i = 0; i < pairs; ++i) {
             final PoleZeroPair pair = analog.getPair(i);
-            digital.addPoleZeroConjugatePairs(transform(pair.poles.first), transform(pair.zeros.first));
+            digital.addPoleZeroConjugatePairs(transform(pair.poles.first, f), transform(pair.zeros.first, f));
         }
 
         if ((numPoles & 1) == 1) {
             final PoleZeroPair pair = analog.getPair(pairs);
-            digital.add(transform(pair.poles.first), transform(pair.zeros.first));
+            digital.add(transform(pair.poles.first, f), transform(pair.zeros.first, f));
         }
 
         digital.setNormal(analog.getNormalW(), analog.getNormalGain());
+    }
+
+    private static Complex transform(final Complex in, final double f) {
+        if (in.isInfinite()) {
+            return new Complex(-1, 0);
+        }
+        Complex c;
+        // frequency transform
+        c = in.multiply(f);
+
+        final Complex one = new Complex(1, 0);
+
+        // bilinear low pass transform
+        return one.add(c).divide(one.subtract(c));
     }
 
 }

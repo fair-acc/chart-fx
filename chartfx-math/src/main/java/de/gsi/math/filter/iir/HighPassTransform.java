@@ -28,9 +28,12 @@ import org.apache.commons.math3.complex.Complex;
  */
 public class HighPassTransform {
 
-    double f;
+    private HighPassTransform() {
 
-    public HighPassTransform(final double fc, final LayoutBase digital, final LayoutBase analog) {
+    }
+
+    public static void transform(final double fc, final LayoutBase digital, final LayoutBase analog) {
+        double f;
         digital.reset();
 
         // pre-warp
@@ -40,24 +43,24 @@ public class HighPassTransform {
         final int pairs = numPoles / 2;
         for (int i = 0; i < pairs; ++i) {
             final PoleZeroPair pair = analog.getPair(i);
-            digital.addPoleZeroConjugatePairs(transform(pair.poles.first), transform(pair.zeros.first));
+            digital.addPoleZeroConjugatePairs(transform(pair.poles.first, f), transform(pair.zeros.first, f));
         }
 
         if ((numPoles & 1) == 1) {
             final PoleZeroPair pair = analog.getPair(pairs);
-            digital.add(transform(pair.poles.first), transform(pair.zeros.first));
+            digital.add(transform(pair.poles.first, f), transform(pair.zeros.first, f));
         }
 
         digital.setNormal(Math.PI - analog.getNormalW(), analog.getNormalGain());
     }
 
-    private Complex transform(Complex c) {
-        if (c.isInfinite()) {
+    private static Complex transform(final Complex in, final double f) {
+        if (in.isInfinite()) {
             return new Complex(1, 0);
         }
-
+        Complex c;
         // frequency transform
-        c = c.multiply(f);
+        c = in.multiply(f);
 
         // bilinear high pass transform
         return new Complex(-1).multiply(new Complex(1).add(c)).divide(new Complex(1).subtract(c));
