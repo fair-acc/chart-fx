@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 
 import de.gsi.chart.XYChart;
 import de.gsi.chart.axes.spi.DefaultNumericAxis;
+import de.gsi.chart.plugins.Zoomer;
 import de.gsi.dataset.spi.DoubleDataSet;
 import javafx.application.Application;
 import javafx.scene.Scene;
@@ -23,7 +24,8 @@ public class SimpleChartSample extends Application {
     @Override
     public void start(final Stage primaryStage) {
         final XYChart chart = new XYChart(new DefaultNumericAxis(), new DefaultNumericAxis());
-
+        chart.getPlugins().add(new Zoomer()); // standard pluging, used in most cases
+        
         final DoubleDataSet dataSet1 = new DoubleDataSet("data set #1");
         dataSet1.addListener(evt -> LOGGER.atInfo().log("dataset1 received " + evt.getClass().getSimpleName()));
         final DoubleDataSet dataSet2 = new DoubleDataSet("data set #2");

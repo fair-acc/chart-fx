@@ -14,9 +14,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.gsi.chart.Chart;
+import de.gsi.chart.XYChart;
 import de.gsi.chart.axes.Axis;
 import de.gsi.chart.axes.AxisMode;
 import de.gsi.chart.axes.spi.Axes;
+import de.gsi.chart.ui.geometry.Side;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
@@ -74,13 +76,41 @@ public class Zoomer extends ChartPlugin {
     private static final Logger LOGGER = LoggerFactory.getLogger(Zoomer.class);
     private static final String FONT_AWESOME = "FontAwesome";
     private static final String ZOOMER_OMIT_AXIS = "OmitAxisZoom";
-    /**
-     * Name of the CCS class of the zoom rectangle.
-     */
     public static final String STYLE_CLASS_ZOOM_RECT = "chart-zoom-rect";
     private static final int ZOOM_RECT_MIN_SIZE = 5;
     private static final Duration DEFAULT_ZOOM_DURATION = Duration.millis(500);
     private static final int FONT_SIZE = 20;
+
+    /**
+     * Default pan mouse filter passing on left mouse button with
+     * {@link MouseEvent#isControlDown() control key down}.
+     */
+    public static final Predicate<MouseEvent> DEFAULT_MOUSE_FILTER = MouseEventsHelper::isOnlyMiddleButtonDown;
+    private Predicate<MouseEvent> mouseFilter = Panner.DEFAULT_MOUSE_FILTER;
+    private double panShiftX;
+    private double panShiftY;
+    private Point2D previousMouseLocation;
+    private BooleanProperty enablePanner = new SimpleBooleanProperty(this, "enablePanner", true);
+    private final EventHandler<MouseEvent> panStartHandler = event -> {
+        if (isPannerEnabled() && mouseFilter == null || mouseFilter.test(event)) {
+            panStarted(event);
+            event.consume();
+        }
+    };
+
+    private final EventHandler<MouseEvent> panDragHandler = event -> {
+        if (panOngoing()) {
+            panDragged(event);
+            event.consume();
+        }
+    };
+
+    private final EventHandler<MouseEvent> panEndHandler = event -> {
+        if (panOngoing()) {
+            panEnded();
+            event.consume();
+        }
+    };
 
     /**
      * Default zoom-in mouse filter passing on left mouse button (only).
@@ -113,8 +143,8 @@ public class Zoomer extends ChartPlugin {
     private Predicate<ScrollEvent> zoomScrollFilter = defaultScrollFilter;
 
     private final Rectangle zoomRectangle = new Rectangle();
-    private Point2D zoomStartPoint = null;
-    private Point2D zoomEndPoint = null;
+    private Point2D zoomStartPoint;
+    private Point2D zoomEndPoint;
     private final Deque<Map<Axis, ZoomState>> zoomStacks = new ArrayDeque<>();
     private final HBox zoomButtons = getZoomInteractorBar();
     private ZoomRangeSlider xRangeSlider;
@@ -135,7 +165,7 @@ public class Zoomer extends ChartPlugin {
 
     private final BooleanProperty animated = new SimpleBooleanProperty(this, "animated", false);
 
-    private final ObjectProperty<Duration> zoomDuration = new SimpleObjectProperty<Duration>(this, "zoomDuration",
+    private final ObjectProperty<Duration> zoomDuration = new SimpleObjectProperty<>(this, "zoomDuration",
             DEFAULT_ZOOM_DURATION) {
         @Override
         protected void invalidated() {
@@ -297,6 +327,7 @@ public class Zoomer extends ChartPlugin {
             ((Node) axis).getProperties().remove(ZOOMER_OMIT_AXIS);
         }
     }
+
     /**
      * limits the mouse event position to the min/max range of the canavs (N.B.
      * event can occur to be negative/larger/outside than the canvas) This is to
@@ -368,7 +399,7 @@ public class Zoomer extends ChartPlugin {
 
     /**
      * Clears the stack of zoom states saved during zoom-in operations for a specific given axis.
-     * 
+     *
      * @param axis axis zoom history that shall be removed
      */
     public void clear(final Axis axis) {
@@ -480,7 +511,7 @@ public class Zoomer extends ChartPlugin {
 
     /**
      * Returns zoom-scroll filter.
-     * 
+     *
      * @return predicate of filter
      */
     public Predicate<ScrollEvent> getZoomScrollFilter() {
@@ -495,6 +526,10 @@ public class Zoomer extends ChartPlugin {
      */
     public final boolean isAnimated() {
         return animatedProperty().get();
+    }
+
+    public final boolean isPannerEnabled() {
+        return pannerEnabledProperty().get();
     }
 
     /**
@@ -552,6 +587,15 @@ public class Zoomer extends ChartPlugin {
      */
     public final void setDragCursor(final Cursor cursor) {
         dragCursorProperty().set(cursor);
+    }
+
+    /**
+     * Sets the value of the {@link #sliderVisibleProperty()}.
+     *
+     * @param state if {@code true} the panner (middle mouse button is enabled
+     */
+    public final void setPannerEnabled(final boolean state) {
+        pannerEnabledProperty().set(state);
     }
 
     /**
@@ -631,11 +675,20 @@ public class Zoomer extends ChartPlugin {
     /**
      * Sets filter on {@link MouseEvent#MOUSE_CLICKED MOUSE_CLICKED} events that
      * should trigger zoom-origin operation.
-     * 
+     *
      * @param zoomScrollFilter filter
      */
     public void setZoomScrollFilter(final Predicate<ScrollEvent> zoomScrollFilter) {
         this.zoomScrollFilter = zoomScrollFilter;
+    }
+
+    /**
+     * When {@code true} pressing the middle mouse button and dragging pans the plot
+     *
+     * @return the pannerEnabled property
+     */
+    public final BooleanProperty pannerEnabledProperty() {
+        return enablePanner;
     }
 
     /**
@@ -800,14 +853,13 @@ public class Zoomer extends ChartPlugin {
     }
 
     private void performZoom(Entry<Axis, ZoomState> zoomStateEntry, final boolean isZoomIn) {
-        Axis axis = zoomStateEntry.getKey();
         ZoomState zoomState = zoomStateEntry.getValue();
-
         if (zoomState.zoomRangeMax - zoomState.zoomRangeMin == 0) {
             LOGGER.atDebug().log("Cannot zoom in deeper than numerical precision");
             return;
         }
 
+        Axis axis = zoomStateEntry.getKey();
         if (isZoomIn && ((axis.getSide().isHorizontal() && getAxisMode().allowsX())
                 || (axis.getSide().isVertical() && getAxisMode().allowsY()))) {
             // perform only zoom-in if axis is horizontal (or vertical) and corresponding horizontal (or vertical) zooming is allowed
@@ -856,6 +908,115 @@ public class Zoomer extends ChartPlugin {
         performZoom(getZoomDataWindows(), true);
     }
 
+    private void panChart(final Chart chart, final Point2D mouseLocation) {
+        if (!(chart instanceof XYChart)) {
+            return;
+        }
+
+        final double oldMouseX = previousMouseLocation.getX();
+        final double oldMouseY = previousMouseLocation.getY();
+        final double newMouseX = mouseLocation.getX();
+        final double newMouseY = mouseLocation.getY();
+        panShiftX += oldMouseX - newMouseX;
+        panShiftY += oldMouseY - newMouseY;
+
+        for (final Axis axis : chart.getAxes()) {
+            if (!(Axes.isNumericAxis(axis)) || axis.getSide() == null) {
+                continue;
+            }
+            final Axis nAxis = Axes.toNumericAxis(axis);
+            final Side side = axis.getSide();
+
+            final double prevData = axis.getValueForDisplay(side.isHorizontal() ? oldMouseX : oldMouseY);
+            final double newData = axis.getValueForDisplay(side.isHorizontal() ? newMouseX : newMouseY);
+            final double offset = prevData - newData;
+
+            final boolean allowsShift = side.isHorizontal() ? getAxisMode().allowsX() : getAxisMode().allowsY();
+            if (!Axes.hasBoundedRange(nAxis) && allowsShift) {
+                nAxis.setAutoRanging(false);
+                shiftBounds(axis, offset);
+            }
+        }
+        previousMouseLocation = mouseLocation;
+    }
+
+        /**
+         * Depending if the offset is positive or negative, change first upper or
+         * lower bound to not provoke lowerBound &gt;= upperBound when offset &gt;=
+         * upperBound - lowerBound.
+         *
+         * @param axis reference axis
+         * @param offset panning distance
+         */
+        private static void shiftBounds(final Axis axis, final double offset) {
+            if (offset < 0) {
+                axis.setLowerBound(axis.getLowerBound() + offset);
+                axis.setUpperBound(axis.getUpperBound() + offset);
+            } else {
+                axis.setUpperBound(axis.getUpperBound() + offset);
+                axis.setLowerBound(axis.getLowerBound() + offset);
+            }
+        }
+
+    private void panDragged(final MouseEvent event) {
+        final Point2D mouseLocation = getLocationInPlotArea(event);
+        panChart(getChart(), mouseLocation);
+        previousMouseLocation = mouseLocation;
+    }
+
+    private void panEnded() {
+        Chart chart = getChart();
+        if (chart == null || panShiftX == 0.0 || panShiftY == 0.0 || previousMouseLocation == null) {
+            return;
+        }
+        final double oldMouseX = previousMouseLocation.getX() - panShiftX;
+        final double oldMouseY = previousMouseLocation.getY() - panShiftY;
+        final double newMouseX = previousMouseLocation.getX();
+        final double newMouseY = previousMouseLocation.getY();
+
+        ConcurrentHashMap<Axis, ZoomState> axisStateMap = new ConcurrentHashMap<>();
+        for (final Axis axis : chart.getAxes()) {
+            if (!(Axes.isNumericAxis(axis)) || axis.getSide() == null) {
+                continue;
+            }
+            final Axis nAxis = Axes.toNumericAxis(axis);
+            final Side side = axis.getSide();
+
+            final double prevData = axis.getValueForDisplay(side.isHorizontal() ? oldMouseX : oldMouseY);
+            final double newData = axis.getValueForDisplay(side.isHorizontal() ? newMouseX : newMouseY);
+            final double offset = prevData - newData;
+
+            final double dataMin = axis.getLowerBound() - offset;
+            final double dataMax = axis.getUpperBound() - offset;
+            final boolean allowsShift = side.isHorizontal() ? getAxisMode().allowsX() : getAxisMode().allowsY();
+            if (!Axes.hasBoundedRange(nAxis) && allowsShift) {
+                nAxis.setAutoRanging(false);
+                axisStateMap.put(axis, new ZoomState(dataMin, dataMax, axis.isAutoRanging(), axis.isAutoGrowRanging()));
+            }
+        }
+//        clearZoomStackIfAxisAutoRangingIsEnabled();
+//        pushCurrentZoomWindows();
+//        this.performZoom(axisStateMap, true);
+
+        panShiftX = 0.0;
+        panShiftY = 0.0;
+        previousMouseLocation = null;
+        uninstallCursor();
+    }
+
+    private boolean panOngoing() {
+        return previousMouseLocation != null;
+    }
+
+    private void panStarted(final MouseEvent event) {
+        previousMouseLocation = getLocationInPlotArea(event);
+        panShiftX = 0.0;
+        panShiftY = 0.0;
+        installCursor();
+        clearZoomStackIfAxisAutoRangingIsEnabled();
+        pushCurrentZoomWindows();
+    }
+
     private void pushCurrentZoomWindows() {
         if (getChart() == null) {
             return;
@@ -875,6 +1036,9 @@ public class Zoomer extends ChartPlugin {
         registerInputEventHandler(MouseEvent.MOUSE_CLICKED, zoomOutHandler);
         registerInputEventHandler(MouseEvent.MOUSE_CLICKED, zoomOriginHandler);
         registerInputEventHandler(ScrollEvent.SCROLL, zoomScrollHandler);
+        registerInputEventHandler(MouseEvent.MOUSE_PRESSED, panStartHandler);
+        registerInputEventHandler(MouseEvent.MOUSE_DRAGGED, panDragHandler);
+        registerInputEventHandler(MouseEvent.MOUSE_RELEASED, panEndHandler);
     }
 
     private void uninstallCursor() {
@@ -940,7 +1104,7 @@ public class Zoomer extends ChartPlugin {
 
     private class ZoomRangeSlider extends RangeSlider {
         private final BooleanProperty invertedSlide = new SimpleBooleanProperty(this, "invertedSlide", false);
-        private boolean isUpdating = false;
+        private boolean isUpdating;
         private final ChangeListener<Boolean> sliderResetHandler = (ch, o, n) -> {
             if (getChart() == null) {
                 return;
@@ -1011,7 +1175,7 @@ public class Zoomer extends ChartPlugin {
             setMaxWidth(Double.MAX_VALUE);
 
             xAxis.invertAxisProperty().bindBidirectional(invertedSlide);
-            invertedSlide.addListener((ch, o, n) -> ZoomRangeSlider.this.setRotate(n ? 180 : 0));
+            invertedSlide.addListener((ch, o, n) -> setRotate(n ? 180 : 0));
 
             xAxis.autoRangingProperty().addListener(sliderResetHandler);
             xAxis.autoGrowRangingProperty().addListener(sliderResetHandler);
@@ -1020,7 +1184,7 @@ public class Zoomer extends ChartPlugin {
             xAxis.upperBoundProperty().addListener(rangeChangeListener);
 
             // rstein: needed in case of autoranging/sliding xAxis (see
-            // RollingBuffer for example)            
+            // RollingBuffer for example)           
             lowValueProperty().addListener(sliderValueChanged);
             highValueProperty().addListener(sliderValueChanged);
 
@@ -1075,7 +1239,7 @@ public class Zoomer extends ChartPlugin {
         protected boolean wasAutoRanging;
         protected boolean wasAutoGrowRanging;
 
-        ZoomState(final double zoomRangeMin, final double zoomRangeMax, final boolean isAutoRanging,
+        private ZoomState(final double zoomRangeMin, final double zoomRangeMax, final boolean isAutoRanging,
                 final boolean isAutoGrowRanging) {
             this.zoomRangeMin = zoomRangeMin;
             this.zoomRangeMax = zoomRangeMax;
