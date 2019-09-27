@@ -35,9 +35,9 @@ public class RollingBufferSample extends Application {
     public static final int DEBUG_UPDATE_RATE = 500;
     // 0: just drop points that are drawn on the same pixel '3' points need to be at least 3 pixel apart to be drawn
     protected static final int MIN_PIXEL_DISTANCE = 0;
-    public static final int N_SAMPLES = 3000; // default: 1000000
-    public static final int UPDATE_PERIOD = 40; // [ms]
-    public static final int BUFFER_CAPACITY = 750; // 750 samples @ 25 Hz <-> 30 s
+    public static int N_SAMPLES = 3000; // default: 1000000
+    public static int UPDATE_PERIOD = 40; // [ms]
+    public static int BUFFER_CAPACITY = 750; // 750 samples @ 25 Hz <-> 30 s
     public final CircularDoubleErrorDataSet rollingBufferDipoleCurrent = new CircularDoubleErrorDataSet(
             "dipole current [A]", RollingBufferSample.BUFFER_CAPACITY);
     public final CircularDoubleErrorDataSet rollingBufferBeamIntensity = new CircularDoubleErrorDataSet(
