@@ -432,6 +432,9 @@ public class XYChart extends Chart {
             return;
         }
         final boolean oldFlag = axis.isAutoNotification();
+        final double oldMin = axis.getMin();
+        final double oldMax = axis.getMax();
+        final double oldLength = axis.getLength();
         axis.setAutoNotifaction(false);
 
         // TODO: add new auto-ranging here
@@ -452,6 +455,9 @@ public class XYChart extends Chart {
 
         // handling of numeric axis and auto-range or auto-grow setting only
         if (!axis.isAutoRanging() && !axis.isAutoGrowRanging()) {
+            if (oldMin != axis.getMin() || oldMax != axis.getMax() || oldLength != axis.getLength()) {
+                axis.forceRedraw();
+            }
             axis.setAutoNotifaction(oldFlag);
             return;
         }
@@ -478,8 +484,7 @@ public class XYChart extends Chart {
             dataMinMax.add(axis.getMax());
         }
 
-        // work-around since we cannot overwrite the method 'autorange(min,max)'
-        // in ValueAxis
+        // work-around since we cannot overwrite the method 'autorange(min,max)' in ValueAxis
         if (axis.isAutoGrowRanging()) {
             double min = +Double.MAX_VALUE;
             double max = -Double.MAX_VALUE;
@@ -490,6 +495,9 @@ public class XYChart extends Chart {
             axis.set(min, max);
         } else {
             axis.invalidateRange(dataMinMax);
+        }
+        if (oldMin != axis.getMin() || oldMax != axis.getMax() || oldLength != axis.getLength()) {
+            axis.forceRedraw();
         }
         axis.setAutoNotifaction(oldFlag);
     }

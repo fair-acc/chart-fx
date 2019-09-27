@@ -181,7 +181,7 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
 		}
 	}
 
-	private final EventListener axisChangeListener = this::axesInvalidated;
+	private final EventListener axisChangeListener =  obs -> FXUtils.runFX(() -> axesInvalidated(obs));
 	protected final ListChangeListener<Axis> axesChangeListenerLocal = this::axesChangedLocal;
 	protected final ListChangeListener<Axis> axesChangeListener = this::axesChanged;
 	protected final ListChangeListener<DataSet> datasetChangeListener = this::datasetsChanged;
@@ -992,9 +992,6 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
 				// check if axis is associated with an existing renderer,
 				// if yes -> throw an exception
 				AssertUtils.notNull("to be added axis is null", set);
-				if (!(set instanceof Axis)) {
-					continue;
-				}
 				set.addListener(axisChangeListener);
 			}
 		}

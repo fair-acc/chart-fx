@@ -17,6 +17,7 @@ import de.gsi.chart.axes.spi.LinearAxis;
 import de.gsi.chart.axes.spi.LogarithmicAxis;
 import de.gsi.chart.axes.spi.NumericAxis;
 import de.gsi.chart.renderer.Renderer;
+import de.gsi.chart.utils.FXUtils;
 import de.gsi.dataset.AxisDescription;
 import de.gsi.dataset.DataSet;
 import de.gsi.dataset.event.EventListener;
@@ -113,7 +114,7 @@ public class UpdateAxisLabels extends ChartPlugin {
         renderersListeners.put(renderer, rendererListener);
 
         dataSets.forEach((DataSet dataSet) -> {
-            EventListener dataSetListener = update -> dataSetChange(update, renderer);
+            EventListener dataSetListener = update -> FXUtils.runFX(() -> dataSetChange(update, renderer));
             dataSet.addListener(dataSetListener);
             dataSetListeners.put(dataSet, dataSetListener);
             dataSetChange(new AxisChangeEvent(dataSet, -1), renderer);
@@ -155,7 +156,7 @@ public class UpdateAxisLabels extends ChartPlugin {
         while (change.next()) {
             if (change.wasAdded()) {
                 for (DataSet dataSet : change.getAddedSubList()) {
-                    EventListener dataSetListener = update -> dataSetChange(update, renderer);
+                    EventListener dataSetListener = update -> FXUtils.runFX(() -> dataSetChange(update, renderer));
                     dataSet.addListener(dataSetListener);
                     dataSetListeners.put(dataSet, dataSetListener);
                     dataSetChange(new AxisChangeEvent(dataSet, -1), renderer);

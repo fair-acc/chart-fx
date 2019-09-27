@@ -223,7 +223,7 @@ public class TableViewer extends ChartPlugin {
 
         private final ListChangeListener<Renderer> rendererChangeListener = this::rendererChanged;
         private final ListChangeListener<DataSet> datasetChangeListener = this::datasetsChanged;
-        private final EventListener dataSetDataUpdateListener = (UpdateEvent evt) -> {
+        private final EventListener dataSetDataUpdateListener = (UpdateEvent evt) -> FXUtils.runFX(() -> {
             nRows = 0;
             for (TableColumn<DataSetsRow, ?> col : columns) {
                 if (col instanceof DataSetTableColumns) {
@@ -237,7 +237,7 @@ public class TableViewer extends ChartPlugin {
                 }
             }
             refresh();
-        };
+        });
 
         public DataSetsModel() {
             super();
