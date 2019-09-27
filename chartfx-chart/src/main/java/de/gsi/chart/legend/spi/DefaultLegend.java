@@ -119,7 +119,7 @@ public class DefaultLegend extends FlowPane implements Legend {
 
     public DefaultLegend() {
         super(GAP, GAP);
-        setItems(FXCollections.<LegendItem>observableArrayList());
+        setItems(FXCollections.<LegendItem> observableArrayList());
         getStyleClass().setAll("chart-legend");
         setAlignment(Pos.CENTER);
     }
@@ -153,11 +153,15 @@ public class DefaultLegend extends FlowPane implements Legend {
      * java.util.List)
      */
     @Override
-    public void updateLegend(final List<DataSet> dataSets, final List<Renderer> renderers) {
+    public void updateLegend(final List<DataSet> dataSets, final List<Renderer> renderers, final boolean forceUpdate) {
 
         // list of already drawn data sets in the legend
         final List<DataSet> alreadyDrawnDataSets = new ArrayList<>();
         final List<LegendItem> legendItems = new ArrayList<>();
+
+        if (forceUpdate) {
+            this.getItems().clear();
+        }
 
         // process legend items common to all renderer
         int legendItemCount = 0;
