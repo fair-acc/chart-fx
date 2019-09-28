@@ -53,7 +53,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
     private final Canvas canvas = new ResizableCanvas();
     protected boolean labelOverlap;
     protected double cachedOffset; // for caching
-    protected final ReentrantLock lock = new ReentrantLock();
+    protected final transient ReentrantLock lock = new ReentrantLock();
     protected double maxLabelHeight;
     protected double maxLabelWidth;
 
@@ -258,8 +258,10 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
      */
     @Override
     public void fireInvalidated() {
-        if (!isAutoNotification() || updateEventListener().isEmpty()) {
-            return;
+        synchronized (autoNotification()) {
+            if (!autoNotification().get() || updateEventListener().isEmpty()) {
+                return;
+            }
         }
 
         if (Platform.isFxApplicationThread()) {
@@ -387,14 +389,13 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
             autoRange.add(dataValue.doubleValue());
         }
 
-        final boolean oldState = isAutoNotification();
-        setAutoNotifaction(false);
+        final boolean oldState = autoNotification().getAndSet(false);
         final boolean change = set(dataMinValue, dataMaxValue);
         if (change) {
             data.clear();
             autoRange.setAxisLength(getLength() == 0 ? 1 : getLength(), getSide());
         }
-        setAutoNotifaction(oldState);
+        autoNotification().set(oldState);
         invalidateRange();
         invokeListener(new AxisChangeEvent(this));
     }
@@ -472,7 +473,8 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
      *            minimum space between labels
      * @return true if labels overlap
      */
-    private static boolean isTickLabelsOverlap(final Side side, final TickMark m1, final TickMark m2, final double gap) {
+    private static boolean isTickLabelsOverlap(final Side side, final TickMark m1, final TickMark m2,
+            final double gap) {
         if (!m1.isVisible() || !m2.isVisible()) {
             return false;
         }
@@ -1162,8 +1164,8 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         gc.restore();
     }
 
-    protected static void drawTickMarkLabel(final GraphicsContext gc, final double x, final double y, final double rotation,
-            final TickMark tickMark) {
+    protected static void drawTickMarkLabel(final GraphicsContext gc, final double x, final double y,
+            final double rotation, final TickMark tickMark) {
         gc.save();
         gc.setFont(tickMark.getFont());
         gc.setFill(tickMark.getFill());

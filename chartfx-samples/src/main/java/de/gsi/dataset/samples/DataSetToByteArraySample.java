@@ -263,7 +263,7 @@ public class DataSetToByteArraySample {
 	private void generateData(final DoubleErrorDataSet dataSet) {
 		final long startTime = ProcessingProfiler.getTimeStamp();
 
-		dataSet.setAutoNotifaction(false);
+		dataSet.autoNotification().set(false);
 		dataSet.clearData();
 		dataSet.setName("data set name" + System.currentTimeMillis());
 		double oldY = 0;
@@ -288,7 +288,7 @@ public class DataSetToByteArraySample {
 		dataSet.getMetaInfo().put("metaKey#2", "metaValue#2");
 		dataSet.getMetaInfo().put("metaKey#3", "metaValue#3");
 
-		dataSet.setAutoNotifaction(true);
+		dataSet.autoNotification().set(true);
 		ProcessingProfiler.getTimeDiff(startTime, "generating data DataSet");
 	}
 

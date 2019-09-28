@@ -41,6 +41,19 @@ public interface EventSource {
         }
     }
 
+    /**
+     * Set the automatic notification of invalidation listeners. In general,
+     * data sets should notify registered invalidation listeners, if the data in
+     * the data set has changed. Charts usually register an invalidation
+     * listener with the data set to be notified of any changes and update the
+     * charts. Setting the automatic notification to false, allows applications
+     * to prevent this behaviour, in case data sets are updated multiple times
+     * during an acquisition cycle but the chart update is only required at the
+     * end of the cycle.
+     * <code>true</code> for automatic notification
+     * 
+     * @return the atomic boolean
+     */
     AtomicBoolean autoNotification();
 
     /**
@@ -66,8 +79,10 @@ public interface EventSource {
      * @param executeParallel {@code true} execute event listener via parallel executor service
      */
     default void invokeListener(final UpdateEvent updateEvent, final boolean executeParallel) {
-        if (updateEventListener() == null || !isAutoNotification()) {
-            return;
+        synchronized (autoNotification()) {
+            if (!autoNotification().get() || updateEventListener() == null) {
+                return;
+            }
         }
         synchronized (updateEventListener()) {
             if (!executeParallel) {
@@ -132,22 +147,6 @@ public interface EventSource {
                 updateEventListener().remove(listener);
             }
         }
-    }
-
-    /**
-     * Set the automatic notification of invalidation listeners. In general,
-     * data sets should notify registered invalidation listeners, if the data in
-     * the data set has changed. Charts usually register an invalidation
-     * listener with the data set to be notified of any changes and update the
-     * charts. Setting the automatic notification to false, allows applications
-     * to prevent this behaviour, in case data sets are updated multiple times
-     * during an acquisition cycle but the chart update is only required at the
-     * end of the cycle.
-     *
-     * @param flag <code>true</code> for automatic notification
-     */
-    default void setAutoNotifaction(boolean flag) {
-        autoNotification().set(flag);
     }
 
     /**

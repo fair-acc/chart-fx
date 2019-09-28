@@ -313,11 +313,6 @@ public class MountainRangeRenderer extends ErrorDataSetRenderer implements Rende
 		}
 
 		@Override
-		public void setAutoNotifaction(final boolean flag) {
-			autoNotification.set(flag);
-		}
-
-		@Override
 		public DataSet setStyle(final String style) {
 			return dataSet.setStyle(style);
 		}

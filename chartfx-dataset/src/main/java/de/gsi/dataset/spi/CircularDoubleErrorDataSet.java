@@ -12,7 +12,8 @@ import de.gsi.dataset.utils.DoubleCircularBuffer;
 /**
  * @author rstein
  */
-public class CircularDoubleErrorDataSet extends AbstractErrorDataSet<CircularDoubleErrorDataSet> implements DataSet2D, DataSetError {
+public class CircularDoubleErrorDataSet extends AbstractErrorDataSet<CircularDoubleErrorDataSet>
+        implements DataSet2D, DataSetError {
     private static final long serialVersionUID = -8010355203980379253L;
     protected DoubleCircularBuffer xValues;
     protected DoubleCircularBuffer yValues;
@@ -61,7 +62,7 @@ public class CircularDoubleErrorDataSet extends AbstractErrorDataSet<CircularDou
 
     @Override
     public double getErrorPositive(final int dimIndex, final int index) {
-    	return dimIndex == DIM_X ? 0.0 : yErrorsPos.get(index);
+        return dimIndex == DIM_X ? 0.0 : yErrorsPos.get(index);
     }
 
     /**
@@ -85,11 +86,11 @@ public class CircularDoubleErrorDataSet extends AbstractErrorDataSet<CircularDou
             dataTag.put(tag);
             dataStyles.put(style);
 
-            recomputeLimits(0);
-            recomputeLimits(1);
+            recomputeLimits(DIM_X);
+            recomputeLimits(DIM_Y);
         });
-        fireInvalidated(new AddedDataEvent(this));
-        return this;
+
+        return fireInvalidated(new AddedDataEvent(this));
     }
 
     /**
@@ -151,11 +152,11 @@ public class CircularDoubleErrorDataSet extends AbstractErrorDataSet<CircularDou
             dataTag.put(new String[yErrPos.length], yErrPos.length);
             dataStyles.put(new String[yErrPos.length], yErrPos.length);
 
-            recomputeLimits(0);
-            recomputeLimits(1);
+            recomputeLimits(DIM_X);
+            recomputeLimits(DIM_Y);
         });
-        fireInvalidated(new AddedDataEvent(this));
-        return this;
+
+        return fireInvalidated(new AddedDataEvent(this));
     }
 
     /**
@@ -173,8 +174,8 @@ public class CircularDoubleErrorDataSet extends AbstractErrorDataSet<CircularDou
             dataStyles.reset();
             getAxisDescriptions().forEach(AxisDescription::clear);
         });
-        fireInvalidated(new RemovedDataEvent(this));
-        return this;
+
+        return fireInvalidated(new RemovedDataEvent(this));
     }
 
     /**

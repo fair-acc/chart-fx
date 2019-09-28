@@ -22,6 +22,12 @@ public final class FXUtils {
     private static class ThrowableWrapper {
         Throwable t;
     }
+    
+    public static void assertJavaFxThread() {
+        if (!Platform.isFxApplicationThread()) {
+            throw new IllegalStateException("access JavaFX from non-JavaFX thread - please fix");
+        }
+    }
 
     /**
      * If you run into any situation where all of your scenes end, the thread managing all of this will just peter out.

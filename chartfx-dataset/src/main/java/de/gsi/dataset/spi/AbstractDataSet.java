@@ -1,6 +1,7 @@
 package de.gsi.dataset.spi;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -42,12 +43,12 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
         implements DataSet, DataSetMetaData {
     private static final long serialVersionUID = -7612136495756923417L;
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractDataSet.class);
-    private transient AtomicBoolean autoNotification = new AtomicBoolean(true);
+    private final transient AtomicBoolean autoNotification = new AtomicBoolean(true);
     private static final String[] DEFAULT_AXES_NAME = { "x-Axis", "y-Axis", "z-Axis" };
     private String name;
     private final int dimension;
     private final List<AxisDescription> axesDescriptions = new ArrayList<>();
-    private final List<EventListener> updateListeners = new LinkedList<>();
+    private final transient List<EventListener> updateListeners =  Collections.synchronizedList(new LinkedList<>());
     private final transient DataSetLock<? extends DataSet> lock = new DefaultDataSetLock<>(this);
     private StringHashMapList dataLabels = new StringHashMapList();
     private StringHashMapList dataStyles = new StringHashMapList();
@@ -123,12 +124,7 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
      * @return itself (fluent design)
      */
     public D fireInvalidated(final UpdateEvent event) {
-        if (!isAutoNotification() || updateEventListener().isEmpty()) {
-            return getThis();
-        }
-
         invokeListener(event);
-
         return getThis();
     }
 
@@ -387,7 +383,7 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
     }
 
     @Override
-    public List<EventListener> updateEventListener() {
+    public synchronized List<EventListener> updateEventListener() {
         return updateListeners;
     }
 

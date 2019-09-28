@@ -86,8 +86,8 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     /** pseudo-class indicating this is a vertical centre Axis. */
     private static final PseudoClass CENTRE_VER_PSEUDOCLASS_STATE = PseudoClass.getPseudoClass("verCentre");
 
-    private final AtomicBoolean autoNotification = new AtomicBoolean();
-    private final List<EventListener> updateListeners = new LinkedList<>();
+    private final transient AtomicBoolean autoNotification = new AtomicBoolean(true);
+    private final List<EventListener> updateListeners = Collections.synchronizedList(new LinkedList<>());
     /**
      * Paths used for css-type styling. Not used for actual drawing. Used as a storage contained for the settings
      * applied to GraphicsContext which allow much faster (and less complex) drawing routines but do no not allow
@@ -673,9 +673,11 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
      */
     @Override
     public void invokeListener(final UpdateEvent updateEvent, final boolean executeParallel) {
-        if (!isAutoNotification()) {
-            //avoids duplicate update events
-            return;
+        synchronized (autoNotification()) {
+            if (!autoNotification().get()) {
+                //avoids duplicate update events
+                return;
+            }
         }
         requestAxisLayout();
         Axis.super.invokeListener(updateEvent, executeParallel);
@@ -1219,12 +1221,11 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     @Override
     public boolean add(final double[] values, final int nlength) {
         boolean changed = false;
-        final boolean oldState = isAutoNotification();
-        setAutoNotifaction(false);
+        final boolean oldState = autoNotification().getAndSet(false);
         for (int i = 0; i < nlength; i++) {
             changed |= add(values[i]);
         }
-        setAutoNotifaction(oldState);
+        autoNotification().set(oldState);
         invokeListener(new AxisChangeEvent(this));
         return changed;
     }
@@ -1235,8 +1236,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
             return false;
         }
         boolean changed = false;
-        final boolean oldState = isAutoNotification();
-        setAutoNotifaction(false);
+        final boolean oldState = autoNotification().getAndSet(false);
         if (value > this.getMax()) {
             this.setMax(value);
             changed = true;
@@ -1245,7 +1245,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
             this.setMin(value);
             changed = true;
         }
-        setAutoNotifaction(oldState);
+        autoNotification().set(oldState);
         if (changed) {
             invokeListener(new AxisChangeEvent(this));
         }
@@ -1254,11 +1254,10 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
 
     @Override
     public boolean clear() {
-        final boolean oldState = isAutoNotification();
-        setAutoNotifaction(false);
+        final boolean oldState = autoNotification().getAndSet(false);
         minProp.set(DEFAULT_MIN_RANGE);
         maxProp.set(DEFAULT_MAX_RANGE);
-        setAutoNotifaction(oldState);
+        autoNotification().set(oldState);
         invokeListener(new AxisChangeEvent(this));
         return false;
     }
@@ -1277,11 +1276,10 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     public boolean set(final double min, final double max) {
         final double oldMin = minProp.get();
         final double oldMax = maxProp.get();
-        final boolean oldState = isAutoNotification();
-        setAutoNotifaction(false);
+        final boolean oldState = autoNotification().getAndSet(false);
         minProp.set(min);
         maxProp.set(max);
-        setAutoNotifaction(oldState);
+        autoNotification().set(oldState);
         final boolean changed = (oldMin != min) || (oldMax != max);
         if (changed) {
             invokeListener(new AxisChangeEvent(this));
@@ -1296,8 +1294,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     @Override
     public boolean set(final String axisName, final String... axisUnit) {
         boolean changed = false;
-        final boolean oldState = isAutoNotification();
-        setAutoNotifaction(false);
+        final boolean oldState = autoNotification().getAndSet(false);
         if (!equalString(axisName, getName())) {
             setName(axisName);
             changed = true;
@@ -1306,7 +1303,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
             setName(axisUnit[0]);
             changed = true;
         }
-        setAutoNotifaction(oldState);
+        autoNotification().set(oldState);
         if (changed) {
             invokeListener(new AxisChangeEvent(this));
         }
@@ -1316,11 +1313,10 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     @Override
     public boolean set(final String axisName, final String axisUnit, final double rangeMin, final double rangeMax) {
         boolean changed = false;
-        final boolean oldState = isAutoNotification();
-        setAutoNotifaction(false);
+        final boolean oldState = autoNotification().getAndSet(false);
         changed |= this.set(axisName, axisUnit);
         changed |= this.set(rangeMin, rangeMax);
-        setAutoNotifaction(oldState);
+        autoNotification().set(oldState);
         if (changed) {
             invokeListener(new AxisChangeEvent(this));
         }

@@ -70,7 +70,7 @@ public class TimeAxisSample extends Application {
     private void generateData(final DefaultErrorDataSet dataSet) {
         final long startTime = ProcessingProfiler.getTimeStamp();
 
-        dataSet.setAutoNotifaction(false);
+        dataSet.autoNotification().set(false);
         dataSet.clearData();
         final double now = System.currentTimeMillis() / 1000.0 + 1; // N.B. '+1'
                                                                     // to check
@@ -84,7 +84,7 @@ public class TimeAxisSample extends Application {
             final double ey = 10;
             dataSet.add(t, y, ex, ey);
         }
-        dataSet.setAutoNotifaction(true);
+        dataSet.autoNotification().set(true);
 
         Platform.runLater(() -> dataSet.fireInvalidated(null));
         ProcessingProfiler.getTimeDiff(startTime, "adding data into DataSet");
