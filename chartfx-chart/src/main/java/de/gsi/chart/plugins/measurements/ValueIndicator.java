@@ -17,6 +17,7 @@ import de.gsi.chart.axes.spi.DefaultNumericAxis;
 import de.gsi.chart.plugins.AbstractSingleValueIndicator;
 import de.gsi.chart.plugins.XValueIndicator;
 import de.gsi.chart.plugins.YValueIndicator;
+import de.gsi.chart.utils.FXUtils;
 import de.gsi.dataset.DataSet;
 import de.gsi.dataset.event.UpdateEvent;
 import javafx.application.Platform;
@@ -88,21 +89,15 @@ public class ValueIndicator extends AbstractChartMeasurement {
 
         sliderIndicator1.valueProperty().addListener((ch, oldValue, newValue) -> {
             if (oldValue != newValue) {
-            	if (Platform.isFxApplicationThread()) {
-            		handle(null);
-            	} else {
-            		Platform.runLater(() -> handle(null));
-            	}
+                FXUtils.runFX(() -> handle(null));
             }
         });
         // chartPane.addListener(e -> invalidated(null));
         super.showConfigDialogue();
-        if (Platform.isFxApplicationThread()) {
-    		handle(null);
-    	} else {
-    		Platform.runLater(() -> handle(null));
-    	}
-        chart.requestLayout();
+        FXUtils.runFX(() -> {
+            handle(null);
+            chart.requestLayout();
+        });
     }
 
     @Override
@@ -125,15 +120,16 @@ public class ValueIndicator extends AbstractChartMeasurement {
 
     @Override
     public void handle(final UpdateEvent observable) {
-    	if (Platform.isFxApplicationThread()) {
-    		Platform.runLater(() -> handle(observable));
-    	    return;
-    	}
+        if (!Platform.isFxApplicationThread()) {
+            // not running from FX application thread restart via runLater...
+            FXUtils.runFX(() -> handle(observable));
+            return;
+        }
         final DataSet selectedDataSet = getDataSet();
-        
+
         final double newValue = sliderIndicator1.getValue();
         final int index = selectedDataSet.getIndex(axisMode == X ? DataSet.DIM_X : DataSet.DIM_Y, newValue);
-        final double val = selectedDataSet.get(axisMode == X ? DataSet.DIM_Y : DataSet.DIM_X,index);
+        final double val = selectedDataSet.get(axisMode == X ? DataSet.DIM_Y : DataSet.DIM_X, index);
         final Axis axis = axisMode == X ? chart.getYAxis() : chart.getXAxis();
 
         // update label unitTextField

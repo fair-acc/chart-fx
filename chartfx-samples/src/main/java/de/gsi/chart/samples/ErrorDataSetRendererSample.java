@@ -163,8 +163,8 @@ public class ErrorDataSetRendererSample extends Application {
             // suppress auto notification since we plan to add multiple data points
             // N.B. this is for illustration of the 'setAutoNotification(..)' functionality
             // one may use also the add(double[], double[], ...) method instead
-            dataSet.setAutoNotifaction(false);
-            dataSetNoErrors.setAutoNotifaction(false);
+            dataSet.autoNotification().set(false);
+            dataSetNoErrors.autoNotification().set(false);
 
             dataSet.clearData();
             dataSetNoErrors.clearData();
@@ -186,8 +186,8 @@ public class ErrorDataSetRendererSample extends Application {
                 }
             }
 
-            dataSet.setAutoNotifaction(true);
-            dataSetNoErrors.setAutoNotifaction(true);
+            dataSet.autoNotification().set(true);
+            dataSetNoErrors.autoNotification().set(true);
         }));
         // need to issue a separate update notification
         // N.B. for performance reasons we let only 'dataSet' fire an event, since we modified both

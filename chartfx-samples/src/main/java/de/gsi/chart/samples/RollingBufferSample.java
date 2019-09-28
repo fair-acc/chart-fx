@@ -132,7 +132,7 @@ public class RollingBufferSample extends Application {
             // suppress auto notification since we plan to add multiple data points
             // N.B. this is for illustration of the 'setAutoNotification(..)' functionality
             // one may use also the add(double[], double[], ...) method instead
-            rollingBufferBeamIntensity.setAutoNotifaction(false);
+            boolean oldState = rollingBufferBeamIntensity.autoNotification().getAndSet(false);
             for (int n = RollingBufferSample.N_SAMPLES; n >= 0; --n) {
                 final double t = now - n * RollingBufferSample.UPDATE_PERIOD / 1000.0;
                 final double y = 100 * RollingBufferSample.rampFunctionBeamIntensity(t);
@@ -140,15 +140,15 @@ public class RollingBufferSample extends Application {
                 rollingBufferBeamIntensity.add(t, y, ey, ey);
                 // N.B. update events suppressed by 'setAutoNotifaction(false)' above
             }
-            rollingBufferBeamIntensity.setAutoNotifaction(true);
+            rollingBufferBeamIntensity.autoNotification().set(oldState);
             // need to issue a separate update notification
             rollingBufferBeamIntensity.fireInvalidated(new AddedDataEvent(rollingBufferBeamIntensity));
         } else {
             final double t = now;
             final double y2 = 100 * RollingBufferSample.rampFunctionBeamIntensity(t);
             final double ey = 1;
-            rollingBufferBeamIntensity.add(t, y2, ey, ey);
             // single add automatically fires update event/update of chart
+            rollingBufferBeamIntensity.add(t, y2, ey, ey);
         }
 
         ProcessingProfiler.getTimeDiff(startTime, "adding data into DataSet");
@@ -165,7 +165,7 @@ public class RollingBufferSample extends Application {
             // suppress auto notification since we plan to add multiple data points
             // N.B. this is for illustration of the 'setAutoNotification(..)' functionality
             // one may use also the add(double[], double[], ...) method instead
-            rollingBufferDipoleCurrent.setAutoNotifaction(false);
+            boolean oldState = rollingBufferDipoleCurrent.autoNotification().getAndSet(false);
             for (int n = RollingBufferSample.N_SAMPLES; n >= 0; --n) {
                 final double t = now - n * RollingBufferSample.UPDATE_PERIOD / 1000.0;
                 final double y = 25 * RollingBufferSample.rampFunctionDipoleCurrent(t);
@@ -173,15 +173,17 @@ public class RollingBufferSample extends Application {
                 rollingBufferDipoleCurrent.add(t, y, ey, ey);
                 // N.B. update events suppressed by 'setAutoNotifaction(false)' above
             }
-            rollingBufferDipoleCurrent.setAutoNotifaction(true);
-            rollingBufferDipoleCurrent.fireInvalidated(new AddedDataEvent(rollingBufferDipoleCurrent));
+            rollingBufferDipoleCurrent.autoNotification().set(oldState);
             // need to issue a separate update notification
+            rollingBufferDipoleCurrent.fireInvalidated(new AddedDataEvent(rollingBufferDipoleCurrent));
         } else {
             final double t = now;
             final double y = 25 * RollingBufferSample.rampFunctionDipoleCurrent(t);
             final double ey = 1;
+            // single add automatically fires update event/update of chart
             rollingBufferDipoleCurrent.add(t, y, ey, ey);
         }
+
         ProcessingProfiler.getTimeDiff(startTime, "adding data into DataSet");
     }
 

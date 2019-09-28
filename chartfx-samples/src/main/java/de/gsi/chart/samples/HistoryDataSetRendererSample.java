@@ -141,8 +141,8 @@ public class HistoryDataSetRendererSample extends Application {
 
         long startTime = ProcessingProfiler.getTimeStamp();
 
-        dataSet.setAutoNotifaction(false);
-        dataSetNoError.setAutoNotifaction(false);
+        dataSet.autoNotification().set(false);
+        dataSetNoError.autoNotification().set(false);
         for (int n = 0; n < HistoryDataSetRendererSample.N_SAMPLES; n++) {
             final double x = n;
             final double phase = 2 * Math.PI * updateIteration / 40.0;
@@ -167,8 +167,8 @@ public class HistoryDataSetRendererSample extends Application {
         // dataSet.setStyle("dsIndex=2;");
 
         updateIteration++;
-        dataSetNoError.setAutoNotifaction(true);
-        dataSet.setAutoNotifaction(true);
+        dataSetNoError.autoNotification().set(true);
+        dataSet.autoNotification().set(true);
 
         Platform.runLater(() -> {
             dataSet.fireInvalidated(null);

@@ -19,6 +19,7 @@ import de.gsi.chart.renderer.spi.ErrorDataSetRenderer;
 import de.gsi.chart.renderer.spi.GridRenderer;
 import de.gsi.chart.renderer.spi.LabelledMarkerRenderer;
 import de.gsi.chart.ui.geometry.Side;
+import de.gsi.chart.utils.FXUtils;
 import de.gsi.dataset.DataSet;
 import de.gsi.dataset.DataSet3D;
 import de.gsi.dataset.utils.AssertUtils;
@@ -248,10 +249,9 @@ public class XYChart extends Chart {
         // check that all registered data sets have proper ranges defined 
         dataSets.parallelStream().forEach(dataset -> dataset.getAxisDescriptions().parallelStream()
                 .filter(axisD -> !axisD.isDefined()).forEach(axisDescription -> {
-                    final boolean oldAutoState = dataset.isAutoNotification();
-                    dataset.setAutoNotifaction(false);
-                    dataset.recomputeLimits(dataset.getAxisDescriptions().indexOf(axisDescription));
-                    dataset.setAutoNotifaction(oldAutoState);
+                    dataset.lock().writeLockGuard(() -> {
+                        dataset.recomputeLimits(dataset.getAxisDescriptions().indexOf(axisDescription));
+                    });
                 }));
 
         // N.B. possible race condition on this line -> for the future to solve
@@ -262,10 +262,8 @@ public class XYChart extends Chart {
         //            dataset.lock().writeLock();
         //            dataset.getAxisDescriptions().parallelStream().filter(axisD -> !axisD.isDefined())
         //                    .forEach(axisDescription -> {
-        //                        final boolean oldAutoState = dataset.isAutoNotification();
         //                        dataset.setAutoNotifaction(false);
         //                        dataset.recomputeLimits(dataset.getAxisDescriptions().indexOf(axisDescription));
-        //                        dataset.setAutoNotifaction(oldAutoState);
         //                    });
         //            DefaultDataSetLock<DataSet> myLock = (DefaultDataSetLock<DataSet>) dataset.lock();
         //            myLock.downGradeWriteLock();
@@ -381,7 +379,7 @@ public class XYChart extends Chart {
             LOGGER.debug("   xychart redrawCanvas() - pre");
         }
         setAutoNotifaction(false);
-
+        FXUtils.assertJavaFxThread();
         final long now = System.nanoTime();
         final double diffMillisSinceLastUpdate = TimeUnit.NANOSECONDS.toMillis(now - lastCanvasUpdate);
         if (diffMillisSinceLastUpdate < XYChart.BURST_LIMIT_MS) {
@@ -431,11 +429,10 @@ public class XYChart extends Chart {
         if (dataSets == null || dataSets.isEmpty()) {
             return;
         }
-        final boolean oldFlag = axis.isAutoNotification();
+        final boolean oldAutoState = axis.autoNotification().getAndSet(false);
         final double oldMin = axis.getMin();
         final double oldMax = axis.getMax();
         final double oldLength = axis.getLength();
-        axis.setAutoNotifaction(false);
 
         // TODO: add new auto-ranging here
         final boolean isHorizontal = axis.getSide().isHorizontal();
@@ -458,12 +455,12 @@ public class XYChart extends Chart {
             if (oldMin != axis.getMin() || oldMax != axis.getMax() || oldLength != axis.getLength()) {
                 axis.forceRedraw();
             }
-            axis.setAutoNotifaction(oldFlag);
+            axis.autoNotification().set(oldAutoState);
             return;
         }
 
         final List<Number> dataMinMax = new ArrayList<>();
-        dataSets.forEach(dataset -> {
+        dataSets.forEach(dataset -> dataset.lock().readLockGuardOptimistic(() -> {
             //            for (AxisDescription axisDescription : dataset.getAxisDescriptions()) {
             //                if (!axisDescription.isDefined()) {
             //                    dataset.recomputeLimits(dataset.getAxisDescriptions().indexOf(axisDescription));
@@ -477,7 +474,7 @@ public class XYChart extends Chart {
                 dataMinMax.add(dataset.getAxisDescription(isHorizontal ? 0 : 1).getMin());
                 dataMinMax.add(dataset.getAxisDescription(isHorizontal ? 0 : 1).getMax());
             }
-        });
+        }));
 
         if (axis.isAutoGrowRanging()) {
             dataMinMax.add(axis.getMin());
@@ -499,7 +496,7 @@ public class XYChart extends Chart {
         if (oldMin != axis.getMin() || oldMax != axis.getMax() || oldLength != axis.getLength()) {
             axis.forceRedraw();
         }
-        axis.setAutoNotifaction(oldFlag);
+        axis.autoNotification().set(oldAutoState);
     }
 
 }

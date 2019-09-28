@@ -44,9 +44,9 @@ public class LogAxisSample extends Application {
         // repaint. This can be suppressed by adding/setting full arrays and/or
         // by selecting dataSet1.setAutoNotifaction(false/true) for the data
         // sets (or chart) concerned to suppress this repaint.
-        dataSet1.setAutoNotifaction(false);
-        dataSet2.setAutoNotifaction(false);
-        dataSet3.setAutoNotifaction(false);
+        dataSet1.autoNotification().set(false);
+        dataSet2.autoNotification().set(false);
+        dataSet3.autoNotification().set(false);
         for (int n = 0; n < N_SAMPLES; n++) {
             final double x = n + 1.0;
             double y = 0.01 * (n + 1);
@@ -55,9 +55,9 @@ public class LogAxisSample extends Application {
             dataSet2.add(x, Math.pow(2, y));
             dataSet3.add(x, Math.exp(y));
         }
-        dataSet1.setAutoNotifaction(true);
-        dataSet2.setAutoNotifaction(true);
-        dataSet3.setAutoNotifaction(true);
+        dataSet1.autoNotification().set(true);
+        dataSet2.autoNotification().set(true);
+        dataSet3.autoNotification().set(true);
 
         final Scene scene = new Scene(root, 800, 600);
         primaryStage.setTitle(this.getClass().getSimpleName());

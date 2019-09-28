@@ -151,14 +151,14 @@ public class DefaultAxisDescription extends DataRange implements AxisDescription
 	}
 
 	private final void notifyFullChange() {
-		if (dataSet == null || !dataSet.isAutoNotification()) {
+		if (dataSet == null || !dataSet.autoNotification().get()) {
 			return;
 		}
 		dataSet.invokeListener(new AxisChangeEvent(dataSet, "updated axis for '" + name + "' '[" + unit + "]'", -1));
 	}
 
 	private final void notifyNameChange() {
-		if (dataSet == null || !dataSet.isAutoNotification()) {
+		if (dataSet == null || !dataSet.autoNotification().get()) {
 			return;
 		}
 		dataSet.invokeListener(
@@ -166,7 +166,7 @@ public class DefaultAxisDescription extends DataRange implements AxisDescription
 	}
 
 	private final void notifyRangeChange() {
-		if (dataSet == null || !dataSet.isAutoNotification()) {
+		if (dataSet == null || !dataSet.autoNotification().get()) {
 			return;
 		}
 		dataSet.invokeListener(
