@@ -1,0 +1,85 @@
+package de.gsi.chart.samples;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import de.gsi.chart.Chart;
+import de.gsi.chart.XYChart;
+import de.gsi.chart.axes.spi.DefaultNumericAxis;
+import de.gsi.chart.plugins.EditAxis;
+import de.gsi.chart.plugins.Zoomer;
+import de.gsi.chart.renderer.spi.ErrorDataSetRenderer;
+import de.gsi.dataset.DataSet;
+import de.gsi.dataset.spi.DoubleErrorDataSet;
+import de.gsi.dataset.spi.FragmentedDataSet;
+import javafx.application.Application;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.scene.Scene;
+import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
+
+/**
+ * Example illustrating the use of a custom renderer to plot graphs with gaps
+ * 
+ * @author akrimm
+ */
+public class CustomFragmentedRendererSample extends Application {
+    private static final Logger LOGGER = LoggerFactory.getLogger(CustomFragmentedRendererSample.class);
+    private static final int N_SAMPLES = 500; // default number of data points
+    private static final int N_DATA_SETS_MAX = 5;
+
+    @Override
+    public void start(final Stage primaryStage) {
+        final XYChart chart = new XYChart(new DefaultNumericAxis("x-Axis"), new DefaultNumericAxis("y-Axis"));
+        chart.getPlugins().add(new Zoomer()); // standard plugins, useful for most cases
+        chart.getPlugins().add(new EditAxis()); // for editing axes
+        VBox.setVgrow(chart, Priority.ALWAYS);
+        ErrorDataSetRenderer renderer = new ErrorDataSetRenderer() {
+            @Override
+            public void render(final GraphicsContext gc, final Chart chart, final int dataSetOffset,
+                    final ObservableList<DataSet> datasets) {
+                ObservableList<DataSet> filteredDataSets = FXCollections.observableArrayList();
+                for (DataSet ds : datasets) {
+                    if (ds instanceof FragmentedDataSet) {
+                        final FragmentedDataSet fragDataSet = (FragmentedDataSet) ds;
+                        for (DataSet innerDataSet : fragDataSet.getDatasets()) {
+                            // TODO: copy style from main dataSet to make all child datasets look the same
+                            filteredDataSets.add(innerDataSet);
+                        }
+                    } else {
+                        filteredDataSets.add(ds);
+                    }
+                }
+                super.render(gc, chart, dataSetOffset, filteredDataSets);
+            }
+        };
+        chart.getRenderers().clear();
+        chart.getRenderers().add(renderer);
+      
+        FragmentedDataSet fragmentedDataSet = new FragmentedDataSet("test");
+        for (int i = 0; i < N_DATA_SETS_MAX; i++) {
+            DoubleErrorDataSet dataSet = new DoubleErrorDataSet("Set#" + i);
+            for (int n = 0; n < N_SAMPLES; n++) {
+                dataSet.add(n + i * N_SAMPLES, 0.5 * i + Math.cos(Math.toRadians(1.0 * n)), 0.15, 0.15);
+            }
+            fragmentedDataSet.add(dataSet);
+        }
+        chart.getDatasets().add(fragmentedDataSet);
+
+        final Scene scene = new Scene(chart, 800, 600);
+        primaryStage.setTitle(getClass().getSimpleName());
+        primaryStage.setScene(scene);
+        primaryStage.show();
+    }
+
+    /**
+     * @param args
+     *            the command line arguments
+     */
+    public static void main(final String[] args) {
+        Application.launch(args);
+    }
+}
