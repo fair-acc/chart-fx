@@ -5,6 +5,7 @@
 package de.gsi.dataset.spi;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 
 import de.gsi.dataset.DataSet2D;
@@ -78,9 +79,16 @@ public class FragmentedDataSet extends AbstractDataSet<FragmentedDataSet> implem
         return list.size();
     }
 
+    /**
+     * @return sub-datasets
+     */
+    public Collection<DataSet2D> getDatasets() {
+        return list;
+    }
+
     @Override
     public double[] getYValues() {
-        return lock().writeLockGuard(() -> {
+        return lock().readLockGuard(() -> {
             final double[] tmp = new double[dataCount];
             int index = 0;
             for (final DataSet2D dataset : list) {
@@ -94,7 +102,7 @@ public class FragmentedDataSet extends AbstractDataSet<FragmentedDataSet> implem
 
     @Override
     public double[] getXValues() {
-        return lock().writeLockGuard(() -> {
+        return lock().readLockGuard(() -> {
             final double[] tmp = new double[dataCount];
             int index = 0;
             for (final DataSet2D dataset : list) {
