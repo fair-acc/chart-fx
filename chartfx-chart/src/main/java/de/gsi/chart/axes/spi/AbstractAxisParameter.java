@@ -1300,7 +1300,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
             changed = true;
         }
         if ((axisUnit != null) && (axisUnit.length > 0) && !equalString(axisUnit[0], getUnit())) {
-            setName(axisUnit[0]);
+            setUnit(axisUnit[0]);
             changed = true;
         }
         autoNotification().set(oldState);

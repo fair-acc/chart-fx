@@ -146,7 +146,7 @@ public class FragmentedDataSet extends AbstractDataSet<FragmentedDataSet> implem
 
     @Override
     public int getXIndex(double x) {
-        return lock().writeLockGuard(() -> {
+        return lock().readLockGuard(() -> {
             if (x < getAxisDescription(0).getMin()) {
                 return 0;
             }
