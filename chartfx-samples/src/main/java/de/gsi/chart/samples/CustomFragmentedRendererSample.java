@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 
 import de.gsi.chart.Chart;
 import de.gsi.chart.XYChart;
+import de.gsi.chart.XYChartCss;
 import de.gsi.chart.axes.spi.DefaultNumericAxis;
 import de.gsi.chart.plugins.EditAxis;
 import de.gsi.chart.plugins.Zoomer;
@@ -12,6 +13,7 @@ import de.gsi.chart.renderer.spi.ErrorDataSetRenderer;
 import de.gsi.dataset.DataSet;
 import de.gsi.dataset.spi.DoubleErrorDataSet;
 import de.gsi.dataset.spi.FragmentedDataSet;
+import de.gsi.dataset.testdata.spi.CosineFunction;
 import javafx.application.Application;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -29,7 +31,7 @@ import javafx.stage.Stage;
 public class CustomFragmentedRendererSample extends Application {
     private static final Logger LOGGER = LoggerFactory.getLogger(CustomFragmentedRendererSample.class);
     private static final int N_SAMPLES = 500; // default number of data points
-    private static final int N_DATA_SETS_MAX = 5;
+    private static final int N_DATA_SETS_MAX = 3;
 
     @Override
     public void start(final Stage primaryStage) {
@@ -42,16 +44,19 @@ public class CustomFragmentedRendererSample extends Application {
             public void render(final GraphicsContext gc, final Chart chart, final int dataSetOffset,
                     final ObservableList<DataSet> datasets) {
                 ObservableList<DataSet> filteredDataSets = FXCollections.observableArrayList();
+                int dsIndex = 0;
                 for (DataSet ds : datasets) {
                     if (ds instanceof FragmentedDataSet) {
                         final FragmentedDataSet fragDataSet = (FragmentedDataSet) ds;
                         for (DataSet innerDataSet : fragDataSet.getDatasets()) {
-                            // TODO: copy style from main dataSet to make all child datasets look the same
+                            innerDataSet.setStyle(XYChartCss.DATASET_INDEX + '=' + Integer.toString(dsIndex));
                             filteredDataSets.add(innerDataSet);
                         }
                     } else {
+                        ds.setStyle(XYChartCss.DATASET_INDEX + '=' + Integer.toString(dsIndex));
                         filteredDataSets.add(ds);
                     }
+                    dsIndex++;
                 }
                 super.render(gc, chart, dataSetOffset, filteredDataSets);
             }
@@ -59,7 +64,7 @@ public class CustomFragmentedRendererSample extends Application {
         chart.getRenderers().clear();
         chart.getRenderers().add(renderer);
       
-        FragmentedDataSet fragmentedDataSet = new FragmentedDataSet("test");
+        FragmentedDataSet fragmentedDataSet = new FragmentedDataSet("FragmentedDataSet");
         for (int i = 0; i < N_DATA_SETS_MAX; i++) {
             DoubleErrorDataSet dataSet = new DoubleErrorDataSet("Set#" + i);
             for (int n = 0; n < N_SAMPLES; n++) {
@@ -67,7 +72,7 @@ public class CustomFragmentedRendererSample extends Application {
             }
             fragmentedDataSet.add(dataSet);
         }
-        chart.getDatasets().add(fragmentedDataSet);
+        chart.getDatasets().addAll(fragmentedDataSet, new CosineFunction("Cosine", N_SAMPLES * N_DATA_SETS_MAX));
 
         final Scene scene = new Scene(chart, 800, 600);
         primaryStage.setTitle(getClass().getSimpleName());
