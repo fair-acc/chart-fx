@@ -6,7 +6,7 @@ package de.gsi.dataset.serializer;
  * @author rstein
  */
 enum Cat {
-    PRIMITIVE,
+    SINGLE_VALUE,
     ARRAY,
-    OBJECT;
+    COMPLEX_OBJECT;
 }
