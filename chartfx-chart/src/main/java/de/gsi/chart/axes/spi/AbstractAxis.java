@@ -167,7 +167,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
      *            double coordinate to snapped to actual pixel index
      * @return coordinate that is snapped to pixel (for a 'crisper' display)
      */
-    private static double snap(final double coordinate) {
+    protected static double snap(final double coordinate) {
         return Math.round(coordinate) + 0.5;
     }
 
@@ -185,7 +185,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
      */
     public abstract double computePreferredTickUnit(final double axisLength);
 
-    private void updateCSS() {
+    protected void updateCSS() {
         final long now = System.nanoTime();
         final double diffMillisSinceLastUpdate = TimeUnit.NANOSECONDS.toMillis(now - lastCssUpdate);
         if (diffMillisSinceLastUpdate < AbstractAxis.BURST_LIMIT_CSS_MS) {
