@@ -17,7 +17,7 @@ public final class GenericsHelper {
 			throw new IllegalArgumentException("null array pointer ");
 		}
 		
-		if (prototype.isAssignableFrom(array.getClass())) {
+		if (!prototype.isAssignableFrom(array.getClass())) {
 			throw new IllegalArgumentException("array class type '" + array.getClass().getName() + "' mismatch with '"
 					+ prototype.getName() + "'");
 		}
