@@ -17,14 +17,25 @@ public final class GenericsHelper {
             throw new IllegalArgumentException("null array pointer ");
         }
 
-        if (!prototype.isAssignableFrom(array.getClass())) {
-            throw new IllegalArgumentException("array class type '" + array.getClass().getName() + "' mismatch with '"
-                    + prototype.getName() + "'");
+        if (array.length == 0) {
+            return;
+        }
+
+        for (int i = 0; i < array.length; i++) {
+            if (array[0] == null) {
+                throw new IllegalArgumentException(
+                        "array class element " + i + " is null, should be of type'" + prototype.getName() + "'");
+            }
+        }
+
+        if (!prototype.isAssignableFrom(array[0].getClass())) {
+            throw new IllegalArgumentException("array class type '" + array[0].getClass().getName()
+                    + "' mismatch with '" + prototype.getName() + "'");
         }
     }
 
     public static boolean[] toBoolPrimitive(final Object[] array) {
-        checkForNonConformity(array, Boolean[].class);
+        checkForNonConformity(array, Boolean.class);
         final boolean[] result = new boolean[array.length];
         for (int i = 0; i < array.length; i++) {
             result[i] = array[i] == null ? false : ((Boolean) array[i]).booleanValue();
@@ -33,7 +44,7 @@ public final class GenericsHelper {
     }
 
     public static byte[] toBytePrimitive(final Object[] array) {
-        checkForNonConformity(array, Byte[].class);
+        checkForNonConformity(array, Byte.class);
         final byte[] result = new byte[array.length];
         for (int i = 0; i < array.length; i++) {
             result[i] = array[i] == null ? 0 : ((Byte) array[i]).byteValue();
@@ -42,7 +53,7 @@ public final class GenericsHelper {
     }
 
     public static double[] toDoublePrimitive(final Object[] array) {
-        checkForNonConformity(array, Double[].class);
+        checkForNonConformity(array, Double.class);
         final double[] result = new double[array.length];
         for (int i = 0; i < array.length; i++) {
             result[i] = array[i] == null ? Double.NaN : ((Double) array[i]).doubleValue();
@@ -51,7 +62,7 @@ public final class GenericsHelper {
     }
 
     public static float[] toFloatPrimitive(final Object[] array) {
-        checkForNonConformity(array, Float[].class);
+        checkForNonConformity(array, Float.class);
         final float[] result = new float[array.length];
         for (int i = 0; i < array.length; i++) {
             result[i] = array[i] == null ? Float.NaN : ((Float) array[i]).floatValue();
@@ -60,7 +71,7 @@ public final class GenericsHelper {
     }
 
     public static int[] toIntegerPrimitive(final Object[] array) {
-        checkForNonConformity(array, Integer[].class);
+        checkForNonConformity(array, Integer.class);
         final int[] result = new int[array.length];
         for (int i = 0; i < array.length; i++) {
             result[i] = array[i] == null ? 0 : ((Integer) array[i]).intValue();
@@ -69,7 +80,7 @@ public final class GenericsHelper {
     }
 
     public static long[] toLongPrimitive(final Object[] array) {
-        checkForNonConformity(array, Long[].class);
+        checkForNonConformity(array, Long.class);
         final long[] result = new long[array.length];
         for (int i = 0; i < array.length; i++) {
             result[i] = array[i] == null ? 0l : ((Long) array[i]).longValue();
