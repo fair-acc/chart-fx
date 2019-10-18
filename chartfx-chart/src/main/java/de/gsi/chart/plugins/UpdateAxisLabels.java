@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import de.gsi.chart.Chart;
 import de.gsi.chart.axes.Axis;
 import de.gsi.chart.axes.spi.CategoryAxis;
+import de.gsi.chart.axes.spi.ColorGradientAxis;
 import de.gsi.chart.axes.spi.DefaultNumericAxis;
 import de.gsi.chart.axes.spi.LinearAxis;
 import de.gsi.chart.axes.spi.LogarithmicAxis;
@@ -20,11 +21,11 @@ import de.gsi.chart.renderer.Renderer;
 import de.gsi.chart.utils.FXUtils;
 import de.gsi.dataset.AxisDescription;
 import de.gsi.dataset.DataSet;
-import de.gsi.dataset.event.EventListener;
-import de.gsi.dataset.event.UpdateEvent;
 import de.gsi.dataset.event.AxisChangeEvent;
 import de.gsi.dataset.event.AxisNameChangeEvent;
 import de.gsi.dataset.event.AxisRangeChangeEvent;
+import de.gsi.dataset.event.EventListener;
+import de.gsi.dataset.event.UpdateEvent;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -164,8 +165,11 @@ public class UpdateAxisLabels extends ChartPlugin {
             }
             if (change.wasRemoved()) {
                 for (DataSet dataSet : change.getRemoved()) {
-                    dataSet.removeListener(dataSetListeners.get(dataSet));
-                    dataSetListeners.remove(dataSet);
+                    EventListener listener = dataSetListeners.get(dataSet);
+                    if (listener != null) {
+                        dataSet.removeListener(listener);
+                        dataSetListeners.remove(dataSet);
+                    }
                 }
             }
         }
@@ -191,6 +195,10 @@ public class UpdateAxisLabels extends ChartPlugin {
                     getChart().getFirstAxis(Orientation.VERTICAL).setName(dataSet.getAxisDescription(1).getName());
                     getChart().getFirstAxis(Orientation.VERTICAL).setUnit(dataSet.getAxisDescription(1).getUnit());
                 }
+                if ((dim == -1 || dim == 2) && dataSet.getDimension() >= 3) {
+                    getChart().getAxes().stream().filter((axis) -> axis instanceof ColorGradientAxis).findFirst()
+                            .ifPresent(axis -> axis.set(dataSet.getAxisDescription(2)));
+                }
             } else {
                 LOGGER.error(
                         "Applying axis information not possible for more than one DataSet added to chart. Please add datasets to separate Renderers");
@@ -211,6 +219,10 @@ public class UpdateAxisLabels extends ChartPlugin {
                     Axis newAxis = getAxis(dataSet.getAxisDescription(1), Orientation.VERTICAL, oldAxis, renderer);
                     renderer.getAxes().remove(oldAxis.get());
                     renderer.getAxes().add(newAxis);
+                }
+                if ((dim == -1 || dim == 2) && dataSet.getDimension() >= 3) {
+                    renderer.getAxes().stream().filter((axis) -> axis instanceof ColorGradientAxis).findFirst()
+                            .ifPresent(axis -> axis.set(dataSet.getAxisDescription(2)));
                 }
             } else {
                 LOGGER.error(
