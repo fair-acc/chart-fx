@@ -14,6 +14,9 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.gsi.dataset.serializer.DataType;
 import de.gsi.dataset.serializer.IoBuffer;
 import de.gsi.dataset.utils.AssertUtils;
@@ -25,6 +28,7 @@ import de.gsi.dataset.utils.AssertUtils;
  * @author rstein
  */
 public class BinarySerialiser { // NOPMD - omen est omen
+    private static final Logger LOGGER = LoggerFactory.getLogger(BinarySerialiser.class);
     private static final String READ_POSITION_AT_BUFFER_END = "read position at buffer end";
     public static final byte VERSION_MAJOR = 1;
     public static final byte VERSION_MINOR = 0;
@@ -36,6 +40,60 @@ public class BinarySerialiser { // NOPMD - omen est omen
 
     protected BinarySerialiser() {
         super();
+    }
+
+    public static FieldHeader parseIoStream(final IoBuffer buffer) {
+        final FieldHeader fieldRoot = new FieldHeader("ROOT", DataType.START_MARKER, new int[] { 0 }, buffer.position(),
+                100);
+
+        parseIoStream(buffer, fieldRoot, 0);
+        return fieldRoot;
+    }
+
+    protected static void parseIoStream(final IoBuffer buffer, final FieldHeader fieldRoot, final int recursionDepth) {
+
+        FieldHeader fieldHeader;
+        for (; ((fieldHeader = BinarySerialiser.getFieldHeader(buffer)) != null);) {
+            final long bytesToSkip = fieldHeader.getExpectedNumberOfDataBytes();
+            final long skipPosition = buffer.position() + bytesToSkip;
+            fieldRoot.getChildren().add(fieldHeader);
+
+            if (fieldHeader.getDataType().equals(DataType.END_MARKER)) {
+                // reached end of (sub-)class
+                // check marker value
+                byte markerValue = buffer.getByte();
+                if (DataType.END_MARKER.getAsByte() != markerValue) {
+                    throw new IllegalStateException("reached end marker, mismatched value '" + markerValue
+                            + "' vs. should '" + DataType.END_MARKER.getAsByte() + "'");
+                }
+                break;
+            }
+
+            if (bytesToSkip < 0) {
+                if (LOGGER.isWarnEnabled()) {
+                    LOGGER.atWarn().addArgument(fieldHeader.getFieldName()).addArgument(fieldHeader.getDataType())
+                            .addArgument(bytesToSkip).log("FieldHeader for '{}' type '{}' has bytesToSkip '{} <= 0'");
+                }
+
+                // fall-back option in case of
+                swallowRest(buffer, fieldHeader);
+            } else {
+                buffer.position(skipPosition);
+            }
+
+            if (fieldHeader.getDataType().equals(DataType.START_MARKER)) {
+                buffer.position(fieldHeader.getDataBufferPosition());
+                // detected sub-class start marker
+                // check marker value
+                byte markerValue = buffer.getByte();
+                if (DataType.START_MARKER.getAsByte() != markerValue) {
+                    throw new IllegalStateException("reached start marker, mismatched value '" + markerValue
+                            + "' vs. should '" + DataType.START_MARKER.getAsByte() + "'");
+                }
+
+                parseIoStream(buffer, fieldHeader, recursionDepth + 1);
+            }
+        }
     }
 
     protected static void adjustDataByteSizeBlock(final IoBuffer buffer, final long sizeMarkerStart) {
@@ -50,13 +108,19 @@ public class BinarySerialiser { // NOPMD - omen est omen
         buffer.position(sizeMarkerEnd);
     }
 
+    //
+    // -- WRITE OPERATIONS -------------------------------------------
+    //
+
     public static HeaderInfo checkHeaderInfo(final IoBuffer readBuffer) {
         AssertUtils.notNull("readBuffer", readBuffer);
+        FieldHeader headerStartField = BinarySerialiser.getFieldHeader(readBuffer);
         final byte startMarker = readBuffer.getByte();
         if (startMarker != DataType.START_MARKER.getAsByte()) {
             // TODO: replace with (new to be written) custom SerializerFormatException(..)
-            throw new InvalidParameterException("header does not start with a START_MARKER('"
-                    + DataType.START_MARKER.getAsByte() + "') DataType but " + startMarker);
+            throw new InvalidParameterException(
+                    "header does not start with a START_MARKER('" + DataType.START_MARKER.getAsByte()
+                            + "') DataType but " + startMarker + " fieldName = " + headerStartField.getFieldName());
         }
         readBuffer.getString(); // should read "#file producer : "
         // -- but not explicitly checked
@@ -75,10 +139,6 @@ public class BinarySerialiser { // NOPMD - omen est omen
         }
         return header;
     }
-
-    //
-    // -- WRITE OPERATIONS -------------------------------------------
-    //
 
     public static int[] getArrayDimensions(final IoBuffer readBuffer) {
         final int arrayDims = readBuffer.getInt(); // array dimensions
@@ -175,9 +235,9 @@ public class BinarySerialiser { // NOPMD - omen est omen
         final byte dataTypeByte = readBuffer.getByte();
         final DataType dataType = DataType.fromByte(dataTypeByte);
 
-        if (dataType.equals(DataType.END_MARKER)) {
-            return null;
-        }
+//        if (dataType.equals(DataType.END_MARKER)) {
+//            return null;
+//        }
 
         if (dataType.isScalar()) {
             long pos = readBuffer.position();
@@ -434,16 +494,16 @@ public class BinarySerialiser { // NOPMD - omen est omen
         put(buffer, fieldName, arrayValue, new int[] { arrayValue.length });
     }
 
+    //
+    // -- READ OPERATIONS --------------------------------------------
+    //
+
     public static void put(final IoBuffer buffer, final String fieldName, final double[] arrayValue, final int[] dims) {
         final int nElements = getNumberOfElements(dims);
         final long sizeMarkerStart = putArrayHeader(buffer, fieldName, DataType.DOUBLE_ARRAY, dims, nElements);
         buffer.putDoubleArray(arrayValue, Math.min(nElements, arrayValue.length));
         adjustDataByteSizeBlock(buffer, sizeMarkerStart);
     }
-
-    //
-    // -- READ OPERATIONS --------------------------------------------
-    //
 
     public static void put(final IoBuffer buffer, final String fieldName, final float value) {
         putFieldHeader(buffer, fieldName, DataType.FLOAT);
@@ -574,8 +634,8 @@ public class BinarySerialiser { // NOPMD - omen est omen
         return sizeMarkerStart;
     }
 
-    public static void putEndMarker(final IoBuffer buffer) {
-        putFieldHeader(buffer, DataType.END_MARKER.getAsString(), DataType.END_MARKER);
+    public static void putEndMarker(final IoBuffer buffer, final String markerName) {
+        putFieldHeader(buffer, markerName, DataType.END_MARKER);
         buffer.putByte(DataType.END_MARKER.getAsByte());
     }
 
@@ -636,7 +696,10 @@ public class BinarySerialiser { // NOPMD - omen est omen
      */
     public static void putHeaderInfo(final IoBuffer buffer) {
         AssertUtils.notNull("buffer", buffer);
-        buffer.putByte(DataType.START_MARKER.getAsByte());
+        long addCapacity = 20 + "OBJ_ROOT_START".length() + "#file producer : ".length()
+                + BinarySerialiser.class.getCanonicalName().length();
+        buffer.ensureAdditionalCapacity(addCapacity);
+        putStartMarker(buffer, "OBJ_ROOT_START");
         buffer.putString("#file producer : ");
         buffer.putString(BinarySerialiser.class.getCanonicalName());
         buffer.putString("\n");
@@ -645,9 +708,100 @@ public class BinarySerialiser { // NOPMD - omen est omen
         buffer.putByte(VERSION_MICRO);
     }
 
+    public static void putStartMarker(final IoBuffer buffer, final String markerName) {
+        putFieldHeader(buffer, markerName, DataType.START_MARKER);
+        buffer.putByte(DataType.START_MARKER.getAsByte());
+    }
+
     public static void setBufferIncrements(final int bufferIncrements) {
         AssertUtils.gtEqThanZero("bufferIncrements", bufferIncrements);
         BinarySerialiser.bufferIncrements = bufferIncrements;
+    }
+
+    protected static void swallowRest(final IoBuffer readBuffer, final FieldHeader fieldHeader) {
+        // parse whatever is left
+        // N.B. this is/should be the only place where 'Object' is used
+        // since the JVM will perform boxing of primitive types
+        // automatically. Boxing and later un-boxing is a significant
+        // high-performance bottleneck for any serialiser
+        Object leftOver = null;
+        int size = -1;
+        switch (fieldHeader.getDataType()) {
+        case BOOL:
+            leftOver = BinarySerialiser.getBoolean(readBuffer);
+            break;
+        case BYTE:
+            leftOver = BinarySerialiser.getByte(readBuffer);
+            break;
+        case SHORT:
+            leftOver = BinarySerialiser.getShort(readBuffer);
+            break;
+        case INT:
+            leftOver = BinarySerialiser.getInteger(readBuffer);
+            break;
+        case LONG:
+            leftOver = BinarySerialiser.getLong(readBuffer);
+            break;
+        case FLOAT:
+            leftOver = BinarySerialiser.getFloat(readBuffer);
+            break;
+        case DOUBLE:
+            leftOver = BinarySerialiser.getDouble(readBuffer);
+            break;
+        case STRING:
+            leftOver = BinarySerialiser.getString(readBuffer);
+            break;
+        case BOOL_ARRAY:
+            size = readBuffer.getInt();
+            leftOver = BinarySerialiser.getBooleanArray(readBuffer);
+            break;
+        case BYTE_ARRAY:
+            size = readBuffer.getInt();
+            leftOver = BinarySerialiser.getByteArray(readBuffer);
+            break;
+        case SHORT_ARRAY:
+            size = readBuffer.getInt();
+            leftOver = BinarySerialiser.getShortArray(readBuffer);
+            break;
+        case INT_ARRAY:
+            size = readBuffer.getInt();
+            leftOver = BinarySerialiser.getIntArray(readBuffer);
+            break;
+        case LONG_ARRAY:
+            size = readBuffer.getInt();
+            leftOver = BinarySerialiser.getLongArray(readBuffer);
+            break;
+        case FLOAT_ARRAY:
+            size = readBuffer.getInt();
+            leftOver = BinarySerialiser.getFloatArray(readBuffer);
+            break;
+        case DOUBLE_ARRAY:
+            size = readBuffer.getInt();
+            leftOver = BinarySerialiser.getDoubleArray(readBuffer);
+            break;
+        case STRING_ARRAY:
+            size = readBuffer.getInt();
+            leftOver = BinarySerialiser.getStringArray(readBuffer);
+            break;
+        case MAP:
+            size = readBuffer.getInt();
+            leftOver = BinarySerialiser.getMap(readBuffer, new ConcurrentHashMap<>());
+            break;
+        case END_MARKER:
+            final byte endMarker = BinarySerialiser.getByte(readBuffer);
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.atDebug().addArgument(fieldHeader).addArgument(Byte.toString(endMarker))
+                        .log("swallowed '{}'='{}'");
+            }
+            break;
+        default:
+            throw new IllegalArgumentException("encountered unknown format for " + fieldHeader.toString());
+        }
+
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.atDebug().addArgument(fieldHeader).addArgument(leftOver).addArgument(size)
+                    .log("swallowed unused element '%s{}'='%s{}' size = {}");
+        }
     }
 
     private static double[] toDoubles(final boolean[] input) {
