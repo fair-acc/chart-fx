@@ -142,7 +142,7 @@ public class DefaultAxisDescription extends DataRange implements AxisDescription
 	@Override
 	public int hashCode() {
 		final int prime = 31;
-		int result = super.hashCode();
+		int result = 1;
 		result = (prime * result) + ((name == null) ? 0 : name.hashCode());
 		result = (prime * result) + ((unit == null) ? 0 : unit.hashCode());
 		result = (prime * result) + Double.hashCode(getMin());
