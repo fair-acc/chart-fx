@@ -16,7 +16,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.gsi.chart.XYChart;
-import de.gsi.chart.axes.spi.DefaultNumericAxis;
+import de.gsi.chart.plugins.EditAxis;
+import de.gsi.chart.plugins.ParameterMeasurements;
+import de.gsi.chart.plugins.TableViewer;
+import de.gsi.chart.plugins.Zoomer;
 import de.gsi.dataset.DataSet;
 import de.gsi.dataset.spi.DoubleDataSet;
 import de.gsi.dataset.testdata.TestDataSet;
@@ -28,24 +31,38 @@ import de.gsi.chart.renderer.spi.ErrorDataSetRenderer;
 import de.gsi.chart.ui.geometry.Side;
 import de.gsi.chart.utils.GlyphFactory;
 import de.gsi.chart.viewer.DataView;
-import de.gsi.chart.viewer.DataViewPane;
+import de.gsi.chart.viewer.DataViewTilingPane.Layout;
+import de.gsi.chart.viewer.DataViewWindow;
 import de.gsi.chart.viewer.DataViewer;
+import javafx.animation.Animation;
+import javafx.animation.RotateTransition;
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.ToolBar;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Circle;
+import javafx.scene.shape.Polygon;
+import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 
 /**
  * @author Grzegorz Kruk
  * @author rstein
  */
 public class DataViewerSample extends Application {
-	private static final Logger LOGGER = LoggerFactory.getLogger(WriteDataSetToFileSample.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DataViewerSample.class);
     private static final String TITLE = "DataViewer Sample";
     private static final int NUMBER_OF_POINTS = 10000; // default: 32000
     private static final int UPDATE_PERIOD = 1000; // [ms]
@@ -57,60 +74,60 @@ public class DataViewerSample extends Application {
         ProcessingProfiler.setVerboseOutputState(false);
         primaryStage.setTitle(DataViewerSample.TITLE);
 
-        final XYChart energyChart = new XYChart(createXAxis(), createYAxis());
-        energyChart.setAnimated(false);
-        energyChart.setLegendVisible(true);
+        // the new JavaFX Chart Dataviewer
+        final DataViewer viewer = new DataViewer();
+        final DataView view1 = new DataView("ChartViews");
+        viewer.getViews().addAll(view1);
+        viewer.setExplorerVisible(true);
+
+        final XYChart energyChart = new TestChart();
         energyChart.getYAxis().setName("Energy");
         energyChart.getDatasets().addAll(createSeries());
 
-        final XYChart currentChart = new XYChart(createXAxis(), createYAxis());
-        currentChart.setAnimated(false);
+        final XYChart currentChart = new TestChart();
         currentChart.getRenderers().clear();
         final ErrorDataSetRenderer errorDataSetRenderer = new ErrorDataSetRenderer();
         errorDataSetRenderer.setErrorType(ErrorStyle.NONE);
         currentChart.getRenderers().add(errorDataSetRenderer);
-        // currentChart.getYAxis().setTickLabelFill(Color.GREEN);
         ((Region) currentChart.getYAxis()).lookup(".axis-label").setStyle("-fx-text-fill: green;");
         currentChart.getYAxis().setName("Current");
         currentChart.getYAxis().setSide(Side.RIGHT);
         currentChart.getDatasets().addAll(createSeries());
 
-        final DataViewPane currentView = new DataViewPane("Current", currentChart);
+        final DataViewWindow currentView = new DataViewWindow(view1, "Current", currentChart);
 
         final XYChart jDataViewerChart = createChart();
-        final DataViewPane jDataViewerPane = new DataViewPane("JDataViewerChart", jDataViewerChart);
+        final DataViewWindow jDataViewerPane = new DataViewWindow(view1, "JDataViewerChart", jDataViewerChart);
 
-        final DataView view1 = new DataView("DV1");
-        final DataViewPane energyView = new DataViewPane("Energy", energyChart);
+        final DataViewWindow energyView = new DataViewWindow(view1, "Energy", energyChart);
         energyView.setGraphic(GlyphFactory.create(FontAwesome.Glyph.ADJUST));
-        energyView.switchToTableView();
-        view1.getChildren().addAll(energyView, currentView, jDataViewerPane);
+        view1.getVisibleChildren().addAll(energyView, currentView, jDataViewerPane);
+        //        view1.getVisibleNodes().addAll(energyChart, currentChart, jDataViewerChart);
 
-        // the new JavaFX Chart Dataviewer
-        final DataViewer viewer = new DataViewer();
-        viewer.getViews().add(view1);
-        viewer.setExplorerVisible(true);
+        //        final BorderPane borderPane = new BorderPane(viewer);
+        final BorderPane borderPane = new BorderPane(view1);
 
-        final BorderPane borderPane = new BorderPane(viewer);
         final Button newView = new Button("add new view");
         newView.setOnAction(evt -> {
             final int count = viewer.getViews().size();
             final XYChart jChart = createChart();
-            final DataViewPane newDataViewerPane = new DataViewPane("Chart" + count, jChart);
-            view1.getChildren().add(newDataViewerPane);
+            final DataViewWindow newDataViewerPane = new DataViewWindow(view1, "Chart" + count, jChart);
+            view1.getVisibleChildren().add(newDataViewerPane);
+            //            view1.getVisibleNodes().add(jChart);
             viewer.requestLayout();
         });
 
         final Button sortButton = new Button("sort");
         sortButton.setOnAction(evt -> viewer.sort());
 
-        final ComboBox<DataView.Layout> sortChoice = new ComboBox<>();
-        sortChoice.getItems().addAll(DataView.Layout.values());
-        sortChoice.getSelectionModel().select(viewer.getSelectedView().getLayout());
-        sortChoice.setOnAction(
-                evt -> viewer.getSelectedView().setLayout(sortChoice.getSelectionModel().getSelectedItem()));
+        final DataView view2 = new DataView("Custom View",
+                new BorderPane(getDemoPane(), new Label("Custom DataView"), null, null, null));
+        //view1.getViewerPanes().add(view2); // done automatically with action below 
+        final Button customViewButton = new Button("custom view");
+        customViewButton.setOnAction(evt -> view1.setView(view2));
 
-        borderPane.setTop(new HBox(newView, sortButton, sortChoice));
+        borderPane
+                .setTop(new HBox(new ToolBar(newView, sortButton), view1.getToolBar(), new ToolBar(customViewButton)));
         final Scene scene = new Scene(borderPane, 800, 600);
         primaryStage.setScene(scene);
         primaryStage.show();
@@ -121,21 +138,7 @@ public class DataViewerSample extends Application {
         });
     }
 
-    private DefaultNumericAxis createYAxis() {
-        final DefaultNumericAxis yAxis = createXAxis();
-        yAxis.setAutoRangePadding(0.1);
-        return yAxis;
-    }
-
-    private DefaultNumericAxis createXAxis() {
-        final DefaultNumericAxis xAxis = new DefaultNumericAxis();
-        xAxis.setAnimated(false);
-        xAxis.setForceZeroInRange(false);
-        xAxis.setAutoRangeRounding(true);
-        return xAxis;
-    }
-
-    private List<DataSet> createSeries() {
+    private static List<DataSet> createSeries() {
 
         final List<DataSet> series = new ArrayList<>();
         for (int i = 0; i < 2; i++) {
@@ -144,7 +147,7 @@ public class DataViewerSample extends Application {
         return series;
     }
 
-    private DoubleDataSet createData(final String name) {
+    private static DoubleDataSet createData(final String name) {
         final DoubleDataSet dataSet = new DoubleDataSet(name, DataViewerSample.NUM_OF_POINTS);
         final Random rnd = new Random();
         for (int i = 0; i < DataViewerSample.NUM_OF_POINTS; i++) {
@@ -163,8 +166,9 @@ public class DataViewerSample extends Application {
      * @return the Swing-based chart component
      */
     private XYChart createChart() {
-        final XYChart chart = new XYChart(new DefaultNumericAxis("X Values", ""),
-                new DefaultNumericAxis("y Values", ""));
+        final XYChart chart = new TestChart();
+        chart.getXAxis().set("time", "s");
+        chart.getYAxis().set("y-axis", "A");
 
         final RandomWalkFunction dataset1 = new RandomWalkFunction("Test1", DataViewerSample.NUMBER_OF_POINTS);
         final RandomWalkFunction dataset2 = new RandomWalkFunction("Test2", DataViewerSample.NUMBER_OF_POINTS);
@@ -174,25 +178,20 @@ public class DataViewerSample extends Application {
         chart.getDatasets().addAll(Arrays.asList(dataset1, dataset2, dataset3));
 
         // Start task adding new data
-        final UpdateTask updateTask1 = new UpdateTask(chart, dataset1);
-        final UpdateTask updateTask2 = new UpdateTask(chart, dataset3);
+        final UpdateTask updateTask = new UpdateTask(chart, dataset1, dataset3);
         final Timer timer = new Timer();
         // Start update in 2sec.
-        timer.schedule(updateTask1, 2000, DataViewerSample.UPDATE_PERIOD);
-        // Start update in 2sec.
-        timer.schedule(updateTask2, 2000, DataViewerSample.UPDATE_PERIOD);
+        timer.schedule(updateTask, 2000, DataViewerSample.UPDATE_PERIOD);
 
         return chart;
     }
 
     private class UpdateTask extends TimerTask {
         private final TestDataSet<?>[] dataSets;
-        private final XYChart localChart;
         private int count;
 
         private UpdateTask(final XYChart chart, final TestDataSet<?>... dataSet) {
             super();
-            localChart = chart;
             dataSets = dataSet.clone();
         }
 
@@ -203,15 +202,56 @@ public class DataViewerSample extends Application {
                 dataSet.update();
             }
 
-            Platform.runLater(() -> {
-                if (count % 10 == 0) {
-                    final long diff = System.currentTimeMillis() - start;
-                    LOGGER.atInfo().log(String.format("update #%d took %d ms", count, diff));
-                    // LOGGER.info("update #{} took {} ms", count, diff);
-                }
+            if (count % 10 == 0) {
+                final long diff = System.currentTimeMillis() - start;
+                LOGGER.atInfo().log(String.format("update #%d took %d ms", count, diff));
+            }
 
-                count = (count + 1) % 1000;
-            });
+            count = (count + 1) % 1000;
         }
+    }
+
+    private class TestChart extends XYChart {
+
+        private TestChart() {
+            super();
+            getPlugins().add(new ParameterMeasurements());
+            getPlugins().add(new Zoomer());
+            getPlugins().add(new TableViewer());
+            getPlugins().add(new EditAxis());
+        }
+
+    }
+
+    private static Group getDemoPane() {
+
+        Rectangle rect = new Rectangle(-130, -40, 80, 80);
+        rect.setFill(Color.BLUE);
+        Circle circle = new Circle(0, 0, 40);
+        circle.setFill(Color.GREEN);
+        Polygon triangle = new Polygon(60, -40, 120, 0, 50, 40);
+        triangle.setFill(Color.RED);
+
+        Group group = new Group(rect, circle, triangle);
+
+        RotateTransition rotateTransition = new RotateTransition(Duration.millis(4000), group);
+        rotateTransition.setByAngle(3.0 * 360);
+        rotateTransition.setCycleCount(Animation.INDEFINITE);
+        rotateTransition.setAutoReverse(true);
+        rotateTransition.play();
+
+        RotateTransition rotateTransition1 = new RotateTransition(Duration.millis(1000), rect);
+        rotateTransition1.setByAngle(360);
+        rotateTransition1.setCycleCount(Animation.INDEFINITE);
+        rotateTransition1.setAutoReverse(false);
+        rotateTransition1.play();
+
+        RotateTransition rotateTransition2 = new RotateTransition(Duration.millis(1000), triangle);
+        rotateTransition2.setByAngle(360);
+        rotateTransition2.setCycleCount(Animation.INDEFINITE);
+        rotateTransition2.setAutoReverse(false);
+        rotateTransition2.play();
+
+        return group;
     }
 }
