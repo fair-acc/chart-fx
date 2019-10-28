@@ -13,36 +13,28 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.value.ChangeListener;
-import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
-import javafx.collections.ListChangeListener.Change;
 import javafx.collections.ObservableList;
 import javafx.scene.Node;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.VBox;
 
 /**
  *
  */
 public class DataViewer extends BorderPane {
     private static final Logger LOGGER = LoggerFactory.getLogger(DataViewer.class);
-    private final ObservableList<DataView> views = FXCollections.observableArrayList();
-    //    private final VisibleViewerPane visibleViewerPane = new VisibleViewerPane();
-    //    private final VBox viewerPane;
+    private final DataView dataViewRoot = new DataView("root");
+    private final ObjectProperty<DataView> selectedView = new SimpleObjectProperty<>(this, "selectedView");
+    // private final VisibleViewerPane visibleViewerPane = new VisibleViewerPane();
+    // private final VBox viewerPane;
 
-    //    private final SplitPane splitPane = new SplitPane();
-    //    private final TreeView<Node> explorerTreeView = new TreeView<>();
+    // private final SplitPane splitPane = new SplitPane();
+    // private final TreeView<Node> explorerTreeView = new TreeView<>();
 
-    private final BooleanProperty explorerVisible = new SimpleBooleanProperty(false);
-
-    private final ObjectProperty<DataView> selectedView = new SimpleObjectProperty<>(this, "selectedView") {
-
+    private final BooleanProperty explorerVisible = new SimpleBooleanProperty(false) {
         @Override
         protected void invalidated() {
-            //            visibleViewerPane.getChildren().setAll(getValue().getViewerPanes());
+            // visibleViewerPane.getChildren().setAll(getValue().getViewerPanes());
             requestLayout();
         }
     };
@@ -51,27 +43,26 @@ public class DataViewer extends BorderPane {
         super();
         getStylesheets().add(getClass().getResource("DataViewer.css").toExternalForm());
 
-        //        VBox.setVgrow(visibleViewerPane, Priority.ALWAYS);
-        //        viewerPane = new VBox(visibleViewerPane, minimizedViewerPane);
-
-        //        setCenter(viewerPane);
-
-        final ListChangeListener<? super DataView> childChangeListener = (final Change<? extends DataView> c) -> {
-            if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("added child -> update pane");
+        dataViewRoot.getSubDataViews().addListener((ListChangeListener<DataView>) change -> {
+            while (change.next()) {
+                if (!dataViewRoot.getSubDataViews().isEmpty() && selectedView.get() == null) {
+                    setSelectedView(dataViewRoot.getSubDataViews().get(0));
+                }
             }
-            layout();
-        };    
+        });
 
-        final ListChangeListener<Node> viewsChangeListener = change -> {
-            if (views.size() == 1) {
-                setSelectedView(views.get(0));
+        selectedView.addListener((ch, o, n) -> {
+            setCenter(n);
+            if (n == null) {
+                return;
             }
-            requestLayout();
-        };
-        views.addListener(viewsChangeListener);
+            if (!dataViewRoot.getSubDataViews().contains(n)) {
+                dataViewRoot.getSubDataViews().add(n);
+            }
+        });
 
         requestLayout();
+
     }
 
     /**
@@ -79,7 +70,7 @@ public class DataViewer extends BorderPane {
      *
      * @return boolean property (true: visible)
      */
-    public final BooleanProperty explorerVisibleProperty() {
+    public BooleanProperty explorerVisibleProperty() {
         return explorerVisible;
     }
 
@@ -93,7 +84,7 @@ public class DataViewer extends BorderPane {
      * @return list of views
      */
     public final ObservableList<DataView> getViews() {
-        return views;
+        return this.dataViewRoot.getSubDataViews();
     }
 
     /**
@@ -112,7 +103,8 @@ public class DataViewer extends BorderPane {
     /**
      * Sets the value of the {@link #explorerVisibleProperty()}.
      *
-     * @param value {@code true} to make the explorer visible, {@code false} to make it invisible
+     * @param value {@code true} to make the explorer visible, {@code false} to make
+     *              it invisible
      */
     public final void setExplorerVisible(final boolean value) {
         explorerVisibleProperty().set(value);
@@ -122,8 +114,18 @@ public class DataViewer extends BorderPane {
         selectedViewProperty().set(selectedView);
     }
 
+    public final void setView(final DataView dataView) {
+        selectedView.set(dataView);
+        // dataViewRoot.setView(dataView);
+    }
+
+    public final void setView(final String viewName) {
+        dataViewRoot.setView(viewName);
+        selectedView.set(dataViewRoot.getActiveView());
+    }
+
     public void sort() {
-        //        visibleViewerPane.sort();
+        // visibleViewerPane.sort();
     }
 
     // @Override

@@ -133,9 +133,9 @@ public class DataViewTilingPane extends GridPane {
     }
 
     public enum Layout {
-        HBOX("HBox", new Glyph(FONT_AWESOME, "\uf7a5").size(FONT_SIZE)),
-        VBOX("VBox", new Glyph(FONT_AWESOME, "\uf7a4").size(FONT_SIZE)),
-        GRID("Grid", new Glyph(FONT_AWESOME, "\uf009").size(FONT_SIZE)),
+        HBOX("HBox", new Glyph(FONT_AWESOME, "\uf07e").size(FONT_SIZE)), // TODO: change to more appropriate icon
+        VBOX("VBox", new Glyph(FONT_AWESOME, "\uf07d").size(FONT_SIZE)), // TODO: change to more appropriate icon
+        GRID("Grid", new Glyph(FONT_AWESOME, "\uf009").size(FONT_SIZE)), // TODO: change to more appropriate icon
         MAXIMISE("Maximise", new Glyph(FONT_AWESOME, "\uf2d0").size(FONT_SIZE));
 
         private final String name;
@@ -147,7 +147,7 @@ public class DataViewTilingPane extends GridPane {
         }
 
         public Node getIcon() {
-            return glyph;
+            return glyph.duplicate();
         }
 
         public String getName() {

@@ -20,20 +20,19 @@ import de.gsi.chart.plugins.EditAxis;
 import de.gsi.chart.plugins.ParameterMeasurements;
 import de.gsi.chart.plugins.TableViewer;
 import de.gsi.chart.plugins.Zoomer;
+import de.gsi.chart.renderer.ErrorStyle;
+import de.gsi.chart.renderer.spi.ErrorDataSetRenderer;
+import de.gsi.chart.ui.geometry.Side;
+import de.gsi.chart.utils.GlyphFactory;
+import de.gsi.chart.viewer.DataView;
+import de.gsi.chart.viewer.DataViewWindow;
+import de.gsi.chart.viewer.DataViewer;
 import de.gsi.dataset.DataSet;
 import de.gsi.dataset.spi.DoubleDataSet;
 import de.gsi.dataset.testdata.TestDataSet;
 import de.gsi.dataset.testdata.spi.RandomStepFunction;
 import de.gsi.dataset.testdata.spi.RandomWalkFunction;
 import de.gsi.dataset.utils.ProcessingProfiler;
-import de.gsi.chart.renderer.ErrorStyle;
-import de.gsi.chart.renderer.spi.ErrorDataSetRenderer;
-import de.gsi.chart.ui.geometry.Side;
-import de.gsi.chart.utils.GlyphFactory;
-import de.gsi.chart.viewer.DataView;
-import de.gsi.chart.viewer.DataViewTilingPane.Layout;
-import de.gsi.chart.viewer.DataViewWindow;
-import de.gsi.chart.viewer.DataViewer;
 import javafx.animation.Animation;
 import javafx.animation.RotateTransition;
 import javafx.application.Application;
@@ -45,10 +44,8 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ToolBar;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
-import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
@@ -102,10 +99,10 @@ public class DataViewerSample extends Application {
         final DataViewWindow energyView = new DataViewWindow(view1, "Energy", energyChart);
         energyView.setGraphic(GlyphFactory.create(FontAwesome.Glyph.ADJUST));
         view1.getVisibleChildren().addAll(energyView, currentView, jDataViewerPane);
-        //        view1.getVisibleNodes().addAll(energyChart, currentChart, jDataViewerChart);
+        // view1.getVisibleNodes().addAll(energyChart, currentChart, jDataViewerChart);
 
-        //        final BorderPane borderPane = new BorderPane(viewer);
-        final BorderPane borderPane = new BorderPane(view1);
+        final BorderPane borderPane = new BorderPane(viewer);
+//        final BorderPane borderPane = new BorderPane(view1);
 
         final Button newView = new Button("add new view");
         newView.setOnAction(evt -> {
@@ -113,21 +110,26 @@ public class DataViewerSample extends Application {
             final XYChart jChart = createChart();
             final DataViewWindow newDataViewerPane = new DataViewWindow(view1, "Chart" + count, jChart);
             view1.getVisibleChildren().add(newDataViewerPane);
-            //            view1.getVisibleNodes().add(jChart);
+            // view1.getVisibleNodes().add(jChart);
             viewer.requestLayout();
         });
 
         final Button sortButton = new Button("sort");
         sortButton.setOnAction(evt -> viewer.sort());
 
+        final Button defaultViewButton = new Button("Default View");
+        defaultViewButton.setOnAction(evt -> viewer.setView(view1));
+
         final DataView view2 = new DataView("Custom View",
                 new BorderPane(getDemoPane(), new Label("Custom DataView"), null, null, null));
-        //view1.getViewerPanes().add(view2); // done automatically with action below 
+        // view1.getViewerPanes().add(view2); // done automatically with action below
         final Button customViewButton = new Button("custom view");
-        customViewButton.setOnAction(evt -> view1.setView(view2));
+        customViewButton.setOnAction(evt -> viewer.setView(view2));
 
-        borderPane
-                .setTop(new HBox(new ToolBar(newView, sortButton), view1.getToolBar(), new ToolBar(customViewButton)));
+        // set default view
+        viewer.setView(view1);
+        borderPane.setTop(new HBox(new ToolBar(newView, sortButton), view1.getToolBar(),
+                new ToolBar(defaultViewButton, customViewButton)));
         final Scene scene = new Scene(borderPane, 800, 600);
         primaryStage.setScene(scene);
         primaryStage.show();
@@ -251,6 +253,9 @@ public class DataViewerSample extends Application {
         rotateTransition2.setCycleCount(Animation.INDEFINITE);
         rotateTransition2.setAutoReverse(false);
         rotateTransition2.play();
+
+//        HBox.setHgrow(group, Priority.ALWAYS);
+//        VBox.setVgrow(group, Priority.ALWAYS);
 
         return group;
     }
