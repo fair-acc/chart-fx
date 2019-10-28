@@ -26,7 +26,6 @@ public class DataViewTilingPane extends GridPane {
     protected static final String FONT_AWESOME = "FontAwesome";
     protected static final int FONT_SIZE = 20;
     public final Layout layout;
-    protected transient boolean isUpdating;
 
     public DataViewTilingPane(final Layout layout) {
         super();
@@ -37,6 +36,15 @@ public class DataViewTilingPane extends GridPane {
                 layoutNormal();
             }
         });
+    }
+
+    public Layout getLayout() {
+        return layout;
+    }
+
+    @Override
+    public String toString() {
+        return DataViewTilingPane.class.getSimpleName() + "('" + layout + "0')";
     }
 
     protected int getColumnsCount() {
@@ -61,22 +69,6 @@ public class DataViewTilingPane extends GridPane {
             }
             return ncols;
         }
-    }
-
-    public Layout getLayout() {
-        return layout;
-    }
-
-    @Override
-    protected void layoutChildren() {
-        if (isUpdating) {
-            return;
-        }
-        isUpdating = true;
-        // TODO: check why this is called so frequently
-        // System.err.println("layoutChildren()");
-        super.layoutChildren();
-        isUpdating = false;
     }
 
     protected void layoutNormal() {

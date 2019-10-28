@@ -12,6 +12,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import org.controlsfx.glyphfont.FontAwesome;
+import org.controlsfx.glyphfont.Glyph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,8 +43,9 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ToolBar;
-import javafx.scene.layout.BorderPane;
+import javafx.scene.control.Tooltip;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
@@ -60,7 +62,9 @@ import javafx.util.Duration;
  */
 public class DataViewerSample extends Application {
     private static final Logger LOGGER = LoggerFactory.getLogger(DataViewerSample.class);
-    private static final String TITLE = "DataViewer Sample";
+    private static final String TITLE = DataViewerSample.class.getSimpleName();
+    protected static final String FONT_AWESOME = "FontAwesome";
+    protected static final int FONT_SIZE = 20;
     private static final int NUMBER_OF_POINTS = 10000; // default: 32000
     private static final int UPDATE_PERIOD = 1000; // [ms]
 
@@ -73,7 +77,8 @@ public class DataViewerSample extends Application {
 
         // the new JavaFX Chart Dataviewer
         final DataViewer viewer = new DataViewer();
-        final DataView view1 = new DataView("ChartViews");
+        final Glyph chartIcon = new Glyph(FONT_AWESOME, FontAwesome.Glyph.LINE_CHART).size(FONT_SIZE);
+        final DataView view1 = new DataView("ChartViews", chartIcon);
         viewer.getViews().addAll(view1);
         viewer.setExplorerVisible(true);
 
@@ -101,36 +106,35 @@ public class DataViewerSample extends Application {
         view1.getVisibleChildren().addAll(energyView, currentView, jDataViewerPane);
         // view1.getVisibleNodes().addAll(energyChart, currentChart, jDataViewerChart);
 
-        final BorderPane borderPane = new BorderPane(viewer);
-//        final BorderPane borderPane = new BorderPane(view1);
-
         final Button newView = new Button("add new view");
         newView.setOnAction(evt -> {
-            final int count = viewer.getViews().size();
+            final int count = view1.getVisibleChildren().size();
             final XYChart jChart = createChart();
             final DataViewWindow newDataViewerPane = new DataViewWindow(view1, "Chart" + count, jChart);
             view1.getVisibleChildren().add(newDataViewerPane);
             // view1.getVisibleNodes().add(jChart);
-            viewer.requestLayout();
         });
 
         final Button sortButton = new Button("sort");
         sortButton.setOnAction(evt -> viewer.sort());
 
-        final Button defaultViewButton = new Button("Default View");
+        final Button defaultViewButton = new Button(view1.getName(), chartIcon.duplicate());
+        defaultViewButton.setTooltip(new Tooltip(view1.getName()));
         defaultViewButton.setOnAction(evt -> viewer.setView(view1));
 
-        final DataView view2 = new DataView("Custom View",
-                new BorderPane(getDemoPane(), new Label("Custom DataView"), null, null, null));
+        final Glyph customViewIcon = new Glyph(FONT_AWESOME, FontAwesome.Glyph.USERS).size(FONT_SIZE);
+        final DataView view2 = new DataView("Custom View", customViewIcon, getDemoPane());
         // view1.getViewerPanes().add(view2); // done automatically with action below
-        final Button customViewButton = new Button("custom view");
+        final Button customViewButton = new Button(view2.getName(), customViewIcon.duplicate());
+        customViewButton.setTooltip(new Tooltip(view2.getName()));
         customViewButton.setOnAction(evt -> viewer.setView(view2));
 
         // set default view
         viewer.setView(view1);
-        borderPane.setTop(new HBox(new ToolBar(newView, sortButton), view1.getToolBar(),
-                new ToolBar(defaultViewButton, customViewButton)));
-        final Scene scene = new Scene(borderPane, 800, 600);
+        ToolBar toolBar = new ToolBar(newView, sortButton);
+        toolBar.getItems().addAll(view1.getToolBar().getItems());
+        toolBar.getItems().addAll(defaultViewButton, customViewButton);
+        final Scene scene = new Scene(new VBox(toolBar, viewer, new Label("bottom")), 800, 600);
         primaryStage.setScene(scene);
         primaryStage.show();
 
@@ -225,8 +229,7 @@ public class DataViewerSample extends Application {
 
     }
 
-    private static Group getDemoPane() {
-
+    private static Pane getDemoPane() {
         Rectangle rect = new Rectangle(-130, -40, 80, 80);
         rect.setFill(Color.BLUE);
         Circle circle = new Circle(0, 0, 40);
@@ -235,6 +238,8 @@ public class DataViewerSample extends Application {
         triangle.setFill(Color.RED);
 
         Group group = new Group(rect, circle, triangle);
+        group.setTranslateX(300);
+        group.setTranslateY(200);
 
         RotateTransition rotateTransition = new RotateTransition(Duration.millis(4000), group);
         rotateTransition.setByAngle(3.0 * 360);
@@ -253,10 +258,11 @@ public class DataViewerSample extends Application {
         rotateTransition2.setCycleCount(Animation.INDEFINITE);
         rotateTransition2.setAutoReverse(false);
         rotateTransition2.play();
+        group.setManaged(true);
 
-//        HBox.setHgrow(group, Priority.ALWAYS);
-//        VBox.setVgrow(group, Priority.ALWAYS);
-
-        return group;
+        HBox.setHgrow(group, Priority.ALWAYS);
+        HBox box = new HBox(group);
+        VBox.setVgrow(box, Priority.ALWAYS);
+        return box;
     }
 }
