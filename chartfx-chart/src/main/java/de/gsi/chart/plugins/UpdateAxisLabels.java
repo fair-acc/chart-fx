@@ -56,13 +56,14 @@ public class UpdateAxisLabels extends ChartPlugin {
                 for (Renderer renderer : renderersChange.getAddedSubList()) {
                     ListChangeListener<DataSet> dataSetsListener = (
                             ListChangeListener.Change<? extends DataSet> dataSetsChange) -> {
-                        System.err.println("update listener -> dataSetsChanged ");
+                        LOGGER.atDebug().log("update listener -> dataSetsChanged ");
                         dataSetsChanged(dataSetsChange, renderer);
                     };
                     renderer.getDatasets().addListener(dataSetsListener);
                     renderersListeners.put(renderer, dataSetsListener);
-                    System.err.println("added listener for render " + renderer.getClass().getSimpleName()
-                            + " rendererDataSetsListeners = " + rendererDataSetsListeners.size());
+                    LOGGER.atDebug().addArgument(renderer.getClass().getSimpleName())
+                            .addArgument(rendererDataSetsListeners.size())
+                            .log("added listener for render {}, number of data set listeners {}");
                 }
             }
             if (renderersChange.wasRemoved()) {
@@ -153,7 +154,7 @@ public class UpdateAxisLabels extends ChartPlugin {
             dataSetListeners = new HashMap<>();
             rendererDataSetsListeners.put(renderer, dataSetListeners);
         }
-        System.err.println("dataSetsChanged added/removed - invoked");
+        LOGGER.atDebug().log("dataSetsChanged added/removed - invoked");
         while (change.next()) {
             if (change.wasAdded()) {
                 for (DataSet dataSet : change.getAddedSubList()) {
@@ -181,7 +182,7 @@ public class UpdateAxisLabels extends ChartPlugin {
                 || (update instanceof AxisRangeChangeEvent)) {
             return;
         }
-        System.err.println("axis - dataSetChange for AxisChangeEvent");
+        LOGGER.atDebug().log("axis - dataSetChange for AxisChangeEvent");
         AxisChangeEvent axisDataUpdate = (AxisChangeEvent) update;
         int dim = axisDataUpdate.getDimension();
         DataSet dataSet = (DataSet) axisDataUpdate.getSource();
@@ -200,7 +201,7 @@ public class UpdateAxisLabels extends ChartPlugin {
                             .ifPresent(axis -> axis.set(dataSet.getAxisDescription(2)));
                 }
             } else {
-                LOGGER.error(
+                LOGGER.atWarn().log(
                         "Applying axis information not possible for more than one DataSet added to chart. Please add datasets to separate Renderers");
             }
         } else { // dataset was added to / is registered at renderer
@@ -225,7 +226,7 @@ public class UpdateAxisLabels extends ChartPlugin {
                             .ifPresent(axis -> axis.set(dataSet.getAxisDescription(2)));
                 }
             } else {
-                LOGGER.error(
+                LOGGER.atWarn().log(
                         "Applying axis information not possible for more than one DataSet added to renderer. Please add datasets to separate Renderers");
             }
         }
@@ -287,7 +288,8 @@ public class UpdateAxisLabels extends ChartPlugin {
                 result = new NumericAxis();
                 result.setName(name);
             } else {
-                LOGGER.warn("Unknown type of axis {}, using DefaultNumericAxis instead", oldAxis.get().getClass());
+                LOGGER.atWarn().addArgument(oldAxis.get().getClass())
+                        .log("Unknown type of axis {}, using DefaultNumericAxis instead");
                 result = new DefaultNumericAxis(name);
             }
             result.setUnit(unit);
