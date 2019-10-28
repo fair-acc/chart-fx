@@ -13,13 +13,16 @@ import org.slf4j.LoggerFactory;
 
 import de.gsi.dataset.AxisDescription;
 import de.gsi.dataset.DataSet;
+import de.gsi.dataset.DataSetError;
 import de.gsi.dataset.DataSetMetaData;
 import de.gsi.dataset.EditConstraints;
+import de.gsi.dataset.EditableDataSet;
 import de.gsi.dataset.event.EventListener;
 import de.gsi.dataset.event.UpdateEvent;
 import de.gsi.dataset.event.UpdatedMetaDataEvent;
 import de.gsi.dataset.locks.DataSetLock;
 import de.gsi.dataset.locks.DefaultDataSetLock;
+import de.gsi.dataset.spi.utils.MathUtils;
 import de.gsi.dataset.spi.utils.StringHashMapList;
 
 /**
@@ -42,13 +45,15 @@ import de.gsi.dataset.spi.utils.StringHashMapList;
 public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends AbstractStylable<D>
         implements DataSet, DataSetMetaData {
     private static final long serialVersionUID = -7612136495756923417L;
+
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractDataSet.class);
-    private final transient AtomicBoolean autoNotification = new AtomicBoolean(true);
+
     private static final String[] DEFAULT_AXES_NAME = { "x-Axis", "y-Axis", "z-Axis" };
+    private final transient AtomicBoolean autoNotification = new AtomicBoolean(true);
     private String name;
     private final int dimension;
     private final List<AxisDescription> axesDescriptions = new ArrayList<>();
-    private final transient List<EventListener> updateListeners =  Collections.synchronizedList(new LinkedList<>());
+    private final transient List<EventListener> updateListeners = Collections.synchronizedList(new LinkedList<>());
     private final transient DataSetLock<? extends DataSet> lock = new DefaultDataSetLock<>(this);
     private StringHashMapList dataLabels = new StringHashMapList();
     private StringHashMapList dataStyles = new StringHashMapList();
@@ -61,7 +66,7 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
     /**
      * default constructor
      * 
-     * @param name the default name of the data set (meta data)
+     * @param name      the default name of the data set (meta data)
      * @param dimension dimension of this data set
      */
     public AbstractDataSet(final String name, final int dimension) {
@@ -75,14 +80,14 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
     }
 
     /**
-     * adds a custom new data label for a point The label can be used as a
-     * category name if CategoryStepsDefinition is used or for annotations
-     * displayed for data points.
+     * adds a custom new data label for a point The label can be used as a category
+     * name if CategoryStepsDefinition is used or for annotations displayed for data
+     * points.
      *
      * @param index of the data point
      * @param label for the data point specified by the index
-     * @return the previously set label or <code>null</code> if no label has
-     *         been specified
+     * @return the previously set label or <code>null</code> if no label has been
+     *         specified
      */
     public String addDataLabel(final int index, final String label) {
         final String retVal = lock().writeLockGuard(() -> dataLabels.put(index, label));
@@ -109,6 +114,48 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
         return autoNotification;
     }
 
+    protected int binarySearchX(final double search, final int indexMin, final int indexMax) {
+        if (indexMin == indexMax) {
+            return indexMin;
+        }
+        if (indexMax - indexMin == 1) {
+            if (Math.abs(get(DIM_X, indexMin) - search) < Math.abs(get(DIM_X, indexMax) - search)) {
+                return indexMin;
+            }
+            return indexMax;
+        }
+        final int middle = (indexMax + indexMin) / 2;
+        final double valMiddle = get(DIM_X, middle);
+        if (valMiddle == search) {
+            return middle;
+        }
+        if (search < valMiddle) {
+            return binarySearchX(search, indexMin, middle);
+        }
+        return binarySearchX(search, middle, indexMax);
+    }
+
+    protected int binarySearchY(final double search, final int indexMin, final int indexMax) {
+        if (indexMin == indexMax) {
+            return indexMin;
+        }
+        if (indexMax - indexMin == 1) {
+            if (Math.abs(get(DIM_Y, indexMin) - search) < Math.abs(get(DIM_Y, indexMax) - search)) {
+                return indexMin;
+            }
+            return indexMax;
+        }
+        final int middle = (indexMax + indexMin) / 2;
+        final double valMiddle = get(DIM_Y, middle);
+        if (valMiddle == search) {
+            return middle;
+        }
+        if (search < valMiddle) {
+            return binarySearchY(search, indexMin, middle);
+        }
+        return binarySearchY(search, middle, indexMax);
+    }
+
     public D clearMetaInfo() {
         infoList.clear();
         warningList.clear();
@@ -117,8 +164,242 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
     }
 
     /**
-     * Notifies listeners that the data has been invalidated. If the data is
-     * added to the chart, it triggers repaint.
+     * checks for equal data labels, may be overwritten by derived classes
+     * 
+     * @param other class
+     * @return {@code true} if equal
+     */
+    protected boolean equalDataLabels(final DataSet other) {
+        if (other instanceof AbstractDataSet) {
+            AbstractDataSet<?> otherAbsDs = (AbstractDataSet<?>) other;
+            if (!getDataLabelMap().equals(otherAbsDs.getDataLabelMap())) {
+                return false;
+            }
+        } else {
+            for (int index = 0; index < getDataCount(); index++) {
+                final String label1 = this.getDataLabel(index);
+                final String label2 = other.getDataLabel(index);
+                if (label1 == label2) {
+                    continue;
+                }
+                if (label1 == null && label2 != null) {
+                    return false;
+                }
+                if (!label1.equals(label2)) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    /**
+     * checks for equal EditConstraints, may be overwritten by derived classes
+     * 
+     * @param other class
+     * @return {@code true} if equal
+     */
+    protected boolean equalEditConstraints(final DataSet other) {
+        // check for error constraints
+        if (other instanceof EditableDataSet) {
+            EditableDataSet otherEditDs = (EditableDataSet) other;
+            if (editConstraints != null && otherEditDs.getEditConstraints() == null) {
+                return false;
+            }
+
+            if (editConstraints != null && !editConstraints.equals(otherEditDs.getEditConstraints())) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * checks for equal 'get' error values, may be overwritten by derived classes
+     * 
+     * @param other   class
+     * @param epsilon tolerance threshold
+     * @return {@code true} if equal
+     */
+    protected boolean equalErrorValues(final DataSet other, final double epsilon) {
+        // check for error data values
+        if (!(this instanceof DataSetError) || !(other instanceof DataSetError)) {
+            return true;
+        }
+        DataSetError thisErrorDs = (DataSetError) this;
+        DataSetError otherErrorDs = (DataSetError) other;
+        if (!thisErrorDs.getErrorType().equals(otherErrorDs.getErrorType())) {
+            return false;
+        }
+
+        if (epsilon <= 0.0) {
+            for (int dimIndex = 0; dimIndex < this.getDimension(); dimIndex++) {
+                for (int index = 0; index < this.getDataCount(dimIndex); index++) {
+                    if (thisErrorDs.getErrorNegative(dimIndex, index) != otherErrorDs.getErrorNegative(dimIndex,
+                            index)) {
+                        return false;
+                    }
+                    if (thisErrorDs.getErrorPositive(dimIndex, index) != otherErrorDs.getErrorPositive(dimIndex,
+                            index)) {
+                        return false;
+                    }
+                }
+            }
+        } else {
+            for (int dimIndex = 0; dimIndex < this.getDimension(); dimIndex++) {
+                for (int index = 0; index < this.getDataCount(dimIndex); index++) {
+                    if (!MathUtils.nearlyEqual(thisErrorDs.getErrorNegative(dimIndex, index),
+                            otherErrorDs.getErrorNegative(dimIndex, index), epsilon)) {
+                        return false;
+                    }
+                    if (!MathUtils.nearlyEqual(thisErrorDs.getErrorPositive(dimIndex, index),
+                            otherErrorDs.getErrorPositive(dimIndex, index), epsilon)) {
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
+    }
+
+    /**
+     * checks for equal meta data, may be overwritten by derived classes
+     * 
+     * @param other class
+     * @return {@code true} if equal
+     */
+    protected boolean equalMetaData(final DataSet other) {
+        if (other instanceof DataSetMetaData) {
+            DataSetMetaData otherMetaDs = (DataSetMetaData) other;
+            if (!getErrorList().equals(otherMetaDs.getErrorList())) {
+                return false;
+            }
+            if (!getWarningList().equals(otherMetaDs.getWarningList())) {
+                return false;
+            }
+            if (!getInfoList().equals(otherMetaDs.getInfoList())) {
+                return false;
+            }
+            if (!getMetaInfo().equals(otherMetaDs.getMetaInfo())) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+        return equals(obj, -1);
+    }
+
+    /**
+     * Indicates whether some other object is "equal to" this one.
+     * 
+     * @param obj     the reference object with which to compare.
+     * @param epsilon tolerance parameter ({@code epsilon<=0} corresponds to
+     *                numerically identical)
+     * @return {@code true} if this object is the same as the obj argument;
+     *         {@code false} otherwise.
+     */
+    public boolean equals(final Object obj, final double epsilon) { // NOPMD - by design
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (!(obj instanceof DataSet)) {
+            return false;
+        }
+        final DataSet other = (DataSet) obj;
+        // TODO: check whether to add a thread-safety guard
+        // N.B. some complication equals can be invoked from both reader as well as
+        // writer threads
+
+        // check dimension and data counts
+        if (this.getDimension() != other.getDimension()) {
+            return false;
+        }
+        if (this.getDataCount() != other.getDataCount()) {
+            return false;
+        }
+        for (int dimIndex = 0; dimIndex < this.getDimension(); dimIndex++) {
+            if (this.getDataCount(dimIndex) != other.getDataCount(dimIndex)) {
+                return false;
+            }
+        }
+
+        // check names
+        final String name1 = this.getName();
+        final String name2 = other.getName();
+
+        if (!(name1 == null ? name2 == null : name1.equals(name2))) {
+            return false;
+        }
+
+        // check axis description
+        if (getAxisDescriptions().isEmpty() && !other.getAxisDescriptions().isEmpty()) {
+            return false;
+        }
+        if (!getAxisDescriptions().equals(other.getAxisDescriptions())) {
+            return false;
+        }
+
+        // check axis data labels
+        if (!equalDataLabels(other)) {
+            return false;
+        }
+
+        // check for error constraints
+        if (!equalEditConstraints(other)) {
+            return false;
+        }
+
+        // check meta data
+        if (!equalMetaData(other)) {
+            return false;
+        }
+
+        // check normal data values
+        if (!equalValues(other, epsilon)) {
+            return false;
+        }
+
+        return equalErrorValues(other, epsilon);
+    }
+
+    /**
+     * checks for equal 'get' values with tolerance band, may be overwritten by
+     * derived classes
+     * 
+     * @param other   class
+     * @param epsilon tolerance threshold
+     * @return {@code true} if equal
+     */
+    protected boolean equalValues(final DataSet other, final double epsilon) {
+        if (epsilon <= 0.0) {
+            for (int dimIndex = 0; dimIndex < this.getDimension(); dimIndex++) {
+                for (int index = 0; index < this.getDataCount(dimIndex); index++) {
+                    if (get(dimIndex, index) != other.get(dimIndex, index)) {
+                        return false;
+                    }
+                }
+            }
+        } else {
+            for (int dimIndex = 0; dimIndex < this.getDimension(); dimIndex++) {
+                for (int index = 0; index < this.getDataCount(dimIndex); index++) {
+                    if (!MathUtils.nearlyEqual(get(dimIndex, index), other.get(dimIndex, index), epsilon)) {
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Notifies listeners that the data has been invalidated. If the data is added
+     * to the chart, it triggers repaint.
      * 
      * @param event the change event
      * @return itself (fluent design)
@@ -137,13 +418,13 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
     }
 
     /**
-     * Returns label of a data point specified by the index. The label can be
-     * used as a category name if CategoryStepsDefinition is used or for
-     * annotations displayed for data points.
+     * Returns label of a data point specified by the index. The label can be used
+     * as a category name if CategoryStepsDefinition is used or for annotations
+     * displayed for data points.
      *
      * @param index of the data label
-     * @return data point label specified by the index or <code>null</code> if
-     *         no label has been specified
+     * @return data point label specified by the index or <code>null</code> if no
+     *         label has been specified
      */
     @Override
     public String getDataLabel(final int index) {
@@ -214,15 +495,19 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
     }
 
     @Override
+    protected D getThis() {
+        return (D) this;
+    }
+
+    @Override
     public List<String> getWarningList() {
         return warningList;
     }
 
     /**
-     * Gets the index of the data point closest to the given x coordinate. The
-     * index returned may be less then zero or larger the the number of data
-     * points in the data set, if the x coordinate lies outside the range of the
-     * data set.
+     * Gets the index of the data point closest to the given x coordinate. The index
+     * returned may be less then zero or larger the the number of data points in the
+     * data set, if the x coordinate lies outside the range of the data set.
      *
      * @param x the x position of the data point
      * @return the index of the data point
@@ -289,8 +574,54 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
     }
 
     @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + axesDescriptions.hashCode();
+        result = prime * result + ((dataLabels == null) ? 0 : dataLabels.hashCode());
+        result = prime * result + dimension;
+        result = prime * result + ((editConstraints == null) ? 0 : editConstraints.hashCode());
+        result = prime * result + ((errorList == null) ? 0 : errorList.hashCode());
+        result = prime * result + ((infoList == null) ? 0 : infoList.hashCode());
+        result = prime * result + metaInfoMap.hashCode();
+        result = prime * result + ((name == null) ? 0 : name.hashCode());
+        result = prime * result + ((warningList == null) ? 0 : warningList.hashCode());
+        return result;
+    }
+
+    @Override
     public DataSetLock<? extends DataSet> lock() {
         return lock;
+    }
+
+    protected int minNeigbourSearchX(final double search, final int indexMin, final int indexMax) {
+        double minAbsDiff = Double.MAX_VALUE;
+        int searchIndex = indexMin;
+
+        final double a = get(DIM_X, indexMin);
+        final double b = get(DIM_X, indexMax);
+        final String eq = a < b ? " < " : " > ";
+        LOGGER.error("- new searchIndex  getX(indexMin)= " + a + eq + " getX(indexMax)= " + b);
+
+        for (int i = indexMin; i <= indexMax; i++) {
+            final double valX = get(DIM_X, i);
+            if (!Double.isFinite(valX)) {
+                LOGGER.error("non-finite value - autsch = " + valX + " index = " + i);
+                throw new IllegalStateException("check");
+                // continue;
+            }
+
+            final double absDiff = Math.abs(search - valX);
+
+            if (Double.isFinite(absDiff) && absDiff < minAbsDiff) {
+                searchIndex = i;
+                minAbsDiff = absDiff;
+            }
+        }
+        LOGGER.error("- new searchIndex Range = " + indexMin + " for " + indexMax);
+        LOGGER.error("- new searchIndex = " + searchIndex + " for " + minAbsDiff);
+
+        return searchIndex;
     }
 
     /**
@@ -320,13 +651,13 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
     }
 
     /**
-     * remove a custom data label for a point The label can be used as a
-     * category name if CategoryStepsDefinition is used or for annotations
-     * displayed for data points.
+     * remove a custom data label for a point The label can be used as a category
+     * name if CategoryStepsDefinition is used or for annotations displayed for data
+     * points.
      *
      * @param index of the data point
-     * @return the previously set label or <code>null</code> if no label has
-     *         been specified
+     * @return the previously set label or <code>null</code> if no label has been
+     *         specified
      */
     public String removeDataLabel(final int index) {
         final String retVal = lock().writeLockGuard(() -> dataLabels.remove(index));
@@ -385,82 +716,5 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
     @Override
     public synchronized List<EventListener> updateEventListener() {
         return updateListeners;
-    }
-
-    protected int binarySearchX(final double search, final int indexMin, final int indexMax) {
-        if (indexMin == indexMax) {
-            return indexMin;
-        }
-        if (indexMax - indexMin == 1) {
-            if (Math.abs(get(DIM_X, indexMin) - search) < Math.abs(get(DIM_X, indexMax) - search)) {
-                return indexMin;
-            }
-            return indexMax;
-        }
-        final int middle = (indexMax + indexMin) / 2;
-        final double valMiddle = get(DIM_X, middle);
-        if (valMiddle == search) {
-            return middle;
-        }
-        if (search < valMiddle) {
-            return binarySearchX(search, indexMin, middle);
-        }
-        return binarySearchX(search, middle, indexMax);
-    }
-
-    protected int binarySearchY(final double search, final int indexMin, final int indexMax) {
-        if (indexMin == indexMax) {
-            return indexMin;
-        }
-        if (indexMax - indexMin == 1) {
-            if (Math.abs(get(DIM_Y, indexMin) - search) < Math.abs(get(DIM_Y, indexMax) - search)) {
-                return indexMin;
-            }
-            return indexMax;
-        }
-        final int middle = (indexMax + indexMin) / 2;
-        final double valMiddle = get(DIM_Y, middle);
-        if (valMiddle == search) {
-            return middle;
-        }
-        if (search < valMiddle) {
-            return binarySearchY(search, indexMin, middle);
-        }
-        return binarySearchY(search, middle, indexMax);
-    }
-
-    @Override
-    protected D getThis() {
-        return (D) this;
-    }
-
-    protected int minNeigbourSearchX(final double search, final int indexMin, final int indexMax) {
-        double minAbsDiff = Double.MAX_VALUE;
-        int searchIndex = indexMin;
-
-        final double a = get(DIM_X, indexMin);
-        final double b = get(DIM_X, indexMax);
-        final String eq = a < b ? " < " : " > ";
-        LOGGER.error("- new searchIndex  getX(indexMin)= " + a + eq + " getX(indexMax)= " + b);
-
-        for (int i = indexMin; i <= indexMax; i++) {
-            final double valX = get(DIM_X, i);
-            if (!Double.isFinite(valX)) {
-                LOGGER.error("non-finite value - autsch = " + valX + " index = " + i);
-                throw new IllegalStateException("check");
-                // continue;
-            }
-
-            final double absDiff = Math.abs(search - valX);
-
-            if (Double.isFinite(absDiff) && absDiff < minAbsDiff) {
-                searchIndex = i;
-                minAbsDiff = absDiff;
-            }
-        }
-        LOGGER.error("- new searchIndex Range = " + indexMin + " for " + indexMax);
-        LOGGER.error("- new searchIndex = " + searchIndex + " for " + minAbsDiff);
-
-        return searchIndex;
     }
 }
