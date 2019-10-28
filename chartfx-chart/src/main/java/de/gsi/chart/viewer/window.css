@@ -7,6 +7,12 @@
         * FontAsome definitions from: https://github.com/encharm/Font-Awesome-SVG-PNG/tree/master/black/svg
 */
 
+.title-label {
+    -fx-text-fill: white;
+    -fx-font-weight: normal;
+    -fx-font-size: 14;
+}
+
 .window {
    /* -fx-skin: "jfxtras.labs.internal.scene.control.skin.window.DefaultWindowSkin";*/
     -fx-glass-color: rgba(85, 132, 160, 0.9);
@@ -93,7 +99,7 @@
 
 .window-titlebar {
     -fx-glass-color: rgba(0, 0, 150, 0.9);
-    -fx-glass-colorDark: rgba(0, 0, 10, 0.9);
+    -fx-glass-colorDark: rgba(0, 0, 150, 0.9);
     -fx-alignment: center;
     /*-fx-background-color: linear-gradient(to bottom, derive(-fx-glass-color, 30%), -fx-glass-color);*/
     -fx-background-color: linear-gradient(to right, -fx-glass-color, -fx-glass-colorDark);
