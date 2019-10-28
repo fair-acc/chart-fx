@@ -16,6 +16,7 @@ import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
+import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.ToolBar;
@@ -99,6 +100,7 @@ public class DataView extends VBox {
         for (final Layout layout : Layout.values()) {
             final DataView dataView = new DataView(layout.getName(), new DataViewTilingPane(layout), false); // NOPMD
             final Button selectionButton = new Button(null, layout.getIcon()); // NOPMD
+            selectionButton.setPadding(new Insets(3, 3, 3, 3));
             selectionButton.setTooltip(new Tooltip("configure pane for " + layout.getName() + "-style layout")); // NOPMD
             selectionButton.setOnAction(evt -> setView(dataView));
 
@@ -282,6 +284,7 @@ public class DataView extends VBox {
 
         activeView = viewerPane;
         if (viewerPane.isStandalone()) {
+            LOGGER.atDebug().addArgument(activeView).log("set standalone DataView '{}'");
             getChildren().setAll(activeView.getContentPane());
             return;
         }
@@ -296,6 +299,7 @@ public class DataView extends VBox {
         } else {
             activeView.getContentPane().getChildren().setAll(getMaximizedChild());
         }
+        LOGGER.atDebug().addArgument(activeView).log("set non-standalone DataView '{}'");
         getChildren().setAll(activeView.getContentPane(), minimisedElements);
     }
 
