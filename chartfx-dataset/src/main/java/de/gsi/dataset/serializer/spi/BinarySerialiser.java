@@ -96,7 +96,7 @@ public class BinarySerialiser { // NOPMD - omen est omen
         }
     }
 
-    protected static void adjustDataByteSizeBlock(final IoBuffer buffer, final long sizeMarkerStart) {
+    public static void adjustDataByteSizeBlock(final IoBuffer buffer, final long sizeMarkerStart) {
         final long sizeMarkerEnd = buffer.position();
 
         // go back and re-adjust the actual size info
@@ -370,7 +370,9 @@ public class BinarySerialiser { // NOPMD - omen est omen
         int ret = 1;
         for (int i = 0; i < dimensions.length; i++) {
             final int dim = dimensions[i];
-            AssertUtils.gtThanZero("dimensions[" + i + "]", dim);
+            if (i > 0) {
+                AssertUtils.gtThanZero("dimensions[" + i + "]", dim);
+            }
             ret *= dim;
         }
         return ret;
@@ -615,7 +617,7 @@ public class BinarySerialiser { // NOPMD - omen est omen
         adjustDataByteSizeBlock(buffer, sizeMarkerStart);
     }
 
-    protected static long putArrayHeader(final IoBuffer buffer, final String fieldName, final DataType dataType,
+    public static long putArrayHeader(final IoBuffer buffer, final String fieldName, final DataType dataType,
             final int[] dims, final int nElements) {
         AssertUtils.notNull("dims", dims);
         final int arrayByteSize = nElements * (int) dataType.getPrimitiveSize();
@@ -639,11 +641,11 @@ public class BinarySerialiser { // NOPMD - omen est omen
         buffer.putByte(DataType.END_MARKER.getAsByte());
     }
 
-    protected static void putFieldHeader(final IoBuffer buffer, final String fieldName, final DataType dataType) {
+    public static void putFieldHeader(final IoBuffer buffer, final String fieldName, final DataType dataType) {
         putFieldHeader(buffer, fieldName, dataType, 0);
     }
 
-    protected static void putFieldHeader(final IoBuffer buffer, final String fieldName, final DataType dataType,
+    public static void putFieldHeader(final IoBuffer buffer, final String fieldName, final DataType dataType,
             final int additionalSize) {
         AssertUtils.notNull("buffer", buffer);
         AssertUtils.notNull("fieldName", fieldName);
@@ -656,7 +658,7 @@ public class BinarySerialiser { // NOPMD - omen est omen
         buffer.putByte(dataType.getAsByte());
     }
 
-    protected static void putGenericArrayAsPrimitive(final IoBuffer buffer, final DataType dataType,
+    public static void putGenericArrayAsPrimitive(final IoBuffer buffer, final DataType dataType,
             final Object[] data, final int nToCopy) {
 
         switch (dataType) {
