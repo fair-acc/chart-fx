@@ -2,6 +2,7 @@ package de.gsi.chart.viewer;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -17,11 +18,7 @@ import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
-import javafx.geometry.Insets;
 import javafx.scene.Node;
-import javafx.scene.control.Button;
-import javafx.scene.control.ToolBar;
-import javafx.scene.control.Tooltip;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
@@ -40,7 +37,6 @@ public class DataView extends VBox {
     private final StringProperty name = new SimpleStringProperty(this, "name");
     private final ObjectProperty<Node> icon = new SimpleObjectProperty<>(this, "icon");
     private final boolean standalone;
-    private final ToolBar toolBar = new ToolBar();
 
     private final FlowPane minimisedElements = new FlowPane();
     private final ObjectProperty<Pane> contentPane = new SimpleObjectProperty<>(this, "contenPane");
@@ -77,13 +73,13 @@ public class DataView extends VBox {
     };
 
     public DataView(final String name, final Node icon) {
-        this(name, icon, null, true);
+        this(name, icon, null, false);
         addStandardViews(); // NOPMD, calling of overridable protected method
     }
 
     public DataView(final String name, final Node icon, final Pane pane) {
         this(name, icon, pane, true);
-        subDataViews.add(this);
+        //subDataViews.add(this);
     }
 
     protected DataView(final String name, final Node icon, final Pane pane, final boolean isStandalone) {
@@ -97,11 +93,14 @@ public class DataView extends VBox {
         VBox.setVgrow(minimisedElements, Priority.NEVER);
         HBox.setHgrow(minimisedElements, Priority.NEVER);
         setFillWidth(true);
+        this.setActiveSubView(this);
 
         registerListListener(); // NOPMD, calling of overridable protected method
 
         activeSubView.addListener((ch, o, n) -> {
-            LOGGER.atDebug().addArgument(n).log("set active DataView '{}'");
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.atDebug().addArgument(n).log("set active DataView '{}'");
+            }
             if (n == null) {
                 getChildren().clear();
                 return;
@@ -112,16 +111,25 @@ public class DataView extends VBox {
             }
 
             if (n.isStandalone()) {
-                LOGGER.atDebug().addArgument(n).log("set standalone DataView '{}'");
+                if (LOGGER.isDebugEnabled()) {
+                    LOGGER.atDebug().addArgument(n)
+                            .log("set standalone DataView '{}'" + n + " - content " + n.getContentPane());
+                }
+                //                this.setContentPane(n);
                 getChildren().setAll(n);
+
+                //                getChildren().setAll(n.getContentPane());
+                // getActiveView().getChildren().setAll(n);
                 return;
             }
 
-            LOGGER.atDebug().addArgument(n).log("set non-standalone DataView '{}'");
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.atDebug().addArgument(n).log("set non-standalone DataView '{}'");
+            }
             // add dependent sub-DataView (e.g. HBox, VBox, Grid-style layout)
-            for (final DataView subView : subDataViews) {
+            for (final DataView subView : getSubDataViews()) {
                 if (!subView.isStandalone()) {
-                    subView.getChildren().clear();
+                    subView.getContentPane().getChildren().clear();
                 }
             }
 
@@ -133,12 +141,17 @@ public class DataView extends VBox {
 
             getChildren().setAll(getActiveView().getContentPane(), minimisedElements);
 
-            LOGGER.atDebug().addArgument(n).log("set non-standalone DataView '{}' - done");
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.atDebug().addArgument(n).log("set non-standalone DataView '{}' - done");
+            }
         });
 
         setName(name);
         setIcon(icon);
         setContentPane(pane == null ? new StackPane() : pane);
+        if (this.standalone) {
+            getChildren().setAll(getContentPane()); // NOPMD
+        }
     }
 
     public ObjectProperty<DataView> activeSubViewProperty() {
@@ -191,10 +204,6 @@ public class DataView extends VBox {
 
     public final ObservableList<DataView> getSubDataViews() {
         return subDataViews;
-    }
-
-    public ToolBar getToolBar() {
-        return toolBar;
     }
 
     public final ObservableList<DataViewWindow> getUndockedChildren() {
@@ -288,6 +297,14 @@ public class DataView extends VBox {
         setView(match.get());
     }
 
+    public void sort() {
+        if (isStandalone() || getContentPane() == null || getContentPane().getChildren().isEmpty()) {
+            return;
+        }
+
+        FXCollections.sort(getContentPane().getChildren(), Comparator.comparing(n -> n.toString().toLowerCase()));
+    }
+
     @Override
     public String toString() {
         return DataView.class.getSimpleName() + "(\"" + getName() + "\")";
@@ -296,15 +313,7 @@ public class DataView extends VBox {
     protected void addStandardViews() {
         for (final Layout layout : Layout.values()) {
             final DataView dataView = new DataView(layout.getName(), null, new DataViewTilingPane(layout), false); // NOPMD
-            final Button selectionButton = new Button(null, layout.getIcon()); // NOPMD
-            selectionButton.setPadding(new Insets(3, 3, 3, 3));
-            selectionButton.setTooltip(new Tooltip("configure pane for " + layout.getName() + "-style layout")); // NOPMD
-            selectionButton.setOnAction(evt -> setView(dataView));
-
             subDataViews.add(dataView);
-            if (!layout.equals(Layout.MAXIMISE)) {
-                toolBar.getItems().add(selectionButton);
-            }
         }
         setNodeLayout(Layout.GRID); // NOPMD
     }
@@ -339,36 +348,43 @@ public class DataView extends VBox {
                     HBox.setHgrow(c, Priority.ALWAYS);
                     VBox.setVgrow(c, Priority.ALWAYS);
                     if (c instanceof DataViewWindow) {
-                        // N.B. list is based on 'NoDuplicatesList'
-                        getActiveView().getContentPane().getChildren().add(c);
+                        if (getActiveView().isStandalone()) {
+                            return;
+                        }
+                        if (!getActiveView().getContentPane().getChildren().contains(c)) {
+                            getActiveView().getContentPane().getChildren().add(c);
+                        }
                     }
                     visibleChildren.add(new DataViewWindow(DataView.this, "", c)); // NOPMD
                 });
             }
         });
 
-        visibleChildren.addListener((ListChangeListener<Node>) change -> {
+        visibleChildren.addListener((ListChangeListener<DataViewWindow>) change -> {
             while (change.next()) {
-                if (activeSubView != null) {
+                if (getActiveView() != null) {
+                    if (getActiveView().isStandalone()) {
+                        return;
+                    }
                     change.getRemoved().forEach(c -> getActiveView().getContentPane().getChildren().remove(c));
-                    // N.B. list is based on 'NoDuplicatesList'
-                    getActiveView().getContentPane().getChildren().addAll(change.getAddedSubList());
+                    change.getAddedSubList().stream()
+                            .filter(o -> !getActiveView().getContentPane().getChildren().contains(o))
+                            .forEach(c -> getActiveView().getContentPane().getChildren().add(c));
                 }
             }
         });
 
-        minimisedChildren.addListener((ListChangeListener<Node>) change -> {
+        minimisedChildren.addListener((ListChangeListener<DataViewWindow>) change -> {
             while (change.next()) {
                 minimisedElements.getChildren().removeAll(change.getRemoved());
-                change.getAddedSubList().forEach(view -> {
-                    if (!minimisedElements.getChildren().contains(view)) {
-                        minimisedElements.getChildren().add(view);
-                    }
-                });
+                change.getAddedSubList().stream().filter(n -> !minimisedElements.getChildren().contains(n))
+                        .forEach(view -> minimisedElements.getChildren().add(view));
             }
         });
 
-        contentPane.addListener((ch, o, n) -> {
+        contentPane.addListener((ch, o, n) ->
+
+        {
             if ((n == null) || n.equals(o)) {
                 return;
             }

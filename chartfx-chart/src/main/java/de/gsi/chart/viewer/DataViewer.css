@@ -1,55 +1,94 @@
-.xyz-view {
-	-fx-border-color: #22bad9;
-	-fx-border-width: 1.0;
+
+.window {
+    -fx-glass-color: rgba(85, 132, 160, 0.9);
+    -fx-alignment: center;
+    -fx-background-color: -fx-background;
+    /*-fx-border-color: -fx-border-color;*/
+    -fx-border-width: 3;
+    -fx-background-insets: 1;
+    -fx-border-radius: 3;
+    -fx-background-radius: 3;
+    -fx-font-size: 14;
+    /*-fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.65), 100, 0.5, 0.0, 0.0);*/
+    -fx-background-color: -fx-shadow-highlight-color,
+        linear-gradient(to bottom, derive(-fx-background, -10%), derive(-fx-background, -5%)),
+        linear-gradient(from 0px 0px to 0px 4px, derive(-fx-background, -4%), derive(-fx-background, 10%));
+   -fx-background-insets: 0 0 -1 0, 0,1;
+   -fx-background-radius: 4,4,3;
+   -fx-padding: 2px;
 }
 
-.title-bar {
-   	-fx-background-color: yellow;
-	-fx-min-height: 20;
-	-fx-pref-height: 20; 
-	-fx-max-height: 20;
-	-fx-background-color: #22bad9;
+.window-titlelabel {
+    -fx-text-fill: white;
+    -fx-font-weight: normal;
+    -fx-font-size: 16;
 }
 
-.title-bar .name-label {
-	-fx-font-weight: bold;
-	-fx-font-size: 12;
+.window-icon {
+    -fx-border-color: rgb(255,255,255);
+    -fx-border-radius: 3;
 }
 
-.title-bar-button {
-    -fx-min-height: 16;
-    -fx-pref-height: 16; 
-    -fx-max-height: 16;
+.window-close-icon {
+    -fx-border-color: rgb(255,255,255);
+  /*  -fx-shape: "m 81.451435,47.885404 -39.71427,39.714277 m 0,-39.714277 39.71427,39.714277 m 27.285725,-19.85714 c 0,26.03628 -21.106585,47.142859 -47.142865,47.142859 -26.03628,0 -47.14285,-21.106579 -47.14285,-47.142859 0,-26.036277 21.10657,-47.142853 47.14285,-47.142853 26.03628,0 47.142865,21.106576 47.142865,47.142853 z";*/
+    -fx-shape: "M1257 1111l-146 146q-10 10-23 10t-23-10l-169-169-169 169q-10 10-23 10t-23-10l-146-146q-10-10-10-23t10-23l169-169-169-169q-10-10-10-23t10-23l146-146q10-10 23-10t23 10l169 169 169-169q10-10 23-10t23 10l146 146q10 10 10 23t-10 23l-169 169 169 169q10 10 10 23t-10 23zm-1001 297h1280v-1024h-1280v1024zm1536-1120v1216q0 66-47 113t-113 47h-1472q-66 0-113-47t-47-113v-1216q0-66 47-113t113-47h1472q66 0 113 47t47 113z";
+    -fx-border-width: 2;
+    -fx-border-insets: 1;
 }
 
-.restore-button {
-	-fx-min-height: 16;
-	-fx-pref-height: 16; 
-	-fx-max-height: 16;
+.window-minimize-icon {
+    -fx-border-color: rgb(255,255,255);
+/*  -fx-shape: "m 84.388275,210.34884 -47.71427,-0.28572 m 70.999995,0.14286 c 0,26.03628 -21.106585,47.14286 -47.142865,47.14286 -26.03628,0 -47.14285,-21.10658 -47.14285,-47.14286 0,-26.03628 21.10657,-47.14285 47.14285,-47.14285 26.03628,0 47.142865,21.10657 47.142865,47.14285 z"; */
+/*     -fx-shape: "M1344 800v64q0 14-9 23t-23 9h-832q-14 0-23-9t-9-23v-64q0-14 9-23t23-9h832q14 0 23 9t9 23zm128 448v-832q0-66-47-113t-113-47h-832q-66 0-113 47t-47 113v832q0 66 47 113t113 47h832q66 0 113-47t47-113zm128-832v832q0 119-84.5 203.5t-203.5 84.5h-832q-119 0-203.5-84.5t-84.5-203.5v-832q0-119 84.5-203.5t203.5-84.5h832q119 0 203.5 84.5t84.5 203.5z"; */
+/*  -fx-shape: "M1792 1312v192q0 66-47 113t-113 47h-1472q-66 0-113-47t-47-113v-192q0-66 47-113t113-47h1472q66 0 113 47t47 113z";*/
+    -fx-shape: "M1792 1312v192q0 66-47 113t-113 47h-1472q-66 0-113-47t-47-113v-192q0-66 47-113t113-47h1472q66 0 113 47t47 113z"; 
+    -fx-border-width: 2; 
+    -fx-border-insets: 1;
 }
 
-.maximize-button {
-	-fx-min-height: 16;
-	-fx-pref-height: 16; 
-	-fx-max-height: 16;
+.window-minimize-icon2 {
+    -fx-border-color: rgb(255,255,255);
+    -fx-shape: "M1344 800v64q0 14-9 23t-23 9h-832q-14 0-23-9t-9-23v-64q0-14 9-23t23-9h832q14 0 23 9t9 23zm128 448v-832q0-66-47-113t-113-47h-832q-66 0-113 47t-47 113v832q0 66 47 113t113 47h832q66 0 113-47t47-113zm128-832v832q0 119-84.5 203.5t-203.5 84.5h-832q-119 0-203.5-84.5t-84.5-203.5v-832q0-119 84.5-203.5t203.5-84.5h832q119 0 203.5 84.5t84.5 203.5z";
+    -fx-border-width: 2;
+    -fx-border-insets: 1;   
 }
 
-.minimize-button {
-    -fx-min-height: 16;
-    -fx-pref-height: 16; 
-    -fx-max-height: 16;
+.window-maximize-icon {
+    -fx-border-color: rgb(255,255,255);
+    -fx-shape: "M256 1408h1280v-768h-1280v768zm1536-1120v1216q0 66-47 113t-113 47h-1472q-66 0-113-47t-47-113v-1216q0-66 47-113t113-47h1472q66 0 113 47t47 113z";
+    -fx-border-width: 2;
+    -fx-border-insets: 1;
 }
 
-.close-button {
-    -fx-min-height: 16;
-    -fx-pref-height: 16; 
-    -fx-max-height: 16;
+.window-restore-icon {
+    -fx-border-color: rgb(255,255,255);
+    -fx-shape: "M256 1536h768v-512h-768v512zm1024-512h512v-768h-768v256h96q66 0 113 47t47 113v352zm768-864v960q0 66-47 113t-113 47h-608v352q0 66-47 113t-113 47h-960q-66 0-113-47t-47-113v-960q0-66 47-113t113-47h608v-352q0-66 47-113t113-47h960q66 0 113 47t47 113z";
+    -fx-border-width: 2;
+    -fx-border-insets: 1;
 }
 
-.detach-button {
-    -fx-min-height: 16;
-    -fx-pref-height: 16; 
-    -fx-max-height: 16;
+.window-detach-icon {
+    -fx-border-color: rgb(255,255,255);
+    -fx-shape: "M1408 928v320q0 119-84.5 203.5t-203.5 84.5h-832q-119 0-203.5-84.5t-84.5-203.5v-832q0-119 84.5-203.5t203.5-84.5h704q14 0 23 9t9 23v64q0 14-9 23t-23 9h-704q-66 0-113 47t-47 113v832q0 66 47 113t113 47h832q66 0 113-47t47-113v-320q0-14 9-23t23-9h64q14 0 23 9t9 23zm384-864v512q0 26-19 45t-45 19-45-19l-176-176-652 652q-10 10-23 10t-23-10l-114-114q-10-10-10-23t10-23l652-652-176-176q-19-19-19-45t19-45 45-19h512q26 0 45 19t19 45z";
+    -fx-border-width: 2;
+    -fx-border-insets: 1;
+    -fx-pref-width: 20px; /* TODO: remove hack for some reasons this button type does not rescale as the others above */ 
+}
+
+.window-titlebar {
+    -fx-glass-color: rgba(0, 0, 150, 0.9);
+    -fx-glass-colorDark: rgba(0, 0, 150, 0.9);
+    -fx-alignment: center;
+    /*-fx-background-color: linear-gradient(to bottom, derive(-fx-glass-color, 30%), -fx-glass-color);*/
+    -fx-background-color: linear-gradient(to right, -fx-glass-color, -fx-glass-colorDark);
+    -fx-border-color: derive(-fx-glass-color, -60%);
+    -fx-border-width: 2;
+    -fx-background-insets: 1;
+    -fx-border-radius: 3;
+    -fx-background-radius: 3;
+    -fx-stroke: rgba(255,255,255,50);
+    -fx-fill: rgba(255,255,255,50);
 }
 
 .minimizedviewer-pane {
