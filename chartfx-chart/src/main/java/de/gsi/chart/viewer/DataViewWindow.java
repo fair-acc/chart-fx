@@ -84,7 +84,6 @@ public class DataViewWindow extends BorderPane {
             getParentView().getMinimisedChildren().remove(this);
             setMinimised(false);
             getParentView().getVisibleChildren().add(this);
-            //minimizeButton.setDisable(false);
             return;
         }
 
@@ -113,15 +112,12 @@ public class DataViewWindow extends BorderPane {
             maximizeRestoreButton.getStyleClass().setAll(CSS_WINDOW_MAXIMIZE_ICON);
             getParentView().setMaximizedChild(null);
             getParentView().getVisibleChildren().add(this);
-            return;
         }
 
         maximizeRestoreButton.getStyleClass().setAll(CSS_WINDOW_MAXIMIZE_ICON);
         setMinimised(true);
         getParentView().getVisibleChildren().remove(this);
         getParentView().getMinimisedChildren().add(this);
-
-        //minimizeButton.setDisable(true);
     };
 
     protected EventHandler<ActionEvent> closeButtonAction = event -> {
