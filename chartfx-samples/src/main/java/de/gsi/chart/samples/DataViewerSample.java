@@ -41,8 +41,8 @@ import javafx.application.Platform;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.ToolBar;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.Separator;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
@@ -76,10 +76,14 @@ public class DataViewerSample extends Application {
         primaryStage.setTitle(DataViewerSample.TITLE);
 
         // the new JavaFX Chart Dataviewer
-        final DataViewer viewer = new DataViewer();
         final Glyph chartIcon = new Glyph(FONT_AWESOME, FontAwesome.Glyph.LINE_CHART).size(FONT_SIZE);
         final DataView view1 = new DataView("ChartViews", chartIcon);
-        viewer.getViews().addAll(view1);
+
+        final Glyph customViewIcon = new Glyph(FONT_AWESOME, FontAwesome.Glyph.USERS).size(FONT_SIZE);
+        final DataView view2 = new DataView("Custom View", customViewIcon, getDemoPane());
+
+        final DataViewer viewer = new DataViewer();
+        viewer.getViews().addAll(view1, view2);
         viewer.setExplorerVisible(true);
 
         final XYChart energyChart = new TestChart();
@@ -99,14 +103,18 @@ public class DataViewerSample extends Application {
         final DataViewWindow currentView = new DataViewWindow(view1, "Current", currentChart);
 
         final XYChart jDataViewerChart = createChart();
-        final DataViewWindow jDataViewerPane = new DataViewWindow(view1, "JDataViewerChart", jDataViewerChart);
+        final DataViewWindow jDataViewerPane = new DataViewWindow(view1, "Chart", jDataViewerChart);
 
         final DataViewWindow energyView = new DataViewWindow(view1, "Energy", energyChart);
         energyView.setGraphic(GlyphFactory.create(FontAwesome.Glyph.ADJUST));
         view1.getVisibleChildren().addAll(energyView, currentView, jDataViewerPane);
         // view1.getVisibleNodes().addAll(energyChart, currentChart, jDataViewerChart);
 
-        final Button newView = new Button("add new view");
+        final Button newView = new Button(null, new HBox( //
+                new Glyph(FONT_AWESOME, FontAwesome.Glyph.PLUS).size(FONT_SIZE), //
+                new Glyph(FONT_AWESOME, FontAwesome.Glyph.LINE_CHART).size(FONT_SIZE)
+                ));
+        newView.setTooltip(new Tooltip("add new view"));
         newView.setOnAction(evt -> {
             final int count = view1.getVisibleChildren().size();
             final XYChart jChart = createChart();
@@ -115,26 +123,26 @@ public class DataViewerSample extends Application {
             // view1.getVisibleNodes().add(jChart);
         });
 
-        final Button sortButton = new Button("sort");
-        sortButton.setOnAction(evt -> viewer.sort());
-
-        final Button defaultViewButton = new Button(view1.getName(), chartIcon.duplicate());
-        defaultViewButton.setTooltip(new Tooltip(view1.getName()));
-        defaultViewButton.setOnAction(evt -> viewer.setView(view1));
-
-        final Glyph customViewIcon = new Glyph(FONT_AWESOME, FontAwesome.Glyph.USERS).size(FONT_SIZE);
-        final DataView view2 = new DataView("Custom View", customViewIcon, getDemoPane());
-        // view1.getViewerPanes().add(view2); // done automatically with action below
-        final Button customViewButton = new Button(view2.getName(), customViewIcon.duplicate());
-        customViewButton.setTooltip(new Tooltip(view2.getName()));
-        customViewButton.setOnAction(evt -> viewer.setView(view2));
-
         // set default view
-        viewer.setView(view1);
-        ToolBar toolBar = new ToolBar(newView, sortButton);
-        toolBar.getItems().addAll(view1.getToolBar().getItems());
-        toolBar.getItems().addAll(defaultViewButton, customViewButton);
-        final Scene scene = new Scene(new VBox(toolBar, viewer, new Label("bottom")), 800, 600);
+//        viewer.setSelectedView(view2);
+        // set user default interactors
+        CheckBox listView = new CheckBox();
+        listView.setGraphic(new Glyph(FONT_AWESOME, '\uf022').size(FONT_SIZE));
+        listView.setTooltip(new Tooltip("click to switch between button and list-style DataView selection"));
+        listView.setSelected(viewer.showListStyleDataViewProperty().get());
+        listView.selectedProperty().bindBidirectional(viewer.showListStyleDataViewProperty());
+        CheckBox windowDeco = new CheckBox();
+        windowDeco.setTooltip(new Tooltip("click to remove sub-window decorations"));
+        windowDeco.setSelected(viewer.windowDecorationVisible().get());
+        windowDeco.setGraphic(new Glyph(FONT_AWESOME, '\uf2d0').size(FONT_SIZE));
+        windowDeco.selectedProperty().bindBidirectional(viewer.windowDecorationVisible());
+        CheckBox closeDeco = new CheckBox();
+        closeDeco.setSelected(true);
+        closeDeco.setGraphic(new Glyph(FONT_AWESOME, FontAwesome.Glyph.CLOSE).size(FONT_SIZE));
+        closeDeco.selectedProperty().bindBidirectional(viewer.closeWindowButtonVisibleProperty());
+        
+        viewer.getUserToolBarItems().addAll(newView, listView, windowDeco, closeDeco, new Separator());
+        final Scene scene = new Scene(new VBox(viewer.getToolBar(), viewer), 800, 600);
         primaryStage.setScene(scene);
         primaryStage.show();
 
@@ -210,7 +218,7 @@ public class DataViewerSample extends Application {
 
             if (count % 10 == 0) {
                 final long diff = System.currentTimeMillis() - start;
-                LOGGER.atInfo().log(String.format("update #%d took %d ms", count, diff));
+                LOGGER.atDebug().log(String.format("update #%d took %d ms", count, diff));
             }
 
             count = (count + 1) % 1000;
@@ -263,6 +271,7 @@ public class DataViewerSample extends Application {
         HBox.setHgrow(group, Priority.ALWAYS);
         HBox box = new HBox(group);
         VBox.setVgrow(box, Priority.ALWAYS);
+        box.setId("demoPane");
         return box;
     }
 }

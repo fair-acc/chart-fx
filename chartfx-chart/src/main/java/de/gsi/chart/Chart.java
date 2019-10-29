@@ -876,9 +876,6 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
             LOGGER.debug("chart requestLayout() - called by {}", ProcessingProfiler.getCallingClassMethod(1));
         }
         FXUtils.assertJavaFxThread();
-        // this.setNeedsLayout(true);
-        super.requestFocus();
-        //		super.layout();
         super.requestLayout();
     }
 
