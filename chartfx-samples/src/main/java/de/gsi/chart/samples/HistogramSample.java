@@ -20,6 +20,7 @@ import de.gsi.chart.plugins.Zoomer;
 import de.gsi.chart.renderer.LineStyle;
 import de.gsi.chart.renderer.spi.ErrorDataSetRenderer;
 import de.gsi.chart.renderer.spi.MetaDataRenderer;
+import de.gsi.chart.utils.FXUtils;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.layout.StackPane;
@@ -109,7 +110,7 @@ public class HistogramSample extends Application {
             @Override
             public void run() {
                 fillData();
-                chart.requestLayout();
+                FXUtils.runFX(chart::requestLayout);
             }
         }, HistogramSample.UPDATE_DELAY, HistogramSample.UPDATE_PERIOD);
     }
