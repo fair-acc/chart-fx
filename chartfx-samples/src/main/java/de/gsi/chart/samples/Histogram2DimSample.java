@@ -14,6 +14,7 @@ import de.gsi.chart.renderer.spi.ContourDataSetRenderer;
 import de.gsi.chart.renderer.spi.ErrorDataSetRenderer;
 import de.gsi.chart.renderer.spi.MetaDataRenderer;
 import de.gsi.chart.ui.geometry.Side;
+import de.gsi.chart.utils.FXUtils;
 import de.gsi.dataset.spi.Histogram2;
 import javafx.application.Application;
 import javafx.scene.Scene;
@@ -127,7 +128,7 @@ public class Histogram2DimSample extends Application {
             @Override
             public void run() {
                 fillData();
-                chart.requestLayout();
+                FXUtils.runFX(chart::requestLayout);
             }
         }, Histogram2DimSample.UPDATE_DELAY, Histogram2DimSample.UPDATE_PERIOD);
     }
