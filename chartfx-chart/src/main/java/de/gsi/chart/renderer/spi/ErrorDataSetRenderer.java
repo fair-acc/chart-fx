@@ -141,9 +141,16 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
 
             // check for potentially reduced data range we are supposed to plot
             final Optional<CachedDataPoints> cachedPoints = dataSet.lock().readLockGuard(() -> {
-                int indexMin = Math.max(0, dataSet.getIndex(DataSet.DIM_X, xMin));
-                /* indexMax is excluded in the drawing */
-                int indexMax = Math.min(dataSet.getIndex(DataSet.DIM_X, xMax) + 1, dataSet.getDataCount(DataSet.DIM_X));
+                int indexMin;
+                int indexMax; /* indexMax is excluded in the drawing */
+                if (isAssumeSortedData()) {
+                    indexMin = Math.max(0, dataSet.getIndex(DataSet.DIM_X, xMin));
+                    indexMax = Math.min(dataSet.getIndex(DataSet.DIM_X, xMax) + 1,
+                            dataSet.getDataCount(DataSet.DIM_X));
+                } else {
+                    indexMin = 0;
+                    indexMax = dataSet.getDataCount(DataSet.DIM_X);
+                }
                 if (xAxis.isInvertedAxis()) {
                     final int temp = indexMin;
                     indexMin = indexMax - 1;
