@@ -6,8 +6,8 @@ jdk:
 
 # setup pgp signing key
 before_install:
-        - echo $GPG_KEY | base64 --decode | $GPG_EXECUTABLE --import
-        - echo $GPG_OWNERTRUST | base64 --decode | $GPG_EXECUTABLE --import-ownertrust
+        - if [ -z CREDS_AVAILABLE ]; then echo $GPG_KEY | base64 --decode | $GPG_EXECUTABLE --import; fi
+        - if [ -z CREDS_AVAILABLE ]; then echo $GPG_OWNERTRUST | base64 --decode | $GPG_EXECUTABLE --import-ownertrust; fi
         - if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then export REVISION=${TRAVIS_BRANCH}; else export REVISION=${TRAVIS_BRANCH}PR${TRAVIS_PULL_REQUEST}; fi
         - if [ -z "$TRAVIS_TAG" ]; then export CHANGELIST=-SNAPSHOT; fi
 
@@ -17,7 +17,7 @@ install:
 
 # compile and deploy maven project
 script:
-        - mvn clean deploy --settings .maven.xml -Prelease -Drevision=${REVISION} -Dchangelist=${CHANGELIST}
+        - if [ -z CREDS_AVAILABLE ]; then mvn clean deploy --settings .maven.xml -Prelease -Drevision=${REVISION} -Dchangelist=${CHANGELIST}; fi
 
 # cache maven artifacts
 cache:
