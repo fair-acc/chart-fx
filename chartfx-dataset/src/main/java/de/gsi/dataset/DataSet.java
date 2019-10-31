@@ -141,6 +141,7 @@ public interface DataSet extends EventSource, Serializable {
     /**
      * @return Read-Write Lock to guard the DataSet
      * @see de.gsi.dataset.locks.DataSetLock
+     * @param <D> generics (fluent design)
      */
     <D extends DataSet> DataSetLock<D> lock();
 
