@@ -42,6 +42,7 @@ import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.Label;
 import javafx.scene.control.Separator;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.HBox;
@@ -141,8 +142,12 @@ public class DataViewerSample extends Application {
         closeDeco.setGraphic(new Glyph(FONT_AWESOME, FontAwesome.Glyph.CLOSE).size(FONT_SIZE));
         closeDeco.selectedProperty().bindBidirectional(viewer.closeWindowButtonVisibleProperty());
         
-        viewer.getUserToolBarItems().addAll(newView, listView, windowDeco, closeDeco, new Separator());
-        final Scene scene = new Scene(new VBox(viewer.getToolBar(), viewer), 800, 600);
+        Label focusedOwner = new Label();
+        
+        
+        viewer.getUserToolBarItems().addAll(newView,listView, windowDeco, closeDeco, new Separator());
+        final Scene scene = new Scene(new VBox(viewer.getToolBar(), viewer, new HBox(new Label("focus on: "), focusedOwner)), 800, 600);
+        scene.focusOwnerProperty().addListener((ch, o, n) -> focusedOwner.setText(n.toString()));
         primaryStage.setScene(scene);
         primaryStage.show();
 
