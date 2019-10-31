@@ -51,7 +51,7 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
     private static final String[] DEFAULT_AXES_NAME = { "x-Axis", "y-Axis", "z-Axis" };
     private final transient AtomicBoolean autoNotification = new AtomicBoolean(true);
     private String name;
-    private final int dimension;
+    private int dimension;
     private final List<AxisDescription> axesDescriptions = new ArrayList<>();
     private final transient List<EventListener> updateListeners = Collections.synchronizedList(new LinkedList<>());
     private final transient DataSetLock<? extends DataSet> lock = new DefaultDataSetLock<>(this);
