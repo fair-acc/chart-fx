@@ -9,10 +9,13 @@ import de.gsi.chart.renderer.datareduction.MaxDataReducer;
 import de.gsi.chart.renderer.datareduction.RamanDouglasPeukerDataReducer;
 import de.gsi.chart.renderer.datareduction.VisvalingamMaheswariWhyattDataReducer;
 import de.gsi.dataset.utils.AssertUtils;
+import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.ReadOnlyBooleanProperty;
+import javafx.beans.property.ReadOnlyBooleanWrapper;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
@@ -37,6 +40,9 @@ public abstract class AbstractErrorDataSetRendererParameter<R extends AbstractEr
     private final ObjectProperty<RendererDataReducer> rendererDataReducer = new SimpleObjectProperty<>(this,
             "rendererDataReducer", new DefaultDataReducer());
     private final BooleanProperty pointReduction = new SimpleBooleanProperty(this, "pointReduction", true);
+    private final BooleanProperty assumeSortedData = new SimpleBooleanProperty(this, "assumeSortedData", true);
+    private final ReadOnlyBooleanWrapper actualPointReduction = new ReadOnlyBooleanWrapper(this, "actualPointReduction",
+            true);
     private final IntegerProperty dashSize = new SimpleIntegerProperty(this, "dashSize", 3);
     private final IntegerProperty minRequiredReductionSize = new SimpleIntegerProperty(this, "minRequiredReductionSize",
             5);
@@ -57,6 +63,14 @@ public abstract class AbstractErrorDataSetRendererParameter<R extends AbstractEr
     private final BooleanProperty drawBubbles = new SimpleBooleanProperty(this, "drawBubbles", false);
 
     /**
+     * 
+     */
+    public AbstractErrorDataSetRendererParameter() {
+        super();
+        actualPointReduction.bind(Bindings.and(pointReduction, assumeSortedData));
+    }
+
+    /**
      * @return the instance of this AbstractErrorDataSetRendererParameter.
      */
     @Override
@@ -65,6 +79,7 @@ public abstract class AbstractErrorDataSetRendererParameter<R extends AbstractEr
     protected R bind(final R other) {
         errorStyleProperty().bind(other.errorStyleProperty());
         pointReductionProperty().bind(other.pointReductionProperty());
+        assumeSortedDataProperty().bind(other.assumeSortedDataProperty());
         dashSizeProperty().bind(other.dashSizeProperty());
         minRequiredReductionSizeProperty().bind(other.minRequiredReductionSizeProperty());
         markerSizeProperty().bind(other.markerSizeProperty());
@@ -172,7 +187,7 @@ public abstract class AbstractErrorDataSetRendererParameter<R extends AbstractEr
      * @param algorithm the new data reducing algorithm to be set (null -&gt; {@link DefaultDataReducer})
      * @return itself (fluent design)
      */
-    public R getRendererDataReducer(final RendererDataReducer algorithm) {
+    public R setRendererDataReducer(final RendererDataReducer algorithm) {
         if (algorithm == null) {
             rendererDataReducer.set(new DefaultDataReducer());
         } else {
@@ -184,6 +199,8 @@ public abstract class AbstractErrorDataSetRendererParameter<R extends AbstractEr
     /**
      * Sets whether superfluous points, otherwise drawn on the same pixel area, are merged and represented by the
      * multiple point average.
+     * Note that the point Reduction is also disabled implicitly by assumeSortedData = false, check the read only
+     * actualDataPointReduction Property.
      *
      * @return true if point reduction is on (default) else false.
      */
@@ -211,6 +228,56 @@ public abstract class AbstractErrorDataSetRendererParameter<R extends AbstractEr
      */
     public BooleanProperty pointReductionProperty() {
         return pointReduction;
+    }
+
+    /**
+     * Indicates whether point reduction is active.
+     *
+     * @return true if point reduction is on (default) else false.
+     */
+    public boolean isActualReducePoints() {
+        return actualPointReduction.get();
+    }
+
+    /**
+     * Indicates whether point reduction is active.
+     *
+     * @return true if data points are supposed to be reduced
+     */
+    public ReadOnlyBooleanProperty actualPointReductionProperty() {
+        return actualPointReduction.getReadOnlyProperty();
+    }
+
+    /**
+     * Disable this if you have data which is not monotonic in x-direction.
+     * This setting can increase rendering time drastically because lots of off screen points might have to be rendered.
+     *
+     * @return true if points should be assumed to be sorted (default)
+     */
+    public boolean isAssumeSortedData() {
+        return assumeSortedData.get();
+    }
+
+    /**
+     * Disable this if you have data which is not monotonic in x-direction.
+     * This setting can increase rendering time drastically because lots of off screen points might have to be rendered.
+     *
+     * @param state true if data points are supposed to be sorted
+     * @return itself (fluent design)
+     */
+    public R setAssumeSortedData(final boolean state) {
+        assumeSortedData.set(state);
+        return getThis();
+    }
+
+    /**
+     * Disable this if you have data which is not monotonic in x-direction.
+     * This setting can increase rendering time drastically because lots of off screen points might have to be rendered.
+     *
+     * @return true if data points are supposed to be sorted
+     */
+    public BooleanProperty assumeSortedDataProperty() {
+        return assumeSortedData;
     }
 
     /**
