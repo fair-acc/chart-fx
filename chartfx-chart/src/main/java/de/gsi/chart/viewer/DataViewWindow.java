@@ -397,6 +397,8 @@ public class DataViewWindow extends BorderPane {
             dialog.setX(mevt.getScreenX() - xOffset);
             dialog.setY(mevt.getScreenY() - yOffset);
             return;
+        } else {
+            this.requestFocus();
         }
 
         if (dialog.isShowing()) {
