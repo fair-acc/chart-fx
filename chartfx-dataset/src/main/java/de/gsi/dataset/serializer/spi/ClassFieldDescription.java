@@ -26,6 +26,10 @@ import de.gsi.dataset.serializer.DataType;
 public class ClassFieldDescription implements Iterable<ClassFieldDescription> {
     private static final Logger LOGGER = LoggerFactory.getLogger(ClassFieldDescription.class);
     private static final int WILDCARD_EXTENDS_LENGTH = "? extends ".length();
+    /**
+     * maximum recursion depth that is being explored
+     * default is 10: anything beyond that is typically an indication if infinite recursion
+     */
     public static int maxRecursionLevel = 10;
     private String toStringName; // computed on demand and cached
     private final int hierarchyDepth;
@@ -80,82 +84,36 @@ public class ClassFieldDescription implements Iterable<ClassFieldDescription> {
      *                       otherwise.
      */
     public ClassFieldDescription(final Class<?> referenceClass, final boolean fullScan) {
-        super();
+        this(referenceClass, null, null, 0);
         if (referenceClass == null) {
             throw new IllegalArgumentException("object must not be null");
         }
-        hierarchyDepth = 0;
-        field = null; // it's a root, no field definition available
-        classType = referenceClass;
-        fieldName = classType.getName();
-        parent = Optional.empty();
-        fieldNameRelative = "";
 
         genericType = classType.getGenericSuperclass();
-        dataType = dataTypeFomClassType(classType);
-        typeName = ClassDescriptions.translateClassName(classType.getTypeName());
-        modifierID = classType.getModifiers();
-
-        modPublic = Modifier.isPublic(modifierID);
-        modProtected = Modifier.isProtected(modifierID);
-        modPrivate = Modifier.isPrivate(modifierID);
-
-        modAbstract = Modifier.isAbstract(modifierID);
-        modStatic = Modifier.isStatic(modifierID);
-        modFinal = Modifier.isFinal(modifierID);
-        modTransient = Modifier.isTransient(modifierID);
-        modVolatile = Modifier.isVolatile(modifierID);
-        modSynchronized = Modifier.isSynchronized(modifierID);
-        modNative = Modifier.isNative(modifierID);
-        modStrict = Modifier.isStrict(modifierID);
-        modInterface = classType.isInterface();
-
-        // additional fields
-        isprimitive = classType.isPrimitive();
-        isclass = !isprimitive && !modInterface;
-        serializable = !modTransient && !modStatic;
 
         // parse object
         exploreClass(classType, this, 0, fullScan);
     }
 
+    /**
+     * This should be called for individual class field members
+     * 
+     * @param field          Field reference for the given class member
+     * @param parent         pointer to the root/parent reference class field
+     *                       description
+     * @param recursionLevel hierarchy level (i.e. '0' being the root class, '1' the
+     *                       sub-class etc.
+     * @param fullScan       {@code true} if the class field should be serialised
+     *                       according to {@link java.io.Serializable} (ie. object's
+     *                       non-static and non-transient fields); {@code false}
+     *                       otherwise.
+     */
     public ClassFieldDescription(final Field field, final ClassFieldDescription parent, final int recursionLevel,
             final boolean fullScan) {
-        super();
+        this(null, field, parent, recursionLevel);
         if (field == null) {
             throw new IllegalArgumentException("field must not be null");
         }
-        hierarchyDepth = recursionLevel;
-        this.field = field;
-        fieldName = field.getName();
-        this.parent = parent == null ? Optional.empty() : Optional.of(parent);
-        fieldNameRelative = (this.parent.isPresent()
-                ? this.parent.get().isRoot() ? "" : (this.parent.get().getFieldNameRelative() + ".")
-                : "") + fieldName;
-
-        classType = field.getType();
-        dataType = dataTypeFomClassType(classType);
-        typeName = ClassDescriptions.translateClassName(classType.getTypeName());
-        modifierID = field.getModifiers();
-
-        modPublic = Modifier.isPublic(modifierID);
-        modProtected = Modifier.isProtected(modifierID);
-        modPrivate = Modifier.isPrivate(modifierID);
-
-        modAbstract = Modifier.isAbstract(modifierID);
-        modStatic = Modifier.isStatic(modifierID);
-        modFinal = Modifier.isFinal(modifierID);
-        modTransient = Modifier.isTransient(modifierID);
-        modVolatile = Modifier.isVolatile(modifierID);
-        modSynchronized = Modifier.isSynchronized(modifierID);
-        modNative = Modifier.isNative(modifierID);
-        modStrict = Modifier.isStrict(modifierID);
-        modInterface = classType.isInterface();
-
-        // additional fields
-        isprimitive = classType.isPrimitive();
-        isclass = !isprimitive && !modInterface;
-        serializable = !modTransient && !modStatic;
 
         // enable access by default (saves performance later on)
         field.setAccessible(true);
@@ -165,6 +123,57 @@ public class ClassFieldDescription implements Iterable<ClassFieldDescription> {
             this.parent.get().getChildren().add(this);
             this.parent.get().getFieldMap().put(fieldName, this);
         }
+    }
+
+    protected ClassFieldDescription(final Class<?> referenceClass, final Field field,
+            final ClassFieldDescription parent, final int recursionLevel) {
+        super();
+        hierarchyDepth = recursionLevel;
+        this.parent = parent == null ? Optional.empty() : Optional.of(parent);
+
+        if (referenceClass == null) {
+            this.field = field;
+            classType = field.getType();
+            fieldName = field.getName();
+            if (this.parent.isPresent()) {
+                final String relativeName = this.parent.get().isRoot() ? ""
+                        : (this.parent.get().getFieldNameRelative() + ".");
+                fieldNameRelative = relativeName + fieldName;
+            } else {
+                fieldNameRelative = fieldName;
+            }
+
+            modifierID = field.getModifiers();
+        } else {
+            this.field = null; // it's a root, no field definition available
+            classType = referenceClass;
+            fieldName = classType.getName();
+            fieldNameRelative = "";
+
+            modifierID = classType.getModifiers();
+        }
+
+        dataType = dataTypeFomClassType(classType);
+        typeName = ClassDescriptions.translateClassName(classType.getTypeName());
+
+        modPublic = Modifier.isPublic(modifierID);
+        modProtected = Modifier.isProtected(modifierID);
+        modPrivate = Modifier.isPrivate(modifierID);
+
+        modAbstract = Modifier.isAbstract(modifierID);
+        modStatic = Modifier.isStatic(modifierID);
+        modFinal = Modifier.isFinal(modifierID);
+        modTransient = Modifier.isTransient(modifierID);
+        modVolatile = Modifier.isVolatile(modifierID);
+        modSynchronized = Modifier.isSynchronized(modifierID);
+        modNative = Modifier.isNative(modifierID);
+        modStrict = Modifier.isStrict(modifierID);
+        modInterface = classType.isInterface();
+
+        // additional fields
+        isprimitive = classType.isPrimitive();
+        isclass = !isprimitive && !modInterface;
+        serializable = !modTransient && !modStatic;
 
     }
 
@@ -185,6 +194,11 @@ public class ClassFieldDescription implements Iterable<ClassFieldDescription> {
         return null;
     }
 
+    /**
+     * 
+     * @return generic type argument name of the class (e.g. for List&lt;String&gt; this
+     *         would return 'java.lang.String')
+     */
     public List<String> getActualTypeArgumentNames() {
         if (genericTypeNameList == null) {
             genericTypeNameList = getActualTypeArguments().stream()
@@ -194,6 +208,11 @@ public class ClassFieldDescription implements Iterable<ClassFieldDescription> {
         return genericTypeNameList;
     }
 
+    /**
+     * 
+     * @return generic type argument objects of the class (e.g. for List&lt;String&gt;
+     *         this would return 'String.class')
+     */
     public List<Class<?>> getActualTypeArguments() {
         if (genericTypeList == null) {
             genericTypeList = new ArrayList<>();
@@ -204,7 +223,7 @@ public class ClassFieldDescription implements Iterable<ClassFieldDescription> {
             for (Type type : typeArguments) {
                 final String tName = type.getTypeName(); // may contain wildcards
                 final String tCleanName = tName.charAt(0) == '?' ? tName.substring(WILDCARD_EXTENDS_LENGTH) : tName;
-                // TODO: if name does not contain a dot '.' then likely it's a generic class
+                // if name does not contain a dot '.' then likely it's a generic class
                 // description, e.g. ConcurrentHashMap<K.V>
                 Class<?> clazz = ClassDescriptions.getClassByNameNonVerboseError(tCleanName);
                 genericTypeList.add(clazz);
@@ -258,6 +277,11 @@ public class ClassFieldDescription implements Iterable<ClassFieldDescription> {
         return fieldNameRelative;
     }
 
+    /**
+     * 
+     * @return field type strings (e.g. for the class Map&lt;Integer,String&gt; this
+     *         returns '&lt;java.lang.Integer,java.lang.String&gt;'
+     */
     public String getGenericFieldTypeString() {
         if (genericTypeNames == null) {
             if (getActualTypeArgumentNames().isEmpty()) {
@@ -281,10 +305,20 @@ public class ClassFieldDescription implements Iterable<ClassFieldDescription> {
         return genericType;
     }
 
+    /**
+     * 
+     * @return hierarchy level depth w.r.t. root object (ie. '0' being a variable in
+     *         the root object)
+     */
     public int getHierarchyDepth() {
         return hierarchyDepth;
     }
 
+    /**
+     * 
+     * @param rootObject reference to the root object
+     * @return the specific object link corresponding to this field
+     */
     public Object getMemberClassObject(final Object rootObject) {
         if (rootObject == null) {
             throw new IllegalArgumentException("rootObject is null");
@@ -299,10 +333,6 @@ public class ClassFieldDescription implements Iterable<ClassFieldDescription> {
             ClassFieldDescription localParent = getParent(this, depth - i);
 
             try {
-//                System.err.println("rootObject = " + rootObject.toString());
-//                System.err.println("localParent = " + localParent.getFieldName());
-//                System.err.println("parent1 = " + parent1);
-//                System.err.println("localParent.getField() = " + localParent.getField());
                 if (localParent.getField() == null) {
                     return rootObject;
                 }
@@ -352,6 +382,13 @@ public class ClassFieldDescription implements Iterable<ClassFieldDescription> {
         return parent;
     }
 
+    /**
+     * 
+     * @param field          class Field description for which
+     * @param hierarchyLevel the recursion level of the parent (e.g. '1' yields the
+     *                       immediate parent, '2' the parent of the parent etc.)
+     * @return the parent field reference description for the provided field
+     */
     public ClassFieldDescription getParent(final ClassFieldDescription field, final int hierarchyLevel) {
         if (field == null) {
             throw new IllegalArgumentException("field is null at hierarchyLevel = " + hierarchyLevel);
@@ -512,16 +549,25 @@ public class ClassFieldDescription implements Iterable<ClassFieldDescription> {
         return readCount;
     }
 
+    /**
+     * resets read and write count
+     */
     public void reset() {
         resetReadCount();
         resetWriteCount();
     }
 
+    /**
+     * resets the read counter
+     */
     public void resetReadCount() {
         readCount.set(0);
         getChildren().stream().forEach(ClassFieldDescription::resetReadCount);
     }
 
+    /**
+     * resets the write counter
+     */
     public void resetWriteCount() {
         writeCount.set(0);
         getChildren().stream().forEach(ClassFieldDescription::resetWriteCount);
@@ -570,11 +616,6 @@ public class ClassFieldDescription implements Iterable<ClassFieldDescription> {
             throw new IllegalArgumentException("parent must not be null");
         }
 
-        if (classType.equals(Object.class)) {
-            // don't further parse Object.class, meaningless and cause infinite recursion
-            return;
-        }
-
         if (recursionLevel > maxRecursionLevel) {
             throw new IllegalStateException("recursion error while scanning object structure: recursionLevel = '"
                     + recursionLevel + "' > " + ClassFieldDescription.class.getSimpleName() + ".maxRecursionLevel ='"
@@ -583,7 +624,8 @@ public class ClassFieldDescription implements Iterable<ClassFieldDescription> {
 
         // call super types
         if (classType.getSuperclass() != null && !classType.getSuperclass().equals(Object.class)) {
-            // dive into parent hierarchy
+            // dive into parent hierarchy w/o parsing Object.class,
+            // -> meaningless and causes infinite recursion
             exploreClass(classType.getSuperclass(), parent, recursionLevel + 1, fullScan);
         }
 
@@ -594,7 +636,8 @@ public class ClassFieldDescription implements Iterable<ClassFieldDescription> {
                 // inner classes contain parent as part of declared fields
                 continue;
             }
-            final ClassFieldDescription field = new ClassFieldDescription(pfield, parent, recursionLevel + 1, fullScan);
+            final ClassFieldDescription field = new ClassFieldDescription(pfield, parent, recursionLevel + 1, fullScan); // NOPMD
+            // N.B. unavoidable in-loop object generation
 
             // N.B. omitting field.isSerializable() (static or transient modifier) is
             // essential

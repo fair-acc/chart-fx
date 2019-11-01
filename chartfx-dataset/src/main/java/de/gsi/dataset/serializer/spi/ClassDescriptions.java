@@ -16,7 +16,6 @@ import org.slf4j.LoggerFactory;
  */
 public final class ClassDescriptions { // NOPMD - nomen est omen
     private static final Logger LOGGER = LoggerFactory.getLogger(ClassDescriptions.class);
-    private static final int WILDCARD_EXTENDS_LENGTH = "? extends ".length();
     public static int indentationNumerOfSpace = 4;
     private static final Map<Integer, ClassFieldDescription> CLASS_FIELD_DESCRIPTION_MAP = new ConcurrentHashMap<>();
     private static final Map<String, Class<?>> CLASS_STRING_MAP = new ConcurrentHashMap<>();
@@ -64,7 +63,7 @@ public final class ClassDescriptions { // NOPMD - nomen est omen
         });
     }
 
-    static Class<?> getClassByNameNonVerboseError(final String name) {
+    public static Class<?> getClassByNameNonVerboseError(final String name) {
         return CLASS_STRING_MAP.computeIfAbsent(name, key -> {
             try {
                 return Class.forName(key);
