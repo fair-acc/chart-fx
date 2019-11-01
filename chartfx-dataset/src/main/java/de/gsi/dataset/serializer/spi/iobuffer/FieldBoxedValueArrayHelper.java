@@ -6,147 +6,75 @@ import org.slf4j.LoggerFactory;
 import de.gsi.dataset.serializer.IoBuffer;
 import de.gsi.dataset.serializer.spi.AbstractSerialiser;
 import de.gsi.dataset.serializer.spi.BinarySerialiser;
-import de.gsi.dataset.serializer.spi.ClassFieldDescription;
 import de.gsi.dataset.serializer.spi.GenericsHelper;
 
-public class FieldBoxedValueArrayHelper {
-    protected static final Logger LOGGER = LoggerFactory.getLogger(FieldBoxedValueArrayHelper.class);
-    protected static final FieldBoxedValueArrayHelper SELF = new FieldBoxedValueArrayHelper();
+/**
+ * helper class to register default serialiser for boxed array primitive types
+ * (ie. Boolean[], Byte[], Short[], ..., double[]) w/o String[] (already part of
+ * the {@link de.gsi.dataset.serializer.spi.iobuffer.FieldPrimitiveValueHelper}
+ * 
+ * @author rstein
+ */
+public final class FieldBoxedValueArrayHelper {
+    private static final Logger LOGGER = LoggerFactory.getLogger(FieldBoxedValueArrayHelper.class);
 
     private FieldBoxedValueArrayHelper() {
         // utility class
     }
-    
+
+    /**
+     * registers default serialiser for boxed array primitive types (ie. Boolean[],
+     * Byte[], Short[], ..., Double[])
+     * 
+     * @param serialiser for which the field serialisers should be registered
+     * @param ioBuffer   reference to the IoBuffer back-ends
+     */
     public static void register(final AbstractSerialiser serialiser, final IoBuffer ioBuffer) {
-        serialiser.addClassDefinition(SELF.new FieldBoxedBooleanArray(ioBuffer, Boolean[].class));
-        serialiser.addClassDefinition(SELF.new FieldBoxedByteArray(ioBuffer, Byte[].class));
-        serialiser.addClassDefinition(SELF.new FieldBoxedShortArray(ioBuffer, Short[].class));
-        serialiser.addClassDefinition(SELF.new FieldBoxedIntegerArray(ioBuffer, Integer[].class));
-        serialiser.addClassDefinition(SELF.new FieldBoxedLongArray(ioBuffer, Long[].class));
-        serialiser.addClassDefinition(SELF.new FieldBoxedFloatArray(ioBuffer, Float[].class));
-        serialiser.addClassDefinition(SELF.new FieldBoxedDoubleArray(ioBuffer, Double[].class));
+
+        serialiser.addClassDefinition(new IoBufferFieldSerialiser(ioBuffer, //
+                (obj, field) -> field.getField().set(obj, GenericsHelper.toObject(ioBuffer.getBooleanArray())), // reader
+                (obj, field) -> BinarySerialiser.put(ioBuffer, field.getFieldName(),
+                        GenericsHelper.toBoolPrimitive((Boolean[]) field.getField().get(obj))), // writer
+                Boolean[].class));
+
+        serialiser.addClassDefinition(new IoBufferFieldSerialiser(ioBuffer, //
+                (obj, field) -> field.getField().set(obj, GenericsHelper.toObject(ioBuffer.getByteArray())), // reader
+                (obj, field) -> BinarySerialiser.put(ioBuffer, field.getFieldName(),
+                        GenericsHelper.toBytePrimitive((Byte[]) field.getField().get(obj))), // writer
+                Byte[].class));
+
+        serialiser.addClassDefinition(new IoBufferFieldSerialiser(ioBuffer, //
+                (obj, field) -> field.getField().set(obj, GenericsHelper.toObject(ioBuffer.getShortArray())), // reader
+                (obj, field) -> BinarySerialiser.put(ioBuffer, field.getFieldName(),
+                        GenericsHelper.toShortPrimitive((Short[]) field.getField().get(obj))), // writer
+                Short[].class));
+
+        serialiser.addClassDefinition(new IoBufferFieldSerialiser(ioBuffer, //
+                (obj, field) -> field.getField().set(obj, GenericsHelper.toObject(ioBuffer.getIntArray())), // reader
+                (obj, field) -> BinarySerialiser.put(ioBuffer, field.getFieldName(),
+                        GenericsHelper.toIntegerPrimitive((Integer[]) field.getField().get(obj))), // writer
+                Integer[].class));
+
+        serialiser.addClassDefinition(new IoBufferFieldSerialiser(ioBuffer, //
+                (obj, field) -> field.getField().set(obj, GenericsHelper.toObject(ioBuffer.getLongArray())), // reader
+                (obj, field) -> BinarySerialiser.put(ioBuffer, field.getFieldName(),
+                        GenericsHelper.toLongPrimitive((Long[]) field.getField().get(obj))), // writer
+                Long[].class));
+
+        serialiser.addClassDefinition(new IoBufferFieldSerialiser(ioBuffer, //
+                (obj, field) -> field.getField().set(obj, GenericsHelper.toObject(ioBuffer.getFloatArray())), // reader
+                (obj, field) -> BinarySerialiser.put(ioBuffer, field.getFieldName(),
+                        GenericsHelper.toFloatPrimitive((Float[]) field.getField().get(obj))), // writer
+                Float[].class));
+
+        serialiser.addClassDefinition(new IoBufferFieldSerialiser(ioBuffer, //
+                (obj, field) -> field.getField().set(obj, GenericsHelper.toObject(ioBuffer.getDoubleArray())), // reader
+                (obj, field) -> BinarySerialiser.put(ioBuffer, field.getFieldName(),
+                        GenericsHelper.toDoublePrimitive((Double[]) field.getField().get(obj))), // writer
+                Double[].class));
 
         if (LOGGER.isDebugEnabled()) {
             LOGGER.atDebug().addArgument(serialiser).addArgument(ioBuffer).log("initialised({}, {}");
-        }
-    }
-
-    public class FieldBoxedBooleanArray extends AbstractIoBufferFieldSerialiser {
-        public FieldBoxedBooleanArray(IoBuffer buffer, Class<?> classPrototype, Class<?>... classGenericArguments) {
-            super(buffer, classPrototype, classGenericArguments);
-        }
-
-        @Override
-        public void readFrom(Object obj, ClassFieldDescription field) throws IllegalAccessException {
-            field.getField().set(obj, GenericsHelper.toObject(ioBuffer.getBooleanArray()));
-        }
-
-        @Override
-        public void writeTo(Object obj, ClassFieldDescription field) throws IllegalAccessException {
-            BinarySerialiser.put(ioBuffer, field.getFieldName(),
-                    GenericsHelper.toBoolPrimitive((Boolean[]) field.getField().get(obj)));
-        }
-    }
-
-    public class FieldBoxedByteArray extends AbstractIoBufferFieldSerialiser {
-        public FieldBoxedByteArray(IoBuffer buffer, Class<?> classPrototype, Class<?>... classGenericArguments) {
-            super(buffer, classPrototype, classGenericArguments);
-        }
-
-        @Override
-        public void readFrom(Object obj, ClassFieldDescription field) throws IllegalAccessException {
-            field.getField().set(obj, GenericsHelper.toObject(ioBuffer.getByteArray()));
-        }
-
-        @Override
-        public void writeTo(Object obj, ClassFieldDescription field) throws IllegalAccessException {
-            BinarySerialiser.put(ioBuffer, field.getFieldName(),
-                    GenericsHelper.toBytePrimitive((Byte[]) field.getField().get(obj)));
-        }
-    }
-
-    public class FieldBoxedDoubleArray extends AbstractIoBufferFieldSerialiser {
-        public FieldBoxedDoubleArray(IoBuffer buffer, Class<?> classPrototype, Class<?>... classGenericArguments) {
-            super(buffer, classPrototype, classGenericArguments);
-        }
-
-        @Override
-        public void readFrom(Object obj, ClassFieldDescription field) throws IllegalAccessException {
-            field.getField().set(obj, GenericsHelper.toObject(ioBuffer.getDoubleArray()));
-        }
-
-        @Override
-        public void writeTo(Object obj, ClassFieldDescription field) throws IllegalAccessException {
-            BinarySerialiser.put(ioBuffer, field.getFieldName(),
-                    GenericsHelper.toDoublePrimitive((Double[]) field.getField().get(obj)));
-        }
-    }
-
-    public class FieldBoxedFloatArray extends AbstractIoBufferFieldSerialiser {
-        public FieldBoxedFloatArray(IoBuffer buffer, Class<?> classPrototype, Class<?>... classGenericArguments) {
-            super(buffer, classPrototype, classGenericArguments);
-        }
-
-        @Override
-        public void readFrom(Object obj, ClassFieldDescription field) throws IllegalAccessException {
-            field.getField().set(obj, GenericsHelper.toObject(ioBuffer.getFloatArray()));
-        }
-
-        @Override
-        public void writeTo(Object obj, ClassFieldDescription field) throws IllegalAccessException {
-            BinarySerialiser.put(ioBuffer, field.getFieldName(),
-                    GenericsHelper.toFloatPrimitive((Float[]) field.getField().get(obj)));
-        }
-    }
-
-    public class FieldBoxedIntegerArray extends AbstractIoBufferFieldSerialiser {
-        public FieldBoxedIntegerArray(IoBuffer buffer, Class<?> classPrototype, Class<?>... classGenericArguments) {
-            super(buffer, classPrototype, classGenericArguments);
-        }
-
-        @Override
-        public void readFrom(Object obj, ClassFieldDescription field) throws IllegalAccessException {
-            field.getField().set(obj, GenericsHelper.toObject(ioBuffer.getIntArray()));
-        }
-
-        @Override
-        public void writeTo(Object obj, ClassFieldDescription field) throws IllegalAccessException {
-            BinarySerialiser.put(ioBuffer, field.getFieldName(),
-                    GenericsHelper.toIntegerPrimitive((Integer[]) field.getField().get(obj)));
-        }
-    }
-
-    public class FieldBoxedLongArray extends AbstractIoBufferFieldSerialiser {
-        public FieldBoxedLongArray(IoBuffer buffer, Class<?> classPrototype, Class<?>... classGenericArguments) {
-            super(buffer, classPrototype, classGenericArguments);
-        }
-
-        @Override
-        public void readFrom(Object obj, ClassFieldDescription field) throws IllegalAccessException {
-            field.getField().set(obj, GenericsHelper.toObject(ioBuffer.getLongArray()));
-        }
-
-        @Override
-        public void writeTo(Object obj, ClassFieldDescription field) throws IllegalAccessException {
-            BinarySerialiser.put(ioBuffer, field.getFieldName(),
-                    GenericsHelper.toLongPrimitive((Long[]) field.getField().get(obj)));
-        }
-    }
-
-    public class FieldBoxedShortArray extends AbstractIoBufferFieldSerialiser {
-        public FieldBoxedShortArray(IoBuffer buffer, Class<?> classPrototype, Class<?>... classGenericArguments) {
-            super(buffer, classPrototype, classGenericArguments);
-        }
-
-        @Override
-        public void readFrom(Object obj, ClassFieldDescription field) throws IllegalAccessException {
-            field.getField().set(obj, GenericsHelper.toObject(ioBuffer.getShortArray()));
-        }
-
-        @Override
-        public void writeTo(Object obj, ClassFieldDescription field) throws IllegalAccessException {
-            BinarySerialiser.put(ioBuffer, field.getFieldName(),
-                    GenericsHelper.toShortPrimitive((Short[]) field.getField().get(obj)));
         }
     }
 }

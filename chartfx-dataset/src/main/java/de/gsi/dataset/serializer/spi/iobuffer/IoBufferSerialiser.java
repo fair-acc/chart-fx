@@ -1,5 +1,6 @@
 package de.gsi.dataset.serializer.spi.iobuffer;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -7,8 +8,6 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.gsi.dataset.AxisDescription;
-import de.gsi.dataset.serializer.FieldSerialiser;
 import de.gsi.dataset.serializer.IoBuffer;
 import de.gsi.dataset.serializer.spi.AbstractSerialiser;
 import de.gsi.dataset.serializer.spi.BinarySerialiser;
@@ -16,12 +15,26 @@ import de.gsi.dataset.serializer.spi.BinarySerialiser.HeaderInfo;
 import de.gsi.dataset.serializer.spi.ClassDescriptions;
 import de.gsi.dataset.serializer.spi.ClassFieldDescription;
 import de.gsi.dataset.serializer.spi.FieldHeader;
+import de.gsi.dataset.serializer.spi.FieldSerialiser;
 import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
 
+/**
+ * reference implementation for streaming arbitrary object to and from a
+ * IoBuffer-based byte-buffer
+ * 
+ * @author rstein
+ */
 public class IoBufferSerialiser extends AbstractSerialiser {
     private static final Logger LOGGER = LoggerFactory.getLogger(IoBufferSerialiser.class);
     private final IoBuffer ioBuffer;
 
+    /**
+     * Initialises new IoBuffer-backed object serialiser
+     * 
+     * @param buffer the backing IoBuffer (see e.g.
+     *               {@link de.gsi.dataset.serializer.spi.FastByteBuffer} or
+     *               {@link de.gsi.dataset.serializer.spi.ByteBuffer}
+     */
     public IoBufferSerialiser(final IoBuffer buffer) {
         super();
         if (buffer == null) {
@@ -37,10 +50,46 @@ public class IoBufferSerialiser extends AbstractSerialiser {
         FieldBoxedValueHelper.register(this, ioBuffer);
         FieldBoxedValueArrayHelper.register(this, ioBuffer);
 
-        addClassDefinition(new FieldList(ioBuffer, List.class));
-        addClassDefinition(new FieldMap(ioBuffer, Map.class));
-        addClassDefinition(new FieldDoubleArrayList(ioBuffer, DoubleArrayList.class));
-        addClassDefinition(new FieldListAxisDescription(ioBuffer, List.class, AxisDescription.class));
+        // List serialiser mapper to IoBuffer
+        addClassDefinition(new IoBufferFieldSerialiser(ioBuffer, //
+                (obj, field) -> { // reader
+                    Collection<?> origCollection = (Collection<?>) field.getField().get(obj);
+                    origCollection.clear();
+
+                    final Collection<?> setVal = BinarySerialiser.getCollection(ioBuffer, origCollection);
+                    field.getField().set(obj, setVal);
+                }, // writer
+                (obj, field) -> {
+                    final Collection<?> retVal = (Collection<?>) field.getField().get(obj);
+                    BinarySerialiser.put(ioBuffer, field.getFieldName(), retVal);
+                }, List.class));
+
+        // Map serialiser mapper to IoBuffer
+        addClassDefinition(new IoBufferFieldSerialiser(ioBuffer, //
+                (obj, field) -> { // reader
+                    Map<?, ?> origMap = (Map<?, ?>) field.getField().get(obj);
+                    origMap.clear();
+                    final Map<?, ?> setVal = BinarySerialiser.getMap(ioBuffer, origMap);
+
+                    field.getField().set(obj, setVal);
+                }, // writer
+                (obj, field) -> {
+                    final Map<?, ?> retVal = (Map<?, ?>) field.getField().get(obj);
+                    BinarySerialiser.put(ioBuffer, field.getFieldName(), retVal);
+                }, Map.class));
+
+        // DoubleArrayList serialiser mapper to IoBuffer
+        addClassDefinition(new IoBufferFieldSerialiser(ioBuffer, //
+                (obj, field) -> { // reader
+                    field.getField().set(obj, DoubleArrayList.wrap(BinarySerialiser.getDoubleArray(ioBuffer)));
+                }, // writer
+                (obj, field) -> {
+                    final DoubleArrayList retVal = (DoubleArrayList) field.getField().get(obj);
+                    BinarySerialiser.put(ioBuffer, field.getFieldName(), retVal.elements(),
+                            new int[] { retVal.size() });
+                }, DoubleArrayList.class));
+
+        addClassDefinition(new FieldListAxisDescription(ioBuffer));
 
         // addClassDefinition(null, StringHashMapList.class);
 
@@ -116,7 +165,7 @@ public class IoBufferSerialiser extends AbstractSerialiser {
 
         ioBuffer.position(fieldRoot.getDataBufferPosition());
         if (serialiser.isPresent()) {
-            serialiser.get().readFrom(firstMatchingField.getMemberClassObject(obj), firstMatchingField);
+            serialiser.get().getReaderFunction().exec(firstMatchingField.getMemberClassObject(obj), firstMatchingField);
             return;
         }
 
