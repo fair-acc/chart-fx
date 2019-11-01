@@ -1,5 +1,6 @@
 package de.gsi.chart.plugins;
 
+import org.controlsfx.glyphfont.Glyph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,17 +21,20 @@ import javafx.scene.layout.Pane;
 /**
  * plugin to implement simple measurements and valueTextField indicators such as
  * <p>
- * * valueTextField at horizontal/vertical marker position
- * -- coloured indication if min/max thresholds are exceeded
- * * rise-time
- * * trigger-to-rising edge detector
- * * absolute signal difference (ie. S0 - S1)
- * * relative signal change (ie. (S0 - S1)/S0)
+ * * valueTextField at horizontal/vertical marker position -- coloured
+ * indication if min/max thresholds are exceeded * rise-time * trigger-to-rising
+ * edge detector * absolute signal difference (ie. S0 - S1) * relative signal
+ * change (ie. (S0 - S1)/S0)
  *
  * @author rstein
  */
 public class ParameterMeasurements extends ChartPlugin {
     private static final Logger LOGGER = LoggerFactory.getLogger(ParameterMeasurements.class);
+    private static final String FONT_AWESOME = "FontAwesome";
+    private static final int FONT_SIZE = 20;
+//    private static final char TOOLBUTTON_DRAFTING_COMPASS = '\uf568'; // drafting compass
+    private static final char TOOLBUTTON_ALT = '\uf0ad'; // wrench
+    private static final char TOOLBUTTON = TOOLBUTTON_ALT; // TODO: replace by drafting compass
     protected final Pane measurmentDisplayPane = new Pane();
     private HBox parameterMenu;
 
@@ -44,7 +48,8 @@ public class ParameterMeasurements extends ChartPlugin {
             if (oldChart != null) {
                 // remove tool bar items
                 oldChart.getToolBar().getChildren().remove(parameterMenu);
-                // oldChart.getChart().getPlotArea().setBottom(null); //TODO: replace meas display
+                // oldChart.getChart().getPlotArea().setBottom(null); //TODO: replace meas
+                // display
                 // remove measurement display pane
 
             }
@@ -65,7 +70,11 @@ public class ParameterMeasurements extends ChartPlugin {
         separator.setOrientation(Orientation.VERTICAL);
 
         final MenuBar menuBar = new MenuBar();
-        final Menu fileMenu = new Menu("Add Measurement:");
+        final Menu fileMenu = new Menu(null, new Glyph(FONT_AWESOME, TOOLBUTTON).size(FONT_SIZE));
+        // final String tooltipKey = "TOOL_TIP";
+        // fileMenu.getProperties().put(tooltipKey, new Tooltip("add measurement
+        // indicator"));
+
         // Prevent the toolbar HiddenSidePane from vanishing when using the menu
         fileMenu.setOnShown((evt) -> getChart().setPinnedSide(javafx.geometry.Side.TOP));
         fileMenu.setOnHidden((evt) -> {
