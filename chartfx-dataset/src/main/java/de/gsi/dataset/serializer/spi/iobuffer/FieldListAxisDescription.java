@@ -13,19 +13,35 @@ import de.gsi.dataset.serializer.spi.BinarySerialiser;
 import de.gsi.dataset.serializer.spi.ClassFieldDescription;
 import de.gsi.dataset.spi.DefaultAxisDescription;
 
-public class FieldListAxisDescription extends AbstractIoBufferFieldSerialiser {
+/**
+ * FieldSerialiser implementation for List&lt;AxisDescription&gt; to
+ * IoBuffer-backed byte-buffer
+ * 
+ * @author rstein
+ */
+public class FieldListAxisDescription extends IoBufferFieldSerialiser {
     protected static final Logger LOGGER = LoggerFactory.getLogger(FieldListAxisDescription.class);
 
-    public FieldListAxisDescription(IoBuffer buffer, Class<?> classPrototype, Class<?>... classGenericArguments) {
-        super(buffer, classPrototype, classGenericArguments);
+    /**
+     * FieldSerialiser implementation for List&lt;AxisDescription&gt; to
+     * IoBuffer-backed byte-buffer
+     * 
+     * @param buffer the backing IoBuffer
+     * 
+     */
+    public FieldListAxisDescription(IoBuffer buffer) {
+        super(buffer, (obj, field) -> {
+        }, (obj, field) -> {
+        }, List.class, AxisDescription.class);
+        readerFunction = this::execFieldReader;
+        writerFunction = this::execFieldWriter;
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.atDebug().addArgument(buffer).addArgument(classPrototype).addArgument(classGenericArguments)
+            LOGGER.atDebug().addArgument(buffer).addArgument(getClassPrototype()).addArgument(getGenericsPrototypes())
                     .log("initialised({}, {}, {}");
         }
     }
 
-    @Override
-    public void readFrom(Object obj, ClassFieldDescription field) throws IllegalAccessException {
+    protected final void execFieldReader(final Object obj, ClassFieldDescription field) throws IllegalAccessException {
         Collection<AxisDescription> setVal = (Collection<AxisDescription>) field.getField().get(obj); // NOPMD
         // N.B. cast should fail at runtime (points to lib inconsistency)
         setVal.clear();
@@ -64,8 +80,7 @@ public class FieldListAxisDescription extends AbstractIoBufferFieldSerialiser {
         field.getField().set(obj, setVal);
     }
 
-    @Override
-    public void writeTo(Object obj, ClassFieldDescription field) throws IllegalAccessException {
+    protected void execFieldWriter(Object obj, ClassFieldDescription field) throws IllegalAccessException {
         final String fieldName = field.getFieldName();
         final List<AxisDescription> axisDescriptions = (List<AxisDescription>) field.getField().get(obj); // NOPMD
         // N.B. cast should fail at runtime (points to lib inconsistency)

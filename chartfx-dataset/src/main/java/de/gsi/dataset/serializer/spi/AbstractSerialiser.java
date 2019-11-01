@@ -14,8 +14,6 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.gsi.dataset.serializer.FieldSerialiser;
-
 /**
  * @author rstein
  */
@@ -162,7 +160,7 @@ public abstract class AbstractSerialiser {
                     root.getActualTypeArguments());
 
             if (serialiser.isPresent()) {
-                serialiser.get().writeTo(root.getMemberClassObject(obj), root);
+                serialiser.get().getWriterFunction().exec(root.getMemberClassObject(obj), root);
                 return;
             }
 

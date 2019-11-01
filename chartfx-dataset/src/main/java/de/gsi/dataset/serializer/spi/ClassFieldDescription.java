@@ -27,8 +27,8 @@ public class ClassFieldDescription implements Iterable<ClassFieldDescription> {
     private static final Logger LOGGER = LoggerFactory.getLogger(ClassFieldDescription.class);
     private static final int WILDCARD_EXTENDS_LENGTH = "? extends ".length();
     /**
-     * maximum recursion depth that is being explored
-     * default is 10: anything beyond that is typically an indication if infinite recursion
+     * maximum recursion depth that is being explored default is 10: anything beyond
+     * that is typically an indication if infinite recursion
      */
     public static int maxRecursionLevel = 10;
     private String toStringName; // computed on demand and cached
@@ -115,8 +115,10 @@ public class ClassFieldDescription implements Iterable<ClassFieldDescription> {
             throw new IllegalArgumentException("field must not be null");
         }
 
-        // enable access by default (saves performance later on)
-        field.setAccessible(true);
+        if (serializable) {
+            // enable access by default (saves performance later on)
+            field.setAccessible(true);
+        }
 
         // add child to parent if it serializable or if a full scan is requested
         if (this.parent.isPresent() && (serializable || fullScan)) {
@@ -196,8 +198,8 @@ public class ClassFieldDescription implements Iterable<ClassFieldDescription> {
 
     /**
      * 
-     * @return generic type argument name of the class (e.g. for List&lt;String&gt; this
-     *         would return 'java.lang.String')
+     * @return generic type argument name of the class (e.g. for List&lt;String&gt;
+     *         this would return 'java.lang.String')
      */
     public List<String> getActualTypeArgumentNames() {
         if (genericTypeNameList == null) {
@@ -210,8 +212,8 @@ public class ClassFieldDescription implements Iterable<ClassFieldDescription> {
 
     /**
      * 
-     * @return generic type argument objects of the class (e.g. for List&lt;String&gt;
-     *         this would return 'String.class')
+     * @return generic type argument objects of the class (e.g. for
+     *         List&lt;String&gt; this would return 'String.class')
      */
     public List<Class<?>> getActualTypeArguments() {
         if (genericTypeList == null) {
