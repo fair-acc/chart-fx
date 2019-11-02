@@ -6,6 +6,7 @@ import java.util.List;
 
 /**
  * @author rstein
+ * @param <E> generics handling
  */
 public class ClassFieldDescriptionIterator<E extends ClassFieldDescription> implements Iterator<ClassFieldDescription> {
     public static int maxRecursionLevel = 10;

@@ -32,14 +32,9 @@
         </dependency>
         <dependency>
             <groupId>org.openjfx</groupId>
-            <artifactId>javafx-swing</artifactId>
+            <artifactId>javafx-swing</artifactId> <!-- needed to for saving images to file -->
             <version>13.0.1</version>
         </dependency>
-        <!-- <dependency> -->
-        <!-- <groupId>org.openjfx</groupId> -->
-        <!-- <artifactId>javafx-fxml</artifactId> -->
-        <!-- <version>12.0.2</version> -->
-        <!-- </dependency> -->
         <dependency>
             <groupId>de.gsi.dataset</groupId>
             <artifactId>chartfx-dataset</artifactId>
@@ -49,11 +44,6 @@
             <groupId>de.gsi.math</groupId>
             <artifactId>chartfx-math</artifactId>
             <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.jfxtras</groupId>
-            <artifactId>jfxtras-labs</artifactId>
-            <version>9.0-r1</version>
         </dependency>
         <dependency>
             <groupId>org.controlsfx</groupId>
