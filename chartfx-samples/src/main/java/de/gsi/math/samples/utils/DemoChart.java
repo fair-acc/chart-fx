@@ -15,9 +15,9 @@ import de.gsi.chart.renderer.ErrorStyle;
 import de.gsi.chart.renderer.LineStyle;
 import de.gsi.chart.renderer.spi.ErrorDataSetRenderer;
 import de.gsi.chart.ui.geometry.Side;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
-import jfxtras.scene.layout.HBox;
-import jfxtras.scene.layout.VBox;
+import javafx.scene.layout.VBox;
 
 /**
  * Short hand extension/configuration of the standard XYChart functionalities to
