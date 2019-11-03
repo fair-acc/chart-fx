@@ -402,6 +402,12 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
             getDataLabelMap().clear();
             getDataStyleMap().clear();
             if (copy) {
+                if (this.xValues == null) {
+                    this.xValues = new DoubleArrayList();
+                }
+                if (this.yValues == null) {
+                    this.yValues = new DoubleArrayList();
+                }
                 resize(0);
                 this.xValues.addElements(0, xValues);
                 this.yValues.addElements(0, yValues);
