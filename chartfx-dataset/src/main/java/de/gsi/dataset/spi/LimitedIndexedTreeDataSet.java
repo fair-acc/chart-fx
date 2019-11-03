@@ -6,7 +6,6 @@ import java.util.NoSuchElementException;
 
 import de.gsi.dataset.AxisDescription;
 import de.gsi.dataset.DataSet2D;
-import de.gsi.dataset.DataSetError;
 import de.gsi.dataset.event.AddedDataEvent;
 import de.gsi.dataset.event.RemovedDataEvent;
 import de.gsi.dataset.event.UpdatedDataEvent;
