@@ -68,6 +68,7 @@ public class ClassFieldDescription implements Iterable<ClassFieldDescription> {
     // additional qualities
     private final boolean isprimitive;
     private final boolean isclass;
+    private final boolean isEnum;
 
     private final boolean serializable;
     // access counter (N.B. to check if data has been modified)
@@ -78,10 +79,10 @@ public class ClassFieldDescription implements Iterable<ClassFieldDescription> {
      * This should be called only once with the root class as an argument
      *
      * @param referenceClass the root node containing further Field children
-     * @param fullScan       {@code true} if the class field should be serialised
-     *                       according to {@link java.io.Serializable} (ie. object's
-     *                       non-static and non-transient fields); {@code false}
-     *                       otherwise.
+     * @param fullScan {@code true} if the class field should be serialised
+     *            according to {@link java.io.Serializable} (ie. object's
+     *            non-static and non-transient fields); {@code false}
+     *            otherwise.
      */
     public ClassFieldDescription(final Class<?> referenceClass, final boolean fullScan) {
         this(referenceClass, null, null, 0);
@@ -97,16 +98,16 @@ public class ClassFieldDescription implements Iterable<ClassFieldDescription> {
 
     /**
      * This should be called for individual class field members
-     * 
-     * @param field          Field reference for the given class member
-     * @param parent         pointer to the root/parent reference class field
-     *                       description
+     *
+     * @param field Field reference for the given class member
+     * @param parent pointer to the root/parent reference class field
+     *            description
      * @param recursionLevel hierarchy level (i.e. '0' being the root class, '1' the
-     *                       sub-class etc.
-     * @param fullScan       {@code true} if the class field should be serialised
-     *                       according to {@link java.io.Serializable} (ie. object's
-     *                       non-static and non-transient fields); {@code false}
-     *                       otherwise.
+     *            sub-class etc.
+     * @param fullScan {@code true} if the class field should be serialised
+     *            according to {@link java.io.Serializable} (ie. object's
+     *            non-static and non-transient fields); {@code false}
+     *            otherwise.
      */
     public ClassFieldDescription(final Field field, final ClassFieldDescription parent, final int recursionLevel,
             final boolean fullScan) {
@@ -175,29 +176,12 @@ public class ClassFieldDescription implements Iterable<ClassFieldDescription> {
         // additional fields
         isprimitive = classType.isPrimitive();
         isclass = !isprimitive && !modInterface;
+        isEnum = Enum.class.isAssignableFrom(classType);
         serializable = !modTransient && !modStatic;
 
     }
 
-    protected Object allocateMemberClassField(final Object fieldParent, final ClassFieldDescription localParent)
-            throws IllegalAccessException {
-        try {
-            // need to allocate new object
-            Constructor<?> constr = getParent(this, 1).getType().getDeclaredConstructor(fieldParent.getClass());
-            final Object newFieldObj = constr.newInstance(fieldParent);
-            localParent.getField().set(fieldParent, newFieldObj);
-
-            return newFieldObj;
-        } catch (InstantiationException | InvocationTargetException | SecurityException | NoSuchMethodException e) {
-            if (LOGGER.isErrorEnabled()) {
-                LOGGER.atError().setCause(e).log("error initialising inner class object");
-            }
-        }
-        return null;
-    }
-
     /**
-     * 
      * @return generic type argument name of the class (e.g. for List&lt;String&gt;
      *         this would return 'java.lang.String')
      */
@@ -211,7 +195,6 @@ public class ClassFieldDescription implements Iterable<ClassFieldDescription> {
     }
 
     /**
-     * 
      * @return generic type argument objects of the class (e.g. for
      *         List&lt;String&gt; this would return 'String.class')
      */
@@ -221,13 +204,13 @@ public class ClassFieldDescription implements Iterable<ClassFieldDescription> {
             if ((field == null) || (getGenericType() == null) || !(getGenericType() instanceof ParameterizedType)) {
                 return genericTypeList;
             }
-            Type[] typeArguments = ((ParameterizedType) getGenericType()).getActualTypeArguments();
-            for (Type type : typeArguments) {
+            final Type[] typeArguments = ((ParameterizedType) getGenericType()).getActualTypeArguments();
+            for (final Type type : typeArguments) {
                 final String tName = type.getTypeName(); // may contain wildcards
                 final String tCleanName = tName.charAt(0) == '?' ? tName.substring(WILDCARD_EXTENDS_LENGTH) : tName;
                 // if name does not contain a dot '.' then likely it's a generic class
                 // description, e.g. ConcurrentHashMap<K.V>
-                Class<?> clazz = ClassDescriptions.getClassByNameNonVerboseError(tCleanName);
+                final Class<?> clazz = ClassDescriptions.getClassByNameNonVerboseError(tCleanName);
                 genericTypeList.add(clazz);
             }
         }
@@ -280,7 +263,6 @@ public class ClassFieldDescription implements Iterable<ClassFieldDescription> {
     }
 
     /**
-     * 
      * @return field type strings (e.g. for the class Map&lt;Integer,String&gt; this
      *         returns '&lt;java.lang.Integer,java.lang.String&gt;'
      */
@@ -308,7 +290,6 @@ public class ClassFieldDescription implements Iterable<ClassFieldDescription> {
     }
 
     /**
-     * 
      * @return hierarchy level depth w.r.t. root object (ie. '0' being a variable in
      *         the root object)
      */
@@ -317,7 +298,6 @@ public class ClassFieldDescription implements Iterable<ClassFieldDescription> {
     }
 
     /**
-     * 
      * @param rootObject reference to the root object
      * @return the specific object link corresponding to this field
      */
@@ -325,14 +305,14 @@ public class ClassFieldDescription implements Iterable<ClassFieldDescription> {
         if (rootObject == null) {
             throw new IllegalArgumentException("rootObject is null");
         }
-        if (this.isRoot()) {
+        if (isRoot()) {
             return rootObject;
         }
-        final int depth = this.getHierarchyDepth() - 1;
+        final int depth = getHierarchyDepth() - 1;
         Object temp = rootObject;
         Object parent1 = rootObject;
         for (int i = 0; i < depth; i++) {
-            ClassFieldDescription localParent = getParent(this, depth - i);
+            final ClassFieldDescription localParent = getParent(this, depth - i);
 
             try {
                 if (localParent.getField() == null) {
@@ -385,17 +365,16 @@ public class ClassFieldDescription implements Iterable<ClassFieldDescription> {
     }
 
     /**
-     * 
-     * @param field          class Field description for which
+     * @param field class Field description for which
      * @param hierarchyLevel the recursion level of the parent (e.g. '1' yields the
-     *                       immediate parent, '2' the parent of the parent etc.)
+     *            immediate parent, '2' the parent of the parent etc.)
      * @return the parent field reference description for the provided field
      */
     public ClassFieldDescription getParent(final ClassFieldDescription field, final int hierarchyLevel) {
         if (field == null) {
             throw new IllegalArgumentException("field is null at hierarchyLevel = " + hierarchyLevel);
         }
-        if (hierarchyLevel == 0 || field.getParent().isEmpty()) {
+        if ((hierarchyLevel == 0) || field.getParent().isEmpty()) {
             return field;
         }
         final Optional<ClassFieldDescription> localParent = field.getParent();
@@ -428,6 +407,13 @@ public class ClassFieldDescription implements Iterable<ClassFieldDescription> {
      */
     public boolean isClass() {
         return isclass;
+    }
+
+    /**
+     * @return whether class is an Enum type
+     */
+    public boolean isEnum() {
+        return isEnum;
     }
 
     /**
@@ -578,9 +564,8 @@ public class ClassFieldDescription implements Iterable<ClassFieldDescription> {
     @Override
     public String toString() {
         if (toStringName == null) {
-            toStringName = ClassFieldDescription.class.getSimpleName() + " for: " + this.getModifierString() + " "
-                    + this.getTypeName() + " " + this.getFieldNameRelative() + " (hierarchyDepth = "
-                    + this.getHierarchyDepth() + ")";
+            toStringName = ClassFieldDescription.class.getSimpleName() + " for: " + getModifierString() + " "
+                    + getTypeName() + " " + getFieldNameRelative() + " (hierarchyDepth = " + getHierarchyDepth() + ")";
         }
         return toStringName;
     }
@@ -590,6 +575,23 @@ public class ClassFieldDescription implements Iterable<ClassFieldDescription> {
      */
     public AtomicInteger writeCount() {
         return writeCount;
+    }
+
+    protected Object allocateMemberClassField(final Object fieldParent, final ClassFieldDescription localParent)
+            throws IllegalAccessException {
+        try {
+            // need to allocate new object
+            final Constructor<?> constr = getParent(this, 1).getType().getDeclaredConstructor(fieldParent.getClass());
+            final Object newFieldObj = constr.newInstance(fieldParent);
+            localParent.getField().set(fieldParent, newFieldObj);
+
+            return newFieldObj;
+        } catch (InstantiationException | InvocationTargetException | SecurityException | NoSuchMethodException e) {
+            if (LOGGER.isErrorEnabled()) {
+                LOGGER.atError().setCause(e).log("error initialising inner class object");
+            }
+        }
+        return null;
     }
 
     /**
@@ -625,7 +627,8 @@ public class ClassFieldDescription implements Iterable<ClassFieldDescription> {
         }
 
         // call super types
-        if (classType.getSuperclass() != null && !classType.getSuperclass().equals(Object.class)) {
+        if ((classType.getSuperclass() != null) && !classType.getSuperclass().equals(Object.class)
+                && !classType.getSuperclass().equals(Enum.class)) {
             // dive into parent hierarchy w/o parsing Object.class,
             // -> meaningless and causes infinite recursion
             exploreClass(classType.getSuperclass(), parent, recursionLevel + 1, fullScan);
@@ -647,8 +650,9 @@ public class ClassFieldDescription implements Iterable<ClassFieldDescription> {
             // dependency loops
             // (e.g. for classes with static references to themselves or
             // maps-of-maps-of-maps-....)
-            final boolean isClassAndNotObject = field.isClass() && !field.getType().equals(Object.class);
-            if (field.isSerializable() && (isClassAndNotObject || field.isInterface())
+            final boolean isClassAndNotObjectOrEnmum = field.isClass()
+                    && (!field.getType().equals(Object.class) || !field.getType().equals(Enum.class));
+            if (field.isSerializable() && (isClassAndNotObjectOrEnmum || field.isInterface())
                     && field.getDataType().equals(DataType.OTHER)) {
                 // object is a (technically) Serializable, unknown (ie 'OTHER) compound object
                 // or interface than can be further parsed

@@ -2,7 +2,6 @@ package de.gsi.dataset.serializer;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
@@ -42,7 +41,7 @@ public enum DataType {
 
     // complex objects
     COLLECTION               (200, "collection",     "",                    1, Cat.ARRAY, Collection.class),
-    ENUMERATION              (201, "enumeration",    "",                    1, Cat.COMPLEX_OBJECT, Enumeration.class),
+    ENUM                     (201, "enum",           "java.lang.Enum",      4, Cat.ARRAY, Enum.class),
     LIST                     (202, "list",           "",                    1, Cat.ARRAY, List.class),
     MAP                      (203, "map",            "",                    1, Cat.ARRAY, Map.class),
     QUEUE                    (204, "queue",          "",                    1, Cat.ARRAY, Queue.class),
@@ -69,10 +68,62 @@ public enum DataType {
         this.stringValue = stringValue;
         this.javaName = javaName;
         this.primitiveSize = primitiveSize;
-        this.classTypes = Arrays.asList(classType);
+        classTypes = Arrays.asList(classType);
         scalar = type.equals(Cat.SINGLE_VALUE);
         array = type.equals(Cat.ARRAY);
         object = type.equals(Cat.COMPLEX_OBJECT);
+    }
+
+    /**
+     * Returns the byte representation of the data type.
+     *
+     * @return the byte representation
+     */
+    public byte getAsByte() {
+        return byteValue;
+    }
+
+    /**
+     * Returns the string representation of the data type.
+     *
+     * @return the string representation
+     */
+    public String getAsString() {
+        return stringValue;
+    }
+
+    /**
+     * Returns the corresponding java class type matching the given data type
+     *
+     * @return the matching java class type
+     */
+    public List<Class<?>> getClassTypes() {
+        return classTypes;
+    }
+
+    /**
+     * Returns the string representation of the java class type.
+     *
+     * @return the string representation of the class
+     */
+    public String getJavaName() {
+        return javaName;
+    }
+
+    public long getPrimitiveSize() {
+        return primitiveSize;
+    }
+
+    public boolean isArray() {
+        return array;
+    }
+
+    public boolean isObject() {
+        return object;
+    }
+
+    public boolean isScalar() {
+        return scalar;
     }
 
     /**
@@ -134,57 +185,5 @@ public enum DataType {
             }
         }
         throw new IllegalArgumentException("Entry type '" + str + "' is not supported");
-    }
-
-    /**
-     * Returns the byte representation of the data type.
-     *
-     * @return the byte representation
-     */
-    public byte getAsByte() {
-        return byteValue;
-    }
-
-    /**
-     * Returns the string representation of the data type.
-     *
-     * @return the string representation
-     */
-    public String getAsString() {
-        return stringValue;
-    }
-
-    /**
-     * Returns the corresponding java class type matching the given data type
-     *
-     * @return the matching java class type
-     */
-    public List<Class<?>> getClassTypes() {
-        return classTypes;
-    }
-
-    /**
-     * Returns the string representation of the java class type.
-     *
-     * @return the string representation of the class
-     */
-    public String getJavaName() {
-        return javaName;
-    }
-
-    public long getPrimitiveSize() {
-        return primitiveSize;
-    }
-
-    public boolean isScalar() {
-        return scalar;
-    }
-
-    public boolean isArray() {
-        return array;
-    }
-
-    public boolean isObject() {
-        return object;
     }
 }

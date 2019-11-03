@@ -3,8 +3,10 @@ package de.gsi.dataset.serializer.spi;
 import static de.gsi.dataset.serializer.spi.FastByteBuffer.SIZE_OF_BYTE;
 import static de.gsi.dataset.serializer.spi.FastByteBuffer.SIZE_OF_INT;
 
+import java.lang.reflect.Method;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -13,6 +15,7 @@ import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,7 +27,7 @@ import de.gsi.dataset.utils.AssertUtils;
 /**
  * Generic binary serialiser aimed at efficiently transferring data between
  * server/client and in particular between Java/C++/web-based programs.
- * 
+ *
  * @author rstein
  */
 public class BinarySerialiser { // NOPMD - omen est omen
@@ -42,79 +45,21 @@ public class BinarySerialiser { // NOPMD - omen est omen
         super();
     }
 
-    public static FieldHeader parseIoStream(final IoBuffer buffer) {
-        final FieldHeader fieldRoot = new FieldHeader("ROOT", DataType.START_MARKER, new int[] { 0 }, buffer.position(),
-                100);
-
-        parseIoStream(buffer, fieldRoot, 0);
-        return fieldRoot;
-    }
-
-    protected static void parseIoStream(final IoBuffer buffer, final FieldHeader fieldRoot, final int recursionDepth) {
-
-        FieldHeader fieldHeader;
-        for (; ((fieldHeader = BinarySerialiser.getFieldHeader(buffer)) != null);) {
-            final long bytesToSkip = fieldHeader.getExpectedNumberOfDataBytes();
-            final long skipPosition = buffer.position() + bytesToSkip;
-            fieldRoot.getChildren().add(fieldHeader);
-
-            if (fieldHeader.getDataType().equals(DataType.END_MARKER)) {
-                // reached end of (sub-)class
-                // check marker value
-                byte markerValue = buffer.getByte();
-                if (DataType.END_MARKER.getAsByte() != markerValue) {
-                    throw new IllegalStateException("reached end marker, mismatched value '" + markerValue
-                            + "' vs. should '" + DataType.END_MARKER.getAsByte() + "'");
-                }
-                break;
-            }
-
-            if (bytesToSkip < 0) {
-                if (LOGGER.isWarnEnabled()) {
-                    LOGGER.atWarn().addArgument(fieldHeader.getFieldName()).addArgument(fieldHeader.getDataType())
-                            .addArgument(bytesToSkip).log("FieldHeader for '{}' type '{}' has bytesToSkip '{} <= 0'");
-                }
-
-                // fall-back option in case of
-                swallowRest(buffer, fieldHeader);
-            } else {
-                buffer.position(skipPosition);
-            }
-
-            if (fieldHeader.getDataType().equals(DataType.START_MARKER)) {
-                buffer.position(fieldHeader.getDataBufferPosition());
-                // detected sub-class start marker
-                // check marker value
-                byte markerValue = buffer.getByte();
-                if (DataType.START_MARKER.getAsByte() != markerValue) {
-                    throw new IllegalStateException("reached start marker, mismatched value '" + markerValue
-                            + "' vs. should '" + DataType.START_MARKER.getAsByte() + "'");
-                }
-
-                parseIoStream(buffer, fieldHeader, recursionDepth + 1);
-            }
-        }
-    }
-
     public static void adjustDataByteSizeBlock(final IoBuffer buffer, final long sizeMarkerStart) {
         final long sizeMarkerEnd = buffer.position();
 
         // go back and re-adjust the actual size info
         buffer.position(sizeMarkerStart);
-        long expectedNumberOfBytes = sizeMarkerEnd - sizeMarkerStart;
+        final long expectedNumberOfBytes = sizeMarkerEnd - sizeMarkerStart;
         buffer.putInt((int) expectedNumberOfBytes); // write actual byte size
 
         // go back to the new write position
         buffer.position(sizeMarkerEnd);
     }
 
-    //
-    // -- WRITE OPERATIONS -------------------------------------------
-    //
-
     public static HeaderInfo checkHeaderInfo(final IoBuffer readBuffer) {
         AssertUtils.notNull("readBuffer", readBuffer);
-        FieldHeader headerStartField = BinarySerialiser.getFieldHeader(readBuffer);
+        final FieldHeader headerStartField = BinarySerialiser.getFieldHeader(readBuffer);
         final byte startMarker = readBuffer.getByte();
         if (startMarker != DataType.START_MARKER.getAsByte()) {
             // TODO: replace with (new to be written) custom SerializerFormatException(..)
@@ -148,6 +93,10 @@ public class BinarySerialiser { // NOPMD - omen est omen
         }
         return dims;
     }
+
+    //
+    // -- WRITE OPERATIONS -------------------------------------------
+    //
 
     public static boolean getBoolean(final IoBuffer readBuffer) {
         if (readBuffer.hasRemaining()) {
@@ -229,18 +178,62 @@ public class BinarySerialiser { // NOPMD - omen est omen
         }
     }
 
-    @SuppressWarnings("PMD.PrematureDeclaration")
+    @SuppressWarnings({ "unused", "PMD.PrematureDeclaration" }) // variables need to be read from stream
+    public static Enum getEnum(final IoBuffer readBuffer, final Enum enumeration) {
+        // read value vector
+        final String enumSimpleName = getString(readBuffer);
+        final String enumName = getString(readBuffer);
+        final String enumTypeList = getString(readBuffer);
+        final String enumState = getString(readBuffer);
+        final int enumOrdinal = getInteger(readBuffer);
+        //TODO: implement matching by incomplete name match,
+        // N.B. for the time being package name + class name is required
+        Class<?> enumClass = ClassDescriptions.getClassByName(enumName);
+        if (enumClass == null) {
+            enumClass = ClassDescriptions.getClassByName(enumSimpleName);
+            if (enumClass == null) {
+                throw new IllegalStateException(
+                        "could not find enum class description '" + enumName + "' or '" + enumSimpleName + "'");
+            }
+        }
+
+        try {
+            final Method valueOf = enumClass.getMethod("valueOf", String.class);
+            return (Enum) valueOf.invoke(null, enumState);
+        } catch (final ReflectiveOperationException e) {
+            if (LOGGER.isErrorEnabled()) {
+                LOGGER.atError().setCause(e).addArgument(enumClass)
+                        .log("could not match 'valueOf(String)' function for class/(supposedly) enum of {}");
+            }
+        }
+
+        return null;
+    }
+
+    @SuppressWarnings({ "unused", "PMD.PrematureDeclaration" }) // variables need to be read from stream
+    public static String getEnumTypeList(final IoBuffer readBuffer) {
+        // read value vector
+        final String enumSimpleName = getString(readBuffer);
+        final String enumName = getString(readBuffer);
+        final String enumTypeList = getString(readBuffer);
+        final String enumState = getString(readBuffer);
+        final int enumOrdinal = getInteger(readBuffer);
+
+        return enumTypeList;
+    }
+
+    @SuppressWarnings({ "unused", "PMD.PrematureDeclaration" }) // variables need to be read from stream
     public static FieldHeader getFieldHeader(final IoBuffer readBuffer) {
         final String fieldName = readBuffer.getString();
         final byte dataTypeByte = readBuffer.getByte();
         final DataType dataType = DataType.fromByte(dataTypeByte);
 
-//        if (dataType.equals(DataType.END_MARKER)) {
-//            return null;
-//        }
+        //        if (dataType.equals(DataType.END_MARKER)) {
+        //            return null;
+        //        }
 
         if (dataType.isScalar()) {
-            long pos = readBuffer.position();
+            final long pos = readBuffer.position();
             final long nBytesToRead = dataType.equals(DataType.STRING) ? readBuffer.getInt() + 4
                     : dataType.getPrimitiveSize();
             readBuffer.position(pos);
@@ -273,41 +266,6 @@ public class BinarySerialiser { // NOPMD - omen est omen
 
     public static float[] getFloatArray(final IoBuffer readBuffer) {
         return readBuffer.getFloatArray();
-    }
-
-    protected static Object[] getGenericArrayAsPrimitive(final IoBuffer readBuffer, final DataType dataType) {
-        Object[] retVal;
-        // @formatter:off
-        switch (dataType) {
-        case BOOL:
-            retVal = GenericsHelper.toObject(readBuffer.getBooleanArray());
-            break;
-        case BYTE:
-            retVal = GenericsHelper.toObject(readBuffer.getByteArray());
-            break;
-        case SHORT:
-            retVal = GenericsHelper.toObject(readBuffer.getShortArray());
-            break;
-        case INT:
-            retVal = GenericsHelper.toObject(readBuffer.getIntArray());
-            break;
-        case LONG:
-            retVal = GenericsHelper.toObject(readBuffer.getLongArray());
-            break;
-        case FLOAT:
-            retVal = GenericsHelper.toObject(readBuffer.getFloatArray());
-            break;
-        case DOUBLE:
-            retVal = GenericsHelper.toObject(readBuffer.getDoubleArray());
-            break;
-        case STRING:
-            retVal = readBuffer.getStringArray();
-            break;
-        // @formatter:on
-        default:
-            throw new IllegalArgumentException("type not implemented - " + dataType);
-        }
-        return retVal;
     }
 
     public static int[] getIntArray(final IoBuffer readBuffer) {
@@ -365,19 +323,6 @@ public class BinarySerialiser { // NOPMD - omen est omen
         return retMap;
     }
 
-    private static int getNumberOfElements(final int[] dimensions) {
-        AssertUtils.notNull("dimensions", dimensions);
-        int ret = 1;
-        for (int i = 0; i < dimensions.length; i++) {
-            final int dim = dimensions[i];
-            if (i > 0) {
-                AssertUtils.gtThanZero("dimensions[" + i + "]", dim);
-            }
-            ret *= dim;
-        }
-        return ret;
-    }
-
     public static <E> Queue<E> getQueue(final IoBuffer readBuffer, final Queue<E> collection) {
         final DataType valueDataType = DataType.fromByte(readBuffer.getByte());
 
@@ -426,6 +371,14 @@ public class BinarySerialiser { // NOPMD - omen est omen
 
     public static String[] getStringArray(final IoBuffer readBuffer) {
         return readBuffer.getStringArray();
+    }
+
+    public static FieldHeader parseIoStream(final IoBuffer buffer) {
+        final FieldHeader fieldRoot = new FieldHeader("ROOT", DataType.START_MARKER, new int[] { 0 }, buffer.position(),
+                100);
+
+        parseIoStream(buffer, fieldRoot, 0);
+        return fieldRoot;
     }
 
     public static void put(final IoBuffer buffer, final String fieldName, final boolean value) {
@@ -496,14 +449,32 @@ public class BinarySerialiser { // NOPMD - omen est omen
         put(buffer, fieldName, arrayValue, new int[] { arrayValue.length });
     }
 
-    //
-    // -- READ OPERATIONS --------------------------------------------
-    //
-
     public static void put(final IoBuffer buffer, final String fieldName, final double[] arrayValue, final int[] dims) {
         final int nElements = getNumberOfElements(dims);
         final long sizeMarkerStart = putArrayHeader(buffer, fieldName, DataType.DOUBLE_ARRAY, dims, nElements);
         buffer.putDoubleArray(arrayValue, Math.min(nElements, arrayValue.length));
+        adjustDataByteSizeBlock(buffer, sizeMarkerStart);
+    }
+
+    public static void put(final IoBuffer buffer, final String fieldName, final Enum enumeration) {
+        if (enumeration == null) {
+            return;
+        }
+
+        final int nElements = 1;
+        final int entrySize = 17; // as an initial estimate
+
+        final long sizeMarkerStart = putArrayHeader(buffer, fieldName, DataType.ENUM, new int[] { 1 },
+                (nElements * entrySize) + 9);
+        final Class<? extends Enum> clazz = enumeration.getClass();
+        final String typeList = Arrays.asList(clazz.getEnumConstants()).stream().map(Object::toString)
+                .collect(Collectors.joining(", ", "[", "]"));
+        buffer.putString(clazz.getSimpleName());
+        buffer.putString(enumeration.getClass().getName());
+        buffer.putString(typeList);
+        buffer.putString(enumeration.name());
+        buffer.putInt(enumeration.ordinal());
+
         adjustDataByteSizeBlock(buffer, sizeMarkerStart);
     }
 
@@ -629,7 +600,7 @@ public class BinarySerialiser { // NOPMD - omen est omen
 
         // add array specific header info
         buffer.putInt(dims.length); // number of dimensions
-        for (int dim : dims) {
+        for (final int dim : dims) {
             buffer.putInt(dim); // vector size for each dimension
         }
 
@@ -651,15 +622,15 @@ public class BinarySerialiser { // NOPMD - omen est omen
         AssertUtils.notNull("fieldName", fieldName);
         // fieldName.lengthxbyte + 1 byte (\0 termination) + 4 bytes length string + 1
         // byte type
-        final long addCapacity = (fieldName.length() + 1 + 4 + 1) * SIZE_OF_BYTE + bufferIncrements
+        final long addCapacity = ((fieldName.length() + 1 + 4 + 1) * SIZE_OF_BYTE) + bufferIncrements
                 + dataType.getPrimitiveSize() + additionalSize;
         buffer.ensureAdditionalCapacity(addCapacity);
         buffer.putString(fieldName);
         buffer.putByte(dataType.getAsByte());
     }
 
-    public static void putGenericArrayAsPrimitive(final IoBuffer buffer, final DataType dataType,
-            final Object[] data, final int nToCopy) {
+    public static void putGenericArrayAsPrimitive(final IoBuffer buffer, final DataType dataType, final Object[] data,
+            final int nToCopy) {
 
         switch (dataType) {
         case BOOL:
@@ -698,7 +669,7 @@ public class BinarySerialiser { // NOPMD - omen est omen
      */
     public static void putHeaderInfo(final IoBuffer buffer) {
         AssertUtils.notNull("buffer", buffer);
-        long addCapacity = 20 + "OBJ_ROOT_START".length() + "#file producer : ".length()
+        final long addCapacity = 20 + "OBJ_ROOT_START".length() + "#file producer : ".length()
                 + BinarySerialiser.class.getCanonicalName().length();
         buffer.ensureAdditionalCapacity(addCapacity);
         putStartMarker(buffer, "OBJ_ROOT_START");
@@ -718,6 +689,165 @@ public class BinarySerialiser { // NOPMD - omen est omen
     public static void setBufferIncrements(final int bufferIncrements) {
         AssertUtils.gtEqThanZero("bufferIncrements", bufferIncrements);
         BinarySerialiser.bufferIncrements = bufferIncrements;
+    }
+
+    private static int getNumberOfElements(final int[] dimensions) {
+        AssertUtils.notNull("dimensions", dimensions);
+        int ret = 1;
+        for (int i = 0; i < dimensions.length; i++) {
+            final int dim = dimensions[i];
+            if (i > 0) {
+                AssertUtils.gtThanZero("dimensions[" + i + "]", dim);
+            }
+            ret *= dim;
+        }
+        return ret;
+    }
+
+    private static double[] toDoubles(final boolean[] input) {
+        final double[] doubleArray = new double[input.length];
+        for (int i = 0; i < input.length; i++) { // NOPMD
+            doubleArray[i] = input[i] ? 1.0 : 0.0;
+        }
+        return doubleArray;
+    }
+
+    private static double[] toDoubles(final byte[] input) {
+        final double[] doubleArray = new double[input.length];
+        for (int i = 0; i < input.length; i++) { // NOPMD
+            doubleArray[i] = input[i];
+        }
+        return doubleArray;
+    }
+
+    private static double[] toDoubles(final char[] input) {
+        final double[] doubleArray = new double[input.length];
+        for (int i = 0; i < input.length; i++) { // NOPMD
+            doubleArray[i] = input[i];
+        }
+        return doubleArray;
+    }
+
+    private static double[] toDoubles(final float[] input) {
+        final double[] doubleArray = new double[input.length];
+        for (int i = 0; i < input.length; i++) { // NOPMD
+            doubleArray[i] = input[i];
+        }
+        return doubleArray;
+    }
+
+    private static double[] toDoubles(final int[] input) {
+        final double[] doubleArray = new double[input.length];
+        for (int i = 0; i < input.length; i++) { // NOPMD
+            doubleArray[i] = input[i];
+        }
+        return doubleArray;
+    }
+
+    private static double[] toDoubles(final long[] input) {
+        final double[] doubleArray = new double[input.length];
+        for (int i = 0; i < input.length; i++) { // NOPMD
+            doubleArray[i] = input[i];
+        }
+        return doubleArray;
+    }
+
+    private static double[] toDoubles(final short[] input) { // NOPMD
+        final double[] doubleArray = new double[input.length];
+        for (int i = 0; i < input.length; i++) { // NOPMD
+            doubleArray[i] = input[i];
+        }
+        return doubleArray;
+    }
+
+    private static double[] toDoubles(final String[] input) {
+        final double[] doubleArray = new double[input.length];
+        for (int i = 0; i < input.length; i++) { // NOPMD
+            doubleArray[i] = input[i] == null ? Double.NaN : Double.parseDouble(input[i]);
+        }
+        return doubleArray;
+    }
+
+    protected static Object[] getGenericArrayAsPrimitive(final IoBuffer readBuffer, final DataType dataType) {
+        Object[] retVal;
+        // @formatter:off
+        switch (dataType) {
+        case BOOL:
+            retVal = GenericsHelper.toObject(readBuffer.getBooleanArray());
+            break;
+        case BYTE:
+            retVal = GenericsHelper.toObject(readBuffer.getByteArray());
+            break;
+        case SHORT:
+            retVal = GenericsHelper.toObject(readBuffer.getShortArray());
+            break;
+        case INT:
+            retVal = GenericsHelper.toObject(readBuffer.getIntArray());
+            break;
+        case LONG:
+            retVal = GenericsHelper.toObject(readBuffer.getLongArray());
+            break;
+        case FLOAT:
+            retVal = GenericsHelper.toObject(readBuffer.getFloatArray());
+            break;
+        case DOUBLE:
+            retVal = GenericsHelper.toObject(readBuffer.getDoubleArray());
+            break;
+        case STRING:
+            retVal = readBuffer.getStringArray();
+            break;
+        // @formatter:on
+        default:
+            throw new IllegalArgumentException("type not implemented - " + dataType);
+        }
+        return retVal;
+    }
+
+    @SuppressWarnings({ "unused", "PMD.PrematureDeclaration" }) // variables need to be read from stream
+    protected static void parseIoStream(final IoBuffer buffer, final FieldHeader fieldRoot, final int recursionDepth) {
+
+        FieldHeader fieldHeader;
+        for (; ((fieldHeader = BinarySerialiser.getFieldHeader(buffer)) != null);) {
+            final long bytesToSkip = fieldHeader.getExpectedNumberOfDataBytes();
+            final long skipPosition = buffer.position() + bytesToSkip;
+            fieldRoot.getChildren().add(fieldHeader);
+
+            if (fieldHeader.getDataType().equals(DataType.END_MARKER)) {
+                // reached end of (sub-)class
+                // check marker value
+                final byte markerValue = buffer.getByte();
+                if (DataType.END_MARKER.getAsByte() != markerValue) {
+                    throw new IllegalStateException("reached end marker, mismatched value '" + markerValue
+                            + "' vs. should '" + DataType.END_MARKER.getAsByte() + "'");
+                }
+                break;
+            }
+
+            if (bytesToSkip < 0) {
+                if (LOGGER.isWarnEnabled()) {
+                    LOGGER.atWarn().addArgument(fieldHeader.getFieldName()).addArgument(fieldHeader.getDataType())
+                            .addArgument(bytesToSkip).log("FieldHeader for '{}' type '{}' has bytesToSkip '{} <= 0'");
+                }
+
+                // fall-back option in case of
+                swallowRest(buffer, fieldHeader);
+            } else {
+                buffer.position(skipPosition);
+            }
+
+            if (fieldHeader.getDataType().equals(DataType.START_MARKER)) {
+                buffer.position(fieldHeader.getDataBufferPosition());
+                // detected sub-class start marker
+                // check marker value
+                final byte markerValue = buffer.getByte();
+                if (DataType.START_MARKER.getAsByte() != markerValue) {
+                    throw new IllegalStateException("reached start marker, mismatched value '" + markerValue
+                            + "' vs. should '" + DataType.START_MARKER.getAsByte() + "'");
+                }
+
+                parseIoStream(buffer, fieldHeader, recursionDepth + 1);
+            }
+        }
     }
 
     protected static void swallowRest(final IoBuffer readBuffer, final FieldHeader fieldHeader) {
@@ -806,70 +936,6 @@ public class BinarySerialiser { // NOPMD - omen est omen
         }
     }
 
-    private static double[] toDoubles(final boolean[] input) {
-        final double[] doubleArray = new double[input.length];
-        for (int i = 0; i < input.length; i++) { // NOPMD
-            doubleArray[i] = input[i] ? 1.0 : 0.0;
-        }
-        return doubleArray;
-    }
-
-    private static double[] toDoubles(final byte[] input) {
-        final double[] doubleArray = new double[input.length];
-        for (int i = 0; i < input.length; i++) { // NOPMD
-            doubleArray[i] = input[i];
-        }
-        return doubleArray;
-    }
-
-    private static double[] toDoubles(final char[] input) {
-        final double[] doubleArray = new double[input.length];
-        for (int i = 0; i < input.length; i++) { // NOPMD
-            doubleArray[i] = input[i];
-        }
-        return doubleArray;
-    }
-
-    private static double[] toDoubles(final float[] input) {
-        final double[] doubleArray = new double[input.length];
-        for (int i = 0; i < input.length; i++) { // NOPMD
-            doubleArray[i] = input[i];
-        }
-        return doubleArray;
-    }
-
-    private static double[] toDoubles(final int[] input) {
-        final double[] doubleArray = new double[input.length];
-        for (int i = 0; i < input.length; i++) { // NOPMD
-            doubleArray[i] = input[i];
-        }
-        return doubleArray;
-    }
-
-    private static double[] toDoubles(final long[] input) {
-        final double[] doubleArray = new double[input.length];
-        for (int i = 0; i < input.length; i++) { // NOPMD
-            doubleArray[i] = input[i];
-        }
-        return doubleArray;
-    }
-
-    private static double[] toDoubles(final short[] input) { // NOPMD
-        final double[] doubleArray = new double[input.length];
-        for (int i = 0; i < input.length; i++) { // NOPMD
-            doubleArray[i] = input[i];
-        }
-        return doubleArray;
-    }
-
-    private static double[] toDoubles(final String[] input) {
-        final double[] doubleArray = new double[input.length];
-        for (int i = 0; i < input.length; i++) { // NOPMD
-            doubleArray[i] = input[i] == null ? Double.NaN : Double.parseDouble(input[i]);
-        }
-        return doubleArray;
-    }
-
     //
     // -- HELPER CLASSES ---------------------------------------------
     //
@@ -888,11 +954,11 @@ public class BinarySerialiser { // NOPMD - omen est omen
         }
 
         @Override
-        public boolean equals(Object obj) {
+        public boolean equals(final Object obj) {
             if (!(obj instanceof HeaderInfo)) {
                 return false;
             }
-            HeaderInfo other = (HeaderInfo) obj;
+            final HeaderInfo other = (HeaderInfo) obj;
             return other.isCompatible();
         }
 
