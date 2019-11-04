@@ -538,6 +538,18 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
             getDataLabelMap().clear();
             getDataStyleMap().clear();
             if (copy) {
+                if (this.xValues == null) {
+                    this.xValues = new DoubleArrayList();
+                }
+                if (this.yValues == null) {
+                    this.yValues = new DoubleArrayList();
+                }
+                if (this.yErrorsPos == null) {
+                    this.yErrorsPos = new DoubleArrayList();
+                }
+                if (this.yErrorsNeg == null) {
+                    this.yErrorsNeg = new DoubleArrayList();
+                }
                 resize(0);
                 this.xValues.addElements(0, xValues);
                 this.yValues.addElements(0, yValues);
