@@ -92,7 +92,7 @@ public class DataSetUtils extends DataSetUtilsHelper {
 		return useFloat32BinaryStandard;
 	}
 
-	public static void setUseFloat32BinaryStandard(boolean state) {
+	public static void setUseFloat32BinaryStandard(final boolean state) {
 		useFloat32BinaryStandard = state;
 	}
 
@@ -100,7 +100,7 @@ public class DataSetUtils extends DataSetUtilsHelper {
 		return exportMetaDataByDefault;
 	}
 
-	public static void setExportMetaDataByDefault(boolean state) {
+	public static void setExportMetaDataByDefault(final boolean state) {
 		exportMetaDataByDefault = state;
 	}
 
@@ -796,25 +796,25 @@ public class DataSetUtils extends DataSetUtilsHelper {
 				// directly
 				final int nSamples = dataSet.getDataCount(DIM_X);
 				final ByteBuffer byteBuffer = getCachedDoubleArray(CACHED_WRITE_BYTE_BUFFER, Float.BYTES * nSamples);
-				writeDoubleArrayAsFloatToByteBuffer(byteBuffer, dataSet.getValues(DIM_X));
+				writeDoubleArrayAsFloatToByteBuffer(byteBuffer, dataSet.getValues(DIM_X), nSamples);
 				outputStream.write(byteBuffer.array());
-				writeDoubleArrayAsFloatToByteBuffer(byteBuffer, dataSet.getValues(DIM_Y));
+				writeDoubleArrayAsFloatToByteBuffer(byteBuffer, dataSet.getValues(DIM_Y), nSamples);
 				outputStream.write(byteBuffer.array());
-				writeDoubleArrayAsFloatToByteBuffer(byteBuffer, errors(dataSet, EYN));
+				writeDoubleArrayAsFloatToByteBuffer(byteBuffer, errors(dataSet, EYN), nSamples);
 				outputStream.write(byteBuffer.array());
-				writeDoubleArrayAsFloatToByteBuffer(byteBuffer, errors(dataSet, EYP));
+				writeDoubleArrayAsFloatToByteBuffer(byteBuffer, errors(dataSet, EYP), nSamples);
 				outputStream.write(byteBuffer.array());
 				release(CACHED_WRITE_BYTE_BUFFER, byteBuffer);
 			} else if (!asFloat && !is3D) {
 				final int nSamples = dataSet.getDataCount(DIM_X);
 				final ByteBuffer byteBuffer = getCachedDoubleArray(CACHED_WRITE_BYTE_BUFFER, Double.BYTES * nSamples);
-				writeDoubleArrayToByteBuffer(byteBuffer, dataSet.getValues(DIM_X));
+				writeDoubleArrayToByteBuffer(byteBuffer, dataSet.getValues(DIM_X), nSamples);
 				outputStream.write(byteBuffer.array());
-				writeDoubleArrayToByteBuffer(byteBuffer, dataSet.getValues(DIM_Y));
+				writeDoubleArrayToByteBuffer(byteBuffer, dataSet.getValues(DIM_Y), nSamples);
 				outputStream.write(byteBuffer.array());
-				writeDoubleArrayToByteBuffer(byteBuffer, errors(dataSet, EYN));
+				writeDoubleArrayToByteBuffer(byteBuffer, errors(dataSet, EYN), nSamples);
 				outputStream.write(byteBuffer.array());
-				writeDoubleArrayToByteBuffer(byteBuffer, errors(dataSet, EYP));
+				writeDoubleArrayToByteBuffer(byteBuffer, errors(dataSet, EYP), nSamples);
 				outputStream.write(byteBuffer.array());
 				release(CACHED_WRITE_BYTE_BUFFER, byteBuffer);
 			} else if (asFloat && is3D) {
@@ -1427,5 +1427,4 @@ public class DataSetUtils extends DataSetUtilsHelper {
 		}
 		return result;
 	}
-
 }
