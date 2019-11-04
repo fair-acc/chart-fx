@@ -172,10 +172,10 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
                 // compute local screen coordinates
                 final boolean isPolarPlot = ((XYChart) chart).isPolarPlot();
                 if (isParallelImplementation()) {
-                	localCachedPoints.computeScreenCoordinatesInParallel(xAxis, yAxis, dataSet,
+                    localCachedPoints.computeScreenCoordinatesInParallel(xAxis, yAxis, dataSet,
                             dataSetOffset + ldataSetIndex, indexMin, indexMax, getErrorType(), isPolarPlot);
                 } else {
-                	localCachedPoints.computeScreenCoordinates(xAxis, yAxis, dataSet, dataSetOffset + ldataSetIndex,
+                    localCachedPoints.computeScreenCoordinates(xAxis, yAxis, dataSet, dataSetOffset + ldataSetIndex,
                             indexMin, indexMax, getErrorType(), isPolarPlot);
                 }
                 stopStamp = ProcessingProfiler.getTimeDiff(stopStamp, "computeScreenCoordinates()");
@@ -749,7 +749,8 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
 
         for (int i = 0; i < lCacheP.actualDataCount; i++) {
 
-            if (lCacheP.errorType == ErrorType.XY || lCacheP.errorType == ErrorType.XY_ASYMMETRIC) {
+            if (lCacheP.errorType[DataSet.DIM_X] != ErrorType.NO_ERROR
+                    || lCacheP.errorType[DataSet.DIM_Y] != ErrorType.NO_ERROR) {
                 // draw error bars
                 gc.strokeLine(lCacheP.xValues[i], lCacheP.errorYNeg[i], lCacheP.xValues[i], lCacheP.errorYPos[i]);
                 gc.strokeLine(lCacheP.errorXNeg[i], lCacheP.yValues[i], lCacheP.errorXPos[i], lCacheP.yValues[i]);
@@ -765,7 +766,8 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
                         lCacheP.yValues[i] + dashHalf);
                 gc.strokeLine(lCacheP.errorXPos[i], lCacheP.yValues[i] - dashHalf, lCacheP.errorXPos[i],
                         lCacheP.yValues[i] + dashHalf);
-            } else if (lCacheP.errorType == ErrorType.Y || lCacheP.errorType == ErrorType.Y_ASYMMETRIC) {
+            } else if (lCacheP.errorType[DataSet.DIM_X] == ErrorType.NO_ERROR
+                    || lCacheP.errorType[DataSet.DIM_Y] != ErrorType.NO_ERROR) {
                 // draw error bars
                 gc.strokeLine(lCacheP.xValues[i], lCacheP.errorYNeg[i], lCacheP.xValues[i], lCacheP.errorYPos[i]);
 
@@ -775,7 +777,8 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
                 gc.strokeLine(lCacheP.xValues[i] - dashHalf, lCacheP.errorYPos[i], lCacheP.xValues[i] + dashHalf,
                         lCacheP.errorYPos[i]);
 
-            } else if (lCacheP.errorType == ErrorType.X || lCacheP.errorType == ErrorType.X_ASYMMETRIC) {
+            } else if (lCacheP.errorType[DataSet.DIM_X] != ErrorType.NO_ERROR
+                    || lCacheP.errorType[DataSet.DIM_Y] == ErrorType.NO_ERROR) {
                 // draw error bars
                 gc.strokeLine(lCacheP.errorXNeg[i], lCacheP.yValues[i], lCacheP.errorXPos[i], lCacheP.yValues[i]);
 
@@ -858,9 +861,9 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
         }
 
         final double minSize = getMarkerSize();
-        switch (localCachedPoints.errorType) {
-        case X:
-        case X_ASYMMETRIC:
+        if (localCachedPoints.errorType[DataSet.DIM_X] != ErrorType.NO_ERROR
+                || localCachedPoints.errorType[DataSet.DIM_Y] == ErrorType.NO_ERROR) {
+            // X, X_ASYMMETRIC
             for (int i = 0; i < localCachedPoints.actualDataCount; i++) {
                 final double radius = Math.max(minSize,
                         localCachedPoints.errorXPos[i] - localCachedPoints.errorXNeg[i]);
@@ -869,9 +872,9 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
 
                 gc.fillOval(x, y, 2 * radius, 2 * radius);
             }
-            break;
-        case Y:
-        case Y_ASYMMETRIC:
+        } else if (localCachedPoints.errorType[DataSet.DIM_X] == ErrorType.NO_ERROR
+                || localCachedPoints.errorType[DataSet.DIM_Y] != ErrorType.NO_ERROR) {
+            // Y, Y_ASYMMETRIC
             for (int i = 0; i < localCachedPoints.actualDataCount; i++) {
                 final double radius = Math.max(minSize,
                         localCachedPoints.errorYNeg[i] - localCachedPoints.errorYPos[i]);
@@ -880,9 +883,9 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
 
                 gc.fillOval(x, y, 2 * radius, 2 * radius);
             }
-            break;
-        case XY:
-        case XY_ASYMMETRIC:
+        } else if (localCachedPoints.errorType[DataSet.DIM_X] != ErrorType.NO_ERROR
+                || localCachedPoints.errorType[DataSet.DIM_Y] != ErrorType.NO_ERROR) {
+            // XY, XY_ASYMMETRIC
             for (int i = 0; i < localCachedPoints.actualDataCount; i++) {
                 final double width = Math.max(minSize, localCachedPoints.errorXPos[i] - localCachedPoints.errorXNeg[i]);
                 final double height = Math.max(minSize,
@@ -892,9 +895,7 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
 
                 gc.fillOval(x, y, 2 * width, 2 * height);
             }
-            break;
-        case NO_ERROR:
-        default:
+        } else { // NO ERROR
             for (int i = 0; i < localCachedPoints.actualDataCount; i++) {
                 final double radius = minSize;
                 final double x = localCachedPoints.xValues[i] - radius;
@@ -902,7 +903,6 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
 
                 gc.fillOval(x, y, 2 * radius, 2 * radius);
             }
-            break;
         }
 
         gc.restore();

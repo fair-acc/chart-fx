@@ -1,6 +1,5 @@
 package de.gsi.dataset.spi;
 
-import de.gsi.dataset.AxisDescription;
 import de.gsi.dataset.DataSetError;
 import de.gsi.dataset.event.UpdateEvent;
 import de.gsi.dataset.locks.DataSetLock;
@@ -24,20 +23,20 @@ import de.gsi.dataset.locks.DataSetLock;
 public abstract class AbstractErrorDataSet<D extends AbstractErrorDataSet<D>> extends AbstractDataSet<D>
         implements DataSetError {
     private static final long serialVersionUID = -5592816592868472957L;
-    private ErrorType errorType;
+    private ErrorType[] errorType;
 
     /**
      * Creates a new instance of <code>AbstractDataSet</code>.
      *
      * @param name of the DataSet
      * @param dimension dimension of data set
-     * @param errorType for possible enum options see {@linkplain de.gsi.dataset.DataSetError.ErrorType}
+     * @param errorTypes for possible enum options see {@linkplain de.gsi.dataset.DataSetError.ErrorType}
      * @throws IllegalArgumentException
      *             if <code>name</code> is <code>null</code>
      */
-    protected AbstractErrorDataSet(final String name, final int dimension, final ErrorType errorType) {
+    protected AbstractErrorDataSet(final String name, final int dimension, final ErrorType ... errorTypes) {
         super(name, dimension);
-        this.errorType = errorType;
+        this.errorType = errorTypes;
     }
 
     @Override
@@ -63,8 +62,8 @@ public abstract class AbstractErrorDataSet<D extends AbstractErrorDataSet<D>> ex
      * @see DataSetError#getErrorType() for details
      */
     @Override
-    public ErrorType getErrorType() {
-        return errorType;
+    public ErrorType getErrorType(final int dimIndex) {
+        return errorType[dimIndex];
     }
 
     /**
@@ -74,8 +73,8 @@ public abstract class AbstractErrorDataSet<D extends AbstractErrorDataSet<D>> ex
      * @return itself (fluent design)
      * @see DataSetError#getErrorType() for details
      */
-    public D setErrorType(final ErrorType errorType) {
-        this.errorType = errorType;
+    public D setErrorType(final int dimIndex, final ErrorType errorType) {
+        this.errorType[dimIndex] = errorType;
         return getThis();
     }
 
@@ -90,79 +89,31 @@ public abstract class AbstractErrorDataSet<D extends AbstractErrorDataSet<D>> ex
             return getThis();
         }
         lock().writeLockGuard(() -> {
-            // Clear previous ranges
-            getAxisDescriptions().forEach(AxisDescription::clear);
-            final int dataCount = getDataCount(dimension);
-
-            // following sections implements separate handling
-            // of the each given error type cases also to avoid
-            // redundant invocation of the error retrieval interfaces
-            // that may hide or abstract given algorithms that may
-            // (re-) calculate the errors in place.
-            switch (getErrorType()) {
-            case NO_ERROR:
-                super.recomputeLimits(0);
-                super.recomputeLimits(1);
-                break;
-            case X:
-                for (int i = 0; i < dataCount; i++) {
-                    final double xData = get(DIM_X, i);
-                    final double yData = get(DIM_Y, i);
-                    final double xDataError = getErrorPositive(DIM_X, i);
-                    getAxisDescription(0).add(xData - xDataError);
-                    getAxisDescription(0).add(xData + xDataError);
-                    getAxisDescription(1).add(yData);
-                }
-                break;
-            case Y:
-                for (int i = 0; i < dataCount; i++) {
-                    final double xData = get(DIM_X, i);
-                    final double yData = get(DIM_Y, i);
-                    final double yDataError = getErrorPositive(DIM_Y, i);
-                    getAxisDescription(0).add(xData);
-                    getAxisDescription(1).add(yData - yDataError);
-                    getAxisDescription(1).add(yData + yDataError);
-                }
-                break;
-            case XY:
-                for (int i = 0; i < dataCount; i++) {
-                    final double xData = get(DIM_X, i);
-                    final double yData = get(DIM_Y, i);
-                    final double xDataError = getErrorPositive(DIM_X, i);
-                    final double yDataError = getErrorPositive(DIM_Y, i);
-                    getAxisDescription(0).add(xData - xDataError);
-                    getAxisDescription(0).add(xData + xDataError);
-                    getAxisDescription(1).add(yData - yDataError);
-                    getAxisDescription(1).add(yData + yDataError);
-                }
-                break;
-            case X_ASYMMETRIC:
-                for (int i = 0; i < dataCount; i++) {
-                    final double xData = get(DIM_X, i);
-                    final double yData = get(DIM_Y, i);
-                    getAxisDescription(0).add(xData - getErrorNegative(DIM_X, i));
-                    getAxisDescription(0).add(xData + getErrorPositive(DIM_X, i));
-                    getAxisDescription(1).add(yData);
-                }
-                break;
-            case Y_ASYMMETRIC:
-                for (int i = 0; i < dataCount; i++) {
-                    final double xData = get(DIM_X, i);
-                    final double yData = get(DIM_Y, i);
-                    getAxisDescription(0).add(xData);
-                    getAxisDescription(1).add(yData - getErrorNegative(DIM_Y, i));
-                    getAxisDescription(1).add(yData + getErrorPositive(DIM_Y, i));
-                }
-                break;
-            case XY_ASYMMETRIC:
-            default:
-                for (int i = 0; i < dataCount; i++) {
-                    final double xData = get(DIM_X, i);
-                    final double yData = get(DIM_Y, i);
-                    getAxisDescription(0).add(xData - getErrorNegative(DIM_X, i));
-                    getAxisDescription(0).add(xData + getErrorPositive(DIM_X, i));
-                    getAxisDescription(1).add(yData - getErrorNegative(DIM_Y, i));
-                    getAxisDescription(1).add(yData + getErrorPositive(DIM_Y, i));
+            for (int dimIndex = 0; dimIndex < getDimension(); dimIndex++) {
+                // Clear previous ranges
+                getAxisDescription(dimIndex).clear();
+                final int dataCount = getDataCount(dimIndex);
+                switch (getErrorType(dimIndex)) {
+                case NO_ERROR:
+                    super.recomputeLimits(dimIndex);
+                    break;
+                case ASYMMETRIC:
+                    for (int i = 0; i < dataCount; i++) {
+                        final double value = get(dimIndex, i);
+                        final double error_neg = getErrorNegative(dimIndex, i);
+                        final double error_pos = getErrorPositive(dimIndex, i);
+                        getAxisDescription(dimIndex).add(value - error_neg);
+                        getAxisDescription(dimIndex).add(value + error_pos);
+                    }
+                    break;
+                case SYMMETRIC:
+                default:
+                    for (int i = 0; i < dataCount; i++) {
+                        final double value = get(dimIndex, i);
+                        final double error = getErrorPositive(dimIndex, i);
+                        getAxisDescription(dimIndex).add(value - error);
+                        getAxisDescription(dimIndex).add(value + error);
+                    }
                 }
             }
         });
