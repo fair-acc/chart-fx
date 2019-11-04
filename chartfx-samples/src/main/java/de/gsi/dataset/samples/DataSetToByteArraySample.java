@@ -16,10 +16,10 @@ import de.gsi.dataset.DataSetError.ErrorType;
 import de.gsi.dataset.DataSetMetaData;
 import de.gsi.dataset.serializer.spi.ClassDescriptions;
 import de.gsi.dataset.serializer.spi.FastByteBuffer;
+import de.gsi.dataset.serializer.spi.iobuffer.DataSetSerialiser;
 import de.gsi.dataset.serializer.spi.iobuffer.IoBufferSerialiser;
 import de.gsi.dataset.spi.DoubleErrorDataSet;
 import de.gsi.dataset.testdata.spi.RandomDataGenerator;
-import de.gsi.dataset.utils.DataSetSerialiser;
 import de.gsi.dataset.utils.DataSetUtils;
 import de.gsi.dataset.utils.ProcessingProfiler;
 
@@ -77,6 +77,39 @@ public class DataSetToByteArraySample {
 
         LOGGER.atInfo().addArgument(encodingBits(asFloat32)).addArgument(encodingBinary(binary))
                 .log("testDataSetUtilsIdentity passed for {} {} encoding with partial meta-data");
+    }
+
+    public void testGenericSerialiserIdentity(final boolean asFloat32) {
+        IoBufferSerialiser serialiser = new IoBufferSerialiser(byteBuffer);
+        DataSetWrapper dsOrig = new DataSetWrapper();
+        dsOrig.source = original;
+        DataSetWrapper cpOrig = new DataSetWrapper();
+
+        try {
+            byteBuffer.reset(); // '0' writing at start of buffer
+            serialiser.serialiseObject(dsOrig);
+            byteBuffer.reset(); // reset to read position (==0)
+            serialiser.deserialiseObject(cpOrig);
+        } catch (IllegalAccessException e) {
+            if (LOGGER.isErrorEnabled()) {
+                LOGGER.atError().setCause(e).log("access error");
+            }
+        }
+
+        if (!(cpOrig.source instanceof DoubleErrorDataSet)) {
+            throw new IllegalStateException(
+                    "DataSet is not not instanceof DoubleErrorDataSet, might be DataSet3D or DoubleDataSet");
+        }
+
+        testIdentityCore(true, asFloat32, original, (DoubleErrorDataSet) cpOrig.source);
+        testIdentityLabelsAndStyles(true, asFloat32, original, cpOrig.source);
+
+        if (cpOrig.source instanceof DataSetMetaData) {
+            testIdentityMetaData(true, asFloat32, original, (DataSetMetaData) cpOrig.source);
+        }
+
+        LOGGER.atInfo().addArgument(encodingBits(asFloat32)).addArgument(encodingBinary(true))
+                .log("testGenericSerialiserIdentity passed for {} {} encoding with partial meta-data");
     }
 
     public void testDataSetSerialiserIdentity(final boolean withMetaData, final boolean asFloat32) {
@@ -264,6 +297,10 @@ public class DataSetToByteArraySample {
                 .log("average {} {} DataSetSerialiser throughput {} meta infos = {}/s");
     }
 
+    public class DataSetWrapper {
+        public DataSet source;
+    }
+
     public void testGenericSerializerPerformance(final int iterations, final boolean withMetaInfos,
             final boolean asFloat32) {
 
@@ -271,6 +308,11 @@ public class DataSetToByteArraySample {
         byteBuffer.reset(); // reset to read position (==0)
         final DoubleErrorDataSet copy = new DoubleErrorDataSet("init", N_SAMPLES);
         copy.setErrorType(ErrorType.NO_ERROR);
+
+        DataSetWrapper dsOrig = new DataSetWrapper();
+        dsOrig.source = original;
+        DataSetWrapper cpOrig = new DataSetWrapper();
+        cpOrig.source = new DoubleErrorDataSet("test", 10);
 
         final long startTime = ProcessingProfiler.getTimeStamp();
         for (int i = 0; i < iterations; i++) {
@@ -284,14 +326,15 @@ public class DataSetToByteArraySample {
             }
             byteBuffer.reset(); // reset to read position (==0)
             try {
-                serialiser.deserialiseObject(copy);
+                serialiser.deserialiseObject(cpOrig.source);
             } catch (IllegalAccessException e) {
                 if (LOGGER.isErrorEnabled()) {
                     LOGGER.atError().setCause(e).log("access error");
                 }
             }
 
-            if (!original.getName().equals(copy.getName()) || !original.equals(copy)) {
+            if (!dsOrig.source.getName()
+                    .equals(cpOrig.source.getName()) || !dsOrig.source.equals(cpOrig.source) ) {
                 LOGGER.atError().log("ERROR data set does not match -> potential streaming error at index = " + i);
                 break;
             }
@@ -357,6 +400,7 @@ public class DataSetToByteArraySample {
             for (boolean binary : new Boolean[] { false, true }) {
                 sample.testDataSetUtilsIdentity(binary, bit32);
             }
+            sample.testGenericSerialiserIdentity(bit32);
         }
         sample.clearGarbage();
         for (boolean bit32 : new Boolean[] { true, false }) {
@@ -378,14 +422,14 @@ public class DataSetToByteArraySample {
 
         final int iterations = 4;
         final int nLoops = 200;
-                for (boolean bit32 : new Boolean[] { true, false }) {
-                    for (boolean header : new Boolean[] { true, false }) {
-                        for (int i = 0; i < iterations; i++) {
-                            sample.testPerformance(nLoops, header, true, bit32);
-                        }
-                        sample.clearGarbage();
-                    }
+        for (boolean bit32 : new Boolean[] { true, false }) {
+            for (boolean header : new Boolean[] { true, false }) {
+                for (int i = 0; i < iterations; i++) {
+                    sample.testPerformance(nLoops, header, true, bit32);
                 }
+                sample.clearGarbage();
+            }
+        }
 
         for (boolean bit32 : new Boolean[] { true, false }) {
             for (boolean header : new Boolean[] { true, false }) {
@@ -395,16 +439,15 @@ public class DataSetToByteArraySample {
                 sample.clearGarbage();
             }
         }
-        
+
         for (boolean bit32 : new Boolean[] { false }) {
             for (boolean header : new Boolean[] { true }) {
-                for (int i = 0; i < 3*iterations; i++) {
+                for (int i = 0; i < 3 * iterations; i++) {
                     sample.testGenericSerializerPerformance(nLoops, header, bit32);
                 }
                 sample.clearGarbage();
             }
         }
-
 
         // infinite loop for performance tracking
         // sample.testSerializerPerformance(Integer.MAX_VALUE, true, false);

@@ -79,10 +79,10 @@ public class ClassFieldDescription implements Iterable<ClassFieldDescription> {
      * This should be called only once with the root class as an argument
      *
      * @param referenceClass the root node containing further Field children
-     * @param fullScan {@code true} if the class field should be serialised
-     *            according to {@link java.io.Serializable} (ie. object's
-     *            non-static and non-transient fields); {@code false}
-     *            otherwise.
+     * @param fullScan       {@code true} if the class field should be serialised
+     *                       according to {@link java.io.Serializable} (ie. object's
+     *                       non-static and non-transient fields); {@code false}
+     *                       otherwise.
      */
     public ClassFieldDescription(final Class<?> referenceClass, final boolean fullScan) {
         this(referenceClass, null, null, 0);
@@ -94,38 +94,6 @@ public class ClassFieldDescription implements Iterable<ClassFieldDescription> {
 
         // parse object
         exploreClass(classType, this, 0, fullScan);
-    }
-
-    /**
-     * This should be called for individual class field members
-     *
-     * @param field Field reference for the given class member
-     * @param parent pointer to the root/parent reference class field
-     *            description
-     * @param recursionLevel hierarchy level (i.e. '0' being the root class, '1' the
-     *            sub-class etc.
-     * @param fullScan {@code true} if the class field should be serialised
-     *            according to {@link java.io.Serializable} (ie. object's
-     *            non-static and non-transient fields); {@code false}
-     *            otherwise.
-     */
-    public ClassFieldDescription(final Field field, final ClassFieldDescription parent, final int recursionLevel,
-            final boolean fullScan) {
-        this(null, field, parent, recursionLevel);
-        if (field == null) {
-            throw new IllegalArgumentException("field must not be null");
-        }
-
-        if (serializable) {
-            // enable access by default (saves performance later on)
-            field.setAccessible(true);
-        }
-
-        // add child to parent if it serializable or if a full scan is requested
-        if (this.parent.isPresent() && (serializable || fullScan)) {
-            this.parent.get().getChildren().add(this);
-            this.parent.get().getFieldMap().put(fieldName, this);
-        }
     }
 
     protected ClassFieldDescription(final Class<?> referenceClass, final Field field,
@@ -179,6 +147,55 @@ public class ClassFieldDescription implements Iterable<ClassFieldDescription> {
         isEnum = Enum.class.isAssignableFrom(classType);
         serializable = !modTransient && !modStatic;
 
+    }
+
+    /**
+     * This should be called for individual class field members
+     *
+     * @param field          Field reference for the given class member
+     * @param parent         pointer to the root/parent reference class field
+     *                       description
+     * @param recursionLevel hierarchy level (i.e. '0' being the root class, '1' the
+     *                       sub-class etc.
+     * @param fullScan       {@code true} if the class field should be serialised
+     *                       according to {@link java.io.Serializable} (ie. object's
+     *                       non-static and non-transient fields); {@code false}
+     *                       otherwise.
+     */
+    public ClassFieldDescription(final Field field, final ClassFieldDescription parent, final int recursionLevel,
+            final boolean fullScan) {
+        this(null, field, parent, recursionLevel);
+        if (field == null) {
+            throw new IllegalArgumentException("field must not be null");
+        }
+
+        if (serializable) {
+            // enable access by default (saves performance later on)
+            field.setAccessible(true);
+        }
+
+        // add child to parent if it serializable or if a full scan is requested
+        if (this.parent.isPresent() && (serializable || fullScan)) {
+            this.parent.get().getChildren().add(this);
+            this.parent.get().getFieldMap().put(fieldName, this);
+        }
+    }
+
+    protected Object allocateMemberClassField(final Object fieldParent, final ClassFieldDescription localParent)
+            throws IllegalAccessException {
+        try {
+            // need to allocate new object
+            final Constructor<?> constr = getParent(this, 1).getType().getDeclaredConstructor(fieldParent.getClass());
+            final Object newFieldObj = constr.newInstance(fieldParent);
+            localParent.getField().set(fieldParent, newFieldObj);
+
+            return newFieldObj;
+        } catch (InstantiationException | InvocationTargetException | SecurityException | NoSuchMethodException e) {
+            if (LOGGER.isErrorEnabled()) {
+                LOGGER.atError().setCause(e).log("error initialising inner class object");
+            }
+        }
+        return null;
     }
 
     /**
@@ -365,9 +382,9 @@ public class ClassFieldDescription implements Iterable<ClassFieldDescription> {
     }
 
     /**
-     * @param field class Field description for which
+     * @param field          class Field description for which
      * @param hierarchyLevel the recursion level of the parent (e.g. '1' yields the
-     *            immediate parent, '2' the parent of the parent etc.)
+     *                       immediate parent, '2' the parent of the parent etc.)
      * @return the parent field reference description for the provided field
      */
     public ClassFieldDescription getParent(final ClassFieldDescription field, final int hierarchyLevel) {
@@ -577,23 +594,6 @@ public class ClassFieldDescription implements Iterable<ClassFieldDescription> {
         return writeCount;
     }
 
-    protected Object allocateMemberClassField(final Object fieldParent, final ClassFieldDescription localParent)
-            throws IllegalAccessException {
-        try {
-            // need to allocate new object
-            final Constructor<?> constr = getParent(this, 1).getType().getDeclaredConstructor(fieldParent.getClass());
-            final Object newFieldObj = constr.newInstance(fieldParent);
-            localParent.getField().set(fieldParent, newFieldObj);
-
-            return newFieldObj;
-        } catch (InstantiationException | InvocationTargetException | SecurityException | NoSuchMethodException e) {
-            if (LOGGER.isErrorEnabled()) {
-                LOGGER.atError().setCause(e).log("error initialising inner class object");
-            }
-        }
-        return null;
-    }
-
     /**
      * Returns the data type matching the given java class type, if any.
      *
@@ -637,7 +637,8 @@ public class ClassFieldDescription implements Iterable<ClassFieldDescription> {
         // loop over member fields and inner classes
         for (final Field pfield : classType.getDeclaredFields()) {
             final Optional<ClassFieldDescription> localParent = parent.getParent();
-            if (localParent.isPresent() && pfield.getType().equals(localParent.get().getType())) {
+            if ((localParent.isPresent() && pfield.getType().equals(localParent.get().getType()))
+                    || pfield.getName().startsWith("this$")) {
                 // inner classes contain parent as part of declared fields
                 continue;
             }

@@ -48,7 +48,7 @@ public enum DataType {
     SET                      (205, "set",            "",                    1, Cat.ARRAY, Set.class),
 
     // default for future extensions (e.g. moving to short
-    OTHER                    (0xFD, "other",         "",                    1, Cat.SINGLE_VALUE, Object.class),
+    OTHER                    (0xFD, "other",         "",                    1, Cat.COMPLEX_OBJECT, Object.class),
     // end marker
     END_MARKER               (0xFE, "end_marker",    "",                    1, Cat.SINGLE_VALUE);
     // @formatter:on

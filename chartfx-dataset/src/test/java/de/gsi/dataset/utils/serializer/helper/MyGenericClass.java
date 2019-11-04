@@ -24,6 +24,8 @@ public class MyGenericClass {
     protected float dummyFloat;
     protected double dummyDouble;
     protected String dummyString = "Test";
+    
+    protected TestEnum enumState = TestEnum.TEST_CASE_1;
 
     protected ArrayList<Integer> arrayListInteger = new ArrayList<>();
     protected ArrayList<String> arrayListString = new ArrayList<>();
@@ -151,6 +153,10 @@ public class MyGenericClass {
             // abort equals for more complex/extended data structures
             return state;
         }
+        
+        if (!enumState.equals(other.enumState)) {
+            state = false;
+        }
 
         if (!arrayListInteger.equals(other.arrayListInteger)) {
             logBackEnd().addArgument(this.getClass().getSimpleName()).addArgument(arrayListInteger)
@@ -181,6 +187,7 @@ public class MyGenericClass {
         final int prime = 31;
         int result = 1;
         if (extendedTestCase) {
+            result = prime * result + ((enumState == null) ? 0 : enumState.hashCode());
             result = prime * result + ((arrayListInteger == null) ? 0 : arrayListInteger.hashCode());
             result = prime * result + ((arrayListString == null) ? 0 : arrayListString.hashCode());
             result = prime * result + ((arrays == null) ? 0 : arrays.hashCode());
@@ -212,6 +219,7 @@ public class MyGenericClass {
         dummyString = MODIFIED + dummyString;
         arrayListInteger.set(0, arrayListInteger.get(0) + 1);
         arrayListString.set(0, MODIFIED + arrayListString.get(0));
+        enumState = enumState.values()[(enumState.ordinal()+1) % enumState.values().length];
     }
 
     public class ArraySubClass {
@@ -586,5 +594,12 @@ public class MyGenericClass {
             dummyBoxedDoubleArray[0] = dummyBoxedDoubleArray[0] + 1.5;
             dummyBoxedStringArray[0] = MODIFIED + dummyBoxedStringArray[0];
         }
+    }
+    
+    public enum TestEnum {
+        TEST_CASE_1,
+        TEST_CASE_2,
+        TEST_CASE_3,
+        TEST_CASE_4;
     }
 }
