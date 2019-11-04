@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 
 import de.gsi.chart.XYChart;
 import de.gsi.chart.axes.spi.DefaultNumericAxis;
+import de.gsi.chart.plugins.ColormapSelector.ColormapComboBox;
 import de.gsi.chart.plugins.EditAxis;
 import de.gsi.chart.plugins.Panner;
 import de.gsi.chart.plugins.Zoomer;
@@ -89,7 +90,7 @@ public class ContourChartSample extends Application {
         cb1.valueProperty().bindBidirectional(renderer1.contourTypeProperty());
         cb1.valueProperty().addListener((ch, old, selection) -> chartPane1.requestLayout());
 
-        final ComboBox<ColorGradient> colorGradient1 = new ComboBox<>();
+        final ColormapComboBox colorGradient1 = new ColormapComboBox();
         colorGradient1.getItems().addAll(ColorGradient.colorGradients());
         colorGradient1.setValue(renderer1.getColorGradient());
         colorGradient1.valueProperty().bindBidirectional(renderer1.colorGradientProperty());
@@ -101,8 +102,7 @@ public class ContourChartSample extends Application {
         cb2.valueProperty().bindBidirectional(renderer2.contourTypeProperty());
         cb1.valueProperty().addListener((ch, old, selection) -> chartPane2.requestLayout());
 
-        final ComboBox<ColorGradient> colorGradient2 = new ComboBox<>();
-        colorGradient2.getItems().addAll(ColorGradient.colorGradients());
+        final ColormapComboBox colorGradient2 = new ColormapComboBox();
         colorGradient2.setValue(renderer2.getColorGradient());
         colorGradient2.valueProperty().bindBidirectional(renderer2.colorGradientProperty());
         colorGradient2.valueProperty().addListener((ch, old, selection) -> chartPane2.requestLayout());
