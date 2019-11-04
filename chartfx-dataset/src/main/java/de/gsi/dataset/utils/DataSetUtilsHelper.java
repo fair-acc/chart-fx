@@ -17,7 +17,6 @@ import de.gsi.dataset.DataSet3D;
  * Small static helper routines to ease the reading of the DataSetUtils class
  * 
  * @author rstein
- *
  */
 public class DataSetUtilsHelper {
     private static final Logger LOGGER = LoggerFactory.getLogger(DataSetUtilsHelper.class);
@@ -25,7 +24,7 @@ public class DataSetUtilsHelper {
     protected static WeakHashMap<String, WeakHashMap<Integer, ByteBuffer>> byteArrayCache = new WeakHashMap<>();
     protected static final ReentrantLock STRING_BUFFER_CACHE_LOCK = new ReentrantLock();
     protected static WeakHashMap<String, WeakHashMap<Integer, StringBuilder>> stringBuilderCache = new WeakHashMap<>();
-    
+
     protected static ByteBuffer getCachedDoubleArray(final String arrayName, final int size) {
         BYTE_ARRAY_CACHE_LOCK.lock();
         WeakHashMap<Integer, ByteBuffer> arrayMap = byteArrayCache.computeIfAbsent(arrayName,
@@ -51,7 +50,7 @@ public class DataSetUtilsHelper {
         byteArrayCache.get(arrayName).put(cachedArray.capacity(), cachedArray);
         BYTE_ARRAY_CACHE_LOCK.unlock();
     }
-    
+
     protected static StringBuilder getCachedStringBuilder(final String arrayName, final int size) {
         STRING_BUFFER_CACHE_LOCK.lock();
         WeakHashMap<Integer, StringBuilder> arrayMap = stringBuilderCache.computeIfAbsent(arrayName,
@@ -77,13 +76,13 @@ public class DataSetUtilsHelper {
         stringBuilderCache.get(arrayName).put(cachedArray.capacity(), cachedArray);
         STRING_BUFFER_CACHE_LOCK.unlock();
     }
-    
+
     /**
      * @param input
      *            double array input
      * @return float array output
      */
-    public static float[] toFloatArray(double[] input) {
+    public static float[] toFloatArray(final double[] input) {
         if (input == null) {
             return null;
         }
@@ -100,59 +99,70 @@ public class DataSetUtilsHelper {
      *            float array input
      * @return double array output
      */
-    public static double[] toDoubleArray(float[] input) {
+    public static double[] toDoubleArray(final float[] input) {
         if (input == null) {
             return null;
         }
         int n = input.length;
         double[] ret = new double[n];
         for (int i = 0; i < n; i++) {
-            ret[i] = (double) input[i];
+            ret[i] = input[i];
         }
         return ret;
     }
 
-    protected static void writeDoubleArrayToByteBuffer(final ByteBuffer byteBuffer, double[] doubleBuffer) {
+    protected static void writeDoubleArrayToByteBuffer(final ByteBuffer byteBuffer, final double[] doubleBuffer,
+            final int nSamples) {
         if (byteBuffer == null) {
             throw new InvalidParameterException("ByteBuffer is 'null'");
         }
         if (doubleBuffer == null) {
             throw new InvalidParameterException("doubleBuffer is 'null'");
         }
-        if (byteBuffer.capacity() < doubleBuffer.length * Double.BYTES) {
+        if (byteBuffer.capacity() < nSamples * Double.BYTES) {
             throw new InvalidParameterException("byte buffer size (" + byteBuffer.capacity()
-                    + ") is smaller than double buffer size (" + doubleBuffer.length + ")");
+                    + ") is smaller than double buffer size (" + nSamples * Float.BYTES + ")");
+        }
+        if (doubleBuffer.length < nSamples) {
+            throw new InvalidParameterException("double array contains less (" + doubleBuffer.length
+            + ") than nsamples (" + nSamples + ") entries.");
         }
         byteBuffer.position(0);
-        for (int i = 0; i < doubleBuffer.length; i++) {
+        for (int i = 0; i < nSamples; i++) {
             byteBuffer.putDouble(doubleBuffer[i]);
         }
         // alt: (N.B. a bit more overhead/slower compared to the above code)
         // final DoubleBuffer xDouble = byteBuffer.asDoubleBuffer();
         // xDouble.put(doubleBuffer);
     }
-    
-    protected static void writeDoubleArrayAsFloatToByteBuffer(final ByteBuffer byteBuffer, double[] doubleBuffer) {
+
+    protected static void writeDoubleArrayAsFloatToByteBuffer(final ByteBuffer byteBuffer, final double[] doubleBuffer,
+            final int nSamples) {
         if (byteBuffer == null) {
             throw new InvalidParameterException("ByteBuffer is 'null'");
         }
         if (doubleBuffer == null) {
             throw new InvalidParameterException("doubleBuffer is 'null'");
         }
-        if (byteBuffer.capacity() < doubleBuffer.length * Float.BYTES) {
+        if (byteBuffer.capacity() < nSamples * Float.BYTES) {
             throw new InvalidParameterException("byte buffer size (" + byteBuffer.capacity()
-                    + ") is smaller than double buffer size (" + doubleBuffer.length * Float.BYTES + ")");
+                    + ") is smaller than double buffer size (" + nSamples * Float.BYTES + ")");
+        }
+        if (doubleBuffer.length < nSamples) {
+            throw new InvalidParameterException("double array contains less (" + doubleBuffer.length
+            + ") than nsamples (" + nSamples + ") entries.");
         }
         byteBuffer.position(0);
-        for (int i = 0; i < doubleBuffer.length; i++) {
-            byteBuffer.putFloat((float)doubleBuffer[i]);
+        for (int i = 0; i < nSamples; i++) {
+            byteBuffer.putFloat((float) doubleBuffer[i]);
         }
         // alt: (N.B. a bit more overhead/slower compared to the above code)
         // final DoubleBuffer xDouble = byteBuffer.asDoubleBuffer();
         // xDouble.put(doubleBuffer);
     }
-    
-    protected static double[] readDoubleArrayFromBuffer(FloatBuffer floatBuffer, DoubleBuffer doubleBuffer) {
+
+    protected static double[] readDoubleArrayFromBuffer(final FloatBuffer floatBuffer,
+            final DoubleBuffer doubleBuffer) {
         double[] retArray;
         if (floatBuffer != null) {
             retArray = new double[floatBuffer.limit()];
@@ -172,7 +182,6 @@ public class DataSetUtilsHelper {
         }
         throw new InvalidParameterException("floatBuffer and doubleBuffer must not both be null");
     }
-
 
     protected static double integralSimple(final DataSet function) {
         double integral1 = 0.0;
