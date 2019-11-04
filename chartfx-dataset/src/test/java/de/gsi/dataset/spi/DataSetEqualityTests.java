@@ -1,5 +1,7 @@
 package de.gsi.dataset.spi;
 
+import static de.gsi.dataset.DataSet.DIM_X;
+import static de.gsi.dataset.DataSet.DIM_Y;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -17,7 +19,6 @@ import de.gsi.dataset.EditConstraints;
  * Tests for minimal DataSet equality and hashCode implementation
  * 
  * @author rstein
- *
  */
 public class DataSetEqualityTests {
     private static final Logger LOGGER = LoggerFactory.getLogger(DataSetEqualityTests.class);
@@ -45,8 +46,8 @@ public class DataSetEqualityTests {
         assertEquals(new FifoDoubleErrorDataSet("default", 10), new FifoDoubleErrorDataSet("default", 11));
         assertEquals(new FragmentedDataSet("default"), new FragmentedDataSet("default"));
         assertEquals(new Histogram("default", 10, 0.0, 1.0), new Histogram("default", 10, 0.0, 1.0));
-//        assertEquals(new Histogram2("default", 10, 0.0, 1.0, 10, 0.0, 1.0),
-//                new Histogram2("default", 10, 0.0, 1.0, 10, 0.0, 1.0));
+        //        assertEquals(new Histogram2("default", 10, 0.0, 1.0, 10, 0.0, 1.0),
+        //                new Histogram2("default", 10, 0.0, 1.0, 10, 0.0, 1.0));
         assertEquals(new LabelledMarkerDataSet("default"), new LabelledMarkerDataSet("default"));
         assertEquals(new LimitedIndexedTreeDataSet("default", 10), new LimitedIndexedTreeDataSet("default", 11));
         assertEquals(new RollingDataSet("default"), new RollingDataSet("default"));
@@ -96,9 +97,10 @@ public class DataSetEqualityTests {
         assertEquals(ds1, ds2);
 
         // check equality of X/Y error values
-        ds1.setErrorType(ErrorType.NO_ERROR);
+        ds1.setErrorType(DIM_X, ErrorType.NO_ERROR);
+        ds1.setErrorType(DIM_Y, ErrorType.NO_ERROR);
         assertNotEquals(ds1, ds2);
-        ds1.setErrorType(ErrorType.Y_ASYMMETRIC);
+        ds1.setErrorType(DIM_Y, ErrorType.ASYMMETRIC);
         assertEquals(ds1, ds2);
         ds1.set(0, 0.0, 1.0, 1.0, 0.0);
         assertNotEquals(ds1, ds2);
@@ -204,7 +206,6 @@ public class DataSetEqualityTests {
      * just for testing... N.B. equals test for existing and object equality
      * 
      * @author rstein
-     *
      */
     private class NullEditConstraints implements EditConstraints {
 
@@ -256,5 +257,5 @@ public class DataSetEqualityTests {
             return 0;
         }
     }
-    
+
 }

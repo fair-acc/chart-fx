@@ -228,7 +228,10 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
         }
         DataSetError thisErrorDs = (DataSetError) this;
         DataSetError otherErrorDs = (DataSetError) other;
-        if (!thisErrorDs.getErrorType().equals(otherErrorDs.getErrorType())) {
+        if (!thisErrorDs.getErrorType(DIM_X).equals(otherErrorDs.getErrorType(DIM_X))) {
+            return false;
+        }
+        if (!thisErrorDs.getErrorType(DIM_Y).equals(otherErrorDs.getErrorType(DIM_Y))) {
             return false;
         }
 

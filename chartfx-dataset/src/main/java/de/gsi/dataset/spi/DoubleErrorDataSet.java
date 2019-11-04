@@ -46,7 +46,7 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
      * @throws IllegalArgumentException if {@code name} is {@code null}
      */
     public DoubleErrorDataSet(final String name, final int initalSize) {
-        super(name, 2, ErrorType.Y_ASYMMETRIC);
+        super(name, 2, ErrorType.NO_ERROR, ErrorType.ASYMMETRIC);
         AssertUtils.gtEqThanZero("initalSize", initalSize);
         xValues = new DoubleArrayList(initalSize);
         yValues = new DoubleArrayList(initalSize);
@@ -61,7 +61,7 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
      * @param another name of this DataSet.
      */
     public DoubleErrorDataSet(final DataSet2D another) {
-        super(another.getName(), another.getDimension(), ErrorType.Y_ASYMMETRIC);
+        super(another.getName(), another.getDimension(), ErrorType.NO_ERROR, ErrorType.ASYMMETRIC);
         this.set(another); // NOPMD by rstein on 25/06/19 07:42
     }
 
@@ -84,7 +84,7 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
      */
     public DoubleErrorDataSet(final String name, final double[] xValues, final double[] yValues,
             final double[] yErrorsNeg, final double[] yErrorsPos, final int initalSize, boolean deepCopy) {
-        super(name, 2, ErrorType.Y_ASYMMETRIC);
+        super(name, 2, ErrorType.NO_ERROR, ErrorType.ASYMMETRIC);
         AssertUtils.notNull("X data", xValues);
         AssertUtils.notNull("Y data", yValues);
         AssertUtils.notNull("Y error pos", yErrorsPos);

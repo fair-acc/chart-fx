@@ -30,7 +30,7 @@ public class CircularDoubleErrorDataSet extends AbstractErrorDataSet<CircularDou
      * @throws IllegalArgumentException if <code>name</code> is <code>null</code>
      */
     public CircularDoubleErrorDataSet(final String name, final int initalSize) {
-        super(name, 2, ErrorType.Y_ASYMMETRIC);
+        super(name, 2, ErrorType.NO_ERROR, ErrorType.ASYMMETRIC);
         AssertUtils.gtEqThanZero("initalSize", initalSize);
         xValues = new DoubleCircularBuffer(initalSize);
         yValues = new DoubleCircularBuffer(initalSize);

@@ -54,7 +54,7 @@ class CachedDataPoints {
     protected String defaultStyle;
     protected int dataSetIndex;
     protected int dataSetStyleIndex;
-    protected ErrorType errorType;
+    protected ErrorType[] errorType;
     protected int indexMin;
     protected int indexMax;
     protected int minDistanceX = +Integer.MAX_VALUE;
@@ -160,29 +160,27 @@ class CachedDataPoints {
 
     private void computeScreenCoordinatesEuclidean(final Axis xAxis, final Axis yAxis, final DataSet dataSet,
             final int min, final int max) {
-        switch (errorType) {
+        switch (errorType[DIM_X]) {
         case NO_ERROR:
             computeWithNoError(xAxis, dataSet, DIM_X, min, max);
-            computeWithNoError(yAxis, dataSet, DIM_Y, min, max);
-            computeErrorStyles(dataSet, min, max);
-            return;
-        case Y:
-        case Y_ASYMMETRIC:
-            computeWithNoError(xAxis, dataSet, DIM_X, min, max);
-            computeWithError(yAxis, dataSet, DIM_Y, min, max);
-            computeErrorStyles(dataSet, min, max);
-            return;
-        case X:
-        case X_ASYMMETRIC:
-        case XY:
-        case XY_ASYMMETRIC:
+            break;
+        case SYMMETRIC:
+        case ASYMMETRIC:
         default:
-            // dataSet may not be non-DataSetError at this stage
             computeWithError(xAxis, dataSet, DIM_X, min, max);
-            computeWithError(yAxis, dataSet, DIM_Y, min, max);
-            computeErrorStyles(dataSet, min, max);
-            return;
+            break;
         }
+        switch (errorType[DIM_Y]) {
+        case NO_ERROR:
+            computeWithNoError(yAxis, dataSet, DIM_Y, min, max);
+            break;
+        case SYMMETRIC:
+        case ASYMMETRIC:
+        default:
+            computeWithError(yAxis, dataSet, DIM_Y, min, max);
+            break;
+        }
+        computeErrorStyles(dataSet, min, max);
     }
 
     private void computeScreenCoordinatesPolar(final Axis yAxis, final DataSet dataSet, final int min, final int max) {
@@ -190,23 +188,14 @@ class CachedDataPoints {
             throw new IllegalStateException("non-DataSet2D implementation not yet propagated");
         }
 
-        switch (errorType) {
-        case NO_ERROR:
+        if (errorType[DIM_X] == ErrorType.NO_ERROR && errorType[DIM_Y] == ErrorType.NO_ERROR) {
             computeNoErrorPolar(yAxis, (DataSet2D) dataSet, min, max);
-            return;
-        case Y:
-        case Y_ASYMMETRIC:
+        } else if (errorType[DIM_X] == ErrorType.NO_ERROR) {
             computeYonlyPolar(yAxis, (DataSet2D) dataSet, min, max);
-            return;
-        case X:
-        case X_ASYMMETRIC:
-        case XY:
-        case XY_ASYMMETRIC:
-        default:
+        } else {
             // dataSet may not be non-DataSetError at this stage
             final DataSetError ds = (DataSetError) dataSet;
             computeFullPolar(yAxis, ds, min, max);
-            return;
         }
     }
 
@@ -461,53 +450,47 @@ class CachedDataPoints {
             System.arraycopy(xValues, indexMin, xValues, 0, actualDataCount);
             System.arraycopy(yValues, indexMin, yValues, 0, actualDataCount);
             System.arraycopy(selected, indexMin, selected, 0, actualDataCount);
-            switch (errorType) {
-            case NO_ERROR: // no error attached
-                break;
-            case Y: // only symmetric errors around y
-            case Y_ASYMMETRIC: // asymmetric errors around y
-                System.arraycopy(errorYNeg, indexMin, errorYNeg, 0, actualDataCount);
-                System.arraycopy(errorYPos, indexMin, errorYPos, 0, actualDataCount);
-                break;
-            case XY: // symmetric errors around x and y
-            case X: // only symmetric errors around x
-            case X_ASYMMETRIC: // asymmetric errors around x
-            default:
+            if (errorType[DIM_X] != ErrorType.NO_ERROR) {
+                // XY: // symmetric errors around x and y
+                // X: // only symmetric errors around x
+                // X_ASYMMETRIC: // asymmetric errors around x
                 System.arraycopy(errorXNeg, indexMin, errorXNeg, 0, actualDataCount);
                 System.arraycopy(errorXPos, indexMin, errorXPos, 0, actualDataCount);
                 System.arraycopy(errorYNeg, indexMin, errorYNeg, 0, actualDataCount);
                 System.arraycopy(errorYPos, indexMin, errorYPos, 0, actualDataCount);
-                break;
+            } else if (errorType[DIM_Y] != ErrorType.NO_ERROR) {
+                // Y: // only symmetric errors around y
+                // Y_ASYMMETRIC: // asymmetric errors around y
+                System.arraycopy(errorYNeg, indexMin, errorYNeg, 0, actualDataCount);
+                System.arraycopy(errorYPos, indexMin, errorYPos, 0, actualDataCount);
             }
 
             ProcessingProfiler.getTimeDiff(startTimeStamp, String.format("no data reduction (%d)", actualDataCount));
             return;
         }
-
-        switch (errorType) {
-        case NO_ERROR: // see comment above
-        case Y:
+        if (errorType[DIM_X] == ErrorType.NO_ERROR) {
             actualDataCount = cruncher.reducePoints(xValues, yValues, null, null, errorYPos, errorYNeg, styles,
                     selected, indexMin, indexMax);
-            minDataPointDistanceX();
-            break;
-        case X:
-        case XY:
-        default:
+        } else {
             actualDataCount = cruncher.reducePoints(xValues, yValues, errorXPos, errorXNeg, errorYPos, errorYNeg,
                     styles, selected, indexMin, indexMax);
-
-            minDataPointDistanceX();
-            break;
         }
+        minDataPointDistanceX();
     }
 
     protected void setErrorType(final DataSet dataSet, final ErrorStyle errorStyle) {
-
-        // compute screen coordinates of other points
+        errorType = new ErrorType[dataSet.getDimension()];
         if (dataSet instanceof DataSetError) {
             final DataSetError ds = (DataSetError) dataSet;
-            errorType = dataSet.lock().readLockGuardOptimistic(ds::getErrorType);
+            for (int dimIndex = 0; dimIndex < ds.getDimension(); dimIndex++) {
+                final int tmpIndex = dimIndex;
+                errorType[dimIndex] = dataSet.lock().readLockGuardOptimistic(() -> ds.getErrorType(tmpIndex));
+            }
+        } else if (errorStyle == ErrorStyle.NONE) {
+            // special case where users does not want error bars
+            for (int dimIndex = 0; dimIndex < dataSet.getDimension(); dimIndex++) {
+                errorType[dimIndex] = ErrorType.NO_ERROR;
+            }
         } else {
             // fall-back for standard DataSet
 
@@ -518,12 +501,9 @@ class CachedDataPoints {
             // (e.g. due to local transients that are being suppressed) are
             // nevertheless being computed and shown even if individual data
             // points have no error
-            errorType = ErrorType.Y;
-        }
-
-        // special case where users does not want error bars
-        if (errorStyle == ErrorStyle.NONE) {
-            errorType = ErrorType.NO_ERROR;
+            for (int dimIndex = 0; dimIndex < dataSet.getDimension(); dimIndex++) {
+                errorType[dimIndex] = dimIndex == DIM_Y ? ErrorType.ASYMMETRIC : ErrorType.NO_ERROR;
+            }
         }
     }
 
