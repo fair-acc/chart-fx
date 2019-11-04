@@ -154,13 +154,18 @@ public abstract class AbstractSerialiser {
         final Class<?> fieldClass = root.getType();
         List<Class<?>> fieldGenericTypes = root.getActualTypeArguments();
 
-        if (isClassKnown(fieldClass, fieldGenericTypes)) {
+        if (isClassKnown(fieldClass, fieldGenericTypes) && recursionDepth != 0) {
             // serialise known class object
             Optional<FieldSerialiser> serialiser = findFieldSerialiserForKnownClassOrInterface(fieldClass,
                     root.getActualTypeArguments());
 
             if (serialiser.isPresent()) {
-                serialiser.get().getWriterFunction().exec(root.getMemberClassObject(obj), root);
+                Object classObj = root.getMemberClassObject(obj);
+                if (classObj == null) {
+                    throw new IllegalStateException("classObj of type '" + root.getTypeName() + "' for '"
+                            + root.getFieldNameRelative() + "' is null");
+                }
+                serialiser.get().getWriterFunction().exec(classObj, root);
                 return;
             }
 

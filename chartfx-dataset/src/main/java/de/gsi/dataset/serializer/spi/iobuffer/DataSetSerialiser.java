@@ -1,4 +1,4 @@
-package de.gsi.dataset.utils;
+package de.gsi.dataset.serializer.spi.iobuffer;
 
 import static de.gsi.dataset.DataSet.DIM_X;
 import static de.gsi.dataset.DataSet.DIM_Y;
@@ -22,6 +22,8 @@ import de.gsi.dataset.serializer.spi.BinarySerialiser;
 import de.gsi.dataset.serializer.spi.BinarySerialiser.HeaderInfo;
 import de.gsi.dataset.serializer.spi.FieldHeader;
 import de.gsi.dataset.spi.DataSetBuilder;
+import de.gsi.dataset.utils.AssertUtils;
+import de.gsi.dataset.utils.DataSetUtilsHelper;
 
 /**
  * Class to efficiently serialise and de-serialise DataSet objects into binary

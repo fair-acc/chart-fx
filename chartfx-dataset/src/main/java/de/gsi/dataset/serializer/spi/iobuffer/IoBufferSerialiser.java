@@ -4,6 +4,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Queue;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,7 +18,7 @@ import de.gsi.dataset.serializer.spi.ClassDescriptions;
 import de.gsi.dataset.serializer.spi.ClassFieldDescription;
 import de.gsi.dataset.serializer.spi.FieldHeader;
 import de.gsi.dataset.serializer.spi.FieldSerialiser;
-import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
+import de.gsi.dataset.serializer.spi.FieldSerialiser.FieldSerialiserFunction;
 
 /**
  * reference implementation for streaming arbitrary object to and from a
@@ -32,8 +34,8 @@ public class IoBufferSerialiser extends AbstractSerialiser {
      * Initialises new IoBuffer-backed object serialiser
      *
      * @param buffer the backing IoBuffer (see e.g.
-     *            {@link de.gsi.dataset.serializer.spi.FastByteBuffer} or
-     *            {@link de.gsi.dataset.serializer.spi.ByteBuffer}
+     *               {@link de.gsi.dataset.serializer.spi.FastByteBuffer} or
+     *               {@link de.gsi.dataset.serializer.spi.ByteBuffer}
      */
     public IoBufferSerialiser(final IoBuffer buffer) {
         super();
@@ -50,19 +52,29 @@ public class IoBufferSerialiser extends AbstractSerialiser {
         FieldBoxedValueHelper.register(this, ioBuffer);
         FieldBoxedValueArrayHelper.register(this, ioBuffer);
 
-        // List serialiser mapper to IoBuffer
-        addClassDefinition(new IoBufferFieldSerialiser(ioBuffer, //
-                (obj, field) -> { // reader
-                    final Collection<?> origCollection = (Collection<?>) field.getField().get(obj);
-                    origCollection.clear();
+        // Collection serialiser mapper to IoBuffer
+        final FieldSerialiserFunction collectionReader = (obj, field) -> {
+            final Collection<?> origCollection = (Collection<?>) field.getField().get(obj);
+            origCollection.clear();
 
-                    final Collection<?> setVal = BinarySerialiser.getCollection(ioBuffer, origCollection);
-                    field.getField().set(obj, setVal);
-                }, // writer
-                (obj, field) -> {
-                    final Collection<?> retVal = (Collection<?>) field.getField().get(obj);
-                    BinarySerialiser.put(ioBuffer, field.getFieldName(), retVal);
-                }, List.class));
+            final Collection<?> setVal = BinarySerialiser.getCollection(ioBuffer, origCollection);
+            field.getField().set(obj, setVal);
+        }; // reader
+        final FieldSerialiserFunction collectionWriter = (obj, field) -> {
+            final Collection<?> retVal = (Collection<?>) field.getField().get(obj);
+            BinarySerialiser.put(ioBuffer, field.getFieldName(), retVal); // writer
+        };
+        addClassDefinition(new IoBufferFieldSerialiser(ioBuffer, collectionReader, collectionWriter, Collection.class));
+        addClassDefinition(new IoBufferFieldSerialiser(ioBuffer, collectionReader, collectionWriter, List.class));
+        addClassDefinition(new IoBufferFieldSerialiser(ioBuffer, collectionReader, collectionWriter, Queue.class));
+        addClassDefinition(new IoBufferFieldSerialiser(ioBuffer, collectionReader, collectionWriter, Set.class));
+
+        // Enum serialiser mapper to IoBuffer
+        addClassDefinition(new IoBufferFieldSerialiser(ioBuffer, //
+                (obj, field) -> field.getField().set(obj,
+                        BinarySerialiser.getEnum(ioBuffer, (Enum) field.getField().get(obj))), // reader
+                (obj, field) -> BinarySerialiser.put(ioBuffer, field.getFieldName(), (Enum) field.getField().get(obj)), // writer
+                Enum.class));
 
         // Map serialiser mapper to IoBuffer
         addClassDefinition(new IoBufferFieldSerialiser(ioBuffer, //
@@ -78,25 +90,7 @@ public class IoBufferSerialiser extends AbstractSerialiser {
                     BinarySerialiser.put(ioBuffer, field.getFieldName(), retVal);
                 }, Map.class));
 
-        // Enum serialiser mapper to IoBuffer
-        addClassDefinition(new IoBufferFieldSerialiser(ioBuffer, //
-                (obj, field) -> field.getField().set(obj,
-                        BinarySerialiser.getEnum(ioBuffer, (Enum) field.getField().get(obj))), // reader
-                (obj, field) -> BinarySerialiser.put(ioBuffer, field.getFieldName(), (Enum) field.getField().get(obj)), // writer
-                Enum.class));
-
-        // DoubleArrayList serialiser mapper to IoBuffer
-        addClassDefinition(new IoBufferFieldSerialiser(ioBuffer, //
-                (obj, field) -> field.getField().set(obj,
-                        DoubleArrayList.wrap(BinarySerialiser.getDoubleArray(ioBuffer))), // reader
-                (obj, field) -> {
-                    final DoubleArrayList retVal = (DoubleArrayList) field.getField().get(obj);
-                    BinarySerialiser.put(ioBuffer, field.getFieldName(), retVal.elements(),
-                            new int[] { retVal.size() });
-                }, // writer
-                DoubleArrayList.class));
-
-        addClassDefinition(new FieldListAxisDescription(ioBuffer));
+        FieldDataSetHelper.register(this, ioBuffer);
 
         // addClassDefinition(null, StringHashMapList.class);
 
@@ -104,40 +98,6 @@ public class IoBufferSerialiser extends AbstractSerialiser {
             LOGGER.atDebug().addArgument(AbstractSerialiser.class.getName()).addArgument(knownClasses().size())
                     .log("{} added {} known classes");
         }
-    }
-
-    @Override
-    public Object deserialiseObject(final Object obj) throws IllegalAccessException {
-        if (obj == null) {
-            throw new IllegalArgumentException("obj must not be null (yet)");
-        }
-
-        final HeaderInfo bufferHeader = BinarySerialiser.checkHeaderInfo(ioBuffer);
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.atDebug().addArgument(bufferHeader).log("read header = {}");
-        }
-
-        // match field header with class field description
-        final ClassFieldDescription classFieldDescription = ClassDescriptions.get(obj.getClass());
-
-        final FieldHeader fieldRoot = BinarySerialiser.parseIoStream(ioBuffer);
-        // deserialise into object
-        deserialise(obj, fieldRoot, classFieldDescription, 0);
-
-        return obj;
-    }
-
-    public IoBuffer getBuffer() {
-        return ioBuffer;
-    }
-
-    @Override
-    public void serialiseObject(final Object obj) throws IllegalAccessException {
-        BinarySerialiser.putHeaderInfo(ioBuffer);
-
-        super.serialiseObject(obj);
-
-        BinarySerialiser.putEndMarker(ioBuffer, "OBJ_ROOT_END");
     }
 
     protected void deserialise(final Object obj, final FieldHeader fieldRoot,
@@ -148,8 +108,8 @@ public class IoBufferSerialiser extends AbstractSerialiser {
 
         // TODO: check expression below (should be correct -> allows for multiple
         // variables in hierarchy with same name)
-        //         firstMatchingField = classFieldDescription.getChildren().stream()
-        //         .filter(e -> e.getFieldName().equals(ioName)).findFirst().orElse(null);
+        // firstMatchingField = classFieldDescription.getChildren().stream()
+        // .filter(e -> e.getFieldName().equals(ioName)).findFirst().orElse(null);
         for (final ClassFieldDescription field : classFieldDescription) {
             if (field.getFieldName().equals(ioName)) {
                 firstMatchingField = field;
@@ -213,5 +173,39 @@ public class IoBufferSerialiser extends AbstractSerialiser {
         // should not happen/reach here (because of 'serialiser.isEmpty()' above)
         throw new IllegalStateException("should not happen -- cannot serialise field - "
                 + firstMatchingField.getFieldNameRelative() + " - class type = " + firstMatchingField.getTypeName());
+    }
+
+    @Override
+    public Object deserialiseObject(final Object obj) throws IllegalAccessException {
+        if (obj == null) {
+            throw new IllegalArgumentException("obj must not be null (yet)");
+        }
+
+        final HeaderInfo bufferHeader = BinarySerialiser.checkHeaderInfo(ioBuffer);
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.atDebug().addArgument(bufferHeader).log("read header = {}");
+        }
+
+        // match field header with class field description
+        final ClassFieldDescription classFieldDescription = ClassDescriptions.get(obj.getClass());
+
+        final FieldHeader fieldRoot = BinarySerialiser.parseIoStream(ioBuffer);
+        // deserialise into object
+        deserialise(obj, fieldRoot, classFieldDescription, 0);
+
+        return obj;
+    }
+
+    public IoBuffer getBuffer() {
+        return ioBuffer;
+    }
+
+    @Override
+    public void serialiseObject(final Object obj) throws IllegalAccessException {
+        BinarySerialiser.putHeaderInfo(ioBuffer);
+
+        super.serialiseObject(obj);
+
+        BinarySerialiser.putEndMarker(ioBuffer, "OBJ_ROOT_END");
     }
 }
