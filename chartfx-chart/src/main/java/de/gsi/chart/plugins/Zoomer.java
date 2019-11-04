@@ -75,7 +75,7 @@ import javafx.util.Duration;
 public class Zoomer extends ChartPlugin {
     private static final Logger LOGGER = LoggerFactory.getLogger(Zoomer.class);
     private static final String FONT_AWESOME = "FontAwesome";
-    private static final String ZOOMER_OMIT_AXIS = "OmitAxisZoom";
+    public static final String ZOOMER_OMIT_AXIS = "OmitAxisZoom";
     public static final String STYLE_CLASS_ZOOM_RECT = "chart-zoom-rect";
     private static final int ZOOM_RECT_MIN_SIZE = 5;
     private static final Duration DEFAULT_ZOOM_DURATION = Duration.millis(500);
@@ -312,7 +312,7 @@ public class Zoomer extends ChartPlugin {
      * @return {@code true} if axis is zoomable, {@code false} otherwise
      */
     public static boolean isOmitZoom(final Axis axis) {
-        return (axis instanceof Node) && ((Node) axis).getProperties().get(ZOOMER_OMIT_AXIS) != null;
+        return (axis instanceof Node) && ((Node) axis).getProperties().get(ZOOMER_OMIT_AXIS) == Boolean.TRUE;
     }
 
     /**
@@ -957,7 +957,7 @@ public class Zoomer extends ChartPlugin {
         panShiftY += oldMouseY - newMouseY;
 
         for (final Axis axis : chart.getAxes()) {
-            if (!(Axes.isNumericAxis(axis)) || axis.getSide() == null) {
+            if (!(Axes.isNumericAxis(axis)) || axis.getSide() == null || isOmitZoomInternal(axis)) {
                 continue;
             }
             final Axis nAxis = Axes.toNumericAxis(axis);
@@ -995,7 +995,7 @@ public class Zoomer extends ChartPlugin {
 
         ConcurrentHashMap<Axis, ZoomState> axisStateMap = new ConcurrentHashMap<>();
         for (final Axis axis : chart.getAxes()) {
-            if (!(Axes.isNumericAxis(axis)) || axis.getSide() == null) {
+            if (!(Axes.isNumericAxis(axis)) || axis.getSide() == null || isOmitZoomInternal(axis)) {
                 continue;
             }
             final Axis nAxis = Axes.toNumericAxis(axis);

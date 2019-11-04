@@ -8,10 +8,6 @@ import org.slf4j.LoggerFactory;
 
 import de.gsi.chart.XYChart;
 import de.gsi.chart.axes.spi.DefaultNumericAxis;
-import de.gsi.dataset.DataSet;
-import de.gsi.dataset.DataSet3D;
-import de.gsi.dataset.spi.AbstractDataSet3D;
-import de.gsi.dataset.utils.ProcessingProfiler;
 import de.gsi.chart.plugins.EditAxis;
 import de.gsi.chart.plugins.Panner;
 import de.gsi.chart.plugins.Zoomer;
@@ -19,6 +15,10 @@ import de.gsi.chart.renderer.ContourType;
 import de.gsi.chart.renderer.spi.ContourDataSetRenderer;
 import de.gsi.chart.renderer.spi.utils.ColorGradient;
 import de.gsi.chart.ui.geometry.Side;
+import de.gsi.dataset.DataSet;
+import de.gsi.dataset.DataSet3D;
+import de.gsi.dataset.spi.AbstractDataSet3D;
+import de.gsi.dataset.utils.ProcessingProfiler;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.control.ComboBox;
@@ -137,6 +137,7 @@ public class ContourChartSample extends Application {
         zAxis.setName("z Amplitude");
         zAxis.setAutoRanging(true);
         zAxis.setSide(Side.RIGHT);
+        zAxis.getProperties().put(Zoomer.ZOOMER_OMIT_AXIS, true);
 
         final XYChart chart = new XYChart(xAxis, yAxis);
         chart.getAxes().add(zAxis);

@@ -14,6 +14,7 @@ import de.gsi.chart.XYChart;
 import de.gsi.chart.axes.Axis;
 import de.gsi.chart.axes.AxisTransform;
 import de.gsi.chart.axes.spi.DefaultNumericAxis;
+import de.gsi.chart.plugins.Zoomer;
 import de.gsi.chart.renderer.ContourType;
 import de.gsi.chart.renderer.Renderer;
 import de.gsi.chart.renderer.spi.hexagon.Hexagon;
@@ -149,7 +150,7 @@ public class ContourDataSetRenderer extends AbstractDataSetManagement<ContourDat
                 // check for potentially reduced data range we are supposed to plot
 
                 final int indexMin = Math.max(0, dataSet.getIndex(DIM_X, xMin));
-                final int indexMax = Math.min(dataSet.getIndex(DIM_X, xMax), dataSet.getDataCount());
+                final int indexMax = Math.min(dataSet.getIndex(DIM_X, Math.min(xMax, dataSet.getDataCount(DIM_X))), dataSet.getDataCount());
 
                 // return if zero length data set
                 if (indexMax - indexMin <= 0) {
@@ -194,7 +195,6 @@ public class ContourDataSetRenderer extends AbstractDataSetManagement<ContourDat
     private void updateCachedVariables(final XYChart chart, final DataSet dataSet) {
         final Axis xAxis = chart.getXAxis();
         final Axis yAxis = chart.getYAxis();
-        final Axis zAxis = getZAxis();
         if (!(dataSet instanceof DataSet3D)) {
             return;
         }
@@ -1121,6 +1121,7 @@ public class ContourDataSetRenderer extends AbstractDataSetManagement<ContourDat
         }
         final boolean isHorizontal = zAxis.getSide().isHorizontal();
         Node zAxisNode = (Node) zAxis;
+        zAxisNode.getProperties().put(Zoomer.ZOOMER_OMIT_AXIS, Boolean.TRUE);
 
         if (isHorizontal) {
             zAxisNode.setLayoutX(50);
