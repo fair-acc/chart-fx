@@ -97,6 +97,8 @@ public class ColorGradient {
 
     public static final ColorGradient VIRIDIS = ColorGradient.viridis();
 
+    public static final ColorGradient DEFAULT = RAINBOW;
+
     private final List<Stop> stops;
 
     private final String name;

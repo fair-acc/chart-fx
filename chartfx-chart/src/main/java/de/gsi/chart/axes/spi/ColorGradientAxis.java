@@ -35,7 +35,7 @@ public class ColorGradientAxis extends DefaultNumericAxis {
     protected final Rectangle gradientRect = new Rectangle();
 
     private final ObjectProperty<ColorGradient> colorGradient = new SimpleObjectProperty<>(this, "colorGradient",
-            ColorGradient.RAINBOW);
+            ColorGradient.DEFAULT);
 
     private final DoubleProperty gradientWidth = new SimpleDoubleProperty(this, "gradientWidth", 20);
 
@@ -46,12 +46,13 @@ public class ColorGradientAxis extends DefaultNumericAxis {
      */
     public ColorGradientAxis(double lowerBound, double upperBound, double tickUnit) {
         super(lowerBound, upperBound, tickUnit);
+        this.colorGradient.addListener((p, o, n) -> this.forceRedraw());
+        this.getProperties().put(Zoomer.ZOOMER_OMIT_AXIS, Boolean.TRUE);
     }
 
     public ColorGradientAxis(double lowerBound, double upperBound, double tickUnit, ColorGradient colorGradient) {
-        super(lowerBound, upperBound, tickUnit);
+        this(lowerBound, upperBound, tickUnit);
         this.colorGradient.set(colorGradient);
-        this.getProperties().put(Zoomer.ZOOMER_OMIT_AXIS, Boolean.TRUE);
     }
 
     /**
@@ -59,13 +60,13 @@ public class ColorGradientAxis extends DefaultNumericAxis {
      */
     public ColorGradientAxis(String axisLabel) {
         super(axisLabel);
+        this.colorGradient.addListener((p, o, n) -> this.forceRedraw());
         this.getProperties().put(Zoomer.ZOOMER_OMIT_AXIS, Boolean.TRUE);
     }
 
     public ColorGradientAxis(String axisLabel, ColorGradient colorGradient) {
-        super(axisLabel);
+        this(axisLabel);
         this.colorGradient.set(colorGradient);
-        this.getProperties().put(Zoomer.ZOOMER_OMIT_AXIS, Boolean.TRUE);
     }
 
     /**
@@ -76,14 +77,14 @@ public class ColorGradientAxis extends DefaultNumericAxis {
      */
     public ColorGradientAxis(String axisLabel, double lowerBound, double upperBound, double tickUnit) {
         super(axisLabel, lowerBound, upperBound, tickUnit);
+        this.colorGradient.addListener((p, o, n) -> this.forceRedraw());
         this.getProperties().put(Zoomer.ZOOMER_OMIT_AXIS, Boolean.TRUE);
     }
 
     public ColorGradientAxis(String axisLabel, double lowerBound, double upperBound, double tickUnit,
             ColorGradient colorGradient) {
-        super(axisLabel, lowerBound, upperBound, tickUnit);
+        this(axisLabel, lowerBound, upperBound, tickUnit);
         this.colorGradient.set(colorGradient);
-        this.getProperties().put(Zoomer.ZOOMER_OMIT_AXIS, Boolean.TRUE);
     }
 
     /**
@@ -92,13 +93,13 @@ public class ColorGradientAxis extends DefaultNumericAxis {
      */
     public ColorGradientAxis(String axisLabel, String unit) {
         super(axisLabel, unit);
+        this.colorGradient.addListener((p, o, n) -> this.forceRedraw());
         this.getProperties().put(Zoomer.ZOOMER_OMIT_AXIS, Boolean.TRUE);
     }
 
     public ColorGradientAxis(String axisLabel, String unit, ColorGradient colorGradient) {
-        super(axisLabel, unit);
+        this(axisLabel, unit);
         this.colorGradient.set(colorGradient);
-        this.getProperties().put(Zoomer.ZOOMER_OMIT_AXIS, Boolean.TRUE);
     }
 
     @Override

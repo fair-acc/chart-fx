@@ -985,7 +985,7 @@ public class ContourDataSetRenderer extends AbstractDataSetManagement<ContourDat
     }
 
     private final ObjectProperty<ColorGradient> colorGradient = new SimpleObjectProperty<>(this, "colorGradient",
-            ColorGradient.RAINBOW);
+            ColorGradient.DEFAULT);
 
     /**
      * Color gradient (linear) used to encode data point values.
