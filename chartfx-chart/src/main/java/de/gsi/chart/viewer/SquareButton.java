@@ -9,14 +9,14 @@ import javafx.scene.layout.Region;
 public class SquareButton extends Button {
     private static final int MAX_BUTTON_SIZE = 30;
 
-    SquareButton(final String cssName) {
+    public SquareButton(final String cssName) {
         super();
         getStyleClass().setAll(cssName);
         setPadding(Insets.EMPTY);
         updateListener();
     }
 
-    SquareButton(final String text, Node graphic) {
+    public SquareButton(final String text, Node graphic) {
         super(text, graphic);
         setPadding(Insets.EMPTY);
         updateListener();
