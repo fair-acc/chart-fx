@@ -10,22 +10,17 @@
         <version>${revision}${sha1}${changelist}</version>
         <relativePath>..</relativePath>
     </parent>
-    <artifactId>chartfx-samples</artifactId>
-    <name>chartfx-samples</name>
+    <artifactId>chartfx-acc</artifactId>
+    <name>chartfx-acc</name>
 
     <description>
-		Small sample applications to showcase the features of the chart-fx library.
-	</description>
+        Collection of accelerator specific widget and functionalities that directly depend on chart-fx or which no other suitable place has been identified (yet).
+    </description>
 
     <dependencies>
         <dependency>
             <groupId>de.gsi.chart</groupId>
             <artifactId>chartfx-chart</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>de.gsi.chart</groupId>
-            <artifactId>chartfx-acc</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
