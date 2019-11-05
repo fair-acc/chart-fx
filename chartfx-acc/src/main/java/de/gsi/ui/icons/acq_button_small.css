@@ -27,7 +27,7 @@
     -fx-graphic: url("./icons/small_play2_p.gif");
 }
 
-.my-play-button: disabled {
+.my-play-button:disabled {
     -fx-graphic: url("./icons/small_play_d.gif");
 }
 
@@ -56,7 +56,7 @@
     -fx-graphic: url("./icons/small_pause2_p.gif");
 }
 
-.my-pause-button: disabled {
+.my-pause-button:disabled {
     -fx-graphic: url("./icons/small_pause_d.gif");
 }
 
@@ -86,7 +86,7 @@
     -fx-graphic: url("./icons/small_playstop2_p.gif");
 }
 
-.my-playstop-button: disabled {
+.my-playstop-button:disabled {
     -fx-graphic: url("./icons/small_playstop_d.gif");
 }
 
@@ -116,7 +116,7 @@
     -fx-graphic: url("./icons/small_stop_p.gif");
 }
 
-.my-stop-button: disabled {
+.my-stop-button:disabled {
     -fx-graphic: url("./icons/small_stop_d.gif");
 }
 

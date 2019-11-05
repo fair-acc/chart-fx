@@ -1,7 +1,6 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <!-- For help regarding the pom.xml please have a look at: http://maven.apache.org/pom.html -->
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -10,8 +9,9 @@
         <version>${revision}${sha1}${changelist}</version>
         <relativePath>..</relativePath>
     </parent>
+    <groupId>de.gsi.acc</groupId>
     <artifactId>chartfx-acc</artifactId>
-    <name>chartfx-acc</name>
+    <name>acc</name>
 
     <description>
         Collection of accelerator specific widget and functionalities that directly depend on chart-fx or which no other suitable place has been identified (yet).

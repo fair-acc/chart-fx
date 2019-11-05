@@ -18,7 +18,7 @@ public class AcquisitionButtonBar extends HBox {
     private final BooleanProperty playState = new SimpleBooleanProperty(this, "buttonPlayState", false);
     private final BooleanProperty stopState = new SimpleBooleanProperty(this, "buttonStopState", false);
 
-    public AcquisitionButtonBar() {
+    public AcquisitionButtonBar(final ButtonStyle setupButtonsAs) {
         super();
         this.getStylesheets().add(getClass().getResource("acq_button_small.css").toExternalForm());
 
@@ -124,5 +124,10 @@ public class AcquisitionButtonBar extends HBox {
 
     public BooleanProperty stopStateProperty() {
         return stopState;
+    }
+    
+    public enum ButtonStyle {
+        FEEDBACK,
+        DATA_ACQUISITION;
     }
 }
