@@ -14,10 +14,10 @@ import de.gsi.dataset.utils.trees.IndexedNavigableSet;
 import de.gsi.dataset.utils.trees.IndexedTreeSet;
 
 /**
- * DataSet implementation based on a sorted indexed TreeDataSets.
- * This tree data set is sorted (allows on-the-fly insertions), indexed (required for the chart interface to
- * efficiently parse through the data ('efficient' for most 'normal' implementations), limited queue (to limit the
- * maximum number samples stored), and limited in time (based on 'x').
+ * DataSet implementation based on a sorted indexed TreeDataSets. This tree data set is sorted (allows on-the-fly
+ * insertions), indexed (required for the chart interface to efficiently parse through the data ('efficient' for most
+ * 'normal' implementations), limited queue (to limit the maximum number samples stored), and limited in time (based on
+ * 'x').
  *
  * @see de.gsi.dataset.DataSet
  * @see de.gsi.dataset.DataSetError
@@ -32,11 +32,9 @@ public class LimitedIndexedTreeDataSet extends AbstractErrorDataSet<LimitedIndex
     /**
      * Creates a new instance of <code>DefaultDataSet</code>.
      *
-     * @param name
-     *            name of this DataSet.
+     * @param name name of this DataSet.
      * @param maxQueueSize maximum number of samples that is being stored
-     * @throws IllegalArgumentException
-     *             if <code>name</code> is <code>null</code>
+     * @throws IllegalArgumentException if <code>name</code> is <code>null</code>
      */
     public LimitedIndexedTreeDataSet(final String name, final int maxQueueSize) {
         super(name, 2, ErrorType.SYMMETRIC, ErrorType.SYMMETRIC);
@@ -46,12 +44,10 @@ public class LimitedIndexedTreeDataSet extends AbstractErrorDataSet<LimitedIndex
     /**
      * Creates a new instance of <code>DefaultDataSet</code>.
      *
-     * @param name
-     *            name of this DataSet.
+     * @param name name of this DataSet.
      * @param maxQueueSize maximum number of samples that is being stored
      * @param maxLength maximum length between first and last sample
-     * @throws IllegalArgumentException
-     *             if <code>name</code> is <code>null</code>
+     * @throws IllegalArgumentException if <code>name</code> is <code>null</code>
      */
     public LimitedIndexedTreeDataSet(final String name, final int maxQueueSize, final double maxLength) {
         super(name, 2, ErrorType.SYMMETRIC, ErrorType.SYMMETRIC);
@@ -169,18 +165,15 @@ public class LimitedIndexedTreeDataSet extends AbstractErrorDataSet<LimitedIndex
 
     @Override
     public double getErrorPositive(final int dimIndex, final int index) {
-    	return dimIndex == DIM_X ? data.get(index).getErrorX() : data.get(index).getErrorY();
+        return dimIndex == DIM_X ? data.get(index).getErrorX() : data.get(index).getErrorY();
     }
 
     /**
      * Sets the point with index to the new coordinate
      *
-     * @param index
-     *            the point index of the data set
-     * @param x
-     *            the horizontal coordinate of the data point
-     * @param y
-     *            the vertical coordinate of the data point
+     * @param index the point index of the data set
+     * @param x the horizontal coordinate of the data point
+     * @param y the vertical coordinate of the data point
      * @return itself
      */
     public LimitedIndexedTreeDataSet set(final int index, final double x, final double y) {
@@ -203,16 +196,11 @@ public class LimitedIndexedTreeDataSet extends AbstractErrorDataSet<LimitedIndex
     /**
      * Sets the point with index to the new coordinate
      *
-     * @param index
-     *            the point index of the data set
-     * @param x
-     *            the horizontal coordinate of the data point
-     * @param y
-     *            the vertical coordinate of the data point
-     * @param dx
-     *            the horizontal error
-     * @param dy
-     *            the vertical error N.B. assumes symmetric errors
+     * @param index the point index of the data set
+     * @param x the horizontal coordinate of the data point
+     * @param y the vertical coordinate of the data point
+     * @param dx the horizontal error
+     * @param dy the vertical error N.B. assumes symmetric errors
      * @return itself
      */
     public LimitedIndexedTreeDataSet set(final int index, final double x, final double y, final double dx,
@@ -235,16 +223,11 @@ public class LimitedIndexedTreeDataSet extends AbstractErrorDataSet<LimitedIndex
      * </p>
      * Note: The method copies values from specified double arrays.
      *
-     * @param xValues
-     *            X coordinates
-     * @param yValues
-     *            Y coordinates
-     * @param xErrors
-     *            symmetric X coordinate errors
-     * @param yErrors
-     *            symmetric Y coordinate errors
-     * @param count
-     *            number of points to be taken from specified arrays.
+     * @param xValues X coordinates
+     * @param yValues Y coordinates
+     * @param xErrors symmetric X coordinate errors
+     * @param yErrors symmetric Y coordinate errors
+     * @param count number of points to be taken from specified arrays.
      * @return itself
      */
     public LimitedIndexedTreeDataSet set(final double[] xValues, final double[] yValues, final double[] xErrors,
@@ -265,7 +248,7 @@ public class LimitedIndexedTreeDataSet extends AbstractErrorDataSet<LimitedIndex
                 getAxisDescription(0).add(x + dx);
                 getAxisDescription(1).add(y - dy);
                 getAxisDescription(1).add(y + dy);
-                data.add(new DataAtom(x, y, dx, dy));
+                data.add(new DataAtom(x, y, dx, dy)); // NOPMD need to initialise object in loop by design
             }
             expire();
         });
@@ -278,12 +261,9 @@ public class LimitedIndexedTreeDataSet extends AbstractErrorDataSet<LimitedIndex
      * </p>
      * Note: The method copies values from specified double arrays.
      *
-     * @param xValues
-     *            X coordinates
-     * @param yValues
-     *            Y coordinates
-     * @param count
-     *            number of points to be taken from specified arrays.
+     * @param xValues X coordinates
+     * @param yValues Y coordinates
+     * @param count number of points to be taken from specified arrays.
      * @return itself
      */
     public LimitedIndexedTreeDataSet set(final double[] xValues, final double[] yValues, final int count) {
@@ -296,14 +276,10 @@ public class LimitedIndexedTreeDataSet extends AbstractErrorDataSet<LimitedIndex
      * </p>
      * Note: The method copies values from specified double arrays.
      *
-     * @param xValues
-     *            X coordinates
-     * @param yValues
-     *            Y coordinates
-     * @param yErrors
-     *            symmetric Y coordinate errors
-     * @param count
-     *            number of points to be taken from specified arrays.
+     * @param xValues X coordinates
+     * @param yValues Y coordinates
+     * @param yErrors symmetric Y coordinate errors
+     * @param count number of points to be taken from specified arrays.
      * @return itself
      */
     public LimitedIndexedTreeDataSet set(final double[] xValues, final double[] yValues, final double[] yErrors,
@@ -317,10 +293,8 @@ public class LimitedIndexedTreeDataSet extends AbstractErrorDataSet<LimitedIndex
      * </p>
      * Note: The method copies values from specified double arrays.
      *
-     * @param xValues
-     *            X coordinates
-     * @param yValues
-     *            Y coordinates
+     * @param xValues X coordinates
+     * @param yValues Y coordinates
      * @return itself
      */
     public LimitedIndexedTreeDataSet set(final double[] xValues, final double[] yValues) {
@@ -329,10 +303,8 @@ public class LimitedIndexedTreeDataSet extends AbstractErrorDataSet<LimitedIndex
     }
 
     /**
-     * @param x
-     *            coordinate
-     * @param y
-     *            coordinate
+     * @param x coordinate
+     * @param y coordinate
      * @return itself
      */
     public LimitedIndexedTreeDataSet add(final double x, final double y) {
@@ -342,20 +314,17 @@ public class LimitedIndexedTreeDataSet extends AbstractErrorDataSet<LimitedIndex
     /**
      * add new point
      *
-     * @param x
-     *            horizontal point coordinate
-     * @param y
-     *            vertical point coordinate
-     * @param ex
-     *            horizontal point error
-     * @param ey
-     *            vertical point error Note: point errors are expected to be
-     *            positive
+     * @param x horizontal point coordinate
+     * @param y vertical point coordinate
+     * @param ex horizontal point error
+     * @param ey vertical point error Note: point errors are expected to be positive
+     * @param labelStyle optional varadic argument containing the data label (first index) and data style (second index)
      * @return itself
      */
-    public LimitedIndexedTreeDataSet add(final double x, final double y, final double ex, final double ey) {
+    public LimitedIndexedTreeDataSet add(final double x, final double y, final double ex, final double ey,
+            final String... labelStyle) {
         lock().writeLockGuard(() -> {
-            data.add(new DataAtom(x, y, ex, ey));
+            data.add(new DataAtom(x, y, ex, ey, labelStyle));
             getAxisDescription(0).add(x - ex);
             getAxisDescription(0).add(x + ex);
             getAxisDescription(1).add(y - ey);
@@ -367,14 +336,11 @@ public class LimitedIndexedTreeDataSet extends AbstractErrorDataSet<LimitedIndex
 
     /**
      * Adds data points to this data set. <br>
-     * If <code>usingXValues</code> flag is set to false - array with X
-     * coordinates is not taken into account (may be <code>null</code>)
-     * otherwise both arrays must be non-null and have the same length.
+     * If <code>usingXValues</code> flag is set to false - array with X coordinates is not taken into account (may be
+     * <code>null</code>) otherwise both arrays must be non-null and have the same length.
      *
-     * @param xValues
-     *            X coordinates
-     * @param yValues
-     *            Y coordinates
+     * @param xValues X coordinates
+     * @param yValues Y coordinates
      * @return itself
      */
     public LimitedIndexedTreeDataSet add(final double[] xValues, final double[] yValues) {
@@ -383,22 +349,18 @@ public class LimitedIndexedTreeDataSet extends AbstractErrorDataSet<LimitedIndex
 
     /**
      * Adds data points to this data set. <br>
-     * If <code>usingXValues</code> flag is set to false - array with X
-     * coordinates is not taken into account (may be <code>null</code>)
-     * otherwise both arrays must be non-null and have the same length.
+     * If <code>usingXValues</code> flag is set to false - array with X coordinates is not taken into account (may be
+     * <code>null</code>) otherwise both arrays must be non-null and have the same length.
      *
-     * @param xValues
-     *            X coordinates
-     * @param yValues
-     *            Y coordinates
-     * @param xErrors
-     *            horizontal errors
-     * @param yErrors
-     *            vertical errors
+     * @param xValues X coordinates
+     * @param yValues Y coordinates
+     * @param xErrors horizontal errors
+     * @param yErrors vertical errors
+     * @param labelStyle optional varadic argument containing the data label (first index) and data style (second index)
      * @return itself
      */
     public LimitedIndexedTreeDataSet add(final double[] xValues, final double[] yValues, final double[] xErrors,
-            final double[] yErrors) {
+            final double[] yErrors, final String... labelStyle) {
         AssertUtils.notNull("X data", xValues);
         AssertUtils.notNull("X error data", xErrors);
         AssertUtils.notNull("Y data", yValues);
@@ -409,7 +371,7 @@ public class LimitedIndexedTreeDataSet extends AbstractErrorDataSet<LimitedIndex
                 final double y = yValues[i];
                 final double ex = xErrors[i];
                 final double ey = yErrors[i];
-                data.add(new DataAtom(x, y, ex, ey));
+                data.add(new DataAtom(x, y, ex, ey, labelStyle)); // NOPMD need to initialise object in loop by design
 
                 getAxisDescription(0).add(x - ex);
                 getAxisDescription(0).add(x + ex);
@@ -449,8 +411,7 @@ public class LimitedIndexedTreeDataSet extends AbstractErrorDataSet<LimitedIndex
     /**
      * Removes from this data set points with specified indices.
      *
-     * @param indices
-     *            array of indicices to be removed
+     * @param indices array of indicices to be removed
      * @return itself
      */
     public LimitedIndexedTreeDataSet remove(final int[] indices) {
@@ -475,50 +436,40 @@ public class LimitedIndexedTreeDataSet extends AbstractErrorDataSet<LimitedIndex
     }
 
     /**
-     * adds a custom new data label for a point The label can be used as a
-     * category name if CategoryStepsDefinition is used or for annotations
-     * displayed for data points.
+     * adds a custom new data label for a point The label can be used as a category name if CategoryStepsDefinition is
+     * used or for annotations displayed for data points.
      *
-     * @param index
-     *            of the data point
-     * @param label
-     *            for the data point specified by the index
-     * @return the previously set label or <code>null</code> if no label has
-     *         been specified
+     * @param index of the data point
+     * @param label for the data point specified by the index
+     * @return the previously set label or <code>null</code> if no label has been specified
      */
     @Override
     public String addDataLabel(final int index, final String label) {
-        final String old = data.get(index).dataLabel;
-        data.get(index).dataLabel = label;
+        final String old = data.get(index).label;
+        data.get(index).label = label;
         return old;
     }
 
     /**
-     * remove a custom data label for a point The label can be used as a
-     * category name if CategoryStepsDefinition is used or for annotations
-     * displayed for data points.
+     * remove a custom data label for a point The label can be used as a category name if CategoryStepsDefinition is
+     * used or for annotations displayed for data points.
      *
-     * @param index
-     *            of the data point
-     * @return the previously set label or <code>null</code> if no label has
-     *         been specified
+     * @param index of the data point
+     * @return the previously set label or <code>null</code> if no label has been specified
      */
     @Override
     public String removeDataLabel(final int index) {
-        final String old = data.get(index).dataLabel;
-        data.get(index).dataLabel = "";
+        final String old = data.get(index).label;
+        data.get(index).label = "";
         return old;
     }
 
     /**
-     * Returns label of a data point specified by the index. The label can be
-     * used as a category name if CategoryStepsDefinition is used or for
-     * annotations displayed for data points.
+     * Returns label of a data point specified by the index. The label can be used as a category name if
+     * CategoryStepsDefinition is used or for annotations displayed for data points.
      *
-     * @param index
-     *            of the data label
-     * @return data point label specified by the index or <code>null</code> if
-     *         no label has been specified
+     * @param index of the data label
+     * @return data point label specified by the index or <code>null</code> if no label has been specified
      */
     @Override
     public String getDataLabel(final int index) {
@@ -531,44 +482,39 @@ public class LimitedIndexedTreeDataSet extends AbstractErrorDataSet<LimitedIndex
     }
 
     /**
-     * A string representation of the CSS style associated with this specific
-     * {@code DataSet} data point. @see #getStyle()
+     * A string representation of the CSS style associated with this specific {@code DataSet} data point. @see
+     * #getStyle()
      *
-     * @param index
-     *            the index of the specific data point
+     * @param index the index of the specific data point
      * @param style data point CSS-style
-     * @return the previously set style or <code>null</code> if no label has
-     *         been specified
+     * @return the previously set style or <code>null</code> if no label has been specified
      */
     @Override
     public String addDataStyle(final int index, final String style) {
-        final String old = data.get(index).dataStyle;
-        data.get(index).dataStyle = style;
+        final String old = data.get(index).style;
+        data.get(index).style = style;
         return old;
     }
 
     /**
-     * A string representation of the CSS style associated with this specific
-     * {@code DataSet} data point. @see #getStyle()
+     * A string representation of the CSS style associated with this specific {@code DataSet} data point. @see
+     * #getStyle()
      *
-     * @param index
-     *            the index of the specific data point
-     * @return the previously set style or <code>null</code> if no label has
-     *         been specified
+     * @param index the index of the specific data point
+     * @return the previously set style or <code>null</code> if no label has been specified
      */
     @Override
     public String removeStyle(final int index) {
-        final String old = data.get(index).dataStyle;
-        data.get(index).dataStyle = "";
+        final String old = data.get(index).style;
+        data.get(index).style = "";
         return old;
     }
 
     /**
-     * A string representation of the CSS style associated with this specific
-     * {@code DataSet} data point. @see #getStyle()
+     * A string representation of the CSS style associated with this specific {@code DataSet} data point. @see
+     * #getStyle()
      *
-     * @param index
-     *            the index of the specific data point
+     * @param index the index of the specific data point
      * @return user-specific data set style description (ie. may be set by user)
      */
     @Override
@@ -582,21 +528,30 @@ public class LimitedIndexedTreeDataSet extends AbstractErrorDataSet<LimitedIndex
         protected double ex; // positive error on X
         protected double ey; // positive error on Y
 
-        protected String dataLabel;
-        protected String dataStyle;
+        protected String label;
+        protected String style;
 
-        protected DataAtom(final double x, final double y, final double ex, final double ey) {
-            this.x = x;
-            this.y = y;
-            this.ex = ex;
-            this.ey = ey;
+        protected DataAtom(final double x, final double y, final double ex, final double ey, final String... args) {
+            this.set(x, y, ex, ey, args);
         }
 
-        protected void set(final double x, final double y, final double ex, final double ey) {
+        protected final void set(final double x, final double y, final double ex, final double ey,
+                final String... args) {
             this.x = x;
             this.y = y;
             this.ex = ex;
             this.ey = ey;
+            if (args == null) {
+                return;
+            }
+            for (int i = 0; i < args.length; i++) {
+                if (i == 0) {
+                    label = args[i];
+                }
+                if (i == 1) {
+                    style = args[i];
+                }
+            }
         }
 
         protected double getX() {
@@ -616,15 +571,18 @@ public class LimitedIndexedTreeDataSet extends AbstractErrorDataSet<LimitedIndex
         }
 
         protected String getLabel() {
-            return dataLabel;
+            return label;
         }
 
         protected String getStyle() {
-            return dataStyle;
+            return style;
         }
 
         @Override
         public int compareTo(final DataAtom other) {
+            if (this == other) {
+                return 0;
+            }
             if (this.getX() < other.getX()) {
                 return -1;
             } else if (this.getX() > other.getX()) {
