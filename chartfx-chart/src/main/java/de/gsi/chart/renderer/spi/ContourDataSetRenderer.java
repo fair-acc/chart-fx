@@ -195,6 +195,7 @@ public class ContourDataSetRenderer extends AbstractDataSetManagement<ContourDat
     private void updateCachedVariables(final XYChart chart, final DataSet dataSet) {
         final Axis xAxis = chart.getXAxis();
         final Axis yAxis = chart.getYAxis();
+        final Axis zAxis = getZAxis();
         if (!(dataSet instanceof DataSet3D)) {
             return;
         }
