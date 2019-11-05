@@ -24,7 +24,7 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>de.gsi.chart</groupId>
+            <groupId>de.gsi.acc</groupId>
             <artifactId>chartfx-acc</artifactId>
             <version>${project.version}</version>
         </dependency>
