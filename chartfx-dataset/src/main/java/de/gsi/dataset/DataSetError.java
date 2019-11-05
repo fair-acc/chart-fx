@@ -7,7 +7,7 @@ package de.gsi.dataset;
  * types that are not relevant. For plotting speed improvement this
  * simplification can/should be indicated via the
  *
- * @see #getErrorType() interface for error type details
+ * @see #getErrorType(int dimIndex) interface for error type details
  * @author rstein
  */
 public interface DataSetError extends DataSet {
