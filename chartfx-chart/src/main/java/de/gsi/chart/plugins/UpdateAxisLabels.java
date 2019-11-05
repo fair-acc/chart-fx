@@ -196,17 +196,16 @@ public class UpdateAxisLabels extends ChartPlugin {
         DataSet dataSet = (DataSet) axisDataUpdate.getSource();
         if (renderer == null) { // dataset was added to / is registered at chart
             if (getChart().getDatasets().size() == 1) {
-                if (dim == -1 || dim == 0) {
-                    getChart().getFirstAxis(Orientation.HORIZONTAL).setName(dataSet.getAxisDescription(0).getName());
-                    getChart().getFirstAxis(Orientation.HORIZONTAL).setUnit(dataSet.getAxisDescription(0).getUnit());
+
+                if (dim == -1 || dim == DataSet.DIM_X) {
+                    getChart().getFirstAxis(Orientation.HORIZONTAL).set(dataSet.getAxisDescription(DataSet.DIM_X));
                 }
-                if (dim == -1 || dim == 1) {
-                    getChart().getFirstAxis(Orientation.VERTICAL).setName(dataSet.getAxisDescription(1).getName());
-                    getChart().getFirstAxis(Orientation.VERTICAL).setUnit(dataSet.getAxisDescription(1).getUnit());
+                if (dim == -1 || dim == DataSet.DIM_Y) {
+                    getChart().getFirstAxis(Orientation.VERTICAL).set(dataSet.getAxisDescription(DataSet.DIM_Y));
                 }
-                if ((dim == -1 || dim == 2) && dataSet.getDimension() >= 3) {
+                if ((dim == -1 || dim == DataSet.DIM_Z) && dataSet.getDimension() >= 3) {
                     getChart().getAxes().stream().filter(axis -> axis instanceof ColorGradientAxis).findFirst()
-                            .ifPresent(axis -> axis.set(dataSet.getAxisDescription(2)));
+                            .ifPresent(axis -> axis.set(dataSet.getAxisDescription(DataSet.DIM_Y)));
                 }
             } else {
                 if (LOGGER.isWarnEnabled()) {
@@ -217,21 +216,23 @@ public class UpdateAxisLabels extends ChartPlugin {
         } else { // dataset was added to / is registered at renderer
             if (renderer.getDatasets().size() == 1) {
 
-                if (dim == -1 || dim == 0) {
+                if (dim == -1 || dim == DataSet.DIM_X) {
                     Optional<Axis> oldAxis = renderer.getAxes().stream().filter(axis -> axis.getSide().isHorizontal())
                             .findFirst();
-                    Axis newAxis = getAxis(dataSet.getAxisDescription(0), Orientation.HORIZONTAL, oldAxis, renderer);
-                    renderer.getAxes().remove(oldAxis.get());
-                    renderer.getAxes().add(newAxis);
+                    oldAxis.ifPresent(a -> a.set(dataSet.getAxisDescription(DataSet.DIM_X)));
+                    //                    Axis newAxis = getAxis(dataSet.getAxisDescription(0), Orientation.HORIZONTAL, oldAxis, renderer);
+                    //                    renderer.getAxes().remove(oldAxis.get());
+                    //                    renderer.getAxes().add(newAxis);
                 }
-                if (dim == -1 || dim == 1) {
+                if (dim == -1 || dim == DataSet.DIM_Y) {
                     Optional<Axis> oldAxis = renderer.getAxes().stream().filter(axis -> axis.getSide().isVertical())
                             .findFirst();
-                    Axis newAxis = getAxis(dataSet.getAxisDescription(1), Orientation.VERTICAL, oldAxis, renderer);
-                    renderer.getAxes().remove(oldAxis.get());
-                    renderer.getAxes().add(newAxis);
+                    oldAxis.ifPresent(a -> a.set(dataSet.getAxisDescription(DataSet.DIM_Y)));
+                    //                    Axis newAxis = getAxis(dataSet.getAxisDescription(1), Orientation.VERTICAL, oldAxis, renderer);
+                    //                    renderer.getAxes().remove(oldAxis.get());
+                    ////                    renderer.getAxes().add(newAxis);
                 }
-                if ((dim == -1 || dim == 2) && dataSet.getDimension() >= 3) {
+                if ((dim == -1 || dim == DataSet.DIM_Z) && dataSet.getDimension() >= 3) {
                     renderer.getAxes().stream().filter(axis -> axis instanceof ColorGradientAxis).findFirst()
                             .ifPresent(axis -> axis.set(dataSet.getAxisDescription(2)));
                 }
@@ -244,77 +245,77 @@ public class UpdateAxisLabels extends ChartPlugin {
         }
     }
 
+    // TODO: consider to remove
     // Helper function to manage Axis Instances
-    private Axis getAxis(AxisDescription axisDescription, Orientation orientation, Optional<Axis> oldAxis,
-            Renderer renderer) {
-        final String name = axisDescription.getName();
-        final String unit = axisDescription.getUnit();
-        final boolean oldAxisExists = oldAxis.isPresent();
-
-        // determine if correct axis already exists
-        Axis result = axisUsage.keySet().stream().filter(a -> a.getName().equals(name))
-                .filter(a -> a.getUnit().equals(unit))
-                .filter(a -> (orientation == Orientation.HORIZONTAL) ? a.getSide().isHorizontal()
-                        : a.getSide().isVertical())
-                .findFirst().orElseGet(() -> null);
-
-        // determine if old axis is exclusively used by this renderer
-        int nOldAxis = 0;
-        if (oldAxisExists && axisUsage.containsKey(oldAxis.get())) {
-            if (!axisUsage.get(oldAxis.get()).contains(renderer)) {
-                axisUsage.get(oldAxis.get()).add(renderer);
-            }
-            nOldAxis = axisUsage.get(oldAxis.get()).size();
-        }
-
-        // trivial case, current axis is the same as the old one
-        if (oldAxisExists && result == oldAxis.get()) {
-            return result;
-        }
-
-        // axis already exists
-        if (oldAxisExists && result != null) {
-            axisUsage.putIfAbsent(result, new HashSet<>());
-            axisUsage.get(result).add(renderer);
-            if (axisUsage.containsKey(oldAxis.get())) {
-                axisUsage.get(oldAxis.get()).remove(renderer);
-            }
-            getChart().getAxes().remove(oldAxis.get());
-            return result;
-        }
-        // rename current axis if exclusively used, else create new one
-        if (nOldAxis <= 1) {
-            result = oldAxis.get();
-            result.setName(name);
-            result.setUnit(unit);
-        } else {
-            if (oldAxis.get().getClass() == DefaultNumericAxis.class) {
-                result = new DefaultNumericAxis(name);
-            } else if (oldAxis.get().getClass() == CategoryAxis.class) {
-                result = new CategoryAxis(name);
-            } else if (oldAxis.get().getClass() == LinearAxis.class) {
-                result = new LinearAxis();
-                result.setName(name);
-            } else if (oldAxis.get().getClass() == LogarithmicAxis.class) {
-                result = new LogarithmicAxis();
-                result.setName(name);
-            } else if (oldAxis.get().getClass() == NumericAxis.class) {
-                result = new NumericAxis();
-                result.setName(name);
-            } else {
-                if (LOGGER.isWarnEnabled()) {
-                    LOGGER.atWarn().addArgument(oldAxis.get().getClass())
-                            .log("Unknown type of axis {}, using DefaultNumericAxis instead");
-                }
-                result = new DefaultNumericAxis(name);
-            }
-            result.setUnit(unit);
-            axisUsage.putIfAbsent(result, new HashSet<>());
-            axisUsage.get(result).add(renderer);
-            if (axisUsage.containsKey(oldAxis.get())) {
-                axisUsage.get(oldAxis.get()).remove(renderer);
-            }
-        }
-        return result;
-    }
+//    private Axis getAxis(AxisDescription axisDescription, Orientation orientation, Optional<Axis> oldAxis,
+//            Renderer renderer) {
+//        final String name = axisDescription.getName();
+//        final String unit = axisDescription.getUnit();
+//        final boolean oldAxisExists = oldAxis.isPresent();
+//
+//        // determine if correct axis already exists
+//        Axis result = axisUsage.keySet().stream().filter(a -> a.getName().equals(name))
+//                .filter(a -> a.getUnit().equals(unit)).filter(a -> (orientation == Orientation.HORIZONTAL)
+//                        ? a.getSide().isHorizontal() : a.getSide().isVertical())
+//                .findFirst().orElseGet(() -> null);
+//
+//        // determine if old axis is exclusively used by this renderer
+//        int nOldAxis = 0;
+//        if (oldAxisExists && axisUsage.containsKey(oldAxis.get())) {
+//            if (!axisUsage.get(oldAxis.get()).contains(renderer)) {
+//                axisUsage.get(oldAxis.get()).add(renderer);
+//            }
+//            nOldAxis = axisUsage.get(oldAxis.get()).size();
+//        }
+//
+//        // trivial case, current axis is the same as the old one
+//        if (result == oldAxis.get()) {
+//            return result;
+//        }
+//
+//        // axis already exists
+//        if (result != null) {
+//            axisUsage.putIfAbsent(result, new HashSet<>());
+//            axisUsage.get(result).add(renderer);
+//            if (axisUsage.containsKey(oldAxis.get())) {
+//                axisUsage.get(oldAxis.get()).remove(renderer);
+//            }
+//            getChart().getAxes().remove(oldAxis.get());
+//            return result;
+//        }
+//        // rename current axis if exclusively used, else create new one
+//        if (nOldAxis <= 1) {
+//            result = oldAxis.get();
+//            result.setName(name);
+//            result.setUnit(unit);
+//        } else {
+//            if (oldAxis.get().getClass() == DefaultNumericAxis.class) {
+//                result = new DefaultNumericAxis(name);
+//            } else if (oldAxis.get().getClass() == CategoryAxis.class) {
+//                result = new CategoryAxis(name);
+//            } else if (oldAxis.get().getClass() == LinearAxis.class) {
+//                result = new LinearAxis();
+//                result.setName(name);
+//            } else if (oldAxis.get().getClass() == LogarithmicAxis.class) {
+//                result = new LogarithmicAxis();
+//                result.setName(name);
+//            } else if (oldAxis.get().getClass() == NumericAxis.class) {
+//                result = new NumericAxis();
+//                result.setName(name);
+//            } else {
+//                if (LOGGER.isWarnEnabled()) {
+//                    LOGGER.atWarn().addArgument(oldAxis.get().getClass())
+//                            .log("Unknown type of axis {}, using DefaultNumericAxis instead");
+//                }
+//                result = new DefaultNumericAxis(name);
+//            }
+//            result.setUnit(unit);
+//            axisUsage.putIfAbsent(result, new HashSet<>());
+//            axisUsage.get(result).add(renderer);
+//            if (axisUsage.containsKey(oldAxis.get())) {
+//                axisUsage.get(oldAxis.get()).remove(renderer);
+//            }
+//        }
+//        return result;
+//    }
 }
