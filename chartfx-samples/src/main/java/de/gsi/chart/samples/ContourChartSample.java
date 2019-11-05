@@ -34,20 +34,14 @@ import javafx.stage.Stage;
  * @author rstein
  */
 public class ContourChartSample extends Application {
-	private static final Logger LOGGER = LoggerFactory.getLogger(ContourChartSample.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ContourChartSample.class);
 
     @Override
     public void start(final Stage stage) {
         stage.setTitle("ContourChart Sample");
-        final Slider nCountourLevelSlider = new Slider(0, 100, 20); // number of
-                                                                    // contour
-                                                                    // levels
-        final Slider nSegmentSlider = new Slider(0, 10000, 500); // number of
-                                                                 // contour
-                                                                 // segments
-        final Slider minHexSizeSlider = new Slider(1, 100, 5); // number of
-                                                               // contour
-                                                               // segments
+        final Slider nCountourLevelSlider = new Slider(0, 100, 20); // number of contour levels
+        final Slider nSegmentSlider = new Slider(0, 10000, 500); // number of contour segments
+        final Slider minHexSizeSlider = new Slider(1, 100, 5); // number of contour segments
         final XYChart chartPane1 = getChartPane(nCountourLevelSlider, nSegmentSlider, minHexSizeSlider,
                 ContourType.CONTOUR);
         final XYChart chartPane2 = getChartPane(nCountourLevelSlider, nSegmentSlider, minHexSizeSlider,
@@ -149,9 +143,7 @@ public class ContourChartSample extends Application {
         contourRenderer.getAxes().addAll(xAxis, yAxis, zAxis);
         chart.getRenderers().setAll(contourRenderer);
 
-        contourRenderer.setContourType(colorMap); // false: for color gradient
-                                                  // map, true: for true contour
-                                                  // map
+        contourRenderer.setContourType(colorMap); // false: for color gradient map, true: for true contour map
         contourRenderer.getDatasets().add(readImage());
         // contourRenderer.getDatasets().add(createTestData());
 
@@ -294,9 +286,9 @@ public class ContourChartSample extends Application {
             return new DefaultData("contour data", xValues, yValues, zValues);
 
         } catch (final Exception e) {
-        	if (LOGGER.isErrorEnabled()) {
-				LOGGER.atError().setCause(e).log("data read error");
-			}
+            if (LOGGER.isErrorEnabled()) {
+                LOGGER.atError().setCause(e).log("data read error");
+            }
         }
         return null;
     }
@@ -351,8 +343,7 @@ public class ContourChartSample extends Application {
     }
 
     /**
-     * @param args
-     *            the command line arguments
+     * @param args the command line arguments
      */
     public static void main(final String[] args) {
         ProcessingProfiler.setVerboseOutputState(true);
