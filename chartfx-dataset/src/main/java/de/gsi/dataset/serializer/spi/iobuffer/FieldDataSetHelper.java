@@ -58,6 +58,8 @@ public final class FieldDataSetHelper {
 
         // List<AxisDescription> serialiser mapper to IoBuffer
         serialiser.addClassDefinition(new FieldListAxisDescription(ioBuffer));
-
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.atDebug().addArgument(FieldDataSetHelper.class.getName()).log("initialised serialiser '{}'");
+        }
     }
 }
