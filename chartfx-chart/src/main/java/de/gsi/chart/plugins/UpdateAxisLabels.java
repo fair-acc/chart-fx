@@ -32,8 +32,8 @@ import javafx.collections.ObservableList;
 import javafx.geometry.Orientation;
 
 /**
- * This plugin updates the labels (name and unit) of all axes according to DataSet Metadata.
- * For now the axes are only updated, if there is exactly one DataSet in the each Renderer or the Chart.
+ * This plugin updates the labels (name and unit) of all axes according to DataSet Metadata. For now the axes are only
+ * updated, if there is exactly one DataSet in the each Renderer or the Chart.
  *
  * @author akrimm
  */
@@ -56,14 +56,18 @@ public class UpdateAxisLabels extends ChartPlugin {
                 for (Renderer renderer : renderersChange.getAddedSubList()) {
                     ListChangeListener<DataSet> dataSetsListener = (
                             ListChangeListener.Change<? extends DataSet> dataSetsChange) -> {
-                        LOGGER.atDebug().log("update listener -> dataSetsChanged ");
+                        if (LOGGER.isDebugEnabled()) {
+                            LOGGER.atDebug().log("update listener -> dataSetsChanged ");
+                        }
                         dataSetsChanged(dataSetsChange, renderer);
                     };
                     renderer.getDatasets().addListener(dataSetsListener);
                     renderersListeners.put(renderer, dataSetsListener);
-                    LOGGER.atDebug().addArgument(renderer.getClass().getSimpleName())
-                            .addArgument(rendererDataSetsListeners.size())
-                            .log("added listener for render {}, number of data set listeners {}");
+                    if (LOGGER.isDebugEnabled()) {
+                        LOGGER.atDebug().addArgument(renderer.getClass().getSimpleName())
+                                .addArgument(rendererDataSetsListeners.size())
+                                .log("added listener for render {}, number of data set listeners {}");
+                    }
                 }
             }
             if (renderersChange.wasRemoved()) {
@@ -76,7 +80,7 @@ public class UpdateAxisLabels extends ChartPlugin {
     };
 
     // called whenever the chart for the plugin is changed
-    private ChangeListener<? super Chart> chartChangeListener = (change, oldChart, newChart) -> {
+    private final ChangeListener<? super Chart> chartChangeListener = (change, oldChart, newChart) -> {
         if (oldChart != null) {
             teardownDataSetListeners(null, oldChart.getDatasets());
             oldChart.getRenderers().removeListener(renderersListener);
@@ -154,14 +158,16 @@ public class UpdateAxisLabels extends ChartPlugin {
             dataSetListeners = new HashMap<>();
             rendererDataSetsListeners.put(renderer, dataSetListeners);
         }
-        LOGGER.atDebug().log("dataSetsChanged added/removed - invoked");
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.atDebug().log("dataSetsChanged added/removed - invoked");
+        }
         while (change.next()) {
             if (change.wasAdded()) {
                 for (DataSet dataSet : change.getAddedSubList()) {
                     EventListener dataSetListener = update -> FXUtils.runFX(() -> dataSetChange(update, renderer));
                     dataSet.addListener(dataSetListener);
                     dataSetListeners.put(dataSet, dataSetListener);
-                    dataSetChange(new AxisChangeEvent(dataSet, -1), renderer);
+                    dataSetChange(new AxisChangeEvent(dataSet, -1), renderer); // NOPMD - normal in-loop instantiation
                 }
             }
             if (change.wasRemoved()) {
@@ -182,7 +188,9 @@ public class UpdateAxisLabels extends ChartPlugin {
                 || (update instanceof AxisRangeChangeEvent)) {
             return;
         }
-        LOGGER.atDebug().log("axis - dataSetChange for AxisChangeEvent");
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.atDebug().log("axis - dataSetChange for AxisChangeEvent");
+        }
         AxisChangeEvent axisDataUpdate = (AxisChangeEvent) update;
         int dim = axisDataUpdate.getDimension();
         DataSet dataSet = (DataSet) axisDataUpdate.getSource();
@@ -197,12 +205,14 @@ public class UpdateAxisLabels extends ChartPlugin {
                     getChart().getFirstAxis(Orientation.VERTICAL).setUnit(dataSet.getAxisDescription(1).getUnit());
                 }
                 if ((dim == -1 || dim == 2) && dataSet.getDimension() >= 3) {
-                    getChart().getAxes().stream().filter((axis) -> axis instanceof ColorGradientAxis).findFirst()
+                    getChart().getAxes().stream().filter(axis -> axis instanceof ColorGradientAxis).findFirst()
                             .ifPresent(axis -> axis.set(dataSet.getAxisDescription(2)));
                 }
             } else {
-                LOGGER.atWarn().log(
-                        "Applying axis information not possible for more than one DataSet added to chart. Please add datasets to separate Renderers");
+                if (LOGGER.isWarnEnabled()) {
+                    LOGGER.atWarn().log(
+                            "Applying axis information not possible for more than one DataSet added to chart. Please add datasets to separate Renderers");
+                }
             }
         } else { // dataset was added to / is registered at renderer
             if (renderer.getDatasets().size() == 1) {
@@ -222,12 +232,14 @@ public class UpdateAxisLabels extends ChartPlugin {
                     renderer.getAxes().add(newAxis);
                 }
                 if ((dim == -1 || dim == 2) && dataSet.getDimension() >= 3) {
-                    renderer.getAxes().stream().filter((axis) -> axis instanceof ColorGradientAxis).findFirst()
+                    renderer.getAxes().stream().filter(axis -> axis instanceof ColorGradientAxis).findFirst()
                             .ifPresent(axis -> axis.set(dataSet.getAxisDescription(2)));
                 }
             } else {
-                LOGGER.atWarn().log(
-                        "Applying axis information not possible for more than one DataSet added to renderer. Please add datasets to separate Renderers");
+                if (LOGGER.isWarnEnabled()) {
+                    LOGGER.atWarn().log(
+                            "Applying axis information not possible for more than one DataSet added to renderer. Please add datasets to separate Renderers");
+                }
             }
         }
     }
@@ -241,30 +253,32 @@ public class UpdateAxisLabels extends ChartPlugin {
 
         // determine if correct axis already exists
         Axis result = axisUsage.keySet().stream().filter(a -> a.getName().equals(name))
-                .filter(a -> a.getUnit().equals(unit)).filter(a -> (orientation == Orientation.HORIZONTAL)
-                        ? a.getSide().isHorizontal() : a.getSide().isVertical())
+                .filter(a -> a.getUnit().equals(unit))
+                .filter(a -> (orientation == Orientation.HORIZONTAL) ? a.getSide().isHorizontal()
+                        : a.getSide().isVertical())
                 .findFirst().orElseGet(() -> null);
 
         // determine if old axis is exclusively used by this renderer
         int nOldAxis = 0;
         if (oldAxisExists && axisUsage.containsKey(oldAxis.get())) {
-            if (!axisUsage.get(oldAxis.get()).contains(renderer))
+            if (!axisUsage.get(oldAxis.get()).contains(renderer)) {
                 axisUsage.get(oldAxis.get()).add(renderer);
+            }
             nOldAxis = axisUsage.get(oldAxis.get()).size();
         }
 
         // trivial case, current axis is the same as the old one
-        if (result == oldAxis.get()) {
+        if (oldAxisExists && result == oldAxis.get()) {
             return result;
         }
 
         // axis already exists
-        if (result != null) {
-            if (!axisUsage.containsKey(result))
-                axisUsage.put(result, new HashSet<>());
+        if (oldAxisExists && result != null) {
+            axisUsage.putIfAbsent(result, new HashSet<>());
             axisUsage.get(result).add(renderer);
-            if (axisUsage.containsKey(oldAxis.get()))
+            if (axisUsage.containsKey(oldAxis.get())) {
                 axisUsage.get(oldAxis.get()).remove(renderer);
+            }
             getChart().getAxes().remove(oldAxis.get());
             return result;
         }
@@ -288,16 +302,18 @@ public class UpdateAxisLabels extends ChartPlugin {
                 result = new NumericAxis();
                 result.setName(name);
             } else {
-                LOGGER.atWarn().addArgument(oldAxis.get().getClass())
-                        .log("Unknown type of axis {}, using DefaultNumericAxis instead");
+                if (LOGGER.isWarnEnabled()) {
+                    LOGGER.atWarn().addArgument(oldAxis.get().getClass())
+                            .log("Unknown type of axis {}, using DefaultNumericAxis instead");
+                }
                 result = new DefaultNumericAxis(name);
             }
             result.setUnit(unit);
-            if (!axisUsage.containsKey(result))
-                axisUsage.put(result, new HashSet<>());
+            axisUsage.putIfAbsent(result, new HashSet<>());
             axisUsage.get(result).add(renderer);
-            if (axisUsage.containsKey(oldAxis.get()))
+            if (axisUsage.containsKey(oldAxis.get())) {
                 axisUsage.get(oldAxis.get()).remove(renderer);
+            }
         }
         return result;
     }
