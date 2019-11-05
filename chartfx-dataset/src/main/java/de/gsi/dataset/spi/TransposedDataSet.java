@@ -1,6 +1,7 @@
 package de.gsi.dataset.spi;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -30,25 +31,10 @@ public class TransposedDataSet implements DataSet {
     protected int[] permutation;
     private boolean transposed;
 
-    public static TransposedDataSet transpose(DataSet dataSet) {
-        return TransposedDataSet.transpose(dataSet, true);
-    }
-
-    public static TransposedDataSet transpose(DataSet dataSet, boolean transpose) {
-        if (dataSet instanceof DataSet3D) {
-            return new TransposedDataSet3D((DataSet3D) dataSet, transpose);
-        }
-        return new TransposedDataSet(dataSet, transpose);
-    }
-
-    public static TransposedDataSet permute(DataSet dataSet, int[] permutation) {
-        if (dataSet instanceof DataSet3D) {
-            return new TransposedDataSet3D((DataSet3D) dataSet, permutation);
-        }
-        return new TransposedDataSet(dataSet, permutation);
-    }
-
     private TransposedDataSet(final DataSet dataSet, final boolean transposed) {
+        if (dataSet == null) {
+            throw new IllegalArgumentException("DataSet is null");
+        }
         this.dataSet = dataSet;
         permutation = new int[dataSet.getDimension()];
         this.transposed = transposed;
@@ -62,64 +48,31 @@ public class TransposedDataSet implements DataSet {
     }
 
     private TransposedDataSet(final DataSet dataSet, final int[] permutation) {
-        if (dataSet.getDimension() < permutation.length) {
-            throw new IllegalArgumentException("DataSet does not have enough dimensions for permuation");
+        if (dataSet == null) {
+            throw new IllegalArgumentException("DataSet is null");
         }
-        for (int i = 0; i < permutation.length; i++) {
-            if (permutation[i] > dataSet.getDimension()) {
-                throw new IndexOutOfBoundsException("Permutation contains dimIndex not present in DataSet");
+        if (permutation == null) {
+            throw new IllegalArgumentException("permutation is null");
+        }
+        if (permutation.length < dataSet.getDimension()) {
+            throw new IllegalArgumentException("insufficient permutation.lenght='" + permutation.length
+                    + "' w.r.t. DataSet dimensions (" + dataSet.getDimension() + ")");
+        }
+        for (int i = 0; i < dataSet.getDimension(); i++) {
+            if (permutation[i] >= dataSet.getDimension()) {
+                throw new IndexOutOfBoundsException("permutation[" + i + "] contains dimIndex='" + permutation[i]
+                        + "' outside DataSet dimension (" + dataSet.getDimension() + ")");
             }
         }
+
         this.dataSet = dataSet;
-        this.permutation = permutation;
+        this.permutation = Arrays.copyOf(permutation, this.dataSet.getDimension());
         this.transposed = false;
-    }
-
-    public synchronized void setTransposed(final boolean transposed) {
-        if (this.transposed != transposed) {
-            final int tmp = this.permutation[1];
-            this.permutation[1] = this.permutation[0];
-            this.permutation[0] = tmp;
-            this.transposed = transposed;
-            dataSet.invokeListener(new UpdateEvent(dataSet, "(Un)transposed"));
-        }
-    }
-
-    public boolean isTransposed() {
-        return transposed;
-    }
-
-    public void setPermutation(final int[] permutation) {
-        if (dataSet.getDimension() < permutation.length) {
-            throw new IllegalArgumentException("DataSet does not have enough dimensions for permuation");
-        }
-        for (int i = 0; i < permutation.length; i++) {
-            if (permutation[i] > dataSet.getDimension()) {
-                throw new IndexOutOfBoundsException("Permutation contains dimIndex not present in DataSet");
-            }
-        }
-        this.permutation = permutation;
-        if (transposed) {
-            final int tmp = this.permutation[1];
-            this.permutation[1] = this.permutation[0];
-            this.permutation[0] = tmp;
-        }
-        dataSet.invokeListener(new UpdateEvent(dataSet, "Permutation changed"));
-        LOGGER.atInfo().addArgument(this.permutation).log("applied permutation: {}");
-    }
-
-    public int[] getPermutation() {
-        return permutation;
     }
 
     @Override
     public AtomicBoolean autoNotification() {
         return dataSet.autoNotification();
-    }
-
-    @Override
-    public List<EventListener> updateEventListener() {
-        return dataSet.updateEventListener();
     }
 
     @Override
@@ -161,6 +114,10 @@ public class TransposedDataSet implements DataSet {
         return dataSet.getName();
     }
 
+    public int[] getPermutation() {
+        return Arrays.copyOf(permutation, permutation.length);
+    }
+
     @Override
     public String getStyle() {
         return dataSet.getStyle();
@@ -174,21 +131,6 @@ public class TransposedDataSet implements DataSet {
     @Override
     public double getValue(int dimIndex, double x) {
         return dataSet.getValue(permutation[dimIndex], x);
-    }
-
-    @Override
-    public <D extends DataSet> DataSetLock<D> lock() {
-        return dataSet.lock();
-    }
-
-    @Override
-    public DataSet recomputeLimits(int dimension) {
-        return dataSet.recomputeLimits(permutation[dimension]);
-    }
-
-    @Override
-    public DataSet setStyle(String style) {
-        return dataSet.setStyle(style);
     }
 
     /**
@@ -205,6 +147,87 @@ public class TransposedDataSet implements DataSet {
         return retValues;
     }
 
+    public boolean isTransposed() {
+        return transposed;
+    }
+
+    @Override
+    public <D extends DataSet> DataSetLock<D> lock() {
+        return dataSet.lock();
+    }
+
+    @Override
+    public DataSet recomputeLimits(int dimension) {
+        return dataSet.recomputeLimits(permutation[dimension]);
+    }
+
+    public void setPermutation(final int[] permutation) {
+        if (permutation == null) {
+            throw new IllegalArgumentException("permutation is null");
+        }
+        this.lock().writeLockGuard(() -> {
+            if (permutation.length < dataSet.getDimension()) {
+                throw new IllegalArgumentException("insufficient permutation.lenght='" + permutation.length
+                        + "' w.r.t. DataSet dimensions (" + dataSet.getDimension() + ")");
+            }
+            for (int i = 0; i < dataSet.getDimension(); i++) {
+                if (permutation[i] >= dataSet.getDimension()) {
+                    throw new IndexOutOfBoundsException("permutation[" + i + "] contains dimIndex='" + permutation[i]
+                            + "' outside DataSet dimension (" + dataSet.getDimension() + ")");
+                }
+            }
+
+            this.permutation = Arrays.copyOf(permutation, dataSet.getDimension());
+            if (transposed) {
+                final int tmp = this.permutation[1];
+                this.permutation[1] = this.permutation[0];
+                this.permutation[0] = tmp;
+            }
+            dataSet.invokeListener(new UpdateEvent(dataSet, "Permutation changed"));
+            LOGGER.atInfo().addArgument(this.permutation).log("applied permutation: {}");
+        });
+    }
+
+    @Override
+    public DataSet setStyle(String style) {
+        return this.lock().writeLockGuard(() -> dataSet.setStyle(style));
+    }
+
+    public void setTransposed(final boolean transposed) {
+        this.lock().writeLockGuard(() -> {
+            if (this.transposed != transposed) {
+                final int tmp = this.permutation[1];
+                this.permutation[1] = this.permutation[0];
+                this.permutation[0] = tmp;
+                this.transposed = transposed;
+                dataSet.invokeListener(new UpdateEvent(dataSet, "(Un)transposed"));
+            }
+        });
+    }
+
+    @Override
+    public List<EventListener> updateEventListener() {
+        return dataSet.updateEventListener();
+    }
+
+    public static TransposedDataSet permute(DataSet dataSet, int[] permutation) {
+        if (dataSet instanceof DataSet3D) {
+            return new TransposedDataSet3D((DataSet3D) dataSet, permutation);
+        }
+        return new TransposedDataSet(dataSet, permutation);
+    }
+
+    public static TransposedDataSet transpose(DataSet dataSet) {
+        return TransposedDataSet.transpose(dataSet, true);
+    }
+
+    public static TransposedDataSet transpose(DataSet dataSet, boolean transpose) {
+        if (dataSet instanceof DataSet3D) {
+            return new TransposedDataSet3D((DataSet3D) dataSet, transpose);
+        }
+        return new TransposedDataSet(dataSet, transpose);
+    }
+
     /**
      * TODO: allow permutations to change number of grid dimensions, while enforcing contract, that all
      * grid axes must come before data axes.
@@ -219,8 +242,8 @@ public class TransposedDataSet implements DataSet {
         }
 
         /**
-         * @param dataSet
-         * @param permutation
+         * @param dataSet the source DataSet to initialise from
+         * @param permutation the initial permutation index
          */
         private TransposedDataSet3D(final DataSet3D dataSet, final int[] permutation) {
             super(dataSet, permutation);
@@ -229,15 +252,6 @@ public class TransposedDataSet implements DataSet {
                         "cannot swap first x or y dimension with z dimension (index missmatch)");
             }
 
-        }
-
-        @Override
-        public void setPermutation(final int[] permutation) {
-            if (permutation[0] > 1 || permutation[1] > 1 || permutation[2] != 2) {
-                throw new IllegalArgumentException(
-                        "cannot swap first x or y dimension with z dimension (index missmatch)");
-            }
-            super.setPermutation(permutation);
         }
 
         @Override
@@ -273,6 +287,17 @@ public class TransposedDataSet implements DataSet {
         public double getZ(int xIndex, int yIndex) {
             return ((DataSet3D) dataSet).getZ(permutation[0] == 0 ? xIndex : yIndex,
                     permutation[1] == 0 ? xIndex : yIndex);
+        }
+
+        @Override
+        public void setPermutation(final int[] permutation) {
+            this.lock().writeLockGuard(() -> {
+                if (permutation[0] > 1 || permutation[1] > 1 || permutation[2] != 2) {
+                    throw new IllegalArgumentException(
+                            "cannot swap first x or y dimension with z dimension (index missmatch)");
+                }
+                super.setPermutation(permutation);
+            });
         }
     }
 }
