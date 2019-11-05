@@ -11,8 +11,8 @@ import org.slf4j.LoggerFactory;
 import de.gsi.dataset.AxisDescription;
 import de.gsi.dataset.DataSet;
 import de.gsi.dataset.DataSet3D;
+import de.gsi.dataset.event.AxisChangeEvent;
 import de.gsi.dataset.event.EventListener;
-import de.gsi.dataset.event.UpdateEvent;
 import de.gsi.dataset.locks.DataSetLock;
 
 /**
@@ -83,11 +83,16 @@ public class TransposedDataSet implements DataSet {
     @Override
     public List<AxisDescription> getAxisDescriptions() {
         ArrayList<AxisDescription> result = new ArrayList<>();
-        for (int i = 0; i < permutation.length; i++) {
-            result.add(dataSet.getAxisDescription(permutation[i]));
+        for (int dimIndex : permutation) {
+            result.add(dataSet.getAxisDescription(dimIndex));
         }
         return result;
     }
+
+//    @Override
+//    public AxisDescription getAxisDescription(final int dimIndex) {
+//        return dataSet.getAxisDescription(permutation[dimIndex]);
+//    }
 
     @Override
     public int getDataCount(int dimIndex) {
@@ -183,9 +188,11 @@ public class TransposedDataSet implements DataSet {
                 this.permutation[1] = this.permutation[0];
                 this.permutation[0] = tmp;
             }
-            dataSet.invokeListener(new UpdateEvent(dataSet, "Permutation changed"));
-            LOGGER.atInfo().addArgument(this.permutation).log("applied permutation: {}");
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.atDebug().addArgument(this.permutation).log("applied permutation: {}");
+            }
         });
+        this.invokeListener(new AxisChangeEvent(this, "Permutation changed", -1));
     }
 
     @Override
@@ -200,9 +207,9 @@ public class TransposedDataSet implements DataSet {
                 this.permutation[1] = this.permutation[0];
                 this.permutation[0] = tmp;
                 this.transposed = transposed;
-                dataSet.invokeListener(new UpdateEvent(dataSet, "(Un)transposed"));
             }
         });
+        this.invokeListener(new AxisChangeEvent(this, "(Un)transposed", -1));
     }
 
     @Override

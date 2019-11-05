@@ -136,7 +136,7 @@ public class TransposedDataSetSample extends Application {
         return chart;
     }
 
-    public DataSet test8Function(final double xMin, final double xMax, final double yMin, final double yMax,
+    public static DataSet test8Function(final double xMin, final double xMax, final double yMin, final double yMax,
             final double omega, final double pert, final int nSamples) {
         final double[] x = new double[nSamples];
         final double[] y = new double[nSamples];
