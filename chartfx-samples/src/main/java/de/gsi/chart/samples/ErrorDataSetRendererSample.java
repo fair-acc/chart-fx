@@ -80,6 +80,8 @@ public class ErrorDataSetRendererSample extends Application {
         // errorRenderer.setErrorType(ErrorStyle.ESTYLE_NONE);
         errorRenderer.setDrawMarker(true);
         errorRenderer.setMarkerSize(1.0);
+//        errorRenderer.setPointReduction(false);
+//        errorRenderer.setAllowNaNs(true);
 
         // example how to set the specifc color of the dataset
         // dataSetNoError.setStyle("strokeColor=cyan; fillColor=darkgreen");
@@ -173,7 +175,7 @@ public class ErrorDataSetRendererSample extends Application {
             for (int n = 0; n < ErrorDataSetRendererSample.N_SAMPLES; n++) {
                 final double x = n;
                 oldY += RandomDataGenerator.random() - 0.5;
-                final double y = oldY + (n == 500000 ? 500.0 : 0);
+                final double y = oldY + (n == 500000 ? 500.0 : 0) /*+ ((x>1e4 && x <2e4) ? Double.NaN: 0.0)*/;
                 final double ex = 0.1;
                 final double ey = 10;
                 dataSet.add(x, y, ex, ey);

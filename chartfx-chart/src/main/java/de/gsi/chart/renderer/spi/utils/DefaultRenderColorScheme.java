@@ -52,8 +52,7 @@ public final class DefaultRenderColorScheme {
             Color.valueOf("#8a7967"), // brown
             Color.valueOf("#6a737b") // darkbrown/black
     ));
-    
-    
+
     public static final ObservableList<Color> DELL = FXCollections.observableList(Arrays.asList( //
             Color.valueOf("#0085c3"), //
             Color.valueOf("#7ab800"), //
@@ -64,7 +63,7 @@ public final class DefaultRenderColorScheme {
             Color.valueOf("#009bbb"), //
             Color.valueOf("#444444") //
     ));
-    
+
     public static final ObservableList<Color> EQUIDISTANT = FXCollections.observableList(Arrays.asList( //
             Color.valueOf("#003f5c"), //
             Color.valueOf("#2f4b7c"), //
@@ -226,9 +225,11 @@ public final class DefaultRenderColorScheme {
         final Map<String, List<String>> map = splitQuery(defaultStyle);
 
         final Color lineColor = StyleParser.getColorPropertyValue(defaultStyle, XYChartCss.DATASET_STROKE_COLOR);
+        final double[] lineDash = StyleParser.getStrokeDashPropertyValue(defaultStyle, XYChartCss.STROKE_DASH_PATTERN);
         final Color rawColor = lineColor == null ? getStrokeColor(dsIndex) : lineColor;
 
         gc.setLineWidth(defaultStrokeLineWidthProperty().get());
+        gc.setLineDashes(lineDash);
         gc.setFill(getFill(dsIndex));
         gc.setStroke(getColorModifier(map, rawColor));
     }
