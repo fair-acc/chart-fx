@@ -19,6 +19,7 @@ import de.gsi.dataset.spi.DataSetBuilder;
 import de.gsi.dataset.spi.DoubleDataSet3D;
 import de.gsi.dataset.spi.TransposedDataSet;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
@@ -121,6 +122,7 @@ public class TransposedDataSetSample extends Application {
         primaryStage.setTitle(getClass().getSimpleName());
         primaryStage.setScene(scene);
         primaryStage.show();
+        primaryStage.setOnCloseRequest(evt -> Platform.exit());
     }
 
     private static XYChart getDefaultChart() {
