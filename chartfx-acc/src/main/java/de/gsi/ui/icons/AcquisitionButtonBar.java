@@ -16,7 +16,7 @@ public class AcquisitionButtonBar extends HBox {
     private final BooleanProperty pauseState = new SimpleBooleanProperty(this, "buttonPauseState", false);
     private final BooleanProperty playStopState = new SimpleBooleanProperty(this, "buttonPlayStopState", false);
     private final BooleanProperty playState = new SimpleBooleanProperty(this, "buttonPlayState", false);
-    private final BooleanProperty stopState = new SimpleBooleanProperty(this, "buttonStopState", false);
+    private final BooleanProperty stopState = new SimpleBooleanProperty(this, "buttonStopState", true);
 
     public AcquisitionButtonBar(final ButtonStyle setupButtonsAs) {
         super();
@@ -59,6 +59,7 @@ public class AcquisitionButtonBar extends HBox {
         playStopState.addListener((ch, o, n) -> {
             buttonPause.setDisable(n);
             buttonPlay.setDisable(n);
+            stopState.set(!n);
 
             buttonStop.pseudoClassStateChanged(PSEUDO_CLASS_ACTIVATED, n);
             buttonPlayStop.pseudoClassStateChanged(PSEUDO_CLASS_ACTIVATED, n);
@@ -68,6 +69,7 @@ public class AcquisitionButtonBar extends HBox {
         playState.addListener((ch, o, n) -> {
             buttonPause.setDisable(n);
             buttonPlayStop.setDisable(n);
+            stopState.set(!n);
 
             buttonStop.pseudoClassStateChanged(PSEUDO_CLASS_ACTIVATED, n);
             buttonPlay.pseudoClassStateChanged(PSEUDO_CLASS_ACTIVATED, n);
@@ -75,20 +77,21 @@ public class AcquisitionButtonBar extends HBox {
 
         buttonStop.setOnAction(evt -> stopState.set(!stopState.get()));
         stopState.addListener((ch, o, n) -> {
+            if (n) {
+                pauseState.set(false);
+                playStopState.set(false);
+                playState.set(false);
 
-            pauseState.set(false);
-            playStopState.set(false);
-            playState.set(false);
+                buttonPause.pseudoClassStateChanged(PSEUDO_CLASS_ACTIVATED, false);
+                buttonPlayStop.pseudoClassStateChanged(PSEUDO_CLASS_ACTIVATED, false);
+                buttonPlay.pseudoClassStateChanged(PSEUDO_CLASS_ACTIVATED, false);
+                buttonStop.pseudoClassStateChanged(PSEUDO_CLASS_ACTIVATED, false);
 
-            buttonPause.pseudoClassStateChanged(PSEUDO_CLASS_ACTIVATED, false);
-            buttonPlayStop.pseudoClassStateChanged(PSEUDO_CLASS_ACTIVATED, false);
-            buttonPlay.pseudoClassStateChanged(PSEUDO_CLASS_ACTIVATED, false);
-            buttonStop.pseudoClassStateChanged(PSEUDO_CLASS_ACTIVATED, false);
-
-            buttonPause.setDisable(false);
-            buttonPlayStop.setDisable(false);
-            buttonPlay.setDisable(false);
-            buttonStop.setDisable(false);
+                buttonPause.setDisable(false);
+                buttonPlayStop.setDisable(false);
+                buttonPlay.setDisable(false);
+                buttonStop.setDisable(false);
+            }
         });
 
         this.getChildren().addAll(buttonPlayStop, buttonPlay, buttonStop);
@@ -125,7 +128,7 @@ public class AcquisitionButtonBar extends HBox {
     public BooleanProperty stopStateProperty() {
         return stopState;
     }
-    
+
     public enum ButtonStyle {
         FEEDBACK,
         DATA_ACQUISITION;
