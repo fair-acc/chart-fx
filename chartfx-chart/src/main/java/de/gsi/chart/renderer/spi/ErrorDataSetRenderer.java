@@ -35,9 +35,8 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.FillRule;
 
 /**
- * Renders data points with error bars and/or error surfaces
- * It can be used e.g. to render horizontal and/or vertical errors
- * additional functionality:
+ * Renders data points with error bars and/or error surfaces It can be used e.g. to render horizontal and/or vertical
+ * errors additional functionality:
  * <ul>
  * <li>bar-type plot
  * <li>polar-axis plotting
@@ -46,7 +45,8 @@ import javafx.scene.shape.FillRule;
  *
  * @author R.J. Steinhagen
  */
-@SuppressWarnings({ "PMD.LongVariable", "PMD.ShortVariable" }) // short variables like x, y are perfectly fine, as well as descriptive long ones
+@SuppressWarnings({ "PMD.LongVariable", "PMD.ShortVariable" }) // short variables like x, y are perfectly fine, as well
+                                                               // as descriptive long ones
 public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<ErrorDataSetRenderer>
         implements Renderer {
     private static final Logger LOGGER = LoggerFactory.getLogger(ErrorDataSetRenderer.class);
@@ -145,8 +145,7 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
                 int indexMax; /* indexMax is excluded in the drawing */
                 if (isAssumeSortedData()) {
                     indexMin = Math.max(0, dataSet.getIndex(DataSet.DIM_X, xMin));
-                    indexMax = Math.min(dataSet.getIndex(DataSet.DIM_X, xMax) + 1,
-                            dataSet.getDataCount(DataSet.DIM_X));
+                    indexMax = Math.min(dataSet.getIndex(DataSet.DIM_X, xMax) + 1, dataSet.getDataCount(DataSet.DIM_X));
                 } else {
                     indexMin = 0;
                     indexMax = dataSet.getDataCount(DataSet.DIM_X);
@@ -158,7 +157,7 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
                 }
 
                 if (indexMax - indexMin <= 0) {
-                    // zero length/range data set -> nothing to be drawn                
+                    // zero length/range data set -> nothing to be drawn
                     return Optional.empty();
                 }
 
@@ -173,10 +172,11 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
                 final boolean isPolarPlot = ((XYChart) chart).isPolarPlot();
                 if (isParallelImplementation()) {
                     localCachedPoints.computeScreenCoordinatesInParallel(xAxis, yAxis, dataSet,
-                            dataSetOffset + ldataSetIndex, indexMin, indexMax, getErrorType(), isPolarPlot);
+                            dataSetOffset + ldataSetIndex, indexMin, indexMax, getErrorType(), isPolarPlot,
+                            isallowNaNs());
                 } else {
                     localCachedPoints.computeScreenCoordinates(xAxis, yAxis, dataSet, dataSetOffset + ldataSetIndex,
-                            indexMin, indexMax, getErrorType(), isPolarPlot);
+                            indexMin, indexMax, getErrorType(), isPolarPlot, isallowNaNs());
                 }
                 stopStamp = ProcessingProfiler.getTimeDiff(stopStamp, "computeScreenCoordinates()");
                 return Optional.of(localCachedPoints);
@@ -208,7 +208,11 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
             drawErrorBars(gc, localCachedPoints);
             break;
         case ERRORSURFACE:
-            drawErrorSurface(gc, localCachedPoints);
+            if (this.isallowNaNs()) {
+                drawErrorSurfaceNaNCompatible(gc, localCachedPoints);
+            } else {
+                drawErrorSurface(gc, localCachedPoints);
+            }
             break;
         case ERRORCOMBO:
             if (localCachedPoints.getMinXDistance() >= getDashSize() * 2) {
@@ -326,28 +330,47 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
                 localCachedPoints.dataSetIndex + localCachedPoints.dataSetStyleIndex);
         DefaultRenderColorScheme.setGraphicsContextAttributes(gc, localCachedPoints.defaultStyle);
 
-        // gc.strokePolyline(localCachedPoints.xValues,
-        // localCachedPoints.yValues, localCachedPoints.actualDataCount);
+        if (localCachedPoints.allowForNaNs) {
+            gc.beginPath();
+            gc.moveTo(localCachedPoints.xValues[0], localCachedPoints.yValues[0]);
+            boolean lastIsFinite = true;
+            double xLastValid = 0.0;
+            double yLastValid = 0.0;
+            for (int i = 0; i < localCachedPoints.actualDataCount; i++) {
+                double x0 = localCachedPoints.xValues[i];
+                double y0 = localCachedPoints.yValues[i];
+                if (Double.isFinite(x0) && Double.isFinite(y0)) {
+                    if (!lastIsFinite) {
+                        gc.moveTo(x0, y0);
+                        lastIsFinite = true;
+                        continue;
+                    }
+                    gc.lineTo(x0, y0);
+                    xLastValid = x0;
+                    yLastValid = y0;
+                    lastIsFinite = true;
+                } else {
+                    lastIsFinite = false;
+                }
+            }
+            gc.moveTo(xLastValid, yLastValid);
+            gc.closePath();
+            gc.stroke();
+        } else {
+            if (gc.getLineDashes() != null) {
+                gc.strokePolyline(localCachedPoints.xValues, localCachedPoints.yValues,
+                        localCachedPoints.actualDataCount);
+            } else {
+                for (int i = 0; i < localCachedPoints.actualDataCount - 1; i++) {
+                    final double x1 = localCachedPoints.xValues[i];
+                    final double x2 = localCachedPoints.xValues[i + 1];
+                    final double y1 = localCachedPoints.yValues[i];
+                    final double y2 = localCachedPoints.yValues[i + 1];
 
-        for (int i = 0; i < localCachedPoints.actualDataCount - 1; i++) {
-            final double x1 = localCachedPoints.xValues[i];
-            final double x2 = localCachedPoints.xValues[i + 1];
-            final double y1 = localCachedPoints.yValues[i];
-            final double y2 = localCachedPoints.yValues[i + 1];
-            gc.strokeLine(x1, y1, x2, y2);
+                    gc.strokeLine(x1, y1, x2, y2);
+                }
+            }
         }
-
-        // gc.beginPath();
-        // for (int i=0; i< localCachedPoints.actualDataCount -1; i++) {
-        // double x0 = localCachedPoints.xValues[i];
-        // double x1 = localCachedPoints.xValues[i+1];
-        // double y0 = localCachedPoints.yValues[i];
-        // double y1 = localCachedPoints.yValues[i+1];
-        // gc.moveTo(x0, y0);
-        // gc.lineTo(x1, y1);
-        // }
-        // gc.closePath();
-        // gc.stroke();
 
         gc.restore();
     }
@@ -839,6 +862,80 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
         Cache.release(Y_VALUES_SURFACE, yValuesSurface);
 
         ProcessingProfiler.getTimeDiff(start);
+    }
+
+    /**
+     * NaN compatible algorithm
+     * 
+     * @param gc the graphics context from the Canvas parent
+     * @param localCachedPoints reference to local cached data point object
+     */
+    protected void drawErrorSurfaceNaNCompatible(final GraphicsContext gc, final CachedDataPoints localCachedPoints) {
+        final long start = ProcessingProfiler.getTimeStamp();
+
+        DefaultRenderColorScheme.setFillScheme(gc, localCachedPoints.defaultStyle,
+                localCachedPoints.dataSetIndex + localCachedPoints.dataSetStyleIndex);
+
+        gc.setFillRule(FillRule.EVEN_ODD);
+
+        final int nDataCount = localCachedPoints.actualDataCount;
+        final int nPolygoneEdges = 2 * nDataCount;
+        final double[] xValuesSurface = Cache.getCachedDoubleArray(X_VALUES_SURFACE, nPolygoneEdges);
+        final double[] yValuesSurface = Cache.getCachedDoubleArray(Y_VALUES_SURFACE, nPolygoneEdges);
+
+        final int xend = nPolygoneEdges - 1;
+        int count = 0;
+        for (int i = 0; i < nDataCount; i++) {
+            final double x = localCachedPoints.xValues[i];
+            final double yen = localCachedPoints.errorYNeg[i];
+            final double yep = localCachedPoints.errorYPos[i];
+
+            if (Double.isFinite(yen) && Double.isFinite(yep)) {
+                xValuesSurface[count] = x;
+                yValuesSurface[count] = yep;
+                xValuesSurface[xend - count] = x;
+                yValuesSurface[xend - count] = yen;
+                count++;
+            } else if (count != 0) {
+
+                // remove zeros and plot intermediate segment
+                compactVector(xValuesSurface, count);
+                compactVector(yValuesSurface, count);
+
+                gc.fillPolygon(xValuesSurface, yValuesSurface, 2 * count);
+                count = 0;
+            }
+        }
+        if (count > 0) {
+            // swap y coordinates at mid-point
+            // remove zeros and plot intermediate segment
+            compactVector(xValuesSurface, count);
+            compactVector(yValuesSurface, count);
+            if (count > 4) {
+                final double yTmp = yValuesSurface[count - 1];
+                yValuesSurface[count - 1] = yValuesSurface[count];
+                yValuesSurface[count] = yTmp;
+            }
+
+            gc.fillPolygon(xValuesSurface, yValuesSurface, 2 * count);
+        }
+
+        drawPolyLine(gc, localCachedPoints);
+        drawBars(gc, localCachedPoints);
+        drawMarker(gc, localCachedPoints);
+        drawBubbles(gc, localCachedPoints);
+
+        Cache.release(X_VALUES_SURFACE, xValuesSurface);
+        Cache.release(Y_VALUES_SURFACE, yValuesSurface);
+
+        ProcessingProfiler.getTimeDiff(start);
+    }
+
+    private static void compactVector(final double[] input, final int stopIndex) {
+        final int xend = input.length - 0;
+        for (int i = 0; i < stopIndex; i++) {
+            input[stopIndex + i] = input[xend - stopIndex + i];
+        }
     }
 
     /**

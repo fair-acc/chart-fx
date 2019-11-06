@@ -31,7 +31,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 public class ChartPerformanceBenchmark extends AbstractTestApplication {
-	private static final Logger LOGGER = LoggerFactory.getLogger(ChartPerformanceBenchmark.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ChartPerformanceBenchmark.class);
     private static final int WAIT_PERIOD = 60 * 1000;
 
     private final int[] testSamples25Hz = { 1000, 10, 10, 10, 20, 30, 40, 50, 60, 70, 80, 90, // 10->100
@@ -68,10 +68,46 @@ public class ChartPerformanceBenchmark extends AbstractTestApplication {
 
     private Thread timer;
 
-    public ChartPerformanceBenchmark() {}
+    public ChartPerformanceBenchmark() {
+    }
+
+    public XYChart getResultChart() {
+        final DefaultNumericAxis xAxis = new DefaultNumericAxis();
+        xAxis.setName("number of samples");
+        xAxis.setForceZeroInRange(true);
+        // xAxis.setLogAxis(true);
+        xAxis.setAutoRangeRounding(true);
+        xAxis.setAutoRangePadding(0.05);
+        xAxis.setLogAxis(true);
+        final DefaultNumericAxis yAxis1 = new DefaultNumericAxis();
+        yAxis1.setName("CPU load");
+        yAxis1.setUnit("%");
+        yAxis1.setForceZeroInRange(true);
+        yAxis1.setAutoRangeRounding(true);
+        yAxis1.setAutoRangeRounding(true);
+        yAxis1.setAutoRangePadding(0.05);
+
+        final XYChart chart = new XYChart(xAxis, yAxis1);
+        chart.legendVisibleProperty().set(true);
+        chart.setAnimated(false);
+        chart.setLegendVisible(true);
+        xAxis.setAutoRangeRounding(false);
+        final ErrorDataSetRenderer renderer = (ErrorDataSetRenderer) chart.getRenderers().get(0);
+        renderer.getDatasets().addAll(results1, results2, results3);
+        chart.setPrefHeight(800);
+        chart.getPlugins().add(new Zoomer());
+        chart.getPlugins().add(new Panner());
+        chart.getPlugins().add(new EditAxis());
+        chart.getPlugins().add(new TableViewer());
+        return chart;
+    }
 
     @Override
-    protected void initChart() {}
+    public void start(final Stage stage) {
+        stage.setTitle(this.getClass().getSimpleName());
+        init(stage);
+        stage.show();
+    }
 
     private void init(final Stage primaryStage) {
 
@@ -81,7 +117,7 @@ public class ChartPerformanceBenchmark extends AbstractTestApplication {
         root.setCenter(chart2);
 
         subStage.setScene(scene);
-        subStage.setOnCloseRequest(evt -> System.exit(0));
+        subStage.setOnCloseRequest(evt -> Platform.exit());
         subStage.show();
 
         final HBox headerBar = getHeaderBar(scene);
@@ -92,31 +128,7 @@ public class ChartPerformanceBenchmark extends AbstractTestApplication {
         headerBar.getChildren().add(5, switchToTestCase("C", chartTestCase3, chart3));
 
         primaryStage.setScene(new Scene(new VBox(headerBar, getResultChart()), 800, 600));
-        primaryStage.setOnCloseRequest(evt -> System.exit(0));
-    }
-
-    @Override
-    public void start(final Stage stage) {
-        stage.setTitle(this.getClass().getSimpleName());
-        init(stage);
-        stage.show();
-    }
-
-    private Button switchToTestCase(final String label, final ChartTestCase testCase, final Node chart) {
-        final Button button = new Button(label);
-        button.setPadding(new Insets(5, 5, 5, 5));
-        button.setMaxHeight(Double.MAX_VALUE);
-        VBox.setVgrow(button, Priority.ALWAYS);
-        button.setOnAction(evt -> {
-            if (timer != null) {
-                timer.interrupt();
-                timer = null;
-            }
-            test = testCase;
-            root.setCenter(chart);
-            test.updateDataSet();
-        });
-        return button;
+        primaryStage.setOnCloseRequest(evt -> Platform.exit());
     }
 
     private Button startTestButton(final String label, final int[] nSamplesTest, final long updatePeriod) {
@@ -173,9 +185,9 @@ public class ChartPerformanceBenchmark extends AbstractTestApplication {
                                 }
                             }
                         } catch (final InterruptedException e) {
-							if (LOGGER.isErrorEnabled()) {
-								LOGGER.atError().setCause(e).log("InterruptedException");
-							}
+                            if (LOGGER.isErrorEnabled()) {
+                                LOGGER.atError().setCause(e).log("InterruptedException");
+                            }
                         }
                     }
                 };
@@ -187,6 +199,31 @@ public class ChartPerformanceBenchmark extends AbstractTestApplication {
             }
         });
         return startTimer;
+    }
+
+    private Button switchToTestCase(final String label, final ChartTestCase testCase, final Node chart) {
+        final Button button = new Button(label);
+        button.setPadding(new Insets(5, 5, 5, 5));
+        button.setMaxHeight(Double.MAX_VALUE);
+        VBox.setVgrow(button, Priority.ALWAYS);
+        button.setOnAction(evt -> {
+            if (timer != null) {
+                timer.interrupt();
+                timer = null;
+            }
+            test = testCase;
+            root.setCenter(chart);
+            test.updateDataSet();
+        });
+        return button;
+    }
+
+    @Override
+    protected void initChart() {
+    }
+
+    public static void main(final String[] args) {
+        launch(args);
     }
 
     private class TestThread extends Thread {
@@ -212,13 +249,20 @@ public class ChartPerformanceBenchmark extends AbstractTestApplication {
         }
 
         @Override
+        public void interrupt() {
+            timer.cancel();
+            super.interrupt();
+        }
+
+        @Override
         public void run() {
             Platform.runLater(() -> {
                 testCase.setNumberOfSamples(nSamples);
                 root.setCenter(chart);
                 try {
                     Thread.sleep(1000);
-                } catch (final InterruptedException e) {}
+                } catch (final InterruptedException e) {
+                }
             });
 
             timer = new Timer();
@@ -268,60 +312,19 @@ public class ChartPerformanceBenchmark extends AbstractTestApplication {
                 try {
                     Thread.sleep(1000);
                 } catch (final InterruptedException e) {
-                	if (LOGGER.isErrorEnabled()) {
-                    	LOGGER.atError().setCause(e).log("InterruptedException");
+                    if (LOGGER.isErrorEnabled()) {
+                        LOGGER.atError().setCause(e).log("InterruptedException");
                     }
                 }
             }
             try {
                 Thread.sleep(1000);
             } catch (final InterruptedException e) {
-            	if (LOGGER.isErrorEnabled()) {
-                	LOGGER.atError().setCause(e).log("InterruptedException");
+                if (LOGGER.isErrorEnabled()) {
+                    LOGGER.atError().setCause(e).log("InterruptedException");
                 }
             }
         }
-
-        @Override
-        public void interrupt() {
-            timer.cancel();
-            super.interrupt();
-        }
-    }
-
-    public XYChart getResultChart() {
-        final DefaultNumericAxis xAxis = new DefaultNumericAxis();
-        xAxis.setName("number of samples");
-        xAxis.setForceZeroInRange(true);
-        // xAxis.setLogAxis(true);
-        xAxis.setAutoRangeRounding(true);
-        xAxis.setAutoRangePadding(0.05);
-        xAxis.setLogAxis(true);
-        final DefaultNumericAxis yAxis1 = new DefaultNumericAxis();
-        yAxis1.setName("CPU load");
-        yAxis1.setUnit("%");
-        yAxis1.setForceZeroInRange(true);
-        yAxis1.setAutoRangeRounding(true);
-        yAxis1.setAutoRangeRounding(true);
-        yAxis1.setAutoRangePadding(0.05);
-
-        final XYChart chart = new XYChart(xAxis, yAxis1);
-        chart.legendVisibleProperty().set(true);
-        chart.setAnimated(false);
-        chart.setLegendVisible(true);
-        xAxis.setAutoRangeRounding(false);
-        final ErrorDataSetRenderer renderer = (ErrorDataSetRenderer) chart.getRenderers().get(0);
-        renderer.getDatasets().addAll(results1, results2, results3);
-        chart.setPrefHeight(800);
-        chart.getPlugins().add(new Zoomer());
-        chart.getPlugins().add(new Panner());
-        chart.getPlugins().add(new EditAxis());
-        chart.getPlugins().add(new TableViewer());
-        return chart;
-    }
-
-    public static void main(final String[] args) {
-        launch(args);
     }
 
 }

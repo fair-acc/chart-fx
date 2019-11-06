@@ -2,12 +2,12 @@ package de.gsi.chart.samples.legacy.utils;
 
 import de.gsi.chart.XYChart;
 import de.gsi.chart.axes.spi.DefaultNumericAxis;
-import de.gsi.dataset.spi.DoubleDataSet;
-import de.gsi.dataset.testdata.spi.SineFunction;
 import de.gsi.chart.renderer.ErrorStyle;
 import de.gsi.chart.renderer.datareduction.DefaultDataReducer;
 import de.gsi.chart.renderer.spi.ErrorDataSetRenderer;
 import de.gsi.chart.renderer.spi.ReducingLineRenderer;
+import de.gsi.dataset.spi.DoubleDataSet;
+import de.gsi.dataset.testdata.spi.SineFunction;
 import javafx.application.Application;
 import javafx.scene.Node;
 
@@ -18,11 +18,6 @@ public class TestChart extends AbstractTestApplication implements ChartTestCase 
     protected final DefaultNumericAxis yAxis = new DefaultNumericAxis("irrelevant y-axis test case 2", -1.1, +1.1, 0.2);
     protected SineFunction testFunction = new SineFunction("test", nSamples, true);
     protected final DoubleDataSet dataSet = new DoubleDataSet("test");
-
-    @Override
-    public void initChart() {
-        test = new TestChart(false);
-    }
 
     public TestChart() {
         this(false);
@@ -69,6 +64,7 @@ public class TestChart extends AbstractTestApplication implements ChartTestCase 
             renderer.setParallelImplementation(false);
             DefaultDataReducer reducer = (DefaultDataReducer) renderer.getRendererDataReducer();
             reducer.setMinPointPixelDistance(5);
+            renderer.setAllowNaNs(false);
         }
 
         setNumberOfSamples(MAX_DATA_POINTS_1K);
@@ -82,12 +78,8 @@ public class TestChart extends AbstractTestApplication implements ChartTestCase 
     }
 
     @Override
-    public void updateDataSet() {
-        // final double[] x = testFunction.generateX(nSamples);
-        // final double[] y = testFunction.generateY(nSamples);
-        //
-        // dataSet.set(x, y);
-        testFunction.update();
+    public void initChart() {
+        test = new TestChart(false);
     }
 
     @Override
@@ -99,6 +91,15 @@ public class TestChart extends AbstractTestApplication implements ChartTestCase 
         xAxis.setMin(0);
         xAxis.setTickUnit(nSamples / 20.0);
         updateDataSet();
+    }
+
+    @Override
+    public void updateDataSet() {
+        // final double[] x = testFunction.generateX(nSamples);
+        // final double[] y = testFunction.generateY(nSamples);
+        //
+        // dataSet.set(x, y);
+        testFunction.update();
     }
 
     public static void main(final String[] args) {
