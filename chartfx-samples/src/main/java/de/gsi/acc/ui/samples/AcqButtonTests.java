@@ -40,7 +40,7 @@ public class AcqButtonTests extends Application {
         CheckBox cb2 = new CheckBox("Property 'Play' selected");
         cb2.selectedProperty().bindBidirectional(acqBar.playStateProperty());
         CheckBox cb3 = new CheckBox("Property 'Stop' selected");
-        cb3.selectedProperty().bindBidirectional(acqBar.playStopStateProperty());
+        cb3.selectedProperty().bindBidirectional(acqBar.stopStateProperty());
 
         root.getChildren().addAll(new HBox(cbDisabled), acqBar, new VBox(cb1, cb2, cb3));
 
