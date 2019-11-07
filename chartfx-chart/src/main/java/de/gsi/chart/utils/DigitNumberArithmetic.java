@@ -7,60 +7,9 @@ import de.gsi.dataset.spi.utils.Tuple;
 
 public final class DigitNumberArithmetic {
 
-    private DigitNumberArithmetic() {
-    }
-
-    public static int getNumberOfSignificantDigits(final double val) {
-        BigDecimal input = BigDecimal.valueOf(val);
-        input = input.stripTrailingZeros();
-        return input.scale() < 0 ? input.precision() - input.scale() : input.precision();
-    }
-
-    public static int getPrecision(final double val) {
-        BigDecimal input = BigDecimal.valueOf(val);
-        input = input.stripTrailingZeros();
-        return input.precision();
-    }
-
-    public static double roundToSignificantFigures(final double num, final int n) {
-        if (num == 0) {
-            return 0;
-        }
-        final double d = Math.ceil(Math.log10(num < 0 ? -num : num));
-        final int power = n - (int) d;
-        final double magnitude = Math.pow(10, power);
-        final long shifted = Math.round(num * magnitude);
-        return shifted / magnitude;
-    }
-
-    public static double roundToFractionalDigits(final double num, final int n) {
-        final double power = Math.pow(10, n);
-        return Math.round(num * power) / power;
-    }
-
     static WeakHashMap<Double, String> numberDigitsCache = new WeakHashMap<>();
 
-    public static int numberDigitsUntilFirstSignificantDigit(final double num1, final double num2) {
-        // TODO: optimise: this function is a performance hotspot (needed for
-        // axis label calculation)
-
-        final String stringNum1 = numberDigitsCache.computeIfAbsent(num1,
-                k -> String.format("%.25e", k).replace(".", ""));
-        final String stringNum2 = numberDigitsCache.computeIfAbsent(num2,
-                k -> String.format("%.25e", k).replace(".", ""));
-        // final String stringNum1 = String.format("%.25e", num1).replace(".",
-        // "");
-        // final String stringNum2 = String.format("%.25e", num2).replace(".",
-        // "");
-        int count = 1;
-        for (int i = 0; i < Math.min(stringNum1.length(), stringNum2.length()); i++) {
-            if (stringNum1.charAt(i) != stringNum2.charAt(i)) {
-                break;
-            }
-            count++;
-        }
-
-        return count;
+    private DigitNumberArithmetic() {
     }
 
     public static Tuple<Double, Double> formatStringForSignificantDigits(final double num1, final double num2) {
@@ -78,8 +27,8 @@ public final class DigitNumberArithmetic {
         final double frac2 = num2 - inum2;
 
         /*
-         * Even if the numbers are different before the decimal point, numbers
-         * after the decimal point may be significant: 15.0 - 17.5 - 20.0 - 22.5 - ...
+         * Even if the numbers are different before the decimal point, numbers after the decimal point may be
+         * significant: 15.0 - 17.5 - 20.0 - 22.5 - ...
          */
         if (inum1 != inum2) {
             return new Tuple<>(Double.valueOf(Math.max(exp1, exp2)), Double.valueOf(0));
@@ -104,9 +53,8 @@ public final class DigitNumberArithmetic {
         // System.err.println(String.format("number %s vs %s differ in %d-th digit\n", stringNum1, stringNum2, count));
 
         /*
-         * how many digits do we need? If stepsize is 0.25 for example, we get
-         * 025000000 and 050000000. Therefore we need two digits after the decimal point (i.e. up to the first
-         * digit from the RIGHT, which is different.
+         * how many digits do we need? If stepsize is 0.25 for example, we get 025000000 and 050000000. Therefore we
+         * need two digits after the decimal point (i.e. up to the first digit from the RIGHT, which is different.
          */
         // for (int i=Math.min(stringNum1.length(),stringNum2.length())-1;i>0;i--) {
         // if (stringNum1.charAt(i) != stringNum2.charAt(i)) {
@@ -118,6 +66,18 @@ public final class DigitNumberArithmetic {
         // count));
 
         return new Tuple<>(Double.valueOf(Math.max(exp1, exp2)), Double.valueOf(count));
+    }
+
+    public static int getNumberOfSignificantDigits(final double val) {
+        BigDecimal input = BigDecimal.valueOf(val);
+        input = input.stripTrailingZeros();
+        return input.scale() < 0 ? input.precision() - input.scale() : input.precision();
+    }
+
+    public static int getPrecision(final double val) {
+        BigDecimal input = BigDecimal.valueOf(val);
+        input = input.stripTrailingZeros();
+        return input.precision();
     }
 
     public static void main(final String[] args) {
@@ -148,6 +108,45 @@ public final class DigitNumberArithmetic {
         System.out.println("3: val1=" + BigDecimal.valueOf(val2).toPlainString());
         System.out.println("4: val1=" + BigDecimal.valueOf(val2).stripTrailingZeros());
 
+    }
+
+    public static int numberDigitsUntilFirstSignificantDigit(final double num1, final double num2) {
+        // TODO: optimise: this function is a performance hotspot (needed for
+        // axis label calculation)
+
+        final String stringNum1 = numberDigitsCache.computeIfAbsent(num1,
+                k -> String.format("%.25e", k).replace(".", ""));
+        final String stringNum2 = numberDigitsCache.computeIfAbsent(num2,
+                k -> String.format("%.25e", k).replace(".", ""));
+        // final String stringNum1 = String.format("%.25e", num1).replace(".",
+        // "");
+        // final String stringNum2 = String.format("%.25e", num2).replace(".",
+        // "");
+        int count = 1;
+        for (int i = 0; i < Math.min(stringNum1.length(), stringNum2.length()); i++) {
+            if (stringNum1.charAt(i) != stringNum2.charAt(i)) {
+                break;
+            }
+            count++;
+        }
+
+        return count;
+    }
+
+    public static double roundToFractionalDigits(final double num, final int n) {
+        final double power = Math.pow(10, n);
+        return Math.round(num * power) / power;
+    }
+
+    public static double roundToSignificantFigures(final double num, final int n) {
+        if (num == 0) {
+            return 0;
+        }
+        final double d = Math.ceil(Math.log10(num < 0 ? -num : num));
+        final int power = n - (int) d;
+        final double magnitude = Math.pow(10, power);
+        final long shifted = Math.round(num * magnitude);
+        return shifted / magnitude;
     }
 
 }

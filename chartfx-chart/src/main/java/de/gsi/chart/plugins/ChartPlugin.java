@@ -74,6 +74,30 @@ public abstract class ChartPlugin {
         return addButtonsToToolBar;
     }
 
+    @SuppressWarnings("unchecked")
+    private <T extends InputEvent> void addEventHandlers(final Node node) {
+        if (node == null) {
+            return;
+        }
+        for (final Pair<EventType<? extends InputEvent>, EventHandler<? extends InputEvent>> pair : mouseEventHandlers) {
+            final EventType<T> type = (EventType<T>) pair.getKey();
+            final EventHandler<T> handler = (EventHandler<T>) pair.getValue();
+            node.addEventHandler(type, handler);
+            node.sceneProperty().addListener((ch, o, n) -> {
+                if (o == n) {
+                    return;
+                }
+                if (o != null) {
+                    o.removeEventHandler(type, handler);
+                }
+
+                if (n != null) {
+                    n.addEventHandler(type, handler);
+                }
+            });
+        }
+    }
+
     /**
      * The associated {@link Chart}. Initialised when the plug-in is added to the Chart, set to {@code null} when
      * removed.
@@ -106,80 +130,6 @@ public abstract class ChartPlugin {
     }
 
     /**
-     * Returns the value of the {@link #addButtonsToToolBarProperty()}.
-     *
-     * @return {@code true} the corresponding control buttons are added to the chart tool bar
-     */
-    public final boolean isAddButtonsToToolBar() {
-        return addButtonsToToolBarProperty().get();
-    }
-
-    /**
-     * Optional method that allows the plug-in to react in case the size of the chart that it belongs to
-     * has changed.
-     */
-    public void layoutChildren() { // #NOPMD
-        // empty by default
-    }
-
-    /**
-     * Sets the value of the {@link #addButtonsToToolBarProperty()}.
-     *
-     * @param state if {@code true} the corresponding control buttons are added to the chart tool bar
-     */
-    public final void setAddButtonsToToolBar(final boolean state) {
-        addButtonsToToolBarProperty().set(state);
-    }
-
-    /**
-     * Called by the {@link Chart} when the plugin is added to it.
-     *
-     * @param chart the chart pane
-     */
-    public final void setChart(final Chart chart) {
-        chartProperty().set(chart);
-    }
-
-    @SuppressWarnings("unchecked")
-    private <T extends InputEvent> void addEventHandlers(final Node node) {
-        if (node == null) {
-            return;
-        }
-        for (final Pair<EventType<? extends InputEvent>, EventHandler<? extends InputEvent>> pair : mouseEventHandlers) {
-            final EventType<T> type = (EventType<T>) pair.getKey();
-            final EventHandler<T> handler = (EventHandler<T>) pair.getValue();
-            node.addEventHandler(type, handler);
-            node.sceneProperty().addListener((ch, o, n) -> {
-                if (o == n) {
-                    return;
-                }
-                if (o != null) {
-                    o.removeEventHandler(type, handler);
-                }
-
-                if (n != null) {
-                    n.addEventHandler(type, handler);
-                }
-            });
-        }
-    }
-
-    @SuppressWarnings("unchecked")
-    private <T extends InputEvent> void removeEventHandlers(final Node node) {
-        if (node == null) {
-            return;
-        }
-        for (final Pair<EventType<? extends InputEvent>, EventHandler<? extends InputEvent>> pair : mouseEventHandlers) {
-            final EventType<T> type = (EventType<T>) pair.getKey();
-            final EventHandler<T> handler = (EventHandler<T>) pair.getValue();
-            node.removeEventHandler(type, handler);
-            if (node.getScene() != null) {
-                node.getScene().removeEventFilter(type, handler);
-            }
-        }
-    }
-
-    /**
      * Converts mouse location within the scene to the location relative to the plot area.
      *
      * @param event mouse event
@@ -198,6 +148,22 @@ public abstract class ChartPlugin {
     }
 
     /**
+     * Returns the value of the {@link #addButtonsToToolBarProperty()}.
+     *
+     * @return {@code true} the corresponding control buttons are added to the chart tool bar
+     */
+    public final boolean isAddButtonsToToolBar() {
+        return addButtonsToToolBarProperty().get();
+    }
+
+    /**
+     * Optional method that allows the plug-in to react in case the size of the chart that it belongs to has changed.
+     */
+    public void layoutChildren() { // #NOPMD
+        // empty by default
+    }
+
+    /**
      * Registers event handlers that should be added to the {@code XYChartPane} node when the plugin is added to the
      * pane and are removed once the plugin is removed from the pane.
      *
@@ -207,6 +173,39 @@ public abstract class ChartPlugin {
     protected final void registerInputEventHandler(final EventType<? extends InputEvent> eventType,
             final EventHandler<? extends InputEvent> handler) {
         mouseEventHandlers.add(new Pair<>(eventType, handler));
+    }
+
+    @SuppressWarnings("unchecked")
+    private <T extends InputEvent> void removeEventHandlers(final Node node) {
+        if (node == null) {
+            return;
+        }
+        for (final Pair<EventType<? extends InputEvent>, EventHandler<? extends InputEvent>> pair : mouseEventHandlers) {
+            final EventType<T> type = (EventType<T>) pair.getKey();
+            final EventHandler<T> handler = (EventHandler<T>) pair.getValue();
+            node.removeEventHandler(type, handler);
+            if (node.getScene() != null) {
+                node.getScene().removeEventFilter(type, handler);
+            }
+        }
+    }
+
+    /**
+     * Sets the value of the {@link #addButtonsToToolBarProperty()}.
+     *
+     * @param state if {@code true} the corresponding control buttons are added to the chart tool bar
+     */
+    public final void setAddButtonsToToolBar(final boolean state) {
+        addButtonsToToolBarProperty().set(state);
+    }
+
+    /**
+     * Called by the {@link Chart} when the plugin is added to it.
+     *
+     * @param chart the chart pane
+     */
+    public final void setChart(final Chart chart) {
+        chartProperty().set(chart);
     }
 
     /**

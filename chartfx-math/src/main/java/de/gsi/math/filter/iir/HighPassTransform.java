@@ -32,6 +32,18 @@ public class HighPassTransform {
 
     }
 
+    private static Complex transform(final Complex in, final double f) {
+        if (in.isInfinite()) {
+            return new Complex(1, 0);
+        }
+        Complex c;
+        // frequency transform
+        c = in.multiply(f);
+
+        // bilinear high pass transform
+        return new Complex(-1).multiply(new Complex(1).add(c)).divide(new Complex(1).subtract(c));
+    }
+
     public static void transform(final double fc, final LayoutBase digital, final LayoutBase analog) {
         double f;
         digital.reset();
@@ -52,18 +64,6 @@ public class HighPassTransform {
         }
 
         digital.setNormal(Math.PI - analog.getNormalW(), analog.getNormalGain());
-    }
-
-    private static Complex transform(final Complex in, final double f) {
-        if (in.isInfinite()) {
-            return new Complex(1, 0);
-        }
-        Complex c;
-        // frequency transform
-        c = in.multiply(f);
-
-        // bilinear high pass transform
-        return new Complex(-1).multiply(new Complex(1).add(c)).divide(new Complex(1).subtract(c));
     }
 
 }

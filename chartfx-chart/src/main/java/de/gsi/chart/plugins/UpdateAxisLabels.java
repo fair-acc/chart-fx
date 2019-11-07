@@ -1,7 +1,6 @@
 package de.gsi.chart.plugins;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -11,15 +10,9 @@ import org.slf4j.LoggerFactory;
 
 import de.gsi.chart.Chart;
 import de.gsi.chart.axes.Axis;
-import de.gsi.chart.axes.spi.CategoryAxis;
 import de.gsi.chart.axes.spi.ColorGradientAxis;
-import de.gsi.chart.axes.spi.DefaultNumericAxis;
-import de.gsi.chart.axes.spi.LinearAxis;
-import de.gsi.chart.axes.spi.LogarithmicAxis;
-import de.gsi.chart.axes.spi.NumericAxis;
 import de.gsi.chart.renderer.Renderer;
 import de.gsi.chart.utils.FXUtils;
-import de.gsi.dataset.AxisDescription;
 import de.gsi.dataset.DataSet;
 import de.gsi.dataset.event.AxisChangeEvent;
 import de.gsi.dataset.event.AxisNameChangeEvent;
@@ -102,6 +95,103 @@ public class UpdateAxisLabels extends ChartPlugin {
         chartChangeListener.changed(chartProperty(), null, getChart());
     }
 
+    // the actual DataSet renaming logic
+    private void dataSetChange(UpdateEvent update, Renderer renderer) {
+        if ((!(update instanceof AxisChangeEvent) && !(update instanceof AxisNameChangeEvent))
+                || (update instanceof AxisRangeChangeEvent)) {
+            return;
+        }
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.atDebug().log("axis - dataSetChange for AxisChangeEvent");
+        }
+        AxisChangeEvent axisDataUpdate = (AxisChangeEvent) update;
+        int dim = axisDataUpdate.getDimension();
+        DataSet dataSet = (DataSet) axisDataUpdate.getSource();
+        if (renderer == null) { // dataset was added to / is registered at chart
+            if (getChart().getDatasets().size() == 1) {
+
+                if (dim == -1 || dim == DataSet.DIM_X) {
+                    getChart().getFirstAxis(Orientation.HORIZONTAL).set(dataSet.getAxisDescription(DataSet.DIM_X));
+                }
+                if (dim == -1 || dim == DataSet.DIM_Y) {
+                    getChart().getFirstAxis(Orientation.VERTICAL).set(dataSet.getAxisDescription(DataSet.DIM_Y));
+                }
+                if ((dim == -1 || dim == DataSet.DIM_Z) && dataSet.getDimension() >= 3) {
+                    getChart().getAxes().stream().filter(axis -> axis instanceof ColorGradientAxis).findFirst()
+                            .ifPresent(axis -> axis.set(dataSet.getAxisDescription(DataSet.DIM_Y)));
+                }
+            } else {
+                if (LOGGER.isWarnEnabled()) {
+                    LOGGER.atWarn().log(
+                            "Applying axis information not possible for more than one DataSet added to chart. Please add datasets to separate Renderers");
+                }
+            }
+        } else { // dataset was added to / is registered at renderer
+            if (renderer.getDatasets().size() == 1) {
+
+                if (dim == -1 || dim == DataSet.DIM_X) {
+                    Optional<Axis> oldAxis = renderer.getAxes().stream().filter(axis -> axis.getSide().isHorizontal())
+                            .findFirst();
+                    oldAxis.ifPresent(a -> a.set(dataSet.getAxisDescription(DataSet.DIM_X)));
+                    // Axis newAxis = getAxis(dataSet.getAxisDescription(0), Orientation.HORIZONTAL, oldAxis, renderer);
+                    // renderer.getAxes().remove(oldAxis.get());
+                    // renderer.getAxes().add(newAxis);
+                }
+                if (dim == -1 || dim == DataSet.DIM_Y) {
+                    Optional<Axis> oldAxis = renderer.getAxes().stream().filter(axis -> axis.getSide().isVertical())
+                            .findFirst();
+                    oldAxis.ifPresent(a -> a.set(dataSet.getAxisDescription(DataSet.DIM_Y)));
+                    // Axis newAxis = getAxis(dataSet.getAxisDescription(1), Orientation.VERTICAL, oldAxis, renderer);
+                    // renderer.getAxes().remove(oldAxis.get());
+                    //// renderer.getAxes().add(newAxis);
+                }
+                if ((dim == -1 || dim == DataSet.DIM_Z) && dataSet.getDimension() >= 3) {
+                    renderer.getAxes().stream().filter(axis -> axis instanceof ColorGradientAxis).findFirst()
+                            .ifPresent(axis -> axis.set(dataSet.getAxisDescription(2)));
+                }
+            } else {
+                if (LOGGER.isWarnEnabled()) {
+                    LOGGER.atWarn().log(
+                            "Applying axis information not possible for more than one DataSet added to renderer. Please add datasets to separate Renderers");
+                }
+            }
+        }
+    }
+
+    private void dataSetsChanged(ListChangeListener.Change<? extends DataSet> change, Renderer renderer) {
+        Map<DataSet, EventListener> dataSetListeners;
+        if (renderer == null) {
+            dataSetListeners = chartDataSetsListeners;
+        } else if (rendererDataSetsListeners.containsKey(renderer)) {
+            dataSetListeners = rendererDataSetsListeners.get(renderer);
+        } else {
+            dataSetListeners = new HashMap<>();
+            rendererDataSetsListeners.put(renderer, dataSetListeners);
+        }
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.atDebug().log("dataSetsChanged added/removed - invoked");
+        }
+        while (change.next()) {
+            if (change.wasAdded()) {
+                for (DataSet dataSet : change.getAddedSubList()) {
+                    EventListener dataSetListener = update -> FXUtils.runFX(() -> dataSetChange(update, renderer));
+                    dataSet.addListener(dataSetListener);
+                    dataSetListeners.put(dataSet, dataSetListener);
+                    dataSetChange(new AxisChangeEvent(dataSet, -1), renderer); // NOPMD - normal in-loop instantiation
+                }
+            }
+            if (change.wasRemoved()) {
+                for (DataSet dataSet : change.getRemoved()) {
+                    EventListener listener = dataSetListeners.get(dataSet);
+                    if (listener != null) {
+                        dataSet.removeListener(listener);
+                        dataSetListeners.remove(dataSet);
+                    }
+                }
+            }
+        }
+    }
+
     // setup all the listeners
     private void setupDataSetListeners(Renderer renderer, ObservableList<DataSet> dataSets) {
         Map<DataSet, EventListener> dataSetListeners;
@@ -146,103 +236,6 @@ public class UpdateAxisLabels extends ChartPlugin {
             dataSet.removeListener(dataSetListeners.get(dataSet));
             dataSetListeners.remove(dataSet);
         });
-    }
-
-    private void dataSetsChanged(ListChangeListener.Change<? extends DataSet> change, Renderer renderer) {
-        Map<DataSet, EventListener> dataSetListeners;
-        if (renderer == null) {
-            dataSetListeners = chartDataSetsListeners;
-        } else if (rendererDataSetsListeners.containsKey(renderer)) {
-            dataSetListeners = rendererDataSetsListeners.get(renderer);
-        } else {
-            dataSetListeners = new HashMap<>();
-            rendererDataSetsListeners.put(renderer, dataSetListeners);
-        }
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.atDebug().log("dataSetsChanged added/removed - invoked");
-        }
-        while (change.next()) {
-            if (change.wasAdded()) {
-                for (DataSet dataSet : change.getAddedSubList()) {
-                    EventListener dataSetListener = update -> FXUtils.runFX(() -> dataSetChange(update, renderer));
-                    dataSet.addListener(dataSetListener);
-                    dataSetListeners.put(dataSet, dataSetListener);
-                    dataSetChange(new AxisChangeEvent(dataSet, -1), renderer); // NOPMD - normal in-loop instantiation
-                }
-            }
-            if (change.wasRemoved()) {
-                for (DataSet dataSet : change.getRemoved()) {
-                    EventListener listener = dataSetListeners.get(dataSet);
-                    if (listener != null) {
-                        dataSet.removeListener(listener);
-                        dataSetListeners.remove(dataSet);
-                    }
-                }
-            }
-        }
-    }
-
-    // the actual DataSet renaming logic
-    private void dataSetChange(UpdateEvent update, Renderer renderer) {
-        if ((!(update instanceof AxisChangeEvent) && !(update instanceof AxisNameChangeEvent))
-                || (update instanceof AxisRangeChangeEvent)) {
-            return;
-        }
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.atDebug().log("axis - dataSetChange for AxisChangeEvent");
-        }
-        AxisChangeEvent axisDataUpdate = (AxisChangeEvent) update;
-        int dim = axisDataUpdate.getDimension();
-        DataSet dataSet = (DataSet) axisDataUpdate.getSource();
-        if (renderer == null) { // dataset was added to / is registered at chart
-            if (getChart().getDatasets().size() == 1) {
-
-                if (dim == -1 || dim == DataSet.DIM_X) {
-                    getChart().getFirstAxis(Orientation.HORIZONTAL).set(dataSet.getAxisDescription(DataSet.DIM_X));
-                }
-                if (dim == -1 || dim == DataSet.DIM_Y) {
-                    getChart().getFirstAxis(Orientation.VERTICAL).set(dataSet.getAxisDescription(DataSet.DIM_Y));
-                }
-                if ((dim == -1 || dim == DataSet.DIM_Z) && dataSet.getDimension() >= 3) {
-                    getChart().getAxes().stream().filter(axis -> axis instanceof ColorGradientAxis).findFirst()
-                            .ifPresent(axis -> axis.set(dataSet.getAxisDescription(DataSet.DIM_Y)));
-                }
-            } else {
-                if (LOGGER.isWarnEnabled()) {
-                    LOGGER.atWarn().log(
-                            "Applying axis information not possible for more than one DataSet added to chart. Please add datasets to separate Renderers");
-                }
-            }
-        } else { // dataset was added to / is registered at renderer
-            if (renderer.getDatasets().size() == 1) {
-
-                if (dim == -1 || dim == DataSet.DIM_X) {
-                    Optional<Axis> oldAxis = renderer.getAxes().stream().filter(axis -> axis.getSide().isHorizontal())
-                            .findFirst();
-                    oldAxis.ifPresent(a -> a.set(dataSet.getAxisDescription(DataSet.DIM_X)));
-                    //                    Axis newAxis = getAxis(dataSet.getAxisDescription(0), Orientation.HORIZONTAL, oldAxis, renderer);
-                    //                    renderer.getAxes().remove(oldAxis.get());
-                    //                    renderer.getAxes().add(newAxis);
-                }
-                if (dim == -1 || dim == DataSet.DIM_Y) {
-                    Optional<Axis> oldAxis = renderer.getAxes().stream().filter(axis -> axis.getSide().isVertical())
-                            .findFirst();
-                    oldAxis.ifPresent(a -> a.set(dataSet.getAxisDescription(DataSet.DIM_Y)));
-                    //                    Axis newAxis = getAxis(dataSet.getAxisDescription(1), Orientation.VERTICAL, oldAxis, renderer);
-                    //                    renderer.getAxes().remove(oldAxis.get());
-                    ////                    renderer.getAxes().add(newAxis);
-                }
-                if ((dim == -1 || dim == DataSet.DIM_Z) && dataSet.getDimension() >= 3) {
-                    renderer.getAxes().stream().filter(axis -> axis instanceof ColorGradientAxis).findFirst()
-                            .ifPresent(axis -> axis.set(dataSet.getAxisDescription(2)));
-                }
-            } else {
-                if (LOGGER.isWarnEnabled()) {
-                    LOGGER.atWarn().log(
-                            "Applying axis information not possible for more than one DataSet added to renderer. Please add datasets to separate Renderers");
-                }
-            }
-        }
     }
 
     // TODO: consider to remove

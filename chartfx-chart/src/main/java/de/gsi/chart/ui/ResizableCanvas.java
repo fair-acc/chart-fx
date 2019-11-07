@@ -3,8 +3,7 @@ package de.gsi.chart.ui;
 import javafx.scene.canvas.Canvas;
 
 /**
- * extended default Canvas class to be embeddable and resizable within a
- * StackPane or Region
+ * extended default Canvas class to be embeddable and resizable within a StackPane or Region
  *
  * @author rstein
  */
@@ -14,8 +13,8 @@ public class ResizableCanvas extends Canvas {
     }
 
     @Override
-    public double minHeight(final double width) {
-        return 1;
+    public boolean isResizable() {
+        return true;
     }
 
     @Override
@@ -24,8 +23,13 @@ public class ResizableCanvas extends Canvas {
     }
 
     @Override
-    public double prefHeight(final double width) {
-        return getHeight();
+    public double maxWidth(final double height) {
+        return Double.MAX_VALUE;
+    }
+
+    @Override
+    public double minHeight(final double width) {
+        return 1;
     }
 
     @Override
@@ -34,8 +38,8 @@ public class ResizableCanvas extends Canvas {
     }
 
     @Override
-    public double maxWidth(final double height) {
-        return Double.MAX_VALUE;
+    public double prefHeight(final double width) {
+        return getHeight();
     }
 
     @Override
@@ -50,10 +54,5 @@ public class ResizableCanvas extends Canvas {
         setHeight(h);
         // System.err.println("canvas resize to = " + String.format("%fx%f",
         // getWidth(), getHeight()));
-    }
-
-    @Override
-    public boolean isResizable() {
-        return true;
     }
 }

@@ -3,8 +3,8 @@ package de.gsi.chart.axes.spi;
 import java.security.InvalidParameterException;
 import java.util.Objects;
 
-import de.gsi.dataset.spi.DataRange;
 import de.gsi.chart.ui.geometry.Side;
+import de.gsi.dataset.spi.DataRange;
 import javafx.scene.chart.ValueAxis;
 
 /**
@@ -34,24 +34,33 @@ public class AxisRange extends DataRange {
         this.tickUnit = tickUnit;
     }
 
+    /**
+     * Add the specified data range to this range.
+     *
+     * @param range range to be added
+     */
+    public void add(final AxisRange range) {
+        add(range.min);
+        add(range.max);
+    }
+
+    public AxisRange copy() {
+        return new AxisRange(this.getLowerBound(), this.getUpperBound(), this.getAxisLength(), this.getScale(),
+                this.getTickUnit());
+    }
+
+    /*
+     * (non-Javadoc)
+     *
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
     @Override
-    public String toString() {
-        return String.format("AxisRange [min=%f, max=%f, axisLength=%f, scale=%f, tickUnit=%f]", min, max, axisLength,
-                scale, tickUnit);
-    }
+    public boolean equals(final Object obj) {
+        if (obj == null || !(obj instanceof AxisRange)) {
+            return false;
+        }
 
-    /**
-     * @return the lower bound of the axis
-     */
-    public double getLowerBound() {
-        return min;
-    }
-
-    /**
-     * @return the upper bound of the axis
-     */
-    public double getUpperBound() {
-        return max;
+        return ((AxisRange) obj).hashCode() == this.hashCode();
     }
 
     /**
@@ -59,6 +68,13 @@ public class AxisRange extends DataRange {
      */
     public double getAxisLength() {
         return axisLength;
+    }
+
+    /**
+     * @return the lower bound of the axis
+     */
+    public double getLowerBound() {
+        return min;
     }
 
     /**
@@ -70,6 +86,26 @@ public class AxisRange extends DataRange {
 
     public double getTickUnit() {
         return tickUnit;
+    }
+
+    /**
+     * @return the upper bound of the axis
+     */
+    public double getUpperBound() {
+        return max;
+    }
+
+    /*
+     * (non-Javadoc)
+     *
+     * @see java.lang.Object#hashCode()
+     */
+    @Override
+    public int hashCode() {
+        return Objects.hash(min, max, axisLength, scale, tickUnit);
+
+        // if performance is an issue, use
+        // return 0;
     }
 
     /**
@@ -96,16 +132,6 @@ public class AxisRange extends DataRange {
     }
 
     /**
-     * Add the specified data range to this range.
-     *
-     * @param range range to be added
-     */
-    public void add(final AxisRange range) {
-        add(range.min);
-        add(range.max);
-    }
-
-    /**
      * Substracts the specified data range from this range. TODO: check algorithm definiton
      * 
      * @param range range to be subtracted
@@ -121,36 +147,10 @@ public class AxisRange extends DataRange {
         return this;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.lang.Object#hashCode()
-     */
     @Override
-    public int hashCode() {
-        return Objects.hash(min, max, axisLength, scale, tickUnit);
-
-        // if performance is an issue, use
-        // return 0;
-    }
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.lang.Object#equals(java.lang.Object)
-     */
-    @Override
-    public boolean equals(final Object obj) {
-        if (obj == null || !(obj instanceof AxisRange)) {
-            return false;
-        }
-
-        return ((AxisRange) obj).hashCode() == this.hashCode();
-    }
-
-    public AxisRange copy() {
-        return new AxisRange(this.getLowerBound(), this.getUpperBound(), this.getAxisLength(), this.getScale(),
-                this.getTickUnit());
+    public String toString() {
+        return String.format("AxisRange [min=%f, max=%f, axisLength=%f, scale=%f, tickUnit=%f]", min, max, axisLength,
+                scale, tickUnit);
     }
 
 }

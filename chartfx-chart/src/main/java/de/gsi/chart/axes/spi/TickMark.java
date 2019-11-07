@@ -3,8 +3,7 @@ package de.gsi.chart.axes.spi;
 import javafx.scene.text.Text;
 
 /**
- * TickMark represents the label text, its associated tick mark value and
- * position along the axis for each tick.
+ * TickMark represents the label text, its associated tick mark value and position along the axis for each tick.
  *
  * @author rstein
  */
@@ -14,6 +13,7 @@ public class TickMark extends Text {
 
     /**
      * Creates and initialises an instance of TickMark.
+     * 
      * @param tickValue numeric value of tick
      * @param tickPosition position of tick in canvas pixel coordinates
      * @param tickMarkLabel string label associated with tick
@@ -26,26 +26,12 @@ public class TickMark extends Text {
     }
 
     /**
-     * @param newValue
-     *            tick mark value in data units
+     * @return the height of the tick mark including rotation etc.
      */
-    public void setValue(final Double newValue) {
-        tickValue = newValue;
-    }
-
-    /**
-     * @return tick mark value in data units
-     */
-    public Double getValue() {
-        return tickValue;
-    }
-
-    /**
-     * @param value
-     *            tick position along the axis in display units
-     */
-    public void setPosition(final double value) {
-        tickPosition = value;
+    public double getHeight() {
+        // N.B. important: usage of getBoundsInParent() which also takes into
+        // account text rotations
+        return getBoundsInParent().getHeight();
     }
 
     /**
@@ -53,6 +39,13 @@ public class TickMark extends Text {
      */
     public Double getPosition() {
         return tickPosition;
+    }
+
+    /**
+     * @return tick mark value in data units
+     */
+    public Double getValue() {
+        return tickValue;
     }
 
     /**
@@ -65,11 +58,16 @@ public class TickMark extends Text {
     }
 
     /**
-     * @return the height of the tick mark including rotation etc.
+     * @param value tick position along the axis in display units
      */
-    public double getHeight() {
-        // N.B. important: usage of getBoundsInParent() which also takes into
-        // account text rotations
-        return getBoundsInParent().getHeight();
+    public void setPosition(final double value) {
+        tickPosition = value;
+    }
+
+    /**
+     * @param newValue tick mark value in data units
+     */
+    public void setValue(final Double newValue) {
+        tickValue = newValue;
     }
 }

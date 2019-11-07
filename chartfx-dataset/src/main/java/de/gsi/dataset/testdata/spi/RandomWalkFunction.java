@@ -1,8 +1,8 @@
 package de.gsi.dataset.testdata.spi;
 
 /**
- * abstract error data set for graphical testing purposes
- * this implementation generates a random walk (Brownian noise) function.
+ * abstract error data set for graphical testing purposes this implementation generates a random walk (Brownian noise)
+ * function.
  *
  * @author rstein
  */

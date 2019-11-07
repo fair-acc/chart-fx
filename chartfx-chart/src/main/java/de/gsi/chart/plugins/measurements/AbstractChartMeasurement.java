@@ -6,10 +6,10 @@ import java.util.Optional;
 
 import de.gsi.chart.Chart;
 import de.gsi.chart.XYChart;
-import de.gsi.dataset.DataSet;
-import de.gsi.dataset.event.EventListener;
 import de.gsi.chart.plugins.measurements.utils.CheckedValueField;
 import de.gsi.chart.plugins.measurements.utils.DataSetSelector;
+import de.gsi.dataset.DataSet;
+import de.gsi.dataset.event.EventListener;
 import impl.org.controlsfx.skin.DecorationPane;
 import javafx.geometry.Insets;
 import javafx.scene.control.Alert;
@@ -78,10 +78,50 @@ public abstract class AbstractChartMeasurement implements EventListener {
         });
     }
 
-    public abstract void initialize();
+    protected void defaultAction() {
+        setDataSet(null);
+    }
+
+    public DataSet getDataSet() {
+        if (dataSet == null) {
+            final List<DataSet> allDataSets = new ArrayList<>(chart.getAllDatasets());
+            return allDataSets.get(0);
+        }
+
+        return dataSet;
+    }
 
     protected VBox getDialogContentBox() {
         return vBox;
+    }
+
+    public Pane getDisplayPane() {
+        return displayPane;
+    }
+
+    public abstract void initialize();
+
+    protected void nominalAction() {
+        setDataSet(dataSetSelector.getSelectedDataSet());
+    }
+
+    protected void removeAction() {
+        chart.getMeasurementBar(chart.getMeasurementBarSide()).getChildren().remove(displayPane);
+    }
+
+    public void setDataSet(final DataSet dataSet) {
+        if (this.dataSet != null) {
+            this.dataSet.removeListener(this);
+        }
+
+        if (dataSet == null) {
+            valueField.setDataSetName("<unknown data set>");
+            this.dataSet = dataSet;
+        } else {
+            valueField.setDataSetName("<" + dataSet.getName() + ">");
+            this.dataSet = dataSet;
+            this.dataSet.addListener(this);
+        }
     }
 
     public void showConfigDialogue() {
@@ -105,46 +145,6 @@ public abstract class AbstractChartMeasurement implements EventListener {
             defaultAction();
         }
         alert.close();
-    }
-
-    protected void nominalAction() {
-        setDataSet(dataSetSelector.getSelectedDataSet());
-    }
-
-    protected void defaultAction() {
-        setDataSet(null);
-    }
-
-    protected void removeAction() {
-        chart.getMeasurementBar(chart.getMeasurementBarSide()).getChildren().remove(displayPane);
-    }
-
-    public DataSet getDataSet() {
-        if (dataSet == null) {
-            final List<DataSet> allDataSets = new ArrayList<>(chart.getAllDatasets());
-            return allDataSets.get(0);
-        }
-
-        return dataSet;
-    }
-
-    public void setDataSet(final DataSet dataSet) {
-        if (this.dataSet != null) {
-            this.dataSet.removeListener(this);
-        }
-
-        if (dataSet == null) {
-            valueField.setDataSetName("<unknown data set>");
-            this.dataSet = dataSet;
-        } else {
-            valueField.setDataSetName("<" + dataSet.getName() + ">");
-            this.dataSet = dataSet;
-            this.dataSet.addListener(this);
-        }
-    }
-
-    public Pane getDisplayPane() {
-        return displayPane;
     }
 
 }

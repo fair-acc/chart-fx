@@ -114,48 +114,6 @@ public class SidesPaneSkin extends SkinBase<SidesPane> {
         getSkinnable().setClip(clip);
     }
 
-    /**
-     * Sets the preferred height of the generic node object by casting it onto
-     * the known Region, ... object
-     *
-     * @param node
-     *            the node to be adapted
-     * @param prefHeight
-     *            the desired preferred height
-     */
-    private static void setPrefHeight(final Node node, final double prefHeight) {
-        if (node instanceof Region) {
-            ((Region) node).setPrefHeight(prefHeight);
-            return;
-        } else if (node instanceof Canvas) {
-            ((Canvas) node).setHeight(prefHeight);
-            return;
-        }
-        // add other derivative of 'Node'
-        throw new InvalidParameterException("no prefHeight for class type:" + node.getClass().getCanonicalName());
-    }
-
-    /**
-     * Sets the preferred width of the generic node object by casting it onto
-     * the known Region, ... object
-     *
-     * @param node
-     *            the node to be adapted
-     * @param prefWidth
-     *            the desired preferred height
-     */
-    private static void setPrefWidth(final Node node, final double prefWidth) {
-        if (node instanceof Region) {
-            ((Region) node).setPrefWidth(prefWidth);
-            return;
-        } else if (node instanceof Canvas) {
-            ((Canvas) node).setWidth(prefWidth);
-            return;
-        }
-        // add other derivative of 'Node'
-        throw new InvalidParameterException("no prefWidth for class type:" + node.getClass().getCanonicalName());
-    }
-
     private Side getSide(final MouseEvent evt) {
         if (borderPane.getBoundsInLocal().contains(evt.getX(), evt.getY())) {
             final double trigger = getSkinnable().getTriggerDistance();
@@ -219,6 +177,63 @@ public class SidesPaneSkin extends SkinBase<SidesPane> {
                                         .getBoundsInParent().contains(event.getX(), event.getY()))));
     }
 
+    @Override
+    protected void layoutChildren(final double contentX, final double contentY, final double contentWidth,
+            final double contentHeight) {
+
+        /*
+         * Layout the BorderPane in a normal way (equals "lay out the content node", the only managed node)
+         */
+        super.layoutChildren(contentX, contentY, contentWidth, contentHeight);
+
+        // layout the managed side nodes && update preferred initial size
+        // estimate
+        final Node bottom = getSkinnable().getBottom();
+        if (bottom != null) {
+            final double prefHeight = getSkinnable().prefHeightBottomProperty().get();
+            if (bottom.prefHeight(-1) > 0) {
+                getSkinnable().prefHeightBottomProperty().set(Math.max(bottom.prefHeight(-1), prefHeight));
+            }
+            final double offset = prefHeight * visibility[Side.BOTTOM.ordinal()].get();
+            bottom.setVisible(visibility[Side.BOTTOM.ordinal()].get() > 0);
+            SidesPaneSkin.setPrefHeight(bottom, offset);
+        }
+
+        final Node left = getSkinnable().getLeft();
+        if (left != null) {
+            final double prefWidth = getSkinnable().prefWidthLeftProperty().get();
+            if (left.prefWidth(-1) > 0) {
+                getSkinnable().prefWidthLeftProperty().set(Math.max(left.prefWidth(-1), prefWidth));
+            }
+            final double offset = prefWidth * visibility[Side.LEFT.ordinal()].get();
+            left.setVisible(visibility[Side.LEFT.ordinal()].get() > 0);
+            SidesPaneSkin.setPrefWidth(left, offset);
+        }
+
+        final Node right = getSkinnable().getRight();
+        if (right != null) {
+            final double prefWidth = getSkinnable().prefWidthRightProperty().get();
+            if (right.prefWidth(-1) > 0) {
+                getSkinnable().prefWidthRightProperty().set(Math.max(right.prefWidth(-1), prefWidth));
+            }
+            final double offset = prefWidth * visibility[Side.RIGHT.ordinal()].get();
+            right.setVisible(visibility[Side.RIGHT.ordinal()].get() > 0);
+            SidesPaneSkin.setPrefWidth(right, offset);
+        }
+
+        final Node top = getSkinnable().getTop();
+        if (top != null) {
+            final double prefHeight = getSkinnable().prefHeightTopProperty().get();
+            if (top.prefHeight(-1) > 0) {
+                getSkinnable().prefHeightTopProperty().set(Math.max(top.prefHeight(-1), prefHeight));
+            }
+            final double offset = prefHeight * visibility[Side.TOP.ordinal()].get();
+            top.setVisible(visibility[Side.TOP.ordinal()].get() > 0);
+            top.setClip(new Rectangle(contentWidth, offset));
+            SidesPaneSkin.setPrefHeight(top, offset);
+        }
+    }
+
     private void show(final Side side) {
         if (hideTimeline[side.ordinal()] != null) {
             hideTimeline[side.ordinal()].stop();
@@ -275,61 +290,39 @@ public class SidesPaneSkin extends SkinBase<SidesPane> {
         }
     }
 
-    @Override
-    protected void layoutChildren(final double contentX, final double contentY, final double contentWidth,
-            final double contentHeight) {
-
-        /*
-         * Layout the BorderPane in a normal way (equals
-         * "lay out the content node", the only managed node)
-         */
-        super.layoutChildren(contentX, contentY, contentWidth, contentHeight);
-
-        // layout the managed side nodes && update preferred initial size
-        // estimate
-        final Node bottom = getSkinnable().getBottom();
-        if (bottom != null) {
-            final double prefHeight = getSkinnable().prefHeightBottomProperty().get();
-            if (bottom.prefHeight(-1) > 0) {
-                getSkinnable().prefHeightBottomProperty().set(Math.max(bottom.prefHeight(-1), prefHeight));
-            }
-            final double offset = prefHeight * visibility[Side.BOTTOM.ordinal()].get();
-            bottom.setVisible(visibility[Side.BOTTOM.ordinal()].get() > 0);
-            SidesPaneSkin.setPrefHeight(bottom, offset);
+    /**
+     * Sets the preferred height of the generic node object by casting it onto the known Region, ... object
+     *
+     * @param node the node to be adapted
+     * @param prefHeight the desired preferred height
+     */
+    private static void setPrefHeight(final Node node, final double prefHeight) {
+        if (node instanceof Region) {
+            ((Region) node).setPrefHeight(prefHeight);
+            return;
+        } else if (node instanceof Canvas) {
+            ((Canvas) node).setHeight(prefHeight);
+            return;
         }
+        // add other derivative of 'Node'
+        throw new InvalidParameterException("no prefHeight for class type:" + node.getClass().getCanonicalName());
+    }
 
-        final Node left = getSkinnable().getLeft();
-        if (left != null) {
-            final double prefWidth = getSkinnable().prefWidthLeftProperty().get();
-            if (left.prefWidth(-1) > 0) {
-                getSkinnable().prefWidthLeftProperty().set(Math.max(left.prefWidth(-1), prefWidth));
-            }
-            final double offset = prefWidth * visibility[Side.LEFT.ordinal()].get();
-            left.setVisible(visibility[Side.LEFT.ordinal()].get() > 0);
-            SidesPaneSkin.setPrefWidth(left, offset);
+    /**
+     * Sets the preferred width of the generic node object by casting it onto the known Region, ... object
+     *
+     * @param node the node to be adapted
+     * @param prefWidth the desired preferred height
+     */
+    private static void setPrefWidth(final Node node, final double prefWidth) {
+        if (node instanceof Region) {
+            ((Region) node).setPrefWidth(prefWidth);
+            return;
+        } else if (node instanceof Canvas) {
+            ((Canvas) node).setWidth(prefWidth);
+            return;
         }
-
-        final Node right = getSkinnable().getRight();
-        if (right != null) {
-            final double prefWidth = getSkinnable().prefWidthRightProperty().get();
-            if (right.prefWidth(-1) > 0) {
-                getSkinnable().prefWidthRightProperty().set(Math.max(right.prefWidth(-1), prefWidth));
-            }
-            final double offset = prefWidth * visibility[Side.RIGHT.ordinal()].get();
-            right.setVisible(visibility[Side.RIGHT.ordinal()].get() > 0);
-            SidesPaneSkin.setPrefWidth(right, offset);
-        }
-
-        final Node top = getSkinnable().getTop();
-        if (top != null) {
-            final double prefHeight = getSkinnable().prefHeightTopProperty().get();
-            if (top.prefHeight(-1) > 0) {
-                getSkinnable().prefHeightTopProperty().set(Math.max(top.prefHeight(-1), prefHeight));
-            }
-            final double offset = prefHeight * visibility[Side.TOP.ordinal()].get();
-            top.setVisible(visibility[Side.TOP.ordinal()].get() > 0);
-            top.setClip(new Rectangle(contentWidth, offset));
-            SidesPaneSkin.setPrefHeight(top, offset);
-        }
+        // add other derivative of 'Node'
+        throw new InvalidParameterException("no prefWidth for class type:" + node.getClass().getCanonicalName());
     }
 }

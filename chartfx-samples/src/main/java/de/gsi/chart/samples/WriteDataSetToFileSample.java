@@ -22,7 +22,7 @@ import javafx.stage.Stage;
  * @author rstein
  */
 public class WriteDataSetToFileSample extends Application {
-	private static final Logger LOGGER = LoggerFactory.getLogger(WriteDataSetToFileSample.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(WriteDataSetToFileSample.class);
     private static final int N_SAMPLES = 100;
     private static final String CSV_FILE_NAME_1 = "{dataSetName}.csv.zip";
     private static final String CSV_FILE_NAME_2 = "test2.dat.gz";
@@ -91,7 +91,6 @@ public class WriteDataSetToFileSample extends Application {
             final String actualFileName2 = DataSetUtils.writeDataSetToFile(dataSet2, path, CSV_FILE_NAME_2_TIMESTAMED,
                     true);
 
-            
             // to suppress serialising the meta-data, default: true
             // DataSetSerialiser.setMetaDataSerialised(false); // uncomment
             // to suppress serialising data labels and styles, default: true

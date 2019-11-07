@@ -34,12 +34,63 @@ public class GridPosition implements Cloneable, Serializable {
         this.r = r;
     }
 
-    public int getQ() {
-        return q;
+    @Override
+    public GridPosition clone() throws CloneNotSupportedException {
+        try {
+            return (GridPosition) super.clone();
+        } catch (final CloneNotSupportedException ex) {
+            Logger.getLogger(GridPosition.class.getName()).log(Level.SEVERE, null, ex);
+            return null;
+        }
     }
 
-    public int getR() {
-        return r;
+    /**
+     * Two positions are equal if they have the same q and r
+     *
+     * @param obj object to compare to
+     * @return positions are equal if they have the same q and r
+     */
+    @Override
+    public boolean equals(final Object obj) {
+        if (obj == null) {
+            return false;
+        }
+
+        if (obj.getClass().equals(this.getClass())) {
+            final GridPosition gridPositionObj = (GridPosition) obj;
+            if (gridPositionObj.q == q && gridPositionObj.r == r) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public String getCoordinates() {
+        final String s = q + ", " + r;
+        return s;
+    }
+
+    /**
+     * @param otherPosition reference grid position
+     * @return the direction
+     */
+    public HexagonMap.Direction getDirectionTo(final GridPosition otherPosition) {
+        if (equals(otherPosition)) {
+            throw new IllegalArgumentException(
+                    "Other position (" + otherPosition + ") cannot be same as this (" + this + ")");
+        }
+        final GridPosition firstStepInLine = line(otherPosition).get(1);
+
+        for (int i = 0; i < 6; i++) {
+            if (getNeighborPosition(GridPosition.getDirectionFromNumber(i)).equals(firstStepInLine)) {
+                return GridPosition.getDirectionFromNumber(i);
+            }
+        }
+        throw new InvalidParameterException("unknown position: " + otherPosition);
+    }
+
+    public int getDistance(final GridPosition target) {
+        return GridPosition.getDistance(this, target);
     }
 
     /**
@@ -53,6 +104,15 @@ public class GridPosition implements Cloneable, Serializable {
         final int[][] neighbors = new int[][] { { 0, -1 }, { +1, -1 }, { +1, 0 }, { 0, +1 }, { -1, +1 }, { -1, 0 } };
         final int[] d = neighbors[i];
         return new GridPosition(q + d[0], r + d[1]);
+    }
+
+    public List<GridPosition> getPositionsInCircleArea(final int radius) {
+        final ArrayList<GridPosition> result = new ArrayList<>();
+        for (int i = 0; i <= radius; i++) {
+            final List<GridPosition> positions = getPositionsOnCircleEdge(i);
+            result.addAll(positions);
+        }
+        return result;
     }
 
     /**
@@ -85,31 +145,65 @@ public class GridPosition implements Cloneable, Serializable {
         return result;
     }
 
-    public List<GridPosition> getPositionsInCircleArea(final int radius) {
-        final ArrayList<GridPosition> result = new ArrayList<>();
-        for (int i = 0; i <= radius; i++) {
-            final List<GridPosition> positions = getPositionsOnCircleEdge(i);
-            result.addAll(positions);
+    public int getQ() {
+        return q;
+    }
+
+    public int getR() {
+        return r;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 5;
+        hash = 97 * hash + q;
+        hash = 97 * hash + r;
+        return hash;
+    }
+
+    /**
+     * @param otherPosition other hex grid position
+     * @return true if the positions are adjacent
+     */
+    public boolean isAdjacent(final GridPosition otherPosition) {
+        GridPosition neighbor;
+        for (int i = 0; i < 6; i++) {
+            neighbor = getNeighborPosition(GridPosition.getDirectionFromNumber(i));
+            if (otherPosition.equals(neighbor)) {
+                return true;
+            }
         }
+        return false;
+    }
+
+    /**
+     * Finds all GridPositions that are on a getLine between this and the given position (the array includes this and
+     * the destination positions)
+     *
+     * @param destination destination grid position
+     * @return an array positions
+     */
+    public List<GridPosition> line(final GridPosition destination) {
+        final ArrayList<GridPosition> result = new ArrayList<>();
+        GridPosition p;
+        double qCalculated;
+        double rCalculated;
+        final double n = GridPosition.getDistance(this, destination);
+        for (int i = 0; i < n; i++) {
+            final double j = i;
+            qCalculated = q * (1.0 - j / n) + destination.q * j / n;
+            rCalculated = r * (1.0 - j / n) + destination.r * j / n;
+            p = GridPosition.hexRound(qCalculated, rCalculated);
+            result.add(p);
+
+        }
+        result.add(destination);
         return result;
     }
 
-    private static int getNumberFromDirection(final HexagonMap.Direction direction) {
-        switch (direction) {
-        case NORTHWEST:
-            return 0;
-        case NORTHEAST:
-            return 1;
-        case EAST:
-            return 2;
-        case SOUTHEAST:
-            return 3;
-        case SOUTHWEST:
-            return 4;
-        case WEST:
-            return 5;
-        }
-        throw new InvalidParameterException("direction unknown: " + direction);
+    @Override
+    public String toString() {
+        return "GridPosition q=" + q + ", r=" + r;
     }
 
     public static HexagonMap.Direction getDirectionFromNumber(final int i) {
@@ -131,9 +225,33 @@ public class GridPosition implements Cloneable, Serializable {
         throw new InvalidParameterException("unknown direction: " + i);
     }
 
-    public String getCoordinates() {
-        final String s = q + ", " + r;
-        return s;
+    /**
+     * Calculates the grid distance between two positions
+     *
+     * @param a the start position
+     * @param b the destination position
+     * @return the distance (number of hexagons)
+     */
+    public static int getDistance(final GridPosition a, final GridPosition b) {
+        return (Math.abs(a.q - b.q) + Math.abs(a.r - b.r) + Math.abs(a.q + a.r - b.q - b.r)) / 2;
+    }
+
+    private static int getNumberFromDirection(final HexagonMap.Direction direction) {
+        switch (direction) {
+        case NORTHWEST:
+            return 0;
+        case NORTHEAST:
+            return 1;
+        case EAST:
+            return 2;
+        case SOUTHEAST:
+            return 3;
+        case SOUTHWEST:
+            return 4;
+        case WEST:
+            return 5;
+        }
+        throw new InvalidParameterException("direction unknown: " + direction);
     }
 
     /**
@@ -164,123 +282,5 @@ public class GridPosition implements Cloneable, Serializable {
             rz = -rx - ry;
         }
         return new GridPosition((int) rx, (int) ry);
-    }
-
-    @Override
-    public GridPosition clone() throws CloneNotSupportedException {
-        try {
-            return (GridPosition) super.clone();
-        } catch (final CloneNotSupportedException ex) {
-            Logger.getLogger(GridPosition.class.getName()).log(Level.SEVERE, null, ex);
-            return null;
-        }
-    }
-
-    /**
-     * Two positions are equal if they have the same q and r
-     *
-     * @param obj object to compare to
-     * @return positions are equal if they have the same q and r
-     */
-    @Override
-    public boolean equals(final Object obj) {
-        if (obj == null) {
-            return false;
-        }
-
-        if (obj.getClass().equals(this.getClass())) {
-            final GridPosition gridPositionObj = (GridPosition) obj;
-            if (gridPositionObj.q == q && gridPositionObj.r == r) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    @Override
-    public int hashCode() {
-        int hash = 5;
-        hash = 97 * hash + q;
-        hash = 97 * hash + r;
-        return hash;
-    }
-
-    /**
-     * @param otherPosition other hex grid position
-     * @return true if the positions are adjacent
-     */
-    public boolean isAdjacent(final GridPosition otherPosition) {
-        GridPosition neighbor;
-        for (int i = 0; i < 6; i++) {
-            neighbor = getNeighborPosition(GridPosition.getDirectionFromNumber(i));
-            if (otherPosition.equals(neighbor)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * @param otherPosition reference grid position
-     * @return the direction
-     */
-    public HexagonMap.Direction getDirectionTo(final GridPosition otherPosition) {
-        if (equals(otherPosition)) {
-            throw new IllegalArgumentException(
-                    "Other position (" + otherPosition + ") cannot be same as this (" + this + ")");
-        }
-        final GridPosition firstStepInLine = line(otherPosition).get(1);
-
-        for (int i = 0; i < 6; i++) {
-            if (getNeighborPosition(GridPosition.getDirectionFromNumber(i)).equals(firstStepInLine)) {
-                return GridPosition.getDirectionFromNumber(i);
-            }
-        }
-        throw new InvalidParameterException("unknown position: " + otherPosition);
-    }
-
-    /**
-     * Finds all GridPositions that are on a getLine between this and the given position (the array includes this and
-     * the destination positions)
-     *
-     * @param destination destination grid position
-     * @return an array positions
-     */
-    public List<GridPosition> line(final GridPosition destination) {
-        final ArrayList<GridPosition> result = new ArrayList<>();
-        GridPosition p;
-        double qCalculated;
-        double rCalculated;
-        final double n = GridPosition.getDistance(this, destination);
-        for (int i = 0; i < n; i++) {
-            final double j = i;
-            qCalculated = q * (1.0 - j / n) + destination.q * j / n;
-            rCalculated = r * (1.0 - j / n) + destination.r * j / n;
-            p = GridPosition.hexRound(qCalculated, rCalculated);
-            result.add(p);
-
-        }
-        result.add(destination);
-        return result;
-    }
-
-    /**
-     * Calculates the grid distance between two positions
-     *
-     * @param a the start position
-     * @param b the destination position
-     * @return the distance (number of hexagons)
-     */
-    public static int getDistance(final GridPosition a, final GridPosition b) {
-        return (Math.abs(a.q - b.q) + Math.abs(a.r - b.r) + Math.abs(a.q + a.r - b.q - b.r)) / 2;
-    }
-
-    public int getDistance(final GridPosition target) {
-        return GridPosition.getDistance(this, target);
-    }
-
-    @Override
-    public String toString() {
-        return "GridPosition q=" + q + ", r=" + r;
     }
 }

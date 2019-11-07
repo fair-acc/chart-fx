@@ -5,9 +5,17 @@ import de.gsi.math.TMath;
 public class CauchyLorentzFunction extends AbstractFunction1D implements Function1D {
 
     /**
-     * initialise the Cauchy-Lorentz distribution function
-     * parameter order:
-     * parameter[0] = location (default: 0.0)
+     * initialise the Cauchy-Lorentz distribution function parameter order: parameter[0] = location (default: 0.0)
+     * parameter[1] = scale (default: 1.0)
+     *
+     * @param name function name
+     */
+    public CauchyLorentzFunction(final String name) {
+        this(name, null);
+    }
+
+    /**
+     * initialise the Cauchy-Lorentz distribution function parameter order: parameter[0] = location (default: 0.0)
      * parameter[1] = scale (default: 1.0)
      *
      * @param name function name
@@ -27,18 +35,6 @@ public class CauchyLorentzFunction extends AbstractFunction1D implements Functio
         for (int i = 0; i < Math.min(parameter.length, 2); i++) {
             setParameterValue(i, parameter[0]);
         }
-    }
-
-    /**
-     * initialise the Cauchy-Lorentz distribution function
-     * parameter order:
-     * parameter[0] = location (default: 0.0)
-     * parameter[1] = scale (default: 1.0)
-     *
-     * @param name function name
-     */
-    public CauchyLorentzFunction(final String name) {
-        this(name, null);
     }
 
     @Override

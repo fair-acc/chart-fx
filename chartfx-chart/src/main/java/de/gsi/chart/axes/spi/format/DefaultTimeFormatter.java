@@ -25,43 +25,17 @@ public class DefaultTimeFormatter extends AbstractFormatter {
     protected ObjectProperty<ZoneOffset> timeZone = new SimpleObjectProperty<>(ZoneOffset.UTC);
 
     /**
-     * A time-zone offset from Greenwich/UTC, such as {@code +02:00}.
-     * <p>
-     * A time-zone offset is the amount of time that a time-zone differs from
-     * Greenwich/UTC. This is usually a fixed number of hours and minutes.
-     *
-     * @return ZoneOffset property that is being used to compute the local time
-     *         axis
+     * Construct a DefaultFormatter for the given NumberAxis
      */
-    public ObjectProperty<ZoneOffset> timeZoneOffsetProperty() {
-        return timeZone;
-    }
+    public DefaultTimeFormatter() {
+        this(null);
 
-    /**
-     * @return Returns the A time-zone offset from Greenwich/UTC, such as
-     *         {@code +02:00}.
-     */
-    public ZoneOffset getTimeZoneOffset() {
-        return timeZoneOffsetProperty().get();
-    }
-
-    /**
-     * @param newOffset
-     *            the ZoneOffset to be taken into account (UTC if 'null'.
-     */
-    public void setTimeZoneOffset(final ZoneOffset newOffset) {
-        if (newOffset != null) {
-            timeZoneOffsetProperty().set(newOffset);
-            return;
-        }
-        timeZoneOffsetProperty().set(ZoneOffset.UTC);
     }
 
     /**
      * Construct a DefaultFormatter for the given NumberAxis
      *
-     * @param axis
-     *            The axis to format tick marks for
+     * @param axis The axis to format tick marks for
      */
     public DefaultTimeFormatter(final Axis axis) {
         super(axis);
@@ -78,28 +52,6 @@ public class DefaultTimeFormatter extends AbstractFormatter {
         }
     }
 
-    /**
-     * Construct a DefaultFormatter for the given NumberAxis
-     */
-    public DefaultTimeFormatter() {
-        this(null);
-
-    }
-
-    @Override
-    protected void rangeUpdated() {
-        // set formatter based on range if necessary
-        formatterIndex = DefaultTimeTickUnitSupplier.getTickIndex(getRange());
-        if (oldIndex != formatterIndex) {
-            labelCache.clear();
-            oldIndex = formatterIndex;
-        }
-    }
-
-    public String getCurrentLocalDateTimeStamp() {
-        return LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS"));
-    }
-
     public String formatHighResString(final Number utcValueSeconds) {
         final double timeAbs = Math.abs(utcValueSeconds.doubleValue());
         final long timeUS = (long) (TimeUnit.SECONDS.toMicros(1) * timeAbs);
@@ -112,8 +64,12 @@ public class DefaultTimeFormatter extends AbstractFormatter {
     }
 
     @Override
-    public String toString(final Number utcValueSeconds) {
-        return labelCache.computeIfAbsent(utcValueSeconds, this::getTimeString);
+    public Number fromString(final String string) {
+        return null;
+    }
+
+    public String getCurrentLocalDateTimeStamp() {
+        return LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS"));
     }
 
     private String getTimeString(final Number utcValueSeconds) {
@@ -121,9 +77,9 @@ public class DefaultTimeFormatter extends AbstractFormatter {
             return formatHighResString(utcValueSeconds);
         }
 
-        long longUTCSeconds =  utcValueSeconds.longValue();
+        long longUTCSeconds = utcValueSeconds.longValue();
         int longNanoSeconds = (int) ((utcValueSeconds.doubleValue() - longUTCSeconds) * 1e9);
-        if (longNanoSeconds< 0) { // Correctly Handle dates before EPOCH
+        if (longNanoSeconds < 0) { // Correctly Handle dates before EPOCH
             longUTCSeconds -= 1;
             longNanoSeconds += 1e9;
         }
@@ -133,8 +89,48 @@ public class DefaultTimeFormatter extends AbstractFormatter {
         return dateTime.format(dateFormat[formatterIndex]).replaceAll(" ", System.lineSeparator());
     }
 
+    /**
+     * @return Returns the A time-zone offset from Greenwich/UTC, such as {@code +02:00}.
+     */
+    public ZoneOffset getTimeZoneOffset() {
+        return timeZoneOffsetProperty().get();
+    }
+
     @Override
-    public Number fromString(final String string) {
-        return null;
+    protected void rangeUpdated() {
+        // set formatter based on range if necessary
+        formatterIndex = DefaultTimeTickUnitSupplier.getTickIndex(getRange());
+        if (oldIndex != formatterIndex) {
+            labelCache.clear();
+            oldIndex = formatterIndex;
+        }
+    }
+
+    /**
+     * @param newOffset the ZoneOffset to be taken into account (UTC if 'null'.
+     */
+    public void setTimeZoneOffset(final ZoneOffset newOffset) {
+        if (newOffset != null) {
+            timeZoneOffsetProperty().set(newOffset);
+            return;
+        }
+        timeZoneOffsetProperty().set(ZoneOffset.UTC);
+    }
+
+    /**
+     * A time-zone offset from Greenwich/UTC, such as {@code +02:00}.
+     * <p>
+     * A time-zone offset is the amount of time that a time-zone differs from Greenwich/UTC. This is usually a fixed
+     * number of hours and minutes.
+     *
+     * @return ZoneOffset property that is being used to compute the local time axis
+     */
+    public ObjectProperty<ZoneOffset> timeZoneOffsetProperty() {
+        return timeZone;
+    }
+
+    @Override
+    public String toString(final Number utcValueSeconds) {
+        return labelCache.computeIfAbsent(utcValueSeconds, this::getTimeString);
     }
 }

@@ -17,17 +17,13 @@ import javafx.util.Duration;
 /**
  * SidesPane inspired by the HiddenSidesPane of the controlsFX package
  * <p>
- * A pane used to display a full-size content node and four initially hidden
- * nodes on the four sides. The hidden nodes can be made visible by moving the
- * mouse cursor to the edges (see {@link #setTriggerDistance(double)}) of the
- * pane. The hidden node will appear (at its preferred width or height) with a
- * short slide-in animation. The node will disappear again as soon as the mouse
- * cursor exits it. A hidden node / side can also be pinned by calling
- * {@link #setPinned(Side,Boolean)}. It will remain visible as long as it stays
- * pinned.
- * <h3>Screenshot</h3> The following screenshots shows the right side node
- * hovering over a table after it was made visible:
- * <img src="hiddenSidesPane.png" alt="Screenshot of HiddenSidesPane">
+ * A pane used to display a full-size content node and four initially hidden nodes on the four sides. The hidden nodes
+ * can be made visible by moving the mouse cursor to the edges (see {@link #setTriggerDistance(double)}) of the pane.
+ * The hidden node will appear (at its preferred width or height) with a short slide-in animation. The node will
+ * disappear again as soon as the mouse cursor exits it. A hidden node / side can also be pinned by calling
+ * {@link #setPinned(Side,Boolean)}. It will remain visible as long as it stays pinned.
+ * <h3>Screenshot</h3> The following screenshots shows the right side node hovering over a table after it was made
+ * visible: <img src="hiddenSidesPane.png" alt="Screenshot of HiddenSidesPane">
  * <h3>Code Sample</h3>
  *
  * <pre>
@@ -59,8 +55,7 @@ public class SidesPane extends Control {
     };
 
     /**
-     * The property used to store a reference to the node shown at the right
-     * side of the pane.
+     * The property used to store a reference to the node shown at the right side of the pane.
      */
     private final ObjectProperty<Node> right = new SimpleObjectProperty<Node>(this, "right") {
         @Override
@@ -77,8 +72,7 @@ public class SidesPane extends Control {
     };
 
     /**
-     * The property used to store a reference to the node shown at the bottom
-     * side of the pane.
+     * The property used to store a reference to the node shown at the bottom side of the pane.
      */
     private final ObjectProperty<Node> bottom = new SimpleObjectProperty<Node>(this, "bottom") {
         @Override
@@ -95,8 +89,7 @@ public class SidesPane extends Control {
     };
 
     /**
-     * The property used to store a reference to the node shown at the left side
-     * of the pane.
+     * The property used to store a reference to the node shown at the left side of the pane.
      */
     private final ObjectProperty<Node> left = new SimpleObjectProperty<Node>(this, "left") {
         @Override
@@ -127,20 +120,14 @@ public class SidesPane extends Control {
     }
 
     /**
-     * Constructs a new pane with the given content node and the four side
-     * nodes. Each one of the side nodes may be null.
+     * Constructs a new pane with the given content node and the four side nodes. Each one of the side nodes may be
+     * null.
      *
-     * @param content
-     *            the primary node that will fill the entire width and height of
-     *            the pane
-     * @param top
-     *            the hidden node on the top side
-     * @param right
-     *            the hidden node on the right side
-     * @param bottom
-     *            the hidden node on the bottom side
-     * @param left
-     *            the hidden node on the left side
+     * @param content the primary node that will fill the entire width and height of the pane
+     * @param top the hidden node on the top side
+     * @param right the hidden node on the right side
+     * @param bottom the hidden node on the bottom side
+     * @param left the hidden node on the left side
      */
     public SidesPane(final Node content, final Node top, final Node right, final Node bottom, final Node left) {
         super();
@@ -182,9 +169,8 @@ public class SidesPane extends Control {
     // Content node support.
 
     /**
-     * Returns the animation delay property. The value of this property
-     * determines the delay before the hidden side slide in / slide out
-     * animation starts to play.
+     * Returns the animation delay property. The value of this property determines the delay before the hidden side
+     * slide in / slide out animation starts to play.
      *
      * @return animation delay property
      */
@@ -193,8 +179,8 @@ public class SidesPane extends Control {
     }
 
     /**
-     * Returns the animation duration property. The value of this property
-     * determines the fade in time for a hidden side to become visible.
+     * Returns the animation duration property. The value of this property determines the fade in time for a hidden side
+     * to become visible.
      *
      * @return animation delay property
      */
@@ -212,8 +198,8 @@ public class SidesPane extends Control {
     }
 
     /**
-     * The property that is used to store a reference to the content node. The
-     * content node will fill the entire width and height of the pane.
+     * The property that is used to store a reference to the content node. The content node will fill the entire width
+     * and height of the pane.
      *
      * @return the content node property
      */
@@ -222,6 +208,11 @@ public class SidesPane extends Control {
     }
 
     // Top node support.
+
+    @Override
+    protected Skin<?> createDefaultSkin() {
+        return new SidesPaneSkin(this);
+    }
 
     /**
      * Returns the animation delay
@@ -250,6 +241,8 @@ public class SidesPane extends Control {
         return bottomProperty().get();
     }
 
+    // Right node support.
+
     /**
      * Returns the value of the content node property.
      *
@@ -258,8 +251,6 @@ public class SidesPane extends Control {
     public final Node getContent() {
         return contentProperty().get();
     }
-
-    // Right node support.
 
     /**
      * Returns the value of the left node property.
@@ -288,6 +279,8 @@ public class SidesPane extends Control {
         return topProperty().get();
     }
 
+    // Bottom node support.
+
     /**
      * Returns the value of the trigger distance property.
      *
@@ -297,13 +290,10 @@ public class SidesPane extends Control {
         return triggerDistance.get();
     }
 
-    // Bottom node support.
-
     /**
      * Returns the value of the pinned side property.
      *
-     * @param side
-     *            the side to query
+     * @param side the side to query
      * @return the pinned side property value
      */
     public final Boolean isPinned(final Side side) {
@@ -324,8 +314,8 @@ public class SidesPane extends Control {
     }
 
     /**
-     * Returns the pinned side property. The value of this property determines
-     * if one of the four hidden sides stays visible all the time.
+     * Returns the pinned side property. The value of this property determines if one of the four hidden sides stays
+     * visible all the time.
      *
      * @return the pinned side property
      */
@@ -333,11 +323,11 @@ public class SidesPane extends Control {
         return pinnedSide;
     }
 
+    // Left node support.
+
     public DoubleProperty prefHeightBottomProperty() {
         return prefHeightBottom;
     }
-
-    // Left node support.
 
     public DoubleProperty prefHeightTopProperty() {
         return prefHeightTop;
@@ -363,8 +353,7 @@ public class SidesPane extends Control {
     /**
      * Set the animation delay
      *
-     * @param duration
-     *            slide in animation delay
+     * @param duration slide in animation delay
      */
     public final void setAnimationDelay(final Duration duration) {
         animationDelay.set(duration);
@@ -373,8 +362,7 @@ public class SidesPane extends Control {
     /**
      * Set the animation delay
      *
-     * @param duration
-     *            animation duration
+     * @param duration animation duration
      */
     public final void setAnimationDuration(final Duration duration) {
         animationDuration.set(duration);
@@ -383,30 +371,27 @@ public class SidesPane extends Control {
     /**
      * Sets the value of the bottom node property.
      *
-     * @param bottom
-     *            the bottom node value
+     * @param bottom the bottom node value
      */
     public final void setBottom(final Node bottom) {
         bottomProperty().set(bottom);
     }
 
+    // slide in animation delay
+
     /**
      * Sets the value of the content node property.
      *
-     * @param content
-     *            the new content node
+     * @param content the new content node
      */
     public final void setContent(final Node content) {
         contentProperty().set(content);
     }
 
-    // slide in animation delay
-
     /**
      * Sets the value of the left node property.
      *
-     * @param left
-     *            the left node value
+     * @param left the left node value
      */
     public final void setLeft(final Node left) {
         leftProperty().set(left);
@@ -415,10 +400,8 @@ public class SidesPane extends Control {
     /**
      * Sets the value of the pinned side property.
      *
-     * @param side
-     *            the new pinned side value
-     * @param stateState
-     *            pinned state
+     * @param side the new pinned side value
+     * @param stateState pinned state
      */
     public final void setPinned(final Side side, final Boolean stateState) {
         if (pinnedSideProperty().get(side) == null) {
@@ -431,41 +414,36 @@ public class SidesPane extends Control {
     /**
      * Sets the value of the right node property.
      *
-     * @param right
-     *            the right node value
+     * @param right the right node value
      */
     public final void setRight(final Node right) {
         rightProperty().set(right);
     }
 
+    // slide in / slide out duration
+
     /**
      * Sets the value of the top node property.
      *
-     * @param top
-     *            the top node value
+     * @param top the top node value
      */
     public final void setTop(final Node top) {
         topProperty().set(top);
     }
 
-    // slide in / slide out duration
-
     /**
      * Set the value of the trigger distance property. <br>
-     * Setting the property to zero or a negative value will disable this
-     * functionality, so a hidden side can only be made visible with
-     * {@link #setPinned(Side,Boolean)}.
+     * Setting the property to zero or a negative value will disable this functionality, so a hidden side can only be
+     * made visible with {@link #setPinned(Side,Boolean)}.
      *
-     * @param distance
-     *            the new value for the trigger distance property
+     * @param distance the new value for the trigger distance property
      */
     public final void setTriggerDistance(final double distance) {
         triggerDistance.set(distance);
     }
 
     /**
-     * The property used to store a reference to the node shown at the top side
-     * of the pane.
+     * The property used to store a reference to the node shown at the top side of the pane.
      *
      * @return the hidden node at the top side of the pane
      */
@@ -474,20 +452,14 @@ public class SidesPane extends Control {
     }
 
     /**
-     * The property that stores the distance to the pane's edges that will
-     * trigger the appearance of the hidden side nodes.<br>
-     * Setting the property to zero or a negative value will disable this
-     * functionality, so a hidden side can only be made visible with
-     * {@link #setPinned(Side, Boolean)}.
+     * The property that stores the distance to the pane's edges that will trigger the appearance of the hidden side
+     * nodes.<br>
+     * Setting the property to zero or a negative value will disable this functionality, so a hidden side can only be
+     * made visible with {@link #setPinned(Side, Boolean)}.
      *
      * @return the trigger distance property
      */
     public final DoubleProperty triggerDistanceProperty() {
         return triggerDistance;
-    }
-
-    @Override
-    protected Skin<?> createDefaultSkin() {
-        return new SidesPaneSkin(this);
     }
 }

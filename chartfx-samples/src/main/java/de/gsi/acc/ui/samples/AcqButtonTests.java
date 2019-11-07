@@ -34,9 +34,9 @@ public class AcqButtonTests extends Application {
         cb4.selectedProperty().bindBidirectional(acqBar.stopStateProperty());
 
         root.getChildren()
-                .addAll(new Label("AcquisitionButtonBar "
-                        + (isPauseEnabled ? "with" : "without") + " pause button functionality "), new HBox(cbDisabled),
-                        acqBar, new VBox(new Label("AcquisitionButtonBar state property values:"), cb1, cb2, cb3, cb4));
+                .addAll(new Label("AcquisitionButtonBar " + (isPauseEnabled ? "with" : "without")
+                        + " pause button functionality "), new HBox(cbDisabled), acqBar,
+                        new VBox(new Label("AcquisitionButtonBar state property values:"), cb1, cb2, cb3, cb4));
 
         return root;
     }

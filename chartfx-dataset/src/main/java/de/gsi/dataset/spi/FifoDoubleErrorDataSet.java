@@ -13,65 +13,11 @@ import de.gsi.dataset.spi.utils.DoublePointError;
 /**
  * @author rstein
  */
-public class FifoDoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet> implements DataSet2D, DataSetError {
+public class FifoDoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
+        implements DataSet2D, DataSetError {
     private static final long serialVersionUID = -7153702141838930486L;
     protected LimitedQueue<DataBlob> data;
     protected double maxDistance = Double.MAX_VALUE;
-
-    /**
-     * @author rstein
-     * @param <E> generics template reference
-     */
-    public class LimitedQueue<E> extends ArrayList<E> {
-
-        private static final long serialVersionUID = -5751322669709687363L;
-        private final int limit;
-
-        /**
-         * @param limit size of queue
-         */
-        public LimitedQueue(final int limit) {
-            this.limit = limit;
-            if (limit < 1) {
-                throw new IllegalArgumentException("Queue limit must be greater than 0");
-            }
-        }
-
-        @Override
-        public boolean add(final E o) {
-            final boolean r = super.add(o);
-            if (size() > limit) {
-                super.remove(0);
-            }
-            return r;
-        }
-
-    }
-
-    protected class DataBlob extends DoublePointError {
-
-        protected String style;
-        protected String tag;
-
-        protected DataBlob(final double x, final double y, final double errorX, final double errorY, final String tag,
-                final String style) {
-            super(x, y, errorX, errorY);
-            this.tag = tag;
-            this.style = style;
-        }
-
-        protected DataBlob(final double x, final double y, final double errorX, final double errorY) {
-            this(x, y, errorX, errorY, null, null);
-        }
-
-        public String getStyle() {
-            return style;
-        }
-
-        public String getDataLabel() {
-            return tag;
-        }
-    }
 
     /**
      * Creates a new instance of <code>FifoDoubleErrorDataSet</code>.
@@ -103,55 +49,6 @@ public class FifoDoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorData
         }
         this.maxDistance = maxDistance;
         data = new LimitedQueue<>(initalSize);
-    }
-
-    /**
-     * @return maximum range before data points are being dropped
-     */
-    public double getMaxDistance() {
-        return maxDistance;
-    }
-
-    /**
-     * @param maxDistance maximum range before data points are being dropped
-     */
-    public void setMaxDistance(final double maxDistance) {
-        this.maxDistance = maxDistance;
-    }
-
-    @Override
-    public double getX(final int index) {
-        return data.get(index).getX();
-    }
-
-    @Override
-    public double getY(final int index) {
-        return data.get(index).getY();
-    }
-
-    @Override
-    public String getStyle(final int index) {
-        return data.get(index).getStyle();
-    }
-
-    @Override
-    public double getErrorNegative(final int dimIndex, final int index) {
-        return dimIndex == DIM_X ? data.get(index).getErrorX() : data.get(index).getErrorY();
-    }
-
-    @Override
-    public double getErrorPositive(final int dimIndex, final int index) {
-    	return dimIndex == DIM_X ? data.get(index).getErrorX() : data.get(index).getErrorY();
-    }
-
-    @Override
-    public String getDataLabel(final int index) {
-        return data.get(index).getDataLabel();
-    }
-
-    @Override
-    public int getDataCount() {
-        return data.size();
     }
 
     /**
@@ -277,11 +174,115 @@ public class FifoDoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorData
         return dataPointsToRemove;
     }
 
+    @Override
+    public int getDataCount() {
+        return data.size();
+    }
+
+    @Override
+    public String getDataLabel(final int index) {
+        return data.get(index).getDataLabel();
+    }
+
+    @Override
+    public double getErrorNegative(final int dimIndex, final int index) {
+        return dimIndex == DIM_X ? data.get(index).getErrorX() : data.get(index).getErrorY();
+    }
+
+    @Override
+    public double getErrorPositive(final int dimIndex, final int index) {
+        return dimIndex == DIM_X ? data.get(index).getErrorX() : data.get(index).getErrorY();
+    }
+
+    /**
+     * @return maximum range before data points are being dropped
+     */
+    public double getMaxDistance() {
+        return maxDistance;
+    }
+
+    @Override
+    public String getStyle(final int index) {
+        return data.get(index).getStyle();
+    }
+
+    @Override
+    public double getX(final int index) {
+        return data.get(index).getX();
+    }
+
+    @Override
+    public double getY(final int index) {
+        return data.get(index).getY();
+    }
+
     /**
      * remove all data points
      */
     public void reset() {
         data.clear();
         fireInvalidated(new RemovedDataEvent(this, "reset"));
+    }
+
+    /**
+     * @param maxDistance maximum range before data points are being dropped
+     */
+    public void setMaxDistance(final double maxDistance) {
+        this.maxDistance = maxDistance;
+    }
+
+    protected class DataBlob extends DoublePointError {
+
+        protected String style;
+        protected String tag;
+
+        protected DataBlob(final double x, final double y, final double errorX, final double errorY) {
+            this(x, y, errorX, errorY, null, null);
+        }
+
+        protected DataBlob(final double x, final double y, final double errorX, final double errorY, final String tag,
+                final String style) {
+            super(x, y, errorX, errorY);
+            this.tag = tag;
+            this.style = style;
+        }
+
+        public String getDataLabel() {
+            return tag;
+        }
+
+        public String getStyle() {
+            return style;
+        }
+    }
+
+    /**
+     * @author rstein
+     * @param <E> generics template reference
+     */
+    public class LimitedQueue<E> extends ArrayList<E> {
+
+        private static final long serialVersionUID = -5751322669709687363L;
+        private final int limit;
+
+        /**
+         * @param limit size of queue
+         */
+        public LimitedQueue(final int limit) {
+            this.limit = limit;
+            if (limit < 1) {
+                throw new IllegalArgumentException("Queue limit must be greater than 0");
+            }
+        }
+
+        @Override
+        public boolean add(final E o) {
+            final boolean r = super.add(o);
+            if (size() > limit) {
+                super.remove(0);
+            }
+            return r;
+        }
+
     }
 }

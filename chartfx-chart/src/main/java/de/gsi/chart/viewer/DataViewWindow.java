@@ -239,6 +239,56 @@ public class DataViewWindow extends BorderPane {
         return dragCursor;
     }
 
+    private void dragFinish(final MouseEvent mevt) {
+        if (isMinimised() || parentView.getMinimisedChildren().contains(this)) {
+            return;
+        }
+        if (mouseFilter != null && !mouseFilter.test(mevt)) {
+            return;
+        }
+        uninstallCursor();
+
+        final Point2D mouseLoc = new Point2D(mevt.getScreenX(), mevt.getScreenY());
+        final Bounds screenBounds = localToScreen(windowDecoration.getBoundsInLocal());
+        if (!screenBounds.contains(mouseLoc)) {
+            // mouse move outside window detected -- launch dialog
+            // dropped outside of node window
+            if (!dialog.isShowing()) {
+
+                dialog.show(mevt);
+                return;
+            }
+            dialog.setX(mevt.getScreenX() - xOffset);
+            dialog.setY(mevt.getScreenY() - yOffset);
+            return;
+        } else {
+            this.requestFocus();
+        }
+
+        if (dialog.isShowing()) {
+            dialog.setX(mevt.getScreenX() - xOffset);
+            dialog.setY(mevt.getScreenY() - yOffset);
+        }
+    }
+
+    private void dragOngoing(final MouseEvent mevt) {
+        if (mouseFilter != null && !mouseFilter.test(mevt)) {
+            return;
+        }
+        // launch dragging dialogue
+        dialog.setX(mevt.getScreenX() - xOffset);
+        dialog.setY(mevt.getScreenY() - yOffset);
+    }
+
+    private void dragStart(final MouseEvent mevt) {
+        if (mouseFilter != null && !mouseFilter.test(mevt)) {
+            return;
+        }
+        installCursor();
+        xOffset = mevt.getSceneX();
+        yOffset = mevt.getSceneY();
+    }
+
     /**
      * @return the closeButton
      */
@@ -315,12 +365,29 @@ public class DataViewWindow extends BorderPane {
         return graphic;
     }
 
+    protected void installCursor() {
+        originalCursor = this.getCursor();
+        if (getDragCursor() != null) {
+            this.setCursor(getDragCursor());
+        }
+    }
+
     public boolean isMinimised() {
         return minimisedProperty().get();
     }
 
     public boolean isWindowDecorationVisible() {
         return windowDecorationVisible().get();
+    }
+
+    @Override
+    protected void layoutChildren() {
+        final long start = ProcessingProfiler.getTimeStamp();
+        super.layoutChildren();
+        if (getContent() instanceof Chart) {
+            ProcessingProfiler.getTimeDiff(start,
+                    "pane updated with data set = " + ((Chart) getContent()).getDatasets().get(0).getName());
+        }
     }
 
     public BooleanProperty minimisedProperty() {
@@ -371,79 +438,12 @@ public class DataViewWindow extends BorderPane {
         return DataViewWindow.class.getSimpleName() + this.getName();
     }
 
-    public BooleanProperty windowDecorationVisible() {
-        return decorationVisible;
-    }
-
-    private void dragFinish(final MouseEvent mevt) {
-        if (isMinimised() || parentView.getMinimisedChildren().contains(this)) {
-            return;
-        }
-        if (mouseFilter != null && !mouseFilter.test(mevt)) {
-            return;
-        }
-        uninstallCursor();
-
-        final Point2D mouseLoc = new Point2D(mevt.getScreenX(), mevt.getScreenY());
-        final Bounds screenBounds = localToScreen(windowDecoration.getBoundsInLocal());
-        if (!screenBounds.contains(mouseLoc)) {
-            // mouse move outside window detected -- launch dialog
-            // dropped outside of node window
-            if (!dialog.isShowing()) {
-
-                dialog.show(mevt);
-                return;
-            }
-            dialog.setX(mevt.getScreenX() - xOffset);
-            dialog.setY(mevt.getScreenY() - yOffset);
-            return;
-        } else {
-            this.requestFocus();
-        }
-
-        if (dialog.isShowing()) {
-            dialog.setX(mevt.getScreenX() - xOffset);
-            dialog.setY(mevt.getScreenY() - yOffset);
-        }
-    }
-
-    private void dragOngoing(final MouseEvent mevt) {
-        if (mouseFilter != null && !mouseFilter.test(mevt)) {
-            return;
-        }
-        // launch dragging dialogue
-        dialog.setX(mevt.getScreenX() - xOffset);
-        dialog.setY(mevt.getScreenY() - yOffset);
-    }
-
-    private void dragStart(final MouseEvent mevt) {
-        if (mouseFilter != null && !mouseFilter.test(mevt)) {
-            return;
-        }
-        installCursor();
-        xOffset = mevt.getSceneX();
-        yOffset = mevt.getSceneY();
-    }
-
     private void uninstallCursor() {
         this.setCursor(originalCursor);
     }
 
-    protected void installCursor() {
-        originalCursor = this.getCursor();
-        if (getDragCursor() != null) {
-            this.setCursor(getDragCursor());
-        }
-    }
-
-    @Override
-    protected void layoutChildren() {
-        final long start = ProcessingProfiler.getTimeStamp();
-        super.layoutChildren();
-        if (getContent() instanceof Chart) {
-            ProcessingProfiler.getTimeDiff(start,
-                    "pane updated with data set = " + ((Chart) getContent()).getDatasets().get(0).getName());
-        }
+    public BooleanProperty windowDecorationVisible() {
+        return decorationVisible;
     }
 
     protected class ExternalStage extends Stage {

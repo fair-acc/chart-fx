@@ -5,28 +5,15 @@ package de.gsi.dataset;
  * <p>
  * N.B. this description is given per dimension (ie. one for "X" and one for "Y" for a typical X-Y dataset/plot)
  * <p>
- * example usages:
- * [..].setName("x-axis"); // for setting only the name
- * [..].setName("time", "s"); // for setting the axis name and unit
- * [..].setName("voltage", "V", 0.0, 230.0); // for setting the axis name, unit and explicit min/max values
- * [..].setName("intensity", "ppp", 1e9, 1e10, 1e8, 1e11); // or
- * [..].setName("intensity", "ppp", intensityRange); // for an unsorted range list based on which the internal min/max
- * range is updated.
+ * example usages: [..].setName("x-axis"); // for setting only the name [..].setName("time", "s"); // for setting the
+ * axis name and unit [..].setName("voltage", "V", 0.0, 230.0); // for setting the axis name, unit and explicit min/max
+ * values [..].setName("intensity", "ppp", 1e9, 1e10, 1e8, 1e11); // or [..].setName("intensity", "ppp",
+ * intensityRange); // for an unsorted range list based on which the internal min/max range is updated.
  * 
  * @author akrimm
  * @author rstein
  */
 public interface AxisDescription {
-
-    /**
-     * Adds values to this range.
-     *
-     * @param values values to be added
-     * @param nlength the maximum array length that should be taken into account
-     * @return <code>true</code> if the value becomes <code>min</code> or
-     *         <code>max</code>.
-     */
-    public boolean add(final double[] values, final int nlength);
 
     /**
      * Adds value to this range.
@@ -47,17 +34,26 @@ public interface AxisDescription {
     }
 
     /**
-     * Empties this DataRange. After calling this method this data range becomes
-     * undefined.
+     * Adds values to this range.
+     *
+     * @param values values to be added
+     * @param nlength the maximum array length that should be taken into account
+     * @return <code>true</code> if the value becomes <code>min</code> or <code>max</code>.
+     */
+    public boolean add(final double[] values, final int nlength);
+
+    /**
+     * Empties this DataRange. After calling this method this data range becomes undefined.
+     * 
      * @return <code>true</code> if the values were valid before
      * @see #isDefined()
      */
     public boolean clear();
 
     public boolean contains(final double value);
-    
+
     public double getLength();
-    
+
     /**
      * @return maximum value of the axis or DataSet
      */
@@ -106,8 +102,7 @@ public interface AxisDescription {
 
     /**
      * @param axisName the new axis name
-     * @param axisUnit the new axis unit (optional variadic argument)
-     *            N.B. issues
+     * @param axisUnit the new axis unit (optional variadic argument) N.B. issues
      * @see de.gsi.dataset.event.AxisNameChangeEvent event if only the name/unit changed, or
      * @see de.gsi.dataset.event.AxisRangeChangeEvent event if only the range changed, or
      * @see de.gsi.dataset.event.AxisChangeEvent for a full change

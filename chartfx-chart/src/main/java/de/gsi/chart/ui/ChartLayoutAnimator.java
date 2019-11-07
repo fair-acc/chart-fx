@@ -38,8 +38,8 @@ import javafx.scene.Parent;
 import javafx.scene.chart.Axis;
 
 /**
- * Runs any number of animations of KeyFrames calling requestLayout on the given node for every frame while one of
- * those animations is running.
+ * Runs any number of animations of KeyFrames calling requestLayout on the given node for every frame while one of those
+ * animations is running.
  */
 public final class ChartLayoutAnimator extends AnimationTimer implements EventHandler<ActionEvent> {
     private Parent nodeToLayout;
@@ -51,35 +51,25 @@ public final class ChartLayoutAnimator extends AnimationTimer implements EventHa
         isAxis = nodeToLayout instanceof Axis;
     }
 
-    @Override
-    public void handle(long l) {
-        if (isAxis) {
-            ((Axis<?>) nodeToLayout).requestAxisLayout();
-        } else {
-            nodeToLayout.requestLayout();
-        }
-    }
-
-    @Override
-    public void handle(ActionEvent actionEvent) {
-        activeTimeLines.remove(actionEvent.getSource());
-        if (activeTimeLines.isEmpty())
-            stop();
-        // cause one last re-layout to make sure final values were used
-        handle(0l);
-    }
-
     /**
-     * Stop the animation with the given ID
+     * Play a animation containing the given keyframes.
      *
-     * @param animationID The id of the animation to stop
+     * @param animation The animation to play
+     * @return A id reference to the animation that can be used to stop the animation if needed
      */
-    public void stop(Object animationID) {
-        Animation t = activeTimeLines.remove(animationID);
-        if (t != null)
-            t.stop();
+    public Object animate(Animation animation) {
+        SequentialTransition t = new SequentialTransition();
+        t.getChildren().add(animation);
+        t.setOnFinished(this);
+        // start animation timer if needed
         if (activeTimeLines.isEmpty())
-            stop();
+            start();
+        // get id and add to map
+        activeTimeLines.put(t, t);
+        // play animation
+        t.play();
+        return t;
+
     }
 
     /**
@@ -104,24 +94,34 @@ public final class ChartLayoutAnimator extends AnimationTimer implements EventHa
         return t;
     }
 
-    /**
-     * Play a animation containing the given keyframes.
-     *
-     * @param animation The animation to play
-     * @return A id reference to the animation that can be used to stop the animation if needed
-     */
-    public Object animate(Animation animation) {
-        SequentialTransition t = new SequentialTransition();
-        t.getChildren().add(animation);
-        t.setOnFinished(this);
-        // start animation timer if needed
+    @Override
+    public void handle(ActionEvent actionEvent) {
+        activeTimeLines.remove(actionEvent.getSource());
         if (activeTimeLines.isEmpty())
-            start();
-        // get id and add to map
-        activeTimeLines.put(t, t);
-        // play animation
-        t.play();
-        return t;
+            stop();
+        // cause one last re-layout to make sure final values were used
+        handle(0l);
+    }
 
+    @Override
+    public void handle(long l) {
+        if (isAxis) {
+            ((Axis<?>) nodeToLayout).requestAxisLayout();
+        } else {
+            nodeToLayout.requestLayout();
+        }
+    }
+
+    /**
+     * Stop the animation with the given ID
+     *
+     * @param animationID The id of the animation to stop
+     */
+    public void stop(Object animationID) {
+        Animation t = activeTimeLines.remove(animationID);
+        if (t != null)
+            t.stop();
+        if (activeTimeLines.isEmpty())
+            stop();
     }
 }

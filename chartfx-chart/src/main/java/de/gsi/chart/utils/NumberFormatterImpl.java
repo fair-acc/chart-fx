@@ -20,6 +20,11 @@ public class NumberFormatterImpl extends StringConverter<Number> implements Numb
         setExponentialForm(exponentialForm);
     }
 
+    @Override
+    public Number fromString(final String string) {
+        return Double.parseDouble(string);
+    }
+
     public DecimalFormat getFormatter() {
         return formatter;
     }
@@ -32,6 +37,18 @@ public class NumberFormatterImpl extends StringConverter<Number> implements Numb
     @Override
     public int getPrecision() {
         return formatter.getMinimumSignificantDigits();
+    }
+
+    @Override
+    public boolean isExponentialForm() {
+        return formatter.isScientificNotation();
+    }
+
+    @Override
+    public NumberFormatter setExponentialForm(final boolean state) {
+        // formatter.setExponentSignAlwaysShown(true);
+        formatter.setScientificNotation(state);
+        return this;
     }
 
     /*
@@ -50,18 +67,6 @@ public class NumberFormatterImpl extends StringConverter<Number> implements Numb
     }
 
     @Override
-    public boolean isExponentialForm() {
-        return formatter.isScientificNotation();
-    }
-
-    @Override
-    public NumberFormatter setExponentialForm(final boolean state) {
-        // formatter.setExponentSignAlwaysShown(true);
-        formatter.setScientificNotation(state);
-        return this;
-    }
-
-    @Override
     public String toString(final double val) {
         return formatter.format(val);
     }
@@ -69,11 +74,6 @@ public class NumberFormatterImpl extends StringConverter<Number> implements Numb
     @Override
     public String toString(final Number object) {
         return toString(object.doubleValue());
-    }
-
-    @Override
-    public Number fromString(final String string) {
-        return Double.parseDouble(string);
     }
 
 }

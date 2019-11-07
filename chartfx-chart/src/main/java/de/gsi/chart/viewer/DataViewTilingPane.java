@@ -15,9 +15,8 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 
 /**
- * DataViewTilingPane that to mimics HBox-, VBox-, or TilePane layout while
- * consistently maximising it's children and following layout constraints from
- * its parent
+ * DataViewTilingPane that to mimics HBox-, VBox-, or TilePane layout while consistently maximising it's children and
+ * following layout constraints from its parent
  *
  * @author rstein
  */
@@ -36,15 +35,6 @@ public class DataViewTilingPane extends GridPane {
                 layoutNormal();
             }
         });
-    }
-
-    public Layout getLayout() {
-        return layout;
-    }
-
-    @Override
-    public String toString() {
-        return DataViewTilingPane.class.getSimpleName() + "('" + layout + "0')";
     }
 
     protected int getColumnsCount() {
@@ -69,6 +59,10 @@ public class DataViewTilingPane extends GridPane {
             }
             return ncols;
         }
+    }
+
+    public Layout getLayout() {
+        return layout;
     }
 
     protected void layoutNormal() {
@@ -122,6 +116,11 @@ public class DataViewTilingPane extends GridPane {
             }
             childCount++;
         }
+    }
+
+    @Override
+    public String toString() {
+        return DataViewTilingPane.class.getSimpleName() + "('" + layout + "0')";
     }
 
     public enum Layout {

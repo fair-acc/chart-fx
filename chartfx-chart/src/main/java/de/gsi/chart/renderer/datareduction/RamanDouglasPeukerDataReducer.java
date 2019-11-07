@@ -6,25 +6,17 @@ import de.gsi.dataset.utils.ProcessingProfiler;
 import de.gsi.math.ArrayUtils;
 
 /**
- * Filters data using Ramer-Douglas-Peucker algorithm with specified tolerance
- * N.B. numberical complexity: average O(n log (n)) -&gt; worst-case O(n^2)
+ * Filters data using Ramer-Douglas-Peucker algorithm with specified tolerance N.B. numberical complexity: average O(n
+ * log (n)) -&gt; worst-case O(n^2)
  *
  * @author Rzeźnik
- * @see <a href=
- *      "http://en.wikipedia.org/wiki/Ramer-Douglas-Peucker_algorithm">Ramer-Douglas-Peucker
- *      algorithm</a>
+ * @see <a href= "http://en.wikipedia.org/wiki/Ramer-Douglas-Peucker_algorithm">Ramer-Douglas-Peucker algorithm</a>
  */
 public class RamanDouglasPeukerDataReducer implements RendererDataReducer {
     private double epsilon = 0.1;
 
-    /**
-     * @param epsilon
-     *            maximum distance of a point in data between original curve and
-     *            simplified curve
-     */
-    public void setEpsilon(final double epsilon) {
-        AssertUtils.gtEqThanZero("epsilon", epsilon);
-        this.epsilon = epsilon;
+    public double[][] filter(final double[][] data) {
+        return ramerDouglasPeuckerFunction(data, 0, data.length - 1);
     }
 
     /**
@@ -32,10 +24,6 @@ public class RamanDouglasPeukerDataReducer implements RendererDataReducer {
      */
     public double getEpsilon() {
         return epsilon;
-    }
-
-    public double[][] filter(final double[][] data) {
-        return ramerDouglasPeuckerFunction(data, 0, data.length - 1);
     }
 
     protected double[][] ramerDouglasPeuckerFunction(final double[][] points, final int startIndex,
@@ -105,6 +93,14 @@ public class RamanDouglasPeukerDataReducer implements RendererDataReducer {
         ProcessingProfiler.getTimeDiff(startTimeStamp,
                 String.format("data reduction (from %d to %d)", indexMax - indexMin, xValuesNew.length));
         return xValuesNew.length;
+    }
+
+    /**
+     * @param epsilon maximum distance of a point in data between original curve and simplified curve
+     */
+    public void setEpsilon(final double epsilon) {
+        AssertUtils.gtEqThanZero("epsilon", epsilon);
+        this.epsilon = epsilon;
     }
 
 }

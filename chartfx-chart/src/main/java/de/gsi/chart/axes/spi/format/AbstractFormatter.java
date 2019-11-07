@@ -33,29 +33,32 @@ public abstract class AbstractFormatter extends StringConverter<Number> implemen
         }
     };
 
-    /**
-     * sets the min/max threshold when to change from one formatter domain to
-     * the other
-     *
-     * @return the Schmitt trigger threshold property
-     */
-    public DoubleProperty schmittTriggerThresholdProperty() {
-        return schmittTriggerThreshold;
+    public AbstractFormatter() {
+        super();
+        rangeMin = 0;
+        rangeMax = 1;
     }
 
     /**
-     * Strategy to compute major tick unit when auto-range is on or when axis
-     * bounds change. By default initialised to {@link DefaultTickUnitSupplier}.
-     * <p>
-     * See {@link TickUnitSupplier} for more information about the expected
-     * behaviour of the strategy.
-     * </p>
+     * Construct a DefaultFormatter for the given NumberAxis
      *
-     * @return tickUnitSupplier property
+     * @param axis The axis to format tick marks for
      */
-    @Override
-    public ObjectProperty<TickUnitSupplier> tickUnitSupplierProperty() {
-        return tickUnitSupplier;
+    public AbstractFormatter(final Axis axis) {
+        this();
+        if (axis == null) {
+            return;
+        }
+    }
+
+    protected double getLogRange() {
+        final double diff = getRange();
+
+        return diff > 0 ? Math.log10(diff) : 1;
+    }
+
+    protected double getRange() {
+        return Math.abs(rangeMax - rangeMin);
     }
 
     /**
@@ -68,39 +71,39 @@ public abstract class AbstractFormatter extends StringConverter<Number> implemen
         return tickUnitSupplierProperty().get();
     }
 
+    protected abstract void rangeUpdated();
+
+    /**
+     * sets the min/max threshold when to change from one formatter domain to the other
+     *
+     * @return the Schmitt trigger threshold property
+     */
+    public DoubleProperty schmittTriggerThresholdProperty() {
+        return schmittTriggerThreshold;
+    }
+
     /**
      * Sets the value of the {@link #tickUnitSupplierProperty()}.
      *
-     * @param supplier
-     *            the tick unit supplier. If {@code null}, the default one will
-     *            be used
+     * @param supplier the tick unit supplier. If {@code null}, the default one will be used
      */
     @Override
     public void setTickUnitSupplier(final TickUnitSupplier supplier) {
         tickUnitSupplierProperty().set(supplier);
     }
 
-    protected double getRange() {
-        return Math.abs(rangeMax - rangeMin);
-    }
-
-    protected double getLogRange() {
-        final double diff = getRange();
-
-        return diff > 0 ? Math.log10(diff) : 1;
-    }
-
     /**
-     * Construct a DefaultFormatter for the given NumberAxis
+     * Strategy to compute major tick unit when auto-range is on or when axis bounds change. By default initialised to
+     * {@link DefaultTickUnitSupplier}.
+     * <p>
+     * See {@link TickUnitSupplier} for more information about the expected behaviour of the strategy.
+     * </p>
      *
-     * @param axis
-     *            The axis to format tick marks for
+     * @return tickUnitSupplier property
      */
-    public AbstractFormatter(final Axis axis) {
-        this();
-        if (axis == null) {
-            return;
-        }
+    @Override
+    public ObjectProperty<TickUnitSupplier> tickUnitSupplierProperty() {
+        return tickUnitSupplier;
     }
 
     @Override
@@ -121,14 +124,6 @@ public abstract class AbstractFormatter extends StringConverter<Number> implemen
         this.rangeMax /= unitScaling;
 
         rangeUpdated();
-    }
-
-    protected abstract void rangeUpdated();
-
-    public AbstractFormatter() {
-        super();
-        rangeMin = 0;
-        rangeMax = 1;
     }
 
 }

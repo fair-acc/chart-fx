@@ -7,14 +7,6 @@ public abstract class AbstractFunctionND extends AbstractFunction implements Fun
 
     /**
      * @param name function name
-     * @param nparm number of free parameter
-     */
-    public AbstractFunctionND(final String name, final int nparm) {
-        this(name, new double[nparm], new String[nparm]);
-    }
-
-    /**
-     * @param name function name
      * @param parameter parameter array
      */
     public AbstractFunctionND(final String name, final double[] parameter) {
@@ -31,19 +23,11 @@ public abstract class AbstractFunctionND extends AbstractFunction implements Fun
     }
 
     /**
-     * sets whether error estimates is included into exports/estimates etc.
-     *
-     * @param state true: compute error estimates
+     * @param name function name
+     * @param nparm number of free parameter
      */
-    public void setErrorEstimateComputation(final boolean state) {
-        computeErrorEstimate = true;
-    }
-
-    /**
-     * @return true: error estimated is included in exports/estimates etc.
-     */
-    public boolean isErrorEstimateComputed() {
-        return computeErrorEstimate;
+    public AbstractFunctionND(final String name, final int nparm) {
+        this(name, new double[nparm], new String[nparm]);
     }
 
     @Override
@@ -66,6 +50,22 @@ public abstract class AbstractFunctionND extends AbstractFunction implements Fun
         }
 
         return ret;
+    }
+
+    /**
+     * @return true: error estimated is included in exports/estimates etc.
+     */
+    public boolean isErrorEstimateComputed() {
+        return computeErrorEstimate;
+    }
+
+    /**
+     * sets whether error estimates is included into exports/estimates etc.
+     *
+     * @param state true: compute error estimates
+     */
+    public void setErrorEstimateComputation(final boolean state) {
+        computeErrorEstimate = true;
     }
 
 }

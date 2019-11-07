@@ -30,12 +30,12 @@ public class MathSupplement {
 
     public static double doubleLn10 = 2.3025850929940456840179914546844;
 
-    public static Complex solve_quadratic_1(final double a, final double b, final double c) {
-        return new Complex(-b).add(new Complex(b * b - 4 * a * c, 0)).sqrt().divide(2. * a);
+    public static double acosh(final double x) {
+        return Math.log(x + Math.sqrt(x * x - 1));
     }
 
-    public static Complex solve_quadratic_2(final double a, final double b, final double c) {
-        return new Complex(-b).subtract(new Complex(b * b - 4 * a * c, 0)).sqrt().divide(2. * a);
+    public static Complex addmul(final Complex c, final double v, final Complex c1) {
+        return new Complex(c.getReal() + v * c1.getReal(), c.getImaginary() + v * c1.getImaginary());
     }
 
     public static Complex adjust_imag(final Complex c) {
@@ -46,8 +46,8 @@ public class MathSupplement {
         }
     }
 
-    public static Complex addmul(final Complex c, final double v, final Complex c1) {
-        return new Complex(c.getReal() + v * c1.getReal(), c.getImaginary() + v * c1.getImaginary());
+    public static double asinh(final double x) {
+        return Math.log(x + Math.sqrt(x * x + 1));
     }
 
     public static Complex recip(final Complex c) {
@@ -56,12 +56,12 @@ public class MathSupplement {
         return new Complex(n * c.getReal(), n * c.getImaginary());
     }
 
-    public static double asinh(final double x) {
-        return Math.log(x + Math.sqrt(x * x + 1));
+    public static Complex solve_quadratic_1(final double a, final double b, final double c) {
+        return new Complex(-b).add(new Complex(b * b - 4 * a * c, 0)).sqrt().divide(2. * a);
     }
 
-    public static double acosh(final double x) {
-        return Math.log(x + Math.sqrt(x * x - 1));
+    public static Complex solve_quadratic_2(final double a, final double b, final double c) {
+        return new Complex(-b).subtract(new Complex(b * b - 4 * a * c, 0)).sqrt().divide(2. * a);
     }
 
 }

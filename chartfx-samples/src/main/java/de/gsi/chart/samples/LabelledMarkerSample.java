@@ -3,8 +3,8 @@ package de.gsi.chart.samples;
 import de.gsi.chart.XYChart;
 import de.gsi.chart.XYChartCss;
 import de.gsi.chart.axes.spi.DefaultNumericAxis;
-import de.gsi.dataset.spi.DoubleDataSet;
 import de.gsi.chart.renderer.spi.LabelledMarkerRenderer;
+import de.gsi.dataset.spi.DoubleDataSet;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
@@ -33,8 +33,8 @@ public class LabelledMarkerSample extends Application {
             // style definitions/string available in XYChartCss.STROKE_WIDTH, ...
             if (n == 3) {
                 dataSet.addDataStyle(n, "strokeColor=red");
-                //alt:
-                //dataSet.addDataStyle(n, "strokeColor:red");
+                // alt:
+                // dataSet.addDataStyle(n, "strokeColor:red");
             }
 
             if (n == 4) {
@@ -65,8 +65,7 @@ public class LabelledMarkerSample extends Application {
     }
 
     /**
-     * @param args
-     *            the command line arguments
+     * @param args the command line arguments
      */
     public static void main(final String[] args) {
         Application.launch(args);

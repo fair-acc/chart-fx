@@ -14,9 +14,9 @@ package de.gsi.math.matrix;
 public class QRDecomposition implements java.io.Serializable {
 
     private static final long serialVersionUID = -6447651515739228852L;
-    /* ------------------------
-       Class variables
-     * ------------------------ */
+    /*
+     * ------------------------ Class variables ------------------------
+     */
 
     /**
      * Array for internal storage of decomposition.
@@ -40,9 +40,9 @@ public class QRDecomposition implements java.io.Serializable {
      */
     private double[] Rdiag;
 
-    /* ------------------------
-       Constructor
-     * ------------------------ */
+    /*
+     * ------------------------ Constructor ------------------------
+     */
 
     /**
      * QR Decomposition, computed by Householder reflections.
@@ -91,23 +91,9 @@ public class QRDecomposition implements java.io.Serializable {
         }
     }
 
-    /* ------------------------
-       Public Methods
-     * ------------------------ */
-
-    /**
-     * Is the matrix full rank?
-     * 
-     * @return true if R, and hence A, has full rank.
+    /*
+     * ------------------------ Public Methods ------------------------
      */
-
-    public boolean isFullRank() {
-        for (int j = 0; j < n; j++) {
-            if (Rdiag[j] == 0)
-                return false;
-        }
-        return true;
-    }
 
     /**
      * Return the Householder vectors
@@ -124,29 +110,6 @@ public class QRDecomposition implements java.io.Serializable {
                     H[i][j] = QR[i][j];
                 } else {
                     H[i][j] = 0.0;
-                }
-            }
-        }
-        return X;
-    }
-
-    /**
-     * Return the upper triangular factor
-     * 
-     * @return R
-     */
-
-    public MatrixD getR() {
-        MatrixD X = new MatrixD(n, n);
-        double[][] R = X.getArray();
-        for (int i = 0; i < n; i++) {
-            for (int j = 0; j < n; j++) {
-                if (i < j) {
-                    R[i][j] = QR[i][j];
-                } else if (i == j) {
-                    R[i][j] = Rdiag[i];
-                } else {
-                    R[i][j] = 0.0;
                 }
             }
         }
@@ -181,6 +144,43 @@ public class QRDecomposition implements java.io.Serializable {
             }
         }
         return X;
+    }
+
+    /**
+     * Return the upper triangular factor
+     * 
+     * @return R
+     */
+
+    public MatrixD getR() {
+        MatrixD X = new MatrixD(n, n);
+        double[][] R = X.getArray();
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                if (i < j) {
+                    R[i][j] = QR[i][j];
+                } else if (i == j) {
+                    R[i][j] = Rdiag[i];
+                } else {
+                    R[i][j] = 0.0;
+                }
+            }
+        }
+        return X;
+    }
+
+    /**
+     * Is the matrix full rank?
+     * 
+     * @return true if R, and hence A, has full rank.
+     */
+
+    public boolean isFullRank() {
+        for (int j = 0; j < n; j++) {
+            if (Rdiag[j] == 0)
+                return false;
+        }
+        return true;
     }
 
     /**

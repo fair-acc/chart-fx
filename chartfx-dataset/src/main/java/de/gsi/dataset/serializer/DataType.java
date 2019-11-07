@@ -8,49 +8,46 @@ import java.util.Queue;
 import java.util.Set;
 
 /**
- * Enum defining the data primitives that can be serialised. Arrays are always
- * handled as multi-dimensional arrays.
+ * Enum defining the data primitives that can be serialised. Arrays are always handled as multi-dimensional arrays.
  *
  * @author rstein
  */
 public enum DataType {
     // @formatter:off
     // start marker
-    START_MARKER             (0,   "bool",          "boolean",             1, Cat.SINGLE_VALUE),
+    START_MARKER(0, "bool", "boolean", 1, Cat.SINGLE_VALUE),
     // primitive types
-    BOOL                     (1,   "bool",          "boolean",             1, Cat.SINGLE_VALUE, boolean.class, Boolean.class),
-    BYTE                     (2,   "byte" ,         "byte",                1, Cat.SINGLE_VALUE, byte.class, Byte.class),
-    SHORT                    (3,   "short",         "short",               2, Cat.SINGLE_VALUE, short.class, Short.class),
-    INT                      (4,   "int",           "int",                 4, Cat.SINGLE_VALUE, int.class, Integer.class),
-    LONG                     (5,   "long",          "long",                8, Cat.SINGLE_VALUE, long.class, Long.class),
-    FLOAT                    (6,   "float" ,        "float",               4, Cat.SINGLE_VALUE, float.class, Float.class),
-    DOUBLE                   (7,   "double",        "double",              8, Cat.SINGLE_VALUE, double.class, Double.class),
-    CHAR                     (8,   "char",          "char",                2, Cat.SINGLE_VALUE, char.class, Character.class),
-    STRING                   (9,   "string",        "java.lang.String",    1, Cat.SINGLE_VALUE, String.class),
+    BOOL(1, "bool", "boolean", 1, Cat.SINGLE_VALUE, boolean.class, Boolean.class),
+    BYTE(2, "byte", "byte", 1, Cat.SINGLE_VALUE, byte.class, Byte.class),
+    SHORT(3, "short", "short", 2, Cat.SINGLE_VALUE, short.class, Short.class),
+    INT(4, "int", "int", 4, Cat.SINGLE_VALUE, int.class, Integer.class),
+    LONG(5, "long", "long", 8, Cat.SINGLE_VALUE, long.class, Long.class),
+    FLOAT(6, "float", "float", 4, Cat.SINGLE_VALUE, float.class, Float.class),
+    DOUBLE(7, "double", "double", 8, Cat.SINGLE_VALUE, double.class, Double.class),
+    CHAR(8, "char", "char", 2, Cat.SINGLE_VALUE, char.class, Character.class),
+    STRING(9, "string", "java.lang.String", 1, Cat.SINGLE_VALUE, String.class),
 
     // array of primitive types
-    BOOL_ARRAY               (101, "bool_array",    "[Z",                  1, Cat.ARRAY, boolean[].class, Boolean[].class),
-    BYTE_ARRAY               (102, "byte_array",    "[B",                  1, Cat.ARRAY, byte[].class, Byte[].class),
-    SHORT_ARRAY              (103, "short_array",   "[S",                  2, Cat.ARRAY, short[].class, Short[].class),
-    INT_ARRAY                (104, "int_array",     "[I",                  4, Cat.ARRAY, int[].class, Integer[].class),
-    LONG_ARRAY               (105, "long_array",    "[J",                  8, Cat.ARRAY, long[].class, Long[].class),
-    FLOAT_ARRAY              (106, "float_array",   "[F",                  4, Cat.ARRAY, float[].class, Float[].class),
-    DOUBLE_ARRAY             (107, "double_array",  "[D",                  8, Cat.ARRAY, double[].class, Double[].class),
-    CHAR_ARRAY               (108, "char_array",    "[C",                  2, Cat.ARRAY, char[].class, Character[].class),
-    STRING_ARRAY             (109, "string_array",  "[java.lang.String",   1, Cat.ARRAY, String[].class),
+    BOOL_ARRAY(101, "bool_array", "[Z", 1, Cat.ARRAY, boolean[].class, Boolean[].class),
+    BYTE_ARRAY(102, "byte_array", "[B", 1, Cat.ARRAY, byte[].class, Byte[].class),
+    SHORT_ARRAY(103, "short_array", "[S", 2, Cat.ARRAY, short[].class, Short[].class),
+    INT_ARRAY(104, "int_array", "[I", 4, Cat.ARRAY, int[].class, Integer[].class),
+    LONG_ARRAY(105, "long_array", "[J", 8, Cat.ARRAY, long[].class, Long[].class),
+    FLOAT_ARRAY(106, "float_array", "[F", 4, Cat.ARRAY, float[].class, Float[].class),
+    DOUBLE_ARRAY(107, "double_array", "[D", 8, Cat.ARRAY, double[].class, Double[].class),
+    CHAR_ARRAY(108, "char_array", "[C", 2, Cat.ARRAY, char[].class, Character[].class),
+    STRING_ARRAY(109, "string_array", "[java.lang.String", 1, Cat.ARRAY, String[].class),
 
     // complex objects
-    COLLECTION               (200, "collection",     "",                    1, Cat.ARRAY, Collection.class),
-    ENUM                     (201, "enum",           "java.lang.Enum",      4, Cat.ARRAY, Enum.class),
-    LIST                     (202, "list",           "",                    1, Cat.ARRAY, List.class),
-    MAP                      (203, "map",            "",                    1, Cat.ARRAY, Map.class),
-    QUEUE                    (204, "queue",          "",                    1, Cat.ARRAY, Queue.class),
-    SET                      (205, "set",            "",                    1, Cat.ARRAY, Set.class),
+    COLLECTION(200, "collection", "", 1, Cat.ARRAY, Collection.class),
+    ENUM(201, "enum", "java.lang.Enum", 4, Cat.ARRAY, Enum.class), LIST(202, "list", "", 1, Cat.ARRAY, List.class),
+    MAP(203, "map", "", 1, Cat.ARRAY, Map.class), QUEUE(204, "queue", "", 1, Cat.ARRAY, Queue.class),
+    SET(205, "set", "", 1, Cat.ARRAY, Set.class),
 
     // default for future extensions (e.g. moving to short
-    OTHER                    (0xFD, "other",         "",                    1, Cat.COMPLEX_OBJECT, Object.class),
+    OTHER(0xFD, "other", "", 1, Cat.COMPLEX_OBJECT, Object.class),
     // end marker
-    END_MARKER               (0xFE, "end_marker",    "",                    1, Cat.SINGLE_VALUE);
+    END_MARKER(0xFE, "end_marker", "", 1, Cat.SINGLE_VALUE);
     // @formatter:on
 
     private final byte byteValue;

@@ -18,21 +18,17 @@ import javafx.scene.Cursor;
 import javafx.scene.input.MouseEvent;
 
 /**
- * Allows dragging the visible plot area along X and/or Y axis, changing the
- * visible axis range.
+ * Allows dragging the visible plot area along X and/or Y axis, changing the visible axis range.
  * <p>
- * Reacts on {@link MouseEvent#DRAG_DETECTED} event accepted by
- * {@link #getMouseFilter() mouse filter}.
+ * Reacts on {@link MouseEvent#DRAG_DETECTED} event accepted by {@link #getMouseFilter() mouse filter}.
  * <p>
- * {@code Panner} works properly only if both X and Y axis are instances of
- * {@link DefaultNumericAxis}.
+ * {@code Panner} works properly only if both X and Y axis are instances of {@link DefaultNumericAxis}.
  *
  * @author Grzegorz Kruk
  */
 public class Panner extends ChartPlugin {
     /**
-     * Default pan mouse filter passing on left mouse button with
-     * {@link MouseEvent#isControlDown() control key down}.
+     * Default pan mouse filter passing on left mouse button with {@link MouseEvent#isControlDown() control key down}.
      */
     public static final Predicate<MouseEvent> DEFAULT_MOUSE_FILTER = event ->
     // MouseEvents.isOnlyPrimaryButtonDown(event) &&
@@ -42,8 +38,7 @@ public class Panner extends ChartPlugin {
     private Predicate<MouseEvent> mouseFilter = Panner.DEFAULT_MOUSE_FILTER;
     private Point2D previousMouseLocation = null;
 
-    private final ObjectProperty<AxisMode> axisMode = new SimpleObjectProperty<>(this, "axisMode",
-            AxisMode.XY) {
+    private final ObjectProperty<AxisMode> axisMode = new SimpleObjectProperty<>(this, "axisMode", AxisMode.XY) {
         @Override
         protected void invalidated() {
             Objects.requireNonNull(get(), "The " + getName() + " must not be null");
@@ -76,8 +71,7 @@ public class Panner extends ChartPlugin {
     };
 
     /**
-     * Creates a new instance of Panner class with {@link AxisMode#XY XY}
-     * {@link #axisModeProperty() axisMode}.
+     * Creates a new instance of Panner class with {@link AxisMode#XY XY} {@link #axisModeProperty() axisMode}.
      */
     public Panner() {
         this(AxisMode.XY);
@@ -86,9 +80,7 @@ public class Panner extends ChartPlugin {
     /**
      * Creates a new instance of Panner class.
      *
-     * @param panMode
-     *            initial value for the {@link #axisModeProperty() axisMode}
-     *            property
+     * @param panMode initial value for the {@link #axisModeProperty() axisMode} property
      */
     public Panner(final AxisMode panMode) {
         setAxisMode(panMode);
@@ -97,8 +89,7 @@ public class Panner extends ChartPlugin {
     }
 
     /**
-     * The mode defining axis along which the pan operation is allowed. By
-     * default initialized to {@link AxisMode#XY}.
+     * The mode defining axis along which the pan operation is allowed. By default initialized to {@link AxisMode#XY}.
      *
      * @return the axis mode property
      */
@@ -136,48 +127,11 @@ public class Panner extends ChartPlugin {
     /**
      * Returns MouseEvent filter triggering pan operation.
      *
-     * @return filter used to test whether given MouseEvent should start panning
-     *         operation
+     * @return filter used to test whether given MouseEvent should start panning operation
      * @see #setMouseFilter(Predicate)
      */
     public Predicate<MouseEvent> getMouseFilter() {
         return mouseFilter;
-    }
-
-    /**
-     * Sets the value of the {@link #axisModeProperty()}.
-     *
-     * @param mode
-     *            the mode to be used
-     */
-    public final void setAxisMode(final AxisMode mode) {
-        axisModeProperty().set(mode);
-    }
-
-    /**
-     * Sets value of the {@link #dragCursorProperty()}.
-     *
-     * @param cursor
-     *            the cursor to be used by the plugin
-     */
-    public final void setDragCursor(final Cursor cursor) {
-        dragCursorProperty().set(cursor);
-    }
-
-    /**
-     * Sets the filter determining whether given MouseEvent triggered on
-     * {@link MouseEvent#DRAG_DETECTED event type} should start the panning
-     * operation.
-     * <p>
-     * By default it is initialized to {@link #DEFAULT_MOUSE_FILTER}.
-     *
-     * @param mouseFilter
-     *            the mouse filter to be used. Can be set to {@code null} to
-     *            start panning on any {@link MouseEvent#DRAG_DETECTED
-     *            DRAG_DETECTED} event.
-     */
-    public void setMouseFilter(final Predicate<MouseEvent> mouseFilter) {
-        this.mouseFilter = mouseFilter;
     }
 
     private void installCursor() {
@@ -239,9 +193,39 @@ public class Panner extends ChartPlugin {
     }
 
     /**
-     * Depending if the offset is positive or negative, change first upper or
-     * lower bound to not provoke lowerBound &gt;= upperBound when offset &gt;=
-     * upperBound - lowerBound.
+     * Sets the value of the {@link #axisModeProperty()}.
+     *
+     * @param mode the mode to be used
+     */
+    public final void setAxisMode(final AxisMode mode) {
+        axisModeProperty().set(mode);
+    }
+
+    /**
+     * Sets value of the {@link #dragCursorProperty()}.
+     *
+     * @param cursor the cursor to be used by the plugin
+     */
+    public final void setDragCursor(final Cursor cursor) {
+        dragCursorProperty().set(cursor);
+    }
+
+    /**
+     * Sets the filter determining whether given MouseEvent triggered on {@link MouseEvent#DRAG_DETECTED event type}
+     * should start the panning operation.
+     * <p>
+     * By default it is initialized to {@link #DEFAULT_MOUSE_FILTER}.
+     *
+     * @param mouseFilter the mouse filter to be used. Can be set to {@code null} to start panning on any
+     *        {@link MouseEvent#DRAG_DETECTED DRAG_DETECTED} event.
+     */
+    public void setMouseFilter(final Predicate<MouseEvent> mouseFilter) {
+        this.mouseFilter = mouseFilter;
+    }
+
+    /**
+     * Depending if the offset is positive or negative, change first upper or lower bound to not provoke lowerBound
+     * &gt;= upperBound when offset &gt;= upperBound - lowerBound.
      * 
      * @param axis reference axis
      * @param offset panning distance

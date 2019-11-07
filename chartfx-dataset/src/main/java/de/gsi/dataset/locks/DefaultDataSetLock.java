@@ -8,13 +8,10 @@ import java.util.function.Supplier;
 import de.gsi.dataset.DataSet;
 
 /**
- * A Simple ReadWriteLock for the DataSet interface and its fluent-design
- * approach
- * Some implementation recommendation: write lock guards behave the same as
- * ReentrantLock with the additional functionality, that a
- * <code>writeLock()</code> and subsequent <code>writeUnLock()</code> mute and,
- * respectively, un-mute the given DataSet's auto-notification states, e.g.
- * example:
+ * A Simple ReadWriteLock for the DataSet interface and its fluent-design approach Some implementation recommendation:
+ * write lock guards behave the same as ReentrantLock with the additional functionality, that a <code>writeLock()</code>
+ * and subsequent <code>writeUnLock()</code> mute and, respectively, un-mute the given DataSet's auto-notification
+ * states, e.g. example:
  *
  * <pre>
  *  lock.writeLock(); // stores isAutoNotification state
@@ -31,8 +28,7 @@ import de.gsi.dataset.DataSet;
  * });
  * </pre>
  *
- * Alternatively the best performing option for frequent simple reads without
- * major data processing
+ * Alternatively the best performing option for frequent simple reads without major data processing
  *
  * <pre>
  * Result ret = lock.readLockGuardOptimistic(() -&gt; {
@@ -41,18 +37,16 @@ import de.gsi.dataset.DataSet;
  * });
  * </pre>
  *
- * The latter assumes infrequent writes (e.g. a single writer thread) and
- * frequent unobstructed reads (ie. many reader threads). The lock internally
- * acquires the data w/o explicitly locking, checks afterwards if the data has
- * potentially changed a write-lock acquiring thread, and as a automatic
- * fall-back uses the guaranteed (but more expensive) read lock to assure that
- * the read data structure is consistent.
+ * The latter assumes infrequent writes (e.g. a single writer thread) and frequent unobstructed reads (ie. many reader
+ * threads). The lock internally acquires the data w/o explicitly locking, checks afterwards if the data has potentially
+ * changed a write-lock acquiring thread, and as a automatic fall-back uses the guaranteed (but more expensive) read
+ * lock to assure that the read data structure is consistent.
  *
  * @author rstein
- * @param <D> generics reference, usually to
- *            <code>&lt;? extends DataSet&gt;</code>
+ * @param <D> generics reference, usually to <code>&lt;? extends DataSet&gt;</code>
  */
-@SuppressWarnings({ "PMD.DoNotUseThreads", "PMD.CommentSize", "PMD.TooManyMethods" }) // Runnable used as functional interface
+@SuppressWarnings({ "PMD.DoNotUseThreads", "PMD.CommentSize", "PMD.TooManyMethods" }) // Runnable used as functional
+                                                                                      // interface
 public class DefaultDataSetLock<D extends DataSet> implements DataSetLock<D> {
     private static final long serialVersionUID = 1L;
     private final transient StampedLock stampedLock = new StampedLock();
@@ -140,8 +134,7 @@ public class DefaultDataSetLock<D extends DataSet> implements DataSetLock<D> {
     }
 
     /**
-     * @return number of writers presently locked on this data set (N.B. all from
-     *         the same thread)
+     * @return number of writers presently locked on this data set (N.B. all from the same thread)
      */
     public int getWriterCount() {
         return writerCount.get();

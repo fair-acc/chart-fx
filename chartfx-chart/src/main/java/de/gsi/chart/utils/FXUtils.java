@@ -8,8 +8,8 @@ import java.util.concurrent.locks.ReentrantLock;
 import javafx.application.Platform;
 
 /**
- * Small tool to execute/call JavaFX GUI-related code from potentially non-JavaFX thread
- * (equivalent to old: SwingUtilities.invokeLater(...) ... invokeAndWait(...) tools)
+ * Small tool to execute/call JavaFX GUI-related code from potentially non-JavaFX thread (equivalent to old:
+ * SwingUtilities.invokeLater(...) ... invokeAndWait(...) tools)
  *
  * @author rstein
  */
@@ -19,10 +19,6 @@ public final class FXUtils {
         throw new UnsupportedOperationException("don't use this in a non-static context");
     }
 
-    private static class ThrowableWrapper {
-        Throwable t;
-    }
-    
     public static void assertJavaFxThread() {
         if (!Platform.isFxApplicationThread()) {
             throw new IllegalStateException("access JavaFX from non-JavaFX thread - please fix");
@@ -37,43 +33,13 @@ public final class FXUtils {
         Platform.setImplicitExit(false);
     }
 
-    public static void runLater(final Runnable run) throws ExecutionException {
-        FXUtils.keepJavaFxAlive();
-        if (Platform.isFxApplicationThread()) {
-            try {
-                run.run();
-            } catch (final Exception e) {
-                throw new ExecutionException(e);
-            }
-        } else {
-            Platform.runLater(run);
-        }
-    }
-    
-    public static void runFX(final Runnable run) {
-        FXUtils.keepJavaFxAlive();
-        if (Platform.isFxApplicationThread()) {
-            try {
-                run.run();
-            } catch (final Exception e) {
-                throw new IllegalStateException(e);
-            }
-        } else {
-            Platform.runLater(run);
-        }
-    }
-
     /**
-     * Invokes a Runnable in JFX Thread and waits while it's finished. Like
-     * SwingUtilities.invokeAndWait does for EDT.
+     * Invokes a Runnable in JFX Thread and waits while it's finished. Like SwingUtilities.invokeAndWait does for EDT.
      *
      * @author hendrikebbers
-     * @param run
-     *            The Runnable that has to be called on JFX thread.
-     * @throws InterruptedException
-     *             if the execution is interrupted.
-     * @throws ExecutionException
-     *             if a exception is occurred in the run method of the Runnable
+     * @param run The Runnable that has to be called on JFX thread.
+     * @throws InterruptedException if the execution is interrupted.
+     * @throws ExecutionException if a exception is occurred in the run method of the Runnable
      */
     public static void runAndWait(final Runnable run) throws InterruptedException, ExecutionException {
         FXUtils.keepJavaFxAlive();
@@ -112,5 +78,35 @@ public final class FXUtils {
                 lock.unlock();
             }
         }
+    }
+
+    public static void runFX(final Runnable run) {
+        FXUtils.keepJavaFxAlive();
+        if (Platform.isFxApplicationThread()) {
+            try {
+                run.run();
+            } catch (final Exception e) {
+                throw new IllegalStateException(e);
+            }
+        } else {
+            Platform.runLater(run);
+        }
+    }
+
+    public static void runLater(final Runnable run) throws ExecutionException {
+        FXUtils.keepJavaFxAlive();
+        if (Platform.isFxApplicationThread()) {
+            try {
+                run.run();
+            } catch (final Exception e) {
+                throw new ExecutionException(e);
+            }
+        } else {
+            Platform.runLater(run);
+        }
+    }
+
+    private static class ThrowableWrapper {
+        Throwable t;
     }
 }

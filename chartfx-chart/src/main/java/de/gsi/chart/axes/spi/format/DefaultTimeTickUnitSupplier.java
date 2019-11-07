@@ -136,6 +136,18 @@ public class DefaultTimeTickUnitSupplier implements TickUnitSupplier {
     };
 
     /**
+     * Should return tick unit that is equal or greater to the given reference tick unit.
+     *
+     * @param referenceTickUnit reference tick unit
+     * @return the computed unit that is equal or grater to the specified one
+     */
+    @Override
+    public double computeTickUnit(final double referenceTickUnit) {
+        return DefaultTimeTickUnitSupplier.TICK_UNIT_DEFAULTS[DefaultTimeTickUnitSupplier
+                .getTickIndex(referenceTickUnit)];
+    }
+
+    /**
      * Gets the index in the TICK_UNIT_DEFAULT list, for which the tick unit is just larger or equal to the reference
      * tick unit.
      * 
@@ -157,18 +169,6 @@ public class DefaultTimeTickUnitSupplier implements TickUnitSupplier {
         // }
         // }
         // return 0;
-    }
-
-    /**
-     * Should return tick unit that is equal or greater to the given reference tick unit.
-     *
-     * @param referenceTickUnit reference tick unit
-     * @return the computed unit that is equal or grater to the specified one
-     */
-    @Override
-    public double computeTickUnit(final double referenceTickUnit) {
-        return DefaultTimeTickUnitSupplier.TICK_UNIT_DEFAULTS[DefaultTimeTickUnitSupplier
-                .getTickIndex(referenceTickUnit)];
     }
 
 }

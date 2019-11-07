@@ -8,32 +8,30 @@ package de.gsi.chart.axes;
 public interface AxisTransform {
 
     /**
-     * default forward transform
-     * for affine functions: backward(forward(val)) = forward(backward(val)) = val;
-     *
-     * @param val input value
-     * @return output value
-     */
-    double forward(double val);
-
-    /**
-     * default backward transform
-     * for affine functions: backward(forward(val)) = forward(backward(val)) = val;
+     * default backward transform for affine functions: backward(forward(val)) = forward(backward(val)) = val;
      *
      * @param val input value
      * @return output value
      */
     double backward(double val);
 
-    void setMinimumRange(double val);
+    /**
+     * default forward transform for affine functions: backward(forward(val)) = forward(backward(val)) = val;
+     *
+     * @param val input value
+     * @return output value
+     */
+    double forward(double val);
+
+    double getMaximumRange();
 
     double getMinimumRange();
+
+    double getRoundedMaximumRange(double val);
 
     double getRoundedMinimumRange(double val);
 
     void setMaximumRange(double val);
 
-    double getMaximumRange();
-
-    double getRoundedMaximumRange(double val);
+    void setMinimumRange(double val);
 }

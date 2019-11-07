@@ -16,12 +16,12 @@ import javafx.scene.paint.Color;
  */
 class StyleParserTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(StyleParserTest.class);
-    
+
     @Test
     @DisplayName("Test parsing styles")
     public void testStyleParser() {
         final String testStyle = " color1 = blue; stroke= 0; bool1=true; color2 = rgb(255,0,0); unclean=\"a\'; index1=2;index2=0xFE; float1=10e7; float2=10.333";
-        
+
         assertEquals("blue", StyleParser.getPropertyValue(testStyle, "color1"));
         assertEquals(Color.web("red"), StyleParser.getColorPropertyValue(testStyle, "color2"));
         assertEquals(2, StyleParser.getIntegerPropertyValue(testStyle, "index1"));

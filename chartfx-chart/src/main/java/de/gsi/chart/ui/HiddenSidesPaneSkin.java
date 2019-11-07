@@ -188,6 +188,59 @@ public class HiddenSidesPaneSkin extends SkinBase<HiddenSidesPane> {
                                         .getBoundsInParent().contains(event.getX(), event.getY()))));
     }
 
+    @Override
+    protected void layoutChildren(double contentX, double contentY, double contentWidth, double contentHeight) {
+
+        // System.out.println("HiddenSidesPaneSkin.layoutChildren: "+contentX+" "+contentY+" "+contentWidth+"
+        // "+contentHeight);
+        /*
+         * Layout the stackpane in a normal way (equals "lay out the content node", the only managed node)
+         */
+        super.layoutChildren(contentX, contentY, contentWidth, contentHeight);
+
+        /*
+         * Layout the content node excplicitly: TODO: should this not come last and take visible side panes into
+         * account???
+         */
+        if (getSkinnable().getContent() != null) {
+            getSkinnable().getContent().resizeRelocate(contentX, contentY, contentWidth, contentHeight);
+        }
+
+        // layout the unmanaged side nodes
+
+        final Node bottom = getSkinnable().getBottom();
+        if (bottom != null) {
+            final double prefHeight = bottom.prefHeight(-1);
+            final double offset = prefHeight * visibility[Side.BOTTOM.ordinal()].get();
+            bottom.resizeRelocate(contentX, contentY + contentHeight - offset, contentWidth, prefHeight);
+            bottom.setVisible(visibility[Side.BOTTOM.ordinal()].get() > 0);
+        }
+
+        final Node left = getSkinnable().getLeft();
+        if (left != null) {
+            final double prefWidth = left.prefWidth(-1);
+            final double offset = prefWidth * visibility[Side.LEFT.ordinal()].get();
+            left.resizeRelocate(contentX - (prefWidth - offset), contentY, prefWidth, contentHeight);
+            left.setVisible(visibility[Side.LEFT.ordinal()].get() > 0);
+        }
+
+        final Node right = getSkinnable().getRight();
+        if (right != null) {
+            final double prefWidth = right.prefWidth(-1);
+            final double offset = prefWidth * visibility[Side.RIGHT.ordinal()].get();
+            right.resizeRelocate(contentX + contentWidth - offset, contentY, prefWidth, contentHeight);
+            right.setVisible(visibility[Side.RIGHT.ordinal()].get() > 0);
+        }
+
+        final Node top = getSkinnable().getTop();
+        if (top != null) {
+            final double prefHeight = top.prefHeight(-1);
+            final double offset = prefHeight * visibility[Side.TOP.ordinal()].get();
+            top.resizeRelocate(contentX, contentY - (prefHeight - offset), contentWidth, prefHeight);
+            top.setVisible(visibility[Side.TOP.ordinal()].get() > 0);
+        }
+    }
+
     private void show(Side side) {
         if (hideTimeline != null) {
             hideTimeline.stop();
@@ -242,59 +295,6 @@ public class HiddenSidesPaneSkin extends SkinBase<HiddenSidesPane> {
             getSkinnable().getLeft().setManaged(false);
             getSkinnable().getLeft().removeEventFilter(MouseEvent.MOUSE_EXITED, exitedHandler);
             getSkinnable().getLeft().addEventFilter(MouseEvent.MOUSE_EXITED, exitedHandler);
-        }
-    }
-
-    @Override
-    protected void layoutChildren(double contentX, double contentY, double contentWidth, double contentHeight) {
-
-        //        System.out.println("HiddenSidesPaneSkin.layoutChildren: "+contentX+" "+contentY+" "+contentWidth+" "+contentHeight);
-        /*
-         * Layout the stackpane in a normal way (equals
-         * "lay out the content node", the only managed node)
-         */
-        super.layoutChildren(contentX, contentY, contentWidth, contentHeight);
-
-        /*
-         * Layout the content node excplicitly:
-         * TODO: should this not come last and take visible side panes into account???
-         */
-        if (getSkinnable().getContent() != null) {
-            getSkinnable().getContent().resizeRelocate(contentX, contentY, contentWidth, contentHeight);
-        }
-
-        // layout the unmanaged side nodes
-
-        final Node bottom = getSkinnable().getBottom();
-        if (bottom != null) {
-            final double prefHeight = bottom.prefHeight(-1);
-            final double offset = prefHeight * visibility[Side.BOTTOM.ordinal()].get();
-            bottom.resizeRelocate(contentX, contentY + contentHeight - offset, contentWidth, prefHeight);
-            bottom.setVisible(visibility[Side.BOTTOM.ordinal()].get() > 0);
-        }
-
-        final Node left = getSkinnable().getLeft();
-        if (left != null) {
-            final double prefWidth = left.prefWidth(-1);
-            final double offset = prefWidth * visibility[Side.LEFT.ordinal()].get();
-            left.resizeRelocate(contentX - (prefWidth - offset), contentY, prefWidth, contentHeight);
-            left.setVisible(visibility[Side.LEFT.ordinal()].get() > 0);
-        }
-
-        final Node right = getSkinnable().getRight();
-        if (right != null) {
-            final double prefWidth = right.prefWidth(-1);
-            final double offset = prefWidth * visibility[Side.RIGHT.ordinal()].get();
-            right.resizeRelocate(contentX + contentWidth - offset, contentY, prefWidth, contentHeight);
-            right.setVisible(visibility[Side.RIGHT.ordinal()].get() > 0);
-        }
-
-        final Node top = getSkinnable().getTop();
-        if (top != null) {
-            final double prefHeight = top.prefHeight(-1);
-            final double offset = prefHeight * visibility[Side.TOP.ordinal()].get();
-            top.resizeRelocate(contentX, contentY - (prefHeight - offset), contentWidth, prefHeight);
-            top.setVisible(visibility[Side.TOP.ordinal()].get() > 0);
         }
     }
 }

@@ -14,8 +14,7 @@ import de.gsi.dataset.serializer.spi.ClassFieldDescription;
 import de.gsi.dataset.spi.DefaultAxisDescription;
 
 /**
- * FieldSerialiser implementation for List&lt;AxisDescription&gt; to
- * IoBuffer-backed byte-buffer
+ * FieldSerialiser implementation for List&lt;AxisDescription&gt; to IoBuffer-backed byte-buffer
  * 
  * @author rstein
  */
@@ -23,8 +22,7 @@ public class FieldListAxisDescription extends IoBufferFieldSerialiser {
     protected static final Logger LOGGER = LoggerFactory.getLogger(FieldListAxisDescription.class);
 
     /**
-     * FieldSerialiser implementation for List&lt;AxisDescription&gt; to
-     * IoBuffer-backed byte-buffer
+     * FieldSerialiser implementation for List&lt;AxisDescription&gt; to IoBuffer-backed byte-buffer
      * 
      * @param buffer the backing IoBuffer
      * 

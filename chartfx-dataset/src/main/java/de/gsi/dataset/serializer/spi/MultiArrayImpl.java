@@ -7,16 +7,13 @@ import de.gsi.dataset.serializer.MultiArray;
 import de.gsi.dataset.utils.AssertUtils;
 
 /**
- * Implementation for multi-dimensional arrays of any type.
- * The representation of multi-dimensional array is in fact one-dimensional
- * array, because of 2 reasons: - we always want to support only rectangle
- * arrays (not arbitrary row length) - it corresponds to C++ implementation,
- * where 1D array is used as well (to support static multi-dimensional arrays)
+ * Implementation for multi-dimensional arrays of any type. The representation of multi-dimensional array is in fact
+ * one-dimensional array, because of 2 reasons: - we always want to support only rectangle arrays (not arbitrary row
+ * length) - it corresponds to C++ implementation, where 1D array is used as well (to support static multi-dimensional
+ * arrays)
  * <p>
- * exemplary use: double[] rawDouble = new double[10*20]; [..] int[] rawDouble =
- * new int[]{10,20}; // here: 2-dim array MultiArrayImpl<double[]> a =
- * MultiArrayImpl<>(rawDouble, dims);
- * double val = a.getDouble(new int[]{2,3});
+ * exemplary use: double[] rawDouble = new double[10*20]; [..] int[] rawDouble = new int[]{10,20}; // here: 2-dim array
+ * MultiArrayImpl<double[]> a = MultiArrayImpl<>(rawDouble, dims); double val = a.getDouble(new int[]{2,3});
  *
  * @author Ilia Yastrebov, CERN
  * @author rstein

@@ -2,9 +2,9 @@ package de.gsi.chart.samples;
 
 import de.gsi.chart.XYChart;
 import de.gsi.chart.axes.spi.DefaultNumericAxis;
-import de.gsi.dataset.spi.DoubleDataSet;
 import de.gsi.chart.plugins.EditAxis;
 import de.gsi.chart.plugins.Zoomer;
+import de.gsi.dataset.spi.DoubleDataSet;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.layout.StackPane;
@@ -67,8 +67,7 @@ public class LogAxisSample extends Application {
     }
 
     /**
-     * @param args
-     *            the command line arguments
+     * @param args the command line arguments
      */
     public static void main(final String[] args) {
         Application.launch(args);

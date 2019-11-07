@@ -63,13 +63,6 @@ public class XValueIndicator extends AbstractSingleValueIndicator {
     }
 
     @Override
-    public void updateStyleClass() {
-        setStyleClasses(label, "x-", AbstractSingleValueIndicator.STYLE_CLASS_LABEL);
-        setStyleClasses(line, "x-", AbstractSingleValueIndicator.STYLE_CLASS_LINE);
-        setStyleClasses(triangle, "x-", AbstractSingleValueIndicator.STYLE_CLASS_MARKER);
-    }
-
-    @Override
     public void layoutChildren() {
         if (getChart() == null) {
             return;
@@ -91,5 +84,12 @@ public class XValueIndicator extends AbstractSingleValueIndicator {
                     getLabelPosition());
         }
 
+    }
+
+    @Override
+    public void updateStyleClass() {
+        setStyleClasses(label, "x-", AbstractSingleValueIndicator.STYLE_CLASS_LABEL);
+        setStyleClasses(line, "x-", AbstractSingleValueIndicator.STYLE_CLASS_LINE);
+        setStyleClasses(triangle, "x-", AbstractSingleValueIndicator.STYLE_CLASS_MARKER);
     }
 }

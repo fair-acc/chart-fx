@@ -23,6 +23,40 @@ public class Histogram extends AbstractHistogram implements Histogram1D {
      * Creates histogram with name and range [minX, maxX]
      * 
      * @param name of the data sets
+     * @param xBins the initial bin array (defines [minX, maxX] and nBins)
+     */
+    public Histogram(String name, double[] xBins) {
+        this(name, xBins, true);
+    }
+
+    /**
+     * Creates histogram with name and range [minX, maxX]
+     * 
+     * @param name of the data sets
+     * @param xBins the initial bin array (defines [minX, maxX] and nBins)
+     * @param horizontal whether binning is performed in X
+     */
+    public Histogram(final String name, final double[] xBins, final boolean horizontal) {
+        super(name, xBins);
+        isHorizontal = horizontal;
+    }
+
+    /**
+     * Creates histogram with name and range [minX, maxX]
+     * 
+     * @param name of the data sets
+     * @param nBins number of bins
+     * @param minX minimum of range
+     * @param maxX maximum of range
+     */
+    public Histogram(String name, int nBins, double minX, double maxX) {
+        this(name, nBins, minX, maxX, true);
+    }
+
+    /**
+     * Creates histogram with name and range [minX, maxX]
+     * 
+     * @param name of the data sets
      * @param nBins number of bins
      * @param minX minimum of range
      * @param maxX maximum of range
@@ -50,52 +84,6 @@ public class Histogram extends AbstractHistogram implements Histogram1D {
         fireInvalidated(new UpdatedDataEvent(this, "addBinContent()"));
     }
 
-    /**
-     * Creates histogram with name and range [minX, maxX]
-     * 
-     * @param name of the data sets
-     * @param nBins number of bins
-     * @param minX minimum of range
-     * @param maxX maximum of range
-     */
-    public Histogram(String name, int nBins, double minX, double maxX) {
-        this(name, nBins, minX, maxX, true);
-    }
-
-    /**
-     * Creates histogram with name and range [minX, maxX]
-     * 
-     * @param name of the data sets
-     * @param xBins the initial bin array (defines [minX, maxX] and nBins)
-     * @param horizontal whether binning is performed in X
-     */
-    public Histogram(final String name, final double[] xBins, final boolean horizontal) {
-        super(name, xBins);
-        isHorizontal = horizontal;
-    }
-
-    /**
-     * Creates histogram with name and range [minX, maxX]
-     * 
-     * @param name of the data sets
-     * @param xBins the initial bin array (defines [minX, maxX] and nBins)
-     */
-    public Histogram(String name, double[] xBins) {
-        this(name, xBins, true);
-    }
-
-    @Override
-    public double get(final int dimIndex, final int index) {
-        if (dimIndex == DIM_X) {
-            return isHorizontal ? getBinCenter(DIM_X, index + 1) : getBinContent(index + 1);
-        }
-
-        if (dimIndex == DIM_Y) {
-            return isHorizontal ? getBinContent(index + 1) : getBinCenter(DIM_Y, index + 1);
-        }
-        return dimIndex + 1 < this.getDimension() ? getBinCenter(DIM_X, index + 1) : getBinContent(index + 1);
-    }
-
     @Override
     public int fill(final double x, final double w) {
         final int retVal = lock().writeLockGuard(() -> {
@@ -105,6 +93,16 @@ public class Histogram extends AbstractHistogram implements Histogram1D {
         });
         fireInvalidated(new AddedDataEvent(this, "fill(double x, double w)"));
         return retVal;
+    }
+
+    @Override
+    public void fillN(double[] x, double[] w, int stepSize) {
+        lock().writeLockGuard(() -> {
+            for (int i = 0; i < x.length; i++) {
+                this.fill(x[i], w[i]);
+            }
+        });
+        fireInvalidated(new AddedDataEvent(this, "fillN"));
     }
 
     @Override
@@ -129,35 +127,20 @@ public class Histogram extends AbstractHistogram implements Histogram1D {
     }
 
     @Override
-    public void fillN(double[] x, double[] w, int stepSize) {
-        lock().writeLockGuard(() -> {
-            for (int i = 0; i < x.length; i++) {
-                this.fill(x[i], w[i]);
-            }
-        });
-        fireInvalidated(new AddedDataEvent(this, "fillN"));
-    }
-
-    @Override
-    public List<String> getInfoList() {
-        return Collections.<String> emptyList();
-    }
-
-    @Override
-    public List<String> getWarningList() {
-        final List<String> retVal = new LinkedList<>();
-        if (getBinContent(0) > 0) {
-            retVal.add(DataSetMetaData.TAG_UNDERSHOOT);
+    public double get(final int dimIndex, final int index) {
+        if (dimIndex == DIM_X) {
+            return isHorizontal ? getBinCenter(DIM_X, index + 1) : getBinContent(index + 1);
         }
-        if (getBinContent(getDataCount() - 1) > 0) {
-            retVal.add(DataSetMetaData.TAG_OVERSHOOT);
+
+        if (dimIndex == DIM_Y) {
+            return isHorizontal ? getBinContent(index + 1) : getBinCenter(DIM_Y, index + 1);
         }
-        return retVal;
+        return dimIndex + 1 < this.getDimension() ? getBinCenter(DIM_X, index + 1) : getBinContent(index + 1);
     }
 
     @Override
     public List<String> getErrorList() {
-        return Collections.<String> emptyList();
+        return Collections.<String>emptyList();
     }
 
     @Override
@@ -166,16 +149,8 @@ public class Histogram extends AbstractHistogram implements Histogram1D {
     }
 
     @Override
-    public void reset() {
-        Arrays.fill(data, 0.0);
-        getDataStyleMap().clear();
-        getDataLabelMap().clear();
-        if (getDimension() == 2) {
-            this.getAxisDescription(isHorizontal ? DIM_Y : DIM_X).clear();
-        } else {
-            this.getAxisDescription(this.getDimension() - 1).clear();
-        }
-
+    public List<String> getInfoList() {
+        return Collections.<String>emptyList();
     }
 
     @Override
@@ -197,5 +172,30 @@ public class Histogram extends AbstractHistogram implements Histogram1D {
         }
 
         return y1 + (((y2 - y1) * (x - x1)) / (x2 - x1));
+    }
+
+    @Override
+    public List<String> getWarningList() {
+        final List<String> retVal = new LinkedList<>();
+        if (getBinContent(0) > 0) {
+            retVal.add(DataSetMetaData.TAG_UNDERSHOOT);
+        }
+        if (getBinContent(getDataCount() - 1) > 0) {
+            retVal.add(DataSetMetaData.TAG_OVERSHOOT);
+        }
+        return retVal;
+    }
+
+    @Override
+    public void reset() {
+        Arrays.fill(data, 0.0);
+        getDataStyleMap().clear();
+        getDataLabelMap().clear();
+        if (getDimension() == 2) {
+            this.getAxisDescription(isHorizontal ? DIM_Y : DIM_X).clear();
+        } else {
+            this.getAxisDescription(this.getDimension() - 1).clear();
+        }
+
     }
 }

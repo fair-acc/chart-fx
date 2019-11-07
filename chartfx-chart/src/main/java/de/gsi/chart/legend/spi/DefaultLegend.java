@@ -5,10 +5,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import de.gsi.chart.XYChartCss;
-import de.gsi.dataset.DataSet;
 import de.gsi.chart.legend.Legend;
 import de.gsi.chart.renderer.Renderer;
 import de.gsi.chart.utils.StyleParser;
+import de.gsi.dataset.DataSet;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -46,8 +46,7 @@ public class DefaultLegend extends FlowPane implements Legend {
 
     // -------------- PUBLIC PROPERTIES ----------------------------------------
     /**
-     * The legend items should be laid out vertically in columns rather than
-     * horizontally in rows
+     * The legend items should be laid out vertically in columns rather than horizontally in rows
      */
     private final BooleanProperty vertical = new SimpleBooleanProperty(this, "vertical", false) {
         @Override
@@ -55,30 +54,6 @@ public class DefaultLegend extends FlowPane implements Legend {
             setOrientation(get() ? Orientation.VERTICAL : Orientation.HORIZONTAL);
         }
     };
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see de.gsi.chart.legend.Legend#isVertical()
-     */
-    @Override
-    public final boolean isVertical() {
-        return vertical.get();
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see de.gsi.chart.legend.Legend#setVertical(boolean)
-     */
-    @Override
-    public final void setVertical(final boolean value) {
-        vertical.set(value);
-    }
-
-    public final BooleanProperty verticalProperty() {
-        return vertical;
-    }
 
     /** The legend items to display in this legend */
     private final ObjectProperty<ObservableList<LegendItem>> items = new SimpleObjectProperty<ObservableList<LegendItem>>(
@@ -105,34 +80,11 @@ public class DefaultLegend extends FlowPane implements Legend {
         }
     };
 
-    public final void setItems(final ObservableList<LegendItem> value) {
-        itemsProperty().set(value);
-    }
-
-    public final ObservableList<LegendItem> getItems() {
-        return items.get();
-    }
-
-    public final ObjectProperty<ObservableList<LegendItem>> itemsProperty() {
-        return items;
-    }
-
     public DefaultLegend() {
         super(GAP, GAP);
-        setItems(FXCollections.<LegendItem> observableArrayList());
+        setItems(FXCollections.<LegendItem>observableArrayList());
         getStyleClass().setAll("chart-legend");
         setAlignment(Pos.CENTER);
-    }
-
-    @Override
-    public Node getNode() {
-        return this;
-    }
-
-    @Override
-    protected double computePrefWidth(final double forHeight) {
-        // Legend prefWidth is zero if there are no legend items
-        return getItems().isEmpty() ? 0 : super.computePrefWidth(forHeight);
     }
 
     @Override
@@ -141,16 +93,58 @@ public class DefaultLegend extends FlowPane implements Legend {
         return getItems().isEmpty() ? 0 : super.computePrefHeight(forWidth);
     }
 
+    @Override
+    protected double computePrefWidth(final double forHeight) {
+        // Legend prefWidth is zero if there are no legend items
+        return getItems().isEmpty() ? 0 : super.computePrefWidth(forHeight);
+    }
+
+    public final ObservableList<LegendItem> getItems() {
+        return items.get();
+    }
+
     public LegendItem getNewLegendItem(final Renderer renderer, final DataSet series, final int seriesIndex) {
         final Canvas symbol = renderer.drawLegendSymbol(series, seriesIndex, SYMBOL_WIDTH, SYMBOL_HEIGHT);
         return new LegendItem(series.getName(), symbol);
     }
 
+    @Override
+    public Node getNode() {
+        return this;
+    }
+
     /*
      * (non-Javadoc)
      * 
-     * @see de.gsi.chart.legend.Legend#updateLegend(java.util.List,
-     * java.util.List)
+     * @see de.gsi.chart.legend.Legend#isVertical()
+     */
+    @Override
+    public final boolean isVertical() {
+        return vertical.get();
+    }
+
+    public final ObjectProperty<ObservableList<LegendItem>> itemsProperty() {
+        return items;
+    }
+
+    public final void setItems(final ObservableList<LegendItem> value) {
+        itemsProperty().set(value);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see de.gsi.chart.legend.Legend#setVertical(boolean)
+     */
+    @Override
+    public final void setVertical(final boolean value) {
+        vertical.set(value);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see de.gsi.chart.legend.Legend#updateLegend(java.util.List, java.util.List)
      */
     @Override
     public void updateLegend(final List<DataSet> dataSets, final List<Renderer> renderers, final boolean forceUpdate) {
@@ -219,16 +213,12 @@ public class DefaultLegend extends FlowPane implements Legend {
         }
     }
 
+    public final BooleanProperty verticalProperty() {
+        return vertical;
+    }
+
     /** A item to be displayed on a Legend */
     public static class LegendItem extends Label {
-
-        public final Node getSymbol() {
-            return getGraphic();
-        }
-
-        public final void setSymbol(final Node value) {
-            this.setGraphic(value);
-        }
 
         public LegendItem(final String text, final Node symbol) {
             setText(text);
@@ -236,6 +226,14 @@ public class DefaultLegend extends FlowPane implements Legend {
             setAlignment(Pos.CENTER_LEFT);
             setContentDisplay(ContentDisplay.LEFT);
             setSymbol(symbol);
+        }
+
+        public final Node getSymbol() {
+            return getGraphic();
+        }
+
+        public final void setSymbol(final Node value) {
+            this.setGraphic(value);
         }
     }
 }

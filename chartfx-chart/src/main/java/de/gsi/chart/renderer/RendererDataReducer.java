@@ -1,16 +1,14 @@
 package de.gsi.chart.renderer;
 
 /**
- * @author rstein
- *         N.B. in-place computation have to be assumed
- *         (ie. the reduced data set is part and overwrites of the input arrays)
+ * @author rstein N.B. in-place computation have to be assumed (ie. the reduced data set is part and overwrites of the
+ *         input arrays)
  */
 public interface RendererDataReducer {
 
     /**
-     * Internal function to the ErrorDataSetRenderer
-     * arrays are cached copies and operations are assumed to be performed in-place
-     * (&lt;-&gt; for performance reasons/minimisation of memory allocation)
+     * Internal function to the ErrorDataSetRenderer arrays are cached copies and operations are assumed to be performed
+     * in-place (&lt;-&gt; for performance reasons/minimisation of memory allocation)
      *
      * @param xValues array of x coordinates
      * @param yValues array of y coordinates

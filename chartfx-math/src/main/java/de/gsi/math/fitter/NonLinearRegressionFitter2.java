@@ -23,14 +23,17 @@ import de.gsi.math.storage.VoxelArrayND;
 @Deprecated
 public class NonLinearRegressionFitter2 {
 
+    // HISTOGRAM CONSTRUCTION
+    // Tolerance used in including an upper point in last histogram bin when it is outside due to riunding erors
+    protected static double histTol = 1.0001D;
     protected int nData = 0; // number of y data points
     protected int nYarrays = 1; // number of y arrays
+
     protected int nTerms = 0; // number of unknown parameters to be estimated
     // multiple linear (a + b.x1 +c.x2 + . . ., = nXarrays + 1
     // polynomial fitting; = polynomial degree + 1
     // generalised linear; = nXarrays
     // simplex = no. of parameters to be estimated
-
     protected int degreesOfFreedom = 0; // degrees of freedom = nData - nTerms
     protected VoxelArrayND xData = null; // x data values
     protected VoxelArrayND yData = null; // y data values
@@ -39,6 +42,7 @@ public class NonLinearRegressionFitter2 {
     protected VoxelArrayND residual = null; // residuals
     protected VoxelArrayND residualW = null; // weighted residuals
     protected boolean weightOpt = false; // weighting factor option
+
     // = true; weights supplied
     // = false; weights set to unity in regression
     // average error used in statistical methods
@@ -47,25 +51,24 @@ public class NonLinearRegressionFitter2 {
     // all weights set to unity
     protected int weightFlag = 0; // weighting flag - weightOpt = false, weightFlag = 0; weightOpt = true, weightFlag =
                                   // 1
-
     protected double[] best = null; // best estimates vector of the unknown parameters
     protected double[] bestSd = null; // standard deviation estimates of the best estimates of the unknown parameters
     protected double[] pseudoSd = null; // Pseudo-nonlinear sd
     protected double[] tValues = null; // t-values of the best estimates
-    protected double[] pValues = null; // p-values of the best estimates
 
+    protected double[] pValues = null; // p-values of the best estimates
     protected double chiSquare = Double.NaN; // chi square (observed-calculated)^2/variance
     protected double reducedChiSquare = Double.NaN; // reduced chi square
     protected double sumOfSquares = Double.NaN; // Sum of the squares of the residuals
     protected double lastSSnoConstraint = 0.0D; // Last sum of the squares of the residuals with no constraint penalty
     protected double[][] covar = null; // Covariance matrix
-    protected double[][] corrCoeff = null; // Correlation coefficient matrix
 
+    protected double[][] corrCoeff = null; // Correlation coefficient matrix
     protected boolean linNonLin = true; // if true linear method, if false non-linear method
+
     protected boolean trueFreq = false; // true if xData values are true frequencies, e.g. in a fit to Gaussian
     // false if not
     // if true chiSquarePoisson (see above) is also calculated
-
     // Non-linear members
     protected boolean nlrStatus = true; // Status of non-linear regression on exiting regression method
     // = true - convergence criterion was met
@@ -105,13 +108,13 @@ public class NonLinearRegressionFitter2 {
     protected int[] penaltyParam = null; // indices of paramaters subject to single parameter constraint
     protected int[][] sumPenaltyParam = null; // indices of paramaters subject to multiple parameter constraint
     protected double[][] sumPlusOrMinus = null; // valueall before each parameter in multiple parameter summation
-    protected int[] sumPenaltyNumber = null; // number of paramaters in each multiple parameter constraint
 
+    protected int[] sumPenaltyNumber = null; // number of paramaters in each multiple parameter constraint
     protected double[] constraints = null; // single parameter constraint values
     protected double[] sumConstraints = null; // multiple parameter constraint values
+
     protected int constraintMethod = 0; // constraint method number
     // =0: cliff to the power two (only method at present)
-
     protected int nMax = 3000; // Nelder and Mead simplex maximum number of iterations
     protected int nIter = 0; // Nelder and Mead simplex number of iterations performed
     protected int konvge = 3; // Nelder and Mead simplex number of restarts allowed
@@ -135,12 +138,13 @@ public class NonLinearRegressionFitter2 {
     // = 1; tests reduced chi suare or sum of squares < mean of abs(y values)*fTol
     protected double simplexSd = 0.0D; // simplex standard deviation
     protected boolean statFlag = true; // if true - statistical method called
+
     // if false - no statistical analysis //
     protected boolean multipleY = false;
     // = true if y variable consists of more than set of data each needing a different calculation in RegressionFunction
     // when set to true - the index of the y value is passed to the function in Regression function
-
     protected double[] values = null; // values entered into gaussianFixed
+
     protected boolean[] fixed = null; // true if above values[i] is fixed, false if it is not
 
     protected boolean ignoreDofFcheck = false; // when set to true, the check on whether degrees of freedom are greater
@@ -148,21 +152,6 @@ public class NonLinearRegressionFitter2 {
 
     protected boolean nFactorOption = false; // = true varaiance, covariance and standard deviation denominator = n
     // = false varaiance, covariance and standard deviation denominator = n-1
-
-    // HISTOGRAM CONSTRUCTION
-    // Tolerance used in including an upper point in last histogram bin when it is outside due to riunding erors
-    protected static double histTol = 1.0001D;
-
-    /**
-     * Constructor with data with x as 1D array and weights provided
-     *
-     * @param xData x coordinate of input data
-     * @param yData y coordinate of input data
-     * @param weights weighting vector
-     */
-    public NonLinearRegressionFitter2(final VoxelArrayND xData, final VoxelArrayND yData, final VoxelArrayND weights) {
-        this.setData(xData, yData, weights);
-    }
 
     /**
      * Constructor with data with x as 1D array and weights provided
@@ -175,29 +164,82 @@ public class NonLinearRegressionFitter2 {
         setData(xData, yData, weight);
     }
 
-    public void setData(final double[] xData, final double[] yData, final double[] weights) {
-        final DoubleStorage1D xDataLocal = new DoubleStorage1D(xData);
-        final DoubleStorage1D yDataLocal = new DoubleStorage1D(xData);
-        final DoubleStorage1D weightLocal = new DoubleStorage1D(weights);
-        if (weights == null) {
-            System.err.println("weights are null");
-        }
-        setData(xDataLocal, yDataLocal, weightLocal);
+    /**
+     * Constructor with data with x as 1D array and weights provided
+     *
+     * @param xData x coordinate of input data
+     * @param yData y coordinate of input data
+     * @param weights weighting vector
+     */
+    public NonLinearRegressionFitter2(final VoxelArrayND xData, final VoxelArrayND yData, final VoxelArrayND weights) {
+        this.setData(xData, yData, weights);
     }
 
-    public void setData(final VoxelArrayND xData, final VoxelArrayND yData, final VoxelArrayND weights) {
-        weight = checkForZeroWeights(weights);
-        if (weightOpt) {
-            weightFlag = 1;
+    // add a single parameter constraint boundary for the non-linear regression
+    public void addConstraint(final int paramIndex, final int conDir, final double constraint) {
+        penalty = true;
+
+        // First element reserved for method number if other methods than 'cliff' are added later
+        if (penalties.isEmpty()) {
+            penalties.add(new Integer(constraintMethod));
         }
-        this.xData = xData;
-        this.yData = yData;
-        weight = weights;
 
-        yCalc = yData.copy();
-        residual = yData.copy();
-        residualW = yData.copy();
+        // add constraint
+        if (penalties.size() == 1) {
+            penalties.add(new Integer(1));
+        } else {
+            int nPC = ((Integer) penalties.get(1)).intValue();
+            nPC++;
+            penalties.set(1, new Integer(nPC));
+        }
+        penalties.add(new Integer(paramIndex));
+        penalties.add(new Integer(conDir));
+        penalties.add(new Double(constraint));
+        if (paramIndex > maxConstraintIndex) {
+            maxConstraintIndex = paramIndex;
+        }
+    }
 
+    // add a multiple parameter constraint boundary for the non-linear regression
+    public void addConstraint(final int[] paramIndices, final double[] plusOrMinus, final int conDir,
+            final double constraint) {
+        final int nCon = paramIndices.length;
+        final int nPorM = plusOrMinus.length;
+        if (nCon != nPorM) {
+            throw new IllegalArgumentException(
+                    "num of parameters, " + nCon + ", does not equal number of parameter signs, " + nPorM);
+        }
+        sumPenalty = true;
+
+        // First element reserved for method number if other methods than 'cliff' are added later
+        if (sumPenalties.isEmpty()) {
+            sumPenalties.add(new Integer(constraintMethod));
+        }
+
+        // add constraint
+        if (sumPenalties.size() == 1) {
+            sumPenalties.add(new Integer(1));
+        } else {
+            int nPC = ((Integer) sumPenalties.get(1)).intValue();
+            nPC++;
+            sumPenalties.set(1, new Integer(nPC));
+        }
+        sumPenalties.add(new Integer(nCon));
+        sumPenalties.add(paramIndices);
+        sumPenalties.add(plusOrMinus);
+        sumPenalties.add(new Integer(conDir));
+        sumPenalties.add(new Double(constraint));
+        final int maxI = TMath.Maximum(paramIndices);
+        if (maxI > maxConstraintIndex) {
+            maxConstraintIndex = maxI;
+        }
+    }
+
+    // add a multiple parameter constraint boundary for the non-linear regression
+    public void addConstraint(final int[] paramIndices, final int[] plusOrMinus, final int conDir,
+            final double constraint) {
+        final double[] dpom = ArrayConversion.getDoubleArray(plusOrMinus);
+        addConstraint(paramIndices, dpom, conDir, constraint);
     }
 
     /**
@@ -239,81 +281,24 @@ public class NonLinearRegressionFitter2 {
                 /*
                  * for (int i = 0; i < n; i++) {
                  *
-                 * if (weight[i] <= 0.0) {
-                 * // weight is negative or zero
+                 * if (weight[i] <= 0.0) { // weight is negative or zero
                  *
                  *
-                 * if (i == 0) {
-                 * int ii = 1;
-                 * for (boolean test = true; test; ) {
-                 * if (weight[ii] > 0.0D) {
-                 * double ww = weight[0];
-                 * weight[0] = weight[ii];
-                 * System.out.println("weight at point " + i + ", " + ww + ", replaced by "
-                 * + weight[i]);
-                 * test = false;
-                 * } else {
-                 * ii++;
-                 * }
-                 * }
-                 * }
+                 * if (i == 0) { int ii = 1; for (boolean test = true; test; ) { if (weight[ii] > 0.0D) { double ww =
+                 * weight[0]; weight[0] = weight[ii]; System.out.println("weight at point " + i + ", " + ww +
+                 * ", replaced by " + weight[i]); test = false; } else { ii++; } } }
                  *
-                 * if (i == (n - 1)) {
-                 * int ii = n - 2;
-                 * boolean test = true;
-                 * while (test) {
-                 * if (weight[ii] > 0.0D) {
-                 * double ww = weight[i];
-                 * weight[i] = weight[ii];
-                 * System.out.println("weight at point " + i + ", " + ww + ", replaced by "
-                 * + weight[i]);
-                 * test = false;
-                 * } else {
-                 * ii--;
-                 * }
-                 * }
-                 * }
+                 * if (i == (n - 1)) { int ii = n - 2; boolean test = true; while (test) { if (weight[ii] > 0.0D) {
+                 * double ww = weight[i]; weight[i] = weight[ii]; System.out.println("weight at point " + i + ", " + ww
+                 * + ", replaced by " + weight[i]); test = false; } else { ii--; } } }
                  *
-                 * if (i > 0 && i < (n - 2)) {
-                 * double lower = 0.0;
-                 * double upper = 0.0;
-                 * int ii = i - 1;
-                 * boolean test = true;
-                 * while (test) {
-                 * if (weight[ii] > 0.0D) {
-                 * lower = weight[ii];
-                 * test = false;
-                 * } else {
-                 * ii--;
-                 * if (ii == 0)
-                 * test = false;
-                 * }
-                 * }
-                 * ii = i + 1;
-                 * test = true;
-                 * while (test) {
-                 * if (weight[ii] > 0.0D) {
-                 * upper = weight[ii];
-                 * test = false;
-                 * } else {
-                 * ii++;
-                 * if (ii == (n - 1))
-                 * test = false;
-                 * }
-                 * }
-                 * double ww = weight[i];
-                 * if (lower == 0.0) {
-                 * weight[i] = upper;
-                 * } else {
-                 * if (upper == 0.0) {
-                 * weight[i] = lower;
-                 * } else {
-                 * weight[i] = (lower + upper) / 2.0;
-                 * }
-                 * }
-                 * System.out.println("weight at point " + i + ", " + ww + ", replaced by " + weight[i]);
-                 * }
-                 * }
+                 * if (i > 0 && i < (n - 2)) { double lower = 0.0; double upper = 0.0; int ii = i - 1; boolean test =
+                 * true; while (test) { if (weight[ii] > 0.0D) { lower = weight[ii]; test = false; } else { ii--; if (ii
+                 * == 0) test = false; } } ii = i + 1; test = true; while (test) { if (weight[ii] > 0.0D) { upper =
+                 * weight[ii]; test = false; } else { ii++; if (ii == (n - 1)) test = false; } } double ww = weight[i];
+                 * if (lower == 0.0) { weight[i] = upper; } else { if (upper == 0.0) { weight[i] = lower; } else {
+                 * weight[i] = (lower + upper) / 2.0; } } System.out.println("weight at point " + i + ", " + ww +
+                 * ", replaced by " + weight[i]); } }
                  *
                  *
                  * }
@@ -325,94 +310,311 @@ public class NonLinearRegressionFitter2 {
         return weight;
     }
 
-    protected static boolean setTrueFreqWeights(final VoxelArrayND yData, final VoxelArrayND weight) {
-        final boolean flag = true;
-
-        // Set all weights to square root of frequency of occurrence
-        for (int ii = 0; ii < yData.getLocalStorageDim(); ii++) {
-            // TODO: refactor here
-            // weight[ii] = Math.sqrt(Math.abs(yData[ii]));
-        }
-
-        // Check for zero weights and take average of neighbours as weight if it is zero
-        for (int ii = 0; ii < yData.getLocalStorageDim(); ii++) {
-            final double last = 0.0D;
-            final double next = 0.0D;
-
-            // TODO: refactor here
-            /*
-             * if (weight[ii] == 0) {
-             * // find previous non-zero value
-             * boolean testLast = true;
-             * int iLast = ii - 1;
-             * while (testLast) {
-             * if (iLast < 0) {
-             * testLast = false;
-             * } else {
-             * if (weight[iLast] == 0.0D) {
-             * iLast--;
-             * } else {
-             * last = weight[iLast];
-             * testLast = false;
-             * }
-             * }
-             * }
-             *
-             * // find next non-zero value
-             * boolean testNext = true;
-             * int iNext = ii + 1;
-             * while (testNext) {
-             * if (iNext >= nData) {
-             * testNext = false;
-             * } else {
-             * if (weight[iNext] == 0.0D) {
-             * iNext++;
-             * } else {
-             * next = weight[iNext];
-             * testNext = false;
-             * }
-             * }
-             * }
-             *
-             * // Take average
-             * weight[ii] = (last + next) / 2.0D;
-             * }
-             */
-        }
-        return flag;
-    }
-
-    // Ignore check on whether degrees of freedom are greater than zero
-    public void ignoreDofFcheck() {
-        ignoreDofFcheck = true;
-    }
-
-    // Reset the true frequency test, trueFreq
-    // true if yData values are true frequencies, e.g. in a fit to Gaussian; false if not
-    // if true chiSquarePoisson (see above) is also calculated
-    public void setTrueFreq(final boolean trFr) {
-        final boolean trFrOld = trueFreq;
-        trueFreq = trFr;
-        if (trFr) {
-            final boolean flag = setTrueFreqWeights(yData, weight);
-            if (flag) {
-                trueFreq = true;
-                weightOpt = true;
-            } else {
-                trueFreq = false;
-                weightOpt = false;
+    // check for zero and negative values
+    public void checkZeroNeg(final double[] xx, final double[] yy, final double[] ww) {
+        int jj = 0;
+        boolean test = true;
+        for (int i = 0; i < nData; i++) {
+            if (yy[i] <= 0.0D) {
+                if (i <= jj) {
+                    test = true;
+                    jj = i;
+                    while (test) {
+                        jj++;
+                        if (jj >= nData) {
+                            throw new ArithmeticException("all zero cumulative data!!");
+                        }
+                        if (yy[jj] > 0.0D) {
+                            yy[i] = yy[jj];
+                            xx[i] = xx[jj];
+                            ww[i] = ww[jj];
+                            test = false;
+                        }
+                    }
+                } else {
+                    if (i == nData - 1) {
+                        yy[i] = yy[i - 1];
+                        xx[i] = xx[i - 1];
+                        ww[i] = ww[i - 1];
+                    } else {
+                        yy[i] = (yy[i - 1] + yy[i + 1]) / 2.0D;
+                        xx[i] = (xx[i - 1] + xx[i + 1]) / 2.0D;
+                        ww[i] = (ww[i - 1] + ww[i + 1]) / 2.0D;
+                    }
+                }
             }
+        }
+    }
+
+    // Get the best estimates of the unknown parameters
+    public double[] getBestEstimates() {
+        return best.clone();
+    }
+
+    // Get the estimates of the errors of the best estimates of the unknown parameters
+    public double[] getBestEstimatesErrors() {
+        return bestSd.clone();
+    }
+
+    // Get the estimates of the standard deviations of the best estimates of the unknown parameters
+    public double[] getbestestimatesStandardDeviations() {
+        return bestSd.clone();
+    }
+
+    // Get the estimates of the errors of the best estimates of the unknown parameters
+    public double[] getBestEstimatesStandardDeviations() {
+        return bestSd.clone();
+    }
+
+    // Get the chi square estimate
+    public double getChiSquare() {
+        double ret = 0.0D;
+        if (weightOpt) {
+            ret = chiSquare;
         } else {
-            if (trFrOld) {
-                weight.initialiseWithValue(1.0);
-                weightOpt = false;
-            }
+            System.out.println("Chi Square cannot be calculated as data are neither true frequencies nor weighted");
+            System.out.println("A value of -1 is returned as Chi Square");
+            ret = -1.0D;
         }
+        return ret;
+    }
+
+    // Get the chi square probablity
+    public double getchiSquareProb() {
+        double ret = 0.0D;
+        if (weightOpt) {
+            ret = 1.0D - TMath.ChisquareQuantile(chiSquare, nData - 1);
+        } else {
+            System.out.println(
+                    "A Chi Square probablity cannot be calculated as data are neither true frequencies nor weighted");
+            System.out.println("A value of -1 is returned as Reduced Chi Square");
+            ret = -1.0D;
+        }
+        return ret;
+    }
+
+    // Get the best estimates of the unknown parameters
+    public double[] getCoeff() {
+        return best.clone();
+    }
+
+    // Get the estimates of the errors of the best estimates of the unknown parameters
+    public double[] getCoeffSd() {
+        return bestSd.clone();
+    }
+
+    // Get the cofficients of variations of the best estimates of the unknown parameters
+    public double[] getCoeffVar() {
+        final double[] coeffVar = new double[nTerms];
+
+        for (int i = 0; i < nTerms; i++) {
+            coeffVar[i] = bestSd[i] * 100.0D / best[i];
+        }
+        return coeffVar;
+    }
+
+    // Get the correlation coefficient matrix
+    public double[][] getCorrCoeffMatrix() {
+        return corrCoeff;
+    }
+
+    // Get the covariance matrix
+    public double[][] getCovMatrix() {
+        return covar;
+    }
+
+    // Get the degrees of freedom
+    public double getDegFree() {
+        return degreesOfFreedom;
+    }
+
+    // Get the non-linear regression fractional step size used in numerical differencing
+    public double getDelta() {
+        return delta;
+    }
+
+    // Get the non-linear regression pre and post minimum gradients
+    public double[][] getGrad() {
+        return grad;
+    }
+
+    // Get the non-linear regression statistics Hessian matrix inversion status flag
+    public boolean getInversionCheck() {
+        return invertFlag;
+    }
+
+    // Get the non-linear regression convergence test option
+    public int getMinTest() {
+        return minTest;
+    }
+
+    // Get the number of iterations in nonlinear regression
+    public int getNiter() {
+        return nIter;
+    }
+
+    // Get the non-linear regression status
+    // true if convergence was achieved
+    // false if convergence not achieved before maximum number of iterations
+    // current values then returned
+    public boolean getNlrStatus() {
+        return nlrStatus;
+    }
+
+    // Get the maximum number of iterations allowed in nonlinear regression
+    public int getNmax() {
+        return nMax;
+    }
+
+    // Get the Nelder and Mead contraction coefficient [gamma]
+    public double getNMcontract() {
+        return cCoeff;
+    }
+
+    // Get the Nelder and Mead extension coefficient [beta]
+    public double getNMextend() {
+        return eCoeff;
+    }
+
+    // Get the Nelder and Mead reflection coefficient [alpha]
+    public double getNMreflect() {
+        return rCoeff;
+    }
+
+    // Get the number of restarts in nonlinear regression
+    public int getNrestarts() {
+        return kRestart;
+    }
+
+    // Get the maximum number of restarts allowed in nonlinear regression
+    public int getNrestartsMax() {
+        return konvge;
+    }
+
+    // Get the non-linear regression statistics Hessian matrix inverse diagonal status flag
+    public boolean getPosVarCheck() {
+        return posVarFlag;
+    }
+
+    // Get the pseudo-estimates of the errors of the best estimates of the unknown parameters
+    public double[] getPseudoErrors() {
+        return pseudoSd.clone();
+    }
+
+    // Get the pseudo-estimates of the errors of the best estimates of the unknown parameters
+    public double[] getPseudoSd() {
+        return pseudoSd.clone();
+    }
+
+    // Get the p-values of the best estimates
+    public double[] getPvalues() {
+        return pValues.clone();
+    }
+
+    // Get the reduced chi square estimate
+    public double getReducedChiSquare() {
+        double ret = 0.0D;
+        if (weightOpt) {
+            ret = reducedChiSquare;
+        } else {
+            System.out.println(
+                    "A Reduced Chi Square cannot be calculated as data are neither true frequencies nor weighted");
+            System.out.println("A value of -1 is returned as Reduced Chi Square");
+            ret = -1.0D;
+        }
+        return ret;
+    }
+
+    // Get the unweighted residuals, y(experimental) - y(calculated)
+    public double[] getResiduals() {
+        final double[] temp = new double[nData];
+        for (int i = 0; i < nData; i++) {
+            // TODO: fix here
+            // temp[i] = this.yData[i] - this.yCalc[i];
+        }
+        return temp;
+    }
+
+    // Get scaling factors
+    public double[] getScale() {
+        return fscale;
+    }
+
+    // Get the simplex sd at the minimum
+    public double getSimplexSd() {
+        return simplexSd;
+    }
+
+    // Get the unweighted sum of squares of the residuals
+    public double getSumOfSquares() {
+        return sumOfSquares;
+    }
+
+    // Get the non-linear regression tolerance
+    public double getTolerance() {
+        return fTol;
     }
 
     // Get the true frequency test, trueFreq
     public boolean getTrueFreq() {
         return trueFreq;
+    }
+
+    // Get the t-values of the best estimates
+    public double[] getTvalues() {
+        return tValues.clone();
+    }
+
+    // Get the weighted residuals, (y(experimental) - y(calculated))/weight
+    public double[] getWeightedResiduals() {
+
+        final double[] temp = new double[nData];
+        for (int i = 0; i < nData; i++) {
+            // TODO: fix here
+            // temp[i] = (this.yData[i] - this.yCalc[i]) / weight[i];
+        }
+        return temp;
+    }
+
+    /**
+     * Get the input x values
+     *
+     * @return array with x coordinates
+     */
+    public double[] getXdata() {
+        if (xData instanceof DoubleStorage1D) {
+            return ((DoubleStorage1D) xData).getArray().clone();
+        }
+
+        // TODO fix here
+        return null;
+    }
+
+    // Get the calculated y values
+    public double[] getYcalc() {
+        if (yCalc instanceof DoubleStorage1D) {
+            return ((DoubleStorage1D) yCalc).getArray().clone();
+        }
+        // TODO fix here
+        return null;
+    }
+
+    /**
+     * Get the inputed y values
+     *
+     * @return array with input y coordinates
+     */
+    public double[] getYdata() {
+        if (yData instanceof DoubleStorage1D) {
+            return ((DoubleStorage1D) yData).getArray().clone();
+        }
+        // TODO fix here
+        return null;
+    }
+
+    // Ignore check on whether degrees of freedom are greater than zero
+    public void ignoreDofFcheck() {
+        ignoreDofFcheck = true;
     }
 
     /**
@@ -849,567 +1051,6 @@ public class NonLinearRegressionFitter2 {
         }
     }
 
-    // Nelder and Mead Simplex Simplex Non-linear Regression
-    public void simplex(final Function1D g, final double[] start, final double[] step, final double fTol,
-            final int nMax) {
-        if (multipleY) {
-            throw new IllegalArgumentException(
-                    "This method cannot handle multiply dimensioned y arrays\nsimplex2 should have been called");
-        }
-        final Object regFun = g;
-        linNonLin = false;
-        zeroCheck = false;
-        degreesOfFreedom = nData - start.length;
-        nelderMead(regFun, start, step, fTol, nMax);
-    }
-
-    // Nelder and Mead simplex
-    // Default maximum iterations
-    public void simplex(final Function1D g, final double[] start, final double[] step, final double fTol) {
-        if (multipleY) {
-            throw new IllegalArgumentException(
-                    "This method cannot handle multiply dimensioned y arrays\nsimplex2 should have been called");
-        }
-        final Object regFun = g;
-        final int nMaxx = nMax;
-        linNonLin = false;
-        zeroCheck = false;
-        degreesOfFreedom = nData - start.length;
-        nelderMead(regFun, start, step, fTol, nMaxx);
-    }
-
-    // Nelder and Mead simplex
-    // Default tolerance
-    public void simplex(final Function1D g, final double[] start, final double[] step, final int nMax) {
-        if (multipleY) {
-            throw new IllegalArgumentException(
-                    "This method cannot handle multiply dimensioned y arrays\nsimplex2 should have been called");
-        }
-        final Object regFun = g;
-        final double fToll = fTol;
-        linNonLin = false;
-        zeroCheck = false;
-        degreesOfFreedom = nData - start.length;
-        nelderMead(regFun, start, step, fToll, nMax);
-    }
-
-    // Nelder and Mead simplex
-    // Default tolerance
-    // Default maximum iterations
-    public void simplex(final Function1D g, final double[] start, final double[] step) {
-        if (multipleY) {
-            throw new IllegalArgumentException(
-                    "This method cannot handle multiply dimensioned y arrays\nsimplex2 should have been called");
-        }
-        final Object regFun = g;
-        final double fToll = fTol;
-        final int nMaxx = nMax;
-        linNonLin = false;
-        zeroCheck = false;
-        degreesOfFreedom = nData - start.length;
-        nelderMead(regFun, start, step, fToll, nMaxx);
-    }
-
-    // Nelder and Mead simplex
-    // Default step option - all step[i] = dStep
-    public void simplex(final Function1D g, final double[] start, final double fTol, final int nMax) {
-        if (multipleY) {
-            throw new IllegalArgumentException(
-                    "This method cannot handle multiply dimensioned y arrays\nsimplex2 should have been called");
-        }
-        final Object regFun = g;
-        final int n = start.length;
-        final double[] stepp = new double[n];
-        for (int i = 0; i < n; i++) {
-            stepp[i] = dStep * start[i];
-        }
-        linNonLin = false;
-        zeroCheck = false;
-        degreesOfFreedom = nData - start.length;
-        nelderMead(regFun, start, stepp, fTol, nMax);
-    }
-
-    // Nelder and Mead simplex
-    // Default maximum iterations
-    // Default step option - all step[i] = dStep
-    public void simplex(final Function1D g, final double[] start, final double fTol) {
-        if (multipleY) {
-            throw new IllegalArgumentException(
-                    "This method cannot handle multiply dimensioned y arrays\nsimplex2 should have been called");
-        }
-        final Object regFun = g;
-        final int n = start.length;
-        final int nMaxx = nMax;
-        final double[] stepp = new double[n];
-        for (int i = 0; i < n; i++) {
-            stepp[i] = dStep * start[i];
-        }
-        linNonLin = false;
-        zeroCheck = false;
-        degreesOfFreedom = nData - start.length;
-        nelderMead(regFun, start, stepp, fTol, nMaxx);
-    }
-
-    // Nelder and Mead simplex
-    // Default tolerance
-    // Default step option - all step[i] = dStep
-    public void simplex(final Function1D g, final double[] start, final int nMax) {
-        if (multipleY) {
-            throw new IllegalArgumentException(
-                    "This method cannot handle multiply dimensioned y arrays\nsimplex2 should have been called");
-        }
-        final Object regFun = g;
-        final int n = start.length;
-        final double fToll = fTol;
-        final double[] stepp = new double[n];
-        for (int i = 0; i < n; i++) {
-            stepp[i] = dStep * start[i];
-        }
-        zeroCheck = false;
-        degreesOfFreedom = nData - start.length;
-        nelderMead(regFun, start, stepp, fToll, nMax);
-    }
-
-    // Nelder and Mead simplex
-    // Default tolerance
-    // Default maximum iterations
-    // Default step option - all step[i] = dStep
-    public void simplex(final Function1D g, final double[] start) {
-        if (multipleY) {
-            throw new IllegalArgumentException(
-                    "This method cannot handle multiply dimensioned y arrays\nsimplex2 should have been called");
-        }
-        final Object regFun = g;
-        final int n = start.length;
-        final int nMaxx = nMax;
-        final double fToll = fTol;
-        final double[] stepp = new double[n];
-        for (int i = 0; i < n; i++) {
-            stepp[i] = dStep * start[i];
-        }
-        linNonLin = false;
-        zeroCheck = false;
-        degreesOfFreedom = nData - start.length;
-        nelderMead(regFun, start, stepp, fToll, nMaxx);
-    }
-
-    // Nelder and Mead Simplex Simplex2 Non-linear Regression
-    public void simplex2(final FunctionND g, final double[] start, final double[] step, final double fTol,
-            final int nMax) {
-        if (!multipleY) {
-            throw new IllegalArgumentException(
-                    "This method cannot handle singly dimensioned y array\nsimplex should have been called");
-        }
-        final Object regFun = g;
-        linNonLin = false;
-        zeroCheck = false;
-        degreesOfFreedom = nData - start.length;
-        nelderMead(regFun, start, step, fTol, nMax);
-    }
-
-    // Nelder and Mead simplex
-    // Default maximum iterations
-    public void simplex2(final FunctionND g, final double[] start, final double[] step, final double fTol) {
-        if (!multipleY) {
-            throw new IllegalArgumentException(
-                    "This method cannot handle singly dimensioned y array\nsimplex should have been called");
-        }
-        final Object regFun = g;
-        final int nMaxx = nMax;
-        linNonLin = false;
-        zeroCheck = false;
-        degreesOfFreedom = nData - start.length;
-        nelderMead(regFun, start, step, fTol, nMaxx);
-    }
-
-    // Nelder and Mead simplex
-    // Default tolerance
-    public void simplex2(final FunctionND g, final double[] start, final double[] step, final int nMax) {
-        if (!multipleY) {
-            throw new IllegalArgumentException(
-                    "This method cannot handle singly dimensioned y array\nsimplex should have been called");
-        }
-        final Object regFun = g;
-        final double fToll = fTol;
-        linNonLin = false;
-        zeroCheck = false;
-        degreesOfFreedom = nData - start.length;
-        nelderMead(regFun, start, step, fToll, nMax);
-    }
-
-    // Nelder and Mead simplex
-    // Default tolerance
-    // Default maximum iterations
-    public void simplex2(final FunctionND g, final double[] start, final double[] step) {
-        if (!multipleY) {
-            throw new IllegalArgumentException(
-                    "This method cannot handle singly dimensioned y array\nsimplex should have been called");
-        }
-        final Object regFun = g;
-        final double fToll = fTol;
-        final int nMaxx = nMax;
-        linNonLin = false;
-        zeroCheck = false;
-        degreesOfFreedom = nData - start.length;
-        nelderMead(regFun, start, step, fToll, nMaxx);
-    }
-
-    // Nelder and Mead simplex
-    // Default step option - all step[i] = dStep
-    public void simplex2(final FunctionND g, final double[] start, final double fTol, final int nMax) {
-        if (!multipleY) {
-            throw new IllegalArgumentException(
-                    "This method cannot handle singly dimensioned y array\nsimplex should have been called");
-        }
-        final Object regFun = g;
-        final int n = start.length;
-        final double[] stepp = new double[n];
-        for (int i = 0; i < n; i++) {
-            stepp[i] = dStep * start[i];
-        }
-        linNonLin = false;
-        zeroCheck = false;
-        degreesOfFreedom = nData - start.length;
-        nelderMead(regFun, start, stepp, fTol, nMax);
-    }
-
-    // Nelder and Mead simplex
-    // Default maximum iterations
-    // Default step option - all step[i] = dStep
-    public void simplex2(final FunctionND g, final double[] start, final double fTol) {
-        if (!multipleY) {
-            throw new IllegalArgumentException(
-                    "This method cannot handle singly dimensioned y array\nsimplex should have been called");
-        }
-        final Object regFun = g;
-        final int n = start.length;
-        final int nMaxx = nMax;
-        final double[] stepp = new double[n];
-        for (int i = 0; i < n; i++) {
-            stepp[i] = dStep * start[i];
-        }
-        linNonLin = false;
-        zeroCheck = false;
-        degreesOfFreedom = nData - start.length;
-        nelderMead(regFun, start, stepp, fTol, nMaxx);
-    }
-
-    // Nelder and Mead simplex
-    // Default tolerance
-    // Default step option - all step[i] = dStep
-    public void simplex2(final FunctionND g, final double[] start, final int nMax) {
-        if (!multipleY) {
-            throw new IllegalArgumentException(
-                    "This method cannot handle singly dimensioned y array\nsimplex should have been called");
-        }
-        final Object regFun = g;
-        final int n = start.length;
-        final double fToll = fTol;
-        final double[] stepp = new double[n];
-        for (int i = 0; i < n; i++) {
-            stepp[i] = dStep * start[i];
-        }
-        zeroCheck = false;
-        degreesOfFreedom = nData - start.length;
-        nelderMead(regFun, start, stepp, fToll, nMax);
-    }
-
-    // Nelder and Mead simplex
-    // Default tolerance
-    // Default maximum iterations
-    // Default step option - all step[i] = dStep
-    public void simplex2(final FunctionND g, final double[] start) {
-        if (!multipleY) {
-            throw new IllegalArgumentException(
-                    "This method cannot handle singly dimensioned y array\nsimplex should have been called");
-        }
-        final Object regFun = g;
-        final int n = start.length;
-        final int nMaxx = nMax;
-        final double fToll = fTol;
-        final double[] stepp = new double[n];
-        for (int i = 0; i < n; i++) {
-            stepp[i] = dStep * start[i];
-        }
-        linNonLin = false;
-        zeroCheck = false;
-        degreesOfFreedom = nData - start.length;
-        nelderMead(regFun, start, stepp, fToll, nMaxx);
-    }
-
-    /**
-     * Calculate the sum of squares of the residuals for non-linear regression
-     *
-     * @param regFun test function
-     * @param testParameter test parameter
-     * @return the sum of all square values
-     */
-    protected double sumSquares(final Object regFun, final double[] testParameter) {
-        double ss = -3.0D;
-        final double[] param = new double[nTerms];
-
-        // rescale
-        for (int i = 0; i < nTerms; i++) {
-            param[i] = testParameter[i] / fscale[i];
-        }
-
-        // single parameter penalty functions
-        final double tempFunctVal = lastSSnoConstraint;
-        boolean test = true;
-        if (penalty) {
-            int k = 0;
-            for (int i = 0; i < nConstraints; i++) {
-                k = penaltyParam[i];
-                switch (penaltyCheck[i]) {
-                case -1:
-                    if (param[k] < constraints[i]) {
-                        ss = tempFunctVal + penaltyWeight * TMathConstants.Sqr(constraints[i] - param[k]);
-                        test = false;
-                    }
-                    break;
-                case 0:
-                    if (param[k] < constraints[i] * (1.0 - constraintTolerance)) {
-                        ss = tempFunctVal + penaltyWeight
-                                * TMathConstants.Sqr(constraints[i] * (1.0 - constraintTolerance) - param[k]);
-                        test = false;
-                    }
-                    if (param[k] > constraints[i] * (1.0 + constraintTolerance)) {
-                        ss = tempFunctVal + penaltyWeight
-                                * TMathConstants.Sqr(param[k] - constraints[i] * (1.0 + constraintTolerance));
-                        test = false;
-                    }
-                    break;
-                case 1:
-                    if (param[k] > constraints[i]) {
-                        ss = tempFunctVal + penaltyWeight * TMathConstants.Sqr(param[k] - constraints[i]);
-                        test = false;
-                    }
-                    break;
-                }
-            }
-        }
-
-        // multiple parameter penalty functions
-        if (sumPenalty) {
-            int kk = 0;
-            double pSign = 0;
-            double sumPenaltySum = 0.0D;
-            for (int i = 0; i < nSumConstraints; i++) {
-                for (int j = 0; j < sumPenaltyNumber[i]; j++) {
-                    kk = sumPenaltyParam[i][j];
-                    pSign = sumPlusOrMinus[i][j];
-                    sumPenaltySum += param[kk] * pSign;
-                }
-                switch (sumPenaltyCheck[i]) {
-                case -1:
-                    if (sumPenaltySum < sumConstraints[i]) {
-                        ss = tempFunctVal + penaltyWeight * TMathConstants.Sqr(sumConstraints[i] - sumPenaltySum);
-                        test = false;
-                    }
-                    break;
-                case 0:
-                    if (sumPenaltySum < sumConstraints[i] * (1.0 - constraintTolerance)) {
-                        ss = tempFunctVal + penaltyWeight
-                                * TMathConstants.Sqr(sumConstraints[i] * (1.0 - constraintTolerance) - sumPenaltySum);
-                        test = false;
-                    }
-                    if (sumPenaltySum > sumConstraints[i] * (1.0 + constraintTolerance)) {
-                        ss = tempFunctVal + penaltyWeight
-                                * TMathConstants.Sqr(sumPenaltySum - sumConstraints[i] * (1.0 + constraintTolerance));
-                        test = false;
-                    }
-                    break;
-                case 1:
-                    if (sumPenaltySum > sumConstraints[i]) {
-                        ss = tempFunctVal + penaltyWeight * TMathConstants.Sqr(sumPenaltySum - sumConstraints[i]);
-                        test = false;
-                    }
-                    break;
-                }
-            }
-        }
-
-        // compute \chi^2 estimate
-        if (test) {
-            if (regFun instanceof Function) {
-                ((Function) regFun).setFitterMode(true);
-                final Function func = (Function) regFun;
-                for (int i = 0; i < func.getParameterCount(); i++) {
-                    if (!func.isParameterFixed(i)) {
-                        func.setParameterValue(i, param[i]);
-                    }
-                }
-            }
-
-            /*
-             * ss = 0.0; for (int i = 0; i < this.nData; i++) { for (int j = 0; j < nXarrays; j++) { xd[j] =
-             * this.xData[j][i]; } if (!this.multipleY) { ss += TMath.Sqr((this.yData[i] - g1.getValue(xd[0])) /
-             * this.weight[i]); } else { ss += TMath.Sqr((this.yData[i] - g2.getValue(xd, i))
-             * /this.weight[i]); } }
-             */
-
-            ss = 0.0;
-
-            if (regFun instanceof Function1D) {
-                final Function1D g1 = (Function1D) regFun;
-                double[] xd, yd, weightd = null;
-
-                if (xData instanceof DoubleStorage1D) {
-                    xd = ((DoubleStorage1D) xData).getArray();
-                } else {
-                    throw new RuntimeException("x-data storage is not a 1D array");
-                }
-
-                if (yData instanceof DoubleStorage1D) {
-                    yd = ((DoubleStorage1D) yData).getArray();
-                } else {
-                    throw new RuntimeException("y-data storage is not a 1D array");
-                }
-
-                if (weight instanceof DoubleStorage1D) {
-                    weightd = ((DoubleStorage1D) weight).getArray();
-                } else {
-                    throw new RuntimeException("weight-data storage is not a 1D array");
-                }
-
-                for (int i = 0; i < yd.length; i++) {
-                    ss += TMathConstants.Sqr((yd[i] - g1.getValue(xd[i])) / weightd[i]);
-                }
-
-            } else {
-                final FunctionND g2 = (FunctionND) regFun;
-                double[] xd = new double[xData.getValueDimension()];
-                double[] yd = new double[yData.getValueDimension()];
-                double[] weightd = new double[yData.getValueDimension()];
-
-                // loops over all dimensions
-                for (int i = 0; i < xData.getLocalStorageDim(); i++) {
-                    xd = xData.getLocal(i);
-                    yd = yData.getLocal(i);
-                    weightd = weight.getLocal(i);
-                    final double[] ysim = g2.getValue(xd);
-
-                    final int vlength = ysim.length;
-                    for (int index = 0; index < vlength; index++) {
-                        ss += TMathConstants.Sqr((yd[index] - ysim[index]) / weightd[index]);
-                    }
-
-                }
-            }
-
-            lastSSnoConstraint = ss;
-
-            if (regFun instanceof Function) {
-                ((Function) regFun).setFitterMode(false);
-            }
-
-        }
-
-        return ss;
-
-    }
-
-    // add a single parameter constraint boundary for the non-linear regression
-    public void addConstraint(final int paramIndex, final int conDir, final double constraint) {
-        penalty = true;
-
-        // First element reserved for method number if other methods than 'cliff' are added later
-        if (penalties.isEmpty()) {
-            penalties.add(new Integer(constraintMethod));
-        }
-
-        // add constraint
-        if (penalties.size() == 1) {
-            penalties.add(new Integer(1));
-        } else {
-            int nPC = ((Integer) penalties.get(1)).intValue();
-            nPC++;
-            penalties.set(1, new Integer(nPC));
-        }
-        penalties.add(new Integer(paramIndex));
-        penalties.add(new Integer(conDir));
-        penalties.add(new Double(constraint));
-        if (paramIndex > maxConstraintIndex) {
-            maxConstraintIndex = paramIndex;
-        }
-    }
-
-    // add a multiple parameter constraint boundary for the non-linear regression
-    public void addConstraint(final int[] paramIndices, final int[] plusOrMinus, final int conDir,
-            final double constraint) {
-        final double[] dpom = ArrayConversion.getDoubleArray(plusOrMinus);
-        addConstraint(paramIndices, dpom, conDir, constraint);
-    }
-
-    // add a multiple parameter constraint boundary for the non-linear regression
-    public void addConstraint(final int[] paramIndices, final double[] plusOrMinus, final int conDir,
-            final double constraint) {
-        final int nCon = paramIndices.length;
-        final int nPorM = plusOrMinus.length;
-        if (nCon != nPorM) {
-            throw new IllegalArgumentException(
-                    "num of parameters, " + nCon + ", does not equal number of parameter signs, " + nPorM);
-        }
-        sumPenalty = true;
-
-        // First element reserved for method number if other methods than 'cliff' are added later
-        if (sumPenalties.isEmpty()) {
-            sumPenalties.add(new Integer(constraintMethod));
-        }
-
-        // add constraint
-        if (sumPenalties.size() == 1) {
-            sumPenalties.add(new Integer(1));
-        } else {
-            int nPC = ((Integer) sumPenalties.get(1)).intValue();
-            nPC++;
-            sumPenalties.set(1, new Integer(nPC));
-        }
-        sumPenalties.add(new Integer(nCon));
-        sumPenalties.add(paramIndices);
-        sumPenalties.add(plusOrMinus);
-        sumPenalties.add(new Integer(conDir));
-        sumPenalties.add(new Double(constraint));
-        final int maxI = TMath.Maximum(paramIndices);
-        if (maxI > maxConstraintIndex) {
-            maxConstraintIndex = maxI;
-        }
-    }
-
-    // remove all constraint boundaries for the non-linear regression
-    public void removeConstraints() {
-
-        // check if single parameter constraints already set
-        if (!penalties.isEmpty()) {
-            final int m = penalties.size();
-
-            // remove single parameter constraints
-            for (int i = m - 1; i >= 0; i--) {
-                penalties.remove(i);
-            }
-        }
-        penalty = false;
-        nConstraints = 0;
-
-        // check if mutiple parameter constraints already set
-        if (!sumPenalties.isEmpty()) {
-            final int m = sumPenalties.size();
-
-            // remove multiple parameter constraints
-            for (int i = m - 1; i >= 0; i--) {
-                sumPenalties.remove(i);
-            }
-        }
-        sumPenalty = false;
-        nSumConstraints = 0;
-        maxConstraintIndex = -1;
-    }
-
-    // Reset the tolerance used in a fixed value constraint
-    public void setConstraintTolerance(final double tolerance) {
-        constraintTolerance = tolerance;
-    }
-
     /**
      * apply linear statistics to a non-linear regression
      *
@@ -1705,12 +1346,107 @@ public class NonLinearRegressionFitter2 {
         return flag;
     }
 
-    // Get the non-linear regression status
-    // true if convergence was achieved
-    // false if convergence not achieved before maximum number of iterations
-    // current values then returned
-    public boolean getNlrStatus() {
-        return nlrStatus;
+    // remove all constraint boundaries for the non-linear regression
+    public void removeConstraints() {
+
+        // check if single parameter constraints already set
+        if (!penalties.isEmpty()) {
+            final int m = penalties.size();
+
+            // remove single parameter constraints
+            for (int i = m - 1; i >= 0; i--) {
+                penalties.remove(i);
+            }
+        }
+        penalty = false;
+        nConstraints = 0;
+
+        // check if mutiple parameter constraints already set
+        if (!sumPenalties.isEmpty()) {
+            final int m = sumPenalties.size();
+
+            // remove multiple parameter constraints
+            for (int i = m - 1; i >= 0; i--) {
+                sumPenalties.remove(i);
+            }
+        }
+        sumPenalty = false;
+        nSumConstraints = 0;
+        maxConstraintIndex = -1;
+    }
+
+    // Reset the tolerance used in a fixed value constraint
+    public void setConstraintTolerance(final double tolerance) {
+        constraintTolerance = tolerance;
+    }
+
+    public void setData(final double[] xData, final double[] yData, final double[] weights) {
+        final DoubleStorage1D xDataLocal = new DoubleStorage1D(xData);
+        final DoubleStorage1D yDataLocal = new DoubleStorage1D(xData);
+        final DoubleStorage1D weightLocal = new DoubleStorage1D(weights);
+        if (weights == null) {
+            System.err.println("weights are null");
+        }
+        setData(xDataLocal, yDataLocal, weightLocal);
+    }
+
+    public void setData(final VoxelArrayND xData, final VoxelArrayND yData, final VoxelArrayND weights) {
+        weight = checkForZeroWeights(weights);
+        if (weightOpt) {
+            weightFlag = 1;
+        }
+        this.xData = xData;
+        this.yData = yData;
+        weight = weights;
+
+        yCalc = yData.copy();
+        residual = yData.copy();
+        residualW = yData.copy();
+
+    }
+
+    // Set the non-linear regression fractional step size used in numerical differencing
+    public void setDelta(final double delta) {
+        this.delta = delta;
+    }
+
+    // Reset the non-linear regression convergence test option
+    public void setMinTest(final int n) {
+        if (n < 0 || n > 1) {
+            throw new IllegalArgumentException("minTest must be 0 or 1");
+        }
+        minTest = n;
+    }
+
+    // Set the maximum number of iterations allowed in nonlinear regression
+    public void setNmax(final int nmax) {
+        nMax = nmax;
+    }
+
+    // Reset the Nelder and Mead contraction coefficient [gamma]
+    public void setNMcontract(final double con) {
+        cCoeff = con;
+    }
+
+    // Reset the Nelder and Mead extension coefficient [beta]
+    public void setNMextend(final double ext) {
+        eCoeff = ext;
+    }
+
+    // Reset the Nelder and Mead reflection coefficient [alpha]
+    public void setNMreflect(final double refl) {
+        rCoeff = refl;
+    }
+
+    // Set the maximum number of restarts allowed in nonlinear regression
+    public void setNrestartsMax(final int nrs) {
+        konvge = nrs;
+    }
+
+    // Reset scaling factors (scaleOpt 2, see above for scaleOpt 0 and 1)
+    public void setScale(final double[] sc) {
+        fscale = sc;
+        scaleOpt = 2;
     }
 
     // Reset scaling factors (scaleOpt 0 and 1, see below for scaleOpt 2)
@@ -1722,336 +1458,491 @@ public class NonLinearRegressionFitter2 {
         scaleOpt = n;
     }
 
-    // Reset scaling factors (scaleOpt 2, see above for scaleOpt 0 and 1)
-    public void setScale(final double[] sc) {
-        fscale = sc;
-        scaleOpt = 2;
-    }
-
-    // Get scaling factors
-    public double[] getScale() {
-        return fscale;
-    }
-
-    // Reset the non-linear regression convergence test option
-    public void setMinTest(final int n) {
-        if (n < 0 || n > 1) {
-            throw new IllegalArgumentException("minTest must be 0 or 1");
-        }
-        minTest = n;
-    }
-
-    // Get the non-linear regression convergence test option
-    public int getMinTest() {
-        return minTest;
-    }
-
-    // Get the simplex sd at the minimum
-    public double getSimplexSd() {
-        return simplexSd;
-    }
-
-    // Get the best estimates of the unknown parameters
-    public double[] getBestEstimates() {
-        return best.clone();
-    }
-
-    // Get the best estimates of the unknown parameters
-    public double[] getCoeff() {
-        return best.clone();
-    }
-
-    // Get the estimates of the standard deviations of the best estimates of the unknown parameters
-    public double[] getbestestimatesStandardDeviations() {
-        return bestSd.clone();
-    }
-
-    // Get the estimates of the errors of the best estimates of the unknown parameters
-    public double[] getBestEstimatesStandardDeviations() {
-        return bestSd.clone();
-    }
-
-    // Get the estimates of the errors of the best estimates of the unknown parameters
-    public double[] getCoeffSd() {
-        return bestSd.clone();
-    }
-
-    // Get the estimates of the errors of the best estimates of the unknown parameters
-    public double[] getBestEstimatesErrors() {
-        return bestSd.clone();
-    }
-
-    // Get the cofficients of variations of the best estimates of the unknown parameters
-    public double[] getCoeffVar() {
-        final double[] coeffVar = new double[nTerms];
-
-        for (int i = 0; i < nTerms; i++) {
-            coeffVar[i] = bestSd[i] * 100.0D / best[i];
-        }
-        return coeffVar;
-    }
-
-    // Get the pseudo-estimates of the errors of the best estimates of the unknown parameters
-    public double[] getPseudoSd() {
-        return pseudoSd.clone();
-    }
-
-    // Get the pseudo-estimates of the errors of the best estimates of the unknown parameters
-    public double[] getPseudoErrors() {
-        return pseudoSd.clone();
-    }
-
-    // Get the t-values of the best estimates
-    public double[] getTvalues() {
-        return tValues.clone();
-    }
-
-    // Get the p-values of the best estimates
-    public double[] getPvalues() {
-        return pValues.clone();
-    }
-
-    /**
-     * Get the input x values
-     *
-     * @return array with x coordinates
-     */
-    public double[] getXdata() {
-        if (xData instanceof DoubleStorage1D) {
-            return ((DoubleStorage1D) xData).getArray().clone();
-        }
-
-        // TODO fix here
-        return null;
-    }
-
-    /**
-     * Get the inputed y values
-     *
-     * @return array with input y coordinates
-     */
-    public double[] getYdata() {
-        if (yData instanceof DoubleStorage1D) {
-            return ((DoubleStorage1D) yData).getArray().clone();
-        }
-        // TODO fix here
-        return null;
-    }
-
-    // Get the calculated y values
-    public double[] getYcalc() {
-        if (yCalc instanceof DoubleStorage1D) {
-            return ((DoubleStorage1D) yCalc).getArray().clone();
-        }
-        // TODO fix here
-        return null;
-    }
-
-    // Get the unweighted residuals, y(experimental) - y(calculated)
-    public double[] getResiduals() {
-        final double[] temp = new double[nData];
-        for (int i = 0; i < nData; i++) {
-            // TODO: fix here
-            // temp[i] = this.yData[i] - this.yCalc[i];
-        }
-        return temp;
-    }
-
-    // Get the weighted residuals, (y(experimental) - y(calculated))/weight
-    public double[] getWeightedResiduals() {
-
-        final double[] temp = new double[nData];
-        for (int i = 0; i < nData; i++) {
-            // TODO: fix here
-            // temp[i] = (this.yData[i] - this.yCalc[i]) / weight[i];
-        }
-        return temp;
-    }
-
-    // Get the unweighted sum of squares of the residuals
-    public double getSumOfSquares() {
-        return sumOfSquares;
-    }
-
-    // Get the chi square estimate
-    public double getChiSquare() {
-        double ret = 0.0D;
-        if (weightOpt) {
-            ret = chiSquare;
-        } else {
-            System.out.println("Chi Square cannot be calculated as data are neither true frequencies nor weighted");
-            System.out.println("A value of -1 is returned as Chi Square");
-            ret = -1.0D;
-        }
-        return ret;
-    }
-
-    // Get the reduced chi square estimate
-    public double getReducedChiSquare() {
-        double ret = 0.0D;
-        if (weightOpt) {
-            ret = reducedChiSquare;
-        } else {
-            System.out.println(
-                    "A Reduced Chi Square cannot be calculated as data are neither true frequencies nor weighted");
-            System.out.println("A value of -1 is returned as Reduced Chi Square");
-            ret = -1.0D;
-        }
-        return ret;
-    }
-
-    // Get the chi square probablity
-    public double getchiSquareProb() {
-        double ret = 0.0D;
-        if (weightOpt) {
-            ret = 1.0D - TMath.ChisquareQuantile(chiSquare, nData - 1);
-        } else {
-            System.out.println(
-                    "A Chi Square probablity cannot be calculated as data are neither true frequencies nor weighted");
-            System.out.println("A value of -1 is returned as Reduced Chi Square");
-            ret = -1.0D;
-        }
-        return ret;
-    }
-
-    // Get the covariance matrix
-    public double[][] getCovMatrix() {
-        return covar;
-    }
-
-    // Get the correlation coefficient matrix
-    public double[][] getCorrCoeffMatrix() {
-        return corrCoeff;
-    }
-
-    // Get the number of iterations in nonlinear regression
-    public int getNiter() {
-        return nIter;
-    }
-
-    // Set the maximum number of iterations allowed in nonlinear regression
-    public void setNmax(final int nmax) {
-        nMax = nmax;
-    }
-
-    // Get the maximum number of iterations allowed in nonlinear regression
-    public int getNmax() {
-        return nMax;
-    }
-
-    // Get the number of restarts in nonlinear regression
-    public int getNrestarts() {
-        return kRestart;
-    }
-
-    // Set the maximum number of restarts allowed in nonlinear regression
-    public void setNrestartsMax(final int nrs) {
-        konvge = nrs;
-    }
-
-    // Get the maximum number of restarts allowed in nonlinear regression
-    public int getNrestartsMax() {
-        return konvge;
-    }
-
-    // Get the degrees of freedom
-    public double getDegFree() {
-        return degreesOfFreedom;
-    }
-
-    // Reset the Nelder and Mead reflection coefficient [alpha]
-    public void setNMreflect(final double refl) {
-        rCoeff = refl;
-    }
-
-    // Get the Nelder and Mead reflection coefficient [alpha]
-    public double getNMreflect() {
-        return rCoeff;
-    }
-
-    // Reset the Nelder and Mead extension coefficient [beta]
-    public void setNMextend(final double ext) {
-        eCoeff = ext;
-    }
-
-    // Get the Nelder and Mead extension coefficient [beta]
-    public double getNMextend() {
-        return eCoeff;
-    }
-
-    // Reset the Nelder and Mead contraction coefficient [gamma]
-    public void setNMcontract(final double con) {
-        cCoeff = con;
-    }
-
-    // Get the Nelder and Mead contraction coefficient [gamma]
-    public double getNMcontract() {
-        return cCoeff;
-    }
-
     // Set the non-linear regression tolerance
     public void setTolerance(final double tol) {
         fTol = tol;
     }
 
-    // Get the non-linear regression tolerance
-    public double getTolerance() {
-        return fTol;
+    // Reset the true frequency test, trueFreq
+    // true if yData values are true frequencies, e.g. in a fit to Gaussian; false if not
+    // if true chiSquarePoisson (see above) is also calculated
+    public void setTrueFreq(final boolean trFr) {
+        final boolean trFrOld = trueFreq;
+        trueFreq = trFr;
+        if (trFr) {
+            final boolean flag = setTrueFreqWeights(yData, weight);
+            if (flag) {
+                trueFreq = true;
+                weightOpt = true;
+            } else {
+                trueFreq = false;
+                weightOpt = false;
+            }
+        } else {
+            if (trFrOld) {
+                weight.initialiseWithValue(1.0);
+                weightOpt = false;
+            }
+        }
     }
 
-    // Get the non-linear regression pre and post minimum gradients
-    public double[][] getGrad() {
-        return grad;
+    // Nelder and Mead simplex
+    // Default tolerance
+    // Default maximum iterations
+    // Default step option - all step[i] = dStep
+    public void simplex(final Function1D g, final double[] start) {
+        if (multipleY) {
+            throw new IllegalArgumentException(
+                    "This method cannot handle multiply dimensioned y arrays\nsimplex2 should have been called");
+        }
+        final Object regFun = g;
+        final int n = start.length;
+        final int nMaxx = nMax;
+        final double fToll = fTol;
+        final double[] stepp = new double[n];
+        for (int i = 0; i < n; i++) {
+            stepp[i] = dStep * start[i];
+        }
+        linNonLin = false;
+        zeroCheck = false;
+        degreesOfFreedom = nData - start.length;
+        nelderMead(regFun, start, stepp, fToll, nMaxx);
     }
 
-    // Set the non-linear regression fractional step size used in numerical differencing
-    public void setDelta(final double delta) {
-        this.delta = delta;
+    // Nelder and Mead simplex
+    // Default maximum iterations
+    // Default step option - all step[i] = dStep
+    public void simplex(final Function1D g, final double[] start, final double fTol) {
+        if (multipleY) {
+            throw new IllegalArgumentException(
+                    "This method cannot handle multiply dimensioned y arrays\nsimplex2 should have been called");
+        }
+        final Object regFun = g;
+        final int n = start.length;
+        final int nMaxx = nMax;
+        final double[] stepp = new double[n];
+        for (int i = 0; i < n; i++) {
+            stepp[i] = dStep * start[i];
+        }
+        linNonLin = false;
+        zeroCheck = false;
+        degreesOfFreedom = nData - start.length;
+        nelderMead(regFun, start, stepp, fTol, nMaxx);
     }
 
-    // Get the non-linear regression fractional step size used in numerical differencing
-    public double getDelta() {
-        return delta;
+    // Nelder and Mead simplex
+    // Default step option - all step[i] = dStep
+    public void simplex(final Function1D g, final double[] start, final double fTol, final int nMax) {
+        if (multipleY) {
+            throw new IllegalArgumentException(
+                    "This method cannot handle multiply dimensioned y arrays\nsimplex2 should have been called");
+        }
+        final Object regFun = g;
+        final int n = start.length;
+        final double[] stepp = new double[n];
+        for (int i = 0; i < n; i++) {
+            stepp[i] = dStep * start[i];
+        }
+        linNonLin = false;
+        zeroCheck = false;
+        degreesOfFreedom = nData - start.length;
+        nelderMead(regFun, start, stepp, fTol, nMax);
     }
 
-    // Get the non-linear regression statistics Hessian matrix inversion status flag
-    public boolean getInversionCheck() {
-        return invertFlag;
+    // Nelder and Mead simplex
+    // Default tolerance
+    // Default maximum iterations
+    public void simplex(final Function1D g, final double[] start, final double[] step) {
+        if (multipleY) {
+            throw new IllegalArgumentException(
+                    "This method cannot handle multiply dimensioned y arrays\nsimplex2 should have been called");
+        }
+        final Object regFun = g;
+        final double fToll = fTol;
+        final int nMaxx = nMax;
+        linNonLin = false;
+        zeroCheck = false;
+        degreesOfFreedom = nData - start.length;
+        nelderMead(regFun, start, step, fToll, nMaxx);
     }
 
-    // Get the non-linear regression statistics Hessian matrix inverse diagonal status flag
-    public boolean getPosVarCheck() {
-        return posVarFlag;
+    // Nelder and Mead simplex
+    // Default maximum iterations
+    public void simplex(final Function1D g, final double[] start, final double[] step, final double fTol) {
+        if (multipleY) {
+            throw new IllegalArgumentException(
+                    "This method cannot handle multiply dimensioned y arrays\nsimplex2 should have been called");
+        }
+        final Object regFun = g;
+        final int nMaxx = nMax;
+        linNonLin = false;
+        zeroCheck = false;
+        degreesOfFreedom = nData - start.length;
+        nelderMead(regFun, start, step, fTol, nMaxx);
     }
 
-    // sort elements x, y and w arrays of doubles into ascending order of the x array
-    // using selection sort method
-    protected static void sort(final double[] x, final double[] y, final double[] w) {
-        int index = 0;
-        int lastIndex = -1;
-        final int n = x.length;
-        double holdx = 0.0D;
-        double holdy = 0.0D;
-        double holdw = 0.0D;
+    // Nelder and Mead Simplex Simplex Non-linear Regression
+    public void simplex(final Function1D g, final double[] start, final double[] step, final double fTol,
+            final int nMax) {
+        if (multipleY) {
+            throw new IllegalArgumentException(
+                    "This method cannot handle multiply dimensioned y arrays\nsimplex2 should have been called");
+        }
+        final Object regFun = g;
+        linNonLin = false;
+        zeroCheck = false;
+        degreesOfFreedom = nData - start.length;
+        nelderMead(regFun, start, step, fTol, nMax);
+    }
 
-        while (lastIndex < n - 1) {
-            index = lastIndex + 1;
-            for (int i = lastIndex + 2; i < n; i++) {
-                if (x[i] < x[index]) {
-                    index = i;
+    // Nelder and Mead simplex
+    // Default tolerance
+    public void simplex(final Function1D g, final double[] start, final double[] step, final int nMax) {
+        if (multipleY) {
+            throw new IllegalArgumentException(
+                    "This method cannot handle multiply dimensioned y arrays\nsimplex2 should have been called");
+        }
+        final Object regFun = g;
+        final double fToll = fTol;
+        linNonLin = false;
+        zeroCheck = false;
+        degreesOfFreedom = nData - start.length;
+        nelderMead(regFun, start, step, fToll, nMax);
+    }
+
+    // Nelder and Mead simplex
+    // Default tolerance
+    // Default step option - all step[i] = dStep
+    public void simplex(final Function1D g, final double[] start, final int nMax) {
+        if (multipleY) {
+            throw new IllegalArgumentException(
+                    "This method cannot handle multiply dimensioned y arrays\nsimplex2 should have been called");
+        }
+        final Object regFun = g;
+        final int n = start.length;
+        final double fToll = fTol;
+        final double[] stepp = new double[n];
+        for (int i = 0; i < n; i++) {
+            stepp[i] = dStep * start[i];
+        }
+        zeroCheck = false;
+        degreesOfFreedom = nData - start.length;
+        nelderMead(regFun, start, stepp, fToll, nMax);
+    }
+
+    // Nelder and Mead simplex
+    // Default tolerance
+    // Default maximum iterations
+    // Default step option - all step[i] = dStep
+    public void simplex2(final FunctionND g, final double[] start) {
+        if (!multipleY) {
+            throw new IllegalArgumentException(
+                    "This method cannot handle singly dimensioned y array\nsimplex should have been called");
+        }
+        final Object regFun = g;
+        final int n = start.length;
+        final int nMaxx = nMax;
+        final double fToll = fTol;
+        final double[] stepp = new double[n];
+        for (int i = 0; i < n; i++) {
+            stepp[i] = dStep * start[i];
+        }
+        linNonLin = false;
+        zeroCheck = false;
+        degreesOfFreedom = nData - start.length;
+        nelderMead(regFun, start, stepp, fToll, nMaxx);
+    }
+
+    // Nelder and Mead simplex
+    // Default maximum iterations
+    // Default step option - all step[i] = dStep
+    public void simplex2(final FunctionND g, final double[] start, final double fTol) {
+        if (!multipleY) {
+            throw new IllegalArgumentException(
+                    "This method cannot handle singly dimensioned y array\nsimplex should have been called");
+        }
+        final Object regFun = g;
+        final int n = start.length;
+        final int nMaxx = nMax;
+        final double[] stepp = new double[n];
+        for (int i = 0; i < n; i++) {
+            stepp[i] = dStep * start[i];
+        }
+        linNonLin = false;
+        zeroCheck = false;
+        degreesOfFreedom = nData - start.length;
+        nelderMead(regFun, start, stepp, fTol, nMaxx);
+    }
+
+    // Nelder and Mead simplex
+    // Default step option - all step[i] = dStep
+    public void simplex2(final FunctionND g, final double[] start, final double fTol, final int nMax) {
+        if (!multipleY) {
+            throw new IllegalArgumentException(
+                    "This method cannot handle singly dimensioned y array\nsimplex should have been called");
+        }
+        final Object regFun = g;
+        final int n = start.length;
+        final double[] stepp = new double[n];
+        for (int i = 0; i < n; i++) {
+            stepp[i] = dStep * start[i];
+        }
+        linNonLin = false;
+        zeroCheck = false;
+        degreesOfFreedom = nData - start.length;
+        nelderMead(regFun, start, stepp, fTol, nMax);
+    }
+
+    // Nelder and Mead simplex
+    // Default tolerance
+    // Default maximum iterations
+    public void simplex2(final FunctionND g, final double[] start, final double[] step) {
+        if (!multipleY) {
+            throw new IllegalArgumentException(
+                    "This method cannot handle singly dimensioned y array\nsimplex should have been called");
+        }
+        final Object regFun = g;
+        final double fToll = fTol;
+        final int nMaxx = nMax;
+        linNonLin = false;
+        zeroCheck = false;
+        degreesOfFreedom = nData - start.length;
+        nelderMead(regFun, start, step, fToll, nMaxx);
+    }
+
+    // Nelder and Mead simplex
+    // Default maximum iterations
+    public void simplex2(final FunctionND g, final double[] start, final double[] step, final double fTol) {
+        if (!multipleY) {
+            throw new IllegalArgumentException(
+                    "This method cannot handle singly dimensioned y array\nsimplex should have been called");
+        }
+        final Object regFun = g;
+        final int nMaxx = nMax;
+        linNonLin = false;
+        zeroCheck = false;
+        degreesOfFreedom = nData - start.length;
+        nelderMead(regFun, start, step, fTol, nMaxx);
+    }
+
+    // Nelder and Mead Simplex Simplex2 Non-linear Regression
+    public void simplex2(final FunctionND g, final double[] start, final double[] step, final double fTol,
+            final int nMax) {
+        if (!multipleY) {
+            throw new IllegalArgumentException(
+                    "This method cannot handle singly dimensioned y array\nsimplex should have been called");
+        }
+        final Object regFun = g;
+        linNonLin = false;
+        zeroCheck = false;
+        degreesOfFreedom = nData - start.length;
+        nelderMead(regFun, start, step, fTol, nMax);
+    }
+
+    // Nelder and Mead simplex
+    // Default tolerance
+    public void simplex2(final FunctionND g, final double[] start, final double[] step, final int nMax) {
+        if (!multipleY) {
+            throw new IllegalArgumentException(
+                    "This method cannot handle singly dimensioned y array\nsimplex should have been called");
+        }
+        final Object regFun = g;
+        final double fToll = fTol;
+        linNonLin = false;
+        zeroCheck = false;
+        degreesOfFreedom = nData - start.length;
+        nelderMead(regFun, start, step, fToll, nMax);
+    }
+
+    // Nelder and Mead simplex
+    // Default tolerance
+    // Default step option - all step[i] = dStep
+    public void simplex2(final FunctionND g, final double[] start, final int nMax) {
+        if (!multipleY) {
+            throw new IllegalArgumentException(
+                    "This method cannot handle singly dimensioned y array\nsimplex should have been called");
+        }
+        final Object regFun = g;
+        final int n = start.length;
+        final double fToll = fTol;
+        final double[] stepp = new double[n];
+        for (int i = 0; i < n; i++) {
+            stepp[i] = dStep * start[i];
+        }
+        zeroCheck = false;
+        degreesOfFreedom = nData - start.length;
+        nelderMead(regFun, start, stepp, fToll, nMax);
+    }
+
+    /**
+     * Calculate the sum of squares of the residuals for non-linear regression
+     *
+     * @param regFun test function
+     * @param testParameter test parameter
+     * @return the sum of all square values
+     */
+    protected double sumSquares(final Object regFun, final double[] testParameter) {
+        double ss = -3.0D;
+        final double[] param = new double[nTerms];
+
+        // rescale
+        for (int i = 0; i < nTerms; i++) {
+            param[i] = testParameter[i] / fscale[i];
+        }
+
+        // single parameter penalty functions
+        final double tempFunctVal = lastSSnoConstraint;
+        boolean test = true;
+        if (penalty) {
+            int k = 0;
+            for (int i = 0; i < nConstraints; i++) {
+                k = penaltyParam[i];
+                switch (penaltyCheck[i]) {
+                case -1:
+                    if (param[k] < constraints[i]) {
+                        ss = tempFunctVal + penaltyWeight * TMathConstants.Sqr(constraints[i] - param[k]);
+                        test = false;
+                    }
+                    break;
+                case 0:
+                    if (param[k] < constraints[i] * (1.0 - constraintTolerance)) {
+                        ss = tempFunctVal + penaltyWeight
+                                * TMathConstants.Sqr(constraints[i] * (1.0 - constraintTolerance) - param[k]);
+                        test = false;
+                    }
+                    if (param[k] > constraints[i] * (1.0 + constraintTolerance)) {
+                        ss = tempFunctVal + penaltyWeight
+                                * TMathConstants.Sqr(param[k] - constraints[i] * (1.0 + constraintTolerance));
+                        test = false;
+                    }
+                    break;
+                case 1:
+                    if (param[k] > constraints[i]) {
+                        ss = tempFunctVal + penaltyWeight * TMathConstants.Sqr(param[k] - constraints[i]);
+                        test = false;
+                    }
+                    break;
                 }
             }
-            lastIndex++;
-            holdx = x[index];
-            x[index] = x[lastIndex];
-            x[lastIndex] = holdx;
-            holdy = y[index];
-            y[index] = y[lastIndex];
-            y[lastIndex] = holdy;
-            holdw = w[index];
-            w[index] = w[lastIndex];
-            w[lastIndex] = holdw;
         }
+
+        // multiple parameter penalty functions
+        if (sumPenalty) {
+            int kk = 0;
+            double pSign = 0;
+            double sumPenaltySum = 0.0D;
+            for (int i = 0; i < nSumConstraints; i++) {
+                for (int j = 0; j < sumPenaltyNumber[i]; j++) {
+                    kk = sumPenaltyParam[i][j];
+                    pSign = sumPlusOrMinus[i][j];
+                    sumPenaltySum += param[kk] * pSign;
+                }
+                switch (sumPenaltyCheck[i]) {
+                case -1:
+                    if (sumPenaltySum < sumConstraints[i]) {
+                        ss = tempFunctVal + penaltyWeight * TMathConstants.Sqr(sumConstraints[i] - sumPenaltySum);
+                        test = false;
+                    }
+                    break;
+                case 0:
+                    if (sumPenaltySum < sumConstraints[i] * (1.0 - constraintTolerance)) {
+                        ss = tempFunctVal + penaltyWeight
+                                * TMathConstants.Sqr(sumConstraints[i] * (1.0 - constraintTolerance) - sumPenaltySum);
+                        test = false;
+                    }
+                    if (sumPenaltySum > sumConstraints[i] * (1.0 + constraintTolerance)) {
+                        ss = tempFunctVal + penaltyWeight
+                                * TMathConstants.Sqr(sumPenaltySum - sumConstraints[i] * (1.0 + constraintTolerance));
+                        test = false;
+                    }
+                    break;
+                case 1:
+                    if (sumPenaltySum > sumConstraints[i]) {
+                        ss = tempFunctVal + penaltyWeight * TMathConstants.Sqr(sumPenaltySum - sumConstraints[i]);
+                        test = false;
+                    }
+                    break;
+                }
+            }
+        }
+
+        // compute \chi^2 estimate
+        if (test) {
+            if (regFun instanceof Function) {
+                ((Function) regFun).setFitterMode(true);
+                final Function func = (Function) regFun;
+                for (int i = 0; i < func.getParameterCount(); i++) {
+                    if (!func.isParameterFixed(i)) {
+                        func.setParameterValue(i, param[i]);
+                    }
+                }
+            }
+
+            /*
+             * ss = 0.0; for (int i = 0; i < this.nData; i++) { for (int j = 0; j < nXarrays; j++) { xd[j] =
+             * this.xData[j][i]; } if (!this.multipleY) { ss += TMath.Sqr((this.yData[i] - g1.getValue(xd[0])) /
+             * this.weight[i]); } else { ss += TMath.Sqr((this.yData[i] - g2.getValue(xd, i)) /this.weight[i]); } }
+             */
+
+            ss = 0.0;
+
+            if (regFun instanceof Function1D) {
+                final Function1D g1 = (Function1D) regFun;
+                double[] xd, yd, weightd = null;
+
+                if (xData instanceof DoubleStorage1D) {
+                    xd = ((DoubleStorage1D) xData).getArray();
+                } else {
+                    throw new RuntimeException("x-data storage is not a 1D array");
+                }
+
+                if (yData instanceof DoubleStorage1D) {
+                    yd = ((DoubleStorage1D) yData).getArray();
+                } else {
+                    throw new RuntimeException("y-data storage is not a 1D array");
+                }
+
+                if (weight instanceof DoubleStorage1D) {
+                    weightd = ((DoubleStorage1D) weight).getArray();
+                } else {
+                    throw new RuntimeException("weight-data storage is not a 1D array");
+                }
+
+                for (int i = 0; i < yd.length; i++) {
+                    ss += TMathConstants.Sqr((yd[i] - g1.getValue(xd[i])) / weightd[i]);
+                }
+
+            } else {
+                final FunctionND g2 = (FunctionND) regFun;
+                double[] xd = new double[xData.getValueDimension()];
+                double[] yd = new double[yData.getValueDimension()];
+                double[] weightd = new double[yData.getValueDimension()];
+
+                // loops over all dimensions
+                for (int i = 0; i < xData.getLocalStorageDim(); i++) {
+                    xd = xData.getLocal(i);
+                    yd = yData.getLocal(i);
+                    weightd = weight.getLocal(i);
+                    final double[] ysim = g2.getValue(xd);
+
+                    final int vlength = ysim.length;
+                    for (int index = 0; index < vlength; index++) {
+                        ss += TMathConstants.Sqr((yd[index] - ysim[index]) / weightd[index]);
+                    }
+
+                }
+            }
+
+            lastSSnoConstraint = ss;
+
+            if (regFun instanceof Function) {
+                ((Function) regFun).setFitterMode(false);
+            }
+
+        }
+
+        return ss;
+
     }
 
     // returns estimate of half-height width
@@ -2113,71 +2004,6 @@ public class NonLinearRegressionFitter2 {
         halfw /= nd;
 
         return halfw;
-    }
-
-    // check for zero and negative values
-    public void checkZeroNeg(final double[] xx, final double[] yy, final double[] ww) {
-        int jj = 0;
-        boolean test = true;
-        for (int i = 0; i < nData; i++) {
-            if (yy[i] <= 0.0D) {
-                if (i <= jj) {
-                    test = true;
-                    jj = i;
-                    while (test) {
-                        jj++;
-                        if (jj >= nData) {
-                            throw new ArithmeticException("all zero cumulative data!!");
-                        }
-                        if (yy[jj] > 0.0D) {
-                            yy[i] = yy[jj];
-                            xx[i] = xx[jj];
-                            ww[i] = ww[jj];
-                            test = false;
-                        }
-                    }
-                } else {
-                    if (i == nData - 1) {
-                        yy[i] = yy[i - 1];
-                        xx[i] = xx[i - 1];
-                        ww[i] = ww[i - 1];
-                    } else {
-                        yy[i] = (yy[i - 1] + yy[i + 1]) / 2.0D;
-                        xx[i] = (xx[i - 1] + xx[i + 1]) / 2.0D;
-                        ww[i] = (ww[i - 1] + ww[i + 1]) / 2.0D;
-                    }
-                }
-            }
-        }
-    }
-
-    // HISTOGRAM METHODS
-    // Distribute data into bins to obtain histogram
-    // zero bin position and upper limit provided
-    public static double[][] histogramBins(final double[] data, final double binWidth, final double binZero,
-            final double binUpper) {
-        int n = 0; // new array length
-        final int m = data.length; // old array length;
-        for (int i = 0; i < m; i++) {
-            if (data[i] <= binUpper) {
-                n++;
-            }
-        }
-        if (n != m) {
-            final double[] newData = new double[n];
-            int j = 0;
-            for (int i = 0; i < m; i++) {
-                if (data[i] <= binUpper) {
-                    newData[j] = data[i];
-                    j++;
-                }
-            }
-            System.out.println(m - n + " data points, above histogram upper limit, excluded in histogramBins");
-            return histogramBins(newData, binWidth, binZero);
-        } else {
-            return histogramBins(data, binWidth, binZero);
-
-        }
     }
 
     // Distribute data into bins to obtain histogram
@@ -2243,6 +2069,95 @@ public class NonLinearRegressionFitter2 {
             System.out.println(nMissed + " data points, outside histogram limits, excluded in histogramBins");
         }
         return binFreq;
+    }
+
+    // HISTOGRAM METHODS
+    // Distribute data into bins to obtain histogram
+    // zero bin position and upper limit provided
+    public static double[][] histogramBins(final double[] data, final double binWidth, final double binZero,
+            final double binUpper) {
+        int n = 0; // new array length
+        final int m = data.length; // old array length;
+        for (int i = 0; i < m; i++) {
+            if (data[i] <= binUpper) {
+                n++;
+            }
+        }
+        if (n != m) {
+            final double[] newData = new double[n];
+            int j = 0;
+            for (int i = 0; i < m; i++) {
+                if (data[i] <= binUpper) {
+                    newData[j] = data[i];
+                    j++;
+                }
+            }
+            System.out.println(m - n + " data points, above histogram upper limit, excluded in histogramBins");
+            return histogramBins(newData, binWidth, binZero);
+        } else {
+            return histogramBins(data, binWidth, binZero);
+
+        }
+    }
+
+    protected static boolean setTrueFreqWeights(final VoxelArrayND yData, final VoxelArrayND weight) {
+        final boolean flag = true;
+
+        // Set all weights to square root of frequency of occurrence
+        for (int ii = 0; ii < yData.getLocalStorageDim(); ii++) {
+            // TODO: refactor here
+            // weight[ii] = Math.sqrt(Math.abs(yData[ii]));
+        }
+
+        // Check for zero weights and take average of neighbours as weight if it is zero
+        for (int ii = 0; ii < yData.getLocalStorageDim(); ii++) {
+            final double last = 0.0D;
+            final double next = 0.0D;
+
+            // TODO: refactor here
+            /*
+             * if (weight[ii] == 0) { // find previous non-zero value boolean testLast = true; int iLast = ii - 1; while
+             * (testLast) { if (iLast < 0) { testLast = false; } else { if (weight[iLast] == 0.0D) { iLast--; } else {
+             * last = weight[iLast]; testLast = false; } } }
+             *
+             * // find next non-zero value boolean testNext = true; int iNext = ii + 1; while (testNext) { if (iNext >=
+             * nData) { testNext = false; } else { if (weight[iNext] == 0.0D) { iNext++; } else { next = weight[iNext];
+             * testNext = false; } } }
+             *
+             * // Take average weight[ii] = (last + next) / 2.0D; }
+             */
+        }
+        return flag;
+    }
+
+    // sort elements x, y and w arrays of doubles into ascending order of the x array
+    // using selection sort method
+    protected static void sort(final double[] x, final double[] y, final double[] w) {
+        int index = 0;
+        int lastIndex = -1;
+        final int n = x.length;
+        double holdx = 0.0D;
+        double holdy = 0.0D;
+        double holdw = 0.0D;
+
+        while (lastIndex < n - 1) {
+            index = lastIndex + 1;
+            for (int i = lastIndex + 2; i < n; i++) {
+                if (x[i] < x[index]) {
+                    index = i;
+                }
+            }
+            lastIndex++;
+            holdx = x[index];
+            x[index] = x[lastIndex];
+            x[lastIndex] = holdx;
+            holdy = y[index];
+            y[index] = y[lastIndex];
+            y[lastIndex] = holdy;
+            holdw = w[index];
+            w[index] = w[lastIndex];
+            w[lastIndex] = holdw;
+        }
     }
 
 }

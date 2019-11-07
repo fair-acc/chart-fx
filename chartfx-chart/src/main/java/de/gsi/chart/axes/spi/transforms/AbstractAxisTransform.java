@@ -20,22 +20,22 @@ public abstract class AbstractAxisTransform implements AxisTransform {
     }
 
     @Override
-    public double getMinimumRange() {
-        return rangeMin;
-    }
-
-    @Override
     public double getMaximumRange() {
         return rangeMax;
     }
 
     @Override
-    public void setMinimumRange(final double val) {
-        axis.minProperty().set(val);
+    public double getMinimumRange() {
+        return rangeMin;
     }
 
     @Override
     public void setMaximumRange(final double val) {
         axis.maxProperty().set(val);
+    }
+
+    @Override
+    public void setMinimumRange(final double val) {
+        axis.minProperty().set(val);
     }
 }

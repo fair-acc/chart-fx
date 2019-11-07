@@ -47,11 +47,10 @@ public class IoSerialiserTests {
             }
         }
 
-        // second test - both vectors should have the same initial values 
+        // second test - both vectors should have the same initial values
         // after serialise/deserialise
         assertEquals(inputObject, outputObject1);
 
-        
         MyGenericClass outputObject2 = new MyGenericClass();
         buffer.reset();
         buffer.clear();
@@ -85,17 +84,16 @@ public class IoSerialiserTests {
         assertEquals(inputObject, outputObject2);
         LOGGER.atInfo().log("simpleStreamerTest() - done");
     }
-    
+
     @Test
     public void testIdentityDoubleDataSet() {
         IoBuffer buffer = new FastByteBuffer(); // TODO: check allocation of byte buffer
         IoBufferSerialiser serialiser = new IoBufferSerialiser(buffer);
-        
+
         final DoubleDataSet inputObject = new DoubleDataSet("inputObject");
         DoubleDataSet outputObject = new DoubleDataSet("outputObject");
         assertNotEquals(inputObject, outputObject);
 
-        
         try {
             buffer.reset();
             serialiser.serialiseObject(inputObject);
@@ -109,7 +107,7 @@ public class IoSerialiserTests {
 
         assertEquals(inputObject, outputObject);
         LOGGER.atDebug().log("finished test#1 - uninitialised DataSet");
-        
+
         inputObject.add(0.0, 1.0);
         inputObject.getAxisDescription(0).set("time", "s");
         try {
@@ -124,7 +122,7 @@ public class IoSerialiserTests {
         }
         assertEquals(inputObject, outputObject);
         LOGGER.atDebug().log("finished test#2 - initialised DataSet w/ single data point");
-        
+
         inputObject.addDataLabel(0, "MyCustomDataLabel");
         inputObject.addDataStyle(0, "MyCustomDataStyle");
         inputObject.setStyle("myDataSetStyle");

@@ -32,6 +32,20 @@ public class LowPassTransform {
 
     }
 
+    private static Complex transform(final Complex in, final double f) {
+        if (in.isInfinite()) {
+            return new Complex(-1, 0);
+        }
+        Complex c;
+        // frequency transform
+        c = in.multiply(f);
+
+        final Complex one = new Complex(1, 0);
+
+        // bilinear low pass transform
+        return one.add(c).divide(one.subtract(c));
+    }
+
     public static void transform(final double fc, final LayoutBase digital, final LayoutBase analog) {
         final double f;
         digital.reset();
@@ -52,20 +66,6 @@ public class LowPassTransform {
         }
 
         digital.setNormal(analog.getNormalW(), analog.getNormalGain());
-    }
-
-    private static Complex transform(final Complex in, final double f) {
-        if (in.isInfinite()) {
-            return new Complex(-1, 0);
-        }
-        Complex c;
-        // frequency transform
-        c = in.multiply(f);
-
-        final Complex one = new Complex(1, 0);
-
-        // bilinear low pass transform
-        return one.add(c).divide(one.subtract(c));
     }
 
 }

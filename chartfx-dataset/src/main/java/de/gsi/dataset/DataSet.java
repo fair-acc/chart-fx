@@ -43,8 +43,7 @@ public interface DataSet extends EventSource, Serializable {
     List<AxisDescription> getAxisDescriptions();
 
     /**
-     * Get the number of data points in the data set.
-     * The default implementation is the number of points in the highest
+     * Get the number of data points in the data set. The default implementation is the number of points in the highest
      * dimension.
      *
      * @return the number of data points
@@ -54,8 +53,7 @@ public interface DataSet extends EventSource, Serializable {
     }
 
     /**
-     * Get the number of data points in the data set for a specific
-     * dimension.
+     * Get the number of data points in the data set for a specific dimension.
      * 
      * @param dimIndex the dimension index (ie. '0' equals 'X', '1' equals 'Y')
      * @return the number of data points
@@ -63,13 +61,12 @@ public interface DataSet extends EventSource, Serializable {
     int getDataCount(final int dimIndex);
 
     /**
-     * Returns label of a data point specified by the index. The label can be
-     * used as a category name if CategoryStepsDefinition is used or for
-     * annotations displayed for data points.
+     * Returns label of a data point specified by the index. The label can be used as a category name if
+     * CategoryStepsDefinition is used or for annotations displayed for data points.
      *
      * @param index the data index
-     * @return label of a data point specified by the index or <code>null</code>
-     *         if none label has been specified for this data point.
+     * @return label of a data point specified by the index or <code>null</code> if none label has been specified for
+     *         this data point.
      */
     String getDataLabel(int index);
 
@@ -79,9 +76,8 @@ public interface DataSet extends EventSource, Serializable {
     int getDimension();
 
     /**
-     * Gets the index of the data point closest to the given 'value' coordinate. The
-     * index returned may be less then zero or larger the the number of data
-     * points in the data set, if the x coordinate lies outside the range of the
+     * Gets the index of the data point closest to the given 'value' coordinate. The index returned may be less then
+     * zero or larger the the number of data points in the data set, if the x coordinate lies outside the range of the
      * data set.
      *
      * @param dimIndex the dimension index (ie. '0' equals 'X', '1' equals 'Y')
@@ -98,18 +94,17 @@ public interface DataSet extends EventSource, Serializable {
     String getName();
 
     /**
-     * A string representation of the CSS style associated with this specific
-     * {@code DataSet}. This is analogous to the "style" attribute of an HTML
-     * element. Note that, like the HTML style attribute, this variable contains
-     * style properties and values and not the selector portion of a style rule.
+     * A string representation of the CSS style associated with this specific {@code DataSet}. This is analogous to the
+     * "style" attribute of an HTML element. Note that, like the HTML style attribute, this variable contains style
+     * properties and values and not the selector portion of a style rule.
      *
      * @return user-specific data set style description (ie. may be set by user)
      */
     String getStyle();
 
     /**
-     * A string representation of the CSS style associated with this specific
-     * {@code DataSet} data point. @see #getStyle()
+     * A string representation of the CSS style associated with this specific {@code DataSet} data point. @see
+     * #getStyle()
      *
      * @param index the specific data point index
      * @return user-specific data set style description (ie. may be set by user)
@@ -148,13 +143,11 @@ public interface DataSet extends EventSource, Serializable {
     DataSet recomputeLimits(final int dimension);
 
     /**
-     * A string representation of the CSS style associated with this specific
-     * {@code DataSet}. This is analogous to the "style" attribute of an HTML
-     * element. Note that, like the HTML style attribute, this variable contains
-     * style properties and values and not the selector portion of a style rule.
+     * A string representation of the CSS style associated with this specific {@code DataSet}. This is analogous to the
+     * "style" attribute of an HTML element. Note that, like the HTML style attribute, this variable contains style
+     * properties and values and not the selector portion of a style rule.
      *
-     * @param style
-     *            the new user-specific style
+     * @param style the new user-specific style
      * @return itself (fluent interface)
      */
     DataSet setStyle(String style);

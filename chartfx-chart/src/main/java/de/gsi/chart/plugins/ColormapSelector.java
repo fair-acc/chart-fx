@@ -16,9 +16,8 @@ import javafx.scene.paint.LinearGradient;
 import javafx.scene.shape.Rectangle;
 
 /**
- * Adds a Dropdown to the toolbar to select different Colormaps.
- * The selected Colormap can be accessed from via colormapProperty() and bound to
- * Renderers/Axes.
+ * Adds a Dropdown to the toolbar to select different Colormaps. The selected Colormap can be accessed from via
+ * colormapProperty() and bound to Renderers/Axes.
  * 
  * @author Alexander Krimm
  */
@@ -69,13 +68,6 @@ public class ColormapSelector extends ChartPlugin {
         return dropdown.valueProperty();
     }
 
-    public void setColormap(final ColorGradient newGradient) {
-        if (!getGradientsList().contains(newGradient)) {
-            getGradientsList().add(newGradient);
-        }
-        dropdown.setValue(newGradient);
-    }
-
     public ColorGradient getColormap() {
         return dropdown.getValue();
     }
@@ -84,16 +76,23 @@ public class ColormapSelector extends ChartPlugin {
         return dropdown.getItems();
     }
 
-    public BooleanProperty showInToolbarProperty() {
-        return showInToolbar;
+    public boolean isShowInToolbar() {
+        return showInToolbar.get();
+    }
+
+    public void setColormap(final ColorGradient newGradient) {
+        if (!getGradientsList().contains(newGradient)) {
+            getGradientsList().add(newGradient);
+        }
+        dropdown.setValue(newGradient);
     }
 
     public void setShowInToolbar(final boolean show) {
         showInToolbar.set(show);
     }
 
-    public boolean isShowInToolbar() {
-        return showInToolbar.get();
+    public BooleanProperty showInToolbarProperty() {
+        return showInToolbar;
     }
 
     public static class ColormapComboBox extends ComboBox<ColorGradient> {

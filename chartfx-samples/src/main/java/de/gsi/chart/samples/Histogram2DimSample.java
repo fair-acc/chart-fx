@@ -33,13 +33,33 @@ public class Histogram2DimSample extends Application {
     private final Histogram2 histogram2 = new Histogram2("hist2", N_BINS_X, 0.0, 20.0, N_BINS_Y, 0.0, 30.0);
     private int counter;
 
+    private void fillData() {
+        counter++;
+        histogram1.autoNotification().set(false);
+        histogram2.autoNotification().set(false);
+        final double angle = Math.PI / 4;
+        for (int i = 0; i < Histogram2DimSample.UPDATE_N_SAMPLES; i++) {
+            final double x0 = rnd.nextGaussian() * 0.5 + 5.0;
+            final double y0 = rnd.nextGaussian() * 0.5 + 5.0;
+            final double x = rnd.nextGaussian() * 1.5;
+            final double y = rnd.nextGaussian() * 0.5;
+            final double x1 = x * Math.sin(angle) + y * Math.cos(angle);
+            final double x2 = x * Math.cos(angle) - y * Math.sin(angle);
+            histogram1.fill(x0, y0);
+            histogram2.fill(x1 + 14.0, x2 + 20.0);
+        }
+        histogram1.autoNotification().set(true);
+        histogram2.autoNotification().set(true);
+        histogram1.fireInvalidated(null);
+        histogram2.fireInvalidated(null);
 
-    /**
-     * @param args
-     *            the command line arguments
-     */
-    public static void main(final String[] args) {
-        Application.launch(args);
+        if (counter % 500 == 0) {
+            // reset distribution every now and then
+            counter = 0;
+            histogram1.reset();
+            histogram2.reset();
+        }
+
     }
 
     @Override
@@ -133,32 +153,10 @@ public class Histogram2DimSample extends Application {
         }, Histogram2DimSample.UPDATE_DELAY, Histogram2DimSample.UPDATE_PERIOD);
     }
 
-    private void fillData() {
-        counter++;
-        histogram1.autoNotification().set(false);
-        histogram2.autoNotification().set(false);
-        final double angle = Math.PI / 4;
-        for (int i = 0; i < Histogram2DimSample.UPDATE_N_SAMPLES; i++) {
-            final double x0 = rnd.nextGaussian() * 0.5 + 5.0;
-            final double y0 = rnd.nextGaussian() * 0.5 + 5.0;
-            final double x = rnd.nextGaussian() * 1.5;
-            final double y = rnd.nextGaussian() * 0.5;
-            final double x1 = x * Math.sin(angle) + y * Math.cos(angle);
-            final double x2 = x * Math.cos(angle) - y * Math.sin(angle);
-            histogram1.fill(x0, y0);
-            histogram2.fill(x1 + 14.0, x2 + 20.0);
-        }
-        histogram1.autoNotification().set(true);
-        histogram2.autoNotification().set(true);
-        histogram1.fireInvalidated(null);
-        histogram2.fireInvalidated(null);
-
-        if (counter % 500 == 0) {
-            // reset distribution every now and then
-            counter = 0;
-            histogram1.reset();
-            histogram2.reset();
-        }
-
+    /**
+     * @param args the command line arguments
+     */
+    public static void main(final String[] args) {
+        Application.launch(args);
     }
 }

@@ -2,6 +2,8 @@ package de.gsi.math;
 
 public class TRandom1 extends TRandom {
 
+    protected static int fgNumEngines = 0; // Number of instances with automatic seed selection
+    protected static int fgMaxIndex = 215; // Maximum index into the seed table;
     protected int fNskip;
     protected int fLuxury;
     protected int fIlag;
@@ -10,8 +12,6 @@ public class TRandom1 extends TRandom {
     protected float[] fFloatSeedTable = new float[24];
     protected float fCarry;
     protected final int fIntModulus;
-    protected static int fgNumEngines = 0; // Number of instances with automatic seed selection
-    protected static int fgMaxIndex = 215; // Maximum index into the seed table;
     protected final long fTheSeeds;
     protected final double fMantissaBit24;
     protected final double fMantissaBit12;
@@ -76,6 +76,33 @@ public class TRandom1 extends TRandom {
             { 957935844, 1490681416 } };
 
     /**
+     * default constructor
+     */
+    public TRandom1() {
+        super(0);
+        fIntModulus = 0x1000000;
+        fMantissaBit24 = TMath.Power(0.5, 24.);
+        fMantissaBit12 = TMath.Power(0.5, 12.);
+        fTheSeeds = fSeed;
+        long seed;
+        long seedlist[] = { 0, 0 };
+
+        fLuxury = 3;
+        int cycle = Math.abs(fgNumEngines / fgMaxIndex);
+        int curIndex = Math.abs(fgNumEngines % fgMaxIndex);
+        fgNumEngines += 1;
+        long mask = ((cycle & 0x007fffff) << 8);
+        GetTableSeeds(seedlist, curIndex);
+        seed = seedlist[0] ^ mask;
+        SetSeed2(seed, fLuxury);
+
+        // setSeeds() wants a zero terminated array!
+        seedlist[0] = fSeed; // <=============
+        seedlist[1] = 0;
+        SetSeeds(seedlist[0], fLuxury);
+    }
+
+    /**
      * Luxury level is set in the same way as the original FORTRAN routine. level 0 (p=24): equivalent to the original
      * RCARRY of Marsaglia and Zaman, very long period, but fails many tests. level 1 (p=48): considerable improvement
      * in quality over level 0, now passes the gap test, but still fails spectral test. level 2 (p=97): passes all known
@@ -99,33 +126,6 @@ public class TRandom1 extends TRandom {
 
         // setSeeds() wants a zero terminated array!
         seedlist[0] = fSeed;
-        seedlist[1] = 0;
-        SetSeeds(seedlist[0], fLuxury);
-    }
-
-    /**
-     * default constructor
-     */
-    public TRandom1() {
-        super(0);
-        fIntModulus = 0x1000000;
-        fMantissaBit24 = TMath.Power(0.5, 24.);
-        fMantissaBit12 = TMath.Power(0.5, 12.);
-        fTheSeeds = fSeed;
-        long seed;
-        long seedlist[] = { 0, 0 };
-
-        fLuxury = 3;
-        int cycle = Math.abs(fgNumEngines / fgMaxIndex);
-        int curIndex = Math.abs(fgNumEngines % fgMaxIndex);
-        fgNumEngines += 1;
-        long mask = ((cycle & 0x007fffff) << 8);
-        GetTableSeeds(seedlist, curIndex);
-        seed = seedlist[0] ^ mask;
-        SetSeed2(seed, fLuxury);
-
-        // setSeeds() wants a zero terminated array!
-        seedlist[0] = fSeed; //<=============
         seedlist[1] = 0;
         SetSeeds(seedlist[0], fLuxury);
     }
@@ -172,7 +172,7 @@ public class TRandom1 extends TRandom {
             fJlag = 23;
 
         if (uni < fMantissaBit12) {
-            uni += (float)fMantissaBit24 * fFloatSeedTable[fJlag];
+            uni += (float) fMantissaBit24 * fFloatSeedTable[fJlag];
             if (uni == 0)
                 uni = (float) (fMantissaBit24 * fMantissaBit24);
         }
@@ -202,15 +202,6 @@ public class TRandom1 extends TRandom {
             }
         }
         return next_random;
-    }
-
-    /**
-     * return an array of random numbers in ]0,1]
-     */
-    @Override
-    public void RndmArray(final int size, float[] vect) {
-        for (int i = 0; i < size; i++)
-            vect[i] = (float) Rndm();
     }
 
     /**
@@ -277,65 +268,20 @@ public class TRandom1 extends TRandom {
     }
 
     /**
-     * set seeds
-     * 
-     * @param seeds initial seed
-     * @param lux initial luxury
+     * return an array of random numbers in ]0,1]
      */
-    public void SetSeeds(final long seeds, int lux) {
-        final int ecuyer_a = 53668;
-        final int ecuyer_b = 40014;
-        final int ecuyer_c = 12211;
-        final int ecuyer_d = 2147483563;
+    @Override
+    public void RndmArray(final int size, float[] vect) {
+        for (int i = 0; i < size; i++)
+            vect[i] = (float) Rndm();
+    }
 
-        final int lux_levels[] = { 0, 24, 73, 199, 365 };
-        int i;
-        long[] int_seed_table = new long[24];
-        long k_multiple, next_seed;
-
-        fSeed = seeds;
-
-        // number of additional random numbers that need to be 'thrown away'
-        // every 24 numbers is set using fLuxury level variable.
-
-        if ((lux > 4) || (lux < 0)) {
-            if (lux >= 24) {
-                fNskip = lux - 24;
-            } else {
-                fNskip = lux_levels[3]; // corresponds to default fLuxury level
-            }
-        } else {
-            fLuxury = lux;
-            fNskip = lux_levels[fLuxury];
-        }
-
-        for (i = 0; (i != 24) && (fSeed != 0); i++) {
-            int_seed_table[i] = fSeed % fIntModulus;
-            fSeed++;
-        }
-
-        if (i != 24) {
-            next_seed = int_seed_table[i - 1];
-            for (; i != 24; i++) {
-                k_multiple = next_seed / ecuyer_a;
-                next_seed = ecuyer_b * (next_seed - k_multiple * ecuyer_a) - k_multiple * ecuyer_c;
-                if (next_seed < 0)
-                    next_seed += ecuyer_d;
-                int_seed_table[i] = next_seed % fIntModulus;
-            }
-        }
-
-        for (i = 0; i != 24; i++)
-            fFloatSeedTable[i] = (float) (int_seed_table[i] * fMantissaBit24);
-
-        fIlag = 23;
-        fJlag = 9;
-        fCarry = 0.f;
-
-        if (fFloatSeedTable[23] == 0.)
-            fCarry = (float) fMantissaBit24;
-
-        fCount24 = 0;
+    /**
+     * Set RanLux seed using default luxury level
+     */
+    @Override
+    public void SetSeed(long seed) {
+        SetSeed2(seed, 3);
     }
 
     /**
@@ -404,11 +350,65 @@ public class TRandom1 extends TRandom {
     }
 
     /**
-     * Set RanLux seed using default luxury level
+     * set seeds
+     * 
+     * @param seeds initial seed
+     * @param lux initial luxury
      */
-    @Override
-    public void SetSeed(long seed) {
-        SetSeed2(seed, 3);
+    public void SetSeeds(final long seeds, int lux) {
+        final int ecuyer_a = 53668;
+        final int ecuyer_b = 40014;
+        final int ecuyer_c = 12211;
+        final int ecuyer_d = 2147483563;
+
+        final int lux_levels[] = { 0, 24, 73, 199, 365 };
+        int i;
+        long[] int_seed_table = new long[24];
+        long k_multiple, next_seed;
+
+        fSeed = seeds;
+
+        // number of additional random numbers that need to be 'thrown away'
+        // every 24 numbers is set using fLuxury level variable.
+
+        if ((lux > 4) || (lux < 0)) {
+            if (lux >= 24) {
+                fNskip = lux - 24;
+            } else {
+                fNskip = lux_levels[3]; // corresponds to default fLuxury level
+            }
+        } else {
+            fLuxury = lux;
+            fNskip = lux_levels[fLuxury];
+        }
+
+        for (i = 0; (i != 24) && (fSeed != 0); i++) {
+            int_seed_table[i] = fSeed % fIntModulus;
+            fSeed++;
+        }
+
+        if (i != 24) {
+            next_seed = int_seed_table[i - 1];
+            for (; i != 24; i++) {
+                k_multiple = next_seed / ecuyer_a;
+                next_seed = ecuyer_b * (next_seed - k_multiple * ecuyer_a) - k_multiple * ecuyer_c;
+                if (next_seed < 0)
+                    next_seed += ecuyer_d;
+                int_seed_table[i] = next_seed % fIntModulus;
+            }
+        }
+
+        for (i = 0; i != 24; i++)
+            fFloatSeedTable[i] = (float) (int_seed_table[i] * fMantissaBit24);
+
+        fIlag = 23;
+        fJlag = 9;
+        fCarry = 0.f;
+
+        if (fFloatSeedTable[23] == 0.)
+            fCarry = (float) fMantissaBit24;
+
+        fCount24 = 0;
     }
 
 }

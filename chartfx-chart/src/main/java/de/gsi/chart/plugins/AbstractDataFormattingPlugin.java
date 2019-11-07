@@ -14,8 +14,7 @@ import javafx.scene.chart.ValueAxis;
 import javafx.util.StringConverter;
 
 /**
- * An abstract plugin with associated formatters for X and Y value of the data. For details see
- * {@link #formatData}.
+ * An abstract plugin with associated formatters for X and Y value of the data. For details see {@link #formatData}.
  *
  * @author Grzegorz Kruk
  * @author rstein
@@ -51,94 +50,6 @@ public abstract class AbstractDataFormattingPlugin extends ChartPlugin {
         });
     }
 
-    private static StringConverter<Number> createDefaultFormatter(final Axis axis) {
-        // if (axis instanceof Axis) {
-        // final de.gsi.chart.axes.spi.format.DefaultFormatter numberConverter
-        // = new
-        // de.gsi.chart.axes.spi.format.DefaultFormatter(
-        // axis);
-        // return numberConverter;
-        // }
-        // if (axis instanceof NumberAxis) { //TODO: re-enable
-        // return (StringConverter<Number>) new
-        // NumberAxis.DefaultFormatter((NumberAxis) axis);
-        // }
-        return new AbstractDataFormattingPlugin.DefaultFormatter<>();
-    }
-
-    /**
-     * Returns the value of the {@link #xValueFormatterProperty()}.
-     *
-     * @return the X value formatter
-     */
-    public final StringConverter<Number> getXValueFormatter() {
-        return xValueFormatterProperty().get();
-    }
-
-    /**
-     * Returns the value of the {@link #xValueFormatterProperty()}.
-     *
-     * @return the X value formatter
-     */
-    public final StringConverter<Number> getYValueFormatter() {
-        return yValueFormatterProperty().get();
-    }
-
-    /**
-     * Sets the value of the {@link #xValueFormatterProperty()}.
-     *
-     * @param formatter the X value formatter
-     */
-    public final void setXValueFormatter(final StringConverter<Number> formatter) {
-        xValueFormatterProperty().set(formatter);
-    }
-
-    /**
-     * Sets the value of the {@link #xValueFormatterProperty()}.
-     *
-     * @param formatter the X value formatter
-     */
-    public final void setYValueFormatter(final StringConverter<Number> formatter) {
-        yValueFormatterProperty().set(formatter);
-    }
-    /**
-     * StringConverter used to format X values. If {@code null} a default will be used.
-     *
-     * @return the X value formatter property
-     */
-    public final ObjectProperty<StringConverter<Number>> xValueFormatterProperty() {
-        return xValueFormatter;
-    }
-
-    /**
-     * StringConverter used to format Y values. If {@code null} a default will be used.
-     *
-     * @return the Y value formatter property
-     */
-    public final ObjectProperty<StringConverter<Number>> yValueFormatterProperty() {
-        return yValueFormatter;
-    }
-
-    private StringConverter<Number> getValueFormatter(final Axis axis, final StringConverter<Number> formatter,
-            final StringConverter<Number> defaultFormatter) {
-        StringConverter<Number> valueFormatter = formatter;
-        if (valueFormatter == null && Axes.isNumericAxis(axis)) {
-            valueFormatter = Axes.toNumericAxis(axis).getTickLabelFormatter();
-        }
-        if (valueFormatter == null) {
-            valueFormatter = defaultFormatter;
-        }
-        return valueFormatter;
-    }
-
-    private StringConverter<Number> getXValueFormatter(final Axis xAxis) {
-        return getValueFormatter(xAxis, getXValueFormatter(), defaultXValueFormatter);
-    }
-
-    private StringConverter<Number> getYValueFormatter(final Axis yAxis) {
-        return getValueFormatter(yAxis, getYValueFormatter(), defaultYValueFormatter);
-    }
-
     /**
      * Formats the data to be displayed by this plugin. Uses the specified {@link #xValueFormatterProperty()} and
      * {@link #yValueFormatterProperty()} to obtain the corresponding formatters. If it is {@code null} and the axis is
@@ -146,6 +57,7 @@ public abstract class AbstractDataFormattingPlugin extends ChartPlugin {
      * one is also not initialized - a default formatter is used.
      * <p>
      * Can be overridden to modify formatting of the data.
+     * 
      * @param chart reference to chart
      *
      * @param data the data point to be formatted
@@ -188,6 +100,95 @@ public abstract class AbstractDataFormattingPlugin extends ChartPlugin {
         }
 
         return result.toString();
+    }
+
+    private StringConverter<Number> getValueFormatter(final Axis axis, final StringConverter<Number> formatter,
+            final StringConverter<Number> defaultFormatter) {
+        StringConverter<Number> valueFormatter = formatter;
+        if (valueFormatter == null && Axes.isNumericAxis(axis)) {
+            valueFormatter = Axes.toNumericAxis(axis).getTickLabelFormatter();
+        }
+        if (valueFormatter == null) {
+            valueFormatter = defaultFormatter;
+        }
+        return valueFormatter;
+    }
+
+    /**
+     * Returns the value of the {@link #xValueFormatterProperty()}.
+     *
+     * @return the X value formatter
+     */
+    public final StringConverter<Number> getXValueFormatter() {
+        return xValueFormatterProperty().get();
+    }
+
+    private StringConverter<Number> getXValueFormatter(final Axis xAxis) {
+        return getValueFormatter(xAxis, getXValueFormatter(), defaultXValueFormatter);
+    }
+
+    /**
+     * Returns the value of the {@link #xValueFormatterProperty()}.
+     *
+     * @return the X value formatter
+     */
+    public final StringConverter<Number> getYValueFormatter() {
+        return yValueFormatterProperty().get();
+    }
+
+    private StringConverter<Number> getYValueFormatter(final Axis yAxis) {
+        return getValueFormatter(yAxis, getYValueFormatter(), defaultYValueFormatter);
+    }
+
+    /**
+     * Sets the value of the {@link #xValueFormatterProperty()}.
+     *
+     * @param formatter the X value formatter
+     */
+    public final void setXValueFormatter(final StringConverter<Number> formatter) {
+        xValueFormatterProperty().set(formatter);
+    }
+
+    /**
+     * Sets the value of the {@link #xValueFormatterProperty()}.
+     *
+     * @param formatter the X value formatter
+     */
+    public final void setYValueFormatter(final StringConverter<Number> formatter) {
+        yValueFormatterProperty().set(formatter);
+    }
+
+    /**
+     * StringConverter used to format X values. If {@code null} a default will be used.
+     *
+     * @return the X value formatter property
+     */
+    public final ObjectProperty<StringConverter<Number>> xValueFormatterProperty() {
+        return xValueFormatter;
+    }
+
+    /**
+     * StringConverter used to format Y values. If {@code null} a default will be used.
+     *
+     * @return the Y value formatter property
+     */
+    public final ObjectProperty<StringConverter<Number>> yValueFormatterProperty() {
+        return yValueFormatter;
+    }
+
+    private static StringConverter<Number> createDefaultFormatter(final Axis axis) {
+        // if (axis instanceof Axis) {
+        // final de.gsi.chart.axes.spi.format.DefaultFormatter numberConverter
+        // = new
+        // de.gsi.chart.axes.spi.format.DefaultFormatter(
+        // axis);
+        // return numberConverter;
+        // }
+        // if (axis instanceof NumberAxis) { //TODO: re-enable
+        // return (StringConverter<Number>) new
+        // NumberAxis.DefaultFormatter((NumberAxis) axis);
+        // }
+        return new AbstractDataFormattingPlugin.DefaultFormatter<>();
     }
 
     private static class DefaultFormatter<T> extends StringConverter<T> {

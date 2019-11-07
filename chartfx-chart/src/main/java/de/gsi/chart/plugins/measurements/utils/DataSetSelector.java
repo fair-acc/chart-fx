@@ -34,6 +34,14 @@ public class DataSetSelector extends HBox {
         getChildren().addAll(label, dataSets);
     }
 
+    public int getNumberDataSets() {
+        return allDataSets.size();
+    }
+
+    public DataSet getSelectedDataSet() {
+        return dataSets.getSelectionModel().getSelectedItem();
+    }
+
     static protected class DataSetLabel extends ListCell<DataSet> {
         @Override
         public void updateItem(final DataSet item, final boolean empty) {
@@ -42,14 +50,6 @@ public class DataSetSelector extends HBox {
                 setText(item.getName());
             }
         }
-    }
-
-    public int getNumberDataSets() {
-        return allDataSets.size();
-    }
-
-    public DataSet getSelectedDataSet() {
-        return dataSets.getSelectionModel().getSelectedItem();
     }
 
     // protected final ObservableList<DataSet> getAllDataSets(final XYChartPane chartPane) {

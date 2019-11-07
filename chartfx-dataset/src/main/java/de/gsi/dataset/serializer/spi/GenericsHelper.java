@@ -1,8 +1,8 @@
 package de.gsi.dataset.serializer.spi;
 
 /**
- * Helper class to convert between boxed and primitive data types. Lot's of
- * boiler plate code because java generics cannot handle primitive types.
+ * Helper class to convert between boxed and primitive data types. Lot's of boiler plate code because java generics
+ * cannot handle primitive types.
  *
  * @author rstein
  */

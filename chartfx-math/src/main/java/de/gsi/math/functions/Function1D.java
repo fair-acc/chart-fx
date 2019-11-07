@@ -12,36 +12,10 @@ import de.gsi.dataset.spi.DefaultErrorDataSet;
  */
 public interface Function1D extends Function {
 
-    double getValue(final double x);
-
-    default double[] getValues(final double[] x) {
-        if (x == null) {
-            throw new IllegalArgumentException("x array argument is null");
-        }
-        final double[] y = new double[x.length];
-        for (int i = 0; i < x.length; i++) {
-            y[i] = getValue(x[i]);
-        }
-        return y;
-    }
-
     /**
-     * @return DataSet representation of the function
-     * @param xValues
-     *            X coordinate for which the function should be evaluated
-     */
-    default DataSet getDataSetEstimate(final double[] xValues) {
-        return new DefaultErrorDataSet(getName(), xValues, getValues(xValues), new double[xValues.length],
-                new double[xValues.length], xValues.length, true);
-    }
-
-    /**
-     * @param xmin
-     *            min. x range
-     * @param xmax
-     *            max x range
-     * @param nsamples
-     *            number of sample points
+     * @param xmin min. x range
+     * @param xmax max x range
+     * @param nsamples number of sample points
      * @return DataSet representation of the function
      */
     default DataSet getDataSetEstimate(final double xmin, final double xmax, final int nsamples) {
@@ -55,6 +29,28 @@ public interface Function1D extends Function {
             xValues[i] = xmin + i * step;
         }
         return getDataSetEstimate(xValues);
+    }
+
+    /**
+     * @return DataSet representation of the function
+     * @param xValues X coordinate for which the function should be evaluated
+     */
+    default DataSet getDataSetEstimate(final double[] xValues) {
+        return new DefaultErrorDataSet(getName(), xValues, getValues(xValues), new double[xValues.length],
+                new double[xValues.length], xValues.length, true);
+    }
+
+    double getValue(final double x);
+
+    default double[] getValues(final double[] x) {
+        if (x == null) {
+            throw new IllegalArgumentException("x array argument is null");
+        }
+        final double[] y = new double[x.length];
+        for (int i = 0; i < x.length; i++) {
+            y[i] = getValue(x[i]);
+        }
+        return y;
     }
 
 }

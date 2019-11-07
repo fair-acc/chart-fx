@@ -21,10 +21,9 @@ import javafx.scene.layout.Pane;
 /**
  * plugin to implement simple measurements and valueTextField indicators such as
  * <p>
- * * valueTextField at horizontal/vertical marker position -- coloured
- * indication if min/max thresholds are exceeded * rise-time * trigger-to-rising
- * edge detector * absolute signal difference (ie. S0 - S1) * relative signal
- * change (ie. (S0 - S1)/S0)
+ * * valueTextField at horizontal/vertical marker position -- coloured indication if min/max thresholds are exceeded *
+ * rise-time * trigger-to-rising edge detector * absolute signal difference (ie. S0 - S1) * relative signal change (ie.
+ * (S0 - S1)/S0)
  *
  * @author rstein
  */

@@ -6,9 +6,9 @@ import de.gsi.chart.Chart;
 import de.gsi.chart.XYChart;
 import de.gsi.chart.axes.Axis;
 import de.gsi.chart.axes.spi.CategoryAxis;
+import de.gsi.chart.renderer.Renderer;
 import de.gsi.dataset.DataSet;
 import de.gsi.dataset.utils.ProcessingProfiler;
-import de.gsi.chart.renderer.Renderer;
 import javafx.collections.ObservableList;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
@@ -21,6 +21,12 @@ import javafx.scene.paint.Color;
 public class LineRenderer extends AbstractDataSetManagement<LineRenderer> implements Renderer {
 
     static private final Color[] COLORS = { Color.BLACK, Color.BLUE, Color.GREEN, Color.RED };
+
+    @Override
+    public Canvas drawLegendSymbol(DataSet dataSet, int dsIndex, int width, int height) {
+        // not implemented for this class
+        return null;
+    }
 
     /**
      * @return the instance of this LineRenderer.
@@ -73,7 +79,8 @@ public class LineRenderer extends AbstractDataSetManagement<LineRenderer> implem
                     double x0 = xAxis.getDisplayPosition(dataset.get(DataSet.DIM_X, i));
                     double y0 = yAxis.getDisplayPosition(dataset.get(DataSet.DIM_Y, i));
                     i++;
-                    final int maxIndex = Math.min(dataset.getIndex(DataSet.DIM_X, xmax) + 1, dataset.getDataCount(DataSet.DIM_X));
+                    final int maxIndex = Math.min(dataset.getIndex(DataSet.DIM_X, xmax) + 1,
+                            dataset.getDataCount(DataSet.DIM_X));
                     for (; i < maxIndex; i++) {
                         final double x1 = xAxis.getDisplayPosition(dataset.get(DataSet.DIM_X, i));
                         final double y1 = yAxis.getDisplayPosition(dataset.get(DataSet.DIM_Y, i));
@@ -86,11 +93,5 @@ public class LineRenderer extends AbstractDataSetManagement<LineRenderer> implem
             });
         }
         ProcessingProfiler.getTimeDiff(start);
-    }
-
-    @Override
-    public Canvas drawLegendSymbol(DataSet dataSet, int dsIndex, int width, int height) {
-        // not implemented for this class
-        return null;
     }
 }

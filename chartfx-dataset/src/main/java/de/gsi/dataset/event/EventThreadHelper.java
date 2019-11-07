@@ -14,16 +14,16 @@ public class EventThreadHelper {
             CachedDaemonThreadFactory.getInstance());
 
     /**
-     * @return maximum number of threads used for event notification
-     */
-    public static int getMaxThreads() {
-        return MAX_THREADS;
-    }
-
-    /**
      * @return event update executor service
      */
     public static ExecutorService getExecutorService() {
         return EXECUTOR_SERVICE;
+    }
+
+    /**
+     * @return maximum number of threads used for event notification
+     */
+    public static int getMaxThreads() {
+        return MAX_THREADS;
     }
 }

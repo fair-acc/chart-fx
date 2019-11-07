@@ -9,30 +9,11 @@ import javafx.scene.canvas.GraphicsContext;
  * @author rstein
  */
 public class GeneralPath /* extends Path2D */ {
-    enum PathType {
-        GC_LINETO,
-        GC_MOVETO,
-        GC_BEGINPATH,
-        GC_CLOSEPATH
-    }
-
     private final List<Segment> drawList = new ArrayList<>();
 
     GeneralPath() {
         // super(Path2D.WIND_EVEN_ODD);
         beginPath();
-    }
-
-    public int size() {
-        return drawList.size();
-    }
-
-    public void lineTo(final float x, final float y) {
-        drawList.add(new Segment(PathType.GC_LINETO, x, y));
-    }
-
-    public void moveTo(final float x, final float y) {
-        drawList.add(new Segment(PathType.GC_MOVETO, x, y));
     }
 
     public final void beginPath() {
@@ -67,6 +48,22 @@ public class GeneralPath /* extends Path2D */ {
             }
         }
         return count;
+    }
+
+    public void lineTo(final float x, final float y) {
+        drawList.add(new Segment(PathType.GC_LINETO, x, y));
+    }
+
+    public void moveTo(final float x, final float y) {
+        drawList.add(new Segment(PathType.GC_MOVETO, x, y));
+    }
+
+    public int size() {
+        return drawList.size();
+    }
+
+    enum PathType {
+        GC_LINETO, GC_MOVETO, GC_BEGINPATH, GC_CLOSEPATH
     }
 
     private class Segment {

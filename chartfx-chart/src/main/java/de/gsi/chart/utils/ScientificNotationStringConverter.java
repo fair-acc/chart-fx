@@ -17,63 +17,63 @@ import javafx.util.StringConverter;
  */
 public class ScientificNotationStringConverter extends StringConverter<Number> implements NumberFormatter {
 
-	private int precision = 2;
-	private final DecimalFormat format = new DecimalFormat();
+    private int precision = 2;
+    private final DecimalFormat format = new DecimalFormat();
 
-	public ScientificNotationStringConverter() {
-		buildFormat(precision);
-	}
+    public ScientificNotationStringConverter() {
+        buildFormat(precision);
+    }
 
-	public ScientificNotationStringConverter(final int precision) {
-		this.precision = precision;
-		buildFormat(precision);
-	}
+    public ScientificNotationStringConverter(final int precision) {
+        this.precision = precision;
+        buildFormat(precision);
+    }
 
-	@Override
-	public int getPrecision() {
-		return precision;
-	}
+    private void buildFormat(final int precision) {
+        final StringBuilder sb = new StringBuilder(32);
+        sb.append("0.");
+        for (int i = 0; i < precision; i++) {
+            sb.append('0');
+        }
+        sb.append("E0");
+        format.applyPattern(sb.toString());
+    }
 
-	@Override
-	public NumberFormatter setPrecision(final int precision) {
-		this.precision = precision;
-		buildFormat(precision);
-		return this;
-	}
+    @Override
+    public Number fromString(final String string) {
+        return Double.parseDouble(string);
+    }
 
-	@Override
-	public boolean isExponentialForm() {
-		return true;
-	}
+    @Override
+    public int getPrecision() {
+        return precision;
+    }
 
-	@Override
-	public NumberFormatter setExponentialForm(boolean state) {
-		return this;
-	}
+    @Override
+    public boolean isExponentialForm() {
+        return true;
+    }
 
-	@Override
-	public String toString(double val) {
-		return toString(Double.valueOf(val));
-	}
+    @Override
+    public NumberFormatter setExponentialForm(boolean state) {
+        return this;
+    }
 
-	@Override
-	public String toString(final Number object) {
-		return format.format(object);
-	}
+    @Override
+    public NumberFormatter setPrecision(final int precision) {
+        this.precision = precision;
+        buildFormat(precision);
+        return this;
+    }
 
-	@Override
-	public Number fromString(final String string) {
-		return Double.parseDouble(string);
-	}
+    @Override
+    public String toString(double val) {
+        return toString(Double.valueOf(val));
+    }
 
-	private void buildFormat(final int precision) {
-		final StringBuilder sb = new StringBuilder(32);
-		sb.append("0.");
-		for (int i = 0; i < precision; i++) {
-			sb.append('0');
-		}
-		sb.append("E0");
-		format.applyPattern(sb.toString());
-	}
+    @Override
+    public String toString(final Number object) {
+        return format.format(object);
+    }
 
 }

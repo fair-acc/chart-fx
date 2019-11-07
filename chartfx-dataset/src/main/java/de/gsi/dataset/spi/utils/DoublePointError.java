@@ -13,15 +13,6 @@ public class DoublePointError extends Tuple<DoublePoint, DoublePoint> {
     }
 
     /**
-     * @param x new X coordinate
-     * @param y new Y coordinate
-     * N.B. errors are implicitly assumed to be zero
-     */
-    private DoublePointError(final DoublePoint x, final DoublePoint y) {
-        super(x, y);
-    }
-
-    /**
      * 
      * @param x new X coordinate
      * @param y new Y coordinate
@@ -34,11 +25,11 @@ public class DoublePointError extends Tuple<DoublePoint, DoublePoint> {
     }
 
     /**
-     * 
-     * @return x coordinate
+     * @param x new X coordinate
+     * @param y new Y coordinate N.B. errors are implicitly assumed to be zero
      */
-    public double getX() {
-        return x.getX();
+    private DoublePointError(final DoublePoint x, final DoublePoint y) {
+        super(x, y);
     }
 
     /**
@@ -51,18 +42,26 @@ public class DoublePointError extends Tuple<DoublePoint, DoublePoint> {
 
     /**
      * 
-     * @return y coordinate
-     */
-    public double getY() {
-        return y.getX();
-    }
-
-    /**
-     * 
      * @return assigned error of y coordinate
      */
     public double getErrorY() {
         return y.getY();
+    }
+
+    /**
+     * 
+     * @return x coordinate
+     */
+    public double getX() {
+        return x.getX();
+    }
+
+    /**
+     * 
+     * @return y coordinate
+     */
+    public double getY() {
+        return y.getX();
     }
 
     /**

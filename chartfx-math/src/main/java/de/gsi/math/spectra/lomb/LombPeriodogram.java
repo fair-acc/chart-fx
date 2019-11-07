@@ -22,6 +22,50 @@ public class LombPeriodogram {
     protected boolean DEBUG = false;
 
     /**
+     * Compute the optimal frequency and binning range based on the acquisition range (t_max-t_min) and the minimum
+     * non-zero sampling distance.
+     *
+     * @param time time base vector
+     * @return vector containing frequency range
+     */
+    public double[] computeFrequencyRange(final double[] time) {
+
+        final double t_range = TMath.Maximum(time) - TMath.Minimum(time);
+        double t_min = Double.MAX_VALUE;
+
+        // detect minimum time interval
+        for (int i = 1; i < time.length; i++) {
+            final double diff = TMathConstants.Abs(time[i] - time[i - 1]);
+            if (t_min > diff && t_min > 0) {
+                t_min = diff;
+            }
+        }
+
+        final double f_s = 1.0 / t_min;
+        final int nTestFrequencies = (int) (t_range / t_min);
+
+        final double[] testFrequencies = new double[nTestFrequencies];
+        final double scale = 0.5 / nTestFrequencies * f_s;
+        for (int i = 0; i < nTestFrequencies; i++) {
+            testFrequencies[i] = i * scale;
+        }
+
+        return testFrequencies;
+    }
+
+    /**
+     * Lomb periodogram computation. The maximum frequency and binning is derived from the acquisition range
+     * (t_max-t_min) and the minimum non-zero sampling distance.
+     *
+     * @param t the time indices
+     * @param val the measurement
+     * @return vector containing Lomb-type Periodogram
+     */
+    public double[] computePeridodogram(final double[] t, final double[] val) {
+        return computePeridodogram(t, val, computeFrequencyRange(t));
+    }
+
+    /**
      * Lomb periodogram computation
      *
      * @param t the time indices
@@ -111,50 +155,6 @@ public class LombPeriodogram {
         }
 
         return ret;
-    }
-
-    /**
-     * Lomb periodogram computation. The maximum frequency and binning is derived from the acquisition range
-     * (t_max-t_min) and the minimum non-zero sampling distance.
-     *
-     * @param t the time indices
-     * @param val the measurement
-     * @return vector containing Lomb-type Periodogram
-     */
-    public double[] computePeridodogram(final double[] t, final double[] val) {
-        return computePeridodogram(t, val, computeFrequencyRange(t));
-    }
-
-    /**
-     * Compute the optimal frequency and binning range based on the acquisition range (t_max-t_min) and the minimum
-     * non-zero sampling distance.
-     *
-     * @param time time base vector
-     * @return vector containing frequency range
-     */
-    public double[] computeFrequencyRange(final double[] time) {
-
-        final double t_range = TMath.Maximum(time) - TMath.Minimum(time);
-        double t_min = Double.MAX_VALUE;
-
-        // detect minimum time interval
-        for (int i = 1; i < time.length; i++) {
-            final double diff = TMathConstants.Abs(time[i] - time[i - 1]);
-            if (t_min > diff && t_min > 0) {
-                t_min = diff;
-            }
-        }
-
-        final double f_s = 1.0 / t_min;
-        final int nTestFrequencies = (int) (t_range / t_min);
-
-        final double[] testFrequencies = new double[nTestFrequencies];
-        final double scale = 0.5 / nTestFrequencies * f_s;
-        for (int i = 0; i < nTestFrequencies; i++) {
-            testFrequencies[i] = i * scale;
-        }
-
-        return testFrequencies;
     }
 
 }

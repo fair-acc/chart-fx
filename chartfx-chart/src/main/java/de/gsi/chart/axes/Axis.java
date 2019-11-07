@@ -177,7 +177,7 @@ public interface Axis extends AxisDescription, EventSource {
      * This is {@code true} when the axis labels and data point order should be inverted
      *
      * @param value {@code true} if axis shall be inverted (i.e. drawn from 'max-&gt;min', rather than the normal
-     *            'min-&gt;max')
+     *        'min-&gt;max')
      */
     void invertAxis(boolean value);
 
@@ -286,8 +286,7 @@ public interface Axis extends AxisDescription, EventSource {
     void setAutoRanging(boolean value);
 
     /**
-     * @param value scaling value
-     *            {@code true} -&gt; scale to the nearest SI unit prefix
+     * @param value scaling value {@code true} -&gt; scale to the nearest SI unit prefix
      */
     void setAutoUnitScaling(final boolean value);
 

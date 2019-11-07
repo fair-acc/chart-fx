@@ -3,8 +3,8 @@ package de.gsi.chart.samples.legacy.utils;
 import java.util.ArrayList;
 import java.util.List;
 
-import de.gsi.dataset.testdata.spi.SineFunction;
 import de.gsi.chart.samples.legacy.RollingBufferLegacySample;
+import de.gsi.dataset.testdata.spi.SineFunction;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.scene.Node;
@@ -19,11 +19,6 @@ public class JavaFXTestChart extends AbstractTestApplication implements ChartTes
     NumberAxis yAxis = new NumberAxis("irrelevant y-axis - JavaFX Chart", -1.1, +1.1, 0.2);
     protected final LineChart<Number, Number> lineChart;
     protected XYChart.Series<Number, Number> series1 = new XYChart.Series<>();
-
-    @Override
-    public void initChart() {
-        test = new JavaFXTestChart();
-    }
 
     public JavaFXTestChart() {
 
@@ -65,15 +60,8 @@ public class JavaFXTestChart extends AbstractTestApplication implements ChartTes
     }
 
     @Override
-    public void updateDataSet() {
-        final double[] x = testFunction.generateX(nSamples);
-        final double[] y = testFunction.generateY(nSamples);
-
-        final List<XYChart.Data<Number, Number>> newData = new ArrayList<>();
-        for (int i = 0; i < nSamples; i++) {
-            newData.add(new XYChart.Data<>(x[i], y[i]));
-        }
-        Platform.runLater(() -> series1.getData().setAll(newData));
+    public void initChart() {
+        test = new JavaFXTestChart();
     }
 
     @Override
@@ -84,6 +72,18 @@ public class JavaFXTestChart extends AbstractTestApplication implements ChartTes
         xAxis.setLowerBound(0);
         xAxis.setTickUnit(nSamples / 20.0);
         updateDataSet();
+    }
+
+    @Override
+    public void updateDataSet() {
+        final double[] x = testFunction.generateX(nSamples);
+        final double[] y = testFunction.generateY(nSamples);
+
+        final List<XYChart.Data<Number, Number>> newData = new ArrayList<>();
+        for (int i = 0; i < nSamples; i++) {
+            newData.add(new XYChart.Data<>(x[i], y[i]));
+        }
+        Platform.runLater(() -> series1.getData().setAll(newData));
     }
 
     public static void main(final String[] args) {

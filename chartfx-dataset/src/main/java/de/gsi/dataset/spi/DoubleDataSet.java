@@ -11,9 +11,8 @@ import de.gsi.dataset.utils.AssertUtils;
 import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
 
 /**
- * Implementation of the {@code DataSet} interface which stores x,y values in
- * two separate arrays. It provides methods allowing easily manipulate of data
- * points.
+ * Implementation of the {@code DataSet} interface which stores x,y values in two separate arrays. It provides methods
+ * allowing easily manipulate of data points.
  *
  * @see DoubleErrorDataSet for an implementation with asymmetric errors in Y
  * @author rstein
@@ -23,6 +22,16 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
     private static final long serialVersionUID = -493232313124620828L;
     protected DoubleArrayList xValues; // way faster than java default lists
     protected DoubleArrayList yValues; // way faster than java default lists
+
+    /**
+     * Creates a new instance of <code>DoubleDataSet</code> as copy of another (deep-copy).
+     *
+     * @param another name of this DataSet.
+     */
+    public DoubleDataSet(final DataSet2D another) {
+        super(another.getName(), another.getDimension());
+        this.set(another); // NOPMD by rstein on 25/06/19 07:42
+    }
 
     /**
      * Creates a new instance of <code>DoubleDataSet</code>.
@@ -35,44 +44,19 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
     }
 
     /**
-     * Creates a new instance of <code>DoubleDataSet</code>.
-     *
-     * @param name name of this DataSet.
-     * @param initalSize initial capacity of buffer (N.B. size=0)
-     * @throws IllegalArgumentException if {@code name} is {@code null}
-     */
-    public DoubleDataSet(final String name, final int initalSize) {
-        super(name, 2);
-        AssertUtils.gtEqThanZero("initalSize", initalSize);
-        xValues = new DoubleArrayList(initalSize);
-        yValues = new DoubleArrayList(initalSize);
-    }
-
-    /**
-     * Creates a new instance of <code>DoubleDataSet</code> as copy of another
-     * (deep-copy).
-     *
-     * @param another name of this DataSet.
-     */
-    public DoubleDataSet(final DataSet2D another) {
-        super(another.getName(), another.getDimension());
-        this.set(another); // NOPMD by rstein on 25/06/19 07:42
-    }
-
-    /**
      * <p>
      * Creates a new instance of <code>DoubleDataSet</code>.
      * </p>
-     * The user than specify via the copy parameter, whether the dataset wraps
-     * the input arrays themselves or on a copies of the input arrays.
+     * The user than specify via the copy parameter, whether the dataset wraps the input arrays themselves or on a
+     * copies of the input arrays.
      *
      * @param name name of this data set.
      * @param xValues X coordinates
      * @param yValues Y coordinates
      * @param initalSize how many data points are relevant to be taken
      * @param deepCopy if true, the input array is copied
-     * @throws IllegalArgumentException if any of the parameters is {@code null}
-     *             or if arrays with coordinates have different lengths
+     * @throws IllegalArgumentException if any of the parameters is {@code null} or if arrays with coordinates have
+     *         different lengths
      */
     public DoubleDataSet(final String name, final double[] xValues, final double[] yValues, final int initalSize,
             final boolean deepCopy) {
@@ -95,105 +79,18 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
         }
     }
 
-    @Override
-    public double[] getXValues() {
-        return xValues.elements();
-    }
-
-    @Override
-    public double[] getYValues() {
-        return yValues.elements();
-    }
-
-    @Override
-    public final double[] getValues(final int dimIndex) {
-        return dimIndex == DataSet.DIM_X ? xValues.elements() : yValues.elements();
-    }
-
-    @Override
-    public int getDataCount() {
-        return Math.min(xValues.size(), yValues.size());
-    }
-
     /**
-     * clear all data points
+     * Creates a new instance of <code>DoubleDataSet</code>.
      *
-     * @return itself (fluent design)
+     * @param name name of this DataSet.
+     * @param initalSize initial capacity of buffer (N.B. size=0)
+     * @throws IllegalArgumentException if {@code name} is {@code null}
      */
-    public DoubleDataSet clearData() {
-        lock().writeLockGuard(() -> {
-            xValues.clear();
-            yValues.clear();
-            getDataLabelMap().clear();
-            getDataStyleMap().clear();
-            clearMetaInfo();
-
-            getAxisDescriptions().forEach(AxisDescription::clear);
-        });
-        return fireInvalidated(new RemovedDataEvent(this, "clearData()"));
-    }
-
-    /**
-     * @return storage capacity of dataset
-     */
-    public int getCapacity() {
-        return Math.min(xValues.elements().length, yValues.elements().length);
-    }
-
-    /**
-     * @param amount storage capacity increase
-     * @return itself (fluent design)
-     */
-    public DoubleDataSet increaseCapacity(final int amount) {
-        lock().writeLockGuard(() -> {
-            final int size = getDataCount();
-            resize(getCapacity() + amount);
-            resize(size);
-        });
-        return getThis();
-    }
-
-    /**
-     * ensures minimum size, enlarges if necessary
-     *
-     * @param size the actually used array lengths
-     * @return itself (fluent design)
-     */
-    public DoubleDataSet resize(final int size) {
-        lock().writeLockGuard(() -> {
-            xValues.size(size);
-            yValues.size(size);
-        });
-        return fireInvalidated(new UpdatedDataEvent(this, "increaseCapacity()"));
-    }
-
-    /**
-     * Trims the arrays list so that the capacity is equal to the size.
-     *
-     * @see java.util.ArrayList#trimToSize()
-     * @return itself (fluent design)
-     */
-    public DoubleDataSet trim() {
-        lock().writeLockGuard(() -> {
-            xValues.trim(0);
-            yValues.trim(0);
-        });
-        return fireInvalidated(new UpdatedDataEvent(this, "increaseCapacity()"));
-    }
-    
-    @Override
-    public final double get(final int dimIndex, final int index) {
-        return dimIndex == DataSet.DIM_X ? xValues.elements()[index] : yValues.elements()[index];
-    }
-
-    @Override
-    public double getX(final int index) {
-        return xValues.elements()[index];
-    }
-
-    @Override
-    public double getY(final int index) {
-        return yValues.elements()[index];
+    public DoubleDataSet(final String name, final int initalSize) {
+        super(name, 2);
+        AssertUtils.gtEqThanZero("initalSize", initalSize);
+        xValues = new DoubleArrayList(initalSize);
+        yValues = new DoubleArrayList(initalSize);
     }
 
     /**
@@ -316,6 +213,79 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
     }
 
     /**
+     * clear all data points
+     *
+     * @return itself (fluent design)
+     */
+    public DoubleDataSet clearData() {
+        lock().writeLockGuard(() -> {
+            xValues.clear();
+            yValues.clear();
+            getDataLabelMap().clear();
+            getDataStyleMap().clear();
+            clearMetaInfo();
+
+            getAxisDescriptions().forEach(AxisDescription::clear);
+        });
+        return fireInvalidated(new RemovedDataEvent(this, "clearData()"));
+    }
+
+    @Override
+    public final double get(final int dimIndex, final int index) {
+        return dimIndex == DataSet.DIM_X ? xValues.elements()[index] : yValues.elements()[index];
+    }
+
+    /**
+     * @return storage capacity of dataset
+     */
+    public int getCapacity() {
+        return Math.min(xValues.elements().length, yValues.elements().length);
+    }
+
+    @Override
+    public int getDataCount() {
+        return Math.min(xValues.size(), yValues.size());
+    }
+
+    @Override
+    public final double[] getValues(final int dimIndex) {
+        return dimIndex == DataSet.DIM_X ? xValues.elements() : yValues.elements();
+    }
+
+    @Override
+    public double getX(final int index) {
+        return xValues.elements()[index];
+    }
+
+    @Override
+    public double[] getXValues() {
+        return xValues.elements();
+    }
+
+    @Override
+    public double getY(final int index) {
+        return yValues.elements()[index];
+    }
+
+    @Override
+    public double[] getYValues() {
+        return yValues.elements();
+    }
+
+    /**
+     * @param amount storage capacity increase
+     * @return itself (fluent design)
+     */
+    public DoubleDataSet increaseCapacity(final int amount) {
+        lock().writeLockGuard(() -> {
+            final int size = getDataCount();
+            resize(getCapacity() + amount);
+            resize(size);
+        });
+        return getThis();
+    }
+
+    /**
      * remove point from data set
      *
      * @param index data point which should be removed
@@ -354,101 +324,17 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
     }
 
     /**
-     * replaces point coordinate of existing data point
+     * ensures minimum size, enlarges if necessary
      *
-     * @param index the index of the data point
-     * @param x new horizontal coordinate
-     * @param y new vertical coordinate N.B. errors are implicitly assumed to be
-     *            zero
+     * @param size the actually used array lengths
      * @return itself (fluent design)
      */
-    @Override
-    public DoubleDataSet set(final int index, final double x, final double y) {
+    public DoubleDataSet resize(final int size) {
         lock().writeLockGuard(() -> {
-            final int dataCount = Math.max(index + 1, this.getDataCount());
-            xValues.size(dataCount);
-            yValues.size(dataCount);
-            xValues.elements()[index] = x;
-            yValues.elements()[index] = y;
-            getDataLabelMap().remove(index);
-            getDataStyleMap().remove(index);
-
-            // invalidate ranges
-            // -> fireInvalidated calls computeLimits for autoNotification
-            getAxisDescriptions().forEach(AxisDescription::clear);
+            xValues.size(size);
+            yValues.size(size);
         });
-        return fireInvalidated(new UpdatedDataEvent(this, "set - single"));
-    }
-
-    /**
-     * <p>
-     * Initialises the data set with specified data.
-     * </p>
-     * Note: The method copies values from specified double arrays.
-     *
-     * @param xValues X coordinates
-     * @param yValues Y coordinates
-     * @param copy true: makes an internal copy, false: use the pointer as is
-     *            (saves memory allocation
-     * @return itself
-     */
-    public DoubleDataSet set(final double[] xValues, final double[] yValues, final boolean copy) {
-        AssertUtils.notNull("X coordinates", xValues);
-        AssertUtils.notNull("Y coordinates", yValues);
-        final int dataMaxIndex = Math.min(xValues.length, yValues.length);
-        AssertUtils.equalDoubleArrays(xValues, yValues, dataMaxIndex);
-
-        lock().writeLockGuard(() -> {
-            getDataLabelMap().clear();
-            getDataStyleMap().clear();
-            if (copy) {
-                if (this.xValues == null) {
-                    this.xValues = new DoubleArrayList();
-                }
-                if (this.yValues == null) {
-                    this.yValues = new DoubleArrayList();
-                }
-                resize(0);
-                this.xValues.addElements(0, xValues);
-                this.yValues.addElements(0, yValues);
-            } else {
-                this.xValues = DoubleArrayList.wrap(xValues);
-                this.yValues = DoubleArrayList.wrap(yValues);
-            }
-
-            recomputeLimits(0);
-            recomputeLimits(1);
-        });
-        return fireInvalidated(new UpdatedDataEvent(this));
-    }
-
-    /**
-     * <p>
-     * Initialises the data set with specified data.
-     * </p>
-     * Note: The method copies values from specified double arrays.
-     *
-     * @param xValues X coordinates
-     * @param yValues Y coordinates
-     * @return itself
-     */
-    public DoubleDataSet set(final double[] xValues, final double[] yValues) {
-        return set(xValues, yValues, true);
-    }
-
-    public DoubleDataSet set(final int index, final double[] x, final double[] y) {
-        lock().writeLockGuard(() -> {
-            resize(Math.max(index + x.length, xValues.size()));
-            System.arraycopy(x, 0, xValues.elements(), index, x.length);
-            System.arraycopy(y, 0, yValues.elements(), index, y.length);
-            getDataLabelMap().remove(index, index + x.length);
-            getDataStyleMap().remove(index, index + x.length);
-
-            // invalidate ranges
-            // -> fireInvalidated calls computeLimits for autoNotification
-            getAxisDescriptions().forEach(AxisDescription::clear);
-        });
-        return fireInvalidated(new UpdatedDataEvent(this, "set - via arrays"));
+        return fireInvalidated(new UpdatedDataEvent(this, "increaseCapacity()"));
     }
 
     /**
@@ -483,5 +369,115 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
             });
         });
         return fireInvalidated(new UpdatedDataEvent(this));
+    }
+
+    /**
+     * <p>
+     * Initialises the data set with specified data.
+     * </p>
+     * Note: The method copies values from specified double arrays.
+     *
+     * @param xValues X coordinates
+     * @param yValues Y coordinates
+     * @return itself
+     */
+    public DoubleDataSet set(final double[] xValues, final double[] yValues) {
+        return set(xValues, yValues, true);
+    }
+
+    /**
+     * <p>
+     * Initialises the data set with specified data.
+     * </p>
+     * Note: The method copies values from specified double arrays.
+     *
+     * @param xValues X coordinates
+     * @param yValues Y coordinates
+     * @param copy true: makes an internal copy, false: use the pointer as is (saves memory allocation
+     * @return itself
+     */
+    public DoubleDataSet set(final double[] xValues, final double[] yValues, final boolean copy) {
+        AssertUtils.notNull("X coordinates", xValues);
+        AssertUtils.notNull("Y coordinates", yValues);
+        final int dataMaxIndex = Math.min(xValues.length, yValues.length);
+        AssertUtils.equalDoubleArrays(xValues, yValues, dataMaxIndex);
+
+        lock().writeLockGuard(() -> {
+            getDataLabelMap().clear();
+            getDataStyleMap().clear();
+            if (copy) {
+                if (this.xValues == null) {
+                    this.xValues = new DoubleArrayList();
+                }
+                if (this.yValues == null) {
+                    this.yValues = new DoubleArrayList();
+                }
+                resize(0);
+                this.xValues.addElements(0, xValues);
+                this.yValues.addElements(0, yValues);
+            } else {
+                this.xValues = DoubleArrayList.wrap(xValues);
+                this.yValues = DoubleArrayList.wrap(yValues);
+            }
+
+            recomputeLimits(0);
+            recomputeLimits(1);
+        });
+        return fireInvalidated(new UpdatedDataEvent(this));
+    }
+
+    /**
+     * replaces point coordinate of existing data point
+     *
+     * @param index the index of the data point
+     * @param x new horizontal coordinate
+     * @param y new vertical coordinate N.B. errors are implicitly assumed to be zero
+     * @return itself (fluent design)
+     */
+    @Override
+    public DoubleDataSet set(final int index, final double x, final double y) {
+        lock().writeLockGuard(() -> {
+            final int dataCount = Math.max(index + 1, this.getDataCount());
+            xValues.size(dataCount);
+            yValues.size(dataCount);
+            xValues.elements()[index] = x;
+            yValues.elements()[index] = y;
+            getDataLabelMap().remove(index);
+            getDataStyleMap().remove(index);
+
+            // invalidate ranges
+            // -> fireInvalidated calls computeLimits for autoNotification
+            getAxisDescriptions().forEach(AxisDescription::clear);
+        });
+        return fireInvalidated(new UpdatedDataEvent(this, "set - single"));
+    }
+
+    public DoubleDataSet set(final int index, final double[] x, final double[] y) {
+        lock().writeLockGuard(() -> {
+            resize(Math.max(index + x.length, xValues.size()));
+            System.arraycopy(x, 0, xValues.elements(), index, x.length);
+            System.arraycopy(y, 0, yValues.elements(), index, y.length);
+            getDataLabelMap().remove(index, index + x.length);
+            getDataStyleMap().remove(index, index + x.length);
+
+            // invalidate ranges
+            // -> fireInvalidated calls computeLimits for autoNotification
+            getAxisDescriptions().forEach(AxisDescription::clear);
+        });
+        return fireInvalidated(new UpdatedDataEvent(this, "set - via arrays"));
+    }
+
+    /**
+     * Trims the arrays list so that the capacity is equal to the size.
+     *
+     * @see java.util.ArrayList#trimToSize()
+     * @return itself (fluent design)
+     */
+    public DoubleDataSet trim() {
+        lock().writeLockGuard(() -> {
+            xValues.trim(0);
+            yValues.trim(0);
+        });
+        return fireInvalidated(new UpdatedDataEvent(this, "increaseCapacity()"));
     }
 }

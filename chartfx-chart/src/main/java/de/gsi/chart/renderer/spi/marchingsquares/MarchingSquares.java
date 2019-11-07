@@ -14,13 +14,63 @@ import de.gsi.dataset.utils.ProcessingProfiler;
 
 /**
  * <p>
- * Implementation of the Marching Squares algorithm described in:
- * {@code https://en.wikipedia.org/wiki/Marching_squares}
+ * Implementation of the Marching Squares algorithm described in: {@code https://en.wikipedia.org/wiki/Marching_squares}
  * </p>
  */
 public class MarchingSquares {
     private static final ExecutorService ES = Executors.newCachedThreadPool(CachedDaemonThreadFactory.getInstance());
     private double[] isovalues;
+
+    public GeneralPath[] buildContours(final double[][] data, final double[] levels)
+            throws InterruptedException, ExecutionException {
+        final long start = ProcessingProfiler.getTimeStamp();
+        // find min, max, and guard
+        double min = +Double.MAX_VALUE;
+        double max = -Double.MAX_VALUE;
+        final int rowCount = data.length;
+        final int colCount = data[0].length;
+        double here;
+        for (int i = 0; i < rowCount; i++) {
+            for (int j = 0; j < colCount; j++) {
+                here = data[i][j];
+                min = Math.min(min, here);
+                max = Math.max(max, here);
+            }
+        }
+
+        isovalues = new double[levels.length];
+        System.arraycopy(levels, 0, isovalues, 0, levels.length);
+
+        GeneralPath[] result = null;
+        if (min == max) {
+            final String m = "All values are equal. Cannot build contours for a constant field";
+            throw new IllegalArgumentException(m);
+        }
+
+        // IMPORTANT: pad data to ensure resulting linear strings are closed
+        final double guard = min - 1;
+        final double padded[][] = MarchingSquares.pad(data, guard);
+
+        result = doConcurrent(padded);
+
+        ProcessingProfiler.getTimeDiff(start, "built " + levels.length + " contours");
+        return result;
+    }
+
+    private GeneralPath[] doConcurrent(final double[][] data) throws InterruptedException, ExecutionException {
+        final Collection<Callable<Result>> workers = new ArrayList<>();
+        for (int i = 0; i < isovalues.length; i++) {
+            workers.add(new Task(i, data, isovalues[i]));
+        }
+
+        final List<Future<Result>> jobs = MarchingSquares.ES.invokeAll(workers);
+        final GeneralPath[] result = new GeneralPath[isovalues.length];
+        for (final Future<Result> future : jobs) {
+            final Result r = future.get();
+            result[r.ndx] = r.path;
+        }
+        return result;
+    }
 
     private static Grid contour(final double[][] data, final double isovalue) {
         final int rowCount = data.length;
@@ -127,10 +177,8 @@ public class MarchingSquares {
      * </p>
      *
      * @param data matrix to pad.
-     * @param guard the value to use for padding. It's expected to be less than
-     *            the minimum of all data cell values.
-     * @return the resulting padded matrix which will be larger by 2 in both
-     *         directions.
+     * @param guard the value to use for padding. It's expected to be less than the minimum of all data cell values.
+     * @return the resulting padded matrix which will be larger by 2 in both directions.
      */
     private static double[][] pad(final double[][] data, final double guard) {
         final int rowCount = data.length;
@@ -154,57 +202,6 @@ public class MarchingSquares {
             System.arraycopy(data[i], 0, result[i + 1], 1, colCount);
         }
 
-        return result;
-    }
-
-    public GeneralPath[] buildContours(final double[][] data, final double[] levels)
-            throws InterruptedException, ExecutionException {
-        final long start = ProcessingProfiler.getTimeStamp();
-        // find min, max, and guard
-        double min = +Double.MAX_VALUE;
-        double max = -Double.MAX_VALUE;
-        final int rowCount = data.length;
-        final int colCount = data[0].length;
-        double here;
-        for (int i = 0; i < rowCount; i++) {
-            for (int j = 0; j < colCount; j++) {
-                here = data[i][j];
-                min = Math.min(min, here);
-                max = Math.max(max, here);
-            }
-        }
-
-        isovalues = new double[levels.length];
-        System.arraycopy(levels, 0, isovalues, 0, levels.length);
-
-        GeneralPath[] result = null;
-        if (min == max) {
-            final String m = "All values are equal. Cannot build contours for a constant field";
-            throw new IllegalArgumentException(m);
-        }
-
-        // IMPORTANT: pad data to ensure resulting linear strings are closed
-        final double guard = min - 1;
-        final double padded[][] = MarchingSquares.pad(data, guard);
-
-        result = doConcurrent(padded);
-
-        ProcessingProfiler.getTimeDiff(start, "built " + levels.length + " contours");
-        return result;
-    }
-
-    private GeneralPath[] doConcurrent(final double[][] data) throws InterruptedException, ExecutionException {
-        final Collection<Callable<Result>> workers = new ArrayList<>();
-        for (int i = 0; i < isovalues.length; i++) {
-            workers.add(new Task(i, data, isovalues[i]));
-        }
-
-        final List<Future<Result>> jobs = MarchingSquares.ES.invokeAll(workers);
-        final GeneralPath[] result = new GeneralPath[isovalues.length];
-        for (final Future<Result> future : jobs) {
-            final Result r = future.get();
-            result[r.ndx] = r.path;
-        }
         return result;
     }
 

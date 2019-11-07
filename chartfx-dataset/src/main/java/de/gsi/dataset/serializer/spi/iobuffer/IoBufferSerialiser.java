@@ -21,8 +21,7 @@ import de.gsi.dataset.serializer.spi.FieldSerialiser;
 import de.gsi.dataset.serializer.spi.FieldSerialiser.FieldSerialiserFunction;
 
 /**
- * reference implementation for streaming arbitrary object to and from a
- * IoBuffer-based byte-buffer
+ * reference implementation for streaming arbitrary object to and from a IoBuffer-based byte-buffer
  *
  * @author rstein
  */
@@ -33,9 +32,8 @@ public class IoBufferSerialiser extends AbstractSerialiser {
     /**
      * Initialises new IoBuffer-backed object serialiser
      *
-     * @param buffer the backing IoBuffer (see e.g.
-     *               {@link de.gsi.dataset.serializer.spi.FastByteBuffer} or
-     *               {@link de.gsi.dataset.serializer.spi.ByteBuffer}
+     * @param buffer the backing IoBuffer (see e.g. {@link de.gsi.dataset.serializer.spi.FastByteBuffer} or
+     *        {@link de.gsi.dataset.serializer.spi.ByteBuffer}
      */
     public IoBufferSerialiser(final IoBuffer buffer) {
         super();

@@ -21,12 +21,11 @@ class CircluarBufferTest {
     private final int fillBufferLength = 35;
 
     @BeforeEach
-    public void initializeCircularBuffers( ) {
-        buffer1  = new CircularBuffer<>(bufferLength);
-        buffer2  = new CircularBuffer<>(bufferLength);
+    public void initializeCircularBuffers() {
+        buffer1 = new CircularBuffer<>(bufferLength);
+        buffer2 = new CircularBuffer<>(bufferLength);
     }
-    
-    
+
     /**
      * Test method for {@link de.gsi.dataset.utils.CircularBuffer#CircularBuffer(int)}.
      */
@@ -45,30 +44,30 @@ class CircluarBufferTest {
         assertEquals(-1.0, buffer2.get(1));
         assertEquals(-2.0, buffer2.get());
 
-        assertEquals(bufferLength-2, buffer1.remainingCapacity());
+        assertEquals(bufferLength - 2, buffer1.remainingCapacity());
         assertEquals(2, buffer1.available());
 
         for (int i = 0; i < fillBufferLength; i++) {
             buffer1.put(Double.valueOf(i));
             input[i] = (double) i;
         }
-        
+
         assertEquals(0, buffer1.remainingCapacity());
         assertEquals(bufferLength, buffer1.available());
-        
+
         buffer2.put(input, fillBufferLength);
-        
+
         assertEquals(0, buffer2.remainingCapacity());
         assertEquals(bufferLength, buffer2.available());
 
         assertEquals(25.0, buffer2.get());
         assertEquals(27.0, buffer2.get(2));
-        assertEquals(27.0, buffer2.get(2-bufferLength));
+        assertEquals(27.0, buffer2.get(2 - bufferLength));
 
         if (LOGGER.isDebugEnabled()) {
             for (int i = 0; i < 30; i++) {
-                LOGGER.atDebug().log("buffer[1,2,output].get({}) = [{},{},{}]", i, buffer1.get(i),
-                        buffer2.get(i), output[i]);
+                LOGGER.atDebug().log("buffer[1,2,output].get({}) = [{},{},{}]", i, buffer1.get(i), buffer2.get(i),
+                        output[i]);
             }
         }
     }

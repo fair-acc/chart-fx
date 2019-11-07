@@ -1,11 +1,10 @@
 package de.gsi.dataset.serializer;
 
 /**
- * Interface for multi-dimensional arrays of any type.
- * The representation of multi-dimensional array is in fact one-dimensional
- * array, because of 2 reasons: - we always want to support only rectangle
- * arrays (not arbitrary row length) - it corresponds to C++ implementation,
- * where 1D array is used as well (to support static multi-dimensional arrays)
+ * Interface for multi-dimensional arrays of any type. The representation of multi-dimensional array is in fact
+ * one-dimensional array, because of 2 reasons: - we always want to support only rectangle arrays (not arbitrary row
+ * length) - it corresponds to C++ implementation, where 1D array is used as well (to support static multi-dimensional
+ * arrays)
  *
  * @author Ilia Yastrebov, CERN
  * @author Joel Lauener, CERN

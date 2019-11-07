@@ -2,6 +2,7 @@ package de.gsi.dataset.event;
 
 /**
  * Event issued when only the name/unit changed
+ * 
  * @see de.gsi.dataset.AxisDescription
  * 
  * @author rstein

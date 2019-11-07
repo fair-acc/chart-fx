@@ -5,14 +5,6 @@ public abstract class AbstractFunction1D extends AbstractFunction implements Fun
 
     /**
      * @param name function name
-     * @param nparm number of free parameter
-     */
-    public AbstractFunction1D(final String name, final int nparm) {
-        this(name, new double[nparm], new String[nparm]);
-    }
-
-    /**
-     * @param name function name
      * @param parameter parameter array
      */
     public AbstractFunction1D(final String name, final double[] parameter) {
@@ -29,19 +21,11 @@ public abstract class AbstractFunction1D extends AbstractFunction implements Fun
     }
 
     /**
-     * sets whether error estimates is included into exports/estimates etc.
-     *
-     * @param state true: compute error estimate
+     * @param name function name
+     * @param nparm number of free parameter
      */
-    public void setErrorEstimateComputation(final boolean state) {
-        computeErrorEstimate = state;
-    }
-
-    /**
-     * @return true: error estimated is included in exports/estimates etc.
-     */
-    public boolean isErrorEstimateComputed() {
-        return computeErrorEstimate;
+    public AbstractFunction1D(final String name, final int nparm) {
+        this(name, new double[nparm], new String[nparm]);
     }
 
     @Override
@@ -52,5 +36,21 @@ public abstract class AbstractFunction1D extends AbstractFunction implements Fun
     @Override
     public int getOutputDimension() {
         return 1;
+    }
+
+    /**
+     * @return true: error estimated is included in exports/estimates etc.
+     */
+    public boolean isErrorEstimateComputed() {
+        return computeErrorEstimate;
+    }
+
+    /**
+     * sets whether error estimates is included into exports/estimates etc.
+     *
+     * @param state true: compute error estimate
+     */
+    public void setErrorEstimateComputation(final boolean state) {
+        computeErrorEstimate = state;
     }
 }

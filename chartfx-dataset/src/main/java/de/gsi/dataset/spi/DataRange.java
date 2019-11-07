@@ -41,8 +41,7 @@ public class DataRange {
     }
 
     /**
-     * Creates a new <code>DataRange</code> with the specified <code>min</code>
-     * and <code>max</code> values.
+     * Creates a new <code>DataRange</code> with the specified <code>min</code> and <code>max</code> values.
      *
      * @param min the new min value
      * @param max the new max value
@@ -67,8 +66,7 @@ public class DataRange {
      * Adds value to this range.
      *
      * @param value value to be added
-     * @return <code>true</code> if the value becomes <code>min</code> or
-     *         <code>max</code>.
+     * @return <code>true</code> if the value becomes <code>min</code> or <code>max</code>.
      */
     public boolean add(final double value) {
         if (!Double.isFinite(value)) {
@@ -122,6 +120,16 @@ public class DataRange {
     }
 
     /**
+     * Empties this DataRange. After calling this method this data range becomes undefined.
+     * 
+     * @return <code>true</code> if the values were valid before
+     * @see #isDefined()
+     */
+    public boolean clear() {
+        return set(DataRange.MAX_VALUE, DataRange.MIN_VALUE);
+    }
+
+    /**
      * Examines if this range contains the specified value.
      *
      * @param value to be tested
@@ -129,16 +137,6 @@ public class DataRange {
      */
     public boolean contains(final double value) {
         return isDefined() && ((value <= max) && (value >= min));
-    }
-
-    /**
-     * Empties this DataRange. After calling this method this data range becomes
-     * undefined.
-     * @return <code>true</code> if the values were valid before
-     * @see #isDefined()
-     */
-    public boolean clear() {
-        return set(DataRange.MAX_VALUE, DataRange.MIN_VALUE);
     }
 
     @Override
@@ -190,8 +188,7 @@ public class DataRange {
     }
 
     /**
-     * Determines if this DataRange is defined - <code>min</code> and
-     * <code>max</code> values are defined.
+     * Determines if this DataRange is defined - <code>min</code> and <code>max</code> values are defined.
      *
      * @return true: range is defined
      */

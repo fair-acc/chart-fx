@@ -26,34 +26,6 @@ public final class XYChartUtils {
 
     }
 
-    public static double getLocationX(final Node node) {
-        return node.getLayoutX() + node.getTranslateX();
-    }
-
-    public static double getLocationY(final Node node) {
-        return node.getLayoutY() + node.getTranslateY();
-    }
-
-    public static Region getChartContent(final Chart chart) {
-        return (Region) chart.lookup(".chart-content");
-    }
-
-    public static Node getPlotContent(final XYChart chart) {
-        return chart.lookup(".plot-content");
-    }
-
-    public static Pane getLegend(final XYChart chart) {
-        return (Pane) chart.lookup(".chart-legend");
-    }
-
-    public static double getHorizontalInsets(final Insets insets) {
-        return insets.getLeft() + insets.getRight();
-    }
-
-    public static double getVerticalInsets(final Insets insets) {
-        return insets.getTop() + insets.getBottom();
-    }
-
     /**
      * Returns Chart instance containing given child node.
      *
@@ -68,6 +40,10 @@ public final class XYChartUtils {
         return (Chart) node;
     }
 
+    public static Region getChartContent(final Chart chart) {
+        return (Region) chart.lookup(".chart-content");
+    }
+
     public static List<Label> getChildLabels(final List<? extends Parent> parents) {
         final List<Label> labels = new LinkedList<>();
         for (final Parent parent : parents) {
@@ -78,6 +54,30 @@ public final class XYChartUtils {
             }
         }
         return labels;
+    }
+
+    public static double getHorizontalInsets(final Insets insets) {
+        return insets.getLeft() + insets.getRight();
+    }
+
+    public static Pane getLegend(final XYChart chart) {
+        return (Pane) chart.lookup(".chart-legend");
+    }
+
+    public static double getLocationX(final Node node) {
+        return node.getLayoutX() + node.getTranslateX();
+    }
+
+    public static double getLocationY(final Node node) {
+        return node.getLayoutY() + node.getTranslateY();
+    }
+
+    public static Node getPlotContent(final XYChart chart) {
+        return chart.lookup(".plot-content");
+    }
+
+    public static double getVerticalInsets(final Insets insets) {
+        return insets.getTop() + insets.getBottom();
     }
 
 }

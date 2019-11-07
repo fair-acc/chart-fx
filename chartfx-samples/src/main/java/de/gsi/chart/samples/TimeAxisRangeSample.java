@@ -26,18 +26,6 @@ import javafx.stage.Stage;
 public class TimeAxisRangeSample extends Application {
     private static final String CHART_CSS = Chart.class.getResource("chart.css").toExternalForm();
 
-    protected class TimeAxis extends DefaultNumericAxis {
-
-        public TimeAxis(String label, final double min, final double max, final double tick) {
-            super(label, min, max, tick);
-            this.setAutoRangeRounding(true);
-            this.setTimeAxis(true);
-            this.setOverlapPolicy(AxisLabelOverlapPolicy.SHIFT_ALT);
-            VBox.setMargin(this, new Insets(5, 50, 30, 50));
-            VBox.setVgrow(this, Priority.ALWAYS);
-        }
-    }
-
     @Override
     public void start(final Stage primaryStage) {
         final double now = System.currentTimeMillis() / 1000; // [s]
@@ -106,10 +94,21 @@ public class TimeAxisRangeSample extends Application {
     }
 
     /**
-     * @param args
-     *            the command line arguments
+     * @param args the command line arguments
      */
     public static void main(final String[] args) {
         Application.launch(args);
+    }
+
+    protected class TimeAxis extends DefaultNumericAxis {
+
+        public TimeAxis(String label, final double min, final double max, final double tick) {
+            super(label, min, max, tick);
+            this.setAutoRangeRounding(true);
+            this.setTimeAxis(true);
+            this.setOverlapPolicy(AxisLabelOverlapPolicy.SHIFT_ALT);
+            VBox.setMargin(this, new Insets(5, 50, 30, 50));
+            VBox.setVgrow(this, Priority.ALWAYS);
+        }
     }
 }

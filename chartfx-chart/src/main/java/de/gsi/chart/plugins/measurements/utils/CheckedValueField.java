@@ -84,32 +84,26 @@ public class CheckedValueField extends VBox {
                 return;
             }
             final double fontSizeLarge = Math.max(CheckedValueField.DEFAULT_MIN_FONT_SIZE,
-                    Math.min(CheckedValueField.DEFAULT_FONT_SIZE, n.doubleValue() / 300.0 * CheckedValueField.DEFAULT_FONT_SIZE));
+                    Math.min(CheckedValueField.DEFAULT_FONT_SIZE,
+                            n.doubleValue() / 300.0 * CheckedValueField.DEFAULT_FONT_SIZE));
             final double fontSizeSmall = Math.max(CheckedValueField.DEFAULT_MIN_UNIT_FONT_SIZE,
-                    Math.min(CheckedValueField.DEFAULT_UNIT_FONT_SIZE, n.doubleValue() / 300.0 * CheckedValueField.DEFAULT_UNIT_FONT_SIZE));
+                    Math.min(CheckedValueField.DEFAULT_UNIT_FONT_SIZE,
+                            n.doubleValue() / 300.0 * CheckedValueField.DEFAULT_UNIT_FONT_SIZE));
 
             dataSetNameField.setFont(Font.font(CheckedValueField.DEFAULT_FONT_DATASET, fontSizeSmall));
             valueTextField.setFont(Font.font(CheckedValueField.DEFAULT_FONT, fontSizeLarge));
             unitTextField.setFont(Font.font(CheckedValueField.DEFAULT_UNIT_FONT, fontSizeSmall));
         });
-        
+
         VBox.setVgrow(this, Priority.SOMETIMES);
-    }
-
-    private class MyHBox extends HBox {
-        public MyHBox(final Node child, final Pos position) {
-            super(child);
-            setAlignment(position);
-            VBox.setVgrow(this, Priority.SOMETIMES);
-        }
-    }
-
-    public CheckedNumberTextField getMinRangeTextField() {
-        return dataRangeMin;
     }
 
     public CheckedNumberTextField getMaxRangeTextField() {
         return dataRangeMax;
+    }
+
+    public CheckedNumberTextField getMinRangeTextField() {
+        return dataRangeMin;
     }
 
     public CheckedValueField resetRanges() {
@@ -120,10 +114,8 @@ public class CheckedValueField extends VBox {
         return this;
     }
 
-    public CheckedValueField setMinRange(final double value) {
-        minRange = Double.isNaN(value) ? Double.NEGATIVE_INFINITY : value;
-        dataRangeMin.setText(Double.toString(minRange));
-        return this;
+    public void setDataSetName(final String name) {
+        dataSetNameField.setText(name);
     }
 
     public CheckedValueField setMaxRange(final double value) {
@@ -132,8 +124,17 @@ public class CheckedValueField extends VBox {
         return this;
     }
 
-    public void setDataSetName(final String name) {
-        dataSetNameField.setText(name);
+    public CheckedValueField setMinRange(final double value) {
+        minRange = Double.isNaN(value) ? Double.NEGATIVE_INFINITY : value;
+        dataRangeMin.setText(Double.toString(minRange));
+        return this;
+    }
+
+    public void setUnit(final String val) {
+        if (unitTextField.getText() == null || unitTextField.getText().equals(val)) {
+            return;
+        }
+        unitTextField.setText(val);
     }
 
     public void setValue(final double value, final String valString) {
@@ -161,10 +162,11 @@ public class CheckedValueField extends VBox {
 
     }
 
-    public void setUnit(final String val) {
-        if (unitTextField.getText() == null || unitTextField.getText().equals(val)) {
-            return;
+    private class MyHBox extends HBox {
+        public MyHBox(final Node child, final Pos position) {
+            super(child);
+            setAlignment(position);
+            VBox.setVgrow(this, Priority.SOMETIMES);
         }
-        unitTextField.setText(val);
     }
 }

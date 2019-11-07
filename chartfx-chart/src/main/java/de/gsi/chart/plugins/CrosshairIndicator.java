@@ -44,18 +44,6 @@ public class CrosshairIndicator extends AbstractDataFormattingPlugin {
     private final Path crosshairPath = new Path();
     private final Label coordinatesLabel = new Label();
 
-    /**
-     * Creates a new instance of CrosshairIndicator class.
-     */
-    public CrosshairIndicator() {
-        crosshairPath.getStyleClass().add(CrosshairIndicator.STYLE_CLASS_PATH);
-        crosshairPath.setManaged(false);
-        coordinatesLabel.getStyleClass().add(CrosshairIndicator.STYLE_CLASS_LABEL);
-        coordinatesLabel.setManaged(false);
-
-        registerInputEventHandler(MouseEvent.MOUSE_MOVED, mouseMoveHandler);
-    }
-
     private final EventHandler<MouseEvent> mouseMoveHandler = (final MouseEvent event) -> {
         final Bounds plotAreaBounds = getChart().getBoundsInLocal();
         if (!plotAreaBounds.contains(event.getX(), event.getY())) {
@@ -71,13 +59,21 @@ public class CrosshairIndicator extends AbstractDataFormattingPlugin {
         }
     };
 
-    private void updatePath(final MouseEvent event, final Bounds plotAreaBounds) {
-        final ObservableList<PathElement> path = crosshairPath.getElements();
-        path.clear();
-        path.add(new MoveTo(plotAreaBounds.getMinX() + 1, event.getY()));
-        path.add(new LineTo(plotAreaBounds.getMaxX(), event.getY()));
-        path.add(new MoveTo(event.getX(), plotAreaBounds.getMinY() + 1));
-        path.add(new LineTo(event.getX(), plotAreaBounds.getMaxY()));
+    /**
+     * Creates a new instance of CrosshairIndicator class.
+     */
+    public CrosshairIndicator() {
+        crosshairPath.getStyleClass().add(CrosshairIndicator.STYLE_CLASS_PATH);
+        crosshairPath.setManaged(false);
+        coordinatesLabel.getStyleClass().add(CrosshairIndicator.STYLE_CLASS_LABEL);
+        coordinatesLabel.setManaged(false);
+
+        registerInputEventHandler(MouseEvent.MOUSE_MOVED, mouseMoveHandler);
+    }
+
+    private String formatLabelText(final Point2D displayPointInPlotArea) {
+        final Axis yAxis = getChart().getFirstAxis(Orientation.VERTICAL);
+        return formatData(getChart(), toDataPoint(yAxis, displayPointInPlotArea));
     }
 
     private void updateLabel(final MouseEvent event, final Bounds plotAreaBounds) {
@@ -98,8 +94,12 @@ public class CrosshairIndicator extends AbstractDataFormattingPlugin {
         coordinatesLabel.resizeRelocate(xLocation, yLocation, width, height);
     }
 
-    private String formatLabelText(final Point2D displayPointInPlotArea) {
-        final Axis yAxis = getChart().getFirstAxis(Orientation.VERTICAL);
-        return formatData(getChart(), toDataPoint(yAxis, displayPointInPlotArea));
+    private void updatePath(final MouseEvent event, final Bounds plotAreaBounds) {
+        final ObservableList<PathElement> path = crosshairPath.getElements();
+        path.clear();
+        path.add(new MoveTo(plotAreaBounds.getMinX() + 1, event.getY()));
+        path.add(new LineTo(plotAreaBounds.getMaxX(), event.getY()));
+        path.add(new MoveTo(event.getX(), plotAreaBounds.getMinY() + 1));
+        path.add(new LineTo(event.getX(), plotAreaBounds.getMaxY()));
     }
 }

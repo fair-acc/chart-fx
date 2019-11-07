@@ -139,7 +139,6 @@ public class ChartOverlay extends ChartPlugin {
      * Defines possible areas to be overlaid.
      */
     public enum OverlayArea {
-        CHART_PANE,
-        PLOT_AREA
+        CHART_PANE, PLOT_AREA
     }
 }

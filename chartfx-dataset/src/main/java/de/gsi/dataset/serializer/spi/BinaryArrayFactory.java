@@ -3,8 +3,7 @@ package de.gsi.dataset.serializer.spi;
 import de.gsi.dataset.serializer.IoBuffer;
 
 /**
- * Helper class to convert serialised one-dimensional arrays into the
- * corresponding native n-dimensional arrays
+ * Helper class to convert serialised one-dimensional arrays into the corresponding native n-dimensional arrays
  *
  * @author rstein
  */
@@ -13,7 +12,6 @@ public class BinaryArrayFactory extends BinarySerialiser {
     protected BinaryArrayFactory() {
         super();
     }
-
 
     public static void put(final FastByteBuffer buffer, final String fieldName, final double[][] matrix) {
         if ((matrix == null) || (matrix.length == 0) || (matrix[0].length == 0)) {
@@ -43,7 +41,7 @@ public class BinaryArrayFactory extends BinarySerialiser {
                 matrix[i][j] = serialisedMatrix[(i * dim2) + j];
             }
         }
-        //TODO: check whether we can smartly cast 1-dim to 2-dim array using Unsafe class
+        // TODO: check whether we can smartly cast 1-dim to 2-dim array using Unsafe class
         return matrix;
     }
 }

@@ -1,16 +1,15 @@
 package de.gsi.dataset.testdata.spi;
 
 /**
- * abstract error data set for graphical testing purposes
- * this implementation generates a sine function
+ * abstract error data set for graphical testing purposes this implementation generates a sine function
  *
  * @author rstein
  */
-public class SineFunction  extends AbstractTestFunction<SineFunction> {
-	private static final long serialVersionUID = -4573144986461354456L;
+public class SineFunction extends AbstractTestFunction<SineFunction> {
+    private static final long serialVersionUID = -4573144986461354456L;
     private final boolean useSystemTimeOffset;
 
-	/**
+    /**
      * 
      * @param name data set name
      * @param count number of samples
@@ -32,15 +31,14 @@ public class SineFunction  extends AbstractTestFunction<SineFunction> {
         update();
     }
 
-
     @Override
     public double[] generateY(final int count) {
-    	final double[] retVal = new double[count];
-    	final double period = count/10.0;
-    	final double offset = useSystemTimeOffset ? System.currentTimeMillis()/1000.0 : 0.0;
+        final double[] retVal = new double[count];
+        final double period = count / 10.0;
+        final double offset = useSystemTimeOffset ? System.currentTimeMillis() / 1000.0 : 0.0;
         for (int i = 0; i < count; i++) {
-        	final double t = i/period;
-            retVal[i] = Math.sin(2.0 * Math.PI * (t + + 0.1*offset));
+            final double t = i / period;
+            retVal[i] = Math.sin(2.0 * Math.PI * (t + +0.1 * offset));
         }
         return retVal;
     }

@@ -79,7 +79,7 @@ public class DataView extends VBox {
 
     public DataView(final String name, final Node icon, final Pane pane) {
         this(name, icon, pane, true);
-        //subDataViews.add(this);
+        // subDataViews.add(this);
     }
 
     protected DataView(final String name, final Node icon, final Pane pane, final boolean isStandalone) {
@@ -115,10 +115,10 @@ public class DataView extends VBox {
                     LOGGER.atDebug().addArgument(n)
                             .log("set standalone DataView '{}'" + n + " - content " + n.getContentPane());
                 }
-                //                this.setContentPane(n);
+                // this.setContentPane(n);
                 getChildren().setAll(n);
 
-                //                getChildren().setAll(n.getContentPane());
+                // getChildren().setAll(n.getContentPane());
                 // getActiveView().getChildren().setAll(n);
                 return;
             }
@@ -156,6 +156,14 @@ public class DataView extends VBox {
 
     public ObjectProperty<DataView> activeSubViewProperty() {
         return activeSubView;
+    }
+
+    protected void addStandardViews() {
+        for (final Layout layout : Layout.values()) {
+            final DataView dataView = new DataView(layout.getName(), null, new DataViewTilingPane(layout), false); // NOPMD
+            subDataViews.add(dataView);
+        }
+        setNodeLayout(Layout.GRID); // NOPMD
     }
 
     public ObjectProperty<Pane> contentPaneProperty() {
@@ -218,6 +226,20 @@ public class DataView extends VBox {
         return visibleNodes;
     }
 
+    protected Collection<Node> getWrappedChildren(final Collection<Node> children) {
+        final Collection<Node> newNodes = new ArrayList<>();
+        for (final Node node : children) {
+            if (node instanceof DataViewWindow) {
+                newNodes.add(node);
+                continue;
+            }
+            final DataViewWindow window = new DataViewWindow(this, "", node); // NOPMD
+            window.setMinimised(true);
+            newNodes.add(window);
+        }
+        return newNodes;
+    }
+
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -243,93 +265,6 @@ public class DataView extends VBox {
 
     public final StringProperty nameProperty() {
         return name;
-    }
-
-    public void setActiveSubView(final DataView pane) {
-        activeSubViewProperty().set(pane);
-    }
-
-    public final void setContentPane(final Pane pane) {
-        contentPaneProperty().set(pane);
-    }
-
-    public final void setIcon(final Node icon) {
-        iconProperty().set(icon);
-    }
-
-    public final void setMaximizedChild(final DataViewWindow view) {
-        maximizedChildProperty().set(view);
-    }
-
-    public final void setName(final String name) {
-        nameProperty().set(name);
-    }
-
-    public void setNodeLayout(final Layout nodeLayout) {
-        final Optional<DataView> match = getSubDataViews().stream()
-                .filter(p -> p.getName().equals(nodeLayout.getName())).findFirst();
-        if (match.isPresent()) {
-            setView(match.get());
-            return;
-        }
-        LOGGER.atWarn().addArgument(nodeLayout).log("could not find view for requested  layout '{}'");
-    }
-
-    public void setView(final DataView viewerPane) {
-        if ((viewerPane == null) || viewerPane.equals(getActiveView())) {
-            return;
-        }
-
-        setActiveSubView(viewerPane);
-    }
-
-    public void setView(final String viewerPaneName) {
-        if (viewerPaneName == null) {
-            LOGGER.atWarn().log("viewerPaneName is null");
-            return;
-        }
-        final Optional<DataView> match = getSubDataViews().stream().filter(c -> c.getName().equals(viewerPaneName))
-                .findFirst();
-        if (match.isEmpty()) {
-            LOGGER.atWarn().addArgument(viewerPaneName).log("no DataView for viewerPaneName '{}'");
-            return;
-        }
-        setView(match.get());
-    }
-
-    public void sort() {
-        if (isStandalone() || getContentPane() == null || getContentPane().getChildren().isEmpty()) {
-            return;
-        }
-
-        FXCollections.sort(getContentPane().getChildren(), Comparator.comparing(n -> n.toString().toLowerCase()));
-    }
-
-    @Override
-    public String toString() {
-        return DataView.class.getSimpleName() + "(\"" + getName() + "\")";
-    }
-
-    protected void addStandardViews() {
-        for (final Layout layout : Layout.values()) {
-            final DataView dataView = new DataView(layout.getName(), null, new DataViewTilingPane(layout), false); // NOPMD
-            subDataViews.add(dataView);
-        }
-        setNodeLayout(Layout.GRID); // NOPMD
-    }
-
-    protected Collection<Node> getWrappedChildren(final Collection<Node> children) {
-        final Collection<Node> newNodes = new ArrayList<>();
-        for (final Node node : children) {
-            if (node instanceof DataViewWindow) {
-                newNodes.add(node);
-                continue;
-            }
-            final DataViewWindow window = new DataViewWindow(this, "", node); // NOPMD
-            window.setMinimised(true);
-            newNodes.add(window);
-        }
-        return newNodes;
     }
 
     protected void registerListListener() {
@@ -395,6 +330,71 @@ public class DataView extends VBox {
                 getChildren().setAll(n, minimisedElements);
             }
         });
+    }
+
+    public void setActiveSubView(final DataView pane) {
+        activeSubViewProperty().set(pane);
+    }
+
+    public final void setContentPane(final Pane pane) {
+        contentPaneProperty().set(pane);
+    }
+
+    public final void setIcon(final Node icon) {
+        iconProperty().set(icon);
+    }
+
+    public final void setMaximizedChild(final DataViewWindow view) {
+        maximizedChildProperty().set(view);
+    }
+
+    public final void setName(final String name) {
+        nameProperty().set(name);
+    }
+
+    public void setNodeLayout(final Layout nodeLayout) {
+        final Optional<DataView> match = getSubDataViews().stream()
+                .filter(p -> p.getName().equals(nodeLayout.getName())).findFirst();
+        if (match.isPresent()) {
+            setView(match.get());
+            return;
+        }
+        LOGGER.atWarn().addArgument(nodeLayout).log("could not find view for requested  layout '{}'");
+    }
+
+    public void setView(final DataView viewerPane) {
+        if ((viewerPane == null) || viewerPane.equals(getActiveView())) {
+            return;
+        }
+
+        setActiveSubView(viewerPane);
+    }
+
+    public void setView(final String viewerPaneName) {
+        if (viewerPaneName == null) {
+            LOGGER.atWarn().log("viewerPaneName is null");
+            return;
+        }
+        final Optional<DataView> match = getSubDataViews().stream().filter(c -> c.getName().equals(viewerPaneName))
+                .findFirst();
+        if (match.isEmpty()) {
+            LOGGER.atWarn().addArgument(viewerPaneName).log("no DataView for viewerPaneName '{}'");
+            return;
+        }
+        setView(match.get());
+    }
+
+    public void sort() {
+        if (isStandalone() || getContentPane() == null || getContentPane().getChildren().isEmpty()) {
+            return;
+        }
+
+        FXCollections.sort(getContentPane().getChildren(), Comparator.comparing(n -> n.toString().toLowerCase()));
+    }
+
+    @Override
+    public String toString() {
+        return DataView.class.getSimpleName() + "(\"" + getName() + "\")";
     }
 
     private static void removeChildFromList(final List<DataViewWindow> list, final Node node) {

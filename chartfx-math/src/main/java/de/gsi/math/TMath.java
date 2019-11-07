@@ -13,793 +13,6 @@ public class TMath extends TMathConstants {
     private final static int kWorkMax = 100;
 
     /**
-     * Calculate the Normalized Cross Product of two vectors
-     * 
-     * @param v1 input vector1
-     * @param v2 input vector2
-     * @param out output vector
-     * @return the computed result
-     */
-    public static float NormCross(float v1[], float v2[], float out[]) {
-        return Normalize(Cross(v1, v2, out));
-    }
-
-    /**
-     * Calculate the Normalized Cross Product of two vectors
-     * 
-     * @param v1 input vector1
-     * @param v2 input vector2
-     * @param out output vector
-     * @return the computed result
-     */
-    public static double NormCross(double v1[], double v2[], double out[]) {
-        return Normalize(Cross(v1, v2, out));
-    }
-
-    /**
-     * Calculate the Cross Product of two vectors:
-     * 
-     * @param v1 input vector1
-     * @param v2 input vector2
-     * @param out output vector
-     * @return out = [v1 x v2]
-     */
-    public static float[] Cross(float v1[], float v2[], float out[]) {
-
-        out[0] = v1[1] * v2[2] - v1[2] * v2[1];
-        out[1] = v1[2] * v2[0] - v1[0] * v2[2];
-        out[2] = v1[0] * v2[1] - v1[1] * v2[0];
-
-        return out;
-    }
-
-    /**
-     * Calculate the Cross Product of two vectors:
-     * 
-     * @param v1 input vector1
-     * @param v2 input vector2
-     * @param out output vector
-     * @return out = [v1 x v2]
-     */
-    public static double[] Cross(double v1[], double v2[], double out[]) {
-
-        out[0] = v1[1] * v2[2] - v1[2] * v2[1];
-        out[1] = v1[2] * v2[0] - v1[0] * v2[2];
-        out[2] = v1[0] * v2[1] - v1[1] * v2[0];
-        return out;
-    }
-
-    /**
-     * The DiLogarithm function Code translated by from CERNLIB DILOG function C332
-     * 
-     * @param x input
-     * @return the computed result
-     */
-    public static double DiLog(double x) {
-        double hf = 0.5;
-        double pi = Pi();
-        double pi2 = pi * pi;
-        double pi3 = pi2 / 3;
-        double pi6 = pi2 / 6;
-        double pi12 = pi2 / 12;
-        double c[] = { +0.42996693560813697, +0.40975987533077105, -0.01858843665014592, +0.00145751084062268,
-                -0.00014304184442340, +0.00001588415541880, -0.00000190784959387, +0.00000024195180854,
-                -0.00000003193341274, +0.00000000434545063, -0.00000000060578480, +0.00000000008612098,
-                -0.00000000001244332, +0.00000000000182256, -0.00000000000027007, +0.00000000000004042,
-                -0.00000000000000610, +0.00000000000000093, -0.00000000000000014, +0.00000000000000002 };
-
-        double t, h, y, s, a, alfa, b1, b2, b0 = 0.0;
-
-        if (x == 1) {
-            h = pi6;
-        } else if (x == -1) {
-            h = -pi12;
-        } else {
-            t = -x;
-            if (t <= -2) {
-                y = -1 / (1 + t);
-                s = 1;
-                b1 = Log(-t);
-                b2 = Log(1 + 1 / t);
-                a = -pi3 + hf * (b1 * b1 - b2 * b2);
-            } else if (t < -1) {
-                y = -1 - t;
-                s = -1;
-                a = Log(-t);
-                a = -pi6 + a * (a + Log(1 + 1 / t));
-            } else if (t <= -0.5) {
-                y = -(1 + t) / t;
-                s = 1;
-                a = Log(-t);
-                a = -pi6 + a * (-hf * a + Log(1 + t));
-            } else if (t < 0) {
-                y = -t / (1 + t);
-                s = -1;
-                b1 = Log(1 + t);
-                a = hf * b1 * b1;
-            } else if (t <= 1) {
-                y = t;
-                s = 1;
-                a = 0;
-            } else {
-                y = 1 / t;
-                s = -1;
-                b1 = Log(t);
-                a = pi6 + hf * b1 * b1;
-            }
-
-            h = y + y - 1;
-            alfa = h + h;
-            b1 = 0;
-            b2 = 0;
-
-            for (int i = 19; i >= 0; i--) {
-                b0 = c[i] + alfa * b1 - b2;
-                b2 = b1;
-                b1 = b0;
-            }
-
-            h = -(s * (b0 - h * b2) + a);
-        }
-
-        return h;
-    }
-
-    /**
-     * Computation of the error function erf(x). Erf(x) = (2/sqrt(pi)) Integral(exp(-t^2))dt between 0 and x --- NvE
-     * 14-nov-1998 UU-SAP Utrecht
-     * 
-     * @param x input
-     * @return the computed result
-     */
-    public static double Erf(double x) {
-        return (1 - Erfc(x));
-    }
-
-    /**
-     * Compute the complementary error function erfc(x). Erfc(x) = (2/sqrt(pi)) Integral(exp(-t^2))dt between x and
-     * infinity Nve 14-nov-1998 UU-SAP Utrecht
-     * 
-     * @param x input parameter
-     * @return the computed result
-     */
-    public static double Erfc(double x) {
-        // The parameters of the Chebyshev fit
-        double a1 = -1.26551223, a2 = 1.00002368, a3 = 0.37409196, a4 = 0.09678418, a5 = -0.18628806, a6 = 0.27886807,
-                a7 = -1.13520398, a8 = 1.48851587, a9 = -0.82215223, a10 = 0.17087277;
-
-        double v = 1; // The return value
-        double z = Math.abs(x);
-
-        if (z <= 0)
-            return v; // erfc(0)=1
-
-        double t = 1 / (1 + 0.5 * z);
-
-        v = t * Exp((-z * z) + a1
-                + t * (a2 + t * (a3 + t * (a4 + t * (a5 + t * (a6 + t * (a7 + t * (a8 + t * (a9 + t * a10)))))))));
-
-        if (x < 0)
-            v = 2 - v; // erfc(-x)=2-erfc(x)
-
-        return v;
-    }
-
-    /**
-     * returns the inverse error function
-     * 
-     * @param x must be &lt;-1&lt;x&lt;1
-     * @return the computed result
-     */
-    public static double ErfInverse(double x) {
-        int kMaxit = 50;
-        double kEps = 1e-14;
-        double kConst = 0.8862269254527579; // sqrt(pi)/2.0
-
-        if (Abs(x) <= kEps)
-            return kConst * x;
-
-        // Newton iterations
-        double erfi, derfi, y0, y1, dy0, dy1;
-        if (Abs(x) < 1.0) {
-            erfi = kConst * Abs(x);
-            y0 = Erf(0.9 * erfi);
-            derfi = 0.1 * erfi;
-            for (int iter = 0; iter < kMaxit; iter++) {
-                y1 = 1. - Erfc(erfi);
-                dy1 = Abs(x) - y1;
-                if (Abs(dy1) < kEps) {
-                    if (x < 0) {
-                        return -erfi;
-                    } else {
-                        return erfi;
-                    }
-                }
-                dy0 = y1 - y0;
-                derfi *= dy1 / dy0;
-                y0 = y1;
-                erfi += derfi;
-
-                if (Abs(derfi / erfi) < kEps) {
-                    if (x < 0) {
-                        return -erfi;
-                    } else {
-                        return erfi;
-                    }
-                }
-            }
-        }
-
-        return Double.NaN; // did not converge
-    }
-
-    /**
-     * Compute factorial(n).
-     * 
-     * @param n input parameter
-     * @return the computed result
-     */
-    public static double Factorial(int n) {
-        if (n <= 0)
-            return 1.;
-        double x = 1;
-        int b = 0;
-        do {
-            b++;
-            x *= b;
-        } while (b != n);
-        return x;
-    }
-
-    /**
-     * Computation of the normal frequency function freq(x). Freq(x) = (1/sqrt(2pi)) Integral(exp(-t^2/2))dt between
-     * -infinity and x. Translated from CERNLIB C300 by Rene Brun.
-     * 
-     * @param x input parameter
-     * @return the computed result
-     */
-    public static double Freq(double x) {
-        double c1 = 0.56418958354775629;
-        double w2 = 1.41421356237309505;
-
-        double p10 = 2.4266795523053175e+2, q10 = 2.1505887586986120e+2, p11 = 2.1979261618294152e+1,
-                q11 = 9.1164905404514901e+1, p12 = 6.9963834886191355e+0, q12 = 1.5082797630407787e+1,
-                p13 = -3.5609843701815385e-2, q13 = 1;
-
-        double p20 = 3.00459261020161601e+2, q20 = 3.00459260956983293e+2, p21 = 4.51918953711872942e+2,
-                q21 = 7.90950925327898027e+2, p22 = 3.39320816734343687e+2, q22 = 9.31354094850609621e+2,
-                p23 = 1.52989285046940404e+2, q23 = 6.38980264465631167e+2, p24 = 4.31622272220567353e+1,
-                q24 = 2.77585444743987643e+2, p25 = 7.21175825088309366e+0, q25 = 7.70001529352294730e+1,
-                p26 = 5.64195517478973971e-1, q26 = 1.27827273196294235e+1, p27 = -1.36864857382716707e-7, q27 = 1;
-
-        double p30 = -2.99610707703542174e-3, q30 = 1.06209230528467918e-2, p31 = -4.94730910623250734e-2,
-                q31 = 1.91308926107829841e-1, p32 = -2.26956593539686930e-1, q32 = 1.05167510706793207e+0,
-                p33 = -2.78661308609647788e-1, q33 = 1.98733201817135256e+0, p34 = -2.23192459734184686e-2, q34 = 1;
-
-        double v = Abs(x) / w2;
-        double vv = v * v;
-        double ap, aq, h, hc, y;
-
-        if (v < 0.5) {
-            y = vv;
-            ap = p13;
-            aq = q13;
-            ap = p12 + y * ap;
-            ap = p11 + y * ap;
-            ap = p10 + y * ap;
-            aq = q12 + y * aq;
-            aq = q11 + y * aq;
-            aq = q10 + y * aq;
-            h = v * ap / aq;
-            hc = 1 - h;
-        } else if (v < 4) {
-            ap = p27;
-            aq = q27;
-            ap = p26 + v * ap;
-            ap = p25 + v * ap;
-            ap = p24 + v * ap;
-            ap = p23 + v * ap;
-            ap = p22 + v * ap;
-            ap = p21 + v * ap;
-            ap = p20 + v * ap;
-            aq = q26 + v * aq;
-            aq = q25 + v * aq;
-            aq = q24 + v * aq;
-            aq = q23 + v * aq;
-            aq = q22 + v * aq;
-            aq = q21 + v * aq;
-            aq = q20 + v * aq;
-            hc = Exp(-vv) * ap / aq;
-            h = 1 - hc;
-        } else {
-            y = 1 / vv;
-            ap = p34;
-            aq = q34;
-            ap = p33 + y * ap;
-            ap = p32 + y * ap;
-            ap = p31 + y * ap;
-            ap = p30 + y * ap;
-            aq = q33 + y * aq;
-            aq = q32 + y * aq;
-            aq = q31 + y * aq;
-            aq = q30 + y * aq;
-            hc = Exp(-vv) * (c1 + y * ap / aq) / v;
-            h = 1 - hc;
-        }
-
-        if (x > 0) {
-            return 0.5 + 0.5 * h;
-        } else {
-            return 0.5 * hc;
-        }
-    }
-
-    /**
-     * Computation of gamma(z) for all z&gt;0. C.Lanczos, SIAM Journal of Numerical Analysis B1 (1964), 86. --- Nve
-     * 14-nov-1998 UU-SAP Utrecht
-     * @param z input parameter
-     * @return gamma(z)
-     */
-    public static double Gamma(double z) {
-        if (z <= 0)
-            return 0;
-
-        double v = LnGamma(z);
-        return Exp(v);
-    }
-
-    /**
-     * Computation of the normalized lower incomplete gamma function P(a,x) as defined in the Handbook of Mathematical
-     * Functions by Abramowitz and Stegun, formula 6.5.1 on page 260 . Its normalization is such that Gamma(a,+infinity)
-     * = 1 . Begin_Latex P(a, x) = #frac{1}{#Gamma(a) } #int_{0}^{x} t^{a-1} e^{-t} dt End_Latex --- Nve 14-nov-1998
-     * UU-SAP Utrecht
-     * 
-     * @param a input parameter
-     * @param x input parameter
-     * @return the computed result
-     */
-    public static double Gamma(double a, double x) {
-
-        if (a <= 0 || x <= 0)
-            return 0;
-
-        if (x < (a + 1))
-            return GamSer(a, x);
-        else
-            return GamCf(a, x);
-    }
-
-    /**
-     * Computation of the incomplete gamma function P(a,x) via its continued fraction representation. --- Nve
-     * 14-nov-1998 UU-SAP Utrecht
-     * 
-     * @param a input parameter
-     * @param x input parameter
-     * @return the computed result
-     */
-    public static double GamCf(double a, double x) {
-
-        int itmax = 100; // Maximum number of iterations
-        double eps = 3.e-14; // Relative accuracy
-        double fpmin = 1.e-30; // Smallest double value allowed here
-
-        if (a <= 0 || x <= 0)
-            return 0;
-
-        double gln = LnGamma(a);
-        double b = x + 1 - a;
-        double c = 1 / fpmin;
-        double d = 1 / b;
-        double h = d;
-        double an, del;
-        for (int i = 1; i <= itmax; i++) {
-            an = (-i) * ((i) - a);
-            b += 2;
-            d = an * d + b;
-            if (Abs(d) < fpmin)
-                d = fpmin;
-            c = b + an / c;
-            if (Abs(c) < fpmin)
-                c = fpmin;
-            d = 1 / d;
-            del = d * c;
-            h = h * del;
-            if (Abs(del - 1) < eps)
-                break;
-            // if (i==itmax) cout << "*GamCf(a,x)* a too large or itmax too
-            // small" << endl;
-        }
-        double v = Exp(-x + a * Log(x) - gln) * h;
-        return (1 - v);
-    }
-
-    /**
-     * Computation of the incomplete gamma function P(a,x) via its series representation. --- Nve 14-nov-1998 UU-SAP
-     * Utrecht
-     * 
-     * @param a input parameter
-     * @param x input parameter
-     * @return the computed result
-     */
-    public static double GamSer(double a, double x) {
-        int itmax = 100; // Maximum number of iterations
-        double eps = 3.e-14; // Relative accuracy
-
-        if (a <= 0 || x <= 0)
-            return 0;
-
-        double gln = LnGamma(a);
-        double ap = a;
-        double sum = 1 / a;
-        double del = sum;
-        for (int n = 1; n <= itmax; n++) {
-            ap += 1;
-            del = del * x / ap;
-            sum += del;
-            if (Abs(del) < Abs(sum * eps))
-                break;
-            // if (n==itmax) cout << "*GamSer(a,x)* a too large or itmax too
-            // small" << endl;
-        }
-        double v = sum * Exp(-x + a * Log(x) - gln);
-        return v;
-    }
-
-    /**
-     * Calculate a Breit Wigner function with mean and gamma.
-     * 
-     * @param x input parameter
-     * @param mean centre of distribution
-     * @param gamma width of distribution
-     * @return the computed result
-     */
-    public static double BreitWigner(double x, double mean, double gamma) {
-        double bw = gamma / ((x - mean) * (x - mean) + gamma * gamma / 4);
-        return bw / (2 * Pi());
-    }
-
-    /**
-     * Calculate a Gaussian function with mean and sigma. If norm=true (default is false) the result is divided by
-     * sqrt(2*Pi)*sigma.
-     * 
-     * @param x input parameter
-     * @param mean centre of distribution
-     * @param sigma width of distribution
-     * @param norm normalisation factor
-     * @return the computed result
-     */
-    public static double Gauss(double x, double mean, double sigma, boolean norm) {
-        if (sigma == 0)
-            return 1.e30;
-        double arg = (x - mean) / sigma;
-        double res = Exp(-0.5 * arg * arg);
-        if (!norm)
-            return res;
-        return res / (2.50662827463100024 * sigma); // sqrt(2*Pi)=2.50662827463100024
-    }
-
-    /**
-     * Calculate the sinc = sin(x)/x function if norm ==true then sinc = sinc(pi*x)/(pi*x) is used
-     * 
-     * @param x input parameter
-     * @param norm normalisation factor
-     * @return the computed result
-     */
-    public static double Sinc(double x, boolean norm) {
-        double val = norm ? TMath.Pi() : 1.0;
-        if (x != 0) {
-            return TMath.Sin(val * x) / (val * x);
-        } else {
-            return 1.0;
-        }
-    }
-
-    /**
-     * The LANDAU function with mpv(most probable value) and sigma. This function has been adapted from the CERNLIB
-     * routine G110 denlan. If norm=true (default is false) the result is divided by sigma
-     * 
-     * @param x input variable
-     * @param mpv most probable value
-     * @param sigma width of distribution
-     * @param norm normalisation of distribution
-     * @return the computed result
-     */
-    public static double Landau(double x, double mpv, double sigma, boolean norm) {
-        double p1[] = { 0.4259894875, -0.1249762550, 0.03984243700, -0.006298287635, 0.001511162253 };
-        double q1[] = { 1.0, -0.3388260629, 0.09594393323, -0.01608042283, 0.003778942063 };
-
-        double p2[] = { 0.1788541609, 0.1173957403, 0.01488850518, -0.001394989411, 0.0001283617211 };
-        double q2[] = { 1.0, 0.7428795082, 0.3153932961, 0.06694219548, 0.008790609714 };
-
-        double p3[] = { 0.1788544503, 0.09359161662, 0.006325387654, 0.00006611667319, -0.000002031049101 };
-        double q3[] = { 1.0, 0.6097809921, 0.2560616665, 0.04746722384, 0.006957301675 };
-
-        double p4[] = { 0.9874054407, 118.6723273, 849.2794360, -743.7792444, 427.0262186 };
-        double q4[] = { 1.0, 106.8615961, 337.6496214, 2016.712389, 1597.063511 };
-
-        double p5[] = { 1.003675074, 167.5702434, 4789.711289, 21217.86767, -22324.94910 };
-        double q5[] = { 1.0, 156.9424537, 3745.310488, 9834.698876, 66924.28357 };
-
-        double p6[] = { 1.000827619, 664.9143136, 62972.92665, 475554.6998, -5743609.109 };
-        double q6[] = { 1.0, 651.4101098, 56974.73333, 165917.4725, -2815759.939 };
-
-        double a1[] = { 0.04166666667, -0.01996527778, 0.02709538966 };
-        double a2[] = { -1.845568670, -4.284640743 };
-
-        if (sigma <= 0) {
-            return 0;
-        }
-
-        double v = (x - mpv) / sigma;
-        double u, ue, us, den;
-        if (v < -5.5) {
-            u = Exp(v + 1.0);
-            if (u < 1e-10)
-                return 0.0;
-            ue = Exp(-1 / u);
-            us = Sqrt(u);
-            den = 0.3989422803 * (ue / us) * (1 + (a1[0] + (a1[1] + a1[2] * u) * u) * u);
-        } else if (v < -1) {
-            u = Exp(-v - 1);
-            den = Exp(-u) * Sqrt(u) * (p1[0] + (p1[1] + (p1[2] + (p1[3] + p1[4] * v) * v) * v) * v)
-                    / (q1[0] + (q1[1] + (q1[2] + (q1[3] + q1[4] * v) * v) * v) * v);
-        } else if (v < 1) {
-            den = (p2[0] + (p2[1] + (p2[2] + (p2[3] + p2[4] * v) * v) * v) * v)
-                    / (q2[0] + (q2[1] + (q2[2] + (q2[3] + q2[4] * v) * v) * v) * v);
-        } else if (v < 5) {
-            den = (p3[0] + (p3[1] + (p3[2] + (p3[3] + p3[4] * v) * v) * v) * v)
-                    / (q3[0] + (q3[1] + (q3[2] + (q3[3] + q3[4] * v) * v) * v) * v);
-        } else if (v < 12) {
-            u = 1 / v;
-            den = u * u * (p4[0] + (p4[1] + (p4[2] + (p4[3] + p4[4] * u) * u) * u) * u)
-                    / (q4[0] + (q4[1] + (q4[2] + (q4[3] + q4[4] * u) * u) * u) * u);
-        } else if (v < 50) {
-            u = 1 / v;
-            den = u * u * (p5[0] + (p5[1] + (p5[2] + (p5[3] + p5[4] * u) * u) * u) * u)
-                    / (q5[0] + (q5[1] + (q5[2] + (q5[3] + q5[4] * u) * u) * u) * u);
-        } else if (v < 300) {
-            u = 1 / v;
-            den = u * u * (p6[0] + (p6[1] + (p6[2] + (p6[3] + p6[4] * u) * u) * u) * u)
-                    / (q6[0] + (q6[1] + (q6[2] + (q6[3] + q6[4] * u) * u) * u) * u);
-        } else {
-            u = 1 / (v - v * Log(v) / (v + 1));
-            den = u * u * (1 + (a2[0] + a2[1] * u) * u);
-        }
-
-        if (!norm) {
-            return den;
-        }
-
-        return den / sigma;
-    }
-
-    // TODO: continue here
-
-    /**
-     * Computation of ln[gamma(z)] for all z&gt;0. C.Lanczos, SIAM Journal of Numerical Analysis B1 (1964), 86 The accuracy
-     * of the result is better than 2e-10. --- Nve 14-nov-1998 UU-SAP Utrecht
-     * @param z input paramater
-     * @return  ln[gamma(z)]
-     */
-    public static double LnGamma(double z) {
-        if (z <= 0)
-            return 0.0;
-
-        // Coefficients for the series expansion
-        double c[] = { 2.5066282746310005, 76.18009172947146, -86.50532032941677, 24.01409824083091, -1.231739572450155,
-                0.1208650973866179e-2, -0.5395239384953e-5 };
-
-        double x = z;
-        double y = x;
-        double tmp = x + 5.5;
-        tmp = (x + 0.5) * Log(tmp) - tmp;
-        double ser = 1.000000000190015;
-        for (int i = 1; i < 7; i++) {
-            y += 1;
-            ser += c[i] / y;
-        }
-        double v = tmp + Log(c[0] * ser / x);
-        return v;
-    }
-
-    /**
-     * Normalise a vector 'v' in place.
-     * 
-     * @param v input parameter vector
-     * @return the computed result the norm of the original vector.
-     */
-    public static float Normalize(float v[]) {
-        float d = (float) Math.sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
-        if (d != 0) {
-            v[0] /= d;
-            v[1] /= d;
-            v[2] /= d;
-        }
-        return d;
-    }
-
-    /**
-     * Normalise a vector v in place. Returns the norm of the original vector. This implementation (thanks Kevin Lynch
-     * &lt;krlynch@bu.edu&gt;) is protected against possible overflows. Find the largest element, and divide that one out.
-     * 
-     * @param v input parameter vector
-     * @return the computed result
-     */
-    public static double Normalize(double v[]) {
-        double av0 = Abs(v[0]), av1 = Abs(v[1]), av2 = Abs(v[2]);
-
-        double amax, foo, bar;
-        // 0 >= {1, 2}
-        if (av0 >= av1 && av0 >= av2) {
-            amax = av0;
-            foo = av1;
-            bar = av2;
-        }
-
-        // 1 >= {0, 2}
-        else if (av1 >= av0 && av1 >= av2) {
-            amax = av1;
-            foo = av0;
-            bar = av2;
-        }
-
-        // 2 >= {0, 1}
-        else {
-            amax = av2;
-            foo = av0;
-            bar = av1;
-        }
-
-        if (amax == 0.0)
-            return 0.;
-
-        double foofrac = foo / amax, barfrac = bar / amax;
-        double d = amax * Sqrt(1. + foofrac * foofrac + barfrac * barfrac);
-
-        v[0] /= d;
-        v[1] /= d;
-        v[2] /= d;
-        return d;
-    }
-
-    /**
-     * Calculate a normal vector of a plane.
-     * 
-     * @param p1 first 3D points belonged the plane to define it.
-     * @param p2 second 3D points belonged the plane to define it.
-     * @param p3 third 3D points belonged the plane to define it.
-     * @param normal Pointer to 3D normal vector (normalised)
-     * @return the computed result
-     */
-    public static float[] Normal2Plane(float p1[], float p2[], float p3[], float normal[]) {
-        float[] v1 = new float[3];
-        float[] v2 = new float[3];
-
-        v1[0] = p2[0] - p1[0];
-        v1[1] = p2[1] - p1[1];
-        v1[2] = p2[2] - p1[2];
-
-        v2[0] = p3[0] - p1[0];
-        v2[1] = p3[1] - p1[1];
-        v2[2] = p3[2] - p1[2];
-
-        NormCross(v1, v2, normal);
-        return normal;
-    }
-
-    /**
-     * Calculate a normal vector of a plane.
-     * 
-     * @param p1 first 3D points belonged the plane to define it.
-     * @param p2 second 3D points belonged the plane to define it.
-     * @param p3 third 3D points belonged the plane to define it.
-     * @param normal Pointer to 3D normal vector (normalised)
-     * @return the computed result
-     */
-    public static double[] Normal2Plane(double p1[], double p2[], double p3[], double normal[]) {
-        double[] v1 = new double[3], v2 = new double[3];
-
-        v1[0] = p2[0] - p1[0];
-        v1[1] = p2[1] - p1[1];
-        v1[2] = p2[2] - p1[2];
-
-        v2[0] = p3[0] - p1[0];
-        v2[1] = p3[1] - p1[1];
-        v2[2] = p3[2] - p1[2];
-
-        NormCross(v1, v2, normal);
-        return normal;
-    }
-
-    /**
-     * compute the Poisson distribution function for (x,par) The Poisson PDF is implemented by means of Euler's
-     * Gamma-function (for the factorial), so for all integer arguments it is correct. BUT for non-integer values it IS
-     * NOT equal to the Poisson distribution.
-     * 
-     * see PoissonI to get a non-smooth function. Note that for large values of par, it is better to call
-     *      Gaus(x,par,sqrt(par),true) Begin_Html
-     * @param x input value
-     * @param par input parameter
-     * @return the computed result
-     */
-    public static double Poisson(double x, double par) {
-        if (x < 0) {
-            return 0;
-        } else if (x == 0.0) {
-            return 1. / Exp(par);
-        } else {
-            double lnpoisson = x * Log(par) - par - LnGamma(x + 1.);
-            return Exp(lnpoisson);
-        }
-        // An alternative strategy is to transition to a Gaussian approximation
-        // for
-        // large values of par ...
-        // else {
-        // return Gaus(x,par,Sqrt(par),true);
-        // }
-    }
-
-    /**
-     * compute the Poisson distribution function for (x,par) This is a non-smooth function
-     * 
-     * @param x input value
-     * @param par input parameter
-     * @return the computed result
-     */
-    public static double PoissonI(double x, double par) {
-        double kMaxInt = 2e6;
-        if (x < 0)
-            return 0;
-        if (x < 1)
-            return Exp(-par);
-        double gam;
-        int ix = (int) (x);
-        if (x < kMaxInt)
-            gam = Power(par, ix) / Gamma(ix + 1);
-        else
-            gam = Power(par, x) / Gamma(x + 1);
-        return gam / Exp(par);
-    }
-
-    /**
-     * Computation of the probability for a certain Chi-squared (chi2) and number of degrees of freedom (ndf).
-     * Calculations are based on the incomplete gamma function P(a,x), where a=ndf/2 and x=chi2/2. P(a,x) represents the
-     * probability that the observed Chi-squared for a correct model should be less than the value chi2. The returned
-     * probability corresponds to 1-P(a,x), which denotes the probability that an observed Chi-squared exceeds the value
-     * chi2 by chance, even for a correct model. --- NvE 14-nov-1998 UU-SAP Utrecht
-     * 
-     * @param chi2 input
-     * @param ndf number of degrees of freedom
-     * @return the computed result
-     */
-    public static double Prob(double chi2, int ndf) {
-        if (ndf <= 0)
-            return 0; // Set CL to zero in case ndf<=0
-
-        if (chi2 <= 0) {
-            if (chi2 < 0)
-                return 0;
-            else
-                return 1;
-        }
-
-        if (ndf == 1) {
-            double v = 1. - Erf(Sqrt(chi2) / Sqrt(2.));
-            return v;
-        }
-
-        // Gaussian approximation for large ndf
-        double q = Sqrt(2 * chi2) - Sqrt(2 * ndf - 1);
-        if (ndf > 30 && q > 5) {
-            double v = 0.5 * (1 - Erf(q / Sqrt(2.)));
-            return v;
-        }
-
-        // Evaluate the incomplete gamma function
-        return (1 - Gamma(0.5 * ndf, 0.5 * chi2));
-    }
-
-    /**
      * Calculates the Kolmogorov distribution function, which gives the probability that Kolmogorov's test statistic
      * will exceed the value z assuming the null hypothesis. This gives a very powerful test for comparing two
      * one-dimensional distributions. see, for example, Eadie et al, "statistocal Methods in Experimental Physics', pp
@@ -961,13 +174,330 @@ public class TMath extends TMathConstants {
             prob = KolmogorovProb(z);
         }
         // debug printout
-        if (opt.contains("D")) {            
+        if (opt.contains("D")) {
             System.out.println(String.format(" Kolmogorov Probability = %g, Max Dist = %g", prob, rdmax));
         }
         if (opt.contains("M"))
             return rdmax;
         else
             return prob;
+    }
+
+    /**
+     * Returns k_th order statistic of the array a of size n (k_th smallest element out of n elements). C-convention is
+     * used for array indexing, so if you want the second smallest element, call KOrdStat(n, a, 1). If work is supplied,
+     * it is used to store the sorting index and assumed to be &gt;= n. If work=0, local storage is used, either on the
+     * stack if n < kWorkMax or on the heap for n &gt;= kWorkMax. Taken from "Numerical Recipes in C++" without the
+     * index array implemented by Anna Khreshuk. See also the declarations at the top of this file
+     * 
+     * @param n see above
+     * @param a see above
+     * @param k see above
+     * @param work see above
+     * @return the computed result
+     */
+    double KOrdStat(int n, double a[], int k, int work[]) {
+
+        boolean isAllocated = false;
+        int i, ir, j, l, mid;
+        int arr;
+        int ind[];
+        int[] workLocal = new int[kWorkMax];
+        int temp;
+
+        if (work != null) {
+            ind = work;
+        } else {
+            ind = workLocal;
+            if (n > kWorkMax) {
+                isAllocated = true;
+                ind = new int[n];
+            }
+        }
+
+        for (int ii = 0; ii < n; ii++) {
+            ind[ii] = ii;
+        }
+        int rk = k;
+        l = 0;
+        ir = n - 1;
+        for (;;) {
+            if (ir <= l + 1) { // active partition contains 1 or 2 elements
+                if (ir == l + 1 && a[ind[ir]] < a[ind[l]]) {
+                    temp = ind[l];
+                    ind[l] = ind[ir];
+                    ind[ir] = temp;
+                }
+                double tmp = a[ind[rk]];
+                if (isAllocated)
+                    ind = null;
+                return tmp;
+            } else {
+                mid = (l + ir) >> 1; // choose median of left, center and right
+                {
+                    temp = ind[mid];
+                    ind[mid] = ind[l + 1];
+                    ind[l + 1] = temp;
+                } // elements as partitioning element arr.
+                if (a[ind[l]] > a[ind[ir]]) // also rearrange so that
+                                            // a[l]<=a[l+1]
+                {
+                    temp = ind[l];
+                    ind[l] = ind[ir];
+                    ind[ir] = temp;
+                }
+
+                if (a[ind[l + 1]] > a[ind[ir]]) {
+                    temp = ind[l + 1];
+                    ind[l + 1] = ind[ir];
+                    ind[ir] = temp;
+                }
+
+                if (a[ind[l]] > a[ind[l + 1]]) {
+                    temp = ind[l];
+                    ind[l] = ind[l + 1];
+                    ind[l + 1] = temp;
+                }
+
+                i = l + 1; // initialize pointers for partitioning
+                j = ir;
+                arr = ind[l + 1];
+                for (;;) {
+                    do
+                        i++;
+                    while (a[ind[i]] < a[arr]);
+                    do
+                        j--;
+                    while (a[ind[j]] > a[arr]);
+                    if (j < i)
+                        break; // pointers crossed, partitioning complete
+                    {
+                        temp = ind[i];
+                        ind[i] = ind[j];
+                        ind[j] = temp;
+                    }
+                }
+                ind[l + 1] = ind[j];
+                ind[j] = arr;
+                if (j >= rk)
+                    ir = j - 1; // keep active the partition that
+                if (j <= rk)
+                    l = i; // contains the k_th element
+            }
+        }
+    }
+
+    /**
+     * Computes sample quantiles, corresponding to the given probabilities Parameters:
+     * 
+     * @param x -the data sample
+     * @param n - its size
+     * @param quantiles - computed quantiles are returned in there
+     * @param prob - probabilities where to compute quantiles
+     * @param nprob - size of prob array
+     * @param isSorted - is the input array x sorted? NOTE, that when the input is not sorted, an array of integers of
+     *        size n needs to be allocated. It can be passed by the user in parameter index, or, if not passed, it will
+     *        be allocated inside the function type - method to compute (from 1 to 9). Following types are provided:
+     *        Discontinuous: type=1 - inverse of the empirical distribution function type=2 - like type 1, but with
+     *        averaging at discontinuities type=3 - SAS definition: nearest even order statistic Piecwise linear
+     *        continuous: In this case, sample quantiles can be obtained by linear interpolation between the k-th order
+     *        statistic and p(k). type=4 - linear interpolation of empirical cdf, p(k)=k/n; type=5 - a very popular
+     *        definition, p(k) = (k-0.5)/n; type=6 - used by Minitab and SPSS, p(k) = k/(n+1); type=7 - used by S-Plus
+     *        and R, p(k) = (k-1)/(n-1); type=8 - resulting sample quantiles are approximately median unbiased
+     *        regardless of the distribution of x. p(k) = (k-1/3)/(n+1/3); type=9 - resulting sample quantiles are
+     *        approximately unbiased, when the sample comes from Normal distribution. p(k)=(k-3/8)/(n+1/4); default type
+     *        = 7 References: 1) Hyndman, R.J and Fan, Y, (1996) "Sample quantiles in statistical packages" American
+     *        Statistician, 50, 361-365 2) R Project documentation for the function quantile of package {stats}
+     * @param index see above
+     * @param type see above
+     */
+    void Quantiles(int n, int nprob, double x[], double quantiles[], double prob[], boolean isSorted, int index[],
+            int type) {
+        if (type < 1 || type > 9) {
+            System.err.println("illegal value of type");
+            return;
+        }
+        double g, npm, np, xj, xjj;
+        int j, intnpm;
+        int[] ind = null;
+        boolean isAllocated = false;
+        if (!isSorted) {
+            if (index == null)
+                ind = index;
+            else {
+                ind = new int[n];
+                isAllocated = true;
+            }
+        }
+        npm = 0;
+        // Discontinuous functions
+        if (type < 4) {
+            for (int i = 0; i < nprob; i++) {
+                npm = n * prob[i];
+                if (npm < 1) {
+                    if (isSorted) {
+                        quantiles[i] = x[0];
+                    } else {
+                        quantiles[i] = KOrdStat(n, x, 0, ind);
+                    }
+                } else {
+                    j = Max(FloorNint(npm) - 1, 0);
+                    if (npm - j - 1 > 1e-14) {
+                        if (isSorted) {
+                            quantiles[i] = x[j + 1];
+                        } else {
+                            quantiles[i] = KOrdStat(n, x, j + 1, ind);
+                        }
+                    } else {
+                        if (isSorted)
+                            xj = x[j];
+                        else
+                            xj = KOrdStat(n, x, j, ind);
+                        if (type == 1)
+                            quantiles[i] = xj;
+                        if (type == 2) {
+                            if (isSorted)
+                                xjj = x[j + 1];
+                            else
+                                xjj = KOrdStat(n, x, j + 1, ind);
+                            quantiles[i] = 0.5 * (xj + xjj);
+                        }
+
+                        if (type == 3) {
+                            if (!Even(j - 1)) {
+                                if (isSorted)
+                                    xjj = x[j + 1];
+                                else
+                                    xjj = KOrdStat(n, x, j + 1, ind);
+                                quantiles[i] = xjj;
+                            } else
+                                quantiles[i] = xj;
+                        }
+                    }
+                }
+            }
+        }
+
+        if (type > 3) {
+            for (int i = 0; i < nprob; i++) {
+                np = n * prob[i];
+                if (np < 1 && type != 7 && type != 4) {
+                    quantiles[i] = KOrdStat(n, x, 0, ind);
+                } else {
+                    if (type == 4)
+                        npm = np;
+                    if (type == 5)
+                        npm = np + 0.5;
+                    if (type == 6)
+                        npm = np + prob[i];
+                    if (type == 7)
+                        npm = np - prob[i] + 1;
+                    if (type == 8)
+                        npm = np + (1. / 3.) * (1 + prob[i]);
+                    if (type == 9)
+                        npm = np + 0.25 * prob[i] + 0.375;
+                    intnpm = FloorNint(npm);
+                    j = Max(intnpm - 1, 0);
+                    g = npm - intnpm;
+                    if (isSorted) {
+                        xj = x[j];
+                        xjj = x[j + 1];
+                    } else {
+                        xj = KOrdStat(n, x, j, ind);
+                        xjj = KOrdStat(n, x, j + 1, ind);
+                    }
+                    quantiles[i] = (1 - g) * xj + g * xjj;
+                }
+            }
+        }
+
+        if (isAllocated) {
+            // delete [] ind;
+            ind = null;
+        }
+    }
+
+    /**
+     * Calculates roots of polynomial of 3rd order a*x^3 + b*x^2 + c*x + d, where a == coef[3], b == coef[2], c ==
+     * coef[1], d == coef[0] coef[3] must be different from 0 If the boolean returned by the method is false: ==> there
+     * are 3 real roots a,b,c stored in roots If the boolean returned by the method is true: ==> there is one real root
+     * a and 2 complex conjugates roots (b+i*c,b-i*c) Author: Francois-Xavier Gentit
+     *
+     * @param coef cubic polynomial coefficients (see above)
+     * @param roots vector containing the computed result
+     * @return true if successful
+     */
+    boolean RootsCubic(double coef[], double roots[]) {
+
+        boolean complex = false;
+        double r, s, t, p, q, d, ps3, ps33, qs2, u, v, tmp, lnu, lnv, su, sv, y1, y2, y3;
+        roots = new double[3];
+        double a;
+        double b;
+        double c;
+        if (coef[3] == 0) {
+            return complex;
+        }
+
+        r = coef[2] / coef[3];
+        s = coef[1] / coef[3];
+        t = coef[0] / coef[3];
+        p = s - (r * r) / 3;
+        ps3 = p / 3;
+        q = (2 * r * r * r) / 27.0 - (r * s) / 3 + t;
+        qs2 = q / 2;
+        ps33 = ps3 * ps3 * ps3;
+        d = ps33 + qs2 * qs2;
+        if (d >= 0) {
+            complex = true;
+            d = Sqrt(d);
+            u = -qs2 + d;
+            v = -qs2 - d;
+            tmp = 1. / 3.;
+            lnu = Log(Abs(u));
+            lnv = Log(Abs(v));
+            su = Sign(1., u);
+            sv = Sign(1., v);
+            u = su * Exp(tmp * lnu);
+            v = sv * Exp(tmp * lnv);
+            y1 = u + v;
+            y2 = -y1 / 2;
+            y3 = ((u - v) * Sqrt(3.)) / 2;
+            tmp = r / 3;
+            a = y1 - tmp;
+            b = y2 - tmp;
+            c = y3;
+        } else {
+            double phi;
+            double cphi;
+            double phis3;
+            double c1;
+            double c2;
+            double c3;
+            double pis3;
+            ps3 = -ps3;
+            ps33 = -ps33;
+            cphi = -qs2 / Sqrt(ps33);
+            phi = ACos(cphi);
+            phis3 = phi / 3;
+            pis3 = Pi() / 3;
+            c1 = Cos(phis3);
+            c2 = Cos(pis3 + phis3);
+            c3 = Cos(pis3 - phis3);
+            tmp = Sqrt(ps3);
+            y1 = 2 * tmp * c1;
+            y2 = -2 * tmp * c2;
+            y3 = -2 * tmp * c3;
+            tmp = r / 3;
+            a = y1 - tmp;
+            b = y2 - tmp;
+            c = y3 - tmp;
+        }
+
+        roots[0] = a;
+        roots[1] = b;
+        roots[2] = c;
+        return complex;
     }
 
     /**
@@ -1095,8 +625,8 @@ public class TMath extends TMathConstants {
                 rg3 = 0;
                 z0 = 272.1014 + y * (1280.829 + y * (2802.870 + y * (3764.966 + y * (3447.629
                         + y * (2256.981 + y * (1074.409 + y * (369.1989 + y * (88.26741 + y * (13.39880 + y))))))))); // Region
-                                                                                                                                                                                                    // 3
-                                                                                                                                                                                                    // y-dependents
+                                                                                                                      // 3
+                                                                                                                      // y-dependents
                 z2 = 211.678 + y * (902.3066 + y * (1758.336 + y
                         * (2037.310 + y * (1549.675 + y * (793.4273 + y * (266.2987 + y * (53.59518 + y * 5.0)))))));
                 z4 = 78.86585
@@ -1147,1336 +677,471 @@ public class TMath extends TMathConstants {
                                      // sqrt(2*pi)*sigma.
     }
 
-    /**
-     * Calculates roots of polynomial of 3rd order a*x^3 + b*x^2 + c*x + d, where a == coef[3], b == coef[2], c ==
-     * coef[1], d == coef[0] coef[3] must be different from 0 If the boolean returned by the method is false: ==> there
-     * are 3 real roots a,b,c stored in roots If the boolean returned by the method is true: ==> there is one real root
-     * a and 2 complex conjugates roots (b+i*c,b-i*c) Author: Francois-Xavier Gentit
-     *
-     * @param coef cubic polynomial coefficients (see above)
-     * @param roots vector containing the computed result
-     * @return true if successful
-     */
-    boolean RootsCubic(double coef[], double roots[]) {
+    public static double BesselI(int n, double x) {
+        // Compute the Integer Order Modified Bessel function I_n(x)
+        // for n=0,1,2,... and any real x.
+        //
+        // --- NvE 12-mar-2000 UU-SAP Utrecht
 
-        boolean complex = false;
-        double r, s, t, p, q, d, ps3, ps33, qs2, u, v, tmp, lnu, lnv, su, sv, y1, y2, y3;
-        roots = new double[3];
-        double a;
-        double b; 
+        int iacc = 40; // Increase to enhance accuracy
+        double kBigPositive = 1.e10;
+        double kBigNegative = 1.e-10;
+
+        if (n < 0) {
+            System.err.println("BesselI(): *I* Invalid argument(s) (n,x) = (" + n + ", " + x + ")");
+            return 0;
+        }
+
+        if (n == 0)
+            return BesselI0(x);
+        if (n == 1)
+            return BesselI1(x);
+
+        if (x == 0)
+            return 0;
+        if (Abs(x) > kBigPositive)
+            return 0;
+
+        double tox = 2 / Abs(x);
+        double bip = 0, bim = 0;
+        double bi = 1;
+        double result = 0;
+        int m = 2 * ((n + (int) (Sqrt(iacc * n))));
+        for (int j = m; j >= 1; j--) {
+            bim = bip + (j) * tox * bi;
+            bip = bi;
+            bi = bim;
+            // Renormalise to prevent overflows
+            if (Abs(bi) > kBigPositive) {
+                result *= kBigNegative;
+                bi *= kBigNegative;
+                bip *= kBigNegative;
+            }
+            if (j == n)
+                result = bip;
+        }
+
+        result *= BesselI0(x) / bi; // Normalise with BesselI0(x)
+        if ((x < 0) && (n % 2 == 1))
+            result = -result;
+
+        return result;
+    }
+
+    public static double BesselI0(double x) {
+        // Compute the modified Bessel function I_0(x) for any real x.
+        //
+        // --- NvE 12-mar-2000 UU-SAP Utrecht
+
+        // Parameters of the polynomial approximation
+        double p1 = 1.0, p2 = 3.5156229, p3 = 3.0899424, p4 = 1.2067492, p5 = 0.2659732, p6 = 3.60768e-2,
+                p7 = 4.5813e-3;
+
+        double q1 = 0.39894228, q2 = 1.328592e-2, q3 = 2.25319e-3, q4 = -1.57565e-3, q5 = 9.16281e-3, q6 = -2.057706e-2,
+                q7 = 2.635537e-2, q8 = -1.647633e-2, q9 = 3.92377e-3;
+
+        double k1 = 3.75;
+        double ax = Abs(x);
+
+        double y = 0, result = 0;
+
+        if (ax < k1) {
+            double xx = x / k1;
+            y = xx * xx;
+            result = p1 + y * (p2 + y * (p3 + y * (p4 + y * (p5 + y * (p6 + y * p7)))));
+        } else {
+            y = k1 / ax;
+            result = (Exp(ax) / Sqrt(ax))
+                    * (q1 + y * (q2 + y * (q3 + y * (q4 + y * (q5 + y * (q6 + y * (q7 + y * (q8 + y * q9))))))));
+        }
+        return result;
+    }
+
+    public static double BesselI1(double x) {
+        // Compute the modified Bessel function I_1(x) for any real x.
+        //
+        // M.Abramowitz and I.A.Stegun, Handbook of Mathematical Functions,
+        // Applied Mathematics Series vol. 55 (1964), Washington.
+        //
+        // --- NvE 12-mar-2000 UU-SAP Utrecht
+
+        // Parameters of the polynomial approximation
+        double p1 = 0.5, p2 = 0.87890594, p3 = 0.51498869, p4 = 0.15084934, p5 = 2.658733e-2, p6 = 3.01532e-3,
+                p7 = 3.2411e-4;
+
+        double q1 = 0.39894228, q2 = -3.988024e-2, q3 = -3.62018e-3, q4 = 1.63801e-3, q5 = -1.031555e-2,
+                q6 = 2.282967e-2, q7 = -2.895312e-2, q8 = 1.787654e-2, q9 = -4.20059e-3;
+
+        double k1 = 3.75;
+        double ax = Abs(x);
+
+        double y = 0, result = 0;
+
+        if (ax < k1) {
+            double xx = x / k1;
+            y = xx * xx;
+            result = x * (p1 + y * (p2 + y * (p3 + y * (p4 + y * (p5 + y * (p6 + y * p7))))));
+        } else {
+            y = k1 / ax;
+            result = (Exp(ax) / Sqrt(ax))
+                    * (q1 + y * (q2 + y * (q3 + y * (q4 + y * (q5 + y * (q6 + y * (q7 + y * (q8 + y * q9))))))));
+            if (x < 0)
+                result = -result;
+        }
+        return result;
+    }
+
+    public static double BesselJ0(double x) {
+        // Returns the Bessel function J0(x) for any real x.
+
+        double ax, z;
+        double xx, y, result, result1, result2;
+        double p1 = 57568490574.0, p2 = -13362590354.0, p3 = 651619640.7;
+        double p4 = -11214424.18, p5 = 77392.33017, p6 = -184.9052456;
+        double p7 = 57568490411.0, p8 = 1029532985.0, p9 = 9494680.718;
+        double p10 = 59272.64853, p11 = 267.8532712;
+
+        double q1 = 0.785398164;
+        double q2 = -0.1098628627e-2, q3 = 0.2734510407e-4;
+        double q4 = -0.2073370639e-5, q5 = 0.2093887211e-6;
+        double q6 = -0.1562499995e-1, q7 = 0.1430488765e-3;
+        double q8 = -0.6911147651e-5, q9 = 0.7621095161e-6;
+        double q10 = 0.934935152e-7, q11 = 0.636619772;
+
+        if ((ax = Abs(x)) < 8) {
+            y = x * x;
+            result1 = p1 + y * (p2 + y * (p3 + y * (p4 + y * (p5 + y * p6))));
+            result2 = p7 + y * (p8 + y * (p9 + y * (p10 + y * (p11 + y))));
+            result = result1 / result2;
+        } else {
+            z = 8 / ax;
+            y = z * z;
+            xx = ax - q1;
+            result1 = 1 + y * (q2 + y * (q3 + y * (q4 + y * q5)));
+            result2 = q6 + y * (q7 + y * (q8 + y * (q9 - y * q10)));
+            result = Sqrt(q11 / ax) * (Cos(xx) * result1 - z * Sin(xx) * result2);
+        }
+        return result;
+    }
+
+    public static double BesselJ1(double x) {
+        // Returns the Bessel function J1(x) for any real x.
+
+        double ax, z;
+        double xx, y, result, result1, result2;
+        double p1 = 72362614232.0, p2 = -7895059235.0, p3 = 242396853.1;
+        double p4 = -2972611.439, p5 = 15704.48260, p6 = -30.16036606;
+        double p7 = 144725228442.0, p8 = 2300535178.0, p9 = 18583304.74;
+        double p10 = 99447.43394, p11 = 376.9991397;
+
+        double q1 = 2.356194491;
+        double q2 = 0.183105e-2, q3 = -0.3516396496e-4;
+        double q4 = 0.2457520174e-5, q5 = -0.240337019e-6;
+        double q6 = 0.04687499995, q7 = -0.2002690873e-3;
+        double q8 = 0.8449199096e-5, q9 = -0.88228987e-6;
+        double q10 = 0.105787412e-6, q11 = 0.636619772;
+
+        if ((ax = Abs(x)) < 8) {
+            y = x * x;
+            result1 = x * (p1 + y * (p2 + y * (p3 + y * (p4 + y * (p5 + y * p6)))));
+            result2 = p7 + y * (p8 + y * (p9 + y * (p10 + y * (p11 + y))));
+            result = result1 / result2;
+        } else {
+            z = 8 / ax;
+            y = z * z;
+            xx = ax - q1;
+            result1 = 1 + y * (q2 + y * (q3 + y * (q4 + y * q5)));
+            result2 = q6 + y * (q7 + y * (q8 + y * (q9 + y * q10)));
+            result = Sqrt(q11 / ax) * (Cos(xx) * result1 - z * Sin(xx) * result2);
+            if (x < 0)
+                result = -result;
+        }
+        return result;
+    }
+
+    public static double BesselK(int n, double x) {
+        // Compute the Integer Order Modified Bessel function K_n(x)
+        // for n=0,1,2,... and positive real x.
+        //
+        // --- NvE 12-mar-2000 UU-SAP Utrecht
+
+        if (x <= 0 || n < 0) {
+            System.err.println("BesselK(): *K* Invalid argument(s) (n,x) = (" + n + ", " + x + ")");
+            return 0;
+        }
+
+        if (n == 0)
+            return BesselK0(x);
+        if (n == 1)
+            return BesselK1(x);
+
+        // Perform upward recurrence for all x
+        double tox = 2 / x;
+        double bkm = BesselK0(x);
+        double bk = BesselK1(x);
+        double bkp = 0;
+        for (int j = 1; j < n; j++) {
+            bkp = bkm + (j) * tox * bk;
+            bkm = bk;
+            bk = bkp;
+        }
+        return bk;
+    }
+
+    public static double BesselK0(double x) {
+        // Compute the modified Bessel function K_0(x) for positive real x.
+        //
+        // M.Abramowitz and I.A.Stegun, Handbook of Mathematical Functions,
+        // Applied Mathematics Series vol. 55 (1964), Washington.
+        //
+        // --- NvE 12-mar-2000 UU-SAP Utrecht
+
+        // Parameters of the polynomial approximation
+        double p1 = -0.57721566, p2 = 0.42278420, p3 = 0.23069756, p4 = 3.488590e-2, p5 = 2.62698e-3, p6 = 1.0750e-4,
+                p7 = 7.4e-6;
+
+        double q1 = 1.25331414, q2 = -7.832358e-2, q3 = 2.189568e-2, q4 = -1.062446e-2, q5 = 5.87872e-3,
+                q6 = -2.51540e-3, q7 = 5.3208e-4;
+
+        if (x <= 0) {
+            System.err.println("BesselK0(): *K0* Invalid argument x = " + x);
+            return 0;
+        }
+
+        double y = 0, result = 0;
+
+        if (x <= 2) {
+            y = x * x / 4;
+            result = (-Log(x / 2.) * BesselI0(x))
+                    + (p1 + y * (p2 + y * (p3 + y * (p4 + y * (p5 + y * (p6 + y * p7))))));
+        } else {
+            y = 2 / x;
+            result = (Exp(-x) / Sqrt(x)) * (q1 + y * (q2 + y * (q3 + y * (q4 + y * (q5 + y * (q6 + y * q7))))));
+        }
+        return result;
+    }
+
+    public static double BesselK1(double x) {
+        // Compute the modified Bessel function K_1(x) for positive real x.
+        //
+        // M.Abramowitz and I.A.Stegun, Handbook of Mathematical Functions,
+        // Applied Mathematics Series vol. 55 (1964), Washington.
+        //
+        // --- NvE 12-mar-2000 UU-SAP Utrecht
+
+        // Parameters of the polynomial approximation
+        double p1 = 1., p2 = 0.15443144, p3 = -0.67278579, p4 = -0.18156897, p5 = -1.919402e-2, p6 = -1.10404e-3,
+                p7 = -4.686e-5;
+
+        double q1 = 1.25331414, q2 = 0.23498619, q3 = -3.655620e-2, q4 = 1.504268e-2, q5 = -7.80353e-3, q6 = 3.25614e-3,
+                q7 = -6.8245e-4;
+
+        if (x <= 0) {
+            System.err.println("BesselK1(): *K1* Invalid argument x = " + x);
+            return 0;
+        }
+
+        double y = 0, result = 0;
+
+        if (x <= 2) {
+            y = x * x / 4;
+            result = (Log(x / 2.) * BesselI1(x))
+                    + (1. / x) * (p1 + y * (p2 + y * (p3 + y * (p4 + y * (p5 + y * (p6 + y * p7))))));
+        } else {
+            y = 2 / x;
+            result = (Exp(-x) / Sqrt(x)) * (q1 + y * (q2 + y * (q3 + y * (q4 + y * (q5 + y * (q6 + y * q7))))));
+        }
+        return result;
+    }
+
+    public static double BesselY0(double x) {
+        // Returns the Bessel function Y0(x) for positive x.
+
+        double z, xx, y, result, result1, result2;
+        double p1 = -2957821389., p2 = 7062834065.0, p3 = -512359803.6;
+        double p4 = 10879881.29, p5 = -86327.92757, p6 = 228.4622733;
+        double p7 = 40076544269., p8 = 745249964.8, p9 = 7189466.438;
+        double p10 = 47447.26470, p11 = 226.1030244, p12 = 0.636619772;
+
+        double q1 = 0.785398164;
+        double q2 = -0.1098628627e-2, q3 = 0.2734510407e-4;
+        double q4 = -0.2073370639e-5, q5 = 0.2093887211e-6;
+        double q6 = -0.1562499995e-1, q7 = 0.1430488765e-3;
+        double q8 = -0.6911147651e-5, q9 = 0.7621095161e-6;
+        double q10 = -0.934945152e-7, q11 = 0.636619772;
+
+        if (x < 8) {
+            y = x * x;
+            result1 = p1 + y * (p2 + y * (p3 + y * (p4 + y * (p5 + y * p6))));
+            result2 = p7 + y * (p8 + y * (p9 + y * (p10 + y * (p11 + y))));
+            result = (result1 / result2) + p12 * BesselJ0(x) * Log(x);
+        } else {
+            z = 8 / x;
+            y = z * z;
+            xx = x - q1;
+            result1 = 1 + y * (q2 + y * (q3 + y * (q4 + y * q5)));
+            result2 = q6 + y * (q7 + y * (q8 + y * (q9 + y * q10)));
+            result = Sqrt(q11 / x) * (Sin(xx) * result1 + z * Cos(xx) * result2);
+        }
+        return result;
+    }
+
+    public static double BesselY1(double x) {
+        // Returns the Bessel function Y1(x) for positive x.
+
+        double z, xx, y, result, result1, result2;
+        double p1 = -0.4900604943e13, p2 = 0.1275274390e13;
+        double p3 = -0.5153438139e11, p4 = 0.7349264551e9;
+        double p5 = -0.4237922726e7, p6 = 0.8511937935e4;
+        double p7 = 0.2499580570e14, p8 = 0.4244419664e12;
+        double p9 = 0.3733650367e10, p10 = 0.2245904002e8;
+        double p11 = 0.1020426050e6, p12 = 0.3549632885e3;
+        double p13 = 0.636619772;
+        double q1 = 2.356194491;
+        double q2 = 0.183105e-2, q3 = -0.3516396496e-4;
+        double q4 = 0.2457520174e-5, q5 = -0.240337019e-6;
+        double q6 = 0.04687499995, q7 = -0.2002690873e-3;
+        double q8 = 0.8449199096e-5, q9 = -0.88228987e-6;
+        double q10 = 0.105787412e-6, q11 = 0.636619772;
+
+        if (x < 8) {
+            y = x * x;
+            result1 = x * (p1 + y * (p2 + y * (p3 + y * (p4 + y * (p5 + y * p6)))));
+            result2 = p7 + y * (p8 + y * (p9 + y * (p10 + y * (p11 + y * (p12 + y)))));
+            result = (result1 / result2) + p13 * (BesselJ1(x) * Log(x) - 1 / x);
+        } else {
+            z = 8 / x;
+            y = z * z;
+            xx = x - q1;
+            result1 = 1 + y * (q2 + y * (q3 + y * (q4 + y * q5)));
+            result2 = q6 + y * (q7 + y * (q8 + y * (q9 + y * q10)));
+            result = Sqrt(q11 / x) * (Sin(xx) * result1 + z * Cos(xx) * result2);
+        }
+        return result;
+    }
+
+    public static double Beta(double p, double q) {
+        // Calculates Beta-function Gamma(p)*Gamma(q)/Gamma(p+q).
+
+        return Exp(LnGamma(p) + LnGamma(q) - LnGamma(p + q));
+    }
+
+    public static double BetaCf(double x, double a, double b) {
+        // Continued fraction evaluation by modified Lentz's method
+        // used in calculation of incomplete Beta function.
+
+        int itmax = 500;
+        double eps = 3.e-14;
+        double fpmin = 1.e-30;
+
+        int m;
+        int m2;
+        double aa;
         double c;
-        if (coef[3] == 0) {
-            return complex;
+        double d;
+        double del;
+        double qab;
+        double qam;
+        double qap;
+        double h;
+        qab = a + b;
+        qap = a + 1.0;
+        qam = a - 1.0;
+        c = 1.0;
+        d = 1.0 - qab * x / qap;
+        if (Abs(d) < fpmin)
+            d = fpmin;
+        d = 1.0 / d;
+        h = d;
+        for (m = 1; m <= itmax; m++) {
+            m2 = m * 2;
+            aa = m * (b - m) * x / ((qam + m2) * (a + m2));
+            d = 1.0 + aa * d;
+            if (Abs(d) < fpmin)
+                d = fpmin;
+            c = 1 + aa / c;
+            if (Abs(c) < fpmin)
+                c = fpmin;
+            d = 1.0 / d;
+            h *= d * c;
+            aa = -(a + m) * (qab + m) * x / ((a + m2) * (qap + m2));
+            d = 1.0 + aa * d;
+            if (Abs(d) < fpmin)
+                d = fpmin;
+            c = 1.0 + aa / c;
+            if (Abs(c) < fpmin)
+                c = fpmin;
+            d = 1.0 / d;
+            del = d * c;
+            h *= del;
+            if (Abs(del - 1) <= eps)
+                break;
         }
+        if (m > itmax) {
+            System.err.printf("BetaCf: a or b too big, or itmax too small," + " a=%e, b=%e, x=%e, h=%e, itmax=%e", a, b,
+                    x, h, itmax);
+        }
+        return h;
+    }
 
-        r = coef[2] / coef[3];
-        s = coef[1] / coef[3];
-        t = coef[0] / coef[3];
-        p = s - (r * r) / 3;
-        ps3 = p / 3;
-        q = (2 * r * r * r) / 27.0 - (r * s) / 3 + t;
-        qs2 = q / 2;
-        ps33 = ps3 * ps3 * ps3;
-        d = ps33 + qs2 * qs2;
-        if (d >= 0) {
-            complex = true;
-            d = Sqrt(d);
-            u = -qs2 + d;
-            v = -qs2 - d;
-            tmp = 1. / 3.;
-            lnu = Log(Abs(u));
-            lnv = Log(Abs(v));
-            su = Sign(1., u);
-            sv = Sign(1., v);
-            u = su * Exp(tmp * lnu);
-            v = sv * Exp(tmp * lnv);
-            y1 = u + v;
-            y2 = -y1 / 2;
-            y3 = ((u - v) * Sqrt(3.)) / 2;
-            tmp = r / 3;
-            a = y1 - tmp;
-            b = y2 - tmp;
-            c = y3;
+    // TODO: continue here
+
+    /**
+     * Computes the probability density function of the Beta distribution (the distribution function is computed in
+     * BetaDistI). The first argument is the point, where the function will be computed, second and third are the
+     * function parameters. Since the Beta distribution is bounded on both sides, it's often used to represent processes
+     * with natural lower and upper limits.
+     * 
+     * @param x input value
+     * @param p p parameter of beta function
+     * @param q q parameter of beta function
+     * @return probability density function of the Beta distribution
+     */
+    public static double BetaDist(double x, double p, double q) {
+
+        if ((x < 0) || (x > 1) || (p <= 0) || (q <= 0)) {
+            System.err.println("BetaDist(): - parameter value outside allowed range");
+            return 0;
+        }
+        double beta = Beta(p, q);
+        double r = Power(x, p - 1) * Power(1 - x, q - 1) / beta;
+        return r;
+    }
+
+    public static double BetaDistI(double x, double p, double q) {
+        // Computes the distribution function of the Beta distribution.
+        // The first argument is the point, where the function will be
+        // computed, second and third are the function parameters.
+        // Since the Beta distribution is bounded on both sides, it's often
+        // used to represent processes with natural lower and upper limits.
+
+        if ((x < 0) || (x > 1) || (p <= 0) || (q <= 0)) {
+            System.err.println("BetaDistI(): parameter value outside allowed range");
+            return 0;
+        }
+        double betai = BetaIncomplete(x, p, q);
+        return betai;
+    }
+
+    public static double BetaIncomplete(double x, double a, double b) {
+        // Calculates the incomplete Beta-function.
+        // -- implementation by Anna Kreshuk
+
+        double bt;
+        if ((x < 0.0) || (x > 1.0)) {
+            System.err.println("BetaIncomplete(): X must between 0 and 1");
+            return 0.0;
+        }
+        if ((x == 0.0) || (x == 1.0)) {
+            bt = 0.0;
         } else {
-            double phi;
-            double cphi;
-            double phis3; 
-            double c1; 
-            double c2; 
-            double c3; 
-            double pis3;
-            ps3 = -ps3;
-            ps33 = -ps33;
-            cphi = -qs2 / Sqrt(ps33);
-            phi = ACos(cphi);
-            phis3 = phi / 3;
-            pis3 = Pi() / 3;
-            c1 = Cos(phis3);
-            c2 = Cos(pis3 + phis3);
-            c3 = Cos(pis3 - phis3);
-            tmp = Sqrt(ps3);
-            y1 = 2 * tmp * c1;
-            y2 = -2 * tmp * c2;
-            y3 = -2 * tmp * c3;
-            tmp = r / 3;
-            a = y1 - tmp;
-            b = y2 - tmp;
-            c = y3 - tmp;
+            bt = Power(x, a) * Power(1 - x, b) / Beta(a, b);
         }
-
-        roots[0] = a;
-        roots[1] = b;
-        roots[2] = c;
-        return complex;
-    }
-
-    // TODO: add array statistics here
-
-    /**
-     * Returns k_th order statistic of the array a of size n (k_th smallest element out of n elements). C-convention is
-     * used for array indexing, so if you want the second smallest element, call KOrdStat(n, a, 1). If work is supplied,
-     * it is used to store the sorting index and assumed to be &gt;= n. If work=0, local storage is used, either on the
-     * stack if n < kWorkMax or on the heap for n &gt;= kWorkMax. Taken from "Numerical Recipes in C++" without the index
-     * array implemented by Anna Khreshuk. See also the declarations at the top of this file
-     * 
-     * @param n see above
-     * @param a see above
-     * @param k see above
-     * @param work see above
-     * @return the computed result
-     */
-    double KOrdStat(int n, double a[], int k, int work[]) {
-
-        boolean isAllocated = false;
-        int i, ir, j, l, mid;
-        int arr;
-        int ind[];
-        int[] workLocal = new int[kWorkMax];
-        int temp;
-
-        if (work != null) {
-            ind = work;
+        if (x < (a + 1) / (a + b + 2)) {
+            return bt * BetaCf(x, a, b) / a;
         } else {
-            ind = workLocal;
-            if (n > kWorkMax) {
-                isAllocated = true;
-                ind = new int[n];
-            }
+            return (1 - bt * BetaCf(1 - x, b, a) / b);
         }
-
-        for (int ii = 0; ii < n; ii++) {
-            ind[ii] = ii;
-        }
-        int rk = k;
-        l = 0;
-        ir = n - 1;
-        for (;;) {
-            if (ir <= l + 1) { // active partition contains 1 or 2 elements
-                if (ir == l + 1 && a[ind[ir]] < a[ind[l]]) {
-                    temp = ind[l];
-                    ind[l] = ind[ir];
-                    ind[ir] = temp;
-                }
-                double tmp = a[ind[rk]];
-                if (isAllocated)
-                    ind = null;
-                return tmp;
-            } else {
-                mid = (l + ir) >> 1; // choose median of left, center and right
-                {
-                    temp = ind[mid];
-                    ind[mid] = ind[l + 1];
-                    ind[l + 1] = temp;
-                } // elements as partitioning element arr.
-                if (a[ind[l]] > a[ind[ir]]) // also rearrange so that
-                                            // a[l]<=a[l+1]
-                {
-                    temp = ind[l];
-                    ind[l] = ind[ir];
-                    ind[ir] = temp;
-                }
-
-                if (a[ind[l + 1]] > a[ind[ir]]) {
-                    temp = ind[l + 1];
-                    ind[l + 1] = ind[ir];
-                    ind[ir] = temp;
-                }
-
-                if (a[ind[l]] > a[ind[l + 1]]) {
-                    temp = ind[l];
-                    ind[l] = ind[l + 1];
-                    ind[l + 1] = temp;
-                }
-
-                i = l + 1; // initialize pointers for partitioning
-                j = ir;
-                arr = ind[l + 1];
-                for (;;) {
-                    do
-                        i++;
-                    while (a[ind[i]] < a[arr]);
-                    do
-                        j--;
-                    while (a[ind[j]] > a[arr]);
-                    if (j < i)
-                        break; // pointers crossed, partitioning complete
-                    {
-                        temp = ind[i];
-                        ind[i] = ind[j];
-                        ind[j] = temp;
-                    }
-                }
-                ind[l + 1] = ind[j];
-                ind[j] = arr;
-                if (j >= rk)
-                    ir = j - 1; // keep active the partition that
-                if (j <= rk)
-                    l = i; // contains the k_th element
-            }
-        }
-    }
-
-    /**
-     * Computes sample quantiles, corresponding to the given probabilities Parameters:
-     * 
-     * @param x -the data sample
-     * @param n - its size
-     * @param quantiles - computed quantiles are returned in there
-     * @param prob - probabilities where to compute quantiles
-     * @param nprob - size of prob array
-     * @param isSorted - is the input array x sorted? NOTE, that when the input is not sorted, an array of integers of
-     *            size n needs to be allocated. It can be passed by the user in parameter index, or, if not passed, it
-     *            will be allocated inside the function type - method to compute (from 1 to 9). Following types are
-     *            provided: Discontinuous: type=1 - inverse of the empirical distribution function type=2 - like type 1,
-     *            but with averaging at discontinuities type=3 - SAS definition: nearest even order statistic Piecwise
-     *            linear continuous: In this case, sample quantiles can be obtained by linear interpolation between the
-     *            k-th order statistic and p(k). type=4 - linear interpolation of empirical cdf, p(k)=k/n; type=5 - a
-     *            very popular definition, p(k) = (k-0.5)/n; type=6 - used by Minitab and SPSS, p(k) = k/(n+1); type=7 -
-     *            used by S-Plus and R, p(k) = (k-1)/(n-1); type=8 - resulting sample quantiles are approximately median
-     *            unbiased regardless of the distribution of x. p(k) = (k-1/3)/(n+1/3); type=9 - resulting sample
-     *            quantiles are approximately unbiased, when the sample comes from Normal distribution.
-     *            p(k)=(k-3/8)/(n+1/4); default type = 7 References: 1) Hyndman, R.J and Fan, Y, (1996) "Sample
-     *            quantiles in statistical packages" American Statistician, 50, 361-365 2) R Project documentation for
-     *            the function quantile of package {stats}
-     * @param index see above
-     * @param type see above 
-     */
-    void Quantiles(int n, int nprob, double x[], double quantiles[], double prob[], boolean isSorted, int index[],
-            int type) {
-        if (type < 1 || type > 9) {
-            System.err.println("illegal value of type");
-            return;
-        }
-        double g, npm, np, xj, xjj;
-        int j, intnpm;
-        int[] ind = null;
-        boolean isAllocated = false;
-        if (!isSorted) {
-            if (index == null)
-                ind = index;
-            else {
-                ind = new int[n];
-                isAllocated = true;
-            }
-        }
-        npm = 0;
-        // Discontinuous functions
-        if (type < 4) {
-            for (int i = 0; i < nprob; i++) {
-                npm = n * prob[i];
-                if (npm < 1) {
-                    if (isSorted) {
-                        quantiles[i] = x[0];
-                    } else {
-                        quantiles[i] = KOrdStat(n, x, 0, ind);
-                    }
-                } else {
-                    j = Max(FloorNint(npm) - 1, 0);
-                    if (npm - j - 1 > 1e-14) {
-                        if (isSorted) {
-                            quantiles[i] = x[j + 1];
-                        } else {
-                            quantiles[i] = KOrdStat(n, x, j + 1, ind);
-                        }
-                    } else {
-                        if (isSorted)
-                            xj = x[j];
-                        else
-                            xj = KOrdStat(n, x, j, ind);
-                        if (type == 1)
-                            quantiles[i] = xj;
-                        if (type == 2) {
-                            if (isSorted)
-                                xjj = x[j + 1];
-                            else
-                                xjj = KOrdStat(n, x, j + 1, ind);
-                            quantiles[i] = 0.5 * (xj + xjj);
-                        }
-
-                        if (type == 3) {
-                            if (!Even(j - 1)) {
-                                if (isSorted)
-                                    xjj = x[j + 1];
-                                else
-                                    xjj = KOrdStat(n, x, j + 1, ind);
-                                quantiles[i] = xjj;
-                            } else
-                                quantiles[i] = xj;
-                        }
-                    }
-                }
-            }
-        }
-
-        if (type > 3) {
-            for (int i = 0; i < nprob; i++) {
-                np = n * prob[i];
-                if (np < 1 && type != 7 && type != 4) {
-                    quantiles[i] = KOrdStat(n, x, 0, ind);
-                } else {
-                    if (type == 4)
-                        npm = np;
-                    if (type == 5)
-                        npm = np + 0.5;
-                    if (type == 6)
-                        npm = np + prob[i];
-                    if (type == 7)
-                        npm = np - prob[i] + 1;
-                    if (type == 8)
-                        npm = np + (1. / 3.) * (1 + prob[i]);
-                    if (type == 9)
-                        npm = np + 0.25 * prob[i] + 0.375;
-                    intnpm = FloorNint(npm);
-                    j = Max(intnpm - 1, 0);
-                    g = npm - intnpm;
-                    if (isSorted) {
-                        xj = x[j];
-                        xjj = x[j + 1];
-                    } else {
-                        xj = KOrdStat(n, x, j, ind);
-                        xjj = KOrdStat(n, x, j + 1, ind);
-                    }
-                    quantiles[i] = (1 - g) * xj + g * xjj;
-                }
-            }
-        }
-
-        if (isAllocated) {
-            // delete [] ind;
-            ind = null;
-        }
-    }
-
-    /**
-     * @param data the input vector
-     * @param length of the input vector
-     * @return average of vector elements
-     */
-    public static synchronized short Mean(short[] data, int length) {
-        double norm = 1.0 / (length), val = 0.0;
-        for (int i = 0; i < length; i++) {
-            val += norm * data[i];
-        }
-        return (short) val;
-    }
-
-    public static synchronized short Mean(short[] data) {
-        return Mean(data, data.length);
-    }
-
-    /**
-     * @param data the input vector
-     * @param length of the input vector
-     * @return average of vector elements
-     */
-    public static synchronized int Mean(int[] data, int length) {
-        double norm = 1.0 / (length), val = 0.0;
-        for (int i = 0; i < length; i++) {
-            val += norm * data[i];
-        }
-        return (int) val;
-    }
-
-    public static synchronized int Mean(int[] data) {
-        return Mean(data, data.length);
-    }
-
-    /**
-     * @param data the input vector
-     * @param length of the input vector
-     * @return average of vector elements
-     */
-    public static synchronized float Mean(float[] data, int length) {
-        float norm = 1.0f / (length), val = 0.0f;
-        for (int i = 0; i < length; i++) {
-            val += norm * data[i];
-        }
-        return val;
-    }
-
-    public static synchronized float Mean(float[] data) {
-        return Mean(data, data.length);
-    }
-
-    /**
-     * @param data the input vector
-     * @param length &lt;= data.length elements to be used
-     * @return average of vector elements
-     */
-    public static synchronized double Mean(double[] data, int length) {
-        double norm = 1.0 / (length), val = 0.0;
-        for (int i = 0; i < length; i++) {
-            val += norm * data[i];
-        }
-        return val;
-    }
-
-    public static synchronized double Mean(double[] data) {
-        return Mean(data, data.length);
-    }
-
-    /**
-     * @param data the input vector
-     * @param length &lt;= data.length elements to be used
-     * @return average of vector elements
-     */
-    public static synchronized long Mean(long[] data, int length) {
-        double norm = 1.0 / (length), val = 0.0;
-        for (int i = 0; i < length; i++) {
-            val += norm * data[i];
-        }
-        return (long) val;
-    }
-
-    public static synchronized long Mean(long[] data) {
-        return Mean(data, data.length);
-    }
-
-    /**
-     * @param data the input vector
-     * @param length &lt;= data.length elements to be used
-     * @return value of smallest vector element
-     */
-    public static synchronized short Minimum(short[] data, int length) {
-        short val = +Short.MAX_VALUE;
-        for (int i = 0; i < length; i++) {
-            if (val < data[i]) {
-                val = data[i];
-            }
-        }
-        return val;
-    }
-
-    public static synchronized short Minimum(short[] data) {
-        return Minimum(data, data.length);
-    }
-
-    /**
-     * @param data the input vector
-     * @param length &lt;= data.length elements to be used
-     * @return value of smallest vector element
-     */
-    public static synchronized int Minimum(int[] data, int length) {
-        int val = +Integer.MAX_VALUE;
-        for (int i = 0; i < length; i++) {
-            val = Math.min(val, data[i]);
-        }
-        return val;
-    }
-
-    public static synchronized int Minimum(int[] data) {
-        return Minimum(data, data.length);
-    }
-
-    /**
-     * @param data the input vector
-     * @param length &lt;= data.length elements to be used
-     * @return value of smallest vector element
-     */
-    public static synchronized float Minimum(float[] data, int length) {
-        float val = +Float.MAX_VALUE;
-        for (int i = 0; i < length; i++) {
-            val = Math.min(val, data[i]);
-        }
-        return val;
-    }
-
-    public static synchronized float Minimum(float[] data) {
-        return Minimum(data, data.length);
-    }
-
-    /**
-     * @param data the input vector
-     * @param length &lt;= data.length elements to be used
-     * @return value of smallest vector element
-     */
-    public static synchronized double Minimum(double[] data, int length) {
-        double val = +Double.MAX_VALUE;
-        for (int i = 0; i < length; i++) {
-            val = Math.min(val, data[i]);
-        }
-        return val;
-    }
-
-    public static synchronized double Minimum(double[] data) {
-        return Minimum(data, data.length);
-    }
-
-    /**
-     * @param data the input vector
-     * @param length &lt;= data.length elements to be used
-     * @return value of smallest vector element
-     */
-    public static synchronized long Minimum(long[] data, int length) {
-        long val = +Long.MAX_VALUE;
-        for (int i = 0; i < length; i++) {
-            val = Math.min(val, data[i]);
-        }
-        return val;
-    }
-
-    public static synchronized long Minimum(long[] data) {
-        return Minimum(data, data.length);
-    }
-
-    /**
-     * @param data the input vector
-     * @param length &lt;= data.length elements to be used
-     * @return value of largest vector element
-     */
-    public static synchronized short Maximum(short[] data, int length) {
-        short val = -Short.MAX_VALUE;
-        for (int i = 0; i < length; i++) {
-            if (val > data[i]) {
-                val = data[i];
-            }
-        }
-        return val;
-    }
-
-    public static synchronized short Maximum(short[] data) {
-        return Maximum(data, data.length);
-    }
-
-    /**
-     * @param data the input vector
-     * @param length &lt;= data.length elements to be used
-     * @return value of largest vector element
-     */
-    public static synchronized int Maximum(int[] data, int length) {
-        int val = -Integer.MAX_VALUE;
-        for (int i = 0; i < length; i++) {
-            val = Math.max(val, data[i]);
-        }
-        return val;
-    }
-
-    public static synchronized int Maximum(int[] data) {
-        return Maximum(data, data.length);
-    }
-
-    /**
-     * @param data the input vector
-     * @param length &lt;= data.length elements to be used
-     * @return value of largest vector element
-     */
-    public static synchronized float Maximum(float[] data, int length) {
-        float val = -Float.MAX_VALUE;
-        for (int i = 0; i < length; i++) {
-            val = Math.max(val, data[i]);
-        }
-        return val;
-    }
-
-    public static synchronized float Maximum(float[] data) {
-        return Maximum(data, data.length);
-    }
-
-    /**
-     * @param data the input vector
-     * @param length &lt;= data.length elements to be used
-     * @return value of largest vector element
-     */
-    public static synchronized double Maximum(double[] data, int length) {
-        double val = -Double.MAX_VALUE;
-        for (int i = 0; i < length; i++) {
-            val = Math.max(val, data[i]);
-        }
-        return val;
-    }
-
-    public static synchronized double Maximum(double[] data) {
-        return Maximum(data, data.length);
-    }
-
-    /**
-     * @param data the input vector
-     * @param length &lt;= data.length elements to be used
-     * @return value of largest vector element
-     */
-    public static synchronized long Maximum(long[] data, int length) {
-        long val = -Long.MAX_VALUE;
-        for (int i = 0; i < length; i++) {
-            val = Math.max(val, data[i]);
-        }
-        return val;
-    }
-
-    public static synchronized long Maximum(long[] data) {
-        return Maximum(data, data.length);
-    }
-
-    /**
-     * @param data the input vector
-     * @param length &lt;= data.length elements to be used
-     * @return median value of vector element
-     */
-    public static synchronized short Median(short[] data, int length) {
-        short[] temp = Sort(data, length, false);
-        if (length % 2 == 0) {
-            return (short) (0.5 * (temp[length / 2] + temp[length / 2 + 1]));
-        } else {
-            return temp[length / 2];
-        }
-    }
-
-    public static synchronized short Median(short[] data) {
-        return Median(data, data.length);
-    }
-
-    /**
-     * @param data the input vector
-     * @param length &lt;= data.length elements to be used
-     * @return median value of vector element
-     */
-    public static synchronized int Median(int[] data, int length) {
-        int[] temp = Sort(data, length, false);
-        if (length % 2 == 0) {
-            return (int) (0.5 * (temp[length / 2] + temp[length / 2 + 1]));
-        } else {
-            return temp[length / 2];
-        }
-    }
-
-    public static synchronized int Median(int[] data) {
-        return Median(data, data.length);
-    }
-
-    /**
-     * @param data the input vector
-     * @param length &lt;= data.length elements to be used
-     * @return median value of vector element
-     */
-    public static synchronized float Median(float[] data, int length) {
-        float[] temp = Sort(data, length, false);
-        if (length % 2 == 0) {
-            return 0.5f * (temp[length / 2] + temp[length / 2 + 1]);
-        } else {
-            return data[length / 2];
-        }
-    }
-
-    public static synchronized float Median(float[] data) {
-        return Median(data, data.length);
-    }
-
-    /**
-     * @param data the input vector
-     * @param length &lt;= data.length elements to be used
-     * @return median value of vector element
-     */
-    public static synchronized double Median(double[] data, int length) {
-        double[] temp = Sort(data, length, false);
-
-        if (length % 2 == 0) {
-            return 0.5 * (temp[length / 2] + temp[length / 2 + 1]);
-        } else {
-            return temp[length / 2];
-        }
-    }
-
-    public static synchronized double Median(double[] data) {
-        return Median(data, data.length);
-    }
-
-    /**
-     * @param data the input vector
-     * @param length &lt;= data.length elements to be used
-     * @return median value of vector element
-     */
-    public static synchronized long Median(long[] data, int length) {
-        long[] temp = Sort(data, length, false);
-        if (length % 2 == 0) {
-            return (long) (0.5 * (temp[length / 2] + data[length / 2 + 1]));
-        } else {
-            return temp[length / 2];
-        }
-    }
-
-    public static synchronized long Median(long[] data) {
-        return Median(data, data.length);
-    }
-
-    /**
-     * @param data the input vector
-     * @param length &lt;= data.length elements to be used
-     * @return peak-to-peak value of vector element
-     */
-    public static synchronized short PeakToPeak(short[] data, int length) {
-        return (short) Math.abs(Maximum(data, length) - Minimum(data, length));
-    }
-
-    public static synchronized short PeakToPeak(short[] data) {
-        return PeakToPeak(data, data.length);
-    }
-
-    /**
-     * @param data the input vector
-     * @param length &lt;= data.length elements to be used
-     * @return peak-to-peak value of vector element
-     */
-    public static synchronized int PeakToPeak(int[] data, int length) {
-        return Math.abs(Maximum(data, length) - Minimum(data, length));
-    }
-
-    public static synchronized int PeakToPeak(int[] data) {
-        return PeakToPeak(data, data.length);
-    }
-
-    /**
-     * @param data the input vector
-     * @param length &lt;= data.length elements to be used
-     * @return peak-to-peak value of vector element
-     */
-    public static synchronized float PeakToPeak(float[] data, int length) {
-        return Math.abs(Maximum(data, length) - Minimum(data, length));
-    }
-
-    public static synchronized float PeakToPeak(float[] data) {
-        return PeakToPeak(data, data.length);
-    }
-
-    /**
-     * @param data the input vector
-     * @param length &lt;= data.length elements to be used
-     * @return peak-to-peak value of vector element
-     */
-    public static synchronized double PeakToPeak(double[] data, int length) {
-        return Math.abs(Maximum(data, length) - Minimum(data, length));
-    }
-
-    public static synchronized double PeakToPeak(double[] data) {
-        return PeakToPeak(data, data.length);
-    }
-
-    /**
-     * @param data the input vector
-     * @param length &lt;= data.length elements to be used
-     * @return peak-to-peak value of vector element
-     */
-    public static synchronized long PeakToPeak(long[] data, int length) {
-        return Math.abs(Maximum(data, length) - Minimum(data, length));
-    }
-
-    public static synchronized long PeakToPeak(long[] data) {
-        return PeakToPeak(data, data.length);
-    }
-
-    /**
-     * @param data the input vector
-     * @param length &lt;= data.length elements to be used
-     * @return un-biased r.m.s. of vector elements
-     */
-    public static synchronized double RMS(double[] data, int length) {
-        if (length <= 0)
-            return -1;
-
-        double norm = 1.0 / (length), val1 = 0.0, val2 = 0.0;
-        for (int i = 0; i < length; i++) {
-            val1 += data[i];
-            val2 += data[i] * data[i];
-        }
-
-        val1 *= norm;
-        val2 *= norm;
-        // un-biased rms!
-        return Math.sqrt(Math.abs(val2 - val1 * val1));
-    }
-
-    public static synchronized double RMS(double[] data) {
-        return RMS(data, data.length);
-    }
-
-    /**
-     * @param data the input vector
-     * @param length &lt;= data.length elements to be used
-     * @return un-biased r.m.s. of vector elements
-     */
-    public static synchronized float RMS(float[] data, int length) {
-        if (length <= 0)
-            return -1;
-
-        double norm = 1.0 / (length), val1 = 0.0, val2 = 0.0;
-        for (int i = 0; i < length; i++) {
-            val1 += data[i];
-            val2 += data[i] * data[i];
-        }
-
-        val1 *= norm;
-        val2 *= norm;
-        // un-biased rms!
-        return (float) Math.sqrt(Math.abs(val2 - val1 * val1));
-    }
-
-    public static synchronized float RMS(float[] data) {
-        return RMS(data, data.length);
-    }
-
-    /**
-     * @param data the input vector
-     * @param length &lt;= data.length elements to be used
-     * @return un-biased r.m.s. of vector elements
-     */
-    public static synchronized short RMS(short[] data, int length) {
-        if (length <= 0)
-            return -1;
-
-        double norm = 1.0 / (length), val1 = 0.0, val2 = 0.0;
-        for (int i = 0; i < length; i++) {
-            val1 += data[i];
-            val2 += data[i] * data[i];
-        }
-
-        val1 *= norm;
-        val2 *= norm;
-        // un-biased rms!
-        return (short) Math.sqrt(Math.abs(val2 - val1 * val1));
-    }
-
-    public static synchronized short RMS(short[] data) {
-        return RMS(data, data.length);
-    }
-
-    /**
-     * @param data the input vector
-     * @param length &lt;= data.length elements to be used
-     * @return un-biased r.m.s. of vector elements
-     */
-    public static synchronized int RMS(int[] data, int length) {
-        if (length <= 0)
-            return -1;
-
-        double norm = 1.0 / (length), val1 = 0.0, val2 = 0.0;
-        for (int i = 0; i < data.length; i++) {
-            val1 += data[i];
-            val2 += data[i] * data[i];
-        }
-
-        val1 *= norm;
-        val2 *= norm;
-        // un-biased rms!
-        return (int) Math.sqrt(Math.abs(val2 - val1 * val1));
-    }
-
-    public static synchronized int RMS(int[] data) {
-        return RMS(data, data.length);
-    }
-
-    /**
-     * @param data the input vector
-     * @param length &lt;= d data.length elements to be used
-     * @return un-biased r.m.s. of vector elements
-     */
-    public static synchronized long RMS(long[] data, int length) {
-        if (length <= 0)
-            return -1;
-
-        double norm = 1.0 / (length), val1 = 0.0, val2 = 0.0;
-        for (int i = 0; i < length; i++) {
-            val1 += data[i];
-            val2 += data[i] * data[i];
-        }
-
-        val1 *= norm;
-        val2 *= norm;
-        // un-biased rms!
-        return (long) Math.sqrt(Math.abs(val2 - val1 * val1));
-    }
-
-    public static synchronized long RMS(long[] data) {
-        return RMS(data, data.length);
-    }
-
-    /**
-     * @param a input vector
-     * @param length &lt;= data.length elements to be used
-     * @return index of array with the minimum element. If more than one element is minimum returns first found.
-     */
-    public static synchronized long LocationMinimum(short a[], int length) {
-        if (a == null || a.length <= 0)
-            return -1;
-        short xmin = a[0];
-        long location = 0;
-        for (int i = 1; i < length; i++) {
-            if (xmin > a[i]) {
-                xmin = a[i];
-                location = i;
-            }
-        }
-        return location;
-    }
-
-    /**
-     * @param a input vector
-     * @param length &lt;= data.length elements to be used
-     * @return index of array with the minimum element. If more than one element is minimum returns first found.
-     */
-    public static synchronized long LocationMinimum(int a[], int length) {
-        if (a == null || a.length <= 0)
-            return -1;
-        int xmin = a[0];
-        long location = 0;
-        for (int i = 1; i < length; i++) {
-            if (xmin > a[i]) {
-                xmin = a[i];
-                location = i;
-            }
-        }
-        return location;
-    }
-
-    /**
-     * @param a input vector
-     * @param length &lt;= data.length elements to be used
-     * @return index of array with the minimum element. If more than one element is minimum returns first found.
-     */
-    public static synchronized long LocationMinimum(float a[], int length) {
-        if (a == null || a.length <= 0)
-            return -1;
-        float xmin = a[0];
-        long location = 0;
-        for (int i = 1; i < length; i++) {
-            if (xmin > a[i]) {
-                xmin = a[i];
-                location = i;
-            }
-        }
-        return location;
-    }
-
-    /**
-     * @param a input vector
-     * @param length &lt;= data.length elements to be used
-     * @return index of array with the minimum element. If more than one element is minimum returns first found.
-     */
-    public static synchronized long LocationMinimum(double a[], int length) {
-        if (a == null || a.length <= 0)
-            return -1;
-        double xmin = a[0];
-        long location = 0;
-        for (int i = 1; i < length; i++) {
-            if (xmin > a[i]) {
-                xmin = a[i];
-                location = i;
-            }
-        }
-        return location;
-    }
-
-    /**
-     * @param a input vector
-     * @param length &lt;= data.length elements to be used
-     * @return index of array with the minimum element. If more than one element is minimum returns first found.
-     */
-    public static synchronized long LocationMinimum(long a[], int length) {
-        if (a == null || a.length <= 0)
-            return -1;
-        long xmin = a[0];
-        long location = 0;
-        for (int i = 1; i < length; i++) {
-            if (xmin > a[i]) {
-                xmin = a[i];
-                location = i;
-            }
-        }
-        return location;
-    }
-
-    /**
-     * @param a input vector
-     * @param length &lt;= data.length elements to be used
-     * @return index of array with the minimum element. If more than one element is minimum returns first found.
-     */
-    public static synchronized long LocationMaximum(int a[], int length) {
-        if (a == null || a.length <= 0)
-            return -1;
-        int xmax = a[0];
-        long location = 0;
-        for (int i = 1; i < length; i++) {
-            if (xmax < a[i]) {
-                xmax = a[i];
-                location = i;
-            }
-        }
-        return location;
-    }
-
-    /**
-     * @param a input vector
-     * @param length &lt;= data.length elements to be used
-     * @return index of array with the minimum element. If more than one element is minimum returns first found.
-     */
-    public static synchronized long LocationMaximum(float a[], int length) {
-        if (a == null || a.length <= 0)
-            return -1;
-        float xmax = a[0];
-        long location = 0;
-        for (int i = 1; i < length; i++) {
-            if (xmax < a[i]) {
-                xmax = a[i];
-                location = i;
-            }
-        }
-        return location;
-    }
-
-    /**
-     * @param a input vector
-     * @param length &lt;= data.length elements to be used
-     * @return index of array with the minimum element. If more than one element is minimum returns first found.
-     */
-    public static synchronized long LocationMaximum(double a[], int length) {
-        if (a == null || a.length <= 0)
-            return -1;
-        double xmax = a[0];
-        long location = 0;
-        for (int i = 1; i < length; i++) {
-            if (xmax < a[i]) {
-                xmax = a[i];
-                location = i;
-            }
-        }
-        return location;
-    }
-
-    /**
-     * @param a input vector
-     * @param length &lt;= data.length elements to be used
-     * @return index of array with the minimum element. If more than one element is minimum returns first found.
-     */
-    public static synchronized long LocationMaximum(long a[], int length) {
-        if (a == null || a.length <= 0)
-            return -1;
-        long xmax = a[0];
-        long location = 0;
-        for (int i = 1; i < length; i++) {
-            if (xmax < a[i]) {
-                xmax = a[i];
-                location = i;
-            }
-        }
-        return location;
-    }
-
-    /**
-     * geometric_mean = (\Prod_{i=0}^{n-1} \abs{a[i]})^{1/n}
-     * 
-     * @param a input vector
-     * @param length &lt;= data.length elements to be used
-     * @return geometric mean of an array a with length n.
-     */
-    public static synchronized short GeometricMean(short a[], int length) {
-        if (a == null || a.length <= 0)
-            return -1;
-        double logsum = 0.0;
-
-        // use logarithm represenation:
-        // product in linear regime -> sum in logarithmic scale
-        for (int i = 0; i < length; i++) {
-            if (a[i] == 0)
-                return 0;
-            double absa = Math.abs(a[i]);
-            logsum += Math.log(absa);
-        }
-
-        return (short) Math.exp(logsum / a.length);
-    }
-
-    public static synchronized short GeometricMean(short[] data) {
-        return GeometricMean(data, data.length);
-    }
-
-    /**
-     * geometric_mean = (\Prod_{i=0}^{n-1} \abs{a[i]})^{1/n}
-     * 
-     * @param a input vector
-     * @param length &lt;= data.length elements to be used
-     * @return geometric mean of an array a with length n.
-     */
-    public static synchronized int GeometricMean(int a[], int length) {
-        if (a == null || a.length <= 0)
-            return -1;
-        double logsum = 0.0;
-
-        // use logarithm represenation:
-        // product in linear regime -> sum in logarithmic scale
-        for (int i = 0; i < length; i++) {
-            if (a[i] == 0)
-                return 0;
-            double absa = Math.abs(a[i]);
-            logsum += Math.log(absa);
-        }
-
-        return (int) Math.exp(logsum / length);
-    }
-
-    public static synchronized int GeometricMean(int[] data) {
-        return GeometricMean(data, data.length);
-    }
-
-    /**
-     * geometric_mean = (\Prod_{i=0}^{n-1} \abs{a[i]})^{1/n}
-     * 
-     * @param a input vector
-     * @param length &lt;= data.length elements to be used
-     * @return geometric mean of an array a with length n.
-     */
-    public static synchronized float GeometricMean(float a[], int length) {
-        if (a == null || a.length <= 0)
-            return -1;
-        double logsum = 0.0;
-
-        // use logarithm represenation:
-        // product in linear regime -> sum in logarithmic scale
-        for (int i = 0; i < length; i++) {
-            if (a[i] == 0)
-                return 0.f;
-            double absa = Math.abs(a[i]);
-            logsum += Math.log(absa);
-        }
-
-        return (float) Math.exp(logsum / length);
-    }
-
-    public static synchronized float GeometricMean(float[] data) {
-        return GeometricMean(data, data.length);
-    }
-
-    /**
-     * geometric_mean = (\Prod_{i=0}^{n-1} \abs{a[i]})^{1/n}
-     * 
-     * @param a input vector
-     * @param length &lt;= data.length elements to be used
-     * @return geometric mean of an array a with length n.
-     */
-    public static synchronized double GeometricMean(double a[], int length) {
-        if (a == null || a.length <= 0)
-            return -1;
-        double logsum = 0.0;
-
-        // use logarithm represenation:
-        // product in linear regime -> sum in logarithmic scale
-        for (int i = 0; i < length; i++) {
-            if (a[i] == 0)
-                return 0.;
-            double absa = Math.abs(a[i]);
-            logsum += Math.log(absa);
-        }
-
-        return Math.exp(logsum / length);
-    }
-
-    public static synchronized double GeometricMean(double[] data) {
-        return GeometricMean(data, data.length);
-    }
-
-    /**
-     * geometric_mean = (\Prod_{i=0}^{n-1} \abs{a[i]})^{1/n}
-     * 
-     * @param a input vector
-     * @param length &lt;= data.length elements to be used
-     * @return geometric mean of an array a with length n.
-     */
-    public static synchronized long GeometricMean(long a[], int length) {
-        if (a == null || a.length <= 0)
-            return -1;
-        double logsum = 0.0;
-
-        // use logarithm represenation:
-        // product in linear regime -> sum in logarithmic scale
-        for (int i = 0; i < length; i++) {
-            if (a[i] == 0)
-                return 0;
-            double absa = Math.abs(a[i]);
-            logsum += Math.log(absa);
-        }
-
-        return (long) Math.exp(logsum / length);
-    }
-
-    public static synchronized long GeometricMean(long[] data) {
-        return GeometricMean(data, data.length);
-    }
-
-    /**
-     * Calculate weighted correlation coefficient x y data and weights w as double
-     * 
-     * @param x input vector 1
-     * @param y input vector 2
-     * @param w wheights weight vector
-     * @return weighted correlation coefficient
-     */
-    public static double CorrelationCoefficient(double[] x, double[] y, double[] w) {
-        final int n = x.length;
-        if (y.length != n) {
-            throw new IllegalArgumentException("x and y array lengths must be equal");
-        }
-        if (w.length != n) {
-            throw new IllegalArgumentException("x and weight array lengths must be equal");
-        }
-
-        double sxy = Covariance(x, y, w);
-        double sx = Variance(x, w);
-        double sy = Variance(y, w);
-        return sxy / Math.sqrt(sx * sy);
-    }
-
-    // Calculation of the effective sample number (double)
-    public static double effectiveSampleNumber(double[] ww) {
-        double[] weight = ww.clone();
-        if (true) {
-            for (int i = 0; i < weight.length; i++) {
-                weight[i] = 1.0 / TMath.Sqr(weight[i]);
-            }
-        }
-        int n = weight.length;
-
-        double nEff = n;
-        if (true) {
-            double sum2w = 0.0D;
-            double sumw2 = 0.0D;
-            for (int i = 0; i < n; i++) {
-                sum2w += weight[i];
-                sumw2 += weight[i] * weight[i];
-            }
-            sum2w *= sum2w;
-            nEff = sum2w / sumw2;
-        }
-        return nEff;
-    }
-
-    public static double Variance(double[] aa, double[] ww) {
-        int n = aa.length;
-        if (n != ww.length)
-            throw new IllegalArgumentException(
-                    "length of variable array, " + n + " and length of weight array, " + ww.length + " are different");
-        double nn = TMath.effectiveSampleNumber(ww);
-        double nterm = nn / (nn - 1.0);
-        // nterm = 1.0; // n
-
-        double sumx = 0.0D, sumw = 0.0D, mean = 0.0D;
-        double[] weight = invertAndSquare(ww);
-        for (int i = 0; i < n; i++) {
-            sumx += aa[i] * weight[i];
-            sumw += weight[i];
-        }
-        mean = sumx / sumw;
-        sumx = 0.0D;
-        for (int i = 0; i < n; i++) {
-            sumx += weight[i] * TMath.Sqr(aa[i] - mean);
-        }
-        return sumx * nterm / sumw;
-    }
-
-    /**
-     * calculated weighted covariance xx and yy with weights ww
-     * 
-     * @param xx input vector 1
-     * @param yy input vector 2
-     * @param ww weights
-     * @return weighted covariance
-     */
-    public static double Covariance(double[] xx, double[] yy, double[] ww) {
-        final int n = xx.length;
-        if (n != yy.length)
-            throw new IllegalArgumentException(
-                    "length of x variable array, " + n + " and length of y array, " + yy.length + " are different");
-        if (n != ww.length)
-            throw new IllegalArgumentException("length of x variable array, " + n + " and length of weight array, "
-                    + yy.length + " are different");
-        double nn = TMath.effectiveSampleNumber(ww);
-        double nterm = nn / (nn - 1.0);
-        if (/* n-factor tue: */true) {
-            // nterm = 1.0;
-        }
-        double sumx = 0.0D, sumy = 0.0D, sumw = 0.0D, meanx = 0.0D, meany = 0.0D;
-        double[] weight = invertAndSquare(ww); // invert and square weights
-
-        for (int i = 0; i < n; i++) {
-            sumx += xx[i] * weight[i];
-            sumy += yy[i] * weight[i];
-            sumw += weight[i];
-        }
-        meanx = sumx / sumw;
-        meany = sumy / sumw;
-
-        double sum = 0.0D;
-        for (int i = 0; i < n; i++) {
-            sum += weight[i] * (xx[i] - meanx) * (yy[i] - meany);
-        }
-        return sum * nterm / sumw;
-    }
-
-    private static double[] invertAndSquare(double[] values) {
-        double[] ret = new double[values.length];
-
-        // TODO: check NaN, inf... cases in other derived function
-        for (int i = 0; i < values.length; i++) {
-            final double val = values[i];
-            if (val == 0.0) {
-                ret[i] = Double.POSITIVE_INFINITY;
-            } else if (Double.isNaN(val)) {
-                ret[i] = Double.NaN;
-            } else if (Double.isInfinite(val)) {
-                ret[i] = 0.0;
-            } else {
-                ret[i] = 1.0 / TMath.Power(val, 2);
-            }
-        }
-        return ret;
-    }
-
-    // TODO: check whether we need harmonic mean as well.
-    // hm = n / \sum_i^{n} 1/x_i
-
-    /**
-     * Binary search in an array of n values to locate value. Array is supposed to be sorted prior to this call. If
-     * match is found, function returns position of element. If no match found, function gives nearest element smaller
-     * than value.
-     * 
-     * @param array input vector
-     * @param length &lt;= data.length elements to be used
-     * @param value to be searched
-     * @return index of found value, -1 otherwise
-     */
-    public static long BinarySearch(short array[], int length, short value) {
-        if (array == null || array.length <= 0)
-            return -1;
-        int n = length;
-        int nabove, nbelow, middle;
-
-        nabove = n + 1;
-        nbelow = 0;
-        while (nabove - nbelow > 1) {
-            middle = (nabove + nbelow) / 2;
-            if (value == array[middle - 1])
-                return middle - 1;
-            if (value < array[middle - 1])
-                nabove = middle;
-            else
-                nbelow = middle;
-        }
-        return nbelow - 1;
     }
 
     /**
@@ -2489,7 +1154,7 @@ public class TMath extends TMathConstants {
      * @param value to be searched
      * @return index of found value, -1 otherwise
      */
-    public static long BinarySearch(int array[], int length, int value) {
+    public static long BinarySearch(double array[], int length, double value) {
         if (array == null || array.length <= 0)
             return -1;
         int n = length;
@@ -2551,7 +1216,7 @@ public class TMath extends TMathConstants {
      * @param value to be searched
      * @return index of found value, -1 otherwise
      */
-    public static long BinarySearch(double array[], int length, double value) {
+    public static long BinarySearch(int array[], int length, int value) {
         if (array == null || array.length <= 0)
             return -1;
         int n = length;
@@ -2604,214 +1269,278 @@ public class TMath extends TMathConstants {
     }
 
     /**
-     * Sorts the input a array
+     * Binary search in an array of n values to locate value. Array is supposed to be sorted prior to this call. If
+     * match is found, function returns position of element. If no match found, function gives nearest element smaller
+     * than value.
      * 
-     * @param a the input array
+     * @param array input vector
      * @param length &lt;= data.length elements to be used
-     * @param down true: ascending , false: descending order
-     * @return the sorted array
+     * @param value to be searched
+     * @return index of found value, -1 otherwise
      */
-    public static synchronized short[] Sort(short a[], int length, boolean down) {
-        if (a == null || a.length <= 0) {
-            return null;
-        }
-        short[] index = java.util.Arrays.copyOf(a, length);
-        java.util.Arrays.sort(index);
+    public static long BinarySearch(short array[], int length, short value) {
+        if (array == null || array.length <= 0)
+            return -1;
+        int n = length;
+        int nabove, nbelow, middle;
 
-        if (down) {
-            short temp;
-            int nlast = length - 1;
-            for (int i = 0; i < (length / 2); i++) {
-                // swap values
-                temp = index[i];
-                index[i] = index[nlast - i];
-                index[nlast - i] = temp;
+        nabove = n + 1;
+        nbelow = 0;
+        while (nabove - nbelow > 1) {
+            middle = (nabove + nbelow) / 2;
+            if (value == array[middle - 1])
+                return middle - 1;
+            if (value < array[middle - 1])
+                nabove = middle;
+            else
+                nbelow = middle;
+        }
+        return nbelow - 1;
+    }
+
+    public static double Binomial(int n, int k) {
+        // Calculate the binomial coefficient n over k.
+
+        if (k == 0 || n == k)
+            return 1;
+        if (n <= 0 || k < 0 || n < k)
+            return 0;
+
+        int k1 = Min(k, n - k);
+        int k2 = n - k1;
+        double fact = k2 + 1;
+        for (int i = k1; i > 1; i--)
+            fact *= (double) (k2 + i) / i;
+        return fact;
+    }
+
+    public static double BinomialI(double p, int n, int k) {
+        // Suppose an event occurs with probability _p_ per trial
+        // Then the probability P of its occuring _k_ or more times
+        // in _n_ trials is termed a cumulative binomial probability
+        // the formula is P = sum_from_j=k_to_n(Binomial(n, j)*
+        // *Power(p, j)*Power(1-p, n-j)
+        // For _n_ larger than 12 BetaIncomplete is a much better way
+        // to evaluate the sum than would be the straightforward sum calculation
+        // for _n_ smaller than 12 either method is acceptable
+        // ("Numerical Recipes")
+        // --implementation by Anna Kreshuk
+
+        if (k <= 0)
+            return 1.0;
+        if (k > n)
+            return 0.0;
+        if (k == n)
+            return Power(p, n);
+
+        return BetaIncomplete(p, k, n - k + 1);
+    }
+
+    /**
+     * Calculate a Breit Wigner function with mean and gamma.
+     * 
+     * @param x input parameter
+     * @param mean centre of distribution
+     * @param gamma width of distribution
+     * @return the computed result
+     */
+    public static double BreitWigner(double x, double mean, double gamma) {
+        double bw = gamma / ((x - mean) * (x - mean) + gamma * gamma / 4);
+        return bw / (2 * Pi());
+    }
+
+    /**
+     * Computes the density of Cauchy distribution at point x The Cauchy distribution, also called Lorentzian
+     * distribution, is a continuous distribution describing resonance behavior The mean and standard deviation of the
+     * Cauchy distribution are undefined. The practical meaning of this is that collecting 1,000 data points gives no
+     * more accurate an estimate of the mean and standard deviation than does a single point. The formula was taken from
+     * "Engineering Statistics Handbook" on site http://www.itl.nist.gov/div898/handbook/eda/section3/eda3663.htm
+     * Implementation by Anna Kreshuk.
+     * 
+     * @param x input value
+     * @param t the location parameter
+     * @param s the scale parameter
+     * @return Cauchy distribution at point x
+     */
+    public static double CauchyDist(double x, double t, double s) {
+
+        double temp = (x - t) * (x - t) / (s * s);
+        double result = 1 / (s * Pi() * (1 + temp));
+        return result;
+    }
+
+    // TODO: add array statistics here
+
+    /**
+     * Evaluate the quantiles of the chi-squared probability distribution function. Algorithm AS 91 Appl. Statist.
+     * (1975) Vol.24, P.35 implemented by Anna Kreshuk. Incorporates the suggested changes in AS R85 (vol.40(1),
+     * pp.233-5, 1991)
+     * 
+     * @param p the probability value, at which the quantile is computed
+     * @param ndf number of degrees of freedom
+     * @return quantiles of the chi-squared probability distribution
+     */
+    public static double ChisquareQuantile(double p, double ndf) {
+
+        double c[] = { 0, 0.01, 0.222222, 0.32, 0.4, 1.24, 2.2, 4.67, 6.66, 6.73, 13.32, 60.0, 70.0, 84.0, 105.0, 120.0,
+                127.0, 140.0, 175.0, 210.0, 252.0, 264.0, 294.0, 346.0, 420.0, 462.0, 606.0, 672.0, 707.0, 735.0, 889.0,
+                932.0, 966.0, 1141.0, 1182.0, 1278.0, 1740.0, 2520.0, 5040.0 };
+        double e = 5e-7;
+        double aa = 0.6931471806;
+        int maxit = 20;
+        double ch, p1, p2, q, t, a, b, x;
+        double s1, s2, s3, s4, s5, s6;
+
+        if (ndf <= 0)
+            return 0;
+
+        double g = LnGamma(0.5 * ndf);
+
+        double xx = 0.5 * ndf;
+        double cp = xx - 1;
+        if (ndf >= Log(p) * (-c[5])) {
+            // starting approximation for ndf less than or equal to 0.32
+            if (ndf > c[3]) {
+                x = NormQuantile(p);
+                // starting approximation using Wilson and Hilferty estimate
+                p1 = c[2] / ndf;
+                ch = ndf * Power((x * Sqrt(p1) + 1 - p1), 3);
+                if (ch > c[6] * ndf + 6)
+                    ch = -2 * (Log(1 - p) - cp * Log(0.5 * ch) + g);
+            } else {
+                ch = c[4];
+                a = Log(1 - p);
+                do {
+                    q = ch;
+                    p1 = 1 + ch * (c[7] + ch);
+                    p2 = ch * (c[9] + ch * (c[8] + ch));
+                    t = -0.5 + (c[7] + 2 * ch) / p1 - (c[9] + ch * (c[10] + 3 * ch)) / p2;
+                    ch = ch - (1 - Exp(a + g + 0.5 * ch + cp * aa) * p2 / p1) / t;
+                } while (Abs(q / ch - 1) > c[1]);
             }
+        } else {
+            ch = Power((p * xx * Exp(g + xx * aa)), (1. / xx));
+            if (ch < e)
+                return ch;
         }
-        return index;
+        // call to algorithm AS 239 and calculation of seven term Taylor series
+        for (int i = 0; i < maxit; i++) {
+            q = ch;
+            p1 = 0.5 * ch;
+            p2 = p - Gamma(xx, p1);
+
+            t = p2 * Exp(xx * aa + g + p1 - cp * Log(ch));
+            b = t / ch;
+            a = 0.5 * t - b * cp;
+            s1 = (c[19] + a * (c[17] + a * (c[14] + a * (c[13] + a * (c[12] + c[11] * a))))) / c[24];
+            s2 = (c[24] + a * (c[29] + a * (c[32] + a * (c[33] + c[35] * a)))) / c[37];
+            s3 = (c[19] + a * (c[25] + a * (c[28] + c[31] * a))) / c[37];
+            s4 = (c[20] + a * (c[27] + c[34] * a) + cp * (c[22] + a * (c[30] + c[36] * a))) / c[38];
+            s5 = (c[13] + c[21] * a + cp * (c[18] + c[26] * a)) / c[37];
+            s6 = (c[15] + cp * (c[23] + c[16] * cp)) / c[38];
+            ch = ch + t * (1 + 0.5 * t * s1 - b * cp * (s1 - b * (s2 - b * (s3 - b * (s4 - b * (s5 - b * s6))))));
+            if (Abs(q / ch - 1) > e)
+                break;
+        }
+        return ch;
     }
 
     /**
-     * Sorts the input a array
+     * Calculate weighted correlation coefficient x y data and weights w as double
      * 
-     * @param a the input array
-     * @param length &lt;= data.length elements to be used
-     * @param down true: ascending , false: descending order
-     * @return the sorted array
+     * @param x input vector 1
+     * @param y input vector 2
+     * @param w wheights weight vector
+     * @return weighted correlation coefficient
      */
-    public static synchronized int[] Sort(int a[], int length, boolean down) {
-        if (a == null || a.length <= 0) {
-            return null;
+    public static double CorrelationCoefficient(double[] x, double[] y, double[] w) {
+        final int n = x.length;
+        if (y.length != n) {
+            throw new IllegalArgumentException("x and y array lengths must be equal");
         }
-        int[] index = java.util.Arrays.copyOf(a, length);
-        java.util.Arrays.sort(index);
+        if (w.length != n) {
+            throw new IllegalArgumentException("x and weight array lengths must be equal");
+        }
 
-        if (down) {
-            int temp;
-            int nlast = length - 1;
-            for (int i = 0; i < (length / 2); i++) {
-                // swap values
-                temp = index[i];
-                index[i] = index[nlast - i];
-                index[nlast - i] = temp;
-            }
-        }
-        return index;
+        double sxy = Covariance(x, y, w);
+        double sx = Variance(x, w);
+        double sy = Variance(y, w);
+        return sxy / Math.sqrt(sx * sy);
     }
 
     /**
-     * Sorts the input a array
+     * calculated weighted covariance xx and yy with weights ww
      * 
-     * @param a the input array
-     * @param length &lt;= data.length elements to be used
-     * @param down true: ascending , false: descending order
-     * @return the sorted array
+     * @param xx input vector 1
+     * @param yy input vector 2
+     * @param ww weights
+     * @return weighted covariance
      */
-    public static synchronized float[] Sort(float a[], int length, boolean down) {
-        if (a == null || a.length <= 0) {
-            return null;
+    public static double Covariance(double[] xx, double[] yy, double[] ww) {
+        final int n = xx.length;
+        if (n != yy.length)
+            throw new IllegalArgumentException(
+                    "length of x variable array, " + n + " and length of y array, " + yy.length + " are different");
+        if (n != ww.length)
+            throw new IllegalArgumentException("length of x variable array, " + n + " and length of weight array, "
+                    + yy.length + " are different");
+        double nn = TMath.effectiveSampleNumber(ww);
+        double nterm = nn / (nn - 1.0);
+        if (/* n-factor tue: */true) {
+            // nterm = 1.0;
         }
-        float[] index = java.util.Arrays.copyOf(a, length);
-        java.util.Arrays.sort(index);
+        double sumx = 0.0D, sumy = 0.0D, sumw = 0.0D, meanx = 0.0D, meany = 0.0D;
+        double[] weight = invertAndSquare(ww); // invert and square weights
 
-        if (down) {
-            float temp;
-            int nlast = length - 1;
-            for (int i = 0; i < (length / 2); i++) {
-                // swap values
-                temp = index[i];
-                index[i] = index[nlast - i];
-                index[nlast - i] = temp;
-            }
+        for (int i = 0; i < n; i++) {
+            sumx += xx[i] * weight[i];
+            sumy += yy[i] * weight[i];
+            sumw += weight[i];
         }
-        return index;
+        meanx = sumx / sumw;
+        meany = sumy / sumw;
+
+        double sum = 0.0D;
+        for (int i = 0; i < n; i++) {
+            sum += weight[i] * (xx[i] - meanx) * (yy[i] - meany);
+        }
+        return sum * nterm / sumw;
     }
 
     /**
-     * Sorts the input a array
+     * Calculate the Cross Product of two vectors:
      * 
-     * @param a the input array
-     * @param length &lt;= data.length elements to be used
-     * @param down true: ascending , false: descending order
-     * @return the sorted array
+     * @param v1 input vector1
+     * @param v2 input vector2
+     * @param out output vector
+     * @return out = [v1 x v2]
      */
-    public static synchronized double[] Sort(double a[], int length, boolean down) {
-        if (a == null || a.length <= 0) {
-            return null;
-        }
-        double[] index = java.util.Arrays.copyOf(a, length);
-        java.util.Arrays.sort(index);
+    public static double[] Cross(double v1[], double v2[], double out[]) {
 
-        if (down) {
-            double temp;
-            int nlast = length - 1;
-            for (int i = 0; i < (length / 2); i++) {
-                // swap values
-                temp = index[i];
-                index[i] = index[nlast - i];
-                index[nlast - i] = temp;
-            }
-        }
-        return index;
+        out[0] = v1[1] * v2[2] - v1[2] * v2[1];
+        out[1] = v1[2] * v2[0] - v1[0] * v2[2];
+        out[2] = v1[0] * v2[1] - v1[1] * v2[0];
+        return out;
     }
 
     /**
-     * Sorts the input a array
+     * Calculate the Cross Product of two vectors:
      * 
-     * @param a the input array
-     * @param length &lt;= data.length elements to be used
-     * @param down true: ascending , false: descending order
-     * @return the sorted array
+     * @param v1 input vector1
+     * @param v2 input vector2
+     * @param out output vector
+     * @return out = [v1 x v2]
      */
-    public static synchronized long[] Sort(long a[], int length, boolean down) {
-        if (a == null || a.length <= 0) {
-            return null;
-        }
-        long[] index = java.util.Arrays.copyOf(a, length);
-        java.util.Arrays.sort(index);
+    public static float[] Cross(float v1[], float v2[], float out[]) {
 
-        if (down) {
-            long temp;
-            int nlast = length - 1;
-            for (int i = 0; i < (length / 2); i++) {
-                // swap values
-                temp = index[i];
-                index[i] = index[nlast - i];
-                index[nlast - i] = temp;
-            }
-        }
-        return index;
+        out[0] = v1[1] * v2[2] - v1[2] * v2[1];
+        out[1] = v1[2] * v2[0] - v1[0] * v2[2];
+        out[2] = v1[0] * v2[1] - v1[1] * v2[0];
+
+        return out;
     }
 
-    /**
-     * computes the difference between vectors
-     * 
-     * @param a input vector a
-     * @param b input vector b
-     * @param length minimum length to be taken into account
-     * @return ret[] = a[] - b[]
-     */
-    public static synchronized short[] Difference(short[] a, short[] b, int length) {
-        if (length <= 0 || a == null || b == null || a.length < length || b.length < length) {
-            return null;
-        }
-        short[] ret = new short[length];
-        for (int i = 0; i < length; i++) {
-            ret[i] = (short) (a[i] - b[i]);
-        }
-
-        return ret;
-    }
-
-    public static synchronized short[] Difference(short[] a, short[] b) {
-        return Difference(a, b, a.length);
-    }
-
-    /**
-     * computes the difference between vectors
-     * 
-     * @param a input vector a
-     * @param b input vector b
-     * @param length minimum length to be taken into account
-     * @return ret[] = a[] - b[]
-     */
-    public static synchronized int[] Difference(int[] a, int[] b, int length) {
-        if (length <= 0 || a == null || b == null || a.length < length || b.length < length) {
-            return null;
-        }
-        int[] ret = new int[length];
-        for (int i = 0; i < length; i++) {
-            ret[i] = (a[i] - b[i]);
-        }
-
-        return ret;
-    }
-
-    public static synchronized int[] Difference(int[] a, int[] b) {
-        return Difference(a, b, a.length);
-    }
-
-    /**
-     * computes the difference between vectors
-     * 
-     * @param a input vector a
-     * @param b input vector b
-     * @param length minimum length to be taken into account
-     * @return ret[] = a[] - b[]
-     */
-    public static synchronized float[] Difference(float[] a, float[] b, int length) {
-        if (length <= 0 || a == null || b == null || a.length < length || b.length < length) {
-            return null;
-        }
-        float[] ret = new float[length];
-        for (int i = 0; i < length; i++) {
-            ret[i] = (a[i] - b[i]);
-        }
-
-        return ret;
-    }
-
-    public static synchronized float[] Difference(float[] a, float[] b) {
+    public static synchronized double[] Difference(double[] a, double[] b) {
         return Difference(a, b, a.length);
     }
 
@@ -2835,7 +1564,55 @@ public class TMath extends TMathConstants {
         return ret;
     }
 
-    public static synchronized double[] Difference(double[] a, double[] b) {
+    public static synchronized float[] Difference(float[] a, float[] b) {
+        return Difference(a, b, a.length);
+    }
+
+    /**
+     * computes the difference between vectors
+     * 
+     * @param a input vector a
+     * @param b input vector b
+     * @param length minimum length to be taken into account
+     * @return ret[] = a[] - b[]
+     */
+    public static synchronized float[] Difference(float[] a, float[] b, int length) {
+        if (length <= 0 || a == null || b == null || a.length < length || b.length < length) {
+            return null;
+        }
+        float[] ret = new float[length];
+        for (int i = 0; i < length; i++) {
+            ret[i] = (a[i] - b[i]);
+        }
+
+        return ret;
+    }
+
+    public static synchronized int[] Difference(int[] a, int[] b) {
+        return Difference(a, b, a.length);
+    }
+
+    /**
+     * computes the difference between vectors
+     * 
+     * @param a input vector a
+     * @param b input vector b
+     * @param length minimum length to be taken into account
+     * @return ret[] = a[] - b[]
+     */
+    public static synchronized int[] Difference(int[] a, int[] b, int length) {
+        if (length <= 0 || a == null || b == null || a.length < length || b.length < length) {
+            return null;
+        }
+        int[] ret = new int[length];
+        for (int i = 0; i < length; i++) {
+            ret[i] = (a[i] - b[i]);
+        }
+
+        return ret;
+    }
+
+    public static synchronized long[] Difference(long[] a, long[] b) {
         return Difference(a, b, a.length);
     }
 
@@ -2859,19 +1636,19 @@ public class TMath extends TMathConstants {
         return ret;
     }
 
-    public static synchronized long[] Difference(long[] a, long[] b) {
+    public static synchronized short[] Difference(short[] a, short[] b) {
         return Difference(a, b, a.length);
     }
 
     /**
-     * computes the sum of vectors
+     * computes the difference between vectors
      * 
      * @param a input vector a
      * @param b input vector b
      * @param length minimum length to be taken into account
-     * @return ret[] = a[] + b[]
+     * @return ret[] = a[] - b[]
      */
-    public static synchronized short[] Sum(short[] a, short[] b, int length) {
+    public static synchronized short[] Difference(short[] a, short[] b, int length) {
         if (length <= 0 || a == null || b == null || a.length < length || b.length < length) {
             return null;
         }
@@ -2883,104 +1660,646 @@ public class TMath extends TMathConstants {
         return ret;
     }
 
-    public static synchronized short[] Sum(short[] a, short[] b) {
-        return Sum(a, b, a.length);
+    /**
+     * The DiLogarithm function Code translated by from CERNLIB DILOG function C332
+     * 
+     * @param x input
+     * @return the computed result
+     */
+    public static double DiLog(double x) {
+        double hf = 0.5;
+        double pi = Pi();
+        double pi2 = pi * pi;
+        double pi3 = pi2 / 3;
+        double pi6 = pi2 / 6;
+        double pi12 = pi2 / 12;
+        double c[] = { +0.42996693560813697, +0.40975987533077105, -0.01858843665014592, +0.00145751084062268,
+                -0.00014304184442340, +0.00001588415541880, -0.00000190784959387, +0.00000024195180854,
+                -0.00000003193341274, +0.00000000434545063, -0.00000000060578480, +0.00000000008612098,
+                -0.00000000001244332, +0.00000000000182256, -0.00000000000027007, +0.00000000000004042,
+                -0.00000000000000610, +0.00000000000000093, -0.00000000000000014, +0.00000000000000002 };
+
+        double t, h, y, s, a, alfa, b1, b2, b0 = 0.0;
+
+        if (x == 1) {
+            h = pi6;
+        } else if (x == -1) {
+            h = -pi12;
+        } else {
+            t = -x;
+            if (t <= -2) {
+                y = -1 / (1 + t);
+                s = 1;
+                b1 = Log(-t);
+                b2 = Log(1 + 1 / t);
+                a = -pi3 + hf * (b1 * b1 - b2 * b2);
+            } else if (t < -1) {
+                y = -1 - t;
+                s = -1;
+                a = Log(-t);
+                a = -pi6 + a * (a + Log(1 + 1 / t));
+            } else if (t <= -0.5) {
+                y = -(1 + t) / t;
+                s = 1;
+                a = Log(-t);
+                a = -pi6 + a * (-hf * a + Log(1 + t));
+            } else if (t < 0) {
+                y = -t / (1 + t);
+                s = -1;
+                b1 = Log(1 + t);
+                a = hf * b1 * b1;
+            } else if (t <= 1) {
+                y = t;
+                s = 1;
+                a = 0;
+            } else {
+                y = 1 / t;
+                s = -1;
+                b1 = Log(t);
+                a = pi6 + hf * b1 * b1;
+            }
+
+            h = y + y - 1;
+            alfa = h + h;
+            b1 = 0;
+            b2 = 0;
+
+            for (int i = 19; i >= 0; i--) {
+                b0 = c[i] + alfa * b1 - b2;
+                b2 = b1;
+                b1 = b0;
+            }
+
+            h = -(s * (b0 - h * b2) + a);
+        }
+
+        return h;
+    }
+
+    // Calculation of the effective sample number (double)
+    public static double effectiveSampleNumber(double[] ww) {
+        double[] weight = ww.clone();
+        if (true) {
+            for (int i = 0; i < weight.length; i++) {
+                weight[i] = 1.0 / TMath.Sqr(weight[i]);
+            }
+        }
+        int n = weight.length;
+
+        double nEff = n;
+        if (true) {
+            double sum2w = 0.0D;
+            double sumw2 = 0.0D;
+            for (int i = 0; i < n; i++) {
+                sum2w += weight[i];
+                sumw2 += weight[i] * weight[i];
+            }
+            sum2w *= sum2w;
+            nEff = sum2w / sumw2;
+        }
+        return nEff;
     }
 
     /**
-     * computes the sum of vectors
+     * Computation of the error function erf(x). Erf(x) = (2/sqrt(pi)) Integral(exp(-t^2))dt between 0 and x --- NvE
+     * 14-nov-1998 UU-SAP Utrecht
      * 
-     * @param a input vector a
-     * @param b input vector b
-     * @param length minimum length to be taken into account
-     * @return ret[] = a[] + b[]
+     * @param x input
+     * @return the computed result
      */
-    public static synchronized int[] Sum(int[] a, int[] b, int length) {
-        if (length <= 0 || a == null || b == null || a.length < length || b.length < length) {
-            return null;
-        }
-        int[] ret = new int[length];
-        for (int i = 0; i < length; i++) {
-            ret[i] = (a[i] - b[i]);
-        }
-
-        return ret;
-    }
-
-    public static synchronized int[] Sum(int[] a, int[] b) {
-        return Sum(a, b, a.length);
+    public static double Erf(double x) {
+        return (1 - Erfc(x));
     }
 
     /**
-     * computes the sum of vectors
+     * Compute the complementary error function erfc(x). Erfc(x) = (2/sqrt(pi)) Integral(exp(-t^2))dt between x and
+     * infinity Nve 14-nov-1998 UU-SAP Utrecht
      * 
-     * @param a input vector a
-     * @param b input vector b
-     * @param length minimum length to be taken into account
-     * @return ret[] = a[] + b[]
+     * @param x input parameter
+     * @return the computed result
      */
-    public static synchronized float[] Sum(float[] a, float[] b, int length) {
-        if (length <= 0 || a == null || b == null || a.length < length || b.length < length) {
-            return null;
-        }
-        float[] ret = new float[length];
-        for (int i = 0; i < length; i++) {
-            ret[i] = (a[i] - b[i]);
-        }
+    public static double Erfc(double x) {
+        // The parameters of the Chebyshev fit
+        double a1 = -1.26551223, a2 = 1.00002368, a3 = 0.37409196, a4 = 0.09678418, a5 = -0.18628806, a6 = 0.27886807,
+                a7 = -1.13520398, a8 = 1.48851587, a9 = -0.82215223, a10 = 0.17087277;
 
-        return ret;
-    }
+        double v = 1; // The return value
+        double z = Math.abs(x);
 
-    public static synchronized float[] Sum(float[] a, float[] b) {
-        return Sum(a, b, a.length);
+        if (z <= 0)
+            return v; // erfc(0)=1
+
+        double t = 1 / (1 + 0.5 * z);
+
+        v = t * Exp((-z * z) + a1
+                + t * (a2 + t * (a3 + t * (a4 + t * (a5 + t * (a6 + t * (a7 + t * (a8 + t * (a9 + t * a10)))))))));
+
+        if (x < 0)
+            v = 2 - v; // erfc(-x)=2-erfc(x)
+
+        return v;
     }
 
     /**
-     * computes the sum of vectors
+     * returns the inverse error function
      * 
-     * @param a input vector a
-     * @param b input vector b
-     * @param length minimum length to be taken into account
-     * @return ret[] = a[] + b[]
+     * @param x must be &lt;-1&lt;x&lt;1
+     * @return the computed result
      */
-    public static synchronized double[] Sum(double[] a, double[] b, int length) {
-        if (length <= 0 || a == null || b == null || a.length < length || b.length < length) {
-            return null;
-        }
-        double[] ret = new double[length];
-        for (int i = 0; i < length; i++) {
-            ret[i] = (a[i] - b[i]);
+    public static double ErfInverse(double x) {
+        int kMaxit = 50;
+        double kEps = 1e-14;
+        double kConst = 0.8862269254527579; // sqrt(pi)/2.0
+
+        if (Abs(x) <= kEps)
+            return kConst * x;
+
+        // Newton iterations
+        double erfi, derfi, y0, y1, dy0, dy1;
+        if (Abs(x) < 1.0) {
+            erfi = kConst * Abs(x);
+            y0 = Erf(0.9 * erfi);
+            derfi = 0.1 * erfi;
+            for (int iter = 0; iter < kMaxit; iter++) {
+                y1 = 1. - Erfc(erfi);
+                dy1 = Abs(x) - y1;
+                if (Abs(dy1) < kEps) {
+                    if (x < 0) {
+                        return -erfi;
+                    } else {
+                        return erfi;
+                    }
+                }
+                dy0 = y1 - y0;
+                derfi *= dy1 / dy0;
+                y0 = y1;
+                erfi += derfi;
+
+                if (Abs(derfi / erfi) < kEps) {
+                    if (x < 0) {
+                        return -erfi;
+                    } else {
+                        return erfi;
+                    }
+                }
+            }
         }
 
-        return ret;
-    }
-
-    public static synchronized double[] Sum(double[] a, double[] b) {
-        return Sum(a, b, a.length);
+        return Double.NaN; // did not converge
     }
 
     /**
-     * computes the sum of vectors
+     * Compute factorial(n).
      * 
-     * @param a input vector a
-     * @param b input vector b
-     * @param length minimum length to be taken into account
-     * @return ret[] = a[] + b[]
+     * @param n input parameter
+     * @return the computed result
      */
-    public static synchronized long[] Sum(long[] a, long[] b, int length) {
-        if (length <= 0 || a == null || b == null || a.length < length || b.length < length) {
-            return null;
-        }
-        long[] ret = new long[length];
-        for (int i = 0; i < length; i++) {
-            ret[i] = (a[i] - b[i]);
-        }
-
-        return ret;
+    public static double Factorial(int n) {
+        if (n <= 0)
+            return 1.;
+        double x = 1;
+        int b = 0;
+        do {
+            b++;
+            x *= b;
+        } while (b != n);
+        return x;
     }
 
-    public static synchronized long[] Sum(long[] a, long[] b) {
-        return Sum(a, b, a.length);
+    public static double FDist(double F, double N, double M) {
+        // Computes the density function of F-distribution
+        // (probability function, integral of density, is computed in FDistI).
+        //
+        // Parameters N and M stand for degrees of freedom of chi-squares
+        // mentioned above parameter F is the actual variable x of the
+        // density function p(x) and the point at which the density function
+        // is calculated.
+        //
+        // About F distribution:
+        // F-distribution arises in testing whether two random samples
+        // have the same variance. It is the ratio of two chi-square
+        // distributions, with N and M degrees of freedom respectively,
+        // where each chi-square is first divided by it's number of degrees
+        // of freedom.
+        // Implementation by Anna Kreshuk.
+
+        if ((F < 0) || (N < 1) || (M < 1)) {
+            return 0;
+        } else {
+            double denom = Gamma(N / 2) * Gamma(M / 2) * Power(M + N * F, (N + M) / 2);
+            double div = Gamma((N + M) / 2) * Power(N, N / 2) * Power(M, M / 2) * Power(F, 0.5 * N - 1);
+            return div / denom;
+        }
+    }
+
+    public static double FDistI(double F, double N, double M) {
+        // Calculates the cumulative distribution function of F-distribution,
+        // this function occurs in the statistical test of whether two observed
+        // samples have the same variance. For this test a certain statistic F,
+        // the ratio of observed dispersion of the first sample to that of the
+        // second sample, is calculated. N and M stand for numbers of degrees
+        // of freedom in the samples 1-FDistI() is the significance level at
+        // which the hypothesis "1 has smaller variance than 2" can be rejected.
+        // A small numerical value of 1 - FDistI() implies a very significant
+        // rejection, in turn implying high confidence in the hypothesis
+        // "1 has variance greater than 2".
+        // Implementation by Anna Kreshuk.
+
+        double fi = 1 - BetaIncomplete((M / (M + N * F)), M * 0.5, N * 0.5);
+        return fi;
+    }
+
+    /**
+     * Computation of the normal frequency function freq(x). Freq(x) = (1/sqrt(2pi)) Integral(exp(-t^2/2))dt between
+     * -infinity and x. Translated from CERNLIB C300 by Rene Brun.
+     * 
+     * @param x input parameter
+     * @return the computed result
+     */
+    public static double Freq(double x) {
+        double c1 = 0.56418958354775629;
+        double w2 = 1.41421356237309505;
+
+        double p10 = 2.4266795523053175e+2, q10 = 2.1505887586986120e+2, p11 = 2.1979261618294152e+1,
+                q11 = 9.1164905404514901e+1, p12 = 6.9963834886191355e+0, q12 = 1.5082797630407787e+1,
+                p13 = -3.5609843701815385e-2, q13 = 1;
+
+        double p20 = 3.00459261020161601e+2, q20 = 3.00459260956983293e+2, p21 = 4.51918953711872942e+2,
+                q21 = 7.90950925327898027e+2, p22 = 3.39320816734343687e+2, q22 = 9.31354094850609621e+2,
+                p23 = 1.52989285046940404e+2, q23 = 6.38980264465631167e+2, p24 = 4.31622272220567353e+1,
+                q24 = 2.77585444743987643e+2, p25 = 7.21175825088309366e+0, q25 = 7.70001529352294730e+1,
+                p26 = 5.64195517478973971e-1, q26 = 1.27827273196294235e+1, p27 = -1.36864857382716707e-7, q27 = 1;
+
+        double p30 = -2.99610707703542174e-3, q30 = 1.06209230528467918e-2, p31 = -4.94730910623250734e-2,
+                q31 = 1.91308926107829841e-1, p32 = -2.26956593539686930e-1, q32 = 1.05167510706793207e+0,
+                p33 = -2.78661308609647788e-1, q33 = 1.98733201817135256e+0, p34 = -2.23192459734184686e-2, q34 = 1;
+
+        double v = Abs(x) / w2;
+        double vv = v * v;
+        double ap, aq, h, hc, y;
+
+        if (v < 0.5) {
+            y = vv;
+            ap = p13;
+            aq = q13;
+            ap = p12 + y * ap;
+            ap = p11 + y * ap;
+            ap = p10 + y * ap;
+            aq = q12 + y * aq;
+            aq = q11 + y * aq;
+            aq = q10 + y * aq;
+            h = v * ap / aq;
+            hc = 1 - h;
+        } else if (v < 4) {
+            ap = p27;
+            aq = q27;
+            ap = p26 + v * ap;
+            ap = p25 + v * ap;
+            ap = p24 + v * ap;
+            ap = p23 + v * ap;
+            ap = p22 + v * ap;
+            ap = p21 + v * ap;
+            ap = p20 + v * ap;
+            aq = q26 + v * aq;
+            aq = q25 + v * aq;
+            aq = q24 + v * aq;
+            aq = q23 + v * aq;
+            aq = q22 + v * aq;
+            aq = q21 + v * aq;
+            aq = q20 + v * aq;
+            hc = Exp(-vv) * ap / aq;
+            h = 1 - hc;
+        } else {
+            y = 1 / vv;
+            ap = p34;
+            aq = q34;
+            ap = p33 + y * ap;
+            ap = p32 + y * ap;
+            ap = p31 + y * ap;
+            ap = p30 + y * ap;
+            aq = q33 + y * aq;
+            aq = q32 + y * aq;
+            aq = q31 + y * aq;
+            aq = q30 + y * aq;
+            hc = Exp(-vv) * (c1 + y * ap / aq) / v;
+            h = 1 - hc;
+        }
+
+        if (x > 0) {
+            return 0.5 + 0.5 * h;
+        } else {
+            return 0.5 * hc;
+        }
+    }
+
+    /**
+     * Computation of the incomplete gamma function P(a,x) via its continued fraction representation. --- Nve
+     * 14-nov-1998 UU-SAP Utrecht
+     * 
+     * @param a input parameter
+     * @param x input parameter
+     * @return the computed result
+     */
+    public static double GamCf(double a, double x) {
+
+        int itmax = 100; // Maximum number of iterations
+        double eps = 3.e-14; // Relative accuracy
+        double fpmin = 1.e-30; // Smallest double value allowed here
+
+        if (a <= 0 || x <= 0)
+            return 0;
+
+        double gln = LnGamma(a);
+        double b = x + 1 - a;
+        double c = 1 / fpmin;
+        double d = 1 / b;
+        double h = d;
+        double an, del;
+        for (int i = 1; i <= itmax; i++) {
+            an = (-i) * ((i) - a);
+            b += 2;
+            d = an * d + b;
+            if (Abs(d) < fpmin)
+                d = fpmin;
+            c = b + an / c;
+            if (Abs(c) < fpmin)
+                c = fpmin;
+            d = 1 / d;
+            del = d * c;
+            h = h * del;
+            if (Abs(del - 1) < eps)
+                break;
+            // if (i==itmax) cout << "*GamCf(a,x)* a too large or itmax too
+            // small" << endl;
+        }
+        double v = Exp(-x + a * Log(x) - gln) * h;
+        return (1 - v);
+    }
+
+    /**
+     * Computation of gamma(z) for all z&gt;0. C.Lanczos, SIAM Journal of Numerical Analysis B1 (1964), 86. --- Nve
+     * 14-nov-1998 UU-SAP Utrecht
+     * 
+     * @param z input parameter
+     * @return gamma(z)
+     */
+    public static double Gamma(double z) {
+        if (z <= 0)
+            return 0;
+
+        double v = LnGamma(z);
+        return Exp(v);
+    }
+
+    /**
+     * Computation of the normalized lower incomplete gamma function P(a,x) as defined in the Handbook of Mathematical
+     * Functions by Abramowitz and Stegun, formula 6.5.1 on page 260 . Its normalization is such that Gamma(a,+infinity)
+     * = 1 . Begin_Latex P(a, x) = #frac{1}{#Gamma(a) } #int_{0}^{x} t^{a-1} e^{-t} dt End_Latex --- Nve 14-nov-1998
+     * UU-SAP Utrecht
+     * 
+     * @param a input parameter
+     * @param x input parameter
+     * @return the computed result
+     */
+    public static double Gamma(double a, double x) {
+
+        if (a <= 0 || x <= 0)
+            return 0;
+
+        if (x < (a + 1))
+            return GamSer(a, x);
+        else
+            return GamCf(a, x);
+    }
+
+    public static double GammaDist(double x, double gamma, double mu, double beta) {
+        // Computes the density function of Gamma distribution at point x.
+        // gamma - shape parameter
+        // mu - location parameter
+        // beta - scale parameter
+        // The formula was taken from "Engineering Statistics Handbook" on site
+        // http://www.itl.nist.gov/div898/handbook/eda/section3/eda366b.htm
+        // Implementation by Anna Kreshuk.
+
+        if ((x < mu) || (gamma <= 0) || (beta <= 0)) {
+            System.err.println("GammaDist(): illegal parameter values");
+            return 0;
+        }
+        double temp = (x - mu) / beta;
+        double temp2 = beta * Gamma(gamma);
+        double result = (Power(temp, gamma - 1) * Exp(-temp)) / temp2;
+        return result;
+    }
+
+    /**
+     * Computation of the incomplete gamma function P(a,x) via its series representation. --- Nve 14-nov-1998 UU-SAP
+     * Utrecht
+     * 
+     * @param a input parameter
+     * @param x input parameter
+     * @return the computed result
+     */
+    public static double GamSer(double a, double x) {
+        int itmax = 100; // Maximum number of iterations
+        double eps = 3.e-14; // Relative accuracy
+
+        if (a <= 0 || x <= 0)
+            return 0;
+
+        double gln = LnGamma(a);
+        double ap = a;
+        double sum = 1 / a;
+        double del = sum;
+        for (int n = 1; n <= itmax; n++) {
+            ap += 1;
+            del = del * x / ap;
+            sum += del;
+            if (Abs(del) < Abs(sum * eps))
+                break;
+            // if (n==itmax) cout << "*GamSer(a,x)* a too large or itmax too
+            // small" << endl;
+        }
+        double v = sum * Exp(-x + a * Log(x) - gln);
+        return v;
+    }
+
+    /**
+     * Calculate a Gaussian function with mean and sigma. If norm=true (default is false) the result is divided by
+     * sqrt(2*Pi)*sigma.
+     * 
+     * @param x input parameter
+     * @param mean centre of distribution
+     * @param sigma width of distribution
+     * @param norm normalisation factor
+     * @return the computed result
+     */
+    public static double Gauss(double x, double mean, double sigma, boolean norm) {
+        if (sigma == 0)
+            return 1.e30;
+        double arg = (x - mean) / sigma;
+        double res = Exp(-0.5 * arg * arg);
+        if (!norm)
+            return res;
+        return res / (2.50662827463100024 * sigma); // sqrt(2*Pi)=2.50662827463100024
+    }
+
+    /**
+     * geometric_mean = (\Prod_{i=0}^{n-1} \abs{a[i]})^{1/n}
+     * 
+     * @param a input vector
+     * @param length &lt;= data.length elements to be used
+     * @return geometric mean of an array a with length n.
+     */
+    public static synchronized double GeometricMean(double a[], int length) {
+        if (a == null || a.length <= 0)
+            return -1;
+        double logsum = 0.0;
+
+        // use logarithm represenation:
+        // product in linear regime -> sum in logarithmic scale
+        for (int i = 0; i < length; i++) {
+            if (a[i] == 0)
+                return 0.;
+            double absa = Math.abs(a[i]);
+            logsum += Math.log(absa);
+        }
+
+        return Math.exp(logsum / length);
+    }
+
+    public static synchronized double GeometricMean(double[] data) {
+        return GeometricMean(data, data.length);
+    }
+
+    /**
+     * geometric_mean = (\Prod_{i=0}^{n-1} \abs{a[i]})^{1/n}
+     * 
+     * @param a input vector
+     * @param length &lt;= data.length elements to be used
+     * @return geometric mean of an array a with length n.
+     */
+    public static synchronized float GeometricMean(float a[], int length) {
+        if (a == null || a.length <= 0)
+            return -1;
+        double logsum = 0.0;
+
+        // use logarithm represenation:
+        // product in linear regime -> sum in logarithmic scale
+        for (int i = 0; i < length; i++) {
+            if (a[i] == 0)
+                return 0.f;
+            double absa = Math.abs(a[i]);
+            logsum += Math.log(absa);
+        }
+
+        return (float) Math.exp(logsum / length);
+    }
+
+    public static synchronized float GeometricMean(float[] data) {
+        return GeometricMean(data, data.length);
+    }
+
+    /**
+     * geometric_mean = (\Prod_{i=0}^{n-1} \abs{a[i]})^{1/n}
+     * 
+     * @param a input vector
+     * @param length &lt;= data.length elements to be used
+     * @return geometric mean of an array a with length n.
+     */
+    public static synchronized int GeometricMean(int a[], int length) {
+        if (a == null || a.length <= 0)
+            return -1;
+        double logsum = 0.0;
+
+        // use logarithm represenation:
+        // product in linear regime -> sum in logarithmic scale
+        for (int i = 0; i < length; i++) {
+            if (a[i] == 0)
+                return 0;
+            double absa = Math.abs(a[i]);
+            logsum += Math.log(absa);
+        }
+
+        return (int) Math.exp(logsum / length);
+    }
+
+    public static synchronized int GeometricMean(int[] data) {
+        return GeometricMean(data, data.length);
+    }
+
+    /**
+     * geometric_mean = (\Prod_{i=0}^{n-1} \abs{a[i]})^{1/n}
+     * 
+     * @param a input vector
+     * @param length &lt;= data.length elements to be used
+     * @return geometric mean of an array a with length n.
+     */
+    public static synchronized long GeometricMean(long a[], int length) {
+        if (a == null || a.length <= 0)
+            return -1;
+        double logsum = 0.0;
+
+        // use logarithm represenation:
+        // product in linear regime -> sum in logarithmic scale
+        for (int i = 0; i < length; i++) {
+            if (a[i] == 0)
+                return 0;
+            double absa = Math.abs(a[i]);
+            logsum += Math.log(absa);
+        }
+
+        return (long) Math.exp(logsum / length);
+    }
+
+    public static synchronized long GeometricMean(long[] data) {
+        return GeometricMean(data, data.length);
+    }
+
+    /**
+     * geometric_mean = (\Prod_{i=0}^{n-1} \abs{a[i]})^{1/n}
+     * 
+     * @param a input vector
+     * @param length &lt;= data.length elements to be used
+     * @return geometric mean of an array a with length n.
+     */
+    public static synchronized short GeometricMean(short a[], int length) {
+        if (a == null || a.length <= 0)
+            return -1;
+        double logsum = 0.0;
+
+        // use logarithm represenation:
+        // product in linear regime -> sum in logarithmic scale
+        for (int i = 0; i < length; i++) {
+            if (a[i] == 0)
+                return 0;
+            double absa = Math.abs(a[i]);
+            logsum += Math.log(absa);
+        }
+
+        return (short) Math.exp(logsum / a.length);
+    }
+
+    public static synchronized short GeometricMean(short[] data) {
+        return GeometricMean(data, data.length);
+    }
+
+    private static double[] invertAndSquare(double[] values) {
+        double[] ret = new double[values.length];
+
+        // TODO: check NaN, inf... cases in other derived function
+        for (int i = 0; i < values.length; i++) {
+            final double val = values[i];
+            if (val == 0.0) {
+                ret[i] = Double.POSITIVE_INFINITY;
+            } else if (Double.isNaN(val)) {
+                ret[i] = Double.NaN;
+            } else if (Double.isInfinite(val)) {
+                ret[i] = 0.0;
+            } else {
+                ret[i] = 1.0 / TMath.Power(val, 2);
+            }
+        }
+        return ret;
     }
 
     /**
@@ -3081,347 +2400,1472 @@ public class TMath extends TMathConstants {
         return false;
     }
 
-    public static double BesselI0(double x) {
-        // Compute the modified Bessel function I_0(x) for any real x.
-        //
-        // --- NvE 12-mar-2000 UU-SAP Utrecht
+    /**
+     * The LANDAU function with mpv(most probable value) and sigma. This function has been adapted from the CERNLIB
+     * routine G110 denlan. If norm=true (default is false) the result is divided by sigma
+     * 
+     * @param x input variable
+     * @param mpv most probable value
+     * @param sigma width of distribution
+     * @param norm normalisation of distribution
+     * @return the computed result
+     */
+    public static double Landau(double x, double mpv, double sigma, boolean norm) {
+        double p1[] = { 0.4259894875, -0.1249762550, 0.03984243700, -0.006298287635, 0.001511162253 };
+        double q1[] = { 1.0, -0.3388260629, 0.09594393323, -0.01608042283, 0.003778942063 };
 
-        // Parameters of the polynomial approximation
-        double p1 = 1.0, p2 = 3.5156229, p3 = 3.0899424, p4 = 1.2067492, p5 = 0.2659732, p6 = 3.60768e-2,
-                p7 = 4.5813e-3;
+        double p2[] = { 0.1788541609, 0.1173957403, 0.01488850518, -0.001394989411, 0.0001283617211 };
+        double q2[] = { 1.0, 0.7428795082, 0.3153932961, 0.06694219548, 0.008790609714 };
 
-        double q1 = 0.39894228, q2 = 1.328592e-2, q3 = 2.25319e-3, q4 = -1.57565e-3, q5 = 9.16281e-3, q6 = -2.057706e-2,
-                q7 = 2.635537e-2, q8 = -1.647633e-2, q9 = 3.92377e-3;
+        double p3[] = { 0.1788544503, 0.09359161662, 0.006325387654, 0.00006611667319, -0.000002031049101 };
+        double q3[] = { 1.0, 0.6097809921, 0.2560616665, 0.04746722384, 0.006957301675 };
 
-        double k1 = 3.75;
-        double ax = Abs(x);
+        double p4[] = { 0.9874054407, 118.6723273, 849.2794360, -743.7792444, 427.0262186 };
+        double q4[] = { 1.0, 106.8615961, 337.6496214, 2016.712389, 1597.063511 };
 
-        double y = 0, result = 0;
+        double p5[] = { 1.003675074, 167.5702434, 4789.711289, 21217.86767, -22324.94910 };
+        double q5[] = { 1.0, 156.9424537, 3745.310488, 9834.698876, 66924.28357 };
 
-        if (ax < k1) {
-            double xx = x / k1;
-            y = xx * xx;
-            result = p1 + y * (p2 + y * (p3 + y * (p4 + y * (p5 + y * (p6 + y * p7)))));
+        double p6[] = { 1.000827619, 664.9143136, 62972.92665, 475554.6998, -5743609.109 };
+        double q6[] = { 1.0, 651.4101098, 56974.73333, 165917.4725, -2815759.939 };
+
+        double a1[] = { 0.04166666667, -0.01996527778, 0.02709538966 };
+        double a2[] = { -1.845568670, -4.284640743 };
+
+        if (sigma <= 0) {
+            return 0;
+        }
+
+        double v = (x - mpv) / sigma;
+        double u, ue, us, den;
+        if (v < -5.5) {
+            u = Exp(v + 1.0);
+            if (u < 1e-10)
+                return 0.0;
+            ue = Exp(-1 / u);
+            us = Sqrt(u);
+            den = 0.3989422803 * (ue / us) * (1 + (a1[0] + (a1[1] + a1[2] * u) * u) * u);
+        } else if (v < -1) {
+            u = Exp(-v - 1);
+            den = Exp(-u) * Sqrt(u) * (p1[0] + (p1[1] + (p1[2] + (p1[3] + p1[4] * v) * v) * v) * v)
+                    / (q1[0] + (q1[1] + (q1[2] + (q1[3] + q1[4] * v) * v) * v) * v);
+        } else if (v < 1) {
+            den = (p2[0] + (p2[1] + (p2[2] + (p2[3] + p2[4] * v) * v) * v) * v)
+                    / (q2[0] + (q2[1] + (q2[2] + (q2[3] + q2[4] * v) * v) * v) * v);
+        } else if (v < 5) {
+            den = (p3[0] + (p3[1] + (p3[2] + (p3[3] + p3[4] * v) * v) * v) * v)
+                    / (q3[0] + (q3[1] + (q3[2] + (q3[3] + q3[4] * v) * v) * v) * v);
+        } else if (v < 12) {
+            u = 1 / v;
+            den = u * u * (p4[0] + (p4[1] + (p4[2] + (p4[3] + p4[4] * u) * u) * u) * u)
+                    / (q4[0] + (q4[1] + (q4[2] + (q4[3] + q4[4] * u) * u) * u) * u);
+        } else if (v < 50) {
+            u = 1 / v;
+            den = u * u * (p5[0] + (p5[1] + (p5[2] + (p5[3] + p5[4] * u) * u) * u) * u)
+                    / (q5[0] + (q5[1] + (q5[2] + (q5[3] + q5[4] * u) * u) * u) * u);
+        } else if (v < 300) {
+            u = 1 / v;
+            den = u * u * (p6[0] + (p6[1] + (p6[2] + (p6[3] + p6[4] * u) * u) * u) * u)
+                    / (q6[0] + (q6[1] + (q6[2] + (q6[3] + q6[4] * u) * u) * u) * u);
         } else {
-            y = k1 / ax;
-            result = (Exp(ax) / Sqrt(ax))
-                    * (q1 + y * (q2 + y * (q3 + y * (q4 + y * (q5 + y * (q6 + y * (q7 + y * (q8 + y * q9))))))));
+            u = 1 / (v - v * Log(v) / (v + 1));
+            den = u * u * (1 + (a2[0] + a2[1] * u) * u);
         }
-        return result;
+
+        if (!norm) {
+            return den;
+        }
+
+        return den / sigma;
     }
 
-    public static double BesselK0(double x) {
-        // Compute the modified Bessel function K_0(x) for positive real x.
-        //
-        // M.Abramowitz and I.A.Stegun, Handbook of Mathematical Functions,
-        // Applied Mathematics Series vol. 55 (1964), Washington.
-        //
-        // --- NvE 12-mar-2000 UU-SAP Utrecht
+    public static double LandauI(double x) {
+        // Returns the value of the Landau distribution function at point x.
+        // The algorithm was taken from the Cernlib function dislan(G110)
+        // Reference: K.S.Kolbig and B.Schorr, "A program package for the Landau
+        // distribution", Computer Phys.Comm., 31(1984), 97-111
 
-        // Parameters of the polynomial approximation
-        double p1 = -0.57721566, p2 = 0.42278420, p3 = 0.23069756, p4 = 3.488590e-2, p5 = 2.62698e-3, p6 = 1.0750e-4,
-                p7 = 7.4e-6;
+        double p1[] = { 0.2514091491e+0, -0.6250580444e-1, 0.1458381230e-1, -0.2108817737e-2, 0.7411247290e-3 };
+        double q1[] = { 1.0, -0.5571175625e-2, 0.6225310236e-1, -0.3137378427e-2, 0.1931496439e-2 };
 
-        double q1 = 1.25331414, q2 = -7.832358e-2, q3 = 2.189568e-2, q4 = -1.062446e-2, q5 = 5.87872e-3,
-                q6 = -2.51540e-3, q7 = 5.3208e-4;
+        double p2[] = { 0.2868328584e+0, 0.3564363231e+0, 0.1523518695e+0, 0.2251304883e-1 };
+        double q2[] = { 1.0, 0.6191136137e+0, 0.1720721448e+0, 0.2278594771e-1 };
 
-        if (x <= 0) {
-            System.err.println("BesselK0(): *K0* Invalid argument x = " + x);
-            return 0;
-        }
+        double p3[] = { 0.2868329066e+0, 0.3003828436e+0, 0.9950951941e-1, 0.8733827185e-2 };
+        double q3[] = { 1.0, 0.4237190502e+0, 0.1095631512e+0, 0.8693851567e-2 };
 
-        double y = 0, result = 0;
+        double p4[] = { 0.1000351630e+1, 0.4503592498e+1, 0.1085883880e+2, 0.7536052269e+1 };
+        double q4[] = { 1.0, 0.5539969678e+1, 0.1933581111e+2, 0.2721321508e+2 };
 
-        if (x <= 2) {
-            y = x * x / 4;
-            result = (-Log(x / 2.) * BesselI0(x))
-                    + (p1 + y * (p2 + y * (p3 + y * (p4 + y * (p5 + y * (p6 + y * p7))))));
+        double p5[] = { 0.1000006517e+1, 0.4909414111e+2, 0.8505544753e+2, 0.1532153455e+3 };
+        double q5[] = { 1.0, 0.5009928881e+2, 0.1399819104e+3, 0.4200002909e+3 };
+
+        double p6[] = { 0.1000000983e+1, 0.1329868456e+3, 0.9162149244e+3, -0.9605054274e+3 };
+        double q6[] = { 1.0, 0.1339887843e+3, 0.1055990413e+4, 0.5532224619e+3 };
+
+        double a1[] = { 0, -0.4583333333e+0, 0.6675347222e+0, -0.1641741416e+1 };
+
+        double a2[] = { 0, 1.0, -0.4227843351e+0, -0.2043403138e+1 };
+
+        double u, v;
+        double lan;
+        v = x;
+        if (v < -5.5) {
+            u = Exp(v + 1);
+            lan = 0.3989422803 * Exp(-1. / u) * Sqrt(u) * (1 + (a1[1] + (a1[2] + a1[3] * u) * u) * u);
+        } else if (v < -1) {
+            u = Exp(-v - 1);
+            lan = (Exp(-u) / Sqrt(u)) * (p1[0] + (p1[1] + (p1[2] + (p1[3] + p1[4] * v) * v) * v) * v)
+                    / (q1[0] + (q1[1] + (q1[2] + (q1[3] + q1[4] * v) * v) * v) * v);
+        } else if (v < 1)
+            lan = (p2[0] + (p2[1] + (p2[2] + p2[3] * v) * v) * v) / (q2[0] + (q2[1] + (q2[2] + q2[3] * v) * v) * v);
+        else if (v < 4)
+            lan = (p3[0] + (p3[1] + (p3[2] + p3[3] * v) * v) * v) / (q3[0] + (q3[1] + (q3[2] + q3[3] * v) * v) * v);
+        else if (v < 12) {
+            u = 1. / v;
+            lan = (p4[0] + (p4[1] + (p4[2] + p4[3] * u) * u) * u) / (q4[0] + (q4[1] + (q4[2] + q4[3] * u) * u) * u);
+        } else if (v < 50) {
+            u = 1. / v;
+            lan = (p5[0] + (p5[1] + (p5[2] + p5[3] * u) * u) * u) / (q5[0] + (q5[1] + (q5[2] + q5[3] * u) * u) * u);
+        } else if (v < 300) {
+            u = 1. / v;
+            lan = (p6[0] + (p6[1] + (p6[2] + p6[3] * u) * u) * u) / (q6[0] + (q6[1] + (q6[2] + q6[3] * u) * u) * u);
         } else {
-            y = 2 / x;
-            result = (Exp(-x) / Sqrt(x)) * (q1 + y * (q2 + y * (q3 + y * (q4 + y * (q5 + y * (q6 + y * q7))))));
+            u = 1. / (v - v * Log(v) / (v + 1));
+            lan = 1 - (a2[1] + (a2[2] + a2[3] * u) * u) * u;
         }
-        return result;
+        return lan;
     }
 
-    public static double BesselI1(double x) {
-        // Compute the modified Bessel function I_1(x) for any real x.
-        //
-        // M.Abramowitz and I.A.Stegun, Handbook of Mathematical Functions,
-        // Applied Mathematics Series vol. 55 (1964), Washington.
-        //
-        // --- NvE 12-mar-2000 UU-SAP Utrecht
+    public static double LaplaceDist(double x, double alpha, double beta) {
+        // Computes the probability density funciton of Laplace distribution
+        // at point x, with location parameter alpha and shape parameter beta.
+        // By default, alpha=0, beta=1
+        // This distribution is known under different names, most common is
+        // double exponential distribution, but it also appears as
+        // the two-tailed exponential or the bilateral exponential distribution
+        double temp;
+        temp = Exp(-Abs((x - alpha) / beta));
+        temp /= (2. * beta);
+        return temp;
+    }
 
-        // Parameters of the polynomial approximation
-        double p1 = 0.5, p2 = 0.87890594, p3 = 0.51498869, p4 = 0.15084934, p5 = 2.658733e-2, p6 = 3.01532e-3,
-                p7 = 3.2411e-4;
+    public static double LaplaceDistI(double x, double alpha, double beta) {
+        // Computes the distribution funciton of Laplace distribution
+        // at point x, with location parameter alpha and shape parameter beta.
+        // By default, alpha=0, beta=1
+        // This distribution is known under different names, most common is
+        // double exponential distribution, but it also appears as
+        // the two-tailed exponential or the bilateral exponential distribution
 
-        double q1 = 0.39894228, q2 = -3.988024e-2, q3 = -3.62018e-3, q4 = 1.63801e-3, q5 = -1.031555e-2,
-                q6 = 2.282967e-2, q7 = -2.895312e-2, q8 = 1.787654e-2, q9 = -4.20059e-3;
-
-        double k1 = 3.75;
-        double ax = Abs(x);
-
-        double y = 0, result = 0;
-
-        if (ax < k1) {
-            double xx = x / k1;
-            y = xx * xx;
-            result = x * (p1 + y * (p2 + y * (p3 + y * (p4 + y * (p5 + y * (p6 + y * p7))))));
+        double temp;
+        if (x <= alpha) {
+            temp = 0.5 * Exp(-Abs((x - alpha) / beta));
         } else {
-            y = k1 / ax;
-            result = (Exp(ax) / Sqrt(ax))
-                    * (q1 + y * (q2 + y * (q3 + y * (q4 + y * (q5 + y * (q6 + y * (q7 + y * (q8 + y * q9))))))));
-            if (x < 0)
-                result = -result;
+            temp = 1 - 0.5 * Exp(-Abs((x - alpha) / beta));
         }
-        return result;
+        return temp;
     }
 
-    public static double BesselK1(double x) {
-        // Compute the modified Bessel function K_1(x) for positive real x.
-        //
-        // M.Abramowitz and I.A.Stegun, Handbook of Mathematical Functions,
-        // Applied Mathematics Series vol. 55 (1964), Washington.
-        //
-        // --- NvE 12-mar-2000 UU-SAP Utrecht
+    /**
+     * Computation of ln[gamma(z)] for all z&gt;0. C.Lanczos, SIAM Journal of Numerical Analysis B1 (1964), 86 The
+     * accuracy of the result is better than 2e-10. --- Nve 14-nov-1998 UU-SAP Utrecht
+     * 
+     * @param z input paramater
+     * @return ln[gamma(z)]
+     */
+    public static double LnGamma(double z) {
+        if (z <= 0)
+            return 0.0;
 
-        // Parameters of the polynomial approximation
-        double p1 = 1., p2 = 0.15443144, p3 = -0.67278579, p4 = -0.18156897, p5 = -1.919402e-2, p6 = -1.10404e-3,
-                p7 = -4.686e-5;
+        // Coefficients for the series expansion
+        double c[] = { 2.5066282746310005, 76.18009172947146, -86.50532032941677, 24.01409824083091, -1.231739572450155,
+                0.1208650973866179e-2, -0.5395239384953e-5 };
 
-        double q1 = 1.25331414, q2 = 0.23498619, q3 = -3.655620e-2, q4 = 1.504268e-2, q5 = -7.80353e-3, q6 = 3.25614e-3,
-                q7 = -6.8245e-4;
-
-        if (x <= 0) {
-            System.err.println("BesselK1(): *K1* Invalid argument x = " + x);
-            return 0;
+        double x = z;
+        double y = x;
+        double tmp = x + 5.5;
+        tmp = (x + 0.5) * Log(tmp) - tmp;
+        double ser = 1.000000000190015;
+        for (int i = 1; i < 7; i++) {
+            y += 1;
+            ser += c[i] / y;
         }
-
-        double y = 0, result = 0;
-
-        if (x <= 2) {
-            y = x * x / 4;
-            result = (Log(x / 2.) * BesselI1(x))
-                    + (1. / x) * (p1 + y * (p2 + y * (p3 + y * (p4 + y * (p5 + y * (p6 + y * p7))))));
-        } else {
-            y = 2 / x;
-            result = (Exp(-x) / Sqrt(x)) * (q1 + y * (q2 + y * (q3 + y * (q4 + y * (q5 + y * (q6 + y * q7))))));
-        }
-        return result;
+        double v = tmp + Log(c[0] * ser / x);
+        return v;
     }
 
-    public static double BesselK(int n, double x) {
-        // Compute the Integer Order Modified Bessel function K_n(x)
-        // for n=0,1,2,... and positive real x.
-        //
-        // --- NvE 12-mar-2000 UU-SAP Utrecht
-
-        if (x <= 0 || n < 0) {
-            System.err.println("BesselK(): *K* Invalid argument(s) (n,x) = (" + n + ", " + x + ")");
-            return 0;
-        }
-
-        if (n == 0)
-            return BesselK0(x);
-        if (n == 1)
-            return BesselK1(x);
-
-        // Perform upward recurrence for all x
-        double tox = 2 / x;
-        double bkm = BesselK0(x);
-        double bk = BesselK1(x);
-        double bkp = 0;
-        for (int j = 1; j < n; j++) {
-            bkp = bkm + (j) * tox * bk;
-            bkm = bk;
-            bk = bkp;
-        }
-        return bk;
-    }
-
-    public static double BesselI(int n, double x) {
-        // Compute the Integer Order Modified Bessel function I_n(x)
-        // for n=0,1,2,... and any real x.
-        //
-        // --- NvE 12-mar-2000 UU-SAP Utrecht
-
-        int iacc = 40; // Increase to enhance accuracy
-        double kBigPositive = 1.e10;
-        double kBigNegative = 1.e-10;
-
-        if (n < 0) {
-            System.err.println("BesselI(): *I* Invalid argument(s) (n,x) = (" + n + ", " + x + ")");
-            return 0;
-        }
-
-        if (n == 0)
-            return BesselI0(x);
-        if (n == 1)
-            return BesselI1(x);
-
-        if (x == 0)
-            return 0;
-        if (Abs(x) > kBigPositive)
-            return 0;
-
-        double tox = 2 / Abs(x);
-        double bip = 0, bim = 0;
-        double bi = 1;
-        double result = 0;
-        int m = 2 * ((n + (int) (Sqrt(iacc * n))));
-        for (int j = m; j >= 1; j--) {
-            bim = bip + (j) * tox * bi;
-            bip = bi;
-            bi = bim;
-            // Renormalise to prevent overflows
-            if (Abs(bi) > kBigPositive) {
-                result *= kBigNegative;
-                bi *= kBigNegative;
-                bip *= kBigNegative;
+    /**
+     * @param a input vector
+     * @param length &lt;= data.length elements to be used
+     * @return index of array with the minimum element. If more than one element is minimum returns first found.
+     */
+    public static synchronized long LocationMaximum(double a[], int length) {
+        if (a == null || a.length <= 0)
+            return -1;
+        double xmax = a[0];
+        long location = 0;
+        for (int i = 1; i < length; i++) {
+            if (xmax < a[i]) {
+                xmax = a[i];
+                location = i;
             }
-            if (j == n)
-                result = bip;
         }
-
-        result *= BesselI0(x) / bi; // Normalise with BesselI0(x)
-        if ((x < 0) && (n % 2 == 1))
-            result = -result;
-
-        return result;
+        return location;
     }
 
-    public static double BesselJ0(double x) {
-        // Returns the Bessel function J0(x) for any real x.
-
-        double ax, z;
-        double xx, y, result, result1, result2;
-        double p1 = 57568490574.0, p2 = -13362590354.0, p3 = 651619640.7;
-        double p4 = -11214424.18, p5 = 77392.33017, p6 = -184.9052456;
-        double p7 = 57568490411.0, p8 = 1029532985.0, p9 = 9494680.718;
-        double p10 = 59272.64853, p11 = 267.8532712;
-
-        double q1 = 0.785398164;
-        double q2 = -0.1098628627e-2, q3 = 0.2734510407e-4;
-        double q4 = -0.2073370639e-5, q5 = 0.2093887211e-6;
-        double q6 = -0.1562499995e-1, q7 = 0.1430488765e-3;
-        double q8 = -0.6911147651e-5, q9 = 0.7621095161e-6;
-        double q10 = 0.934935152e-7, q11 = 0.636619772;
-
-        if ((ax = Abs(x)) < 8) {
-            y = x * x;
-            result1 = p1 + y * (p2 + y * (p3 + y * (p4 + y * (p5 + y * p6))));
-            result2 = p7 + y * (p8 + y * (p9 + y * (p10 + y * (p11 + y))));
-            result = result1 / result2;
-        } else {
-            z = 8 / ax;
-            y = z * z;
-            xx = ax - q1;
-            result1 = 1 + y * (q2 + y * (q3 + y * (q4 + y * q5)));
-            result2 = q6 + y * (q7 + y * (q8 + y * (q9 - y * q10)));
-            result = Sqrt(q11 / ax) * (Cos(xx) * result1 - z * Sin(xx) * result2);
+    /**
+     * @param a input vector
+     * @param length &lt;= data.length elements to be used
+     * @return index of array with the minimum element. If more than one element is minimum returns first found.
+     */
+    public static synchronized long LocationMaximum(float a[], int length) {
+        if (a == null || a.length <= 0)
+            return -1;
+        float xmax = a[0];
+        long location = 0;
+        for (int i = 1; i < length; i++) {
+            if (xmax < a[i]) {
+                xmax = a[i];
+                location = i;
+            }
         }
-        return result;
+        return location;
     }
 
-    public static double BesselJ1(double x) {
-        // Returns the Bessel function J1(x) for any real x.
-
-        double ax, z;
-        double xx, y, result, result1, result2;
-        double p1 = 72362614232.0, p2 = -7895059235.0, p3 = 242396853.1;
-        double p4 = -2972611.439, p5 = 15704.48260, p6 = -30.16036606;
-        double p7 = 144725228442.0, p8 = 2300535178.0, p9 = 18583304.74;
-        double p10 = 99447.43394, p11 = 376.9991397;
-
-        double q1 = 2.356194491;
-        double q2 = 0.183105e-2, q3 = -0.3516396496e-4;
-        double q4 = 0.2457520174e-5, q5 = -0.240337019e-6;
-        double q6 = 0.04687499995, q7 = -0.2002690873e-3;
-        double q8 = 0.8449199096e-5, q9 = -0.88228987e-6;
-        double q10 = 0.105787412e-6, q11 = 0.636619772;
-
-        if ((ax = Abs(x)) < 8) {
-            y = x * x;
-            result1 = x * (p1 + y * (p2 + y * (p3 + y * (p4 + y * (p5 + y * p6)))));
-            result2 = p7 + y * (p8 + y * (p9 + y * (p10 + y * (p11 + y))));
-            result = result1 / result2;
-        } else {
-            z = 8 / ax;
-            y = z * z;
-            xx = ax - q1;
-            result1 = 1 + y * (q2 + y * (q3 + y * (q4 + y * q5)));
-            result2 = q6 + y * (q7 + y * (q8 + y * (q9 + y * q10)));
-            result = Sqrt(q11 / ax) * (Cos(xx) * result1 - z * Sin(xx) * result2);
-            if (x < 0)
-                result = -result;
+    /**
+     * @param a input vector
+     * @param length &lt;= data.length elements to be used
+     * @return index of array with the minimum element. If more than one element is minimum returns first found.
+     */
+    public static synchronized long LocationMaximum(int a[], int length) {
+        if (a == null || a.length <= 0)
+            return -1;
+        int xmax = a[0];
+        long location = 0;
+        for (int i = 1; i < length; i++) {
+            if (xmax < a[i]) {
+                xmax = a[i];
+                location = i;
+            }
         }
-        return result;
+        return location;
     }
 
-    public static double BesselY0(double x) {
-        // Returns the Bessel function Y0(x) for positive x.
-
-        double z, xx, y, result, result1, result2;
-        double p1 = -2957821389., p2 = 7062834065.0, p3 = -512359803.6;
-        double p4 = 10879881.29, p5 = -86327.92757, p6 = 228.4622733;
-        double p7 = 40076544269., p8 = 745249964.8, p9 = 7189466.438;
-        double p10 = 47447.26470, p11 = 226.1030244, p12 = 0.636619772;
-
-        double q1 = 0.785398164;
-        double q2 = -0.1098628627e-2, q3 = 0.2734510407e-4;
-        double q4 = -0.2073370639e-5, q5 = 0.2093887211e-6;
-        double q6 = -0.1562499995e-1, q7 = 0.1430488765e-3;
-        double q8 = -0.6911147651e-5, q9 = 0.7621095161e-6;
-        double q10 = -0.934945152e-7, q11 = 0.636619772;
-
-        if (x < 8) {
-            y = x * x;
-            result1 = p1 + y * (p2 + y * (p3 + y * (p4 + y * (p5 + y * p6))));
-            result2 = p7 + y * (p8 + y * (p9 + y * (p10 + y * (p11 + y))));
-            result = (result1 / result2) + p12 * BesselJ0(x) * Log(x);
-        } else {
-            z = 8 / x;
-            y = z * z;
-            xx = x - q1;
-            result1 = 1 + y * (q2 + y * (q3 + y * (q4 + y * q5)));
-            result2 = q6 + y * (q7 + y * (q8 + y * (q9 + y * q10)));
-            result = Sqrt(q11 / x) * (Sin(xx) * result1 + z * Cos(xx) * result2);
+    /**
+     * @param a input vector
+     * @param length &lt;= data.length elements to be used
+     * @return index of array with the minimum element. If more than one element is minimum returns first found.
+     */
+    public static synchronized long LocationMaximum(long a[], int length) {
+        if (a == null || a.length <= 0)
+            return -1;
+        long xmax = a[0];
+        long location = 0;
+        for (int i = 1; i < length; i++) {
+            if (xmax < a[i]) {
+                xmax = a[i];
+                location = i;
+            }
         }
-        return result;
+        return location;
     }
 
-    public static double BesselY1(double x) {
-        // Returns the Bessel function Y1(x) for positive x.
-
-        double z, xx, y, result, result1, result2;
-        double p1 = -0.4900604943e13, p2 = 0.1275274390e13;
-        double p3 = -0.5153438139e11, p4 = 0.7349264551e9;
-        double p5 = -0.4237922726e7, p6 = 0.8511937935e4;
-        double p7 = 0.2499580570e14, p8 = 0.4244419664e12;
-        double p9 = 0.3733650367e10, p10 = 0.2245904002e8;
-        double p11 = 0.1020426050e6, p12 = 0.3549632885e3;
-        double p13 = 0.636619772;
-        double q1 = 2.356194491;
-        double q2 = 0.183105e-2, q3 = -0.3516396496e-4;
-        double q4 = 0.2457520174e-5, q5 = -0.240337019e-6;
-        double q6 = 0.04687499995, q7 = -0.2002690873e-3;
-        double q8 = 0.8449199096e-5, q9 = -0.88228987e-6;
-        double q10 = 0.105787412e-6, q11 = 0.636619772;
-
-        if (x < 8) {
-            y = x * x;
-            result1 = x * (p1 + y * (p2 + y * (p3 + y * (p4 + y * (p5 + y * p6)))));
-            result2 = p7 + y * (p8 + y * (p9 + y * (p10 + y * (p11 + y * (p12 + y)))));
-            result = (result1 / result2) + p13 * (BesselJ1(x) * Log(x) - 1 / x);
-        } else {
-            z = 8 / x;
-            y = z * z;
-            xx = x - q1;
-            result1 = 1 + y * (q2 + y * (q3 + y * (q4 + y * q5)));
-            result2 = q6 + y * (q7 + y * (q8 + y * (q9 + y * q10)));
-            result = Sqrt(q11 / x) * (Sin(xx) * result1 + z * Cos(xx) * result2);
+    /**
+     * @param a input vector
+     * @param length &lt;= data.length elements to be used
+     * @return index of array with the minimum element. If more than one element is minimum returns first found.
+     */
+    public static synchronized long LocationMinimum(double a[], int length) {
+        if (a == null || a.length <= 0)
+            return -1;
+        double xmin = a[0];
+        long location = 0;
+        for (int i = 1; i < length; i++) {
+            if (xmin > a[i]) {
+                xmin = a[i];
+                location = i;
+            }
         }
-        return result;
+        return location;
+    }
+
+    /**
+     * @param a input vector
+     * @param length &lt;= data.length elements to be used
+     * @return index of array with the minimum element. If more than one element is minimum returns first found.
+     */
+    public static synchronized long LocationMinimum(float a[], int length) {
+        if (a == null || a.length <= 0)
+            return -1;
+        float xmin = a[0];
+        long location = 0;
+        for (int i = 1; i < length; i++) {
+            if (xmin > a[i]) {
+                xmin = a[i];
+                location = i;
+            }
+        }
+        return location;
+    }
+
+    /**
+     * @param a input vector
+     * @param length &lt;= data.length elements to be used
+     * @return index of array with the minimum element. If more than one element is minimum returns first found.
+     */
+    public static synchronized long LocationMinimum(int a[], int length) {
+        if (a == null || a.length <= 0)
+            return -1;
+        int xmin = a[0];
+        long location = 0;
+        for (int i = 1; i < length; i++) {
+            if (xmin > a[i]) {
+                xmin = a[i];
+                location = i;
+            }
+        }
+        return location;
+    }
+
+    /**
+     * @param a input vector
+     * @param length &lt;= data.length elements to be used
+     * @return index of array with the minimum element. If more than one element is minimum returns first found.
+     */
+    public static synchronized long LocationMinimum(long a[], int length) {
+        if (a == null || a.length <= 0)
+            return -1;
+        long xmin = a[0];
+        long location = 0;
+        for (int i = 1; i < length; i++) {
+            if (xmin > a[i]) {
+                xmin = a[i];
+                location = i;
+            }
+        }
+        return location;
+    }
+
+    /**
+     * @param a input vector
+     * @param length &lt;= data.length elements to be used
+     * @return index of array with the minimum element. If more than one element is minimum returns first found.
+     */
+    public static synchronized long LocationMinimum(short a[], int length) {
+        if (a == null || a.length <= 0)
+            return -1;
+        short xmin = a[0];
+        long location = 0;
+        for (int i = 1; i < length; i++) {
+            if (xmin > a[i]) {
+                xmin = a[i];
+                location = i;
+            }
+        }
+        return location;
+    }
+
+    /**
+     * Computes the density of LogNormal distribution at point x. Variable X has lognormal distribution if Y=Ln(X) has
+     * normal distribution. The formula was taken from "Engineering Statistics Handbook" on site
+     * http://www.itl.nist.gov/div898/handbook/eda/section3/eda3669.htm Implementation by Anna Kreshuk.
+     * 
+     * @param x input value
+     * @param sigma the shape parameter
+     * @param theta the location parameter
+     * @param m the scale parameter
+     * @return density of LogNormal distribution at point x
+     */
+    public static double LogNormal(double x, double sigma, double theta, double m) {
+        if ((x < theta) || (sigma <= 0) || (m <= 0)) {
+            System.err.println("Lognormal(): illegal parameter values");
+            return 0;
+        }
+        double templog2 = Log((x - theta) / m) * Log((x - theta) / m);
+        double temp1 = Exp(-templog2 / (2 * sigma * sigma));
+        double temp2 = (x - theta) * sigma * Sqrt(2 * Pi());
+
+        return temp1 / temp2;
+    }
+
+    public static void main(String argv[]) {
+        // Some simple test cases
+
+        double[] a = new double[11];
+        for (int i = 0; i < a.length; i++) {
+            a[i] = i + 1;
+        }
+        System.out.println("mean      = " + TMath.Mean(a));
+        System.out.println("rms       = " + TMath.RMS(a));
+        System.out.println("min       = " + TMath.Minimum(a));
+        System.out.println("max       = " + TMath.Maximum(a));
+        System.out.println("median    = " + TMath.Median(a));
+        System.out.println("geo. mean = " + TMath.GeometricMean(a));
+    }
+
+    public static synchronized double Maximum(double[] data) {
+        return Maximum(data, data.length);
+    }
+
+    /**
+     * @param data the input vector
+     * @param length &lt;= data.length elements to be used
+     * @return value of largest vector element
+     */
+    public static synchronized double Maximum(double[] data, int length) {
+        double val = -Double.MAX_VALUE;
+        for (int i = 0; i < length; i++) {
+            val = Math.max(val, data[i]);
+        }
+        return val;
+    }
+
+    public static synchronized float Maximum(float[] data) {
+        return Maximum(data, data.length);
+    }
+
+    /**
+     * @param data the input vector
+     * @param length &lt;= data.length elements to be used
+     * @return value of largest vector element
+     */
+    public static synchronized float Maximum(float[] data, int length) {
+        float val = -Float.MAX_VALUE;
+        for (int i = 0; i < length; i++) {
+            val = Math.max(val, data[i]);
+        }
+        return val;
+    }
+
+    public static synchronized int Maximum(int[] data) {
+        return Maximum(data, data.length);
+    }
+
+    /**
+     * @param data the input vector
+     * @param length &lt;= data.length elements to be used
+     * @return value of largest vector element
+     */
+    public static synchronized int Maximum(int[] data, int length) {
+        int val = -Integer.MAX_VALUE;
+        for (int i = 0; i < length; i++) {
+            val = Math.max(val, data[i]);
+        }
+        return val;
+    }
+
+    public static synchronized long Maximum(long[] data) {
+        return Maximum(data, data.length);
+    }
+
+    /**
+     * @param data the input vector
+     * @param length &lt;= data.length elements to be used
+     * @return value of largest vector element
+     */
+    public static synchronized long Maximum(long[] data, int length) {
+        long val = -Long.MAX_VALUE;
+        for (int i = 0; i < length; i++) {
+            val = Math.max(val, data[i]);
+        }
+        return val;
+    }
+
+    public static synchronized short Maximum(short[] data) {
+        return Maximum(data, data.length);
+    }
+
+    /**
+     * @param data the input vector
+     * @param length &lt;= data.length elements to be used
+     * @return value of largest vector element
+     */
+    public static synchronized short Maximum(short[] data, int length) {
+        short val = -Short.MAX_VALUE;
+        for (int i = 0; i < length; i++) {
+            if (val > data[i]) {
+                val = data[i];
+            }
+        }
+        return val;
+    }
+
+    public static synchronized double Mean(double[] data) {
+        return Mean(data, data.length);
+    }
+
+    /**
+     * @param data the input vector
+     * @param length &lt;= data.length elements to be used
+     * @return average of vector elements
+     */
+    public static synchronized double Mean(double[] data, int length) {
+        double norm = 1.0 / (length), val = 0.0;
+        for (int i = 0; i < length; i++) {
+            val += norm * data[i];
+        }
+        return val;
+    }
+
+    public static synchronized float Mean(float[] data) {
+        return Mean(data, data.length);
+    }
+
+    /**
+     * @param data the input vector
+     * @param length of the input vector
+     * @return average of vector elements
+     */
+    public static synchronized float Mean(float[] data, int length) {
+        float norm = 1.0f / (length), val = 0.0f;
+        for (int i = 0; i < length; i++) {
+            val += norm * data[i];
+        }
+        return val;
+    }
+
+    public static synchronized int Mean(int[] data) {
+        return Mean(data, data.length);
+    }
+
+    /**
+     * @param data the input vector
+     * @param length of the input vector
+     * @return average of vector elements
+     */
+    public static synchronized int Mean(int[] data, int length) {
+        double norm = 1.0 / (length), val = 0.0;
+        for (int i = 0; i < length; i++) {
+            val += norm * data[i];
+        }
+        return (int) val;
+    }
+
+    public static synchronized long Mean(long[] data) {
+        return Mean(data, data.length);
+    }
+
+    /**
+     * @param data the input vector
+     * @param length &lt;= data.length elements to be used
+     * @return average of vector elements
+     */
+    public static synchronized long Mean(long[] data, int length) {
+        double norm = 1.0 / (length), val = 0.0;
+        for (int i = 0; i < length; i++) {
+            val += norm * data[i];
+        }
+        return (long) val;
+    }
+
+    public static synchronized short Mean(short[] data) {
+        return Mean(data, data.length);
+    }
+
+    /**
+     * @param data the input vector
+     * @param length of the input vector
+     * @return average of vector elements
+     */
+    public static synchronized short Mean(short[] data, int length) {
+        double norm = 1.0 / (length), val = 0.0;
+        for (int i = 0; i < length; i++) {
+            val += norm * data[i];
+        }
+        return (short) val;
+    }
+
+    public static synchronized double Median(double[] data) {
+        return Median(data, data.length);
+    }
+
+    /**
+     * @param data the input vector
+     * @param length &lt;= data.length elements to be used
+     * @return median value of vector element
+     */
+    public static synchronized double Median(double[] data, int length) {
+        double[] temp = Sort(data, length, false);
+
+        if (length % 2 == 0) {
+            return 0.5 * (temp[length / 2] + temp[length / 2 + 1]);
+        } else {
+            return temp[length / 2];
+        }
+    }
+
+    public static synchronized float Median(float[] data) {
+        return Median(data, data.length);
+    }
+
+    /**
+     * @param data the input vector
+     * @param length &lt;= data.length elements to be used
+     * @return median value of vector element
+     */
+    public static synchronized float Median(float[] data, int length) {
+        float[] temp = Sort(data, length, false);
+        if (length % 2 == 0) {
+            return 0.5f * (temp[length / 2] + temp[length / 2 + 1]);
+        } else {
+            return data[length / 2];
+        }
+    }
+
+    public static synchronized int Median(int[] data) {
+        return Median(data, data.length);
+    }
+
+    /**
+     * @param data the input vector
+     * @param length &lt;= data.length elements to be used
+     * @return median value of vector element
+     */
+    public static synchronized int Median(int[] data, int length) {
+        int[] temp = Sort(data, length, false);
+        if (length % 2 == 0) {
+            return (int) (0.5 * (temp[length / 2] + temp[length / 2 + 1]));
+        } else {
+            return temp[length / 2];
+        }
+    }
+
+    // TODO: check whether we need harmonic mean as well.
+    // hm = n / \sum_i^{n} 1/x_i
+
+    public static synchronized long Median(long[] data) {
+        return Median(data, data.length);
+    }
+
+    /**
+     * @param data the input vector
+     * @param length &lt;= data.length elements to be used
+     * @return median value of vector element
+     */
+    public static synchronized long Median(long[] data, int length) {
+        long[] temp = Sort(data, length, false);
+        if (length % 2 == 0) {
+            return (long) (0.5 * (temp[length / 2] + data[length / 2 + 1]));
+        } else {
+            return temp[length / 2];
+        }
+    }
+
+    public static synchronized short Median(short[] data) {
+        return Median(data, data.length);
+    }
+
+    /**
+     * @param data the input vector
+     * @param length &lt;= data.length elements to be used
+     * @return median value of vector element
+     */
+    public static synchronized short Median(short[] data, int length) {
+        short[] temp = Sort(data, length, false);
+        if (length % 2 == 0) {
+            return (short) (0.5 * (temp[length / 2] + temp[length / 2 + 1]));
+        } else {
+            return temp[length / 2];
+        }
+    }
+
+    public static synchronized double Minimum(double[] data) {
+        return Minimum(data, data.length);
+    }
+
+    /**
+     * @param data the input vector
+     * @param length &lt;= data.length elements to be used
+     * @return value of smallest vector element
+     */
+    public static synchronized double Minimum(double[] data, int length) {
+        double val = +Double.MAX_VALUE;
+        for (int i = 0; i < length; i++) {
+            val = Math.min(val, data[i]);
+        }
+        return val;
+    }
+
+    public static synchronized float Minimum(float[] data) {
+        return Minimum(data, data.length);
+    }
+
+    /**
+     * @param data the input vector
+     * @param length &lt;= data.length elements to be used
+     * @return value of smallest vector element
+     */
+    public static synchronized float Minimum(float[] data, int length) {
+        float val = +Float.MAX_VALUE;
+        for (int i = 0; i < length; i++) {
+            val = Math.min(val, data[i]);
+        }
+        return val;
+    }
+
+    public static synchronized int Minimum(int[] data) {
+        return Minimum(data, data.length);
+    }
+
+    /**
+     * @param data the input vector
+     * @param length &lt;= data.length elements to be used
+     * @return value of smallest vector element
+     */
+    public static synchronized int Minimum(int[] data, int length) {
+        int val = +Integer.MAX_VALUE;
+        for (int i = 0; i < length; i++) {
+            val = Math.min(val, data[i]);
+        }
+        return val;
+    }
+
+    public static synchronized long Minimum(long[] data) {
+        return Minimum(data, data.length);
+    }
+
+    /**
+     * @param data the input vector
+     * @param length &lt;= data.length elements to be used
+     * @return value of smallest vector element
+     */
+    public static synchronized long Minimum(long[] data, int length) {
+        long val = +Long.MAX_VALUE;
+        for (int i = 0; i < length; i++) {
+            val = Math.min(val, data[i]);
+        }
+        return val;
+    }
+
+    public static synchronized short Minimum(short[] data) {
+        return Minimum(data, data.length);
+    }
+
+    /**
+     * @param data the input vector
+     * @param length &lt;= data.length elements to be used
+     * @return value of smallest vector element
+     */
+    public static synchronized short Minimum(short[] data, int length) {
+        short val = +Short.MAX_VALUE;
+        for (int i = 0; i < length; i++) {
+            if (val < data[i]) {
+                val = data[i];
+            }
+        }
+        return val;
+    }
+
+    /**
+     * Calculate a normal vector of a plane.
+     * 
+     * @param p1 first 3D points belonged the plane to define it.
+     * @param p2 second 3D points belonged the plane to define it.
+     * @param p3 third 3D points belonged the plane to define it.
+     * @param normal Pointer to 3D normal vector (normalised)
+     * @return the computed result
+     */
+    public static double[] Normal2Plane(double p1[], double p2[], double p3[], double normal[]) {
+        double[] v1 = new double[3], v2 = new double[3];
+
+        v1[0] = p2[0] - p1[0];
+        v1[1] = p2[1] - p1[1];
+        v1[2] = p2[2] - p1[2];
+
+        v2[0] = p3[0] - p1[0];
+        v2[1] = p3[1] - p1[1];
+        v2[2] = p3[2] - p1[2];
+
+        NormCross(v1, v2, normal);
+        return normal;
+    }
+
+    /**
+     * Calculate a normal vector of a plane.
+     * 
+     * @param p1 first 3D points belonged the plane to define it.
+     * @param p2 second 3D points belonged the plane to define it.
+     * @param p3 third 3D points belonged the plane to define it.
+     * @param normal Pointer to 3D normal vector (normalised)
+     * @return the computed result
+     */
+    public static float[] Normal2Plane(float p1[], float p2[], float p3[], float normal[]) {
+        float[] v1 = new float[3];
+        float[] v2 = new float[3];
+
+        v1[0] = p2[0] - p1[0];
+        v1[1] = p2[1] - p1[1];
+        v1[2] = p2[2] - p1[2];
+
+        v2[0] = p3[0] - p1[0];
+        v2[1] = p3[1] - p1[1];
+        v2[2] = p3[2] - p1[2];
+
+        NormCross(v1, v2, normal);
+        return normal;
+    }
+
+    /**
+     * Normalise a vector v in place. Returns the norm of the original vector. This implementation (thanks Kevin Lynch
+     * &lt;krlynch@bu.edu&gt;) is protected against possible overflows. Find the largest element, and divide that one
+     * out.
+     * 
+     * @param v input parameter vector
+     * @return the computed result
+     */
+    public static double Normalize(double v[]) {
+        double av0 = Abs(v[0]), av1 = Abs(v[1]), av2 = Abs(v[2]);
+
+        double amax, foo, bar;
+        // 0 >= {1, 2}
+        if (av0 >= av1 && av0 >= av2) {
+            amax = av0;
+            foo = av1;
+            bar = av2;
+        }
+
+        // 1 >= {0, 2}
+        else if (av1 >= av0 && av1 >= av2) {
+            amax = av1;
+            foo = av0;
+            bar = av2;
+        }
+
+        // 2 >= {0, 1}
+        else {
+            amax = av2;
+            foo = av0;
+            bar = av1;
+        }
+
+        if (amax == 0.0)
+            return 0.;
+
+        double foofrac = foo / amax, barfrac = bar / amax;
+        double d = amax * Sqrt(1. + foofrac * foofrac + barfrac * barfrac);
+
+        v[0] /= d;
+        v[1] /= d;
+        v[2] /= d;
+        return d;
+    }
+
+    /**
+     * Normalise a vector 'v' in place.
+     * 
+     * @param v input parameter vector
+     * @return the computed result the norm of the original vector.
+     */
+    public static float Normalize(float v[]) {
+        float d = (float) Math.sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
+        if (d != 0) {
+            v[0] /= d;
+            v[1] /= d;
+            v[2] /= d;
+        }
+        return d;
+    }
+
+    /**
+     * Calculate the Normalized Cross Product of two vectors
+     * 
+     * @param v1 input vector1
+     * @param v2 input vector2
+     * @param out output vector
+     * @return the computed result
+     */
+    public static double NormCross(double v1[], double v2[], double out[]) {
+        return Normalize(Cross(v1, v2, out));
+    }
+
+    /**
+     * Calculate the Normalized Cross Product of two vectors
+     * 
+     * @param v1 input vector1
+     * @param v2 input vector2
+     * @param out output vector
+     * @return the computed result
+     */
+    public static float NormCross(float v1[], float v2[], float out[]) {
+        return Normalize(Cross(v1, v2, out));
+    }
+
+    /**
+     * Computes quantiles for standard normal distribution N(0, 1) at probability p ALGORITHM AS241 APPL. STATIST.
+     * (1988) VOL. 37, NO. 3, 477-484.
+     * 
+     * @param p input value
+     * @return quantiles for standard normal distribution N(0, 1) at probability p
+     */
+    public static double NormQuantile(double p) {
+        if ((p <= 0) || (p >= 1)) {
+            System.err.println("NormQuantile(): probability outside (0, 1)");
+            return 0;
+        }
+
+        double a0 = 3.3871328727963666080e0;
+        double a1 = 1.3314166789178437745e+2;
+        double a2 = 1.9715909503065514427e+3;
+        double a3 = 1.3731693765509461125e+4;
+        double a4 = 4.5921953931549871457e+4;
+        double a5 = 6.7265770927008700853e+4;
+        double a6 = 3.3430575583588128105e+4;
+        double a7 = 2.5090809287301226727e+3;
+        double b1 = 4.2313330701600911252e+1;
+        double b2 = 6.8718700749205790830e+2;
+        double b3 = 5.3941960214247511077e+3;
+        double b4 = 2.1213794301586595867e+4;
+        double b5 = 3.9307895800092710610e+4;
+        double b6 = 2.8729085735721942674e+4;
+        double b7 = 5.2264952788528545610e+3;
+        double c0 = 1.42343711074968357734e0;
+        double c1 = 4.63033784615654529590e0;
+        double c2 = 5.76949722146069140550e0;
+        double c3 = 3.64784832476320460504e0;
+        double c4 = 1.27045825245236838258e0;
+        double c5 = 2.41780725177450611770e-1;
+        double c6 = 2.27238449892691845833e-2;
+        double c7 = 7.74545014278341407640e-4;
+        double d1 = 2.05319162663775882187e0;
+        double d2 = 1.67638483018380384940e0;
+        double d3 = 6.89767334985100004550e-1;
+        double d4 = 1.48103976427480074590e-1;
+        double d5 = 1.51986665636164571966e-2;
+        double d6 = 5.47593808499534494600e-4;
+        double d7 = 1.05075007164441684324e-9;
+        double e0 = 6.65790464350110377720e0;
+        double e1 = 5.46378491116411436990e0;
+        double e2 = 1.78482653991729133580e0;
+        double e3 = 2.96560571828504891230e-1;
+        double e4 = 2.65321895265761230930e-2;
+        double e5 = 1.24266094738807843860e-3;
+        double e6 = 2.71155556874348757815e-5;
+        double e7 = 2.01033439929228813265e-7;
+        double f1 = 5.99832206555887937690e-1;
+        double f2 = 1.36929880922735805310e-1;
+        double f3 = 1.48753612908506148525e-2;
+        double f4 = 7.86869131145613259100e-4;
+        double f5 = 1.84631831751005468180e-5;
+        double f6 = 1.42151175831644588870e-7;
+        double f7 = 2.04426310338993978564e-15;
+
+        double split1 = 0.425;
+        double split2 = 5.;
+        double konst1 = 0.180625;
+        double konst2 = 1.6;
+
+        double q, r, quantile;
+        q = p - 0.5;
+        if (Abs(q) < split1) {
+            r = konst1 - q * q;
+            quantile = q * (((((((a7 * r + a6) * r + a5) * r + a4) * r + a3) * r + a2) * r + a1) * r + a0)
+                    / (((((((b7 * r + b6) * r + b5) * r + b4) * r + b3) * r + b2) * r + b1) * r + 1.);
+        } else {
+            if (q < 0)
+                r = p;
+            else
+                r = 1 - p;
+            // error case
+            if (r <= 0)
+                quantile = 0;
+            else {
+                r = Sqrt(-Log(r));
+                if (r <= split2) {
+                    r = r - konst2;
+                    quantile = (((((((c7 * r + c6) * r + c5) * r + c4) * r + c3) * r + c2) * r + c1) * r + c0)
+                            / (((((((d7 * r + d6) * r + d5) * r + d4) * r + d3) * r + d2) * r + d1) * r + 1);
+                } else {
+                    r = r - split2;
+                    quantile = (((((((e7 * r + e6) * r + e5) * r + e4) * r + e3) * r + e2) * r + e1) * r + e0)
+                            / (((((((f7 * r + f6) * r + f5) * r + f4) * r + f3) * r + f2) * r + f1) * r + 1);
+                }
+                if (q < 0)
+                    quantile = -quantile;
+            }
+        }
+        return quantile;
+    }
+
+    public static synchronized double PeakToPeak(double[] data) {
+        return PeakToPeak(data, data.length);
+    }
+
+    /**
+     * @param data the input vector
+     * @param length &lt;= data.length elements to be used
+     * @return peak-to-peak value of vector element
+     */
+    public static synchronized double PeakToPeak(double[] data, int length) {
+        return Math.abs(Maximum(data, length) - Minimum(data, length));
+    }
+
+    public static synchronized float PeakToPeak(float[] data) {
+        return PeakToPeak(data, data.length);
+    }
+
+    /**
+     * @param data the input vector
+     * @param length &lt;= data.length elements to be used
+     * @return peak-to-peak value of vector element
+     */
+    public static synchronized float PeakToPeak(float[] data, int length) {
+        return Math.abs(Maximum(data, length) - Minimum(data, length));
+    }
+
+    public static synchronized int PeakToPeak(int[] data) {
+        return PeakToPeak(data, data.length);
+    }
+
+    /**
+     * @param data the input vector
+     * @param length &lt;= data.length elements to be used
+     * @return peak-to-peak value of vector element
+     */
+    public static synchronized int PeakToPeak(int[] data, int length) {
+        return Math.abs(Maximum(data, length) - Minimum(data, length));
+    }
+
+    public static synchronized long PeakToPeak(long[] data) {
+        return PeakToPeak(data, data.length);
+    }
+
+    /**
+     * @param data the input vector
+     * @param length &lt;= data.length elements to be used
+     * @return peak-to-peak value of vector element
+     */
+    public static synchronized long PeakToPeak(long[] data, int length) {
+        return Math.abs(Maximum(data, length) - Minimum(data, length));
+    }
+
+    public static synchronized short PeakToPeak(short[] data) {
+        return PeakToPeak(data, data.length);
+    }
+
+    /**
+     * @param data the input vector
+     * @param length &lt;= data.length elements to be used
+     * @return peak-to-peak value of vector element
+     */
+    public static synchronized short PeakToPeak(short[] data, int length) {
+        return (short) Math.abs(Maximum(data, length) - Minimum(data, length));
+    }
+
+    /**
+     * Simple recursive algorithm to find the permutations of n natural numbers, not necessarily all distinct adapted
+     * from CERNLIB routine PERMU. The input array has to be initialised with a non descending sequence. The method
+     * returns false when all combinations are exhausted.
+     * 
+     * @param n size of input vector
+     * @param a input vector
+     * @return false when all combinations are exhausted
+     */
+    public static boolean Permute(int n, int a[]) {
+        int i, itmp;
+        int i1 = -1;
+
+        // find rightmost upward transition
+        for (i = n - 2; i > -1; i--) {
+            if (a[i] < a[i + 1]) {
+                i1 = i;
+                break;
+            }
+        }
+        // no more upward transitions, end of the story
+        if (i1 == -1)
+            return false;
+        else {
+            // find lower right element higher than the lower
+            // element of the upward transition
+            for (i = n - 1; i > i1; i--) {
+                if (a[i] > a[i1]) {
+                    // swap the two
+                    itmp = a[i1];
+                    a[i1] = a[i];
+                    a[i] = itmp;
+                    break;
+                }
+            }
+            // order the rest, in fact just invert, as there
+            // are only downward transitions from here on
+            for (i = 0; i < (n - i1 - 1) / 2; i++) {
+                itmp = a[i1 + i + 1];
+                a[i1 + i + 1] = a[n - i - 1];
+                a[n - i - 1] = itmp;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * compute the Poisson distribution function for (x,par) The Poisson PDF is implemented by means of Euler's
+     * Gamma-function (for the factorial), so for all integer arguments it is correct. BUT for non-integer values it IS
+     * NOT equal to the Poisson distribution.
+     * 
+     * see PoissonI to get a non-smooth function. Note that for large values of par, it is better to call
+     * Gaus(x,par,sqrt(par),true) Begin_Html
+     * 
+     * @param x input value
+     * @param par input parameter
+     * @return the computed result
+     */
+    public static double Poisson(double x, double par) {
+        if (x < 0) {
+            return 0;
+        } else if (x == 0.0) {
+            return 1. / Exp(par);
+        } else {
+            double lnpoisson = x * Log(par) - par - LnGamma(x + 1.);
+            return Exp(lnpoisson);
+        }
+        // An alternative strategy is to transition to a Gaussian approximation
+        // for
+        // large values of par ...
+        // else {
+        // return Gaus(x,par,Sqrt(par),true);
+        // }
+    }
+
+    /**
+     * compute the Poisson distribution function for (x,par) This is a non-smooth function
+     * 
+     * @param x input value
+     * @param par input parameter
+     * @return the computed result
+     */
+    public static double PoissonI(double x, double par) {
+        double kMaxInt = 2e6;
+        if (x < 0)
+            return 0;
+        if (x < 1)
+            return Exp(-par);
+        double gam;
+        int ix = (int) (x);
+        if (x < kMaxInt)
+            gam = Power(par, ix) / Gamma(ix + 1);
+        else
+            gam = Power(par, x) / Gamma(x + 1);
+        return gam / Exp(par);
+    }
+
+    /**
+     * Computation of the probability for a certain Chi-squared (chi2) and number of degrees of freedom (ndf).
+     * Calculations are based on the incomplete gamma function P(a,x), where a=ndf/2 and x=chi2/2. P(a,x) represents the
+     * probability that the observed Chi-squared for a correct model should be less than the value chi2. The returned
+     * probability corresponds to 1-P(a,x), which denotes the probability that an observed Chi-squared exceeds the value
+     * chi2 by chance, even for a correct model. --- NvE 14-nov-1998 UU-SAP Utrecht
+     * 
+     * @param chi2 input
+     * @param ndf number of degrees of freedom
+     * @return the computed result
+     */
+    public static double Prob(double chi2, int ndf) {
+        if (ndf <= 0)
+            return 0; // Set CL to zero in case ndf<=0
+
+        if (chi2 <= 0) {
+            if (chi2 < 0)
+                return 0;
+            else
+                return 1;
+        }
+
+        if (ndf == 1) {
+            double v = 1. - Erf(Sqrt(chi2) / Sqrt(2.));
+            return v;
+        }
+
+        // Gaussian approximation for large ndf
+        double q = Sqrt(2 * chi2) - Sqrt(2 * ndf - 1);
+        if (ndf > 30 && q > 5) {
+            double v = 0.5 * (1 - Erf(q / Sqrt(2.)));
+            return v;
+        }
+
+        // Evaluate the incomplete gamma function
+        return (1 - Gamma(0.5 * ndf, 0.5 * chi2));
+    }
+
+    public static synchronized double RMS(double[] data) {
+        return RMS(data, data.length);
+    }
+
+    /**
+     * @param data the input vector
+     * @param length &lt;= data.length elements to be used
+     * @return un-biased r.m.s. of vector elements
+     */
+    public static synchronized double RMS(double[] data, int length) {
+        if (length <= 0)
+            return -1;
+
+        double norm = 1.0 / (length), val1 = 0.0, val2 = 0.0;
+        for (int i = 0; i < length; i++) {
+            val1 += data[i];
+            val2 += data[i] * data[i];
+        }
+
+        val1 *= norm;
+        val2 *= norm;
+        // un-biased rms!
+        return Math.sqrt(Math.abs(val2 - val1 * val1));
+    }
+
+    public static synchronized float RMS(float[] data) {
+        return RMS(data, data.length);
+    }
+
+    /**
+     * @param data the input vector
+     * @param length &lt;= data.length elements to be used
+     * @return un-biased r.m.s. of vector elements
+     */
+    public static synchronized float RMS(float[] data, int length) {
+        if (length <= 0)
+            return -1;
+
+        double norm = 1.0 / (length), val1 = 0.0, val2 = 0.0;
+        for (int i = 0; i < length; i++) {
+            val1 += data[i];
+            val2 += data[i] * data[i];
+        }
+
+        val1 *= norm;
+        val2 *= norm;
+        // un-biased rms!
+        return (float) Math.sqrt(Math.abs(val2 - val1 * val1));
+    }
+
+    public static synchronized int RMS(int[] data) {
+        return RMS(data, data.length);
+    }
+
+    /**
+     * @param data the input vector
+     * @param length &lt;= data.length elements to be used
+     * @return un-biased r.m.s. of vector elements
+     */
+    public static synchronized int RMS(int[] data, int length) {
+        if (length <= 0)
+            return -1;
+
+        double norm = 1.0 / (length), val1 = 0.0, val2 = 0.0;
+        for (int i = 0; i < data.length; i++) {
+            val1 += data[i];
+            val2 += data[i] * data[i];
+        }
+
+        val1 *= norm;
+        val2 *= norm;
+        // un-biased rms!
+        return (int) Math.sqrt(Math.abs(val2 - val1 * val1));
+    }
+
+    public static synchronized long RMS(long[] data) {
+        return RMS(data, data.length);
+    }
+
+    /**
+     * @param data the input vector
+     * @param length &lt;= d data.length elements to be used
+     * @return un-biased r.m.s. of vector elements
+     */
+    public static synchronized long RMS(long[] data, int length) {
+        if (length <= 0)
+            return -1;
+
+        double norm = 1.0 / (length), val1 = 0.0, val2 = 0.0;
+        for (int i = 0; i < length; i++) {
+            val1 += data[i];
+            val2 += data[i] * data[i];
+        }
+
+        val1 *= norm;
+        val2 *= norm;
+        // un-biased rms!
+        return (long) Math.sqrt(Math.abs(val2 - val1 * val1));
+    }
+
+    public static synchronized short RMS(short[] data) {
+        return RMS(data, data.length);
+    }
+
+    /**
+     * @param data the input vector
+     * @param length &lt;= data.length elements to be used
+     * @return un-biased r.m.s. of vector elements
+     */
+    public static synchronized short RMS(short[] data, int length) {
+        if (length <= 0)
+            return -1;
+
+        double norm = 1.0 / (length), val1 = 0.0, val2 = 0.0;
+        for (int i = 0; i < length; i++) {
+            val1 += data[i];
+            val2 += data[i] * data[i];
+        }
+
+        val1 *= norm;
+        val2 *= norm;
+        // un-biased rms!
+        return (short) Math.sqrt(Math.abs(val2 - val1 * val1));
+    }
+
+    /**
+     * Calculate the sinc = sin(x)/x function if norm ==true then sinc = sinc(pi*x)/(pi*x) is used
+     * 
+     * @param x input parameter
+     * @param norm normalisation factor
+     * @return the computed result
+     */
+    public static double Sinc(double x, boolean norm) {
+        double val = norm ? TMath.Pi() : 1.0;
+        if (x != 0) {
+            return TMath.Sin(val * x) / (val * x);
+        } else {
+            return 1.0;
+        }
+    }
+
+    /**
+     * Sorts the input a array
+     * 
+     * @param a the input array
+     * @param length &lt;= data.length elements to be used
+     * @param down true: ascending , false: descending order
+     * @return the sorted array
+     */
+    public static synchronized double[] Sort(double a[], int length, boolean down) {
+        if (a == null || a.length <= 0) {
+            return null;
+        }
+        double[] index = java.util.Arrays.copyOf(a, length);
+        java.util.Arrays.sort(index);
+
+        if (down) {
+            double temp;
+            int nlast = length - 1;
+            for (int i = 0; i < (length / 2); i++) {
+                // swap values
+                temp = index[i];
+                index[i] = index[nlast - i];
+                index[nlast - i] = temp;
+            }
+        }
+        return index;
+    }
+
+    /**
+     * Sorts the input a array
+     * 
+     * @param a the input array
+     * @param length &lt;= data.length elements to be used
+     * @param down true: ascending , false: descending order
+     * @return the sorted array
+     */
+    public static synchronized float[] Sort(float a[], int length, boolean down) {
+        if (a == null || a.length <= 0) {
+            return null;
+        }
+        float[] index = java.util.Arrays.copyOf(a, length);
+        java.util.Arrays.sort(index);
+
+        if (down) {
+            float temp;
+            int nlast = length - 1;
+            for (int i = 0; i < (length / 2); i++) {
+                // swap values
+                temp = index[i];
+                index[i] = index[nlast - i];
+                index[nlast - i] = temp;
+            }
+        }
+        return index;
+    }
+
+    /**
+     * Sorts the input a array
+     * 
+     * @param a the input array
+     * @param length &lt;= data.length elements to be used
+     * @param down true: ascending , false: descending order
+     * @return the sorted array
+     */
+    public static synchronized int[] Sort(int a[], int length, boolean down) {
+        if (a == null || a.length <= 0) {
+            return null;
+        }
+        int[] index = java.util.Arrays.copyOf(a, length);
+        java.util.Arrays.sort(index);
+
+        if (down) {
+            int temp;
+            int nlast = length - 1;
+            for (int i = 0; i < (length / 2); i++) {
+                // swap values
+                temp = index[i];
+                index[i] = index[nlast - i];
+                index[nlast - i] = temp;
+            }
+        }
+        return index;
+    }
+
+    /**
+     * Sorts the input a array
+     * 
+     * @param a the input array
+     * @param length &lt;= data.length elements to be used
+     * @param down true: ascending , false: descending order
+     * @return the sorted array
+     */
+    public static synchronized long[] Sort(long a[], int length, boolean down) {
+        if (a == null || a.length <= 0) {
+            return null;
+        }
+        long[] index = java.util.Arrays.copyOf(a, length);
+        java.util.Arrays.sort(index);
+
+        if (down) {
+            long temp;
+            int nlast = length - 1;
+            for (int i = 0; i < (length / 2); i++) {
+                // swap values
+                temp = index[i];
+                index[i] = index[nlast - i];
+                index[nlast - i] = temp;
+            }
+        }
+        return index;
+    }
+
+    /**
+     * Sorts the input a array
+     * 
+     * @param a the input array
+     * @param length &lt;= data.length elements to be used
+     * @param down true: ascending , false: descending order
+     * @return the sorted array
+     */
+    public static synchronized short[] Sort(short a[], int length, boolean down) {
+        if (a == null || a.length <= 0) {
+            return null;
+        }
+        short[] index = java.util.Arrays.copyOf(a, length);
+        java.util.Arrays.sort(index);
+
+        if (down) {
+            short temp;
+            int nlast = length - 1;
+            for (int i = 0; i < (length / 2); i++) {
+                // swap values
+                temp = index[i];
+                index[i] = index[nlast - i];
+                index[nlast - i] = temp;
+            }
+        }
+        return index;
     }
 
     public static double StruveH0(double x) {
@@ -3633,517 +4077,6 @@ public class TMath extends TMathConstants {
         return sl1;
     }
 
-    public static double Beta(double p, double q) {
-        // Calculates Beta-function Gamma(p)*Gamma(q)/Gamma(p+q).
-
-        return Exp(LnGamma(p) + LnGamma(q) - LnGamma(p + q));
-    }
-
-    public static double BetaCf(double x, double a, double b) {
-        // Continued fraction evaluation by modified Lentz's method
-        // used in calculation of incomplete Beta function.
-
-        int itmax = 500;
-        double eps = 3.e-14;
-        double fpmin = 1.e-30;
-
-        int m;
-        int m2;
-        double aa;
-        double c;
-        double d; 
-        double del; 
-        double qab; 
-        double qam;
-        double qap;
-        double h;
-        qab = a + b;
-        qap = a + 1.0;
-        qam = a - 1.0;
-        c = 1.0;
-        d = 1.0 - qab * x / qap;
-        if (Abs(d) < fpmin)
-            d = fpmin;
-        d = 1.0 / d;
-        h = d;
-        for (m = 1; m <= itmax; m++) {
-            m2 = m * 2;
-            aa = m * (b - m) * x / ((qam + m2) * (a + m2));
-            d = 1.0 + aa * d;
-            if (Abs(d) < fpmin)
-                d = fpmin;
-            c = 1 + aa / c;
-            if (Abs(c) < fpmin)
-                c = fpmin;
-            d = 1.0 / d;
-            h *= d * c;
-            aa = -(a + m) * (qab + m) * x / ((a + m2) * (qap + m2));
-            d = 1.0 + aa * d;
-            if (Abs(d) < fpmin)
-                d = fpmin;
-            c = 1.0 + aa / c;
-            if (Abs(c) < fpmin)
-                c = fpmin;
-            d = 1.0 / d;
-            del = d * c;
-            h *= del;
-            if (Abs(del - 1) <= eps)
-                break;
-        }
-        if (m > itmax) {
-            System.err.printf("BetaCf: a or b too big, or itmax too small," + " a=%e, b=%e, x=%e, h=%e, itmax=%e", a, b,
-                    x, h, itmax);
-        }
-        return h;
-    }
-
-    /**
-     * Computes the probability density function of the Beta distribution (the distribution function is computed in
-     * BetaDistI). The first argument is the point, where the function will be computed, second and third are the
-     * function parameters. Since the Beta distribution is bounded on both sides, it's often used to represent processes
-     * with natural lower and upper limits.
-     * 
-     * @param x input value
-     * @param p p parameter of beta function
-     * @param q q parameter of beta function
-     * @return probability density function of the Beta distribution
-     */
-    public static double BetaDist(double x, double p, double q) {
-
-        if ((x < 0) || (x > 1) || (p <= 0) || (q <= 0)) {
-            System.err.println("BetaDist(): - parameter value outside allowed range");
-            return 0;
-        }
-        double beta = Beta(p, q);
-        double r = Power(x, p - 1) * Power(1 - x, q - 1) / beta;
-        return r;
-    }
-
-    public static double BetaDistI(double x, double p, double q) {
-        // Computes the distribution function of the Beta distribution.
-        // The first argument is the point, where the function will be
-        // computed, second and third are the function parameters.
-        // Since the Beta distribution is bounded on both sides, it's often
-        // used to represent processes with natural lower and upper limits.
-
-        if ((x < 0) || (x > 1) || (p <= 0) || (q <= 0)) {
-            System.err.println("BetaDistI(): parameter value outside allowed range");
-            return 0;
-        }
-        double betai = BetaIncomplete(x, p, q);
-        return betai;
-    }
-
-    public static double BetaIncomplete(double x, double a, double b) {
-        // Calculates the incomplete Beta-function.
-        // -- implementation by Anna Kreshuk
-
-        double bt;
-        if ((x < 0.0) || (x > 1.0)) {
-            System.err.println("BetaIncomplete(): X must between 0 and 1");
-            return 0.0;
-        }
-        if ((x == 0.0) || (x == 1.0)) {
-            bt = 0.0;
-        } else {
-            bt = Power(x, a) * Power(1 - x, b) / Beta(a, b);
-        }
-        if (x < (a + 1) / (a + b + 2)) {
-            return bt * BetaCf(x, a, b) / a;
-        } else {
-            return (1 - bt * BetaCf(1 - x, b, a) / b);
-        }
-    }
-
-    public static double Binomial(int n, int k) {
-        // Calculate the binomial coefficient n over k.
-
-        if (k == 0 || n == k)
-            return 1;
-        if (n <= 0 || k < 0 || n < k)
-            return 0;
-
-        int k1 = Min(k, n - k);
-        int k2 = n - k1;
-        double fact = k2 + 1;
-        for (int i = k1; i > 1; i--)
-            fact *= (double) (k2 + i) / i;
-        return fact;
-    }
-
-    public static double BinomialI(double p, int n, int k) {
-        // Suppose an event occurs with probability _p_ per trial
-        // Then the probability P of its occuring _k_ or more times
-        // in _n_ trials is termed a cumulative binomial probability
-        // the formula is P = sum_from_j=k_to_n(Binomial(n, j)*
-        // *Power(p, j)*Power(1-p, n-j)
-        // For _n_ larger than 12 BetaIncomplete is a much better way
-        // to evaluate the sum than would be the straightforward sum calculation
-        // for _n_ smaller than 12 either method is acceptable
-        // ("Numerical Recipes")
-        // --implementation by Anna Kreshuk
-
-        if (k <= 0)
-            return 1.0;
-        if (k > n)
-            return 0.0;
-        if (k == n)
-            return Power(p, n);
-
-        return BetaIncomplete(p, k, n - k + 1);
-    }
-
-    /**
-     * Computes the density of Cauchy distribution at point x The Cauchy distribution, also called Lorentzian
-     * distribution, is a continuous distribution describing resonance behavior The mean and standard deviation of the
-     * Cauchy distribution are undefined. The practical meaning of this is that collecting 1,000 data points gives no
-     * more accurate an estimate of the mean and standard deviation than does a single point. The formula was taken from
-     * "Engineering Statistics Handbook" on site http://www.itl.nist.gov/div898/handbook/eda/section3/eda3663.htm
-     * Implementation by Anna Kreshuk.
-     * 
-     * @param x input value
-     * @param t the location parameter
-     * @param s the scale parameter
-     * @return Cauchy distribution at point x
-     */
-    public static double CauchyDist(double x, double t, double s) {
-
-        double temp = (x - t) * (x - t) / (s * s);
-        double result = 1 / (s * Pi() * (1 + temp));
-        return result;
-    }
-
-    /**
-     * Evaluate the quantiles of the chi-squared probability distribution function. Algorithm AS 91 Appl. Statist.
-     * (1975) Vol.24, P.35 implemented by Anna Kreshuk. Incorporates the suggested changes in AS R85 (vol.40(1),
-     * pp.233-5, 1991)
-     * 
-     * @param p the probability value, at which the quantile is computed
-     * @param ndf number of degrees of freedom
-     * @return quantiles of the chi-squared probability distribution
-     */
-    public static double ChisquareQuantile(double p, double ndf) {
-
-        double c[] = { 0, 0.01, 0.222222, 0.32, 0.4, 1.24, 2.2, 4.67, 6.66, 6.73, 13.32, 60.0, 70.0, 84.0, 105.0, 120.0,
-                127.0, 140.0, 175.0, 210.0, 252.0, 264.0, 294.0, 346.0, 420.0, 462.0, 606.0, 672.0, 707.0, 735.0, 889.0,
-                932.0, 966.0, 1141.0, 1182.0, 1278.0, 1740.0, 2520.0, 5040.0 };
-        double e = 5e-7;
-        double aa = 0.6931471806;
-        int maxit = 20;
-        double ch, p1, p2, q, t, a, b, x;
-        double s1, s2, s3, s4, s5, s6;
-
-        if (ndf <= 0)
-            return 0;
-
-        double g = LnGamma(0.5 * ndf);
-
-        double xx = 0.5 * ndf;
-        double cp = xx - 1;
-        if (ndf >= Log(p) * (-c[5])) {
-            // starting approximation for ndf less than or equal to 0.32
-            if (ndf > c[3]) {
-                x = NormQuantile(p);
-                // starting approximation using Wilson and Hilferty estimate
-                p1 = c[2] / ndf;
-                ch = ndf * Power((x * Sqrt(p1) + 1 - p1), 3);
-                if (ch > c[6] * ndf + 6)
-                    ch = -2 * (Log(1 - p) - cp * Log(0.5 * ch) + g);
-            } else {
-                ch = c[4];
-                a = Log(1 - p);
-                do {
-                    q = ch;
-                    p1 = 1 + ch * (c[7] + ch);
-                    p2 = ch * (c[9] + ch * (c[8] + ch));
-                    t = -0.5 + (c[7] + 2 * ch) / p1 - (c[9] + ch * (c[10] + 3 * ch)) / p2;
-                    ch = ch - (1 - Exp(a + g + 0.5 * ch + cp * aa) * p2 / p1) / t;
-                } while (Abs(q / ch - 1) > c[1]);
-            }
-        } else {
-            ch = Power((p * xx * Exp(g + xx * aa)), (1. / xx));
-            if (ch < e)
-                return ch;
-        }
-        // call to algorithm AS 239 and calculation of seven term Taylor series
-        for (int i = 0; i < maxit; i++) {
-            q = ch;
-            p1 = 0.5 * ch;
-            p2 = p - Gamma(xx, p1);
-
-            t = p2 * Exp(xx * aa + g + p1 - cp * Log(ch));
-            b = t / ch;
-            a = 0.5 * t - b * cp;
-            s1 = (c[19] + a * (c[17] + a * (c[14] + a * (c[13] + a * (c[12] + c[11] * a))))) / c[24];
-            s2 = (c[24] + a * (c[29] + a * (c[32] + a * (c[33] + c[35] * a)))) / c[37];
-            s3 = (c[19] + a * (c[25] + a * (c[28] + c[31] * a))) / c[37];
-            s4 = (c[20] + a * (c[27] + c[34] * a) + cp * (c[22] + a * (c[30] + c[36] * a))) / c[38];
-            s5 = (c[13] + c[21] * a + cp * (c[18] + c[26] * a)) / c[37];
-            s6 = (c[15] + cp * (c[23] + c[16] * cp)) / c[38];
-            ch = ch + t * (1 + 0.5 * t * s1 - b * cp * (s1 - b * (s2 - b * (s3 - b * (s4 - b * (s5 - b * s6))))));
-            if (Abs(q / ch - 1) > e)
-                break;
-        }
-        return ch;
-    }
-
-    public static double FDist(double F, double N, double M) {
-        // Computes the density function of F-distribution
-        // (probability function, integral of density, is computed in FDistI).
-        //
-        // Parameters N and M stand for degrees of freedom of chi-squares
-        // mentioned above parameter F is the actual variable x of the
-        // density function p(x) and the point at which the density function
-        // is calculated.
-        //
-        // About F distribution:
-        // F-distribution arises in testing whether two random samples
-        // have the same variance. It is the ratio of two chi-square
-        // distributions, with N and M degrees of freedom respectively,
-        // where each chi-square is first divided by it's number of degrees
-        // of freedom.
-        // Implementation by Anna Kreshuk.
-
-        if ((F < 0) || (N < 1) || (M < 1)) {
-            return 0;
-        } else {
-            double denom = Gamma(N / 2) * Gamma(M / 2) * Power(M + N * F, (N + M) / 2);
-            double div = Gamma((N + M) / 2) * Power(N, N / 2) * Power(M, M / 2) * Power(F, 0.5 * N - 1);
-            return div / denom;
-        }
-    }
-
-    public static double FDistI(double F, double N, double M) {
-        // Calculates the cumulative distribution function of F-distribution,
-        // this function occurs in the statistical test of whether two observed
-        // samples have the same variance. For this test a certain statistic F,
-        // the ratio of observed dispersion of the first sample to that of the
-        // second sample, is calculated. N and M stand for numbers of degrees
-        // of freedom in the samples 1-FDistI() is the significance level at
-        // which the hypothesis "1 has smaller variance than 2" can be rejected.
-        // A small numerical value of 1 - FDistI() implies a very significant
-        // rejection, in turn implying high confidence in the hypothesis
-        // "1 has variance greater than 2".
-        // Implementation by Anna Kreshuk.
-
-        double fi = 1 - BetaIncomplete((M / (M + N * F)), M * 0.5, N * 0.5);
-        return fi;
-    }
-
-    public static double GammaDist(double x, double gamma, double mu, double beta) {
-        // Computes the density function of Gamma distribution at point x.
-        // gamma - shape parameter
-        // mu - location parameter
-        // beta - scale parameter
-        // The formula was taken from "Engineering Statistics Handbook" on site
-        // http://www.itl.nist.gov/div898/handbook/eda/section3/eda366b.htm
-        // Implementation by Anna Kreshuk.
-
-        if ((x < mu) || (gamma <= 0) || (beta <= 0)) {
-            System.err.println("GammaDist(): illegal parameter values");
-            return 0;
-        }
-        double temp = (x - mu) / beta;
-        double temp2 = beta * Gamma(gamma);
-        double result = (Power(temp, gamma - 1) * Exp(-temp)) / temp2;
-        return result;
-    }
-
-    public static double LaplaceDist(double x, double alpha, double beta) {
-        // Computes the probability density funciton of Laplace distribution
-        // at point x, with location parameter alpha and shape parameter beta.
-        // By default, alpha=0, beta=1
-        // This distribution is known under different names, most common is
-        // double exponential distribution, but it also appears as
-        // the two-tailed exponential or the bilateral exponential distribution
-        double temp;
-        temp = Exp(-Abs((x - alpha) / beta));
-        temp /= (2. * beta);
-        return temp;
-    }
-
-    public static double LaplaceDistI(double x, double alpha, double beta) {
-        // Computes the distribution funciton of Laplace distribution
-        // at point x, with location parameter alpha and shape parameter beta.
-        // By default, alpha=0, beta=1
-        // This distribution is known under different names, most common is
-        // double exponential distribution, but it also appears as
-        // the two-tailed exponential or the bilateral exponential distribution
-
-        double temp;
-        if (x <= alpha) {
-            temp = 0.5 * Exp(-Abs((x - alpha) / beta));
-        } else {
-            temp = 1 - 0.5 * Exp(-Abs((x - alpha) / beta));
-        }
-        return temp;
-    }
-
-    /**
-     * Computes the density of LogNormal distribution at point x. Variable X has lognormal distribution if Y=Ln(X) has
-     * normal distribution. The formula was taken from "Engineering Statistics Handbook" on site
-     * http://www.itl.nist.gov/div898/handbook/eda/section3/eda3669.htm Implementation by Anna Kreshuk.
-     * 
-     * @param x input value
-     * @param sigma the shape parameter
-     * @param theta the location parameter
-     * @param m the scale parameter
-     * @return density of LogNormal distribution at point x
-     */
-    public static double LogNormal(double x, double sigma, double theta, double m) {
-        if ((x < theta) || (sigma <= 0) || (m <= 0)) {
-            System.err.println("Lognormal(): illegal parameter values");
-            return 0;
-        }
-        double templog2 = Log((x - theta) / m) * Log((x - theta) / m);
-        double temp1 = Exp(-templog2 / (2 * sigma * sigma));
-        double temp2 = (x - theta) * sigma * Sqrt(2 * Pi());
-
-        return temp1 / temp2;
-    }
-
-    /**
-     * Computes quantiles for standard normal distribution N(0, 1) at probability p ALGORITHM AS241 APPL. STATIST.
-     * (1988) VOL. 37, NO. 3, 477-484.
-     * 
-     * @param p input value
-     * @return quantiles for standard normal distribution N(0, 1) at probability p
-     */
-    public static double NormQuantile(double p) {
-        if ((p <= 0) || (p >= 1)) {
-            System.err.println("NormQuantile(): probability outside (0, 1)");
-            return 0;
-        }
-
-        double a0 = 3.3871328727963666080e0;
-        double a1 = 1.3314166789178437745e+2;
-        double a2 = 1.9715909503065514427e+3;
-        double a3 = 1.3731693765509461125e+4;
-        double a4 = 4.5921953931549871457e+4;
-        double a5 = 6.7265770927008700853e+4;
-        double a6 = 3.3430575583588128105e+4;
-        double a7 = 2.5090809287301226727e+3;
-        double b1 = 4.2313330701600911252e+1;
-        double b2 = 6.8718700749205790830e+2;
-        double b3 = 5.3941960214247511077e+3;
-        double b4 = 2.1213794301586595867e+4;
-        double b5 = 3.9307895800092710610e+4;
-        double b6 = 2.8729085735721942674e+4;
-        double b7 = 5.2264952788528545610e+3;
-        double c0 = 1.42343711074968357734e0;
-        double c1 = 4.63033784615654529590e0;
-        double c2 = 5.76949722146069140550e0;
-        double c3 = 3.64784832476320460504e0;
-        double c4 = 1.27045825245236838258e0;
-        double c5 = 2.41780725177450611770e-1;
-        double c6 = 2.27238449892691845833e-2;
-        double c7 = 7.74545014278341407640e-4;
-        double d1 = 2.05319162663775882187e0;
-        double d2 = 1.67638483018380384940e0;
-        double d3 = 6.89767334985100004550e-1;
-        double d4 = 1.48103976427480074590e-1;
-        double d5 = 1.51986665636164571966e-2;
-        double d6 = 5.47593808499534494600e-4;
-        double d7 = 1.05075007164441684324e-9;
-        double e0 = 6.65790464350110377720e0;
-        double e1 = 5.46378491116411436990e0;
-        double e2 = 1.78482653991729133580e0;
-        double e3 = 2.96560571828504891230e-1;
-        double e4 = 2.65321895265761230930e-2;
-        double e5 = 1.24266094738807843860e-3;
-        double e6 = 2.71155556874348757815e-5;
-        double e7 = 2.01033439929228813265e-7;
-        double f1 = 5.99832206555887937690e-1;
-        double f2 = 1.36929880922735805310e-1;
-        double f3 = 1.48753612908506148525e-2;
-        double f4 = 7.86869131145613259100e-4;
-        double f5 = 1.84631831751005468180e-5;
-        double f6 = 1.42151175831644588870e-7;
-        double f7 = 2.04426310338993978564e-15;
-
-        double split1 = 0.425;
-        double split2 = 5.;
-        double konst1 = 0.180625;
-        double konst2 = 1.6;
-
-        double q, r, quantile;
-        q = p - 0.5;
-        if (Abs(q) < split1) {
-            r = konst1 - q * q;
-            quantile = q * (((((((a7 * r + a6) * r + a5) * r + a4) * r + a3) * r + a2) * r + a1) * r + a0)
-                    / (((((((b7 * r + b6) * r + b5) * r + b4) * r + b3) * r + b2) * r + b1) * r + 1.);
-        } else {
-            if (q < 0)
-                r = p;
-            else
-                r = 1 - p;
-            // error case
-            if (r <= 0)
-                quantile = 0;
-            else {
-                r = Sqrt(-Log(r));
-                if (r <= split2) {
-                    r = r - konst2;
-                    quantile = (((((((c7 * r + c6) * r + c5) * r + c4) * r + c3) * r + c2) * r + c1) * r + c0)
-                            / (((((((d7 * r + d6) * r + d5) * r + d4) * r + d3) * r + d2) * r + d1) * r + 1);
-                } else {
-                    r = r - split2;
-                    quantile = (((((((e7 * r + e6) * r + e5) * r + e4) * r + e3) * r + e2) * r + e1) * r + e0)
-                            / (((((((f7 * r + f6) * r + f5) * r + f4) * r + f3) * r + f2) * r + f1) * r + 1);
-                }
-                if (q < 0)
-                    quantile = -quantile;
-            }
-        }
-        return quantile;
-    }
-
-    /**
-     * Simple recursive algorithm to find the permutations of n natural numbers, not necessarily all distinct adapted
-     * from CERNLIB routine PERMU. The input array has to be initialised with a non descending sequence. The method
-     * returns false when all combinations are exhausted.
-     * 
-     * @param n size of input vector
-     * @param a input vector
-     * @return false when all combinations are exhausted
-     */
-    public static boolean Permute(int n, int a[]) {
-        int i, itmp;
-        int i1 = -1;
-
-        // find rightmost upward transition
-        for (i = n - 2; i > -1; i--) {
-            if (a[i] < a[i + 1]) {
-                i1 = i;
-                break;
-            }
-        }
-        // no more upward transitions, end of the story
-        if (i1 == -1)
-            return false;
-        else {
-            // find lower right element higher than the lower
-            // element of the upward transition
-            for (i = n - 1; i > i1; i--) {
-                if (a[i] > a[i1]) {
-                    // swap the two
-                    itmp = a[i1];
-                    a[i1] = a[i];
-                    a[i] = itmp;
-                    break;
-                }
-            }
-            // order the rest, in fact just invert, as there
-            // are only downward transitions from here on
-            for (i = 0; i < (n - i1 - 1) / 2; i++) {
-                itmp = a[i1 + i + 1];
-                a[i1 + i + 1] = a[n - i - 1];
-                a[n - i - 1] = itmp;
-            }
-        }
-        return true;
-    }
-
     /**
      * Computes density function for Student's t- distribution (the probability function (integral of density) is
      * computed in StudentI). First parameter stands for x - the actual variable of the density function p(x) and the
@@ -4257,6 +4190,149 @@ public class TMath extends TMathConstants {
         return quantile;
     }
 
+    public static synchronized double[] Sum(double[] a, double[] b) {
+        return Sum(a, b, a.length);
+    }
+
+    /**
+     * computes the sum of vectors
+     * 
+     * @param a input vector a
+     * @param b input vector b
+     * @param length minimum length to be taken into account
+     * @return ret[] = a[] + b[]
+     */
+    public static synchronized double[] Sum(double[] a, double[] b, int length) {
+        if (length <= 0 || a == null || b == null || a.length < length || b.length < length) {
+            return null;
+        }
+        double[] ret = new double[length];
+        for (int i = 0; i < length; i++) {
+            ret[i] = (a[i] - b[i]);
+        }
+
+        return ret;
+    }
+
+    public static synchronized float[] Sum(float[] a, float[] b) {
+        return Sum(a, b, a.length);
+    }
+
+    /**
+     * computes the sum of vectors
+     * 
+     * @param a input vector a
+     * @param b input vector b
+     * @param length minimum length to be taken into account
+     * @return ret[] = a[] + b[]
+     */
+    public static synchronized float[] Sum(float[] a, float[] b, int length) {
+        if (length <= 0 || a == null || b == null || a.length < length || b.length < length) {
+            return null;
+        }
+        float[] ret = new float[length];
+        for (int i = 0; i < length; i++) {
+            ret[i] = (a[i] - b[i]);
+        }
+
+        return ret;
+    }
+
+    public static synchronized int[] Sum(int[] a, int[] b) {
+        return Sum(a, b, a.length);
+    }
+
+    /**
+     * computes the sum of vectors
+     * 
+     * @param a input vector a
+     * @param b input vector b
+     * @param length minimum length to be taken into account
+     * @return ret[] = a[] + b[]
+     */
+    public static synchronized int[] Sum(int[] a, int[] b, int length) {
+        if (length <= 0 || a == null || b == null || a.length < length || b.length < length) {
+            return null;
+        }
+        int[] ret = new int[length];
+        for (int i = 0; i < length; i++) {
+            ret[i] = (a[i] - b[i]);
+        }
+
+        return ret;
+    }
+
+    public static synchronized long[] Sum(long[] a, long[] b) {
+        return Sum(a, b, a.length);
+    }
+
+    /**
+     * computes the sum of vectors
+     * 
+     * @param a input vector a
+     * @param b input vector b
+     * @param length minimum length to be taken into account
+     * @return ret[] = a[] + b[]
+     */
+    public static synchronized long[] Sum(long[] a, long[] b, int length) {
+        if (length <= 0 || a == null || b == null || a.length < length || b.length < length) {
+            return null;
+        }
+        long[] ret = new long[length];
+        for (int i = 0; i < length; i++) {
+            ret[i] = (a[i] - b[i]);
+        }
+
+        return ret;
+    }
+
+    public static synchronized short[] Sum(short[] a, short[] b) {
+        return Sum(a, b, a.length);
+    }
+
+    /**
+     * computes the sum of vectors
+     * 
+     * @param a input vector a
+     * @param b input vector b
+     * @param length minimum length to be taken into account
+     * @return ret[] = a[] + b[]
+     */
+    public static synchronized short[] Sum(short[] a, short[] b, int length) {
+        if (length <= 0 || a == null || b == null || a.length < length || b.length < length) {
+            return null;
+        }
+        short[] ret = new short[length];
+        for (int i = 0; i < length; i++) {
+            ret[i] = (short) (a[i] - b[i]);
+        }
+
+        return ret;
+    }
+
+    public static double Variance(double[] aa, double[] ww) {
+        int n = aa.length;
+        if (n != ww.length)
+            throw new IllegalArgumentException(
+                    "length of variable array, " + n + " and length of weight array, " + ww.length + " are different");
+        double nn = TMath.effectiveSampleNumber(ww);
+        double nterm = nn / (nn - 1.0);
+        // nterm = 1.0; // n
+
+        double sumx = 0.0D, sumw = 0.0D, mean = 0.0D;
+        double[] weight = invertAndSquare(ww);
+        for (int i = 0; i < n; i++) {
+            sumx += aa[i] * weight[i];
+            sumw += weight[i];
+        }
+        mean = sumx / sumw;
+        sumx = 0.0D;
+        for (int i = 0; i < n; i++) {
+            sumx += weight[i] * TMath.Sqr(aa[i] - mean);
+        }
+        return sumx * nterm / sumw;
+    }
+
     public static double Vavilov(double x, double kappa, double beta2) {
         // Returns the value of the Vavilov density function
         // Parameters: 1st - the point were the density function is evaluated
@@ -4285,6 +4361,54 @@ public class TMath extends TMathConstants {
         double v = VavilovDenEval(x, ac, hc, itype[0]);
         ac = null;
         hc = null;
+        return v;
+    }
+
+    /**
+     * Internal function, called by Vavilov and VavilovSet
+     * 
+     * @param rlam ???
+     * @param AC ???
+     * @param HC ???
+     * @param itype ???
+     * @return internal value
+     */
+    protected static double VavilovDenEval(double rlam, double AC[], double HC[], int itype) {
+        double v = 0;
+        if (rlam < AC[0] || rlam > AC[8])
+            return 0;
+        int k;
+        double x, fn, s;
+        double[] h = new double[10];
+        if (itype == 1) {
+            fn = 1;
+            x = (rlam + HC[0]) * HC[1];
+            h[1] = x;
+            h[2] = x * x - 1;
+            for (k = 2; k <= 8; k++) {
+                fn++;
+                h[k + 1] = x * h[k] - fn * h[k - 1];
+            }
+            s = 1 + HC[7] * h[9];
+            for (k = 2; k <= 6; k++) {
+                s += HC[k] * h[k + 1];
+            }
+            v = HC[8] * Exp(-0.5 * x * x) * Max(s, 0.);
+        } else if (itype == 2) {
+            x = rlam * rlam;
+            v = AC[1] * Exp(-AC[2] * (rlam + AC[5] * x) - AC[3] * Exp(-AC[4] * (rlam + AC[6] * x)));
+        } else if (itype == 3) {
+            if (rlam < AC[7]) {
+                x = rlam * rlam;
+                v = AC[1] * Exp(-AC[2] * (rlam + AC[5] * x) - AC[3] * Exp(-AC[4] * (rlam + AC[6] * x)));
+            } else {
+                x = 1. / rlam;
+                v = (AC[11] * x + AC[12]) * x;
+            }
+        } else if (itype == 4) {
+            // TODO: check this line
+            // v = AC[13]*Landau(rlam);
+        }
         return v;
     }
 
@@ -4331,64 +4455,6 @@ public class TMath extends TMathConstants {
         hc = null;
         wcm = null;
         return v;
-    }
-
-    public static double LandauI(double x) {
-        // Returns the value of the Landau distribution function at point x.
-        // The algorithm was taken from the Cernlib function dislan(G110)
-        // Reference: K.S.Kolbig and B.Schorr, "A program package for the Landau
-        // distribution", Computer Phys.Comm., 31(1984), 97-111
-
-        double p1[] = { 0.2514091491e+0, -0.6250580444e-1, 0.1458381230e-1, -0.2108817737e-2, 0.7411247290e-3 };
-        double q1[] = { 1.0, -0.5571175625e-2, 0.6225310236e-1, -0.3137378427e-2, 0.1931496439e-2 };
-
-        double p2[] = { 0.2868328584e+0, 0.3564363231e+0, 0.1523518695e+0, 0.2251304883e-1 };
-        double q2[] = { 1.0, 0.6191136137e+0, 0.1720721448e+0, 0.2278594771e-1 };
-
-        double p3[] = { 0.2868329066e+0, 0.3003828436e+0, 0.9950951941e-1, 0.8733827185e-2 };
-        double q3[] = { 1.0, 0.4237190502e+0, 0.1095631512e+0, 0.8693851567e-2 };
-
-        double p4[] = { 0.1000351630e+1, 0.4503592498e+1, 0.1085883880e+2, 0.7536052269e+1 };
-        double q4[] = { 1.0, 0.5539969678e+1, 0.1933581111e+2, 0.2721321508e+2 };
-
-        double p5[] = { 0.1000006517e+1, 0.4909414111e+2, 0.8505544753e+2, 0.1532153455e+3 };
-        double q5[] = { 1.0, 0.5009928881e+2, 0.1399819104e+3, 0.4200002909e+3 };
-
-        double p6[] = { 0.1000000983e+1, 0.1329868456e+3, 0.9162149244e+3, -0.9605054274e+3 };
-        double q6[] = { 1.0, 0.1339887843e+3, 0.1055990413e+4, 0.5532224619e+3 };
-
-        double a1[] = { 0, -0.4583333333e+0, 0.6675347222e+0, -0.1641741416e+1 };
-
-        double a2[] = { 0, 1.0, -0.4227843351e+0, -0.2043403138e+1 };
-
-        double u, v;
-        double lan;
-        v = x;
-        if (v < -5.5) {
-            u = Exp(v + 1);
-            lan = 0.3989422803 * Exp(-1. / u) * Sqrt(u) * (1 + (a1[1] + (a1[2] + a1[3] * u) * u) * u);
-        } else if (v < -1) {
-            u = Exp(-v - 1);
-            lan = (Exp(-u) / Sqrt(u)) * (p1[0] + (p1[1] + (p1[2] + (p1[3] + p1[4] * v) * v) * v) * v)
-                    / (q1[0] + (q1[1] + (q1[2] + (q1[3] + q1[4] * v) * v) * v) * v);
-        } else if (v < 1)
-            lan = (p2[0] + (p2[1] + (p2[2] + p2[3] * v) * v) * v) / (q2[0] + (q2[1] + (q2[2] + q2[3] * v) * v) * v);
-        else if (v < 4)
-            lan = (p3[0] + (p3[1] + (p3[2] + p3[3] * v) * v) * v) / (q3[0] + (q3[1] + (q3[2] + q3[3] * v) * v) * v);
-        else if (v < 12) {
-            u = 1. / v;
-            lan = (p4[0] + (p4[1] + (p4[2] + p4[3] * u) * u) * u) / (q4[0] + (q4[1] + (q4[2] + q4[3] * u) * u) * u);
-        } else if (v < 50) {
-            u = 1. / v;
-            lan = (p5[0] + (p5[1] + (p5[2] + p5[3] * u) * u) * u) / (q5[0] + (q5[1] + (q5[2] + q5[3] * u) * u) * u);
-        } else if (v < 300) {
-            u = 1. / v;
-            lan = (p6[0] + (p6[1] + (p6[2] + p6[3] * u) * u) * u) / (q6[0] + (q6[1] + (q6[2] + q6[3] * u) * u) * u);
-        } else {
-            u = 1. / (v - v * Log(v) / (v + 1));
-            lan = 1 - (a2[1] + (a2[2] + a2[3] * u) * u) * u;
-        }
-        return lan;
     }
 
     /**
@@ -4669,69 +4735,6 @@ public class TMath extends TMathConstants {
         for (k = 1; k <= npt[0]; k++) {
             WCM[k] *= x;
         }
-    }
-
-    /**
-     * Internal function, called by Vavilov and VavilovSet
-     * 
-     * @param rlam ???
-     * @param AC ???
-     * @param HC ???
-     * @param itype ???
-     * @return internal value
-     */
-    protected static double VavilovDenEval(double rlam, double AC[], double HC[], int itype) {
-        double v = 0;
-        if (rlam < AC[0] || rlam > AC[8])
-            return 0;
-        int k;
-        double x, fn, s;
-        double[] h = new double[10];
-        if (itype == 1) {
-            fn = 1;
-            x = (rlam + HC[0]) * HC[1];
-            h[1] = x;
-            h[2] = x * x - 1;
-            for (k = 2; k <= 8; k++) {
-                fn++;
-                h[k + 1] = x * h[k] - fn * h[k - 1];
-            }
-            s = 1 + HC[7] * h[9];
-            for (k = 2; k <= 6; k++) {
-                s += HC[k] * h[k + 1];
-            }
-            v = HC[8] * Exp(-0.5 * x * x) * Max(s, 0.);
-        } else if (itype == 2) {
-            x = rlam * rlam;
-            v = AC[1] * Exp(-AC[2] * (rlam + AC[5] * x) - AC[3] * Exp(-AC[4] * (rlam + AC[6] * x)));
-        } else if (itype == 3) {
-            if (rlam < AC[7]) {
-                x = rlam * rlam;
-                v = AC[1] * Exp(-AC[2] * (rlam + AC[5] * x) - AC[3] * Exp(-AC[4] * (rlam + AC[6] * x)));
-            } else {
-                x = 1. / rlam;
-                v = (AC[11] * x + AC[12]) * x;
-            }
-        } else if (itype == 4) {
-            // TODO: check this line
-            // v = AC[13]*Landau(rlam);
-        }
-        return v;
-    }
-
-    public static void main(String argv[]) {
-        // Some simple test cases
-
-        double[] a = new double[11];
-        for (int i = 0; i < a.length; i++) {
-            a[i] = i + 1;
-        }
-        System.out.println("mean      = " + TMath.Mean(a));
-        System.out.println("rms       = " + TMath.RMS(a));
-        System.out.println("min       = " + TMath.Minimum(a));
-        System.out.println("max       = " + TMath.Maximum(a));
-        System.out.println("median    = " + TMath.Median(a));
-        System.out.println("geo. mean = " + TMath.GeometricMean(a));
     }
 
 }

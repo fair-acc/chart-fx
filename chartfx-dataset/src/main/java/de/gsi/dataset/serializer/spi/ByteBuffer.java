@@ -119,7 +119,7 @@ public class ByteBuffer implements IoBuffer {
     public double getDouble() {
         return nioByteBuffer.getDouble();
     }
-    
+
     @Override
     public double[] getDoubleArray(final double[] dst, final long offset, final int length) {
         final int arraySize = getInt();
@@ -278,8 +278,6 @@ public class ByteBuffer implements IoBuffer {
         }
         return this;
     }
-    
-    
 
     @Override
     public IoBuffer putByte(final byte b) {
@@ -317,7 +315,7 @@ public class ByteBuffer implements IoBuffer {
         nioByteBuffer.putDouble(value);
         return this;
     }
-    
+
     @Override
     public IoBuffer putDoubleArray(final double[] src, final long offset, final int nToCopy) {
         final int nElements = nToCopy > 0 ? Math.min(nToCopy, src.length) : src.length;
@@ -437,7 +435,7 @@ public class ByteBuffer implements IoBuffer {
 
     @Override
     public IoBuffer trim(final int requestedCapacity) {
-    	 return this;
+        return this;
     }
 
 }

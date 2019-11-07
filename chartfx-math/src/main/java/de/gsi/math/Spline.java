@@ -20,7 +20,7 @@ public class Spline {
      * 
      * @param x array of horizontal coordinates
      * @param y array of vertical coordinates Both arrays are expected to be sorted. The horizontal array should not
-     *            contain entries with the same value. The default dimension is derived from the
+     *        contain entries with the same value. The default dimension is derived from the
      * @see #Spline(double[] x, double[] y, int length, int scrPos)
      */
     public Spline(double[] x, double[] y) {
@@ -32,8 +32,8 @@ public class Spline {
      * @param y array of vertical coordinates
      * @param length length of the data
      * @param scrPos first index of the data Both arrays are expected to be sorted. The horizontal array should not
-     *            contain entries with the same value. It is implicitly required that: 0 &lt;= srcPos &lt;= srcPos+length &lt;
-     *            x.length and length &gt; 3
+     *        contain entries with the same value. It is implicitly required that: 0 &lt;= srcPos &lt;= srcPos+length
+     *        &lt; x.length and length &gt; 3
      */
     public Spline(double[] x, double[] y, int length, int scrPos) {
         fsrcPos = scrPos;
@@ -48,16 +48,6 @@ public class Spline {
         System.arraycopy(y, fsrcPos, fy, 0, length);
         SetupBoundaryConditions();
         CalcCoefficients();
-    }
-
-    /**
-     * set type 1 boundary coefficients (vanishing second order moment)
-     */
-    private void SetupBoundaryConditions() {
-        fboundCond1[0] = 0.0f;
-        fboundCond1[1] = 0.0f; // = 2.0f * x''(0)
-        fboundCondN[0] = 0.0f;
-        fboundCondN[1] = 0.0f; // = 2.0f * x''(N-1)
     }
 
     /**
@@ -141,6 +131,16 @@ public class Spline {
             System.out.println("(x,y)[" + i + "] = (" + fx[i] + "," + fy[i] + ")");
             System.out.println("(a,b,c) = (" + fA[i] + "," + fB[i] + "," + fC[i] + ")");
         }
+    }
+
+    /**
+     * set type 1 boundary coefficients (vanishing second order moment)
+     */
+    private void SetupBoundaryConditions() {
+        fboundCond1[0] = 0.0f;
+        fboundCond1[1] = 0.0f; // = 2.0f * x''(0)
+        fboundCondN[0] = 0.0f;
+        fboundCondN[1] = 0.0f; // = 2.0f * x''(N-1)
     }
 
     @Override

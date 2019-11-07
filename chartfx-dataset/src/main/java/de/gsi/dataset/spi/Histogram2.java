@@ -39,63 +39,6 @@ public class Histogram2 extends AbstractHistogram implements Histogram2D, DataSe
         yProjection = new Histogram(name + "-Proj-Y", nBinsY, minY, maxY, false);
     }
 
-    /**
-     * @return 1D histogram with projection in X
-     */
-    public Histogram1D getProjectionX() {
-        return xProjection;
-    }
-
-    /**
-     * @return 1D histogram with projection in Y
-     */
-    public Histogram1D getProjectionY() {
-        return yProjection;
-    }
-
-    @Override
-    public void reset() {
-        xProjection.reset();
-        yProjection.reset();
-        super.reset();
-    }
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see de.gsi.dataset.DataSet3D#getZ(int, int)
-     */
-    @Override
-    public double getZ(int xIndex, int yIndex) {
-        final int bin = (yIndex + 1) * getDataCount() + xIndex + 1;
-        return super.getBinContent(bin);
-    }
-
-    //	/*
-    //	 * (non-Javadoc)
-    //	 *
-    //	 * @see de.gsi.dataset.DataSet#getX(int)
-    //	 */
-    //	@Override
-    //	public double getX(int i) {
-    //		return getBinCenter(DIM_X, i + 1);
-    //	}
-    //
-    //	/*
-    //	 * (non-Javadoc)
-    //	 *
-    //	 * @see de.gsi.dataset.DataSet#getY(int)
-    //	 */
-    //	@Override
-    //	public double getY(int i) {
-    //		return getBinCenter(DIM_Y, i + 1);
-    //	}
-
-    @Override
-    public double get(final int dimIndex, final int binIndex) {
-        return getBinCenter(dimIndex, binIndex + 1);
-    }
-
     /*
      * (non-Javadoc)
      *
@@ -135,8 +78,62 @@ public class Histogram2 extends AbstractHistogram implements Histogram2D, DataSe
     }
 
     @Override
+    public double get(final int dimIndex, final int binIndex) {
+        return getBinCenter(dimIndex, binIndex + 1);
+    }
+
+    // /*
+    // * (non-Javadoc)
+    // *
+    // * @see de.gsi.dataset.DataSet#getX(int)
+    // */
+    // @Override
+    // public double getX(int i) {
+    // return getBinCenter(DIM_X, i + 1);
+    // }
+    //
+    // /*
+    // * (non-Javadoc)
+    // *
+    // * @see de.gsi.dataset.DataSet#getY(int)
+    // */
+    // @Override
+    // public double getY(int i) {
+    // return getBinCenter(DIM_Y, i + 1);
+    // }
+
+    @Override
+    public int getDataCount() {
+        return getDataCount(DIM_X);
+    }
+
+    @Override
+    public List<String> getErrorList() {
+        return Collections.<String>emptyList();
+    }
+
+    @Override
+    public int getIndex(int dimIndex, double value) {
+        return findBin(dimIndex, value);
+    }
+
+    @Override
     public List<String> getInfoList() {
-        return Collections.<String> emptyList();
+        return Collections.<String>emptyList();
+    }
+
+    /**
+     * @return 1D histogram with projection in X
+     */
+    public Histogram1D getProjectionX() {
+        return xProjection;
+    }
+
+    /**
+     * @return 1D histogram with projection in Y
+     */
+    public Histogram1D getProjectionY() {
+        return yProjection;
     }
 
     protected double getSum(final int dimIndex, int bin) {
@@ -151,6 +148,12 @@ public class Histogram2 extends AbstractHistogram implements Histogram2D, DataSe
             }
         }
         return sum;
+    }
+
+    @Override
+    public double getValue(int dimIndex, double x) {
+        // TODO Auto-generated method stub
+        return 0;
     }
 
     @Override
@@ -170,24 +173,21 @@ public class Histogram2 extends AbstractHistogram implements Histogram2D, DataSe
         return retVal;
     }
 
+    /*
+     * (non-Javadoc)
+     *
+     * @see de.gsi.dataset.DataSet3D#getZ(int, int)
+     */
     @Override
-    public List<String> getErrorList() {
-        return Collections.<String> emptyList();
+    public double getZ(int xIndex, int yIndex) {
+        final int bin = (yIndex + 1) * getDataCount() + xIndex + 1;
+        return super.getBinContent(bin);
     }
 
     @Override
-    public int getIndex(int dimIndex, double value) {
-        return findBin(dimIndex, value);
-    }
-
-    @Override
-    public double getValue(int dimIndex, double x) {
-        // TODO Auto-generated method stub
-        return 0;
-    }
-
-    @Override
-    public int getDataCount() {
-        return getDataCount(DIM_X);
+    public void reset() {
+        xProjection.reset();
+        yProjection.reset();
+        super.reset();
     }
 }

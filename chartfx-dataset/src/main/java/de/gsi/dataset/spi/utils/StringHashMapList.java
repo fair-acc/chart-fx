@@ -11,21 +11,6 @@ public class StringHashMapList extends ConcurrentHashMap<Integer, String> {
      *
      * @param fromIndex the start index (inclusive).
      * @param toIndex the end index (exclusive).
-     */
-    public void shiftKeys(final int fromIndex, final int toIndex) {
-        for (int i = toIndex; i >= fromIndex; i--) {
-            final String oldData = remove(i);
-            if (oldData != null) {
-                put(i + 1, oldData);
-            }
-        }
-    }
-
-    /**
-     * shift elements all keys from starting index until the last toIndex.
-     *
-     * @param fromIndex the start index (inclusive).
-     * @param toIndex the end index (exclusive).
      * @param label label to be added
      */
     public void addValueAndShiftKeys(final int fromIndex, final int toIndex, final String label) {
@@ -62,6 +47,21 @@ public class StringHashMapList extends ConcurrentHashMap<Integer, String> {
                 this.put(kv.getKey(), label);
             }
         });
+    }
+
+    /**
+     * shift elements all keys from starting index until the last toIndex.
+     *
+     * @param fromIndex the start index (inclusive).
+     * @param toIndex the end index (exclusive).
+     */
+    public void shiftKeys(final int fromIndex, final int toIndex) {
+        for (int i = toIndex; i >= fromIndex; i--) {
+            final String oldData = remove(i);
+            if (oldData != null) {
+                put(i + 1, oldData);
+            }
+        }
     }
 
 }

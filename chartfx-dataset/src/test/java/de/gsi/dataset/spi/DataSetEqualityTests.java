@@ -46,8 +46,8 @@ public class DataSetEqualityTests {
         assertEquals(new FifoDoubleErrorDataSet("default", 10), new FifoDoubleErrorDataSet("default", 11));
         assertEquals(new FragmentedDataSet("default"), new FragmentedDataSet("default"));
         assertEquals(new Histogram("default", 10, 0.0, 1.0), new Histogram("default", 10, 0.0, 1.0));
-        //        assertEquals(new Histogram2("default", 10, 0.0, 1.0, 10, 0.0, 1.0),
-        //                new Histogram2("default", 10, 0.0, 1.0, 10, 0.0, 1.0));
+        // assertEquals(new Histogram2("default", 10, 0.0, 1.0, 10, 0.0, 1.0),
+        // new Histogram2("default", 10, 0.0, 1.0, 10, 0.0, 1.0));
         assertEquals(new LabelledMarkerDataSet("default"), new LabelledMarkerDataSet("default"));
         assertEquals(new LimitedIndexedTreeDataSet("default", 10), new LimitedIndexedTreeDataSet("default", 11));
         assertEquals(new RollingDataSet("default"), new RollingDataSet("default"));
@@ -56,8 +56,7 @@ public class DataSetEqualityTests {
     }
 
     /**
-     * more specific test here DoubleErrorDataSet as stand-in for all
-     * AbstractDataSet derived classes
+     * more specific test here DoubleErrorDataSet as stand-in for all AbstractDataSet derived classes
      */
     @Test
     public void testDoubleDataSetEquality() {
@@ -210,12 +209,12 @@ public class DataSetEqualityTests {
     private class NullEditConstraints implements EditConstraints {
 
         @Override
-        public boolean canDelete(int index) {
+        public boolean canAdd(int index) {
             return false;
         }
 
         @Override
-        public boolean canAdd(int index) {
+        public boolean canDelete(int index) {
             return false;
         }
 

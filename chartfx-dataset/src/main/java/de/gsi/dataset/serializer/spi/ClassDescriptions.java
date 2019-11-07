@@ -25,6 +25,22 @@ public final class ClassDescriptions { // NOPMD - nomen est omen
     }
 
     @SafeVarargs
+    private static int computeHashCode(final Class<?> classPrototype, final Class<? extends Object>... classArguments) {
+        final int prime = 31;
+        int result = 1;
+        result = (prime * result) + ((classPrototype == null) ? 0 : classPrototype.getName().hashCode());
+        if ((classArguments == null) || (classArguments.length <= 0)) {
+            return result;
+        }
+
+        for (final Class<? extends Object> clazz : Arrays.asList(classArguments)) {
+            result = (prime * result) + clazz.hashCode();
+        }
+
+        return result;
+    }
+
+    @SafeVarargs
     public static ClassFieldDescription get(final Class<? extends Object> clazz,
             final Class<? extends Object>... classArguments) {
         if (clazz == null) {
@@ -131,6 +147,10 @@ public final class ClassDescriptions { // NOPMD - nomen est omen
         printClassStructure(field, true, 0);
     }
 
+    private static String spaces(final int spaces) {
+        return CharBuffer.allocate(spaces).toString().replace('\0', ' ');
+    }
+
     public static String translateClassName(final String name) {
         final String retName = name;
         if (retName.startsWith("[Z")) {
@@ -150,30 +170,10 @@ public final class ClassDescriptions { // NOPMD - nomen est omen
         } else if (retName.startsWith("[L")) {
             return retName.substring(2, retName.length() - 1) + "[]";
         }
-        //		else if (retName.startsWith("\\? extends ")) {
-        //			return retName.substring(WILDCARD_EXTENDS_LENGTH, retName.length() - 1);
-        //		}
+        // else if (retName.startsWith("\\? extends ")) {
+        // return retName.substring(WILDCARD_EXTENDS_LENGTH, retName.length() - 1);
+        // }
 
         return retName;
-    }
-
-    @SafeVarargs
-    private static int computeHashCode(final Class<?> classPrototype, final Class<? extends Object>... classArguments) {
-        final int prime = 31;
-        int result = 1;
-        result = (prime * result) + ((classPrototype == null) ? 0 : classPrototype.getName().hashCode());
-        if ((classArguments == null) || (classArguments.length <= 0)) {
-            return result;
-        }
-
-        for (final Class<? extends Object> clazz : Arrays.asList(classArguments)) {
-            result = (prime * result) + clazz.hashCode();
-        }
-
-        return result;
-    }
-
-    private static String spaces(final int spaces) {
-        return CharBuffer.allocate(spaces).toString().replace('\0', ' ');
     }
 }

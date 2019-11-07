@@ -33,19 +33,43 @@ import javafx.scene.layout.Priority;
 import javafx.stage.Stage;
 
 /**
- * example to illustrate bubble- and scatter-type plot
- * using either the DataSetError interface or (more customisable) DataStyle Marker interface.
+ * example to illustrate bubble- and scatter-type plot using either the DataSetError interface or (more customisable)
+ * DataStyle Marker interface.
  *
  * @author rstein
  */
 public class ScatterAndBubbleRendererSample extends Application {
-	private static final Logger LOGGER = LoggerFactory.getLogger(ScatterAndBubbleRendererSample.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ScatterAndBubbleRendererSample.class);
     private static String demoDataFile = "testdata/2017_OECD_data.csv";
     private final Map<String, Double> lifeExpectancyWomen = new ConcurrentHashMap<>();
     private final Map<String, Double> lifeExpectancyMen = new ConcurrentHashMap<>();
     private final Map<String, Double> gdpPerCapita = new ConcurrentHashMap<>();
     private final Map<String, Double> population = new ConcurrentHashMap<>();
     private double maxPopulation = 1.0;
+
+    private void loadDemoData(final String fileName) {
+        try (BufferedReader csvReader = Files
+                .newBufferedReader(Paths.get(this.getClass().getResource(fileName).toURI()))) {
+            // skip first row
+            String row = csvReader.readLine();
+            // LOCATION,TIME,LIFEEXP65 – WOMEN,LIFEEXP65 – MEN,TIME,USD_CAP,TIME,MLN_PER
+            while ((row = csvReader.readLine()) != null) {
+                String[] data = row.split(",");
+                final double pop = 1e6 * Double.parseDouble(data[7]);
+                maxPopulation = Math.max(maxPopulation, pop);
+
+                lifeExpectancyWomen.put(data[0], 65.0 + Double.parseDouble(data[2]));
+                lifeExpectancyMen.put(data[0], 65.0 + Double.parseDouble(data[3]));
+                gdpPerCapita.put(data[0], Double.parseDouble(data[5]));
+                population.put(data[0], pop);
+            }
+        } catch (IOException | URISyntaxException e) {
+            if (LOGGER.isErrorEnabled()) {
+                LOGGER.atError().setCause(e).log("InterruptedException");
+            }
+        }
+
+    }
 
     @Override
     public void start(final Stage primaryStage) {
@@ -64,7 +88,7 @@ public class ScatterAndBubbleRendererSample extends Application {
 
         Map<String, Double> sortedGDP = gdpPerCapita.entrySet().stream().sorted(Entry.comparingByValue())
                 .collect(Collectors.toMap(Entry::getKey, Entry::getValue, (e1, e2) -> e2, LinkedHashMap::new));
-        // N.B. for the time the being the Zoomer plugin and Data reduction algorithm require 
+        // N.B. for the time the being the Zoomer plugin and Data reduction algorithm require
         // DataSets to be sorted along the x coordinate
         int count = 0;
         for (Entry<String, Double> entry : sortedGDP.entrySet()) {
@@ -72,7 +96,7 @@ public class ScatterAndBubbleRendererSample extends Application {
             final double gdp = entry.getValue();
             final double popSize = 0.2 * population.get(country) / maxPopulation;
 
-            // set bubble size as error of y (also possible to set it as error of X or both) 
+            // set bubble size as error of y (also possible to set it as error of X or both)
             // N.B. Tip: Math.sqrt(..) since for the observer the surface are is more important than the diameter
             bubbleDataSet1a.add(gdp, lifeExpectancyWomen.get(country), Math.sqrt(popSize), Math.sqrt(popSize), country);
             bubbleDataSet1b.add(gdp, lifeExpectancyMen.get(country), Math.sqrt(popSize), Math.sqrt(popSize), country);
@@ -81,7 +105,8 @@ public class ScatterAndBubbleRendererSample extends Application {
             bubbleDataSet2a.add(gdp, lifeExpectancyWomen.get(country), country);
             bubbleDataSet2b.add(gdp, lifeExpectancyMen.get(country), country);
             // N.B. markerSize is in pixel regardless of the xAxis or yAxis scale
-            String markerSize = "markerSize=" + 40 * Math.sqrt(population.get(country) / maxPopulation) + "; index="+count+";";
+            String markerSize = "markerSize=" + 40 * Math.sqrt(population.get(country) / maxPopulation) + "; index="
+                    + count + ";";
             bubbleDataSet2a.addDataStyle(count, markerSize);
             bubbleDataSet2b.addDataStyle(count, markerSize);
             if (country.equals("FRA")) {
@@ -91,7 +116,7 @@ public class ScatterAndBubbleRendererSample extends Application {
                 bubbleDataSet2a.addDataStyle(count, markerSize + "markerColor=green; markerType=diamond;");
                 bubbleDataSet2b.addDataStyle(count, markerSize + "markerColor=lightgreen; markerType=diamond;");
             }
-            // for more marker types see DefaultMarker 
+            // for more marker types see DefaultMarker
 
             count++;
         }
@@ -155,30 +180,6 @@ public class ScatterAndBubbleRendererSample extends Application {
         HBox.setHgrow(chart, Priority.ALWAYS);
 
         return chart;
-    }
-
-    private void loadDemoData(final String fileName) {
-        try (BufferedReader csvReader = Files
-                .newBufferedReader(Paths.get(this.getClass().getResource(fileName).toURI()))) {
-            // skip first row
-            String row = csvReader.readLine();
-            // LOCATION,TIME,LIFEEXP65 – WOMEN,LIFEEXP65 – MEN,TIME,USD_CAP,TIME,MLN_PER
-            while ((row = csvReader.readLine()) != null) {
-                String[] data = row.split(",");
-                final double pop = 1e6 * Double.parseDouble(data[7]);
-                maxPopulation = Math.max(maxPopulation, pop);
-
-                lifeExpectancyWomen.put(data[0], 65.0 + Double.parseDouble(data[2]));
-                lifeExpectancyMen.put(data[0], 65.0 + Double.parseDouble(data[3]));
-                gdpPerCapita.put(data[0], Double.parseDouble(data[5]));
-                population.put(data[0], pop);
-            }
-        } catch (IOException | URISyntaxException e) {
-        	if (LOGGER.isErrorEnabled()) {
-				LOGGER.atError().setCause(e).log("InterruptedException");
-			}
-        }
-
     }
 
     /**

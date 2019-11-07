@@ -5,23 +5,96 @@ import de.gsi.math.utils.ConcurrencyUtils;
 
 public class HilbertTransform extends Convolution {
 
+    public double[] computeAmplitude(final double[] data) {
+        final int nsamples = data.length;
+        final double[] hdata = transformFourier(data);
+        final double[] amplitude = new double[nsamples];
+
+        for (int i = 0; i < nsamples; i++) {
+            final double a = hdata[i];
+            final double b = data[i];
+            amplitude[i] = Math.sqrt(TMathConstants.Sqr(a) + TMathConstants.Sqr(b));
+        }
+
+        return amplitude;
+    }
+
+    public double[] computeInstantaneousAmplitude(final double[] data) {
+        final int nsamples = data.length;
+        final double[] amplitude = computeAmplitude(data);
+
+        // remove spurious Nyquist content
+        final double[] lowPass = Convolution.getLowPassFilter(ConcurrencyUtils.nextPow2(3 * nsamples), 0.4);
+        Convolution.complexMultiply(lowPass, lowPass);
+        return transform(amplitude, lowPass, false);
+    }
+
+    public double[] computeInstantaneousFrequency(final double[] data) {
+        final int nsamples = data.length;
+        final double[] phase = computePhase(data);
+        final double[] filter = Convolution.getDerivativeFilter(ConcurrencyUtils.nextPow2(3 * nsamples));
+        final double[] frequency = transform(phase, filter, false);
+
+        for (int i = 1; i < frequency.length - 1; i++) {
+            frequency[i] /= TMathConstants.TwoPi();
+            if (frequency[i] > 0.5) {
+                frequency[i] = 1.0 - frequency[i];
+            } else if (frequency[i] > 0.5) {
+                frequency[i] = 0;
+            }
+            // phase_diff[i] = HilbertTransform.modulo(frequency[i], 1.0);
+        }
+        frequency[0] = 0;
+        frequency[frequency.length - 1] = 0;
+
+        // remove spurious Nyquist content
+        final double[] lowPass = Convolution.getLowPassFilter(ConcurrencyUtils.nextPow2(3 * nsamples), 0.4);
+        Convolution.complexMultiply(lowPass, lowPass);
+        return transform(frequency, lowPass, false);
+    }
+
+    public double[] computePhase(final double[] data) {
+        final int nsamples = data.length;
+        final double[] hdata = transformFourier(data);
+        final double[] phase = new double[nsamples];
+
+        for (int i = 0; i < nsamples; i++) {
+            final double a = hdata[i];
+            final double b = data[i];
+            final double phas = Math.atan2(a, b);
+            phase[i] = phas;
+        }
+
+        UnwrapPhase2(phase);
+        return phase;
+    }
+
+    public double[] computePhase(final double[] data, final double[] amplitude) {
+        final int nsamples = data.length;
+        final double[] hdata = transformTime(data);
+        final double[] phase = new double[nsamples];
+
+        for (int i = 0; i < nsamples; i++) {
+            final double a = hdata[i];
+            final double b = data[i];
+            final double phas = Math.atan2(a, b);
+            final double ampl = Math.sqrt(a * a + b * b);
+            phase[i] = phas;
+            amplitude[i] = (float) ampl;
+        }
+
+        UnwrapPhase2(phase);
+        return phase;
+    }
+
     /**
-     * FFT based Hilbert Transform computation is done in Fourier domain
+     * Hilbert Transform
      * 
      * @param data input data
      * @return Hilbert-transformed signal
      */
-    public double[] transformFourier(final double[] data) {
-        final int nsamples = data.length;
-
-        // ensures that the convolution is done on multiples of two (faster)
-        final int fft_samples = ConcurrencyUtils.nextPow2(3 * nsamples);
-        ;
-
-        // Hilbert filter kernel (Fourier domain)
-        final double[] filter = Convolution.getHilbertFilter(fft_samples);
-
-        return transform(data, filter, false);
+    public double[] transform(final double[] data) {
+        return transformFourier(data);
     }
 
     public double[] transform2(final double[] data) {
@@ -59,6 +132,25 @@ public class HilbertTransform extends Convolution {
     }
 
     /**
+     * FFT based Hilbert Transform computation is done in Fourier domain
+     * 
+     * @param data input data
+     * @return Hilbert-transformed signal
+     */
+    public double[] transformFourier(final double[] data) {
+        final int nsamples = data.length;
+
+        // ensures that the convolution is done on multiples of two (faster)
+        final int fft_samples = ConcurrencyUtils.nextPow2(3 * nsamples);
+        ;
+
+        // Hilbert filter kernel (Fourier domain)
+        final double[] filter = Convolution.getHilbertFilter(fft_samples);
+
+        return transform(data, filter, false);
+    }
+
+    /**
      * discrete Hilbert transform according to: S. Kak, The discrete Hilbert transform. Proc. IEEE, vol. 58, pp.
      * 585-586, 1970. computation is done in time domain
      * 
@@ -90,16 +182,6 @@ public class HilbertTransform extends Convolution {
         }
 
         return htransformed;
-    }
-
-    /**
-     * Hilbert Transform
-     * 
-     * @param data input data
-     * @return Hilbert-transformed signal
-     */
-    public double[] transform(final double[] data) {
-        return transformFourier(data);
     }
 
     public static double modulo(double x, final double m) {
@@ -144,88 +226,6 @@ public class HilbertTransform extends Convolution {
             phase0 += diff;
             phase[i] = phase0;
         }
-    }
-
-    public double[] computePhase(final double[] data, final double[] amplitude) {
-        final int nsamples = data.length;
-        final double[] hdata = transformTime(data);
-        final double[] phase = new double[nsamples];
-
-        for (int i = 0; i < nsamples; i++) {
-            final double a = hdata[i];
-            final double b = data[i];
-            final double phas = Math.atan2(a, b);
-            final double ampl = Math.sqrt(a * a + b * b);
-            phase[i] = phas;
-            amplitude[i] = (float) ampl;
-        }
-
-        UnwrapPhase2(phase);
-        return phase;
-    }
-
-    public double[] computePhase(final double[] data) {
-        final int nsamples = data.length;
-        final double[] hdata = transformFourier(data);
-        final double[] phase = new double[nsamples];
-
-        for (int i = 0; i < nsamples; i++) {
-            final double a = hdata[i];
-            final double b = data[i];
-            final double phas = Math.atan2(a, b);
-            phase[i] = phas;
-        }
-
-        UnwrapPhase2(phase);
-        return phase;
-    }
-
-    public double[] computeAmplitude(final double[] data) {
-        final int nsamples = data.length;
-        final double[] hdata = transformFourier(data);
-        final double[] amplitude = new double[nsamples];
-
-        for (int i = 0; i < nsamples; i++) {
-            final double a = hdata[i];
-            final double b = data[i];
-            amplitude[i] = Math.sqrt(TMathConstants.Sqr(a) + TMathConstants.Sqr(b));
-        }
-
-        return amplitude;
-    }
-
-    public double[] computeInstantaneousFrequency(final double[] data) {
-        final int nsamples = data.length;
-        final double[] phase = computePhase(data);
-        final double[] filter = Convolution.getDerivativeFilter(ConcurrencyUtils.nextPow2(3 * nsamples));
-        final double[] frequency = transform(phase, filter, false);
-
-        for (int i = 1; i < frequency.length - 1; i++) {
-            frequency[i] /= TMathConstants.TwoPi();
-            if (frequency[i] > 0.5) {
-                frequency[i] = 1.0 - frequency[i];
-            } else if (frequency[i] > 0.5) {
-                frequency[i] = 0;
-            }
-            // phase_diff[i] = HilbertTransform.modulo(frequency[i], 1.0);
-        }
-        frequency[0] = 0;
-        frequency[frequency.length - 1] = 0;
-
-        // remove spurious Nyquist content
-        final double[] lowPass = Convolution.getLowPassFilter(ConcurrencyUtils.nextPow2(3 * nsamples), 0.4);
-        Convolution.complexMultiply(lowPass, lowPass);
-        return transform(frequency, lowPass, false);
-    }
-
-    public double[] computeInstantaneousAmplitude(final double[] data) {
-        final int nsamples = data.length;
-        final double[] amplitude = computeAmplitude(data);
-
-        // remove spurious Nyquist content
-        final double[] lowPass = Convolution.getLowPassFilter(ConcurrencyUtils.nextPow2(3 * nsamples), 0.4);
-        Convolution.complexMultiply(lowPass, lowPass);
-        return transform(amplitude, lowPass, false);
     }
 
 }

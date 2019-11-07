@@ -102,11 +102,12 @@ public class ColorGradient {
     private final List<Stop> stops;
 
     private final String name;
+
     /**
      * Creates a new instance of ColorGradient.**
      *
      * @param stops the gradient's color specification; should contain at least* two stops with offsets between 0.0 and
-     *            1.0*
+     *        1.0*
      * @see #getStops()
      */
 
@@ -118,7 +119,7 @@ public class ColorGradient {
      * Creates a new instance of ColorGradient.
      *
      * @param stops the gradient's color specification; should contain at least two stops with offsets between 0.0 and
-     *            1.0
+     *        1.0
      * @see #getStops()
      */
     public ColorGradient(final Stop... stops) {
@@ -130,7 +131,7 @@ public class ColorGradient {
      *
      * @param name name of gradient
      * @param stops the gradient's color specification; should contain at least two stops with offsets between 0.0 and
-     *            1.0
+     *        1.0
      * @see #getStops()
      */
     public ColorGradient(final String name, final List<Stop> stops) {
@@ -144,13 +145,28 @@ public class ColorGradient {
      *
      * @param name name of gradient
      * @param stops the gradient's color specification; should contain at least two stops with offsets between 0.0 and
-     *            1.0
+     *        1.0
      * @see #getStops()
      */
     public ColorGradient(final String name, final Stop... stops) {
         // Use LinearGradient to normalize stops
         this.stops = new LinearGradient(0, 0, 0, 0, false, CycleMethod.NO_CYCLE, stops).getStops(); // NOPMD
         this.name = name;
+    }
+
+    /**
+     * Returns the gradient stops.
+     *
+     * @return list of stop colours
+     * @see LinearGradient#getStops()
+     */
+    public List<Stop> getStops() {
+        return stops;
+    }
+
+    @Override
+    public String toString() {
+        return name;
     }
 
     public static List<ColorGradient> colorGradients() {
@@ -296,21 +312,6 @@ public class ColorGradient {
             stops.add(new Stop(i * delta, Color.color(vals[i][0], vals[i][1], vals[i][2], 1.0)));
         }
         return new ColorGradient("VIRIDIS", stops);
-    }
-
-    /**
-     * Returns the gradient stops.
-     *
-     * @return list of stop colours
-     * @see LinearGradient#getStops()
-     */
-    public List<Stop> getStops() {
-        return stops;
-    }
-
-    @Override
-    public String toString() {
-        return name;
     }
 
 }

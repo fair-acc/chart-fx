@@ -6,13 +6,12 @@ import org.slf4j.LoggerFactory;
 import de.gsi.math.TRandom;
 
 /**
- * computes IN = U*S*V^T. With diag(S)={fEigenValues(0),
- * fEigenValues(1),..,fEigenValues(n)} and V the fEigenVector matrix of IN
+ * computes IN = U*S*V^T. With diag(S)={fEigenValues(0), fEigenValues(1),..,fEigenValues(n)} and V the fEigenVector
+ * matrix of IN
  * <p>
- * algorithm according to Golub and Reinsch G. Golub and C. Reinsch, "Handbook
- * for Automatic Computation II, Linear Algebra". Springer, NY, 1971.
- * numerically checked but... TODO: code clean up necessary... code as been
- * translated from FORTRAN -&gt; C -&gt; C++ -&gt; Java ;-)
+ * algorithm according to Golub and Reinsch G. Golub and C. Reinsch, "Handbook for Automatic Computation II, Linear
+ * Algebra". Springer, NY, 1971. numerically checked but... TODO: code clean up necessary... code as been translated
+ * from FORTRAN -&gt; C -&gt; C++ -&gt; Java ;-)
  *
  * @author rstein
  */
@@ -46,10 +45,406 @@ public class SingularValueDecomposition {
     /**
      * default constructor.
      *
-     * @param inputMatrix
-     *            the preset input matrix to be decomposed
+     * @param inputMatrix the preset input matrix to be decomposed
      */
     public SingularValueDecomposition(final MatrixD inputMatrix) {
+        final int m = inputMatrix.getRowDimension();
+        final int n = inputMatrix.getColumnDimension();
+        fInitSVD = false;
+        fCut = 1e-20;
+        finputMatrix = new MatrixD(m, n);
+        feigenVectorsU = new MatrixD(m, n);
+        fEigenValues = new MatrixD(n, n);
+        fInverseEigenValues = new MatrixD(n, n);
+        feigenVectorsV = new MatrixD(n, n);
+        finputMatrix = inputMatrix.copy();
+        fInit = true;
+        fInitSVD = false;
+    }
+
+    /**
+     * Two norm condition number
+     *
+     * @return max(S)/min(S)
+     */
+    public double cond() {
+        if (!fInitSVD) {
+            decompose();
+        }
+        final double firstEigenValue = fEigenValues.get(0, 0);
+        final int m = getEigenVectorMatrixU().getRowDimension();
+        final int n = getEigenVectorMatrixU().getColumnDimension();
+        final int index = Math.min(m, n) - 1;
+        final double lastEigenValue = fEigenValues.get(index, index);
+        return firstEigenValue / lastEigenValue;
+    }
+
+    /**
+     * Perform the singular value decomposition. (does not use intermediate square matrices)
+     *
+     * @return true if operation was successful, false otherwise
+     */
+    public boolean decompose() {
+        return decompose(false);
+    }
+
+    /**
+     * Perform the singular value decomposition.
+     *
+     * @param useSquareMatrix whether to use intermediate step of transforming the input matrix to a square one.
+     * @return true if operation was successful, false otherwise
+     */
+    public boolean decompose(final boolean useSquareMatrix) {
+        if (!fInit) {
+            LOGGER.error("no matrix specified");
+            return false;
+        }
+        int m = finputMatrix.getRowDimension();
+        int n = finputMatrix.getColumnDimension();
+        if (m == 0 || n == 0) {
+            LOGGER.error(String.format("null matrix specified (%d,%d)", m, n));
+            return false;
+        }
+        double[] a;
+        final double[] eigenValues = new double[n];
+        final double[] eigenVectorMatrixV = new double[n * n];
+
+        if (useSquareMatrix) {
+            // final MatrixD square =
+            // finputMatrix.times(finputMatrix.transpose());
+            final MatrixD square = finputMatrix.transpose().times(finputMatrix);
+            n = square.getRowDimension();
+            m = n;
+
+            LOGGER.debug(String.format("reduced to %dx%d matrix", n, n));
+            a = new double[n * n];
+
+            // A = Rt*R
+            // MatrixD A(fIN, MatrixD::kTransposeMult, fIN);
+            // ffIN=A.GetMatrixArray();
+            // for (int i=0; i<n*n; i++) a[i]=ffIN[i];
+            for (int i = 0; i < m; i++) {
+                for (int j = 0; j < n; j++) {
+                    a[i * n + j] = square.get(i, j);
+                }
+            }
+
+        } else {
+            a = new double[m * n];
+            for (int i = 0; i < m; i++) {
+                for (int j = 0; j < n; j++) {
+                    a[i * n + j] = finputMatrix.get(i, j);
+                }
+            }
+        }
+
+        // for (int i=0; i<n; i++)
+        // for (int j=0; j<n; j++)
+        // gsl_matrix_set(A, i, j, a[i*n+j]);
+
+        // gsl_linalg_SV_decomp (A,V,S,work);
+        svdcmp(a, m, n, eigenValues, eigenVectorMatrixV);
+
+        // sorting of Eigenvalues and Eigenvectors
+        if (useSquareMatrix) {
+            sortEigenValues(eigenValues, eigenVectorMatrixV);
+        } else {
+            sortEigenValues(a, eigenValues, eigenVectorMatrixV, m);
+        }
+
+        fInverseEigenValues.times(0.0);
+        fEigenValues.times(0.0);
+        if (useSquareMatrix) {
+            for (int i = 0; i < n; i++) {
+                final double eigenValue = Math.sqrt(eigenValues[i]);
+                fEigenValues.set(i, i, eigenValue);
+                if (eigenValue == 0) {
+                    fInverseEigenValues.set(i, i, 0.0);
+                } else {
+                    fInverseEigenValues.set(i, i, 1 / eigenValue);
+                }
+            }
+        } else {
+            for (int i = 0; i < n; i++) {
+                final double eigenValue = eigenValues[i];
+                fEigenValues.set(i, i, eigenValue);
+                if (eigenValue == 0) {
+                    fInverseEigenValues.set(i, i, 0.0);
+                } else {
+                    fInverseEigenValues.set(i, i, 1 / eigenValue);
+                }
+            }
+        }
+
+        // standard equation O(n^4);
+        // fU = fIN * fEigenVectors * Lambda_minus1;
+        // Lambda_minus1(,) is diagonal, hence fEigenVectors*Lambda_minus1 can
+        // be computed in O(n^2)
+
+        if (useSquareMatrix) {
+            final MatrixD EigenTimesLambda_minus1 = new MatrixD(n, n);
+            for (int i = 0; i < n; i++) {
+                final int row_index = i * n;
+                for (int j = 0; j < n; j++) {
+                    feigenVectorsV.set(i, j, eigenVectorMatrixV[row_index + j]);
+                    final double eigenValue = fInverseEigenValues.get(j, j);
+                    EigenTimesLambda_minus1.set(i, j, eigenValue * eigenVectorMatrixV[row_index + j]);
+                }
+            }
+
+            feigenVectorsU = finputMatrix.times(EigenTimesLambda_minus1);
+        } else {
+            final MatrixD EigenTimesLambda_minus1 = new MatrixD(n, n);
+
+            for (int i = 0; i < n; i++) {
+                final int row_index = i * n;
+                for (int j = 0; j < n; j++) {
+                    feigenVectorsV.set(i, j, eigenVectorMatrixV[row_index + j]);
+                    final double eigenValue = fInverseEigenValues.get(j, j);
+                    EigenTimesLambda_minus1.set(i, j, eigenValue * eigenVectorMatrixV[row_index + j]);
+                }
+            }
+
+            feigenVectorsU = finputMatrix.times(EigenTimesLambda_minus1);
+        }
+
+        fInitSVD = true;
+        return true;
+    }
+
+    public MatrixD getEigenSolution(final int eigen) {
+        if (!fInitSVD) {
+            decompose();
+        }
+        final int n = feigenVectorsU.getRowDimension();
+        final MatrixD ret = new MatrixD(n, 1);
+        for (int i = 0; i < n; i++) {
+            ret.set(i, 0, feigenVectorsU.get(i, eigen));
+        }
+        return ret;
+    }
+
+    public MatrixD getEigenValues() {
+        if (!fInitSVD) {
+            decompose();
+        }
+        return fEigenValues;
+    }
+
+    public MatrixD getEigenVector(final int eigen) {
+        if (!fInitSVD) {
+            decompose();
+        }
+        final int n = feigenVectorsV.getRowDimension();
+        final MatrixD ret = new MatrixD(n, 1);
+        for (int i = 0; i < n; i++) {
+            ret.set(i, 0, feigenVectorsV.get(i, eigen));
+        }
+
+        return ret;
+    }
+
+    /**
+     * @return the eigenvector matrix U (m x n)
+     */
+    public MatrixD getEigenVectorMatrixU() {
+        if (!fInitSVD) {
+            decompose();
+        }
+        return feigenVectorsU;
+    }
+
+    /**
+     * @return the eigenvector matrix V (n x n)
+     */
+    public MatrixD getEigenVectorMatrixV() {
+        if (!fInitSVD) {
+            decompose();
+        }
+        return feigenVectorsV;
+    }
+
+    public MatrixD getInverse() {
+        if (!fInitSVD) {
+            decompose();
+        }
+        return getInverse(false, -1);
+    }
+
+    public MatrixD getInverse(final boolean timer, final int nEigenValues) {
+        final int m = feigenVectorsU.getRowDimension();
+        final int n = feigenVectorsU.getColumnDimension();
+        int nEigen = nEigenValues;
+
+        if (nEigen < 0) {
+            nEigen = fEigenValues.getRowDimension() - 1;
+        }
+
+        if (nEigen < 0 || nEigen >= n) {
+            LOGGER.warn(String.format("selected number of eigenvalues %d exceeds maximum %d . et to max", nEigen, n));
+            nEigen = n;
+        }
+
+        if (!fInitSVD) {
+            LOGGER.debug(String.format("forced decomposition of %dx%d matrix", m, n));
+            decompose(false);
+        }
+
+        LOGGER.debug(String.format("cut below %e and max %d eigenvalues", fCut, nEigen));
+
+        final MatrixD lambdaMinus1 = new MatrixD(n, n); // inverse eigenvector
+                                                        // matrix w.r.t. R
+
+        final double eigenValueMax = fEigenValues.get(0, 0);
+        for (int i = 0; i < n; i++) {
+            final double eigenValue = fEigenValues.get(i, i);
+            if (eigenValue / eigenValueMax > fCut && i <= nEigen) {
+                lambdaMinus1.set(i, i, fInverseEigenValues.get(i, i));
+            } else {
+                LOGGER.debug(String.format("discarding from eigenvalue %d", i + 1));
+                break;
+            }
+        }
+
+        // MatrixD UR= IN*EigenVectors*Lambda_minus1; // UR is the U Matrix w.r.
+        // to R
+        // MatrixD URt(MatrixD::kTransposed,UR);
+
+        // old:
+        // fU= fIN*fEigenVectors*Lambda_minus1;
+        // feigenVectorsU =
+        // finputMatrix.times(feigenVectorsV.times(lambdaMinus1));
+        final MatrixD eigenVectorsUt = feigenVectorsU.transpose();
+        final MatrixD iRESPONSE = feigenVectorsV.times(lambdaMinus1.times(eigenVectorsUt));
+
+        return iRESPONSE;
+    }
+
+    public MatrixD getMatrix() {
+        if (!fInitSVD) {
+            decompose();
+        }
+        return feigenVectorsU.times(fEigenValues.times(feigenVectorsV.transpose()));
+    }
+
+    public MatrixD getPseudoInverseEigenvalues() {
+        if (!fInitSVD) {
+            decompose();
+        }
+        return fInverseEigenValues.copy();
+    }
+
+    /***************************************************************************************************/
+    /******************
+     * the holy cow: the svd algorithm
+     ************************************************/
+    /***************************************************************************************************/
+
+    public double[] getSingularValues() {
+        if (!fInitSVD) {
+            decompose();
+        }
+        final int n = fEigenValues.getColumnDimension();
+        final double[] retVal = new double[n];
+        for (int i = 0; i < n; i++) {
+            retVal[i] = fEigenValues.get(i, i);
+        }
+        return retVal;
+    }
+
+    public double getThreshold() {
+        return fCut;
+    }
+
+    public double getTol() {
+        return getThreshold();
+    }
+
+    /**
+     * @return the eigenvector matrix U (n x n)
+     */
+    public MatrixD getU() {
+        return getEigenVectorMatrixU();
+    }
+
+    /**
+     * @return the eigenvector matrix V (n x n)
+     */
+    public MatrixD getV() {
+        return getEigenVectorMatrixV();
+    }
+
+    private double mySIGN(final double a, final double b) {
+        return b >= 0.0 ? Math.abs(a) : -Math.abs(a);
+    }
+
+    /***************************************************************************************************/
+    /******************
+     * the holy cow: the svd algorithm ***** end
+     **************************************/
+    /***************************************************************************************************/
+
+    /**
+     * Two norm
+     *
+     * @return max(S)
+     * @deprecated used only in old implementation
+     */
+    @Deprecated
+    public double norm2() {
+        if (!fInitSVD) {
+            decompose();
+        }
+        return fEigenValues.get(0, 0);
+    }
+
+    /**
+     * @param a input a
+     * @param b input b
+     * @return numerically precise implementation of pythagoras (vs. 'sqrt(a*a + b*b)')
+     */
+    private double pythagoras(final double a, final double b) {
+        final double absa = Math.abs(a);
+        final double absb = Math.abs(b);
+
+        if (absa > absb) {
+            return absa * Math.sqrt(1.0 + square(absb / absa));
+        } else {
+            return absb == 0.0 ? 0.0 : absb * Math.sqrt(1.0 + square(absa / absb));
+        }
+    }
+
+    /**
+     * Effective numerical matrix rank
+     *
+     * @return Number of non-negligible singular values.
+     */
+    public int rank() {
+        if (!fInitSVD) {
+            decompose();
+        }
+        int rank = 0;
+        final double eps = Math.pow(2.0, -52.0);
+        final int m = getEigenVectorMatrixU().getRowDimension();
+        final int n = getEigenVectorMatrixU().getColumnDimension();
+        final double firstEigenValue = fEigenValues.get(0, 0);
+        final double tol = Math.max(m, n) * firstEigenValue * eps;
+        for (int i = 0; i < fEigenValues.getColumnDimension(); i++) {
+            final double eigenValue = fEigenValues.get(i, i);
+            if (eigenValue > tol) {
+                rank++;
+            }
+        }
+
+        return rank;
+    }
+
+    /**
+     * Sets the input matrix to be decomposed.
+     *
+     * @param inputMatrix the input matrix
+     */
+    public void setMatrix(final MatrixD inputMatrix) {
         final int m = inputMatrix.getRowDimension();
         final int n = inputMatrix.getColumnDimension();
         fInitSVD = false;
@@ -68,104 +463,9 @@ public class SingularValueDecomposition {
         fCut = val;
     }
 
-    public double getThreshold() {
-        return fCut;
-    }
-
     public void setTol(final double val) {
         setThreshold(val);
     }
-
-    public double getTol() {
-        return getThreshold();
-    }
-
-    public MatrixD getEigenValues() {
-        if (!fInitSVD) {
-            decompose();
-        }
-        return fEigenValues;
-    }
-
-    public double[] getSingularValues() {
-        if (!fInitSVD) {
-            decompose();
-        }
-        final int n = fEigenValues.getColumnDimension();
-        final double[] retVal = new double[n];
-        for (int i = 0; i < n; i++) {
-            retVal[i] = fEigenValues.get(i, i);
-        }
-        return retVal;
-    }
-
-    public MatrixD getPseudoInverseEigenvalues() {
-        if (!fInitSVD) {
-            decompose();
-        }
-        return fInverseEigenValues.copy();
-    }
-
-    /**
-     * @return the eigenvector matrix V (n x n)
-     */
-    public MatrixD getEigenVectorMatrixV() {
-        if (!fInitSVD) {
-            decompose();
-        }
-        return feigenVectorsV;
-    }
-
-    /**
-     * @return the eigenvector matrix V (n x n)
-     */
-    public MatrixD getV() {
-        return getEigenVectorMatrixV();
-    }
-
-    /**
-     * @return the eigenvector matrix U (m x n)
-     */
-    public MatrixD getEigenVectorMatrixU() {
-        if (!fInitSVD) {
-            decompose();
-        }
-        return feigenVectorsU;
-    }
-
-    /**
-     * @return the eigenvector matrix U (n x n)
-     */
-    public MatrixD getU() {
-        return getEigenVectorMatrixU();
-    }
-
-    /**
-     * Sets the input matrix to be decomposed.
-     *
-     * @param inputMatrix
-     *            the input matrix
-     */
-    public void setMatrix(final MatrixD inputMatrix) {
-        final int m = inputMatrix.getRowDimension();
-        final int n = inputMatrix.getColumnDimension();
-        fInitSVD = false;
-        fCut = 1e-20;
-        finputMatrix = new MatrixD(m, n);
-        feigenVectorsU = new MatrixD(m, n);
-        fEigenValues = new MatrixD(n, n);
-        fInverseEigenValues = new MatrixD(n, n);
-        feigenVectorsV = new MatrixD(n, n);
-        finputMatrix = inputMatrix.copy();
-        fInit = true;
-        fInitSVD = false;
-    }
-
-    /***************************************************************************************************/
-    /******************
-     * the holy cow: the svd algorithm
-     ************************************************/
-    /***************************************************************************************************/
 
     /**
      * 
@@ -236,31 +536,8 @@ public class SingularValueDecomposition {
         }
     }
 
-    private double mySIGN(final double a, final double b) {
-        return b >= 0.0 ? Math.abs(a) : -Math.abs(a);
-    }
-
     private double square(final double a) {
         return a * a;
-    }
-
-    /**
-     * @param a
-     *            input a
-     * @param b
-     *            input b
-     * @return numerically precise implementation of pythagoras (vs. 'sqrt(a*a +
-     *         b*b)')
-     */
-    private double pythagoras(final double a, final double b) {
-        final double absa = Math.abs(a);
-        final double absb = Math.abs(b);
-
-        if (absa > absb) {
-            return absa * Math.sqrt(1.0 + square(absb / absa));
-        } else {
-            return absb == 0.0 ? 0.0 : absb * Math.sqrt(1.0 + square(absa / absb));
-        }
     }
 
     private void svdcmp(final double[] inputMatrix, final int m, final int n, final double[] eigenValues,
@@ -539,330 +816,8 @@ public class SingularValueDecomposition {
 
     }
 
-    /***************************************************************************************************/
-    /******************
-     * the holy cow: the svd algorithm ***** end
-     **************************************/
-    /***************************************************************************************************/
-
     /**
-     * Perform the singular value decomposition. (does not use intermediate
-     * square matrices)
-     *
-     * @return true if operation was successful, false otherwise
-     */
-    public boolean decompose() {
-        return decompose(false);
-    }
-
-    /**
-     * Perform the singular value decomposition.
-     *
-     * @param useSquareMatrix
-     *            whether to use intermediate step of transforming the input
-     *            matrix to a square one.
-     * @return true if operation was successful, false otherwise
-     */
-    public boolean decompose(final boolean useSquareMatrix) {
-        if (!fInit) {
-            LOGGER.error("no matrix specified");
-            return false;
-        }
-        int m = finputMatrix.getRowDimension();
-        int n = finputMatrix.getColumnDimension();
-        if (m == 0 || n == 0) {
-            LOGGER.error(String.format("null matrix specified (%d,%d)", m, n));
-            return false;
-        }
-        double[] a;
-        final double[] eigenValues = new double[n];
-        final double[] eigenVectorMatrixV = new double[n * n];
-
-        if (useSquareMatrix) {
-            // final MatrixD square =
-            // finputMatrix.times(finputMatrix.transpose());
-            final MatrixD square = finputMatrix.transpose().times(finputMatrix);
-            n = square.getRowDimension();
-            m = n;
-
-            LOGGER.debug(String.format("reduced to %dx%d matrix", n, n));
-            a = new double[n * n];
-
-            // A = Rt*R
-            // MatrixD A(fIN, MatrixD::kTransposeMult, fIN);
-            // ffIN=A.GetMatrixArray();
-            // for (int i=0; i<n*n; i++) a[i]=ffIN[i];
-            for (int i = 0; i < m; i++) {
-                for (int j = 0; j < n; j++) {
-                    a[i * n + j] = square.get(i, j);
-                }
-            }
-
-        } else {
-            a = new double[m * n];
-            for (int i = 0; i < m; i++) {
-                for (int j = 0; j < n; j++) {
-                    a[i * n + j] = finputMatrix.get(i, j);
-                }
-            }
-        }
-
-        // for (int i=0; i<n; i++)
-        // for (int j=0; j<n; j++)
-        // gsl_matrix_set(A, i, j, a[i*n+j]);
-
-        // gsl_linalg_SV_decomp (A,V,S,work);
-        svdcmp(a, m, n, eigenValues, eigenVectorMatrixV);
-
-        // sorting of Eigenvalues and Eigenvectors
-        if (useSquareMatrix) {
-            sortEigenValues(eigenValues, eigenVectorMatrixV);
-        } else {
-            sortEigenValues(a, eigenValues, eigenVectorMatrixV, m);
-        }
-
-        fInverseEigenValues.times(0.0);
-        fEigenValues.times(0.0);
-        if (useSquareMatrix) {
-            for (int i = 0; i < n; i++) {
-                final double eigenValue = Math.sqrt(eigenValues[i]);
-                fEigenValues.set(i, i, eigenValue);
-                if (eigenValue == 0) {
-                    fInverseEigenValues.set(i, i, 0.0);
-                } else {
-                    fInverseEigenValues.set(i, i, 1 / eigenValue);
-                }
-            }
-        } else {
-            for (int i = 0; i < n; i++) {
-                final double eigenValue = eigenValues[i];
-                fEigenValues.set(i, i, eigenValue);
-                if (eigenValue == 0) {
-                    fInverseEigenValues.set(i, i, 0.0);
-                } else {
-                    fInverseEigenValues.set(i, i, 1 / eigenValue);
-                }
-            }
-        }
-
-        // standard equation O(n^4);
-        // fU = fIN * fEigenVectors * Lambda_minus1;
-        // Lambda_minus1(,) is diagonal, hence fEigenVectors*Lambda_minus1 can
-        // be computed in O(n^2)
-
-        if (useSquareMatrix) {
-            final MatrixD EigenTimesLambda_minus1 = new MatrixD(n, n);
-            for (int i = 0; i < n; i++) {
-                final int row_index = i * n;
-                for (int j = 0; j < n; j++) {
-                    feigenVectorsV.set(i, j, eigenVectorMatrixV[row_index + j]);
-                    final double eigenValue = fInverseEigenValues.get(j, j);
-                    EigenTimesLambda_minus1.set(i, j, eigenValue * eigenVectorMatrixV[row_index + j]);
-                }
-            }
-
-            feigenVectorsU = finputMatrix.times(EigenTimesLambda_minus1);
-        } else {
-            final MatrixD EigenTimesLambda_minus1 = new MatrixD(n, n);
-
-            for (int i = 0; i < n; i++) {
-                final int row_index = i * n;
-                for (int j = 0; j < n; j++) {
-                    feigenVectorsV.set(i, j, eigenVectorMatrixV[row_index + j]);
-                    final double eigenValue = fInverseEigenValues.get(j, j);
-                    EigenTimesLambda_minus1.set(i, j, eigenValue * eigenVectorMatrixV[row_index + j]);
-                }
-            }
-
-            feigenVectorsU = finputMatrix.times(EigenTimesLambda_minus1);
-        }
-
-        fInitSVD = true;
-        return true;
-    }
-
-    public MatrixD getMatrix() {
-        if (!fInitSVD) {
-            decompose();
-        }
-        return feigenVectorsU.times(fEigenValues.times(feigenVectorsV.transpose()));
-    }
-
-    public MatrixD getInverse() {
-        if (!fInitSVD) {
-            decompose();
-        }
-        return getInverse(false, -1);
-    }
-
-    public MatrixD getInverse(final boolean timer, final int nEigenValues) {
-        final int m = feigenVectorsU.getRowDimension();
-        final int n = feigenVectorsU.getColumnDimension();
-        int nEigen = nEigenValues;
-
-        if (nEigen < 0) {
-            nEigen = fEigenValues.getRowDimension() - 1;
-        }
-
-        if (nEigen < 0 || nEigen >= n) {
-            LOGGER.warn(String.format("selected number of eigenvalues %d exceeds maximum %d . et to max", nEigen, n));
-            nEigen = n;
-        }
-
-        if (!fInitSVD) {
-            LOGGER.debug(String.format("forced decomposition of %dx%d matrix", m, n));
-            decompose(false);
-        }
-
-        LOGGER.debug(String.format("cut below %e and max %d eigenvalues", fCut, nEigen));
-
-        final MatrixD lambdaMinus1 = new MatrixD(n, n); // inverse eigenvector
-                                                        // matrix w.r.t. R
-
-        final double eigenValueMax = fEigenValues.get(0, 0);
-        for (int i = 0; i < n; i++) {
-            final double eigenValue = fEigenValues.get(i, i);
-            if (eigenValue / eigenValueMax > fCut && i <= nEigen) {
-                lambdaMinus1.set(i, i, fInverseEigenValues.get(i, i));
-            } else {
-                LOGGER.debug(String.format("discarding from eigenvalue %d", i + 1));
-                break;
-            }
-        }
-
-        // MatrixD UR= IN*EigenVectors*Lambda_minus1; // UR is the U Matrix w.r.
-        // to R
-        // MatrixD URt(MatrixD::kTransposed,UR);
-
-        // old:
-        // fU= fIN*fEigenVectors*Lambda_minus1;
-        // feigenVectorsU =
-        // finputMatrix.times(feigenVectorsV.times(lambdaMinus1));
-        final MatrixD eigenVectorsUt = feigenVectorsU.transpose();
-        final MatrixD iRESPONSE = feigenVectorsV.times(lambdaMinus1.times(eigenVectorsUt));
-
-        return iRESPONSE;
-    }
-
-    public MatrixD getEigenVector(final int eigen) {
-        if (!fInitSVD) {
-            decompose();
-        }
-        final int n = feigenVectorsV.getRowDimension();
-        final MatrixD ret = new MatrixD(n, 1);
-        for (int i = 0; i < n; i++) {
-            ret.set(i, 0, feigenVectorsV.get(i, eigen));
-        }
-
-        return ret;
-    }
-
-    public MatrixD getEigenSolution(final int eigen) {
-        if (!fInitSVD) {
-            decompose();
-        }
-        final int n = feigenVectorsU.getRowDimension();
-        final MatrixD ret = new MatrixD(n, 1);
-        for (int i = 0; i < n; i++) {
-            ret.set(i, 0, feigenVectorsU.get(i, eigen));
-        }
-        return ret;
-    }
-
-    /**
-     * Two norm
-     *
-     * @return max(S)
-     * @deprecated used only in old implementation
-     */
-    @Deprecated
-    public double norm2() {
-        if (!fInitSVD) {
-            decompose();
-        }
-        return fEigenValues.get(0, 0);
-    }
-
-    /**
-     * Two norm condition number
-     *
-     * @return max(S)/min(S)
-     */
-    public double cond() {
-        if (!fInitSVD) {
-            decompose();
-        }
-        final double firstEigenValue = fEigenValues.get(0, 0);
-        final int m = getEigenVectorMatrixU().getRowDimension();
-        final int n = getEigenVectorMatrixU().getColumnDimension();
-        final int index = Math.min(m, n) - 1;
-        final double lastEigenValue = fEigenValues.get(index, index);
-        return firstEigenValue / lastEigenValue;
-    }
-
-    /**
-     * Effective numerical matrix rank
-     *
-     * @return Number of non-negligible singular values.
-     */
-    public int rank() {
-        if (!fInitSVD) {
-            decompose();
-        }
-        int rank = 0;
-        final double eps = Math.pow(2.0, -52.0);
-        final int m = getEigenVectorMatrixU().getRowDimension();
-        final int n = getEigenVectorMatrixU().getColumnDimension();
-        final double firstEigenValue = fEigenValues.get(0, 0);
-        final double tol = Math.max(m, n) * firstEigenValue * eps;
-        for (int i = 0; i < fEigenValues.getColumnDimension(); i++) {
-            final double eigenValue = fEigenValues.get(i, i);
-            if (eigenValue > tol) {
-                rank++;
-            }
-        }
-
-        return rank;
-    }
-
-    /**
-     * Tests whether 'inputMatrix' == 'SVD decomposed matrix'. assumes default
-     * numerical precision threshold,
-     *
-     * @see #testSVD(double threshold) for more info
-     * @return true if test successful, false otherwise
-     */
-    // @Test
-    public boolean testSVD() {
-        return testSVD(TEST_SVD_THRESHOLD);
-    }
-
-    /**
-     * Tests whether 'inputMatrix' == 'SVD decomposed matrix'.
-     *
-     * @param threshold
-     *            the numerical threshold for the test
-     * @return true if test successful, false otherwise
-     */
-    // @Test
-    public boolean testSVD(final double threshold) {
-        final MatrixD testMatrix = finputMatrix.minus(getMatrix());
-
-        for (int i = 0; i < testMatrix.getRowDimension(); i++) {
-            for (int j = 0; j < testMatrix.getColumnDimension(); j++) {
-                if (Math.abs(testMatrix.get(i, j)) > threshold) {
-                    LOGGER.warn(String.format("found that element (%d,%d) differs %e from zero!", i, j,
-                            testMatrix.get(i, j)));
-                    return false;
-                }
-            }
-        }
-        return true;
-    }
-
-    /**
-     * Test of 'inputMatrix'*'pseudo-inverse SVD matrix' == 1. only works for
-     * non-singular matrices
+     * Test of 'inputMatrix'*'pseudo-inverse SVD matrix' == 1. only works for non-singular matrices
      *
      * @see #testInvert(double threshold) for more info
      * @return true if test successful, false otherwise
@@ -873,11 +828,9 @@ public class SingularValueDecomposition {
     }
 
     /**
-     * Test of 'inputMatrix'*'pseudo-inverse SVD matrix' == '1' matrix. only
-     * works for non-singular matrices
+     * Test of 'inputMatrix'*'pseudo-inverse SVD matrix' == '1' matrix. only works for non-singular matrices
      *
-     * @param threshold
-     *            the numerical threshold for the test
+     * @param threshold the numerical threshold for the test
      * @return true if test successful, false otherwise
      */
     // @Test
@@ -913,10 +866,42 @@ public class SingularValueDecomposition {
     }
 
     /**
+     * Tests whether 'inputMatrix' == 'SVD decomposed matrix'. assumes default numerical precision threshold,
+     *
+     * @see #testSVD(double threshold) for more info
+     * @return true if test successful, false otherwise
+     */
+    // @Test
+    public boolean testSVD() {
+        return testSVD(TEST_SVD_THRESHOLD);
+    }
+
+    /**
+     * Tests whether 'inputMatrix' == 'SVD decomposed matrix'.
+     *
+     * @param threshold the numerical threshold for the test
+     * @return true if test successful, false otherwise
+     */
+    // @Test
+    public boolean testSVD(final double threshold) {
+        final MatrixD testMatrix = finputMatrix.minus(getMatrix());
+
+        for (int i = 0; i < testMatrix.getRowDimension(); i++) {
+            for (int j = 0; j < testMatrix.getColumnDimension(); j++) {
+                if (Math.abs(testMatrix.get(i, j)) > threshold) {
+                    LOGGER.warn(String.format("found that element (%d,%d) differs %e from zero!", i, j,
+                            testMatrix.get(i, j)));
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    /**
      * some small test routines to check SVD matrix computation.
      *
-     * @param argc
-     *            the input parameter (unused)
+     * @param argc the input parameter (unused)
      */
     public static void main(final String[] argc) {
         final TRandom rnd = new TRandom(1);

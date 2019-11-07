@@ -14,23 +14,19 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public interface EventSource {
 
     /**
-     * Adds an {@link EventListener} which will be notified whenever the
-     * {@code Observable} becomes invalid. If the same listener is added more
-     * than once, then it will be notified more than once. That is, no check is
-     * made to ensure uniqueness.
+     * Adds an {@link EventListener} which will be notified whenever the {@code Observable} becomes invalid. If the same
+     * listener is added more than once, then it will be notified more than once. That is, no check is made to ensure
+     * uniqueness.
      * <p>
-     * Note that the same actual {@code InvalidationListener} instance may be
-     * safely registered for different {@code UpdateSource}.
+     * Note that the same actual {@code InvalidationListener} instance may be safely registered for different
+     * {@code UpdateSource}.
      * <p>
-     * The {@code UpdateSource} stores a strong reference to the listener which
-     * will prevent the listener from being garbage collected and may result in
-     * a memory leak.
+     * The {@code UpdateSource} stores a strong reference to the listener which will prevent the listener from being
+     * garbage collected and may result in a memory leak.
      *
      * @see #removeListener(EventListener)
-     * @param listener
-     *            The listener to register
-     * @throws NullPointerException
-     *             if the listener is null
+     * @param listener The listener to register
+     * @throws NullPointerException if the listener is null
      */
     default void addListener(EventListener listener) {
         synchronized (updateEventListener()) {
@@ -42,15 +38,12 @@ public interface EventSource {
     }
 
     /**
-     * Set the automatic notification of invalidation listeners. In general,
-     * data sets should notify registered invalidation listeners, if the data in
-     * the data set has changed. Charts usually register an invalidation
-     * listener with the data set to be notified of any changes and update the
-     * charts. Setting the automatic notification to false, allows applications
-     * to prevent this behaviour, in case data sets are updated multiple times
-     * during an acquisition cycle but the chart update is only required at the
-     * end of the cycle.
-     * <code>true</code> for automatic notification
+     * Set the automatic notification of invalidation listeners. In general, data sets should notify registered
+     * invalidation listeners, if the data in the data set has changed. Charts usually register an invalidation listener
+     * with the data set to be notified of any changes and update the charts. Setting the automatic notification to
+     * false, allows applications to prevent this behaviour, in case data sets are updated multiple times during an
+     * acquisition cycle but the chart update is only required at the end of the cycle. <code>true</code> for automatic
+     * notification
      * 
      * @return the atomic boolean
      */
@@ -126,19 +119,16 @@ public interface EventSource {
     }
 
     /**
-     * Removes the given listener from the list of listeners, that are notified
-     * whenever the value of the {@code UpdateSource} becomes invalid.
+     * Removes the given listener from the list of listeners, that are notified whenever the value of the
+     * {@code UpdateSource} becomes invalid.
      * <p>
-     * If the given listener has not been previously registered (i.e. it was
-     * never added) then this method call is a no-op. If it had been previously
-     * added then it will be removed. If it had been added more than once, then
-     * only the first occurrence will be removed.
+     * If the given listener has not been previously registered (i.e. it was never added) then this method call is a
+     * no-op. If it had been previously added then it will be removed. If it had been added more than once, then only
+     * the first occurrence will be removed.
      *
      * @see #addListener(EventListener)
-     * @param listener
-     *            The listener to remove
-     * @throws NullPointerException
-     *             if the listener is null
+     * @param listener The listener to remove
+     * @throws NullPointerException if the listener is null
      */
     default void removeListener(EventListener listener) {
         synchronized (updateEventListener()) {
@@ -150,8 +140,7 @@ public interface EventSource {
     }
 
     /**
-     * @return list containing all update event listener (needs to be provided
-     *         by implementing class)
+     * @return list containing all update event listener (needs to be provided by implementing class)
      */
     List<EventListener> updateEventListener();
 }

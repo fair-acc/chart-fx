@@ -8,9 +8,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * default field serialiser implementation. The user needs to provide the reader
- * and writer consumer lambdas to connect to the given serialiser back-end
- * implementation.
+ * default field serialiser implementation. The user needs to provide the reader and writer consumer lambdas to connect
+ * to the given serialiser back-end implementation.
  * 
  * @author rstein
  */
@@ -27,18 +26,12 @@ public class FieldSerialiser {
 
     /**
      * 
-     * @param reader                consumer executed when reading from the back-end
-     *                              serialiser implementation
-     * @param writer                consumer executed when writing to the back-end
-     *                              serialiser implementation
-     * @param classPrototype        applicable class/interface prototype reference
-     *                              for which the consumers are applicable (e.g.
-     *                              example 1: 'List.class' for List&lt;String&gt;
-     *                              or example 2: 'Map.class' for Map&lt;Integer,
-     *                              String&gt;)
-     * @param classGenericArguments applicable generics definition (e.g.
-     *                              'String.class' for List&lt;String&gt; or
-     *                              'Integer.class, String.class' resp.)
+     * @param reader consumer executed when reading from the back-end serialiser implementation
+     * @param writer consumer executed when writing to the back-end serialiser implementation
+     * @param classPrototype applicable class/interface prototype reference for which the consumers are applicable (e.g.
+     *        example 1: 'List.class' for List&lt;String&gt; or example 2: 'Map.class' for Map&lt;Integer, String&gt;)
+     * @param classGenericArguments applicable generics definition (e.g. 'String.class' for List&lt;String&gt; or
+     *        'Integer.class, String.class' resp.)
      */
     public FieldSerialiser(final FieldSerialiserFunction reader, final FieldSerialiserFunction writer,
             final Class<?> classPrototype, Class<?>... classGenericArguments) {
@@ -102,8 +95,7 @@ public class FieldSerialiser {
 
     /**
      * 
-     * @return consumer that is being executed for reading from the back-end
-     *         serialiser implementation
+     * @return consumer that is being executed for reading from the back-end serialiser implementation
      */
     public FieldSerialiserFunction getReaderFunction() {
         return readerFunction;
@@ -119,8 +111,7 @@ public class FieldSerialiser {
 
     /**
      * 
-     * @return consumer that is being executed for writing to the back-end
-     *         serialiser implementation
+     * @return consumer that is being executed for writing to the back-end serialiser implementation
      */
     public FieldSerialiserFunction getWriterFunction() {
         return writerFunction;
@@ -137,8 +128,8 @@ public class FieldSerialiser {
     }
 
     /**
-     * used as lambda expression for user-level code to read/write data into the
-     * given serialiser back-end implementation
+     * used as lambda expression for user-level code to read/write data into the given serialiser back-end
+     * implementation
      * 
      * @author rstein
      */

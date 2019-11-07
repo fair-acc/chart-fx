@@ -15,8 +15,8 @@ import javafx.beans.property.SimpleDoubleProperty;
 import javafx.scene.Scene;
 
 public class SimplePerformanceMeter extends AnimationTimer {
-    private OperatingSystemMXBean osBean = ManagementFactory.getPlatformMXBean(OperatingSystemMXBean.class);
     private static PerformanceTracker tracker;
+    private OperatingSystemMXBean osBean = ManagementFactory.getPlatformMXBean(OperatingSystemMXBean.class);
     private final long[] frameTimes = new long[100];
     private int frameTimeIndex = 0;
     private boolean arrayFilled = false;
@@ -37,6 +37,29 @@ public class SimplePerformanceMeter extends AnimationTimer {
     private DoubleProperty avgSystemCpuLoad = new SimpleDoubleProperty(this, "avgSystemCpuLoad", -1);
     private double frameRateLocal;
 
+    public SimplePerformanceMeter(Scene scene, long updateDuration) {
+
+        tracker = PerformanceTracker.getSceneTracker(scene);
+        this.start();
+
+        Timer timer = new Timer();
+        timer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                try {
+                    FXUtils.runLater(SimplePerformanceMeter.this::updateProperties);
+                } catch (ExecutionException e) {
+                    // not of concern
+                }
+            }
+
+        }, 0, updateDuration);
+    }
+
+    public ReadOnlyDoubleProperty actualFrameRateProperty() {
+        return trackerFrameRate;
+    }
+
     /**
      * 
      * IIR-alpha filter constant as in y(n) = alpha * x(n) + (1-alpha) * y(n-1)
@@ -51,84 +74,64 @@ public class SimplePerformanceMeter extends AnimationTimer {
         return averageFactor;
     }
 
-    public double getFxFrameRate() {
-        return fxFrameRateProperty().get();
-    }
-
-    public ReadOnlyDoubleProperty fxFrameRateProperty() {
-        return frameRate;
-    }
-
-    public double getAverageFxFrameRate() {
-        return averageFxFrameRateProperty().get();
+    public ReadOnlyDoubleProperty averageFrameRateProperty() {
+        return avgTrackerFrameRate;
     }
 
     public ReadOnlyDoubleProperty averageFxFrameRateProperty() {
         return avgFrameRate;
     }
 
-    public double getActualFrameRate() {
-        return actualFrameRateProperty().get();
+    public ReadOnlyDoubleProperty averageProcessCpuLoadProperty() {
+        return avgProcessCpuLoad;
     }
 
-    public ReadOnlyDoubleProperty actualFrameRateProperty() {
-        return trackerFrameRate;
+    public ReadOnlyDoubleProperty averageSystemCpuLoadProperty() {
+        return avgSystemCpuLoad;
+    }
+
+    public ReadOnlyDoubleProperty fxFrameRateProperty() {
+        return frameRate;
+    }
+
+    public double getActualFrameRate() {
+        return actualFrameRateProperty().get();
     }
 
     public double getAverageFrameRate() {
         return averageFrameRateProperty().get();
     }
 
-    public ReadOnlyDoubleProperty averageFrameRateProperty() {
-        return avgTrackerFrameRate;
-    }
-
-    public double getProcessCpuLoad() {
-        return processCpuLoadProperty().get();
-    }
-
-    public ReadOnlyDoubleProperty processCpuLoadProperty() {
-        return processCpuLoad;
-    }
-
-    public double getMinProcessCpuLoad() {
-        return minProcessCpuLoadProperty().get();
-    }
-
-    public ReadOnlyDoubleProperty minProcessCpuLoadProperty() {
-        return minProcessCpuLoad;
+    public double getAverageFxFrameRate() {
+        return averageFxFrameRateProperty().get();
     }
 
     public double getAverageProcessCpuLoad() {
         return averageProcessCpuLoadProperty().get();
     }
 
-    public double getMaxProcessCpuLoad() {
-        return minProcessCpuLoadProperty().get();
-    }
-
-    public ReadOnlyDoubleProperty maxProcessCpuLoadProperty() {
-        return maxProcessCpuLoad;
-    }
-
-    public ReadOnlyDoubleProperty averageProcessCpuLoadProperty() {
-        return avgProcessCpuLoad;
-    }
-
-    public double getSystemCpuLoad() {
-        return systemCpuLoadProperty().get();
-    }
-
-    public ReadOnlyDoubleProperty systemCpuLoadProperty() {
-        return systemCpuLoad;
-    }
-
     public double getAverageSystemCpuLoad() {
         return averageSystemCpuLoadProperty().get();
     }
 
-    public ReadOnlyDoubleProperty averageSystemCpuLoadProperty() {
-        return avgSystemCpuLoad;
+    public double getFxFrameRate() {
+        return fxFrameRateProperty().get();
+    }
+
+    public double getMaxProcessCpuLoad() {
+        return minProcessCpuLoadProperty().get();
+    }
+
+    public double getMinProcessCpuLoad() {
+        return minProcessCpuLoadProperty().get();
+    }
+
+    public double getProcessCpuLoad() {
+        return processCpuLoadProperty().get();
+    }
+
+    public double getSystemCpuLoad() {
+        return systemCpuLoadProperty().get();
     }
 
     @Override
@@ -145,6 +148,31 @@ public class SimplePerformanceMeter extends AnimationTimer {
         long elapsedNanos = now - oldFrameTime;
         long elapsedNanosPerFrame = elapsedNanos / frameTimes.length;
         frameRateLocal = 1_000_000_000.0 / elapsedNanosPerFrame;
+    }
+
+    public ReadOnlyDoubleProperty maxProcessCpuLoadProperty() {
+        return maxProcessCpuLoad;
+    }
+
+    public ReadOnlyDoubleProperty minProcessCpuLoadProperty() {
+        return minProcessCpuLoad;
+    }
+
+    public ReadOnlyDoubleProperty processCpuLoadProperty() {
+        return processCpuLoad;
+    }
+
+    public void resetAverages() {
+        tracker.resetAveragePulses();
+        tracker.resetAverageFPS();
+        minProcessCpuLoad.set(-1);
+        avgProcessCpuLoad.set(-1);
+        maxProcessCpuLoad.set(-1);
+        avgSystemCpuLoad.set(-1);
+    }
+
+    public ReadOnlyDoubleProperty systemCpuLoadProperty() {
+        return systemCpuLoad;
     }
 
     private void updateProperties() {
@@ -182,34 +210,6 @@ public class SimplePerformanceMeter extends AnimationTimer {
         } else {
             avgSystemCpuLoad.set((1 - alpha) * oldSystemLoad + alpha * systemCpuLoad.get());
         }
-    }
-
-    public void resetAverages() {
-        tracker.resetAveragePulses();
-        tracker.resetAverageFPS();
-        minProcessCpuLoad.set(-1);
-        avgProcessCpuLoad.set(-1);
-        maxProcessCpuLoad.set(-1);
-        avgSystemCpuLoad.set(-1);
-    }
-
-    public SimplePerformanceMeter(Scene scene, long updateDuration) {
-
-        tracker = PerformanceTracker.getSceneTracker(scene);
-        this.start();
-
-        Timer timer = new Timer();
-        timer.scheduleAtFixedRate(new TimerTask() {
-            @Override
-            public void run() {
-                try {
-                    FXUtils.runLater(SimplePerformanceMeter.this::updateProperties);
-                } catch (ExecutionException e) {
-                    // not of concern
-                }
-            }
-
-        }, 0, updateDuration);
     }
 
 }

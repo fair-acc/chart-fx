@@ -42,9 +42,8 @@ import de.gsi.math.spectra.fft.DoubleFFT_1D;
 import de.gsi.math.utils.ConcurrencyUtils;
 
 /**
- * Computes 1D Discrete Hartley Transform (DHT) of real, double precision data.
- * The size of the data can be an arbitrary number. It uses FFT algorithm. This
- * is a parallel implementation optimized for SMP systems.
+ * Computes 1D Discrete Hartley Transform (DHT) of real, double precision data. The size of the data can be an arbitrary
+ * number. It uses FFT algorithm. This is a parallel implementation optimized for SMP systems.
  *
  * @author Piotr Wendykier (piotr.wendykier@gmail.com)
  */
@@ -55,8 +54,7 @@ public class DoubleDHT_1D {
     /**
      * Creates new instance of DoubleDHT_1D.
      *
-     * @param n
-     *            size of data
+     * @param n size of data
      */
     public DoubleDHT_1D(final int n) {
         this.n = n;
@@ -66,8 +64,7 @@ public class DoubleDHT_1D {
     /**
      * Computes 1D real, forward DHT leaving the result in <code>a</code>.
      *
-     * @param a
-     *            data to transform
+     * @param a data to transform
      */
     public void forward(final double[] a) {
         forward(a, 0);
@@ -76,10 +73,8 @@ public class DoubleDHT_1D {
     /**
      * Computes 1D real, forward DHT leaving the result in <code>a</code>.
      *
-     * @param a
-     *            data to transform
-     * @param offa
-     *            index of the first element in array <code>a</code>
+     * @param a data to transform
+     * @param offa index of the first element in array <code>a</code>
      */
     public void forward(final double[] a, final int offa) {
         if (n == 1) {
@@ -134,10 +129,8 @@ public class DoubleDHT_1D {
     /**
      * Computes 1D real, inverse DHT leaving the result in <code>a</code>.
      *
-     * @param a
-     *            data to transform
-     * @param scale
-     *            if true then scaling is performed
+     * @param a data to transform
+     * @param scale if true then scaling is performed
      */
     public void inverse(final double[] a, final boolean scale) {
         inverse(a, 0, scale);
@@ -146,12 +139,9 @@ public class DoubleDHT_1D {
     /**
      * Computes 1D real, inverse DHT leaving the result in <code>a</code>.
      *
-     * @param a
-     *            data to transform
-     * @param offa
-     *            index of the first element in array <code>a</code>
-     * @param scale
-     *            if true then scaling is performed
+     * @param a data to transform
+     * @param offa index of the first element in array <code>a</code>
+     * @param scale if true then scaling is performed
      */
     public void inverse(final double[] a, final int offa, final boolean scale) {
         if (n == 1) {

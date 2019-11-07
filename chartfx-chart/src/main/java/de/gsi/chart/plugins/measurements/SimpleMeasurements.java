@@ -24,8 +24,8 @@ import javafx.scene.Node;
 import javafx.scene.paint.Color;
 
 /**
- * Simple DataSet parameter measurements N.B. this contains only algorithms w/o
- * external library dependencies (ie. fitting routines, etc.)
+ * Simple DataSet parameter measurements N.B. this contains only algorithms w/o external library dependencies (ie.
+ * fitting routines, etc.)
  *
  * @author rstein
  */
@@ -33,79 +33,6 @@ public class SimpleMeasurements extends ValueIndicator {
     private static final Logger LOGGER = LoggerFactory.getLogger(SimpleMeasurements.class);
     private static final double DEFAULT_MIN = Double.NEGATIVE_INFINITY;
     private static final double DEFAULT_MAX = Double.POSITIVE_INFINITY;
-
-    public enum MeasurementCategory {
-        INDICATOR("Indicators"),
-        VERTICAL("Vertical Measurements"),
-        HORIZONTAL("Horizontal Measurements"),
-        ACC("Accelerator Misc.");
-
-        private String name;
-
-        MeasurementCategory(final String description) {
-            name = description;
-        }
-
-        @Override
-        public String toString() {
-            return name;
-        }
-    }
-
-    public enum MeasurementType {
-        // indicators
-        VALUE_HOR(false, INDICATOR, "hor. value"),
-        VALUE_VER(true, INDICATOR, "ver. value"),
-        DISTANCE_HOR(false, INDICATOR, "hor. distance"),
-        DISTANCE_VER(true, INDICATOR, "ver. distance"),
-
-        // vertical-type measurements
-        MINIMUM(true, VERTICAL, "Minimum"),
-        MAXIMUM(true, VERTICAL, "Maximum"),
-        RANGE(true, VERTICAL, "Range"),
-        MEAN(true, VERTICAL, "Mean"),
-        RMS(true, VERTICAL, "R.M.S."),
-        MEDIAN(true, VERTICAL, "Median"),
-        INTEGRAL(true, VERTICAL, "Integral"),
-        TRANSMISSION_ABS(true, ACC, "Abs. Transmission"),
-        TRANSMISSION_REL(true, ACC, "Rel. Transmission"),
-
-        // horizontal-type measurements
-        EDGE_DETECT(false, HORIZONTAL, "Edge-Detect"),
-        RISETIME_10_90(false, HORIZONTAL, "10%-90% Rise-/Fall-Time\n (simple)"),
-        RISETIME_20_80(false, HORIZONTAL, "20%-80% Rise-/Fall-Time\n (simple)"),
-        FWHM(false, HORIZONTAL, "FWHM"),
-        FWHM_INTERPOLATED(false, HORIZONTAL, "FWHM (interp.)"),
-        LOCATION_MAXIMUM(false, HORIZONTAL, "Loc. Maximum"),
-        LOCATION_MAXIMUM_GAUSS(false, HORIZONTAL, "Loc. Maximum\n(Gauss-interp.)"),
-        DUTY_CYCLE(false, HORIZONTAL, "Duty Cycle\n(10% hysteresis)"),
-        PERIOD(true, HORIZONTAL, "Period"),
-        FREQUENCY(false, HORIZONTAL, "Frequency");
-
-        private String name;
-        private MeasurementCategory category;
-        private boolean isVertical;
-
-        MeasurementType(final boolean isVerticalMeasurement, final MeasurementCategory measurementCategory,
-                final String description) {
-            isVertical = isVerticalMeasurement;
-            category = measurementCategory;
-            name = description;
-        }
-
-        public MeasurementCategory getCategory() {
-            return category;
-        }
-
-        public boolean isVerticalMeasurement() {
-            return isVertical;
-        }
-
-        @Override
-        public String toString() {
-            return name;
-        }
-    }
 
     private final MeasurementType measType;
 
@@ -136,35 +63,6 @@ public class SimpleMeasurements extends ValueIndicator {
         }
 
         valueField.setMinRange(SimpleMeasurements.DEFAULT_MIN).setMaxRange(SimpleMeasurements.DEFAULT_MAX);
-    }
-
-    @Override
-    public void initialize() {
-        final Node node = Borders.wrap(valueField).lineBorder().title(title).color(Color.BLACK).build().build();
-        node.setMouseTransparent(true);
-        displayPane.getChildren().add(node);
-
-        sliderIndicator1.valueProperty().addListener((ch, oldValue, newValue) -> {
-            if (oldValue != newValue) {
-                handle(null);
-            }
-        });
-
-        sliderIndicator2.valueProperty().addListener((ch, oldValue, newValue) -> {
-            if (oldValue != newValue) {
-                handle(null);
-            }
-        });
-        chart.addListener(e -> handle(null));
-        super.showConfigDialogue();
-        handle(null);
-    }
-
-    @Override
-    protected void removeAction() {
-        super.removeAction();
-        chart.getPlugins().remove(sliderIndicator2);
-        chart.requestLayout();
     }
 
     @Override
@@ -312,6 +210,96 @@ public class SimpleMeasurements extends ValueIndicator {
             // valueField.setUnit(unit + "*" + unit2);
             // valueField.setUnit(unit);
             break;
+        }
+    }
+
+    @Override
+    public void initialize() {
+        final Node node = Borders.wrap(valueField).lineBorder().title(title).color(Color.BLACK).build().build();
+        node.setMouseTransparent(true);
+        displayPane.getChildren().add(node);
+
+        sliderIndicator1.valueProperty().addListener((ch, oldValue, newValue) -> {
+            if (oldValue != newValue) {
+                handle(null);
+            }
+        });
+
+        sliderIndicator2.valueProperty().addListener((ch, oldValue, newValue) -> {
+            if (oldValue != newValue) {
+                handle(null);
+            }
+        });
+        chart.addListener(e -> handle(null));
+        super.showConfigDialogue();
+        handle(null);
+    }
+
+    @Override
+    protected void removeAction() {
+        super.removeAction();
+        chart.getPlugins().remove(sliderIndicator2);
+        chart.requestLayout();
+    }
+
+    public enum MeasurementCategory {
+        INDICATOR("Indicators"), VERTICAL("Vertical Measurements"), HORIZONTAL("Horizontal Measurements"),
+        ACC("Accelerator Misc.");
+
+        private String name;
+
+        MeasurementCategory(final String description) {
+            name = description;
+        }
+
+        @Override
+        public String toString() {
+            return name;
+        }
+    }
+
+    public enum MeasurementType {
+        // indicators
+        VALUE_HOR(false, INDICATOR, "hor. value"), VALUE_VER(true, INDICATOR, "ver. value"),
+        DISTANCE_HOR(false, INDICATOR, "hor. distance"), DISTANCE_VER(true, INDICATOR, "ver. distance"),
+
+        // vertical-type measurements
+        MINIMUM(true, VERTICAL, "Minimum"), MAXIMUM(true, VERTICAL, "Maximum"), RANGE(true, VERTICAL, "Range"),
+        MEAN(true, VERTICAL, "Mean"), RMS(true, VERTICAL, "R.M.S."), MEDIAN(true, VERTICAL, "Median"),
+        INTEGRAL(true, VERTICAL, "Integral"), TRANSMISSION_ABS(true, ACC, "Abs. Transmission"),
+        TRANSMISSION_REL(true, ACC, "Rel. Transmission"),
+
+        // horizontal-type measurements
+        EDGE_DETECT(false, HORIZONTAL, "Edge-Detect"),
+        RISETIME_10_90(false, HORIZONTAL, "10%-90% Rise-/Fall-Time\n (simple)"),
+        RISETIME_20_80(false, HORIZONTAL, "20%-80% Rise-/Fall-Time\n (simple)"), FWHM(false, HORIZONTAL, "FWHM"),
+        FWHM_INTERPOLATED(false, HORIZONTAL, "FWHM (interp.)"), LOCATION_MAXIMUM(false, HORIZONTAL, "Loc. Maximum"),
+        LOCATION_MAXIMUM_GAUSS(false, HORIZONTAL, "Loc. Maximum\n(Gauss-interp.)"),
+        DUTY_CYCLE(false, HORIZONTAL, "Duty Cycle\n(10% hysteresis)"), PERIOD(true, HORIZONTAL, "Period"),
+        FREQUENCY(false, HORIZONTAL, "Frequency");
+
+        private String name;
+        private MeasurementCategory category;
+        private boolean isVertical;
+
+        MeasurementType(final boolean isVerticalMeasurement, final MeasurementCategory measurementCategory,
+                final String description) {
+            isVertical = isVerticalMeasurement;
+            category = measurementCategory;
+            name = description;
+        }
+
+        public MeasurementCategory getCategory() {
+            return category;
+        }
+
+        public boolean isVerticalMeasurement() {
+            return isVertical;
+        }
+
+        @Override
+        public String toString() {
+            return name;
         }
     }
 

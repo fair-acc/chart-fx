@@ -63,7 +63,7 @@ public class CustomFragmentedRendererSample extends Application {
         };
         chart.getRenderers().clear();
         chart.getRenderers().add(renderer);
-      
+
         FragmentedDataSet fragmentedDataSet = new FragmentedDataSet("FragmentedDataSet");
         for (int i = 0; i < N_DATA_SETS_MAX; i++) {
             DoubleErrorDataSet dataSet = new DoubleErrorDataSet("Set#" + i);
@@ -81,8 +81,7 @@ public class CustomFragmentedRendererSample extends Application {
     }
 
     /**
-     * @param args
-     *            the command line arguments
+     * @param args the command line arguments
      */
     public static void main(final String[] args) {
         Application.launch(args);

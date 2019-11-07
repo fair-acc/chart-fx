@@ -1,11 +1,9 @@
 package de.gsi.dataset;
 
 /**
- * The <code>DataSetError</code> is a basic interface that specifies all methods
- * needed to read and modify data point error. This interface is kept most
- * general. However, derived classes may have dummy implementation for error
- * types that are not relevant. For plotting speed improvement this
- * simplification can/should be indicated via the
+ * The <code>DataSetError</code> is a basic interface that specifies all methods needed to read and modify data point
+ * error. This interface is kept most general. However, derived classes may have dummy implementation for error types
+ * that are not relevant. For plotting speed improvement this simplification can/should be indicated via the
  *
  * @see #getErrorType(int dimIndex) interface for error type details
  * @author rstein
@@ -13,9 +11,8 @@ package de.gsi.dataset;
 public interface DataSetError extends DataSet {
 
     /**
-     * Returns the negative error along the 'dimIndex' axis of a point specified by the
-     * <code>x</code> coordinate. Please note that errors are assumed to be always
-     * positive!
+     * Returns the negative error along the 'dimIndex' axis of a point specified by the <code>x</code> coordinate.
+     * Please note that errors are assumed to be always positive!
      *
      * @param dimIndex the dimension index (ie. '0' equals 'X', '1' equals 'Y')
      * @param x horizontal 'dimIndex' coordinate
@@ -44,9 +41,8 @@ public interface DataSetError extends DataSet {
     }
 
     /**
-     * Returns the negative error along the 'dimIndex' axis of a point specified by the
-     * <code>index</code>. Please note that errors are assumed to be always
-     * positive!
+     * Returns the negative error along the 'dimIndex' axis of a point specified by the <code>index</code>. Please note
+     * that errors are assumed to be always positive!
      *
      * @param dimIndex the dimension index (ie. '0' equals 'X', '1' equals 'Y')
      * @param index of negative 'dimIndex' error to be returned.
@@ -55,9 +51,8 @@ public interface DataSetError extends DataSet {
     double getErrorNegative(final int dimIndex, final int index);
 
     /**
-     * Returns the positive error along the 'dimIndex' axis of a point specified by the
-     * <code>x</code> coordinate. Please note that errors are assumed to be always
-     * positive!
+     * Returns the positive error along the 'dimIndex' axis of a point specified by the <code>x</code> coordinate.
+     * Please note that errors are assumed to be always positive!
      *
      * @param dimIndex the dimension index (ie. '0' equals 'X', '1' equals 'Y')
      * @param x horizontal 'dimIndex' coordinate
@@ -86,9 +81,8 @@ public interface DataSetError extends DataSet {
     }
 
     /**
-     * Returns the positive error along the 'dimIndex' axis of a point specified by the
-     * <code>index</code>. Please note that errors are assumed to be always
-     * positive!
+     * Returns the positive error along the 'dimIndex' axis of a point specified by the <code>index</code>. Please note
+     * that errors are assumed to be always positive!
      *
      * @param dimIndex the dimension index (ie. '0' equals 'X', '1' equals 'Y')
      * @param index of positive 'dimIndex' error to be returned.
@@ -97,8 +91,8 @@ public interface DataSetError extends DataSet {
     double getErrorPositive(final int dimIndex, final int index);
 
     /**
-     * Returns the negative error along the 'dimIndex' axis for all available data points.
-     * Please note that errors are assumed to be always positive!
+     * Returns the negative error along the 'dimIndex' axis for all available data points. Please note that errors are
+     * assumed to be always positive!
      * 
      * @param dimIndex the dimension index (ie. '0' equals 'X', '1' equals 'Y')
      * @return array containing negative 'dimIndex' error
@@ -113,8 +107,8 @@ public interface DataSetError extends DataSet {
     }
 
     /**
-     * Returns the positive error along the 'dimIndex' axis for all available data points.
-     * Please note that errors are assumed to be always positive!
+     * Returns the positive error along the 'dimIndex' axis for all available data points. Please note that errors are
+     * assumed to be always positive!
      *
      * @param dimIndex the dimension index (ie. '0' equals 'X', '1' equals 'Y')
      * @return array containing positive 'dimIndex' error
@@ -129,8 +123,8 @@ public interface DataSetError extends DataSet {
     }
 
     /**
-     * Returns the given error type for a specific dimension that may be used to drive given simplifications
-     * and optimisation in derived classes.
+     * Returns the given error type for a specific dimension that may be used to drive given simplifications and
+     * optimisation in derived classes.
      *
      * @param dimIndex the dimension for which to query the ErrorType
      * @return one of the error types specified in ErrorType

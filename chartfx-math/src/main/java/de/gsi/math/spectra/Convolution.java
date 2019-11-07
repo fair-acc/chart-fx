@@ -24,6 +24,30 @@ public class Convolution {
         }
     }
 
+    public void Test() {
+        final int nbins = 1024;
+        final boolean cyclicBoundaries = false;
+        double[] testa = new double[nbins];
+        final double[] testb = new double[nbins];
+
+        for (int i = 0; i < nbins; i++) {
+            testa[i] = 100 * Math.cos(2 * Math.PI * 0.31 * i + 0.1) + 100;
+        }
+        System.arraycopy(testa, 0, testb, 0, testa.length);
+
+        // setup filter
+        final int filterDim = ConcurrencyUtils.nextPow2((cyclicBoundaries ? 1 : 3) * nbins);
+        final double[] filter = Convolution.getIdentityFilter(filterDim);
+        testa = transform(testa, filter, cyclicBoundaries);
+
+        double e, err = 0.0;
+        for (int i = 0; i < nbins - 1; i++) {
+            e = Math.abs(testa[i] - testb[i]);
+            err = Math.max(err, e);
+        }
+        System.out.printf("reconstruction error = %e\n", err);
+    }
+
     /**
      * implements convolution via FFT transform only the real part of the signal is computed
      *
@@ -164,21 +188,37 @@ public class Convolution {
     }
 
     /**
-     * computes the identity filter
+     * computes derivative filter (Fourier Domain)
      * 
      * @param length the length of the filter
-     * @return vector containing identy filter
+     * @return array containing derivative filter kernel
      */
-    public static double[] getIdentityFilter(final int length) {
-        if (length <= 0 || !ConcurrencyUtils.isPowerOf2(length)) {
+    public static double[] getDerivativeFilter(final int length) {
+        if (length <= 0 || length % 2 != 0) {
             throw new InvalidParameterException(
-                    "getIdentityFilter(" + length + ")" + " - length has to be a power of two");
+                    "getDerivativeFilter(" + length + ")" + " - length has to be positive and multiples of two");
         }
 
         final double[] ret = new double[length];
-        for (int i = 0; i < length >> 1; i++) {
-            ret[i << 1] = 1.0;
+        final int half = length >> 1;
+        final double norm = TMathConstants.TwoPi() / length;
+        for (int i = 0; i < half; i++) {
+            final int i2 = i << 1;
+            final double window = Math.cos(TMathConstants.Pi() * i / (length - 1));
+            final double val = window * norm * i;
+
+            if (i < half) {
+                // positive frequencies
+                ret[i2] = +0.0;
+                ret[i2 + 1] = +val;
+            } else {
+                // negative frequencies
+                ret[i2] = +0.0;
+                ret[i2 + 1] = -val;
+            }
         }
+        ret[1] = 0.0;
+
         return ret;
     }
 
@@ -219,37 +259,21 @@ public class Convolution {
     }
 
     /**
-     * computes derivative filter (Fourier Domain)
+     * computes the identity filter
      * 
      * @param length the length of the filter
-     * @return array containing derivative filter kernel
+     * @return vector containing identy filter
      */
-    public static double[] getDerivativeFilter(final int length) {
-        if (length <= 0 || length % 2 != 0) {
+    public static double[] getIdentityFilter(final int length) {
+        if (length <= 0 || !ConcurrencyUtils.isPowerOf2(length)) {
             throw new InvalidParameterException(
-                    "getDerivativeFilter(" + length + ")" + " - length has to be positive and multiples of two");
+                    "getIdentityFilter(" + length + ")" + " - length has to be a power of two");
         }
 
         final double[] ret = new double[length];
-        final int half = length >> 1;
-        final double norm = TMathConstants.TwoPi() / length;
-        for (int i = 0; i < half; i++) {
-            final int i2 = i << 1;
-            final double window = Math.cos(TMathConstants.Pi() * i / (length - 1));
-            final double val = window * norm * i;
-
-            if (i < half) {
-                // positive frequencies
-                ret[i2] = +0.0;
-                ret[i2 + 1] = +val;
-            } else {
-                // negative frequencies
-                ret[i2] = +0.0;
-                ret[i2 + 1] = -val;
-            }
+        for (int i = 0; i < length >> 1; i++) {
+            ret[i << 1] = 1.0;
         }
-        ret[1] = 0.0;
-
         return ret;
     }
 
@@ -277,19 +301,11 @@ public class Convolution {
             final double f = (double) i / (double) length;
 
             /*
-             * double val = 1.0;
-             * double phi = TMath.TwoPi() * f;
+             * double val = 1.0; double phi = TMath.TwoPi() * f;
              * 
-             * if (frequency != 0.5) {
-             * if (f >= frequency && f < 1.2 * frequency) {
-             * double val2 = (1.0-Math.sin(TMath.Pi() * (f - frequency)/(0.4*frequency)));
-             * val = Math.pow(val2,2);
-             * } else if (f > 1.2 * frequency) {
-             * val = 0.0;
-             * }
-             * }
-             * ret[i2] = +val;
-             * ret[i2 + 1] = 0;
+             * if (frequency != 0.5) { if (f >= frequency && f < 1.2 * frequency) { double val2 =
+             * (1.0-Math.sin(TMath.Pi() * (f - frequency)/(0.4*frequency))); val = Math.pow(val2,2); } else if (f > 1.2
+             * * frequency) { val = 0.0; } } ret[i2] = +val; ret[i2 + 1] = 0;
              */
             final double Re = 1.0 / (1 + TMathConstants.Sqr(TwoPiTau * f));
             final double Im = Re * TwoPiTau * f;
@@ -304,18 +320,6 @@ public class Convolution {
         // ret[0] = 1.0;
         // ret[1] = 0.0;
         return ret;
-    }
-
-    protected static double MorletWaveletFunctionFourier(final double frequency, final double f0, final double width) {
-        final double heisenberg = width / 2; // implements Heisenberg-box scaling
-        final double K_sigma = TMathConstants.Exp(-0.5 * TMathConstants.Sqr(TMathConstants.TwoPi() * f0 * heisenberg));
-        final double C_sigmaPi = TMathConstants.Power(TMathConstants.Pi(), 0.25);
-
-        final double val = C_sigmaPi
-                * (TMathConstants.Exp(-0.5 * TMathConstants.Sqr(TMathConstants.TwoPi() * (f0 - frequency) * heisenberg))
-                        - K_sigma * TMathConstants
-                                .Exp(-0.5 * TMathConstants.Sqr(TMathConstants.TwoPi() * frequency * heisenberg)));
-        return val;
     }
 
     public static double[] getMorletFilter(final int length, final double f0, final double width) {
@@ -345,33 +349,21 @@ public class Convolution {
         return ret;
     }
 
-    public void Test() {
-        final int nbins = 1024;
-        final boolean cyclicBoundaries = false;
-        double[] testa = new double[nbins];
-        final double[] testb = new double[nbins];
-
-        for (int i = 0; i < nbins; i++) {
-            testa[i] = 100 * Math.cos(2 * Math.PI * 0.31 * i + 0.1) + 100;
-        }
-        System.arraycopy(testa, 0, testb, 0, testa.length);
-
-        // setup filter
-        final int filterDim = ConcurrencyUtils.nextPow2((cyclicBoundaries ? 1 : 3) * nbins);
-        final double[] filter = Convolution.getIdentityFilter(filterDim);
-        testa = transform(testa, filter, cyclicBoundaries);
-
-        double e, err = 0.0;
-        for (int i = 0; i < nbins - 1; i++) {
-            e = Math.abs(testa[i] - testb[i]);
-            err = Math.max(err, e);
-        }
-        System.out.printf("reconstruction error = %e\n", err);
-    }
-
     public static void main(final String[] args) {
         final Convolution decon = new Convolution();
         decon.Test();
+    }
+
+    protected static double MorletWaveletFunctionFourier(final double frequency, final double f0, final double width) {
+        final double heisenberg = width / 2; // implements Heisenberg-box scaling
+        final double K_sigma = TMathConstants.Exp(-0.5 * TMathConstants.Sqr(TMathConstants.TwoPi() * f0 * heisenberg));
+        final double C_sigmaPi = TMathConstants.Power(TMathConstants.Pi(), 0.25);
+
+        final double val = C_sigmaPi
+                * (TMathConstants.Exp(-0.5 * TMathConstants.Sqr(TMathConstants.TwoPi() * (f0 - frequency) * heisenberg))
+                        - K_sigma * TMathConstants
+                                .Exp(-0.5 * TMathConstants.Sqr(TMathConstants.TwoPi() * frequency * heisenberg)));
+        return val;
     }
 
 }

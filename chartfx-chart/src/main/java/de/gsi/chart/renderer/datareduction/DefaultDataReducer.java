@@ -35,15 +35,6 @@ public class DefaultDataReducer implements RendererDataReducer {
         return minPointPixelDistanceProperty().get();
     }
 
-    /**
-     * Sets the <code>minPointPixelDistance</code> to the specified value.
-     *
-     * @param minPixelDistance the minimum distance between two adjacent points.
-     */
-    public final void setMinPointPixelDistance(final int minPixelDistance) {
-        minPointPixelDistanceProperty().setValue(minPixelDistance);
-    }
-
     public final IntegerProperty minPointPixelDistanceProperty() {
         return minPointPixelDistance;
     }
@@ -418,6 +409,15 @@ public class DefaultDataReducer implements RendererDataReducer {
         ProcessingProfiler.getTimeDiff(start,
                 String.format("data reduction (no error definitions: from %d to %d)", indexMax - indexMin, count));
         return count;
+    }
+
+    /**
+     * Sets the <code>minPointPixelDistance</code> to the specified value.
+     *
+     * @param minPixelDistance the minimum distance between two adjacent points.
+     */
+    public final void setMinPointPixelDistance(final int minPixelDistance) {
+        minPointPixelDistanceProperty().setValue(minPixelDistance);
     }
 
 }

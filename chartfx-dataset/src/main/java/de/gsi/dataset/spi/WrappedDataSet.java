@@ -33,9 +33,37 @@ public class WrappedDataSet extends AbstractDataSet<WrappedDataSet> implements D
         super(name, 2);
     }
 
+    private void datasetInvalidated() {
+        recomputeLimits(0);
+        recomputeLimits(1);
+        fireInvalidated(new UpdatedDataEvent(this));
+    }
+
+    @Override
+    public double get(int dimIndex, int index) {
+        return dimIndex == DIM_X ? getX(index) : getY(index);
+    }
+
+    @Override
+    public List<AxisDescription> getAxisDescriptions() {
+        return dataset == null ? new ArrayList<>() : dataset.getAxisDescriptions();
+    }
+
+    @Override
+    public int getDataCount() {
+        return dataset == null ? 0 : dataset.getDataCount();
+    }
+
     /**
-     * Returns the name of the dataset. This will return the name of the wrapped
-     * dataset. If no dataset is wrapped, the name of this object is returned.
+     * @return wrapped internal data set
+     */
+    public DataSet2D getDataset() {
+        return dataset;
+    }
+
+    /**
+     * Returns the name of the dataset. This will return the name of the wrapped dataset. If no dataset is wrapped, the
+     * name of this object is returned.
      * 
      * @return name of the dataset
      */
@@ -44,6 +72,26 @@ public class WrappedDataSet extends AbstractDataSet<WrappedDataSet> implements D
         if (dataset != null)
             return dataset.getName();
         return super.getName();
+    }
+
+    @Override
+    public String getStyle(final int index) {
+        return dataset == null ? null : dataset.getStyle(index);
+    }
+
+    @Override
+    public double getX(final int i) {
+        return dataset == null ? 0 : dataset.getX(i);
+    }
+
+    @Override
+    public int getXIndex(final double x) {
+        return dataset == null ? 0 : dataset.getXIndex(x);
+    }
+
+    @Override
+    public double getY(final int i) {
+        return dataset == null ? 0 : dataset.getY(i);
     }
 
     /**
@@ -59,57 +107,9 @@ public class WrappedDataSet extends AbstractDataSet<WrappedDataSet> implements D
         if (this.dataset != null) {
             this.dataset.addListener(listener);
         }
-        //        xRange.setMax(Double.NaN);
-        //        yRange.setMax(Double.NaN);
+        // xRange.setMax(Double.NaN);
+        // yRange.setMax(Double.NaN);
         fireInvalidated(new UpdatedDataEvent(this));
-    }
-
-    /**
-     * @return wrapped internal data set
-     */
-    public DataSet2D getDataset() {
-        return dataset;
-    }
-
-    @Override
-    public int getDataCount() {
-        return dataset == null ? 0 : dataset.getDataCount();
-    }
-
-    @Override
-    public double getX(final int i) {
-        return dataset == null ? 0 : dataset.getX(i);
-    }
-
-    @Override
-    public double getY(final int i) {
-        return dataset == null ? 0 : dataset.getY(i);
-    }
-
-    @Override
-    public int getXIndex(final double x) {
-        return dataset == null ? 0 : dataset.getXIndex(x);
-    }
-
-    @Override
-    public List<AxisDescription> getAxisDescriptions() {
-        return dataset == null ? new ArrayList<>() : dataset.getAxisDescriptions();
-    }
-
-    private void datasetInvalidated() {
-        recomputeLimits(0);
-        recomputeLimits(1);
-        fireInvalidated(new UpdatedDataEvent(this));
-    }
-
-    @Override
-    public String getStyle(final int index) {
-        return dataset == null ? null : dataset.getStyle(index);
-    }
-
-    @Override
-    public double get(int dimIndex, int index) {
-        return dimIndex == DIM_X ? getX(index) : getY(index);
     }
 
 }

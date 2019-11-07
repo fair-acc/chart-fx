@@ -34,8 +34,8 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 /**
- * Simple Example for the use of the TransposedDataSet
- * Shows how 1D and 2D dataSets can be transposed and how to reduce the dimensionality of data.
+ * Simple Example for the use of the TransposedDataSet Shows how 1D and 2D dataSets can be transposed and how to reduce
+ * the dimensionality of data.
  *
  * @author akrimm
  */
@@ -125,39 +125,6 @@ public class TransposedDataSetSample extends Application {
         primaryStage.setOnCloseRequest(evt -> Platform.exit());
     }
 
-    private static XYChart getDefaultChart() {
-        final XYChart chart = new XYChart();
-        chart.getPlugins().add(new Zoomer());
-        chart.getPlugins().add(new EditAxis());
-        chart.getPlugins().add(new UpdateAxisLabels());
-        chart.getXAxis().setAutoRanging(true);
-        chart.getYAxis().setAutoRanging(true);
-        VBox.setVgrow(chart, Priority.ALWAYS);
-        HBox.setHgrow(chart, Priority.ALWAYS);
-
-        return chart;
-    }
-
-    public static DataSet test8Function(final double xMin, final double xMax, final double yMin, final double yMax,
-            final double omega, final double pert, final int nSamples) {
-        final double[] x = new double[nSamples];
-        final double[] y = new double[nSamples];
-        final double a = (xMax - xMin) / 2.0;
-        final double b = (yMax - yMin) / 2.0;
-        for (int i = 0; i < nSamples; i++) {
-            x[i] = xMin + (a * (Math.sin(i * omega) + 1))
-                    + (pert * Math.sin(i * omega * 0.95) * Math.cos(i * omega * 2));
-            y[i] = yMin + (b * (Math.sin(i * omega * 2) + 1))
-                    + (pert * Math.sin(i * omega * 0.777) * Math.cos(i * omega));
-        }
-        final DataSet dataSet = new DataSetBuilder().setName("non-sorted 2D DataSet").setXValues(x).setYValues(y)
-                .build();
-        dataSet.getAxisDescription(0).set("x-axis", "x-unit");
-        dataSet.getAxisDescription(1).set("y-axis", "y-unit");
-
-        return dataSet;
-    }
-    
     private static DataSet3D createTestData() {
         final int nPoints = 1000;
         final double f = 0.1;
@@ -184,11 +151,43 @@ public class TransposedDataSetSample extends Application {
         return new DoubleDataSet3D("3D test data", x, y, z);
     }
 
+    private static XYChart getDefaultChart() {
+        final XYChart chart = new XYChart();
+        chart.getPlugins().add(new Zoomer());
+        chart.getPlugins().add(new EditAxis());
+        chart.getPlugins().add(new UpdateAxisLabels());
+        chart.getXAxis().setAutoRanging(true);
+        chart.getYAxis().setAutoRanging(true);
+        VBox.setVgrow(chart, Priority.ALWAYS);
+        HBox.setHgrow(chart, Priority.ALWAYS);
+
+        return chart;
+    }
+
     /**
-     * @param args
-     *            the command line arguments
+     * @param args the command line arguments
      */
     public static void main(final String[] args) {
         Application.launch(args);
+    }
+
+    public static DataSet test8Function(final double xMin, final double xMax, final double yMin, final double yMax,
+            final double omega, final double pert, final int nSamples) {
+        final double[] x = new double[nSamples];
+        final double[] y = new double[nSamples];
+        final double a = (xMax - xMin) / 2.0;
+        final double b = (yMax - yMin) / 2.0;
+        for (int i = 0; i < nSamples; i++) {
+            x[i] = xMin + (a * (Math.sin(i * omega) + 1))
+                    + (pert * Math.sin(i * omega * 0.95) * Math.cos(i * omega * 2));
+            y[i] = yMin + (b * (Math.sin(i * omega * 2) + 1))
+                    + (pert * Math.sin(i * omega * 0.777) * Math.cos(i * omega));
+        }
+        final DataSet dataSet = new DataSetBuilder().setName("non-sorted 2D DataSet").setXValues(x).setYValues(y)
+                .build();
+        dataSet.getAxisDescription(0).set("x-axis", "x-unit");
+        dataSet.getAxisDescription(1).set("y-axis", "y-unit");
+
+        return dataSet;
     }
 }

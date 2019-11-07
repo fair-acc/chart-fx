@@ -42,11 +42,11 @@ public class PoleZeroPair {
         zeros = new ComplexPair(z1, z2);
     }
 
-    public boolean isSinglePole() {
-        return poles.second.equals(new Complex(0, 0)) && zeros.second.equals(new Complex(0, 0));
-    }
-
     public boolean isNaN() {
         return poles.isNaN() || zeros.isNaN();
+    }
+
+    public boolean isSinglePole() {
+        return poles.second.equals(new Complex(0, 0)) && zeros.second.equals(new Complex(0, 0));
     }
 }

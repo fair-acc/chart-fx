@@ -18,26 +18,20 @@ import javafx.util.StringConverter;
  */
 public class TimeStringConverter extends StringConverter<Number> {
 
-  private final GregorianCalendar calendar = new GregorianCalendar();
+    private final GregorianCalendar calendar = new GregorianCalendar();
 
-  public TimeStringConverter()
-  {
-  }
+    public TimeStringConverter() {
+    }
 
+    @Override
+    public Number fromString(String string) {
+        throw new UnsupportedOperationException("Converting from string not supported yet");
+    }
 
-
-  @Override
-  public String toString(Number object)
-  {
-    calendar.setTimeInMillis(object.longValue());
-    return String.format("%tT",calendar);
-  }
-
-  @Override
-  public Number fromString(String string)
-  {
-    throw new UnsupportedOperationException("Converting from string not supported yet");
-  }
-
+    @Override
+    public String toString(Number object) {
+        calendar.setTimeInMillis(object.longValue());
+        return String.format("%tT", calendar);
+    }
 
 }

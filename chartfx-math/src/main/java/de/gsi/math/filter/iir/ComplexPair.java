@@ -30,22 +30,18 @@ public class ComplexPair {
     public Complex first;
     public Complex second;
 
-    public ComplexPair(final Complex c1, final Complex c2) {
-        first = c1;
-        second = c2;
-    }
-
     public ComplexPair(final Complex c1) {
         first = c1;
         second = new Complex(0, 0);
     }
 
-    public boolean isConjugate() {
-        return second.equals(first.conjugate());
+    public ComplexPair(final Complex c1, final Complex c2) {
+        first = c1;
+        second = c2;
     }
 
-    public boolean isReal() {
-        return first.getImaginary() == 0 && second.getImaginary() == 0;
+    public boolean isConjugate() {
+        return second.equals(first.conjugate());
     }
 
     /**
@@ -60,5 +56,9 @@ public class ComplexPair {
 
     public boolean isNaN() {
         return first.isNaN() || second.isNaN();
+    }
+
+    public boolean isReal() {
+        return first.getImaginary() == 0 && second.getImaginary() == 0;
     }
 }

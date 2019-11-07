@@ -39,7 +39,7 @@ public class SimpleChartSample extends Application {
         final double[] xValues = new double[N_SAMPLES];
         final double[] yValues1 = new double[N_SAMPLES];
         final double[] yValues2 = new double[N_SAMPLES];
-        //dataSet2.setAutoNotifaction(false); // to suppress auto notification
+        // dataSet2.setAutoNotifaction(false); // to suppress auto notification
         for (int n = 0; n < N_SAMPLES; n++) {
             final double x = n;
             final double y1 = Math.cos(Math.toRadians(10.0 * n));
@@ -53,7 +53,7 @@ public class SimpleChartSample extends Application {
         // dataSet2.setAutoNotifaction(false); // to suppress auto notification
         // dataSet2.invokeListener(null); // to manually trigger an update
 
-        // alternatively (optional): 
+        // alternatively (optional):
         // final DoubleDataSet dataSet3 = new DoubleDataSet("data set #1", xValues, yValues1, N_SAMPLES, false);
 
         final Scene scene = new Scene(new StackPane(chart), 800, 600);
@@ -63,8 +63,7 @@ public class SimpleChartSample extends Application {
     }
 
     /**
-     * @param args
-     *            the command line arguments
+     * @param args the command line arguments
      */
     public static void main(final String[] args) {
         Application.launch(args);

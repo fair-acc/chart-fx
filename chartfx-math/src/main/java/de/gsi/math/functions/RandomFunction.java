@@ -3,8 +3,8 @@ package de.gsi.math.functions;
 import java.util.Random;
 
 public class RandomFunction extends AbstractFunction1D implements Function1D {
-    private double amplitude = 0.5;
     private static final Random RANDOM = new Random(System.currentTimeMillis());
+    private double amplitude = 0.5;
 
     public RandomFunction(final String name, final double amplitude) {
         super(name, 0);

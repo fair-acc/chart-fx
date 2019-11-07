@@ -42,9 +42,8 @@ import de.gsi.math.spectra.dct.FloatDCT_1D;
 import de.gsi.math.utils.ConcurrencyUtils;
 
 /**
- * Computes 1D Discrete Sine Transform (DST) of single precision data. The size
- * of data can be an arbitrary number. It uses DCT algorithm. This is a parallel
- * implementation optimized for SMP systems.
+ * Computes 1D Discrete Sine Transform (DST) of single precision data. The size of data can be an arbitrary number. It
+ * uses DCT algorithm. This is a parallel implementation optimized for SMP systems.
  *
  * @author Piotr Wendykier (piotr.wendykier@gmail.com)
  */
@@ -57,8 +56,7 @@ public class FloatDST_1D {
     /**
      * Creates new instance of FloatDST_1D.
      *
-     * @param n
-     *            size of data
+     * @param n size of data
      */
     public FloatDST_1D(final int n) {
         this.n = n;
@@ -68,10 +66,8 @@ public class FloatDST_1D {
     /**
      * Computes 1D forward DST (DST-II) leaving the result in <code>a</code>.
      *
-     * @param a
-     *            data to transform
-     * @param scale
-     *            if true then scaling is performed
+     * @param a data to transform
+     * @param scale if true then scaling is performed
      */
     public void forward(final float[] a, final boolean scale) {
         forward(a, 0, scale);
@@ -80,12 +76,9 @@ public class FloatDST_1D {
     /**
      * Computes 1D forward DST (DST-II) leaving the result in <code>a</code>.
      *
-     * @param a
-     *            data to transform
-     * @param offa
-     *            index of the first element in array <code>a</code>
-     * @param scale
-     *            if true then scaling is performed
+     * @param a data to transform
+     * @param offa index of the first element in array <code>a</code>
+     * @param scale if true then scaling is performed
      */
     public void forward(final float[] a, final int offa, final boolean scale) {
         if (n == 1) {
@@ -142,10 +135,8 @@ public class FloatDST_1D {
     /**
      * Computes 1D inverse DST (DST-III) leaving the result in <code>a</code>.
      *
-     * @param a
-     *            data to transform
-     * @param scale
-     *            if true then scaling is performed
+     * @param a data to transform
+     * @param scale if true then scaling is performed
      */
     public void inverse(final float[] a, final boolean scale) {
         inverse(a, 0, scale);
@@ -154,12 +145,9 @@ public class FloatDST_1D {
     /**
      * Computes 1D inverse DST (DST-III) leaving the result in <code>a</code>.
      *
-     * @param a
-     *            data to transform
-     * @param offa
-     *            index of the first element in array <code>a</code>
-     * @param scale
-     *            if true then scaling is performed
+     * @param a data to transform
+     * @param offa index of the first element in array <code>a</code>
+     * @param scale if true then scaling is performed
      */
     public void inverse(final float[] a, final int offa, final boolean scale) {
         if (n == 1) {

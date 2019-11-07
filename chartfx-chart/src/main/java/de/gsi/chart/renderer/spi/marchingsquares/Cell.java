@@ -45,11 +45,10 @@ class Cell {
      * Clear this cell's index.
      * </p>
      * <p>
-     * When building up shapes, it is possible to have disjoint regions and
-     * holes in them. An easy way to build up a new shape from the cell's index
-     * is to build sub-paths for one isoline at a time. As the shape is built
-     * up, it is necessary to erase the (single) line afterward so that subsequent
-     * searches for isolines will not loop indefinitely.
+     * When building up shapes, it is possible to have disjoint regions and holes in them. An easy way to build up a new
+     * shape from the cell's index is to build sub-paths for one isoline at a time. As the shape is built up, it is
+     * necessary to erase the (single) line afterward so that subsequent searches for isolines will not loop
+     * indefinitely.
      */
     public void clear() {
         switch (cellNdx) {
@@ -90,6 +89,11 @@ class Cell {
         }
     }
 
+    /** @return whether this cell is flipped or not. */
+    public boolean isFlipped() {
+        return flipped;
+    }
+
     /** @return true if this Cell is a Saddle case. Returns false otherwise. */
     public boolean isSaddle() {
         return cellNdx == 5 || cellNdx == 10;
@@ -102,14 +106,10 @@ class Cell {
         return cellNdx == 0 || cellNdx == 15;
     }
 
-    /** @return whether this cell is flipped or not. */
-    public boolean isFlipped() {
-        return flipped;
-    }
-
     @Override
     public String toString() {
-        return "Cell{index=" + cellNdx + ", flipped? " + flipped + ", left=" + left + ", top=" + top + ", right=" + right + ", bottom=" + bottom + '}';
+        return "Cell{index=" + cellNdx + ", flipped? " + flipped + ", left=" + left + ", top=" + top + ", right="
+                + right + ", bottom=" + bottom + '}';
     }
 
 }

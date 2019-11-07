@@ -10,16 +10,14 @@ public interface DataSet3D extends DataSet2D {
 
     @Override
     default int getDimension() {
-        return 3; //TODO: get rid of this method
+        return 3; // TODO: get rid of this method
     }
 
     /**
      * Returns Z coordinate for the specified data point.
      *
-     * @param xIndex
-     *            index of X coordinate
-     * @param yIndex
-     *            index of Y coordinate
+     * @param xIndex index of X coordinate
+     * @param yIndex index of Y coordinate
      * @return Z coordinate
      */
     double getZ(int xIndex, int yIndex);

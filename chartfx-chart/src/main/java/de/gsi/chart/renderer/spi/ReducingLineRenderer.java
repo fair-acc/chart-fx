@@ -12,11 +12,11 @@ import de.gsi.chart.Chart;
 import de.gsi.chart.XYChart;
 import de.gsi.chart.axes.Axis;
 import de.gsi.chart.axes.spi.CategoryAxis;
+import de.gsi.chart.renderer.Renderer;
+import de.gsi.chart.renderer.spi.utils.DefaultRenderColorScheme;
 import de.gsi.dataset.DataSet;
 import de.gsi.dataset.DataSet2D;
 import de.gsi.dataset.utils.ProcessingProfiler;
-import de.gsi.chart.renderer.Renderer;
-import de.gsi.chart.renderer.spi.utils.DefaultRenderColorScheme;
 import javafx.collections.ObservableList;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
@@ -30,7 +30,7 @@ public class ReducingLineRenderer extends AbstractDataSetManagement<ReducingLine
 
     private int maxPoints;
 
-    //    static private final Color[] COLORS = { Color.BLACK, Color.BLUE, Color.GREEN, Color.RED };
+    // static private final Color[] COLORS = { Color.BLACK, Color.BLUE, Color.GREEN, Color.RED };
 
     public ReducingLineRenderer() {
         maxPoints = 300;
@@ -40,20 +40,22 @@ public class ReducingLineRenderer extends AbstractDataSetManagement<ReducingLine
         this.maxPoints = maxPoints;
     }
 
-    /**
-     * @return the instance of this ReducingLineRenderer.
-     */
     @Override
-    protected ReducingLineRenderer getThis() {
-        return this;
+    public Canvas drawLegendSymbol(DataSet dataSet, int dsIndex, int width, int height) {
+        // not implemented for this class
+        return null;
     }
 
     public int getMaxPoints() {
         return maxPoints;
     }
 
-    public void setMaxPoints(final int maxPoints) {
-        this.maxPoints = maxPoints;
+    /**
+     * @return the instance of this ReducingLineRenderer.
+     */
+    @Override
+    protected ReducingLineRenderer getThis() {
+        return this;
     }
 
     @Override
@@ -81,7 +83,7 @@ public class ReducingLineRenderer extends AbstractDataSetManagement<ReducingLine
             if (!(ds instanceof DataSet2D)) {
                 continue;
             }
-            final DataSet2D dataset = (DataSet2D)ds;
+            final DataSet2D dataset = (DataSet2D) ds;
             final int lindex = index;
             dataset.lock().readLockGuardOptimistic(() -> {
                 // update categories in case of category axes for the first
@@ -163,9 +165,7 @@ public class ReducingLineRenderer extends AbstractDataSetManagement<ReducingLine
         ProcessingProfiler.getTimeDiff(start);
     }
 
-    @Override
-    public Canvas drawLegendSymbol(DataSet dataSet, int dsIndex, int width, int height) {
-        // not implemented for this class
-        return null;
+    public void setMaxPoints(final int maxPoints) {
+        this.maxPoints = maxPoints;
     }
 }

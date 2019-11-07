@@ -19,6 +19,14 @@ public class NoDuplicatesList<E> extends LinkedList<E> {
     }
 
     @Override
+    public void add(int index, E element) {
+        if (this.contains(element)) {
+            return;
+        }
+        super.add(index, element);
+    }
+
+    @Override
     public boolean addAll(Collection<? extends E> collection) {
         Collection<E> copy = new LinkedList<>(collection);
         copy.removeAll(this);
@@ -30,13 +38,5 @@ public class NoDuplicatesList<E> extends LinkedList<E> {
         Collection<E> copy = new LinkedList<>(collection);
         copy.removeAll(this);
         return super.addAll(index, copy);
-    }
-
-    @Override
-    public void add(int index, E element) {
-        if (this.contains(element)) {
-            return;
-        }
-        super.add(index, element);
     }
 }

@@ -76,26 +76,35 @@ public class PeriodicScreenCapture implements Observable {
         this.addDateTime = addDateTime;
     }
 
-    public void start() {
-        if (periodicTask != null) {
-            periodicTask.stop();
+    @Override
+    public void addListener(final InvalidationListener listener) {
+        Objects.requireNonNull(listener, "InvalidationListener must not be null");
+        // N.B. suppress duplicates
+        if (!listeners.contains(listener)) {
+            listeners.add(listener);
         }
-        periodicTask = new Timeline(new KeyFrame(Duration.seconds(period), new EventHandler<ActionEvent>() {
-
-            @Override
-            public void handle(final ActionEvent event) {
-                performScreenCapture();
-            }
-        }));
-        periodicTask.setDelay(Duration.seconds(delay));
-        periodicTask.setCycleCount(Animation.INDEFINITE);
-        periodicTask.play();
     }
 
-    public void stop() {
-        if (periodicTask != null) {
-            periodicTask.stop();
+    protected void executeFireInvalidated() {
+        for (final InvalidationListener listener : new ArrayList<>(listeners)) {
+            listener.invalidated(this);
         }
+    }
+
+    public void fireInvalidated() {
+        if (listeners.isEmpty()) {
+            return;
+        }
+
+        if (Platform.isFxApplicationThread()) {
+            executeFireInvalidated();
+        } else {
+            Platform.runLater(this::executeFireInvalidated);
+        }
+    }
+
+    public String getIsoDateTimeFormatterString() {
+        return isoDateTimeFormatString;
     }
 
     public void performScreenCapture() {
@@ -117,6 +126,11 @@ public class PeriodicScreenCapture implements Observable {
         }
     }
 
+    @Override
+    public void removeListener(final InvalidationListener listener) {
+        listeners.remove(listener);
+    }
+
     public void setIsoDateTimeFormatterString(final String newFormat) {
         if (newFormat == null || newFormat.isEmpty()) {
             throw new IllegalArgumentException("new format must not be null or empty");
@@ -124,16 +138,26 @@ public class PeriodicScreenCapture implements Observable {
         isoDateTimeFormatString = newFormat;
     }
 
-    public String getIsoDateTimeFormatterString() {
-        return isoDateTimeFormatString;
+    public void start() {
+        if (periodicTask != null) {
+            periodicTask.stop();
+        }
+        periodicTask = new Timeline(new KeyFrame(Duration.seconds(period), new EventHandler<ActionEvent>() {
+
+            @Override
+            public void handle(final ActionEvent event) {
+                performScreenCapture();
+            }
+        }));
+        periodicTask.setDelay(Duration.seconds(delay));
+        periodicTask.setCycleCount(Animation.INDEFINITE);
+        periodicTask.play();
     }
 
-    protected static String getISODate(final long timeMillis, final String format) {
-        final long time = TimeUnit.MILLISECONDS.toMillis(timeMillis);
-        final TimeZone tz = TimeZone.getTimeZone("UTC");
-        final DateFormat df = new SimpleDateFormat(format);
-        df.setTimeZone(tz);
-        return df.format(new Date(time));
+    public void stop() {
+        if (periodicTask != null) {
+            periodicTask.stop();
+        }
     }
 
     private void writeImage(final Image image) {
@@ -158,36 +182,12 @@ public class PeriodicScreenCapture implements Observable {
         }
     }
 
-    @Override
-    public void addListener(final InvalidationListener listener) {
-        Objects.requireNonNull(listener, "InvalidationListener must not be null");
-        // N.B. suppress duplicates
-        if (!listeners.contains(listener)) {
-            listeners.add(listener);
-        }
-    }
-
-    @Override
-    public void removeListener(final InvalidationListener listener) {
-        listeners.remove(listener);
-    }
-
-    public void fireInvalidated() {
-        if (listeners.isEmpty()) {
-            return;
-        }
-
-        if (Platform.isFxApplicationThread()) {
-            executeFireInvalidated();
-        } else {
-            Platform.runLater(this::executeFireInvalidated);
-        }
-    }
-
-    protected void executeFireInvalidated() {
-        for (final InvalidationListener listener : new ArrayList<>(listeners)) {
-            listener.invalidated(this);
-        }
+    protected static String getISODate(final long timeMillis, final String format) {
+        final long time = TimeUnit.MILLISECONDS.toMillis(timeMillis);
+        final TimeZone tz = TimeZone.getTimeZone("UTC");
+        final DateFormat df = new SimpleDateFormat(format);
+        df.setTimeZone(tz);
+        return df.format(new Date(time));
     }
 
 }

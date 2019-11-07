@@ -22,8 +22,7 @@
 package de.gsi.math.filter.iir;
 
 /**
- * Implementation of a Direct Form I filter with its states. The coefficients
- * are supplied from the outside.
+ * Implementation of a Direct Form I filter with its states. The coefficients are supplied from the outside.
  */
 public class DirectFormI extends DirectFormAbstract {
     public double mX2; // x[n-2]
@@ -36,14 +35,6 @@ public class DirectFormI extends DirectFormAbstract {
     }
 
     @Override
-    public final void reset() {
-        mX1 = 0;
-        mX2 = 0;
-        mY1 = 0;
-        mY2 = 0;
-    }
-
-    @Override
     public double process1(final double input, final Biquad s) {
 
         final double output = s.mB0 * input + s.mB1 * mX1 + s.mB2 * mX2 - s.mA1 * mY1 - s.mA2 * mY2;
@@ -53,5 +44,13 @@ public class DirectFormI extends DirectFormAbstract {
         mY1 = output;
 
         return output;
+    }
+
+    @Override
+    public final void reset() {
+        mX1 = 0;
+        mX2 = 0;
+        mY1 = 0;
+        mY2 = 0;
     }
 }

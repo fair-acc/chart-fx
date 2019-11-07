@@ -82,40 +82,9 @@ public class ValueIndicator extends AbstractChartMeasurement {
     }
 
     @Override
-    public void initialize() {
-        final Node node = Borders.wrap(valueField).lineBorder().title(title).color(Color.BLACK).build().build();
-        node.setMouseTransparent(true);
-        displayPane.getChildren().add(node);
-
-        sliderIndicator1.valueProperty().addListener((ch, oldValue, newValue) -> {
-            if (oldValue != newValue) {
-                FXUtils.runFX(() -> handle(null));
-            }
-        });
-        // chartPane.addListener(e -> invalidated(null));
-        super.showConfigDialogue();
-        FXUtils.runFX(() -> {
-            handle(null);
-            chart.requestLayout();
-        });
-    }
-
-    @Override
-    protected void nominalAction() {
-        super.nominalAction();
-    }
-
-    @Override
     protected void defaultAction() {
         super.defaultAction();
         valueField.resetRanges();
-    }
-
-    @Override
-    protected void removeAction() {
-        super.removeAction();
-        chart.getPlugins().remove(sliderIndicator1);
-        chart.requestLayout();
     }
 
     @Override
@@ -153,6 +122,37 @@ public class ValueIndicator extends AbstractChartMeasurement {
 
         valueField.setValue(val, valueLabel);
 
+    }
+
+    @Override
+    public void initialize() {
+        final Node node = Borders.wrap(valueField).lineBorder().title(title).color(Color.BLACK).build().build();
+        node.setMouseTransparent(true);
+        displayPane.getChildren().add(node);
+
+        sliderIndicator1.valueProperty().addListener((ch, oldValue, newValue) -> {
+            if (oldValue != newValue) {
+                FXUtils.runFX(() -> handle(null));
+            }
+        });
+        // chartPane.addListener(e -> invalidated(null));
+        super.showConfigDialogue();
+        FXUtils.runFX(() -> {
+            handle(null);
+            chart.requestLayout();
+        });
+    }
+
+    @Override
+    protected void nominalAction() {
+        super.nominalAction();
+    }
+
+    @Override
+    protected void removeAction() {
+        super.removeAction();
+        chart.getPlugins().remove(sliderIndicator1);
+        chart.requestLayout();
     }
 
 }

@@ -102,13 +102,6 @@ public class ChartPerformanceBenchmark extends AbstractTestApplication {
         return chart;
     }
 
-    @Override
-    public void start(final Stage stage) {
-        stage.setTitle(this.getClass().getSimpleName());
-        init(stage);
-        stage.show();
-    }
-
     private void init(final Stage primaryStage) {
 
         final Stage subStage = new Stage();
@@ -129,6 +122,17 @@ public class ChartPerformanceBenchmark extends AbstractTestApplication {
 
         primaryStage.setScene(new Scene(new VBox(headerBar, getResultChart()), 800, 600));
         primaryStage.setOnCloseRequest(evt -> Platform.exit());
+    }
+
+    @Override
+    protected void initChart() {
+    }
+
+    @Override
+    public void start(final Stage stage) {
+        stage.setTitle(this.getClass().getSimpleName());
+        init(stage);
+        stage.show();
     }
 
     private Button startTestButton(final String label, final int[] nSamplesTest, final long updatePeriod) {
@@ -216,10 +220,6 @@ public class ChartPerformanceBenchmark extends AbstractTestApplication {
             test.updateDataSet();
         });
         return button;
-    }
-
-    @Override
-    protected void initChart() {
     }
 
     public static void main(final String[] args) {

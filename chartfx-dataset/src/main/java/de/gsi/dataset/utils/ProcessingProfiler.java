@@ -17,103 +17,19 @@ public final class ProcessingProfiler { // NOPMD nomen est omen
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ProcessingProfiler.class);
     /**
-     * boolean flag controlling whether diagnostics time-marks are taken or the
-     * routine to be skipped
+     * boolean flag controlling whether diagnostics time-marks are taken or the routine to be skipped
      */
     protected static boolean debugState = false;
     /**
-     * boolean flag controlling whether the statistics/time differences are output
-     * to the logger/console or not
+     * boolean flag controlling whether the statistics/time differences are output to the logger/console or not
      */
     protected static boolean verboseOutput = true;
     /**
-     * boolean flag controlling whether the statistics/time differences are output
-     * to the logger/console or not
+     * boolean flag controlling whether the statistics/time differences are output to the logger/console or not
      */
     protected static boolean loggerOutput = false;
 
     private ProcessingProfiler() {
-    }
-
-    /**
-     * boolean flag controlling whether diagnostics time-marks are taken or the
-     * routine to be skipped
-     * 
-     * @param state true: enable
-     */
-    public static void setDebugState(final boolean state) {
-        debugState = state;
-    }
-
-    /**
-     * @return boolean flag controlling whether diagnostics time-marks are taken or
-     *         the routine to be skipped
-     */
-    public static boolean getDebugState() {
-        return debugState;
-    }
-
-    /**
-     * boolean flag controlling whether the statistics/time differences are output
-     * to the logger/console or not
-     * 
-     * @param state true: enable
-     */
-    public static void setVerboseOutputState(final boolean state) {
-        verboseOutput = state;
-    }
-
-    /**
-     * @return boolean flag controlling whether the statistics/time differences are
-     *         output to the logger/console or not
-     */
-    public static boolean getVerboseOutputState() {
-        return verboseOutput;
-    }
-
-    /**
-     * boolean flag controlling whether the statistics/time differences are output
-     * to the logger/console or not
-     * 
-     * @param state true: enable
-     */
-    public static void setLoggerOutputState(final boolean state) {
-        loggerOutput = state;
-    }
-
-    /**
-     * @return boolean flag controlling whether the statistics/time differences are
-     *         output to the logger/console or not
-     */
-    public static boolean getLoggerOutputState() {
-        return loggerOutput;
-    }
-
-    /**
-     * Returns the current value of the running Java Virtual Machine's
-     * high-resolution time source, in nanoseconds.
-     * <p>
-     * This method can only be used to measure elapsed time and is not related to
-     * any other notion of system or wall-clock time. The value returned represents
-     * nanoseconds since some fixed but arbitrary <i>origin</i> time.
-     * <p>
-     * the overhead of taking the time stamp is disabled via #debugProperty()
-     *
-     * @return nanoSecond resolution time stam
-     */
-    public static long getTimeStamp() {
-        if (ProcessingProfiler.debugState) {
-            return System.nanoTime();
-        }
-        return 0;
-    }
-
-    /**
-     * @param lastStamp reference time stamp
-     * @return actual delay
-     */
-    public static long getTimeDiff(final long lastStamp) {
-        return ProcessingProfiler.getTimeDiff(lastStamp, null);
     }
 
     /**
@@ -157,9 +73,30 @@ public final class ProcessingProfiler { // NOPMD nomen est omen
     }
 
     /**
+     * @return boolean flag controlling whether diagnostics time-marks are taken or the routine to be skipped
+     */
+    public static boolean getDebugState() {
+        return debugState;
+    }
+
+    /**
+     * @return boolean flag controlling whether the statistics/time differences are output to the logger/console or not
+     */
+    public static boolean getLoggerOutputState() {
+        return loggerOutput;
+    }
+
+    /**
      * @param lastStamp reference time stamp
-     * @param msg custom string message that should be printed alongside the
-     *            time stamp
+     * @return actual delay
+     */
+    public static long getTimeDiff(final long lastStamp) {
+        return ProcessingProfiler.getTimeDiff(lastStamp, null);
+    }
+
+    /**
+     * @param lastStamp reference time stamp
+     * @param msg custom string message that should be printed alongside the time stamp
      * @return actual delay
      */
     public static long getTimeDiff(final long lastStamp, final String msg) {
@@ -181,5 +118,56 @@ public final class ProcessingProfiler { // NOPMD nomen est omen
         }
         // TODO: log statistic to HashMap/histogram, etc.
         return now;
+    }
+
+    /**
+     * Returns the current value of the running Java Virtual Machine's high-resolution time source, in nanoseconds.
+     * <p>
+     * This method can only be used to measure elapsed time and is not related to any other notion of system or
+     * wall-clock time. The value returned represents nanoseconds since some fixed but arbitrary <i>origin</i> time.
+     * <p>
+     * the overhead of taking the time stamp is disabled via #debugProperty()
+     *
+     * @return nanoSecond resolution time stam
+     */
+    public static long getTimeStamp() {
+        if (ProcessingProfiler.debugState) {
+            return System.nanoTime();
+        }
+        return 0;
+    }
+
+    /**
+     * @return boolean flag controlling whether the statistics/time differences are output to the logger/console or not
+     */
+    public static boolean getVerboseOutputState() {
+        return verboseOutput;
+    }
+
+    /**
+     * boolean flag controlling whether diagnostics time-marks are taken or the routine to be skipped
+     * 
+     * @param state true: enable
+     */
+    public static void setDebugState(final boolean state) {
+        debugState = state;
+    }
+
+    /**
+     * boolean flag controlling whether the statistics/time differences are output to the logger/console or not
+     * 
+     * @param state true: enable
+     */
+    public static void setLoggerOutputState(final boolean state) {
+        loggerOutput = state;
+    }
+
+    /**
+     * boolean flag controlling whether the statistics/time differences are output to the logger/console or not
+     * 
+     * @param state true: enable
+     */
+    public static void setVerboseOutputState(final boolean state) {
+        verboseOutput = state;
     }
 }

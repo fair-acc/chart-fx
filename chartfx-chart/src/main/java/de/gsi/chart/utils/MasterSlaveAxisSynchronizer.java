@@ -13,8 +13,7 @@ import java.util.ArrayList;
 import de.gsi.chart.axes.spi.AbstractAxis;
 
 /**
- * Synchronizes the axes of different slave charts to the axis of a master
- * chart.
+ * Synchronizes the axes of different slave charts to the axis of a master chart.
  *
  * @author braeun
  */
@@ -35,6 +34,16 @@ public class MasterSlaveAxisSynchronizer {
         axis.tickUnitProperty().bind(master.tickUnitProperty());
     }
 
+    private void lowerBoundChanged(double value) {
+        if (Double.isNaN(value)) {
+            return;
+        }
+        for (final AbstractAxis slave : slaves) {
+            slave.setMin(value);
+            // slave.setTickUnit(master.getTickUnit());
+        }
+    }
+
     public void remove(AbstractAxis axis) {
         slaves.remove(axis);
         axis.tickUnitProperty().unbind();
@@ -47,16 +56,6 @@ public class MasterSlaveAxisSynchronizer {
         }
         for (final AbstractAxis slave : slaves) {
             slave.setMax(value);
-            // slave.setTickUnit(master.getTickUnit());
-        }
-    }
-
-    private void lowerBoundChanged(double value) {
-        if (Double.isNaN(value)) {
-            return;
-        }
-        for (final AbstractAxis slave : slaves) {
-            slave.setMin(value);
             // slave.setTickUnit(master.getTickUnit());
         }
     }

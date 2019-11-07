@@ -20,8 +20,8 @@ import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
 /**
- * Small example of how to use the dynamic/static axis scaling functionality
- * N.B. applies only for axes derived from Axis/AbstractNumericAxis
+ * Small example of how to use the dynamic/static axis scaling functionality N.B. applies only for axes derived from
+ * Axis/AbstractNumericAxis
  *
  * @author rstein
  */
@@ -140,8 +140,7 @@ public class AxisRangeScalingSample extends Application {
     }
 
     /**
-     * @param args
-     *            the command line arguments
+     * @param args the command line arguments
      */
     public static void main(final String[] args) {
         Application.launch(args);

@@ -20,19 +20,18 @@ import javafx.scene.Node;
 import javafx.scene.layout.VBox;
 
 /**
- * example illustrating the discrete time fourier transform and Fast-Fourier
- * transform and spectral interpolation methods. Zoom into the peaks to see the
- * details
+ * example illustrating the discrete time fourier transform and Fast-Fourier transform and spectral interpolation
+ * methods. Zoom into the peaks to see the details
  * 
  * @author rstein
  */
 public class FourierSample extends AbstractDemoApplication {
-	private static final Logger LOGGER = LoggerFactory.getLogger(FourierSample.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(FourierSample.class);
     private static final int MAX_POINTS = 512;
-    private DataSet fraw; 
+    private DataSet fraw;
     private DataSet fspectra1;
-    private DataSet fspectra2; 
-    private DataSet fspectra3; 
+    private DataSet fspectra2;
+    private DataSet fspectra3;
     private DataSet fspectra4;
     private final TRandom rnd = new TRandom(0);
 
@@ -45,6 +44,26 @@ public class FourierSample extends AbstractDemoApplication {
         val += 0.8 * Math.sin(TMath.TwoPi() * (0.3 + 1e-3 * TMath.Sin(TMath.TwoPi() * 0.01 * t)) * t);
         val += error;
         return val;
+    }
+
+    @Override
+    public Node getContent() {
+        initData();
+        final DemoChart chart1 = new DemoChart();
+        chart1.getXAxis().setName("time");
+        chart1.getXAxis().setUnit("s");
+        chart1.getYAxis().setName("magnitude");
+        chart1.getYAxis().setUnit("a.u.");
+        chart1.getDatasets().add(fraw);
+
+        final DemoChart chart2 = new DemoChart();
+        chart2.getXAxis().setName("frequency [fs]");
+        chart2.getXAxis().setUnit("fs");
+        chart2.getYAxis().setName("magnitude");
+        chart2.getYAxis().setUnit("a.u.");
+        chart2.getDatasets().addAll(fspectra1, fspectra2, fspectra3, fspectra4);
+
+        return new VBox(chart1, chart2);
     }
 
     private void initData() {
@@ -101,26 +120,6 @@ public class FourierSample extends AbstractDemoApplication {
         fspectra3 = new DefaultDataSet("int. DT-FourierTransform spectra", frequency2, dtft2, frequency2.length, true);
         LOGGER.atInfo().log("dim %d vs %d\n", frequency2.length, mag.length);
         fspectra4 = new DefaultDataSet("interpolated FFT", frequency3, mag, frequency3.length, true);
-    }
-
-    @Override
-    public Node getContent() {
-        initData();
-        final DemoChart chart1 = new DemoChart();
-        chart1.getXAxis().setName("time");
-        chart1.getXAxis().setUnit("s");
-        chart1.getYAxis().setName("magnitude");
-        chart1.getYAxis().setUnit("a.u.");
-        chart1.getDatasets().add(fraw);
-
-        final DemoChart chart2 = new DemoChart();
-        chart2.getXAxis().setName("frequency [fs]");
-        chart2.getXAxis().setUnit("fs");
-        chart2.getYAxis().setName("magnitude");
-        chart2.getYAxis().setUnit("a.u.");
-        chart2.getDatasets().addAll(fspectra1, fspectra2, fspectra3, fspectra4);
-
-        return new VBox(chart1, chart2);
     }
 
     public static void main(final String[] args) {

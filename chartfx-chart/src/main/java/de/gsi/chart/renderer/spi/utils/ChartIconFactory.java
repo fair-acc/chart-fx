@@ -26,22 +26,6 @@ public final class ChartIconFactory { // NOPMD
         // private constructor
     }
 
-    public static Image getInfoIcon() {
-        return ChartIconFactory.getIcon(ChartIconFactory.ICON_INFO);
-    }
-
-    public static Image getInfoIcon(double width, double height) {
-        return new Image(ChartIconFactory.ICON_INFO, width, height, true, false);
-    }
-
-    public static Image getWarningIcon() {
-        return ChartIconFactory.getIcon(ChartIconFactory.ICON_WARN);
-    }
-
-    public static Image getWarningIcon(double width, double height) {
-        return new Image(ChartIconFactory.ICON_WARN, width, height, true, false);
-    }
-
     public static Image getErrorIcon() {
         return ChartIconFactory.getIcon(ChartIconFactory.ICON_ERROR);
     }
@@ -58,6 +42,22 @@ public final class ChartIconFactory { // NOPMD
         final double w = Math.min(Math.max(width, ChartIconFactory.MIN_WIDTH), ChartIconFactory.MAX_WIDTH);
         final double h = Math.min(Math.max(height, ChartIconFactory.MIN_HEIGHT), ChartIconFactory.MAX_HEIGHT);
         return new Image(file, w, h, true, false);
+    }
+
+    public static Image getInfoIcon() {
+        return ChartIconFactory.getIcon(ChartIconFactory.ICON_INFO);
+    }
+
+    public static Image getInfoIcon(double width, double height) {
+        return new Image(ChartIconFactory.ICON_INFO, width, height, true, false);
+    }
+
+    public static Image getWarningIcon() {
+        return ChartIconFactory.getIcon(ChartIconFactory.ICON_WARN);
+    }
+
+    public static Image getWarningIcon(double width, double height) {
+        return new Image(ChartIconFactory.ICON_WARN, width, height, true, false);
     }
 
 }

@@ -40,29 +40,33 @@ public class CircularDoubleErrorDataSet extends AbstractErrorDataSet<CircularDou
         dataStyles = new CircularBuffer<>(initalSize);
     }
 
-    @Override
-    public int getDataCount() {
-        return xValues.available();
+    /**
+     * Add point to the DoublePoints object
+     *
+     * @param x the new x coordinate
+     * @param y the new y coordinate
+     * @param yErrorNeg the +dy error
+     * @param yErrorPos the -dy error
+     * @return itself
+     */
+    public CircularDoubleErrorDataSet add(final double x, final double y, final double yErrorNeg,
+            final double yErrorPos) {
+        return add(x, y, yErrorNeg, yErrorPos, null);
     }
 
-    @Override
-    public double getX(final int index) {
-        return xValues.get(index);
-    }
-
-    @Override
-    public double getY(final int index) {
-        return yValues.get(index);
-    }
-
-    @Override
-    public double getErrorNegative(final int dimIndex, final int index) {
-        return dimIndex == DIM_X ? 0.0 : yErrorsNeg.get(index);
-    }
-
-    @Override
-    public double getErrorPositive(final int dimIndex, final int index) {
-        return dimIndex == DIM_X ? 0.0 : yErrorsPos.get(index);
+    /**
+     * Add point to the DoublePoints object
+     *
+     * @param x the new x coordinate
+     * @param y the new y coordinate
+     * @param yErrorNeg the +dy error
+     * @param yErrorPos the -dy error
+     * @param tag the data tag
+     * @return itself
+     */
+    public CircularDoubleErrorDataSet add(final double x, final double y, final double yErrorNeg,
+            final double yErrorPos, final String tag) {
+        return add(x, y, yErrorNeg, yErrorPos, tag, null);
     }
 
     /**
@@ -91,35 +95,6 @@ public class CircularDoubleErrorDataSet extends AbstractErrorDataSet<CircularDou
         });
 
         return fireInvalidated(new AddedDataEvent(this));
-    }
-
-    /**
-     * Add point to the DoublePoints object
-     *
-     * @param x the new x coordinate
-     * @param y the new y coordinate
-     * @param yErrorNeg the +dy error
-     * @param yErrorPos the -dy error
-     * @param tag the data tag
-     * @return itself
-     */
-    public CircularDoubleErrorDataSet add(final double x, final double y, final double yErrorNeg,
-            final double yErrorPos, final String tag) {
-        return add(x, y, yErrorNeg, yErrorPos, tag, null);
-    }
-
-    /**
-     * Add point to the DoublePoints object
-     *
-     * @param x the new x coordinate
-     * @param y the new y coordinate
-     * @param yErrorNeg the +dy error
-     * @param yErrorPos the -dy error
-     * @return itself
-     */
-    public CircularDoubleErrorDataSet add(final double x, final double y, final double yErrorNeg,
-            final double yErrorPos) {
-        return add(x, y, yErrorNeg, yErrorPos, null);
     }
 
     /**
@@ -159,23 +134,9 @@ public class CircularDoubleErrorDataSet extends AbstractErrorDataSet<CircularDou
         return fireInvalidated(new AddedDataEvent(this));
     }
 
-    /**
-     * resets all data
-     * 
-     * @return itself (fluent design)
-     */
-    public CircularDoubleErrorDataSet reset() {
-        lock().writeLockGuard(() -> {
-            xValues.reset();
-            yValues.reset();
-            yErrorsNeg.reset();
-            yErrorsPos.reset();
-            dataTag.reset();
-            dataStyles.reset();
-            getAxisDescriptions().forEach(AxisDescription::clear);
-        });
-
-        return fireInvalidated(new RemovedDataEvent(this));
+    @Override
+    public int getDataCount() {
+        return xValues.available();
     }
 
     /**
@@ -195,6 +156,16 @@ public class CircularDoubleErrorDataSet extends AbstractErrorDataSet<CircularDou
         return tag;
     }
 
+    @Override
+    public double getErrorNegative(final int dimIndex, final int index) {
+        return dimIndex == DIM_X ? 0.0 : yErrorsNeg.get(index);
+    }
+
+    @Override
+    public double getErrorPositive(final int dimIndex, final int index) {
+        return dimIndex == DIM_X ? 0.0 : yErrorsPos.get(index);
+    }
+
     /**
      * A string representation of the CSS style associated with this specific {@code DataSet} data point. @see
      * #getStyle()
@@ -205,6 +176,35 @@ public class CircularDoubleErrorDataSet extends AbstractErrorDataSet<CircularDou
     @Override
     public String getStyle(final int index) {
         return dataStyles.get(index);
+    }
+
+    @Override
+    public double getX(final int index) {
+        return xValues.get(index);
+    }
+
+    @Override
+    public double getY(final int index) {
+        return yValues.get(index);
+    }
+
+    /**
+     * resets all data
+     * 
+     * @return itself (fluent design)
+     */
+    public CircularDoubleErrorDataSet reset() {
+        lock().writeLockGuard(() -> {
+            xValues.reset();
+            yValues.reset();
+            yErrorsNeg.reset();
+            yErrorsPos.reset();
+            dataTag.reset();
+            dataStyles.reset();
+            getAxisDescriptions().forEach(AxisDescription::clear);
+        });
+
+        return fireInvalidated(new RemovedDataEvent(this));
     }
 
 }

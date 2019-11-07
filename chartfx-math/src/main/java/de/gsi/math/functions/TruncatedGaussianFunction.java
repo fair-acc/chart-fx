@@ -8,20 +8,29 @@ import de.gsi.math.TMath;
  * @author rstein
  */
 public class TruncatedGaussianFunction extends AbstractFunction1D implements Function1D {
-    //@formatter:off
+    // @formatter:off
     /**
-     * initialise Gaussian function (/normal distribution)
-     * y = scale/(sigma*sqrt(2.pi)) * exp( -0.5 [(x - mean)/sigma]^2 )
-     * parameter order:
-     * parameter[0] = mean (default: 0.0)
-     * parameter[1] = sigma (default: 1.0)
-     * parameter[2] = scale (default: 1.0)
-     * parameter[3] = truncation (default: 2.0 sigma)
+     * initialise Gaussian function (/normal distribution) y = scale/(sigma*sqrt(2.pi)) * exp( -0.5 [(x - mean)/sigma]^2
+     * ) parameter order: parameter[0] = mean (default: 0.0) parameter[1] = sigma (default: 1.0) parameter[2] = scale
+     * (default: 1.0) parameter[3] = truncation (default: 3.0 sigma)
+     *
+     * @param name function name
+     */
+    // @formatter:on
+    public TruncatedGaussianFunction(final String name) {
+        this(name, null);
+    }
+
+    // @formatter:off
+    /**
+     * initialise Gaussian function (/normal distribution) y = scale/(sigma*sqrt(2.pi)) * exp( -0.5 [(x - mean)/sigma]^2
+     * ) parameter order: parameter[0] = mean (default: 0.0) parameter[1] = sigma (default: 1.0) parameter[2] = scale
+     * (default: 1.0) parameter[3] = truncation (default: 2.0 sigma)
      *
      * @param name function name
      * @param parameter function parameter
      */
-    //@formatter:on
+    // @formatter:on
     public TruncatedGaussianFunction(final String name, final double[] parameter) {
         super(name, new double[4]);
         setParameterName(0, "mean");
@@ -40,23 +49,6 @@ public class TruncatedGaussianFunction extends AbstractFunction1D implements Fun
         for (int i = 0; i < Math.min(parameter.length, 4); i++) {
             setParameterValue(i, parameter[0]);
         }
-    }
-
-    //@formatter:off
-    /**
-     * initialise Gaussian function (/normal distribution)
-     * y = scale/(sigma*sqrt(2.pi)) * exp( -0.5 [(x - mean)/sigma]^2 )
-     * parameter order:
-     * parameter[0] = mean (default: 0.0)
-     * parameter[1] = sigma (default: 1.0)
-     * parameter[2] = scale (default: 1.0)
-     * parameter[3] = truncation (default: 3.0 sigma)
-     *
-     * @param name function name
-     */
-    //@formatter:on
-    public TruncatedGaussianFunction(final String name) {
-        this(name, null);
     }
 
     @Override

@@ -62,6 +62,20 @@ public class ToolBarFlowPane extends FlowPane {
         cornerRadius.addListener(toolBarSizeListener);
     }
 
+    private void adjustToolBarWidth() {
+        final double maxLength = 0.90 * chart.getCanvas().getWidth();
+        double length = 0.0;
+        for (Node node : this.getChildren()) {
+            length += node.prefWidth(-2);
+        }
+        length += 4 * cornerRadius.get();
+        final double wrapLength = Math.min(maxLength, Math.max(length, 50));
+
+        this.prefWrapLengthProperty().set(wrapLength);
+        this.setMaxWidth(maxLength);
+        this.setShape(ToolBarShapeHelper.getToolBarShape(wrapLength, this.getHeight(), cornerRadius.get()));
+    }
+
     public DoubleProperty cornerRadiusProperty() {
         return cornerRadius;
     }
@@ -105,19 +119,5 @@ public class ToolBarFlowPane extends FlowPane {
 
     public void setToolBarSelectedColor(final Color color) {
         this.selectedColour = color;
-    }
-
-    private void adjustToolBarWidth() {
-        final double maxLength = 0.90 * chart.getCanvas().getWidth();
-        double length = 0.0;
-        for (Node node : this.getChildren()) {
-            length += node.prefWidth(-2);
-        }
-        length += 4 * cornerRadius.get();
-        final double wrapLength = Math.min(maxLength, Math.max(length, 50));
-
-        this.prefWrapLengthProperty().set(wrapLength);
-        this.setMaxWidth(maxLength);
-        this.setShape(ToolBarShapeHelper.getToolBarShape(wrapLength, this.getHeight(), cornerRadius.get()));
     }
 }

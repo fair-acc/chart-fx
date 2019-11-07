@@ -37,6 +37,44 @@ public class AxisSynchronizer {
         axis.minProperty().addListener(lowerBoundChangeListener);
     }
 
+    private Axis findAxis(ObservableValue<? extends Number> property) {
+        for (final Axis chart : axes) {
+            if (property == chart.maxProperty()) {
+                return chart;
+            }
+            if (property == chart.minProperty()) {
+                return chart;
+            }
+        }
+        return null;
+    }
+
+    private void lowerBoundChanged(ObservableValue<? extends Number> property, Number oldValue, Number newValue) {
+        if (!updating) {
+            final double value = newValue.doubleValue();
+            if (Double.isNaN(value)) {
+                return;
+            }
+            if (value == oldValue.doubleValue())
+                return;
+            updating = true;
+            final Axis sender = findAxis(property);
+            if (sender == null) {
+                updating = false;
+                return;
+            }
+            final double tickUnit = sender.getTickUnit();
+            for (final Axis axis : axes) {
+                if (axis != sender) {
+                    axis.setMin(value);
+                    axis.setAutoRanging(false);
+                }
+                axis.setTickUnit(tickUnit);
+            }
+            updating = false;
+        }
+    }
+
     public void remove(Axis axis) {
         axes.remove(axis);
         axis.maxProperty().removeListener(upperBoundChangeListener);
@@ -68,44 +106,6 @@ public class AxisSynchronizer {
             }
             updating = false;
         }
-    }
-
-    private void lowerBoundChanged(ObservableValue<? extends Number> property, Number oldValue, Number newValue) {
-        if (!updating) {
-            final double value = newValue.doubleValue();
-            if (Double.isNaN(value)) {
-                return;
-            }
-            if (value == oldValue.doubleValue())
-                return;
-            updating = true;
-            final Axis sender = findAxis(property);
-            if (sender == null) {
-                updating = false;
-                return;
-            }
-            final double tickUnit = sender.getTickUnit();
-            for (final Axis axis : axes) {
-                if (axis != sender) {
-                    axis.setMin(value);
-                    axis.setAutoRanging(false);
-                }
-                axis.setTickUnit(tickUnit);
-            }
-            updating = false;
-        }
-    }
-
-    private Axis findAxis(ObservableValue<? extends Number> property) {
-        for (final Axis chart : axes) {
-            if (property == chart.maxProperty()) {
-                return chart;
-            }
-            if (property == chart.minProperty()) {
-                return chart;
-            }
-        }
-        return null;
     }
 
 }

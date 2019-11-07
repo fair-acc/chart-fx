@@ -13,14 +13,13 @@ public final class HashMapHelper {
     }
 
     /**
-     * Returns the least power of two smaller than or equal to 2<sup>30</sup> and
-     * larger than or equal to <code>Math.ceil( expected / f )</code>.
+     * Returns the least power of two smaller than or equal to 2<sup>30</sup> and larger than or equal to
+     * <code>Math.ceil( expected / f )</code>.
      *
      * @param expected the expected number of elements in a hash table.
      * @param f the load factor.
      * @return the minimum possible size for a backing array.
-     * @throws IllegalArgumentException if the necessary size is larger than
-     *             2<sup>30</sup>.
+     * @throws IllegalArgumentException if the necessary size is larger than 2<sup>30</sup>.
      */
     public static int arraySize(final int expected, final float f) {
         final long s = Math.max(2, nextPowerOfTwo((long) Math.ceil(expected / f)));

@@ -43,12 +43,40 @@ import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 
 public class MetaDataRendererSample extends Application {
-	private static final Logger LOGGER = LoggerFactory.getLogger(MetaDataRendererSample.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MetaDataRendererSample.class);
     private static final int N_SAMPLES1 = 10000; // default: 1000000
     private static final int N_SAMPLES2 = 50; // default: 1000000
     private static final int UPDATE_DELAY = 1000; // [ms]
     private static final int UPDATE_PERIOD = 1000; // [ms]
     private Timer timer;
+
+    protected int counter1 = -1;
+
+    protected int counter2 = -1;
+
+    public TimerTask getTask(final Renderer renderer1, final Renderer renderer2) {
+        return new TimerTask() {
+
+            int updateCount;
+
+            @Override
+            public void run() {
+                Platform.runLater(() -> {
+                    // setAll in order to implicitly clear previous list of
+                    // 'old' data sets
+                    renderer1.getDatasets()
+                            .setAll(new MetaInfoRandomWalkFunction("random walk", MetaDataRendererSample.N_SAMPLES1));
+                    renderer2.getDatasets().setAll(new MetaInfoGausFunction("gaussy", MetaDataRendererSample.N_SAMPLES2,
+                            MetaDataRendererSample.N_SAMPLES1));
+
+                    if (updateCount % 100 == 0) {
+                        LOGGER.atInfo().log("update iteration #" + updateCount);
+                    }
+                    updateCount++;
+                });
+            }
+        };
+    }
 
     @Override
     public void start(final Stage primaryStage) {
@@ -163,31 +191,60 @@ public class MetaDataRendererSample extends Application {
 
     }
 
-    public TimerTask getTask(final Renderer renderer1, final Renderer renderer2) {
-        return new TimerTask() {
-
-            int updateCount;
-
-            @Override
-            public void run() {
-                Platform.runLater(() -> {
-                    // setAll in order to implicitly clear previous list of
-                    // 'old' data sets
-                    renderer1.getDatasets()
-                            .setAll(new MetaInfoRandomWalkFunction("random walk", MetaDataRendererSample.N_SAMPLES1));
-                    renderer2.getDatasets().setAll(new MetaInfoGausFunction("gaussy", MetaDataRendererSample.N_SAMPLES2,
-                            MetaDataRendererSample.N_SAMPLES1));
-
-                    if (updateCount % 100 == 0) {
-                        LOGGER.atInfo().log("update iteration #" + updateCount);
-                    }
-                    updateCount++;
-                });
-            }
-        };
+    /**
+     * @param args the command line arguments
+     */
+    public static void main(final String[] args) {
+        Application.launch(args);
     }
 
-    protected int counter1 = -1;
+    class MetaInfoGausFunction extends GaussFunction implements DataSetMetaData {
+        private static final long serialVersionUID = -397052291718132117L;
+        private int range;
+
+        public MetaInfoGausFunction(String name, int count, int range2) {
+            super(name, count);
+            counter2++;
+            range = range2;
+            this.setStyle("fillColor=green");
+        }
+
+        @Override
+        public List<String> getErrorList() {
+            if (counter2 % 2 == 0) {
+                return Arrays.asList(DataSetMetaData.TAG_OVERSHOOT);
+            }
+            return Collections.<String>emptyList();
+        }
+
+        @Override
+        public List<String> getInfoList() {
+            if (counter1 % 4 == 0) {
+                return Arrays.asList("info1");
+            }
+            return Collections.<String>emptyList();
+        }
+
+        @Override
+        public List<String> getWarningList() {
+            if (counter1 % 2 == 0) {
+                return Arrays.asList(DataSetMetaData.TAG_GAIN_RANGE);
+            }
+            return Collections.<String>emptyList();
+        }
+
+        @Override
+        public double getX(final int index) {
+            return (double) index / ((double) this.getDataCount()) * range;
+        }
+
+        @Override
+        public double getY(final int index) {
+            double x = getX(index);
+            return 1000 * MetaInfoGausFunction.gauss(x, 0.5 * range, 1000);
+        }
+
+    }
 
     class MetaInfoRandomWalkFunction extends RandomWalkFunction implements DataSetMetaData {
         private static final long serialVersionUID = -7647999890793017350L;
@@ -202,7 +259,7 @@ public class MetaDataRendererSample extends Application {
             if (counter1 % 3 == 0) {
                 return Arrays.asList(DataSetMetaData.TAG_OVERSHOOT, DataSetMetaData.TAG_UNDERSHOOT);
             }
-            return Collections.<String> emptyList();
+            return Collections.<String>emptyList();
         }
 
         @Override
@@ -210,7 +267,7 @@ public class MetaDataRendererSample extends Application {
             if (counter1 % 2 == 0) {
                 return Arrays.asList("info1", "info2");
             }
-            return Collections.<String> emptyList();
+            return Collections.<String>emptyList();
         }
 
         @Override
@@ -218,65 +275,8 @@ public class MetaDataRendererSample extends Application {
             if (counter1 % 2 == 0) {
                 return Arrays.asList(DataSetMetaData.TAG_GAIN_RANGE);
             }
-            return Collections.<String> emptyList();
+            return Collections.<String>emptyList();
         }
 
-    }
-
-    protected int counter2 = -1;
-
-    class MetaInfoGausFunction extends GaussFunction implements DataSetMetaData {
-        private static final long serialVersionUID = -397052291718132117L;
-        private int range;
-
-        public MetaInfoGausFunction(String name, int count, int range2) {
-            super(name, count);
-            counter2++;
-            range = range2;
-            this.setStyle("fillColor=green");
-        }
-
-        @Override
-        public double getX(final int index) {
-            return (double) index / ((double) this.getDataCount()) * range;
-        }
-
-        @Override
-        public double getY(final int index) {
-            double x = getX(index);
-            return 1000 * MetaInfoGausFunction.gauss(x, 0.5 * range, 1000);
-        }
-
-        @Override
-        public List<String> getErrorList() {
-            if (counter2 % 2 == 0) {
-                return Arrays.asList(DataSetMetaData.TAG_OVERSHOOT);
-            }
-            return Collections.<String> emptyList();
-        }
-
-        @Override
-        public List<String> getInfoList() {
-            if (counter1 % 4 == 0) {
-                return Arrays.asList("info1");
-            }
-            return Collections.<String> emptyList();
-        }
-
-        @Override
-        public List<String> getWarningList() {
-            if (counter1 % 2 == 0) {
-                return Arrays.asList(DataSetMetaData.TAG_GAIN_RANGE);
-            }
-            return Collections.<String> emptyList();
-        }
-
-    }
-
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(final String[] args) {
-        Application.launch(args);
     }
 }

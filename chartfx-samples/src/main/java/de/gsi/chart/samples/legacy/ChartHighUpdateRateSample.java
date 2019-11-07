@@ -29,7 +29,7 @@ public class ChartHighUpdateRateSample extends RollingBufferSample {
             counter = (counter + 1) % 100;
             if (counter == 0) {
                 System.err.println("pulse auto dipole = " + rollingBufferDipoleCurrent.autoNotification().get()
-                + " auto beam " + rollingBufferBeamIntensity.autoNotification().get());
+                        + " auto beam " + rollingBufferBeamIntensity.autoNotification().get());
             }
         });
 

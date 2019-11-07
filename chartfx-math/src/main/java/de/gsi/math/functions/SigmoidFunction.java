@@ -5,12 +5,18 @@ import de.gsi.math.TMathConstants;
 public class SigmoidFunction extends AbstractFunction1D implements Function1D {
 
     /**
-     * initialise the sigmoid function
-     * y = 1.0/(1.0*exp(-slope*(x-location))))
-     * parameter order:
-     * parameter[0] = location (default: 0.0)
-     * parameter[1] = slope (default: 1.0)
-     * parameter[2] = scaling (default: 1.0 (fixed))
+     * initialise the sigmoid function y = 1.0/(1.0*exp(-slope*(x-location)))) parameter order: parameter[0] = location
+     * (default: 0.0) parameter[1] = slope (default: 1.0) parameter[2] = scaling (default: 1.0 (fixed))
+     *
+     * @param name function name
+     */
+    public SigmoidFunction(final String name) {
+        this(name, null);
+    }
+
+    /**
+     * initialise the sigmoid function y = 1.0/(1.0*exp(-slope*(x-location)))) parameter order: parameter[0] = location
+     * (default: 0.0) parameter[1] = slope (default: 1.0) parameter[2] = scaling (default: 1.0 (fixed))
      *
      * @param name function name
      * @param parameter function parameter
@@ -32,20 +38,6 @@ public class SigmoidFunction extends AbstractFunction1D implements Function1D {
         for (int i = 0; i < Math.min(parameter.length, 3); i++) {
             setParameterValue(i, parameter[0]);
         }
-    }
-
-    /**
-     * initialise the sigmoid function
-     * y = 1.0/(1.0*exp(-slope*(x-location))))
-     * parameter order:
-     * parameter[0] = location (default: 0.0)
-     * parameter[1] = slope (default: 1.0)
-     * parameter[2] = scaling (default: 1.0 (fixed))
-     *
-     * @param name function name
-     */
-    public SigmoidFunction(final String name) {
-        this(name, null);
     }
 
     @Override

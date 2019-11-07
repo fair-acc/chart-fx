@@ -21,6 +21,22 @@ public class GridDrawer {
         this.map = map;
     }
 
+    public void draw(final Canvas canvas) {
+        // registerCanvasMouseLiner(canvas); // TODO move elsewhere
+
+        final GraphicsContext gc = canvas.getGraphicsContext2D();
+        gc.clearRect(0, 0, gc.getCanvas().getWidth(), gc.getCanvas().getHeight());
+
+        for (final Hexagon hexagon : map.getAllHexagons()) {
+            // draw hexagon according to Node specifications
+            hexagon.draw(gc);
+
+            if (map.renderCoordinates) {
+                hexagon.renderCoordinates(gc);
+            }
+        }
+    }
+
     public void draw(final Group root) {
         final Collection<Hexagon> hexagons = map.getAllHexagons();
         for (final Hexagon hexagon : hexagons) {
@@ -88,38 +104,24 @@ public class GridDrawer {
 
     }
 
-
-
-    public void draw(final Canvas canvas) {
-        //registerCanvasMouseLiner(canvas); // TODO move elsewhere
-
-        final GraphicsContext gc = canvas.getGraphicsContext2D();
-        gc.clearRect(0, 0, gc.getCanvas().getWidth(), gc.getCanvas().getHeight());
-
-        for (final Hexagon hexagon : map.getAllHexagons()) {
-            // draw hexagon according to Node specifications
-        	hexagon.draw(gc);
-
-            if (map.renderCoordinates) {
-            	hexagon.renderCoordinates(gc);
-            }
-        }
-    }
-
     public void drawContour(final Canvas canvas) {
-        //registerCanvasMouseLiner(canvas); // TODO move elsewhere
+        // registerCanvasMouseLiner(canvas); // TODO move elsewhere
 
         final GraphicsContext gc = canvas.getGraphicsContext2D();
         gc.clearRect(0, 0, gc.getCanvas().getWidth(), gc.getCanvas().getHeight());
 
         for (final Hexagon hexagon : map.getAllHexagons()) {
             // draw hexagon contour according to Node specifications
-        	hexagon.drawContour(gc);
+            hexagon.drawContour(gc);
 
             if (map.renderCoordinates) {
-            	hexagon.renderCoordinates(gc);
+                hexagon.renderCoordinates(gc);
             }
         }
+    }
+
+    public void setFont(final Font font) {
+        this.font = font;
     }
 
     /**
@@ -138,10 +140,6 @@ public class GridDrawer {
         final double q = (1.0 / 3.0 * Math.sqrt(3.0) * xLocal - 1.0 / 3.0 * yLocal) / hexagonRadius;
         final double r = 2.0 / 3.0 * y / hexagonRadius;
         return GridPosition.hexRound(q, r);
-    }
-
-    public void setFont(final Font font) {
-        this.font = font;
     }
 
 }

@@ -46,8 +46,7 @@ import javafx.util.Duration;
  * plugin concept/zoomer), modified to mitigate JavaFX performance issues and extended renderer
  * concept/canvas-concept/interfaces/+more plugins by GSI. Refactored and re-write in 2018 to make it compatible with
  * Apache 2.0 which -- in the spirit of 'Ship of Theseus' -- makes it de-facto a new development. Contributions,
- * bug-fixes,
- * and modifications are welcome. Hope you find this library useful and enjoy!
+ * bug-fixes, and modifications are welcome. Hope you find this library useful and enjoy!
  *
  * @author braeun
  * @author rstein
@@ -96,204 +95,6 @@ public class XYChart extends Chart {
         setAnimated(false);
         xAxis.setAnimated(false);
         yAxis.setAnimated(false);
-    }
-
-    /**
-     * @return datasets attached to the chart and datasets attached to all renderers
-     */
-    @Override
-    public ObservableList<DataSet> getAllDatasets() {
-        if (getRenderers() == null) {
-            return allDataSets;
-        }
-
-        allDataSets.clear();
-        allDataSets.addAll(getDatasets());
-        getRenderers().stream().filter(renderer -> !(renderer instanceof LabelledMarkerRenderer))
-                .forEach(renderer -> allDataSets.addAll(renderer.getDatasets()));
-
-        return allDataSets;
-    }
-
-    /**
-     * @return datasets attached to the chart and datasets attached to all renderers TODO: change to change listener
-     *         that add/remove datasets from a global observable list
-     */
-    public ObservableList<DataSet> getAllShownDatasets() {
-        // return allVisibleDataSets;
-        final ObservableList<DataSet> ret = FXCollections.observableArrayList();
-        ret.addAll(getDatasets());
-        getRenderers().stream().filter(Renderer::showInLegend).forEach(renderer -> ret.addAll(renderer.getDatasets()));
-        return ret;
-    }
-
-    /**
-     * @return nomen est omen
-     */
-    public GridRenderer getGridRenderer() {
-        return gridRenderer;
-    }
-
-    public PolarTickStep getPolarStepSize() {
-        return polarStepSizeProperty().get();
-    }
-
-    /**
-     * Returns the x axis.
-     *
-     * @return x axis
-     */
-    public Axis getXAxis() {
-        return getFirstAxis(Orientation.HORIZONTAL);
-    }
-
-    /**
-     * Returns the y axis.
-     *
-     * @return y axis
-     */
-    public Axis getYAxis() {
-        return getFirstAxis(Orientation.VERTICAL);
-    }
-
-    /**
-     * Indicates whether horizontal grid lines are visible or not.
-     *
-     * @return horizontalGridLinesVisible property
-     */
-    public final BooleanProperty horizontalGridLinesVisibleProperty() {
-        return gridRenderer.horizontalGridLinesVisibleProperty();
-    }
-
-    /**
-     * Indicates whether horizontal grid lines are visible.
-     *
-     * @return {@code true} if horizontal grid lines are visible else {@code false}.
-     */
-    public final boolean isHorizontalGridLinesVisible() {
-        return horizontalGridLinesVisibleProperty().get();
-    }
-
-    /**
-     * whether renderer should use polar coordinates (x -&gt; interpreted as phi, y as radial coordinate)
-     *
-     * @return true if renderer is plotting in polar coordinates
-     */
-    public final boolean isPolarPlot() {
-        return polarPlotProperty().get();
-    }
-
-    /**
-     * Indicates whether vertical grid lines are visible.
-     *
-     * @return {@code true} if vertical grid lines are visible else {@code false}.
-     */
-    public final boolean isVerticalGridLinesVisible() {
-        return verticalGridLinesVisibleProperty().get();
-    }
-
-    /**
-     * Sets whether renderer should use polar coordinates (x -&gt; interpreted as phi, y as radial coordinate)
-     *
-     * @return true if renderer is plotting in polar coordinates
-     */
-    public final BooleanProperty polarPlotProperty() {
-        return polarPlot;
-    }
-
-    public ObjectProperty<PolarTickStep> polarStepSizeProperty() {
-        return polarStepSize;
-    }
-
-    /**
-     * Sets the value of the {@link #verticalGridLinesVisibleProperty()}.
-     *
-     * @param value {@code true} to make vertical lines visible
-     */
-    public final void setHorizontalGridLinesVisible(final boolean value) {
-        horizontalGridLinesVisibleProperty().set(value);
-    }
-
-    /**
-     * Sets whether renderer should use polar coordinates (x -&gt; interpreted as phi, y as radial coordinate)
-     *
-     * @param state true if renderer is parallelising sub-functionalities
-     * @return itself (fluent design)
-     */
-    public final XYChart setPolarPlot(final boolean state) {
-        polarPlotProperty().set(state);
-        return this;
-    }
-
-    public void setPolarStepSize(final PolarTickStep step) {
-        polarStepSizeProperty().set(step);
-    }
-
-    /**
-     * Sets the value of the {@link #verticalGridLinesVisibleProperty()}.
-     *
-     * @param value {@code true} to make vertical lines visible
-     */
-    public final void setVerticalGridLinesVisible(final boolean value) {
-        verticalGridLinesVisibleProperty().set(value);
-    }
-
-    @Override
-    public void updateAxisRange() {
-        if (isDataEmpty()) {
-            return;
-        }
-
-        // lock datasets to prevent writes while updating the axes
-        ObservableList<DataSet> dataSets = this.getAllDatasets();
-        // check that all registered data sets have proper ranges defined 
-        dataSets.parallelStream().forEach(dataset -> dataset.getAxisDescriptions().parallelStream()
-                .filter(axisD -> !axisD.isDefined()).forEach(axisDescription -> {
-                    dataset.lock().writeLockGuard(() -> {
-                        dataset.recomputeLimits(dataset.getAxisDescriptions().indexOf(axisDescription));
-                    });
-                }));
-
-        // N.B. possible race condition on this line -> for the future to solve
-        // recomputeLimits holds a writeLock the following sections need a read lock (for allowing parallel axis)
-        // there isn't an easy way to down-grade the established write locks into read locks (yet)
-        // Experimental version:
-        //        dataSets.forEach(dataset -> {
-        //            dataset.lock().writeLock();
-        //            dataset.getAxisDescriptions().parallelStream().filter(axisD -> !axisD.isDefined())
-        //                    .forEach(axisDescription -> {
-        //                        dataset.setAutoNotifaction(false);
-        //                        dataset.recomputeLimits(dataset.getAxisDescriptions().indexOf(axisDescription));
-        //                    });
-        //            DefaultDataSetLock<DataSet> myLock = (DefaultDataSetLock<DataSet>) dataset.lock();
-        //            myLock.downGradeWriteLock();
-        //        });
-
-        dataSets.forEach(ds -> ds.lock().readLock());
-        try {
-            getAxes().forEach(chartAxis -> {
-                final List<DataSet> dataSetForAxis = getDataSetForAxis(chartAxis);
-                updateNumericAxis(chartAxis, dataSetForAxis);
-                // chartAxis.requestAxisLayout();
-            });
-        } finally {
-            dataSets.forEach(ds -> ds.lock().readUnLock());
-        }
-
-        // unlock datasets again
-    }
-
-    /**
-     * Indicates whether vertical grid lines are visible or not.
-     *
-     * @return verticalGridLinesVisible property
-     */
-    public final BooleanProperty verticalGridLinesVisibleProperty() {
-        return gridRenderer.verticalGridLinesVisibleProperty();
-    }
-
-    private boolean isDataEmpty() {
-        return getAllDatasets() == null || getAllDatasets().isEmpty();
     }
 
     /**
@@ -362,6 +163,35 @@ public class XYChart extends Chart {
         requestLayout();
     }
 
+    /**
+     * @return datasets attached to the chart and datasets attached to all renderers
+     */
+    @Override
+    public ObservableList<DataSet> getAllDatasets() {
+        if (getRenderers() == null) {
+            return allDataSets;
+        }
+
+        allDataSets.clear();
+        allDataSets.addAll(getDatasets());
+        getRenderers().stream().filter(renderer -> !(renderer instanceof LabelledMarkerRenderer))
+                .forEach(renderer -> allDataSets.addAll(renderer.getDatasets()));
+
+        return allDataSets;
+    }
+
+    /**
+     * @return datasets attached to the chart and datasets attached to all renderers TODO: change to change listener
+     *         that add/remove datasets from a global observable list
+     */
+    public ObservableList<DataSet> getAllShownDatasets() {
+        // return allVisibleDataSets;
+        final ObservableList<DataSet> ret = FXCollections.observableArrayList();
+        ret.addAll(getDatasets());
+        getRenderers().stream().filter(Renderer::showInLegend).forEach(renderer -> ret.addAll(renderer.getDatasets()));
+        return ret;
+    }
+
     protected List<DataSet> getDataSetForAxis(final Axis axis) {
         final List<DataSet> retVal = new ArrayList<>();
         if (axis == null) {
@@ -371,6 +201,88 @@ public class XYChart extends Chart {
         getRenderers().forEach(renderer -> renderer.getAxes().stream().filter(axis::equals)
                 .forEach(rendererAxis -> retVal.addAll(renderer.getDatasets())));
         return retVal;
+    }
+
+    /**
+     * @return nomen est omen
+     */
+    public GridRenderer getGridRenderer() {
+        return gridRenderer;
+    }
+
+    public PolarTickStep getPolarStepSize() {
+        return polarStepSizeProperty().get();
+    }
+
+    /**
+     * Returns the x axis.
+     *
+     * @return x axis
+     */
+    public Axis getXAxis() {
+        return getFirstAxis(Orientation.HORIZONTAL);
+    }
+
+    /**
+     * Returns the y axis.
+     *
+     * @return y axis
+     */
+    public Axis getYAxis() {
+        return getFirstAxis(Orientation.VERTICAL);
+    }
+
+    /**
+     * Indicates whether horizontal grid lines are visible or not.
+     *
+     * @return horizontalGridLinesVisible property
+     */
+    public final BooleanProperty horizontalGridLinesVisibleProperty() {
+        return gridRenderer.horizontalGridLinesVisibleProperty();
+    }
+
+    private boolean isDataEmpty() {
+        return getAllDatasets() == null || getAllDatasets().isEmpty();
+    }
+
+    /**
+     * Indicates whether horizontal grid lines are visible.
+     *
+     * @return {@code true} if horizontal grid lines are visible else {@code false}.
+     */
+    public final boolean isHorizontalGridLinesVisible() {
+        return horizontalGridLinesVisibleProperty().get();
+    }
+
+    /**
+     * whether renderer should use polar coordinates (x -&gt; interpreted as phi, y as radial coordinate)
+     *
+     * @return true if renderer is plotting in polar coordinates
+     */
+    public final boolean isPolarPlot() {
+        return polarPlotProperty().get();
+    }
+
+    /**
+     * Indicates whether vertical grid lines are visible.
+     *
+     * @return {@code true} if vertical grid lines are visible else {@code false}.
+     */
+    public final boolean isVerticalGridLinesVisible() {
+        return verticalGridLinesVisibleProperty().get();
+    }
+
+    /**
+     * Sets whether renderer should use polar coordinates (x -&gt; interpreted as phi, y as radial coordinate)
+     *
+     * @return true if renderer is plotting in polar coordinates
+     */
+    public final BooleanProperty polarPlotProperty() {
+        return polarPlot;
+    }
+
+    public ObjectProperty<PolarTickStep> polarStepSizeProperty() {
+        return polarStepSize;
     }
 
     @Override
@@ -425,6 +337,93 @@ public class XYChart extends Chart {
         }
     }
 
+    /**
+     * Sets the value of the {@link #verticalGridLinesVisibleProperty()}.
+     *
+     * @param value {@code true} to make vertical lines visible
+     */
+    public final void setHorizontalGridLinesVisible(final boolean value) {
+        horizontalGridLinesVisibleProperty().set(value);
+    }
+
+    /**
+     * Sets whether renderer should use polar coordinates (x -&gt; interpreted as phi, y as radial coordinate)
+     *
+     * @param state true if renderer is parallelising sub-functionalities
+     * @return itself (fluent design)
+     */
+    public final XYChart setPolarPlot(final boolean state) {
+        polarPlotProperty().set(state);
+        return this;
+    }
+
+    public void setPolarStepSize(final PolarTickStep step) {
+        polarStepSizeProperty().set(step);
+    }
+
+    /**
+     * Sets the value of the {@link #verticalGridLinesVisibleProperty()}.
+     *
+     * @param value {@code true} to make vertical lines visible
+     */
+    public final void setVerticalGridLinesVisible(final boolean value) {
+        verticalGridLinesVisibleProperty().set(value);
+    }
+
+    @Override
+    public void updateAxisRange() {
+        if (isDataEmpty()) {
+            return;
+        }
+
+        // lock datasets to prevent writes while updating the axes
+        ObservableList<DataSet> dataSets = this.getAllDatasets();
+        // check that all registered data sets have proper ranges defined
+        dataSets.parallelStream().forEach(dataset -> dataset.getAxisDescriptions().parallelStream()
+                .filter(axisD -> !axisD.isDefined()).forEach(axisDescription -> {
+                    dataset.lock().writeLockGuard(() -> {
+                        dataset.recomputeLimits(dataset.getAxisDescriptions().indexOf(axisDescription));
+                    });
+                }));
+
+        // N.B. possible race condition on this line -> for the future to solve
+        // recomputeLimits holds a writeLock the following sections need a read lock (for allowing parallel axis)
+        // there isn't an easy way to down-grade the established write locks into read locks (yet)
+        // Experimental version:
+        // dataSets.forEach(dataset -> {
+        // dataset.lock().writeLock();
+        // dataset.getAxisDescriptions().parallelStream().filter(axisD -> !axisD.isDefined())
+        // .forEach(axisDescription -> {
+        // dataset.setAutoNotifaction(false);
+        // dataset.recomputeLimits(dataset.getAxisDescriptions().indexOf(axisDescription));
+        // });
+        // DefaultDataSetLock<DataSet> myLock = (DefaultDataSetLock<DataSet>) dataset.lock();
+        // myLock.downGradeWriteLock();
+        // });
+
+        dataSets.forEach(ds -> ds.lock().readLock());
+        try {
+            getAxes().forEach(chartAxis -> {
+                final List<DataSet> dataSetForAxis = getDataSetForAxis(chartAxis);
+                updateNumericAxis(chartAxis, dataSetForAxis);
+                // chartAxis.requestAxisLayout();
+            });
+        } finally {
+            dataSets.forEach(ds -> ds.lock().readUnLock());
+        }
+
+        // unlock datasets again
+    }
+
+    /**
+     * Indicates whether vertical grid lines are visible or not.
+     *
+     * @return verticalGridLinesVisible property
+     */
+    public final BooleanProperty verticalGridLinesVisibleProperty() {
+        return gridRenderer.verticalGridLinesVisibleProperty();
+    }
+
     protected static void updateNumericAxis(final Axis axis, final List<DataSet> dataSets) {
         if (dataSets == null || dataSets.isEmpty()) {
             return;
@@ -461,11 +460,11 @@ public class XYChart extends Chart {
 
         final List<Number> dataMinMax = new ArrayList<>();
         dataSets.forEach(dataset -> dataset.lock().readLockGuardOptimistic(() -> {
-            //            for (AxisDescription axisDescription : dataset.getAxisDescriptions()) {
-            //                if (!axisDescription.isDefined()) {
-            //                    dataset.recomputeLimits(dataset.getAxisDescriptions().indexOf(axisDescription));
-            //                }
-            //            }
+            // for (AxisDescription axisDescription : dataset.getAxisDescriptions()) {
+            // if (!axisDescription.isDefined()) {
+            // dataset.recomputeLimits(dataset.getAxisDescriptions().indexOf(axisDescription));
+            // }
+            // }
             if (dataset instanceof DataSet3D && (side == Side.RIGHT || side == Side.TOP)) {
                 final DataSet3D mDataSet = (DataSet3D) dataset;
                 dataMinMax.add(mDataSet.getAxisDescription(DIM_Z).getMin());

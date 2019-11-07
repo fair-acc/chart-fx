@@ -48,6 +48,60 @@ public class RollingBufferLegacySample extends Application {
 
     private NumberAxis xAxis;
 
+    private HBox getHeaderBar(Scene scene) {
+        final AddToQueue addToQueue = new AddToQueue();
+        final Button newDataSet = new Button("new DataSet");
+        newDataSet.setOnAction(evt -> Platform.runLater(addToQueue::run));
+
+        final Button startTimer = new Button("timer");
+        startTimer.setOnAction(evt -> {
+            series1.getData().clear();
+            series2.getData().clear();
+            if (timer == null) {
+                timer = new Timer();
+                timer.scheduleAtFixedRate(new TimerTask() {
+                    @Override
+                    public void run() {
+                        Platform.runLater(addToQueue::run);
+                    }
+                }, 0, UPDATE_PERIOD);
+            } else {
+                timer.cancel();
+                timer = null;
+            }
+        });
+
+        // H-Spacer
+        Region spacer = new Region();
+        spacer.setMinWidth(Region.USE_PREF_SIZE);
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+
+        // JavaFX and Chart Performance metrics
+        SimplePerformanceMeter meter = new SimplePerformanceMeter(scene, RollingBufferSample.DEBUG_UPDATE_RATE);
+
+        Label fxFPS = new Label();
+        fxFPS.setFont(Font.font("Monospaced", 12));
+        Label chartFPS = new Label();
+        chartFPS.setFont(Font.font("Monospaced", 12));
+        Label cpuLoadProcess = new Label();
+        cpuLoadProcess.setFont(Font.font("Monospaced", 12));
+        Label cpuLoadSystem = new Label();
+        cpuLoadSystem.setFont(Font.font("Monospaced", 12));
+        meter.fxFrameRateProperty().addListener((ch, o, n) -> {
+            final String fxRate = String.format("%4.1f", meter.getFxFrameRate());
+            final String actualRate = String.format("%4.1f", meter.getActualFrameRate());
+            final String cpuProcess = String.format("%5.1f", meter.getProcessCpuLoad());
+            final String cpuSystem = String.format("%5.1f", meter.getSystemCpuLoad());
+            fxFPS.setText(String.format("%-6s: %4s %s", "JavaFX", fxRate, "FPS, "));
+            chartFPS.setText(String.format("%-6s: %4s %s", "Actual", actualRate, "FPS, "));
+            cpuLoadProcess.setText(String.format("%-11s: %4s %s", "Process-CPU", cpuProcess, "%"));
+            cpuLoadSystem.setText(String.format("%-11s: %4s %s", "System -CPU", cpuSystem, "%"));
+        });
+
+        return new HBox(newDataSet, startTimer, spacer, new VBox(fxFPS, chartFPS),
+                new VBox(cpuLoadProcess, cpuLoadSystem));
+    }
+
     private void init(final Stage primaryStage) {
         BorderPane root = new BorderPane();
 
@@ -60,6 +114,11 @@ public class RollingBufferLegacySample extends Application {
         xAxis.setTickLabelFormatter(new StringConverter<Number>() {
 
             @Override
+            public Number fromString(String string) {
+                return null;
+            }
+
+            @Override
             public String toString(Number utcValueSeconds) {
                 final long longUTCSeconds = utcValueSeconds.longValue();
                 final int longNanoSeconds = (int) ((utcValueSeconds.doubleValue() - longUTCSeconds) * 1e9);
@@ -68,11 +127,6 @@ public class RollingBufferLegacySample extends Application {
 
                 final String computed = dateTime.format(formatter).replaceAll(" ", System.lineSeparator());
                 return computed;
-            }
-
-            @Override
-            public Number fromString(String string) {
-                return null;
             }
 
         });
@@ -86,13 +140,13 @@ public class RollingBufferLegacySample extends Application {
             DecimalFormat formatter = new DecimalFormat("0.##E0");
 
             @Override
-            public String toString(Number object) {
-                return formatter.format(object.doubleValue());
+            public Number fromString(String string) {
+                return null;
             }
 
             @Override
-            public Number fromString(String string) {
-                return null;
+            public String toString(Number object) {
+                return formatter.format(object.doubleValue());
             }
         });
 
@@ -156,6 +210,10 @@ public class RollingBufferLegacySample extends Application {
         stage.show();
     }
 
+    public static void main(final String[] args) {
+        launch(args);
+    }
+
     private class AddToQueue implements Runnable {
         @Override
         public void run() {
@@ -181,64 +239,6 @@ public class RollingBufferLegacySample extends Application {
             xAxis.setUpperBound(now);
         }
 
-    }
-
-    private HBox getHeaderBar(Scene scene) {
-        final AddToQueue addToQueue = new AddToQueue();
-        final Button newDataSet = new Button("new DataSet");
-        newDataSet.setOnAction(evt -> Platform.runLater(addToQueue::run));
-
-        final Button startTimer = new Button("timer");
-        startTimer.setOnAction(evt -> {
-            series1.getData().clear();
-            series2.getData().clear();
-            if (timer == null) {
-                timer = new Timer();
-                timer.scheduleAtFixedRate(new TimerTask() {
-                    @Override
-                    public void run() {
-                        Platform.runLater(addToQueue::run);
-                    }
-                }, 0, UPDATE_PERIOD);
-            } else {
-                timer.cancel();
-                timer = null;
-            }
-        });
-
-        // H-Spacer
-        Region spacer = new Region();
-        spacer.setMinWidth(Region.USE_PREF_SIZE);
-        HBox.setHgrow(spacer, Priority.ALWAYS);
-
-        // JavaFX and Chart Performance metrics
-        SimplePerformanceMeter meter = new SimplePerformanceMeter(scene, RollingBufferSample.DEBUG_UPDATE_RATE);
-
-        Label fxFPS = new Label();
-        fxFPS.setFont(Font.font("Monospaced", 12));
-        Label chartFPS = new Label();
-        chartFPS.setFont(Font.font("Monospaced", 12));
-        Label cpuLoadProcess = new Label();
-        cpuLoadProcess.setFont(Font.font("Monospaced", 12));
-        Label cpuLoadSystem = new Label();
-        cpuLoadSystem.setFont(Font.font("Monospaced", 12));
-        meter.fxFrameRateProperty().addListener((ch, o, n) -> {
-            final String fxRate = String.format("%4.1f", meter.getFxFrameRate());
-            final String actualRate = String.format("%4.1f", meter.getActualFrameRate());
-            final String cpuProcess = String.format("%5.1f", meter.getProcessCpuLoad());
-            final String cpuSystem = String.format("%5.1f", meter.getSystemCpuLoad());
-            fxFPS.setText(String.format("%-6s: %4s %s", "JavaFX", fxRate, "FPS, "));
-            chartFPS.setText(String.format("%-6s: %4s %s", "Actual", actualRate, "FPS, "));
-            cpuLoadProcess.setText(String.format("%-11s: %4s %s", "Process-CPU", cpuProcess, "%"));
-            cpuLoadSystem.setText(String.format("%-11s: %4s %s", "System -CPU", cpuSystem, "%"));
-        });
-
-        return new HBox(newDataSet, startTimer, spacer, new VBox(fxFPS, chartFPS),
-                new VBox(cpuLoadProcess, cpuLoadSystem));
-    }
-
-    public static void main(final String[] args) {
-        launch(args);
     }
 
 }

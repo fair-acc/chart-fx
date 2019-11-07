@@ -83,15 +83,12 @@ import javafx.scene.layout.VBox;
 import javafx.util.Duration;
 
 /**
- * Chart designed primarily to display data traces using DataSet interfaces
- * which are more flexible and efficient than the observable lists used by
- * XYChart. Brief history: original design inspired by Oracle, extended by CERN
- * (i.e. plugin concept/zoomer), modified to mitigate JavaFX performance issues
- * and extended renderer concept/canvas-concept/interfaces/+more plugins by GSI.
- * Refactored and re-write in 2018 to make it compatible with GPLv3 which -- in
- * the spirit of 'Ship of Theseus' -- makes it de-facto a new development.
- * Contributions, bug-fixes, and modifications are welcome. Hope you find this
- * library useful and enjoy!
+ * Chart designed primarily to display data traces using DataSet interfaces which are more flexible and efficient than
+ * the observable lists used by XYChart. Brief history: original design inspired by Oracle, extended by CERN (i.e.
+ * plugin concept/zoomer), modified to mitigate JavaFX performance issues and extended renderer
+ * concept/canvas-concept/interfaces/+more plugins by GSI. Refactored and re-write in 2018 to make it compatible with
+ * GPLv3 which -- in the spirit of 'Ship of Theseus' -- makes it de-facto a new development. Contributions, bug-fixes,
+ * and modifications are welcome. Hope you find this library useful and enjoy!
  *
  * @author original conceptual design by Oracle (2010, 2014)
  * @author hbraeun, rstein, major refactoring, re-implementation and re-design
@@ -110,8 +107,7 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
     /** Animator for animating stuff on the chart */
     protected final ChartLayoutAnimator animator = new ChartLayoutAnimator(this);
     /**
-     * When true the chart will display a legend if the chart implementation
-     * supports a legend.
+     * When true the chart will display a legend if the chart implementation supports a legend.
      */
     private final BooleanProperty legendVisible = new StylishBooleanProperty(StyleableProperties.LEGEND_VISIBLE, this,
             "legendVisible", true, () -> {
@@ -253,21 +249,20 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
         }
 
         @Override
+        protected void invalidated() {
+            requestLayout();
+        }
+
+        @Override
         public void set(final Side side) {
             AssertUtils.notNull("Side must not be null", side);
             super.set(side);
         }
-
-        @Override
-        protected void invalidated() {
-            requestLayout();
-        }
     };
 
     /**
-     * The node to display as the Legend. Subclasses can set a node here to be
-     * displayed on a side as the legend. If no legend is wanted then this can be
-     * set to null
+     * The node to display as the Legend. Subclasses can set a node here to be displayed on a side as the legend. If no
+     * legend is wanted then this can be set to null
      */
     private final ObjectProperty<Legend> legend = new SimpleObjectProperty<Legend>(this, "legend") {
 
@@ -288,8 +283,7 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
     };
 
     /**
-     * The side of the chart where the legend should be displayed default value
-     * Side.BOTTOM
+     * The side of the chart where the legend should be displayed default value Side.BOTTOM
      */
     private final ObjectProperty<Side> legendSide = new StylishObjectProperty<Side>(StyleableProperties.LEGEND_SIDE,
             this, "legendSide", Side.BOTTOM, this::requestLayout) {
@@ -329,6 +323,11 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
         }
 
         @Override
+        protected void invalidated() {
+            requestLayout();
+        }
+
+        @Override
         public void set(final Side side) {
             AssertUtils.notNull("Side must not be null", side);
 
@@ -357,11 +356,6 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
                 break;
             }
             super.set(side);
-        }
-
-        @Override
-        protected void invalidated() {
-            requestLayout();
         }
     };
 
@@ -518,7 +512,7 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
         toolBar.registerListener();
         HBox topbox = new HBox(getToolBar());
         topbox.setAlignment(Pos.TOP_CENTER);
-        //        getPlotArea().setTop(topbox);
+        // getPlotArea().setTop(topbox);
         setTop(topbox);
 
         getTitleLegendPane(Side.TOP).getChildren().add(titleLabel);
@@ -548,23 +542,6 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
         registerShowingListener(); // NOPMD - unlikely but allowed override
     }
 
-    /**
-     * @return The CssMetaData associated with this class, which may include the
-     *         CssMetaData of its super classes.
-     * @since JavaFX 8.0
-     */
-    public static List<CssMetaData<? extends Styleable, ?>> getClassCssMetaData() {
-        return StyleableProperties.STYLEABLES;
-    }
-
-    protected static Group createChildGroup() {
-        final Group group = new Group();
-        group.setManaged(false);
-        group.setAutoSizeChildren(false);
-        group.relocate(0, 0);
-        return group;
-    }
-
     @Override
     public void addListener(final InvalidationListener listener) {
         Objects.requireNonNull(listener, "InvalidationListener must not be null");
@@ -572,8 +549,18 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
     }
 
     /**
-     * Play a animation involving the given keyframes. On every frame of the
-     * animation the chart will be relayed out
+     * Play the given animation on every frame of the animation the chart will be relayed out until the animation
+     * finishes. So to add a animation to a chart, create a animation on data model, during layoutChartContent() map
+     * data model to nodes then call this method with the animation.
+     *
+     * @param animation The animation to play
+     */
+    protected void animate(final Animation animation) {
+        animator.animate(animation);
+    }
+
+    /**
+     * Play a animation involving the given keyframes. On every frame of the animation the chart will be relayed out
      *
      * @param keyFrames Array of KeyFrames to play
      */
@@ -590,8 +577,99 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
     }
 
     /**
-     * Notifies listeners that the data has been invalidated. If the data is added
-     * to the chart, it triggers repaint.
+     * add Chart specific axis handling (ie. placement around charts, add new DefaultNumericAxis if one is missing,
+     * etc.)
+     *
+     * @param change the new axis change that is being added
+     */
+    protected abstract void axesChanged(final ListChangeListener.Change<? extends Axis> change);
+
+    /**
+     * add Chart specific axis handling (ie. placement around charts, add new DefaultNumericAxis if one is missing,
+     * etc.)
+     *
+     * @param change the new axis change that is being added
+     */
+    protected void axesChangedLocal(final ListChangeListener.Change<? extends Axis> change) {
+        while (change.next()) {
+            change.getRemoved().forEach(set -> {
+                AssertUtils.notNull("to be removed axis is null", set);
+                // remove axis invalidation listener
+                set.removeListener(axisChangeListener);
+            });
+            for (final Axis set : change.getAddedSubList()) {
+                // check if axis is associated with an existing renderer,
+                // if yes -> throw an exception
+                AssertUtils.notNull("to be added axis is null", set);
+                set.addListener(axisChangeListener);
+            }
+        }
+
+        requestLayout();
+    }
+
+    /**
+     * function called whenever a axis has been invalidated (e.g. range change or parameter plotting changes). Typically
+     * calls 'requestLayout()' but can be overwritten in derived classes.
+     *
+     * @param axisObj the calling axis object
+     */
+    protected void axesInvalidated(final Object axisObj) {
+        if (!(axisObj instanceof Axis) || layoutOngoing || isAxesUpdate) {
+            return;
+        }
+        FXUtils.assertJavaFxThread();
+        isAxesUpdate = true;
+        if (DEBUG && LOGGER.isDebugEnabled()) {
+            LOGGER.debug("chart axesInvalidated() - called by (1) {}", ProcessingProfiler.getCallingClassMethod(1));
+            LOGGER.debug("chart axesInvalidated() - called by (3) {}", ProcessingProfiler.getCallingClassMethod(3));
+        }
+        requestLayout();
+        isAxesUpdate = false;
+    }
+
+    protected void dataSetInvalidated() {
+        // DataSet has notified and invalidate
+        if (DEBUG && LOGGER.isDebugEnabled()) {
+            LOGGER.debug("chart dataSetDataListener change notified");
+        }
+        FXUtils.assertJavaFxThread();
+        // updateAxisRange();
+        // TODO: check why the following does not always forces a layoutChildren
+        requestLayout();
+    }
+
+    protected void datasetsChanged(final ListChangeListener.Change<? extends DataSet> change) {
+        boolean dataSetChanges = false;
+        FXUtils.assertJavaFxThread();
+        while (change.next()) {
+            for (final DataSet set : change.getRemoved()) {
+                set.removeListener(dataSetDataListener);
+                dataSetChanges = true;
+            }
+
+            for (final DataSet set : change.getAddedSubList()) {
+                set.addListener(dataSetDataListener);
+                dataSetChanges = true;
+            }
+        }
+
+        if (dataSetChanges) {
+            if (DEBUG && LOGGER.isDebugEnabled()) {
+                LOGGER.debug("chart datasetsChanged(Change) - has dataset changes");
+            }
+            // updateAxisRange();
+            updateLegend(getDatasets(), getRenderers());
+            requestLayout();
+        }
+    }
+
+    protected void executeFireInvalidated() {
+        new ArrayList<>(listeners).forEach(listener -> listener.invalidated(this));
+    }
+
+    /**
+     * Notifies listeners that the data has been invalidated. If the data is added to the chart, it triggers repaint.
      *
      * @return itself (fluent design)
      */
@@ -652,6 +730,15 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
 
     public final Pane getCanvasForeground() {
         return canvasForeground;
+    }
+
+    /**
+     * @return unmodifiable list of the controls css styleable properties
+     * @since JavaFX 8.0
+     */
+    @Override
+    protected List<CssMetaData<? extends Styleable, ?>> getControlCssMetaData() {
+        return Chart.getClassCssMetaData();
     }
 
     /**
@@ -775,6 +862,10 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
         return showing.get();
     }
 
+    public boolean isToolBarPinned() {
+        return toolBarPinned.get();
+    }
+
     @Override
     public void layoutChildren() {
         if (DEBUG && LOGGER.isDebugEnabled()) {
@@ -822,6 +913,10 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
         fireInvalidated();
     }
 
+    protected void layoutPluginsChildren() {
+        plugins.forEach(ChartPlugin::layoutChildren);
+    }
+
     public final ObjectProperty<Legend> legendProperty() {
         return legend;
     }
@@ -836,247 +931,6 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
 
     public final ObjectProperty<Side> measurementBarSideProperty() {
         return measurementBarSide;
-    }
-
-    public BooleanProperty toolBarPinnedProperty() {
-        return toolBarPinned;
-    }
-
-    public boolean isToolBarPinned() {
-        return toolBarPinned.get();
-    }
-
-    public Chart setToolBarPinned(boolean value) {
-        toolBarPinned.set(value);
-        return this;
-    }
-
-    public boolean removeFromAllAxesPanes(final Axis node) {
-        boolean state = false;
-        if (!(node instanceof Node)) {
-            return state;
-        }
-        // remove axis from all axis panes
-        for (final Side side : Side.values()) {
-            if (getAxesPane(side).getChildren().remove(node)) {
-                state = true;
-            }
-        }
-        return state;
-    }
-
-    @Override
-    public void removeListener(final InvalidationListener listener) {
-        listeners.remove(listener);
-    }
-
-    @Override
-    public void requestLayout() {
-        if (DEBUG && LOGGER.isDebugEnabled()) {
-            LOGGER.debug("chart requestLayout() - called by {}", ProcessingProfiler.getCallingClassMethod(1));
-        }
-        FXUtils.assertJavaFxThread();
-        super.requestLayout();
-    }
-
-    public final void setAnimated(final boolean value) {
-        animated.set(value);
-    }
-
-    public void setAutoNotifaction(final boolean flag) {
-        autoNotification.set(flag);
-    }
-
-    public final void setLegend(final Legend value) {
-        legend.setValue(value);
-    }
-
-    public final void setLegendSide(final Side value) {
-        legendSide.set(value);
-    }
-
-    public final void setLegendVisible(final boolean value) {
-        legendVisible.set(value);
-    }
-
-    public final void setMeasurementBarSide(final Side value) {
-        measurementBarSide.set(value);
-    }
-
-    public final void setTitle(final String value) {
-        title.set(value);
-    }
-
-    public final void setTitleSide(final Side value) {
-        titleSide.set(value);
-    }
-
-    public final void setToolBarSide(final Side value) {
-        toolBarSide.set(value);
-    }
-
-    /**
-     * @return property indicating if chart is actively visible in Scene/Window
-     */
-    public ReadOnlyBooleanProperty showingProperty() {
-        return showing;
-    }
-
-    public final StringProperty titleProperty() {
-        return title;
-    }
-
-    // -------------- CONSTRUCTOR
-    // --------------------------------------------------------------------------------------
-
-    public final ObjectProperty<Side> titleSideProperty() {
-        return titleSide;
-    }
-
-    // -------------- METHODS
-    // ------------------------------------------------------------------------------------------
-
-    public final ObjectProperty<Side> toolBarSideProperty() {
-        return toolBarSide;
-    }
-
-    /**
-     * Translates point from chart pane coordinates to the plot area coordinates.
-     *
-     * @param xCoord the x coordinate within XYChartPane coordinates system
-     * @param yCoord the y coordinate within XYChartPane coordinates system
-     * @return point in plot area coordinates
-     */
-    public final Point2D toPlotArea(final double xCoord, final double yCoord) {
-        final Bounds plotAreaBounds = getCanvas().getBoundsInParent();
-        return new Point2D(xCoord - plotAreaBounds.getMinX(), yCoord - plotAreaBounds.getMinY());
-    }
-
-    /**
-     * update axes ranges (if necessary). This is supposed to be implemented in
-     * derived classes
-     */
-    public abstract void updateAxisRange();
-
-    /**
-     * Play the given animation on every frame of the animation the chart will be
-     * relayed out until the animation finishes. So to add a animation to a chart,
-     * create a animation on data model, during layoutChartContent() map data model
-     * to nodes then call this method with the animation.
-     *
-     * @param animation The animation to play
-     */
-    protected void animate(final Animation animation) {
-        animator.animate(animation);
-    }
-
-    /**
-     * add Chart specific axis handling (ie. placement around charts, add new
-     * DefaultNumericAxis if one is missing, etc.)
-     *
-     * @param change the new axis change that is being added
-     */
-    protected abstract void axesChanged(final ListChangeListener.Change<? extends Axis> change);
-
-    /**
-     * add Chart specific axis handling (ie. placement around charts, add new
-     * DefaultNumericAxis if one is missing, etc.)
-     *
-     * @param change the new axis change that is being added
-     */
-    protected void axesChangedLocal(final ListChangeListener.Change<? extends Axis> change) {
-        while (change.next()) {
-            change.getRemoved().forEach(set -> {
-                AssertUtils.notNull("to be removed axis is null", set);
-                // remove axis invalidation listener
-                set.removeListener(axisChangeListener);
-            });
-            for (final Axis set : change.getAddedSubList()) {
-                // check if axis is associated with an existing renderer,
-                // if yes -> throw an exception
-                AssertUtils.notNull("to be added axis is null", set);
-                set.addListener(axisChangeListener);
-            }
-        }
-
-        requestLayout();
-    }
-
-    /**
-     * function called whenever a axis has been invalidated (e.g. range change or
-     * parameter plotting changes). Typically calls 'requestLayout()' but can be
-     * overwritten in derived classes.
-     *
-     * @param axisObj the calling axis object
-     */
-    protected void axesInvalidated(final Object axisObj) {
-        if (!(axisObj instanceof Axis) || layoutOngoing || isAxesUpdate) {
-            return;
-        }
-        FXUtils.assertJavaFxThread();
-        isAxesUpdate = true;
-        if (DEBUG && LOGGER.isDebugEnabled()) {
-            LOGGER.debug("chart axesInvalidated() - called by (1) {}", ProcessingProfiler.getCallingClassMethod(1));
-            LOGGER.debug("chart axesInvalidated() - called by (3) {}", ProcessingProfiler.getCallingClassMethod(3));
-        }
-        requestLayout();
-        isAxesUpdate = false;
-    }
-
-    protected void dataSetInvalidated() {
-        // DataSet has notified and invalidate
-        if (DEBUG && LOGGER.isDebugEnabled()) {
-            LOGGER.debug("chart dataSetDataListener change notified");
-        }
-        FXUtils.assertJavaFxThread();
-        // updateAxisRange();
-        // TODO: check why the following does not always forces a layoutChildren
-        requestLayout();
-    }
-
-    protected void datasetsChanged(final ListChangeListener.Change<? extends DataSet> change) {
-        boolean dataSetChanges = false;
-        FXUtils.assertJavaFxThread();
-        while (change.next()) {
-            for (final DataSet set : change.getRemoved()) {
-                set.removeListener(dataSetDataListener);
-                dataSetChanges = true;
-            }
-
-            for (final DataSet set : change.getAddedSubList()) {
-                set.addListener(dataSetDataListener);
-                dataSetChanges = true;
-            }
-        }
-
-        if (dataSetChanges) {
-            if (DEBUG && LOGGER.isDebugEnabled()) {
-                LOGGER.debug("chart datasetsChanged(Change) - has dataset changes");
-            }
-            // updateAxisRange();
-            updateLegend(getDatasets(), getRenderers());
-            requestLayout();
-        }
-    }
-
-    protected void executeFireInvalidated() {
-        new ArrayList<>(listeners).forEach(listener -> listener.invalidated(this));
-    }
-
-    /**
-     * @return unmodifiable list of the controls css styleable properties
-     * @since JavaFX 8.0
-     */
-    @Override
-    protected List<CssMetaData<? extends Styleable, ?>> getControlCssMetaData() {
-        return Chart.getClassCssMetaData();
-    }
-
-    // -------------- STYLESHEET HANDLING
-    // ------------------------------------------------------------------------------
-
-    protected void layoutPluginsChildren() {
-        plugins.forEach(ChartPlugin::layoutChildren);
     }
 
     protected void pluginAdded(final ChartPlugin plugin) {
@@ -1094,9 +948,6 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
         pluginsArea.getChildren().remove(group);
     }
 
-    // -------------- LISTENER HANDLING
-    // ------------------------------------------------------------------------------
-
     protected void pluginsChanged(final ListChangeListener.Change<? extends ChartPlugin> change) {
         while (change.next()) {
             change.getRemoved().forEach(this::pluginRemoved);
@@ -1106,8 +957,7 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
     }
 
     /**
-     * (re-)draw canvas (if necessary). This is supposed to be implemented in
-     * derived classes
+     * (re-)draw canvas (if necessary). This is supposed to be implemented in derived classes
      */
     protected abstract void redrawCanvas();
 
@@ -1151,6 +1001,25 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
                 Platform.runLater(timeline::play);
             }
         });
+    }
+
+    public boolean removeFromAllAxesPanes(final Axis node) {
+        boolean state = false;
+        if (!(node instanceof Node)) {
+            return state;
+        }
+        // remove axis from all axis panes
+        for (final Side side : Side.values()) {
+            if (getAxesPane(side).getChildren().remove(node)) {
+                state = true;
+            }
+        }
+        return state;
+    }
+
+    @Override
+    public void removeListener(final InvalidationListener listener) {
+        listeners.remove(listener);
     }
 
     protected void rendererChanged(final ListChangeListener.Change<? extends Renderer> change) {
@@ -1214,15 +1083,117 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
         updateLegend(getDatasets(), getRenderers());
     }
 
+    @Override
+    public void requestLayout() {
+        if (DEBUG && LOGGER.isDebugEnabled()) {
+            LOGGER.debug("chart requestLayout() - called by {}", ProcessingProfiler.getCallingClassMethod(1));
+        }
+        FXUtils.assertJavaFxThread();
+        super.requestLayout();
+    }
+
+    // -------------- CONSTRUCTOR
+    // --------------------------------------------------------------------------------------
+
+    public final void setAnimated(final boolean value) {
+        animated.set(value);
+    }
+
+    // -------------- METHODS
+    // ------------------------------------------------------------------------------------------
+
+    public void setAutoNotifaction(final boolean flag) {
+        autoNotification.set(flag);
+    }
+
+    public final void setLegend(final Legend value) {
+        legend.setValue(value);
+    }
+
+    public final void setLegendSide(final Side value) {
+        legendSide.set(value);
+    }
+
+    public final void setLegendVisible(final boolean value) {
+        legendVisible.set(value);
+    }
+
+    public final void setMeasurementBarSide(final Side value) {
+        measurementBarSide.set(value);
+    }
+
+    public final void setTitle(final String value) {
+        title.set(value);
+    }
+
+    public final void setTitleSide(final Side value) {
+        titleSide.set(value);
+    }
+
+    public Chart setToolBarPinned(boolean value) {
+        toolBarPinned.set(value);
+        return this;
+    }
+
+    public final void setToolBarSide(final Side value) {
+        toolBarSide.set(value);
+    }
+
     /**
-     * This is used to check if any given animation should run. It returns true if
-     * animation is enabled and the node is visible and in a scene.
+     * This is used to check if any given animation should run. It returns true if animation is enabled and the node is
+     * visible and in a scene.
      * 
      * @return true if should animate
      */
     protected final boolean shouldAnimate() {
         return isAnimated() && getScene() != null;
     }
+
+    /**
+     * @return property indicating if chart is actively visible in Scene/Window
+     */
+    public ReadOnlyBooleanProperty showingProperty() {
+        return showing;
+    }
+
+    // -------------- STYLESHEET HANDLING
+    // ------------------------------------------------------------------------------
+
+    public final StringProperty titleProperty() {
+        return title;
+    }
+
+    public final ObjectProperty<Side> titleSideProperty() {
+        return titleSide;
+    }
+
+    public BooleanProperty toolBarPinnedProperty() {
+        return toolBarPinned;
+    }
+
+    // -------------- LISTENER HANDLING
+    // ------------------------------------------------------------------------------
+
+    public final ObjectProperty<Side> toolBarSideProperty() {
+        return toolBarSide;
+    }
+
+    /**
+     * Translates point from chart pane coordinates to the plot area coordinates.
+     *
+     * @param xCoord the x coordinate within XYChartPane coordinates system
+     * @param yCoord the y coordinate within XYChartPane coordinates system
+     * @return point in plot area coordinates
+     */
+    public final Point2D toPlotArea(final double xCoord, final double yCoord) {
+        final Bounds plotAreaBounds = getCanvas().getBoundsInParent();
+        return new Point2D(xCoord - plotAreaBounds.getMinX(), yCoord - plotAreaBounds.getMinY());
+    }
+
+    /**
+     * update axes ranges (if necessary). This is supposed to be implemented in derived classes
+     */
+    public abstract void updateAxisRange();
 
     protected void updateLegend(final List<DataSet> dataSets, final List<Renderer> renderers) {
         final Legend legend = getLegend();
@@ -1235,6 +1206,50 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
     protected void updatePluginsArea() {
         pluginsArea.getChildren().setAll(plugins.stream().map(pluginGroups::get).collect(Collectors.toList()));
         requestLayout();
+    }
+
+    protected static Group createChildGroup() {
+        final Group group = new Group();
+        group.setManaged(false);
+        group.setAutoSizeChildren(false);
+        group.relocate(0, 0);
+        return group;
+    }
+
+    /**
+     * @return The CssMetaData associated with this class, which may include the CssMetaData of its super classes.
+     * @since JavaFX 8.0
+     */
+    public static List<CssMetaData<? extends Styleable, ?>> getClassCssMetaData() {
+        return StyleableProperties.STYLEABLES;
+    }
+
+    protected class ChartHBox extends HBox {
+
+        public ChartHBox() {
+            super();
+            setAlignment(Pos.CENTER);
+            setPrefSize(Region.USE_COMPUTED_SIZE, Region.USE_COMPUTED_SIZE);
+        }
+
+        public ChartHBox(final boolean fill) {
+            this();
+            setFillHeight(fill);
+        }
+    }
+
+    protected class ChartVBox extends VBox {
+
+        public ChartVBox() {
+            super();
+            setAlignment(Pos.CENTER);
+            setPrefSize(Region.USE_COMPUTED_SIZE, Region.USE_COMPUTED_SIZE);
+        }
+
+        public ChartVBox(final boolean fill) {
+            this();
+            setFillWidth(fill);
+        }
     }
 
     private static class StyleableProperties {
@@ -1320,34 +1335,6 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
             styleables.add(StyleableProperties.LEGEND_VISIBLE);
 
             STYLEABLES = Collections.unmodifiableList(styleables);
-        }
-    }
-
-    protected class ChartHBox extends HBox {
-
-        public ChartHBox() {
-            super();
-            setAlignment(Pos.CENTER);
-            setPrefSize(Region.USE_COMPUTED_SIZE, Region.USE_COMPUTED_SIZE);
-        }
-
-        public ChartHBox(final boolean fill) {
-            this();
-            setFillHeight(fill);
-        }
-    }
-
-    protected class ChartVBox extends VBox {
-
-        public ChartVBox() {
-            super();
-            setAlignment(Pos.CENTER);
-            setPrefSize(Region.USE_COMPUTED_SIZE, Region.USE_COMPUTED_SIZE);
-        }
-
-        public ChartVBox(final boolean fill) {
-            this();
-            setFillWidth(fill);
         }
     }
 

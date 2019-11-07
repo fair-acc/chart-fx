@@ -25,15 +25,6 @@ public class RingBuffer<E extends Object> {
     }
 
     /**
-     * clear all data and resets buffer
-     */
-    public void reset() {
-        writePos = 0;
-        readPos = 0;
-        flipped = false;
-    }
-
-    /**
      * 
      * @return number of values that are already stored in buffer
      */
@@ -45,18 +36,8 @@ public class RingBuffer<E extends Object> {
     }
 
     /**
-     * 
-     * @return number of values that can be stored before the buffer is full and rolls over
-     */
-    public int remainingCapacity() {
-        if (!flipped) {
-            return capacity - writePos;
-        }
-        return readPos - writePos;
-    }
-
-    /**
      * add new element
+     * 
      * @param element new element
      * @return true: if index of write position is below index of read position
      */
@@ -133,6 +114,26 @@ public class RingBuffer<E extends Object> {
         }
 
         return newElementsReadPos;
+    }
+
+    /**
+     * 
+     * @return number of values that can be stored before the buffer is full and rolls over
+     */
+    public int remainingCapacity() {
+        if (!flipped) {
+            return capacity - writePos;
+        }
+        return readPos - writePos;
+    }
+
+    /**
+     * clear all data and resets buffer
+     */
+    public void reset() {
+        writePos = 0;
+        readPos = 0;
+        flipped = false;
     }
 
     /**

@@ -21,7 +21,7 @@ public final class FieldDataSetHelper {
      * registers default DataSet interface and related helper methods
      * 
      * @param serialiser for which the field serialisers should be registered
-     * @param ioBuffer   reference to the IoBuffer back-ends
+     * @param ioBuffer reference to the IoBuffer back-ends
      */
     public static void register(final AbstractSerialiser serialiser, final IoBuffer ioBuffer) {
 
@@ -42,7 +42,7 @@ public final class FieldDataSetHelper {
                     if (!DataSet.class.getName().equals(dataSetType)) {
                         throw new IllegalArgumentException("unknown DataSet type = " + dataSetType);
                     }
-                    
+
                     field.getField().set(obj, DataSetSerialiser.readDataSetFromByteArray(ioBuffer));
                 }, // reader
                 (obj, field) -> {

@@ -16,13 +16,12 @@ import javafx.application.Application;
 import javafx.scene.Node;
 
 /**
- * Sample to illustrate averaging over several data sets with an IIR and FIR
- * low-pass filter
+ * Sample to illustrate averaging over several data sets with an IIR and FIR low-pass filter
  * 
  * @author rstein
  */
 public class DataSetAverageSample extends AbstractDemoApplication {
-	private static final Logger LOGGER = LoggerFactory.getLogger(DataSetAverageSample.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DataSetAverageSample.class);
     private static final int N_GRAPHS = 20;
     private static final int N_SAMPLES = 100;
     private DataSet oldAverageDataSet;
