@@ -181,7 +181,7 @@ public class DataViewerSample extends Application {
         primaryStage.setScene(scene);
         primaryStage.show();
 
-        primaryStage.setOnCloseRequest(e -> Platform.exit());
+        primaryStage.setOnCloseRequest(evt -> Platform.exit());
     }
 
     private static DoubleDataSet createData(final String name) {

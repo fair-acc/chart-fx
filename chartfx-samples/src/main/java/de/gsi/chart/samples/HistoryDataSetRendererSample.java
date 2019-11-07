@@ -187,7 +187,7 @@ public class HistoryDataSetRendererSample extends Application {
         startTime = ProcessingProfiler.getTimeStamp();
         primaryStage.setTitle(this.getClass().getSimpleName());
         primaryStage.setScene(scene);
-        primaryStage.setOnCloseRequest(evt -> System.exit(0));
+        primaryStage.setOnCloseRequest(evt -> Platform.exit());
         primaryStage.show();
         ProcessingProfiler.getTimeDiff(startTime, "for showing");
 

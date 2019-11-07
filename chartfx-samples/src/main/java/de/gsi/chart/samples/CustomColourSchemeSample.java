@@ -14,6 +14,7 @@ import de.gsi.chart.renderer.spi.ErrorDataSetRenderer;
 import de.gsi.chart.renderer.spi.utils.DefaultRenderColorScheme;
 import de.gsi.dataset.spi.DoubleErrorDataSet;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.Scene;
@@ -111,6 +112,7 @@ public class CustomColourSchemeSample extends Application {
         primaryStage.setTitle(getClass().getSimpleName());
         primaryStage.setScene(scene);
         primaryStage.show();
+        primaryStage.setOnCloseRequest(evt -> Platform.exit());
     }
 
     /**

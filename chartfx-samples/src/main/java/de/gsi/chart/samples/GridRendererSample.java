@@ -3,6 +3,7 @@ package de.gsi.chart.samples;
 import de.gsi.chart.XYChart;
 import de.gsi.chart.axes.spi.DefaultNumericAxis;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.layout.FlowPane;
@@ -61,7 +62,7 @@ public class GridRendererSample extends Application {
         final Scene scene = new Scene(root, 1200, 650);
         primaryStage.setTitle(this.getClass().getSimpleName());
         primaryStage.setScene(scene);
-        primaryStage.setOnCloseRequest(evt -> System.exit(0));
+        primaryStage.setOnCloseRequest(evt -> Platform.exit());
         primaryStage.show();
     }
 

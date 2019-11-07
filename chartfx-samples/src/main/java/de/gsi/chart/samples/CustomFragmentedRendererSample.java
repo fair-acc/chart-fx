@@ -15,6 +15,7 @@ import de.gsi.dataset.spi.DoubleErrorDataSet;
 import de.gsi.dataset.spi.FragmentedDataSet;
 import de.gsi.dataset.testdata.spi.CosineFunction;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.Scene;
@@ -78,6 +79,7 @@ public class CustomFragmentedRendererSample extends Application {
         primaryStage.setTitle(getClass().getSimpleName());
         primaryStage.setScene(scene);
         primaryStage.show();
+        primaryStage.setOnCloseRequest(evt -> Platform.exit());
     }
 
     /**

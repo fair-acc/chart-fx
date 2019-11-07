@@ -7,6 +7,7 @@ import de.gsi.chart.renderer.spi.hexagon.Hexagon;
 import de.gsi.chart.renderer.spi.hexagon.HexagonMap;
 import de.gsi.chart.renderer.spi.hexagon.NoPathFoundException;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
@@ -83,6 +84,7 @@ public class HexagonSamples extends Application {
         final Scene hexScene = new Scene(new HBox(hexagonGroup, canvas), 2 * 850, 700);
         primaryStage.setScene(hexScene);
         primaryStage.show();
+        primaryStage.setOnCloseRequest(evt -> Platform.exit());
     }
 
     /**

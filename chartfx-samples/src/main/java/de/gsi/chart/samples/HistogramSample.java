@@ -22,6 +22,7 @@ import de.gsi.chart.utils.FXUtils;
 import de.gsi.dataset.spi.Histogram;
 import de.gsi.dataset.testdata.spi.RandomDataGenerator;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
@@ -131,7 +132,7 @@ public class HistogramSample extends Application {
         root.getChildren().add(chart);
         primaryStage.setTitle(this.getClass().getSimpleName());
         primaryStage.setScene(scene);
-        primaryStage.setOnCloseRequest(evt -> System.exit(0));
+        primaryStage.setOnCloseRequest(evt -> Platform.exit());
         primaryStage.show();
 
         final Timer timer = new Timer();

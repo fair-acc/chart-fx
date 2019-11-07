@@ -3,6 +3,7 @@ package de.gsi.math.samples.utils;
 import java.util.Random;
 
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
@@ -35,7 +36,7 @@ public abstract class AbstractDemoApplication extends Application {
         root.setCenter(getContent());
         primaryStage.setTitle(this.getClass().getSimpleName());
         primaryStage.setScene(scene);
-        primaryStage.setOnCloseRequest(evt -> System.exit(0));
+        primaryStage.setOnCloseRequest(evt -> Platform.exit());
         primaryStage.show();
     }
 

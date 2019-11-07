@@ -15,6 +15,7 @@ import de.gsi.dataset.serializer.spi.iobuffer.DataSetSerialiser;
 import de.gsi.dataset.spi.DoubleDataSet;
 import de.gsi.dataset.utils.DataSetUtils;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
@@ -53,7 +54,7 @@ public class WriteDataSetToFileSample extends Application {
         final Scene scene = new Scene(chart1, 800, 600);
         primaryStage.setTitle(this.getClass().getSimpleName() + " - original");
         primaryStage.setScene(scene);
-        primaryStage.setOnCloseRequest(evt -> System.exit(0));
+        primaryStage.setOnCloseRequest(evt -> Platform.exit());
 
         final Stage secondaryStage = new Stage();
 

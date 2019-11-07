@@ -13,6 +13,7 @@ import de.gsi.chart.ui.geometry.Corner;
 import de.gsi.chart.ui.geometry.Side;
 import de.gsi.dataset.DataSet;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.collections.ListChangeListener.Change;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
@@ -133,7 +134,7 @@ public class ChartAnatomySample extends Application {
         final Scene scene = new Scene(root, 1000, 600);
         primaryStage.setTitle(this.getClass().getSimpleName());
         primaryStage.setScene(scene);
-        primaryStage.setOnCloseRequest(evt -> System.exit(0));
+        primaryStage.setOnCloseRequest(evt -> Platform.exit());
         primaryStage.show();
     }
 

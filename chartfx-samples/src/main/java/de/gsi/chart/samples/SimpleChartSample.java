@@ -8,6 +8,7 @@ import de.gsi.chart.axes.spi.DefaultNumericAxis;
 import de.gsi.chart.plugins.Zoomer;
 import de.gsi.dataset.spi.DoubleDataSet;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
@@ -60,6 +61,7 @@ public class SimpleChartSample extends Application {
         primaryStage.setTitle(getClass().getSimpleName());
         primaryStage.setScene(scene);
         primaryStage.show();
+        primaryStage.setOnCloseRequest(evt -> Platform.exit());
     }
 
     /**
