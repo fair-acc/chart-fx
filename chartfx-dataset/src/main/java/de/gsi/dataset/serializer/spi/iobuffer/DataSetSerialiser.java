@@ -403,27 +403,22 @@ public class DataSetSerialiser extends DataSetUtilsHelper {
                 return;
             }
             final DataSetError ds = (DataSetError) dataSet;
-            switch (ds.getErrorType(DIM_X)) {
-            case NO_ERROR:
-                break;
-            case SYMMETRIC:
-                BinarySerialiser.put(buffer, XEP, toFloats(ds.getErrorsPositive(DIM_X)), new int[] { nsamples });
-                break;
-            case ASYMMETRIC:
-                BinarySerialiser.put(buffer, XEN, toFloats(ds.getErrorsNegative(DIM_X)), new int[] { nsamples });
-                BinarySerialiser.put(buffer, XEP, toFloats(ds.getErrorsPositive(DIM_X)), new int[] { nsamples });
-                break;
-            }
-            switch (ds.getErrorType(DIM_Y)) {
-            case NO_ERROR:
-                break;
-            case SYMMETRIC:
-                BinarySerialiser.put(buffer, YEP, toFloats(ds.getErrorsPositive(DIM_Y)), new int[] { nsamples });
-                break;
-            case ASYMMETRIC:
-                BinarySerialiser.put(buffer, YEN, toFloats(ds.getErrorsNegative(DIM_Y)), new int[] { nsamples });
-                BinarySerialiser.put(buffer, YEP, toFloats(ds.getErrorsPositive(DIM_Y)), new int[] { nsamples });
-                break;
+            for (int dimIndex = 0; dimIndex < 2; dimIndex++) {
+                switch (ds.getErrorType(dimIndex)) {
+                default:
+                case NO_ERROR:
+                    break;
+                case SYMMETRIC:
+                    BinarySerialiser.put(buffer, dimIndex == DIM_X ? XEP : YEP,
+                            toFloats(ds.getErrorsPositive(dimIndex)), new int[] { nsamples });
+                    break;
+                case ASYMMETRIC:
+                    BinarySerialiser.put(buffer, dimIndex == DIM_X ? XEN : YEN,
+                            toFloats(ds.getErrorsNegative(dimIndex)), new int[] { nsamples });
+                    BinarySerialiser.put(buffer, dimIndex == DIM_X ? XEP : YEP,
+                            toFloats(ds.getErrorsPositive(dimIndex)), new int[] { nsamples });
+                    break;
+                }
             }
         } else {
             BinarySerialiser.put(buffer, X_ARRAY_NAME, dataSet.getValues(DIM_X), new int[] { nsamples });
@@ -433,27 +428,20 @@ public class DataSetSerialiser extends DataSetUtilsHelper {
                 return;
             }
             final DataSetError ds = (DataSetError) dataSet;
-            switch (ds.getErrorType(DIM_X)) {
-            case NO_ERROR:
-                break;
-            case SYMMETRIC:
-                BinarySerialiser.put(buffer, XEP, ds.getErrorsPositive(DIM_X), new int[] { nsamples });
-                break;
-            case ASYMMETRIC:
-                BinarySerialiser.put(buffer, XEN, ds.getErrorsNegative(DIM_X), new int[] { nsamples });
-                BinarySerialiser.put(buffer, XEP, ds.getErrorsPositive(DIM_X), new int[] { nsamples });
-                break;
-            }
-            switch (ds.getErrorType(DIM_Y)) {
-            case NO_ERROR:
-                break;
-            case SYMMETRIC:
-                BinarySerialiser.put(buffer, YEP, ds.getErrorsPositive(DIM_Y), new int[] { nsamples });
-                break;
-            case ASYMMETRIC:
-                BinarySerialiser.put(buffer, YEN, ds.getErrorsNegative(DIM_Y), new int[] { nsamples });
-                BinarySerialiser.put(buffer, YEP, ds.getErrorsPositive(DIM_Y), new int[] { nsamples });
-                break;
+            for (int dimIndex = 0; dimIndex < 2; dimIndex++) {
+                switch (ds.getErrorType(dimIndex)) {
+                default:
+                case SYMMETRIC:
+                    BinarySerialiser.put(buffer, dimIndex == DIM_X ? XEP : YEP, ds.getErrorsPositive(dimIndex),
+                            new int[] { nsamples });
+                    break;
+                case ASYMMETRIC:
+                    BinarySerialiser.put(buffer, dimIndex == DIM_X ? XEN : YEN, ds.getErrorsNegative(dimIndex),
+                            new int[] { nsamples });
+                    BinarySerialiser.put(buffer, dimIndex == DIM_X ? XEP : YEP, ds.getErrorsPositive(dimIndex),
+                            new int[] { nsamples });
+                    break;
+                }
             }
         }
     }
