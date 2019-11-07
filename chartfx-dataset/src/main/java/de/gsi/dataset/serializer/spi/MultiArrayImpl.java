@@ -228,6 +228,7 @@ class MultiArrayImpl<T> implements MultiArray<T> {
 
     @Override
     public String toString() {
-        return String.format("MultiArray [dimensions = %s, elements = %s]", this.dimensions, Arrays.asList(this.elements).toString());
+        return String.format("MultiArray [dimensions = %s, elements = %s]", Arrays.asList(this.dimensions).toString(),
+                Arrays.asList(this.elements).toString());
     }
 }
