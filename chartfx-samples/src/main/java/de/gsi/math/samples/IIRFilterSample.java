@@ -105,12 +105,10 @@ public class IIRFilterSample extends AbstractDemoApplication {
                         final String[] str = line.split(",");
                         final double s = Math.sin(2 * Math.PI * (sampling - width) * count);
                         final double y = lowPass.filter(s * bandPass.filter(Double.parseDouble(str[1])));
-                        if (count >= offset && n < nSamples) {
+                        if (count >= offset && n < nSamples && count % decimationFactor == 0) {
                             // actual downsampling
-                            if (count % decimationFactor == 0) {
-                                ret.add(n / sampling, y);
-                                n++;
-                            }
+                            ret.add(n / sampling, y);
+                            n++;
                         }
 
                         count++;
