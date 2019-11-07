@@ -1,6 +1,7 @@
 package de.gsi.acc.ui;
 
 import de.gsi.chart.viewer.SquareButton;
+import javafx.beans.NamedArg;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.css.PseudoClass;
@@ -18,7 +19,7 @@ public class AcquisitionButtonBar extends HBox {
     private final BooleanProperty playState = new SimpleBooleanProperty(this, "buttonPlayState", false);
     private final BooleanProperty stopState = new SimpleBooleanProperty(this, "buttonStopState", true);
 
-    public AcquisitionButtonBar(boolean isPauseEnabled) {
+    public AcquisitionButtonBar(@NamedArg(value = "isPauseEnabled") boolean isPauseEnabled) {
         super();
         this.getStylesheets().add(getClass().getResource("acq_button_small.css").toExternalForm());
 
