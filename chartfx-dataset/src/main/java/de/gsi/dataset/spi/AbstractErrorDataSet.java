@@ -86,10 +86,10 @@ public abstract class AbstractErrorDataSet<D extends AbstractErrorDataSet<D>> ex
                 case ASYMMETRIC:
                     for (int i = 0; i < dataCount; i++) {
                         final double value = get(dimIndex, i);
-                        final double error_neg = getErrorNegative(dimIndex, i);
-                        final double error_pos = getErrorPositive(dimIndex, i);
-                        getAxisDescription(dimIndex).add(value - error_neg);
-                        getAxisDescription(dimIndex).add(value + error_pos);
+                        final double errorNeg = getErrorNegative(dimIndex, i);
+                        final double errorPos = getErrorPositive(dimIndex, i);
+                        getAxisDescription(dimIndex).add(value - errorNeg);
+                        getAxisDescription(dimIndex).add(value + errorPos);
                     }
                     break;
                 case SYMMETRIC:
@@ -100,6 +100,7 @@ public abstract class AbstractErrorDataSet<D extends AbstractErrorDataSet<D>> ex
                         getAxisDescription(dimIndex).add(value - error);
                         getAxisDescription(dimIndex).add(value + error);
                     }
+                    break;
                 }
             }
         });
