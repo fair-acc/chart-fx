@@ -16,15 +16,27 @@
 }
 
 .my-play-button:activated {
+    -fx-graphic: url("./icons/medium_pause2.gif");
+}
+
+.my-play-button:activated:paused {
     -fx-graphic: url("./icons/medium_play2.gif");
 }
 
-.my-play-button:activated:hover {
+.my-play-button:activated:hover:paused {
     -fx-graphic: url("./icons/medium_play2_r.gif");
 }
 
-.my-play-button:pressed:activated {
+.my-play-button:pressed:activated:paused {
     -fx-graphic: url("./icons/medium_play2_p.gif");
+}
+
+.my-play-button:activated:hover {
+    -fx-graphic: url("./icons/medium_pause2_r.gif");
+}
+
+.my-play-button:pressed:activated {
+    -fx-graphic: url("./icons/medium_pause2_p.gif");
 }
 
 .my-play-button:disabled {
@@ -63,27 +75,27 @@
 /* play-stop button */
 
 .my-playstop-button {
-    -fx-graphic: url("./icons/medium_playstop_d.gif");
-}
-
-.my-playstop-button:hover {
-    -fx-graphic: url("./icons/medium_playstop_d.gif");
-}
-
-.my-playstop-button:pressed {
-    -fx-graphic: url("./icons/medium_playstop_d.gif");
-}
-
-.my-playstop-button:activated {
     -fx-graphic: url("./icons/medium_playstop1.gif");
 }
 
-.my-playstop-button:activated:hover {
+.my-playstop-button:hover {
     -fx-graphic: url("./icons/medium_playstop1_r.gif");
 }
 
-.my-playstop-button:pressed:activated {
+.my-playstop-button:pressed {
     -fx-graphic: url("./icons/medium_playstop1_p.gif");
+}
+
+.my-playstop-button:activated {
+    -fx-graphic: url("./icons/medium_playstop2.gif");
+}
+
+.my-playstop-button:activated:hover {
+    -fx-graphic: url("./icons/medium_playstop2_r.gif");
+}
+
+.my-playstop-button:pressed:activated {
+    -fx-graphic: url("./icons/medium_playstop2_p.gif");
 }
 
 .my-playstop-button:disabled {
