@@ -87,7 +87,7 @@ public class Zoomer extends ChartPlugin {
     private Point2D previousMouseLocation;
     private BooleanProperty enablePanner = new SimpleBooleanProperty(this, "enablePanner", true);
     private final EventHandler<MouseEvent> panStartHandler = event -> {
-        if (isPannerEnabled() && mouseFilter == null || mouseFilter.test(event)) {
+        if (isPannerEnabled() && mouseFilter == null || (mouseFilter != null && mouseFilter.test(event))) {
             panStarted(event);
             event.consume();
         }
@@ -658,7 +658,6 @@ public class Zoomer extends ChartPlugin {
         final double newMouseX = previousMouseLocation.getX();
         final double newMouseY = previousMouseLocation.getY();
 
-        ConcurrentHashMap<Axis, ZoomState> axisStateMap = new ConcurrentHashMap<>();
         for (final Axis axis : chart.getAxes()) {
             if (!(Axes.isNumericAxis(axis)) || axis.getSide() == null || isOmitZoomInternal(axis)) {
                 continue;
@@ -675,12 +674,8 @@ public class Zoomer extends ChartPlugin {
             final boolean allowsShift = side.isHorizontal() ? getAxisMode().allowsX() : getAxisMode().allowsY();
             if (!Axes.hasBoundedRange(nAxis) && allowsShift) {
                 nAxis.setAutoRanging(false);
-                axisStateMap.put(axis, new ZoomState(dataMin, dataMax, axis.isAutoRanging(), axis.isAutoGrowRanging()));
             }
         }
-//        clearZoomStackIfAxisAutoRangingIsEnabled();
-//        pushCurrentZoomWindows();
-//        this.performZoom(axisStateMap, true);
 
         panShiftX = 0.0;
         panShiftY = 0.0;
