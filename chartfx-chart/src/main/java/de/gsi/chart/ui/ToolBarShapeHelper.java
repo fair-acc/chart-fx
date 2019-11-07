@@ -30,7 +30,7 @@ public final class ToolBarShapeHelper {
         path.getElements().add(new CubicCurveTo(//
                 centreX - halfWidth - 2 * radii, centreY - halfHeight, // first control point
                 centreX - halfWidth - 2 * radii, centreY + halfHeight, // second control point
-                centreX - halfWidth + 0 * radii, centreY + halfHeight)); // to coordinate
+                centreX - halfWidth, centreY + halfHeight)); // to coordinate
         // line on bottom
         path.getElements().add(new LineTo(centreX + halfWidth, centreY + halfHeight));
 
