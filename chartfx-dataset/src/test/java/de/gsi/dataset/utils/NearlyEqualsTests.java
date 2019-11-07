@@ -1,6 +1,7 @@
 package de.gsi.dataset.utils;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
@@ -20,11 +21,6 @@ import de.gsi.dataset.spi.utils.MathUtils;
  * @author Michael Borgwardt
  */
 public class NearlyEqualsTests {
-
-    private void assertTrue(boolean nearlyEqual) {
-        // TODO Auto-generated method stub
-
-    }
 
     /** Regular large numbers - generally not problematic */
     @Test
