@@ -11,7 +11,7 @@ import javafx.scene.paint.ImagePattern;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.Line;
 
-public final class FillPatternStyle {
+public final class FillPatternStyleHelper {
     private static final int HATCH_WINDOW_SIZE = 8;
     private static int hatchSpacing = 10;
     private static int hatchAngle = 45;
@@ -21,7 +21,7 @@ public final class FillPatternStyle {
     protected static WeakHashMap<Paint, WeakHashMap<Double, Image>> defaultHatchCacheWithStrokeWidth = new WeakHashMap<>();
 
     private static Image createDefaultHatch(final Paint color, final double strokeWidth) {
-        WeakHashMap<Double, Image> checkCache = FillPatternStyle.defaultHatchCacheWithStrokeWidth.get(color);
+        WeakHashMap<Double, Image> checkCache = FillPatternStyleHelper.defaultHatchCacheWithStrokeWidth.get(color);
         if (checkCache != null) {
             final Image val = checkCache.get(Double.valueOf(strokeWidth));
             if (val != null) {
@@ -51,7 +51,7 @@ public final class FillPatternStyle {
         if (checkCache == null) {
             final WeakHashMap<Double, Image> temp = new WeakHashMap<>();
             temp.put(Double.valueOf(strokeWidth), retVal);
-            FillPatternStyle.defaultHatchCacheWithStrokeWidth.put(color, temp);
+            FillPatternStyleHelper.defaultHatchCacheWithStrokeWidth.put(color, temp);
             // checkCache = new WeakHashMap<>();
         } else {
             checkCache.put(Double.valueOf(strokeWidth), retVal);
@@ -62,13 +62,13 @@ public final class FillPatternStyle {
 
     private static Image createHatch(final FillPattern fillPattern, final Paint color, final double strokeWidth) {
         final Pane pane = new Pane();
-        pane.setPrefSize(FillPatternStyle.HATCH_WINDOW_SIZE, FillPatternStyle.HATCH_WINDOW_SIZE);
+        pane.setPrefSize(FillPatternStyleHelper.HATCH_WINDOW_SIZE, FillPatternStyleHelper.HATCH_WINDOW_SIZE);
         pane.setStyle("-fx-background-color: rgba(0, 0, 0, 0.0)");
 
         final int hatchAngle = 45;
-        final int windowSize = 5 * FillPatternStyle.HATCH_WINDOW_SIZE;
-        FillPatternStyle.drawHatching(pane, fillPattern, -windowSize, -windowSize, windowSize, windowSize, color,
-                strokeWidth, hatchAngle, FillPatternStyle.hatchSpacing);
+        final int windowSize = 5 * FillPatternStyleHelper.HATCH_WINDOW_SIZE;
+        FillPatternStyleHelper.drawHatching(pane, fillPattern, -windowSize, -windowSize, windowSize, windowSize, color,
+                strokeWidth, hatchAngle, FillPatternStyleHelper.hatchSpacing);
 
         final Scene scene = new Scene(pane);
         scene.setFill(Color.TRANSPARENT);
@@ -199,45 +199,45 @@ public final class FillPatternStyle {
     }
 
     public static ImagePattern getDefaultHatch(final Color color) {
-        ImagePattern retVal = FillPatternStyle.defaultHatchCache.get(color);
+        ImagePattern retVal = FillPatternStyleHelper.defaultHatchCache.get(color);
         if (retVal == null) {
-            retVal = FillPatternStyle.getDefaultHatch(color, 0.0);
-            FillPatternStyle.defaultHatchCache.put(color, retVal);
+            retVal = FillPatternStyleHelper.getDefaultHatch(color, 0.0);
+            FillPatternStyleHelper.defaultHatchCache.put(color, retVal);
         }
         return retVal;
     }
 
     public static ImagePattern getDefaultHatch(final Paint color, final double xOffset) {
-        return new ImagePattern(FillPatternStyle.createDefaultHatch(color, 1.0), xOffset, xOffset,
-                FillPatternStyle.HATCH_WINDOW_SIZE, FillPatternStyle.HATCH_WINDOW_SIZE, false);
+        return new ImagePattern(FillPatternStyleHelper.createDefaultHatch(color, 1.0), xOffset, xOffset,
+                FillPatternStyleHelper.HATCH_WINDOW_SIZE, FillPatternStyleHelper.HATCH_WINDOW_SIZE, false);
     }
 
     public static int getDefaultHatchAngle() {
-        return FillPatternStyle.hatchAngle;
+        return FillPatternStyleHelper.hatchAngle;
     }
 
     public static int getDefaultHatchSpacing() {
-        return FillPatternStyle.hatchSpacing;
+        return FillPatternStyleHelper.hatchSpacing;
     }
 
     public static ImagePattern getHatch(final FillPattern fillPattern, final Paint color) {
-        return FillPatternStyle.getHatch(fillPattern, color, 1.0);
+        return FillPatternStyleHelper.getHatch(fillPattern, color, 1.0);
     }
 
     public static ImagePattern getHatch(final FillPattern fillPattern, final Paint color, final double width) {
-        final Image hatch = FillPatternStyle.createHatch(fillPattern, color, width);
-        return new ImagePattern(hatch, 0, 0, FillPatternStyle.HATCH_WINDOW_SIZE, FillPatternStyle.HATCH_WINDOW_SIZE,
+        final Image hatch = FillPatternStyleHelper.createHatch(fillPattern, color, width);
+        return new ImagePattern(hatch, 0, 0, FillPatternStyleHelper.HATCH_WINDOW_SIZE, FillPatternStyleHelper.HATCH_WINDOW_SIZE,
                 false);
     }
 
     public static void setDefaultHatchAngle(final int angle) {
         AssertUtils.gtEqThanZero("setDefaultHatchSpacing", angle);
-        FillPatternStyle.hatchAngle = angle;
+        FillPatternStyleHelper.hatchAngle = angle;
     }
 
     public static void setDefaultHatchSpacing(final int spacing) {
         AssertUtils.gtEqThanZero("setDefaultHatchSpacing", spacing);
-        FillPatternStyle.hatchSpacing = spacing;
+        FillPatternStyleHelper.hatchSpacing = spacing;
     }
 
     public enum FillPattern {
