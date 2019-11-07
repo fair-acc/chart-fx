@@ -78,12 +78,12 @@ public class DefaultTimeFormatter extends AbstractFormatter {
         }
 
         long longUTCSeconds = utcValueSeconds.longValue();
-        int longNanoSeconds = (int) ((utcValueSeconds.doubleValue() - longUTCSeconds) * 1e9);
-        if (longNanoSeconds < 0) { // Correctly Handle dates before EPOCH
+        int nanoSeconds = (int) ((utcValueSeconds.doubleValue() - longUTCSeconds) * 1e9);
+        if (nanoSeconds < 0) { // Correctly Handle dates before EPOCH
             longUTCSeconds -= 1;
-            longNanoSeconds += 1e9;
+            nanoSeconds += (int) 1e9;
         }
-        final LocalDateTime dateTime = LocalDateTime.ofEpochSecond(longUTCSeconds, longNanoSeconds,
+        final LocalDateTime dateTime = LocalDateTime.ofEpochSecond(longUTCSeconds, nanoSeconds,
                 getTimeZoneOffset());
 
         return dateTime.format(dateFormat[formatterIndex]).replaceAll(" ", System.lineSeparator());
