@@ -1,4 +1,4 @@
-package de.gsi.ui.icons;
+package de.gsi.acc.ui;
 
 import de.gsi.chart.viewer.SquareButton;
 import javafx.beans.property.BooleanProperty;
@@ -9,7 +9,7 @@ import javafx.scene.layout.HBox;
 
 public class AcquisitionButtonBar extends HBox {
     private static PseudoClass PSEUDO_CLASS_ACTIVATED = PseudoClass.getPseudoClass("activated");
-    private final Button buttonPause = new SquareButton("my-pause-button");
+    private static PseudoClass PSEUDO_CLASS_PAUSE = PseudoClass.getPseudoClass("paused");
     private final Button buttonPlayStop = new SquareButton("my-playstop-button");
     private final Button buttonPlay = new SquareButton("my-play-button");
     private final Button buttonStop = new SquareButton("my-stop-button");
@@ -18,61 +18,74 @@ public class AcquisitionButtonBar extends HBox {
     private final BooleanProperty playState = new SimpleBooleanProperty(this, "buttonPlayState", false);
     private final BooleanProperty stopState = new SimpleBooleanProperty(this, "buttonStopState", true);
 
-    public AcquisitionButtonBar(final ButtonStyle setupButtonsAs) {
+    public AcquisitionButtonBar(boolean isPauseEnabled) {
         super();
         this.getStylesheets().add(getClass().getResource("acq_button_small.css").toExternalForm());
 
         disabledProperty().addListener((ch, o, n) -> {
-            buttonPause.setDisable(n);
             buttonPlayStop.setDisable(n);
             buttonPlay.setDisable(n);
             buttonStop.setDisable(n);
         });
 
-        buttonPause.disableProperty().addListener((ch, o, n) -> {
-            if (!n) {
-                pauseState.set(false);
-            }
-        });
         buttonPlayStop.disableProperty().addListener((ch, o, n) -> {
-            if (!n) {
+            if (n) {
                 playStopState.set(false);
             }
         });
         buttonPlay.disableProperty().addListener((ch, o, n) -> {
-            if (!n) {
+            if (n) {
                 playState.set(false);
             }
         });
         buttonStop.disableProperty().addListener((ch, o, n) -> {
-            if (!n) {
-                stopState.set(false);
-            }
+            stopState.set(!n);
         });
 
-        buttonPause.setOnAction(evt -> {
-            pauseState.set(!pauseState.get());
-            buttonPause.pseudoClassStateChanged(PSEUDO_CLASS_ACTIVATED, pauseState.get());
+        pauseState.addListener((ch, o, n) -> {
+            if (isPauseEnabled) {
+                if (n) {
+                    playState.set(true);
+                }
+                buttonPlay.pseudoClassStateChanged(PSEUDO_CLASS_PAUSE, isPauseEnabled ? n : playState.get());
+            } else {
+                pauseState.set(false);
+            }
         });
 
         buttonPlayStop.setOnAction(evt -> playStopState.set(!playStopState.get()));
         playStopState.addListener((ch, o, n) -> {
-            buttonPause.setDisable(n);
             buttonPlay.setDisable(n);
             stopState.set(!n);
 
             buttonStop.pseudoClassStateChanged(PSEUDO_CLASS_ACTIVATED, n);
             buttonPlayStop.pseudoClassStateChanged(PSEUDO_CLASS_ACTIVATED, n);
+            if (n) {
+                buttonPlay.pseudoClassStateChanged(PSEUDO_CLASS_ACTIVATED, false);
+                buttonPlay.pseudoClassStateChanged(PSEUDO_CLASS_PAUSE, false);
+            }
         });
 
-        buttonPlay.setOnAction(evt -> playState.set(!playState.get()));
+        buttonPlay.setOnAction(evt -> {
+            if (isPauseEnabled) {
+                if (!playState.get()) {
+                    playState.set(true);
+                } else {
+                    pauseState.set(!pauseState.get());
+                }
+            } else {
+                playState.set(!playState.get());
+                pauseState.set(false);
+            }
+        });
+
         playState.addListener((ch, o, n) -> {
-            buttonPause.setDisable(n);
             buttonPlayStop.setDisable(n);
             stopState.set(!n);
 
             buttonStop.pseudoClassStateChanged(PSEUDO_CLASS_ACTIVATED, n);
             buttonPlay.pseudoClassStateChanged(PSEUDO_CLASS_ACTIVATED, n);
+            buttonPlay.pseudoClassStateChanged(PSEUDO_CLASS_PAUSE, isPauseEnabled ? pauseState.get() : true);
         });
 
         buttonStop.setOnAction(evt -> stopState.set(!stopState.get()));
@@ -82,31 +95,24 @@ public class AcquisitionButtonBar extends HBox {
                 playStopState.set(false);
                 playState.set(false);
 
-                buttonPause.pseudoClassStateChanged(PSEUDO_CLASS_ACTIVATED, false);
                 buttonPlayStop.pseudoClassStateChanged(PSEUDO_CLASS_ACTIVATED, false);
                 buttonPlay.pseudoClassStateChanged(PSEUDO_CLASS_ACTIVATED, false);
-                buttonStop.pseudoClassStateChanged(PSEUDO_CLASS_ACTIVATED, false);
 
-                buttonPause.setDisable(false);
                 buttonPlayStop.setDisable(false);
                 buttonPlay.setDisable(false);
-                buttonStop.setDisable(false);
             }
+            buttonStop.pseudoClassStateChanged(PSEUDO_CLASS_ACTIVATED, !n);
         });
 
         this.getChildren().addAll(buttonPlayStop, buttonPlay, buttonStop);
     }
 
-    public Button getButtonPause() {
-        return buttonPause;
+    public Button getButtonPlay() {
+        return buttonPlay;
     }
 
     public Button getButtonPlayStop() {
         return buttonPlayStop;
-    }
-
-    public Button getButtonPlay() {
-        return buttonPlay;
     }
 
     public Button getButtonStop() {
@@ -117,20 +123,15 @@ public class AcquisitionButtonBar extends HBox {
         return pauseState;
     }
 
-    public BooleanProperty playStopStateProperty() {
-        return playStopState;
-    }
-
     public BooleanProperty playStateProperty() {
         return playState;
     }
 
-    public BooleanProperty stopStateProperty() {
-        return stopState;
+    public BooleanProperty playStopStateProperty() {
+        return playStopState;
     }
 
-    public enum ButtonStyle {
-        FEEDBACK,
-        DATA_ACQUISITION;
+    public BooleanProperty stopStateProperty() {
+        return stopState;
     }
 }
