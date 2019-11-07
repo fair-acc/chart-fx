@@ -94,8 +94,7 @@ public class UpdateAxisLabels extends ChartPlugin {
 
     // the actual DataSet renaming logic
     private void dataSetChange(UpdateEvent update, Renderer renderer) {
-        if ((!(update instanceof AxisChangeEvent) && !(update instanceof AxisNameChangeEvent))
-                || (update instanceof AxisRangeChangeEvent)) {
+        if (!(update instanceof AxisChangeEvent)) {
             return;
         }
         if (LOGGER.isDebugEnabled()) {
