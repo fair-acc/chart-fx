@@ -38,9 +38,6 @@ public class UpdateAxisLabels extends ChartPlugin {
     private Map<DataSet, EventListener> chartDataSetsListeners = new HashMap<>();
     private Map<Renderer, ListChangeListener<DataSet>> renderersListeners = new HashMap<>();
 
-    // axis bookkeeping, to be able to remove axes, which are no longer used by any renderer
-    private Map<Axis, Set<Renderer>> axisUsage = new HashMap<>();
-
     // called whenever renderers are added or removed
     private ListChangeListener<Renderer> renderersListener = (
             ListChangeListener.Change<? extends Renderer> renderersChange) -> {
@@ -133,17 +130,11 @@ public class UpdateAxisLabels extends ChartPlugin {
                     Optional<Axis> oldAxis = renderer.getAxes().stream().filter(axis -> axis.getSide().isHorizontal())
                             .findFirst();
                     oldAxis.ifPresent(a -> a.set(dataSet.getAxisDescription(DataSet.DIM_X)));
-                    // Axis newAxis = getAxis(dataSet.getAxisDescription(0), Orientation.HORIZONTAL, oldAxis, renderer);
-                    // renderer.getAxes().remove(oldAxis.get());
-                    // renderer.getAxes().add(newAxis);
                 }
                 if (dim == -1 || dim == DataSet.DIM_Y) {
                     Optional<Axis> oldAxis = renderer.getAxes().stream().filter(axis -> axis.getSide().isVertical())
                             .findFirst();
                     oldAxis.ifPresent(a -> a.set(dataSet.getAxisDescription(DataSet.DIM_Y)));
-                    // Axis newAxis = getAxis(dataSet.getAxisDescription(1), Orientation.VERTICAL, oldAxis, renderer);
-                    // renderer.getAxes().remove(oldAxis.get());
-                    //// renderer.getAxes().add(newAxis);
                 }
                 if ((dim == -1 || dim == DataSet.DIM_Z) && dataSet.getDimension() >= 3) {
                     renderer.getAxes().stream().filter(axis -> axis instanceof ColorGradientAxis).findFirst()
@@ -237,78 +228,4 @@ public class UpdateAxisLabels extends ChartPlugin {
             dataSetListeners.remove(dataSet);
         });
     }
-
-    // TODO: consider to remove
-    // Helper function to manage Axis Instances
-//    private Axis getAxis(AxisDescription axisDescription, Orientation orientation, Optional<Axis> oldAxis,
-//            Renderer renderer) {
-//        final String name = axisDescription.getName();
-//        final String unit = axisDescription.getUnit();
-//        final boolean oldAxisExists = oldAxis.isPresent();
-//
-//        // determine if correct axis already exists
-//        Axis result = axisUsage.keySet().stream().filter(a -> a.getName().equals(name))
-//                .filter(a -> a.getUnit().equals(unit)).filter(a -> (orientation == Orientation.HORIZONTAL)
-//                        ? a.getSide().isHorizontal() : a.getSide().isVertical())
-//                .findFirst().orElseGet(() -> null);
-//
-//        // determine if old axis is exclusively used by this renderer
-//        int nOldAxis = 0;
-//        if (oldAxisExists && axisUsage.containsKey(oldAxis.get())) {
-//            if (!axisUsage.get(oldAxis.get()).contains(renderer)) {
-//                axisUsage.get(oldAxis.get()).add(renderer);
-//            }
-//            nOldAxis = axisUsage.get(oldAxis.get()).size();
-//        }
-//
-//        // trivial case, current axis is the same as the old one
-//        if (result == oldAxis.get()) {
-//            return result;
-//        }
-//
-//        // axis already exists
-//        if (result != null) {
-//            axisUsage.putIfAbsent(result, new HashSet<>());
-//            axisUsage.get(result).add(renderer);
-//            if (axisUsage.containsKey(oldAxis.get())) {
-//                axisUsage.get(oldAxis.get()).remove(renderer);
-//            }
-//            getChart().getAxes().remove(oldAxis.get());
-//            return result;
-//        }
-//        // rename current axis if exclusively used, else create new one
-//        if (nOldAxis <= 1) {
-//            result = oldAxis.get();
-//            result.setName(name);
-//            result.setUnit(unit);
-//        } else {
-//            if (oldAxis.get().getClass() == DefaultNumericAxis.class) {
-//                result = new DefaultNumericAxis(name);
-//            } else if (oldAxis.get().getClass() == CategoryAxis.class) {
-//                result = new CategoryAxis(name);
-//            } else if (oldAxis.get().getClass() == LinearAxis.class) {
-//                result = new LinearAxis();
-//                result.setName(name);
-//            } else if (oldAxis.get().getClass() == LogarithmicAxis.class) {
-//                result = new LogarithmicAxis();
-//                result.setName(name);
-//            } else if (oldAxis.get().getClass() == NumericAxis.class) {
-//                result = new NumericAxis();
-//                result.setName(name);
-//            } else {
-//                if (LOGGER.isWarnEnabled()) {
-//                    LOGGER.atWarn().addArgument(oldAxis.get().getClass())
-//                            .log("Unknown type of axis {}, using DefaultNumericAxis instead");
-//                }
-//                result = new DefaultNumericAxis(name);
-//            }
-//            result.setUnit(unit);
-//            axisUsage.putIfAbsent(result, new HashSet<>());
-//            axisUsage.get(result).add(renderer);
-//            if (axisUsage.containsKey(oldAxis.get())) {
-//                axisUsage.get(oldAxis.get()).remove(renderer);
-//            }
-//        }
-//        return result;
-//    }
 }
