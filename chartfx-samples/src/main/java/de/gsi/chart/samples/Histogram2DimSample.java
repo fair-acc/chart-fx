@@ -17,6 +17,7 @@ import de.gsi.chart.ui.geometry.Side;
 import de.gsi.chart.utils.FXUtils;
 import de.gsi.dataset.spi.Histogram2;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
@@ -140,7 +141,7 @@ public class Histogram2DimSample extends Application {
         root.getChildren().add(chart);
         primaryStage.setTitle(this.getClass().getSimpleName());
         primaryStage.setScene(scene);
-        primaryStage.setOnCloseRequest(evt -> System.exit(0));
+        primaryStage.setOnCloseRequest(evt -> Platform.exit());
         primaryStage.show();
 
         final Timer timer = new Timer();

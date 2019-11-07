@@ -200,7 +200,7 @@ public class RollingBufferLegacySample extends Application {
         }, 0, UPDATE_PERIOD);
 
         primaryStage.setScene(scene);
-        primaryStage.setOnCloseRequest(evt -> System.exit(0));
+        primaryStage.setOnCloseRequest(evt -> Platform.exit());
     }
 
     @Override

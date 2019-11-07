@@ -6,6 +6,7 @@ import de.gsi.chart.axes.spi.DefaultNumericAxis;
 import de.gsi.chart.renderer.spi.LabelledMarkerRenderer;
 import de.gsi.dataset.spi.DoubleDataSet;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
@@ -60,7 +61,7 @@ public class LabelledMarkerSample extends Application {
         final Scene scene = new Scene(chart, 600, 400);
         primaryStage.setTitle(this.getClass().getSimpleName());
         primaryStage.setScene(scene);
-        primaryStage.setOnCloseRequest(evt -> System.exit(0));
+        primaryStage.setOnCloseRequest(evt -> Platform.exit());
         primaryStage.show();
     }
 

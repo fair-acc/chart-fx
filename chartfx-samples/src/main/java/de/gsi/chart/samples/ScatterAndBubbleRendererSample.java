@@ -27,6 +27,7 @@ import de.gsi.dataset.spi.DefaultDataSet;
 import de.gsi.dataset.spi.DefaultErrorDataSet;
 import de.gsi.dataset.utils.ProcessingProfiler;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
@@ -134,7 +135,7 @@ public class ScatterAndBubbleRendererSample extends Application {
 
         primaryStage.setTitle(this.getClass().getSimpleName());
         primaryStage.setScene(new Scene(chart1, 800, 600));
-        primaryStage.setOnCloseRequest(evt -> System.exit(0)); // NOPMD by rstein on 05/08/2019
+        primaryStage.setOnCloseRequest(evt -> Platform.exit());
         primaryStage.show();
 
         // alternative solution using Marker and DataSet style

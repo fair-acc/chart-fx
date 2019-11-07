@@ -117,7 +117,7 @@ public class MultipleAxesSample extends Application {
         startTime = ProcessingProfiler.getTimeStamp();
         primaryStage.setTitle(this.getClass().getSimpleName());
         primaryStage.setScene(scene);
-        primaryStage.setOnCloseRequest(evt -> System.exit(0)); // NOPMD by rstein on 05/08/2019
+        primaryStage.setOnCloseRequest(evt -> Platform.exit());
         primaryStage.show();
         ProcessingProfiler.getTimeDiff(startTime, "for showing");
 

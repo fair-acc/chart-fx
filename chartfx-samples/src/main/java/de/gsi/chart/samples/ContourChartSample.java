@@ -21,6 +21,7 @@ import de.gsi.dataset.DataSet3D;
 import de.gsi.dataset.spi.AbstractDataSet3D;
 import de.gsi.dataset.utils.ProcessingProfiler;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
@@ -173,8 +174,8 @@ public class ContourChartSample extends Application {
     }
 
     @Override
-    public void start(final Stage stage) {
-        stage.setTitle("ContourChart Sample");
+    public void start(final Stage primaryStage) {
+        primaryStage.setTitle("ContourChart Sample");
         final Slider nCountourLevelSlider = new Slider(0, 100, 20); // number of contour levels
         final Slider nSegmentSlider = new Slider(0, 10000, 500); // number of contour segments
         final Slider minHexSizeSlider = new Slider(1, 100, 5); // number of contour segments
@@ -243,8 +244,9 @@ public class ContourChartSample extends Application {
         final VBox vBox = new VBox(hBox, hBoxSlider1, hBoxSlider2, hBoxSlider3, parameter);
 
         final Scene scene = new Scene(vBox, 1600, 600);
-        stage.setScene(scene);
-        stage.show();
+        primaryStage.setScene(scene);
+        primaryStage.show();
+        primaryStage.setOnCloseRequest(evt -> Platform.exit());
     }
 
     private static void bindAxis(final XYChart chartPane1, final XYChart chartPane2) {

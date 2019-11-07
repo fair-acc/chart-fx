@@ -17,6 +17,7 @@ import de.gsi.dataset.DataSet;
 import de.gsi.dataset.DataSet3D;
 import de.gsi.dataset.spi.AbstractDataSet3D;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.control.Spinner;
@@ -117,8 +118,8 @@ public class MountainRangeRendererSample extends Application {
     }
 
     @Override
-    public void start(final Stage stage) {
-        stage.setTitle(this.getClass().getSimpleName());
+    public void start(final Stage primaryStage) {
+        primaryStage.setTitle(this.getClass().getSimpleName());
 
         final DefaultNumericAxis xAxis = new DefaultNumericAxis("X Position");
         final DefaultNumericAxis yAxis = new DefaultNumericAxis("Y Position");
@@ -150,8 +151,9 @@ public class MountainRangeRendererSample extends Application {
 
         final Scene scene = new Scene(
                 new BorderPane(chart, new ToolBar(new Label(""), mountainRangeOffset), null, null, null), 1200, 800);
-        stage.setScene(scene);
-        stage.show();
+        primaryStage.setScene(scene);
+        primaryStage.show();
+        primaryStage.setOnCloseRequest(evt -> Platform.exit());
     }
 
     public static double gaussian(final double x, final double mean, final double sigma) {
