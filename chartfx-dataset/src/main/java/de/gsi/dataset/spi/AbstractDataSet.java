@@ -181,7 +181,7 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
                 if (label1 == null && label2 != null) {
                     return false;
                 }
-                if (!label1.equals(label2)) {
+                if (label1 == null || !label1.equals(label2)) {
                     return false;
                 }
             }
