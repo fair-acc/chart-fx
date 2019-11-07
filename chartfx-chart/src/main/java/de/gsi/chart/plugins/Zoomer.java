@@ -669,8 +669,6 @@ public class Zoomer extends ChartPlugin {
             final double newData = axis.getValueForDisplay(side.isHorizontal() ? newMouseX : newMouseY);
             final double offset = prevData - newData;
 
-            final double dataMin = axis.getMin() - offset;
-            final double dataMax = axis.getMax() - offset;
             final boolean allowsShift = side.isHorizontal() ? getAxisMode().allowsX() : getAxisMode().allowsY();
             if (!Axes.hasBoundedRange(nAxis) && allowsShift) {
                 nAxis.setAutoRanging(false);
