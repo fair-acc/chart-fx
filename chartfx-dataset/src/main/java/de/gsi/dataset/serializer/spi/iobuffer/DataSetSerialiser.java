@@ -3,6 +3,7 @@ package de.gsi.dataset.serializer.spi.iobuffer;
 import static de.gsi.dataset.DataSet.DIM_X;
 import static de.gsi.dataset.DataSet.DIM_Y;
 
+import java.util.Arrays;
 import java.util.InputMismatchException;
 import java.util.List;
 import java.util.Map;
@@ -85,7 +86,7 @@ public class DataSetSerialiser extends DataSetUtilsHelper {
             }
             if (!foundMatchingDataType) {
                 throw new InputMismatchException(fieldName + " is type " + fieldHeader.get().getDataType()
-                        + " vs. required type " + requireDataTypes);
+                        + " vs. required type " + Arrays.asList(requireDataTypes).toString());
             }
 
             final long dataPosition = fieldHeader.get().getDataBufferPosition();
