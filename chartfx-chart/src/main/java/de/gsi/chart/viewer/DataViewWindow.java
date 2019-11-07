@@ -97,7 +97,7 @@ public class DataViewWindow extends BorderPane {
             return;
         }
 
-        if (equals(getParentView().getMaximizedChild())) {
+        if (this.equals(getParentView().getMaximizedChild())) {
             // this DataViewWindow is already maximised
             maximizeRestoreButton.getStyleClass().setAll(CSS_WINDOW_MAXIMIZE_ICON);
             getParentView().setMaximizedChild(null);
@@ -120,7 +120,7 @@ public class DataViewWindow extends BorderPane {
             return;
         }
 
-        if (equals(getParentView().getMaximizedChild())) {
+        if (this.equals(getParentView().getMaximizedChild())) {
             maximizeRestoreButton.getStyleClass().setAll(CSS_WINDOW_MAXIMIZE_ICON);
             getParentView().setMaximizedChild(null);
             getParentView().getVisibleChildren().add(this);
@@ -146,7 +146,7 @@ public class DataViewWindow extends BorderPane {
         getParentView().getVisibleChildren().remove(this);
         getParentView().getUndockedChildren().remove(this);
 
-        if (equals(getParentView().getMaximizedChild())) {
+        if (this.equals(getParentView().getMaximizedChild())) {
             getParentView().setMaximizedChild(null);
         }
     };
