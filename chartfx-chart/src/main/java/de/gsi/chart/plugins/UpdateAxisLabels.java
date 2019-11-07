@@ -3,7 +3,6 @@ package de.gsi.chart.plugins;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,8 +14,6 @@ import de.gsi.chart.renderer.Renderer;
 import de.gsi.chart.utils.FXUtils;
 import de.gsi.dataset.DataSet;
 import de.gsi.dataset.event.AxisChangeEvent;
-import de.gsi.dataset.event.AxisNameChangeEvent;
-import de.gsi.dataset.event.AxisRangeChangeEvent;
 import de.gsi.dataset.event.EventListener;
 import de.gsi.dataset.event.UpdateEvent;
 import javafx.beans.value.ChangeListener;
