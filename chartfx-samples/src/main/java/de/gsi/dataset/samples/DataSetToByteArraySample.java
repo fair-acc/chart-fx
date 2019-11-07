@@ -115,9 +115,7 @@ public class DataSetToByteArraySample {
 
         testIdentityCore(true, asFloat32, original, dataSet);
         testIdentityLabelsAndStyles(true, asFloat32, original, dataSet);
-        if (dataSet instanceof DataSetMetaData) {
-            testIdentityMetaData(true, asFloat32, original, (DataSetMetaData) dataSet);
-        }
+        testIdentityMetaData(true, asFloat32, original, (DataSetMetaData) dataSet);
 
         LOGGER.atInfo().addArgument(encodingBits(asFloat32)).addArgument(encodingBinary(true))
                 .addArgument(withMetaData ? "with" : "w/o")
