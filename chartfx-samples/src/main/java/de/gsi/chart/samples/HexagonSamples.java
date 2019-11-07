@@ -17,7 +17,7 @@ import javafx.scene.paint.Paint;
 import javafx.stage.Stage;
 
 public class HexagonSamples extends Application {
-	private static final Logger LOGGER = LoggerFactory.getLogger(WriteDataSetToFileSample.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(WriteDataSetToFileSample.class);
     private Paint oldHexColour = null;
 
     @Override
@@ -50,7 +50,7 @@ public class HexagonSamples extends Application {
                 hexagon.setFill(Color.RED);
             }
         } catch (final NoPathFoundException e) {
-        	LOGGER.atInfo().log("could not find path for given start/destination coordinates" + e);
+            LOGGER.atInfo().log("could not find path for given start/destination coordinates" + e);
         }
 
         map.setOnHexagonClickedCallback(hexagon -> {
@@ -86,8 +86,7 @@ public class HexagonSamples extends Application {
     }
 
     /**
-     * @param args
-     *            the command line arguments
+     * @param args the command line arguments
      */
     public static void main(final String[] args) {
         Application.launch(args);

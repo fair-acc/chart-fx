@@ -12,8 +12,6 @@ import java.util.TimerTask;
 import de.gsi.chart.XYChart;
 import de.gsi.chart.axes.spi.CategoryAxis;
 import de.gsi.chart.axes.spi.DefaultNumericAxis;
-import de.gsi.dataset.spi.Histogram;
-import de.gsi.dataset.testdata.spi.RandomDataGenerator;
 import de.gsi.chart.plugins.EditAxis;
 import de.gsi.chart.plugins.ParameterMeasurements;
 import de.gsi.chart.plugins.Zoomer;
@@ -21,6 +19,8 @@ import de.gsi.chart.renderer.LineStyle;
 import de.gsi.chart.renderer.spi.ErrorDataSetRenderer;
 import de.gsi.chart.renderer.spi.MetaDataRenderer;
 import de.gsi.chart.utils.FXUtils;
+import de.gsi.dataset.spi.Histogram;
+import de.gsi.dataset.testdata.spi.RandomDataGenerator;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.layout.StackPane;
@@ -37,6 +37,36 @@ public class HistogramSample extends Application {
     private final Histogram dataSet1 = new Histogram("myHistogram1", N_BINS, 0.0, 20.0);
     private final Histogram dataSet2 = new Histogram("myHistogram2", N_BINS, 0.0, 20.0);
     private final Histogram dataSet3 = new Histogram("myHistogram3", xBins); // custom, non-equidistant histogram
+
+    int counter = 0;
+
+    private void fillData() {
+        counter++;
+        dataSet1.fill(RandomDataGenerator.nextGaussian() * 2 + 8.0);
+        dataSet2.fill(RandomDataGenerator.nextGaussian() * 3 + 12.0);
+        if (counter % 10 == 0) {
+            dataSet3.fill(RandomDataGenerator.nextGaussian() * 3 + 10.0);
+        }
+
+        if (counter % 2000 == 0) {
+            // reset distribution every now and then
+            counter = 0;
+            dataSet1.reset();
+            dataSet2.reset();
+            dataSet3.reset();
+        }
+
+    }
+
+    private void fillDemoData() {
+        double randomData = 0;
+        for (int n = 0; n < HistogramSample.N_BINS; n++) {
+            final double x = n;
+            randomData += RandomDataGenerator.random() - 0.5;
+            dataSet1.fill(x, randomData);
+            dataSet1.addDataLabel(n, "SpecialCategory#" + n);
+        }
+    }
 
     @Override
     public void start(final Stage primaryStage) {
@@ -113,36 +143,6 @@ public class HistogramSample extends Application {
                 FXUtils.runFX(chart::requestLayout);
             }
         }, HistogramSample.UPDATE_DELAY, HistogramSample.UPDATE_PERIOD);
-    }
-
-    private void fillDemoData() {
-        double randomData = 0;
-        for (int n = 0; n < HistogramSample.N_BINS; n++) {
-            final double x = n;
-            randomData += RandomDataGenerator.random() - 0.5;
-            dataSet1.fill(x, randomData);
-            dataSet1.addDataLabel(n, "SpecialCategory#" + n);
-        }
-    }
-
-    int counter = 0;
-
-    private void fillData() {
-        counter++;
-        dataSet1.fill(RandomDataGenerator.nextGaussian() * 2 + 8.0);
-        dataSet2.fill(RandomDataGenerator.nextGaussian() * 3 + 12.0);
-        if (counter % 10 == 0) {
-            dataSet3.fill(RandomDataGenerator.nextGaussian() * 3 + 10.0);
-        }
-
-        if (counter % 2000 == 0) {
-            // reset distribution every now and then
-            counter = 0;
-            dataSet1.reset();
-            dataSet2.reset();
-            dataSet3.reset();
-        }
-
     }
 
     /**

@@ -12,16 +12,17 @@ import de.gsi.dataset.event.UpdateEvent;
 public interface TestDataSet<D extends TestDataSet<D>> extends DataSet {
 
     /**
-     * generate a new set of numbers
+     * notify listener with given event that the data set has changed
+     * 
+     * @param evt the modification event
      * @return itself (fluent design)
      */
-    D update();
+    D fireInvalidated(UpdateEvent evt);
 
     /**
      * generate test data set
      *
-     * @param count
-     *            number of bins
+     * @param count number of bins
      * @return the generated array
      */
     double[] generateX(final int count);
@@ -29,16 +30,15 @@ public interface TestDataSet<D extends TestDataSet<D>> extends DataSet {
     /**
      * generate test data set
      *
-     * @param count
-     *            number of bins
+     * @param count number of bins
      * @return the generated array
      */
     double[] generateY(final int count);
 
     /**
-     * notify listener with given event that the data set has changed
-     * @param evt the modification event
+     * generate a new set of numbers
+     * 
      * @return itself (fluent design)
      */
-    D fireInvalidated(UpdateEvent evt);
+    D update();
 }

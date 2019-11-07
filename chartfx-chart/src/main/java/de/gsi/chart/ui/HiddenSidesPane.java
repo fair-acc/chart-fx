@@ -141,6 +141,11 @@ public class HiddenSidesPane extends Control {
 
     // Right node support.
 
+    @Override
+    protected Skin<?> createDefaultSkin() {
+        return new HiddenSidesPaneSkin(this);
+    }
+
     /**
      * Returns the animation delay
      *
@@ -168,6 +173,8 @@ public class HiddenSidesPane extends Control {
         return bottomProperty().get();
     }
 
+    // Bottom node support.
+
     /**
      * Returns the value of the content node property.
      *
@@ -176,8 +183,6 @@ public class HiddenSidesPane extends Control {
     public final Node getContent() {
         return contentProperty().get();
     }
-
-    // Bottom node support.
 
     /**
      * Returns the value of the left node property.
@@ -206,6 +211,8 @@ public class HiddenSidesPane extends Control {
         return rightProperty().get();
     }
 
+    // Left node support.
+
     /**
      * Returns the value of the top node property.
      *
@@ -214,8 +221,6 @@ public class HiddenSidesPane extends Control {
     public final Node getTop() {
         return topProperty().get();
     }
-
-    // Left node support.
 
     /**
      * Returns the value of the trigger distance property.
@@ -245,14 +250,14 @@ public class HiddenSidesPane extends Control {
         return pinnedSide;
     }
 
+    // Pinned side support.
+
     @Override
     public void resizeRelocate(double x, double y, double w, double h) {
         super.resizeRelocate(x, y, w, h);
         requestLayout();
         layout();
     }
-
-    // Pinned side support.
 
     /**
      * Returns the value of the right node property.
@@ -281,6 +286,8 @@ public class HiddenSidesPane extends Control {
         animationDuration.set(duration);
     }
 
+    // slide in animation delay
+
     /**
      * Sets the value of the bottom node property.
      *
@@ -289,8 +296,6 @@ public class HiddenSidesPane extends Control {
     public final void setBottom(Node bottom) {
         bottomProperty().set(bottom);
     }
-
-    // slide in animation delay
 
     /**
      * Sets the value of the content node property.
@@ -319,6 +324,8 @@ public class HiddenSidesPane extends Control {
         pinnedSideProperty().set(side);
     }
 
+    // slide in / slide out duration
+
     /**
      * Sets the value of the right node property.
      *
@@ -327,8 +334,6 @@ public class HiddenSidesPane extends Control {
     public final void setRight(Node right) {
         rightProperty().set(right);
     }
-
-    // slide in / slide out duration
 
     /**
      * Sets the value of the top node property.
@@ -369,11 +374,6 @@ public class HiddenSidesPane extends Control {
      */
     public final DoubleProperty triggerDistanceProperty() {
         return triggerDistance;
-    }
-
-    @Override
-    protected Skin<?> createDefaultSkin() {
-        return new HiddenSidesPaneSkin(this);
     }
 
 }

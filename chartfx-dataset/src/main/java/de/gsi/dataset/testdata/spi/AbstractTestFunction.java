@@ -28,18 +28,12 @@ public abstract class AbstractTestFunction<D extends AbstractTestFunction<D>> ex
     }
 
     @Override
-    public D update() {
-        lock().writeLockGuard(() -> {
-            data = generateY(data.length);
-            recomputeLimits(0);
-            recomputeLimits(1);
-        });
-        return fireInvalidated(new UpdatedDataEvent(this));
-    }
-
-    @Override
-    public int getDataCount() {
-        return data.length;
+    public double[] generateX(final int count) {
+        final double[] retVal = new double[count];
+        for (int i = 0; i < count; i++) {
+            retVal[i] = i;
+        }
+        return retVal;
     }
 
     @Override
@@ -48,19 +42,8 @@ public abstract class AbstractTestFunction<D extends AbstractTestFunction<D>> ex
     }
 
     @Override
-    public double getX(final int index) {
-        // returns the i-th index as horizontal X axis value
-        return index;
-    }
-
-    @Override
-    public double getY(final int index) {
-        // include for example dimension sanity checks
-        if (index < 0 || index >= getDataCount()) {
-            return Double.NaN;
-        }
-
-        return data[index];
+    public int getDataCount() {
+        return data.length;
     }
 
     @Override
@@ -71,14 +54,6 @@ public abstract class AbstractTestFunction<D extends AbstractTestFunction<D>> ex
     @Override
     public final double getErrorPositive(final int dimIndex, final int index) {
         return dimIndex == DIM_X ? AbstractTestFunction.getXError() : AbstractTestFunction.getYError();
-    }
-
-    private static double getXError() {
-        return 0.1;
-    }
-
-    private static double getYError() {
-        return 0.1;
     }
 
     @Override
@@ -98,12 +73,37 @@ public abstract class AbstractTestFunction<D extends AbstractTestFunction<D>> ex
     }
 
     @Override
-    public double[] generateX(final int count) {
-        final double[] retVal = new double[count];
-        for (int i = 0; i < count; i++) {
-            retVal[i] = i;
+    public double getX(final int index) {
+        // returns the i-th index as horizontal X axis value
+        return index;
+    }
+
+    @Override
+    public double getY(final int index) {
+        // include for example dimension sanity checks
+        if (index < 0 || index >= getDataCount()) {
+            return Double.NaN;
         }
-        return retVal;
+
+        return data[index];
+    }
+
+    @Override
+    public D update() {
+        lock().writeLockGuard(() -> {
+            data = generateY(data.length);
+            recomputeLimits(0);
+            recomputeLimits(1);
+        });
+        return fireInvalidated(new UpdatedDataEvent(this));
+    }
+
+    private static double getXError() {
+        return 0.1;
+    }
+
+    private static double getYError() {
+        return 0.1;
     }
 
 }

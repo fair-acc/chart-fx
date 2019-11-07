@@ -11,17 +11,11 @@ public class StylishDoubleProperty extends SimpleStyleableDoubleProperty {
     /**
      * The constructor of the {@code StylishDoubleProperty}.
      *
-     * @param cssMetaData
-     *            the CssMetaData associated with this
-     *            {@code StylishDoubleProperty}
-     * @param bean
-     *            the bean of this {@code BooleanProperty}
-     * @param name
-     *            the name of this {@code BooleanProperty}
-     * @param initialValue
-     *            the initial value of the wrapped {@code Object}
-     * @param invalidateAction
-     *            lambda expression executed in invalidated
+     * @param cssMetaData the CssMetaData associated with this {@code StylishDoubleProperty}
+     * @param bean the bean of this {@code BooleanProperty}
+     * @param name the name of this {@code BooleanProperty}
+     * @param initialValue the initial value of the wrapped {@code Object}
+     * @param invalidateAction lambda expression executed in invalidated
      */
     public StylishDoubleProperty(@NamedArg("cssMetaData") CssMetaData<? extends Styleable, Number> cssMetaData,
             @NamedArg("bean") Object bean, @NamedArg("name") String name, @NamedArg("initialValue") Double initialValue,

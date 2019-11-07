@@ -20,11 +20,21 @@ import javafx.scene.Node;
  * @author rstein
  */
 public class GaussianFitSample extends AbstractDemoApplication {
-	private static final Logger LOGGER = LoggerFactory.getLogger(GaussianFitSample.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(GaussianFitSample.class);
     private static final int MAX_POINTS = 101;
     private DataSet fmodel;
     private DataSet fdataOrig;
     private DataSet fdataFitted;
+
+    @Override
+    public Node getContent() {
+        initData();
+
+        final DemoChart chart = new DemoChart();
+        chart.getRenderer(0).getDatasets().addAll(fmodel, fdataOrig, fdataFitted);
+
+        return chart;
+    }
 
     private void initData() {
         // user specific fitting function, here: normalised Gaussian Function
@@ -92,7 +102,7 @@ public class GaussianFitSample extends AbstractDemoApplication {
 
         LOGGER.atInfo().log("fit results chi^2 =" + fitter.getChiSquare() + ":");
         for (int i = 0; i < 3; i++) {
-        	LOGGER.atInfo().log("fitted-parameter  '%s' = %f -> %f +- %f\n", func.getParameterName(i), start[i],
+            LOGGER.atInfo().log("fitted-parameter  '%s' = %f -> %f +- %f\n", func.getParameterName(i), start[i],
                     fittedParameter[i], fittedParameterError[i]);
         }
 
@@ -104,27 +114,18 @@ public class GaussianFitSample extends AbstractDemoApplication {
 
         // plot fitting results
         /*
-         * for (int i=0; i < func.getParameterCount(); i++) {
-         * LOGGER.atInfo().log("fitted parameter '%s': %f +- %f\n",
+         * for (int i=0; i < func.getParameterCount(); i++) { LOGGER.atInfo().log("fitted parameter '%s': %f +- %f\n",
          * func.getParameterName(i), func.getParameterValue(i),
-         * 0.5*(func.getParameterRangeMaximum(i)-func.getParameterRangeMinimum(i
-         * ))); }
+         * 0.5*(func.getParameterRangeMaximum(i)-func.getParameterRangeMinimum(i ))); }
          */
     }
 
-    @Override
-    public Node getContent() {
-        initData();
-
-        final DemoChart chart = new DemoChart();
-        chart.getRenderer(0).getDatasets().addAll(fmodel, fdataOrig, fdataFitted);
-
-        return chart;
+    public static void main(final String[] args) {
+        Application.launch(args);
     }
 
     /**
-     * example fitting function y = scale/(sqrt(2*pi*sigma)*exp(-
-     * 0.5*(x-mu)^2/sigma^2)
+     * example fitting function y = scale/(sqrt(2*pi*sigma)*exp(- 0.5*(x-mu)^2/sigma^2)
      */
     protected class MyGaussianFunction extends AbstractFunction1D {
 
@@ -158,10 +159,6 @@ public class GaussianFitSample extends AbstractDemoApplication {
 
             return scale * 1.0 / (Math.sqrt(TMath.TwoPi()) * sigma) * Math.exp(-0.5 * Math.pow((x - mu) / sigma, 2));
         }
-    }
-
-    public static void main(final String[] args) {
-        Application.launch(args);
     }
 
 }

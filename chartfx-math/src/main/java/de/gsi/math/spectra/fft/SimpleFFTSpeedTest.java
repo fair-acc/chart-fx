@@ -17,32 +17,32 @@ public class SimpleFFTSpeedTest {
 
     }
 
-    private void initData(final int size, final double frequency) {
-        fsize = size;
-        fcdata = new Complex[fsize];
-        fcfft = new Complex[fsize];
-        fddata = new double[fsize];
-        ffdata = new float[fsize];
-
-        for (int i = 0; i < fsize; i++) {
-            final double re = Math.sin(2 * Math.PI * frequency * i);
-            final double im = 0.0;
-            fcdata[i] = new Complex(re, im);
-            fcfft[i] = new Complex(0.0);
-            fddata[i] = re;
-            ffdata[i] = (float) re;
-        }
-        fdfft = new DoubleFFT_1D(size);
-        fffft = new FloatFFT_1D(size);
-        runComplexFFT();
-    }
-
     public double getPeakFrequencyC() {
         double max = -1e99;
         int max_index = -1;
         for (int i = 0; i < fsize / 2; i++) {
             if (fcfft[i].abs() > max) {
                 max = fcfft[i].abs();
+                max_index = i;
+            }
+        }
+        if (max_index > 0) {
+            return (double) max_index / (double) fsize;
+        } else {
+            return 0.0;
+        }
+    }
+
+    public double getPeakFrequencyD() {
+        double max = -1e99;
+        int max_index = -1;
+        for (int i = 0; i < fsize / 2; i++) {
+            final double re = fddata[2 * i];
+            final double im = fddata[2 * i + 1];
+            final double val = Math.hypot(re, im);
+
+            if (val > max) {
+                max = val;
                 max_index = i;
             }
         }
@@ -73,24 +73,24 @@ public class SimpleFFTSpeedTest {
         }
     }
 
-    public double getPeakFrequencyD() {
-        double max = -1e99;
-        int max_index = -1;
-        for (int i = 0; i < fsize / 2; i++) {
-            final double re = fddata[2 * i];
-            final double im = fddata[2 * i + 1];
-            final double val = Math.hypot(re, im);
+    private void initData(final int size, final double frequency) {
+        fsize = size;
+        fcdata = new Complex[fsize];
+        fcfft = new Complex[fsize];
+        fddata = new double[fsize];
+        ffdata = new float[fsize];
 
-            if (val > max) {
-                max = val;
-                max_index = i;
-            }
+        for (int i = 0; i < fsize; i++) {
+            final double re = Math.sin(2 * Math.PI * frequency * i);
+            final double im = 0.0;
+            fcdata[i] = new Complex(re, im);
+            fcfft[i] = new Complex(0.0);
+            fddata[i] = re;
+            ffdata[i] = (float) re;
         }
-        if (max_index > 0) {
-            return (double) max_index / (double) fsize;
-        } else {
-            return 0.0;
-        }
+        fdfft = new DoubleFFT_1D(size);
+        fffft = new FloatFFT_1D(size);
+        runComplexFFT();
     }
 
     public void runComplexFFT() {

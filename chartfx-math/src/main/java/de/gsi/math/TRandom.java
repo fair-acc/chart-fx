@@ -32,11 +32,6 @@ public class TRandom {
         SetSeed(seed);
     }
 
-    @Override
-    public String toString() {
-        return "TRandom(" + fSeed + ")";
-    }
-
     public int Binomial(int ntot, double prob) {
         // Generates a random integer N according to the binomial law
         // Coded from Los Alamos report LA-5061-MS
@@ -464,22 +459,6 @@ public class TRandom {
     /**
      * Return 2 numbers distributed following a gaussian with mean=0 and sigma=1
      * 
-     * @param val storage vector for Rannor distributed random numbers
-     */
-    public void Rannor(float[] val) {
-        double r, x, y, z;
-
-        y = Rndm();
-        z = Rndm();
-        x = z * 6.28318530717958623;
-        r = TMath.Sqrt(-2 * TMath.Log(y));
-        val[0] = (float) (r * TMath.Sin(x));
-        val[0] = (float) (r * TMath.Cos(x));
-    }
-
-    /**
-     * Return 2 numbers distributed following a gaussian with mean=0 and sigma=1
-     * 
      * @param val storage vector for Gaussian distributed random numbers
      */
     public void Rannor(double[] val) {
@@ -491,6 +470,22 @@ public class TRandom {
         r = TMath.Sqrt(-2 * TMath.Log(y));
         val[0] = r * TMath.Sin(x);
         val[1] = r * TMath.Cos(x);
+    }
+
+    /**
+     * Return 2 numbers distributed following a gaussian with mean=0 and sigma=1
+     * 
+     * @param val storage vector for Rannor distributed random numbers
+     */
+    public void Rannor(float[] val) {
+        double r, x, y, z;
+
+        y = Rndm();
+        z = Rndm();
+        x = z * 6.28318530717958623;
+        r = TMath.Sqrt(-2 * TMath.Log(y));
+        val[0] = (float) (r * TMath.Sin(x));
+        val[0] = (float) (r * TMath.Cos(x));
     }
 
     /**
@@ -564,6 +559,11 @@ public class TRandom {
         double scale = 8.0 * r * TMath.Sqrt(0.25 - r2);
         val[0] = a * scale;
         val[1] = b * scale;
+    }
+
+    @Override
+    public String toString() {
+        return "TRandom(" + fSeed + ")";
     }
 
     /**

@@ -30,7 +30,7 @@ import javafx.scene.layout.VBox;
  * @author rstein
  */
 public class WaveletScalogram extends AbstractDemoApplication {
-	private static final Logger LOGGER = LoggerFactory.getLogger(WaveletScalogram.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(WaveletScalogram.class);
     private static final int MAX_POINTS = 1024;
     public static final boolean LOAD_EXAMPLE_DATA = true;
     private DataSet3D fdataset;
@@ -118,46 +118,6 @@ public class WaveletScalogram extends AbstractDemoApplication {
         return fdataset;
     }
 
-    private void sleep(int millis) {
-        try {
-            Thread.sleep(millis);
-        } catch (InterruptedException e) {
-        	if (LOGGER.isErrorEnabled()) {
-        		LOGGER.atError().setCause(e).log("InterruptedException");
-        	}
-            Thread.currentThread().interrupt();
-        }
-    }
-
-    private double[] loadSyntheticData() {
-        // synthetic data
-        final double[] yModel = new double[MAX_POINTS];
-
-        final Random rnd = new Random();
-        for (int i = 0; i < yModel.length; i++) {
-            final double x = i;
-            double offset = 0;
-            final double error = 0.1 * rnd.nextGaussian();
-
-            // linear chirp with discontinuity
-            offset = (i > 500) ? -20 : 0;
-            yModel[i] = (i > 100 && i < 700) ? 0.7 * Math.sin(TMath.TwoPi() * 2e-4 * x * (x + offset)) : 0;
-
-            // single tone at 0.25
-            yModel[i] += (i > 50 && i < 500) ? 1.0 * Math.sin(TMath.TwoPi() * 0.25 * x) : 0;
-
-            // modulation around 0.4
-            final double mod = Math.cos(TMath.TwoPi() * 0.01 * x);
-            yModel[i] += (i > 300 && i < 900) ? 1.0 * Math.sin(TMath.TwoPi() * (0.4 - 5e-4 * mod) * x) : 0;
-
-            // quadratic chirp starting at 0.1
-            yModel[i] += 0.5 * Math.sin(TMath.TwoPi() * ((0.1 + 5e-8 * x * x) * x));
-
-            yModel[i] = yModel[i] + error;
-        }
-        return yModel;
-    }
-
     @Override
     public Node getContent() {
 
@@ -190,6 +150,35 @@ public class WaveletScalogram extends AbstractDemoApplication {
         return new VBox(chart1, chart2);
     }
 
+    private double[] loadSyntheticData() {
+        // synthetic data
+        final double[] yModel = new double[MAX_POINTS];
+
+        final Random rnd = new Random();
+        for (int i = 0; i < yModel.length; i++) {
+            final double x = i;
+            double offset = 0;
+            final double error = 0.1 * rnd.nextGaussian();
+
+            // linear chirp with discontinuity
+            offset = (i > 500) ? -20 : 0;
+            yModel[i] = (i > 100 && i < 700) ? 0.7 * Math.sin(TMath.TwoPi() * 2e-4 * x * (x + offset)) : 0;
+
+            // single tone at 0.25
+            yModel[i] += (i > 50 && i < 500) ? 1.0 * Math.sin(TMath.TwoPi() * 0.25 * x) : 0;
+
+            // modulation around 0.4
+            final double mod = Math.cos(TMath.TwoPi() * 0.01 * x);
+            yModel[i] += (i > 300 && i < 900) ? 1.0 * Math.sin(TMath.TwoPi() * (0.4 - 5e-4 * mod) * x) : 0;
+
+            // quadratic chirp starting at 0.1
+            yModel[i] += 0.5 * Math.sin(TMath.TwoPi() * ((0.1 + 5e-8 * x * x) * x));
+
+            yModel[i] = yModel[i] + error;
+        }
+        return yModel;
+    }
+
     private double[] readDemoData(int index) {
         final String fileName = index <= 1 ? "./rawDataCPS2.dat" : "./rawDataLHCInj.dat";
         try {
@@ -213,11 +202,22 @@ public class WaveletScalogram extends AbstractDemoApplication {
 
         } catch (Exception e) {
             if (LOGGER.isErrorEnabled()) {
-            	LOGGER.atError().setCause(e).log("read error");
+                LOGGER.atError().setCause(e).log("read error");
             }
         }
 
         return new double[1000];
+    }
+
+    private void sleep(int millis) {
+        try {
+            Thread.sleep(millis);
+        } catch (InterruptedException e) {
+            if (LOGGER.isErrorEnabled()) {
+                LOGGER.atError().setCause(e).log("InterruptedException");
+            }
+            Thread.currentThread().interrupt();
+        }
     }
 
     public static void main(final String[] args) {

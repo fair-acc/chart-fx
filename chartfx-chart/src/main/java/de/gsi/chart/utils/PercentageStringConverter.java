@@ -36,26 +36,16 @@ public class PercentageStringConverter extends StringConverter<Number> {
         buildFormat(precision);
     }
 
-    public int getPrecision() {
-        return precision;
-    }
-
-    public void setPrecision(final int precision) {
-        this.precision = precision;
-        buildFormat(precision);
-    }
-
-    public boolean isAppendPercentSign() {
-        return appendPercentSign;
-    }
-
-    public void setAppendPercentSign(final boolean appendPercentSign) {
-        this.appendPercentSign = appendPercentSign;
-    }
-
-    @Override
-    public String toString(final Number object) {
-        return format.format(object.doubleValue() * 100.0) + (appendPercentSign ? "%" : "");
+    private void buildFormat(final int precision) {
+        final StringBuilder sb = new StringBuilder(32);
+        sb.append('0');
+        if (precision > 0) {
+            sb.append('.');
+            for (int i = 0; i < precision; i++) {
+                sb.append('0');
+            }
+        }
+        format.applyPattern(sb.toString());
     }
 
     @Override
@@ -68,16 +58,26 @@ public class PercentageStringConverter extends StringConverter<Number> {
         return Double.parseDouble(s);
     }
 
-    private void buildFormat(final int precision) {
-        final StringBuilder sb = new StringBuilder(32);
-        sb.append('0');
-        if (precision > 0) {
-            sb.append('.');
-            for (int i = 0; i < precision; i++) {
-                sb.append('0');
-            }
-        }
-        format.applyPattern(sb.toString());
+    public int getPrecision() {
+        return precision;
+    }
+
+    public boolean isAppendPercentSign() {
+        return appendPercentSign;
+    }
+
+    public void setAppendPercentSign(final boolean appendPercentSign) {
+        this.appendPercentSign = appendPercentSign;
+    }
+
+    public void setPrecision(final int precision) {
+        this.precision = precision;
+        buildFormat(precision);
+    }
+
+    @Override
+    public String toString(final Number object) {
+        return format.format(object.doubleValue() * 100.0) + (appendPercentSign ? "%" : "");
     }
 
 }

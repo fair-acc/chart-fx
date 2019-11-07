@@ -23,15 +23,6 @@ public class DoubleRingBuffer {
     }
 
     /**
-     * resets and clears buffer
-     */
-    public void reset() {
-        writePos = 0;
-        readPos = 0;
-        flipped = false;
-    }
-
-    /**
      * 
      * @return number of available buffer elements
      */
@@ -40,17 +31,6 @@ public class DoubleRingBuffer {
             return writePos - readPos;
         }
         return capacity - readPos + writePos;
-    }
-
-    /**
-     * 
-     * @return number of elements that can be written before buffer wraps-around
-     */
-    public int remainingCapacity() {
-        if (!flipped) {
-            return capacity - writePos;
-        }
-        return readPos - writePos;
     }
 
     /**
@@ -131,6 +111,26 @@ public class DoubleRingBuffer {
         }
 
         return newElementsReadPos;
+    }
+
+    /**
+     * 
+     * @return number of elements that can be written before buffer wraps-around
+     */
+    public int remainingCapacity() {
+        if (!flipped) {
+            return capacity - writePos;
+        }
+        return readPos - writePos;
+    }
+
+    /**
+     * resets and clears buffer
+     */
+    public void reset() {
+        writePos = 0;
+        readPos = 0;
+        flipped = false;
     }
 
     /**

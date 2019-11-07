@@ -19,19 +19,19 @@ public class SimpleFormatter extends AbstractFormatter {
 
     /**
      * Construct a DefaultFormatter for the given NumberAxis
+     */
+    public SimpleFormatter() {
+        super();
+        setTickUnitSupplier(SimpleFormatter.DEFAULT_TICK_UNIT_SUPPLIER);
+    }
+
+    /**
+     * Construct a DefaultFormatter for the given NumberAxis
      *
      * @param axis The axis to format tick marks for
      */
     public SimpleFormatter(final Axis axis) {
         super(axis);
-    }
-
-    /**
-     * Construct a DefaultFormatter for the given NumberAxis
-     */
-    public SimpleFormatter() {
-        super();
-        setTickUnitSupplier(SimpleFormatter.DEFAULT_TICK_UNIT_SUPPLIER);
     }
 
     /**
@@ -45,36 +45,6 @@ public class SimpleFormatter extends AbstractFormatter {
         this(axis);
         this.prefix = prefix;
         this.suffix = suffix;
-    }
-
-    @Override
-    protected void rangeUpdated() {
-        // normally set formatter based on range, this doesn't because it's the
-        // 'simple' implementation
-    }
-
-    /**
-     * Converts the object provided into its string form. Format of the returned string is defined by this converter.
-     *
-     * @return a string representation of the object passed in.
-     * @see StringConverter#toString
-     */
-    @Override
-    public String toString(final Number object) {
-        return toString(object, formatter);
-    }
-
-    //    private String toString(final Number object, final String numFormatter) {
-    //        if (numFormatter == null || numFormatter.isEmpty()) {
-    //            return toString(object, formatter);
-    //        }
-    //        return toString(object, new DecimalFormat(numFormatter));
-    //    }
-
-    private String toString(final Number object, final DecimalFormat numFormatter) {
-        final String pref = prefix == null ? "" : prefix;
-        final String suff = suffix == null ? "" : suffix;
-        return pref + numFormatter.format(object) + suff;
     }
 
     /**
@@ -93,5 +63,35 @@ public class SimpleFormatter extends AbstractFormatter {
         } catch (final ParseException exc) {
             throw new IllegalArgumentException(exc);
         }
+    }
+
+    @Override
+    protected void rangeUpdated() {
+        // normally set formatter based on range, this doesn't because it's the
+        // 'simple' implementation
+    }
+
+    // private String toString(final Number object, final String numFormatter) {
+    // if (numFormatter == null || numFormatter.isEmpty()) {
+    // return toString(object, formatter);
+    // }
+    // return toString(object, new DecimalFormat(numFormatter));
+    // }
+
+    /**
+     * Converts the object provided into its string form. Format of the returned string is defined by this converter.
+     *
+     * @return a string representation of the object passed in.
+     * @see StringConverter#toString
+     */
+    @Override
+    public String toString(final Number object) {
+        return toString(object, formatter);
+    }
+
+    private String toString(final Number object, final DecimalFormat numFormatter) {
+        final String pref = prefix == null ? "" : prefix;
+        final String suff = suffix == null ? "" : suffix;
+        return pref + numFormatter.format(object) + suff;
     }
 }

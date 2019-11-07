@@ -12,7 +12,6 @@ import de.gsi.chart.plugins.Zoomer;
 import de.gsi.chart.renderer.ErrorStyle;
 import de.gsi.chart.renderer.spi.ErrorDataSetRenderer;
 import de.gsi.chart.renderer.spi.utils.DefaultRenderColorScheme;
-import de.gsi.chart.renderer.spi.utils.FillPatternStyle;
 import de.gsi.dataset.spi.DoubleErrorDataSet;
 import javafx.application.Application;
 import javafx.collections.FXCollections;
@@ -115,8 +114,7 @@ public class CustomColourSchemeSample extends Application {
     }
 
     /**
-     * @param args
-     *            the command line arguments
+     * @param args the command line arguments
      */
     public static void main(final String[] args) {
         Application.launch(args);

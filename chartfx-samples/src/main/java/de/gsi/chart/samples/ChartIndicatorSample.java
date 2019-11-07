@@ -10,9 +10,6 @@ import org.slf4j.LoggerFactory;
 import de.gsi.chart.XYChart;
 import de.gsi.chart.axes.spi.DefaultNumericAxis;
 import de.gsi.chart.axes.spi.format.DefaultTimeFormatter;
-import de.gsi.dataset.spi.FifoDoubleErrorDataSet;
-import de.gsi.dataset.testdata.spi.RandomDataGenerator;
-import de.gsi.dataset.utils.ProcessingProfiler;
 import de.gsi.chart.plugins.DataPointTooltip;
 import de.gsi.chart.plugins.EditAxis;
 import de.gsi.chart.plugins.Panner;
@@ -27,6 +24,9 @@ import de.gsi.chart.renderer.datareduction.DefaultDataReducer;
 import de.gsi.chart.renderer.spi.ErrorDataSetRenderer;
 import de.gsi.chart.ui.geometry.Side;
 import de.gsi.chart.utils.SimplePerformanceMeter;
+import de.gsi.dataset.spi.FifoDoubleErrorDataSet;
+import de.gsi.dataset.testdata.spi.RandomDataGenerator;
+import de.gsi.dataset.utils.ProcessingProfiler;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.scene.Scene;
@@ -41,7 +41,7 @@ import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
 public class ChartIndicatorSample extends Application {
-	private static final Logger LOGGER = LoggerFactory.getLogger(ChartIndicatorSample.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ChartIndicatorSample.class);
     private static final int DEBUG_UPDATE_RATE = 1000;
     private static final int MIN_PIXEL_DISTANCE = 0; // 0: just drop points that
                                                      // are drawn on the same
@@ -66,31 +66,94 @@ public class ChartIndicatorSample extends Application {
     private Timer timer;
     private long startTime;
 
-    protected void initErrorDataSetRenderer(final ErrorDataSetRenderer eRenderer) {
-        eRenderer.setErrorType(ErrorStyle.ERRORSURFACE);
-        eRenderer.setDashSize(ChartIndicatorSample.MIN_PIXEL_DISTANCE); // plot
-                                                                        // pixel-to-pixel
-                                                                        // distance
-        eRenderer.setDrawMarker(false);
-        final DefaultDataReducer reductionAlgorithm = (DefaultDataReducer) eRenderer.getRendererDataReducer();
-        reductionAlgorithm.setMinPointPixelDistance(ChartIndicatorSample.MIN_PIXEL_DISTANCE);
+    private void generateData() {
+        startTime = ProcessingProfiler.getTimeStamp();
+        final double now = System.currentTimeMillis() / 1000.0 + 1; // N.B. '+1'
+                                                                    // to check
+                                                                    // for
+                                                                    // resolution
+
+        if (rollingBufferDipoleCurrent.getDataCount() == 0) {
+            rollingBufferBeamIntensity.autoNotification().set(false);
+            rollingBufferDipoleCurrent.autoNotification().set(false);
+            rollingSine.autoNotification().set(false);
+            for (int n = ChartIndicatorSample.N_SAMPLES; n > 0; n--) {
+                final double t = now - n * ChartIndicatorSample.UPDATE_PERIOD / 1000.0;
+                final double y = 25 * ChartIndicatorSample.rampFunctionDipoleCurrent(t);
+                final double y2 = 100 * ChartIndicatorSample.rampFunctionBeamIntensity(t);
+                final double ey = 1;
+                rollingBufferDipoleCurrent.add(t, y, ey, ey);
+                rollingBufferBeamIntensity.add(
+                        t + ChartIndicatorSample.UPDATE_PERIOD / 1000.0 * RandomDataGenerator.random(), y2, ey, ey);
+                rollingSine.add(t + 1 + ChartIndicatorSample.UPDATE_PERIOD / 1000.0 * RandomDataGenerator.random(),
+                        y * 0.8, ey, ey);
+            }
+            rollingBufferBeamIntensity.autoNotification().set(true);
+            rollingBufferDipoleCurrent.autoNotification().set(true);
+            rollingSine.autoNotification().set(true);
+        } else {
+            rollingBufferDipoleCurrent.autoNotification().set(false);
+            final double t = now;
+            final double y = 25 * ChartIndicatorSample.rampFunctionDipoleCurrent(t);
+            final double y2 = 100 * ChartIndicatorSample.rampFunctionBeamIntensity(t);
+            final double ey = 1;
+            rollingBufferDipoleCurrent.add(t, y, ey, ey);
+            rollingBufferBeamIntensity.add(t, y2, ey, ey);
+            final double val = 1500 + 1000.0 * Math.sin(Math.PI * 2 * 0.1 * t);
+            rollingSine.add(t + 1, val, ey, ey);
+            rollingBufferDipoleCurrent.autoNotification().set(true);
+        }
+
+        ProcessingProfiler.getTimeDiff(startTime, "adding data into DataSet");
     }
 
-    @Override
-    public void start(final Stage primaryStage) {
-        ProcessingProfiler.setDebugState(false);
+    private HBox getHeaderBar(final Scene scene, final TimerTask task) {
 
-        final BorderPane root = new BorderPane();
-        final Scene scene = new Scene(root, 1800, 400);
-        root.setCenter(initComponents(scene));
+        final Button newDataSet = new Button("new DataSet");
+        newDataSet.setOnAction(evt -> Platform.runLater(task));
 
-        startTime = ProcessingProfiler.getTimeStamp();
-        primaryStage.setTitle(this.getClass().getSimpleName());
-        primaryStage.setScene(scene);
-        primaryStage.setOnCloseRequest(evt -> System.exit(0));
-        primaryStage.show();
-        ProcessingProfiler.getTimeDiff(startTime, "for showing");
+        final Button startTimer = new Button("timer");
+        startTimer.setOnAction(evt -> {
+            rollingBufferBeamIntensity.reset();
+            rollingBufferDipoleCurrent.reset();
+            if (timer == null) {
+                timer = new Timer();
+                timer.scheduleAtFixedRate(task, UPDATE_DELAY, UPDATE_PERIOD);
+            } else {
+                timer.cancel();
+                timer = null;
+            }
+        });
 
+        // H-Spacer
+        final Region spacer = new Region();
+        spacer.setMinWidth(Region.USE_PREF_SIZE);
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+
+        // JavaFX and Chart Performance metrics
+        final SimplePerformanceMeter meter = new SimplePerformanceMeter(scene, DEBUG_UPDATE_RATE);
+
+        final Label fxFPS = new Label();
+        fxFPS.setFont(Font.font("Monospaced", 12));
+        final Label chartFPS = new Label();
+        chartFPS.setFont(Font.font("Monospaced", 12));
+        final Label cpuLoadProcess = new Label();
+        cpuLoadProcess.setFont(Font.font("Monospaced", 12));
+        final Label cpuLoadSystem = new Label();
+        cpuLoadSystem.setFont(Font.font("Monospaced", 12));
+        meter.fxFrameRateProperty().addListener((ch, o, n) -> {
+            final String fxRate = String.format("%4.1f", meter.getFxFrameRate());
+            final String actualRate = String.format("%4.1f", meter.getActualFrameRate());
+            final String cpuProcess = String.format("%5.1f", meter.getProcessCpuLoad());
+            final String cpuSystem = String.format("%5.1f", meter.getSystemCpuLoad());
+            fxFPS.setText(String.format("%-6s: %4s %s", "JavaFX", fxRate, "FPS, "));
+            chartFPS.setText(String.format("%-6s: %4s %s", "Actual", actualRate, "FPS, "));
+            cpuLoadProcess.setText(String.format("%-11s: %4s %s", "Process-CPU", cpuProcess, "%"));
+            cpuLoadSystem.setText(String.format("%-11s: %4s %s", "System -CPU", cpuSystem, "%"));
+        });
+
+        return new HBox(newDataSet, startTimer, spacer, new VBox(fxFPS, chartFPS),
+                new VBox(cpuLoadProcess, cpuLoadSystem));
     }
 
     public BorderPane initComponents(final Scene scene) {
@@ -232,83 +295,38 @@ public class ChartIndicatorSample extends Application {
         return root;
     }
 
-    private HBox getHeaderBar(final Scene scene, final TimerTask task) {
-
-        final Button newDataSet = new Button("new DataSet");
-        newDataSet.setOnAction(evt -> Platform.runLater(task));
-
-        final Button startTimer = new Button("timer");
-        startTimer.setOnAction(evt -> {
-            rollingBufferBeamIntensity.reset();
-            rollingBufferDipoleCurrent.reset();
-            if (timer == null) {
-                timer = new Timer();
-                timer.scheduleAtFixedRate(task, UPDATE_DELAY, UPDATE_PERIOD);
-            } else {
-                timer.cancel();
-                timer = null;
-            }
-        });
-
-        // H-Spacer
-        final Region spacer = new Region();
-        spacer.setMinWidth(Region.USE_PREF_SIZE);
-        HBox.setHgrow(spacer, Priority.ALWAYS);
-
-        // JavaFX and Chart Performance metrics
-        final SimplePerformanceMeter meter = new SimplePerformanceMeter(scene, DEBUG_UPDATE_RATE);
-
-        final Label fxFPS = new Label();
-        fxFPS.setFont(Font.font("Monospaced", 12));
-        final Label chartFPS = new Label();
-        chartFPS.setFont(Font.font("Monospaced", 12));
-        final Label cpuLoadProcess = new Label();
-        cpuLoadProcess.setFont(Font.font("Monospaced", 12));
-        final Label cpuLoadSystem = new Label();
-        cpuLoadSystem.setFont(Font.font("Monospaced", 12));
-        meter.fxFrameRateProperty().addListener((ch, o, n) -> {
-            final String fxRate = String.format("%4.1f", meter.getFxFrameRate());
-            final String actualRate = String.format("%4.1f", meter.getActualFrameRate());
-            final String cpuProcess = String.format("%5.1f", meter.getProcessCpuLoad());
-            final String cpuSystem = String.format("%5.1f", meter.getSystemCpuLoad());
-            fxFPS.setText(String.format("%-6s: %4s %s", "JavaFX", fxRate, "FPS, "));
-            chartFPS.setText(String.format("%-6s: %4s %s", "Actual", actualRate, "FPS, "));
-            cpuLoadProcess.setText(String.format("%-11s: %4s %s", "Process-CPU", cpuProcess, "%"));
-            cpuLoadSystem.setText(String.format("%-11s: %4s %s", "System -CPU", cpuSystem, "%"));
-        });
-
-        return new HBox(newDataSet, startTimer, spacer, new VBox(fxFPS, chartFPS),
-                new VBox(cpuLoadProcess, cpuLoadSystem));
+    protected void initErrorDataSetRenderer(final ErrorDataSetRenderer eRenderer) {
+        eRenderer.setErrorType(ErrorStyle.ERRORSURFACE);
+        eRenderer.setDashSize(ChartIndicatorSample.MIN_PIXEL_DISTANCE); // plot
+                                                                        // pixel-to-pixel
+                                                                        // distance
+        eRenderer.setDrawMarker(false);
+        final DefaultDataReducer reductionAlgorithm = (DefaultDataReducer) eRenderer.getRendererDataReducer();
+        reductionAlgorithm.setMinPointPixelDistance(ChartIndicatorSample.MIN_PIXEL_DISTANCE);
     }
 
-    private static double square(final double frequency, final double t) {
-        final double sine = 100 * Math.sin(2.0 * Math.PI * frequency * t);
-        final double squarePoint = Math.signum(sine);
-        return squarePoint >= 0 ? squarePoint : 0.0;
+    @Override
+    public void start(final Stage primaryStage) {
+        ProcessingProfiler.setDebugState(false);
+
+        final BorderPane root = new BorderPane();
+        final Scene scene = new Scene(root, 1800, 400);
+        root.setCenter(initComponents(scene));
+
+        startTime = ProcessingProfiler.getTimeStamp();
+        primaryStage.setTitle(this.getClass().getSimpleName());
+        primaryStage.setScene(scene);
+        primaryStage.setOnCloseRequest(evt -> System.exit(0));
+        primaryStage.show();
+        ProcessingProfiler.getTimeDiff(startTime, "for showing");
+
     }
 
-    private static double sine(final double frequency, final double t) {
-        return Math.sin(2.0 * Math.PI * frequency * t);
-    }
-
-    private static double rampFunctionDipoleCurrent(final double t) {
-        final int second = (int) Math.floor(t);
-        final double subSecond = t - second;
-        double offset = 0.3;
-
-        double y = 100 * ChartIndicatorSample.sine(1, subSecond - offset);
-
-        // every 5th cycle is a booster mode cycle
-        if (second % 5 == 0) {
-            offset = 0.1;
-            y = 100 * Math.pow(ChartIndicatorSample.sine(1.5, subSecond - offset), 2);
-        }
-
-        if (y <= 0 || subSecond < offset) {
-            y = 0;
-        }
-        return y + 10;
-
+    /**
+     * @param args the command line arguments
+     */
+    public static void main(final String[] args) {
+        Application.launch(args);
     }
 
     private static double rampFunctionBeamIntensity(final double t) {
@@ -333,52 +351,33 @@ public class ChartIndicatorSample extends Application {
 
     }
 
-    private void generateData() {
-        startTime = ProcessingProfiler.getTimeStamp();
-        final double now = System.currentTimeMillis() / 1000.0 + 1; // N.B. '+1'
-                                                                    // to check
-                                                                    // for
-                                                                    // resolution
+    private static double rampFunctionDipoleCurrent(final double t) {
+        final int second = (int) Math.floor(t);
+        final double subSecond = t - second;
+        double offset = 0.3;
 
-        if (rollingBufferDipoleCurrent.getDataCount() == 0) {
-            rollingBufferBeamIntensity.autoNotification().set(false);
-            rollingBufferDipoleCurrent.autoNotification().set(false);
-            rollingSine.autoNotification().set(false);
-            for (int n = ChartIndicatorSample.N_SAMPLES; n > 0; n--) {
-                final double t = now - n * ChartIndicatorSample.UPDATE_PERIOD / 1000.0;
-                final double y = 25 * ChartIndicatorSample.rampFunctionDipoleCurrent(t);
-                final double y2 = 100 * ChartIndicatorSample.rampFunctionBeamIntensity(t);
-                final double ey = 1;
-                rollingBufferDipoleCurrent.add(t, y, ey, ey);
-                rollingBufferBeamIntensity.add(
-                        t + ChartIndicatorSample.UPDATE_PERIOD / 1000.0 * RandomDataGenerator.random(), y2, ey, ey);
-                rollingSine.add(t + 1 + ChartIndicatorSample.UPDATE_PERIOD / 1000.0 * RandomDataGenerator.random(),
-                        y * 0.8, ey, ey);
-            }
-            rollingBufferBeamIntensity.autoNotification().set(true);
-            rollingBufferDipoleCurrent.autoNotification().set(true);
-            rollingSine.autoNotification().set(true);
-        } else {
-            rollingBufferDipoleCurrent.autoNotification().set(false);
-            final double t = now;
-            final double y = 25 * ChartIndicatorSample.rampFunctionDipoleCurrent(t);
-            final double y2 = 100 * ChartIndicatorSample.rampFunctionBeamIntensity(t);
-            final double ey = 1;
-            rollingBufferDipoleCurrent.add(t, y, ey, ey);
-            rollingBufferBeamIntensity.add(t, y2, ey, ey);
-            final double val = 1500 + 1000.0 * Math.sin(Math.PI * 2 * 0.1 * t);
-            rollingSine.add(t + 1, val, ey, ey);
-            rollingBufferDipoleCurrent.autoNotification().set(true);
+        double y = 100 * ChartIndicatorSample.sine(1, subSecond - offset);
+
+        // every 5th cycle is a booster mode cycle
+        if (second % 5 == 0) {
+            offset = 0.1;
+            y = 100 * Math.pow(ChartIndicatorSample.sine(1.5, subSecond - offset), 2);
         }
 
-        ProcessingProfiler.getTimeDiff(startTime, "adding data into DataSet");
+        if (y <= 0 || subSecond < offset) {
+            y = 0;
+        }
+        return y + 10;
+
     }
 
-    /**
-     * @param args
-     *            the command line arguments
-     */
-    public static void main(final String[] args) {
-        Application.launch(args);
+    private static double sine(final double frequency, final double t) {
+        return Math.sin(2.0 * Math.PI * frequency * t);
+    }
+
+    private static double square(final double frequency, final double t) {
+        final double sine = 100 * Math.sin(2.0 * Math.PI * frequency * t);
+        final double squarePoint = Math.signum(sine);
+        return squarePoint >= 0 ? squarePoint : 0.0;
     }
 }

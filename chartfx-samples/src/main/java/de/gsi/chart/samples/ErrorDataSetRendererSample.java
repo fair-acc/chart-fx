@@ -39,8 +39,50 @@ public class ErrorDataSetRendererSample extends Application {
     private static final int UPDATE_DELAY = 1000; // [ms]
     private static final int UPDATE_PERIOD = 200; // [ms]
     private final DoubleErrorDataSet dataSet = new DoubleErrorDataSet("TestData", ErrorDataSetRendererSample.N_SAMPLES);
-    private final DoubleDataSet dataSetNoError = new DoubleDataSet("TestDataNoErrors", ErrorDataSetRendererSample.N_SAMPLES);
+    private final DoubleDataSet dataSetNoError = new DoubleDataSet("TestDataNoErrors",
+            ErrorDataSetRendererSample.N_SAMPLES);
     private Timer timer;
+
+    private HBox getHeaderBar(final Scene scene) {
+
+        final Button newDataSet = new Button("new DataSet");
+        newDataSet.setOnAction(evt -> getTimerTask().run());
+
+        // repetitively generate new data
+        final Button startTimer = new Button("timer");
+        startTimer.setOnAction(evt -> {
+            if (timer == null) {
+                timer = new Timer();
+                timer.scheduleAtFixedRate(getTimerTask(), UPDATE_DELAY, UPDATE_PERIOD);
+            } else {
+                timer.cancel();
+                timer = null; // NOPMD
+            }
+        });
+
+        // H-Spacer
+        final Region spacer = new Region();
+        spacer.setMinWidth(Region.USE_PREF_SIZE);
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+
+        return new HBox(newDataSet, startTimer, spacer, new ProfilerInfoBox(scene, DEBUG_UPDATE_RATE));
+    }
+
+    private TimerTask getTimerTask() {
+        return new TimerTask() {
+            private int updateCount;
+
+            @Override
+            public void run() {
+                generateData(dataSet, dataSetNoError);
+
+                if (updateCount % 10 == 0 && LOGGER.isDebugEnabled()) {
+                    LOGGER.atDebug().addArgument(updateCount).log("update iteration #{}");
+                }
+                updateCount++;
+            }
+        };
+    }
 
     @Override
     public void start(final Stage primaryStage) {
@@ -109,55 +151,6 @@ public class ErrorDataSetRendererSample extends Application {
 
     }
 
-    private HBox getHeaderBar(final Scene scene) {
-
-        final Button newDataSet = new Button("new DataSet");
-        newDataSet.setOnAction(evt -> getTimerTask().run());
-
-        // repetitively generate new data
-        final Button startTimer = new Button("timer");
-        startTimer.setOnAction(evt -> {
-            if (timer == null) {
-                timer = new Timer();
-                timer.scheduleAtFixedRate(getTimerTask(), UPDATE_DELAY, UPDATE_PERIOD);
-            } else {
-                timer.cancel();
-                timer = null; // NOPMD
-            }
-        });
-
-        // H-Spacer
-        final Region spacer = new Region();
-        spacer.setMinWidth(Region.USE_PREF_SIZE);
-        HBox.setHgrow(spacer, Priority.ALWAYS);
-
-        return new HBox(newDataSet, startTimer, spacer, new ProfilerInfoBox(scene, DEBUG_UPDATE_RATE));
-    }
-
-    private TimerTask getTimerTask() {
-        return new TimerTask() {
-            private int updateCount;
-
-            @Override
-            public void run() {
-                generateData(dataSet, dataSetNoError);
-
-                if (updateCount % 10 == 0 && LOGGER.isDebugEnabled()) {
-                    LOGGER.atDebug().addArgument(updateCount).log("update iteration #{}");
-                }
-                updateCount++;
-            }
-        };
-    }
-
-    /**
-     * @param args
-     *            the command line arguments
-     */
-    public static void main(final String[] args) {
-        Application.launch(args);
-    }
-
     private static void generateData(final DoubleErrorDataSet dataSet, final DoubleDataSet dataSetNoErrors) {
         final long startTime = ProcessingProfiler.getTimeStamp();
 
@@ -175,7 +168,7 @@ public class ErrorDataSetRendererSample extends Application {
             for (int n = 0; n < ErrorDataSetRendererSample.N_SAMPLES; n++) {
                 final double x = n;
                 oldY += RandomDataGenerator.random() - 0.5;
-                final double y = oldY + (n == 500000 ? 500.0 : 0) /*+ ((x>1e4 && x <2e4) ? Double.NaN: 0.0)*/;
+                final double y = oldY + (n == 500000 ? 500.0 : 0) /* + ((x>1e4 && x <2e4) ? Double.NaN: 0.0) */;
                 final double ex = 0.1;
                 final double ey = 10;
                 dataSet.add(x, y, ex, ey);
@@ -193,10 +186,17 @@ public class ErrorDataSetRendererSample extends Application {
         }));
         // need to issue a separate update notification
         // N.B. for performance reasons we let only 'dataSet' fire an event, since we modified both
-        // dataSetNoErrors will be updated alongside dataSet. 
+        // dataSetNoErrors will be updated alongside dataSet.
         dataSet.fireInvalidated(new AddedDataEvent(dataSet));
-        // disabled on purpose -- dataSetNoErrors.fireInvalidated(new AddedDataEvent(dataSet)) -- 
+        // disabled on purpose -- dataSetNoErrors.fireInvalidated(new AddedDataEvent(dataSet)) --
 
         ProcessingProfiler.getTimeDiff(startTime, "generating data DataSet");
+    }
+
+    /**
+     * @param args the command line arguments
+     */
+    public static void main(final String[] args) {
+        Application.launch(args);
     }
 }

@@ -27,7 +27,7 @@ import javafx.scene.layout.VBox;
  * @author rstein
  */
 public class WaveletDenoising extends AbstractDemoApplication {
-	private static final Logger LOGGER = LoggerFactory.getLogger(WaveletDenoising.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(WaveletDenoising.class);
     private static final int MAX_POINTS = 512;
     private static final boolean LOAD_EXAMPLE_DATA = false;
     private DataSet fraw;
@@ -36,6 +36,21 @@ public class WaveletDenoising extends AbstractDemoApplication {
     private DataSet fspectraModel;
     private DataSet fspectra;
     private DataSet fspectraFit;
+
+    @Override
+    public Node getContent() {
+        initData();
+
+        final DemoChart chart1 = new DemoChart();
+        chart1.getXAxis().setName("time");
+        chart1.getDatasets().addAll(fdata, fraw, freconstructed);
+
+        final DemoChart chart2 = new DemoChart();
+        chart2.getXAxis().setName("frequency");
+        chart2.getDatasets().addAll(fspectraModel, fspectra, fspectraFit);
+
+        return new VBox(chart1, chart2);
+    }
 
     private void initData() {
         // third order polynomial function
@@ -170,28 +185,13 @@ public class WaveletDenoising extends AbstractDemoApplication {
             LOGGER.atInfo().log("improved noise floor from %f \t-> %f \t(%f %%)\n", error1, error2,
                     (error1 - error2) / error1 * 100);
         } else {
-        	LOGGER.atInfo().log("deteriorated noise floor from %f \t-> %f \t(%f %%)\n", error1, error2,
+            LOGGER.atInfo().log("deteriorated noise floor from %f \t-> %f \t(%f %%)\n", error1, error2,
                     (error1 - error2) / error1 * 100);
         }
 
         fdata = new DefaultDataSet("model ", xValues, yModel, xValues.length, true);
         fraw = new DefaultDataSet("raw data", xValues, yValues, xValues.length, true);
         freconstructed = new DefaultDataSet("reconstructed", xValues, recon, xValues.length, true);
-    }
-
-    @Override
-    public Node getContent() {
-        initData();
-
-        final DemoChart chart1 = new DemoChart();
-        chart1.getXAxis().setName("time");
-        chart1.getDatasets().addAll(fdata, fraw, freconstructed);
-
-        final DemoChart chart2 = new DemoChart();
-        chart2.getXAxis().setName("frequency");
-        chart2.getDatasets().addAll(fspectraModel, fspectra, fspectraFit);
-
-        return new VBox(chart1, chart2);
     }
 
     private double[][] readDemoData() {
@@ -215,9 +215,9 @@ public class WaveletDenoising extends AbstractDemoApplication {
             return ret;
 
         } catch (Exception e) {
-        	if (LOGGER.isErrorEnabled()) {
-        		LOGGER.atError().setCause(e).log("read error");
-        	}
+            if (LOGGER.isErrorEnabled()) {
+                LOGGER.atError().setCause(e).log("read error");
+            }
         }
         return new double[10][10];
     }

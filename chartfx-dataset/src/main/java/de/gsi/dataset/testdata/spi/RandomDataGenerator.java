@@ -36,13 +36,10 @@ public final class RandomDataGenerator {
     private static double nextNextGaussian;
     private static boolean haveNextNextGaussian = false;
 
-    public static double[] generateZeroOneArray(final double firstValue, final int size) {
-        final double[] data = new double[size];
+    public static byte[] generateByteArray(final int size) {
+        final byte[] data = new byte[size];
 
-        data[0] = firstValue;
-        for (int i = 1; i < data.length; i++) {
-            data[i] = RND.nextBoolean() ? 0 : 1;
-        }
+        RND_DEPRECATED.nextBytes(data);
 
         return data;
     }
@@ -85,50 +82,37 @@ public final class RandomDataGenerator {
         return data;
     }
 
-    public static byte[] generateByteArray(final int size) {
-        final byte[] data = new byte[size];
+    public static double[] generateZeroOneArray(final double firstValue, final int size) {
+        final double[] data = new double[size];
 
-        RND_DEPRECATED.nextBytes(data);
+        data[0] = firstValue;
+        for (int i = 1; i < data.length; i++) {
+            data[i] = RND.nextBoolean() ? 0 : 1;
+        }
 
         return data;
     }
 
-    synchronized static public double nextGaussian() {
-        // See Knuth, ACP, Section 3.4.1 Algorithm C.
-        if (haveNextNextGaussian) {
-            haveNextNextGaussian = false;
-            return nextNextGaussian;
+    public static double[] getGaussianX() {
+        if (RandomDataGenerator.xValues == null) {
+            RandomDataGenerator.getNew1DGaussian();
         }
 
-        double v1;
-        double v2;
-        double s;
-        do {
-            v1 = 2 * RND.nextDouble() - 1; // between -1 and 1
-            v2 = 2 * RND.nextDouble() - 1; // between -1 and 1
-            s = v1 * v1 + v2 * v2;
-        } while (s >= 1 || s == 0);
-        final double multiplier = StrictMath.sqrt(-2 * StrictMath.log(s) / s);
-        nextNextGaussian = v2 * multiplier;
-        haveNextNextGaussian = true;
-        return v1 * multiplier;
+        return RandomDataGenerator.xValues;
     }
 
-    static public double random() {
-        return RND.nextDouble();
+    public static double[] getGaussianY() {
+        if (RandomDataGenerator.yValues == null) {
+            RandomDataGenerator.getNew1DGaussian();
+        }
+
+        return RandomDataGenerator.yValues;
     }
 
     //
     // ---------- For configuring the Gaussian data generator
     // ------------------------------------------------------------
     //
-
-    public static double myRandom(final double low, final double high) {
-        assert high > low;
-        return RND.nextDouble() * (high - low) + low;
-    }
-
-
 
     public static synchronized void getNew1DGaussian() {
         RandomDataGenerator.slope = RandomDataGenerator.myRandom(-0.003, 0.003);
@@ -159,26 +143,41 @@ public final class RandomDataGenerator {
 
         for (int i = 0; i < RandomDataGenerator.NUMBER_OF_POINTS; i++) {
             RandomDataGenerator.yValues[i] = RandomDataGenerator.yValues[i] > RandomDataGenerator.SATURATION_LEVEL
-                    ? RandomDataGenerator.SATURATION_LEVEL : RandomDataGenerator.yValues[i];
+                    ? RandomDataGenerator.SATURATION_LEVEL
+                    : RandomDataGenerator.yValues[i];
         }
-    }
-
-    public static double[] getGaussianY() {
-        if (RandomDataGenerator.yValues == null) {
-            RandomDataGenerator.getNew1DGaussian();
-        }
-
-        return RandomDataGenerator.yValues;
-    }
-
-    public static double[] getGaussianX() {
-        if (RandomDataGenerator.xValues == null) {
-            RandomDataGenerator.getNew1DGaussian();
-        }
-
-        return RandomDataGenerator.xValues;
     }
 
     public static void main(final String[] args) {
+    }
+
+    public static double myRandom(final double low, final double high) {
+        assert high > low;
+        return RND.nextDouble() * (high - low) + low;
+    }
+
+    synchronized static public double nextGaussian() {
+        // See Knuth, ACP, Section 3.4.1 Algorithm C.
+        if (haveNextNextGaussian) {
+            haveNextNextGaussian = false;
+            return nextNextGaussian;
+        }
+
+        double v1;
+        double v2;
+        double s;
+        do {
+            v1 = 2 * RND.nextDouble() - 1; // between -1 and 1
+            v2 = 2 * RND.nextDouble() - 1; // between -1 and 1
+            s = v1 * v1 + v2 * v2;
+        } while (s >= 1 || s == 0);
+        final double multiplier = StrictMath.sqrt(-2 * StrictMath.log(s) / s);
+        nextNextGaussian = v2 * multiplier;
+        haveNextNextGaussian = true;
+        return v1 * multiplier;
+    }
+
+    static public double random() {
+        return RND.nextDouble();
     }
 }

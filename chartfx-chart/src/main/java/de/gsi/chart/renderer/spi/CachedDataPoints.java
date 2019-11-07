@@ -91,15 +91,37 @@ class CachedDataPoints {
         ArrayUtils.fillArray(styles, null);
     }
 
-    public void release() {
-        Cache.release(X_VALUES, xValues);
-        Cache.release(Y_VALUES, yValues);
-        Cache.release(ERROR_Y_NEG, errorYNeg);
-        Cache.release(ERROR_Y_POS, errorYPos);
-        Cache.release(ERROR_X_NEG, errorXNeg);
-        Cache.release(ERROR_X_POS, errorXPos);
-        Cache.release(SELECTED2, selected);
-        Cache.release(STYLES2, styles);
+    protected void computeBoundaryVariables(final Axis xAxis, final Axis yAxis) {
+        xAxisInverted = xAxis.isInvertedAxis();
+        yAxisInverted = yAxis.isInvertedAxis();
+
+        // compute cached axis variables ... about 50% faster than the
+        // generic template based version from the original ValueAxis<Number>
+        if (xAxis.isLogAxis()) {
+            xZero = xAxis.getDisplayPosition(xAxis.getMin());
+        } else {
+            xZero = xAxis.getDisplayPosition(0);
+        }
+        if (yAxis.isLogAxis()) {
+            yZero = yAxis.getDisplayPosition(yAxis.getMin());
+        } else {
+            yZero = yAxis.getDisplayPosition(0);
+        }
+
+        yMin = yAxis.getDisplayPosition(yAxis.getMin());
+        yMax = yAxis.getDisplayPosition(yAxis.getMax());
+        xMin = xAxis.getDisplayPosition(xAxis.getMin());
+        xMax = xAxis.getDisplayPosition(xAxis.getMax());
+
+        xRange = Math.abs(xMax - xMin);
+        yRange = Math.abs(yMax - yMin);
+        maxRadius = 0.5 * Math.max(Math.min(xRange, yRange), 20) * 0.9;
+        // TODO: parameterise '0.9' -> radius axis fills 90% of min canvas
+        // axis
+        if (polarPlot) {
+            xZero = 0.5 * xRange;
+            yZero = 0.5 * yRange;
+        }
     }
 
     private void computeErrorStyles(final DataSet dataSet, final int min, final int max) {
@@ -159,6 +181,16 @@ class CachedDataPoints {
         });
     }
 
+    protected void computeScreenCoordinates(final Axis xAxis, final Axis yAxis, final DataSet dataSet,
+            final int dsIndex, final int min, final int max, final ErrorStyle localRendErrorStyle,
+            final boolean isPolarPlot, final boolean doAllowForNaNs) {
+        setBoundaryConditions(xAxis, yAxis, dataSet, dsIndex, min, max, localRendErrorStyle, isPolarPlot,
+                doAllowForNaNs);
+
+        // compute data set to screen coordinates
+        computeScreenCoordinatesNonThreaded(xAxis, yAxis, dataSet, min, max);
+    }
+
     private void computeScreenCoordinatesEuclidean(final Axis xAxis, final Axis yAxis, final DataSet dataSet,
             final int min, final int max) {
         for (int dimIndex = 0; dimIndex < 2; dimIndex++) {
@@ -183,6 +215,57 @@ class CachedDataPoints {
         }
 
         computeErrorStyles(dataSet, min, max);
+    }
+
+    protected void computeScreenCoordinatesInParallel(final Axis xAxis, final Axis yAxis, final DataSet dataSet,
+            final int dsIndex, final int min, final int max, final ErrorStyle localRendErrorStyle,
+            final boolean isPolarPlot, final boolean doAllowForNaNs) {
+        setBoundaryConditions(xAxis, yAxis, dataSet, dsIndex, min, max, localRendErrorStyle, isPolarPlot,
+                doAllowForNaNs);
+
+        // compute data set to screen coordinates
+        computeScreenCoordinatesParallel(xAxis, yAxis, dataSet, min, max);
+    }
+
+    protected void computeScreenCoordinatesNonThreaded(final Axis xAxis, final Axis yAxis, final DataSet dataSet,
+            final int min, final int max) {
+        if (polarPlot) {
+            computeScreenCoordinatesPolar(yAxis, dataSet, min, max);
+        } else {
+            computeScreenCoordinatesEuclidean(xAxis, yAxis, dataSet, min, max);
+        }
+    }
+
+    protected void computeScreenCoordinatesParallel(final Axis xAxis, final Axis yAxis, final DataSet dataSet,
+            final int min, final int max) {
+        final int minthreshold = 1000;
+        final int divThread = (int) Math
+                .ceil(Math.abs(max - min) / (double) CachedDaemonThreadFactory.getNumbersOfThreads());
+        final int stepSize = Math.max(divThread, minthreshold);
+        final List<Callable<Boolean>> workers = new ArrayList<>();
+        for (int i = min; i < max; i += stepSize) {
+            final int start = i;
+            workers.add(() -> {
+                if (polarPlot) {
+                    computeScreenCoordinatesPolar(yAxis, dataSet, start, Math.min(max, start + stepSize));
+                } else {
+                    computeScreenCoordinatesEuclidean(xAxis, yAxis, dataSet, start, Math.min(max, start + stepSize));
+                }
+                return Boolean.TRUE;
+            });
+        }
+
+        try {
+            final List<Future<Boolean>> jobs = CachedDaemonThreadFactory.getCommonPool().invokeAll(workers);
+            for (final Future<Boolean> future : jobs) {
+                final Boolean r = future.get();
+                if (!r) {
+                    throw new IllegalStateException("one parallel worker thread finished execution with error");
+                }
+            }
+        } catch (final InterruptedException | ExecutionException e) {
+            throw new IllegalStateException("one parallel worker thread finished execution with error", e);
+        }
     }
 
     private void computeScreenCoordinatesPolar(final Axis yAxis, final DataSet dataSet, final int min, final int max) {
@@ -369,126 +452,6 @@ class CachedDataPoints {
         });
     }
 
-    private int minDataPointDistanceX() {
-        if (actualDataCount <= 1) {
-            minDistanceX = 1;
-            return minDistanceX;
-        }
-        minDistanceX = Integer.MAX_VALUE;
-        for (int i = 1; i < actualDataCount; i++) {
-            final double x0 = xValues[i - 1];
-            final double x1 = xValues[i];
-            minDistanceX = Math.min(minDistanceX, (int) Math.abs(x1 - x0));
-        }
-        return minDistanceX;
-    }
-
-    private void setBoundaryConditions(final Axis xAxis, final Axis yAxis, final DataSet dataSet, final int dsIndex,
-            final int min, final int max, final ErrorStyle rendererErrorStyle, final boolean isPolarPlot,
-            final boolean doAllowForNaNs) {
-        indexMin = min;
-        indexMax = max;
-        polarPlot = isPolarPlot;
-        this.allowForNaNs = doAllowForNaNs;
-        this.rendererErrorStyle = rendererErrorStyle;
-
-        computeBoundaryVariables(xAxis, yAxis);
-        setStyleVariable(dataSet, dsIndex);
-        setErrorType(dataSet, rendererErrorStyle);
-    }
-
-    protected void computeBoundaryVariables(final Axis xAxis, final Axis yAxis) {
-        xAxisInverted = xAxis.isInvertedAxis();
-        yAxisInverted = yAxis.isInvertedAxis();
-
-        // compute cached axis variables ... about 50% faster than the
-        // generic template based version from the original ValueAxis<Number>
-        if (xAxis.isLogAxis()) {
-            xZero = xAxis.getDisplayPosition(xAxis.getMin());
-        } else {
-            xZero = xAxis.getDisplayPosition(0);
-        }
-        if (yAxis.isLogAxis()) {
-            yZero = yAxis.getDisplayPosition(yAxis.getMin());
-        } else {
-            yZero = yAxis.getDisplayPosition(0);
-        }
-
-        yMin = yAxis.getDisplayPosition(yAxis.getMin());
-        yMax = yAxis.getDisplayPosition(yAxis.getMax());
-        xMin = xAxis.getDisplayPosition(xAxis.getMin());
-        xMax = xAxis.getDisplayPosition(xAxis.getMax());
-
-        xRange = Math.abs(xMax - xMin);
-        yRange = Math.abs(yMax - yMin);
-        maxRadius = 0.5 * Math.max(Math.min(xRange, yRange), 20) * 0.9;
-        // TODO: parameterise '0.9' -> radius axis fills 90% of min canvas
-        // axis
-        if (polarPlot) {
-            xZero = 0.5 * xRange;
-            yZero = 0.5 * yRange;
-        }
-    }
-
-    protected void computeScreenCoordinates(final Axis xAxis, final Axis yAxis, final DataSet dataSet,
-            final int dsIndex, final int min, final int max, final ErrorStyle localRendErrorStyle,
-            final boolean isPolarPlot, final boolean doAllowForNaNs) {
-        setBoundaryConditions(xAxis, yAxis, dataSet, dsIndex, min, max, localRendErrorStyle, isPolarPlot, doAllowForNaNs);
-
-        // compute data set to screen coordinates
-        computeScreenCoordinatesNonThreaded(xAxis, yAxis, dataSet, min, max);
-    }
-
-    protected void computeScreenCoordinatesInParallel(final Axis xAxis, final Axis yAxis, final DataSet dataSet,
-            final int dsIndex, final int min, final int max, final ErrorStyle localRendErrorStyle,
-            final boolean isPolarPlot, final boolean doAllowForNaNs) {
-        setBoundaryConditions(xAxis, yAxis, dataSet, dsIndex, min, max, localRendErrorStyle, isPolarPlot, doAllowForNaNs);
-
-        // compute data set to screen coordinates
-        computeScreenCoordinatesParallel(xAxis, yAxis, dataSet, min, max);
-    }
-
-    protected void computeScreenCoordinatesNonThreaded(final Axis xAxis, final Axis yAxis, final DataSet dataSet,
-            final int min, final int max) {
-        if (polarPlot) {
-            computeScreenCoordinatesPolar(yAxis, dataSet, min, max);
-        } else {
-            computeScreenCoordinatesEuclidean(xAxis, yAxis, dataSet, min, max);
-        }
-    }
-
-    protected void computeScreenCoordinatesParallel(final Axis xAxis, final Axis yAxis, final DataSet dataSet,
-            final int min, final int max) {
-        final int minthreshold = 1000;
-        final int divThread = (int) Math
-                .ceil(Math.abs(max - min) / (double) CachedDaemonThreadFactory.getNumbersOfThreads());
-        final int stepSize = Math.max(divThread, minthreshold);
-        final List<Callable<Boolean>> workers = new ArrayList<>();
-        for (int i = min; i < max; i += stepSize) {
-            final int start = i;
-            workers.add(() -> {
-                if (polarPlot) {
-                    computeScreenCoordinatesPolar(yAxis, dataSet, start, Math.min(max, start + stepSize));
-                } else {
-                    computeScreenCoordinatesEuclidean(xAxis, yAxis, dataSet, start, Math.min(max, start + stepSize));
-                }
-                return Boolean.TRUE;
-            });
-        }
-
-        try {
-            final List<Future<Boolean>> jobs = CachedDaemonThreadFactory.getCommonPool().invokeAll(workers);
-            for (final Future<Boolean> future : jobs) {
-                final Boolean r = future.get();
-                if (!r) {
-                    throw new IllegalStateException("one parallel worker thread finished execution with error");
-                }
-            }
-        } catch (final InterruptedException | ExecutionException e) {
-            throw new IllegalStateException("one parallel worker thread finished execution with error", e);
-        }
-    }
-
     /**
      * computes the minimum distance in between data points N.B. assumes sorted data set points
      *
@@ -504,6 +467,20 @@ class CachedDataPoints {
             return minDistanceX;
         }
 
+        minDistanceX = Integer.MAX_VALUE;
+        for (int i = 1; i < actualDataCount; i++) {
+            final double x0 = xValues[i - 1];
+            final double x1 = xValues[i];
+            minDistanceX = Math.min(minDistanceX, (int) Math.abs(x1 - x0));
+        }
+        return minDistanceX;
+    }
+
+    private int minDataPointDistanceX() {
+        if (actualDataCount <= 1) {
+            minDistanceX = 1;
+            return minDistanceX;
+        }
         minDistanceX = Integer.MAX_VALUE;
         for (int i = 1; i < actualDataCount; i++) {
             final double x0 = xValues[i - 1];
@@ -549,6 +526,31 @@ class CachedDataPoints {
                     styles, selected, indexMin, indexMax);
         }
         minDataPointDistanceX();
+    }
+
+    public void release() {
+        Cache.release(X_VALUES, xValues);
+        Cache.release(Y_VALUES, yValues);
+        Cache.release(ERROR_Y_NEG, errorYNeg);
+        Cache.release(ERROR_Y_POS, errorYPos);
+        Cache.release(ERROR_X_NEG, errorXNeg);
+        Cache.release(ERROR_X_POS, errorXPos);
+        Cache.release(SELECTED2, selected);
+        Cache.release(STYLES2, styles);
+    }
+
+    private void setBoundaryConditions(final Axis xAxis, final Axis yAxis, final DataSet dataSet, final int dsIndex,
+            final int min, final int max, final ErrorStyle rendererErrorStyle, final boolean isPolarPlot,
+            final boolean doAllowForNaNs) {
+        indexMin = min;
+        indexMax = max;
+        polarPlot = isPolarPlot;
+        this.allowForNaNs = doAllowForNaNs;
+        this.rendererErrorStyle = rendererErrorStyle;
+
+        computeBoundaryVariables(xAxis, yAxis);
+        setStyleVariable(dataSet, dsIndex);
+        setErrorType(dataSet, rendererErrorStyle);
     }
 
     protected void setErrorType(final DataSet dataSet, final ErrorStyle errorStyle) {

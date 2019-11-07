@@ -41,16 +41,6 @@ public class DataSetUtilsHelper {
         return cachedArray;
     }
 
-    protected static void release(final String arrayName, final ByteBuffer cachedArray) {
-        if (cachedArray == null) {
-            return;
-        }
-        cachedArray.clear();
-        BYTE_ARRAY_CACHE_LOCK.lock();
-        byteArrayCache.get(arrayName).put(cachedArray.capacity(), cachedArray);
-        BYTE_ARRAY_CACHE_LOCK.unlock();
-    }
-
     protected static StringBuilder getCachedStringBuilder(final String arrayName, final int size) {
         STRING_BUFFER_CACHE_LOCK.lock();
         WeakHashMap<Integer, StringBuilder> arrayMap = stringBuilderCache.computeIfAbsent(arrayName,
@@ -66,121 +56,6 @@ public class DataSetUtilsHelper {
         cachedArray.delete(0, cachedArray.length());
         STRING_BUFFER_CACHE_LOCK.unlock();
         return cachedArray;
-    }
-
-    protected static void release(final String arrayName, final StringBuilder cachedArray) {
-        if (cachedArray == null) {
-            return;
-        }
-        STRING_BUFFER_CACHE_LOCK.lock();
-        stringBuilderCache.get(arrayName).put(cachedArray.capacity(), cachedArray);
-        STRING_BUFFER_CACHE_LOCK.unlock();
-    }
-
-    /**
-     * @param input
-     *            double array input
-     * @return float array output
-     */
-    public static float[] toFloatArray(final double[] input) {
-        if (input == null) {
-            return null;
-        }
-        int n = input.length;
-        float[] ret = new float[n];
-        for (int i = 0; i < n; i++) {
-            ret[i] = (float) input[i];
-        }
-        return ret;
-    }
-
-    /**
-     * @param input
-     *            float array input
-     * @return double array output
-     */
-    public static double[] toDoubleArray(final float[] input) {
-        if (input == null) {
-            return null;
-        }
-        int n = input.length;
-        double[] ret = new double[n];
-        for (int i = 0; i < n; i++) {
-            ret[i] = input[i];
-        }
-        return ret;
-    }
-
-    protected static void writeDoubleArrayToByteBuffer(final ByteBuffer byteBuffer, final double[] doubleBuffer,
-            final int nSamples) {
-        if (byteBuffer == null) {
-            throw new InvalidParameterException("ByteBuffer is 'null'");
-        }
-        if (doubleBuffer == null) {
-            throw new InvalidParameterException("doubleBuffer is 'null'");
-        }
-        if (byteBuffer.capacity() < nSamples * Double.BYTES) {
-            throw new InvalidParameterException("byte buffer size (" + byteBuffer.capacity()
-                    + ") is smaller than double buffer size (" + nSamples * Float.BYTES + ")");
-        }
-        if (doubleBuffer.length < nSamples) {
-            throw new InvalidParameterException("double array contains less (" + doubleBuffer.length
-            + ") than nsamples (" + nSamples + ") entries.");
-        }
-        byteBuffer.position(0);
-        for (int i = 0; i < nSamples; i++) {
-            byteBuffer.putDouble(doubleBuffer[i]);
-        }
-        // alt: (N.B. a bit more overhead/slower compared to the above code)
-        // final DoubleBuffer xDouble = byteBuffer.asDoubleBuffer();
-        // xDouble.put(doubleBuffer);
-    }
-
-    protected static void writeDoubleArrayAsFloatToByteBuffer(final ByteBuffer byteBuffer, final double[] doubleBuffer,
-            final int nSamples) {
-        if (byteBuffer == null) {
-            throw new InvalidParameterException("ByteBuffer is 'null'");
-        }
-        if (doubleBuffer == null) {
-            throw new InvalidParameterException("doubleBuffer is 'null'");
-        }
-        if (byteBuffer.capacity() < nSamples * Float.BYTES) {
-            throw new InvalidParameterException("byte buffer size (" + byteBuffer.capacity()
-                    + ") is smaller than double buffer size (" + nSamples * Float.BYTES + ")");
-        }
-        if (doubleBuffer.length < nSamples) {
-            throw new InvalidParameterException("double array contains less (" + doubleBuffer.length
-            + ") than nsamples (" + nSamples + ") entries.");
-        }
-        byteBuffer.position(0);
-        for (int i = 0; i < nSamples; i++) {
-            byteBuffer.putFloat((float) doubleBuffer[i]);
-        }
-        // alt: (N.B. a bit more overhead/slower compared to the above code)
-        // final DoubleBuffer xDouble = byteBuffer.asDoubleBuffer();
-        // xDouble.put(doubleBuffer);
-    }
-
-    protected static double[] readDoubleArrayFromBuffer(final FloatBuffer floatBuffer,
-            final DoubleBuffer doubleBuffer) {
-        double[] retArray;
-        if (floatBuffer != null) {
-            retArray = new double[floatBuffer.limit()];
-            for (int i = 0; i < retArray.length; i++) {
-                retArray[i] = floatBuffer.get(i);
-            }
-            return retArray;
-        }
-        if (doubleBuffer != null) {
-            retArray = new double[doubleBuffer.limit()];
-            for (int i = 0; i < retArray.length; i++) {
-                retArray[i] = doubleBuffer.get(i);
-            }
-            // alt:
-            // doubleBuffer.get(retArray);
-            return retArray;
-        }
-        throw new InvalidParameterException("floatBuffer and doubleBuffer must not both be null");
     }
 
     protected static double integralSimple(final DataSet function) {
@@ -206,8 +81,7 @@ public class DataSetUtilsHelper {
     }
 
     /**
-     * @param data
-     *            the input vector
+     * @param data the input vector
      * @return average of vector elements
      */
     protected static synchronized double mean(final double[] data) {
@@ -222,9 +96,49 @@ public class DataSetUtilsHelper {
         return val;
     }
 
+    protected static double[] readDoubleArrayFromBuffer(final FloatBuffer floatBuffer,
+            final DoubleBuffer doubleBuffer) {
+        double[] retArray;
+        if (floatBuffer != null) {
+            retArray = new double[floatBuffer.limit()];
+            for (int i = 0; i < retArray.length; i++) {
+                retArray[i] = floatBuffer.get(i);
+            }
+            return retArray;
+        }
+        if (doubleBuffer != null) {
+            retArray = new double[doubleBuffer.limit()];
+            for (int i = 0; i < retArray.length; i++) {
+                retArray[i] = doubleBuffer.get(i);
+            }
+            // alt:
+            // doubleBuffer.get(retArray);
+            return retArray;
+        }
+        throw new InvalidParameterException("floatBuffer and doubleBuffer must not both be null");
+    }
+
+    protected static void release(final String arrayName, final ByteBuffer cachedArray) {
+        if (cachedArray == null) {
+            return;
+        }
+        cachedArray.clear();
+        BYTE_ARRAY_CACHE_LOCK.lock();
+        byteArrayCache.get(arrayName).put(cachedArray.capacity(), cachedArray);
+        BYTE_ARRAY_CACHE_LOCK.unlock();
+    }
+
+    protected static void release(final String arrayName, final StringBuilder cachedArray) {
+        if (cachedArray == null) {
+            return;
+        }
+        STRING_BUFFER_CACHE_LOCK.lock();
+        stringBuilderCache.get(arrayName).put(cachedArray.capacity(), cachedArray);
+        STRING_BUFFER_CACHE_LOCK.unlock();
+    }
+
     /**
-     * @param data
-     *            the input vector
+     * @param data the input vector
      * @return un-biased r.m.s. of vector elements
      */
     protected static synchronized double rootMeanSquare(final double[] data) {
@@ -244,5 +158,87 @@ public class DataSetUtilsHelper {
         val2 *= norm;
         // un-biased rms!
         return Math.sqrt(Math.abs(val2 - (val1 * val1)));
+    }
+
+    /**
+     * @param input float array input
+     * @return double array output
+     */
+    public static double[] toDoubleArray(final float[] input) {
+        if (input == null) {
+            return null;
+        }
+        int n = input.length;
+        double[] ret = new double[n];
+        for (int i = 0; i < n; i++) {
+            ret[i] = input[i];
+        }
+        return ret;
+    }
+
+    /**
+     * @param input double array input
+     * @return float array output
+     */
+    public static float[] toFloatArray(final double[] input) {
+        if (input == null) {
+            return null;
+        }
+        int n = input.length;
+        float[] ret = new float[n];
+        for (int i = 0; i < n; i++) {
+            ret[i] = (float) input[i];
+        }
+        return ret;
+    }
+
+    protected static void writeDoubleArrayAsFloatToByteBuffer(final ByteBuffer byteBuffer, final double[] doubleBuffer,
+            final int nSamples) {
+        if (byteBuffer == null) {
+            throw new InvalidParameterException("ByteBuffer is 'null'");
+        }
+        if (doubleBuffer == null) {
+            throw new InvalidParameterException("doubleBuffer is 'null'");
+        }
+        if (byteBuffer.capacity() < nSamples * Float.BYTES) {
+            throw new InvalidParameterException("byte buffer size (" + byteBuffer.capacity()
+                    + ") is smaller than double buffer size (" + nSamples * Float.BYTES + ")");
+        }
+        if (doubleBuffer.length < nSamples) {
+            throw new InvalidParameterException("double array contains less (" + doubleBuffer.length
+                    + ") than nsamples (" + nSamples + ") entries.");
+        }
+        byteBuffer.position(0);
+        for (int i = 0; i < nSamples; i++) {
+            byteBuffer.putFloat((float) doubleBuffer[i]);
+        }
+        // alt: (N.B. a bit more overhead/slower compared to the above code)
+        // final DoubleBuffer xDouble = byteBuffer.asDoubleBuffer();
+        // xDouble.put(doubleBuffer);
+    }
+
+    protected static void writeDoubleArrayToByteBuffer(final ByteBuffer byteBuffer, final double[] doubleBuffer,
+            final int nSamples) {
+        if (byteBuffer == null) {
+            throw new InvalidParameterException("ByteBuffer is 'null'");
+        }
+        if (doubleBuffer == null) {
+            throw new InvalidParameterException("doubleBuffer is 'null'");
+        }
+        if (byteBuffer.capacity() < nSamples * Double.BYTES) {
+            throw new InvalidParameterException("byte buffer size (" + byteBuffer.capacity()
+                    + ") is smaller than double buffer size (" + nSamples * Float.BYTES + ")");
+        }
+        if (doubleBuffer.length < nSamples) {
+            throw new InvalidParameterException("double array contains less (" + doubleBuffer.length
+                    + ") than nsamples (" + nSamples + ") entries.");
+        }
+        byteBuffer.position(0);
+        for (int i = 0; i < nSamples; i++) {
+            byteBuffer.putDouble(doubleBuffer[i]);
+        }
+        // alt: (N.B. a bit more overhead/slower compared to the above code)
+        // final DoubleBuffer xDouble = byteBuffer.asDoubleBuffer();
+        // xDouble.put(doubleBuffer);
     }
 }

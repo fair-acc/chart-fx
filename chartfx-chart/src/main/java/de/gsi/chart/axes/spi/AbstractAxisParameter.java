@@ -119,8 +119,8 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     protected AxisRange userRange = new AxisRange();
 
     /**
-     * The side of the plot which this axis is being drawn on
-     * default axis orientation is BOTTOM, can be set latter to another side
+     * The side of the plot which this axis is being drawn on default axis orientation is BOTTOM, can be set latter to
+     * another side
      */
     private final ObjectProperty<Side> side = new StyleableObjectProperty<>(Side.BOTTOM) {
 
@@ -207,7 +207,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
 
     /** true if tick mark labels should be displayed */
     private final BooleanProperty tickLabelsVisible = new StylishBooleanProperty(
-            StyleableProperties.TICK_LABELS_VISIBLE, this, "tickLabelsVisible", true, () -> { // update                                                                                                             // tick
+            StyleableProperties.TICK_LABELS_VISIBLE, this, "tickLabelsVisible", true, () -> { // update // tick
                 for (final TickMark tick : majorTickMarks) {
                     tick.setVisible(AbstractAxisParameter.this.tickLabelsVisible.get());
                 }
@@ -517,11 +517,38 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
         axisLabel.applyCss();
     }
 
-    /**
-     * @return The CssMetaData associated with this class, which may include the CssMetaData of its super classes.
-     */
-    public static List<CssMetaData<? extends Styleable, ?>> getClassCssMetaData() {
-        return StyleableProperties.STYLEABLES;
+    @Override
+    public boolean add(final double value) {
+        if (this.contains(value)) {
+            return false;
+        }
+        boolean changed = false;
+        final boolean oldState = autoNotification().getAndSet(false);
+        if (value > this.getMax()) {
+            this.setMax(value);
+            changed = true;
+        }
+        if (value < this.getMin()) {
+            this.setMin(value);
+            changed = true;
+        }
+        autoNotification().set(oldState);
+        if (changed) {
+            invokeListener(new AxisChangeEvent(this));
+        }
+        return changed;
+    }
+
+    @Override
+    public boolean add(final double[] values, final int nlength) {
+        boolean changed = false;
+        final boolean oldState = autoNotification().getAndSet(false);
+        for (int i = 0; i < nlength; i++) {
+            changed |= add(values[i]);
+        }
+        autoNotification().set(oldState);
+        invokeListener(new AxisChangeEvent(this));
+        return changed;
     }
 
     public BooleanProperty animatedProperty() {
@@ -540,6 +567,14 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     @Override
     public BooleanProperty autoGrowRangingProperty() {
         return autoGrowRanging;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public AtomicBoolean autoNotification() {
+        return autoNotification;
     }
 
     /**
@@ -591,20 +626,33 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
         return centerAxisPosition;
     }
 
+    @Override
+    public boolean clear() {
+        final boolean oldState = autoNotification().getAndSet(false);
+        minProp.set(DEFAULT_MIN_RANGE);
+        maxProp.set(DEFAULT_MAX_RANGE);
+        autoNotification().set(oldState);
+        invokeListener(new AxisChangeEvent(this));
+        return false;
+    }
+
+    @Override
+    public boolean contains(final double value) {
+        return Double.isFinite(value) && (value >= getMin()) && (value <= getMax());
+    }
+
+    protected double decadeRange() {
+        final double range = Math.abs(getMax() - getMin());
+        if (range <= 0) {
+            return 1;
+        }
+        return Math.log10(range);
+    }
+
     public abstract void fireInvalidated();
 
     public TextAlignment getaAxisLabelTextAlignment() {
         return axisLabelTextAlignmentProperty().get();
-    }
-
-    /**
-     * Indicates whether the changes to axis range will be animated or not.
-     *
-     * @return true if axis range changes will be animated and false otherwise
-     */
-
-    public boolean isAnimated() {
-        return animated.get();
     }
 
     public int getAnimationDuration() {
@@ -623,11 +671,6 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
      */
     public double getAutoRangePadding() {
         return autoRangePaddingProperty().get();
-    }
-
-    @Override
-    public boolean isAutoUnitScaling() {
-        return autoUnitScaling.get();
     }
 
     /**
@@ -653,47 +696,8 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
      * {@inheritDoc}
      */
     @Override
-    public List<EventListener> updateEventListener() {
-        return updateListeners;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public AtomicBoolean autoNotification() {
-        return autoNotification;
-    }
-
-    /**
-     * invoke object within update listener list
-     *
-     * @param updateEvent the event the listeners are notified with
-     * @param executeParallel {@code true} execute event listener via parallel executor service
-     */
-    @Override
-    public void invokeListener(final UpdateEvent updateEvent, final boolean executeParallel) {
-        synchronized (autoNotification()) {
-            if (!autoNotification().get()) {
-                //avoids duplicate update events
-                return;
-            }
-        }
-        requestAxisLayout();
-        Axis.super.invokeListener(updateEvent, executeParallel);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public List<CssMetaData<? extends Styleable, ?>> getCssMetaData() {
         return AbstractAxisParameter.getClassCssMetaData();
-    }
-
-    @Override
-    public String getName() {
-        return nameProperty().get();
     }
 
     /**
@@ -707,16 +711,21 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
         return getSide().isHorizontal() ? getWidth() : getHeight();
     }
 
-    @Override
-    public double getMin() {
-        return minProp.get();
-    }
-
     /**
      * @return the majorTickStyle for custom user-code based styling
      */
     public Path getMajorTickStyle() {
         return majorTickStyle;
+    }
+
+    @Override
+    public double getMax() {
+        return maxProp.get();
+    }
+
+    @Override
+    public double getMin() {
+        return minProp.get();
     }
 
     @Override
@@ -741,6 +750,11 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
      */
     public Path getMinorTickStyle() {
         return minorTickStyle;
+    }
+
+    @Override
+    public String getName() {
+        return nameProperty().get();
     }
 
     public AxisLabelOverlapPolicy getOverlapPolicy() {
@@ -827,20 +841,23 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     }
 
     @Override
-    public double getMax() {
-        return maxProp.get();
-    }
-
-    @Override
     public AxisRange getUserRange() {
         return userRange;
+    }
+
+    /**
+     * Mark the current range invalid, this will cause anything that depends on the range to be recalculated on the next
+     * layout.
+     */
+    protected void invalidateRange() {
+        rangeValid = false;
     }
 
     /**
      * This is {@code true} when the axis labels and data point order should be inverted
      *
      * @param value {@code true} if axis shall be inverted (i.e. drawn from 'max-&gt;min', rather than the normal
-     *            'min-&gt;max')
+     *        'min-&gt;max')
      */
     @Override
     public void invertAxis(final boolean value) {
@@ -855,6 +872,34 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     @Override
     public BooleanProperty invertAxisProperty() {
         return invertAxis;
+    }
+
+    /**
+     * invoke object within update listener list
+     *
+     * @param updateEvent the event the listeners are notified with
+     * @param executeParallel {@code true} execute event listener via parallel executor service
+     */
+    @Override
+    public void invokeListener(final UpdateEvent updateEvent, final boolean executeParallel) {
+        synchronized (autoNotification()) {
+            if (!autoNotification().get()) {
+                // avoids duplicate update events
+                return;
+            }
+        }
+        requestAxisLayout();
+        Axis.super.invokeListener(updateEvent, executeParallel);
+    }
+
+    /**
+     * Indicates whether the changes to axis range will be animated or not.
+     *
+     * @return true if axis range changes will be animated and false otherwise
+     */
+
+    public boolean isAnimated() {
+        return animated.get();
     }
 
     /**
@@ -879,6 +924,16 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     @Override
     public boolean isAutoRanging() {
         return autoRanging.get();
+    }
+
+    @Override
+    public boolean isAutoUnitScaling() {
+        return autoUnitScaling.get();
+    }
+
+    @Override
+    public boolean isDefined() {
+        return Double.isFinite(getMin()) && Double.isFinite(getMax());
     }
 
     /**
@@ -915,13 +970,8 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     }
 
     @Override
-    public StringProperty nameProperty() {
-        return axisName;
-    }
-
-    @Override
-    public DoubleProperty minProperty() {
-        return minProp;
+    public DoubleProperty maxProperty() {
+        return maxProp;
     }
 
     public IntegerProperty minorTickCountProperty() {
@@ -936,12 +986,73 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
         return minorTickVisible;
     }
 
+    @Override
+    public DoubleProperty minProperty() {
+        return minProp;
+    }
+
+    @Override
+    public StringProperty nameProperty() {
+        return axisName;
+    }
+
     public ObjectProperty<AxisLabelOverlapPolicy> overlapPolicyProperty() {
         return overlapPolicy;
     }
 
     public ReadOnlyDoubleProperty scaleProperty() {
         return scale.getReadOnlyProperty();
+    }
+
+    ReadOnlyDoubleWrapper scalePropertyImpl() {
+        return scale;
+    }
+
+    @Override
+    public boolean set(final double min, final double max) {
+        final double oldMin = minProp.get();
+        final double oldMax = maxProp.get();
+        final boolean oldState = autoNotification().getAndSet(false);
+        minProp.set(min);
+        maxProp.set(max);
+        autoNotification().set(oldState);
+        final boolean changed = (oldMin != min) || (oldMax != max);
+        if (changed) {
+            invokeListener(new AxisChangeEvent(this));
+        }
+        return changed;
+    }
+
+    @Override
+    public boolean set(final String axisName, final String... axisUnit) {
+        boolean changed = false;
+        final boolean oldState = autoNotification().getAndSet(false);
+        if (!equalString(axisName, getName())) {
+            setName(axisName);
+            changed = true;
+        }
+        if ((axisUnit != null) && (axisUnit.length > 0) && !equalString(axisUnit[0], getUnit())) {
+            setUnit(axisUnit[0]);
+            changed = true;
+        }
+        autoNotification().set(oldState);
+        if (changed) {
+            invokeListener(new AxisChangeEvent(this));
+        }
+        return changed;
+    }
+
+    @Override
+    public boolean set(final String axisName, final String axisUnit, final double rangeMin, final double rangeMax) {
+        boolean changed = false;
+        final boolean oldState = autoNotification().getAndSet(false);
+        changed |= this.set(axisName, axisUnit);
+        changed |= this.set(rangeMin, rangeMax);
+        autoNotification().set(oldState);
+        if (changed) {
+            invokeListener(new AxisChangeEvent(this));
+        }
+        return changed;
     }
 
     @Override
@@ -1012,8 +1123,10 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     }
 
     @Override
-    public void setName(final String value) {
-        nameProperty().set(value);
+    public boolean setMax(final double value) {
+        final double oldvalue = maxProp.get();
+        maxProp.set(value);
+        return oldvalue != value;
     }
 
     @Override
@@ -1035,8 +1148,17 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
         minorTickVisible.set(value);
     }
 
+    @Override
+    public void setName(final String value) {
+        nameProperty().set(value);
+    }
+
     public void setOverlapPolicy(final AxisLabelOverlapPolicy value) {
         overlapPolicyProperty().set(value);
+    }
+
+    protected void setScale(final double scale) {
+        this.scale.set(scale);
     }
 
     @Override
@@ -1101,6 +1223,8 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
         axisUnit.set(value);
     }
 
+    // -------------- UPDATER ROUTINE PROTOTYPES
+
     @Override
     public void setUnitScaling(final double value) {
         if (!Double.isFinite(value) || (value == 0)) {
@@ -1116,16 +1240,11 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     }
 
     @Override
-    public boolean setMax(final double value) {
-        final double oldvalue = maxProp.get();
-        maxProp.set(value);
-        return oldvalue != value;
-    }
-
-    @Override
     public ObjectProperty<Side> sideProperty() {
         return side;
     }
+
+    // -------------- STYLESHEET HANDLING
 
     public ObjectProperty<Paint> tickLabelFillProperty() {
         return tickLabelFill;
@@ -1159,8 +1278,6 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
         return tickMarkVisible;
     }
 
-    // -------------- UPDATER ROUTINE PROTOTYPES
-
     /**
      * The value between each major tick mark in data units. This is automatically set if we are auto-ranging.
      *
@@ -1186,141 +1303,9 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
         return axisUnit;
     }
 
-    // -------------- STYLESHEET HANDLING
-
     @Override
     public DoubleProperty unitScalingProperty() {
         return unitScaling;
-    }
-
-    @Override
-    public DoubleProperty maxProperty() {
-        return maxProp;
-    }
-
-    protected double decadeRange() {
-        final double range = Math.abs(getMax() - getMin());
-        if (range <= 0) {
-            return 1;
-        }
-        return Math.log10(range);
-    }
-
-    /**
-     * Mark the current range invalid, this will cause anything that depends on the range to be recalculated on the next
-     * layout.
-     */
-    protected void invalidateRange() {
-        rangeValid = false;
-    }
-
-    protected void setScale(final double scale) {
-        this.scale.set(scale);
-    }
-
-    @Override
-    public boolean add(final double[] values, final int nlength) {
-        boolean changed = false;
-        final boolean oldState = autoNotification().getAndSet(false);
-        for (int i = 0; i < nlength; i++) {
-            changed |= add(values[i]);
-        }
-        autoNotification().set(oldState);
-        invokeListener(new AxisChangeEvent(this));
-        return changed;
-    }
-
-    @Override
-    public boolean add(final double value) {
-        if (this.contains(value)) {
-            return false;
-        }
-        boolean changed = false;
-        final boolean oldState = autoNotification().getAndSet(false);
-        if (value > this.getMax()) {
-            this.setMax(value);
-            changed = true;
-        }
-        if (value < this.getMin()) {
-            this.setMin(value);
-            changed = true;
-        }
-        autoNotification().set(oldState);
-        if (changed) {
-            invokeListener(new AxisChangeEvent(this));
-        }
-        return changed;
-    }
-
-    @Override
-    public boolean clear() {
-        final boolean oldState = autoNotification().getAndSet(false);
-        minProp.set(DEFAULT_MIN_RANGE);
-        maxProp.set(DEFAULT_MAX_RANGE);
-        autoNotification().set(oldState);
-        invokeListener(new AxisChangeEvent(this));
-        return false;
-    }
-
-    @Override
-    public boolean contains(final double value) {
-        return Double.isFinite(value) && (value >= getMin()) && (value <= getMax());
-    }
-
-    @Override
-    public boolean isDefined() {
-        return Double.isFinite(getMin()) && Double.isFinite(getMax());
-    }
-
-    @Override
-    public boolean set(final double min, final double max) {
-        final double oldMin = minProp.get();
-        final double oldMax = maxProp.get();
-        final boolean oldState = autoNotification().getAndSet(false);
-        minProp.set(min);
-        maxProp.set(max);
-        autoNotification().set(oldState);
-        final boolean changed = (oldMin != min) || (oldMax != max);
-        if (changed) {
-            invokeListener(new AxisChangeEvent(this));
-        }
-        return changed;
-    }
-
-    private static boolean equalString(final String str1, final String str2) {
-        return (str1 == null ? str2 == null : str1.equals(str2));
-    }
-
-    @Override
-    public boolean set(final String axisName, final String... axisUnit) {
-        boolean changed = false;
-        final boolean oldState = autoNotification().getAndSet(false);
-        if (!equalString(axisName, getName())) {
-            setName(axisName);
-            changed = true;
-        }
-        if ((axisUnit != null) && (axisUnit.length > 0) && !equalString(axisUnit[0], getUnit())) {
-            setUnit(axisUnit[0]);
-            changed = true;
-        }
-        autoNotification().set(oldState);
-        if (changed) {
-            invokeListener(new AxisChangeEvent(this));
-        }
-        return changed;
-    }
-
-    @Override
-    public boolean set(final String axisName, final String axisUnit, final double rangeMin, final double rangeMax) {
-        boolean changed = false;
-        final boolean oldState = autoNotification().getAndSet(false);
-        changed |= this.set(axisName, axisUnit);
-        changed |= this.set(rangeMin, rangeMax);
-        autoNotification().set(oldState);
-        if (changed) {
-            invokeListener(new AxisChangeEvent(this));
-        }
-        return changed;
     }
 
     protected void updateAxisLabelAndUnit() {
@@ -1345,6 +1330,14 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
         axisLabel.applyCss();
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<EventListener> updateEventListener() {
+        return updateListeners;
+    }
+
     protected void updateScaleAndUnitPrefix() {
         final double range = Math.abs(getMax() - getMin());
         final double logRange = Math.log10(range);
@@ -1364,14 +1357,21 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
 
     }
 
-    ReadOnlyDoubleWrapper scalePropertyImpl() {
-        return scale;
+    private static boolean equalString(final String str1, final String str2) {
+        return (str1 == null ? str2 == null : str1.equals(str2));
+    }
+
+    /**
+     * @return The CssMetaData associated with this class, which may include the CssMetaData of its super classes.
+     */
+    public static List<CssMetaData<? extends Styleable, ?>> getClassCssMetaData() {
+        return StyleableProperties.STYLEABLES;
     }
 
     /*
      *
-     * TODO: follow-up idea of simplifying CSS handling: add/make css collector
-     * to StylishXXXProperty handling and put below code inside
+     * TODO: follow-up idea of simplifying CSS handling: add/make css collector to StylishXXXProperty handling and put
+     * below code inside
      *
      */
     private static class StyleableProperties {

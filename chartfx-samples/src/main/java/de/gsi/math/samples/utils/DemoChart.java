@@ -20,8 +20,7 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 
 /**
- * Short hand extension/configuration of the standard XYChart functionalities to
- * make the samples more readable
+ * Short hand extension/configuration of the standard XYChart functionalities to make the samples more readable
  * 
  * @author rstein
  */
@@ -71,6 +70,14 @@ public class DemoChart extends XYChart {
         HBox.setHgrow(this, Priority.ALWAYS);
     }
 
+    public ErrorDataSetRenderer getRenderer() {
+        return renderer.get(0);
+    }
+
+    public ErrorDataSetRenderer getRenderer(final int index) {
+        return renderer.get(index);
+    }
+
     @Override
     public DefaultNumericAxis getXAxis() {
         return (DefaultNumericAxis) super.getXAxis();
@@ -83,14 +90,6 @@ public class DemoChart extends XYChart {
 
     public DefaultNumericAxis getYAxis(final int index) {
         return yAxes.get(index);
-    }
-
-    public ErrorDataSetRenderer getRenderer() {
-        return renderer.get(0);
-    }
-
-    public ErrorDataSetRenderer getRenderer(final int index) {
-        return renderer.get(index);
     }
 
 }

@@ -5,9 +5,17 @@ import de.gsi.math.TMath;
 public class BreitWignerFunction extends AbstractFunction1D implements Function1D {
 
     /**
-     * initialise the Breit-Wigner distribution function
-     * parameter order:
-     * parameter[0] = mean (default: 0.0)
+     * initialise the Breit-Wigner distribution function parameter order: parameter[0] = mean (default: 0.0)
+     * parameter[1] = gamma (default: 1.0)
+     *
+     * @param name function name
+     */
+    public BreitWignerFunction(final String name) {
+        this(name, null);
+    }
+
+    /**
+     * initialise the Breit-Wigner distribution function parameter order: parameter[0] = mean (default: 0.0)
      * parameter[1] = gamma (default: 1.0)
      *
      * @param name function name
@@ -27,18 +35,6 @@ public class BreitWignerFunction extends AbstractFunction1D implements Function1
         for (int i = 0; i < Math.min(parameter.length, 2); i++) {
             setParameterValue(i, parameter[0]);
         }
-    }
-
-    /**
-     * initialise the Breit-Wigner distribution function
-     * parameter order:
-     * parameter[0] = mean (default: 0.0)
-     * parameter[1] = gamma (default: 1.0)
-     *
-     * @param name function name
-     */
-    public BreitWignerFunction(final String name) {
-        this(name, null);
     }
 
     @Override

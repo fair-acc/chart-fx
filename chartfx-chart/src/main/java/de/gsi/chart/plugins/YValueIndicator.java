@@ -12,19 +12,16 @@ import javafx.geometry.Point2D;
 import javafx.scene.input.MouseEvent;
 
 /**
- * A horizontal line drawn on the plot area, indicating specified Y value, with
- * an optional {@link #textProperty() text label} describing the value.
+ * A horizontal line drawn on the plot area, indicating specified Y value, with an optional {@link #textProperty() text
+ * label} describing the value.
  * <p>
  * Style Classes (from least to most specific):
  * <ul>
- * <li><b>Label:</b>
- * {@code value-indicator-label, y-value-indicator-label, y-value-indicator-label[index]}</li>
- * <li><b>Line:</b>
- * {@code value-indicator-line, y-value-indicator-line, y-value-indicator-line[index]}</li>
+ * <li><b>Label:</b> {@code value-indicator-label, y-value-indicator-label, y-value-indicator-label[index]}</li>
+ * <li><b>Line:</b> {@code value-indicator-line, y-value-indicator-line, y-value-indicator-line[index]}</li>
  * </ul>
- * where {@code [index]} corresponds to the index (zero based) of this indicator
- * instance added to the {@code XYChartPane}. For example class
- * {@code y-value-indicator-label1} can be used to style label of the second
+ * where {@code [index]} corresponds to the index (zero based) of this indicator instance added to the
+ * {@code XYChartPane}. For example class {@code y-value-indicator-label1} can be used to style label of the second
  * instance of this indicator added to the chart pane.
  *
  * @author mhrabia
@@ -32,30 +29,22 @@ import javafx.scene.input.MouseEvent;
 public class YValueIndicator extends AbstractSingleValueIndicator {
 
     /**
-     * Creates a new instance indicating given Y value belonging to the
-     * specified {@code yAxis}.
+     * Creates a new instance indicating given Y value belonging to the specified {@code yAxis}.
      *
-     * @param axis
-     *            the axis this indicator is associated with
-     * @param value
-     *            a value to be marked
+     * @param axis the axis this indicator is associated with
+     * @param value a value to be marked
      */
     public YValueIndicator(final Axis axis, final double value) {
         this(axis, value, null);
     }
 
     /**
-     * Creates a new instance indicating given Y value belonging to the
-     * specified {@code yAxis}, with the specified {@link #textProperty()
-     * label}.
+     * Creates a new instance indicating given Y value belonging to the specified {@code yAxis}, with the specified
+     * {@link #textProperty() label}.
      *
-     * @param axis
-     *            the axis this indicator is associated with
-     * @param value
-     *            a value to be marked
-     * @param text
-     *            the text to be shown by the label. Value of
-     *            {@link #textProperty()}.
+     * @param axis the axis this indicator is associated with
+     * @param value a value to be marked
+     * @param text the text to be shown by the label. Value of {@link #textProperty()}.
      */
     public YValueIndicator(final Axis axis, final double value, final String text) {
         super(axis, value, text);
@@ -80,13 +69,6 @@ public class YValueIndicator extends AbstractSingleValueIndicator {
     }
 
     @Override
-    public void updateStyleClass() {
-        setStyleClasses(label, "y-", AbstractSingleValueIndicator.STYLE_CLASS_LABEL);
-        setStyleClasses(line, "y-", AbstractSingleValueIndicator.STYLE_CLASS_LINE);
-        setStyleClasses(triangle, "x-", AbstractSingleValueIndicator.STYLE_CLASS_MARKER);
-    }
-
-    @Override
     public void layoutChildren() {
         if (getChart() == null) {
             return;
@@ -104,10 +86,17 @@ public class YValueIndicator extends AbstractSingleValueIndicator {
         } else {
             layoutLine(minX, yPos, maxX, yPos);
             layoutMarker(maxX - 1.5 * AbstractSingleValueIndicator.triangleHalfWidth, yPos, minX, yPos); // +
-                                                                                                           // 1.5*TRIANGLE_HALF_WIDTH
+                                                                                                         // 1.5*TRIANGLE_HALF_WIDTH
             layoutLabel(new BoundingBox(minX, yPos, maxX - minX, 0), getLabelPosition(),
                     AbstractSingleValueIndicator.MIDDLE_POSITION);
         }
+    }
+
+    @Override
+    public void updateStyleClass() {
+        setStyleClasses(label, "y-", AbstractSingleValueIndicator.STYLE_CLASS_LABEL);
+        setStyleClasses(line, "y-", AbstractSingleValueIndicator.STYLE_CLASS_LINE);
+        setStyleClasses(triangle, "x-", AbstractSingleValueIndicator.STYLE_CLASS_MARKER);
     }
 
 }

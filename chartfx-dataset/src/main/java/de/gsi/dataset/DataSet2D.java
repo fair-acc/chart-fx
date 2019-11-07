@@ -38,9 +38,8 @@ public interface DataSet2D extends DataSet {
     }
 
     /**
-     * Gets the index of the data point closest to the given 'value' coordinate. The
-     * index returned may be less then zero or larger the the number of data
-     * points in the data set, if the x coordinate lies outside the range of the
+     * Gets the index of the data point closest to the given 'value' coordinate. The index returned may be less then
+     * zero or larger the the number of data points in the data set, if the x coordinate lies outside the range of the
      * data set.
      *
      * @param dimIndex the dimension index (ie. '0' equals 'X', '1' equals 'Y')
@@ -50,18 +49,6 @@ public interface DataSet2D extends DataSet {
     @Override
     default int getIndex(final int dimIndex, final double value) {
         return dimIndex == DIM_X ? getXIndex(value) : getYIndex(value);
-    }
-
-    /**
-     * Gets the interpolated y value of the data point for given x coordinate
-     *
-     * @param dimIndex the dimension index (ie. '0' equals 'X', '1' equals 'Y')
-     * @param x the new x coordinate
-     * @return the y value
-     */
-    @Override
-    default double getValue(final int dimIndex, final double x) {
-        return getValue(x);
     }
 
     /**
@@ -91,6 +78,18 @@ public interface DataSet2D extends DataSet {
     }
 
     /**
+     * Gets the interpolated y value of the data point for given x coordinate
+     *
+     * @param dimIndex the dimension index (ie. '0' equals 'X', '1' equals 'Y')
+     * @param x the new x coordinate
+     * @return the y value
+     */
+    @Override
+    default double getValue(final int dimIndex, final double x) {
+        return getValue(x);
+    }
+
+    /**
      * Gets the x value of the data point with the index i
      *
      * @param index the data point index
@@ -101,13 +100,10 @@ public interface DataSet2D extends DataSet {
     }
 
     /**
-     * Gets the index of the data point closest to the given x coordinate. The
-     * index returned may be less then zero or larger the the number of data
-     * points in the data set, if the x coordinate lies outside the range of the
-     * data set.
+     * Gets the index of the data point closest to the given x coordinate. The index returned may be less then zero or
+     * larger the the number of data points in the data set, if the x coordinate lies outside the range of the data set.
      *
-     * @param x
-     *            the x position of the data point
+     * @param x the x position of the data point
      * @return the index of the data point
      */
     int getXIndex(double x);
@@ -132,8 +128,7 @@ public interface DataSet2D extends DataSet {
     /**
      * Gets the first index of the data point closest to the given y coordinate.
      *
-     * @param y
-     *            the y position of the data point
+     * @param y the y position of the data point
      * @return the index of the data point
      */
     int getYIndex(double y);

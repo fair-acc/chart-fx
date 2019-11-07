@@ -20,8 +20,7 @@ import javafx.geometry.Orientation;
 
 /**
  * @author rstein
- * @param <R>
- *            renderer generics
+ * @param <R> renderer generics
  */
 public abstract class AbstractDataSetManagement<R extends Renderer> implements Renderer {
     private final ObservableList<DataSet> datasets = FXCollections.observableArrayList();
@@ -42,6 +41,21 @@ public abstract class AbstractDataSetManagement<R extends Renderer> implements R
     @Override
     public ObservableList<DataSet> getDatasetsCopy() {
         return getDatasetsCopy(getDatasets());
+    }
+
+    protected ObservableList<DataSet> getDatasetsCopy(final ObservableList<DataSet> localDataSets) {
+        final long start = ProcessingProfiler.getTimeStamp();
+        final ObservableList<DataSet> dataSets = FXCollections.observableArrayList();
+        for (final DataSet dataSet : localDataSets) {
+            if (dataSet instanceof DataSetError) {
+                final DataSetError dataSetError = (DataSetError) dataSet;
+                dataSets.add(AbstractDataSetManagement.getErrorDataSetCopy(dataSetError));
+            } else {
+                dataSets.add(AbstractDataSetManagement.getDataSetCopy(dataSet));
+            }
+        }
+        ProcessingProfiler.getTimeDiff(start);
+        return dataSets;
     }
 
     public Axis getFirstAxis(final Orientation orientation) {
@@ -67,11 +81,14 @@ public abstract class AbstractDataSetManagement<R extends Renderer> implements R
     }
 
     /**
-     * Sets whether DataSets attached to this renderer shall be shown in the
-     * legend
+     * @return the instance of this AbstractDataSetManagement.
+     */
+    protected abstract R getThis();
+
+    /**
+     * Sets whether DataSets attached to this renderer shall be shown in the legend
      *
-     * @param state
-     *            true (default) if data sets are supposed to be drawn
+     * @param state true (default) if data sets are supposed to be drawn
      * @return the renderer class
      */
     @Override
@@ -81,8 +98,7 @@ public abstract class AbstractDataSetManagement<R extends Renderer> implements R
     }
 
     /**
-     * Sets whether DataSets attached to this renderer shall be shown in the
-     * legend
+     * Sets whether DataSets attached to this renderer shall be shown in the legend
      *
      * @return true (default) if data sets are supposed to be drawn
      */
@@ -92,8 +108,7 @@ public abstract class AbstractDataSetManagement<R extends Renderer> implements R
     }
 
     /**
-     * Sets whether DataSets attached to this renderer shall be shown in the
-     * legend
+     * Sets whether DataSets attached to this renderer shall be shown in the legend
      *
      * @return true (default) if data sets are supposed to be drawn
      */
@@ -102,32 +117,12 @@ public abstract class AbstractDataSetManagement<R extends Renderer> implements R
         return showInLegend;
     }
 
-    protected ObservableList<DataSet> getDatasetsCopy(final ObservableList<DataSet> localDataSets) {
-        final long start = ProcessingProfiler.getTimeStamp();
-        final ObservableList<DataSet> dataSets = FXCollections.observableArrayList();
-        for (final DataSet dataSet : localDataSets) {
-            if (dataSet instanceof DataSetError) {
-                final DataSetError dataSetError = (DataSetError) dataSet;
-                dataSets.add(AbstractDataSetManagement.getErrorDataSetCopy(dataSetError));
-            } else {
-                dataSets.add(AbstractDataSetManagement.getDataSetCopy(dataSet));
-            }
-        }
-        ProcessingProfiler.getTimeDiff(start);
-        return dataSets;
-    }
-
-    /**
-     * @return the instance of this AbstractDataSetManagement.
-     */
-    protected abstract R getThis();
-
     protected static void copyMetaData(final DataSet from, final DataSet to) {
         to.setStyle(from.getStyle());
     }
 
     protected static final DoubleDataSet getDataSetCopy(final DataSet dataSet) {
-        final int nLength = dataSet.getDataCount(DIM_X); //TODO: expand to n-dimensional DataSet
+        final int nLength = dataSet.getDataCount(DIM_X); // TODO: expand to n-dimensional DataSet
         final DoubleDataSet ret = new DoubleDataSet(dataSet.getName(), nLength);
 
         dataSet.lock().writeLockGuard(() -> {

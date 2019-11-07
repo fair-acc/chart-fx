@@ -12,13 +12,8 @@ public class EllipseFunction extends AbstractFunction implements FunctionND {
     }
 
     @Override
-    public double getValue(final double[] x, final int i) {
-        return 0;
-    }
-
-    @Override
-    public double[] getValue(final double[] x) {
-        throw new IllegalArgumentException("not implemented");
+    public String getID() {
+        return "EllipseFunction@+" + System.currentTimeMillis();
     }
 
     @Override
@@ -32,8 +27,13 @@ public class EllipseFunction extends AbstractFunction implements FunctionND {
     }
 
     @Override
-    public String getID() {
-        return "EllipseFunction@+" + System.currentTimeMillis();
+    public double[] getValue(final double[] x) {
+        throw new IllegalArgumentException("not implemented");
+    }
+
+    @Override
+    public double getValue(final double[] x, final int i) {
+        return 0;
     }
 
     public static List<DoublePoint> calculateEllipse(final double centerX, final double centerY, final double halfAxisA,

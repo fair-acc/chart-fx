@@ -3,8 +3,7 @@ package de.gsi.dataset.testdata.spi;
 import java.util.SplittableRandom;
 
 /**
- * abstract error data set for graphical testing purposes this implementation
- * generates a random step function
+ * abstract error data set for graphical testing purposes this implementation generates a random step function
  *
  * @author rstein
  */

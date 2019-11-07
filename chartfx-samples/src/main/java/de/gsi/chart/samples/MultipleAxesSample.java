@@ -33,8 +33,8 @@ import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 
 public class MultipleAxesSample extends Application {
-	private static final Logger LOGGER = LoggerFactory.getLogger(MultipleAxesSample.class);
-	
+    private static final Logger LOGGER = LoggerFactory.getLogger(MultipleAxesSample.class);
+
     private static final int N_SAMPLES = 10000; // default: 10000
     private static final long UPDATE_DELAY = 1000; // [ms]
     private static final long UPDATE_PERIOD = 1000; // [ms]
@@ -138,12 +138,19 @@ public class MultipleAxesSample extends Application {
                     renderer3.getDatasets().setAll(new GaussFunction("gaussy", MultipleAxesSample.N_SAMPLES));
 
                     if (updateCount % 10 == 0) {
-                    	LOGGER.atInfo().log("update iteration #" + updateCount);
+                        LOGGER.atInfo().log("update iteration #" + updateCount);
                     }
                     updateCount++;
                 });
             }
         };
+    }
+
+    /**
+     * @param args the command line arguments
+     */
+    public static void main(final String[] args) {
+        Application.launch(args);
     }
 
     private class MyZoomCheckBox extends CheckBox {
@@ -169,12 +176,5 @@ public class MultipleAxesSample extends Application {
             });
         }
 
-    }
-
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(final String[] args) {
-        Application.launch(args);
     }
 }

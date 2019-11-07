@@ -60,175 +60,6 @@ public class ErrorDataSetRendererStylingSample extends Application {
     private int nSamples = 400;
     private Timer timer;
 
-    @Override
-    public void start(final Stage primaryStage) {
-        ProcessingProfiler.setVerboseOutputState(false);
-        ProcessingProfiler.setLoggerOutputState(true);
-        ProcessingProfiler.setDebugState(false);
-
-        final BorderPane root = new BorderPane();
-
-        final Scene scene = new Scene(root, ErrorDataSetRendererStylingSample.DEFAULT_WIDTH,
-                ErrorDataSetRendererStylingSample.DEFAULT_HEIGHT);
-
-        final DefaultNumericAxis xAxis = new DefaultNumericAxis();
-        xAxis.setUnit("Largeness");
-        // xAxis.setSide(Side.CENTER_HOR);
-        xAxis.setMouseTransparent(true);
-        final DefaultNumericAxis yAxis = new DefaultNumericAxis();
-        yAxis.setUnit("Coolness");
-        final XYChart chart = new XYChart(xAxis, yAxis);
-        chart.getXAxis().setName("x axis");
-        chart.getYAxis().setName("y axis");
-        chart.legendVisibleProperty().set(true);
-        // set them false to make the plot faster
-        chart.setAnimated(false);
-        final ErrorDataSetRenderer errorRenderer = new ErrorDataSetRenderer();
-        chart.getRenderers().set(0, errorRenderer);
-        chart.getPlugins().add(new Zoomer());
-        chart.getPlugins().add(new Panner());
-        chart.getPlugins().add(new EditAxis());
-        chart.getPlugins().add(new DataPointTooltip());
-        chart.getPlugins().add(new TableViewer());
-
-        // yAxis.lookup(".axis-label")
-        // .setStyle("-fx-label-padding: +10 0 +10 0;");
-
-        final HBox headerBar = getHeaderBar(chart, scene);
-
-        final Label sampleIndicator = new Label();
-        sampleIndicator.setText(String.valueOf(nSamples));
-        final Label actualSampleIndicator = new Label();
-        final Slider nSampleSlider = new Slider(10, N_MAX_SAMPLES, nSamples);
-        nSampleSlider.setShowTickMarks(true);
-        nSampleSlider.setMajorTickUnit(200);
-        nSampleSlider.setMinorTickCount(20);
-        nSampleSlider.setBlockIncrement(1);
-        HBox.setHgrow(nSampleSlider, Priority.ALWAYS);
-        nSampleSlider.valueProperty().addListener((ch, old, n) -> {
-            nSamples = n.intValue();
-            sampleIndicator.setText(String.valueOf(nSamples));
-            generateData(chart);
-        });
-
-        final HBox hBoxSlider = new HBox(new Label("Number of Samples:"), nSampleSlider, sampleIndicator,
-                actualSampleIndicator);
-        root.setTop(new VBox(headerBar, hBoxSlider));
-
-        final Button newDataSet = new Button("new DataSet");
-        newDataSet.setOnAction(evt -> Platform.runLater(getTimerTask(chart)));
-
-        final Button startTimer = new Button("timer");
-        startTimer.setOnAction(evt -> {
-            if (timer == null) {
-                timer = new Timer();
-                timer.scheduleAtFixedRate(getTimerTask(chart), ErrorDataSetRendererStylingSample.UPDATE_DELAY,
-                        ErrorDataSetRendererStylingSample.UPDATE_PERIOD);
-            } else {
-                timer.cancel();
-                timer = null; // NOPMD
-            }
-        });
-
-        final ComboBox<DataSetType> dataSetTypeSelector = new ComboBox<>();
-        dataSetTypeSelector.getItems().addAll(DataSetType.values());
-        dataSetTypeSelector.setValue(dataSetType);
-        dataSetTypeSelector.valueProperty().addListener((ch, old, selection) -> {
-            dataSetType = selection;
-            generateData(chart);
-        });
-
-        // organise parameter config according to tabs
-        final TabPane tabPane = new TabPane();
-
-        tabPane.getTabs().add(getRendererTab(chart, errorRenderer));
-        tabPane.getTabs().add(getAxisTab("x-Axis", chart, xAxis));
-        tabPane.getTabs().add(getAxisTab("y-Axis", chart, yAxis));
-        tabPane.getTabs().add(getChartTab(chart));
-
-        root.setLeft(tabPane);
-
-        generateData(chart);
-
-        long startTime = ProcessingProfiler.getTimeStamp();
-
-        ProcessingProfiler.getTimeDiff(startTime, "adding data to chart");
-
-        startTime = ProcessingProfiler.getTimeStamp();
-
-        root.setCenter(chart);
-        ProcessingProfiler.getTimeDiff(startTime, "adding chart into StackPane");
-
-        startTime = ProcessingProfiler.getTimeStamp();
-        primaryStage.setTitle(this.getClass().getSimpleName());
-        primaryStage.setScene(scene);
-        primaryStage.setOnCloseRequest(evt -> System.exit(0));
-        primaryStage.show();
-        ProcessingProfiler.getTimeDiff(startTime, "for showing");
-
-    }
-
-    private HBox getHeaderBar(final XYChart chart, final Scene scene) {
-
-        final Button newDataSet = new Button("new DataSet");
-        newDataSet.setOnAction(evt -> Platform.runLater(getTimerTask(chart)));
-
-        // repetitively generate new data
-        final Button startTimer = new Button("timer");
-        startTimer.setOnAction(evt -> {
-            if (timer == null) {
-                timer = new Timer();
-                timer.scheduleAtFixedRate(getTimerTask(chart), UPDATE_DELAY, UPDATE_PERIOD);
-            } else {
-                timer.cancel();
-                timer = null; // NOPMD
-            }
-        });
-
-        final ComboBox<DataSetType> dataSetTypeSelector = new ComboBox<>();
-        dataSetTypeSelector.getItems().addAll(DataSetType.values());
-        dataSetTypeSelector.setValue(dataSetType);
-        dataSetTypeSelector.valueProperty().addListener((ch, old, selection) -> {
-            dataSetType = selection;
-            generateData(chart);
-        });
-
-        // H-Spacer
-        final Region spacer = new Region();
-        spacer.setMinWidth(Region.USE_PREF_SIZE);
-        HBox.setHgrow(spacer, Priority.ALWAYS);
-
-        return new HBox(new Label("Function Type: "), dataSetTypeSelector, newDataSet, startTimer, spacer,
-                new ProfilerInfoBox(scene, DEBUG_UPDATE_RATE));
-    }
-
-    public TimerTask getTimerTask(final XYChart chart) {
-        return new TimerTask() {
-            private int updateCount;
-
-            @Override
-            public void run() {
-                generateData(chart);
-
-                if (updateCount % 10 == 0 && LOGGER.isDebugEnabled()) {
-                    LOGGER.atDebug().addArgument(updateCount).log("update iteration #{}");
-                }
-                updateCount++;
-            }
-        };
-    }
-
-    public enum DataSetType {
-        RANDOM_WALK,
-        OUTLIER,
-        STEP,
-        SINC,
-        GAUSS,
-        SINE,
-        COSINE,
-        MIX_TRIGONOMETRIC;
-    }
-
     private void generateData(final XYChart chart) {
 
         long startTime = ProcessingProfiler.getTimeStamp();
@@ -271,6 +102,75 @@ public class ErrorDataSetRendererStylingSample extends Application {
         startTime = ProcessingProfiler.getTimeDiff(startTime, "adding data into DataSet");
     }
 
+    private ParameterTab getAxisTab(final String name, final XYChart chart, final DefaultNumericAxis axis) {
+        final ParameterTab pane = new ParameterTab(name);
+
+        final CheckBox animated = new CheckBox();
+        animated.selectedProperty().bindBidirectional(axis.animatedProperty());
+        animated.selectedProperty().addListener((ch, old, selected) -> chart.requestLayout());
+        pane.addToParameterPane("Amimated: ", animated);
+
+        final CheckBox autoranging = new CheckBox();
+        autoranging.selectedProperty().bindBidirectional(axis.autoRangingProperty());
+        autoranging.selectedProperty().addListener((ch, old, selected) -> chart.requestLayout());
+        pane.addToParameterPane("Auto-Ranging: ", autoranging);
+
+        final CheckBox autogrowranging = new CheckBox();
+        autogrowranging.selectedProperty().bindBidirectional(axis.autoGrowRangingProperty());
+        autogrowranging.selectedProperty().addListener((ch, old, selected) -> chart.requestLayout());
+        pane.addToParameterPane("Auto-Grow-Ranging: ", autogrowranging);
+
+        final Spinner<Number> upperRange = new Spinner<>(-N_MAX_SAMPLES, +N_MAX_SAMPLES, axis.getMin(), 0.1);
+        upperRange.valueProperty().addListener((ch, old, value) -> {
+            axis.setMax(value.doubleValue());
+            chart.requestLayout();
+        });
+        pane.addToParameterPane("   Upper Bound): ", upperRange);
+
+        final Spinner<Number> lowerRange = new Spinner<>(-N_MAX_SAMPLES, +N_MAX_SAMPLES, axis.getMin(), 0.1);
+        lowerRange.valueProperty().addListener((ch, old, value) -> {
+            axis.setMin(value.doubleValue());
+            chart.requestLayout();
+        });
+        pane.addToParameterPane("   Lower Bound): ", lowerRange);
+
+        final CheckBox autoRangeRounding = new CheckBox();
+        autoRangeRounding.selectedProperty().bindBidirectional(axis.autoRangeRoundingProperty());
+        autoRangeRounding.selectedProperty().addListener((ch, old, selected) -> chart.requestLayout());
+        pane.addToParameterPane("Auto-Range-Rounding: ", autoRangeRounding);
+
+        final Spinner<Double> autoRangePadding = new Spinner<>(0, 100.0, axis.getAutoRangePadding(), 0.05);
+        autoRangePadding.valueProperty().addListener((ch, old, value) -> {
+            axis.setAutoRangePadding(value.doubleValue());
+            chart.requestLayout();
+        });
+        pane.addToParameterPane("   auto-range padding): ", autoRangePadding);
+
+        final CheckBox logAxis = new CheckBox();
+        logAxis.selectedProperty().bindBidirectional(axis.logAxisProperty());
+        logAxis.selectedProperty().addListener((ch, old, selected) -> chart.requestLayout());
+        pane.addToParameterPane("Log-Axis: ", logAxis);
+
+        final CheckBox timeAxis = new CheckBox();
+        timeAxis.selectedProperty().bindBidirectional(axis.timeAxisProperty());
+        timeAxis.selectedProperty().addListener((ch, old, selected) -> chart.requestLayout());
+        pane.addToParameterPane("Time-Axis: ", timeAxis);
+
+        final CheckBox invertAxis = new CheckBox();
+        invertAxis.selectedProperty().bindBidirectional(axis.invertAxisProperty());
+        invertAxis.selectedProperty().addListener((ch, old, selected) -> chart.requestLayout());
+        pane.addToParameterPane("Invert-Axis: ", invertAxis);
+
+        final CheckBox autoUnit = new CheckBox();
+        autoUnit.selectedProperty().bindBidirectional(axis.autoUnitScalingProperty());
+        autoUnit.selectedProperty().addListener((ch, old, selected) -> chart.requestLayout());
+        pane.addToParameterPane("Auto Unit: ", autoUnit);
+
+        pane.addToParameterPane(" ", null);
+
+        return pane;
+    }
+
     private Tab getChartTab(XYChart chart) {
         final ParameterTab pane = new ParameterTab("Chart");
 
@@ -290,6 +190,40 @@ public class ErrorDataSetRendererStylingSample extends Application {
         pane.addToParameterPane("Grid on top: ", gridOnTop);
 
         return pane;
+    }
+
+    private HBox getHeaderBar(final XYChart chart, final Scene scene) {
+
+        final Button newDataSet = new Button("new DataSet");
+        newDataSet.setOnAction(evt -> Platform.runLater(getTimerTask(chart)));
+
+        // repetitively generate new data
+        final Button startTimer = new Button("timer");
+        startTimer.setOnAction(evt -> {
+            if (timer == null) {
+                timer = new Timer();
+                timer.scheduleAtFixedRate(getTimerTask(chart), UPDATE_DELAY, UPDATE_PERIOD);
+            } else {
+                timer.cancel();
+                timer = null; // NOPMD
+            }
+        });
+
+        final ComboBox<DataSetType> dataSetTypeSelector = new ComboBox<>();
+        dataSetTypeSelector.getItems().addAll(DataSetType.values());
+        dataSetTypeSelector.setValue(dataSetType);
+        dataSetTypeSelector.valueProperty().addListener((ch, old, selection) -> {
+            dataSetType = selection;
+            generateData(chart);
+        });
+
+        // H-Spacer
+        final Region spacer = new Region();
+        spacer.setMinWidth(Region.USE_PREF_SIZE);
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+
+        return new HBox(new Label("Function Type: "), dataSetTypeSelector, newDataSet, startTimer, spacer,
+                new ProfilerInfoBox(scene, DEBUG_UPDATE_RATE));
     }
 
     private ParameterTab getRendererTab(final XYChart chart, final ErrorDataSetRenderer errorRenderer) {
@@ -408,73 +342,139 @@ public class ErrorDataSetRendererStylingSample extends Application {
         return pane;
     }
 
-    private ParameterTab getAxisTab(final String name, final XYChart chart, final DefaultNumericAxis axis) {
-        final ParameterTab pane = new ParameterTab(name);
+    public TimerTask getTimerTask(final XYChart chart) {
+        return new TimerTask() {
+            private int updateCount;
 
-        final CheckBox animated = new CheckBox();
-        animated.selectedProperty().bindBidirectional(axis.animatedProperty());
-        animated.selectedProperty().addListener((ch, old, selected) -> chart.requestLayout());
-        pane.addToParameterPane("Amimated: ", animated);
+            @Override
+            public void run() {
+                generateData(chart);
 
-        final CheckBox autoranging = new CheckBox();
-        autoranging.selectedProperty().bindBidirectional(axis.autoRangingProperty());
-        autoranging.selectedProperty().addListener((ch, old, selected) -> chart.requestLayout());
-        pane.addToParameterPane("Auto-Ranging: ", autoranging);
+                if (updateCount % 10 == 0 && LOGGER.isDebugEnabled()) {
+                    LOGGER.atDebug().addArgument(updateCount).log("update iteration #{}");
+                }
+                updateCount++;
+            }
+        };
+    }
 
-        final CheckBox autogrowranging = new CheckBox();
-        autogrowranging.selectedProperty().bindBidirectional(axis.autoGrowRangingProperty());
-        autogrowranging.selectedProperty().addListener((ch, old, selected) -> chart.requestLayout());
-        pane.addToParameterPane("Auto-Grow-Ranging: ", autogrowranging);
+    @Override
+    public void start(final Stage primaryStage) {
+        ProcessingProfiler.setVerboseOutputState(false);
+        ProcessingProfiler.setLoggerOutputState(true);
+        ProcessingProfiler.setDebugState(false);
 
-        final Spinner<Number> upperRange = new Spinner<>(-N_MAX_SAMPLES, +N_MAX_SAMPLES, axis.getMin(), 0.1);
-        upperRange.valueProperty().addListener((ch, old, value) -> {
-            axis.setMax(value.doubleValue());
-            chart.requestLayout();
+        final BorderPane root = new BorderPane();
+
+        final Scene scene = new Scene(root, ErrorDataSetRendererStylingSample.DEFAULT_WIDTH,
+                ErrorDataSetRendererStylingSample.DEFAULT_HEIGHT);
+
+        final DefaultNumericAxis xAxis = new DefaultNumericAxis();
+        xAxis.setUnit("Largeness");
+        // xAxis.setSide(Side.CENTER_HOR);
+        xAxis.setMouseTransparent(true);
+        final DefaultNumericAxis yAxis = new DefaultNumericAxis();
+        yAxis.setUnit("Coolness");
+        final XYChart chart = new XYChart(xAxis, yAxis);
+        chart.getXAxis().setName("x axis");
+        chart.getYAxis().setName("y axis");
+        chart.legendVisibleProperty().set(true);
+        // set them false to make the plot faster
+        chart.setAnimated(false);
+        final ErrorDataSetRenderer errorRenderer = new ErrorDataSetRenderer();
+        chart.getRenderers().set(0, errorRenderer);
+        chart.getPlugins().add(new Zoomer());
+        chart.getPlugins().add(new Panner());
+        chart.getPlugins().add(new EditAxis());
+        chart.getPlugins().add(new DataPointTooltip());
+        chart.getPlugins().add(new TableViewer());
+
+        // yAxis.lookup(".axis-label")
+        // .setStyle("-fx-label-padding: +10 0 +10 0;");
+
+        final HBox headerBar = getHeaderBar(chart, scene);
+
+        final Label sampleIndicator = new Label();
+        sampleIndicator.setText(String.valueOf(nSamples));
+        final Label actualSampleIndicator = new Label();
+        final Slider nSampleSlider = new Slider(10, N_MAX_SAMPLES, nSamples);
+        nSampleSlider.setShowTickMarks(true);
+        nSampleSlider.setMajorTickUnit(200);
+        nSampleSlider.setMinorTickCount(20);
+        nSampleSlider.setBlockIncrement(1);
+        HBox.setHgrow(nSampleSlider, Priority.ALWAYS);
+        nSampleSlider.valueProperty().addListener((ch, old, n) -> {
+            nSamples = n.intValue();
+            sampleIndicator.setText(String.valueOf(nSamples));
+            generateData(chart);
         });
-        pane.addToParameterPane("   Upper Bound): ", upperRange);
 
-        final Spinner<Number> lowerRange = new Spinner<>(-N_MAX_SAMPLES, +N_MAX_SAMPLES, axis.getMin(), 0.1);
-        lowerRange.valueProperty().addListener((ch, old, value) -> {
-            axis.setMin(value.doubleValue());
-            chart.requestLayout();
+        final HBox hBoxSlider = new HBox(new Label("Number of Samples:"), nSampleSlider, sampleIndicator,
+                actualSampleIndicator);
+        root.setTop(new VBox(headerBar, hBoxSlider));
+
+        final Button newDataSet = new Button("new DataSet");
+        newDataSet.setOnAction(evt -> Platform.runLater(getTimerTask(chart)));
+
+        final Button startTimer = new Button("timer");
+        startTimer.setOnAction(evt -> {
+            if (timer == null) {
+                timer = new Timer();
+                timer.scheduleAtFixedRate(getTimerTask(chart), ErrorDataSetRendererStylingSample.UPDATE_DELAY,
+                        ErrorDataSetRendererStylingSample.UPDATE_PERIOD);
+            } else {
+                timer.cancel();
+                timer = null; // NOPMD
+            }
         });
-        pane.addToParameterPane("   Lower Bound): ", lowerRange);
 
-        final CheckBox autoRangeRounding = new CheckBox();
-        autoRangeRounding.selectedProperty().bindBidirectional(axis.autoRangeRoundingProperty());
-        autoRangeRounding.selectedProperty().addListener((ch, old, selected) -> chart.requestLayout());
-        pane.addToParameterPane("Auto-Range-Rounding: ", autoRangeRounding);
-
-        final Spinner<Double> autoRangePadding = new Spinner<>(0, 100.0, axis.getAutoRangePadding(), 0.05);
-        autoRangePadding.valueProperty().addListener((ch, old, value) -> {
-            axis.setAutoRangePadding(value.doubleValue());
-            chart.requestLayout();
+        final ComboBox<DataSetType> dataSetTypeSelector = new ComboBox<>();
+        dataSetTypeSelector.getItems().addAll(DataSetType.values());
+        dataSetTypeSelector.setValue(dataSetType);
+        dataSetTypeSelector.valueProperty().addListener((ch, old, selection) -> {
+            dataSetType = selection;
+            generateData(chart);
         });
-        pane.addToParameterPane("   auto-range padding): ", autoRangePadding);
 
-        final CheckBox logAxis = new CheckBox();
-        logAxis.selectedProperty().bindBidirectional(axis.logAxisProperty());
-        logAxis.selectedProperty().addListener((ch, old, selected) -> chart.requestLayout());
-        pane.addToParameterPane("Log-Axis: ", logAxis);
+        // organise parameter config according to tabs
+        final TabPane tabPane = new TabPane();
 
-        final CheckBox timeAxis = new CheckBox();
-        timeAxis.selectedProperty().bindBidirectional(axis.timeAxisProperty());
-        timeAxis.selectedProperty().addListener((ch, old, selected) -> chart.requestLayout());
-        pane.addToParameterPane("Time-Axis: ", timeAxis);
+        tabPane.getTabs().add(getRendererTab(chart, errorRenderer));
+        tabPane.getTabs().add(getAxisTab("x-Axis", chart, xAxis));
+        tabPane.getTabs().add(getAxisTab("y-Axis", chart, yAxis));
+        tabPane.getTabs().add(getChartTab(chart));
 
-        final CheckBox invertAxis = new CheckBox();
-        invertAxis.selectedProperty().bindBidirectional(axis.invertAxisProperty());
-        invertAxis.selectedProperty().addListener((ch, old, selected) -> chart.requestLayout());
-        pane.addToParameterPane("Invert-Axis: ", invertAxis);
+        root.setLeft(tabPane);
 
-        final CheckBox autoUnit = new CheckBox();
-        autoUnit.selectedProperty().bindBidirectional(axis.autoUnitScalingProperty());
-        autoUnit.selectedProperty().addListener((ch, old, selected) -> chart.requestLayout());
-        pane.addToParameterPane("Auto Unit: ", autoUnit);
+        generateData(chart);
 
-        pane.addToParameterPane(" ", null);
+        long startTime = ProcessingProfiler.getTimeStamp();
 
-        return pane;
+        ProcessingProfiler.getTimeDiff(startTime, "adding data to chart");
+
+        startTime = ProcessingProfiler.getTimeStamp();
+
+        root.setCenter(chart);
+        ProcessingProfiler.getTimeDiff(startTime, "adding chart into StackPane");
+
+        startTime = ProcessingProfiler.getTimeStamp();
+        primaryStage.setTitle(this.getClass().getSimpleName());
+        primaryStage.setScene(scene);
+        primaryStage.setOnCloseRequest(evt -> System.exit(0));
+        primaryStage.show();
+        ProcessingProfiler.getTimeDiff(startTime, "for showing");
+
+    }
+
+    /**
+     * @param args the command line arguments
+     */
+    public static void main(final String[] args) {
+        Application.launch(args);
+    }
+
+    public enum DataSetType {
+        RANDOM_WALK, OUTLIER, STEP, SINC, GAUSS, SINE, COSINE, MIX_TRIGONOMETRIC;
     }
 
     private class ParameterTab extends Tab {
@@ -494,13 +494,5 @@ public class ErrorDataSetRendererStylingSample extends Application {
             }
             rowIndex++;
         }
-    }
-
-    /**
-     * @param args
-     *            the command line arguments
-     */
-    public static void main(final String[] args) {
-        Application.launch(args);
     }
 }

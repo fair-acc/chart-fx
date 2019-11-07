@@ -16,18 +16,6 @@ public final class CachedDaemonThreadFactory implements ThreadFactory {
         // helper class
     }
 
-    public static CachedDaemonThreadFactory getInstance() {
-        return SELF;
-    }
-
-    public static int getNumbersOfThreads() {
-        return MAX_THREADS;
-    }
-
-    public static ExecutorService getCommonPool() {
-        return COMMON_POOL;
-    }
-
     @Override
     public Thread newThread(Runnable r) {
         Thread thread = defaultFactory.newThread(r);
@@ -35,5 +23,17 @@ public final class CachedDaemonThreadFactory implements ThreadFactory {
         thread.setName("daemonised_chartfx_thread_#" + threadCounter.intValue());
         thread.setDaemon(true);
         return thread;
+    }
+
+    public static ExecutorService getCommonPool() {
+        return COMMON_POOL;
+    }
+
+    public static CachedDaemonThreadFactory getInstance() {
+        return SELF;
+    }
+
+    public static int getNumbersOfThreads() {
+        return MAX_THREADS;
     }
 }

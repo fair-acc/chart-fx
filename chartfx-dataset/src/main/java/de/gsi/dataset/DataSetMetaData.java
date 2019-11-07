@@ -13,12 +13,12 @@ public interface DataSetMetaData {
     String TAG_UNDERSHOOT = "under-range";
     String TAG_GAIN_RANGE = "gain-range";
 
-    Map<String, String> getMetaInfo();
+    List<String> getErrorList();
 
     List<String> getInfoList();
 
-    List<String> getWarningList();
+    Map<String, String> getMetaInfo();
 
-    List<String> getErrorList();
+    List<String> getWarningList();
 
 }

@@ -66,67 +66,6 @@ public class MatrixD extends AbstractMatrix {
      */
 
     /**
-     * Construct an m-by-n matrix of zeros.
-     *
-     * @param m Number of rows.
-     * @param n Number of columns.
-     */
-    public MatrixD(final int m, final int n) {
-        super.m = m;
-        super.n = n;
-        element = new double[m][n];
-    }
-
-    /**
-     * Construct an m-by-n constant matrix.
-     *
-     * @param m Number of rows.
-     * @param n Number of columns.
-     * @param s Fill the matrix with this scalar value.
-     */
-    public MatrixD(final int m, final int n, final double s) {
-        super.m = m;
-        super.n = n;
-        element = new double[m][n];
-        for (int i = 0; i < m; i++) {
-            for (int j = 0; j < n; j++) {
-                element[i][j] = s;
-            }
-        }
-    }
-
-    /**
-     * Construct a matrix from a 2-D array.
-     *
-     * @param A Two-dimensional array of doubles.
-     * @exception IllegalArgumentException All rows must have the same length 
-     */
-
-    public MatrixD(final double[][] A) {
-        super.m = A.length;
-        super.n = A[0].length;
-        for (int i = 0; i < m; i++) {
-            if (A[i].length != n) {
-                throw new IllegalArgumentException("All rows must have the same length.");
-            }
-        }
-        element = A;
-    }
-
-    /**
-     * Construct a matrix quickly without checking arguments.
-     *
-     * @param A Two-dimensional array of doubles.
-     * @param m Number of rows.
-     * @param n Number of columns.
-     */
-    public MatrixD(final double[][] A, final int m, final int n) {
-        element = A;
-        this.m = m;
-        this.n = n;
-    }
-
-    /**
      * Construct a matrix from a one-dimensional packed array
      *
      * @param vals One-dimensional array of doubles
@@ -165,9 +104,217 @@ public class MatrixD extends AbstractMatrix {
         }
     }
 
+    /**
+     * Construct a matrix from a 2-D array.
+     *
+     * @param A Two-dimensional array of doubles.
+     * @exception IllegalArgumentException All rows must have the same length
+     */
+
+    public MatrixD(final double[][] A) {
+        super.m = A.length;
+        super.n = A[0].length;
+        for (int i = 0; i < m; i++) {
+            if (A[i].length != n) {
+                throw new IllegalArgumentException("All rows must have the same length.");
+            }
+        }
+        element = A;
+    }
+
+    /**
+     * Construct a matrix quickly without checking arguments.
+     *
+     * @param A Two-dimensional array of doubles.
+     * @param m Number of rows.
+     * @param n Number of columns.
+     */
+    public MatrixD(final double[][] A, final int m, final int n) {
+        element = A;
+        this.m = m;
+        this.n = n;
+    }
+
+    /**
+     * Construct an m-by-n matrix of zeros.
+     *
+     * @param m Number of rows.
+     * @param n Number of columns.
+     */
+    public MatrixD(final int m, final int n) {
+        super.m = m;
+        super.n = n;
+        element = new double[m][n];
+    }
+
+    /**
+     * Construct an m-by-n constant matrix.
+     *
+     * @param m Number of rows.
+     * @param n Number of columns.
+     * @param s Fill the matrix with this scalar value.
+     */
+    public MatrixD(final int m, final int n, final double s) {
+        super.m = m;
+        super.n = n;
+        element = new double[m][n];
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                element[i][j] = s;
+            }
+        }
+    }
+
     /*
      * ------------------------ Public Methods ------------------------
      */
+
+    /**
+     * apply user specified function to each matrix element
+     * 
+     * @param func user-supplied function
+     */
+    public void apply1DFunction(final Function1D func) {
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                element[i][j] = func.getValue(element[i][j]);
+            }
+        }
+    }
+
+    /**
+     * Element-by-element left division, C = A.\B
+     *
+     * @param B another matrix
+     * @return A.\B
+     */
+    public MatrixD arrayLeftDivide(final MatrixD B) {
+        checkMatrixDimensions(B);
+        final MatrixD X = new MatrixD(m, n);
+        final double[][] C = X.getArray();
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                C[i][j] = B.element[i][j] / element[i][j];
+            }
+        }
+        return X;
+    }
+
+    /**
+     * Element-by-element left division in place, A = A.\B
+     *
+     * @param B another matrix
+     * @return A.\B
+     */
+
+    public MatrixD arrayLeftDivideEquals(final MatrixD B) {
+        checkMatrixDimensions(B);
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                element[i][j] = B.element[i][j] / element[i][j];
+            }
+        }
+        return this;
+    }
+
+    /**
+     * Element-by-element right division, C = A./B
+     *
+     * @param B another matrix
+     * @return A./B
+     */
+    public MatrixD arrayRightDivide(final MatrixD B) {
+        checkMatrixDimensions(B);
+        final MatrixD X = new MatrixD(m, n);
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                X.set(i, j, get(i, j) / B.get(i, j));
+            }
+        }
+        return X;
+    }
+
+    /**
+     * Element-by-element right division in place, A = A./B
+     *
+     * @param B another matrix
+     * @return A./B
+     */
+    public MatrixD arrayRightDivideEquals(final MatrixD B) {
+        checkMatrixDimensions(B);
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                element[i][j] = element[i][j] / B.element[i][j];
+            }
+        }
+        return this;
+    }
+
+    /**
+     * Element-by-element multiplication, C = A.*B
+     *
+     * @param B another matrix
+     * @return A.*B
+     */
+
+    public MatrixD arrayTimes(final MatrixD B) {
+        checkMatrixDimensions(B);
+        final MatrixD X = new MatrixD(m, n);
+        final double[][] C = X.getArray();
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                C[i][j] = element[i][j] * B.element[i][j];
+            }
+        }
+        return X;
+    }
+
+    /**
+     * Element-by-element multiplication in place, A = A.*B
+     *
+     * @param B another matrix
+     * @return A.*B
+     */
+
+    public MatrixD arrayTimesEquals(final MatrixD B) {
+        checkMatrixDimensions(B);
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                set(i, j, get(i, j) * B.get(i, j));
+            }
+        }
+        return this;
+    }
+
+    /**
+     * Cholesky Decomposition
+     *
+     * @return CholeskyDecomposition
+     * @see CholeskyDecomposition
+     */
+
+    public CholeskyDecomposition chol() {
+        return new CholeskyDecomposition(this);
+    }
+
+    /**
+     * Clone the Matrix object.
+     */
+
+    @Override
+    public Object clone() {
+        return copy();
+    }
+
+    /**
+     * Matrix condition (2 norm)
+     *
+     * @return ratio of largest to smallest singular value.
+     */
+
+    public double cond() {
+        return new SingularValueDecomposition(this).cond();
+    }
 
     /**
      * Make a deep copy of a matrix
@@ -186,12 +333,36 @@ public class MatrixD extends AbstractMatrix {
     }
 
     /**
-     * Clone the Matrix object.
+     * Matrix determinant
+     *
+     * @return determinant
      */
 
+    public double det() {
+        return new LUDecomposition(this).det();
+    }
+
+    /**
+     * Eigenvalue Decomposition
+     *
+     * @return EigenvalueDecomposition
+     * @see EigenvalueDecomposition
+     */
+
+    public EigenvalueDecomposition eig() {
+        return new EigenvalueDecomposition(this);
+    }
+
+    /**
+     * Get a single element.
+     *
+     * @param i Row index.
+     * @param j Column index
+     * @return A(i,j)
+     */
     @Override
-    public Object clone() {
-        return copy();
+    public double get(final int i, final int j) {
+        return element[i][j];
     }
 
     /**
@@ -234,44 +405,6 @@ public class MatrixD extends AbstractMatrix {
     }
 
     /**
-     * Make a one-dimensional row Major copy of the internal array.
-     *
-     * @return Matrix elements packed in a one-dimensional array by rows.
-     */
-
-    public double[] getRowPackedCopy() {
-        final double[] vals = new double[m * n];
-        for (int i = 0; i < m; i++) {
-            System.arraycopy(element[i], 0, vals, i * m, n);
-        }
-        return vals;
-    }
-
-    /**
-     * Get a single element.
-     *
-     * @param i Row index.
-     * @param j Column index
-     * @return A(i,j)
-     */
-    @Override
-    public double get(final int i, final int j) {
-        return element[i][j];
-    }
-
-    /**
-     * Set a single element.
-     *
-     * @param i Row index.
-     * @param j Column index.
-     * @param s A(i,j).
-     */
-    @Override
-    public void set(final int i, final int j, final double s) {
-        element[i][j] = s;
-    }
-
-    /**
      * Get a sub-matrix.
      *
      * @param i0 Initial row index
@@ -287,29 +420,6 @@ public class MatrixD extends AbstractMatrix {
         try {
             for (int i = i0; i <= i1; i++) {
                 System.arraycopy(element[i], j0, B[i - i0], j0, j1 - j0);
-            }
-        } catch (final ArrayIndexOutOfBoundsException e) {
-            throw new ArrayIndexOutOfBoundsException("Submatrix indices");
-        }
-        return X;
-    }
-
-    /**
-     * Get a sub-matrix.
-     *
-     * @param r Array of row indices.
-     * @param c Array of column indices.
-     * @return A(r(:),c(:))
-     * @exception ArrayIndexOutOfBoundsException Submatrix indices
-     */
-    public MatrixD getMatrix(final int[] r, final int[] c) {
-        final MatrixD X = new MatrixD(r.length, c.length);
-        final double[][] B = X.getArray();
-        try {
-            for (int i = 0; i < r.length; i++) {
-                for (int j = 0; j < c.length; j++) {
-                    B[i][j] = element[r[i]][c[j]];
-                }
             }
         } catch (final ArrayIndexOutOfBoundsException e) {
             throw new ArrayIndexOutOfBoundsException("Submatrix indices");
@@ -366,155 +476,59 @@ public class MatrixD extends AbstractMatrix {
     }
 
     /**
-     * Set a submatrix.
-     *
-     * @param i0 Initial row index
-     * @param i1 Final row index
-     * @param j0 Initial column index
-     * @param j1 Final column index
-     * @param X A(i0:i1,j0:j1)
-     * @exception ArrayIndexOutOfBoundsException Submatrix indices
-     */
-
-    public void setMatrix(final int i0, final int i1, final int j0, final int j1, final MatrixD X) {
-        try {
-            for (int i = i0; i <= i1; i++) {
-                for (int j = j0; j <= j1; j++) {
-                    element[i][j] = X.get(i - i0, j - j0);
-                }
-            }
-        } catch (final ArrayIndexOutOfBoundsException e) {
-            throw new ArrayIndexOutOfBoundsException("Submatrix indices");
-        }
-    }
-
-    /**
-     * Set a submatrix.
+     * Get a sub-matrix.
      *
      * @param r Array of row indices.
      * @param c Array of column indices.
-     * @param X A(r(:),c(:))
+     * @return A(r(:),c(:))
      * @exception ArrayIndexOutOfBoundsException Submatrix indices
      */
-
-    public void setMatrix(final int[] r, final int[] c, final MatrixD X) {
+    public MatrixD getMatrix(final int[] r, final int[] c) {
+        final MatrixD X = new MatrixD(r.length, c.length);
+        final double[][] B = X.getArray();
         try {
             for (int i = 0; i < r.length; i++) {
                 for (int j = 0; j < c.length; j++) {
-                    element[r[i]][c[j]] = X.get(i, j);
+                    B[i][j] = element[r[i]][c[j]];
                 }
             }
         } catch (final ArrayIndexOutOfBoundsException e) {
             throw new ArrayIndexOutOfBoundsException("Submatrix indices");
         }
-    }
-
-    /**
-     * Set a submatrix.
-     *
-     * @param r Array of row indices.
-     * @param j0 Initial column index
-     * @param j1 Final column index
-     * @param X A(r(:),j0:j1)
-     * @exception ArrayIndexOutOfBoundsException Submatrix indices
-     */
-
-    public void setMatrix(final int[] r, final int j0, final int j1, final MatrixD X) {
-        try {
-            for (int i = 0; i < r.length; i++) {
-                for (int j = j0; j <= j1; j++) {
-                    element[r[i]][j] = X.get(i, j - j0);
-                }
-            }
-        } catch (final ArrayIndexOutOfBoundsException e) {
-            throw new ArrayIndexOutOfBoundsException("Submatrix indices");
-        }
-    }
-
-    /**
-     * Set a submatrix.
-     *
-     * @param i0 Initial row index
-     * @param i1 Final row index
-     * @param c Array of column indices.
-     * @param X A(i0:i1,c(:))
-     * @exception ArrayIndexOutOfBoundsException Submatrix indices
-     */
-
-    public void setMatrix(final int i0, final int i1, final int[] c, final MatrixD X) {
-        try {
-            for (int i = i0; i <= i1; i++) {
-                for (int j = 0; j < c.length; j++) {
-                    element[i][c[j]] = X.get(i - i0, j);
-                }
-            }
-        } catch (final ArrayIndexOutOfBoundsException e) {
-            throw new ArrayIndexOutOfBoundsException("Submatrix indices");
-        }
-    }
-
-    /**
-     * Matrix transpose.
-     *
-     * @return A^{T}
-     */
-    public MatrixD transpose() {
-        final MatrixD X = new MatrixD(n, m);
-        final double[][] C = X.getArray();
-        for (int i = 0; i < m; i++) {
-            for (int j = 0; j < n; j++) {
-                C[j][i] = element[i][j];
-            }
-        }
         return X;
     }
 
     /**
-     * Unary minus
+     * Make a one-dimensional row Major copy of the internal array.
      *
-     * @return -A
+     * @return Matrix elements packed in a one-dimensional array by rows.
      */
-    public MatrixD uminus() {
-        final MatrixD X = new MatrixD(m, n);
+
+    public double[] getRowPackedCopy() {
+        final double[] vals = new double[m * n];
         for (int i = 0; i < m; i++) {
-            for (int j = 0; j < n; j++) {
-                X.set(i, j, -element[i][j]);
-            }
+            System.arraycopy(element[i], 0, vals, i * m, n);
         }
-        return X;
+        return vals;
     }
 
     /**
-     * C = A + B
+     * Matrix inverse or pseudo-inverse
      *
-     * @param B another matrix
-     * @return A + B
+     * @return inverse(A) if A is square, pseudo-inverse otherwise.
      */
-    public MatrixD plus(final MatrixD B) {
-        checkMatrixDimensions(B);
-        final MatrixD X = new MatrixD(m, n);
-        for (int i = 0; i < m; i++) {
-            for (int j = 0; j < n; j++) {
-                X.set(i, j, get(i, j) + B.get(i, j));
-            }
-        }
-        return X;
+    public MatrixD inverse() {
+        return solve(MatrixFactory.identity(m, m));
     }
 
     /**
-     * A = A + B
+     * LU Decomposition
      *
-     * @param B another matrix
-     * @return A + B
+     * @return LUDecomposition
+     * @see LUDecomposition
      */
-    public MatrixD plusEquals(final MatrixD B) {
-        checkMatrixDimensions(B);
-        for (int i = 0; i < m; i++) {
-            for (int j = 0; j < n; j++) {
-                set(i, j, get(i, j) + B.get(i, j));
-            }
-        }
-        return this;
+    public LUDecomposition lu() {
+        return new LUDecomposition(this);
     }
 
     /**
@@ -554,107 +568,299 @@ public class MatrixD extends AbstractMatrix {
     }
 
     /**
-     * Element-by-element multiplication, C = A.*B
+     * C = A + B
      *
      * @param B another matrix
-     * @return A.*B
+     * @return A + B
      */
-
-    public MatrixD arrayTimes(final MatrixD B) {
+    public MatrixD plus(final MatrixD B) {
         checkMatrixDimensions(B);
         final MatrixD X = new MatrixD(m, n);
-        final double[][] C = X.getArray();
         for (int i = 0; i < m; i++) {
             for (int j = 0; j < n; j++) {
-                C[i][j] = element[i][j] * B.element[i][j];
+                X.set(i, j, get(i, j) + B.get(i, j));
             }
         }
         return X;
     }
 
     /**
-     * Element-by-element multiplication in place, A = A.*B
+     * A = A + B
      *
      * @param B another matrix
-     * @return A.*B
+     * @return A + B
      */
-
-    public MatrixD arrayTimesEquals(final MatrixD B) {
+    public MatrixD plusEquals(final MatrixD B) {
         checkMatrixDimensions(B);
         for (int i = 0; i < m; i++) {
             for (int j = 0; j < n; j++) {
-                set(i, j, get(i, j) * B.get(i, j));
+                set(i, j, get(i, j) + B.get(i, j));
             }
         }
         return this;
     }
 
     /**
-     * Element-by-element right division, C = A./B
+     * Print the matrix to stdout. Line the elements up in columns with a Fortran-like 'Fw.d' style format.
      *
-     * @param B another matrix
-     * @return A./B
+     * @param w Column width.
+     * @param d Number of digits after the decimal.
      */
-    public MatrixD arrayRightDivide(final MatrixD B) {
-        checkMatrixDimensions(B);
-        final MatrixD X = new MatrixD(m, n);
-        for (int i = 0; i < m; i++) {
-            for (int j = 0; j < n; j++) {
-                X.set(i, j, get(i, j) / B.get(i, j));
-            }
-        }
-        return X;
+
+    public void print(final int w, final int d) {
+        print(new PrintWriter(System.out, true), w, d);
     }
 
     /**
-     * Element-by-element right division in place, A = A./B
+     * Print the matrix to stdout. Line the elements up in columns. Use the format object, and right justify within
+     * columns of width characters. Note that is the matrix is to be read back in, you probably will want to use a
+     * NumberFormat that is set to US Locale.
      *
-     * @param B another matrix
-     * @return A./B
+     * @param format A Formatting object for individual elements.
+     * @param width Field width for each column.
+     * @see java.text.DecimalFormat#setDecimalFormatSymbols
      */
-    public MatrixD arrayRightDivideEquals(final MatrixD B) {
-        checkMatrixDimensions(B);
-        for (int i = 0; i < m; i++) {
-            for (int j = 0; j < n; j++) {
-                element[i][j] = element[i][j] / B.element[i][j];
-            }
-        }
-        return this;
+
+    public void print(final NumberFormat format, final int width) {
+        print(new PrintWriter(System.out, true), format, width);
     }
 
     /**
-     * Element-by-element left division, C = A.\B
+     * Print the matrix to the output stream. Line the elements up in columns with a Fortran-like 'Fw.d' style format.
      *
-     * @param B another matrix
-     * @return A.\B
+     * @param output Output stream.
+     * @param w Column width.
+     * @param d Number of digits after the decimal.
      */
-    public MatrixD arrayLeftDivide(final MatrixD B) {
-        checkMatrixDimensions(B);
-        final MatrixD X = new MatrixD(m, n);
-        final double[][] C = X.getArray();
-        for (int i = 0; i < m; i++) {
-            for (int j = 0; j < n; j++) {
-                C[i][j] = B.element[i][j] / element[i][j];
-            }
-        }
-        return X;
+
+    public void print(final PrintWriter output, final int w, final int d) {
+        final DecimalFormat format = new DecimalFormat();
+        format.setDecimalFormatSymbols(new DecimalFormatSymbols(Locale.US));
+        format.setMinimumIntegerDigits(1);
+        format.setMaximumFractionDigits(d);
+        format.setMinimumFractionDigits(d);
+        format.setGroupingUsed(false);
+        print(output, format, w + 2);
     }
 
     /**
-     * Element-by-element left division in place, A = A.\B
+     * Print the matrix to the output stream. Line the elements up in columns. Use the format object, and right justify
+     * within columns of width characters. Note that is the matrix is to be read back in, you probably will want to use
+     * a NumberFormat that is set to US Locale.
      *
-     * @param B another matrix
-     * @return A.\B
+     * @param output the output stream.
+     * @param format A formatting object to format the matrix elements
+     * @param width Column width.
+     * @see java.text.DecimalFormat#setDecimalFormatSymbols
      */
 
-    public MatrixD arrayLeftDivideEquals(final MatrixD B) {
-        checkMatrixDimensions(B);
+    public void print(final PrintWriter output, final NumberFormat format, final int width) {
+        output.println(); // start on new line.
         for (int i = 0; i < m; i++) {
             for (int j = 0; j < n; j++) {
-                element[i][j] = B.element[i][j] / element[i][j];
+                final String s = format.format(element[i][j]); // format the number
+                final int padding = Math.max(1, width - s.length()); // At _least_ 1 space
+                for (int k = 0; k < padding; k++) {
+                    output.print(' ');
+                }
+                output.print(s);
+            }
+            output.println();
+        }
+        output.println(); // end with blank line.
+    }
+
+    /**
+     * Matrix inversion using the SVD pseudo inverse
+     *
+     * @param condition condition number
+     * @return inverse matrix
+     */
+    public MatrixD pseudoInverse(final double condition) {
+        final SingularValueDecomposition decomp = svd();
+        final double invCondition = condition > 0 ? 1.0 / condition : 1e19;
+        final double[] sig = decomp.getSingularValues();
+        final MatrixD newS = new MatrixD(sig.length, sig.length);
+        final double first = sig[0];
+        for (int i = 0; i < sig.length; i++) {
+            if (sig[i] / first < invCondition || TMathConstants.Abs(sig[i]) < 2 * Double.MIN_VALUE) {
+                // discard eigenvalue
+                if (true) {
+                    System.out.println("TMatrixD::drop singluar eigenvalue " + i);
+                }
+                newS.set(i, i, 0.0);
+            } else {
+                newS.set(i, i, 1.0 / sig[i]);
             }
         }
-        return this;
+        decomp.rank();
+
+        return decomp.getV().times(newS).times(decomp.getU().transpose());
+    }
+
+    /**
+     * QR Decomposition
+     *
+     * @return QRDecomposition
+     * @see QRDecomposition
+     */
+
+    public QRDecomposition qr() {
+        return new QRDecomposition(this);
+    }
+
+    /**
+     * Matrix rank
+     *
+     * @return effective numerical rank, obtained from SVD.
+     */
+
+    public int rank() {
+        return new SingularValueDecomposition(this).rank();
+    }
+
+    /**
+     * Set a single element.
+     *
+     * @param i Row index.
+     * @param j Column index.
+     * @param s A(i,j).
+     */
+    @Override
+    public void set(final int i, final int j, final double s) {
+        element[i][j] = s;
+    }
+
+    /**
+     * Set a submatrix.
+     *
+     * @param i0 Initial row index
+     * @param i1 Final row index
+     * @param j0 Initial column index
+     * @param j1 Final column index
+     * @param X A(i0:i1,j0:j1)
+     * @exception ArrayIndexOutOfBoundsException Submatrix indices
+     */
+
+    public void setMatrix(final int i0, final int i1, final int j0, final int j1, final MatrixD X) {
+        try {
+            for (int i = i0; i <= i1; i++) {
+                for (int j = j0; j <= j1; j++) {
+                    element[i][j] = X.get(i - i0, j - j0);
+                }
+            }
+        } catch (final ArrayIndexOutOfBoundsException e) {
+            throw new ArrayIndexOutOfBoundsException("Submatrix indices");
+        }
+    }
+
+    /**
+     * Set a submatrix.
+     *
+     * @param i0 Initial row index
+     * @param i1 Final row index
+     * @param c Array of column indices.
+     * @param X A(i0:i1,c(:))
+     * @exception ArrayIndexOutOfBoundsException Submatrix indices
+     */
+
+    public void setMatrix(final int i0, final int i1, final int[] c, final MatrixD X) {
+        try {
+            for (int i = i0; i <= i1; i++) {
+                for (int j = 0; j < c.length; j++) {
+                    element[i][c[j]] = X.get(i - i0, j);
+                }
+            }
+        } catch (final ArrayIndexOutOfBoundsException e) {
+            throw new ArrayIndexOutOfBoundsException("Submatrix indices");
+        }
+    }
+
+    /**
+     * Set a submatrix.
+     *
+     * @param r Array of row indices.
+     * @param j0 Initial column index
+     * @param j1 Final column index
+     * @param X A(r(:),j0:j1)
+     * @exception ArrayIndexOutOfBoundsException Submatrix indices
+     */
+
+    public void setMatrix(final int[] r, final int j0, final int j1, final MatrixD X) {
+        try {
+            for (int i = 0; i < r.length; i++) {
+                for (int j = j0; j <= j1; j++) {
+                    element[r[i]][j] = X.get(i, j - j0);
+                }
+            }
+        } catch (final ArrayIndexOutOfBoundsException e) {
+            throw new ArrayIndexOutOfBoundsException("Submatrix indices");
+        }
+    }
+
+    /**
+     * Set a submatrix.
+     *
+     * @param r Array of row indices.
+     * @param c Array of column indices.
+     * @param X A(r(:),c(:))
+     * @exception ArrayIndexOutOfBoundsException Submatrix indices
+     */
+
+    public void setMatrix(final int[] r, final int[] c, final MatrixD X) {
+        try {
+            for (int i = 0; i < r.length; i++) {
+                for (int j = 0; j < c.length; j++) {
+                    element[r[i]][c[j]] = X.get(i, j);
+                }
+            }
+        } catch (final ArrayIndexOutOfBoundsException e) {
+            throw new ArrayIndexOutOfBoundsException("Submatrix indices");
+        }
+    }
+
+    /**
+     * Solve A*X = B
+     *
+     * @param B right hand side
+     * @return solution if A is square, least squares solution otherwise
+     */
+
+    public MatrixD solve(final MatrixD B) {
+        return m == n ? new LUDecomposition(this).solve(B) : new QRDecomposition(this).solve(B);
+    }
+
+    /**
+     * Solve X*A = B, which is also A'*X' = B'
+     *
+     * @param B right hand side
+     * @return solution if A is square, least squares solution otherwise.
+     */
+
+    public MatrixD solveTranspose(final MatrixD B) {
+        return transpose().solve(B.transpose());
+    }
+
+    /**
+     * Square individual matrix elements
+     */
+    public void squareElements() {
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                element[i][j] = TMathConstants.Sqr(element[i][j]);
+            }
+        }
+    }
+
+    /**
+     * Singular Value Decomposition
+     *
+     * @return SingularValueDecomposition
+     * @see SingularValueDecomposition
+     */
+
+    public SingularValueDecomposition svd() {
+        return new SingularValueDecomposition(this);
     }
 
     /**
@@ -673,44 +879,6 @@ public class MatrixD extends AbstractMatrix {
             }
         }
         return X;
-    }
-
-    /**
-     * Square individual matrix elements
-     */
-    public void squareElements() {
-        for (int i = 0; i < m; i++) {
-            for (int j = 0; j < n; j++) {
-                element[i][j] = TMathConstants.Sqr(element[i][j]);
-            }
-        }
-    }
-
-    /**
-     * apply user specified function to each matrix element
-     * @param func user-supplied function
-     */
-    public void apply1DFunction(final Function1D func) {
-        for (int i = 0; i < m; i++) {
-            for (int j = 0; j < n; j++) {
-                element[i][j] = func.getValue(element[i][j]);
-            }
-        }
-    }
-
-    /**
-     * Multiply a matrix by a scalar in place, A = s*A
-     *
-     * @param s scalar
-     * @return replace A by s*A
-     */
-    public MatrixD timesEquals(final double s) {
-        for (int i = 0; i < m; i++) {
-            for (int j = 0; j < n; j++) {
-                element[i][j] = s * element[i][j];
-            }
-        }
-        return this;
     }
 
     /**
@@ -764,146 +932,18 @@ public class MatrixD extends AbstractMatrix {
     }
 
     /**
-     * LU Decomposition
+     * Multiply a matrix by a scalar in place, A = s*A
      *
-     * @return LUDecomposition
-     * @see LUDecomposition
+     * @param s scalar
+     * @return replace A by s*A
      */
-    public LUDecomposition lu() {
-        return new LUDecomposition(this);
-    }
-
-    /**
-     * QR Decomposition
-     *
-     * @return QRDecomposition
-     * @see QRDecomposition
-     */
-
-    public QRDecomposition qr() {
-        return new QRDecomposition(this);
-    }
-
-    /**
-     * Cholesky Decomposition
-     *
-     * @return CholeskyDecomposition
-     * @see CholeskyDecomposition
-     */
-
-    public CholeskyDecomposition chol() {
-        return new CholeskyDecomposition(this);
-    }
-
-    /**
-     * Singular Value Decomposition
-     *
-     * @return SingularValueDecomposition
-     * @see SingularValueDecomposition
-     */
-
-    public SingularValueDecomposition svd() {
-        return new SingularValueDecomposition(this);
-    }
-
-    /**
-     * Eigenvalue Decomposition
-     *
-     * @return EigenvalueDecomposition
-     * @see EigenvalueDecomposition
-     */
-
-    public EigenvalueDecomposition eig() {
-        return new EigenvalueDecomposition(this);
-    }
-
-    /**
-     * Solve A*X = B
-     *
-     * @param B right hand side
-     * @return solution if A is square, least squares solution otherwise
-     */
-
-    public MatrixD solve(final MatrixD B) {
-        return m == n ? new LUDecomposition(this).solve(B) : new QRDecomposition(this).solve(B);
-    }
-
-    /**
-     * Solve X*A = B, which is also A'*X' = B'
-     *
-     * @param B right hand side
-     * @return solution if A is square, least squares solution otherwise.
-     */
-
-    public MatrixD solveTranspose(final MatrixD B) {
-        return transpose().solve(B.transpose());
-    }
-
-    /**
-     * Matrix inverse or pseudo-inverse
-     *
-     * @return inverse(A) if A is square, pseudo-inverse otherwise.
-     */
-    public MatrixD inverse() {
-        return solve(MatrixFactory.identity(m, m));
-    }
-
-    /**
-     * Matrix inversion using the SVD pseudo inverse
-     *
-     * @param condition condition number
-     * @return inverse matrix
-     */
-    public MatrixD pseudoInverse(final double condition) {
-        final SingularValueDecomposition decomp = svd();
-        final double invCondition = condition > 0 ? 1.0 / condition : 1e19;
-        final double[] sig = decomp.getSingularValues();
-        final MatrixD newS = new MatrixD(sig.length, sig.length);
-        final double first = sig[0];
-        for (int i = 0; i < sig.length; i++) {
-            if (sig[i] / first < invCondition || TMathConstants.Abs(sig[i]) < 2 * Double.MIN_VALUE) {
-                // discard eigenvalue
-                if (true) {
-                    System.out.println("TMatrixD::drop singluar eigenvalue " + i);
-                }
-                newS.set(i, i, 0.0);
-            } else {
-                newS.set(i, i, 1.0 / sig[i]);
+    public MatrixD timesEquals(final double s) {
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                element[i][j] = s * element[i][j];
             }
         }
-        decomp.rank();
-
-        return decomp.getV().times(newS).times(decomp.getU().transpose());
-    }
-
-    /**
-     * Matrix determinant
-     *
-     * @return determinant
-     */
-
-    public double det() {
-        return new LUDecomposition(this).det();
-    }
-
-    /**
-     * Matrix rank
-     *
-     * @return effective numerical rank, obtained from SVD.
-     */
-
-    public int rank() {
-        return new SingularValueDecomposition(this).rank();
-    }
-
-    /**
-     * Matrix condition (2 norm)
-     *
-     * @return ratio of largest to smallest singular value.
-     */
-
-    public double cond() {
-        return new SingularValueDecomposition(this).cond();
+        return this;
     }
 
     /**
@@ -921,46 +961,19 @@ public class MatrixD extends AbstractMatrix {
     }
 
     /**
-     * Print the matrix to stdout. Line the elements up in columns with a Fortran-like 'Fw.d' style format.
+     * Matrix transpose.
      *
-     * @param w Column width.
-     * @param d Number of digits after the decimal.
+     * @return A^{T}
      */
-
-    public void print(final int w, final int d) {
-        print(new PrintWriter(System.out, true), w, d);
-    }
-
-    /**
-     * Print the matrix to the output stream. Line the elements up in columns with a Fortran-like 'Fw.d' style format.
-     *
-     * @param output Output stream.
-     * @param w Column width.
-     * @param d Number of digits after the decimal.
-     */
-
-    public void print(final PrintWriter output, final int w, final int d) {
-        final DecimalFormat format = new DecimalFormat();
-        format.setDecimalFormatSymbols(new DecimalFormatSymbols(Locale.US));
-        format.setMinimumIntegerDigits(1);
-        format.setMaximumFractionDigits(d);
-        format.setMinimumFractionDigits(d);
-        format.setGroupingUsed(false);
-        print(output, format, w + 2);
-    }
-
-    /**
-     * Print the matrix to stdout. Line the elements up in columns. Use the format object, and right justify within
-     * columns of width characters. Note that is the matrix is to be read back in, you probably will want to use a
-     * NumberFormat that is set to US Locale.
-     *
-     * @param format A Formatting object for individual elements.
-     * @param width Field width for each column.
-     * @see java.text.DecimalFormat#setDecimalFormatSymbols
-     */
-
-    public void print(final NumberFormat format, final int width) {
-        print(new PrintWriter(System.out, true), format, width);
+    public MatrixD transpose() {
+        final MatrixD X = new MatrixD(n, m);
+        final double[][] C = X.getArray();
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                C[j][i] = element[i][j];
+            }
+        }
+        return X;
     }
 
     // DecimalFormat is a little disappointing coming from Fortran or C's printf.
@@ -969,30 +982,18 @@ public class MatrixD extends AbstractMatrix {
     // argument and do the extra padding ourselves.
 
     /**
-     * Print the matrix to the output stream. Line the elements up in columns. Use the format object, and right justify
-     * within columns of width characters. Note that is the matrix is to be read back in, you probably will want to use
-     * a NumberFormat that is set to US Locale.
+     * Unary minus
      *
-     * @param output the output stream.
-     * @param format A formatting object to format the matrix elements
-     * @param width Column width.
-     * @see java.text.DecimalFormat#setDecimalFormatSymbols
+     * @return -A
      */
-
-    public void print(final PrintWriter output, final NumberFormat format, final int width) {
-        output.println(); // start on new line.
+    public MatrixD uminus() {
+        final MatrixD X = new MatrixD(m, n);
         for (int i = 0; i < m; i++) {
             for (int j = 0; j < n; j++) {
-                final String s = format.format(element[i][j]); // format the number
-                final int padding = Math.max(1, width - s.length()); // At _least_ 1 space
-                for (int k = 0; k < padding; k++) {
-                    output.print(' ');
-                }
-                output.print(s);
+                X.set(i, j, -element[i][j]);
             }
-            output.println();
         }
-        output.println(); // end with blank line.
+        return X;
     }
 
     /**

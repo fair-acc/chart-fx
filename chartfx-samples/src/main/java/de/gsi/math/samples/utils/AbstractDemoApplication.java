@@ -40,8 +40,7 @@ public abstract class AbstractDemoApplication extends Application {
     }
 
     /**
-     * @param args
-     *            the command line arguments
+     * @param args the command line arguments
      */
     public static void main(final String[] args) {
         Application.launch(args);

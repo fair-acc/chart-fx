@@ -30,6 +30,37 @@ public class BandStopTransform {
     private BandStopTransform() {
     }
 
+    private static ComplexPair transform(final Complex in, final double a, final double b) {
+        Complex c;
+        if (in.isInfinite()) {
+            c = new Complex(-1);
+        } else {
+            c = new Complex(1).add(in).divide(new Complex(1).subtract(in)); // bilinear
+        }
+
+        final double a2 = a * a;
+        final double b2 = b * b;
+
+        Complex u = new Complex(0);
+        u = u.add(c.multiply(4 * (b2 + a2 - 1)));
+        u = u.add(8 * (b2 - a2 + 1));
+        u = u.multiply(c);
+        u = u.add(4 * (a2 + b2 - 1));
+        u = u.sqrt();
+
+        Complex v = u.multiply(-.5).add(a);
+        v = v.add(c.multiply(-a));
+
+        u = u.multiply(.5);
+        u = u.add(a);
+        u = u.add(c.multiply(-a));
+
+        Complex d = new Complex(b + 1);
+        d = d.add(c.multiply(b - 1));
+
+        return new ComplexPair(u.divide(d), v.divide(d));
+    }
+
     public static void transform(final double fc, final double fw, final LayoutBase digital, final LayoutBase analog) {
         double wc;
         double wc2;
@@ -76,37 +107,6 @@ public class BandStopTransform {
         } else {
             digital.setNormal(0, analog.getNormalGain());
         }
-    }
-
-    private static ComplexPair transform(final Complex in, final double a, final double b) {
-        Complex c;
-        if (in.isInfinite()) {
-            c = new Complex(-1);
-        } else {
-            c = new Complex(1).add(in).divide(new Complex(1).subtract(in)); // bilinear
-        }
-
-        final double a2 = a * a;
-        final double b2 = b * b;
-
-        Complex u = new Complex(0);
-        u = u.add(c.multiply(4 * (b2 + a2 - 1)));
-        u = u.add(8 * (b2 - a2 + 1));
-        u = u.multiply(c);
-        u = u.add(4 * (a2 + b2 - 1));
-        u = u.sqrt();
-
-        Complex v = u.multiply(-.5).add(a);
-        v = v.add(c.multiply(-a));
-
-        u = u.multiply(.5);
-        u = u.add(a);
-        u = u.add(c.multiply(-a));
-
-        Complex d = new Complex(b + 1);
-        d = d.add(c.multiply(b - 1));
-
-        return new ComplexPair(u.divide(d), v.divide(d));
     }
 
 }

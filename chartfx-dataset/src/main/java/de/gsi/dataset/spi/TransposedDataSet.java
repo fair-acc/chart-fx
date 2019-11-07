@@ -16,11 +16,9 @@ import de.gsi.dataset.event.EventListener;
 import de.gsi.dataset.locks.DataSetLock;
 
 /**
- * Allows permutation of the axes of an underlying DataSet, for applications like:
- * - transposed display
- * - reduction of multi-dimensional DataSets to lower dimensions
- * To be able to handle different DataSet Interface types, the constructors are private
- * and only acessible via the static class methods, which return the correct subtype.
+ * Allows permutation of the axes of an underlying DataSet, for applications like: - transposed display - reduction of
+ * multi-dimensional DataSets to lower dimensions To be able to handle different DataSet Interface types, the
+ * constructors are private and only acessible via the static class methods, which return the correct subtype.
  *
  * @author Alexander Krimm
  */
@@ -236,8 +234,8 @@ public class TransposedDataSet implements DataSet {
     }
 
     /**
-     * TODO: allow permutations to change number of grid dimensions, while enforcing contract, that all
-     * grid axes must come before data axes.
+     * TODO: allow permutations to change number of grid dimensions, while enforcing contract, that all grid axes must
+     * come before data axes.
      * 
      * @author Alexander Krimm
      */

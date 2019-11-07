@@ -2,6 +2,7 @@ package de.gsi.dataset.event;
 
 /**
  * Event issued when only the axis range changed
+ * 
  * @see de.gsi.dataset.AxisDescription
  * 
  * @author rstein

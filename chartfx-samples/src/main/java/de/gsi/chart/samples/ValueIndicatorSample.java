@@ -2,8 +2,8 @@ package de.gsi.chart.samples;
 
 import de.gsi.chart.XYChart;
 import de.gsi.chart.axes.spi.DefaultNumericAxis;
-import de.gsi.dataset.spi.DoubleDataSet;
 import de.gsi.chart.plugins.XValueIndicator;
+import de.gsi.dataset.spi.DoubleDataSet;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.layout.StackPane;

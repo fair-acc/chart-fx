@@ -49,6 +49,11 @@ public abstract class AbstractMetaDataRendererParameter<R extends AbstractMetaDa
         return style.get();
     }
 
+    /**
+     * @return the instance of this AbstractMetaDataRendererParameter.
+     */
+    protected abstract R getThis();
+
     public boolean isShowErrorMessages() {
         return showErrorMessages.get();
     }
@@ -94,6 +99,8 @@ public abstract class AbstractMetaDataRendererParameter<R extends AbstractMetaDa
         return style;
     }
 
+    // ******************************* CSS Style Stuff *********************
+
     public final R updateCSS() {
         // TODO add/complete CSS parser
 
@@ -108,12 +115,5 @@ public abstract class AbstractMetaDataRendererParameter<R extends AbstractMetaDa
 
         return getThis();
     }
-
-    // ******************************* CSS Style Stuff *********************
-
-    /**
-     * @return the instance of this AbstractMetaDataRendererParameter.
-     */
-    protected abstract R getThis();
 
 }

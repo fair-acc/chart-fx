@@ -41,12 +41,11 @@ import java.util.concurrent.Future;
 import de.gsi.math.utils.ConcurrencyUtils;
 
 /**
- * Computes 2D Discrete Hartley Transform (DHT) of real, double precision data.
- * The sizes of both dimensions can be arbitrary numbers. This is a parallel
- * implementation optimized for SMP systems.<br>
+ * Computes 2D Discrete Hartley Transform (DHT) of real, double precision data. The sizes of both dimensions can be
+ * arbitrary numbers. This is a parallel implementation optimized for SMP systems.<br>
  * <br>
- * Part of code is derived from General Purpose FFT Package written by Takuya
- * Ooura (http://www.kurims.kyoto-u.ac.jp/~ooura/fft.html)
+ * Part of code is derived from General Purpose FFT Package written by Takuya Ooura
+ * (http://www.kurims.kyoto-u.ac.jp/~ooura/fft.html)
  *
  * @author Piotr Wendykier (piotr.wendykier@gmail.com)
  */
@@ -73,10 +72,8 @@ public class DoubleDHT_2D {
     /**
      * Creates new instance of DoubleDHT_2D.
      *
-     * @param rows
-     *            number of rows
-     * @param column
-     *            number of columns
+     * @param rows number of rows
+     * @param column number of columns
      */
     public DoubleDHT_2D(final int rows, final int column) {
         if (rows <= 1 || column <= 1) {
@@ -106,362 +103,141 @@ public class DoubleDHT_2D {
         }
     }
 
-    /**
-     * Computes 2D real, forward DHT leaving the result in <code>a</code>. The
-     * data is stored in 1D array in row-major order.
-     *
-     * @param a
-     *            data to transform
-     */
-    public void forward(final double[] a) {
-        final int nthreads = ConcurrencyUtils.getNumberOfThreads();
-        if (isPowerOfTwo) {
-            if (nthreads != oldNthreads) {
-                nt = 4 * nthreads * rows;
-                if (columns == 2 * nthreads) {
-                    nt >>= 1;
-                } else if (columns < 2 * nthreads) {
-                    nt >>= 2;
-                }
-                t = new double[nt];
-                oldNthreads = nthreads;
-            }
-            if (nthreads > 1 && useThreads) {
-                ddxt2d_subth(-1, a, true);
-                ddxt2d0_subth(-1, a, true);
-            } else {
-                ddxt2d_sub(-1, a, true);
-                for (int i = 0; i < rows; i++) {
-                    dhtColumns.forward(a, i * columns);
-                }
-            }
-            yTransform(a);
-        } else {
-            if (nthreads > 1 && useThreads && rows >= nthreads && columns >= nthreads) {
-                final Future<?>[] futures = new Future[nthreads];
-                int p = rows / nthreads;
-                for (int l = 0; l < nthreads; l++) {
-                    final int firstRow = l * p;
-                    final int lastRow = l == nthreads - 1 ? rows : firstRow + p;
-                    futures[l] = ConcurrencyUtils.submit(new Runnable() {
-                        @Override
-                        public void run() {
-                            for (int i = firstRow; i < lastRow; i++) {
-                                dhtColumns.forward(a, i * columns);
-                            }
-                        }
-                    });
-                }
-                ConcurrencyUtils.waitForCompletion(futures);
-                p = columns / nthreads;
-                for (int l = 0; l < nthreads; l++) {
-                    final int firstColumn = l * p;
-                    final int lastColumn = l == nthreads - 1 ? columns : firstColumn + p;
-                    futures[l] = ConcurrencyUtils.submit(new Runnable() {
-                        @Override
-                        public void run() {
-                            final double[] temp = new double[rows];
-                            for (int c = firstColumn; c < lastColumn; c++) {
-                                for (int r = 0; r < rows; r++) {
-                                    temp[r] = a[r * columns + c];
-                                }
-                                dhtRows.forward(temp);
-                                for (int r = 0; r < rows; r++) {
-                                    a[r * columns + c] = temp[r];
-                                }
-                            }
-                        }
-                    });
-                }
-                ConcurrencyUtils.waitForCompletion(futures);
+    private void ddxt2d_sub(final int isgn, final double[] a, final boolean scale) {
+        int idx1, idx2;
 
-            } else {
-                for (int i = 0; i < rows; i++) {
-                    dhtColumns.forward(a, i * columns);
-                }
-                final double[] temp = new double[rows];
-                for (int c = 0; c < columns; c++) {
+        if (columns > 2) {
+            if (isgn == -1) {
+                for (int c = 0; c < columns; c += 4) {
                     for (int r = 0; r < rows; r++) {
-                        temp[r] = a[r * columns + c];
+                        idx1 = r * columns + c;
+                        idx2 = rows + r;
+                        t[r] = a[idx1];
+                        t[idx2] = a[idx1 + 1];
+                        t[idx2 + rows] = a[idx1 + 2];
+                        t[idx2 + 2 * rows] = a[idx1 + 3];
                     }
-                    dhtRows.forward(temp);
+                    dhtRows.forward(t, 0);
+                    dhtRows.forward(t, rows);
+                    dhtRows.forward(t, 2 * rows);
+                    dhtRows.forward(t, 3 * rows);
                     for (int r = 0; r < rows; r++) {
-                        a[r * columns + c] = temp[r];
+                        idx1 = r * columns + c;
+                        idx2 = rows + r;
+                        a[idx1] = t[r];
+                        a[idx1 + 1] = t[idx2];
+                        a[idx1 + 2] = t[idx2 + rows];
+                        a[idx1 + 3] = t[idx2 + 2 * rows];
+                    }
+                }
+            } else {
+                for (int c = 0; c < columns; c += 4) {
+                    for (int r = 0; r < rows; r++) {
+                        idx1 = r * columns + c;
+                        idx2 = rows + r;
+                        t[r] = a[idx1];
+                        t[idx2] = a[idx1 + 1];
+                        t[idx2 + rows] = a[idx1 + 2];
+                        t[idx2 + 2 * rows] = a[idx1 + 3];
+                    }
+                    dhtRows.inverse(t, 0, scale);
+                    dhtRows.inverse(t, rows, scale);
+                    dhtRows.inverse(t, 2 * rows, scale);
+                    dhtRows.inverse(t, 3 * rows, scale);
+                    for (int r = 0; r < rows; r++) {
+                        idx1 = r * columns + c;
+                        idx2 = rows + r;
+                        a[idx1] = t[r];
+                        a[idx1 + 1] = t[idx2];
+                        a[idx1 + 2] = t[idx2 + rows];
+                        a[idx1 + 3] = t[idx2 + 2 * rows];
                     }
                 }
             }
-            yTransform(a);
+        } else if (columns == 2) {
+            for (int r = 0; r < rows; r++) {
+                idx1 = r * columns;
+                t[r] = a[idx1];
+                t[rows + r] = a[idx1 + 1];
+            }
+            if (isgn == -1) {
+                dhtRows.forward(t, 0);
+                dhtRows.forward(t, rows);
+            } else {
+                dhtRows.inverse(t, 0, scale);
+                dhtRows.inverse(t, rows, scale);
+            }
+            for (int r = 0; r < rows; r++) {
+                idx1 = r * columns;
+                a[idx1] = t[r];
+                a[idx1 + 1] = t[rows + r];
+            }
         }
     }
 
-    /**
-     * Computes 2D real, forward DHT leaving the result in <code>a</code>. The
-     * data is stored in 2D array.
-     *
-     * @param a
-     *            data to transform
-     */
-    public void forward(final double[][] a) {
-        final int nthreads = ConcurrencyUtils.getNumberOfThreads();
-        if (isPowerOfTwo) {
-            if (nthreads != oldNthreads) {
-                nt = 4 * nthreads * rows;
-                if (columns == 2 * nthreads) {
-                    nt >>= 1;
-                } else if (columns < 2 * nthreads) {
-                    nt >>= 2;
-                }
-                t = new double[nt];
-                oldNthreads = nthreads;
-            }
-            if (nthreads > 1 && useThreads) {
-                ddxt2d_subth(-1, a, true);
-                ddxt2d0_subth(-1, a, true);
-            } else {
-                ddxt2d_sub(-1, a, true);
-                for (int i = 0; i < rows; i++) {
-                    dhtColumns.forward(a[i]);
-                }
-            }
-            y_transform(a);
-        } else {
-            if (nthreads > 1 && useThreads && rows >= nthreads && columns >= nthreads) {
-                final Future<?>[] futures = new Future[nthreads];
-                int p = rows / nthreads;
-                for (int l = 0; l < nthreads; l++) {
-                    final int firstRow = l * p;
-                    final int lastRow = l == nthreads - 1 ? rows : firstRow + p;
-                    futures[l] = ConcurrencyUtils.submit(new Runnable() {
-                        @Override
-                        public void run() {
-                            for (int i = firstRow; i < lastRow; i++) {
-                                dhtColumns.forward(a[i]);
-                            }
-                        }
-                    });
-                }
-                ConcurrencyUtils.waitForCompletion(futures);
+    private void ddxt2d_sub(final int isgn, final double[][] a, final boolean scale) {
+        int idx2;
 
-                p = columns / nthreads;
-                for (int l = 0; l < nthreads; l++) {
-                    final int firstColumn = l * p;
-                    final int lastColumn = l == nthreads - 1 ? columns : firstColumn + p;
-                    futures[l] = ConcurrencyUtils.submit(new Runnable() {
-                        @Override
-                        public void run() {
-                            final double[] temp = new double[rows];
-                            for (int c = firstColumn; c < lastColumn; c++) {
-                                for (int r = 0; r < rows; r++) {
-                                    temp[r] = a[r][c];
-                                }
-                                dhtRows.forward(temp);
-                                for (int r = 0; r < rows; r++) {
-                                    a[r][c] = temp[r];
-                                }
-                            }
-                        }
-                    });
-                }
-                ConcurrencyUtils.waitForCompletion(futures);
-
-            } else {
-                for (int i = 0; i < rows; i++) {
-                    dhtColumns.forward(a[i]);
-                }
-                final double[] temp = new double[rows];
-                for (int c = 0; c < columns; c++) {
+        if (columns > 2) {
+            if (isgn == -1) {
+                for (int c = 0; c < columns; c += 4) {
                     for (int r = 0; r < rows; r++) {
-                        temp[r] = a[r][c];
+                        idx2 = rows + r;
+                        t[r] = a[r][c];
+                        t[idx2] = a[r][c + 1];
+                        t[idx2 + rows] = a[r][c + 2];
+                        t[idx2 + 2 * rows] = a[r][c + 3];
                     }
-                    dhtRows.forward(temp);
+                    dhtRows.forward(t, 0);
+                    dhtRows.forward(t, rows);
+                    dhtRows.forward(t, 2 * rows);
+                    dhtRows.forward(t, 3 * rows);
                     for (int r = 0; r < rows; r++) {
-                        a[r][c] = temp[r];
+                        idx2 = rows + r;
+                        a[r][c] = t[r];
+                        a[r][c + 1] = t[idx2];
+                        a[r][c + 2] = t[idx2 + rows];
+                        a[r][c + 3] = t[idx2 + 2 * rows];
+                    }
+                }
+            } else {
+                for (int c = 0; c < columns; c += 4) {
+                    for (int r = 0; r < rows; r++) {
+                        idx2 = rows + r;
+                        t[r] = a[r][c];
+                        t[idx2] = a[r][c + 1];
+                        t[idx2 + rows] = a[r][c + 2];
+                        t[idx2 + 2 * rows] = a[r][c + 3];
+                    }
+                    dhtRows.inverse(t, 0, scale);
+                    dhtRows.inverse(t, rows, scale);
+                    dhtRows.inverse(t, 2 * rows, scale);
+                    dhtRows.inverse(t, 3 * rows, scale);
+                    for (int r = 0; r < rows; r++) {
+                        idx2 = rows + r;
+                        a[r][c] = t[r];
+                        a[r][c + 1] = t[idx2];
+                        a[r][c + 2] = t[idx2 + rows];
+                        a[r][c + 3] = t[idx2 + 2 * rows];
                     }
                 }
             }
-            y_transform(a);
-        }
-    }
-
-    /**
-     * Computes 2D real, inverse DHT leaving the result in <code>a</code>. The
-     * data is stored in 1D array in row-major order.
-     *
-     * @param a
-     *            data to transform
-     * @param scale
-     *            if true then scaling is performed
-     */
-    public void inverse(final double[] a, final boolean scale) {
-        final int nthreads = ConcurrencyUtils.getNumberOfThreads();
-        if (isPowerOfTwo) {
-            if (nthreads != oldNthreads) {
-                nt = 4 * nthreads * rows;
-                if (columns == 2 * nthreads) {
-                    nt >>= 1;
-                } else if (columns < 2 * nthreads) {
-                    nt >>= 2;
-                }
-                t = new double[nt];
-                oldNthreads = nthreads;
+        } else if (columns == 2) {
+            for (int r = 0; r < rows; r++) {
+                t[r] = a[r][0];
+                t[rows + r] = a[r][1];
             }
-            if (nthreads > 1 && useThreads) {
-                ddxt2d_subth(1, a, scale);
-                ddxt2d0_subth(1, a, scale);
+            if (isgn == -1) {
+                dhtRows.forward(t, 0);
+                dhtRows.forward(t, rows);
             } else {
-                ddxt2d_sub(1, a, scale);
-                for (int i = 0; i < rows; i++) {
-                    dhtColumns.inverse(a, i * columns, scale);
-                }
+                dhtRows.inverse(t, 0, scale);
+                dhtRows.inverse(t, rows, scale);
             }
-            yTransform(a);
-        } else {
-            if (nthreads > 1 && useThreads && rows >= nthreads && columns >= nthreads) {
-                final Future<?>[] futures = new Future[nthreads];
-                int p = rows / nthreads;
-                for (int l = 0; l < nthreads; l++) {
-                    final int firstRow = l * p;
-                    final int lastRow = l == nthreads - 1 ? rows : firstRow + p;
-                    futures[l] = ConcurrencyUtils.submit(new Runnable() {
-                        @Override
-                        public void run() {
-                            for (int i = firstRow; i < lastRow; i++) {
-                                dhtColumns.inverse(a, i * columns, scale);
-                            }
-                        }
-                    });
-                }
-                ConcurrencyUtils.waitForCompletion(futures);
-
-                p = columns / nthreads;
-                for (int l = 0; l < nthreads; l++) {
-                    final int firstColumn = l * p;
-                    final int lastColumn = l == nthreads - 1 ? columns : firstColumn + p;
-                    futures[l] = ConcurrencyUtils.submit(new Runnable() {
-                        @Override
-                        public void run() {
-                            final double[] temp = new double[rows];
-                            for (int c = firstColumn; c < lastColumn; c++) {
-                                for (int r = 0; r < rows; r++) {
-                                    temp[r] = a[r * columns + c];
-                                }
-                                dhtRows.inverse(temp, scale);
-                                for (int r = 0; r < rows; r++) {
-                                    a[r * columns + c] = temp[r];
-                                }
-                            }
-                        }
-                    });
-                }
-                ConcurrencyUtils.waitForCompletion(futures);
-
-            } else {
-                for (int i = 0; i < rows; i++) {
-                    dhtColumns.inverse(a, i * columns, scale);
-                }
-                final double[] temp = new double[rows];
-                for (int c = 0; c < columns; c++) {
-                    for (int r = 0; r < rows; r++) {
-                        temp[r] = a[r * columns + c];
-                    }
-                    dhtRows.inverse(temp, scale);
-                    for (int r = 0; r < rows; r++) {
-                        a[r * columns + c] = temp[r];
-                    }
-                }
+            for (int r = 0; r < rows; r++) {
+                a[r][0] = t[r];
+                a[r][1] = t[rows + r];
             }
-            yTransform(a);
-        }
-    }
-
-    /**
-     * Computes 2D real, inverse DHT leaving the result in <code>a</code>. The
-     * data is stored in 2D array.
-     *
-     * @param a
-     *            data to transform
-     * @param scale
-     *            if true then scaling is performed
-     */
-    public void inverse(final double[][] a, final boolean scale) {
-        final int nthreads = ConcurrencyUtils.getNumberOfThreads();
-        if (isPowerOfTwo) {
-            if (nthreads != oldNthreads) {
-                nt = 4 * nthreads * rows;
-                if (columns == 2 * nthreads) {
-                    nt >>= 1;
-                } else if (columns < 2 * nthreads) {
-                    nt >>= 2;
-                }
-                t = new double[nt];
-                oldNthreads = nthreads;
-            }
-            if (nthreads > 1 && useThreads) {
-                ddxt2d_subth(1, a, scale);
-                ddxt2d0_subth(1, a, scale);
-            } else {
-                ddxt2d_sub(1, a, scale);
-                for (int i = 0; i < rows; i++) {
-                    dhtColumns.inverse(a[i], scale);
-                }
-            }
-            y_transform(a);
-        } else {
-            if (nthreads > 1 && useThreads && rows >= nthreads && columns >= nthreads) {
-                final Future<?>[] futures = new Future[nthreads];
-                int p = rows / nthreads;
-                for (int l = 0; l < nthreads; l++) {
-                    final int firstRow = l * p;
-                    final int lastRow = l == nthreads - 1 ? rows : firstRow + p;
-                    futures[l] = ConcurrencyUtils.submit(new Runnable() {
-                        @Override
-                        public void run() {
-                            for (int i = firstRow; i < lastRow; i++) {
-                                dhtColumns.inverse(a[i], scale);
-                            }
-                        }
-                    });
-                }
-                ConcurrencyUtils.waitForCompletion(futures);
-
-                p = columns / nthreads;
-                for (int l = 0; l < nthreads; l++) {
-                    final int firstColumn = l * p;
-                    final int lastColumn = l == nthreads - 1 ? columns : firstColumn + p;
-                    futures[l] = ConcurrencyUtils.submit(new Runnable() {
-                        @Override
-                        public void run() {
-                            final double[] temp = new double[rows];
-                            for (int c = firstColumn; c < lastColumn; c++) {
-                                for (int r = 0; r < rows; r++) {
-                                    temp[r] = a[r][c];
-                                }
-                                dhtRows.inverse(temp, scale);
-                                for (int r = 0; r < rows; r++) {
-                                    a[r][c] = temp[r];
-                                }
-                            }
-                        }
-                    });
-                }
-                ConcurrencyUtils.waitForCompletion(futures);
-
-            } else {
-                for (int i = 0; i < rows; i++) {
-                    dhtColumns.inverse(a[i], scale);
-                }
-                final double[] temp = new double[rows];
-                for (int c = 0; c < columns; c++) {
-                    for (int r = 0; r < rows; r++) {
-                        temp[r] = a[r][c];
-                    }
-                    dhtRows.inverse(temp, scale);
-                    for (int r = 0; r < rows; r++) {
-                        a[r][c] = temp[r];
-                    }
-                }
-            }
-            y_transform(a);
         }
     }
 
@@ -725,140 +501,373 @@ public class DoubleDHT_2D {
         ConcurrencyUtils.waitForCompletion(futures);
     }
 
-    private void ddxt2d_sub(final int isgn, final double[] a, final boolean scale) {
-        int idx1, idx2;
+    /**
+     * Computes 2D real, forward DHT leaving the result in <code>a</code>. The data is stored in 1D array in row-major
+     * order.
+     *
+     * @param a data to transform
+     */
+    public void forward(final double[] a) {
+        final int nthreads = ConcurrencyUtils.getNumberOfThreads();
+        if (isPowerOfTwo) {
+            if (nthreads != oldNthreads) {
+                nt = 4 * nthreads * rows;
+                if (columns == 2 * nthreads) {
+                    nt >>= 1;
+                } else if (columns < 2 * nthreads) {
+                    nt >>= 2;
+                }
+                t = new double[nt];
+                oldNthreads = nthreads;
+            }
+            if (nthreads > 1 && useThreads) {
+                ddxt2d_subth(-1, a, true);
+                ddxt2d0_subth(-1, a, true);
+            } else {
+                ddxt2d_sub(-1, a, true);
+                for (int i = 0; i < rows; i++) {
+                    dhtColumns.forward(a, i * columns);
+                }
+            }
+            yTransform(a);
+        } else {
+            if (nthreads > 1 && useThreads && rows >= nthreads && columns >= nthreads) {
+                final Future<?>[] futures = new Future[nthreads];
+                int p = rows / nthreads;
+                for (int l = 0; l < nthreads; l++) {
+                    final int firstRow = l * p;
+                    final int lastRow = l == nthreads - 1 ? rows : firstRow + p;
+                    futures[l] = ConcurrencyUtils.submit(new Runnable() {
+                        @Override
+                        public void run() {
+                            for (int i = firstRow; i < lastRow; i++) {
+                                dhtColumns.forward(a, i * columns);
+                            }
+                        }
+                    });
+                }
+                ConcurrencyUtils.waitForCompletion(futures);
+                p = columns / nthreads;
+                for (int l = 0; l < nthreads; l++) {
+                    final int firstColumn = l * p;
+                    final int lastColumn = l == nthreads - 1 ? columns : firstColumn + p;
+                    futures[l] = ConcurrencyUtils.submit(new Runnable() {
+                        @Override
+                        public void run() {
+                            final double[] temp = new double[rows];
+                            for (int c = firstColumn; c < lastColumn; c++) {
+                                for (int r = 0; r < rows; r++) {
+                                    temp[r] = a[r * columns + c];
+                                }
+                                dhtRows.forward(temp);
+                                for (int r = 0; r < rows; r++) {
+                                    a[r * columns + c] = temp[r];
+                                }
+                            }
+                        }
+                    });
+                }
+                ConcurrencyUtils.waitForCompletion(futures);
 
-        if (columns > 2) {
-            if (isgn == -1) {
-                for (int c = 0; c < columns; c += 4) {
-                    for (int r = 0; r < rows; r++) {
-                        idx1 = r * columns + c;
-                        idx2 = rows + r;
-                        t[r] = a[idx1];
-                        t[idx2] = a[idx1 + 1];
-                        t[idx2 + rows] = a[idx1 + 2];
-                        t[idx2 + 2 * rows] = a[idx1 + 3];
-                    }
-                    dhtRows.forward(t, 0);
-                    dhtRows.forward(t, rows);
-                    dhtRows.forward(t, 2 * rows);
-                    dhtRows.forward(t, 3 * rows);
-                    for (int r = 0; r < rows; r++) {
-                        idx1 = r * columns + c;
-                        idx2 = rows + r;
-                        a[idx1] = t[r];
-                        a[idx1 + 1] = t[idx2];
-                        a[idx1 + 2] = t[idx2 + rows];
-                        a[idx1 + 3] = t[idx2 + 2 * rows];
-                    }
-                }
             } else {
-                for (int c = 0; c < columns; c += 4) {
+                for (int i = 0; i < rows; i++) {
+                    dhtColumns.forward(a, i * columns);
+                }
+                final double[] temp = new double[rows];
+                for (int c = 0; c < columns; c++) {
                     for (int r = 0; r < rows; r++) {
-                        idx1 = r * columns + c;
-                        idx2 = rows + r;
-                        t[r] = a[idx1];
-                        t[idx2] = a[idx1 + 1];
-                        t[idx2 + rows] = a[idx1 + 2];
-                        t[idx2 + 2 * rows] = a[idx1 + 3];
+                        temp[r] = a[r * columns + c];
                     }
-                    dhtRows.inverse(t, 0, scale);
-                    dhtRows.inverse(t, rows, scale);
-                    dhtRows.inverse(t, 2 * rows, scale);
-                    dhtRows.inverse(t, 3 * rows, scale);
+                    dhtRows.forward(temp);
                     for (int r = 0; r < rows; r++) {
-                        idx1 = r * columns + c;
-                        idx2 = rows + r;
-                        a[idx1] = t[r];
-                        a[idx1 + 1] = t[idx2];
-                        a[idx1 + 2] = t[idx2 + rows];
-                        a[idx1 + 3] = t[idx2 + 2 * rows];
+                        a[r * columns + c] = temp[r];
                     }
                 }
             }
-        } else if (columns == 2) {
-            for (int r = 0; r < rows; r++) {
-                idx1 = r * columns;
-                t[r] = a[idx1];
-                t[rows + r] = a[idx1 + 1];
-            }
-            if (isgn == -1) {
-                dhtRows.forward(t, 0);
-                dhtRows.forward(t, rows);
-            } else {
-                dhtRows.inverse(t, 0, scale);
-                dhtRows.inverse(t, rows, scale);
-            }
-            for (int r = 0; r < rows; r++) {
-                idx1 = r * columns;
-                a[idx1] = t[r];
-                a[idx1 + 1] = t[rows + r];
-            }
+            yTransform(a);
         }
     }
 
-    private void ddxt2d_sub(final int isgn, final double[][] a, final boolean scale) {
-        int idx2;
+    /**
+     * Computes 2D real, forward DHT leaving the result in <code>a</code>. The data is stored in 2D array.
+     *
+     * @param a data to transform
+     */
+    public void forward(final double[][] a) {
+        final int nthreads = ConcurrencyUtils.getNumberOfThreads();
+        if (isPowerOfTwo) {
+            if (nthreads != oldNthreads) {
+                nt = 4 * nthreads * rows;
+                if (columns == 2 * nthreads) {
+                    nt >>= 1;
+                } else if (columns < 2 * nthreads) {
+                    nt >>= 2;
+                }
+                t = new double[nt];
+                oldNthreads = nthreads;
+            }
+            if (nthreads > 1 && useThreads) {
+                ddxt2d_subth(-1, a, true);
+                ddxt2d0_subth(-1, a, true);
+            } else {
+                ddxt2d_sub(-1, a, true);
+                for (int i = 0; i < rows; i++) {
+                    dhtColumns.forward(a[i]);
+                }
+            }
+            y_transform(a);
+        } else {
+            if (nthreads > 1 && useThreads && rows >= nthreads && columns >= nthreads) {
+                final Future<?>[] futures = new Future[nthreads];
+                int p = rows / nthreads;
+                for (int l = 0; l < nthreads; l++) {
+                    final int firstRow = l * p;
+                    final int lastRow = l == nthreads - 1 ? rows : firstRow + p;
+                    futures[l] = ConcurrencyUtils.submit(new Runnable() {
+                        @Override
+                        public void run() {
+                            for (int i = firstRow; i < lastRow; i++) {
+                                dhtColumns.forward(a[i]);
+                            }
+                        }
+                    });
+                }
+                ConcurrencyUtils.waitForCompletion(futures);
 
-        if (columns > 2) {
-            if (isgn == -1) {
-                for (int c = 0; c < columns; c += 4) {
-                    for (int r = 0; r < rows; r++) {
-                        idx2 = rows + r;
-                        t[r] = a[r][c];
-                        t[idx2] = a[r][c + 1];
-                        t[idx2 + rows] = a[r][c + 2];
-                        t[idx2 + 2 * rows] = a[r][c + 3];
-                    }
-                    dhtRows.forward(t, 0);
-                    dhtRows.forward(t, rows);
-                    dhtRows.forward(t, 2 * rows);
-                    dhtRows.forward(t, 3 * rows);
-                    for (int r = 0; r < rows; r++) {
-                        idx2 = rows + r;
-                        a[r][c] = t[r];
-                        a[r][c + 1] = t[idx2];
-                        a[r][c + 2] = t[idx2 + rows];
-                        a[r][c + 3] = t[idx2 + 2 * rows];
-                    }
+                p = columns / nthreads;
+                for (int l = 0; l < nthreads; l++) {
+                    final int firstColumn = l * p;
+                    final int lastColumn = l == nthreads - 1 ? columns : firstColumn + p;
+                    futures[l] = ConcurrencyUtils.submit(new Runnable() {
+                        @Override
+                        public void run() {
+                            final double[] temp = new double[rows];
+                            for (int c = firstColumn; c < lastColumn; c++) {
+                                for (int r = 0; r < rows; r++) {
+                                    temp[r] = a[r][c];
+                                }
+                                dhtRows.forward(temp);
+                                for (int r = 0; r < rows; r++) {
+                                    a[r][c] = temp[r];
+                                }
+                            }
+                        }
+                    });
                 }
+                ConcurrencyUtils.waitForCompletion(futures);
+
             } else {
-                for (int c = 0; c < columns; c += 4) {
+                for (int i = 0; i < rows; i++) {
+                    dhtColumns.forward(a[i]);
+                }
+                final double[] temp = new double[rows];
+                for (int c = 0; c < columns; c++) {
                     for (int r = 0; r < rows; r++) {
-                        idx2 = rows + r;
-                        t[r] = a[r][c];
-                        t[idx2] = a[r][c + 1];
-                        t[idx2 + rows] = a[r][c + 2];
-                        t[idx2 + 2 * rows] = a[r][c + 3];
+                        temp[r] = a[r][c];
                     }
-                    dhtRows.inverse(t, 0, scale);
-                    dhtRows.inverse(t, rows, scale);
-                    dhtRows.inverse(t, 2 * rows, scale);
-                    dhtRows.inverse(t, 3 * rows, scale);
+                    dhtRows.forward(temp);
                     for (int r = 0; r < rows; r++) {
-                        idx2 = rows + r;
-                        a[r][c] = t[r];
-                        a[r][c + 1] = t[idx2];
-                        a[r][c + 2] = t[idx2 + rows];
-                        a[r][c + 3] = t[idx2 + 2 * rows];
+                        a[r][c] = temp[r];
                     }
                 }
             }
-        } else if (columns == 2) {
-            for (int r = 0; r < rows; r++) {
-                t[r] = a[r][0];
-                t[rows + r] = a[r][1];
+            y_transform(a);
+        }
+    }
+
+    /**
+     * Computes 2D real, inverse DHT leaving the result in <code>a</code>. The data is stored in 1D array in row-major
+     * order.
+     *
+     * @param a data to transform
+     * @param scale if true then scaling is performed
+     */
+    public void inverse(final double[] a, final boolean scale) {
+        final int nthreads = ConcurrencyUtils.getNumberOfThreads();
+        if (isPowerOfTwo) {
+            if (nthreads != oldNthreads) {
+                nt = 4 * nthreads * rows;
+                if (columns == 2 * nthreads) {
+                    nt >>= 1;
+                } else if (columns < 2 * nthreads) {
+                    nt >>= 2;
+                }
+                t = new double[nt];
+                oldNthreads = nthreads;
             }
-            if (isgn == -1) {
-                dhtRows.forward(t, 0);
-                dhtRows.forward(t, rows);
+            if (nthreads > 1 && useThreads) {
+                ddxt2d_subth(1, a, scale);
+                ddxt2d0_subth(1, a, scale);
             } else {
-                dhtRows.inverse(t, 0, scale);
-                dhtRows.inverse(t, rows, scale);
+                ddxt2d_sub(1, a, scale);
+                for (int i = 0; i < rows; i++) {
+                    dhtColumns.inverse(a, i * columns, scale);
+                }
             }
-            for (int r = 0; r < rows; r++) {
-                a[r][0] = t[r];
-                a[r][1] = t[rows + r];
+            yTransform(a);
+        } else {
+            if (nthreads > 1 && useThreads && rows >= nthreads && columns >= nthreads) {
+                final Future<?>[] futures = new Future[nthreads];
+                int p = rows / nthreads;
+                for (int l = 0; l < nthreads; l++) {
+                    final int firstRow = l * p;
+                    final int lastRow = l == nthreads - 1 ? rows : firstRow + p;
+                    futures[l] = ConcurrencyUtils.submit(new Runnable() {
+                        @Override
+                        public void run() {
+                            for (int i = firstRow; i < lastRow; i++) {
+                                dhtColumns.inverse(a, i * columns, scale);
+                            }
+                        }
+                    });
+                }
+                ConcurrencyUtils.waitForCompletion(futures);
+
+                p = columns / nthreads;
+                for (int l = 0; l < nthreads; l++) {
+                    final int firstColumn = l * p;
+                    final int lastColumn = l == nthreads - 1 ? columns : firstColumn + p;
+                    futures[l] = ConcurrencyUtils.submit(new Runnable() {
+                        @Override
+                        public void run() {
+                            final double[] temp = new double[rows];
+                            for (int c = firstColumn; c < lastColumn; c++) {
+                                for (int r = 0; r < rows; r++) {
+                                    temp[r] = a[r * columns + c];
+                                }
+                                dhtRows.inverse(temp, scale);
+                                for (int r = 0; r < rows; r++) {
+                                    a[r * columns + c] = temp[r];
+                                }
+                            }
+                        }
+                    });
+                }
+                ConcurrencyUtils.waitForCompletion(futures);
+
+            } else {
+                for (int i = 0; i < rows; i++) {
+                    dhtColumns.inverse(a, i * columns, scale);
+                }
+                final double[] temp = new double[rows];
+                for (int c = 0; c < columns; c++) {
+                    for (int r = 0; r < rows; r++) {
+                        temp[r] = a[r * columns + c];
+                    }
+                    dhtRows.inverse(temp, scale);
+                    for (int r = 0; r < rows; r++) {
+                        a[r * columns + c] = temp[r];
+                    }
+                }
+            }
+            yTransform(a);
+        }
+    }
+
+    /**
+     * Computes 2D real, inverse DHT leaving the result in <code>a</code>. The data is stored in 2D array.
+     *
+     * @param a data to transform
+     * @param scale if true then scaling is performed
+     */
+    public void inverse(final double[][] a, final boolean scale) {
+        final int nthreads = ConcurrencyUtils.getNumberOfThreads();
+        if (isPowerOfTwo) {
+            if (nthreads != oldNthreads) {
+                nt = 4 * nthreads * rows;
+                if (columns == 2 * nthreads) {
+                    nt >>= 1;
+                } else if (columns < 2 * nthreads) {
+                    nt >>= 2;
+                }
+                t = new double[nt];
+                oldNthreads = nthreads;
+            }
+            if (nthreads > 1 && useThreads) {
+                ddxt2d_subth(1, a, scale);
+                ddxt2d0_subth(1, a, scale);
+            } else {
+                ddxt2d_sub(1, a, scale);
+                for (int i = 0; i < rows; i++) {
+                    dhtColumns.inverse(a[i], scale);
+                }
+            }
+            y_transform(a);
+        } else {
+            if (nthreads > 1 && useThreads && rows >= nthreads && columns >= nthreads) {
+                final Future<?>[] futures = new Future[nthreads];
+                int p = rows / nthreads;
+                for (int l = 0; l < nthreads; l++) {
+                    final int firstRow = l * p;
+                    final int lastRow = l == nthreads - 1 ? rows : firstRow + p;
+                    futures[l] = ConcurrencyUtils.submit(new Runnable() {
+                        @Override
+                        public void run() {
+                            for (int i = firstRow; i < lastRow; i++) {
+                                dhtColumns.inverse(a[i], scale);
+                            }
+                        }
+                    });
+                }
+                ConcurrencyUtils.waitForCompletion(futures);
+
+                p = columns / nthreads;
+                for (int l = 0; l < nthreads; l++) {
+                    final int firstColumn = l * p;
+                    final int lastColumn = l == nthreads - 1 ? columns : firstColumn + p;
+                    futures[l] = ConcurrencyUtils.submit(new Runnable() {
+                        @Override
+                        public void run() {
+                            final double[] temp = new double[rows];
+                            for (int c = firstColumn; c < lastColumn; c++) {
+                                for (int r = 0; r < rows; r++) {
+                                    temp[r] = a[r][c];
+                                }
+                                dhtRows.inverse(temp, scale);
+                                for (int r = 0; r < rows; r++) {
+                                    a[r][c] = temp[r];
+                                }
+                            }
+                        }
+                    });
+                }
+                ConcurrencyUtils.waitForCompletion(futures);
+
+            } else {
+                for (int i = 0; i < rows; i++) {
+                    dhtColumns.inverse(a[i], scale);
+                }
+                final double[] temp = new double[rows];
+                for (int c = 0; c < columns; c++) {
+                    for (int r = 0; r < rows; r++) {
+                        temp[r] = a[r][c];
+                    }
+                    dhtRows.inverse(temp, scale);
+                    for (int r = 0; r < rows; r++) {
+                        a[r][c] = temp[r];
+                    }
+                }
+            }
+            y_transform(a);
+        }
+    }
+
+    private void y_transform(final double[][] a) {
+        int mRow, mCol;
+        double A, B, C, D, E;
+        for (int r = 0; r <= rows / 2; r++) {
+            mRow = (rows - r) % rows;
+            for (int c = 0; c <= columns / 2; c++) {
+                mCol = (columns - c) % columns;
+                A = a[r][c];
+                B = a[mRow][c];
+                C = a[r][mCol];
+                D = a[mRow][mCol];
+                E = (A + D - (B + C)) / 2;
+                a[r][c] = A - E;
+                a[mRow][c] = B + E;
+                a[r][mCol] = C + E;
+                a[mRow][mCol] = D - E;
             }
         }
     }
@@ -881,26 +890,6 @@ public class DoubleDHT_2D {
                 a[idx2 + c] = B + E;
                 a[idx1 + mCol] = C + E;
                 a[idx2 + mCol] = D - E;
-            }
-        }
-    }
-
-    private void y_transform(final double[][] a) {
-        int mRow, mCol;
-        double A, B, C, D, E;
-        for (int r = 0; r <= rows / 2; r++) {
-            mRow = (rows - r) % rows;
-            for (int c = 0; c <= columns / 2; c++) {
-                mCol = (columns - c) % columns;
-                A = a[r][c];
-                B = a[mRow][c];
-                C = a[r][mCol];
-                D = a[mRow][mCol];
-                E = (A + D - (B + C)) / 2;
-                a[r][c] = A - E;
-                a[mRow][c] = B + E;
-                a[r][mCol] = C + E;
-                a[mRow][mCol] = D - E;
             }
         }
     }

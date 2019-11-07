@@ -41,12 +41,11 @@ import java.util.concurrent.Future;
 import de.gsi.math.utils.ConcurrencyUtils;
 
 /**
- * Computes 2D Discrete Sine Transform (DST) of single precision data. The sizes
- * of both dimensions can be arbitrary numbers. This is a parallel
- * implementation optimized for SMP systems.<br>
+ * Computes 2D Discrete Sine Transform (DST) of single precision data. The sizes of both dimensions can be arbitrary
+ * numbers. This is a parallel implementation optimized for SMP systems.<br>
  * <br>
- * Part of code is derived from General Purpose FFT Package written by Takuya
- * Ooura (http://www.kurims.kyoto-u.ac.jp/~ooura/fft.html)
+ * Part of code is derived from General Purpose FFT Package written by Takuya Ooura
+ * (http://www.kurims.kyoto-u.ac.jp/~ooura/fft.html)
  *
  * @author Piotr Wendykier (piotr.wendykier@gmail.com)
  */
@@ -73,10 +72,8 @@ public class FloatDST_2D {
     /**
      * Creates new instance of FloatDST_2D.
      *
-     * @param rows
-     *            number of rows
-     * @param columns
-     *            number of columns
+     * @param rows number of rows
+     * @param columns number of columns
      */
     public FloatDST_2D(final int rows, final int columns) {
         if (rows <= 1 || columns <= 1) {
@@ -106,350 +103,140 @@ public class FloatDST_2D {
         }
     }
 
-    /**
-     * Computes 2D forward DST (DST-II) leaving the result in <code>a</code>.
-     * The data is stored in 1D array in row-major order.
-     *
-     * @param a
-     *            data to transform
-     * @param scale
-     *            if true then scaling is performed
-     */
-    public void forward(final float[] a, final boolean scale) {
-        final int nthreads = ConcurrencyUtils.getNumberOfThreads();
-        if (isPowerOfTwo) {
-            if (nthreads != oldNthreads) {
-                nt = 4 * nthreads * rows;
-                if (columns == 2 * nthreads) {
-                    nt >>= 1;
-                } else if (columns < 2 * nthreads) {
-                    nt >>= 2;
-                }
-                t = new float[nt];
-                oldNthreads = nthreads;
-            }
-            if (nthreads > 1 && useThreads) {
-                ddxt2d_subth(-1, a, scale);
-                ddxt2d0_subth(-1, a, scale);
-            } else {
-                ddxt2d_sub(-1, a, scale);
-                for (int i = 0; i < rows; i++) {
-                    dstColumns.forward(a, i * columns, scale);
-                }
-            }
-        } else {
-            if (nthreads > 1 && useThreads && rows >= nthreads && columns >= nthreads) {
-                final Future<?>[] futures = new Future[nthreads];
-                int p = rows / nthreads;
-                for (int l = 0; l < nthreads; l++) {
-                    final int firstRow = l * p;
-                    final int lastRow = l == nthreads - 1 ? rows : firstRow + p;
-                    futures[l] = ConcurrencyUtils.submit(new Runnable() {
-                        @Override
-                        public void run() {
-                            for (int i = firstRow; i < lastRow; i++) {
-                                dstColumns.forward(a, i * columns, scale);
-                            }
-                        }
-                    });
-                }
-                ConcurrencyUtils.waitForCompletion(futures);
-                p = columns / nthreads;
-                for (int l = 0; l < nthreads; l++) {
-                    final int firstColumn = l * p;
-                    final int lastColumn = l == nthreads - 1 ? columns : firstColumn + p;
-                    futures[l] = ConcurrencyUtils.submit(new Runnable() {
-                        @Override
-                        public void run() {
-                            final float[] temp = new float[rows];
-                            for (int c = firstColumn; c < lastColumn; c++) {
-                                for (int r = 0; r < rows; r++) {
-                                    temp[r] = a[r * columns + c];
-                                }
-                                dstRows.forward(temp, scale);
-                                for (int r = 0; r < rows; r++) {
-                                    a[r * columns + c] = temp[r];
-                                }
-                            }
-                        }
-                    });
-                }
-                ConcurrencyUtils.waitForCompletion(futures);
-            } else {
-                for (int i = 0; i < rows; i++) {
-                    dstColumns.forward(a, i * columns, scale);
-                }
-                final float[] temp = new float[rows];
-                for (int c = 0; c < columns; c++) {
+    private void ddxt2d_sub(final int isgn, final float[] a, final boolean scale) {
+        int idx1, idx2;
+
+        if (columns > 2) {
+            if (isgn == -1) {
+                for (int c = 0; c < columns; c += 4) {
                     for (int r = 0; r < rows; r++) {
-                        temp[r] = a[r * columns + c];
+                        idx1 = r * columns + c;
+                        idx2 = rows + r;
+                        t[r] = a[idx1];
+                        t[idx2] = a[idx1 + 1];
+                        t[idx2 + rows] = a[idx1 + 2];
+                        t[idx2 + 2 * rows] = a[idx1 + 3];
                     }
-                    dstRows.forward(temp, scale);
+                    dstRows.forward(t, 0, scale);
+                    dstRows.forward(t, rows, scale);
+                    dstRows.forward(t, 2 * rows, scale);
+                    dstRows.forward(t, 3 * rows, scale);
                     for (int r = 0; r < rows; r++) {
-                        a[r * columns + c] = temp[r];
+                        idx1 = r * columns + c;
+                        idx2 = rows + r;
+                        a[idx1] = t[r];
+                        a[idx1 + 1] = t[idx2];
+                        a[idx1 + 2] = t[idx2 + rows];
+                        a[idx1 + 3] = t[idx2 + 2 * rows];
                     }
                 }
+            } else {
+                for (int c = 0; c < columns; c += 4) {
+                    for (int r = 0; r < rows; r++) {
+                        idx1 = r * columns + c;
+                        idx2 = rows + r;
+                        t[r] = a[idx1];
+                        t[idx2] = a[idx1 + 1];
+                        t[idx2 + rows] = a[idx1 + 2];
+                        t[idx2 + 2 * rows] = a[idx1 + 3];
+                    }
+                    dstRows.inverse(t, 0, scale);
+                    dstRows.inverse(t, rows, scale);
+                    dstRows.inverse(t, 2 * rows, scale);
+                    dstRows.inverse(t, 3 * rows, scale);
+                    for (int r = 0; r < rows; r++) {
+                        idx1 = r * columns + c;
+                        idx2 = rows + r;
+                        a[idx1] = t[r];
+                        a[idx1 + 1] = t[idx2];
+                        a[idx1 + 2] = t[idx2 + rows];
+                        a[idx1 + 3] = t[idx2 + 2 * rows];
+                    }
+                }
+            }
+        } else if (columns == 2) {
+            for (int r = 0; r < rows; r++) {
+                idx1 = r * columns;
+                t[r] = a[idx1];
+                t[rows + r] = a[idx1 + 1];
+            }
+            if (isgn == -1) {
+                dstRows.forward(t, 0, scale);
+                dstRows.forward(t, rows, scale);
+            } else {
+                dstRows.inverse(t, 0, scale);
+                dstRows.inverse(t, rows, scale);
+            }
+            for (int r = 0; r < rows; r++) {
+                idx1 = r * columns;
+                a[idx1] = t[r];
+                a[idx1 + 1] = t[rows + r];
             }
         }
     }
 
-    /**
-     * Computes 2D forward DST (DST-II) leaving the result in <code>a</code>.
-     * The data is stored in 2D array.
-     *
-     * @param a
-     *            data to transform
-     * @param scale
-     *            if true then scaling is performed
-     */
-    public void forward(final float[][] a, final boolean scale) {
-        final int nthreads = ConcurrencyUtils.getNumberOfThreads();
-        if (isPowerOfTwo) {
-            if (nthreads != oldNthreads) {
-                nt = 4 * nthreads * rows;
-                if (columns == 2 * nthreads) {
-                    nt >>= 1;
-                } else if (columns < 2 * nthreads) {
-                    nt >>= 2;
-                }
-                t = new float[nt];
-                oldNthreads = nthreads;
-            }
-            if (nthreads > 1 && useThreads) {
-                ddxt2d_subth(-1, a, scale);
-                ddxt2d0_subth(-1, a, scale);
-            } else {
-                ddxt2d_sub(-1, a, scale);
-                for (int i = 0; i < rows; i++) {
-                    dstColumns.forward(a[i], scale);
-                }
-            }
-        } else {
-            if (nthreads > 1 && useThreads && rows >= nthreads && columns >= nthreads) {
-                final Future<?>[] futures = new Future[nthreads];
-                int p = rows / nthreads;
-                for (int l = 0; l < nthreads; l++) {
-                    final int firstRow = l * p;
-                    final int lastRow = l == nthreads - 1 ? rows : firstRow + p;
-                    futures[l] = ConcurrencyUtils.submit(new Runnable() {
-                        @Override
-                        public void run() {
-                            for (int i = firstRow; i < lastRow; i++) {
-                                dstColumns.forward(a[i], scale);
-                            }
-                        }
-                    });
-                }
-                ConcurrencyUtils.waitForCompletion(futures);
-                p = columns / nthreads;
-                for (int l = 0; l < nthreads; l++) {
-                    final int firstColumn = l * p;
-                    final int lastColumn = l == nthreads - 1 ? columns : firstColumn + p;
-                    futures[l] = ConcurrencyUtils.submit(new Runnable() {
-                        @Override
-                        public void run() {
-                            final float[] temp = new float[rows];
-                            for (int c = firstColumn; c < lastColumn; c++) {
-                                for (int r = 0; r < rows; r++) {
-                                    temp[r] = a[r][c];
-                                }
-                                dstRows.forward(temp, scale);
-                                for (int r = 0; r < rows; r++) {
-                                    a[r][c] = temp[r];
-                                }
-                            }
-                        }
-                    });
-                }
-                ConcurrencyUtils.waitForCompletion(futures);
-            } else {
-                for (int i = 0; i < rows; i++) {
-                    dstColumns.forward(a[i], scale);
-                }
-                final float[] temp = new float[rows];
-                for (int c = 0; c < columns; c++) {
-                    for (int r = 0; r < rows; r++) {
-                        temp[r] = a[r][c];
-                    }
-                    dstRows.forward(temp, scale);
-                    for (int r = 0; r < rows; r++) {
-                        a[r][c] = temp[r];
-                    }
-                }
-            }
-        }
-    }
+    private void ddxt2d_sub(final int isgn, final float[][] a, final boolean scale) {
+        int idx2;
 
-    /**
-     * Computes 2D inverse DST (DST-III) leaving the result in <code>a</code>.
-     * The data is stored in 1D array in row-major order.
-     *
-     * @param a
-     *            data to transform
-     * @param scale
-     *            if true then scaling is performed
-     */
-    public void inverse(final float[] a, final boolean scale) {
-        final int nthreads = ConcurrencyUtils.getNumberOfThreads();
-        if (isPowerOfTwo) {
-            if (nthreads != oldNthreads) {
-                nt = 4 * nthreads * rows;
-                if (columns == 2 * nthreads) {
-                    nt >>= 1;
-                } else if (columns < 2 * nthreads) {
-                    nt >>= 2;
-                }
-                t = new float[nt];
-                oldNthreads = nthreads;
-            }
-            if (nthreads > 1 && useThreads) {
-                ddxt2d_subth(1, a, scale);
-                ddxt2d0_subth(1, a, scale);
-            } else {
-                ddxt2d_sub(1, a, scale);
-                for (int i = 0; i < rows; i++) {
-                    dstColumns.inverse(a, i * columns, scale);
-                }
-            }
-        } else {
-            if (nthreads > 1 && useThreads && rows >= nthreads && columns >= nthreads) {
-                final Future<?>[] futures = new Future[nthreads];
-                int p = rows / nthreads;
-                for (int l = 0; l < nthreads; l++) {
-                    final int firstRow = l * p;
-                    final int lastRow = l == nthreads - 1 ? rows : firstRow + p;
-                    futures[l] = ConcurrencyUtils.submit(new Runnable() {
-                        @Override
-                        public void run() {
-                            for (int i = firstRow; i < lastRow; i++) {
-                                dstColumns.inverse(a, i * columns, scale);
-                            }
-                        }
-                    });
-                }
-                ConcurrencyUtils.waitForCompletion(futures);
-                p = columns / nthreads;
-                for (int l = 0; l < nthreads; l++) {
-                    final int firstColumn = l * p;
-                    final int lastColumn = l == nthreads - 1 ? columns : firstColumn + p;
-                    futures[l] = ConcurrencyUtils.submit(new Runnable() {
-                        @Override
-                        public void run() {
-                            final float[] temp = new float[rows];
-                            for (int c = firstColumn; c < lastColumn; c++) {
-                                for (int r = 0; r < rows; r++) {
-                                    temp[r] = a[r * columns + c];
-                                }
-                                dstRows.inverse(temp, scale);
-                                for (int r = 0; r < rows; r++) {
-                                    a[r * columns + c] = temp[r];
-                                }
-                            }
-                        }
-                    });
-                }
-                ConcurrencyUtils.waitForCompletion(futures);
-            } else {
-                for (int i = 0; i < rows; i++) {
-                    dstColumns.inverse(a, i * columns, scale);
-                }
-                final float[] temp = new float[rows];
-                for (int c = 0; c < columns; c++) {
+        if (columns > 2) {
+            if (isgn == -1) {
+                for (int c = 0; c < columns; c += 4) {
                     for (int r = 0; r < rows; r++) {
-                        temp[r] = a[r * columns + c];
+                        idx2 = rows + r;
+                        t[r] = a[r][c];
+                        t[idx2] = a[r][c + 1];
+                        t[idx2 + rows] = a[r][c + 2];
+                        t[idx2 + 2 * rows] = a[r][c + 3];
                     }
-                    dstRows.inverse(temp, scale);
+                    dstRows.forward(t, 0, scale);
+                    dstRows.forward(t, rows, scale);
+                    dstRows.forward(t, 2 * rows, scale);
+                    dstRows.forward(t, 3 * rows, scale);
                     for (int r = 0; r < rows; r++) {
-                        a[r * columns + c] = temp[r];
+                        idx2 = rows + r;
+                        a[r][c] = t[r];
+                        a[r][c + 1] = t[idx2];
+                        a[r][c + 2] = t[idx2 + rows];
+                        a[r][c + 3] = t[idx2 + 2 * rows];
+                    }
+                }
+            } else {
+                for (int c = 0; c < columns; c += 4) {
+                    for (int r = 0; r < rows; r++) {
+                        idx2 = rows + r;
+                        t[r] = a[r][c];
+                        t[idx2] = a[r][c + 1];
+                        t[idx2 + rows] = a[r][c + 2];
+                        t[idx2 + 2 * rows] = a[r][c + 3];
+                    }
+                    dstRows.inverse(t, 0, scale);
+                    dstRows.inverse(t, rows, scale);
+                    dstRows.inverse(t, 2 * rows, scale);
+                    dstRows.inverse(t, 3 * rows, scale);
+                    for (int r = 0; r < rows; r++) {
+                        idx2 = rows + r;
+                        a[r][c] = t[r];
+                        a[r][c + 1] = t[idx2];
+                        a[r][c + 2] = t[idx2 + rows];
+                        a[r][c + 3] = t[idx2 + 2 * rows];
                     }
                 }
             }
-        }
-    }
-
-    /**
-     * Computes 2D inverse DST (DST-III) leaving the result in <code>a</code>.
-     * The data is stored in 2D array.
-     *
-     * @param a
-     *            data to transform
-     * @param scale
-     *            if true then scaling is performed
-     */
-    public void inverse(final float[][] a, final boolean scale) {
-        final int nthreads = ConcurrencyUtils.getNumberOfThreads();
-        if (isPowerOfTwo) {
-            if (nthreads != oldNthreads) {
-                nt = 4 * nthreads * rows;
-                if (columns == 2 * nthreads) {
-                    nt >>= 1;
-                } else if (columns < 2 * nthreads) {
-                    nt >>= 2;
-                }
-                t = new float[nt];
-                oldNthreads = nthreads;
+        } else if (columns == 2) {
+            for (int r = 0; r < rows; r++) {
+                t[r] = a[r][0];
+                t[rows + r] = a[r][1];
             }
-            if (nthreads > 1 && useThreads) {
-                ddxt2d_subth(1, a, scale);
-                ddxt2d0_subth(1, a, scale);
+            if (isgn == -1) {
+                dstRows.forward(t, 0, scale);
+                dstRows.forward(t, rows, scale);
             } else {
-                ddxt2d_sub(1, a, scale);
-                for (int i = 0; i < rows; i++) {
-                    dstColumns.inverse(a[i], scale);
-                }
+                dstRows.inverse(t, 0, scale);
+                dstRows.inverse(t, rows, scale);
             }
-        } else {
-            if (nthreads > 1 && useThreads && rows >= nthreads && columns >= nthreads) {
-                final Future<?>[] futures = new Future[nthreads];
-                int p = rows / nthreads;
-                for (int l = 0; l < nthreads; l++) {
-                    final int firstRow = l * p;
-                    final int lastRow = l == nthreads - 1 ? rows : firstRow + p;
-                    futures[l] = ConcurrencyUtils.submit(new Runnable() {
-                        @Override
-                        public void run() {
-                            for (int i = firstRow; i < lastRow; i++) {
-                                dstColumns.inverse(a[i], scale);
-                            }
-                        }
-                    });
-                }
-                ConcurrencyUtils.waitForCompletion(futures);
-                p = columns / nthreads;
-                for (int l = 0; l < nthreads; l++) {
-                    final int firstColumn = l * p;
-                    final int lastColumn = l == nthreads - 1 ? columns : firstColumn + p;
-                    futures[l] = ConcurrencyUtils.submit(new Runnable() {
-                        @Override
-                        public void run() {
-                            final float[] temp = new float[rows];
-                            for (int c = firstColumn; c < lastColumn; c++) {
-                                for (int r = 0; r < rows; r++) {
-                                    temp[r] = a[r][c];
-                                }
-                                dstRows.inverse(temp, scale);
-                                for (int r = 0; r < rows; r++) {
-                                    a[r][c] = temp[r];
-                                }
-                            }
-                        }
-                    });
-                }
-                ConcurrencyUtils.waitForCompletion(futures);
-            } else {
-                for (int i = 0; i < rows; i++) {
-                    dstColumns.inverse(a[i], scale);
-                }
-                final float[] temp = new float[rows];
-                for (int c = 0; c < columns; c++) {
-                    for (int r = 0; r < rows; r++) {
-                        temp[r] = a[r][c];
-                    }
-                    dstRows.inverse(temp, scale);
-                    for (int r = 0; r < rows; r++) {
-                        a[r][c] = temp[r];
-                    }
-                }
+            for (int r = 0; r < rows; r++) {
+                a[r][0] = t[r];
+                a[r][1] = t[rows + r];
             }
         }
     }
@@ -714,140 +501,340 @@ public class FloatDST_2D {
         ConcurrencyUtils.waitForCompletion(futures);
     }
 
-    private void ddxt2d_sub(final int isgn, final float[] a, final boolean scale) {
-        int idx1, idx2;
-
-        if (columns > 2) {
-            if (isgn == -1) {
-                for (int c = 0; c < columns; c += 4) {
-                    for (int r = 0; r < rows; r++) {
-                        idx1 = r * columns + c;
-                        idx2 = rows + r;
-                        t[r] = a[idx1];
-                        t[idx2] = a[idx1 + 1];
-                        t[idx2 + rows] = a[idx1 + 2];
-                        t[idx2 + 2 * rows] = a[idx1 + 3];
-                    }
-                    dstRows.forward(t, 0, scale);
-                    dstRows.forward(t, rows, scale);
-                    dstRows.forward(t, 2 * rows, scale);
-                    dstRows.forward(t, 3 * rows, scale);
-                    for (int r = 0; r < rows; r++) {
-                        idx1 = r * columns + c;
-                        idx2 = rows + r;
-                        a[idx1] = t[r];
-                        a[idx1 + 1] = t[idx2];
-                        a[idx1 + 2] = t[idx2 + rows];
-                        a[idx1 + 3] = t[idx2 + 2 * rows];
-                    }
+    /**
+     * Computes 2D forward DST (DST-II) leaving the result in <code>a</code>. The data is stored in 1D array in
+     * row-major order.
+     *
+     * @param a data to transform
+     * @param scale if true then scaling is performed
+     */
+    public void forward(final float[] a, final boolean scale) {
+        final int nthreads = ConcurrencyUtils.getNumberOfThreads();
+        if (isPowerOfTwo) {
+            if (nthreads != oldNthreads) {
+                nt = 4 * nthreads * rows;
+                if (columns == 2 * nthreads) {
+                    nt >>= 1;
+                } else if (columns < 2 * nthreads) {
+                    nt >>= 2;
                 }
+                t = new float[nt];
+                oldNthreads = nthreads;
+            }
+            if (nthreads > 1 && useThreads) {
+                ddxt2d_subth(-1, a, scale);
+                ddxt2d0_subth(-1, a, scale);
             } else {
-                for (int c = 0; c < columns; c += 4) {
-                    for (int r = 0; r < rows; r++) {
-                        idx1 = r * columns + c;
-                        idx2 = rows + r;
-                        t[r] = a[idx1];
-                        t[idx2] = a[idx1 + 1];
-                        t[idx2 + rows] = a[idx1 + 2];
-                        t[idx2 + 2 * rows] = a[idx1 + 3];
-                    }
-                    dstRows.inverse(t, 0, scale);
-                    dstRows.inverse(t, rows, scale);
-                    dstRows.inverse(t, 2 * rows, scale);
-                    dstRows.inverse(t, 3 * rows, scale);
-                    for (int r = 0; r < rows; r++) {
-                        idx1 = r * columns + c;
-                        idx2 = rows + r;
-                        a[idx1] = t[r];
-                        a[idx1 + 1] = t[idx2];
-                        a[idx1 + 2] = t[idx2 + rows];
-                        a[idx1 + 3] = t[idx2 + 2 * rows];
-                    }
+                ddxt2d_sub(-1, a, scale);
+                for (int i = 0; i < rows; i++) {
+                    dstColumns.forward(a, i * columns, scale);
                 }
             }
-        } else if (columns == 2) {
-            for (int r = 0; r < rows; r++) {
-                idx1 = r * columns;
-                t[r] = a[idx1];
-                t[rows + r] = a[idx1 + 1];
-            }
-            if (isgn == -1) {
-                dstRows.forward(t, 0, scale);
-                dstRows.forward(t, rows, scale);
+        } else {
+            if (nthreads > 1 && useThreads && rows >= nthreads && columns >= nthreads) {
+                final Future<?>[] futures = new Future[nthreads];
+                int p = rows / nthreads;
+                for (int l = 0; l < nthreads; l++) {
+                    final int firstRow = l * p;
+                    final int lastRow = l == nthreads - 1 ? rows : firstRow + p;
+                    futures[l] = ConcurrencyUtils.submit(new Runnable() {
+                        @Override
+                        public void run() {
+                            for (int i = firstRow; i < lastRow; i++) {
+                                dstColumns.forward(a, i * columns, scale);
+                            }
+                        }
+                    });
+                }
+                ConcurrencyUtils.waitForCompletion(futures);
+                p = columns / nthreads;
+                for (int l = 0; l < nthreads; l++) {
+                    final int firstColumn = l * p;
+                    final int lastColumn = l == nthreads - 1 ? columns : firstColumn + p;
+                    futures[l] = ConcurrencyUtils.submit(new Runnable() {
+                        @Override
+                        public void run() {
+                            final float[] temp = new float[rows];
+                            for (int c = firstColumn; c < lastColumn; c++) {
+                                for (int r = 0; r < rows; r++) {
+                                    temp[r] = a[r * columns + c];
+                                }
+                                dstRows.forward(temp, scale);
+                                for (int r = 0; r < rows; r++) {
+                                    a[r * columns + c] = temp[r];
+                                }
+                            }
+                        }
+                    });
+                }
+                ConcurrencyUtils.waitForCompletion(futures);
             } else {
-                dstRows.inverse(t, 0, scale);
-                dstRows.inverse(t, rows, scale);
-            }
-            for (int r = 0; r < rows; r++) {
-                idx1 = r * columns;
-                a[idx1] = t[r];
-                a[idx1 + 1] = t[rows + r];
+                for (int i = 0; i < rows; i++) {
+                    dstColumns.forward(a, i * columns, scale);
+                }
+                final float[] temp = new float[rows];
+                for (int c = 0; c < columns; c++) {
+                    for (int r = 0; r < rows; r++) {
+                        temp[r] = a[r * columns + c];
+                    }
+                    dstRows.forward(temp, scale);
+                    for (int r = 0; r < rows; r++) {
+                        a[r * columns + c] = temp[r];
+                    }
+                }
             }
         }
     }
 
-    private void ddxt2d_sub(final int isgn, final float[][] a, final boolean scale) {
-        int idx2;
+    /**
+     * Computes 2D forward DST (DST-II) leaving the result in <code>a</code>. The data is stored in 2D array.
+     *
+     * @param a data to transform
+     * @param scale if true then scaling is performed
+     */
+    public void forward(final float[][] a, final boolean scale) {
+        final int nthreads = ConcurrencyUtils.getNumberOfThreads();
+        if (isPowerOfTwo) {
+            if (nthreads != oldNthreads) {
+                nt = 4 * nthreads * rows;
+                if (columns == 2 * nthreads) {
+                    nt >>= 1;
+                } else if (columns < 2 * nthreads) {
+                    nt >>= 2;
+                }
+                t = new float[nt];
+                oldNthreads = nthreads;
+            }
+            if (nthreads > 1 && useThreads) {
+                ddxt2d_subth(-1, a, scale);
+                ddxt2d0_subth(-1, a, scale);
+            } else {
+                ddxt2d_sub(-1, a, scale);
+                for (int i = 0; i < rows; i++) {
+                    dstColumns.forward(a[i], scale);
+                }
+            }
+        } else {
+            if (nthreads > 1 && useThreads && rows >= nthreads && columns >= nthreads) {
+                final Future<?>[] futures = new Future[nthreads];
+                int p = rows / nthreads;
+                for (int l = 0; l < nthreads; l++) {
+                    final int firstRow = l * p;
+                    final int lastRow = l == nthreads - 1 ? rows : firstRow + p;
+                    futures[l] = ConcurrencyUtils.submit(new Runnable() {
+                        @Override
+                        public void run() {
+                            for (int i = firstRow; i < lastRow; i++) {
+                                dstColumns.forward(a[i], scale);
+                            }
+                        }
+                    });
+                }
+                ConcurrencyUtils.waitForCompletion(futures);
+                p = columns / nthreads;
+                for (int l = 0; l < nthreads; l++) {
+                    final int firstColumn = l * p;
+                    final int lastColumn = l == nthreads - 1 ? columns : firstColumn + p;
+                    futures[l] = ConcurrencyUtils.submit(new Runnable() {
+                        @Override
+                        public void run() {
+                            final float[] temp = new float[rows];
+                            for (int c = firstColumn; c < lastColumn; c++) {
+                                for (int r = 0; r < rows; r++) {
+                                    temp[r] = a[r][c];
+                                }
+                                dstRows.forward(temp, scale);
+                                for (int r = 0; r < rows; r++) {
+                                    a[r][c] = temp[r];
+                                }
+                            }
+                        }
+                    });
+                }
+                ConcurrencyUtils.waitForCompletion(futures);
+            } else {
+                for (int i = 0; i < rows; i++) {
+                    dstColumns.forward(a[i], scale);
+                }
+                final float[] temp = new float[rows];
+                for (int c = 0; c < columns; c++) {
+                    for (int r = 0; r < rows; r++) {
+                        temp[r] = a[r][c];
+                    }
+                    dstRows.forward(temp, scale);
+                    for (int r = 0; r < rows; r++) {
+                        a[r][c] = temp[r];
+                    }
+                }
+            }
+        }
+    }
 
-        if (columns > 2) {
-            if (isgn == -1) {
-                for (int c = 0; c < columns; c += 4) {
-                    for (int r = 0; r < rows; r++) {
-                        idx2 = rows + r;
-                        t[r] = a[r][c];
-                        t[idx2] = a[r][c + 1];
-                        t[idx2 + rows] = a[r][c + 2];
-                        t[idx2 + 2 * rows] = a[r][c + 3];
-                    }
-                    dstRows.forward(t, 0, scale);
-                    dstRows.forward(t, rows, scale);
-                    dstRows.forward(t, 2 * rows, scale);
-                    dstRows.forward(t, 3 * rows, scale);
-                    for (int r = 0; r < rows; r++) {
-                        idx2 = rows + r;
-                        a[r][c] = t[r];
-                        a[r][c + 1] = t[idx2];
-                        a[r][c + 2] = t[idx2 + rows];
-                        a[r][c + 3] = t[idx2 + 2 * rows];
-                    }
+    /**
+     * Computes 2D inverse DST (DST-III) leaving the result in <code>a</code>. The data is stored in 1D array in
+     * row-major order.
+     *
+     * @param a data to transform
+     * @param scale if true then scaling is performed
+     */
+    public void inverse(final float[] a, final boolean scale) {
+        final int nthreads = ConcurrencyUtils.getNumberOfThreads();
+        if (isPowerOfTwo) {
+            if (nthreads != oldNthreads) {
+                nt = 4 * nthreads * rows;
+                if (columns == 2 * nthreads) {
+                    nt >>= 1;
+                } else if (columns < 2 * nthreads) {
+                    nt >>= 2;
                 }
+                t = new float[nt];
+                oldNthreads = nthreads;
+            }
+            if (nthreads > 1 && useThreads) {
+                ddxt2d_subth(1, a, scale);
+                ddxt2d0_subth(1, a, scale);
             } else {
-                for (int c = 0; c < columns; c += 4) {
-                    for (int r = 0; r < rows; r++) {
-                        idx2 = rows + r;
-                        t[r] = a[r][c];
-                        t[idx2] = a[r][c + 1];
-                        t[idx2 + rows] = a[r][c + 2];
-                        t[idx2 + 2 * rows] = a[r][c + 3];
-                    }
-                    dstRows.inverse(t, 0, scale);
-                    dstRows.inverse(t, rows, scale);
-                    dstRows.inverse(t, 2 * rows, scale);
-                    dstRows.inverse(t, 3 * rows, scale);
-                    for (int r = 0; r < rows; r++) {
-                        idx2 = rows + r;
-                        a[r][c] = t[r];
-                        a[r][c + 1] = t[idx2];
-                        a[r][c + 2] = t[idx2 + rows];
-                        a[r][c + 3] = t[idx2 + 2 * rows];
-                    }
+                ddxt2d_sub(1, a, scale);
+                for (int i = 0; i < rows; i++) {
+                    dstColumns.inverse(a, i * columns, scale);
                 }
             }
-        } else if (columns == 2) {
-            for (int r = 0; r < rows; r++) {
-                t[r] = a[r][0];
-                t[rows + r] = a[r][1];
-            }
-            if (isgn == -1) {
-                dstRows.forward(t, 0, scale);
-                dstRows.forward(t, rows, scale);
+        } else {
+            if (nthreads > 1 && useThreads && rows >= nthreads && columns >= nthreads) {
+                final Future<?>[] futures = new Future[nthreads];
+                int p = rows / nthreads;
+                for (int l = 0; l < nthreads; l++) {
+                    final int firstRow = l * p;
+                    final int lastRow = l == nthreads - 1 ? rows : firstRow + p;
+                    futures[l] = ConcurrencyUtils.submit(new Runnable() {
+                        @Override
+                        public void run() {
+                            for (int i = firstRow; i < lastRow; i++) {
+                                dstColumns.inverse(a, i * columns, scale);
+                            }
+                        }
+                    });
+                }
+                ConcurrencyUtils.waitForCompletion(futures);
+                p = columns / nthreads;
+                for (int l = 0; l < nthreads; l++) {
+                    final int firstColumn = l * p;
+                    final int lastColumn = l == nthreads - 1 ? columns : firstColumn + p;
+                    futures[l] = ConcurrencyUtils.submit(new Runnable() {
+                        @Override
+                        public void run() {
+                            final float[] temp = new float[rows];
+                            for (int c = firstColumn; c < lastColumn; c++) {
+                                for (int r = 0; r < rows; r++) {
+                                    temp[r] = a[r * columns + c];
+                                }
+                                dstRows.inverse(temp, scale);
+                                for (int r = 0; r < rows; r++) {
+                                    a[r * columns + c] = temp[r];
+                                }
+                            }
+                        }
+                    });
+                }
+                ConcurrencyUtils.waitForCompletion(futures);
             } else {
-                dstRows.inverse(t, 0, scale);
-                dstRows.inverse(t, rows, scale);
+                for (int i = 0; i < rows; i++) {
+                    dstColumns.inverse(a, i * columns, scale);
+                }
+                final float[] temp = new float[rows];
+                for (int c = 0; c < columns; c++) {
+                    for (int r = 0; r < rows; r++) {
+                        temp[r] = a[r * columns + c];
+                    }
+                    dstRows.inverse(temp, scale);
+                    for (int r = 0; r < rows; r++) {
+                        a[r * columns + c] = temp[r];
+                    }
+                }
             }
-            for (int r = 0; r < rows; r++) {
-                a[r][0] = t[r];
-                a[r][1] = t[rows + r];
+        }
+    }
+
+    /**
+     * Computes 2D inverse DST (DST-III) leaving the result in <code>a</code>. The data is stored in 2D array.
+     *
+     * @param a data to transform
+     * @param scale if true then scaling is performed
+     */
+    public void inverse(final float[][] a, final boolean scale) {
+        final int nthreads = ConcurrencyUtils.getNumberOfThreads();
+        if (isPowerOfTwo) {
+            if (nthreads != oldNthreads) {
+                nt = 4 * nthreads * rows;
+                if (columns == 2 * nthreads) {
+                    nt >>= 1;
+                } else if (columns < 2 * nthreads) {
+                    nt >>= 2;
+                }
+                t = new float[nt];
+                oldNthreads = nthreads;
+            }
+            if (nthreads > 1 && useThreads) {
+                ddxt2d_subth(1, a, scale);
+                ddxt2d0_subth(1, a, scale);
+            } else {
+                ddxt2d_sub(1, a, scale);
+                for (int i = 0; i < rows; i++) {
+                    dstColumns.inverse(a[i], scale);
+                }
+            }
+        } else {
+            if (nthreads > 1 && useThreads && rows >= nthreads && columns >= nthreads) {
+                final Future<?>[] futures = new Future[nthreads];
+                int p = rows / nthreads;
+                for (int l = 0; l < nthreads; l++) {
+                    final int firstRow = l * p;
+                    final int lastRow = l == nthreads - 1 ? rows : firstRow + p;
+                    futures[l] = ConcurrencyUtils.submit(new Runnable() {
+                        @Override
+                        public void run() {
+                            for (int i = firstRow; i < lastRow; i++) {
+                                dstColumns.inverse(a[i], scale);
+                            }
+                        }
+                    });
+                }
+                ConcurrencyUtils.waitForCompletion(futures);
+                p = columns / nthreads;
+                for (int l = 0; l < nthreads; l++) {
+                    final int firstColumn = l * p;
+                    final int lastColumn = l == nthreads - 1 ? columns : firstColumn + p;
+                    futures[l] = ConcurrencyUtils.submit(new Runnable() {
+                        @Override
+                        public void run() {
+                            final float[] temp = new float[rows];
+                            for (int c = firstColumn; c < lastColumn; c++) {
+                                for (int r = 0; r < rows; r++) {
+                                    temp[r] = a[r][c];
+                                }
+                                dstRows.inverse(temp, scale);
+                                for (int r = 0; r < rows; r++) {
+                                    a[r][c] = temp[r];
+                                }
+                            }
+                        }
+                    });
+                }
+                ConcurrencyUtils.waitForCompletion(futures);
+            } else {
+                for (int i = 0; i < rows; i++) {
+                    dstColumns.inverse(a[i], scale);
+                }
+                final float[] temp = new float[rows];
+                for (int c = 0; c < columns; c++) {
+                    for (int r = 0; r < rows; r++) {
+                        temp[r] = a[r][c];
+                    }
+                    dstRows.inverse(temp, scale);
+                    for (int r = 0; r < rows; r++) {
+                        a[r][c] = temp[r];
+                    }
+                }
             }
         }
     }

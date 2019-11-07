@@ -27,20 +27,18 @@ import de.gsi.dataset.spi.utils.StringHashMapList;
 
 /**
  * <p>
- * The abstract implementation of DataSet interface that provides implementation
- * of some methods.
+ * The abstract implementation of DataSet interface that provides implementation of some methods.
  * </p>
  * <ul>
  * <li>It maintains the name of the DataSet
- * <li>It maintains a list of DataSetListener objects and provides methods that
- * can be used to dispatch DataSetEvent events.
+ * <li>It maintains a list of DataSetListener objects and provides methods that can be used to dispatch DataSetEvent
+ * events.
  * <li>It maintains ranges of X and Y values.
  * <li>It gives a possibility to specify an undefined value.
  * <li>It maintains the names and units for the axes
  * </ul>
  * 
- * @param <D> java generics handling of DataSet for derived classes (needed for
- *            fluent design)
+ * @param <D> java generics handling of DataSet for derived classes (needed for fluent design)
  */
 public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends AbstractStylable<D>
         implements DataSet, DataSetMetaData {
@@ -66,7 +64,7 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
     /**
      * default constructor
      * 
-     * @param name      the default name of the data set (meta data)
+     * @param name the default name of the data set (meta data)
      * @param dimension dimension of this data set
      */
     public AbstractDataSet(final String name, final int dimension) {
@@ -80,14 +78,12 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
     }
 
     /**
-     * adds a custom new data label for a point The label can be used as a category
-     * name if CategoryStepsDefinition is used or for annotations displayed for data
-     * points.
+     * adds a custom new data label for a point The label can be used as a category name if CategoryStepsDefinition is
+     * used or for annotations displayed for data points.
      *
      * @param index of the data point
      * @param label for the data point specified by the index
-     * @return the previously set label or <code>null</code> if no label has been
-     *         specified
+     * @return the previously set label or <code>null</code> if no label has been specified
      */
     public String addDataLabel(final int index, final String label) {
         final String retVal = lock().writeLockGuard(() -> dataLabels.put(index, label));
@@ -96,8 +92,8 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
     }
 
     /**
-     * A string representation of the CSS style associated with this specific
-     * {@code DataSet} data point. @see #getStyle()
+     * A string representation of the CSS style associated with this specific {@code DataSet} data point. @see
+     * #getStyle()
      *
      * @param index the index of the specific data point
      * @param style string for the data point specific CSS-styling
@@ -217,7 +213,7 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
     /**
      * checks for equal 'get' error values, may be overwritten by derived classes
      * 
-     * @param other   class
+     * @param other class
      * @param epsilon tolerance threshold
      * @return {@code true} if equal
      */
@@ -298,11 +294,9 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
     /**
      * Indicates whether some other object is "equal to" this one.
      * 
-     * @param obj     the reference object with which to compare.
-     * @param epsilon tolerance parameter ({@code epsilon<=0} corresponds to
-     *                numerically identical)
-     * @return {@code true} if this object is the same as the obj argument;
-     *         {@code false} otherwise.
+     * @param obj the reference object with which to compare.
+     * @param epsilon tolerance parameter ({@code epsilon<=0} corresponds to numerically identical)
+     * @return {@code true} if this object is the same as the obj argument; {@code false} otherwise.
      */
     public boolean equals(final Object obj, final double epsilon) { // NOPMD - by design
         if (this == obj) {
@@ -372,10 +366,9 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
     }
 
     /**
-     * checks for equal 'get' values with tolerance band, may be overwritten by
-     * derived classes
+     * checks for equal 'get' values with tolerance band, may be overwritten by derived classes
      * 
-     * @param other   class
+     * @param other class
      * @param epsilon tolerance threshold
      * @return {@code true} if equal
      */
@@ -401,8 +394,7 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
     }
 
     /**
-     * Notifies listeners that the data has been invalidated. If the data is added
-     * to the chart, it triggers repaint.
+     * Notifies listeners that the data has been invalidated. If the data is added to the chart, it triggers repaint.
      * 
      * @param event the change event
      * @return itself (fluent design)
@@ -421,13 +413,11 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
     }
 
     /**
-     * Returns label of a data point specified by the index. The label can be used
-     * as a category name if CategoryStepsDefinition is used or for annotations
-     * displayed for data points.
+     * Returns label of a data point specified by the index. The label can be used as a category name if
+     * CategoryStepsDefinition is used or for annotations displayed for data points.
      *
      * @param index of the data label
-     * @return data point label specified by the index or <code>null</code> if no
-     *         label has been specified
+     * @return data point label specified by the index or <code>null</code> if no label has been specified
      */
     @Override
     public String getDataLabel(final int index) {
@@ -486,8 +476,8 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
     }
 
     /**
-     * A string representation of the CSS style associated with this specific
-     * {@code DataSet} data point. @see #getStyle()
+     * A string representation of the CSS style associated with this specific {@code DataSet} data point. @see
+     * #getStyle()
      *
      * @param index the index of the specific data point
      * @return user-specific data set style description (ie. may be set by user)
@@ -508,9 +498,8 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
     }
 
     /**
-     * Gets the index of the data point closest to the given x coordinate. The index
-     * returned may be less then zero or larger the the number of data points in the
-     * data set, if the x coordinate lies outside the range of the data set.
+     * Gets the index of the data point closest to the given x coordinate. The index returned may be less then zero or
+     * larger the the number of data points in the data set, if the x coordinate lies outside the range of the data set.
      *
      * @param x the x position of the data point
      * @return the index of the data point
@@ -654,13 +643,11 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
     }
 
     /**
-     * remove a custom data label for a point The label can be used as a category
-     * name if CategoryStepsDefinition is used or for annotations displayed for data
-     * points.
+     * remove a custom data label for a point The label can be used as a category name if CategoryStepsDefinition is
+     * used or for annotations displayed for data points.
      *
      * @param index of the data point
-     * @return the previously set label or <code>null</code> if no label has been
-     *         specified
+     * @return the previously set label or <code>null</code> if no label has been specified
      */
     public String removeDataLabel(final int index) {
         final String retVal = lock().writeLockGuard(() -> dataLabels.remove(index));
@@ -669,8 +656,8 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
     }
 
     /**
-     * A string representation of the CSS style associated with this specific
-     * {@code DataSet} data point. @see #getStyle()
+     * A string representation of the CSS style associated with this specific {@code DataSet} data point. @see
+     * #getStyle()
      *
      * @param index the index of the specific data point
      * @return itself (fluent interface)

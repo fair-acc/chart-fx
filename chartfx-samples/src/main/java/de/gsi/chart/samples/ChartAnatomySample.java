@@ -8,10 +8,10 @@ import org.slf4j.LoggerFactory;
 import de.gsi.chart.Chart;
 import de.gsi.chart.axes.Axis;
 import de.gsi.chart.axes.spi.DefaultNumericAxis;
-import de.gsi.dataset.DataSet;
 import de.gsi.chart.renderer.Renderer;
 import de.gsi.chart.ui.geometry.Corner;
 import de.gsi.chart.ui.geometry.Side;
+import de.gsi.dataset.DataSet;
 import javafx.application.Application;
 import javafx.collections.ListChangeListener.Change;
 import javafx.geometry.Pos;
@@ -31,7 +31,7 @@ import javafx.stage.Stage;
  * @author rstein
  */
 public class ChartAnatomySample extends Application {
-	private static final Logger LOGGER = LoggerFactory.getLogger(WriteDataSetToFileSample.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(WriteDataSetToFileSample.class);
 
     @Override
     public void start(final Stage primaryStage) {
@@ -61,12 +61,12 @@ public class ChartAnatomySample extends Application {
 
         final Chart chart = new Chart() {
             @Override
-            protected void updateLegend(final List<DataSet> dataSets, final List<Renderer> renderers) {
+            protected void axesChanged(Change<? extends Axis> change) {
                 // TODO Auto-generated method stub
             }
 
             @Override
-            protected void axesChanged(Change<? extends Axis> change) {
+            protected void redrawCanvas() {
                 // TODO Auto-generated method stub
             }
 
@@ -76,7 +76,7 @@ public class ChartAnatomySample extends Application {
             }
 
             @Override
-            protected void redrawCanvas() {
+            protected void updateLegend(final List<DataSet> dataSets, final List<Renderer> renderers) {
                 // TODO Auto-generated method stub
             }
         };
@@ -137,6 +137,13 @@ public class ChartAnatomySample extends Application {
         primaryStage.show();
     }
 
+    /**
+     * @param args the command line arguments
+     */
+    public static void main(final String[] args) {
+        Application.launch(args);
+    }
+
     class MyLabel extends Label {
         public MyLabel(final String label) {
             super(label);
@@ -151,13 +158,5 @@ public class ChartAnatomySample extends Application {
                 setRotate(90);
             }
         }
-    }
-
-    /**
-     * @param args
-     *            the command line arguments
-     */
-    public static void main(final String[] args) {
-        Application.launch(args);
     }
 }

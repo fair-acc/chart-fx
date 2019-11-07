@@ -16,18 +16,14 @@ import de.gsi.dataset.spi.utils.Tuple;
 import de.gsi.dataset.utils.AssertUtils;
 
 /**
- * Implementation of the <code>DataSet</code> interface which keeps the x,y
- * values in an observable list. It provides methods allowing easily manipulate
- * of data points. <br>
- * User provides X and Y coordinates or only Y coordinates. In the former case X
- * coordinates have value of data point index.
- * N.B. this is a classic list-based implementation. This is a "simple"
- * implementation but has a poorer performance compared to Default- and
- * Double-based DataSets @see DoubleDataSet
+ * Implementation of the <code>DataSet</code> interface which keeps the x,y values in an observable list. It provides
+ * methods allowing easily manipulate of data points. <br>
+ * User provides X and Y coordinates or only Y coordinates. In the former case X coordinates have value of data point
+ * index. N.B. this is a classic list-based implementation. This is a "simple" implementation but has a poorer
+ * performance compared to Default- and Double-based DataSets @see DoubleDataSet
  *
  * @author rstein
- * @deprecated due to poorer CPU performance (this is kept for reference
- *             reasons)
+ * @deprecated due to poorer CPU performance (this is kept for reference reasons)
  */
 public class ListDataSet extends AbstractDataSet<ListDataSet> implements DataSet2D {
     private static final long serialVersionUID = -4444745436188783390L;
@@ -39,24 +35,20 @@ public class ListDataSet extends AbstractDataSet<ListDataSet> implements DataSet
      * Creates a new instance of <code>CustomDataSet</code>.
      *
      * @param name name of this DataSet.
-     * @throws IllegalArgumentException if <code>name</code> is
-     *             <code>null</code>
+     * @throws IllegalArgumentException if <code>name</code> is <code>null</code>
      */
     public ListDataSet(final String name) {
         super(name, 2);
     }
 
     /**
-     * Creates a new instance of <code>CustomDataSet</code>. X coordinates are
-     * equal to data points indices. <br>
-     * Note: The provided array is not copied (data set operates on the
-     * specified array object) thus the array should not be modified outside of
-     * this data set.
+     * Creates a new instance of <code>CustomDataSet</code>. X coordinates are equal to data points indices. <br>
+     * Note: The provided array is not copied (data set operates on the specified array object) thus the array should
+     * not be modified outside of this data set.
      *
      * @param name name of this data set.
      * @param yValues Y coordinates
-     * @throws IllegalArgumentException if any of parameters is
-     *             <code>null</code>
+     * @throws IllegalArgumentException if any of parameters is <code>null</code>
      */
     public ListDataSet(final String name, final double[] yValues) {
         this(name);
@@ -71,16 +63,14 @@ public class ListDataSet extends AbstractDataSet<ListDataSet> implements DataSet
      * <p>
      * Creates a new instance of <code>CustomDataSet</code>.
      * </p>
-     * Note: The provided arrays are not copied (data set operates on specified
-     * array objects) thus these array should not be modified outside of this
-     * data set.
+     * Note: The provided arrays are not copied (data set operates on specified array objects) thus these array should
+     * not be modified outside of this data set.
      *
      * @param name name of this data set.
      * @param xValues X coordinates
      * @param yValues Y coordinates
-     * @throws IllegalArgumentException if any of parameters is
-     *             <code>null</code> or if arrays with coordinates have
-     *             different lengths
+     * @throws IllegalArgumentException if any of parameters is <code>null</code> or if arrays with coordinates have
+     *         different lengths
      */
     public ListDataSet(final String name, final double[] xValues, final double[] yValues) {
         this(name);
@@ -99,87 +89,14 @@ public class ListDataSet extends AbstractDataSet<ListDataSet> implements DataSet
      *
      * @param name name of this data set.
      * @param values list of data points to set
-     * @throws IllegalArgumentException if any of parameters is
-     *             <code>null</code> or if arrays with coordinates have
-     *             different lengths
+     * @throws IllegalArgumentException if any of parameters is <code>null</code> or if arrays with coordinates have
+     *         different lengths
      */
     public ListDataSet(final String name, final List<DoublePoint> values) {
         this(name);
         AssertUtils.notNull("values", values);
         data.clear();
         data.addAll(values);
-    }
-
-    /**
-     * @return list containing data point definition
-     */
-    public List<DoublePoint> getData() {
-        return data;
-    }
-
-    @Override
-    public int getDataCount() {
-        return data.size();
-    }
-
-    /**
-     * clear all data points
-     * 
-     * @return itself (fluent design)
-     */
-    public ListDataSet clearData() {
-        lock().writeLockGuard(() -> {
-            data.clear();
-            getAxisDescriptions().forEach(AxisDescription::clear);
-        });
-        return fireInvalidated(new RemovedDataEvent(this, "clearData()"));
-    }
-
-    @Override
-    public double getX(final int index) {
-        return data.get(index).getX();
-    }
-
-    @Override
-    public double getY(final int index) {
-        return data.get(index).getY();
-    }
-
-    /**
-     * replaces values of all existing data points
-     * 
-     * @param values new data points
-     * @return itself (fluent design)
-     */
-    public ListDataSet set(final List<DoublePoint> values) {
-        AssertUtils.notNull("values", values);
-        lock().writeLockGuard(() -> {
-            data.clear();
-            data.addAll(values);
-
-            recomputeLimits(0);
-            recomputeLimits(1);
-        });
-        return fireInvalidated(new UpdatedDataEvent(this));
-    }
-
-    /**
-     * sets new value of existing data point
-     * 
-     * @param index data point index
-     * @param x new horizontal value
-     * @param y new vertical value
-     * @return itself (fluent design)
-     */
-    public ListDataSet set(final int index, final double x, final double y) {
-        lock().writeLockGuard(() -> {
-            AssertUtils.indexInBounds(index, getDataCount());
-            data.get(index).set(x, y);
-
-            getAxisDescription(0).add(x);
-            getAxisDescription(1).add(y);
-        });
-        return fireInvalidated(new UpdatedDataEvent(this));
     }
 
     /**
@@ -197,6 +114,128 @@ public class ListDataSet extends AbstractDataSet<ListDataSet> implements DataSet
             getAxisDescription(1).add(y);
         });
         return fireInvalidated(new AddedDataEvent(this));
+    }
+
+    /**
+     * <p>
+     * Initialises the data set with specified data.
+     * </p>
+     * Note: The method copies values from specified double arrays.
+     *
+     * @param xValues X coordinates
+     * @param yValues Y coordinates
+     * @return itself
+     */
+    public ListDataSet add(final double[] xValues, final double[] yValues) {
+        AssertUtils.notNull("X coordinates", xValues);
+        AssertUtils.notNull("Y coordinates", yValues);
+        AssertUtils.equalDoubleArrays(xValues, yValues);
+
+        lock().writeLockGuard(() -> {
+            data.clear();
+            getAxisDescription(0).setMax(Double.NaN);
+            getAxisDescription(1).setMax(Double.NaN);
+            for (int i = 0; i < xValues.length; i++) {
+                data.add(new DoublePoint(xValues[i], yValues[i]));
+                getAxisDescription(0).add(xValues[i]);
+                getAxisDescription(1).add(yValues[i]);
+            }
+        });
+        return fireInvalidated(new AddedDataEvent(this));
+    }
+
+    /**
+     * adds a custom new data label for a point The label can be used as a category name if CategoryStepsDefinition is
+     * used or for annotations displayed for data points.
+     *
+     * @param index of the data point
+     * @param label for the data point specified by the index
+     * @return the previously set label or <code>null</code> if no label has been specified
+     */
+    @Override
+    public String addDataLabel(final int index, final String label) {
+        final String retVal = lock().writeLockGuard(() -> dataLabels.put(index, label));
+        fireInvalidated(new UpdatedMetaDataEvent(this, "added label"));
+        return retVal;
+    }
+
+    /**
+     * A string representation of the CSS style associated with this specific {@code DataSet} data point. @see
+     * #getStyle()
+     *
+     * @param index the index of the specific data point
+     * @param style for the given data point (CSS-styling)
+     * @return itself (fluent interface)
+     */
+    @Override
+    public String addDataStyle(final int index, final String style) {
+        final String retVal = lock().writeLockGuard(() -> dataStyles.put(index, style));
+        fireInvalidated(new UpdatedMetaDataEvent(this, "added style"));
+        return retVal;
+    }
+
+    /**
+     * clear all data points
+     * 
+     * @return itself (fluent design)
+     */
+    public ListDataSet clearData() {
+        lock().writeLockGuard(() -> {
+            data.clear();
+            getAxisDescriptions().forEach(AxisDescription::clear);
+        });
+        return fireInvalidated(new RemovedDataEvent(this, "clearData()"));
+    }
+
+    /**
+     * @return list containing data point definition
+     */
+    public List<DoublePoint> getData() {
+        return data;
+    }
+
+    @Override
+    public int getDataCount() {
+        return data.size();
+    }
+
+    /**
+     * Returns label of a data point specified by the index. The label can be used as a category name if
+     * CategoryStepsDefinition is used or for annotations displayed for data points.
+     *
+     * @param index of the data label
+     * @return data point label specified by the index or <code>null</code> if no label has been specified
+     */
+    @Override
+    public String getDataLabel(final int index) {
+        final String dataLabel = dataLabels.get(index);
+        if (dataLabel != null) {
+            return dataLabel;
+        }
+
+        return super.getDataLabel(index);
+    }
+
+    /**
+     * A string representation of the CSS style associated with this specific {@code DataSet} data point. @see
+     * #getStyle()
+     *
+     * @param index the index of the specific data point
+     * @return user-specific data set style description (ie. may be set by user)
+     */
+    @Override
+    public String getStyle(final int index) {
+        return dataStyles.get(index);
+    }
+
+    @Override
+    public double getX(final int index) {
+        return data.get(index).getX();
+    }
+
+    @Override
+    public double getY(final int index) {
+        return data.get(index).getY();
     }
 
     /**
@@ -245,58 +284,11 @@ public class ListDataSet extends AbstractDataSet<ListDataSet> implements DataSet
     }
 
     /**
-     * <p>
-     * Initialises the data set with specified data.
-     * </p>
-     * Note: The method copies values from specified double arrays.
-     *
-     * @param xValues X coordinates
-     * @param yValues Y coordinates
-     * @return itself
-     */
-    public ListDataSet add(final double[] xValues, final double[] yValues) {
-        AssertUtils.notNull("X coordinates", xValues);
-        AssertUtils.notNull("Y coordinates", yValues);
-        AssertUtils.equalDoubleArrays(xValues, yValues);
-
-        lock().writeLockGuard(() -> {
-            data.clear();
-            getAxisDescription(0).setMax(Double.NaN);
-            getAxisDescription(1).setMax(Double.NaN);
-            for (int i = 0; i < xValues.length; i++) {
-                data.add(new DoublePoint(xValues[i], yValues[i]));
-                getAxisDescription(0).add(xValues[i]);
-                getAxisDescription(1).add(yValues[i]);
-            }
-        });
-        return fireInvalidated(new AddedDataEvent(this));
-    }
-
-    /**
-     * adds a custom new data label for a point The label can be used as a
-     * category name if CategoryStepsDefinition is used or for annotations
-     * displayed for data points.
+     * remove a custom data label for a point The label can be used as a category name if CategoryStepsDefinition is
+     * used or for annotations displayed for data points.
      *
      * @param index of the data point
-     * @param label for the data point specified by the index
-     * @return the previously set label or <code>null</code> if no label has
-     *         been specified
-     */
-    @Override
-    public String addDataLabel(final int index, final String label) {
-        final String retVal = lock().writeLockGuard(() -> dataLabels.put(index, label));
-        fireInvalidated(new UpdatedMetaDataEvent(this, "added label"));
-        return retVal;
-    }
-
-    /**
-     * remove a custom data label for a point The label can be used as a
-     * category name if CategoryStepsDefinition is used or for annotations
-     * displayed for data points.
-     *
-     * @param index of the data point
-     * @return the previously set label or <code>null</code> if no label has
-     *         been specified
+     * @return the previously set label or <code>null</code> if no label has been specified
      */
     @Override
     public String removeDataLabel(final int index) {
@@ -306,42 +298,8 @@ public class ListDataSet extends AbstractDataSet<ListDataSet> implements DataSet
     }
 
     /**
-     * Returns label of a data point specified by the index. The label can be
-     * used as a category name if CategoryStepsDefinition is used or for
-     * annotations displayed for data points.
-     *
-     * @param index of the data label
-     * @return data point label specified by the index or <code>null</code> if
-     *         no label has been specified
-     */
-    @Override
-    public String getDataLabel(final int index) {
-        final String dataLabel = dataLabels.get(index);
-        if (dataLabel != null) {
-            return dataLabel;
-        }
-
-        return super.getDataLabel(index);
-    }
-
-    /**
-     * A string representation of the CSS style associated with this specific
-     * {@code DataSet} data point. @see #getStyle()
-     *
-     * @param index the index of the specific data point
-     * @param style for the given data point (CSS-styling)
-     * @return itself (fluent interface)
-     */
-    @Override
-    public String addDataStyle(final int index, final String style) {
-        final String retVal = lock().writeLockGuard(() -> dataStyles.put(index, style));
-        fireInvalidated(new UpdatedMetaDataEvent(this, "added style"));
-        return retVal;
-    }
-
-    /**
-     * A string representation of the CSS style associated with this specific
-     * {@code DataSet} data point. @see #getStyle()
+     * A string representation of the CSS style associated with this specific {@code DataSet} data point. @see
+     * #getStyle()
      *
      * @param index the index of the specific data point
      * @return itself (fluent interface)
@@ -354,14 +312,39 @@ public class ListDataSet extends AbstractDataSet<ListDataSet> implements DataSet
     }
 
     /**
-     * A string representation of the CSS style associated with this specific
-     * {@code DataSet} data point. @see #getStyle()
-     *
-     * @param index the index of the specific data point
-     * @return user-specific data set style description (ie. may be set by user)
+     * sets new value of existing data point
+     * 
+     * @param index data point index
+     * @param x new horizontal value
+     * @param y new vertical value
+     * @return itself (fluent design)
      */
-    @Override
-    public String getStyle(final int index) {
-        return dataStyles.get(index);
+    public ListDataSet set(final int index, final double x, final double y) {
+        lock().writeLockGuard(() -> {
+            AssertUtils.indexInBounds(index, getDataCount());
+            data.get(index).set(x, y);
+
+            getAxisDescription(0).add(x);
+            getAxisDescription(1).add(y);
+        });
+        return fireInvalidated(new UpdatedDataEvent(this));
+    }
+
+    /**
+     * replaces values of all existing data points
+     * 
+     * @param values new data points
+     * @return itself (fluent design)
+     */
+    public ListDataSet set(final List<DoublePoint> values) {
+        AssertUtils.notNull("values", values);
+        lock().writeLockGuard(() -> {
+            data.clear();
+            data.addAll(values);
+
+            recomputeLimits(0);
+            recomputeLimits(1);
+        });
+        return fireInvalidated(new UpdatedDataEvent(this));
     }
 }

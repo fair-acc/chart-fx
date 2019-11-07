@@ -3,9 +3,9 @@ package de.gsi.math.matrix;
 /**
  * LU Decomposition.
  * <P>
- * For an m-by-n matrix A with m &gt;= n, the LU decomposition is an m-by-n unit lower triangular matrix L, an n-by-n upper
- * triangular matrix U, and a permutation vector piv of length m so that A(piv,:) = L*U. If m &lt; n, then L is m-by-m and
- * U is m-by-n.
+ * For an m-by-n matrix A with m &gt;= n, the LU decomposition is an m-by-n unit lower triangular matrix L, an n-by-n
+ * upper triangular matrix U, and a permutation vector piv of length m so that A(piv,:) = L*U. If m &lt; n, then L is
+ * m-by-m and U is m-by-n.
  * <P>
  * The LU decompostion with pivoting always exists, even if the matrix is singular, so the constructor will never fail.
  * The primary use of the LU decomposition is in the solution of square systems of simultaneous linear equations. This
@@ -14,9 +14,9 @@ package de.gsi.math.matrix;
 
 public class LUDecomposition implements java.io.Serializable {
 
-    /* ------------------------
-       Class variables
-     * ------------------------ */
+    /*
+     * ------------------------ Class variables ------------------------
+     */
 
     private static final long serialVersionUID = -170566359275556527L;
 
@@ -43,9 +43,9 @@ public class LUDecomposition implements java.io.Serializable {
      */
     private int[] piv;
 
-    /* ------------------------
-       Constructor
-     * ------------------------ */
+    /*
+     * ------------------------ Constructor ------------------------
+     */
 
     /**
      * LU Decomposition
@@ -124,81 +124,66 @@ public class LUDecomposition implements java.io.Serializable {
         }
     }
 
-    /* ------------------------
-       Temporary, experimental code.
-       ------------------------ *\
-    
-       \** LU Decomposition, computed by Gaussian elimination.
-       <P>
-       This constructor computes L and U with the "daxpy"-based elimination
-       algorithm used in LINPACK and MATLAB.  In Java, we suspect the dot-product,
-       Crout algorithm will be faster.  We have temporarily included this
-       constructor until timing experiments confirm this suspicion.
-       <P>
-       @param  A             Rectangular matrix
-       @param  linpackflag   Use Gaussian elimination.  Actual value ignored.
-       @return               Structure to access L, U and piv.
-       *\
-    
-       public LUDecomposition (Matrix A, int linpackflag) {
-      // Initialize.
-      LU = A.getArrayCopy();
-      m = A.getRowDimension();
-      n = A.getColumnDimension();
-      piv = new int[m];
-      for (int i = 0; i < m; i++) {
-         piv[i] = i;
-      }
-      pivsign = 1;
-      // Main loop.
-      for (int k = 0; k < n; k++) {
-         // Find pivot.
-         int p = k;
-         for (int i = k+1; i < m; i++) {
-            if (Math.abs(LU[i][k]) > Math.abs(LU[p][k])) {
-               p = i;
-            }
-         }
-         // Exchange if necessary.
-         if (p != k) {
-            for (int j = 0; j < n; j++) {
-               double t = LU[p][j]; LU[p][j] = LU[k][j]; LU[k][j] = t;
-            }
-            int t = piv[p]; piv[p] = piv[k]; piv[k] = t;
-            pivsign = -pivsign;
-         }
-         // Compute multipliers and eliminate k-th column.
-         if (LU[k][k] != 0.0) {
-            for (int i = k+1; i < m; i++) {
-               LU[i][k] /= LU[k][k];
-               for (int j = k+1; j < n; j++) {
-                  LU[i][j] -= LU[i][k]*LU[k][j];
-               }
-            }
-         }
-      }
-       }
-    
-    \* ------------------------
-       End of temporary code.
-     * ------------------------ */
-
-    /* ------------------------
-       Public Methods
-     * ------------------------ */
-
-    /**
-     * Is the matrix nonsingular?
+    /*
+     * ------------------------ Temporary, experimental code. ------------------------ *\
      * 
-     * @return true if U, and hence A, is nonsingular.
+     * \** LU Decomposition, computed by Gaussian elimination. <P> This constructor computes L and U with the
+     * "daxpy"-based elimination algorithm used in LINPACK and MATLAB. In Java, we suspect the dot-product, Crout
+     * algorithm will be faster. We have temporarily included this constructor until timing experiments confirm this
+     * suspicion. <P>
+     * 
+     * @param A Rectangular matrix
+     * 
+     * @param linpackflag Use Gaussian elimination. Actual value ignored.
+     * 
+     * @return Structure to access L, U and piv. \
+     * 
+     * public LUDecomposition (Matrix A, int linpackflag) { // Initialize. LU = A.getArrayCopy(); m =
+     * A.getRowDimension(); n = A.getColumnDimension(); piv = new int[m]; for (int i = 0; i < m; i++) { piv[i] = i; }
+     * pivsign = 1; // Main loop. for (int k = 0; k < n; k++) { // Find pivot. int p = k; for (int i = k+1; i < m; i++)
+     * { if (Math.abs(LU[i][k]) > Math.abs(LU[p][k])) { p = i; } } // Exchange if necessary. if (p != k) { for (int j =
+     * 0; j < n; j++) { double t = LU[p][j]; LU[p][j] = LU[k][j]; LU[k][j] = t; } int t = piv[p]; piv[p] = piv[k];
+     * piv[k] = t; pivsign = -pivsign; } // Compute multipliers and eliminate k-th column. if (LU[k][k] != 0.0) { for
+     * (int i = k+1; i < m; i++) { LU[i][k] /= LU[k][k]; for (int j = k+1; j < n; j++) { LU[i][j] -= LU[i][k]*LU[k][j];
+     * } } } } }
+     * 
+     * \* ------------------------ End of temporary code. ------------------------
      */
 
-    public boolean isNonsingular() {
-        for (int j = 0; j < n; j++) {
-            if (LU[j][j] == 0)
-                return false;
+    /*
+     * ------------------------ Public Methods ------------------------
+     */
+
+    /**
+     * Determinant
+     * 
+     * @return det(A)
+     * @exception IllegalArgumentException Matrix must be square
+     */
+
+    public double det() {
+        if (m != n) {
+            throw new IllegalArgumentException("Matrix must be square.");
         }
-        return true;
+        double d = pivsign;
+        for (int j = 0; j < n; j++) {
+            d *= LU[j][j];
+        }
+        return d;
+    }
+
+    /**
+     * Return pivot permutation vector as a one-dimensional double array
+     * 
+     * @return (double) piv
+     */
+
+    public double[] getDoublePivot() {
+        double[] vals = new double[m];
+        for (int i = 0; i < m; i++) {
+            vals[i] = piv[i];
+        }
+        return vals;
     }
 
     /**
@@ -225,6 +210,20 @@ public class LUDecomposition implements java.io.Serializable {
     }
 
     /**
+     * Return pivot permutation vector
+     * 
+     * @return piv
+     */
+
+    public int[] getPivot() {
+        int[] p = new int[m];
+        for (int i = 0; i < m; i++) {
+            p[i] = piv[i];
+        }
+        return p;
+    }
+
+    /**
      * Return upper triangular factor
      * 
      * @return U
@@ -246,49 +245,17 @@ public class LUDecomposition implements java.io.Serializable {
     }
 
     /**
-     * Return pivot permutation vector
+     * Is the matrix nonsingular?
      * 
-     * @return piv
+     * @return true if U, and hence A, is nonsingular.
      */
 
-    public int[] getPivot() {
-        int[] p = new int[m];
-        for (int i = 0; i < m; i++) {
-            p[i] = piv[i];
-        }
-        return p;
-    }
-
-    /**
-     * Return pivot permutation vector as a one-dimensional double array
-     * 
-     * @return (double) piv
-     */
-
-    public double[] getDoublePivot() {
-        double[] vals = new double[m];
-        for (int i = 0; i < m; i++) {
-            vals[i] = piv[i];
-        }
-        return vals;
-    }
-
-    /**
-     * Determinant
-     * 
-     * @return det(A)
-     * @exception IllegalArgumentException Matrix must be square
-     */
-
-    public double det() {
-        if (m != n) {
-            throw new IllegalArgumentException("Matrix must be square.");
-        }
-        double d = pivsign;
+    public boolean isNonsingular() {
         for (int j = 0; j < n; j++) {
-            d *= LU[j][j];
+            if (LU[j][j] == 0)
+                return false;
         }
-        return d;
+        return true;
     }
 
     /**

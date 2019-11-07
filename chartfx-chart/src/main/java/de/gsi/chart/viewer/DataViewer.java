@@ -172,8 +172,7 @@ public class DataViewer extends BorderPane {
     /**
      * Sets the value of the {@link #explorerVisibleProperty()}.
      *
-     * @param value {@code true} to make the explorer visible, {@code false} to make
-     *            it invisible
+     * @param value {@code true} to make the explorer visible, {@code false} to make it invisible
      */
     public final void setExplorerVisible(final boolean value) {
         explorerVisibleProperty().set(value);
@@ -198,30 +197,6 @@ public class DataViewer extends BorderPane {
         return showListStyleDataViews;
     }
 
-    public void updateMenuButton(Menu menuButton, DataView dataView) {
-        for (DataView view : dataView.getSubDataViews()) {
-            final String name = view.getName();
-            final Node icon = view.getIcon();
-
-            if (view.getSubDataViews().isEmpty()) {
-                MenuItem menuItem = new MenuItem(name, icon);
-
-                menuItem.setOnAction(evt -> dataView.setView(view));
-                menuButton.getItems().add(menuItem);
-                continue;
-            }
-
-            Menu subMenuButton = new Menu(name, icon);
-            subMenuButton.setOnAction(evt -> dataView.setView(view));
-            menuButton.getItems().add(subMenuButton);
-            updateMenuButton(subMenuButton, view);
-        }
-    }
-
-    public BooleanProperty windowDecorationVisible() {
-        return decorationVisible;
-    }
-
     protected void updateCloseWindowButton(final DataView root, final boolean state) {
         for (DataView view : root.getSubDataViews()) {
             updateCloseWindowButton(view, state);
@@ -244,6 +219,26 @@ public class DataViewer extends BorderPane {
             } else {
                 window.removeCloseWindowButton();
             }
+        }
+    }
+
+    public void updateMenuButton(Menu menuButton, DataView dataView) {
+        for (DataView view : dataView.getSubDataViews()) {
+            final String name = view.getName();
+            final Node icon = view.getIcon();
+
+            if (view.getSubDataViews().isEmpty()) {
+                MenuItem menuItem = new MenuItem(name, icon);
+
+                menuItem.setOnAction(evt -> dataView.setView(view));
+                menuButton.getItems().add(menuItem);
+                continue;
+            }
+
+            Menu subMenuButton = new Menu(name, icon);
+            subMenuButton.setOnAction(evt -> dataView.setView(view));
+            menuButton.getItems().add(subMenuButton);
+            updateMenuButton(subMenuButton, view);
         }
     }
 
@@ -337,5 +332,9 @@ public class DataViewer extends BorderPane {
             DataViewWindow window = (DataViewWindow) child;
             window.setWindowDecorationVisible(this.isWindowDecorationVisible());
         }
+    }
+
+    public BooleanProperty windowDecorationVisible() {
+        return decorationVisible;
     }
 }

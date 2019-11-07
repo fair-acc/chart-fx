@@ -26,14 +26,13 @@ import de.gsi.dataset.utils.AssertUtils;
 import de.gsi.dataset.utils.DataSetUtilsHelper;
 
 /**
- * Class to efficiently serialise and de-serialise DataSet objects into binary
- * byte arrays. The performance can be tuned through:
+ * Class to efficiently serialise and de-serialise DataSet objects into binary byte arrays. The performance can be tuned
+ * through:
  * <ul>
  * <li>using floats (ie. memory-IO vs network-IO bound serialisation), or</li>
- * <li>via {@link #setDataLablesSerialised(boolean)} (default: false) to control
- * whether data labels and styles shall be processed</li>
- * <li>via {@link #setMetaDataSerialised(boolean)} (default: true) to control
- * whether meta data shall be processed</li>
+ * <li>via {@link #setDataLablesSerialised(boolean)} (default: false) to control whether data labels and styles shall be
+ * processed</li>
+ * <li>via {@link #setMetaDataSerialised(boolean)} (default: true) to control whether meta data shall be processed</li>
  * </ul>
  *
  * @author rstein
@@ -238,9 +237,8 @@ public class DataSetSerialiser extends DataSetUtilsHelper {
 
     /**
      * Read a Dataset from a byte array containing comma separated values.<br>
-     * The data format is a custom extension of csv with an additional #-commented
-     * Metadata Header and a $-commented column header. Expects the following
-     * columns in this order to be present: index, x, y, eyn, eyp.
+     * The data format is a custom extension of csv with an additional #-commented Metadata Header and a $-commented
+     * column header. Expects the following columns in this order to be present: index, x, y, eyn, eyp.
      *
      * @param readBuffer IoBuffer (encapsulates byte array).
      * @return DataSet with the data and metadata read from the file
@@ -317,8 +315,8 @@ public class DataSetSerialiser extends DataSetUtilsHelper {
      *
      * @param dataSet The DataSet to export
      * @param buffer byte output buffer (N.B. keep caching this object)
-     * @param asFloat {@code true}: encode data as binary floats (smaller size,
-     *            performance), or {@code false} as double (better precision)
+     * @param asFloat {@code true}: encode data as binary floats (smaller size, performance), or {@code false} as double
+     *        (better precision)
      */
     public static void writeDataSetToByteArray(final DataSet dataSet, final IoBuffer buffer, final boolean asFloat) {
         AssertUtils.notNull("dataSet", dataSet);
@@ -389,8 +387,8 @@ public class DataSetSerialiser extends DataSetUtilsHelper {
     /**
      * @param buffer IoBuffer to write binary data into
      * @param dataSet to be exported
-     * @param asFloat {@code true} use 32-bit floats (less memory, faster transfer)
-     *            instead of 64-bit doubles (DataSet default, higher precision)
+     * @param asFloat {@code true} use 32-bit floats (less memory, faster transfer) instead of 64-bit doubles (DataSet
+     *        default, higher precision)
      */
     protected static void writeNumericBinaryDataToBuffer(final IoBuffer buffer, final DataSet dataSet,
             final boolean asFloat) {

@@ -48,81 +48,6 @@ public class RollingBufferSample extends Application {
     private final DefaultNumericAxis yAxis2 = new DefaultNumericAxis("dipole current", "A");
     protected Timer[] timer;
 
-    public BorderPane initComponents(Scene scene) {
-        final BorderPane root = new BorderPane();
-        generateBeamIntensityData();
-        generateDipoleCurrentData();
-        initErrorDataSetRenderer(beamIntensityRenderer);
-        initErrorDataSetRenderer(dipoleCurrentRenderer);
-
-        final DefaultNumericAxis xAxis1 = new DefaultNumericAxis("time");
-        xAxis1.setAutoRangeRounding(false);
-        xAxis1.setTickLabelRotation(45);
-        xAxis1.setMinorTickCount(30);
-        xAxis1.invertAxis(false);
-        xAxis1.setTimeAxis(true);
-        yAxis2.setSide(Side.RIGHT);
-        yAxis2.setAnimated(false);
-        // N.B. it's important to set secondary axis on the 2nd renderer before
-        // adding the renderer to the chart
-        dipoleCurrentRenderer.getAxes().add(yAxis2);
-
-        final XYChart chart = new XYChart(xAxis1, yAxis1);
-        chart.legendVisibleProperty().set(true);
-        chart.setAnimated(false);
-        chart.getRenderers().set(0, beamIntensityRenderer);
-        chart.getRenderers().add(dipoleCurrentRenderer);
-        chart.getPlugins().add(new EditAxis());
-
-        beamIntensityRenderer.getDatasets().add(rollingBufferBeamIntensity);
-        dipoleCurrentRenderer.getDatasets().add(rollingBufferDipoleCurrent);
-
-        // set localised time offset
-        if (xAxis1.isTimeAxis() && xAxis1.getAxisLabelFormatter() instanceof DefaultTimeFormatter) {
-            final DefaultTimeFormatter axisFormatter = (DefaultTimeFormatter) xAxis1.getAxisLabelFormatter();
-
-            axisFormatter.setTimeZoneOffset(ZoneOffset.UTC);
-            axisFormatter.setTimeZoneOffset(ZoneOffset.ofHoursMinutes(5, 0));
-        }
-
-        yAxis1.setForceZeroInRange(true);
-        yAxis2.setForceZeroInRange(true);
-        yAxis1.setAutoRangeRounding(true);
-        yAxis2.setAutoRangeRounding(true);
-
-        // init menu bar
-        root.setTop(getHeaderBar(scene));
-
-        long startTime = ProcessingProfiler.getTimeStamp();
-        ProcessingProfiler.getTimeDiff(startTime, "adding data to chart");
-
-        startTime = ProcessingProfiler.getTimeStamp();
-        root.setCenter(chart);
-
-        ProcessingProfiler.getTimeDiff(startTime, "adding chart into StackPane");
-
-        return root;
-    }
-
-    @Override
-    public void start(final Stage primaryStage) {
-        ProcessingProfiler.setVerboseOutputState(true);
-        ProcessingProfiler.setLoggerOutputState(true);
-        ProcessingProfiler.setDebugState(false);
-
-        final BorderPane root = new BorderPane();
-        final Scene scene = new Scene(root, 1800, 400);
-        root.setCenter(initComponents(scene));
-
-        final long startTime = ProcessingProfiler.getTimeStamp();
-        primaryStage.setTitle(this.getClass().getSimpleName());
-        primaryStage.setScene(scene);
-        primaryStage.setOnCloseRequest(evt -> System.exit(0));
-        primaryStage.show();
-        ProcessingProfiler.getTimeDiff(startTime, "for showing");
-
-    }
-
     private void generateBeamIntensityData() {
         final long startTime = ProcessingProfiler.getTimeStamp();
         final double now = System.currentTimeMillis() / 1000.0 + 1;
@@ -241,6 +166,62 @@ public class RollingBufferSample extends Application {
         };
     }
 
+    public BorderPane initComponents(Scene scene) {
+        final BorderPane root = new BorderPane();
+        generateBeamIntensityData();
+        generateDipoleCurrentData();
+        initErrorDataSetRenderer(beamIntensityRenderer);
+        initErrorDataSetRenderer(dipoleCurrentRenderer);
+
+        final DefaultNumericAxis xAxis1 = new DefaultNumericAxis("time");
+        xAxis1.setAutoRangeRounding(false);
+        xAxis1.setTickLabelRotation(45);
+        xAxis1.setMinorTickCount(30);
+        xAxis1.invertAxis(false);
+        xAxis1.setTimeAxis(true);
+        yAxis2.setSide(Side.RIGHT);
+        yAxis2.setAnimated(false);
+        // N.B. it's important to set secondary axis on the 2nd renderer before
+        // adding the renderer to the chart
+        dipoleCurrentRenderer.getAxes().add(yAxis2);
+
+        final XYChart chart = new XYChart(xAxis1, yAxis1);
+        chart.legendVisibleProperty().set(true);
+        chart.setAnimated(false);
+        chart.getRenderers().set(0, beamIntensityRenderer);
+        chart.getRenderers().add(dipoleCurrentRenderer);
+        chart.getPlugins().add(new EditAxis());
+
+        beamIntensityRenderer.getDatasets().add(rollingBufferBeamIntensity);
+        dipoleCurrentRenderer.getDatasets().add(rollingBufferDipoleCurrent);
+
+        // set localised time offset
+        if (xAxis1.isTimeAxis() && xAxis1.getAxisLabelFormatter() instanceof DefaultTimeFormatter) {
+            final DefaultTimeFormatter axisFormatter = (DefaultTimeFormatter) xAxis1.getAxisLabelFormatter();
+
+            axisFormatter.setTimeZoneOffset(ZoneOffset.UTC);
+            axisFormatter.setTimeZoneOffset(ZoneOffset.ofHoursMinutes(5, 0));
+        }
+
+        yAxis1.setForceZeroInRange(true);
+        yAxis2.setForceZeroInRange(true);
+        yAxis1.setAutoRangeRounding(true);
+        yAxis2.setAutoRangeRounding(true);
+
+        // init menu bar
+        root.setTop(getHeaderBar(scene));
+
+        long startTime = ProcessingProfiler.getTimeStamp();
+        ProcessingProfiler.getTimeDiff(startTime, "adding data to chart");
+
+        startTime = ProcessingProfiler.getTimeStamp();
+        root.setCenter(chart);
+
+        ProcessingProfiler.getTimeDiff(startTime, "adding chart into StackPane");
+
+        return root;
+    }
+
     protected void initErrorDataSetRenderer(final ErrorDataSetRenderer eRenderer) {
         eRenderer.setErrorType(ErrorStyle.ERRORSURFACE);
         // for higher performance w/o error bars, enable this for comparing with
@@ -254,9 +235,27 @@ public class RollingBufferSample extends Application {
         reductionAlgorithm.setMinPointPixelDistance(RollingBufferSample.MIN_PIXEL_DISTANCE);
     }
 
+    @Override
+    public void start(final Stage primaryStage) {
+        ProcessingProfiler.setVerboseOutputState(true);
+        ProcessingProfiler.setLoggerOutputState(true);
+        ProcessingProfiler.setDebugState(false);
+
+        final BorderPane root = new BorderPane();
+        final Scene scene = new Scene(root, 1800, 400);
+        root.setCenter(initComponents(scene));
+
+        final long startTime = ProcessingProfiler.getTimeStamp();
+        primaryStage.setTitle(this.getClass().getSimpleName());
+        primaryStage.setScene(scene);
+        primaryStage.setOnCloseRequest(evt -> System.exit(0));
+        primaryStage.show();
+        ProcessingProfiler.getTimeDiff(startTime, "for showing");
+
+    }
+
     /**
-     * @param args
-     *            the command line arguments
+     * @param args the command line arguments
      */
     public static void main(final String[] args) {
         Application.launch(args);

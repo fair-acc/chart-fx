@@ -19,128 +19,40 @@ public class ContinuousWavelet {
     private final Convolution[] fdecon = new Convolution[ConcurrencyUtils.getNumberOfThreads()];
 
     /**
-     * Complex Morlet wavelet function
-     *
-     * @param x the
-     * @param nu the oscillatory parameter (needs to be &gt; 0.8)
-     * @return reference: P. Goupillaud, A. Grossman, and J. Morlet., Cycle-Octave and Related Transforms in Seismic
-     *         Signal Analysis., Geoexploration, 23:85-102, 1984
-     */
-    public Complex Morlet(final double x, final double nu) {
-        final double val1 = 1.0 / Math.sqrt(TMathConstants.TwoPi())
-                * TMathConstants.Exp(-2 * TMathConstants.Sqr(TMathConstants.Sqr(TMathConstants.TwoPi()) * x / nu));
-        final double val2 = TMathConstants.TwoPi() * nu * x;
-        final double re = val1 * Math.sin(val2);
-        final double im = val1 * Math.cos(val2);
-        return new Complex(re, im);
-    }
-
-    /**
-     * Complex Morlet wavelet function this version avoids the Complex object for the sake of performance
-     *
-     * @param x input
-     * @param nu the oscillatory parameter
-     * @param ret return value ret[0] stores the real and ret[1] the imaginary value of the function reference: P.
-     *            Goupillaud, A. Grossman, and J. Morlet., Cycle-Octave and Related Transforms in Seismic Signal
-     *            Analysis., Geoexploration, 23:85-102, 1984
-     */
-    public void Morlet(final double x, final double nu, final double[] ret) {
-        final double val1 = 1.0 / Math.sqrt(TMathConstants.TwoPi())
-                * TMathConstants.Exp(-2 * TMathConstants.Sqr(TMathConstants.Sqr(TMathConstants.TwoPi()) * x / nu));
-        final double val2 = TMathConstants.TwoPi() * nu * x;
-        ret[0] = val1 * Math.cos(val2);
-        ret[1] = val1 * Math.sin(val2);
-    }
-
-    /**
-     * Complex Paul wavelet function
-     *
-     * @param x input
-     * @param m input
-     * @return complex Paul wavelet function
-     */
-    public Complex Paul(final double x, final int m) {
-        final double val = Math.pow(2, m) * TMath.Factorial(m)
-                / Math.sqrt(TMathConstants.Pi() * TMath.Factorial(2 * m));
-        Complex c1 = new Complex(1, 0);
-        Complex c2 = new Complex(1, 0);
-        for (int i = 0; i < m + 1; i++) {
-            c1 = c1.multiply(new Complex(1, -x));
-            if (i < m) {
-                c2 = c2.multiply(new Complex(0, 1));
-            }
-        }
-        return c1.multiply(c2).multiply(val);
-    }
-
-    public Complex MexicanHat(final double x) {
-        final double x2 = x * x;
-        final double im = (1.0 - x2) * Math.exp(-0.5 * x2);
-        return new Complex(0, im);
-    }
-
-    /**
-     * Complex Wavelet Scalogram implementation -- no assumptions on the Wavelet nor input data are made. -- beware:
-     * this transform is quite time-consuming
-     *
-     * @param data complex valued input data
-     * @param scale the scale parameter
-     * @param translation the time shift parameter
-     * @param nu the number of oscillations per wavelet
-     * @return the complex scalogram spectrum coefficient
-     */
-    public synchronized Complex WaveletTransform(final Complex[] data, final double scale, final double translation,
-            final double nu) {
-        double re = 0;
-        double im = 0;
-        final double norm = 1.0 / Math.sqrt(scale);
-
-        for (int i = 0; i < data.length; i++) {
-            final Complex morlet = Morlet((i - translation) / scale, nu).multiply(norm);
-            re += data[i].multiply(morlet).getReal();
-            im += data[i].multiply(morlet).getImaginary();
-        }
-
-        return new Complex(re, im);
-    }
-
-    /**
      * Wavelet Scalogram implementation with truncated convolution the assumption is made that the wavelet vanishes for
      * large scales
-     *
+     * 
      * @param data real valued input data
-     * @param scale the scale parameter
-     * @param translation the time shift parameter
+     * @param nQuantx number of bins on the time axis
+     * @param nQuanty number of frequency bins of full range
      * @param nu the number of oscillations per wavelet
-     * @return the complex scalogram spectrum coefficient
+     * @param fmin minimum scalogram frequency range
+     * @param fmax maximum scalogram frequency range
+     * @return the complex scalogram spectrum
      */
-    public synchronized Complex WaveletTransform(final double[] data, final double scale, final double translation,
-            final double nu) {
-        double re = 0, im = 0;
-        final double[] ret = new double[2]; // temp. real/imaginary storage for
-                                            // the morlet wavelet
-        final double norm = 1.0 / Math.sqrt(scale);
-
-        // reduce rank of multiplication (speed optimisation)
-        final int centre = (int) translation + 1;
-        final int width = (int) (10.0 * scale); // significant half-width
-                                                // (morlet)
-        final int min = Math.max(0, centre - width);
-        final int max = Math.min(data.length, centre + width);
-
-        // implements the scalogram spectrum
-        // W(tau, scale) =
-        // \int_{-\infty}^{\infty}
-        // f(t)\cdot\frac{}{\sqrt{scale}}\psi^{*}((t-tau)/scale, nu) dt
-        for (int i = min; i < max; i++) {
-            Morlet((i - translation) / scale, nu, ret);
-            ret[0] *= norm;
-            ret[1] *= norm;
-            re += data[i] * ret[1]; // data * Im(Morlet)
-            im += data[i] * ret[0]; // data * Re(Morlet)
+    public DoubleDataSet3D getScalogram(final double[] data, final int nQuantx, final int nQuanty, final double nu,
+            final double fmin, final double fmax) {
+        if (data == null || data.length == 0) {
+            throw new InvalidParameterException(
+                    " getScalogram(double[],int,int,double,fmin,fmax) - data null or zero length");
         }
 
-        return new Complex(re, im);
+        if (fmin < 0 || fmax > 0.5 || fmax <= fmin) {
+            throw new InvalidParameterException(" getScalogram(double[],int,int,double," + fmin + "," + fmax
+                    + ") - frequency range not within 0<=fmin<fmax<=0.5");
+        }
+
+        if (nQuantx <= 0 || nQuantx > data.length) {
+            throw new InvalidParameterException(" getScalogram(double[]," + nQuantx + ",int,double," + fmin + "," + fmax
+                    + ") - nQuantx out of range [0," + data.length + "]");
+        }
+
+        // create and return data set.
+        final DoubleDataSet3D ds = new DoubleDataSet3D("Scalogram");
+        ds.set(getScalogramTimeAxis(data, nQuantx, nQuanty, nu, fmin, fmax),
+                getScalogramFrequencyAxis(nQuantx, nQuanty, nu, fmin, fmax),
+                getScalogramArrayFourier(data, nQuantx, nQuanty, nu, fmin, fmax));
+        return ds;
     }
 
     /**
@@ -363,40 +275,10 @@ public class ContinuousWavelet {
     }
 
     /**
-     * Wavelet Scalogram implementation with truncated convolution the assumption is made that the wavelet vanishes for
-     * large scales
-     *    
-     * @param data real valued input data
-     * @param nQuantx number of bins on the time axis
-     * @param nQuanty number of frequency bins of full range
-     * @param nu the number of oscillations per wavelet
-     * @param fmin minimum scalogram frequency range
-     * @param fmax maximum scalogram frequency range
-     * @return the complex scalogram spectrum
+     * @return progress of pending calculations in percent
      */
-    public DoubleDataSet3D getScalogram(final double[] data, final int nQuantx, final int nQuanty, final double nu,
-            final double fmin, final double fmax) {
-        if (data == null || data.length == 0) {
-            throw new InvalidParameterException(
-                    " getScalogram(double[],int,int,double,fmin,fmax) - data null or zero length");
-        }
-
-        if (fmin < 0 || fmax > 0.5 || fmax <= fmin) {
-            throw new InvalidParameterException(" getScalogram(double[],int,int,double," + fmin + "," + fmax
-                    + ") - frequency range not within 0<=fmin<fmax<=0.5");
-        }
-
-        if (nQuantx <= 0 || nQuantx > data.length) {
-            throw new InvalidParameterException(" getScalogram(double[]," + nQuantx + ",int,double," + fmin + "," + fmax
-                    + ") - nQuantx out of range [0," + data.length + "]");
-        }
-
-        // create and return data set.
-        final DoubleDataSet3D ds = new DoubleDataSet3D("Scalogram");
-        ds.set(getScalogramTimeAxis(data, nQuantx, nQuanty, nu, fmin, fmax),
-                getScalogramFrequencyAxis(nQuantx, nQuanty, nu, fmin, fmax),
-                getScalogramArrayFourier(data, nQuantx, nQuanty, nu, fmin, fmax));
-        return ds;
+    public int getStatus() {
+        return fstatus;
     }
 
     /**
@@ -406,11 +288,129 @@ public class ContinuousWavelet {
         return fstatus < 100 ? true : false;
     }
 
+    public Complex MexicanHat(final double x) {
+        final double x2 = x * x;
+        final double im = (1.0 - x2) * Math.exp(-0.5 * x2);
+        return new Complex(0, im);
+    }
+
     /**
-     * @return progress of pending calculations in percent
+     * Complex Morlet wavelet function
+     *
+     * @param x the
+     * @param nu the oscillatory parameter (needs to be &gt; 0.8)
+     * @return reference: P. Goupillaud, A. Grossman, and J. Morlet., Cycle-Octave and Related Transforms in Seismic
+     *         Signal Analysis., Geoexploration, 23:85-102, 1984
      */
-    public int getStatus() {
-        return fstatus;
+    public Complex Morlet(final double x, final double nu) {
+        final double val1 = 1.0 / Math.sqrt(TMathConstants.TwoPi())
+                * TMathConstants.Exp(-2 * TMathConstants.Sqr(TMathConstants.Sqr(TMathConstants.TwoPi()) * x / nu));
+        final double val2 = TMathConstants.TwoPi() * nu * x;
+        final double re = val1 * Math.sin(val2);
+        final double im = val1 * Math.cos(val2);
+        return new Complex(re, im);
+    }
+
+    /**
+     * Complex Morlet wavelet function this version avoids the Complex object for the sake of performance
+     *
+     * @param x input
+     * @param nu the oscillatory parameter
+     * @param ret return value ret[0] stores the real and ret[1] the imaginary value of the function reference: P.
+     *        Goupillaud, A. Grossman, and J. Morlet., Cycle-Octave and Related Transforms in Seismic Signal Analysis.,
+     *        Geoexploration, 23:85-102, 1984
+     */
+    public void Morlet(final double x, final double nu, final double[] ret) {
+        final double val1 = 1.0 / Math.sqrt(TMathConstants.TwoPi())
+                * TMathConstants.Exp(-2 * TMathConstants.Sqr(TMathConstants.Sqr(TMathConstants.TwoPi()) * x / nu));
+        final double val2 = TMathConstants.TwoPi() * nu * x;
+        ret[0] = val1 * Math.cos(val2);
+        ret[1] = val1 * Math.sin(val2);
+    }
+
+    /**
+     * Complex Paul wavelet function
+     *
+     * @param x input
+     * @param m input
+     * @return complex Paul wavelet function
+     */
+    public Complex Paul(final double x, final int m) {
+        final double val = Math.pow(2, m) * TMath.Factorial(m)
+                / Math.sqrt(TMathConstants.Pi() * TMath.Factorial(2 * m));
+        Complex c1 = new Complex(1, 0);
+        Complex c2 = new Complex(1, 0);
+        for (int i = 0; i < m + 1; i++) {
+            c1 = c1.multiply(new Complex(1, -x));
+            if (i < m) {
+                c2 = c2.multiply(new Complex(0, 1));
+            }
+        }
+        return c1.multiply(c2).multiply(val);
+    }
+
+    /**
+     * Complex Wavelet Scalogram implementation -- no assumptions on the Wavelet nor input data are made. -- beware:
+     * this transform is quite time-consuming
+     *
+     * @param data complex valued input data
+     * @param scale the scale parameter
+     * @param translation the time shift parameter
+     * @param nu the number of oscillations per wavelet
+     * @return the complex scalogram spectrum coefficient
+     */
+    public synchronized Complex WaveletTransform(final Complex[] data, final double scale, final double translation,
+            final double nu) {
+        double re = 0;
+        double im = 0;
+        final double norm = 1.0 / Math.sqrt(scale);
+
+        for (int i = 0; i < data.length; i++) {
+            final Complex morlet = Morlet((i - translation) / scale, nu).multiply(norm);
+            re += data[i].multiply(morlet).getReal();
+            im += data[i].multiply(morlet).getImaginary();
+        }
+
+        return new Complex(re, im);
+    }
+
+    /**
+     * Wavelet Scalogram implementation with truncated convolution the assumption is made that the wavelet vanishes for
+     * large scales
+     *
+     * @param data real valued input data
+     * @param scale the scale parameter
+     * @param translation the time shift parameter
+     * @param nu the number of oscillations per wavelet
+     * @return the complex scalogram spectrum coefficient
+     */
+    public synchronized Complex WaveletTransform(final double[] data, final double scale, final double translation,
+            final double nu) {
+        double re = 0, im = 0;
+        final double[] ret = new double[2]; // temp. real/imaginary storage for
+                                            // the morlet wavelet
+        final double norm = 1.0 / Math.sqrt(scale);
+
+        // reduce rank of multiplication (speed optimisation)
+        final int centre = (int) translation + 1;
+        final int width = (int) (10.0 * scale); // significant half-width
+                                                // (morlet)
+        final int min = Math.max(0, centre - width);
+        final int max = Math.min(data.length, centre + width);
+
+        // implements the scalogram spectrum
+        // W(tau, scale) =
+        // \int_{-\infty}^{\infty}
+        // f(t)\cdot\frac{}{\sqrt{scale}}\psi^{*}((t-tau)/scale, nu) dt
+        for (int i = min; i < max; i++) {
+            Morlet((i - translation) / scale, nu, ret);
+            ret[0] *= norm;
+            ret[1] *= norm;
+            re += data[i] * ret[1]; // data * Im(Morlet)
+            im += data[i] * ret[0]; // data * Re(Morlet)
+        }
+
+        return new Complex(re, im);
     }
 
     public static void main(final String[] args) {

@@ -1,20 +1,16 @@
 package de.gsi.chart.renderer.spi;
 
 import java.security.InvalidParameterException;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-
-import javafx.css.converter.BooleanConverter;
 
 import de.gsi.chart.Chart;
 import de.gsi.chart.XYChart;
 import de.gsi.chart.axes.Axis;
 import de.gsi.chart.axes.spi.TickMark;
-import de.gsi.dataset.DataSet;
-import de.gsi.dataset.utils.NoDuplicatesList;
 import de.gsi.chart.renderer.Renderer;
 import de.gsi.chart.renderer.spi.utils.DashPatternStyle;
+import de.gsi.dataset.DataSet;
+import de.gsi.dataset.utils.NoDuplicatesList;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
@@ -22,9 +18,7 @@ import javafx.collections.ObservableList;
 import javafx.collections.SetChangeListener;
 import javafx.css.CssMetaData;
 import javafx.css.PseudoClass;
-import javafx.css.SimpleStyleableBooleanProperty;
 import javafx.css.Styleable;
-import javafx.css.StyleableProperty;
 import javafx.geometry.VPos;
 import javafx.scene.Group;
 import javafx.scene.Node;
@@ -32,7 +26,6 @@ import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.layout.Pane;
-import javafx.scene.layout.Region;
 import javafx.scene.shape.Line;
 import javafx.scene.text.TextAlignment;
 
@@ -53,8 +46,9 @@ public class GridRenderer extends Pane implements Renderer {
 
     private static final double[] DEFAULT_GRID_DASH_PATTERM = { 4.5, 2.5 };
     protected final Chart baseChart;
-    //    protected final BooleanProperty drawGridOnTop = new SimpleStyleableBooleanProperty(StyleableProperties.GRID_ON_TOP,
-    //            this, "drawGridOnTop", true);
+    // protected final BooleanProperty drawGridOnTop = new
+    // SimpleStyleableBooleanProperty(StyleableProperties.GRID_ON_TOP,
+    // this, "drawGridOnTop", true);
     private final Line horMajorGridStyleNode;
     private final Line verMajorGridStyleNode;
     private final Line horMinorGridStyleNode;
@@ -123,18 +117,56 @@ public class GridRenderer extends Pane implements Renderer {
         drawOnTopProperty().addListener(change);
     }
 
-    private static double snap(final double value) {
-        return (int) value + 0.5;
+    protected void drawEuclideanGrid(final GraphicsContext gc, XYChart xyChart) {
+        final Axis xAxis = xyChart.getXAxis();
+        final Axis yAxis = xyChart.getYAxis();
+        final double xAxisWidth = xyChart.getCanvas().getWidth();
+        final double xAxisWidthSnapped = snap(xAxisWidth);
+        final double yAxisHeight = xyChart.getCanvas().getHeight();
+        final double yAxisHeightSnapped = snap(yAxisHeight);
+        if (xAxis instanceof Node) {
+            ((Node) xAxis).setVisible(true);
+        }
+
+        gc.save();
+        drawVerticalMajorGridLines(gc, xAxis, xAxisWidth, yAxisHeightSnapped);
+        drawVerticalMinorGridLines(gc, xAxis, xAxisWidth, yAxisHeightSnapped);
+        drawHorizontalMajorGridLines(gc, yAxis, xAxisWidthSnapped, yAxisHeight);
+        drawHorizontalMinorGridLines(gc, yAxis, xAxisWidthSnapped, yAxisHeight);
+        gc.restore();
     }
 
-    protected static void applyGraphicsStyleFromLineStyle(final GraphicsContext gc, final Line style) {
-        gc.setStroke(style.getStroke());
-        gc.setLineWidth(style.getStrokeWidth());
-        if (style.getStrokeDashArray() == null || style.getStrokeDashArray().isEmpty()) {
-            gc.setLineDashes(DEFAULT_GRID_DASH_PATTERM);
-        } else {
-            final double[] dashes = style.getStrokeDashArray().stream().mapToDouble(d -> d).toArray();
-            gc.setLineDashes(dashes);
+    protected void drawHorizontalMajorGridLines(final GraphicsContext gc, final Axis yAxis,
+            final double xAxisWidthSnapped, final double yAxisHeight) {
+        if (!horMajorGridStyleNode.isVisible() && !horMinorGridStyleNode.isVisible()) {
+            return;
+        }
+        final double zeroSnapped = snap(0);
+        applyGraphicsStyleFromLineStyle(gc, horMajorGridStyleNode);
+        ObservableList<TickMark> tickMarks = yAxis.getTickMarks();
+        for (int i = 0; i < tickMarks.size(); i++) {
+            double y = snap(yAxis.getDisplayPosition(tickMarks.get(i).getValue()));
+            if (y >= 0 && y < yAxisHeight) {
+                // gc.strokeLine(zeroSnapped, y, xAxisWidthSnapped, y);
+                DashPatternStyle.strokeDashedLine(gc, zeroSnapped, y, xAxisWidthSnapped, y);
+            }
+        }
+    }
+
+    protected void drawHorizontalMinorGridLines(final GraphicsContext gc, final Axis yAxis,
+            final double xAxisWidthSnapped, final double yAxisHeight) {
+        if (!yAxis.isLogAxis() && !horMinorGridStyleNode.isVisible()) {
+            return;
+        }
+        final double zeroSnapped = snap(0);
+        applyGraphicsStyleFromLineStyle(gc, horMinorGridStyleNode);
+        ObservableList<TickMark> tickMarks = yAxis.getMinorTickMarks();
+        for (int i = 0; i < tickMarks.size(); i++) {
+            double y = snap(yAxis.getDisplayPosition(tickMarks.get(i).getValue()));
+            if (y >= 0 && y < yAxisHeight) {
+                // gc.strokeLine(zeroSnapped, y, xAxisWidthSnapped, y);
+                DashPatternStyle.strokeDashedLine(gc, zeroSnapped, y, xAxisWidthSnapped, y);
+            }
         }
     }
 
@@ -151,6 +183,145 @@ public class GridRenderer extends Pane implements Renderer {
      */
     public final BooleanProperty drawOnTopProperty() {
         return drawGridOnTopNode.visibleProperty();
+    }
+
+    protected void drawPolarCircle(final GraphicsContext gc, final Axis yAxis, final double yRange,
+            final double xCentre, final double yCentre, final double maxRadius) {
+        if (!horMajorGridStyleNode.isVisible() && !horMinorGridStyleNode.isVisible()) {
+            return;
+        }
+
+        applyGraphicsStyleFromLineStyle(gc, horMajorGridStyleNode);
+        final ObservableList<TickMark> yTickMarks = yAxis.getTickMarks();
+
+        gc.strokeOval(xCentre - maxRadius, yCentre - maxRadius, 2 * maxRadius, 2 * maxRadius);
+
+        // draw major tick circle
+        yTickMarks.forEach(tick -> {
+            final double yPos = yRange - yAxis.getDisplayPosition(tick.getValue());
+            final String label = yAxis.getTickMarkLabel(tick.getValue());
+            final double yNorm = yPos / yRange * maxRadius;
+
+            if (yNorm >= 0 && yNorm < maxRadius) {
+                gc.strokeOval(xCentre - yNorm, yCentre - yNorm, 2 * yNorm, 2 * yNorm);
+
+                gc.save();
+                gc.setFont(yAxis.getTickLabelFont());
+                gc.setStroke(yAxis.getTickLabelFill());
+                gc.setLineDashes(null);
+                gc.setTextBaseline(VPos.CENTER);
+                gc.strokeText(label, xCentre + (int) yAxis.getTickLabelGap(), yCentre - yNorm);
+                gc.restore();
+            }
+        });
+
+        if (!yAxis.isLogAxis() && !horMinorGridStyleNode.isVisible()) {
+            return;
+        }
+
+        // draw minor tick circle
+        applyGraphicsStyleFromLineStyle(gc, horMinorGridStyleNode);
+        yAxis.getMinorTickMarks().stream().mapToDouble(minorTick -> yRange - minorTick.getPosition()).forEach(yPos -> {
+            final double yNorm = yPos / yRange * maxRadius;
+            if (yNorm >= 0 && yNorm < maxRadius) {
+                gc.strokeOval(xCentre - yNorm, yCentre - yNorm, 2 * yNorm, 2 * yNorm);
+            }
+        });
+    }
+
+    protected void drawPolarGrid(final GraphicsContext gc, XYChart xyChart) {
+        final Axis xAxis = xyChart.getXAxis();
+        final Axis yAxis = xyChart.getYAxis();
+        final double xAxisWidth = xyChart.getCanvas().getWidth();
+        final double yAxisHeight = xyChart.getCanvas().getHeight();
+        final double xRange = xAxis.getWidth();
+        final double yRange = yAxis.getHeight();
+        final double xCentre = xRange / 2;
+        final double yCentre = yRange / 2;
+        final double maxRadius = 0.5 * Math.min(xRange, yRange) * 0.9;
+        if (xAxis instanceof Node) {
+            ((Node) xAxis).setVisible(false);
+        }
+
+        gc.save();
+        if (verMajorGridStyleNode.isVisible() || verMinorGridStyleNode.isVisible()) {
+            applyGraphicsStyleFromLineStyle(gc, verMajorGridStyleNode);
+            for (double phi = 0.0; phi <= 360; phi += xyChart.getPolarStepSize().get()) {
+                final double x = xCentre + maxRadius * Math.sin(phi * GridRenderer.DEG_TO_RAD);
+                final double y = yCentre - maxRadius * Math.cos(phi * GridRenderer.DEG_TO_RAD);
+                final double xl = xCentre + maxRadius * Math.sin(phi * GridRenderer.DEG_TO_RAD) * 1.05;
+                final double yl = yCentre - maxRadius * Math.cos(phi * GridRenderer.DEG_TO_RAD) * 1.05;
+
+                gc.strokeLine(xCentre, yCentre, x, y);
+
+                gc.save();
+                gc.setFont(yAxis.getTickLabelFont());
+                gc.setStroke(yAxis.getTickLabelFill());
+                gc.setLineDashes(null);
+                gc.setTextBaseline(VPos.CENTER);
+                if (phi < 350) {
+                    if (phi < 20) {
+                        gc.setTextAlign(TextAlignment.CENTER);
+                    } else if (phi <= 160) {
+                        gc.setTextAlign(TextAlignment.LEFT);
+                    } else if (phi <= 200) {
+                        gc.setTextAlign(TextAlignment.CENTER);
+                    } else {
+                        gc.setTextAlign(TextAlignment.RIGHT);
+                    }
+                    gc.strokeText(String.valueOf(phi), xl, yl);
+                }
+                gc.restore();
+
+            }
+
+            if (xAxis.isLogAxis() || verMinorGridStyleNode.isVisible()) {
+                applyGraphicsStyleFromLineStyle(gc, verMinorGridStyleNode);
+                xAxis.getMinorTickMarks().stream().mapToDouble(TickMark::getPosition).forEach(xPos -> {
+                    if (xPos > 0 && xPos <= xAxisWidth) {
+                        gc.strokeLine(xPos, 0, xPos, yAxisHeight);
+                    }
+                });
+            }
+        }
+
+        drawPolarCircle(gc, yAxis, yRange, xCentre, yCentre, maxRadius);
+
+        gc.restore();
+    }
+
+    protected void drawVerticalMajorGridLines(final GraphicsContext gc, final Axis xAxis, final double xAxisWidth,
+            final double yAxisHeightSnapped) {
+        if (!verMajorGridStyleNode.isVisible() && !verMinorGridStyleNode.isVisible()) {
+            return;
+        }
+        final double zeroSnapped = snap(0);
+        applyGraphicsStyleFromLineStyle(gc, verMajorGridStyleNode);
+        ObservableList<TickMark> tickMarks = xAxis.getTickMarks();
+        for (int i = 0; i < tickMarks.size(); i++) {
+            double x = snap(xAxis.getDisplayPosition(tickMarks.get(i).getValue()));
+            if (x > 0 && x <= xAxisWidth) {
+                // gc.strokeLine(x, zeroSnapped, x, yAxisHeightSnapped);
+                DashPatternStyle.strokeDashedLine(gc, x, zeroSnapped, x, yAxisHeightSnapped);
+            }
+        }
+    }
+
+    protected void drawVerticalMinorGridLines(final GraphicsContext gc, final Axis xAxis, final double xAxisWidth,
+            final double yAxisHeightSnapped) {
+        if (!xAxis.isLogAxis() && !verMinorGridStyleNode.isVisible()) {
+            return;
+        }
+        final double zeroSnapped = snap(0);
+        applyGraphicsStyleFromLineStyle(gc, verMinorGridStyleNode);
+        ObservableList<TickMark> tickMarks = xAxis.getMinorTickMarks();
+        for (int i = 0; i < tickMarks.size(); i++) {
+            double x = snap(xAxis.getDisplayPosition(tickMarks.get(i).getValue()));
+            if (x > 0 && x <= xAxisWidth) {
+                // gc.strokeLine(x, zeroSnapped, x, yAxisHeightSnapped);
+                DashPatternStyle.strokeDashedLine(gc, x, zeroSnapped, x, yAxisHeightSnapped);
+            }
+        }
     }
 
     /**
@@ -298,196 +469,19 @@ public class GridRenderer extends Pane implements Renderer {
         return verMinorGridStyleNode.visibleProperty();
     }
 
-    protected void drawEuclideanGrid(final GraphicsContext gc, XYChart xyChart) {
-        final Axis xAxis = xyChart.getXAxis();
-        final Axis yAxis = xyChart.getYAxis();
-        final double xAxisWidth = xyChart.getCanvas().getWidth();
-        final double xAxisWidthSnapped = snap(xAxisWidth);
-        final double yAxisHeight = xyChart.getCanvas().getHeight();
-        final double yAxisHeightSnapped = snap(yAxisHeight);
-        if (xAxis instanceof Node) {
-            ((Node) xAxis).setVisible(true);
-        }
-
-        gc.save();
-        drawVerticalMajorGridLines(gc, xAxis, xAxisWidth, yAxisHeightSnapped);
-        drawVerticalMinorGridLines(gc, xAxis, xAxisWidth, yAxisHeightSnapped);
-        drawHorizontalMajorGridLines(gc, yAxis, xAxisWidthSnapped, yAxisHeight);
-        drawHorizontalMinorGridLines(gc, yAxis, xAxisWidthSnapped, yAxisHeight);
-        gc.restore();
-    }
-
-    protected void drawHorizontalMajorGridLines(final GraphicsContext gc, final Axis yAxis,
-            final double xAxisWidthSnapped, final double yAxisHeight) {
-        if (!horMajorGridStyleNode.isVisible() && !horMinorGridStyleNode.isVisible()) {
-            return;
-        }
-        final double zeroSnapped = snap(0);
-        applyGraphicsStyleFromLineStyle(gc, horMajorGridStyleNode);
-        ObservableList<TickMark> tickMarks = yAxis.getTickMarks();
-        for (int i = 0; i < tickMarks.size(); i++) {
-            double y = snap(yAxis.getDisplayPosition(tickMarks.get(i).getValue()));
-            if (y >= 0 && y < yAxisHeight) {
-                // gc.strokeLine(zeroSnapped, y, xAxisWidthSnapped, y);
-                DashPatternStyle.strokeDashedLine(gc, zeroSnapped, y, xAxisWidthSnapped, y);
-            }
+    protected static void applyGraphicsStyleFromLineStyle(final GraphicsContext gc, final Line style) {
+        gc.setStroke(style.getStroke());
+        gc.setLineWidth(style.getStrokeWidth());
+        if (style.getStrokeDashArray() == null || style.getStrokeDashArray().isEmpty()) {
+            gc.setLineDashes(DEFAULT_GRID_DASH_PATTERM);
+        } else {
+            final double[] dashes = style.getStrokeDashArray().stream().mapToDouble(d -> d).toArray();
+            gc.setLineDashes(dashes);
         }
     }
 
-    protected void drawHorizontalMinorGridLines(final GraphicsContext gc, final Axis yAxis,
-            final double xAxisWidthSnapped, final double yAxisHeight) {
-        if (!yAxis.isLogAxis() && !horMinorGridStyleNode.isVisible()) {
-            return;
-        }
-        final double zeroSnapped = snap(0);
-        applyGraphicsStyleFromLineStyle(gc, horMinorGridStyleNode);
-        ObservableList<TickMark> tickMarks = yAxis.getMinorTickMarks();
-        for (int i = 0; i < tickMarks.size(); i++) {
-            double y = snap(yAxis.getDisplayPosition(tickMarks.get(i).getValue()));
-            if (y >= 0 && y < yAxisHeight) {
-                //gc.strokeLine(zeroSnapped, y, xAxisWidthSnapped, y);
-                DashPatternStyle.strokeDashedLine(gc, zeroSnapped, y, xAxisWidthSnapped, y);
-            }
-        }
-    }
-
-    protected void drawPolarCircle(final GraphicsContext gc, final Axis yAxis, final double yRange,
-            final double xCentre, final double yCentre, final double maxRadius) {
-        if (!horMajorGridStyleNode.isVisible() && !horMinorGridStyleNode.isVisible()) {
-            return;
-        }
-
-        applyGraphicsStyleFromLineStyle(gc, horMajorGridStyleNode);
-        final ObservableList<TickMark> yTickMarks = yAxis.getTickMarks();
-
-        gc.strokeOval(xCentre - maxRadius, yCentre - maxRadius, 2 * maxRadius, 2 * maxRadius);
-
-        // draw major tick circle
-        yTickMarks.forEach(tick -> {
-            final double yPos = yRange - yAxis.getDisplayPosition(tick.getValue());
-            final String label = yAxis.getTickMarkLabel(tick.getValue());
-            final double yNorm = yPos / yRange * maxRadius;
-
-            if (yNorm >= 0 && yNorm < maxRadius) {
-                gc.strokeOval(xCentre - yNorm, yCentre - yNorm, 2 * yNorm, 2 * yNorm);
-
-                gc.save();
-                gc.setFont(yAxis.getTickLabelFont());
-                gc.setStroke(yAxis.getTickLabelFill());
-                gc.setLineDashes(null);
-                gc.setTextBaseline(VPos.CENTER);
-                gc.strokeText(label, xCentre + (int) yAxis.getTickLabelGap(), yCentre - yNorm);
-                gc.restore();
-            }
-        });
-
-        if (!yAxis.isLogAxis() && !horMinorGridStyleNode.isVisible()) {
-            return;
-        }
-
-        // draw minor tick circle
-        applyGraphicsStyleFromLineStyle(gc, horMinorGridStyleNode);
-        yAxis.getMinorTickMarks().stream().mapToDouble(minorTick -> yRange - minorTick.getPosition()).forEach(yPos -> {
-            final double yNorm = yPos / yRange * maxRadius;
-            if (yNorm >= 0 && yNorm < maxRadius) {
-                gc.strokeOval(xCentre - yNorm, yCentre - yNorm, 2 * yNorm, 2 * yNorm);
-            }
-        });
-    }
-
-    protected void drawPolarGrid(final GraphicsContext gc, XYChart xyChart) {
-        final Axis xAxis = xyChart.getXAxis();
-        final Axis yAxis = xyChart.getYAxis();
-        final double xAxisWidth = xyChart.getCanvas().getWidth();
-        final double yAxisHeight = xyChart.getCanvas().getHeight();
-        final double xRange = xAxis.getWidth();
-        final double yRange = yAxis.getHeight();
-        final double xCentre = xRange / 2;
-        final double yCentre = yRange / 2;
-        final double maxRadius = 0.5 * Math.min(xRange, yRange) * 0.9;
-        if (xAxis instanceof Node) {
-            ((Node) xAxis).setVisible(false);
-        }
-
-        gc.save();
-        if (verMajorGridStyleNode.isVisible() || verMinorGridStyleNode.isVisible()) {
-            applyGraphicsStyleFromLineStyle(gc, verMajorGridStyleNode);
-            for (double phi = 0.0; phi <= 360; phi += xyChart.getPolarStepSize().get()) {
-                final double x = xCentre + maxRadius * Math.sin(phi * GridRenderer.DEG_TO_RAD);
-                final double y = yCentre - maxRadius * Math.cos(phi * GridRenderer.DEG_TO_RAD);
-                final double xl = xCentre + maxRadius * Math.sin(phi * GridRenderer.DEG_TO_RAD) * 1.05;
-                final double yl = yCentre - maxRadius * Math.cos(phi * GridRenderer.DEG_TO_RAD) * 1.05;
-
-                gc.strokeLine(xCentre, yCentre, x, y);
-
-                gc.save();
-                gc.setFont(yAxis.getTickLabelFont());
-                gc.setStroke(yAxis.getTickLabelFill());
-                gc.setLineDashes(null);
-                gc.setTextBaseline(VPos.CENTER);
-                if (phi < 350) {
-                    if (phi < 20) {
-                        gc.setTextAlign(TextAlignment.CENTER);
-                    } else if (phi <= 160) {
-                        gc.setTextAlign(TextAlignment.LEFT);
-                    } else if (phi <= 200) {
-                        gc.setTextAlign(TextAlignment.CENTER);
-                    } else {
-                        gc.setTextAlign(TextAlignment.RIGHT);
-                    }
-                    gc.strokeText(String.valueOf(phi), xl, yl);
-                }
-                gc.restore();
-
-            }
-
-            if (xAxis.isLogAxis() || verMinorGridStyleNode.isVisible()) {
-                applyGraphicsStyleFromLineStyle(gc, verMinorGridStyleNode);
-                xAxis.getMinorTickMarks().stream().mapToDouble(TickMark::getPosition).forEach(xPos -> {
-                    if (xPos > 0 && xPos <= xAxisWidth) {
-                        gc.strokeLine(xPos, 0, xPos, yAxisHeight);
-                    }
-                });
-            }
-        }
-
-        drawPolarCircle(gc, yAxis, yRange, xCentre, yCentre, maxRadius);
-
-        gc.restore();
-    }
-
-    protected void drawVerticalMajorGridLines(final GraphicsContext gc, final Axis xAxis, final double xAxisWidth,
-            final double yAxisHeightSnapped) {
-        if (!verMajorGridStyleNode.isVisible() && !verMinorGridStyleNode.isVisible()) {
-            return;
-        }
-        final double zeroSnapped = snap(0);
-        applyGraphicsStyleFromLineStyle(gc, verMajorGridStyleNode);
-        ObservableList<TickMark> tickMarks = xAxis.getTickMarks();
-        for (int i = 0; i < tickMarks.size(); i++) {
-            double x = snap(xAxis.getDisplayPosition(tickMarks.get(i).getValue()));
-            if (x > 0 && x <= xAxisWidth) {
-                // gc.strokeLine(x, zeroSnapped, x, yAxisHeightSnapped);
-                DashPatternStyle.strokeDashedLine(gc, x, zeroSnapped, x, yAxisHeightSnapped);
-            }
-        }
-    }
-
-    protected void drawVerticalMinorGridLines(final GraphicsContext gc, final Axis xAxis, final double xAxisWidth,
-            final double yAxisHeightSnapped) {
-        if (!xAxis.isLogAxis() && !verMinorGridStyleNode.isVisible()) {
-            return;
-        }
-        final double zeroSnapped = snap(0);
-        applyGraphicsStyleFromLineStyle(gc, verMinorGridStyleNode);
-        ObservableList<TickMark> tickMarks = xAxis.getMinorTickMarks();
-        for (int i = 0; i < tickMarks.size(); i++) {
-            double x = snap(xAxis.getDisplayPosition(tickMarks.get(i).getValue()));
-            if (x > 0 && x <= xAxisWidth) {
-                // gc.strokeLine(x, zeroSnapped, x, yAxisHeightSnapped);
-                DashPatternStyle.strokeDashedLine(gc, x, zeroSnapped, x, yAxisHeightSnapped);
-            }
-        }
+    private static double snap(final double value) {
+        return (int) value + 0.5;
     }
 
 }

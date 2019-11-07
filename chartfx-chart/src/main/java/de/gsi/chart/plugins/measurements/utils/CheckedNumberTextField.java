@@ -22,7 +22,8 @@ public class CheckedNumberTextField extends TextField {
 
         final ValidationSupport support = new ValidationSupport();
         final Validator<String> validator = (final Control control, final String value) -> {
-            final boolean condition = value == null || !(value.matches(CheckedNumberTextField.NUMBER_REGEX) || CheckedNumberTextField.isNumberInfinity(value));
+            final boolean condition = value == null || !(value.matches(CheckedNumberTextField.NUMBER_REGEX)
+                    || CheckedNumberTextField.isNumberInfinity(value));
 
             // change text colour depending on validity as a number
             setStyle(condition ? "-fx-text-inner-color: red;" : "-fx-text-inner-color: black;");

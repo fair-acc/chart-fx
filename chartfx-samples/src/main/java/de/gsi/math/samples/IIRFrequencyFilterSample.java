@@ -51,19 +51,6 @@ public class IIRFrequencyFilterSample extends AbstractDemoApplication {
         return flowPane;
     }
 
-    private static DataSet2D generateDemoDataSet() {
-        // generate some random samples
-        final double[] xValues = new double[N_SAMPLES];
-        final double[] yValues = new double[N_SAMPLES];
-        double fs = N_SAMPLE_RATE;
-        for (int i = 0; i < N_SAMPLES; i++) {
-            xValues[i] = i / fs;
-            // yValues[i] = i < N_SAMPLES / 2 ? 0.0 : 1.0; // step
-        }
-        yValues[N_SAMPLES / 2] = 0.5 * N_SAMPLES; // dirac delta
-        return new DefaultDataSet("dirac", xValues, yValues, xValues.length, true);
-    }
-
     private DemoChart getDemoChart(final String title) {
         final DemoChart defaultChart = new DemoChart();
         defaultChart.setTitle(title);
@@ -78,23 +65,23 @@ public class IIRFrequencyFilterSample extends AbstractDemoApplication {
         return defaultChart;
     }
 
-    private DemoChart getDemoChartButterworth() {
-        final String filterType = "Butterworth - " + "(" + ORDER + "th-order)";
+    private DemoChart getDemoChartBessel() {
+        final String filterType = "Bessel - " + "(" + ORDER + "th-order)";
         DefaultDataSet lowPass = new DefaultDataSet(LOW_PASS);
         DefaultDataSet highPass = new DefaultDataSet(HIGH_PASS);
         DefaultDataSet bandPass = new DefaultDataSet(BAND_PASS);
         DefaultDataSet bandStop = new DefaultDataSet(BAND_STOP);
 
-        final Butterworth iirLowPass = new Butterworth();
+        final Bessel iirLowPass = new Bessel();
         iirLowPass.lowPass(ORDER, 1.0, F_CUT_HIGH);
 
-        final Butterworth iirHighPass = new Butterworth();
+        final Bessel iirHighPass = new Bessel();
         iirHighPass.highPass(ORDER, 1.0, F_CUT_LOW);
 
-        final Butterworth iirBandPass = new Butterworth();
+        final Bessel iirBandPass = new Bessel();
         iirBandPass.bandPass(ORDER, 1.0, 0.5 * (F_CUT_LOW + F_CUT_HIGH), (F_CUT_HIGH - F_CUT_LOW));
 
-        final Butterworth iirBandStop = new Butterworth();
+        final Bessel iirBandStop = new Bessel();
         iirBandStop.bandStop(ORDER, 1.0, 0.5 * (F_CUT_LOW + F_CUT_HIGH), (F_CUT_HIGH - F_CUT_LOW));
 
         for (int i = 0; i < demoDataSet.getDataCount(); i++) {
@@ -115,23 +102,23 @@ public class IIRFrequencyFilterSample extends AbstractDemoApplication {
         return chart;
     }
 
-    private DemoChart getDemoChartBessel() {
-        final String filterType = "Bessel - " + "(" + ORDER + "th-order)";
+    private DemoChart getDemoChartButterworth() {
+        final String filterType = "Butterworth - " + "(" + ORDER + "th-order)";
         DefaultDataSet lowPass = new DefaultDataSet(LOW_PASS);
         DefaultDataSet highPass = new DefaultDataSet(HIGH_PASS);
         DefaultDataSet bandPass = new DefaultDataSet(BAND_PASS);
         DefaultDataSet bandStop = new DefaultDataSet(BAND_STOP);
 
-        final Bessel iirLowPass = new Bessel();
+        final Butterworth iirLowPass = new Butterworth();
         iirLowPass.lowPass(ORDER, 1.0, F_CUT_HIGH);
 
-        final Bessel iirHighPass = new Bessel();
+        final Butterworth iirHighPass = new Butterworth();
         iirHighPass.highPass(ORDER, 1.0, F_CUT_LOW);
 
-        final Bessel iirBandPass = new Bessel();
+        final Butterworth iirBandPass = new Butterworth();
         iirBandPass.bandPass(ORDER, 1.0, 0.5 * (F_CUT_LOW + F_CUT_HIGH), (F_CUT_HIGH - F_CUT_LOW));
 
-        final Bessel iirBandStop = new Bessel();
+        final Butterworth iirBandStop = new Butterworth();
         iirBandStop.bandStop(ORDER, 1.0, 0.5 * (F_CUT_LOW + F_CUT_HIGH), (F_CUT_HIGH - F_CUT_LOW));
 
         for (int i = 0; i < demoDataSet.getDataCount(); i++) {
@@ -230,6 +217,19 @@ public class IIRFrequencyFilterSample extends AbstractDemoApplication {
                 DataSetMath.normalisedMagnitudeSpectrumDecibel(bandPass),
                 DataSetMath.normalisedMagnitudeSpectrumDecibel(bandStop));
         return chart;
+    }
+
+    private static DataSet2D generateDemoDataSet() {
+        // generate some random samples
+        final double[] xValues = new double[N_SAMPLES];
+        final double[] yValues = new double[N_SAMPLES];
+        double fs = N_SAMPLE_RATE;
+        for (int i = 0; i < N_SAMPLES; i++) {
+            xValues[i] = i / fs;
+            // yValues[i] = i < N_SAMPLES / 2 ? 0.0 : 1.0; // step
+        }
+        yValues[N_SAMPLES / 2] = 0.5 * N_SAMPLES; // dirac delta
+        return new DefaultDataSet("dirac", xValues, yValues, xValues.length, true);
     }
 
     public static void main(final String[] args) {

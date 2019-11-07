@@ -23,9 +23,8 @@ import javafx.scene.Node;
 import javafx.scene.control.Label;
 
 /**
- * Base class for plugins indicating a specific value or range of values on a
- * {@link Chart} with an optional {@link #textProperty() text label}
- * description.
+ * Base class for plugins indicating a specific value or range of values on a {@link Chart} with an optional
+ * {@link #textProperty() text label} description.
  *
  * @author mhrabia
  */
@@ -43,14 +42,34 @@ public abstract class AbstractValueIndicator extends ChartPlugin {
     /* Difference between the mouse press position and the indicators center */
     protected final Delta dragDelta = new Delta();
 
+    protected final BooleanProperty editableIndicator = new SimpleBooleanProperty(this, "editableIndicator", true) {
+        @Override
+        protected void invalidated() {
+            layoutChildren();
+        }
+    };
+
+    private final ObjectProperty<HPos> labelHorizontalAnchor = new SimpleObjectProperty<HPos>(this,
+            "labelHorizontalAnchor", HPos.CENTER) {
+        @Override
+        protected void invalidated() {
+            layoutChildren();
+        }
+    };
+
+    private final ObjectProperty<VPos> labelVerticalAnchor = new SimpleObjectProperty<VPos>(this, "labelVerticalAnchor",
+            VPos.CENTER) {
+        @Override
+        protected void invalidated() {
+            layoutChildren();
+        }
+    };
+
     /**
      * Creates a new instance of the indicator.
      *
-     * @param axis
-     *            the axis this indicator is associated with
-     * @param text
-     *            the text to be shown by the label. Value of
-     *            {@link #textProperty()}.
+     * @param axis the axis this indicator is associated with
+     * @param text the text to be shown by the label. Value of {@link #textProperty()}.
      */
     protected AbstractValueIndicator(Axis axis, final String text) {
         super();
@@ -62,9 +81,8 @@ public abstract class AbstractValueIndicator extends ChartPlugin {
 
         label.setOnMousePressed(mouseEvent -> {
             /*
-             * Record a delta distance for the drag and drop operation. PROBLEM:
-             * At this point, we need to know the relative position of the label
-             * with respect to the indicator value.
+             * Record a delta distance for the drag and drop operation. PROBLEM: At this point, we need to know the
+             * relative position of the label with respect to the indicator value.
              */
             Point2D c = label.sceneToLocal(mouseEvent.getSceneX(), mouseEvent.getSceneY());
             dragDelta.x = -(c.getX() + xOffset);
@@ -90,22 +108,22 @@ public abstract class AbstractValueIndicator extends ChartPlugin {
         textProperty().addListener((obs, oldText, newText) -> layoutChildren());
     }
 
-    private void updateMouseListener(final boolean state) {
-        if (state) {
-            label.setOnMouseReleased(mouseEvent -> label.setCursor(Cursor.HAND));
-            label.setOnMouseEntered(mouseEvent -> label.setCursor(Cursor.HAND));
-        } else {
-            label.setOnMouseReleased(null);
-            label.setOnMouseEntered(null);
+    private void addAxisListener() {
+        final Axis valueAxis = getNumericAxis();
+        valueAxis.minProperty().addListener(axisBoundsListener);
+        valueAxis.maxProperty().addListener(axisBoundsListener);
+    }
+
+    protected void addChildNodeIfNotPresent(final Node node) {
+        if (!getChartChildren().contains(node)) {
+            getChartChildren().add(node);
         }
     }
 
-    protected final BooleanProperty editableIndicator = new SimpleBooleanProperty(this, "editableIndicator", true) {
-        @Override
-        protected void invalidated() {
-            layoutChildren();
-        }
-    };
+    private void addPluginsListListener(final Chart chart) {
+        chart.getPlugins().addListener(pluginsListListener);
+        updateStyleClass();
+    }
 
     /**
      * whether this plugin is editable
@@ -114,56 +132,6 @@ public abstract class AbstractValueIndicator extends ChartPlugin {
      */
     public final BooleanProperty editableIndicatorProperty() {
         return editableIndicator;
-    }
-
-    /**
-     * @return whether this plugin is editable
-     */
-    public final boolean isEditable() {
-        return editableIndicatorProperty().get();
-    }
-
-    /**
-     * Sets the state whether this plugin is editable
-     *
-     * @param newState
-     *            true: edits are allowed
-     */
-    public final void setEditable(final boolean newState) {
-        editableIndicatorProperty().set(newState);
-    }
-
-    private void addAxisListener() {
-        final Axis valueAxis = getNumericAxis();
-        valueAxis.minProperty().addListener(axisBoundsListener);
-        valueAxis.maxProperty().addListener(axisBoundsListener);
-    }
-
-    private void removeAxisListener() {
-        final Axis valueAxis = getNumericAxis();
-        valueAxis.minProperty().removeListener(axisBoundsListener);
-        valueAxis.maxProperty().removeListener(axisBoundsListener);
-    }
-
-    private void addPluginsListListener(final Chart chart) {
-        chart.getPlugins().addListener(pluginsListListener);
-        updateStyleClass();
-    }
-
-    private void removePluginsListListener(final Chart chart) {
-        chart.getPlugins().removeListener(pluginsListListener);
-    }
-
-    /**
-     * There might be several instances of a given indicator class. If one wants
-     * to specify different CSS for each instance - we need a unique class name
-     * for each, so whenever the list of plugins changes, this method should
-     * update name of it's CSS class.
-     */
-    public abstract void updateStyleClass();
-
-    public void setStyleClasses(final Node node, final String prefix, final String root) {
-        node.getStyleClass().setAll(root, prefix + root, prefix + root + getIndicatorInstanceIndex());
     }
 
     private int getIndicatorInstanceIndex() {
@@ -184,106 +152,12 @@ public abstract class AbstractValueIndicator extends ChartPlugin {
     }
 
     /**
-     * Returns the ValueAxis that this indicator is associated with.
-     *
-     * @return associated ValueAxis
-     */
-    protected Axis getNumericAxis() {
-        return axis;
-    }
-
-    /**
-     * Text to be displayed by the label. If set to {@code null}, the label is
-     * not shown.
-     *
-     * @return text of the indicator's label
-     */
-    public final StringProperty textProperty() {
-        return label.textProperty();
-    }
-
-    /**
-     * Returns the value of the {@link #textProperty()}.
-     *
-     * @return text displayed within or next to the indicator
-     */
-    public final String getText() {
-        return textProperty().get();
-    }
-
-    /**
-     * Sets the value of the {@link #textProperty()}.
-     *
-     * @param text
-     *            the new text. If {@code null}, the label will be hidden.
-     */
-    public final void setText(final String text) {
-        textProperty().set(text);
-    }
-
-    private final ObjectProperty<HPos> labelHorizontalAnchor = new SimpleObjectProperty<HPos>(this,
-            "labelHorizontalAnchor", HPos.CENTER) {
-        @Override
-        protected void invalidated() {
-            layoutChildren();
-        }
-    };
-
-    /**
-     * Specifies anchor of the {@link #textProperty() text label} with respect
-     * to the horizontal label position i.e. it describes whether the position
-     * is related to the LEFT, CENTER or RIGHT side of the label. The position
-     * itself should be specified by the extending classes.
-     * <p>
-     * <b>Default value: {@link HPos#CENTER}</b>
-     * </p>
-     *
-     * @return labelHorizontalAnchor property
-     */
-    public final ObjectProperty<HPos> labelHorizontalAnchorProperty() {
-        return labelHorizontalAnchor;
-    }
-
-    /**
      * Returns the value of the {@link #labelHorizontalAnchorProperty()}.
      *
      * @return value of the labelHorizontalAnchor property
      */
     public final HPos getLabelHorizontalAnchor() {
         return labelHorizontalAnchorProperty().get();
-    }
-
-    /**
-     * Sets the value of the {@link #labelHorizontalAnchorProperty()}.
-     *
-     * @param anchor
-     *            new anchor
-     */
-    public final void setLabelHorizontalAnchor(final HPos anchor) {
-        labelHorizontalAnchorProperty().set(anchor);
-    }
-
-    private final ObjectProperty<VPos> labelVerticalAnchor = new SimpleObjectProperty<VPos>(this, "labelVerticalAnchor",
-            VPos.CENTER) {
-        @Override
-        protected void invalidated() {
-            layoutChildren();
-        }
-    };
-
-    /**
-     * Specifies anchor of the {@link #textProperty() text label} with respect
-     * to the vertical label position i.e. it describes whether the position is
-     * related to the TOP, CENTER, BASELINE or BOTTOM of of the label. The
-     * position itself should be specified by the extending classes.
-     * <p>
-     * <b>Default value: {@link VPos#CENTER}</b>
-     * </p>
-     *
-     * @return labelVerticalAnchor property
-     */
-    public final ObjectProperty<VPos> labelVerticalAnchorProperty() {
-        return labelVerticalAnchor;
     }
 
     /**
@@ -296,30 +170,65 @@ public abstract class AbstractValueIndicator extends ChartPlugin {
     }
 
     /**
-     * Sets the value of the {@link #labelVerticalAnchorProperty()}.
+     * Returns the ValueAxis that this indicator is associated with.
      *
-     * @param anchor
-     *            new anchor
+     * @return associated ValueAxis
      */
-    public final void setLabelVerticalAnchor(final VPos anchor) {
-        labelVerticalAnchorProperty().set(anchor);
+    protected Axis getNumericAxis() {
+        return axis;
     }
 
     /**
-     * Layouts the label within specified bounds and given horizontal and
-     * vertical position, taking into account
-     * {@link #labelHorizontalAnchorProperty() horizontal} and
-     * {@link #labelVerticalAnchorProperty() vertical} anchor.
+     * Returns the value of the {@link #textProperty()}.
      *
-     * @param bounds
-     *            the bounding rectangle with respect to which the label should
-     *            be positioned
-     * @param hPos
-     *            relative [0, 1] horizontal position of the label within the
-     *            bounds
-     * @param vPos
-     *            relative [0, 1] vertical position of the label within the
-     *            bounds
+     * @return text displayed within or next to the indicator
+     */
+    public final String getText() {
+        return textProperty().get();
+    }
+
+    /**
+     * @return whether this plugin is editable
+     */
+    public final boolean isEditable() {
+        return editableIndicatorProperty().get();
+    }
+
+    /**
+     * Specifies anchor of the {@link #textProperty() text label} with respect to the horizontal label position i.e. it
+     * describes whether the position is related to the LEFT, CENTER or RIGHT side of the label. The position itself
+     * should be specified by the extending classes.
+     * <p>
+     * <b>Default value: {@link HPos#CENTER}</b>
+     * </p>
+     *
+     * @return labelHorizontalAnchor property
+     */
+    public final ObjectProperty<HPos> labelHorizontalAnchorProperty() {
+        return labelHorizontalAnchor;
+    }
+
+    /**
+     * Specifies anchor of the {@link #textProperty() text label} with respect to the vertical label position i.e. it
+     * describes whether the position is related to the TOP, CENTER, BASELINE or BOTTOM of of the label. The position
+     * itself should be specified by the extending classes.
+     * <p>
+     * <b>Default value: {@link VPos#CENTER}</b>
+     * </p>
+     *
+     * @return labelVerticalAnchor property
+     */
+    public final ObjectProperty<VPos> labelVerticalAnchorProperty() {
+        return labelVerticalAnchor;
+    }
+
+    /**
+     * Layouts the label within specified bounds and given horizontal and vertical position, taking into account
+     * {@link #labelHorizontalAnchorProperty() horizontal} and {@link #labelVerticalAnchorProperty() vertical} anchor.
+     *
+     * @param bounds the bounding rectangle with respect to which the label should be positioned
+     * @param hPos relative [0, 1] horizontal position of the label within the bounds
+     * @param vPos relative [0, 1] vertical position of the label within the bounds
      */
     protected final void layoutLabel(final Bounds bounds, final double hPos, final double vPos) {
         if (label.getText() == null || label.getText().isEmpty()) {
@@ -354,11 +263,81 @@ public abstract class AbstractValueIndicator extends ChartPlugin {
         addChildNodeIfNotPresent(label);
     }
 
-    protected void addChildNodeIfNotPresent(final Node node) {
-        if (!getChartChildren().contains(node)) {
-            getChartChildren().add(node);
+    private void removeAxisListener() {
+        final Axis valueAxis = getNumericAxis();
+        valueAxis.minProperty().removeListener(axisBoundsListener);
+        valueAxis.maxProperty().removeListener(axisBoundsListener);
+    }
+
+    private void removePluginsListListener(final Chart chart) {
+        chart.getPlugins().removeListener(pluginsListListener);
+    }
+
+    /**
+     * Sets the state whether this plugin is editable
+     *
+     * @param newState true: edits are allowed
+     */
+    public final void setEditable(final boolean newState) {
+        editableIndicatorProperty().set(newState);
+    }
+
+    /**
+     * Sets the value of the {@link #labelHorizontalAnchorProperty()}.
+     *
+     * @param anchor new anchor
+     */
+    public final void setLabelHorizontalAnchor(final HPos anchor) {
+        labelHorizontalAnchorProperty().set(anchor);
+    }
+
+    /**
+     * Sets the value of the {@link #labelVerticalAnchorProperty()}.
+     *
+     * @param anchor new anchor
+     */
+    public final void setLabelVerticalAnchor(final VPos anchor) {
+        labelVerticalAnchorProperty().set(anchor);
+    }
+
+    public void setStyleClasses(final Node node, final String prefix, final String root) {
+        node.getStyleClass().setAll(root, prefix + root, prefix + root + getIndicatorInstanceIndex());
+    }
+
+    /**
+     * Sets the value of the {@link #textProperty()}.
+     *
+     * @param text the new text. If {@code null}, the label will be hidden.
+     */
+    public final void setText(final String text) {
+        textProperty().set(text);
+    }
+
+    /**
+     * Text to be displayed by the label. If set to {@code null}, the label is not shown.
+     *
+     * @return text of the indicator's label
+     */
+    public final StringProperty textProperty() {
+        return label.textProperty();
+    }
+
+    private void updateMouseListener(final boolean state) {
+        if (state) {
+            label.setOnMouseReleased(mouseEvent -> label.setCursor(Cursor.HAND));
+            label.setOnMouseEntered(mouseEvent -> label.setCursor(Cursor.HAND));
+        } else {
+            label.setOnMouseReleased(null);
+            label.setOnMouseEntered(null);
         }
     }
+
+    /**
+     * There might be several instances of a given indicator class. If one wants to specify different CSS for each
+     * instance - we need a unique class name for each, so whenever the list of plugins changes, this method should
+     * update name of it's CSS class.
+     */
+    public abstract void updateStyleClass();
 
     // records relative x and y co-ordinates.
     protected class Delta {

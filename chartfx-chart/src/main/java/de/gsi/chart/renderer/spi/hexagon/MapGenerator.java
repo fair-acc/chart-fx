@@ -19,6 +19,7 @@ class MapGenerator {
 
     /**
      * The image proportions are maintained, therefore only the desired width is specified.
+     * 
      * @param map global hex map
      * @param image source image
      * @param mapWidthInHexes desired map width in hex grid quantas
@@ -29,27 +30,14 @@ class MapGenerator {
         mapWidth = mapWidthInHexes;
     }
 
-    public Optional<Double> getHorizontalRelation() {
-        return horizontalRelation == null ? Optional.empty() : Optional.of(horizontalRelation);
-    }
-
-
-    public Optional<Double> getVerticalRelation() {
-        return verticalRelation == null ? Optional.empty() : Optional.of(verticalRelation);
-    }
-
     /**
      * You will have to supply an object that will create the Hexagons as you like. E.g.
      * <p>
      * class HexagonCreator implements IHexagonCreator {
      *
      * @param creator the object that will actually create the Hexagon.
-     * @Override public void createHexagon(GridPosition position, javafx.scene.paint.Color color) {
-     * Hexagon h = new Hexagon(position, 20, 0, 0);
-     * h.setBackgroundColor(color);
-     * map.addHexagon(h);
-     * }
-     * }
+     * @Override public void createHexagon(GridPosition position, javafx.scene.paint.Color color) { Hexagon h = new
+     *           Hexagon(position, 20, 0, 0); h.setBackgroundColor(color); map.addHexagon(h); } }
      */
     public void generate(IHexagonCreator creator) {
         final PixelReader pr = image.getPixelReader();
@@ -59,9 +47,12 @@ class MapGenerator {
         horizontalRelation = imageWidth / hexagonMapWidthInPixels;
         final double estimatedHexagonMapHeightInPixels = imageHeight / horizontalRelation;
 
-        final int mapHeight = (int) (estimatedHexagonMapHeightInPixels / map.getGraphicsverticalDistanceBetweenHexagons());
-        verticalRelation = imageHeight / (map.getGraphicsverticalDistanceBetweenHexagons() * mapHeight + map.getGraphicsHexagonHeight() / 2);
-        // Not really sure about the last part but it seems to work. And should I make the corresponding correction on the horizontalRelation ?
+        final int mapHeight = (int) (estimatedHexagonMapHeightInPixels
+                / map.getGraphicsverticalDistanceBetweenHexagons());
+        verticalRelation = imageHeight
+                / (map.getGraphicsverticalDistanceBetweenHexagons() * mapHeight + map.getGraphicsHexagonHeight() / 2);
+        // Not really sure about the last part but it seems to work. And should I make the corresponding correction on
+        // the horizontalRelation ?
 
         for (int x = 0; x < mapWidth; x++) {
             for (int y = 0; y < mapHeight; y++) {
@@ -75,5 +66,13 @@ class MapGenerator {
                 creator.createHexagon(axialQ, axialR, pixelColor, map);
             }
         }
+    }
+
+    public Optional<Double> getHorizontalRelation() {
+        return horizontalRelation == null ? Optional.empty() : Optional.of(horizontalRelation);
+    }
+
+    public Optional<Double> getVerticalRelation() {
+        return verticalRelation == null ? Optional.empty() : Optional.of(verticalRelation);
     }
 }

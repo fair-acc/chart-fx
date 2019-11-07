@@ -67,8 +67,8 @@ public class EEMD {
                         break;
                     }
 
-                    //                        System.err.printf("extrema %d vs. %d zero-crossings = %d vs (%d)\n", spmax[0].length,
-                    //                                spmin[0].length, ncrossing, nextrema);
+                    // System.err.printf("extrema %d vs. %d zero-crossings = %d vs (%d)\n", spmax[0].length,
+                    // spmin[0].length, ncrossing, nextrema);
 
                     final Spline upper = new Spline(spmax[0], spmax[1]);
                     final Spline lower = new Spline(spmin[0], spmin[1]);
@@ -139,6 +139,102 @@ public class EEMD {
         allmode.times(Ystd);
 
         return mode;
+    }
+
+    /**
+     * EMD spectrum implementation
+     * 
+     * @param data input data
+     * @param nQuantx quantisation in X
+     * @param nQuanty quantisation in Y
+     *
+     * @return the complex HHT spectrum
+     */
+    public synchronized DataSet3D getScalogram(final double[] data, final int nQuantx, final int nQuanty) {
+        // create and return data set.
+        fstatus = 0;
+        final int nsamples = data.length;
+        final double[] time = new double[nsamples];
+        final double[] frequency = new double[nsamples / 2];
+
+        for (int i = 0; i < nsamples; i++) {
+            time[i] = i;
+        }
+
+        for (int i = 0; i < nsamples / 2; i++) {
+            frequency[i] = (double) i / (double) nsamples;
+        }
+
+        final DoubleDataSet3D ds = new DoubleDataSet3D("HilbertSpectrum");
+        ds.set(time, frequency, getSpectrumArray(data, nQuantx, nQuanty));
+
+        fstatus = 100;
+        return ds;
+    }
+
+    public double[][] getSpectrumArray(final double[] data, final int nQuantx, final int Quanty) {
+        final int nsamples = data.length;
+        // required index[yrange][xrange]
+        final double[][] ret = new double[nsamples / 2][nsamples];
+        for (int i = 0; i < nsamples / 2; i++) {
+            for (int j = 0; j < nsamples; j++) {
+                ret[i][j] = Double.NaN;
+            }
+        }
+
+        final HilbertTransform hilbert = new HilbertTransform();
+        final MatrixD emd = eemd(data, 0, 1.0);
+        final double[] mode = new double[nsamples];
+        final int nmodes = emd.getColumnDimension() - 1;
+        for (int nmode = 1; nmode < nmodes; nmode++) {
+            for (int j = 0; j < nsamples; j++) {
+                mode[j] = emd.get(j, nmode);
+            }
+            final Convolution decon = new Convolution();
+            final double[] lowPass = Convolution.getLowPassFilter(ConcurrencyUtils.nextPow2(3 * nsamples), 0.3);
+            final double[] amplitude = hilbert.computeInstantaneousAmplitude(mode);
+            final double[] frequency = hilbert.computeInstantaneousFrequency(mode);
+            final double[] amplitude_filtered = decon.transform(amplitude, lowPass, false);
+            final double[] frequency_filtered = decon.transform(frequency, lowPass, false);
+
+            for (int j = 0; j < nsamples; j++) {
+
+                if (j < nsamples) {
+
+                    int yIndex = (int) (frequency_filtered[j] * nsamples);
+
+                    if (yIndex < 0) {
+                        yIndex = 0;
+                    } else if (yIndex >= nsamples / 2) {
+                        yIndex = nsamples / 2 - 1;
+                    }
+
+                    // ret[j][y_index] = Math.log(amplitude);
+                    ret[yIndex][j] = 10 * Math.log(amplitude_filtered[j]);
+                    if (ret[yIndex][j] < -10 || ret[yIndex][j] > 10) {
+                        ret[yIndex][j] = Double.NaN;
+                        // ret[j][y_index] = TMath.Sqr(amplitude);
+                    }
+                }
+            }
+
+        }
+
+        return ret;
+    }
+
+    /**
+     * @return progress of pending calculations in percent
+     */
+    public int getStatus() {
+        return fstatus;
+    }
+
+    /**
+     * @return whether class is busy computing a spectra
+     */
+    public boolean isBusy() {
+        return fstatus < 100 ? true : false;
     }
 
     public static int computeZeroCrossings(final double[] data) {
@@ -237,100 +333,5 @@ public class EEMD {
         flag = 1;
 
         return flag;
-    }
-
-    public double[][] getSpectrumArray(final double[] data, final int nQuantx, final int Quanty) {
-        final int nsamples = data.length;
-        // required index[yrange][xrange]
-        final double[][] ret = new double[nsamples / 2][nsamples];
-        for (int i = 0; i < nsamples / 2; i++) {
-            for (int j = 0; j < nsamples; j++) {
-                ret[i][j] = Double.NaN;
-            }
-        }
-
-        final HilbertTransform hilbert = new HilbertTransform();
-        final MatrixD emd = eemd(data, 0, 1.0);
-        final double[] mode = new double[nsamples];
-        final int nmodes = emd.getColumnDimension() - 1;
-        for (int nmode = 1; nmode < nmodes; nmode++) {
-            for (int j = 0; j < nsamples; j++) {
-                mode[j] = emd.get(j, nmode);
-            }
-            final Convolution decon = new Convolution();
-            final double[] lowPass = Convolution.getLowPassFilter(ConcurrencyUtils.nextPow2(3 * nsamples), 0.3);
-            final double[] amplitude = hilbert.computeInstantaneousAmplitude(mode);
-            final double[] frequency = hilbert.computeInstantaneousFrequency(mode);
-            final double[] amplitude_filtered = decon.transform(amplitude, lowPass, false);
-            final double[] frequency_filtered = decon.transform(frequency, lowPass, false);
-
-            for (int j = 0; j < nsamples; j++) {
-
-                if (j < nsamples) {
-
-                    int yIndex = (int) (frequency_filtered[j] * nsamples);
-
-                    if (yIndex < 0) {
-                        yIndex = 0;
-                    } else if (yIndex >= nsamples / 2) {
-                        yIndex = nsamples / 2 - 1;
-                    }
-
-                    // ret[j][y_index] = Math.log(amplitude);
-                    ret[yIndex][j] = 10 * Math.log(amplitude_filtered[j]);
-                    if (ret[yIndex][j] < -10 || ret[yIndex][j] > 10) {
-                        ret[yIndex][j] = Double.NaN;
-                        // ret[j][y_index] = TMath.Sqr(amplitude);
-                    }
-                }
-            }
-
-        }
-
-        return ret;
-    }
-
-    /**
-     * EMD spectrum implementation
-     * @param data input data
-     * @param nQuantx quantisation in X
-     * @param nQuanty quantisation in Y
-     *
-     * @return the complex HHT spectrum
-     */
-    public synchronized DataSet3D getScalogram(final double[] data, final int nQuantx, final int nQuanty) {
-        // create and return data set.
-        fstatus = 0;
-        final int nsamples = data.length;
-        final double[] time = new double[nsamples];
-        final double[] frequency = new double[nsamples / 2];
-
-        for (int i = 0; i < nsamples; i++) {
-            time[i] = i;
-        }
-
-        for (int i = 0; i < nsamples / 2; i++) {
-            frequency[i] = (double) i / (double) nsamples;
-        }
-
-        final DoubleDataSet3D ds = new DoubleDataSet3D("HilbertSpectrum");
-        ds.set(time, frequency, getSpectrumArray(data, nQuantx, nQuanty));
-
-        fstatus = 100;
-        return ds;
-    }
-
-    /**
-     * @return whether class is busy computing a spectra
-     */
-    public boolean isBusy() {
-        return fstatus < 100 ? true : false;
-    }
-
-    /**
-     * @return progress of pending calculations in percent
-     */
-    public int getStatus() {
-        return fstatus;
     }
 }

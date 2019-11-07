@@ -6,11 +6,11 @@ import java.util.List;
 
 import de.gsi.chart.Chart;
 import de.gsi.chart.axes.Axis;
+import de.gsi.chart.renderer.Renderer;
+import de.gsi.chart.ui.geometry.Side;
 import de.gsi.dataset.DataSet;
 import de.gsi.dataset.DataSetMetaData;
 import de.gsi.dataset.utils.ProcessingProfiler;
-import de.gsi.chart.renderer.Renderer;
-import de.gsi.chart.ui.geometry.Side;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -108,11 +108,52 @@ public class MetaDataRenderer extends AbstractMetaDataRendererParameter<MetaData
     public BooleanProperty drawOnCanvasProperty() {
         return drawOnCanvas;
     }
+
+    private List<String> extractMessages(List<DataSet> metaDataSets, boolean singleDS, MsgType msgType) {
+        final List<String> list = new ArrayList<>();
+
+        for (final DataSet dataSet : metaDataSets) {
+            if (!(dataSet instanceof DataSetMetaData)) {
+                continue;
+            }
+            final String dataSetName = dataSet.getName();
+            final DataSetMetaData metaData = (DataSetMetaData) dataSet;
+
+            List<String> msg;
+            switch (msgType) {
+            case ERROR:
+                msg = metaData.getErrorList();
+                break;
+            case WARNING:
+                msg = metaData.getWarningList();
+                break;
+            case INFO:
+            default:
+                msg = metaData.getInfoList();
+                break;
+            }
+
+            for (final String info : msg) {
+                if (singleDS) {
+                    // just one applicable data set
+                    list.add(info);
+                } else {
+                    // if duplicates, then add list with
+                    // 'InfoMsg(DataSet::Name)'
+                    list.add(info + " (" + dataSetName + ")");
+                }
+            }
+        }
+
+        return list;
+    }
+
     @Override
     public ObservableList<Axis> getAxes() {
-    	// regenerate list... this renderer does not need to keep track of axes
+        // regenerate list... this renderer does not need to keep track of axes
         return FXCollections.observableArrayList();
     }
+
     public BorderPane getBorderPaneOnCanvas() {
         return borderPane;
     }
@@ -127,6 +168,18 @@ public class MetaDataRenderer extends AbstractMetaDataRendererParameter<MetaData
         return FXCollections.observableArrayList();
     }
 
+    protected List<DataSet> getDataSetsWithMetaData(List<DataSet> dataSets) {
+        final List<DataSet> list = new ArrayList<>();
+        for (final DataSet dataSet : dataSets) {
+            if (!(dataSet instanceof DataSetMetaData)) {
+                continue;
+            }
+            list.add(dataSet);
+        }
+
+        return list;
+    }
+
     /**
      *
      * @return box that is being filled with Error messages
@@ -134,6 +187,8 @@ public class MetaDataRenderer extends AbstractMetaDataRendererParameter<MetaData
     public HBox getErrorBox() {
         return errorBox;
     }
+
+    // ******************************* class specific properties **********
 
     /**
      *
@@ -152,14 +207,17 @@ public class MetaDataRenderer extends AbstractMetaDataRendererParameter<MetaData
         return infoBoxSideProperty().get();
     }
 
-    // ******************************* class specific properties **********
-
     /**
      *
      * @return FlowPane containing the Info-, Warning- and Error-Boxes
      */
     public FlowPane getMessageBox() {
         return messageBox;
+    }
+
+    @Override
+    protected MetaDataRenderer getThis() {
+        return this;
     }
 
     /**
@@ -253,8 +311,7 @@ public class MetaDataRenderer extends AbstractMetaDataRendererParameter<MetaData
     /**
      * whether renderer should draw info box in Side side, ...
      *
-     * @param side
-     *            the side to draw
+     * @param side the side to draw
      * @return itself (fluent design)
      */
     public final MetaDataRenderer setInfoBoxSide(final Side side) {
@@ -275,62 +332,6 @@ public class MetaDataRenderer extends AbstractMetaDataRendererParameter<MetaData
     @Override
     public BooleanProperty showInLegendProperty() {
         return null;
-    }
-
-    private List<String> extractMessages(List<DataSet> metaDataSets, boolean singleDS, MsgType msgType) {
-        final List<String> list = new ArrayList<>();
-
-        for (final DataSet dataSet : metaDataSets) {
-            if (!(dataSet instanceof DataSetMetaData)) {
-                continue;
-            }
-            final String dataSetName = dataSet.getName();
-            final DataSetMetaData metaData = (DataSetMetaData) dataSet;
-
-            List<String> msg;
-            switch (msgType) {
-            case ERROR:
-                msg = metaData.getErrorList();
-                break;
-            case WARNING:
-                msg = metaData.getWarningList();
-                break;
-            case INFO:
-            default:
-                msg = metaData.getInfoList();
-                break;
-            }
-
-            for (final String info : msg) {
-                if (singleDS) {
-                    // just one applicable data set
-                    list.add(info);
-                } else {
-                    // if duplicates, then add list with
-                    // 'InfoMsg(DataSet::Name)'
-                    list.add(info + " (" + dataSetName + ")");
-                }
-            }
-        }
-
-        return list;
-    }
-
-    protected List<DataSet> getDataSetsWithMetaData(List<DataSet> dataSets) {
-        final List<DataSet> list = new ArrayList<>();
-        for (final DataSet dataSet : dataSets) {
-            if (!(dataSet instanceof DataSetMetaData)) {
-                continue;
-            }
-            list.add(dataSet);
-        }
-
-        return list;
-    }
-
-    @Override
-    protected MetaDataRenderer getThis() {
-        return this;
     }
 
     protected void updateInfoBoxLocation() {
@@ -372,21 +373,6 @@ public class MetaDataRenderer extends AbstractMetaDataRendererParameter<MetaData
         // chart.requestLayout();
     }
 
-    protected class MetaLabel extends Label {
-
-        public MetaLabel(final String text) {
-            super(text);
-            setMouseTransparent(true);
-            setMinSize(100, 20);
-            setCache(true);
-        }
-
-    }
-
-    protected enum MsgType {
-        INFO, WARNING, ERROR;
-    }
-
     class InfoHBox extends HBox {
         public InfoHBox() {
             super();
@@ -405,5 +391,20 @@ public class MetaDataRenderer extends AbstractMetaDataRendererParameter<MetaData
                 }
             });
         }
+    }
+
+    protected class MetaLabel extends Label {
+
+        public MetaLabel(final String text) {
+            super(text);
+            setMouseTransparent(true);
+            setMinSize(100, 20);
+            setCache(true);
+        }
+
+    }
+
+    protected enum MsgType {
+        INFO, WARNING, ERROR;
     }
 }

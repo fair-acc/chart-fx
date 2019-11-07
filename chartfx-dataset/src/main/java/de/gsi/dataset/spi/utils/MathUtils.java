@@ -1,8 +1,7 @@
 package de.gsi.dataset.spi.utils;
 
 /**
- * small helper class from:
- * https://floating-point-gui.de/errors/NearlyEqualsTest.java
+ * small helper class from: https://floating-point-gui.de/errors/NearlyEqualsTest.java
  * 
  * @author Michael Borgwardt
  */
@@ -31,7 +30,7 @@ public class MathUtils {
     public static boolean nearlyEqual(float a, float b) {
         return nearlyEqual(a, b, 0.00001f);
     }
-    
+
     public static boolean nearlyEqual(float a, float b, float epsilon) {
         final float absA = Math.abs(a);
         final float absB = Math.abs(b);

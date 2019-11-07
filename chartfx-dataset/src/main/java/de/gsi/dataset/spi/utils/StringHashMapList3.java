@@ -1,15 +1,15 @@
 package de.gsi.dataset.spi.utils;
 
 public class StringHashMapList3 extends IntStringMap {
-	private static final long PARALLELISM_THRESHOLD = 1000;
-	private static final int DEFAULT_SIZE = 1000;
-	private static final float DEFAULT_FILL_FACTOR = 0.1f;
+    private static final long PARALLELISM_THRESHOLD = 1000;
+    private static final int DEFAULT_SIZE = 1000;
+    private static final float DEFAULT_FILL_FACTOR = 0.1f;
 
-	public StringHashMapList3() {
-		super(DEFAULT_SIZE, DEFAULT_FILL_FACTOR);
-		// TODO Auto-generated constructor stub
-	}
-	
+    public StringHashMapList3() {
+        super(DEFAULT_SIZE, DEFAULT_FILL_FACTOR);
+        // TODO Auto-generated constructor stub
+    }
+
     /**
      * shift elements all keys from starting index until the last toIndex.
      *

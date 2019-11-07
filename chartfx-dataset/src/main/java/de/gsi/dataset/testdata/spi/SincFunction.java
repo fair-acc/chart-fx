@@ -1,8 +1,7 @@
 package de.gsi.dataset.testdata.spi;
 
 /**
- * abstract error data set for graphical testing purposes this implementation
- * generates a sinc function
+ * abstract error data set for graphical testing purposes this implementation generates a sinc function
  *
  * @author rstein
  */
@@ -11,10 +10,8 @@ public class SincFunction extends AbstractTestFunction<SincFunction> {
 
     /**
      * 
-     * @param name
-     *            data set name
-     * @param count
-     *            number of samples
+     * @param name data set name
+     * @param count number of samples
      */
     public SincFunction(final String name, final int count) {
         super(name, count);

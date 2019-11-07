@@ -31,6 +31,33 @@ public class BandPassTransform {
     private BandPassTransform() {
     }
 
+    private static ComplexPair transform(final Complex in, final double a, final double b) {
+        Complex c;
+        if (in.isInfinite()) {
+            return new ComplexPair(new Complex(-1), new Complex(1));
+        }
+
+        c = new Complex(1).add(in).divide(new Complex(1).subtract(in)); // bilinear
+
+        final double a2 = a * a;
+        final double b2 = b * b;
+        final double ab = a * b;
+        final double ab_2 = 2 * ab;
+        Complex v = new Complex(0).add(c.multiply(4 * (b2 * (a2 - 1) + 1)));
+        v = v.add(8 * (b2 * (a2 - 1) - 1));
+        v = v.multiply(c);
+        v = v.add(4 * (b2 * (a2 - 1) + 1));
+        v = v.sqrt();
+
+        Complex u = v.multiply(-1).add(c.multiply(ab_2)).add(ab_2);
+
+        v = v.add(c.multiply(ab_2)).add(ab_2);
+
+        Complex d = new Complex(0).add(c.multiply(2 * (b - 1))).add(2 * (1 + b));
+
+        return new ComplexPair(u.divide(d), v.divide(d));
+    }
+
     public static void transform(final double fc, final double fw, final LayoutBase digital, final LayoutBase analog) {
         double wc2;
         double wc;
@@ -77,33 +104,6 @@ public class BandPassTransform {
         final double wn = analog.getNormalW();
         digital.setNormal(2 * Math.atan(Math.sqrt(Math.tan((wc + wn) * 0.5) * Math.tan((wc2 + wn) * 0.5))),
                 analog.getNormalGain());
-    }
-
-    private static ComplexPair transform(final Complex in, final double a, final double b) {
-        Complex c;
-        if (in.isInfinite()) {
-            return new ComplexPair(new Complex(-1), new Complex(1));
-        }
-
-        c = new Complex(1).add(in).divide(new Complex(1).subtract(in)); // bilinear
-
-        final double a2 = a * a;
-        final double b2 = b * b;
-        final double ab = a * b;
-        final double ab_2 = 2 * ab;
-        Complex v = new Complex(0).add(c.multiply(4 * (b2 * (a2 - 1) + 1)));
-        v = v.add(8 * (b2 * (a2 - 1) - 1));
-        v = v.multiply(c);
-        v = v.add(4 * (b2 * (a2 - 1) + 1));
-        v = v.sqrt();
-
-        Complex u = v.multiply(-1).add(c.multiply(ab_2)).add(ab_2);
-
-        v = v.add(c.multiply(ab_2)).add(ab_2);
-
-        Complex d = new Complex(0).add(c.multiply(2 * (b - 1))).add(2 * (1 + b));
-
-        return new ComplexPair(u.divide(d), v.divide(d));
     }
 
 }

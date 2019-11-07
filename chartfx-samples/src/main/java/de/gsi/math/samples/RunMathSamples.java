@@ -21,7 +21,7 @@ import javafx.stage.Stage;
  * @author rstein
  */
 public class RunMathSamples extends Application {
-	private static final Logger LOGGER = LoggerFactory.getLogger(RunMathSamples.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(RunMathSamples.class);
     private static final int DEFAULT_DELAY = 2;
     private static final int DEFAULT_PERIOD = 5;
     private final String userHome = System.getProperty("user.home");
@@ -63,6 +63,14 @@ public class RunMathSamples extends Application {
         primaryStage.show();
     }
 
+    /**
+     * @param args the command line arguments
+     */
+    public static void main(final String[] args) {
+        Application.launch(args);
+
+    }
+
     protected class MyButton extends Button {
 
         public MyButton(final String buttonText, final Application run) {
@@ -81,37 +89,29 @@ public class RunMathSamples extends Application {
                                 try {
                                     Thread.sleep(2000);
                                     Platform.runLater(() -> {
-                                        LOGGER.atInfo().log(
-                                                "make screen shot to file of " + run.getClass().getSimpleName());
+                                        LOGGER.atInfo()
+                                                .log("make screen shot to file of " + run.getClass().getSimpleName());
                                         final PeriodicScreenCapture screenCapture = new PeriodicScreenCapture(path,
                                                 run.getClass().getSimpleName(), stage.getScene(), DEFAULT_DELAY,
                                                 DEFAULT_PERIOD, false);
                                         screenCapture.performScreenCapture();
                                     });
                                 } catch (final InterruptedException e) {
-                                	if (LOGGER.isErrorEnabled()) {
-                                		LOGGER.atError().setCause(e).log("InterruptedException");
-                                	}
+                                    if (LOGGER.isErrorEnabled()) {
+                                        LOGGER.atError().setCause(e).log("InterruptedException");
+                                    }
                                 }
                             }
                         }.start();
 
                     }
                 } catch (final Exception e1) {
-                	if (LOGGER.isErrorEnabled()) {
-                		LOGGER.atError().setCause(e1).log("InterruptedException");
-                	}
+                    if (LOGGER.isErrorEnabled()) {
+                        LOGGER.atError().setCause(e1).log("InterruptedException");
+                    }
                 }
 
             });
         }
-    }
-
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(final String[] args) {
-        Application.launch(args);
-
     }
 }

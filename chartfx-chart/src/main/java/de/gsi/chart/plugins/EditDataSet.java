@@ -156,69 +156,6 @@ public class EditDataSet extends TableViewer {
      */
     protected EventHandler<MouseEvent> dragHandler = this::performPointDrag;
 
-    public static boolean isShiftDown() {
-        return shiftDown;
-    }
-
-    public static boolean isControlDown() {
-        return controlDown;
-    }
-
-    /**
-     * Mouse cursor to be used during drag operation.
-     *
-     * @return the mouse cursor property
-     */
-    public final ObjectProperty<Cursor> dragCursorProperty() {
-        return dragCursor;
-    }
-
-    /**
-     * Sets value of the {@link #dragCursorProperty()}.
-     *
-     * @param cursor the cursor to be used by the plugin
-     */
-    public final void setDragCursor(final Cursor cursor) {
-        dragCursorProperty().set(cursor);
-    }
-
-    /**
-     * Returns the value of the {@link #dragCursorProperty()}
-     *
-     * @return the current cursor
-     */
-    public final Cursor getDragCursor() {
-        return dragCursorProperty().get();
-    }
-
-    /**
-     * @return whether points can be edited
-     */
-    public final ReadOnlyBooleanProperty editEnableProperty() {
-        return editEnable;
-    }
-
-    /**
-     * Returns the value of the {@link #editEnableProperty()}
-     * 
-     * @return true: can edit point
-     */
-    public final boolean isEditable() {
-        return editEnableProperty().get();
-    }
-
-    protected void installCursor() {
-        final Region chart = getChart();
-        originalCursor = chart.getCursor();
-        if (getDragCursor() != null) {
-            chart.setCursor(getDragCursor());
-        }
-    }
-
-    protected void uninstallCursor() {
-        getChart().setCursor(originalCursor);
-    }
-
     private final DoubleProperty pickingDistance = new SimpleDoubleProperty(this, "pickingDistance",
             DEFAULT_PICKING_DISTANCE) {
 
@@ -227,35 +164,6 @@ public class EditDataSet extends TableViewer {
             super.set(Math.max(1, newValue));
         }
     };
-
-    /**
-     * Distance of the mouse cursor from the data point (expressed in display
-     * units) that should trigger showing the tool tip. By default initialised
-     * to {@value #DEFAULT_PICKING_DISTANCE}.
-     *
-     * @return the picking distance property
-     */
-    public final DoubleProperty pickingDistanceProperty() {
-        return pickingDistance;
-    }
-
-    /**
-     * Returns the value of the {@link #pickingDistanceProperty()}.
-     *
-     * @return the current picking distance
-     */
-    public final double getPickingDistance() {
-        return pickingDistanceProperty().get();
-    }
-
-    /**
-     * Sets the value of {@link #pickingDistanceProperty()}.
-     *
-     * @param distance the new picking distance
-     */
-    public final void setPickingDistance(final double distance) {
-        pickingDistanceProperty().set(distance);
-    }
 
     public EditDataSet() {
         super();
@@ -291,16 +199,205 @@ public class EditDataSet extends TableViewer {
 
     }
 
-    private void registerMouseHandlers() {
-        registerInputEventHandler(MouseEvent.MOUSE_PRESSED, selectionStartHandler);
-        registerInputEventHandler(MouseEvent.MOUSE_DRAGGED, selectionDragHandler);
-        registerInputEventHandler(MouseEvent.MOUSE_RELEASED, selectionEndHandler);
+    protected void addPoint(final double x, final double y) {
+        if (!(getChart() instanceof XYChart)) {
+            return;
+        }
+        final XYChart xyChart = (XYChart) getChart();
+
+        // TODO: tidy up code and make it compatible with multiple renderer
+
+        // find data set closes to screen coordinate x & y
+        final Pane pane = getChart().getCanvasForeground();
+        final Bounds bounds = pane.getBoundsInLocal();
+        final Bounds screenBounds = pane.localToScreen(bounds);
+        final int x0 = (int) screenBounds.getMinX();
+        final int y0 = (int) screenBounds.getMinY();
+        final DataPoint dataPoint = findNearestDataPoint(getChart(), new Point2D(x - x0, y - y0));
+
+        if (dataPoint != null && (dataPoint.getDataSet() instanceof EditableDataSet)) {
+            final Axis xAxis = xyChart.getFirstAxis(Orientation.HORIZONTAL);
+            final Axis yAxis = xyChart.getFirstAxis(Orientation.VERTICAL);
+            final int index = dataPoint.getIndex();
+            final double newValX = xAxis.getValueForDisplay(x - x0);
+            final double newValY = yAxis.getValueForDisplay(y - y0);
+            final EditableDataSet ds = (EditableDataSet) (dataPoint.getDataSet());
+            final double oldValX = ds.getX(index);
+            if (oldValX <= newValX) {
+                ds.add(index, newValX, newValY);
+            } else {
+                ds.add(index - 1, newValX, newValY);
+            }
+        }
+
+        updateMarker();
+    }
+
+    protected void applyDrag(final double deltaX, final double deltaY) {
+        for (final Node node : markerPane.getChildren()) {
+            if (!(node instanceof SelectedDataPoint)) {
+                continue;
+            }
+            final SelectedDataPoint marker = (SelectedDataPoint) node;
+            marker.applyDrag(deltaX, deltaY);
+        }
+        this.updateMarker();
+    }
+
+    protected void deleteAllMarkedPoints() {
+        for (final EditableDataSet dataSet : markedPoints.keySet()) {
+            final ConcurrentHashMap<Integer, SelectedDataPoint> dataPoints = markedPoints.get(dataSet);
+            for (final Integer dataPointIndex : dataPoints.keySet()) {
+                final SelectedDataPoint dataPoint = dataPoints.get(dataPointIndex);
+
+                if (dataPoint.delete()) {
+                    dataPoints.remove(dataPointIndex);
+                }
+            }
+        }
+        updateMarker();
+    }
+
+    /**
+     * Mouse cursor to be used during drag operation.
+     *
+     * @return the mouse cursor property
+     */
+    public final ObjectProperty<Cursor> dragCursorProperty() {
+        return dragCursor;
+    }
+
+    /**
+     * @return whether points can be edited
+     */
+    public final ReadOnlyBooleanProperty editEnableProperty() {
+        return editEnable;
+    }
+
+    protected void findDataPoint(final Axis xAxis, final Axis yAxis, final List<DataSet> dataSets) {
+        final double xMinScreen = Math.min(selectStartPoint.getX(), selectEndPoint.getX());
+        final double xMaxScreen = Math.max(selectStartPoint.getX(), selectEndPoint.getX());
+        final double yMinScreen = Math.min(selectStartPoint.getY(), selectEndPoint.getY());
+        final double yMaxScreen = Math.max(selectStartPoint.getY(), selectEndPoint.getY());
+
+        for (final DataSet ds : dataSets) {
+            if (!(ds instanceof EditableDataSet)) {
+                continue;
+            }
+            final EditableDataSet dataSet = (EditableDataSet) ds;
+
+            final int indexMin = Math.max(0, dataSet.getXIndex(xAxis.getValueForDisplay(xMinScreen)));
+            final int indexMax = Math.min(dataSet.getXIndex(xAxis.getValueForDisplay(xMaxScreen)) + 1,
+                    dataSet.getDataCount());
+
+            // N.B. (0,0) screen coordinate is in the top left corner vs. normal
+            // 0,0 in the bottom left -> need to invert limits
+            final double yMax = yAxis.getValueForDisplay(yMinScreen);
+            final double yMin = yAxis.getValueForDisplay(yMaxScreen);
+
+            final ConcurrentHashMap<Integer, SelectedDataPoint> dataSetHashMap = markedPoints.computeIfAbsent(dataSet,
+                    k -> new ConcurrentHashMap<>());
+            for (int i = indexMin; i < indexMax; i++) {
+                final double y = dataSet.getY(i);
+                if ((y >= yMin) && (y <= yMax)) {
+                    if (isShiftDown()) {
+                        // add if not existing/remove if existing
+                        if (dataSetHashMap.get(i) != null) {
+                            dataSetHashMap.remove(i);
+                        } else {
+                            dataSetHashMap.put(i, new SelectedDataPoint(xAxis, yAxis, dataSet, i));
+                        }
+                    } else {
+                        dataSetHashMap.put(i, new SelectedDataPoint(xAxis, yAxis, dataSet, i));
+                    }
+
+                }
+            }
+        }
 
     }
 
-    private void registerKeyHandlers() {
-        registerInputEventHandler(KeyEvent.KEY_PRESSED, keyPressedHandler);
-        registerInputEventHandler(KeyEvent.KEY_RELEASED, keyReleasedHandler);
+    protected DataPoint findNearestDataPoint(final Chart chart, final Point2D mouseLocation) {
+        if (!(chart instanceof XYChart)) {
+            return null;
+        }
+        final XYChart xyChart = (XYChart) chart;
+        // TODO: iterate through all axes, renderer and datasets
+        final double xValue = xyChart.getXAxis().getValueForDisplay(mouseLocation.getX());
+
+        DataPoint nearestDataPoint = null;
+        for (final DataPoint dataPoint : findNeighborPoints(xyChart, xValue)) {
+            if (getChart().getFirstAxis(Orientation.HORIZONTAL) != null) {
+                final double x = xyChart.getXAxis().getDisplayPosition(dataPoint.getX());
+                final double y = xyChart.getYAxis().getDisplayPosition(dataPoint.getY());
+                final Point2D displayPoint = new Point2D(x, y);
+                dataPoint.setDistanceFromMouse(displayPoint.distance(mouseLocation));
+                if ((nearestDataPoint == null
+                        || dataPoint.getDistanceFromMouse() < nearestDataPoint.getDistanceFromMouse())) {
+                    nearestDataPoint = dataPoint;
+                }
+            }
+        }
+        return nearestDataPoint;
+    }
+
+    /**
+     * Handles series that have data sorted or not sorted with respect to X coordinate.
+     * 
+     * @param dataSet data set
+     * @param searchedX X coordinates
+     * @return pair of neighbouring data points
+     */
+    protected Pair<DataPoint, DataPoint> findNeighborPoints(final DataSet dataSet, final double searchedX) {
+        int prevIndex = -1;
+        int nextIndex = -1;
+        double prevX = Double.MIN_VALUE;
+        double nextX = Double.MAX_VALUE;
+
+        for (int i = 0; i < dataSet.getDataCount(DataSet.DIM_X); i++) {
+            final double currentX = dataSet.get(DataSet.DIM_X, i);
+
+            if (currentX <= searchedX) {
+                if (prevX <= currentX) {
+                    prevIndex = i;
+                    prevX = currentX;
+                }
+            } else if (nextX > currentX) {
+                nextIndex = i;
+                nextX = currentX;
+            }
+        }
+        final DataPoint prevPoint = prevIndex == -1 ? null
+                : new DataPoint(getChart(), dataSet, prevIndex, dataSet.get(DataSet.DIM_X, prevIndex),
+                        dataSet.get(DataSet.DIM_Y, prevIndex), dataSet.getDataLabel(prevIndex));
+        final DataPoint nextPoint = nextIndex == -1 || nextIndex == prevIndex ? null
+                : new DataPoint(getChart(), dataSet, nextIndex, dataSet.get(DataSet.DIM_X, nextIndex),
+                        dataSet.get(DataSet.DIM_Y, nextIndex), dataSet.getDataLabel(nextIndex));
+
+        return new Pair<>(prevPoint, nextPoint);
+    }
+
+    protected List<DataPoint> findNeighborPoints(final XYChart chart, final double searchedX) {
+        final List<DataPoint> points = new LinkedList<>();
+        for (final DataSet dataSet : chart.getAllDatasets()) {
+            final Pair<DataPoint, DataPoint> neighborPoints = findNeighborPoints(dataSet, searchedX);
+            if (neighborPoints.getKey() != null) {
+                points.add(neighborPoints.getKey());
+            }
+            if (neighborPoints.getValue() != null) {
+                points.add(neighborPoints.getValue());
+            }
+        }
+        return points;
+    }
+
+    /**
+     * Returns the value of the {@link #dragCursorProperty()}
+     *
+     * @return the current cursor
+     */
+    public final Cursor getDragCursor() {
+        return dragCursorProperty().get();
     }
 
     @Override
@@ -380,55 +477,70 @@ public class EditDataSet extends TableViewer {
         return interactorBar;
     }
 
-    protected void selectionStarted(final MouseEvent event) {
-        selectStartPoint = new Point2D(event.getX(), event.getY());
-
-        selectRectangle.setX(selectStartPoint.getX());
-        selectRectangle.setY(selectStartPoint.getY());
-        selectRectangle.setWidth(0);
-        selectRectangle.setHeight(0);
-        selectRectangle.setVisible(true);
-        // installCursor();
-    }
-
-    protected boolean selectionOngoing() {
-        return selectStartPoint != null;
-    }
-
-    protected void selectionDragged(final MouseEvent event) {
-        final Bounds plotAreaBounds = getChart().getPlotArea().getBoundsInLocal();
-        selectEndPoint = limitToPlotArea(event, plotAreaBounds);
-
-        selectRectangle.setX(Math.min(selectStartPoint.getX(), selectEndPoint.getX())); // zoomRectX
-        selectRectangle.setY(Math.min(selectStartPoint.getY(), selectEndPoint.getY())); // zoomRectY
-        selectRectangle.setWidth(Math.abs(selectEndPoint.getX() - selectStartPoint.getX())); // zoomRectWidth
-        selectRectangle.setHeight(Math.abs(selectEndPoint.getY() - selectStartPoint.getY())); // zoomRectHeight
+    /**
+     * Returns the value of the {@link #pickingDistanceProperty()}.
+     *
+     * @return the current picking distance
+     */
+    public final double getPickingDistance() {
+        return pickingDistanceProperty().get();
     }
 
     /**
-     * limits the mouse event position to the min/max range of the canavs (N.B.
-     * event can occur to be negative/larger/outside than the canvas) This is to
-     * avoid zooming outside the visible canvas range
+     * Returns zoom-in mouse event filter.
      *
-     * @param event the mouse event
-     * @param plotBounds of the canvas
-     * @return the clipped mouse location
+     * @return zoom-in mouse event filter
+     * @see #setZoomInMouseFilter(Predicate)
      */
-    private static Point2D limitToPlotArea(final MouseEvent event, final Bounds plotBounds) {
-        final double limitedX = Math.max(Math.min(event.getX() - plotBounds.getMinX(), plotBounds.getMaxX()),
-                plotBounds.getMinX());
-        final double limitedY = Math.max(Math.min(event.getY() - plotBounds.getMinY(), plotBounds.getMaxY()),
-                plotBounds.getMinY());
-        return new Point2D(limitedX, limitedY);
+    public Predicate<MouseEvent> getSelectionMouseFilter() {
+        return zoomInMouseFilter;
     }
 
-    protected void selectionEnded() {
-        selectRectangle.setVisible(false);
-        if (selectRectangle.getWidth() > SELECT_RECT_MIN_SIZE && selectRectangle.getHeight() > SELECT_RECT_MIN_SIZE) {
-            performSelection();
+    protected void installCursor() {
+        final Region chart = getChart();
+        originalCursor = chart.getCursor();
+        if (getDragCursor() != null) {
+            chart.setCursor(getDragCursor());
         }
-        selectStartPoint = selectEndPoint = null;
-        // uninstallCursor();
+    }
+
+    /**
+     * Returns the value of the {@link #editEnableProperty()}
+     * 
+     * @return true: can edit point
+     */
+    public final boolean isEditable() {
+        return editEnableProperty().get();
+    }
+
+    protected boolean isMouseEventWithinCanvas(final MouseEvent mouseEvent) {
+        final Canvas canvas = getChart().getCanvas();
+        // listen to only events within the canvas
+        final Point2D mouseLoc = new Point2D(mouseEvent.getScreenX(), mouseEvent.getScreenY());
+        final Bounds screenBounds = canvas.localToScreen(canvas.getBoundsInLocal());
+        return screenBounds.contains(mouseLoc);
+    }
+
+    protected void performPointDrag(final MouseEvent event) {
+        if (event.getButton() == MouseButton.PRIMARY && !controlDown && isPointDragActive) {
+            if (mouseOriginX < 0) {
+                mouseOriginX = event.getSceneX();
+            }
+            if (mouseOriginY < 0) {
+                mouseOriginY = event.getSceneY();
+            }
+            final double deltaX = event.getSceneX() - mouseOriginX;
+            final double deltaY = event.getSceneY() - mouseOriginY;
+
+            // get the latest mouse coordinate.
+            mouseOriginX = event.getSceneX();
+            mouseOriginY = event.getSceneY();
+
+            applyDrag(deltaX, deltaY);
+            event.consume();
+        } else {
+            isPointDragActive = false;
+        }
     }
 
     protected void performSelection() {
@@ -459,123 +571,85 @@ public class EditDataSet extends TableViewer {
         updateMarker();
     }
 
-    private static Axis getFirstAxis(final List<Axis> axes, final Orientation orientation) {
-        for (final Axis axis : axes) {
-            if (axis.getSide() == null) {
-                continue;
-            }
-            switch (orientation) {
-            case VERTICAL:
-                if (axis.getSide().isVertical()) {
-                    return axis;
-                }
-                break;
-            case HORIZONTAL:
-            default:
-                if (axis.getSide().isHorizontal()) {
-                    return axis;
-                }
-                break;
-            }
-        }
-        return null;
-    }
-
-    protected void updateMarker() {
-        this.markerPane.getChildren().clear();
-
-        markerPane.getParent().setMouseTransparent(false);
-
-        for (final EditableDataSet dataSet : markedPoints.keySet()) {
-            final ConcurrentHashMap<Integer, SelectedDataPoint> dataPoints = markedPoints.get(dataSet);
-            for (final Integer dataPointIndex : dataPoints.keySet()) {
-                final SelectedDataPoint dataPoint = dataPoints.get(dataPointIndex);
-
-                // dataPoint.setOnMouseClicked(evt -> {
-                // if (evt.isSecondaryButtonDown()) {
-                // // right clicked on circle
-                // }
-                // });
-
-                dataPoint.update();
-                markerPane.getChildren().add(dataPoint);
-
-            }
-        }
-        if (markerPane.getChildren().isEmpty()) {
-            markerPane.getParent().setMouseTransparent(true);
-        }
-    }
-
-    protected void findDataPoint(final Axis xAxis, final Axis yAxis, final List<DataSet> dataSets) {
-        final double xMinScreen = Math.min(selectStartPoint.getX(), selectEndPoint.getX());
-        final double xMaxScreen = Math.max(selectStartPoint.getX(), selectEndPoint.getX());
-        final double yMinScreen = Math.min(selectStartPoint.getY(), selectEndPoint.getY());
-        final double yMaxScreen = Math.max(selectStartPoint.getY(), selectEndPoint.getY());
-
-        for (final DataSet ds : dataSets) {
-            if (!(ds instanceof EditableDataSet)) {
-                continue;
-            }
-            final EditableDataSet dataSet = (EditableDataSet) ds;
-
-            final int indexMin = Math.max(0, dataSet.getXIndex(xAxis.getValueForDisplay(xMinScreen)));
-            final int indexMax = Math.min(dataSet.getXIndex(xAxis.getValueForDisplay(xMaxScreen)) + 1,
-                    dataSet.getDataCount());
-
-            // N.B. (0,0) screen coordinate is in the top left corner vs. normal
-            // 0,0 in the bottom left -> need to invert limits
-            final double yMax = yAxis.getValueForDisplay(yMinScreen);
-            final double yMin = yAxis.getValueForDisplay(yMaxScreen);
-
-            final ConcurrentHashMap<Integer, SelectedDataPoint> dataSetHashMap = markedPoints.computeIfAbsent(dataSet,
-                    k -> new ConcurrentHashMap<>());
-            for (int i = indexMin; i < indexMax; i++) {
-                final double y = dataSet.getY(i);
-                if ((y >= yMin) && (y <= yMax)) {
-                    if (isShiftDown()) {
-                        // add if not existing/remove if existing
-                        if (dataSetHashMap.get(i) != null) {
-                            dataSetHashMap.remove(i);
-                        } else {
-                            dataSetHashMap.put(i, new SelectedDataPoint(xAxis, yAxis, dataSet, i));
-                        }
-                    } else {
-                        dataSetHashMap.put(i, new SelectedDataPoint(xAxis, yAxis, dataSet, i));
-                    }
-
-                }
-            }
-        }
-
-    }
-
-    protected boolean isMouseEventWithinCanvas(final MouseEvent mouseEvent) {
-        final Canvas canvas = getChart().getCanvas();
-        // listen to only events within the canvas
-        final Point2D mouseLoc = new Point2D(mouseEvent.getScreenX(), mouseEvent.getScreenY());
-        final Bounds screenBounds = canvas.localToScreen(canvas.getBoundsInLocal());
-        return screenBounds.contains(mouseLoc);
-    }
-
     /**
-     * Returns zoom-in mouse event filter.
+     * Distance of the mouse cursor from the data point (expressed in display units) that should trigger showing the
+     * tool tip. By default initialised to {@value #DEFAULT_PICKING_DISTANCE}.
      *
-     * @return zoom-in mouse event filter
-     * @see #setZoomInMouseFilter(Predicate)
+     * @return the picking distance property
      */
-    public Predicate<MouseEvent> getSelectionMouseFilter() {
-        return zoomInMouseFilter;
+    public final DoubleProperty pickingDistanceProperty() {
+        return pickingDistance;
+    }
+
+    private void registerKeyHandlers() {
+        registerInputEventHandler(KeyEvent.KEY_PRESSED, keyPressedHandler);
+        registerInputEventHandler(KeyEvent.KEY_RELEASED, keyReleasedHandler);
+    }
+
+    private void registerMouseHandlers() {
+        registerInputEventHandler(MouseEvent.MOUSE_PRESSED, selectionStartHandler);
+        registerInputEventHandler(MouseEvent.MOUSE_DRAGGED, selectionDragHandler);
+        registerInputEventHandler(MouseEvent.MOUSE_RELEASED, selectionEndHandler);
+
+    }
+
+    protected void selectionDragged(final MouseEvent event) {
+        final Bounds plotAreaBounds = getChart().getPlotArea().getBoundsInLocal();
+        selectEndPoint = limitToPlotArea(event, plotAreaBounds);
+
+        selectRectangle.setX(Math.min(selectStartPoint.getX(), selectEndPoint.getX())); // zoomRectX
+        selectRectangle.setY(Math.min(selectStartPoint.getY(), selectEndPoint.getY())); // zoomRectY
+        selectRectangle.setWidth(Math.abs(selectEndPoint.getX() - selectStartPoint.getX())); // zoomRectWidth
+        selectRectangle.setHeight(Math.abs(selectEndPoint.getY() - selectStartPoint.getY())); // zoomRectHeight
+    }
+
+    protected void selectionEnded() {
+        selectRectangle.setVisible(false);
+        if (selectRectangle.getWidth() > SELECT_RECT_MIN_SIZE && selectRectangle.getHeight() > SELECT_RECT_MIN_SIZE) {
+            performSelection();
+        }
+        selectStartPoint = selectEndPoint = null;
+        // uninstallCursor();
+    }
+
+    protected boolean selectionOngoing() {
+        return selectStartPoint != null;
+    }
+
+    protected void selectionStarted(final MouseEvent event) {
+        selectStartPoint = new Point2D(event.getX(), event.getY());
+
+        selectRectangle.setX(selectStartPoint.getX());
+        selectRectangle.setY(selectStartPoint.getY());
+        selectRectangle.setWidth(0);
+        selectRectangle.setHeight(0);
+        selectRectangle.setVisible(true);
+        // installCursor();
     }
 
     /**
-     * Sets filter on {@link MouseEvent#DRAG_DETECTED DRAG_DETECTED} events that
-     * should start zoom-in operation.
+     * Sets value of the {@link #dragCursorProperty()}.
      *
-     * @param zoomInMouseFilter the filter to accept zoom-in mouse event. If
-     *            {@code null} then any DRAG_DETECTED event will start zoom-in
-     *            operation. By default it's set to
-     *            {@link #defaultSelectFilter}.
+     * @param cursor the cursor to be used by the plugin
+     */
+    public final void setDragCursor(final Cursor cursor) {
+        dragCursorProperty().set(cursor);
+    }
+
+    /**
+     * Sets the value of {@link #pickingDistanceProperty()}.
+     *
+     * @param distance the new picking distance
+     */
+    public final void setPickingDistance(final double distance) {
+        pickingDistanceProperty().set(distance);
+    }
+
+    /**
+     * Sets filter on {@link MouseEvent#DRAG_DETECTED DRAG_DETECTED} events that should start zoom-in operation.
+     *
+     * @param zoomInMouseFilter the filter to accept zoom-in mouse event. If {@code null} then any DRAG_DETECTED event
+     *        will start zoom-in operation. By default it's set to {@link #defaultSelectFilter}.
      * @see #getSelectionMouseFilter()
      */
     public void setZoomInMouseFilter(final Predicate<MouseEvent> zoomInMouseFilter) {
@@ -610,37 +684,191 @@ public class EditDataSet extends TableViewer {
         };
     }
 
-    protected void performPointDrag(final MouseEvent event) {
-        if (event.getButton() == MouseButton.PRIMARY && !controlDown && isPointDragActive) {
-            if (mouseOriginX < 0) {
-                mouseOriginX = event.getSceneX();
-            }
-            if (mouseOriginY < 0) {
-                mouseOriginY = event.getSceneY();
-            }
-            final double deltaX = event.getSceneX() - mouseOriginX;
-            final double deltaY = event.getSceneY() - mouseOriginY;
+    protected void uninstallCursor() {
+        getChart().setCursor(originalCursor);
+    }
 
-            // get the latest mouse coordinate.
-            mouseOriginX = event.getSceneX();
-            mouseOriginY = event.getSceneY();
+    protected void updateMarker() {
+        this.markerPane.getChildren().clear();
 
-            applyDrag(deltaX, deltaY);
-            event.consume();
-        } else {
-            isPointDragActive = false;
+        markerPane.getParent().setMouseTransparent(false);
+
+        for (final EditableDataSet dataSet : markedPoints.keySet()) {
+            final ConcurrentHashMap<Integer, SelectedDataPoint> dataPoints = markedPoints.get(dataSet);
+            for (final Integer dataPointIndex : dataPoints.keySet()) {
+                final SelectedDataPoint dataPoint = dataPoints.get(dataPointIndex);
+
+                // dataPoint.setOnMouseClicked(evt -> {
+                // if (evt.isSecondaryButtonDown()) {
+                // // right clicked on circle
+                // }
+                // });
+
+                dataPoint.update();
+                markerPane.getChildren().add(dataPoint);
+
+            }
+        }
+        if (markerPane.getChildren().isEmpty()) {
+            markerPane.getParent().setMouseTransparent(true);
         }
     }
 
-    protected void applyDrag(final double deltaX, final double deltaY) {
-        for (final Node node : markerPane.getChildren()) {
-            if (!(node instanceof SelectedDataPoint)) {
+    private static Axis getFirstAxis(final List<Axis> axes, final Orientation orientation) {
+        for (final Axis axis : axes) {
+            if (axis.getSide() == null) {
                 continue;
             }
-            final SelectedDataPoint marker = (SelectedDataPoint) node;
-            marker.applyDrag(deltaX, deltaY);
+            switch (orientation) {
+            case VERTICAL:
+                if (axis.getSide().isVertical()) {
+                    return axis;
+                }
+                break;
+            case HORIZONTAL:
+            default:
+                if (axis.getSide().isHorizontal()) {
+                    return axis;
+                }
+                break;
+            }
         }
-        this.updateMarker();
+        return null;
+    }
+
+    public static boolean isControlDown() {
+        return controlDown;
+    }
+
+    public static boolean isShiftDown() {
+        return shiftDown;
+    }
+
+    /**
+     * limits the mouse event position to the min/max range of the canavs (N.B. event can occur to be
+     * negative/larger/outside than the canvas) This is to avoid zooming outside the visible canvas range
+     *
+     * @param event the mouse event
+     * @param plotBounds of the canvas
+     * @return the clipped mouse location
+     */
+    private static Point2D limitToPlotArea(final MouseEvent event, final Bounds plotBounds) {
+        final double limitedX = Math.max(Math.min(event.getX() - plotBounds.getMinX(), plotBounds.getMaxX()),
+                plotBounds.getMinX());
+        final double limitedY = Math.max(Math.min(event.getY() - plotBounds.getMinY(), plotBounds.getMaxY()),
+                plotBounds.getMinY());
+        return new Point2D(limitedX, limitedY);
+    }
+
+    public class DataPoint {
+
+        private final Chart chart;
+        private final double x;
+        private final double y;
+        private final String label;
+        private double distanceFromMouse;
+        private final DataSet dataSet;
+        private final int index;
+
+        public DataPoint(final Chart chart, final DataSet dataSet, final int index, final double x, final double y,
+                final String label) {
+            this.chart = chart;
+            this.dataSet = dataSet;
+            this.index = index;
+            this.x = x;
+            this.y = y;
+            this.label = label;
+        }
+
+        public Chart getChart() {
+            return chart;
+        }
+
+        public DataSet getDataSet() {
+            return dataSet;
+        }
+
+        public double getDistanceFromMouse() {
+            return distanceFromMouse;
+        }
+
+        public int getIndex() {
+            return index;
+        }
+
+        public String getLabel() {
+            return label;
+        }
+
+        public double getX() {
+            return x;
+        }
+
+        public double getY() {
+            return y;
+        }
+
+        public void setDistanceFromMouse(final double distance) {
+            distanceFromMouse = distance;
+        }
+
+        @Override
+        public String toString() {
+            return "DataSet= '" + dataSet.getName() + "' index=" + index;
+        }
+
+    }
+
+    protected class PointEditionPopup extends Popup {
+
+        private final Button addPoint = new Button("add");
+        private final Button deletePoint = new Button("delete");
+        private final Button deletePoints = new Button("delete all");
+
+        public PointEditionPopup() {
+            super();
+            setAutoFix(true);
+            setAutoHide(true);
+            setHideOnEscape(true);
+            setAutoHide(true);
+            getContent().add(initContent());
+
+            addPoint.setOnAction(evt -> {
+                final double x = getX();
+                final double y = getY();
+                addPoint(x, y);
+            });
+            deletePoints.setOnAction(evt -> deleteAllMarkedPoints());
+        }
+
+        private VBox initContent() {
+            final VBox pane = new VBox();
+            pane.getChildren().add(new Label("popup"));
+            pane.getChildren().add(addPoint);
+            pane.getChildren().add(deletePoint);
+            pane.getChildren().add(deletePoints);
+
+            return pane;
+        }
+
+        public void showPopup(final MouseEvent event, final SelectedDataPoint selectedPoint) {
+            // System.err.println("show popup = " + selectedPoint);
+            deletePoints.setDisable(markerPane.getChildren().isEmpty());
+
+            if (selectedPoint == null) {
+                deletePoint.setDisable(true);
+            } else {
+                deletePoint.setDisable(false);
+                deletePoint.setOnAction(evt -> {
+                    if (selectedPoint.delete()) {
+                        markedPoints.get(selectedPoint.getDataSet()).remove(selectedPoint.getIndex());
+                    }
+                    updateMarker();
+                });
+            }
+
+            show(getChart().getScene().getWindow(), event.getScreenX(), event.getScreenY());
+        }
     }
 
     protected class SelectedDataPoint extends Circle {
@@ -696,49 +924,6 @@ public class EditDataSet extends TableViewer {
             dataSet.addListener(e -> FXUtils.runFX(this::update));
         }
 
-        public EditableDataSet getDataSet() {
-            return dataSet;
-        }
-
-        public int getIndex() {
-            for (int i = 0; i < dataSet.getDataCount(); i++) {
-                final double x0 = dataSet.getX(i);
-                final double y0 = dataSet.getY(i);
-                if (x0 == xValue && y0 == yValue) {
-                    return i;
-                }
-            }
-            return -1;
-        }
-
-        public double getX() {
-            return xAxis.getDisplayPosition(xValue);
-        }
-
-        public double getY() {
-            return yAxis.getDisplayPosition(yValue);
-        }
-
-        public void update() {
-            setCenterX(getX());
-            setCenterY(getY());
-        }
-
-        public boolean delete() {
-            final EditConstraints constraints = dataSet.getEditConstraints();
-            if (constraints == null) {
-                dataSet.remove(getIndex());
-                return true;
-            }
-
-            if (constraints.canDelete(getIndex())) {
-                dataSet.remove(getIndex());
-                return true;
-            }
-
-            return false;
-        }
-
         public void applyDrag(final double deltaX, final double deltaY) {
             double nX = getX();
             double nY = getY();
@@ -779,243 +964,52 @@ public class EditDataSet extends TableViewer {
             // update();
         }
 
-        @Override
-        public String toString() {
-            return "selected index=" + getIndex();
-        }
-    }
-
-    protected void addPoint(final double x, final double y) {
-        if (!(getChart() instanceof XYChart)) {
-            return;
-        }
-        final XYChart xyChart = (XYChart) getChart();
-
-        // TODO: tidy up code and make it compatible with multiple renderer
-
-        // find data set closes to screen coordinate x & y
-        final Pane pane = getChart().getCanvasForeground();
-        final Bounds bounds = pane.getBoundsInLocal();
-        final Bounds screenBounds = pane.localToScreen(bounds);
-        final int x0 = (int) screenBounds.getMinX();
-        final int y0 = (int) screenBounds.getMinY();
-        final DataPoint dataPoint = findNearestDataPoint(getChart(), new Point2D(x - x0, y - y0));
-
-        if (dataPoint != null && (dataPoint.getDataSet() instanceof EditableDataSet)) {
-            final Axis xAxis = xyChart.getFirstAxis(Orientation.HORIZONTAL);
-            final Axis yAxis = xyChart.getFirstAxis(Orientation.VERTICAL);
-            final int index = dataPoint.getIndex();
-            final double newValX = xAxis.getValueForDisplay(x - x0);
-            final double newValY = yAxis.getValueForDisplay(y - y0);
-            final EditableDataSet ds = (EditableDataSet) (dataPoint.getDataSet());
-            final double oldValX = ds.getX(index);
-            if (oldValX <= newValX) {
-                ds.add(index, newValX, newValY);
-            } else {
-                ds.add(index - 1, newValX, newValY);
-            }
-        }
-
-        updateMarker();
-    }
-
-    protected DataPoint findNearestDataPoint(final Chart chart, final Point2D mouseLocation) {
-        if (!(chart instanceof XYChart)) {
-            return null;
-        }
-        final XYChart xyChart = (XYChart) chart;
-        // TODO: iterate through all axes, renderer and datasets
-        final double xValue = xyChart.getXAxis().getValueForDisplay(mouseLocation.getX());
-
-        DataPoint nearestDataPoint = null;
-        for (final DataPoint dataPoint : findNeighborPoints(xyChart, xValue)) {
-            if (getChart().getFirstAxis(Orientation.HORIZONTAL) != null) {
-                final double x = xyChart.getXAxis().getDisplayPosition(dataPoint.getX());
-                final double y = xyChart.getYAxis().getDisplayPosition(dataPoint.getY());
-                final Point2D displayPoint = new Point2D(x, y);
-                dataPoint.setDistanceFromMouse(displayPoint.distance(mouseLocation));
-                if ((nearestDataPoint == null
-                        || dataPoint.getDistanceFromMouse() < nearestDataPoint.getDistanceFromMouse())) {
-                    nearestDataPoint = dataPoint;
-                }
-            }
-        }
-        return nearestDataPoint;
-    }
-
-    protected List<DataPoint> findNeighborPoints(final XYChart chart, final double searchedX) {
-        final List<DataPoint> points = new LinkedList<>();
-        for (final DataSet dataSet : chart.getAllDatasets()) {
-            final Pair<DataPoint, DataPoint> neighborPoints = findNeighborPoints(dataSet, searchedX);
-            if (neighborPoints.getKey() != null) {
-                points.add(neighborPoints.getKey());
-            }
-            if (neighborPoints.getValue() != null) {
-                points.add(neighborPoints.getValue());
-            }
-        }
-        return points;
-    }
-
-    /**
-     * Handles series that have data sorted or not sorted with respect to X
-     * coordinate.
-     * 
-     * @param dataSet data set
-     * @param searchedX X coordinates
-     * @return pair of neighbouring data points
-     */
-    protected Pair<DataPoint, DataPoint> findNeighborPoints(final DataSet dataSet, final double searchedX) {
-        int prevIndex = -1;
-        int nextIndex = -1;
-        double prevX = Double.MIN_VALUE;
-        double nextX = Double.MAX_VALUE;
-
-        for (int i = 0; i < dataSet.getDataCount(DataSet.DIM_X); i++) {
-            final double currentX = dataSet.get(DataSet.DIM_X, i);
-
-            if (currentX <= searchedX) {
-                if (prevX <= currentX) {
-                    prevIndex = i;
-                    prevX = currentX;
-                }
-            } else if (nextX > currentX) {
-                nextIndex = i;
-                nextX = currentX;
-            }
-        }
-        final DataPoint prevPoint = prevIndex == -1 ? null
-                : new DataPoint(getChart(), dataSet, prevIndex, dataSet.get(DataSet.DIM_X, prevIndex), dataSet.get(DataSet.DIM_Y, prevIndex),
-                        dataSet.getDataLabel(prevIndex));
-        final DataPoint nextPoint = nextIndex == -1 || nextIndex == prevIndex ? null
-                : new DataPoint(getChart(), dataSet, nextIndex, dataSet.get(DataSet.DIM_X, nextIndex), dataSet.get(DataSet.DIM_Y, nextIndex),
-                        dataSet.getDataLabel(nextIndex));
-
-        return new Pair<>(prevPoint, nextPoint);
-    }
-
-    protected void deleteAllMarkedPoints() {
-        for (final EditableDataSet dataSet : markedPoints.keySet()) {
-            final ConcurrentHashMap<Integer, SelectedDataPoint> dataPoints = markedPoints.get(dataSet);
-            for (final Integer dataPointIndex : dataPoints.keySet()) {
-                final SelectedDataPoint dataPoint = dataPoints.get(dataPointIndex);
-
-                if (dataPoint.delete()) {
-                    dataPoints.remove(dataPointIndex);
-                }
-            }
-        }
-        updateMarker();
-    }
-
-    protected class PointEditionPopup extends Popup {
-
-        private final Button addPoint = new Button("add");
-        private final Button deletePoint = new Button("delete");
-        private final Button deletePoints = new Button("delete all");
-
-        public PointEditionPopup() {
-            super();
-            setAutoFix(true);
-            setAutoHide(true);
-            setHideOnEscape(true);
-            setAutoHide(true);
-            getContent().add(initContent());
-
-            addPoint.setOnAction(evt -> {
-                final double x = getX();
-                final double y = getY();
-                addPoint(x, y);
-            });
-            deletePoints.setOnAction(evt -> deleteAllMarkedPoints());
-        }
-
-        private VBox initContent() {
-            final VBox pane = new VBox();
-            pane.getChildren().add(new Label("popup"));
-            pane.getChildren().add(addPoint);
-            pane.getChildren().add(deletePoint);
-            pane.getChildren().add(deletePoints);
-
-            return pane;
-        }
-
-        public void showPopup(final MouseEvent event, final SelectedDataPoint selectedPoint) {
-            // System.err.println("show popup = " + selectedPoint);
-            deletePoints.setDisable(markerPane.getChildren().isEmpty());
-
-            if (selectedPoint == null) {
-                deletePoint.setDisable(true);
-            } else {
-                deletePoint.setDisable(false);
-                deletePoint.setOnAction(evt -> {
-                    if (selectedPoint.delete()) {
-                        markedPoints.get(selectedPoint.getDataSet()).remove(selectedPoint.getIndex());
-                    }
-                    updateMarker();
-                });
+        public boolean delete() {
+            final EditConstraints constraints = dataSet.getEditConstraints();
+            if (constraints == null) {
+                dataSet.remove(getIndex());
+                return true;
             }
 
-            show(getChart().getScene().getWindow(), event.getScreenX(), event.getScreenY());
-        }
-    }
+            if (constraints.canDelete(getIndex())) {
+                dataSet.remove(getIndex());
+                return true;
+            }
 
-    public class DataPoint {
-
-        private final Chart chart;
-        private final double x;
-        private final double y;
-        private final String label;
-        private double distanceFromMouse;
-        private final DataSet dataSet;
-        private final int index;
-
-        public DataPoint(final Chart chart, final DataSet dataSet, final int index, final double x, final double y,
-                final String label) {
-            this.chart = chart;
-            this.dataSet = dataSet;
-            this.index = index;
-            this.x = x;
-            this.y = y;
-            this.label = label;
+            return false;
         }
 
-        public Chart getChart() {
-            return chart;
-        }
-
-        public DataSet getDataSet() {
+        public EditableDataSet getDataSet() {
             return dataSet;
         }
 
         public int getIndex() {
-            return index;
+            for (int i = 0; i < dataSet.getDataCount(); i++) {
+                final double x0 = dataSet.getX(i);
+                final double y0 = dataSet.getY(i);
+                if (x0 == xValue && y0 == yValue) {
+                    return i;
+                }
+            }
+            return -1;
         }
 
         public double getX() {
-            return x;
+            return xAxis.getDisplayPosition(xValue);
         }
 
         public double getY() {
-            return y;
-        }
-
-        public String getLabel() {
-            return label;
-        }
-        
-        public void setDistanceFromMouse(final double distance) {
-            distanceFromMouse = distance;
-        }
-
-        public double getDistanceFromMouse() {
-            return distanceFromMouse;
+            return yAxis.getDisplayPosition(yValue);
         }
 
         @Override
         public String toString() {
-            return "DataSet= '" + dataSet.getName() + "' index=" + index;
+            return "selected index=" + getIndex();
         }
 
+        public void update() {
+            setCenterX(getX());
+            setCenterY(getY());
+        }
     }
 }

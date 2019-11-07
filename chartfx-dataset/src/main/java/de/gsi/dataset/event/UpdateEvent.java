@@ -3,9 +3,8 @@ package de.gsi.dataset.event;
 import java.util.EventObject;
 
 /**
- * Event class that is passed along the notification performed by the
- * {@code EventSource} class. The class is intended to be further extended by
- * named derivatives to allow for context-based event filters.
+ * Event class that is passed along the notification performed by the {@code EventSource} class. The class is intended
+ * to be further extended by named derivatives to allow for context-based event filters.
  * 
  * @see EventSource for details
  * 
@@ -20,8 +19,7 @@ public class UpdateEvent extends EventObject {
     /**
      * generates new update event
      * 
-     * @param source
-     *            the class issuing the event
+     * @param source the class issuing the event
      */
     public UpdateEvent(final EventSource source) {
         this(source, null, null);
@@ -30,10 +28,8 @@ public class UpdateEvent extends EventObject {
     /**
      * generates new update event
      * 
-     * @param source
-     *            the class issuing the event
-     * @param msg
-     *            a customised message to be passed along (e.g. for debugging)
+     * @param source the class issuing the event
+     * @param msg a customised message to be passed along (e.g. for debugging)
      */
     public UpdateEvent(final EventSource source, final String msg) {
         this(source, msg, null);
@@ -42,12 +38,9 @@ public class UpdateEvent extends EventObject {
     /**
      * generates new update event
      * 
-     * @param source
-     *            the class issuing the event
-     * @param msg
-     *            a customised message to be passed along (e.g. for debugging)
-     * @param payload
-     *            a customised user pay-load to be passed to the listener
+     * @param source the class issuing the event
+     * @param msg a customised message to be passed along (e.g. for debugging)
+     * @param payload a customised user pay-load to be passed to the listener
      */
     public UpdateEvent(final EventSource source, final String msg, final Object payload) {
         super(source);

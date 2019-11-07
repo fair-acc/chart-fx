@@ -9,9 +9,8 @@ import de.gsi.dataset.serializer.spi.BinarySerialiser;
 import de.gsi.dataset.serializer.spi.GenericsHelper;
 
 /**
- * helper class to register default serialiser for boxed array primitive types
- * (ie. Boolean[], Byte[], Short[], ..., double[]) w/o String[] (already part of
- * the {@link de.gsi.dataset.serializer.spi.iobuffer.FieldPrimitiveValueHelper}
+ * helper class to register default serialiser for boxed array primitive types (ie. Boolean[], Byte[], Short[], ...,
+ * double[]) w/o String[] (already part of the {@link de.gsi.dataset.serializer.spi.iobuffer.FieldPrimitiveValueHelper}
  * 
  * @author rstein
  */
@@ -23,11 +22,10 @@ public final class FieldBoxedValueArrayHelper {
     }
 
     /**
-     * registers default serialiser for boxed array primitive types (ie. Boolean[],
-     * Byte[], Short[], ..., Double[])
+     * registers default serialiser for boxed array primitive types (ie. Boolean[], Byte[], Short[], ..., Double[])
      * 
      * @param serialiser for which the field serialisers should be registered
-     * @param ioBuffer   reference to the IoBuffer back-ends
+     * @param ioBuffer reference to the IoBuffer back-ends
      */
     public static void register(final AbstractSerialiser serialiser, final IoBuffer ioBuffer) {
 

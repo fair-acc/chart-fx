@@ -6,14 +6,12 @@ public abstract class AbstractMatrix implements Matrix {
     protected int m; // row dimension
     protected int n; // column dimension
 
-    /**
-     * Get row dimension
-     * 
-     * @return m, the number of rows.
-     */
+    /** Check if size(A) == size(B) **/
     @Override
-    public int getRowDimension() {
-        return m;
+    public void checkMatrixDimensions(Matrix B) {
+        if (B.getRowDimension() != m || B.getColumnDimension() != n) {
+            throw new IllegalArgumentException("Matrix dimensions must agree.");
+        }
     }
 
     /**
@@ -24,6 +22,16 @@ public abstract class AbstractMatrix implements Matrix {
     @Override
     public int getColumnDimension() {
         return n;
+    }
+
+    /**
+     * Get row dimension
+     * 
+     * @return m, the number of rows.
+     */
+    @Override
+    public int getRowDimension() {
+        return m;
     }
 
     /**
@@ -63,23 +71,6 @@ public abstract class AbstractMatrix implements Matrix {
     }
 
     /**
-     * Infinity norm
-     * 
-     * @return maximum row sum.
-     */
-    public double normInf() {
-        double f = 0;
-        for (int i = 0; i < m; i++) {
-            double s = 0;
-            for (int j = 0; j < n; j++) {
-                s += Math.abs(get(i, j));
-            }
-            f = Math.max(f, s);
-        }
-        return f;
-    }
-
-    /**
      * Frobenius norm
      * 
      * @return sqrt of sum of squares of all elements.
@@ -94,12 +85,21 @@ public abstract class AbstractMatrix implements Matrix {
         return f;
     }
 
-    /** Check if size(A) == size(B) **/
-    @Override
-    public void checkMatrixDimensions(Matrix B) {
-        if (B.getRowDimension() != m || B.getColumnDimension() != n) {
-            throw new IllegalArgumentException("Matrix dimensions must agree.");
+    /**
+     * Infinity norm
+     * 
+     * @return maximum row sum.
+     */
+    public double normInf() {
+        double f = 0;
+        for (int i = 0; i < m; i++) {
+            double s = 0;
+            for (int j = 0; j < n; j++) {
+                s += Math.abs(get(i, j));
+            }
+            f = Math.max(f, s);
         }
+        return f;
     }
 
 }

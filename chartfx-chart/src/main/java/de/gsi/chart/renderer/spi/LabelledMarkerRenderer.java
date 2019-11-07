@@ -8,10 +8,10 @@ import de.gsi.chart.Chart;
 import de.gsi.chart.XYChart;
 import de.gsi.chart.XYChartCss;
 import de.gsi.chart.axes.Axis;
-import de.gsi.dataset.DataSet;
-import de.gsi.dataset.utils.ProcessingProfiler;
 import de.gsi.chart.renderer.Renderer;
 import de.gsi.chart.utils.StyleParser;
+import de.gsi.dataset.DataSet;
+import de.gsi.dataset.utils.ProcessingProfiler;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -44,82 +44,14 @@ public class LabelledMarkerRenderer extends AbstractDataSetManagement<LabelledMa
         setShowInLegend(false);
     }
 
-    @Override
-    protected LabelledMarkerRenderer getThis() {
-        return this;
-    }
-
-    @Override
-    public void render(final GraphicsContext gc, final Chart chart, final int dataSetOffset,
-            final ObservableList<DataSet> datasets) {
-        final long start = ProcessingProfiler.getTimeStamp();
-        if (!(chart instanceof XYChart)) {
-            throw new InvalidParameterException(
-                    "must be derivative of XYChart for renderer - " + this.getClass().getSimpleName());
-        }
-        final XYChart xyChart = (XYChart) chart;
-
-        // make local copy and add renderer specific data sets
-        final List<DataSet> localDataSetList = new ArrayList<>(datasets);
-        // N.B. only render data sets that are directly attached to this
-        // renderer
-        localDataSetList.addAll(getDatasets());
-
-        // If there are no data sets
-        if (localDataSetList.isEmpty()) {
-            return;
-        }
-
-        final Axis xAxis = xyChart.getXAxis();
-        final double xAxisWidth = xAxis.getWidth();
-        final double xMin = xAxis.getValueForDisplay(0);
-        final double xMax = xAxis.getValueForDisplay(xAxisWidth);
-
-        // N.B. importance of reverse order: start with last index, so that
-        // most(-like) important DataSet is drawn on top of the others
-
-        for (int dataSetIndex = localDataSetList.size() - 1; dataSetIndex >= 0; dataSetIndex--) {
-            final DataSet dataSet = localDataSetList.get(dataSetIndex);
-            dataSet.lock().readLockGuardOptimistic(() -> {
-                // check for potentially reduced data range we are supposed to plot
-                final int indexMin = Math.max(0, dataSet.getIndex(DataSet.DIM_X, xMin));
-                final int indexMax = Math.min(dataSet.getIndex(DataSet.DIM_X, xMax) + 1, dataSet.getDataCount(DataSet.DIM_X));
-
-                // return if zero length data set
-                if (indexMax - indexMin <= 0) {
-                    return;
-                }
-
-                if (horizontalMarker.get()) {
-                    // draw horizontal marker
-                    drawHorizontalLabelledMarker(gc, xyChart, dataSet, indexMin, indexMax);
-                }
-
-                if (verticalMarker.get()) {
-                    // draw vertical marker
-                    drawVerticalLabelledMarker(gc, xyChart, dataSet, indexMin, indexMax);
-                }
-            });
-
-        } // end of 'dataSetIndex' loop
-
-        ProcessingProfiler.getTimeDiff(start);
-    }
-
     /**
-     * Draws horizontal markers with horizontal (default) labels attached to the
-     * top
+     * Draws horizontal markers with horizontal (default) labels attached to the top
      *
-     * @param gc
-     *            the graphics context from the Canvas parent
-     * @param chart
-     *            instance of the calling chart
-     * @param dataSet
-     *            instance of the data set that is supposed to be drawn
-     * @param indexMin
-     *            minimum index of data set to be drawn
-     * @param indexMax
-     *            maximum index of data set to be drawn
+     * @param gc the graphics context from the Canvas parent
+     * @param chart instance of the calling chart
+     * @param dataSet instance of the data set that is supposed to be drawn
+     * @param indexMin minimum index of data set to be drawn
+     * @param indexMax maximum index of data set to be drawn
      */
     protected void drawHorizontalLabelledMarker(final GraphicsContext gc, final XYChart chart, final DataSet dataSet,
             final int indexMin, final int indexMax) {
@@ -162,19 +94,20 @@ public class LabelledMarkerRenderer extends AbstractDataSetManagement<LabelledMa
         gc.restore();
     }
 
+    @Override
+    public Canvas drawLegendSymbol(DataSet dataSet, int dsIndex, int width, int height) {
+        // not applicable
+        return null;
+    }
+
     /**
      * Draws vertical markers with vertical (default) labels attached to the top
      *
-     * @param gc
-     *            the graphics context from the Canvas parent
-     * @param chart
-     *            instance of the calling chart
-     * @param dataSet
-     *            instance of the data set that is supposed to be drawn
-     * @param indexMin
-     *            minimum index of data set to be drawn
-     * @param indexMax
-     *            maximum index of data set to be drawn
+     * @param gc the graphics context from the Canvas parent
+     * @param chart instance of the calling chart
+     * @param dataSet instance of the data set that is supposed to be drawn
+     * @param indexMin minimum index of data set to be drawn
+     * @param indexMax maximum index of data set to be drawn
      */
     protected void drawVerticalLabelledMarker(final GraphicsContext gc, final XYChart chart, final DataSet dataSet,
             final int indexMin, final int indexMax) {
@@ -218,6 +151,95 @@ public class LabelledMarkerRenderer extends AbstractDataSetManagement<LabelledMa
         gc.restore();
     }
 
+    public LabelledMarkerRenderer enableHorizontalMarker(final boolean state) {
+        horizontalMarker.set(state);
+        return getThis();
+    }
+
+    public LabelledMarkerRenderer enableVerticalMarker(final boolean state) {
+        verticalMarker.set(state);
+        return getThis();
+    }
+
+    public String getStyle() {
+        return style.get();
+    }
+
+    @Override
+    protected LabelledMarkerRenderer getThis() {
+        return this;
+    }
+
+    public BooleanProperty horizontalMarkerProperty() {
+        return horizontalMarker;
+    }
+
+    public boolean isHorizontalMarker() {
+        return horizontalMarker.get();
+    }
+
+    public boolean isVerticalMarker() {
+        return verticalMarker.get();
+    }
+
+    @Override
+    public void render(final GraphicsContext gc, final Chart chart, final int dataSetOffset,
+            final ObservableList<DataSet> datasets) {
+        final long start = ProcessingProfiler.getTimeStamp();
+        if (!(chart instanceof XYChart)) {
+            throw new InvalidParameterException(
+                    "must be derivative of XYChart for renderer - " + this.getClass().getSimpleName());
+        }
+        final XYChart xyChart = (XYChart) chart;
+
+        // make local copy and add renderer specific data sets
+        final List<DataSet> localDataSetList = new ArrayList<>(datasets);
+        // N.B. only render data sets that are directly attached to this
+        // renderer
+        localDataSetList.addAll(getDatasets());
+
+        // If there are no data sets
+        if (localDataSetList.isEmpty()) {
+            return;
+        }
+
+        final Axis xAxis = xyChart.getXAxis();
+        final double xAxisWidth = xAxis.getWidth();
+        final double xMin = xAxis.getValueForDisplay(0);
+        final double xMax = xAxis.getValueForDisplay(xAxisWidth);
+
+        // N.B. importance of reverse order: start with last index, so that
+        // most(-like) important DataSet is drawn on top of the others
+
+        for (int dataSetIndex = localDataSetList.size() - 1; dataSetIndex >= 0; dataSetIndex--) {
+            final DataSet dataSet = localDataSetList.get(dataSetIndex);
+            dataSet.lock().readLockGuardOptimistic(() -> {
+                // check for potentially reduced data range we are supposed to plot
+                final int indexMin = Math.max(0, dataSet.getIndex(DataSet.DIM_X, xMin));
+                final int indexMax = Math.min(dataSet.getIndex(DataSet.DIM_X, xMax) + 1,
+                        dataSet.getDataCount(DataSet.DIM_X));
+
+                // return if zero length data set
+                if (indexMax - indexMin <= 0) {
+                    return;
+                }
+
+                if (horizontalMarker.get()) {
+                    // draw horizontal marker
+                    drawHorizontalLabelledMarker(gc, xyChart, dataSet, indexMin, indexMax);
+                }
+
+                if (verticalMarker.get()) {
+                    // draw vertical marker
+                    drawVerticalLabelledMarker(gc, xyChart, dataSet, indexMin, indexMax);
+                }
+            });
+
+        } // end of 'dataSetIndex' loop
+
+        ProcessingProfiler.getTimeDiff(start);
+    }
+
     protected void setGraphicsContextAttributes(final GraphicsContext gc, final String style) {
 
         final Color strokeColor = StyleParser.getColorPropertyValue(style, XYChartCss.STROKE_COLOR);
@@ -258,43 +280,13 @@ public class LabelledMarkerRenderer extends AbstractDataSetManagement<LabelledMa
 
     }
 
-    public BooleanProperty horizontalMarkerProperty() {
-        return horizontalMarker;
-    }
-
-    public boolean isHorizontalMarker() {
-        return horizontalMarker.get();
-    }
-
-    public LabelledMarkerRenderer enableHorizontalMarker(final boolean state) {
-        horizontalMarker.set(state);
-        return getThis();
-    }
-
-    public BooleanProperty verticalMarkerProperty() {
-        return verticalMarker;
-    }
-
-    public boolean isVerticalMarker() {
-        return verticalMarker.get();
-    }
-
-    public LabelledMarkerRenderer enableVerticalMarker(final boolean state) {
-        verticalMarker.set(state);
+    public LabelledMarkerRenderer setStyle(final String newStyle) {
+        style.set(newStyle);
         return getThis();
     }
 
     public StringProperty styleProperty() {
         return style;
-    }
-
-    public String getStyle() {
-        return style.get();
-    }
-
-    public LabelledMarkerRenderer setStyle(final String newStyle) {
-        style.set(newStyle);
-        return getThis();
     }
 
     // ******************************* CSS Style Stuff *********************
@@ -316,9 +308,7 @@ public class LabelledMarkerRenderer extends AbstractDataSetManagement<LabelledMa
         return getThis();
     }
 
-    @Override
-    public Canvas drawLegendSymbol(DataSet dataSet, int dsIndex, int width, int height) {
-        // not applicable
-        return null;
+    public BooleanProperty verticalMarkerProperty() {
+        return verticalMarker;
     }
 }

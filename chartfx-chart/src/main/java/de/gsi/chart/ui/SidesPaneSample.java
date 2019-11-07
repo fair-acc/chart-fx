@@ -16,10 +16,6 @@ public class SidesPaneSample extends Application {
     protected static final int SHUTDOWN_PERIOD = 5000; // [ms]
     protected static final int UPDATE_PERIOD = 100; // [ms]
 
-    public static void main(final String[] args) {
-        Application.launch(args);
-    }
-
     @Override
     public void start(final Stage stage) {
         stage.setTitle("TitledPane");
@@ -53,5 +49,9 @@ public class SidesPaneSample extends Application {
 
         stage.setScene(scene);
         stage.show();
+    }
+
+    public static void main(final String[] args) {
+        Application.launch(args);
     }
 }

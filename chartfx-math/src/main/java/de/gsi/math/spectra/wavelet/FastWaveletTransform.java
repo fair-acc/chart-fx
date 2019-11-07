@@ -9,66 +9,13 @@ package de.gsi.math.spectra.wavelet;
  *************************/
 public final class FastWaveletTransform {
 
-    public FastWaveletTransform() {}
-
     static final double[] scale = { 0.0322231006040782f, -0.0126039672622638f, -0.0992195435769564f, 0.297857795605605f,
             0.803738751805386f, 0.497618667632563f, -0.0296355276459604f, -0.0757657147893567f };
+
     static final double[] wavelet = { -scale[7], scale[6], -scale[5], scale[4], -scale[3], scale[2], -scale[1],
             scale[0] };
 
-    public static int mirror(final int i, final int n) {
-        if (i < n) {
-            return i;
-        } else {
-            return 2 * n - i;
-        }
-    }
-
-    public static void transform(final double[] data, final int n) {
-        final double[] ans = new double[n];
-        final int half = n >> 1;
-
-        try {
-            for (int k = 0; k < half; k++) {
-                for (int i = 0; i < wavelet.length; i++) {
-                    final double a = data[mirror(2 * k + i, data.length)] * wavelet[i];
-                    final double b = data[mirror(2 * k + i, data.length)] * scale[i];
-                    ans[k + half] += a;
-                    ans[k] += b;
-                }
-            }
-        } catch (final IndexOutOfBoundsException e) {
-            System.err.println("exception " + n + "  message " + e.getLocalizedMessage());
-        }
-
-        /*
-         * ans[n-3] =
-         * data[n-6]*wavelet[0]+data[n-5]*wavelet[1]+data[n-4]*wavelet[2]+data[n-3]*wavelet[3]+data[n-2]*wavelet[4]+data
-         * [n-1]*wavelet[5]+data[0]*wavelet[6]+data[1]*wavelet[7];
-         * ans[n-2] =
-         * data[n-4]*wavelet[0]+data[n-3]*wavelet[1]+data[n-2]*wavelet[2]+data[n-1]*wavelet[3]+data[0]*wavelet[4]+data[1
-         * ]*wavelet[5]+data[2]*wavelet[6]+data[3]*wavelet[7];
-         * ans[n-1] = data[n-2]*wavelet[0]+data[n-1]*wavelet[1]+data[0]*wavelet[2] +data[1]*wavelet[3]
-         * +data[2]*wavelet[4]+data[3]*wavelet[5]+data[4]*wavelet[6]+data[5]*wavelet[7];
-         * 
-         * ans[half-3] = data[n-6]*scale[0] +data[n-5]*scale[1] +data[n-4]*scale[2] +data[n-3]*scale[3]
-         * +data[n-2]*scale[4]+data[n-1]*scale[5]+data[0]*scale[6]+data[1]*scale[7];
-         * ans[half-2] = data[n-4]*scale[0] +data[n-3]*scale[1] +data[n-2]*scale[2] +data[n-1]*scale[3]
-         * +data[0]*scale[4]+data[1]*scale[5]+data[2]*scale[6]+data[3]*scale[7];
-         * ans[half-1] = data[n-2]*scale[0] +data[n-1]*scale[1] +data[0]*scale[2] +data[1]*scale[3]
-         * +data[2]*scale[4]+data[3]*scale[5]+data[4]*scale[6]+data[5]*scale[7];
-         */
-        System.arraycopy(ans, 0, data, 0, n);
-    }
-
-    public void transform(final double[] v) {
-        int last;
-        for (last = v.length; last > 8; last /= 2) {
-            transform(v, last);
-        }
-        if (last != 8) {
-            System.err.println("Careful! this should be a power of 2 : " + v.length);
-        }
+    public FastWaveletTransform() {
     }
 
     public void invTransform(final double[] v) {
@@ -77,6 +24,16 @@ public final class FastWaveletTransform {
             invTransform(v, last);
         }
         if (last != v.length) {
+            System.err.println("Careful! this should be a power of 2 : " + v.length);
+        }
+    }
+
+    public void transform(final double[] v) {
+        int last;
+        for (last = v.length; last > 8; last /= 2) {
+            transform(v, last);
+        }
+        if (last != 8) {
             System.err.println("Careful! this should be a power of 2 : " + v.length);
         }
     }
@@ -123,5 +80,49 @@ public final class FastWaveletTransform {
         ans[5] += scale[7] * v[n - 1] + wavelet[7] * v[ResultingLength - 1];
 
         System.arraycopy(ans, 0, v, 0, ans.length);
+    }
+
+    public static int mirror(final int i, final int n) {
+        if (i < n) {
+            return i;
+        } else {
+            return 2 * n - i;
+        }
+    }
+
+    public static void transform(final double[] data, final int n) {
+        final double[] ans = new double[n];
+        final int half = n >> 1;
+
+        try {
+            for (int k = 0; k < half; k++) {
+                for (int i = 0; i < wavelet.length; i++) {
+                    final double a = data[mirror(2 * k + i, data.length)] * wavelet[i];
+                    final double b = data[mirror(2 * k + i, data.length)] * scale[i];
+                    ans[k + half] += a;
+                    ans[k] += b;
+                }
+            }
+        } catch (final IndexOutOfBoundsException e) {
+            System.err.println("exception " + n + "  message " + e.getLocalizedMessage());
+        }
+
+        /*
+         * ans[n-3] =
+         * data[n-6]*wavelet[0]+data[n-5]*wavelet[1]+data[n-4]*wavelet[2]+data[n-3]*wavelet[3]+data[n-2]*wavelet[4]+data
+         * [n-1]*wavelet[5]+data[0]*wavelet[6]+data[1]*wavelet[7]; ans[n-2] =
+         * data[n-4]*wavelet[0]+data[n-3]*wavelet[1]+data[n-2]*wavelet[2]+data[n-1]*wavelet[3]+data[0]*wavelet[4]+data[1
+         * ]*wavelet[5]+data[2]*wavelet[6]+data[3]*wavelet[7]; ans[n-1] =
+         * data[n-2]*wavelet[0]+data[n-1]*wavelet[1]+data[0]*wavelet[2] +data[1]*wavelet[3]
+         * +data[2]*wavelet[4]+data[3]*wavelet[5]+data[4]*wavelet[6]+data[5]*wavelet[7];
+         * 
+         * ans[half-3] = data[n-6]*scale[0] +data[n-5]*scale[1] +data[n-4]*scale[2] +data[n-3]*scale[3]
+         * +data[n-2]*scale[4]+data[n-1]*scale[5]+data[0]*scale[6]+data[1]*scale[7]; ans[half-2] = data[n-4]*scale[0]
+         * +data[n-3]*scale[1] +data[n-2]*scale[2] +data[n-1]*scale[3]
+         * +data[0]*scale[4]+data[1]*scale[5]+data[2]*scale[6]+data[3]*scale[7]; ans[half-1] = data[n-2]*scale[0]
+         * +data[n-1]*scale[1] +data[0]*scale[2] +data[1]*scale[3]
+         * +data[2]*scale[4]+data[3]*scale[5]+data[4]*scale[6]+data[5]*scale[7];
+         */
+        System.arraycopy(ans, 0, data, 0, n);
     }
 }

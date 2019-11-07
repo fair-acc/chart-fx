@@ -13,15 +13,14 @@ import javafx.scene.shape.Line;
 import javafx.scene.shape.Polygon;
 
 /**
- * Plugin indicating a specific X or Y value as a line drawn on the plot area,
- * with an optional {@link #textProperty() text label} describing the value.
+ * Plugin indicating a specific X or Y value as a line drawn on the plot area, with an optional {@link #textProperty()
+ * text label} describing the value.
  *
  * @author mhrabia
  */
 public abstract class AbstractSingleValueIndicator extends AbstractValueIndicator {
     /**
-     * The default distance between the data point coordinates and mouse cursor
-     * that triggers shifting the line.
+     * The default distance between the data point coordinates and mouse cursor that triggers shifting the line.
      */
     protected static final int DEFAULT_PICKING_DISTANCE = 30;
     protected static final double MIDDLE_POSITION = 0.5;
@@ -41,15 +40,40 @@ public abstract class AbstractSingleValueIndicator extends AbstractValueIndicato
      */
     protected final Polygon triangle = new Polygon();
 
+    private final DoubleProperty pickingDistance = new SimpleDoubleProperty(this, "pickingDistance",
+            DEFAULT_PICKING_DISTANCE) {
+        @Override
+        protected void invalidated() {
+            if (get() <= 0) {
+                throw new IllegalArgumentException("The " + getName() + " must be a positive value");
+            }
+        }
+    };
+
+    private final DoubleProperty value = new SimpleDoubleProperty(this, "value") {
+        @Override
+        protected void invalidated() {
+            layoutChildren();
+        }
+    };
+
+    private final DoubleProperty labelPosition = new SimpleDoubleProperty(this, "labelPosition", 0.5) {
+        @Override
+        protected void invalidated() {
+            if (get() < 0 || get() > 1) {
+                throw new IllegalArgumentException("labelPosition must be in rage [0,1]");
+            }
+            layoutChildren();
+        }
+    };
+
     /**
      * Creates a new instance of AbstractSingleValueIndicator.
+     * 
      * @param axis reference axis
-     *                        
-     * @param value
-     *            a X value to be indicated
-     * @param text
-     *            the text to be shown by the label. Value of
-     *            {@link #textProperty()}.
+     * 
+     * @param value a X value to be indicated
+     * @param text the text to be shown by the label. Value of {@link #textProperty()}.
      */
     protected AbstractSingleValueIndicator(Axis axis, final double value, final String text) {
         super(axis, text);
@@ -68,35 +92,13 @@ public abstract class AbstractSingleValueIndicator extends AbstractValueIndicato
         getChartChildren().addAll(line, triangle, label);
     }
 
-    private final DoubleProperty pickingDistance = new SimpleDoubleProperty(this, "pickingDistance",
-            DEFAULT_PICKING_DISTANCE) {
-        @Override
-        protected void invalidated() {
-            if (get() <= 0) {
-                throw new IllegalArgumentException("The " + getName() + " must be a positive value");
-            }
-        }
-    };
-
     /**
-     * Distance of the mouse cursor from the line (in pixel) that should trigger
-     * the moving of the line. By default initialized to
-     * {@value #DEFAULT_PICKING_DISTANCE}.
+     * Returns the value of the {@link #labelPositionProperty()}.
      *
-     * @return the picking distance property
+     * @return the relative position of the {@link #textProperty() text label}
      */
-    public final DoubleProperty pickingDistanceProperty() {
-        return pickingDistance;
-    }
-
-    /**
-     * Sets the value of {@link #pickingDistanceProperty()}.
-     *
-     * @param distance
-     *            the new picking distance
-     */
-    public final void setPickingDistance(final double distance) {
-        pickingDistanceProperty().set(distance);
+    public final double getLabelPosition() {
+        return labelPositionProperty().get();
     }
 
     /**
@@ -108,6 +110,15 @@ public abstract class AbstractSingleValueIndicator extends AbstractValueIndicato
         return pickingDistanceProperty().get();
     }
 
+    /**
+     * Returns the indicated value.
+     *
+     * @return indicated value
+     */
+    public final double getValue() {
+        return valueProperty().get();
+    }
+
     private void initLine() {
         // mouse transparent if not editable
         line.setMouseTransparent(true);
@@ -117,11 +128,9 @@ public abstract class AbstractSingleValueIndicator extends AbstractValueIndicato
         pickLine.mouseTransparentProperty().bind(editableIndicatorProperty().not());
         pickLine.setOnMousePressed(mouseEvent -> {
             /*
-             * Record a delta distance for the drag and drop operation. Because
-             * layoutLine() sets the start/end points we have to use these here.
-             * It is enough to use the start point. For X indicators, start x
-             * and end x are identical and for Y indicators start y and end y
-             * are identical.
+             * Record a delta distance for the drag and drop operation. Because layoutLine() sets the start/end points
+             * we have to use these here. It is enough to use the start point. For X indicators, start x and end x are
+             * identical and for Y indicators start y and end y are identical.
              */
             dragDelta.x = pickLine.getStartX() - mouseEvent.getX();
             dragDelta.y = pickLine.getStartY() - mouseEvent.getY();
@@ -138,9 +147,8 @@ public abstract class AbstractSingleValueIndicator extends AbstractValueIndicato
         triangle.getPoints().setAll(-a, -a, -a, +a, +a, +a, +a, -a);
         triangle.setOnMousePressed(mouseEvent -> {
             /*
-             * Record a delta distance for the drag and drop operation. Because
-             * the whole node is translated in layoutMarker we use the layout
-             * position here.
+             * Record a delta distance for the drag and drop operation. Because the whole node is translated in
+             * layoutMarker we use the layout position here.
              */
             dragDelta.x = triangle.getLayoutX() - mouseEvent.getX();
             dragDelta.y = triangle.getLayoutY() - mouseEvent.getY();
@@ -149,72 +157,9 @@ public abstract class AbstractSingleValueIndicator extends AbstractValueIndicato
         });
     }
 
-    private void updateMouseListener(final boolean state) {
-        if (state) {
-            pickLine.setOnMouseReleased(mouseEvent -> pickLine.setCursor(Cursor.HAND));
-            pickLine.setOnMouseEntered(mouseEvent -> pickLine.setCursor(Cursor.HAND));
-            triangle.setOnMouseReleased(mouseEvent -> triangle.setCursor(Cursor.HAND));
-            triangle.setOnMouseEntered(mouseEvent -> triangle.setCursor(Cursor.HAND));
-            label.setOnMouseReleased(mouseEvent -> label.setCursor(Cursor.HAND));
-            label.setOnMouseEntered(mouseEvent -> label.setCursor(Cursor.HAND));
-        } else {
-            pickLine.setOnMouseReleased(null);
-            pickLine.setOnMouseEntered(null);
-            triangle.setOnMouseReleased(null);
-            triangle.setOnMouseEntered(null);
-            label.setOnMouseReleased(null);
-            label.setOnMouseEntered(null);
-        }
-    }
-
-    private final DoubleProperty value = new SimpleDoubleProperty(this, "value") {
-        @Override
-        protected void invalidated() {
-            layoutChildren();
-        }
-    };
-
     /**
-     * Value indicated by this plugin.
-     *
-     * @return value property
-     */
-    public final DoubleProperty valueProperty() {
-        return value;
-    }
-
-    /**
-     * Returns the indicated value.
-     *
-     * @return indicated value
-     */
-    public final double getValue() {
-        return valueProperty().get();
-    }
-
-    /**
-     * Sets the value that should be indicated.
-     *
-     * @param newValue
-     *            value to be indicated
-     */
-    public final void setValue(final double newValue) {
-        valueProperty().set(newValue);
-    }
-
-    private final DoubleProperty labelPosition = new SimpleDoubleProperty(this, "labelPosition", 0.5) {
-        @Override
-        protected void invalidated() {
-            if (get() < 0 || get() > 1) {
-                throw new IllegalArgumentException("labelPosition must be in rage [0,1]");
-            }
-            layoutChildren();
-        }
-    };
-
-    /**
-     * Relative position, between 0.0 (left, bottom) and 1.0 (right, top) of the
-     * description {@link #textProperty() label} in the plot area.
+     * Relative position, between 0.0 (left, bottom) and 1.0 (right, top) of the description {@link #textProperty()
+     * label} in the plot area.
      * <p>
      * <b>Default value: 0.5</b>
      * </p>
@@ -226,26 +171,8 @@ public abstract class AbstractSingleValueIndicator extends AbstractValueIndicato
     }
 
     /**
-     * Returns the value of the {@link #labelPositionProperty()}.
-     *
-     * @return the relative position of the {@link #textProperty() text label}
-     */
-    public final double getLabelPosition() {
-        return labelPositionProperty().get();
-    }
-
-    /**
-     * Sets the new value of the {@link #labelPositionProperty()}.
-     *
-     * @param value
-     *            the label position, between 0.0 and 1.0 (both inclusive)
-     */
-    public final void setLabelPosition(final double value) {
-        labelPositionProperty().set(value);
-    }
-
-    /**
      * Sets the line coordinates.
+     * 
      * @param startX start x coordinate
      * @param startY start y coordinate
      * @param endX stop x coordinate
@@ -268,6 +195,7 @@ public abstract class AbstractSingleValueIndicator extends AbstractValueIndicato
 
     /**
      * Sets the marker coordinates.
+     * 
      * @param startX start x coordinate
      * @param startY start y coordinate
      * @param endX stop x coordinate
@@ -281,6 +209,70 @@ public abstract class AbstractSingleValueIndicator extends AbstractValueIndicato
         triangle.setTranslateX(startX);
         triangle.setTranslateY(startY);
         addChildNodeIfNotPresent(triangle);
+    }
+
+    /**
+     * Distance of the mouse cursor from the line (in pixel) that should trigger the moving of the line. By default
+     * initialized to {@value #DEFAULT_PICKING_DISTANCE}.
+     *
+     * @return the picking distance property
+     */
+    public final DoubleProperty pickingDistanceProperty() {
+        return pickingDistance;
+    }
+
+    /**
+     * Sets the new value of the {@link #labelPositionProperty()}.
+     *
+     * @param value the label position, between 0.0 and 1.0 (both inclusive)
+     */
+    public final void setLabelPosition(final double value) {
+        labelPositionProperty().set(value);
+    }
+
+    /**
+     * Sets the value of {@link #pickingDistanceProperty()}.
+     *
+     * @param distance the new picking distance
+     */
+    public final void setPickingDistance(final double distance) {
+        pickingDistanceProperty().set(distance);
+    }
+
+    /**
+     * Sets the value that should be indicated.
+     *
+     * @param newValue value to be indicated
+     */
+    public final void setValue(final double newValue) {
+        valueProperty().set(newValue);
+    }
+
+    private void updateMouseListener(final boolean state) {
+        if (state) {
+            pickLine.setOnMouseReleased(mouseEvent -> pickLine.setCursor(Cursor.HAND));
+            pickLine.setOnMouseEntered(mouseEvent -> pickLine.setCursor(Cursor.HAND));
+            triangle.setOnMouseReleased(mouseEvent -> triangle.setCursor(Cursor.HAND));
+            triangle.setOnMouseEntered(mouseEvent -> triangle.setCursor(Cursor.HAND));
+            label.setOnMouseReleased(mouseEvent -> label.setCursor(Cursor.HAND));
+            label.setOnMouseEntered(mouseEvent -> label.setCursor(Cursor.HAND));
+        } else {
+            pickLine.setOnMouseReleased(null);
+            pickLine.setOnMouseEntered(null);
+            triangle.setOnMouseReleased(null);
+            triangle.setOnMouseEntered(null);
+            label.setOnMouseReleased(null);
+            label.setOnMouseEntered(null);
+        }
+    }
+
+    /**
+     * Value indicated by this plugin.
+     *
+     * @return value property
+     */
+    public final DoubleProperty valueProperty() {
+        return value;
     }
 
 }

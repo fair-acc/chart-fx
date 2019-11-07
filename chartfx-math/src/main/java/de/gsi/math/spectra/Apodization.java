@@ -10,25 +10,14 @@ import de.gsi.math.TMathConstants;
  * @author rstein
  */
 public enum Apodization {
-    Rectangular("rectangular"),
-    Hamming("Hamming"),
-    Hann("von Hann"),
-    HannExp("exp. von Hann"),
-    Blackman("Blackman"),
-    Nuttall("Nuttall"),
-    BlackmanHarris("Blackman-Harris"),
-    BlackmanNuttall("Blackman-Nuttall"),
-    FlatTop("Flat-Top"),
+    Rectangular("rectangular"), Hamming("Hamming"), Hann("von Hann"), HannExp("exp. von Hann"), Blackman("Blackman"),
+    Nuttall("Nuttall"), BlackmanHarris("Blackman-Harris"), BlackmanNuttall("Blackman-Nuttall"), FlatTop("Flat-Top"),
     Exponential("exponential");
 
     private String fname;
 
     private Apodization(final String name) {
         fname = name;
-    }
-
-    public String getName() {
-        return fname;
     }
 
     /**
@@ -124,6 +113,10 @@ public enum Apodization {
         default:
             return 1.0;
         }
+    }
+
+    public String getName() {
+        return fname;
     }
 
     public static void apodize(final double[] data, final Apodization function) {

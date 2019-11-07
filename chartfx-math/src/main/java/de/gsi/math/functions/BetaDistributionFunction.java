@@ -5,10 +5,18 @@ import de.gsi.math.TMath;
 public class BetaDistributionFunction extends AbstractFunction1D implements Function1D {
 
     /**
-     * initialise the Beta distribution function
-     * parameter order:
-     * parameter[0] = p (default: 5.0)
-     * parameter[1] = q (default: 1.0)
+     * initialise the Beta distribution function parameter order: parameter[0] = p (default: 5.0) parameter[1] = q
+     * (default: 1.0)
+     *
+     * @param name function name
+     */
+    public BetaDistributionFunction(final String name) {
+        this(name, null);
+    }
+
+    /**
+     * initialise the Beta distribution function parameter order: parameter[0] = p (default: 5.0) parameter[1] = q
+     * (default: 1.0)
      *
      * @param name function name
      * @param parameter 0:p 1:q
@@ -27,18 +35,6 @@ public class BetaDistributionFunction extends AbstractFunction1D implements Func
         for (int i = 0; i < Math.min(parameter.length, 2); i++) {
             setParameterValue(i, parameter[0]);
         }
-    }
-
-    /**
-     * initialise the Beta distribution function
-     * parameter order:
-     * parameter[0] = p (default: 5.0)
-     * parameter[1] = q (default: 1.0)
-     *
-     * @param name function name
-     */
-    public BetaDistributionFunction(final String name) {
-        this(name, null);
     }
 
     @Override

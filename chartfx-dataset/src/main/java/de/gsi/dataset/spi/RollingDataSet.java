@@ -79,6 +79,13 @@ public class RollingDataSet extends FragmentedDataSet {
     }
 
     /**
+     * @return maximum depth before points are being dropped
+     */
+    public int getDepth() {
+        return depth;
+    }
+
+    /**
      * @return distance to last data point
      */
     public double getLastLength() {
@@ -90,13 +97,6 @@ public class RollingDataSet extends FragmentedDataSet {
      */
     public void setDepth(final int d) {
         depth = d;
-    }
-
-    /**
-     * @return maximum depth before points are being dropped
-     */
-    public int getDepth() {
-        return depth;
     }
 
     private class InternalDataSet extends DoubleDataSet {

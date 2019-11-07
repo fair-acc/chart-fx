@@ -2,15 +2,14 @@ package de.gsi.chart.utils;
 
 public interface NumberFormatter {
 
-	int getPrecision();
+    int getPrecision();
 
-	NumberFormatter setPrecision(int precision);
+    boolean isExponentialForm();
 
-	boolean isExponentialForm();
+    NumberFormatter setExponentialForm(boolean state);
 
-	NumberFormatter setExponentialForm(boolean state);
+    NumberFormatter setPrecision(int precision);
 
-	String toString(double val);
-
+    String toString(double val);
 
 }

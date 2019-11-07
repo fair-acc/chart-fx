@@ -9,5 +9,7 @@ public enum PolarTickStep {
         this.value = value;
     }
 
-    public double get() { return value; }
+    public double get() {
+        return value;
+    }
 }

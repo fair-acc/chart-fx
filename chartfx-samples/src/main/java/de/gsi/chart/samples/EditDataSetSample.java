@@ -44,8 +44,8 @@ public class EditDataSetSample extends Application {
         final DoubleDataSet dataSet2 = new DoubleDataSet("data set #2 (modify y-only)");
         dataSet2.getAxisDescription(0).set("time", "s");
         dataSet2.getAxisDescription(1).set("Current", "A");
-        //        chart.getDatasets().add(dataSet1); // for single data set
-        //        chart.getDatasets().addAll(dataSet1, dataSet2); // two data sets
+        // chart.getDatasets().add(dataSet1); // for single data set
+        // chart.getDatasets().addAll(dataSet1, dataSet2); // two data sets
 
         // Add data Sets to different Renderers to allow automatic axis names and units
         Renderer renderer1 = new ErrorDataSetRenderer();
@@ -53,7 +53,7 @@ public class EditDataSetSample extends Application {
 //        renderer1.getDatasets().add(dataSet1);
         renderer2.getDatasets().add(dataSet2);
         chart.getRenderers().addAll(renderer1, renderer2);
-        
+
         renderer1.getDatasets().add(dataSet1);
 
         final double[] xValues = new double[N_SAMPLES];
@@ -70,13 +70,6 @@ public class EditDataSetSample extends Application {
         // add some edit constraints
         dataSet2.setEditConstraints(new EditConstraints() {
             @Override
-            public boolean canDelete(int index) {
-                // can delete all points except the first and last five points
-                // as well as resilient point at index 25
-                return (index <= 4 || index >= dataSet2.getDataCount() - 6 || index == 25) ? false : true;
-            }
-
-            @Override
             public boolean canAdd(int index) {
                 return true;
             }
@@ -86,6 +79,13 @@ public class EditDataSetSample extends Application {
                 // example to fix first and last five point, as well as the
                 // resilient
                 // point at index 25
+                return (index <= 4 || index >= dataSet2.getDataCount() - 6 || index == 25) ? false : true;
+            }
+
+            @Override
+            public boolean canDelete(int index) {
+                // can delete all points except the first and last five points
+                // as well as resilient point at index 25
                 return (index <= 4 || index >= dataSet2.getDataCount() - 6 || index == 25) ? false : true;
             }
 
@@ -110,8 +110,7 @@ public class EditDataSetSample extends Application {
     }
 
     /**
-     * @param args
-     *            the command line arguments
+     * @param args the command line arguments
      */
     public static void main(final String[] args) {
         Application.launch(args);

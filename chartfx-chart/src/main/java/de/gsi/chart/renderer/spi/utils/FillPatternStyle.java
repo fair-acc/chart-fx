@@ -20,48 +20,6 @@ public final class FillPatternStyle {
 
     protected static WeakHashMap<Paint, WeakHashMap<Double, Image>> defaultHatchCacheWithStrokeWidth = new WeakHashMap<>();
 
-    public static ImagePattern getDefaultHatch(final Color color) {
-        ImagePattern retVal = FillPatternStyle.defaultHatchCache.get(color);
-        if (retVal == null) {
-            retVal = FillPatternStyle.getDefaultHatch(color, 0.0);
-            FillPatternStyle.defaultHatchCache.put(color, retVal);
-        }
-        return retVal;
-    }
-
-    public static ImagePattern getDefaultHatch(final Paint color, final double xOffset) {
-        return new ImagePattern(FillPatternStyle.createDefaultHatch(color, 1.0), xOffset, xOffset,
-                FillPatternStyle.HATCH_WINDOW_SIZE, FillPatternStyle.HATCH_WINDOW_SIZE, false);
-    }
-
-    public static int getDefaultHatchAngle() {
-        return FillPatternStyle.hatchAngle;
-    }
-
-    public static int getDefaultHatchSpacing() {
-        return FillPatternStyle.hatchSpacing;
-    }
-
-    public static ImagePattern getHatch(final FillPattern fillPattern, final Paint color) {
-        return FillPatternStyle.getHatch(fillPattern, color, 1.0);
-    }
-
-    public static ImagePattern getHatch(final FillPattern fillPattern, final Paint color, final double width) {
-        final Image hatch = FillPatternStyle.createHatch(fillPattern, color, width);
-        return new ImagePattern(hatch, 0, 0, FillPatternStyle.HATCH_WINDOW_SIZE, FillPatternStyle.HATCH_WINDOW_SIZE,
-                false);
-    }
-
-    public static void setDefaultHatchAngle(final int angle) {
-        AssertUtils.gtEqThanZero("setDefaultHatchSpacing", angle);
-        FillPatternStyle.hatchAngle = angle;
-    }
-
-    public static void setDefaultHatchSpacing(final int spacing) {
-        AssertUtils.gtEqThanZero("setDefaultHatchSpacing", spacing);
-        FillPatternStyle.hatchSpacing = spacing;
-    }
-
     private static Image createDefaultHatch(final Paint color, final double strokeWidth) {
         WeakHashMap<Double, Image> checkCache = FillPatternStyle.defaultHatchCacheWithStrokeWidth.get(color);
         if (checkCache != null) {
@@ -94,7 +52,7 @@ public final class FillPatternStyle {
             final WeakHashMap<Double, Image> temp = new WeakHashMap<>();
             temp.put(Double.valueOf(strokeWidth), retVal);
             FillPatternStyle.defaultHatchCacheWithStrokeWidth.put(color, temp);
-            //checkCache = new WeakHashMap<>();
+            // checkCache = new WeakHashMap<>();
         } else {
             checkCache.put(Double.valueOf(strokeWidth), retVal);
         }
@@ -119,8 +77,7 @@ public final class FillPatternStyle {
 
     /**
      * Draws hatching within the (minx,miny) to (maxx,maxy) specified box. This call should be preceded by an
-     * appropriate
-     * clipping range to limit the hatching to a given surface area
+     * appropriate clipping range to limit the hatching to a given surface area
      *
      * @param pane the pane the prototype hatch should be drawn in
      * @param fillPattern requested hatching
@@ -241,16 +198,50 @@ public final class FillPatternStyle {
         }
     }
 
+    public static ImagePattern getDefaultHatch(final Color color) {
+        ImagePattern retVal = FillPatternStyle.defaultHatchCache.get(color);
+        if (retVal == null) {
+            retVal = FillPatternStyle.getDefaultHatch(color, 0.0);
+            FillPatternStyle.defaultHatchCache.put(color, retVal);
+        }
+        return retVal;
+    }
+
+    public static ImagePattern getDefaultHatch(final Paint color, final double xOffset) {
+        return new ImagePattern(FillPatternStyle.createDefaultHatch(color, 1.0), xOffset, xOffset,
+                FillPatternStyle.HATCH_WINDOW_SIZE, FillPatternStyle.HATCH_WINDOW_SIZE, false);
+    }
+
+    public static int getDefaultHatchAngle() {
+        return FillPatternStyle.hatchAngle;
+    }
+
+    public static int getDefaultHatchSpacing() {
+        return FillPatternStyle.hatchSpacing;
+    }
+
+    public static ImagePattern getHatch(final FillPattern fillPattern, final Paint color) {
+        return FillPatternStyle.getHatch(fillPattern, color, 1.0);
+    }
+
+    public static ImagePattern getHatch(final FillPattern fillPattern, final Paint color, final double width) {
+        final Image hatch = FillPatternStyle.createHatch(fillPattern, color, width);
+        return new ImagePattern(hatch, 0, 0, FillPatternStyle.HATCH_WINDOW_SIZE, FillPatternStyle.HATCH_WINDOW_SIZE,
+                false);
+    }
+
+    public static void setDefaultHatchAngle(final int angle) {
+        AssertUtils.gtEqThanZero("setDefaultHatchSpacing", angle);
+        FillPatternStyle.hatchAngle = angle;
+    }
+
+    public static void setDefaultHatchSpacing(final int spacing) {
+        AssertUtils.gtEqThanZero("setDefaultHatchSpacing", spacing);
+        FillPatternStyle.hatchSpacing = spacing;
+    }
+
     public enum FillPattern {
-        SOLID,
-        HATCH,
-        HATCH0,
-        HATCH30,
-        HATCH45,
-        HATCH60,
-        HATCH90,
-        HATCHCROSS1,
-        HATCHCROSS2,
+        SOLID, HATCH, HATCH0, HATCH30, HATCH45, HATCH60, HATCH90, HATCHCROSS1, HATCHCROSS2,
     }
 
 }

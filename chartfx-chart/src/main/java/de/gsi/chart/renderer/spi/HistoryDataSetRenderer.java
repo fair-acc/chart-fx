@@ -13,12 +13,12 @@ import de.gsi.chart.Chart;
 import de.gsi.chart.XYChart;
 import de.gsi.chart.XYChartCss;
 import de.gsi.chart.axes.Axis;
-import de.gsi.dataset.DataSet;
-import de.gsi.dataset.EditableDataSet;
-import de.gsi.dataset.utils.ProcessingProfiler;
 import de.gsi.chart.renderer.Renderer;
 import de.gsi.chart.utils.FXUtils;
 import de.gsi.chart.utils.StyleParser;
+import de.gsi.dataset.DataSet;
+import de.gsi.dataset.EditableDataSet;
+import de.gsi.dataset.utils.ProcessingProfiler;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -104,6 +104,22 @@ public class HistoryDataSetRenderer extends ErrorDataSetRenderer implements Rend
     }
 
     /**
+     * clear renderer history
+     */
+    public void clearHistory() {
+        for (final Renderer renderer : renderers) {
+            try {
+                FXUtils.runAndWait(() -> {
+                    super.getDatasets().removeAll(renderer.getDatasets());
+                    renderer.getDatasets().clear();
+                });
+            } catch (InterruptedException | ExecutionException e) {
+                HistoryDataSetRenderer.LOGGER.error("error in clearHistory()", e);
+            }
+        }
+    }
+
+    /**
      * @return all DataSets that are either from the calling graph or this first specific renderer
      */
     private ObservableList<DataSet> getLocalDataSets() {
@@ -117,6 +133,23 @@ public class HistoryDataSetRenderer extends ErrorDataSetRenderer implements Rend
 
         retVal.removeAll(removeList);
         return retVal;
+    }
+
+    protected void modifyStyle(final DataSet dataSet, final int dataSetIndex) {
+        // modify style and add dsIndex if there is not strokeColor or dsIndex
+        // Marker
+        final String style = dataSet.getStyle();
+        final Map<String, String> map = StyleParser.splitIntoMap(style);
+
+        final String stroke = map.get(XYChartCss.DATASET_STROKE_COLOR.toLowerCase());
+        final String fill = map.get(XYChartCss.DATASET_FILL_COLOR.toLowerCase());
+        final String index = map.get(XYChartCss.DATASET_INDEX.toLowerCase());
+
+        if (stroke == null && fill == null && index == null) {
+            map.put(XYChartCss.DATASET_INDEX, Integer.toString(dataSetIndex));
+            dataSet.setStyle(StyleParser.mapToString(map));
+        }
+
     }
 
     @Override
@@ -154,23 +187,6 @@ public class HistoryDataSetRenderer extends ErrorDataSetRenderer implements Rend
         super.render(gc, chart, dataSetOffset, emptyList);
 
         ProcessingProfiler.getTimeDiff(start);
-    }
-
-    protected void modifyStyle(final DataSet dataSet, final int dataSetIndex) {
-        // modify style and add dsIndex if there is not strokeColor or dsIndex
-        // Marker
-        final String style = dataSet.getStyle();
-        final Map<String, String> map = StyleParser.splitIntoMap(style);
-
-        final String stroke = map.get(XYChartCss.DATASET_STROKE_COLOR.toLowerCase());
-        final String fill = map.get(XYChartCss.DATASET_FILL_COLOR.toLowerCase());
-        final String index = map.get(XYChartCss.DATASET_INDEX.toLowerCase());
-
-        if (stroke == null && fill == null && index == null) {
-            map.put(XYChartCss.DATASET_INDEX, Integer.toString(dataSetIndex));
-            dataSet.setStyle(StyleParser.mapToString(map));
-        }
-
     }
 
     public void shiftHistory() {
@@ -234,22 +250,6 @@ public class HistoryDataSetRenderer extends ErrorDataSetRenderer implements Rend
         // checking -> tradeoff between: 'reduced memory footprint' vs.
         // 'significantly reduced CPU efficiency'
         // System.gc();
-    }
-
-    /**
-     * clear renderer history
-     */
-    public void clearHistory() {
-        for (final Renderer renderer : renderers) {
-            try {
-                FXUtils.runAndWait(() -> {
-                    super.getDatasets().removeAll(renderer.getDatasets());
-                    renderer.getDatasets().clear();
-                });
-            } catch (InterruptedException | ExecutionException e) {
-                HistoryDataSetRenderer.LOGGER.error("error in clearHistory()", e);
-            }
-        }
     }
 
     private static String setLegendCounter(final String oldStyle, final int count) {

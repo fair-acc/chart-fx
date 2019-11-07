@@ -18,76 +18,76 @@ import javafx.util.StringConverter;
  */
 public class DecimalStringConverter extends StringConverter<Number> implements NumberFormatter {
 
-	private int precision = 6;
-	private final DecimalFormat format = new DecimalFormat();
+    private int precision = 6;
+    private final DecimalFormat format = new DecimalFormat();
 
-	public DecimalStringConverter() {
-		buildFormat(precision);
-	}
+    public DecimalStringConverter() {
+        buildFormat(precision);
+    }
 
-	public DecimalStringConverter(int precision) {
-		this.precision = precision;
-		buildFormat(precision);
-	}
+    public DecimalStringConverter(int precision) {
+        this.precision = precision;
+        buildFormat(precision);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see de.gsi.chart.utils.NumberFormatter#getPrecision()
-	 */
-	@Override
-	public int getPrecision() {
-		return precision;
-	}
+    private void buildFormat(int precision) {
+        if (precision == 0) {
+            format.applyPattern("#0");
+        } else {
+            final StringBuilder sb = new StringBuilder(32);
+            sb.append("0.");
+            for (int i = 0; i < precision; i++) {
+                sb.append('0');
+            }
+            format.applyPattern(sb.toString());
+        }
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see de.gsi.chart.utils.NumberFormatter#setPrecision(int)
-	 */
-	@Override
-	public NumberFormatter setPrecision(int precision) {
-		this.precision = precision;
-		buildFormat(precision);
-		return this;
-	}
+    @Override
+    public Number fromString(String string) {
+        return Double.parseDouble(string);
+    }
 
-	@Override
-	public boolean isExponentialForm() {
-		return false;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see de.gsi.chart.utils.NumberFormatter#getPrecision()
+     */
+    @Override
+    public int getPrecision() {
+        return precision;
+    }
 
-	@Override
-	public NumberFormatter setExponentialForm(boolean state) {
-		return this;
-	}
+    @Override
+    public boolean isExponentialForm() {
+        return false;
+    }
 
-	@Override
-	public String toString(double val) {
-		return toString(Double.valueOf(val));
-	}
+    @Override
+    public NumberFormatter setExponentialForm(boolean state) {
+        return this;
+    }
 
-	@Override
-	public String toString(Number object) {
-		return format.format(object);
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see de.gsi.chart.utils.NumberFormatter#setPrecision(int)
+     */
+    @Override
+    public NumberFormatter setPrecision(int precision) {
+        this.precision = precision;
+        buildFormat(precision);
+        return this;
+    }
 
-	@Override
-	public Number fromString(String string) {
-		return Double.parseDouble(string);
-	}
+    @Override
+    public String toString(double val) {
+        return toString(Double.valueOf(val));
+    }
 
-	private void buildFormat(int precision) {
-		if (precision == 0) {
-			format.applyPattern("#0");
-		} else {
-			final StringBuilder sb = new StringBuilder(32);
-			sb.append("0.");
-			for (int i = 0; i < precision; i++) {
-				sb.append('0');
-			}
-			format.applyPattern(sb.toString());
-		}
-	}
+    @Override
+    public String toString(Number object) {
+        return format.format(object);
+    }
 
 }

@@ -10,7 +10,6 @@ import de.gsi.dataset.serializer.spi.BinarySerialiser;
 import de.gsi.dataset.serializer.spi.FastByteBuffer;
 import de.gsi.dataset.serializer.spi.FieldHeader;
 
-
 /**
  *
  * @author rstein
@@ -18,31 +17,28 @@ import de.gsi.dataset.serializer.spi.FieldHeader;
 public class BinarySerialiserTests {
     private static final Logger LOGGER = LoggerFactory.getLogger(BinarySerialiserTests.class);
 
-
     @Test
     public void testBinarySerialiserSimple() {
         FastByteBuffer buffer = new FastByteBuffer();
-        
+
         BinarySerialiser.put(buffer, "boolean", true);
-        BinarySerialiser.put(buffer, "byte", (byte)42);
-        BinarySerialiser.put(buffer, "short", (short)43);
+        BinarySerialiser.put(buffer, "byte", (byte) 42);
+        BinarySerialiser.put(buffer, "short", (short) 43);
         BinarySerialiser.put(buffer, "int", 44);
-        BinarySerialiser.put(buffer, "long", (long)45);
-        
+        BinarySerialiser.put(buffer, "long", (long) 45);
+
         buffer.reset();
         FieldHeader header;
         header = BinarySerialiser.getFieldHeader(buffer);
         assertTrue(header.getFieldName().equals("boolean"), "byte type retrieval");
         assertTrue(buffer.getBoolean(), "byte retrieval");
-        
+
         header = BinarySerialiser.getFieldHeader(buffer);
         assertTrue(header.getFieldName().equals("byte"), "byte type retrieval");
         assertTrue(buffer.getByte() == 42, "byte retrieval");
-
 
         if (LOGGER.isDebugEnabled()) {
             LOGGER.atDebug().log("finished testBinarySerialiserSimple(..)");
         }
     }
 }
-

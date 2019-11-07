@@ -24,100 +24,33 @@ import de.gsi.math.spectra.fft.DoubleFFT_1D;
 public class SpectrumTools {
 
     /**
-     * interpolation using a bary-centre approach
+     * compute equidistant frequency axis based on the length of the magnitude spectrum
      *
-     * @param data data array
-     * @param index 0&lt; index &lt; data.length, location of the to be interpolated peak
-     * @return interpolated bary centre
+     * @param nMag requested length of output vector
+     * @return computed [0.0, 0.5] frequency scale
      */
-    public static double interpolateBaryCentre(final double[] data, final int index) {
-        final double tresolution = 1.0 / (2.0 * data.length);
-
-        if (index > 0 && index < data.length - 1) {
-            double sum = Math.pow(data[index - 1], 1);
-            sum += Math.pow(data[index - 0], 1);
-            sum += Math.pow(data[index + 1], 1);
-
-            double val = data[index - 1] * (index - 1);
-            val += data[index + 0] * (index + 0);
-            val += data[index + 1] * (index + 1);
-            val /= sum;
-            return val * tresolution;
-        } else {
-            return index * tresolution;
+    public static double[] computeFrequencyScale(final int nMag) {
+        final double[] ret = new double[nMag];
+        final double scale = 0.5 / nMag;
+        for (int i = 0; i < nMag; i++) {
+            ret[i] = i * scale;
         }
+        return ret;
     }
 
     /**
-     * interpolation using a Gaussian interpolation
+     * compute equidistant frequency axis based on the length of the magnitude spectrum
      *
-     * @param data data array
-     * @param index 0&lt; index &lt; data.length, location of the to be interpolated peak
-     * @return interpolated gauss index
+     * @param nMag requested length of output vector
+     * @return computed [0.0, 0.5] frequency scale
      */
-    public static double interpolateGaussian(final double[] data, final int index) {
-        final double tresolution = 1.0 / (2 * data.length);
-
-        if (index > 0 && index < data.length - 1) {
-            final double left = Math.pow(data[index - 1], 1);
-            final double center = Math.pow(data[index - 0], 1);
-            final double right = Math.pow(data[index + 1], 1);
-
-            double val = index;
-            val += 0.5 * Math.log(right / left) / Math.log(Math.pow(center, 2) / (left * right));
-            return val * tresolution;
-        } else {
-            return index * tresolution;
+    public static float[] computeFrequencyScaleFloat(final int nMag) {
+        final float[] ret = new float[nMag];
+        final float scale = 0.5f / nMag;
+        for (int i = 0; i < nMag; i++) {
+            ret[i] = i * scale;
         }
-    }
-
-    /**
-     * interpolation using a parabolic interpolation
-     *
-     * @param data data array
-     * @param index 0&lt; index &lt; data.length, location of the to be interpolated peak
-     * @return parabolic-interpolated peak position
-     */
-    public static double interpolateParabolic(final double[] data, final int index) {
-        final double tresolution = 1.0 / (2.0 * data.length);
-
-        if (index > 0 && index < data.length - 1) {
-            final double left = Math.pow(data[index - 1], 1);
-            final double center = Math.pow(data[index - 0], 1);
-            final double right = Math.pow(data[index + 1], 1);
-
-            return (index + 0.5 * (right - left) / (2 * center - left - right)) * tresolution;
-        } else {
-            return data[index] * tresolution;
-        }
-    }
-
-    /**
-     * interpolation using a NAFF/SUSSIX based approach
-     *
-     * @param data data array
-     * @param index 0&lt; index &lt; data.length, location of the to be interpolated peak
-     * @return NAFF-interpolated peak position
-     */
-    public static double interpolateNAFF(final double[] data, final int index) {
-        final double val = index / (double) (2 * data.length);
-        if (index > 0 && index < data.length - 1) {
-            final double pin = TMathConstants.Pi() / data.length;
-            final double left = Math.pow(data[index - 1], 1);
-            final double center = Math.pow(data[index - 0], 1);
-            final double right = Math.pow(data[index + 1], 1);
-
-            if (left < right) {
-                return val + TMathConstants.ATan2(right * TMathConstants.Sin(pin),
-                        center + right * TMathConstants.Cos(pin)) / TMathConstants.Pi();
-            } else {
-                return val
-                        - TMathConstants.ATan2(left * TMathConstants.Sin(pin), center + left * TMathConstants.Cos(pin))
-                                / TMathConstants.Pi();
-            }
-        } else {
-            return val;
-        }
+        return ret;
     }
 
     /**
@@ -125,7 +58,7 @@ public class SpectrumTools {
      *
      * @see DoubleFFT_1D for the expected spectra layout
      * @param data the input data Since due to intrinsic uncertainties the DC and Nyquist frequency components are less
-     *            representative for the given spectrum, their values are set to their adjacent frequency bins.
+     *        representative for the given spectrum, their values are set to their adjacent frequency bins.
      * @return computed magnitude spectrum
      */
     public static double[] computeMagnitudeSpectrum(final double[] data) {
@@ -149,6 +82,50 @@ public class SpectrumTools {
             final double Im = data[i2 + 1];
 
             ret[i] = TMathConstants.Sqrt(TMathConstants.Sqr(Re) + TMathConstants.Sqr(Im)) / ret.length;
+        }
+        if (truncateDCNyq) {
+            // smooth spectra on both ends to minimise DC/Nyquist frequency
+            // artefacts
+            ret[0] = ret[1];
+            ret[ret.length - 1] = ret[ret.length - 2];
+        } else {
+            // full DC/Nyquist frequency treatment
+            ret[0] = data[0] / ret.length;
+            ret[ret.length - 1] = data[1] / ret.length;
+        }
+
+        return ret;
+    }
+
+    /**
+     * compute magnitude power spectra
+     *
+     * @see DoubleFFT_1D for the expected spectra layout
+     * @param data the input data Since due to intrinsic uncertainties the DC and Nyquist frequency components are less
+     *        representative for the given spectrum, their values are set to their adjacent frequency bins.
+     * @return computed magnitude spectrum
+     */
+    public static float[] computeMagnitudeSpectrum(final float[] data) {
+        return computeMagnitudeSpectrum(data);
+    }
+
+    /**
+     * compute magnitude power spectra
+     *
+     * @see DoubleFFT_1D for the expected spectra layout
+     * @param data the input data
+     * @param truncateDCNyq true: whether to smooth spectra and to ZOH the DC and Nyquist frequencies
+     * @return computed magnitude spectrum
+     */
+    public static float[] computeMagnitudeSpectrum(final float[] data, final boolean truncateDCNyq) {
+
+        final float[] ret = new float[data.length / 2];
+        for (int i = 0; i < ret.length; i++) {
+            final int i2 = i << 1;
+            final double Re = data[i2];
+            final double Im = data[i2 + 1];
+
+            ret[i] = (float) (TMathConstants.Sqrt(TMathConstants.Sqr(Re) + TMathConstants.Sqr(Im)) / ret.length);
         }
         if (truncateDCNyq) {
             // smooth spectra on both ends to minimise DC/Nyquist frequency
@@ -217,160 +194,15 @@ public class SpectrumTools {
                     * TMathConstants.Log10((TMathConstants.Sqr(Re) + TMathConstants.Sqr(Im)) / ret.length));
         }
 
-        //            // smooth spectra on both ends to minimise DC/Nyquist frequency
-        //            // artifacts
-        //            ret[0] = ret[1];
-        //            ret[ret.length - 1] = ret[ret.length - 2];
+        // // smooth spectra on both ends to minimise DC/Nyquist frequency
+        // // artifacts
+        // ret[0] = ret[1];
+        // ret[ret.length - 1] = ret[ret.length - 2];
 
         // full DC/Nyquist frequency treatment
         ret[0] = data[0];
         ret[ret.length - 1] = data[1];
 
-        return ret;
-    }
-
-    /**
-     * compute magnitude power spectra
-     *
-     * @see DoubleFFT_1D for the expected spectra layout
-     * @param data the input data Since due to intrinsic uncertainties the DC and Nyquist frequency components are less
-     *            representative for the given spectrum, their values are set to their adjacent frequency bins.
-     * @return computed magnitude spectrum
-     */
-    public static float[] computeMagnitudeSpectrum(final float[] data) {
-        return computeMagnitudeSpectrum(data);
-    }
-
-    /**
-     * compute magnitude power spectra
-     *
-     * @see DoubleFFT_1D for the expected spectra layout
-     * @param data the input data
-     * @param truncateDCNyq true: whether to smooth spectra and to ZOH the DC and Nyquist frequencies
-     * @return computed magnitude spectrum
-     */
-    public static float[] computeMagnitudeSpectrum(final float[] data, final boolean truncateDCNyq) {
-
-        final float[] ret = new float[data.length / 2];
-        for (int i = 0; i < ret.length; i++) {
-            final int i2 = i << 1;
-            final double Re = data[i2];
-            final double Im = data[i2 + 1];
-
-            ret[i] = (float) (TMathConstants.Sqrt(TMathConstants.Sqr(Re) + TMathConstants.Sqr(Im)) / ret.length);
-        }
-        if (truncateDCNyq) {
-            // smooth spectra on both ends to minimise DC/Nyquist frequency
-            // artefacts
-            ret[0] = ret[1];
-            ret[ret.length - 1] = ret[ret.length - 2];
-        } else {
-            // full DC/Nyquist frequency treatment
-            ret[0] = data[0] / ret.length;
-            ret[ret.length - 1] = data[1] / ret.length;
-        }
-
-        return ret;
-    }
-
-    /**
-     * compute phase spectra ([-PI,+PI])
-     *
-     * @see DoubleFFT_1D for the expected spectra layout
-     * @param data the input data
-     * @return computed phase spectrum
-     */
-    public static double[] computePhaseSpectrum(final double[] data) {
-
-        final double[] ret = new double[data.length / 2];
-        for (int i = 0; i < ret.length; i++) {
-            final int i2 = i << 1;
-            final double Re = data[i2];
-            final double Im = data[i2 + 1];
-
-            ret[i] = TMathConstants.ATan2(Im, Re);
-        }
-
-        // smooth spectra on both ends to minimise DC/Nyquist frequency
-        // artifacts
-        ret[0] = ret[1];
-        ret[ret.length - 1] = ret[ret.length - 2];
-
-        return ret;
-    }
-
-    /**
-     * compute phase spectra ([-PI,+PI])
-     *
-     * @see DoubleFFT_1D for the expected spectra layout
-     * @param data the input data
-     * @return phase spectrum
-     */
-    public static float[] computePhaseSpectrum(final float[] data) {
-
-        final float[] ret = new float[data.length / 2];
-        for (int i = 0; i < ret.length; i++) {
-            final int i2 = i << 1;
-            final double Re = data[i2];
-            final double Im = data[i2 + 1];
-
-            ret[i] = (float) TMathConstants.ATan2(Im, Re);
-        }
-
-        // smooth spectra on both ends to minimise DC/Nyquist frequency
-        // artefacts
-        ret[0] = ret[1];
-        ret[ret.length - 1] = ret[ret.length - 2];
-
-        return ret;
-    }
-
-    public static synchronized double[] interpolateSpectrum(final double[] data, final int noversampling) {
-        final double[] val1 = Arrays.copyOf(data, data.length);
-
-        DoubleFFT_1D fft1D = new DoubleFFT_1D(data.length);
-        fft1D.realInverse(val1, true);
-
-        final double[] val2 = new double[noversampling * val1.length];
-        System.arraycopy(val1, 0, val2, 0, val1.length - 2);
-
-        fft1D = new DoubleFFT_1D(noversampling * data.length);
-        fft1D.realForward(val2);
-
-        for (int i = 0; i < val2.length; i++) {
-            val2[i] *= noversampling;
-        }
-
-        return val2;
-    }
-
-    /**
-     * compute equidistant frequency axis based on the length of the magnitude spectrum
-     *
-     * @param nMag requested length of output vector
-     * @return computed [0.0, 0.5] frequency scale
-     */
-    public static double[] computeFrequencyScale(final int nMag) {
-        final double[] ret = new double[nMag];
-        final double scale = 0.5 / nMag;
-        for (int i = 0; i < nMag; i++) {
-            ret[i] = i * scale;
-        }
-        return ret;
-    }
-
-    /**
-     * compute equidistant frequency axis based on the length of the magnitude spectrum
-     *
-     * @param nMag requested length of output vector
-     * @return computed [0.0, 0.5] frequency scale
-     */
-    public static float[] computeFrequencyScaleFloat(final int nMag) {
-        final float[] ret = new float[nMag];
-        final float scale = 0.5f / nMag;
-        for (int i = 0; i < nMag; i++) {
-            ret[i] = i * scale;
-        }
         return ret;
     }
 
@@ -467,32 +299,55 @@ public class SpectrumTools {
         return ret;
     }
 
-    public static double[][] filterPeaksSignalToNoise(final double[][] peaks, final double snRatio,
-            final boolean dBScale) {
-        final double[][] ret = new double[2][peaks[0].length];
-        final double[] x = peaks[0];
-        final double[] y = peaks[1];
-        int count = 0;
-        final double max = TMath.Maximum(y);
-        if (!dBScale) {
-            for (int i = 0; i < peaks[0].length; i++) {
-                if (y[i] > max / snRatio) {
-                    ret[0][count] = x[i];
-                    ret[1][count] = y[i];
-                    count++;
-                }
-            }
-        } else {
-            for (int i = 0; i < peaks[0].length; i++) {
-                if (y[i] > max - snRatio) {
-                    ret[0][count] = x[i];
-                    ret[1][count] = y[i];
-                    count++;
-                }
-            }
+    /**
+     * compute phase spectra ([-PI,+PI])
+     *
+     * @see DoubleFFT_1D for the expected spectra layout
+     * @param data the input data
+     * @return computed phase spectrum
+     */
+    public static double[] computePhaseSpectrum(final double[] data) {
+
+        final double[] ret = new double[data.length / 2];
+        for (int i = 0; i < ret.length; i++) {
+            final int i2 = i << 1;
+            final double Re = data[i2];
+            final double Im = data[i2 + 1];
+
+            ret[i] = TMathConstants.ATan2(Im, Re);
         }
-        ret[0] = Arrays.copyOf(ret[0], count);
-        ret[1] = Arrays.copyOf(ret[1], count);
+
+        // smooth spectra on both ends to minimise DC/Nyquist frequency
+        // artifacts
+        ret[0] = ret[1];
+        ret[ret.length - 1] = ret[ret.length - 2];
+
+        return ret;
+    }
+
+    /**
+     * compute phase spectra ([-PI,+PI])
+     *
+     * @see DoubleFFT_1D for the expected spectra layout
+     * @param data the input data
+     * @return phase spectrum
+     */
+    public static float[] computePhaseSpectrum(final float[] data) {
+
+        final float[] ret = new float[data.length / 2];
+        for (int i = 0; i < ret.length; i++) {
+            final int i2 = i << 1;
+            final double Re = data[i2];
+            final double Im = data[i2 + 1];
+
+            ret[i] = (float) TMathConstants.ATan2(Im, Re);
+        }
+
+        // smooth spectra on both ends to minimise DC/Nyquist frequency
+        // artefacts
+        ret[0] = ret[1];
+        ret[ret.length - 1] = ret[ret.length - 2];
+
         return ret;
     }
 
@@ -556,7 +411,152 @@ public class SpectrumTools {
         ret[1] = Arrays.copyOf(ret[1], count);
         return ret;
     }
-   
+
+    public static double[][] filterPeaksSignalToNoise(final double[][] peaks, final double snRatio,
+            final boolean dBScale) {
+        final double[][] ret = new double[2][peaks[0].length];
+        final double[] x = peaks[0];
+        final double[] y = peaks[1];
+        int count = 0;
+        final double max = TMath.Maximum(y);
+        if (!dBScale) {
+            for (int i = 0; i < peaks[0].length; i++) {
+                if (y[i] > max / snRatio) {
+                    ret[0][count] = x[i];
+                    ret[1][count] = y[i];
+                    count++;
+                }
+            }
+        } else {
+            for (int i = 0; i < peaks[0].length; i++) {
+                if (y[i] > max - snRatio) {
+                    ret[0][count] = x[i];
+                    ret[1][count] = y[i];
+                    count++;
+                }
+            }
+        }
+        ret[0] = Arrays.copyOf(ret[0], count);
+        ret[1] = Arrays.copyOf(ret[1], count);
+        return ret;
+    }
+
+    /**
+     * interpolation using a bary-centre approach
+     *
+     * @param data data array
+     * @param index 0&lt; index &lt; data.length, location of the to be interpolated peak
+     * @return interpolated bary centre
+     */
+    public static double interpolateBaryCentre(final double[] data, final int index) {
+        final double tresolution = 1.0 / (2.0 * data.length);
+
+        if (index > 0 && index < data.length - 1) {
+            double sum = Math.pow(data[index - 1], 1);
+            sum += Math.pow(data[index - 0], 1);
+            sum += Math.pow(data[index + 1], 1);
+
+            double val = data[index - 1] * (index - 1);
+            val += data[index + 0] * (index + 0);
+            val += data[index + 1] * (index + 1);
+            val /= sum;
+            return val * tresolution;
+        } else {
+            return index * tresolution;
+        }
+    }
+
+    /**
+     * interpolation using a Gaussian interpolation
+     *
+     * @param data data array
+     * @param index 0&lt; index &lt; data.length, location of the to be interpolated peak
+     * @return interpolated gauss index
+     */
+    public static double interpolateGaussian(final double[] data, final int index) {
+        final double tresolution = 1.0 / (2 * data.length);
+
+        if (index > 0 && index < data.length - 1) {
+            final double left = Math.pow(data[index - 1], 1);
+            final double center = Math.pow(data[index - 0], 1);
+            final double right = Math.pow(data[index + 1], 1);
+
+            double val = index;
+            val += 0.5 * Math.log(right / left) / Math.log(Math.pow(center, 2) / (left * right));
+            return val * tresolution;
+        } else {
+            return index * tresolution;
+        }
+    }
+
+    /**
+     * interpolation using a NAFF/SUSSIX based approach
+     *
+     * @param data data array
+     * @param index 0&lt; index &lt; data.length, location of the to be interpolated peak
+     * @return NAFF-interpolated peak position
+     */
+    public static double interpolateNAFF(final double[] data, final int index) {
+        final double val = index / (double) (2 * data.length);
+        if (index > 0 && index < data.length - 1) {
+            final double pin = TMathConstants.Pi() / data.length;
+            final double left = Math.pow(data[index - 1], 1);
+            final double center = Math.pow(data[index - 0], 1);
+            final double right = Math.pow(data[index + 1], 1);
+
+            if (left < right) {
+                return val + TMathConstants.ATan2(right * TMathConstants.Sin(pin),
+                        center + right * TMathConstants.Cos(pin)) / TMathConstants.Pi();
+            } else {
+                return val
+                        - TMathConstants.ATan2(left * TMathConstants.Sin(pin), center + left * TMathConstants.Cos(pin))
+                                / TMathConstants.Pi();
+            }
+        } else {
+            return val;
+        }
+    }
+
+    /**
+     * interpolation using a parabolic interpolation
+     *
+     * @param data data array
+     * @param index 0&lt; index &lt; data.length, location of the to be interpolated peak
+     * @return parabolic-interpolated peak position
+     */
+    public static double interpolateParabolic(final double[] data, final int index) {
+        final double tresolution = 1.0 / (2.0 * data.length);
+
+        if (index > 0 && index < data.length - 1) {
+            final double left = Math.pow(data[index - 1], 1);
+            final double center = Math.pow(data[index - 0], 1);
+            final double right = Math.pow(data[index + 1], 1);
+
+            return (index + 0.5 * (right - left) / (2 * center - left - right)) * tresolution;
+        } else {
+            return data[index] * tresolution;
+        }
+    }
+
+    public static synchronized double[] interpolateSpectrum(final double[] data, final int noversampling) {
+        final double[] val1 = Arrays.copyOf(data, data.length);
+
+        DoubleFFT_1D fft1D = new DoubleFFT_1D(data.length);
+        fft1D.realInverse(val1, true);
+
+        final double[] val2 = new double[noversampling * val1.length];
+        System.arraycopy(val1, 0, val2, 0, val1.length - 2);
+
+        fft1D = new DoubleFFT_1D(noversampling * data.length);
+        fft1D.realForward(val2);
+
+        for (int i = 0; i < val2.length; i++) {
+            val2[i] *= noversampling;
+        }
+
+        return val2;
+    }
+
     public static void main(final String[] args) {
         final double[] data = new double[1024];
         final double mean = 128.123456789123456789123456789; // [bins]

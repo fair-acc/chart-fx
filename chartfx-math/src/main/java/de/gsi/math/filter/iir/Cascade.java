@@ -25,9 +25,8 @@ import org.apache.commons.math3.complex.Complex;
 import org.apache.commons.math3.complex.ComplexUtils;
 
 /**
- * The mother of all filters. It contains the coefficients of all
- * filter stages as a sequence of 2nd order filters and the states
- * of the 2nd order filters which also imply if it's direct form I or II
+ * The mother of all filters. It contains the coefficients of all filter stages as a sequence of 2nd order filters and
+ * the states of the 2nd order filters which also imply if it's direct form I or II
  */
 public class Cascade {
 
@@ -40,23 +39,17 @@ public class Cascade {
     // number of biquads in the system
     private int mNumBiquads;
 
-    public int getNumBiquads() {
-        return mNumBiquads;
-    }
-
-    public Biquad getBiquad(final int index) {
-        return mBiquads[index];
-    }
-
     public Cascade() {
         mNumBiquads = 0;
         mBiquads = null;
         mStates = null;
     }
 
-    public void reset() {
-        for (int i = 0; i < mNumBiquads; i++) {
-            mStates[i].reset();
+    public void applyScale(final double scale) {
+        // For higher order filters it might be helpful
+        // to spread this factor between all the stages.
+        if (mBiquads.length > 0) {
+            mBiquads[0].applyScale(scale);
         }
     }
 
@@ -68,6 +61,20 @@ public class Cascade {
             }
         }
         return out;
+    }
+
+    public Biquad getBiquad(final int index) {
+        return mBiquads[index];
+    }
+
+    public int getNumBiquads() {
+        return mNumBiquads;
+    }
+
+    public void reset() {
+        for (int i = 0; i < mNumBiquads; i++) {
+            mStates[i].reset();
+        }
     }
 
     public Complex response(final double normalizedFrequency) {
@@ -93,14 +100,6 @@ public class Cascade {
         }
 
         return ch.divide(cbot);
-    }
-
-    public void applyScale(final double scale) {
-        // For higher order filters it might be helpful
-        // to spread this factor between all the stages.
-        if (mBiquads.length > 0) {
-            mBiquads[0].applyScale(scale);
-        }
     }
 
     public void setLayout(final LayoutBase proto, final int filterTypes) {

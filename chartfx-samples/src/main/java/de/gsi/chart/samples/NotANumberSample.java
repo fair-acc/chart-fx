@@ -36,7 +36,7 @@ public class NotANumberSample extends Application {
         renderer.setMarkerSize(3);
         renderer.setErrorType(ErrorStyle.ERRORSURFACE);
 
-        // enables NaN support (N.B. may have some impact on the plotting 
+        // enables NaN support (N.B. may have some impact on the plotting
         // performance for larger DataSets and/or high rate update (ie. 100 kPoints@25Hz)
         renderer.setAllowNaNs(true);
 

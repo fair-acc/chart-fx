@@ -36,6 +36,142 @@ import javafx.stage.Stage;
 public class ContourChartSample extends Application {
     private static final Logger LOGGER = LoggerFactory.getLogger(ContourChartSample.class);
 
+    private DataSet3D createData() {
+        final double[] x = { -12, -9, -8, -7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 12 };
+        final double[] y = x;
+        final double[][] z = new double[x.length][y.length];
+        for (int yIndex = 0; yIndex < y.length; yIndex++) {
+            for (int xIndex = 0; xIndex < x.length; xIndex++) {
+                z[xIndex][yIndex] = Math.sin(y[yIndex] * x[xIndex]);
+            }
+        }
+
+        return new DefaultData("demoDataSet", ContourChartSample.toNumbers(x), ContourChartSample.toNumbers(y), z);
+    }
+
+    private DataSet3D createTestData() {
+        final int nPoints = 1000;
+        final double f = 0.1;
+        final double[] x = new double[nPoints];
+        final double[] y = new double[nPoints];
+        for (int i = 0; i < x.length; i++) {
+            final double val = (i / (double) x.length - 0.5) * 10;
+            x[i] = val;
+            y[i] = val;
+        }
+        final double[][] z = new double[x.length][y.length];
+        for (int yIndex = 0; yIndex < y.length; yIndex++) {
+            for (int xIndex = 0; xIndex < x.length; xIndex++) {
+                // if (x[xIndex]>=-3 && x[xIndex]<=-2 && y[yIndex]>=1 &&
+                // y[yIndex]<=2) {
+                // z[xIndex][yIndex] = 200;
+                // } else {
+                // z[xIndex][yIndex] = 1000.0;
+                // }
+                z[xIndex][yIndex] = Math.sin(2.0 * Math.PI * f * x[xIndex]) * Math.cos(2.0 * Math.PI * f * y[yIndex]);
+            }
+        }
+
+        return new DefaultData("demoDataSet", ContourChartSample.toNumbers(x), ContourChartSample.toNumbers(y), z);
+    }
+
+    private XYChart getChartPane(final Slider slider1, final Slider slider2, final Slider slider3,
+            final ContourType colorMap) {
+        final DefaultNumericAxis xAxis = new DefaultNumericAxis();
+        xAxis.setAnimated(false);
+        xAxis.setAutoRangeRounding(false);
+        xAxis.setName("X Position");
+        xAxis.setAutoRanging(true);
+
+        final DefaultNumericAxis yAxis = new DefaultNumericAxis();
+        yAxis.setAnimated(false);
+        yAxis.setAutoRangeRounding(false);
+        yAxis.setName("Y Position");
+        yAxis.setAutoRanging(true);
+
+        final DefaultNumericAxis zAxis = new DefaultNumericAxis();
+        zAxis.setAnimated(false);
+        zAxis.setAutoRangeRounding(false);
+        zAxis.setName("z Amplitude");
+        zAxis.setAutoRanging(true);
+        zAxis.setSide(Side.RIGHT);
+        zAxis.getProperties().put(Zoomer.ZOOMER_OMIT_AXIS, true);
+
+        final XYChart chart = new XYChart(xAxis, yAxis);
+        chart.getAxes().add(zAxis);
+        chart.setTitle("Test data");
+        chart.setAnimated(false);
+        chart.getRenderers().clear();
+        chart.setLegendVisible(false);
+        final ContourDataSetRenderer contourRenderer = new ContourDataSetRenderer();
+        contourRenderer.getAxes().addAll(xAxis, yAxis, zAxis);
+        chart.getRenderers().setAll(contourRenderer);
+
+        contourRenderer.setContourType(colorMap); // false: for color gradient map, true: for true contour map
+        contourRenderer.getDatasets().add(readImage());
+        // contourRenderer.getDatasets().add(createTestData());
+
+        slider1.valueProperty().bindBidirectional(contourRenderer.quantisationLevelsProperty());
+        slider1.valueProperty().addListener((ch, o, n) -> chart.requestLayout());
+
+        slider2.valueProperty().bindBidirectional(contourRenderer.maxContourSegmentsProperty());
+        slider2.valueProperty().addListener((ch, o, n) -> chart.requestLayout());
+
+        slider3.valueProperty().bindBidirectional(contourRenderer.minHexTileSizeProperty());
+        slider3.valueProperty().addListener((ch, o, n) -> chart.requestLayout());
+
+        // chart.getZAxis().setAutoRanging(false);
+        // chart.getZAxis().setUpperBound(1500);
+        // chart.getZAxis().setLowerBound(0);
+        // chart.getZAxis().setTickUnit(100);
+
+        // chart.setData(createData());
+        // chart.setSmooth(true);
+        // chart.setData(readImage());
+        // chart.setLegendSide(Side.RIGHT);
+
+        chart.getPlugins().add(new Zoomer());
+        chart.getPlugins().add(new Panner());
+        chart.getPlugins().add(new EditAxis());
+
+        HBox.setHgrow(chart, Priority.ALWAYS);
+
+        return chart;
+    }
+
+    public DataSet3D readImage() {
+        try (final BufferedReader reader = new BufferedReader(
+                new InputStreamReader(ContourChartSample.class.getResourceAsStream("./testdata/image.txt")))) {
+            // final BufferedReader reader = new BufferedReader(new
+            // InputStreamReader(
+            // ContourChartSampleReference.class.getResourceAsStream("./testdata/image.txt")));
+            reader.readLine();
+            final String[] x = reader.readLine().split(" ");
+            reader.readLine();
+            final String[] y = reader.readLine().split(" ");
+            reader.readLine();
+            final String[] z = reader.readLine().split(" ");
+
+            final Number[] xValues = ContourChartSample.toNumberArray(x);
+            final Number[] yValues = ContourChartSample.toNumberArray(y);
+
+            final double[][] zValues = new double[x.length][y.length];
+            int i = 0;
+            for (int yIdx = 0; yIdx < y.length; yIdx++) {
+                for (int xIdx = 0; xIdx < x.length; xIdx++) {
+                    zValues[xIdx][yIdx] = Double.parseDouble(z[i++]);
+                }
+            }
+            return new DefaultData("contour data", xValues, yValues, zValues);
+
+        } catch (final Exception e) {
+            if (LOGGER.isErrorEnabled()) {
+                LOGGER.atError().setCause(e).log("data read error");
+            }
+        }
+        return null;
+    }
+
     @Override
     public void start(final Stage stage) {
         stage.setTitle("ContourChart Sample");
@@ -111,70 +247,6 @@ public class ContourChartSample extends Application {
         stage.show();
     }
 
-    private XYChart getChartPane(final Slider slider1, final Slider slider2, final Slider slider3,
-            final ContourType colorMap) {
-        final DefaultNumericAxis xAxis = new DefaultNumericAxis();
-        xAxis.setAnimated(false);
-        xAxis.setAutoRangeRounding(false);
-        xAxis.setName("X Position");
-        xAxis.setAutoRanging(true);
-
-        final DefaultNumericAxis yAxis = new DefaultNumericAxis();
-        yAxis.setAnimated(false);
-        yAxis.setAutoRangeRounding(false);
-        yAxis.setName("Y Position");
-        yAxis.setAutoRanging(true);
-
-        final DefaultNumericAxis zAxis = new DefaultNumericAxis();
-        zAxis.setAnimated(false);
-        zAxis.setAutoRangeRounding(false);
-        zAxis.setName("z Amplitude");
-        zAxis.setAutoRanging(true);
-        zAxis.setSide(Side.RIGHT);
-        zAxis.getProperties().put(Zoomer.ZOOMER_OMIT_AXIS, true);
-
-        final XYChart chart = new XYChart(xAxis, yAxis);
-        chart.getAxes().add(zAxis);
-        chart.setTitle("Test data");
-        chart.setAnimated(false);
-        chart.getRenderers().clear();
-        chart.setLegendVisible(false);
-        final ContourDataSetRenderer contourRenderer = new ContourDataSetRenderer();
-        contourRenderer.getAxes().addAll(xAxis, yAxis, zAxis);
-        chart.getRenderers().setAll(contourRenderer);
-
-        contourRenderer.setContourType(colorMap); // false: for color gradient map, true: for true contour map
-        contourRenderer.getDatasets().add(readImage());
-        // contourRenderer.getDatasets().add(createTestData());
-
-        slider1.valueProperty().bindBidirectional(contourRenderer.quantisationLevelsProperty());
-        slider1.valueProperty().addListener((ch, o, n) -> chart.requestLayout());
-
-        slider2.valueProperty().bindBidirectional(contourRenderer.maxContourSegmentsProperty());
-        slider2.valueProperty().addListener((ch, o, n) -> chart.requestLayout());
-
-        slider3.valueProperty().bindBidirectional(contourRenderer.minHexTileSizeProperty());
-        slider3.valueProperty().addListener((ch, o, n) -> chart.requestLayout());
-
-        // chart.getZAxis().setAutoRanging(false);
-        // chart.getZAxis().setUpperBound(1500);
-        // chart.getZAxis().setLowerBound(0);
-        // chart.getZAxis().setTickUnit(100);
-
-        // chart.setData(createData());
-        // chart.setSmooth(true);
-        // chart.setData(readImage());
-        // chart.setLegendSide(Side.RIGHT);
-
-        chart.getPlugins().add(new Zoomer());
-        chart.getPlugins().add(new Panner());
-        chart.getPlugins().add(new EditAxis());
-
-        HBox.setHgrow(chart, Priority.ALWAYS);
-
-        return chart;
-    }
-
     private static void bindAxis(final XYChart chartPane1, final XYChart chartPane2) {
 
         final DefaultNumericAxis xAxis1 = (DefaultNumericAxis) chartPane1.getXAxis();
@@ -205,43 +277,12 @@ public class ContourChartSample extends Application {
         zAxis1.minProperty().bindBidirectional(zAxis2.minProperty());
     }
 
-    private DataSet3D createData() {
-        final double[] x = { -12, -9, -8, -7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 12 };
-        final double[] y = x;
-        final double[][] z = new double[x.length][y.length];
-        for (int yIndex = 0; yIndex < y.length; yIndex++) {
-            for (int xIndex = 0; xIndex < x.length; xIndex++) {
-                z[xIndex][yIndex] = Math.sin(y[yIndex] * x[xIndex]);
-            }
-        }
-
-        return new DefaultData("demoDataSet", ContourChartSample.toNumbers(x), ContourChartSample.toNumbers(y), z);
-    }
-
-    private DataSet3D createTestData() {
-        final int nPoints = 1000;
-        final double f = 0.1;
-        final double[] x = new double[nPoints];
-        final double[] y = new double[nPoints];
-        for (int i = 0; i < x.length; i++) {
-            final double val = (i / (double) x.length - 0.5) * 10;
-            x[i] = val;
-            y[i] = val;
-        }
-        final double[][] z = new double[x.length][y.length];
-        for (int yIndex = 0; yIndex < y.length; yIndex++) {
-            for (int xIndex = 0; xIndex < x.length; xIndex++) {
-                // if (x[xIndex]>=-3 && x[xIndex]<=-2 && y[yIndex]>=1 &&
-                // y[yIndex]<=2) {
-                // z[xIndex][yIndex] = 200;
-                // } else {
-                // z[xIndex][yIndex] = 1000.0;
-                // }
-                z[xIndex][yIndex] = Math.sin(2.0 * Math.PI * f * x[xIndex]) * Math.cos(2.0 * Math.PI * f * y[yIndex]);
-            }
-        }
-
-        return new DefaultData("demoDataSet", ContourChartSample.toNumbers(x), ContourChartSample.toNumbers(y), z);
+    /**
+     * @param args the command line arguments
+     */
+    public static void main(final String[] args) {
+        ProcessingProfiler.setVerboseOutputState(true);
+        Application.launch(args);
     }
 
     private static Number[] toNumberArray(final String[] stringValues) {
@@ -260,39 +301,6 @@ public class ContourChartSample extends Application {
         return result;
     }
 
-    public DataSet3D readImage() {
-        try (final BufferedReader reader = new BufferedReader(
-                new InputStreamReader(ContourChartSample.class.getResourceAsStream("./testdata/image.txt")))) {
-            // final BufferedReader reader = new BufferedReader(new
-            // InputStreamReader(
-            // ContourChartSampleReference.class.getResourceAsStream("./testdata/image.txt")));
-            reader.readLine();
-            final String[] x = reader.readLine().split(" ");
-            reader.readLine();
-            final String[] y = reader.readLine().split(" ");
-            reader.readLine();
-            final String[] z = reader.readLine().split(" ");
-
-            final Number[] xValues = ContourChartSample.toNumberArray(x);
-            final Number[] yValues = ContourChartSample.toNumberArray(y);
-
-            final double[][] zValues = new double[x.length][y.length];
-            int i = 0;
-            for (int yIdx = 0; yIdx < y.length; yIdx++) {
-                for (int xIdx = 0; xIdx < x.length; xIdx++) {
-                    zValues[xIdx][yIdx] = Double.parseDouble(z[i++]);
-                }
-            }
-            return new DefaultData("contour data", xValues, yValues, zValues);
-
-        } catch (final Exception e) {
-            if (LOGGER.isErrorEnabled()) {
-                LOGGER.atError().setCause(e).log("data read error");
-            }
-        }
-        return null;
-    }
-
     public class DefaultData extends AbstractDataSet3D<DefaultData> {
         private final Number[] xValues;
         private final Number[] yValues;
@@ -307,23 +315,16 @@ public class ContourChartSample extends Application {
         }
 
         @Override
-        public double getZ(final int xIndex, final int yIndex) {
-            return zValues[xIndex][yIndex];
-        }
-
-        public void set(final int xIndex, final int yIndex, final double x, final double y, final double z) {
-            xValues[xIndex] = x;
-            yValues[yIndex] = y;
-            zValues[xIndex][yIndex] = z;
-
-        }
-
-        @Override
         public int getDataCount(final int dimIndex) {
             if (dimIndex == DataSet.DIM_X) {
                 return xValues.length;
             }
             return yValues.length;
+        }
+
+        @Override
+        public String getStyle(final int index) {
+            return null;
         }
 
         @Override
@@ -337,16 +338,15 @@ public class ContourChartSample extends Application {
         }
 
         @Override
-        public String getStyle(final int index) {
-            return null;
+        public double getZ(final int xIndex, final int yIndex) {
+            return zValues[xIndex][yIndex];
         }
-    }
 
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(final String[] args) {
-        ProcessingProfiler.setVerboseOutputState(true);
-        Application.launch(args);
+        public void set(final int xIndex, final int yIndex, final double x, final double y, final double z) {
+            xValues[xIndex] = x;
+            yValues[yIndex] = y;
+            zValues[xIndex][yIndex] = z;
+
+        }
     }
 }

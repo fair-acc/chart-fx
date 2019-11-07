@@ -19,6 +19,33 @@ public abstract class AbstractHistogram extends AbstractDataSet<AbstractHistogra
      * Creates histogram with name and range [minX, maxX]
      * 
      * @param name of the data sets
+     * @param xBins the initial bin array (defines [minX, maxX] and nBins)
+     */
+    public AbstractHistogram(final String name, final double[] xBins) {
+        super(name, 2);
+        final int nBins = xBins.length;
+        nAxisBins = new int[2];
+        nAxisBins[0] = nBins + 2; // N.B. one bin for underflow, one bin for overflow
+        nAxisBins[1] = nBins + 2;
+        data = new double[nAxisBins[0]];
+        axisBins = new double[1][];
+        axisBins[0] = new double[nAxisBins[0]];
+        axisBins[0][0] = -Double.MAX_VALUE;
+        axisBins[0][nAxisBins[0] - 1] = +Double.MAX_VALUE;
+        final double[] xBinsSorted = Arrays.copyOf(xBins, xBins.length);
+        Arrays.sort(xBinsSorted);
+        for (int i = 0; i < nBins; i++) {
+            axisBins[0][i + 1] = xBinsSorted[i];
+            getAxisDescription(0).add(xBinsSorted[i]);
+        }
+        getAxisDescription(1).clear();
+        equidistant = false;
+    }
+
+    /**
+     * Creates histogram with name and range [minX, maxX]
+     * 
+     * @param name of the data sets
      * @param nBins number of bins
      * @param minX minimum of range
      * @param maxX maximum of range
@@ -26,7 +53,7 @@ public abstract class AbstractHistogram extends AbstractDataSet<AbstractHistogra
     public AbstractHistogram(final String name, final int nBins, final double minX, final double maxX) {
         super(name, 2);
         nAxisBins = new int[2];
-        nAxisBins[0] = nBins + 2; // N.B. one bin for underflow, one bin for overflow 
+        nAxisBins[0] = nBins + 2; // N.B. one bin for underflow, one bin for overflow
         nAxisBins[1] = nBins + 2;
         data = new double[nAxisBins[0]];
         getAxisDescription(0).set(minX, maxX);
@@ -49,7 +76,7 @@ public abstract class AbstractHistogram extends AbstractDataSet<AbstractHistogra
             final int nBinsY, final double minY, final double maxY) {
         super(name, 3);
         nAxisBins = new int[3];
-        nAxisBins[0] = nBinsX + 2; // N.B. one bin for underflow, one bin for overflow 
+        nAxisBins[0] = nBinsX + 2; // N.B. one bin for underflow, one bin for overflow
         nAxisBins[1] = nBinsY + 2;
         nAxisBins[2] = nBinsX * nBinsY + 2;
         data = new double[nAxisBins[2]];
@@ -57,48 +84,6 @@ public abstract class AbstractHistogram extends AbstractDataSet<AbstractHistogra
         getAxisDescription(1).set(minY, maxY);
         getAxisDescription(2).clear();
         equidistant = true;
-    }
-
-    /**
-     * Creates histogram with name and range [minX, maxX]
-     * 
-     * @param name of the data sets
-     * @param xBins the initial bin array (defines [minX, maxX] and nBins)
-     */
-    public AbstractHistogram(final String name, final double[] xBins) {
-        super(name, 2);
-        final int nBins = xBins.length;
-        nAxisBins = new int[2];
-        nAxisBins[0] = nBins + 2; // N.B. one bin for underflow, one bin for overflow 
-        nAxisBins[1] = nBins + 2;
-        data = new double[nAxisBins[0]];
-        axisBins = new double[1][];
-        axisBins[0] = new double[nAxisBins[0]];
-        axisBins[0][0] = -Double.MAX_VALUE;
-        axisBins[0][nAxisBins[0] - 1] = +Double.MAX_VALUE;
-        final double[] xBinsSorted = Arrays.copyOf(xBins, xBins.length);
-        Arrays.sort(xBinsSorted);
-        for (int i = 0; i < nBins; i++) {
-            axisBins[0][i + 1] = xBinsSorted[i];
-            getAxisDescription(0).add(xBinsSorted[i]);
-        }
-        getAxisDescription(1).clear();
-        equidistant = false;
-    }
-
-    @Override
-    public boolean isEquiDistant() {
-        return equidistant;
-    }
-
-    @Override
-    public int getDataCount(final int dimIndex) {
-        return nAxisBins[dimIndex] - 2;
-    }
-
-    @Override
-    public double getBinContent(final int bin) {
-        return data[bin];
     }
 
     @Override
@@ -115,13 +100,19 @@ public abstract class AbstractHistogram extends AbstractDataSet<AbstractHistogra
         fireInvalidated(new UpdatedDataEvent(this, "addBinContent()"));
     }
 
-    protected int findNextLargerIndex(final double[] bin, final double value) {
-        for (int i = 1; i < bin.length; i++) {
-            if (value < bin[i]) {
-                return i - 1;
-            }
-        }
-        return bin.length - 1;
+    @Override
+    public int findBin(final double x, final double y) {
+        final int indexX = findBin(DIM_X, x);
+        final int indexY = findBin(DIM_Y, y);
+        return (getDataCount() * indexY) + indexX;
+    }
+
+    @Override
+    public int findBin(final double x, final double y, final double z) {
+        final int indexX = findBin(DIM_X, x);
+        final int indexY = findBin(DIM_Y, y);
+        final int indexZ = findBin(DIM_Z, z);
+        return (getDataCount() * (indexY + (getDataCount(DIM_Z) * indexZ))) + indexX;
     }
 
     @Override
@@ -144,19 +135,13 @@ public abstract class AbstractHistogram extends AbstractDataSet<AbstractHistogra
         return findNextLargerIndex(axisBins[dimIndex], x);
     }
 
-    @Override
-    public int findBin(final double x, final double y) {
-        final int indexX = findBin(DIM_X, x);
-        final int indexY = findBin(DIM_Y, y);
-        return (getDataCount() * indexY) + indexX;
-    }
-
-    @Override
-    public int findBin(final double x, final double y, final double z) {
-        final int indexX = findBin(DIM_X, x);
-        final int indexY = findBin(DIM_Y, y);
-        final int indexZ = findBin(DIM_Z, z);
-        return (getDataCount() * (indexY + (getDataCount(DIM_Z) * indexZ))) + indexX;
+    protected int findNextLargerIndex(final double[] bin, final double value) {
+        for (int i = 1; i < bin.length; i++) {
+            if (value < bin[i]) {
+                return i - 1;
+            }
+        }
+        return bin.length - 1;
     }
 
     /**
@@ -176,6 +161,21 @@ public abstract class AbstractHistogram extends AbstractDataSet<AbstractHistogra
         }
 
         return axisBins[dimIndex][binIndex] + (0.5 * (axisBins[dimIndex][binIndex + 1] - axisBins[dimIndex][binIndex]));
+    }
+
+    @Override
+    public double getBinContent(final int bin) {
+        return data[bin];
+    }
+
+    @Override
+    public int getDataCount(final int dimIndex) {
+        return nAxisBins[dimIndex] - 2;
+    }
+
+    @Override
+    public boolean isEquiDistant() {
+        return equidistant;
     }
 
     @Override

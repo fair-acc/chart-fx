@@ -2,15 +2,14 @@ package de.gsi.chart.samples.legacy;
 
 import java.util.Timer;
 
-import de.gsi.chart.samples.RollingBufferSample;
 import de.gsi.chart.renderer.ErrorStyle;
 import de.gsi.chart.renderer.datareduction.DefaultDataReducer;
 import de.gsi.chart.renderer.spi.ErrorDataSetRenderer;
+import de.gsi.chart.samples.RollingBufferSample;
 import javafx.application.Application;
 
 /**
- * derived class to benchmark performance of new chart library against JavaFX
- * Chart version
+ * derived class to benchmark performance of new chart library against JavaFX Chart version
  * 
  * @author rstein
  *
@@ -44,8 +43,7 @@ public class RollingBufferNewRefSample extends RollingBufferSample {
     }
 
     /**
-     * @param args
-     *            the command line arguments
+     * @param args the command line arguments
      */
     public static void main(final String[] args) {
         Application.launch(args);

@@ -24,21 +24,30 @@ public class DefaultLogFormatter extends AbstractFormatter {
 
     /**
      * Construct a DefaultFormatter for the given NumberAxis
+     */
+    public DefaultLogFormatter() {
+        super();
+        setTickUnitSupplier(DefaultLogFormatter.DEFAULT_TICK_UNIT_SUPPLIER);
+    }
+
+    /**
+     * Construct a DefaultFormatter for the given NumberAxis
      *
-     * @param axis
-     *            The axis to format tick marks for
+     * @param axis The axis to format tick marks for
      */
     public DefaultLogFormatter(final Axis axis) {
         super(axis);
 
     }
 
-    /**
-     * Construct a DefaultFormatter for the given NumberAxis
-     */
-    public DefaultLogFormatter() {
-        super();
-        setTickUnitSupplier(DefaultLogFormatter.DEFAULT_TICK_UNIT_SUPPLIER);
+    @Override
+    public Number fromString(final String string) {
+        return null;
+    }
+
+    @Override
+    protected double getLogRange() {
+        return Math.abs(Math.log10(rangeMin)) + Math.abs(Math.log10(rangeMax));
     }
 
     @Override
@@ -60,18 +69,8 @@ public class DefaultLogFormatter extends AbstractFormatter {
     }
 
     @Override
-    protected double getLogRange() {
-        return Math.abs(Math.log10(rangeMin)) + Math.abs(Math.log10(rangeMax));
-    }
-
-    @Override
     public String toString(final Number object) {
         return labelCache.get(formatter, object.doubleValue());
-    }
-
-    @Override
-    public Number fromString(final String string) {
-        return null;
     }
 
     private class MyDecimalFormat extends StringConverter<Number> implements NumberFormatter {
@@ -82,8 +81,13 @@ public class DefaultLogFormatter extends AbstractFormatter {
             this.localFormatter = formatter;
         }
 
-        private void setFormatter(final DecimalFormat formatter) {
-            this.localFormatter = formatter;
+        @Override
+        public Number fromString(String source) {
+            try {
+                return localFormatter.parse(source);
+            } catch (ParseException e) {
+                return Double.NaN;
+            }
         }
 
         private DecimalFormat getFormatter() {
@@ -96,17 +100,21 @@ public class DefaultLogFormatter extends AbstractFormatter {
         }
 
         @Override
-        public NumberFormatter setPrecision(int precision) {
-            return this;
-        }
-
-        @Override
         public boolean isExponentialForm() {
             return false;
         }
 
         @Override
         public NumberFormatter setExponentialForm(boolean state) {
+            return this;
+        }
+
+        private void setFormatter(final DecimalFormat formatter) {
+            this.localFormatter = formatter;
+        }
+
+        @Override
+        public NumberFormatter setPrecision(int precision) {
             return this;
         }
 
@@ -118,15 +126,6 @@ public class DefaultLogFormatter extends AbstractFormatter {
         @Override
         public String toString(Number object) {
             return localFormatter.format(object.doubleValue());
-        }
-
-        @Override
-        public Number fromString(String source) {
-            try {
-                return localFormatter.parse(source);
-            } catch (ParseException e) {
-                return Double.NaN;
-            }
         }
 
     }

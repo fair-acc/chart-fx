@@ -52,10 +52,9 @@ import javafx.stage.FileChooser;
 import javafx.util.converter.DoubleStringConverter;
 
 /**
- * Displays the all visible data sets inside a table on demand. Implements
- * copy-paste functionality into system clip-board and *.csv file export to
- * allow further processing in other applications. Also enables editing of
- * values if the underlying DataSet allows it.
+ * Displays the all visible data sets inside a table on demand. Implements copy-paste functionality into system
+ * clip-board and *.csv file export to allow further processing in other applications. Also enables editing of values if
+ * the underlying DataSet allows it.
  * 
  * @author rstein
  * @author akrimm
@@ -75,8 +74,7 @@ public class TableViewer extends ChartPlugin {
     protected boolean editable;
 
     /**
-     * Creates a new instance of DataSetTableViewer class and setup the required
-     * listeners.
+     * Creates a new instance of DataSetTableViewer class and setup the required listeners.
      */
     public TableViewer() {
         super();
@@ -137,6 +135,33 @@ public class TableViewer extends ChartPlugin {
     }
 
     /**
+     * Copies the (selected) table data to the clipboard in csv Format.
+     */
+    public void copySelectedToClipboard() {
+        final ClipboardContent content = new ClipboardContent();
+        content.putString(dsModel.getSelectedData(table.getSelectionModel()));
+        Clipboard.getSystemClipboard().setContent(content);
+    }
+
+    /**
+     * Show a FileChooser and export the (selected) Table Data to the choosen .csv File.
+     */
+    public void exportGridToCSV() {
+        final FileChooser chooser = new FileChooser();
+        final File save = chooser.showSaveDialog(getChart().getScene().getWindow());
+        if (save == null) {
+            return;
+        }
+        final String data = dsModel.getSelectedData(table.getSelectionModel());
+        try (BufferedWriter writer = Files.newBufferedWriter(Paths.get(save.getPath() + ".csv"),
+                StandardCharsets.UTF_8)) {
+            writer.write(data);
+        } catch (IOException ex) {
+            LOGGER.error("error while exporting data to csv", ex);
+        }
+    }
+
+    /**
      * Helper function to initialize the UI elements for the Interactor toolbar.
      * 
      * @return HBox node with the toolbar elements
@@ -179,40 +204,15 @@ public class TableViewer extends ChartPlugin {
         return table;
     }
 
-    /**
-     * Show a FileChooser and export the (selected) Table Data to the choosen
-     * .csv File.
-     */
-    public void exportGridToCSV() {
-        final FileChooser chooser = new FileChooser();
-        final File save = chooser.showSaveDialog(getChart().getScene().getWindow());
-        if (save == null) {
-            return;
-        }
-        final String data = dsModel.getSelectedData(table.getSelectionModel());
-        try (BufferedWriter writer = Files.newBufferedWriter(Paths.get(save.getPath() + ".csv"),
-                StandardCharsets.UTF_8)) {
-            writer.write(data);
-        } catch (IOException ex) {
-            LOGGER.error("error while exporting data to csv", ex);
-        }
+    protected enum ColumnType {
+        X, Y, EXN, EXP, EYN, EYP
     }
 
     /**
-     * Copies the (selected) table data to the clipboard in csv Format.
-     */
-    public void copySelectedToClipboard() {
-        final ClipboardContent content = new ClipboardContent();
-        content.putString(dsModel.getSelectedData(table.getSelectionModel()));
-        Clipboard.getSystemClipboard().setContent(content);
-    }
-
-    /**
-     * Model Abstraction to the DataSets of a chart as the backing for a JavaFX
-     * TableView. Only elements visible on screen are allocated and new elements
-     * are generated onDemand using Cell Factories. Also generates the column
-     * Objects for the TableView and subscribes Change Listeners to update the
-     * Table whenever the datasets change or new Datasets are added
+     * Model Abstraction to the DataSets of a chart as the backing for a JavaFX TableView. Only elements visible on
+     * screen are allocated and new elements are generated onDemand using Cell Factories. Also generates the column
+     * Objects for the TableView and subscribes Change Listeners to update the Table whenever the datasets change or new
+     * Datasets are added
      * 
      * @author akrimm
      */
@@ -245,10 +245,35 @@ public class TableViewer extends ChartPlugin {
         }
 
         /**
-         * @param refreshFunction the refreshFunction to set
+         * @param oldChart The old chart the plugin is operating on
+         * @param newChart The new chart the plugin is operating on
          */
-        public void setRefreshFunction(final Callable<Void> refreshFunction) {
-            this.refreshFunction = refreshFunction;
+        public void chartChanged(final Chart oldChart, final Chart newChart) {
+            if (oldChart != null) {
+                // de-register data set listeners
+                oldChart.getDatasets().removeListener(datasetChangeListener);
+                oldChart.getDatasets().forEach(dataSet -> dataSet.removeListener(dataSetDataUpdateListener));
+                oldChart.getRenderers().removeListener(rendererChangeListener);
+                if (newChart != null) {
+                    newChart.getRenderers()
+                            .forEach(renderer -> renderer.getDatasets().removeListener(datasetChangeListener));
+                }
+            }
+            if (newChart != null) {
+                // register data set listeners
+                newChart.getDatasets().addListener(datasetChangeListener);
+                newChart.getDatasets().forEach(dataSet -> dataSet.addListener(dataSetDataUpdateListener));
+                newChart.getRenderers().addListener(rendererChangeListener);
+                newChart.getRenderers().forEach(renderer -> renderer.getDatasets().addListener(datasetChangeListener));
+            }
+        }
+
+        @Override
+        public boolean contains(final Object o) {
+            if (o instanceof DataSetsRow) {
+                return (nRows > ((DataSetsRow) o).getRow());
+            }
+            return false;
         }
 
         protected void datasetsChanged(final ListChangeListener.Change<? extends DataSet> change) {
@@ -281,90 +306,32 @@ public class TableViewer extends ChartPlugin {
             }
         }
 
-        private void refresh() {
-            try {
-                refreshFunction.call();
-            } catch (Exception e) { // NOPMD 'call()' issues generic 'Exception'
-                LOGGER.error("Error refreshing table model", e);
-            }
-        }
-
-        /**
-         * @param oldChart The old chart the plugin is operating on
-         * @param newChart The new chart the plugin is operating on
-         */
-        public void chartChanged(final Chart oldChart, final Chart newChart) {
-            if (oldChart != null) {
-                // de-register data set listeners
-                oldChart.getDatasets().removeListener(datasetChangeListener);
-                oldChart.getDatasets().forEach(dataSet -> dataSet.removeListener(dataSetDataUpdateListener));
-                oldChart.getRenderers().removeListener(rendererChangeListener);
-                if (newChart != null) {
-                    newChart.getRenderers()
-                            .forEach(renderer -> renderer.getDatasets().removeListener(datasetChangeListener));
-                }
-            }
-            if (newChart != null) {
-                // register data set listeners
-                newChart.getDatasets().addListener(datasetChangeListener);
-                newChart.getDatasets().forEach(dataSet -> dataSet.addListener(dataSetDataUpdateListener));
-                newChart.getRenderers().addListener(rendererChangeListener);
-                newChart.getRenderers().forEach(renderer -> renderer.getDatasets().addListener(datasetChangeListener));
-            }
-        }
-
-        protected void rendererChanged(final ListChangeListener.Change<? extends Renderer> change) {
-            boolean dataSetChanges = false;
-            while (change.next()) {
-                // handle added renderer
-                change.getAddedSubList().forEach(renderer -> renderer.getDatasets().addListener(datasetChangeListener));
-                if (!change.getAddedSubList().isEmpty()) {
-                    dataSetChanges = true;
-                }
-
-                // handle removed renderer
-                change.getRemoved().forEach(renderer -> renderer.getDatasets().removeListener(datasetChangeListener));
-                if (!change.getRemoved().isEmpty()) {
-                    dataSetChanges = true;
-                }
-            }
-
-            if (dataSetChanges) {
-                this.refresh();
-            }
-        }
-
         @Override
         public DataSetsRow get(final int row) {
             return new DataSetsRow(row, this);
             // return getDataSetsRow(row);
         }
 
-        @Override
-        public int size() {
-            return nRows;
-        }
-
-        @Override
-        public boolean isEmpty() {
-            return (nRows >= 0);
-        }
-
-        @Override
-        public boolean contains(final Object o) {
-            if (o instanceof DataSetsRow) {
-                return (nRows > ((DataSetsRow) o).getRow());
+        protected String getAllData() {
+            final StringBuilder sb = new StringBuilder();
+            sb.append('#');
+            for (TableColumn<DataSetsRow, ?> col : columns) {
+                sb.append(col.getText()).append(", ");
             }
-            return false;
-        }
-
-        @Override
-        public int indexOf(final Object o) {
-            if (o instanceof DataSetsRow) {
-                final int row = ((DataSetsRow) o).row;
-                return row < nRows ? row : -1;
+            sb.setCharAt(sb.length() - 2, '\n');
+            sb.deleteCharAt(sb.length() - 1);
+            for (int r = 0; r < nRows; r++) {
+                for (TableColumn<DataSetsRow, ?> col : columns) {
+                    if (col instanceof DataSetTableColumn) {
+                        sb.append(((DataSetTableColumn) col).getValue(r)).append(", ");
+                    } else {
+                        sb.append(col.getCellData(r)).append(", ");
+                    }
+                }
+                sb.setCharAt(sb.length() - 2, '\n');
+                sb.deleteCharAt(sb.length() - 1);
             }
-            return -1;
+            return sb.toString();
         }
 
         public ObservableList<TableColumn<DataSetsRow, ?>> getColumns() {
@@ -410,28 +377,6 @@ public class TableViewer extends ChartPlugin {
             return sb.toString();
         }
 
-        protected String getAllData() {
-            final StringBuilder sb = new StringBuilder();
-            sb.append('#');
-            for (TableColumn<DataSetsRow, ?> col : columns) {
-                sb.append(col.getText()).append(", ");
-            }
-            sb.setCharAt(sb.length() - 2, '\n');
-            sb.deleteCharAt(sb.length() - 1);
-            for (int r = 0; r < nRows; r++) {
-                for (TableColumn<DataSetsRow, ?> col : columns) {
-                    if (col instanceof DataSetTableColumn) {
-                        sb.append(((DataSetTableColumn) col).getValue(r)).append(", ");
-                    } else {
-                        sb.append(col.getCellData(r)).append(", ");
-                    }
-                }
-                sb.setCharAt(sb.length() - 2, '\n');
-                sb.deleteCharAt(sb.length() - 1);
-            }
-            return sb.toString();
-        }
-
         public double getValue(final int row, final DataSet ds, final ColumnType type) {
             if (row >= ds.getDataCount(DIM_X)) {
                 return 0.0;
@@ -459,69 +404,63 @@ public class TableViewer extends ChartPlugin {
             }
         }
 
-        /**
-         * A simple Column displaying the Table Row and styled like the Table
-         * Header, non editable
-         *
-         * @author akrimm
-         */
-        protected class RowIndexHeaderTableColumn extends TableColumn<DataSetsRow, Integer> {
-            public RowIndexHeaderTableColumn() {
-                super();
-                setCellValueFactory(dataSetsRow -> {
-                    return new ReadOnlyObjectWrapper<>(dataSetsRow.getValue().getRow());
-                });
-                getStyleClass().add("column-header"); // make the column look
-                                                      // like a header
-                setEditable(false);
+        @Override
+        public int indexOf(final Object o) {
+            if (o instanceof DataSetsRow) {
+                final int row = ((DataSetsRow) o).row;
+                return row < nRows ? row : -1;
+            }
+            return -1;
+        }
+
+        @Override
+        public boolean isEmpty() {
+            return (nRows >= 0);
+        }
+
+        private void refresh() {
+            try {
+                refreshFunction.call();
+            } catch (Exception e) { // NOPMD 'call()' issues generic 'Exception'
+                LOGGER.error("Error refreshing table model", e);
+            }
+        }
+
+        protected void rendererChanged(final ListChangeListener.Change<? extends Renderer> change) {
+            boolean dataSetChanges = false;
+            while (change.next()) {
+                // handle added renderer
+                change.getAddedSubList().forEach(renderer -> renderer.getDatasets().addListener(datasetChangeListener));
+                if (!change.getAddedSubList().isEmpty()) {
+                    dataSetChanges = true;
+                }
+
+                // handle removed renderer
+                change.getRemoved().forEach(renderer -> renderer.getDatasets().removeListener(datasetChangeListener));
+                if (!change.getRemoved().isEmpty()) {
+                    dataSetChanges = true;
+                }
+            }
+
+            if (dataSetChanges) {
+                this.refresh();
             }
         }
 
         /**
-         * Columns for a DataSet. Manages the the nested subcolumns for the
-         * actual data and handles updates of the DataSet.
-         * 
-         * @author akrimm
+         * @param refreshFunction the refreshFunction to set
          */
-        protected class DataSetTableColumns extends TableColumn<DataSetsRow, Double> {
-            private final DataSet dataSet;
+        public void setRefreshFunction(final Callable<Void> refreshFunction) {
+            this.refreshFunction = refreshFunction;
+        }
 
-            public DataSetTableColumns(final DataSet dataSet) {
-                super(dataSet.getName());
-                this.dataSet = dataSet;
-                addSubcolumns();
-
-            }
-
-            private void addSubcolumns() {
-                this.getColumns().add(new DataSetTableColumn("x", dataSet, ColumnType.X));
-                this.getColumns().add(new DataSetTableColumn("y", dataSet, ColumnType.Y));
-
-                if (!(dataSet instanceof DataSetError)) {
-                    return;
-                }
-                DataSetError eDs = (DataSetError) dataSet;
-
-                if (eDs.getErrorType(DIM_X) == ErrorType.SYMMETRIC) {
-                    this.getColumns().add(new DataSetTableColumn("e_x", dataSet, ColumnType.EXN));
-                }
-                if (eDs.getErrorType(DIM_X) == ErrorType.ASYMMETRIC) {
-                    this.getColumns().add(new DataSetTableColumn("-e_x", dataSet, ColumnType.EXN));
-                    this.getColumns().add(new DataSetTableColumn("+e_x", dataSet, ColumnType.EXP));
-                }
-                if (eDs.getErrorType(DIM_Y) == ErrorType.SYMMETRIC) {
-                    this.getColumns().add(new DataSetTableColumn("e_y", dataSet, ColumnType.EYN));
-                }
-                if (eDs.getErrorType(DIM_Y) == ErrorType.ASYMMETRIC) {
-                    this.getColumns().add(new DataSetTableColumn("-e_y", dataSet, ColumnType.EYN));
-                    this.getColumns().add(new DataSetTableColumn("+e_y", dataSet, ColumnType.EYP));
-                }
-            }
+        @Override
+        public int size() {
+            return nRows;
         }
 
         /**
-         * A Column representing an actual colum displaying Double values from a
-         * DataSet.
+         * A Column representing an actual colum displaying Double values from a DataSet.
          *
          * @author akrimm
          */
@@ -530,13 +469,11 @@ public class TableViewer extends ChartPlugin {
             private final ColumnType type;
 
             /**
-             * Creates a TableColumn with the text set to the provided string,
-             * with default comparator. The cell factory and onEditCommit
-             * implementation facilitate editing of the DataSet column
-             * identified by the ds and type Parameter
+             * Creates a TableColumn with the text set to the provided string, with default comparator. The cell factory
+             * and onEditCommit implementation facilitate editing of the DataSet column identified by the ds and type
+             * Parameter
              * 
-             * @param text The string to show when the TableColumn is placed
-             *            within the TableView
+             * @param text The string to show when the TableColumn is placed within the TableView
              * @param dataSet The dataset containing the column
              * @param type The field of the data to be shown
              */
@@ -550,6 +487,10 @@ public class TableViewer extends ChartPlugin {
                 if (editable) {
                     updateEditableState();
                 }
+            }
+
+            public double getValue(final int row) {
+                return dsModel.getValue(row, ds, type);
             }
 
             private void updateEditableState() {
@@ -615,32 +556,75 @@ public class TableViewer extends ChartPlugin {
                     }
                 });
             }
+        }
 
-            public double getValue(final int row) {
-                return dsModel.getValue(row, ds, type);
+        /**
+         * Columns for a DataSet. Manages the the nested subcolumns for the actual data and handles updates of the
+         * DataSet.
+         * 
+         * @author akrimm
+         */
+        protected class DataSetTableColumns extends TableColumn<DataSetsRow, Double> {
+            private final DataSet dataSet;
+
+            public DataSetTableColumns(final DataSet dataSet) {
+                super(dataSet.getName());
+                this.dataSet = dataSet;
+                addSubcolumns();
+
+            }
+
+            private void addSubcolumns() {
+                this.getColumns().add(new DataSetTableColumn("x", dataSet, ColumnType.X));
+                this.getColumns().add(new DataSetTableColumn("y", dataSet, ColumnType.Y));
+
+                if (!(dataSet instanceof DataSetError)) {
+                    return;
+                }
+                DataSetError eDs = (DataSetError) dataSet;
+
+                if (eDs.getErrorType(DIM_X) == ErrorType.SYMMETRIC) {
+                    this.getColumns().add(new DataSetTableColumn("e_x", dataSet, ColumnType.EXN));
+                }
+                if (eDs.getErrorType(DIM_X) == ErrorType.ASYMMETRIC) {
+                    this.getColumns().add(new DataSetTableColumn("-e_x", dataSet, ColumnType.EXN));
+                    this.getColumns().add(new DataSetTableColumn("+e_x", dataSet, ColumnType.EXP));
+                }
+                if (eDs.getErrorType(DIM_Y) == ErrorType.SYMMETRIC) {
+                    this.getColumns().add(new DataSetTableColumn("e_y", dataSet, ColumnType.EYN));
+                }
+                if (eDs.getErrorType(DIM_Y) == ErrorType.ASYMMETRIC) {
+                    this.getColumns().add(new DataSetTableColumn("-e_y", dataSet, ColumnType.EYN));
+                    this.getColumns().add(new DataSetTableColumn("+e_y", dataSet, ColumnType.EYP));
+                }
             }
         }
-    }
 
-    protected enum ColumnType {
-        X,
-        Y,
-        EXN,
-        EXP,
-        EYN,
-        EYP
+        /**
+         * A simple Column displaying the Table Row and styled like the Table Header, non editable
+         *
+         * @author akrimm
+         */
+        protected class RowIndexHeaderTableColumn extends TableColumn<DataSetsRow, Integer> {
+            public RowIndexHeaderTableColumn() {
+                super();
+                setCellValueFactory(dataSetsRow -> {
+                    return new ReadOnlyObjectWrapper<>(dataSetsRow.getValue().getRow());
+                });
+                getStyleClass().add("column-header"); // make the column look
+                                                      // like a header
+                setEditable(false);
+            }
+        }
     }
 
     protected class DataSetsRow {
         private final int row;
         private final DataSetsModel model;
 
-        @Override
-        public int hashCode() {
-            int hash = 7;
-            hash = 31 * hash + model.hashCode();
-            hash = 31 * hash + row;
-            return hash;
+        private DataSetsRow(final int row, final DataSetsModel model) {
+            this.row = row;
+            this.model = model;
         }
 
         @Override
@@ -650,11 +634,6 @@ public class TableViewer extends ChartPlugin {
                 return ((dsr.getRow() == row) && model.equals(dsr.getModel()));
             }
             return false;
-        }
-
-        private DataSetsRow(final int row, final DataSetsModel model) {
-            this.row = row;
-            this.model = model;
         }
 
         protected DataSetsModel getModel() {
@@ -667,6 +646,14 @@ public class TableViewer extends ChartPlugin {
 
         public double getValue(final DataSet ds, final ColumnType type) {
             return model.getValue(row, ds, type);
+        }
+
+        @Override
+        public int hashCode() {
+            int hash = 7;
+            hash = 31 * hash + model.hashCode();
+            hash = 31 * hash + row;
+            return hash;
         }
     }
 }

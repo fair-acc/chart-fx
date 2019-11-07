@@ -2,12 +2,6 @@ package de.gsi.math.functions;
 
 public class PolynomialFunction extends AbstractFunction1D implements Function1D {
 
-    public PolynomialFunction(final String name, final int order) {
-        super(name, order);
-        setParameterNames();
-        setErrorEstimateComputation(true);
-    }
-
     public PolynomialFunction(final String name, final double[] parameter) {
         super(name, parameter);
         setParameterNames();
@@ -17,6 +11,21 @@ public class PolynomialFunction extends AbstractFunction1D implements Function1D
     public PolynomialFunction(final String name, final double[] parameter, final String[] parameterNames) {
         super(name, parameter, parameterNames);
         setErrorEstimateComputation(true);
+    }
+
+    public PolynomialFunction(final String name, final int order) {
+        super(name, order);
+        setParameterNames();
+        setErrorEstimateComputation(true);
+    }
+
+    @Override
+    public double getValue(final double x) {
+        double val = 0;
+        for (int i = 0; i < getParameterCount(); i++) {
+            val += getParameterValue(i) * Math.pow(x, i);
+        }
+        return val;
     }
 
     @Override
@@ -29,15 +38,6 @@ public class PolynomialFunction extends AbstractFunction1D implements Function1D
         for (int i = 0; i < getParameterCount(); i++) {
             setParameterName(i, "p" + i);
         }
-    }
-
-    @Override
-    public double getValue(final double x) {
-        double val = 0;
-        for (int i = 0; i < getParameterCount(); i++) {
-            val += getParameterValue(i) * Math.pow(x, i);
-        }
-        return val;
     }
 
     public static void main(final String[] args) {

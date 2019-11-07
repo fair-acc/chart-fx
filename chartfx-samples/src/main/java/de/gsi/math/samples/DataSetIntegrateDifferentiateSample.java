@@ -11,8 +11,7 @@ import javafx.application.Application;
 import javafx.scene.Node;
 
 /**
- * Sample to illustrate integral and differentiation of data sets low-pass
- * filter
+ * Sample to illustrate integral and differentiation of data sets low-pass filter
  * 
  * @author rstein
  */

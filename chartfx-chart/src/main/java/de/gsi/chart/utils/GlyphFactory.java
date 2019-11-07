@@ -27,9 +27,6 @@ import org.controlsfx.glyphfont.GlyphFontRegistry;
 public final class GlyphFactory { // NOPMD nomen est fix
     private static GlyphFont fontAwesome;
 
-    private GlyphFactory() {
-    }
-
     static {
         try (InputStream is = GlyphFactory.class.getResourceAsStream("FONT_AWESOME-webfont")) {
             GlyphFactory.fontAwesome = new FontAwesome(is);
@@ -37,6 +34,9 @@ public final class GlyphFactory { // NOPMD nomen est fix
         } catch (final IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private GlyphFactory() {
     }
 
     /**

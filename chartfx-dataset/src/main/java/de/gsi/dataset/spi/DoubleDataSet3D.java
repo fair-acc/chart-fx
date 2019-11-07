@@ -7,8 +7,8 @@ import de.gsi.dataset.event.RemovedDataEvent;
 import de.gsi.dataset.utils.AssertUtils;
 
 /**
- * Implementation of a AbstractDataSet3D backed by arrays. The z-values are
- * stored in a 2-dim array d[row][column] or d[y][x].
+ * Implementation of a AbstractDataSet3D backed by arrays. The z-values are stored in a 2-dim array d[row][column] or
+ * d[y][x].
  *
  * @author braeun
  */
@@ -30,24 +30,17 @@ public class DoubleDataSet3D extends AbstractDataSet3D<DoubleDataSet3D> {
 
     /**
      * @param name of data set
-     * @param dimX horizontal binning dimension (equidistant model)
-     * @param dimY vertical binning dimension (equidistant model)
+     * @param xValues array containing new X coordinates
+     * @param yValues array containing new X coordinates
+     * @param zValues array containing new X coordinates
      */
-    public DoubleDataSet3D(final String name, final int dimX, final int dimY) {
+    public DoubleDataSet3D(final String name, final double[] xValues, final double[] yValues,
+            final double[][] zValues) {
         super(name);
-        zValues = new double[dimY][dimX];
-        yValues = new double[zValues.length];
-        for (int y = 0; y < yValues.length; y++) {
-            yValues[y] = y;
-        }
-        if (yValues.length > 0) {
-            xValues = new double[zValues[0].length];
-            for (int x = 0; x < xValues.length; x++) {
-                xValues[x] = x;
-            }
-        } else {
-            xValues = new double[0];
-        }
+        checkDimensionConsistency(xValues, yValues, zValues);
+        this.xValues = xValues;
+        this.yValues = yValues;
+        this.zValues = zValues;
     }
 
     /**
@@ -73,17 +66,83 @@ public class DoubleDataSet3D extends AbstractDataSet3D<DoubleDataSet3D> {
 
     /**
      * @param name of data set
-     * @param xValues array containing new X coordinates
-     * @param yValues array containing new X coordinates
-     * @param zValues array containing new X coordinates
+     * @param dimX horizontal binning dimension (equidistant model)
+     * @param dimY vertical binning dimension (equidistant model)
      */
-    public DoubleDataSet3D(final String name, final double[] xValues, final double[] yValues,
-            final double[][] zValues) {
+    public DoubleDataSet3D(final String name, final int dimX, final int dimY) {
         super(name);
-        checkDimensionConsistency(xValues, yValues, zValues);
-        this.xValues = xValues;
-        this.yValues = yValues;
-        this.zValues = zValues;
+        zValues = new double[dimY][dimX];
+        yValues = new double[zValues.length];
+        for (int y = 0; y < yValues.length; y++) {
+            yValues[y] = y;
+        }
+        if (yValues.length > 0) {
+            xValues = new double[zValues[0].length];
+            for (int x = 0; x < xValues.length; x++) {
+                xValues[x] = x;
+            }
+        } else {
+            xValues = new double[0];
+        }
+    }
+
+    /**
+     * clears all data points
+     * 
+     * @return itself (fluent design)
+     */
+    public DoubleDataSet3D clearData() {
+        lock().writeLockGuard(() -> {
+            for (int i = 0; i < zValues.length; i++) {
+                fillArray(zValues[i], 0, zValues[i].length, 0.0);
+            }
+        });
+        fireInvalidated(new RemovedDataEvent(this, "clearData()"));
+        return this;
+    }
+
+    @Override
+    public int getDataCount(final int dimIndex) {
+        if (dimIndex == DataSet.DIM_X) {
+            return xValues.length;
+        } else if (dimIndex == DataSet.DIM_Y) {
+            return yValues.length;
+        }
+        return xValues.length * yValues.length;
+    }
+
+    @Override
+    public String getStyle(final int index) {
+        return null;
+    }
+
+    @Override
+    public double getX(final int i) {
+        return xValues[i];
+    }
+
+    @Override
+    public double[] getXValues() {
+        return Arrays.copyOf(xValues, xValues.length);
+    }
+
+    @Override
+    public double getY(final int i) {
+        return yValues[i];
+    }
+
+    @Override
+    public double[] getYValues() {
+        return Arrays.copyOf(yValues, yValues.length);
+    }
+
+    @Override
+    public double getZ(final int xIndex, final int yIndex) {
+        return zValues[yIndex][xIndex];
+    }
+
+    public double[][] getZValues() {
+        return zValues;
     }
 
     /**
@@ -98,6 +157,39 @@ public class DoubleDataSet3D extends AbstractDataSet3D<DoubleDataSet3D> {
         this.xValues = xValues;
         this.yValues = yValues;
         this.zValues = zValues;
+    }
+
+    /**
+     * @param xIndex index of the to be modified point
+     * @param yIndex index of the to be modified point
+     * @param z new Z coordinate
+     */
+    public void set(final int xIndex, final int yIndex, final double z) {
+        zValues[yIndex][xIndex] = z;
+
+    }
+
+    public void set(final int xIndex, final int yIndex, final double x, final double y, final double z) {
+        xValues[xIndex] = x;
+        yValues[yIndex] = y;
+        zValues[yIndex][xIndex] = z;
+
+    }
+
+    /**
+     * @param xIndex index of the to be modified point
+     * @param x new X coordinate
+     */
+    public void setX(final int xIndex, final double x) {
+        xValues[xIndex] = x;
+    }
+
+    /**
+     * @param yIndex index of the to be modified point
+     * @param y new Y coordinate
+     */
+    public void setY(final int yIndex, final double y) {
+        yValues[yIndex] = y;
     }
 
     private static void checkDimensionConsistency(final double[] xValues, final double[] yValues,
@@ -132,15 +224,10 @@ public class DoubleDataSet3D extends AbstractDataSet3D<DoubleDataSet3D> {
         }
     }
 
-    @Override
-    public double getZ(final int xIndex, final int yIndex) {
-        return zValues[yIndex][xIndex];
-    }
-
     /**
      * fast filling of an array with a default value <br>
-     * initialize a smaller piece of the array and use the System.arraycopy call
-     * to fill in the rest of the array in an expanding binary fashion
+     * initialize a smaller piece of the array and use the System.arraycopy call to fill in the rest of the array in an
+     * expanding binary fashion
      *
      * @param array to be initialized
      * @param indexStart the first index to be set
@@ -159,93 +246,6 @@ public class DoubleDataSet3D extends AbstractDataSet3D<DoubleDataSet3D> {
         for (int i = 1; i < len; i += i) {
             System.arraycopy(array, indexStart, array, i, (len - i) < i ? len - i : i);
         }
-    }
-
-    /**
-     * clears all data points
-     * 
-     * @return itself (fluent design)
-     */
-    public DoubleDataSet3D clearData() {
-        lock().writeLockGuard(() -> {
-            for (int i = 0; i < zValues.length; i++) {
-                fillArray(zValues[i], 0, zValues[i].length, 0.0);
-            }
-        });
-        fireInvalidated(new RemovedDataEvent(this, "clearData()"));
-        return this;
-    }
-
-    public void set(final int xIndex, final int yIndex, final double x, final double y, final double z) {
-        xValues[xIndex] = x;
-        yValues[yIndex] = y;
-        zValues[yIndex][xIndex] = z;
-
-    }
-
-    /**
-     * @param xIndex index of the to be modified point
-     * @param x new X coordinate
-     */
-    public void setX(final int xIndex, final double x) {
-        xValues[xIndex] = x;
-    }
-
-    /**
-     * @param yIndex index of the to be modified point
-     * @param y new Y coordinate
-     */
-    public void setY(final int yIndex, final double y) {
-        yValues[yIndex] = y;
-    }
-
-    /**
-     * @param xIndex index of the to be modified point
-     * @param yIndex index of the to be modified point
-     * @param z new Z coordinate
-     */
-    public void set(final int xIndex, final int yIndex, final double z) {
-        zValues[yIndex][xIndex] = z;
-
-    }
-
-    @Override
-    public int getDataCount(final int dimIndex) {
-        if (dimIndex == DataSet.DIM_X) {
-            return xValues.length;
-        } else if (dimIndex == DataSet.DIM_Y) {
-            return yValues.length;
-        }
-        return xValues.length * yValues.length;
-    }
-
-    @Override
-    public double getX(final int i) {
-        return xValues[i];
-    }
-
-    @Override
-    public double[] getXValues() {
-        return Arrays.copyOf(xValues, xValues.length);
-    }
-
-    @Override
-    public double getY(final int i) {
-        return yValues[i];
-    }
-
-    @Override
-    public double[] getYValues() {
-        return Arrays.copyOf(yValues, yValues.length);
-    }
-
-    @Override
-    public String getStyle(final int index) {
-        return null;
-    }
-
-    public double[][] getZValues() {
-        return zValues;
     }
 
 }

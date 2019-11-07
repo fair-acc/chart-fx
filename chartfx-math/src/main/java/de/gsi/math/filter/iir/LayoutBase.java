@@ -24,8 +24,8 @@ package de.gsi.math.filter.iir;
 import org.apache.commons.math3.complex.Complex;
 
 /**
- * Digital/analogue filter coefficient storage space organising the
- * storage as PoleZeroPairs so that we have as always a 2nd order filter
+ * Digital/analogue filter coefficient storage space organising the storage as PoleZeroPairs so that we have as always a
+ * 2nd order filter
  */
 public class LayoutBase {
 
@@ -33,11 +33,6 @@ public class LayoutBase {
     private PoleZeroPair[] mPair;
     private double mNormalW;
     private double mNormalGain;
-
-    public LayoutBase(final PoleZeroPair[] pairs) {
-        mNumPoles = pairs.length * 2;
-        mPair = pairs;
-    }
 
     public LayoutBase(final int numPoles) {
         mNumPoles = 0;
@@ -48,17 +43,19 @@ public class LayoutBase {
         }
     }
 
-    public void reset() {
-        mNumPoles = 0;
-    }
-
-    public int getNumPoles() {
-        return mNumPoles;
+    public LayoutBase(final PoleZeroPair[] pairs) {
+        mNumPoles = pairs.length * 2;
+        mPair = pairs;
     }
 
     public void add(final Complex pole, final Complex zero) {
         mPair[mNumPoles / 2] = new PoleZeroPair(pole, zero);
         ++mNumPoles;
+    }
+
+    public void add(final ComplexPair poles, final ComplexPair zeros) {
+        mPair[mNumPoles / 2] = new PoleZeroPair(poles.first, zeros.first, poles.second, zeros.second);
+        mNumPoles += 2;
     }
 
     public void addPoleZeroConjugatePairs(final Complex pole, final Complex zero) {
@@ -75,21 +72,24 @@ public class LayoutBase {
         mNumPoles += 2;
     }
 
-    public void add(final ComplexPair poles, final ComplexPair zeros) {
-        mPair[mNumPoles / 2] = new PoleZeroPair(poles.first, zeros.first, poles.second, zeros.second);
-        mNumPoles += 2;
-    }
-
-    public PoleZeroPair getPair(final int pairIndex) {
-        return mPair[pairIndex];
+    public double getNormalGain() {
+        return mNormalGain;
     }
 
     public double getNormalW() {
         return mNormalW;
     }
 
-    public double getNormalGain() {
-        return mNormalGain;
+    public int getNumPoles() {
+        return mNumPoles;
+    }
+
+    public PoleZeroPair getPair(final int pairIndex) {
+        return mPair[pairIndex];
+    }
+
+    public void reset() {
+        mNumPoles = 0;
     }
 
     public void setNormal(final double w, final double g) {

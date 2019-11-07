@@ -28,77 +28,6 @@ public class DataSetLockTest {
     private static int writeCount = 0;
 
     /**
-     * Initalizes a lock and obtains a read lock.
-     * Then a thread is started which tries to obtain a write lock and blocks.
-     * Another thread then obtains a read lock, which succeeds.
-     * The main thread releases its read lock, upon which the writer thread also
-     * completes.
-     */
-    @Test
-    @DisplayName("Tests DefaultDataSetLock for interaction of write and read lock")
-    @Timeout(value = 5, unit = TimeUnit.SECONDS)
-    public void testDataSetLockReadWrite() {
-        DefaultDataSet dataSet = new DefaultDataSet("test");
-        DefaultDataSetLock<DefaultDataSet> myLockImpl = new DefaultDataSetLock<>(dataSet);
-        DataSetLock<DefaultDataSet> myLock = myLockImpl;
-        // assert initial state
-        assertEquals(0, myLockImpl.getReaderCount());
-        assertEquals(0, myLockImpl.getWriterCount());
-        assertTrue(dataSet.isAutoNotification());
-
-        myLock.readLock().getDataCount();
-        assertEquals(1, myLockImpl.getReaderCount());
-        assertEquals(0, myLockImpl.getWriterCount());
-
-        myLock.readLock();
-        assertEquals(2, myLockImpl.getReaderCount());
-        assertEquals(0, myLockImpl.getWriterCount());
-
-        myLock.readUnLock();
-        assertEquals(1, myLockImpl.getReaderCount());
-        assertEquals(0, myLockImpl.getWriterCount());
-
-        Thread writer = new Thread(() -> {
-            myLock.writeLock().add(1, 2);
-            assertEquals(0, myLockImpl.getReaderCount());
-            assertEquals(1, myLockImpl.getWriterCount());
-            myLock.writeUnLock();
-            assertEquals(0, myLockImpl.getWriterCount());
-        });
-        writer.start();
-
-        sleep(200);
-        assertTrue(writer.isAlive());
-        assertEquals(1, myLockImpl.getReaderCount());
-        assertEquals(0, myLockImpl.getWriterCount());
-
-        Thread reader = new Thread(() -> {
-            myLock.readLock().getDataCount();
-            assertEquals(2, myLockImpl.getReaderCount());
-            assertEquals(0, myLockImpl.getWriterCount());
-            myLock.readUnLock();
-        });
-        reader.start();
-
-        try {
-            reader.join();
-        } catch (InterruptedException e) {
-            fail("ReaderThread was interupted");
-        }
-        assertEquals(1, myLockImpl.getReaderCount());
-        assertEquals(0, myLockImpl.getWriterCount());
-
-        assertTrue(writer.isAlive());
-        myLock.readUnLock();
-
-        sleep(200);
-
-        assertFalse(writer.isAlive());
-        assertEquals(0, myLockImpl.getReaderCount());
-        assertEquals(0, myLockImpl.getWriterCount());
-    }
-
-    /**
      * coarse tests N.B. to be refined
      */
     @Test
@@ -312,6 +241,75 @@ public class DataSetLockTest {
         }
         assertEquals(0, myLockImpl.getReaderCount());
         assertEquals(100, readCount);
+    }
+
+    /**
+     * Initalizes a lock and obtains a read lock. Then a thread is started which tries to obtain a write lock and
+     * blocks. Another thread then obtains a read lock, which succeeds. The main thread releases its read lock, upon
+     * which the writer thread also completes.
+     */
+    @Test
+    @DisplayName("Tests DefaultDataSetLock for interaction of write and read lock")
+    @Timeout(value = 5, unit = TimeUnit.SECONDS)
+    public void testDataSetLockReadWrite() {
+        DefaultDataSet dataSet = new DefaultDataSet("test");
+        DefaultDataSetLock<DefaultDataSet> myLockImpl = new DefaultDataSetLock<>(dataSet);
+        DataSetLock<DefaultDataSet> myLock = myLockImpl;
+        // assert initial state
+        assertEquals(0, myLockImpl.getReaderCount());
+        assertEquals(0, myLockImpl.getWriterCount());
+        assertTrue(dataSet.isAutoNotification());
+
+        myLock.readLock().getDataCount();
+        assertEquals(1, myLockImpl.getReaderCount());
+        assertEquals(0, myLockImpl.getWriterCount());
+
+        myLock.readLock();
+        assertEquals(2, myLockImpl.getReaderCount());
+        assertEquals(0, myLockImpl.getWriterCount());
+
+        myLock.readUnLock();
+        assertEquals(1, myLockImpl.getReaderCount());
+        assertEquals(0, myLockImpl.getWriterCount());
+
+        Thread writer = new Thread(() -> {
+            myLock.writeLock().add(1, 2);
+            assertEquals(0, myLockImpl.getReaderCount());
+            assertEquals(1, myLockImpl.getWriterCount());
+            myLock.writeUnLock();
+            assertEquals(0, myLockImpl.getWriterCount());
+        });
+        writer.start();
+
+        sleep(200);
+        assertTrue(writer.isAlive());
+        assertEquals(1, myLockImpl.getReaderCount());
+        assertEquals(0, myLockImpl.getWriterCount());
+
+        Thread reader = new Thread(() -> {
+            myLock.readLock().getDataCount();
+            assertEquals(2, myLockImpl.getReaderCount());
+            assertEquals(0, myLockImpl.getWriterCount());
+            myLock.readUnLock();
+        });
+        reader.start();
+
+        try {
+            reader.join();
+        } catch (InterruptedException e) {
+            fail("ReaderThread was interupted");
+        }
+        assertEquals(1, myLockImpl.getReaderCount());
+        assertEquals(0, myLockImpl.getWriterCount());
+
+        assertTrue(writer.isAlive());
+        myLock.readUnLock();
+
+        sleep(200);
+
+        assertFalse(writer.isAlive());
+        assertEquals(0, myLockImpl.getReaderCount());
+        assertEquals(0, myLockImpl.getWriterCount());
     }
 
     @Test

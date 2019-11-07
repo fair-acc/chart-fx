@@ -71,6 +71,32 @@ public class DataViewerSample extends Application {
 
     private static final int NUM_OF_POINTS = 20;
 
+    /**
+     * create demo JDataViewer Chart
+     *
+     * @return the Swing-based chart component
+     */
+    private XYChart createChart() {
+        final XYChart chart = new TestChart();
+        chart.getXAxis().set("time", "s");
+        chart.getYAxis().set("y-axis", "A");
+
+        final RandomWalkFunction dataset1 = new RandomWalkFunction("Test1", DataViewerSample.NUMBER_OF_POINTS);
+        final RandomWalkFunction dataset2 = new RandomWalkFunction("Test2", DataViewerSample.NUMBER_OF_POINTS);
+        final RandomStepFunction dataset3 = new RandomStepFunction("Test3", DataViewerSample.NUMBER_OF_POINTS);
+        chart.getRenderers().clear();
+        chart.getRenderers().add(new ErrorDataSetRenderer());
+        chart.getDatasets().addAll(Arrays.asList(dataset1, dataset2, dataset3));
+
+        // Start task adding new data
+        final UpdateTask updateTask = new UpdateTask(chart, dataset1, dataset3);
+        final Timer timer = new Timer();
+        // Start update in 2sec.
+        timer.schedule(updateTask, 2000, DataViewerSample.UPDATE_PERIOD);
+
+        return chart;
+    }
+
     @Override
     public void start(final Stage primaryStage) {
         ProcessingProfiler.setVerboseOutputState(false);
@@ -158,15 +184,6 @@ public class DataViewerSample extends Application {
         primaryStage.setOnCloseRequest(e -> Platform.exit());
     }
 
-    private static List<DataSet> createSeries() {
-
-        final List<DataSet> series = new ArrayList<>();
-        for (int i = 0; i < 2; i++) {
-            series.add(createData("Series " + i));
-        }
-        return series;
-    }
-
     private static DoubleDataSet createData(final String name) {
         final DoubleDataSet dataSet = new DoubleDataSet(name, DataViewerSample.NUM_OF_POINTS);
         final Random rnd = new Random();
@@ -176,71 +193,13 @@ public class DataViewerSample extends Application {
         return dataSet;
     }
 
-    public static void main(final String[] args) {
-        Application.launch(args);
-    }
+    private static List<DataSet> createSeries() {
 
-    /**
-     * create demo JDataViewer Chart
-     *
-     * @return the Swing-based chart component
-     */
-    private XYChart createChart() {
-        final XYChart chart = new TestChart();
-        chart.getXAxis().set("time", "s");
-        chart.getYAxis().set("y-axis", "A");
-
-        final RandomWalkFunction dataset1 = new RandomWalkFunction("Test1", DataViewerSample.NUMBER_OF_POINTS);
-        final RandomWalkFunction dataset2 = new RandomWalkFunction("Test2", DataViewerSample.NUMBER_OF_POINTS);
-        final RandomStepFunction dataset3 = new RandomStepFunction("Test3", DataViewerSample.NUMBER_OF_POINTS);
-        chart.getRenderers().clear();
-        chart.getRenderers().add(new ErrorDataSetRenderer());
-        chart.getDatasets().addAll(Arrays.asList(dataset1, dataset2, dataset3));
-
-        // Start task adding new data
-        final UpdateTask updateTask = new UpdateTask(chart, dataset1, dataset3);
-        final Timer timer = new Timer();
-        // Start update in 2sec.
-        timer.schedule(updateTask, 2000, DataViewerSample.UPDATE_PERIOD);
-
-        return chart;
-    }
-
-    private class UpdateTask extends TimerTask {
-        private final TestDataSet<?>[] dataSets;
-        private int count;
-
-        private UpdateTask(final XYChart chart, final TestDataSet<?>... dataSet) {
-            super();
-            dataSets = dataSet.clone();
+        final List<DataSet> series = new ArrayList<>();
+        for (int i = 0; i < 2; i++) {
+            series.add(createData("Series " + i));
         }
-
-        @Override
-        public void run() {
-            final long start = System.currentTimeMillis();
-            for (final TestDataSet<?> dataSet : dataSets) {
-                dataSet.update();
-            }
-
-            if (count % 10 == 0) {
-                final long diff = System.currentTimeMillis() - start;
-                LOGGER.atDebug().log(String.format("update #%d took %d ms", count, diff));
-            }
-
-            count = (count + 1) % 1000;
-        }
-    }
-
-    private class TestChart extends XYChart {
-
-        private TestChart() {
-            super();
-            getPlugins().add(new ParameterMeasurements());
-            getPlugins().add(new Zoomer());
-            getPlugins().add(new TableViewer());
-            getPlugins().add(new EditAxis());
-        }
-
+        return series;
     }
 
     private static Pane getDemoPane() {
@@ -279,5 +238,46 @@ public class DataViewerSample extends Application {
         VBox.setVgrow(box, Priority.ALWAYS);
         box.setId("demoPane");
         return box;
+    }
+
+    public static void main(final String[] args) {
+        Application.launch(args);
+    }
+
+    private class TestChart extends XYChart {
+
+        private TestChart() {
+            super();
+            getPlugins().add(new ParameterMeasurements());
+            getPlugins().add(new Zoomer());
+            getPlugins().add(new TableViewer());
+            getPlugins().add(new EditAxis());
+        }
+
+    }
+
+    private class UpdateTask extends TimerTask {
+        private final TestDataSet<?>[] dataSets;
+        private int count;
+
+        private UpdateTask(final XYChart chart, final TestDataSet<?>... dataSet) {
+            super();
+            dataSets = dataSet.clone();
+        }
+
+        @Override
+        public void run() {
+            final long start = System.currentTimeMillis();
+            for (final TestDataSet<?> dataSet : dataSets) {
+                dataSet.update();
+            }
+
+            if (count % 10 == 0) {
+                final long diff = System.currentTimeMillis() - start;
+                LOGGER.atDebug().log(String.format("update #%d took %d ms", count, diff));
+            }
+
+            count = (count + 1) % 1000;
+        }
     }
 }

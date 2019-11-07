@@ -11,11 +11,11 @@ public class IntStringMap implements Map<Integer, String> {
     private static final String FREE_KEY = "";
     private static final String REMOVED_KEY = "";
 
-    /** Keys and values */
-    private Object[] data;
-
     /** Value for the null key (if inserted into a map) */
     private static final String NULL_VALUE = null; // NOPMD
+
+    /** Keys and values */
+    private Object[] data;
     private boolean hasNull;
 
     /** Fill factor, must be between (0 and 1) */
@@ -67,26 +67,18 @@ public class IntStringMap implements Map<Integer, String> {
         throw new IllegalStateException(NOT_IMPLEMENTED);
     }
 
-    @Override
-    public String get(final Object key) {
-        if (key == null) {
-            return NULL_VALUE; // we null it on remove, so safe not to check a flag here
-        }
-        return this.get(key);
-    }
-
     public String get(int key) {
-        //int ptr = (key.hashCode() & mask) << 1;
+        // int ptr = (key.hashCode() & mask) << 1;
         int ptr = (key & mask) << 1;
         Object k = data[ptr];
 
         if (k.equals(FREE_KEY)) {
             return null; // end of chain already
         }
-        //        if (k.equals(key)) {
-        //            // we check FREE and REMOVED prior to this call
-        //            return (String) data[ptr + 1];
-        //        }
+        // if (k.equals(key)) {
+        // // we check FREE and REMOVED prior to this call
+        // return (String) data[ptr + 1];
+        // }
         while (true) {
             ptr = (ptr + 2) & mask2; // that's next index
             k = data[ptr];
@@ -99,9 +91,17 @@ public class IntStringMap implements Map<Integer, String> {
         }
     }
 
+    @Override
+    public String get(final Object key) {
+        if (key == null) {
+            return NULL_VALUE; // we null it on remove, so safe not to check a flag here
+        }
+        return this.get(key);
+    }
+
     public int getStartIndex(final Object key) {
         // key is not null here
-        //return key.hashCode() & mask;
+        // return key.hashCode() & mask;
         return ((Integer) key) & mask;
     }
 

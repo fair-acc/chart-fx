@@ -37,130 +37,148 @@ public class WaveletTransform extends WaveletCoefficients {
     protected final double Ig2 = h1;
     protected final double Ig3 = g1; // -h2
 
-    public double[] invoke(final double[] input) {
-        final int nfilter = fwavelet.getLength(); // wavelet filter length
-        final double[] h = fwavelet.getDecompHP();
-        final double[] g = fwavelet.getDecompLP();
+    int allocating_downsampling_convolution(final double[] input, final int N, final double[] filter, final int F,
+            final double[] output, final int step, final MODE mode) {
+        int i, j, F_minus_1, N_extended_len, N_extended_right_start;
+        int start, stop, index = 0;
+        double sum, tmp;
+        double[] buffer;
 
-        // This function assumes input.length=2^n, n>1
-        final double[] output = new double[input.length];
+        F_minus_1 = F - 1;
+        start = F_minus_1 + step - 1;
 
-        for (int length = input.length >> 1;; length >>= 1) {
-            // length=2^n, WITH DECREASING n
-            for (int i = 0; i < length - nfilter; i++) {
-                double sum = 0;
-                double diff = 0;
-                final int i2 = i * 2;
-                for (int k = 0; k < nfilter; k++) {
-                    sum += input[i2 + k] * g[k];
-                    diff += input[i2 + k] * h[k];
+        // allocate memory and copy input
+        if (mode != MODE.MODE_PERIODIZATION) {
+
+            N_extended_len = N + 2 * F_minus_1;
+            N_extended_right_start = N + F_minus_1;
+
+            buffer = new double[N_extended_len];
+
+            System.arraycopy(input, F_minus_1, buffer, 0, N);
+            stop = N_extended_len;
+
+        } else {
+
+            N_extended_len = N + F - 1;
+            N_extended_right_start = N - 1 + F / 2;
+
+            buffer = new double[N_extended_len];
+
+            System.arraycopy(input, F / 2 - 1, buffer, 0, N);
+            start -= 1;
+
+            if (step == 1) {
+                stop = N_extended_len - 1;
+            } else {
+                // step == 2
+                stop = N_extended_len;
+            }
+        }
+
+        // copy extended signal elements
+        switch (mode) {
+
+        case MODE_PERIODIZATION:
+            if (N % 2 > 0) { // odd - repeat last element
+                buffer[N_extended_right_start] = input[N - 1];
+                for (j = 1; j < F / 2; ++j) {
+                    buffer[N_extended_right_start + j] = buffer[F / 2 - 2 + j]; // copy from begining of `input` to
+                                                                                // right
                 }
-                output[i] = sum;
-                output[length + i] = diff;
-            }
-            if (length == 1) {
-                return output;
-            }
-
-            // Swap arrays to do next iteration
-            System.arraycopy(output, 0, input, 0, length << 1);
-        }
-    }
-
-    /**
-     * <p>
-     * Forward wavelet transform.
-     * </p>
-     * <p>
-     * Note that at the end of the computation the calculation wraps around to the beginning of the signal.
-     * </p>
-     * 
-     * @param a input signal, which will be replaced by its output transform
-     * @param n length of the signal, and must be a power of 2
-     */
-    protected void transform(final double a[], final int n) {
-        final int nfilter = fwavelet.getLength(); // wavelet filter length
-        final double[] h = fwavelet.getDecompHP();
-        final double[] g = fwavelet.getDecompLP();
-        System.err.printf("dim %d %d\n", h.length, g.length);
-        System.err.printf("A h0 = %f h1 = %f h2 = %f h3= %f\n", h0, h1, h2, h3);
-        System.err.printf("B h0 = %f h1 = %f h2 = %f h3= %f\n", h[0], h[1], h[2], h[3]);
-        if (n >= nfilter) {
-            int i;
-            final int half = n >> 1;
-
-            final double tmp[] = new double[n];
-
-            i = 0;
-            for (int j = 0; j < n - nfilter - 1; j = j + 2) {
-                tmp[i] = 0;
-                tmp[i + half] = 0;
-                for (int k = 0; k < nfilter; k++) {
-                    tmp[i] += a[j + k] * h[k];
-                    tmp[i + half] = a[j + k] * g[k];
+                for (j = 0; j < F / 2 - 1; ++j) {
+                    // copy from 'buffer' to left
+                    buffer[F / 2 - 2 - j] = buffer[N_extended_right_start - j];
                 }
-                i++;
+            } else {
+                for (j = 0; j < F / 2; ++j) {
+                    buffer[N_extended_right_start + j] = input[j % N]; // copy from begining of `input` to right
+                }
+                for (j = 0; j < F / 2 - 1; ++j) {
+                    // copy from 'buffer' to left
+                    buffer[F / 2 - 2 - j] = buffer[N_extended_right_start - 1 - j];
+                }
+            }
+            break;
+
+        case MODE_SYMMETRIC:
+            for (j = 0; j < N; ++j) {
+                buffer[F_minus_1 - 1 - j] = input[j % N];
+                buffer[N_extended_right_start + j] = input[N - 1 - j % N];
+            }
+            i = j;
+            // use `buffer` as source
+            for (; j < F_minus_1; ++j) {
+                buffer[F_minus_1 - 1 - j] = buffer[N_extended_right_start - 1 + i - j];
+                buffer[N_extended_right_start + j] = buffer[F_minus_1 + j - i];
+            }
+            break;
+
+        case MODE_ASYMMETRIC:
+            for (j = 0; j < N; ++j) {
+                buffer[F_minus_1 - 1 - j] = input[0] - input[j % N];
+                buffer[N_extended_right_start + j] = input[N - 1] - input[N - 1 - j % N];
+            }
+            i = j;
+            // use `buffer` as source
+            for (; j < F_minus_1; ++j) {
+                buffer[F_minus_1 - 1 - j] = buffer[N_extended_right_start - 1 + i - j];
+                buffer[N_extended_right_start + j] = buffer[F_minus_1 + j - i];
+            }
+            break;
+
+        case MODE_SMOOTH:
+            if (N > 1) {
+                tmp = input[0] - input[1];
+                for (j = 0; j < F_minus_1; ++j) {
+                    buffer[j] = input[0] + tmp * (F_minus_1 - j);
+                }
+                tmp = input[N - 1] - input[N - 2];
+                for (j = 0; j < F_minus_1; ++j) {
+                    buffer[N_extended_right_start + j] = input[N - 1] + tmp * j;
+                }
+                break;
             }
 
-            tmp[i] = a[n - 2] * h[0] + a[n - 1] * h[1] + a[0] * h[2] + a[1] * h[3];
-            tmp[i + half] = a[n - 2] * g[0] + a[n - 1] * g[1] + a[0] * g[2] + a[1] * g[3];
-
-            for (i = 0; i < n; i++) {
-                a[i] = tmp[i];
+        case MODE_CONSTANT_EDGE:
+            for (j = 0; j < F_minus_1; ++j) {
+                buffer[j] = input[0];
+                buffer[N_extended_right_start + j] = input[N - 1];
             }
+            break;
+
+        case MODE_PERIODIC:
+            for (j = 0; j < F_minus_1; ++j) {
+                buffer[N_extended_right_start + j] = input[j % N]; // copy from beggining of `input` to right
+            }
+
+            for (j = 0; j < F_minus_1; ++j) {
+                // copy from 'buffer' to left
+                buffer[F_minus_1 - 1 - j] = buffer[N_extended_right_start - 1 - j];
+            }
+            break;
+
+        case MODE_ZEROPAD:
+        default:
+            // memset(buffer, 0, sizeof(double)*F_minus_1);
+            // memset(buffer+N_extended_right_start, 0, sizeof(double)*F_minus_1);
+            // memcpy(buffer+N_extended_right_start, buffer, sizeof(double)*F_minus_1);
+            break;
         }
-    } // transform
 
-    protected void invTransform(final double a[], final int n) {
-        if (n >= 4) {
-            int i, j;
-            final int half = n >> 1;
-            final int halfPls1 = half + 1;
-
-            final double tmp[] = new double[n];
-
-            // last smooth val last coef. first smooth first coef
-            tmp[0] = a[half - 1] * Ih0 + a[n - 1] * Ih1 + a[0] * Ih2 + a[half] * Ih3;
-            tmp[1] = a[half - 1] * Ig0 + a[n - 1] * Ig1 + a[0] * Ig2 + a[half] * Ig3;
-            j = 2;
-            for (i = 0; i < half - 1; i++) {
-                // smooth val coef. val smooth val coef. val
-                tmp[j++] = a[i] * Ih0 + a[i + half] * Ih1 + a[i + 1] * Ih2 + a[i + halfPls1] * Ih3;
-                tmp[j++] = a[i] * Ig0 + a[i + half] * Ig1 + a[i + 1] * Ig2 + a[i + halfPls1] * Ig3;
+        ///////////////////////////////////////////////////////////////////////
+        // F - N-1 - filter in input range
+        // perform convolution with decimation
+        for (i = start; i < stop; i += step) { // input elements
+            sum = 0;
+            for (j = 0; j < F; ++j) {
+                sum += buffer[i - j] * filter[j];
             }
-            for (i = 0; i < n; i++) {
-                a[i] = tmp[i];
-            }
+            output[index++] = sum;
         }
+
+        return 0;
     }
-
-    /**
-     * Forward wavelet transform
-     * 
-     * @param s input vector
-     */
-    public void daubTrans(final double s[]) {
-        final int N = s.length;
-        int n;
-        for (n = N; n >= fwavelet.getLength(); n >>= 1) {
-            transform(s, n);
-        }
-    }
-
-    /**
-     * Inverse wavelet transform
-     * 
-     * @param coef input vector
-     */
-    public void invDaubTrans(final double coef[]) {
-        final int N = coef.length;
-        int n;
-        for (n = fwavelet.getLength(); n <= N; n <<= 1) {
-            invTransform(coef, n);
-        }
-    }
-
-    // Decomposition of input with lowpass filter
 
     int d_dec_a(final double input[], final int input_len, final Wavelet wavelet, final double output[],
             final int output_len, final MODE mode) {
@@ -185,34 +203,6 @@ public class WaveletTransform extends WaveletCoefficients {
 
         return downsampling_convolution(input, input_len, wavelet.getDecompHP(), wavelet.getDecompHP().length, output,
                 2, mode);
-    }
-
-    // Direct reconstruction with lowpass reconstruction filter
-
-    int d_rec_a(final double coeffs_a[], final int coeffs_len, final Wavelet wavelet, final double output[],
-            final int output_len) {
-
-        // check output length
-        if (output_len != reconstruction_buffer_length(coeffs_len, wavelet.getReconLP().length)) {
-            return -1;
-        }
-
-        return upsampling_convolution_full(coeffs_a, coeffs_len, wavelet.getReconLP(), wavelet.getReconLP().length,
-                output, output_len);
-    }
-
-    // Direct reconstruction with highpass reconstruction filter
-
-    int d_rec_d(final double coeffs_d[], final int coeffs_len, final Wavelet wavelet, final double output[],
-            final int output_len) {
-
-        // check for output length
-        if (output_len != reconstruction_buffer_length(coeffs_len, wavelet.getReconHP().length)) {
-            return -1;
-        }
-
-        return upsampling_convolution_full(coeffs_d, coeffs_len, wavelet.getReconHP(), wavelet.getReconHP().length,
-                output, output_len);
     }
 
     // IDWT reconstruction from aproximation and detail coeffs
@@ -282,6 +272,32 @@ public class WaveletTransform extends WaveletCoefficients {
 
     }
 
+    int d_rec_a(final double coeffs_a[], final int coeffs_len, final Wavelet wavelet, final double output[],
+            final int output_len) {
+
+        // check output length
+        if (output_len != reconstruction_buffer_length(coeffs_len, wavelet.getReconLP().length)) {
+            return -1;
+        }
+
+        return upsampling_convolution_full(coeffs_a, coeffs_len, wavelet.getReconLP(), wavelet.getReconLP().length,
+                output, output_len);
+    }
+
+    // Decomposition of input with lowpass filter
+
+    int d_rec_d(final double coeffs_d[], final int coeffs_len, final Wavelet wavelet, final double output[],
+            final int output_len) {
+
+        // check for output length
+        if (output_len != reconstruction_buffer_length(coeffs_len, wavelet.getReconHP().length)) {
+            return -1;
+        }
+
+        return upsampling_convolution_full(coeffs_d, coeffs_len, wavelet.getReconHP(), wavelet.getReconHP().length,
+                output, output_len);
+    }
+
     // basic SWT step
     // TODO: optimize
     int d_swt_(final double input[], final int input_len, final double filter[], final int filter_len,
@@ -324,12 +340,16 @@ public class WaveletTransform extends WaveletCoefficients {
         }
     }
 
+    // Direct reconstruction with lowpass reconstruction filter
+
     // Approximation at specified level
     // input - approximation coeffs from upper level or signal if level == 1
     int d_swt_a(final double input[], final int input_len, final Wavelet wavelet, final double output[],
             final int output_len, final int level) {
         return d_swt_(input, input_len, wavelet.getDecompLP(), wavelet.getDecompLP().length, output, output_len, level);
     }
+
+    // Direct reconstruction with highpass reconstruction filter
 
     // Details at specified level
     // input - approximation coeffs from upper level or signal if level == 1
@@ -338,68 +358,17 @@ public class WaveletTransform extends WaveletCoefficients {
         return d_swt_(input, input_len, wavelet.getDecompHP(), wavelet.getDecompHP().length, output, output_len, level);
     }
 
-    int dwt_buffer_length(final int input_len, final int filter_len, final MODE mode) {
-        if (input_len < 1 || filter_len < 1) {
-            return 0;
+    /**
+     * Forward wavelet transform
+     * 
+     * @param s input vector
+     */
+    public void daubTrans(final double s[]) {
+        final int N = s.length;
+        int n;
+        for (n = N; n >= fwavelet.getLength(); n >>= 1) {
+            transform(s, n);
         }
-
-        switch (mode) {
-        case MODE_PERIODIZATION:
-            return (int) Math.ceil(input_len / 2.);
-        default:
-            return (int) Math.floor((input_len + filter_len - 1) / 2.);
-        }
-    }
-
-    int reconstruction_buffer_length(final int coeffs_len, final int filter_len) {
-        if (coeffs_len < 1 || filter_len < 1) {
-            return 0;
-        }
-
-        return 2 * coeffs_len + filter_len - 2;
-    }
-
-    int idwt_buffer_length(final int coeffs_len, final int filter_len, final MODE mode) {
-        if (coeffs_len < 0 || filter_len < 0) {
-            return 0;
-        }
-
-        switch (mode) {
-        case MODE_PERIODIZATION:
-            return 2 * coeffs_len;
-        default:
-            return 2 * coeffs_len - filter_len + 2;
-        }
-    }
-
-    int swt_buffer_length(final int input_len) {
-        if (input_len < 0) {
-            return 0;
-        }
-
-        return input_len;
-    }
-
-    int dwt_max_level(final int input_len, final int filter_len) {
-        if (input_len < 1 || filter_len < 2) {
-            return 0;
-        }
-
-        return (int) Math.floor(Math.log((double) input_len / (double) (filter_len - 1)) / Math.log(2.0));
-    }
-
-    int swt_max_level(int input_len) {
-        int i, j;
-        i = (int) Math.floor(Math.log(input_len) / Math.log(2.0));
-
-        // check how many times (maximum i times) input_len is divisible by 2
-        for (j = 0; j <= i; ++j) {
-            if ((input_len & 0x1) == 1) {
-                return j;
-            }
-            input_len >>= 1;
-        }
-        return i;
     }
 
     int downsampling_convolution(final double[] input, final int N, final double[] filter, final int F,
@@ -694,158 +663,207 @@ public class WaveletTransform extends WaveletCoefficients {
         }
     }
 
+    int dwt_buffer_length(final int input_len, final int filter_len, final MODE mode) {
+        if (input_len < 1 || filter_len < 1) {
+            return 0;
+        }
+
+        switch (mode) {
+        case MODE_PERIODIZATION:
+            return (int) Math.ceil(input_len / 2.);
+        default:
+            return (int) Math.floor((input_len + filter_len - 1) / 2.);
+        }
+    }
+
+    int dwt_max_level(final int input_len, final int filter_len) {
+        if (input_len < 1 || filter_len < 2) {
+            return 0;
+        }
+
+        return (int) Math.floor(Math.log((double) input_len / (double) (filter_len - 1)) / Math.log(2.0));
+    }
+
+    int idwt_buffer_length(final int coeffs_len, final int filter_len, final MODE mode) {
+        if (coeffs_len < 0 || filter_len < 0) {
+            return 0;
+        }
+
+        switch (mode) {
+        case MODE_PERIODIZATION:
+            return 2 * coeffs_len;
+        default:
+            return 2 * coeffs_len - filter_len + 2;
+        }
+    }
+
+    /**
+     * Inverse wavelet transform
+     * 
+     * @param coef input vector
+     */
+    public void invDaubTrans(final double coef[]) {
+        final int N = coef.length;
+        int n;
+        for (n = fwavelet.getLength(); n <= N; n <<= 1) {
+            invTransform(coef, n);
+        }
+    }
+
+    public double[] invoke(final double[] input) {
+        final int nfilter = fwavelet.getLength(); // wavelet filter length
+        final double[] h = fwavelet.getDecompHP();
+        final double[] g = fwavelet.getDecompLP();
+
+        // This function assumes input.length=2^n, n>1
+        final double[] output = new double[input.length];
+
+        for (int length = input.length >> 1;; length >>= 1) {
+            // length=2^n, WITH DECREASING n
+            for (int i = 0; i < length - nfilter; i++) {
+                double sum = 0;
+                double diff = 0;
+                final int i2 = i * 2;
+                for (int k = 0; k < nfilter; k++) {
+                    sum += input[i2 + k] * g[k];
+                    diff += input[i2 + k] * h[k];
+                }
+                output[i] = sum;
+                output[length + i] = diff;
+            }
+            if (length == 1) {
+                return output;
+            }
+
+            // Swap arrays to do next iteration
+            System.arraycopy(output, 0, input, 0, length << 1);
+        }
+    }
+
+    protected void invTransform(final double a[], final int n) {
+        if (n >= 4) {
+            int i, j;
+            final int half = n >> 1;
+            final int halfPls1 = half + 1;
+
+            final double tmp[] = new double[n];
+
+            // last smooth val last coef. first smooth first coef
+            tmp[0] = a[half - 1] * Ih0 + a[n - 1] * Ih1 + a[0] * Ih2 + a[half] * Ih3;
+            tmp[1] = a[half - 1] * Ig0 + a[n - 1] * Ig1 + a[0] * Ig2 + a[half] * Ig3;
+            j = 2;
+            for (i = 0; i < half - 1; i++) {
+                // smooth val coef. val smooth val coef. val
+                tmp[j++] = a[i] * Ih0 + a[i + half] * Ih1 + a[i + 1] * Ih2 + a[i + halfPls1] * Ih3;
+                tmp[j++] = a[i] * Ig0 + a[i + half] * Ig1 + a[i + 1] * Ig2 + a[i + halfPls1] * Ig3;
+            }
+            for (i = 0; i < n; i++) {
+                a[i] = tmp[i];
+            }
+        }
+    }
+
+    int reconstruction_buffer_length(final int coeffs_len, final int filter_len) {
+        if (coeffs_len < 1 || filter_len < 1) {
+            return 0;
+        }
+
+        return 2 * coeffs_len + filter_len - 2;
+    }
+
+    int swt_buffer_length(final int input_len) {
+        if (input_len < 0) {
+            return 0;
+        }
+
+        return input_len;
+    }
+
+    int swt_max_level(int input_len) {
+        int i, j;
+        i = (int) Math.floor(Math.log(input_len) / Math.log(2.0));
+
+        // check how many times (maximum i times) input_len is divisible by 2
+        for (j = 0; j <= i; ++j) {
+            if ((input_len & 0x1) == 1) {
+                return j;
+            }
+            input_len >>= 1;
+        }
+        return i;
+    }
+
     ///////////////////////////////////////////////////////////////////////////////
     //
     // like downsampling_convolution, but with memory allocation
     //
 
-    int allocating_downsampling_convolution(final double[] input, final int N, final double[] filter, final int F,
-            final double[] output, final int step, final MODE mode) {
-        int i, j, F_minus_1, N_extended_len, N_extended_right_start;
-        int start, stop, index = 0;
-        double sum, tmp;
-        double[] buffer;
+    /**
+     * <p>
+     * Forward wavelet transform.
+     * </p>
+     * <p>
+     * Note that at the end of the computation the calculation wraps around to the beginning of the signal.
+     * </p>
+     * 
+     * @param a input signal, which will be replaced by its output transform
+     * @param n length of the signal, and must be a power of 2
+     */
+    protected void transform(final double a[], final int n) {
+        final int nfilter = fwavelet.getLength(); // wavelet filter length
+        final double[] h = fwavelet.getDecompHP();
+        final double[] g = fwavelet.getDecompLP();
+        System.err.printf("dim %d %d\n", h.length, g.length);
+        System.err.printf("A h0 = %f h1 = %f h2 = %f h3= %f\n", h0, h1, h2, h3);
+        System.err.printf("B h0 = %f h1 = %f h2 = %f h3= %f\n", h[0], h[1], h[2], h[3]);
+        if (n >= nfilter) {
+            int i;
+            final int half = n >> 1;
 
-        F_minus_1 = F - 1;
-        start = F_minus_1 + step - 1;
+            final double tmp[] = new double[n];
 
-        // allocate memory and copy input
-        if (mode != MODE.MODE_PERIODIZATION) {
+            i = 0;
+            for (int j = 0; j < n - nfilter - 1; j = j + 2) {
+                tmp[i] = 0;
+                tmp[i + half] = 0;
+                for (int k = 0; k < nfilter; k++) {
+                    tmp[i] += a[j + k] * h[k];
+                    tmp[i + half] = a[j + k] * g[k];
+                }
+                i++;
+            }
 
-            N_extended_len = N + 2 * F_minus_1;
-            N_extended_right_start = N + F_minus_1;
+            tmp[i] = a[n - 2] * h[0] + a[n - 1] * h[1] + a[0] * h[2] + a[1] * h[3];
+            tmp[i + half] = a[n - 2] * g[0] + a[n - 1] * g[1] + a[0] * g[2] + a[1] * g[3];
 
-            buffer = new double[N_extended_len];
-
-            System.arraycopy(input, F_minus_1, buffer, 0, N);
-            stop = N_extended_len;
-
-        } else {
-
-            N_extended_len = N + F - 1;
-            N_extended_right_start = N - 1 + F / 2;
-
-            buffer = new double[N_extended_len];
-
-            System.arraycopy(input, F / 2 - 1, buffer, 0, N);
-            start -= 1;
-
-            if (step == 1) {
-                stop = N_extended_len - 1;
-            } else {
-                // step == 2
-                stop = N_extended_len;
+            for (i = 0; i < n; i++) {
+                a[i] = tmp[i];
             }
         }
-
-        // copy extended signal elements
-        switch (mode) {
-
-        case MODE_PERIODIZATION:
-            if (N % 2 > 0) { // odd - repeat last element
-                buffer[N_extended_right_start] = input[N - 1];
-                for (j = 1; j < F / 2; ++j) {
-                    buffer[N_extended_right_start + j] = buffer[F / 2 - 2 + j]; // copy from begining of `input` to
-                                                                                // right
-                }
-                for (j = 0; j < F / 2 - 1; ++j) {
-                    // copy from 'buffer' to left
-                    buffer[F / 2 - 2 - j] = buffer[N_extended_right_start - j];
-                }
-            } else {
-                for (j = 0; j < F / 2; ++j) {
-                    buffer[N_extended_right_start + j] = input[j % N]; // copy from begining of `input` to right
-                }
-                for (j = 0; j < F / 2 - 1; ++j) {
-                    // copy from 'buffer' to left
-                    buffer[F / 2 - 2 - j] = buffer[N_extended_right_start - 1 - j];
-                }
-            }
-            break;
-
-        case MODE_SYMMETRIC:
-            for (j = 0; j < N; ++j) {
-                buffer[F_minus_1 - 1 - j] = input[j % N];
-                buffer[N_extended_right_start + j] = input[N - 1 - j % N];
-            }
-            i = j;
-            // use `buffer` as source
-            for (; j < F_minus_1; ++j) {
-                buffer[F_minus_1 - 1 - j] = buffer[N_extended_right_start - 1 + i - j];
-                buffer[N_extended_right_start + j] = buffer[F_minus_1 + j - i];
-            }
-            break;
-
-        case MODE_ASYMMETRIC:
-            for (j = 0; j < N; ++j) {
-                buffer[F_minus_1 - 1 - j] = input[0] - input[j % N];
-                buffer[N_extended_right_start + j] = input[N - 1] - input[N - 1 - j % N];
-            }
-            i = j;
-            // use `buffer` as source
-            for (; j < F_minus_1; ++j) {
-                buffer[F_minus_1 - 1 - j] = buffer[N_extended_right_start - 1 + i - j];
-                buffer[N_extended_right_start + j] = buffer[F_minus_1 + j - i];
-            }
-            break;
-
-        case MODE_SMOOTH:
-            if (N > 1) {
-                tmp = input[0] - input[1];
-                for (j = 0; j < F_minus_1; ++j) {
-                    buffer[j] = input[0] + tmp * (F_minus_1 - j);
-                }
-                tmp = input[N - 1] - input[N - 2];
-                for (j = 0; j < F_minus_1; ++j) {
-                    buffer[N_extended_right_start + j] = input[N - 1] + tmp * j;
-                }
-                break;
-            }
-
-        case MODE_CONSTANT_EDGE:
-            for (j = 0; j < F_minus_1; ++j) {
-                buffer[j] = input[0];
-                buffer[N_extended_right_start + j] = input[N - 1];
-            }
-            break;
-
-        case MODE_PERIODIC:
-            for (j = 0; j < F_minus_1; ++j) {
-                buffer[N_extended_right_start + j] = input[j % N]; // copy from beggining of `input` to right
-            }
-
-            for (j = 0; j < F_minus_1; ++j) {
-                // copy from 'buffer' to left
-                buffer[F_minus_1 - 1 - j] = buffer[N_extended_right_start - 1 - j];
-            }
-            break;
-
-        case MODE_ZEROPAD:
-        default:
-            // memset(buffer, 0, sizeof(double)*F_minus_1);
-            // memset(buffer+N_extended_right_start, 0, sizeof(double)*F_minus_1);
-            // memcpy(buffer+N_extended_right_start, buffer, sizeof(double)*F_minus_1);
-            break;
-        }
-
-        ///////////////////////////////////////////////////////////////////////
-        // F - N-1 - filter in input range
-        // perform convolution with decimation
-        for (i = start; i < stop; i += step) { // input elements
-            sum = 0;
-            for (j = 0; j < F; ++j) {
-                sum += buffer[i - j] * filter[j];
-            }
-            output[index++] = sum;
-        }
-
-        return 0;
-    }
+    } // transform
 
     ///////////////////////////////////////////////////////////////////////////////
     // requires zero-filled output buffer
     // output is larger than input
     // performs "normal" convolution of "upsampled" input coeffs array with filter
+
+    // -> swt - todo
+    int upsampled_filter_convolution(final double[] input, final int N, final double[] filter, final int F,
+            final double[] output, final int step, final MODE mode) {
+        return -1;
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////
+    // performs IDWT for all modes (PERIODIZATION & others)
+    //
+    // The upsampling is performed by splitting filters to even and odd elements
+    // and performing 2 convolutions
+    //
+    // This code is quite complicated because of special handling of PERIODIZATION mode.
+    // The input data has to be periodically extended for this mode.
+    // Refactoring this case out can dramatically simplify the code for other modes.
+    // TODO: refactor, split into several functions
+    // (Sorry for not keeping the 80 chars in line limit)
 
     int upsampling_convolution_full(final double[] input, final int N, final double[] filter, final int F,
             final double[] output, final int O) {
@@ -872,18 +890,6 @@ public class WaveletTransform extends WaveletCoefficients {
 
         return 0;
     }
-
-    ///////////////////////////////////////////////////////////////////////////////
-    // performs IDWT for all modes (PERIODIZATION & others)
-    //
-    // The upsampling is performed by splitting filters to even and odd elements
-    // and performing 2 convolutions
-    //
-    // This code is quite complicated because of special handling of PERIODIZATION mode.
-    // The input data has to be periodically extended for this mode.
-    // Refactoring this case out can dramatically simplify the code for other modes.
-    // TODO: refactor, split into several functions
-    // (Sorry for not keeping the 80 chars in line limit)
 
     int upsampling_convolution_valid_sf(final double[] input, final int N, final double[] filter, final int F,
             final double[] output, final int O, final MODE mode) {
@@ -1009,49 +1015,40 @@ public class WaveletTransform extends WaveletCoefficients {
             /*
              * if(N_p > 0){ // ======= // Allocate memory only for the front and rear extension parts, not the // whole
              * input periodization_buf = new double[N_p]; periodization_buf_rear = new double[N_p]; // Memory checking
-             * if(periodization_buf == null || periodization_buf_rear == null){ return -1; } //
-             * Fill buffers with appropriate elements //if(k <= N){ // F_2-1 <= N // copy from beginning of input to end
-             * of buffer System.arraycopy(input, 0, periodization_buf, N_p - k, k); for(i = 1; i <= (N_p - k); ++i)
-             * periodization_buf[(N_p - k) - i] = input[N - (i%N)]; // copy from end of input
-             * to begginning of buffer System.arraycopy(input, N - k, periodization_buf_rear, 0, k); for(i = 0; i < (N_p
-             * - k); ++i) periodization_buf_rear[k + i] = input[i%N]; //} else { //
+             * if(periodization_buf == null || periodization_buf_rear == null){ return -1; } // Fill buffers with
+             * appropriate elements //if(k <= N){ // F_2-1 <= N // copy from beginning of input to end of buffer
+             * System.arraycopy(input, 0, periodization_buf, N_p - k, k); for(i = 1; i <= (N_p - k); ++i)
+             * periodization_buf[(N_p - k) - i] = input[N - (i%N)]; // copy from end of input to begginning of buffer
+             * System.arraycopy(input, N - k, periodization_buf_rear, 0, k); for(i = 0; i < (N_p - k); ++i)
+             * periodization_buf_rear[k + i] = input[i%N]; //} else { //
              * printf("Convolution.c: line %d. This code should not be executed. Please report use case.\n", __LINE__);
-             * //}
-             * /////////////////////////////////////////////////////////////////// // Convolve filters with the (front)
-             * periodization_buf and compute // the first part of output ptr_base = periodization_buf + F_2 - 1; if(k%2
-             * == 1){ sum_odd = 0; for(j = 0; j < F_2; ++j) sum_odd += filter_odd[j] *
-             * ptr_base[-j]; (ptr_out++) += sum_odd; --k; if(k) upsampling_convolution_valid_sf(periodization_buf + 1,
-             * N_p-1, filter, F, ptr_out, O-1, MODE_ZEROPAD); ptr_out += k; // k0 - 1 // really move backward by 1 }
-             * else if(k){ upsampling_convolution_valid_sf(periodization_buf, N_p, filter, F,
-             * ptr_out, O, MODE_ZEROPAD); ptr_out += k; } } } // MODE_PERIODIZATION
+             * //} /////////////////////////////////////////////////////////////////// // Convolve filters with the
+             * (front) periodization_buf and compute // the first part of output ptr_base = periodization_buf + F_2 - 1;
+             * if(k%2 == 1){ sum_odd = 0; for(j = 0; j < F_2; ++j) sum_odd += filter_odd[j] * ptr_base[-j]; (ptr_out++)
+             * += sum_odd; --k; if(k) upsampling_convolution_valid_sf(periodization_buf + 1, N_p-1, filter, F, ptr_out,
+             * O-1, MODE_ZEROPAD); ptr_out += k; // k0 - 1 // really move backward by 1 } else if(k){
+             * upsampling_convolution_valid_sf(periodization_buf, N_p, filter, F, ptr_out, O, MODE_ZEROPAD); ptr_out +=
+             * k; } } } // MODE_PERIODIZATION
              * ///////////////////////////////////////////////////////////////////////////
              * /////////////////////////////////////////////////////////////////////////// // Perform _valid_
-             * convolution (only when all filter_even and
-             * filter_odd elements // are in range of input data). // // This part is simple, no extra hacks, just two
-             * convolutions in one loop ptr_base = (double[])input + F_2 - 1; for(i = 0; i < N-(F_2-1); ++i){ // sliding
-             * over signal from left to right sum_even = 0; sum_odd = 0; for(j = 0; j <
-             * F_2; ++j){ sum_even += filter_even[j] * ptr_base[i-j]; sum_odd += filter_odd[j] * ptr_base[i-j]; }
-             * (ptr_out++) += sum_even; (ptr_out++) += sum_odd; } //
+             * convolution (only when all filter_even and filter_odd elements // are in range of input data). // // This
+             * part is simple, no extra hacks, just two convolutions in one loop ptr_base = (double[])input + F_2 - 1;
+             * for(i = 0; i < N-(F_2-1); ++i){ // sliding over signal from left to right sum_even = 0; sum_odd = 0;
+             * for(j = 0; j < F_2; ++j){ sum_even += filter_even[j] * ptr_base[i-j]; sum_odd += filter_odd[j] *
+             * ptr_base[i-j]; } (ptr_out++) += sum_even; (ptr_out++) += sum_odd; } //
              * ///////////////////////////////////////////////////////////////////////////
              * /////////////////////////////////////////////////////////////////////////// // MODE_PERIODIZATION if(mode
              * == MODE.MODE_PERIODIZATION){ if(N_p > 0){ // ======= k = F_2-1; if(k%2 == 1){ if(F/2 <= N_p - 1){ // k >
-             * 1 ? upsampling_convolution_valid_sf(periodization_buf_rear , N_p-1,
-             * filter, F, ptr_out, O-1, MODE_ZEROPAD); } ptr_out += k; // move forward anyway -> see lower if(F_2%2 ==
-             * 0){ // remaining one element ptr_base = periodization_buf_rear + N_p - 1; sum_even = 0; for(j = 0; j <
-             * F_2; ++j){ sum_even += filter_even[j] * ptr_base[-j]; } (--ptr_out) +=
-             * sum_even; // move backward first } } else { if(k){
+             * 1 ? upsampling_convolution_valid_sf(periodization_buf_rear , N_p-1, filter, F, ptr_out, O-1,
+             * MODE_ZEROPAD); } ptr_out += k; // move forward anyway -> see lower if(F_2%2 == 0){ // remaining one
+             * element ptr_base = periodization_buf_rear + N_p - 1; sum_even = 0; for(j = 0; j < F_2; ++j){ sum_even +=
+             * filter_even[j] * ptr_base[-j]; } (--ptr_out) += sum_even; // move backward first } } else { if(k){
              * upsampling_convolution_valid_sf(periodization_buf_rear, N_p, filter, F, ptr_out, O, MODE_ZEROPAD); } } }
              */
         } // MODE_PERIODIZATION
           ///////////////////////////////////////////////////////////////////////////
 
         return 0;
-    }
-
-    // -> swt - todo
-    int upsampled_filter_convolution(final double[] input, final int N, final double[] filter, final int F,
-            final double[] output, final int step, final MODE mode) {
-        return -1;
     }
 
 }

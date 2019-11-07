@@ -38,19 +38,19 @@ public class DefaultFormatter extends AbstractFormatter {
 
     /**
      * Construct a DefaultFormatter for the given NumberAxis
+     */
+    public DefaultFormatter() {
+        super();
+        setTickUnitSupplier(DefaultFormatter.DEFAULT_TICK_UNIT_SUPPLIER);
+    }
+
+    /**
+     * Construct a DefaultFormatter for the given NumberAxis
      *
      * @param axis The axis to format tick marks for
      */
     public DefaultFormatter(final Axis axis) {
         super(axis);
-    }
-
-    /**
-     * Construct a DefaultFormatter for the given NumberAxis
-     */
-    public DefaultFormatter() {
-        super();
-        setTickUnitSupplier(DefaultFormatter.DEFAULT_TICK_UNIT_SUPPLIER);
     }
 
     /**
@@ -65,6 +65,29 @@ public class DefaultFormatter extends AbstractFormatter {
         this.prefix = prefix;
         this.suffix = suffix;
 
+    }
+
+    /**
+     * Converts the string provided into a Number defined by the this converter. Format of the string and type of the
+     * resulting object is defined by this converter.
+     *
+     * @return a Number representation of the string passed in.
+     * @see StringConverter#toString
+     */
+    @Override
+    public Number fromString(final String string) {
+        final int prefixLength = prefix == null ? 0 : prefix.length();
+        final int suffixLength = suffix == null ? 0 : suffix.length();
+        try {
+            return formatterSmall.parse(string.substring(prefixLength, string.length() - suffixLength));
+        } catch (final ParseException exc) {
+            try {
+                return formatterLarge.parse(string.substring(prefixLength, string.length() - suffixLength));
+            } catch (final ParseException ex) {
+                ex.addSuppressed(exc);
+                throw new IllegalArgumentException(ex);
+            }
+        }
     }
 
     @Override
@@ -171,28 +194,5 @@ public class DefaultFormatter extends AbstractFormatter {
         }
 
         return retVal;
-    }
-
-    /**
-     * Converts the string provided into a Number defined by the this converter. Format of the string and type of the
-     * resulting object is defined by this converter.
-     *
-     * @return a Number representation of the string passed in.
-     * @see StringConverter#toString
-     */
-    @Override
-    public Number fromString(final String string) {
-        final int prefixLength = prefix == null ? 0 : prefix.length();
-        final int suffixLength = suffix == null ? 0 : suffix.length();
-        try {
-            return formatterSmall.parse(string.substring(prefixLength, string.length() - suffixLength));
-        } catch (final ParseException exc) {
-            try {
-                return formatterLarge.parse(string.substring(prefixLength, string.length() - suffixLength));
-            } catch (final ParseException ex) {
-                ex.addSuppressed(exc);
-                throw new IllegalArgumentException(ex);
-            }
-        }
     }
 }

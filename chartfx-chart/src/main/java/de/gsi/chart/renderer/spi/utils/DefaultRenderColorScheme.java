@@ -59,7 +59,7 @@ public final class DefaultRenderColorScheme {
             Color.valueOf("#f2af00"), //
             Color.valueOf("#dc5034"), //
             Color.valueOf("#6e2585"), //
-            Color.valueOf("#71c6c1"), // 
+            Color.valueOf("#71c6c1"), //
             Color.valueOf("#009bbb"), //
             Color.valueOf("#444444") //
     ));
@@ -70,7 +70,7 @@ public final class DefaultRenderColorScheme {
             Color.valueOf("#665191"), //
             Color.valueOf("#a05195"), //
             Color.valueOf("#d45087"), //
-            Color.valueOf("#f95d6a"), // 
+            Color.valueOf("#f95d6a"), //
             Color.valueOf("#ff7c43"), //
             Color.valueOf("#ffa600") //
     ));
@@ -129,6 +129,22 @@ public final class DefaultRenderColorScheme {
 
     public static ObjectProperty<Font> fontProperty() {
         return defaultFont;
+    }
+
+    private static Color getColorModifier(final Map<String, List<String>> parameterMap, final Color orignalColor) {
+        Color color = orignalColor;
+
+        final List<String> intensityModifier = parameterMap.get(XYChartCss.DATASET_INTENSITY.toLowerCase(Locale.UK));
+        if ((color != null) && (intensityModifier != null) && !intensityModifier.isEmpty()) {
+            try {
+                final double intensity = Double.parseDouble(intensityModifier.get(0));
+                color = color.deriveColor(0, intensity / 100, 1.0, intensity / 100);
+            } catch (final NumberFormatException e) {
+                // re-use unmodified original color
+            }
+        }
+
+        return color;
     }
 
     public static Paint getFill(final int index) {
@@ -245,26 +261,6 @@ public final class DefaultRenderColorScheme {
         gc.setFill(color);
     }
 
-    public static ListProperty<Color> strokeColorProperty() {
-        return strokeColours;
-    }
-
-    private static Color getColorModifier(final Map<String, List<String>> parameterMap, final Color orignalColor) {
-        Color color = orignalColor;
-
-        final List<String> intensityModifier = parameterMap.get(XYChartCss.DATASET_INTENSITY.toLowerCase(Locale.UK));
-        if ((color != null) && (intensityModifier != null) && !intensityModifier.isEmpty()) {
-            try {
-                final double intensity = Double.parseDouble(intensityModifier.get(0));
-                color = color.deriveColor(0, intensity / 100, 1.0, intensity / 100);
-            } catch (final NumberFormatException e) {
-                // re-use unmodified original color
-            }
-        }
-
-        return color;
-    }
-
     private static Map<String, List<String>> splitQuery(final String styleString) {
         if ((styleString == null) || styleString.isEmpty()) {
             return Collections.emptyMap();
@@ -275,12 +271,12 @@ public final class DefaultRenderColorScheme {
                         Collectors.mapping(Map.Entry::getValue, Collectors.toList())));
     }
 
+    public static ListProperty<Color> strokeColorProperty() {
+        return strokeColours;
+    }
+
     public enum Palette {
-        P_TUNEVIEWER(TUNEVIEWER),
-        P_MISC(MISC),
-        P_ADOBE(ADOBE),
-        P_DELL(DELL),
-        P_EQUIDISTANT(EQUIDISTANT);
+        P_TUNEVIEWER(TUNEVIEWER), P_MISC(MISC), P_ADOBE(ADOBE), P_DELL(DELL), P_EQUIDISTANT(EQUIDISTANT);
 
         ObservableList<Color> list;
 

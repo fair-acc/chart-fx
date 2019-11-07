@@ -8,8 +8,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 
 /**
- * Simple JavaFX and Chart Performance metrics
- * N.B. these are only indicative
+ * Simple JavaFX and Chart Performance metrics N.B. these are only indicative
  * 
  * @author rstein
  */

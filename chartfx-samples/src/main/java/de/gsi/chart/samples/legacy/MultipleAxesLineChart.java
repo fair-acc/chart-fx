@@ -65,94 +65,6 @@ public class MultipleAxesLineChart extends StackPane {
         rebuildChart();
     }
 
-    private void bindMouseEvents(final LineChart<?, ?> baseChart, final Double strokeWidth) {
-        getChildren().add(detailsWindow);
-        detailsWindow.prefHeightProperty().bind(heightProperty());
-        detailsWindow.prefWidthProperty().bind(widthProperty());
-        detailsWindow.setMouseTransparent(true);
-
-        setOnMouseMoved(null);
-        setMouseTransparent(false);
-
-        final Axis<?> xAxis = baseChart.getXAxis();
-        final Axis<?> yAxis = baseChart.getYAxis();
-
-        final Line xLine = new Line();
-        final Line yLine = new Line();
-        yLine.setFill(Color.GRAY);
-        xLine.setFill(Color.GRAY);
-        yLine.setStrokeWidth(strokeWidth / 2);
-        xLine.setStrokeWidth(strokeWidth / 2);
-        xLine.setVisible(false);
-        yLine.setVisible(false);
-
-        final Node chartBackground = baseChart.lookup(".chart-plot-background");
-        for (final Node n : chartBackground.getParent().getChildrenUnmodifiable()) {
-            if ((n != chartBackground) && (n != xAxis) && (n != yAxis)) {
-                n.setMouseTransparent(true);
-            }
-        }
-    }
-
-    private void styleBaseChart(final LineChart<?, ?> baseChart) {
-        baseChart.setCreateSymbols(false);
-        baseChart.setLegendVisible(false);
-        baseChart.getXAxis().setAutoRanging(false);
-        baseChart.getXAxis().setAnimated(false);
-        baseChart.getYAxis().setAnimated(false);
-    }
-
-    private void setFixedAxisWidth(final LineChart<?, ?> chart) {
-        chart.getYAxis().setPrefWidth(yAxisWidth);
-        chart.getYAxis().setMaxWidth(yAxisWidth);
-    }
-
-    private void rebuildChart() {
-        getChildren().clear();
-
-        getChildren().add(resizeBaseChart(baseChart));
-        for (final LineChart<?, ?> lineChart : backgroundCharts) {
-            getChildren().add(resizeBackgroundChart(lineChart));
-        }
-        getChildren().add(detailsWindow);
-    }
-
-    private Node resizeBaseChart(final LineChart<?, ?> lineChart) {
-        final HBox hBox = new HBox(lineChart);
-        hBox.setAlignment(Pos.CENTER_LEFT);
-        hBox.prefHeightProperty().bind(heightProperty());
-        hBox.prefWidthProperty().bind(widthProperty());
-
-        lineChart.minWidthProperty()
-                .bind(widthProperty().subtract((yAxisWidth + yAxisSeparation) * backgroundCharts.size()));
-        lineChart.prefWidthProperty()
-                .bind(widthProperty().subtract((yAxisWidth + yAxisSeparation) * backgroundCharts.size()));
-        lineChart.maxWidthProperty()
-                .bind(widthProperty().subtract((yAxisWidth + yAxisSeparation) * backgroundCharts.size()));
-
-        return lineChart;
-    }
-
-    private Node resizeBackgroundChart(final LineChart<?, ?> lineChart) {
-        final HBox hBox = new HBox(lineChart);
-        hBox.setAlignment(Pos.CENTER_LEFT);
-        hBox.prefHeightProperty().bind(heightProperty());
-        hBox.prefWidthProperty().bind(widthProperty());
-        hBox.setMouseTransparent(true);
-
-        lineChart.minWidthProperty()
-                .bind(widthProperty().subtract((yAxisWidth + yAxisSeparation) * backgroundCharts.size()));
-        lineChart.prefWidthProperty()
-                .bind(widthProperty().subtract((yAxisWidth + yAxisSeparation) * backgroundCharts.size()));
-        lineChart.maxWidthProperty()
-                .bind(widthProperty().subtract((yAxisWidth + yAxisSeparation) * backgroundCharts.size()));
-
-        lineChart.translateXProperty().bind(baseChart.getYAxis().widthProperty());
-        lineChart.getYAxis().setTranslateX((yAxisWidth + yAxisSeparation) * backgroundCharts.indexOf(lineChart));
-        lineChart.getXAxis().tickLabelRotationProperty().bind(baseChart.getXAxis().tickLabelRotationProperty());
-        return hBox;
-    }
-
     public void addSeries(final XYChart.Series<Number, Number> series, final Color lineColor) {
         final NumberAxis yAxis = new NumberAxis();
         final NumberAxis xAxis = new NumberAxis();
@@ -182,29 +94,33 @@ public class MultipleAxesLineChart extends StackPane {
         backgroundCharts.add(lineChart);
     }
 
-    private void styleBackgroundChart(final LineChart<?, ?> lineChart, final Color lineColor) {
-        styleChartLine(lineChart, lineColor);
+    private void bindMouseEvents(final LineChart<?, ?> baseChart, final Double strokeWidth) {
+        getChildren().add(detailsWindow);
+        detailsWindow.prefHeightProperty().bind(heightProperty());
+        detailsWindow.prefWidthProperty().bind(widthProperty());
+        detailsWindow.setMouseTransparent(true);
 
-        final Node contentBackground = lineChart.lookup(".chart-content").lookup(".chart-plot-background");
-        contentBackground.setStyle("-fx-background-color: transparent;");
+        setOnMouseMoved(null);
+        setMouseTransparent(false);
 
-        lineChart.setVerticalZeroLineVisible(false);
-        lineChart.setHorizontalZeroLineVisible(false);
-        lineChart.setVerticalGridLinesVisible(false);
-        lineChart.setHorizontalGridLinesVisible(false);
-        lineChart.setCreateSymbols(false);
-    }
+        final Axis<?> xAxis = baseChart.getXAxis();
+        final Axis<?> yAxis = baseChart.getYAxis();
 
-    private String toRGBCode(final Color color) {
-        return String.format("#%02X%02X%02X", (int) (color.getRed() * 255), (int) (color.getGreen() * 255),
-                (int) (color.getBlue() * 255));
-    }
+        final Line xLine = new Line();
+        final Line yLine = new Line();
+        yLine.setFill(Color.GRAY);
+        xLine.setFill(Color.GRAY);
+        yLine.setStrokeWidth(strokeWidth / 2);
+        xLine.setStrokeWidth(strokeWidth / 2);
+        xLine.setVisible(false);
+        yLine.setVisible(false);
 
-    private void styleChartLine(final LineChart<?, ?> chart, final Color lineColor) {
-        chart.getYAxis().lookup(".axis-label")
-                .setStyle("-fx-text-fill: " + toRGBCode(lineColor) + "; -fx-font-weight: bold;");
-        final Node seriesLine = chart.lookup(".chart-series-line");
-        seriesLine.setStyle("-fx-stroke: " + toRGBCode(lineColor) + "; -fx-stroke-width: " + strokeWidth + ";");
+        final Node chartBackground = baseChart.lookup(".chart-plot-background");
+        for (final Node n : chartBackground.getParent().getChildrenUnmodifiable()) {
+            if ((n != chartBackground) && (n != xAxis) && (n != yAxis)) {
+                n.setMouseTransparent(true);
+            }
+        }
     }
 
     public Node getLegend() {
@@ -238,6 +154,90 @@ public class MultipleAxesLineChart extends StackPane {
         hBox.setStyle("-fx-padding: 0 10 20 10");
 
         return hBox;
+    }
+
+    private void rebuildChart() {
+        getChildren().clear();
+
+        getChildren().add(resizeBaseChart(baseChart));
+        for (final LineChart<?, ?> lineChart : backgroundCharts) {
+            getChildren().add(resizeBackgroundChart(lineChart));
+        }
+        getChildren().add(detailsWindow);
+    }
+
+    private Node resizeBackgroundChart(final LineChart<?, ?> lineChart) {
+        final HBox hBox = new HBox(lineChart);
+        hBox.setAlignment(Pos.CENTER_LEFT);
+        hBox.prefHeightProperty().bind(heightProperty());
+        hBox.prefWidthProperty().bind(widthProperty());
+        hBox.setMouseTransparent(true);
+
+        lineChart.minWidthProperty()
+                .bind(widthProperty().subtract((yAxisWidth + yAxisSeparation) * backgroundCharts.size()));
+        lineChart.prefWidthProperty()
+                .bind(widthProperty().subtract((yAxisWidth + yAxisSeparation) * backgroundCharts.size()));
+        lineChart.maxWidthProperty()
+                .bind(widthProperty().subtract((yAxisWidth + yAxisSeparation) * backgroundCharts.size()));
+
+        lineChart.translateXProperty().bind(baseChart.getYAxis().widthProperty());
+        lineChart.getYAxis().setTranslateX((yAxisWidth + yAxisSeparation) * backgroundCharts.indexOf(lineChart));
+        lineChart.getXAxis().tickLabelRotationProperty().bind(baseChart.getXAxis().tickLabelRotationProperty());
+        return hBox;
+    }
+
+    private Node resizeBaseChart(final LineChart<?, ?> lineChart) {
+        final HBox hBox = new HBox(lineChart);
+        hBox.setAlignment(Pos.CENTER_LEFT);
+        hBox.prefHeightProperty().bind(heightProperty());
+        hBox.prefWidthProperty().bind(widthProperty());
+
+        lineChart.minWidthProperty()
+                .bind(widthProperty().subtract((yAxisWidth + yAxisSeparation) * backgroundCharts.size()));
+        lineChart.prefWidthProperty()
+                .bind(widthProperty().subtract((yAxisWidth + yAxisSeparation) * backgroundCharts.size()));
+        lineChart.maxWidthProperty()
+                .bind(widthProperty().subtract((yAxisWidth + yAxisSeparation) * backgroundCharts.size()));
+
+        return lineChart;
+    }
+
+    private void setFixedAxisWidth(final LineChart<?, ?> chart) {
+        chart.getYAxis().setPrefWidth(yAxisWidth);
+        chart.getYAxis().setMaxWidth(yAxisWidth);
+    }
+
+    private void styleBackgroundChart(final LineChart<?, ?> lineChart, final Color lineColor) {
+        styleChartLine(lineChart, lineColor);
+
+        final Node contentBackground = lineChart.lookup(".chart-content").lookup(".chart-plot-background");
+        contentBackground.setStyle("-fx-background-color: transparent;");
+
+        lineChart.setVerticalZeroLineVisible(false);
+        lineChart.setHorizontalZeroLineVisible(false);
+        lineChart.setVerticalGridLinesVisible(false);
+        lineChart.setHorizontalGridLinesVisible(false);
+        lineChart.setCreateSymbols(false);
+    }
+
+    private void styleBaseChart(final LineChart<?, ?> baseChart) {
+        baseChart.setCreateSymbols(false);
+        baseChart.setLegendVisible(false);
+        baseChart.getXAxis().setAutoRanging(false);
+        baseChart.getXAxis().setAnimated(false);
+        baseChart.getYAxis().setAnimated(false);
+    }
+
+    private void styleChartLine(final LineChart<?, ?> chart, final Color lineColor) {
+        chart.getYAxis().lookup(".axis-label")
+                .setStyle("-fx-text-fill: " + toRGBCode(lineColor) + "; -fx-font-weight: bold;");
+        final Node seriesLine = chart.lookup(".chart-series-line");
+        seriesLine.setStyle("-fx-stroke: " + toRGBCode(lineColor) + "; -fx-stroke-width: " + strokeWidth + ";");
+    }
+
+    private String toRGBCode(final Color color) {
+        return String.format("#%02X%02X%02X", (int) (color.getRed() * 255), (int) (color.getGreen() * 255),
+                (int) (color.getBlue() * 255));
     }
 
 }

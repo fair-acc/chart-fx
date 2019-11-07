@@ -8,13 +8,11 @@ public enum AxisLabelOverlapPolicy {
     /** narrow font where possible */
     NARROW_FONT,
     /**
-     * shift every second label by one label height/width (N.B. especially
-     * useful for category axes
+     * shift every second label by one label height/width (N.B. especially useful for category axes
      */
     SHIFT_ALT,
     /**
-     * shift every second label by one label height/width (N.B. especially
-     * useful for category axes
+     * shift every second label by one label height/width (N.B. especially useful for category axes
      */
     FORCED_SHIFT_ALT;
 }

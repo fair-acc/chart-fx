@@ -11,6 +11,54 @@ public class ComplexFFT_1D {
     private static Complex[][] coef; // FFT coefficients (calculated once
     private static int coef_order = 0; // power of two till the coefficients are computed
 
+    // compute the circular convolution of x and y
+    public static Complex[] cconvolve(final Complex[] x, final Complex[] y) {
+
+        // should probably pad x and y with 0s so that they have same length
+        // and are powers of 2
+        if (x.length != y.length) {
+            throw new RuntimeException("Dimensions don't agree");
+        }
+
+        final int N = x.length;
+
+        // compute FFT of each sequence
+        final Complex[] a = fft(x);
+        final Complex[] b = fft(y);
+
+        // point-wise multiply
+        final Complex[] c = new Complex[N];
+        for (int i = 0; i < N; i++) {
+            c[i] = a[i].multiply(b[i]);
+        }
+
+        // compute inverse FFT
+        return ifft(c);
+    }
+
+    // compute the linear convolution of x and y
+    public static Complex[] convolve(final Complex[] x, final Complex[] y) {
+        final Complex ZERO = new Complex(0, 0);
+
+        final Complex[] a = new Complex[2 * x.length];
+        for (int i = 0; i < x.length; i++) {
+            a[i] = x[i];
+        }
+        for (int i = x.length; i < 2 * x.length; i++) {
+            a[i] = ZERO;
+        }
+
+        final Complex[] b = new Complex[2 * y.length];
+        for (int i = 0; i < y.length; i++) {
+            b[i] = y[i];
+        }
+        for (int i = y.length; i < 2 * y.length; i++) {
+            b[i] = ZERO;
+        }
+
+        return cconvolve(a, b);
+    }
+
     // compute the FFT of x[], assuming its length is a power of 2
     public static Complex[] fft(final Complex[] x) {
         final int N = x.length;
@@ -149,54 +197,6 @@ public class ComplexFFT_1D {
 
         return y;
 
-    }
-
-    // compute the circular convolution of x and y
-    public static Complex[] cconvolve(final Complex[] x, final Complex[] y) {
-
-        // should probably pad x and y with 0s so that they have same length
-        // and are powers of 2
-        if (x.length != y.length) {
-            throw new RuntimeException("Dimensions don't agree");
-        }
-
-        final int N = x.length;
-
-        // compute FFT of each sequence
-        final Complex[] a = fft(x);
-        final Complex[] b = fft(y);
-
-        // point-wise multiply
-        final Complex[] c = new Complex[N];
-        for (int i = 0; i < N; i++) {
-            c[i] = a[i].multiply(b[i]);
-        }
-
-        // compute inverse FFT
-        return ifft(c);
-    }
-
-    // compute the linear convolution of x and y
-    public static Complex[] convolve(final Complex[] x, final Complex[] y) {
-        final Complex ZERO = new Complex(0, 0);
-
-        final Complex[] a = new Complex[2 * x.length];
-        for (int i = 0; i < x.length; i++) {
-            a[i] = x[i];
-        }
-        for (int i = x.length; i < 2 * x.length; i++) {
-            a[i] = ZERO;
-        }
-
-        final Complex[] b = new Complex[2 * y.length];
-        for (int i = 0; i < y.length; i++) {
-            b[i] = y[i];
-        }
-        for (int i = y.length; i < 2 * y.length; i++) {
-            b[i] = ZERO;
-        }
-
-        return cconvolve(a, b);
     }
 
     // test client

@@ -24,9 +24,9 @@ package de.gsi.math.spectra.wavelet;
  * </p>
  * 
  * 
- *  coef<sub>i</sub> = odd<sub>i</sub> - even<sub>i</sub><br>
- *  or<br>
- *  coef<sub>i</sub> = 0.5 * (odd<sub>i</sub> - even<sub>i</sub>)<br>
+ * coef<sub>i</sub> = odd<sub>i</sub> - even<sub>i</sub><br>
+ * or<br>
+ * coef<sub>i</sub> = 0.5 * (odd<sub>i</sub> - even<sub>i</sub>)<br>
  * 
  * <p>
  * depending on the version of the Haar algorithm used.
@@ -46,14 +46,14 @@ package de.gsi.math.spectra.wavelet;
  * </p>
  * 
  * <p>
- *  a<sub>i</sub> = ...h0,h1,h2,h3, 0, 0, 0, 0, 0, 0, 0, ...   s<sub>i</sub><br>
- *  c<sub>i</sub> = ...g0,g1,g2,g3, 0, 0, 0, 0, 0, 0, 0, ...   s<sub>i+1</sub><br>
- *  a<sub>i+1</sub> = ...0, 0, h0,h1,h2,h3, 0, 0, 0, 0, 0, ...   s<sub>i+2</sub><br>
- *  c<sub>i+1</sub> = ...0, 0, g0,g1,g2,g3, 0, 0, 0, 0, 0, ...   s<sub>i+3</sub><br>
- *  a<sub>i+2</sub> = ...0, 0, 0, 0, h0,h1,h2,h3, 0, 0, 0, ...   s<sub>i+4</sub><br>
- *  c<sub>i+2</sub> = ...0, 0, 0, 0, g0,g1,g2,g3, 0, 0, 0, ...   s<sub>i+5</sub><br>
- *  a<sub>i+3</sub> = ...0, 0, 0, 0, 0, 0, h0,h1,h2,h3, 0, ...   s<sub>i+6</sub><br>
- *  c<sub>i+3</sub> = ...0, 0, 0, 0, 0, 0, g0,g1,g2,g3, 0, ...   s<sub>i+7</sub><br>
+ * a<sub>i</sub> = ...h0,h1,h2,h3, 0, 0, 0, 0, 0, 0, 0, ... s<sub>i</sub><br>
+ * c<sub>i</sub> = ...g0,g1,g2,g3, 0, 0, 0, 0, 0, 0, 0, ... s<sub>i+1</sub><br>
+ * a<sub>i+1</sub> = ...0, 0, h0,h1,h2,h3, 0, 0, 0, 0, 0, ... s<sub>i+2</sub><br>
+ * c<sub>i+1</sub> = ...0, 0, g0,g1,g2,g3, 0, 0, 0, 0, 0, ... s<sub>i+3</sub><br>
+ * a<sub>i+2</sub> = ...0, 0, 0, 0, h0,h1,h2,h3, 0, 0, 0, ... s<sub>i+4</sub><br>
+ * c<sub>i+2</sub> = ...0, 0, 0, 0, g0,g1,g2,g3, 0, 0, 0, ... s<sub>i+5</sub><br>
+ * a<sub>i+3</sub> = ...0, 0, 0, 0, 0, 0, h0,h1,h2,h3, 0, ... s<sub>i+6</sub><br>
+ * c<sub>i+3</sub> = ...0, 0, 0, 0, 0, 0, g0,g1,g2,g3, 0, ... s<sub>i+7</sub><br>
  * 
  * <p>
  * The dot product (inner product) of the infinite vector and a row of the matrix produces either a smoother version of
@@ -70,14 +70,14 @@ package de.gsi.math.spectra.wavelet;
  * </p>
  * 
  *
- *  s<sub>i</sub> = ...h2,g2,h0,g0, 0, 0, 0, 0, 0, 0, 0, ...  a<sub>i</sub><br>
- *  s<sub>i+1</sub> = ...h3,g3,h1,g1, 0, 0, 0, 0, 0, 0, 0, ...  c<sub>i</sub><br>
- *  s<sub>i+2</sub> = ...0, 0, h2,g2,h0,g0, 0, 0, 0, 0, 0, ...  a<sub>i+1</sub><br>
- *  s<sub>i+3</sub> = ...0, 0, h3,g3,h1,g1, 0, 0, 0, 0, 0, ...  c<sub>i+1</sub><br>
- *  s<sub>i+4</sub> = ...0, 0, 0, 0, h2,g2,h0,g0, 0, 0, 0, ...  a<sub>i+2</sub><br>
- *  s<sub>i+5</sub> = ...0, 0, 0, 0, h3,g3,h1,g1, 0, 0, 0, ...  c<sub>i+2</sub><br>
- *  s<sub>i+6</sub> = ...0, 0, 0, 0, 0, 0, h2,g2,h0,g0, 0, ...  a<sub>i+3</sub><br>
- * s<sub>i+7</sub> = ...0, 0, 0, 0, 0, 0, h3,g3,h1,g1, 0, ...  c<sub>i+3</sub><br>
+ * s<sub>i</sub> = ...h2,g2,h0,g0, 0, 0, 0, 0, 0, 0, 0, ... a<sub>i</sub><br>
+ * s<sub>i+1</sub> = ...h3,g3,h1,g1, 0, 0, 0, 0, 0, 0, 0, ... c<sub>i</sub><br>
+ * s<sub>i+2</sub> = ...0, 0, h2,g2,h0,g0, 0, 0, 0, 0, 0, ... a<sub>i+1</sub><br>
+ * s<sub>i+3</sub> = ...0, 0, h3,g3,h1,g1, 0, 0, 0, 0, 0, ... c<sub>i+1</sub><br>
+ * s<sub>i+4</sub> = ...0, 0, 0, 0, h2,g2,h0,g0, 0, 0, 0, ... a<sub>i+2</sub><br>
+ * s<sub>i+5</sub> = ...0, 0, 0, 0, h3,g3,h1,g1, 0, 0, 0, ... c<sub>i+2</sub><br>
+ * s<sub>i+6</sub> = ...0, 0, 0, 0, 0, 0, h2,g2,h0,g0, 0, ... a<sub>i+3</sub><br>
+ * s<sub>i+7</sub> = ...0, 0, 0, 0, 0, 0, h3,g3,h1,g1, 0, ... c<sub>i+3</sub><br>
  * 
  * <p>
  * Using a standard dot product is grossly inefficient since most of the operands are zero. In practice the wavelet
@@ -150,38 +150,30 @@ public class DaubechiesWavelet {
     protected final double Ig3 = g1; // -h2
 
     /**
-     * <p>
-     * Forward wavelet transform.
-     * </p>
-     * <p>
-     * Note that at the end of the computation the calculation wraps around to the beginning of the signal.
-     * </p>
+     * Forward Daubechies D4 transform
      * 
-     * @param a input vector 
-     * @param n  size of input vector
+     * @param s input vector (result replaces original)
      */
-    protected void transform(final double a[], final int n) {
-        if (n >= 4) {
-            int i, j;
-            final int half = n >> 1;
-
-            final double tmp[] = new double[n];
-            System.err.printf("h0 = %f h1 = %f h2 = %f h3= %f\n", h0, h1, h2, h3);
-            i = 0;
-            for (j = 0; j < n - 3; j = j + 2) {
-                tmp[i] = a[j] * h0 + a[j + 1] * h1 + a[j + 2] * h2 + a[j + 3] * h3;
-                tmp[i + half] = a[j] * g0 + a[j + 1] * g1 + a[j + 2] * g2 + a[j + 3] * g3;
-                i++;
-            }
-
-            tmp[i] = a[n - 2] * h0 + a[n - 1] * h1 + a[0] * h2 + a[1] * h3;
-            tmp[i + half] = a[n - 2] * g0 + a[n - 1] * g1 + a[0] * g2 + a[1] * g3;
-
-            for (i = 0; i < n; i++) {
-                a[i] = tmp[i];
-            }
+    public void daubTrans(final double s[]) {
+        final int N = s.length;
+        int n;
+        for (n = N; n >= 4; n >>= 1) {
+            transform(s, n);
         }
-    } // transform
+    }
+
+    /**
+     * Inverse Daubechies D4 transform
+     * 
+     * @param coef input vector (result replaces original)
+     */
+    public void invDaubTrans(final double coef[]) {
+        final int N = coef.length;
+        int n;
+        for (n = 4; n <= N; n <<= 1) {
+            invTransform(coef, n);
+        }
+    }
 
     protected void invTransform(final double a[], final int n) {
         if (n >= 4) {
@@ -207,27 +199,37 @@ public class DaubechiesWavelet {
     }
 
     /**
-     * Forward Daubechies D4 transform
-     * @param s input vector (result replaces original)
+     * <p>
+     * Forward wavelet transform.
+     * </p>
+     * <p>
+     * Note that at the end of the computation the calculation wraps around to the beginning of the signal.
+     * </p>
+     * 
+     * @param a input vector
+     * @param n size of input vector
      */
-    public void daubTrans(final double s[]) {
-        final int N = s.length;
-        int n;
-        for (n = N; n >= 4; n >>= 1) {
-            transform(s, n);
-        }
-    }
+    protected void transform(final double a[], final int n) {
+        if (n >= 4) {
+            int i, j;
+            final int half = n >> 1;
 
-    /**
-     * Inverse Daubechies D4 transform
-     * @param coef input vector (result replaces original)
-     */
-    public void invDaubTrans(final double coef[]) {
-        final int N = coef.length;
-        int n;
-        for (n = 4; n <= N; n <<= 1) {
-            invTransform(coef, n);
+            final double tmp[] = new double[n];
+            System.err.printf("h0 = %f h1 = %f h2 = %f h3= %f\n", h0, h1, h2, h3);
+            i = 0;
+            for (j = 0; j < n - 3; j = j + 2) {
+                tmp[i] = a[j] * h0 + a[j + 1] * h1 + a[j + 2] * h2 + a[j + 3] * h3;
+                tmp[i + half] = a[j] * g0 + a[j + 1] * g1 + a[j + 2] * g2 + a[j + 3] * g3;
+                i++;
+            }
+
+            tmp[i] = a[n - 2] * h0 + a[n - 1] * h1 + a[0] * h2 + a[1] * h3;
+            tmp[i + half] = a[n - 2] * g0 + a[n - 1] * g1 + a[0] * g2 + a[1] * g3;
+
+            for (i = 0; i < n; i++) {
+                a[i] = tmp[i];
+            }
         }
-    }
+    } // transform
 
 } // daub

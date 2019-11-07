@@ -13,8 +13,7 @@ import javafx.scene.Node;
 import javafx.scene.layout.VBox;
 
 /**
- * example illustrating the Fast-Fourier transform and math operations directly
- * on DataSet
+ * example illustrating the Fast-Fourier transform and math operations directly on DataSet
  * 
  * N.B. Zoom into the peaks to see the details
  * 

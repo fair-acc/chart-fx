@@ -6,13 +6,12 @@ import de.gsi.dataset.locks.DataSetLock;
 
 /**
  * <p>
- * The abstract implementation of DataSet and DataSetError interface that
- * provides implementation of some methods.
+ * The abstract implementation of DataSet and DataSetError interface that provides implementation of some methods.
  * </p>
  * <ul>
  * <li>It maintains the name of the DataSet
- * <li>It maintains a list of DataSetListener objects and provides methods that
- * can be used to dispatch DataSetEvent events.
+ * <li>It maintains a list of DataSetListener objects and provides methods that can be used to dispatch DataSetEvent
+ * events.
  * <li>It maintains ranges of X and Y values including error bars
  * <li>It gives a possibility to specify an undefined value.
  * </ul>
@@ -31,23 +30,11 @@ public abstract class AbstractErrorDataSet<D extends AbstractErrorDataSet<D>> ex
      * @param name of the DataSet
      * @param dimension dimension of data set
      * @param errorTypes for possible enum options see {@linkplain de.gsi.dataset.DataSetError.ErrorType}
-     * @throws IllegalArgumentException
-     *             if <code>name</code> is <code>null</code>
+     * @throws IllegalArgumentException if <code>name</code> is <code>null</code>
      */
-    protected AbstractErrorDataSet(final String name, final int dimension, final ErrorType ... errorTypes) {
+    protected AbstractErrorDataSet(final String name, final int dimension, final ErrorType... errorTypes) {
         super(name, dimension);
         this.errorType = errorTypes;
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    protected D getThis() {
-        return (D) this;
-    }
-
-    @Override
-    public DataSetLock<D> lock() {
-        return (DataSetLock<D>)super.lock();
     }
 
     @Override
@@ -66,16 +53,15 @@ public abstract class AbstractErrorDataSet<D extends AbstractErrorDataSet<D>> ex
         return errorType[dimIndex];
     }
 
-    /**
-     * sets the error type of the data set for the given dimension index
-     * @param dimIndex the dimension for which to set the ErrorType
-     * @param errorType error type to be set
-     * @return itself (fluent design)
-     * @see DataSetError#getErrorType(int dimIndex) for details
-     */
-    public D setErrorType(final int dimIndex, final ErrorType errorType) {
-        this.errorType[dimIndex] = errorType;
-        return getThis();
+    @Override
+    @SuppressWarnings("unchecked")
+    protected D getThis() {
+        return (D) this;
+    }
+
+    @Override
+    public DataSetLock<D> lock() {
+        return (DataSetLock<D>) super.lock();
     }
 
     /**
@@ -85,7 +71,7 @@ public abstract class AbstractErrorDataSet<D extends AbstractErrorDataSet<D>> ex
     public D recomputeLimits(final int dimension) {
         // presently always computes both dimensions
         if (dimension == 1) {
-            //TODO: find cleaner solution
+            // TODO: find cleaner solution
             return getThis();
         }
         lock().writeLockGuard(() -> {
@@ -117,6 +103,19 @@ public abstract class AbstractErrorDataSet<D extends AbstractErrorDataSet<D>> ex
                 }
             }
         });
+        return getThis();
+    }
+
+    /**
+     * sets the error type of the data set for the given dimension index
+     * 
+     * @param dimIndex the dimension for which to set the ErrorType
+     * @param errorType error type to be set
+     * @return itself (fluent design)
+     * @see DataSetError#getErrorType(int dimIndex) for details
+     */
+    public D setErrorType(final int dimIndex, final ErrorType errorType) {
+        this.errorType[dimIndex] = errorType;
         return getThis();
     }
 

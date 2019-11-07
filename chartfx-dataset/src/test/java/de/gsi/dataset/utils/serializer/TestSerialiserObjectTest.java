@@ -10,8 +10,7 @@ import org.slf4j.LoggerFactory;
 import de.gsi.dataset.utils.serializer.helper.MyGenericClass;
 
 /**
- * Simple tests to verify that the equals and hashCode functions of
- * 'MyGenericClass' work as expected
+ * Simple tests to verify that the equals and hashCode functions of 'MyGenericClass' work as expected
  * 
  * @author rstein
  */

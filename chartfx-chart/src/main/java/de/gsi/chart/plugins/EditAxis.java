@@ -58,7 +58,8 @@ public class EditAxis extends ChartPlugin {
     protected static final int DEFAULT_UPDATE_PERIOD = 100; // [ms]
     protected static final int DEFAULT_PREFERRED_WIDTH = 700; // [pixel]
     protected static final int DEFAULT_PREFERRED_HEIGHT = 200; // [pixel]
-    //    private static final String NUMBER_REGEX = "[\\x00-\\x20]*[+-]?(((((\\p{Digit}+)(\\.)?((\\p{Digit}+)?)([eE][+-]?(\\p{Digit}+))?)|(\\.((\\p{Digit}+))([eE][+-]?(\\p{Digit}+))?)|(((0[xX](\\p{XDigit}+)(\\.)?)|(0[xX](\\p{XDigit}+)?(\\.)(\\p{XDigit}+)))[pP][+-]?(\\p{Digit}+)))[fFdD]?))[\\x00-\\x20]*";
+    // private static final String NUMBER_REGEX =
+    // "[\\x00-\\x20]*[+-]?(((((\\p{Digit}+)(\\.)?((\\p{Digit}+)?)([eE][+-]?(\\p{Digit}+))?)|(\\.((\\p{Digit}+))([eE][+-]?(\\p{Digit}+))?)|(((0[xX](\\p{XDigit}+)(\\.)?)|(0[xX](\\p{XDigit}+)?(\\.)(\\p{XDigit}+)))[pP][+-]?(\\p{Digit}+)))[fFdD]?))[\\x00-\\x20]*";
     private static final Duration DEFAULT_ANIMATION_DURATION = Duration.millis(500);
     private final BooleanProperty animated = new SimpleBooleanProperty(this, "animated", false);
     private final List<MyPopOver> popUpList = new ArrayList<>();
@@ -73,8 +74,7 @@ public class EditAxis extends ChartPlugin {
         }
     };
 
-    private final ObjectProperty<AxisMode> axisMode = new SimpleObjectProperty<>(this, "axisMode",
-            AxisMode.XY) {
+    private final ObjectProperty<AxisMode> axisMode = new SimpleObjectProperty<>(this, "axisMode", AxisMode.XY) {
 
         @Override
         protected void invalidated() {
@@ -128,6 +128,10 @@ public class EditAxis extends ChartPlugin {
         this(AxisMode.XY, animated);
     }
 
+    private void addMouseEventHandlers(final Chart newChart) {
+        newChart.getAxes().forEach(axis -> popUpList.add(new MyPopOver(axis, axis.getSide().isHorizontal())));
+    }
+
     /**
      * When {@code true} zooming will be animated. By default it's {@code false}.
      *
@@ -175,6 +179,13 @@ public class EditAxis extends ChartPlugin {
         return animatedProperty().get();
     }
 
+    private void removeMouseEventHandlers(final Chart oldChart) {
+        popUpList.forEach(popOver -> {
+            popOver.deregisterMouseEvents();
+            popUpList.remove(popOver);
+        });
+    }
+
     /**
      * Sets the value of the {@link #animatedProperty()}.
      *
@@ -211,17 +222,6 @@ public class EditAxis extends ChartPlugin {
      */
     public final ObjectProperty<Duration> zoomDurationProperty() {
         return fadeDuration;
-    }
-
-    private void addMouseEventHandlers(final Chart newChart) {
-        newChart.getAxes().forEach(axis -> popUpList.add(new MyPopOver(axis, axis.getSide().isHorizontal())));
-    }
-
-    private void removeMouseEventHandlers(final Chart oldChart) {
-        popUpList.forEach(popOver -> {
-            popOver.deregisterMouseEvents();
-            popUpList.remove(popOver);
-        });
     }
 
     private class AxisEditor extends BorderPane {

@@ -30,15 +30,6 @@ public class HexagonMap {
     public List<HexagonCallback> onHexEnteredCallback = new LinkedList<>();
     public List<HexagonCallback> onHexExitCallback = new LinkedList<>();
 
-    public enum Direction {
-        NORTHWEST,
-        NORTHEAST,
-        EAST,
-        SOUTHEAST,
-        SOUTHWEST,
-        WEST
-    }
-
     /**
      * Creates an empty HexagonMap
      *
@@ -72,13 +63,10 @@ public class HexagonMap {
      * @param image an Image which will be used to generate a HexagonMap
      * @param mapWidthInHexes the number of hexagons on the x-axis
      * @param hexagonCreator a class implementing IHexagonCreator. This is how you decide HOW the HexagonMap should be
-     *            generated from the Image. In it's most basic form:
-     *            <p>
-     *            public void createHexagon(int q, int r, Color imagePixelColor, HexagonMap map) {
-     *            Hexagon h = new Hexagon(q, r);
-     *            h.setBackgroundColor(imagePixelColor);
-     *            map.addHexagon(h);
-     *            }
+     *        generated from the Image. In it's most basic form:
+     *        <p>
+     *        public void createHexagon(int q, int r, Color imagePixelColor, HexagonMap map) { Hexagon h = new
+     *        Hexagon(q, r); h.setBackgroundColor(imagePixelColor); map.addHexagon(h); }
      */
     public HexagonMap(final int hexagonSize, final Image image, final int mapWidthInHexes,
             final IHexagonCreator hexagonCreator) {
@@ -88,45 +76,8 @@ public class HexagonMap {
     }
 
     /**
-     * Tells the renderer that you want some space before the HexagonMap is rendered
-     * @param left padding margin left
-     * @param top padding margin right
-     */
-    public void setPadding(final int left, final int top) {
-        graphicsXpadding = left;
-        graphicsYpadding = top;
-        for (final Hexagon h : getAllHexagons()) {
-            h.getPoints().removeAll(h.getPoints());
-            h.init();
-        }
-    }
-
-    public double getPaddingX() {
-    	return graphicsXpadding;
-    }
-
-    public double getPaddingY() {
-    	return graphicsYpadding;
-    }
-
-    private double getGraphicsHexagonWidth() {
-        return Math.sqrt(3) / 2 * hexagonSize * 2;
-    }
-
-    public int getGraphicsHexagonHeight() {
-        return hexagonSize * 2;
-    }
-
-    public double getGraphicsHorizontalDistanceBetweenHexagons() {
-        return getGraphicsHexagonWidth();
-    }
-
-    public double getGraphicsverticalDistanceBetweenHexagons() {
-        return 3.0 / 4.0 * hexagonSize * 2.0;
-    }
-
-    /**
      * Add a Hexagon to the HexagonMap
+     * 
      * @param hexagon new hexagon
      *
      * @return the same hexagon
@@ -138,23 +89,30 @@ public class HexagonMap {
     }
 
     /**
-     * Removes a Hexagon from the HexagonMap
-     * @param hexagon to be removed
+     * @return all Hexagons that has been added to the map
      */
-    public void removeHexagon(final Hexagon hexagon) {
-        hexagon.setMap(null);
-        hexagons.remove(hexagon.position);
+    public Collection<Hexagon> getAllHexagons() {
+        return hexagons.values();
     }
 
-    /**
-     * @param x carthesian x coordinate
-     * @param y carthesian y coordinate
-     * @return the hexagon that is rendered on a specific position on the screen 
-     * if there is no Hexagon at the specified position
-     */
-    public Hexagon getHexagonContainingPixel(final int x, final int y) {
-        return getHexagon(
-                GridDrawer.pixelToPosition(x, y, getGraphicsHexagonHeight(), graphicsXpadding, graphicsYpadding));
+    public int getGraphicsHexagonHeight() {
+        return hexagonSize * 2;
+    }
+
+    private double getGraphicsHexagonWidth() {
+        return Math.sqrt(3) / 2 * hexagonSize * 2;
+    }
+
+    public double getGraphicsHorizontalDistanceBetweenHexagons() {
+        return getGraphicsHexagonWidth();
+    }
+
+    public double getGraphicsverticalDistanceBetweenHexagons() {
+        return 3.0 / 4.0 * hexagonSize * 2.0;
+    }
+
+    public Hexagon getHexagon(final GridPosition position) {
+        return getHexagon(position.q, position.r);
     }
 
     /**
@@ -162,8 +120,7 @@ public class HexagonMap {
      *
      * @param q the Q coordinate
      * @param r the R coordinate
-     * @return the Hexagon
-     * if there is no Hexagon at the specified position
+     * @return the Hexagon if there is no Hexagon at the specified position
      */
     public Hexagon getHexagon(final int q, final int r) {
         final GridPosition position = new GridPosition(q, r);
@@ -174,36 +131,25 @@ public class HexagonMap {
         return result;
     }
 
-    public Hexagon getHexagon(final GridPosition position) {
-        return getHexagon(position.q, position.r);
-    }
-
     public Hexagon getHexagonByCube(final int x, final int y, final int z) {
         return getHexagon(x, z);
     }
 
     /**
-     * @return all Hexagons that has been added to the map
+     * @param x carthesian x coordinate
+     * @param y carthesian y coordinate
+     * @return the hexagon that is rendered on a specific position on the screen if there is no Hexagon at the specified
+     *         position
      */
-    public Collection<Hexagon> getAllHexagons() {
-        return hexagons.values();
-    }
-
-    static class DefaultPathInfoSupplier implements IPathInfoSupplier {
-        @Override
-        public boolean isBlockingPath(final Hexagon hexagon) {
-            return hexagon == null || hexagon.isBlockingPath();
-        }
-
-        @Override
-        public int getMovementCost(final Hexagon from, final Hexagon to) {
-            return 1;
-        }
+    public Hexagon getHexagonContainingPixel(final int x, final int y) {
+        return getHexagon(
+                GridDrawer.pixelToPosition(x, y, getGraphicsHexagonHeight(), graphicsXpadding, graphicsYpadding));
     }
 
     /**
-     * If the map was created from an Image, this will return the horizontal pixel relation between the image and
-     * the generated map
+     * If the map was created from an Image, this will return the horizontal pixel relation between the image and the
+     * generated map
+     * 
      * @return scaling factor between pixel and grid
      */
     public Optional<Double> getImageMapHorizontalRelation() {
@@ -211,81 +157,22 @@ public class HexagonMap {
     }
 
     /**
-     * If the map was created from an Image, this will return the vertical pixel relation between the image and
-     * the generated map
+     * If the map was created from an Image, this will return the vertical pixel relation between the image and the
+     * generated map
+     * 
      * @return scaling factor between pixel and grid
      */
     public Optional<Double> getImageMapVerticalRelation() {
         return mapGenerator == null ? Optional.empty() : mapGenerator.getVerticalRelation();
     }
 
-    /**
-     * If you want the coordinates rendered on the screen
-     * @param b true: render coordinates
-     */
-    public void setRenderCoordinates(final boolean b) {
-        renderCoordinates = b;
+    public double getPaddingX() {
+        return graphicsXpadding;
     }
 
-    /**
-     * Sets the font used to draw the hexagon positions
-     * @param font for rendering the hex positions
-     */
-    public void setRenderFont(final Font font) {
-        gridDrawer.setFont(font);
+    public double getPaddingY() {
+        return graphicsYpadding;
     }
-
-    /**
-     * Renders the HexagonMap
-     *
-     * @param group the JaxaFX Group where all the hexagons should be rendered
-     */
-    public void render(final Group group) {
-        gridDrawer.draw(group);
-    }
-
-    /**
-     * Renders the HexagonMap
-     *
-     * @param canvas the JaxaFX Group where all the hexagons should be rendered
-     */
-    public void render(final Canvas canvas) {
-        gridDrawer.draw(canvas);
-    }
-
-    /**
-     * Renders the contours of the HexagonMap
-     *
-     * @param canvas the JaxaFX Group where all the hexagons should be rendered
-     */
-    public void renderContour(final Canvas canvas) {
-        gridDrawer.drawContour(canvas);
-    }
-
-    /**
-     * A callback when the user clicks on a Hexagon
-     * @param callback call-back function handler
-     */
-    public void setOnHexagonClickedCallback(final HexagonCallback callback) {
-        onHexClickedCallback.add(callback);
-    }
-
-    /**
-     * A callback when the user moves into a Hexagon
-     * @param callback call-back function handler
-     */
-    public void setOnHexagonEnteredCallback(final HexagonCallback callback) {
-        onHexEnteredCallback.add(callback);
-    }
-
-    /**
-     * A callback when the user moves out of a Hexagon
-     * @param callback call-back function handler
-     */
-    public void setOnHexagonExitCallback(final HexagonCallback callback) {
-        onHexExitCallback.add(callback);
-    }
-
 
     public void registerCanvasMouseLiner(final Canvas canvas) {
 
@@ -345,6 +232,117 @@ public class HexagonMap {
         });
     }
 
+    /**
+     * Removes a Hexagon from the HexagonMap
+     * 
+     * @param hexagon to be removed
+     */
+    public void removeHexagon(final Hexagon hexagon) {
+        hexagon.setMap(null);
+        hexagons.remove(hexagon.position);
+    }
 
+    /**
+     * Renders the HexagonMap
+     *
+     * @param canvas the JaxaFX Group where all the hexagons should be rendered
+     */
+    public void render(final Canvas canvas) {
+        gridDrawer.draw(canvas);
+    }
+
+    /**
+     * Renders the HexagonMap
+     *
+     * @param group the JaxaFX Group where all the hexagons should be rendered
+     */
+    public void render(final Group group) {
+        gridDrawer.draw(group);
+    }
+
+    /**
+     * Renders the contours of the HexagonMap
+     *
+     * @param canvas the JaxaFX Group where all the hexagons should be rendered
+     */
+    public void renderContour(final Canvas canvas) {
+        gridDrawer.drawContour(canvas);
+    }
+
+    /**
+     * A callback when the user clicks on a Hexagon
+     * 
+     * @param callback call-back function handler
+     */
+    public void setOnHexagonClickedCallback(final HexagonCallback callback) {
+        onHexClickedCallback.add(callback);
+    }
+
+    /**
+     * A callback when the user moves into a Hexagon
+     * 
+     * @param callback call-back function handler
+     */
+    public void setOnHexagonEnteredCallback(final HexagonCallback callback) {
+        onHexEnteredCallback.add(callback);
+    }
+
+    /**
+     * A callback when the user moves out of a Hexagon
+     * 
+     * @param callback call-back function handler
+     */
+    public void setOnHexagonExitCallback(final HexagonCallback callback) {
+        onHexExitCallback.add(callback);
+    }
+
+    /**
+     * Tells the renderer that you want some space before the HexagonMap is rendered
+     * 
+     * @param left padding margin left
+     * @param top padding margin right
+     */
+    public void setPadding(final int left, final int top) {
+        graphicsXpadding = left;
+        graphicsYpadding = top;
+        for (final Hexagon h : getAllHexagons()) {
+            h.getPoints().removeAll(h.getPoints());
+            h.init();
+        }
+    }
+
+    /**
+     * If you want the coordinates rendered on the screen
+     * 
+     * @param b true: render coordinates
+     */
+    public void setRenderCoordinates(final boolean b) {
+        renderCoordinates = b;
+    }
+
+    /**
+     * Sets the font used to draw the hexagon positions
+     * 
+     * @param font for rendering the hex positions
+     */
+    public void setRenderFont(final Font font) {
+        gridDrawer.setFont(font);
+    }
+
+    static class DefaultPathInfoSupplier implements IPathInfoSupplier {
+        @Override
+        public int getMovementCost(final Hexagon from, final Hexagon to) {
+            return 1;
+        }
+
+        @Override
+        public boolean isBlockingPath(final Hexagon hexagon) {
+            return hexagon == null || hexagon.isBlockingPath();
+        }
+    }
+
+    public enum Direction {
+        NORTHWEST, NORTHEAST, EAST, SOUTHEAST, SOUTHWEST, WEST
+    }
 
 }

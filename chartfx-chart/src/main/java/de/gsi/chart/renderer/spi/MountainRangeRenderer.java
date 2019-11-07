@@ -58,11 +58,36 @@ public class MountainRangeRenderer extends ErrorDataSetRenderer implements Rende
         setMountainRangeOffset(mountainRangeOffset);
     }
 
+    private void checkAndRecreateRenderer(final int nRenderer) {
+        if (renderers.size() == nRenderer) {
+            // all OK
+            return;
+        }
+
+        if (nRenderer > renderers.size()) {
+            for (int i = renderers.size(); i < nRenderer; i++) {
+                final ErrorDataSetRenderer newRenderer = new ErrorDataSetRenderer();
+                newRenderer.bind(this);
+                // do not show history sets in legend (single exception to
+                // binding)
+                newRenderer.showInLegendProperty().unbind();
+                newRenderer.setShowInLegend(false);
+                renderers.add(newRenderer);
+            }
+            return;
+        }
+
+        // require less renderer -> remove first until we have the right number
+        // needed
+        while (nRenderer < renderers.size()) {
+            renderers.remove(0);
+        }
+    }
+
     /**
      * Returns the <code>mountainRangeOffset</code>.
      *
-     * @return the <code>mountainRangeOffset</code>, i.e. vertical offset between
-     *         subsequent data sets
+     * @return the <code>mountainRangeOffset</code>, i.e. vertical offset between subsequent data sets
      */
     public final double getMountainRangeOffset() {
         return mountainRangeOffset.get();
@@ -137,44 +162,16 @@ public class MountainRangeRenderer extends ErrorDataSetRenderer implements Rende
     }
 
     /**
-     * Sets the <code>dashSize</code> to the specified value. The dash is the
-     * horizontal line painted at the ends of the vertical line. It is not painted
-     * if set to 0.
+     * Sets the <code>dashSize</code> to the specified value. The dash is the horizontal line painted at the ends of the
+     * vertical line. It is not painted if set to 0.
      *
-     * @param mountainRangeOffset t<code>mountainRangeOffset</code>, i.e. vertical
-     *            offset between subsequent data sets
+     * @param mountainRangeOffset t<code>mountainRangeOffset</code>, i.e. vertical offset between subsequent data sets
      * @return itself (fluent design)
      */
     public final MountainRangeRenderer setMountainRangeOffset(final double mountainRangeOffset) {
         AssertUtils.gtEqThanZero("mountainRangeOffset", mountainRangeOffset);
         this.mountainRangeOffset.setValue(mountainRangeOffset);
         return this;
-    }
-
-    private void checkAndRecreateRenderer(final int nRenderer) {
-        if (renderers.size() == nRenderer) {
-            // all OK
-            return;
-        }
-
-        if (nRenderer > renderers.size()) {
-            for (int i = renderers.size(); i < nRenderer; i++) {
-                final ErrorDataSetRenderer newRenderer = new ErrorDataSetRenderer();
-                newRenderer.bind(this);
-                // do not show history sets in legend (single exception to
-                // binding)
-                newRenderer.showInLegendProperty().unbind();
-                newRenderer.setShowInLegend(false);
-                renderers.add(newRenderer);
-            }
-            return;
-        }
-
-        // require less renderer -> remove first until we have the right number
-        // needed
-        while (nRenderer < renderers.size()) {
-            renderers.remove(0);
-        }
     }
 
     private class Demux3dTo2dDataSet implements DataSet2D, DataSetError {
@@ -213,6 +210,11 @@ public class MountainRangeRenderer extends ErrorDataSetRenderer implements Rende
         }
 
         @Override
+        public double get(final int dimIndex, final int i) {
+            return dimIndex == DIM_Y ? this.getY(i) : dataSet.get(dimIndex, i);
+        }
+
+        @Override
         public List<AxisDescription> getAxisDescriptions() {
             return axesDescriptions;
         }
@@ -223,8 +225,23 @@ public class MountainRangeRenderer extends ErrorDataSetRenderer implements Rende
         }
 
         @Override
+        public int getDataCount(int dimIndex) {
+            return this.getDataCount();
+        }
+
+        @Override
         public String getDataLabel(final int index) {
             return dataSet.getDataLabel(index);
+        }
+
+        @Override
+        public double getErrorNegative(final int dimIndex, final int index) {
+            return 0;
+        }
+
+        @Override
+        public double getErrorPositive(final int dimIndex, final int index) {
+            return 0;
         }
 
         @Override
@@ -257,21 +274,6 @@ public class MountainRangeRenderer extends ErrorDataSetRenderer implements Rende
         @Override
         public double getX(final int i) {
             return dataSet.getX(i);
-        }
-
-        @Override
-        public double get(final int dimIndex, final int i) {
-            return dimIndex == DIM_Y ? this.getY(i) : dataSet.get(dimIndex, i);
-        }
-
-        @Override
-        public double getErrorNegative(final int dimIndex, final int index) {
-            return 0;
-        }
-
-        @Override
-        public double getErrorPositive(final int dimIndex, final int index) {
-            return 0;
         }
 
         @Override
@@ -324,11 +326,6 @@ public class MountainRangeRenderer extends ErrorDataSetRenderer implements Rende
             return dataSet.setStyle(style);
         }
 
-        @Override
-        public List<EventListener> updateEventListener() {
-            return updateListener;
-        }
-
         private final void setYMax(AxisDescription zAxis) {
             yShift = mountainRaingeExtra * zAxis.getMax() * yIndex / yMax;
 
@@ -337,8 +334,8 @@ public class MountainRangeRenderer extends ErrorDataSetRenderer implements Rende
         }
 
         @Override
-        public int getDataCount(int dimIndex) {
-            return this.getDataCount();
+        public List<EventListener> updateEventListener() {
+            return updateListener;
         }
     }
 }

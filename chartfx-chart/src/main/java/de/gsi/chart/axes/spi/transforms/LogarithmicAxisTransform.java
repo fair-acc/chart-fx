@@ -32,6 +32,48 @@ public class LogarithmicAxisTransform extends AbstractAxisTransform {
         }
     };
 
+    public LogarithmicAxisTransform(final Axis axis) {
+        super(axis);
+        rangeMin = LogarithmicAxisTransform.DEFAULT_LOG_MIN_VALUE;
+    }
+
+    @Override
+    public double backward(final double val) {
+        return pow(val);
+    }
+
+    @Override
+    public double forward(final double val) {
+        return log(val);
+    }
+
+    /**
+     * Returns the value of the {@link #logarithmBaseProperty()}.
+     *
+     * @return base of the logarithm
+     */
+    public double getLogarithmBase() {
+        return logarithmBase.get();
+    }
+
+    @Override
+    public double getRoundedMaximumRange(final double max) {
+        return backward(Math.ceil(forward(max)));
+    }
+
+    @Override
+    public double getRoundedMinimumRange(final double min) {
+        return min <= 0 ? rangeMin : backward(Math.floor(forward(min)));
+    }
+
+    protected double log(final double value) {
+        if (value <= 0) {
+            return Double.NaN;
+            // return rangeMin * 0.99;
+        }
+        return Math.log10(value) / logBaseCache;
+    }
+
     /**
      * Base of the logarithm used by the axis, must be grater than 1.
      * <p>
@@ -44,56 +86,17 @@ public class LogarithmicAxisTransform extends AbstractAxisTransform {
         return logarithmBase;
     }
 
-    /**
-     * Returns the value of the {@link #logarithmBaseProperty()}.
-     *
-     * @return base of the logarithm
-     */
-    public double getLogarithmBase() {
-        return logarithmBase.get();
+    protected double pow(final double value) {
+        return Math.pow(logarithmBaseCache, value);
     }
 
     /**
      * Sets value of the {@link #logarithmBaseProperty()}.
      *
-     * @param value
-     *            base of the logarithm, value &gt; 1
+     * @param value base of the logarithm, value &gt; 1
      */
     public void setLogarithmBase(final double value) {
         logarithmBaseProperty().set(value);
-    }
-
-    protected double log(final double value) {
-        if (value <= 0) {
-            return Double.NaN;
-            // return rangeMin * 0.99;
-        }
-        return Math.log10(value) / logBaseCache;
-    }
-
-    protected double pow(final double value) {
-        return Math.pow(logarithmBaseCache, value);
-    }
-
-    @Override
-    public double forward(final double val) {
-        return log(val);
-    }
-
-    @Override
-    public double backward(final double val) {
-        return pow(val);
-    }
-
-    @Override
-    public void setMinimumRange(final double val) {
-        if (val <= 0) {
-            // reject
-            LogarithmicAxisTransform.LOGGER.warn(String.format("%s::setMinimumRange(%f) - rejected",
-                    LogarithmicAxisTransform.class.getSimpleName(), val));
-            return;
-        }
-        axis.minProperty().set(val);
     }
 
     @Override
@@ -108,18 +111,14 @@ public class LogarithmicAxisTransform extends AbstractAxisTransform {
     }
 
     @Override
-    public double getRoundedMinimumRange(final double min) {
-        return min <= 0 ? rangeMin : backward(Math.floor(forward(min)));
-    }
-
-    @Override
-    public double getRoundedMaximumRange(final double max) {
-        return backward(Math.ceil(forward(max)));
-    }
-
-    public LogarithmicAxisTransform(final Axis axis) {
-        super(axis);
-        rangeMin = LogarithmicAxisTransform.DEFAULT_LOG_MIN_VALUE;
+    public void setMinimumRange(final double val) {
+        if (val <= 0) {
+            // reject
+            LogarithmicAxisTransform.LOGGER.warn(String.format("%s::setMinimumRange(%f) - rejected",
+                    LogarithmicAxisTransform.class.getSimpleName(), val));
+            return;
+        }
+        axis.minProperty().set(val);
     }
 
 }

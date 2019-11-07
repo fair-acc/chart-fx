@@ -27,8 +27,8 @@ public class ClassFieldDescription implements Iterable<ClassFieldDescription> {
     private static final Logger LOGGER = LoggerFactory.getLogger(ClassFieldDescription.class);
     private static final int WILDCARD_EXTENDS_LENGTH = "? extends ".length();
     /**
-     * maximum recursion depth that is being explored default is 10: anything beyond
-     * that is typically an indication if infinite recursion
+     * maximum recursion depth that is being explored default is 10: anything beyond that is typically an indication if
+     * infinite recursion
      */
     public static int maxRecursionLevel = 10;
     private String toStringName; // computed on demand and cached
@@ -79,10 +79,8 @@ public class ClassFieldDescription implements Iterable<ClassFieldDescription> {
      * This should be called only once with the root class as an argument
      *
      * @param referenceClass the root node containing further Field children
-     * @param fullScan       {@code true} if the class field should be serialised
-     *                       according to {@link java.io.Serializable} (ie. object's
-     *                       non-static and non-transient fields); {@code false}
-     *                       otherwise.
+     * @param fullScan {@code true} if the class field should be serialised according to {@link java.io.Serializable}
+     *        (ie. object's non-static and non-transient fields); {@code false} otherwise.
      */
     public ClassFieldDescription(final Class<?> referenceClass, final boolean fullScan) {
         this(referenceClass, null, null, 0);
@@ -152,15 +150,11 @@ public class ClassFieldDescription implements Iterable<ClassFieldDescription> {
     /**
      * This should be called for individual class field members
      *
-     * @param field          Field reference for the given class member
-     * @param parent         pointer to the root/parent reference class field
-     *                       description
-     * @param recursionLevel hierarchy level (i.e. '0' being the root class, '1' the
-     *                       sub-class etc.
-     * @param fullScan       {@code true} if the class field should be serialised
-     *                       according to {@link java.io.Serializable} (ie. object's
-     *                       non-static and non-transient fields); {@code false}
-     *                       otherwise.
+     * @param field Field reference for the given class member
+     * @param parent pointer to the root/parent reference class field description
+     * @param recursionLevel hierarchy level (i.e. '0' being the root class, '1' the sub-class etc.
+     * @param fullScan {@code true} if the class field should be serialised according to {@link java.io.Serializable}
+     *        (ie. object's non-static and non-transient fields); {@code false} otherwise.
      */
     public ClassFieldDescription(final Field field, final ClassFieldDescription parent, final int recursionLevel,
             final boolean fullScan) {
@@ -199,8 +193,8 @@ public class ClassFieldDescription implements Iterable<ClassFieldDescription> {
     }
 
     /**
-     * @return generic type argument name of the class (e.g. for List&lt;String&gt;
-     *         this would return 'java.lang.String')
+     * @return generic type argument name of the class (e.g. for List&lt;String&gt; this would return
+     *         'java.lang.String')
      */
     public List<String> getActualTypeArgumentNames() {
         if (genericTypeNameList == null) {
@@ -212,8 +206,7 @@ public class ClassFieldDescription implements Iterable<ClassFieldDescription> {
     }
 
     /**
-     * @return generic type argument objects of the class (e.g. for
-     *         List&lt;String&gt; this would return 'String.class')
+     * @return generic type argument objects of the class (e.g. for List&lt;String&gt; this would return 'String.class')
      */
     public List<Class<?>> getActualTypeArguments() {
         if (genericTypeList == null) {
@@ -243,8 +236,8 @@ public class ClassFieldDescription implements Iterable<ClassFieldDescription> {
     }
 
     /**
-     * @return the DataType (if known) for the detected Field,
-     *         {@link de.gsi.dataset.serializer.DataType#OTHER} in all other cases
+     * @return the DataType (if known) for the detected Field, {@link de.gsi.dataset.serializer.DataType#OTHER} in all
+     *         other cases
      */
     public DataType getDataType() {
         return dataType;
@@ -272,16 +265,15 @@ public class ClassFieldDescription implements Iterable<ClassFieldDescription> {
     }
 
     /**
-     * @return relative field name within class hierarchy (ie.
-     *         field_level0.field_level1.variable_0)
+     * @return relative field name within class hierarchy (ie. field_level0.field_level1.variable_0)
      */
     public String getFieldNameRelative() {
         return fieldNameRelative;
     }
 
     /**
-     * @return field type strings (e.g. for the class Map&lt;Integer,String&gt; this
-     *         returns '&lt;java.lang.Integer,java.lang.String&gt;'
+     * @return field type strings (e.g. for the class Map&lt;Integer,String&gt; this returns
+     *         '&lt;java.lang.Integer,java.lang.String&gt;'
      */
     public String getGenericFieldTypeString() {
         if (genericTypeNames == null) {
@@ -307,8 +299,7 @@ public class ClassFieldDescription implements Iterable<ClassFieldDescription> {
     }
 
     /**
-     * @return hierarchy level depth w.r.t. root object (ie. '0' being a variable in
-     *         the root object)
+     * @return hierarchy level depth w.r.t. root object (ie. '0' being a variable in the root object)
      */
     public int getHierarchyDepth() {
         return hierarchyDepth;
@@ -382,9 +373,9 @@ public class ClassFieldDescription implements Iterable<ClassFieldDescription> {
     }
 
     /**
-     * @param field          class Field description for which
-     * @param hierarchyLevel the recursion level of the parent (e.g. '1' yields the
-     *                       immediate parent, '2' the parent of the parent etc.)
+     * @param field class Field description for which
+     * @param hierarchyLevel the recursion level of the parent (e.g. '1' yields the immediate parent, '2' the parent of
+     *        the parent etc.)
      * @return the parent field reference description for the provided field
      */
     public ClassFieldDescription getParent(final ClassFieldDescription field, final int hierarchyLevel) {
@@ -434,8 +425,7 @@ public class ClassFieldDescription implements Iterable<ClassFieldDescription> {
     }
 
     /**
-     * @return {@code true} if the class field includes the {@code final} modifier;
-     *         {@code false} otherwise.
+     * @return {@code true} if the class field includes the {@code final} modifier; {@code false} otherwise.
      */
     public boolean isFinal() {
         return modFinal;
@@ -456,16 +446,14 @@ public class ClassFieldDescription implements Iterable<ClassFieldDescription> {
     }
 
     /**
-     * @return {@code true} if the class field is a primitive type (ie. boolean,
-     *         byte, ..., int, float, double)
+     * @return {@code true} if the class field is a primitive type (ie. boolean, byte, ..., int, float, double)
      */
     public boolean isPrimitive() {
         return isprimitive;
     }
 
     /**
-     * @return {@code true} if the class field includes the {@code private}
-     *         modifier; {@code false} otherwise.
+     * @return {@code true} if the class field includes the {@code private} modifier; {@code false} otherwise.
      */
     public boolean isPrivate() {
         return modPrivate;
@@ -479,8 +467,7 @@ public class ClassFieldDescription implements Iterable<ClassFieldDescription> {
     }
 
     /**
-     * @return {@code true} if the class field includes the {@code public} modifier;
-     *         {@code false} otherwise.
+     * @return {@code true} if the class field includes the {@code public} modifier; {@code false} otherwise.
      */
     public boolean isPublic() {
         return modPublic;
@@ -494,49 +481,43 @@ public class ClassFieldDescription implements Iterable<ClassFieldDescription> {
     }
 
     /**
-     * @return {@code true} if the class field should be serialised according to
-     *         {@link java.io.Serializable} (ie. object's non-static and
-     *         non-transient fields); {@code false} otherwise.
+     * @return {@code true} if the class field should be serialised according to {@link java.io.Serializable} (ie.
+     *         object's non-static and non-transient fields); {@code false} otherwise.
      */
     public boolean isSerializable() {
         return serializable;
     }
 
     /**
-     * @return {@code true} if the class field includes the {@code static} modifier;
-     *         {@code false} otherwise.
+     * @return {@code true} if the class field includes the {@code static} modifier; {@code false} otherwise.
      */
     public boolean isStatic() {
         return modStatic;
     }
 
     /**
-     * @return {@code true} if the class field includes the {@code strictfp}
-     *         modifier; {@code false} otherwise.
+     * @return {@code true} if the class field includes the {@code strictfp} modifier; {@code false} otherwise.
      */
     public boolean isStrict() {
         return modStrict;
     }
 
     /**
-     * @return {@code true} if the class field includes the {@code synchronized}
-     *         modifier; {@code false} otherwise.
+     * @return {@code true} if the class field includes the {@code synchronized} modifier; {@code false} otherwise.
      */
     public boolean isSynchronized() {
         return modSynchronized;
     }
 
     /**
-     * @return {@code true} if the class field includes the {@code transient}
-     *         modifier; {@code false} otherwise.
+     * @return {@code true} if the class field includes the {@code transient} modifier; {@code false} otherwise.
      */
     public boolean isTransient() {
         return modTransient;
     }
 
     /**
-     * @return {@code true} if the class field includes the {@code volatile}
-     *         modifier; {@code false} otherwise.
+     * @return {@code true} if the class field includes the {@code volatile} modifier; {@code false} otherwise.
      */
     public boolean isVolatile() {
         return modVolatile;

@@ -14,6 +14,7 @@ import de.gsi.math.utils.UpdateListener;
  */
 public abstract class AbstractFunction implements Function {
 
+    private static Vector<Function> fallFunctions = new Vector<>();
     private String funcName = "none";
     private int fnbOfParameter = -1;
     protected double[] fparameter = null;
@@ -24,16 +25,7 @@ public abstract class AbstractFunction implements Function {
     protected String[] fparameterName = null;
     protected boolean isFitterMode = false;
     private final Vector<UpdateListener> flistener = new Vector<>();
-    private static Vector<Function> fallFunctions = new Vector<>();
     private final long fcreationTime = System.currentTimeMillis();
-
-    /**
-     * @param name function name
-     * @param nparm number of free parameter
-     */
-    public AbstractFunction(final String name, final int nparm) {
-        this(name, new double[nparm], new String[nparm]);
-    }
 
     /**
      * @param name function name
@@ -74,6 +66,185 @@ public abstract class AbstractFunction implements Function {
     }
 
     /**
+     * @param name function name
+     * @param nparm number of free parameter
+     */
+    public AbstractFunction(final String name, final int nparm) {
+        this(name, new double[nparm], new String[nparm]);
+    }
+
+    /**
+     * add object to global function list
+     *
+     * @param object function to be added
+     */
+    public void addFunction(final Function object) {
+        synchronized (fallFunctions) {
+            if (fallFunctions.indexOf(object) < 0) {
+                fallFunctions.add(object);
+            }
+        }
+    }
+
+    /**
+     * add object to update listener list
+     *
+     * @param object update listener to be added
+     */
+    public void addListener(final UpdateListener object) {
+        synchronized (flistener) {
+            if (flistener.indexOf(object) < 0) {
+                flistener.add(object);
+            }
+        }
+    }
+
+    @Override
+    public void clearParameterValues() {
+        for (int i = 0; i < fparameter.length; i++) {
+            if (!isParameterFixed(i)) {
+                fparameter[i] = 0.0;
+            }
+        }
+    }
+
+    @Override
+    public void fixParameter(final int id, final boolean state) {
+        if (id >= 0 || id <= fnbOfParameter) {
+            fparameterFixed[id] = state;
+        } else {
+            throw new InvalidParameterException("AbstractFunction::fixParameter(" + id + "," + state + "):"
+                    + " invalid parameter index [0," + (fnbOfParameter - 1) + "}");
+        }
+    }
+
+    @Override
+    public int getFreeParameterCount() {
+        int nDim = 0;
+        for (int i = 0; i < fnbOfParameter; i++) {
+            if (!isParameterFixed(i)) {
+                nDim++;
+            }
+        }
+        return nDim;
+    }
+
+    /**
+     * @return all registered functions
+     */
+    public Function[] getFunctions() {
+        synchronized (fallFunctions) {
+            if (!fallFunctions.isEmpty()) {
+                return fallFunctions.toArray(new Function[0]);
+            }
+        }
+        return new Function[0];
+    }
+
+    @Override
+    public String getID() {
+        return getName() + fcreationTime;
+    }
+
+    @Override
+    public String getName() {
+        return funcName;
+    }
+
+    @Override
+    public int getParameterCount() {
+        return fnbOfParameter;
+    }
+
+    @Override
+    public String getParameterName(final int id) {
+        if (id >= 0 || id <= fnbOfParameter) {
+            return fparameterName[id];
+        }
+
+        throw new InvalidParameterException("AbstractFunction::GetParameterName(" + id + "):"
+                + " invalid parameter index [0," + (fnbOfParameter - 1) + "}");
+    }
+
+    @Override
+    public double getParameterRangeMaximum(final int id) {
+        if (id < 0 || id >= fnbOfParameter) {
+            throw new InvalidParameterException("AbstractFunction::getParameterRangeMaximum(" + id
+                    + "): invalid parameter index [0," + (fnbOfParameter - 1) + "}");
+        }
+        return fparameterMax[id];
+    }
+
+    @Override
+    public double getParameterRangeMinimum(final int id) {
+        if (id < 0 || id >= fnbOfParameter) {
+            throw new InvalidParameterException("AbstractFunction::getParameterRangeMinimum(" + id
+                    + "): invalid parameter index [0," + (fnbOfParameter - 1) + "}");
+        }
+        return fparameterMin[id];
+    }
+
+    @Override
+    public double getParameterValue(final int id) {
+        if (id >= 0 || id <= fnbOfParameter) {
+            return fparameter[id];
+        }
+        throw new InvalidParameterException("AbstractFunction::getParameterValue(" + id
+                + "): invalid parameter index [0," + (fnbOfParameter - 1) + "}");
+    }
+
+    /**
+     * a convenience method to return all parameter values
+     *
+     * @return get array with parameter values
+     */
+    public double[] getParameterValues() {
+        return fparameter;
+    }
+
+    /**
+     * invoke object within update listener list
+     */
+    public void invokeListener() {
+        synchronized (flistener) {
+            final Iterator<UpdateListener> flist = flistener.listIterator();
+            while (flist.hasNext()) {
+                flist.next().Update(this);
+            }
+        }
+    }
+
+    @Override
+    public boolean isFitterMode() {
+        return isFitterMode;
+    }
+
+    @Override
+    public boolean isParameterFixed(final int id) {
+        if (id >= 0 || id <= fnbOfParameter) {
+            return fparameterFixed[id];
+        }
+        throw new InvalidParameterException("AbstractFunction::isParameterFixed(" + id + "):"
+                + " invalid parameter index [0," + (fnbOfParameter - 1) + "}");
+    }
+
+    public void printParameters() {
+        printParameters(false);
+    }
+
+    public void printParameters(final boolean fullDebug) {
+        System.out.printf("AbstractFunction - function name: %s\n", getName());
+        for (int i = 0; i < getParameterCount(); i++) {
+            if (!fullDebug) {
+                System.out.printf("Parameter %2d: %-20s = %f\n", i, getParameterName(i), getParameterValue(i));
+            } else {
+                System.out.printf("Parameter %2d: %-20s = %f \t [%f, %f]\n", i, getParameterName(i),
+                        getParameterValue(i), getParameterRangeMinimum(i), getParameterRangeMaximum(i));
+            }
+        }
+    }
+
+    /**
      * create and update parameter copies and names if necessary
      */
     private void reinitialise() {
@@ -109,24 +280,6 @@ public abstract class AbstractFunction implements Function {
         }
     }
 
-    @Override
-    public String getName() {
-        return funcName;
-    }
-
-    /**
-     * add object to global function list
-     *
-     * @param object function to be added
-     */
-    public void addFunction(final Function object) {
-        synchronized (fallFunctions) {
-            if (fallFunctions.indexOf(object) < 0) {
-                fallFunctions.add(object);
-            }
-        }
-    }
-
     /**
      * remove object to global function list
      *
@@ -136,31 +289,6 @@ public abstract class AbstractFunction implements Function {
         synchronized (fallFunctions) {
             if (fallFunctions.indexOf(object) >= 0) {
                 fallFunctions.remove(object);
-            }
-        }
-    }
-
-    /**
-     * @return all registered functions
-     */
-    public Function[] getFunctions() {
-        synchronized (fallFunctions) {
-            if (!fallFunctions.isEmpty()) {
-                return fallFunctions.toArray(new Function[0]);
-            }
-        }
-        return new Function[0];
-    }
-
-    /**
-     * add object to update listener list
-     *
-     * @param object update listener to be added
-     */
-    public void addListener(final UpdateListener object) {
-        synchronized (flistener) {
-            if (flistener.indexOf(object) < 0) {
-                flistener.add(object);
             }
         }
     }
@@ -178,15 +306,20 @@ public abstract class AbstractFunction implements Function {
         }
     }
 
-    /**
-     * invoke object within update listener list
-     */
-    public void invokeListener() {
-        synchronized (flistener) {
-            final Iterator<UpdateListener> flist = flistener.listIterator();
-            while (flist.hasNext()) {
-                flist.next().Update(this);
-            }
+    @Override
+    public void setFitterMode(final boolean state) {
+        if (isFitterMode == state) {
+            throw new InvalidParameterException(
+                    "AbstractFunction::setFitterMode(" + state + ") - funciton is already in this mode");
+        }
+        isFitterMode = state;
+
+        // fitter may need to reset parameter values in the line of fitting
+        // following lines ensure that preset parameter values are preserved
+        if (isFitterMode) {
+            fparameterCopy = java.util.Arrays.copyOf(fparameter, fparameter.length);
+        } else {
+            fparameter = java.util.Arrays.copyOf(fparameterCopy, fparameterCopy.length);
         }
     }
 
@@ -200,48 +333,13 @@ public abstract class AbstractFunction implements Function {
     }
 
     @Override
-    public int getParameterCount() {
-        return fnbOfParameter;
-    }
-
-    @Override
-    public int getFreeParameterCount() {
-        int nDim = 0;
-        for (int i = 0; i < fnbOfParameter; i++) {
-            if (!isParameterFixed(i)) {
-                nDim++;
-            }
-        }
-        return nDim;
-    }
-
-    @Override
-    public boolean isParameterFixed(final int id) {
+    public void setParameterName(final int id, final String paramName) {
         if (id >= 0 || id <= fnbOfParameter) {
-            return fparameterFixed[id];
-        }
-        throw new InvalidParameterException("AbstractFunction::isParameterFixed(" + id + "):"
-                + " invalid parameter index [0," + (fnbOfParameter - 1) + "}");
-    }
-
-    @Override
-    public void fixParameter(final int id, final boolean state) {
-        if (id >= 0 || id <= fnbOfParameter) {
-            fparameterFixed[id] = state;
+            fparameterName[id] = paramName;
         } else {
-            throw new InvalidParameterException("AbstractFunction::fixParameter(" + id + "," + state + "):"
-                    + " invalid parameter index [0," + (fnbOfParameter - 1) + "}");
+            throw new InvalidParameterException("AbstractFunction::setParameterName(" + id + "," + paramName
+                    + "): invalid parameter index [0," + (fnbOfParameter - 1) + "}");
         }
-    }
-
-    @Override
-    public String getParameterName(final int id) {
-        if (id >= 0 || id <= fnbOfParameter) {
-            return fparameterName[id];
-        }
-
-        throw new InvalidParameterException("AbstractFunction::GetParameterName(" + id + "):"
-                + " invalid parameter index [0," + (fnbOfParameter - 1) + "}");
     }
 
     @Override
@@ -252,24 +350,6 @@ public abstract class AbstractFunction implements Function {
         }
         fparameterMin[id] = minRange;
         fparameterMax[id] = maxRange;
-    }
-
-    @Override
-    public double getParameterRangeMaximum(final int id) {
-        if (id < 0 || id >= fnbOfParameter) {
-            throw new InvalidParameterException("AbstractFunction::getParameterRangeMaximum(" + id
-                    + "): invalid parameter index [0," + (fnbOfParameter - 1) + "}");
-        }
-        return fparameterMax[id];
-    }
-
-    @Override
-    public double getParameterRangeMinimum(final int id) {
-        if (id < 0 || id >= fnbOfParameter) {
-            throw new InvalidParameterException("AbstractFunction::getParameterRangeMinimum(" + id
-                    + "): invalid parameter index [0," + (fnbOfParameter - 1) + "}");
-        }
-        return fparameterMin[id];
     }
 
     @Override
@@ -292,85 +372,5 @@ public abstract class AbstractFunction implements Function {
             throw new InvalidParameterException("AbstractFunction::setParameterValue(" + value.length + ","
                     + Arrays.toString(value) + "): invalid parameter index [0," + (fnbOfParameter - 1) + "}");
         }
-    }
-
-    @Override
-    public void clearParameterValues() {
-        for (int i = 0; i < fparameter.length; i++) {
-            if (!isParameterFixed(i)) {
-                fparameter[i] = 0.0;
-            }
-        }
-    }
-
-    @Override
-    public double getParameterValue(final int id) {
-        if (id >= 0 || id <= fnbOfParameter) {
-            return fparameter[id];
-        }
-        throw new InvalidParameterException("AbstractFunction::getParameterValue(" + id
-                + "): invalid parameter index [0," + (fnbOfParameter - 1) + "}");
-    }
-
-    /**
-     * a convenience method to return all parameter values
-     *
-     * @return get array with parameter values
-     */
-    public double[] getParameterValues() {
-        return fparameter;
-    }
-
-    @Override
-    public boolean isFitterMode() {
-        return isFitterMode;
-    }
-
-    @Override
-    public void setFitterMode(final boolean state) {
-        if (isFitterMode == state) {
-            throw new InvalidParameterException(
-                    "AbstractFunction::setFitterMode(" + state + ") - funciton is already in this mode");
-        }
-        isFitterMode = state;
-
-        // fitter may need to reset parameter values in the line of fitting
-        // following lines ensure that preset parameter values are preserved
-        if (isFitterMode) {
-            fparameterCopy = java.util.Arrays.copyOf(fparameter, fparameter.length);
-        } else {
-            fparameter = java.util.Arrays.copyOf(fparameterCopy, fparameterCopy.length);
-        }
-    }
-
-    @Override
-    public void setParameterName(final int id, final String paramName) {
-        if (id >= 0 || id <= fnbOfParameter) {
-            fparameterName[id] = paramName;
-        } else {
-            throw new InvalidParameterException("AbstractFunction::setParameterName(" + id + "," + paramName
-                    + "): invalid parameter index [0," + (fnbOfParameter - 1) + "}");
-        }
-    }
-
-    public void printParameters() {
-        printParameters(false);
-    }
-
-    public void printParameters(final boolean fullDebug) {
-        System.out.printf("AbstractFunction - function name: %s\n", getName());
-        for (int i = 0; i < getParameterCount(); i++) {
-            if (!fullDebug) {
-                System.out.printf("Parameter %2d: %-20s = %f\n", i, getParameterName(i), getParameterValue(i));
-            } else {
-                System.out.printf("Parameter %2d: %-20s = %f \t [%f, %f]\n", i, getParameterName(i),
-                        getParameterValue(i), getParameterRangeMinimum(i), getParameterRangeMaximum(i));
-            }
-        }
-    }
-
-    @Override
-    public String getID() {
-        return getName() + fcreationTime;
     }
 }

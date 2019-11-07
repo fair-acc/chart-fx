@@ -12,14 +12,14 @@ public class LogarithmicTimeAxisTransform extends LogarithmicAxisTransform {
     }
 
     @Override
-    public double forward(final double val) {
-        // return log(rangeMax - val);
-        return log(val);
-    }
-
-    @Override
     public double backward(final double val) {
         // return pow(val) + rangeMax;
         return pow(val);
+    }
+
+    @Override
+    public double forward(final double val) {
+        // return log(rangeMax - val);
+        return log(val);
     }
 }

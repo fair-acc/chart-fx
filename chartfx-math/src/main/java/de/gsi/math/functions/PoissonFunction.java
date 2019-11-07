@@ -5,9 +5,16 @@ import de.gsi.math.TMath;
 public class PoissonFunction extends AbstractFunction1D implements Function1D {
 
     /**
-     * initialise Poisson function
-     * parameter order:
-     * parameter[0] = par (default: 1.0)
+     * initialise Poisson function parameter order: parameter[0] = par (default: 1.0)
+     * 
+     * @param name function name
+     */
+    public PoissonFunction(final String name) {
+        this(name, null);
+    }
+
+    /**
+     * initialise Poisson function parameter order: parameter[0] = par (default: 1.0)
      * 
      * @param name function name
      * @param parameter function parameter
@@ -24,17 +31,6 @@ public class PoissonFunction extends AbstractFunction1D implements Function1D {
         for (int i = 0; i < Math.min(parameter.length, 1); i++) {
             setParameterValue(i, parameter[0]);
         }
-    }
-
-    /**
-     * initialise Poisson function
-     * parameter order:
-     * parameter[0] = par (default: 1.0)
-     * 
-     * @param name function name
-     */
-    public PoissonFunction(final String name) {
-        this(name, null);
     }
 
     @Override

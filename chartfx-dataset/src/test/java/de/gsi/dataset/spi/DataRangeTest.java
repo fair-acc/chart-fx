@@ -15,6 +15,57 @@ public class DataRangeTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(DataRangeTest.class);
 
     @Test
+    public void testAddDoubleArrayMethods() {
+        {
+            // test add(double[]) interface
+            // initial range
+            final DataRange test1 = new DataRange(-1.0, +1.0);
+            assertTrue(test1.isDefined());
+
+            final double[] arrayWithin = { -0.5, 0.0, +0.5 };
+            final boolean resultA = test1.add(arrayWithin);
+            assertFalse(resultA);
+            assertEquals(-1.0, test1.getMin());
+            assertEquals(+1.0, test1.getMax());
+
+            final double[] arrayOutside1 = { 2.0, 0.0, -0.2 };
+            final boolean resultB = test1.add(arrayOutside1);
+            assertTrue(resultB);
+            assertEquals(-1.0, test1.getMin());
+            assertEquals(+2.0, test1.getMax());
+
+            final double[] arrayOutside2 = { 2.0, 0.0, -2.0 };
+            final boolean resultC = test1.add(arrayOutside2);
+            assertTrue(resultC);
+            assertEquals(-2.0, test1.getMin());
+            assertEquals(+2.0, test1.getMax());
+
+            final double[] arrayOutside3 = { 3.0, 0.0, -3.0 };
+            final boolean resultD = test1.add(arrayOutside3);
+            assertTrue(resultD);
+            assertEquals(-3.0, test1.getMin());
+            assertEquals(+3.0, test1.getMax());
+        }
+
+        {
+            // test add(double[], int) interface
+            // initial range
+            final DataRange test1 = new DataRange(-1.0, +1.0);
+            assertTrue(test1.isDefined());
+
+            final double[] arrayOutside1 = { 2.0, 0.0, -2.0 };
+            final boolean resultA = test1.add(arrayOutside1, 2);
+            assertTrue(resultA);
+            assertEquals(-1.0, test1.getMin());
+            assertEquals(+2.0, test1.getMax());
+        }
+
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.atDebug().log("finished testAddDoubleArrayMethods()");
+        }
+    }
+
+    @Test
     public void testAddDoubleMethods() {
 
         // test add(double) interface
@@ -93,57 +144,6 @@ public class DataRangeTest {
 
         if (LOGGER.isDebugEnabled()) {
             LOGGER.atDebug().log("finished testAddInvalidNumberMethods()");
-        }
-    }
-
-    @Test
-    public void testAddDoubleArrayMethods() {
-        {
-            // test add(double[]) interface
-            // initial range
-            final DataRange test1 = new DataRange(-1.0, +1.0);
-            assertTrue(test1.isDefined());
-
-            final double[] arrayWithin = { -0.5, 0.0, +0.5 };
-            final boolean resultA = test1.add(arrayWithin);
-            assertFalse(resultA);
-            assertEquals(-1.0, test1.getMin());
-            assertEquals(+1.0, test1.getMax());
-
-            final double[] arrayOutside1 = { 2.0, 0.0, -0.2 };
-            final boolean resultB = test1.add(arrayOutside1);
-            assertTrue(resultB);
-            assertEquals(-1.0, test1.getMin());
-            assertEquals(+2.0, test1.getMax());
-
-            final double[] arrayOutside2 = { 2.0, 0.0, -2.0 };
-            final boolean resultC = test1.add(arrayOutside2);
-            assertTrue(resultC);
-            assertEquals(-2.0, test1.getMin());
-            assertEquals(+2.0, test1.getMax());
-
-            final double[] arrayOutside3 = { 3.0, 0.0, -3.0 };
-            final boolean resultD = test1.add(arrayOutside3);
-            assertTrue(resultD);
-            assertEquals(-3.0, test1.getMin());
-            assertEquals(+3.0, test1.getMax());
-        }
-
-        {
-            // test add(double[], int) interface
-            // initial range
-            final DataRange test1 = new DataRange(-1.0, +1.0);
-            assertTrue(test1.isDefined());
-
-            final double[] arrayOutside1 = { 2.0, 0.0, -2.0 };
-            final boolean resultA = test1.add(arrayOutside1, 2);
-            assertTrue(resultA);
-            assertEquals(-1.0, test1.getMin());
-            assertEquals(+2.0, test1.getMax());
-        }
-
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.atDebug().log("finished testAddDoubleArrayMethods()");
         }
     }
 

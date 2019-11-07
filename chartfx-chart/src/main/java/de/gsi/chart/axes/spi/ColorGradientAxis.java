@@ -21,12 +21,9 @@ import javafx.scene.shape.Path;
 import javafx.scene.shape.Rectangle;
 
 /**
- * An Axis with a color gradient e.g. for use with HeatMap plots.
- * By default this axis is excluded from the Zoomer Plugin.
- * TODO:
- * - Fix LEFT, CENTER_HOR/VERT
- * - Reduce Boilerplate Code
- * - Allow free Positioning? e.g legend style, outside of chart, ...
+ * An Axis with a color gradient e.g. for use with HeatMap plots. By default this axis is excluded from the Zoomer
+ * Plugin. TODO: - Fix LEFT, CENTER_HOR/VERT - Reduce Boilerplate Code - Allow free Positioning? e.g legend style,
+ * outside of chart, ...
  *
  * @author Alexander Krimm
  */
@@ -102,6 +99,35 @@ public class ColorGradientAxis extends DefaultNumericAxis {
         this.colorGradient.set(colorGradient);
     }
 
+    /**
+     * Color gradient (linear) used to encode data point values.
+     *
+     * @return gradient property
+     */
+    public ObjectProperty<ColorGradient> colorGradientProperty() {
+        return colorGradient;
+    }
+
+    @Override
+    protected double computePrefHeight(final double width) {
+        // add width of the bar
+        final Side side = getSide();
+        if ((side == null) || (side == Side.CENTER_HOR) || side.isVertical()) {
+            return super.computePrefHeight(width);
+        }
+        return super.computePrefHeight(width) + getGradientWidth();
+    }
+
+    @Override
+    protected double computePrefWidth(final double height) {
+        // add width of the bar
+        final Side side = getSide();
+        if ((side == null) || (side == Side.CENTER_VER) || side.isHorizontal()) {
+            return super.computePrefWidth(height);
+        }
+        return super.computePrefWidth(height) + getGradientWidth();
+    }
+
     @Override
     public void drawAxis(final GraphicsContext gc, final double axisWidth, final double axisHeight) {
         if ((gc == null) || (getSide() == null)) {
@@ -119,7 +145,7 @@ public class ColorGradientAxis extends DefaultNumericAxis {
         // draw colorBar
         drawAxisLine(gc, axisLength, axisWidth, axisHeight);
 
-        // translate 
+        // translate
         final double gradientWidth = getGradientWidth();
         gc.save();
         switch (getSide()) {
@@ -244,45 +270,6 @@ public class ColorGradientAxis extends DefaultNumericAxis {
         gc.restore();
     }
 
-    public double getGradientWidth() {
-        return gradientWidth.get();
-    }
-
-    public void setGradientWidth(final double newGradientWidth) {
-        gradientWidth.set(newGradientWidth);
-    }
-
-    public DoubleProperty gradientWidthProperty() {
-        return gradientWidth;
-    }
-
-    /**
-     * Color gradient (linear) used to encode data point values.
-     *
-     * @return gradient property
-     */
-    public ObjectProperty<ColorGradient> colorGradientProperty() {
-        return colorGradient;
-    }
-
-    /**
-     * Sets the value of the {@link #colorGradientProperty()}.
-     *
-     * @param value the gradient to be used
-     */
-    public void setColorGradient(final ColorGradient value) {
-        colorGradientProperty().set(value);
-    }
-
-    /**
-     * Returns the value of the {@link #colorGradientProperty()}.
-     *
-     * @return the color gradient used for encoding data values
-     */
-    public ColorGradient getColorGradient() {
-        return colorGradientProperty().get();
-    }
-
     /**
      * @param value z-Value, values outside of the visible limit are clamped to the extrema
      * @return the color representing the input value on the z-Axis
@@ -315,8 +302,21 @@ public class ColorGradientAxis extends DefaultNumericAxis {
     }
 
     /**
-     * Return the color for a value as an integer with the color values in its bytes.
-     * For use e.g. with an IntBuffer backed PixelBuffer.
+     * Returns the value of the {@link #colorGradientProperty()}.
+     *
+     * @return the color gradient used for encoding data values
+     */
+    public ColorGradient getColorGradient() {
+        return colorGradientProperty().get();
+    }
+
+    public double getGradientWidth() {
+        return gradientWidth.get();
+    }
+
+    /**
+     * Return the color for a value as an integer with the color values in its bytes. For use e.g. with an IntBuffer
+     * backed PixelBuffer.
      * 
      * @param value z-Value
      * @return integer with one byte each set to alpha, red, green, blue
@@ -327,23 +327,20 @@ public class ColorGradientAxis extends DefaultNumericAxis {
                 + ((byte) (color.getGreen() * 255) << 8) + ((byte) (color.getBlue() * 255));
     }
 
-    @Override
-    protected double computePrefHeight(final double width) {
-        // add width of the bar
-        final Side side = getSide();
-        if ((side == null) || (side == Side.CENTER_HOR) || side.isVertical()) {
-            return super.computePrefHeight(width);
-        }
-        return super.computePrefHeight(width) + getGradientWidth();
+    public DoubleProperty gradientWidthProperty() {
+        return gradientWidth;
     }
 
-    @Override
-    protected double computePrefWidth(final double height) {
-        // add width of the bar
-        final Side side = getSide();
-        if ((side == null) || (side == Side.CENTER_VER) || side.isHorizontal()) {
-            return super.computePrefWidth(height);
-        }
-        return super.computePrefWidth(height) + getGradientWidth();
+    /**
+     * Sets the value of the {@link #colorGradientProperty()}.
+     *
+     * @param value the gradient to be used
+     */
+    public void setColorGradient(final ColorGradient value) {
+        colorGradientProperty().set(value);
+    }
+
+    public void setGradientWidth(final double newGradientWidth) {
+        gradientWidth.set(newGradientWidth);
     }
 }

@@ -46,12 +46,6 @@ public class YRangeIndicator extends AbstractRangeValueIndicator {
     }
 
     @Override
-    public void updateStyleClass() {
-        setStyleClasses(label, "y-", AbstractRangeValueIndicator.STYLE_CLASS_LABEL);
-        setStyleClasses(rectangle, "y-", AbstractRangeValueIndicator.STYLE_CLASS_RECT);
-    }
-
-    @Override
     public void layoutChildren() {
         if (getChart() == null) {
             return;
@@ -69,5 +63,11 @@ public class YRangeIndicator extends AbstractRangeValueIndicator {
         final double endY = Math.min(maxY, minY + yAxis.getDisplayPosition(getLowerBound()));
 
         layout(new BoundingBox(minX, startY, maxX - minX, endY - startY));
+    }
+
+    @Override
+    public void updateStyleClass() {
+        setStyleClasses(label, "y-", AbstractRangeValueIndicator.STYLE_CLASS_LABEL);
+        setStyleClasses(rectangle, "y-", AbstractRangeValueIndicator.STYLE_CLASS_RECT);
     }
 }

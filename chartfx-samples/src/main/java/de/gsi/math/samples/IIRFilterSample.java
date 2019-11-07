@@ -19,29 +19,65 @@ import javafx.scene.Node;
 import javafx.scene.layout.VBox;
 
 /**
- * Reads schottky measurement data and downmixes it with the following algorithm:
- * * apply band-pass arround the relevant band
- * * multiply with 28 MHz sine signal
- * * low-pass filter
- * * downsampling
- * Then applies different IIR Filters to the signal
+ * Reads schottky measurement data and downmixes it with the following algorithm: * apply band-pass arround the relevant
+ * band * multiply with 28 MHz sine signal * low-pass filter * downsampling Then applies different IIR Filters to the
+ * signal
+ * 
  * @author rstein
  */
 public class IIRFilterSample extends AbstractDemoApplication {
-	private static final Logger LOGGER = LoggerFactory.getLogger(IIRFilterSample.class);
-    private static final int ORDER = 32;      // Order of filters
-    
-    private final double sampling = 100e6;    // Sampling Rate:    100 MS/s
-    private final double center = 28e6;       // Center Frequency:  28 MHz
-    private final double width = 0.5e6;       // Signal Bandwidth: 0.5 MHz
+    private static final Logger LOGGER = LoggerFactory.getLogger(IIRFilterSample.class);
+    private static final int ORDER = 32; // Order of filters
+
+    private final double sampling = 100e6; // Sampling Rate: 100 MS/s
+    private final double center = 28e6; // Center Frequency: 28 MHz
+    private final double width = 0.5e6; // Signal Bandwidth: 0.5 MHz
     private final int decimationFactor = 100;
-    
+
     private DataSet fraw;
-    private DataSet fraw1; 
+    private DataSet fraw1;
     private DataSet fraw2;
     private DataSet fspectra;
-    private DataSet fspectra1; 
+    private DataSet fspectra1;
     private DataSet fspectra2;
+
+    @Override
+    public Node getContent() {
+        initData();
+        final DemoChart chart1 = new DemoChart();
+        chart1.getXAxis().setName("time");
+        chart1.getXAxis().setUnit("s");
+        chart1.getYAxis().setName("magnitude");
+        chart1.getYAxis().setUnit("a.u.");
+        chart1.getDatasets().addAll(fraw1, fraw2);
+
+        final DemoChart chart2 = new DemoChart();
+        chart2.getXAxis().setName("frequency [fs]");
+        chart2.getXAxis().setUnit("fs");
+        // chart2.getXAxis().setAutoRanging(false);
+        // chart2.getXAxis().setUpperBound(28e6 + 1e6);
+        // chart2.getXAxis().setLowerBound(28e6 - 1e6);
+        chart2.getYAxis().setName("magnitude");
+        chart2.getYAxis().setUnit("a.u.");
+        chart2.getDatasets().addAll(fspectra, fspectra1, fspectra2);
+
+        return new VBox(chart1, chart2);
+    }
+
+    private void initData() {
+        final double fs = 100e6;
+        final int nBins = 4 * 8192;
+        fraw = readDemoData(27500, nBins);
+        fraw1 = readDemoData(27500 + (int) (0.5e-3 * fs), nBins);
+        fraw2 = readDemoData(27500 + (int) (1.5e-3 * fs), nBins);
+        LOGGER.atInfo().log("length 0 = " + fraw.getDataCount(DataSet.DIM_X));
+        LOGGER.atInfo().log("length 1 = " + fraw1.getDataCount(DataSet.DIM_X));
+        LOGGER.atInfo().log("length 2 = " + fraw2.getDataCount(DataSet.DIM_X));
+
+        fspectra = DataSetMath.magnitudeSpectrumDecibel(fraw);
+        fspectra1 = DataSetMath.magnitudeSpectrumDecibel(fraw1);
+        fspectra2 = DataSetMath.magnitudeSpectrumDecibel(fraw2);
+    }
 
     private DataSet readDemoData(final int offset, final int nSamples) {
         // setup Bandpass to capture Signal
@@ -83,57 +119,19 @@ public class IIRFilterSample extends AbstractDemoApplication {
                     return ret;
 
                 } catch (final Exception e) {
-                	if (LOGGER.isErrorEnabled()) {
-                		LOGGER.atError().setCause(e).log("read error");
-                	}
+                    if (LOGGER.isErrorEnabled()) {
+                        LOGGER.atError().setCause(e).log("read error");
+                    }
                 }
 
                 zipStream.closeEntry();
             }
         } catch (final Exception e) {
-        	if (LOGGER.isErrorEnabled()) {
-        		LOGGER.atError().setCause(e).log("read error");
-        	}
+            if (LOGGER.isErrorEnabled()) {
+                LOGGER.atError().setCause(e).log("read error");
+            }
         }
         return null;
-    }
-
-    private void initData() {
-        final double fs = 100e6;
-        final int nBins = 4 * 8192;
-        fraw = readDemoData(27500, nBins);
-        fraw1 = readDemoData(27500 + (int) (0.5e-3 * fs), nBins);
-        fraw2 = readDemoData(27500 + (int) (1.5e-3 * fs), nBins);
-        LOGGER.atInfo().log("length 0 = " + fraw.getDataCount(DataSet.DIM_X));
-        LOGGER.atInfo().log("length 1 = " + fraw1.getDataCount(DataSet.DIM_X));
-        LOGGER.atInfo().log("length 2 = " + fraw2.getDataCount(DataSet.DIM_X));
-
-        fspectra = DataSetMath.magnitudeSpectrumDecibel(fraw);
-        fspectra1 = DataSetMath.magnitudeSpectrumDecibel(fraw1);
-        fspectra2 = DataSetMath.magnitudeSpectrumDecibel(fraw2);
-    }
-
-    @Override
-    public Node getContent() {
-        initData();
-        final DemoChart chart1 = new DemoChart();
-        chart1.getXAxis().setName("time");
-        chart1.getXAxis().setUnit("s");
-        chart1.getYAxis().setName("magnitude");
-        chart1.getYAxis().setUnit("a.u.");
-        chart1.getDatasets().addAll(fraw1, fraw2);
-
-        final DemoChart chart2 = new DemoChart();
-        chart2.getXAxis().setName("frequency [fs]");
-        chart2.getXAxis().setUnit("fs");
-        // chart2.getXAxis().setAutoRanging(false);
-        // chart2.getXAxis().setUpperBound(28e6 + 1e6);
-        // chart2.getXAxis().setLowerBound(28e6 - 1e6);
-        chart2.getYAxis().setName("magnitude");
-        chart2.getYAxis().setUnit("a.u.");
-        chart2.getDatasets().addAll(fspectra, fspectra1, fspectra2);
-
-        return new VBox(chart1, chart2);
     }
 
     public static void main(final String[] args) {

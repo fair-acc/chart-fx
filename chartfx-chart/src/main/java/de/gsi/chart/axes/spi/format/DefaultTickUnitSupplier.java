@@ -22,7 +22,8 @@ import de.gsi.chart.axes.TickUnitSupplier;
  */
 public final class DefaultTickUnitSupplier implements TickUnitSupplier {
     private static final int BASE = 10;
-    private static final SortedSet<Number> DEFAULT_MULTIPLIERS = Collections.unmodifiableSortedSet(new TreeSet<>(Arrays.asList(1d, 2.5, 5d)));
+    private static final SortedSet<Number> DEFAULT_MULTIPLIERS = Collections
+            .unmodifiableSortedSet(new TreeSet<>(Arrays.asList(1d, 2.5, 5d)));
     private final double[] multipliers;
 
     /**
@@ -36,7 +37,7 @@ public final class DefaultTickUnitSupplier implements TickUnitSupplier {
      * Creates a new instance of {@code DefaultTickUnitSupplier} with specified multipliers.
      *
      * @param multipliers an array of ascending numbers, with at least one element, from 1 (inclusive) to 10
-     *            (exclusive).
+     *        (exclusive).
      */
     public DefaultTickUnitSupplier(final SortedSet<? extends Number> multipliers) {
         Objects.requireNonNull(multipliers, "The multipliers must not be null");
@@ -46,14 +47,6 @@ public final class DefaultTickUnitSupplier implements TickUnitSupplier {
         DefaultTickUnitSupplier.checkRange(multipliers);
 
         this.multipliers = multipliers.stream().mapToDouble(Number::doubleValue).toArray();
-    }
-
-    private static void checkRange(final SortedSet<? extends Number> multipliers) {
-        for (final Number mult : multipliers) {
-            if (mult.doubleValue() < 1 || mult.doubleValue() >= DefaultTickUnitSupplier.BASE) {
-                throw new IllegalArgumentException("The multiplier values must be in range [1, 10)");
-            }
-        }
     }
 
     /**
@@ -98,5 +91,13 @@ public final class DefaultTickUnitSupplier implements TickUnitSupplier {
             }
         }
         return multiplier * Math.pow(DefaultTickUnitSupplier.BASE, exp);
+    }
+
+    private static void checkRange(final SortedSet<? extends Number> multipliers) {
+        for (final Number mult : multipliers) {
+            if (mult.doubleValue() < 1 || mult.doubleValue() >= DefaultTickUnitSupplier.BASE) {
+                throw new IllegalArgumentException("The multiplier values must be in range [1, 10)");
+            }
+        }
     }
 }

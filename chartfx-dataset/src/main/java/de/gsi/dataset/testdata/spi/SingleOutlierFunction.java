@@ -3,8 +3,8 @@ package de.gsi.dataset.testdata.spi;
 import java.util.SplittableRandom;
 
 /**
- * abstract error data set for graphical testing purposes this implementation
- * generates a function with a single random outlier
+ * abstract error data set for graphical testing purposes this implementation generates a function with a single random
+ * outlier
  *
  * @author rstein
  */
@@ -22,7 +22,7 @@ public class SingleOutlierFunction extends AbstractTestFunction<SingleOutlierFun
     }
 
     @Override
-    public double[] generateY(final int count) {        
+    public double[] generateY(final int count) {
         final long step = SingleOutlierFunction.rnd.nextInt(count);
         final double[] retVal = new double[count];
         for (int i = 0; i < count; i++) {

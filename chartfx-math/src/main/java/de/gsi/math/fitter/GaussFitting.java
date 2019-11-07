@@ -43,7 +43,7 @@ public class GaussFitting { // NOPMD - nomen est omen
         double[] pos = new double[2 * halfWidth + 2 * nadd];
         double[] meas = new double[2 * halfWidth + 2 * nadd];
         double[] var = new double[2 * halfWidth + 2 * nadd];
-        //		GaussFcn theFCN = new GaussFcn(meas, pos, var);
+        // GaussFcn theFCN = new GaussFcn(meas, pos, var);
 
         // copy data
         for (int i = 0; i < 2 * halfWidth; i++) {
@@ -53,7 +53,7 @@ public class GaussFitting { // NOPMD - nomen est omen
             meas[i + nadd] = valY;
         }
 
-        //zero padding at the begin and end of the data sample
+        // zero padding at the begin and end of the data sample
         for (int i = 0; i < nadd; i++) {
             pos[nadd - i] = pos[nadd] - dx * i;
             pos[nadd + 2 * halfWidth + i] = pos[nadd + 2 * halfWidth - 1] + dx * i;
@@ -63,8 +63,8 @@ public class GaussFitting { // NOPMD - nomen est omen
 
         for (int i = 0; i < meas.length; i++) {
 
-            //			pos[i] = (double)i/(double)(meas.length);    	
-            //			meas[i] = testdata.valueAt(pos[i]);
+            // pos[i] = (double)i/(double)(meas.length);
+            // meas[i] = testdata.valueAt(pos[i]);
 
             var[i] = Math.pow(meas[i] * 0.1, 2);
             norm += meas[i];
@@ -78,31 +78,31 @@ public class GaussFitting { // NOPMD - nomen est omen
         double rms2 = x2 / norm - mean * mean;
         double rms = rms2 > 0. ? Math.sqrt(rms2) : 1.;
 
-        //		System.out.printf("initial assumption: %g %g %g\n",mean,rms,area);
-        //		System.out.printf("measurement array as %s elements\n", meas.length); 	        		
-        //		MnUserParameters upar = new MnUserParameters();
-        //		upar.add("mean", mean, 0.01);
-        //		upar.add("rms",  rms, rms*0.1);
-        //		upar.add("area", area, area*0.1);
-        //		upar.add("mean", mean, mean);
-        //		upar.add("rms",  rms, rms);
-        //		upar.add("area", area, area);
+        // System.out.printf("initial assumption: %g %g %g\n",mean,rms,area);
+        // System.out.printf("measurement array as %s elements\n", meas.length);
+        // MnUserParameters upar = new MnUserParameters();
+        // upar.add("mean", mean, 0.01);
+        // upar.add("rms", rms, rms*0.1);
+        // upar.add("area", area, area*0.1);
+        // upar.add("mean", mean, mean);
+        // upar.add("rms", rms, rms);
+        // upar.add("area", area, area);
 
         // redirect migrad output to nirvana
         // TODO: redirect output to some error string
-        //		PrintStream temp = System.out;
-        //		System.setOut(null);
-        //create minimizer (default constructor)
-        //		MnMigrad migrad = new MnMigrad(theFCN, init_par, init_err);
-        //		MnMigrad migrad = new MnMigrad(theFCN, upar);
-        //		migrad.setCheckAnalyticalDerivatives(false);
-        //		migrad.setErrorDef(2);
+        // PrintStream temp = System.out;
+        // System.setOut(null);
+        // create minimizer (default constructor)
+        // MnMigrad migrad = new MnMigrad(theFCN, init_par, init_err);
+        // MnMigrad migrad = new MnMigrad(theFCN, upar);
+        // migrad.setCheckAnalyticalDerivatives(false);
+        // migrad.setErrorDef(2);
 
         // ... and minimise
-        //		FunctionMinimum min = migrad.minimize(300, 0.3);
-        //		fmean     = min.userState().value("mean");
-        //		frms      = min.userState().value("rms");
-        //		fconstant = min.userState().value("area");	        	        
+        // FunctionMinimum min = migrad.minimize(300, 0.3);
+        // fmean = min.userState().value("mean");
+        // frms = min.userState().value("rms");
+        // fconstant = min.userState().value("area");
 
         fmean = mean;
         frms = rms;
@@ -110,54 +110,48 @@ public class GaussFitting { // NOPMD - nomen est omen
         farea = eqArea;
 
         // output
-        //		System.out.println("minimum: " + min);	 
+        // System.out.println("minimum: " + min);
 
         // create MINOS error factory
-        //		MnMinos minos = new MnMinos(theFCN, min);
-        //		System.setOut(temp);
-        //		System.out.printf("mean %s rms %s\n", fmean, frms);
+        // MnMinos minos = new MnMinos(theFCN, min);
+        // System.setOut(temp);
+        // System.out.printf("mean %s rms %s\n", fmean, frms);
 
-        //		fmean_error     = choose_absmax(minos.lower(0),minos.upper(0));
-        //		frms_error      = choose_absmax(minos.lower(1),minos.upper(1));
-        //		fconstant_error = choose_absmax(minos.lower(2),minos.upper(2));   
-    }
-
-    public static double getMean() {
-        return fmean;
-    }
-
-    public static double getRMS() {
-        return frms;
-    }
-
-    public static double getConstant() {
-        return fconstant;
+        // fmean_error = choose_absmax(minos.lower(0),minos.upper(0));
+        // frms_error = choose_absmax(minos.lower(1),minos.upper(1));
+        // fconstant_error = choose_absmax(minos.lower(2),minos.upper(2));
     }
 
     public static double getArea() {
         return farea;
     }
 
-    public static double getMeanError() {
-        return fmeanError;
+    public static double getAreaError() {
+        return fareaError;
     }
 
-    public static double getRMSError() {
-        return frmsError;
+    public static double getConstant() {
+        return fconstant;
     }
 
     public static double getConstantError() {
         return fconstantError;
     }
 
-    public static double getAreaError() {
-        return fareaError;
+    public static double getMean() {
+        return fmean;
     }
 
-    public static void print() {
-        System.out.printf("mean    : %s \t+- %s%nrms     : %s \t+- %s%nconstant: %s \t+- %s%narea    : %s \t+- %s\n", //  NOPMD -- acceptable debugging use
-                getMean(), getMeanError(), getRMS(), getRMSError(), getConstant(), getConstantError(), getArea(),
-                getAreaError());
+    public static double getMeanError() {
+        return fmeanError;
+    }
+
+    public static double getRMS() {
+        return frms;
+    }
+
+    public static double getRMSError() {
+        return frmsError;
     }
 
     public static void main(String[] args) {
@@ -172,6 +166,16 @@ public class GaussFitting { // NOPMD - nomen est omen
         GaussFitting.fitData(valX, valY, 40, 20, 20);
 
         GaussFitting.print();
+    }
+
+    public static void print() {
+        System.out.printf("mean    : %s \t+- %s%nrms     : %s \t+- %s%nconstant: %s \t+- %s%narea    : %s \t+- %s\n", // NOPMD
+                                                                                                                      // --
+                                                                                                                      // acceptable
+                                                                                                                      // debugging
+                                                                                                                      // use
+                getMean(), getMeanError(), getRMS(), getRMSError(), getConstant(), getConstantError(), getArea(),
+                getAreaError());
     }
 
 //    public static int removeSpuriousPeaks(double[] posX, double[] measY, double sigma) {

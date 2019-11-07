@@ -34,23 +34,6 @@ public abstract class AbstractTestApplication extends Application {
         super();
     }
 
-    protected abstract void initChart();
-
-    @Override
-    public void start(final Stage stage) {
-        stage.setTitle(this.getClass().getSimpleName());
-        initChart();
-
-        BorderPane root = new BorderPane();
-        final Scene scene = new Scene(root, 1800, 400);
-        root.setCenter(test.getChart(MAX_DATA_POINTS_1K));
-        root.setTop(getHeaderBar(scene));
-
-        stage.setScene(scene);
-        stage.setOnCloseRequest(evt -> System.exit(0));
-        stage.show();
-    }
-
     protected HBox getHeaderBar(final Scene scene) {
 
         final Button newDataSet1k = new Button("1k");
@@ -171,6 +154,23 @@ public abstract class AbstractTestApplication extends Application {
         return new HBox(new VBox(newDataSet1k, newDataSet100k), new VBox(newDataSet10k, newDataSet200k),
                 new VBox(startTimer25Hz, startTimer1Hz), spacer, new VBox(fxFPS, chartFPS),
                 new VBox(cpuLoadProcess, cpuLoadSystem));
+    }
+
+    protected abstract void initChart();
+
+    @Override
+    public void start(final Stage stage) {
+        stage.setTitle(this.getClass().getSimpleName());
+        initChart();
+
+        BorderPane root = new BorderPane();
+        final Scene scene = new Scene(root, 1800, 400);
+        root.setCenter(test.getChart(MAX_DATA_POINTS_1K));
+        root.setTop(getHeaderBar(scene));
+
+        stage.setScene(scene);
+        stage.setOnCloseRequest(evt -> System.exit(0));
+        stage.show();
     }
 
 }

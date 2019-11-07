@@ -32,31 +32,6 @@ public class FragmentedDataSet extends AbstractDataSet<FragmentedDataSet> implem
     }
 
     /**
-     * clears all sub-dataset references
-     */
-    public void clear() {
-        lock().writeLockGuard(() -> {
-            dataCount = 0;
-            list.clear();
-            fireInvalidated(new UpdatedDataEvent(this, "clear()"));
-        });
-    }
-
-    /**
-     * adds new custom x and y array values (internally generates a new DataSet)
-     * 
-     * @param xValues new X coordinates
-     * @param yValues new Y coordinates
-     */
-    public void add(final double[] xValues, final double[] yValues) {
-        // TODO: harald -> please check whether this is supposed to be deep copy
-        // (true) or by reference (false) hand over (assumption here is 'by reference/pointer' -> remove this comment once checked
-        final DoubleDataSet set = new DoubleDataSet(String.format("Fragement #%d", list.size() + 1), xValues, yValues,
-                xValues.length, false);
-        add(set);
-    }
-
-    /**
      * @param set new data set to be added to list
      */
     public void add(final DataSet2D set) {
@@ -70,6 +45,37 @@ public class FragmentedDataSet extends AbstractDataSet<FragmentedDataSet> implem
         recomputeLimits(0);
         recomputeLimits(1);
         fireInvalidated(new AddedDataEvent(this, "added data set"));
+    }
+
+    /**
+     * adds new custom x and y array values (internally generates a new DataSet)
+     * 
+     * @param xValues new X coordinates
+     * @param yValues new Y coordinates
+     */
+    public void add(final double[] xValues, final double[] yValues) {
+        // TODO: harald -> please check whether this is supposed to be deep copy
+        // (true) or by reference (false) hand over (assumption here is 'by reference/pointer' -> remove this comment
+        // once checked
+        final DoubleDataSet set = new DoubleDataSet(String.format("Fragement #%d", list.size() + 1), xValues, yValues,
+                xValues.length, false);
+        add(set);
+    }
+
+    /**
+     * clears all sub-dataset references
+     */
+    public void clear() {
+        lock().writeLockGuard(() -> {
+            dataCount = 0;
+            list.clear();
+            fireInvalidated(new UpdatedDataEvent(this, "clear()"));
+        });
+    }
+
+    @Override
+    public int getDataCount() {
+        return dataCount;
     }
 
     /**
@@ -87,16 +93,41 @@ public class FragmentedDataSet extends AbstractDataSet<FragmentedDataSet> implem
     }
 
     @Override
-    public double[] getYValues() {
+    public String getStyle(int i) {
+        for (final DataSet2D dataset : list) {
+            if (i < dataset.getDataCount()) {
+                return dataset.getStyle(i);
+            }
+            i -= dataset.getDataCount();
+        }
+        return "";
+    }
+
+    @Override
+    public double getX(int i) {
+        for (final DataSet2D dataset : list) {
+            if (i < dataset.getDataCount()) {
+                return dataset.getX(i);
+            }
+            i -= dataset.getDataCount();
+        }
+        return 0;
+    }
+
+    @Override
+    public int getXIndex(double x) {
         return lock().readLockGuard(() -> {
-            final double[] tmp = new double[dataCount];
+            if (x < getAxisDescription(0).getMin()) {
+                return 0;
+            }
             int index = 0;
             for (final DataSet2D dataset : list) {
-                for (int i = 0; i < dataset.getDataCount(); i++) {
-                    tmp[index++] = dataset.getY(i);
+                if (x >= dataset.getAxisDescription(0).getMin() && x <= dataset.getAxisDescription(0).getMax()) {
+                    return index + dataset.getXIndex(x);
                 }
+                index += dataset.getDataCount();
             }
-            return tmp;
+            return getDataCount();
         });
     }
 
@@ -115,22 +146,6 @@ public class FragmentedDataSet extends AbstractDataSet<FragmentedDataSet> implem
     }
 
     @Override
-    public int getDataCount() {
-        return dataCount;
-    }
-
-    @Override
-    public double getX(int i) {
-        for (final DataSet2D dataset : list) {
-            if (i < dataset.getDataCount()) {
-                return dataset.getX(i);
-            }
-            i -= dataset.getDataCount();
-        }
-        return 0;
-    }
-
-    @Override
     public double getY(int i) {
         for (final DataSet2D dataset : list) {
             if (i < dataset.getDataCount()) {
@@ -142,30 +157,16 @@ public class FragmentedDataSet extends AbstractDataSet<FragmentedDataSet> implem
     }
 
     @Override
-    public String getStyle(int i) {
-        for (final DataSet2D dataset : list) {
-            if (i < dataset.getDataCount()) {
-                return dataset.getStyle(i);
-            }
-            i -= dataset.getDataCount();
-        }
-        return "";
-    }
-
-    @Override
-    public int getXIndex(double x) {
+    public double[] getYValues() {
         return lock().readLockGuard(() -> {
-            if (x < getAxisDescription(0).getMin()) {
-                return 0;
-            }
+            final double[] tmp = new double[dataCount];
             int index = 0;
             for (final DataSet2D dataset : list) {
-                if (x >= dataset.getAxisDescription(0).getMin() && x <= dataset.getAxisDescription(0).getMax()) {
-                    return index + dataset.getXIndex(x);
+                for (int i = 0; i < dataset.getDataCount(); i++) {
+                    tmp[index++] = dataset.getY(i);
                 }
-                index += dataset.getDataCount();
             }
-            return getDataCount();
+            return tmp;
         });
     }
 

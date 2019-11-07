@@ -45,6 +45,32 @@ public class Hexagon extends Polygon {
         setFill(Color.GREY);
     }
 
+    // --------------------- Graphics
+    // --------------------------------------------
+    private double[] calculatePolygonPoints() {
+        checkMap();
+        final int graphicsHeight = map.hexagonSize * 2;
+        final double graphicsWidth = Math.sqrt(3) / 2 * graphicsHeight;
+        graphicsXoffset = (int) (graphicsWidth * position.q + 0.5 * graphicsWidth * position.r);
+        graphicsYoffset = (int) (3.0 / 4.0 * graphicsHeight * position.r);
+        graphicsXoffset = graphicsXoffset + map.graphicsXpadding;
+        graphicsYoffset = graphicsYoffset + map.graphicsYpadding;
+
+        final double[] polyPoints = new double[12];
+        for (int i = 0; i < 6; i++) {
+            polyPoints[i * 2] = graphicsXoffset + map.hexagonSize * Hexagon.sinAngle[i];
+            polyPoints[i * 2 + 1] = graphicsYoffset + map.hexagonSize * Hexagon.cosAngle[i];
+        }
+        return polyPoints;
+    }
+
+    private void checkMap() {
+        if (map == null) {
+            throw new IllegalStateException(
+                    "Hexagon must be added to a HexagonMap before this operation. See addHexagon()");
+        }
+    }
+
     public void draw(GraphicsContext gc) {
         gc.save();
         gc.setStroke(getStroke());
@@ -75,7 +101,7 @@ public class Hexagon extends Polygon {
             // list.add(direction);
             // }
 
-            //TODO: find work-around for colour smoothing operation on image scaling
+            // TODO: find work-around for colour smoothing operation on image scaling
             if (stroke != null && !myColourCompare(stroke, getStroke(), 0.2)) {
                 list.add(direction);
             }
@@ -163,6 +189,7 @@ public class Hexagon extends Polygon {
     public HexagonMap.Direction getDirectionTo(final Hexagon target) {
         return position.getDirectionTo(target.position);
     }
+
     /**
      * Calculates the distance (number of hexagons) to the target hexagon
      * 
@@ -273,7 +300,7 @@ public class Hexagon extends Polygon {
      *
      * @param destination the target Hexagon
      * @param pathInfoSupplier a class implementing the IPathInfoSupplier interface. This can be used to add inpassable
-     *            hexagons and customize the movement costs.
+     *        hexagons and customize the movement costs.
      * @return an array of Hexagons, sorted so that the first step comes first.
      * @throws NoPathFoundException if there exists no path between start and the goal
      */
@@ -341,6 +368,18 @@ public class Hexagon extends Polygon {
         return isVisualObstacle;
     }
 
+    private boolean myColourCompare(Paint a, Paint b, double threshold) {
+        if (!(a instanceof Color) || !(b instanceof Color)) {
+            return false;
+        }
+        final Color ca = (Color) a;
+        final Color cb = (Color) b;
+        return !(Math.abs(ca.getRed() - cb.getRed()) > threshold)
+                && (!(Math.abs(ca.getGreen() - cb.getGreen()) > threshold)
+                        && (!(Math.abs(ca.getBlue() - cb.getBlue()) > threshold)
+                                && !(Math.abs(ca.getOpacity() - cb.getOpacity()) > threshold)));
+    }
+
     public void renderCoordinates(GraphicsContext gc) {
         final Text text = new Text(position.getCoordinates());
         if (map != null) {
@@ -405,44 +444,6 @@ public class Hexagon extends Polygon {
     @Override
     public String toString() {
         return "Hexagon q:" + position.q + " r:" + position.r;
-    }
-
-    // --------------------- Graphics
-    // --------------------------------------------
-    private double[] calculatePolygonPoints() {
-        checkMap();
-        final int graphicsHeight = map.hexagonSize * 2;
-        final double graphicsWidth = Math.sqrt(3) / 2 * graphicsHeight;
-        graphicsXoffset = (int) (graphicsWidth * position.q + 0.5 * graphicsWidth * position.r);
-        graphicsYoffset = (int) (3.0 / 4.0 * graphicsHeight * position.r);
-        graphicsXoffset = graphicsXoffset + map.graphicsXpadding;
-        graphicsYoffset = graphicsYoffset + map.graphicsYpadding;
-
-        final double[] polyPoints = new double[12];
-        for (int i = 0; i < 6; i++) {
-            polyPoints[i * 2] = graphicsXoffset + map.hexagonSize * Hexagon.sinAngle[i];
-            polyPoints[i * 2 + 1] = graphicsYoffset + map.hexagonSize * Hexagon.cosAngle[i];
-        }
-        return polyPoints;
-    }
-
-    private void checkMap() {
-        if (map == null) {
-            throw new IllegalStateException(
-                    "Hexagon must be added to a HexagonMap before this operation. See addHexagon()");
-        }
-    }
-
-    private boolean myColourCompare(Paint a, Paint b, double threshold) {
-        if (!(a instanceof Color) || !(b instanceof Color)) {
-            return false;
-        }
-        final Color ca = (Color) a;
-        final Color cb = (Color) b;
-        return !(Math.abs(ca.getRed() - cb.getRed()) > threshold)
-                && (!(Math.abs(ca.getGreen() - cb.getGreen()) > threshold)
-                        && (!(Math.abs(ca.getBlue() - cb.getBlue()) > threshold)
-                                && !(Math.abs(ca.getOpacity() - cb.getOpacity()) > threshold)));
     }
 
     class UIupdater implements Runnable {
