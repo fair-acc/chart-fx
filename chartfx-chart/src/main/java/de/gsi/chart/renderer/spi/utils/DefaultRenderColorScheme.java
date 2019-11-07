@@ -162,7 +162,7 @@ public final class DefaultRenderColorScheme {
     public static final ObservableList<Paint> getStandardFillStyle() {
         final ObservableList<Paint> values = FXCollections.observableArrayList();
         for (Color colour : fillColorProperty().get()) {
-            values.add(FillPatternStyle.getDefaultHatch(colour.brighter(), hatchShiftByIndexProperty().get()));
+            values.add(FillPatternStyleHelper.getDefaultHatch(colour.brighter(), hatchShiftByIndexProperty().get()));
         }
         return values;
     }
@@ -194,7 +194,7 @@ public final class DefaultRenderColorScheme {
                 return;
             }
 
-            final ImagePattern hatch = FillPatternStyle.getDefaultHatch(color.brighter(),
+            final ImagePattern hatch = FillPatternStyleHelper.getDefaultHatch(color.brighter(),
                     dsIndex * hatchShiftByIndexProperty().get());
 
             gc.setFill(hatch);
