@@ -101,6 +101,9 @@ public class ClassFieldDescription implements Iterable<ClassFieldDescription> {
         this.parent = parent == null ? Optional.empty() : Optional.of(parent);
 
         if (referenceClass == null) {
+            if (field == null) {
+                throw new IllegalArgumentException("field must not be null");
+            }
             this.field = field;
             classType = field.getType();
             fieldName = field.getName();
