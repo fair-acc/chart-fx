@@ -113,8 +113,7 @@ public class DataViewerSample extends Application {
 
         final Button newView = new Button(null, new HBox( //
                 new Glyph(FONT_AWESOME, FontAwesome.Glyph.PLUS).size(FONT_SIZE), //
-                new Glyph(FONT_AWESOME, FontAwesome.Glyph.LINE_CHART).size(FONT_SIZE)
-                ));
+                new Glyph(FONT_AWESOME, FontAwesome.Glyph.LINE_CHART).size(FONT_SIZE)));
         newView.setTooltip(new Tooltip("add new view"));
         newView.setOnAction(evt -> {
             final int count = view1.getVisibleChildren().size();
@@ -141,20 +140,22 @@ public class DataViewerSample extends Application {
         closeDeco.setSelected(true);
         closeDeco.setGraphic(new Glyph(FONT_AWESOME, FontAwesome.Glyph.CLOSE).size(FONT_SIZE));
         closeDeco.selectedProperty().bindBidirectional(viewer.closeWindowButtonVisibleProperty());
-        
+
         Label focusedOwner = new Label();
-        
-        
-        viewer.getUserToolBarItems().addAll(newView,listView, windowDeco, closeDeco, new Separator());
-        final Scene scene = new Scene(new VBox(viewer.getToolBar(), viewer, new HBox(new Label("focus on: "), focusedOwner)), 800, 600);
-        scene.focusOwnerProperty().addListener((ch, o, n) -> focusedOwner.setText(n.toString()));
+
+        viewer.getUserToolBarItems().addAll(newView, listView, windowDeco, closeDeco, new Separator());
+        final Scene scene = new Scene(
+                new VBox(viewer.getToolBar(), viewer, new HBox(new Label("focus on: "), focusedOwner)), 800, 600);
+        scene.focusOwnerProperty().addListener((ch, o, n) -> {
+            if (n != null) {
+                focusedOwner.setText(n.toString());
+            }
+            focusedOwner.setText(null);
+        });
         primaryStage.setScene(scene);
         primaryStage.show();
 
-        primaryStage.setOnCloseRequest(e -> {
-            Platform.exit();
-            System.exit(0);
-        });
+        primaryStage.setOnCloseRequest(e -> Platform.exit());
     }
 
     private static List<DataSet> createSeries() {
