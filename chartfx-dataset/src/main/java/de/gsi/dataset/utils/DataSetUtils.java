@@ -417,9 +417,8 @@ public class DataSetUtils extends DataSetUtilsHelper {
      * @return DataSet with the data and metadata read from the file
      */
     public static DataSet readDataSetFromByteArray(final byte[] byteArray) {
-        if ((byteArray == null) || (byteArray.length == 0)) {
+        if (byteArray == null) {
             throw new InvalidParameterException("null byteArray");
-
         }
         if (byteArray.length == 0) {
             throw new InvalidParameterException("byteArray with zero length");
