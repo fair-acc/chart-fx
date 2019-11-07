@@ -132,8 +132,8 @@ public class PathGenerator {
      * idempotent when using the same object references and values.
      * 
      * @param grid the grid
-     * @param r row index of the start Cell.
-     * @param c column index of the start Cell.
+     * @param rowIndex row index of the start Cell.
+     * @param clumnIndex column index of the start Cell.
      * @param path a non-null GeneralPath instance to update.
      */
     private void update(final Grid grid, final int rowIndex, final int clumnIndex, final GeneralPath path) {
