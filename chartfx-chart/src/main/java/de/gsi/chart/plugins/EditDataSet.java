@@ -35,7 +35,9 @@ import javafx.scene.Node;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListCell;
 import javafx.scene.control.Tooltip;
 import javafx.scene.input.InputEvent;
 import javafx.scene.input.KeyCode;
@@ -400,6 +402,49 @@ public class EditDataSet extends TableViewer {
         return dragCursorProperty().get();
     }
 
+    enum ShiftConstraint {
+        SHIFTXY,
+        SHIFTX,
+        SHIFTY;
+    }
+
+    class ShiftConstraintListCell extends ListCell<ShiftConstraint> {
+        public ShiftConstraintListCell() {
+            super();
+            setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
+        }
+
+        @Override
+        protected void updateItem(ShiftConstraint shiftConstraint, boolean empty) {
+            super.updateItem(shiftConstraint, empty);
+            if (shiftConstraint == null || empty) {
+                setGraphic(null);
+                return;
+            }
+            Glyph result;
+            Tooltip tooltip = new Tooltip();
+            switch (shiftConstraint) {
+            case SHIFTX:
+                result = new Glyph(FONT_AWESOME, FontAwesome.Glyph.ARROWS_H).size(FONT_SIZE_COMBO);
+                tooltip.setText("Allow to modify the x value of the points");
+                break;
+            case SHIFTXY:
+                result = new Glyph(FONT_AWESOME, FontAwesome.Glyph.ARROWS).size(FONT_SIZE_COMBO);
+                tooltip.setText("Allow to modify the the points freely");
+                break;
+            case SHIFTY:
+                result = new Glyph(FONT_AWESOME, FontAwesome.Glyph.ARROWS_V).size(FONT_SIZE_COMBO);
+                tooltip.setText("Allow to modify the x value of the points");
+                break;
+            default:
+                result = new Glyph(FONT_AWESOME, FontAwesome.Glyph.QUESTION_CIRCLE).size(FONT_SIZE_COMBO);
+            }
+            result.setTextFill(Color.DARKBLUE);
+            result.setPadding(Insets.EMPTY);
+            setGraphic(result);
+        }
+    }
+
     @Override
     protected HBox getInteractorBar() {
         final HBox interactorBar = super.getInteractorBar();
@@ -407,9 +452,6 @@ public class EditDataSet extends TableViewer {
         final Glyph editGlyph = new Glyph(FONT_AWESOME, FontAwesome.Glyph.EDIT).size(FONT_SIZE);
         final Glyph addGlyph = new Glyph(FONT_AWESOME, FontAwesome.Glyph.PLUS_CIRCLE).size(FONT_SIZE);
         final Glyph removeGlyph = new Glyph(FONT_AWESOME, FontAwesome.Glyph.MINUS_CIRCLE).size(FONT_SIZE);
-        final Glyph shiftXYGlyph = new Glyph(FONT_AWESOME, FontAwesome.Glyph.ARROWS).size(FONT_SIZE_COMBO);
-        final Glyph shiftXGlyph = new Glyph(FONT_AWESOME, FontAwesome.Glyph.ARROWS_H).size(FONT_SIZE_COMBO);
-        final Glyph shiftYGlyph = new Glyph(FONT_AWESOME, FontAwesome.Glyph.ARROWS_V).size(FONT_SIZE_COMBO);
 
         final Button editButton = new Button(null, editGlyph);
         editButton.setPadding(new Insets(3, 3, 3, 3));
@@ -431,33 +473,28 @@ public class EditDataSet extends TableViewer {
         removeButton.setTooltip(new Tooltip("remove data point"));
         interactorBar.getChildren().add(removeButton);
 
-        shiftXYGlyph.setTextFill(Color.DARKBLUE);
-        shiftXYGlyph.setPadding(Insets.EMPTY);
-        shiftXGlyph.setTextFill(Color.DARKBLUE);
-        shiftXGlyph.setPadding(Insets.EMPTY);
-        shiftYGlyph.setTextFill(Color.DARKBLUE);
-        shiftYGlyph.setPadding(Insets.EMPTY);
-
-        final ComboBox<Glyph> comBox = new ComboBox<>();
+        final ComboBox<ShiftConstraint> comBox = new ComboBox<>();
         comBox.setPrefSize(-1, -1);
         comBox.setPadding(Insets.EMPTY);
         comBox.setBorder(null);
-        comBox.getItems().addAll(shiftXYGlyph, shiftXGlyph, shiftYGlyph);
-        comBox.getSelectionModel().select(0);
-        comBox.getSelectionModel().selectedIndexProperty().addListener((ch, o, n) -> {
+        comBox.setValue(ShiftConstraint.SHIFTXY);
+        comBox.getItems().addAll(ShiftConstraint.values());
+        comBox.setButtonCell(new ShiftConstraintListCell());
+        comBox.setCellFactory((listView) -> new ShiftConstraintListCell());
+        comBox.valueProperty().addListener((ch, o, n) -> {
             if (n == null) {
                 return;
             }
-            switch (n.intValue()) {
-            case 1: // allow shifts in X
+            switch (n) {
+            case SHIFTX: // allow shifts in X
                 allowShiftX.set(true);
                 allowShiftY.set(false);
                 break;
-            case 2:// allow shifts in Y
+            case SHIFTY:// allow shifts in Y
                 allowShiftX.set(false);
                 allowShiftY.set(true);
                 break;
-            case 0:
+            case SHIFTXY:
             default:
                 allowShiftX.set(true);
                 allowShiftY.set(true);
@@ -649,7 +686,7 @@ public class EditDataSet extends TableViewer {
      * Sets filter on {@link MouseEvent#DRAG_DETECTED DRAG_DETECTED} events that should start zoom-in operation.
      *
      * @param zoomInMouseFilter the filter to accept zoom-in mouse event. If {@code null} then any DRAG_DETECTED event
-     *        will start zoom-in operation. By default it's set to {@link #defaultSelectFilter}.
+     *            will start zoom-in operation. By default it's set to {@link #defaultSelectFilter}.
      * @see #getSelectionMouseFilter()
      */
     public void setZoomInMouseFilter(final Predicate<MouseEvent> zoomInMouseFilter) {
@@ -660,7 +697,6 @@ public class EditDataSet extends TableViewer {
      * Creates an event handler that handles a mouse press on the node.
      * 
      * @param dataPoint corresponding to clicked data point
-     * 
      * @return the event handler.
      */
     protected EventHandler<MouseEvent> startDragHandler(final SelectedDataPoint dataPoint) {
