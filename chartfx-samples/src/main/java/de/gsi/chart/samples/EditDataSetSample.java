@@ -5,7 +5,6 @@ import de.gsi.chart.axes.spi.DefaultNumericAxis;
 import de.gsi.chart.plugins.DataPointTooltip;
 import de.gsi.chart.plugins.EditAxis;
 import de.gsi.chart.plugins.EditDataSet;
-import de.gsi.chart.plugins.Panner;
 import de.gsi.chart.plugins.UpdateAxisLabels;
 import de.gsi.chart.plugins.Zoomer;
 import de.gsi.chart.renderer.Renderer;

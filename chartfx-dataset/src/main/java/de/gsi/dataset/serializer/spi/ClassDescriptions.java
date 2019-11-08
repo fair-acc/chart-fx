@@ -2,6 +2,7 @@ package de.gsi.dataset.serializer.spi;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.nio.CharBuffer;
 import java.util.Arrays;
 import java.util.Collection;
@@ -19,6 +20,7 @@ public final class ClassDescriptions { // NOPMD - nomen est omen
     public static int indentationNumerOfSpace = 4;
     private static final Map<Integer, ClassFieldDescription> CLASS_FIELD_DESCRIPTION_MAP = new ConcurrentHashMap<>();
     private static final Map<String, Class<?>> CLASS_STRING_MAP = new ConcurrentHashMap<>();
+    private static final Map<Class<?>, Map<String, Method>> CLASS_METHOD_MAP = new ConcurrentHashMap<>();
 
     private ClassDescriptions() {
         // empty constructor
@@ -79,6 +81,21 @@ public final class ClassDescriptions { // NOPMD - nomen est omen
 
     public static Collection<ClassFieldDescription> getKnownClasses() {
         return CLASS_FIELD_DESCRIPTION_MAP.values();
+    }
+
+    public static Map<Class<?>, Map<String, Method>> getKnownMethods() {
+        return CLASS_METHOD_MAP;
+    }
+
+    public static Method getMethod(final Class<?> clazz, final String methodName) {
+        return CLASS_METHOD_MAP.computeIfAbsent(clazz, c -> new ConcurrentHashMap<>()).computeIfAbsent(methodName,
+                name -> {
+                    try {
+                        return clazz.getMethod(methodName);
+                    } catch (NoSuchMethodException | SecurityException e) {
+                        return null;
+                    }
+                });
     }
 
     public static void initNullMemberFields(final Object rootObject) {

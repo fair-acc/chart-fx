@@ -74,13 +74,6 @@ public class ParameterMeasurements extends ChartPlugin {
         // fileMenu.getProperties().put(tooltipKey, new Tooltip("add measurement
         // indicator"));
 
-        // Prevent the toolbar HiddenSidePane from vanishing when using the menu
-        fileMenu.setOnShown((evt) -> getChart().setPinnedSide(javafx.geometry.Side.TOP));
-        fileMenu.setOnHidden((evt) -> {
-            if (!getChart().isToolBarPinned())
-                getChart().setPinnedSide(null);
-        });
-
         // loop through category
         for (final MeasurementCategory category : MeasurementCategory.values()) {
             final Menu newCategory = new Menu(category.toString());

@@ -24,6 +24,10 @@
  */
 package de.gsi.chart.ui;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+
+import de.gsi.dataset.serializer.spi.ClassDescriptions;
 import javafx.animation.Animation.Status;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
@@ -34,6 +38,7 @@ import javafx.beans.property.SimpleDoubleProperty;
 import javafx.event.EventHandler;
 import javafx.geometry.Side;
 import javafx.scene.Node;
+import javafx.scene.Parent;
 import javafx.scene.control.SkinBase;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.StackPane;
@@ -47,6 +52,9 @@ public class HiddenSidesPaneSkin extends SkinBase<HiddenSidesPane> {
     private final DoubleProperty[] visibility = new SimpleDoubleProperty[Side.values().length];
     private Timeline showTimeline;
     private Timeline hideTimeline;
+
+    private Node lastHideBlockingNode = null;
+    private long blockedSince = 0;
 
     public HiddenSidesPaneSkin(HiddenSidesPane pane) {
         super(pane);
@@ -117,6 +125,24 @@ public class HiddenSidesPaneSkin extends SkinBase<HiddenSidesPane> {
         getSkinnable().setClip(clip);
     }
 
+    protected Node getSidePane(Side side) {
+        if (getSkinnable() == null) {
+            return null;
+        }
+        switch (side) {
+        case BOTTOM:
+            return getSkinnable().getBottom();
+        case LEFT:
+            return getSkinnable().getLeft();
+        case RIGHT:
+            return getSkinnable().getRight();
+        case TOP:
+            return getSkinnable().getTop();
+        default:
+            return null;
+        }
+    }
+
     private Side getSide(MouseEvent evt) {
         if (stackPane.getBoundsInLocal().contains(evt.getX(), evt.getY())) {
             final double trigger = getSkinnable().getTriggerDistance();
@@ -144,17 +170,41 @@ public class HiddenSidesPaneSkin extends SkinBase<HiddenSidesPane> {
             return;
         }
 
-        boolean sideVisible = false;
+        Side visibleSide = null;
         for (final Side side : Side.values()) {
             if (visibility[side.ordinal()].get() > 0) {
-                sideVisible = true;
+                visibleSide = side;
                 break;
             }
         }
 
         // nothing to do here
-        if (!sideVisible) {
+        if (visibleSide == null) {
             return;
+        }
+
+        // check for children having focus (eg Combo boxes/menus)
+        if (hasShowingChild(lastHideBlockingNode) || hasShowingChild(getSidePane(visibleSide))) {
+            final long now = System.currentTimeMillis();
+            if (blockedSince == 0) {
+                blockedSince = now;
+            }
+            if ((now - blockedSince) < getSkinnable().getAnimationDelay().toMillis()) {
+                return;
+            }
+        }
+        blockedSince = 0;
+
+        // collapse open menus/comboboxes before hiding side pane
+        if (hasShowingChild(lastHideBlockingNode)) {
+            Method closeMethod = ClassDescriptions.getMethod(lastHideBlockingNode.getClass(), "hide");
+            if (closeMethod != null) {
+                try {
+                    closeMethod.invoke(lastHideBlockingNode);
+                } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+                    // do nothing
+                }
+            }
         }
 
         final KeyValue[] keyValues = new KeyValue[Side.values().length];
@@ -171,6 +221,32 @@ public class HiddenSidesPaneSkin extends SkinBase<HiddenSidesPane> {
         hideTimeline = new Timeline(keyFrame);
         hideTimeline.setDelay(delay);
         hideTimeline.play();
+    }
+
+    /**
+     * @return
+     */
+    private boolean hasShowingChild(Node n) {
+        if (n == null) {
+            return false;
+        }
+        if (n.isHover()) {
+            lastHideBlockingNode = n;
+            return true;
+        }
+        try {
+            Method isShowingMethod = ClassDescriptions.getMethod(n.getClass(), "isShowing");
+            if (isShowingMethod != null && (Boolean) isShowingMethod.invoke(n)) {
+                lastHideBlockingNode = n;
+                return true;
+            }
+        } catch (SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+            // do nothing
+        }
+        if (n instanceof Parent) {
+            return ((Parent) n).getChildrenUnmodifiable().stream().anyMatch(child -> hasShowingChild(child));
+        }
+        return false;
     }
 
     private boolean isMouseEnabled() {

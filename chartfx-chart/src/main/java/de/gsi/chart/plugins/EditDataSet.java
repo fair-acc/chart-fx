@@ -411,7 +411,7 @@ public class EditDataSet extends TableViewer {
     class ShiftConstraintListCell extends ListCell<ShiftConstraint> {
         public ShiftConstraintListCell() {
             super();
-            setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
+            setContentDisplay(ContentDisplay.LEFT);
         }
 
         @Override
@@ -427,17 +427,21 @@ public class EditDataSet extends TableViewer {
             case SHIFTX:
                 result = new Glyph(FONT_AWESOME, FontAwesome.Glyph.ARROWS_H).size(FONT_SIZE_COMBO);
                 tooltip.setText("Allow to modify the x value of the points");
+                setText("shift x");
                 break;
             case SHIFTXY:
                 result = new Glyph(FONT_AWESOME, FontAwesome.Glyph.ARROWS).size(FONT_SIZE_COMBO);
                 tooltip.setText("Allow to modify the the points freely");
+                setText("shift xy");
                 break;
             case SHIFTY:
                 result = new Glyph(FONT_AWESOME, FontAwesome.Glyph.ARROWS_V).size(FONT_SIZE_COMBO);
                 tooltip.setText("Allow to modify the x value of the points");
+                setText("shift y");
                 break;
             default:
                 result = new Glyph(FONT_AWESOME, FontAwesome.Glyph.QUESTION_CIRCLE).size(FONT_SIZE_COMBO);
+                setText("-");
             }
             result.setTextFill(Color.DARKBLUE);
             result.setPadding(Insets.EMPTY);
