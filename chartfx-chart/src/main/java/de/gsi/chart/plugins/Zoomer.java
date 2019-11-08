@@ -653,20 +653,12 @@ public class Zoomer extends ChartPlugin {
         if (chart == null || panShiftX == 0.0 || panShiftY == 0.0 || previousMouseLocation == null) {
             return;
         }
-        final double oldMouseX = previousMouseLocation.getX() - panShiftX;
-        final double oldMouseY = previousMouseLocation.getY() - panShiftY;
-        final double newMouseX = previousMouseLocation.getX();
-        final double newMouseY = previousMouseLocation.getY();
 
         for (final Axis axis : chart.getAxes()) {
             if (axis.getSide() == null || isOmitZoomInternal(axis)) {
                 continue;
             }
             final Side side = axis.getSide();
-
-            final double prevData = axis.getValueForDisplay(side.isHorizontal() ? oldMouseX : oldMouseY);
-            final double newData = axis.getValueForDisplay(side.isHorizontal() ? newMouseX : newMouseY);
-            final double offset = prevData - newData;
 
             final boolean allowsShift = side.isHorizontal() ? getAxisMode().allowsX() : getAxisMode().allowsY();
             if (!Axes.hasBoundedRange(axis) && allowsShift) {
