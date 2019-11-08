@@ -146,10 +146,9 @@ public class Panner extends ChartPlugin {
             return;
         }
         for (final Axis axis : chart.getAxes()) {
-            if (!(Axes.isNumericAxis(axis)) || axis.getSide() == null) {
+            if (axis.getSide() == null) {
                 continue;
             }
-            final Axis nAxis = Axes.toNumericAxis(axis);
             final Side side = axis.getSide();
 
             final double prevData = axis.getValueForDisplay(
@@ -159,9 +158,9 @@ public class Panner extends ChartPlugin {
             final double offset = prevData - newData;
 
             final boolean allowsShift = side.isHorizontal() ? getAxisMode().allowsX() : getAxisMode().allowsY();
-            if (!Axes.hasBoundedRange(nAxis) && allowsShift) {
-                nAxis.setAutoRanging(false);
-                shiftBounds(nAxis, offset);
+            if (!Axes.hasBoundedRange(axis) && allowsShift) {
+                axis.setAutoRanging(false);
+                shiftBounds(axis, offset);
             }
         }
     }

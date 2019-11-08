@@ -105,8 +105,8 @@ public abstract class AbstractDataFormattingPlugin extends ChartPlugin {
     private StringConverter<Number> getValueFormatter(final Axis axis, final StringConverter<Number> formatter,
             final StringConverter<Number> defaultFormatter) {
         StringConverter<Number> valueFormatter = formatter;
-        if (valueFormatter == null && Axes.isNumericAxis(axis)) {
-            valueFormatter = Axes.toNumericAxis(axis).getTickLabelFormatter();
+        if (valueFormatter == null) {
+            valueFormatter = axis.getTickLabelFormatter();
         }
         if (valueFormatter == null) {
             valueFormatter = defaultFormatter;
