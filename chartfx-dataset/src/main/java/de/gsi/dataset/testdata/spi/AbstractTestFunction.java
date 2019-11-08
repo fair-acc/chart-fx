@@ -37,7 +37,7 @@ public abstract class AbstractTestFunction<D extends AbstractTestFunction<D>> ex
     }
 
     @Override
-    public final double get(final int dimIndex, final int index) {
+    public double get(final int dimIndex, final int index) {
         return dimIndex == DIM_X ? index : data[index];
     }
 
