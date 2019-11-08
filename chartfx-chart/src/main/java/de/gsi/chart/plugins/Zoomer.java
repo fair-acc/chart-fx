@@ -87,7 +87,7 @@ public class Zoomer extends ChartPlugin {
     private Point2D previousMouseLocation;
     private BooleanProperty enablePanner = new SimpleBooleanProperty(this, "enablePanner", true);
     private final EventHandler<MouseEvent> panStartHandler = event -> {
-        if (isPannerEnabled() && mouseFilter == null || (mouseFilter != null && mouseFilter.test(event))) {
+        if (isPannerEnabled() && (mouseFilter == null || (mouseFilter != null && mouseFilter.test(event)))) {
             panStarted(event);
             event.consume();
         }
