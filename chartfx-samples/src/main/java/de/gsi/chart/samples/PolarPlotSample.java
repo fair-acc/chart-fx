@@ -38,7 +38,6 @@ public class PolarPlotSample extends Application {
         final XYChart chart = new XYChart(xAxis, yAxis);
         // set them false to make the plot faster
         chart.setAnimated(false);
-        chart.getPlugins().add(new Zoomer());
         chart.getPlugins().add(new EditAxis());
         root.getChildren().add(chart);
 
