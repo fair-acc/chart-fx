@@ -226,7 +226,11 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
             if (localCachedPoints.getMinXDistance() >= getDashSize() * 2) {
                 drawErrorBars(gc, localCachedPoints);
             } else {
-                drawErrorSurface(gc, localCachedPoints);
+                if (this.isallowNaNs()) {
+                    drawErrorSurfaceNaNCompatible(gc, localCachedPoints);
+                } else {
+                    drawErrorSurface(gc, localCachedPoints);
+                }
             }
             break;
         case NONE:
@@ -266,7 +270,7 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
         for (int i = 0; i < lCacheP.actualDataCount; i++) {
 
             if (lCacheP.errorType[DataSet.DIM_X] != ErrorType.NO_ERROR
-                    || lCacheP.errorType[DataSet.DIM_Y] != ErrorType.NO_ERROR) {
+                    && lCacheP.errorType[DataSet.DIM_Y] != ErrorType.NO_ERROR) {
                 // draw error bars
                 gc.strokeLine(lCacheP.xValues[i], lCacheP.errorYNeg[i], lCacheP.xValues[i], lCacheP.errorYPos[i]);
                 gc.strokeLine(lCacheP.errorXNeg[i], lCacheP.yValues[i], lCacheP.errorXPos[i], lCacheP.yValues[i]);
@@ -283,7 +287,7 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
                 gc.strokeLine(lCacheP.errorXPos[i], lCacheP.yValues[i] - dashHalf, lCacheP.errorXPos[i],
                         lCacheP.yValues[i] + dashHalf);
             } else if (lCacheP.errorType[DataSet.DIM_X] == ErrorType.NO_ERROR
-                    || lCacheP.errorType[DataSet.DIM_Y] != ErrorType.NO_ERROR) {
+                    && lCacheP.errorType[DataSet.DIM_Y] != ErrorType.NO_ERROR) {
                 // draw error bars
                 gc.strokeLine(lCacheP.xValues[i], lCacheP.errorYNeg[i], lCacheP.xValues[i], lCacheP.errorYPos[i]);
 
@@ -292,9 +296,8 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
                         lCacheP.errorYNeg[i]);
                 gc.strokeLine(lCacheP.xValues[i] - dashHalf, lCacheP.errorYPos[i], lCacheP.xValues[i] + dashHalf,
                         lCacheP.errorYPos[i]);
-
             } else if (lCacheP.errorType[DataSet.DIM_X] != ErrorType.NO_ERROR
-                    || lCacheP.errorType[DataSet.DIM_Y] == ErrorType.NO_ERROR) {
+                    && lCacheP.errorType[DataSet.DIM_Y] == ErrorType.NO_ERROR) {
                 // draw error bars
                 gc.strokeLine(lCacheP.errorXNeg[i], lCacheP.yValues[i], lCacheP.errorXPos[i], lCacheP.yValues[i]);
 
