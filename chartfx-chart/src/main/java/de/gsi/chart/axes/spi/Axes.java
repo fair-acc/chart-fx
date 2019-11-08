@@ -62,30 +62,6 @@ public final class Axes { // NOPMD nomen est omen et fix
     }
 
     /**
-     * Returns {@code true} if given axis is an instance of {@link ValueAxis}.
-     *
-     * @param axis the axis to test
-     * @return {@code true} if given axis is an instance of {@code ValueAxis}.
-     */
-    public static boolean isNumericAxis(final Axis axis) {
-        return axis instanceof Axis;
-    }
-
-    /**
-     * Casts given axis to {@link Axis}.
-     *
-     * @param axis the axis to be cast
-     * @return given axis
-     * @throws IllegalArgumentException if the given axis is not an instance of ValueAxis
-     */
-    public static Axis toNumericAxis(final Axis axis) {
-        if (Axes.isNumericAxis(axis)) {
-            return (Axis) axis;
-        }
-        throw new IllegalArgumentException("Expected an instance of ValueAxis");
-    }
-
-    /**
      * {@link DoubleProperty#unbind() Unbinds} lower and upper bound of given axis.
      *
      * @param axis axis whose lower and upper bound should be unbound

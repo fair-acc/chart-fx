@@ -622,10 +622,10 @@ public class Zoomer extends ChartPlugin {
         panShiftY += oldMouseY - newMouseY;
 
         for (final Axis axis : chart.getAxes()) {
-            if (!(Axes.isNumericAxis(axis)) || axis.getSide() == null || isOmitZoomInternal(axis)) {
+            if (axis.getSide() == null || isOmitZoomInternal(axis)) {
                 continue;
             }
-            final Axis nAxis = Axes.toNumericAxis(axis);
+
             final Side side = axis.getSide();
 
             final double prevData = axis.getValueForDisplay(side.isHorizontal() ? oldMouseX : oldMouseY);
@@ -633,8 +633,8 @@ public class Zoomer extends ChartPlugin {
             final double offset = prevData - newData;
 
             final boolean allowsShift = side.isHorizontal() ? getAxisMode().allowsX() : getAxisMode().allowsY();
-            if (!Axes.hasBoundedRange(nAxis) && allowsShift) {
-                nAxis.setAutoRanging(false);
+            if (!Axes.hasBoundedRange(axis) && allowsShift) {
+                axis.setAutoRanging(false);
                 // shift bounds
                 axis.set(axis.getMin() + offset, axis.getMax() + offset);
             }
@@ -659,10 +659,9 @@ public class Zoomer extends ChartPlugin {
         final double newMouseY = previousMouseLocation.getY();
 
         for (final Axis axis : chart.getAxes()) {
-            if (!(Axes.isNumericAxis(axis)) || axis.getSide() == null || isOmitZoomInternal(axis)) {
+            if (axis.getSide() == null || isOmitZoomInternal(axis)) {
                 continue;
             }
-            final Axis nAxis = Axes.toNumericAxis(axis);
             final Side side = axis.getSide();
 
             final double prevData = axis.getValueForDisplay(side.isHorizontal() ? oldMouseX : oldMouseY);
@@ -670,8 +669,8 @@ public class Zoomer extends ChartPlugin {
             final double offset = prevData - newData;
 
             final boolean allowsShift = side.isHorizontal() ? getAxisMode().allowsX() : getAxisMode().allowsY();
-            if (!Axes.hasBoundedRange(nAxis) && allowsShift) {
-                nAxis.setAutoRanging(false);
+            if (!Axes.hasBoundedRange(axis) && allowsShift) {
+                axis.setAutoRanging(false);
             }
         }
 
