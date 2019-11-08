@@ -173,10 +173,11 @@ public class DataViewerSample extends Application {
         final Scene scene = new Scene(
                 new VBox(viewer.getToolBar(), viewer, new HBox(new Label("focus on: "), focusedOwner)), 800, 600);
         scene.focusOwnerProperty().addListener((ch, o, n) -> {
-            if (n != null) {
-                focusedOwner.setText(n.toString());
+            if (n == null) {
+                focusedOwner.setText(null);
+                return;
             }
-            focusedOwner.setText(null);
+            focusedOwner.setText(n.toString());
         });
         primaryStage.setScene(scene);
         primaryStage.show();
