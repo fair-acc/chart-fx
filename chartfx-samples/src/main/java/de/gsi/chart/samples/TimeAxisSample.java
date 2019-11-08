@@ -52,9 +52,9 @@ public class TimeAxisSample extends Application {
         final BorderPane root = new BorderPane();
         final Scene scene = new Scene(root, 800, 600);
 
-        final DefaultNumericAxis xAxis1 = new DefaultNumericAxis();
+        final DefaultNumericAxis xAxis1 = new DefaultNumericAxis("time", "iso");
         xAxis1.setOverlapPolicy(AxisLabelOverlapPolicy.SKIP_ALT);
-        final DefaultNumericAxis yAxis1 = new DefaultNumericAxis();
+        final DefaultNumericAxis yAxis1 = new DefaultNumericAxis("y-axis", "a.u.");
 
         final XYChart chart = new XYChart(xAxis1, yAxis1);
         chart.legendVisibleProperty().set(true);
