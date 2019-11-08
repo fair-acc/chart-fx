@@ -18,7 +18,7 @@ import javafx.scene.paint.Paint;
 import javafx.stage.Stage;
 
 public class HexagonSamples extends Application {
-    private static final Logger LOGGER = LoggerFactory.getLogger(WriteDataSetToFileSample.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(HexagonSamples.class);
     private Paint oldHexColour = null;
 
     @Override
@@ -82,6 +82,7 @@ public class HexagonSamples extends Application {
         map.registerCanvasMouseLiner(canvas);
 
         final Scene hexScene = new Scene(new HBox(hexagonGroup, canvas), 2 * 850, 700);
+        primaryStage.setTitle(HexagonSamples.class.getSimpleName());
         primaryStage.setScene(hexScene);
         primaryStage.show();
         primaryStage.setOnCloseRequest(evt -> Platform.exit());

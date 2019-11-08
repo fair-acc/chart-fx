@@ -123,6 +123,7 @@ public class Histogram2DimSample extends Application {
         histogram2.getProjectionY().setStyle("dsIndex=1");
         projectionRendererY.setPolyLineStyle(LineStyle.HISTOGRAM);
         projectionRendererY.setPointReduction(false);
+        projectionRendererY.setAssumeSortedData(false);
         chart.getRenderers().add(projectionRendererY);
 
         final MetaDataRenderer metaRenderer = new MetaDataRenderer(chart);

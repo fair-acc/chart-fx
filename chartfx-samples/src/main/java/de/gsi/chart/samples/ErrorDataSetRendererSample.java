@@ -37,7 +37,7 @@ public class ErrorDataSetRendererSample extends Application {
     private static final int DEBUG_UPDATE_RATE = 500;
     private static final int N_SAMPLES = 1000000; // default: 1000000
     private static final int UPDATE_DELAY = 1000; // [ms]
-    private static final int UPDATE_PERIOD = 200; // [ms]
+    private static final int UPDATE_PERIOD = 1000; // [ms]
     private final DoubleErrorDataSet dataSet = new DoubleErrorDataSet("TestData", ErrorDataSetRendererSample.N_SAMPLES);
     private final DoubleDataSet dataSetNoError = new DoubleDataSet("TestDataNoErrors",
             ErrorDataSetRendererSample.N_SAMPLES);

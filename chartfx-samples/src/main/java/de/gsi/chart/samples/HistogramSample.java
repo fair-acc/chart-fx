@@ -15,6 +15,7 @@ import de.gsi.chart.axes.spi.DefaultNumericAxis;
 import de.gsi.chart.plugins.EditAxis;
 import de.gsi.chart.plugins.ParameterMeasurements;
 import de.gsi.chart.plugins.Zoomer;
+import de.gsi.chart.renderer.ErrorStyle;
 import de.gsi.chart.renderer.LineStyle;
 import de.gsi.chart.renderer.spi.ErrorDataSetRenderer;
 import de.gsi.chart.renderer.spi.MetaDataRenderer;
@@ -45,6 +46,7 @@ public class HistogramSample extends Application {
         counter++;
         dataSet1.fill(RandomDataGenerator.nextGaussian() * 2 + 8.0);
         dataSet2.fill(RandomDataGenerator.nextGaussian() * 3 + 12.0);
+
         if (counter % 10 == 0) {
             dataSet3.fill(RandomDataGenerator.nextGaussian() * 3 + 10.0);
         }
@@ -98,6 +100,7 @@ public class HistogramSample extends Application {
         renderer2.getDatasets().addAll(dataSet1, dataSet3);
         dataSet1.setStyle("strokeColor=red; strokeWidth=3");
         renderer2.setPolyLineStyle(LineStyle.HISTOGRAM);
+        renderer2.setErrorType(ErrorStyle.ERRORBARS);
         chart.getRenderers().add(renderer2);
 
         final MetaDataRenderer metaRenderer = new MetaDataRenderer(chart);
@@ -132,7 +135,6 @@ public class HistogramSample extends Application {
         root.getChildren().add(chart);
         primaryStage.setTitle(this.getClass().getSimpleName());
         primaryStage.setScene(scene);
-        primaryStage.setOnCloseRequest(evt -> Platform.exit());
         primaryStage.show();
 
         final Timer timer = new Timer();
@@ -144,6 +146,11 @@ public class HistogramSample extends Application {
                 FXUtils.runFX(chart::requestLayout);
             }
         }, HistogramSample.UPDATE_DELAY, HistogramSample.UPDATE_PERIOD);
+        
+        primaryStage.setOnCloseRequest(evt -> {
+            timer.cancel();
+            Platform.exit();
+        });
     }
 
     /**

@@ -132,7 +132,6 @@ public class ContourChartSample extends Application {
         // chart.setLegendSide(Side.RIGHT);
 
         chart.getPlugins().add(new Zoomer());
-        chart.getPlugins().add(new Panner());
         chart.getPlugins().add(new EditAxis());
 
         HBox.setHgrow(chart, Priority.ALWAYS);
