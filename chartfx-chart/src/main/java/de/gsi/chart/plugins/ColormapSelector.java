@@ -31,34 +31,18 @@ public class ColormapSelector extends ChartPlugin {
         chartProperty().addListener((change, o, n) -> {
             if (o != null) {
                 o.getToolBar().getChildren().remove(dropdown);
-                dropdown.setOnShown(null);
-                dropdown.setOnHidden(null);
             }
             if (n != null) {
                 if (isShowInToolbar()) {
                     n.getToolBar().getChildren().add(dropdown);
-                    // Prevent the toolbar HiddenSidePane from vanishing when using the menu
-                    dropdown.setOnShown((evt) -> getChart().setPinnedSide(javafx.geometry.Side.TOP));
-                    dropdown.setOnHidden((evt) -> {
-                        if (!getChart().isToolBarPinned())
-                            getChart().setPinnedSide(null);
-                    });
                 }
             }
         });
         showInToolbar.addListener((prop, o, n) -> {
             if (n) {
                 getChart().getToolBar().getChildren().add(dropdown);
-                // Prevent the toolbar HiddenSidePane from vanishing when using the menu
-                dropdown.setOnShown((evt) -> getChart().setPinnedSide(javafx.geometry.Side.TOP));
-                dropdown.setOnHidden((evt) -> {
-                    if (!getChart().isToolBarPinned())
-                        getChart().setPinnedSide(null);
-                });
             } else {
                 getChart().getToolBar().getChildren().remove(dropdown);
-                dropdown.setOnShown(null);
-                dropdown.setOnHidden(null);
             }
 
         });
