@@ -54,7 +54,7 @@ public class ErrorDataSetRendererStylingSample extends Application {
     private static final int DEFAULT_WIDTH = 1200;
     private static final int DEFAULT_HEIGHT = 600;
     private static final int UPDATE_DELAY = 1000; // [ms]
-    private static final int UPDATE_PERIOD = 40; // [ms]
+    private static final int UPDATE_PERIOD = 100; // [ms]
     private static final double N_MAX_SAMPLES = 10000;
     private DataSetType dataSetType = DataSetType.RANDOM_WALK;
     private int nSamples = 400;

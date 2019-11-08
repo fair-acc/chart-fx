@@ -8,7 +8,6 @@ import de.gsi.chart.axes.spi.DefaultNumericAxis;
 import de.gsi.chart.plugins.DataPointTooltip;
 import de.gsi.chart.plugins.EditAxis;
 import de.gsi.chart.plugins.Zoomer;
-import de.gsi.chart.renderer.ErrorStyle;
 import de.gsi.chart.renderer.spi.ErrorDataSetRenderer;
 import de.gsi.dataset.spi.DoubleDataSet;
 import de.gsi.dataset.spi.DoubleErrorDataSet;
@@ -28,13 +27,14 @@ public class NotANumberSample extends Application {
 
     @Override
     public void start(final Stage primaryStage) {
+        LOGGER.atInfo().addArgument(NotANumberSample.class.getSimpleName()).log("launching sample {}");
+
         final XYChart chart = new XYChart(new DefaultNumericAxis("x-axis"), new DefaultNumericAxis("y-axis"));
         chart.getPlugins().add(new Zoomer()); // standard plugin, useful for most cases
         chart.getPlugins().add(new EditAxis());
         chart.getPlugins().add(new DataPointTooltip());
         final ErrorDataSetRenderer renderer = (ErrorDataSetRenderer) chart.getRenderers().get(0);
         renderer.setMarkerSize(3);
-        renderer.setErrorType(ErrorStyle.ERRORSURFACE);
 
         // enables NaN support (N.B. may have some impact on the plotting
         // performance for larger DataSets and/or high rate update (ie. 100 kPoints@25Hz)
@@ -66,6 +66,8 @@ public class NotANumberSample extends Application {
         primaryStage.setScene(scene);
         primaryStage.show();
         primaryStage.setOnCloseRequest(evt -> Platform.exit());
+
+        LOGGER.atInfo().addArgument(NotANumberSample.class.getSimpleName()).log("launching sample {} - done");
     }
 
     /**

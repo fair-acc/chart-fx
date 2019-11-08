@@ -32,7 +32,6 @@ public class EditDataSetSample extends Application {
 
         final XYChart chart = new XYChart(new DefaultNumericAxis(), new DefaultNumericAxis());
         chart.getPlugins().add(new Zoomer());
-        chart.getPlugins().add(new Panner());
         chart.getPlugins().add(new EditAxis());
         chart.getPlugins().add(new EditDataSet());
         chart.getPlugins().add(new DataPointTooltip());
