@@ -210,6 +210,16 @@ public class MetaDataRendererSample extends Application {
         }
 
         @Override
+        public double get(final int dimIndex, final int index) {
+            if (dimIndex == DataSet.DIM_X) {
+            return (double) index / ((double) this.getDataCount()) * range;
+            } else {
+                double x = get(DIM_X, index);
+                return 1000 * MetaInfoGausFunction.gauss(x, 0.5 * range, 1000);
+            }
+        }
+
+        @Override
         public List<String> getErrorList() {
             if (counter2 % 2 == 0) {
                 return Arrays.asList(DataSetMetaData.TAG_OVERSHOOT);
@@ -232,18 +242,6 @@ public class MetaDataRendererSample extends Application {
             }
             return Collections.<String>emptyList();
         }
-
-        @Override
-        public double getX(final int index) {
-            return (double) index / ((double) this.getDataCount()) * range;
-        }
-
-        @Override
-        public double getY(final int index) {
-            double x = getX(index);
-            return 1000 * MetaInfoGausFunction.gauss(x, 0.5 * range, 1000);
-        }
-
     }
 
     class MetaInfoRandomWalkFunction extends RandomWalkFunction implements DataSetMetaData {
