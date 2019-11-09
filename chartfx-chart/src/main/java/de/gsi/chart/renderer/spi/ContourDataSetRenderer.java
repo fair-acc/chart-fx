@@ -848,8 +848,8 @@ public class ContourDataSetRenderer extends AbstractDataSetManagement<ContourDat
         if (input.getWidth() == 0 || input.getHeight() == 0) {
             return input;
         }
-        final int width = (int) input.getWidth();
-        final int height = (int) input.getHeight();
+        final double width = (int) input.getWidth();
+        final double height = (int) input.getHeight();
         final double scalingX = targetWidth / width;
         final double scalingY = targetHeight / height;
 
