@@ -603,6 +603,11 @@ public class DataSetUtils extends DataSetUtilsHelper {
             } else {
                 dataSet = readNumericDataFromFile(inputReader, dataSetName, is3D, nDataCountEstimate);
             }
+            
+            if (dataSet == null) {
+                // coverity detected that 'readNumericDataFromBinaryFile' may return null (unlikely but possible)
+                throw new IllegalStateException("dataSet is null for branch binary = " + binary);
+            }
 
             ((DataSetMetaData) dataSet).getMetaInfo().putAll(metaInfoMap);
             ((DataSetMetaData) dataSet).getInfoList().addAll(info);
