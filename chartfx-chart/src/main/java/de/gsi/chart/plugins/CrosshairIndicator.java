@@ -73,6 +73,9 @@ public class CrosshairIndicator extends AbstractDataFormattingPlugin {
 
     private String formatLabelText(final Point2D displayPointInPlotArea) {
         final Axis yAxis = getChart().getFirstAxis(Orientation.VERTICAL);
+        if (yAxis == null) {
+            return getChart() + " - " + "no y-axis present to translate point " + displayPointInPlotArea;
+        }
         return formatData(getChart(), toDataPoint(yAxis, displayPointInPlotArea));
     }
 
