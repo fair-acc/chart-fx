@@ -249,8 +249,8 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
             dataMaxIndex = 0;
             Arrays.fill(xValues, 0.0);
             Arrays.fill(yValues, 0.0);
-            getDataLabelMap().isEmpty();
-            getDataStyleMap().isEmpty();
+            getDataLabelMap().clear();
+            getDataStyleMap().clear();
 
             getAxisDescriptions().forEach(AxisDescription::clear);
         });
