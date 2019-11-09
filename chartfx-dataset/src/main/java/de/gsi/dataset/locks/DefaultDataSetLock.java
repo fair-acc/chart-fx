@@ -45,8 +45,7 @@ import de.gsi.dataset.DataSet;
  * @author rstein
  * @param <D> generics reference, usually to <code>&lt;? extends DataSet&gt;</code>
  */
-@SuppressWarnings({ "PMD.DoNotUseThreads", "PMD.CommentSize", "PMD.TooManyMethods" }) // Runnable used as functional
-                                                                                      // interface
+@SuppressWarnings({ "PMD.DoNotUseThreads", "PMD.CommentSize", "PMD.TooManyMethods" }) // Runnable used as functional interface
 public class DefaultDataSetLock<D extends DataSet> implements DataSetLock<D> {
     private static final long serialVersionUID = 1L;
     private final transient StampedLock stampedLock = new StampedLock();
@@ -219,7 +218,7 @@ public class DefaultDataSetLock<D extends DataSet> implements DataSetLock<D> {
         final Thread callingThread = Thread.currentThread();
         while (callingThread != writeLockedByThread) {
             lastWriteStamp = stampedLock.writeLock();
-            synchronized (dataSet.autoNotification()) {
+            synchronized (stampedLock) {
                 // copy threadID
                 writeLockedByThread = callingThread;
                 // store present auto-notify state
@@ -262,7 +261,7 @@ public class DefaultDataSetLock<D extends DataSet> implements DataSetLock<D> {
     @Override
     public D writeUnLock() {
         if (writerCount.decrementAndGet() == 0) {
-            synchronized (dataSet.autoNotification()) {
+            synchronized (stampedLock) {
                 final long temp = lastWriteStamp;
                 lastWriteStamp = 0;
                 // restore present auto-notify state
