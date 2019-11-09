@@ -373,9 +373,7 @@ public class ContourDataSetRenderer extends AbstractDataSetManagement<ContourDat
             boolean test) {
         final long start = ProcessingProfiler.getTimeStamp();
 
-        isSmooth();
         Math.max((int) lCache.xAxisWidth / lCache.xSize, 1);
-        isSmooth();
         Math.max((int) lCache.yAxisHeight / lCache.ySize, 1);
         final int xSize = lCache.xSize;
         final int ySize = lCache.ySize;
