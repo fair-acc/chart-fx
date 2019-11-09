@@ -326,7 +326,7 @@ public class DataSetToByteArraySample {
         for (int i = 0; i < iterations; i++) {
             DataSetUtils.writeDataSetToByteArray(original, byteOutput, binary, asFloat32);
             final DataSet dataSet = DataSetUtils.readDataSetFromByteArray(byteOutput.toByteArray());
-            if (!original.getName().equals(dataSet.getName())) {
+            if (dataSet == null || !original.getName().equals(dataSet.getName())) {
                 LOGGER.atError().log("ERROR data set does not match -> potential streaming error at index = " + i);
                 break;
             }
