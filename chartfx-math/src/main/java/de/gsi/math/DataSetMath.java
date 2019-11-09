@@ -104,15 +104,20 @@ public final class DataSetMath { // NOPMD - nomen est omen
                 count++;
             }
 
-            mean /= count;
-            eyn /= count;
-            eyp /= count;
-            var /= count;
-            final double mean2 = mean * mean;
-            final double diff = Math.abs(var - mean2);
-            eyn = Math.sqrt(eyn * eyn + diff);
-            eyp = Math.sqrt(eyp * eyp + diff);
-            retFunction.add(newX, mean, eyn, eyp);
+            if (count == 0) {
+                // cannot compute average
+                retFunction.add(newX, Double.NaN, Double.NaN, Double.NaN);
+            } else {
+                mean /= count;
+                eyn /= count;
+                eyp /= count;
+                var /= count;
+                final double mean2 = mean * mean;
+                final double diff = Math.abs(var - mean2);
+                eyn = Math.sqrt(eyn * eyn + diff);
+                eyp = Math.sqrt(eyp * eyp + diff);
+                retFunction.add(newX, mean, eyn, eyp);
+            }
         }
 
         return retFunction;
@@ -1038,11 +1043,19 @@ public final class DataSetMath { // NOPMD - nomen est omen
     }
 
     public enum ErrType {
-        EXN, EXP, EYN, EYP;
+        EXN,
+        EXP,
+        EYN,
+        EYP;
     }
 
     public enum Filter {
-        MEAN("LowPass"), MEDIAN("Median"), MIN("Min"), MAX("Max"), P2P("PeakToPeak"), RMS("RMS"),
+        MEAN("LowPass"),
+        MEDIAN("Median"),
+        MIN("Min"),
+        MAX("Max"),
+        P2P("PeakToPeak"),
+        RMS("RMS"),
         GEOMMEAN("GeometricMean");
 
         private String tag;
@@ -1057,7 +1070,14 @@ public final class DataSetMath { // NOPMD - nomen est omen
     }
 
     public enum MathOp {
-        ADD("+"), SUBTRACT("-"), MULTIPLY("*"), DIVIDE("*"), SQR("SQR"), SQRT("SQRT"), LOG10("Log10"), DB("dB");
+        ADD("+"),
+        SUBTRACT("-"),
+        MULTIPLY("*"),
+        DIVIDE("*"),
+        SQR("SQR"),
+        SQRT("SQRT"),
+        LOG10("Log10"),
+        DB("dB");
 
         private String tag;
 
