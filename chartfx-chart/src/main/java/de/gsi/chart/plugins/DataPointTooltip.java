@@ -91,12 +91,7 @@ public class DataPointTooltip extends AbstractDataFormattingPlugin {
         DataPoint nearestDataPoint = null;
 
         Chart chart = getChart();
-        final DataPoint point = findNearestDataPointWithinPickingDistance(chart, mouseLocation);
-        if (nearestDataPoint == null || point != null && point.distanceFromMouse < nearestDataPoint.distanceFromMouse) {
-            nearestDataPoint = point;
-        }
-
-        return nearestDataPoint;
+        return findNearestDataPointWithinPickingDistance(chart, mouseLocation);
     }
 
     private DataPoint findNearestDataPointWithinPickingDistance(final Chart chart, final Point2D mouseLocation) {
