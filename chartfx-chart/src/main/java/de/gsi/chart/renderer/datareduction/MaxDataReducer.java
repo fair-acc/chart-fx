@@ -5,10 +5,7 @@
  */
 package de.gsi.chart.renderer.datareduction;
 
-import static de.gsi.dataset.DataSet.DIM_X;
-
 import de.gsi.chart.renderer.RendererDataReducer;
-import de.gsi.dataset.DataSetError.ErrorType;
 import de.gsi.dataset.utils.ProcessingProfiler;
 
 /**
