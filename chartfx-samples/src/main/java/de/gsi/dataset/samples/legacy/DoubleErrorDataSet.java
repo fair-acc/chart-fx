@@ -239,8 +239,8 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
             Arrays.fill(yValues, 0.0);
             Arrays.fill(yErrorsPos, 0.0);
             Arrays.fill(yErrorsNeg, 0.0);
-            getDataLabelMap().isEmpty();
-            getDataStyleMap().isEmpty();
+            getDataLabelMap().clear();
+            getDataStyleMap().clear();
 
             getAxisDescription(0).clear();
             getAxisDescription(1).clear();
