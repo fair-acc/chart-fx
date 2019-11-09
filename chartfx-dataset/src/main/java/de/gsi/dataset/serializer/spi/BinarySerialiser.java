@@ -555,15 +555,22 @@ public class BinarySerialiser { // NOPMD - omen est omen
         if (enumeration == null) {
             return;
         }
+        final Class<? extends Enum> clazz = enumeration.getClass();
+        if (clazz == null) {
+            return;
+        }
+        Enum[] enumConsts = clazz.getEnumConstants();
+        if (enumConsts == null) {
+            return;
+        }
 
         final int nElements = 1;
         final int entrySize = 17; // as an initial estimate
 
         final long sizeMarkerStart = putArrayHeader(buffer, fieldName, DataType.ENUM, new int[] { 1 },
                 (nElements * entrySize) + 9);
-        final Class<? extends Enum> clazz = enumeration.getClass();
-        final String typeList = Arrays.asList(clazz.getEnumConstants()).stream().map(Object::toString)
-                .collect(Collectors.joining(", ", "[", "]"));
+        final String typeList = Arrays.asList(clazz.getEnumConstants()).stream()
+                .map(Object::toString).collect(Collectors.joining(", ", "[", "]"));
         buffer.putString(clazz.getSimpleName());
         buffer.putString(enumeration.getClass().getName());
         buffer.putString(typeList);
