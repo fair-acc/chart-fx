@@ -734,8 +734,13 @@ public class ContourDataSetRenderer extends AbstractDataSetManagement<ContourDat
         }
 
         final Axis zAxis = getZAxis();
+        if (zAxis == null) {
+            return;
+        }
         final AxisTransform axisTransform = zAxis.getAxisTransform();
-        zAxis.getAxisTransform();
+        if (axisTransform == null) {
+            return;
+        }
         switch (getContourType()) {
         case CONTOUR:
             drawContour(gc, axisTransform, localCache);
