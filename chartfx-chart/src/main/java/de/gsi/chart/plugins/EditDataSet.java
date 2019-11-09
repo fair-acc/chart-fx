@@ -277,6 +277,9 @@ public class EditDataSet extends TableViewer {
     }
 
     protected void findDataPoint(final Axis xAxis, final Axis yAxis, final List<DataSet> dataSets) {
+        if (xAxis == null || yAxis == null || dataSets == null) {
+            return;
+        }
         final double xMinScreen = Math.min(selectStartPoint.getX(), selectEndPoint.getX());
         final double xMaxScreen = Math.max(selectStartPoint.getX(), selectEndPoint.getX());
         final double yMinScreen = Math.min(selectStartPoint.getY(), selectEndPoint.getY());
