@@ -5,7 +5,10 @@
  */
 package de.gsi.chart.renderer.datareduction;
 
+import static de.gsi.dataset.DataSet.DIM_X;
+
 import de.gsi.chart.renderer.RendererDataReducer;
+import de.gsi.dataset.DataSetError.ErrorType;
 import de.gsi.dataset.utils.ProcessingProfiler;
 
 /**
@@ -67,8 +70,14 @@ public class MaxDataReducer implements RendererDataReducer {
             MaxDataReducer.shiftDataToFront(xValues, indexMin, indexMax);
             MaxDataReducer.shiftDataToFront(yValues, indexMin, indexMax);
 
-            MaxDataReducer.shiftDataToFront(xPointErrorsPos, indexMin, indexMax);
-            MaxDataReducer.shiftDataToFront(xPointErrorsNeg, indexMin, indexMax);
+            if (xPointErrorsPos != null) {
+                // may be null due to a CachedDataPoint optimisation
+                MaxDataReducer.shiftDataToFront(xPointErrorsPos, indexMin, indexMax);
+            }
+            if (xPointErrorsNeg != null) {
+                // may be null due to a CachedDataPoint optimisation
+                MaxDataReducer.shiftDataToFront(xPointErrorsNeg, indexMin, indexMax);
+            }
             MaxDataReducer.shiftDataToFront(yPointErrorsPos, indexMin, indexMax);
             MaxDataReducer.shiftDataToFront(yPointErrorsNeg, indexMin, indexMax);
 
