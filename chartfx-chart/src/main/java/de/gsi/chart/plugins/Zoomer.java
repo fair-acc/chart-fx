@@ -1058,7 +1058,6 @@ public class Zoomer extends ChartPlugin {
         final double posOnAxis = axis.getValueForDisplay(mousePos);
         final double max = axis.getMax();
         final double min = axis.getMin();
-        Math.abs(max - min);
         final double scaling = isZoomIn ? 0.9 : 1 / 0.9;
         final double diffHalf1 = scaling * Math.abs(posOnAxis - min);
         final double diffHalf2 = scaling * Math.abs(max - posOnAxis);
