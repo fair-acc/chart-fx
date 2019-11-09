@@ -216,7 +216,7 @@ public class DefaultDataSetLock<D extends DataSet> implements DataSetLock<D> {
     @Override
     public D writeLock() {
         final Thread callingThread = Thread.currentThread();
-        while (callingThread != writeLockedByThread) {
+        while (threadsAreUnequal(callingThread, writeLockedByThread)) {
             lastWriteStamp = stampedLock.writeLock();
             synchronized (stampedLock) {
                 // copy threadID
@@ -273,5 +273,11 @@ public class DefaultDataSetLock<D extends DataSet> implements DataSetLock<D> {
             throw new IllegalStateException("write lock alread unlocked");
         }
         return dataSet;
+    }
+
+    protected boolean threadsAreUnequal(final Thread thread1, final Thread thread2) {
+        synchronized (stampedLock) {
+            return thread1 != thread2;
+        }
     }
 }
