@@ -720,6 +720,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
                 gc.setTextBaseline(VPos.BOTTOM);
             }
 
+            counter = 0;
             for (final TickMark tickMark : tickMarks) {
                 final double position = tickMark.getPosition();
                 if (!tickMark.isVisible()) {
@@ -753,6 +754,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
                     }
                     break;
                 }
+                counter++;
             }
             break;
 
@@ -832,7 +834,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
                 gc.setTextAlign(TextAlignment.LEFT);
                 gc.setTextBaseline(VPos.TOP);
             }
-
+            counter = 0;
             for (final TickMark tickMark : tickMarks) {
                 final double position = tickMark.getPosition();
                 if (!tickMark.isVisible()) {
@@ -866,6 +868,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
                     }
                     break;
                 }
+                counter++;
             }
             break;
 
