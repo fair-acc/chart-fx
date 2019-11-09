@@ -69,7 +69,7 @@ public class PeriodicScreenCapture implements Observable {
     public PeriodicScreenCapture(final Path path, final String fileName, final Scene scene, final double delay,
             final double period, final boolean addDateTime) {
         this.path = path;
-        this.fileName = fileName.replaceAll(".png", "").replaceAll(".PNG", "");
+        this.fileName = fileName.replace(".png", "").replace(".PNG", "");
         primaryScene = scene;
         this.delay = delay;
         this.period = period;
