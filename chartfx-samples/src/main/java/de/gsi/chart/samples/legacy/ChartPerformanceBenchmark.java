@@ -295,7 +295,7 @@ public class ChartPerformanceBenchmark extends AbstractTestApplication {
                     LOGGER.atInfo().log("finished test case #" + caseNr + " and '" + nSamples
                             + "' samples and cpu load of " + avgCPULoad + " % and average fps = " + avgFPS);
 
-                    if (avgFPS > ((20 * 40) / updatePeriod)) {
+                    if (avgFPS > ((20.0 * 40.0) / (double)updatePeriod)) {
                         result.add(nSamples, Math.min(avgCPULoad, 400));
                     } else {
                         compute[caseNr - 1] = false;
