@@ -17,7 +17,11 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 /**
- * Simple example of test/demonstrate line-styling the ErrorDataSetRenderer
+ * Test/demo that explicitly allows to draw NaN values in DataSets as well as custom dash-based line-styling
+ * <p>
+ * Note: this works fine for >JDK11/JFX11 but consistently crashes the JDK8/JavaFX framework outside this library
+ * whenever e.g performing a zoom, panning or other similar operation (ie. one of the reasons for the NaN workaround in
+ * earlier chart-fx versions).
  * 
  * @author rstein
  */
@@ -38,6 +42,7 @@ public class NotANumberSample extends Application {
 
         // enables NaN support (N.B. may have some impact on the plotting
         // performance for larger DataSets and/or high rate update (ie. 100 kPoints@25Hz)
+        // N.B. this may make the system unresponsive for JDK8-type JVMs.
         renderer.setAllowNaNs(true);
 
         final DoubleErrorDataSet dataSet1 = new DoubleErrorDataSet("data set #1");
