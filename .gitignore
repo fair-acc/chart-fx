@@ -152,4 +152,6 @@ $RECYCLE.BIN/
 
 # End of https://www.gitignore.io/api/vim,java,linux,maven,windows,eclipse
 .flattened-pom.xml
-/chart-fx.tgz
+
+# intermediated scan results for coverity
+/*.tgz
