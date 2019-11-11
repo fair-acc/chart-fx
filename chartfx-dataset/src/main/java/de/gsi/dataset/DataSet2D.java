@@ -9,11 +9,6 @@ package de.gsi.dataset;
  */
 public interface DataSet2D extends DataSet {
 
-    @Override
-    default double get(final int dimIndex, final int index) {
-        return dimIndex == DIM_X ? getX(index) : getY(index);
-    }
-
     /**
      * Get the number of data points in the data set.
      *
