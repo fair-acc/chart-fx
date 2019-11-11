@@ -28,7 +28,7 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
      *
      * @param another name of this DataSet.
      */
-    public DoubleDataSet(final DataSet2D another) {
+    public DoubleDataSet(final DataSet another) {
         super(another.getName(), another.getDimension());
         this.set(another); // NOPMD by rstein on 25/06/19 07:42
     }
@@ -333,31 +333,36 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
      * @param other the source data set
      * @return itself (fluent design)
      */
-    public DoubleDataSet set(final DataSet2D other) {
-        lock().writeLockGuard(() -> {
-            other.lock().writeLockGuard(() -> {
+    public DoubleDataSet set(final DataSet other) {
+        lock().writeLockGuard(() -> other.lock().writeLockGuard(() -> {
 
-                // deep copy data point labels and styles
-                getDataLabelMap().clear();
-                for (int index = 0; index < other.getDataCount(); index++) {
-                    final String label = other.getDataLabel(index);
-                    if ((label != null) && !label.isEmpty()) {
-                        addDataLabel(index, label);
-                    }
+            // deep copy data point labels and styles
+            getDataLabelMap().clear();
+            for (int index = 0; index < other.getDataCount(); index++) {
+                final String label = other.getDataLabel(index);
+                if ((label != null) && !label.isEmpty()) {
+                    addDataLabel(index, label);
                 }
-                getDataStyleMap().clear();
-                for (int index = 0; index < other.getDataCount(); index++) {
-                    final String style = other.getStyle(index);
-                    if ((style != null) && !style.isEmpty()) {
-                        addDataStyle(index, style);
-                    }
+            }
+            getDataStyleMap().clear();
+            for (int index = 0; index < other.getDataCount(); index++) {
+                final String style = other.getStyle(index);
+                if ((style != null) && !style.isEmpty()) {
+                    addDataStyle(index, style);
                 }
-                setStyle(other.getStyle());
+            }
+            setStyle(other.getStyle());
 
-                // copy data
-                this.set(other.getXValues(), other.getYValues(), true);
-            });
-        });
+            // copy data
+            if (other instanceof DataSet2D) {
+                this.set(((DataSet2D) other).getXValues(), ((DataSet2D) other).getYValues(), true);
+            } else {
+                this.clearData();
+                for (int i = 0; i < other.getDataCount(DIM_X); i++) {
+                    this.add(other.get(DIM_X, i), other.get(DIM_Y, i));
+                }
+            }
+        }));
         return fireInvalidated(new UpdatedDataEvent(this));
     }
 
