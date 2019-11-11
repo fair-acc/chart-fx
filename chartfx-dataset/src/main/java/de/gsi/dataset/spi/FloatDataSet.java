@@ -18,7 +18,7 @@ import it.unimi.dsi.fastutil.floats.FloatArrayList;
  * @see DoubleErrorDataSet for an equivalent implementation with asymmetric errors in Y
  * @author rstein
  */
-public class FloatDataSet extends AbstractDataSet<FloatDataSet> implements EditableDataSet {
+public class FloatDataSet extends AbstractDataSet<FloatDataSet> implements EditableDataSet, DataSet2D {
     private static final long serialVersionUID = 7625465583757088697L;
     protected FloatArrayList xValues; // faster compared to java default
     protected FloatArrayList yValues; // faster compared to java default
@@ -250,8 +250,8 @@ public class FloatDataSet extends AbstractDataSet<FloatDataSet> implements Edita
     }
 
     @Override
-    public double getX(final int index) {
-        return xValues.elements()[index];
+    public double get(final int dimIndex, final int index) {
+        return dimIndex == DIM_X ? xValues.elements()[index] : yValues.elements()[index];
     }
 
     public float[] getXFloatValues() {
@@ -261,11 +261,6 @@ public class FloatDataSet extends AbstractDataSet<FloatDataSet> implements Edita
     @Override
     public double[] getXValues() {
         return toDoubles(xValues.elements());
-    }
-
-    @Override
-    public double getY(final int index) {
-        return yValues.elements()[index];
     }
 
     public float[] getYFloatValues() {
