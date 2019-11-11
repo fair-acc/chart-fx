@@ -184,16 +184,6 @@ public class CircularDoubleErrorDataSet extends AbstractErrorDataSet<CircularDou
         return dimIndex == DataSet.DIM_X ? xValues.get(index) : yValues.get(index);
     }
 
-    @Override
-    public double getX(final int index) {
-        return xValues.get(index);
-    }
-
-    @Override
-    public double getY(final int index) {
-        return yValues.get(index);
-    }
-
     /**
      * resets all data
      * 
