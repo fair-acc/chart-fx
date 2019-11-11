@@ -69,6 +69,11 @@ public class LabelledMarkerDataSet extends AbstractDataSet<LabelledMarkerDataSet
         return fireInvalidated(new RemovedDataEvent(this, "clear"));
     }
 
+    @Override
+    public double get(final int dimIndex, final int index) {
+        return dimIndex == DIM_X ? data.get(index).getX() : data.get(index).getY();
+    }
+
     /**
      * @return list containing data point values
      */
@@ -79,6 +84,12 @@ public class LabelledMarkerDataSet extends AbstractDataSet<LabelledMarkerDataSet
     @Override
     public int getDataCount() {
         return data.size();
+    }
+
+    @Override
+    public int getDataCount(int dimIndex) {
+        // TODO Auto-generated method stub
+        return dataLabels.size();
     }
 
     /**
@@ -122,16 +133,6 @@ public class LabelledMarkerDataSet extends AbstractDataSet<LabelledMarkerDataSet
     @Override
     public String getStyle(final int index) {
         return dataStyles.get(index);
-    }
-
-    @Override
-    public double getX(final int index) {
-        return data.get(index).getX();
-    }
-
-    @Override
-    public double getY(final int index) {
-        return data.get(index).getY();
     }
 
     /**
