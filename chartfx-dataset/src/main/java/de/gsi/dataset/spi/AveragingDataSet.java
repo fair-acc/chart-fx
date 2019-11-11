@@ -170,7 +170,7 @@ public class AveragingDataSet extends AbstractDataSet<AveragingDataSet> implemen
         private static final long serialVersionUID = 1L;
 
         public InternalDataSet(DataSet2D ds) {
-            super(ds.getName(), ds.getXValues(), ds.getYValues(), ds.getDataCount(), true);
+            super(ds.getName(), ds.getValues(DataSet.DIM_X), ds.getValues(DataSet.DIM_Y), ds.getDataCount(), true);
             // xValues = new double[ds.getDataCount()];
             // yValues = new double[ds.getDataCount()];
             // for (int i=0;i<yValues.length;i++)

@@ -4,7 +4,7 @@ package de.gsi.dataset;
  * @author rstein
  *
  */
-public interface EditableDataSet {
+public interface EditableDataSet extends DataSet {
 
     /**
      * add point to the data set

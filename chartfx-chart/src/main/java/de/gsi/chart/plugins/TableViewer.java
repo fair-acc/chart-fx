@@ -520,8 +520,8 @@ public class TableViewer extends ChartPlugin {
 
                 this.setOnEditCommit(e -> {
                     final int row = e.getRowValue().getRow();
-                    final double oldX = editableDataSet.getX(row);
-                    final double oldY = editableDataSet.getY(row);
+                    final double oldX = editableDataSet.get(DIM_X, row);
+                    final double oldY = editableDataSet.get(DIM_Y, row);
 
                     if (editConstraints != null && !editConstraints.canChange(row)) {
                         // may not edit value, revert to old value (ie. via

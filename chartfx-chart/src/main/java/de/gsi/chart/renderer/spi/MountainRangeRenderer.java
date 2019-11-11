@@ -273,7 +273,7 @@ public class MountainRangeRenderer extends ErrorDataSetRenderer implements Rende
 
         @Override
         public double getX(final int i) {
-            return dataSet.getX(i);
+            return dataSet.get(DIM_X, i);
         }
 
         @Override

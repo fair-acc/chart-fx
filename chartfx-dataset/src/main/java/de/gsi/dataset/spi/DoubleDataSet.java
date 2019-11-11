@@ -263,16 +263,6 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
         return dimIndex == DataSet.DIM_X ? xValues.elements() : yValues.elements();
     }
 
-    @Override
-    public double[] getXValues() {
-        return xValues.elements();
-    }
-
-    @Override
-    public double[] getYValues() {
-        return yValues.elements();
-    }
-
     /**
      * @param amount storage capacity increase
      * @return itself (fluent design)

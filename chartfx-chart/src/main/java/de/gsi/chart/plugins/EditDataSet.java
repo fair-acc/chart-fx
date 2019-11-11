@@ -14,6 +14,7 @@ import de.gsi.chart.axes.Axis;
 import de.gsi.chart.renderer.Renderer;
 import de.gsi.chart.utils.FXUtils;
 import de.gsi.dataset.DataSet;
+import de.gsi.dataset.DataSet2D;
 import de.gsi.dataset.EditConstraints;
 import de.gsi.dataset.EditableDataSet;
 import javafx.beans.property.BooleanProperty;
@@ -224,7 +225,7 @@ public class EditDataSet extends TableViewer {
             final double newValX = xAxis.getValueForDisplay(x - x0);
             final double newValY = yAxis.getValueForDisplay(y - y0);
             final EditableDataSet ds = (EditableDataSet) (dataPoint.getDataSet());
-            final double oldValX = ds.getX(index);
+            final double oldValX = ds.get(DataSet.DIM_X, index);
             if (oldValX <= newValX) {
                 ds.add(index, newValX, newValY);
             } else {
@@ -286,13 +287,13 @@ public class EditDataSet extends TableViewer {
         final double yMaxScreen = Math.max(selectStartPoint.getY(), selectEndPoint.getY());
 
         for (final DataSet ds : dataSets) {
-            if (!(ds instanceof EditableDataSet)) {
+            if (!(ds instanceof EditableDataSet || !(ds instanceof DataSet2D))) {
                 continue;
             }
             final EditableDataSet dataSet = (EditableDataSet) ds;
 
-            final int indexMin = Math.max(0, dataSet.getXIndex(xAxis.getValueForDisplay(xMinScreen)));
-            final int indexMax = Math.min(dataSet.getXIndex(xAxis.getValueForDisplay(xMaxScreen)) + 1,
+            final int indexMin = Math.max(0, ((DataSet2D) dataSet).getXIndex(xAxis.getValueForDisplay(xMinScreen)));
+            final int indexMax = Math.min(((DataSet2D) dataSet).getXIndex(xAxis.getValueForDisplay(xMaxScreen)) + 1,
                     dataSet.getDataCount());
 
             // N.B. (0,0) screen coordinate is in the top left corner vs. normal
@@ -303,7 +304,7 @@ public class EditDataSet extends TableViewer {
             final ConcurrentHashMap<Integer, SelectedDataPoint> dataSetHashMap = markedPoints.computeIfAbsent(dataSet,
                     k -> new ConcurrentHashMap<>());
             for (int i = indexMin; i < indexMax; i++) {
-                final double y = dataSet.getY(i);
+                final double y = dataSet.get(DataSet.DIM_Y, i);
                 if ((y >= yMin) && (y <= yMax)) {
                     if (isShiftDown()) {
                         // add if not existing/remove if existing
@@ -941,8 +942,8 @@ public class EditDataSet extends TableViewer {
             this.xAxis = xAxis;
             this.yAxis = yAxis;
             this.dataSet = dataSet;
-            this.xValue = dataSet.getX(index);
-            this.yValue = dataSet.getY(index);
+            this.xValue = dataSet.get(DataSet.DIM_X, index);
+            this.yValue = dataSet.get(DataSet.DIM_Y, index);
             this.setCenterX(getX()); // NOPMD by rstein on 13/06/19 14:14
             this.setCenterY(getY()); // NOPMD by rstein on 13/06/19 14:14
             this.setRadius(DEFAULT_MARKER_RADIUS);
@@ -1028,8 +1029,8 @@ public class EditDataSet extends TableViewer {
 
         public int getIndex() {
             for (int i = 0; i < dataSet.getDataCount(); i++) {
-                final double x0 = dataSet.getX(i);
-                final double y0 = dataSet.getY(i);
+                final double x0 = dataSet.get(DataSet.DIM_X, i);
+                final double y0 = dataSet.get(DataSet.DIM_Y, i);
                 if (x0 == xValue && y0 == yValue) {
                     return i;
                 }
