@@ -187,6 +187,11 @@ public class ListDataSet extends AbstractDataSet<ListDataSet> implements DataSet
         return fireInvalidated(new RemovedDataEvent(this, "clearData()"));
     }
 
+    @Override
+    public double get(final int dimIndex, final int index) {
+        return dimIndex == DIM_X ? data.get(index).getX() : data.get(index).getY();
+    }
+
     /**
      * @return list containing data point definition
      */
@@ -226,16 +231,6 @@ public class ListDataSet extends AbstractDataSet<ListDataSet> implements DataSet
     @Override
     public String getStyle(final int index) {
         return dataStyles.get(index);
-    }
-
-    @Override
-    public double getX(final int index) {
-        return data.get(index).getX();
-    }
-
-    @Override
-    public double getY(final int index) {
-        return data.get(index).getY();
     }
 
     /**
