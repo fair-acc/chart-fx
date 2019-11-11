@@ -317,20 +317,9 @@ public class ListErrorDataSet extends AbstractErrorDataSet<ListErrorDataSet> imp
         return lock().readLockGuard(() -> dataStyles.get(index));
     }
 
-    /**
-     * @return the x coordinate
-     */
     @Override
-    public double getX(final int i) {
-        return data.get(i).getX();
-    }
-
-    /**
-     * @return the y coordinate
-     */
-    @Override
-    public double getY(final int i) {
-        return data.get(i).getY();
+    public double get(final int dimIndex, final int i) {
+        return dimIndex == DIM_X ? data.get(i).getX() : data.get(i).getY();
     }
 
     /**
