@@ -195,11 +195,22 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
      * add point to the data set
      *
      * @param index data point index at which the new data point should be added
+     * @param newValue new data point coordinate
+     * @return itself (fluent design)
+     */
+    @Override
+    public DoubleErrorDataSet add(final int index, final double... newValue) {
+        return add(index, newValue[0], newValue[1]);
+    }
+
+    /**
+     * add point to the data set
+     *
+     * @param index data point index at which the new data point should be added
      * @param x horizontal coordinate of the new data point
      * @param y vertical coordinate of the new data point
      * @return itself (fluent design)
      */
-    @Override
     public DoubleErrorDataSet add(int index, double x, double y) {
         return add(index, x, y, 0.0, 0.0, null);
     }
@@ -542,13 +553,24 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
 
     /**
      * replaces point coordinate of existing data point
+     *
+     * @param index data point index at which the new data point should be added
+     * @param newValue new data point coordinate
+     * @return itself (fluent design)
+     */
+    @Override
+    public DoubleErrorDataSet set(final int index, final double... newValue) {
+        return set(index, newValue[0], newValue[1]);
+    }
+
+    /**
+     * replaces point coordinate of existing data point
      * 
      * @param index the index of the data point
      * @param x new horizontal coordinate
      * @param y new vertical coordinate N.B. errors are implicitly assumed to be zero
      * @return itself (fluent design)
      */
-    @Override
     public DoubleErrorDataSet set(int index, double x, double y) {
         return set(index, x, y, 0.0, 0.0);
     }

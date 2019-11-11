@@ -9,6 +9,7 @@ import de.gsi.chart.plugins.UpdateAxisLabels;
 import de.gsi.chart.plugins.Zoomer;
 import de.gsi.chart.renderer.Renderer;
 import de.gsi.chart.renderer.spi.ErrorDataSetRenderer;
+import de.gsi.dataset.DataSet;
 import de.gsi.dataset.EditConstraints;
 import de.gsi.dataset.spi.DoubleDataSet;
 import javafx.application.Application;
@@ -89,15 +90,9 @@ public class EditDataSetSample extends Application {
             }
 
             @Override
-            public boolean isXEditable() {
+            public boolean isEditable(final int dimIndex) {
                 // only allow editing in Y
-                return false;
-            }
-
-            @Override
-            public boolean isYEditable() {
-                // only allow editing in Y
-                return true;
+                return dimIndex == DataSet.DIM_X ? false : true;
             }
         });
 

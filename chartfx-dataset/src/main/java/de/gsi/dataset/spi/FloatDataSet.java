@@ -158,11 +158,22 @@ public class FloatDataSet extends AbstractDataSet<FloatDataSet> implements Edita
      * add point to the data set
      *
      * @param index data point index at which the new data point should be added
+     * @param newValue new data point coordinate
+     * @return itself (fluent design)
+     */
+    @Override
+    public FloatDataSet add(final int index, final double... newValue) {
+        return add(index, (float) newValue[0], (float) newValue[1], null);
+    }
+
+    /**
+     * add point to the data set
+     *
+     * @param index data point index at which the new data point should be added
      * @param x horizontal coordinate of the new data point
      * @param y vertical coordinate of the new data point
      * @return itself (fluent design)
      */
-    @Override
     public FloatDataSet add(final int index, final double x, final double y) {
         return add(index, (float) x, (float) y, null);
     }
@@ -237,6 +248,11 @@ public class FloatDataSet extends AbstractDataSet<FloatDataSet> implements Edita
         return fireInvalidated(new RemovedDataEvent(this, "clearData()"));
     }
 
+    @Override
+    public double get(final int dimIndex, final int index) {
+        return dimIndex == DIM_X ? xValues.elements()[index] : yValues.elements()[index];
+    }
+
     /**
      * @return storage capacity of dataset
      */
@@ -247,11 +263,6 @@ public class FloatDataSet extends AbstractDataSet<FloatDataSet> implements Edita
     @Override
     public int getDataCount() {
         return Math.min(xValues.size(), yValues.size());
-    }
-
-    @Override
-    public double get(final int dimIndex, final int index) {
-        return dimIndex == DIM_X ? xValues.elements()[index] : yValues.elements()[index];
     }
 
     public float[] getXFloatValues() {
@@ -422,7 +433,18 @@ public class FloatDataSet extends AbstractDataSet<FloatDataSet> implements Edita
         return fireInvalidated(new UpdatedDataEvent(this));
     }
 
+    /**
+     * replaces point coordinate of existing data point
+     *
+     * @param index data point index at which the new data point should be added
+     * @param newValue new data point coordinate
+     * @return itself (fluent design)
+     */
     @Override
+    public FloatDataSet set(final int index, final double... newValue) {
+        return set(index, newValue[0], newValue[1]);
+    }
+
     public FloatDataSet set(final int index, final double x, final double y) {
         lock().writeLockGuard(() -> {
             final int dataCount = Math.max(index + 1, this.getDataCount());

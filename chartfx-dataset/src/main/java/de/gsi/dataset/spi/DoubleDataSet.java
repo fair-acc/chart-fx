@@ -154,11 +154,22 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
      * add point to the data set
      *
      * @param index data point index at which the new data point should be added
+     * @param newValue new data point coordinate
+     * @return itself (fluent design)
+     */
+    @Override
+    public DoubleDataSet add(final int index, final double... newValue) {
+        return add(index, newValue[0], newValue[1], null);
+    }
+
+    /**
+     * add point to the data set
+     *
+     * @param index data point index at which the new data point should be added
      * @param x horizontal coordinate of the new data point
      * @param y vertical coordinate of the new data point
      * @return itself (fluent design)
      */
-    @Override
     public DoubleDataSet add(final int index, final double x, final double y) {
         return add(index, x, y, null);
     }
@@ -424,12 +435,23 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
     /**
      * replaces point coordinate of existing data point
      *
+     * @param index data point index at which the new data point should be added
+     * @param newValue new data point coordinate
+     * @return itself (fluent design)
+     */
+    @Override
+    public DoubleDataSet set(final int index, final double... newValue) {
+        return set(index, newValue[0], newValue[1]);
+    }
+
+    /**
+     * replaces point coordinate of existing data point
+     *
      * @param index the index of the data point
      * @param x new horizontal coordinate
      * @param y new vertical coordinate N.B. errors are implicitly assumed to be zero
      * @return itself (fluent design)
      */
-    @Override
     public DoubleDataSet set(final int index, final double x, final double y) {
         lock().writeLockGuard(() -> {
             final int dataCount = Math.max(index + 1, this.getDataCount());

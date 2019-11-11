@@ -10,11 +10,10 @@ public interface EditableDataSet {
      * add point to the data set
      *
      * @param index data point index at which the new data point should be added
-     * @param x horizontal coordinate of the new data point
-     * @param y vertical coordinate of the new data point
+     * @param newValue new data point coordinate
      * @return itself (fluent design)
      */
-    EditableDataSet add(final int index, final double x, final double y);
+    EditableDataSet add(final int index, final double ...newValue);
 
     /**
      * 
@@ -34,11 +33,10 @@ public interface EditableDataSet {
      * modify point in the the data set
      *
      * @param index data point index at which the new data point should be added
-     * @param x horizontal coordinate of the new data point
-     * @param y vertical coordinate of the new data point
+     * @param newValue new data point coordinate
      * @return itself (fluent design)
      */
-    EditableDataSet set(final int index, final double x, final double y);
+    EditableDataSet set(final int index, final double ...newValue);
 
     /**
      * 
