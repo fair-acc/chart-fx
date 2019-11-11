@@ -503,11 +503,11 @@ public class TableViewer extends ChartPlugin {
                 final EditableDataSet editableDataSet = (EditableDataSet) ds;
                 final EditConstraints editConstraints = editableDataSet.getEditConstraints();
 
-                if (type == ColumnType.X && editConstraints != null && !editConstraints.isXEditable()) {
+                if (type == ColumnType.X && editConstraints != null && !editConstraints.isEditable(DataSet.DIM_X)) {
                     // editing of x coordinate is excluded
                     return;
                 }
-                if (type == ColumnType.Y && editConstraints != null && !editConstraints.isYEditable()) {
+                if (type == ColumnType.Y && editConstraints != null && !editConstraints.isEditable(DataSet.DIM_Y)) {
                     // editing of y coordinate is excluded
                     return;
                 }

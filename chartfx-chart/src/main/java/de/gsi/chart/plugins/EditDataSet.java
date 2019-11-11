@@ -14,7 +14,6 @@ import de.gsi.chart.axes.Axis;
 import de.gsi.chart.renderer.Renderer;
 import de.gsi.chart.utils.FXUtils;
 import de.gsi.dataset.DataSet;
-import de.gsi.dataset.DataSet2D;
 import de.gsi.dataset.EditConstraints;
 import de.gsi.dataset.EditableDataSet;
 import javafx.beans.property.BooleanProperty;
@@ -74,7 +73,7 @@ public class EditDataSet extends TableViewer {
     private final Predicate<MouseEvent> defaultSelectFilter = event -> MouseEventsHelper.isOnlyPrimaryButtonDown(event)
             && event.isControlDown() && isMouseEventWithinCanvas(event) && !isPointDragActive;
 
-    protected ConcurrentHashMap<EditableDataSet, ConcurrentHashMap<Integer, SelectedDataPoint>> markedPoints = new ConcurrentHashMap<>();
+    protected final ConcurrentHashMap<EditableDataSet, ConcurrentHashMap<Integer, SelectedDataPoint>> markedPoints = new ConcurrentHashMap<>();
     protected final Rectangle selectRectangle = new Rectangle();
     protected Point2D selectStartPoint;
     protected Point2D selectEndPoint;
@@ -287,14 +286,14 @@ public class EditDataSet extends TableViewer {
         final double yMaxScreen = Math.max(selectStartPoint.getY(), selectEndPoint.getY());
 
         for (final DataSet ds : dataSets) {
-            if (!(ds instanceof EditableDataSet || !(ds instanceof DataSet2D))) {
+            if (!(ds instanceof EditableDataSet)) {
                 continue;
             }
             final EditableDataSet dataSet = (EditableDataSet) ds;
 
-            final int indexMin = Math.max(0, ((DataSet2D) dataSet).getXIndex(xAxis.getValueForDisplay(xMinScreen)));
-            final int indexMax = Math.min(((DataSet2D) dataSet).getXIndex(xAxis.getValueForDisplay(xMaxScreen)) + 1,
-                    dataSet.getDataCount());
+            final int indexMin = Math.max(0, ds.getIndex(DataSet.DIM_X, xAxis.getValueForDisplay(xMinScreen)));
+            final int indexMax = Math.min(ds.getIndex(DataSet.DIM_X, xAxis.getValueForDisplay(xMaxScreen)) + 1,
+                    ds.getDataCount());
 
             // N.B. (0,0) screen coordinate is in the top left corner vs. normal
             // 0,0 in the bottom left -> need to invert limits
@@ -316,7 +315,6 @@ public class EditDataSet extends TableViewer {
                     } else {
                         dataSetHashMap.put(i, new SelectedDataPoint(xAxis, yAxis, dataSet, i));
                     }
-
                 }
             }
         }
@@ -694,7 +692,7 @@ public class EditDataSet extends TableViewer {
      * Sets filter on {@link MouseEvent#DRAG_DETECTED DRAG_DETECTED} events that should start zoom-in operation.
      *
      * @param zoomInMouseFilter the filter to accept zoom-in mouse event. If {@code null} then any DRAG_DETECTED event
-     *            will start zoom-in operation. By default it's set to {@link #defaultSelectFilter}.
+     *        will start zoom-in operation. By default it's set to {@link #defaultSelectFilter}.
      * @see #getSelectionMouseFilter()
      */
     public void setZoomInMouseFilter(final Predicate<MouseEvent> zoomInMouseFilter) {
@@ -739,6 +737,10 @@ public class EditDataSet extends TableViewer {
 
         for (final EditableDataSet dataSet : markedPoints.keySet()) {
             final ConcurrentHashMap<Integer, SelectedDataPoint> dataPoints = markedPoints.get(dataSet);
+            if (dataPoints == null) {
+                // workaround... key shouldn't be here in the first place
+                continue;
+            }
             for (final Integer dataPointIndex : dataPoints.keySet()) {
                 final SelectedDataPoint dataPoint = dataPoints.get(dataPointIndex);
 
@@ -896,7 +898,6 @@ public class EditDataSet extends TableViewer {
         }
 
         public void showPopup(final MouseEvent event, final SelectedDataPoint selectedPoint) {
-            // System.err.println("show popup = " + selectedPoint);
             deletePoints.setDisable(markerPane.getChildren().isEmpty());
 
             if (selectedPoint == null) {
@@ -991,11 +992,11 @@ public class EditDataSet extends TableViewer {
             }
             final boolean canChange = constraints.canChange(getIndex());
 
-            if (canChange && constraints.isXEditable() && allowShiftX.get()) {
+            if (canChange && constraints.isEditable(DataSet.DIM_X) && allowShiftX.get()) {
                 nX += deltaX;
             }
 
-            if (canChange && constraints.isYEditable() && allowShiftY.get()) {
+            if (canChange && constraints.isEditable(DataSet.DIM_Y) && allowShiftY.get()) {
                 nY += deltaY;
             }
 
