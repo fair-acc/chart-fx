@@ -20,7 +20,7 @@ import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
  */
 @SuppressWarnings("PMD.TooManyMethods") // part of the flexible class nature
 public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
-        implements DataSetError, EditableDataSet {
+        implements DataSetError, EditableDataSet, DataSet2D {
     private static final long serialVersionUID = 8931518518245752926L;
     protected DoubleArrayList xValues; // way faster than java default lists
     protected DoubleArrayList yValues; // way faster than java default lists

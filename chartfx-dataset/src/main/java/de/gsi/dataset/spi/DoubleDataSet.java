@@ -18,7 +18,7 @@ import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
  * @author rstein
  */
 @SuppressWarnings("PMD.TooManyMethods") // part of the flexible class nature
-public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements EditableDataSet {
+public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements EditableDataSet, DataSet2D {
     private static final long serialVersionUID = -493232313124620828L;
     protected DoubleArrayList xValues; // way faster than java default lists
     protected DoubleArrayList yValues; // way faster than java default lists
@@ -253,18 +253,8 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
     }
 
     @Override
-    public double getX(final int index) {
-        return xValues.elements()[index];
-    }
-
-    @Override
     public double[] getXValues() {
         return xValues.elements();
-    }
-
-    @Override
-    public double getY(final int index) {
-        return yValues.elements()[index];
     }
 
     @Override

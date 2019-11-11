@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import de.gsi.dataset.AxisDescription;
+import de.gsi.dataset.DataSet;
 import de.gsi.dataset.DataSet2D;
 import de.gsi.dataset.DataSetError;
 import de.gsi.dataset.event.AddedDataEvent;
@@ -207,13 +208,8 @@ public class FifoDoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorData
     }
 
     @Override
-    public double getX(final int index) {
-        return data.get(index).getX();
-    }
-
-    @Override
-    public double getY(final int index) {
-        return data.get(index).getY();
+    public final double get(final int dimIndex, final int index) {
+        return dimIndex == DataSet.DIM_X ? data.get(index).getX() : data.get(index).getY();
     }
 
     /**

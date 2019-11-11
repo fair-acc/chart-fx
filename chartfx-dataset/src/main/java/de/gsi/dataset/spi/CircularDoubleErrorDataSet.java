@@ -1,6 +1,7 @@
 package de.gsi.dataset.spi;
 
 import de.gsi.dataset.AxisDescription;
+import de.gsi.dataset.DataSet;
 import de.gsi.dataset.DataSet2D;
 import de.gsi.dataset.DataSetError;
 import de.gsi.dataset.event.AddedDataEvent;
@@ -176,6 +177,11 @@ public class CircularDoubleErrorDataSet extends AbstractErrorDataSet<CircularDou
     @Override
     public String getStyle(final int index) {
         return dataStyles.get(index);
+    }
+
+    @Override
+    public final double get(final int dimIndex, final int index) {
+        return dimIndex == DataSet.DIM_X ? xValues.get(index) : yValues.get(index);
     }
 
     @Override

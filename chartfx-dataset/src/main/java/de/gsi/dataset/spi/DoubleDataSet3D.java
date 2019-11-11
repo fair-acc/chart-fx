@@ -117,6 +117,19 @@ public class DoubleDataSet3D extends AbstractDataSet3D<DoubleDataSet3D> {
     }
 
     @Override
+    public final double get(final int dimIndex, final int index) {
+        switch (dimIndex) {
+        case DIM_X:
+            return xValues[index];
+        case DIM_Y:
+            return yValues[index];
+        case DIM_Z:
+            return zValues[index/xValues.length][index%xValues.length];
+        }
+        return Double.NaN;
+    }
+
+    @Override
     public double getX(final int i) {
         return xValues[i];
     }
