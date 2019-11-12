@@ -125,8 +125,9 @@ public class DoubleDataSet3D extends AbstractDataSet3D<DoubleDataSet3D> {
             return yValues[index];
         case DIM_Z:
             return zValues[index / xValues.length][index % xValues.length];
+        default:
+            return Double.NaN;
         }
-        return Double.NaN;
     }
 
     @Override
@@ -143,8 +144,9 @@ public class DoubleDataSet3D extends AbstractDataSet3D<DoubleDataSet3D> {
             return Arrays.copyOf(yValues, yValues.length);
         case DIM_Z:
             return super.getValues(dimIndex);
+        default:
+            return new double[0];
         }
-        return new double[0];
     }
 
     @Override

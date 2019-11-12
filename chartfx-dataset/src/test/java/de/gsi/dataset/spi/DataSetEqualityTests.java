@@ -234,7 +234,7 @@ public class DataSetEqualityTests {
 
     private class OneDimDataSet extends AbstractDataSet<OneDimDataSet> implements DataSet {
         private static final long serialVersionUID = 1L;
-        final double[] data = new double[] { 2.4, 5.2, 8.5, 9.2 };
+        final private double[] data = new double[] { 2.4, 5.2, 8.5, 9.2 };
 
         public OneDimDataSet() {
             super("test", 1);
