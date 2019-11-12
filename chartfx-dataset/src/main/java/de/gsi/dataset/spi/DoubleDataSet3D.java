@@ -117,23 +117,36 @@ public class DoubleDataSet3D extends AbstractDataSet3D<DoubleDataSet3D> {
     }
 
     @Override
+    public final double get(final int dimIndex, final int index) {
+        switch (dimIndex) {
+        case DIM_X:
+            return xValues[index];
+        case DIM_Y:
+            return yValues[index];
+        case DIM_Z:
+            return zValues[index / xValues.length][index % xValues.length];
+        default:
+            return Double.NaN;
+        }
+    }
+
+    @Override
     public double getX(final int i) {
         return xValues[i];
     }
 
     @Override
-    public double[] getXValues() {
-        return Arrays.copyOf(xValues, xValues.length);
-    }
-
-    @Override
-    public double getY(final int i) {
-        return yValues[i];
-    }
-
-    @Override
-    public double[] getYValues() {
-        return Arrays.copyOf(yValues, yValues.length);
+    public double[] getValues(final int dimIndex) {
+        switch (dimIndex) {
+        case DIM_X:
+            return Arrays.copyOf(xValues, xValues.length);
+        case DIM_Y:
+            return Arrays.copyOf(yValues, yValues.length);
+        case DIM_Z:
+            return super.getValues(dimIndex);
+        default:
+            return new double[0];
+        }
     }
 
     @Override

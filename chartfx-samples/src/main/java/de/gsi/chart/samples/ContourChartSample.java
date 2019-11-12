@@ -10,7 +10,6 @@ import de.gsi.chart.XYChart;
 import de.gsi.chart.axes.spi.DefaultNumericAxis;
 import de.gsi.chart.plugins.ColormapSelector.ColormapComboBox;
 import de.gsi.chart.plugins.EditAxis;
-import de.gsi.chart.plugins.Panner;
 import de.gsi.chart.plugins.Zoomer;
 import de.gsi.chart.renderer.ContourType;
 import de.gsi.chart.renderer.spi.ContourDataSetRenderer;
@@ -347,7 +346,19 @@ public class ContourChartSample extends Application {
             xValues[xIndex] = x;
             yValues[yIndex] = y;
             zValues[xIndex][yIndex] = z;
+        }
 
+        @Override
+        public double get(int dimIndex, int index) {
+            switch (dimIndex) {
+            case DIM_X:
+                return xValues[index].doubleValue();
+            case DIM_Y:
+                return yValues[index].doubleValue();
+            case DIM_Z:
+                return zValues[index / xValues.length][index % xValues.length];
+            }
+            throw new IndexOutOfBoundsException("Dimension Index out of bounds 3, was " + dimIndex);
         }
     }
 }

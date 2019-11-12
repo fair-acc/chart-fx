@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 
+import de.gsi.dataset.DataSet;
 import de.gsi.dataset.DataSet2D;
 import de.gsi.dataset.event.AddedDataEvent;
 import de.gsi.dataset.event.UpdatedDataEvent;
@@ -22,7 +23,7 @@ public class FragmentedDataSet extends AbstractDataSet<FragmentedDataSet> implem
     // protected double xmax;
     // protected double ymin;
     // protected double ymax;
-    protected final ArrayList<DataSet2D> list = new ArrayList<>();
+    protected final ArrayList<DataSet> list = new ArrayList<>();
 
     /**
      * @param name data set name
@@ -34,7 +35,7 @@ public class FragmentedDataSet extends AbstractDataSet<FragmentedDataSet> implem
     /**
      * @param set new data set to be added to list
      */
-    public void add(final DataSet2D set) {
+    public void add(final DataSet set) {
         lock().writeLockGuard(() -> {
             list.add(set);
             /* Trace data is expected to be sorted in ascending order */
@@ -88,13 +89,13 @@ public class FragmentedDataSet extends AbstractDataSet<FragmentedDataSet> implem
     /**
      * @return sub-datasets
      */
-    public Collection<DataSet2D> getDatasets() {
+    public Collection<DataSet> getDatasets() {
         return list;
     }
 
     @Override
     public String getStyle(int i) {
-        for (final DataSet2D dataset : list) {
+        for (final DataSet dataset : list) {
             if (i < dataset.getDataCount()) {
                 return dataset.getStyle(i);
             }
@@ -104,14 +105,15 @@ public class FragmentedDataSet extends AbstractDataSet<FragmentedDataSet> implem
     }
 
     @Override
-    public double getX(int i) {
-        for (final DataSet2D dataset : list) {
+    public double get(final int dimIndex, final int index) {
+        int i = index;
+        for (final DataSet dataset : list) {
             if (i < dataset.getDataCount()) {
-                return dataset.getX(i);
+                return dataset.get(dimIndex, i);
             }
             i -= dataset.getDataCount();
         }
-        return 0;
+        return Double.NaN;
     }
 
     @Override
@@ -121,9 +123,9 @@ public class FragmentedDataSet extends AbstractDataSet<FragmentedDataSet> implem
                 return 0;
             }
             int index = 0;
-            for (final DataSet2D dataset : list) {
+            for (final DataSet dataset : list) {
                 if (x >= dataset.getAxisDescription(0).getMin() && x <= dataset.getAxisDescription(0).getMax()) {
-                    return index + dataset.getXIndex(x);
+                    return index + dataset.getIndex(DIM_X, x);
                 }
                 index += dataset.getDataCount();
             }
@@ -136,9 +138,9 @@ public class FragmentedDataSet extends AbstractDataSet<FragmentedDataSet> implem
         return lock().readLockGuard(() -> {
             final double[] tmp = new double[dataCount];
             int index = 0;
-            for (final DataSet2D dataset : list) {
+            for (final DataSet dataset : list) {
                 for (int i = 0; i < dataset.getDataCount(); i++) {
-                    tmp[index++] = dataset.getX(i);
+                    tmp[index++] = dataset.get(DIM_X, i);
                 }
             }
             return tmp;
@@ -146,24 +148,13 @@ public class FragmentedDataSet extends AbstractDataSet<FragmentedDataSet> implem
     }
 
     @Override
-    public double getY(int i) {
-        for (final DataSet2D dataset : list) {
-            if (i < dataset.getDataCount()) {
-                return dataset.getY(i);
-            }
-            i -= dataset.getDataCount();
-        }
-        return 0;
-    }
-
-    @Override
     public double[] getYValues() {
         return lock().readLockGuard(() -> {
             final double[] tmp = new double[dataCount];
             int index = 0;
-            for (final DataSet2D dataset : list) {
+            for (final DataSet dataset : list) {
                 for (int i = 0; i < dataset.getDataCount(); i++) {
-                    tmp[index++] = dataset.getY(i);
+                    tmp[index++] = dataset.get(DIM_Y, i);
                 }
             }
             return tmp;

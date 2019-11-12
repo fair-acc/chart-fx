@@ -212,6 +212,11 @@ public class LimitedIndexedTreeDataSet extends AbstractErrorDataSet<LimitedIndex
         });
     }
 
+    @Override
+    public double get(final int dimIndex, final int i) {
+        return dimIndex == DIM_X ? data.get(i).getX() : data.get(i).getY();
+    }
+
     /**
      * @return data container
      */
@@ -275,22 +280,6 @@ public class LimitedIndexedTreeDataSet extends AbstractErrorDataSet<LimitedIndex
     @Override
     public String getStyle(final int index) {
         return data.get(index).getStyle();
-    }
-
-    /**
-     * @return the x coordinate
-     */
-    @Override
-    public double getX(final int i) {
-        return data.get(i).getX();
-    }
-
-    /**
-     * @return the y coordinate
-     */
-    @Override
-    public double getY(final int i) {
-        return data.get(i).getY();
     }
 
     /**

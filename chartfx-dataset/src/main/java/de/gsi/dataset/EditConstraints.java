@@ -36,22 +36,17 @@ public interface EditConstraints {
      * doesn't have the same X coordinate as existing point.
      * 
      * @param index index of the point being modified or -1 if it is a new point
-     * @param newX X coordinate of the considered point
-     * @param newY Y coordinate of the considered point
+     * @param newValue coordinate list of the considered point
      * @return <code>true</code> if the point is acceptable by the data set, <code>false</code> otherwise
      */
-    default boolean isAcceptable(int index, double newX, double newY) {
+    default boolean isAcceptable(int index, double ...newValue) {
         return true;
     }
 
     /**
+     * @param dimIndex the dimension index (ie. '0' equals 'X', '1' equals 'Y')
      * @return true: if the horizontal values can be modified
      */
-    boolean isXEditable();
-
-    /**
-     * @return true: if the vertical values can be modified
-     */
-    boolean isYEditable();
+    boolean isEditable(final int dimIndex);
 
 }

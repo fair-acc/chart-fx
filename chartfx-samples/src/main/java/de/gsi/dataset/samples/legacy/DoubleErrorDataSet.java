@@ -24,7 +24,7 @@ import de.gsi.dataset.utils.AssertUtils;
  */
 @SuppressWarnings("PMD")
 public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
-        implements DataSetError, EditableDataSet {
+        implements DataSetError, EditableDataSet, DataSet2D {
     protected double[] xValues;
     protected double[] yValues;
     protected double[] yErrorsPos;
@@ -223,7 +223,7 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
     }
 
     @Override
-    public EditableDataSet add(int index, double x, double y) {
+    public EditableDataSet add(int index, double... newValue) {
         return null;
     }
 
@@ -246,6 +246,11 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
             getAxisDescription(1).clear();
         });
         return fireInvalidated(new RemovedDataEvent(this, "clearData()"));
+    }
+
+    @Override
+    public double get(final int dimIndex, final int index) {
+        return dimIndex == DIM_X ? xValues[index] : yValues[index];
     }
 
     @Override
@@ -274,18 +279,8 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
     }
 
     @Override
-    public double getX(final int index) {
-        return xValues[index];
-    }
-
-    @Override
     public double[] getXValues() {
         return xValues;
-    }
-
-    @Override
-    public double getY(final int index) {
-        return yValues[index];
     }
 
     @Override
@@ -454,13 +449,12 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
      * replaces point coordinate of existing data point
      * 
      * @param index the index of the data point
-     * @param x new horizontal coordinate
-     * @param y new vertical coordinate N.B. errors are implicitly assumed to be zero
+     * @param newValue new point coordinates
      * @return itself (fluent design)
      */
     @Override
-    public DoubleErrorDataSet set(int index, double x, double y) {
-        return set(index, x, y, 0.0, 0.0);
+    public DoubleErrorDataSet set(int index, double... newValue) {
+        return set(index, newValue[0], newValue[1], 0.0, 0.0);
     }
 
     /**

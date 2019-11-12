@@ -2,6 +2,7 @@ package de.gsi.dataset.spi;
 
 import java.util.ArrayDeque;
 
+import de.gsi.dataset.DataSet;
 import de.gsi.dataset.DataSet2D;
 import de.gsi.dataset.event.AddedDataEvent;
 
@@ -116,11 +117,11 @@ public class AveragingDataSet extends AbstractDataSet<AveragingDataSet> implemen
     }
 
     @Override
-    public double getX(int i) {
+    public final double get(final int dimIndex, final int index) {
         if (dataset == null) {
-            return 0;
+            return Double.NaN;
         }
-        return dataset.getX(i);
+        return dimIndex == DataSet.DIM_X ? dataset.getX(index) : dataset.getY(index);
     }
 
     @Override
@@ -129,14 +130,6 @@ public class AveragingDataSet extends AbstractDataSet<AveragingDataSet> implemen
             return 0;
         }
         return dataset.getXIndex(x);
-    }
-
-    @Override
-    public double getY(int i) {
-        if (dataset == null) {
-            return 0;
-        }
-        return dataset.getY(i);
     }
 
     @Override
@@ -174,9 +167,10 @@ public class AveragingDataSet extends AbstractDataSet<AveragingDataSet> implemen
     }
 
     private class InternalDataSet extends DoubleDataSet {
+        private static final long serialVersionUID = 1L;
 
         public InternalDataSet(DataSet2D ds) {
-            super(ds.getName(), ds.getXValues(), ds.getYValues(), ds.getDataCount(), true);
+            super(ds.getName(), ds.getValues(DataSet.DIM_X), ds.getValues(DataSet.DIM_Y), ds.getDataCount(), true);
             // xValues = new double[ds.getDataCount()];
             // yValues = new double[ds.getDataCount()];
             // for (int i=0;i<yValues.length;i++)
@@ -217,7 +211,5 @@ public class AveragingDataSet extends AbstractDataSet<AveragingDataSet> implemen
                 yValues.elements()[i] -= d.getY(i);
             }
         }
-
     }
-
 }

@@ -164,8 +164,8 @@ class CachedDataPoints {
         // experimental transform euclidean to polar coordinates
         dataSet.lock().readLockGuardOptimistic(() -> {
             for (int index = min; index < max; index++) {
-                final double x = dataSet.getX(index);
-                final double y = dataSet.getY(index);
+                final double x = dataSet.get(DIM_X, index);
+                final double y = dataSet.get(DIM_Y, index);
                 // check if error should be surrounded by Math.abs(..)
                 // to ensure that they are always positive
                 final double phi = x * DEG_TO_RAD;
@@ -429,8 +429,8 @@ class CachedDataPoints {
     private void computeYonlyPolar(final Axis yAxis, final DataSet2D dataSet, final int min, final int max) {
         dataSet.lock().readLockGuardOptimistic(() -> {
             for (int index = min; index < max; index++) {
-                final double x = dataSet.getX(index);
-                final double y = dataSet.getY(index);
+                final double x = dataSet.get(DIM_X, index);
+                final double y = dataSet.get(DIM_Y, index);
                 // check if error should be surrounded by Math.abs(..)
                 // to ensure that they are always positive
                 final double phi = x * DEG_TO_RAD;

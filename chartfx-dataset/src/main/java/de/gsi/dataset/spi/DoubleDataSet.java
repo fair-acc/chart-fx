@@ -18,7 +18,7 @@ import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
  * @author rstein
  */
 @SuppressWarnings("PMD.TooManyMethods") // part of the flexible class nature
-public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements EditableDataSet {
+public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements EditableDataSet, DataSet2D {
     private static final long serialVersionUID = -493232313124620828L;
     protected DoubleArrayList xValues; // way faster than java default lists
     protected DoubleArrayList yValues; // way faster than java default lists
@@ -28,7 +28,7 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
      *
      * @param another name of this DataSet.
      */
-    public DoubleDataSet(final DataSet2D another) {
+    public DoubleDataSet(final DataSet another) {
         super(another.getName(), another.getDimension());
         this.set(another); // NOPMD by rstein on 25/06/19 07:42
     }
@@ -154,11 +154,22 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
      * add point to the data set
      *
      * @param index data point index at which the new data point should be added
+     * @param newValue new data point coordinate
+     * @return itself (fluent design)
+     */
+    @Override
+    public DoubleDataSet add(final int index, final double... newValue) {
+        return add(index, newValue[0], newValue[1], null);
+    }
+
+    /**
+     * add point to the data set
+     *
+     * @param index data point index at which the new data point should be added
      * @param x horizontal coordinate of the new data point
      * @param y vertical coordinate of the new data point
      * @return itself (fluent design)
      */
-    @Override
     public DoubleDataSet add(final int index, final double x, final double y) {
         return add(index, x, y, null);
     }
@@ -252,26 +263,6 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
         return dimIndex == DataSet.DIM_X ? xValues.elements() : yValues.elements();
     }
 
-    @Override
-    public double getX(final int index) {
-        return xValues.elements()[index];
-    }
-
-    @Override
-    public double[] getXValues() {
-        return xValues.elements();
-    }
-
-    @Override
-    public double getY(final int index) {
-        return yValues.elements()[index];
-    }
-
-    @Override
-    public double[] getYValues() {
-        return yValues.elements();
-    }
-
     /**
      * @param amount storage capacity increase
      * @return itself (fluent design)
@@ -343,31 +334,36 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
      * @param other the source data set
      * @return itself (fluent design)
      */
-    public DoubleDataSet set(final DataSet2D other) {
-        lock().writeLockGuard(() -> {
-            other.lock().writeLockGuard(() -> {
+    public DoubleDataSet set(final DataSet other) {
+        lock().writeLockGuard(() -> other.lock().writeLockGuard(() -> {
 
-                // deep copy data point labels and styles
-                getDataLabelMap().clear();
-                for (int index = 0; index < other.getDataCount(); index++) {
-                    final String label = other.getDataLabel(index);
-                    if ((label != null) && !label.isEmpty()) {
-                        addDataLabel(index, label);
-                    }
+            // deep copy data point labels and styles
+            getDataLabelMap().clear();
+            for (int index = 0; index < other.getDataCount(); index++) {
+                final String label = other.getDataLabel(index);
+                if ((label != null) && !label.isEmpty()) {
+                    addDataLabel(index, label);
                 }
-                getDataStyleMap().clear();
-                for (int index = 0; index < other.getDataCount(); index++) {
-                    final String style = other.getStyle(index);
-                    if ((style != null) && !style.isEmpty()) {
-                        addDataStyle(index, style);
-                    }
+            }
+            getDataStyleMap().clear();
+            for (int index = 0; index < other.getDataCount(); index++) {
+                final String style = other.getStyle(index);
+                if ((style != null) && !style.isEmpty()) {
+                    addDataStyle(index, style);
                 }
-                setStyle(other.getStyle());
+            }
+            setStyle(other.getStyle());
 
-                // copy data
-                this.set(other.getXValues(), other.getYValues(), true);
-            });
-        });
+            // copy data
+            if (other instanceof DataSet2D) {
+                this.set(((DataSet2D) other).getXValues(), ((DataSet2D) other).getYValues(), true);
+            } else {
+                this.clearData();
+                for (int i = 0; i < other.getDataCount(DIM_X); i++) {
+                    this.add(other.get(DIM_X, i), other.get(DIM_Y, i));
+                }
+            }
+        }));
         return fireInvalidated(new UpdatedDataEvent(this));
     }
 
@@ -429,12 +425,23 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
     /**
      * replaces point coordinate of existing data point
      *
+     * @param index data point index at which the new data point should be added
+     * @param newValue new data point coordinate
+     * @return itself (fluent design)
+     */
+    @Override
+    public DoubleDataSet set(final int index, final double... newValue) {
+        return set(index, newValue[0], newValue[1]);
+    }
+
+    /**
+     * replaces point coordinate of existing data point
+     *
      * @param index the index of the data point
      * @param x new horizontal coordinate
      * @param y new vertical coordinate N.B. errors are implicitly assumed to be zero
      * @return itself (fluent design)
      */
-    @Override
     public DoubleDataSet set(final int index, final double x, final double y) {
         lock().writeLockGuard(() -> {
             final int dataCount = Math.max(index + 1, this.getDataCount());

@@ -23,7 +23,7 @@ import de.gsi.dataset.utils.AssertUtils;
  * @deprecated this is kept for reference/performance comparisons only
  */
 @SuppressWarnings("PMD")
-public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements EditableDataSet {
+public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements EditableDataSet, DataSet2D {
     private static final long serialVersionUID = 467969092912080826L;
     protected double[] xValues;
     protected double[] yValues;
@@ -171,13 +171,12 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
      * add point to the data set
      *
      * @param index data point index at which the new data point should be added
-     * @param x horizontal coordinate of the new data point
-     * @param y vertical coordinate of the new data point
+     * @param newValues coordinate of the new data point
      * @return itself (fluent design)
      */
     @Override
-    public DoubleDataSet add(final int index, final double x, final double y) {
-        return add(index, x, y, null);
+    public DoubleDataSet add(final int index, final double... newValues) {
+        return add(index, newValues[0], newValues[1], null);
     }
 
     /**
@@ -259,23 +258,18 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
     }
 
     @Override
+    public double get(final int dimImdex, final int index) {
+        return dimImdex == DIM_X ? xValues[index] : yValues[index];
+    }
+
+    @Override
     public int getDataCount() {
         return Math.min(dataMaxIndex, xValues.length);
     }
 
     @Override
-    public double getX(final int index) {
-        return xValues[index];
-    }
-
-    @Override
     public double[] getXValues() {
         return xValues;
-    }
-
-    @Override
-    public double getY(final int index) {
-        return yValues[index];
     }
 
     @Override
@@ -429,10 +423,10 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
     }
 
     @Override
-    public DoubleDataSet set(final int index, final double x, final double y) {
+    public DoubleDataSet set(final int index, final double... newValue) {
         lock().writeLockGuard(() -> {
-            xValues[index] = x;
-            yValues[index] = y;
+            xValues[index] = newValue[0];
+            yValues[index] = newValue[1];
             dataMaxIndex = Math.max(index, dataMaxIndex);
 
             getAxisDescriptions().forEach(AxisDescription::clear);

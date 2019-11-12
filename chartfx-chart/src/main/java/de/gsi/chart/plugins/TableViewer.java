@@ -205,7 +205,12 @@ public class TableViewer extends ChartPlugin {
     }
 
     protected enum ColumnType {
-        X, Y, EXN, EXP, EYN, EYP
+        X,
+        Y,
+        EXN,
+        EXP,
+        EYN,
+        EYP
     }
 
     /**
@@ -262,9 +267,15 @@ public class TableViewer extends ChartPlugin {
             if (newChart != null) {
                 // register data set listeners
                 newChart.getDatasets().addListener(datasetChangeListener);
-                newChart.getDatasets().forEach(dataSet -> dataSet.addListener(dataSetDataUpdateListener));
+                newChart.getDatasets().forEach(dataSet -> {
+                    dataSet.addListener(dataSetDataUpdateListener);
+                    addDataSetToTableModel(dataSet);
+                });
                 newChart.getRenderers().addListener(rendererChangeListener);
-                newChart.getRenderers().forEach(renderer -> renderer.getDatasets().addListener(datasetChangeListener));
+                newChart.getRenderers().forEach(renderer -> {
+                    renderer.getDatasets().addListener(datasetChangeListener);
+                    renderer.getDatasets().forEach(this::addDataSetToTableModel);
+                });
             }
         }
 
@@ -294,9 +305,7 @@ public class TableViewer extends ChartPlugin {
                 }
 
                 for (final DataSet set : change.getAddedSubList()) {
-                    set.addListener(dataSetDataUpdateListener);
-                    columns.add(new DataSetTableColumns(set)); // NOPMD - necessary for function
-                    nRows = Math.max(nRows, set.getDataCount(DIM_X));
+                    addDataSetToTableModel(set);
                     dataSetChanges = true;
                 }
             }
@@ -304,6 +313,20 @@ public class TableViewer extends ChartPlugin {
             if (dataSetChanges) {
                 this.refresh();
             }
+        }
+
+        /**
+         * @param set
+         */
+        private void addDataSetToTableModel(final DataSet set) {
+            // check if dataSet was already added
+            if (columns != null && columns.stream().anyMatch(
+                    col -> (col instanceof DataSetTableColumn && ((DataSetTableColumn) col).ds.equals(set)))) {
+                return;
+            }
+            set.addListener(dataSetDataUpdateListener);
+            columns.add(new DataSetTableColumns(set)); // NOPMD - necessary for function
+            nRows = Math.max(nRows, set.getDataCount(DIM_X));
         }
 
         @Override
@@ -430,7 +453,10 @@ public class TableViewer extends ChartPlugin {
             boolean dataSetChanges = false;
             while (change.next()) {
                 // handle added renderer
-                change.getAddedSubList().forEach(renderer -> renderer.getDatasets().addListener(datasetChangeListener));
+                change.getAddedSubList().forEach(renderer -> {
+                    renderer.getDatasets().addListener(datasetChangeListener);
+                    renderer.getDatasets().forEach(this::addDataSetToTableModel);
+                });
                 if (!change.getAddedSubList().isEmpty()) {
                     dataSetChanges = true;
                 }
@@ -503,11 +529,11 @@ public class TableViewer extends ChartPlugin {
                 final EditableDataSet editableDataSet = (EditableDataSet) ds;
                 final EditConstraints editConstraints = editableDataSet.getEditConstraints();
 
-                if (type == ColumnType.X && editConstraints != null && !editConstraints.isXEditable()) {
+                if (type == ColumnType.X && editConstraints != null && !editConstraints.isEditable(DIM_X)) {
                     // editing of x coordinate is excluded
                     return;
                 }
-                if (type == ColumnType.Y && editConstraints != null && !editConstraints.isYEditable()) {
+                if (type == ColumnType.Y && editConstraints != null && !editConstraints.isEditable(DIM_Y)) {
                     // editing of y coordinate is excluded
                     return;
                 }
@@ -520,8 +546,8 @@ public class TableViewer extends ChartPlugin {
 
                 this.setOnEditCommit(e -> {
                     final int row = e.getRowValue().getRow();
-                    final double oldX = editableDataSet.getX(row);
-                    final double oldY = editableDataSet.getY(row);
+                    final double oldX = editableDataSet.get(DIM_X, row);
+                    final double oldY = editableDataSet.get(DIM_Y, row);
 
                     if (editConstraints != null && !editConstraints.canChange(row)) {
                         // may not edit value, revert to old value (ie. via

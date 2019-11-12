@@ -113,8 +113,8 @@ public class ReducingLineRenderer extends AbstractDataSetManagement<ReducingLine
                         if (i < 0) {
                             i = 0;
                         }
-                        double x0 = xAxis.getDisplayPosition(dataset.getX(i));
-                        double y0 = yAxis.getDisplayPosition(dataset.getY(i));
+                        double x0 = xAxis.getDisplayPosition(dataset.get(DataSet.DIM_X, i));
+                        double y0 = yAxis.getDisplayPosition(dataset.get(DataSet.DIM_Y, i));
                         i++;
                         for (; i < Math.min(dataset.getXIndex(xmax) + 1, dataset.getDataCount()); i++) {
                             final double x1 = xAxis.getDisplayPosition(dataset.getX(i));
@@ -128,18 +128,18 @@ public class ReducingLineRenderer extends AbstractDataSetManagement<ReducingLine
                         if (i < 0) {
                             i = 0;
                         }
-                        double x0 = xAxis.getDisplayPosition(dataset.getX(i));
-                        double y0 = yAxis.getDisplayPosition(dataset.getY(i));
+                        double x0 = xAxis.getDisplayPosition(dataset.get(DataSet.DIM_X, i));
+                        double y0 = yAxis.getDisplayPosition(dataset.get(DataSet.DIM_Y, i));
                         i++;
-                        double x1 = xAxis.getDisplayPosition(dataset.getX(i));
-                        double y1 = yAxis.getDisplayPosition(dataset.getY(i));
+                        double x1 = xAxis.getDisplayPosition(dataset.get(DataSet.DIM_X, i));
+                        double y1 = yAxis.getDisplayPosition(dataset.get(DataSet.DIM_Y, i));
                         double delta = Math.abs(y1 - y0);
                         i++;
                         int j = d - 2;
                         for (; i < Math.min(dataset.getXIndex(xmax) + 1, dataset.getDataCount()); i++) {
                             if (j > 0) {
-                                final double x2 = xAxis.getDisplayPosition(dataset.getX(i));
-                                final double y2 = yAxis.getDisplayPosition(dataset.getY(i));
+                                final double x2 = xAxis.getDisplayPosition(dataset.get(DataSet.DIM_X, i));
+                                final double y2 = yAxis.getDisplayPosition(dataset.get(DataSet.DIM_Y, i));
                                 if (Math.abs(y2 - y0) > delta) {
                                     x1 = x2;
                                     y1 = y2;
@@ -150,8 +150,8 @@ public class ReducingLineRenderer extends AbstractDataSetManagement<ReducingLine
                                 gc.strokeLine(x0, y0, x1, y1);
                                 x0 = x1;
                                 y0 = y1;
-                                x1 = xAxis.getDisplayPosition(dataset.getX(i));
-                                y1 = yAxis.getDisplayPosition(dataset.getY(i));
+                                x1 = xAxis.getDisplayPosition(dataset.get(DataSet.DIM_X, i));
+                                y1 = yAxis.getDisplayPosition(dataset.get(DataSet.DIM_Y, i));
                                 delta = Math.abs(y1 - y0);
                                 j = d - 1;
                             }

@@ -19,7 +19,7 @@ import javafx.stage.Stage;
 /**
  * Test/demo that explicitly allows to draw NaN values in DataSets as well as custom dash-based line-styling
  * <p>
- * Note: this works fine for >JDK11/JFX11 but consistently crashes the JDK8/JavaFX framework outside this library
+ * Note: this works fine for &gt;JDK11/JFX11 but consistently crashes the JDK8/JavaFX framework outside this library
  * whenever e.g performing a zoom, panning or other similar operation (ie. one of the reasons for the NaN workaround in
  * earlier chart-fx versions).
  * 

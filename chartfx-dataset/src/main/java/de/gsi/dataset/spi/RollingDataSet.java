@@ -9,7 +9,6 @@
 package de.gsi.dataset.spi;
 
 import de.gsi.dataset.DataSet;
-import de.gsi.dataset.DataSet2D;
 import de.gsi.dataset.event.AddedDataEvent;
 import de.gsi.dataset.event.UpdatedDataEvent;
 
@@ -62,9 +61,9 @@ public class RollingDataSet extends FragmentedDataSet {
     // }
 
     @Override
-    public void add(final DataSet2D set) {
+    public void add(final DataSet set) {
         while (list.size() >= depth) {
-            final DataSet2D ds = list.remove(0);
+            final DataSet ds = list.remove(0);
             dataCount -= ds.getDataCount();
         }
         for (final DataSet ds : list) {
@@ -101,7 +100,7 @@ public class RollingDataSet extends FragmentedDataSet {
 
     private class InternalDataSet extends DoubleDataSet {
 
-        public InternalDataSet(DataSet2D ds) {
+        public InternalDataSet(DataSet ds) {
             super(ds);
             recomputeLimits(0);
             recomputeLimits(1);

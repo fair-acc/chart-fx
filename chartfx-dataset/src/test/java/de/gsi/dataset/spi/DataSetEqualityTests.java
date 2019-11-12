@@ -7,6 +7,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.Arrays;
+
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,6 +54,12 @@ public class DataSetEqualityTests {
         assertEquals(new LimitedIndexedTreeDataSet("default", 10), new LimitedIndexedTreeDataSet("default", 11));
         assertEquals(new RollingDataSet("default"), new RollingDataSet("default"));
         assertEquals(new WrappedDataSet("default"), new WrappedDataSet("default"));
+        assertEquals(
+                new DoubleDataSet3D("test", new double[] { 1, 2, 3 }, new double[] { 6, 7, 8 },
+                        new double[][] { new double[] { 1, 2, 3 }, new double[] { 6, 5, 4 },
+                                new double[] { 9, 8, 7 } }),
+                new DoubleDataSet3D("test", new double[] { 1, 2, 3 }, new double[] { 6, 7, 8 }, new double[][] {
+                        new double[] { 1, 2, 3 }, new double[] { 6, 5, 4 }, new double[] { 9, 8, 7 } }));
 
     }
 
@@ -219,18 +227,14 @@ public class DataSetEqualityTests {
         }
 
         @Override
-        public boolean isXEditable() {
+        public boolean isEditable(final int dimIndex) {
             return false;
         }
-
-        @Override
-        public boolean isYEditable() {
-            return false;
-        }
-
     }
 
-    private class OneDimDataSet extends AbstractDataSet implements DataSet {
+    private class OneDimDataSet extends AbstractDataSet<OneDimDataSet> implements DataSet {
+        private static final long serialVersionUID = 1L;
+        final private double[] data = new double[] { 2.4, 5.2, 8.5, 9.2 };
 
         public OneDimDataSet() {
             super("test", 1);
@@ -238,22 +242,32 @@ public class DataSetEqualityTests {
 
         @Override
         public double get(int dimIndex, int index) {
-            return 0;
+            if (dimIndex != 0) {
+                throw new IndexOutOfBoundsException("Dimension index out of bound");
+            }
+            return data[index];
         }
 
         @Override
         public int getDataCount(int dimIndex) {
-            return 0;
+            if (dimIndex != 0) {
+                throw new IndexOutOfBoundsException("Dimension index out of bound");
+            }
+            return data.length;
         }
 
         @Override
         public int getIndex(int dimIndex, double value) {
-            return 0;
+            if (dimIndex != 0) {
+                throw new IndexOutOfBoundsException("Dimension index out of bound");
+            }
+            return Math.abs(Arrays.binarySearch(data, value));
         }
 
         @Override
         public double getValue(int dimIndex, double x) {
-            return 0;
+            return (x - Math.floor(x)) * get(dimIndex, (int) Math.floor(x))
+                    + (Math.ceil(x) - x) * get(dimIndex, (int) Math.ceil(x));
         }
     }
 
