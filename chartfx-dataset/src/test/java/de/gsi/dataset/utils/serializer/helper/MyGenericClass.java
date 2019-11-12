@@ -181,7 +181,7 @@ public class MyGenericClass {
         dummyString = MODIFIED + dummyString;
         arrayListInteger.set(0, arrayListInteger.get(0) + 1);
         arrayListString.set(0, MODIFIED + arrayListString.get(0));
-        enumState = enumState.values()[(enumState.ordinal() + 1) % enumState.values().length];
+        enumState = TestEnum.values()[(enumState.ordinal() + 1) % TestEnum.values().length];
     }
 
     @Override

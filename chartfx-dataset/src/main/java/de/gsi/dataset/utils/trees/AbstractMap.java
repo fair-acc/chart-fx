@@ -297,7 +297,7 @@ public abstract class AbstractMap<K, V> implements Map<K, V> {
     @Override
     public Set<K> keySet() {
         if (keySet == null) {
-            keySet = new AbstractSet<K>() {
+            keySet = new AbstractSet<>() {
 
                 @Override
                 public boolean contains(final Object k) {
@@ -306,7 +306,7 @@ public abstract class AbstractMap<K, V> implements Map<K, V> {
 
                 @Override
                 public Iterator<K> iterator() {
-                    return new Iterator<K>() {
+                    return new Iterator<>() {
 
                         private final Iterator<Entry<K, V>> i = entrySet().iterator();
 
@@ -477,7 +477,7 @@ public abstract class AbstractMap<K, V> implements Map<K, V> {
     @Override
     public Collection<V> values() {
         if (values == null) {
-            values = new AbstractCollection<V>() {
+            values = new AbstractCollection<>() {
 
                 @Override
                 public boolean contains(final Object v) {
@@ -486,7 +486,7 @@ public abstract class AbstractMap<K, V> implements Map<K, V> {
 
                 @Override
                 public Iterator<V> iterator() {
-                    return new Iterator<V>() {
+                    return new Iterator<>() {
 
                         private final Iterator<Entry<K, V>> i = entrySet().iterator();
 

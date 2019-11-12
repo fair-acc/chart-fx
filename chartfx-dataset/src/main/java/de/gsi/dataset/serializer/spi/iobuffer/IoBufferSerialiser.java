@@ -70,8 +70,8 @@ public class IoBufferSerialiser extends AbstractSerialiser {
         // Enum serialiser mapper to IoBuffer
         addClassDefinition(new IoBufferFieldSerialiser(ioBuffer, //
                 (obj, field) -> field.getField().set(obj,
-                        BinarySerialiser.getEnum(ioBuffer, (Enum) field.getField().get(obj))), // reader
-                (obj, field) -> BinarySerialiser.put(ioBuffer, field.getFieldName(), (Enum) field.getField().get(obj)), // writer
+                        BinarySerialiser.getEnum(ioBuffer, (Enum<?>) field.getField().get(obj))), // reader
+                (obj, field) -> BinarySerialiser.put(ioBuffer, field.getFieldName(), (Enum<?>) field.getField().get(obj)), // writer
                 Enum.class));
 
         // Map serialiser mapper to IoBuffer

@@ -65,7 +65,7 @@ public class StringHashMapList2 implements Map<Integer, String> {
     public Set<Entry<Integer, String>> entrySet() {
         HashSet<Entry<Integer, String>> retVal = new HashSet<>();
         for (int i = 0; i < indices.size(); i++) {
-            retVal.add(new AbstractMap.SimpleEntry<Integer, String>(indices.getInt(i), data.get(i)));
+            retVal.add(new AbstractMap.SimpleEntry<>(indices.getInt(i), data.get(i)));
         }
         return retVal;
     }

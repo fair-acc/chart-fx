@@ -179,7 +179,7 @@ public class BinarySerialiser { // NOPMD - omen est omen
     }
 
     @SuppressWarnings({ "unused", "PMD.PrematureDeclaration" }) // variables need to be read from stream
-    public static Enum getEnum(final IoBuffer readBuffer, final Enum enumeration) {
+    public static Enum<?> getEnum(final IoBuffer readBuffer, final Enum<?> enumeration) {
         // read value vector
         final String enumSimpleName = getString(readBuffer);
         final String enumName = getString(readBuffer);
@@ -199,7 +199,7 @@ public class BinarySerialiser { // NOPMD - omen est omen
 
         try {
             final Method valueOf = enumClass.getMethod("valueOf", String.class);
-            return (Enum) valueOf.invoke(null, enumState);
+            return (Enum<?>) valueOf.invoke(null, enumState);
         } catch (final ReflectiveOperationException e) {
             if (LOGGER.isErrorEnabled()) {
                 LOGGER.atError().setCause(e).addArgument(enumClass)
@@ -551,15 +551,15 @@ public class BinarySerialiser { // NOPMD - omen est omen
         adjustDataByteSizeBlock(buffer, sizeMarkerStart);
     }
 
-    public static void put(final IoBuffer buffer, final String fieldName, final Enum enumeration) {
+    public static void put(final IoBuffer buffer, final String fieldName, final Enum<?> enumeration) {
         if (enumeration == null) {
             return;
         }
-        final Class<? extends Enum> clazz = enumeration.getClass();
+        final Class<? extends Enum<?>> clazz = (Class<? extends Enum<?>>) enumeration.getClass();
         if (clazz == null) {
             return;
         }
-        Enum[] enumConsts = clazz.getEnumConstants();
+        Enum<?>[] enumConsts = clazz.getEnumConstants();
         if (enumConsts == null) {
             return;
         }

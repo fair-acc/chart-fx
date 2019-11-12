@@ -10,6 +10,7 @@ import de.gsi.dataset.DataSet;
  * @param <D> java generics handling of DataSet for derived classes (needed for fluent design)
  */
 public abstract class AbstractStylable<D extends DataSet> implements DataSet {
+    private static final long serialVersionUID = 1L;
     private String style = "";
     private String styleClass = ""; // TODO: check whether this is needed
 

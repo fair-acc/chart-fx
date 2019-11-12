@@ -100,6 +100,8 @@ public class RollingDataSet extends FragmentedDataSet {
 
     private class InternalDataSet extends DoubleDataSet {
 
+        private static final long serialVersionUID = 1L;
+
         public InternalDataSet(DataSet ds) {
             super(ds);
             recomputeLimits(0);

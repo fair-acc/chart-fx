@@ -15,6 +15,8 @@ import de.gsi.dataset.DataSet2D;
  */
 public class DefaultDataSet extends DoubleDataSet {
 
+    private static final long serialVersionUID = 1L;
+
     /**
      * Creates a new instance of <code>DefaultDataSet</code> as copy of another (deep-copy).
      *

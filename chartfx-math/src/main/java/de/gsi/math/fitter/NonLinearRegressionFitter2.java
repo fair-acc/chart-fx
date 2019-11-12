@@ -181,20 +181,20 @@ public class NonLinearRegressionFitter2 {
 
         // First element reserved for method number if other methods than 'cliff' are added later
         if (penalties.isEmpty()) {
-            penalties.add(new Integer(constraintMethod));
+            penalties.add(Integer.valueOf(constraintMethod));
         }
 
         // add constraint
         if (penalties.size() == 1) {
-            penalties.add(new Integer(1));
+            penalties.add(Integer.valueOf(1));
         } else {
             int nPC = ((Integer) penalties.get(1)).intValue();
             nPC++;
-            penalties.set(1, new Integer(nPC));
+            penalties.set(1, Integer.valueOf(nPC));
         }
-        penalties.add(new Integer(paramIndex));
-        penalties.add(new Integer(conDir));
-        penalties.add(new Double(constraint));
+        penalties.add(Integer.valueOf(paramIndex));
+        penalties.add(Integer.valueOf(conDir));
+        penalties.add(Double.valueOf(constraint));
         if (paramIndex > maxConstraintIndex) {
             maxConstraintIndex = paramIndex;
         }
@@ -213,22 +213,22 @@ public class NonLinearRegressionFitter2 {
 
         // First element reserved for method number if other methods than 'cliff' are added later
         if (sumPenalties.isEmpty()) {
-            sumPenalties.add(new Integer(constraintMethod));
+            sumPenalties.add(Integer.valueOf(constraintMethod));
         }
 
         // add constraint
         if (sumPenalties.size() == 1) {
-            sumPenalties.add(new Integer(1));
+            sumPenalties.add(Integer.valueOf(1));
         } else {
             int nPC = ((Integer) sumPenalties.get(1)).intValue();
             nPC++;
-            sumPenalties.set(1, new Integer(nPC));
+            sumPenalties.set(1, Integer.valueOf(nPC));
         }
-        sumPenalties.add(new Integer(nCon));
+        sumPenalties.add(Integer.valueOf(nCon));
         sumPenalties.add(paramIndices);
         sumPenalties.add(plusOrMinus);
-        sumPenalties.add(new Integer(conDir));
-        sumPenalties.add(new Double(constraint));
+        sumPenalties.add(Integer.valueOf(conDir));
+        sumPenalties.add(Double.valueOf(constraint));
         final int maxI = TMath.Maximum(paramIndices);
         if (maxI > maxConstraintIndex) {
             maxConstraintIndex = maxI;

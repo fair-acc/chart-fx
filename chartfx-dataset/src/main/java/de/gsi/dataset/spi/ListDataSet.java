@@ -25,6 +25,7 @@ import de.gsi.dataset.utils.AssertUtils;
  * @author rstein
  * @deprecated due to poorer CPU performance (this is kept for reference reasons)
  */
+@Deprecated
 public class ListDataSet extends AbstractDataSet<ListDataSet> implements DataSet2D {
     private static final long serialVersionUID = -4444745436188783390L;
     protected Map<Integer, String> dataLabels = new ConcurrentHashMap<>();
