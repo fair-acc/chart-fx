@@ -35,6 +35,8 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Path;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 import javafx.util.Duration;
@@ -668,7 +670,13 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         // tickMarks)
         if (!tickMarks.isEmpty()) {
             final TickMark firstTick = tickMarks.get(0);
-            gc.setFont(firstTick.getFont());
+            if (overlapPolicy.equals(AxisLabelOverlapPolicy.NARROW_FONT)) {
+                Font firstTickFont = firstTick.getFont();
+                Font narrowFont = Font.font(firstTickFont.getFamily(), FontWeight.THIN, firstTickFont.getSize());
+                gc.setFont(narrowFont);
+            } else {
+                gc.setFont(firstTick.getFont());
+            }
             gc.setFill(firstTick.getFill());
             // gc.setStroke(tickMark.getStroke());
             // gc.setLineWidth(tickMark.getStrokeWidth());
@@ -677,6 +685,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
 
         switch (getSide()) {
         case LEFT:
+            // TODO: enable/deploy overlap policies
             gc.setTextAlign(TextAlignment.RIGHT);
             gc.setTextBaseline(VPos.CENTER);
             for (final TickMark tickMark : tickMarks) {
@@ -693,6 +702,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
             break;
 
         case RIGHT:
+            // TODO: enable/deploy overlap policies
             gc.setTextAlign(TextAlignment.LEFT);
             gc.setTextBaseline(VPos.CENTER);
             for (final TickMark tickMark : tickMarks) {
@@ -1248,7 +1258,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
             for (final TickMark m : majorTickMarks) {
                 m.setPosition(getDisplayPosition(m.getValue()));
                 if (m.isVisible()) {
-                    final double tickSize = side.isHorizontal() ? m.getWidth() : m.getHeight();
+                    final double tickSize = side.isHorizontal() ? m.getWidth() : m.getHeight() + 2 * getTickLabelGap();
                     totalLabelsSize += tickSize;
                     maxLabelSize = Math.round(Math.max(maxLabelSize, tickSize));
                 }
