@@ -132,6 +132,6 @@ public interface DataSet2D extends DataSet {
      * @return the x value array
      */
     default double[] getYValues() {
-        return getValues(DIM_X);
+        return getValues(DIM_Y);
     }
 }
