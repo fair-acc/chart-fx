@@ -205,7 +205,12 @@ public class TableViewer extends ChartPlugin {
     }
 
     protected enum ColumnType {
-        X, Y, EXN, EXP, EYN, EYP
+        X,
+        Y,
+        EXN,
+        EXP,
+        EYN,
+        EYP
     }
 
     /**
@@ -262,9 +267,15 @@ public class TableViewer extends ChartPlugin {
             if (newChart != null) {
                 // register data set listeners
                 newChart.getDatasets().addListener(datasetChangeListener);
-                newChart.getDatasets().forEach(dataSet -> dataSet.addListener(dataSetDataUpdateListener));
+                newChart.getDatasets().forEach(dataSet -> {
+                    dataSet.addListener(dataSetDataUpdateListener);
+                    addDataSetToTableModel(dataSet);
+                });
                 newChart.getRenderers().addListener(rendererChangeListener);
-                newChart.getRenderers().forEach(renderer -> renderer.getDatasets().addListener(datasetChangeListener));
+                newChart.getRenderers().forEach(renderer -> {
+                    renderer.getDatasets().addListener(datasetChangeListener);
+                    renderer.getDatasets().forEach(this::addDataSetToTableModel);
+                });
             }
         }
 
@@ -294,9 +305,7 @@ public class TableViewer extends ChartPlugin {
                 }
 
                 for (final DataSet set : change.getAddedSubList()) {
-                    set.addListener(dataSetDataUpdateListener);
-                    columns.add(new DataSetTableColumns(set)); // NOPMD - necessary for function
-                    nRows = Math.max(nRows, set.getDataCount(DIM_X));
+                    addDataSetToTableModel(set);
                     dataSetChanges = true;
                 }
             }
@@ -304,6 +313,20 @@ public class TableViewer extends ChartPlugin {
             if (dataSetChanges) {
                 this.refresh();
             }
+        }
+
+        /**
+         * @param set
+         */
+        private void addDataSetToTableModel(final DataSet set) {
+            // check if dataSet was already added
+            if (columns != null && columns.stream().anyMatch(
+                    col -> (col instanceof DataSetTableColumn && ((DataSetTableColumn) col).ds.equals(set)))) {
+                return;
+            }
+            set.addListener(dataSetDataUpdateListener);
+            columns.add(new DataSetTableColumns(set)); // NOPMD - necessary for function
+            nRows = Math.max(nRows, set.getDataCount(DIM_X));
         }
 
         @Override
@@ -430,7 +453,10 @@ public class TableViewer extends ChartPlugin {
             boolean dataSetChanges = false;
             while (change.next()) {
                 // handle added renderer
-                change.getAddedSubList().forEach(renderer -> renderer.getDatasets().addListener(datasetChangeListener));
+                change.getAddedSubList().forEach(renderer -> {
+                    renderer.getDatasets().addListener(datasetChangeListener);
+                    renderer.getDatasets().forEach(this::addDataSetToTableModel);
+                });
                 if (!change.getAddedSubList().isEmpty()) {
                     dataSetChanges = true;
                 }

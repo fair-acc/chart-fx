@@ -50,11 +50,9 @@ public class EditDataSetSample extends Application {
         // Add data Sets to different Renderers to allow automatic axis names and units
         Renderer renderer1 = new ErrorDataSetRenderer();
         Renderer renderer2 = new ErrorDataSetRenderer();
-//        renderer1.getDatasets().add(dataSet1);
-        renderer2.getDatasets().add(dataSet2);
-        chart.getRenderers().addAll(renderer1, renderer2);
-
         renderer1.getDatasets().add(dataSet1);
+        chart.getRenderers().addAll(renderer1, renderer2);
+        renderer2.getDatasets().add(dataSet2);
 
         final double[] xValues = new double[N_SAMPLES];
         final double[] yValues1 = new double[N_SAMPLES];
