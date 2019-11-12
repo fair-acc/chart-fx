@@ -1,0 +1,205 @@
+# Default Restyler Configuration
+#
+# All keys are optional and default as shown. All list values can also be given
+# a single value, to indicate a single-element list.
+#
+####
+
+# Do anything at all?
+enabled: true
+
+# Patterns to exclude from all Restylers
+#
+# By default, we ignore directories that are often checked-in but rarely
+# represent project code. This glob is slightly complicated to match paths
+# within directories of these names appearing at any depth.
+#
+# This behavior can be disabled in your project with:
+#
+#   exclude: []
+#
+exclude:
+  - "**/node_modules/**/*"
+  - "**/vendor/**/*"
+
+# Push the style fixes directly to the original PR
+#
+# This setting implies pull_requests: false for origin PRs, and has no effect on
+# forked PRs (since we can't push to those).
+#
+auto: false
+
+# Download remote files before restyling
+#
+# Example:
+#
+#   remote_files:
+#     - url: https://raw.github.com/.../hlint.yaml
+#       path: .hlint.yaml
+#
+# Files must be publicly accessible.
+#
+remote_files: []
+
+# Open Restyle PRs?
+pull_requests: true
+
+# Leave comments on the original PR linking to the Restyle PR?
+comments: false
+
+# Set commit statuses on the original PR?
+statuses:
+  # Red status in the case of differences found
+  differences: true
+  # Green status in the case of no differences found
+  no_differences: true
+  # Red status if we encounter errors restyling
+  error: true
+
+# Request review on the Restyle PR?
+#
+# Possible values:
+#
+#   author: From the author of the original PR
+#   owner: From the owner of the repository
+#   none: Don't
+#
+# One value will apply to both origin and forked PRs, but you can also specify
+# separate values.
+#
+#   request_review:
+#     origin: author
+#     forked: owner
+#
+request_review: none
+
+# Add labels to any created Restyle PRs
+#
+# These can be used to tell other automation to avoid our PRs.
+#
+labels: []
+
+# Labels to ignore
+#
+# PRs with any of these labels will be ignored by Restyled.
+#
+ignore_labels:
+  - restyled-ignore
+
+# Version of the set of Restylers to run
+#
+# This should correspond to a ref on the restyled-io/restylers repository,
+# usually it's a tag that is a date of when that set was released. You could
+# re-specify the default in your own config if you prefer to avoid update
+# surprises.
+#
+restylers_version: "20191031"
+
+# Restylers to run, and how
+#
+# Setting this key to null accepts the defaults of the restylers_version named
+# above, including which Restylers to run.
+#
+# Restylers can be specified in three ways:
+#
+# A string, which means to run that Restyler with all defaults
+#
+#   ---
+#   restylers:
+#     - prettier
+#
+# A single key, that is a name, and override value:
+#
+#   ---
+#   restylers:
+#     - prettier:
+#         include:
+#           - "**/*.js"
+#
+# An object with a name key
+#
+#   ---
+#   restylers:
+#     - name: prettier:
+#       include:
+#         - "**/*.js"
+#
+# All three of the above are equivalent. The latter two are useful if you want
+# to run the same Restyler multiple ways:
+#
+#   ---
+#   restylers:
+#     - name: prettier
+#       arguments: ["--one-thing"]
+#       include: ["needs-one-thing/**/*.js"]
+#
+#     - name: prettier
+#       arguments: ["--another"]
+#       include: ["needs-another/**/*.js"]
+#
+# Valid keys in the override object are:
+#
+# - enabled: true|false
+#
+#   Restylers present in the list are considered enabled and those not in the
+#   list are considered not enabled, however this key is an explicit way to
+#   disable a Restyler without removing it from the list (e.g. temporarily).
+#
+# - arguments: string or array of string
+#
+#   Any additional argument(s) to pass to the restyling command.
+#
+# - include: pattern or array of pattern
+#
+#   Pattern(s) to match files that should be Restyled.
+#
+#   NOTE: these are processed in order, so be careful you don't accidentally do
+#   something like:
+#
+#     - "!/bad-file.hs"
+#     - "**/*.hs"
+#
+#   which says to exclude bad-file.hs, then immediately re-includes it via the
+#   wildcard.
+#
+# - interpreters: interpreter or array of interpreters
+#
+#   Extension-less files will be Restyled if they match interpreter(s) given
+#   here. Valid values are sh, bash, python, and ruby.
+#
+# Less-commonly needed:
+#
+# - image: string
+#
+#   The Docker image to run. Can be anything publicly pull-able.
+#
+# - command: string or array of string
+#
+#   The command (and any required argument(s)) to perform the Restyling.
+#
+restylers: null
+
+---
+image: restyled/restyler-clang-format:v9.0.0
+command:
+- clang-format
+- "-i"
+arguments: []
+include:
+- "**/*.c"
+- "**/*.cc"
+- "**/*.cpp"
+- "**/*.cxx"
+- "**/*.c++"
+- "**/*.C"
+- "**/*.cs"
+- "**/*.h"
+- "**/*.hh"
+- "**/*.hpp"
+- "**/*.hxx"
+- "**/*.h++"
+- "**/*.H"
+- "**/*.java"
+- "**/*.js"
+- "**/*.m"
+interpreters: []
