@@ -177,9 +177,7 @@ restylers_version: "20191031"
 #
 #   The command (and any required argument(s)) to perform the Restyling.
 #
-restylers: null
-
----
+restylers:
 image: restyled/restyler-clang-format:v9.0.0
 command:
 - clang-format
