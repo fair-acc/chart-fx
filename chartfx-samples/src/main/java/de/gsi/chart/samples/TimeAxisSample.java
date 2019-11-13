@@ -65,7 +65,7 @@ public class TimeAxisSample extends Application {
         chart.setAnimated(false);
 
         xAxis1.setAutoRangeRounding(false);
-        xAxis1.invertAxis(true);
+        // xAxis1.invertAxis(true); TODO: bug inverted time axis crashes when zooming
         xAxis1.setTimeAxis(true);
         yAxis1.setAutoRangeRounding(true);
 
