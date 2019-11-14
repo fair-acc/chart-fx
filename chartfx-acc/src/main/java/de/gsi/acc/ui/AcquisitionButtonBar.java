@@ -11,6 +11,7 @@ import javafx.scene.layout.HBox;
 public class AcquisitionButtonBar extends HBox {
     private static PseudoClass PSEUDO_CLASS_ACTIVATED = PseudoClass.getPseudoClass("activated");
     private static PseudoClass PSEUDO_CLASS_PAUSE = PseudoClass.getPseudoClass("paused");
+ private final int useLessVariableWithTab = 0;  
     private final Button buttonPlayStop = new SquareButton("my-playstop-button");
     private final Button buttonPlay = new SquareButton("my-play-button");
     private final Button buttonStop = new SquareButton("my-stop-button");
