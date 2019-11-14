@@ -21,6 +21,9 @@ public class AcqButtonTests extends Application {
         CheckBox cbDisabled = new CheckBox("disable acquisition buttons");
 
         AcquisitionButtonBar acqBar = new AcquisitionButtonBar(isPauseEnabled);
+        // overwrite default style with local preference
+        acqBar.getStylesheets().setAll(AcquisitionButtonBar.class.getResource("acq_button_small.css").toExternalForm());
+        //acqBar.getStylesheets().setAll(AcquisitionButtonBar.class.getResource("acq_button_medium.css").toExternalForm());
 
         cbDisabled.setOnAction(evt -> acqBar.setDisable(cbDisabled.isSelected()));
 
@@ -45,7 +48,6 @@ public class AcqButtonTests extends Application {
     public void start(Stage primaryStage) throws Exception {
         HBox root = new HBox();
         root.setPrefSize(640, 480);
-        root.getStylesheets().add(AcquisitionButtonBar.class.getResource("acq_button_small.css").toExternalForm());
 
         root.getChildren().addAll(getAcquisitionBarTest(true), getAcquisitionBarTest(false));
 
