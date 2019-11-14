@@ -134,7 +134,6 @@
                     <configuration>
                         <skip>true</skip>
                         <mainClass>de.gsi.chart.samples.RunChartSamples</mainClass>
-                        <!-- <mainClass>none</mainClass> -->
                     </configuration>
                 </plugin>
             </plugins>

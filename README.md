@@ -115,13 +115,9 @@ To use different buildsystems or library versions, have a look at the snippets o
 
 ```bash
 mvn compile
-mvn exec:java -Dproject.mainClass=com.example.chartfx.ChartFxSample
+mvn exec:java
 ```
 
-```bash
-mvn compile
-mvn exec:java -Dproject.mainClass=com.example.chartfx.ChartFxSample
-```
 
 </details>
 
@@ -129,7 +125,17 @@ mvn exec:java -Dproject.mainClass=com.example.chartfx.ChartFxSample
 If you want to try them yourself run:
 
 ```bash
-mvn exec:java -Dproject.mainClass=de.gsi.chart.samples.RunChartSamples
+mvn compile
+mvn exec:java
+```
+or for the individual sample groups:
+
+```bash
+mvn compile
+mvn exec:java@chart
+mvn exec:java@math
+mvn exec:java@dataset
+mvn exec:java@acc-ui
 ```
 
 <table>
@@ -184,7 +190,7 @@ mvn exec:java -Dproject.mainClass=de.gsi.chart.samples.RunChartSamples
 If you want to try them yourself run:
 
 ```bash
-mvn exec:java -Dproject.mainClass=de.gsi.chart.samples.RunMathSamples
+mvn exec:java@math
 ```
 
 <table>
@@ -251,7 +257,7 @@ Maven calls java with the corresponding options so that JavaFX is working. Becau
 git clone
 cd chart-fx
 mvn compile
-mvn exec:java -Dexec.mainClass=de.gsi.chart.samples.RunChartSamples
+mvn exec:java
 ```
 
 ### Eclipse

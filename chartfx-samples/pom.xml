@@ -44,6 +44,44 @@
                     <skip>false</skip>
                     <mainClass>de.gsi.chart.samples.RunChartSamples</mainClass>
                 </configuration>
+                <executions>
+                    <execution>
+                        <id>chart</id>
+                        <goals>
+                            <goal>java</goal>
+                        </goals>
+                        <configuration>
+                            <mainClass>de.gsi.chart.samples.RunChartSamples</mainClass>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>dataset</id>
+                        <goals>
+                            <goal>java</goal>
+                        </goals>
+                        <configuration>
+                            <mainClass>de.gsi.dataset.samples.RunDataSetSamples</mainClass>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>math</id>
+                        <goals>
+                            <goal>java</goal>
+                        </goals>
+                        <configuration>
+                            <mainClass>de.gsi.math.samples.RunMathSamples</mainClass>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>acc-ui</id>
+                        <goals>
+                            <goal>java</goal>
+                        </goals>
+                        <configuration>
+                            <mainClass>de.gsi.acc.ui.samples.RunUiSamples</mainClass>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
