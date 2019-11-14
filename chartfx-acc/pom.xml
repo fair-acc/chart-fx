@@ -29,17 +29,4 @@
             <version>2.0.0-alpha0</version>
         </dependency>
     </dependencies>
-
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>exec-maven-plugin</artifactId>
-                <configuration>
-                    <skip>false</skip>
-                    <mainClass>de.gsi.chart.samples.RunChartSamples</mainClass>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
 </project>

@@ -9,6 +9,7 @@ import javafx.scene.control.Button;
 import javafx.scene.layout.HBox;
 
 public class AcquisitionButtonBar extends HBox {
+    private static String DEFAULT_CSS = AcquisitionButtonBar.class.getResource("acq_button_small.css").toExternalForm();
     private static PseudoClass PSEUDO_CLASS_ACTIVATED = PseudoClass.getPseudoClass("activated");
     private static PseudoClass PSEUDO_CLASS_PAUSE = PseudoClass.getPseudoClass("paused");
     private final Button buttonPlayStop = new SquareButton("my-playstop-button");
@@ -21,7 +22,9 @@ public class AcquisitionButtonBar extends HBox {
 
     public AcquisitionButtonBar(@NamedArg(value = "isPauseEnabled") boolean isPauseEnabled) {
         super();
-        this.getStylesheets().add(getClass().getResource("acq_button_small.css").toExternalForm());
+        if (this.getStylesheets().isEmpty()) {
+            this.getStylesheets().add(DEFAULT_CSS);
+        }
 
         disabledProperty().addListener((ch, o, n) -> {
             buttonPlayStop.setDisable(n);
