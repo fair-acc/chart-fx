@@ -34,8 +34,10 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import javafx.scene.shape.Path;
 import javafx.scene.text.Font;
+import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
@@ -652,6 +654,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         final AxisLabelOverlapPolicy overlapPolicy = getOverlapPolicy();
         final double tickLabelGap = getTickLabelGap();
         final double tickLabelRotation = getTickLabelRotation();
+        final boolean narrowFont = overlapPolicy.equals(AxisLabelOverlapPolicy.NARROW_FONT);
         int counter = 0;
 
         // save css-styled label parameters
@@ -670,13 +673,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         // tickMarks)
         if (!tickMarks.isEmpty()) {
             final TickMark firstTick = tickMarks.get(0);
-            if (overlapPolicy.equals(AxisLabelOverlapPolicy.NARROW_FONT)) {
-                Font firstTickFont = firstTick.getFont();
-                Font narrowFont = Font.font(firstTickFont.getFamily(), FontWeight.THIN, firstTickFont.getSize());
-                gc.setFont(narrowFont);
-            } else {
-                gc.setFont(firstTick.getFont());
-            }
+
             gc.setFill(firstTick.getFill());
             // gc.setStroke(tickMark.getStroke());
             // gc.setLineWidth(tickMark.getStrokeWidth());
@@ -697,7 +694,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
 
                 final double x = axisWidth - tickLength - tickLabelGap;
                 final double y = position;
-                drawTickMarkLabel(gc, x, y, tickLabelRotation, tickMark);
+                drawTickMarkLabel(gc, x, y, tickLabelRotation, narrowFont, tickMark);
             }
             break;
 
@@ -714,7 +711,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
 
                 final double x = tickLength + tickLabelGap;
                 final double y = position;
-                drawTickMarkLabel(gc, x, y, tickLabelRotation, tickMark);
+                drawTickMarkLabel(gc, x, y, tickLabelRotation, narrowFont, tickMark);
             }
 
             break;
@@ -742,25 +739,25 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
                 double y = axisHeight - tickLength - tickLabelGap;
                 switch (overlapPolicy) {
                 case DO_NOTHING:
-                    drawTickMarkLabel(gc, x, y, tickLabelRotation, tickMark);
+                    drawTickMarkLabel(gc, x, y, tickLabelRotation, narrowFont, tickMark);
                     break;
                 case NARROW_FONT:
-                    drawTickMarkLabel(gc, x, y, tickLabelRotation, tickMark);
+                    drawTickMarkLabel(gc, x, y, tickLabelRotation, narrowFont, tickMark);
                     break;
                 case SHIFT_ALT:
                     if (isLabelOverlapping()) {
                         y -= ((counter % 2) * tickLabelGap) + ((counter % 2) * tickMark.getFont().getSize());
                     }
-                    drawTickMarkLabel(gc, x, y, tickLabelRotation, tickMark);
+                    drawTickMarkLabel(gc, x, y, tickLabelRotation, narrowFont, tickMark);
                     break;
                 case FORCED_SHIFT_ALT:
                     y -= ((counter % 2) * tickLabelGap) + ((counter % 2) * tickMark.getFont().getSize());
-                    drawTickMarkLabel(gc, x, y, tickLabelRotation, tickMark);
+                    drawTickMarkLabel(gc, x, y, tickLabelRotation, narrowFont, tickMark);
                     break;
                 case SKIP_ALT:
                 default:
                     if (((counter % 2) == 0) || !isLabelOverlapping()) {
-                        drawTickMarkLabel(gc, x, y, tickLabelRotation, tickMark);
+                        drawTickMarkLabel(gc, x, y, tickLabelRotation, narrowFont, tickMark);
                     }
                     break;
                 }
@@ -791,25 +788,25 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
                 double y = tickLength + tickLabelGap;
                 switch (overlapPolicy) {
                 case DO_NOTHING:
-                    drawTickMarkLabel(gc, x, y, tickLabelRotation, tickMark);
+                    drawTickMarkLabel(gc, x, y, tickLabelRotation, narrowFont, tickMark);
                     break;
                 case NARROW_FONT:
-                    drawTickMarkLabel(gc, x, y, tickLabelRotation, tickMark);
+                    drawTickMarkLabel(gc, x, y, tickLabelRotation, narrowFont, tickMark);
                     break;
                 case SHIFT_ALT:
                     if (isLabelOverlapping()) {
                         y += ((counter % 2) * tickLabelGap) + ((counter % 2) * tickMark.getFont().getSize());
                     }
-                    drawTickMarkLabel(gc, x, y, tickLabelRotation, tickMark);
+                    drawTickMarkLabel(gc, x, y, tickLabelRotation, narrowFont, tickMark);
                     break;
                 case FORCED_SHIFT_ALT:
                     y += ((counter % 2) * tickLabelGap) + ((counter % 2) * tickMark.getFont().getSize());
-                    drawTickMarkLabel(gc, x, y, tickLabelRotation, tickMark);
+                    drawTickMarkLabel(gc, x, y, tickLabelRotation, narrowFont, tickMark);
                     break;
                 case SKIP_ALT:
                 default:
                     if (((counter % 2) == 0) || !isLabelOverlapping()) {
-                        drawTickMarkLabel(gc, x, y, tickLabelRotation, tickMark);
+                        drawTickMarkLabel(gc, x, y, tickLabelRotation, narrowFont, tickMark);
                     }
                     break;
                 }
@@ -829,7 +826,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
 
                 final double x = (axisCentre * axisWidth) + tickLength + tickLabelGap;
                 final double y = position;
-                drawTickMarkLabel(gc, x, y, tickLabelRotation, tickMark);
+                drawTickMarkLabel(gc, x, y, tickLabelRotation, narrowFont, tickMark);
             }
 
             break;
@@ -856,25 +853,25 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
                 double y = (axisCentre * axisHeight) + tickLength + tickLabelGap;
                 switch (overlapPolicy) {
                 case DO_NOTHING:
-                    drawTickMarkLabel(gc, x, y, tickLabelRotation, tickMark);
+                    drawTickMarkLabel(gc, x, y, tickLabelRotation, narrowFont, tickMark);
                     break;
                 case NARROW_FONT:
-                    drawTickMarkLabel(gc, x, y, tickLabelRotation, tickMark);
+                    drawTickMarkLabel(gc, x, y, tickLabelRotation, narrowFont, tickMark);
                     break;
                 case SHIFT_ALT:
                     if (isLabelOverlapping()) {
                         y += ((counter % 2) * tickLabelGap) + ((counter % 2) * tickMark.getFont().getSize());
                     }
-                    drawTickMarkLabel(gc, x, y, tickLabelRotation, tickMark);
+                    drawTickMarkLabel(gc, x, y, tickLabelRotation, narrowFont, tickMark);
                     break;
                 case FORCED_SHIFT_ALT:
                     y += ((counter % 2) * tickLabelGap) + ((counter % 2) * tickMark.getFont().getSize());
-                    drawTickMarkLabel(gc, x, y, tickLabelRotation, tickMark);
+                    drawTickMarkLabel(gc, x, y, tickLabelRotation, narrowFont, tickMark);
                     break;
                 case SKIP_ALT:
                 default:
                     if (((counter % 2) == 0) || !isLabelOverlapping()) {
-                        drawTickMarkLabel(gc, x, y, tickLabelRotation, tickMark);
+                        drawTickMarkLabel(gc, x, y, tickLabelRotation, narrowFont, tickMark);
                     }
                     break;
                 }
@@ -1271,9 +1268,8 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
                 labelOverlap = true;
             }
 
-            final boolean isShiftOverlapPolicy = (getOverlapPolicy() == AxisLabelOverlapPolicy.SHIFT_ALT)
-                    || (getOverlapPolicy() == AxisLabelOverlapPolicy.FORCED_SHIFT_ALT);
-            if ((numLabelsToSkip > 0) && !isShiftOverlapPolicy) {
+            final boolean isSkipOverlapPolicy = (getOverlapPolicy() == AxisLabelOverlapPolicy.SKIP_ALT);
+            if ((numLabelsToSkip > 0) && isSkipOverlapPolicy) {
                 int tickIndex = 0;
                 for (final TickMark m : majorTickMarks) {
                     if (m.isVisible()) {
@@ -1436,10 +1432,18 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
     }
 
     protected static void drawTickMarkLabel(final GraphicsContext gc, final double x, final double y,
-            final double rotation, final TickMark tickMark) {
+            final double rotation, final boolean narrowFont, final TickMark tickMark) {
         gc.save();
-        gc.setFont(tickMark.getFont());
-        gc.setFill(tickMark.getFill());
+        if (narrowFont) {
+            Font tickFont = tickMark.getFont();
+            Font narrow = Font.font("Arial", FontWeight.EXTRA_LIGHT, FontPosture.REGULAR, tickFont.getSize());
+            gc.setFont(narrow);
+            gc.setFill(Color.DARKRED);
+        } else {
+            gc.setFont(tickMark.getFont());
+            gc.setFill(tickMark.getFill());
+        }
+        
         gc.translate(x, y);
         if (rotation != 0.0) {
             gc.rotate(tickMark.getRotate());
