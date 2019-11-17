@@ -37,7 +37,6 @@ import javafx.scene.chart.NumberAxis;
 public class DefaultNumericAxis extends AbstractAxis implements Axis {
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultNumericAxis.class);
     public static final double DEFAULT_LOG_MIN_VALUE = 1e-6;
-    private static final int MAX_TICK_COUNT = 20;
     private static final int DEFAULT_RANGE_LENGTH = 2;
     private double offset;
     private final Cache cache = new Cache();
@@ -280,7 +279,7 @@ public class DefaultNumericAxis extends AbstractAxis implements Axis {
     public double computePreferredTickUnit(final double axisLength) {
         final double labelSize = getTickLabelFont().getSize() * 2;
         final int numOfFittingLabels = (int) Math.floor(axisLength / labelSize);
-        final int numOfTickMarks = Math.max(Math.min(numOfFittingLabels, DefaultNumericAxis.MAX_TICK_COUNT), 2);
+        final int numOfTickMarks = Math.max(Math.min(numOfFittingLabels, getMaxMaxjorTickLabelCount()), 2);
         double rawTickUnit = (getMax() - getMin()) / numOfTickMarks;
         if (rawTickUnit == 0 || Double.isNaN(rawTickUnit)) {
             rawTickUnit = 1e-3;// TODO: remove this hack (eventually) ;-)
@@ -315,7 +314,7 @@ public class DefaultNumericAxis extends AbstractAxis implements Axis {
     private AxisRange computeRangeImpl(final double min, final double max, final double axisLength,
             final double labelSize) {
         final int numOfFittingLabels = (int) Math.floor(axisLength / labelSize);
-        final int numOfTickMarks = Math.max(Math.min(numOfFittingLabels, DefaultNumericAxis.MAX_TICK_COUNT), 2);
+        final int numOfTickMarks = Math.max(Math.min(numOfFittingLabels, getMaxMaxjorTickLabelCount()), 2);
 
         double rawTickUnit = (max - min) / numOfTickMarks;
         if (rawTickUnit == 0 || Double.isNaN(rawTickUnit)) {
