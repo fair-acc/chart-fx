@@ -43,6 +43,8 @@ import javafx.util.StringConverter;
  * @author rstein
  */
 public abstract class AbstractAxis extends AbstractAxisParameter implements Axis {
+    protected static final double MIN_NARROW_FONT_SCALE = 0.7;
+    protected static final double MAX_NARROW_FONT_SCALE = 1.0;
     protected static final int RANGE_ANIMATION_DURATION_MS = 700;
     protected static final int BURST_LIMIT_CSS_MS = 3000;
     private long lastCssUpdate;
@@ -862,7 +864,6 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
                 final double y = position;
                 switch (overlapPolicy) {
                 case DO_NOTHING:
-                case NARROW_FONT:
                     drawTickMarkLabel(gc, x, y, scaleFont, tickMark);
                     break;
                 case SHIFT_ALT:
@@ -875,9 +876,10 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
                     x -= ((counter % 2) * tickLabelGap) + ((counter % 2) * tickMark.getFont().getSize());
                     drawTickMarkLabel(gc, x, y, scaleFont, tickMark);
                     break;
+                case NARROW_FONT:
                 case SKIP_ALT:
                 default:
-                    if (((counter % 2) == 0) || !isLabelOverlapping()) {
+                    if (((counter % 2) == 0) || !isLabelOverlapping() || scaleFont < MAX_NARROW_FONT_SCALE) {
                         drawTickMarkLabel(gc, x, y, scaleFont, tickMark);
                     }
                     break;
@@ -903,7 +905,6 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
                 }
                 switch (overlapPolicy) {
                 case DO_NOTHING:
-                case NARROW_FONT:
                     drawTickMarkLabel(gc, x, y, scaleFont, tickMark);
                     break;
                 case SHIFT_ALT:
@@ -916,9 +917,10 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
                     x += ((counter % 2) * tickLabelGap) + ((counter % 2) * tickMark.getFont().getSize());
                     drawTickMarkLabel(gc, x, y, scaleFont, tickMark);
                     break;
+                case NARROW_FONT:
                 case SKIP_ALT:
                 default:
-                    if (((counter % 2) == 0) || !isLabelOverlapping()) {
+                    if (((counter % 2) == 0) || !isLabelOverlapping() || scaleFont < MAX_NARROW_FONT_SCALE) {
                         drawTickMarkLabel(gc, x, y, scaleFont, tickMark);
                     }
                     break;
@@ -939,7 +941,6 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
                 double y = axisHeight - tickLength - tickLabelGap;
                 switch (overlapPolicy) {
                 case DO_NOTHING:
-                case NARROW_FONT:
                     drawTickMarkLabel(gc, x, y, scaleFont, tickMark);
                     break;
                 case SHIFT_ALT:
@@ -952,9 +953,10 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
                     y -= ((counter % 2) * tickLabelGap) + ((counter % 2) * tickMark.getFont().getSize());
                     drawTickMarkLabel(gc, x, y, scaleFont, tickMark);
                     break;
+                case NARROW_FONT:
                 case SKIP_ALT:
                 default:
-                    if (((counter % 2) == 0) || !isLabelOverlapping()) {
+                    if (((counter % 2) == 0) || !isLabelOverlapping() || scaleFont < MAX_NARROW_FONT_SCALE) {
                         drawTickMarkLabel(gc, x, y, scaleFont, tickMark);
                     }
                     break;
@@ -981,7 +983,6 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
 
                 switch (overlapPolicy) {
                 case DO_NOTHING:
-                case NARROW_FONT:
                     drawTickMarkLabel(gc, x, y, scaleFont, tickMark);
                     break;
                 case SHIFT_ALT:
@@ -994,9 +995,10 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
                     y += ((counter % 2) * tickLabelGap) + ((counter % 2) * tickMark.getFont().getSize());
                     drawTickMarkLabel(gc, x, y, scaleFont, tickMark);
                     break;
+                case NARROW_FONT:
                 case SKIP_ALT:
                 default:
-                    if (((counter % 2) == 0) || !isLabelOverlapping()) {
+                    if (((counter % 2) == 0) || !isLabelOverlapping() || scaleFont < MAX_NARROW_FONT_SCALE) {
                         drawTickMarkLabel(gc, x, y, scaleFont, tickMark);
                     }
                     break;
@@ -1231,26 +1233,26 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
 
             labelOverlap = false;
 
-            final double projectedLengthFromIndividualMarks = (Math.max(majorTickMarks.size(), 1) * maxLabelSize);
-            final double scale = axisLength / projectedLengthFromIndividualMarks;
-
-            int numLabelsToSkip = 0;
-            if ((maxLabelSize > 0) && (axisLength < totalLabelsSize)) {
-                numLabelsToSkip = (int) (projectedLengthFromIndividualMarks / axisLength) + (1 * 0);
-                labelOverlap = true;
-            }
+            // '+1' tick label more because first and last tick are half outside axis length
+            final double projectedLengthFromIndividualMarks = (majorTickMarks.size() + 1) * maxLabelSize;
 
             switch (getOverlapPolicy()) {
             case NARROW_FONT:
-                if ((scale >= 0.6) && (scale <= 1.0)) {
+                final double scale = axisLength / projectedLengthFromIndividualMarks;
+                if ((scale >= MIN_NARROW_FONT_SCALE) && (scale <= MAX_NARROW_FONT_SCALE)) {
                     scaleFont = scale;
                     break;
 
                 }
-                scaleFont = 1.0;
+                scaleFont = Math.min(Math.max(scale, MIN_NARROW_FONT_SCALE), MAX_NARROW_FONT_SCALE);
                 // fall through to SKIP_ALT
                 //$FALL-THROUGH$
             case SKIP_ALT:
+                int numLabelsToSkip = 0;
+                if ((maxLabelSize > 0) && (axisLength < totalLabelsSize)) {
+                    numLabelsToSkip = (int) (projectedLengthFromIndividualMarks / axisLength);
+                    labelOverlap = true;
+                }
                 if (numLabelsToSkip > 0) {
                     int tickIndex = 0;
                     for (final TickMark m : majorTickMarks) {
