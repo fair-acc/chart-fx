@@ -173,7 +173,7 @@ public class ErrorDataSetRendererSample extends Application {
                 final double ey = 10;
                 dataSet.add(x, y, ex, ey);
                 dataSetNoErrors.add(x, y + 20);
-                // N.B. update events suppressed by 'setAutoNotifaction(false)' above
+                // N.B. update events suppressed by 'setAutoNotification(false)' above
 
                 if (n == 500000) { // NOPMD this point is really special ;-)
                     dataSet.getDataLabelMap().put(n, "special outlier");

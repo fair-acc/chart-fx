@@ -1102,7 +1102,7 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
     // -------------- METHODS
     // ------------------------------------------------------------------------------------------
 
-    public void setAutoNotifaction(final boolean flag) {
+    public void setAutoNotification(final boolean flag) {
         autoNotification.set(flag);
     }
 

@@ -290,7 +290,7 @@ public class XYChart extends Chart {
         if (DEBUG && LOGGER.isDebugEnabled()) {
             LOGGER.debug("   xychart redrawCanvas() - pre");
         }
-        setAutoNotifaction(false);
+        setAutoNotification(false);
         FXUtils.assertJavaFxThread();
         final long now = System.nanoTime();
         final double diffMillisSinceLastUpdate = TimeUnit.NANOSECONDS.toMillis(now - lastCanvasUpdate);
@@ -331,7 +331,7 @@ public class XYChart extends Chart {
         if (gridRenderer.isDrawOnTop()) {
             gridRenderer.render(gc, this, 0, null);
         }
-        setAutoNotifaction(true);
+        setAutoNotification(true);
         if (DEBUG && LOGGER.isDebugEnabled()) {
             LOGGER.debug("   xychart redrawCanvas() - done");
         }
@@ -394,7 +394,7 @@ public class XYChart extends Chart {
         // dataset.lock().writeLock();
         // dataset.getAxisDescriptions().parallelStream().filter(axisD -> !axisD.isDefined())
         // .forEach(axisDescription -> {
-        // dataset.setAutoNotifaction(false);
+        // dataset.setAutoNotification(false);
         // dataset.recomputeLimits(dataset.getAxisDescriptions().indexOf(axisDescription));
         // });
         // DefaultDataSetLock<DataSet> myLock = (DefaultDataSetLock<DataSet>) dataset.lock();

@@ -40,7 +40,7 @@ public class SimpleChartSample extends Application {
         final double[] xValues = new double[N_SAMPLES];
         final double[] yValues1 = new double[N_SAMPLES];
         final double[] yValues2 = new double[N_SAMPLES];
-        // dataSet2.setAutoNotifaction(false); // to suppress auto notification
+        // dataSet2.setAutoNotification(false); // to suppress auto notification
         for (int n = 0; n < N_SAMPLES; n++) {
             final double x = n;
             final double y1 = Math.cos(Math.toRadians(10.0 * n));
@@ -51,7 +51,7 @@ public class SimpleChartSample extends Application {
             dataSet2.add(n, y2); // style #1 how to set data, notifies re-draw for every 'add'
         }
         dataSet1.set(xValues, yValues1); // style #2 how to set data, notifies once per set
-        // dataSet2.setAutoNotifaction(false); // to suppress auto notification
+        // dataSet2.setAutoNotification(false); // to suppress auto notification
         // dataSet2.invokeListener(null); // to manually trigger an update
 
         // alternatively (optional):

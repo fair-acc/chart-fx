@@ -45,7 +45,7 @@ public class LogAxisSample extends Application {
         // classic way of adding data points
         // N.B. in a life-update context every new points triggers a chart
         // repaint. This can be suppressed by adding/setting full arrays and/or
-        // by selecting dataSet1.setAutoNotifaction(false/true) for the data
+        // by selecting dataSet1.setAutoNotification(false/true) for the data
         // sets (or chart) concerned to suppress this repaint.
         dataSet1.autoNotification().set(false);
         dataSet2.autoNotification().set(false);

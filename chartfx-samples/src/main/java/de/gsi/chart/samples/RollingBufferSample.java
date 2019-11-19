@@ -64,7 +64,7 @@ public class RollingBufferSample extends Application {
                 final double y = 100 * RollingBufferSample.rampFunctionBeamIntensity(t);
                 final double ey = 1;
                 rollingBufferBeamIntensity.add(t, y, ey, ey);
-                // N.B. update events suppressed by 'setAutoNotifaction(false)' above
+                // N.B. update events suppressed by 'setAutoNotification(false)' above
             }
             rollingBufferBeamIntensity.autoNotification().set(oldState);
             // need to issue a separate update notification
@@ -97,7 +97,7 @@ public class RollingBufferSample extends Application {
                 final double y = 25 * RollingBufferSample.rampFunctionDipoleCurrent(t);
                 final double ey = 1;
                 rollingBufferDipoleCurrent.add(t, y, ey, ey);
-                // N.B. update events suppressed by 'setAutoNotifaction(false)' above
+                // N.B. update events suppressed by 'setAutoNotification(false)' above
             }
             rollingBufferDipoleCurrent.autoNotification().set(oldState);
             // need to issue a separate update notification
