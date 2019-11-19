@@ -696,7 +696,7 @@ public class SingularValueDecomposition {
             // values, and over allowed iterations.
             for (int its = 1; its <= MAX_SVD_CONVERSION_LIMIT; its++) {
                 boolean flag = true;
-                for (l = k; l >= 0; l--) {
+                for (l = k; l > 0; l--) {
                     // Test for splitting.
                     nm = l - 1;
                     // Note that rv[1] is always zero.
