@@ -138,8 +138,8 @@ public class DataSetBuilder {
         // at least one error array has been provided
         final double[] dsYep = yErrorsPos == null ? yErrorsNeg : yErrorsPos;
         final double[] dsYen = yErrorsNeg == null ? yErrorsPos : yErrorsNeg;
-        AssertUtils.equalDoubleArrays(xValues, yErrorsPos, size);
-        AssertUtils.equalDoubleArrays(xValues, yErrorsNeg, size);
+        AssertUtils.equalDoubleArrays(xValues, dsYep, size);
+        AssertUtils.equalDoubleArrays(xValues, dsYen, size);
 
         return new DefaultErrorDataSet(dsName, xValues, yValues, dsYen, dsYep, size, false);
     }
