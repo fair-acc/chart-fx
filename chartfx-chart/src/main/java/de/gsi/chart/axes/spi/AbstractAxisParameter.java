@@ -63,6 +63,7 @@ import javafx.util.StringConverter;
 public abstract class AbstractAxisParameter extends Pane implements Axis {
 
     private static final String CHART_CSS = Chart.class.getResource("chart.css").toExternalForm();
+    private static final int MAX_TICK_COUNT = 20;
     private static final double DEFAULT_MIN_RANGE = -1.0;
     private static final double DEFAULT_MAX_RANGE = +1.0;
     private static final double DEFAULT_TICK_UNIT = +5d;
@@ -256,6 +257,11 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     /** The animation duration in MS */
     private final IntegerProperty animationDuration = new StylishIntegerProperty(StyleableProperties.ANIMATION_DURATION,
             this, "animationDuration", 250, this::requestAxisLayout);
+
+    /** The maximum number of ticks */
+    private final IntegerProperty maxMajorTickLabelCount = new StylishIntegerProperty(
+            StyleableProperties.MAX_TICK_LABEL_COUNT, this, "maxMaxjorTickLabelCount", MAX_TICK_COUNT,
+            this::requestAxisLayout);
 
     /**
      * When true any changes to the axis and its range will be animated.
@@ -641,14 +647,6 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
         return Double.isFinite(value) && (value >= getMin()) && (value <= getMax());
     }
 
-    protected double decadeRange() {
-        final double range = Math.abs(getMax() - getMin());
-        if (range <= 0) {
-            return 1;
-        }
-        return Math.log10(range);
-    }
-
     public abstract void fireInvalidated();
 
     public TextAlignment getaAxisLabelTextAlignment() {
@@ -656,7 +654,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     }
 
     public int getAnimationDuration() {
-        return animationDuration.get();
+        return animationDurationProperty().get();
     }
 
     @Override
@@ -721,6 +719,10 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     @Override
     public double getMax() {
         return maxProp.get();
+    }
+
+    public int getMaxMaxjorTickLabelCount() {
+        return maxMajorTickLabelCountProperty().get();
     }
 
     @Override
@@ -846,18 +848,10 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     }
 
     /**
-     * Mark the current range invalid, this will cause anything that depends on the range to be recalculated on the next
-     * layout.
-     */
-    protected void invalidateRange() {
-        rangeValid = false;
-    }
-
-    /**
      * This is {@code true} when the axis labels and data point order should be inverted
      *
      * @param value {@code true} if axis shall be inverted (i.e. drawn from 'max-&gt;min', rather than the normal
-     *        'min-&gt;max')
+     *            'min-&gt;max')
      */
     @Override
     public void invertAxis(final boolean value) {
@@ -969,6 +963,10 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
         return timeAxis.get();
     }
 
+    public IntegerProperty maxMajorTickLabelCountProperty() {
+        return maxMajorTickLabelCount;
+    }
+
     @Override
     public DoubleProperty maxProperty() {
         return maxProp;
@@ -1002,10 +1000,6 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
 
     public ReadOnlyDoubleProperty scaleProperty() {
         return scale.getReadOnlyProperty();
-    }
-
-    ReadOnlyDoubleWrapper scalePropertyImpl() {
-        return scale;
     }
 
     @Override
@@ -1061,9 +1055,9 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     }
 
     public void setAnimationDuration(final int value) {
-        animationDuration.set(value);
+        animationDurationProperty().set(value);
     }
-
+    
     /**
      * This is true when the axis determines its range from the data automatically and grows it if necessary
      *
@@ -1129,6 +1123,10 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
         return oldvalue != value;
     }
 
+    public void setMaxMajorTickLabelCount(final int value) {
+        this.maxMajorTickLabelCountProperty().set(value);
+    }
+
     @Override
     public boolean setMin(final double value) {
         final double oldvalue = minProp.get();
@@ -1155,10 +1153,6 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
 
     public void setOverlapPolicy(final AxisLabelOverlapPolicy value) {
         overlapPolicyProperty().set(value);
-    }
-
-    protected void setScale(final double scale) {
-        this.scale.set(scale);
     }
 
     @Override
@@ -1223,8 +1217,6 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
         axisUnit.set(value);
     }
 
-    // -------------- UPDATER ROUTINE PROTOTYPES
-
     @Override
     public void setUnitScaling(final double value) {
         if (!Double.isFinite(value) || (value == 0)) {
@@ -1244,11 +1236,11 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
         return side;
     }
 
-    // -------------- STYLESHEET HANDLING
-
     public ObjectProperty<Paint> tickLabelFillProperty() {
         return tickLabelFill;
     }
+
+    // -------------- UPDATER ROUTINE PROTOTYPES
 
     public ObjectProperty<Font> tickLabelFontProperty() {
         return tickLabelFont;
@@ -1261,6 +1253,8 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     public DoubleProperty tickLabelGapProperty() {
         return tickLabelGap;
     }
+
+    // -------------- STYLESHEET HANDLING
 
     public DoubleProperty tickLabelRotationProperty() {
         return tickLabelRotation;
@@ -1308,6 +1302,34 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
         return unitScaling;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<EventListener> updateEventListener() {
+        return updateListeners;
+    }
+
+    protected double decadeRange() {
+        final double range = Math.abs(getMax() - getMin());
+        if (range <= 0) {
+            return 1;
+        }
+        return Math.log10(range);
+    }
+
+    /**
+     * Mark the current range invalid, this will cause anything that depends on the range to be recalculated on the next
+     * layout.
+     */
+    protected void invalidateRange() {
+        rangeValid = false;
+    }
+
+    protected void setScale(final double scale) {
+        this.scale.set(scale);
+    }
+
     protected void updateAxisLabelAndUnit() {
         final String axisPrimaryLabel = getName();
         String axisUnit = getUnit();
@@ -1330,14 +1352,6 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
         axisLabel.applyCss();
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public List<EventListener> updateEventListener() {
-        return updateListeners;
-    }
-
     protected void updateScaleAndUnitPrefix() {
         final double range = Math.abs(getMax() - getMin());
         final double logRange = Math.log10(range);
@@ -1357,8 +1371,8 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
 
     }
 
-    private static boolean equalString(final String str1, final String str2) {
-        return (str1 == null ? str2 == null : str1.equals(str2));
+    ReadOnlyDoubleWrapper scalePropertyImpl() {
+        return scale;
     }
 
     /**
@@ -1366,6 +1380,10 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
      */
     public static List<CssMetaData<? extends Styleable, ?>> getClassCssMetaData() {
         return StyleableProperties.STYLEABLES;
+    }
+
+    private static boolean equalString(final String str1, final String str2) {
+        return (str1 == null ? str2 == null : str1.equals(str2));
     }
 
     /*
@@ -1542,6 +1560,21 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
             @Override
             public boolean isSettable(final AbstractAxisParameter n) {
                 return (n.tickLabelGap == null) || !n.tickLabelGap.isBound();
+            }
+        };
+
+        private static final CssMetaData<AbstractAxisParameter, Number> MAX_TICK_LABEL_COUNT = new CssMetaData<>(
+                "-fx-axis-max-major-tick-label-count", SizeConverter.getInstance(), MAX_TICK_COUNT) {
+
+            @SuppressWarnings("unchecked")
+            @Override
+            public StyleableProperty<Number> getStyleableProperty(final AbstractAxisParameter n) {
+                return (StyleableProperty<Number>) n.maxMajorTickLabelCountProperty();
+            }
+
+            @Override
+            public boolean isSettable(final AbstractAxisParameter n) {
+                return (n.maxMajorTickLabelCount == null) || !n.maxMajorTickLabelCount.isBound();
             }
         };
 

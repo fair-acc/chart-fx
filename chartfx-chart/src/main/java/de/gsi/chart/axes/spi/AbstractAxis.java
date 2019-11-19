@@ -36,7 +36,6 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Path;
 import javafx.scene.text.Text;
-import javafx.scene.text.TextAlignment;
 import javafx.util.Duration;
 import javafx.util.StringConverter;
 
@@ -44,6 +43,8 @@ import javafx.util.StringConverter;
  * @author rstein
  */
 public abstract class AbstractAxis extends AbstractAxisParameter implements Axis {
+    protected static final double MIN_NARROW_FONT_SCALE = 0.7;
+    protected static final double MAX_NARROW_FONT_SCALE = 1.0;
     protected static final int RANGE_ANIMATION_DURATION_MS = 700;
     protected static final int BURST_LIMIT_CSS_MS = 3000;
     private long lastCssUpdate;
@@ -52,6 +53,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
     protected final Timeline animator = new Timeline();
     private final Canvas canvas = new ResizableCanvas();
     protected boolean labelOverlap;
+    protected double scaleFont = 1.0;
     protected double cachedOffset; // for caching
     protected final transient ReentrantLock lock = new ReentrantLock();
     protected double maxLabelHeight;
@@ -160,6 +162,263 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         setAutoRanging(false);
     }
 
+    public ObjectProperty<AxisLabelFormatter> axisLabelFormatterProperty() {
+        return axisFormatter;
+    }
+
+    /**
+     * Computes the preferred tick unit based on the upper/lower bounds and the length of the axis in screen
+     * coordinates.
+     *
+     * @param axisLength the length in screen coordinates
+     * @return the tick unit
+     */
+    public abstract double computePreferredTickUnit(final double axisLength);
+
+    @Override
+    public void drawAxis(final GraphicsContext gc, final double axisWidth, final double axisHeight) {
+        if ((gc == null) || (getSide() == null)) {
+            return;
+        }
+
+        drawAxisPre();
+
+        // update CSS data
+        updateCSS();
+        final double axisLength = getSide().isHorizontal() ? axisWidth : axisHeight;
+
+        // draw dominant axis line
+        drawAxisLine(gc, axisLength, axisWidth, axisHeight);
+
+        if (!isTickMarkVisible()) {
+            // draw axis title w/o major TickMark
+            drawAxisLabel(gc, axisWidth, axisHeight, getAxisLabel(), null, getTickLength());
+            drawAxisPost();
+            return;
+        }
+
+        final ObservableList<TickMark> majorTicks = getTickMarks();
+        final ObservableList<TickMark> minorTicks = getMinorTickMarks();
+
+        // neededLength assumes tick-mark width of one, needed to suppress minor
+        // ticks if tick-mark pixel are overlapping
+        final double neededLength = (getTickMarks().size() + minorTicks.size()) * 2.0;
+        // Don't draw minor tick marks if there isn't enough space for them!
+        if (isMinorTickVisible() && (axisLength > neededLength)) {
+            drawTickMarks(gc, axisLength, axisWidth, axisHeight, minorTicks, getMinorTickLength(), getMinorTickStyle());
+            drawTickLabels(gc, axisWidth, axisHeight, minorTicks, getMinorTickLength());
+        }
+
+        // draw major tick-mark over minor tick-marks so that the visible
+        // (long) line along the axis with the style of the major-tick is
+        // visible
+        drawTickMarks(gc, axisLength, axisWidth, axisHeight, majorTicks, getTickLength(), getMajorTickStyle());
+        drawTickLabels(gc, axisWidth, axisHeight, majorTicks, getTickLength());
+
+        // draw axis title
+        drawAxisLabel(gc, axisWidth, axisHeight, getAxisLabel(), majorTicks, getTickLength());
+        drawAxisPost();
+    }
+
+    /**
+     * Notifies listeners that the data has been invalidated. If the data is added to the chart, it triggers repaint.
+     */
+    @Override
+    public void fireInvalidated() {
+        synchronized (autoNotification()) {
+            if (!autoNotification().get() || updateEventListener().isEmpty()) {
+                return;
+            }
+        }
+
+        if (Platform.isFxApplicationThread()) {
+            this.invokeListener(new AxisChangeEvent(this), false);
+        } else {
+            Platform.runLater(() -> this.invokeListener(new AxisChangeEvent(this), false));
+        }
+    }
+
+    @Override
+    public void forceRedraw() {
+        layoutChildren();
+    }
+
+    public AxisLabelFormatter getAxisLabelFormatter() {
+        return axisFormatter.get();
+    }
+
+    public Canvas getCanvas() {
+        return canvas;
+    }
+
+    // some protection overwrites
+    /**
+     * Get the display position along this axis for a given value. If the value is not in the current range, the
+     * returned value will be an extrapolation of the display position.
+     *
+     * @param value The data value to work out display position for
+     * @return display position
+     */
+    @Override
+    public double getDisplayPosition(final double value) {
+        return cachedOffset + ((value - currentLowerBound.get()) * getScale());
+    }
+
+    public GraphicsContext getGraphicsContext() {
+        return canvas.getGraphicsContext2D();
+    }
+
+    public TickMark getNewTickMark(final double tickValue, final double tickPosition, final String tickMarkLabel) {
+        TickMark tick;
+        if (tickMarkLabel.isEmpty()) {
+            // usually a minor tick mark w/o label
+            tick = tickMarkDoubleCache.computeIfAbsent(tickValue,
+                    k -> new TickMark(getSide(), tickValue, tickPosition, getTickLabelRotation(), ""));
+        } else {
+            // usually a major tick mark with label
+            tick = tickMarkStringCache.computeIfAbsent(tickMarkLabel,
+                    k -> new TickMark(getSide(), tickValue, tickPosition, getTickLabelRotation(), k));
+            tick.setValue(tickValue);
+        }
+        tick.setPosition(tickPosition);
+
+        tick.setFont(getTickLabelFont());
+        tick.setFill(getTickLabelFill());
+        tick.setVisible(isTickLabelsVisible());
+        tick.applyCss();
+        return tick;
+    }
+
+    /**
+     * Get the string label name for a tick mark with the given value
+     *
+     * @param value The value to format into a tick label string
+     * @return A formatted string for the given value
+     */
+    @Override
+    public String getTickMarkLabel(final double value) {
+        // convert value according to scale factor
+        final double scaledValue = value / getUnitScaling();
+
+        final StringConverter<Number> formatter = getTickLabelFormatter();
+        if (formatter != null) {
+            return formatter.toString(scaledValue);
+        }
+        // use AxisLabelFormatter based implementation
+        return getAxisLabelFormatter().toString(scaledValue);
+    }
+
+    /**
+     * Get the display position of the zero line along this axis.
+     *
+     * @return display position or Double.NaN if zero is not in current range;
+     */
+    @Override
+    public double getZeroPosition() {
+        if ((0 < getMin()) || (0 > getMax())) {
+            return Double.NaN;
+        }
+        return getDisplayPosition(0.0);
+    }
+
+    /**
+     * Called when data has changed and the range may not be valid any more. This is only called by the chart if
+     * isAutoRanging() returns true. If we are auto ranging it will cause layout to be requested and auto ranging to
+     * happen on next layout pass.
+     *
+     * @param data The current set of all data that needs to be plotted on this axis
+     */
+    @Override
+    public void invalidateRange(final List<Number> data) {
+        double dataMaxValue;
+        double dataMinValue;
+        if (data.isEmpty()) {
+            dataMaxValue = getMax();
+            dataMinValue = getMin();
+            autoRange.set(getMin(), getMax());
+        } else {
+            dataMinValue = Double.MAX_VALUE;
+            // We need to init to the lowest negative double (which is NOT
+            // Double.MIN_VALUE)
+            // in order to find the maximum (positive or negative)
+            dataMaxValue = -Double.MAX_VALUE;
+            autoRange.clear();
+        }
+
+        for (final Number dataValue : data) {
+            dataMinValue = Math.min(dataMinValue, dataValue.doubleValue());
+            dataMaxValue = Math.max(dataMaxValue, dataValue.doubleValue());
+            autoRange.add(dataValue.doubleValue());
+        }
+
+        final boolean oldState = autoNotification().getAndSet(false);
+        final boolean change = set(dataMinValue, dataMaxValue);
+        if (change) {
+            data.clear();
+            autoRange.setAxisLength(getLength() == 0 ? 1 : getLength(), getSide());
+        }
+        autoNotification().set(oldState);
+        invalidateRange();
+        invokeListener(new AxisChangeEvent(this));
+    }
+
+    public boolean isLabelOverlapping() {
+        // needed for diagnostics purposes
+        return labelOverlap;
+    }
+
+    /**
+     * Checks if the given value is plottable on this axis
+     *
+     * @param value The value to check if its on axis
+     * @return true if the given value is plottable on this axis
+     */
+    @Override
+    public boolean isValueOnAxis(final double value) {
+        return Double.isFinite(value) && (value >= getMin()) && (value <= getMax());
+    }
+
+    public void recomputeTickMarks() {
+        recomputeTickMarks(getRange());
+    }
+
+    /**
+     * Request that the axis is laid out in the next layout pass. This replaces requestLayout() as it has been
+     * overridden to do nothing so that changes to children's bounds etc do not cause a layout. This was done as a
+     * optimisation as the Axis knows the exact minimal set of changes that really need layout to be updated. So we only
+     * want to request layout then, not on any child change.
+     */
+    @Override
+    public void requestAxisLayout() {
+        super.requestLayout();
+    }
+
+    public void setAxisLabelFormatter(final AxisLabelFormatter value) {
+        axisFormatter.set(value);
+    }
+
+    @Override
+    public boolean setMax(final double value) {
+        if (isLogAxis() && ((value <= 0) || !Double.isFinite(value))) {
+            if (getMin() >= 0) {
+                return super.setMax(getMin() * 1.0E6);
+            }
+            return false;
+        }
+        return super.setMax(value);
+    }
+
+    @Override
+    public boolean setMin(final double value) {
+        if (isLogAxis() && ((value <= 0) || !Double.isFinite(value))) {
+            if (getMax() > 0) {
+                return super.setMin(getMax() / 1.0E6);
+            }
+            return false;
+        }
+        return super.setMin(value);
+    }
+
     /**
      * This calculates the upper and lower bound based on the data provided to invalidateRange() method. This must not
      * effect the state of the axis, changing any properties of the axis. Any results of the auto-ranging should be
@@ -175,7 +434,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         if (isAutoRanging() || isAutoGrowRanging()) {
             // guess a sensible starting size for label size, that is approx 2
             // lines vertically or 2 charts horizontally
-            final double labelSize = getTickLabelFont().getSize() * 2;
+            final double labelSize = getTickLabelFont().getSize() * 1.2; // N.B. was '2' in earlier implementations
             return autoRange(autoRange.getMin(), autoRange.getMax(), length, labelSize);
         }
         return getAxisRange();
@@ -191,11 +450,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
 
     protected AxisRange autoRange(final double minValue, final double maxValue, final double length,
             final double labelSize) {
-        return computeRange(minValue, maxValue, length, 2 * labelSize);
-    }
-
-    public ObjectProperty<AxisLabelFormatter> axisLabelFormatterProperty() {
-        return axisFormatter;
+        return computeRange(minValue, maxValue, length, labelSize);
     }
 
     /**
@@ -240,15 +495,6 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
     protected void clearAxisCanvas(final GraphicsContext gc, final double width, final double height) {
         gc.clearRect(0, 0, width, height);
     }
-
-    /**
-     * Computes the preferred tick unit based on the upper/lower bounds and the length of the axis in screen
-     * coordinates.
-     *
-     * @param axisLength the length in screen coordinates
-     * @return the tick unit
-     */
-    public abstract double computePreferredTickUnit(final double axisLength);
 
     /**
      * Computes the preferred height of this axis for the given width. If axis orientation is horizontal, it takes into
@@ -403,65 +649,6 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         return newTickMarkList;
     }
 
-    @Override
-    public void drawAxis(final GraphicsContext gc, final double axisWidth, final double axisHeight) {
-        if ((gc == null) || (getSide() == null)) {
-            return;
-        }
-
-        drawAxisPre();
-
-        // update CSS data
-        updateCSS();
-        final double axisLength = getSide().isHorizontal() ? axisWidth : axisHeight;
-
-        // draw dominant axis line
-        drawAxisLine(gc, axisLength, axisWidth, axisHeight);
-
-        if (!isTickMarkVisible()) {
-            // draw axis title w/o major TickMark
-            drawAxisLabel(gc, axisWidth, axisHeight, getAxisLabel(), null, getTickLength());
-            drawAxisPost();
-            return;
-        }
-
-        final ObservableList<TickMark> majorTicks = getTickMarks();
-        final ObservableList<TickMark> minorTicks = getMinorTickMarks();
-
-        // neededLength assumes tick-mark width of one, needed to suppress minor
-        // ticks if tick-mark pixel are overlapping
-        final double neededLength = (getTickMarks().size() + minorTicks.size()) * 2.0;
-        // Don't draw minor tick marks if there isn't enough space for them!
-        if (isMinorTickVisible() && (axisLength > neededLength)) {
-            drawTickMarks(gc, axisLength, axisWidth, axisHeight, minorTicks, getMinorTickLength(), getMinorTickStyle());
-            drawTickLabels(gc, axisWidth, axisHeight, minorTicks, getMinorTickLength());
-        }
-
-        // draw major tick-mark over minor tick-marks so that the visible
-        // (long) line along the axis with the style of the major-tick is
-        // visible
-        drawTickMarks(gc, axisLength, axisWidth, axisHeight, majorTicks, getTickLength(), getMajorTickStyle());
-        drawTickLabels(gc, axisWidth, axisHeight, majorTicks, getTickLength());
-
-        // draw axis title
-        drawAxisLabel(gc, axisWidth, axisHeight, getAxisLabel(), majorTicks, getTickLength());
-        drawAxisPost();
-    }
-
-    protected void drawAxisLabel(final GraphicsContext gc, final double x, final double y, final Text label) {
-        gc.save();
-        gc.setTextAlign(label.getTextAlignment());
-        gc.setFont(label.getFont());
-        gc.setFill(label.getFill());
-        gc.setStroke(label.getStroke());
-        gc.setLineWidth(label.getStrokeWidth());
-        gc.translate(x, y);
-        gc.rotate(label.getRotate());
-        gc.fillText(label.getText(), 0, 0);
-        gc.restore();
-
-    }
-
     protected void drawAxisLabel(final GraphicsContext gc, final double axisWidth, final double axisHeight,
             final Text axisName, final ObservableList<TickMark> tickMarks, final double tickLength) {
 
@@ -508,7 +695,6 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         // loops
         switch (getSide()) {
         case LEFT: {
-            // gc.setTextBaseline(VPos.BOTTOM);
             gc.setTextBaseline(VPos.BASELINE);
             final double x = axisWidth - tickLength - (2 * tickLabelGap) - tickLabelSize - axisLabelGap - shiftedLabels;
             final double y = ((1.0 - labelPosition) * axisHeight) - labelGap;
@@ -640,7 +826,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
 
     protected void drawTickLabels(final GraphicsContext gc, final double axisWidth, final double axisHeight,
             final ObservableList<TickMark> tickMarks, final double tickLength) {
-        if (tickLength <= 0) {
+        if ((tickLength <= 0) || tickMarks.isEmpty()) {
             return;
         }
         final double paddingX = getSide().isHorizontal() ? getAxisPadding() : 0.0;
@@ -649,8 +835,6 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         final double axisCentre = getCenterAxisPosition();
         final AxisLabelOverlapPolicy overlapPolicy = getOverlapPolicy();
         final double tickLabelGap = getTickLabelGap();
-        final double tickLabelRotation = getTickLabelRotation();
-        int counter = 0;
 
         // save css-styled label parameters
         gc.save();
@@ -663,22 +847,12 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         // numerical number and not actual readability), thus sticking to 'for'
         // loops
 
-        // apply best-guess tick mark font and color (minimises the need of
-        // setting this for individual actual
-        // tickMarks)
-        if (!tickMarks.isEmpty()) {
-            final TickMark firstTick = tickMarks.get(0);
-            gc.setFont(firstTick.getFont());
-            gc.setFill(firstTick.getFill());
-            // gc.setStroke(tickMark.getStroke());
-            // gc.setLineWidth(tickMark.getStrokeWidth());
-            gc.setGlobalAlpha(firstTick.getOpacity());
-        }
+        final TickMark firstTick = tickMarks.get(0);
+        gc.setGlobalAlpha(firstTick.getOpacity());
+        int counter = ((int) firstTick.getValue()) % 2;
 
         switch (getSide()) {
         case LEFT:
-            gc.setTextAlign(TextAlignment.RIGHT);
-            gc.setTextBaseline(VPos.CENTER);
             for (final TickMark tickMark : tickMarks) {
                 final double position = tickMark.getPosition();
                 if (!tickMark.isVisible()) {
@@ -686,15 +860,36 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
                     continue;
                 }
 
-                final double x = axisWidth - tickLength - tickLabelGap;
+                double x = axisWidth - tickLength - tickLabelGap;
                 final double y = position;
-                drawTickMarkLabel(gc, x, y, tickLabelRotation, tickMark);
+                switch (overlapPolicy) {
+                case DO_NOTHING:
+                    drawTickMarkLabel(gc, x, y, scaleFont, tickMark);
+                    break;
+                case SHIFT_ALT:
+                    if (isLabelOverlapping()) {
+                        x -= ((counter % 2) * tickLabelGap) + ((counter % 2) * tickMark.getFont().getSize());
+                    }
+                    drawTickMarkLabel(gc, x, y, scaleFont, tickMark);
+                    break;
+                case FORCED_SHIFT_ALT:
+                    x -= ((counter % 2) * tickLabelGap) + ((counter % 2) * tickMark.getFont().getSize());
+                    drawTickMarkLabel(gc, x, y, scaleFont, tickMark);
+                    break;
+                case NARROW_FONT:
+                case SKIP_ALT:
+                default:
+                    if (((counter % 2) == 0) || !isLabelOverlapping() || scaleFont < MAX_NARROW_FONT_SCALE) {
+                        drawTickMarkLabel(gc, x, y, scaleFont, tickMark);
+                    }
+                    break;
+                }
+                counter++;
             }
             break;
 
         case RIGHT:
-            gc.setTextAlign(TextAlignment.LEFT);
-            gc.setTextBaseline(VPos.CENTER);
+        case CENTER_VER:
             for (final TickMark tickMark : tickMarks) {
                 final double position = tickMark.getPosition();
                 if (!tickMark.isVisible()) {
@@ -702,25 +897,39 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
                     continue;
                 }
 
-                final double x = tickLength + tickLabelGap;
+                double x = tickLength + tickLabelGap;
                 final double y = position;
-                drawTickMarkLabel(gc, x, y, tickLabelRotation, tickMark);
+                if (getSide().equals(Side.CENTER_VER)) {
+                    // additional special offset for horizontal centre axis
+                    x += axisCentre * axisWidth;
+                }
+                switch (overlapPolicy) {
+                case DO_NOTHING:
+                    drawTickMarkLabel(gc, x, y, scaleFont, tickMark);
+                    break;
+                case SHIFT_ALT:
+                    if (isLabelOverlapping()) {
+                        x += ((counter % 2) * tickLabelGap) + ((counter % 2) * tickMark.getFont().getSize());
+                    }
+                    drawTickMarkLabel(gc, x, y, scaleFont, tickMark);
+                    break;
+                case FORCED_SHIFT_ALT:
+                    x += ((counter % 2) * tickLabelGap) + ((counter % 2) * tickMark.getFont().getSize());
+                    drawTickMarkLabel(gc, x, y, scaleFont, tickMark);
+                    break;
+                case NARROW_FONT:
+                case SKIP_ALT:
+                default:
+                    if (((counter % 2) == 0) || !isLabelOverlapping() || scaleFont < MAX_NARROW_FONT_SCALE) {
+                        drawTickMarkLabel(gc, x, y, scaleFont, tickMark);
+                    }
+                    break;
+                }
+                counter++;
             }
-
             break;
 
         case TOP:
-            // special alignment treatment if axes labels are to be rotated
-            if ((tickLabelRotation % 360) == 0) {
-                gc.setTextAlign(TextAlignment.CENTER);
-                gc.setTextBaseline(VPos.BOTTOM);
-            } else {
-                // pivoting point to left-bottom label corner
-                gc.setTextAlign(TextAlignment.LEFT);
-                gc.setTextBaseline(VPos.BOTTOM);
-            }
-
-            counter = 0;
             for (final TickMark tickMark : tickMarks) {
                 final double position = tickMark.getPosition();
                 if (!tickMark.isVisible()) {
@@ -732,25 +941,23 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
                 double y = axisHeight - tickLength - tickLabelGap;
                 switch (overlapPolicy) {
                 case DO_NOTHING:
-                    drawTickMarkLabel(gc, x, y, tickLabelRotation, tickMark);
-                    break;
-                case NARROW_FONT:
-                    drawTickMarkLabel(gc, x, y, tickLabelRotation, tickMark);
+                    drawTickMarkLabel(gc, x, y, scaleFont, tickMark);
                     break;
                 case SHIFT_ALT:
                     if (isLabelOverlapping()) {
                         y -= ((counter % 2) * tickLabelGap) + ((counter % 2) * tickMark.getFont().getSize());
                     }
-                    drawTickMarkLabel(gc, x, y, tickLabelRotation, tickMark);
+                    drawTickMarkLabel(gc, x, y, scaleFont, tickMark);
                     break;
                 case FORCED_SHIFT_ALT:
                     y -= ((counter % 2) * tickLabelGap) + ((counter % 2) * tickMark.getFont().getSize());
-                    drawTickMarkLabel(gc, x, y, tickLabelRotation, tickMark);
+                    drawTickMarkLabel(gc, x, y, scaleFont, tickMark);
                     break;
+                case NARROW_FONT:
                 case SKIP_ALT:
                 default:
-                    if (((counter % 2) == 0) || !isLabelOverlapping()) {
-                        drawTickMarkLabel(gc, x, y, tickLabelRotation, tickMark);
+                    if (((counter % 2) == 0) || !isLabelOverlapping() || scaleFont < MAX_NARROW_FONT_SCALE) {
+                        drawTickMarkLabel(gc, x, y, scaleFont, tickMark);
                     }
                     break;
                 }
@@ -759,17 +966,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
             break;
 
         case BOTTOM:
-            // special alignment treatment if axes labels are to be rotated
-            if ((tickLabelRotation % 360) == 0) {
-                gc.setTextAlign(TextAlignment.CENTER);
-                gc.setTextBaseline(VPos.TOP);
-            } else {
-                // pivoting point to left-top label corner
-                gc.setTextAlign(TextAlignment.LEFT);
-                gc.setTextBaseline(VPos.TOP);
-            }
-
-            counter = 0;
+        case CENTER_HOR:
             for (final TickMark tickMark : tickMarks) {
                 final double position = tickMark.getPosition();
                 if (!tickMark.isVisible()) {
@@ -779,99 +976,36 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
 
                 final double x = position;
                 double y = tickLength + tickLabelGap;
+                if (getSide().equals(Side.CENTER_HOR)) {
+                    // additional special offset for horizontal centre axis
+                    y += axisCentre * axisHeight;
+                }
+
                 switch (overlapPolicy) {
                 case DO_NOTHING:
-                    drawTickMarkLabel(gc, x, y, tickLabelRotation, tickMark);
-                    break;
-                case NARROW_FONT:
-                    drawTickMarkLabel(gc, x, y, tickLabelRotation, tickMark);
+                    drawTickMarkLabel(gc, x, y, scaleFont, tickMark);
                     break;
                 case SHIFT_ALT:
                     if (isLabelOverlapping()) {
                         y += ((counter % 2) * tickLabelGap) + ((counter % 2) * tickMark.getFont().getSize());
                     }
-                    drawTickMarkLabel(gc, x, y, tickLabelRotation, tickMark);
+                    drawTickMarkLabel(gc, x, y, scaleFont, tickMark);
                     break;
                 case FORCED_SHIFT_ALT:
                     y += ((counter % 2) * tickLabelGap) + ((counter % 2) * tickMark.getFont().getSize());
-                    drawTickMarkLabel(gc, x, y, tickLabelRotation, tickMark);
+                    drawTickMarkLabel(gc, x, y, scaleFont, tickMark);
                     break;
+                case NARROW_FONT:
                 case SKIP_ALT:
                 default:
-                    if (((counter % 2) == 0) || !isLabelOverlapping()) {
-                        drawTickMarkLabel(gc, x, y, tickLabelRotation, tickMark);
+                    if (((counter % 2) == 0) || !isLabelOverlapping() || scaleFont < MAX_NARROW_FONT_SCALE) {
+                        drawTickMarkLabel(gc, x, y, scaleFont, tickMark);
                     }
                     break;
                 }
                 counter++;
             }
             break;
-
-        case CENTER_VER:
-            gc.setTextAlign(TextAlignment.LEFT);
-            gc.setTextBaseline(VPos.CENTER);
-            for (final TickMark tickMark : tickMarks) {
-                final double position = tickMark.getPosition();
-                if (!tickMark.isVisible()) {
-                    // skip invisible labels
-                    continue;
-                }
-
-                final double x = (axisCentre * axisWidth) + tickLength + tickLabelGap;
-                final double y = position;
-                drawTickMarkLabel(gc, x, y, tickLabelRotation, tickMark);
-            }
-
-            break;
-
-        case CENTER_HOR:
-            // special alignment treatment if axes labels are to be rotated
-            if ((tickLabelRotation % 360) == 0) {
-                gc.setTextAlign(TextAlignment.CENTER);
-                gc.setTextBaseline(VPos.TOP);
-            } else {
-                // pivoting point to left-top label corner
-                gc.setTextAlign(TextAlignment.LEFT);
-                gc.setTextBaseline(VPos.TOP);
-            }
-            counter = 0;
-            for (final TickMark tickMark : tickMarks) {
-                final double position = tickMark.getPosition();
-                if (!tickMark.isVisible()) {
-                    // skip invisible labels
-                    continue;
-                }
-
-                final double x = position;
-                double y = (axisCentre * axisHeight) + tickLength + tickLabelGap;
-                switch (overlapPolicy) {
-                case DO_NOTHING:
-                    drawTickMarkLabel(gc, x, y, tickLabelRotation, tickMark);
-                    break;
-                case NARROW_FONT:
-                    drawTickMarkLabel(gc, x, y, tickLabelRotation, tickMark);
-                    break;
-                case SHIFT_ALT:
-                    if (isLabelOverlapping()) {
-                        y += ((counter % 2) * tickLabelGap) + ((counter % 2) * tickMark.getFont().getSize());
-                    }
-                    drawTickMarkLabel(gc, x, y, tickLabelRotation, tickMark);
-                    break;
-                case FORCED_SHIFT_ALT:
-                    y += ((counter % 2) * tickLabelGap) + ((counter % 2) * tickMark.getFont().getSize());
-                    drawTickMarkLabel(gc, x, y, tickLabelRotation, tickMark);
-                    break;
-                case SKIP_ALT:
-                default:
-                    if (((counter % 2) == 0) || !isLabelOverlapping()) {
-                        drawTickMarkLabel(gc, x, y, tickLabelRotation, tickMark);
-                    }
-                    break;
-                }
-                counter++;
-            }
-            break;
-
         default:
             break;
         }
@@ -1003,111 +1137,11 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
     }
 
     /**
-     * Notifies listeners that the data has been invalidated. If the data is added to the chart, it triggers repaint.
-     */
-    @Override
-    public void fireInvalidated() {
-        synchronized (autoNotification()) {
-            if (!autoNotification().get() || updateEventListener().isEmpty()) {
-                return;
-            }
-        }
-
-        if (Platform.isFxApplicationThread()) {
-            this.invokeListener(new AxisChangeEvent(this), false);
-        } else {
-            Platform.runLater(() -> this.invokeListener(new AxisChangeEvent(this), false));
-        }
-    }
-
-    @Override
-    public void forceRedraw() {
-        layoutChildren();
-    }
-
-    public AxisLabelFormatter getAxisLabelFormatter() {
-        return axisFormatter.get();
-    }
-
-    /**
      * @return axsis range that is supposed to be shown
      */
     protected AxisRange getAxisRange() {
         // TODO: switch between auto-range and user-defined range here
         return new AxisRange(getMin(), getMax(), getLength(), getScale(), getTickUnit());
-    }
-
-    public Canvas getCanvas() {
-        return canvas;
-    }
-
-    // some protection overwrites
-    /**
-     * Get the display position along this axis for a given value. If the value is not in the current range, the
-     * returned value will be an extrapolation of the display position.
-     *
-     * @param value The data value to work out display position for
-     * @return display position
-     */
-    @Override
-    public double getDisplayPosition(final double value) {
-        return cachedOffset + ((value - currentLowerBound.get()) * getScale());
-    }
-
-    public GraphicsContext getGraphicsContext() {
-        return canvas.getGraphicsContext2D();
-    }
-
-    public TickMark getNewTickMark(final Double tickValue, final Double tickPosition, final String tickMarkLabel) {
-        TickMark tick;
-        if (tickMarkLabel.isEmpty()) {
-            // usually a minor tick mark w/o label
-            tick = tickMarkDoubleCache.computeIfAbsent(tickValue, k -> new TickMark(tickValue, tickPosition, ""));
-        } else {
-            // usually a major tick mark with label
-            tick = tickMarkStringCache.computeIfAbsent(tickMarkLabel, k -> new TickMark(tickValue, tickPosition, k));
-            tick.setValue(tickValue);
-        }
-        tick.setPosition(tickPosition);
-
-        tick.setFont(getTickLabelFont());
-        tick.setFill(getTickLabelFill());
-        tick.setRotate(getTickLabelRotation());
-        tick.setVisible(isTickLabelsVisible());
-        tick.applyCss();
-        return tick;
-    }
-
-    /**
-     * Get the string label name for a tick mark with the given value
-     *
-     * @param value The value to format into a tick label string
-     * @return A formatted string for the given value
-     */
-    @Override
-    public String getTickMarkLabel(final double value) {
-        // convert value according to scale factor
-        final double scaledValue = value / getUnitScaling();
-
-        final StringConverter<Number> formatter = getTickLabelFormatter();
-        if (formatter != null) {
-            return formatter.toString(scaledValue);
-        }
-        // use AxisLabelFormatter based implementation
-        return getAxisLabelFormatter().toString(scaledValue);
-    }
-
-    /**
-     * Get the display position of the zero line along this axis.
-     *
-     * @return display position or Double.NaN if zero is not in current range;
-     */
-    @Override
-    public double getZeroPosition() {
-        if ((0 < getMin()) || (0 > getMax())) {
-            return Double.NaN;
-        }
-        return getDisplayPosition(0.0);
     }
 
     /**
@@ -1120,52 +1154,6 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
     }
 
     /**
-     * Called when data has changed and the range may not be valid any more. This is only called by the chart if
-     * isAutoRanging() returns true. If we are auto ranging it will cause layout to be requested and auto ranging to
-     * happen on next layout pass.
-     *
-     * @param data The current set of all data that needs to be plotted on this axis
-     */
-    @Override
-    public void invalidateRange(final List<Number> data) {
-        double dataMaxValue;
-        double dataMinValue;
-        if (data.isEmpty()) {
-            dataMaxValue = getMax();
-            dataMinValue = getMin();
-            autoRange.set(getMin(), getMax());
-        } else {
-            dataMinValue = Double.MAX_VALUE;
-            // We need to init to the lowest negative double (which is NOT
-            // Double.MIN_VALUE)
-            // in order to find the maximum (positive or negative)
-            dataMaxValue = -Double.MAX_VALUE;
-            autoRange.clear();
-        }
-
-        for (final Number dataValue : data) {
-            dataMinValue = Math.min(dataMinValue, dataValue.doubleValue());
-            dataMaxValue = Math.max(dataMaxValue, dataValue.doubleValue());
-            autoRange.add(dataValue.doubleValue());
-        }
-
-        final boolean oldState = autoNotification().getAndSet(false);
-        final boolean change = set(dataMinValue, dataMaxValue);
-        if (change) {
-            data.clear();
-            autoRange.setAxisLength(getLength() == 0 ? 1 : getLength(), getSide());
-        }
-        autoNotification().set(oldState);
-        invalidateRange();
-        invokeListener(new AxisChangeEvent(this));
-    }
-
-    public boolean isLabelOverlapping() {
-        // needed for diagnostics purposes
-        return labelOverlap;
-    }
-
-    /**
      * See if the current range is valid, if it is not then any range dependent calculations need to redone on the next
      * layout pass
      *
@@ -1173,17 +1161,6 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
      */
     protected boolean isRangeValid() {
         return rangeValid;
-    }
-
-    /**
-     * Checks if the given value is plottable on this axis
-     *
-     * @param value The value to check if its on axis
-     * @return true if the given value is plottable on this axis
-     */
-    @Override
-    public boolean isValueOnAxis(final double value) {
-        return Double.isFinite(value) && (value >= getMin()) && (value <= getMax());
     }
 
     /**
@@ -1242,13 +1219,13 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
             measureInvalid = false;
             tickLabelsVisibleInvalid = false;
 
-            int numLabelsToSkip = 0;
             double totalLabelsSize = 0;
             double maxLabelSize = 0;
             for (final TickMark m : majorTickMarks) {
                 m.setPosition(getDisplayPosition(m.getValue()));
                 if (m.isVisible()) {
-                    final double tickSize = side.isHorizontal() ? m.getWidth() : m.getHeight();
+                    final double tickSize = side.isHorizontal() ? m.getWidth()
+                            : m.getHeight() + (2 * getTickLabelGap());
                     totalLabelsSize += tickSize;
                     maxLabelSize = Math.round(Math.max(maxLabelSize, tickSize));
                 }
@@ -1256,20 +1233,37 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
 
             labelOverlap = false;
 
-            if ((maxLabelSize > 0) && (axisLength < totalLabelsSize)) {
-                numLabelsToSkip = (int) ((majorTickMarks.size() * maxLabelSize) / axisLength) + 1;
-                labelOverlap = true;
-            }
+            // '+1' tick label more because first and last tick are half outside axis length
+            final double projectedLengthFromIndividualMarks = (majorTickMarks.size() + 1) * maxLabelSize;
 
-            final boolean isShiftOverlapPolicy = (getOverlapPolicy() == AxisLabelOverlapPolicy.SHIFT_ALT)
-                    || (getOverlapPolicy() == AxisLabelOverlapPolicy.FORCED_SHIFT_ALT);
-            if ((numLabelsToSkip > 0) && !isShiftOverlapPolicy) {
-                int tickIndex = 0;
-                for (final TickMark m : majorTickMarks) {
-                    if (m.isVisible()) {
-                        m.setVisible((tickIndex++ % numLabelsToSkip) == 0);
+            switch (getOverlapPolicy()) {
+            case NARROW_FONT:
+                final double scale = axisLength / projectedLengthFromIndividualMarks;
+                if ((scale >= MIN_NARROW_FONT_SCALE) && (scale <= MAX_NARROW_FONT_SCALE)) {
+                    scaleFont = scale;
+                    break;
+
+                }
+                scaleFont = Math.min(Math.max(scale, MIN_NARROW_FONT_SCALE), MAX_NARROW_FONT_SCALE);
+                // fall through to SKIP_ALT
+                //$FALL-THROUGH$
+            case SKIP_ALT:
+                int numLabelsToSkip = 0;
+                if ((maxLabelSize > 0) && (axisLength < totalLabelsSize)) {
+                    numLabelsToSkip = (int) (projectedLengthFromIndividualMarks / axisLength);
+                    labelOverlap = true;
+                }
+                if (numLabelsToSkip > 0) {
+                    int tickIndex = 0;
+                    for (final TickMark m : majorTickMarks) {
+                        if (m.isVisible()) {
+                            m.setVisible((tickIndex++ % numLabelsToSkip) == 0);
+                        }
                     }
                 }
+                break;
+            default:
+                break;
             }
 
             if (majorTickMarks.size() > 2) {
@@ -1304,10 +1298,6 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         return getSide().isHorizontal() ? tick.getWidth() : tick.getHeight();
     }
 
-    public void recomputeTickMarks() {
-        recomputeTickMarks(getRange());
-    }
-
     protected void recomputeTickMarks(final AxisRange range) {
         final Side side = getSide();
         if (side == null) {
@@ -1320,43 +1310,6 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         // recalculate minor tick marks
         minorTickMarks.setAll(computeTickMarks(range, false));
         tickMarksUpdated();
-    }
-
-    /**
-     * Request that the axis is laid out in the next layout pass. This replaces requestLayout() as it has been
-     * overridden to do nothing so that changes to children's bounds etc do not cause a layout. This was done as a
-     * optimisation as the Axis knows the exact minimal set of changes that really need layout to be updated. So we only
-     * want to request layout then, not on any child change.
-     */
-    @Override
-    public void requestAxisLayout() {
-        super.requestLayout();
-    }
-
-    public void setAxisLabelFormatter(final AxisLabelFormatter value) {
-        axisFormatter.set(value);
-    }
-
-    @Override
-    public boolean setMax(final double value) {
-        if (isLogAxis() && ((value <= 0) || !Double.isFinite(value))) {
-            if (getMin() >= 0) {
-                return super.setMax(getMin() * 1.0E6);
-            }
-            return false;
-        }
-        return super.setMax(value);
-    }
-
-    @Override
-    public boolean setMin(final double value) {
-        if (isLogAxis() && ((value <= 0) || !Double.isFinite(value))) {
-            if (getMax() > 0) {
-                return super.setMin(getMax() / 1.0E6);
-            }
-            return false;
-        }
-        return super.setMin(value);
     }
 
     protected void setRange(final AxisRange rangeObj, final boolean animate) {
@@ -1425,32 +1378,6 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         axisLabel.applyCss();
     }
 
-    protected static void drawTickMarkLabel(final GraphicsContext gc, final double x, final double y,
-            final double rotation, final TickMark tickMark) {
-        gc.save();
-        gc.setFont(tickMark.getFont());
-        gc.setFill(tickMark.getFill());
-        gc.translate(x, y);
-        if (rotation != 0.0) {
-            gc.rotate(tickMark.getRotate());
-        }
-        gc.setGlobalAlpha(tickMark.getOpacity());
-        gc.fillText(tickMark.getText(), 0, 0);
-        // gc.fillText(tickMark.getText(), x, y);C
-        gc.restore();
-
-    }
-
-    protected static double getMaxTickLabelHeight(final List<TickMark> tickMarks) {
-        return (tickMarks == null) || tickMarks.isEmpty() ? 0.0
-                : tickMarks.stream().mapToDouble(TickMark::getHeight).max().getAsDouble();
-    }
-
-    protected static double getMaxTickLabelWidth(final List<TickMark> tickMarks) {
-        return (tickMarks == null) || tickMarks.isEmpty() ? 0.0
-                : tickMarks.stream().mapToDouble(TickMark::getWidth).max().getAsDouble();
-    }
-
     /**
      * Checks if two consecutive tick mark labels overlaps.
      *
@@ -1472,6 +1399,54 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         final double m2Start = m2.getPosition() - (m2Size / 2);
         final double m2End = m2.getPosition() + (m2Size / 2);
         return side.isVertical() ? (m1Start - m2End) <= gap : (m2Start - m1End) <= gap;
+    }
+
+    protected static void drawAxisLabel(final GraphicsContext gc, final double x, final double y, final Text label) {
+        gc.save();
+        gc.setTextAlign(label.getTextAlignment());
+        gc.setFont(label.getFont());
+        gc.setFill(label.getFill());
+        gc.setStroke(label.getStroke());
+        gc.setLineWidth(label.getStrokeWidth());
+        gc.translate(x, y);
+        gc.rotate(label.getRotate());
+        gc.fillText(label.getText(), 0, 0);
+        gc.restore();
+
+    }
+
+    protected static void drawTickMarkLabel(final GraphicsContext gc, final double x, final double y,
+            final double scaleFont, final TickMark tickMark) {
+        gc.save();
+
+        gc.setFont(tickMark.getFont());
+        gc.setFill(tickMark.getFill());
+        gc.setTextAlign(tickMark.getTextAlignment());
+        gc.setTextBaseline(tickMark.getTextOrigin());
+
+        gc.translate(x, y);
+        if (tickMark.getRotate() != 0.0) {
+            gc.rotate(tickMark.getRotate());
+        }
+        gc.setGlobalAlpha(tickMark.getOpacity());
+        if (scaleFont != 1.0) {
+            gc.scale(scaleFont, 1.0);
+        }
+
+        gc.fillText(tickMark.getText(), 0, 0);
+        // gc.fillText(tickMark.getText(), x, y);C
+        gc.restore();
+
+    }
+
+    protected static double getMaxTickLabelHeight(final List<TickMark> tickMarks) {
+        return (tickMarks == null) || tickMarks.isEmpty() ? 0.0
+                : tickMarks.stream().mapToDouble(TickMark::getHeight).max().getAsDouble();
+    }
+
+    protected static double getMaxTickLabelWidth(final List<TickMark> tickMarks) {
+        return (tickMarks == null) || tickMarks.isEmpty() ? 0.0
+                : tickMarks.stream().mapToDouble(TickMark::getWidth).max().getAsDouble();
     }
 
     /**
