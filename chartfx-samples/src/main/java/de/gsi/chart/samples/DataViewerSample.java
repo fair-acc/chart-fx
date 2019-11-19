@@ -1,7 +1,3 @@
-/**
- * Copyright (c) 2016 European Organisation for Nuclear Research (CERN), All Rights Reserved.
- */
-
 package de.gsi.chart.samples;
 
 import java.util.ArrayList;
@@ -28,7 +24,10 @@ import de.gsi.chart.utils.GlyphFactory;
 import de.gsi.chart.viewer.DataView;
 import de.gsi.chart.viewer.DataViewWindow;
 import de.gsi.chart.viewer.DataViewer;
+import de.gsi.chart.viewer.event.WindowClosedEvent;
+import de.gsi.chart.viewer.event.WindowUpdateEvent;
 import de.gsi.dataset.DataSet;
+import de.gsi.dataset.event.EventListener;
 import de.gsi.dataset.spi.DoubleDataSet;
 import de.gsi.dataset.testdata.TestDataSet;
 import de.gsi.dataset.testdata.spi.RandomStepFunction;
@@ -38,6 +37,7 @@ import javafx.animation.Animation;
 import javafx.animation.RotateTransition;
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.beans.value.ChangeListener;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -70,6 +70,21 @@ public class DataViewerSample extends Application {
     private static final int UPDATE_PERIOD = 1000; // [ms]
 
     private static final int NUM_OF_POINTS = 20;
+
+    private EventListener dataWindowEventListener = evt -> {
+        if (evt instanceof WindowUpdateEvent) {
+            WindowUpdateEvent wEvt = (WindowUpdateEvent) evt;
+            LOGGER.atInfo().addArgument(wEvt).addArgument(wEvt.getType())
+                    .log("received window update event {} of type {}");
+        } else {
+            LOGGER.atInfo().addArgument(evt).addArgument(evt.getMessage())
+                    .log("received generic window update event {} with message {}");
+        }
+
+        if (evt instanceof WindowClosedEvent) {
+            LOGGER.atInfo().addArgument(((WindowClosedEvent) evt).getSource()).log("window {} closed");
+        }
+    };
 
     /**
      * create demo JDataViewer Chart
@@ -128,12 +143,20 @@ public class DataViewerSample extends Application {
         currentChart.getDatasets().addAll(createSeries());
 
         final DataViewWindow currentView = new DataViewWindow(view1, "Current", currentChart);
+        currentView.addListener(dataWindowEventListener);
+        currentView.closedProperty()
+                .addListener((ch, o, n) -> LOGGER.atInfo().log("currentView Window has been closed"));
 
         final XYChart jDataViewerChart = createChart();
         final DataViewWindow jDataViewerPane = new DataViewWindow(view1, "Chart", jDataViewerChart);
+        jDataViewerPane.addListener(dataWindowEventListener);
+        jDataViewerPane.closedProperty()
+                .addListener((ch, o, n) -> LOGGER.atInfo().log("jDataViewerPane Window has been closed"));
 
         final DataViewWindow energyView = new DataViewWindow(view1, "Energy", energyChart);
         energyView.setGraphic(GlyphFactory.create(FontAwesome.Glyph.ADJUST));
+        energyView.addListener(dataWindowEventListener);
+        energyView.closedProperty().addListener((ch, o, n) -> LOGGER.atInfo().log("energyView Window has been closed"));
         view1.getVisibleChildren().addAll(energyView, currentView, jDataViewerPane);
         // view1.getVisibleNodes().addAll(energyChart, currentChart, jDataViewerChart);
 
@@ -146,11 +169,32 @@ public class DataViewerSample extends Application {
             final XYChart jChart = createChart();
             final DataViewWindow newDataViewerPane = new DataViewWindow(view1, "Chart" + count, jChart);
             view1.getVisibleChildren().add(newDataViewerPane);
+            newDataViewerPane.addListener(dataWindowEventListener);
+            newDataViewerPane.closedProperty().addListener((ch, o, n) -> {
+                LOGGER.atInfo().log("newDataViewerPane Window '" + newDataViewerPane.getName()
+                        + "' has been closed - performing clean-up actions");
+                // perform some custom clean-up action
+            });
+
+            // add listener on specific events
+            ChangeListener<Boolean> changeListener = (ch, o, n) -> {
+                // small debugging routine to check state-machine
+                LOGGER.atInfo().addArgument(newDataViewerPane.isMinimised())
+                        .addArgument(newDataViewerPane.isMaximised()).addArgument(newDataViewerPane.isRestored())
+                        .addArgument(newDataViewerPane.isDetached()).addArgument(newDataViewerPane.isClosed())
+                        .log("minimised: {}, maximised {}, restored {}, detached {}, closed {}");
+            };
+            newDataViewerPane.minimisedProperty().addListener(changeListener);
+            newDataViewerPane.maximisedProperty().addListener(changeListener);
+            newDataViewerPane.restoredProperty().addListener(changeListener);
+            newDataViewerPane.detachedProperty().addListener(changeListener);
+            newDataViewerPane.closedProperty().addListener(changeListener);
+
             // view1.getVisibleNodes().add(jChart);
         });
 
         // set default view
-//        viewer.setSelectedView(view2);
+        //        viewer.setSelectedView(view2);
         // set user default interactors
         CheckBox listView = new CheckBox();
         listView.setGraphic(new Glyph(FONT_AWESOME, '\uf022').size(FONT_SIZE));
