@@ -36,7 +36,7 @@ public class HeavisideStepFunction extends AbstractFunction1D implements Functio
         }
 
         for (int i = 0; i < Math.min(parameter.length, 3); i++) {
-            this.setParameterValue(i, parameter[0]);
+            this.setParameterValue(i, parameter[i]);
         }
     }
 

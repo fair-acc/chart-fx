@@ -47,7 +47,7 @@ public class TruncatedGaussianFunction extends AbstractFunction1D implements Fun
         }
 
         for (int i = 0; i < Math.min(parameter.length, 4); i++) {
-            setParameterValue(i, parameter[0]);
+            setParameterValue(i, parameter[i]);
         }
     }
 

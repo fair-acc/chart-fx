@@ -36,7 +36,7 @@ public class SigmoidFunction extends AbstractFunction1D implements Function1D {
         }
 
         for (int i = 0; i < Math.min(parameter.length, 3); i++) {
-            setParameterValue(i, parameter[0]);
+            setParameterValue(i, parameter[i]);
         }
     }
 
