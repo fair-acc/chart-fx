@@ -134,9 +134,13 @@ public class DataView extends VBox {
             }
 
             if (getMaximizedChild() == null) {
-                getActiveView().getContentPane().getChildren().setAll(getVisibleChildren());
+                if (!getActiveView().getContentPane().getChildren().containsAll(getVisibleChildren())) {
+                    getActiveView().getContentPane().getChildren().setAll(getVisibleChildren());
+                }
             } else {
-                getActiveView().getContentPane().getChildren().setAll(getMaximizedChild());
+                if (!getActiveView().getContentPane().getChildren().contains(getMaximizedChild())) {
+                    getActiveView().getContentPane().getChildren().setAll(getMaximizedChild());
+                }
             }
 
             getChildren().setAll(getActiveView().getContentPane(), minimisedElements);
