@@ -170,6 +170,11 @@ public class DataViewerSample extends Application {
             final DataViewWindow newDataViewerPane = new DataViewWindow(view1, "Chart" + count, jChart);
             view1.getVisibleChildren().add(newDataViewerPane);
             newDataViewerPane.addListener(dataWindowEventListener);
+            newDataViewerPane.addListener(windowEvent -> {
+                // print window state explicitly
+                LOGGER.atInfo().addArgument(newDataViewerPane.getName()).addArgument(newDataViewerPane.getWindowState())
+                        .log("explicite '{}' window state is {}");
+            });
             newDataViewerPane.closedProperty().addListener((ch, o, n) -> {
                 LOGGER.atInfo().log("newDataViewerPane Window '" + newDataViewerPane.getName()
                         + "' has been closed - performing clean-up actions");
@@ -226,7 +231,7 @@ public class DataViewerSample extends Application {
         primaryStage.setScene(scene);
         primaryStage.show();
 
-        primaryStage.setOnCloseRequest(evt -> Platform.exit());
+        primaryStage.setOnCloseRequest(evt -> System.exit(0)); //NOPMD
     }
 
     private static DoubleDataSet createData(final String name) {
