@@ -11,6 +11,8 @@ import org.slf4j.LoggerFactory;
 
 import de.gsi.chart.viewer.DataViewTilingPane.Layout;
 import de.gsi.dataset.utils.NoDuplicatesList;
+import javafx.beans.DefaultProperty;
+import javafx.beans.NamedArg;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -32,6 +34,7 @@ import javafx.scene.layout.VBox;
  * @author Grzegorz Kruk (original idea)
  * @author rstein (adapted to JDVE&lt;-&gt;JavaFX bridge
  */
+@DefaultProperty(value = "visibleChildren")
 public class DataView extends VBox {
     private static final Logger LOGGER = LoggerFactory.getLogger(DataView.class);
     private final StringProperty name = new SimpleStringProperty(this, "name");
@@ -72,7 +75,17 @@ public class DataView extends VBox {
         }
     };
 
-    public DataView(final String name, final Node icon) {
+    public DataView(@NamedArg(value = "name") final String name) {
+        this(name, null, null, false);
+        addStandardViews(); // NOPMD, calling of overridable protected method
+    }
+
+    public DataView(@NamedArg(value = "icon") final Node icon) {
+        this("", icon, null, false);
+        addStandardViews(); // NOPMD, calling of overridable protected method
+    }
+
+    public DataView(@NamedArg(value = "name") final String name, @NamedArg(value = "icon") final Node icon) {
         this(name, icon, null, false);
         addStandardViews(); // NOPMD, calling of overridable protected method
     }

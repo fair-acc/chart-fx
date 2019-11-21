@@ -36,7 +36,7 @@ import de.gsi.dataset.utils.ProcessingProfiler;
 import javafx.animation.Animation;
 import javafx.animation.RotateTransition;
 import javafx.application.Application;
-import javafx.application.Platform;
+import javafx.beans.DefaultProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.scene.Group;
 import javafx.scene.Scene;
@@ -61,6 +61,7 @@ import javafx.util.Duration;
  * @author Grzegorz Kruk
  * @author rstein
  */
+@DefaultProperty(value="views")
 public class DataViewerSample extends Application {
     private static final Logger LOGGER = LoggerFactory.getLogger(DataViewerSample.class);
     private static final String TITLE = DataViewerSample.class.getSimpleName();

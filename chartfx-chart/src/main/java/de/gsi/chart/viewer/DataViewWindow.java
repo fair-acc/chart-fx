@@ -28,6 +28,8 @@ import de.gsi.chart.viewer.event.WindowRestoringEvent;
 import de.gsi.dataset.event.EventListener;
 import de.gsi.dataset.event.EventSource;
 import de.gsi.dataset.utils.ProcessingProfiler;
+import javafx.beans.DefaultProperty;
+import javafx.beans.NamedArg;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -53,6 +55,7 @@ import javafx.scene.layout.Priority;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 
+@DefaultProperty(value = "content")
 public class DataViewWindow extends BorderPane implements EventSource {
     private static final Logger LOGGER = LoggerFactory.getLogger(DataViewWindow.class);
     private static final String WINDOW_CSS = "DataViewer.css";
@@ -274,7 +277,10 @@ public class DataViewWindow extends BorderPane implements EventSource {
         setWindowState(WindowState.WINDOW_CLOSED);
     };
 
-    public DataViewWindow(final DataView parent, final String name, final Node content) {
+    // TODO: fxml compatibility: make parent a property and let it be populated by DataView on add
+    // content should propbably also be optional
+    public DataViewWindow(@NamedArg(value = "parent") final DataView parent,
+            @NamedArg(value = "name") final String name, @NamedArg(value = "content") final Node content) {
         this(parent, name, content, true, true);
     }
 
