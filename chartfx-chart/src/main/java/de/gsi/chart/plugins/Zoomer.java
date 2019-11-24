@@ -23,8 +23,10 @@ import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
 import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
@@ -75,17 +77,21 @@ public class Zoomer extends ChartPlugin {
     public static final String STYLE_CLASS_ZOOM_RECT = "chart-zoom-rect";
     private static final int ZOOM_RECT_MIN_SIZE = 5;
     private static final Duration DEFAULT_ZOOM_DURATION = Duration.millis(500);
+    private static final int DEFAULT_AUTO_ZOOM_THRESHOLD = 15; // [degrees]
     private static final int FONT_SIZE = 20;
 
     /**
      * Default pan mouse filter passing on left mouse button with {@link MouseEvent#isControlDown() control key down}.
      */
     public static final Predicate<MouseEvent> DEFAULT_MOUSE_FILTER = MouseEventsHelper::isOnlyMiddleButtonDown;
-    private Predicate<MouseEvent> mouseFilter = Panner.DEFAULT_MOUSE_FILTER;
+    private final Predicate<MouseEvent> mouseFilter = Panner.DEFAULT_MOUSE_FILTER;
     private double panShiftX;
     private double panShiftY;
     private Point2D previousMouseLocation;
-    private BooleanProperty enablePanner = new SimpleBooleanProperty(this, "enablePanner", true);
+    private final BooleanProperty enablePanner = new SimpleBooleanProperty(this, "enablePanner", true);
+    private final BooleanProperty autoZoomEnable = new SimpleBooleanProperty(this, "enableAutoZoom", false);
+    private final IntegerProperty autoZoomThreshold = new SimpleIntegerProperty(this, "autoZoomThreshold",
+            DEFAULT_AUTO_ZOOM_THRESHOLD);
     private final EventHandler<MouseEvent> panStartHandler = event -> {
         if (isPannerEnabled() && (mouseFilter == null || mouseFilter.test(event))) {
             panStarted(event);
@@ -143,10 +149,9 @@ public class Zoomer extends ChartPlugin {
     private final HBox zoomButtons = getZoomInteractorBar();
     private ZoomRangeSlider xRangeSlider;
     private boolean xRangeSliderInit;
-    private ObservableList<Axis> omitAxisZoom = FXCollections.observableArrayList();
+    private final ObservableList<Axis> omitAxisZoom = FXCollections.observableArrayList();
 
-    private final ObjectProperty<AxisMode> axisMode = new SimpleObjectProperty<AxisMode>(this, "axisMode",
-            AxisMode.XY) {
+    private final ObjectProperty<AxisMode> axisMode = new SimpleObjectProperty<>(this, "axisMode", AxisMode.XY) {
         @Override
         protected void invalidated() {
             Objects.requireNonNull(get(), "The " + getName() + " must not be null");
@@ -307,6 +312,20 @@ public class Zoomer extends ChartPlugin {
     }
 
     /**
+     * When {@code true} auto-zooming feature is being enabled,
+     * ie. more horizontal drags do x-zoom only, more vertical drags do y-zoom only, and xy-zoom otherwise
+     *
+     * @return the autoZoom property
+     */
+    public final BooleanProperty autoZoomEnabledProperty() {
+        return autoZoomEnable;
+    }
+
+    public IntegerProperty autoZoomThresholdProperty() {
+        return autoZoomThreshold;
+    }
+
+    /**
      * The mode defining axis along which the zoom can be performed. By default initialised to {@link AxisMode#XY}.
      *
      * @return the axis mode property
@@ -334,38 +353,16 @@ public class Zoomer extends ChartPlugin {
     }
 
     /**
-     * While performing zoom-in on all charts we disable auto-ranging on axes (depending on the axisMode) so if user has
-     * enabled back the auto-ranging - he wants the chart to adapt to the data. Therefore keeping the zoom stack doesn't
-     * make sense - performing zoom-out would again disable auto-ranging and put back ranges saved during the previous
-     * zoom-in operation. Also if user enables auto-ranging between two zoom-in operations, the saved zoom stack becomes
-     * irrelevant.
-     */
-    private void clearZoomStackIfAxisAutoRangingIsEnabled() {
-        Chart chart = getChart();
-        if (chart == null) {
-            return;
-        }
-
-        for (Axis axis : getChart().getAxes()) {
-            if (axis.getSide().isHorizontal()) {
-                if (getAxisMode().allowsX() && (axis.isAutoRanging() || axis.isAutoGrowRanging())) {
-                    clear(axis);
-                }
-            } else {
-                if (getAxisMode().allowsY() && (axis.isAutoRanging() || axis.isAutoGrowRanging())) {
-                    clear(axis);
-                }
-            }
-        }
-    }
-
-    /**
      * Mouse cursor to be used during drag operation.
      *
      * @return the mouse cursor property
      */
     public final ObjectProperty<Cursor> dragCursorProperty() {
         return dragCursor;
+    }
+
+    public int getAutoZoomThreshold() {
+        return autoZoomThresholdProperty().get();
     }
 
     /**
@@ -397,35 +394,6 @@ public class Zoomer extends ChartPlugin {
      */
     public final Cursor getZoomCursor() {
         return zoomCursorProperty().get();
-    }
-
-    private Map<Axis, ZoomState> getZoomDataWindows() {
-        ConcurrentHashMap<Axis, ZoomState> axisStateMap = new ConcurrentHashMap<>();
-        if (getChart() == null) {
-            return axisStateMap;
-        }
-        final double minX = zoomRectangle.getX();
-        final double minY = zoomRectangle.getY() + zoomRectangle.getHeight();
-        final double maxX = zoomRectangle.getX() + zoomRectangle.getWidth();
-        final double maxY = zoomRectangle.getY();
-
-        // pixel coordinates w.r.t. plot area
-        final Point2D minPlotCoordinate = getChart().toPlotArea(minX, minY);
-        final Point2D maxPlotCoordinate = getChart().toPlotArea(maxX, maxY);
-        for (Axis axis : getChart().getAxes()) {
-            double dataMin;
-            double dataMax;
-            if (axis.getSide().isVertical()) {
-                dataMin = axis.getValueForDisplay(minPlotCoordinate.getY());
-                dataMax = axis.getValueForDisplay(maxPlotCoordinate.getY());
-            } else {
-                dataMin = axis.getValueForDisplay(minPlotCoordinate.getX());
-                dataMax = axis.getValueForDisplay(maxPlotCoordinate.getX());
-            }
-            axisStateMap.put(axis, new ZoomState(dataMin, dataMax, axis.isAutoRanging(), axis.isAutoGrowRanging()));
-        }
-
-        return axisStateMap;
     }
 
     /**
@@ -507,6 +475,305 @@ public class Zoomer extends ChartPlugin {
         return zoomScrollFilter;
     }
 
+    /**
+     * Returns the value of the {@link #animatedProperty()}.
+     *
+     * @return {@code true} if zoom is animated, {@code false} otherwise
+     * @see #getZoomDuration()
+     */
+    public final boolean isAnimated() {
+        return animatedProperty().get();
+    }
+
+    /**
+     * @return {@code true} if auto-zooming feature is being enabled,
+     *         ie. more horizontal drags do x-zoom only, more vertical drags do y-zoom only, and xy-zoom otherwise
+     */
+    public final boolean isAutoZoomEnabled() {
+        return autoZoomEnabledProperty().get();
+    }
+
+    public final boolean isPannerEnabled() {
+        return pannerEnabledProperty().get();
+    }
+
+    /**
+     * Returns the value of the {@link #sliderVisibleProperty()}.
+     *
+     * @return {@code true} if horizontal range slider is shown
+     */
+    public final boolean isSliderVisible() {
+        return sliderVisibleProperty().get();
+    }
+
+    /**
+     * Returns the value of the {@link #animatedProperty()}.
+     *
+     * @return {@code true} if zoom is animated, {@code false} otherwise
+     * @see #getZoomDuration()
+     */
+    public final boolean isUpdateTickUnit() {
+        return updateTickUnitProperty().get();
+    }
+
+    /**
+     * @return list of axes that shall be ignored when performing zoom-in or outs
+     */
+    public final ObservableList<Axis> omitAxisZoomList() {
+        return omitAxisZoom;
+    }
+
+    /**
+     * When {@code true} pressing the middle mouse button and dragging pans the plot
+     *
+     * @return the pannerEnabled property
+     */
+    public final BooleanProperty pannerEnabledProperty() {
+        return enablePanner;
+    }
+
+    /**
+     * Sets the value of the {@link #animatedProperty()}.
+     *
+     * @param value if {@code true} zoom will be animated
+     * @see #setZoomDuration(Duration)
+     */
+    public final void setAnimated(final boolean value) {
+        animatedProperty().set(value);
+    }
+
+    /**
+     * Sets the value of the {@link #autoZoomEnabledProperty()}.
+     *
+     * @param state if {@code true} auto-zooming feature is being enabled,
+     *            ie. more horizontal drags do x-zoom only, more vertical drags do y-zoom only, and xy-zoom otherwise
+     */
+    public final void setAutoZoomEnabled(final boolean state) {
+        autoZoomEnabledProperty().set(state);
+    }
+
+    public void setAutoZoomThreshold(final int value) {
+        autoZoomThresholdProperty().set(value);
+    }
+
+    /**
+     * Sets the value of the {@link #axisModeProperty()}.
+     *
+     * @param mode the mode to be used
+     */
+    public final void setAxisMode(final AxisMode mode) {
+        axisModeProperty().set(mode);
+    }
+
+    /**
+     * Sets value of the {@link #dragCursorProperty()}.
+     *
+     * @param cursor the cursor to be used by the plugin
+     */
+    public final void setDragCursor(final Cursor cursor) {
+        dragCursorProperty().set(cursor);
+    }
+
+    /**
+     * Sets the value of the {@link #sliderVisibleProperty()}.
+     *
+     * @param state if {@code true} the panner (middle mouse button is enabled
+     */
+    public final void setPannerEnabled(final boolean state) {
+        pannerEnabledProperty().set(state);
+    }
+
+    /**
+     * Sets the value of the {@link #sliderVisibleProperty()}.
+     *
+     * @param state if {@code true} the horizontal range slider is shown
+     */
+    public final void setSliderVisible(final boolean state) {
+        sliderVisibleProperty().set(state);
+    }
+
+    /**
+     * Sets the value of the {@link #animatedProperty()}.
+     *
+     * @param value if {@code true} zoom will be animated
+     * @see #setZoomDuration(Duration)
+     */
+    public final void setUpdateTickUnit(final boolean value) {
+        updateTickUnitProperty().set(value);
+    }
+
+    /**
+     * Sets value of the {@link #zoomCursorProperty()}.
+     *
+     * @param cursor the cursor to be used by the plugin
+     */
+    public final void setZoomCursor(final Cursor cursor) {
+        zoomCursorProperty().set(cursor);
+    }
+
+    /**
+     * Sets the value of the {@link #zoomDurationProperty()}.
+     *
+     * @param duration duration of the zoom
+     */
+    public final void setZoomDuration(final Duration duration) {
+        zoomDurationProperty().set(duration);
+    }
+
+    /**
+     * Sets filter on {@link MouseEvent#DRAG_DETECTED DRAG_DETECTED} events that should start zoom-in operation.
+     *
+     * @param zoomInMouseFilter the filter to accept zoom-in mouse event. If {@code null} then any DRAG_DETECTED event
+     *            will start zoom-in operation. By default it's set to {@link #defaultZoomInMouseFilter}.
+     * @see #getZoomInMouseFilter()
+     */
+    public void setZoomInMouseFilter(final Predicate<MouseEvent> zoomInMouseFilter) {
+        this.zoomInMouseFilter = zoomInMouseFilter;
+    }
+
+    /**
+     * Sets filter on {@link MouseEvent#MOUSE_CLICKED MOUSE_CLICKED} events that should trigger zoom-origin operation.
+     *
+     * @param zoomOriginMouseFilter the filter to accept zoom-origin mouse event. If {@code null} then any MOUSE_CLICKED
+     *            event will start zoom-origin operation. By default it's set to {@link #defaultZoomOriginFilter}.
+     * @see #getZoomOriginMouseFilter()
+     */
+    public void setZoomOriginMouseFilter(final Predicate<MouseEvent> zoomOriginMouseFilter) {
+        this.zoomOriginMouseFilter = zoomOriginMouseFilter;
+    }
+
+    /**
+     * Sets filter on {@link MouseEvent#MOUSE_CLICKED MOUSE_CLICKED} events that should trigger zoom-out operation.
+     *
+     * @param zoomOutMouseFilter the filter to accept zoom-out mouse event. If {@code null} then any MOUSE_CLICKED event
+     *            will start zoom-out operation. By default it's set to {@link #defaultZoomOutMouseFilter}.
+     * @see #getZoomOutMouseFilter()
+     */
+    public void setZoomOutMouseFilter(final Predicate<MouseEvent> zoomOutMouseFilter) {
+        this.zoomOutMouseFilter = zoomOutMouseFilter;
+    }
+
+    /**
+     * Sets filter on {@link MouseEvent#MOUSE_CLICKED MOUSE_CLICKED} events that should trigger zoom-origin operation.
+     *
+     * @param zoomScrollFilter filter
+     */
+    public void setZoomScrollFilter(final Predicate<ScrollEvent> zoomScrollFilter) {
+        this.zoomScrollFilter = zoomScrollFilter;
+    }
+
+    /**
+     * When {@code true} an additional horizontal range slider is shown in a HiddeSidesPane at the bottom. By default
+     * it's {@code true}.
+     *
+     * @return the sliderVisible property
+     * @see #getRangeSlider()
+     */
+    public final BooleanProperty sliderVisibleProperty() {
+        return sliderVisible;
+    }
+
+    /**
+     * When {@code true} zooming will be animated. By default it's {@code false}.
+     *
+     * @return the animated property
+     * @see #zoomDurationProperty()
+     */
+    public final BooleanProperty updateTickUnitProperty() {
+        return updateTickUnit;
+    }
+
+    /**
+     * Mouse cursor to be used during zoom operation.
+     *
+     * @return the mouse cursor property
+     */
+    public final ObjectProperty<Cursor> zoomCursorProperty() {
+        return zoomCursor;
+    }
+
+    /**
+     * Duration of the animated zoom (in and out). Used only when {@link #animatedProperty()} is set to {@code true}. By
+     * default initialised to 500ms.
+     *
+     * @return the zoom duration property
+     */
+    public final ObjectProperty<Duration> zoomDurationProperty() {
+        return zoomDuration;
+    }
+
+    public boolean zoomOrigin() {
+        clearZoomStackIfAxisAutoRangingIsEnabled();
+        final Map<Axis, ZoomState> zoomWindows = zoomStacks.peekLast();
+        if (zoomWindows == null || zoomWindows.isEmpty()) {
+            return false;
+        }
+        clear();
+        performZoom(zoomWindows, false);
+        if (xRangeSlider != null) {
+            xRangeSlider.reset();
+        }
+        for (Axis axis : getChart().getAxes()) {
+            axis.forceRedraw();
+        }
+        return true;
+    }
+
+    /**
+     * While performing zoom-in on all charts we disable auto-ranging on axes (depending on the axisMode) so if user has
+     * enabled back the auto-ranging - he wants the chart to adapt to the data. Therefore keeping the zoom stack doesn't
+     * make sense - performing zoom-out would again disable auto-ranging and put back ranges saved during the previous
+     * zoom-in operation. Also if user enables auto-ranging between two zoom-in operations, the saved zoom stack becomes
+     * irrelevant.
+     */
+    private void clearZoomStackIfAxisAutoRangingIsEnabled() {
+        Chart chart = getChart();
+        if (chart == null) {
+            return;
+        }
+
+        for (Axis axis : getChart().getAxes()) {
+            if (axis.getSide().isHorizontal()) {
+                if (getAxisMode().allowsX() && (axis.isAutoRanging() || axis.isAutoGrowRanging())) {
+                    clear(axis);
+                }
+            } else {
+                if (getAxisMode().allowsY() && (axis.isAutoRanging() || axis.isAutoGrowRanging())) {
+                    clear(axis);
+                }
+            }
+        }
+    }
+
+    private Map<Axis, ZoomState> getZoomDataWindows() {
+        ConcurrentHashMap<Axis, ZoomState> axisStateMap = new ConcurrentHashMap<>();
+        if (getChart() == null) {
+            return axisStateMap;
+        }
+        final double minX = zoomRectangle.getX();
+        final double minY = zoomRectangle.getY() + zoomRectangle.getHeight();
+        final double maxX = zoomRectangle.getX() + zoomRectangle.getWidth();
+        final double maxY = zoomRectangle.getY();
+
+        // pixel coordinates w.r.t. plot area
+        final Point2D minPlotCoordinate = getChart().toPlotArea(minX, minY);
+        final Point2D maxPlotCoordinate = getChart().toPlotArea(maxX, maxY);
+        for (Axis axis : getChart().getAxes()) {
+            double dataMin;
+            double dataMax;
+            if (axis.getSide().isVertical()) {
+                dataMin = axis.getValueForDisplay(minPlotCoordinate.getY());
+                dataMax = axis.getValueForDisplay(maxPlotCoordinate.getY());
+            } else {
+                dataMin = axis.getValueForDisplay(minPlotCoordinate.getX());
+                dataMax = axis.getValueForDisplay(maxPlotCoordinate.getX());
+            }
+            axisStateMap.put(axis, new ZoomState(dataMin, dataMax, axis.isAutoRanging(), axis.isAutoGrowRanging()));
+        }
+
+        return axisStateMap;
+    }
+
     private void installDragCursor() {
         final Region chart = getChart();
         originalCursor = chart.getCursor();
@@ -521,16 +788,6 @@ public class Zoomer extends ChartPlugin {
         if (getDragCursor() != null) {
             chart.setCursor(getZoomCursor());
         }
-    }
-
-    /**
-     * Returns the value of the {@link #animatedProperty()}.
-     *
-     * @return {@code true} if zoom is animated, {@code false} otherwise
-     * @see #getZoomDuration()
-     */
-    public final boolean isAnimated() {
-        return animatedProperty().get();
     }
 
     private boolean isMouseEventWithinCanvas(final MouseEvent mouseEvent) {
@@ -559,29 +816,6 @@ public class Zoomer extends ChartPlugin {
         return propertyState || omitAxisZoomList().contains(axis);
     }
 
-    public final boolean isPannerEnabled() {
-        return pannerEnabledProperty().get();
-    }
-
-    /**
-     * Returns the value of the {@link #sliderVisibleProperty()}.
-     *
-     * @return {@code true} if horizontal range slider is shown
-     */
-    public final boolean isSliderVisible() {
-        return sliderVisibleProperty().get();
-    }
-
-    /**
-     * Returns the value of the {@link #animatedProperty()}.
-     *
-     * @return {@code true} if zoom is animated, {@code false} otherwise
-     * @see #getZoomDuration()
-     */
-    public final boolean isUpdateTickUnit() {
-        return updateTickUnitProperty().get();
-    }
-
     /**
      * take a snapshot of present view (needed for scroll zoom interactor
      */
@@ -600,13 +834,6 @@ public class Zoomer extends ChartPlugin {
         pushCurrentZoomWindows();
         performZoom(getZoomDataWindows(), true);
         zoomRectangle.setVisible(false);
-    }
-
-    /**
-     * @return list of axes that shall be ignored when performing zoom-in or outs
-     */
-    public final ObservableList<Axis> omitAxisZoomList() {
-        return omitAxisZoom;
     }
 
     private void panChart(final Chart chart, final Point2D mouseLocation) {
@@ -670,15 +897,6 @@ public class Zoomer extends ChartPlugin {
         panShiftY = 0.0;
         previousMouseLocation = null;
         uninstallCursor();
-    }
-
-    /**
-     * When {@code true} pressing the middle mouse button and dragging pans the plot
-     *
-     * @return the pannerEnabled property
-     */
-    public final BooleanProperty pannerEnabledProperty() {
-        return enablePanner;
     }
 
     private boolean panOngoing() {
@@ -774,164 +992,8 @@ public class Zoomer extends ChartPlugin {
         registerInputEventHandler(MouseEvent.MOUSE_RELEASED, panEndHandler);
     }
 
-    /**
-     * Sets the value of the {@link #animatedProperty()}.
-     *
-     * @param value if {@code true} zoom will be animated
-     * @see #setZoomDuration(Duration)
-     */
-    public final void setAnimated(final boolean value) {
-        animatedProperty().set(value);
-    }
-
-    /**
-     * Sets the value of the {@link #axisModeProperty()}.
-     *
-     * @param mode the mode to be used
-     */
-    public final void setAxisMode(final AxisMode mode) {
-        axisModeProperty().set(mode);
-    }
-
-    /**
-     * Sets value of the {@link #dragCursorProperty()}.
-     *
-     * @param cursor the cursor to be used by the plugin
-     */
-    public final void setDragCursor(final Cursor cursor) {
-        dragCursorProperty().set(cursor);
-    }
-
-    /**
-     * Sets the value of the {@link #sliderVisibleProperty()}.
-     *
-     * @param state if {@code true} the panner (middle mouse button is enabled
-     */
-    public final void setPannerEnabled(final boolean state) {
-        pannerEnabledProperty().set(state);
-    }
-
-    /**
-     * Sets the value of the {@link #sliderVisibleProperty()}.
-     *
-     * @param state if {@code true} the horizontal range slider is shown
-     */
-    public final void setSliderVisible(final boolean state) {
-        sliderVisibleProperty().set(state);
-    }
-
-    /**
-     * Sets the value of the {@link #animatedProperty()}.
-     *
-     * @param value if {@code true} zoom will be animated
-     * @see #setZoomDuration(Duration)
-     */
-    public final void setUpdateTickUnit(final boolean value) {
-        updateTickUnitProperty().set(value);
-    }
-
-    /**
-     * Sets value of the {@link #zoomCursorProperty()}.
-     *
-     * @param cursor the cursor to be used by the plugin
-     */
-    public final void setZoomCursor(final Cursor cursor) {
-        zoomCursorProperty().set(cursor);
-    }
-
-    /**
-     * Sets the value of the {@link #zoomDurationProperty()}.
-     *
-     * @param duration duration of the zoom
-     */
-    public final void setZoomDuration(final Duration duration) {
-        zoomDurationProperty().set(duration);
-    }
-
-    /**
-     * Sets filter on {@link MouseEvent#DRAG_DETECTED DRAG_DETECTED} events that should start zoom-in operation.
-     *
-     * @param zoomInMouseFilter the filter to accept zoom-in mouse event. If {@code null} then any DRAG_DETECTED event
-     *        will start zoom-in operation. By default it's set to {@link #defaultZoomInMouseFilter}.
-     * @see #getZoomInMouseFilter()
-     */
-    public void setZoomInMouseFilter(final Predicate<MouseEvent> zoomInMouseFilter) {
-        this.zoomInMouseFilter = zoomInMouseFilter;
-    }
-
-    /**
-     * Sets filter on {@link MouseEvent#MOUSE_CLICKED MOUSE_CLICKED} events that should trigger zoom-origin operation.
-     *
-     * @param zoomOriginMouseFilter the filter to accept zoom-origin mouse event. If {@code null} then any MOUSE_CLICKED
-     *        event will start zoom-origin operation. By default it's set to {@link #defaultZoomOriginFilter}.
-     * @see #getZoomOriginMouseFilter()
-     */
-    public void setZoomOriginMouseFilter(final Predicate<MouseEvent> zoomOriginMouseFilter) {
-        this.zoomOriginMouseFilter = zoomOriginMouseFilter;
-    }
-
-    /**
-     * Sets filter on {@link MouseEvent#MOUSE_CLICKED MOUSE_CLICKED} events that should trigger zoom-out operation.
-     *
-     * @param zoomOutMouseFilter the filter to accept zoom-out mouse event. If {@code null} then any MOUSE_CLICKED event
-     *        will start zoom-out operation. By default it's set to {@link #defaultZoomOutMouseFilter}.
-     * @see #getZoomOutMouseFilter()
-     */
-    public void setZoomOutMouseFilter(final Predicate<MouseEvent> zoomOutMouseFilter) {
-        this.zoomOutMouseFilter = zoomOutMouseFilter;
-    }
-
-    /**
-     * Sets filter on {@link MouseEvent#MOUSE_CLICKED MOUSE_CLICKED} events that should trigger zoom-origin operation.
-     *
-     * @param zoomScrollFilter filter
-     */
-    public void setZoomScrollFilter(final Predicate<ScrollEvent> zoomScrollFilter) {
-        this.zoomScrollFilter = zoomScrollFilter;
-    }
-
-    /**
-     * When {@code true} an additional horizontal range slider is shown in a HiddeSidesPane at the bottom. By default
-     * it's {@code true}.
-     *
-     * @return the sliderVisible property
-     * @see #getRangeSlider()
-     */
-    public final BooleanProperty sliderVisibleProperty() {
-        return sliderVisible;
-    }
-
     private void uninstallCursor() {
         getChart().setCursor(originalCursor);
-    }
-
-    /**
-     * When {@code true} zooming will be animated. By default it's {@code false}.
-     *
-     * @return the animated property
-     * @see #zoomDurationProperty()
-     */
-    public final BooleanProperty updateTickUnitProperty() {
-        return updateTickUnit;
-    }
-
-    /**
-     * Mouse cursor to be used during zoom operation.
-     *
-     * @return the mouse cursor property
-     */
-    public final ObjectProperty<Cursor> zoomCursorProperty() {
-        return zoomCursor;
-    }
-
-    /**
-     * Duration of the animated zoom (in and out). Used only when {@link #animatedProperty()} is set to {@code true}. By
-     * default initialised to 500ms.
-     *
-     * @return the zoom duration property
-     */
-    public final ObjectProperty<Duration> zoomDurationProperty() {
-        return zoomDuration;
     }
 
     private void zoomInDragged(final MouseEvent event) {
@@ -942,6 +1004,32 @@ public class Zoomer extends ChartPlugin {
         double zoomRectY = plotAreaBounds.getMinY();
         double zoomRectWidth = plotAreaBounds.getWidth();
         double zoomRectHeight = plotAreaBounds.getHeight();
+
+        if (isAutoZoomEnabled()) {
+            final double diffX = zoomEndPoint.getX() - zoomStartPoint.getX();
+            final double diffY = zoomEndPoint.getY() - zoomStartPoint.getY();
+
+            //final double length = Math.sqrt(Math.pow(diffX, 2) + Math.pow(diffY, 2));
+
+            final int limit = Math.abs(getAutoZoomThreshold());
+
+            // pixel distance based algorithm
+            final boolean isZoomX = Math.abs(diffY) <= limit && Math.abs(diffX) >= limit;
+            final boolean isZoomY = Math.abs(diffX) <= limit && Math.abs(diffY) >= limit;
+
+            // alternate angle-based algorithm
+            // final int angle = (int) Math.toDegrees(Math.atan2(diffY, diffX));
+            // final boolean isZoomX = Math.abs(angle) <= limit || Math.abs((angle - 180) % 180) <= limit;
+            // final boolean isZoomY = Math.abs((angle - 90) % 180) <= limit || Math.abs((angle - 270) % 180) <= limit;
+
+            if (isZoomX) {
+                this.setAxisMode(AxisMode.X);
+            } else if (isZoomY) {
+                this.setAxisMode(AxisMode.Y);
+            } else {
+                this.setAxisMode(AxisMode.XY);
+            }
+        }
 
         if (getAxisMode().allowsX()) {
             zoomRectX = Math.min(zoomStartPoint.getX(), zoomEndPoint.getX());
@@ -981,23 +1069,6 @@ public class Zoomer extends ChartPlugin {
         return zoomStartPoint != null;
     }
 
-    public boolean zoomOrigin() {
-        clearZoomStackIfAxisAutoRangingIsEnabled();
-        final Map<Axis, ZoomState> zoomWindows = zoomStacks.peekLast();
-        if (zoomWindows == null || zoomWindows.isEmpty()) {
-            return false;
-        }
-        clear();
-        performZoom(zoomWindows, false);
-        if (xRangeSlider != null) {
-            xRangeSlider.reset();
-        }
-        for (Axis axis : getChart().getAxes()) {
-            axis.forceRedraw();
-        }
-        return true;
-    }
-
     private boolean zoomOut() {
         clearZoomStackIfAxisAutoRangingIsEnabled();
         final Map<Axis, ZoomState> zoomWindows = zoomStacks.pollFirst();
@@ -1017,6 +1088,21 @@ public class Zoomer extends ChartPlugin {
     }
 
     /**
+     * @param axis the axis to be modified
+     * @param state true: axis is not taken into account when zooming
+     */
+    public static void setOmitZoom(final Axis axis, final boolean state) {
+        if (!(axis instanceof Node)) {
+            return;
+        }
+        if (state) {
+            ((Node) axis).getProperties().put(ZOOMER_OMIT_AXIS, true);
+        } else {
+            ((Node) axis).getProperties().remove(ZOOMER_OMIT_AXIS);
+        }
+    }
+
+    /**
      * limits the mouse event position to the min/max range of the canavs (N.B. event can occur to be
      * negative/larger/outside than the canvas) This is to avoid zooming outside the visible canvas range
      *
@@ -1030,21 +1116,6 @@ public class Zoomer extends ChartPlugin {
         final double limitedY = Math.max(Math.min(event.getY() - plotBounds.getMinY(), plotBounds.getMaxY()),
                 plotBounds.getMinY());
         return new Point2D(limitedX, limitedY);
-    }
-
-    /**
-     * @param axis the axis to be modified
-     * @param state true: axis is not taken into account when zooming
-     */
-    public static void setOmitZoom(final Axis axis, final boolean state) {
-        if (!(axis instanceof Node)) {
-            return;
-        }
-        if (state) {
-            ((Node) axis).getProperties().put(ZOOMER_OMIT_AXIS, true);
-        } else {
-            ((Node) axis).getProperties().remove(ZOOMER_OMIT_AXIS);
-        }
     }
 
     private static void zoomOnAxis(final Axis axis, final ScrollEvent event) {

@@ -72,6 +72,7 @@ public class RunChartSamples extends Application {
         buttons.getChildren().add(new MyButton("TransposedDataSetSample", new TransposedDataSetSample()));
         buttons.getChildren().add(new MyButton("ValueIndicatorSample", new ValueIndicatorSample()));
         buttons.getChildren().add(new MyButton("WriteDataSetToFileSample", new WriteDataSetToFileSample()));
+        buttons.getChildren().add(new MyButton("ZoomerSample", new ZoomerSample()));
 
         final Scene scene = new Scene(root);
 
