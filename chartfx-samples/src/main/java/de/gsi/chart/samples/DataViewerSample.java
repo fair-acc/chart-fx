@@ -143,18 +143,18 @@ public class DataViewerSample extends Application {
         currentChart.getYAxis().setSide(Side.RIGHT);
         currentChart.getDatasets().addAll(createSeries());
 
-        final DataViewWindow currentView = new DataViewWindow(view1, "Current", currentChart);
+        final DataViewWindow currentView = new DataViewWindow("Current", currentChart);
         currentView.addListener(dataWindowEventListener);
         currentView.closedProperty()
                 .addListener((ch, o, n) -> LOGGER.atInfo().log("currentView Window has been closed"));
 
         final XYChart jDataViewerChart = createChart();
-        final DataViewWindow jDataViewerPane = new DataViewWindow(view1, "Chart", jDataViewerChart);
+        final DataViewWindow jDataViewerPane = new DataViewWindow("Chart", jDataViewerChart);
         jDataViewerPane.addListener(dataWindowEventListener);
         jDataViewerPane.closedProperty()
                 .addListener((ch, o, n) -> LOGGER.atInfo().log("jDataViewerPane Window has been closed"));
 
-        final DataViewWindow energyView = new DataViewWindow(view1, "Energy", energyChart);
+        final DataViewWindow energyView = new DataViewWindow("Energy", energyChart);
         energyView.setGraphic(GlyphFactory.create(FontAwesome.Glyph.ADJUST));
         energyView.addListener(dataWindowEventListener);
         energyView.closedProperty().addListener((ch, o, n) -> LOGGER.atInfo().log("energyView Window has been closed"));
@@ -168,7 +168,7 @@ public class DataViewerSample extends Application {
         newView.setOnAction(evt -> {
             final int count = view1.getVisibleChildren().size();
             final XYChart jChart = createChart();
-            final DataViewWindow newDataViewerPane = new DataViewWindow(view1, "Chart" + count, jChart);
+            final DataViewWindow newDataViewerPane = new DataViewWindow("Chart" + count, jChart);
             view1.getVisibleChildren().add(newDataViewerPane);
             newDataViewerPane.addListener(dataWindowEventListener);
             newDataViewerPane.addListener(windowEvent -> {
