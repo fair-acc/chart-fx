@@ -19,6 +19,11 @@
 
     <dependencies>
         <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-fxml</artifactId>
+            <version>13.0.1</version>
+        </dependency>
+        <dependency>
             <groupId>de.gsi.chart</groupId>
             <artifactId>chartfx-chart</artifactId>
             <version>${project.version}</version>

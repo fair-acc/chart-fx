@@ -102,7 +102,7 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
     protected BooleanBinding showingBinding;
     protected final BooleanProperty showing = new SimpleBooleanProperty(this, "showing", false);
     /** When true any data changes will be animated. */
-    private final BooleanProperty animated = new SimpleBooleanProperty(this, "animated", true);
+    private final BooleanProperty animated = new SimpleBooleanProperty(this, "animated", false);
     // TODO: Check whether 'this' or chart contents need to be added
     /** Animator for animating stuff on the chart */
     protected final ChartLayoutAnimator animator = new ChartLayoutAnimator(this);
@@ -767,7 +767,20 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
                 break;
             }
         }
-        return null;
+        // Add default axis if no suitable axis is available
+        switch (orientation) {
+        case HORIZONTAL:
+            Axis newXAxis = new DefaultNumericAxis("x-Axis");
+            newXAxis.setSide(Side.BOTTOM);
+            getAxes().add(newXAxis);
+            return newXAxis;
+        case VERTICAL:
+        default:
+            Axis newYAxis = new DefaultNumericAxis("y-Axis");
+            newYAxis.setSide(Side.LEFT);
+            getAxes().add(newYAxis);
+            return newYAxis;
+        }
     }
 
     public final Legend getLegend() {
@@ -1025,55 +1038,13 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
     protected void rendererChanged(final ListChangeListener.Change<? extends Renderer> change) {
         FXUtils.assertJavaFxThread();
         while (change.next()) {
-
             // handle added renderer
             for (final Renderer renderer : change.getAddedSubList()) {
+                // update legend and recalculateLayout on datasetChange
                 renderer.getDatasets().addListener(datasetChangeListener);
 
-                boolean rendererHasXAxis = false;
-                boolean rendererHasYAxis = false;
-                for (final Axis axis : renderer.getAxes()) {
-                    if (axis.getSide() != null && axis.getSide().isHorizontal()) {
-                        getAxes().add(axis);
-                        rendererHasXAxis = true;
-                    }
-                }
-                for (final Axis axis : renderer.getAxes()) {
-                    if (axis.getSide() != null && axis.getSide().isVertical()) {
-                        getAxes().add(axis);
-                        rendererHasYAxis = true;
-                    }
-                }
-
-                if (rendererHasXAxis && rendererHasYAxis) {
-                    // all good, already have added new axis from renderer
-                    // continue
-                    continue;
-                }
-
-                // search for existing axis, in case Chart hasn't defined
-                // already some
-                final Axis existingChartXAxis = getFirstAxis(Orientation.HORIZONTAL);
-                if (existingChartXAxis != null) {
-                    renderer.getAxes().add(existingChartXAxis);
-                } else if (!rendererHasXAxis) {
-                    final DefaultNumericAxis newAxis = new DefaultNumericAxis();
-                    newAxis.setName("default x-axis");
-                    newAxis.setSide(Side.BOTTOM);
-                    renderer.getAxes().add(newAxis);
-                    getAxes().add(newAxis);
-                }
-
-                final Axis existingChartXYAxis = getFirstAxis(Orientation.VERTICAL);
-                if (existingChartXYAxis != null) {
-                    renderer.getAxes().add(existingChartXYAxis);
-                } else if (!rendererHasYAxis) {
-                    final DefaultNumericAxis newAxis = new DefaultNumericAxis();
-                    newAxis.setName("default y-axis");
-                    newAxis.setSide(Side.LEFT);
-                    renderer.getAxes().add(newAxis);
-                    getAxes().add(newAxis);
-                }
+                // add all visible axes from the renderer to the chart
+                getAxes().addAll(renderer.getAxes().filtered(axis -> axis.getSide() != null));
             }
 
             // handle removed renderer

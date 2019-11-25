@@ -5,14 +5,12 @@ import static de.gsi.dataset.DataSet.DIM_Z;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.gsi.chart.axes.Axis;
-import de.gsi.chart.axes.spi.DefaultNumericAxis;
 import de.gsi.chart.renderer.PolarTickStep;
 import de.gsi.chart.renderer.Renderer;
 import de.gsi.chart.renderer.spi.ErrorDataSetRenderer;
@@ -62,7 +60,7 @@ public class XYChart extends Chart {
     private final ChangeListener<Side> axisSideChangeListener = this::axisSideChanged;
 
     public XYChart() {
-        this(new DefaultNumericAxis(), new DefaultNumericAxis());
+        this(null, null);
     }
 
     /**
@@ -73,28 +71,22 @@ public class XYChart extends Chart {
      */
     public XYChart(final Axis xAxis, final Axis yAxis) {
         super();
-        Objects.requireNonNull(xAxis, "X axis is required");
-        Objects.requireNonNull(yAxis, "Y axis is required");
 
-        if (xAxis.getSide() == null || !xAxis.getSide().isHorizontal()) {
-            xAxis.setSide(Side.BOTTOM);
+        if (xAxis != null) {
+            if (xAxis.getSide() == null || !xAxis.getSide().isHorizontal()) {
+                xAxis.setSide(Side.BOTTOM);
+            }
+            getAxes().add(xAxis);
         }
 
-        if (yAxis.getSide() == null || !yAxis.getSide().isVertical()) {
-            yAxis.setSide(Side.LEFT);
+        if (yAxis != null) {
+            if (yAxis.getSide() == null || !yAxis.getSide().isVertical()) {
+                yAxis.setSide(Side.LEFT);
+            }
+            getAxes().add(yAxis);
         }
-
-        // add XYChart specific axis handling (ie. placement around charts, add
-        // new DefaultNumericAxis if one is
-        // missing, etc.)
-
-        getAxes().addAll(xAxis, yAxis);
 
         getRenderers().add(new ErrorDataSetRenderer());
-
-        setAnimated(false);
-        xAxis.setAnimated(false);
-        yAxis.setAnimated(false);
     }
 
     /**

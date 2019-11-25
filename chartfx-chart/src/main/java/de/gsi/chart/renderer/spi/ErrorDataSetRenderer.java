@@ -641,14 +641,16 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
             return;
         }
 
-        final Axis xAxis = getFirstAxis(Orientation.HORIZONTAL);
-        if (xAxis == null) {
-            throw new InvalidParameterException("x-Axis must not be null - axesList() = " + getAxes());
+        Axis xAxisTemp = getFirstAxis(Orientation.HORIZONTAL);
+        if (xAxisTemp == null) {
+            xAxisTemp = chart.getFirstAxis(Orientation.HORIZONTAL);
         }
-        final Axis yAxis = getFirstAxis(Orientation.VERTICAL);
-        if (yAxis == null) {
-            throw new InvalidParameterException("y-Axis must not be null - axesList() = " + getAxes());
+        final Axis xAxis = xAxisTemp;
+        Axis yAxisTemp = getFirstAxis(Orientation.VERTICAL);
+        if (yAxisTemp == null) {
+            yAxisTemp = chart.getFirstAxis(Orientation.VERTICAL);
         }
+        final Axis yAxis = yAxisTemp;
         final long start = ProcessingProfiler.getTimeStamp();
         final double xAxisWidth = xAxis.getWidth();
         final double xMin = xAxis.getValueForDisplay(0);
