@@ -51,6 +51,7 @@ public class RunChartSamples extends Application {
         buttons.getChildren().add(new MyButton("ErrorDataSetRendererSample", new ErrorDataSetRendererSample()));
         buttons.getChildren()
                 .add(new MyButton("ErrorDataSetRendererStylingSample", new ErrorDataSetRendererStylingSample()));
+        buttons.getChildren().add(new MyButton("FxmlSample", new FxmlSample()));
         buttons.getChildren().add(new MyButton("GridRendererSample", new GridRendererSample()));
         buttons.getChildren().add(new MyButton("HexagonSamples", new HexagonSamples()));
         buttons.getChildren().add(new MyButton("Histogram2DimSample", new Histogram2DimSample()));
