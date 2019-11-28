@@ -37,6 +37,7 @@ import javafx.animation.Animation;
 import javafx.animation.RotateTransition;
 import javafx.application.Application;
 import javafx.beans.DefaultProperty;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.scene.Group;
 import javafx.scene.Scene;
@@ -61,7 +62,7 @@ import javafx.util.Duration;
  * @author Grzegorz Kruk
  * @author rstein
  */
-@DefaultProperty(value="views")
+@DefaultProperty(value = "views")
 public class DataViewerSample extends Application {
     private static final Logger LOGGER = LoggerFactory.getLogger(DataViewerSample.class);
     private static final String TITLE = DataViewerSample.class.getSimpleName();
@@ -145,19 +146,17 @@ public class DataViewerSample extends Application {
 
         final DataViewWindow currentView = new DataViewWindow("Current", currentChart);
         currentView.addListener(dataWindowEventListener);
-        currentView.closedProperty()
-                .addListener((ch, o, n) -> LOGGER.atInfo().log("currentView Window has been closed"));
+        logStatePropertyChanges(currentView.getName(), currentView);
 
         final XYChart jDataViewerChart = createChart();
         final DataViewWindow jDataViewerPane = new DataViewWindow("Chart", jDataViewerChart);
         jDataViewerPane.addListener(dataWindowEventListener);
-        jDataViewerPane.closedProperty()
-                .addListener((ch, o, n) -> LOGGER.atInfo().log("jDataViewerPane Window has been closed"));
+        logStatePropertyChanges(jDataViewerPane.getName(), jDataViewerPane);
 
         final DataViewWindow energyView = new DataViewWindow("Energy", energyChart);
         energyView.setGraphic(GlyphFactory.create(FontAwesome.Glyph.ADJUST));
         energyView.addListener(dataWindowEventListener);
-        energyView.closedProperty().addListener((ch, o, n) -> LOGGER.atInfo().log("energyView Window has been closed"));
+        logStatePropertyChanges(energyView.getName(), energyView);
         view1.getVisibleChildren().addAll(energyView, currentView, jDataViewerPane);
         // view1.getVisibleNodes().addAll(energyChart, currentChart, jDataViewerChart);
 
@@ -233,6 +232,18 @@ public class DataViewerSample extends Application {
         primaryStage.show();
 
         primaryStage.setOnCloseRequest(evt -> System.exit(0)); //NOPMD
+    }
+
+    private static void logStatePropertyChanges(String windowName, final DataViewWindow currentView) {
+        logPropertyChange(currentView.minimisedProperty(), windowName + " minimized");
+        logPropertyChange(currentView.detachedProperty(), windowName + " detached");
+        logPropertyChange(currentView.closedProperty(), windowName + " closed");
+        logPropertyChange(currentView.restoredProperty(), windowName + " restored");
+        logPropertyChange(currentView.maximisedProperty(), windowName + " maximized");
+    }
+
+    private static void logPropertyChange(BooleanProperty property, String name) {
+        property.addListener((ch, o, n) -> LOGGER.atInfo().log("Property '{}' changed to '{}'", name, n));
     }
 
     private static DoubleDataSet createData(final String name) {
