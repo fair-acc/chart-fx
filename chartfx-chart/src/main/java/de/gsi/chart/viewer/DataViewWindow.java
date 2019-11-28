@@ -215,7 +215,7 @@ public class DataViewWindow extends BorderPane implements EventSource {
     };
 
     protected final EventHandler<ActionEvent> minimizeButtonAction = event -> {
-        if (autoNotification.get() || isDetached()) {
+        if (autoNotification.get() || isDetached() || isMinimised()) {
             // update guard
             return;
         }
