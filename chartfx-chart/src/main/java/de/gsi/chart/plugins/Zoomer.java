@@ -77,7 +77,8 @@ public class Zoomer extends ChartPlugin {
     public static final String STYLE_CLASS_ZOOM_RECT = "chart-zoom-rect";
     private static final int ZOOM_RECT_MIN_SIZE = 5;
     private static final Duration DEFAULT_ZOOM_DURATION = Duration.millis(500);
-    private static final int DEFAULT_AUTO_ZOOM_THRESHOLD = 15; // [degrees]
+    private static final int DEFAULT_AUTO_ZOOM_THRESHOLD = 15; // [pixels]
+    private static final int DEFAULT_FLICKER_THRESHOLD = 3; // [pixels]
     private static final int FONT_SIZE = 20;
 
     /**
@@ -975,7 +976,7 @@ public class Zoomer extends ChartPlugin {
         ConcurrentHashMap<Axis, ZoomState> axisStateMap = new ConcurrentHashMap<>();
         for (Axis axis : getChart().getAxes()) {
             axisStateMap.put(axis,
-                    new ZoomState(axis.getMin(), axis.getMax(), axis.isAutoRanging(), axis.isAutoGrowRanging()));
+                    new ZoomState(axis.getMin(), axis.getMax(), axis.isAutoRanging(), axis.isAutoGrowRanging())); // NOPMD necessary in-loop instantiation
         }
         zoomStacks.addFirst(axisStateMap);
     }
@@ -1009,13 +1010,13 @@ public class Zoomer extends ChartPlugin {
             final double diffX = zoomEndPoint.getX() - zoomStartPoint.getX();
             final double diffY = zoomEndPoint.getY() - zoomStartPoint.getY();
 
-            //final double length = Math.sqrt(Math.pow(diffX, 2) + Math.pow(diffY, 2));
-
             final int limit = Math.abs(getAutoZoomThreshold());
 
-            // pixel distance based algorithm
-            final boolean isZoomX = Math.abs(diffY) <= limit && Math.abs(diffX) >= limit;
-            final boolean isZoomY = Math.abs(diffX) <= limit && Math.abs(diffY) >= limit;
+            // pixel distance based algorithm  + aspect ratio to prevent flickering when starting selection
+            final boolean isZoomX = Math.abs(diffY) <= limit && Math.abs(diffX) >= limit
+                    && Math.abs(diffX / diffY) > DEFAULT_FLICKER_THRESHOLD;
+            final boolean isZoomY = Math.abs(diffX) <= limit && Math.abs(diffY) >= limit
+                    && Math.abs(diffY / diffX) > DEFAULT_FLICKER_THRESHOLD;
 
             // alternate angle-based algorithm
             // final int angle = (int) Math.toDegrees(Math.atan2(diffY, diffX));
@@ -1146,7 +1147,7 @@ public class Zoomer extends ChartPlugin {
                 return;
             }
             final Axis axis = getChart().getFirstAxis(Orientation.HORIZONTAL);
-            if (n) {
+            if (Boolean.TRUE.equals(n)) {
                 setMin(axis.getMin());
                 setMax(axis.getMax());
             }
@@ -1208,7 +1209,7 @@ public class Zoomer extends ChartPlugin {
             setMaxWidth(Double.MAX_VALUE);
 
             xAxis.invertAxisProperty().bindBidirectional(invertedSlide);
-            invertedSlide.addListener((ch, o, n) -> setRotate(n ? 180 : 0));
+            invertedSlide.addListener((ch, o, n) -> setRotate(Boolean.TRUE.equals(n) ? 180 : 0));
 
             xAxis.autoRangingProperty().addListener(sliderResetHandler);
             xAxis.autoGrowRangingProperty().addListener(sliderResetHandler);
@@ -1231,7 +1232,7 @@ public class Zoomer extends ChartPlugin {
                     return;
                 }
                 isUpdating = true;
-                if (n) {
+                if (Boolean.TRUE.equals(n)) {
                     getChart().getPlotArea().setBottom(xRangeSlider);
                     prefWidthProperty().bind(getChart().getCanvasForeground().widthProperty());
                 } else {
@@ -1246,7 +1247,7 @@ public class Zoomer extends ChartPlugin {
                 if (chartLocal == null || n.equals(o)) {
                     return;
                 }
-                if (n) {
+                if (Boolean.TRUE.equals(n)) {
                     chartLocal.getToolBar().getChildren().add(zoomButtons);
                 } else {
                     chartLocal.getToolBar().getChildren().remove(zoomButtons);
