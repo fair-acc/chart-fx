@@ -353,9 +353,9 @@ public class DataViewWindow extends BorderPane implements EventSource {
         closeButton.setOnAction(evt -> setClosed(true));
 
         // install drag handler
-        setOnMouseReleased(this::dragFinish);
+        windowDecoration.setOnMouseReleased(this::dragFinish);
         windowDecoration.setOnMousePressed(this::dragStart);
-        setOnMouseDragged(this::dragOngoing);
+        windowDecoration.setOnMouseDragged(this::dragOngoing);
 
         setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
         setName(name);
