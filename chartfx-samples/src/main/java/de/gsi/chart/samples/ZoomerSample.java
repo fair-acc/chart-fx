@@ -1,15 +1,24 @@
 package de.gsi.chart.samples;
 
+import java.util.List;
+import java.util.Map;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.gsi.chart.Chart;
 import de.gsi.chart.XYChart;
+import de.gsi.chart.axes.Axis;
 import de.gsi.chart.axes.AxisMode;
 import de.gsi.chart.plugins.Zoomer;
+import de.gsi.chart.plugins.Zoomer.ZoomState;
 import de.gsi.dataset.DataSet;
 import de.gsi.dataset.event.AddedDataEvent;
 import de.gsi.dataset.spi.DoubleErrorDataSet;
 import de.gsi.dataset.testdata.spi.RandomDataGenerator;
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.collections.ListChangeListener;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.ContentDisplay;
@@ -22,6 +31,7 @@ import javafx.stage.Stage;
  * @author rstein
  */
 public class ZoomerSample extends Application {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ZoomerSample.class);
     private static final int PREF_WIDTH = 600;
     private static final int PREF_HEIGHT = 300;
     private static final int N_SAMPLES = 1000000; // default: 1000000
@@ -43,21 +53,28 @@ public class ZoomerSample extends Application {
 
         // chart with default zoom
         final Chart chart1 = getTestChart("default zoom", testDataSet);
-        chart1.getPlugins().add(new Zoomer());
+        Zoomer zoomer1 = new Zoomer();
+        registerZoomerChangeListener(zoomer1, chart1.getTitle());
+        chart1.getPlugins().add(zoomer1);
 
         // chart with auto xy zoom
         final Chart chart2 = getTestChart("auto xy zoom", testDataSet);
         final Zoomer zoomer2 = new Zoomer();
         zoomer2.setAutoZoomEnabled(true);
+        registerZoomerChangeListener(zoomer2, chart2.getTitle());
         chart2.getPlugins().add(zoomer2);
 
         // chart with x-only zoom
         final Chart chart3 = getTestChart("x-only zoom", testDataSet);
-        chart3.getPlugins().add(new Zoomer(AxisMode.X));
+        Zoomer zoomer3 = new Zoomer(AxisMode.X);
+        registerZoomerChangeListener(zoomer3, chart3.getTitle());
+        chart3.getPlugins().add(zoomer3);
 
         // chart with x-only zoom
         final Chart chart4 = getTestChart("y-only zoom", testDataSet);
-        chart4.getPlugins().add(new Zoomer(AxisMode.Y));
+        Zoomer zoomer4 = new Zoomer(AxisMode.Y);
+        registerZoomerChangeListener(zoomer4, chart4.getTitle());
+        chart4.getPlugins().add(zoomer4);
 
         root.getChildren().addAll(chart1, chart2, chart3, chart4, label);
 
@@ -72,16 +89,6 @@ public class ZoomerSample extends Application {
      */
     public static void main(final String[] args) {
         Application.launch(args);
-    }
-
-    private static Chart getTestChart(final String title, final DataSet testDataSet) {
-        final Chart chart = new XYChart();
-        chart.setTitle(title);
-        chart.setLegendVisible(false);
-        chart.getDatasets().add(testDataSet);
-        chart.setPrefSize(PREF_WIDTH, PREF_HEIGHT);
-
-        return chart;
     }
 
     private static DataSet generateData() {
@@ -113,5 +120,34 @@ public class ZoomerSample extends Application {
         dataSet.fireInvalidated(new AddedDataEvent(dataSet));
 
         return dataSet;
+    }
+
+    private static Chart getTestChart(final String title, final DataSet testDataSet) {
+        final Chart chart = new XYChart();
+        chart.setTitle(title);
+        chart.setLegendVisible(false);
+        chart.getDatasets().add(testDataSet);
+        chart.setPrefSize(PREF_WIDTH, PREF_HEIGHT);
+
+        return chart;
+    }
+
+    private static void registerZoomerChangeListener(final Zoomer zoomer, final String chart) {
+        zoomer.zoomStackDeque().addListener((ListChangeListener<Map<Axis, Zoomer.ZoomState>>) (change -> {
+            while (change.next()) {
+                List<? extends Map<Axis, ZoomState>> added = change.getAddedSubList();
+                if (added != null) {
+                    added.forEach(ch -> ch.forEach((a, s) -> LOGGER.atInfo().addArgument(chart).addArgument(a.getSide())
+                            .addArgument(s).log("chart '{}' - axis {} -> new zoomState = {}")));
+                }
+
+                List<? extends Map<Axis, ZoomState>> removed = change.getRemoved();
+                if (removed != null) {
+                    removed.forEach(
+                            ch -> ch.forEach((a, s) -> LOGGER.atInfo().addArgument(chart).addArgument(a.getSide())
+                                    .addArgument(s).log("chart '{}' - axis {} -> removed zoomState = {}")));
+                }
+            }
+        }));
     }
 }

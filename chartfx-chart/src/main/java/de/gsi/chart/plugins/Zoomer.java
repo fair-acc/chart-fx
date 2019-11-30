@@ -1,7 +1,6 @@
 package de.gsi.chart.plugins;
 
 import java.util.ArrayDeque;
-import java.util.Deque;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
@@ -18,6 +17,7 @@ import de.gsi.chart.XYChart;
 import de.gsi.chart.axes.Axis;
 import de.gsi.chart.axes.AxisMode;
 import de.gsi.chart.axes.spi.Axes;
+import de.gsi.chart.ui.ObservableDeque;
 import de.gsi.chart.ui.geometry.Side;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
@@ -146,7 +146,7 @@ public class Zoomer extends ChartPlugin {
     private final Rectangle zoomRectangle = new Rectangle();
     private Point2D zoomStartPoint;
     private Point2D zoomEndPoint;
-    private final Deque<Map<Axis, ZoomState>> zoomStacks = new ArrayDeque<>();
+    private final ObservableDeque<Map<Axis, ZoomState>> zoomStacks = new ObservableDeque<>(new ArrayDeque<>());
     private final HBox zoomButtons = getZoomInteractorBar();
     private ZoomRangeSlider xRangeSlider;
     private boolean xRangeSliderInit;
@@ -721,6 +721,13 @@ public class Zoomer extends ChartPlugin {
     }
 
     /**
+     * @return observable queue (allows to attach ListChangeListener listener)
+     */
+    public ObservableDeque<Map<Axis, ZoomState>> zoomStackDeque() {
+        return zoomStacks;
+    }
+
+    /**
      * While performing zoom-in on all charts we disable auto-ranging on axes (depending on the axisMode) so if user has
      * enabled back the auto-ranging - he wants the chart to adapt to the data. Therefore keeping the zoom stack doesn't
      * make sense - performing zoom-out would again disable auto-ranging and put back ranges saved during the previous
@@ -769,7 +776,25 @@ public class Zoomer extends ChartPlugin {
                 dataMin = axis.getValueForDisplay(minPlotCoordinate.getX());
                 dataMax = axis.getValueForDisplay(maxPlotCoordinate.getX());
             }
-            axisStateMap.put(axis, new ZoomState(dataMin, dataMax, axis.isAutoRanging(), axis.isAutoGrowRanging()));
+            switch (getAxisMode()) {
+            case X:
+                if (axis.getSide().isHorizontal()) {
+                    axisStateMap.put(axis,
+                            new ZoomState(dataMin, dataMax, axis.isAutoRanging(), axis.isAutoGrowRanging()));
+                }
+                break;
+            case Y:
+                if (axis.getSide().isVertical()) {
+                    axisStateMap.put(axis,
+                            new ZoomState(dataMin, dataMax, axis.isAutoRanging(), axis.isAutoGrowRanging()));
+                }
+                break;
+            case XY:
+            default:
+                axisStateMap.put(axis, new ZoomState(dataMin, dataMax, axis.isAutoRanging(), axis.isAutoGrowRanging()));
+                break;
+            }
+
         }
 
         return axisStateMap;
@@ -975,10 +1000,29 @@ public class Zoomer extends ChartPlugin {
         }
         ConcurrentHashMap<Axis, ZoomState> axisStateMap = new ConcurrentHashMap<>();
         for (Axis axis : getChart().getAxes()) {
-            axisStateMap.put(axis,
-                    new ZoomState(axis.getMin(), axis.getMax(), axis.isAutoRanging(), axis.isAutoGrowRanging())); // NOPMD necessary in-loop instantiation
+            switch (getAxisMode()) {
+            case X:
+                if (axis.getSide().isHorizontal()) {
+                    axisStateMap.put(axis, new ZoomState(axis.getMin(), axis.getMax(), axis.isAutoRanging(),
+                            axis.isAutoGrowRanging())); // NOPMD necessary in-loop instantiation
+                }
+                break;
+            case Y:
+                if (axis.getSide().isVertical()) {
+                    axisStateMap.put(axis, new ZoomState(axis.getMin(), axis.getMax(), axis.isAutoRanging(),
+                            axis.isAutoGrowRanging())); // NOPMD necessary in-loop instantiation
+                }
+                break;
+            case XY:
+            default:
+                axisStateMap.put(axis,
+                        new ZoomState(axis.getMin(), axis.getMax(), axis.isAutoRanging(), axis.isAutoGrowRanging())); // NOPMD necessary in-loop instantiation
+                break;
+            }
         }
-        zoomStacks.addFirst(axisStateMap);
+        if (!axisStateMap.keySet().isEmpty()) {
+            zoomStacks.addFirst(axisStateMap);
+        }
     }
 
     private void registerMouseHandlers() {
@@ -1139,6 +1183,59 @@ public class Zoomer extends ChartPlugin {
         axis.forceRedraw();
     }
 
+    /**
+     * small class used to remember whether the autorange axis was on/off to be able to restore the original state on
+     * unzooming
+     */
+    public class ZoomState {
+        protected double zoomRangeMin;
+        protected double zoomRangeMax;
+        protected boolean wasAutoRanging;
+        protected boolean wasAutoGrowRanging;
+
+        private ZoomState(final double zoomRangeMin, final double zoomRangeMax, final boolean isAutoRanging,
+                final boolean isAutoGrowRanging) {
+            this.zoomRangeMin = zoomRangeMin;
+            this.zoomRangeMax = zoomRangeMax;
+            this.wasAutoRanging = isAutoRanging;
+            this.wasAutoGrowRanging = isAutoGrowRanging;
+        }
+
+        /**
+         * @return the zoomRangeMax
+         */
+        public double getZoomRangeMax() {
+            return zoomRangeMax;
+        }
+
+        /**
+         * @return the zoomRangeMin
+         */
+        public double getZoomRangeMin() {
+            return zoomRangeMin;
+        }
+
+        @Override
+        public String toString() {
+            return "ZoomState[zoomRangeMin= " + zoomRangeMin + ", zoomRangeMax= " + zoomRangeMax + ", wasAutoRanging= "
+                    + wasAutoRanging + ", wasAutoGrowRanging= " + wasAutoGrowRanging + "]";
+        }
+
+        /**
+         * @return the wasAutoGrowRanging
+         */
+        public boolean wasAutoGrowRanging() {
+            return wasAutoGrowRanging;
+        }
+
+        /**
+         * @return the wasAutoRanging
+         */
+        public boolean wasAutoRanging() {
+            return wasAutoRanging;
+        }
+    }
+
     private class ZoomRangeSlider extends RangeSlider {
         private final BooleanProperty invertedSlide = new SimpleBooleanProperty(this, "invertedSlide", false);
         private boolean isUpdating;
@@ -1262,23 +1359,4 @@ public class Zoomer extends ChartPlugin {
         }
 
     } // ZoomRangeSlider
-
-    /**
-     * small class used to remember whether the autorange axis was on/off to be able to restore the original state on
-     * unzooming
-     */
-    private class ZoomState {
-        protected double zoomRangeMin;
-        protected double zoomRangeMax;
-        protected boolean wasAutoRanging;
-        protected boolean wasAutoGrowRanging;
-
-        private ZoomState(final double zoomRangeMin, final double zoomRangeMax, final boolean isAutoRanging,
-                final boolean isAutoGrowRanging) {
-            this.zoomRangeMin = zoomRangeMin;
-            this.zoomRangeMax = zoomRangeMax;
-            this.wasAutoRanging = isAutoRanging;
-            this.wasAutoGrowRanging = isAutoGrowRanging;
-        }
-    }
 }
