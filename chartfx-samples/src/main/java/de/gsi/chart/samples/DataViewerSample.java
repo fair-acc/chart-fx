@@ -173,7 +173,7 @@ public class DataViewerSample extends Application {
             newDataViewerPane.addListener(windowEvent -> {
                 // print window state explicitly
                 LOGGER.atInfo().addArgument(newDataViewerPane.getName()).addArgument(newDataViewerPane.getWindowState())
-                        .log("explicite '{}' window state is {}");
+                        .log("explicit '{}' window state is {}");
             });
             newDataViewerPane.closedProperty().addListener((ch, o, n) -> {
                 LOGGER.atInfo().log("newDataViewerPane Window '" + newDataViewerPane.getName()

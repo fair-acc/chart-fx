@@ -72,7 +72,8 @@ public class DataViewWindow extends BorderPane implements EventSource {
 
     // needed for EventSource listener interface
     protected transient boolean parallelListeners = false;
-    private final transient AtomicBoolean autoNotification = new AtomicBoolean(false);
+    private final transient AtomicBoolean autoNotification = new AtomicBoolean(true);
+    private final transient AtomicBoolean updatingStage = new AtomicBoolean(false);
     private final transient List<EventListener> updateListeners = Collections.synchronizedList(new LinkedList<>());
 
     private final StringProperty name = new SimpleStringProperty(this, "name", "");
@@ -99,24 +100,18 @@ public class DataViewWindow extends BorderPane implements EventSource {
                 setMinimised(true);
                 setMaximised(false);
                 setRestored(false);
-                setClosed(false);
                 break;
             case WINDOW_MAXIMISED:
                 setMinimised(false);
                 setMaximised(true);
                 setRestored(false);
-                setClosed(false);
                 break;
             case WINDOW_RESTORED:
                 setMinimised(false);
                 setMaximised(false);
                 setRestored(true);
-                setClosed(false);
                 break;
             case WINDOW_CLOSED:
-                setMinimised(false);
-                setMaximised(false);
-                setRestored(false);
                 setClosed(true);
                 break;
             default:
@@ -139,8 +134,6 @@ public class DataViewWindow extends BorderPane implements EventSource {
                 break;
             default:
             }
-            // disarm and allow for new notifications
-            autoNotification.set(false);
         }
     };
 
@@ -165,11 +158,11 @@ public class DataViewWindow extends BorderPane implements EventSource {
     private Cursor originalCursor;
     private final ObjectProperty<Node> graphic = new SimpleObjectProperty<>(this, "graphic");
     protected final EventHandler<ActionEvent> maximizeButtonAction = event -> {
-        if (autoNotification.get() || getParentView() == null || isDetached()) {
+        if (updatingStage.get() || getParentView() == null || isDetached()) {
             // update guard
             return;
         }
-        autoNotification.set(true);
+        updatingStage.set(true);
         if (LOGGER.isDebugEnabled()) {
             LOGGER.atDebug().log("maximizeButtonAction");
         }
@@ -186,6 +179,7 @@ public class DataViewWindow extends BorderPane implements EventSource {
         if (dialog.isShowing()) {
             // enlarge to maximum screen size
             dialog.maximizeRestore();
+            updatingStage.set(false);
             return;
         }
 
@@ -196,6 +190,7 @@ public class DataViewWindow extends BorderPane implements EventSource {
             setMinimised(false);
             getParentView().getVisibleChildren().add(this);
             setWindowState(WindowState.WINDOW_RESTORED);
+            updatingStage.set(false);
             return;
         }
 
@@ -205,6 +200,7 @@ public class DataViewWindow extends BorderPane implements EventSource {
             getParentView().setMaximizedChild(null);
             getParentView().getVisibleChildren().add(this);
             setWindowState(WindowState.WINDOW_RESTORED);
+            updatingStage.set(false);
             return;
         }
 
@@ -212,14 +208,16 @@ public class DataViewWindow extends BorderPane implements EventSource {
         getParentView().getVisibleChildren().remove(this);
         getParentView().setMaximizedChild(this);
         setWindowState(WindowState.WINDOW_MAXIMISED);
+        updatingStage.set(false);
     };
 
     protected final EventHandler<ActionEvent> minimizeButtonAction = event -> {
-        if (autoNotification.get() || isDetached() || isMinimised()) {
+        if (isDetached() || isMinimised()) {
             // update guard
             return;
         }
-        autoNotification.set(true);
+        updatingStage.set(true);
+
         invokeListener(new WindowMinimisingEvent(this), parallelListeners);
         if (LOGGER.isDebugEnabled()) {
             LOGGER.atDebug().log("minimizeButtonAction");
@@ -241,26 +239,20 @@ public class DataViewWindow extends BorderPane implements EventSource {
         getParentView().getVisibleChildren().remove(this);
         getParentView().getMinimisedChildren().add(this);
         setWindowState(WindowState.WINDOW_MINIMISED);
+        updatingStage.set(false);
     };
 
     protected EventHandler<ActionEvent> closeButtonAction = event -> {
-        if (autoNotification.get()) {
+        if (updatingStage.get() || isClosed()) {
             // update guard
             return;
         }
-        autoNotification.set(true);
+        updatingStage.set(true);
         invokeListener(new WindowClosingEvent(this), parallelListeners);
         if (LOGGER.isDebugEnabled()) {
             LOGGER.atDebug().log("closeButtonAction");
         }
         // asked to remove pane
-        if (dialog.isShowing()) {
-            dialog.hide();
-            setDetached(false);
-            setWindowState(WindowState.WINDOW_RESTORED);
-            return;
-        }
-
         getParentView().getMinimisedChildren().remove(this);
         getParentView().getVisibleChildren().remove(this);
         getParentView().getUndockedChildren().remove(this);
@@ -269,6 +261,7 @@ public class DataViewWindow extends BorderPane implements EventSource {
             getParentView().setMaximizedChild(null);
         }
         setWindowState(WindowState.WINDOW_CLOSED);
+        updatingStage.set(false);
     };
 
     public DataViewWindow(@NamedArg(value = "name") final String name,
@@ -350,7 +343,7 @@ public class DataViewWindow extends BorderPane implements EventSource {
         detachButton.setOnAction(evt -> setDetached(true));
         minimizeButton.setOnAction(minimizeButtonAction);
         maximizeRestoreButton.setOnAction(maximizeButtonAction);
-        closeButton.setOnAction(evt -> setClosed(true));
+        closeButton.setOnAction(closeButtonAction);
 
         // install drag handler
         windowDecoration.setOnMouseReleased(this::dragFinish);
@@ -708,7 +701,7 @@ public class DataViewWindow extends BorderPane implements EventSource {
                 if (getParentView() == null) {
                     return;
                 }
-                autoNotification.set(true);
+                // asked to reattach pane
                 invokeListener(new WindowRestoringEvent(DataViewWindow.this), parallelListeners);
                 dialogContent.setCenter(null);
                 setCenter(getContent());
@@ -716,6 +709,7 @@ public class DataViewWindow extends BorderPane implements EventSource {
                 getParentView().getVisibleChildren().add(DataViewWindow.this);
 
                 setWindowState(WindowState.WINDOW_RESTORED);
+                maximizeRestoreButton.getStyleClass().setAll(CSS_WINDOW_MAXIMIZE_ICON);
                 setDetached(false);
             });
 
@@ -723,7 +717,6 @@ public class DataViewWindow extends BorderPane implements EventSource {
                 if (getParentView() == null) {
                     return;
                 }
-                autoNotification.set(true);
                 if (Boolean.TRUE.equals(n)) {
                     invokeListener(new WindowMaximisingEvent(DataViewWindow.this), parallelListeners);
                     setWindowState(WindowState.WINDOW_MAXIMISED);
@@ -734,7 +727,6 @@ public class DataViewWindow extends BorderPane implements EventSource {
             });
 
             this.iconifiedProperty().addListener((ch, o, n) -> {
-                autoNotification.set(true);
                 if (Boolean.TRUE.equals(n)) {
                     invokeListener(new WindowMinimisingEvent(DataViewWindow.this), parallelListeners);
                     setWindowState(WindowState.WINDOW_MINIMISED);
@@ -800,7 +792,7 @@ public class DataViewWindow extends BorderPane implements EventSource {
                 setX(mouseEvent.getScreenX());
                 setY(mouseEvent.getScreenY());
             }
-            autoNotification.set(true);
+
             invokeListener(new WindowDetachingEvent(DataViewWindow.this), parallelListeners);
 
             posX = getX();
@@ -811,9 +803,7 @@ public class DataViewWindow extends BorderPane implements EventSource {
             show();
             setWindowState(WindowState.WINDOW_RESTORED);
             setDetached(true);
-            autoNotification.set(true);
             invokeListener(new WindowDetachedEvent(DataViewWindow.this), parallelListeners);
-            autoNotification.set(false);
         }
     }
 
