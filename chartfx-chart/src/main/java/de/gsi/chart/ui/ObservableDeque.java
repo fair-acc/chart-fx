@@ -3,7 +3,6 @@ package de.gsi.chart.ui;
 import java.security.InvalidParameterException;
 import java.util.Deque;
 import java.util.Iterator;
-import java.util.Queue;
 
 import javafx.collections.ObservableListBase;
 
@@ -16,15 +15,16 @@ import javafx.collections.ObservableListBase;
  * @param <E> queue generic parameter
  */
 public class ObservableDeque<E> extends ObservableListBase<E> implements Deque<E> {
-    private final Deque<E> deque;
+    private final transient Deque<E> deque;
 
     /**
-     * Creates an ObservableDeque backed by the supplied Deque.
-     * Note that manipulations of the underlying deque will not result in notification to listeners.
-     * 
+     * Creates an ObservableDeque backed by the supplied Deque. Note that manipulations of the underlying deque will not
+     * result in notification to listeners.
+     *
      * @param deque the specific backing implementation
      */
-    public ObservableDeque(Deque<E> deque) {
+    public ObservableDeque(final Deque<E> deque) {
+        super();
         if (deque == null) {
             throw new InvalidParameterException("deque must not be null");
         }
@@ -32,9 +32,9 @@ public class ObservableDeque<E> extends ObservableListBase<E> implements Deque<E
     }
 
     @Override
-    public boolean offer(E e) {
+    public boolean offer(final E e) {
         beginChange();
-        boolean result = deque.offer(e);
+        final boolean result = deque.offer(e);
         if (result) {
             nextAdd(deque.size() - 1, deque.size());
         }
@@ -43,7 +43,7 @@ public class ObservableDeque<E> extends ObservableListBase<E> implements Deque<E
     }
 
     @Override
-    public boolean add(E e) {
+    public boolean add(final E e) {
         beginChange();
         try {
             deque.add(e);
@@ -58,7 +58,7 @@ public class ObservableDeque<E> extends ObservableListBase<E> implements Deque<E
     public E remove() {
         beginChange();
         try {
-            E e = deque.remove();
+            final E e = deque.remove();
             nextRemove(0, e);
             return e;
         } finally {
@@ -69,7 +69,7 @@ public class ObservableDeque<E> extends ObservableListBase<E> implements Deque<E
     @Override
     public E poll() {
         beginChange();
-        E e = deque.poll();
+        final E e = deque.poll();
         if (e != null) {
             nextRemove(0, e);
         }
@@ -88,8 +88,8 @@ public class ObservableDeque<E> extends ObservableListBase<E> implements Deque<E
     }
 
     @Override
-    public E get(int index) {
-        Iterator<E> iterator = deque.iterator();
+    public E get(final int index) {
+        final Iterator<E> iterator = deque.iterator();
         for (int i = 0; i < index; i++) {
             iterator.next();
         }
@@ -102,7 +102,7 @@ public class ObservableDeque<E> extends ObservableListBase<E> implements Deque<E
     }
 
     @Override
-    public void addFirst(E e) {
+    public void addFirst(final E e) {
         beginChange();
         try {
             deque.addFirst(e);
@@ -113,7 +113,7 @@ public class ObservableDeque<E> extends ObservableListBase<E> implements Deque<E
     }
 
     @Override
-    public void addLast(E e) {
+    public void addLast(final E e) {
         beginChange();
         try {
             deque.addLast(e);
@@ -124,7 +124,7 @@ public class ObservableDeque<E> extends ObservableListBase<E> implements Deque<E
     }
 
     @Override
-    public boolean offerFirst(E e) {
+    public boolean offerFirst(final E e) {
         if (deque.offerFirst(e)) {
             beginChange();
             try {
@@ -138,7 +138,7 @@ public class ObservableDeque<E> extends ObservableListBase<E> implements Deque<E
     }
 
     @Override
-    public boolean offerLast(E e) {
+    public boolean offerLast(final E e) {
         if (deque.offerLast(e)) {
             try {
                 deque.addLast(e);
@@ -154,7 +154,7 @@ public class ObservableDeque<E> extends ObservableListBase<E> implements Deque<E
     @Override
     public E removeFirst() {
         beginChange();
-        E e = deque.removeFirst();
+        final E e = deque.removeFirst();
         if (e != null) {
             nextRemove(0, e);
         }
@@ -165,7 +165,7 @@ public class ObservableDeque<E> extends ObservableListBase<E> implements Deque<E
     @Override
     public E removeLast() {
         beginChange();
-        E e = deque.removeLast();
+        final E e = deque.removeLast();
         if (e != null) {
             nextRemove(deque.size() - 1, e);
         }
@@ -176,7 +176,7 @@ public class ObservableDeque<E> extends ObservableListBase<E> implements Deque<E
     @Override
     public E pollFirst() {
         beginChange();
-        E e = deque.pollFirst();
+        final E e = deque.pollFirst();
         if (e != null) {
             nextRemove(0, e);
         }
@@ -187,7 +187,7 @@ public class ObservableDeque<E> extends ObservableListBase<E> implements Deque<E
     @Override
     public E pollLast() {
         beginChange();
-        E e = deque.pollLast();
+        final E e = deque.pollLast();
         if (e != null) {
             nextRemove(deque.size(), e);
         }
@@ -216,12 +216,12 @@ public class ObservableDeque<E> extends ObservableListBase<E> implements Deque<E
     }
 
     @Override
-    public boolean removeFirstOccurrence(Object o) {
+    public boolean removeFirstOccurrence(final Object o) {
         if (o == null) {
             return false;
         }
 
-        Iterator<E> iterator = deque.iterator();
+        final Iterator<E> iterator = deque.iterator();
         beginChange();
         for (int i = 0; i < deque.size(); i++) {
             final E e = iterator.next();
@@ -235,12 +235,12 @@ public class ObservableDeque<E> extends ObservableListBase<E> implements Deque<E
     }
 
     @Override
-    public boolean removeLastOccurrence(Object o) {
+    public boolean removeLastOccurrence(final Object o) {
         if (o == null) {
             return false;
         }
 
-        Iterator<E> iterator = deque.descendingIterator();
+        final Iterator<E> iterator = deque.descendingIterator();
         beginChange();
         for (int i = 0; i < deque.size(); i++) {
             final E e = iterator.next();
@@ -254,7 +254,7 @@ public class ObservableDeque<E> extends ObservableListBase<E> implements Deque<E
     }
 
     @Override
-    public void push(E e) {
+    public void push(final E e) {
         this.addFirst(e);
     }
 
