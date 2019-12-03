@@ -30,7 +30,7 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 
 /**
- * Holds all charts/tables to be displayed
+ * Holds all charts/tables or custom panes to be displayed
  *
  * @author Grzegorz Kruk (original idea)
  * @author rstein (adapted to ChartFX)
