@@ -6,11 +6,13 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.gsi.chart.viewer.DataViewTilingPane.Layout;
+import de.gsi.chart.viewer.DataViewWindow.WindowState;
 import de.gsi.dataset.utils.NoDuplicatesList;
 import javafx.beans.DefaultProperty;
 import javafx.beans.NamedArg;
@@ -397,14 +399,35 @@ public class DataView extends VBox {
         minimisedChildren.addListener((ListChangeListener<DataViewWindow>) change -> {
             while (change.next()) {
                 minimisedElements.getChildren().removeAll(change.getRemoved());
-                change.getAddedSubList().stream().filter(n -> !minimisedElements.getChildren().contains(n))
-                        .forEach(view -> minimisedElements.getChildren().add(view));
+
+                change.getAddedSubList().stream().forEach(view -> {
+                    view.setParentView(this);
+                    if (!view.isMinimised() && view.getWindowState().equals(WindowState.WINDOW_RESTORED)) {
+                        view.setMinimised(true);
+                    }
+                });
+
+                minimisedElements.getChildren().addAll(change.getAddedSubList().stream()
+                        .filter(view -> !minimisedElements.getChildren().contains(view)).collect(Collectors.toList()));
             }
         });
 
-        contentPane.addListener((ch, o, n) ->
+        undockedChildren.addListener((ListChangeListener<DataViewWindow>) change -> {
+            while (change.next()) {
+                minimisedElements.getChildren().removeAll(change.getRemoved());
+                visibleChildren.removeAll(change.getRemoved());
+                minimisedChildren.removeAll(change.getRemoved());
 
-        {
+                change.getRemoved().forEach(view -> view.setDetached(false));
+
+                change.getAddedSubList().stream().forEach(view -> {
+                    view.setParentView(this);
+                    view.setDetached(true);
+                });
+            }
+        });
+
+        contentPane.addListener((ch, o, n) -> {
             if ((n == null) || n.equals(o)) {
                 return;
             }

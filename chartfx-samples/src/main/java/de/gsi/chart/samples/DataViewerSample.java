@@ -43,6 +43,7 @@ import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.Separator;
 import javafx.scene.control.Tooltip;
@@ -87,32 +88,6 @@ public class DataViewerSample extends Application {
             LOGGER.atInfo().addArgument(((WindowClosedEvent) evt).getSource()).log("window {} closed");
         }
     };
-
-    /**
-     * create demo JDataViewer Chart
-     *
-     * @return the Swing-based chart component
-     */
-    private XYChart createChart() {
-        final XYChart chart = new TestChart();
-        chart.getXAxis().set("time", "s");
-        chart.getYAxis().set("y-axis", "A");
-
-        final RandomWalkFunction dataset1 = new RandomWalkFunction("Test1", DataViewerSample.NUMBER_OF_POINTS);
-        final RandomWalkFunction dataset2 = new RandomWalkFunction("Test2", DataViewerSample.NUMBER_OF_POINTS);
-        final RandomStepFunction dataset3 = new RandomStepFunction("Test3", DataViewerSample.NUMBER_OF_POINTS);
-        chart.getRenderers().clear();
-        chart.getRenderers().add(new ErrorDataSetRenderer());
-        chart.getDatasets().addAll(Arrays.asList(dataset1, dataset2, dataset3));
-
-        // Start task adding new data
-        final UpdateTask updateTask = new UpdateTask(chart, dataset1, dataset3);
-        final Timer timer = new Timer();
-        // Start update in 2sec.
-        timer.schedule(updateTask, 2000, DataViewerSample.UPDATE_PERIOD);
-
-        return chart;
-    }
 
     @Override
     public void start(final Stage primaryStage) {
@@ -160,15 +135,33 @@ public class DataViewerSample extends Application {
         view1.getVisibleChildren().addAll(energyView, currentView, jDataViewerPane);
         // view1.getVisibleNodes().addAll(energyChart, currentChart, jDataViewerChart);
 
+        ComboBox<InitialWindowState> initialWindowState = new ComboBox<>();
+        initialWindowState.getItems().setAll(InitialWindowState.values());
+        initialWindowState.setValue(InitialWindowState.VISIBLE);
+
         final Button newView = new Button(null, new HBox( //
                 new Glyph(FONT_AWESOME, FontAwesome.Glyph.PLUS).size(FONT_SIZE), //
                 new Glyph(FONT_AWESOME, FontAwesome.Glyph.LINE_CHART).size(FONT_SIZE)));
         newView.setTooltip(new Tooltip("add new view"));
         newView.setOnAction(evt -> {
-            final int count = view1.getVisibleChildren().size();
+            final int count = view1.getVisibleChildren().size() + view1.getMinimisedChildren().size();
             final XYChart jChart = createChart();
             final DataViewWindow newDataViewerPane = new DataViewWindow("Chart" + count, jChart);
-            view1.getVisibleChildren().add(newDataViewerPane);
+            switch (initialWindowState.getValue()) {
+            case DETACHED:
+                // alternate: add immediately to undocked state
+                view1.getUndockedChildren().add(newDataViewerPane);
+                break;
+            case MINIMISED:
+                // alternate: add immediately to minimised state
+                view1.getMinimisedChildren().add(newDataViewerPane);
+                break;
+            case VISIBLE:
+            default:
+                view1.getVisibleChildren().add(newDataViewerPane);
+                break;
+            }
+
             newDataViewerPane.addListener(dataWindowEventListener);
             newDataViewerPane.addListener(windowEvent -> {
                 // print window state explicitly
@@ -218,7 +211,8 @@ public class DataViewerSample extends Application {
 
         Label focusedOwner = new Label();
 
-        viewer.getUserToolBarItems().addAll(newView, listView, windowDeco, closeDeco, new Separator());
+        viewer.getUserToolBarItems().addAll(newView, listView, windowDeco, closeDeco, initialWindowState,
+                new Separator());
         final Scene scene = new Scene(
                 new VBox(viewer.getToolBar(), viewer, new HBox(new Label("focus on: "), focusedOwner)), 800, 600);
         scene.focusOwnerProperty().addListener((ch, o, n) -> {
@@ -234,16 +228,34 @@ public class DataViewerSample extends Application {
         primaryStage.setOnCloseRequest(evt -> System.exit(0)); //NOPMD
     }
 
-    private static void logStatePropertyChanges(String windowName, final DataViewWindow currentView) {
-        logPropertyChange(currentView.minimisedProperty(), windowName + " minimized");
-        logPropertyChange(currentView.detachedProperty(), windowName + " detached");
-        logPropertyChange(currentView.closedProperty(), windowName + " closed");
-        logPropertyChange(currentView.restoredProperty(), windowName + " restored");
-        logPropertyChange(currentView.maximisedProperty(), windowName + " maximized");
+    /**
+     * create demo JDataViewer Chart
+     *
+     * @return the Swing-based chart component
+     */
+    private XYChart createChart() {
+        final XYChart chart = new TestChart();
+        chart.getXAxis().set("time", "s");
+        chart.getYAxis().set("y-axis", "A");
+
+        final RandomWalkFunction dataset1 = new RandomWalkFunction("Test1", DataViewerSample.NUMBER_OF_POINTS);
+        final RandomWalkFunction dataset2 = new RandomWalkFunction("Test2", DataViewerSample.NUMBER_OF_POINTS);
+        final RandomStepFunction dataset3 = new RandomStepFunction("Test3", DataViewerSample.NUMBER_OF_POINTS);
+        chart.getRenderers().clear();
+        chart.getRenderers().add(new ErrorDataSetRenderer());
+        chart.getDatasets().addAll(Arrays.asList(dataset1, dataset2, dataset3));
+
+        // Start task adding new data
+        final UpdateTask updateTask = new UpdateTask(dataset1, dataset3);
+        final Timer timer = new Timer();
+        // Start update in 2sec.
+        timer.schedule(updateTask, 2000, DataViewerSample.UPDATE_PERIOD);
+
+        return chart;
     }
 
-    private static void logPropertyChange(BooleanProperty property, String name) {
-        property.addListener((ch, o, n) -> LOGGER.atInfo().log("Property '{}' changed to '{}'", name, n));
+    public static void main(final String[] args) {
+        Application.launch(args);
     }
 
     private static DoubleDataSet createData(final String name) {
@@ -302,8 +314,22 @@ public class DataViewerSample extends Application {
         return box;
     }
 
-    public static void main(final String[] args) {
-        Application.launch(args);
+    private static void logPropertyChange(BooleanProperty property, String name) {
+        property.addListener((ch, o, n) -> LOGGER.atInfo().log("Property '{}' changed to '{}'", name, n));
+    }
+
+    private static void logStatePropertyChanges(String windowName, final DataViewWindow currentView) {
+        logPropertyChange(currentView.minimisedProperty(), windowName + " minimized");
+        logPropertyChange(currentView.detachedProperty(), windowName + " detached");
+        logPropertyChange(currentView.closedProperty(), windowName + " closed");
+        logPropertyChange(currentView.restoredProperty(), windowName + " restored");
+        logPropertyChange(currentView.maximisedProperty(), windowName + " maximized");
+    }
+
+    private enum InitialWindowState {
+        VISIBLE,
+        MINIMISED,
+        DETACHED;
     }
 
     private class TestChart extends XYChart {
@@ -322,7 +348,7 @@ public class DataViewerSample extends Application {
         private final TestDataSet<?>[] dataSets;
         private int count;
 
-        private UpdateTask(final XYChart chart, final TestDataSet<?>... dataSet) {
+        private UpdateTask(final TestDataSet<?>... dataSet) {
             super();
             dataSets = dataSet.clone();
         }

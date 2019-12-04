@@ -237,8 +237,9 @@ public class DataViewWindow extends BorderPane implements EventSource {
 
         maximizeRestoreButton.getStyleClass().setAll(CSS_WINDOW_MAXIMIZE_ICON);
         getParentView().getVisibleChildren().remove(this);
-        getParentView().getMinimisedChildren().add(this);
         setWindowState(WindowState.WINDOW_MINIMISED);
+        getParentView().getMinimisedChildren().add(this);
+
         updatingStage.set(false);
     };
 
@@ -334,12 +335,6 @@ public class DataViewWindow extends BorderPane implements EventSource {
         });
 
         // set actions
-        // old actions
-        //        detachButton.setOnAction(evt -> dialog.show(null));
-        //        minimizeButton.setOnAction(minimizeButtonAction);
-        //        maximizeRestoreButton.setOnAction(maximizeButtonAction);
-        //        closeButton.setOnAction(closeButtonAction);
-        // new actions
         detachButton.setOnAction(evt -> setDetached(true));
         minimizeButton.setOnAction(minimizeButtonAction);
         maximizeRestoreButton.setOnAction(maximizeButtonAction);
