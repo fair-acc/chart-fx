@@ -61,6 +61,13 @@ public class YRangeIndicator extends AbstractRangeValueIndicator {
 
         final double startY = Math.max(minY, minY + yAxis.getDisplayPosition(getUpperBound()));
         final double endY = Math.min(maxY, minY + yAxis.getDisplayPosition(getLowerBound()));
+        
+//        final Axis yAxis = getNumericAxis();
+//        final double value1 = yAxis.getDisplayPosition(getLowerBound());
+//        final double value2 = yAxis.getDisplayPosition(getUpperBound());
+//
+//        final double startY = Math.max(minY, minY + Math.min(value1, value2));
+//        final double endY = Math.min(maxY, minY + Math.max(value1, value2));
 
         layout(new BoundingBox(minX, startY, maxX - minX, endY - startY));
     }
