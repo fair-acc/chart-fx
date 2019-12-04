@@ -56,9 +56,11 @@ public class XRangeIndicator extends AbstractRangeValueIndicator {
         final double maxY = plotAreaBounds.getMaxY();
 
         final Axis xAxis = getNumericAxis();
+        final double value1 = xAxis.getDisplayPosition(getLowerBound());
+        final double value2 = xAxis.getDisplayPosition(getUpperBound());
 
-        final double startX = Math.max(minX, minX + xAxis.getDisplayPosition(getLowerBound()));
-        final double endX = Math.min(maxX, minX + xAxis.getDisplayPosition(getUpperBound()));
+        final double startX = Math.max(minX, minX + Math.min(value1, value2));
+        final double endX = Math.min(maxX, minX + Math.max(value1, value2));
 
         layout(new BoundingBox(startX, minY, endX - startX, maxY - minY));
     }
