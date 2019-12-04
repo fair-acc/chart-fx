@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,6 +24,9 @@ public final class StyleParser { // NOPMD
     private static final Logger LOGGER = LoggerFactory.getLogger(StyleParser.class);
     private static final int DEFAULT_FONT_SIZE = 18;
     private static final String DEFAULT_FONT = "Helvetia";
+    private static final Pattern AT_LEAST_ONE_WHITESPACE_PATTERN = Pattern.compile("\\s+");
+    private static final Pattern QUOTES_PATTERN = Pattern.compile("[\"\']");
+    private static final Pattern STYLE_ASSIGNMENT_PATTERN = Pattern.compile("[=:]");
 
     private StyleParser() {
 
@@ -242,14 +246,15 @@ public final class StyleParser { // NOPMD
         if (style == null) {
             return retVal;
         }
-        final String[] keyVals = style.toLowerCase(Locale.UK).replaceAll("\\s+", "").split("[;]");
+        
+        final String[] keyVals = AT_LEAST_ONE_WHITESPACE_PATTERN.matcher(style.toLowerCase(Locale.UK)).replaceAll("").split(";");
         for (final String keyVal : keyVals) {
-            final String[] parts = keyVal.split("[=:]", 2);
+            final String[] parts = STYLE_ASSIGNMENT_PATTERN.split(keyVal, 2);
             if (parts == null || parts[0] == null || parts.length <= 1) {
                 continue;
             }
 
-            retVal.put(parts[0], parts[1].replaceAll("[\"\']", ""));
+            retVal.put(parts[0], QUOTES_PATTERN.matcher(parts[1]).replaceAll(""));
         }
 
         return retVal;
