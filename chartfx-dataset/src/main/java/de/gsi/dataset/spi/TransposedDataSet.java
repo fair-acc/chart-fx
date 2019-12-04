@@ -18,14 +18,14 @@ import de.gsi.dataset.locks.DataSetLock;
 /**
  * Allows permutation of the axes of an underlying DataSet, for applications like: - transposed display - reduction of
  * multi-dimensional DataSets to lower dimensions To be able to handle different DataSet Interface types, the
- * constructors are private and only acessible via the static class methods, which return the correct subtype.
+ * constructors are private and only accessible via the static class methods, which return the correct sub-type.
  *
  * @author Alexander Krimm
  */
 public class TransposedDataSet implements DataSet {
     private static final Logger LOGGER = LoggerFactory.getLogger(TransposedDataSet.class);
     private static final long serialVersionUID = 2019092401;
-    final protected DataSet dataSet;
+    protected final DataSet dataSet;
     protected int[] permutation;
     private boolean transposed;
 
