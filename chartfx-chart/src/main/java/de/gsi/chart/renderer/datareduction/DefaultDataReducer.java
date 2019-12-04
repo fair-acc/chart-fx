@@ -204,8 +204,10 @@ public class DefaultDataReducer implements RendererDataReducer {
         styles[count] = styles[indexMax - 1];
         count++;
 
-        ProcessingProfiler.getTimeDiff(start,
-                String.format("data reduction (full-xy error definitions: from %d to %d)", indexMax - indexMin, count));
+        if (ProcessingProfiler.getDebugState()) {
+            ProcessingProfiler.getTimeDiff(start,
+                    String.format("data reduction (full-xy error definitions: from %d to %d)", indexMax - indexMin, count));
+        }
         return count;
     }
 
@@ -312,8 +314,10 @@ public class DefaultDataReducer implements RendererDataReducer {
         styles[count] = styles[indexMax - 1];
         count++;
 
-        ProcessingProfiler.getTimeDiff(start,
-                String.format("only-y error definitions: data reduction (from %d to %d)", indexMax - indexMin, count));
+        if (ProcessingProfiler.getDebugState()) {
+            ProcessingProfiler.getTimeDiff(start,
+                    String.format("only-y error definitions: data reduction (from %d to %d)", indexMax - indexMin, count));
+        }
         return count;
     }
 
@@ -406,8 +410,10 @@ public class DefaultDataReducer implements RendererDataReducer {
         styles[count] = styles[indexMax - 1];
         count++;
 
-        ProcessingProfiler.getTimeDiff(start,
-                String.format("data reduction (no error definitions: from %d to %d)", indexMax - indexMin, count));
+        if (ProcessingProfiler.getDebugState()) {
+            ProcessingProfiler.getTimeDiff(start,
+                    String.format("data reduction (no error definitions: from %d to %d)", indexMax - indexMin, count));
+        }
         return count;
     }
 
