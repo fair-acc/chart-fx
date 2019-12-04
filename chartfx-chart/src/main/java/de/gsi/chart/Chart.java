@@ -102,7 +102,7 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
     protected BooleanBinding showingBinding;
     protected final BooleanProperty showing = new SimpleBooleanProperty(this, "showing", false);
     /** When true any data changes will be animated. */
-    private final BooleanProperty animated = new SimpleBooleanProperty(this, "animated", false);
+    private final BooleanProperty animated = new SimpleBooleanProperty(this, "animated", true);
     // TODO: Check whether 'this' or chart contents need to be added
     /** Animator for animating stuff on the chart */
     protected final ChartLayoutAnimator animator = new ChartLayoutAnimator(this);
@@ -1042,14 +1042,14 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
             for (final Renderer renderer : change.getAddedSubList()) {
                 // update legend and recalculateLayout on datasetChange
                 renderer.getDatasets().addListener(datasetChangeListener);
-
-                // add all visible axes from the renderer to the chart
-                getAxes().addAll(renderer.getAxes().filtered(axis -> axis.getSide() != null));
             }
 
             // handle removed renderer
             change.getRemoved().forEach(renderer -> renderer.getDatasets().removeListener(datasetChangeListener));
         }
+        // reset change to allow derived classes to add additional listeners to renderer changes
+        change.reset();
+
         requestLayout();
         updateLegend(getDatasets(), getRenderers());
     }
