@@ -104,14 +104,19 @@ public class UpdateAxisLabels extends ChartPlugin {
             if (getChart().getDatasets().size() == 1) {
 
                 if (dim == -1 || dim == DataSet.DIM_X) {
-                    getChart().getFirstAxis(Orientation.HORIZONTAL).set(dataSet.getAxisDescription(DataSet.DIM_X));
+                    getChart().getFirstAxis(Orientation.HORIZONTAL).set(
+                            dataSet.getAxisDescription(DataSet.DIM_X).getName(),
+                            dataSet.getAxisDescription(DataSet.DIM_X).getUnit());
                 }
                 if (dim == -1 || dim == DataSet.DIM_Y) {
-                    getChart().getFirstAxis(Orientation.VERTICAL).set(dataSet.getAxisDescription(DataSet.DIM_Y));
+                    getChart().getFirstAxis(Orientation.VERTICAL).set(
+                            dataSet.getAxisDescription(DataSet.DIM_Y).getName(),
+                            dataSet.getAxisDescription(DataSet.DIM_Y).getUnit());
                 }
                 if ((dim == -1 || dim == DataSet.DIM_Z) && dataSet.getDimension() >= 3) {
                     getChart().getAxes().stream().filter(axis -> axis instanceof ColorGradientAxis).findFirst()
-                            .ifPresent(axis -> axis.set(dataSet.getAxisDescription(DataSet.DIM_Y)));
+                            .ifPresent(axis -> axis.set(dataSet.getAxisDescription(DataSet.DIM_Z).getName(),
+                                    dataSet.getAxisDescription(DataSet.DIM_Z).getUnit()));
                 }
             } else {
                 if (LOGGER.isWarnEnabled()) {
@@ -125,16 +130,21 @@ public class UpdateAxisLabels extends ChartPlugin {
                 if (dim == -1 || dim == DataSet.DIM_X) {
                     Optional<Axis> oldAxis = renderer.getAxes().stream().filter(axis -> axis.getSide().isHorizontal())
                             .findFirst();
-                    oldAxis.ifPresent(a -> a.set(dataSet.getAxisDescription(DataSet.DIM_X)));
+                    oldAxis.ifPresent(a -> a.set(
+                            dataSet.getAxisDescription(DataSet.DIM_X).getName(),
+                            dataSet.getAxisDescription(DataSet.DIM_X).getUnit()));
                 }
                 if (dim == -1 || dim == DataSet.DIM_Y) {
                     Optional<Axis> oldAxis = renderer.getAxes().stream().filter(axis -> axis.getSide().isVertical())
                             .findFirst();
-                    oldAxis.ifPresent(a -> a.set(dataSet.getAxisDescription(DataSet.DIM_Y)));
+                    oldAxis.ifPresent(a -> a.set(
+                            dataSet.getAxisDescription(DataSet.DIM_Y).getName(),
+                            dataSet.getAxisDescription(DataSet.DIM_Y).getUnit()));
                 }
                 if ((dim == -1 || dim == DataSet.DIM_Z) && dataSet.getDimension() >= 3) {
                     renderer.getAxes().stream().filter(axis -> axis instanceof ColorGradientAxis).findFirst()
-                            .ifPresent(axis -> axis.set(dataSet.getAxisDescription(2)));
+                            .ifPresent(axis -> axis.set(dataSet.getAxisDescription(DataSet.DIM_Z).getName(),
+                                    dataSet.getAxisDescription(DataSet.DIM_Z).getUnit()));
                 }
             } else {
                 if (LOGGER.isWarnEnabled()) {
