@@ -1364,7 +1364,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
         final double a = power3Upper > power3Lower ? power3Lower : power3Upper;
         final double power = Math.pow(10, a);
         final double oldPower = getUnitScaling();
-        if ((power != oldPower) && (power != 0)) {
+        if ((power != oldPower) && (power != 0) && (Double.isFinite(power))) {
             this.setUnitScaling(power);
         }
         setTickUnit(range / getMinorTickCount());
