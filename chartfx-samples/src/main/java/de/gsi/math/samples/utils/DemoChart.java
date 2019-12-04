@@ -61,7 +61,6 @@ public class DemoChart extends XYChart {
 
         getPlugins().add(new ParameterMeasurements());
         getPlugins().add(new Zoomer());
-        getPlugins().add(new Panner());
         getPlugins().add(new TableViewer());
         getPlugins().add(new EditAxis());
         getPlugins().add(new DataPointTooltip());
