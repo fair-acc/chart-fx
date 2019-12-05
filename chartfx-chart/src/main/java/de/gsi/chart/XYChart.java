@@ -181,11 +181,10 @@ public class XYChart extends Chart {
                 // search for horizontal axis in Chart (which creates one if missing) and add to renderer
                 renderer.getAxes().add(getFirstAxis(Orientation.VERTICAL));
             }
-
-            // check if there are assignable axes not yet present in the Chart's list
-            getAxes().addAll(renderer.getAxes().subList(0, 2).stream()
-                    .filter(a -> (a.getSide() != null && !getAxes().contains(a))).collect(Collectors.toList()));
         }
+        // check if there are assignable axes not yet present in the Chart's list
+        getAxes().addAll(renderer.getAxes().stream().limit(2)
+                .filter(a -> (a.getSide() != null && !getAxes().contains(a))).collect(Collectors.toList()));
     }
 
     /**
@@ -369,15 +368,15 @@ public class XYChart extends Chart {
         FXUtils.assertJavaFxThread();
         super.rendererChanged(change);
 
-        //        while (change.next()) {
-        //            // handle added renderer
-        //            for (final Renderer renderer : change.getAddedSubList()) {
-        //                // checkRendererForRequiredAxes(renderer);
-        //            }
+        // while (change.next()) {
+        // // handle added renderer
+        // for (final Renderer renderer : change.getAddedSubList()) {
+        // // checkRendererForRequiredAxes(renderer);
+        // }
         //
-        //            // handle removed renderer
-        //            change.getRemoved().forEach(renderer -> renderer.getDatasets().removeListener(datasetChangeListener));
-        //        }
+        // // handle removed renderer
+        // change.getRemoved().forEach(renderer -> renderer.getDatasets().removeListener(datasetChangeListener));
+        // }
         requestLayout();
         updateLegend(getDatasets(), getRenderers());
     }
