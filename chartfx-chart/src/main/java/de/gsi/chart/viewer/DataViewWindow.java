@@ -48,6 +48,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
+import javafx.scene.layout.StackPane;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 
@@ -146,6 +147,7 @@ public class DataViewWindow extends BorderPane implements EventSource {
     private final Button maximizeRestoreButton = new SquareButton(CSS_WINDOW_MAXIMIZE_ICON);
     private final Button closeButton = new SquareButton(CSS_WINDOW_CLOSE_ICON);
 
+    // second stage per DataViewWindow to be used when content is requested to be detached
     private final ExternalStage dialog = new ExternalStage();
 
     private transient double xOffset;
@@ -178,7 +180,7 @@ public class DataViewWindow extends BorderPane implements EventSource {
         }
         if (dialog.isShowing()) {
             // enlarge to maximum screen size
-            dialog.maximizeRestore();
+            dialog.maximizeRestore(this);
             updatingStage.set(false);
             return;
         }
@@ -323,7 +325,7 @@ public class DataViewWindow extends BorderPane implements EventSource {
         restoredWindow.addListener((ch, o, n) -> maximizeButtonAction.handle(null));
         detachedWindow.addListener((ch, o, n) -> {
             if (Boolean.TRUE.equals(n)) {
-                dialog.show(null);
+                dialog.show(this, null);
             } else {
                 dialog.hide();
             }
@@ -344,6 +346,9 @@ public class DataViewWindow extends BorderPane implements EventSource {
         windowDecoration.setOnMouseReleased(this::dragFinish);
         windowDecoration.setOnMousePressed(this::dragStart);
         windowDecoration.setOnMouseDragged(this::dragOngoing);
+
+        // install hide function on external window
+        dialog.setOnHiding(we -> dialog.hide(this));
 
         setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
         setName(name);
@@ -600,7 +605,7 @@ public class DataViewWindow extends BorderPane implements EventSource {
             // dropped outside of node window
             if (!dialog.isShowing()) {
 
-                dialog.show(mevt);
+                dialog.show(this, mevt);
                 return;
             }
             dialog.setX(mevt.getScreenX() - xOffset);
@@ -661,87 +666,36 @@ public class DataViewWindow extends BorderPane implements EventSource {
         WINDOW_CLOSED; // closed and final window state
     }
 
-    protected class ExternalStage extends Stage {
+    protected static class ExternalStage extends Stage {
         private transient double posX = 640;
         private transient double posY = 480;
         private transient double width = 640;
         private transient double height = 480;
         private transient boolean maximized;
+        private transient final Scene scene = new Scene(new StackPane(), 640, 480);
 
         public ExternalStage() {
             super();
-            titleProperty().bind(nameProperty());
-            final BorderPane dialogContent = new BorderPane();
-            final Scene scene = new Scene(dialogContent, 640, 480);
             setScene(scene);
+        }
 
-            setOnShown(windowEvent -> {
-                if (getParentView() == null) {
-                    return;
-                }
-                if (DataViewWindow.this.equals(getParentView().getMaximizedChild())) {
-                    getParentView().setMaximizedChild(null);
-                }
-                getParentView().getMinimisedChildren().remove(DataViewWindow.this);
-                getParentView().getVisibleChildren().remove(DataViewWindow.this);
-                getParentView().getUndockedChildren().add(DataViewWindow.this);
+        public void hide(final DataViewWindow dataViewWindow) {
+            dataViewWindow.invokeListener(new WindowRestoringEvent(dataViewWindow), dataViewWindow.parallelListeners);
+            titleProperty().unbind();
+            scene.setRoot(new StackPane());
 
-                setCenter(null);
-                dialogContent.setCenter(getContent());
+            dataViewWindow.setCenter(dataViewWindow.getContent());
+            dataViewWindow.getParentView().getUndockedChildren().remove(dataViewWindow);
+            dataViewWindow.getParentView().getVisibleChildren().add(dataViewWindow);
 
-                setDetached(true);
-            });
-
-            setOnHidden(windowEvent -> {
-                if (getParentView() == null) {
-                    return;
-                }
-                // asked to reattach pane
-                invokeListener(new WindowRestoringEvent(DataViewWindow.this), parallelListeners);
-                dialogContent.setCenter(null);
-                setCenter(getContent());
-                getParentView().getUndockedChildren().remove(DataViewWindow.this);
-                getParentView().getVisibleChildren().add(DataViewWindow.this);
-
-                setWindowState(WindowState.WINDOW_RESTORED);
-                maximizeRestoreButton.getStyleClass().setAll(CSS_WINDOW_MAXIMIZE_ICON);
-                setDetached(false);
-            });
-
-            this.maximizedProperty().addListener((ch, o, n) -> {
-                if (getParentView() == null) {
-                    return;
-                }
-                if (Boolean.TRUE.equals(n)) {
-                    invokeListener(new WindowMaximisingEvent(DataViewWindow.this), parallelListeners);
-                    setWindowState(WindowState.WINDOW_MAXIMISED);
-                } else {
-                    invokeListener(new WindowRestoringEvent(DataViewWindow.this), parallelListeners);
-                    setWindowState(WindowState.WINDOW_RESTORED);
-                }
-            });
-
-            this.iconifiedProperty().addListener((ch, o, n) -> {
-                if (Boolean.TRUE.equals(n)) {
-                    invokeListener(new WindowMinimisingEvent(DataViewWindow.this), parallelListeners);
-                    setWindowState(WindowState.WINDOW_MINIMISED);
-                } else {
-                    if (isMaximised()) {
-                        invokeListener(new WindowMinimisingEvent(DataViewWindow.this), parallelListeners);
-                        setWindowState(WindowState.WINDOW_MINIMISED);
-                    } else {
-                        invokeListener(new WindowRestoringEvent(DataViewWindow.this), parallelListeners);
-                        setWindowState(WindowState.WINDOW_RESTORED);
-                    }
-                }
-            });
+            dataViewWindow.invokeListener(new WindowRestoredEvent(dataViewWindow), dataViewWindow.parallelListeners);
         }
 
         public boolean isMaximised() {
             return maximized;
         }
 
-        public void maximizeRestore() {
+        public void maximizeRestore(final DataViewWindow dataViewWindow) {
             if (maximized) {
                 // restore
                 if (LOGGER.isDebugEnabled()) {
@@ -753,7 +707,7 @@ public class DataViewWindow extends BorderPane implements EventSource {
                 setY(posY);
                 maximized = false;
 
-                setWindowState(WindowState.WINDOW_RESTORED);
+                dataViewWindow.setWindowState(WindowState.WINDOW_RESTORED);
                 return;
             }
             final Rectangle2D primaryScreenBounds = Screen.getPrimary().getVisualBounds();
@@ -771,37 +725,56 @@ public class DataViewWindow extends BorderPane implements EventSource {
             setHeight(primaryScreenBounds.getHeight());
             maximized = true;
 
-            setWindowState(WindowState.WINDOW_MAXIMISED);
+            dataViewWindow.setWindowState(WindowState.WINDOW_MAXIMISED);
         }
 
-        public void show(final MouseEvent mouseEvent) {
+        public void show(final DataViewWindow dataViewWindow, final MouseEvent mouseEvent) {
             if (isShowing()) {
                 return;
             }
+
             if (mouseEvent == null) {
-                if (DataViewWindow.this.getParentView() == null) {
-                    setX(0.0);
-                    setY(0.0);
-                } else {
-                    setX(DataViewWindow.this.getParentView().getScene().getWindow().getX() + 50);
-                    setY(DataViewWindow.this.getParentView().getScene().getWindow().getY() + 50);
-                }
+                setX(dataViewWindow.getScene().getWindow().getX() + 50);
+                setY(dataViewWindow.getScene().getWindow().getY() + 50);
             } else {
                 setX(mouseEvent.getScreenX());
                 setY(mouseEvent.getScreenY());
             }
 
-            invokeListener(new WindowDetachingEvent(DataViewWindow.this), parallelListeners);
+            dataViewWindow.invokeListener(new WindowDetachingEvent(dataViewWindow), dataViewWindow.parallelListeners);
 
             posX = getX();
             posY = getY();
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.atDebug().addArgument(getName()).log("show window '{}'");
             }
+
+            titleProperty().set(dataViewWindow.getName());
+            titleProperty().bind(dataViewWindow.nameProperty());
+
+            if (dataViewWindow.equals(dataViewWindow.getParentView().getMaximizedChild())) {
+                dataViewWindow.getParentView().setMaximizedChild(null);
+            }
+            dataViewWindow.getParentView().getMinimisedChildren().remove(dataViewWindow);
+            dataViewWindow.getParentView().getVisibleChildren().remove(dataViewWindow);
+            dataViewWindow.getParentView().getUndockedChildren().add(dataViewWindow);
+
+            dataViewWindow.setCenter(null);
+            Node dataWindowContent = dataViewWindow.getContent();
+            if (dataWindowContent instanceof Pane) {
+                scene.setRoot((Pane) dataWindowContent);
+            } else {
+                scene.setRoot(new StackPane(dataWindowContent));
+            }
             show();
-            setWindowState(WindowState.WINDOW_RESTORED);
-            setDetached(true);
-            invokeListener(new WindowDetachedEvent(DataViewWindow.this), parallelListeners);
+
+            dataViewWindow.setWindowState(WindowState.WINDOW_RESTORED);
+            dataViewWindow.setDetached(true);
+            dataViewWindow.invokeListener(new WindowDetachedEvent(dataViewWindow), dataViewWindow.parallelListeners);
+        }
+
+        private String getName() {
+            return titleProperty().getValue();
         }
     }
 
