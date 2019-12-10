@@ -45,7 +45,6 @@ public class GridRenderer extends Pane implements Renderer {
     private static final PseudoClass SELECTED_PSEUDO_CLASS = PseudoClass.getPseudoClass("withMinor");
 
     private static final double[] DEFAULT_GRID_DASH_PATTERM = { 4.5, 2.5 };
-    protected final Chart baseChart;
     // protected final BooleanProperty drawGridOnTop = new
     // SimpleStyleableBooleanProperty(StyleableProperties.GRID_ON_TOP,
     // this, "drawGridOnTop", true);
@@ -57,12 +56,9 @@ public class GridRenderer extends Pane implements Renderer {
     private final Group gridStyleNodes = new Group();
     protected final ObservableList<Axis> axesList = FXCollections.observableList(new NoDuplicatesList<Axis>());
 
-    public GridRenderer(final XYChart chart) {
+    public GridRenderer() {
         super();
-        if (chart == null) {
-            throw new InvalidParameterException("chart must not be null");
-        }
-        baseChart = chart;
+
         getStylesheets().add(GridRenderer.CHART_CSS);
         getStyleClass().setAll(GridRenderer.STYLE_CLASS_GRID_RENDERER);
         horMajorGridStyleNode = new Line();
@@ -109,7 +105,6 @@ public class GridRenderer extends Pane implements Renderer {
                     verMinorGridStyleNode.isVisible());
             drawGridOnTopNode.pseudoClassStateChanged(GridRenderer.SELECTED_PSEUDO_CLASS,
                     drawGridOnTopNode.isVisible());
-            chart.requestLayout();
         };
 
         horizontalGridLinesVisibleProperty().addListener(change);

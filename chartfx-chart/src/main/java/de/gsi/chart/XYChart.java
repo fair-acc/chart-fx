@@ -56,7 +56,8 @@ public class XYChart extends Chart {
     protected static final int BURST_LIMIT_MS = 15;
     protected BooleanProperty polarPlot = new SimpleBooleanProperty(this, "polarPlot", false);
     private final ObjectProperty<PolarTickStep> polarStepSize = new SimpleObjectProperty<>(PolarTickStep.THIRTY);
-    private final GridRenderer gridRenderer = new GridRenderer(this);
+    private final GridRenderer gridRenderer = new GridRenderer();
+    protected final ChangeListener<? super Boolean> gridLineVisibilitychange = (ob, o, n) -> requestLayout();
     private long lastCanvasUpdate;
     private boolean callCanvasUpdateLater;
     private final ChangeListener<Side> axisSideChangeListener = this::axisSideChanged;
@@ -87,6 +88,9 @@ public class XYChart extends Chart {
             }
             getAxes().add(yAxis);
         }
+
+        gridRenderer.horizontalGridLinesVisibleProperty().addListener(gridLineVisibilitychange);
+        gridRenderer.verticalGridLinesVisibleProperty().addListener(gridLineVisibilitychange);
 
         this.setAnimated(false);
         getRenderers().addListener(this::rendererChanged);
