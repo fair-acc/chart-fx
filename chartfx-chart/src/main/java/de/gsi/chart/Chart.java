@@ -67,6 +67,7 @@ import javafx.geometry.Pos;
 import javafx.scene.CacheHint;
 import javafx.scene.Group;
 import javafx.scene.Node;
+import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
@@ -80,6 +81,7 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.RowConstraints;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.stage.Window;
 import javafx.util.Duration;
 
 /**
@@ -101,6 +103,7 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
 
     protected BooleanBinding showingBinding;
     protected final BooleanProperty showing = new SimpleBooleanProperty(this, "showing", false);
+    protected final ChangeListener<? super Boolean> showingListener = (ch2, o, n) -> showing.set(n);
     /** When true any data changes will be animated. */
     private final BooleanProperty animated = new SimpleBooleanProperty(this, "animated", true);
     // TODO: Check whether 'this' or chart contents need to be added
@@ -183,6 +186,33 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
     protected final ListChangeListener<DataSet> datasetChangeListener = this::datasetsChanged;
     protected final EventListener dataSetDataListener = obs -> FXUtils.runFX(this::dataSetInvalidated);
     protected final ListChangeListener<ChartPlugin> pluginsChangedListener = this::pluginsChanged;
+    protected final ChangeListener<? super Window> windowPropertyListener = (ch1, oldWindow, newWindow) -> {
+        if (oldWindow != null) {
+            oldWindow.showingProperty().removeListener(showingListener);
+        }
+        if (newWindow == null) {
+            showing.set(false);
+            return;
+        }
+        newWindow.showingProperty().addListener(showingListener);
+    };
+    private final ChangeListener<? super Scene> scenePropertyListener = (ch, oldScene, newScene) -> {
+        if (oldScene == newScene) {
+            return;
+        }
+        if (oldScene != null) {
+            // remove listener
+            oldScene.windowProperty().removeListener(windowPropertyListener);
+        }
+
+        if (newScene == null) {
+            showing.set(false);
+            return;
+        }
+
+        // add listener
+        newScene.windowProperty().addListener(windowPropertyListener);
+    };
     {
         getDatasets().addListener(datasetChangeListener);
         getAxes().addListener(axesChangeListener);
@@ -975,36 +1005,13 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
     protected abstract void redrawCanvas();
 
     protected void registerShowingListener() {
-        sceneProperty().addListener((ch, oldScene, newScene) -> {
-            if (oldScene == newScene) {
-                return;
-            }
-            if (oldScene != null) {
-                // remove listener
+        sceneProperty().addListener(scenePropertyListener);
 
-            }
-
-            if (newScene == null) {
-                showing.set(false);
-                return;
-            }
-
-            // add listener
-            newScene.windowProperty().addListener((ch1, oldWindow, newWindow) -> {
-                if (newWindow == null) {
-                    showing.set(false);
-                    return;
-                }
-                newWindow.showingProperty().addListener((ch2, o, n) -> {
-                    showing.set(n);
-                });
-            });
-        });
         showing.addListener((ch, o, n) -> {
             if (n.equals(n)) {
                 return;
             }
-            if (n) {
+            if (Boolean.TRUE.equals(n)) {
                 // requestLayout();
 
                 // alt implementation in case of start-up issues
