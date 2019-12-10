@@ -656,7 +656,9 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
         final double xMin = xAxis.getValueForDisplay(0);
         final double xMax = xAxis.getValueForDisplay(xAxisWidth);
 
-        ProcessingProfiler.getTimeDiff(start, "init");
+        if (ProcessingProfiler.getDebugState()) {
+            ProcessingProfiler.getTimeDiff(start, "init");
+        }
 
         for (int dataSetIndex = localDataSetList.size() - 1; dataSetIndex >= 0; dataSetIndex--) {
             final int ldataSetIndex = dataSetIndex;
@@ -705,12 +707,16 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
                     return Optional.empty();
                 }
 
-                stopStamp = ProcessingProfiler.getTimeDiff(stopStamp,
-                        "get min/max" + String.format(" from:%d to:%d", indexMin, indexMax));
+                if (ProcessingProfiler.getDebugState()) {
+                    stopStamp = ProcessingProfiler.getTimeDiff(stopStamp,
+                            "get min/max" + String.format(" from:%d to:%d", indexMin, indexMax));
+                }
 
                 final CachedDataPoints localCachedPoints = new CachedDataPoints(indexMin, indexMax,
                         dataSet.getDataCount(DataSet.DIM_X), true);
-                stopStamp = ProcessingProfiler.getTimeDiff(stopStamp, "get CachedPoints");
+                if (ProcessingProfiler.getDebugState()) {
+                    stopStamp = ProcessingProfiler.getTimeDiff(stopStamp, "get CachedPoints");
+                }
 
                 // compute local screen coordinates
                 final boolean isPolarPlot = ((XYChart) chart).isPolarPlot();
@@ -722,7 +728,9 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
                     localCachedPoints.computeScreenCoordinates(xAxis, yAxis, dataSet, dataSetOffset + ldataSetIndex,
                             indexMin, indexMax, getErrorType(), isPolarPlot, isallowNaNs());
                 }
-                stopStamp = ProcessingProfiler.getTimeDiff(stopStamp, "computeScreenCoordinates()");
+                if (ProcessingProfiler.getDebugState()) {
+                    stopStamp = ProcessingProfiler.getTimeDiff(stopStamp, "computeScreenCoordinates()");
+                }
                 return Optional.of(localCachedPoints);
             });
 
@@ -739,7 +747,9 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
 
             stopStamp = ProcessingProfiler.getTimeStamp();
 
-            ProcessingProfiler.getTimeDiff(stopStamp, "localCachedPoints.release()");
+            if (ProcessingProfiler.getDebugState()) {
+                ProcessingProfiler.getTimeDiff(stopStamp, "localCachedPoints.release()");
+            }
         } // end of 'dataSetIndex' loop
         ProcessingProfiler.getTimeDiff(start);
 
