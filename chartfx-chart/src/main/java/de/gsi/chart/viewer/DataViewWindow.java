@@ -775,6 +775,9 @@ public class DataViewWindow extends BorderPane implements EventSource {
         }
 
         public void show(final MouseEvent mouseEvent) {
+            if (isShowing()) {
+                return;
+            }
             if (mouseEvent == null) {
                 if (DataViewWindow.this.getParentView() == null) {
                     setX(0.0);
