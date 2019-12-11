@@ -838,7 +838,7 @@ public class DataSetUtils extends DataSetUtilsHelper {
         }
 
         byteOutput.reset();
-        dataSet.lock().readLockGuard(() -> {
+        dataSet.lock().writeLockGuard(() -> {
             try {
                 byteOutput.write(("#file producer : " + DataSetUtils.class.getCanonicalName() + '\n').getBytes());
 
