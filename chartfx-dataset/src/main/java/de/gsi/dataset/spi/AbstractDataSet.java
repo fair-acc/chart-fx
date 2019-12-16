@@ -110,46 +110,25 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
         return autoNotification;
     }
 
-    protected int binarySearchX(final double search, final int indexMin, final int indexMax) {
+    protected int binarySearch(final int dimIndex, final double search, final int indexMin, final int indexMax) {
         if (indexMin == indexMax) {
             return indexMin;
         }
         if (indexMax - indexMin == 1) {
-            if (Math.abs(get(DIM_X, indexMin) - search) < Math.abs(get(DIM_X, indexMax) - search)) {
+            if (Math.abs(get(dimIndex, indexMin) - search) < Math.abs(get(dimIndex, indexMax) - search)) {
                 return indexMin;
             }
             return indexMax;
         }
         final int middle = (indexMax + indexMin) / 2;
-        final double valMiddle = get(DIM_X, middle);
+        final double valMiddle = get(dimIndex, middle);
         if (valMiddle == search) {
             return middle;
         }
         if (search < valMiddle) {
-            return binarySearchX(search, indexMin, middle);
+            return binarySearch(dimIndex, search, indexMin, middle);
         }
-        return binarySearchX(search, middle, indexMax);
-    }
-
-    protected int binarySearchY(final double search, final int indexMin, final int indexMax) {
-        if (indexMin == indexMax) {
-            return indexMin;
-        }
-        if (indexMax - indexMin == 1) {
-            if (Math.abs(get(DIM_Y, indexMin) - search) < Math.abs(get(DIM_Y, indexMax) - search)) {
-                return indexMin;
-            }
-            return indexMax;
-        }
-        final int middle = (indexMax + indexMin) / 2;
-        final double valMiddle = get(DIM_Y, middle);
-        if (valMiddle == search) {
-            return middle;
-        }
-        if (search < valMiddle) {
-            return binarySearchY(search, indexMin, middle);
-        }
-        return binarySearchY(search, middle, indexMax);
+        return binarySearch(dimIndex, search, middle, indexMax);
     }
 
     public D clearMetaInfo() {
@@ -501,10 +480,12 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
      * Gets the index of the data point closest to the given x coordinate. The index returned may be less then zero or
      * larger the the number of data points in the data set, if the x coordinate lies outside the range of the data set.
      *
-     * @param x the x position of the data point
+     * @param dimIndex the dimension index
+     * @param x the x position of the data point#
      * @return the index of the data point
      */
-    public int getXIndex(final double x) {
+    @Override
+    public int getIndex(final int dimIndex, final double x) {
         if (this.getDataCount() == 0) {
             return 0;
         }
@@ -517,52 +498,13 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
             return 0;
         }
 
-        final int lastIndex = getDataCount() - 1;
-        if (x > this.getAxisDescription(0).getMax()) {
+        final int lastIndex = getDataCount(dimIndex) - 1;
+        if (x > this.getAxisDescription(dimIndex).getMax()) {
             return lastIndex;
         }
 
         // binary closest search -- assumes sorted data set
-        // TODO: should implement either sorting and/or flag that data set is
-        // sorted
-        return binarySearchX(x, 0, lastIndex);
-        // alt implementation (less performant than binary search)
-        // System.err.println("AAA - range check: x = " + x + " vs. diff to min
-        // = " + Math.abs(x - getXMin()) + " max =
-        // "
-        // + Math.abs(x - getXMax()));
-        // System.err.println("AAA - " + getName() + " - search A = " +
-        // minNeigbourSearchX(x, 0, lastIndex)
-        // + " vs. search B = " + binarySearchX(x, 0, lastIndex) + " max= " +
-        // this.getDataCount());
-        // return minNeigbourSearchX(x, 0, lastIndex);
-    }
-
-    /**
-     * Gets the first index of the data point closest to the given y coordinate.
-     *
-     * @param y the y position of the data point
-     * @return the index of the data point
-     */
-    public int getYIndex(final double y) {
-        if (this.getDataCount(DIM_Y) == 0) {
-            return 0;
-        }
-        final boolean startedAbove = y < get(DIM_Y, 0);
-        for (int i = 0; i < getDataCount(DIM_Y); i++) {
-            final double val = get(DIM_Y, i);
-            if (Double.isFinite(val)) {
-                if (startedAbove) {
-                    if (val <= y) {
-                        return i;
-                    }
-                } else // started below
-                if (val >= y) {
-                    return i;
-                }
-            }
-        }
-        return getDataCount(DIM_Y) - 1;
+        return binarySearch(dimIndex, x, 0, lastIndex);
     }
 
     @Override

@@ -155,7 +155,7 @@ public class Histogram extends AbstractHistogram implements Histogram1D {
 
     @Override
     public double getValue(int dimIndex, double x) {
-        final int index1 = getXIndex(x);
+        final int index1 = getIndex(DIM_X, x);
         final double x1 = get(DIM_X, index1);
         final double y1 = get(DIM_Y, index1);
         int index2 = x1 < x ? index1 + 1 : index1 - 1;

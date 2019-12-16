@@ -277,30 +277,8 @@ public class MountainRangeRenderer extends ErrorDataSetRenderer implements Rende
         }
 
         @Override
-        public int getXIndex(final double x) {
-            // added computation of hash since this is recomputed quite often
-            // (and the same) for each slice
-            return xWeakIndexMap.computeIfAbsent(x, key -> {
-                Integer ret = dataSet.getXIndex(x);
-                xWeakIndexMap.put(x, ret);
-                return ret;
-            });
-        }
-
-        @Override
         public double getY(final int i) {
             return dataSet.getZ(i, yIndex) + yShift;
-        }
-
-        @Override
-        public int getYIndex(final double y) {
-            // added computation of hash since this is recomputed quite often
-            // (and the same) for each slice
-            return yWeakIndexMap.computeIfAbsent(y, key -> {
-                Integer ret = dataSet.getYIndex(y);
-                yWeakIndexMap.put(y, ret);
-                return ret;
-            });
         }
 
         @Override
@@ -337,5 +315,30 @@ public class MountainRangeRenderer extends ErrorDataSetRenderer implements Rende
         public List<EventListener> updateEventListener() {
             return updateListener;
         }
+
+        @Override
+        public int getIndex(int dimIndex, double value) {
+            switch (dimIndex) {
+            case DIM_X:
+                // added computation of hash since this is recomputed quite often
+                // (and the same) for each slice
+                return xWeakIndexMap.computeIfAbsent(value, key -> {
+                    Integer ret = dataSet.getXIndex(value);
+                    xWeakIndexMap.put(value, ret);
+                    return ret;
+                });
+            case DIM_Y:
+                // added computation of hash since this is recomputed quite often
+                // (and the same) for each slice
+                return yWeakIndexMap.computeIfAbsent(value, key -> {
+                    Integer ret = dataSet.getYIndex(value);
+                    yWeakIndexMap.put(value, ret);
+                    return ret;
+                });
+            default:
+                throw new IndexOutOfBoundsException("dimIndex=" + dimIndex + " out of range");
+            }
+        }
+
     }
 }
