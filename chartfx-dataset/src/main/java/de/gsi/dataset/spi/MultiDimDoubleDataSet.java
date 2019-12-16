@@ -87,6 +87,7 @@ public class MultiDimDoubleDataSet extends AbstractDataSet<MultiDimDoubleDataSet
      */
     public MultiDimDoubleDataSet(final String name, final int nDims, final int initalSize) {
         super(name, nDims);
+        AssertUtils.gtThanZero("nDims", nDims);
         AssertUtils.gtEqThanZero("initalSize", initalSize);
         values = new DoubleArrayList[nDims];
         for (int i = 0; i < nDims; i++) {
