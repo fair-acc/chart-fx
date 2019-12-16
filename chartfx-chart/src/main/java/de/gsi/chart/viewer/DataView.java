@@ -78,18 +78,6 @@ public class DataView extends VBox {
         }
     };
 
-    @Deprecated // is this default constructor really needed?
-    public DataView(@NamedArg(value = "icon") final Node icon) {
-        this("", icon, null, false);
-        addStandardViews(); // NOPMD, calling of overridable protected method
-    }
-
-    @Deprecated // is this default constructor really needed?
-    public DataView(@NamedArg(value = "name") final String name) {
-        this(name, null, null, false);
-        addStandardViews(); // NOPMD, calling of overridable protected method
-    }
-
     public DataView(@NamedArg(value = "name") final String name, @NamedArg(value = "icon") final Node icon) {
         this(name, icon, null, false);
         addStandardViews(); // NOPMD, calling of overridable protected method
