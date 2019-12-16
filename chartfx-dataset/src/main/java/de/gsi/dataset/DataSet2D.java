@@ -33,20 +33,6 @@ public interface DataSet2D extends DataSet {
     }
 
     /**
-     * Gets the index of the data point closest to the given 'value' coordinate. The index returned may be less then
-     * zero or larger the the number of data points in the data set, if the x coordinate lies outside the range of the
-     * data set.
-     *
-     * @param dimIndex the dimension index (ie. '0' equals 'X', '1' equals 'Y')
-     * @param value the data point coordinate to search for
-     * @return the index of the data point
-     */
-    @Override
-    default int getIndex(final int dimIndex, final double value) {
-        return dimIndex == DIM_X ? getXIndex(value) : getYIndex(value);
-    }
-
-    /**
      * Gets the interpolated y value of the data point for given x coordinate
      *
      * @param x the new x coordinate
@@ -101,7 +87,9 @@ public interface DataSet2D extends DataSet {
      * @param x the x position of the data point
      * @return the index of the data point
      */
-    int getXIndex(double x);
+    default int getXIndex(double x) {
+        return getIndex(DIM_X, x);
+    };
 
     /**
      * @return the x value array
@@ -126,7 +114,9 @@ public interface DataSet2D extends DataSet {
      * @param y the y position of the data point
      * @return the index of the data point
      */
-    int getYIndex(double y);
+    default int getYIndex(double y) {
+        return getIndex(DIM_Y, y);
+    };
 
     /**
      * @return the x value array
