@@ -1,0 +1,108 @@
+package de.gsi.dataset.spi;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+/**
+ * Tests for the MultiDimDoubleDataSet
+ * TODO: Test EventListeners
+ * 
+ * @author Alexander Krimm
+ */
+class MultiDimDoubleDataSetTests {
+    private static final Logger LOGGER = LoggerFactory.getLogger(MultiDimDoubleDataSetTests.class);
+
+    @Test
+    void test() {
+        MultiDimDoubleDataSet dataset = new MultiDimDoubleDataSet("Test Dataset",
+                new double[][] { { 1, 2, 3, 4 }, { 2, 4, 6, 8 }, { 3, 3, 6, 8 }, { 1, 5, 7, 1 } }, 4, false);
+        assertEquals(3, dataset.get(2, 0));
+
+        // Add points (single)
+        dataset.add(2, 14, 15, 16, 17); // single Point
+        assertEquals(16, dataset.get(2, 2));
+        dataset.add(new double[] { 14.0, 15, 23, 17 }, "foo");
+        assertEquals(23, dataset.get(2, dataset.getDataCount() - 1));
+        assertArrayEquals(new double[] { 3, 3, 16, 6, 8, 23 }, dataset.getValues(2));
+        assertEquals("foo", dataset.getDataLabel(dataset.getDataCount() - 1));
+
+        // add points with wrong number of coordinates
+        assertThrows(IllegalArgumentException.class, () -> dataset.add(2, 1, 2, 4));
+        assertThrows(IllegalArgumentException.class, () -> dataset.add(2, 1, 2, 3, 5, 6, 7));
+        assertThrows(IllegalArgumentException.class, () -> dataset.add(2.0, 1, 2, 3, 5, 6, 7));
+        assertThrows(IllegalArgumentException.class, () -> dataset.add());
+
+        // add points (multiple)
+        dataset.add(new double[][] { { 11, 12 }, { 21, 22 }, { 31, 32 }, { 41, 42 } });
+        dataset.add(1, new double[][] { { 51, 52 }, { 61, 62 }, { 71, 72 }, { 81, 82 } });
+        assertArrayEquals(new double[] { 2, 61, 62, 4, 15, 6, 8, 15, 21, 22 }, dataset.getValues(1));
+
+        // set point (single)
+        dataset.set(3, 4, 4, 4, 4);
+        assertEquals(4, dataset.get(3, 3));
+
+        // set multiple points
+        dataset.set(5, new double[][] { { -1, -2 }, { -3, -4 }, { -5, -6 }, { -7, -8 } });
+        assertArrayEquals(new double[] { 2, 61, 62, 4, 15, -3, -4, 15, 21, 22 }, dataset.getValues(1));
+
+        // remove point
+        dataset.remove(4);
+        assertEquals(9, dataset.getDataCount());
+        assertArrayEquals(new double[] { 2, 61, 62, 4, -3, -4, 15, 21, 22 }, dataset.getValues(1));
+
+        // remove points
+        dataset.remove(6, 8);
+        assertEquals(7, dataset.getDataCount());
+        assertArrayEquals(new double[] { 2, 61, 62, 4, -3, -4, 22 }, dataset.getValues(1));
+
+        // set all points
+        dataset.set(new double[][] { { -1, -2 }, { -3, -4 }, { -5, -6 }, { -7, -8 } });
+        assertEquals(2, dataset.getDataCount());
+
+        // test capacity management
+        dataset.trim();
+        assertEquals(2, dataset.getCapacity());
+        dataset.increaseCapacity(10);
+        assertEquals(12, dataset.getCapacity());
+
+        // clear dataSet
+        dataset.clearData();
+        assertEquals(0, dataset.getDataCount());
+        assertArrayEquals(new double[] {}, dataset.getValues(3));
+    }
+
+    @Test
+    public void testCopyConstructors() {
+        MultiDimDoubleDataSet dataset1 = new MultiDimDoubleDataSet("Test Dataset",
+                new double[][] { { 1, 2, 3, 4 }, { 2, 4, 6, 8 }, { 3, 3, 6, 8 }, { 1, 5, 7, 1 } }, 4, false);
+        dataset1.add(new double[] { 1, 3, 3, 7 }, "foobar");
+        dataset1.add(new double[] { 2, 0, 2, 0 });
+        dataset1.addDataStyle(dataset1.getDataCount() - 1, "color=red");
+        MultiDimDoubleDataSet dataset2 = new MultiDimDoubleDataSet(dataset1);
+        assertEquals(dataset1, dataset2);
+        MultiDimDoubleDataSet dataset3 = new MultiDimDoubleDataSet("Test Dataset", new double[][] {
+                { 1, 2, 3, 4, 1, 2 }, { 2, 4, 6, 8, 3, 0 }, { 3, 3, 6, 8, 3, 2 }, { 1, 5, 7, 1, 7, 0 } }, 6, true);
+        dataset3.addDataLabel(4, "foobar");
+        assertEquals(dataset1, dataset3);
+
+        // test copying double data set
+        DoubleDataSet doubleDataSet = new DoubleDataSet("doubleTest", new double[] { 1, 2, 3, 4 },
+                new double[] { 10, 20, 30, 40 }, 4, false);
+        MultiDimDoubleDataSet multiDimFromDoubleDataSet = new MultiDimDoubleDataSet(doubleDataSet);
+        assertEquals(doubleDataSet, multiDimFromDoubleDataSet);
+        assertEquals(multiDimFromDoubleDataSet, doubleDataSet);
+    }
+
+    @Test
+    public void testInterpolation() {
+        MultiDimDoubleDataSet dataset = new MultiDimDoubleDataSet("Test Dataset",
+                new double[][] { { 1, 2, 3, 4 }, { 2, 4, Double.NaN, 8 }, { 3, 3, 6, 8 }, { 1, 5, 7, 1 } }, 4, false);
+        assertEquals(3, dataset.getValue(1, 1.5));
+        assertEquals(Double.NaN, dataset.getValue(1, 3.3));
+        assertEquals(Double.NaN, dataset.getValue(1, 2.4));
+        assertEquals(2, dataset.getValue(1, 0.5));
+    }
+}
