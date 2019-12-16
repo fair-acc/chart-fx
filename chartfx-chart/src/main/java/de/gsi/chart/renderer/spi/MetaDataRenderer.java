@@ -36,6 +36,7 @@ public class MetaDataRenderer extends AbstractMetaDataRendererParameter<MetaData
     protected HBox infoBox = new InfoHBox();
     protected HBox warningBox = new InfoHBox();
     protected HBox errorBox = new InfoHBox();
+    protected final ObservableList<Axis> axesList = FXCollections.observableArrayList();
     protected Chart chart;
 
     protected List<String> oldInfoMessages;
@@ -150,8 +151,7 @@ public class MetaDataRenderer extends AbstractMetaDataRendererParameter<MetaData
 
     @Override
     public ObservableList<Axis> getAxes() {
-        // regenerate list... this renderer does not need to keep track of axes
-        return FXCollections.observableArrayList();
+        return axesList;
     }
 
     public BorderPane getBorderPaneOnCanvas() {

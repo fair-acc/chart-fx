@@ -52,8 +52,10 @@ public class MaxDataReducer implements RendererDataReducer {
             n++;
         }
 
-        ProcessingProfiler.getTimeDiff(start,
-                String.format("data reduction (from %d to %d)", indexMax - indexMin, count));
+        if (ProcessingProfiler.getDebugState()) {
+            ProcessingProfiler.getTimeDiff(start,
+                    String.format("data reduction (from %d to %d)", indexMax - indexMin, count));
+        }
         return count;
     }
 

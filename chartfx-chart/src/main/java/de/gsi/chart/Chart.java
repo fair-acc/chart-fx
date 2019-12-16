@@ -67,6 +67,7 @@ import javafx.geometry.Pos;
 import javafx.scene.CacheHint;
 import javafx.scene.Group;
 import javafx.scene.Node;
+import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
@@ -80,6 +81,7 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.RowConstraints;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.stage.Window;
 import javafx.util.Duration;
 
 /**
@@ -101,6 +103,7 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
 
     protected BooleanBinding showingBinding;
     protected final BooleanProperty showing = new SimpleBooleanProperty(this, "showing", false);
+    protected final ChangeListener<? super Boolean> showingListener = (ch2, o, n) -> showing.set(n);
     /** When true any data changes will be animated. */
     private final BooleanProperty animated = new SimpleBooleanProperty(this, "animated", true);
     // TODO: Check whether 'this' or chart contents need to be added
@@ -183,6 +186,33 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
     protected final ListChangeListener<DataSet> datasetChangeListener = this::datasetsChanged;
     protected final EventListener dataSetDataListener = obs -> FXUtils.runFX(this::dataSetInvalidated);
     protected final ListChangeListener<ChartPlugin> pluginsChangedListener = this::pluginsChanged;
+    protected final ChangeListener<? super Window> windowPropertyListener = (ch1, oldWindow, newWindow) -> {
+        if (oldWindow != null) {
+            oldWindow.showingProperty().removeListener(showingListener);
+        }
+        if (newWindow == null) {
+            showing.set(false);
+            return;
+        }
+        newWindow.showingProperty().addListener(showingListener);
+    };
+    private final ChangeListener<? super Scene> scenePropertyListener = (ch, oldScene, newScene) -> {
+        if (oldScene == newScene) {
+            return;
+        }
+        if (oldScene != null) {
+            // remove listener
+            oldScene.windowProperty().removeListener(windowPropertyListener);
+        }
+
+        if (newScene == null) {
+            showing.set(false);
+            return;
+        }
+
+        // add listener
+        newScene.windowProperty().addListener(windowPropertyListener);
+    };
     {
         getDatasets().addListener(datasetChangeListener);
         getAxes().addListener(axesChangeListener);
@@ -767,7 +797,20 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
                 break;
             }
         }
-        return null;
+        // Add default axis if no suitable axis is available
+        switch (orientation) {
+        case HORIZONTAL:
+            Axis newXAxis = new DefaultNumericAxis("x-Axis");
+            newXAxis.setSide(Side.BOTTOM);
+            getAxes().add(newXAxis);
+            return newXAxis;
+        case VERTICAL:
+        default:
+            Axis newYAxis = new DefaultNumericAxis("y-Axis");
+            newYAxis.setSide(Side.LEFT);
+            getAxes().add(newYAxis);
+            return newYAxis;
+        }
     }
 
     public final Legend getLegend() {
@@ -962,36 +1005,13 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
     protected abstract void redrawCanvas();
 
     protected void registerShowingListener() {
-        sceneProperty().addListener((ch, oldScene, newScene) -> {
-            if (oldScene == newScene) {
-                return;
-            }
-            if (oldScene != null) {
-                // remove listener
+        sceneProperty().addListener(scenePropertyListener);
 
-            }
-
-            if (newScene == null) {
-                showing.set(false);
-                return;
-            }
-
-            // add listener
-            newScene.windowProperty().addListener((ch1, oldWindow, newWindow) -> {
-                if (newWindow == null) {
-                    showing.set(false);
-                    return;
-                }
-                newWindow.showingProperty().addListener((ch2, o, n) -> {
-                    showing.set(n);
-                });
-            });
-        });
         showing.addListener((ch, o, n) -> {
             if (n.equals(n)) {
                 return;
             }
-            if (n) {
+            if (Boolean.TRUE.equals(n)) {
                 // requestLayout();
 
                 // alt implementation in case of start-up issues
@@ -1025,60 +1045,18 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
     protected void rendererChanged(final ListChangeListener.Change<? extends Renderer> change) {
         FXUtils.assertJavaFxThread();
         while (change.next()) {
-
             // handle added renderer
             for (final Renderer renderer : change.getAddedSubList()) {
+                // update legend and recalculateLayout on datasetChange
                 renderer.getDatasets().addListener(datasetChangeListener);
-
-                boolean rendererHasXAxis = false;
-                boolean rendererHasYAxis = false;
-                for (final Axis axis : renderer.getAxes()) {
-                    if (axis.getSide() != null && axis.getSide().isHorizontal()) {
-                        getAxes().add(axis);
-                        rendererHasXAxis = true;
-                    }
-                }
-                for (final Axis axis : renderer.getAxes()) {
-                    if (axis.getSide() != null && axis.getSide().isVertical()) {
-                        getAxes().add(axis);
-                        rendererHasYAxis = true;
-                    }
-                }
-
-                if (rendererHasXAxis && rendererHasYAxis) {
-                    // all good, already have added new axis from renderer
-                    // continue
-                    continue;
-                }
-
-                // search for existing axis, in case Chart hasn't defined
-                // already some
-                final Axis existingChartXAxis = getFirstAxis(Orientation.HORIZONTAL);
-                if (existingChartXAxis != null) {
-                    renderer.getAxes().add(existingChartXAxis);
-                } else if (!rendererHasXAxis) {
-                    final DefaultNumericAxis newAxis = new DefaultNumericAxis();
-                    newAxis.setName("default x-axis");
-                    newAxis.setSide(Side.BOTTOM);
-                    renderer.getAxes().add(newAxis);
-                    getAxes().add(newAxis);
-                }
-
-                final Axis existingChartXYAxis = getFirstAxis(Orientation.VERTICAL);
-                if (existingChartXYAxis != null) {
-                    renderer.getAxes().add(existingChartXYAxis);
-                } else if (!rendererHasYAxis) {
-                    final DefaultNumericAxis newAxis = new DefaultNumericAxis();
-                    newAxis.setName("default y-axis");
-                    newAxis.setSide(Side.LEFT);
-                    renderer.getAxes().add(newAxis);
-                    getAxes().add(newAxis);
-                }
             }
 
             // handle removed renderer
             change.getRemoved().forEach(renderer -> renderer.getDatasets().removeListener(datasetChangeListener));
         }
+        // reset change to allow derived classes to add additional listeners to renderer changes
+        change.reset();
+
         requestLayout();
         updateLegend(getDatasets(), getRenderers());
     }

@@ -641,20 +641,24 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
             return;
         }
 
-        final Axis xAxis = getFirstAxis(Orientation.HORIZONTAL);
-        if (xAxis == null) {
-            throw new InvalidParameterException("x-Axis must not be null - axesList() = " + getAxes());
+        Axis xAxisTemp = getFirstAxis(Orientation.HORIZONTAL);
+        if (xAxisTemp == null) {
+            xAxisTemp = chart.getFirstAxis(Orientation.HORIZONTAL);
         }
-        final Axis yAxis = getFirstAxis(Orientation.VERTICAL);
-        if (yAxis == null) {
-            throw new InvalidParameterException("y-Axis must not be null - axesList() = " + getAxes());
+        final Axis xAxis = xAxisTemp;
+        Axis yAxisTemp = getFirstAxis(Orientation.VERTICAL);
+        if (yAxisTemp == null) {
+            yAxisTemp = chart.getFirstAxis(Orientation.VERTICAL);
         }
+        final Axis yAxis = yAxisTemp;
         final long start = ProcessingProfiler.getTimeStamp();
         final double xAxisWidth = xAxis.getWidth();
         final double xMin = xAxis.getValueForDisplay(0);
         final double xMax = xAxis.getValueForDisplay(xAxisWidth);
 
-        ProcessingProfiler.getTimeDiff(start, "init");
+        if (ProcessingProfiler.getDebugState()) {
+            ProcessingProfiler.getTimeDiff(start, "init");
+        }
 
         for (int dataSetIndex = localDataSetList.size() - 1; dataSetIndex >= 0; dataSetIndex--) {
             final int ldataSetIndex = dataSetIndex;
@@ -703,12 +707,16 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
                     return Optional.empty();
                 }
 
-                stopStamp = ProcessingProfiler.getTimeDiff(stopStamp,
-                        "get min/max" + String.format(" from:%d to:%d", indexMin, indexMax));
+                if (ProcessingProfiler.getDebugState()) {
+                    stopStamp = ProcessingProfiler.getTimeDiff(stopStamp,
+                            "get min/max" + String.format(" from:%d to:%d", indexMin, indexMax));
+                }
 
                 final CachedDataPoints localCachedPoints = new CachedDataPoints(indexMin, indexMax,
                         dataSet.getDataCount(DataSet.DIM_X), true);
-                stopStamp = ProcessingProfiler.getTimeDiff(stopStamp, "get CachedPoints");
+                if (ProcessingProfiler.getDebugState()) {
+                    stopStamp = ProcessingProfiler.getTimeDiff(stopStamp, "get CachedPoints");
+                }
 
                 // compute local screen coordinates
                 final boolean isPolarPlot = ((XYChart) chart).isPolarPlot();
@@ -720,7 +728,9 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
                     localCachedPoints.computeScreenCoordinates(xAxis, yAxis, dataSet, dataSetOffset + ldataSetIndex,
                             indexMin, indexMax, getErrorType(), isPolarPlot, isallowNaNs());
                 }
-                stopStamp = ProcessingProfiler.getTimeDiff(stopStamp, "computeScreenCoordinates()");
+                if (ProcessingProfiler.getDebugState()) {
+                    stopStamp = ProcessingProfiler.getTimeDiff(stopStamp, "computeScreenCoordinates()");
+                }
                 return Optional.of(localCachedPoints);
             });
 
@@ -737,7 +747,9 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
 
             stopStamp = ProcessingProfiler.getTimeStamp();
 
-            ProcessingProfiler.getTimeDiff(stopStamp, "localCachedPoints.release()");
+            if (ProcessingProfiler.getDebugState()) {
+                ProcessingProfiler.getTimeDiff(stopStamp, "localCachedPoints.release()");
+            }
         } // end of 'dataSetIndex' loop
         ProcessingProfiler.getTimeDiff(start);
 

@@ -5,14 +5,14 @@ import static de.gsi.dataset.DataSet.DIM_Z;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.gsi.chart.axes.Axis;
-import de.gsi.chart.axes.spi.DefaultNumericAxis;
 import de.gsi.chart.renderer.PolarTickStep;
 import de.gsi.chart.renderer.Renderer;
 import de.gsi.chart.renderer.spi.ErrorDataSetRenderer;
@@ -56,13 +56,14 @@ public class XYChart extends Chart {
     protected static final int BURST_LIMIT_MS = 15;
     protected BooleanProperty polarPlot = new SimpleBooleanProperty(this, "polarPlot", false);
     private final ObjectProperty<PolarTickStep> polarStepSize = new SimpleObjectProperty<>(PolarTickStep.THIRTY);
-    private final GridRenderer gridRenderer = new GridRenderer(this);
+    private final GridRenderer gridRenderer = new GridRenderer();
+    protected final ChangeListener<? super Boolean> gridLineVisibilitychange = (ob, o, n) -> requestLayout();
     private long lastCanvasUpdate;
     private boolean callCanvasUpdateLater;
     private final ChangeListener<Side> axisSideChangeListener = this::axisSideChanged;
 
     public XYChart() {
-        this(new DefaultNumericAxis(), new DefaultNumericAxis());
+        this(null, null);
     }
 
     /**
@@ -73,28 +74,28 @@ public class XYChart extends Chart {
      */
     public XYChart(final Axis xAxis, final Axis yAxis) {
         super();
-        Objects.requireNonNull(xAxis, "X axis is required");
-        Objects.requireNonNull(yAxis, "Y axis is required");
 
-        if (xAxis.getSide() == null || !xAxis.getSide().isHorizontal()) {
-            xAxis.setSide(Side.BOTTOM);
+        if (xAxis != null) {
+            if (xAxis.getSide() == null || !xAxis.getSide().isHorizontal()) {
+                xAxis.setSide(Side.BOTTOM);
+            }
+            getAxes().add(xAxis);
         }
 
-        if (yAxis.getSide() == null || !yAxis.getSide().isVertical()) {
-            yAxis.setSide(Side.LEFT);
+        if (yAxis != null) {
+            if (yAxis.getSide() == null || !yAxis.getSide().isVertical()) {
+                yAxis.setSide(Side.LEFT);
+            }
+            getAxes().add(yAxis);
         }
 
-        // add XYChart specific axis handling (ie. placement around charts, add
-        // new DefaultNumericAxis if one is
-        // missing, etc.)
+        gridRenderer.horizontalGridLinesVisibleProperty().addListener(gridLineVisibilitychange);
+        gridRenderer.verticalGridLinesVisibleProperty().addListener(gridLineVisibilitychange);
 
-        getAxes().addAll(xAxis, yAxis);
+        this.setAnimated(false);
+        getRenderers().addListener(this::rendererChanged);
 
         getRenderers().add(new ErrorDataSetRenderer());
-
-        setAnimated(false);
-        xAxis.setAnimated(false);
-        yAxis.setAnimated(false);
     }
 
     /**
@@ -161,6 +162,33 @@ public class XYChart extends Chart {
             getAxesPane(axis.getSide()).getChildren().add((Node) axis);
         }
         requestLayout();
+    }
+
+    /**
+     * checks whether renderer has required x and y axes and adds the first x or y from the chart itself if necessary
+     * <p>
+     * additionally moves axis from Renderer with defined Side that are not yet in the Chart also to the chart's list
+     * 
+     * @param renderer to be checked
+     */
+    protected void checkRendererForRequiredAxes(final Renderer renderer) {
+        if (renderer.getAxes().size() < 2) {
+            // not enough axes present in renderer
+            Optional<Axis> xAxis = renderer.getAxes().stream().filter(a -> a.getSide().isHorizontal()).findFirst();
+            Optional<Axis> yAxis = renderer.getAxes().stream().filter(a -> a.getSide().isVertical()).findFirst();
+
+            // search for horizontal/vertical axes in Chart (which creates one if missing) and add to renderer
+            if (xAxis.isEmpty()) {
+                renderer.getAxes().add(getFirstAxis(Orientation.HORIZONTAL));
+            }
+            if (yAxis.isEmpty()) {
+                // search for horizontal axis in Chart (which creates one if missing) and add to renderer
+                renderer.getAxes().add(getFirstAxis(Orientation.VERTICAL));
+            }
+        }
+        // check if there are assignable axes not yet present in the Chart's list
+        getAxes().addAll(renderer.getAxes().stream().limit(2)
+                .filter(a -> (a.getSide() != null && !getAxes().contains(a))).collect(Collectors.toList()));
     }
 
     /**
@@ -324,6 +352,9 @@ public class XYChart extends Chart {
 
         int dataSetOffset = 0;
         for (final Renderer renderer : getRenderers()) {
+            // check for and add required axes
+            checkRendererForRequiredAxes(renderer);
+
             renderer.render(gc, this, dataSetOffset, getDatasets());
             dataSetOffset += getDatasets().size() + renderer.getDatasets().size();
         }
@@ -335,6 +366,23 @@ public class XYChart extends Chart {
         if (DEBUG && LOGGER.isDebugEnabled()) {
             LOGGER.debug("   xychart redrawCanvas() - done");
         }
+    }
+
+    protected void rendererChanged(final ListChangeListener.Change<? extends Renderer> change) {
+        FXUtils.assertJavaFxThread();
+        super.rendererChanged(change);
+
+        // while (change.next()) {
+        // // handle added renderer
+        // for (final Renderer renderer : change.getAddedSubList()) {
+        // // checkRendererForRequiredAxes(renderer);
+        // }
+        //
+        // // handle removed renderer
+        // change.getRemoved().forEach(renderer -> renderer.getDatasets().removeListener(datasetChangeListener));
+        // }
+        requestLayout();
+        updateLegend(getDatasets(), getRenderers());
     }
 
     /**

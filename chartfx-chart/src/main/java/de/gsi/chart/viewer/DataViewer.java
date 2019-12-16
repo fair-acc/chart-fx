@@ -1,7 +1,3 @@
-/**
- * Copyright (c) 2017 European Organisation for Nuclear Research (CERN), All Rights Reserved.
- */
-
 package de.gsi.chart.viewer;
 
 import java.util.ArrayList;
@@ -14,6 +10,7 @@ import org.slf4j.LoggerFactory;
 
 import de.gsi.chart.viewer.DataViewTilingPane.Layout;
 import de.gsi.dataset.utils.NoDuplicatesList;
+import javafx.beans.DefaultProperty;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -36,8 +33,37 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 
 /**
- *
+ * DataViewer to manage multiple 'DatavView's which contain either custom 'Pane' derived nodes and or managed
+ * 'DataViewWindow' that can be detached and re-attached to the DataView
+ * <p>
+ * usage example:
+ * <p>
+ * 
+ * <pre>
+ * <code>
+ * final DataView view1 = new DataView("ChartViews", chartIcon);
+ * // [..] these nodes are detachable sub-windows (with decorated minimize, maximize, close buttons)
+ * view1.getVisibleChildren().addAll(customNode1, customNode2, customNode3);
+ * 
+ *  // [..] add undecorated custom Pan
+ * final DataView view2 = new DataView("Custom View", customViewIcon, getDemoPane());
+ * 
+ * final DataViewer viewer = new DataViewer();
+ * viewer.getViews().addAll(view1, view2);
+ * 
+ * // [..] to switch between configurations one may use:
+ * // a) Toolbar which contains the 'Text-Icon' Buttons for each view
+ * viewer.getToolBar();
+ * // b) directly/programmatically, e.g.:
+ * viewer.setSelectedView(view2);
+ *  
+ * </code>
+ * </pre>
+ * 
+ * @author Grzegorz Kruk
+ * @author rstein
  */
+@DefaultProperty(value = "views")
 public class DataViewer extends BorderPane {
     private static final Logger LOGGER = LoggerFactory.getLogger(DataViewer.class);
     protected static final String FONT_AWESOME = "FontAwesome";

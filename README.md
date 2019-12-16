@@ -114,7 +114,7 @@ To use different buildsystems or library versions, have a look at the snippets o
 </details><details><summary>run with (expand)</summary>
 
 ```bash
-mvn compile
+mvn compile install
 mvn exec:java
 ```
 
@@ -125,13 +125,13 @@ mvn exec:java
 If you want to try them yourself run:
 
 ```bash
-mvn compile
+mvn compile install
 mvn exec:java
 ```
 or for the individual sample groups:
 
 ```bash
-mvn compile
+mvn compile install
 mvn exec:java@chart
 mvn exec:java@math
 mvn exec:java@dataset
@@ -256,7 +256,7 @@ Maven calls java with the corresponding options so that JavaFX is working. Becau
 ```sh
 git clone
 cd chart-fx
-mvn compile
+mvn compile install
 mvn exec:java
 ```
 
