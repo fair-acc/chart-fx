@@ -1,10 +1,10 @@
 package de.gsi.dataset.spi;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Tests for the MultiDimDoubleDataSet
@@ -13,10 +13,9 @@ import org.slf4j.LoggerFactory;
  * @author Alexander Krimm
  */
 class MultiDimDoubleDataSetTests {
-    private static final Logger LOGGER = LoggerFactory.getLogger(MultiDimDoubleDataSetTests.class);
 
     @Test
-    void test() {
+    public void test() {
         MultiDimDoubleDataSet dataset = new MultiDimDoubleDataSet("Test Dataset",
                 new double[][] { { 1, 2, 3, 4 }, { 2, 4, 6, 8 }, { 3, 3, 6, 8 }, { 1, 5, 7, 1 } }, 4, false);
         assertEquals(3, dataset.get(2, 0));
