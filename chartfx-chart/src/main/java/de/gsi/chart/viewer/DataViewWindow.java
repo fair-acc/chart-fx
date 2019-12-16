@@ -752,6 +752,9 @@ public class DataViewWindow extends BorderPane implements EventSource {
             titleProperty().set(dataViewWindow.getName());
             titleProperty().bind(dataViewWindow.nameProperty());
 
+            // needs to be executed here to active guard above
+            show();
+
             if (dataViewWindow.equals(dataViewWindow.getParentView().getMaximizedChild())) {
                 dataViewWindow.getParentView().setMaximizedChild(null);
             }
@@ -766,7 +769,6 @@ public class DataViewWindow extends BorderPane implements EventSource {
             } else {
                 scene.setRoot(new StackPane(dataWindowContent));
             }
-            show();
 
             dataViewWindow.setWindowState(WindowState.WINDOW_RESTORED);
             dataViewWindow.setDetached(true);
