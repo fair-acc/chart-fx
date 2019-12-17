@@ -24,6 +24,7 @@
         <module>chartfx-dataset</module>
         <module>chartfx-math</module>
         <module>chartfx-samples</module>
+        <module>chartfx-report</module>
     </modules>
 
     <properties>
@@ -203,10 +204,35 @@
                     </execution>
                 </executions>
             </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.19.1</version>
+                <configuration>
+                    <!-- Jacoco prepare-agent builds some command-line params without -->
+                    <!-- which jacoco will not instrument. Hence it is important 
+                        to add -->
+                    <!-- those command-line params here (${argLine} holds those params) -->
+                    <argLine>${argLine} -Xms256m -Xmx2048m</argLine>
+                    <forkCount>1</forkCount>
+                    <runOrder>random</runOrder>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
                 <version>${chartfx.jacoco.version}</version>
+                <configuration>
+                    <excludes>
+                        <!-- <exclude>de/gsi/chart/**/*</exclude> -->
+                        <exclude>de/gsi/math/**/*</exclude>
+                        <exclude>de/gsi/chart/samples/**/*</exclude>
+                        <exclude>de/gsi/dataset/samples/**/*</exclude>
+                        <exclude>de/gsi/math/samples/**/*</exclude>
+                        <exclude>de/gsi/acc/ui/samples/**/*</exclude>
+                    </excludes>
+                </configuration>
                 <executions>
                     <execution>
                         <id>prepare-agent</id>
