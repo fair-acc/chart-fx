@@ -23,17 +23,17 @@
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-base</artifactId>
-            <version>13.0.1</version> 
+            <version>${chartfx.javafx.version}</version> 
         </dependency>
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-controls</artifactId>
-            <version>13.0.1</version>
+            <version>${chartfx.javafx.version}</version>
         </dependency>
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-swing</artifactId> <!-- needed to for saving images to file -->
-            <version>13.0.1</version>
+            <version>${chartfx.javafx.version}</version>
         </dependency>
         <dependency>
             <groupId>de.gsi.dataset</groupId>
@@ -48,7 +48,7 @@
         <dependency>
             <groupId>org.controlsfx</groupId>
             <artifactId>controlsfx</artifactId>
-            <version>11.0.0</version>
+            <version>${chartfx.controlsfx.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.openjfx</groupId>
@@ -59,12 +59,12 @@
         <dependency>
             <groupId>de.codecentric.centerdevice</groupId>
             <artifactId>javafxsvg</artifactId>
-            <version>1.3.0</version>
+            <version>${chartfx.javafxsvg.version}</version>
         </dependency>
         <dependency>
             <groupId>com.ibm.icu</groupId>
             <artifactId>icu4j</artifactId>
-            <version>65.1</version>
+            <version>${chartfx.icu4j.version}</version>
         </dependency>
     </dependencies>
 

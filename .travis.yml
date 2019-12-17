@@ -11,6 +11,12 @@ before_install:
         - if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then export REVISION=${TRAVIS_BRANCH}; else export REVISION=${TRAVIS_BRANCH}PR${TRAVIS_PULL_REQUEST}; fi
         - if [ -z "$TRAVIS_TAG" ]; then export CHANGELIST=-SNAPSHOT; fi
 
+# execute junit tests and generate coveralls reports 
+after_success:
+  - mvn clean test jacoco:report coveralls:report
+# alt for aggregating across modules:
+# - mvn clean test jacoco:report-aggregate coveralls:report
+
 # Install dependencies and output maven version information
 install:
         - mvn --settings .maven.xml install -Dgpg.skip=true -Dmaven.javadoc.skip=true -B -V -Drevision=${REVISION} -Dchangelist=${CHANGELIST}
