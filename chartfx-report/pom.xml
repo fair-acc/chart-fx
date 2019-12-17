@@ -51,10 +51,10 @@
                     <excludes>
                         <!-- <exclude>de/gsi/chart/**/*</exclude> -->
                         <exclude>de/gsi/math/**/*</exclude>
-                        <exclude>de/gsi/chart/samples/**/*</exclude>
-                        <exclude>de/gsi/dataset/samples/**/*</exclude>
-                        <exclude>de/gsi/math/samples/**/*</exclude>
-                        <exclude>de/gsi/acc/ui/samples/**/*</exclude>
+                        <!-- <exclude>de/gsi/chart/samples/**/*</exclude> -->
+                        <!-- <exclude>de/gsi/dataset/samples/**/*</exclude> -->
+                        <!-- <exclude>de/gsi/math/samples/**/*</exclude> -->
+                        <!-- <exclude>de/gsi/acc/ui/samples/**/*</exclude> -->
                     </excludes>
                 </configuration>
                 <executions>
