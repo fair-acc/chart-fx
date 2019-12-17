@@ -23,12 +23,6 @@
             <artifactId>chartfx-dataset</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <!-- excluded for the time being since there are not yet any relevant tests -->
-        <!-- <dependency> -->
-        <!-- <groupId>de.gsi.math</groupId> -->
-        <!-- <artifactId>chartfx-math</artifactId> -->
-        <!-- <version>${project.version}</version> -->
-        <!-- </dependency> -->
         <dependency>
             <groupId>de.gsi.chart</groupId>
             <artifactId>chartfx-chart</artifactId>
@@ -40,33 +34,4 @@
             <version>${project.version}</version>
         </dependency>
     </dependencies>
-
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.jacoco</groupId>
-                <artifactId>jacoco-maven-plugin</artifactId>
-                <version>${chartfx.jacoco.version}</version>
-                <configuration>
-                    <excludes>
-                        <!-- <exclude>de/gsi/chart/**/*</exclude> -->
-                        <exclude>de/gsi/math/**/*</exclude>
-                        <!-- <exclude>de/gsi/chart/samples/**/*</exclude> -->
-                        <!-- <exclude>de/gsi/dataset/samples/**/*</exclude> -->
-                        <!-- <exclude>de/gsi/math/samples/**/*</exclude> -->
-                        <!-- <exclude>de/gsi/acc/ui/samples/**/*</exclude> -->
-                    </excludes>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>report-aggregate</id>
-                        <phase>verify</phase>
-                        <goals>
-                            <goal>report-aggregate</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
-    </build>
 </project>
