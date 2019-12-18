@@ -2,6 +2,7 @@ package de.gsi.chart.plugins.measurements.utils;
 
 import de.gsi.chart.XYChart;
 import de.gsi.dataset.DataSet;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Orientation;
 import javafx.scene.control.Label;
@@ -21,7 +22,9 @@ public class DataSetSelector extends HBox {
         super();
         final Label label = new Label("Selected Dataset:");
 
-        allDataSets = chart.getAllDatasets();
+        // wrap observable Array List, to prevent resetting the selection model whenever getAllDatasets() is called
+        // somewhere in the code.
+        allDataSets = FXCollections.observableArrayList(chart.getAllDatasets());
         dataSets = new ListView<>(allDataSets);
         dataSets.setOrientation(Orientation.VERTICAL);
         dataSets.setPrefSize(-1, DataSetSelector.DEFAULT_SELECTOR_HEIGHT);
