@@ -41,6 +41,10 @@ public class DataSetSelector extends HBox {
     public DataSet getSelectedDataSet() {
         return dataSets.getSelectionModel().getSelectedItem();
     }
+    
+    public DataSet getFirstDataSet() {
+        return dataSets.getItems().get(0);
+    }
 
     static protected class DataSetLabel extends ListCell<DataSet> {
         @Override

@@ -115,8 +115,12 @@ public abstract class AbstractChartMeasurement implements EventListener {
         }
 
         if (dataSet == null) {
-            valueField.setDataSetName("<unknown data set>");
-            this.dataSet = dataSet;
+            if (dataSetSelector.getNumberDataSets() == 1) {
+                valueField.setDataSetName(dataSetSelector.getFirstDataSet().getName());
+            } else {
+                valueField.setDataSetName("<unknown data set>");
+                this.dataSet = dataSet;
+            }
         } else {
             valueField.setDataSetName("<" + dataSet.getName() + ">");
             this.dataSet = dataSet;
