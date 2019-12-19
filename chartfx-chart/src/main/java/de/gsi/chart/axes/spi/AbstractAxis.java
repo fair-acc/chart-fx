@@ -36,6 +36,7 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Path;
 import javafx.scene.text.Text;
+import javafx.scene.text.TextAlignment;
 import javafx.util.Duration;
 import javafx.util.StringConverter;
 
@@ -151,6 +152,23 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
 
         widthProperty().addListener(axisSizeChangeListener);
         heightProperty().addListener(axisSizeChangeListener);
+
+        // set default axis title/label alignment
+        sideProperty().addListener((ch, o, n) -> {
+            switch (n) {
+            case CENTER_HOR:
+            case CENTER_VER:
+                AbstractAxis.this.getAxisLabel().setTextAlignment(TextAlignment.RIGHT);
+                break;
+            case TOP:
+            case BOTTOM:
+            case LEFT:
+            case RIGHT:
+            default:
+                AbstractAxis.this.getAxisLabel().setTextAlignment(TextAlignment.CENTER);
+                break;
+            }
+        });
 
         VBox.setVgrow(this, Priority.ALWAYS);
         HBox.setHgrow(this, Priority.ALWAYS);
@@ -731,7 +749,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         case CENTER_VER: {
             gc.setTextBaseline(VPos.TOP);
             axisName.setRotate(-90);
-            final double x = (axisCentre * axisWidth) - tickLength - tickLabelGap - tickLabelSize - axisLabelGap
+            final double x = (axisCentre * axisWidth) - tickLength - (2 * tickLabelGap) - tickLabelSize - axisLabelGap
                     - shiftedLabels;
             final double y = ((1.0 - labelPosition) * axisHeight) - labelGap;
             drawAxisLabel(gc, x, y, axisName);

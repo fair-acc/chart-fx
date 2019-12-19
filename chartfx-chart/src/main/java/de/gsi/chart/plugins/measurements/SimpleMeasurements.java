@@ -18,6 +18,7 @@ import de.gsi.chart.axes.AxisLabelFormatter;
 import de.gsi.chart.axes.spi.DefaultNumericAxis;
 import de.gsi.chart.axes.spi.MetricPrefix;
 import de.gsi.chart.plugins.measurements.utils.SimpleDataSetEstimators;
+import de.gsi.chart.utils.FXUtils;
 import de.gsi.dataset.DataSet;
 import de.gsi.dataset.event.UpdateEvent;
 import javafx.scene.Node;
@@ -196,13 +197,13 @@ public class SimpleMeasurements extends ValueIndicator {
             valueField.setUnit(unit);
         }
 
-        valueField.setValue(val, valueLabel);
+        FXUtils.runFX(() -> valueField.setValue(val, valueLabel));
 
         final String altAxisLabel = altAxis.getName();
         switch (measType) {
         case TRANSMISSION_ABS:
         case TRANSMISSION_REL:
-            valueField.setUnit("%");
+            FXUtils.runFX(() -> valueField.setUnit("%"));
             break;
         case INTEGRAL:
         default:
@@ -243,7 +244,9 @@ public class SimpleMeasurements extends ValueIndicator {
     }
 
     public enum MeasurementCategory {
-        INDICATOR("Indicators"), VERTICAL("Vertical Measurements"), HORIZONTAL("Horizontal Measurements"),
+        INDICATOR("Indicators"),
+        VERTICAL("Vertical Measurements"),
+        HORIZONTAL("Horizontal Measurements"),
         ACC("Accelerator Misc.");
 
         private String name;
@@ -260,22 +263,32 @@ public class SimpleMeasurements extends ValueIndicator {
 
     public enum MeasurementType {
         // indicators
-        VALUE_HOR(false, INDICATOR, "hor. value"), VALUE_VER(true, INDICATOR, "ver. value"),
-        DISTANCE_HOR(false, INDICATOR, "hor. distance"), DISTANCE_VER(true, INDICATOR, "ver. distance"),
+        VALUE_HOR(false, INDICATOR, "hor. value"),
+        VALUE_VER(true, INDICATOR, "ver. value"),
+        DISTANCE_HOR(false, INDICATOR, "hor. distance"),
+        DISTANCE_VER(true, INDICATOR, "ver. distance"),
 
         // vertical-type measurements
-        MINIMUM(true, VERTICAL, "Minimum"), MAXIMUM(true, VERTICAL, "Maximum"), RANGE(true, VERTICAL, "Range"),
-        MEAN(true, VERTICAL, "Mean"), RMS(true, VERTICAL, "R.M.S."), MEDIAN(true, VERTICAL, "Median"),
-        INTEGRAL(true, VERTICAL, "Integral"), TRANSMISSION_ABS(true, ACC, "Abs. Transmission"),
+        MINIMUM(true, VERTICAL, "Minimum"),
+        MAXIMUM(true, VERTICAL, "Maximum"),
+        RANGE(true, VERTICAL, "Range"),
+        MEAN(true, VERTICAL, "Mean"),
+        RMS(true, VERTICAL, "R.M.S."),
+        MEDIAN(true, VERTICAL, "Median"),
+        INTEGRAL(true, VERTICAL, "Integral"),
+        TRANSMISSION_ABS(true, ACC, "Abs. Transmission"),
         TRANSMISSION_REL(true, ACC, "Rel. Transmission"),
 
         // horizontal-type measurements
         EDGE_DETECT(false, HORIZONTAL, "Edge-Detect"),
         RISETIME_10_90(false, HORIZONTAL, "10%-90% Rise-/Fall-Time\n (simple)"),
-        RISETIME_20_80(false, HORIZONTAL, "20%-80% Rise-/Fall-Time\n (simple)"), FWHM(false, HORIZONTAL, "FWHM"),
-        FWHM_INTERPOLATED(false, HORIZONTAL, "FWHM (interp.)"), LOCATION_MAXIMUM(false, HORIZONTAL, "Loc. Maximum"),
+        RISETIME_20_80(false, HORIZONTAL, "20%-80% Rise-/Fall-Time\n (simple)"),
+        FWHM(false, HORIZONTAL, "FWHM"),
+        FWHM_INTERPOLATED(false, HORIZONTAL, "FWHM (interp.)"),
+        LOCATION_MAXIMUM(false, HORIZONTAL, "Loc. Maximum"),
         LOCATION_MAXIMUM_GAUSS(false, HORIZONTAL, "Loc. Maximum\n(Gauss-interp.)"),
-        DUTY_CYCLE(false, HORIZONTAL, "Duty Cycle\n(10% hysteresis)"), PERIOD(true, HORIZONTAL, "Period"),
+        DUTY_CYCLE(false, HORIZONTAL, "Duty Cycle\n(10% hysteresis)"),
+        PERIOD(true, HORIZONTAL, "Period"),
         FREQUENCY(false, HORIZONTAL, "Frequency");
 
         private String name;
