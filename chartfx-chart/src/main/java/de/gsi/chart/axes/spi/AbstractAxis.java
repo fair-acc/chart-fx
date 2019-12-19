@@ -166,6 +166,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
             case RIGHT:
             default:
                 AbstractAxis.this.getAxisLabel().setTextAlignment(TextAlignment.CENTER);
+                break;
             }
         });
 
