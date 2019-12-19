@@ -178,26 +178,27 @@ restylers_version: "20191031"
 #   The command (and any required argument(s)) to perform the Restyling.
 #
 restylers:
-image: restyled/restyler-clang-format:v9.0.0
-command:
-- clang-format
-- "-i"
-arguments: []
-include:
-- "**/*.c"
-- "**/*.cc"
-- "**/*.cpp"
-- "**/*.cxx"
-- "**/*.c++"
-- "**/*.C"
-- "**/*.cs"
-- "**/*.h"
-- "**/*.hh"
-- "**/*.hpp"
-- "**/*.hxx"
-- "**/*.h++"
-- "**/*.H"
-- "**/*.java"
-- "**/*.js"
-- "**/*.m"
-interpreters: []
+  - name: prettier
+    image: restyled/restyler-clang-format:v9.0.0
+    command:
+      - clang-format
+      - "-i"
+    arguments: []
+    include:
+      - "**/*.c"
+      - "**/*.cc"
+      - "**/*.cpp"
+      - "**/*.cxx"
+      - "**/*.c++"
+      - "**/*.C"
+      - "**/*.cs"
+      - "**/*.h"
+      - "**/*.hh"
+      - "**/*.hpp"
+      - "**/*.hxx"
+      - "**/*.h++"
+      - "**/*.H"
+      - "**/*.java"
+      - "**/*.js"
+      - "**/*.m"
+    interpreters: []
