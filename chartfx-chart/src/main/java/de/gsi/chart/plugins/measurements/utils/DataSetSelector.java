@@ -14,55 +14,54 @@ import javafx.scene.layout.HBox;
  * @author rstein
  */
 public class DataSetSelector extends HBox {
-    private static final int DEFAULT_SELECTOR_HEIGHT = 50;
-    protected final ListView<DataSet> dataSets;
-    protected final ObservableList<DataSet> allDataSets;
+  private static final int DEFAULT_SELECTOR_HEIGHT = 50;
+  protected final ListView<DataSet> dataSets;
+  protected final ObservableList<DataSet> allDataSets;
 
-    public DataSetSelector(final XYChart chart) {
-        super();
-        final Label label = new Label("Selected Dataset:");
+  public DataSetSelector(final XYChart chart) {
+    super();
+    final Label label = new Label("Selected Dataset:");
 
-        // wrap observable Array List, to prevent resetting the selection model whenever getAllDatasets() is called
-        // somewhere in the code.
-        allDataSets = FXCollections.observableArrayList(chart.getAllDatasets());
-        dataSets = new ListView<>(allDataSets);
-        dataSets.setOrientation(Orientation.VERTICAL);
-        dataSets.setPrefSize(-1, DataSetSelector.DEFAULT_SELECTOR_HEIGHT);
-        if (!allDataSets.isEmpty()) {
-            dataSets.getSelectionModel().select(0);
-        }
-
-        dataSets.setCellFactory(list -> new DataSetLabel());
-
-        getChildren().addAll(label, dataSets);
+    // wrap observable Array List, to prevent resetting the selection model
+    // whenever getAllDatasets() is called somewhere in the code.
+    allDataSets = FXCollections.observableArrayList(chart.getAllDatasets());
+    dataSets = new ListView<>(allDataSets);
+    dataSets.setOrientation(Orientation.VERTICAL);
+    dataSets.setPrefSize(-1, DataSetSelector.DEFAULT_SELECTOR_HEIGHT);
+    if (!allDataSets.isEmpty()) {
+      dataSets.getSelectionModel().select(0);
     }
 
-    public int getNumberDataSets() {
-        return allDataSets.size();
-    }
+    dataSets.setCellFactory(list -> new DataSetLabel());
 
-    public DataSet getSelectedDataSet() {
-        return dataSets.getSelectionModel().getSelectedItem();
-    }
+    getChildren().addAll(label, dataSets);
+  }
 
-    static protected class DataSetLabel extends ListCell<DataSet> {
-        @Override
-        public void updateItem(final DataSet item, final boolean empty) {
-            super.updateItem(item, empty);
-            if (item != null) {
-                setText(item.getName());
-            }
-        }
-    }
+  public int getNumberDataSets() { return allDataSets.size(); }
 
-    // protected final ObservableList<DataSet> getAllDataSets(final XYChartPane chartPane) {
-    // final ObservableList<DataSet> allDataSets = FXCollections.observableArrayList();
-    // allDataSets.addAll(chartPane.getChart().getAllDatasets());
-    // final ObservableList<XYChart> a = chartPane.getOverlayCharts();
-    // for (final XYChart chart : a) {
-    // allDataSets.addAll(chart.getAllDatasets());
-    // }
-    //
-    // return allDataSets;
-    // }
+  public DataSet getSelectedDataSet() {
+    return dataSets.getSelectionModel().getSelectedItem();
+  }
+
+  static protected class DataSetLabel extends ListCell<DataSet> {
+    @Override
+    public void updateItem(final DataSet item, final boolean empty) {
+      super.updateItem(item, empty);
+      if (item != null) {
+        setText(item.getName());
+      }
+    }
+  }
+
+  // protected final ObservableList<DataSet> getAllDataSets(final XYChartPane
+  // chartPane) { final ObservableList<DataSet> allDataSets =
+  // FXCollections.observableArrayList();
+  // allDataSets.addAll(chartPane.getChart().getAllDatasets());
+  // final ObservableList<XYChart> a = chartPane.getOverlayCharts();
+  // for (final XYChart chart : a) {
+  // allDataSets.addAll(chart.getAllDatasets());
+  // }
+  //
+  // return allDataSets;
+  // }
 }
