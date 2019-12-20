@@ -11,7 +11,7 @@ before_install:
         - if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then export REVISION=${TRAVIS_BRANCH}; else export REVISION=${TRAVIS_BRANCH}PR${TRAVIS_PULL_REQUEST}; fi
         - if [ -z "$TRAVIS_TAG" ]; then export CHANGELIST=-SNAPSHOT; fi
         - export COVERITY_RESULTS_ARCHIVE=coverity_report.tar.bz2
-        - if [ "$TRAVIS_EVENT_TYPE" == "cron" ]; then export COVERITY_SCAN_VERSION="cron"; else if [ -n "$TRAVIS_TAG" ]; then export COVERITY_SCAN_VERSION="$TRAVIS_TAG"; else if [ "$TRAVIS_BRANCH" == "coverity_scan" ]; then export COVERITY_SCAN_VERSION="$TRAVIS_BRANCH"; else export COVERITY_SCAN_VERSION="test_remove_me"; fi; fi; fi
+        - if [ "$TRAVIS_EVENT_TYPE" == "cron" ]; then export COVERITY_SCAN_VERSION="cron"; else if [ -n "$TRAVIS_TAG" ]; then export COVERITY_SCAN_VERSION="$TRAVIS_TAG"; else if [ "$TRAVIS_BRANCH" == "coverity_scan" ]; then export COVERITY_SCAN_VERSION="$TRAVIS_BRANCH"; fi; fi; fi
         - echo "detected coverity scan export name ='${COVERITY_SCAN_VERSION}'"
 
 # Install dependencies and output maven version information
@@ -22,7 +22,7 @@ install:
 script:
         - if [ -n "$GPG_KEY" ]; then mvn clean deploy --settings .maven.xml -Prelease -Drevision=${REVISION} -Dchangelist=${CHANGELIST}; fi
         - |-2
-          if [ -n "$COVERITY_SCAN_VERSION" || true ]; then
+          if [ -n "$COVERITY_SCAN_VERSION"]; then
             if [ ! -d "$HOME/cov-analysis-linux64-2019.03" ]; then
               wget https://scan.coverity.com/download/java/Linux --post-data "token=${COVERITY_TOKEN}&project=chart-fx" -O coverity_tool.tgz
               tar xzf coverity_tool.tgz --directory $HOME;
@@ -43,7 +43,7 @@ after_success:
         echo "coverity tool is present";
         cov-build --dir cov-int mvn clean compile;
         tar cjf $COVERITY_RESULTS_ARCHIVE cov-int;
-        if [ -n "$COVERITY_SCAN_VERSION" && false ]; then
+        if [ -n "$COVERITY_SCAN_VERSION" ]; then
           curl --form token=${COVERITY_TOKEN} \
             --form email=$COVERITY_SCAN_NOTIFICATION_EMAIL \
             --form file=@$COVERITY_RESULTS_ARCHIVE \
