@@ -33,6 +33,7 @@ script:
             fi
             export PATH=$PATH:$HOME/cov-analysis-linux64-2019.03/bin;
           fi
+        - if [ -n "$COVERITY_SCAN_VERSION"]; then mvn dependency-check:aggregate@owaspcheck; fi
 
 # execute junit tests and generate jacoco to coveralls.io reports
 after_success:
