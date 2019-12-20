@@ -148,6 +148,22 @@
                         <mainClass>de.gsi.chart.samples.RunChartSamples</mainClass>
                     </configuration>
                 </plugin>
+                <plugin>
+                    <groupId>org.owasp</groupId>
+                    <artifactId>dependency-check-maven</artifactId>
+                    <version>5.2.4</version>
+                    <configuration>
+                        <failBuildOnCVSS>8</failBuildOnCVSS>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <id>owaspcheck</id>
+                            <goals>
+                                <goal>check</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
             </plugins>
         </pluginManagement>
         <plugins>
@@ -256,6 +272,17 @@
             </plugin>
         </plugins>
     </build>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <!-- Override old batik version included by javafxsvg due to CVEs -->
+                <groupId>org.apache.xmlgraphics</groupId>
+                <artifactId>batik-transcoder</artifactId>
+                <version>1.12</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <dependencies>
         <dependency>
