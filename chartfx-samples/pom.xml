@@ -18,10 +18,10 @@
 	</description>
 
     <dependencies>
-        <dependency>
+     	<dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-fxml</artifactId>
-            <version>13.0.1</version>
+            <version>${chartfx.javafx.version}</version>
         </dependency>
         <dependency>
             <groupId>de.gsi.chart</groupId>
@@ -36,7 +36,7 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
-            <version>2.0.0-alpha0</version>
+            <version>${chartfx.slf4j.version}</version>
         </dependency>
     </dependencies>
 

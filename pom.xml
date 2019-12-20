@@ -24,6 +24,7 @@
         <module>chartfx-dataset</module>
         <module>chartfx-math</module>
         <module>chartfx-samples</module>
+        <module>chartfx-report</module>
     </modules>
 
     <properties>
@@ -33,6 +34,17 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
+
+        <chartfx.javafx.version>13.0.1</chartfx.javafx.version>
+        <chartfx.controlsfx.version>11.0.0</chartfx.controlsfx.version>
+        <chartfx.icu4j.version>65.1</chartfx.icu4j.version>
+        <chartfx.javafxsvg.version>1.3.0</chartfx.javafxsvg.version>
+
+        <chartfx.slf4j.version>2.0.0-alpha0</chartfx.slf4j.version>
+        <chartfx.junit.jupiter.version>5.5.2</chartfx.junit.jupiter.version>
+        <chartfx.jacoco.version>0.8.5</chartfx.jacoco.version>
+        <chartfx.surefire.version>2.22.2</chartfx.surefire.version>
+        <chartfx.coveralls.version>3.2.0</chartfx.coveralls.version>
     </properties>
 
     <licenses>
@@ -192,18 +204,55 @@
                     </execution>
                 </executions>
             </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.22.0</version>
+                <version>${chartfx.surefire.version}</version>
+                <configuration>
+                    <!-- Jacoco prepare-agent builds some command-line params without -->
+                    <!-- which jacoco will not instrument. Hence it is important 
+                        to add -->
+                    <!-- those command-line params here (${argLine} holds those params) -->
+                    <argLine>${argLine} -Xms256m -Xmx2048m</argLine>
+                    <forkCount>1</forkCount>
+                    <runOrder>random</runOrder>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>${chartfx.jacoco.version}</version>
+                <configuration>
+                    <excludes>
+                        <!-- <exclude>de/gsi/chart/**/*</exclude> -->
+                        <exclude>de/gsi/math/**/*</exclude>
+                        <!-- <exclude>de/gsi/chart/samples/**/*</exclude> -->
+                        <!-- <exclude>de/gsi/dataset/samples/**/*</exclude> -->
+                        <!-- <exclude>de/gsi/math/samples/**/*</exclude> -->
+                        <!-- <exclude>de/gsi/acc/ui/samples/**/*</exclude> -->
+                    </excludes>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+
+                    <execution>
+                        <id>report</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
             <plugin>
                 <groupId>org.eluder.coveralls</groupId>
                 <artifactId>coveralls-maven-plugin</artifactId>
-                <version>4.3.0</version>
-                <configuration>
-                    <repoToken>Eqx5NUfvbnGjgztCMWZoLOTm9WAwF5gSk</repoToken>
-                </configuration>
+                <version>${chartfx.coveralls.version}</version>
             </plugin>
         </plugins>
     </build>
@@ -212,24 +261,24 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
-            <version>2.0.0-alpha0</version>
+            <version>${chartfx.slf4j.version}</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
-            <version>2.0.0-alpha0</version>
+            <version>${chartfx.slf4j.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>
-            <version>5.5.2</version>
+            <version>${chartfx.junit.jupiter.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-params</artifactId>
-            <version>5.5.2</version>
+            <version>${chartfx.junit.jupiter.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
