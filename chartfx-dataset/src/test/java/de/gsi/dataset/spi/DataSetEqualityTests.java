@@ -64,9 +64,9 @@ public class DataSetEqualityTests {
         assertEquals(new DimReductionDataSet(
                 new DoubleDataSet3D("test", new double[] { 1, 2, 3 }, new double[] { 6, 7, 8 },
                         new double[][] { new double[] { 1, 2, 3 }, new double[] { 6, 5, 4 },
-                                new double[] { 9, 8, 7 } }), DataSet.DIM_X, Option.SLICE),
+                                new double[] { 9, 8, 7 } }), DIM_X, Option.SLICE),
                 new DimReductionDataSet(new DoubleDataSet3D("test", new double[] { 1, 2, 3 }, new double[] { 6, 7, 8 }, new double[][] {
-                        new double[] { 1, 2, 3 }, new double[] { 6, 5, 4 }, new double[] { 9, 8, 7 } }), DataSet.DIM_X, Option.SLICE));
+                        new double[] { 1, 2, 3 }, new double[] { 6, 5, 4 }, new double[] { 9, 8, 7 } }), DIM_X, Option.SLICE));
         
         
     }

@@ -182,7 +182,7 @@ restylers:
     image: restyled/restyler-clang-format:v9.0.0
     command:
       - clang-format
-      - "-i -style=.clang-format"
+      - "-i"
     arguments: []
     include:
       - "**/*.c"
