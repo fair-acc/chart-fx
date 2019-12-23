@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import de.gsi.dataset.DataSet;
 import de.gsi.dataset.DataSetError.ErrorType;
 import de.gsi.dataset.EditConstraints;
+import de.gsi.dataset.spi.DimReductionDataSet.Option;
 
 /**
  * Tests for minimal DataSet equality and hashCode implementation
@@ -60,7 +61,14 @@ public class DataSetEqualityTests {
                                 new double[] { 9, 8, 7 } }),
                 new DoubleDataSet3D("test", new double[] { 1, 2, 3 }, new double[] { 6, 7, 8 }, new double[][] {
                         new double[] { 1, 2, 3 }, new double[] { 6, 5, 4 }, new double[] { 9, 8, 7 } }));
-
+        assertEquals(new DimReductionDataSet(
+                new DoubleDataSet3D("test", new double[] { 1, 2, 3 }, new double[] { 6, 7, 8 },
+                        new double[][] { new double[] { 1, 2, 3 }, new double[] { 6, 5, 4 },
+                                new double[] { 9, 8, 7 } }), DataSet.DIM_X, Option.SLICE),
+                new DimReductionDataSet(new DoubleDataSet3D("test", new double[] { 1, 2, 3 }, new double[] { 6, 7, 8 }, new double[][] {
+                        new double[] { 1, 2, 3 }, new double[] { 6, 5, 4 }, new double[] { 9, 8, 7 } }), DataSet.DIM_X, Option.SLICE));
+        
+        
     }
 
     /**

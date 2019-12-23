@@ -13,7 +13,6 @@ import de.gsi.dataset.event.UpdateEvent;
  * Reduces 3D data to 2D DataSet either via slicing, min, mean, max or integration
  * 
  * @author rstein
- *
  */
 public class DimReductionDataSet extends DoubleDataSet implements EventListener {
     private static final Logger LOGGER = LoggerFactory.getLogger(DimReductionDataSet.class);
@@ -47,7 +46,6 @@ public class DimReductionDataSet extends DoubleDataSet implements EventListener 
     }
 
     /**
-     * 
      * @return source data set
      */
     public DataSet getSourceDataSet() {
@@ -110,7 +108,7 @@ public class DimReductionDataSet extends DoubleDataSet implements EventListener 
                 final double x = source.get(dimIndex, index);
                 double integral = 0.0;
                 double nSlices = 0.0;
-                for (int i = min; i < max; i++) {
+                for (int i = min; i <= Math.min(max, nDataCount - 1); i++) {
                     integral += source.getZ(i, index);
                     nSlices += 1.0;
                 }
@@ -121,7 +119,7 @@ public class DimReductionDataSet extends DoubleDataSet implements EventListener 
                 final double x = source.get(dimIndex, index);
                 double integral = 0.0;
                 double nSlices = 0.0;
-                for (int i = min; i < max; i++) {
+                for (int i = min; i <= Math.min(max, nDataCount - 1); i++) {
                     integral += source.getZ(index, i);
                     nSlices += 1.0;
                 }
@@ -139,7 +137,7 @@ public class DimReductionDataSet extends DoubleDataSet implements EventListener 
             for (int index = 0; index < nDataCount; index++) {
                 final double x = source.get(dimIndex, index);
                 double ret = source.getZ(min, index);
-                for (int i = min + 1; i < max; i++) {
+                for (int i = min + 1; i <= Math.min(max, nDataCount - 1); i++) {
                     final double val = source.getZ(i, index);
                     ret = isMin ? Math.min(val, ret) : Math.max(val, ret);
                 }
@@ -149,7 +147,7 @@ public class DimReductionDataSet extends DoubleDataSet implements EventListener 
             for (int index = 0; index < nDataCount; index++) {
                 final double x = source.get(dimIndex, index);
                 double ret = source.getZ(index, min);
-                for (int i = min + 1; i < max; i++) {
+                for (int i = min + 1; i <= Math.min(max, nDataCount - 1); i++) {
                     final double val = source.getZ(index, i);
                     ret = isMin ? Math.min(val, ret) : Math.max(val, ret);
                 }
@@ -177,6 +175,10 @@ public class DimReductionDataSet extends DoubleDataSet implements EventListener 
     }
 
     public enum Option {
-        MIN, MEAN, MAX, INTEGRAL, SLICE;
+        MIN,
+        MEAN,
+        MAX,
+        INTEGRAL,
+        SLICE;
     }
 }
