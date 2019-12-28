@@ -13,6 +13,8 @@ before_install:
         - export COVERITY_RESULTS_ARCHIVE=coverity_report.tar.bz2
         - if [ "$TRAVIS_EVENT_TYPE" == "cron" ]; then export COVERITY_SCAN_VERSION="cron"; else if [ -n "$TRAVIS_TAG" ]; then export COVERITY_SCAN_VERSION="$TRAVIS_TAG"; else if [ "$TRAVIS_BRANCH" == "coverity_scan" ]; then export COVERITY_SCAN_VERSION="$TRAVIS_BRANCH"; fi; fi; fi
         - echo "detected coverity scan export name ='${COVERITY_SCAN_VERSION}'"
+        - sudo apt-get install jq
+        - curl -LSs $(curl -LSs https://api.github.com/repos/codacy/codacy-coverage-reporter/releases/latest | jq -r '.assets | map({name, browser_download_url} | select(.name | endswith(".jar"))) | .[0].browser_download_url') -o codacy-coverage-reporter-assembly.jar
 
 # Install dependencies and output maven version information
 install:
@@ -35,6 +37,7 @@ script:
 # execute junit tests and generate jacoco to coveralls.io reports
 after_success:
   - mvn clean test jacoco:report-aggregate coveralls:report
+  - java -jar codacy-coverage-reporter-assembly.jar report -l Java -r chartfx-report/target/site/jacoco-aggregate/jacoco.xml
   - echo "TRAVIS_EVENT_TYPE = '${TRAVIS_EVENT_TYPE}'  TRAVIS_BRANCH = '${TRAVIS_BRANCH}' TRAVIS_TAG = '${TRAVIS_TAG}'"
   - |-2
     if [ -n "$COVERITY_SCAN_VERSION" ]; then
