@@ -57,24 +57,12 @@ public class FloatDataSet extends AbstractDataSet<FloatDataSet> implements Edita
      * @param initalSize initial buffer size
      * @param deepCopy if true, the input array is copied
      * @throws IllegalArgumentException if any of parameters is <code>null</code> or if arrays with coordinates have
-     *         different lengths
+     *             different lengths
      */
     public FloatDataSet(final String name, final float[] xValues, final float[] yValues, final int initalSize,
             final boolean deepCopy) {
         this(name);
-        AssertUtils.notNull("X data", xValues);
-        AssertUtils.notNull("Y data", yValues);
-        final int dataMaxIndex = Math.min(xValues.length, Math.min(yValues.length, initalSize));
-        AssertUtils.equalFloatArrays(xValues, yValues, initalSize);
-        if (deepCopy) {
-            this.xValues = new FloatArrayList(dataMaxIndex);
-            this.yValues = new FloatArrayList(dataMaxIndex);
-            System.arraycopy(xValues, 0, this.xValues.elements(), 0, Math.min(dataMaxIndex, initalSize));
-            System.arraycopy(yValues, 0, this.yValues.elements(), 0, Math.min(dataMaxIndex, initalSize));
-        } else {
-            this.xValues = FloatArrayList.wrap(xValues);
-            this.yValues = FloatArrayList.wrap(yValues);
-        }
+        set(xValues, yValues, initalSize, deepCopy); // NOPMD
     }
 
     /**
@@ -317,15 +305,15 @@ public class FloatDataSet extends AbstractDataSet<FloatDataSet> implements Edita
     public FloatDataSet remove(final int fromIndex, final int toIndex) {
         lock().writeLockGuard(() -> {
             AssertUtils.indexInBounds(fromIndex, getDataCount(), "fromIndex");
-            AssertUtils.indexInBounds(toIndex, getDataCount(), "toIndex");
             AssertUtils.indexOrder(fromIndex, "fromIndex", toIndex, "toIndex");
 
-            xValues.removeElements(fromIndex, toIndex);
-            yValues.removeElements(fromIndex, toIndex);
+            final int clampedToIndex = Math.min(toIndex, getDataCount());
+            xValues.removeElements(fromIndex, clampedToIndex);
+            yValues.removeElements(fromIndex, clampedToIndex);
 
             // remove old label and style keys
-            getDataLabelMap().remove(fromIndex, toIndex);
-            getDataLabelMap().remove(fromIndex, toIndex);
+            getDataLabelMap().remove(fromIndex, clampedToIndex);
+            getDataLabelMap().remove(fromIndex, clampedToIndex);
 
             // invalidate ranges
             // -> fireInvalidated calls computeLimits for autoNotification
@@ -357,6 +345,9 @@ public class FloatDataSet extends AbstractDataSet<FloatDataSet> implements Edita
     public FloatDataSet set(final DataSet2D other) {
         lock().writeLockGuard(() -> {
             other.lock().writeLockGuard(() -> {
+                // copy data
+                this.set(toFloats(other.getXValues()), toFloats(other.getYValues()), other.getDataCount(), true);
+
                 // deep copy data point labels and styles
                 getDataLabelMap().clear();
                 for (int index = 0; index < other.getDataCount(); index++) {
@@ -374,7 +365,10 @@ public class FloatDataSet extends AbstractDataSet<FloatDataSet> implements Edita
                 }
                 this.setStyle(other.getStyle());
 
-                this.set(toFloats(other.getXValues()), toFloats(other.getYValues()), true);
+                // synchronise axis description
+                for (int dimIndex = 0; dimIndex < getDimension(); dimIndex++) {
+                    this.getAxisDescription(dimIndex).set(other.getAxisDescription(dimIndex));
+                }
             });
         });
         return fireInvalidated(new UpdatedDataEvent(this));
@@ -406,29 +400,52 @@ public class FloatDataSet extends AbstractDataSet<FloatDataSet> implements Edita
      * @return itself
      */
     public FloatDataSet set(final float[] xValues, final float[] yValues, final boolean copy) {
+        return set(xValues, yValues, -1, true);
+    }
+
+    /**
+     * <p>
+     * Initialises the data set with specified data.
+     * </p>
+     * Note: The method copies values from specified double arrays.
+     *
+     * @param xValues X coordinates
+     * @param yValues Y coordinates
+     * @param nSamples number of samples to be copied
+     * @param copy true: makes an internal copy, false: use the pointer as is (saves memory allocation
+     * @return itself
+     */
+    public FloatDataSet set(final float[] xValues, final float[] yValues, final int nSamples, final boolean copy) {
         AssertUtils.notNull("X coordinates", xValues);
         AssertUtils.notNull("Y coordinates", yValues);
         AssertUtils.equalFloatArrays(xValues, yValues);
+        if (nSamples >= 0) {
+            AssertUtils.indexInBounds(nSamples, xValues.length + 1, "xValues bounds");
+            AssertUtils.indexInBounds(nSamples, yValues.length + 1, "yValues bounds");
+        }
+        final int nSamplesToAdd = nSamples >= 0 ? Math.min(nSamples, xValues.length) : xValues.length;
 
         lock().writeLockGuard(() -> {
-            if (!copy) {
-                getDataLabelMap().clear();
-                getDataStyleMap().clear();
-                this.xValues = FloatArrayList.wrap(xValues);
-                this.yValues = FloatArrayList.wrap(yValues);
+            getDataLabelMap().clear();
+            getDataStyleMap().clear();
+            if (copy) {
+                if (this.xValues == null) {
+                    this.xValues = new FloatArrayList();
+                }
+                if (this.yValues == null) {
+                    this.yValues = new FloatArrayList();
+                }
+                resize(0);
 
-                recomputeLimits(0);
-                recomputeLimits(1);
-                return;
+                this.xValues.addElements(0, xValues, 0, nSamplesToAdd);
+                this.yValues.addElements(0, yValues, 0, nSamplesToAdd);
+            } else {
+                this.xValues = FloatArrayList.wrap(xValues, nSamplesToAdd);
+                this.yValues = FloatArrayList.wrap(yValues, nSamplesToAdd);
             }
 
-            this.xValues.size(0);
-            this.xValues.addElements(0, xValues);
-            this.yValues.size(0);
-            this.yValues.addElements(0, yValues);
-
-            recomputeLimits(0);
-            recomputeLimits(1);
+            recomputeLimits(DIM_X);
+            recomputeLimits(DIM_Y);
         });
         return fireInvalidated(new UpdatedDataEvent(this));
     }
@@ -463,15 +480,15 @@ public class FloatDataSet extends AbstractDataSet<FloatDataSet> implements Edita
 
     public FloatDataSet set(final int index, final double[] x, final double[] y) {
         lock().writeLockGuard(() -> {
-            xValues.size(index + x.length);
-            System.arraycopy(x, 0, xValues.elements(), index, x.length);
-            yValues.size(index + y.length);
-            System.arraycopy(y, 0, yValues.elements(), index, y.length);
+            resize(Math.max(index + x.length, xValues.size()));
+            System.arraycopy(toFloats(x), 0, xValues.elements(), index, x.length);
+            System.arraycopy(toFloats(y), 0, yValues.elements(), index, y.length);
+            getDataLabelMap().remove(index, index + x.length);
+            getDataStyleMap().remove(index, index + x.length);
 
-            // invalidate ranges
-            // -> fireInvalidated calls computeLimits for autoNotification
-            getAxisDescriptions().forEach(AxisDescription::clear);
-
+            // invalidate and recompute ranges
+            recomputeLimits(DIM_X);
+            recomputeLimits(DIM_Y);
         });
         return fireInvalidated(new UpdatedDataEvent(this));
     }
