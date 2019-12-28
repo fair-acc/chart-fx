@@ -1,10 +1,11 @@
 package de.gsi.dataset.spi;
 
-import static de.gsi.dataset.DataSet.DIM_X;
-import static de.gsi.dataset.DataSet.DIM_Y;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+
+import static de.gsi.dataset.DataSet.DIM_X;
+import static de.gsi.dataset.DataSet.DIM_Y;
 
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -28,7 +29,6 @@ public class EditableDataSetTests {
 
     @Test
     public void testCommonDataSetImplementations() {
-
         // common known EditableDataSet implementations
         // add your own version to improve coverage
 
@@ -48,8 +48,7 @@ public class EditableDataSetTests {
         final int nDim = dataSet.getDimension();
         final int nData = dataSet.getDataCount();
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.atDebug().addArgument(dsType).addArgument(nDim).addArgument(nData)
-                    .log("info: data set '{}' with n-dimd = {} and n-data-count = {}");
+            LOGGER.atDebug().addArgument(dsType).addArgument(nDim).addArgument(nData).log("info: data set '{}' with n-dimd = {} and n-data-count = {}");
         }
         if (nDim != 2) {
             fail("this test is not designed for '" + dsType + "' with dimension = " + nDim);
@@ -75,9 +74,9 @@ public class EditableDataSetTests {
                             "check '" + dsType + "' dimIndex=" + dimIndex + " coordinate of added point");
 
                     final String errStrNeg = "check '" + dsType + "' dimIndex=" + dimIndex
-                            + " negative error coordinate of added point";
+                                             + " negative error coordinate of added point";
                     final String errStrPos = "check '" + dsType + "' dimIndex=" + dimIndex
-                            + " positive error coordinate of added point";
+                                             + " positive error coordinate of added point";
                     switch (errorDs.getErrorType(dimIndex)) {
                     case SYMMETRIC: // symmetric error attached to this dimension
                         assertEquals(errorCoordinates[errIndex] + i, errorDs.getErrorNegative(dimIndex, nDataLocal),
@@ -99,10 +98,8 @@ public class EditableDataSetTests {
                         // no error attached to this dimension
                         break;
                     }
-
                 }
             }
-
         }
         assertEquals(nCount, dataSet.getDataCount() - nData,
                 "check '" + dsType + "' diff data count at end of addition");
@@ -177,8 +174,7 @@ public class EditableDataSetTests {
         final int nDim = dataSet.getDimension();
         final int nData = dataSet.getDataCount();
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.atDebug().addArgument(dsType).addArgument(nDim).addArgument(nData)
-                    .log("info: data set '{}' with n-dimd = {} and n-data-count = {}");
+            LOGGER.atDebug().addArgument(dsType).addArgument(nDim).addArgument(nData).log("info: data set '{}' with n-dimd = {} and n-data-count = {}");
         }
         if (nDim != 2) {
             fail("this test is not designed for '" + dsType + "' with dimension = " + nDim);
@@ -192,7 +188,7 @@ public class EditableDataSetTests {
                         errorCoordinates[0] + i, errorCoordinates[1] + i, errorCoordinates[2] + i,
                         errorCoordinates[3] + i, errorCoordinates[4] + i, errorCoordinates[5] + i); // error coordinates
             } else {
-                ret = dataSet.add(0, i + testCoordinates[DIM_X], i + testCoordinates[DIM_Y]); // X & Y coordinates only    
+                ret = dataSet.add(0, i + testCoordinates[DIM_X], i + testCoordinates[DIM_Y]); // X & Y coordinates only
             }
             assertEquals(dataSet, ret, "check '" + dsType + "' return value (fluent design)");
 
@@ -207,9 +203,9 @@ public class EditableDataSetTests {
                             "check '" + dsType + "' dimIndex=" + dimIndex + " coordinate of inserted point");
 
                     final String errStrNeg = "check '" + dsType + "' dimIndex=" + dimIndex
-                            + " negative error coordinate of inserted point";
+                                             + " negative error coordinate of inserted point";
                     final String errStrPos = "check '" + dsType + "' dimIndex=" + dimIndex
-                            + " positive error coordinate of inserted point";
+                                             + " positive error coordinate of inserted point";
                     switch (errorDs.getErrorType(dimIndex)) {
                     case SYMMETRIC: // symmetric error attached to this dimension
                         assertEquals(errorCoordinates[errIndex] + i, errorDs.getErrorNegative(dimIndex, 0), errStrNeg);
@@ -225,15 +221,12 @@ public class EditableDataSetTests {
                     case NO_ERROR: // no error attached to this dimension
                     default:
                         if (LOGGER.isDebugEnabled()) {
-                            LOGGER.atDebug().addArgument(dsType).addArgument(dimIndex)
-                                    .log("data set '{}' dimIndex = {} has no error definition");
+                            LOGGER.atDebug().addArgument(dsType).addArgument(dimIndex).log("data set '{}' dimIndex = {} has no error definition");
                         }
                         break;
                     }
-
                 }
             }
-
         }
         assertEquals(nCount, dataSet.getDataCount() - nData,
                 "check '" + dsType + "' diff data count at end of insertion");
@@ -246,8 +239,7 @@ public class EditableDataSetTests {
         final int nDim = dataSet.getDimension();
         final int nData = dataSet.getDataCount();
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.atDebug().addArgument(dsType).addArgument(nDim).addArgument(nData)
-                    .log("info: data set '{}' with n-dimd = {} and n-data-count = {}");
+            LOGGER.atDebug().addArgument(dsType).addArgument(nDim).addArgument(nData).log("info: data set '{}' with n-dimd = {} and n-data-count = {}");
         }
         if (nDim != 2) {
             fail("this test is not designed for '" + dsType + "' with dimension = " + nDim);
@@ -272,8 +264,7 @@ public class EditableDataSetTests {
         final int nDim = dataSet.getDimension();
         final int nData = dataSet.getDataCount();
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.atDebug().addArgument(dsType).addArgument(nDim).addArgument(nData)
-                    .log("info: data set '{}' with n-dimd = {} and n-data-count = {}");
+            LOGGER.atDebug().addArgument(dsType).addArgument(nDim).addArgument(nData).log("info: data set '{}' with n-dimd = {} and n-data-count = {}");
         }
         if (nDim != 2) {
             fail("this test is not designed for '" + dsType + "' with dimension = " + nDim);
@@ -302,9 +293,9 @@ public class EditableDataSetTests {
                             "check '" + dsType + "' dimIndex=" + dimIndex + " coordinate of set point");
 
                     final String errStrNeg = "check '" + dsType + "' dimIndex=" + dimIndex
-                            + " negative error coordinate of set point";
+                                             + " negative error coordinate of set point";
                     final String errStrPos = "check '" + dsType + "' dimIndex=" + dimIndex
-                            + " positive error coordinate of set point";
+                                             + " positive error coordinate of set point";
                     switch (errorDs.getErrorType(dimIndex)) {
                     case SYMMETRIC: // symmetric error attached to this dimension
                         assertEquals((2 * errorCoordinates[errIndex]) + i, errorDs.getErrorNegative(dimIndex, 0),
@@ -324,15 +315,12 @@ public class EditableDataSetTests {
                     case NO_ERROR: // no error attached to this dimension
                     default:
                         if (LOGGER.isDebugEnabled()) {
-                            LOGGER.atDebug().addArgument(dsType).addArgument(dimIndex)
-                                    .log("data set '{}' dimIndex = {} has no error definition");
+                            LOGGER.atDebug().addArgument(dsType).addArgument(dimIndex).log("data set '{}' dimIndex = {} has no error definition");
                         }
                         break;
                     }
-
                 }
             }
-
         }
         assertEquals(nData, dataSet.getDataCount(), "check '" + dsType + "' diff data count at end of set");
     }

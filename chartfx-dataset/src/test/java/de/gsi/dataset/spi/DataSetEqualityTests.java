@@ -1,11 +1,12 @@
 package de.gsi.dataset.spi;
 
-import static de.gsi.dataset.DataSet.DIM_X;
-import static de.gsi.dataset.DataSet.DIM_Y;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import static de.gsi.dataset.DataSet.DIM_X;
+import static de.gsi.dataset.DataSet.DIM_Y;
 
 import java.util.Arrays;
 
@@ -28,7 +29,6 @@ public class DataSetEqualityTests {
 
     @Test
     public void testDataSetEquality() {
-
         // check for helper classes
         assertEquals(new DataRange(), new DataRange());
         assertEquals(new DefaultAxisDescription("default"), new DefaultAxisDescription("default"));
@@ -59,18 +59,15 @@ public class DataSetEqualityTests {
                 new DoubleDataSet3D("test", new double[] { 1, 2, 3 }, new double[] { 6, 7, 8 },
                         new double[][] { new double[] { 1, 2, 3 }, new double[] { 6, 5, 4 },
                                 new double[] { 9, 8, 7 } }),
-                new DoubleDataSet3D("test", new double[] { 1, 2, 3 }, new double[] { 6, 7, 8 }, new double[][] {
-                        new double[] { 1, 2, 3 }, new double[] { 6, 5, 4 }, new double[] { 9, 8, 7 } }));
+                new DoubleDataSet3D("test", new double[] { 1, 2, 3 }, new double[] { 6, 7, 8 }, new double[][] { new double[] { 1, 2, 3 }, new double[] { 6, 5, 4 }, new double[] { 9, 8, 7 } }));
         assertEquals(
                 new DimReductionDataSet(new DoubleDataSet3D("test", new double[] { 1, 2, 3 }, new double[] { 6, 7, 8 },
-                        new double[][] { new double[] { 1, 2, 3 }, new double[] { 6, 5, 4 },
-                                new double[] { 9, 8, 7 } }),
+                                                new double[][] { new double[] { 1, 2, 3 }, new double[] { 6, 5, 4 },
+                                                        new double[] { 9, 8, 7 } }),
                         DIM_X, Option.SLICE),
                 new DimReductionDataSet(
-                        new DoubleDataSet3D("test", new double[] { 1, 2, 3 }, new double[] { 6, 7, 8 }, new double[][] {
-                                new double[] { 1, 2, 3 }, new double[] { 6, 5, 4 }, new double[] { 9, 8, 7 } }),
+                        new DoubleDataSet3D("test", new double[] { 1, 2, 3 }, new double[] { 6, 7, 8 }, new double[][] { new double[] { 1, 2, 3 }, new double[] { 6, 5, 4 }, new double[] { 9, 8, 7 } }),
                         DIM_X, Option.SLICE));
-
     }
 
     /**
@@ -227,7 +224,6 @@ public class DataSetEqualityTests {
      * @author rstein
      */
     private class NullEditConstraints implements EditConstraints {
-
         @Override
         public boolean canAdd(int index) {
             return false;
@@ -282,5 +278,4 @@ public class DataSetEqualityTests {
                     + (Math.ceil(x) - x) * get(dimIndex, (int) Math.ceil(x));
         }
     }
-
 }

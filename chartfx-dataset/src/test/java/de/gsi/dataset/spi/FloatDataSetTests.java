@@ -1,9 +1,10 @@
 package de.gsi.dataset.spi;
 
-import static de.gsi.dataset.DataSet.DIM_X;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import static de.gsi.dataset.DataSet.DIM_X;
 
 import java.util.Arrays;
 
@@ -62,8 +63,7 @@ public class FloatDataSetTests extends EditableDataSetTests {
         final int nDim = dataSet.getDimension();
         final int nData = dataSet.getDataCount();
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.atDebug().addArgument(dsType).addArgument(nDim).addArgument(nData)
-                    .log("info: data set '{}' with nDim = {} and nData = {}");
+            LOGGER.atDebug().addArgument(dsType).addArgument(nDim).addArgument(nData).log("info: data set '{}' with nDim = {} and nData = {}");
         }
 
         for (int i = 0; i < testCoordinate[0].length; i++) {
@@ -127,7 +127,7 @@ public class FloatDataSetTests extends EditableDataSetTests {
                 "check '" + dsType + "' diff data count at end of adding");
 
         if (testCase <= 2) {
-            //TODO capacity increases beyond size due to DoubleArrayList's grow(capacity) implementation that increases the capacity by 
+            //TODO capacity increases beyond size due to DoubleArrayList's grow(capacity) implementation that increases the capacity by
             // by Min(size + 0.5* size, capacity) ... need to find a work around
             assertEquals(dataSet.getDataCount(), dataSet.getCapacity(),
                     "check '" + dsType + "' capacity data count match , test case = " + testCase);
