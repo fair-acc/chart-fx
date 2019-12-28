@@ -5,6 +5,7 @@ import de.gsi.dataset.DataSet;
 import de.gsi.dataset.event.AxisChangeEvent;
 import de.gsi.dataset.event.AxisNameChangeEvent;
 import de.gsi.dataset.event.AxisRangeChangeEvent;
+import de.gsi.dataset.spi.utils.MathUtils;
 
 /**
  * Simple default implementation of the AxisDescription interface
@@ -117,6 +118,15 @@ public class DefaultAxisDescription extends DataRange implements AxisDescription
 
     @Override
     public boolean equals(final Object obj) {
+        return equals(obj, 1e-6); // always fuzzy comparisons
+    }
+
+    /**
+     * @param obj object to compare to
+     * @param epsilon allow for fuzzy comparisons of min/max
+     * @return true: matches, false otherwise
+     */
+    public boolean equals(final Object obj, final double epsilon) {
         if (!(obj instanceof AxisDescription)) {
             return false;
         }
@@ -125,7 +135,47 @@ public class DefaultAxisDescription extends DataRange implements AxisDescription
         }
 
         final AxisDescription other = (AxisDescription) obj;
-        return hashCode() == other.hashCode();
+        if (hashCode() == other.hashCode()) {
+            return true;
+        }
+
+        if (epsilon <= 0.0) {
+            return false;
+        }
+
+        if (getName() != null && !getName().equals(other.getName())) {
+            return false;
+        }
+
+        if (other.getName() != null && !other.getName().equals(getName())) {
+            return false;
+        }
+
+        if (getUnit() != null && !getUnit().equals(other.getUnit())) {
+            return false;
+        }
+
+        if (other.getUnit() != null && !other.getUnit().equals(getUnit())) {
+            return false;
+        }
+
+        if (epsilon <= 0.0) {
+            if (getMin() != other.getMin()) {
+                return false;
+            }
+            if (getMax() != other.getMax()) {
+                return false;
+            }
+        } else {
+            if (!MathUtils.nearlyEqual(getMin(), other.getMin(), epsilon)) {
+                return false;
+            }
+
+            if (!MathUtils.nearlyEqual(getMax(), other.getMax(), epsilon)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     @Override
