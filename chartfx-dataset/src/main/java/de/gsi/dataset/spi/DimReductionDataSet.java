@@ -11,7 +11,7 @@ import de.gsi.dataset.event.UpdateEvent;
 
 /**
  * Reduces 3D data to 2D DataSet either via slicing, min, mean, max or integration
- * 
+ *
  * @author rstein
  */
 public class DimReductionDataSet extends DoubleDataSet implements EventListener {
@@ -77,24 +77,20 @@ public class DimReductionDataSet extends DoubleDataSet implements EventListener 
                 break;
             }
         }));
-        this.fireInvalidated(new AddedDataEvent(this,
-                "updated " + DimReductionDataSet.class.getSimpleName() + " name = " + this.getName()));
+        this.fireInvalidated(new AddedDataEvent(
+                this, "updated " + DimReductionDataSet.class.getSimpleName() + " name = " + this.getName()));
         if (LOGGER.isDebugEnabled()) {
             LOGGER.atDebug().addArgument(event).log("handle({}) - done");
         }
     }
 
     public void setMaxIndex(final int dimIndex, double val) {
-        lock().writeLockGuard(() -> {
-            indexMax = source.getIndex(dimIndex, val);
-        });
+        lock().writeLockGuard(() -> { indexMax = source.getIndex(dimIndex, val); });
         this.handle(new UpdateEvent(this, "changed indexMax"));
     }
 
     public void setMinIndex(final int dimIndex, double val) {
-        lock().writeLockGuard(() -> {
-            indexMin = source.getIndex(dimIndex, val);
-        });
+        lock().writeLockGuard(() -> { indexMin = source.getIndex(dimIndex, val); });
         this.handle(new UpdateEvent(this, "changed indexMax"));
     }
 

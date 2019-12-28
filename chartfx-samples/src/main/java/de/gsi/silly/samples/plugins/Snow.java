@@ -2,12 +2,6 @@ package de.gsi.silly.samples.plugins;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import de.gsi.chart.plugins.ChartPlugin;
-import de.gsi.math.TRandom;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -26,6 +20,12 @@ import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.StrokeType;
 import javafx.util.Duration;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import de.gsi.chart.plugins.ChartPlugin;
+import de.gsi.math.TRandom;
 
 /**
  * @author rstein
@@ -46,8 +46,8 @@ public class Snow extends ChartPlugin {
         this(100, 10.0, 5.0, Color.web("white", 0.7));
     }
 
-    public Snow(final int nSnowFlakes, final double meanSnowFlakeSize, final double rmsSnowFlakeSize,
-            final Color color) {
+    public Snow(
+            final int nSnowFlakes, final double meanSnowFlakeSize, final double rmsSnowFlakeSize, final Color color) {
         super();
 
         numberOfFlakesProperty().set(nSnowFlakes);
@@ -183,8 +183,6 @@ public class Snow extends ChartPlugin {
             y = Math.random() * yMax;
             this.setTranslateX(x - size / 2);
             this.setTranslateY(y - size / 2);
-
         }
     }
-
 }

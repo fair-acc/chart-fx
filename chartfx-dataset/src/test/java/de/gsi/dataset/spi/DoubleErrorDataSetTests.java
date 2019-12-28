@@ -1,10 +1,11 @@
 package de.gsi.dataset.spi;
 
-import static de.gsi.dataset.DataSet.DIM_X;
-import static de.gsi.dataset.DataSet.DIM_Y;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import static de.gsi.dataset.DataSet.DIM_X;
+import static de.gsi.dataset.DataSet.DIM_Y;
 
 import java.util.Arrays;
 
@@ -14,15 +15,15 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Checks for DoubleErrorDataSet interfaces and constructors.
- * 
+ *
  * @author rstein
  */
 public class DoubleErrorDataSetTests extends EditableDataSetTests {
     private static final Logger LOGGER = LoggerFactory.getLogger(DoubleErrorDataSetTests.class);
-    protected static final double[][] testCoordinate = { { 1.0, 2.0, 3.0 }, { 2.0, 4.0, 6.0 } };
-    protected static final double[] testEYZERO = { 0.0, 0.0, 0.0 };
-    protected static final double[] testEYN = { 0.2, 0.3, 0.4 };
-    protected static final double[] testEYP = { 0.1, 0.2, 0.3 };
+    protected static final double[][] testCoordinate = {{1.0, 2.0, 3.0}, {2.0, 4.0, 6.0}};
+    protected static final double[] testEYZERO = {0.0, 0.0, 0.0};
+    protected static final double[] testEYN = {0.2, 0.3, 0.4};
+    protected static final double[] testEYP = {0.1, 0.2, 0.3};
     private static final int n = testCoordinate[0].length;
 
     @Test
@@ -33,8 +34,8 @@ public class DoubleErrorDataSetTests extends EditableDataSetTests {
         DoubleErrorDataSet firstDataSet = new DoubleErrorDataSet("test");
         checkAddPoints(firstDataSet, 0); // w/o errors
 
-        final DoubleErrorDataSet secondDataSetA = new DoubleErrorDataSet("test", testCoordinate[0], testCoordinate[1],
-                testEYZERO, testEYZERO, n, true);
+        final DoubleErrorDataSet secondDataSetA = new DoubleErrorDataSet(
+                "test", testCoordinate[0], testCoordinate[1], testEYZERO, testEYZERO, n, true);
         assertEquals(firstDataSet, secondDataSetA, "DoubleErrorDataSet(via arrays, deep copy) constructor");
 
         final DoubleErrorDataSet secondDataSetB = new DoubleErrorDataSet("test", Arrays.copyOf(testCoordinate[0], n),
@@ -66,8 +67,8 @@ public class DoubleErrorDataSetTests extends EditableDataSetTests {
         final int nDim = dataSet.getDimension();
         final int nData = dataSet.getDataCount();
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.atDebug().addArgument(dsType).addArgument(nDim).addArgument(nData)
-                    .log("info: data set '{}' with nDim = {} and nData = {}");
+            LOGGER.atDebug().addArgument(dsType).addArgument(nDim).addArgument(nData).log(
+                    "info: data set '{}' with nDim = {} and nData = {}");
         }
 
         for (int i = 0; i < testCoordinate[0].length; i++) {
@@ -122,8 +123,8 @@ public class DoubleErrorDataSetTests extends EditableDataSetTests {
             }
 
             if (testCase == 3) {
-                assertEquals(null, dataSet.getDataLabel(nData + i),
-                        "check '" + dsType + "' label[" + nData + i + "] value");
+                assertEquals(
+                        null, dataSet.getDataLabel(nData + i), "check '" + dsType + "' label[" + nData + i + "] value");
             }
         }
 
@@ -131,7 +132,8 @@ public class DoubleErrorDataSetTests extends EditableDataSetTests {
                 "check '" + dsType + "' diff data count at end of adding");
 
         if (testCase < 3) {
-            //TODO capacity increases beyond size due to DoubleArrayList's grow(capacity) implementation that increases the capacity by 
+            // TODO capacity increases beyond size due to DoubleArrayList's grow(capacity) implementation that increases
+            // the capacity by
             // by Min(size + 0.5* size, capacity) ... need to find a work around
             assertEquals(dataSet.getDataCount(), dataSet.getCapacity(),
                     "check '" + dsType + "' capacity data count match , test case = " + testCase);
@@ -154,8 +156,8 @@ public class DoubleErrorDataSetTests extends EditableDataSetTests {
 
     @Test
     public void setterTests() {
-        final DoubleErrorDataSet firstDataSet = new DoubleErrorDataSet("test", testCoordinate[0], testCoordinate[1],
-                testEYN, testEYP, testEYN.length, true);
+        final DoubleErrorDataSet firstDataSet = new DoubleErrorDataSet(
+                "test", testCoordinate[0], testCoordinate[1], testEYN, testEYP, testEYN.length, true);
 
         DoubleErrorDataSet secondDataSet = new DoubleErrorDataSet("test", testCoordinate[0].length);
         assertNotEquals(firstDataSet, secondDataSet);
@@ -172,8 +174,8 @@ public class DoubleErrorDataSetTests extends EditableDataSetTests {
 
     @Test
     public void getterTests() {
-        final DoubleErrorDataSet dataSet = new DoubleErrorDataSet("test", testCoordinate[0], testCoordinate[1], testEYN,
-                testEYP, testEYN.length, true);
+        final DoubleErrorDataSet dataSet = new DoubleErrorDataSet(
+                "test", testCoordinate[0], testCoordinate[1], testEYN, testEYP, testEYN.length, true);
 
         assertEquals(dataSet.getXValues(), dataSet.getValues(DIM_X));
         assertEquals(dataSet.getYValues(), dataSet.getValues(DIM_Y));
@@ -184,8 +186,8 @@ public class DoubleErrorDataSetTests extends EditableDataSetTests {
             final double[] errorsPos = dataSet.getErrorsPositive(dimIndex);
 
             for (int i = 0; i < testCoordinate[dimIndex].length; i++) {
-                assertEquals(testCoordinate[dimIndex][i], dataSet.get(dimIndex, i),
-                        "test1(" + dimIndex + ", " + i + ")");
+                assertEquals(
+                        testCoordinate[dimIndex][i], dataSet.get(dimIndex, i), "test1(" + dimIndex + ", " + i + ")");
                 assertEquals(testCoordinate[dimIndex][i], values[i], "test2(" + dimIndex + ", " + i + ")");
                 assertEquals(testCoordinate[dimIndex][i], dimIndex == DIM_X ? dataSet.getX(i) : dataSet.getY(i),
                         "test3(" + dimIndex + ", " + i + ")");
@@ -204,13 +206,13 @@ public class DoubleErrorDataSetTests extends EditableDataSetTests {
 
     @Test
     public void mixedErrorNonErrorDataSetTests() {
-        final DoubleDataSet dataSet1 = new DoubleDataSet("test", testCoordinate[0], testCoordinate[1],
-                testCoordinate[0].length, true);
+        final DoubleDataSet dataSet1 = new DoubleDataSet(
+                "test", testCoordinate[0], testCoordinate[1], testCoordinate[0].length, true);
         dataSet1.addDataLabel(1, "label1");
         dataSet1.addDataStyle(1, "style1");
 
-        final DoubleErrorDataSet dataSet2 = new DoubleErrorDataSet("test", testCoordinate[0], testCoordinate[1],
-                testEYZERO, testEYZERO, testEYZERO.length, true);
+        final DoubleErrorDataSet dataSet2 = new DoubleErrorDataSet(
+                "test", testCoordinate[0], testCoordinate[1], testEYZERO, testEYZERO, testEYZERO.length, true);
         dataSet2.addDataLabel(1, "label1");
         dataSet2.addDataStyle(1, "style1");
         assertEquals(dataSet1, dataSet2);

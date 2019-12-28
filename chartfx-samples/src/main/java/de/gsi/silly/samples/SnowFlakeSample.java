@@ -2,23 +2,6 @@ package de.gsi.silly.samples;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import org.controlsfx.glyphfont.Glyph;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import de.gsi.chart.XYChart;
-import de.gsi.chart.axes.spi.DefaultNumericAxis;
-import de.gsi.chart.plugins.EditAxis;
-import de.gsi.chart.plugins.Zoomer;
-import de.gsi.chart.renderer.LineStyle;
-import de.gsi.chart.renderer.spi.ErrorDataSetRenderer;
-import de.gsi.chart.ui.geometry.Side;
-import de.gsi.dataset.DataSet;
-import de.gsi.dataset.spi.DataSetBuilder;
-import de.gsi.dataset.spi.DoubleDataSet;
-import de.gsi.dataset.spi.TransposedDataSet;
-import de.gsi.silly.samples.plugins.Snow;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
@@ -40,9 +23,26 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 
+import org.controlsfx.glyphfont.Glyph;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import de.gsi.chart.XYChart;
+import de.gsi.chart.axes.spi.DefaultNumericAxis;
+import de.gsi.chart.plugins.EditAxis;
+import de.gsi.chart.plugins.Zoomer;
+import de.gsi.chart.renderer.LineStyle;
+import de.gsi.chart.renderer.spi.ErrorDataSetRenderer;
+import de.gsi.chart.ui.geometry.Side;
+import de.gsi.dataset.DataSet;
+import de.gsi.dataset.spi.DataSetBuilder;
+import de.gsi.dataset.spi.DoubleDataSet;
+import de.gsi.dataset.spi.TransposedDataSet;
+import de.gsi.silly.samples.plugins.Snow;
+
 /**
  * Happy Christmas and a Happy Coding 2020
- * 
+ *
  * @author rstein
  */
 public class SnowFlakeSample extends Application {
@@ -170,8 +170,8 @@ public class SnowFlakeSample extends Application {
         List<DataSet> list = new ArrayList<>();
         final double scale = 25.0 / 10.0;
 
-        double[] xStomp = { 0.0, 2.0, 2.0, 0.0 };
-        double[] yStomp = { 2.0, 2.0, -2.0, -2.0 };
+        double[] xStomp = {0.0, 2.0, 2.0, 0.0};
+        double[] yStomp = {2.0, 2.0, -2.0, -2.0};
         for (int i = 0; i < xStomp.length; i++) {
             xStomp[i] /= scale;
             yStomp[i] /= scale;
@@ -181,10 +181,10 @@ public class SnowFlakeSample extends Application {
         stomp.getAxisDescription(1).set("Y", "Mas");
         stomp.setStyle("strokeColor=#B5651D; fillColor=#B5651D");
 
-        final double[] xTree = { 2.0, 2.0, 8.0, 8.0, 12.0, 12.0, 16.0, 16.0, 21.0, /* the tip */
-                16.0, 16.0, 12.0, 12.0, 8.0, 8.0, 2.0, 2.0 };
-        final double[] yTree = { 0.0, 9.0, 4.0, 7.0, 3.0, 5.0, 2.0, 3.0, 0.0, /* the tip */
-                -3.0, -2.0, -5.0, -3.0, -7.0, -4.0, -9.0, 0.0 };
+        final double[] xTree = {2.0, 2.0, 8.0, 8.0, 12.0, 12.0, 16.0, 16.0, 21.0, /* the tip */
+                16.0, 16.0, 12.0, 12.0, 8.0, 8.0, 2.0, 2.0};
+        final double[] yTree = {0.0, 9.0, 4.0, 7.0, 3.0, 5.0, 2.0, 3.0, 0.0, /* the tip */
+                -3.0, -2.0, -5.0, -3.0, -7.0, -4.0, -9.0, 0.0};
         for (int i = 0; i < xTree.length; i++) {
             xTree[i] /= scale;
             yTree[i] /= scale;
@@ -233,5 +233,4 @@ public class SnowFlakeSample extends Application {
 
         return dataSet;
     }
-
 }

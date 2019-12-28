@@ -1,9 +1,10 @@
 package de.gsi.dataset.spi;
 
-import static de.gsi.dataset.DataSet.DIM_X;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import static de.gsi.dataset.DataSet.DIM_X;
 
 import java.util.Arrays;
 
@@ -13,12 +14,12 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Checks for FloatDataSet interfaces and constructors.
- * 
+ *
  * @author rstein
  */
 public class FloatDataSetTests extends EditableDataSetTests {
     private static final Logger LOGGER = LoggerFactory.getLogger(FloatDataSetTests.class);
-    protected static final float[][] testCoordinate = { { 1.0f, 2.0f, 3.0f }, { 2.0f, 4.0f, 6.0f } };
+    protected static final float[][] testCoordinate = {{1.0f, 2.0f, 3.0f}, {2.0f, 4.0f, 6.0f}};
     private static final int n = testCoordinate[0].length;
 
     @Test
@@ -32,8 +33,8 @@ public class FloatDataSetTests extends EditableDataSetTests {
         final FloatDataSet secondDataSetA = new FloatDataSet("test", testCoordinate[0], testCoordinate[1], n, true);
         assertEquals(firstDataSet, secondDataSetA, "FloatDataSet(via arrays, deep copy) constructor");
 
-        final FloatDataSet secondDataSetB = new FloatDataSet("test", Arrays.copyOf(testCoordinate[0], n),
-                Arrays.copyOf(testCoordinate[1], n), n, false);
+        final FloatDataSet secondDataSetB = new FloatDataSet(
+                "test", Arrays.copyOf(testCoordinate[0], n), Arrays.copyOf(testCoordinate[1], n), n, false);
         assertEquals(firstDataSet, secondDataSetB, "FloatDataSet(via arrays, no deep copy) constructor");
 
         checkAddPoints(firstDataSet, 1); // X, Y, and label
@@ -62,8 +63,8 @@ public class FloatDataSetTests extends EditableDataSetTests {
         final int nDim = dataSet.getDimension();
         final int nData = dataSet.getDataCount();
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.atDebug().addArgument(dsType).addArgument(nDim).addArgument(nData)
-                    .log("info: data set '{}' with nDim = {} and nData = {}");
+            LOGGER.atDebug().addArgument(dsType).addArgument(nDim).addArgument(nData).log(
+                    "info: data set '{}' with nDim = {} and nData = {}");
         }
 
         for (int i = 0; i < testCoordinate[0].length; i++) {
@@ -118,8 +119,8 @@ public class FloatDataSetTests extends EditableDataSetTests {
             }
 
             if (testCase == 2) {
-                assertEquals(null, dataSet.getDataLabel(nData + i),
-                        "check '" + dsType + "' label[" + nData + i + "] value");
+                assertEquals(
+                        null, dataSet.getDataLabel(nData + i), "check '" + dsType + "' label[" + nData + i + "] value");
             }
         }
 
@@ -127,7 +128,8 @@ public class FloatDataSetTests extends EditableDataSetTests {
                 "check '" + dsType + "' diff data count at end of adding");
 
         if (testCase <= 2) {
-            //TODO capacity increases beyond size due to DoubleArrayList's grow(capacity) implementation that increases the capacity by 
+            // TODO capacity increases beyond size due to DoubleArrayList's grow(capacity) implementation that increases
+            // the capacity by
             // by Min(size + 0.5* size, capacity) ... need to find a work around
             assertEquals(dataSet.getDataCount(), dataSet.getCapacity(),
                     "check '" + dsType + "' capacity data count match , test case = " + testCase);
@@ -177,8 +179,8 @@ public class FloatDataSetTests extends EditableDataSetTests {
 
             for (int i = 0; i < testCoordinate[dimIndex].length; i++) {
                 assertEquals(testCoordinate[dimIndex][i], floatValues[i], "test0(" + dimIndex + ", " + i + ")");
-                assertEquals(testCoordinate[dimIndex][i], dataSet.get(dimIndex, i),
-                        "test1(" + dimIndex + ", " + i + ")");
+                assertEquals(
+                        testCoordinate[dimIndex][i], dataSet.get(dimIndex, i), "test1(" + dimIndex + ", " + i + ")");
                 assertEquals(testCoordinate[dimIndex][i], values[i], "test2(" + dimIndex + ", " + i + ")");
                 assertEquals(testCoordinate[dimIndex][i], dimIndex == DIM_X ? dataSet.getX(i) : dataSet.getY(i),
                         "test3(" + dimIndex + ", " + i + ")");
@@ -188,8 +190,8 @@ public class FloatDataSetTests extends EditableDataSetTests {
 
     @Test
     public void mixedErrorNonErrorDataSetTests() {
-        final FloatDataSet dataSet1 = new FloatDataSet("test", testCoordinate[0], testCoordinate[1],
-                testCoordinate[0].length, true);
+        final FloatDataSet dataSet1 = new FloatDataSet(
+                "test", testCoordinate[0], testCoordinate[1], testCoordinate[0].length, true);
         dataSet1.addDataLabel(1, "label1");
         dataSet1.addDataStyle(1, "style1");
 

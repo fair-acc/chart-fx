@@ -1,10 +1,11 @@
 package de.gsi.dataset.spi;
 
-import static de.gsi.dataset.DataSet.DIM_X;
-import static de.gsi.dataset.DataSet.DIM_Y;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import static de.gsi.dataset.DataSet.DIM_X;
+import static de.gsi.dataset.DataSet.DIM_Y;
 
 import java.util.Arrays;
 
@@ -14,12 +15,12 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Checks for DoubleDataSet interfaces and constructors.
- * 
+ *
  * @author rstein
  */
 public class DoubleDataSetTests extends EditableDataSetTests {
     private static final Logger LOGGER = LoggerFactory.getLogger(DoubleDataSetTests.class);
-    protected static final double[][] testCoordinate = { { 1.0, 2.0, 3.0 }, { 2.0, 4.0, 6.0 } };
+    protected static final double[][] testCoordinate = {{1.0, 2.0, 3.0}, {2.0, 4.0, 6.0}};
     private static final int n = testCoordinate[0].length;
 
     @Test
@@ -33,8 +34,8 @@ public class DoubleDataSetTests extends EditableDataSetTests {
         final DoubleDataSet secondDataSetA = new DoubleDataSet("test", testCoordinate[0], testCoordinate[1], n, true);
         assertEquals(firstDataSet, secondDataSetA, "DoubleDataSet(via arrays, deep copy) constructor");
 
-        final DoubleDataSet secondDataSetB = new DoubleDataSet("test", Arrays.copyOf(testCoordinate[0], n),
-                Arrays.copyOf(testCoordinate[1], n), n, false);
+        final DoubleDataSet secondDataSetB = new DoubleDataSet(
+                "test", Arrays.copyOf(testCoordinate[0], n), Arrays.copyOf(testCoordinate[1], n), n, false);
         assertEquals(firstDataSet, secondDataSetB, "DoubleDataSet(via arrays, no deep copy) constructor");
 
         checkAddPoints(firstDataSet, 1); // X, Y, and label
@@ -59,8 +60,8 @@ public class DoubleDataSetTests extends EditableDataSetTests {
         final int nDim = dataSet.getDimension();
         final int nData = dataSet.getDataCount();
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.atDebug().addArgument(dsType).addArgument(nDim).addArgument(nData)
-                    .log("info: data set '{}' with nDim = {} and nData = {}");
+            LOGGER.atDebug().addArgument(dsType).addArgument(nDim).addArgument(nData).log(
+                    "info: data set '{}' with nDim = {} and nData = {}");
         }
 
         for (int i = 0; i < testCoordinate[0].length; i++) {
@@ -105,8 +106,8 @@ public class DoubleDataSetTests extends EditableDataSetTests {
             }
 
             if (testCase == 2) {
-                assertEquals(null, dataSet.getDataLabel(nData + i),
-                        "check '" + dsType + "' label[" + nData + i + "] value");
+                assertEquals(
+                        null, dataSet.getDataLabel(nData + i), "check '" + dsType + "' label[" + nData + i + "] value");
             }
         }
 
@@ -114,7 +115,8 @@ public class DoubleDataSetTests extends EditableDataSetTests {
                 "check '" + dsType + "' diff data count at end of adding");
 
         if (testCase <= 1) {
-            //TODO capacity increases beyond size due to DoubleArrayList's grow(capacity) implementation that increases the capacity by 
+            // TODO capacity increases beyond size due to DoubleArrayList's grow(capacity) implementation that increases
+            // the capacity by
             // by Min(size + 0.5* size, capacity) ... need to find a work around
             assertEquals(dataSet.getDataCount(), dataSet.getCapacity(),
                     "check '" + dsType + "' capacity data count match , test case = " + testCase);
@@ -163,8 +165,8 @@ public class DoubleDataSetTests extends EditableDataSetTests {
             final double[] values = dataSet.getValues(dimIndex);
 
             for (int i = 0; i < testCoordinate[dimIndex].length; i++) {
-                assertEquals(testCoordinate[dimIndex][i], dataSet.get(dimIndex, i),
-                        "test1(" + dimIndex + ", " + i + ")");
+                assertEquals(
+                        testCoordinate[dimIndex][i], dataSet.get(dimIndex, i), "test1(" + dimIndex + ", " + i + ")");
                 assertEquals(testCoordinate[dimIndex][i], values[i], "test2(" + dimIndex + ", " + i + ")");
                 assertEquals(testCoordinate[dimIndex][i], dimIndex == DIM_X ? dataSet.getX(i) : dataSet.getY(i),
                         "test3(" + dimIndex + ", " + i + ")");
@@ -174,13 +176,13 @@ public class DoubleDataSetTests extends EditableDataSetTests {
 
     @Test
     public void mixedErrorNonErrorDataSetTests() {
-        final DoubleDataSet dataSet1 = new DoubleDataSet("test", testCoordinate[0], testCoordinate[1],
-                testCoordinate[0].length, true);
+        final DoubleDataSet dataSet1 = new DoubleDataSet(
+                "test", testCoordinate[0], testCoordinate[1], testCoordinate[0].length, true);
         dataSet1.addDataLabel(1, "label1");
         dataSet1.addDataStyle(1, "style1");
 
-        final DoubleErrorDataSet dataSet2 = new DoubleErrorDataSet("test", testCoordinate[0], testCoordinate[1],
-                new double[n], new double[n], n, true);
+        final DoubleErrorDataSet dataSet2 = new DoubleErrorDataSet(
+                "test", testCoordinate[0], testCoordinate[1], new double[n], new double[n], n, true);
         dataSet2.addDataLabel(1, "label1");
         dataSet2.addDataStyle(1, "style1");
         assertEquals(dataSet1, dataSet2);

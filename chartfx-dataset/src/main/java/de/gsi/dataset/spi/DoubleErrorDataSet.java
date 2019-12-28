@@ -19,8 +19,8 @@ import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
  * @author rstein
  */
 @SuppressWarnings("PMD.TooManyMethods") // part of the flexible class nature
-public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
-        implements DataSetError, EditableDataSet, DataSet2D {
+public class DoubleErrorDataSet
+        extends AbstractErrorDataSet<DoubleErrorDataSet> implements DataSetError, EditableDataSet, DataSet2D {
     private static final String Y_COORDINATES = "Y coordinates";
     private static final String X_COORDINATES = "X coordinates";
     private static final long serialVersionUID = 8931518518245752926L;
@@ -122,8 +122,8 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
      * @param label the data label
      * @return itself (fluent design)
      */
-    public DoubleErrorDataSet add(final double x, final double y, final double yErrorNeg, final double yErrorPos,
-            final String label) {
+    public DoubleErrorDataSet add(
+            final double x, final double y, final double yErrorNeg, final double yErrorPos, final String label) {
         lock().writeLockGuard(() -> {
             xValues.add(x);
             yValues.add(y);
@@ -255,8 +255,8 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
      * @param yErrorPos the -dy error
      * @return itself (fluent design)
      */
-    public DoubleErrorDataSet add(final int index, final double[] x, final double[] y, final double[] yErrorNeg,
-            final double[] yErrorPos) {
+    public DoubleErrorDataSet add(
+            final int index, final double[] x, final double[] y, final double[] yErrorNeg, final double[] yErrorPos) {
         AssertUtils.notNull(X_COORDINATES, x);
         AssertUtils.notNull(Y_COORDINATES, y);
         AssertUtils.notNull(X_COORDINATES, yErrorNeg);
@@ -285,7 +285,7 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
 
     /**
      * clears all data
-     * 
+     *
      * @return itself (fluent design)
      */
     public DoubleErrorDataSet clearData() {
@@ -385,7 +385,7 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
 
     /**
      * remove sub-range of data points
-     * 
+     *
      * @param fromIndex start index
      * @param toIndex stop index
      * @return itself (fluent design)
@@ -414,7 +414,7 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
 
     /**
      * ensures minimum size, enlarges if necessary
-     * 
+     *
      * @param size the actually used array lengths
      * @return itself (fluent design)
      */
@@ -430,7 +430,7 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
 
     /**
      * clear old data and overwrite with data from 'other' data set (deep copy)
-     * 
+     *
      * @param other the other data set
      * @return itself (fluent design)
      */
@@ -485,8 +485,8 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
      * @param yErrorsPos the -dy errors
      * @return itself (fluent design)
      */
-    public DoubleErrorDataSet set(final double[] xValues, final double[] yValues, final double[] yErrorsNeg,
-            final double[] yErrorsPos) {
+    public DoubleErrorDataSet set(
+            final double[] xValues, final double[] yValues, final double[] yErrorsNeg, final double[] yErrorsPos) {
         return set(xValues, yValues, yErrorsNeg, yErrorsPos, true);
     }
 
@@ -592,7 +592,7 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
 
     /**
      * replaces point coordinate of existing data point
-     * 
+     *
      * @param index the index of the data point
      * @param x new horizontal coordinate
      * @param y new vertical coordinate N.B. errors are implicitly assumed to be zero
@@ -604,7 +604,7 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
 
     /**
      * replaces point coordinate of existing data point
-     * 
+     *
      * @param index the index of the data point
      * @param x new horizontal coordinate
      * @param y new vertical coordinate
@@ -612,8 +612,8 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
      * @param yErrorPos new vertical positive error of y (can be asymmetric)
      * @return itself (fluent design)
      */
-    public DoubleErrorDataSet set(final int index, final double x, final double y, final double yErrorNeg,
-            final double yErrorPos) {
+    public DoubleErrorDataSet set(
+            final int index, final double x, final double y, final double yErrorNeg, final double yErrorPos) {
         lock().writeLockGuard(() -> {
             final int dataCount = Math.max(index + 1, this.getDataCount());
             xValues.size(dataCount);
@@ -635,8 +635,8 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
         return fireInvalidated(new UpdatedDataEvent(this, "set - single"));
     }
 
-    public DoubleErrorDataSet set(final int index, final double[] x, final double[] y, final double[] yErrorNeg,
-            final double[] yErrorPos) {
+    public DoubleErrorDataSet set(
+            final int index, final double[] x, final double[] y, final double[] yErrorNeg, final double[] yErrorPos) {
         lock().writeLockGuard(() -> {
             resize(Math.max(index + x.length, xValues.size()));
             System.arraycopy(x, 0, xValues.elements(), index, x.length);
@@ -668,5 +668,4 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
         });
         return fireInvalidated(new UpdatedDataEvent(this, "increaseCapacity()"));
     }
-
 }

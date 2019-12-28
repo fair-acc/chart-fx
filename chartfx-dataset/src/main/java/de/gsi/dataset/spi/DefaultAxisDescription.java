@@ -29,7 +29,7 @@ public class DefaultAxisDescription extends DataRange implements AxisDescription
 
     /**
      * Copy constructor to generate axisDescriptions for datasets from existing Axis Descriptions
-     * 
+     *
      * @param dataSet for which the update events shall be registered
      * @param axisDesc axis Description to copy all data except dataSet from
      */
@@ -107,7 +107,7 @@ public class DefaultAxisDescription extends DataRange implements AxisDescription
 
     /**
      * Empties this DataRange. After calling this method this data range becomes undefined.
-     * 
+     *
      * @return <code>true</code> if the values were valid before
      * @see #isDefined()
      */
@@ -259,8 +259,8 @@ public class DefaultAxisDescription extends DataRange implements AxisDescription
     }
 
     @Override
-    public final boolean set(final String axisName, final String axisUnit, final double rangeMin,
-            final double rangeMax) {
+    public final boolean set(
+            final String axisName, final String axisUnit, final double rangeMin, final double rangeMax) {
         final boolean namesHaveChanged = !strEqual(name, axisName) || !strEqual(unit, axisUnit);
         name = axisName;
         unit = axisUnit;
