@@ -1,8 +1,5 @@
 package de.gsi.silly.samples.plugins;
 
-import com.sun.javafx.scene.DirtyBits;
-import com.sun.javafx.scene.NodeHelper;
-
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleDoubleProperty;
@@ -11,6 +8,9 @@ import javafx.scene.paint.Paint;
 import javafx.scene.shape.LineTo;
 import javafx.scene.shape.MoveTo;
 import javafx.scene.shape.Path;
+
+import com.sun.javafx.scene.DirtyBits;
+import com.sun.javafx.scene.NodeHelper;
 
 /**
  * Basic implementation of a fractal Koch snowflake.
@@ -180,5 +180,4 @@ public class SnowFlake extends Path {
         setTranslateX(this.getCenterX() - flakeRadius);
         setTranslateY(this.getCenterY() - flakeRadius);
     }
-
 }

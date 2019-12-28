@@ -1,10 +1,11 @@
 package de.gsi.dataset.spi;
 
-import static de.gsi.dataset.DataSet.DIM_X;
-import static de.gsi.dataset.DataSet.DIM_Y;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import static de.gsi.dataset.DataSet.DIM_X;
+import static de.gsi.dataset.DataSet.DIM_Y;
 
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -31,7 +32,7 @@ public class DimReductionDataSetTests {
                 new double[] { 1, 2, 3 }, // x-array
                 new double[] { 6, 7, 8 }, // y-array
                 new double[][] { // z-array
-                        new double[] { 1, 2, 3 }, // 
+                        new double[] { 1, 2, 3 }, //
                         new double[] { 6, 5, 4 }, //
                         new double[] { 9, 8, 7 } });
 
@@ -93,7 +94,7 @@ public class DimReductionDataSetTests {
                 new double[] { 1, 2, 3 }, // x-array
                 new double[] { 6, 7, 8 }, // y-array
                 new double[][] { // z-array
-                        new double[] { 1, 2, 3 }, // 
+                        new double[] { 1, 2, 3 }, //
                         new double[] { 6, 5, 4 }, //
                         new double[] { 9, 8, 7 } });
 
@@ -130,7 +131,7 @@ public class DimReductionDataSetTests {
                 new double[] { 1, 2, 3 }, // x-array
                 new double[] { 6, 7, 8 }, // y-array
                 new double[][] { // z-array
-                        new double[] { 1, 2, 3 }, // 
+                        new double[] { 1, 2, 3 }, //
                         new double[] { 6, 5, 4 }, //
                         new double[] { 9, 8, 7 } });
 
@@ -169,7 +170,7 @@ public class DimReductionDataSetTests {
                 new double[] { 1, 2, 3 }, // x-array
                 new double[] { 6, 7, 8 }, // y-array
                 new double[][] { // z-array
-                        new double[] { 1, 2, 3 }, // 
+                        new double[] { 1, 2, 3 }, //
                         new double[] { 6, 5, 4 }, //
                         new double[] { 9, 8, 7 } });
 
@@ -207,7 +208,7 @@ public class DimReductionDataSetTests {
                 new double[] { 1, 2, 3 }, // x-array
                 new double[] { 6, 7, 8 }, // y-array
                 new double[][] { // z-array
-                        new double[] { 1, 2, 3 }, // 
+                        new double[] { 1, 2, 3 }, //
                         new double[] { 6, 5, 4 }, //
                         new double[] { 9, 8, 7 } });
 
