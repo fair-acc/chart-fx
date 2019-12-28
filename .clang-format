@@ -21,8 +21,8 @@ AlignConsecutiveAssignments: false
 AlignConsecutiveDeclarations: false
 AlignEscapedNewlines: DontAlign
 AlignOperands:   true
-AlignTrailingComments: true
-AllowAllParametersOfDeclarationOnNextLine: true
+AlignTrailingComments: false
+AllowAllParametersOfDeclarationOnNextLine: false
 AllowShortCaseLabelsOnASingleLine: false
 AllowShortFunctionsOnASingleLine: None
 AllowShortIfStatementsOnASingleLine: Never
@@ -97,7 +97,7 @@ PenaltyBreakString: 600
 PenaltyExcessCharacter: 50
 PenaltyReturnTypeOnItsOwnLine: 300
 PointerAlignment: Right
-ReflowComments:  false
+ReflowComments:  true
 SortIncludes:    true
 SortUsingDeclarations: true
 SpaceAfterCStyleCast: true
@@ -122,8 +122,8 @@ AlignConsecutiveAssignments: false
 AlignConsecutiveDeclarations: false
 AlignEscapedNewlines: DontAlign
 AlignOperands:   true
-AlignTrailingComments: true
-AllowAllParametersOfDeclarationOnNextLine: true
+AlignTrailingComments: false
+AllowAllParametersOfDeclarationOnNextLine: false
 AllowShortCaseLabelsOnASingleLine: false
 AllowShortFunctionsOnASingleLine: None
 AllowShortIfStatementsOnASingleLine: Never
@@ -198,7 +198,7 @@ PenaltyBreakString: 600
 PenaltyExcessCharacter: 50
 PenaltyReturnTypeOnItsOwnLine: 300
 PointerAlignment: Right
-ReflowComments:  false
+ReflowComments:  true
 SortIncludes:    true
 SortUsingDeclarations: true
 SpaceAfterCStyleCast: true
