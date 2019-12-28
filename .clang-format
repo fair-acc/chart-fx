@@ -116,7 +116,7 @@ TabWidth:        4
 UseTab:          Never
 ---
 Language:        Java
-JavaImportGroups: ['de.gsi', 'java', 'javax', 'org', 'com']
+JavaImportGroups: ['java', 'javax', 'org', 'com', 'de.gsi']
 AccessModifierOffset: -4
 AlignAfterOpenBracket: DontAlign
 AlignConsecutiveAssignments: false
