@@ -61,14 +61,16 @@ public class DataSetEqualityTests {
                                 new double[] { 9, 8, 7 } }),
                 new DoubleDataSet3D("test", new double[] { 1, 2, 3 }, new double[] { 6, 7, 8 }, new double[][] {
                         new double[] { 1, 2, 3 }, new double[] { 6, 5, 4 }, new double[] { 9, 8, 7 } }));
-        assertEquals(new DimReductionDataSet(
-                new DoubleDataSet3D("test", new double[] { 1, 2, 3 }, new double[] { 6, 7, 8 },
+        assertEquals(
+                new DimReductionDataSet(new DoubleDataSet3D("test", new double[] { 1, 2, 3 }, new double[] { 6, 7, 8 },
                         new double[][] { new double[] { 1, 2, 3 }, new double[] { 6, 5, 4 },
-                                new double[] { 9, 8, 7 } }), DIM_X, Option.SLICE),
-                new DimReductionDataSet(new DoubleDataSet3D("test", new double[] { 1, 2, 3 }, new double[] { 6, 7, 8 }, new double[][] {
-                        new double[] { 1, 2, 3 }, new double[] { 6, 5, 4 }, new double[] { 9, 8, 7 } }), DIM_X, Option.SLICE));
-        
-        
+                                new double[] { 9, 8, 7 } }),
+                        DIM_X, Option.SLICE),
+                new DimReductionDataSet(
+                        new DoubleDataSet3D("test", new double[] { 1, 2, 3 }, new double[] { 6, 7, 8 }, new double[][] {
+                                new double[] { 1, 2, 3 }, new double[] { 6, 5, 4 }, new double[] { 9, 8, 7 } }),
+                        DIM_X, Option.SLICE));
+
     }
 
     /**
@@ -145,6 +147,8 @@ public class DataSetEqualityTests {
         ds1.set(0, 1e9 + 1e9 * delta, 0.0, 0.0, 0.0);
         assertFalse(ds1.equals(ds2, delta));
         ds2.set(0, 1e9 + 3e9 * delta, 0.0, 0.0, 0.0);
+        assertEquals(ds1.getAxisDescription(DIM_Y), ds2.getAxisDescription(DIM_Y));
+        assertEquals(ds1.getAxisDescription(DIM_X), ds2.getAxisDescription(DIM_X));
         assertTrue(ds1.equals(ds2, delta));
 
         // check near equality of X/Y error values
