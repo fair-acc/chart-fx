@@ -7,6 +7,7 @@ package de.gsi.chart.renderer.spi.utils;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.WeakHashMap;
 
 import javafx.scene.paint.Color;
 import javafx.scene.paint.CycleMethod;
@@ -96,12 +97,11 @@ public class ColorGradient {
             new Stop(0.66, Color.YELLOW), new Stop(1.0, Color.WHITE));
 
     public static final ColorGradient VIRIDIS = ColorGradient.viridis();
-
     public static final ColorGradient DEFAULT = RAINBOW;
-
     private final List<Stop> stops;
-
     private final String name;
+    private transient final WeakHashMap<Double, Color> colorMap = new WeakHashMap<>();
+    private transient final WeakHashMap<Double, int[]> colorMapBytes = new WeakHashMap<>();
 
     /**
      * Creates a new instance of ColorGradient.**
@@ -152,6 +152,76 @@ public class ColorGradient {
         // Use LinearGradient to normalize stops
         this.stops = new LinearGradient(0, 0, 0, 0, false, CycleMethod.NO_CYCLE, stops).getStops(); // NOPMD
         this.name = name;
+    }
+
+    /**
+     * @param offset within ranges [0, 1], N.B. outside ranges are transparent
+     * @return corresponding interpolated colour
+     */
+    public Color getColor(final double offset) {
+        return colorMap.computeIfAbsent(offset, value -> {
+            double lowerOffset = 0.0;
+            double upperOffset = 1.0;
+            Color lowerColor = Color.TRANSPARENT;
+            Color upperColor = Color.TRANSPARENT;
+
+            for (final Stop stop : getStops()) {
+                final double currentOffset = stop.getOffset();
+                if (currentOffset == offset) {
+                    return stop.getColor();
+                } else if (currentOffset < offset) {
+                    lowerOffset = currentOffset;
+                    lowerColor = stop.getColor();
+                } else {
+                    upperOffset = currentOffset;
+                    upperColor = stop.getColor();
+                    break;
+                }
+            }
+
+            final double interpolationOffset = (offset - lowerOffset) / (upperOffset - lowerOffset);
+            return lowerColor.interpolate(upperColor, interpolationOffset);
+        });
+    }
+    
+    /**
+     * @param offset within ranges [0, 1], N.B. outside ranges are transparent
+     * @return corresponding interpolated colour as ARGB bytes (N.B. stored for performance reasons as integers)
+     */
+    public int[] getColorBytes(final double offset) {
+        return colorMapBytes.computeIfAbsent(offset, value -> {
+            double lowerOffset = 0.0;
+            double upperOffset = 1.0;
+            Color lowerColor = Color.TRANSPARENT;
+            Color upperColor = Color.TRANSPARENT;
+            final int[] color = new int[4];
+
+            for (final Stop stop : getStops()) {
+                final double currentOffset = stop.getOffset();
+                if (currentOffset == offset) {
+                    color[0] = (int) Math.round(255 * stop.getColor().getOpacity());
+                    color[1] = (int) Math.round(255 * stop.getColor().getRed());
+                    color[2] = (int) Math.round(255 * stop.getColor().getGreen());
+                    color[3] = (int) Math.round(255 * stop.getColor().getBlue());
+                    return color;
+                } else if (currentOffset < offset) {
+                    lowerOffset = currentOffset;
+                    lowerColor = stop.getColor();
+                } else {
+                    upperOffset = currentOffset;
+                    upperColor = stop.getColor();
+                    break;
+                }
+            }
+
+            final double interpolationOffset = (offset - lowerOffset) / (upperOffset - lowerOffset);
+            final Color interpolatedColor = lowerColor.interpolate(upperColor, interpolationOffset);
+            color[0] = (int) Math.round(255 * interpolatedColor.getOpacity());
+            color[1] = (int) Math.round(255 * interpolatedColor.getRed());
+            color[2] = (int) Math.round(255 * interpolatedColor.getGreen());
+            color[3] = (int) Math.round(255 * interpolatedColor.getBlue());
+            return color;
+        });
     }
 
     /**

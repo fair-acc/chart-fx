@@ -50,7 +50,7 @@ public class WrappedDataSet extends AbstractDataSet<WrappedDataSet> implements D
     }
 
     @Override
-    public int getDataCount() {
+    public int getDataCount(final int dimIndex) {
         return dataset == null ? 0 : dataset.getDataCount();
     }
 

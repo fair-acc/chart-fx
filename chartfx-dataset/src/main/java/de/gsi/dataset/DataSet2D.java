@@ -9,24 +9,6 @@ package de.gsi.dataset;
  */
 public interface DataSet2D extends DataSet {
 
-    /**
-     * Get the number of data points in the data set.
-     *
-     * @return the number of data points
-     */
-    @Override
-    int getDataCount(); // Force overriding default getDataCount() to prevent loop
-
-    /**
-     * Get the number of data points in the data set
-     *
-     * @return the number of data points
-     */
-    @Override
-    default int getDataCount(int dim) {
-        return getDataCount();
-    }
-
     @Override
     default int getDimension() {
         return 2;
@@ -89,7 +71,7 @@ public interface DataSet2D extends DataSet {
      */
     default int getXIndex(double x) {
         return getIndex(DIM_X, x);
-    };
+    }
 
     /**
      * @return the x value array
@@ -116,7 +98,7 @@ public interface DataSet2D extends DataSet {
      */
     default int getYIndex(double y) {
         return getIndex(DIM_Y, y);
-    };
+    }
 
     /**
      * @return the x value array

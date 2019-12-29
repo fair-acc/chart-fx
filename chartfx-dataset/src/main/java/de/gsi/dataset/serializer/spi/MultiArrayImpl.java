@@ -201,6 +201,12 @@ class MultiArrayImpl<T> implements MultiArray<T> {
         return result;
     }
 
+    @Override
+    public String toString() {
+        return String.format("MultiArray [dimensions = %s, elements = %s]", Arrays.asList(this.dimensions).toString(),
+                Arrays.asList(this.elements).toString());
+    }
+
     private void initPrimitiveArrays() { // NOPMD by rstein on 19/07/19 10:47
         // statically cast to primitive if possible
         // this adds the overhead of casting only once and subsequent double
@@ -224,11 +230,5 @@ class MultiArrayImpl<T> implements MultiArray<T> {
         } else if (elements.getClass() == String[].class) {
             elementString = (String[]) elements;
         }
-    }
-
-    @Override
-    public String toString() {
-        return String.format("MultiArray [dimensions = %s, elements = %s]", Arrays.asList(this.dimensions).toString(),
-                Arrays.asList(this.elements).toString());
     }
 }

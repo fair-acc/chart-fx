@@ -176,7 +176,7 @@ public class FifoDoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorData
     }
 
     @Override
-    public int getDataCount() {
+    public int getDataCount(final int dimIndex) {
         return data.size();
     }
 

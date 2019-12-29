@@ -6,10 +6,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import de.gsi.chart.axes.AxisTransform;
-import de.gsi.chart.axes.LogAxisType;
-import de.gsi.chart.axes.TickUnitSupplier;
-import de.gsi.chart.axes.spi.format.DefaultTickUnitSupplier;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleDoubleProperty;
@@ -20,6 +16,11 @@ import javafx.css.Styleable;
 import javafx.css.StyleableProperty;
 import javafx.css.converter.SizeConverter;
 import javafx.scene.chart.ValueAxis;
+
+import de.gsi.chart.axes.AxisTransform;
+import de.gsi.chart.axes.LogAxisType;
+import de.gsi.chart.axes.TickUnitSupplier;
+import de.gsi.chart.axes.spi.format.DefaultTickUnitSupplier;
 
 /**
  * @author rstein
@@ -44,7 +45,7 @@ public class LogarithmicAxis extends AbstractAxis {
         @Override
         protected void invalidated() {
             if (!(isAutoRanging() || isAutoGrowRanging())) {
-                invalidateRange();
+                invalidate();
                 requestAxisLayout();
             }
         }
@@ -60,7 +61,7 @@ public class LogarithmicAxis extends AbstractAxis {
             if (get() <= 1) {
                 throw new IllegalArgumentException("logarithmBase must be grater than 1");
             }
-            invalidateRange();
+            invalidate();
             requestAxisLayout();
         }
     };
@@ -111,69 +112,6 @@ public class LogarithmicAxis extends AbstractAxis {
         isUpdating = false;
     }
 
-    @Override
-    protected AxisRange autoRange(final double minValue, final double maxValue, final double length,
-            final double labelSize) {
-        double min = minValue;
-        final double max = maxValue;
-
-        // sanitise range if < 0
-        if (min <= 0) {
-            min = LogarithmicAxis.DEFAULT_LOG_MIN_VALUE;
-            isUpdating = true;
-            setMin(LogarithmicAxis.DEFAULT_LOG_MIN_VALUE);
-            isUpdating = false;
-        }
-
-        final double paddingScale = 1.0 + getAutoRangePadding();
-        final double paddedMin = min / paddingScale;
-        final double paddedMax = max * paddingScale;
-
-        return computeRange(paddedMin, paddedMax, length, labelSize);
-    }
-
-    @Override
-    protected List<Double> calculateMajorTickValues(final double axisLength, final AxisRange range) {
-        if (!(range instanceof AxisRange)) {
-            throw new InvalidParameterException("unknown range class:" + range.getClass().getCanonicalName());
-        }
-        final AxisRange rangeImpl = range;
-
-        final List<Double> tickValues = new ArrayList<>();
-        if (rangeImpl.getLowerBound() >= rangeImpl.getUpperBound()) {
-            return Arrays.asList(rangeImpl.getLowerBound());
-        }
-        double exp = Math.ceil(log(rangeImpl.getLowerBound()));
-        for (double tickValue = pow(exp); tickValue <= rangeImpl.getUpperBound(); tickValue = pow(++exp)) {
-            tickValues.add(tickValue);
-        }
-        return tickValues;
-    }
-
-    @Override
-    protected List<Double> calculateMinorTickValues() {
-        if (getMinorTickCount() <= 0) {
-            return Collections.emptyList();
-        }
-
-        final List<Double> minorTickMarks = new ArrayList<>();
-        final double lowerBound = getMin();
-        final double upperBound = getMax();
-
-        double exp = Math.floor(log(lowerBound));
-        for (double majorTick = pow(exp); majorTick < upperBound; majorTick = pow(++exp)) {
-            final double nextMajorTick = pow(exp + 1);
-            final double minorUnit = (nextMajorTick - majorTick) / getMinorTickCount();
-            for (double minorTick = majorTick + minorUnit; minorTick < nextMajorTick; minorTick += minorUnit) {
-                if (minorTick >= lowerBound && minorTick <= upperBound) {
-                    minorTickMarks.add(minorTick);
-                }
-            }
-        }
-
-        return minorTickMarks;
-    }
-
     /**
      * Computes the preferred tick unit based on the upper/lower bounds and the length of the axis in screen
      * coordinates.
@@ -184,20 +122,6 @@ public class LogarithmicAxis extends AbstractAxis {
     @Override
     public double computePreferredTickUnit(final double axisLength) {
         return tickUnit.get();
-    }
-
-    @Override
-    protected AxisRange computeRange(final double min, final double max, final double axisLength,
-            final double labelSize) {
-        double minValue = min;
-        double maxValue = max;
-
-        if ((isAutoRanging() || isAutoGrowRanging()) && isAutoRangeRounding()) {
-            minValue = minValue <= 0 ? LogarithmicAxis.DEFAULT_LOG_MIN_VALUE : pow(Math.floor(log(minValue)));
-            maxValue = pow(Math.ceil(log(maxValue)));
-        }
-        final double newScale = calculateNewScale(axisLength, minValue, maxValue);
-        return new AxisRange(minValue, maxValue, axisLength, newScale, tickUnit.get());
     }
 
     @Override
@@ -309,13 +233,6 @@ public class LogarithmicAxis extends AbstractAxis {
         return value >= getMin() && value <= getMax();
     }
 
-    private double log(final double value) {
-        if (value <= 0) {
-            return Double.NaN;
-        }
-        return Math.log10(value) / cache.logBase;
-    }
-
     /**
      * Base of the logarithm used by the axis, must be grater than 1.
      * <p>
@@ -326,10 +243,6 @@ public class LogarithmicAxis extends AbstractAxis {
      */
     public DoubleProperty logarithmBaseProperty() {
         return logarithmBase;
-    }
-
-    private double pow(final double value) {
-        return Math.pow(getLogarithmBase(), value);
     }
 
     @Override
@@ -349,12 +262,6 @@ public class LogarithmicAxis extends AbstractAxis {
         logarithmBaseProperty().set(value);
     }
 
-    @Override
-    protected void setRange(final AxisRange range, final boolean animate) {
-        super.setRange(range, animate);
-        setTickUnit(range.getTickUnit());
-    }
-
     /**
      * Sets the value of the {@link #tickUnitProperty()}.
      *
@@ -364,9 +271,6 @@ public class LogarithmicAxis extends AbstractAxis {
     public void setTickUnit(final double unit) {
         tickUnitProperty().set(unit);
     }
-
-    // -------------- STYLESHEET HANDLING
-    // ------------------------------------------------------------------------------
 
     /**
      * Sets the value of the {@link #tickUnitSupplierProperty()}.
@@ -400,8 +304,135 @@ public class LogarithmicAxis extends AbstractAxis {
         return tickUnitSupplier;
     }
 
+    private double log(final double value) {
+        if (value <= 0) {
+            return Double.NaN;
+        }
+        return Math.log10(value) / cache.logBase;
+    }
+
+    private double pow(final double value) {
+        return Math.pow(getLogarithmBase(), value);
+    }
+
+    @Override
+    protected AxisRange autoRange(final double minValue, final double maxValue, final double length,
+            final double labelSize) {
+        double min = minValue;
+        final double max = maxValue;
+
+        // sanitise range if < 0
+        if (min <= 0) {
+            min = LogarithmicAxis.DEFAULT_LOG_MIN_VALUE;
+            isUpdating = true;
+            setMin(LogarithmicAxis.DEFAULT_LOG_MIN_VALUE);
+            isUpdating = false;
+        }
+
+        final double paddingScale = 1.0 + getAutoRangePadding();
+        final double paddedMin = min / paddingScale;
+        final double paddedMax = max * paddingScale;
+
+        return computeRange(paddedMin, paddedMax, length, labelSize);
+    }
+
+    @Override
+    protected List<Double> calculateMajorTickValues(final double axisLength, final AxisRange range) {
+        if (!(range instanceof AxisRange)) {
+            throw new InvalidParameterException("unknown range class:" + range.getClass().getCanonicalName());
+        }
+        final AxisRange rangeImpl = range;
+
+        final List<Double> tickValues = new ArrayList<>();
+        if (rangeImpl.getLowerBound() >= rangeImpl.getUpperBound()) {
+            return Arrays.asList(rangeImpl.getLowerBound());
+        }
+        double exp = Math.ceil(log(rangeImpl.getLowerBound()));
+        for (double tickValue = pow(exp); tickValue <= rangeImpl.getUpperBound(); tickValue = pow(++exp)) {
+            tickValues.add(tickValue);
+        }
+        return tickValues;
+    }
+
+    // -------------- STYLESHEET HANDLING
+    // ------------------------------------------------------------------------------
+
+    @Override
+    protected List<Double> calculateMinorTickValues() {
+        if (getMinorTickCount() <= 0) {
+            return Collections.emptyList();
+        }
+
+        final List<Double> minorTickMarks = new ArrayList<>();
+        final double lowerBound = getMin();
+        final double upperBound = getMax();
+
+        double exp = Math.floor(log(lowerBound));
+        for (double majorTick = pow(exp); majorTick < upperBound; majorTick = pow(++exp)) {
+            final double nextMajorTick = pow(exp + 1);
+            final double minorUnit = (nextMajorTick - majorTick) / getMinorTickCount();
+            for (double minorTick = majorTick + minorUnit; minorTick < nextMajorTick; minorTick += minorUnit) {
+                if (minorTick >= lowerBound && minorTick <= upperBound) {
+                    minorTickMarks.add(minorTick);
+                }
+            }
+        }
+
+        return minorTickMarks;
+    }
+
+    @Override
+    protected AxisRange computeRange(final double min, final double max, final double axisLength,
+            final double labelSize) {
+        double minValue = min;
+        double maxValue = max;
+
+        if ((isAutoRanging() || isAutoGrowRanging()) && isAutoRangeRounding()) {
+            minValue = minValue <= 0 ? LogarithmicAxis.DEFAULT_LOG_MIN_VALUE : pow(Math.floor(log(minValue)));
+            maxValue = pow(Math.ceil(log(maxValue)));
+        }
+        final double newScale = calculateNewScale(axisLength, minValue, maxValue);
+        return new AxisRange(minValue, maxValue, axisLength, newScale, tickUnit.get());
+    }
+
+    @Override
+    protected void setRange(final AxisRange range, final boolean animate) {
+        super.setRange(range, animate);
+        setTickUnit(range.getTickUnit());
+    }
+
     public static List<CssMetaData<? extends Styleable, ?>> getClassCssMetaData() {
         return StyleableProperties.STYLEABLES;
+    }
+
+    private static class StyleableProperties {
+        private static final CssMetaData<LogarithmicAxis, Number> TICK_UNIT = new CssMetaData<LogarithmicAxis, Number>(
+                "-fx-tick-unit", SizeConverter.getInstance(), 5.0) {
+
+            @SuppressWarnings("unchecked")
+            @Override
+            public StyleableProperty<Number> getStyleableProperty(final LogarithmicAxis axis) {
+                return (StyleableProperty<Number>) axis.tickUnitProperty();
+            }
+
+            @Override
+            public boolean isSettable(final LogarithmicAxis axis) {
+                return axis.tickUnit == null || !axis.tickUnit.isBound();
+            }
+        };
+
+        private static final List<CssMetaData<? extends Styleable, ?>> STYLEABLES;
+
+        static {
+            final List<CssMetaData<? extends Styleable, ?>> styleables = new ArrayList<>(
+                    ValueAxis.getClassCssMetaData());
+            styleables.add(StyleableProperties.TICK_UNIT);
+            STYLEABLES = Collections.unmodifiableList(styleables);
+        }
+
+        private StyleableProperties() {
+
+        }
     }
 
     protected class Cache {
@@ -437,36 +468,6 @@ public class LogarithmicAxis extends AbstractAxis {
             }
 
             logBase = Math.log10(getLogarithmBase());
-        }
-    }
-
-    private static class StyleableProperties {
-        private static final CssMetaData<LogarithmicAxis, Number> TICK_UNIT = new CssMetaData<LogarithmicAxis, Number>(
-                "-fx-tick-unit", SizeConverter.getInstance(), 5.0) {
-
-            @SuppressWarnings("unchecked")
-            @Override
-            public StyleableProperty<Number> getStyleableProperty(final LogarithmicAxis axis) {
-                return (StyleableProperty<Number>) axis.tickUnitProperty();
-            }
-
-            @Override
-            public boolean isSettable(final LogarithmicAxis axis) {
-                return axis.tickUnit == null || !axis.tickUnit.isBound();
-            }
-        };
-
-        private static final List<CssMetaData<? extends Styleable, ?>> STYLEABLES;
-
-        static {
-            final List<CssMetaData<? extends Styleable, ?>> styleables = new ArrayList<>(
-                    ValueAxis.getClassCssMetaData());
-            styleables.add(StyleableProperties.TICK_UNIT);
-            STYLEABLES = Collections.unmodifiableList(styleables);
-        }
-
-        private StyleableProperties() {
-
         }
     }
 }

@@ -75,7 +75,7 @@ public class FragmentedDataSet extends AbstractDataSet<FragmentedDataSet> implem
     }
 
     @Override
-    public int getDataCount() {
+    public int getDataCount(final int dimIndex) {
         return dataCount;
     }
 

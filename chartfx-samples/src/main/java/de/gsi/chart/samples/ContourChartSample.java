@@ -356,7 +356,7 @@ public class ContourChartSample extends Application {
             case DIM_Y:
                 return yValues[index].doubleValue();
             case DIM_Z:
-                return zValues[index / xValues.length][index % xValues.length];
+                return zValues[index % xValues.length][index / xValues.length];
             }
             throw new IndexOutOfBoundsException("Dimension Index out of bounds 3, was " + dimIndex);
         }

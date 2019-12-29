@@ -1,9 +1,10 @@
 package de.gsi.chart.axes.spi;
 
-import de.gsi.chart.ui.geometry.Side;
 import javafx.geometry.VPos;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
+
+import de.gsi.chart.ui.geometry.Side;
 
 /**
  * TickMark represents the label text, its associated tick mark value and position along the axis for each tick.
@@ -34,6 +35,10 @@ public class TickMark extends Text {
         setText(tickMarkLabel);
         setRotate(tickRotation);
         recomputeAlignment(); // NOPMD may be overwritten in user-code
+
+        fontProperty().addListener((ch, o, n) -> applyCss());
+        fillProperty().addListener((ch, o, n) -> applyCss());
+        visibleProperty().addListener((ch, o, n) -> applyCss());
     }
 
     @Override

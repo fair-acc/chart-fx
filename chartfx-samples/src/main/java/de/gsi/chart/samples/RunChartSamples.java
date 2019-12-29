@@ -43,6 +43,7 @@ public class RunChartSamples extends Application {
         buttons.getChildren().add(new MyButton("CategoryAxisSample", new CategoryAxisSample()));
         buttons.getChildren().add(new MyButton("ChartAnatomySample", new ChartAnatomySample()));
         buttons.getChildren().add(new MyButton("ChartIndicatorSample", new ChartIndicatorSample()));
+        buttons.getChildren().add(new MyButton("ChartPerformanceGraph", new ChartPerformanceGraph()));
         buttons.getChildren().add(new MyButton("ContourChartSample", new ContourChartSample()));
         buttons.getChildren().add(new MyButton("CustomColourSchemeSample", new CustomColourSchemeSample()));
         buttons.getChildren().add(new MyButton("CustomFragmentedRendererSample", new CustomFragmentedRendererSample()));
@@ -72,6 +73,7 @@ public class RunChartSamples extends Application {
         buttons.getChildren().add(new MyButton("TimeAxisSample", new TimeAxisSample()));
         buttons.getChildren().add(new MyButton("TransposedDataSetSample", new TransposedDataSetSample()));
         buttons.getChildren().add(new MyButton("ValueIndicatorSample", new ValueIndicatorSample()));
+        buttons.getChildren().add(new MyButton("WaterfallPerformanceSample", new WaterfallPerformanceSample()));
         buttons.getChildren().add(new MyButton("WriteDataSetToFileSample", new WriteDataSetToFileSample()));
         buttons.getChildren().add(new MyButton("ZoomerSample", new ZoomerSample()));
 
