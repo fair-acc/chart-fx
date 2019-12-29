@@ -9,13 +9,11 @@ import de.gsi.chart.renderer.datareduction.MaxDataReducer;
 import de.gsi.chart.renderer.datareduction.RamanDouglasPeukerDataReducer;
 import de.gsi.chart.renderer.datareduction.VisvalingamMaheswariWhyattDataReducer;
 import de.gsi.dataset.utils.AssertUtils;
-import javafx.beans.binding.Bindings;
+
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.ReadOnlyBooleanProperty;
-import javafx.beans.property.ReadOnlyBooleanWrapper;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
@@ -32,7 +30,7 @@ import javafx.collections.ListChangeListener;
 @SuppressWarnings({ "PMD.TooManyMethods", "PMD.TooManyFields", "PMD.ExcessivePublicCount" }) // designated purpose of
                                                                                              // this class
 public abstract class AbstractErrorDataSetRendererParameter<R extends AbstractErrorDataSetRendererParameter<R>>
-        extends AbstractDataSetManagement<R> {
+        extends AbstractPointReductionManagment<R> {
 
     // intensity fading factor per stage
     protected static final double DEFAULT_HISTORY_INTENSITY_FADING = 0.65;
@@ -40,13 +38,8 @@ public abstract class AbstractErrorDataSetRendererParameter<R extends AbstractEr
             ErrorStyle.ERRORCOMBO);
     private final ObjectProperty<RendererDataReducer> rendererDataReducer = new SimpleObjectProperty<>(this,
             "rendererDataReducer", new DefaultDataReducer());
-    private final BooleanProperty pointReduction = new SimpleBooleanProperty(this, "pointReduction", true);
-    private final BooleanProperty assumeSortedData = new SimpleBooleanProperty(this, "assumeSortedData", true);
-    private final ReadOnlyBooleanWrapper actualPointReduction = new ReadOnlyBooleanWrapper(this, "actualPointReduction",
-            true);
+
     private final IntegerProperty dashSize = new SimpleIntegerProperty(this, "dashSize", 3);
-    private final IntegerProperty minRequiredReductionSize = new SimpleIntegerProperty(this, "minRequiredReductionSize",
-            5);
     private final DoubleProperty markerSize = new SimpleDoubleProperty(this, "markerSize", 1.5);
     private final BooleanProperty drawMarker = new SimpleBooleanProperty(this, "drawMarker", true);
     private final ObjectProperty<LineStyle> polyLineStyle = new SimpleObjectProperty<>(this, "polyLineStyle",
@@ -57,8 +50,6 @@ public abstract class AbstractErrorDataSetRendererParameter<R extends AbstractEr
     private final BooleanProperty dynamicBarWidth = new SimpleBooleanProperty(this, "dynamicBarWidth", true);
     private final DoubleProperty barWidthPercentage = new SimpleDoubleProperty(this, "barWidthPercentage", 70.0);
     private final IntegerProperty barWidth = new SimpleIntegerProperty(this, "barWidth", 5);
-    private final BooleanProperty parallelImplementation = new SimpleBooleanProperty(this, "parallelImplementation",
-            true);
     private final DoubleProperty intensityFading = new SimpleDoubleProperty(this, "intensityFading",
             AbstractErrorDataSetRendererParameter.DEFAULT_HISTORY_INTENSITY_FADING);
     private final BooleanProperty drawBubbles = new SimpleBooleanProperty(this, "drawBubbles", false);
@@ -69,16 +60,6 @@ public abstract class AbstractErrorDataSetRendererParameter<R extends AbstractEr
      */
     public AbstractErrorDataSetRendererParameter() {
         super();
-        actualPointReduction.bind(Bindings.and(pointReduction, assumeSortedData));
-    }
-
-    /**
-     * Indicates whether point reduction is active.
-     *
-     * @return true if data points are supposed to be reduced
-     */
-    public ReadOnlyBooleanProperty actualPointReductionProperty() {
-        return actualPointReduction.getReadOnlyProperty();
     }
 
     /**
@@ -86,16 +67,6 @@ public abstract class AbstractErrorDataSetRendererParameter<R extends AbstractEr
      */
     public BooleanProperty allowNaNsProperty() {
         return allowNaNs;
-    }
-
-    /**
-     * Disable this if you have data which is not monotonic in x-direction. This setting can increase rendering time
-     * drastically because lots of off screen points might have to be rendered.
-     *
-     * @return true if data points are supposed to be sorted
-     */
-    public BooleanProperty assumeSortedDataProperty() {
-        return assumeSortedData;
     }
 
     public DoubleProperty barWidthPercentageProperty() {
@@ -230,13 +201,6 @@ public abstract class AbstractErrorDataSetRendererParameter<R extends AbstractEr
     }
 
     /**
-     * @return the minimum number of samples before performing data reduction
-     */
-    public int getMinRequiredReductionSize() {
-        return minRequiredReductionSize.get();
-    }
-
-    /**
      * whether renderer should draw no, simple (point-to-point), stair-case, Bezier, ... lines
      *
      * @return LineStyle
@@ -273,29 +237,10 @@ public abstract class AbstractErrorDataSetRendererParameter<R extends AbstractEr
     }
 
     /**
-     * Indicates whether point reduction is active.
-     *
-     * @return true if point reduction is on (default) else false.
-     */
-    public boolean isActualReducePoints() {
-        return actualPointReduction.get();
-    }
-
-    /**
      * @return true if NaN values are permitted
      */
     public boolean isallowNaNs() {
         return allowNaNs.get();
-    }
-
-    /**
-     * Disable this if you have data which is not monotonic in x-direction. This setting can increase rendering time
-     * drastically because lots of off screen points might have to be rendered.
-     *
-     * @return true if points should be assumed to be sorted (default)
-     */
-    public boolean isAssumeSortedData() {
-        return assumeSortedData.get();
     }
 
     /**
@@ -327,26 +272,6 @@ public abstract class AbstractErrorDataSetRendererParameter<R extends AbstractEr
     }
 
     /**
-     * whether renderer should aim at parallelising sub-functionalities
-     *
-     * @return true if renderer is parallelising sub-functionalities
-     */
-    public boolean isParallelImplementation() {
-        return parallelImplementation.get();
-    }
-
-    /**
-     * Sets whether superfluous points, otherwise drawn on the same pixel area, are merged and represented by the
-     * multiple point average. Note that the point Reduction is also disabled implicitly by assumeSortedData = false,
-     * check the read only actualDataPointReduction Property.
-     *
-     * @return true if point reduction is on (default) else false.
-     */
-    public boolean isReducePoints() {
-        return pointReduction.get();
-    }
-
-    /**
      * @return true if bars drawn to the y==0 axis shall be horizontally shifted for each DataSet
      */
     public boolean isShiftBar() {
@@ -355,29 +280,6 @@ public abstract class AbstractErrorDataSetRendererParameter<R extends AbstractEr
 
     public DoubleProperty markerSizeProperty() {
         return markerSize;
-    }
-
-    public IntegerProperty minRequiredReductionSizeProperty() {
-        return minRequiredReductionSize;
-    }
-
-    /**
-     * Sets whether renderer should aim at parallelising sub-functionalities
-     *
-     * @return true if data points are supposed to be reduced
-     */
-    public BooleanProperty parallelImplementationProperty() {
-        return parallelImplementation;
-    }
-
-    /**
-     * Sets whether superfluous points, otherwise drawn on the same pixel area, are merged and represented by the
-     * multiple point average.
-     *
-     * @return true if data points are supposed to be reduced
-     */
-    public BooleanProperty pointReductionProperty() {
-        return pointReduction;
     }
 
     /**
@@ -411,18 +313,6 @@ public abstract class AbstractErrorDataSetRendererParameter<R extends AbstractEr
      */
     public R setAllowNaNs(final boolean state) {
         allowNaNs.set(state);
-        return getThis();
-    }
-
-    /**
-     * Disable this if you have data which is not monotonic in x-direction. This setting can increase rendering time
-     * drastically because lots of off screen points might have to be rendered.
-     *
-     * @param state true if data points are supposed to be sorted
-     * @return itself (fluent design)
-     */
-    public R setAssumeSortedData(final boolean state) {
-        assumeSortedData.set(state);
         return getThis();
     }
 
@@ -529,38 +419,6 @@ public abstract class AbstractErrorDataSetRendererParameter<R extends AbstractEr
     public R setMarkerSize(final double size) {
         AssertUtils.gtEqThanZero("marker size ", size);
         markerSize.setValue(size);
-        return getThis();
-    }
-
-    /**
-     * @param size the minimum number of samples before performing data reduction
-     * @return itself (fluent design)
-     */
-    public R setMinRequiredReductionSize(final int size) {
-        minRequiredReductionSize.setValue(size);
-        return getThis();
-    }
-
-    /**
-     * Sets whether renderer should aim at parallelising sub-functionalities
-     *
-     * @param state true if renderer is parallelising sub-functionalities
-     * @return itself (fluent design)
-     */
-    public R setParallelImplementation(final boolean state) {
-        parallelImplementation.set(state);
-        return getThis();
-    }
-
-    /**
-     * Sets whether superfluous points, otherwise drawn on the same pixel area, are merged and represented by the
-     * multiple point average.
-     *
-     * @param state true if data points are supposed to be reduced
-     * @return itself (fluent design)
-     */
-    public R setPointReduction(final boolean state) {
-        pointReduction.set(state);
         return getThis();
     }
 

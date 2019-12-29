@@ -274,7 +274,7 @@ public class ListErrorDataSet extends AbstractErrorDataSet<ListErrorDataSet> imp
     }
 
     @Override
-    public int getDataCount() {
+    public int getDataCount(final int dimIndex) {
         return data.size();
     }
 

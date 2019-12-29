@@ -201,7 +201,7 @@ public class ListDataSet extends AbstractDataSet<ListDataSet> implements DataSet
     }
 
     @Override
-    public int getDataCount() {
+    public int getDataCount(final int dimIndex) {
         return data.size();
     }
 

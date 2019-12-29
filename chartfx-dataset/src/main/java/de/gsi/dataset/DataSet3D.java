@@ -10,7 +10,7 @@ public interface DataSet3D extends DataSet2D {
 
     @Override
     default int getDimension() {
-        return 3; // TODO: get rid of this method
+        return 3;
     }
 
     /**

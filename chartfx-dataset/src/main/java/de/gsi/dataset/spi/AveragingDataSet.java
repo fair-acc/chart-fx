@@ -93,11 +93,11 @@ public class AveragingDataSet extends AbstractDataSet<AveragingDataSet> implemen
     }
 
     @Override
-    public int getDataCount() {
+    public int getDataCount(final int dimIndex) {
         if (dataset == null) {
             return 0;
         }
-        return dataset.getDataCount();
+        return dataset.getDataCount(dimIndex);
     }
 
     /**

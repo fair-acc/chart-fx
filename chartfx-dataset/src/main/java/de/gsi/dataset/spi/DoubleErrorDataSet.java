@@ -317,7 +317,7 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
     }
 
     @Override
-    public int getDataCount() {
+    public int getDataCount(final int dimIndex) {
         return Math.min(xValues.size(), yValues.size());
     }
 

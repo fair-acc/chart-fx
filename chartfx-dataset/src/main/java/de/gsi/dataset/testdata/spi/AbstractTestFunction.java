@@ -42,7 +42,7 @@ public abstract class AbstractTestFunction<D extends AbstractTestFunction<D>> ex
     }
 
     @Override
-    public int getDataCount() {
+    public int getDataCount(int dimIndex) {
         return data.length;
     }
 

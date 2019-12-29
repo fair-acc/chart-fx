@@ -5,6 +5,11 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.scene.chart.NumberAxis;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,10 +20,6 @@ import de.gsi.chart.axes.TickUnitSupplier;
 import de.gsi.chart.axes.spi.transforms.DefaultAxisTransform;
 import de.gsi.chart.axes.spi.transforms.LogarithmicAxisTransform;
 import de.gsi.chart.axes.spi.transforms.LogarithmicTimeAxisTransform;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.DoubleProperty;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.scene.chart.NumberAxis;
 
 /**
  * A axis class that plots a range of numbers with major tick marks every "tickUnit". You can use any Number type with
@@ -31,7 +32,7 @@ import javafx.scene.chart.NumberAxis;
  * <li>Supports configuration of {@link #autoRangeRoundingProperty() auto-range rounding}</li>
  * <li>Supports custom {@code tickUnitSupplierProperty} tick unit suppliers</li>
  * </ul>
- * 
+ *
  * @author rstein
  */
 public class DefaultNumericAxis extends AbstractAxis implements Axis {
@@ -50,7 +51,7 @@ public class DefaultNumericAxis extends AbstractAxis implements Axis {
         @Override
         protected void invalidated() {
             if (isAutoRanging() || isAutoGrowRanging()) {
-                invalidateRange();
+                invalidate();
                 requestAxisLayout();
             }
         }
@@ -77,7 +78,7 @@ public class DefaultNumericAxis extends AbstractAxis implements Axis {
                     isUpdating = false;
                 }
 
-                invalidateRange();
+                invalidate();
                 requestLayout();
             } else {
                 axisTransform = linearTransform;
@@ -89,7 +90,7 @@ public class DefaultNumericAxis extends AbstractAxis implements Axis {
             }
 
             if (isAutoRanging() || isAutoGrowRanging()) {
-                invalidateRange();
+                invalidate();
             }
             requestAxisLayout();
         }
@@ -156,118 +157,6 @@ public class DefaultNumericAxis extends AbstractAxis implements Axis {
         setUnit(unit);
     }
 
-    @Override
-    protected AxisRange autoRange(final double minValue, final double maxValue, final double length,
-            final double labelSize) {
-        double min = minValue > 0 && isForceZeroInRange() ? 0 : minValue;
-        if (isLogAxis && minValue <= 0) {
-            min = DefaultNumericAxis.DEFAULT_LOG_MIN_VALUE;
-            isUpdating = true;
-            // TODO: check w.r.t. inverted axis (lower <-> upper bound exchange)
-            setMin(DefaultNumericAxis.DEFAULT_LOG_MIN_VALUE);
-            isUpdating = false;
-        }
-        final double max = maxValue < 0 && isForceZeroInRange() ? 0 : maxValue;
-        final double padding = DefaultNumericAxis.getEffectiveRange(min, max) * getAutoRangePadding();
-        final double paddingScale = 1.0 + getAutoRangePadding();
-        final double paddedMin = isLogAxis ? minValue / paddingScale
-                : DefaultNumericAxis.clampBoundToZero(min - padding, min);
-        final double paddedMax = isLogAxis ? maxValue * paddingScale
-                : DefaultNumericAxis.clampBoundToZero(max + padding, max);
-
-        return computeRange(paddedMin, paddedMax, length, labelSize);
-    }
-
-    @Override
-    protected List<Double> calculateMajorTickValues(final double axisLength, final AxisRange axisRange) {
-        final List<Double> tickValues = new ArrayList<>();
-        if (isLogAxis) {
-            if (axisRange.getLowerBound() >= axisRange.getUpperBound()) {
-                return Arrays.asList(axisRange.getLowerBound());
-            }
-            double exp = Math.ceil(axisTransform.forward(axisRange.getLowerBound()));
-            for (double tickValue = axisTransform.backward(exp); tickValue <= axisRange
-                    .getUpperBound(); tickValue = axisTransform.backward(++exp)) {
-                tickValues.add(tickValue);
-            }
-
-            // add minor tick marks to major
-            // tickValues.addAll(calculateMinorTickMarks());
-
-            return tickValues;
-        }
-
-        if (axisRange.getLowerBound() == axisRange.getUpperBound() || axisRange.getTickUnit() <= 0) {
-            return Arrays.asList(axisRange.getLowerBound());
-        }
-
-        final double firstTick = DefaultNumericAxis.computeFistMajorTick(axisRange.getLowerBound(),
-                axisRange.getTickUnit());
-        if (firstTick + axisRange.getTickUnit() == firstTick) {
-            LOGGER.atDebug().log("major ticks numerically not resolvable");
-            return tickValues;
-        }
-        for (double major = firstTick; major <= axisRange.getUpperBound(); major += axisRange.getTickUnit()) {
-            tickValues.add(major);
-        }
-        return tickValues;
-    }
-
-    @Override
-    protected List<Double> calculateMinorTickValues() {
-        if (isLogAxis) {
-            if (getMinorTickCount() <= 0) {
-                return Collections.emptyList();
-            }
-        } else if (getMinorTickCount() == 0 || getTickUnit() == 0) {
-            return Collections.emptyList();
-        }
-
-        final List<Double> minorTickMarks = new ArrayList<>();
-        final double lowerBound = getMin();
-        final double upperBound = getMax();
-        final double majorUnit = getTickUnit();
-
-        if (isLogAxis) {
-            double exp = Math.floor(axisTransform.forward(lowerBound));
-            for (double majorTick = axisTransform.backward(exp); majorTick < upperBound; majorTick = axisTransform
-                    .backward(++exp)) {
-                final double nextMajorTick = axisTransform.backward(exp + 1);
-                final double minorUnit = (nextMajorTick - majorTick) / getMinorTickCount();
-                for (double minorTick = majorTick + minorUnit; minorTick < nextMajorTick; minorTick += minorUnit) {
-                    if (minorTick == majorTick) {
-                        LOGGER.atDebug().log("minor ticks numerically not possible");
-                        break;
-                    }
-                    if (minorTick >= lowerBound && minorTick <= upperBound) {
-                        minorTickMarks.add(minorTick);
-                    }
-                }
-            }
-        } else {
-            final double firstMajorTick = DefaultNumericAxis.computeFistMajorTick(lowerBound, majorUnit);
-            final double minorUnit = majorUnit / getMinorTickCount();
-
-            for (double majorTick = firstMajorTick - majorUnit; majorTick < upperBound; majorTick += majorUnit) {
-                if (majorTick + majorUnit == majorTick) {
-                    LOGGER.atDebug().log("major ticks numerically not resolvable");
-                    break;
-                }
-                final double nextMajorTick = majorTick + majorUnit;
-                for (double minorTick = majorTick + minorUnit; minorTick < nextMajorTick; minorTick += minorUnit) {
-                    if (minorTick == majorTick) {
-                        LOGGER.atDebug().log("minor ticks numerically not possible");
-                        break;
-                    }
-                    if (minorTick >= lowerBound && minorTick <= upperBound) {
-                        minorTickMarks.add(minorTick);
-                    }
-                }
-            }
-        }
-        return minorTickMarks;
-    }
-
     /**
      * Computes the preferred tick unit based on the upper/lower bounds and the length of the axis in screen
      * coordinates.
@@ -285,116 +174,6 @@ public class DefaultNumericAxis extends AbstractAxis implements Axis {
             rawTickUnit = 1e-3;// TODO: remove this hack (eventually) ;-)
         }
         return computeTickUnit(rawTickUnit);
-    }
-
-    @Override
-    protected AxisRange computeRange(final double min, final double max, final double axisLength,
-            final double labelSize) {
-        double minValue = min;
-        double maxValue = max;
-        if (isLogAxis) {
-            if ((isAutoRanging() || isAutoGrowRanging()) && isAutoRangeRounding()) {
-                minValue = axisTransform.getRoundedMinimumRange(minValue);
-                maxValue = axisTransform.getRoundedMaximumRange(maxValue);
-            }
-            final double newScale = calculateNewScale(axisLength, minValue, maxValue);
-            return new AxisRange(minValue, maxValue, axisLength, newScale, getTickUnit());
-        }
-
-        if (maxValue - minValue == 0) {
-            final double padding = getAutoRangePadding() < 0 ? 0.0 : getAutoRangePadding();
-            final double paddedRange = DefaultNumericAxis.getEffectiveRange(minValue, maxValue) * padding;
-            minValue = minValue - paddedRange / 2;
-            maxValue = maxValue + paddedRange / 2;
-        }
-
-        return computeRangeImpl(minValue, maxValue, axisLength, labelSize);
-    }
-
-    private AxisRange computeRangeImpl(final double min, final double max, final double axisLength,
-            final double labelSize) {
-        final int numOfFittingLabels = (int) Math.floor(axisLength / labelSize);
-        final int numOfTickMarks = Math.max(Math.min(numOfFittingLabels, getMaxMaxjorTickLabelCount()), 2);
-
-        double rawTickUnit = (max - min) / numOfTickMarks;
-        if (rawTickUnit == 0 || Double.isNaN(rawTickUnit)) {
-            rawTickUnit = 1e-3;// TODO: remove hack
-        }
-
-        // double tickUnitRounded = Double.MIN_VALUE; // TODO check if not
-        // '-Double.MAX_VALUE'
-        final double tickUnitRounded = computeTickUnit(rawTickUnit);
-        final boolean round = (isAutoRanging() || isAutoGrowRanging()) && isAutoRangeRounding();
-        final double minRounded = round ? axisTransform.getRoundedMinimumRange(min) : min;
-        final double maxRounded = round ? axisTransform.getRoundedMaximumRange(max) : max;
-
-        // int ticksCount;
-        // double reqLength;
-        //
-        // do {
-        // if (Double.isNaN(rawTickUnit)) {
-        // throw new IllegalArgumentException("Can't calculate axis range: data
-        // contains NaN value");
-        // }
-        // // Here we ignore the tickUnit property, so even if the tick unit
-        // // was specified and the auto-range is off
-        // // we don't use it. When narrowing the range (e.g. zoom-in) - this
-        // // is usually ok, but if one wants
-        // // explicitly change bounds while preserving the specified tickUnit,
-        // // this won't work. Perhaps the usage of
-        // // tickUnit should be independent of the auto-range so we should
-        // // introduce autoTickUnit. The other option is
-        // // to provide custom TickUnitSupplier that always returns the same
-        // // tick unit.
-        // prevTickUnitRounded = tickUnitRounded;
-        // tickUnitRounded = computeTickUnit(rawTickUnit);
-        // if (tickUnitRounded <= prevTickUnitRounded) {
-        // break;
-        // }
-        //
-        // double firstMajorTick;
-        // if ((isAutoRanging() || isAutoGrowRanging()) &&
-        // isAutoRangeRounding()) {
-        // minRounded = Math.floor(min / tickUnitRounded) * tickUnitRounded;
-        // maxRounded = Math.ceil(max / tickUnitRounded) * tickUnitRounded;
-        // firstMajorTick = minRounded;
-        // } else {
-        // firstMajorTick = Math.ceil(min / tickUnitRounded) * tickUnitRounded;
-        // }
-        //
-        // ticksCount = 0;
-        // double maxReqTickGap = 0;
-        // double halfOfLastTickSize = 0;
-        // for (double major = firstMajorTick; major <= maxRounded; major +=
-        // tickUnitRounded, ticksCount++) {
-        // final double tickMarkSize = measureTickMarkLength(major);
-        // if (major == firstMajorTick) {
-        // halfOfLastTickSize = tickMarkSize / 2;
-        // } else {
-        // maxReqTickGap = Math.max(maxReqTickGap, halfOfLastTickSize +
-        // TICK_MARK_GAP + tickMarkSize / 2);
-        // }
-        // }
-        // reqLength = (ticksCount - 1) * maxReqTickGap;
-        // rawTickUnit = tickUnitRounded * NEXT_TICK_UNIT_FACTOR;
-        // } while (numOfTickMarks > 2 && (reqLength > axisLength || ticksCount
-        // > MAX_TICK_COUNT));
-
-        final double newScale = calculateNewScale(axisLength, minRounded, maxRounded);
-        return new AxisRange(minRounded, maxRounded, axisLength, newScale, tickUnitRounded);
-    }
-
-    protected double computeTickUnit(final double rawTickUnit) {
-        final TickUnitSupplier unitSupplier = getAxisLabelFormatter().getTickUnitSupplier();
-        if (unitSupplier == null) {
-            throw new IllegalStateException("class defaults not properly initialised");
-        }
-        final double majorUnit = unitSupplier.computeTickUnit(rawTickUnit);
-        if (majorUnit <= 0) {
-            throw new IllegalArgumentException("The " + unitSupplier.getClass().getName()
-                    + " computed illegal unit value [" + majorUnit + "] for argument " + rawTickUnit);
-        }
-        return majorUnit;
     }
 
     /**
@@ -433,23 +212,6 @@ public class DefaultNumericAxis extends AbstractAxis implements Axis {
         return getDisplayPositionImpl(value);
     }
 
-    private double getDisplayPositionImpl(final double value) {
-        if (isLogAxis) {
-            final double valueLogOffset = axisTransform.forward(value) - cache.lowerBoundLog;
-
-            if (cache.isVerticalAxis) {
-                return cache.axisHeight - valueLogOffset * cache.logScaleLengthInv;
-            }
-            return valueLogOffset * cache.logScaleLengthInv;
-        }
-
-        // default case: linear axis computation (dependent variables are being
-        // cached for performance reasons)
-        // return cache.localOffset + (value - cache.localCurrentLowerBound) *
-        // cache.localScale;
-        return cache.localOffset2 + value * cache.localScale;
-    }
-
     /**
      * Returns the value of the {@link #logarithmBaseProperty()}.
      *
@@ -484,20 +246,6 @@ public class DefaultNumericAxis extends AbstractAxis implements Axis {
             return getValueForDisplayImpl(offset - displayPosition);
         }
         return getValueForDisplayImpl(displayPosition);
-    }
-
-    private double getValueForDisplayImpl(final double displayPosition) {
-        if (isLogAxis) {
-            if (cache.isVerticalAxis) {
-                final double height = cache.axisHeight;
-                return axisTransform
-                        .backward(cache.lowerBoundLog + (height - displayPosition) / height * cache.logScaleLength);
-            }
-            return axisTransform
-                    .backward(cache.lowerBoundLog + displayPosition / cache.axisWidth * cache.logScaleLength);
-        }
-
-        return cache.localCurrentLowerBound + (displayPosition - cache.localOffset) / cache.localScale;
     }
 
     /**
@@ -600,7 +348,7 @@ public class DefaultNumericAxis extends AbstractAxis implements Axis {
      */
     public void setLogarithmBase(final double value) {
         logarithmBaseProperty().set(value);
-        invalidateRange();
+        invalidate();
         requestAxisLayout();
     }
 
@@ -614,6 +362,257 @@ public class DefaultNumericAxis extends AbstractAxis implements Axis {
         logAxis.set(value);
     }
 
+    private AxisRange computeRangeImpl(final double min, final double max, final double axisLength,
+            final double labelSize) {
+        final int numOfFittingLabels = (int) Math.floor(axisLength / labelSize);
+        final int numOfTickMarks = Math.max(Math.min(numOfFittingLabels, getMaxMaxjorTickLabelCount()), 2);
+
+        double rawTickUnit = (max - min) / numOfTickMarks;
+        if (rawTickUnit == 0 || Double.isNaN(rawTickUnit)) {
+            rawTickUnit = 1e-3;// TODO: remove hack
+        }
+
+        // double tickUnitRounded = Double.MIN_VALUE; // TODO check if not
+        // '-Double.MAX_VALUE'
+        final double tickUnitRounded = computeTickUnit(rawTickUnit);
+        final boolean round = (isAutoRanging() || isAutoGrowRanging()) && isAutoRangeRounding();
+        final double minRounded = round ? axisTransform.getRoundedMinimumRange(min) : min;
+        final double maxRounded = round ? axisTransform.getRoundedMaximumRange(max) : max;
+
+        // int ticksCount;
+        // double reqLength;
+        //
+        // do {
+        // if (Double.isNaN(rawTickUnit)) {
+        // throw new IllegalArgumentException("Can't calculate axis range: data
+        // contains NaN value");
+        // }
+        // // Here we ignore the tickUnit property, so even if the tick unit
+        // // was specified and the auto-range is off
+        // // we don't use it. When narrowing the range (e.g. zoom-in) - this
+        // // is usually ok, but if one wants
+        // // explicitly change bounds while preserving the specified tickUnit,
+        // // this won't work. Perhaps the usage of
+        // // tickUnit should be independent of the auto-range so we should
+        // // introduce autoTickUnit. The other option is
+        // // to provide custom TickUnitSupplier that always returns the same
+        // // tick unit.
+        // prevTickUnitRounded = tickUnitRounded;
+        // tickUnitRounded = computeTickUnit(rawTickUnit);
+        // if (tickUnitRounded <= prevTickUnitRounded) {
+        // break;
+        // }
+        //
+        // double firstMajorTick;
+        // if ((isAutoRanging() || isAutoGrowRanging()) &&
+        // isAutoRangeRounding()) {
+        // minRounded = Math.floor(min / tickUnitRounded) * tickUnitRounded;
+        // maxRounded = Math.ceil(max / tickUnitRounded) * tickUnitRounded;
+        // firstMajorTick = minRounded;
+        // } else {
+        // firstMajorTick = Math.ceil(min / tickUnitRounded) * tickUnitRounded;
+        // }
+        //
+        // ticksCount = 0;
+        // double maxReqTickGap = 0;
+        // double halfOfLastTickSize = 0;
+        // for (double major = firstMajorTick; major <= maxRounded; major +=
+        // tickUnitRounded, ticksCount++) {
+        // final double tickMarkSize = measureTickMarkLength(major);
+        // if (major == firstMajorTick) {
+        // halfOfLastTickSize = tickMarkSize / 2;
+        // } else {
+        // maxReqTickGap = Math.max(maxReqTickGap, halfOfLastTickSize +
+        // TICK_MARK_GAP + tickMarkSize / 2);
+        // }
+        // }
+        // reqLength = (ticksCount - 1) * maxReqTickGap;
+        // rawTickUnit = tickUnitRounded * NEXT_TICK_UNIT_FACTOR;
+        // } while (numOfTickMarks > 2 && (reqLength > axisLength || ticksCount
+        // > MAX_TICK_COUNT));
+
+        final double newScale = calculateNewScale(axisLength, minRounded, maxRounded);
+        return new AxisRange(minRounded, maxRounded, axisLength, newScale, tickUnitRounded);
+    }
+
+    private double getDisplayPositionImpl(final double value) {
+        if (isLogAxis) {
+            final double valueLogOffset = axisTransform.forward(value) - cache.lowerBoundLog;
+
+            if (cache.isVerticalAxis) {
+                return cache.axisHeight - valueLogOffset * cache.logScaleLengthInv;
+            }
+            return valueLogOffset * cache.logScaleLengthInv;
+        }
+
+        // default case: linear axis computation (dependent variables are being
+        // cached for performance reasons)
+        // return cache.localOffset + (value - cache.localCurrentLowerBound) *
+        // cache.localScale;
+        return cache.localOffset2 + value * cache.localScale;
+    }
+
+    private double getValueForDisplayImpl(final double displayPosition) {
+        if (isLogAxis) {
+            if (cache.isVerticalAxis) {
+                final double height = cache.axisHeight;
+                return axisTransform
+                        .backward(cache.lowerBoundLog + (height - displayPosition) / height * cache.logScaleLength);
+            }
+            return axisTransform
+                    .backward(cache.lowerBoundLog + displayPosition / cache.axisWidth * cache.logScaleLength);
+        }
+
+        return cache.localCurrentLowerBound + (displayPosition - cache.localOffset) / cache.localScale;
+    }
+
+    @Override
+    protected AxisRange autoRange(final double minValue, final double maxValue, final double length,
+            final double labelSize) {
+        double min = minValue > 0 && isForceZeroInRange() ? 0 : minValue;
+        if (isLogAxis && minValue <= 0) {
+            min = DefaultNumericAxis.DEFAULT_LOG_MIN_VALUE;
+            isUpdating = true;
+            // TODO: check w.r.t. inverted axis (lower <-> upper bound exchange)
+            setMin(DefaultNumericAxis.DEFAULT_LOG_MIN_VALUE);
+            isUpdating = false;
+        }
+        final double max = maxValue < 0 && isForceZeroInRange() ? 0 : maxValue;
+        final double padding = DefaultNumericAxis.getEffectiveRange(min, max) * getAutoRangePadding();
+        final double paddingScale = 1.0 + getAutoRangePadding();
+        final double paddedMin = isLogAxis ? minValue / paddingScale
+                : DefaultNumericAxis.clampBoundToZero(min - padding, min);
+        final double paddedMax = isLogAxis ? maxValue * paddingScale
+                : DefaultNumericAxis.clampBoundToZero(max + padding, max);
+
+        return computeRange(paddedMin, paddedMax, length, labelSize);
+    }
+
+    @Override
+    protected List<Double> calculateMajorTickValues(final double axisLength, final AxisRange axisRange) {
+        final List<Double> tickValues = new ArrayList<>();
+        if (isLogAxis) {
+            if (axisRange.getLowerBound() >= axisRange.getUpperBound()) {
+                return Arrays.asList(axisRange.getLowerBound());
+            }
+            double exp = Math.ceil(axisTransform.forward(axisRange.getLowerBound()));
+            for (double tickValue = axisTransform.backward(exp); tickValue <= axisRange
+                    .getUpperBound(); tickValue = axisTransform.backward(++exp)) {
+                tickValues.add(tickValue);
+            }
+
+            // add minor tick marks to major
+            // tickValues.addAll(calculateMinorTickMarks());
+
+            return tickValues;
+        }
+
+        if (axisRange.getLowerBound() == axisRange.getUpperBound() || axisRange.getTickUnit() <= 0) {
+            return Arrays.asList(axisRange.getLowerBound());
+        }
+
+        final double firstTick = DefaultNumericAxis.computeFistMajorTick(axisRange.getLowerBound(),
+                axisRange.getTickUnit());
+        if (firstTick + axisRange.getTickUnit() == firstTick) {
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.atDebug().log("major ticks numerically not resolvable");
+            }
+            return tickValues;
+        }
+        for (double major = firstTick; major <= axisRange.getUpperBound(); major += axisRange.getTickUnit()) {
+            tickValues.add(major);
+        }
+        return tickValues;
+    }
+
+    @Override
+    protected List<Double> calculateMinorTickValues() {
+        if (getMinorTickCount() <= 0 || getTickUnit() <= 0) {
+            return Collections.emptyList();
+        }
+
+        final List<Double> newMinorTickMarks = new ArrayList<>();
+        final double lowerBound = getMin();
+        final double upperBound = getMax();
+        final double majorUnit = getTickUnit();
+
+        if (isLogAxis) {
+            double exp = Math.floor(axisTransform.forward(lowerBound));
+            for (double majorTick = axisTransform.backward(exp); majorTick < upperBound; majorTick = axisTransform
+                    .backward(++exp)) {
+                final double nextMajorTick = axisTransform.backward(exp + 1);
+                final double minorUnit = (nextMajorTick - majorTick) / getMinorTickCount();
+                for (double minorTick = majorTick + minorUnit; minorTick < nextMajorTick; minorTick += minorUnit) {
+                    if (minorTick == majorTick) {
+                        // minor ticks numerically not possible
+                        break;
+                    }
+                    if (minorTick >= lowerBound && minorTick <= upperBound) {
+                        newMinorTickMarks.add(minorTick);
+                    }
+                }
+            }
+        } else {
+            final double firstMajorTick = DefaultNumericAxis.computeFistMajorTick(lowerBound, majorUnit);
+            final double minorUnit = majorUnit / getMinorTickCount();
+
+            for (double majorTick = firstMajorTick - majorUnit; majorTick < upperBound; majorTick += majorUnit) {
+                if (majorTick + majorUnit == majorTick) {
+                    // major ticks numerically not resolvable
+                    break;
+                }
+                final double nextMajorTick = majorTick + majorUnit;
+                for (double minorTick = majorTick + minorUnit; minorTick < nextMajorTick; minorTick += minorUnit) {
+                    if (minorTick == majorTick) {
+                        // minor ticks numerically not possible
+                        break;
+                    }
+                    if (minorTick >= lowerBound && minorTick <= upperBound) {
+                        newMinorTickMarks.add(minorTick);
+                    }
+                }
+            }
+        }
+        return newMinorTickMarks;
+    }
+
+    @Override
+    protected AxisRange computeRange(final double min, final double max, final double axisLength,
+            final double labelSize) {
+        double minValue = min;
+        double maxValue = max;
+        if (isLogAxis) {
+            if ((isAutoRanging() || isAutoGrowRanging()) && isAutoRangeRounding()) {
+                minValue = axisTransform.getRoundedMinimumRange(minValue);
+                maxValue = axisTransform.getRoundedMaximumRange(maxValue);
+            }
+            final double newScale = calculateNewScale(axisLength, minValue, maxValue);
+            return new AxisRange(minValue, maxValue, axisLength, newScale, getTickUnit());
+        }
+
+        if (maxValue - minValue == 0) {
+            final double padding = getAutoRangePadding() < 0 ? 0.0 : getAutoRangePadding();
+            final double paddedRange = DefaultNumericAxis.getEffectiveRange(minValue, maxValue) * padding;
+            minValue = minValue - paddedRange / 2;
+            maxValue = maxValue + paddedRange / 2;
+        }
+
+        return computeRangeImpl(minValue, maxValue, axisLength, labelSize);
+    }
+
+    protected double computeTickUnit(final double rawTickUnit) {
+        final TickUnitSupplier unitSupplier = getAxisLabelFormatter().getTickUnitSupplier();
+        if (unitSupplier == null) {
+            throw new IllegalStateException("class defaults not properly initialised");
+        }
+        final double majorUnit = unitSupplier.computeTickUnit(rawTickUnit);
+        if (majorUnit <= 0) {
+            throw new IllegalArgumentException("The " + unitSupplier.getClass().getName()
+                    + " computed illegal unit value [" + majorUnit + "] for argument " + rawTickUnit);
+        }
+        return majorUnit;
+    }
+
     @Override
     protected void setRange(final AxisRange range, final boolean animate) {
         super.setRange(range, animate);
@@ -625,9 +624,13 @@ public class DefaultNumericAxis extends AbstractAxis implements Axis {
         cache.updateCachedAxisVariables();
     }
 
+    private static double computeFistMajorTick(final double lowerBound, final double tickUnit) {
+        return Math.ceil(lowerBound / tickUnit) * tickUnit;
+    }
+
     /**
      * If padding pushed the bound above or below zero - stick it to zero.
-     * 
+     *
      * @param paddedBound padded version of bound
      * @param bound computed raw version of bound
      * @return clamped value
@@ -637,10 +640,6 @@ public class DefaultNumericAxis extends AbstractAxis implements Axis {
             return 0;
         }
         return paddedBound;
-    }
-
-    private static double computeFistMajorTick(final double lowerBound, final double tickUnit) {
-        return Math.ceil(lowerBound / tickUnit) * tickUnit;
     }
 
     protected static double getEffectiveRange(final double min, final double max) {
