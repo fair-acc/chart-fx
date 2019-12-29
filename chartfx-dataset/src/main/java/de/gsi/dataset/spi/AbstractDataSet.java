@@ -494,7 +494,7 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
             return 0;
         }
 
-        if (x < this.getAxisDescription(0).getMin()) {
+        if (x < this.getAxisDescription(dimIndex).getMin()) {
             return 0;
         }
 

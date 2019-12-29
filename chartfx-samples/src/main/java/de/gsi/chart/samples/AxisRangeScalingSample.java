@@ -27,6 +27,8 @@ import javafx.stage.Stage;
  */
 public class AxisRangeScalingSample extends Application {
     private static final String CHART_CSS = Chart.class.getResource("chart.css").toExternalForm();
+    private static final int DEFAULT_WIDTH = 800;
+    private static final int DEFAULT_HEIGHT = 800;
 
     @Override
     public void start(final Stage primaryStage) {
@@ -130,7 +132,7 @@ public class AxisRangeScalingSample extends Application {
         };
         timer.scheduleAtFixedRate(task, 0, TimeUnit.SECONDS.toMillis(2));
 
-        final Scene scene = new Scene(root, 800, 700);
+        final Scene scene = new Scene(root, DEFAULT_WIDTH, DEFAULT_HEIGHT);
         scene.getStylesheets().setAll(CHART_CSS);
 
         primaryStage.setTitle(this.getClass().getSimpleName());

@@ -136,7 +136,7 @@ public class CircularDoubleErrorDataSet extends AbstractErrorDataSet<CircularDou
     }
 
     @Override
-    public int getDataCount() {
+    public int getDataCount(final int dimIndex) {
         return xValues.available();
     }
 

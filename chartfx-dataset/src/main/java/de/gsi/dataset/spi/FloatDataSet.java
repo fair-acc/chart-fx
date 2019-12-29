@@ -250,7 +250,7 @@ public class FloatDataSet extends AbstractDataSet<FloatDataSet> implements Edita
     }
 
     @Override
-    public int getDataCount() {
+    public int getDataCount(final int dimIndex) {
         return Math.min(xValues.size(), yValues.size());
     }
 

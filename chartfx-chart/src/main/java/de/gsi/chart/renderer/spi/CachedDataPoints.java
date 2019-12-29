@@ -13,12 +13,12 @@ import de.gsi.chart.XYChartCss;
 import de.gsi.chart.axes.Axis;
 import de.gsi.chart.renderer.ErrorStyle;
 import de.gsi.chart.renderer.RendererDataReducer;
-import de.gsi.chart.renderer.spi.utils.Cache;
 import de.gsi.chart.utils.StyleParser;
 import de.gsi.dataset.DataSet;
 import de.gsi.dataset.DataSet2D;
 import de.gsi.dataset.DataSetError;
 import de.gsi.dataset.DataSetError.ErrorType;
+import de.gsi.dataset.utils.ArrayCache;
 import de.gsi.dataset.utils.CachedDaemonThreadFactory;
 import de.gsi.dataset.utils.ProcessingProfiler;
 import de.gsi.math.ArrayUtils;
@@ -76,18 +76,18 @@ class CachedDataPoints {
 
     public CachedDataPoints(final int indexMin, final int indexMax, final int dataLength, final boolean full) {
         maxDataCount = dataLength;
-        xValues = Cache.getCachedDoubleArray(X_VALUES, maxDataCount);
-        yValues = Cache.getCachedDoubleArray(Y_VALUES, maxDataCount);
-        styles = Cache.getCachedStringArray(STYLES2, dataLength);
+        xValues = ArrayCache.getCachedDoubleArray(X_VALUES, maxDataCount);
+        yValues = ArrayCache.getCachedDoubleArray(Y_VALUES, maxDataCount);
+        styles = ArrayCache.getCachedStringArray(STYLES2, dataLength);
         this.indexMin = indexMin;
         this.indexMax = indexMax;
-        errorYNeg = Cache.getCachedDoubleArray(ERROR_Y_NEG, maxDataCount);
-        errorYPos = Cache.getCachedDoubleArray(ERROR_Y_POS, maxDataCount);
+        errorYNeg = ArrayCache.getCachedDoubleArray(ERROR_Y_NEG, maxDataCount);
+        errorYPos = ArrayCache.getCachedDoubleArray(ERROR_Y_POS, maxDataCount);
         if (full) {
-            errorXNeg = Cache.getCachedDoubleArray(ERROR_X_NEG, maxDataCount);
-            errorXPos = Cache.getCachedDoubleArray(ERROR_X_POS, maxDataCount);
+            errorXNeg = ArrayCache.getCachedDoubleArray(ERROR_X_NEG, maxDataCount);
+            errorXPos = ArrayCache.getCachedDoubleArray(ERROR_X_POS, maxDataCount);
         }
-        selected = Cache.getCachedBooleanArray(SELECTED2, dataLength);
+        selected = ArrayCache.getCachedBooleanArray(SELECTED2, dataLength);
         ArrayUtils.fillArray(styles, null);
     }
 
@@ -529,14 +529,14 @@ class CachedDataPoints {
     }
 
     public void release() {
-        Cache.release(X_VALUES, xValues);
-        Cache.release(Y_VALUES, yValues);
-        Cache.release(ERROR_Y_NEG, errorYNeg);
-        Cache.release(ERROR_Y_POS, errorYPos);
-        Cache.release(ERROR_X_NEG, errorXNeg);
-        Cache.release(ERROR_X_POS, errorXPos);
-        Cache.release(SELECTED2, selected);
-        Cache.release(STYLES2, styles);
+        ArrayCache.release(X_VALUES, xValues);
+        ArrayCache.release(Y_VALUES, yValues);
+        ArrayCache.release(ERROR_Y_NEG, errorYNeg);
+        ArrayCache.release(ERROR_Y_POS, errorYPos);
+        ArrayCache.release(ERROR_X_NEG, errorXNeg);
+        ArrayCache.release(ERROR_X_POS, errorXPos);
+        ArrayCache.release(SELECTED2, selected);
+        ArrayCache.release(STYLES2, styles);
     }
 
     private void setBoundaryConditions(final Axis xAxis, final Axis yAxis, final DataSet dataSet, final int dsIndex,
