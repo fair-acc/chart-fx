@@ -106,7 +106,7 @@ public class SpectrumTools {
      * @return computed magnitude spectrum
      */
     public static float[] computeMagnitudeSpectrum(final float[] data) {
-        return computeMagnitudeSpectrum(data);
+        return computeMagnitudeSpectrum(data, true);
     }
 
     /**
@@ -163,7 +163,7 @@ public class SpectrumTools {
 
         if (truncateDCNyq) {
             // smooth spectra on both ends to minimise DC/Nyquist frequency
-            // artefacts
+            // artifacts
             ret[0] = ret[1];
             ret[n2 - 1] = ret[n2 - 2];
         } else {
@@ -182,8 +182,9 @@ public class SpectrumTools {
      * @param data the input data
      * @return computed magnitude spectrum in [dB]
      */
-    public static float[] computeMagnitudeSpectrum_dB(final float[] data) {
+    public static float[] computeMagnitudeSpectrum_dB(final float[] data, final boolean truncateDCNyq) {
 
+        final int n2 = data.length / 2;
         final float[] ret = new float[data.length / 2];
         for (int i = 0; i < ret.length; i++) {
             final int i2 = i << 1;
@@ -194,14 +195,16 @@ public class SpectrumTools {
                     * TMathConstants.Log10((TMathConstants.Sqr(Re) + TMathConstants.Sqr(Im)) / ret.length));
         }
 
-        // // smooth spectra on both ends to minimise DC/Nyquist frequency
-        // // artifacts
-        // ret[0] = ret[1];
-        // ret[ret.length - 1] = ret[ret.length - 2];
-
-        // full DC/Nyquist frequency treatment
-        ret[0] = data[0];
-        ret[ret.length - 1] = data[1];
+        if (truncateDCNyq) {
+            // smooth spectra on both ends to minimise DC/Nyquist frequency
+            // artifacts
+            ret[0] = ret[1];
+            ret[n2 - 1] = ret[n2 - 2];
+        } else {
+            // full DC/Nyquist frequency treatment
+            ret[0] = data[0];
+            ret[ret.length - 1] = data[1];
+        }
 
         return ret;
     }
