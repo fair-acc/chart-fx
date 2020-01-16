@@ -5,6 +5,26 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.scene.Node;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.Slider;
+import javafx.scene.control.Spinner;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
+import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,25 +48,6 @@ import de.gsi.dataset.testdata.spi.SincFunction;
 import de.gsi.dataset.testdata.spi.SineFunction;
 import de.gsi.dataset.testdata.spi.SingleOutlierFunction;
 import de.gsi.dataset.utils.ProcessingProfiler;
-import javafx.application.Application;
-import javafx.application.Platform;
-import javafx.scene.Node;
-import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.Slider;
-import javafx.scene.control.Spinner;
-import javafx.scene.control.Tab;
-import javafx.scene.control.TabPane;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.Region;
-import javafx.scene.layout.VBox;
-import javafx.stage.Stage;
 
 public class ErrorDataSetRendererStylingSample extends Application {
     private static final Logger LOGGER = LoggerFactory.getLogger(RollingBufferSample.class);
@@ -61,7 +62,6 @@ public class ErrorDataSetRendererStylingSample extends Application {
     private Timer timer;
 
     private void generateData(final XYChart chart) {
-
         long startTime = ProcessingProfiler.getTimeStamp();
         final List<DataSetError> dataSet = new ArrayList<>();
         switch (dataSetType) {
@@ -97,7 +97,6 @@ public class ErrorDataSetRendererStylingSample extends Application {
         Platform.runLater(() -> {
             chart.getRenderers().get(0).getDatasets().setAll(dataSetToLoad);
             chart.requestLayout();
-
         });
         startTime = ProcessingProfiler.getTimeDiff(startTime, "adding data into DataSet");
     }
@@ -193,17 +192,18 @@ public class ErrorDataSetRendererStylingSample extends Application {
     }
 
     private HBox getHeaderBar(final XYChart chart, final Scene scene) {
-
         final Button newDataSet = new Button("new DataSet");
         newDataSet.setOnAction(evt -> Platform.runLater(getTimerTask(chart)));
 
         // repetitively generate new data
-        final Button startTimer = new Button("timer");
+        final Button startTimer = new Button("start timer");
         startTimer.setOnAction(evt -> {
             if (timer == null) {
+                startTimer.setText("stop timer");
                 timer = new Timer();
                 timer.scheduleAtFixedRate(getTimerTask(chart), UPDATE_DELAY, UPDATE_PERIOD);
             } else {
+                startTimer.setText("start timer");
                 timer.cancel();
                 timer = null; // NOPMD
             }
@@ -416,13 +416,15 @@ public class ErrorDataSetRendererStylingSample extends Application {
         final Button newDataSet = new Button("new DataSet");
         newDataSet.setOnAction(evt -> Platform.runLater(getTimerTask(chart)));
 
-        final Button startTimer = new Button("timer");
+        final Button startTimer = new Button("start timer");
         startTimer.setOnAction(evt -> {
             if (timer == null) {
+                startTimer.setText("stop timer");
                 timer = new Timer();
                 timer.scheduleAtFixedRate(getTimerTask(chart), ErrorDataSetRendererStylingSample.UPDATE_DELAY,
                         ErrorDataSetRendererStylingSample.UPDATE_PERIOD);
             } else {
+                startTimer.setText("start timer");
                 timer.cancel();
                 timer = null; // NOPMD
             }
@@ -463,7 +465,6 @@ public class ErrorDataSetRendererStylingSample extends Application {
         primaryStage.setOnCloseRequest(evt -> Platform.exit());
         primaryStage.show();
         ProcessingProfiler.getTimeDiff(startTime, "for showing");
-
     }
 
     /**
@@ -474,7 +475,14 @@ public class ErrorDataSetRendererStylingSample extends Application {
     }
 
     public enum DataSetType {
-        RANDOM_WALK, OUTLIER, STEP, SINC, GAUSS, SINE, COSINE, MIX_TRIGONOMETRIC;
+        RANDOM_WALK,
+        OUTLIER,
+        STEP,
+        SINC,
+        GAUSS,
+        SINE,
+        COSINE,
+        MIX_TRIGONOMETRIC;
     }
 
     private class ParameterTab extends Tab {
