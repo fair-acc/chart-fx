@@ -19,21 +19,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
-import org.controlsfx.glyphfont.FontAwesome;
-import org.controlsfx.glyphfont.Glyph;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import de.gsi.chart.Chart;
-import de.gsi.chart.renderer.Renderer;
-import de.gsi.chart.utils.FXUtils;
-import de.gsi.dataset.DataSet;
-import de.gsi.dataset.DataSetError;
-import de.gsi.dataset.DataSetError.ErrorType;
-import de.gsi.dataset.EditConstraints;
-import de.gsi.dataset.EditableDataSet;
-import de.gsi.dataset.event.EventListener;
-import de.gsi.dataset.event.UpdateEvent;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.beans.property.ReadOnlyObjectWrapper;
@@ -57,6 +42,22 @@ import javafx.scene.input.ClipboardContent;
 import javafx.scene.layout.HBox;
 import javafx.stage.FileChooser;
 import javafx.util.converter.DoubleStringConverter;
+
+import org.controlsfx.glyphfont.FontAwesome;
+import org.controlsfx.glyphfont.Glyph;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import de.gsi.chart.Chart;
+import de.gsi.chart.renderer.Renderer;
+import de.gsi.chart.utils.FXUtils;
+import de.gsi.dataset.DataSet;
+import de.gsi.dataset.DataSetError;
+import de.gsi.dataset.DataSetError.ErrorType;
+import de.gsi.dataset.EditConstraints;
+import de.gsi.dataset.EditableDataSet;
+import de.gsi.dataset.event.EventListener;
+import de.gsi.dataset.event.UpdateEvent;
 
 /**
  * Displays the all visible data sets inside a table on demand. Implements copy-paste functionality into system
@@ -91,7 +92,7 @@ public class TableViewer extends ChartPlugin {
         table.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         table.getSelectionModel().setCellSelectionEnabled(true);
         table.setEditable(true); // Generally the TableView is editable, actual
-                                 // editability is configured column-wise
+                // editability is configured column-wise
         table.setItems(dsModel);
         dsModel.setRefreshFunction(() -> {
             // workaround: force table to acknowledge changed data (by setting to empty list and then back)
@@ -120,7 +121,7 @@ public class TableViewer extends ChartPlugin {
                 newChart.getPlotForeground().getChildren().add(table);
                 table.toFront();
                 table.setVisible(false); // table is initially invisible above
-                                         // the chart
+                        // the chart
                 table.prefWidthProperty().bind(newChart.getPlotForeground().widthProperty());
                 table.prefHeightProperty().bind(newChart.getPlotForeground().heightProperty());
             }
@@ -160,7 +161,7 @@ public class TableViewer extends ChartPlugin {
         }
         final String data = dsModel.getSelectedData(table.getSelectionModel());
         try (BufferedWriter writer = Files.newBufferedWriter(Paths.get(save.getPath() + ".csv"),
-                StandardCharsets.UTF_8)) {
+                     StandardCharsets.UTF_8)) {
             writer.write(data);
         } catch (IOException ex) {
             LOGGER.error("error while exporting data to csv", ex);
@@ -235,8 +236,7 @@ public class TableViewer extends ChartPlugin {
 
         private final ListChangeListener<Renderer> rendererChangeListener = this::rendererChanged;
         private final InvalidationListener datasetChangeListener = this::datasetsChanged;
-        private final EventListener dataSetDataUpdateListener = (UpdateEvent evt) -> FXUtils
-                .runFX(() -> this.datasetsChanged(null));
+        private final EventListener dataSetDataUpdateListener = (UpdateEvent evt) -> FXUtils.runFX(() -> this.datasetsChanged(null));
 
         public DataSetsModel() {
             super();
@@ -254,13 +254,11 @@ public class TableViewer extends ChartPlugin {
         public void datasetsChanged(Observable obs) {
             long now = System.currentTimeMillis();
             if (now - lastColumnUpdate > 1000) {
-                List<DataSet> columnsUpdated = getChart().getAllDatasets().stream()
-                        .sorted((a, b) -> a.getName().compareTo(b.getName())).collect(Collectors.toList());
+                List<DataSet> columnsUpdated = getChart().getAllDatasets().stream().sorted((a, b) -> a.getName().compareTo(b.getName())).collect(Collectors.toList());
                 int nRowsNew = 0;
                 for (int i = 0; i < columns.size() - 1 || i < columnsUpdated.size(); i++) {
                     if (i > MAX_DATASETS_IN_TABLE) {
-                        LOGGER.atWarn().addArgument(columnsUpdated.size())
-                                .log("Limiting number of DataSets shown in Table, chart has {} DataSets.");
+                        LOGGER.atWarn().addArgument(columnsUpdated.size()).log("Limiting number of DataSets shown in Table, chart has {} DataSets.");
                         break;
                     }
                     if (i < columnsUpdated.size()) {
@@ -280,7 +278,6 @@ public class TableViewer extends ChartPlugin {
                 lastColumnUpdate = now;
                 refresh();
             } else {
-
                 if (updateScheduled.compareAndExchange(false, true))
                     timer.schedule(new TimerTask() {
                         @Override
@@ -523,8 +520,7 @@ public class TableViewer extends ChartPlugin {
                 this.setReorderable(false);
                 this.ds = null;
                 this.type = type;
-                this.setCellValueFactory(dataSetsRowFeature -> new ReadOnlyObjectWrapper<>(
-                        dataSetsRowFeature.getValue().getValue(ds, type)));
+                this.setCellValueFactory(dataSetsRowFeature -> new ReadOnlyObjectWrapper<>(dataSetsRowFeature.getValue().getValue(ds, type)));
 
                 setVisible(false);
             }
@@ -719,7 +715,7 @@ public class TableViewer extends ChartPlugin {
                     return new ReadOnlyObjectWrapper<>(dataSetsRow.getValue().getRow());
                 });
                 getStyleClass().add("column-header"); // make the column look
-                                                      // like a header
+                        // like a header
                 setEditable(false);
             }
         }

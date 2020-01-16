@@ -190,5 +190,4 @@ public abstract class AbstractHistogram extends AbstractDataSet<AbstractHistogra
         getDataLabelMap().clear();
         this.getAxisDescription(this.getDimension() - 1).clear();
     }
-
 }

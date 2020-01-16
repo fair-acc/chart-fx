@@ -140,7 +140,7 @@ public class Histogram extends AbstractHistogram implements Histogram1D {
 
     @Override
     public List<String> getErrorList() {
-        return Collections.<String> emptyList();
+        return Collections.<String>emptyList();
     }
 
     @Override
@@ -150,7 +150,7 @@ public class Histogram extends AbstractHistogram implements Histogram1D {
 
     @Override
     public List<String> getInfoList() {
-        return Collections.<String> emptyList();
+        return Collections.<String>emptyList();
     }
 
     @Override
@@ -196,6 +196,5 @@ public class Histogram extends AbstractHistogram implements Histogram1D {
         } else {
             this.getAxisDescription(this.getDimension() - 1).clear();
         }
-
     }
 }

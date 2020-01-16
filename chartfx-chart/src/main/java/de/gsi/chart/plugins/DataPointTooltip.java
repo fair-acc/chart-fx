@@ -7,10 +7,6 @@ package de.gsi.chart.plugins;
 import java.util.LinkedList;
 import java.util.List;
 
-import de.gsi.chart.Chart;
-import de.gsi.chart.XYChart;
-import de.gsi.chart.axes.Axis;
-import de.gsi.dataset.DataSet;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.event.EventHandler;
@@ -20,6 +16,11 @@ import javafx.geometry.Point2D;
 import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
 import javafx.util.Pair;
+
+import de.gsi.chart.Chart;
+import de.gsi.chart.XYChart;
+import de.gsi.chart.axes.Axis;
+import de.gsi.dataset.DataSet;
 
 /**
  * A tool tip label appearing next to the mouse cursor when placed over a data point's symbol. If symbols are not
@@ -33,7 +34,6 @@ import javafx.util.Pair;
  *         edit/update the custom object based on DataPoint (for the time being private class)
  */
 public class DataPointTooltip extends AbstractDataFormattingPlugin {
-
     /**
      * Name of the CSS class of the tool tip label.
      */
@@ -52,7 +52,6 @@ public class DataPointTooltip extends AbstractDataFormattingPlugin {
 
     private final DoubleProperty pickingDistance = new SimpleDoubleProperty(this, "pickingDistance",
             DataPointTooltip.DEFAULT_PICKING_DISTANCE) {
-
         @Override
         protected void invalidated() {
             if (get() <= 0) {
@@ -113,8 +112,7 @@ public class DataPointTooltip extends AbstractDataFormattingPlugin {
                 final double y = xyChart.getYAxis().getDisplayPosition(dataPoint.y);
                 final Point2D displayPoint = new Point2D(x, y);
                 dataPoint.distanceFromMouse = displayPoint.distance(mouseLocation);
-                if (displayPoint.distance(mouseLocation) <= getPickingDistance() && (nearestDataPoint == null
-                        || dataPoint.distanceFromMouse < nearestDataPoint.distanceFromMouse)) {
+                if (displayPoint.distance(mouseLocation) <= getPickingDistance() && (nearestDataPoint == null || dataPoint.distanceFromMouse < nearestDataPoint.distanceFromMouse)) {
                     nearestDataPoint = dataPoint;
                 }
             }
@@ -150,11 +148,11 @@ public class DataPointTooltip extends AbstractDataFormattingPlugin {
             }
         }
         final DataPoint prevPoint = prevIndex == -1 ? null
-                : new DataPoint(getChart(), dataSet.get(DataSet.DIM_X, prevIndex),
-                        dataSet.get(DataSet.DIM_Y, prevIndex), getDataLabelSafe(dataSet, prevIndex));
+                                                    : new DataPoint(getChart(), dataSet.get(DataSet.DIM_X, prevIndex),
+                                                            dataSet.get(DataSet.DIM_Y, prevIndex), getDataLabelSafe(dataSet, prevIndex));
         final DataPoint nextPoint = nextIndex == -1 || nextIndex == prevIndex ? null
-                : new DataPoint(getChart(), dataSet.get(DataSet.DIM_X, nextIndex),
-                        dataSet.get(DataSet.DIM_Y, nextIndex), getDataLabelSafe(dataSet, nextIndex));
+                                                                              : new DataPoint(getChart(), dataSet.get(DataSet.DIM_X, nextIndex),
+                                                                                      dataSet.get(DataSet.DIM_Y, nextIndex), getDataLabelSafe(dataSet, nextIndex));
 
         return new Pair<>(prevPoint, nextPoint);
     }
@@ -274,7 +272,6 @@ public class DataPointTooltip extends AbstractDataFormattingPlugin {
     }
 
     protected class DataPoint {
-
         protected final Chart chart;
         protected final double x;
         protected final double y;
@@ -307,6 +304,5 @@ public class DataPointTooltip extends AbstractDataFormattingPlugin {
         public double getY() {
             return y;
         }
-
     }
 }
