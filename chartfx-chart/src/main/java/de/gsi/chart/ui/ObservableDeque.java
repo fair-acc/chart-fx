@@ -32,6 +32,19 @@ public class ObservableDeque<E> extends ObservableListBase<E> implements Deque<E
     }
 
     @Override
+    public void clear() {
+        if (hasListeners()) {
+            beginChange();
+            nextRemove(0, this);
+        }
+        deque.clear();
+        ++modCount;
+        if (hasListeners()) {
+            endChange();
+        }
+    }
+
+    @Override
     public boolean offer(final E e) {
         beginChange();
         final boolean result = deque.offer(e);
@@ -267,5 +280,4 @@ public class ObservableDeque<E> extends ObservableListBase<E> implements Deque<E
     public Iterator<E> descendingIterator() {
         return deque.descendingIterator();
     }
-
 }
