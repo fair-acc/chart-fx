@@ -362,16 +362,28 @@ public class TableViewer extends ChartPlugin {
         protected String getAllData() {
             final StringBuilder sb = new StringBuilder();
             sb.append('#');
+            int dataSetNo = 0;
             for (TableColumn<DataSetsRow, ?> col : columns) {
-                sb.append(col.getText()).append(", ");
+                if (col instanceof DataSetTableColumns && col.isVisible()) {
+                    dataSetNo++;
+                    for (TableColumn<DataSetsRow, ?> subcol : col.getColumns()) {
+                        if (subcol instanceof DataSetTableColumn && subcol.isVisible()) {
+                            sb.append(((DataSetTableColumn) subcol).getText()).append(dataSetNo).append(", ");
+                        }
+                    }
+                }
             }
             sb.setCharAt(sb.length() - 2, '\n');
             sb.deleteCharAt(sb.length() - 1);
             for (int r = 0; r < nRows; r++) {
                 for (TableColumn<DataSetsRow, ?> col : columns) {
-                    if (col instanceof DataSetTableColumn) {
-                        sb.append(((DataSetTableColumn) col).getValue(r)).append(", ");
-                    } else {
+                    if (col instanceof DataSetTableColumns && col.isVisible()) {
+                        for (TableColumn<DataSetsRow, ?> subcol : col.getColumns()) {
+                            if (subcol instanceof DataSetTableColumn && subcol.isVisible()) {
+                                sb.append(((DataSetTableColumn) subcol).getValue(r)).append(", ");
+                            }
+                        }
+                    } else if (col instanceof RowIndexHeaderTableColumn) {
                         sb.append(col.getCellData(r)).append(", ");
                     }
                 }
