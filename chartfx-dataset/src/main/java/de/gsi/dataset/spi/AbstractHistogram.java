@@ -169,6 +169,11 @@ public abstract class AbstractHistogram extends AbstractDataSet<AbstractHistogra
     }
 
     @Override
+    public int getDataCount() {
+        return getDataCount(DIM_X);
+    }
+
+    @Override
     public int getDataCount(final int dimIndex) {
         return nAxisBins[dimIndex] - 2;
     }

@@ -140,17 +140,17 @@ public class Histogram extends AbstractHistogram implements Histogram1D {
 
     @Override
     public List<String> getErrorList() {
-        return Collections.<String>emptyList();
+        return Collections.<String> emptyList();
     }
 
     @Override
     public int getIndex(int dimIndex, double value) {
-        return findBin(dimIndex, value);
+        return findBin(dimIndex, value) - 1;
     }
 
     @Override
     public List<String> getInfoList() {
-        return Collections.<String>emptyList();
+        return Collections.<String> emptyList();
     }
 
     @Override
