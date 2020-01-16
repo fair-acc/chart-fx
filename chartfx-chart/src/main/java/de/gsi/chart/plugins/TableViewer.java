@@ -9,27 +9,21 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.concurrent.Callable;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
 
-import org.controlsfx.glyphfont.FontAwesome;
-import org.controlsfx.glyphfont.Glyph;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import de.gsi.chart.Chart;
-import de.gsi.chart.renderer.Renderer;
-import de.gsi.chart.utils.FXUtils;
-import de.gsi.dataset.DataSet;
-import de.gsi.dataset.DataSetError;
-import de.gsi.dataset.DataSetError.ErrorType;
-import de.gsi.dataset.EditConstraints;
-import de.gsi.dataset.EditableDataSet;
-import de.gsi.dataset.event.EventListener;
-import de.gsi.dataset.event.UpdateEvent;
+import javafx.beans.InvalidationListener;
+import javafx.beans.Observable;
+import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ReadOnlyObjectWrapper;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -51,6 +45,21 @@ import javafx.scene.layout.HBox;
 import javafx.stage.FileChooser;
 import javafx.util.converter.DoubleStringConverter;
 
+import org.controlsfx.glyphfont.FontAwesome;
+import org.controlsfx.glyphfont.Glyph;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import de.gsi.chart.Chart;
+import de.gsi.chart.renderer.Renderer;
+import de.gsi.chart.utils.FXUtils;
+import de.gsi.dataset.DataSet;
+import de.gsi.dataset.DataSetError;
+import de.gsi.dataset.EditConstraints;
+import de.gsi.dataset.EditableDataSet;
+import de.gsi.dataset.event.EventListener;
+import de.gsi.dataset.event.UpdateEvent;
+
 /**
  * Displays the all visible data sets inside a table on demand. Implements copy-paste functionality into system
  * clip-board and *.csv file export to allow further processing in other applications. Also enables editing of values if
@@ -63,7 +72,11 @@ public class TableViewer extends ChartPlugin {
     private static final Logger LOGGER = LoggerFactory.getLogger(TableViewer.class);
 
     protected static final String FONT_AWESOME = "FontAwesome";
+    // prevent allocating an infinite number of columns in case something goes wrong
+    private static final int MAX_DATASETS_IN_TABLE = 100;
     protected static final int FONT_SIZE = 20;
+
+    protected static final int MIN_REFRESH_RATE_WARN = 20; // [ms] warn if refresh rate is set lower than this value
     private final Glyph tableView = new Glyph(FONT_AWESOME, FontAwesome.Glyph.TABLE).size(FONT_SIZE);
     private final Glyph graphView = new Glyph(FONT_AWESOME, FontAwesome.Glyph.LINE_CHART).size(FONT_SIZE);
     private final Glyph saveIcon = new Glyph(FONT_AWESOME, "\uf0c7").size(FONT_SIZE);
@@ -72,6 +85,19 @@ public class TableViewer extends ChartPlugin {
     private final TableView<DataSetsRow> table = new TableView<>();
     private final DataSetsModel dsModel = new DataSetsModel();
     protected boolean editable;
+    private Timer timer = new Timer();
+    private final IntegerProperty refreshRate = new SimpleIntegerProperty(this, "refreshRate", 1000) {
+        @Override
+        public void set(int newValue) {
+            if (newValue < 0) {
+                throw new IllegalArgumentException("refresh rate must be positive");
+            }
+            if (newValue < MIN_REFRESH_RATE_WARN) {
+                LOGGER.atWarn().addArgument(newValue).addArgument(MIN_REFRESH_RATE_WARN).log("New refresh rate ({}ms) lower than recommended minimun ({}ms)");
+            }
+            super.set(newValue);
+        }
+    };
 
     /**
      * Creates a new instance of DataSetTableViewer class and setup the required listeners.
@@ -81,19 +107,15 @@ public class TableViewer extends ChartPlugin {
         table.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         table.getSelectionModel().setCellSelectionEnabled(true);
         table.setEditable(true); // Generally the TableView is editable, actual
-                                 // editability is configured column-wise
+                // editability is configured column-wise
         table.setItems(dsModel);
-
-        table.getColumns().addAll(dsModel.getColumns());
-        dsModel.getColumns().addListener((ListChangeListener<TableColumn<DataSetsRow, ?>>) (change -> table.getColumns()
-                .setAll(dsModel.getColumns())));
         dsModel.setRefreshFunction(() -> {
-            // workaround: force table to acknowledge changed data (by setting
-            // to empty list and then back)
+            // workaround: force table to acknowledge changed data (by setting to empty list and then back)
             FXUtils.runFX(() -> {
                 ObservableList<DataSetsRow> tmp = table.getItems();
                 table.setItems(FXCollections.emptyObservableList());
                 table.setItems(tmp);
+                table.getColumns().setAll(dsModel.getColumns());
             });
             return null;
         });
@@ -114,7 +136,7 @@ public class TableViewer extends ChartPlugin {
                 newChart.getPlotForeground().getChildren().add(table);
                 table.toFront();
                 table.setVisible(false); // table is initially invisible above
-                                         // the chart
+                        // the chart
                 table.prefWidthProperty().bind(newChart.getPlotForeground().widthProperty());
                 table.prefHeightProperty().bind(newChart.getPlotForeground().heightProperty());
             }
@@ -154,7 +176,7 @@ public class TableViewer extends ChartPlugin {
         }
         final String data = dsModel.getSelectedData(table.getSelectionModel());
         try (BufferedWriter writer = Files.newBufferedWriter(Paths.get(save.getPath() + ".csv"),
-                StandardCharsets.UTF_8)) {
+                     StandardCharsets.UTF_8)) {
             writer.write(data);
         } catch (IOException ex) {
             LOGGER.error("error while exporting data to csv", ex);
@@ -190,6 +212,7 @@ public class TableViewer extends ChartPlugin {
             table.setVisible(!table.isVisible());
             getChart().getPlotForeground().setMouseTransparent(!table.isVisible());
             table.setMouseTransparent(!table.isVisible());
+            dsModel.datasetsChanged(null);
             dsModel.refresh();
         });
 
@@ -205,12 +228,24 @@ public class TableViewer extends ChartPlugin {
     }
 
     protected enum ColumnType {
-        X,
-        Y,
-        EXN,
-        EXP,
-        EYN,
-        EYP
+        X(DIM_X, "x", false, true),
+        Y(DIM_Y, "y", false, true),
+        EXN(DIM_X, "e_x", true, false),
+        EXP(DIM_X, "e_x", true, true),
+        EYN(DIM_Y, "e_y", true, false),
+        EYP(DIM_Y, "e_y", true, true);
+
+        int dimIdx;
+        String label;
+        boolean errorCol;
+        boolean positive;
+
+        private ColumnType(final int dimIdx, final String label, final boolean errorCol, final boolean positive) {
+            this.dimIdx = dimIdx;
+            this.label = label;
+            this.errorCol = errorCol;
+            this.positive = positive;
+        }
     }
 
     /**
@@ -226,27 +261,59 @@ public class TableViewer extends ChartPlugin {
         private final ObservableList<TableColumn<DataSetsRow, ?>> columns = FXCollections.observableArrayList();
         private Callable<Void> refreshFunction;
 
+        private long lastColumnUpdate = 0;
+        private AtomicBoolean columnUpdateScheduled = new AtomicBoolean(false);
+
         private final ListChangeListener<Renderer> rendererChangeListener = this::rendererChanged;
-        private final ListChangeListener<DataSet> datasetChangeListener = this::datasetsChanged;
-        private final EventListener dataSetDataUpdateListener = (UpdateEvent evt) -> FXUtils.runFX(() -> {
-            nRows = 0;
-            for (TableColumn<DataSetsRow, ?> col : columns) {
-                if (col instanceof DataSetTableColumns) {
-                    DataSetTableColumns dataSetColumn = ((DataSetTableColumns) col);
-                    nRows = Math.max(nRows, dataSetColumn.dataSet.getDataCount(DIM_X));
-                    for (final TableColumn<DataSetsRow, ?> subColumn : dataSetColumn.getColumns()) {
-                        if (subColumn instanceof DataSetTableColumn) {
-                            ((DataSetTableColumn) subColumn).updateEditableState();
-                        }
-                    }
-                }
-            }
-            refresh();
-        });
+        private final InvalidationListener datasetChangeListener = this::datasetsChanged;
+        private final EventListener dataSetDataUpdateListener = (UpdateEvent evt) -> FXUtils.runFX(() -> this.datasetsChanged(null));
 
         public DataSetsModel() {
             super();
             columns.add(new RowIndexHeaderTableColumn());
+        }
+
+        @Override
+        public String toString() {
+            return "TableModel";
+        }
+
+        public void datasetsChanged(Observable obs) {
+            long now = System.currentTimeMillis();
+            if (now - lastColumnUpdate > refreshRate.get()) {
+                List<DataSet> columnsUpdated = getChart().getAllDatasets().stream().sorted((a, b) -> a.getName().compareTo(b.getName())).collect(Collectors.toList());
+                int nRowsNew = 0;
+                for (int i = 0; i < columns.size() - 1 || i < columnsUpdated.size(); i++) {
+                    if (i > MAX_DATASETS_IN_TABLE) {
+                        LOGGER.atWarn().addArgument(columnsUpdated.size()).log("Limiting number of DataSets shown in Table, chart has {} DataSets.");
+                        break;
+                    }
+                    if (i < columnsUpdated.size()) {
+                        if (i < columns.size()) {
+                            columns.add(new DataSetTableColumns());
+                        }
+                        DataSet ds = columnsUpdated.get(i);
+                        ds.removeListener(dataSetDataUpdateListener);
+                        ds.addListener(dataSetDataUpdateListener);
+                        ((DataSetTableColumns) columns.get(i + 1)).update(ds);
+                        nRowsNew = Math.max(nRowsNew, ds.getDataCount());
+                    } else {
+                        ((DataSetTableColumns) columns.get(i + 1)).update(null);
+                    }
+                }
+                nRows = nRowsNew;
+                lastColumnUpdate = now;
+                refresh();
+            } else {
+                if (columnUpdateScheduled.compareAndExchange(false, true))
+                    timer.schedule(new TimerTask() {
+                        @Override
+                        public void run() {
+                            columnUpdateScheduled.set(false);
+                            FXUtils.runFX(() -> datasetsChanged(null));
+                        }
+                    }, refreshRate.get());
+            }
         }
 
         /**
@@ -269,13 +336,12 @@ public class TableViewer extends ChartPlugin {
                 newChart.getDatasets().addListener(datasetChangeListener);
                 newChart.getDatasets().forEach(dataSet -> {
                     dataSet.addListener(dataSetDataUpdateListener);
-                    addDataSetToTableModel(dataSet);
                 });
                 newChart.getRenderers().addListener(rendererChangeListener);
                 newChart.getRenderers().forEach(renderer -> {
                     renderer.getDatasets().addListener(datasetChangeListener);
-                    renderer.getDatasets().forEach(this::addDataSetToTableModel);
                 });
+                datasetsChanged(null);
             }
         }
 
@@ -285,48 +351,6 @@ public class TableViewer extends ChartPlugin {
                 return (nRows > ((DataSetsRow) o).getRow());
             }
             return false;
-        }
-
-        protected void datasetsChanged(final ListChangeListener.Change<? extends DataSet> change) {
-            boolean dataSetChanges = false;
-
-            while (change.next()) {
-                for (final DataSet set : change.getRemoved()) {
-                    set.removeListener(dataSetDataUpdateListener);
-                    columns.removeIf(
-                            col -> (col instanceof DataSetTableColumns && ((DataSetTableColumns) col).dataSet == set));
-                    nRows = 0;
-                    for (TableColumn<DataSetsRow, ?> col : columns) {
-                        if (col instanceof DataSetTableColumn) {
-                            nRows = Math.max(nRows, ((DataSetTableColumn) col).ds.getDataCount(DIM_X));
-                        }
-                    }
-                    dataSetChanges = true;
-                }
-
-                for (final DataSet set : change.getAddedSubList()) {
-                    addDataSetToTableModel(set);
-                    dataSetChanges = true;
-                }
-            }
-
-            if (dataSetChanges) {
-                this.refresh();
-            }
-        }
-
-        /**
-         * @param set
-         */
-        private void addDataSetToTableModel(final DataSet set) {
-            // check if dataSet was already added
-            if (columns != null && columns.stream().anyMatch(
-                    col -> (col instanceof DataSetTableColumn && ((DataSetTableColumn) col).ds.equals(set)))) {
-                return;
-            }
-            set.addListener(dataSetDataUpdateListener);
-            columns.add(new DataSetTableColumns(set)); // NOPMD - necessary for function
-            nRows = Math.max(nRows, set.getDataCount(DIM_X));
         }
 
         @Override
@@ -401,30 +425,19 @@ public class TableViewer extends ChartPlugin {
         }
 
         public double getValue(final int row, final DataSet ds, final ColumnType type) {
-            if (row >= ds.getDataCount(DIM_X)) {
+            if (ds == null || row >= ds.getDataCount(DIM_X)) {
                 return 0.0;
             }
-            switch (type) {
-            case X:
-                return ds.get(DIM_X, row);
-            case Y:
-                return ds.get(DIM_Y, row);
-            default:
-                break;
+            if (!type.errorCol) {
+                return ds.get(type.dimIdx, row);
             }
+            if (!(ds instanceof DataSetError))
+                return 0.0;
             DataSetError eds = (DataSetError) ds;
-            switch (type) {
-            case EXN:
-                return eds.getErrorNegative(DIM_X, row);
-            case EXP:
-                return eds.getErrorPositive(DIM_X, row);
-            case EYN:
-                return eds.getErrorNegative(DIM_Y, row);
-            case EYP:
-                return eds.getErrorPositive(DIM_Y, row);
-            default:
-                return 0.0;
+            if (type.positive) {
+                return eds.getErrorPositive(type.dimIdx, row);
             }
+            return eds.getErrorNegative(type.dimIdx, row);
         }
 
         @Override
@@ -455,7 +468,6 @@ public class TableViewer extends ChartPlugin {
                 // handle added renderer
                 change.getAddedSubList().forEach(renderer -> {
                     renderer.getDatasets().addListener(datasetChangeListener);
-                    renderer.getDatasets().forEach(this::addDataSetToTableModel);
                 });
                 if (!change.getAddedSubList().isEmpty()) {
                     dataSetChanges = true;
@@ -469,7 +481,8 @@ public class TableViewer extends ChartPlugin {
             }
 
             if (dataSetChanges) {
-                this.refresh();
+                datasetsChanged(null);
+                refresh();
             }
         }
 
@@ -491,7 +504,7 @@ public class TableViewer extends ChartPlugin {
          * @author akrimm
          */
         protected class DataSetTableColumn extends TableColumn<DataSetsRow, Double> {
-            private final DataSet ds;
+            private DataSet ds;
             private final ColumnType type;
 
             /**
@@ -499,24 +512,53 @@ public class TableViewer extends ChartPlugin {
              * and onEditCommit implementation facilitate editing of the DataSet column identified by the ds and type
              * Parameter
              * 
-             * @param text The string to show when the TableColumn is placed within the TableView
-             * @param dataSet The dataset containing the column
              * @param type The field of the data to be shown
              */
-            public DataSetTableColumn(final String text, final DataSet dataSet, final ColumnType type) {
-                super(text);
-                this.ds = dataSet;
+            public DataSetTableColumn(final ColumnType type) {
+                super("");
+                this.ds = null;
                 this.type = type;
-                this.setCellValueFactory(dataSetsRowFeature -> new ReadOnlyObjectWrapper<>(
-                        dataSetsRowFeature.getValue().getValue(ds, type)));
+                this.setCellValueFactory(dataSetsRowFeature -> new ReadOnlyObjectWrapper<>(dataSetsRowFeature.getValue().getValue(ds, type)));
 
-                if (editable) {
-                    updateEditableState();
-                }
+                setVisible(false);
             }
 
             public double getValue(final int row) {
                 return dsModel.getValue(row, ds, type);
+            }
+
+            public void update(final DataSet newDataSet) {
+                ds = newDataSet;
+                if (ds == null) {
+                    setVisible(false);
+                    return;
+                }
+                if (editable) {
+                    updateEditableState();
+                }
+                if (!type.errorCol) {
+                    setText(type.label);
+                    setVisible(true);
+                    return;
+                }
+                if (!(newDataSet instanceof DataSetError)) {
+                    setVisible(false);
+                    return;
+                }
+                DataSetError eDs = (DataSetError) newDataSet;
+                switch (eDs.getErrorType(type.dimIdx)) {
+                case SYMMETRIC:
+                    setText(type.label);
+                    setVisible(!type.positive);
+                    return;
+                case ASYMMETRIC:
+                    setText((type.positive ? '+' : '-') + type.label);
+                    setVisible(true);
+                    return;
+                case NO_ERROR:
+                default:
+                    setVisible(false);
+                }
             }
 
             private void updateEditableState() {
@@ -591,38 +633,30 @@ public class TableViewer extends ChartPlugin {
          * @author akrimm
          */
         protected class DataSetTableColumns extends TableColumn<DataSetsRow, Double> {
-            private final DataSet dataSet;
+            private DataSet dataSet;
 
-            public DataSetTableColumns(final DataSet dataSet) {
-                super(dataSet.getName());
-                this.dataSet = dataSet;
-                addSubcolumns();
-
+            public DataSetTableColumns() {
+                super("");
+                this.dataSet = null;
+                for (ColumnType type : ColumnType.values()) {
+                    this.getColumns().add(new DataSetTableColumn(type));
+                }
             }
 
-            private void addSubcolumns() {
-                this.getColumns().add(new DataSetTableColumn("x", dataSet, ColumnType.X));
-                this.getColumns().add(new DataSetTableColumn("y", dataSet, ColumnType.Y));
-
-                if (!(dataSet instanceof DataSetError)) {
-                    return;
+            public void update(final DataSet newDataSet) {
+                this.dataSet = newDataSet;
+                if (newDataSet != null) {
+                    this.setText(newDataSet.getName());
+                    setVisible(true);
+                } else {
+                    this.setText("");
+                    setVisible(false);
                 }
-                DataSetError eDs = (DataSetError) dataSet;
-
-                if (eDs.getErrorType(DIM_X) == ErrorType.SYMMETRIC) {
-                    this.getColumns().add(new DataSetTableColumn("e_x", dataSet, ColumnType.EXN));
-                }
-                if (eDs.getErrorType(DIM_X) == ErrorType.ASYMMETRIC) {
-                    this.getColumns().add(new DataSetTableColumn("-e_x", dataSet, ColumnType.EXN));
-                    this.getColumns().add(new DataSetTableColumn("+e_x", dataSet, ColumnType.EXP));
-                }
-                if (eDs.getErrorType(DIM_Y) == ErrorType.SYMMETRIC) {
-                    this.getColumns().add(new DataSetTableColumn("e_y", dataSet, ColumnType.EYN));
-                }
-                if (eDs.getErrorType(DIM_Y) == ErrorType.ASYMMETRIC) {
-                    this.getColumns().add(new DataSetTableColumn("-e_y", dataSet, ColumnType.EYN));
-                    this.getColumns().add(new DataSetTableColumn("+e_y", dataSet, ColumnType.EYP));
-                }
+                this.getColumns().forEach(col -> {
+                    if (col instanceof DataSetTableColumn) {
+                        ((DataSetTableColumn) col).update(this.dataSet);
+                    }
+                });
             }
         }
 
@@ -638,7 +672,7 @@ public class TableViewer extends ChartPlugin {
                     return new ReadOnlyObjectWrapper<>(dataSetsRow.getValue().getRow());
                 });
                 getStyleClass().add("column-header"); // make the column look
-                                                      // like a header
+                        // like a header
                 setEditable(false);
             }
         }
