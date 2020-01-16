@@ -154,7 +154,7 @@ public class DataPointTooltip extends AbstractDataFormattingPlugin {
                         dataSet.get(DataSet.DIM_Y, prevIndex), getDataLabelSafe(dataSet, prevIndex));
         final DataPoint nextPoint = nextIndex == -1 || nextIndex == prevIndex ? null
                 : new DataPoint(getChart(), dataSet.get(DataSet.DIM_X, nextIndex),
-                        dataSet.get(DataSet.DIM_X, nextIndex), getDataLabelSafe(dataSet, nextIndex));
+                        dataSet.get(DataSet.DIM_Y, nextIndex), getDataLabelSafe(dataSet, nextIndex));
 
         return new Pair<>(prevPoint, nextPoint);
     }
