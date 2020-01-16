@@ -145,7 +145,7 @@ public class Histogram extends AbstractHistogram implements Histogram1D {
 
     @Override
     public int getIndex(int dimIndex, double value) {
-        return findBin(dimIndex, value);
+        return findBin(dimIndex, value) - 1;
     }
 
     @Override
@@ -196,6 +196,5 @@ public class Histogram extends AbstractHistogram implements Histogram1D {
         } else {
             this.getAxisDescription(this.getDimension() - 1).clear();
         }
-
     }
 }
