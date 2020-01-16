@@ -528,6 +528,8 @@ public class TableViewer extends ChartPlugin {
              */
             public DataSetTableColumn(final ColumnType type) {
                 super("");
+                this.setSortable(false);
+                this.setReorderable(false);
                 this.ds = null;
                 this.type = type;
                 this.setCellValueFactory(dataSetsRowFeature -> new ReadOnlyObjectWrapper<>(dataSetsRowFeature.getValue().getValue(ds, type)));
@@ -650,6 +652,8 @@ public class TableViewer extends ChartPlugin {
 
             public DataSetTableColumns() {
                 super("");
+                this.setSortable(false);
+                this.setReorderable(false);
                 this.dataSet = null;
                 for (ColumnType type : ColumnType.values()) {
                     this.getColumns().add(new DataSetTableColumn(type));
@@ -681,6 +685,8 @@ public class TableViewer extends ChartPlugin {
         protected class RowIndexHeaderTableColumn extends TableColumn<DataSetsRow, Integer> {
             public RowIndexHeaderTableColumn() {
                 super();
+                this.setSortable(false);
+                this.setReorderable(false);
                 setCellValueFactory(dataSetsRow -> {
                     return new ReadOnlyObjectWrapper<>(dataSetsRow.getValue().getRow());
                 });
