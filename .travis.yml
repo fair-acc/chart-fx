@@ -4,41 +4,45 @@ dist: xenial
 jdk:
         - openjdk11
 
-# setup pgp signing key
 before_install:
-        - if [ -n "$GPG_KEY" ]; then echo $GPG_KEY | base64 --decode | $GPG_EXECUTABLE --import; fi
-        - if [ -n "$GPG_KEY" ]; then echo $GPG_OWNERTRUST | base64 --decode | $GPG_EXECUTABLE --import-ownertrust; fi
-        - if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then export REVISION=${TRAVIS_BRANCH}; else export REVISION=${TRAVIS_BRANCH}PR${TRAVIS_PULL_REQUEST}; fi
-        - if [ -z "$TRAVIS_TAG" ]; then export CHANGELIST=-SNAPSHOT; fi
-        - export COVERITY_RESULTS_ARCHIVE=coverity_report.tar.bz2
-        - if [ "$TRAVIS_EVENT_TYPE" == "cron" ]; then export COVERITY_SCAN_VERSION="cron"; else if [ -n "$TRAVIS_TAG" ]; then export COVERITY_SCAN_VERSION="$TRAVIS_TAG"; else if [ "$TRAVIS_BRANCH" == "coverity_scan" ]; then export COVERITY_SCAN_VERSION="$TRAVIS_BRANCH"; fi; fi; fi
-        - echo "detected coverity scan export name ='${COVERITY_SCAN_VERSION}'"
-        - |-2
-          if [ -n "$COVERITY_SCAN_VERSION" ]; then
-            if [ ! -d "$HOME/cov-analysis-linux64-2019.03" ]; then
-              wget https://scan.coverity.com/download/java/Linux --post-data "token=${COVERITY_TOKEN}&project=chart-fx" -O coverity_tool.tgz
-              tar xzf coverity_tool.tgz --directory $HOME;
-            else
-              echo "coverity tool already present"
-            fi
-            export PATH=$PATH:$HOME/cov-analysis-linux64-2019.03/bin;
-          fi
-        - sudo apt-get install jq
-        - curl -LSs $(curl -LSs https://api.github.com/repos/codacy/codacy-coverage-reporter/releases/latest | jq -r '.assets | map({name, browser_download_url} | select(.name | endswith(".jar"))) | .[0].browser_download_url') -o codacy-coverage-reporter-assembly.jar
+  # setup pgp signing key
+  - if [ -n "$GPG_KEY" ]; then echo $GPG_KEY | base64 --decode | $GPG_EXECUTABLE --import; fi
+  - if [ -n "$GPG_KEY" ]; then echo $GPG_OWNERTRUST | base64 --decode | $GPG_EXECUTABLE --import-ownertrust; fi
+  # setup version information
+  - if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then export REVISION=${TRAVIS_BRANCH}; else export REVISION=${TRAVIS_BRANCH}PR${TRAVIS_PULL_REQUEST}; fi
+  - if [ -z "$TRAVIS_TAG" ]; then export CHANGELIST=-SNAPSHOT; fi
+  # download coverity tools and determine if extended scans should be performed
+  - export COVERITY_RESULTS_ARCHIVE=coverity_report.tar.bz2
+  - if [ "$TRAVIS_EVENT_TYPE" == "cron" ]; then export COVERITY_SCAN_VERSION="cron"; else if [ -n "$TRAVIS_TAG" ]; then export COVERITY_SCAN_VERSION="$TRAVIS_TAG"; else if [ "$TRAVIS_BRANCH" == "coverity_scan" ]; then export COVERITY_SCAN_VERSION="$TRAVIS_BRANCH"; fi; fi; fi
+  - echo "detected coverity scan export name ='${COVERITY_SCAN_VERSION}'"
+  - |-2
+    if [ -n "$COVERITY_SCAN_VERSION" ]; then
+      if [ ! -d "$HOME/cov-analysis-linux64-2019.03" ]; then
+        wget https://scan.coverity.com/download/java/Linux --post-data "token=${COVERITY_TOKEN}&project=chart-fx" -O coverity_tool.tgz
+        tar xzf coverity_tool.tgz --directory $HOME;
+      else
+        echo "coverity tool already present"
+      fi
+      export PATH=$PATH:$HOME/cov-analysis-linux64-2019.03/bin;
+    fi
+  - sudo apt-get install jq
+  - curl -LSs $(curl -LSs https://api.github.com/repos/codacy/codacy-coverage-reporter/releases/latest | jq -r '.assets | map({name, browser_download_url} | select(.name | endswith(".jar"))) | .[0].browser_download_url') -o codacy-coverage-reporter-assembly.jar
 
-# Install dependencies and output maven version information
 install:
-        - mvn --settings .maven.xml install -Dgpg.skip=true -Dmaven.javadoc.skip=true -B -V -Drevision=${REVISION} -Dchangelist=${CHANGELIST}
+  # Compile, test and install to local m2 repository
+  - mvn --settings .maven.xml install -Dgpg.skip=true -Dmaven.javadoc.skip=true -B -V -Drevision=${REVISION} -Dchangelist=${CHANGELIST}
 
-# compile and deploy maven project
 script:
-        - if [ -n "$GPG_KEY" ]; then mvn clean deploy --settings .maven.xml -Prelease -Drevision=${REVISION} -Dchangelist=${CHANGELIST}; fi
-        - if [ -n "$COVERITY_SCAN_VERSION" ]; then mvn dependency-check:aggregate@owaspcheck; fi
+  # deploy maven project
+  - if [ -n "$GPG_KEY" ]; then mvn clean deploy --settings .maven.xml -Prelease -Drevision=${REVISION} -Dchangelist=${CHANGELIST}; fi
+  # check for vulnerable dependencies. Only performed in certain builds because downloading the CVE database takes a lot of time
+  - if [ -n "$COVERITY_SCAN_VERSION" ]; then mvn dependency-check:aggregate@owaspcheck; fi
 
-# execute junit tests and generate jacoco to coveralls.io reports
 after_success:
-  - mvn clean test jacoco:report-aggregate coveralls:report
+  # create and upload coverage report
+  - mvn jacoco:report-aggregate coveralls:report
   - java -jar codacy-coverage-reporter-assembly.jar report -l Java -r chartfx-report/target/site/jacoco-aggregate/jacoco.xml
+  # upload runtime data to perform exhaustive statical analysis on coverity if enabled for this build
   - echo "TRAVIS_EVENT_TYPE = '${TRAVIS_EVENT_TYPE}'  TRAVIS_BRANCH = '${TRAVIS_BRANCH}' TRAVIS_TAG = '${TRAVIS_TAG}'"
   - |-2
     if [ -n "$COVERITY_SCAN_VERSION" ]; then
