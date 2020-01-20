@@ -8,6 +8,9 @@ import static de.gsi.chart.plugins.measurements.SimpleMeasurements.MeasurementCa
 import static de.gsi.chart.plugins.measurements.SimpleMeasurements.MeasurementType.VALUE_HOR;
 import static de.gsi.chart.plugins.measurements.SimpleMeasurements.MeasurementType.VALUE_VER;
 
+import javafx.scene.Node;
+import javafx.scene.paint.Color;
+
 import org.controlsfx.tools.Borders;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,12 +20,10 @@ import de.gsi.chart.axes.Axis;
 import de.gsi.chart.axes.AxisLabelFormatter;
 import de.gsi.chart.axes.spi.DefaultNumericAxis;
 import de.gsi.chart.axes.spi.MetricPrefix;
-import de.gsi.chart.plugins.measurements.utils.SimpleDataSetEstimators;
 import de.gsi.chart.utils.FXUtils;
 import de.gsi.dataset.DataSet;
 import de.gsi.dataset.event.UpdateEvent;
-import javafx.scene.Node;
-import javafx.scene.paint.Color;
+import de.gsi.math.SimpleDataSetEstimators;
 
 /**
  * Simple DataSet parameter measurements N.B. this contains only algorithms w/o external library dependencies (ie.
@@ -40,8 +41,7 @@ public class SimpleMeasurements extends ValueIndicator {
     public SimpleMeasurements(final XYChart chart, final MeasurementType measType) {
         super(chart, X);
         this.measType = measType;
-        title = new StringBuilder().append(measType).append(" [#").append(AbstractChartMeasurement.markerCount - 1)
-                .append(", #").append(AbstractChartMeasurement.markerCount).append("]").toString();
+        title = new StringBuilder().append(measType).append(" [#").append(AbstractChartMeasurement.markerCount - 1).append(", #").append(AbstractChartMeasurement.markerCount).append("]").toString();
         valueField.setMinRange(SimpleMeasurements.DEFAULT_MIN).setMaxRange(SimpleMeasurements.DEFAULT_MAX);
 
         final Axis axis = axisMode == X ? chart.getXAxis() : chart.getYAxis();
@@ -315,5 +315,4 @@ public class SimpleMeasurements extends ValueIndicator {
             return name;
         }
     }
-
 }
