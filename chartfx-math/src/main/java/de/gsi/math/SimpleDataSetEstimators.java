@@ -1,4 +1,7 @@
-package de.gsi.chart.plugins.measurements.utils;
+package de.gsi.math;
+
+import static de.gsi.dataset.DataSet.DIM_X;
+import static de.gsi.dataset.DataSet.DIM_Y;
 
 import de.gsi.dataset.DataSet;
 
@@ -11,6 +14,48 @@ public final class SimpleDataSetEstimators { // NOPMD name is as is (ie. no Help
 
     private SimpleDataSetEstimators() {
         // this is a static class
+    }
+
+    /**
+     * Computes the centre of mass in a given index range.
+     * 
+     * @param dataSet
+     * @param minIndex
+     * @param maxIndex
+     * @return centre of mass
+     */
+    public static double computeCentreOfMass(DataSet dataSet, int minIndex, int maxIndex) {
+        double com = 0;
+        double mass = 0;
+        for (int i = minIndex; i < maxIndex; i++) {
+            double freq = dataSet.get(DIM_X, i);
+            double val = dataSet.get(DIM_Y, i);
+            com += freq * val;
+            mass += val;
+        }
+        return com / mass;
+    }
+
+    /**
+     * Computes the centre of mass in a given x range.
+     * 
+     * @param dataSet
+     * @param min
+     * @param max
+     * @return centre of mass
+     */
+    public static double computeCentreOfMass(DataSet dataSet, double min, double max) {
+        return computeCentreOfMass(dataSet, dataSet.getIndex(DIM_X, min), dataSet.getIndex(DIM_X, max));
+    }
+
+    /**
+     * Compute centre of mass over full DataSet
+     * 
+     * @param dataSet
+     * @return centre of mass
+     */
+    public static double computeCentreOfMass(DataSet dataSet) {
+        return computeCentreOfMass(dataSet, 0, dataSet.getDataCount(DIM_X));
     }
 
     /**
@@ -221,6 +266,12 @@ public final class SimpleDataSetEstimators { // NOPMD name is as is (ie. no Help
         return SimpleDataSetEstimators.computeFWHM(data, data.length, locationMaximum - indexMin);
     }
 
+    /**
+     * @param dataSet
+     * @param indexMin the starting index
+     * @param indexMax the end index (switching indices reverses sign of result)
+     * @return the Integral of the DataSet according to the trapezoidal rule
+     */
     public static double getIntegral(final DataSet dataSet, final int indexMin, final int indexMax) {
         if (Math.abs(indexMax - indexMin) < 0) {
             return Double.NaN;
@@ -327,6 +378,15 @@ public final class SimpleDataSetEstimators { // NOPMD name is as is (ie. no Help
         return val;
     }
 
+    /**
+     * Returns the range of the y Data of the dataSet between the given indices.
+     * This equals the maximum value in the range minus the minimum value.
+     * 
+     * @param dataSet
+     * @param indexMin
+     * @param indexMax
+     * @return the range of yData between the given indices
+     */
     public static double getRange(final DataSet dataSet, final int indexMin, final int indexMax) {
         double valMin = Double.MAX_VALUE;
         double valMax = -1.0 * Double.MAX_VALUE;
@@ -348,6 +408,12 @@ public final class SimpleDataSetEstimators { // NOPMD name is as is (ie. no Help
         return SimpleDataSetEstimators.rootMeanSquare(data, data.length);
     }
 
+    /**
+     * @param dataSet
+     * @param indexMin
+     * @param indexMax
+     * @return the 20% to 80% rise time of the signal
+     */
     public static double getSimpleRiseTime(final DataSet dataSet, final int indexMin, final int indexMax) {
         return getSimpleRiseTime2080(dataSet, indexMin, indexMax);
     }
@@ -411,7 +477,7 @@ public final class SimpleDataSetEstimators { // NOPMD name is as is (ie. no Help
     }
 
     public static double getSimpleRiseTime2080(final DataSet dataSet, final int indexMin, final int indexMax) {
-        return getSimpleRiseTime(dataSet, indexMin, indexMax, 0.2, 0.9);
+        return getSimpleRiseTime(dataSet, indexMin, indexMax, 0.2, 0.8);
     }
 
     public static double getTransmission(final DataSet dataSet, final int indexMin, final int indexMax,

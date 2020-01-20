@@ -17,10 +17,10 @@ import de.gsi.chart.axes.Axis;
 import de.gsi.chart.axes.AxisLabelFormatter;
 import de.gsi.chart.axes.spi.DefaultNumericAxis;
 import de.gsi.chart.axes.spi.MetricPrefix;
-import de.gsi.chart.plugins.measurements.utils.SimpleDataSetEstimators;
 import de.gsi.chart.utils.FXUtils;
 import de.gsi.dataset.DataSet;
 import de.gsi.dataset.event.UpdateEvent;
+import de.gsi.math.SimpleDataSetEstimators;
 import javafx.scene.Node;
 import javafx.scene.paint.Color;
 
