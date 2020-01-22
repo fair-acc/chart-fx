@@ -477,11 +477,11 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
     }
 
     /**
-     * Gets the index of the data point closest to the given x coordinate. The index returned may be less then zero or
-     * larger the the number of data points in the data set, if the x coordinate lies outside the range of the data set.
+     * Gets the index of the data point closest to the given x coordinate.
+     * If the x coordinate lies outside the range of the data set, the index of the first/last point is returned.
      *
      * @param dimIndex the dimension index
-     * @param x the x position of the data point#
+     * @param x the x position of the data point
      * @return the index of the data point
      */
     @Override
