@@ -207,7 +207,8 @@ public class Zoomer extends ChartPlugin {
             }
 
             for (final Axis axis : getChart().getAxes()) {
-                if (axis.getSide() == null || !(axis.getSide().isHorizontal() ? mode.allowsX() : mode.allowsY())) {
+                if (axis.getSide() == null || !(axis.getSide().isHorizontal() ? mode.allowsX() : mode.allowsY())
+                        || isOmitZoomInternal(axis)) {
                     continue;
                 }
 
