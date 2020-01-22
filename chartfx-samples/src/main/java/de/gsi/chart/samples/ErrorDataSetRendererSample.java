@@ -10,6 +10,7 @@ import de.gsi.chart.XYChart;
 import de.gsi.chart.axes.spi.DefaultNumericAxis;
 import de.gsi.chart.plugins.EditAxis;
 import de.gsi.chart.plugins.ParameterMeasurements;
+import de.gsi.chart.plugins.Screenshot;
 import de.gsi.chart.plugins.TableViewer;
 import de.gsi.chart.plugins.Zoomer;
 import de.gsi.chart.renderer.ErrorStyle;
@@ -103,6 +104,7 @@ public class ErrorDataSetRendererSample extends Application {
         chart.getYAxis().setAutoUnitScaling(true);
         chart.legendVisibleProperty().set(true);
         chart.getPlugins().add(new ParameterMeasurements());
+        chart.getPlugins().add(new Screenshot());
         chart.getPlugins().add(new EditAxis());
         final Zoomer zoomer = new Zoomer();
         zoomer.setUpdateTickUnit(true);
