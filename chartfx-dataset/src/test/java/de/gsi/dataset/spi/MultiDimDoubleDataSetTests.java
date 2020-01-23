@@ -13,7 +13,6 @@ import org.junit.jupiter.api.Test;
  * @author Alexander Krimm
  */
 class MultiDimDoubleDataSetTests {
-
     @Test
     public void test() {
         MultiDimDoubleDataSet dataset = new MultiDimDoubleDataSet("Test Dataset",
@@ -82,8 +81,7 @@ class MultiDimDoubleDataSetTests {
         dataset1.addDataStyle(dataset1.getDataCount() - 1, "color=red");
         MultiDimDoubleDataSet dataset2 = new MultiDimDoubleDataSet(dataset1);
         assertEquals(dataset1, dataset2);
-        MultiDimDoubleDataSet dataset3 = new MultiDimDoubleDataSet("Test Dataset", new double[][] {
-                { 1, 2, 3, 4, 1, 2 }, { 2, 4, 6, 8, 3, 0 }, { 3, 3, 6, 8, 3, 2 }, { 1, 5, 7, 1, 7, 0 } }, 6, true);
+        MultiDimDoubleDataSet dataset3 = new MultiDimDoubleDataSet("Test Dataset", new double[][] { { 1, 2, 3, 4, 1, 2 }, { 2, 4, 6, 8, 3, 0 }, { 3, 3, 6, 8, 3, 2 }, { 1, 5, 7, 1, 7, 0 } }, 6, true);
         dataset3.addDataLabel(4, "foobar");
         assertEquals(dataset1, dataset3);
 
