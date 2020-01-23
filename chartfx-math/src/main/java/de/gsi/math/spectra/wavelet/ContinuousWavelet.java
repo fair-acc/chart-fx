@@ -48,8 +48,8 @@ public class ContinuousWavelet {
         }
 
         // create and return data set.
-        final DoubleDataSet3D ds = new DoubleDataSet3D("Scalogram");
-        ds.set(getScalogramTimeAxis(data, nQuantx, nQuanty, nu, fmin, fmax),
+        final DoubleDataSet3D ds = new DoubleDataSet3D("Scalogram",
+                getScalogramTimeAxis(data, nQuantx, nQuanty, nu, fmin, fmax),
                 getScalogramFrequencyAxis(nQuantx, nQuanty, nu, fmin, fmax),
                 getScalogramArrayFourier(data, nQuantx, nQuanty, nu, fmin, fmax));
         return ds;
@@ -317,8 +317,8 @@ public class ContinuousWavelet {
      * @param x input
      * @param nu the oscillatory parameter
      * @param ret return value ret[0] stores the real and ret[1] the imaginary value of the function reference: P.
-     *        Goupillaud, A. Grossman, and J. Morlet., Cycle-Octave and Related Transforms in Seismic Signal Analysis.,
-     *        Geoexploration, 23:85-102, 1984
+     *            Goupillaud, A. Grossman, and J. Morlet., Cycle-Octave and Related Transforms in Seismic Signal
+     *            Analysis., Geoexploration, 23:85-102, 1984
      */
     public void Morlet(final double x, final double nu, final double[] ret) {
         final double val1 = 1.0 / Math.sqrt(TMathConstants.TwoPi())
