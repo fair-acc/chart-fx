@@ -126,7 +126,7 @@ public class DoubleDataSet3D extends AbstractDataSet3D<DoubleDataSet3D> {
         case DIM_Z:
             return zValues[index / xValues.length][index % xValues.length];
         default:
-            return Double.NaN;
+            throw new IndexOutOfBoundsException("dimIndex cannot be < 2");
         }
     }
 
@@ -145,7 +145,7 @@ public class DoubleDataSet3D extends AbstractDataSet3D<DoubleDataSet3D> {
         case DIM_Z:
             return super.getValues(dimIndex);
         default:
-            return new double[0];
+            throw new IndexOutOfBoundsException("dimIndex cannot be < 2");
         }
     }
 
@@ -179,14 +179,12 @@ public class DoubleDataSet3D extends AbstractDataSet3D<DoubleDataSet3D> {
      */
     public void set(final int xIndex, final int yIndex, final double z) {
         zValues[yIndex][xIndex] = z;
-
     }
 
     public void set(final int xIndex, final int yIndex, final double x, final double y, final double z) {
         xValues[xIndex] = x;
         yValues[yIndex] = y;
         zValues[yIndex][xIndex] = z;
-
     }
 
     /**
@@ -210,30 +208,30 @@ public class DoubleDataSet3D extends AbstractDataSet3D<DoubleDataSet3D> {
         if (xValues == null) {
             throw new IllegalArgumentException("xValues array is null");
         }
-        if (xValues.length == 0) {
-            throw new IllegalArgumentException("xValues array length is '0'");
-        }
         if (yValues == null) {
             throw new IllegalArgumentException("yValues array is null");
-        }
-        if (yValues.length == 0) {
-            throw new IllegalArgumentException("yValues array length is '0'");
         }
         if (zValues == null) {
             throw new IllegalArgumentException("zValues array is null");
         }
         if (zValues.length == 0) {
-            throw new IllegalArgumentException("zValues array length is '0'");
-        }
-        if (zValues.length != yValues.length) {
-            final String msg = String.format("array dimension mismatch: zValues.length = %d != yValues.length = %d",
-                    zValues.length, yValues.length);
-            throw new IllegalArgumentException(msg);
-        }
-        if (zValues[0].length != xValues.length) {
-            final String msg = String.format("array dimension mismatch: zValues[0].length = %d != xValues.length = %d",
-                    zValues.length, xValues.length);
-            throw new IllegalArgumentException(msg);
+            if (0 != xValues.length || 0 != yValues.length) {
+                final String msg = String.format(
+                        "array zValues is empty but: xValues.length = %d and yValues.length = %d", xValues.length, yValues.length);
+                throw new IllegalArgumentException(msg);
+            }
+        } else {
+            if (zValues.length != yValues.length) {
+                final String msg = String.format("array dimension mismatch: zValues.length = %d != yValues.length = %d",
+                        zValues.length, yValues.length);
+                throw new IllegalArgumentException(msg);
+            }
+            if (zValues[0].length != xValues.length) {
+                final String msg = String.format(
+                        "array dimension mismatch: zValues[0].length = %d != xValues.length = %d", zValues[0].length,
+                        xValues.length);
+                throw new IllegalArgumentException(msg);
+            }
         }
     }
 
@@ -243,8 +241,8 @@ public class DoubleDataSet3D extends AbstractDataSet3D<DoubleDataSet3D> {
      * expanding binary fashion
      *
      * @param array to be initialized
-     * @param indexStart the first index to be set
-     * @param indexStop the last index to be set
+     * @param indexStart the first index to be set (inclusive)
+     * @param indexStop the last index to be set (exclusive)
      * @param value the value for each to be set element
      */
     protected static void fillArray(final double[] array, final int indexStart, final int indexStop,
@@ -257,8 +255,7 @@ public class DoubleDataSet3D extends AbstractDataSet3D<DoubleDataSet3D> {
         }
 
         for (int i = 1; i < len; i += i) {
-            System.arraycopy(array, indexStart, array, i, (len - i) < i ? len - i : i);
+            System.arraycopy(array, indexStart, array, indexStart + i, (len - i) < i ? len - i : i);
         }
     }
-
 }
