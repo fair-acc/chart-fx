@@ -39,9 +39,6 @@ public final class StyleParser { // NOPMD
 
         final Map<String, String> map = StyleParser.splitIntoMap(style);
         final String value = map.get(key.toLowerCase(Locale.UK));
-        if (value == null) {
-            return null;
-        }
 
         try {
             return Boolean.parseBoolean(value);
@@ -61,9 +58,6 @@ public final class StyleParser { // NOPMD
 
         final Map<String, String> map = StyleParser.splitIntoMap(style);
         final String value = map.get(key.toLowerCase(Locale.UK));
-        if (value == null) {
-            return null;
-        }
 
         try {
             return Color.web(value);
@@ -83,9 +77,6 @@ public final class StyleParser { // NOPMD
 
         final Map<String, String> map = StyleParser.splitIntoMap(style);
         final String value = map.get(key.toLowerCase(Locale.UK));
-        if (value == null) {
-            return null;
-        }
 
         try {
             final String[] splitValues = value.split(",");
@@ -113,9 +104,6 @@ public final class StyleParser { // NOPMD
 
         final Map<String, String> map = StyleParser.splitIntoMap(style);
         final String value = map.get(key.toLowerCase(Locale.UK));
-        if (value == null) {
-            return null;
-        }
 
         try {
             return Double.parseDouble(value);
@@ -175,9 +163,6 @@ public final class StyleParser { // NOPMD
 
         final Map<String, String> map = StyleParser.splitIntoMap(style);
         final String value = map.get(key.toLowerCase(Locale.UK));
-        if (value == null) {
-            return null;
-        }
 
         try {
             return Integer.decode(value);
@@ -207,9 +192,6 @@ public final class StyleParser { // NOPMD
 
         final Map<String, String> map = StyleParser.splitIntoMap(style);
         final String value = map.get(key.toLowerCase(Locale.UK));
-        if (value == null) {
-            return null;
-        }
 
         try {
             return Arrays.asList(value.split(",\\s*")).stream().map(String::trim).mapToDouble(Double::parseDouble)
@@ -228,9 +210,7 @@ public final class StyleParser { // NOPMD
         for (final Map.Entry<String, String> entry : map.entrySet()) {
             final String key = entry.getKey();
             final String value = entry.getValue();
-            if (value != null) {
-                ret = ret.concat(key).concat("=").concat(value).concat(";");
-            }
+            ret = ret.concat(key).concat("=").concat(value).concat(";");
         }
         return ret;
     }
@@ -246,8 +226,9 @@ public final class StyleParser { // NOPMD
         if (style == null) {
             return retVal;
         }
-        
-        final String[] keyVals = AT_LEAST_ONE_WHITESPACE_PATTERN.matcher(style.toLowerCase(Locale.UK)).replaceAll("").split(";");
+
+        final String[] keyVals = AT_LEAST_ONE_WHITESPACE_PATTERN.matcher(style.toLowerCase(Locale.UK)).replaceAll("")
+                .split(";");
         for (final String keyVal : keyVals) {
             final String[] parts = STYLE_ASSIGNMENT_PATTERN.split(keyVal, 2);
             if (parts == null || parts[0] == null || parts.length <= 1) {
