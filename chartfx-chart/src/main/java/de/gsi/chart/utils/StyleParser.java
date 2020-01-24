@@ -39,6 +39,9 @@ public final class StyleParser { // NOPMD
 
         final Map<String, String> map = StyleParser.splitIntoMap(style);
         final String value = map.get(key.toLowerCase(Locale.UK));
+        if (value == null) {
+            return null;
+        }
 
         try {
             return Boolean.parseBoolean(value);
@@ -58,6 +61,9 @@ public final class StyleParser { // NOPMD
 
         final Map<String, String> map = StyleParser.splitIntoMap(style);
         final String value = map.get(key.toLowerCase(Locale.UK));
+        if (value == null) {
+            return null;
+        }
 
         try {
             return Color.web(value);
@@ -77,6 +83,9 @@ public final class StyleParser { // NOPMD
 
         final Map<String, String> map = StyleParser.splitIntoMap(style);
         final String value = map.get(key.toLowerCase(Locale.UK));
+        if (value == null) {
+            return null;
+        }
 
         try {
             final String[] splitValues = value.split(",");
@@ -104,6 +113,9 @@ public final class StyleParser { // NOPMD
 
         final Map<String, String> map = StyleParser.splitIntoMap(style);
         final String value = map.get(key.toLowerCase(Locale.UK));
+        if (value == null) {
+            return null;
+        }
 
         try {
             return Double.parseDouble(value);
@@ -163,6 +175,9 @@ public final class StyleParser { // NOPMD
 
         final Map<String, String> map = StyleParser.splitIntoMap(style);
         final String value = map.get(key.toLowerCase(Locale.UK));
+        if (value == null) {
+            return null;
+        }
 
         try {
             return Integer.decode(value);
@@ -192,7 +207,10 @@ public final class StyleParser { // NOPMD
 
         final Map<String, String> map = StyleParser.splitIntoMap(style);
         final String value = map.get(key.toLowerCase(Locale.UK));
-
+        if (value == null) {
+            return null;
+        }
+        
         try {
             return Arrays.asList(value.split(",\\s*")).stream().map(String::trim).mapToDouble(Double::parseDouble).toArray();
         } catch (final IllegalArgumentException ex) {
