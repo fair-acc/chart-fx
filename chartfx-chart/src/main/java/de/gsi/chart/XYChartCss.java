@@ -21,7 +21,7 @@ public final class XYChartCss { // NOPMD decide not to rename it for the time be
     public static final String STROKE_DASH_PATTERN = "strokeDashPattern";
     public static final String FILL_COLOR = "fillColor";
     public static final String FONT = "font";
-    public static final String FONT_WEIGHT = "fontWheight";
+    public static final String FONT_WEIGHT = "fontWeight";
     public static final String FONT_POSTURE = "fontPosture";
     public static final String FONT_SIZE = "fontSize";
 
