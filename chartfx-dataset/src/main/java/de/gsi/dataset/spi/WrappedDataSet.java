@@ -111,5 +111,4 @@ public class WrappedDataSet extends AbstractDataSet<WrappedDataSet> implements D
         // yRange.setMax(Double.NaN);
         fireInvalidated(new UpdatedDataEvent(this));
     }
-
 }

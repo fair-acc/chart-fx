@@ -5,11 +5,6 @@ import java.io.IOException;
 
 import javax.imageio.ImageIO;
 
-import org.controlsfx.glyphfont.FontAwesome;
-import org.controlsfx.glyphfont.Glyph;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import javafx.embed.swing.SwingFXUtils;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
@@ -24,6 +19,11 @@ import javafx.scene.input.ClipboardContent;
 import javafx.scene.layout.HBox;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
+
+import org.controlsfx.glyphfont.FontAwesome;
+import org.controlsfx.glyphfont.Glyph;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Plugin allowing to take a screenshot of the complete chart.
@@ -131,7 +131,7 @@ public class Screenshot extends ChartPlugin {
      */
     private File showFileDialog() {
         FileChooser fileChooser = new FileChooser();
-        fileChooser.getExtensionFilters().setAll(new ExtensionFilter("PNG-Image", new String[] {"*.png"}));
+        fileChooser.getExtensionFilters().setAll(new ExtensionFilter("PNG-Image", new String[] { "*.png" }));
         return fileChooser.showSaveDialog(getChart().getScene().getWindow());
     }
 }

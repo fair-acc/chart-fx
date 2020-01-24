@@ -27,7 +27,6 @@ import de.gsi.chart.axes.spi.format.DefaultTickUnitSupplier;
  * @author rstein
  */
 public class LinearAxis extends AbstractAxis {
-
     private static final int DEFAULT_TICK_COUNT = 9;
 
     private static final int TICK_MARK_GAP = 6;
@@ -41,7 +40,6 @@ public class LinearAxis extends AbstractAxis {
     private boolean isUpdating = true;
 
     private final BooleanProperty forceZeroInRange = new SimpleBooleanProperty(this, "forceZeroInRange", false) {
-
         @Override
         protected void invalidated() {
             if (isAutoRanging() || isAutoGrowRanging()) {
@@ -53,7 +51,6 @@ public class LinearAxis extends AbstractAxis {
 
     private final SimpleStyleableDoubleProperty tickUnit = new SimpleStyleableDoubleProperty(
             StyleableProperties.TICK_UNIT, this, "tickUnit", 5d) {
-
         @Override
         protected void invalidated() {
             if (!(isAutoRanging() || isAutoGrowRanging())) {
@@ -423,7 +420,7 @@ public class LinearAxis extends AbstractAxis {
         final double majorUnit = unitSupplier.computeTickUnit(rawTickUnit);
         if (majorUnit <= 0) {
             throw new IllegalArgumentException("The " + unitSupplier.getClass().getName()
-                    + " computed illegal unit value [" + majorUnit + "] for argument " + rawTickUnit);
+                                               + " computed illegal unit value [" + majorUnit + "] for argument " + rawTickUnit);
         }
         return majorUnit;
     }
@@ -468,7 +465,6 @@ public class LinearAxis extends AbstractAxis {
 
     @Override
     protected List<Double> calculateMinorTickValues() {
-
         final List<Double> minorTickMarks = new ArrayList<>();
         final double lowerBound = getMin();
         final double upperBound = getMax();
@@ -553,10 +549,8 @@ public class LinearAxis extends AbstractAxis {
     }
 
     private static class StyleableProperties {
-
         private static final CssMetaData<LinearAxis, Number> TICK_UNIT = new CssMetaData<LinearAxis, Number>(
                 "-fx-tick-unit", SizeConverter.getInstance(), 5.0) {
-
             @SuppressWarnings("unchecked")
             @Override
             public StyleableProperty<Number> getStyleableProperty(final LinearAxis axis) {
@@ -580,7 +574,6 @@ public class LinearAxis extends AbstractAxis {
     }
 
     protected class Cache {
-
         protected double localScale;
         protected double localCurrentLowerBound;
         protected double localCurrentUpperBound;

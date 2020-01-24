@@ -7,6 +7,13 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
+import javafx.collections.ObservableList;
+import javafx.geometry.Orientation;
+import javafx.scene.canvas.Canvas;
+import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.FillRule;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,12 +34,6 @@ import de.gsi.dataset.DataSetError.ErrorType;
 import de.gsi.dataset.spi.utils.Triple;
 import de.gsi.dataset.utils.ArrayCache;
 import de.gsi.dataset.utils.ProcessingProfiler;
-import javafx.collections.ObservableList;
-import javafx.geometry.Orientation;
-import javafx.scene.canvas.Canvas;
-import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.paint.Color;
-import javafx.scene.shape.FillRule;
 
 /**
  * Renders data points with error bars and/or error surfaces It can be used e.g. to render horizontal and/or vertical
@@ -46,7 +47,7 @@ import javafx.scene.shape.FillRule;
  * @author R.J. Steinhagen
  */
 @SuppressWarnings({ "PMD.LongVariable", "PMD.ShortVariable" }) // short variables like x, y are perfectly fine, as well
-                                                               // as descriptive long ones
+// as descriptive long ones
 public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<ErrorDataSetRenderer>
         implements Renderer {
     private static final Logger LOGGER = LoggerFactory.getLogger(ErrorDataSetRenderer.class);
@@ -174,7 +175,7 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
                 gc.fillOval(x, y, 2 * radius, 2 * radius);
             }
         } else if (localCachedPoints.errorType[DataSet.DIM_X] == ErrorType.NO_ERROR
-                || localCachedPoints.errorType[DataSet.DIM_Y] != ErrorType.NO_ERROR) {
+                   || localCachedPoints.errorType[DataSet.DIM_Y] != ErrorType.NO_ERROR) {
             // Y, Y_ASYMMETRIC
             for (int i = 0; i < localCachedPoints.actualDataCount; i++) {
                 final double radius = Math.max(minSize,
@@ -185,7 +186,7 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
                 gc.fillOval(x, y, 2 * radius, 2 * radius);
             }
         } else if (localCachedPoints.errorType[DataSet.DIM_X] != ErrorType.NO_ERROR
-                || localCachedPoints.errorType[DataSet.DIM_Y] != ErrorType.NO_ERROR) {
+                   || localCachedPoints.errorType[DataSet.DIM_Y] != ErrorType.NO_ERROR) {
             // XY, XY_ASYMMETRIC
             for (int i = 0; i < localCachedPoints.actualDataCount; i++) {
                 final double width = Math.max(minSize, localCachedPoints.errorXPos[i] - localCachedPoints.errorXNeg[i]);
@@ -257,7 +258,6 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
      * @param lCacheP reference to local cached data point object
      */
     protected void drawErrorBars(final GraphicsContext gc, final CachedDataPoints lCacheP) {
-
         final long start = ProcessingProfiler.getTimeStamp();
 
         drawBars(gc, lCacheP);
@@ -268,7 +268,6 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
         DefaultRenderColorScheme.setGraphicsContextAttributes(gc, lCacheP.defaultStyle);
 
         for (int i = 0; i < lCacheP.actualDataCount; i++) {
-
             if (lCacheP.errorType[DataSet.DIM_X] != ErrorType.NO_ERROR
                     && lCacheP.errorType[DataSet.DIM_Y] != ErrorType.NO_ERROR) {
                 // draw error bars
@@ -287,7 +286,7 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
                 gc.strokeLine(lCacheP.errorXPos[i], lCacheP.yValues[i] - dashHalf, lCacheP.errorXPos[i],
                         lCacheP.yValues[i] + dashHalf);
             } else if (lCacheP.errorType[DataSet.DIM_X] == ErrorType.NO_ERROR
-                    && lCacheP.errorType[DataSet.DIM_Y] != ErrorType.NO_ERROR) {
+                       && lCacheP.errorType[DataSet.DIM_Y] != ErrorType.NO_ERROR) {
                 // draw error bars
                 gc.strokeLine(lCacheP.xValues[i], lCacheP.errorYNeg[i], lCacheP.xValues[i], lCacheP.errorYPos[i]);
 
@@ -297,7 +296,7 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
                 gc.strokeLine(lCacheP.xValues[i] - dashHalf, lCacheP.errorYPos[i], lCacheP.xValues[i] + dashHalf,
                         lCacheP.errorYPos[i]);
             } else if (lCacheP.errorType[DataSet.DIM_X] != ErrorType.NO_ERROR
-                    && lCacheP.errorType[DataSet.DIM_Y] == ErrorType.NO_ERROR) {
+                       && lCacheP.errorType[DataSet.DIM_Y] == ErrorType.NO_ERROR) {
                 // draw error bars
                 gc.strokeLine(lCacheP.errorXNeg[i], lCacheP.yValues[i], lCacheP.errorXPos[i], lCacheP.yValues[i]);
 
@@ -393,7 +392,6 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
                 yValuesSurface[xend - count] = yen;
                 count++;
             } else if (count != 0) {
-
                 // remove zeros and plot intermediate segment
                 compactVector(xValuesSurface, count);
                 compactVector(yValuesSurface, count);
@@ -444,7 +442,7 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
         final Integer dsIndexLocal = StyleParser.getIntegerPropertyValue(style, XYChartCss.DATASET_INDEX);
 
         final int dsLayoutIndexOffset = layoutOffset == null ? 0 : layoutOffset.intValue(); // TODO:
-                                                                                            // rationalise
+                // rationalise
 
         final int plotingIndex = dsLayoutIndexOffset + (dsIndexLocal == null ? dsIndex : dsIndexLocal.intValue());
 
@@ -512,7 +510,7 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
                     gc.setFill(markerForPoint.getSecond());
                 }
                 final Marker pointMarker = markerForPoint.getFirst() == null ? defaultMarker
-                        : markerForPoint.getFirst();
+                                                                             : markerForPoint.getFirst();
                 pointMarker.draw(gc, x, y, markerForPoint.getThird());
                 gc.restore();
             }
@@ -574,7 +572,8 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
             } catch (final IllegalArgumentException ex) {
                 if (LOGGER.isErrorEnabled()) {
                     LOGGER.error("could not parse marker type description for '" + XYChartCss.MARKER_TYPE + "'='"
-                            + markerType + "'", ex);
+                                         + markerType + "'",
+                            ex);
                 }
             }
         }
@@ -586,7 +585,8 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
             } catch (final NumberFormatException ex) {
                 if (LOGGER.isErrorEnabled()) {
                     LOGGER.error("could not parse marker size description for '" + XYChartCss.MARKER_SIZE + "'='"
-                            + markerSize + "'", ex);
+                                         + markerSize + "'",
+                            ex);
                 }
             }
         }
@@ -599,7 +599,8 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
             } catch (final IllegalArgumentException ex) {
                 if (LOGGER.isErrorEnabled()) {
                     LOGGER.error("could not parse marker color description for '" + XYChartCss.MARKER_COLOR + "'='"
-                            + markerColor + "'", ex);
+                                         + markerColor + "'",
+                            ex);
                 }
             }
         }
@@ -752,7 +753,6 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
             }
         } // end of 'dataSetIndex' loop
         ProcessingProfiler.getTimeDiff(start);
-
     }
 
     /**

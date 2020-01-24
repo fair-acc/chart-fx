@@ -104,7 +104,6 @@ public class GeneralFFTTests {
             return (double) max_index / (double) fsize;
         }
         return 0.0;
-
     }
 
     public double getPeakFrequencyD() {
@@ -205,5 +204,4 @@ public class GeneralFFTTests {
     public static void main(final String[] args) {
         new GeneralFFTTests();
     }
-
 }

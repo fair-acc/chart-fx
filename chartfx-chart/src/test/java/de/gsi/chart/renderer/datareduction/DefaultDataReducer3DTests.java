@@ -16,10 +16,11 @@ import de.gsi.math.ArrayUtils;
 public class DefaultDataReducer3DTests {
     private static final int N_DIM = 4;
     private static final double[] TEST_DATA = { //
-            1, 2, 3, 4, //
-            5, 6, 7, 8, //
-            9, 10, 11, 12, //
-            13, 14, 15, 16 };
+        1, 2, 3, 4, //
+        5, 6, 7, 8, //
+        9, 10, 11, 12, //
+        13, 14, 15, 16
+    };
     private static final double[] TEST_DATA_RED_X_2_MIN = { 1, 3, 5, 7, 9, 11, 13, 15 };
     private static final double[] TEST_DATA_RED_Y_2_MIN = { 1, 2, 3, 4, 9, 10, 11, 12 };
     private static final double[] TEST_DATA_RED_XY_2_MIN = { 1, 3, 9, 11 };

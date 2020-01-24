@@ -12,7 +12,6 @@ import de.gsi.math.spectra.Convolution;
 import de.gsi.math.utils.ConcurrencyUtils;
 
 public class ContinuousWavelet {
-
     protected int START_THREADS = 512;
     protected boolean DEBUG = false;
     private int fstatus = 100;
@@ -39,12 +38,12 @@ public class ContinuousWavelet {
 
         if (fmin < 0 || fmax > 0.5 || fmax <= fmin) {
             throw new InvalidParameterException(" getScalogram(double[],int,int,double," + fmin + "," + fmax
-                    + ") - frequency range not within 0<=fmin<fmax<=0.5");
+                                                + ") - frequency range not within 0<=fmin<fmax<=0.5");
         }
 
         if (nQuantx <= 0 || nQuantx > data.length) {
             throw new InvalidParameterException(" getScalogram(double[]," + nQuantx + ",int,double," + fmin + "," + fmax
-                    + ") - nQuantx out of range [0," + data.length + "]");
+                                                + ") - nQuantx out of range [0," + data.length + "]");
         }
 
         // create and return data set.
@@ -94,7 +93,6 @@ public class ContinuousWavelet {
                     ret[i][j - min] = Double.NaN;
                 }
             }
-
         }
         fstatus = 100;
         return ret;
@@ -134,10 +132,8 @@ public class ContinuousWavelet {
                 final int thread_id = thread;
 
                 futures[thread] = ConcurrencyUtils.submit(new Runnable() {
-
                     @Override
                     public void run() {
-
                         if (fdecon[thread_id] == null) {
                             fdecon[thread_id] = new Convolution();
                         }
@@ -304,7 +300,7 @@ public class ContinuousWavelet {
      */
     public Complex Morlet(final double x, final double nu) {
         final double val1 = 1.0 / Math.sqrt(TMathConstants.TwoPi())
-                * TMathConstants.Exp(-2 * TMathConstants.Sqr(TMathConstants.Sqr(TMathConstants.TwoPi()) * x / nu));
+                            * TMathConstants.Exp(-2 * TMathConstants.Sqr(TMathConstants.Sqr(TMathConstants.TwoPi()) * x / nu));
         final double val2 = TMathConstants.TwoPi() * nu * x;
         final double re = val1 * Math.sin(val2);
         final double im = val1 * Math.cos(val2);
@@ -322,7 +318,7 @@ public class ContinuousWavelet {
      */
     public void Morlet(final double x, final double nu, final double[] ret) {
         final double val1 = 1.0 / Math.sqrt(TMathConstants.TwoPi())
-                * TMathConstants.Exp(-2 * TMathConstants.Sqr(TMathConstants.Sqr(TMathConstants.TwoPi()) * x / nu));
+                            * TMathConstants.Exp(-2 * TMathConstants.Sqr(TMathConstants.Sqr(TMathConstants.TwoPi()) * x / nu));
         final double val2 = TMathConstants.TwoPi() * nu * x;
         ret[0] = val1 * Math.cos(val2);
         ret[1] = val1 * Math.sin(val2);
@@ -337,7 +333,7 @@ public class ContinuousWavelet {
      */
     public Complex Paul(final double x, final int m) {
         final double val = Math.pow(2, m) * TMath.Factorial(m)
-                / Math.sqrt(TMathConstants.Pi() * TMath.Factorial(2 * m));
+                           / Math.sqrt(TMathConstants.Pi() * TMath.Factorial(2 * m));
         Complex c1 = new Complex(1, 0);
         Complex c2 = new Complex(1, 0);
         for (int i = 0; i < m + 1; i++) {
@@ -388,13 +384,13 @@ public class ContinuousWavelet {
             final double nu) {
         double re = 0, im = 0;
         final double[] ret = new double[2]; // temp. real/imaginary storage for
-                                            // the morlet wavelet
+                // the morlet wavelet
         final double norm = 1.0 / Math.sqrt(scale);
 
         // reduce rank of multiplication (speed optimisation)
         final int centre = (int) translation + 1;
         final int width = (int) (10.0 * scale); // significant half-width
-                                                // (morlet)
+                // (morlet)
         final int min = Math.max(0, centre - width);
         final int max = Math.min(data.length, centre + width);
 

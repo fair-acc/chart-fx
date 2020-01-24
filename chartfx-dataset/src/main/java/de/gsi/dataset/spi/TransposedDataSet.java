@@ -54,12 +54,12 @@ public class TransposedDataSet implements DataSet {
         }
         if (permutation.length < dataSet.getDimension()) {
             throw new IllegalArgumentException("insufficient permutation.lenght='" + permutation.length
-                    + "' w.r.t. DataSet dimensions (" + dataSet.getDimension() + ")");
+                                               + "' w.r.t. DataSet dimensions (" + dataSet.getDimension() + ")");
         }
         for (int i = 0; i < dataSet.getDimension(); i++) {
             if (permutation[i] >= dataSet.getDimension()) {
                 throw new IndexOutOfBoundsException("permutation[" + i + "] contains dimIndex='" + permutation[i]
-                        + "' outside DataSet dimension (" + dataSet.getDimension() + ")");
+                                                    + "' outside DataSet dimension (" + dataSet.getDimension() + ")");
             }
         }
 
@@ -171,12 +171,12 @@ public class TransposedDataSet implements DataSet {
         this.lock().writeLockGuard(() -> {
             if (permutation.length < dataSet.getDimension()) {
                 throw new IllegalArgumentException("insufficient permutation.lenght='" + permutation.length
-                        + "' w.r.t. DataSet dimensions (" + dataSet.getDimension() + ")");
+                                                   + "' w.r.t. DataSet dimensions (" + dataSet.getDimension() + ")");
             }
             for (int i = 0; i < dataSet.getDimension(); i++) {
                 if (permutation[i] >= dataSet.getDimension()) {
                     throw new IndexOutOfBoundsException("permutation[" + i + "] contains dimIndex='" + permutation[i]
-                            + "' outside DataSet dimension (" + dataSet.getDimension() + ")");
+                                                        + "' outside DataSet dimension (" + dataSet.getDimension() + ")");
                 }
             }
 
@@ -256,7 +256,6 @@ public class TransposedDataSet implements DataSet {
                 throw new IllegalArgumentException(
                         "cannot swap first x or y dimension with z dimension (index missmatch)");
             }
-
         }
 
         @Override
@@ -290,15 +289,13 @@ public class TransposedDataSet implements DataSet {
 
         @Override
         public double getZ(int xIndex, int yIndex) {
-            return ((DataSet3D) dataSet).getZ(permutation[0] == 0 ? xIndex : yIndex,
-                    permutation[1] == 0 ? xIndex : yIndex);
+            return ((DataSet3D) dataSet).getZ(permutation[0] == 0 ? xIndex : yIndex, permutation[1] == 0 ? xIndex : yIndex);
         }
 
         @Override
         public double get(int dimIndex, int index) {
             if (dimIndex == DIM_Z && permutation[DIM_X] != DIM_X) {
-                return ((DataSet3D) dataSet).getZ(index / dataSet.getDataCount(DIM_Y),
-                        index % dataSet.getDataCount(DIM_Y));
+                return ((DataSet3D) dataSet).getZ(index / dataSet.getDataCount(DIM_Y), index % dataSet.getDataCount(DIM_Y));
             }
             return super.get(dimIndex, index);
         }

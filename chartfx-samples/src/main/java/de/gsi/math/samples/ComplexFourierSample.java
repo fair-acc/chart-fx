@@ -2,6 +2,10 @@ package de.gsi.math.samples;
 
 import java.util.Arrays;
 
+import javafx.application.Application;
+import javafx.scene.Node;
+import javafx.scene.layout.VBox;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,9 +16,6 @@ import de.gsi.math.samples.utils.AbstractDemoApplication;
 import de.gsi.math.samples.utils.DemoChart;
 import de.gsi.math.spectra.SpectrumTools;
 import de.gsi.math.spectra.fft.DoubleFFT_1D;
-import javafx.application.Application;
-import javafx.scene.Node;
-import javafx.scene.layout.VBox;
 
 /**
  * example illustrating the discrete time fourier transform and Fast-Fourier transform and spectral interpolation
@@ -39,11 +40,11 @@ public class ComplexFourierSample extends AbstractDemoApplication {
         for (int i = 0; i < nSamples; i++) {
             final int i2 = i << 1;
             final double t = i * T / nSamples;
-            double a1 =TMathConstants.Sin(TMathConstants.TwoPi() * f1 * t);
-            double b1 =TMathConstants.Cos(TMathConstants.TwoPi() * f1 * t);
-            double a2 =TMathConstants.Cos(TMathConstants.TwoPi() * f2 * t);
-            double b2 =TMathConstants.Sin(TMathConstants.TwoPi() * f2 * t);
-            val[i2] =  a1 + a2;
+            double a1 = TMathConstants.Sin(TMathConstants.TwoPi() * f1 * t);
+            double b1 = TMathConstants.Cos(TMathConstants.TwoPi() * f1 * t);
+            double a2 = TMathConstants.Cos(TMathConstants.TwoPi() * f2 * t);
+            double b2 = TMathConstants.Sin(TMathConstants.TwoPi() * f2 * t);
+            val[i2] = a1 + a2;
             val[i2 + 1] = b1 + b2;
         }
         return val;
@@ -88,7 +89,7 @@ public class ComplexFourierSample extends AbstractDemoApplication {
         double[] frequency1 = new double[MAX_POINTS];
         final double scaling1 = 1.0 / frequency1.length;
         for (int i = 0; i < frequency1.length; i++) {
-            frequency1[i] = (i - 0.5 * MAX_POINTS) * scaling1 ;
+            frequency1[i] = (i - 0.5 * MAX_POINTS) * scaling1;
         }
 
         final DoubleFFT_1D fastFourierTrafo = new DoubleFFT_1D(MAX_POINTS);

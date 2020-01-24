@@ -3,6 +3,17 @@ package de.gsi.chart.samples;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 
+import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.scene.Scene;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.Slider;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,16 +30,6 @@ import de.gsi.dataset.DataSet;
 import de.gsi.dataset.DataSet3D;
 import de.gsi.dataset.spi.AbstractDataSet3D;
 import de.gsi.dataset.utils.ProcessingProfiler;
-import javafx.application.Application;
-import javafx.application.Platform;
-import javafx.scene.Scene;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.Slider;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.VBox;
-import javafx.stage.Stage;
 
 /**
  * @author rstein
@@ -140,7 +141,7 @@ public class ContourChartSample extends Application {
 
     public DataSet3D readImage() {
         try (final BufferedReader reader = new BufferedReader(
-                new InputStreamReader(ContourChartSample.class.getResourceAsStream("./testdata/image.txt")))) {
+                     new InputStreamReader(ContourChartSample.class.getResourceAsStream("./testdata/image.txt")))) {
             // final BufferedReader reader = new BufferedReader(new
             // InputStreamReader(
             // ContourChartSampleReference.class.getResourceAsStream("./testdata/image.txt")));
@@ -248,16 +249,17 @@ public class ContourChartSample extends Application {
     }
 
     private static void bindAxis(final XYChart chartPane1, final XYChart chartPane2) {
-
         final DefaultNumericAxis xAxis1 = (DefaultNumericAxis) chartPane1.getXAxis();
         final DefaultNumericAxis yAxis1 = (DefaultNumericAxis) chartPane1.getYAxis();
         final DefaultNumericAxis xAxis2 = (DefaultNumericAxis) chartPane2.getXAxis();
         final DefaultNumericAxis yAxis2 = (DefaultNumericAxis) chartPane2.getYAxis();
 
         final DefaultNumericAxis zAxis1 = (DefaultNumericAxis) ((ContourDataSetRenderer) chartPane1.getRenderers()
-                .get(0)).getZAxis();
+                                                                        .get(0))
+                                                  .getZAxis();
         final DefaultNumericAxis zAxis2 = (DefaultNumericAxis) ((ContourDataSetRenderer) chartPane2.getRenderers()
-                .get(0)).getZAxis();
+                                                                        .get(0))
+                                                  .getZAxis();
 
         // xAxis1.setAutoRanging(false);
         // yAxis1.setAutoRanging(false);

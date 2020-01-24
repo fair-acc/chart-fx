@@ -1,9 +1,5 @@
 package de.gsi.chart.renderer.spi;
 
-import de.gsi.chart.renderer.ContourType;
-import de.gsi.chart.renderer.datareduction.ReductionType;
-import de.gsi.chart.renderer.spi.utils.ColorGradient;
-
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ObjectProperty;
@@ -12,9 +8,12 @@ import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.image.ImageView;
 
+import de.gsi.chart.renderer.ContourType;
+import de.gsi.chart.renderer.datareduction.ReductionType;
+import de.gsi.chart.renderer.spi.utils.ColorGradient;
+
 public abstract class AbstractContourDataSetRendererParameter<R extends AbstractContourDataSetRendererParameter<R>>
         extends AbstractPointReductionManagment<R> {
-
     private final BooleanProperty altImplementation = new SimpleBooleanProperty(this, "altImplementation", false);
     private final IntegerProperty reductionFactorX = new SimpleIntegerProperty(this, "reductionFactorX", 2);
     private final IntegerProperty reductionFactorY = new SimpleIntegerProperty(this, "reductionFactorY", 2);
@@ -31,7 +30,6 @@ public abstract class AbstractContourDataSetRendererParameter<R extends Abstract
      * suppresses contour segments being drawn that have more than the specified number of sub-segments
      */
     private final IntegerProperty maxContourSegments = new SimpleIntegerProperty(this, "maxContourSegments", 500) {
-
         @Override
         public void set(int newValue) {
             super.set(Math.max(2, newValue));
@@ -39,7 +37,6 @@ public abstract class AbstractContourDataSetRendererParameter<R extends Abstract
     };
 
     private final IntegerProperty minHexTileSize = new SimpleIntegerProperty(this, "minHexTileSize", 5) {
-
         @Override
         public void set(int newValue) {
             super.set(Math.max(2, newValue));
@@ -54,7 +51,6 @@ public abstract class AbstractContourDataSetRendererParameter<R extends Abstract
     };
 
     private final BooleanProperty smooth = new SimpleBooleanProperty(this, "smooth", false) {
-
         @Override
         protected void invalidated() {
             // requestChartLayout();
@@ -293,5 +289,4 @@ public abstract class AbstractContourDataSetRendererParameter<R extends Abstract
     public BooleanProperty smoothProperty() {
         return smooth;
     }
-
 }

@@ -12,7 +12,6 @@ import de.gsi.dataset.event.AddedDataEvent;
  * @author braeun
  */
 public class AveragingDataSet extends AbstractDataSet<AveragingDataSet> implements DataSet2D {
-
     private static final long serialVersionUID = 1L;
     private int averageSize = 1;
     private int fuzzyCount = 0;

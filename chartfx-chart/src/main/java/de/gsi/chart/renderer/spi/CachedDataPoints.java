@@ -72,7 +72,7 @@ class CachedDataPoints {
     protected double maxRadius;
     protected int maxDataCount;
     protected int actualDataCount; // number of data points that remain
-                                   // after data reduction
+            // after data reduction
 
     public CachedDataPoints(final int indexMin, final int indexMax, final int dataLength, final boolean full) {
         maxDataCount = dataLength;
@@ -240,7 +240,7 @@ class CachedDataPoints {
             final int min, final int max) {
         final int minthreshold = 1000;
         final int divThread = (int) Math
-                .ceil(Math.abs(max - min) / (double) CachedDaemonThreadFactory.getNumbersOfThreads());
+                                      .ceil(Math.abs(max - min) / (double) CachedDaemonThreadFactory.getNumbersOfThreads());
         final int stepSize = Math.max(divThread, minthreshold);
         final List<Callable<Boolean>> workers = new ArrayList<>();
         for (int i = min; i < max; i += stepSize) {

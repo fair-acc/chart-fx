@@ -202,5 +202,4 @@ public class CircularDoubleErrorDataSet extends AbstractErrorDataSet<CircularDou
 
         return fireInvalidated(new RemovedDataEvent(this));
     }
-
 }

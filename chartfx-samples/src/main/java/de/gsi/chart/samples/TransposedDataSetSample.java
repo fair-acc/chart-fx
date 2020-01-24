@@ -3,6 +3,21 @@ package de.gsi.chart.samples;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
+import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.Separator;
+import javafx.scene.control.TextField;
+import javafx.scene.control.ToolBar;
+import javafx.scene.control.Tooltip;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
+
 import org.controlsfx.glyphfont.Glyph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,20 +33,6 @@ import de.gsi.dataset.DataSet3D;
 import de.gsi.dataset.spi.DataSetBuilder;
 import de.gsi.dataset.spi.DoubleDataSet3D;
 import de.gsi.dataset.spi.TransposedDataSet;
-import javafx.application.Application;
-import javafx.application.Platform;
-import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.Separator;
-import javafx.scene.control.TextField;
-import javafx.scene.control.ToolBar;
-import javafx.scene.control.Tooltip;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.VBox;
-import javafx.stage.Stage;
 
 /**
  * Simple Example for the use of the TransposedDataSet Shows how 1D and 2D dataSets can be transposed and how to reduce
@@ -50,7 +51,6 @@ public class TransposedDataSetSample extends Application {
 
     @Override
     public void start(final Stage primaryStage) {
-
         // init default 2D Chart
         final XYChart chart1 = getDefaultChart();
         final ErrorDataSetRenderer renderer = (ErrorDataSetRenderer) chart1.getRenderers().get(0);
@@ -67,9 +67,9 @@ public class TransposedDataSetSample extends Application {
         final ContourDataSetRenderer contourRenderer = new ContourDataSetRenderer();
         chart2.getRenderers().setAll(contourRenderer);
 
-//        final DataSet3D dataSet2 = new DoubleDataSet3D("test 3D", new double[] { 0, 10, 20, 30 },
-//                new double[] { 0, 1, 2, 3 },
-//                new double[][] { { 0.1, 0, 0, 0.2 }, { 0.3, 0.4, 0.5, 0.6 }, { 0.7, 0, 0, 1 }, { 1, 1, 1, 1 } });
+        //        final DataSet3D dataSet2 = new DoubleDataSet3D("test 3D", new double[] { 0, 10, 20, 30 },
+        //                new double[] { 0, 1, 2, 3 },
+        //                new double[][] { { 0.1, 0, 0, 0.2 }, { 0.3, 0.4, 0.5, 0.6 }, { 0.7, 0, 0, 1 }, { 1, 1, 1, 1 } });
         final DataSet3D dataSet2 = createTestData();
         dataSet2.getAxisDescription(0).set("x-axis", "x-unit");
         dataSet2.getAxisDescription(1).set("y-axis", "y-unit");
@@ -92,18 +92,23 @@ public class TransposedDataSetSample extends Application {
             }
             transposedDataSet1.setTransposed(cbTransposed.isSelected());
             transposedDataSet2.setTransposed(cbTransposed.isSelected());
-            textPermutation.setText(Arrays.stream(transposedDataSet2.getPermutation()).boxed().map(String::valueOf)
-                    .collect(Collectors.joining(",")));
+            textPermutation.setText(Arrays.stream(transposedDataSet2.getPermutation()).boxed().map(String::valueOf).collect(Collectors.joining(",")));
         });
 
         // flipping method #2: via 'setPermutation(int[])' - flips arbitrary combination of axes
         final Runnable permutationAction = () -> {
             final int[] parsedInt1 = Arrays.asList(textPermutation.getText().split(","))
-                    .subList(0, transposedDataSet1.getDimension()).stream().map(String::trim)
-                    .mapToInt(Integer::parseInt).toArray();
+                                             .subList(0, transposedDataSet1.getDimension())
+                                             .stream()
+                                             .map(String::trim)
+                                             .mapToInt(Integer::parseInt)
+                                             .toArray();
             final int[] parsedInt2 = Arrays.asList(textPermutation.getText().split(","))
-                    .subList(0, transposedDataSet2.getDimension()).stream().map(String::trim)
-                    .mapToInt(Integer::parseInt).toArray();
+                                             .subList(0, transposedDataSet2.getDimension())
+                                             .stream()
+                                             .map(String::trim)
+                                             .mapToInt(Integer::parseInt)
+                                             .toArray();
 
             transposedDataSet1.setPermutation(parsedInt1);
             transposedDataSet2.setPermutation(parsedInt2);
@@ -129,7 +134,7 @@ public class TransposedDataSetSample extends Application {
         final int nPoints = 1000;
         final double f = 0.1;
         final double[] x = new double[nPoints];
-        final double[] y = new double[2*nPoints];
+        final double[] y = new double[2 * nPoints];
         for (int i = 0; i < x.length; i++) {
             final double val = (i / (double) x.length - 0.5) * 10;
             x[i] = val;
@@ -182,12 +187,11 @@ public class TransposedDataSetSample extends Application {
         final double b = (yMax - yMin) / 2.0;
         for (int i = 0; i < nSamples; i++) {
             x[i] = xMin + (a * (Math.sin(i * omega) + 1))
-                    + (pert * Math.sin(i * omega * 0.95) * Math.cos(i * omega * 2));
+                   + (pert * Math.sin(i * omega * 0.95) * Math.cos(i * omega * 2));
             y[i] = yMin + (b * (Math.sin(i * omega * 2) + 1))
-                    + (pert * Math.sin(i * omega * 0.777) * Math.cos(i * omega));
+                   + (pert * Math.sin(i * omega * 0.777) * Math.cos(i * omega));
         }
-        final DataSet dataSet = new DataSetBuilder().setName("non-sorted 2D DataSet").setXValues(x).setYValues(y)
-                .build();
+        final DataSet dataSet = new DataSetBuilder().setName("non-sorted 2D DataSet").setXValues(x).setYValues(y).build();
         dataSet.getAxisDescription(0).set("x-axis", "x-unit");
         dataSet.getAxisDescription(1).set("y-axis", "y-unit");
 
