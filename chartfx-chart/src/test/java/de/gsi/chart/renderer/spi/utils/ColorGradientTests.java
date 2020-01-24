@@ -8,13 +8,12 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.jupiter.api.Test;
-
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Stop;
 
-public class ColorGradientTests {
+import org.junit.jupiter.api.Test;
 
+public class ColorGradientTests {
     @Test
     public void testColorGradientApi() {
         assertDoesNotThrow(() -> new ColorGradient(new ArrayList<Stop>()));

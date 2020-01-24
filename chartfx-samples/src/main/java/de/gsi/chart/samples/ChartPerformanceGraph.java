@@ -70,7 +70,6 @@ public class ChartPerformanceGraph extends Application {
         DoubleDataSet dataSet = new DoubleDataSet(fileName.replace(".csv", ""));
 
         try (BufferedReader csvReader = new BufferedReader(new InputStreamReader(inputStream, "UTF-8"))) {
-
             int lineCount = 0;
             String row;
             while ((row = csvReader.readLine()) != null) {
@@ -94,13 +93,11 @@ public class ChartPerformanceGraph extends Application {
             }
 
         } catch (IOException | NumberFormatException e) {
-            LOGGER.atError().setCause(e).addArgument(fileName).addArgument(pathToCsv)
-                    .log("failed to open '{}' -> '{}'");
+            LOGGER.atError().setCause(e).addArgument(fileName).addArgument(pathToCsv).log("failed to open '{}' -> '{}'");
         }
 
         if (LOGGER.isInfoEnabled()) {
-            LOGGER.atInfo().addArgument(dataSet.getDataCount()).addArgument(fileName)
-                    .log("read {} data points from file '{}'");
+            LOGGER.atInfo().addArgument(dataSet.getDataCount()).addArgument(fileName).log("read {} data points from file '{}'");
         }
 
         return dataSet;

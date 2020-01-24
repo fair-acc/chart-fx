@@ -78,38 +78,37 @@ class MultiArrayImpl<T> implements MultiArray<T> {
             if (Arrays.equals((Object[]) other.elements, (Object[]) this.elements)) {
                 return true;
             }
-        } catch (final Exception c) {// Cover all possibilities
+        } catch (final Exception c) { // Cover all possibilities
         }
         try {
             if (Arrays.equals((boolean[]) other.elements, (boolean[]) this.elements)) {
                 return true;
             }
-        } catch (final Exception c) {// Cover all possibilities
+        } catch (final Exception c) { // Cover all possibilities
         }
         try {
             retValue = Arrays.equals((byte[]) other.elements, (byte[]) this.elements);
-        } catch (final Exception c) {// Cover all possibilities
-
+        } catch (final Exception c) { // Cover all possibilities
         }
         try {
             retValue = Arrays.equals((short[]) other.elements, (short[]) this.elements); // NOPMD
-        } catch (final Exception c) {// Cover all possibilities
+        } catch (final Exception c) { // Cover all possibilities
         }
         try {
             retValue = Arrays.equals((int[]) other.elements, (int[]) this.elements);
-        } catch (final Exception c) {// Cover all possibilities
+        } catch (final Exception c) { // Cover all possibilities
         }
         try {
             retValue = Arrays.equals((long[]) other.elements, (long[]) this.elements);
-        } catch (final Exception c) {// Cover all possibilities
+        } catch (final Exception c) { // Cover all possibilities
         }
         try {
             retValue = Arrays.equals((float[]) other.elements, (float[]) this.elements);
-        } catch (final Exception c) {// Cover all possibilities
+        } catch (final Exception c) { // Cover all possibilities
         }
         try {
             retValue = Arrays.equals((double[]) other.elements, (double[]) this.elements);
-        } catch (final Exception c) {// Cover all possibilities
+        } catch (final Exception c) { // Cover all possibilities
         }
 
         return retValue;

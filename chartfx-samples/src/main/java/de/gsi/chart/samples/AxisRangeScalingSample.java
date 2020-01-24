@@ -4,9 +4,6 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 
-import de.gsi.chart.Chart;
-import de.gsi.chart.axes.spi.DefaultNumericAxis;
-import de.gsi.chart.axes.spi.MetricPrefix;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
@@ -18,6 +15,10 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
+
+import de.gsi.chart.Chart;
+import de.gsi.chart.axes.spi.DefaultNumericAxis;
+import de.gsi.chart.axes.spi.MetricPrefix;
 
 /**
  * Small example of how to use the dynamic/static axis scaling functionality N.B. applies only for axes derived from
@@ -32,7 +33,6 @@ public class AxisRangeScalingSample extends Application {
 
     @Override
     public void start(final Stage primaryStage) {
-
         final VBox root = new VBox();
         root.setAlignment(Pos.CENTER);
 
@@ -121,14 +121,13 @@ public class AxisRangeScalingSample extends Application {
                     final double power = Math.pow(10, counter);
                     xAxis9.maxProperty().set(power);
                     final String text = "actual SI range for dynamic axis: [" + xAxis9.getMin() + " V, "
-                            + xAxis9.getMax() + " V]";
+                                        + xAxis9.getMax() + " V]";
                     xAxis9Text.setText(text);
                 });
                 if ((counter >= 9) || (counter <= -9)) {
                     directionUpwards = !directionUpwards;
                 }
             }
-
         };
         timer.scheduleAtFixedRate(task, 0, TimeUnit.SECONDS.toMillis(2));
 

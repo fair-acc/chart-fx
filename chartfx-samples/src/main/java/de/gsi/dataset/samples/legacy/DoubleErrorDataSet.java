@@ -30,7 +30,7 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
     protected double[] yErrorsPos;
     protected double[] yErrorsNeg;
     protected int dataMaxIndex; // <= xValues.length, stores the actually used
-                                // data array size
+            // data array size
 
     /**
      * Creates a new instance of <code>DoubleDataSet</code> as copy of another (deep-copy).
@@ -485,5 +485,4 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
         });
         return fireInvalidated(new UpdatedDataEvent(this));
     }
-
 }

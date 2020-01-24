@@ -22,8 +22,7 @@ public class CacheTests {
 
     @Test
     public void demoTestCase() {
-        final Cache<String, Integer> cache = Cache.builder().withLimit(10).withTimeout(100, TimeUnit.MILLISECONDS)
-                .build();
+        final Cache<String, Integer> cache = Cache.builder().withLimit(10).withTimeout(100, TimeUnit.MILLISECONDS).build();
 
         String name1 = "Han Solo";
 
@@ -54,7 +53,6 @@ public class CacheTests {
 
     @Test
     public void testHelperMethods() {
-
         // TimeUnit to ChronoUnit conversions
         for (TimeUnit timeUnit : TimeUnit.values()) {
             ChronoUnit chronoUnit = Cache.convertToChronoUnit(timeUnit);
@@ -144,6 +142,6 @@ public class CacheTests {
             Cache.builder().withLimit(0).build();
         });
 
-//        Cache cache4 = Cache.builder().withLimit(20).withTimeout(100, TimeUnit.MILLISECONDS).build();
+        //        Cache cache4 = Cache.builder().withLimit(20).withTimeout(100, TimeUnit.MILLISECONDS).build();
     }
 }

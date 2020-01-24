@@ -213,12 +213,10 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
         if (epsilon <= 0.0) {
             for (int dimIndex = 0; dimIndex < this.getDimension(); dimIndex++) {
                 for (int index = 0; index < this.getDataCount(dimIndex); index++) {
-                    if (thisErrorDs.getErrorNegative(dimIndex, index) != otherErrorDs.getErrorNegative(dimIndex,
-                            index)) {
+                    if (thisErrorDs.getErrorNegative(dimIndex, index) != otherErrorDs.getErrorNegative(dimIndex, index)) {
                         return false;
                     }
-                    if (thisErrorDs.getErrorPositive(dimIndex, index) != otherErrorDs.getErrorPositive(dimIndex,
-                            index)) {
+                    if (thisErrorDs.getErrorPositive(dimIndex, index) != otherErrorDs.getErrorPositive(dimIndex, index)) {
                         return false;
                     }
                 }
@@ -227,11 +225,11 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
             for (int dimIndex = 0; dimIndex < this.getDimension(); dimIndex++) {
                 for (int index = 0; index < this.getDataCount(dimIndex); index++) {
                     if (!MathUtils.nearlyEqual(thisErrorDs.getErrorNegative(dimIndex, index),
-                            otherErrorDs.getErrorNegative(dimIndex, index), epsilon)) {
+                                otherErrorDs.getErrorNegative(dimIndex, index), epsilon)) {
                         return false;
                     }
                     if (!MathUtils.nearlyEqual(thisErrorDs.getErrorPositive(dimIndex, index),
-                            otherErrorDs.getErrorPositive(dimIndex, index), epsilon)) {
+                                otherErrorDs.getErrorPositive(dimIndex, index), epsilon)) {
                         return false;
                     }
                 }
@@ -573,7 +571,6 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
             if (dimension == 0) {
                 for (int i = 0; i < dataCount; i++) {
                     getAxisDescription(dimension).add(get(DIM_X, i));
-
                 }
             } else {
                 for (int i = 0; i < dataCount; i++) {
@@ -633,12 +630,18 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
         for (int i = 0; i < this.getDimension(); i++) {
             final AxisDescription desc = getAxisDescription(i);
             final boolean isDefined = desc.isDefined();
-            builder.append(" dataCount(").append(i).append(")=").append(this.getDataCount(i)).append(',')//
-                    .append(" axisName ='").append(desc.getName()).append("',")//
-                    .append(" axisUnit = '").append(desc.getUnit()).append("',") //
-                    .append(" axisRange = ")//
-                    .append(" [min=").append(isDefined ? desc.getMin() : "NotDefined") //
-                    .append(", max=").append(isDefined ? desc.getMax() : "NotDefined")//
+            builder.append(" dataCount(").append(i).append(")=").append(this.getDataCount(i)).append(',') //
+                    .append(" axisName ='")
+                    .append(desc.getName())
+                    .append("',") //
+                    .append(" axisUnit = '")
+                    .append(desc.getUnit())
+                    .append("',") //
+                    .append(" axisRange = ") //
+                    .append(" [min=")
+                    .append(isDefined ? desc.getMin() : "NotDefined") //
+                    .append(", max=")
+                    .append(isDefined ? desc.getMax() : "NotDefined") //
                     .append("],");
         }
         builder.append(']');

@@ -36,7 +36,6 @@ import de.gsi.chart.axes.spi.format.DefaultTickUnitSupplier;
  * </ul>
  */
 public final class NumericAxis extends AbstractAxis {
-
     private static final int TICK_MARK_GAP = 6;
     private static final double NEXT_TICK_UNIT_FACTOR = 1.01;
     private static final int MAX_TICK_COUNT = 20;
@@ -452,7 +451,7 @@ public final class NumericAxis extends AbstractAxis {
         final double majorUnit = unitSupplier.computeTickUnit(rawTickUnit);
         if (majorUnit <= 0) {
             throw new IllegalArgumentException("The " + unitSupplier.getClass().getName()
-                    + " computed illegal unit value [" + majorUnit + "] for argument " + rawTickUnit);
+                                               + " computed illegal unit value [" + majorUnit + "] for argument " + rawTickUnit);
         }
         return majorUnit;
     }
@@ -515,7 +514,7 @@ public final class NumericAxis extends AbstractAxis {
         double maxValue = max;
         if (max - min == 0) {
             final double padding = getAutoRangePadding() == 0 ? NumericAxis.DEFAULT_RANGE_PADDING
-                    : getAutoRangePadding();
+                                                              : getAutoRangePadding();
             final double paddedRange = NumericAxis.getEffectiveRange(min, max) * padding;
             minValue = min - paddedRange / 2;
             maxValue = max + paddedRange / 2;
@@ -596,7 +595,6 @@ public final class NumericAxis extends AbstractAxis {
     private static class StyleableProperties {
         private static final CssMetaData<NumericAxis, Number> TICK_UNIT = new CssMetaData<NumericAxis, Number>(
                 "-fx-tick-unit", SizeConverter.getInstance(), 5.0) {
-
             @SuppressWarnings("unchecked")
             @Override
             public StyleableProperty<Number> getStyleableProperty(final NumericAxis axis) {

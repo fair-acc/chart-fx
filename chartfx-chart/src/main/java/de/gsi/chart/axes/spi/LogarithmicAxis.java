@@ -31,8 +31,8 @@ public class LogarithmicAxis extends AbstractAxis {
     public static final double DB20_LOGARITHM_BASE = Math.exp(Math.log10(10) / 20.0);
     public static final double DB10_LOGARITHM_BASE = Math.exp(Math.log10(10) / 10.0);
     public static final int DEFAULT_SMALL_LOG_AXIS = 4; // [orders of
-                                                        // magnitude], e.g. '4'
-                                                        // <-> [1,10000]
+            // magnitude], e.g. '4'
+            // <-> [1,10000]
     private static final int DEFAULT_TICK_COUNT = 9;
     private static final TickUnitSupplier DEFAULT_TICK_UNIT_SUPPLIER = new DefaultTickUnitSupplier();
 
@@ -408,7 +408,6 @@ public class LogarithmicAxis extends AbstractAxis {
     private static class StyleableProperties {
         private static final CssMetaData<LogarithmicAxis, Number> TICK_UNIT = new CssMetaData<LogarithmicAxis, Number>(
                 "-fx-tick-unit", SizeConverter.getInstance(), 5.0) {
-
             @SuppressWarnings("unchecked")
             @Override
             public StyleableProperty<Number> getStyleableProperty(final LogarithmicAxis axis) {
@@ -431,7 +430,6 @@ public class LogarithmicAxis extends AbstractAxis {
         }
 
         private StyleableProperties() {
-
         }
     }
 

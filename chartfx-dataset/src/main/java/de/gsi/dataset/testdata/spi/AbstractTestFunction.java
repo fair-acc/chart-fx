@@ -105,5 +105,4 @@ public abstract class AbstractTestFunction<D extends AbstractTestFunction<D>> ex
     private static double getYError() {
         return 0.1;
     }
-
 }

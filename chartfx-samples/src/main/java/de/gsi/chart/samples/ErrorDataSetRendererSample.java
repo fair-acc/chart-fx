@@ -3,6 +3,16 @@ package de.gsi.chart.samples;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
+import javafx.stage.Stage;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,15 +30,6 @@ import de.gsi.dataset.spi.DoubleDataSet;
 import de.gsi.dataset.spi.DoubleErrorDataSet;
 import de.gsi.dataset.testdata.spi.RandomDataGenerator;
 import de.gsi.dataset.utils.ProcessingProfiler;
-import javafx.application.Application;
-import javafx.application.Platform;
-import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.Region;
-import javafx.stage.Stage;
 
 /**
  * @author rstein
@@ -45,7 +46,6 @@ public class ErrorDataSetRendererSample extends Application {
     private Timer timer;
 
     private HBox getHeaderBar(final Scene scene) {
-
         final Button newDataSet = new Button("new DataSet");
         newDataSet.setOnAction(evt -> getTimerTask().run());
 
@@ -124,8 +124,8 @@ public class ErrorDataSetRendererSample extends Application {
         // errorRenderer.setErrorType(ErrorStyle.ESTYLE_NONE);
         errorRenderer.setDrawMarker(true);
         errorRenderer.setMarkerSize(1.0);
-//        errorRenderer.setPointReduction(false);
-//        errorRenderer.setAllowNaNs(true);
+        //        errorRenderer.setPointReduction(false);
+        //        errorRenderer.setAllowNaNs(true);
 
         // example how to set the specifc color of the dataset
         // dataSetNoError.setStyle("strokeColor=cyan; fillColor=darkgreen");
@@ -150,7 +150,6 @@ public class ErrorDataSetRendererSample extends Application {
         primaryStage.setOnCloseRequest(evt -> Platform.exit());
         primaryStage.show();
         ProcessingProfiler.getTimeDiff(startTime, "for showing");
-
     }
 
     private static void generateData(final DoubleErrorDataSet dataSet, final DoubleDataSet dataSetNoErrors) {

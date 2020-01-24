@@ -7,7 +7,6 @@ package de.gsi.dataset;
  * @author rstein
  */
 public interface DataSet3D extends DataSet2D {
-
     @Override
     default int getDimension() {
         return 3;
@@ -21,5 +20,4 @@ public interface DataSet3D extends DataSet2D {
      * @return Z coordinate
      */
     double getZ(int xIndex, int yIndex);
-
 }

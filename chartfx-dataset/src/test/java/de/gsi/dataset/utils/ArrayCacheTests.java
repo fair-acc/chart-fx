@@ -12,7 +12,6 @@ import org.junit.jupiter.api.Test;
  * @author rstein
  */
 public class ArrayCacheTests {
-
     @Test
     public void doubleArrayTests() {
         final String uniqueIdentifier = "doubleArray";
@@ -30,7 +29,7 @@ public class ArrayCacheTests {
         assertEquals((Object) original, (Object) copy, "pointer equivalency");
         assertNotEquals((Object) original, (Object) fakeCopy, "pointer difference ");
     }
-    
+
     @Test
     public void floatArrayTests() {
         final String uniqueIdentifier = "floatArray";
@@ -48,7 +47,7 @@ public class ArrayCacheTests {
         assertEquals((Object) original, (Object) copy, "pointer equivalency");
         assertNotEquals((Object) original, (Object) fakeCopy, "pointer difference ");
     }
-    
+
     @Test
     public void shortArrayTests() {
         final String uniqueIdentifier = "shortArray";
@@ -66,7 +65,7 @@ public class ArrayCacheTests {
         assertEquals((Object) original, (Object) copy, "pointer equivalency");
         assertNotEquals((Object) original, (Object) fakeCopy, "pointer difference ");
     }
-    
+
     @Test
     public void intArrayTests() {
         final String uniqueIdentifier = "intArray";
@@ -84,7 +83,7 @@ public class ArrayCacheTests {
         assertEquals((Object) original, (Object) copy, "pointer equivalency");
         assertNotEquals((Object) original, (Object) fakeCopy, "pointer difference ");
     }
-    
+
     @Test
     public void longArrayTests() {
         final String uniqueIdentifier = "longArray";
@@ -102,7 +101,7 @@ public class ArrayCacheTests {
         assertEquals((Object) original, (Object) copy, "pointer equivalency");
         assertNotEquals((Object) original, (Object) fakeCopy, "pointer difference ");
     }
-    
+
     @Test
     public void byteArrayTests() {
         final String uniqueIdentifier = "byteArray";
@@ -120,7 +119,7 @@ public class ArrayCacheTests {
         assertEquals((Object) original, (Object) copy, "pointer equivalency");
         assertNotEquals((Object) original, (Object) fakeCopy, "pointer difference ");
     }
-    
+
     @Test
     public void booleanArrayTests() {
         final String uniqueIdentifier = "booleanArray";
@@ -138,7 +137,7 @@ public class ArrayCacheTests {
         assertEquals((Object) original, (Object) copy, "pointer equivalency");
         assertNotEquals((Object) original, (Object) fakeCopy, "pointer difference ");
     }
-    
+
     @Test
     public void stringArrayTests() {
         final String uniqueIdentifier = "booleanArray";

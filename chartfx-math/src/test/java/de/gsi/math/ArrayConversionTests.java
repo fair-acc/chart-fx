@@ -278,5 +278,4 @@ public class ArrayConversionTests {
             LOGGER.atDebug().log("miscTest() - passed");
         }
     }
-
 }

@@ -177,7 +177,7 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
                 continue;
             }
             parameterDisplayPane.put(side, side.isVertical() ? new ChartHBox() : new ChartVBox()); // NOPMD - default
-                                                                                                   // init
+                    // init
         }
     }
 
@@ -224,7 +224,6 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
     protected final Label titleLabel = new Label();
 
     protected final StringProperty title = new StringPropertyBase() {
-
         @Override
         public Object getBean() {
             return Chart.this;
@@ -246,7 +245,6 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
      */
     private final ObjectProperty<Side> titleSide = new StylishObjectProperty<Side>(StyleableProperties.TITLE_SIDE, this,
             "titleSide", Side.TOP, this::requestLayout) {
-
         @Override
         public void set(final Side side) {
             AssertUtils.notNull("Side must not be null", side);
@@ -263,7 +261,6 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
      * The side of the chart where the title is displayed default Side.TOP
      */
     private final ObjectProperty<Side> measurementBarSide = new StyleableObjectProperty<Side>(Side.RIGHT) {
-
         @Override
         public Object getBean() {
             return Chart.this;
@@ -296,7 +293,6 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
      * legend is wanted then this can be set to null
      */
     private final ObjectProperty<Legend> legend = new SimpleObjectProperty<Legend>(this, "legend") {
-
         private Legend oldLegend;
 
         @Override
@@ -318,7 +314,6 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
      */
     private final ObjectProperty<Side> legendSide = new StylishObjectProperty<Side>(StyleableProperties.LEGEND_SIDE,
             this, "legendSide", Side.BOTTOM, this::requestLayout) {
-
         @Override
         public void set(final Side side) {
             AssertUtils.notNull("Side must not be null", side);
@@ -337,7 +332,6 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
     };
 
     private final ObjectProperty<Side> toolBarSide = new StyleableObjectProperty<Side>(Side.TOP) {
-
         @Override
         public Object getBean() {
             return Chart.this;
@@ -561,7 +555,6 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
             } else {
                 getTitleLegendPane(getLegendSide()).getChildren().remove(getLegend().getNode());
             }
-
         });
         getTitleLegendPane(getLegendSide()).getChildren().add(getLegend().getNode());
 
@@ -627,8 +620,7 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
 
         allDataSets.clear();
         allDataSets.addAll(getDatasets());
-        getRenderers().stream().filter(renderer -> !(renderer instanceof LabelledMarkerRenderer))
-                .forEach(renderer -> allDataSets.addAll(renderer.getDatasets()));
+        getRenderers().stream().filter(renderer -> !(renderer instanceof LabelledMarkerRenderer)).forEach(renderer -> allDataSets.addAll(renderer.getDatasets()));
 
         return allDataSets;
     }
@@ -1204,10 +1196,8 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
     }
 
     private static class StyleableProperties {
-
         private static final CssMetaData<Chart, Side> TITLE_SIDE = new CssMetaData<Chart, Side>("-fx-title-side",
                 new EnumConverter<>(Side.class), Side.TOP) {
-
             @Override
             public StyleableProperty<Side> getStyleableProperty(final Chart node) {
                 return (StyleableProperty<Side>) (WritableValue<Side>) node.titleSideProperty();
@@ -1221,7 +1211,6 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
 
         private static final CssMetaData<Chart, Side> MEASUREMENT_SIDE_BAR = new CssMetaData<Chart, Side>(
                 "-fx-measurement-bar-side", new EnumConverter<>(Side.class), Side.RIGHT) {
-
             @Override
             public StyleableProperty<Side> getStyleableProperty(final Chart node) {
                 return (StyleableProperty<Side>) (WritableValue<Side>) node.measurementBarSideProperty();
@@ -1235,7 +1224,6 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
 
         private static final CssMetaData<Chart, Side> TOOLBAR_SIDE = new CssMetaData<Chart, Side>("-fx-toolbar-side",
                 new EnumConverter<>(Side.class), Side.TOP) {
-
             @Override
             public StyleableProperty<Side> getStyleableProperty(final Chart node) {
                 return (StyleableProperty<Side>) (WritableValue<Side>) node.toolBarSideProperty();
@@ -1249,7 +1237,6 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
 
         private static final CssMetaData<Chart, Side> LEGEND_SIDE = new CssMetaData<Chart, Side>("-fx-legend-side",
                 new EnumConverter<>(Side.class), Side.BOTTOM) {
-
             @Override
             public StyleableProperty<Side> getStyleableProperty(final Chart node) {
                 return (StyleableProperty<Side>) (WritableValue<Side>) node.legendSideProperty();
@@ -1263,7 +1250,6 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
 
         private static final CssMetaData<Chart, Boolean> LEGEND_VISIBLE = new CssMetaData<Chart, Boolean>(
                 "-fx-legend-visible", BooleanConverter.getInstance(), Boolean.TRUE) {
-
             @SuppressWarnings("unchecked")
             @Override
             public StyleableProperty<Boolean> getStyleableProperty(final Chart node) {
@@ -1290,7 +1276,6 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
     }
 
     protected class ChartHBox extends HBox {
-
         public ChartHBox() {
             super();
             setAlignment(Pos.CENTER);
@@ -1304,7 +1289,6 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
     }
 
     protected class ChartVBox extends VBox {
-
         public ChartVBox() {
             super();
             setAlignment(Pos.CENTER);
@@ -1316,5 +1300,4 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
             setFillWidth(fill);
         }
     }
-
 }

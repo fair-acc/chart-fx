@@ -2,24 +2,6 @@ package de.gsi.chart.samples;
 
 import java.util.Timer;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import de.gsi.chart.Chart;
-import de.gsi.chart.XYChart;
-import de.gsi.chart.axes.spi.DefaultNumericAxis;
-import de.gsi.chart.plugins.ColormapSelector.ColormapComboBox;
-import de.gsi.chart.plugins.EditAxis;
-import de.gsi.chart.plugins.Zoomer;
-import de.gsi.chart.renderer.ContourType;
-import de.gsi.chart.renderer.datareduction.ReductionType;
-import de.gsi.chart.renderer.spi.ContourDataSetRenderer;
-import de.gsi.chart.samples.utils.TestDataSetSource;
-import de.gsi.chart.samples.utils.TestDataSetSource.DataInput;
-import de.gsi.chart.ui.geometry.Side;
-import de.gsi.dataset.DataSet;
-import de.gsi.dataset.utils.ProcessingProfiler;
-
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
@@ -39,6 +21,24 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import de.gsi.chart.Chart;
+import de.gsi.chart.XYChart;
+import de.gsi.chart.axes.spi.DefaultNumericAxis;
+import de.gsi.chart.plugins.ColormapSelector.ColormapComboBox;
+import de.gsi.chart.plugins.EditAxis;
+import de.gsi.chart.plugins.Zoomer;
+import de.gsi.chart.renderer.ContourType;
+import de.gsi.chart.renderer.datareduction.ReductionType;
+import de.gsi.chart.renderer.spi.ContourDataSetRenderer;
+import de.gsi.chart.samples.utils.TestDataSetSource;
+import de.gsi.chart.samples.utils.TestDataSetSource.DataInput;
+import de.gsi.chart.ui.geometry.Side;
+import de.gsi.dataset.DataSet;
+import de.gsi.dataset.utils.ProcessingProfiler;
 
 /**
  * Example and test-case for waterfall-type contour/heatmap-type plots commonly found in spectrum signal analysis.
@@ -248,8 +248,7 @@ public class WaterfallPerformanceSample extends Application {
         frameCount.setPrefWidth(80);
 
         final Label canvasDimension = new Label();
-        ChangeListener<Number> canvasListener = (ch, o, n) -> canvasDimension.setText(
-                "canvas = " + chart.getCanvas().getWidth() + " x " + chart.getCanvas().getHeight() + " pixels");
+        ChangeListener<Number> canvasListener = (ch, o, n) -> canvasDimension.setText("canvas = " + chart.getCanvas().getWidth() + " x " + chart.getCanvas().getHeight() + " pixels");
 
         final Label dataSetDimension = new Label();
 
