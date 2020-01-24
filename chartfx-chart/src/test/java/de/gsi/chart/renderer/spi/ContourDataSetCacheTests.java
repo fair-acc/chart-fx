@@ -1,21 +1,17 @@
 package de.gsi.chart.renderer.spi;
 
+import static de.gsi.dataset.DataSet.DIM_X;
+import static de.gsi.dataset.DataSet.DIM_Y;
+import static de.gsi.dataset.DataSet.DIM_Z;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import static de.gsi.dataset.DataSet.DIM_X;
-import static de.gsi.dataset.DataSet.DIM_Y;
-import static de.gsi.dataset.DataSet.DIM_Z;
-
 import java.util.Arrays;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
 
 import de.gsi.chart.axes.AxisTransform;
-import de.gsi.chart.renderer.datareduction.ReductionType;
 import de.gsi.chart.renderer.spi.utils.ColorGradient;
 import de.gsi.dataset.spi.AbstractDataSet3D;
 import de.gsi.dataset.spi.DataRange;
@@ -29,48 +25,30 @@ public class ContourDataSetCacheTests {
     private static final double[] TEST_DATA_X = { 1, 2, 3 };
     private static final double[] TEST_DATA_Y = { 1, 2, 3, 4 };
     private static final double[] TEST_DATA_Z = { //
-        1, 2, 3, //
-        4, 5, 6, //
-        7, 8, 9, //
-        10, 11, 12
-    };
+            1, 2, 3, //
+            4, 5, 6, //
+            7, 8, 9, //
+            10, 11, 12 };
     // test cases for inversion
     private static final double[] TEST_DATA_Z_X_INVERTED = { //
-        3, 2, 1, //
-        6, 5, 4, //
-        9, 8, 7, //
-        12, 11, 10
-    };
+            3, 2, 1, //
+            6, 5, 4, //
+            9, 8, 7, //
+            12, 11, 10 };
     private static final double[] TEST_DATA_Z_Y_INVERTED = { //
-        10, 11, 12, //
-        7, 8, 9, //
-        4, 5, 6, //
-        1, 2, 3
-    };
+            10, 11, 12, //
+            7, 8, 9, //
+            4, 5, 6, //
+            1, 2, 3 };
     private static final double[] TEST_DATA_Z_XY_INVERTED = { //
-        12, 11, 10, //
-        9, 8, 7, //
-        6, 5, 4, //
-        3, 2, 1
-    };
-    private static final double[] TEST_DATA_RED_Y_MIN = { //
-        1, 2, 3, //
-        7, 8, 9
-    };
-    private static final double[] TEST_DATA_RED_Y_MAX = { //
-        4, 5, 6, //
-        10, 11, 12
-    };
-    private static final double[] TEST_DATA_RED_Y_AVG = { //
-        2.5, 3.5, 4.5, //
-        8.5, 9.5, 10.5
-    };
+            12, 11, 10, //
+            9, 8, 7, //
+            6, 5, 4, //
+            3, 2, 1 };
     private static final double[] TEST_DATA_Z_QUANT1 = { //
-        0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0
-    };
+            0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0 };
     private static final double[] TEST_DATA_Z_QUANT2 = { //
-        0.9, 0.8, 0.7, 0.6, 0.5, 0.5, 0.4, 0.3, 0.2, 0.1, 0.0, 0.0
-    };
+            0.9, 0.8, 0.7, 0.6, 0.5, 0.5, 0.4, 0.3, 0.2, 0.1, 0.0, 0.0 };
 
     @Test
     public void testDataSet() {
@@ -173,41 +151,6 @@ public class ContourDataSetCacheTests {
         assertArrayEquals(TEST_DATA_Z_QUANT2, inputDataInv, "quantizeData(..) - inverted");
     }
 
-    @ParameterizedTest
-    @ValueSource(booleans = { false, true })
-    public void testDataReduction(final boolean parallel) {
-        TestDataSet dataSet = new TestDataSet();
-        final int srcWidth = dataSet.getDataCount(DIM_X);
-        final int srcHeigth = dataSet.getDataCount(DIM_Y);
-
-        final double[] inputBuffer = Arrays.copyOf(TEST_DATA_Z, TEST_DATA_Z.length);
-        assertEquals(TEST_DATA_Z.length, inputBuffer.length, "data buffer length");
-        final double[] tempBuffer = new double[TEST_DATA_Z.length / 2];
-        ArrayUtils.fillArray(tempBuffer, -1);
-
-        ContourDataSetCache.reduceData( //
-                inputBuffer, srcWidth, srcHeigth, tempBuffer, srcWidth, srcHeigth / 2, //
-                2 /* reductionFactor */, ReductionType.MIN, parallel);
-        assertArrayEquals(TEST_DATA_RED_Y_MIN, tempBuffer, "data reduction Y min");
-        ArrayUtils.fillArray(tempBuffer, -1);
-
-        ContourDataSetCache.reduceData( //
-                inputBuffer, dataSet.getDataCount(DIM_X), dataSet.getDataCount(DIM_Y), //
-                tempBuffer, dataSet.getDataCount(DIM_X), dataSet.getDataCount(DIM_Y) / 2, //
-                2 /* reductionFactor */, ReductionType.MAX, //
-                parallel);
-        assertArrayEquals(TEST_DATA_RED_Y_MAX, tempBuffer, "data reduction Y max");
-        // assertEquals(TEST_DATA_RED_Y_MAX, tempBuffer, "data reduction Y max");
-        ArrayUtils.fillArray(tempBuffer, -1);
-
-        ContourDataSetCache.reduceData( //
-                inputBuffer, dataSet.getDataCount(DIM_X), dataSet.getDataCount(DIM_Y), //
-                tempBuffer, dataSet.getDataCount(DIM_X), dataSet.getDataCount(DIM_Y) / 2, //
-                2 /* reductionFactor */, ReductionType.AVERAGE, //
-                parallel);
-        assertArrayEquals(TEST_DATA_RED_Y_AVG, tempBuffer, "data reduction Y max");
-    }
-
     @Test
     public void testDataTransform() {
         TestDataSet dataSet = new TestDataSet();
@@ -259,7 +202,8 @@ public class ContourDataSetCacheTests {
         ContourDataSetCache.copySubFrame(dataSet, dataBuffer, true, false, 0, 2, false, 0, 3);
         assertArrayEquals(TEST_DATA_Z, dataBuffer, "data buffer content - parallel copySubFrame");
 
-        assertDoesNotThrow(() -> ContourDataSetCache.convertDataArrayToImage(TEST_DATA_Z, TEST_DATA_X.length, TEST_DATA_Y.length, ColorGradient.DEFAULT), "data to colour image conversion");
+        assertDoesNotThrow(() -> ContourDataSetCache.convertDataArrayToImage(TEST_DATA_Z, TEST_DATA_X.length,
+                TEST_DATA_Y.length, ColorGradient.DEFAULT), "data to colour image conversion");
     }
 
     private class TestDataSet extends AbstractDataSet3D<TestDataSet> {
