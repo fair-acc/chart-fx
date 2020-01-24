@@ -602,7 +602,12 @@ public class TableViewer extends ChartPlugin {
                 this.setCellFactory(TextFieldTableCell.forTableColumn(new DoubleStringConverter()));
 
                 this.setOnEditCommit(e -> {
-                    final int row = e.getRowValue().getRow();
+                    DataSetsRow rowValue = e.getRowValue();
+                    if (rowValue == null) {
+                        LOGGER.atError().log("DataSet row should not be null");
+                        return;
+                    }
+                    final int row = rowValue.getRow();
                     final double oldX = editableDataSet.get(DIM_X, row);
                     final double oldY = editableDataSet.get(DIM_Y, row);
 

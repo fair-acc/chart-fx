@@ -88,7 +88,7 @@ public class MidiWaveformSynthesizer {
             sequencer.addMetaEventListener(evt -> {
                 final int command = evt.getType();
                 final byte[] data = evt.getData();
-                if ((data.length < 2) || ((command != LOCAL_NOTE_ON) && (command != LOCAL_NOTE_OFF))) {
+                if ((data.length < 2) || ((command != LOCAL_NOTE_ON) && (command != LOCAL_NOTE_OFF) && (command != ShortMessage.CONTROL_CHANGE))) {
                     return;
                 }
                 final int note = evt.getData()[1] & 0xFF;
@@ -116,7 +116,7 @@ public class MidiWaveformSynthesizer {
         } catch (final MidiUnavailableException e) {
             LOGGER.atError().setCause(e).log("could not initialise MidiSystem");
         } catch (final IOException e) {
-            LOGGER.atError().setCause(e).addArgument(TestDataSetSource.class.getResourceAsStream(midiFile)).log("could not open file '{}'");
+            LOGGER.atError().setCause(e).addArgument(TestDataSetSource.class.getResource(midiFile)).log("could not open file '{}'");
         } catch (final InvalidMidiDataException e) {
             LOGGER.atError().setCause(e).addArgument(midiFile).log("'{}' does not seem to be recognised as a Midi file");
         }
@@ -124,10 +124,13 @@ public class MidiWaveformSynthesizer {
 
     public void decode(final float[] data, final int frameSize, final int updatePeriod, final int samplingRate,
             final int nBits) {
+        if (frameSize <= 0) {
+            throw new IllegalArgumentException("Frame size must be greater than zero");
+        }
         final Track track = mergeShortMessageEvent(sequence.getTracks());
         final float length = 1e-6f * sequence.getMicrosecondLength();
         final float ts = 1.0f / samplingRate;
-        final float tickLength = length / track.ticks();
+        final float tickLength = track.ticks() <= 0 ? 0 : length / track.ticks();
         final int frameCount = data.length / frameSize;
         final float scale = 2 << Math.max(1, nBits + 1);
 

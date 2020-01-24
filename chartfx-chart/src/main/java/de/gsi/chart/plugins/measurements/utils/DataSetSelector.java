@@ -8,6 +8,7 @@ import javafx.geometry.Orientation;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
+import javafx.scene.control.MultipleSelectionModel;
 import javafx.scene.layout.HBox;
 
 /**
@@ -28,8 +29,9 @@ public class DataSetSelector extends HBox {
         dataSets = new ListView<>(allDataSets);
         dataSets.setOrientation(Orientation.VERTICAL);
         dataSets.setPrefSize(-1, DataSetSelector.DEFAULT_SELECTOR_HEIGHT);
-        if (!allDataSets.isEmpty()) {
-            dataSets.getSelectionModel().select(0);
+        MultipleSelectionModel<DataSet> selModel = dataSets.getSelectionModel();
+        if (!allDataSets.isEmpty() && selModel != null) {
+            selModel.select(0);
         }
 
         dataSets.setCellFactory(list -> new DataSetLabel());
@@ -42,7 +44,10 @@ public class DataSetSelector extends HBox {
     }
 
     public DataSet getSelectedDataSet() {
-        return dataSets.getSelectionModel().getSelectedItem();
+        MultipleSelectionModel<DataSet> selModel = dataSets.getSelectionModel();
+        if (selModel == null)
+            return null;
+        return selModel.getSelectedItem();
     }
 
     static protected class DataSetLabel extends ListCell<DataSet> {

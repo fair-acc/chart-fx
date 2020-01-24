@@ -390,8 +390,6 @@ public class EditAxis extends ChartPlugin {
             axis.minProperty().addListener((ch, o, n) -> lambda.run());
             axis.maxProperty().addListener((ch, o, n) -> lambda.run());
 
-            textField.snappedTopInset();
-            textField.snappedBottomInset();
             // force the field to be numeric only
             textField.textProperty().addListener((observable, oldValue, newValue) -> {
                 if ((newValue != null) && !newValue.matches("\\d*")) {

@@ -295,7 +295,10 @@ public class TransposedDataSet implements DataSet {
         @Override
         public double get(int dimIndex, int index) {
             if (dimIndex == DIM_Z && permutation[DIM_X] != DIM_X) {
-                return ((DataSet3D) dataSet).getZ(index / dataSet.getDataCount(DIM_Y), index % dataSet.getDataCount(DIM_Y));
+                int ny = dataSet.getDataCount(DIM_Y);
+                if (ny == 0)
+                    throw new IndexOutOfBoundsException("ny = 0");
+                return ((DataSet3D) dataSet).getZ(index / ny, index % ny);
             }
             return super.get(dimIndex, index);
         }

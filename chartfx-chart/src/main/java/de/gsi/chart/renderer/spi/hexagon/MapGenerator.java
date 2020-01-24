@@ -41,6 +41,9 @@ class MapGenerator {
      */
     public void generate(IHexagonCreator creator) {
         final PixelReader pr = image.getPixelReader();
+        if (pr == null) {
+            return;
+        }
         final double imageWidth = image.getWidth();
         final double imageHeight = image.getHeight();
         final double hexagonMapWidthInPixels = map.getGraphicsHorizontalDistanceBetweenHexagons() * mapWidth;

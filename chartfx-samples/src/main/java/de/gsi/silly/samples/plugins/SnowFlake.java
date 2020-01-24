@@ -24,7 +24,7 @@ public class SnowFlake extends Path {
      *
      * @defaultValue 0.0
      */
-    private DoubleProperty centerX = new SimpleDoubleProperty(this, "centerX", 0.0) {
+    private final DoubleProperty centerX = new SimpleDoubleProperty(this, "centerX", 0.0) {
         @Override
         public void invalidated() {
             NodeHelper.markDirty(SnowFlake.this, DirtyBits.NODE_GEOMETRY);
@@ -38,7 +38,7 @@ public class SnowFlake extends Path {
      *
      * @defaultValue 0.0
      */
-    private DoubleProperty centerY = new SimpleDoubleProperty(this, "centerY", 0.0) {
+    private final DoubleProperty centerY = new SimpleDoubleProperty(this, "centerY", 0.0) {
         @Override
         public void invalidated() {
             NodeHelper.markDirty(SnowFlake.this, DirtyBits.NODE_GEOMETRY);
