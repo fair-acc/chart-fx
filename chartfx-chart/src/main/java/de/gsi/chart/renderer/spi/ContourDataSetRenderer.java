@@ -179,6 +179,12 @@ public class ContourDataSetRenderer extends AbstractContourDataSetRendererParame
 
         final WritableImage image = new WritableImage(xSize, ySize);
         final PixelWriter pixelWriter = image.getPixelWriter();
+        if (pixelWriter == null) {
+            if (LOGGER.isErrorEnabled()) {
+                LOGGER.atError().log("Could not get PixelWriter for image");
+            }
+            return;
+        }
 
         final ColorGradient colorGradient = getColorGradient();
         for (final double level : levels) {
@@ -248,6 +254,12 @@ public class ContourDataSetRenderer extends AbstractContourDataSetRendererParame
         final WritableImage image = new WritableImage(xSize * scaleX, ySize * scaleY);
 
         final PixelWriter pixelWriter = image.getPixelWriter();
+        if (pixelWriter == null) {
+            if (LOGGER.isErrorEnabled()) {
+                LOGGER.atError().log("Could not get PixelWriter for image");
+            }
+            return;
+        }
         for (int xIndex = 0; xIndex < xSize; xIndex++) {
             for (int yIndex = 0; yIndex < ySize; yIndex++) {
                 final double z = dataSet.getZ(xIndex + indexXMin, yIndex + indexYMin);

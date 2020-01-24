@@ -33,8 +33,6 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.geometry.Bounds;
 import javafx.geometry.Point2D;
 import javafx.geometry.Rectangle2D;
@@ -159,7 +157,7 @@ public class DataViewWindow extends BorderPane implements EventSource {
             Cursor.CLOSED_HAND);
     private Cursor originalCursor;
     private final ObjectProperty<Node> graphic = new SimpleObjectProperty<>(this, "graphic");
-    protected final EventHandler<ActionEvent> maximizeButtonAction = event -> {
+    protected final Runnable maximizeButtonAction = () -> {
         if (updatingStage.get() || getParentView() == null || isDetached()) {
             // update guard
             return;
@@ -213,7 +211,7 @@ public class DataViewWindow extends BorderPane implements EventSource {
         updatingStage.set(false);
     };
 
-    protected final EventHandler<ActionEvent> minimizeButtonAction = event -> {
+    protected final Runnable minimizeButtonAction = () -> {
         if (isDetached() || isMinimised()) {
             // update guard
             return;
@@ -245,7 +243,7 @@ public class DataViewWindow extends BorderPane implements EventSource {
         updatingStage.set(false);
     };
 
-    protected EventHandler<ActionEvent> closeButtonAction = event -> {
+    protected Runnable closeButtonAction = () -> {
         if (updatingStage.get() || isClosed()) {
             // update guard
             return;
@@ -320,9 +318,9 @@ public class DataViewWindow extends BorderPane implements EventSource {
             getRightIcons().add(closeButton);
         }
 
-        minimisedWindow.addListener((ch, o, n) -> minimizeButtonAction.handle(null));
-        maximisedWindow.addListener((ch, o, n) -> maximizeButtonAction.handle(null));
-        restoredWindow.addListener((ch, o, n) -> maximizeButtonAction.handle(null));
+        minimisedWindow.addListener((ch, o, n) -> minimizeButtonAction.run());
+        maximisedWindow.addListener((ch, o, n) -> maximizeButtonAction.run());
+        restoredWindow.addListener((ch, o, n) -> maximizeButtonAction.run());
         detachedWindow.addListener((ch, o, n) -> {
             if (Boolean.TRUE.equals(n)) {
                 dialog.show(this, null);
@@ -332,15 +330,15 @@ public class DataViewWindow extends BorderPane implements EventSource {
         });
         closedWindow.addListener((ch, o, n) -> {
             if (Boolean.TRUE.equals(n)) {
-                closeButtonAction.handle(null);
+                closeButtonAction.run();
             }
         });
 
         // set actions
         detachButton.setOnAction(evt -> setDetached(true));
-        minimizeButton.setOnAction(minimizeButtonAction);
-        maximizeRestoreButton.setOnAction(maximizeButtonAction);
-        closeButton.setOnAction(closeButtonAction);
+        minimizeButton.setOnAction(evt -> minimizeButtonAction.run());
+        maximizeRestoreButton.setOnAction((evt) -> maximizeButtonAction.run());
+        closeButton.setOnAction((evt) -> closeButtonAction.run());
 
         // install drag handler
         windowDecoration.setOnMouseReleased(this::dragFinish);

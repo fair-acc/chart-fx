@@ -15,6 +15,9 @@ import javafx.scene.image.PixelFormat;
 import javafx.scene.image.PixelWriter;
 import javafx.scene.image.WritableImage;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.gsi.chart.XYChart;
 import de.gsi.chart.axes.Axis;
 import de.gsi.chart.axes.AxisTransform;
@@ -33,6 +36,7 @@ import de.gsi.dataset.utils.ProcessingProfiler;
  * @author rstein
  */
 class ContourDataSetCache {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ContourDataSetCache.class);
     private static final String PARALLEL_WORKER_ERROR = "one parallel worker thread finished execution with error";
     private static final String CLASS_NAME = ContourDataSetCache.class.getSimpleName() + System.currentTimeMillis();
     private static final String DATA_COPY_BUFFER_NAME = CLASS_NAME + ":dataBuffer";
@@ -159,6 +163,9 @@ class ContourDataSetCache {
 
         // process continuous to quantised z values
         final AxisTransform axisTransform = zAxis.getAxisTransform();
+        if (axisTransform == null) {
+            throw new IllegalArgumentException("zAxis of renderer needs to have an axis transform for its z-Axis");
+        }
         final int nQuant = renderer.getNumberQuantisationLevels();
         quantizeData(reduced, xSize, ySize, zInverted, zMin, zMax, axisTransform, nQuant);
         ProcessingProfiler.getTimeDiff(start, "quantized data");
@@ -348,6 +355,12 @@ class ContourDataSetCache {
         final int rowSizeInBytes = BGRA_BYTE_SIZE * dataWidth;
         final WritableImage image = new WritableImage(dataWidth, dataHeight);
         final PixelWriter pixelWriter = image.getPixelWriter();
+        if (pixelWriter == null) {
+            if (LOGGER.isErrorEnabled()) {
+                LOGGER.atError().log("Could not get PixelWriter for image");
+            }
+            return image;
+        }
 
         final int hMinus1 = dataHeight - 1;
         for (int yIndex = 0; yIndex < dataHeight; yIndex++) {
