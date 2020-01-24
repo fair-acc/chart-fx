@@ -29,7 +29,6 @@ public class FifoDoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorData
      */
     public FifoDoubleErrorDataSet(final String name, final int initalSize) {
         this(name, initalSize, Double.MAX_VALUE);
-
     }
 
     /**
@@ -151,7 +150,6 @@ public class FifoDoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorData
                         // data.remove(blob);
                         toRemoveList.add(blob);
                     } else {
-
                         getAxisDescription(0).add(x + blob.getErrorX());
                         getAxisDescription(0).add(x - blob.getErrorX());
                         getAxisDescription(1).add(y + blob.getErrorY());
@@ -228,7 +226,6 @@ public class FifoDoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorData
     }
 
     protected class DataBlob extends DoublePointError {
-
         protected String style;
         protected String tag;
 
@@ -257,7 +254,6 @@ public class FifoDoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorData
      * @param <E> generics template reference
      */
     public class LimitedQueue<E> extends ArrayList<E> {
-
         private static final long serialVersionUID = -5751322669709687363L;
         private final int limit;
 
@@ -279,6 +275,5 @@ public class FifoDoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorData
             }
             return r;
         }
-
     }
 }

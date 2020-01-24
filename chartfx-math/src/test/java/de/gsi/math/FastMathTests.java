@@ -59,7 +59,6 @@ public class FastMathTests {
 
     @Test
     public void simpleTest() {
-
         final int oldPrecision = FastMath.getPrecision();
         FastMath.setPrecision(100);
         assertEquals(100, FastMath.getPrecision(), "set precision");
@@ -117,13 +116,9 @@ public class FastMathTests {
             // code that requires less then 3 seconds to execute
             LOGGER.atInfo().log("run\tsinTab\tcosTab\tsinLib\tsinJaFa\tcosJaFa\tsinApa\tcosApa");
             for (int i = 0; i < sets; i++) {
-                LOGGER.atInfo().addArgument(i).addArgument(testSinTab(reps)).addArgument(testCosTab(reps))
-                        .addArgument(testSinLib(reps)).addArgument(testSinJaFama(reps)).addArgument(testCosJaFama(reps))
-                        .addArgument(testSinApache(reps)).addArgument(testCosApache(reps))
-                        .log("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{} [ns]");
+                LOGGER.atInfo().addArgument(i).addArgument(testSinTab(reps)).addArgument(testCosTab(reps)).addArgument(testSinLib(reps)).addArgument(testSinJaFama(reps)).addArgument(testCosJaFama(reps)).addArgument(testSinApache(reps)).addArgument(testCosApache(reps)).log("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{} [ns]");
             }
         }, "performance test length exceeded");
-
     }
 
     public static void main(String[] args) {

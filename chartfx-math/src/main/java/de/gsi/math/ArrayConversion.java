@@ -614,5 +614,4 @@ public final class ArrayConversion { // NOPMD nomen est omen
 
         return ret;
     }
-
 }

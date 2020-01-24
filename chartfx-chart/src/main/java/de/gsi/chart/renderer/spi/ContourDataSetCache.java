@@ -10,6 +10,11 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
+import javafx.scene.image.Image;
+import javafx.scene.image.PixelFormat;
+import javafx.scene.image.PixelWriter;
+import javafx.scene.image.WritableImage;
+
 import de.gsi.chart.XYChart;
 import de.gsi.chart.axes.Axis;
 import de.gsi.chart.axes.AxisTransform;
@@ -23,11 +28,6 @@ import de.gsi.dataset.spi.DataRange;
 import de.gsi.dataset.utils.ArrayCache;
 import de.gsi.dataset.utils.CachedDaemonThreadFactory;
 import de.gsi.dataset.utils.ProcessingProfiler;
-
-import javafx.scene.image.Image;
-import javafx.scene.image.PixelFormat;
-import javafx.scene.image.PixelWriter;
-import javafx.scene.image.WritableImage;
 
 /**
  * @author rstein
@@ -151,7 +151,7 @@ class ContourDataSetCache {
 
         // compute local Range
         final boolean computeLocalRange = renderer.computeLocalRange()
-                && (zAxis.isAutoRanging() || zAxis.isAutoGrowRanging());
+                                          && (zAxis.isAutoRanging() || zAxis.isAutoGrowRanging());
         final DataRange zDataRange = computeLocalRange(reduced, xSize, ySize, computeLocalRange);
         if (zDataRange.isDefined()) {
             zMin = zDataRange.getMin();
@@ -210,7 +210,7 @@ class ContourDataSetCache {
                 targetHeight = (int) (srcHeight / minPixelSizeY);
             }
 
-//            System.err.printf("image width = %d x %d - reduced from %d x %d\n", targetWidth, targetHeight, xSize, ySize);
+            //            System.err.printf("image width = %d x %d - reduced from %d x %d\n", targetWidth, targetHeight, xSize, ySize);
 
             tempDataBuffer = ArrayCache.getCachedDoubleArray(TEMP_DATA_COPY_BUFFER_NAME, targetWidth * targetHeight);
 
@@ -223,7 +223,7 @@ class ContourDataSetCache {
         }
 
         reducedData = input;
-//        System.err.printf("image width = %d x %d\n", xSize, ySize);
+        //        System.err.printf("image width = %d x %d\n", xSize, ySize);
         return reducedData;
     }
 
@@ -264,8 +264,7 @@ class ContourDataSetCache {
                 }
                 rowIndex2 -= dstWidth;
             }
-        }
-            break;
+        } break;
         case NORMAL:
         default:
             for (int yIndex = yMinIndex; yIndex <= yMaxIndex; yIndex++) {
@@ -346,7 +345,6 @@ class ContourDataSetCache {
     protected static double[] reduceData(final double[] inputBuffer, int inputWidth, int inputHeight,
             final double[] tempOutBuffer, final int dstWidth, final int dstHeight, final int reductionFactor,
             final ReductionType reductionType, final boolean parallelImplementation) {
-
         int tempWidth = inputWidth;
         int tempHeight = inputHeight;
         double[] input = inputBuffer;
@@ -363,7 +361,7 @@ class ContourDataSetCache {
             } else {
                 final int minthreshold = 10;
                 final int divThread = (int) Math
-                        .ceil(Math.abs(targetHeight - 0) / (double) CachedDaemonThreadFactory.getNumbersOfThreads());
+                                              .ceil(Math.abs(targetHeight - 0) / (double) CachedDaemonThreadFactory.getNumbersOfThreads());
                 final int stepSize = Math.max(divThread, minthreshold);
                 final List<Callable<Boolean>> workers = new ArrayList<>();
                 for (int k = 0; k < targetHeight; k += stepSize) {
@@ -443,7 +441,10 @@ class ContourDataSetCache {
     }
 
     protected enum InvertedAxisCase {
-        NORMAL, X_ONLY, Y_ONLY, BOTH;
+        NORMAL,
+        X_ONLY,
+        Y_ONLY,
+        BOTH;
 
         public static InvertedAxisCase get(final boolean xInverted, final boolean yInverted) {
             if (xInverted && yInverted) {

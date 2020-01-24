@@ -433,5 +433,4 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
         });
         return fireInvalidated(new UpdatedDataEvent(this));
     }
-
 }

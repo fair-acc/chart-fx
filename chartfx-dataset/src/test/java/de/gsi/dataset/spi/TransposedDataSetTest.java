@@ -1,11 +1,12 @@
 package de.gsi.dataset.spi;
 
-import static de.gsi.dataset.DataSet.DIM_X;
-import static de.gsi.dataset.DataSet.DIM_Y;
-import static de.gsi.dataset.DataSet.DIM_Z;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import static de.gsi.dataset.DataSet.DIM_X;
+import static de.gsi.dataset.DataSet.DIM_Y;
+import static de.gsi.dataset.DataSet.DIM_Z;
 
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -22,8 +23,7 @@ public class TransposedDataSetTest {
 
     @Test
     public void testWithDataSet2D() {
-        DataSet dataSet = new DataSetBuilder().setName("Test Default Data Set")
-                .setXValuesNoCopy(new double[] { 1, 2, 3 }).setYValuesNoCopy(new double[] { 4, 7, 6 }).build();
+        DataSet dataSet = new DataSetBuilder().setName("Test Default Data Set").setXValuesNoCopy(new double[] { 1, 2, 3 }).setYValuesNoCopy(new double[] { 4, 7, 6 }).build();
 
         TransposedDataSet transposed0 = TransposedDataSet.transpose(dataSet, true);
         assertArrayEquals(new int[] { 1, 0 }, transposed0.getPermutation());
@@ -62,7 +62,7 @@ public class TransposedDataSetTest {
         double[] xvalues = new double[] { 1, 2, 3, 4 };
         double[] yvalues = new double[] { -3, -2, -0, 2, 4 };
         double[][] zvalues = new double[][] { { 1, 2, 3, 4 }, { 5, 6, 7, 8 }, { 9, 10, 11, 12 }, { -1, -2, -3, -4 },
-                { 1337, 2337, 4242, 2323 } };
+            { 1337, 2337, 4242, 2323 } };
         DoubleDataSet3D dataset = new DoubleDataSet3D("testdataset", xvalues, yvalues, zvalues);
         // transpose dataset and test indexing
         TransposedDataSet datasetTransposed = TransposedDataSet.transpose(dataset);

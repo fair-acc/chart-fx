@@ -24,6 +24,7 @@ import de.gsi.dataset.utils.DoubleCircularBuffer;
 import de.gsi.math.spectra.Apodization;
 import de.gsi.math.spectra.SpectrumTools;
 import de.gsi.math.spectra.fft.FloatFFT_1D;
+
 import net.jafama.FastMath;
 
 /**
@@ -100,30 +101,25 @@ public class MidiWaveformSynthesizer {
                         synthesizerChannel.noteOn(note, velocity);
                     }
                     if (LOGGER.isDebugEnabled()) {
-                        LOGGER.atDebug().addArgument(evt).addArgument(note).addArgument(velocity)
-                                .log("note on event = {}  note = {}  velocity {}");
+                        LOGGER.atDebug().addArgument(evt).addArgument(note).addArgument(velocity).log("note on event = {}  note = {}  velocity {}");
                     }
                 } else if (command == LOCAL_NOTE_OFF /* ShortMessage.NOTE_OFF */) {
                     noteAmplitude[note] = 0.0f;
                     synthesizerChannel.noteOff(note, 0);
                     if (LOGGER.isDebugEnabled()) {
-                        LOGGER.atDebug().addArgument(evt).addArgument(note).addArgument(velocity)
-                                .log("note off event = {}  note = {}  velocity {}");
+                        LOGGER.atDebug().addArgument(evt).addArgument(note).addArgument(velocity).log("note off event = {}  note = {}  velocity {}");
                     }
                 } else if (command == ShortMessage.CONTROL_CHANGE && LOGGER.isDebugEnabled()) {
-                    LOGGER.atDebug().addArgument(evt).addArgument(note).addArgument(velocity)
-                            .log("generic CONTROL_CHANGE evt = {} bytes = {} {}");
+                    LOGGER.atDebug().addArgument(evt).addArgument(note).addArgument(velocity).log("generic CONTROL_CHANGE evt = {} bytes = {} {}");
                 }
             });
 
         } catch (final MidiUnavailableException e) {
             LOGGER.atError().setCause(e).log("could not initialise MidiSystem");
         } catch (final IOException e) {
-            LOGGER.atError().setCause(e).addArgument(TestDataSetSource.class.getResourceAsStream(midiFile))
-                    .log("could not open file '{}'");
+            LOGGER.atError().setCause(e).addArgument(TestDataSetSource.class.getResourceAsStream(midiFile)).log("could not open file '{}'");
         } catch (final InvalidMidiDataException e) {
-            LOGGER.atError().setCause(e).addArgument(midiFile)
-                    .log("'{}' does not seem to be recognised as a Midi file");
+            LOGGER.atError().setCause(e).addArgument(midiFile).log("'{}' does not seem to be recognised as a Midi file");
         }
     }
 

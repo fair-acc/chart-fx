@@ -22,7 +22,6 @@ import de.gsi.math.spectra.fft.DoubleFFT_1D;
  * @author rstein
  */
 public class SpectrumTools {
-
     /**
      * compute equidistant frequency axis based on the length of the magnitude spectrum
      *
@@ -74,7 +73,6 @@ public class SpectrumTools {
      * @return computed magnitude spectrum
      */
     public static double[] computeMagnitudeSpectrum(final double[] data, final boolean truncateDCNyq) {
-
         final double[] ret = new double[data.length / 2];
         for (int i = 0; i < ret.length; i++) {
             final int i2 = i << 1;
@@ -118,7 +116,6 @@ public class SpectrumTools {
      * @return computed magnitude spectrum
      */
     public static float[] computeMagnitudeSpectrum(final float[] data, final boolean truncateDCNyq) {
-
         final float[] ret = new float[data.length / 2];
         for (int i = 0; i < ret.length; i++) {
             final int i2 = i << 1;
@@ -150,7 +147,6 @@ public class SpectrumTools {
      * @return computed magnitude spectrum in [dB]
      */
     public static double[] computeMagnitudeSpectrum_dB(final double[] data, final boolean truncateDCNyq) {
-
         final int n2 = data.length / 2;
         final double[] ret = new double[n2];
         for (int i = 0; i < ret.length; i++) {
@@ -183,7 +179,6 @@ public class SpectrumTools {
      * @return computed magnitude spectrum in [dB]
      */
     public static float[] computeMagnitudeSpectrum_dB(final float[] data, final boolean truncateDCNyq) {
-
         final int n2 = data.length / 2;
         final float[] ret = new float[data.length / 2];
         for (int i = 0; i < ret.length; i++) {
@@ -192,7 +187,7 @@ public class SpectrumTools {
             final double Im = data[i2 + 1];
 
             ret[i] = (float) (10
-                    * TMathConstants.Log10((TMathConstants.Sqr(Re) + TMathConstants.Sqr(Im)) / ret.length));
+                              * TMathConstants.Log10((TMathConstants.Sqr(Re) + TMathConstants.Sqr(Im)) / ret.length));
         }
 
         if (truncateDCNyq) {
@@ -310,7 +305,6 @@ public class SpectrumTools {
      * @return computed phase spectrum
      */
     public static double[] computePhaseSpectrum(final double[] data) {
-
         final double[] ret = new double[data.length / 2];
         for (int i = 0; i < ret.length; i++) {
             final int i2 = i << 1;
@@ -336,7 +330,6 @@ public class SpectrumTools {
      * @return phase spectrum
      */
     public static float[] computePhaseSpectrum(final float[] data) {
-
         final float[] ret = new float[data.length / 2];
         for (int i = 0; i < ret.length; i++) {
             final int i2 = i << 1;
@@ -508,12 +501,11 @@ public class SpectrumTools {
             final double right = Math.pow(data[index + 1], 1);
 
             if (left < right) {
-                return val + TMathConstants.ATan2(right * TMathConstants.Sin(pin),
-                        center + right * TMathConstants.Cos(pin)) / TMathConstants.Pi();
+                return val + TMathConstants.ATan2(right * TMathConstants.Sin(pin), center + right * TMathConstants.Cos(pin)) / TMathConstants.Pi();
             } else {
                 return val
                         - TMathConstants.ATan2(left * TMathConstants.Sin(pin), center + left * TMathConstants.Cos(pin))
-                                / TMathConstants.Pi();
+                                  / TMathConstants.Pi();
             }
         } else {
             return val;
@@ -598,5 +590,4 @@ public class SpectrumTools {
                 Math.abs(interNAFF - mean));
         System.out.println(" ");
     }
-
 }

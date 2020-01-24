@@ -171,7 +171,7 @@ public class DefaultNumericAxis extends AbstractAxis implements Axis {
         final int numOfTickMarks = Math.max(Math.min(numOfFittingLabels, getMaxMaxjorTickLabelCount()), 2);
         double rawTickUnit = (getMax() - getMin()) / numOfTickMarks;
         if (rawTickUnit == 0 || Double.isNaN(rawTickUnit)) {
-            rawTickUnit = 1e-3;// TODO: remove this hack (eventually) ;-)
+            rawTickUnit = 1e-3; // TODO: remove this hack (eventually) ;-)
         }
         return computeTickUnit(rawTickUnit);
     }
@@ -369,7 +369,7 @@ public class DefaultNumericAxis extends AbstractAxis implements Axis {
 
         double rawTickUnit = (max - min) / numOfTickMarks;
         if (rawTickUnit == 0 || Double.isNaN(rawTickUnit)) {
-            rawTickUnit = 1e-3;// TODO: remove hack
+            rawTickUnit = 1e-3; // TODO: remove hack
         }
 
         // double tickUnitRounded = Double.MIN_VALUE; // TODO check if not
@@ -481,9 +481,9 @@ public class DefaultNumericAxis extends AbstractAxis implements Axis {
         final double padding = DefaultNumericAxis.getEffectiveRange(min, max) * getAutoRangePadding();
         final double paddingScale = 1.0 + getAutoRangePadding();
         final double paddedMin = isLogAxis ? minValue / paddingScale
-                : DefaultNumericAxis.clampBoundToZero(min - padding, min);
+                                           : DefaultNumericAxis.clampBoundToZero(min - padding, min);
         final double paddedMax = isLogAxis ? maxValue * paddingScale
-                : DefaultNumericAxis.clampBoundToZero(max + padding, max);
+                                           : DefaultNumericAxis.clampBoundToZero(max + padding, max);
 
         return computeRange(paddedMin, paddedMax, length, labelSize);
     }
@@ -497,7 +497,8 @@ public class DefaultNumericAxis extends AbstractAxis implements Axis {
             }
             double exp = Math.ceil(axisTransform.forward(axisRange.getLowerBound()));
             for (double tickValue = axisTransform.backward(exp); tickValue <= axisRange
-                    .getUpperBound(); tickValue = axisTransform.backward(++exp)) {
+                                                                                      .getUpperBound();
+                    tickValue = axisTransform.backward(++exp)) {
                 tickValues.add(tickValue);
             }
 
@@ -539,7 +540,7 @@ public class DefaultNumericAxis extends AbstractAxis implements Axis {
         if (isLogAxis) {
             double exp = Math.floor(axisTransform.forward(lowerBound));
             for (double majorTick = axisTransform.backward(exp); majorTick < upperBound; majorTick = axisTransform
-                    .backward(++exp)) {
+                                                                                                             .backward(++exp)) {
                 final double nextMajorTick = axisTransform.backward(exp + 1);
                 final double minorUnit = (nextMajorTick - majorTick) / getMinorTickCount();
                 for (double minorTick = majorTick + minorUnit; minorTick < nextMajorTick; minorTick += minorUnit) {
@@ -608,7 +609,7 @@ public class DefaultNumericAxis extends AbstractAxis implements Axis {
         final double majorUnit = unitSupplier.computeTickUnit(rawTickUnit);
         if (majorUnit <= 0) {
             throw new IllegalArgumentException("The " + unitSupplier.getClass().getName()
-                    + " computed illegal unit value [" + majorUnit + "] for argument " + rawTickUnit);
+                                               + " computed illegal unit value [" + majorUnit + "] for argument " + rawTickUnit);
         }
         return majorUnit;
     }
@@ -694,5 +695,4 @@ public class DefaultNumericAxis extends AbstractAxis implements Axis {
             offset = isVerticalAxis ? getHeight() : getWidth();
         }
     }
-
 }

@@ -516,5 +516,4 @@ public class ListErrorDataSet extends AbstractErrorDataSet<ListErrorDataSet> imp
         });
         return fireInvalidated(new UpdatedDataEvent(this));
     }
-
 }

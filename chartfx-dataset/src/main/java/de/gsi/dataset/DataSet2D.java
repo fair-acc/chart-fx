@@ -8,7 +8,6 @@ package de.gsi.dataset;
  * @author rstein
  */
 public interface DataSet2D extends DataSet {
-
     @Override
     default int getDimension() {
         return 2;

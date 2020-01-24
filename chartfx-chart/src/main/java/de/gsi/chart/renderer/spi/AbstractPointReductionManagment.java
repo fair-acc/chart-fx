@@ -10,7 +10,6 @@ import javafx.beans.property.SimpleIntegerProperty;
 
 public abstract class AbstractPointReductionManagment<R extends AbstractPointReductionManagment<R>>
         extends AbstractDataSetManagement<R> {
-
     private final ReadOnlyBooleanWrapper actualPointReduction = new ReadOnlyBooleanWrapper(this, "actualPointReduction",
             true);
     private final BooleanProperty assumeSortedData = new SimpleBooleanProperty(this, "assumeSortedData", true);

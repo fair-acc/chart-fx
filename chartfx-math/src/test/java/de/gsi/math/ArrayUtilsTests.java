@@ -77,7 +77,6 @@ public class ArrayUtilsTests {
 
     @Test
     public void miscTests() {
-
         double[] ref = new double[] { 1.0, 2.0, 3.0 };
         double[] test = ArrayUtils.createArray(1.0, 1.0, 3);
         assertArrayEquals(ref, test, "createArray");
@@ -142,5 +141,4 @@ public class ArrayUtilsTests {
             LOGGER.atDebug().addArgument(length).log("fillRoutineTests({}) - passed");
         }
     }
-
 }

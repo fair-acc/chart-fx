@@ -276,7 +276,10 @@ public final class DefaultDataReducer3D { // NOPMD nomen est omen
     }
 
     private enum ScaleAxis {
-        BOTH, X_ONLY, Y_ONLY, NONE;
+        BOTH,
+        X_ONLY,
+        Y_ONLY,
+        NONE;
 
         static ScaleAxis get(final boolean scaleX, final boolean scaleY) {
             if (scaleX && scaleY) {

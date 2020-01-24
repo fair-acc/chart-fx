@@ -90,7 +90,6 @@ public class Cache<K, V> /* implements Map<K, V> */ {
 
         cache = new ConcurrentHashMap<>();
         timeOutMap = new ConcurrentHashMap<>();
-
     }
 
     public Cache(final int limit) {
@@ -129,15 +128,13 @@ public class Cache<K, V> /* implements Map<K, V> */ {
             return;
         }
         int surplusEntries = Math.max(cache.size() - limit + 1, 0);
-        List<K> toBeRemoved = timeOutMap.entrySet().stream().sorted(Map.Entry.<K, Instant>comparingByValue().reversed())
-                .limit(surplusEntries).map(Map.Entry::getKey).collect(Collectors.toList());
+        List<K> toBeRemoved = timeOutMap.entrySet().stream().sorted(Map.Entry.<K, Instant>comparingByValue().reversed()).limit(surplusEntries).map(Map.Entry::getKey).collect(Collectors.toList());
         removeEntries(toBeRemoved);
     }
 
     protected void checkTime() {
         Instant cutoffTime = Instant.now().minus(timeOut, chronoUnit);
-        List<K> toBeRemoved = timeOutMap.entrySet().stream().filter(entry -> entry.getValue().isBefore(cutoffTime))
-                .map(Map.Entry::getKey).collect(Collectors.toList());
+        List<K> toBeRemoved = timeOutMap.entrySet().stream().filter(entry -> entry.getValue().isBefore(cutoffTime)).map(Map.Entry::getKey).collect(Collectors.toList());
         removeEntries(toBeRemoved);
     }
 

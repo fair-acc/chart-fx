@@ -1,15 +1,5 @@
 package de.gsi.chart.renderer.spi;
 
-import de.gsi.chart.axes.Axis;
-import de.gsi.chart.renderer.ErrorStyle;
-import de.gsi.chart.renderer.LineStyle;
-import de.gsi.chart.renderer.RendererDataReducer;
-import de.gsi.chart.renderer.datareduction.DefaultDataReducer;
-import de.gsi.chart.renderer.datareduction.MaxDataReducer;
-import de.gsi.chart.renderer.datareduction.RamanDouglasPeukerDataReducer;
-import de.gsi.chart.renderer.datareduction.VisvalingamMaheswariWhyattDataReducer;
-import de.gsi.dataset.utils.AssertUtils;
-
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.IntegerProperty;
@@ -20,6 +10,16 @@ import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ListChangeListener;
 
+import de.gsi.chart.axes.Axis;
+import de.gsi.chart.renderer.ErrorStyle;
+import de.gsi.chart.renderer.LineStyle;
+import de.gsi.chart.renderer.RendererDataReducer;
+import de.gsi.chart.renderer.datareduction.DefaultDataReducer;
+import de.gsi.chart.renderer.datareduction.MaxDataReducer;
+import de.gsi.chart.renderer.datareduction.RamanDouglasPeukerDataReducer;
+import de.gsi.chart.renderer.datareduction.VisvalingamMaheswariWhyattDataReducer;
+import de.gsi.dataset.utils.AssertUtils;
+
 /**
  * simple class to move the various parameters out of the class containing the algorithms uses the shadow field pattern
  * to minimise memory usage (lots of boiler-plate code ... sorry)
@@ -28,10 +28,9 @@ import javafx.collections.ListChangeListener;
  * @param <R> generic object type for renderer parameter
  */
 @SuppressWarnings({ "PMD.TooManyMethods", "PMD.TooManyFields", "PMD.ExcessivePublicCount" }) // designated purpose of
-                                                                                             // this class
+// this class
 public abstract class AbstractErrorDataSetRendererParameter<R extends AbstractErrorDataSetRendererParameter<R>>
         extends AbstractPointReductionManagment<R> {
-
     // intensity fading factor per stage
     protected static final double DEFAULT_HISTORY_INTENSITY_FADING = 0.65;
     private final ObjectProperty<ErrorStyle> errorStyle = new SimpleObjectProperty<>(this, "errorStyle",
@@ -405,7 +404,6 @@ public abstract class AbstractErrorDataSetRendererParameter<R extends AbstractEr
      * @return itself (fluent design)
      */
     public R setIntensityFading(final double size) {
-
         intensityFading.setValue(size);
         return getThis();
     }
@@ -499,5 +497,4 @@ public abstract class AbstractErrorDataSetRendererParameter<R extends AbstractEr
 
         return getThis();
     }
-
 }

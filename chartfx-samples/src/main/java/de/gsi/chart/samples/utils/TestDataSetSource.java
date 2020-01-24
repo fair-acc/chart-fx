@@ -22,6 +22,7 @@ import de.gsi.math.ArrayUtils;
 import de.gsi.math.spectra.Apodization;
 import de.gsi.math.spectra.SpectrumTools;
 import de.gsi.math.spectra.fft.FloatFFT_1D;
+
 import it.unimi.dsi.fastutil.floats.FloatArrayList;
 
 /**
@@ -44,10 +45,11 @@ public class TestDataSetSource extends AbstractDataSet3D<TestDataSetSource> {
 
     protected transient TargetDataLine line; // the line from which audio data is captured
     protected transient DoubleCircularBuffer lineBuffer = new DoubleCircularBuffer(CIRCULAR_BUFFER_SIZE);
-    protected FloatArrayList[] history = { //
-            new FloatArrayList(INITIAL_FRAME_SIZE), // xValues
-            new FloatArrayList(INITIAL_FRAME_COUNT), // yValues
-            new FloatArrayList(INITIAL_FRAME_SIZE * INITIAL_FRAME_COUNT) // zValues
+    protected FloatArrayList[] history = {
+        //
+        new FloatArrayList(INITIAL_FRAME_SIZE), // xValues
+        new FloatArrayList(INITIAL_FRAME_COUNT), // yValues
+        new FloatArrayList(INITIAL_FRAME_SIZE *INITIAL_FRAME_COUNT) // zValues
     };
     protected transient FloatArrayList frame = new FloatArrayList(INITIAL_FRAME_SIZE);
     protected int circIndex = 0; // circular buffer index
@@ -97,8 +99,7 @@ public class TestDataSetSource extends AbstractDataSet3D<TestDataSetSource> {
                 LOGGER.atInfo().log("opened audio line-in, format = " + format);
             }
         } catch (final LineUnavailableException e) {
-            LOGGER.atError().setCause(e).addArgument(DATA_SOURCE_FILE)
-                    .log("'{}' does not seem to be recognised as a Midi file");
+            LOGGER.atError().setCause(e).addArgument(DATA_SOURCE_FILE).log("'{}' does not seem to be recognised as a Midi file");
         }
     }
 
@@ -301,7 +302,6 @@ public class TestDataSetSource extends AbstractDataSet3D<TestDataSetSource> {
                 if (LOGGER.isDebugEnabled()) {
                     LOGGER.atDebug().log("stop recording...");
                 }
-
             }
         };
     }
@@ -360,7 +360,7 @@ public class TestDataSetSource extends AbstractDataSet3D<TestDataSetSource> {
             history[DIM_X].elements()[i] = ((0.5f * i) / frameSize) * samplingRate;
         }
         for (int i = 0; i < frameCount; i++) {
-            history[DIM_Y].elements()[i] = -0.001f * updatePeriod * (frameCount-1-i);
+            history[DIM_Y].elements()[i] = -0.001f * updatePeriod * (frameCount - 1 - i);
         }
 
         Arrays.fill(frame.elements(), 0.0f);
@@ -388,5 +388,4 @@ public class TestDataSetSource extends AbstractDataSet3D<TestDataSetSource> {
         MIDI,
         LINE;
     }
-
 }
