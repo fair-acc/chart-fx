@@ -87,10 +87,10 @@ public class TransposedDataSet implements DataSet {
         return result;
     }
 
-//    @Override
-//    public AxisDescription getAxisDescription(final int dimIndex) {
-//        return dataSet.getAxisDescription(permutation[dimIndex]);
-//    }
+    @Override
+    public AxisDescription getAxisDescription(final int dimIndex) {
+        return dataSet.getAxisDescription(permutation[dimIndex]);
+    }
 
     @Override
     public int getDataCount(int dimIndex) {
@@ -295,6 +295,15 @@ public class TransposedDataSet implements DataSet {
         }
 
         @Override
+        public double get(int dimIndex, int index) {
+            if (dimIndex == DIM_Z && permutation[DIM_X] != DIM_X) {
+                return ((DataSet3D) dataSet).getZ(index / dataSet.getDataCount(DIM_Y),
+                        index % dataSet.getDataCount(DIM_Y));
+            }
+            return super.get(dimIndex, index);
+        }
+
+        @Override
         public void setPermutation(final int[] permutation) {
             this.lock().writeLockGuard(() -> {
                 if (permutation[0] > 1 || permutation[1] > 1 || permutation[2] != 2) {
@@ -303,6 +312,7 @@ public class TransposedDataSet implements DataSet {
                 }
                 super.setPermutation(permutation);
             });
+            this.invokeListener(new AxisChangeEvent(this, "Permutation changed", -1));
         }
     }
 }
