@@ -11,7 +11,7 @@ import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
 public class GridRendererSample extends Application {
-    int c = 0;
+    private int c;
 
     @Override
     public void start(final Stage primaryStage) {

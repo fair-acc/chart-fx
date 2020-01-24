@@ -19,7 +19,7 @@ import javafx.stage.Stage;
 
 public class HexagonSamples extends Application {
     private static final Logger LOGGER = LoggerFactory.getLogger(HexagonSamples.class);
-    private Paint oldHexColour = null;
+    private Paint oldHexColour;
 
     @Override
     public void start(Stage primaryStage) throws Exception {

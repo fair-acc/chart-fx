@@ -32,11 +32,11 @@ import javafx.stage.Stage;
  */
 public class HistoryDataSetRendererSample extends Application {
     private static final Logger LOGGER = LoggerFactory.getLogger(HistoryDataSetRendererSample.class);
-    private static final int N_SAMPLES = 10000; // default: 10000
+    private static final int N_SAMPLES = 10_000; // default: 10000
     private static final int UPDATE_DELAY = 1000; // [ms]
     private static final int UPDATE_PERIOD = 100; // [ms]
     private Timer timer;
-    private double updateIteration = 0;
+    private double updateIteration;
 
     private void generateData(final XYChart chart) {
         final DoubleErrorDataSet dataSet = new DoubleErrorDataSet("TestData", HistoryDataSetRendererSample.N_SAMPLES);
@@ -99,7 +99,7 @@ public class HistoryDataSetRendererSample extends Application {
 
     public TimerTask getTask(final XYChart chart) {
         return new TimerTask() {
-            int updateCount = 0;
+            private int updateCount;
 
             @Override
             public void run() {

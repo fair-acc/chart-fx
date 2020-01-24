@@ -60,7 +60,7 @@ public class WriteDataSetToFileSample extends Application {
 
         secondaryStage.setTitle(this.getClass().getSimpleName() + " - recovered");
         secondaryStage.setScene(new Scene(chart2, 800, 600));
-        secondaryStage.setOnCloseRequest(evt -> System.exit(0));
+        secondaryStage.setOnCloseRequest(evt -> Platform.exit());
         primaryStage.show();
         secondaryStage.show();
 

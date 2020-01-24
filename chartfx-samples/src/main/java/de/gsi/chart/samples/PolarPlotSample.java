@@ -3,7 +3,6 @@ package de.gsi.chart.samples;
 import de.gsi.chart.XYChart;
 import de.gsi.chart.axes.spi.DefaultNumericAxis;
 import de.gsi.chart.plugins.EditAxis;
-import de.gsi.chart.plugins.Zoomer;
 import de.gsi.chart.renderer.PolarTickStep;
 import de.gsi.chart.renderer.datareduction.DefaultDataReducer;
 import de.gsi.chart.renderer.spi.ErrorDataSetRenderer;
@@ -21,7 +20,7 @@ import javafx.stage.Stage;
  * @author rstein
  */
 public class PolarPlotSample extends Application {
-    private static final int N_SAMPLES = 10000;
+    private static final int N_SAMPLES = 10_000;
 
     @Override
     public void start(final Stage primaryStage) {

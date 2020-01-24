@@ -110,10 +110,10 @@ public class ScatterAndBubbleRendererSample extends Application {
                     + count + ";";
             bubbleDataSet2a.addDataStyle(count, markerSize);
             bubbleDataSet2b.addDataStyle(count, markerSize);
-            if (country.equals("FRA")) {
+            if ("FRA".equals(country)) {
                 bubbleDataSet2a.addDataStyle(count, markerSize + "markerColor=darkblue; markerType=circle2;");
                 bubbleDataSet2b.addDataStyle(count, markerSize + "markerColor=darkred; markerType=circle2;");
-            } else if (country.equals("JPN")) {
+            } else if ("JPN".equals(country)) {
                 bubbleDataSet2a.addDataStyle(count, markerSize + "markerColor=green; markerType=diamond;");
                 bubbleDataSet2b.addDataStyle(count, markerSize + "markerColor=lightgreen; markerType=diamond;");
             }
@@ -169,8 +169,8 @@ public class ScatterAndBubbleRendererSample extends Application {
         xAxis.setAutoUnitScaling(true);
         xAxis.setAutoRangePadding(0.05);
         xAxis.setAutoRanging(false);
-        xAxis.setMin(15000);
-        xAxis.setMax(75000);
+        xAxis.setMin(15_000);
+        xAxis.setMax(75_000);
         DefaultNumericAxis yAxis = new DefaultNumericAxis("life-expectancy", "years");
         yAxis.setAutoRangePadding(0.05);
 

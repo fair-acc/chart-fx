@@ -140,7 +140,7 @@ public class ContourChartSample extends Application {
     }
 
     public DataSet3D readImage() {
-        try (final BufferedReader reader = new BufferedReader(
+        try (BufferedReader reader = new BufferedReader(
                      new InputStreamReader(ContourChartSample.class.getResourceAsStream("./testdata/image.txt")))) {
             // final BufferedReader reader = new BufferedReader(new
             // InputStreamReader(
@@ -176,7 +176,7 @@ public class ContourChartSample extends Application {
     public void start(final Stage primaryStage) {
         primaryStage.setTitle("ContourChart Sample");
         final Slider nCountourLevelSlider = new Slider(0, 100, 20); // number of contour levels
-        final Slider nSegmentSlider = new Slider(0, 10000, 500); // number of contour segments
+        final Slider nSegmentSlider = new Slider(0, 10_000, 500); // number of contour segments
         final Slider minHexSizeSlider = new Slider(1, 100, 5); // number of contour segments
         final XYChart chartPane1 = getChartPane(nCountourLevelSlider, nSegmentSlider, minHexSizeSlider,
                 ContourType.CONTOUR);
@@ -304,11 +304,12 @@ public class ContourChartSample extends Application {
     }
 
     public class DefaultData extends AbstractDataSet3D<DefaultData> {
+        private static final long serialVersionUID = 6376458088774766677L;
         private final Number[] xValues;
         private final Number[] yValues;
         private final double[][] zValues;
 
-        DefaultData(final String name, final Number[] xValues, final Number[] yValues, final double[][] zValues) {
+        public DefaultData(final String name, final Number[] xValues, final Number[] yValues, final double[][] zValues) {
             super(name);
 
             this.xValues = xValues;

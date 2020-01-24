@@ -34,7 +34,7 @@ public class ZoomerSample extends Application {
     private static final Logger LOGGER = LoggerFactory.getLogger(ZoomerSample.class);
     private static final int PREF_WIDTH = 600;
     private static final int PREF_HEIGHT = 300;
-    private static final int N_SAMPLES = 1000000; // default: 1000000
+    private static final int N_SAMPLES = 1_000_000; // default: 1000000
 
     @Override
     public void start(final Stage primaryStage) {
@@ -102,7 +102,7 @@ public class ZoomerSample extends Application {
             for (int n = 0; n < N_SAMPLES; n++) {
                 final double x = n;
                 oldY += RandomDataGenerator.random() - 0.5;
-                final double y = oldY + (n == 500000 ? 500.0 : 0) /* + ((x>1e4 && x <2e4) ? Double.NaN: 0.0) */;
+                final double y = oldY + (n == 500_000 ? 500.0 : 0) /* + ((x>1e4 && x <2e4) ? Double.NaN: 0.0) */;
                 final double ex = 0.1;
                 final double ey = 10;
                 dataSet.add(x, y, ex, ey);

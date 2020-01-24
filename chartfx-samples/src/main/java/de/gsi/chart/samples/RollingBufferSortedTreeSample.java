@@ -35,6 +35,7 @@ import javafx.stage.Stage;
  * @author rstein
  */
 public class RollingBufferSortedTreeSample extends Application {
+    private static final String MONOSPACED = "Monospaced";
     private static final Logger LOGGER = LoggerFactory.getLogger(RollingBufferSortedTreeSample.class);
     public final LimitedIndexedTreeDataSet rollingBufferDipoleCurrent = new LimitedIndexedTreeDataSet(
             "dipole current [A]", RollingBufferSample.BUFFER_CAPACITY);
@@ -77,7 +78,7 @@ public class RollingBufferSortedTreeSample extends Application {
         ProcessingProfiler.getTimeDiff(startTime, "adding data into DataSet");
     }
 
-    private HBox getHeaderBar(XYChart chart, Scene scene) {
+    private HBox getHeaderBar(Scene scene) {
 
         final Button newDataSet = new Button("new DataSet");
         newDataSet.setOnAction(evt -> Platform.runLater(getTask()));
@@ -104,13 +105,13 @@ public class RollingBufferSortedTreeSample extends Application {
         SimplePerformanceMeter meter = new SimplePerformanceMeter(scene, RollingBufferSample.DEBUG_UPDATE_RATE);
 
         Label fxFPS = new Label();
-        fxFPS.setFont(Font.font("Monospaced", 12));
+        fxFPS.setFont(Font.font(MONOSPACED, 12));
         Label chartFPS = new Label();
-        chartFPS.setFont(Font.font("Monospaced", 12));
+        chartFPS.setFont(Font.font(MONOSPACED, 12));
         Label cpuLoadProcess = new Label();
-        cpuLoadProcess.setFont(Font.font("Monospaced", 12));
+        cpuLoadProcess.setFont(Font.font(MONOSPACED, 12));
         Label cpuLoadSystem = new Label();
-        cpuLoadSystem.setFont(Font.font("Monospaced", 12));
+        cpuLoadSystem.setFont(Font.font(MONOSPACED, 12));
         meter.fxFrameRateProperty().addListener((ch, o, n) -> {
             final String fxRate = String.format("%4.1f", meter.getFxFrameRate());
             final String actualRate = String.format("%4.1f", meter.getActualFrameRate());
@@ -128,7 +129,7 @@ public class RollingBufferSortedTreeSample extends Application {
 
     private TimerTask getTask() {
         return new TimerTask() {
-            int updateCount = 0;
+            private int updateCount;
 
             @Override
             public void run() {
@@ -187,7 +188,7 @@ public class RollingBufferSortedTreeSample extends Application {
         yAxis1.setAutoRangeRounding(true);
         yAxis2.setAutoRangeRounding(true);
 
-        root.setTop(getHeaderBar(chart, scene));
+        root.setTop(getHeaderBar(scene));
 
         long startTime = ProcessingProfiler.getTimeStamp();
         ProcessingProfiler.getTimeDiff(startTime, "adding data to chart");

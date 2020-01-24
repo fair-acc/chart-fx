@@ -69,12 +69,12 @@ public class DataViewerSample extends Application {
     private static final String TITLE = DataViewerSample.class.getSimpleName();
     protected static final String FONT_AWESOME = "FontAwesome";
     protected static final int FONT_SIZE = 20;
-    private static final int NUMBER_OF_POINTS = 10000; // default: 32000
+    private static final int NUMBER_OF_POINTS = 10_000; // default: 32000
     private static final int UPDATE_PERIOD = 1000; // [ms]
 
     private static final int NUM_OF_POINTS = 20;
 
-    private EventListener dataWindowEventListener = evt -> {
+    private final EventListener dataWindowEventListener = evt -> {
         if (evt instanceof WindowUpdateEvent) {
             WindowUpdateEvent wEvt = (WindowUpdateEvent) evt;
             LOGGER.atInfo().addArgument(wEvt).addArgument(wEvt.getType())

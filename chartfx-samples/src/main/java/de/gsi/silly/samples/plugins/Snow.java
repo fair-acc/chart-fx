@@ -33,14 +33,14 @@ import de.gsi.math.TRandom;
  */
 public class Snow extends ChartPlugin {
     private static final Logger LOGGER = LoggerFactory.getLogger(Snow.class);
-    private static final TRandom rnd = new TRandom(0);
-    final Group circles = new Group();
+    private static final TRandom RND = new TRandom(0);
+    private final Group circles = new Group();
     private final IntegerProperty numberOfFlakes = new SimpleIntegerProperty(this, "numberOfFlakes", 100);
     private final DoubleProperty velocity = new SimpleDoubleProperty(this, "velocity", 0.1);
     private final DoubleProperty meanSize = new SimpleDoubleProperty(this, "meanSize", 10.0);
     private final DoubleProperty rmsSize = new SimpleDoubleProperty(this, "rmsSize", 5.0);
     private final ObjectProperty<Color> snowColor = new SimpleObjectProperty<>(this, "snowColor");
-    private BooleanProperty snow = new SimpleBooleanProperty(this, "snow", true);
+    private final BooleanProperty snow = new SimpleBooleanProperty(this, "snow", true);
     private final ChangeListener changeListener = (ch, o, n) -> this.init();
 
     public Snow() {
@@ -123,7 +123,7 @@ public class Snow extends ChartPlugin {
         List<PhysicalSnowFlake> list = new ArrayList<>(n);
         if (snowProperty().get()) {
             for (int i = 0; i < n; i++) {
-                final double radius = rnd.Gaus(meanSizeProperty().get(), rmsSizeProperty().get());
+                final double radius = RND.Gaus(meanSizeProperty().get(), rmsSizeProperty().get());
                 final PhysicalSnowFlake circle = new PhysicalSnowFlake(radius, snowColorProperty().get()); // NOPMD
                 circle.setStrokeType(StrokeType.OUTSIDE);
                 circle.setStroke(Color.web("black", 0.16));

@@ -16,7 +16,7 @@ import javafx.application.Application;
  *      Eclipse in Java11 (2b) </a>
  * @author akrimm
  */
-public class LaunchJFX {
+public class LaunchJFX { // NOMEN EST OMEN
     public static void main(final String[] args) throws ClassNotFoundException {
         if (args.length < 1) {
             Application.launch(RunChartSamples.class);

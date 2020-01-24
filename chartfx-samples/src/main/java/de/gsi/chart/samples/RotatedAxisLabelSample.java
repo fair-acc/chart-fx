@@ -6,7 +6,6 @@ import org.slf4j.LoggerFactory;
 import de.gsi.chart.XYChart;
 import de.gsi.chart.axes.AxisLabelOverlapPolicy;
 import de.gsi.chart.axes.spi.DefaultNumericAxis;
-import de.gsi.chart.plugins.EditAxis;
 import de.gsi.chart.plugins.Zoomer;
 import de.gsi.chart.ui.geometry.Side;
 import de.gsi.dataset.spi.DoubleDataSet;

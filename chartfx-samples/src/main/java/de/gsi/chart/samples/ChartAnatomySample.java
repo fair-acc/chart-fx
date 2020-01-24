@@ -89,7 +89,7 @@ public class ChartAnatomySample extends Application {
 
         chart.getToolBar().getChildren().add(new Label("ToolBar Menu: "));
         for (final Side side : Side.values()) {
-            final Button toolBarButton = new Button("ToolBar to " + side);
+            final Button toolBarButton = new Button("ToolBar to " + side); // NOPMD
             toolBarButton.setOnMouseClicked(mevt -> chart.setToolBarSide(side));
             chart.getToolBar().getChildren().add(toolBarButton);
         }
@@ -118,7 +118,7 @@ public class ChartAnatomySample extends Application {
         }
 
         for (final Side side : Side.values()) {
-            chart.getMeasurementBar(side).getChildren().add(new MyLabel("ParBox - " + side));
+            chart.getMeasurementBar(side).getChildren().add(new MyLabel("ParBox - " + side)); // NOPMD
             chart.getMeasurementBar(side).setStyle("-fx-background-color: rgba(125, 125, 125, 0.5);");
             // chart.setPinned(side, true);
         }
@@ -145,7 +145,7 @@ public class ChartAnatomySample extends Application {
         Application.launch(args);
     }
 
-    class MyLabel extends Label {
+    private class MyLabel extends Label {
         public MyLabel(final String label) {
             super(label);
             VBox.setVgrow(this, Priority.ALWAYS);

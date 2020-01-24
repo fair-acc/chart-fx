@@ -35,7 +35,7 @@ import javafx.stage.Stage;
 public class MultipleAxesSample extends Application {
     private static final Logger LOGGER = LoggerFactory.getLogger(MultipleAxesSample.class);
 
-    private static final int N_SAMPLES = 10000; // default: 10000
+    private static final int N_SAMPLES = 10_000; // default: 10000
     private static final long UPDATE_DELAY = 1000; // [ms]
     private static final long UPDATE_PERIOD = 1000; // [ms]
     private final ScheduledExecutorService timer = Executors.newScheduledThreadPool(1);
