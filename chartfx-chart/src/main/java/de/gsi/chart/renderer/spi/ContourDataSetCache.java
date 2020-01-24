@@ -340,69 +340,6 @@ class ContourDataSetCache {
         // original: return Math.round(value * nLevels) / (double) nLevels;
     }
 
-    protected static double[] reduceData(final double[] inputBuffer, int inputWidth, int inputHeight,
-            final double[] tempOutBuffer, final int dstWidth, final int dstHeight, final int reductionFactor,
-            final ReductionType reductionType, final boolean parallelImplementation) {
-        int tempWidth = inputWidth;
-        int tempHeight = inputHeight;
-        double[] input = inputBuffer;
-        double[] output = tempOutBuffer;
-        for (int i = 0; i < reductionFactor; i++) {
-            final int targetWidth = tempWidth / (dstWidth < tempWidth ? 2 : 1);
-            final int targetHeight = tempHeight / (dstHeight < tempHeight ? 2 : 1);
-
-            if (!parallelImplementation) {
-                final int srcStart = 0;
-                final int srcStop = targetHeight;
-                DefaultDataReducer3D.scaleDownByFactorTwo(output, targetWidth, targetHeight, input, tempWidth,
-                        tempHeight, srcStart, srcStop, reductionType);
-            } else {
-                final int minthreshold = 10;
-                final int divThread = (int) Math
-                                              .ceil(Math.abs(targetHeight - 0) / (double) CachedDaemonThreadFactory.getNumbersOfThreads());
-                final int stepSize = Math.max(divThread, minthreshold);
-                final List<Callable<Boolean>> workers = new ArrayList<>();
-                for (int k = 0; k < targetHeight; k += stepSize) {
-                    final int start = k;
-                    final double[] input2 = input;
-                    final double[] output2 = output;
-                    final int srcWidth = tempWidth;
-                    final int srcHeight = tempHeight;
-                    workers.add(() -> {
-                        final int srcStart = start;
-                        final int srcStop = Math.min(start + stepSize, targetHeight);
-                        DefaultDataReducer3D.scaleDownByFactorTwo(output2, targetWidth, targetHeight, input2, srcWidth,
-                                srcHeight, srcStart, srcStop, reductionType);
-                        return Boolean.TRUE;
-                    });
-                }
-
-                try {
-                    final List<Future<Boolean>> jobs = CachedDaemonThreadFactory.getCommonPool().invokeAll(workers);
-                    for (final Future<Boolean> future : jobs) {
-                        if (Boolean.FALSE.equals(future.get())) {
-                            throw new IllegalStateException(PARALLEL_WORKER_ERROR);
-                        }
-                    }
-                } catch (final InterruptedException | ExecutionException e) {
-                    throw new IllegalStateException(PARALLEL_WORKER_ERROR, e);
-                }
-            }
-
-            tempWidth = tempWidth / (dstWidth < tempWidth ? 2 : 1);
-            tempHeight = tempHeight / (dstWidth < tempHeight ? 2 : 1);
-            // swap buffers
-            double[] temp = input;
-            input = output;
-            output = temp;
-            if (tempWidth == dstWidth || tempHeight == dstHeight) {
-                break;
-            }
-        }
-
-        return input;
-    }
-
     protected static Image convertDataArrayToImage(final double[] inputData, final int dataWidth, final int dataHeight,
             final ColorGradient colorGradient) {
         final int length = dataWidth * dataHeight;
