@@ -162,7 +162,7 @@ public class HistoryDataSetRendererSample extends Application {
         final Button startTimer = new Button("timer");
         startTimer.setOnAction(evt -> {
             if (timer == null) {
-                timer = new Timer();
+                timer = new Timer("sample-update-timer", true);
                 timer.scheduleAtFixedRate(getTask(chart), HistoryDataSetRendererSample.UPDATE_DELAY,
                         HistoryDataSetRendererSample.UPDATE_PERIOD);
             } else {

@@ -137,7 +137,7 @@ public class HistogramSample extends Application {
         primaryStage.setScene(scene);
         primaryStage.show();
 
-        final Timer timer = new Timer();
+        final Timer timer = new Timer("sample-update-timer", true);
         timer.scheduleAtFixedRate(new TimerTask() {
 
             @Override

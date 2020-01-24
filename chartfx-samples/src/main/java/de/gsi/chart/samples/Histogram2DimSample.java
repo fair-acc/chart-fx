@@ -145,7 +145,7 @@ public class Histogram2DimSample extends Application {
         primaryStage.setOnCloseRequest(evt -> Platform.exit());
         primaryStage.show();
 
-        final Timer timer = new Timer();
+        final Timer timer = new Timer("sample-update-timer", true);
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {

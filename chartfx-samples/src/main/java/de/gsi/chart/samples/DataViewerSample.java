@@ -247,7 +247,7 @@ public class DataViewerSample extends Application {
 
         // Start task adding new data
         final UpdateTask updateTask = new UpdateTask(dataset1, dataset3);
-        final Timer timer = new Timer();
+        final Timer timer = new Timer("sample-update-timer", true);
         // Start update in 2sec.
         timer.schedule(updateTask, 2000, DataViewerSample.UPDATE_PERIOD);
 

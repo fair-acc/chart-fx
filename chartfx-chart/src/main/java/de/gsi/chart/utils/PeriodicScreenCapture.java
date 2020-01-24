@@ -58,7 +58,7 @@ public class PeriodicScreenCapture implements Observable {
     private String isoDateTimeFormatString = DEFAULT_TIME_FORMAT;
     private final boolean addDateTime;
     protected final List<InvalidationListener> listeners = new LinkedList<>();
-    private final Timer timer = new Timer(); // for non-JavaFX tasks
+    private final Timer timer = new Timer("sample-update-timer", true); // for non-JavaFX tasks
 
     public PeriodicScreenCapture(final Path path, final String fileName, final Scene scene, final double delay,
             final double period) {

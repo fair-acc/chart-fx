@@ -125,11 +125,11 @@ public class RollingBufferSample extends Application {
         startTimer.setOnAction(evt -> {
             if (timer == null) {
                 timer = new Timer[2];
-                timer[0] = new Timer();
+                timer[0] = new Timer("sample-update-timer", true);
                 rollingBufferBeamIntensity.reset();
                 timer[0].scheduleAtFixedRate(getTask(0), 0, UPDATE_PERIOD);
 
-                timer[1] = new Timer();
+                timer[1] = new Timer("sample-update-timer", true);
                 rollingBufferDipoleCurrent.reset();
                 timer[1].scheduleAtFixedRate(getTask(1), 0, UPDATE_PERIOD);
             } else {
