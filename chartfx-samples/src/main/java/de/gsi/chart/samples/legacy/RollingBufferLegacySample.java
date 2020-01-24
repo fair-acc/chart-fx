@@ -58,7 +58,7 @@ public class RollingBufferLegacySample extends Application {
             series1.getData().clear();
             series2.getData().clear();
             if (timer == null) {
-                timer = new Timer();
+                timer = new Timer("sample-update-timer", true);
                 timer.scheduleAtFixedRate(new TimerTask() {
                     @Override
                     public void run() {
@@ -191,7 +191,7 @@ public class RollingBufferLegacySample extends Application {
         root.setTop(header);
 
         // start chart with animation 'on'
-        timer = new Timer();
+        timer = new Timer(true);
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {

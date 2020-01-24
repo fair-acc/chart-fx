@@ -265,7 +265,7 @@ public class ChartPerformanceBenchmark extends AbstractTestApplication {
                 }
             });
 
-            timer = new Timer();
+            timer = new Timer("sample-update-timer", true);
             final TimerTask updateTimerTask = new TimerTask() {
                 @Override
                 public void run() {

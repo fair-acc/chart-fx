@@ -73,7 +73,7 @@ public abstract class AbstractTestApplication extends Application {
         startTimer25Hz.setMaxWidth(Double.MAX_VALUE);
         startTimer25Hz.setOnAction(evt -> {
             if (timer == null) {
-                timer = new Timer();
+                timer = new Timer("sample-update-timer", true);
                 timer.scheduleAtFixedRate(new TimerTask() {
 
                     @Override
@@ -93,7 +93,7 @@ public abstract class AbstractTestApplication extends Application {
         startTimer1Hz.setMaxWidth(Double.MAX_VALUE);
         startTimer1Hz.setOnAction(evt -> {
             if (timer == null) {
-                timer = new Timer();
+                timer = new Timer(true);
                 timer.scheduleAtFixedRate(new TimerTask() {
 
                     @Override

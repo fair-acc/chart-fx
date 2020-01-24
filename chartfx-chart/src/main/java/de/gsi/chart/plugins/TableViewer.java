@@ -85,7 +85,7 @@ public class TableViewer extends ChartPlugin {
     private final TableView<DataSetsRow> table = new TableView<>();
     private final DataSetsModel dsModel = new DataSetsModel();
     protected boolean editable;
-    private Timer timer = new Timer();
+    private Timer timer = new Timer("TableViewer-update-task", true);
     private final IntegerProperty refreshRate = new SimpleIntegerProperty(this, "refreshRate", 1000) {
         @Override
         public void set(int newValue) {

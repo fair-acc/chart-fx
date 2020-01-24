@@ -347,7 +347,7 @@ public class WaterfallPerformanceSample extends Application {
             }
         }
 
-        timer = new Timer();
+        timer = new Timer("sample-update-timer", true);
         final int period = updatePeriod.getValue();
         final int localFrameSize = frameSize.getValue();
         final int localFrameCount = frameCount.getValue();

@@ -54,7 +54,7 @@ public class FifoDoubleErrorDataSetSample {
         }
         ProcessingProfiler.getTimeDiff(start, "init and write 10k times");
 
-        final Timer timer = new Timer();
+        final Timer timer = new Timer("sample-update-timer", true);
 
         timer.scheduleAtFixedRate(new TimerTask() {
 

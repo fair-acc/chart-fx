@@ -117,7 +117,7 @@ public class ChartIndicatorSample extends Application {
             rollingBufferBeamIntensity.reset();
             rollingBufferDipoleCurrent.reset();
             if (timer == null) {
-                timer = new Timer();
+                timer = new Timer("sample-update-timer", true);
                 timer.scheduleAtFixedRate(task, UPDATE_DELAY, UPDATE_PERIOD);
             } else {
                 timer.cancel();

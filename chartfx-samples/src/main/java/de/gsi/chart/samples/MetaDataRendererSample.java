@@ -155,7 +155,7 @@ public class MetaDataRendererSample extends Application {
         final Button startTimer = new Button("timer");
         startTimer.setOnAction(evt -> {
             if (timer == null) {
-                timer = new Timer();
+                timer = new Timer("sample-update-timer", true);
                 timer.scheduleAtFixedRate(getTask(renderer1, renderer2), MetaDataRendererSample.UPDATE_DELAY,
                         MetaDataRendererSample.UPDATE_PERIOD);
             } else {

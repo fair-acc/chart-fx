@@ -105,7 +105,7 @@ public class AxisRangeScalingSample extends Application {
         final Label xAxis9Text = new Label();
         root.getChildren().add(xAxis9Text);
 
-        final Timer timer = new Timer();
+        final Timer timer = new Timer("sample-update-timer", true);
         final TimerTask task = new TimerTask() {
             int counter = -9;
             boolean directionUpwards = true;

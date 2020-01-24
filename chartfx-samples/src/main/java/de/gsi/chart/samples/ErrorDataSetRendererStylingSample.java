@@ -200,7 +200,7 @@ public class ErrorDataSetRendererStylingSample extends Application {
         startTimer.setOnAction(evt -> {
             if (timer == null) {
                 startTimer.setText("stop timer");
-                timer = new Timer();
+                timer = new Timer("sample-update-timer", true);
                 timer.scheduleAtFixedRate(getTimerTask(chart), UPDATE_DELAY, UPDATE_PERIOD);
             } else {
                 startTimer.setText("start timer");
@@ -420,7 +420,7 @@ public class ErrorDataSetRendererStylingSample extends Application {
         startTimer.setOnAction(evt -> {
             if (timer == null) {
                 startTimer.setText("stop timer");
-                timer = new Timer();
+                timer = new Timer(true);
                 timer.scheduleAtFixedRate(getTimerTask(chart), ErrorDataSetRendererStylingSample.UPDATE_DELAY,
                         ErrorDataSetRendererStylingSample.UPDATE_PERIOD);
             } else {

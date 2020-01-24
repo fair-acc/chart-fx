@@ -21,8 +21,8 @@ public class RollingBufferNewRefSample extends RollingBufferSample {
 
         if (timer == null) {
             timer = new Timer[2];
-            timer[0] = new Timer();
-            timer[1] = new Timer();
+            timer[0] = new Timer("sample-update-timer", true);
+            timer[1] = new Timer("sample-update-timer", true);
             rollingBufferBeamIntensity.reset();
             rollingBufferDipoleCurrent.reset();
             timer[0].scheduleAtFixedRate(getTask(0), 0, UPDATE_PERIOD);

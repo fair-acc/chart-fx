@@ -42,7 +42,7 @@ public class SimplePerformanceMeter extends AnimationTimer {
         tracker = PerformanceTracker.getSceneTracker(scene);
         this.start();
 
-        Timer timer = new Timer();
+        Timer timer = new Timer("SimplePerformanceMeter-timer", true);
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
