@@ -129,7 +129,7 @@ public class ContourDataSetRenderer extends AbstractContourDataSetRendererParame
                     continue;
                 }
                 final Color color = lCache.zInverted ? colorGradient.getColor(1 - levels[levelCount++])
-                        : colorGradient.getColor(levels[levelCount++]);
+                                                     : colorGradient.getColor(levels[levelCount++]);
                 gc.setStroke(color);
                 gc.setLineDashes(1.0);
                 gc.setMiterLimit(10);
@@ -253,7 +253,7 @@ public class ContourDataSetRenderer extends AbstractContourDataSetRendererParame
                 final double z = dataSet.getZ(xIndex + indexXMin, yIndex + indexYMin);
                 final double offset = (axisTransform.forward(z) - zMin) / (zMax - zMin);
                 final Color color = lCache.zInverted ? colorGradient.getColor(quantize(1 - offset, nQuant))
-                        : colorGradient.getColor(quantize(offset, nQuant));
+                                                     : colorGradient.getColor(quantize(offset, nQuant));
 
                 final int x = xIndex * scaleX;
                 final int y = (ySize - 1 - yIndex) * scaleY;
@@ -375,7 +375,7 @@ public class ContourDataSetRenderer extends AbstractContourDataSetRendererParame
         final double estimatedHexMapHeightInPixels = imageHeight / horizontalRelation;
 
         final int mapHeight = (int) (estimatedHexMapHeightInPixels / map.getGraphicsverticalDistanceBetweenHexagons())
-                + 1;
+                              + 1;
         final ColorGradient colorGradient = getColorGradient();
         for (int x = 0; x < mapWidth; x++) {
             for (int y = 0; y < mapHeight; y++) {
@@ -405,7 +405,7 @@ public class ContourDataSetRenderer extends AbstractContourDataSetRendererParame
 
                 final double offset = (axisTransform.forward(z) - zMin) / (zMax - zMin);
                 final double quant = lCache.zInverted ? ContourDataSetRenderer.quantize(1 - offset, nQuant)
-                        : ContourDataSetRenderer.quantize(offset, nQuant);
+                                                      : ContourDataSetRenderer.quantize(offset, nQuant);
                 final Color color = colorGradient.getColor(quant);
 
                 hex.setStroke(color);
@@ -644,9 +644,9 @@ public class ContourDataSetRenderer extends AbstractContourDataSetRendererParame
 
     public static double convolution(final double[][] pixelMatrix) {
         final double gy = pixelMatrix[0][0] * -1 + pixelMatrix[0][1] * -2 + pixelMatrix[0][2] * -1 + pixelMatrix[2][0]
-                + pixelMatrix[2][1] * 2 + pixelMatrix[2][2] * 1;
+                          + pixelMatrix[2][1] * 2 + pixelMatrix[2][2] * 1;
         final double gx = pixelMatrix[0][0] + pixelMatrix[0][2] * -1 + pixelMatrix[1][0] * 2 + pixelMatrix[1][2] * -2
-                + pixelMatrix[2][0] + pixelMatrix[2][2] * -1;
+                          + pixelMatrix[2][0] + pixelMatrix[2][2] * -1;
         return Math.sqrt(Math.pow(gy, 2) + Math.pow(gx, 2));
     }
 
