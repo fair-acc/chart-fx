@@ -3,6 +3,11 @@ package de.gsi.chart.samples;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,10 +19,6 @@ import de.gsi.dataset.serializer.spi.FastByteBuffer;
 import de.gsi.dataset.serializer.spi.iobuffer.DataSetSerialiser;
 import de.gsi.dataset.spi.DoubleDataSet;
 import de.gsi.dataset.utils.DataSetUtils;
-import javafx.application.Application;
-import javafx.application.Platform;
-import javafx.scene.Scene;
-import javafx.stage.Stage;
 
 /**
  * @author rstein
@@ -60,7 +61,7 @@ public class WriteDataSetToFileSample extends Application {
 
         secondaryStage.setTitle(this.getClass().getSimpleName() + " - recovered");
         secondaryStage.setScene(new Scene(chart2, 800, 600));
-        secondaryStage.setOnCloseRequest(evt -> System.exit(0));
+        secondaryStage.setOnCloseRequest(evt -> Platform.exit());
         primaryStage.show();
         secondaryStage.show();
 

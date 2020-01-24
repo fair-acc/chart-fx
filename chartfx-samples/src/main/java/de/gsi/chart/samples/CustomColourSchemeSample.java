@@ -2,17 +2,6 @@ package de.gsi.chart.samples;
 
 import java.util.Arrays;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import de.gsi.chart.XYChart;
-import de.gsi.chart.axes.spi.DefaultNumericAxis;
-import de.gsi.chart.plugins.EditAxis;
-import de.gsi.chart.plugins.Zoomer;
-import de.gsi.chart.renderer.ErrorStyle;
-import de.gsi.chart.renderer.spi.ErrorDataSetRenderer;
-import de.gsi.chart.renderer.spi.utils.DefaultRenderColorScheme;
-import de.gsi.dataset.spi.DoubleErrorDataSet;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
@@ -30,6 +19,18 @@ import javafx.scene.paint.LinearGradient;
 import javafx.scene.paint.Paint;
 import javafx.scene.paint.Stop;
 import javafx.stage.Stage;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import de.gsi.chart.XYChart;
+import de.gsi.chart.axes.spi.DefaultNumericAxis;
+import de.gsi.chart.plugins.EditAxis;
+import de.gsi.chart.plugins.Zoomer;
+import de.gsi.chart.renderer.ErrorStyle;
+import de.gsi.chart.renderer.spi.ErrorDataSetRenderer;
+import de.gsi.chart.renderer.spi.utils.DefaultRenderColorScheme;
+import de.gsi.dataset.spi.DoubleErrorDataSet;
 
 /**
  * Example illustrating the various colour scheme options
@@ -50,7 +51,7 @@ public class CustomColourSchemeSample extends Application {
         ErrorDataSetRenderer renderer = (ErrorDataSetRenderer) chart.getRenderers().get(0);
 
         for (int i = 0; i < N_DATA_SETS_MAX; i++) {
-            DoubleErrorDataSet dataSet = new DoubleErrorDataSet("Set#" + i);
+            DoubleErrorDataSet dataSet = new DoubleErrorDataSet("Set#" + i); // NOPMD
             for (int n = 0; n < N_SAMPLES; n++) {
                 dataSet.add(n, 0.5 * i + Math.cos(Math.toRadians(1.0 * n)), 0.15, 0.15);
             }
@@ -94,9 +95,9 @@ public class CustomColourSchemeSample extends Application {
         customFill.setOnAction(evt -> {
             final ObservableList<Paint> values = FXCollections.observableArrayList();
             for (Color colour : DefaultRenderColorScheme.fillColorProperty()) {
-                Stop[] stops = new Stop[] { new Stop(0, colour.brighter().interpolate(Color.TRANSPARENT, 0.4)),
-                        new Stop(1, colour.brighter().interpolate(Color.TRANSPARENT, 0.95)) };
-                LinearGradient gradient = new LinearGradient(0.0, 0.0, 1.0, 0.0, true, CycleMethod.REPEAT, stops);
+                Stop[] stops = new Stop[] { new Stop(0, colour.brighter().interpolate(Color.TRANSPARENT, 0.4)), // NOPMD
+                    new Stop(1, colour.brighter().interpolate(Color.TRANSPARENT, 0.95)) }; // NOPMD
+                LinearGradient gradient = new LinearGradient(0.0, 0.0, 1.0, 0.0, true, CycleMethod.REPEAT, stops); // NOPMD
                 values.add(gradient);
             }
             DefaultRenderColorScheme.fillStylesProperty().clear();

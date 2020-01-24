@@ -10,7 +10,6 @@ import javafx.scene.paint.Color;
  * This class creates a map of Hexagons from an image file.
  */
 class MapGenerator {
-
     private final HexagonMap map;
     private final Image image;
     private final int mapWidth;
@@ -51,9 +50,9 @@ class MapGenerator {
         final double estimatedHexagonMapHeightInPixels = imageHeight / horizontalRelation;
 
         final int mapHeight = (int) (estimatedHexagonMapHeightInPixels
-                / map.getGraphicsverticalDistanceBetweenHexagons());
+                                     / map.getGraphicsverticalDistanceBetweenHexagons());
         verticalRelation = imageHeight
-                / (map.getGraphicsverticalDistanceBetweenHexagons() * mapHeight + map.getGraphicsHexagonHeight() / 2);
+                           / (map.getGraphicsverticalDistanceBetweenHexagons() * mapHeight + map.getGraphicsHexagonHeight() / 2);
         // Not really sure about the last part but it seems to work. And should I make the corresponding correction on
         // the horizontalRelation ?
 

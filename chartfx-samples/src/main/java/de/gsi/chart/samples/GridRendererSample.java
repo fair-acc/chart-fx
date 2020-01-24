@@ -1,7 +1,5 @@
 package de.gsi.chart.samples;
 
-import de.gsi.chart.XYChart;
-import de.gsi.chart.axes.spi.DefaultNumericAxis;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.geometry.Pos;
@@ -10,12 +8,13 @@ import javafx.scene.layout.FlowPane;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
+import de.gsi.chart.XYChart;
+import de.gsi.chart.axes.spi.DefaultNumericAxis;
+
 public class GridRendererSample extends Application {
-    int c = 0;
 
     @Override
     public void start(final Stage primaryStage) {
-
         final FlowPane root = new FlowPane();
         root.setAlignment(Pos.CENTER);
 
@@ -33,9 +32,9 @@ public class GridRendererSample extends Application {
         xyChart2.getGridRenderer().getHorizontalMinorGrid().setVisible(true); // implicit major = true
         xyChart2.getGridRenderer().getVerticalMajorGrid().setVisible(true);
         xyChart2.getGridRenderer().getVerticalMinorGrid().setVisible(true);
-//        xyChart2.getGridRenderer().getVerticalMinorGrid().setStyle(".chart-minor-grid-lines{visible:true}");
-//        xyChart2.getGridRenderer().getHorizontalMajorGrid().setStyle("-fx-stroke: blue;-fx-stroke-width:4;");
-//        xyChart2.getGridRenderer().getVerticalMajorGrid().setStyle("-fx-stroke: darkblue");
+        //        xyChart2.getGridRenderer().getVerticalMinorGrid().setStyle(".chart-minor-grid-lines{visible:true}");
+        //        xyChart2.getGridRenderer().getHorizontalMajorGrid().setStyle("-fx-stroke: blue;-fx-stroke-width:4;");
+        //        xyChart2.getGridRenderer().getVerticalMajorGrid().setStyle("-fx-stroke: darkblue");
 
         final XYChart xyChart3 = new XYChart(new DefaultNumericAxis("x-Axis 3", 0, 100, 10),
                 new DefaultNumericAxis("y-Axis 3", 0, 100, 20));

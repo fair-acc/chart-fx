@@ -11,6 +11,13 @@ import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
+import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.scene.Scene;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.stage.Stage;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,12 +33,6 @@ import de.gsi.chart.renderer.spi.ErrorDataSetRenderer;
 import de.gsi.dataset.spi.DefaultDataSet;
 import de.gsi.dataset.spi.DefaultErrorDataSet;
 import de.gsi.dataset.utils.ProcessingProfiler;
-import javafx.application.Application;
-import javafx.application.Platform;
-import javafx.scene.Scene;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
-import javafx.stage.Stage;
 
 /**
  * example to illustrate bubble- and scatter-type plot using either the DataSetError interface or (more customisable)
@@ -50,7 +51,7 @@ public class ScatterAndBubbleRendererSample extends Application {
 
     private void loadDemoData(final String fileName) {
         try (BufferedReader csvReader = Files
-                .newBufferedReader(Paths.get(this.getClass().getResource(fileName).toURI()))) {
+                                                .newBufferedReader(Paths.get(this.getClass().getResource(fileName).toURI()))) {
             // skip first row
             String row = csvReader.readLine();
             // LOCATION,TIME,LIFEEXP65 – WOMEN,LIFEEXP65 – MEN,TIME,USD_CAP,TIME,MLN_PER
@@ -69,12 +70,10 @@ public class ScatterAndBubbleRendererSample extends Application {
                 LOGGER.atError().setCause(e).log("InterruptedException");
             }
         }
-
     }
 
     @Override
     public void start(final Stage primaryStage) {
-
         // initialises Map based on https://data.oecd.org/ data
         loadDemoData(demoDataFile);
 
@@ -87,8 +86,7 @@ public class ScatterAndBubbleRendererSample extends Application {
         DefaultDataSet bubbleDataSet2a = new DefaultDataSet("women");
         DefaultDataSet bubbleDataSet2b = new DefaultDataSet("men");
 
-        Map<String, Double> sortedGDP = gdpPerCapita.entrySet().stream().sorted(Entry.comparingByValue())
-                .collect(Collectors.toMap(Entry::getKey, Entry::getValue, (e1, e2) -> e2, LinkedHashMap::new));
+        Map<String, Double> sortedGDP = gdpPerCapita.entrySet().stream().sorted(Entry.comparingByValue()).collect(Collectors.toMap(Entry::getKey, Entry::getValue, (e1, e2) -> e2, LinkedHashMap::new));
         // N.B. for the time the being the Zoomer plugin and Data reduction algorithm require
         // DataSets to be sorted along the x coordinate
         int count = 0;
@@ -107,13 +105,13 @@ public class ScatterAndBubbleRendererSample extends Application {
             bubbleDataSet2b.add(gdp, lifeExpectancyMen.get(country), country);
             // N.B. markerSize is in pixel regardless of the xAxis or yAxis scale
             String markerSize = "markerSize=" + 40 * Math.sqrt(population.get(country) / maxPopulation) + "; index="
-                    + count + ";";
+                                + count + ";";
             bubbleDataSet2a.addDataStyle(count, markerSize);
             bubbleDataSet2b.addDataStyle(count, markerSize);
-            if (country.equals("FRA")) {
+            if ("FRA".equals(country)) {
                 bubbleDataSet2a.addDataStyle(count, markerSize + "markerColor=darkblue; markerType=circle2;");
                 bubbleDataSet2b.addDataStyle(count, markerSize + "markerColor=darkred; markerType=circle2;");
-            } else if (country.equals("JPN")) {
+            } else if ("JPN".equals(country)) {
                 bubbleDataSet2a.addDataStyle(count, markerSize + "markerColor=green; markerType=diamond;");
                 bubbleDataSet2b.addDataStyle(count, markerSize + "markerColor=lightgreen; markerType=diamond;");
             }
@@ -169,8 +167,8 @@ public class ScatterAndBubbleRendererSample extends Application {
         xAxis.setAutoUnitScaling(true);
         xAxis.setAutoRangePadding(0.05);
         xAxis.setAutoRanging(false);
-        xAxis.setMin(15000);
-        xAxis.setMax(75000);
+        xAxis.setMin(15_000);
+        xAxis.setMax(75_000);
         DefaultNumericAxis yAxis = new DefaultNumericAxis("life-expectancy", "years");
         yAxis.setAutoRangePadding(0.05);
 

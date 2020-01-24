@@ -3,6 +3,17 @@ package de.gsi.chart.samples;
 import java.util.List;
 import java.util.Map;
 
+import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.collections.ListChangeListener;
+import javafx.geometry.Pos;
+import javafx.scene.Scene;
+import javafx.scene.control.ContentDisplay;
+import javafx.scene.control.Label;
+import javafx.scene.layout.FlowPane;
+import javafx.scene.text.Font;
+import javafx.stage.Stage;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,16 +27,6 @@ import de.gsi.dataset.DataSet;
 import de.gsi.dataset.event.AddedDataEvent;
 import de.gsi.dataset.spi.DoubleErrorDataSet;
 import de.gsi.dataset.testdata.spi.RandomDataGenerator;
-import javafx.application.Application;
-import javafx.application.Platform;
-import javafx.collections.ListChangeListener;
-import javafx.geometry.Pos;
-import javafx.scene.Scene;
-import javafx.scene.control.ContentDisplay;
-import javafx.scene.control.Label;
-import javafx.scene.layout.FlowPane;
-import javafx.scene.text.Font;
-import javafx.stage.Stage;
 
 /**
  * @author rstein
@@ -34,18 +35,17 @@ public class ZoomerSample extends Application {
     private static final Logger LOGGER = LoggerFactory.getLogger(ZoomerSample.class);
     private static final int PREF_WIDTH = 600;
     private static final int PREF_HEIGHT = 300;
-    private static final int N_SAMPLES = 1000000; // default: 1000000
+    private static final int N_SAMPLES = 1_000_000; // default: 1000000
 
     @Override
     public void start(final Stage primaryStage) {
-
         final FlowPane root = new FlowPane();
         root.setAlignment(Pos.CENTER);
 
         DataSet testDataSet = generateData();
 
         Label label = new Label("left-click-hold-drag for zooming. middle-button for panning.\n"
-                + "Tip: drag horizontally/vertically/diagonally for testing; try to select the outlier");
+                                + "Tip: drag horizontally/vertically/diagonally for testing; try to select the outlier");
         label.setFont(Font.font(20));
         label.setAlignment(Pos.CENTER);
         label.setContentDisplay(ContentDisplay.CENTER);
@@ -102,7 +102,7 @@ public class ZoomerSample extends Application {
             for (int n = 0; n < N_SAMPLES; n++) {
                 final double x = n;
                 oldY += RandomDataGenerator.random() - 0.5;
-                final double y = oldY + (n == 500000 ? 500.0 : 0) /* + ((x>1e4 && x <2e4) ? Double.NaN: 0.0) */;
+                final double y = oldY + (n == 500_000 ? 500.0 : 0) /* + ((x>1e4 && x <2e4) ? Double.NaN: 0.0) */;
                 final double ex = 0.1;
                 final double ey = 10;
                 dataSet.add(x, y, ex, ey);
@@ -137,15 +137,13 @@ public class ZoomerSample extends Application {
             while (change.next()) {
                 List<? extends Map<Axis, ZoomState>> added = change.getAddedSubList();
                 if (added != null) {
-                    added.forEach(ch -> ch.forEach((a, s) -> LOGGER.atInfo().addArgument(chart).addArgument(a.getSide())
-                            .addArgument(s).log("chart '{}' - axis {} -> new zoomState = {}")));
+                    added.forEach(ch -> ch.forEach((a, s) -> LOGGER.atInfo().addArgument(chart).addArgument(a.getSide()).addArgument(s).log("chart '{}' - axis {} -> new zoomState = {}")));
                 }
 
                 List<? extends Map<Axis, ZoomState>> removed = change.getRemoved();
                 if (removed != null) {
                     removed.forEach(
-                            ch -> ch.forEach((a, s) -> LOGGER.atInfo().addArgument(chart).addArgument(a.getSide())
-                                    .addArgument(s).log("chart '{}' - axis {} -> removed zoomState = {}")));
+                            ch -> ch.forEach((a, s) -> LOGGER.atInfo().addArgument(chart).addArgument(a.getSide()).addArgument(s).log("chart '{}' - axis {} -> removed zoomState = {}")));
                 }
             }
         }));

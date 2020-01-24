@@ -4,10 +4,6 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 
-import de.gsi.chart.Chart;
-import de.gsi.chart.axes.AxisLabelOverlapPolicy;
-import de.gsi.chart.axes.spi.DefaultNumericAxis;
-import de.gsi.chart.axes.spi.format.DefaultTimeTickUnitSupplier;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
@@ -17,6 +13,11 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+
+import de.gsi.chart.Chart;
+import de.gsi.chart.axes.AxisLabelOverlapPolicy;
+import de.gsi.chart.axes.spi.DefaultNumericAxis;
+import de.gsi.chart.axes.spi.format.DefaultTimeTickUnitSupplier;
 
 /**
  * Small example for testing different time axis ranges
@@ -40,9 +41,8 @@ public class TimeAxisRangeSample extends Application {
         root.getChildren().add(xAxis2);
 
         final double[] ranges = { 0.1, 1.0, 10.0, 30.0, 3600.0, 3600 * 24, 3600 * 24 * 31 * 3, 3600 * 24 * 31 * 60 };
-        for (int i = 0; i < ranges.length; i++) {
-            final double range = ranges[i];
-            final TimeAxis axis = new TimeAxis("time axis - range = " + range + " s", now - range, now, range / 10);
+        for (double range : ranges) {
+            final TimeAxis axis = new TimeAxis("time axis - range = " + range + " s", now - range, now, range / 10); // NOPMD
             root.getChildren().add(axis);
         }
 
@@ -57,8 +57,8 @@ public class TimeAxisRangeSample extends Application {
 
         final Timer timer = new Timer("sample-update-timer", true);
         final TimerTask task = new TimerTask() {
-            int counter = 0;
-            boolean directionUpwards = true;
+            private int counter;
+            private boolean directionUpwards = true;
 
             @Override
             public void run() {
@@ -71,7 +71,7 @@ public class TimeAxisRangeSample extends Application {
                     final double range = DefaultTimeTickUnitSupplier.TICK_UNIT_DEFAULTS[counter];
                     xAxisDyn.minProperty().set(now - range);
                     final String text = "actual range [s]: " + String.format("%#.3f", range) + " ("
-                            + String.format("%#.1f", range / 3600 / 24) + " days)";
+                                        + String.format("%#.1f", range / 3600 / 24) + " days)";
                     xAxisDyn.setTickUnit(range / 10);
                     xAxisDyn.forceRedraw();
                     xAxis9Text.setText(text);
@@ -80,7 +80,6 @@ public class TimeAxisRangeSample extends Application {
                     directionUpwards = !directionUpwards;
                 }
             }
-
         };
         timer.scheduleAtFixedRate(task, 0, TimeUnit.SECONDS.toMillis(2));
 
@@ -101,7 +100,6 @@ public class TimeAxisRangeSample extends Application {
     }
 
     protected class TimeAxis extends DefaultNumericAxis {
-
         public TimeAxis(String label, final double min, final double max, final double tick) {
             super(label, min, max, tick);
             this.setAutoRangeRounding(true);

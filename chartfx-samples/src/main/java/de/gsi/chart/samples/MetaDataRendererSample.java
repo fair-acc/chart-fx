@@ -6,6 +6,19 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import javafx.application.Application;
+import javafx.application.ConditionalFeature;
+import javafx.application.Platform;
+import javafx.collections.ListChangeListener;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
+import javafx.stage.Stage;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,18 +42,6 @@ import de.gsi.dataset.DataSetMetaData;
 import de.gsi.dataset.testdata.spi.GaussFunction;
 import de.gsi.dataset.testdata.spi.RandomWalkFunction;
 import de.gsi.dataset.utils.ProcessingProfiler;
-import javafx.application.Application;
-import javafx.application.ConditionalFeature;
-import javafx.application.Platform;
-import javafx.collections.ListChangeListener;
-import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.Label;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
-import javafx.stage.Stage;
 
 public class MetaDataRendererSample extends Application {
     private static final Logger LOGGER = LoggerFactory.getLogger(MetaDataRendererSample.class);
@@ -56,7 +57,6 @@ public class MetaDataRendererSample extends Application {
 
     public TimerTask getTask(final Renderer renderer1, final Renderer renderer2) {
         return new TimerTask() {
-
             int updateCount;
 
             @Override
@@ -80,7 +80,6 @@ public class MetaDataRendererSample extends Application {
 
     @Override
     public void start(final Stage primaryStage) {
-
         if (Platform.isSupported(ConditionalFeature.TRANSPARENT_WINDOW)) {
             Application.setUserAgentStylesheet(Chart.class.getResource("solid-pick.css").toExternalForm());
         }
@@ -188,7 +187,6 @@ public class MetaDataRendererSample extends Application {
         primaryStage.setOnCloseRequest(evt -> Platform.exit());
         primaryStage.show();
         ProcessingProfiler.getTimeDiff(startTime, "for showing");
-
     }
 
     /**
@@ -212,7 +210,7 @@ public class MetaDataRendererSample extends Application {
         @Override
         public double get(final int dimIndex, final int index) {
             if (dimIndex == DataSet.DIM_X) {
-            return (double) index / ((double) this.getDataCount()) * range;
+                return (double) index / ((double) this.getDataCount()) * range;
             } else {
                 double x = get(DIM_X, index);
                 return 1000 * MetaInfoGausFunction.gauss(x, 0.5 * range, 1000);
@@ -275,6 +273,5 @@ public class MetaDataRendererSample extends Application {
             }
             return Collections.<String>emptyList();
         }
-
     }
 }
