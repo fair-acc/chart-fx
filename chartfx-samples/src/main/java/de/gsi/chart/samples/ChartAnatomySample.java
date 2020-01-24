@@ -2,16 +2,6 @@ package de.gsi.chart.samples;
 
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import de.gsi.chart.Chart;
-import de.gsi.chart.axes.Axis;
-import de.gsi.chart.axes.spi.DefaultNumericAxis;
-import de.gsi.chart.renderer.Renderer;
-import de.gsi.chart.ui.geometry.Corner;
-import de.gsi.chart.ui.geometry.Side;
-import de.gsi.dataset.DataSet;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.collections.ListChangeListener.Change;
@@ -28,6 +18,17 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import de.gsi.chart.Chart;
+import de.gsi.chart.axes.Axis;
+import de.gsi.chart.axes.spi.DefaultNumericAxis;
+import de.gsi.chart.renderer.Renderer;
+import de.gsi.chart.ui.geometry.Corner;
+import de.gsi.chart.ui.geometry.Side;
+import de.gsi.dataset.DataSet;
+
 /**
  * @author rstein
  */
@@ -36,7 +37,6 @@ public class ChartAnatomySample extends Application {
 
     @Override
     public void start(final Stage primaryStage) {
-
         final VBox root = new VBox();
         root.setAlignment(Pos.CENTER);
 

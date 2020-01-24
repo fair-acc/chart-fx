@@ -3,6 +3,16 @@ package de.gsi.chart.samples;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.collections.ObservableList;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
+import javafx.stage.Stage;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,15 +27,6 @@ import de.gsi.dataset.spi.DoubleDataSet;
 import de.gsi.dataset.spi.DoubleErrorDataSet;
 import de.gsi.dataset.testdata.spi.GaussFunction;
 import de.gsi.dataset.utils.ProcessingProfiler;
-import javafx.application.Application;
-import javafx.application.Platform;
-import javafx.collections.ObservableList;
-import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.CheckBox;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
-import javafx.stage.Stage;
 
 /**
  * @author rstein
@@ -52,10 +53,8 @@ public class HistoryDataSetRendererSample extends Application {
             final double phase = 2 * Math.PI * updateIteration / 40.0;
             final double a1 = 1 + 0.5 * Math.sin(phase);
             final double a2 = 1 + 0.5 * Math.cos(phase);
-            final double y1 = a1 * GaussFunction.gauss(x, HistoryDataSetRendererSample.N_SAMPLES * 1.0 / 3.0,
-                    HistoryDataSetRendererSample.N_SAMPLES / 20.0) * 1000;
-            final double y2 = a2 * GaussFunction.gauss(x, HistoryDataSetRendererSample.N_SAMPLES * 2.0 / 3.0,
-                    HistoryDataSetRendererSample.N_SAMPLES / 20.0) * 1000;
+            final double y1 = a1 * GaussFunction.gauss(x, HistoryDataSetRendererSample.N_SAMPLES * 1.0 / 3.0, HistoryDataSetRendererSample.N_SAMPLES / 20.0) * 1000;
+            final double y2 = a2 * GaussFunction.gauss(x, HistoryDataSetRendererSample.N_SAMPLES * 2.0 / 3.0, HistoryDataSetRendererSample.N_SAMPLES / 20.0) * 1000;
             final double ey1 = 0.01 * y1;
 
             // lin scale
@@ -190,7 +189,6 @@ public class HistoryDataSetRendererSample extends Application {
         primaryStage.setOnCloseRequest(evt -> Platform.exit());
         primaryStage.show();
         ProcessingProfiler.getTimeDiff(startTime, "for showing");
-
     }
 
     /**

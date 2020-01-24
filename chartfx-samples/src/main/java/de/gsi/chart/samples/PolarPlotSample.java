@@ -1,5 +1,11 @@
 package de.gsi.chart.samples;
 
+import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.scene.Scene;
+import javafx.scene.layout.StackPane;
+import javafx.stage.Stage;
+
 import de.gsi.chart.XYChart;
 import de.gsi.chart.axes.spi.DefaultNumericAxis;
 import de.gsi.chart.plugins.EditAxis;
@@ -8,11 +14,6 @@ import de.gsi.chart.renderer.datareduction.DefaultDataReducer;
 import de.gsi.chart.renderer.spi.ErrorDataSetRenderer;
 import de.gsi.dataset.spi.DefaultDataSet;
 import de.gsi.dataset.spi.DefaultErrorDataSet;
-import javafx.application.Application;
-import javafx.application.Platform;
-import javafx.scene.Scene;
-import javafx.scene.layout.StackPane;
-import javafx.stage.Stage;
 
 /**
  * small demo to experiment with polar plot geometries
@@ -61,7 +62,6 @@ public class PolarPlotSample extends Application {
 
             dataSet1.add(x, y1);
             dataSet2.add(x, y2);
-
         }
 
         final Scene scene = new Scene(root, 800, 600);

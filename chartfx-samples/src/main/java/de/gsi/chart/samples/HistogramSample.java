@@ -8,6 +8,12 @@ import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.scene.Scene;
+import javafx.scene.layout.StackPane;
+import javafx.stage.Stage;
+
 import de.gsi.chart.XYChart;
 import de.gsi.chart.axes.spi.CategoryAxis;
 import de.gsi.chart.axes.spi.DefaultNumericAxis;
@@ -21,19 +27,13 @@ import de.gsi.chart.renderer.spi.MetaDataRenderer;
 import de.gsi.chart.utils.FXUtils;
 import de.gsi.dataset.spi.Histogram;
 import de.gsi.dataset.testdata.spi.RandomDataGenerator;
-import javafx.application.Application;
-import javafx.application.Platform;
-import javafx.scene.Scene;
-import javafx.scene.layout.StackPane;
-import javafx.stage.Stage;
 
 public class HistogramSample extends Application {
-
     private static final int UPDATE_DELAY = 1000; // [ms]
     private static final int UPDATE_PERIOD = 20; // [ms]
     private static final int N_BINS = 30;
     private final double[] xBins = { 0.0, 0.1, 0.2, 0.3, 1.0, 2.0, 3.0, 4.0, 5.0, 10.0, 15.0, 16.0, 17.0, 18.0, 19.0,
-            19.7, 19.8, 19.9, 20.0 };
+        19.7, 19.8, 19.9, 20.0 };
     private final Histogram dataSet1 = new Histogram("myHistogram1", N_BINS, 0.0, 20.0);
     private final Histogram dataSet2 = new Histogram("myHistogram2", N_BINS, 0.0, 20.0);
     private final Histogram dataSet3 = new Histogram("myHistogram3", xBins); // custom, non-equidistant histogram
@@ -56,7 +56,6 @@ public class HistogramSample extends Application {
             dataSet2.reset();
             dataSet3.reset();
         }
-
     }
 
     private void fillDemoData() {
@@ -137,7 +136,6 @@ public class HistogramSample extends Application {
 
         final Timer timer = new Timer("sample-update-timer", true);
         timer.scheduleAtFixedRate(new TimerTask() {
-
             @Override
             public void run() {
                 fillData();

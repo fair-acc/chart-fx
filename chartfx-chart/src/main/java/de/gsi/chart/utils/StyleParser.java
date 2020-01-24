@@ -210,7 +210,7 @@ public final class StyleParser { // NOPMD
         if (value == null) {
             return null;
         }
-        
+
         try {
             return Arrays.asList(value.split(",\\s*")).stream().map(String::trim).mapToDouble(Double::parseDouble).toArray();
         } catch (final IllegalArgumentException ex) {

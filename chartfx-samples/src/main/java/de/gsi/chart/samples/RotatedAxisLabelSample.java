@@ -1,5 +1,11 @@
 package de.gsi.chart.samples;
 
+import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.scene.Scene;
+import javafx.scene.layout.StackPane;
+import javafx.stage.Stage;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -9,11 +15,6 @@ import de.gsi.chart.axes.spi.DefaultNumericAxis;
 import de.gsi.chart.plugins.Zoomer;
 import de.gsi.chart.ui.geometry.Side;
 import de.gsi.dataset.spi.DoubleDataSet;
-import javafx.application.Application;
-import javafx.application.Platform;
-import javafx.scene.Scene;
-import javafx.scene.layout.StackPane;
-import javafx.stage.Stage;
 
 /**
  * Simple example of how to rotate axis label and different label collision-avoidance schemes
@@ -38,7 +39,6 @@ public class RotatedAxisLabelSample extends Application {
 
         // set additional axes
         for (AxisLabelOverlapPolicy policy : AxisLabelOverlapPolicy.values()) {
-
             final DefaultNumericAxis xAxis1 = getSynchedAxis(xAxis0, "x-axis (" + policy + ")");
             xAxis1.setSide(Side.BOTTOM);
             xAxis1.setOverlapPolicy(policy);

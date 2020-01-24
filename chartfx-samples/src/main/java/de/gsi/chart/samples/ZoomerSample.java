@@ -3,6 +3,17 @@ package de.gsi.chart.samples;
 import java.util.List;
 import java.util.Map;
 
+import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.collections.ListChangeListener;
+import javafx.geometry.Pos;
+import javafx.scene.Scene;
+import javafx.scene.control.ContentDisplay;
+import javafx.scene.control.Label;
+import javafx.scene.layout.FlowPane;
+import javafx.scene.text.Font;
+import javafx.stage.Stage;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,16 +27,6 @@ import de.gsi.dataset.DataSet;
 import de.gsi.dataset.event.AddedDataEvent;
 import de.gsi.dataset.spi.DoubleErrorDataSet;
 import de.gsi.dataset.testdata.spi.RandomDataGenerator;
-import javafx.application.Application;
-import javafx.application.Platform;
-import javafx.collections.ListChangeListener;
-import javafx.geometry.Pos;
-import javafx.scene.Scene;
-import javafx.scene.control.ContentDisplay;
-import javafx.scene.control.Label;
-import javafx.scene.layout.FlowPane;
-import javafx.scene.text.Font;
-import javafx.stage.Stage;
 
 /**
  * @author rstein
@@ -38,14 +39,13 @@ public class ZoomerSample extends Application {
 
     @Override
     public void start(final Stage primaryStage) {
-
         final FlowPane root = new FlowPane();
         root.setAlignment(Pos.CENTER);
 
         DataSet testDataSet = generateData();
 
         Label label = new Label("left-click-hold-drag for zooming. middle-button for panning.\n"
-                + "Tip: drag horizontally/vertically/diagonally for testing; try to select the outlier");
+                                + "Tip: drag horizontally/vertically/diagonally for testing; try to select the outlier");
         label.setFont(Font.font(20));
         label.setAlignment(Pos.CENTER);
         label.setContentDisplay(ContentDisplay.CENTER);
@@ -137,15 +137,13 @@ public class ZoomerSample extends Application {
             while (change.next()) {
                 List<? extends Map<Axis, ZoomState>> added = change.getAddedSubList();
                 if (added != null) {
-                    added.forEach(ch -> ch.forEach((a, s) -> LOGGER.atInfo().addArgument(chart).addArgument(a.getSide())
-                            .addArgument(s).log("chart '{}' - axis {} -> new zoomState = {}")));
+                    added.forEach(ch -> ch.forEach((a, s) -> LOGGER.atInfo().addArgument(chart).addArgument(a.getSide()).addArgument(s).log("chart '{}' - axis {} -> new zoomState = {}")));
                 }
 
                 List<? extends Map<Axis, ZoomState>> removed = change.getRemoved();
                 if (removed != null) {
                     removed.forEach(
-                            ch -> ch.forEach((a, s) -> LOGGER.atInfo().addArgument(chart).addArgument(a.getSide())
-                                    .addArgument(s).log("chart '{}' - axis {} -> removed zoomState = {}")));
+                            ch -> ch.forEach((a, s) -> LOGGER.atInfo().addArgument(chart).addArgument(a.getSide()).addArgument(s).log("chart '{}' - axis {} -> removed zoomState = {}")));
                 }
             }
         }));

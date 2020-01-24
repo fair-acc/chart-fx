@@ -4,6 +4,19 @@ import java.time.ZoneOffset;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
+import javafx.scene.layout.VBox;
+import javafx.scene.text.Font;
+import javafx.stage.Stage;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,18 +31,6 @@ import de.gsi.chart.ui.geometry.Side;
 import de.gsi.chart.utils.SimplePerformanceMeter;
 import de.gsi.dataset.spi.LimitedIndexedTreeDataSet;
 import de.gsi.dataset.utils.ProcessingProfiler;
-import javafx.application.Application;
-import javafx.application.Platform;
-import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.Region;
-import javafx.scene.layout.VBox;
-import javafx.scene.text.Font;
-import javafx.stage.Stage;
 
 /**
  * @author rstein
@@ -48,9 +49,9 @@ public class RollingBufferSortedTreeSample extends Application {
     private void generateData() {
         final long startTime = ProcessingProfiler.getTimeStamp();
         final double now = System.currentTimeMillis() / 1000.0 + 1; // N.B. '+1'
-                                                                    // to check
-                                                                    // for
-                                                                    // resolution
+                // to check
+                // for
+                // resolution
 
         if (rollingBufferDipoleCurrent.getDataCount() == 0) {
             rollingBufferBeamIntensity.autoNotification().set(false);
@@ -79,7 +80,6 @@ public class RollingBufferSortedTreeSample extends Application {
     }
 
     private HBox getHeaderBar(Scene scene) {
-
         final Button newDataSet = new Button("new DataSet");
         newDataSet.setOnAction(evt -> Platform.runLater(getTask()));
 
@@ -204,8 +204,8 @@ public class RollingBufferSortedTreeSample extends Application {
     protected void initErrorDataSetRenderer(final ErrorDataSetRenderer eRenderer) {
         eRenderer.setErrorType(ErrorStyle.ERRORSURFACE);
         eRenderer.setDashSize(RollingBufferSample.MIN_PIXEL_DISTANCE); // plot
-                                                                       // pixel-to-pixel
-                                                                       // distance
+                // pixel-to-pixel
+                // distance
         eRenderer.setDrawMarker(false);
         final DefaultDataReducer reductionAlgorithm = (DefaultDataReducer) eRenderer.getRendererDataReducer();
         reductionAlgorithm.setMinPointPixelDistance(RollingBufferSample.MIN_PIXEL_DISTANCE);
@@ -227,7 +227,6 @@ public class RollingBufferSortedTreeSample extends Application {
         primaryStage.setOnCloseRequest(evt -> Platform.exit());
         primaryStage.show();
         ProcessingProfiler.getTimeDiff(startTime, "for showing");
-
     }
 
     /**

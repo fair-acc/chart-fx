@@ -3,7 +3,6 @@ package de.gsi.chart.samples.legacy.utils;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import de.gsi.chart.utils.SimplePerformanceMeter;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.scene.Scene;
@@ -17,6 +16,8 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
+
+import de.gsi.chart.utils.SimplePerformanceMeter;
 
 public abstract class AbstractTestApplication extends Application {
     protected static final int MAX_DATA_POINTS_1K = 1000;
@@ -35,7 +36,6 @@ public abstract class AbstractTestApplication extends Application {
     }
 
     protected HBox getHeaderBar(final Scene scene) {
-
         final Button newDataSet1k = new Button("1k");
         newDataSet1k.setTooltip(new Tooltip("update present data set with 1k data points"));
         newDataSet1k.setMaxWidth(Double.MAX_VALUE);
@@ -75,11 +75,9 @@ public abstract class AbstractTestApplication extends Application {
             if (timer == null) {
                 timer = new Timer("sample-update-timer", true);
                 timer.scheduleAtFixedRate(new TimerTask() {
-
                     @Override
                     public void run() {
                         test.updateDataSet();
-
                     }
                 }, 0, 40);
             } else {
@@ -95,11 +93,9 @@ public abstract class AbstractTestApplication extends Application {
             if (timer == null) {
                 timer = new Timer(true);
                 timer.scheduleAtFixedRate(new TimerTask() {
-
                     @Override
                     public void run() {
                         test.updateDataSet();
-
                     }
                 }, 0, 1000);
             } else {
@@ -172,5 +168,4 @@ public abstract class AbstractTestApplication extends Application {
         stage.setOnCloseRequest(evt -> System.exit(0));
         stage.show();
     }
-
 }

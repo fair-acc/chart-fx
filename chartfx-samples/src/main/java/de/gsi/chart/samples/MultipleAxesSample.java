@@ -5,6 +5,16 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
+import javafx.application.Application;
+import javafx.application.ConditionalFeature;
+import javafx.application.Platform;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
+import javafx.stage.Stage;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,15 +32,6 @@ import de.gsi.dataset.testdata.spi.GaussFunction;
 import de.gsi.dataset.testdata.spi.RandomWalkFunction;
 import de.gsi.dataset.testdata.spi.SineFunction;
 import de.gsi.dataset.utils.ProcessingProfiler;
-import javafx.application.Application;
-import javafx.application.ConditionalFeature;
-import javafx.application.Platform;
-import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.CheckBox;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
-import javafx.stage.Stage;
 
 public class MultipleAxesSample extends Application {
     private static final Logger LOGGER = LoggerFactory.getLogger(MultipleAxesSample.class);
@@ -43,7 +44,6 @@ public class MultipleAxesSample extends Application {
 
     @Override
     public void start(final Stage primaryStage) {
-
         if (Platform.isSupported(ConditionalFeature.TRANSPARENT_WINDOW)) {
             Application.setUserAgentStylesheet(Chart.class.getResource("solid-pick.css").toExternalForm());
         }
@@ -120,7 +120,6 @@ public class MultipleAxesSample extends Application {
         primaryStage.setOnCloseRequest(evt -> Platform.exit());
         primaryStage.show();
         ProcessingProfiler.getTimeDiff(startTime, "for showing");
-
     }
 
     public static Runnable getTask(final Renderer renderer1, final Renderer renderer2, final Renderer renderer3) {
@@ -154,7 +153,6 @@ public class MultipleAxesSample extends Application {
     }
 
     private class MyZoomCheckBox extends CheckBox {
-
         /**
          * @param zoom the zoom interactor
          * @param axis to be synchronised
@@ -175,6 +173,5 @@ public class MultipleAxesSample extends Application {
                 }
             });
         }
-
     }
 }

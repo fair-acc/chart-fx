@@ -1,11 +1,5 @@
 package de.gsi.chart.samples;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import de.gsi.chart.renderer.spi.hexagon.Hexagon;
-import de.gsi.chart.renderer.spi.hexagon.HexagonMap;
-import de.gsi.chart.renderer.spi.hexagon.NoPathFoundException;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.scene.Group;
@@ -16,6 +10,13 @@ import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.stage.Stage;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import de.gsi.chart.renderer.spi.hexagon.Hexagon;
+import de.gsi.chart.renderer.spi.hexagon.HexagonMap;
+import de.gsi.chart.renderer.spi.hexagon.NoPathFoundException;
 
 public class HexagonSamples extends Application {
     private static final Logger LOGGER = LoggerFactory.getLogger(HexagonSamples.class);
@@ -67,7 +68,6 @@ public class HexagonSamples extends Application {
             if (oldHexColour != null) {
                 hexagon.setFill(oldHexColour);
             }
-
         });
 
         final Group hexagonGroup = new Group();
@@ -94,5 +94,4 @@ public class HexagonSamples extends Application {
     public static void main(final String[] args) {
         Application.launch(args);
     }
-
 }
