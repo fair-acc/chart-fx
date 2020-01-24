@@ -37,7 +37,7 @@ import de.gsi.dataset.utils.ProcessingProfiler;
 public class ErrorDataSetRendererSample extends Application {
     private static final Logger LOGGER = LoggerFactory.getLogger(ErrorDataSetRendererSample.class);
     private static final int DEBUG_UPDATE_RATE = 500;
-    private static final int N_SAMPLES = 1000000; // default: 1000000
+    private static final int N_SAMPLES = 1_000_000; // default: 1000000
     private static final int UPDATE_DELAY = 1000; // [ms]
     private static final int UPDATE_PERIOD = 1000; // [ms]
     private final DoubleErrorDataSet dataSet = new DoubleErrorDataSet("TestData", ErrorDataSetRendererSample.N_SAMPLES);
@@ -169,7 +169,7 @@ public class ErrorDataSetRendererSample extends Application {
             for (int n = 0; n < ErrorDataSetRendererSample.N_SAMPLES; n++) {
                 final double x = n;
                 oldY += RandomDataGenerator.random() - 0.5;
-                final double y = oldY + (n == 500000 ? 500.0 : 0) /* + ((x>1e4 && x <2e4) ? Double.NaN: 0.0) */;
+                final double y = oldY + (n == 500_000 ? 500.0 : 0) /* + ((x>1e4 && x <2e4) ? Double.NaN: 0.0) */;
                 final double ex = 0.1;
                 final double ey = 10;
                 dataSet.add(x, y, ex, ey);

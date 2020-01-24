@@ -4,6 +4,19 @@ import java.time.ZoneOffset;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
+import javafx.scene.layout.VBox;
+import javafx.scene.text.Font;
+import javafx.stage.Stage;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,23 +31,12 @@ import de.gsi.chart.ui.geometry.Side;
 import de.gsi.chart.utils.SimplePerformanceMeter;
 import de.gsi.dataset.spi.LimitedIndexedTreeDataSet;
 import de.gsi.dataset.utils.ProcessingProfiler;
-import javafx.application.Application;
-import javafx.application.Platform;
-import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.Region;
-import javafx.scene.layout.VBox;
-import javafx.scene.text.Font;
-import javafx.stage.Stage;
 
 /**
  * @author rstein
  */
 public class RollingBufferSortedTreeSample extends Application {
+    private static final String MONOSPACED = "Monospaced";
     private static final Logger LOGGER = LoggerFactory.getLogger(RollingBufferSortedTreeSample.class);
     public final LimitedIndexedTreeDataSet rollingBufferDipoleCurrent = new LimitedIndexedTreeDataSet(
             "dipole current [A]", RollingBufferSample.BUFFER_CAPACITY);
@@ -47,9 +49,9 @@ public class RollingBufferSortedTreeSample extends Application {
     private void generateData() {
         final long startTime = ProcessingProfiler.getTimeStamp();
         final double now = System.currentTimeMillis() / 1000.0 + 1; // N.B. '+1'
-                                                                    // to check
-                                                                    // for
-                                                                    // resolution
+                // to check
+                // for
+                // resolution
 
         if (rollingBufferDipoleCurrent.getDataCount() == 0) {
             rollingBufferBeamIntensity.autoNotification().set(false);
@@ -77,8 +79,7 @@ public class RollingBufferSortedTreeSample extends Application {
         ProcessingProfiler.getTimeDiff(startTime, "adding data into DataSet");
     }
 
-    private HBox getHeaderBar(XYChart chart, Scene scene) {
-
+    private HBox getHeaderBar(Scene scene) {
         final Button newDataSet = new Button("new DataSet");
         newDataSet.setOnAction(evt -> Platform.runLater(getTask()));
 
@@ -104,13 +105,13 @@ public class RollingBufferSortedTreeSample extends Application {
         SimplePerformanceMeter meter = new SimplePerformanceMeter(scene, RollingBufferSample.DEBUG_UPDATE_RATE);
 
         Label fxFPS = new Label();
-        fxFPS.setFont(Font.font("Monospaced", 12));
+        fxFPS.setFont(Font.font(MONOSPACED, 12));
         Label chartFPS = new Label();
-        chartFPS.setFont(Font.font("Monospaced", 12));
+        chartFPS.setFont(Font.font(MONOSPACED, 12));
         Label cpuLoadProcess = new Label();
-        cpuLoadProcess.setFont(Font.font("Monospaced", 12));
+        cpuLoadProcess.setFont(Font.font(MONOSPACED, 12));
         Label cpuLoadSystem = new Label();
-        cpuLoadSystem.setFont(Font.font("Monospaced", 12));
+        cpuLoadSystem.setFont(Font.font(MONOSPACED, 12));
         meter.fxFrameRateProperty().addListener((ch, o, n) -> {
             final String fxRate = String.format("%4.1f", meter.getFxFrameRate());
             final String actualRate = String.format("%4.1f", meter.getActualFrameRate());
@@ -128,7 +129,7 @@ public class RollingBufferSortedTreeSample extends Application {
 
     private TimerTask getTask() {
         return new TimerTask() {
-            int updateCount = 0;
+            private int updateCount;
 
             @Override
             public void run() {
@@ -187,7 +188,7 @@ public class RollingBufferSortedTreeSample extends Application {
         yAxis1.setAutoRangeRounding(true);
         yAxis2.setAutoRangeRounding(true);
 
-        root.setTop(getHeaderBar(chart, scene));
+        root.setTop(getHeaderBar(scene));
 
         long startTime = ProcessingProfiler.getTimeStamp();
         ProcessingProfiler.getTimeDiff(startTime, "adding data to chart");
@@ -203,8 +204,8 @@ public class RollingBufferSortedTreeSample extends Application {
     protected void initErrorDataSetRenderer(final ErrorDataSetRenderer eRenderer) {
         eRenderer.setErrorType(ErrorStyle.ERRORSURFACE);
         eRenderer.setDashSize(RollingBufferSample.MIN_PIXEL_DISTANCE); // plot
-                                                                       // pixel-to-pixel
-                                                                       // distance
+                // pixel-to-pixel
+                // distance
         eRenderer.setDrawMarker(false);
         final DefaultDataReducer reductionAlgorithm = (DefaultDataReducer) eRenderer.getRendererDataReducer();
         reductionAlgorithm.setMinPointPixelDistance(RollingBufferSample.MIN_PIXEL_DISTANCE);
@@ -226,7 +227,6 @@ public class RollingBufferSortedTreeSample extends Application {
         primaryStage.setOnCloseRequest(evt -> Platform.exit());
         primaryStage.show();
         ProcessingProfiler.getTimeDiff(startTime, "for showing");
-
     }
 
     /**

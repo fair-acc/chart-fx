@@ -4,6 +4,16 @@ import java.time.ZoneOffset;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
+import javafx.stage.Stage;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,15 +28,6 @@ import de.gsi.chart.ui.geometry.Side;
 import de.gsi.dataset.event.AddedDataEvent;
 import de.gsi.dataset.spi.CircularDoubleErrorDataSet;
 import de.gsi.dataset.utils.ProcessingProfiler;
-import javafx.application.Application;
-import javafx.application.Platform;
-import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.Region;
-import javafx.stage.Stage;
 
 /**
  * @author rstein
@@ -83,9 +84,9 @@ public class RollingBufferSample extends Application {
     private void generateDipoleCurrentData() {
         final long startTime = ProcessingProfiler.getTimeStamp();
         final double now = System.currentTimeMillis() / 1000.0 + 1; // N.B. '+1'
-                                                                    // to check
-                                                                    // for
-                                                                    // resolution
+                // to check
+                // for
+                // resolution
 
         if (rollingBufferDipoleCurrent.getDataCount() == 0) {
             // suppress auto notification since we plan to add multiple data points
@@ -114,7 +115,6 @@ public class RollingBufferSample extends Application {
     }
 
     private HBox getHeaderBar(Scene scene) {
-
         final Button newDataSet = new Button("new DataSet");
         newDataSet.setOnAction(evt -> {
             getTask(0).run();
@@ -252,7 +252,6 @@ public class RollingBufferSample extends Application {
         primaryStage.setOnCloseRequest(evt -> Platform.exit());
         primaryStage.show();
         ProcessingProfiler.getTimeDiff(startTime, "for showing");
-
     }
 
     /**
@@ -268,7 +267,7 @@ public class RollingBufferSample extends Application {
         double offset = 0.3;
         final double y = (1 - 0.1 * subSecond) * 1e9;
         double gate = RollingBufferSample.square(2, subSecond - offset)
-                * RollingBufferSample.square(1, subSecond - offset);
+                      * RollingBufferSample.square(1, subSecond - offset);
 
         // every 5th cycle is a booster mode cycle
         if (second % 5 == 0) {
@@ -281,7 +280,6 @@ public class RollingBufferSample extends Application {
         }
 
         return gate * y;
-
     }
 
     public static double rampFunctionDipoleCurrent(final double t) {
@@ -301,7 +299,6 @@ public class RollingBufferSample extends Application {
             y = 0;
         }
         return y + 10;
-
     }
 
     private static double sine(final double frequency, final double t) {

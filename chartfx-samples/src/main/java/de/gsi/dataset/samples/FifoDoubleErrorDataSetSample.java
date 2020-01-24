@@ -26,7 +26,6 @@ public class FifoDoubleErrorDataSetSample {
         final CircularDoubleErrorDataSet buffer2 = new CircularDoubleErrorDataSet("test", bufferLength);
 
         for (int i = 0; i < fillBufferLength; i++) {
-
             final double delta = i >= 13 ? 5 : 0;
             final double t = i + delta;
             if (i == 13) {
@@ -57,7 +56,6 @@ public class FifoDoubleErrorDataSetSample {
         final Timer timer = new Timer("sample-update-timer", true);
 
         timer.scheduleAtFixedRate(new TimerTask() {
-
             @Override
             public void run() {
                 System.gc();
@@ -70,5 +68,4 @@ public class FifoDoubleErrorDataSetSample {
             buffer3.add(now * 1e-3, 1.0, 0.0, 0.0);
         }
     }
-
 }

@@ -6,24 +6,6 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Predicate;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import de.gsi.chart.Chart;
-import de.gsi.chart.plugins.MouseEventsHelper;
-import de.gsi.chart.viewer.event.WindowClosedEvent;
-import de.gsi.chart.viewer.event.WindowClosingEvent;
-import de.gsi.chart.viewer.event.WindowDetachedEvent;
-import de.gsi.chart.viewer.event.WindowDetachingEvent;
-import de.gsi.chart.viewer.event.WindowMaximisedEvent;
-import de.gsi.chart.viewer.event.WindowMaximisingEvent;
-import de.gsi.chart.viewer.event.WindowMinimisedEvent;
-import de.gsi.chart.viewer.event.WindowMinimisingEvent;
-import de.gsi.chart.viewer.event.WindowRestoredEvent;
-import de.gsi.chart.viewer.event.WindowRestoringEvent;
-import de.gsi.dataset.event.EventListener;
-import de.gsi.dataset.event.EventSource;
-import de.gsi.dataset.utils.ProcessingProfiler;
 import javafx.beans.DefaultProperty;
 import javafx.beans.NamedArg;
 import javafx.beans.property.BooleanProperty;
@@ -49,6 +31,25 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import de.gsi.chart.Chart;
+import de.gsi.chart.plugins.MouseEventsHelper;
+import de.gsi.chart.viewer.event.WindowClosedEvent;
+import de.gsi.chart.viewer.event.WindowClosingEvent;
+import de.gsi.chart.viewer.event.WindowDetachedEvent;
+import de.gsi.chart.viewer.event.WindowDetachingEvent;
+import de.gsi.chart.viewer.event.WindowMaximisedEvent;
+import de.gsi.chart.viewer.event.WindowMaximisingEvent;
+import de.gsi.chart.viewer.event.WindowMinimisedEvent;
+import de.gsi.chart.viewer.event.WindowMinimisingEvent;
+import de.gsi.chart.viewer.event.WindowRestoredEvent;
+import de.gsi.chart.viewer.event.WindowRestoringEvent;
+import de.gsi.dataset.event.EventListener;
+import de.gsi.dataset.event.EventSource;
+import de.gsi.dataset.utils.ProcessingProfiler;
 
 /**
  * DataViewWindow containing content pane (based on BorderPane) and window decorations to detach, minimise, maximise,
@@ -602,7 +603,6 @@ public class DataViewWindow extends BorderPane implements EventSource {
             // mouse move outside window detected -- launch dialog
             // dropped outside of node window
             if (!dialog.isShowing()) {
-
                 dialog.show(this, mevt);
                 return;
             }
@@ -777,5 +777,4 @@ public class DataViewWindow extends BorderPane implements EventSource {
             return titleProperty().getValue();
         }
     }
-
 }

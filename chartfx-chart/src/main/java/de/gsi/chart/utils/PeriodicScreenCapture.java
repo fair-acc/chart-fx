@@ -20,9 +20,6 @@ import java.util.concurrent.TimeUnit;
 
 import javax.imageio.ImageIO;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -37,6 +34,9 @@ import javafx.scene.image.Image;
 import javafx.scene.image.WritableImage;
 import javafx.util.Duration;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * Simple class to make a periodic (or on-demand) screen-shot of given JavaFX scene to file. Class permits to add an ISO
  * date-time string
@@ -44,7 +44,6 @@ import javafx.util.Duration;
  * @author rstein
  */
 public class PeriodicScreenCapture implements Observable {
-
     private static final Logger LOGGER = LoggerFactory.getLogger(PeriodicScreenCapture.class);
     private static final String DEFAULT_TIME_FORMAT = "yyyyMMdd_HHmmss";
     private static final String FILE_LOGGING_SUFFIX = ".png";
@@ -63,7 +62,6 @@ public class PeriodicScreenCapture implements Observable {
     public PeriodicScreenCapture(final Path path, final String fileName, final Scene scene, final double delay,
             final double period) {
         this(path, fileName, scene, delay, period, false);
-
     }
 
     public PeriodicScreenCapture(final Path path, final String fileName, final Scene scene, final double delay,
@@ -112,7 +110,6 @@ public class PeriodicScreenCapture implements Observable {
             final WritableImage image = primaryScene.snapshot(null);
             // open save in separate thread
             timer.schedule(new TimerTask() {
-
                 @Override
                 public void run() {
                     writeImage(image);
@@ -143,7 +140,6 @@ public class PeriodicScreenCapture implements Observable {
             periodicTask.stop();
         }
         periodicTask = new Timeline(new KeyFrame(Duration.seconds(period), new EventHandler<ActionEvent>() {
-
             @Override
             public void handle(final ActionEvent event) {
                 performScreenCapture();
@@ -165,8 +161,8 @@ public class PeriodicScreenCapture implements Observable {
         try {
             final String format = getIsoDateTimeFormatterString();
             final String longFileName = addDateTime && format != null && !format.isEmpty()
-                    ? path.toFile() + String.format("/%s_%s%s", fileName, getISODate(now, format), FILE_LOGGING_SUFFIX)
-                    : path.toFile() + "/" + fileName;
+                                                ? path.toFile() + String.format("/%s_%s%s", fileName, getISODate(now, format), FILE_LOGGING_SUFFIX)
+                                                : path.toFile() + "/" + fileName;
             final String tempFileName = longFileName + "_temp.png";
             final File file = new File(tempFileName);
             if (file.getParentFile().mkdirs()) {
@@ -189,5 +185,4 @@ public class PeriodicScreenCapture implements Observable {
         df.setTimeZone(tz);
         return df.format(new Date(time));
     }
-
 }

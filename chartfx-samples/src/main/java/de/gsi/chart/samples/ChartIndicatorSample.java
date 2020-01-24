@@ -4,6 +4,19 @@ import java.time.ZoneOffset;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
+import javafx.scene.layout.VBox;
+import javafx.scene.text.Font;
+import javafx.stage.Stage;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,32 +40,20 @@ import de.gsi.chart.utils.SimplePerformanceMeter;
 import de.gsi.dataset.spi.FifoDoubleErrorDataSet;
 import de.gsi.dataset.testdata.spi.RandomDataGenerator;
 import de.gsi.dataset.utils.ProcessingProfiler;
-import javafx.application.Application;
-import javafx.application.Platform;
-import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.Region;
-import javafx.scene.layout.VBox;
-import javafx.scene.text.Font;
-import javafx.stage.Stage;
 
 public class ChartIndicatorSample extends Application {
     private static final Logger LOGGER = LoggerFactory.getLogger(ChartIndicatorSample.class);
     private static final int DEBUG_UPDATE_RATE = 1000;
     private static final int MIN_PIXEL_DISTANCE = 0; // 0: just drop points that
-                                                     // are drawn on the same
-                                                     // pixel
+            // are drawn on the same
+            // pixel
     private static final int N_SAMPLES = 3000; // default: 1000000
     private static final int UPDATE_DELAY = 1000; // [ms]
     private static final int UPDATE_PERIOD = 40; // [ms]
     private static final int BUFFER_CAPACITY = 750; // 750 samples @ 25 Hz <->
-                                                    // 30 s
+            // 30 s
     private static final double MAX_DISTANCE = ChartIndicatorSample.BUFFER_CAPACITY * ChartIndicatorSample.UPDATE_PERIOD
-            * 1e-3 * 0.90;
+                                               * 1e-3 * 0.90;
 
     public final FifoDoubleErrorDataSet rollingBufferDipoleCurrent = new FifoDoubleErrorDataSet("dipole current [A]",
             ChartIndicatorSample.BUFFER_CAPACITY, ChartIndicatorSample.MAX_DISTANCE);
@@ -69,9 +70,9 @@ public class ChartIndicatorSample extends Application {
     private void generateData() {
         startTime = ProcessingProfiler.getTimeStamp();
         final double now = System.currentTimeMillis() / 1000.0 + 1; // N.B. '+1'
-                                                                    // to check
-                                                                    // for
-                                                                    // resolution
+                // to check
+                // for
+                // resolution
 
         if (rollingBufferDipoleCurrent.getDataCount() == 0) {
             rollingBufferBeamIntensity.autoNotification().set(false);
@@ -108,7 +109,6 @@ public class ChartIndicatorSample extends Application {
     }
 
     private HBox getHeaderBar(final Scene scene, final TimerTask task) {
-
         final Button newDataSet = new Button("new DataSet");
         newDataSet.setOnAction(evt -> Platform.runLater(task));
 
@@ -219,7 +219,7 @@ public class ChartIndicatorSample extends Application {
 
         final XValueIndicator xValueIndicator = new XValueIndicator(xAxis1, minX + 0.5 * rangeX, "mid-range label -X");
         chart.getPlugins().add(xValueIndicator);
-//        xValueIndicator.valueProperty().bind(xAxis1.lowerBoundProperty().add(5));
+        //        xValueIndicator.valueProperty().bind(xAxis1.lowerBoundProperty().add(5));
 
         final YValueIndicator yValueIndicator1 = new YValueIndicator(yAxis1, minY1 + 0.5 * rangeY1,
                 "mid-range label -Y1");
@@ -298,8 +298,8 @@ public class ChartIndicatorSample extends Application {
     protected void initErrorDataSetRenderer(final ErrorDataSetRenderer eRenderer) {
         eRenderer.setErrorType(ErrorStyle.ERRORSURFACE);
         eRenderer.setDashSize(ChartIndicatorSample.MIN_PIXEL_DISTANCE); // plot
-                                                                        // pixel-to-pixel
-                                                                        // distance
+                // pixel-to-pixel
+                // distance
         eRenderer.setDrawMarker(false);
         final DefaultDataReducer reductionAlgorithm = (DefaultDataReducer) eRenderer.getRendererDataReducer();
         reductionAlgorithm.setMinPointPixelDistance(ChartIndicatorSample.MIN_PIXEL_DISTANCE);
@@ -319,7 +319,6 @@ public class ChartIndicatorSample extends Application {
         primaryStage.setOnCloseRequest(evt -> Platform.exit());
         primaryStage.show();
         ProcessingProfiler.getTimeDiff(startTime, "for showing");
-
     }
 
     /**
@@ -335,7 +334,7 @@ public class ChartIndicatorSample extends Application {
         double offset = 0.3;
         final double y = (1 - 0.1 * subSecond) * 1e9;
         double gate = ChartIndicatorSample.square(2, subSecond - offset)
-                * ChartIndicatorSample.square(1, subSecond - offset);
+                      * ChartIndicatorSample.square(1, subSecond - offset);
 
         // every 5th cycle is a booster mode cycle
         if (second % 5 == 0) {
@@ -348,7 +347,6 @@ public class ChartIndicatorSample extends Application {
         }
 
         return gate * y;
-
     }
 
     private static double rampFunctionDipoleCurrent(final double t) {
@@ -368,7 +366,6 @@ public class ChartIndicatorSample extends Application {
             y = 0;
         }
         return y + 10;
-
     }
 
     private static double sine(final double frequency, final double t) {

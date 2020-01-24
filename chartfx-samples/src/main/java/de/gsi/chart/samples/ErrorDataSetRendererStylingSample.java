@@ -50,13 +50,15 @@ import de.gsi.dataset.testdata.spi.SingleOutlierFunction;
 import de.gsi.dataset.utils.ProcessingProfiler;
 
 public class ErrorDataSetRendererStylingSample extends Application {
+    private static final String STOP_TIMER = "stop timer";
+    private static final String START_TIMER = "start timer";
     private static final Logger LOGGER = LoggerFactory.getLogger(RollingBufferSample.class);
     private static final int DEBUG_UPDATE_RATE = 1000;
     private static final int DEFAULT_WIDTH = 1200;
     private static final int DEFAULT_HEIGHT = 600;
     private static final int UPDATE_DELAY = 1000; // [ms]
     private static final int UPDATE_PERIOD = 100; // [ms]
-    private static final double N_MAX_SAMPLES = 10000;
+    private static final double N_MAX_SAMPLES = 10_000;
     private DataSetType dataSetType = DataSetType.RANDOM_WALK;
     private int nSamples = 400;
     private Timer timer;
@@ -196,14 +198,14 @@ public class ErrorDataSetRendererStylingSample extends Application {
         newDataSet.setOnAction(evt -> Platform.runLater(getTimerTask(chart)));
 
         // repetitively generate new data
-        final Button startTimer = new Button("start timer");
+        final Button startTimer = new Button(START_TIMER);
         startTimer.setOnAction(evt -> {
             if (timer == null) {
-                startTimer.setText("stop timer");
+                startTimer.setText(STOP_TIMER);
                 timer = new Timer("sample-update-timer", true);
                 timer.scheduleAtFixedRate(getTimerTask(chart), UPDATE_DELAY, UPDATE_PERIOD);
             } else {
-                startTimer.setText("start timer");
+                startTimer.setText(START_TIMER);
                 timer.cancel();
                 timer = null; // NOPMD
             }
@@ -416,15 +418,15 @@ public class ErrorDataSetRendererStylingSample extends Application {
         final Button newDataSet = new Button("new DataSet");
         newDataSet.setOnAction(evt -> Platform.runLater(getTimerTask(chart)));
 
-        final Button startTimer = new Button("start timer");
+        final Button startTimer = new Button(START_TIMER);
         startTimer.setOnAction(evt -> {
             if (timer == null) {
-                startTimer.setText("stop timer");
+                startTimer.setText(STOP_TIMER);
                 timer = new Timer(true);
                 timer.scheduleAtFixedRate(getTimerTask(chart), ErrorDataSetRendererStylingSample.UPDATE_DELAY,
                         ErrorDataSetRendererStylingSample.UPDATE_PERIOD);
             } else {
-                startTimer.setText("start timer");
+                startTimer.setText(START_TIMER);
                 timer.cancel();
                 timer = null; // NOPMD
             }

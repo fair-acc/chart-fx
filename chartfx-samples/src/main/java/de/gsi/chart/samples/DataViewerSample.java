@@ -7,32 +7,6 @@ import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import org.controlsfx.glyphfont.FontAwesome;
-import org.controlsfx.glyphfont.Glyph;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import de.gsi.chart.XYChart;
-import de.gsi.chart.plugins.EditAxis;
-import de.gsi.chart.plugins.ParameterMeasurements;
-import de.gsi.chart.plugins.TableViewer;
-import de.gsi.chart.plugins.Zoomer;
-import de.gsi.chart.renderer.ErrorStyle;
-import de.gsi.chart.renderer.spi.ErrorDataSetRenderer;
-import de.gsi.chart.ui.geometry.Side;
-import de.gsi.chart.utils.GlyphFactory;
-import de.gsi.chart.viewer.DataView;
-import de.gsi.chart.viewer.DataViewWindow;
-import de.gsi.chart.viewer.DataViewer;
-import de.gsi.chart.viewer.event.WindowClosedEvent;
-import de.gsi.chart.viewer.event.WindowUpdateEvent;
-import de.gsi.dataset.DataSet;
-import de.gsi.dataset.event.EventListener;
-import de.gsi.dataset.spi.DoubleDataSet;
-import de.gsi.dataset.testdata.TestDataSet;
-import de.gsi.dataset.testdata.spi.RandomStepFunction;
-import de.gsi.dataset.testdata.spi.RandomWalkFunction;
-import de.gsi.dataset.utils.ProcessingProfiler;
 import javafx.animation.Animation;
 import javafx.animation.RotateTransition;
 import javafx.application.Application;
@@ -59,6 +33,33 @@ import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
+import org.controlsfx.glyphfont.FontAwesome;
+import org.controlsfx.glyphfont.Glyph;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import de.gsi.chart.XYChart;
+import de.gsi.chart.plugins.EditAxis;
+import de.gsi.chart.plugins.ParameterMeasurements;
+import de.gsi.chart.plugins.TableViewer;
+import de.gsi.chart.plugins.Zoomer;
+import de.gsi.chart.renderer.ErrorStyle;
+import de.gsi.chart.renderer.spi.ErrorDataSetRenderer;
+import de.gsi.chart.ui.geometry.Side;
+import de.gsi.chart.utils.GlyphFactory;
+import de.gsi.chart.viewer.DataView;
+import de.gsi.chart.viewer.DataViewWindow;
+import de.gsi.chart.viewer.DataViewer;
+import de.gsi.chart.viewer.event.WindowClosedEvent;
+import de.gsi.chart.viewer.event.WindowUpdateEvent;
+import de.gsi.dataset.DataSet;
+import de.gsi.dataset.event.EventListener;
+import de.gsi.dataset.spi.DoubleDataSet;
+import de.gsi.dataset.testdata.TestDataSet;
+import de.gsi.dataset.testdata.spi.RandomStepFunction;
+import de.gsi.dataset.testdata.spi.RandomWalkFunction;
+import de.gsi.dataset.utils.ProcessingProfiler;
+
 /**
  * @author Grzegorz Kruk
  * @author rstein
@@ -69,19 +70,17 @@ public class DataViewerSample extends Application {
     private static final String TITLE = DataViewerSample.class.getSimpleName();
     protected static final String FONT_AWESOME = "FontAwesome";
     protected static final int FONT_SIZE = 20;
-    private static final int NUMBER_OF_POINTS = 10000; // default: 32000
+    private static final int NUMBER_OF_POINTS = 10_000; // default: 32000
     private static final int UPDATE_PERIOD = 1000; // [ms]
 
     private static final int NUM_OF_POINTS = 20;
 
-    private EventListener dataWindowEventListener = evt -> {
+    private final EventListener dataWindowEventListener = evt -> {
         if (evt instanceof WindowUpdateEvent) {
             WindowUpdateEvent wEvt = (WindowUpdateEvent) evt;
-            LOGGER.atInfo().addArgument(wEvt).addArgument(wEvt.getType())
-                    .log("received window update event {} of type {}");
+            LOGGER.atInfo().addArgument(wEvt).addArgument(wEvt.getType()).log("received window update event {} of type {}");
         } else {
-            LOGGER.atInfo().addArgument(evt).addArgument(evt.getMessage())
-                    .log("received generic window update event {} with message {}");
+            LOGGER.atInfo().addArgument(evt).addArgument(evt.getMessage()).log("received generic window update event {} with message {}");
         }
 
         if (evt instanceof WindowClosedEvent) {
@@ -140,8 +139,8 @@ public class DataViewerSample extends Application {
         initialWindowState.setValue(InitialWindowState.VISIBLE);
 
         final Button newView = new Button(null, new HBox( //
-                new Glyph(FONT_AWESOME, FontAwesome.Glyph.PLUS).size(FONT_SIZE), //
-                new Glyph(FONT_AWESOME, FontAwesome.Glyph.LINE_CHART).size(FONT_SIZE)));
+                                                        new Glyph(FONT_AWESOME, FontAwesome.Glyph.PLUS).size(FONT_SIZE), //
+                                                        new Glyph(FONT_AWESOME, FontAwesome.Glyph.LINE_CHART).size(FONT_SIZE)));
         newView.setTooltip(new Tooltip("add new view"));
         newView.setOnAction(evt -> {
             final int count = view1.getVisibleChildren().size() + view1.getMinimisedChildren().size();
@@ -165,22 +164,18 @@ public class DataViewerSample extends Application {
             newDataViewerPane.addListener(dataWindowEventListener);
             newDataViewerPane.addListener(windowEvent -> {
                 // print window state explicitly
-                LOGGER.atInfo().addArgument(newDataViewerPane.getName()).addArgument(newDataViewerPane.getWindowState())
-                        .log("explicit '{}' window state is {}");
+                LOGGER.atInfo().addArgument(newDataViewerPane.getName()).addArgument(newDataViewerPane.getWindowState()).log("explicit '{}' window state is {}");
             });
             newDataViewerPane.closedProperty().addListener((ch, o, n) -> {
                 LOGGER.atInfo().log("newDataViewerPane Window '" + newDataViewerPane.getName()
-                        + "' has been closed - performing clean-up actions");
+                                    + "' has been closed - performing clean-up actions");
                 // perform some custom clean-up action
             });
 
             // add listener on specific events
             ChangeListener<Boolean> changeListener = (ch, o, n) -> {
                 // small debugging routine to check state-machine
-                LOGGER.atInfo().addArgument(newDataViewerPane.isMinimised())
-                        .addArgument(newDataViewerPane.isMaximised()).addArgument(newDataViewerPane.isRestored())
-                        .addArgument(newDataViewerPane.isDetached()).addArgument(newDataViewerPane.isClosed())
-                        .log("minimised: {}, maximised {}, restored {}, detached {}, closed {}");
+                LOGGER.atInfo().addArgument(newDataViewerPane.isMinimised()).addArgument(newDataViewerPane.isMaximised()).addArgument(newDataViewerPane.isRestored()).addArgument(newDataViewerPane.isDetached()).addArgument(newDataViewerPane.isClosed()).log("minimised: {}, maximised {}, restored {}, detached {}, closed {}");
             };
             newDataViewerPane.minimisedProperty().addListener(changeListener);
             newDataViewerPane.maximisedProperty().addListener(changeListener);
@@ -268,7 +263,6 @@ public class DataViewerSample extends Application {
     }
 
     private static List<DataSet> createSeries() {
-
         final List<DataSet> series = new ArrayList<>();
         for (int i = 0; i < 2; i++) {
             series.add(createData("Series " + i));
@@ -333,7 +327,6 @@ public class DataViewerSample extends Application {
     }
 
     private class TestChart extends XYChart {
-
         private TestChart() {
             super();
             getPlugins().add(new ParameterMeasurements());
@@ -341,7 +334,6 @@ public class DataViewerSample extends Application {
             getPlugins().add(new TableViewer());
             getPlugins().add(new EditAxis());
         }
-
     }
 
     private class UpdateTask extends TimerTask {

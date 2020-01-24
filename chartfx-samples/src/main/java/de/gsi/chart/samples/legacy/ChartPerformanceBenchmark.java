@@ -3,6 +3,18 @@ package de.gsi.chart.samples.legacy;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import javafx.application.Platform;
+import javafx.geometry.Insets;
+import javafx.scene.Node;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.Tooltip;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,36 +30,25 @@ import de.gsi.chart.samples.legacy.utils.ChartTestCase;
 import de.gsi.chart.samples.legacy.utils.JavaFXTestChart;
 import de.gsi.chart.samples.legacy.utils.TestChart;
 import de.gsi.dataset.spi.DoubleDataSet;
-import javafx.application.Platform;
-import javafx.geometry.Insets;
-import javafx.scene.Node;
-import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Tooltip;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.VBox;
-import javafx.stage.Stage;
 
 public class ChartPerformanceBenchmark extends AbstractTestApplication {
     private static final Logger LOGGER = LoggerFactory.getLogger(ChartPerformanceBenchmark.class);
     private static final int WAIT_PERIOD = 60 * 1000;
 
     private final int[] testSamples25Hz = { 1000, 10, 10, 10, 20, 30, 40, 50, 60, 70, 80, 90, // 10->100
-            100, 200, 300, 400, 500, 600, 700, 800, 900, // 100 -> 1k
-            1000, 1500, 2000, 2500, 3000, 3500, 4000, 4500, 5000, // 1k -> 5k
-            5500, 6000, 6500, 7000, 7500, 8000, 8500, 9000, 9500, // 5.5k -> 10k
-            10000, 15000, 20000, 25000, 30000, 35000, 40000, 45000, 50000, // 5k
-            55000, 60000, 65000, 70000, 75000, 80000, 85000, 90000, 95000, // 100k
-            (int) 1e5, (int) 2e5, (int) 3e5, (int) 4e5, (int) 5e5, (int) 6e5, (int) 7e5, (int) 8e5, (int) 9e5, // 1M
-            (int) 1e6, (int) 2e6, (int) 3e6, (int) 4e6, (int) 5e6, (int) 6e6, (int) 7e6, (int) 8e6, (int) 9e7 };
+        100, 200, 300, 400, 500, 600, 700, 800, 900, // 100 -> 1k
+        1000, 1500, 2000, 2500, 3000, 3500, 4000, 4500, 5000, // 1k -> 5k
+        5500, 6000, 6500, 7000, 7500, 8000, 8500, 9000, 9500, // 5.5k -> 10k
+        10000, 15000, 20000, 25000, 30000, 35000, 40000, 45000, 50000, // 5k
+        55000, 60000, 65000, 70000, 75000, 80000, 85000, 90000, 95000, // 100k
+        (int) 1e5, (int) 2e5, (int) 3e5, (int) 4e5, (int) 5e5, (int) 6e5, (int) 7e5, (int) 8e5, (int) 9e5, // 1M
+        (int) 1e6, (int) 2e6, (int) 3e6, (int) 4e6, (int) 5e6, (int) 6e6, (int) 7e6, (int) 8e6, (int) 9e7 };
 
     private final int[] testSamples1Hz = { 1000, 100, 100, 100, 500, 1000, 2000, 3000, 4000, 5000, 10000, 20000, 30000,
-            40000, 50000, 100000, // 100k
-            (int) 0.2e6, (int) 0.3e6, (int) 0.4e6, (int) 0.5e6, (int) 0.6e6, (int) 0.7e6, (int) 0.8e6, (int) 0.9e6,
-            (int) 1e6, (int) 2e6, (int) 3e6, (int) 4e6, (int) 5e6, (int) 6e6, (int) 7e6, (int) 8e6, (int) 9e6,
-            (int) 1e7 };
+        40000, 50000, 100000, // 100k
+        (int) 0.2e6, (int) 0.3e6, (int) 0.4e6, (int) 0.5e6, (int) 0.6e6, (int) 0.7e6, (int) 0.8e6, (int) 0.9e6,
+        (int) 1e6, (int) 2e6, (int) 3e6, (int) 4e6, (int) 5e6, (int) 6e6, (int) 7e6, (int) 8e6, (int) 9e6,
+        (int) 1e7 };
 
     private final BorderPane root = new BorderPane();
     private final int nSamples = 100;
@@ -103,7 +104,6 @@ public class ChartPerformanceBenchmark extends AbstractTestApplication {
     }
 
     private void init(final Stage primaryStage) {
-
         final Stage subStage = new Stage();
         final Scene scene = new Scene(root, 1800, 400);
         test = chartTestCase2;
@@ -115,7 +115,7 @@ public class ChartPerformanceBenchmark extends AbstractTestApplication {
 
         final HBox headerBar = getHeaderBar(scene);
         headerBar.getChildren().add(2, new VBox(startTestButton("Series@25Hz", testSamples25Hz, 40),
-                startTestButton("Series@2Hz", testSamples1Hz, 500)));
+                                               startTestButton("Series@2Hz", testSamples1Hz, 500)));
         headerBar.getChildren().add(3, switchToTestCase("A", chartTestCase1, chart1));
         headerBar.getChildren().add(4, switchToTestCase("B", chartTestCase2, chart2));
         headerBar.getChildren().add(5, switchToTestCase("C", chartTestCase3, chart3));
@@ -142,10 +142,8 @@ public class ChartPerformanceBenchmark extends AbstractTestApplication {
         startTimer.setOnAction(evt -> {
             if (timer == null) {
                 timer = new Thread() {
-
                     @Override
                     public void run() {
-
                         try {
                             for (int i = 0; i < nSamplesTest.length; i++) {
                                 final int samples = nSamplesTest[i];
@@ -227,7 +225,6 @@ public class ChartPerformanceBenchmark extends AbstractTestApplication {
     }
 
     private class TestThread extends Thread {
-
         private final int caseNr;
         private final int nSamples;
         private final Node chart;
@@ -274,18 +271,15 @@ public class ChartPerformanceBenchmark extends AbstractTestApplication {
             };
             timer.scheduleAtFixedRate(updateTimerTask, 0, updatePeriod);
             timer.schedule(new TimerTask() {
-
                 @Override
                 public void run() {
                     // needed to get steady-state results (to compensate for JIT
                     // compiler effects)
                     meter.resetAverages();
-
                 }
             }, (long) (1.5 * waitPeriod));
 
             timer.schedule(new TimerTask() {
-
                 @Override
                 public void run() {
                     final double avgFPS = Math.min(meter.getAverageFrameRate(), 25);
@@ -293,9 +287,9 @@ public class ChartPerformanceBenchmark extends AbstractTestApplication {
                     // result.add(nSamples, Math.min(avgCPULoad * 25.0 / avgFPS,
                     // 400));
                     LOGGER.atInfo().log("finished test case #" + caseNr + " and '" + nSamples
-                            + "' samples and cpu load of " + avgCPULoad + " % and average fps = " + avgFPS);
+                                        + "' samples and cpu load of " + avgCPULoad + " % and average fps = " + avgFPS);
 
-                    if (avgFPS > ((20.0 * 40.0) / (double)updatePeriod)) {
+                    if (avgFPS > ((20.0 * 40.0) / (double) updatePeriod)) {
                         result.add(nSamples, Math.min(avgCPULoad, 400));
                     } else {
                         compute[caseNr - 1] = false;
@@ -326,5 +320,4 @@ public class ChartPerformanceBenchmark extends AbstractTestApplication {
             }
         }
     }
-
 }

@@ -5,16 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import org.controlsfx.control.PopOver;
-import org.controlsfx.glyphfont.Glyph;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import de.gsi.chart.Chart;
-import de.gsi.chart.axes.Axis;
-import de.gsi.chart.axes.AxisMode;
-import de.gsi.chart.axes.spi.AbstractAxis;
-import de.gsi.chart.axes.spi.DefaultNumericAxis;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -44,6 +34,17 @@ import javafx.scene.layout.VBox;
 import javafx.util.Duration;
 import javafx.util.converter.NumberStringConverter;
 
+import org.controlsfx.control.PopOver;
+import org.controlsfx.glyphfont.Glyph;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import de.gsi.chart.Chart;
+import de.gsi.chart.axes.Axis;
+import de.gsi.chart.axes.AxisMode;
+import de.gsi.chart.axes.spi.AbstractAxis;
+import de.gsi.chart.axes.spi.DefaultNumericAxis;
+
 /**
  * Allows editing of the chart axes (auto range, minimum/maximum range, etc.)
  * <p>
@@ -66,7 +67,6 @@ public class EditAxis extends ChartPlugin {
 
     private final ObjectProperty<Duration> fadeDuration = new SimpleObjectProperty<>(this, "fadeDuration",
             EditAxis.DEFAULT_ANIMATION_DURATION) {
-
         @Override
         protected void invalidated() {
             Objects.requireNonNull(get(),
@@ -75,7 +75,6 @@ public class EditAxis extends ChartPlugin {
     };
 
     private final ObjectProperty<AxisMode> axisMode = new SimpleObjectProperty<>(this, "axisMode", AxisMode.XY) {
-
         @Override
         protected void invalidated() {
             Objects.requireNonNull(get(),
@@ -225,7 +224,6 @@ public class EditAxis extends ChartPlugin {
     }
 
     private class AxisEditor extends BorderPane {
-
         AxisEditor(final Axis axis, final boolean isHorizontal) {
             super();
 
@@ -265,7 +263,6 @@ public class EditAxis extends ChartPlugin {
         }
 
         private void changeAxisRangeLimit(final Axis axis, final boolean isHorizontal, final boolean isIncrease) {
-
             final boolean isInverted = axis.isInvertedAxis();
             DoubleProperty prop;
             if (isHorizontal) {
@@ -428,7 +425,6 @@ public class EditAxis extends ChartPlugin {
                                     ((AbstractAxis) axis).computePreferredTickUnit(axis.getLength()));
                         }
                     }
-
                 }
             });
 
@@ -578,11 +574,9 @@ public class EditAxis extends ChartPlugin {
 
             return boxMax;
         }
-
     }
 
     private class MyPopOver extends PopOver {
-
         private long popOverShowStartTime;
         private boolean isMouseInPopOver;
         private Axis axis = null;
@@ -595,7 +589,6 @@ public class EditAxis extends ChartPlugin {
                     show((Node) axis, x, y);
                 }
             }
-
         };
 
         MyPopOver(final Axis axis, final boolean isHorizontal) {

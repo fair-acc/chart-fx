@@ -5,14 +5,14 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ExecutionException;
 
-import com.sun.javafx.perf.PerformanceTracker;
-import com.sun.management.OperatingSystemMXBean;
-
 import javafx.animation.AnimationTimer;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.scene.Scene;
+
+import com.sun.javafx.perf.PerformanceTracker;
+import com.sun.management.OperatingSystemMXBean;
 
 public class SimplePerformanceMeter extends AnimationTimer {
     private static PerformanceTracker tracker;
@@ -38,7 +38,6 @@ public class SimplePerformanceMeter extends AnimationTimer {
     private double frameRateLocal;
 
     public SimplePerformanceMeter(Scene scene, long updateDuration) {
-
         tracker = PerformanceTracker.getSceneTracker(scene);
         this.start();
 
@@ -52,7 +51,6 @@ public class SimplePerformanceMeter extends AnimationTimer {
                     // not of concern
                 }
             }
-
         }, 0, updateDuration);
     }
 
@@ -211,5 +209,4 @@ public class SimplePerformanceMeter extends AnimationTimer {
             avgSystemCpuLoad.set((1 - alpha) * oldSystemLoad + alpha * systemCpuLoad.get());
         }
     }
-
 }

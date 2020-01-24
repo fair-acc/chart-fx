@@ -4,6 +4,12 @@ import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.scene.Scene;
+import javafx.scene.layout.StackPane;
+import javafx.stage.Stage;
+
 import de.gsi.chart.XYChart;
 import de.gsi.chart.axes.spi.DefaultNumericAxis;
 import de.gsi.chart.plugins.EditAxis;
@@ -16,11 +22,6 @@ import de.gsi.chart.renderer.spi.MetaDataRenderer;
 import de.gsi.chart.ui.geometry.Side;
 import de.gsi.chart.utils.FXUtils;
 import de.gsi.dataset.spi.Histogram2;
-import javafx.application.Application;
-import javafx.application.Platform;
-import javafx.scene.Scene;
-import javafx.scene.layout.StackPane;
-import javafx.stage.Stage;
 
 public class Histogram2DimSample extends Application {
     private static final int UPDATE_DELAY = 1000; // [ms]
@@ -60,7 +61,6 @@ public class Histogram2DimSample extends Application {
             histogram1.reset();
             histogram2.reset();
         }
-
     }
 
     @Override

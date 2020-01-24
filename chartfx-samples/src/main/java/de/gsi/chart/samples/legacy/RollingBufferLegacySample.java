@@ -7,8 +7,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import de.gsi.chart.samples.RollingBufferSample;
-import de.gsi.chart.utils.SimplePerformanceMeter;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.scene.Scene;
@@ -26,6 +24,9 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
+
+import de.gsi.chart.samples.RollingBufferSample;
+import de.gsi.chart.utils.SimplePerformanceMeter;
 
 /**
  * RollingBuffer implementation using JavaFX Chart library.
@@ -112,7 +113,6 @@ public class RollingBufferLegacySample extends Application {
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
         xAxis.setTickLabelFormatter(new StringConverter<Number>() {
-
             @Override
             public Number fromString(String string) {
                 return null;
@@ -128,7 +128,6 @@ public class RollingBufferLegacySample extends Application {
                 final String computed = dateTime.format(formatter).replaceAll(" ", System.lineSeparator());
                 return computed;
             }
-
         });
 
         // xAxis.setTickLabelsVisible(false);
@@ -238,7 +237,5 @@ public class RollingBufferLegacySample extends Application {
             xAxis.setLowerBound(now - MAX_DATA_POINTS * UPDATE_PERIOD / 1000.0 * 1.01);
             xAxis.setUpperBound(now);
         }
-
     }
-
 }

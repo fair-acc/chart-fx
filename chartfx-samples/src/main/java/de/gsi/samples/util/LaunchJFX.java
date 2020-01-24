@@ -1,7 +1,8 @@
 package de.gsi.samples.util;
 
-import de.gsi.chart.samples.RunChartSamples;
 import javafx.application.Application;
+
+import de.gsi.chart.samples.RunChartSamples;
 
 /**
  * Helper class to launch JavaFX applications without manually adding modules and exports to the java command line. Add
@@ -16,7 +17,7 @@ import javafx.application.Application;
  *      Eclipse in Java11 (2b) </a>
  * @author akrimm
  */
-public class LaunchJFX {
+public class LaunchJFX { // NOMEN EST OMEN
     public static void main(final String[] args) throws ClassNotFoundException {
         if (args.length < 1) {
             Application.launch(RunChartSamples.class);

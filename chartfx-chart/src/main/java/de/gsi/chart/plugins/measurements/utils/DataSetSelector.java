@@ -1,7 +1,5 @@
 package de.gsi.chart.plugins.measurements.utils;
 
-import de.gsi.chart.XYChart;
-import de.gsi.dataset.DataSet;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Orientation;
@@ -10,6 +8,9 @@ import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.MultipleSelectionModel;
 import javafx.scene.layout.HBox;
+
+import de.gsi.chart.XYChart;
+import de.gsi.dataset.DataSet;
 
 /**
  * @author rstein

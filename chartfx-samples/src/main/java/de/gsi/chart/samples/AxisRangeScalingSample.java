@@ -107,8 +107,8 @@ public class AxisRangeScalingSample extends Application {
 
         final Timer timer = new Timer("sample-update-timer", true);
         final TimerTask task = new TimerTask() {
-            int counter = -9;
-            boolean directionUpwards = true;
+            private int counter = -9;
+            private boolean directionUpwards = true;
 
             @Override
             public void run() {
