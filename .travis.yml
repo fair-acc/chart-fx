@@ -1,5 +1,5 @@
 language: java
-sudo: false
+os: linux
 dist: xenial
 jdk:
         - openjdk11
@@ -17,15 +17,15 @@ before_install:
   - echo "detected coverity scan export name ='${COVERITY_SCAN_VERSION}'"
   - |-2
     if [ -n "$COVERITY_SCAN_VERSION" ]; then
-      if [ ! -d "$HOME/cov-analysis-linux64-2019.03" ]; then
+      if [ ! -x "$HOME/cov-analysis-linux64-2019.03/bin/cov-build" ]; then
         wget https://scan.coverity.com/download/java/Linux --post-data "token=${COVERITY_TOKEN}&project=chart-fx" -O coverity_tool.tgz
         tar xzf coverity_tool.tgz --directory $HOME;
       else
         echo "coverity tool already present"
       fi
-      export PATH=$PATH:$HOME/cov-analysis-linux64-2019.03/bin;
     fi
   - sudo apt-get install jq
+  # download codacy coverage reporter:https://github.com/codacy/codacy-coverage-reporter#travis-ci
   - curl -LSs $(curl -LSs https://api.github.com/repos/codacy/codacy-coverage-reporter/releases/latest | jq -r '.assets | map({name, browser_download_url} | select(.name | endswith(".jar"))) | .[0].browser_download_url') -o codacy-coverage-reporter-assembly.jar
 
 install:
@@ -47,9 +47,9 @@ after_success:
   - |-2
     if [ -n "$COVERITY_SCAN_VERSION" ]; then
       echo "coverity scan triggered as COVERITY_SCAN_VERSION = '${COVERITY_SCAN_VERSION}'";
-      if [ -d "$HOME/cov-analysis-linux64-2019.03" ]; then
+      if [ -x "$HOME/cov-analysis-linux64-2019.03/bin/cov-build" ]; then
         echo "coverity tool is present";
-        cov-build --dir cov-int mvn clean compile;
+        $HOME/cov-analysis-linux64-2019.03/bin/cov-build --dir cov-int mvn clean compile;
         tar cjf $COVERITY_RESULTS_ARCHIVE cov-int;
         if [ -n "$COVERITY_SCAN_VERSION" ]; then
           curl --form token=${COVERITY_TOKEN} \
