@@ -6,15 +6,15 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Map;
 
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
+
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Test StyleParser
@@ -29,7 +29,7 @@ class StyleParserTest {
     @DisplayName("Test parsing styles")
     public void testStyleParser() {
         final String testStyle = " color1 = blue; stroke= 0; bool1=true; color2 = rgb(255,0,0); unclean=\"a\'; index1=2;index2=0xFE; "
-                + "float1=10e7; float2=10.333; malformedInt= 0.aG; emptyProperty=;invalidColor=darthRed#22;";
+                                 + "float1=10e7; float2=10.333; malformedInt= 0.aG; emptyProperty=;invalidColor=darthRed#22;";
 
         assertEquals(null, StyleParser.getPropertyValue(testStyle, null));
         assertEquals(null, StyleParser.getPropertyValue(null, "color1"));
@@ -85,7 +85,5 @@ class StyleParserTest {
                 StyleParser.getFontPropertyValue(fontTestStyle1));
         assertEquals(Font.font("system", FontWeight.BOLD, FontPosture.ITALIC, 18),
                 StyleParser.getFontPropertyValue(fontTestStyle2));
-
     }
-
 }

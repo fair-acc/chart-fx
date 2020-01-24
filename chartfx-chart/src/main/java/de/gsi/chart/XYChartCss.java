@@ -26,6 +26,5 @@ public final class XYChartCss { // NOPMD decide not to rename it for the time be
     public static final String FONT_SIZE = "fontSize";
 
     private XYChartCss() {
-
     }
 }
