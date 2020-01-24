@@ -1,11 +1,12 @@
 package de.gsi.chart.renderer.spi;
 
-import static de.gsi.dataset.DataSet.DIM_X;
-import static de.gsi.dataset.DataSet.DIM_Y;
-import static de.gsi.dataset.DataSet.DIM_Z;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import static de.gsi.dataset.DataSet.DIM_X;
+import static de.gsi.dataset.DataSet.DIM_Y;
+import static de.gsi.dataset.DataSet.DIM_Z;
 
 import java.util.Arrays;
 
@@ -25,30 +26,36 @@ public class ContourDataSetCacheTests {
     private static final double[] TEST_DATA_X = { 1, 2, 3 };
     private static final double[] TEST_DATA_Y = { 1, 2, 3, 4 };
     private static final double[] TEST_DATA_Z = { //
-            1, 2, 3, //
-            4, 5, 6, //
-            7, 8, 9, //
-            10, 11, 12 };
+        1, 2, 3, //
+        4, 5, 6, //
+        7, 8, 9, //
+        10, 11, 12
+    };
     // test cases for inversion
     private static final double[] TEST_DATA_Z_X_INVERTED = { //
-            3, 2, 1, //
-            6, 5, 4, //
-            9, 8, 7, //
-            12, 11, 10 };
+        3, 2, 1, //
+        6, 5, 4, //
+        9, 8, 7, //
+        12, 11, 10
+    };
     private static final double[] TEST_DATA_Z_Y_INVERTED = { //
-            10, 11, 12, //
-            7, 8, 9, //
-            4, 5, 6, //
-            1, 2, 3 };
+        10, 11, 12, //
+        7, 8, 9, //
+        4, 5, 6, //
+        1, 2, 3
+    };
     private static final double[] TEST_DATA_Z_XY_INVERTED = { //
-            12, 11, 10, //
-            9, 8, 7, //
-            6, 5, 4, //
-            3, 2, 1 };
+        12, 11, 10, //
+        9, 8, 7, //
+        6, 5, 4, //
+        3, 2, 1
+    };
     private static final double[] TEST_DATA_Z_QUANT1 = { //
-            0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0 };
+        0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0
+    };
     private static final double[] TEST_DATA_Z_QUANT2 = { //
-            0.9, 0.8, 0.7, 0.6, 0.5, 0.5, 0.4, 0.3, 0.2, 0.1, 0.0, 0.0 };
+        0.9, 0.8, 0.7, 0.6, 0.5, 0.5, 0.4, 0.3, 0.2, 0.1, 0.0, 0.0
+    };
 
     @Test
     public void testDataSet() {
@@ -202,8 +209,7 @@ public class ContourDataSetCacheTests {
         ContourDataSetCache.copySubFrame(dataSet, dataBuffer, true, false, 0, 2, false, 0, 3);
         assertArrayEquals(TEST_DATA_Z, dataBuffer, "data buffer content - parallel copySubFrame");
 
-        assertDoesNotThrow(() -> ContourDataSetCache.convertDataArrayToImage(TEST_DATA_Z, TEST_DATA_X.length,
-                TEST_DATA_Y.length, ColorGradient.DEFAULT), "data to colour image conversion");
+        assertDoesNotThrow(() -> ContourDataSetCache.convertDataArrayToImage(TEST_DATA_Z, TEST_DATA_X.length, TEST_DATA_Y.length, ColorGradient.DEFAULT), "data to colour image conversion");
     }
 
     private class TestDataSet extends AbstractDataSet3D<TestDataSet> {

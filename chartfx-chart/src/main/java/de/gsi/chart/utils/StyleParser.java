@@ -6,14 +6,15 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import de.gsi.chart.XYChartCss;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import de.gsi.chart.XYChartCss;
 
 /**
  * Some helper routines to parse CSS-style formatting attributes
@@ -29,7 +30,6 @@ public final class StyleParser { // NOPMD
     private static final Pattern STYLE_ASSIGNMENT_PATTERN = Pattern.compile("[=:]");
 
     private StyleParser() {
-
     }
 
     public static Boolean getBooleanPropertyValue(final String style, final String key) {
@@ -194,8 +194,7 @@ public final class StyleParser { // NOPMD
         final String value = map.get(key.toLowerCase(Locale.UK));
 
         try {
-            return Arrays.asList(value.split(",\\s*")).stream().map(String::trim).mapToDouble(Double::parseDouble)
-                    .toArray();
+            return Arrays.asList(value.split(",\\s*")).stream().map(String::trim).mapToDouble(Double::parseDouble).toArray();
         } catch (final IllegalArgumentException ex) {
             if (LOGGER.isErrorEnabled()) {
                 StyleParser.LOGGER.error(
@@ -227,8 +226,7 @@ public final class StyleParser { // NOPMD
             return retVal;
         }
 
-        final String[] keyVals = AT_LEAST_ONE_WHITESPACE_PATTERN.matcher(style.toLowerCase(Locale.UK)).replaceAll("")
-                .split(";");
+        final String[] keyVals = AT_LEAST_ONE_WHITESPACE_PATTERN.matcher(style.toLowerCase(Locale.UK)).replaceAll("").split(";");
         for (final String keyVal : keyVals) {
             final String[] parts = STYLE_ASSIGNMENT_PATTERN.split(keyVal, 2);
             if (parts == null || parts[0] == null || parts.length <= 1) {
