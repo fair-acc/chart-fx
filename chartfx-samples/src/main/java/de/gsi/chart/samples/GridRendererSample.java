@@ -12,7 +12,6 @@ import de.gsi.chart.XYChart;
 import de.gsi.chart.axes.spi.DefaultNumericAxis;
 
 public class GridRendererSample extends Application {
-
     @Override
     public void start(final Stage primaryStage) {
         final FlowPane root = new FlowPane();
