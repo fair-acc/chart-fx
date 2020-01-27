@@ -86,8 +86,11 @@ public class MaxDataReducer implements RendererDataReducer {
             return size;
         }
 
-        return reduce(xValues, yValues, xPointErrorsPos, xPointErrorsNeg, yPointErrorsPos, yPointErrorsNeg, styles,
-                pointSelected, indexMin, indexMax, MaxDataReducer.DEFAULT_MAX_POINTS_COUNT);
+        return reduce(xValues, yValues, //
+                xPointErrorsPos == null ? new double[indexMax - indexMin] : xPointErrorsPos, //
+                xPointErrorsNeg == null ? new double[indexMax - indexMin] : xPointErrorsNeg, //
+                yPointErrorsPos, yPointErrorsNeg, styles, pointSelected, indexMin, indexMax,
+                MaxDataReducer.DEFAULT_MAX_POINTS_COUNT);
     }
 
     private static void moveInPlace(final double[] xValues, final double[] yValues, final double[] xPointErrorsPos,
