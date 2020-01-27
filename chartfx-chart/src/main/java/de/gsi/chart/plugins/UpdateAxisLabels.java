@@ -68,16 +68,8 @@ public class UpdateAxisLabels extends ChartPlugin {
 
     // called whenever the chart for the plugin is changed
     private final ChangeListener<? super Chart> chartChangeListener = (change, oldChart, newChart) -> {
-        if (oldChart != null) {
-            teardownDataSetListeners(null, oldChart.getDatasets());
-            oldChart.getRenderers().removeListener(renderersListener);
-            oldChart.getRenderers().forEach((Renderer r) -> teardownDataSetListeners(r, r.getDatasets()));
-        }
-        if (newChart != null) {
-            setupDataSetListeners(null, newChart.getDatasets());
-            newChart.getRenderers().addListener(renderersListener);
-            newChart.getRenderers().forEach((Renderer r) -> setupDataSetListeners(r, r.getDatasets()));
-        }
+        removeRendererAndDataSetListener(oldChart);
+        addRendererAndDataSetListener(newChart);
     };
 
     /**
@@ -86,7 +78,16 @@ public class UpdateAxisLabels extends ChartPlugin {
     public UpdateAxisLabels() {
         super();
         chartProperty().addListener(chartChangeListener);
-        chartChangeListener.changed(chartProperty(), null, getChart());
+        addRendererAndDataSetListener(getChart());
+    }
+
+    private void addRendererAndDataSetListener(Chart newChart) {
+        if (newChart == null) {
+            return;
+        }
+        setupDataSetListeners(null, newChart.getDatasets());
+        newChart.getRenderers().addListener(renderersListener);
+        newChart.getRenderers().forEach((Renderer r) -> setupDataSetListeners(r, r.getDatasets()));
     }
 
     // the actual DataSet renaming logic
@@ -130,15 +131,13 @@ public class UpdateAxisLabels extends ChartPlugin {
                 if (dim == -1 || dim == DataSet.DIM_X) {
                     Optional<Axis> oldAxis = renderer.getAxes().stream().filter(axis -> axis.getSide().isHorizontal())
                             .findFirst();
-                    oldAxis.ifPresent(a -> a.set(
-                            dataSet.getAxisDescription(DataSet.DIM_X).getName(),
+                    oldAxis.ifPresent(a -> a.set(dataSet.getAxisDescription(DataSet.DIM_X).getName(),
                             dataSet.getAxisDescription(DataSet.DIM_X).getUnit()));
                 }
                 if (dim == -1 || dim == DataSet.DIM_Y) {
                     Optional<Axis> oldAxis = renderer.getAxes().stream().filter(axis -> axis.getSide().isVertical())
                             .findFirst();
-                    oldAxis.ifPresent(a -> a.set(
-                            dataSet.getAxisDescription(DataSet.DIM_Y).getName(),
+                    oldAxis.ifPresent(a -> a.set(dataSet.getAxisDescription(DataSet.DIM_Y).getName(),
                             dataSet.getAxisDescription(DataSet.DIM_Y).getUnit()));
                 }
                 if ((dim == -1 || dim == DataSet.DIM_Z) && dataSet.getDimension() >= 3) {
@@ -187,6 +186,15 @@ public class UpdateAxisLabels extends ChartPlugin {
                 }
             }
         }
+    }
+
+    private void removeRendererAndDataSetListener(Chart oldChart) {
+        if (oldChart == null) {
+            return;
+        }
+        teardownDataSetListeners(null, oldChart.getDatasets());
+        oldChart.getRenderers().removeListener(renderersListener);
+        oldChart.getRenderers().forEach((Renderer r) -> teardownDataSetListeners(r, r.getDatasets()));
     }
 
     // setup all the listeners

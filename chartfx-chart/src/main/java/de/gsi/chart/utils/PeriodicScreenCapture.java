@@ -165,7 +165,7 @@ public class PeriodicScreenCapture implements Observable {
                                                 : path.toFile() + "/" + fileName;
             final String tempFileName = longFileName + "_temp.png";
             final File file = new File(tempFileName);
-            if (file.getParentFile().mkdirs()) {
+            if (file.getParentFile() != null && file.getParentFile().mkdirs()) {
                 LOGGER.info("needed to create directory for file: " + longFileName);
             }
 

@@ -5,6 +5,9 @@ import static javafx.geometry.Side.LEFT;
 import static javafx.geometry.Side.RIGHT;
 import static javafx.geometry.Side.TOP;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javafx.geometry.Side;
 
 /**
@@ -13,6 +16,7 @@ import javafx.geometry.Side;
  * </p>
  */
 public class PathGenerator {
+    private static final Logger LOGGER = LoggerFactory.getLogger(PathGenerator.class);
     private static final double EPSILON = 1E-7;
 
     PathGenerator() {
@@ -89,6 +93,12 @@ public class PathGenerator {
         case 7:
             return TOP;
         case 5:
+            if (prev == null) {
+                if (LOGGER.isErrorEnabled()) {
+                    LOGGER.atError().addArgument(cell).log("cell '{}' switch case 5, prev is null");
+                }
+                throw new IllegalStateException("cell " + cell + " prev is null");
+            }
             switch (prev) {
             case LEFT:
                 return cell.isFlipped() ? BOTTOM : TOP;
@@ -99,6 +109,12 @@ public class PathGenerator {
                 throw new IllegalStateException(m);
             }
         case 10:
+            if (prev == null) {
+                if (LOGGER.isErrorEnabled()) {
+                    LOGGER.atError().addArgument(cell).log("cell '{}' switch case 5, prev is null");
+                }
+                throw new IllegalStateException("cell " + cell + " prev is null");
+            }
             switch (prev) {
             case BOTTOM:
                 return cell.isFlipped() ? RIGHT : LEFT;
@@ -233,6 +249,12 @@ public class PathGenerator {
         case 9:
             return TOP;
         case 5:
+            if (prev == null) {
+                if (LOGGER.isErrorEnabled()) {
+                    LOGGER.atError().addArgument(cell).log("cell '{}' switch case 5, prev is null");
+                }
+                throw new IllegalStateException("cell " + cell + " prev is null");
+            }
             switch (prev) {
             case LEFT:
                 return RIGHT;
@@ -242,6 +264,12 @@ public class PathGenerator {
                 throw new NoSaddlePointException(cell, prev);
             }
         case 10:
+            if (prev == null) {
+                if (LOGGER.isErrorEnabled()) {
+                    LOGGER.atError().addArgument(cell).log("cell '{}' switch case 5, prev is null");
+                }
+                throw new IllegalStateException("cell " + cell + " prev is null");
+            }
             switch (prev) {
             case BOTTOM:
                 return TOP;

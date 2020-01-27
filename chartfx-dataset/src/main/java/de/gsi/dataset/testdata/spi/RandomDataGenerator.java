@@ -16,7 +16,7 @@ import java.util.SplittableRandom;
  * @version $Id: RandomDataGenerator.java,v 1.5 2008-12-11 13:46:35 emccrory Exp $
  */
 @SuppressWarnings("PMD.VariableNamingConventions")
-public final class RandomDataGenerator {
+public final class RandomDataGenerator { // NOPMD nomen est omen
     private static final Random RND_DEPRECATED = new Random(System.currentTimeMillis());
     private static final SplittableRandom RND = new SplittableRandom(System.currentTimeMillis());
     private static final int NUMBER_OF_POINTS = 1000;
@@ -93,7 +93,7 @@ public final class RandomDataGenerator {
         return data;
     }
 
-    public static double[] getGaussianX() {
+    public static synchronized double[] getGaussianX() {
         if (RandomDataGenerator.xValues == null) {
             RandomDataGenerator.getNew1DGaussian();
         }
@@ -101,7 +101,7 @@ public final class RandomDataGenerator {
         return RandomDataGenerator.xValues;
     }
 
-    public static double[] getGaussianY() {
+    public static synchronized double[] getGaussianY() {
         if (RandomDataGenerator.yValues == null) {
             RandomDataGenerator.getNew1DGaussian();
         }
@@ -146,9 +146,6 @@ public final class RandomDataGenerator {
                     ? RandomDataGenerator.SATURATION_LEVEL
                     : RandomDataGenerator.yValues[i];
         }
-    }
-
-    public static void main(final String[] args) {
     }
 
     public static double myRandom(final double low, final double high) {

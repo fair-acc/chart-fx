@@ -2291,18 +2291,23 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V>
 
         protected NavigableSubMap(IndexedTreeMap<K, V> m, boolean fromStart, K lo, boolean loInclusive, boolean toEnd,
                 K hi, boolean hiInclusive) {
+            if (m == null) {
+                throw new IllegalStateException("m must not be null");
+            }
             if (!fromStart && !toEnd) {
                 if (m.compare(lo, hi) > 0) {
                     throw new IllegalArgumentException("fromKey > toKey");
                 }
-            } else {
-                if (!fromStart) {
-                    m.compare(lo, lo);
-                }
-                if (!toEnd) {
-                    m.compare(hi, hi);
-                }
-            }
+            } 
+            // TODO: dead code remove eventually
+//            else {
+//                if (!fromStart) {
+//                    m.compare(lo, lo);
+//                }
+//                if (!toEnd) {
+//                    m.compare(hi, hi);
+//                }
+//            }
 
             this.m = m;
             this.fromStart = fromStart;

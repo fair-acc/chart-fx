@@ -4,7 +4,12 @@
 
 package de.gsi.chart.plugins;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.gsi.chart.axes.Axis;
+import de.gsi.dataset.spi.utils.Tuple;
+
 import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
 import javafx.geometry.Bounds;
@@ -27,7 +32,7 @@ import javafx.scene.shape.PathElement;
  * @author Grzegorz Kruk
  */
 public class CrosshairIndicator extends AbstractDataFormattingPlugin {
-
+    private static final Logger LOGGER = LoggerFactory.getLogger(CrosshairIndicator.class);
     /**
      * Name of the CSS class of the horizontal and vertical lines path.
      */
@@ -76,7 +81,14 @@ public class CrosshairIndicator extends AbstractDataFormattingPlugin {
         if (yAxis == null) {
             return getChart() + " - " + "no y-axis present to translate point " + displayPointInPlotArea;
         }
-        return formatData(getChart(), toDataPoint(yAxis, displayPointInPlotArea));
+        Tuple<Number, Number> tuple = toDataPoint(yAxis, displayPointInPlotArea);
+        if (tuple == null) {
+            if (LOGGER.isWarnEnabled()) {
+                LOGGER.atWarn().addArgument(tuple).log("toDataPoint tupple is '{}' returning default string");
+            }
+            return "unknown coordinate";
+        }
+        return formatData(getChart(), tuple);
     }
 
     private void updateLabel(final MouseEvent event, final Bounds plotAreaBounds) {

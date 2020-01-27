@@ -964,7 +964,7 @@ public class DataSetUtils extends DataSetUtilsHelper {
             final String realFileName = getFileName(dataSet, fileName);
             final String longFileName = path.toFile() + "/" + realFileName;
             final File file = new File(longFileName);
-            if (file.getParentFile().mkdirs() && LOGGER.isInfoEnabled()) {
+            if (file.getParentFile() != null && file.getParentFile().mkdirs() && LOGGER.isInfoEnabled()) {
                 LOGGER.atInfo().addArgument(longFileName).log("needed to create directory for file: {}");
             }
 

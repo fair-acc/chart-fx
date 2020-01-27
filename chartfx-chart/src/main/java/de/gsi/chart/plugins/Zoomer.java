@@ -314,8 +314,8 @@ public class Zoomer extends ChartPlugin {
     }
 
     /**
-     * When {@code true} auto-zooming feature is being enabled,
-     * ie. more horizontal drags do x-zoom only, more vertical drags do y-zoom only, and xy-zoom otherwise
+     * When {@code true} auto-zooming feature is being enabled, ie. more horizontal drags do x-zoom only, more vertical
+     * drags do y-zoom only, and xy-zoom otherwise
      *
      * @return the autoZoom property
      */
@@ -488,8 +488,8 @@ public class Zoomer extends ChartPlugin {
     }
 
     /**
-     * @return {@code true} if auto-zooming feature is being enabled,
-     *         ie. more horizontal drags do x-zoom only, more vertical drags do y-zoom only, and xy-zoom otherwise
+     * @return {@code true} if auto-zooming feature is being enabled, ie. more horizontal drags do x-zoom only, more
+     *         vertical drags do y-zoom only, and xy-zoom otherwise
      */
     public final boolean isAutoZoomEnabled() {
         return autoZoomEnabledProperty().get();
@@ -547,8 +547,8 @@ public class Zoomer extends ChartPlugin {
     /**
      * Sets the value of the {@link #autoZoomEnabledProperty()}.
      *
-     * @param state if {@code true} auto-zooming feature is being enabled,
-     *            ie. more horizontal drags do x-zoom only, more vertical drags do y-zoom only, and xy-zoom otherwise
+     * @param state if {@code true} auto-zooming feature is being enabled, ie. more horizontal drags do x-zoom only,
+     *        more vertical drags do y-zoom only, and xy-zoom otherwise
      */
     public final void setAutoZoomEnabled(final boolean state) {
         autoZoomEnabledProperty().set(state);
@@ -626,7 +626,7 @@ public class Zoomer extends ChartPlugin {
      * Sets filter on {@link MouseEvent#DRAG_DETECTED DRAG_DETECTED} events that should start zoom-in operation.
      *
      * @param zoomInMouseFilter the filter to accept zoom-in mouse event. If {@code null} then any DRAG_DETECTED event
-     *            will start zoom-in operation. By default it's set to {@link #defaultZoomInMouseFilter}.
+     *        will start zoom-in operation. By default it's set to {@link #defaultZoomInMouseFilter}.
      * @see #getZoomInMouseFilter()
      */
     public void setZoomInMouseFilter(final Predicate<MouseEvent> zoomInMouseFilter) {
@@ -637,7 +637,7 @@ public class Zoomer extends ChartPlugin {
      * Sets filter on {@link MouseEvent#MOUSE_CLICKED MOUSE_CLICKED} events that should trigger zoom-origin operation.
      *
      * @param zoomOriginMouseFilter the filter to accept zoom-origin mouse event. If {@code null} then any MOUSE_CLICKED
-     *            event will start zoom-origin operation. By default it's set to {@link #defaultZoomOriginFilter}.
+     *        event will start zoom-origin operation. By default it's set to {@link #defaultZoomOriginFilter}.
      * @see #getZoomOriginMouseFilter()
      */
     public void setZoomOriginMouseFilter(final Predicate<MouseEvent> zoomOriginMouseFilter) {
@@ -648,7 +648,7 @@ public class Zoomer extends ChartPlugin {
      * Sets filter on {@link MouseEvent#MOUSE_CLICKED MOUSE_CLICKED} events that should trigger zoom-out operation.
      *
      * @param zoomOutMouseFilter the filter to accept zoom-out mouse event. If {@code null} then any MOUSE_CLICKED event
-     *            will start zoom-out operation. By default it's set to {@link #defaultZoomOutMouseFilter}.
+     *        will start zoom-out operation. By default it's set to {@link #defaultZoomOutMouseFilter}.
      * @see #getZoomOutMouseFilter()
      */
     public void setZoomOutMouseFilter(final Predicate<MouseEvent> zoomOutMouseFilter) {
@@ -1017,7 +1017,10 @@ public class Zoomer extends ChartPlugin {
             case XY:
             default:
                 axisStateMap.put(axis,
-                        new ZoomState(axis.getMin(), axis.getMax(), axis.isAutoRanging(), axis.isAutoGrowRanging())); // NOPMD necessary in-loop instantiation
+                        new ZoomState(axis.getMin(), axis.getMax(), axis.isAutoRanging(), axis.isAutoGrowRanging())); // NOPMD
+                                                                                                                      // necessary
+                                                                                                                      // in-loop
+                                                                                                                      // instantiation
                 break;
             }
         }
@@ -1057,7 +1060,7 @@ public class Zoomer extends ChartPlugin {
 
             final int limit = Math.abs(getAutoZoomThreshold());
 
-            // pixel distance based algorithm  + aspect ratio to prevent flickering when starting selection
+            // pixel distance based algorithm + aspect ratio to prevent flickering when starting selection
             final boolean isZoomX = Math.abs(diffY) <= limit && Math.abs(diffX) >= limit
                     && Math.abs(diffX / diffY) > DEFAULT_FLICKER_THRESHOLD;
             final boolean isZoomY = Math.abs(diffX) <= limit && Math.abs(diffY) >= limit
@@ -1240,7 +1243,9 @@ public class Zoomer extends ChartPlugin {
     private class ZoomRangeSlider extends RangeSlider {
         private final BooleanProperty invertedSlide = new SimpleBooleanProperty(this, "invertedSlide", false);
         private boolean isUpdating;
-        private final ChangeListener<Boolean> sliderResetHandler = (ch, o, n) -> {
+        private final ChangeListener<Boolean> sliderResetHandler = (ch, o, n) -> resetSlider(n);
+
+        protected void resetSlider(Boolean n) {
             if (getChart() == null) {
                 return;
             }
@@ -1249,7 +1254,7 @@ public class Zoomer extends ChartPlugin {
                 setMin(axis.getMin());
                 setMax(axis.getMax());
             }
-        };
+        }
 
         private final ChangeListener<Number> rangeChangeListener = (ch, o, n) -> {
             if (isUpdating) {
@@ -1356,7 +1361,7 @@ public class Zoomer extends ChartPlugin {
         }
 
         public void reset() {
-            sliderResetHandler.changed(null, false, true);
+            resetSlider(true);
         }
 
     } // ZoomRangeSlider
