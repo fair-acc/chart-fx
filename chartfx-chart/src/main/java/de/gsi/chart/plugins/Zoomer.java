@@ -7,18 +7,6 @@ import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
 
-import org.controlsfx.control.RangeSlider;
-import org.controlsfx.glyphfont.Glyph;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import de.gsi.chart.Chart;
-import de.gsi.chart.XYChart;
-import de.gsi.chart.axes.Axis;
-import de.gsi.chart.axes.AxisMode;
-import de.gsi.chart.axes.spi.Axes;
-import de.gsi.chart.ui.ObservableDeque;
-import de.gsi.chart.ui.geometry.Side;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
@@ -48,6 +36,19 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import javafx.scene.shape.Rectangle;
 import javafx.util.Duration;
+
+import org.controlsfx.control.RangeSlider;
+import org.controlsfx.glyphfont.Glyph;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import de.gsi.chart.Chart;
+import de.gsi.chart.XYChart;
+import de.gsi.chart.axes.Axis;
+import de.gsi.chart.axes.AxisMode;
+import de.gsi.chart.axes.spi.Axes;
+import de.gsi.chart.ui.ObservableDeque;
+import de.gsi.chart.ui.geometry.Side;
 
 /**
  * Zoom capabilities along X, Y or both axis. For every zoom-in operation the current X and Y range is remembered and
@@ -117,21 +118,18 @@ public class Zoomer extends ChartPlugin {
     /**
      * Default zoom-in mouse filter passing on left mouse button (only).
      */
-    public final Predicate<MouseEvent> defaultZoomInMouseFilter = event -> MouseEventsHelper.isOnlyPrimaryButtonDown(
-            event) && MouseEventsHelper.modifierKeysUp(event) && isMouseEventWithinCanvas(event);
+    public final Predicate<MouseEvent> defaultZoomInMouseFilter = event -> MouseEventsHelper.isOnlyPrimaryButtonDown(event) && MouseEventsHelper.modifierKeysUp(event) && isMouseEventWithinCanvas(event);
 
     /**
      * Default zoom-out mouse filter passing on right mouse button (only).
      */
-    public final Predicate<MouseEvent> defaultZoomOutMouseFilter = event -> MouseEventsHelper.isOnlySecondaryButtonDown(
-            event) && MouseEventsHelper.modifierKeysUp(event) && isMouseEventWithinCanvas(event);
+    public final Predicate<MouseEvent> defaultZoomOutMouseFilter = event -> MouseEventsHelper.isOnlySecondaryButtonDown(event) && MouseEventsHelper.modifierKeysUp(event) && isMouseEventWithinCanvas(event);
 
     /**
      * Default zoom-origin mouse filter passing on right mouse button with {@link MouseEvent#isControlDown() control key
      * down}.
      */
-    public final Predicate<MouseEvent> defaultZoomOriginFilter = event -> MouseEventsHelper.isOnlySecondaryButtonDown(
-            event) && MouseEventsHelper.isOnlyCtrlModifierDown(event) && isMouseEventWithinCanvas(event);
+    public final Predicate<MouseEvent> defaultZoomOriginFilter = event -> MouseEventsHelper.isOnlySecondaryButtonDown(event) && MouseEventsHelper.isOnlyCtrlModifierDown(event) && isMouseEventWithinCanvas(event);
 
     /**
      * Default zoom scroll filter with {@link MouseEvent#isControlDown() control key down}.
@@ -217,7 +215,6 @@ public class Zoomer extends ChartPlugin {
 
             event.consume();
         }
-
     };
 
     private final EventHandler<MouseEvent> zoomOutHandler = event -> {
@@ -289,7 +286,6 @@ public class Zoomer extends ChartPlugin {
                     n.getPlotArea().setBottom(slider);
                     xRangeSlider.prefWidthProperty().bind(n.getCanvasForeground().widthProperty());
                 }
-
             }
         });
     }
@@ -314,8 +310,8 @@ public class Zoomer extends ChartPlugin {
     }
 
     /**
-     * When {@code true} auto-zooming feature is being enabled,
-     * ie. more horizontal drags do x-zoom only, more vertical drags do y-zoom only, and xy-zoom otherwise
+     * When {@code true} auto-zooming feature is being enabled, ie. more horizontal drags do x-zoom only, more vertical
+     * drags do y-zoom only, and xy-zoom otherwise
      *
      * @return the autoZoom property
      */
@@ -488,8 +484,8 @@ public class Zoomer extends ChartPlugin {
     }
 
     /**
-     * @return {@code true} if auto-zooming feature is being enabled,
-     *         ie. more horizontal drags do x-zoom only, more vertical drags do y-zoom only, and xy-zoom otherwise
+     * @return {@code true} if auto-zooming feature is being enabled, ie. more horizontal drags do x-zoom only, more
+     *         vertical drags do y-zoom only, and xy-zoom otherwise
      */
     public final boolean isAutoZoomEnabled() {
         return autoZoomEnabledProperty().get();
@@ -547,8 +543,8 @@ public class Zoomer extends ChartPlugin {
     /**
      * Sets the value of the {@link #autoZoomEnabledProperty()}.
      *
-     * @param state if {@code true} auto-zooming feature is being enabled,
-     *            ie. more horizontal drags do x-zoom only, more vertical drags do y-zoom only, and xy-zoom otherwise
+     * @param state if {@code true} auto-zooming feature is being enabled, ie. more horizontal drags do x-zoom only,
+     *        more vertical drags do y-zoom only, and xy-zoom otherwise
      */
     public final void setAutoZoomEnabled(final boolean state) {
         autoZoomEnabledProperty().set(state);
@@ -626,7 +622,7 @@ public class Zoomer extends ChartPlugin {
      * Sets filter on {@link MouseEvent#DRAG_DETECTED DRAG_DETECTED} events that should start zoom-in operation.
      *
      * @param zoomInMouseFilter the filter to accept zoom-in mouse event. If {@code null} then any DRAG_DETECTED event
-     *            will start zoom-in operation. By default it's set to {@link #defaultZoomInMouseFilter}.
+     *        will start zoom-in operation. By default it's set to {@link #defaultZoomInMouseFilter}.
      * @see #getZoomInMouseFilter()
      */
     public void setZoomInMouseFilter(final Predicate<MouseEvent> zoomInMouseFilter) {
@@ -637,7 +633,7 @@ public class Zoomer extends ChartPlugin {
      * Sets filter on {@link MouseEvent#MOUSE_CLICKED MOUSE_CLICKED} events that should trigger zoom-origin operation.
      *
      * @param zoomOriginMouseFilter the filter to accept zoom-origin mouse event. If {@code null} then any MOUSE_CLICKED
-     *            event will start zoom-origin operation. By default it's set to {@link #defaultZoomOriginFilter}.
+     *        event will start zoom-origin operation. By default it's set to {@link #defaultZoomOriginFilter}.
      * @see #getZoomOriginMouseFilter()
      */
     public void setZoomOriginMouseFilter(final Predicate<MouseEvent> zoomOriginMouseFilter) {
@@ -648,7 +644,7 @@ public class Zoomer extends ChartPlugin {
      * Sets filter on {@link MouseEvent#MOUSE_CLICKED MOUSE_CLICKED} events that should trigger zoom-out operation.
      *
      * @param zoomOutMouseFilter the filter to accept zoom-out mouse event. If {@code null} then any MOUSE_CLICKED event
-     *            will start zoom-out operation. By default it's set to {@link #defaultZoomOutMouseFilter}.
+     *        will start zoom-out operation. By default it's set to {@link #defaultZoomOutMouseFilter}.
      * @see #getZoomOutMouseFilter()
      */
     public void setZoomOutMouseFilter(final Predicate<MouseEvent> zoomOutMouseFilter) {
@@ -795,7 +791,6 @@ public class Zoomer extends ChartPlugin {
                 axisStateMap.put(axis, new ZoomState(dataMin, dataMax, axis.isAutoRanging(), axis.isAutoGrowRanging()));
                 break;
             }
-
         }
 
         return axisStateMap;
@@ -947,8 +942,7 @@ public class Zoomer extends ChartPlugin {
         }
 
         Axis axis = zoomStateEntry.getKey();
-        if (isZoomIn && ((axis.getSide().isHorizontal() && getAxisMode().allowsX())
-                || (axis.getSide().isVertical() && getAxisMode().allowsY()))) {
+        if (isZoomIn && ((axis.getSide().isHorizontal() && getAxisMode().allowsX()) || (axis.getSide().isVertical() && getAxisMode().allowsY()))) {
             // perform only zoom-in if axis is horizontal (or vertical) and corresponding horizontal (or vertical)
             // zooming is allowed
             axis.setAutoRanging(false);
@@ -1005,19 +999,22 @@ public class Zoomer extends ChartPlugin {
             case X:
                 if (axis.getSide().isHorizontal()) {
                     axisStateMap.put(axis, new ZoomState(axis.getMin(), axis.getMax(), axis.isAutoRanging(),
-                            axis.isAutoGrowRanging())); // NOPMD necessary in-loop instantiation
+                                                   axis.isAutoGrowRanging())); // NOPMD necessary in-loop instantiation
                 }
                 break;
             case Y:
                 if (axis.getSide().isVertical()) {
                     axisStateMap.put(axis, new ZoomState(axis.getMin(), axis.getMax(), axis.isAutoRanging(),
-                            axis.isAutoGrowRanging())); // NOPMD necessary in-loop instantiation
+                                                   axis.isAutoGrowRanging())); // NOPMD necessary in-loop instantiation
                 }
                 break;
             case XY:
             default:
                 axisStateMap.put(axis,
-                        new ZoomState(axis.getMin(), axis.getMax(), axis.isAutoRanging(), axis.isAutoGrowRanging())); // NOPMD necessary in-loop instantiation
+                        new ZoomState(axis.getMin(), axis.getMax(), axis.isAutoRanging(), axis.isAutoGrowRanging())); // NOPMD
+                        // necessary
+                        // in-loop
+                        // instantiation
                 break;
             }
         }
@@ -1057,11 +1054,11 @@ public class Zoomer extends ChartPlugin {
 
             final int limit = Math.abs(getAutoZoomThreshold());
 
-            // pixel distance based algorithm  + aspect ratio to prevent flickering when starting selection
+            // pixel distance based algorithm + aspect ratio to prevent flickering when starting selection
             final boolean isZoomX = Math.abs(diffY) <= limit && Math.abs(diffX) >= limit
-                    && Math.abs(diffX / diffY) > DEFAULT_FLICKER_THRESHOLD;
+                                    && Math.abs(diffX / diffY) > DEFAULT_FLICKER_THRESHOLD;
             final boolean isZoomY = Math.abs(diffX) <= limit && Math.abs(diffY) >= limit
-                    && Math.abs(diffY / diffX) > DEFAULT_FLICKER_THRESHOLD;
+                                    && Math.abs(diffY / diffX) > DEFAULT_FLICKER_THRESHOLD;
 
             // alternate angle-based algorithm
             // final int angle = (int) Math.toDegrees(Math.atan2(diffY, diffX));
@@ -1240,7 +1237,9 @@ public class Zoomer extends ChartPlugin {
     private class ZoomRangeSlider extends RangeSlider {
         private final BooleanProperty invertedSlide = new SimpleBooleanProperty(this, "invertedSlide", false);
         private boolean isUpdating;
-        private final ChangeListener<Boolean> sliderResetHandler = (ch, o, n) -> {
+        private final ChangeListener<Boolean> sliderResetHandler = (ch, o, n) -> resetSlider(n);
+
+        protected void resetSlider(Boolean n) {
             if (getChart() == null) {
                 return;
             }
@@ -1249,7 +1248,7 @@ public class Zoomer extends ChartPlugin {
                 setMin(axis.getMin());
                 setMax(axis.getMax());
             }
-        };
+        }
 
         private final ChangeListener<Number> rangeChangeListener = (ch, o, n) -> {
             if (isUpdating) {
@@ -1356,7 +1355,7 @@ public class Zoomer extends ChartPlugin {
         }
 
         public void reset() {
-            sliderResetHandler.changed(null, false, true);
+            resetSlider(true);
         }
 
     } // ZoomRangeSlider

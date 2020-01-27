@@ -16,7 +16,7 @@ import java.util.SplittableRandom;
  * @version $Id: RandomDataGenerator.java,v 1.5 2008-12-11 13:46:35 emccrory Exp $
  */
 @SuppressWarnings("PMD.VariableNamingConventions")
-public final class RandomDataGenerator {
+public final class RandomDataGenerator { // NOPMD nomen est omen
     private static final Random RND_DEPRECATED = new Random(System.currentTimeMillis());
     private static final SplittableRandom RND = new SplittableRandom(System.currentTimeMillis());
     private static final int NUMBER_OF_POINTS = 1000;
@@ -93,7 +93,7 @@ public final class RandomDataGenerator {
         return data;
     }
 
-    public static double[] getGaussianX() {
+    public static synchronized double[] getGaussianX() {
         if (RandomDataGenerator.xValues == null) {
             RandomDataGenerator.getNew1DGaussian();
         }
@@ -101,7 +101,7 @@ public final class RandomDataGenerator {
         return RandomDataGenerator.xValues;
     }
 
-    public static double[] getGaussianY() {
+    public static synchronized double[] getGaussianY() {
         if (RandomDataGenerator.yValues == null) {
             RandomDataGenerator.getNew1DGaussian();
         }
@@ -126,29 +126,25 @@ public final class RandomDataGenerator {
             RandomDataGenerator.xValues = new double[RandomDataGenerator.NUMBER_OF_POINTS];
             RandomDataGenerator.yValues = new double[RandomDataGenerator.NUMBER_OF_POINTS];
             for (int i = 0; i < RandomDataGenerator.NUMBER_OF_POINTS; i++) {
-                RandomDataGenerator.xValues[i] = 2 * RandomDataGenerator.X_MAX * (0.5
-                        - (double) (RandomDataGenerator.NUMBER_OF_POINTS - i) / RandomDataGenerator.NUMBER_OF_POINTS);
+                RandomDataGenerator.xValues[i] = 2 * RandomDataGenerator.X_MAX * (0.5 - (double) (RandomDataGenerator.NUMBER_OF_POINTS - i) / RandomDataGenerator.NUMBER_OF_POINTS);
             }
         }
 
         for (int i = 0; i < RandomDataGenerator.NUMBER_OF_POINTS; i++) {
             RandomDataGenerator.yValues[i] = RandomDataGenerator.myRandom(0, RandomDataGenerator.noiseLevel)
-                    + RandomDataGenerator.background
-                    + RandomDataGenerator.slope * (RandomDataGenerator.xValues[i] - RandomDataGenerator.center)
-                    + RandomDataGenerator.amplitude
-                            * Math.exp(-(RandomDataGenerator.xValues[i] - RandomDataGenerator.center)
-                                    * (RandomDataGenerator.xValues[i] - RandomDataGenerator.center)
-                                    / RandomDataGenerator.width / RandomDataGenerator.width / 2);
+                                             + RandomDataGenerator.background
+                                             + RandomDataGenerator.slope * (RandomDataGenerator.xValues[i] - RandomDataGenerator.center)
+                                             + RandomDataGenerator.amplitude
+                                                       * Math.exp(-(RandomDataGenerator.xValues[i] - RandomDataGenerator.center)
+                                                                  * (RandomDataGenerator.xValues[i] - RandomDataGenerator.center)
+                                                                  / RandomDataGenerator.width / RandomDataGenerator.width / 2);
         }
 
         for (int i = 0; i < RandomDataGenerator.NUMBER_OF_POINTS; i++) {
             RandomDataGenerator.yValues[i] = RandomDataGenerator.yValues[i] > RandomDataGenerator.SATURATION_LEVEL
-                    ? RandomDataGenerator.SATURATION_LEVEL
-                    : RandomDataGenerator.yValues[i];
+                                                     ? RandomDataGenerator.SATURATION_LEVEL
+                                                     : RandomDataGenerator.yValues[i];
         }
-    }
-
-    public static void main(final String[] args) {
     }
 
     public static double myRandom(final double low, final double high) {

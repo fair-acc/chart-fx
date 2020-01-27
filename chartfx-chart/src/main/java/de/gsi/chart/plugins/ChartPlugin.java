@@ -3,10 +3,6 @@ package de.gsi.chart.plugins;
 import java.util.LinkedList;
 import java.util.List;
 
-import de.gsi.chart.Chart;
-import de.gsi.chart.XYChart;
-import de.gsi.chart.axes.Axis;
-import de.gsi.dataset.spi.utils.Tuple;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -20,6 +16,14 @@ import javafx.scene.Node;
 import javafx.scene.input.InputEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.util.Pair;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import de.gsi.chart.Chart;
+import de.gsi.chart.XYChart;
+import de.gsi.chart.axes.Axis;
+import de.gsi.dataset.spi.utils.Tuple;
 
 /**
  * Represents an add-on to a Chart that can either annotate/decorate the chart or perform some interactions with it.
@@ -35,7 +39,7 @@ import javafx.util.Pair;
  * @author rstein - modified to new Chart, XYChart API
  */
 public abstract class ChartPlugin {
-
+    private static final Logger LOGGER = LoggerFactory.getLogger(ChartPlugin.class);
     private final ObservableList<Node> chartChildren = FXCollections.observableArrayList();
     private final List<Pair<EventType<? extends InputEvent>, EventHandler<? extends InputEvent>>> mouseEventHandlers = new LinkedList<>();
 
@@ -219,13 +223,14 @@ public abstract class ChartPlugin {
     protected final Tuple<Number, Number> toDataPoint(final Axis yAxis, final Point2D displayPoint) {
         final Chart chart = getChart();
         if (!(chart instanceof XYChart)) {
+            if (LOGGER.isWarnEnabled()) {
+                LOGGER.atWarn().addArgument(chart).log("chart '{}' is not of type XYChart returning null");
+            }
             return null;
         }
         final XYChart xyChart = (XYChart) chart;
         return new Tuple<>(xyChart.getXAxis().getValueForDisplay(displayPoint.getX()),
                 yAxis.getValueForDisplay(displayPoint.getY()));
-        // TODO: rstein: check whether this is correct (bug potential for
-        // casting error)
     }
 
     /**
