@@ -3,13 +3,6 @@ package de.gsi.chart.plugins;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import de.gsi.chart.Chart;
-import de.gsi.chart.XYChart;
-import de.gsi.chart.axes.Axis;
-import de.gsi.dataset.spi.utils.Tuple;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -23,6 +16,14 @@ import javafx.scene.Node;
 import javafx.scene.input.InputEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.util.Pair;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import de.gsi.chart.Chart;
+import de.gsi.chart.XYChart;
+import de.gsi.chart.axes.Axis;
+import de.gsi.dataset.spi.utils.Tuple;
 
 /**
  * Represents an add-on to a Chart that can either annotate/decorate the chart or perform some interactions with it.

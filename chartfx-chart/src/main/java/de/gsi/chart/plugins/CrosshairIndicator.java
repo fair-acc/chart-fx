@@ -4,12 +4,6 @@
 
 package de.gsi.chart.plugins;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import de.gsi.chart.axes.Axis;
-import de.gsi.dataset.spi.utils.Tuple;
-
 import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
 import javafx.geometry.Bounds;
@@ -22,6 +16,12 @@ import javafx.scene.shape.LineTo;
 import javafx.scene.shape.MoveTo;
 import javafx.scene.shape.Path;
 import javafx.scene.shape.PathElement;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import de.gsi.chart.axes.Axis;
+import de.gsi.dataset.spi.utils.Tuple;
 
 /**
  * Horizontal and vertical {@link Line} drawn on the plot area, crossing at the mouse cursor location, together with a
@@ -79,7 +79,8 @@ public class CrosshairIndicator extends AbstractDataFormattingPlugin {
     private String formatLabelText(final Point2D displayPointInPlotArea) {
         final Axis yAxis = getChart().getFirstAxis(Orientation.VERTICAL);
         if (yAxis == null) {
-            return getChart() + " - " + "no y-axis present to translate point " + displayPointInPlotArea;
+            return getChart() + " - "
+                    + "no y-axis present to translate point " + displayPointInPlotArea;
         }
         Tuple<Number, Number> tuple = toDataPoint(yAxis, displayPointInPlotArea);
         if (tuple == null) {

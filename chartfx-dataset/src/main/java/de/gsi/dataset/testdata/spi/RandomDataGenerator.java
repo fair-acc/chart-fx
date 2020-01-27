@@ -126,25 +126,24 @@ public final class RandomDataGenerator { // NOPMD nomen est omen
             RandomDataGenerator.xValues = new double[RandomDataGenerator.NUMBER_OF_POINTS];
             RandomDataGenerator.yValues = new double[RandomDataGenerator.NUMBER_OF_POINTS];
             for (int i = 0; i < RandomDataGenerator.NUMBER_OF_POINTS; i++) {
-                RandomDataGenerator.xValues[i] = 2 * RandomDataGenerator.X_MAX * (0.5
-                        - (double) (RandomDataGenerator.NUMBER_OF_POINTS - i) / RandomDataGenerator.NUMBER_OF_POINTS);
+                RandomDataGenerator.xValues[i] = 2 * RandomDataGenerator.X_MAX * (0.5 - (double) (RandomDataGenerator.NUMBER_OF_POINTS - i) / RandomDataGenerator.NUMBER_OF_POINTS);
             }
         }
 
         for (int i = 0; i < RandomDataGenerator.NUMBER_OF_POINTS; i++) {
             RandomDataGenerator.yValues[i] = RandomDataGenerator.myRandom(0, RandomDataGenerator.noiseLevel)
-                    + RandomDataGenerator.background
-                    + RandomDataGenerator.slope * (RandomDataGenerator.xValues[i] - RandomDataGenerator.center)
-                    + RandomDataGenerator.amplitude
-                            * Math.exp(-(RandomDataGenerator.xValues[i] - RandomDataGenerator.center)
-                                    * (RandomDataGenerator.xValues[i] - RandomDataGenerator.center)
-                                    / RandomDataGenerator.width / RandomDataGenerator.width / 2);
+                                             + RandomDataGenerator.background
+                                             + RandomDataGenerator.slope * (RandomDataGenerator.xValues[i] - RandomDataGenerator.center)
+                                             + RandomDataGenerator.amplitude
+                                                       * Math.exp(-(RandomDataGenerator.xValues[i] - RandomDataGenerator.center)
+                                                                  * (RandomDataGenerator.xValues[i] - RandomDataGenerator.center)
+                                                                  / RandomDataGenerator.width / RandomDataGenerator.width / 2);
         }
 
         for (int i = 0; i < RandomDataGenerator.NUMBER_OF_POINTS; i++) {
             RandomDataGenerator.yValues[i] = RandomDataGenerator.yValues[i] > RandomDataGenerator.SATURATION_LEVEL
-                    ? RandomDataGenerator.SATURATION_LEVEL
-                    : RandomDataGenerator.yValues[i];
+                                                     ? RandomDataGenerator.SATURATION_LEVEL
+                                                     : RandomDataGenerator.yValues[i];
         }
     }
 

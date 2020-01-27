@@ -5,10 +5,10 @@ import static javafx.geometry.Side.LEFT;
 import static javafx.geometry.Side.RIGHT;
 import static javafx.geometry.Side.TOP;
 
+import javafx.geometry.Side;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javafx.geometry.Side;
 
 /**
  * <p>

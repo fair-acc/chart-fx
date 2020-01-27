@@ -4,6 +4,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+import javafx.beans.value.ChangeListener;
+import javafx.collections.ListChangeListener;
+import javafx.collections.ObservableList;
+import javafx.geometry.Orientation;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,10 +21,6 @@ import de.gsi.dataset.DataSet;
 import de.gsi.dataset.event.AxisChangeEvent;
 import de.gsi.dataset.event.EventListener;
 import de.gsi.dataset.event.UpdateEvent;
-import javafx.beans.value.ChangeListener;
-import javafx.collections.ListChangeListener;
-import javafx.collections.ObservableList;
-import javafx.geometry.Orientation;
 
 /**
  * This plugin updates the labels (name and unit) of all axes according to DataSet Metadata. For now the axes are only
@@ -36,13 +37,11 @@ public class UpdateAxisLabels extends ChartPlugin {
     private Map<Renderer, ListChangeListener<DataSet>> renderersListeners = new HashMap<>();
 
     // called whenever renderers are added or removed
-    private ListChangeListener<Renderer> renderersListener = (
-            ListChangeListener.Change<? extends Renderer> renderersChange) -> {
+    private ListChangeListener<Renderer> renderersListener = (ListChangeListener.Change<? extends Renderer> renderersChange) -> {
         while (renderersChange.next()) {
             if (renderersChange.wasAdded()) {
                 for (Renderer renderer : renderersChange.getAddedSubList()) {
-                    ListChangeListener<DataSet> dataSetsListener = (
-                            ListChangeListener.Change<? extends DataSet> dataSetsChange) -> {
+                    ListChangeListener<DataSet> dataSetsListener = (ListChangeListener.Change<? extends DataSet> dataSetsChange) -> {
                         if (LOGGER.isDebugEnabled()) {
                             LOGGER.atDebug().log("update listener -> dataSetsChanged ");
                         }
@@ -51,9 +50,7 @@ public class UpdateAxisLabels extends ChartPlugin {
                     renderer.getDatasets().addListener(dataSetsListener);
                     renderersListeners.put(renderer, dataSetsListener);
                     if (LOGGER.isDebugEnabled()) {
-                        LOGGER.atDebug().addArgument(renderer.getClass().getSimpleName())
-                                .addArgument(rendererDataSetsListeners.size())
-                                .log("added listener for render {}, number of data set listeners {}");
+                        LOGGER.atDebug().addArgument(renderer.getClass().getSimpleName()).addArgument(rendererDataSetsListeners.size()).log("added listener for render {}, number of data set listeners {}");
                     }
                 }
             }
@@ -103,21 +100,14 @@ public class UpdateAxisLabels extends ChartPlugin {
         DataSet dataSet = (DataSet) axisDataUpdate.getSource();
         if (renderer == null) { // dataset was added to / is registered at chart
             if (getChart().getDatasets().size() == 1) {
-
                 if (dim == -1 || dim == DataSet.DIM_X) {
-                    getChart().getFirstAxis(Orientation.HORIZONTAL).set(
-                            dataSet.getAxisDescription(DataSet.DIM_X).getName(),
-                            dataSet.getAxisDescription(DataSet.DIM_X).getUnit());
+                    getChart().getFirstAxis(Orientation.HORIZONTAL).set(dataSet.getAxisDescription(DataSet.DIM_X).getName(), dataSet.getAxisDescription(DataSet.DIM_X).getUnit());
                 }
                 if (dim == -1 || dim == DataSet.DIM_Y) {
-                    getChart().getFirstAxis(Orientation.VERTICAL).set(
-                            dataSet.getAxisDescription(DataSet.DIM_Y).getName(),
-                            dataSet.getAxisDescription(DataSet.DIM_Y).getUnit());
+                    getChart().getFirstAxis(Orientation.VERTICAL).set(dataSet.getAxisDescription(DataSet.DIM_Y).getName(), dataSet.getAxisDescription(DataSet.DIM_Y).getUnit());
                 }
                 if ((dim == -1 || dim == DataSet.DIM_Z) && dataSet.getDimension() >= 3) {
-                    getChart().getAxes().stream().filter(axis -> axis instanceof ColorGradientAxis).findFirst()
-                            .ifPresent(axis -> axis.set(dataSet.getAxisDescription(DataSet.DIM_Z).getName(),
-                                    dataSet.getAxisDescription(DataSet.DIM_Z).getUnit()));
+                    getChart().getAxes().stream().filter(axis -> axis instanceof ColorGradientAxis).findFirst().ifPresent(axis -> axis.set(dataSet.getAxisDescription(DataSet.DIM_Z).getName(), dataSet.getAxisDescription(DataSet.DIM_Z).getUnit()));
                 }
             } else {
                 if (LOGGER.isWarnEnabled()) {
@@ -127,23 +117,16 @@ public class UpdateAxisLabels extends ChartPlugin {
             }
         } else { // dataset was added to / is registered at renderer
             if (renderer.getDatasets().size() == 1) {
-
                 if (dim == -1 || dim == DataSet.DIM_X) {
-                    Optional<Axis> oldAxis = renderer.getAxes().stream().filter(axis -> axis.getSide().isHorizontal())
-                            .findFirst();
-                    oldAxis.ifPresent(a -> a.set(dataSet.getAxisDescription(DataSet.DIM_X).getName(),
-                            dataSet.getAxisDescription(DataSet.DIM_X).getUnit()));
+                    Optional<Axis> oldAxis = renderer.getAxes().stream().filter(axis -> axis.getSide().isHorizontal()).findFirst();
+                    oldAxis.ifPresent(a -> a.set(dataSet.getAxisDescription(DataSet.DIM_X).getName(), dataSet.getAxisDescription(DataSet.DIM_X).getUnit()));
                 }
                 if (dim == -1 || dim == DataSet.DIM_Y) {
-                    Optional<Axis> oldAxis = renderer.getAxes().stream().filter(axis -> axis.getSide().isVertical())
-                            .findFirst();
-                    oldAxis.ifPresent(a -> a.set(dataSet.getAxisDescription(DataSet.DIM_Y).getName(),
-                            dataSet.getAxisDescription(DataSet.DIM_Y).getUnit()));
+                    Optional<Axis> oldAxis = renderer.getAxes().stream().filter(axis -> axis.getSide().isVertical()).findFirst();
+                    oldAxis.ifPresent(a -> a.set(dataSet.getAxisDescription(DataSet.DIM_Y).getName(), dataSet.getAxisDescription(DataSet.DIM_Y).getUnit()));
                 }
                 if ((dim == -1 || dim == DataSet.DIM_Z) && dataSet.getDimension() >= 3) {
-                    renderer.getAxes().stream().filter(axis -> axis instanceof ColorGradientAxis).findFirst()
-                            .ifPresent(axis -> axis.set(dataSet.getAxisDescription(DataSet.DIM_Z).getName(),
-                                    dataSet.getAxisDescription(DataSet.DIM_Z).getUnit()));
+                    renderer.getAxes().stream().filter(axis -> axis instanceof ColorGradientAxis).findFirst().ifPresent(axis -> axis.set(dataSet.getAxisDescription(DataSet.DIM_Z).getName(), dataSet.getAxisDescription(DataSet.DIM_Z).getUnit()));
                 }
             } else {
                 if (LOGGER.isWarnEnabled()) {
@@ -209,8 +192,7 @@ public class UpdateAxisLabels extends ChartPlugin {
             rendererDataSetsListeners.put(renderer, dataSetListeners);
         }
 
-        ListChangeListener<DataSet> rendererListener = (
-                ListChangeListener.Change<? extends DataSet> change) -> dataSetsChanged(change, renderer);
+        ListChangeListener<DataSet> rendererListener = (ListChangeListener.Change<? extends DataSet> change) -> dataSetsChanged(change, renderer);
         dataSets.addListener(rendererListener);
         renderersListeners.put(renderer, rendererListener);
 
