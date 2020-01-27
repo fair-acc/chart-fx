@@ -109,7 +109,13 @@ public class Screenshot extends ChartPlugin {
      */
     private Image getScreenshot() {
         SnapshotParameters snapParams = new SnapshotParameters();
-        WritableImage result = chartProperty().get().snapshot(snapParams, null);
+        // hide toolbar
+        boolean oldval = getChart().getToolBar().isVisible();
+        getChart().getToolBar().setVisible(false);
+        // take screenshot
+        WritableImage result = getChart().snapshot(snapParams, null);
+        // restore toolbar
+        getChart().getToolBar().setVisible(oldval);
         return result;
     }
 
