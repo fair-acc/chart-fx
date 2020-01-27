@@ -1012,9 +1012,9 @@ public class Zoomer extends ChartPlugin {
             default:
                 axisStateMap.put(axis,
                         new ZoomState(axis.getMin(), axis.getMax(), axis.isAutoRanging(), axis.isAutoGrowRanging())); // NOPMD
-                        // necessary
-                        // in-loop
-                        // instantiation
+                // necessary
+                // in-loop
+                // instantiation
                 break;
             }
         }
