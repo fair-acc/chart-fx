@@ -24,6 +24,13 @@ import javafx.scene.paint.Paint;
 import javafx.scene.text.Font;
 import javafx.scene.text.TextAlignment;
 
+/**
+ * Draws horizontal markers with horizontal (default) labels attached at the top.
+ * If the labels are to close together, overlapping label texts are hidden.
+ * For markers without any label text, add labels with the empty string {@code ("")}.
+ * 
+ * Points without any label data are ignored by the renderer.
+ */
 public class LabelledMarkerRenderer extends AbstractDataSetManagement<LabelledMarkerRenderer> implements Renderer {
     private static final String STYLE_CLASS_LABELLED_MARKER = "chart-labelled-marker";
     private static final String DEFAULT_FONT = "Helvetia";
@@ -123,6 +130,9 @@ public class LabelledMarkerRenderer extends AbstractDataSetManagement<LabelledMa
         for (int i = indexMin; i < indexMax; i++) {
             final double screenX = (int) xAxis.getDisplayPosition(dataSet.get(DataSet.DIM_X, i));
             final String label = dataSet.getDataLabel(i);
+            if (label == null) {
+                continue;
+            }
 
             final String pointStyle = dataSet.getStyle(i);
 
