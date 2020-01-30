@@ -192,6 +192,26 @@ public class DefaultDataReducer implements RendererDataReducer {
             }
         }
 
+        if (ncount > 0) {
+            // absorbed at least one point before
+            // compute mean -- first part: accumulation, min, max
+            if (ncount == 1) {
+                xValues[count] = (int) (meanX);
+                yValues[count] = (int) (meanY);
+            } else {
+                xValues[count] = (int) (meanX / ncount);
+                yValues[count] = (int) (meanY / ncount);
+            }
+            xPointErrorsNeg[count] = minX;
+            xPointErrorsPos[count] = maxX;
+            yPointErrorsNeg[count] = maxY;
+            yPointErrorsPos[count] = minY;
+            pointSelected[count] = sel;
+            styles[count] = style;
+            count++;
+            // aggregated/merged previous points - accumulation phase is finished
+        }
+
         // add last point - by default (was earlier as a conditional statement
         // in for loop which reduced performance, ie. this code is a hot-spot)
         xValues[count] = xValues[indexMax - 1];
@@ -304,6 +324,24 @@ public class DefaultDataReducer implements RendererDataReducer {
             }
         }
 
+        if (ncount > 0) {
+            // absorbed at least one point before
+            // compute mean -- first part: accumulation, min, max
+            if (ncount == 1) {
+                xValues[count] = (int) (meanX);
+                yValues[count] = (int) (meanY);
+            } else {
+                xValues[count] = (int) (meanX / ncount);
+                yValues[count] = (int) (meanY / ncount);
+            }
+            yPointErrorsNeg[count] = maxY;
+            yPointErrorsPos[count] = minY;
+            pointSelected[count] = sel;
+            styles[count] = style;
+            count++;
+            // aggregated/merged previous points - accumulation phase is finished
+        }
+
         // add last point - by default (was earlier as a conditional statement
         // in for loop which reduced performance, ie. this code is a hot-spot)
         xValues[count] = xValues[indexMax - 1];
@@ -400,6 +438,23 @@ public class DefaultDataReducer implements RendererDataReducer {
                 sel |= pointSelected[i];
                 ncount++;
             }
+        }
+
+        if (ncount > 0) {
+            // absorbed at least one point before
+            // compute mean -- first part: accumulation, min, max
+            if (ncount == 1) {
+                xValues[count] = (int) (meanX);
+                yValues[count] = (int) (meanY);
+            } else {
+                xValues[count] = (int) (meanX / ncount);
+                yValues[count] = (int) (meanY / ncount);
+            }
+            pointSelected[count] = sel;
+            styles[count] = style;
+            count++;
+
+            // aggregated/merged previous points - accumulation phase is finished
         }
 
         // add last point - by default (was earlier as a conditional statement
