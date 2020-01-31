@@ -6,6 +6,11 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.temporal.ChronoUnit;
+import java.util.Collection;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.Test;
@@ -22,7 +27,8 @@ public class CacheTests {
 
     @Test
     public void demoTestCase() {
-        final Cache<String, Integer> cache = Cache.builder().withLimit(10).withTimeout(100, TimeUnit.MILLISECONDS).build();
+        final Cache<String, Integer> cache = Cache.builder().withLimit(10).withTimeout(100, TimeUnit.MILLISECONDS)
+                .build();
 
         String name1 = "Han Solo";
 
@@ -48,7 +54,7 @@ public class CacheTests {
     }
 
     private boolean isCached(Cache cache, final String KEY) {
-        return cache.get(KEY).isPresent();
+        return cache.getOptional(KEY).isPresent();
     }
 
     @Test
@@ -76,7 +82,7 @@ public class CacheTests {
 
     @Test
     public void testCacheSizeLimit() {
-        Cache cache = Cache.builder().withLimit(3).build();
+        Cache<String, Integer> cache = Cache.builder().withLimit(3).build();
 
         assertEquals(3, cache.getLimit());
 
@@ -92,8 +98,47 @@ public class CacheTests {
         final String testString = "testString";
         cache.put(testString, 42);
         assertTrue(isCached(cache, testString), testString + " being cached");
+        assertEquals(42, cache.get(testString), testString + " being cached");
         cache.remove(testString);
         assertFalse(isCached(cache, testString), testString + " being removed from cache");
+
+        cache.clear();
+        assertEquals(0, cache.size(), "cache size");
+        cache.put(testString, 42);
+        assertTrue(cache.containsKey(testString), "containsKey");
+        assertTrue(cache.containsValue(42), "containsValue");
+        Set<Entry<String, Integer>> entrySet = cache.entrySet();
+        
+        assertEquals(1, entrySet.size(), "entrySet size");
+        for (Entry<String, Integer> entry : entrySet) {
+            assertEquals(testString, entry.getKey(), "entrySet - key");
+            assertEquals(42, entry.getValue(), "entrySet - value");
+        }
+        
+        Set<String> keySet = cache.keySet();
+        assertEquals(1, keySet.size(), "keySet size");
+        for (String key : keySet) {
+            assertEquals(testString, key, "keySet - key");
+        }
+        
+        Collection<Integer> values = cache.values();
+        assertEquals(1, values.size(), "values size");
+        for (Integer value : values) {
+            assertEquals(42, value, "values - value");
+        }
+
+        assertEquals(1, cache.size(), "cache size");
+        cache.clear();
+        assertEquals(0, cache.size(), "cache size");
+        assertFalse(isCached(cache, testString), testString + " being removed from cache");
+        assertTrue(cache.isEmpty(), " cache being empty after clear");
+        
+        Map<String, Integer> mapToAdd = new ConcurrentHashMap<>();
+        mapToAdd.put("Test1", 1);
+        mapToAdd.put("Test2", 2);
+        mapToAdd.put("Test3", 3);
+        cache.putAll(mapToAdd);
+        assertEquals(3, cache.size(), "cache size");
     }
 
     @Test
@@ -142,6 +187,6 @@ public class CacheTests {
             Cache.builder().withLimit(0).build();
         });
 
-        //        Cache cache4 = Cache.builder().withLimit(20).withTimeout(100, TimeUnit.MILLISECONDS).build();
+        // Cache cache4 = Cache.builder().withLimit(20).withTimeout(100, TimeUnit.MILLISECONDS).build();
     }
 }

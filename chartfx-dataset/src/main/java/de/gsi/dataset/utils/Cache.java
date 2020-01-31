@@ -2,9 +2,11 @@ package de.gsi.dataset.utils;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -16,7 +18,8 @@ import java.util.stream.Collectors;
  *
  * usage example:
  *
- * <pre> {@code
+ * <pre>
+ *  {@code
  *     public class Demo {
  *         private Cache<String, Integer> cache;
  *
@@ -59,8 +62,9 @@ import java.util.stream.Collectors;
  *             new Demo();
  *         }
  *     }
- * }</pre>
- * TODO: add missing Map functions
+ * }
+ * </pre>
+ * 
  *
  * Original code courtesy from: https://github.com/HanSolo/cache
  *
@@ -69,7 +73,7 @@ import java.util.stream.Collectors;
  * @param <K> search key
  * @param <V> cached value
  */
-public class Cache<K, V> /* implements Map<K, V> */ {
+public class Cache<K, V> implements Map<K, V> {
     private ConcurrentHashMap<K, V> cache;
     private ChronoUnit chronoUnit;
     private ScheduledExecutorService executor;
@@ -124,50 +128,62 @@ public class Cache<K, V> /* implements Map<K, V> */ {
     }
 
     protected void checkSize() {
+        checkSize(1);
+    }
+
+    protected void checkSize(final int nNewElements) {
         if (cache.size() < limit) {
             return;
         }
-        int surplusEntries = Math.max(cache.size() - limit + 1, 0);
-        List<K> toBeRemoved = timeOutMap.entrySet().stream().sorted(Map.Entry.<K, Instant>comparingByValue().reversed()).limit(surplusEntries).map(Map.Entry::getKey).collect(Collectors.toList());
+        int surplusEntries = Math.max(cache.size() - limit + nNewElements, 0);
+        List<K> toBeRemoved = timeOutMap.entrySet().stream().sorted(Map.Entry.<K, Instant>comparingByValue().reversed())
+                .limit(surplusEntries).map(Map.Entry::getKey).collect(Collectors.toList());
         removeEntries(toBeRemoved);
     }
 
     protected void checkTime() {
         Instant cutoffTime = Instant.now().minus(timeOut, chronoUnit);
-        List<K> toBeRemoved = timeOutMap.entrySet().stream().filter(entry -> entry.getValue().isBefore(cutoffTime)).map(Map.Entry::getKey).collect(Collectors.toList());
+        List<K> toBeRemoved = timeOutMap.entrySet().stream().filter(entry -> entry.getValue().isBefore(cutoffTime))
+                .map(Map.Entry::getKey).collect(Collectors.toList());
         removeEntries(toBeRemoved);
     }
 
-    protected static ChronoUnit convertToChronoUnit(final TimeUnit timeUnit) {
-        switch (timeUnit) {
-        case NANOSECONDS:
-            return ChronoUnit.NANOS;
-        case MICROSECONDS:
-            return ChronoUnit.MICROS;
-        case SECONDS:
-            return ChronoUnit.SECONDS;
-        case MINUTES:
-            return ChronoUnit.MINUTES;
-        case HOURS:
-            return ChronoUnit.HOURS;
-        case DAYS:
-            return ChronoUnit.DAYS;
-        case MILLISECONDS:
-        default:
-            return ChronoUnit.MILLIS;
-        }
+    @Override
+    public void clear() {
+        cache.clear();
+        timeOutMap.clear();
     }
 
-    public Optional<V> get(final K KEY) {
-        return Optional.ofNullable(getIfPresent(KEY));
+    @Override
+    public boolean containsKey(Object key) {
+        return cache.containsKey(key);
     }
 
-    public V getIfPresent(final K KEY) {
-        return cache.getOrDefault(KEY, null);
+    @Override
+    public boolean containsValue(Object value) {
+        return cache.containsValue(value);
+    }
+
+    @Override
+    public Set<Entry<K, V>> entrySet() {
+        return cache.entrySet();
+    }
+
+    @Override
+    public V get(final Object key) {
+        return getIfPresent(key);
+    }
+
+    public V getIfPresent(final Object key) {
+        return cache.getOrDefault(key, null);
     }
 
     public long getLimit() {
         return limit;
+    }
+
+    public Optional<V> getOptional(final K key) {
+        return Optional.ofNullable(getIfPresent(key));
     }
 
     public int getSize() {
@@ -182,22 +198,56 @@ public class Cache<K, V> /* implements Map<K, V> */ {
         return timeUnit;
     }
 
-    public void put(final K KEY, final V VALUE) {
+    @Override
+    public boolean isEmpty() {
+        return cache.isEmpty();
+    }
+
+    @Override
+    public Set<K> keySet() {
+        return cache.keySet();
+    }
+
+    @Override
+    public V put(final K key, final V VALUE) {
         checkSize();
-        cache.putIfAbsent(KEY, VALUE);
-        timeOutMap.putIfAbsent(KEY, Instant.now());
+        final V val = cache.putIfAbsent(key, VALUE);
+        timeOutMap.putIfAbsent(key, Instant.now());
+        return val;
     }
 
-    public void remove(final K KEY) {
-        cache.remove(KEY);
-        timeOutMap.remove(KEY);
+    @Override
+    public void putAll(Map<? extends K, ? extends V> m) {
+        checkSize(m.size());
+        cache.putAll(m);
+        final Instant now = Instant.now();
+        for (K key : m.keySet()) {
+            timeOutMap.putIfAbsent(key, now);
+        }
     }
 
-    private void removeEntries(final List<K> TO_BE_REMOVED) {
-        TO_BE_REMOVED.forEach(key -> {
+    @Override
+    public V remove(final Object key) {
+        final V val = cache.remove(key);
+        timeOutMap.remove(key);
+        return val;
+    }
+
+    private void removeEntries(final List<K> toBeRemoved) {
+        toBeRemoved.forEach(key -> {
             timeOutMap.remove(key);
             cache.remove(key);
         });
+    }
+
+    @Override
+    public int size() {
+        return cache.size();
+    }
+
+    @Override
+    public Collection<V> values() {
+        return cache.values();
     }
 
     public static CacheBuilder builder() {
@@ -220,6 +270,26 @@ public class Cache<K, V> /* implements Map<K, V> */ {
         return value;
     }
 
+    protected static ChronoUnit convertToChronoUnit(final TimeUnit timeUnit) {
+        switch (timeUnit) {
+        case NANOSECONDS:
+            return ChronoUnit.NANOS;
+        case MICROSECONDS:
+            return ChronoUnit.MICROS;
+        case SECONDS:
+            return ChronoUnit.SECONDS;
+        case MINUTES:
+            return ChronoUnit.MINUTES;
+        case HOURS:
+            return ChronoUnit.HOURS;
+        case DAYS:
+            return ChronoUnit.DAYS;
+        case MILLISECONDS:
+        default:
+            return ChronoUnit.MILLIS;
+        }
+    }
+
     public static class CacheBuilder {
         private int limit = Integer.MAX_VALUE;
         private long timeOut = 0;
@@ -229,8 +299,8 @@ public class Cache<K, V> /* implements Map<K, V> */ {
             // only called via builder
         }
 
-        public Cache build() {
-            return new Cache(timeOut, timeUnit, limit);
+        public <K,V> Cache<K,V> build() {
+            return new Cache<>(timeOut, timeUnit, limit);
         }
 
         public CacheBuilder withLimit(final int limit) {
@@ -253,4 +323,5 @@ public class Cache<K, V> /* implements Map<K, V> */ {
             return this;
         }
     }
+
 }
