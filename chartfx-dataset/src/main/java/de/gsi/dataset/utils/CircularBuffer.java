@@ -1,5 +1,8 @@
 package de.gsi.dataset.utils;
 
+import java.lang.reflect.Array;
+import java.util.Arrays;
+
 /**
  * simple circular ring buffer implementation for generic object type (with read == write position)
  *
@@ -14,10 +17,24 @@ public class CircularBuffer<E extends Object> {
 
     /**
      * 
+     * @param initalElements adds element the buffer should be initialised with
+     * @param capacity maximum capacity of the buffer
+     */
+    @SuppressWarnings("unchecked")
+    public CircularBuffer(E[] initalElements, final int capacity) {
+        this(capacity);
+        put(initalElements, initalElements.length);
+    }
+
+    /**
+     * 
      * @param capacity maximum capacity of the buffer
      */
     @SuppressWarnings("unchecked")
     public CircularBuffer(final int capacity) {
+        if (capacity <= 0) {
+            throw new IllegalArgumentException("capcacity='" + capacity + "' must be larger than zero");
+        }
         this.capacity = capacity;
         elements = (E[]) new Object[capacity];
         flipped = false;
@@ -32,6 +49,22 @@ public class CircularBuffer<E extends Object> {
             return capacity;
         }
         return writePos;
+    }
+
+    /**
+     * @return the maximum possible/filled number of available buffer elements
+     */
+    public int capacity() {
+        return capacity;
+    }
+
+    /**
+     * @param returnVectorType need to supply export type vector
+     * @return internal field array
+     */
+    @SuppressWarnings("unchecked")
+    public E[] elements(E[] returnVectorType) {
+        return (E[]) Arrays.copyOf(elements, available(), returnVectorType.getClass());
     }
 
     /**
@@ -61,7 +94,9 @@ public class CircularBuffer<E extends Object> {
      */
     @SuppressWarnings("unchecked")
     public E[] get(final E[] into, final int readPos, final int length) {
-        final E[] retVal = into == null ? (E[]) new Object[length] : into;
+        final E[] retVal = into == null || into.length < length
+                ? (E[]) Array.newInstance(elements[0].getClass(), length)
+                : into;
         // N.B. actually there seem to be no numerically more efficient implementation
         // since the order of the indices for 'into' need to be reverse order w.r.t. 'elements'
         for (int i = 0; i < length; i++) {
@@ -77,12 +112,17 @@ public class CircularBuffer<E extends Object> {
      * @return the value
      */
     public E get(final int readPos) {
+        int index = getIndex(readPos);
+        return elements[index];
+    }
+
+    protected int getIndex(final int readPos) {
         // int index = writePos - 1 - readPos;
         int index = flipped ? writePos + readPos : readPos;
         if (!flipped) {
 
             if (index >= 0) {
-                return elements[index];
+                return index;
             }
             // return null;
             throw new IllegalArgumentException("writePos = '" + writePos + "' readPos = '" + readPos + "'/index = '"
@@ -97,7 +137,14 @@ public class CircularBuffer<E extends Object> {
         while (index >= capacity) {
             index -= capacity;
         }
-        return elements[index];
+        return index;
+    }
+
+    /**
+     * @return whether write position exceeded at least once the capacity
+     */
+    public boolean isBufferFlipped() {
+        return flipped;
     }
 
     /**
@@ -154,10 +201,8 @@ public class CircularBuffer<E extends Object> {
         System.arraycopy(newElements, startIndex, elements, writePos, lengthUpperHalf);
         writePos = capacity - 1;
         writePos += lengthUpperHalf;
-        if (writePos >= capacity) {
-            writePos = 0;
-            flipped = true;
-        }
+        writePos = 0;
+        flipped = true;
 
         // writing the remained of the array to the circular buffer
         return put(newElements, startIndex + lengthUpperHalf, length - lengthUpperHalf);
@@ -173,10 +218,37 @@ public class CircularBuffer<E extends Object> {
     }
 
     /**
+     * @param element to replace an existing element at the head buffer position
+     * @return the previous element stored at that location
+     */
+    public E replace(final E element) {
+        return replace(element, 0);
+    }
+
+    /**
+     * @param element to replace an existing element at given buffer position
+     * @param atIndex index at which to replace the value
+     * @return the previous element stored at that location
+     */
+    public E replace(final E element, final int atIndex) {
+        final int internalIndex = getIndex(atIndex);
+        final E oldValue = elements[internalIndex];
+        elements[internalIndex] = element;
+        return oldValue;
+    }
+
+    /**
      * resets buffer
      */
     public void reset() {
         writePos = 0;
         flipped = false;
+    }
+
+    /**
+     * @return internal write position
+     */
+    public int writePosition() {
+        return writePos;
     }
 }
