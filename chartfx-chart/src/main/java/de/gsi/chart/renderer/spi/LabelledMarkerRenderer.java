@@ -4,6 +4,19 @@ import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.List;
 
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
+import javafx.collections.ObservableList;
+import javafx.geometry.Orientation;
+import javafx.scene.canvas.Canvas;
+import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
+import javafx.scene.text.Font;
+import javafx.scene.text.TextAlignment;
+
 import de.gsi.chart.Chart;
 import de.gsi.chart.XYChart;
 import de.gsi.chart.XYChartCss;
@@ -12,17 +25,6 @@ import de.gsi.chart.renderer.Renderer;
 import de.gsi.chart.utils.StyleParser;
 import de.gsi.dataset.DataSet;
 import de.gsi.dataset.utils.ProcessingProfiler;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
-import javafx.collections.ObservableList;
-import javafx.scene.canvas.Canvas;
-import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
-import javafx.scene.text.Font;
-import javafx.scene.text.TextAlignment;
 
 /**
  * Draws horizontal markers with horizontal (default) labels attached at the top.
@@ -62,7 +64,7 @@ public class LabelledMarkerRenderer extends AbstractDataSetManagement<LabelledMa
      */
     protected void drawHorizontalLabelledMarker(final GraphicsContext gc, final XYChart chart, final DataSet dataSet,
             final int indexMin, final int indexMax) {
-        final Axis yAxis = chart.getYAxis();
+        final Axis yAxis = this.getFirstAxis(Orientation.VERTICAL, chart);
 
         gc.save();
         setGraphicsContextAttributes(gc, dataSet.getStyle());
@@ -118,7 +120,7 @@ public class LabelledMarkerRenderer extends AbstractDataSetManagement<LabelledMa
      */
     protected void drawVerticalLabelledMarker(final GraphicsContext gc, final XYChart chart, final DataSet dataSet,
             final int indexMin, final int indexMax) {
-        final Axis xAxis = chart.getXAxis();
+        final Axis xAxis = this.getFirstAxis(Orientation.HORIZONTAL);
 
         gc.save();
         setGraphicsContextAttributes(gc, dataSet.getStyle());
@@ -213,7 +215,10 @@ public class LabelledMarkerRenderer extends AbstractDataSetManagement<LabelledMa
             return;
         }
 
-        final Axis xAxis = xyChart.getXAxis();
+        Axis xAxis = this.getFirstAxis(Orientation.HORIZONTAL);
+        if (xAxis == null) {
+            xAxis = xyChart.getXAxis();
+        }
         final double xAxisWidth = xAxis.getWidth();
         final double xMin = xAxis.getValueForDisplay(0);
         final double xMax = xAxis.getValueForDisplay(xAxisWidth);
@@ -251,7 +256,6 @@ public class LabelledMarkerRenderer extends AbstractDataSetManagement<LabelledMa
     }
 
     protected void setGraphicsContextAttributes(final GraphicsContext gc, final String style) {
-
         final Color strokeColor = StyleParser.getColorPropertyValue(style, XYChartCss.STROKE_COLOR);
         if (strokeColor == null) {
             gc.setStroke(strokeColorMarker);
@@ -287,7 +291,6 @@ public class LabelledMarkerRenderer extends AbstractDataSetManagement<LabelledMa
         } else {
             gc.setLineDashes(dashPattern);
         }
-
     }
 
     public LabelledMarkerRenderer setStyle(final String newStyle) {
