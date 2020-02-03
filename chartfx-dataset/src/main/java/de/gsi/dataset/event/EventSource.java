@@ -133,9 +133,7 @@ public interface EventSource {
     default void removeListener(EventListener listener) {
         synchronized (updateEventListener()) {
             Objects.requireNonNull(listener, "UpdateListener must not be null");
-            if (updateEventListener().contains(listener)) {
-                updateEventListener().remove(listener);
-            }
+            updateEventListener().remove(listener);
         }
     }
 
