@@ -177,7 +177,7 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
                 continue;
             }
             parameterDisplayPane.put(side, side.isVertical() ? new ChartHBox() : new ChartVBox()); // NOPMD - default
-                    // init
+            // init
         }
     }
 
@@ -620,7 +620,8 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
 
         allDataSets.clear();
         allDataSets.addAll(getDatasets());
-        getRenderers().stream().filter(renderer -> !(renderer instanceof LabelledMarkerRenderer)).forEach(renderer -> allDataSets.addAll(renderer.getDatasets()));
+        getRenderers().stream().filter(renderer -> !(renderer instanceof LabelledMarkerRenderer))
+                .forEach(renderer -> allDataSets.addAll(renderer.getDatasets()));
 
         return allDataSets;
     }
