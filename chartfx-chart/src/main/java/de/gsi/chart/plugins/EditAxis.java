@@ -114,7 +114,9 @@ public class EditAxis extends ChartPlugin {
             if (oldChart != null) {
                 removeMouseEventHandlers(oldChart);
             }
-            addMouseEventHandlers(newChart);
+            if (newChart != null) {
+                addMouseEventHandlers(newChart);
+            }
         });
     }
 
