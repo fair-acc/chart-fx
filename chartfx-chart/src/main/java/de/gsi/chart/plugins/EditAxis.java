@@ -639,7 +639,6 @@ public class EditAxis extends ChartPlugin {
                             MyPopOver.this.hide();
                         }
                     }));
-            checkMouseInsidePopUp.setCycleCount(Animation.INDEFINITE);
             checkMouseInsidePopUp.play();
 
             registerMouseEvents();
