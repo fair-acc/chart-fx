@@ -855,17 +855,17 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
     }
 
     public boolean removeFromAllAxesPanes(final Axis node) {
-        boolean state = false;
         if (!(node instanceof Node)) {
-            return state;
+            return false;
         }
+        final Node axisNode = (Node) node;
         // remove axis from all axis panes
         for (final Side side : Side.values()) {
-            if (getAxesPane(side).getChildren().remove(node)) {
-                state = true;
+            if (getAxesPane(side).getChildren().remove(axisNode)) {
+                return true;
             }
         }
-        return state;
+        return false;
     }
 
     @Override
