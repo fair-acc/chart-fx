@@ -289,7 +289,7 @@ public class TableViewer extends ChartPlugin {
                         break;
                     }
                     if (i < columnsUpdated.size()) {
-                        if (i < columns.size()) {
+                        if (i >= columns.size() - 1) {
                             columns.add(new DataSetTableColumns());
                         }
                         DataSet ds = columnsUpdated.get(i);
