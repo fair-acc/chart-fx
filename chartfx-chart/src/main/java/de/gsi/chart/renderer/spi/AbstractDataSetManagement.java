@@ -3,6 +3,13 @@ package de.gsi.chart.renderer.spi;
 import static de.gsi.dataset.DataSet.DIM_X;
 import static de.gsi.dataset.DataSet.DIM_Y;
 
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.geometry.Orientation;
+
+import de.gsi.chart.XYChart;
 import de.gsi.chart.axes.Axis;
 import de.gsi.chart.renderer.Renderer;
 import de.gsi.dataset.DataSet;
@@ -12,11 +19,6 @@ import de.gsi.dataset.spi.DoubleDataSet;
 import de.gsi.dataset.spi.DoubleErrorDataSet;
 import de.gsi.dataset.utils.NoDuplicatesList;
 import de.gsi.dataset.utils.ProcessingProfiler;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import javafx.geometry.Orientation;
 
 /**
  * @author rstein
@@ -81,6 +83,27 @@ public abstract class AbstractDataSetManagement<R extends Renderer> implements R
     }
 
     /**
+     * Returns the first axis for a specific orientation and falls back to the first axis
+     * of the chart if no such axis exists. The chart will automatically return a default
+     * axis in case no axis is present.
+     *
+     * Because this code adds axes automatically, it should not be called during chart setup
+     * but only inside of rendering routines. Otherwise there is risk of duplicate axes if
+     * things are called in the wrong order.
+     *
+     * @param orientation specifies if a horizontal or vertical axis is requested
+     * @param fallback The chart from which to get the axis if no axis is present
+     * @return The requested axis
+     */
+    protected Axis getFirstAxis(final Orientation orientation, final XYChart fallback) {
+        final Axis axis = getFirstAxis(orientation);
+        if (axis == null) {
+            return fallback.getFirstAxis(orientation);
+        }
+        return axis;
+    }
+
+    /**
      * @return the instance of this AbstractDataSetManagement.
      */
     protected abstract R getThis();
@@ -126,7 +149,6 @@ public abstract class AbstractDataSetManagement<R extends Renderer> implements R
         final DoubleDataSet ret = new DoubleDataSet(dataSet.getName(), nLength);
 
         dataSet.lock().writeLockGuard(() -> {
-
             if (dataSet instanceof DoubleDataSet) {
                 final DoubleDataSet doubleDataSet = (DoubleDataSet) dataSet;
                 // known data set implementation, may use faster array copy
@@ -198,5 +220,4 @@ public abstract class AbstractDataSetManagement<R extends Renderer> implements R
 
         return ret;
     }
-
 }
