@@ -17,6 +17,7 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.ObservableList;
+import javafx.geometry.Orientation;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
@@ -55,7 +56,10 @@ public class LabelledMarkerRenderer extends AbstractDataSetManagement<LabelledMa
      */
     protected void drawHorizontalLabelledMarker(final GraphicsContext gc, final XYChart chart, final DataSet dataSet,
             final int indexMin, final int indexMax) {
-        final Axis yAxis = chart.getYAxis();
+        Axis yAxis = this.getFirstAxis(Orientation.VERTICAL);
+        if (yAxis == null) {
+            yAxis = chart.getYAxis();
+        }
 
         gc.save();
         setGraphicsContextAttributes(gc, dataSet.getStyle());
@@ -111,7 +115,10 @@ public class LabelledMarkerRenderer extends AbstractDataSetManagement<LabelledMa
      */
     protected void drawVerticalLabelledMarker(final GraphicsContext gc, final XYChart chart, final DataSet dataSet,
             final int indexMin, final int indexMax) {
-        final Axis xAxis = chart.getXAxis();
+        Axis xAxis = this.getFirstAxis(Orientation.HORIZONTAL);
+        if (xAxis == null) {
+            xAxis = chart.getXAxis();
+        }
 
         gc.save();
         setGraphicsContextAttributes(gc, dataSet.getStyle());
@@ -206,7 +213,10 @@ public class LabelledMarkerRenderer extends AbstractDataSetManagement<LabelledMa
             return;
         }
 
-        final Axis xAxis = xyChart.getXAxis();
+        Axis xAxis = this.getFirstAxis(Orientation.HORIZONTAL);
+        if (xAxis == null) {
+            xAxis = xyChart.getXAxis();
+        }
         final double xAxisWidth = xAxis.getWidth();
         final double xMin = xAxis.getValueForDisplay(0);
         final double xMax = xAxis.getValueForDisplay(xAxisWidth);
