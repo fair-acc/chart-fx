@@ -23,6 +23,7 @@ import javafx.scene.paint.Color;
  * @author rstein
  */
 public class ToolBarFlowPane extends FlowPane {
+    private static final double CORNER_SPACE_PADDING_FACTOR = 1.8;
     private Color defaultColour = Color.web("#f4f4f4", 0.85).deriveColor(0, 1.0, .94, 1.0);
     private Color selectedColour = Color.web("#f4f4f4", 0.85).deriveColor(0, 1.0, .92, 1.0);
     private Insets toolBarPadding = new Insets(1, 12.5, 5, 12.5);
@@ -45,7 +46,7 @@ public class ToolBarFlowPane extends FlowPane {
 
         this.setAlignment(Pos.TOP_CENTER);
         this.setMinWidth(0);
-        this.setPadding(toolBarPadding);
+        setPadding(calculateInsets());
         VBox.setVgrow(this, Priority.ALWAYS);
         HBox.setHgrow(this, Priority.NEVER);
 
@@ -76,6 +77,19 @@ public class ToolBarFlowPane extends FlowPane {
         this.setShape(ToolBarShapeHelper.getToolBarShape(wrapLength, this.getHeight(), cornerRadius.get()));
     }
 
+    /**
+     * Calculate the tool bar insets. It is called on tool bar width or it's contents changes and on corner radius
+     * changes.
+     * 
+     * @return Insets for the tool bar pane
+     */
+    protected Insets calculateInsets() {
+        final double roundCornerSpace = CORNER_SPACE_PADDING_FACTOR * cornerRadius.get();
+        final double sidePaddingRight = Math.max(roundCornerSpace, toolBarPadding.getRight());
+        final double sidePaddingLeft = Math.max(roundCornerSpace, toolBarPadding.getLeft());
+        return new Insets(toolBarPadding.getTop(), sidePaddingRight, toolBarPadding.getBottom(), sidePaddingLeft);
+    }
+
     public DoubleProperty cornerRadiusProperty() {
         return cornerRadius;
     }
@@ -95,7 +109,12 @@ public class ToolBarFlowPane extends FlowPane {
     public void registerListener() {
         this.getChildren().addListener((ListChangeListener.Change<? extends Node> c) -> adjustToolBarWidth());
 
-        this.setOnMouseClicked(mevt -> chart.setToolBarPinned(!chart.isToolBarPinned()));
+        setOnMouseClicked(mevt -> {
+            if (chart.toolBarPinnedProperty().isBound()) {
+                return;
+            }
+            chart.setToolBarPinned(!chart.isToolBarPinned());
+        });
         chart.toolBarPinnedProperty().addListener((obj, valOld, valNew) -> {
             if (valNew) {
                 chart.setPinnedSide(javafx.geometry.Side.TOP);
