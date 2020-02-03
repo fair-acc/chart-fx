@@ -3,6 +3,7 @@ package de.gsi.chart.renderer.spi;
 import static de.gsi.dataset.DataSet.DIM_X;
 import static de.gsi.dataset.DataSet.DIM_Y;
 
+import de.gsi.chart.XYChart;
 import de.gsi.chart.axes.Axis;
 import de.gsi.chart.renderer.Renderer;
 import de.gsi.dataset.DataSet;
@@ -78,6 +79,27 @@ public abstract class AbstractDataSetManagement<R extends Renderer> implements R
             }
         }
         return null;
+    }
+
+    /**
+     * Returns the first axis for a specific orientation and falls back to the first axis
+     * of the chart if no such axis exists. The chart will automatically return a default
+     * axis in case no axis is present.
+     *
+     * Because this code adds axes automatically, it should not be called during chart setup
+     * but only inside of rendering routines. Otherwise there is risk of duplicate axes if
+     * things are called in the wrong order.
+     *
+     * @param orientation specifies if a horizontal or vertical axis is requested
+     * @param fallback The chart from which to get the axis if no axis is present
+     * @return The requested axis
+     */
+    protected Axis getFirstAxis(final Orientation orientation, final XYChart fallback) {
+        final Axis axis = getFirstAxis(orientation);
+        if (axis == null) {
+            return fallback.getFirstAxis(orientation);
+        }
+        return axis;
     }
 
     /**
