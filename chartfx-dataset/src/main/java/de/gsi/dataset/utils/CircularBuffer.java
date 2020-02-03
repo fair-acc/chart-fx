@@ -199,8 +199,6 @@ public class CircularBuffer<E extends Object> {
 
         // length > lengthUpperHalf
         System.arraycopy(newElements, startIndex, elements, writePos, lengthUpperHalf);
-        writePos = capacity - 1;
-        writePos += lengthUpperHalf;
         writePos = 0;
         flipped = true;
 
