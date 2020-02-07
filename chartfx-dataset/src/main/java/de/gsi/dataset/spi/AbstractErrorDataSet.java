@@ -68,40 +68,33 @@ public abstract class AbstractErrorDataSet<D extends AbstractErrorDataSet<D>> ex
      * Computes limits (ranges) of this DataSet including data point errors.
      */
     @Override
-    public D recomputeLimits(final int dimension) {
-        // presently always computes both dimensions
-        if (dimension == 1) {
-            // TODO: find cleaner solution
-            return getThis();
-        }
+    public D recomputeLimits(final int dimIndex) {
         lock().writeLockGuard(() -> {
-            for (int dimIndex = 0; dimIndex < getDimension(); dimIndex++) {
-                // Clear previous ranges
-                getAxisDescription(dimIndex).clear();
-                final int dataCount = getDataCount(dimIndex);
-                switch (getErrorType(dimIndex)) {
-                case NO_ERROR:
-                    super.recomputeLimits(dimIndex);
-                    break;
-                case ASYMMETRIC:
-                    for (int i = 0; i < dataCount; i++) {
-                        final double value = get(dimIndex, i);
-                        final double errorNeg = getErrorNegative(dimIndex, i);
-                        final double errorPos = getErrorPositive(dimIndex, i);
-                        getAxisDescription(dimIndex).add(value - errorNeg);
-                        getAxisDescription(dimIndex).add(value + errorPos);
-                    }
-                    break;
-                case SYMMETRIC:
-                default:
-                    for (int i = 0; i < dataCount; i++) {
-                        final double value = get(dimIndex, i);
-                        final double error = getErrorPositive(dimIndex, i);
-                        getAxisDescription(dimIndex).add(value - error);
-                        getAxisDescription(dimIndex).add(value + error);
-                    }
-                    break;
+            // Clear previous ranges
+            getAxisDescription(dimIndex).clear();
+            final int dataCount = getDataCount(dimIndex);
+            switch (getErrorType(dimIndex)) {
+            case NO_ERROR:
+                super.recomputeLimits(dimIndex);
+                break;
+            case ASYMMETRIC:
+                for (int i = 0; i < dataCount; i++) {
+                    final double value = get(dimIndex, i);
+                    final double errorNeg = getErrorNegative(dimIndex, i);
+                    final double errorPos = getErrorPositive(dimIndex, i);
+                    getAxisDescription(dimIndex).add(value - errorNeg);
+                    getAxisDescription(dimIndex).add(value + errorPos);
                 }
+                break;
+            case SYMMETRIC:
+            default:
+                for (int i = 0; i < dataCount; i++) {
+                    final double value = get(dimIndex, i);
+                    final double error = getErrorPositive(dimIndex, i);
+                    getAxisDescription(dimIndex).add(value - error);
+                    getAxisDescription(dimIndex).add(value + error);
+                }
+                break;
             }
         });
         return getThis();
@@ -119,5 +112,4 @@ public abstract class AbstractErrorDataSet<D extends AbstractErrorDataSet<D>> ex
         this.errorType[dimIndex] = errorType;
         return getThis();
     }
-
 }
