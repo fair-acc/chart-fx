@@ -376,6 +376,8 @@ public final class DataSetMath { // NOPMD - nomen est omen
         final int n = function.getDataCount();
         final DoubleErrorDataSet filteredFunction = new DoubleErrorDataSet(
                 filterType.getTag() + "(" + function.getName() + "," + Double.toString(width) + ")", n);
+        filteredFunction.getAxisDescription(DIM_X).set(function.getAxisDescription(DIM_X));
+        filteredFunction.getAxisDescription(DIM_Y).set(function.getAxisDescription(DIM_Y));
         final double[] subArrayY = new double[n];
         final double[] subArrayYn = new double[n];
         final double[] subArrayYp = new double[n];
@@ -782,6 +784,9 @@ public final class DataSetMath { // NOPMD - nomen est omen
     public static DataSet mathFunction(final DataSet function1, final DataSet function2, final MathOp op) {
         final DoubleErrorDataSet ret = new DoubleErrorDataSet(function1.getName() + op.getTag() + function2.getName(),
                 function1.getDataCount());
+        ret.getAxisDescription(DIM_X).set(function1.getAxisDescription(DIM_X));
+        ret.getAxisDescription(DIM_Y).set(function1.getAxisDescription(DIM_Y).getName(),
+                function1.getAxisDescription(DIM_Y).getUnit());
 
         for (int i = 0; i < function1.getDataCount(); i++) {
             final double X1 = function1.get(DIM_X, i);
