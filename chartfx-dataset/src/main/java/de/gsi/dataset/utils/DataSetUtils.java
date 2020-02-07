@@ -247,43 +247,46 @@ public class DataSetUtils extends DataSetUtilsHelper {
         final Matcher matcher = placeholder.matcher(fileName);
         final StringBuffer result = new StringBuffer();
         while (matcher.find()) {
+            boolean valueValid = true;
             final String[] substitutionparams = matcher.group(1).split(";");
-            if (substitutionparams.length == 0) {
-                throw new IllegalArgumentException("fileName contains empty placeholder: " + matcher.group());
-            }
             String value;
+            if (substitutionparams.length == 0) {
+                value = "";
+                valueValid = false;
+            }
             switch (substitutionparams[0]) {
             case "systemTime":
                 value = Long.toString(System.currentTimeMillis());
                 break;
             case "dataSetName":
-                value = dataSet.getName();
+                value = dataSet == null ? "noDataset" : dataSet.getName();
                 break;
             case "xMin":
-                value = Double.toString(dataSet.getAxisDescription(0).getMin());
+                value = dataSet == null ? "noDataset" : Double.toString(dataSet.getAxisDescription(0).getMin());
                 break;
             case "xMax":
-                value = Double.toString(dataSet.getAxisDescription(0).getMax());
+                value = dataSet == null ? "noDataset" : Double.toString(dataSet.getAxisDescription(0).getMax());
                 break;
             case "yMin":
-                value = Double.toString(dataSet.getAxisDescription(1).getMin());
+                value = dataSet == null ? "noDataset" : Double.toString(dataSet.getAxisDescription(1).getMin());
                 break;
             case "yMax":
-                value = Double.toString(dataSet.getAxisDescription(1).getMax());
+                value = dataSet == null ? "noDataset" : Double.toString(dataSet.getAxisDescription(1).getMax());
                 break;
             default:
                 if (!(dataSet instanceof DataSetMetaData)) {
-                    throw new IllegalArgumentException(
-                            "fileName placeholder references meta data but dataSet is not instanceof DataSetMetaData");
-                }
-                final DataSetMetaData metaDataSet = (DataSetMetaData) dataSet;
-                value = metaDataSet.getMetaInfo().get(substitutionparams[0]);
-                if (value == null) {
-                    throw new IllegalArgumentException(
-                            "fileName placeholder references nonexisting metaData field: " + substitutionparams[0]);
+                    value = "metaDataMissing";
+                    valueValid = false;
+                } else {
+                    final DataSetMetaData metaDataSet = (DataSetMetaData) dataSet;
+                    value = metaDataSet.getMetaInfo().get(substitutionparams[0]);
+                    if (value == null) {
+                        value = "metaDataFieldMissing";
+                        valueValid = false;
+                    }
                 }
             }
-            if ((substitutionparams.length != 1) && !substitutionparams[1].equals("string")) {
+            if (valueValid && (substitutionparams.length != 1) && !substitutionparams[1].equals("string")) {
                 String format;
                 switch (substitutionparams[1]) {
                 case "date":
@@ -400,8 +403,7 @@ public class DataSetUtils extends DataSetUtilsHelper {
             final ZipOutputStream zipOStream = new ZipOutputStream(Files.newOutputStream(file.toPath()));
             final String filename = file.getName();
             final String zipentryname = filename.toLowerCase(Locale.UK).endsWith(".zip")
-                                                ? filename.substring(0, filename.length() - 4)
-                                                : filename;
+                    ? filename.substring(0, filename.length() - 4) : filename;
             zipOStream.putNextEntry(new ZipEntry(zipentryname));
             return zipOStream;
         default:
@@ -426,12 +428,13 @@ public class DataSetUtils extends DataSetUtilsHelper {
         }
         DataSet dataSet = null;
         try (final SplitCharByteInputStream inputFile = new SplitCharByteInputStream(
-                     new PushbackInputStream(new ByteArrayInputStream(byteArray), 8192))) {
+                new PushbackInputStream(new ByteArrayInputStream(byteArray), 8192))) {
             dataSet = readDataSetFromStream(inputFile);
 
         } catch (final IOException e) {
             if (LOGGER.isErrorEnabled()) {
-                LOGGER.atError().setCause(e).addArgument(byteArray.length).log("could not open/parse byte array size = {}");
+                LOGGER.atError().setCause(e).addArgument(byteArray.length)
+                        .log("could not open/parse byte array size = {}");
             }
         }
         return dataSet;
@@ -469,7 +472,7 @@ public class DataSetUtils extends DataSetUtilsHelper {
         try {
             final File file = new File(fileName);
             try (SplitCharByteInputStream inputFile = openDatasetFileInput(file,
-                         compression == Compression.AUTO ? evaluateAutoCompression(fileName) : compression)) {
+                    compression == Compression.AUTO ? evaluateAutoCompression(fileName) : compression)) {
                 dataSet = readDataSetFromStream(inputFile);
 
             } catch (final IOException e) {
@@ -662,7 +665,7 @@ public class DataSetUtils extends DataSetUtilsHelper {
                 boolean isFloat32 = dataentry.type.toLowerCase(Locale.UK).contains("float32");
 
                 final ByteBuffer byteData = isFloat32 ? ByteBuffer.allocate(dataentry.nsamples * Float.BYTES)
-                                                      : ByteBuffer.allocate(dataentry.nsamples * Double.BYTES);
+                        : ByteBuffer.allocate(dataentry.nsamples * Double.BYTES);
                 int alreadyRead = 0;
                 if (isFloat32) {
                     dataentry.data32 = byteData.asFloatBuffer();
@@ -695,7 +698,8 @@ public class DataSetUtils extends DataSetUtilsHelper {
                     break;
                 default:
                     if (LOGGER.isDebugEnabled()) {
-                        LOGGER.atDebug().addArgument(dataentry.name).addArgument(dataentry.type).log("Got unused variable {} of type {}");
+                        LOGGER.atDebug().addArgument(dataentry.name).addArgument(dataentry.type)
+                                .log("Got unused variable {} of type {}");
                     }
                     break;
                 }
@@ -789,7 +793,8 @@ public class DataSetUtils extends DataSetUtilsHelper {
             }
         } catch (final Exception e) {
             if (LOGGER.isErrorEnabled()) {
-                LOGGER.atError().setCause(e).addArgument(result == null ? "null" : result.getName()).log("readNumericDataFrom File could not parse numeric data for: '{}'");
+                LOGGER.atError().setCause(e).addArgument(result == null ? "null" : result.getName())
+                        .log("readNumericDataFrom File could not parse numeric data for: '{}'");
             }
         }
         return result;
@@ -964,7 +969,7 @@ public class DataSetUtils extends DataSetUtilsHelper {
             final ByteArrayOutputStream byteOutput = new ByteArrayOutputStream(8192);
             // TODO: cache ByteArrayOutputStream
             try (OutputStream outputfile = openDatasetFileOutput(file,
-                         compression == Compression.AUTO ? evaluateAutoCompression(fileName) : compression);) {
+                    compression == Compression.AUTO ? evaluateAutoCompression(fileName) : compression);) {
                 writeDataSetToByteArray(dataSet, byteOutput, binary, useFloat32BinaryStandard());
 
                 byteOutput.writeTo(outputfile);
@@ -977,7 +982,8 @@ public class DataSetUtils extends DataSetUtilsHelper {
             }
 
             if (LOGGER.isDebugEnabled()) {
-                LOGGER.atDebug().addArgument(dataSet.getName()).addArgument(longFileName).log("write data set '{}' to {}");
+                LOGGER.atDebug().addArgument(dataSet.getName()).addArgument(longFileName)
+                        .log("write data set '{}' to {}");
             }
 
             return longFileName;
@@ -1017,14 +1023,12 @@ public class DataSetUtils extends DataSetUtilsHelper {
                     // opening the
                     // file with standard text-based viewers
                     buffer.append("#integral : ").append(integralSimple(dataSet)) //
-                            .append("\n#mean : ")
-                            .append(mean(dataSet.getValues(DIM_Y))) //
-                            .append("\n#rms : ")
-                            .append(rootMeanSquare(dataSet.getValues(DIM_Y)))
-                            .append('\n');
+                            .append("\n#mean : ").append(mean(dataSet.getValues(DIM_Y))) //
+                            .append("\n#rms : ").append(rootMeanSquare(dataSet.getValues(DIM_Y))).append('\n');
                 } catch (final Exception e) {
                     if (LOGGER.isErrorEnabled()) {
-                        LOGGER.atError().addArgument(dataSet.getName()).setCause(e).log("writeHeaderDataToFile - compute Math error for dataSet = '{}'");
+                        LOGGER.atError().addArgument(dataSet.getName()).setCause(e)
+                                .log("writeHeaderDataToFile - compute Math error for dataSet = '{}'");
                     }
                 }
             }
@@ -1034,7 +1038,8 @@ public class DataSetUtils extends DataSetUtilsHelper {
             release("headerDataCacheBuilder", buffer);
         } catch (final Exception e) {
             if (LOGGER.isErrorEnabled()) {
-                LOGGER.atError().setCause(e).addArgument(dataSet.getName()).log("writeHeaderDataToFile - error for dataSet = '{}'");
+                LOGGER.atError().setCause(e).addArgument(dataSet.getName())
+                        .log("writeHeaderDataToFile - error for dataSet = '{}'");
             }
         }
     }
