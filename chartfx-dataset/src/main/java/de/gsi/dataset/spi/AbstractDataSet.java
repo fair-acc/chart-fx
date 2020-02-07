@@ -559,23 +559,17 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
     /**
      * Computes limits (ranges) of this DataSet.
      * 
-     * @param dimension the chosen dimension
+     * @param dimIndex the chosen dimension
      * @return itself (fluent design)
      */
     @Override
-    public D recomputeLimits(final int dimension) {
+    public D recomputeLimits(final int dimIndex) {
         lock().writeLockGuard(() -> {
             // Clear previous ranges
-            getAxisDescription(dimension).clear();
-            final int dataCount = getDataCount(dimension);
-            if (dimension == 0) {
-                for (int i = 0; i < dataCount; i++) {
-                    getAxisDescription(dimension).add(get(DIM_X, i));
-                }
-            } else {
-                for (int i = 0; i < dataCount; i++) {
-                    getAxisDescription(dimension).add(get(dimension, i));
-                }
+            getAxisDescription(dimIndex).clear();
+            final int dataCount = getDataCount(dimIndex);
+            for (int i = 0; i < dataCount; i++) {
+                getAxisDescription(dimIndex).add(get(dimIndex, i));
             }
         });
         return getThis();
