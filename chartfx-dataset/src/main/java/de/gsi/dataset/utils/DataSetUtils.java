@@ -247,43 +247,45 @@ public class DataSetUtils extends DataSetUtilsHelper {
         final Matcher matcher = placeholder.matcher(fileName);
         final StringBuffer result = new StringBuffer();
         while (matcher.find()) {
+            boolean valueValid = true;
             final String[] substitutionparams = matcher.group(1).split(";");
-            if (substitutionparams.length == 0) {
-                throw new IllegalArgumentException("fileName contains empty placeholder: " + matcher.group());
-            }
             String value;
+            if (substitutionparams.length == 0) {
+                valueValid = false;
+            }
             switch (substitutionparams[0]) {
             case "systemTime":
                 value = Long.toString(System.currentTimeMillis());
                 break;
             case "dataSetName":
-                value = dataSet.getName();
+                value = dataSet == null ? "noDataset" : dataSet.getName();
                 break;
             case "xMin":
-                value = Double.toString(dataSet.getAxisDescription(0).getMin());
+                value = dataSet == null ? "noDataset" : Double.toString(dataSet.getAxisDescription(0).getMin());
                 break;
             case "xMax":
-                value = Double.toString(dataSet.getAxisDescription(0).getMax());
+                value = dataSet == null ? "noDataset" : Double.toString(dataSet.getAxisDescription(0).getMax());
                 break;
             case "yMin":
-                value = Double.toString(dataSet.getAxisDescription(1).getMin());
+                value = dataSet == null ? "noDataset" : Double.toString(dataSet.getAxisDescription(1).getMin());
                 break;
             case "yMax":
-                value = Double.toString(dataSet.getAxisDescription(1).getMax());
+                value = dataSet == null ? "noDataset" : Double.toString(dataSet.getAxisDescription(1).getMax());
                 break;
             default:
                 if (!(dataSet instanceof DataSetMetaData)) {
-                    throw new IllegalArgumentException(
-                            "fileName placeholder references meta data but dataSet is not instanceof DataSetMetaData");
-                }
-                final DataSetMetaData metaDataSet = (DataSetMetaData) dataSet;
-                value = metaDataSet.getMetaInfo().get(substitutionparams[0]);
-                if (value == null) {
-                    throw new IllegalArgumentException(
-                            "fileName placeholder references nonexisting metaData field: " + substitutionparams[0]);
+                    value = "metaDataMissing";
+                    valueValid = false;
+                } else {
+                    final DataSetMetaData metaDataSet = (DataSetMetaData) dataSet;
+                    value = metaDataSet.getMetaInfo().get(substitutionparams[0]);
+                    if (value == null) {
+                        value = "metaDataFieldMissing";
+                        valueValid = false;
+                    }
                 }
             }
-            if ((substitutionparams.length != 1) && !substitutionparams[1].equals("string")) {
+            if (valueValid && (substitutionparams.length != 1) && !substitutionparams[1].equals("string")) {
                 String format;
                 switch (substitutionparams[1]) {
                 case "date":
