@@ -26,7 +26,7 @@ import javafx.scene.layout.VBox;
 
 /**
  * example illustrating wavelet-based scalograms
- * 
+ *
  * @author rstein
  */
 public class WaveletScalogram extends AbstractDemoApplication {
@@ -95,7 +95,9 @@ public class WaveletScalogram extends AbstractDemoApplication {
                 val += fdataset.getZ(j, i);
                 count++;
             }
-            magWavelet[i] = val / count;
+            if (count > 0) {
+                magWavelet[i] = val / count;
+            }
         }
 
         final double[] magFourier = SpectrumTools.computeMagnitudeSpectrum_dB(fftSpectra, true);
