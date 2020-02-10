@@ -37,7 +37,7 @@ public class DataSetBuilder {
 
     /**
      * default DataSet factory
-     * 
+     *
      * @param dataSetName data set name
      */
     public DataSetBuilder(final String dataSetName) {
@@ -136,6 +136,9 @@ public class DataSetBuilder {
 
     protected DefaultErrorDataSet buildWithYErrors(final String dsName, final int size) {
         // at least one error array has been provided
+        if (xErrorsNeg == null && yErrorsNeg == null) {
+            throw new IllegalStateException("xErrorsNeg and yErrorsNeg cannot both be null");
+        }
         final double[] dsYep = yErrorsPos == null ? yErrorsNeg : yErrorsPos;
         final double[] dsYen = yErrorsNeg == null ? yErrorsPos : yErrorsNeg;
         AssertUtils.equalDoubleArrays(xValues, dsYep, size);
