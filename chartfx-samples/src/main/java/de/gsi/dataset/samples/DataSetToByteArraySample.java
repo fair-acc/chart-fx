@@ -82,7 +82,7 @@ public class DataSetToByteArraySample {
         for (int n = 0; n < N_SAMPLES; n++) {
             final double x = n;
             oldY += RandomDataGenerator.random() - 0.5;
-            final double y = oldY + (n == 500000 ? 500.0 : 0);
+            final double y = oldY;
             final double eyNeg = 0.1;
             final double eyPos = 10;
             dataSet.set(n, x, y, eyNeg, eyPos);
