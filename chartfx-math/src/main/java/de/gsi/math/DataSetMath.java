@@ -64,7 +64,8 @@ public final class DataSetMath { // NOPMD - nomen est omen
 
     public static DataSet averageDataSetsFIR(final List<DataSet> dataSets, final int nUpdates) {
         if (dataSets == null || dataSets.isEmpty()) {
-            return null;
+            final String name = dataSets == null ? "null" : "<empty>";
+            return new DoubleErrorDataSet("LP(" + name + ", FIR)");
         }
         final String functionName = "LP(" + dataSets.get(0).getName() + ", FIR)";
         if (dataSets.size() <= 1) {
