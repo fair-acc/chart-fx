@@ -36,19 +36,13 @@ public class DataSetToByteArraySample {
         LOGGER.atInfo().log(DataSetToByteArraySample.class.getSimpleName() + " - generated data");
 
         DataSetUtils.writeDataSetToByteArray(original, byteOutput, false, false);
-        LOGGER.atInfo().addArgument(encodingBits(false)).addArgument(encodingBinary(false))
-                .addArgument(humanReadableByteCount(byteOutput.size(), true))
-                .log("byte buffer array length with {} {} encoding = {}");
+        LOGGER.atInfo().addArgument(encodingBits(false)).addArgument(encodingBinary(false)).addArgument(humanReadableByteCount(byteOutput.size(), true)).log("byte buffer array length with {} {} encoding = {}");
 
         DataSetUtils.writeDataSetToByteArray(original, byteOutput, true, true);
-        LOGGER.atInfo().addArgument(encodingBits(true)).addArgument(encodingBinary(true))
-                .addArgument(humanReadableByteCount(byteOutput.size(), true))
-                .log("byte buffer array length with {} {} encoding =  = {}");
+        LOGGER.atInfo().addArgument(encodingBits(true)).addArgument(encodingBinary(true)).addArgument(humanReadableByteCount(byteOutput.size(), true)).log("byte buffer array length with {} {} encoding =  = {}");
 
         DataSetUtils.writeDataSetToByteArray(original, byteOutput, true, false);
-        LOGGER.atInfo().addArgument(encodingBits(false)).addArgument(encodingBinary(true))
-                .addArgument(humanReadableByteCount(byteOutput.size(), true))
-                .log("byte buffer array length with {} {} encoding =  = {}");
+        LOGGER.atInfo().addArgument(encodingBits(false)).addArgument(encodingBinary(true)).addArgument(humanReadableByteCount(byteOutput.size(), true)).log("byte buffer array length with {} {} encoding =  = {}");
 
         byteBuffer.ensureCapacity(byteOutput.size() + 1000l);
     }
@@ -117,9 +111,7 @@ public class DataSetToByteArraySample {
         testIdentityLabelsAndStyles(true, asFloat32, original, dataSet);
         testIdentityMetaData(true, asFloat32, original, (DataSetMetaData) dataSet);
 
-        LOGGER.atInfo().addArgument(encodingBits(asFloat32)).addArgument(encodingBinary(true))
-                .addArgument(withMetaData ? "with" : "w/o")
-                .log("testDataSetSerialiserIdentity passed for {} {} encoding {} meta-data");
+        LOGGER.atInfo().addArgument(encodingBits(asFloat32)).addArgument(encodingBinary(true)).addArgument(withMetaData ? "with" : "w/o").log("testDataSetSerialiserIdentity passed for {} {} encoding {} meta-data");
     }
 
     public void testDataSetUtilsIdentity(final boolean binary, final boolean asFloat32) {
@@ -139,8 +131,7 @@ public class DataSetToByteArraySample {
             testIdentityMetaData(binary, asFloat32, original, (DataSetMetaData) dataSet);
         }
 
-        LOGGER.atInfo().addArgument(encodingBits(asFloat32)).addArgument(encodingBinary(binary))
-                .log("testDataSetUtilsIdentity passed for {} {} encoding with partial meta-data");
+        LOGGER.atInfo().addArgument(encodingBits(asFloat32)).addArgument(encodingBinary(binary)).log("testDataSetUtilsIdentity passed for {} {} encoding with partial meta-data");
     }
 
     public void testGenericSerialiserIdentity(final boolean asFloat32) {
@@ -172,13 +163,11 @@ public class DataSetToByteArraySample {
             testIdentityMetaData(true, asFloat32, original, (DataSetMetaData) cpOrig.source);
         }
 
-        LOGGER.atInfo().addArgument(encodingBits(asFloat32)).addArgument(encodingBinary(true))
-                .log("testGenericSerialiserIdentity passed for {} {} encoding with partial meta-data");
+        LOGGER.atInfo().addArgument(encodingBits(asFloat32)).addArgument(encodingBinary(true)).log("testGenericSerialiserIdentity passed for {} {} encoding with partial meta-data");
     }
 
     public void testGenericSerializerPerformance(final int iterations, final boolean withMetaInfos,
             final boolean asFloat32) {
-
         IoBufferSerialiser serialiser = new IoBufferSerialiser(byteBuffer);
         byteBuffer.reset(); // reset to read position (==0)
         final DoubleErrorDataSet copy = new DoubleErrorDataSet("init", N_SAMPLES);
@@ -219,9 +208,7 @@ public class DataSetToByteArraySample {
 
         final double diffMillis = TimeUnit.NANOSECONDS.toMillis(stopTime - startTime);
         final double byteCount = iterations * ((byteBuffer.position() / diffMillis) * 1e3);
-        LOGGER.atInfo().addArgument(encodingBits(asFloat32)).addArgument(encodingBinary(true))
-                .addArgument(withMetaInfos ? "with" : "w/o").addArgument(humanReadableByteCount((long) byteCount, true))
-                .log("average {} {} IoBufferSerialiser throughput {} meta infos = {}/s");
+        LOGGER.atInfo().addArgument(encodingBits(asFloat32)).addArgument(encodingBinary(true)).addArgument(withMetaInfos ? "with" : "w/o").addArgument(humanReadableByteCount((long) byteCount, true)).log("average {} {} IoBufferSerialiser throughput {} meta infos = {}/s");
     }
 
     public void testIdentityCore(final boolean binary, final boolean asFloat32, final DataSetError originalDS,
@@ -229,12 +216,12 @@ public class DataSetToByteArraySample {
         // some checks
         if (originalDS.getDataCount() != testDS.getDataCount()) {
             throw new IllegalStateException("data set counts do not match (" + encodingBinary(binary) + "): original = "
-                    + originalDS.getDataCount() + " vs. copy = " + testDS.getDataCount());
+                                            + originalDS.getDataCount() + " vs. copy = " + testDS.getDataCount());
         }
 
         if (!originalDS.getName().equals(testDS.getName())) {
             throw new IllegalStateException("data set name do not match (" + encodingBinary(binary) + "): original = "
-                    + originalDS.getName() + " vs. copy = " + testDS.getName());
+                                            + originalDS.getName() + " vs. copy = " + testDS.getName());
         }
 
         // check for numeric value
@@ -337,9 +324,7 @@ public class DataSetToByteArraySample {
 
         final double diffMillis = TimeUnit.NANOSECONDS.toMillis(stopTime - startTime);
         final double byteCount = iterations * ((byteOutput.size() / diffMillis) * 1e3);
-        LOGGER.atInfo().addArgument(encodingBits(asFloat32)).addArgument(encodingBinary(binary))
-                .addArgument(withMetaInfos ? "with" : "w/o").addArgument(humanReadableByteCount((long) byteCount, true))
-                .log("average {} {} DataSetUtils throughput {} meta infos = {}/s");
+        LOGGER.atInfo().addArgument(encodingBits(asFloat32)).addArgument(encodingBinary(binary)).addArgument(withMetaInfos ? "with" : "w/o").addArgument(humanReadableByteCount((long) byteCount, true)).log("average {} {} DataSetUtils throughput {} meta infos = {}/s");
     }
 
     public void testSerializerPerformance(final int iterations, final boolean withMetaInfos, final boolean asFloat32) {
@@ -365,9 +350,7 @@ public class DataSetToByteArraySample {
 
         final double diffMillis = TimeUnit.NANOSECONDS.toMillis(stopTime - startTime);
         final double byteCount = iterations * ((byteBuffer.position() / diffMillis) * 1e3);
-        LOGGER.atInfo().addArgument(encodingBits(asFloat32)).addArgument(encodingBinary(true))
-                .addArgument(withMetaInfos ? "with" : "w/o").addArgument(humanReadableByteCount((long) byteCount, true))
-                .log("average {} {} DataSetSerialiser throughput {} meta infos = {}/s");
+        LOGGER.atInfo().addArgument(encodingBits(asFloat32)).addArgument(encodingBinary(true)).addArgument(withMetaInfos ? "with" : "w/o").addArgument(humanReadableByteCount((long) byteCount, true)).log("average {} {} DataSetSerialiser throughput {} meta infos = {}/s");
     }
 
     public static String humanReadableByteCount(final long bytes, final boolean si) {
@@ -382,7 +365,6 @@ public class DataSetToByteArraySample {
     }
 
     public static void main(final String[] args) {
-
         // for extra timing diagnostics
         ProcessingProfiler.setVerboseOutputState(false);
         ProcessingProfiler.setLoggerOutputState(true);
@@ -450,5 +432,4 @@ public class DataSetToByteArraySample {
     public class DataSetWrapper {
         public DataSet source;
     }
-
 }

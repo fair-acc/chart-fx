@@ -5,6 +5,10 @@ import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.Random;
 
+import javafx.application.Application;
+import javafx.scene.Node;
+import javafx.scene.layout.VBox;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,9 +21,6 @@ import de.gsi.math.samples.utils.AbstractDemoApplication;
 import de.gsi.math.samples.utils.DemoChart;
 import de.gsi.math.spectra.wavelet.CDFWavelet;
 import de.gsi.math.spectra.wavelet.FastWaveletTransform;
-import javafx.application.Application;
-import javafx.scene.Node;
-import javafx.scene.layout.VBox;
 
 /**
  * example illustrating a wavelet denoising algorithm
@@ -197,8 +198,7 @@ public class WaveletDenoising extends AbstractDemoApplication {
     private double[][] readDemoData() {
         final String fileName = "./BBQSpectra.dat";
         try (BufferedReader reader = new BufferedReader(
-                new InputStreamReader(WaveletScalogram.class.getResourceAsStream(fileName)))) {
-
+                     new InputStreamReader(WaveletScalogram.class.getResourceAsStream(fileName)))) {
             String line = reader.readLine();
             final int nDim = line == null ? 0 : Integer.parseInt(line);
             double[][] ret = new double[2][nDim];

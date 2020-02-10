@@ -620,8 +620,7 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
 
         allDataSets.clear();
         allDataSets.addAll(getDatasets());
-        getRenderers().stream().filter(renderer -> !(renderer instanceof LabelledMarkerRenderer))
-                .forEach(renderer -> allDataSets.addAll(renderer.getDatasets()));
+        getRenderers().stream().filter(renderer -> !(renderer instanceof LabelledMarkerRenderer)).forEach(renderer -> allDataSets.addAll(renderer.getDatasets()));
 
         return allDataSets;
     }

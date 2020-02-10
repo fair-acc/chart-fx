@@ -27,9 +27,9 @@ public class SingularValueDecomposition {
     private MatrixD feigenVectorsU; // the eigenvector matrix U (m x n)
     private MatrixD feigenVectorsV; // the eigenvector matrix V (n x n)
     private MatrixD fEigenValues; // the diagonal eigenvalue matrix of input
-                                  // matrix (n x n)
+            // matrix (n x n)
     private MatrixD fInverseEigenValues; // pseuodo-inverse diagonal eigenvalue
-                                         // matrix of input matrix (n x n)
+            // matrix of input matrix (n x n)
 
     private double fCut;
 
@@ -306,7 +306,7 @@ public class SingularValueDecomposition {
         }
 
         final MatrixD lambdaMinus1 = new MatrixD(n, n); // inverse eigenvector
-                                                        // matrix w.r.t. R
+                // matrix w.r.t. R
 
         final double eigenValueMax = fEigenValues.get(0, 0);
         for (int i = 0; i < n; i++) {
@@ -486,7 +486,6 @@ public class SingularValueDecomposition {
      * @param eigenVectorMatrixV vector containing the diagonal matrix elements of eigen vector matrix
      */
     private static void sortEigenValues(final double[] eigenValues, final double[] eigenVectorMatrixV) {
-
         // Given the eigenvalues d[1..n] and eigenvectors v[1..n][1..n]
         // this routine sorts (straight insertion) the eigenvalues into
         // descending order, and rearranges
@@ -829,7 +828,6 @@ public class SingularValueDecomposition {
                 eigenValues[k] = x;
             }
         }
-
     }
 
     /**
@@ -877,8 +875,7 @@ public class SingularValueDecomposition {
                 }
                 if (Math.abs(testMatrix.get(i, j)) > threshold) {
                     if (LOGGER.isDebugEnabled()) {
-                        LOGGER.atWarn().addArgument(i).addArgument(j).addArgument(testMatrix.get(i, j))
-                                .log("TestInvert() - found that element ({},{}) differs {} from zero!");
+                        LOGGER.atWarn().addArgument(i).addArgument(j).addArgument(testMatrix.get(i, j)).log("TestInvert() - found that element ({},{}) differs {} from zero!");
                     }
                     return false;
                 }
@@ -965,10 +962,7 @@ public class SingularValueDecomposition {
         if (eigenvalues1 != null && eigenvalues2 != null) {
             for (int i = 0; i < eigenvalues1.getRowDimension(); i++) {
                 if (LOGGER.isInfoEnabled()) {
-                    LOGGER.atInfo().addArgument(i).addArgument(eigenvalues1.get(i, i))
-                            .addArgument(eigenvalues2.get(i, i))
-                            .addArgument(eigenvalues1.get(i, i) - eigenvalues2.get(i, i))
-                            .log("eigenvalue({}) = {} vs {}   diff = {}");
+                    LOGGER.atInfo().addArgument(i).addArgument(eigenvalues1.get(i, i)).addArgument(eigenvalues2.get(i, i)).addArgument(eigenvalues1.get(i, i) - eigenvalues2.get(i, i)).log("eigenvalue({}) = {} vs {}   diff = {}");
                 }
             }
         } else if (eigenvalues1 != null) {
@@ -1042,5 +1036,4 @@ public class SingularValueDecomposition {
             }
         }
     }
-
 }

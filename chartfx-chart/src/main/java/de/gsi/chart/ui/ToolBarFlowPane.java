@@ -1,6 +1,5 @@
 package de.gsi.chart.ui;
 
-import de.gsi.chart.Chart;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.value.ChangeListener;
@@ -16,6 +15,8 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+
+import de.gsi.chart.Chart;
 
 /**
  * tool bar for plugins to add their controls (if necessary)
