@@ -115,7 +115,7 @@ public class LogarithmicAxis extends AbstractAxis {
     /**
      * Computes the preferred tick unit based on the upper/lower bounds and the length of the axis in screen
      * coordinates.
-     * 
+     *
      * @param axisLength the length in screen coordinates
      * @return the tick unit
      */
@@ -416,7 +416,7 @@ public class LogarithmicAxis extends AbstractAxis {
 
             @Override
             public boolean isSettable(final LogarithmicAxis axis) {
-                return axis.tickUnit == null || !axis.tickUnit.isBound();
+                return axis != null && !axis.tickUnit.isBound();
             }
         };
 

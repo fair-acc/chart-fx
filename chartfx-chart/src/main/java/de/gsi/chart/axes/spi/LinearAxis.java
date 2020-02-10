@@ -111,7 +111,7 @@ public class LinearAxis extends AbstractAxis {
     /**
      * Computes the preferred tick unit based on the upper/lower bounds and the length of the axis in screen
      * coordinates.
-     * 
+     *
      * @param axisLength the length in screen coordinates
      * @return the tick unit
      */
@@ -524,7 +524,7 @@ public class LinearAxis extends AbstractAxis {
 
     /**
      * If padding pushed the bound above or below zero - stick it to zero.
-     * 
+     *
      * @param paddedBound padded bounds
      * @param bound computed raw bounds
      * @return clamped bounds
@@ -559,7 +559,7 @@ public class LinearAxis extends AbstractAxis {
 
             @Override
             public boolean isSettable(final LinearAxis axis) {
-                return axis.tickUnit == null || !axis.tickUnit.isBound();
+                return axis != null && !axis.tickUnit.isBound();
             }
         };
 
