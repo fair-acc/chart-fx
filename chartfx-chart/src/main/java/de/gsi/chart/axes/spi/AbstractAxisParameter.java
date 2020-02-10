@@ -1612,7 +1612,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
 
             @Override
             public boolean isSettable(final AbstractAxisParameter n) {
-                return (n != null) & !n.tickMarkVisible.isBound();
+                return (n != null) && !n.tickMarkVisible.isBound();
             }
         };
 
