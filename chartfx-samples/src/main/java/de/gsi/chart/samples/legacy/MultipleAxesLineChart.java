@@ -210,8 +210,13 @@ public class MultipleAxesLineChart extends StackPane {
     private void styleBackgroundChart(final LineChart<?, ?> lineChart, final Color lineColor) {
         styleChartLine(lineChart, lineColor);
 
-        final Node contentBackground = lineChart.lookup(".chart-content").lookup(".chart-plot-background");
-        contentBackground.setStyle("-fx-background-color: transparent;");
+        final Node chartContent = lineChart.lookup(".chart-content");
+        if (chartContent != null) {
+            final Node chartPlotBackground = chartContent.lookup(".chart-plot-background");
+            if (chartPlotBackground != null) {
+                chartPlotBackground.setStyle("-fx-background-color: transparent;");
+            }
+        }
 
         lineChart.setVerticalZeroLineVisible(false);
         lineChart.setHorizontalZeroLineVisible(false);
