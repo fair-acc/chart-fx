@@ -145,6 +145,7 @@ public class ContourChartSample extends Application {
             // final BufferedReader reader = new BufferedReader(new
             // InputStreamReader(
             // ContourChartSampleReference.class.getResourceAsStream("./testdata/image.txt")));
+            @SuppressWarnings("unused")
             String skipLine;
             if ((skipLine = reader.readLine()) == null) {
                 throw new IllegalStateException("expected non-null line");

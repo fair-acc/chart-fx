@@ -90,6 +90,7 @@ public class MountainRangeRendererSample extends Application {
                 new InputStreamReader(ContourChartSample.class.getResourceAsStream("./testdata/image.txt")))) {
             // final BufferedReader reader = new BufferedReader(new InputStreamReader(
             // ContourChartSampleReference.class.getResourceAsStream("./testdata/image.txt")));
+            @SuppressWarnings("unused")
             String skipLine;
             if ((skipLine = reader.readLine()) == null) {
                 throw new IllegalStateException("expected non-null line");
