@@ -21,7 +21,7 @@ import de.gsi.dataset.spi.DimReductionDataSet.Option;
 
 /**
  * Tests for minimal DataSet equality and hashCode implementation
- * 
+ *
  * @author rstein
  */
 public class DataSetEqualityTests {
@@ -68,6 +68,10 @@ public class DataSetEqualityTests {
                 new DimReductionDataSet(
                         new DoubleDataSet3D("test", new double[] { 1, 2, 3 }, new double[] { 6, 7, 8 }, new double[][] { new double[] { 1, 2, 3 }, new double[] { 6, 5, 4 }, new double[] { 9, 8, 7 } }),
                         DIM_X, Option.SLICE));
+
+        assertEquals(new ListDataSet("default"), new ListDataSet("default"));
+        assertEquals(new ListErrorDataSet("default"), new ListErrorDataSet("default"));
+        assertEquals(new LimitedIndexedTreeDataSet("default", 100), new LimitedIndexedTreeDataSet("default", 100));
     }
 
     /**
@@ -220,7 +224,7 @@ public class DataSetEqualityTests {
 
     /**
      * just for testing... N.B. equals test for existing and object equality
-     * 
+     *
      * @author rstein
      */
     private class NullEditConstraints implements EditConstraints {
