@@ -592,7 +592,7 @@ public class DataViewWindow extends BorderPane implements EventSource {
         if (isMinimised() || getParentView() == null || getParentView().getMinimisedChildren().contains(this)) {
             return;
         }
-        if (mouseFilter != null && !mouseFilter.test(mevt)) {
+        if (!mouseFilter.test(mevt)) {
             return;
         }
         uninstallCursor();
@@ -619,7 +619,7 @@ public class DataViewWindow extends BorderPane implements EventSource {
     }
 
     private void dragOngoing(final MouseEvent mevt) {
-        if (mouseFilter != null && !mouseFilter.test(mevt)) {
+        if (!mouseFilter.test(mevt)) {
             return;
         }
         // launch dragging dialogue
@@ -628,7 +628,7 @@ public class DataViewWindow extends BorderPane implements EventSource {
     }
 
     private void dragStart(final MouseEvent mevt) {
-        if (mouseFilter != null && !mouseFilter.test(mevt)) {
+        if (!mouseFilter.test(mevt)) {
             return;
         }
         installCursor();
