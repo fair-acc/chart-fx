@@ -5,6 +5,10 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.zip.ZipInputStream;
 
+import javafx.application.Application;
+import javafx.scene.Node;
+import javafx.scene.layout.VBox;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,9 +18,6 @@ import de.gsi.math.DataSetMath;
 import de.gsi.math.filter.iir.Butterworth;
 import de.gsi.math.samples.utils.AbstractDemoApplication;
 import de.gsi.math.samples.utils.DemoChart;
-import javafx.application.Application;
-import javafx.scene.Node;
-import javafx.scene.layout.VBox;
 
 /**
  * Reads schottky measurement data and downmixes it with the following algorithm: * apply band-pass arround the relevant

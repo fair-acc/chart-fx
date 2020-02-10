@@ -5,6 +5,10 @@ import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.Random;
 
+import javafx.application.Application;
+import javafx.scene.Node;
+import javafx.scene.layout.VBox;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,9 +24,6 @@ import de.gsi.math.samples.utils.DemoChart;
 import de.gsi.math.spectra.SpectrumTools;
 import de.gsi.math.spectra.fft.DoubleFFT_1D;
 import de.gsi.math.spectra.wavelet.ContinuousWavelet;
-import javafx.application.Application;
-import javafx.scene.Node;
-import javafx.scene.layout.VBox;
 
 /**
  * example illustrating wavelet-based scalograms
@@ -63,7 +64,6 @@ public class WaveletScalogram extends AbstractDemoApplication {
         final ContinuousWavelet wtrafo = new ContinuousWavelet();
 
         new Thread() {
-
             @Override
             public void run() {
                 fdataset = wtrafo.getScalogram(yValues, nQuantx, nQuanty, nu, fmin, fmax);
@@ -122,7 +122,6 @@ public class WaveletScalogram extends AbstractDemoApplication {
 
     @Override
     public Node getContent() {
-
         final DemoChart chart1 = new DemoChart();
         chart1.getXAxis().setName("time");
         chart1.getXAxis().setUnit("turns");
@@ -185,8 +184,7 @@ public class WaveletScalogram extends AbstractDemoApplication {
         final String fileName = index <= 1 ? "./rawDataCPS2.dat" : "./rawDataLHCInj.dat";
         try {
             try (BufferedReader reader = new BufferedReader(
-                    new InputStreamReader(EMDSample.class.getResourceAsStream(fileName)))) {
-
+                         new InputStreamReader(EMDSample.class.getResourceAsStream(fileName)))) {
                 String line = reader.readLine();
                 final int nDim = line == null ? 0 : Integer.parseInt(line);
                 double[] ret = new double[nDim];
@@ -225,5 +223,4 @@ public class WaveletScalogram extends AbstractDemoApplication {
     public static void main(final String[] args) {
         Application.launch(args);
     }
-
 }

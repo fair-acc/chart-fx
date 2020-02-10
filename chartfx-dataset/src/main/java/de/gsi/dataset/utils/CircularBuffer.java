@@ -95,8 +95,8 @@ public class CircularBuffer<E extends Object> {
     @SuppressWarnings("unchecked")
     public E[] get(final E[] into, final int readPos, final int length) {
         final E[] retVal = into == null || into.length < length
-                ? (E[]) Array.newInstance(elements[0].getClass(), length)
-                : into;
+                                   ? (E[]) Array.newInstance(elements[0].getClass(), length)
+                                   : into;
         // N.B. actually there seem to be no numerically more efficient implementation
         // since the order of the indices for 'into' need to be reverse order w.r.t. 'elements'
         for (int i = 0; i < length; i++) {
@@ -120,13 +120,12 @@ public class CircularBuffer<E extends Object> {
         // int index = writePos - 1 - readPos;
         int index = flipped ? writePos + readPos : readPos;
         if (!flipped) {
-
             if (index >= 0) {
                 return index;
             }
             // return null;
             throw new IllegalArgumentException("writePos = '" + writePos + "' readPos = '" + readPos + "'/index = '"
-                    + index + "' is beyond circular buffer capacity limits = [0," + capacity + "]");
+                                               + index + "' is beyond circular buffer capacity limits = [0," + capacity + "]");
             // TODO: check whether it's better design to throw an exception for reading beyond the limits of
             // a semi-filled buffer rather than returning a 'NaN'
         }
@@ -204,7 +203,6 @@ public class CircularBuffer<E extends Object> {
 
         // writing the remained of the array to the circular buffer
         return put(newElements, startIndex + lengthUpperHalf, length - lengthUpperHalf);
-
     }
 
     /**
