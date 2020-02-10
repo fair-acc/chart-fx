@@ -130,7 +130,8 @@ public class MidiWaveformSynthesizer {
         final Track track = mergeShortMessageEvent(sequence.getTracks());
         final float length = 1e-6f * sequence.getMicrosecondLength();
         final float ts = 1.0f / samplingRate;
-        final float tickLength = track.ticks() <= 0 ? 0 : length / track.ticks();
+        final long trackTicks = track.ticks();
+        final float tickLength = trackTicks <= 0 ? 0 : length / trackTicks;
         final int frameCount = data.length / frameSize;
         final float scale = 2 << Math.max(1, nBits + 1);
 
