@@ -23,7 +23,7 @@ import javafx.scene.layout.VBox;
 
 /**
  * example illustrating a wavelet denoising algorithm
- * 
+ *
  * @author rstein
  */
 public class WaveletDenoising extends AbstractDemoApplication {
@@ -163,9 +163,7 @@ public class WaveletDenoising extends AbstractDemoApplication {
         //
         // }
 
-        for (int i = 0; i < 0; i++) {
-            recon[i] = 0.0;
-        }
+        Arrays.fill(recon, 0.0);
 
         fspectraModel = new DefaultDataSet("model", xValues, ySModel, xValues.length, true);
         fspectra = new DefaultDataSet("raw data", xValues, ySmooth, xValues.length, true);
@@ -179,8 +177,10 @@ public class WaveletDenoising extends AbstractDemoApplication {
             wvTrafo3.invTransform(recon);
         }
 
-        final double error1 = TMath.RMS(TMath.Difference(yValues, yModel));
-        final double error2 = TMath.RMS(TMath.Difference(recon, yModel));
+        final double[] diff1 = TMath.Difference(yValues, yModel);
+        final double error1 = diff1 == null ? 0.0 : TMath.RMS(diff1);
+        final double[] diff2 = TMath.Difference(recon, yModel);
+        final double error2 = diff2 == null ? 0.0 : TMath.RMS(diff2);
         if (error1 > error2) {
             LOGGER.atInfo().log("improved noise floor from %f \t-> %f \t(%f %%)\n", error1, error2,
                     (error1 - error2) / error1 * 100);
