@@ -15,7 +15,7 @@ import com.sun.javafx.scene.NodeHelper;
 /**
  * Basic implementation of a fractal Koch snowflake.
  * For details see: https://en.wikipedia.org/wiki/Koch_snowflake
- * 
+ *
  * @author rstein
  */
 public class SnowFlake extends Path {
@@ -127,13 +127,13 @@ public class SnowFlake extends Path {
     }
 
     public final void setCenterX(double value) {
-        if (centerX != null || value != 0.0) {
+        if (value != 0.0) {
             centerXProperty().set(value);
         }
     }
 
     public final void setCenterY(double value) {
-        if (centerY != null || value != 0.0) {
+        if (value != 0.0) {
             centerYProperty().set(value);
         }
     }
