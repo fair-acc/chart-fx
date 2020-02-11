@@ -37,7 +37,6 @@ public class ReproduceTableViewerBug extends Application {
     private static final int UPDATE_PERIOD = 100; // [ms]
     private int nSamples = 400;
     private Timer timer;
-    private TableViewer tableViewer;
 
     private void generateData(final XYChart chart) {
         long startTime = ProcessingProfiler.getTimeStamp();
@@ -52,7 +51,7 @@ public class ReproduceTableViewerBug extends Application {
         startTime = ProcessingProfiler.getTimeDiff(startTime, "adding data into DataSet");
     }
 
-    private HBox getHeaderBar(final XYChart chart, final Scene scene) {
+    private HBox getHeaderBar(final XYChart chart) {
         final Button newDataSet = new Button("new DataSet");
         newDataSet.setOnAction(evt -> Platform.runLater(getTimerTask(chart)));
 
@@ -104,7 +103,7 @@ public class ReproduceTableViewerBug extends Application {
         chart.legendVisibleProperty().set(true);
         // set them false to make the plot faster
         chart.setAnimated(false);
-        tableViewer = new TableViewer();
+        final TableViewer tableViewer = new TableViewer();
         tableViewer.setRefreshRate(200);
         chart.getPlugins().add(tableViewer);
 
@@ -116,7 +115,7 @@ public class ReproduceTableViewerBug extends Application {
 
         startTime = ProcessingProfiler.getTimeStamp();
 
-        root.setTop(getHeaderBar(chart, scene));
+        root.setTop(getHeaderBar(chart));
         root.setCenter(chart);
         ProcessingProfiler.getTimeDiff(startTime, "adding chart into StackPane");
 
