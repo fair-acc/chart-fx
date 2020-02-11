@@ -88,11 +88,12 @@ public class MountainRangeRendererSample extends Application {
 
     public DataSet3D readImage() {
         try (final BufferedReader reader = new BufferedReader(
-                     new InputStreamReader(ContourChartSample.class.getResourceAsStream("./testdata/image.txt")))) {
+                new InputStreamReader(ContourChartSample.class.getResourceAsStream("./testdata/image.txt")))) {
             // final BufferedReader reader = new BufferedReader(new InputStreamReader(
             // ContourChartSampleReference.class.getResourceAsStream("./testdata/image.txt")));
             @SuppressWarnings("unused")
-            String skipLine;
+            String skipLine; // NOPMD variable is needed to skip/check line that contains the dimension of the following
+                             // line to be read which we derive from the data itself
             if ((skipLine = reader.readLine()) == null) {
                 throw new IllegalStateException("expected non-null line");
             }
@@ -139,9 +140,9 @@ public class MountainRangeRendererSample extends Application {
         chart.getRenderers().set(0, mountainRangeRenderer);
         // mountainRangeRenderer.getDatasets().add(readImage());
         chart.getDatasets().setAll(createTestData(0.0));
-        //		DataSet3D additionalData = createTestData(1.0);
-        //		additionalData.setStyle("strokeColor=red");
-        //		chart.getDatasets().add(additionalData);
+        // DataSet3D additionalData = createTestData(1.0);
+        // additionalData.setStyle("strokeColor=red");
+        // chart.getDatasets().add(additionalData);
 
         chart.setLegendVisible(true);
         chart.getPlugins().add(new Zoomer());
