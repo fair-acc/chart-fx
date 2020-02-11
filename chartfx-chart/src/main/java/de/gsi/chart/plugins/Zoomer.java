@@ -86,7 +86,6 @@ public class Zoomer extends ChartPlugin {
      * Default pan mouse filter passing on left mouse button with {@link MouseEvent#isControlDown() control key down}.
      */
     public static final Predicate<MouseEvent> DEFAULT_MOUSE_FILTER = MouseEventsHelper::isOnlyMiddleButtonDown;
-    private final Predicate<MouseEvent> mouseFilter = Panner.DEFAULT_MOUSE_FILTER;
     private double panShiftX;
     private double panShiftY;
     private Point2D previousMouseLocation;
@@ -95,7 +94,7 @@ public class Zoomer extends ChartPlugin {
     private final IntegerProperty autoZoomThreshold = new SimpleIntegerProperty(this, "autoZoomThreshold",
             DEFAULT_AUTO_ZOOM_THRESHOLD);
     private final EventHandler<MouseEvent> panStartHandler = event -> {
-        if (isPannerEnabled() && (mouseFilter == null || mouseFilter.test(event))) {
+        if (isPannerEnabled() && DEFAULT_MOUSE_FILTER.test(event)) {
             panStarted(event);
             event.consume();
         }

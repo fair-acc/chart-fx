@@ -177,7 +177,7 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
                 continue;
             }
             parameterDisplayPane.put(side, side.isVertical() ? new ChartHBox() : new ChartVBox()); // NOPMD - default
-                    // init
+            // init
         }
     }
 
@@ -854,17 +854,17 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
     }
 
     public boolean removeFromAllAxesPanes(final Axis node) {
-        boolean state = false;
         if (!(node instanceof Node)) {
-            return state;
+            return false;
         }
+        final Node axisNode = (Node) node;
         // remove axis from all axis panes
         for (final Side side : Side.values()) {
-            if (getAxesPane(side).getChildren().remove(node)) {
-                state = true;
+            if (getAxesPane(side).getChildren().remove(axisNode)) {
+                return true;
             }
         }
-        return state;
+        return false;
     }
 
     @Override
@@ -1205,7 +1205,7 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
 
             @Override
             public boolean isSettable(final Chart node) {
-                return node.titleSide == null || !node.titleSide.isBound();
+                return node != null && !node.titleSide.isBound();
             }
         };
 
@@ -1218,7 +1218,7 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
 
             @Override
             public boolean isSettable(final Chart node) {
-                return node.measurementBarSide == null || !node.measurementBarSide.isBound();
+                return node != null && !node.measurementBarSide.isBound();
             }
         };
 
@@ -1231,7 +1231,7 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
 
             @Override
             public boolean isSettable(final Chart node) {
-                return node.toolBarSide == null || !node.toolBarSide.isBound();
+                return node != null && !node.toolBarSide.isBound();
             }
         };
 
@@ -1244,7 +1244,7 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
 
             @Override
             public boolean isSettable(final Chart node) {
-                return node.legendSide == null || !node.legendSide.isBound();
+                return node != null && !node.legendSide.isBound();
             }
         };
 
@@ -1258,7 +1258,7 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
 
             @Override
             public boolean isSettable(final Chart node) {
-                return node.legendVisible == null || !node.legendVisible.isBound();
+                return node != null && !node.legendVisible.isBound();
             }
         };
 

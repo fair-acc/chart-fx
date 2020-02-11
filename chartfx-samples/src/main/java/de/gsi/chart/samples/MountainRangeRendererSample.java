@@ -4,6 +4,15 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
+import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.scene.Scene;
+import javafx.scene.control.Label;
+import javafx.scene.control.Spinner;
+import javafx.scene.control.ToolBar;
+import javafx.scene.layout.BorderPane;
+import javafx.stage.Stage;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,14 +25,6 @@ import de.gsi.chart.renderer.spi.MountainRangeRenderer;
 import de.gsi.dataset.DataSet;
 import de.gsi.dataset.DataSet3D;
 import de.gsi.dataset.spi.AbstractDataSet3D;
-import javafx.application.Application;
-import javafx.application.Platform;
-import javafx.scene.Scene;
-import javafx.scene.control.Label;
-import javafx.scene.control.Spinner;
-import javafx.scene.control.ToolBar;
-import javafx.scene.layout.BorderPane;
-import javafx.stage.Stage;
 
 /**
  * @author rstein
@@ -87,14 +88,23 @@ public class MountainRangeRendererSample extends Application {
 
     public DataSet3D readImage() {
         try (final BufferedReader reader = new BufferedReader(
-                new InputStreamReader(ContourChartSample.class.getResourceAsStream("./testdata/image.txt")))) {
+                     new InputStreamReader(ContourChartSample.class.getResourceAsStream("./testdata/image.txt")))) {
             // final BufferedReader reader = new BufferedReader(new InputStreamReader(
             // ContourChartSampleReference.class.getResourceAsStream("./testdata/image.txt")));
-            reader.readLine();
+            @SuppressWarnings("unused")
+            String skipLine; // NOPMD variable is needed to skip/check line that contains the dimension of the following
+                    // line to be read which we derive from the data itself
+            if ((skipLine = reader.readLine()) == null) {
+                throw new IllegalStateException("expected non-null line");
+            }
             final String[] x = reader.readLine().split(" ");
-            reader.readLine();
+            if ((skipLine = reader.readLine()) == null) {
+                throw new IllegalStateException("expected non-null line");
+            }
             final String[] y = reader.readLine().split(" ");
-            reader.readLine();
+            if ((skipLine = reader.readLine()) == null) {
+                throw new IllegalStateException("expected non-null line");
+            }
             final String[] z = reader.readLine().split(" ");
 
             final Number[] xValues = MountainRangeRendererSample.toNumberArray(x);
@@ -130,9 +140,9 @@ public class MountainRangeRendererSample extends Application {
         chart.getRenderers().set(0, mountainRangeRenderer);
         // mountainRangeRenderer.getDatasets().add(readImage());
         chart.getDatasets().setAll(createTestData(0.0));
-//		DataSet3D additionalData = createTestData(1.0);
-//		additionalData.setStyle("strokeColor=red");
-//		chart.getDatasets().add(additionalData);
+        // DataSet3D additionalData = createTestData(1.0);
+        // additionalData.setStyle("strokeColor=red");
+        // chart.getDatasets().add(additionalData);
 
         chart.setLegendVisible(true);
         chart.getPlugins().add(new Zoomer());
@@ -245,7 +255,6 @@ public class MountainRangeRendererSample extends Application {
             xValues[xIndex] = x;
             yValues[yIndex] = y;
             zValues[xIndex][yIndex] = z;
-
         }
     }
 }

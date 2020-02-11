@@ -5,6 +5,10 @@ import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.Random;
 
+import javafx.application.Application;
+import javafx.scene.Node;
+import javafx.scene.layout.VBox;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,13 +21,10 @@ import de.gsi.math.samples.utils.AbstractDemoApplication;
 import de.gsi.math.samples.utils.DemoChart;
 import de.gsi.math.spectra.wavelet.CDFWavelet;
 import de.gsi.math.spectra.wavelet.FastWaveletTransform;
-import javafx.application.Application;
-import javafx.scene.Node;
-import javafx.scene.layout.VBox;
 
 /**
  * example illustrating a wavelet denoising algorithm
- * 
+ *
  * @author rstein
  */
 public class WaveletDenoising extends AbstractDemoApplication {
@@ -163,9 +164,7 @@ public class WaveletDenoising extends AbstractDemoApplication {
         //
         // }
 
-        for (int i = 0; i < 0; i++) {
-            recon[i] = 0.0;
-        }
+        Arrays.fill(recon, 0.0);
 
         fspectraModel = new DefaultDataSet("model", xValues, ySModel, xValues.length, true);
         fspectra = new DefaultDataSet("raw data", xValues, ySmooth, xValues.length, true);
@@ -179,8 +178,10 @@ public class WaveletDenoising extends AbstractDemoApplication {
             wvTrafo3.invTransform(recon);
         }
 
-        final double error1 = TMath.RMS(TMath.Difference(yValues, yModel));
-        final double error2 = TMath.RMS(TMath.Difference(recon, yModel));
+        final double[] diff1 = TMath.Difference(yValues, yModel);
+        final double error1 = diff1 == null ? 0.0 : TMath.RMS(diff1);
+        final double[] diff2 = TMath.Difference(recon, yModel);
+        final double error2 = diff2 == null ? 0.0 : TMath.RMS(diff2);
         if (error1 > error2) {
             LOGGER.atInfo().log("improved noise floor from %f \t-> %f \t(%f %%)\n", error1, error2,
                     (error1 - error2) / error1 * 100);
@@ -197,8 +198,7 @@ public class WaveletDenoising extends AbstractDemoApplication {
     private double[][] readDemoData() {
         final String fileName = "./BBQSpectra.dat";
         try (BufferedReader reader = new BufferedReader(
-                new InputStreamReader(WaveletScalogram.class.getResourceAsStream(fileName)))) {
-
+                     new InputStreamReader(WaveletScalogram.class.getResourceAsStream(fileName)))) {
             String line = reader.readLine();
             final int nDim = line == null ? 0 : Integer.parseInt(line);
             double[][] ret = new double[2][nDim];

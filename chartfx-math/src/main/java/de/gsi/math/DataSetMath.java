@@ -64,7 +64,8 @@ public final class DataSetMath { // NOPMD - nomen est omen
 
     public static DataSet averageDataSetsFIR(final List<DataSet> dataSets, final int nUpdates) {
         if (dataSets == null || dataSets.isEmpty()) {
-            return null;
+            final String name = dataSets == null ? "null" : "<empty>";
+            return new DoubleErrorDataSet("LP(" + name + ", FIR)");
         }
         final String functionName = "LP(" + dataSets.get(0).getName() + ", FIR)";
         if (dataSets.size() <= 1) {
@@ -128,13 +129,11 @@ public final class DataSetMath { // NOPMD - nomen est omen
         final String functionName = "LP(" + newDataSet.getName() + ", IIR)";
         if (prevAverage == null || prevAverage2 == null || prevAverage.getDataCount() == 0
                 || prevAverage2.getDataCount() == 0) {
-
             final double[] yValues = values(DIM_Y, newDataSet);
             final double[] eyn = errors(newDataSet, EYN);
             final double[] eyp = errors(newDataSet, EYP);
             if (prevAverage2 instanceof DoubleErrorDataSet) {
-                ((DoubleErrorDataSet) prevAverage2).set(values(DIM_X, newDataSet), ArrayMath.sqr(yValues),
-                        ArrayMath.sqr(eyn), ArrayMath.sqr(eyp));
+                ((DoubleErrorDataSet) prevAverage2).set(values(DIM_X, newDataSet), ArrayMath.sqr(yValues), ArrayMath.sqr(eyn), ArrayMath.sqr(eyp));
             } else if (prevAverage2 instanceof DoubleDataSet) {
                 ((DoubleDataSet) prevAverage2).set(values(DIM_X, newDataSet), ArrayMath.sqr(yValues));
             }
@@ -146,10 +145,10 @@ public final class DataSetMath { // NOPMD - nomen est omen
         final int dataCount2 = prevAverage2.getDataCount();
 
         final DoubleErrorDataSet retFunction = dataCount1 == 0
-                ? new DoubleErrorDataSet(functionName, values(DIM_X, newDataSet), values(DIM_Y, newDataSet),
-                        errors(newDataSet, EYN), errors(newDataSet, EYP), newDataSet.getDataCount(), true)
-                : new DoubleErrorDataSet(prevAverage.getName(), values(DIM_X, prevAverage), values(DIM_Y, prevAverage),
-                        errors(prevAverage, EYN), errors(prevAverage, EYP), newDataSet.getDataCount(), true);
+                                                       ? new DoubleErrorDataSet(functionName, values(DIM_X, newDataSet), values(DIM_Y, newDataSet),
+                                                               errors(newDataSet, EYN), errors(newDataSet, EYP), newDataSet.getDataCount(), true)
+                                                       : new DoubleErrorDataSet(prevAverage.getName(), values(DIM_X, prevAverage), values(DIM_Y, prevAverage),
+                                                               errors(prevAverage, EYN), errors(prevAverage, EYP), newDataSet.getDataCount(), true);
 
         final double alpha = 1.0 / (1.0 + nUpdates);
         final boolean avg2Empty = dataCount2 == 0;
@@ -247,13 +246,13 @@ public final class DataSetMath { // NOPMD - nomen est omen
             final double yenC = error(function, EYN, i);
             final double yenR = error(function, EYN, i + 1);
             final double yen = Math.sqrt(TMathConstants.Sqr(yenL) + TMathConstants.Sqr(yenC) + TMathConstants.Sqr(yenR))
-                    / 4;
+                               / 4;
 
             final double yepL = error(function, EYP, i - 1);
             final double yepC = error(function, EYP, i);
             final double yepR = error(function, EYP, i + 1);
             final double yep = Math.sqrt(TMathConstants.Sqr(yepL) + TMathConstants.Sqr(yepC) + TMathConstants.Sqr(yepR))
-                    / 4;
+                               / 4;
 
             // simple derivative computation
             final double derivative = 0.5 * ((valC - valL) / stepL + (valR - valC) / stepR);
@@ -428,7 +427,6 @@ public final class DataSetMath { // NOPMD - nomen est omen
                         TMath.Mean(subArrayYp, count) * norm);
                 break;
             }
-
         }
 
         return filteredFunction;
@@ -757,7 +755,7 @@ public final class DataSetMath { // NOPMD - nomen est omen
 
         fastFourierTrafo.realForward(fftSpectra);
         final double[] mag = dbScale ? SpectrumTools.computeMagnitudeSpectrum_dB(fftSpectra, true)
-                : SpectrumTools.computeMagnitudeSpectrum(fftSpectra, true);
+                                     : SpectrumTools.computeMagnitudeSpectrum(fftSpectra, true);
         final double dt = function.get(DIM_X, function.getDataCount() - 1) - function.get(DIM_X, 0);
         final double fsampling = normalisedFrequency || dt <= 0 ? 0.5 / mag.length : 1.0 / dt;
 

@@ -303,28 +303,30 @@ public class XYChart extends Chart {
     @Override
     protected void axesChanged(final ListChangeListener.Change<? extends Axis> change) {
         while (change.next()) {
-            change.getRemoved().forEach(set -> {
-                AssertUtils.notNull("to be removed axis is null", set);
+            change.getRemoved().forEach(axis -> {
+                AssertUtils.notNull("to be removed axis is null", axis);
                 // check if axis is associated with an existing renderer, if yes
                 // -&gt; throw an exception
                 // remove from axis.side property side listener
-                set.sideProperty().removeListener(axisSideChangeListener);
+                removeFromAllAxesPanes(axis);
+                axis.sideProperty().removeListener(axisSideChangeListener);
             });
-            for (final Axis set : change.getAddedSubList()) {
+
+            change.getAddedSubList().forEach(axis -> {
                 // check if axis is associated with an existing renderer,
                 // if yes -&gt; throw an exception
-                AssertUtils.notNull("to be added axis is null", set);
+                AssertUtils.notNull("to be added axis is null", axis);
 
-                final Side side = set.getSide();
+                final Side side = axis.getSide();
                 if (side == null) {
-                    throw new InvalidParameterException(new StringBuilder().append("axis '").append(set.getName()).append("' has 'null' as side being set").toString());
+                    throw new InvalidParameterException(new StringBuilder().append("axis '").append(axis.getName()).append("' has 'null' as side being set").toString());
                 }
-                if (!getAxesPane(set.getSide()).getChildren().contains((Node) set)) {
-                    getAxesPane(set.getSide()).getChildren().add((Node) set);
+                if (!getAxesPane(axis.getSide()).getChildren().contains((Node) axis)) {
+                    getAxesPane(axis.getSide()).getChildren().add((Node) axis);
                 }
 
-                set.sideProperty().addListener(axisSideChangeListener);
-            }
+                axis.sideProperty().addListener(axisSideChangeListener);
+            });
         }
 
         requestLayout();

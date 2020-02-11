@@ -12,7 +12,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * @author rstein
  */
 public interface EventSource {
-
     /**
      * Adds an {@link EventListener} which will be notified whenever the {@code Observable} becomes invalid. If the same
      * listener is added more than once, then it will be notified more than once. That is, no check is made to ensure
@@ -133,9 +132,7 @@ public interface EventSource {
     default void removeListener(EventListener listener) {
         synchronized (updateEventListener()) {
             Objects.requireNonNull(listener, "UpdateListener must not be null");
-            if (updateEventListener().contains(listener)) {
-                updateEventListener().remove(listener);
-            }
+            updateEventListener().remove(listener);
         }
     }
 

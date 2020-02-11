@@ -37,7 +37,7 @@ public class DataSetBuilder {
 
     /**
      * default DataSet factory
-     * 
+     *
      * @param dataSetName data set name
      */
     public DataSetBuilder(final String dataSetName) {
@@ -136,6 +136,9 @@ public class DataSetBuilder {
 
     protected DefaultErrorDataSet buildWithYErrors(final String dsName, final int size) {
         // at least one error array has been provided
+        if (xErrorsNeg == null && yErrorsNeg == null) {
+            throw new IllegalStateException("xErrorsNeg and yErrorsNeg cannot both be null");
+        }
         final double[] dsYep = yErrorsPos == null ? yErrorsNeg : yErrorsPos;
         final double[] dsYen = yErrorsNeg == null ? yErrorsPos : yErrorsNeg;
         AssertUtils.equalDoubleArrays(xValues, dsYep, size);
@@ -227,7 +230,7 @@ public class DataSetBuilder {
 
     public DataSetBuilder setXNegError(final double[] xErrorValuesNeg) {
         final int size = initialCapacity < 0 ? xErrorValuesNeg.length
-                : Math.min(initialCapacity, xErrorValuesNeg.length);
+                                             : Math.min(initialCapacity, xErrorValuesNeg.length);
         this.xErrorsNeg = new double[size];
         System.arraycopy(xErrorValuesNeg, 0, this.xErrorsNeg, 0, size);
         return this;
@@ -241,7 +244,7 @@ public class DataSetBuilder {
 
     public final DataSetBuilder setXPosError(final double[] xErrorValuesPos) {
         final int size = initialCapacity < 0 ? xErrorValuesPos.length
-                : Math.min(initialCapacity, xErrorValuesPos.length);
+                                             : Math.min(initialCapacity, xErrorValuesPos.length);
         this.xErrorsPos = new double[size];
         System.arraycopy(xErrorValuesPos, 0, this.xErrorsPos, 0, size);
         return this;
@@ -272,7 +275,7 @@ public class DataSetBuilder {
 
     public DataSetBuilder setYNegError(final double[] yErrorValuesNeg) {
         final int size = initialCapacity < 0 ? yErrorValuesNeg.length
-                : Math.min(initialCapacity, yErrorValuesNeg.length);
+                                             : Math.min(initialCapacity, yErrorValuesNeg.length);
         this.yErrorsNeg = new double[size];
         System.arraycopy(yErrorValuesNeg, 0, this.yErrorsNeg, 0, size);
         return this;
@@ -286,7 +289,7 @@ public class DataSetBuilder {
 
     public final DataSetBuilder setYPosError(final double[] yErrorValuesPos) {
         final int size = initialCapacity < 0 ? yErrorValuesPos.length
-                : Math.min(initialCapacity, yErrorValuesPos.length);
+                                             : Math.min(initialCapacity, yErrorValuesPos.length);
         this.yErrorsPos = new double[size];
         System.arraycopy(yErrorValuesPos, 0, this.yErrorsPos, 0, size);
         return this;

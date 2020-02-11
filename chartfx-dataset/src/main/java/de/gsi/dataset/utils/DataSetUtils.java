@@ -90,7 +90,7 @@ public class DataSetUtils extends DataSetUtilsHelper {
 
     /**
      * perform and return a deep copy of the data set
-     * 
+     *
      * @param ds data set to be copied
      * @return deep copy of data set
      */
@@ -364,6 +364,7 @@ public class DataSetUtils extends DataSetUtilsHelper {
         case ZIP:
             final ZipInputStream zipIStream = new ZipInputStream(Files.newInputStream(file.toPath()));
             if (zipIStream.getNextEntry() == null) {
+                zipIStream.close();
                 throw new ZipException("Corrupt zip archive has no entries");
             }
             istream = zipIStream;
@@ -456,7 +457,7 @@ public class DataSetUtils extends DataSetUtilsHelper {
      *
      * @param fileName Path and name of file containing csv data.
      * @param compression Compression of the file (GZIP, ZIP or NONE). Supply AUTO or omit this value to use file
-     *        extension.
+     *            extension.
      * @return DataSet with the data and metadata read from the file
      */
     public static DataSet readDataSetFromFile(final String fileName, final Compression compression) {
@@ -816,9 +817,9 @@ public class DataSetUtils extends DataSetUtilsHelper {
      * @param dataSet The DataSet to export
      * @param byteOutput byte output stream (N.B. keep caching this object)
      * @param binary {@code true}: encode data as binary (smaller size, performance), or {@code false} as string (human
-     *        readable, easier debugging)
+     *            readable, easier debugging)
      * @param asFloat {@code true}: encode data as binary floats (smaller size, performance), or {@code false} as double
-     *        (better precision)
+     *            (better precision)
      */
     public static void writeDataSetToByteArray(final DataSet dataSet, final ByteArrayOutputStream byteOutput,
             final boolean binary, final boolean asFloat) {
@@ -938,7 +939,7 @@ public class DataSetUtils extends DataSetUtilsHelper {
      * @param path Path to the location of the file
      * @param fileName Filename (with "{metadatafield;type;format}" placeholders for variables)
      * @param compression Compression of the file (GZIP, ZIP or NONE). Supply AUTO or omit this value to use file
-     *        extension.
+     *            extension.
      * @param binary true: whether to store data as binary or string
      * @return actual name of the file that was written or none in case of errors
      */
@@ -1077,7 +1078,7 @@ public class DataSetUtils extends DataSetUtilsHelper {
      * @param outputStream stream to write binary data into
      * @param dataSet to be exported
      * @param asFloat {@code true} use 32-bit floats (less memory, faster transfer) instead of 64-bit doubles (DataSet
-     *        default, higher precision)
+     *            default, higher precision)
      */
     private static void writeNumericBinaryDataToStream(final OutputStream outputStream, final DataSet dataSet,
             final boolean asFloat) {
@@ -1115,7 +1116,7 @@ public class DataSetUtils extends DataSetUtilsHelper {
         // DoubleBuffer.wrap(dataSet.getXValues());
         try {
             outputStream.write(SWITCH_TO_BINARY_KEY); // magic byte to switch to
-                    // binary data
+            // binary data
             if (asFloat && !is3D) {
                 // TODO: check performance w.r.t. using 'DataOutputStream'
                 // directly
@@ -1278,7 +1279,7 @@ public class DataSetUtils extends DataSetUtilsHelper {
 
     /**
      * Error type short handle
-     * 
+     *
      * @author rstein
      */
     public enum ErrType {

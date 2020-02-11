@@ -28,7 +28,6 @@ import javafx.scene.shape.Line;
  */
 @Deprecated
 public class MultipleAxesLineChart extends StackPane {
-
     private final LineChart<?, ?> baseChart;
     private final ObservableList<LineChart<?, ?>> backgroundCharts = FXCollections.observableArrayList();
     private final Map<LineChart<?, ?>, Color> chartColorMap = new HashMap<>();
@@ -210,8 +209,13 @@ public class MultipleAxesLineChart extends StackPane {
     private void styleBackgroundChart(final LineChart<?, ?> lineChart, final Color lineColor) {
         styleChartLine(lineChart, lineColor);
 
-        final Node contentBackground = lineChart.lookup(".chart-content").lookup(".chart-plot-background");
-        contentBackground.setStyle("-fx-background-color: transparent;");
+        final Node chartContent = lineChart.lookup(".chart-content");
+        if (chartContent != null) {
+            final Node chartPlotBackground = chartContent.lookup(".chart-plot-background");
+            if (chartPlotBackground != null) {
+                chartPlotBackground.setStyle("-fx-background-color: transparent;");
+            }
+        }
 
         lineChart.setVerticalZeroLineVisible(false);
         lineChart.setHorizontalZeroLineVisible(false);
@@ -229,8 +233,7 @@ public class MultipleAxesLineChart extends StackPane {
     }
 
     private void styleChartLine(final LineChart<?, ?> chart, final Color lineColor) {
-        chart.getYAxis().lookup(".axis-label")
-                .setStyle("-fx-text-fill: " + toRGBCode(lineColor) + "; -fx-font-weight: bold;");
+        chart.getYAxis().lookup(".axis-label").setStyle("-fx-text-fill: " + toRGBCode(lineColor) + "; -fx-font-weight: bold;");
         final Node seriesLine = chart.lookup(".chart-series-line");
         seriesLine.setStyle("-fx-stroke: " + toRGBCode(lineColor) + "; -fx-stroke-width: " + strokeWidth + ";");
     }
@@ -239,5 +242,4 @@ public class MultipleAxesLineChart extends StackPane {
         return String.format("#%02X%02X%02X", (int) (color.getRed() * 255), (int) (color.getGreen() * 255),
                 (int) (color.getBlue() * 255));
     }
-
 }

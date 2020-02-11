@@ -27,9 +27,9 @@ public class SingularValueDecomposition {
     private MatrixD feigenVectorsU; // the eigenvector matrix U (m x n)
     private MatrixD feigenVectorsV; // the eigenvector matrix V (n x n)
     private MatrixD fEigenValues; // the diagonal eigenvalue matrix of input
-                                  // matrix (n x n)
+            // matrix (n x n)
     private MatrixD fInverseEigenValues; // pseuodo-inverse diagonal eigenvalue
-                                         // matrix of input matrix (n x n)
+            // matrix of input matrix (n x n)
 
     private double fCut;
 
@@ -96,13 +96,17 @@ public class SingularValueDecomposition {
      */
     public boolean decompose(final boolean useSquareMatrix) {
         if (!fInit) {
-            LOGGER.error("no matrix specified");
+            if (LOGGER.isErrorEnabled()) {
+                LOGGER.atError().log("no matrix specified");
+            }
             return false;
         }
         int m = finputMatrix.getRowDimension();
         int n = finputMatrix.getColumnDimension();
         if (m == 0 || n == 0) {
-            LOGGER.error(String.format("null matrix specified (%d,%d)", m, n));
+            if (LOGGER.isErrorEnabled()) {
+                LOGGER.atError().log(String.format("null matrix specified (%d,%d)", m, n));
+            }
             return false;
         }
         double[] a;
@@ -116,7 +120,9 @@ public class SingularValueDecomposition {
             n = square.getRowDimension();
             m = n;
 
-            LOGGER.debug(String.format("reduced to %dx%d matrix", n, n));
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.atDebug().log(String.format("reduced to %dx%d matrix", n, n));
+            }
             a = new double[n * n];
 
             // A = Rt*R
@@ -281,19 +287,26 @@ public class SingularValueDecomposition {
         }
 
         if (nEigen < 0 || nEigen >= n) {
-            LOGGER.warn(String.format("selected number of eigenvalues %d exceeds maximum %d . et to max", nEigen, n));
+            if (LOGGER.isWarnEnabled()) {
+                LOGGER.atWarn().log(
+                        String.format("selected number of eigenvalues %d exceeds maximum %d . et to max", nEigen, n));
+            }
             nEigen = n;
         }
 
         if (!fInitSVD) {
-            LOGGER.debug(String.format("forced decomposition of %dx%d matrix", m, n));
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.atDebug().log(String.format("forced decomposition of %dx%d matrix", m, n));
+            }
             decompose(false);
         }
 
-        LOGGER.debug(String.format("cut below %e and max %d eigenvalues", fCut, nEigen));
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.atDebug().log(String.format("cut below %e and max %d eigenvalues", fCut, nEigen));
+        }
 
         final MatrixD lambdaMinus1 = new MatrixD(n, n); // inverse eigenvector
-                                                        // matrix w.r.t. R
+                // matrix w.r.t. R
 
         final double eigenValueMax = fEigenValues.get(0, 0);
         for (int i = 0; i < n; i++) {
@@ -301,7 +314,9 @@ public class SingularValueDecomposition {
             if (eigenValue / eigenValueMax > fCut && i <= nEigen) {
                 lambdaMinus1.set(i, i, fInverseEigenValues.get(i, i));
             } else {
-                LOGGER.debug(String.format("discarding from eigenvalue %d", i + 1));
+                if (LOGGER.isDebugEnabled()) {
+                    LOGGER.atDebug().log(String.format("discarding from eigenvalue %d", i + 1));
+                }
                 break;
             }
         }
@@ -374,7 +389,7 @@ public class SingularValueDecomposition {
         return getEigenVectorMatrixV();
     }
 
-    private double mySIGN(final double a, final double b) {
+    private static double mySIGN(final double a, final double b) {
         return b >= 0.0 ? Math.abs(a) : -Math.abs(a);
     }
 
@@ -403,15 +418,14 @@ public class SingularValueDecomposition {
      * @param b input b
      * @return numerically precise implementation of pythagoras (vs. 'sqrt(a*a + b*b)')
      */
-    private double pythagoras(final double a, final double b) {
+    private static double pythagoras(final double a, final double b) {
         final double absa = Math.abs(a);
         final double absb = Math.abs(b);
 
         if (absa > absb) {
             return absa * Math.sqrt(1.0 + square(absb / absa));
-        } else {
-            return absb == 0.0 ? 0.0 : absb * Math.sqrt(1.0 + square(absa / absb));
         }
+        return absb == 0.0 ? 0.0 : absb * Math.sqrt(1.0 + square(absa / absb));
     }
 
     /**
@@ -468,12 +482,10 @@ public class SingularValueDecomposition {
     }
 
     /**
-     * 
      * @param eigenValues vector containing eigen values
      * @param eigenVectorMatrixV vector containing the diagonal matrix elements of eigen vector matrix
      */
-    private void sortEigenValues(final double[] eigenValues, final double[] eigenVectorMatrixV) {
-
+    private static void sortEigenValues(final double[] eigenValues, final double[] eigenVectorMatrixV) {
         // Given the eigenvalues d[1..n] and eigenvectors v[1..n][1..n]
         // this routine sorts (straight insertion) the eigenvalues into
         // descending order, and rearranges
@@ -501,7 +513,7 @@ public class SingularValueDecomposition {
         }
     }
 
-    private void sortEigenValues(final double[] eigenVectorU, final double[] eigenValues,
+    private static void sortEigenValues(final double[] eigenVectorU, final double[] eigenValues,
             final double[] eigenVectorMatrixV, final int m) {
         // Given the eigenvalues d[1..n] and eigenvectors v[1..n][1..n]
         // this routine sorts (straight insertion) the eigenvalues into
@@ -536,11 +548,11 @@ public class SingularValueDecomposition {
         }
     }
 
-    private double square(final double a) {
+    private static double square(final double a) {
         return a * a;
     }
 
-    private void svdcmp(final double[] inputMatrix, final int m, final int n, final double[] eigenValues,
+    private static void svdcmp(final double[] inputMatrix, final int m, final int n, final double[] eigenValues,
             final double[] eigenVectorMatrixV) {
         // Given a matrix a[1..m][1..n], this routine computes its singular
         // value decomposition,
@@ -750,7 +762,10 @@ public class SingularValueDecomposition {
                     break;
                 }
                 if (its == MAX_SVD_CONVERSION_LIMIT) {
-                    LOGGER.warn(String.format("no convergence in %d svdcmp iterations", MAX_SVD_CONVERSION_LIMIT));
+                    if (LOGGER.isWarnEnabled()) {
+                        LOGGER.atWarn()
+                                .log(String.format("no convergence in %d svdcmp iterations", MAX_SVD_CONVERSION_LIMIT));
+                    }
                     break;
                 }
                 double x = eigenValues[l];
@@ -813,7 +828,6 @@ public class SingularValueDecomposition {
                 eigenValues[k] = x;
             }
         }
-
     }
 
     /**
@@ -844,11 +858,15 @@ public class SingularValueDecomposition {
 
         setTol(stol);
 
-        LOGGER.debug(String.format("dimension of test matrix %dx%d", testMatrix.getRowDimension(),
-                testMatrix.getColumnDimension()));
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.atDebug().log(String.format("dimension of test matrix %dx%d", testMatrix.getRowDimension(),
+                    testMatrix.getColumnDimension()));
+        }
         final int nEigenMax = fEigenValues.getRowDimension() - 1;
-        LOGGER.debug(String.format("max/min eigenvalue ratio: %+e",
-                fEigenValues.get(0, 0) / fEigenValues.get(nEigenMax, nEigenMax)));
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.atDebug().log(String.format("max/min eigenvalue ratio: %+e",
+                    fEigenValues.get(0, 0) / fEigenValues.get(nEigenMax, nEigenMax)));
+        }
 
         for (int i = 0; i < testMatrix.getRowDimension(); i++) {
             for (int j = 0; j < testMatrix.getColumnDimension(); j++) {
@@ -856,8 +874,9 @@ public class SingularValueDecomposition {
                     testMatrix.set(i, j, testMatrix.get(i, j) - 1);
                 }
                 if (Math.abs(testMatrix.get(i, j)) > threshold) {
-                    LOGGER.warn("TestInvert() - found that element (%d,%d) differs %e from zero!", i, j,
-                            testMatrix.get(i, j));
+                    if (LOGGER.isDebugEnabled()) {
+                        LOGGER.atWarn().addArgument(i).addArgument(j).addArgument(testMatrix.get(i, j)).log("TestInvert() - found that element ({},{}) differs {} from zero!");
+                    }
                     return false;
                 }
             }
@@ -889,8 +908,10 @@ public class SingularValueDecomposition {
         for (int i = 0; i < testMatrix.getRowDimension(); i++) {
             for (int j = 0; j < testMatrix.getColumnDimension(); j++) {
                 if (Math.abs(testMatrix.get(i, j)) > threshold) {
-                    LOGGER.warn(String.format("found that element (%d,%d) differs %e from zero!", i, j,
-                            testMatrix.get(i, j)));
+                    if (LOGGER.isWarnEnabled()) {
+                        LOGGER.atWarn().log(String.format("found that element (%d,%d) differs %e from zero!", i, j,
+                                testMatrix.get(i, j)));
+                    }
                     return false;
                 }
             }
@@ -917,52 +938,75 @@ public class SingularValueDecomposition {
         MatrixD eigenvalues2 = null;
         final boolean useIntermediateSquareMatrix = true;
         if (svd.decompose(useIntermediateSquareMatrix)) {
-            LOGGER.info("decompose() - square intermediate matrix - successful");
+            if (LOGGER.isInfoEnabled()) {
+                LOGGER.atInfo().log("decompose() - square intermediate matrix - successful");
+            }
             eigenvalues1 = svd.getEigenValues();
         } else {
-            LOGGER.info("decompose() - failed");
+            if (LOGGER.isInfoEnabled()) {
+                LOGGER.atInfo().log("decompose() - failed");
+            }
         }
 
         if (svd.decompose(false)) {
-            LOGGER.info("decompose() - successful");
+            if (LOGGER.isInfoEnabled()) {
+                LOGGER.atInfo().log("decompose() - successful");
+            }
             eigenvalues2 = svd.getEigenValues();
         } else {
-            LOGGER.info("decompose() - failed");
+            if (LOGGER.isInfoEnabled()) {
+                LOGGER.atInfo().log("decompose() - failed");
+            }
         }
 
         if (eigenvalues1 != null && eigenvalues2 != null) {
             for (int i = 0; i < eigenvalues1.getRowDimension(); i++) {
-                LOGGER.info("eigenvalue(%2d) = %+e vs %+e   diff = %+e", i, eigenvalues1.get(i, i),
-                        eigenvalues2.get(i, i), eigenvalues1.get(i, i) - eigenvalues2.get(i, i));
+                if (LOGGER.isInfoEnabled()) {
+                    LOGGER.atInfo().addArgument(i).addArgument(eigenvalues1.get(i, i)).addArgument(eigenvalues2.get(i, i)).addArgument(eigenvalues1.get(i, i) - eigenvalues2.get(i, i)).log("eigenvalue({}) = {} vs {}   diff = {}");
+                }
             }
         } else if (eigenvalues1 != null) {
             for (int i = 0; i < eigenvalues1.getRowDimension(); i++) {
-                LOGGER.info("eigenvalue(%2d) = %+e", i, eigenvalues1.get(i, i));
+                if (LOGGER.isInfoEnabled()) {
+                    LOGGER.atInfo().addArgument(i).addArgument(eigenvalues1.get(i, i)).log("eigenvalue({}) = {}");
+                }
             }
         } else if (eigenvalues2 != null) {
             for (int i = 0; i < eigenvalues2.getRowDimension(); i++) {
-                LOGGER.info("eigenvalue(%2d) = %+e", i, eigenvalues2.get(i, i));
+                if (LOGGER.isInfoEnabled()) {
+                    LOGGER.atInfo().addArgument(i).addArgument(eigenvalues2.get(i, i)).log("eigenvalue({}) = {}");
+                }
             }
         }
 
-        LOGGER.info("norm2 = %lf", svd.norm2());
-        LOGGER.info("cond = %lf", svd.cond());
-        LOGGER.info("rank = %lf", svd.rank());
+        if (LOGGER.isInfoEnabled()) {
+            LOGGER.atInfo().addArgument(svd.norm2()).log("norm2 = %lf");
+            LOGGER.atInfo().addArgument(svd.cond()).log("cond = {}");
+            LOGGER.atInfo().addArgument(svd.rank()).log("rank = {}");
 
-        LOGGER.info("check - testSVD()");
+            LOGGER.atInfo().log("check - testSVD()");
+        }
         if (svd.testSVD()) {
-            LOGGER.info("testSVD() - passed");
+            if (LOGGER.isInfoEnabled()) {
+                LOGGER.atInfo().log("testSVD() - passed");
+            }
 
         } else {
-            LOGGER.warn("testSVD() - failed");
+            if (LOGGER.isWarnEnabled()) {
+                LOGGER.atWarn().log("testSVD() - failed");
+            }
         }
 
-        LOGGER.info("check - testInvert()");
+        LOGGER.atInfo().log("check - testInvert()");
         if (svd.testInvert()) {
-            LOGGER.info("testInvert() - passed");
+            if (LOGGER.isInfoEnabled()) {
+                LOGGER.atInfo().log("testInvert() - passed");
+            }
 
         } else {
-            LOGGER.warn("testInvert() - failed");
+            if (LOGGER.isWarnEnabled()) {
+                LOGGER.atWarn().log("testInvert() - failed");
+            }
 
             if (input.getRowDimension() < 20 && input.getColumnDimension() < 20) {
                 final MatrixD matS = svd.getEigenValues();
@@ -970,19 +1014,26 @@ public class SingularValueDecomposition {
                 final MatrixD matU = svd.getEigenVectorMatrixU();
                 final MatrixD matV = svd.getEigenVectorMatrixV();
 
-                LOGGER.info("eigenvalues x pseudo-inverse eigenvalue matrix =");
-                matS.times(matSm).print(4, 3);
+                if (LOGGER.isInfoEnabled()) {
+                    LOGGER.atInfo().log("eigenvalues x pseudo-inverse eigenvalue matrix =");
+                    matS.times(matSm).print(4, 3);
+                }
 
-                LOGGER.info("V x Vt =");
-                matV.times(matV.transpose()).print(4, 2);
+                if (LOGGER.isInfoEnabled()) {
+                    LOGGER.atInfo().log("V x Vt =");
+                    matV.times(matV.transpose()).print(4, 2);
+                }
 
-                LOGGER.info("U x Ut =");
-                matU.times(matU.transpose()).print(4, 2);
+                if (LOGGER.isInfoEnabled()) {
+                    LOGGER.atInfo().log("U x Ut =");
+                    matU.times(matU.transpose()).print(4, 2);
+                }
 
-                LOGGER.info("Ut x U =");
-                matU.transpose().times(matU).print(4, 2);
+                if (LOGGER.isInfoEnabled()) {
+                    LOGGER.atInfo().log("Ut x U =");
+                    matU.transpose().times(matU).print(4, 2);
+                }
             }
         }
     }
-
 }

@@ -1428,7 +1428,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
 
             @Override
             public boolean isSettable(final AbstractAxisParameter n) {
-                return (n.side == null) || !n.side.isBound();
+                return (n != null) && !n.side.isBound();
             }
         };
 
@@ -1443,7 +1443,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
 
             @Override
             public boolean isSettable(final AbstractAxisParameter n) {
-                return (n.overlapPolicy == null) || !n.overlapPolicy.isBound();
+                return (n != null) && !n.overlapPolicy.isBound();
             }
         };
 
@@ -1457,7 +1457,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
 
             @Override
             public boolean isSettable(final AbstractAxisParameter n) {
-                return (n.axisLabelTextAlignment == null) || !n.axisLabelTextAlignment.isBound();
+                return (n != null) && !n.axisLabelTextAlignment.isBound();
             }
         };
 
@@ -1471,7 +1471,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
 
             @Override
             public boolean isSettable(final AbstractAxisParameter n) {
-                return (n.axisName == null) || !n.axisName.isBound();
+                return (n != null) && !n.axisName.isBound();
             }
         };
 
@@ -1485,7 +1485,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
 
             @Override
             public boolean isSettable(final AbstractAxisParameter n) {
-                return (n.centerAxisPosition == null) || !n.centerAxisPosition.isBound();
+                return (n != null) && !n.centerAxisPosition.isBound();
             }
         };
 
@@ -1499,7 +1499,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
 
             @Override
             public boolean isSettable(final AbstractAxisParameter n) {
-                return (n.axisPadding == null) || !n.axisPadding.isBound();
+                return (n != null) && !n.axisPadding.isBound();
             }
         };
 
@@ -1513,7 +1513,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
 
             @Override
             public boolean isSettable(final AbstractAxisParameter n) {
-                return (n.tickLength == null) || !n.tickLength.isBound();
+                return (n != null) && !n.tickLength.isBound();
             }
         };
 
@@ -1528,7 +1528,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
 
             @Override
             public boolean isSettable(final AbstractAxisParameter n) {
-                return (n.tickLabelFont == null) || !n.tickLabelFont.isBound();
+                return (n != null) && !n.tickLabelFont.isBound();
             }
         };
 
@@ -1542,7 +1542,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
 
             @Override
             public boolean isSettable(final AbstractAxisParameter n) {
-                return (n.tickLabelFill == null) || !n.tickLabelFill.isBound();
+                return (n != null) && !n.tickLabelFill.isBound();
             }
         };
 
@@ -1556,7 +1556,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
 
             @Override
             public boolean isSettable(final AbstractAxisParameter n) {
-                return (n.tickLabelGap == null) || !n.tickLabelGap.isBound();
+                return (n != null) && !n.tickLabelGap.isBound();
             }
         };
 
@@ -1570,7 +1570,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
 
             @Override
             public boolean isSettable(final AbstractAxisParameter n) {
-                return (n.tickLabelGap == null) || !n.tickLabelGap.isBound();
+                return (n != null) && !n.tickLabelGap.isBound();
             }
         };
 
@@ -1584,7 +1584,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
 
             @Override
             public boolean isSettable(final AbstractAxisParameter n) {
-                return (n.maxMajorTickLabelCount == null) || !n.maxMajorTickLabelCount.isBound();
+                return (n != null) && !n.maxMajorTickLabelCount.isBound();
             }
         };
 
@@ -1598,7 +1598,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
 
             @Override
             public boolean isSettable(final AbstractAxisParameter n) {
-                return (n.animationDuration == null) || !n.animationDuration.isBound();
+                return (n != null) && !n.animationDuration.isBound();
             }
         };
 
@@ -1612,7 +1612,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
 
             @Override
             public boolean isSettable(final AbstractAxisParameter n) {
-                return (n.tickMarkVisible == null) || !n.tickMarkVisible.isBound();
+                return (n != null) && !n.tickMarkVisible.isBound();
             }
         };
 
@@ -1626,7 +1626,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
 
             @Override
             public boolean isSettable(final AbstractAxisParameter n) {
-                return (n.tickLabelsVisible == null) || !n.tickLabelsVisible.isBound();
+                return (n != null) && !n.tickLabelsVisible.isBound();
             }
         };
 
@@ -1640,7 +1640,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
 
             @Override
             public boolean isSettable(final DefaultNumericAxis axis) {
-                return (axis.tickUnit == null) || !axis.tickUnit.isBound();
+                return (axis != null) && !axis.tickUnit.isBound();
             }
         };
 
@@ -1654,7 +1654,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
 
             @Override
             public boolean isSettable(final DefaultNumericAxis axis) {
-                return (axis.tickLabelRotation == null) || !axis.tickLabelRotation.isBound();
+                return (axis != null) && !axis.tickLabelRotation.isBound();
             }
         };
 
@@ -1668,7 +1668,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
 
             @Override
             public boolean isSettable(final AbstractAxisParameter n) {
-                return (n.minorTickLength == null) || !n.minorTickLength.isBound();
+                return (n != null) && !n.minorTickLength.isBound();
             }
         };
 
@@ -1682,7 +1682,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
 
             @Override
             public boolean isSettable(final AbstractAxisParameter n) {
-                return (n.minorTickCount == null) || !n.minorTickCount.isBound();
+                return (n != null) && !n.minorTickCount.isBound();
             }
         };
 
@@ -1696,7 +1696,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
 
             @Override
             public boolean isSettable(final AbstractAxisParameter n) {
-                return (n.minorTickVisible == null) || !n.minorTickVisible.isBound();
+                return (n != null) && !n.minorTickVisible.isBound();
             }
         };
 
@@ -1710,7 +1710,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
 
             @Override
             public boolean isSettable(final AbstractAxisParameter n) {
-                return (n.autoRanging == null) || !n.autoRanging.isBound();
+                return (n != null) && !n.autoRanging.isBound();
             }
         };
 
@@ -1724,7 +1724,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
 
             @Override
             public boolean isSettable(final AbstractAxisParameter n) {
-                return (n.autoGrowRanging == null) || !n.autoGrowRanging.isBound();
+                return (n != null) && !n.autoGrowRanging.isBound();
             }
         };
 
@@ -1738,7 +1738,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
 
             @Override
             public boolean isSettable(final AbstractAxisParameter n) {
-                return (n.autoRangeRounding == null) || !n.autoRangeRounding.isBound();
+                return (n != null) && !n.autoRangeRounding.isBound();
             }
         };
 

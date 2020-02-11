@@ -5,6 +5,10 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.zip.ZipInputStream;
 
+import javafx.application.Application;
+import javafx.scene.Node;
+import javafx.scene.layout.VBox;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,15 +18,12 @@ import de.gsi.math.DataSetMath;
 import de.gsi.math.filter.iir.Butterworth;
 import de.gsi.math.samples.utils.AbstractDemoApplication;
 import de.gsi.math.samples.utils.DemoChart;
-import javafx.application.Application;
-import javafx.scene.Node;
-import javafx.scene.layout.VBox;
 
 /**
  * Reads schottky measurement data and downmixes it with the following algorithm: * apply band-pass arround the relevant
  * band * multiply with 28 MHz sine signal * low-pass filter * downsampling Then applies different IIR Filters to the
  * signal
- * 
+ *
  * @author rstein
  */
 public class IIRFilterSample extends AbstractDemoApplication {
@@ -68,8 +69,17 @@ public class IIRFilterSample extends AbstractDemoApplication {
         final double fs = 100e6;
         final int nBins = 4 * 8192;
         fraw = readDemoData(27500, nBins);
+        if (fraw == null) {
+            throw new IllegalStateException("fraw is null");
+        }
         fraw1 = readDemoData(27500 + (int) (0.5e-3 * fs), nBins);
+        if (fraw1 == null) {
+            throw new IllegalStateException("fraw1 is null");
+        }
         fraw2 = readDemoData(27500 + (int) (1.5e-3 * fs), nBins);
+        if (fraw2 == null) {
+            throw new IllegalStateException("fraw2 is null");
+        }
         LOGGER.atInfo().log("length 0 = " + fraw.getDataCount(DataSet.DIM_X));
         LOGGER.atInfo().log("length 1 = " + fraw1.getDataCount(DataSet.DIM_X));
         LOGGER.atInfo().log("length 2 = " + fraw2.getDataCount(DataSet.DIM_X));

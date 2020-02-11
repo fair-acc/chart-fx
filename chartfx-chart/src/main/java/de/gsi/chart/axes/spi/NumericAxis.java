@@ -603,7 +603,7 @@ public final class NumericAxis extends AbstractAxis {
 
             @Override
             public boolean isSettable(final NumericAxis axis) {
-                return axis.tickUnit == null || !axis.tickUnit.isBound();
+                return axis != null && !axis.tickUnit.isBound();
             }
         };
 

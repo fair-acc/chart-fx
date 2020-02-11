@@ -29,7 +29,7 @@ public class TimeAxisRangeSample extends Application {
 
     @Override
     public void start(final Stage primaryStage) {
-        final double now = System.currentTimeMillis() / 1000; // [s]
+        final double now = System.currentTimeMillis() / 1000.0; // [s]
         final VBox root = new VBox();
         root.setAlignment(Pos.CENTER);
 

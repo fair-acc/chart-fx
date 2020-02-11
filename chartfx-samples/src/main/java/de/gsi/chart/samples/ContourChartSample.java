@@ -145,11 +145,20 @@ public class ContourChartSample extends Application {
             // final BufferedReader reader = new BufferedReader(new
             // InputStreamReader(
             // ContourChartSampleReference.class.getResourceAsStream("./testdata/image.txt")));
-            reader.readLine();
+            @SuppressWarnings("unused")
+            String skipLine; // NOPMD variable is needed to skip/check line that contains the dimension of the following
+                    // line to be read which we derive from the data itself
+            if ((skipLine = reader.readLine()) == null) {
+                throw new IllegalStateException("expected non-null line");
+            }
             final String[] x = reader.readLine().split(" ");
-            reader.readLine();
+            if ((skipLine = reader.readLine()) == null) {
+                throw new IllegalStateException("expected non-null line");
+            }
             final String[] y = reader.readLine().split(" ");
-            reader.readLine();
+            if ((skipLine = reader.readLine()) == null) {
+                throw new IllegalStateException("expected non-null line");
+            }
             final String[] z = reader.readLine().split(" ");
 
             final Number[] xValues = ContourChartSample.toNumberArray(x);
@@ -309,7 +318,8 @@ public class ContourChartSample extends Application {
         private final Number[] yValues;
         private final double[][] zValues;
 
-        public DefaultData(final String name, final Number[] xValues, final Number[] yValues, final double[][] zValues) {
+        public DefaultData(final String name, final Number[] xValues, final Number[] yValues,
+                final double[][] zValues) {
             super(name);
 
             this.xValues = xValues;
