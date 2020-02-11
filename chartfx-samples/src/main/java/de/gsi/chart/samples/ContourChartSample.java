@@ -141,13 +141,13 @@ public class ContourChartSample extends Application {
 
     public DataSet3D readImage() {
         try (BufferedReader reader = new BufferedReader(
-                new InputStreamReader(ContourChartSample.class.getResourceAsStream("./testdata/image.txt")))) {
+                     new InputStreamReader(ContourChartSample.class.getResourceAsStream("./testdata/image.txt")))) {
             // final BufferedReader reader = new BufferedReader(new
             // InputStreamReader(
             // ContourChartSampleReference.class.getResourceAsStream("./testdata/image.txt")));
             @SuppressWarnings("unused")
             String skipLine; // NOPMD variable is needed to skip/check line that contains the dimension of the following
-                             // line to be read which we derive from the data itself
+                    // line to be read which we derive from the data itself
             if ((skipLine = reader.readLine()) == null) {
                 throw new IllegalStateException("expected non-null line");
             }
@@ -264,9 +264,11 @@ public class ContourChartSample extends Application {
         final DefaultNumericAxis yAxis2 = (DefaultNumericAxis) chartPane2.getYAxis();
 
         final DefaultNumericAxis zAxis1 = (DefaultNumericAxis) ((ContourDataSetRenderer) chartPane1.getRenderers()
-                .get(0)).getZAxis();
+                                                                        .get(0))
+                                                  .getZAxis();
         final DefaultNumericAxis zAxis2 = (DefaultNumericAxis) ((ContourDataSetRenderer) chartPane2.getRenderers()
-                .get(0)).getZAxis();
+                                                                        .get(0))
+                                                  .getZAxis();
 
         // xAxis1.setAutoRanging(false);
         // yAxis1.setAutoRanging(false);
