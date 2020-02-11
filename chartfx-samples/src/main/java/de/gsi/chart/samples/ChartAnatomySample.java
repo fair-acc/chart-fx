@@ -52,13 +52,13 @@ public class ChartAnatomySample extends Application {
         xAxis2.setSide(Side.TOP);
         xAxis3.setSide(Side.CENTER_HOR);
         xAxis3.setMinorTickCount(2);
-        xAxis3.setAxisLabelAlignment(TextAlignment.RIGHT);
+        xAxis3.setAxisLabelTextAlignment(TextAlignment.RIGHT);
         yAxis1.setSide(Side.LEFT);
         yAxis2.setSide(Side.RIGHT);
         yAxis3.setSide(Side.RIGHT);
         yAxis4.setSide(Side.CENTER_VER);
         yAxis4.setMinorTickCount(2);
-        yAxis4.setAxisLabelAlignment(TextAlignment.RIGHT);
+        yAxis4.setAxisLabelTextAlignment(TextAlignment.RIGHT);
 
         final Chart chart = new Chart() {
             @Override

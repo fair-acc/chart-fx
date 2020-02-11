@@ -93,14 +93,14 @@ public class AbstractAxisParameterTests {
         axis.setAutoUnitScaling(false);
 
         assertEquals(0.5, axis.getCenterAxisPosition()); //TODO: rename function w.r.t. setter
-        axis.setAxisCentrePosition(0.2);
+        axis.setAxisCenterPosition(0.2);
         assertEquals(0.2, axis.getCenterAxisPosition());
-        axis.setAxisCentrePosition(0.5);
+        axis.setAxisCenterPosition(0.5);
 
         assertEquals(TextAlignment.CENTER, axis.getaAxisLabelTextAlignment()); //TODO: rename function w.r.t. setter
-        axis.setAxisLabelAlignment(TextAlignment.LEFT);
+        axis.setAxisLabelTextAlignment(TextAlignment.LEFT);
         assertEquals(TextAlignment.LEFT, axis.getaAxisLabelTextAlignment()); //TODO: rename function w.r.t. setter
-        axis.setAxisLabelAlignment(TextAlignment.CENTER);
+        axis.setAxisLabelTextAlignment(TextAlignment.CENTER);
 
         axis.setAxisLabelGap(5);
         assertEquals(5, axis.getAxisLabelGap());
