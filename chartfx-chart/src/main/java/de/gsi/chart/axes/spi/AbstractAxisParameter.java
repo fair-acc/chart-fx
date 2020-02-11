@@ -1125,12 +1125,20 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
         autoUnitScalingProperty().set(value);
     }
 
-    public void setAxisCentrePosition(final double value) {
+    public void setAxisCenterPosition(final double value) {
         centerAxisPositionProperty().set(value);
     }
 
-    public void setAxisLabelAlignment(final TextAlignment value) {
+    public double getAxisCenterPosition() {
+        return centerAxisPositionProperty().get();
+    }
+
+    public void setAxisLabelTextAlignment(final TextAlignment value) {
         axisLabelTextAlignmentProperty().set(value);
+    }
+
+    public TextAlignment getAxisLabelTextAlignment() {
+        return axisLabelTextAlignmentProperty().get();
     }
 
     public void setAxisLabelGap(final double value) {
@@ -1150,6 +1158,10 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
 
     public void setMaxMajorTickLabelCount(final int value) {
         this.maxMajorTickLabelCountProperty().set(value);
+    }
+
+    public int getMaxMajorTickLabelCount() {
+        return this.maxMajorTickLabelCountProperty().get();
     }
 
     @Override
