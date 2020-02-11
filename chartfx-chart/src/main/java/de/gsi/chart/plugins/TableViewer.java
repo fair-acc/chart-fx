@@ -15,12 +15,12 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.TreeMap;
 import java.util.TreeSet;
-import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
+import javafx.beans.binding.Bindings;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.SimpleIntegerProperty;
@@ -106,19 +106,9 @@ public class TableViewer extends ChartPlugin {
         super();
         table.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         table.getSelectionModel().setCellSelectionEnabled(true);
-        table.setEditable(true); // Generally the TableView is editable, actual
-                // editability is configured column-wise
+        table.setEditable(true); // Generally the TableView is editable, actual editability is configured column-wise
         table.setItems(dsModel);
-        dsModel.setRefreshFunction(() -> {
-            // workaround: force table to acknowledge changed data (by setting to empty list and then back)
-            FXUtils.runFX(() -> {
-                ObservableList<DataSetsRow> tmp = table.getItems();
-                table.setItems(FXCollections.emptyObservableList());
-                table.setItems(tmp);
-                table.getColumns().setAll(dsModel.getColumns());
-            });
-            return null;
-        });
+        Bindings.bindContent(table.getColumns(), dsModel.getColumns());
 
         chartProperty().addListener((change, oldChart, newChart) -> {
             if (oldChart != null) {
@@ -135,8 +125,7 @@ public class TableViewer extends ChartPlugin {
                 }
                 newChart.getPlotForeground().getChildren().add(table);
                 table.toFront();
-                table.setVisible(false); // table is initially invisible above
-                        // the chart
+                table.setVisible(false); // table is initially invisible above the chart
                 table.prefWidthProperty().bind(newChart.getPlotForeground().widthProperty());
                 table.prefHeightProperty().bind(newChart.getPlotForeground().heightProperty());
             }
@@ -205,7 +194,7 @@ public class TableViewer extends ChartPlugin {
                      StandardCharsets.UTF_8)) {
             writer.write(data);
         } catch (IOException ex) {
-            LOGGER.error("error while exporting data to csv", ex);
+            LOGGER.atError().setCause(ex).log("error while exporting data to csv");
         }
     }
 
@@ -239,7 +228,6 @@ public class TableViewer extends ChartPlugin {
             getChart().getPlotForeground().setMouseTransparent(!table.isVisible());
             table.setMouseTransparent(!table.isVisible());
             dsModel.datasetsChanged(null);
-            dsModel.refresh();
         });
 
         buttonBar.getChildren().addAll(separator, switchTableView, copyToClipBoard, saveTableView);
@@ -283,9 +271,9 @@ public class TableViewer extends ChartPlugin {
      * @author akrimm
      */
     protected class DataSetsModel extends ObservableListBase<DataSetsRow> {
+        protected static final double DEFAULT_COL_WIDTH = 150;
         private int nRows;
         private final ObservableList<TableColumn<DataSetsRow, ?>> columns = FXCollections.observableArrayList();
-        private Callable<Void> refreshFunction;
 
         private long lastColumnUpdate = 0;
         private AtomicBoolean columnUpdateScheduled = new AtomicBoolean(false);
@@ -293,10 +281,16 @@ public class TableViewer extends ChartPlugin {
         private final ListChangeListener<Renderer> rendererChangeListener = this::rendererChanged;
         private final InvalidationListener datasetChangeListener = this::datasetsChanged;
         private final EventListener dataSetDataUpdateListener = (UpdateEvent evt) -> FXUtils.runFX(() -> this.datasetsChanged(null));
+        private TimerTask timerTask;
 
         public DataSetsModel() {
             super();
             columns.add(new RowIndexHeaderTableColumn());
+            table.visibleProperty().addListener((prop, oldVal, newVal) -> {
+                if (newVal) {
+                    datasetsChanged(null);
+                }
+            });
         }
 
         @Override
@@ -304,7 +298,13 @@ public class TableViewer extends ChartPlugin {
             return "TableModel";
         }
 
-        public void datasetsChanged(Observable obs) {
+        public void datasetsChanged(@SuppressWarnings("unused") Observable obs) { // unused parameter is needed for listener interface
+            if (getChart() == null) { // the plugin was removed from the chart
+                return;
+            }
+            if (!table.isVisible()) {
+                return;
+            }
             long now = System.currentTimeMillis();
             if (now - lastColumnUpdate > refreshRate.get()) {
                 List<DataSet> columnsUpdated = getChart().getAllDatasets().stream().sorted((a, b) -> a.getName().compareTo(b.getName())).collect(Collectors.toList());
@@ -327,18 +327,27 @@ public class TableViewer extends ChartPlugin {
                         ((DataSetTableColumns) columns.get(i + 1)).update(null);
                     }
                 }
-                nRows = nRowsNew;
                 lastColumnUpdate = now;
-                refresh();
+                if (nRows != nRowsNew) {
+                    // Workaround, let the selection model realize, that the number of cols has changed
+                    // in the process the selection is lost
+                    nRows = nRowsNew;
+                    table.setItems(null);
+                    table.setItems(dsModel);
+                } else {
+                    table.refresh();
+                }
             } else {
-                if (columnUpdateScheduled.compareAndExchange(false, true))
-                    timer.schedule(new TimerTask() {
+                if (columnUpdateScheduled.compareAndExchange(false, true)) {
+                    timerTask = new TimerTask() {
                         @Override
                         public void run() {
                             columnUpdateScheduled.set(false);
                             FXUtils.runFX(() -> datasetsChanged(null));
                         }
-                    }, refreshRate.get());
+                    };
+                    timer.schedule(timerTask, refreshRate.get());
+                }
             }
         }
 
@@ -348,6 +357,9 @@ public class TableViewer extends ChartPlugin {
          */
         public void chartChanged(final Chart oldChart, final Chart newChart) {
             if (oldChart != null) {
+                if (timerTask != null) {
+                    timerTask.cancel();
+                }
                 // de-register data set listeners
                 oldChart.getDatasets().removeListener(datasetChangeListener);
                 oldChart.getDatasets().forEach(dataSet -> dataSet.removeListener(dataSetDataUpdateListener));
@@ -382,7 +394,6 @@ public class TableViewer extends ChartPlugin {
         @Override
         public DataSetsRow get(final int row) {
             return new DataSetsRow(row, this);
-            // return getDataSetsRow(row);
         }
 
         protected String getAllData() {
@@ -393,7 +404,7 @@ public class TableViewer extends ChartPlugin {
                 if (col instanceof DataSetTableColumns && col.isVisible()) {
                     dataSetNo++;
                     for (TableColumn<DataSetsRow, ?> subcol : col.getColumns()) {
-                        if (subcol instanceof DataSetTableColumn && subcol.isVisible()) {
+                        if (subcol instanceof DataSetTableColumn && ((DataSetTableColumn) subcol).active) {
                             sb.append(((DataSetTableColumn) subcol).getText()).append(dataSetNo).append(", ");
                         }
                     }
@@ -405,7 +416,7 @@ public class TableViewer extends ChartPlugin {
                 for (TableColumn<DataSetsRow, ?> col : columns) {
                     if (col instanceof DataSetTableColumns && col.isVisible()) {
                         for (TableColumn<DataSetsRow, ?> subcol : col.getColumns()) {
-                            if (subcol instanceof DataSetTableColumn && subcol.isVisible()) {
+                            if (subcol instanceof DataSetTableColumn && ((DataSetTableColumn) subcol).active) {
                                 sb.append(((DataSetTableColumn) subcol).getValue(r)).append(", ");
                             }
                         }
@@ -492,14 +503,6 @@ public class TableViewer extends ChartPlugin {
             return (nRows >= 0);
         }
 
-        private void refresh() {
-            try {
-                refreshFunction.call();
-            } catch (Exception e) { // NOPMD 'call()' issues generic 'Exception'
-                LOGGER.error("Error refreshing table model", e);
-            }
-        }
-
         protected void rendererChanged(final ListChangeListener.Change<? extends Renderer> change) {
             boolean dataSetChanges = false;
             while (change.next()) {
@@ -520,15 +523,7 @@ public class TableViewer extends ChartPlugin {
 
             if (dataSetChanges) {
                 datasetsChanged(null);
-                refresh();
             }
-        }
-
-        /**
-         * @param refreshFunction the refreshFunction to set
-         */
-        public void setRefreshFunction(final Callable<Void> refreshFunction) {
-            this.refreshFunction = refreshFunction;
         }
 
         @Override
@@ -544,6 +539,7 @@ public class TableViewer extends ChartPlugin {
         protected class DataSetTableColumn extends TableColumn<DataSetsRow, Double> {
             private DataSet ds;
             private final ColumnType type;
+            protected boolean active = false;
 
             /**
              * Creates a TableColumn with the text set to the provided string, with default comparator. The cell factory
@@ -560,7 +556,7 @@ public class TableViewer extends ChartPlugin {
                 this.type = type;
                 this.setCellValueFactory(dataSetsRowFeature -> new ReadOnlyObjectWrapper<>(dataSetsRowFeature.getValue().getValue(ds, type)));
 
-                setVisible(false);
+                this.setPrefWidth(0);
             }
 
             public double getValue(final int row) {
@@ -570,7 +566,9 @@ public class TableViewer extends ChartPlugin {
             public void update(final DataSet newDataSet) {
                 ds = newDataSet;
                 if (ds == null) {
-                    setVisible(false);
+                    this.setText("");
+                    this.setPrefWidth(0);
+                    active = false;
                     return;
                 }
                 if (editable) {
@@ -578,26 +576,33 @@ public class TableViewer extends ChartPlugin {
                 }
                 if (!type.errorCol) {
                     setText(type.label);
-                    setVisible(true);
+                    this.setPrefWidth(DEFAULT_COL_WIDTH);
+                    active = true;
                     return;
                 }
                 if (!(newDataSet instanceof DataSetError)) {
-                    setVisible(false);
+                    this.setText("");
+                    this.setPrefWidth(0);
+                    active = false;
                     return;
                 }
                 DataSetError eDs = (DataSetError) newDataSet;
                 switch (eDs.getErrorType(type.dimIdx)) {
                 case SYMMETRIC:
-                    setText(type.label);
-                    setVisible(!type.positive);
+                    setText(type.positive ? "" : type.label);
+                    this.setPrefWidth(type.positive ? 0 : DEFAULT_COL_WIDTH);
+                    active = !type.positive;
                     return;
                 case ASYMMETRIC:
                     setText((type.positive ? '+' : '-') + type.label);
-                    setVisible(true);
+                    this.setPrefWidth(DEFAULT_COL_WIDTH);
+                    active = true;
                     return;
                 case NO_ERROR:
                 default:
-                    setVisible(false);
+                    this.setText("");
+                    this.setPrefWidth(0);
+                    active = false;
                     break;
                 }
             }
@@ -621,8 +626,7 @@ public class TableViewer extends ChartPlugin {
                     return;
                 }
 
-                // column can theoretically be edited as long as
-                // 'canChange(index)' is true for the selected index
+                // column can theoretically be edited as long as 'canChange(index)' is true for the selected index
                 // and isAcceptable(index, double, double) is also true
                 this.setEditable(true);
                 this.setCellFactory(TextFieldTableCell.forTableColumn(new DoubleStringConverter()));
@@ -638,8 +642,7 @@ public class TableViewer extends ChartPlugin {
                     final double oldY = editableDataSet.get(DIM_Y, row);
 
                     if (editConstraints != null && !editConstraints.canChange(row)) {
-                        // may not edit value, revert to old value (ie. via
-                        // rewriting old value)
+                        // may not edit value, revert to old value (ie. via rewriting old value)
                         editableDataSet.set(row, oldX, oldY);
                         return;
                     }
@@ -663,8 +666,7 @@ public class TableViewer extends ChartPlugin {
                         editableDataSet.set(row, oldX, newVal);
                         break;
                     default:
-                        // Errors are not editable, as there is no
-                        // interface for manipulating them
+                        // Errors are not editable, as there is no interface for manipulating them
                         editableDataSet.set(row, oldX, oldY);
                         break;
                     }
@@ -695,10 +697,10 @@ public class TableViewer extends ChartPlugin {
                 this.dataSet = newDataSet;
                 if (newDataSet != null) {
                     this.setText(newDataSet.getName());
-                    setVisible(true);
+                    this.setPrefWidth(DEFAULT_COL_WIDTH);
                 } else {
                     this.setText("");
-                    setVisible(false);
+                    this.setPrefWidth(0);
                 }
                 this.getColumns().forEach(col -> {
                     if (col instanceof DataSetTableColumn) {
@@ -721,8 +723,7 @@ public class TableViewer extends ChartPlugin {
                 setCellValueFactory(dataSetsRow -> {
                     return new ReadOnlyObjectWrapper<>(dataSetsRow.getValue().getRow());
                 });
-                getStyleClass().add("column-header"); // make the column look
-                        // like a header
+                getStyleClass().add("column-header"); // make the column look like a header
                 setEditable(false);
             }
         }

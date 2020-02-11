@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.beans.Observable;
@@ -139,7 +138,7 @@ public class EditAxis extends ChartPlugin {
         newChart.getAxes().addListener(this::axesChangedHandler);
     }
 
-    private void axesChangedHandler(Observable observable) {
+    private void axesChangedHandler(@SuppressWarnings("unused") Observable observable) { // parameter for EventHandler api
         removeMouseEventHandlers(getChart());
         addMouseEventHandlers(getChart());
     }
