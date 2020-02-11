@@ -4,17 +4,17 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>de.gsi</groupId>
     <artifactId>chartfx</artifactId>
-    <!-- N.B. convention: major version number is linked to the compatible JDK Version, 
+    <!-- N.B. convention: major version number is linked to the compatible JDK Version,
         minor version number to library feature/api changes, micro version number to bug-fixes -->
     <version>${revision}${sha1}${changelist}</version>
     <packaging>pom</packaging>
     <name>chartfx</name>
-    <description>This charting library ${project.artifactId}- is an extension 
-        in the spirit of Oracle's XYChart and performance/time-proven JDataViewer charting functionalities. 
-        Emphasis was put on plotting performance for both large number of data points and real-time displays, 
-        as well as scientific accuracies leading to error bar/surface plots, and other scientific plotting 
-        features (parameter measurements, fitting, multiple axes, zoom, ...). 
-        The library also contains a small set of math routines that can operate directly on the DataSet primitive 
+    <description>This charting library ${project.artifactId}- is an extension
+        in the spirit of Oracle's XYChart and performance/time-proven JDataViewer charting functionalities.
+        Emphasis was put on plotting performance for both large number of data points and real-time displays,
+        as well as scientific accuracies leading to error bar/surface plots, and other scientific plotting
+        features (parameter measurements, fitting, multiple axes, zoom, ...).
+        The library also contains a small set of math routines that can operate directly on the DataSet primitive
         for fitting, computing spectra, linear algebra, FIR/IIR filtering, and other functionalities common to signal processing.
     </description>
 
@@ -42,6 +42,7 @@
 
         <chartfx.slf4j.version>2.0.0-alpha0</chartfx.slf4j.version>
         <chartfx.junit.jupiter.version>5.5.2</chartfx.junit.jupiter.version>
+        <chartfx.awaitility.version>4.0.2</chartfx.awaitility.version>
         <chartfx.jacoco.version>0.8.5</chartfx.jacoco.version>
         <chartfx.surefire.version>2.22.2</chartfx.surefire.version>
         <chartfx.coveralls.version>3.2.0</chartfx.coveralls.version>
@@ -138,7 +139,7 @@
                     </executions>
                 </plugin>
                 <plugin>
-                    <!-- https://stackoverflow.com/questions/3459928/running-a-specific- 
+                    <!-- https://stackoverflow.com/questions/3459928/running-a-specific-
                         maven-plugin-goal-from-the-command-line-in-a-sub-module-of-a/26448447#26448447 -->
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>exec-maven-plugin</artifactId>
@@ -207,7 +208,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <!-- <configuration> <additionalparam>-Xdoclint:none</additionalparam> 
+                <!-- <configuration> <additionalparam>-Xdoclint:none</additionalparam>
                     <skip>true</skip> </configuration> -->
                 <executions>
                     <execution>
@@ -215,7 +216,7 @@
                         <goals>
                             <goal>jar</goal>
                         </goals>
-                        <!-- <configuration> <additionalparam>-Xdoclint:none</additionalparam> 
+                        <!-- <configuration> <additionalparam>-Xdoclint:none</additionalparam>
                             <skip>true</skip> </configuration> -->
                     </execution>
                 </executions>
@@ -227,7 +228,7 @@
                 <version>${chartfx.surefire.version}</version>
                 <configuration>
                     <!-- Jacoco prepare-agent builds some command-line params without -->
-                    <!-- which jacoco will not instrument. Hence it is important 
+                    <!-- which jacoco will not instrument. Hence it is important
                         to add -->
                     <!-- those command-line params here (${argLine} holds those params) -->
                     <argLine>${argLine} -Xms256m -Xmx2048m</argLine>
@@ -306,6 +307,12 @@
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-params</artifactId>
             <version>${chartfx.junit.jupiter.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.awaitility</groupId>
+            <artifactId>awaitility</artifactId>
+            <version>${chartfx.awaitility.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

@@ -8,6 +8,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import de.gsi.dataset.utils.AggregateException;
+
 /**
  * @author rstein
  */
@@ -43,7 +45,7 @@ public interface EventSource {
      * false, allows applications to prevent this behaviour, in case data sets are updated multiple times during an
      * acquisition cycle but the chart update is only required at the end of the cycle. <code>true</code> for automatic
      * notification
-     * 
+     *
      * @return the atomic boolean
      */
     AtomicBoolean autoNotification();
@@ -57,7 +59,7 @@ public interface EventSource {
 
     /**
      * invoke object within update listener list
-     * 
+     *
      * @param updateEvent the event the listeners are notified with
      */
     default void invokeListener(final UpdateEvent updateEvent) {
@@ -66,21 +68,28 @@ public interface EventSource {
 
     /**
      * invoke object within update listener list
-     * 
+     *
      * @param updateEvent the event the listeners are notified with
      * @param executeParallel {@code true} execute event listener via parallel executor service
      */
     default void invokeListener(final UpdateEvent updateEvent, final boolean executeParallel) {
         synchronized (autoNotification()) {
-            if (!autoNotification().get() || updateEventListener() == null) {
+            if (!autoNotification().get() || updateEventListener() == null || updateEventListener().isEmpty()) {
                 return;
             }
         }
         synchronized (updateEventListener()) {
+            final AggregateException exceptions = new AggregateException(
+                    EventSource.class.getSimpleName() + "executeParallel=" + executeParallel);
+
             if (!executeParallel) {
                 // alt implementation:
                 for (EventListener listener : updateEventListener()) {
-                    listener.handle(updateEvent);
+                    try {
+                        listener.handle(updateEvent);
+                    } catch (Exception e) {
+                        exceptions.getThrowableList().add(e);
+                    }
                 }
                 return;
             }
@@ -89,20 +98,26 @@ public interface EventSource {
             final List<Callable<Boolean>> workers = new ArrayList<>();
             for (EventListener listener : updateEventListener()) {
                 workers.add(() -> {
-                    listener.handle(event);
-                    return Boolean.TRUE;
+                    try {
+                        listener.handle(event);
+                        return Boolean.TRUE;
+                    } catch (Exception e) {
+                        exceptions.getThrowableList().add(e);
+                    }
+                    return Boolean.FALSE;
                 });
             }
 
             try {
                 final List<Future<Boolean>> jobs = EventThreadHelper.getExecutorService().invokeAll(workers);
                 for (final Future<Boolean> future : jobs) {
-                    final Boolean execstate = future.get();
-                    if (!execstate) {
-                        throw new IllegalStateException("one parallel worker thread finished execution with error");
-                    }
+                    future.get();
+                }
+                if (!exceptions.getThrowableList().isEmpty()) {
+                    throw exceptions;
                 }
             } catch (final InterruptedException | ExecutionException e) {
+                Thread.currentThread().interrupt();
                 throw new IllegalStateException("one parallel worker thread finished execution with error", e);
             }
         }
