@@ -293,7 +293,7 @@ public class TableViewer extends ChartPlugin {
         public DataSetsModel() {
             super();
             columns.add(new RowIndexHeaderTableColumn());
-            table.visibleProperty().addListener((prop, oldVal, newVal)-> {
+            table.visibleProperty().addListener((prop, oldVal, newVal) -> {
                 if (newVal == true) {
                     datasetsChanged(null);
                 }
