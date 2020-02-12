@@ -170,7 +170,7 @@ public class TableViewer extends ChartPlugin {
         }
         final String data = dsModel.getSelectedData(table.getSelectionModel());
         try (BufferedWriter writer = Files.newBufferedWriter(Paths.get(save.getPath() + ".csv"),
-                StandardCharsets.UTF_8)) {
+                     StandardCharsets.UTF_8)) {
             writer.write(data);
         } catch (IOException ex) {
             LOGGER.atError().setCause(ex).log("error while exporting data to csv");
