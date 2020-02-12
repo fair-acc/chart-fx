@@ -652,8 +652,13 @@ public class DataViewWindow extends BorderPane implements EventSource {
         final long start = ProcessingProfiler.getTimeStamp();
         super.layoutChildren();
         if (getContent() instanceof Chart) {
-            ProcessingProfiler.getTimeDiff(start,
-                    "pane updated with data set = " + ((Chart) getContent()).getDatasets().get(0).getName());
+            final Chart chart = ((Chart) getContent());
+            if (chart.getDatasets().isEmpty()) {
+                ProcessingProfiler.getTimeDiff(start, "pane updated for chart = " + chart.getTitle());
+            } else {
+                ProcessingProfiler.getTimeDiff(start,
+                        "pane updated with data set = " + chart.getDatasets().get(0).getName());
+            }
         }
     }
 
