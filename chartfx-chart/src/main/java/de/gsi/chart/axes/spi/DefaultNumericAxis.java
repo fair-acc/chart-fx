@@ -137,7 +137,7 @@ public class DefaultNumericAxis extends AbstractAxis implements Axis {
             final double tickUnit) {
         super(lowerBound, upperBound);
         this.setName(axisLabel);
-        if (lowerBound >= upperBound || lowerBound == 0 && upperBound == 0) {
+        if (lowerBound >= upperBound) {
             setAutoRanging(true);
         }
         setTickUnit(tickUnit);
@@ -272,7 +272,7 @@ public class DefaultNumericAxis extends AbstractAxis implements Axis {
      * @return value of the forceZeroInRange property
      */
     public boolean isForceZeroInRange() {
-        return forceZeroInRange.getValue();
+        return forceZeroInRangeProperty().getValue();
     }
 
     /**
@@ -338,7 +338,7 @@ public class DefaultNumericAxis extends AbstractAxis implements Axis {
      * @param value if {@code true}, zero is always included in the visible range
      */
     public void setForceZeroInRange(final boolean value) {
-        forceZeroInRange.setValue(value);
+        forceZeroInRangeProperty().setValue(value);
     }
 
     /**
