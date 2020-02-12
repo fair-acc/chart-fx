@@ -44,7 +44,7 @@ public enum MetricPrefix {
                 return e.getLongPrefix();
             }
         }
-        return scaling + "*";
+        return "*" + scaling;
     }
 
     public static MetricPrefix getNearestMatch(final double scaling) {
@@ -62,6 +62,6 @@ public enum MetricPrefix {
                 return e.getShortPrefix();
             }
         }
-        return scaling + "*";
+        return "*" + scaling;
     }
 }
