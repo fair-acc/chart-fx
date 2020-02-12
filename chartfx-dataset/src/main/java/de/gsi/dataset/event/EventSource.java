@@ -79,22 +79,26 @@ public interface EventSource {
             }
         }
         synchronized (updateEventListener()) {
-            final AggregateException exceptions = new AggregateException(
-                    EventSource.class.getSimpleName() + "executeParallel=" + executeParallel);
-
             if (!executeParallel) {
                 // alt implementation:
+                final AggregateException exceptions = new AggregateException(
+                        EventSource.class.getSimpleName() + "(NonParallel)");
                 for (EventListener listener : updateEventListener()) {
                     try {
                         listener.handle(updateEvent);
                     } catch (Exception e) {
-                        exceptions.getThrowableList().add(e);
+                        exceptions.add(e);
                     }
+                }
+                if (!exceptions.isEmpty()) {
+                    throw exceptions;
                 }
                 return;
             }
-            final UpdateEvent event = updateEvent == null ? new UpdateEvent(this) : updateEvent;
 
+            final UpdateEvent event = updateEvent == null ? new UpdateEvent(this) : updateEvent;
+            final AggregateException exceptions = new AggregateException(
+                    EventSource.class.getSimpleName() + "(Parallel)");
             final List<Callable<Boolean>> workers = new ArrayList<>();
             for (EventListener listener : updateEventListener()) {
                 workers.add(() -> {
@@ -102,7 +106,8 @@ public interface EventSource {
                         listener.handle(event);
                         return Boolean.TRUE;
                     } catch (Exception e) {
-                        exceptions.getThrowableList().add(e);
+                        exceptions.add(e);
+                        exceptions.fillInStackTrace();
                     }
                     return Boolean.FALSE;
                 });
@@ -113,12 +118,13 @@ public interface EventSource {
                 for (final Future<Boolean> future : jobs) {
                     future.get();
                 }
-                if (!exceptions.getThrowableList().isEmpty()) {
-                    throw exceptions;
-                }
             } catch (final InterruptedException | ExecutionException e) {
                 Thread.currentThread().interrupt();
                 throw new IllegalStateException("one parallel worker thread finished execution with error", e);
+            }
+            
+            if (!exceptions.isEmpty()) {
+                throw exceptions;
             }
         }
     }
