@@ -157,6 +157,32 @@ public class TableViewer extends ChartPlugin {
     }
 
     /**
+     * The refresh Rate limits minimum amount of time between table updates in milliseconds and defaults to 100ms.
+     * Setting this below 20ms is discouraged and will produce warnings.
+     * 
+     * @return The refreshRate property
+     */
+    public IntegerProperty refreshRateProperty() {
+        return refreshRate;
+    }
+
+    /**
+     * gets {@link #refreshRateProperty()}
+     * @return the value of the refreshRate Property
+     */
+    public int getRefreshRate() {
+        return refreshRate.get();
+    }
+
+    /**
+     * sets {@link #refreshRateProperty()}
+     * @param newVal the new value for the refreshRate Property
+     */
+    public void setRefreshRate(final int newVal) {
+        refreshRate.set(newVal);
+    }
+
+    /**
      * Copies the (selected) table data to the clipboard in csv Format.
      */
     public void copySelectedToClipboard() {
