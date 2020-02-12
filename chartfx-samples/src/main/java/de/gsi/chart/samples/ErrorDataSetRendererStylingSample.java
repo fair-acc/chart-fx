@@ -89,6 +89,12 @@ public class ErrorDataSetRendererStylingSample extends Application {
             dataSet.add(new SineFunction("dyn. sine function", nSamples, true));
             dataSet.add(new CosineFunction("dyn. cosine function", nSamples, true));
             break;
+        case MIX_TRIGONOMETRIC_TOGGLE:
+            dataSet.add(new SineFunction("dyn. sine function", nSamples, true));
+            if (System.currentTimeMillis() % 500 < 200) { // toggle second function every 2s
+                dataSet.add(new CosineFunction("dyn. cosine function", nSamples, true));
+            }
+            break;
         case RANDOM_WALK:
         default:
             dataSet.add(new RandomWalkFunction("random walk data", nSamples));
@@ -98,7 +104,6 @@ public class ErrorDataSetRendererStylingSample extends Application {
         final List<DataSetError> dataSetToLoad = dataSet;
         Platform.runLater(() -> {
             chart.getRenderers().get(0).getDatasets().setAll(dataSetToLoad);
-            chart.requestLayout();
         });
         startTime = ProcessingProfiler.getTimeDiff(startTime, "adding data into DataSet");
     }
@@ -484,7 +489,8 @@ public class ErrorDataSetRendererStylingSample extends Application {
         GAUSS,
         SINE,
         COSINE,
-        MIX_TRIGONOMETRIC;
+        MIX_TRIGONOMETRIC,
+        MIX_TRIGONOMETRIC_TOGGLE;
     }
 
     private class ParameterTab extends Tab {
