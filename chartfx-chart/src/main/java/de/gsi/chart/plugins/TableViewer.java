@@ -293,6 +293,11 @@ public class TableViewer extends ChartPlugin {
         public DataSetsModel() {
             super();
             columns.add(new RowIndexHeaderTableColumn());
+            table.visibleProperty().addListener((prop, oldVal, newVal)-> {
+                if (newVal == true) {
+                    datasetsChanged(null);
+                }
+            });
         }
 
         @Override
@@ -302,6 +307,9 @@ public class TableViewer extends ChartPlugin {
 
         public void datasetsChanged(@SuppressWarnings("unused") Observable obs) { // unused parameter is needed for listener interface
             if (getChart() == null) { // the plugin was removed from the chart
+                return;
+            }
+            if (!table.isVisible()) {
                 return;
             }
             long now = System.currentTimeMillis();
