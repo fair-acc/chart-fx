@@ -3,6 +3,8 @@ package de.gsi.dataset.event;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.Test;
@@ -77,21 +79,43 @@ public class EventSourceTests {
         // clear event listener and add exception throwing listener
         evtSource.eventListener.clear();
         evtSource.addListener(evt -> {
-            throw new IllegalStateException("bad bad exception");
+            throw new IllegalStateException("bad bad exception #1");
+        });
+        evtSource.addListener(evt -> {
+            exceptionThrowingFunctionA();
+        });
+        evtSource.addListener(evt -> {
+            exceptionThrowingFunctionB();
         });
         assertThrows(AggregateException.class, () -> evtSource.invokeListener());
         try {
             // check exception handling for parallel execution
             evtSource.invokeListener(updateEvent, true);
         } catch (AggregateException e) {
-            assertEquals(1, e.getThrowableList().size());
+            assertEquals(3, e.getThrowableList().size());
         }
 
         try {
             // check exception handling for non-parallel execution
             evtSource.invokeListener(updateEvent, false);
         } catch (AggregateException e) {
-            assertEquals(1, e.getThrowableList().size());
+            assertEquals(3, e.getThrowableList().size());
+        }
+
+        try {
+            // check stack-trace printout
+            evtSource.invokeListener(updateEvent, false);
+        } catch (AggregateException e) {
+            if (LOGGER.isTraceEnabled()) {
+                e.printStackTrace();
+            }
+            ByteArrayOutputStream os = new ByteArrayOutputStream();
+            PrintStream ps = new PrintStream(os);
+            e.printStackTrace(ps);
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.atDebug().addArgument(os.toString())
+                        .log("test-case stack trace -- ignore this -- this is valid output:\n{}");
+            }
         }
 
         // corrupt event listener list (test failure case)
@@ -102,6 +126,14 @@ public class EventSourceTests {
         if (LOGGER.isDebugEnabled()) {
             LOGGER.atDebug().log("basicTests() - done");
         }
+    }
+
+    protected void exceptionThrowingFunctionA() {
+        throw new IllegalStateException("bad bad exception #2");
+    }
+
+    protected void exceptionThrowingFunctionB() {
+        throw new IllegalStateException("bad bad exception #3");
     }
 
 }
