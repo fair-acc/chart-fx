@@ -9,6 +9,8 @@ import javafx.scene.chart.ValueAxis;
 
 /**
  * Holds the range of the axis along with {@link ValueAxis#getScale() scale} and tick numbers format to be used.
+ *
+ * @author rstein
  */
 public class AxisRange extends DataRange {
 
@@ -17,7 +19,11 @@ public class AxisRange extends DataRange {
     protected double tickUnit;
 
     public AxisRange() {
-        this(0.0, 1.0, 1.0, 1.0, 0.1);
+        this(Double.NaN, Double.NaN, 1.0, 1.0, 0.1);
+    }
+
+    public AxisRange(final AxisRange other) {
+        this(other.getMin(), other.getMax(), other.getAxisLength(), other.getScale(), other.getTickUnit());
     }
 
     public AxisRange(final double lowerBound, final double upperBound, final double axisLength, final double scale,
@@ -39,9 +45,15 @@ public class AxisRange extends DataRange {
      *
      * @param range range to be added
      */
-    public void add(final AxisRange range) {
-        add(range.min);
-        add(range.max);
+    public boolean add(final AxisRange range) {
+        boolean retVal = false;
+        if (add(range.min)) {
+            retVal = true;
+        }
+        if (add(range.max)) {
+            retVal = true;
+        }
+        return retVal;
     }
 
     public AxisRange copy() {
@@ -49,14 +61,9 @@ public class AxisRange extends DataRange {
                 this.getTickUnit());
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.lang.Object#equals(java.lang.Object)
-     */
     @Override
     public boolean equals(final Object obj) {
-        if (obj == null || !(obj instanceof AxisRange)) {
+        if (!(obj instanceof AxisRange)) {
             return false;
         }
 
@@ -129,22 +136,6 @@ public class AxisRange extends DataRange {
         }
         this.scale = newScale;
         this.tickUnit = diff / 10;
-    }
-
-    /**
-     * Substracts the specified data range from this range. TODO: check algorithm definiton
-     * 
-     * @param range range to be subtracted
-     * @return this axis with reduced limits
-     */
-    public AxisRange substract(final AxisRange range) {
-        if (range.min > max || range.max < min) {
-            return this;
-        }
-        this.min = Math.max(min, range.min);
-        this.max = Math.min(max, range.max);
-
-        return this;
     }
 
     @Override
