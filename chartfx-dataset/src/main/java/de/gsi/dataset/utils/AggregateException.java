@@ -108,7 +108,7 @@ public class AggregateException extends RuntimeException {
 
     /**
      * Print our stack trace as an enclosed exception for the specified stack trace.
-     * 
+     *
      * @param throwable the throwable to be printed/dived-into
      * @param stream the output stream to write to
      * @param enclosingTrace from the previous exception instance
@@ -160,15 +160,15 @@ public class AggregateException extends RuntimeException {
     protected interface PrintStreamOrWriter {
         /**
          * Returns the object to be locked when using this StreamOrWriter
-         * 
+         *
          * @return lock object
          */
         Object lock();
 
         /**
          * Prints the specified string msg as a line on this StreamOrWriter
-         * 
-         * @param msg
+         *
+         * @param msg to be printed
          */
         void println(Object msg);
     }
