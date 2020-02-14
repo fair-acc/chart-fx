@@ -3,14 +3,12 @@ package de.gsi.chart.plugins;
 import de.gsi.chart.Chart;
 import de.gsi.chart.XYChart;
 import de.gsi.chart.axes.Axis;
-import de.gsi.chart.axes.spi.Axes;
 import de.gsi.chart.axes.spi.MetricPrefix;
 import de.gsi.chart.ui.geometry.Side;
 import de.gsi.dataset.spi.utils.Tuple;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.geometry.Orientation;
-import javafx.scene.chart.ValueAxis;
 import javafx.util.StringConverter;
 
 /**
@@ -52,12 +50,10 @@ public abstract class AbstractDataFormattingPlugin extends ChartPlugin {
 
     /**
      * Formats the data to be displayed by this plugin. Uses the specified {@link #xValueFormatterProperty()} and
-     * {@link #yValueFormatterProperty()} to obtain the corresponding formatters. If it is {@code null} and the axis is
-     * a {@code ValueAxis} - the method will use {@link ValueAxis#getTickLabelFormatter() tick label formatter}. If this
-     * one is also not initialized - a default formatter is used.
+     * {@link #yValueFormatterProperty()} to obtain the corresponding formatters.
      * <p>
      * Can be overridden to modify formatting of the data.
-     * 
+     *
      * @param chart reference to chart
      *
      * @param data the data point to be formatted
