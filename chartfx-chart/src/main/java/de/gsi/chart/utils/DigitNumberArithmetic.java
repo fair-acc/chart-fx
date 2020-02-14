@@ -5,7 +5,7 @@ import java.util.WeakHashMap;
 
 import de.gsi.dataset.spi.utils.Tuple;
 
-public final class DigitNumberArithmetic {
+public final class DigitNumberArithmetic { //NOPMD nomen est omen
 
     static WeakHashMap<Double, String> numberDigitsCache = new WeakHashMap<>();
 
