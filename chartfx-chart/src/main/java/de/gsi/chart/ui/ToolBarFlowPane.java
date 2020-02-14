@@ -20,7 +20,7 @@ import de.gsi.chart.Chart;
 
 /**
  * tool bar for plugins to add their controls (if necessary)
- * 
+ *
  * @author rstein
  */
 public class ToolBarFlowPane extends FlowPane {
@@ -47,7 +47,7 @@ public class ToolBarFlowPane extends FlowPane {
 
         this.setAlignment(Pos.TOP_CENTER);
         this.setMinWidth(0);
-        setPadding(calculateInsets());
+        setPadding(calculateInsets()); // NOPMD
         VBox.setVgrow(this, Priority.ALWAYS);
         HBox.setHgrow(this, Priority.NEVER);
 
@@ -81,7 +81,7 @@ public class ToolBarFlowPane extends FlowPane {
     /**
      * Calculate the tool bar insets. It is called on tool bar width or it's contents changes and on corner radius
      * changes.
-     * 
+     *
      * @return Insets for the tool bar pane
      */
     protected Insets calculateInsets() {

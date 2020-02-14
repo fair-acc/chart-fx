@@ -7,7 +7,6 @@ import de.gsi.chart.Chart;
 import de.gsi.chart.XYChart;
 import de.gsi.chart.axes.Axis;
 import de.gsi.chart.axes.AxisMode;
-import de.gsi.chart.axes.spi.Axes;
 import de.gsi.chart.axes.spi.DefaultNumericAxis;
 import de.gsi.chart.ui.geometry.Side;
 import javafx.beans.property.ObjectProperty;
@@ -158,7 +157,7 @@ public class Panner extends ChartPlugin {
             final double offset = prevData - newData;
 
             final boolean allowsShift = side.isHorizontal() ? getAxisMode().allowsX() : getAxisMode().allowsY();
-            if (!Axes.hasBoundedRange(axis) && allowsShift) {
+            if (!(axis.minProperty().isBound() || axis.maxProperty().isBound()) && allowsShift) {
                 axis.setAutoRanging(false);
                 shiftBounds(axis, offset);
             }
@@ -225,7 +224,7 @@ public class Panner extends ChartPlugin {
     /**
      * Depending if the offset is positive or negative, change first upper or lower bound to not provoke lowerBound
      * &gt;= upperBound when offset &gt;= upperBound - lowerBound.
-     * 
+     *
      * @param axis reference axis
      * @param offset panning distance
      */
