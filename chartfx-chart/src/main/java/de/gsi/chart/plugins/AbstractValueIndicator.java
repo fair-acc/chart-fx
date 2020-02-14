@@ -170,9 +170,9 @@ public abstract class AbstractValueIndicator extends ChartPlugin {
     }
 
     /**
-     * Returns the ValueAxis that this indicator is associated with.
+     * Returns the Axis that this indicator is associated with.
      *
-     * @return associated ValueAxis
+     * @return associated Axis
      */
     protected Axis getNumericAxis() {
         return axis;
