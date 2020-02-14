@@ -51,6 +51,7 @@ public class TickMark extends Text {
         }
         final TickMark other = (TickMark) obj;
 
+        // text is not a critical for equals/hashCode
         return (tickPosition == other.tickPosition) && (tickRotation == other.tickRotation)
                 && (tickValue == other.tickValue);
     }
@@ -114,8 +115,7 @@ public class TickMark extends Text {
         result = (prime * result) + (int) (temp ^ (temp >>> 32));
         temp = Double.doubleToLongBits(tickValue);
         result = (prime * result) + (int) (temp ^ (temp >>> 32));
-        final String text = getText();
-        result = (prime * result) + ((text == null) ? 0 : text.hashCode());
+        // text is not a critical for equals/hashCode
 
         return result;
     }
