@@ -13,7 +13,8 @@ import de.gsi.dataset.utils.DoubleCircularBuffer;
 public class EventRateLimiter implements EventListener {
     private static final int MAX_RATE_BUFFER = 20;
     private static final AtomicInteger serialCounter = new AtomicInteger(0);
-    private final Timer timer = new Timer(EventRateLimiter.class.getSimpleName() + serialCounter.getAndIncrement());
+    private final Timer timer = new Timer(EventRateLimiter.class.getSimpleName() + serialCounter.getAndIncrement(),
+            true);
     private final AtomicBoolean rateLimitActive = new AtomicBoolean(false);
     private final Object lock = new Object();
     private final DoubleCircularBuffer rateEstimatorBuffer = new DoubleCircularBuffer(MAX_RATE_BUFFER);
