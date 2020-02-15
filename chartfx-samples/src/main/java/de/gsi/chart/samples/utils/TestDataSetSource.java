@@ -12,6 +12,7 @@ import javax.sound.sampled.DataLine;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.TargetDataLine;
 
+import org.jtransforms.fft.FloatFFT_1D;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,7 +22,6 @@ import de.gsi.dataset.utils.DoubleCircularBuffer;
 import de.gsi.math.ArrayUtils;
 import de.gsi.math.spectra.Apodization;
 import de.gsi.math.spectra.SpectrumTools;
-import de.gsi.math.spectra.fft.FloatFFT_1D;
 
 import it.unimi.dsi.fastutil.floats.FloatArrayList;
 

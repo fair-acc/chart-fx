@@ -3,13 +3,14 @@ package de.gsi.math.spectra;
 import java.security.InvalidParameterException;
 import java.util.Arrays;
 
+import org.jtransforms.fft.DoubleFFT_1D;
+
 import de.gsi.math.TMathConstants;
-import de.gsi.math.spectra.fft.DoubleFFT_1D;
 import de.gsi.math.utils.ConcurrencyUtils;
 
 /**
  * implementation of the discrete convolution algorithm via the fourier transform
- * 
+ *
  * @author rstein
  */
 public class Convolution {
@@ -18,8 +19,6 @@ public class Convolution {
 
     private void init(final int size) {
         if (f1dFFT == null) {
-            f1dFFT = new DoubleFFT_1D(size);
-        } else if (f1dFFT.getDimension() != size) {
             f1dFFT = new DoubleFFT_1D(size);
         }
     }
@@ -189,7 +188,7 @@ public class Convolution {
 
     /**
      * computes derivative filter (Fourier Domain)
-     * 
+     *
      * @param length the length of the filter
      * @return array containing derivative filter kernel
      */
@@ -224,7 +223,7 @@ public class Convolution {
 
     /**
      * computes the Hilbert transform filter (Fourier Domain)
-     * 
+     *
      * @param length the length of the filter
      * @return vector containing Hilbert filter kernel
      */
@@ -260,7 +259,7 @@ public class Convolution {
 
     /**
      * computes the identity filter
-     * 
+     *
      * @param length the length of the filter
      * @return vector containing identy filter
      */
@@ -279,7 +278,7 @@ public class Convolution {
 
     /**
      * computes low-pass filter (Fourier Domain)
-     * 
+     *
      * @param length the length of the filter
      * @param frequency cut-off frequency
      * @return array containing low-pass filter kernel
@@ -302,7 +301,7 @@ public class Convolution {
 
             /*
              * double val = 1.0; double phi = TMath.TwoPi() * f;
-             * 
+             *
              * if (frequency != 0.5) { if (f >= frequency && f < 1.2 * frequency) { double val2 =
              * (1.0-Math.sin(TMath.Pi() * (f - frequency)/(0.4*frequency))); val = Math.pow(val2,2); } else if (f > 1.2
              * * frequency) { val = 0.0; } } ret[i2] = +val; ret[i2 + 1] = 0;
