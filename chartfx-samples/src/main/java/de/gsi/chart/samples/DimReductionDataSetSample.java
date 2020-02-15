@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.Arrays;
 
+import org.jtransforms.fft.DoubleFFT_1D;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,7 +26,6 @@ import de.gsi.dataset.DataSet3D;
 import de.gsi.dataset.spi.DimReductionDataSet;
 import de.gsi.dataset.spi.DimReductionDataSet.Option;
 import de.gsi.math.samples.EMDSample;
-import de.gsi.math.spectra.fft.DoubleFFT_1D;
 import de.gsi.math.spectra.wavelet.ContinuousWavelet;
 import javafx.application.Application;
 import javafx.application.Platform;
