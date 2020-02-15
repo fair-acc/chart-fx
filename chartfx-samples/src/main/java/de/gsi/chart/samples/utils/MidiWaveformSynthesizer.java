@@ -17,13 +17,13 @@ import javax.sound.midi.ShortMessage;
 import javax.sound.midi.Synthesizer;
 import javax.sound.midi.Track;
 
+import org.jtransforms.fft.FloatFFT_1D;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.gsi.dataset.utils.DoubleCircularBuffer;
 import de.gsi.math.spectra.Apodization;
 import de.gsi.math.spectra.SpectrumTools;
-import de.gsi.math.spectra.fft.FloatFFT_1D;
 
 import net.jafama.FastMath;
 

@@ -2,6 +2,7 @@ package de.gsi.math.spectra.dct;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
+import org.jtransforms.dct.FloatDCT_3D;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 

@@ -9,6 +9,8 @@ import static de.gsi.math.DataSetMath.ErrType.EYP;
 import java.util.Arrays;
 import java.util.List;
 
+import org.jtransforms.fft.DoubleFFT_1D;
+
 import de.gsi.dataset.DataSet;
 import de.gsi.dataset.DataSet2D;
 import de.gsi.dataset.DataSetError;
@@ -18,7 +20,6 @@ import de.gsi.dataset.spi.DoubleErrorDataSet;
 import de.gsi.dataset.spi.utils.DoublePointError;
 import de.gsi.math.spectra.Apodization;
 import de.gsi.math.spectra.SpectrumTools;
-import de.gsi.math.spectra.fft.DoubleFFT_1D;
 
 /**
  * Some math operation on DataSet and DataSetError

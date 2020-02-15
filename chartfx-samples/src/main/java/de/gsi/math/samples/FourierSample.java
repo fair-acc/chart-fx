@@ -2,6 +2,7 @@ package de.gsi.math.samples;
 
 import java.util.Arrays;
 
+import org.jtransforms.fft.DoubleFFT_1D;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,7 +14,6 @@ import de.gsi.math.samples.utils.AbstractDemoApplication;
 import de.gsi.math.samples.utils.DemoChart;
 import de.gsi.math.spectra.SpectrumTools;
 import de.gsi.math.spectra.dtft.DiscreteTimeFourierTransform;
-import de.gsi.math.spectra.fft.DoubleFFT_1D;
 import de.gsi.math.spectra.lomb.LombPeriodogram;
 import javafx.application.Application;
 import javafx.scene.Node;
@@ -22,7 +22,7 @@ import javafx.scene.layout.VBox;
 /**
  * example illustrating the discrete time fourier transform and Fast-Fourier transform and spectral interpolation
  * methods. Zoom into the peaks to see the details
- * 
+ *
  * @author rstein
  */
 public class FourierSample extends AbstractDemoApplication {
