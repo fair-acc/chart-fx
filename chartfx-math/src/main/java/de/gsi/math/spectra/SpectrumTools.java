@@ -2,11 +2,12 @@ package de.gsi.math.spectra;
 
 import java.util.Arrays;
 
+import org.jtransforms.fft.DoubleFFT_1D;
+
 import de.gsi.math.TMath;
 import de.gsi.math.TMathConstants;
 import de.gsi.math.fitter.NonLinearRegressionFitter;
 import de.gsi.math.functions.CombFunction;
-import de.gsi.math.spectra.fft.DoubleFFT_1D;
 
 /**
  * Class implements frequency interpolation of spectral peaks. The main idea behind these algorithm is: The resolution
