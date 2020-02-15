@@ -5,7 +5,7 @@ package de.gsi.math;
  *
  * @author rstein
  */
-public final class ArrayMath {
+public final class ArrayMath { // NOPMD - nomen est omen
 
     public static double[] add(final double[] in, final double add) {
         if (in == null) {
@@ -68,21 +68,19 @@ public final class ArrayMath {
     public static double[] calculateFilterParameters(final double cutoffFraction, final FilterType filterType,
             final double rippleP, final double numberOfPoles, final int iteration) {
 
-        // calculate the pole location on the unit circle
+        // calculate the pole location on the unit circle - Butterworth filter response
         double rp = -Math.cos(Math.PI / (numberOfPoles * 2) + (iteration - 1) * (Math.PI / numberOfPoles));
         double ip = Math.sin(Math.PI / (numberOfPoles * 2) + (iteration - 1) * Math.PI / numberOfPoles);
 
-        // warp from a circle to an ellipse
         if (rippleP != 0) {
             // Chebychev filter response
+            // warp from a circle to an ellipse
             final double es = Math.sqrt(Math.pow(100 / (100 - rippleP), 2) - 1);
             final double vx = 1 / numberOfPoles * Math.log(1 / es + Math.sqrt(1 / Math.pow(es, 2) + 1));
             double kx = 1 / numberOfPoles * Math.log(1 / es + Math.sqrt(1 / Math.pow(es, 2) - 1));
             kx = (Math.exp(kx) + Math.exp(-kx)) / 2;
             rp = rp * ((Math.exp(vx) - Math.exp(-vx)) / 2) / kx;
             ip = ip * ((Math.exp(vx) + Math.exp(-vx)) / 2) / kx;
-        } else {
-            // Butterworth filter response
         }
 
         // s-domain to z-domain conversion
@@ -110,20 +108,20 @@ public final class ArrayMath {
         d = 1 + y1 * k - y2 * Math.pow(k, 2);
 
         final double[] filterParameters = new double[5];
-        final double A0 = (x0 - x1 * k + x2 * Math.pow(k, 2)) / d; // a0
-        double A1 = (-2 * x0 * k + x1 + x1 * Math.pow(k, 2) - 2 * x2 * k) / d; // a1
-        final double A2 = (x0 * Math.pow(k, 2) - x1 * k + x2) / d; // a2
-        double B1 = (2 * k + y1 + y1 * Math.pow(k, 2) - 2 * y2 * k) / d; // b1
-        final double B2 = (-Math.pow(k, 2) - y1 * k + y2) / d; // b2
+        final double a0 = (x0 - x1 * k + x2 * Math.pow(k, 2)) / d; // a0
+        double a1 = (-2 * x0 * k + x1 + x1 * Math.pow(k, 2) - 2 * x2 * k) / d; // a1
+        final double a2 = (x0 * Math.pow(k, 2) - x1 * k + x2) / d; // a2
+        double b1 = (2 * k + y1 + y1 * Math.pow(k, 2) - 2 * y2 * k) / d; // b1
+        final double b2 = (-Math.pow(k, 2) - y1 * k + y2) / d; // b2
         if (filterType == FilterType.HIGH_PASS) {
-            A1 = -A1;
-            B1 = -B1;
+            a1 = -a1;
+            b1 = -b1;
         }
-        filterParameters[0] = A0;
-        filterParameters[1] = A1;
-        filterParameters[2] = A2;
-        filterParameters[3] = B1;
-        filterParameters[4] = B2;
+        filterParameters[0] = a0;
+        filterParameters[1] = a1;
+        filterParameters[2] = a2;
+        filterParameters[3] = b1;
+        filterParameters[4] = b2;
 
         return filterParameters;
     }
@@ -180,7 +178,7 @@ public final class ArrayMath {
      * filter from: "The Scientist and Engineer's Guide to DSP" Chapter 20
      *
      * @param signal input signal
-     * @param cutoffFraction cutoffFreq must be smaller than half the samplerate
+     * @param cutoffFraction cutoffFreq must be smaller than half the sample rate
      * @param filterOrder can be between 2 and 20
      * @param filterType 0: lowPass 1: highPass
      * @param ripplePercent ripplePercent is amount of ripple in Chebyshev filter (0-29) (ripplePercent == 0 -&gt;
@@ -270,6 +268,26 @@ public final class ArrayMath {
 
         return filteredSignal;
 
+    }
+
+    public static double[] inverseDecibel(final double[] in) {
+        if (in == null) {
+            return new double[0];
+        }
+        final double[] ret = new double[in.length];
+
+        for (int i = 0; i < in.length; i++) {
+            ret[i] = Math.pow(10, in[i] / 20);
+        }
+
+        return ret;
+    }
+
+    public static double[] inverseDecibelInPlace(final double[] in) {
+        for (int i = 0; i < in.length; i++) {
+            in[i] = Math.pow(10, in[i] / 20);
+        }
+        return in;
     }
 
     public static double[] multiply(final double[] in, final double multiplicator) {

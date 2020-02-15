@@ -1,5 +1,19 @@
 package de.gsi.math.spectra;
 
+import java.security.InvalidParameterException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import de.gsi.dataset.spi.utils.DoublePoint;
+import de.gsi.dataset.utils.ArrayCache;
+import de.gsi.math.ArrayMath;
+import de.gsi.math.ArrayUtils;
+import de.gsi.math.TMath;
+
 /**************************************************************************
  * Original Author: Miroslav Morhac 27/05/99 clean up/java port: Ralph Steinhagen 18/04/18 THIS CLASS CONTAINS ADVANCED
  * SPECTRA PROCESSING FUNCTIONS. ONE-DIMENSIONAL BACKGROUND ESTIMATION FUNCTIONS ONE-DIMENSIONAL SMOOTHING FUNCTIONS
@@ -20,43 +34,27 @@ package de.gsi.math.spectra;
  */
 
 public class TSpectrum {
+    private static final Logger LOGGER = LoggerFactory.getLogger(TSpectrum.class);
+    private static final String CACHED_ARRAY_BACKGROUND = "TSpectrum::background:workingSpace";
+    private static final String CACHED_ARRAY_SMOOTH_MARKOV = "TSpectrum::smoothMarkov:workingSpace";
+    private static final String CACHED_ARRAY_SEARCH = "TSpectrum::search:workingSpace";
+    private static final String CACHED_ARRAY_DECONVOLUTION = "TSpectrum::deconvolution:workingSpace";
+    private static final String CACHED_ARRAY_DECONVOLUTION_RL = "TSpectrum::deconvolutionLR:workingSpace";
+    private static final String CACHED_ARRAY_UNFOLDING = "TSpectrum::unfolding:workingSpace";
+    private static final int PEAK_WINDOW = 1024;
+    protected int fgAverageWindow = 3; // Average window of searched peaks
+    protected int fgIterations = 3; // Maximum number of decon iterations (default=3)
 
-    protected static int fgAverageWindow = 3; // Average window of searched peaks
-    protected static int fgIterations = 3; // Maximum number of decon iterations (default=3)
-    private static int PEAK_WINDOW = 1024;
-    private static int kBackOrder2 = 0;
-    private static int kBackOrder4 = 1;
-    private static int kBackOrder6 = 2;
-    private static int kBackOrder8 = 3;
-    private static int kBackIncreasingWindow = 0;
-
-    private static int kBackDecreasingWindow = 1;
-
-    private static int kBackSmoothing3 = 3;
-    private static int kBackSmoothing5 = 5;
-    private static int kBackSmoothing7 = 7;
-    private static int kBackSmoothing9 = 9;
-    private static int kBackSmoothing11 = 11;
-    private static int kBackSmoothing13 = 13;
-    private static int kBackSmoothing15 = 15;
     protected int fMaxPeaks; // Maximum number of peaks to be found
-    protected int fNPeaks; // number of peaks found
-    protected double[] fPosition; // [fNPeaks] array of current peak positions
-    protected double[] fPositionX; // [fNPeaks] X position of peaks
-    protected double[] fPositionY; // [fNPeaks] Y position of peaks
-    protected double fResolution; // resolution of the neighboring peaks
+    protected double fResolution; // resolution of the neighbouring peaks
 
     /**
      * The TSpectrum() default constructor
      */
     public TSpectrum() {
-        int n = 100;
+        final int n = 100;
         fMaxPeaks = n;
-        fPosition = new double[n];
-        fPositionX = new double[n];
-        fPositionY = new double[n];
         fResolution = 1;
-        fNPeaks = 0;
     }
 
     /**
@@ -67,1206 +65,1150 @@ public class TSpectrum {
      */
     public TSpectrum(int maxpositions, double resolution) {
         int n = maxpositions;
-        if (n <= 0)
+        if (n <= 0) {
             n = 1;
+        }
         fMaxPeaks = n;
-        fPosition = new double[n];
-        fPositionX = new double[n];
-        fPositionY = new double[n];
-        fNPeaks = 0;
-        SetResolution(resolution);
+        setResolution(resolution);
+    }
+
+    /**
+     * @param w average window of searched peaks
+     * @see #search
+     */
+    public void setAverageWindow(int w) {
+        fgAverageWindow = w;
+    }
+
+    /**
+     * @param n max number of decon iterations in deconvolution operation
+     * @see #search
+     */
+    public void setDeconIterations(int n) {
+        fgIterations = n;
+    }
+
+    /**
+     * @param resolution determines resolution of the neighboring peaks default value is 1 correspond to 3 sigma
+     *        distance between peaks. Higher values allow higher resolution (smaller distance between peaks. May be set
+     *        later through SetResolution.
+     */
+    public void setResolution(double resolution) {
+
+        if (resolution > 1) {
+            fResolution = resolution;
+        } else {
+            fResolution = 1;
+        }
     }
 
     /**
      * ONE-DIMENSIONAL BACKGROUND ESTIMATION FUNCTION - GENERAL FUNCTION This function calculates background spectrum
-     * from source spectrum. The result is placed in the vector pointed by spe1945ctrum pointer. Function parameters:
-     * 
-     * @param spectrum vector of source spectrum
-     * @param ssize length of the spectrum vector
+     * from source spectrum. The result is placed in the vector pointed by spectrum pointer.
+     *
+     * @param source vector of source spectrum
+     * @param destination where to copy the filtered background
+     * @param length length of the spectrum vector
      * @param numberIterations maximal width of clipping window,
      * @param direction direction of change of clipping window - possible values=kBackIncreasingWindow
      *        kBackDecreasingWindow
      * @param filterOrder order of clipping filter, -possible values=kBackOrder2 kBackOrder4 kBackOrder6 kBackOrder8
      * @param smoothing logical variable whether the smoothing operation in the estimation of background will be
-     *        included - possible values=kFALSE kTRUE
-     * @param smoothWindow width of smoothing window, -possible values=kBackSmoothing3 kBackSmoothing5 kBackSmoothing7
-     *        kBackSmoothing9 kBackSmoothing11 kBackSmoothing13 kBackSmoothing15
+     *        included resp. smoothing window
      * @param compton logical variable whether the estimation of Compton edge will be included - possible values=kFALSE
      *        kTRUE
-     * @return message of algorithm
+     * @return filtered array, N.B. if destination is null or has insufficient length a new array is being allocated,
+     *         otherwise calculations are done in-place.
      */
-    String Background(double[] spectrum, int ssize, int numberIterations, int direction, int filterOrder,
-            boolean smoothing, int smoothWindow, boolean compton) {
-        int i, j, w, bw, b1, b2, priz;
-        double a, b, c, d, e, yb1, yb2, ai, av, men, b4, c4, d4, e4, b6, c6, d6, e6, f6, g6, b8, c8, d8, e8, f8, g8, h8,
-                i8;
+    public static double[] background(final double[] source, final double[] destination, int length,
+            int numberIterations, Direction direction, FilterOrder filterOrder, SmoothWindow smoothing,
+            boolean compton) {
 
-        if (ssize <= 0)
-            return "Wrong Parameters";
-        if (numberIterations < 1)
-            return "Width of Clipping Window Must Be Positive";
-        if (ssize < 2 * numberIterations + 1)
-            return "Too Large Clipping Window";
-        if (smoothing == true && smoothWindow != kBackSmoothing3 && smoothWindow != kBackSmoothing5
-                && smoothWindow != kBackSmoothing7 && smoothWindow != kBackSmoothing9
-                && smoothWindow != kBackSmoothing11 && smoothWindow != kBackSmoothing13
-                && smoothWindow != kBackSmoothing15)
-            return "Incorrect width of smoothing window";
-
-        double[] working_space = new double[2 * ssize];
-        for (i = 0; i < ssize; i++) {
-            working_space[i] = spectrum[i];
-            working_space[i + ssize] = spectrum[i];
+        if (source == null || length <= 0 || source.length < length) {
+            throw new InvalidParameterException("input spectrum null or invalid vector size");
+        }
+        if (numberIterations < 1) {
+            throw new InvalidParameterException("width of clipping window must be positive, is: " + numberIterations);
+        }
+        if (length < 2 * numberIterations + 1) {
+            throw new InvalidParameterException("clipping window is too large (length < 2 * numberIterations + 1) -> "
+                    + length + "< " + (2 * numberIterations + 1));
+        }
+        if (filterOrder == null) {
+            throw new InvalidParameterException("filterOrder must not be null");
+        }
+        if (smoothing == null) {
+            throw new InvalidParameterException("smoothing must not be null");
         }
 
-        bw = (smoothWindow - 1) / 2;
-        if (direction == kBackIncreasingWindow)
-            i = 1;
-        else if (direction == kBackDecreasingWindow)
-            i = numberIterations;
+        final double[] workingSpace = ArrayCache.getCachedDoubleArray(CACHED_ARRAY_BACKGROUND, 2 * length);
+        System.arraycopy(source, 0, workingSpace, 0, length);
+        System.arraycopy(source, 0, workingSpace, length, length);
 
-        if (filterOrder == kBackOrder2) {
-            do {
-                for (j = i; j < ssize - i; j++) {
-                    if (smoothing == false) {
-                        a = working_space[ssize + j];
-                        b = (working_space[ssize + j - i] + working_space[ssize + j + i]) / 2.0;
-                        if (b < a)
-                            a = b;
-                        working_space[j] = a;
-                    }
-
-                    else if (smoothing == true) {
-                        a = working_space[ssize + j];
-                        av = 0;
-                        men = 0;
-                        for (w = j - bw; w <= j + bw; w++) {
-                            if (w >= 0 && w < ssize) {
-                                av += working_space[ssize + w];
-                                men += 1;
-                            }
-                        }
-                        av = av / men;
-                        b = 0;
-                        men = 0;
-                        for (w = j - i - bw; w <= j - i + bw; w++) {
-                            if (w >= 0 && w < ssize) {
-                                b += working_space[ssize + w];
-                                men += 1;
-                            }
-                        }
-                        b = b / men;
-                        c = 0;
-                        men = 0;
-                        for (w = j + i - bw; w <= j + i + bw; w++) {
-                            if (w >= 0 && w < ssize) {
-                                c += working_space[ssize + w];
-                                men += 1;
-                            }
-                        }
-                        c = c / men;
-                        b = (b + c) / 2;
-                        if (b < a)
-                            av = b;
-                        working_space[j] = av;
-                    }
-                }
-                for (j = i; j < ssize - i; j++)
-                    working_space[ssize + j] = working_space[j];
-                if (direction == kBackIncreasingWindow)
-                    i += 1;
-                else if (direction == kBackDecreasingWindow)
-                    i -= 1;
-            } while (direction == kBackIncreasingWindow && i <= numberIterations
-                    || direction == kBackDecreasingWindow && i >= 1);
+        switch (filterOrder) {
+        case ORDER_2:
+            filterBackgroundOrder2(workingSpace, length, numberIterations, direction, smoothing);
+            break;
+        case ORDER_4: {
+            filterBackgroundOrder4(workingSpace, length, numberIterations, direction, smoothing);
         }
-
-        else if (filterOrder == kBackOrder4) {
-            do {
-                for (j = i; j < ssize - i; j++) {
-                    if (smoothing == false) {
-                        a = working_space[ssize + j];
-                        b = (working_space[ssize + j - i] + working_space[ssize + j + i]) / 2.0;
-                        c = 0;
-                        ai = i / 2;
-                        c -= working_space[ssize + j - (int) (2 * ai)] / 6;
-                        c += 4 * working_space[ssize + j - (int) ai] / 6;
-                        c += 4 * working_space[ssize + j + (int) ai] / 6;
-                        c -= working_space[ssize + j + (int) (2 * ai)] / 6;
-                        if (b < c)
-                            b = c;
-                        if (b < a)
-                            a = b;
-                        working_space[j] = a;
-                    }
-
-                    else if (smoothing == true) {
-                        a = working_space[ssize + j];
-                        av = 0;
-                        men = 0;
-                        for (w = j - bw; w <= j + bw; w++) {
-                            if (w >= 0 && w < ssize) {
-                                av += working_space[ssize + w];
-                                men += 1;
-                            }
-                        }
-                        av = av / men;
-                        b = 0;
-                        men = 0;
-                        for (w = j - i - bw; w <= j - i + bw; w++) {
-                            if (w >= 0 && w < ssize) {
-                                b += working_space[ssize + w];
-                                men += 1;
-                            }
-                        }
-                        b = b / men;
-                        c = 0;
-                        men = 0;
-                        for (w = j + i - bw; w <= j + i + bw; w++) {
-                            if (w >= 0 && w < ssize) {
-                                c += working_space[ssize + w];
-                                men += 1;
-                            }
-                        }
-                        c = c / men;
-                        b = (b + c) / 2;
-                        ai = i / 2;
-                        b4 = 0;
-                        men = 0;
-                        for (w = j - (int) (2 * ai) - bw; w <= j - (int) (2 * ai) + bw; w++) {
-                            if (w >= 0 && w < ssize) {
-                                b4 += working_space[ssize + w];
-                                men += 1;
-                            }
-                        }
-                        b4 = b4 / men;
-                        c4 = 0;
-                        men = 0;
-                        for (w = j - (int) ai - bw; w <= j - (int) ai + bw; w++) {
-                            if (w >= 0 && w < ssize) {
-                                c4 += working_space[ssize + w];
-                                men += 1;
-                            }
-                        }
-                        c4 = c4 / men;
-                        d4 = 0;
-                        men = 0;
-                        for (w = j + (int) ai - bw; w <= j + (int) ai + bw; w++) {
-                            if (w >= 0 && w < ssize) {
-                                d4 += working_space[ssize + w];
-                                men += 1;
-                            }
-                        }
-                        d4 = d4 / men;
-                        e4 = 0;
-                        men = 0;
-                        for (w = j + (int) (2 * ai) - bw; w <= j + (int) (2 * ai) + bw; w++) {
-                            if (w >= 0 && w < ssize) {
-                                e4 += working_space[ssize + w];
-                                men += 1;
-                            }
-                        }
-                        e4 = e4 / men;
-                        b4 = (-b4 + 4 * c4 + 4 * d4 - e4) / 6;
-                        if (b < b4)
-                            b = b4;
-                        if (b < a)
-                            av = b;
-                        working_space[j] = av;
-                    }
-                }
-                for (j = i; j < ssize - i; j++)
-                    working_space[ssize + j] = working_space[j];
-                if (direction == kBackIncreasingWindow)
-                    i += 1;
-                else if (direction == kBackDecreasingWindow)
-                    i -= 1;
-            } while (direction == kBackIncreasingWindow && i <= numberIterations
-                    || direction == kBackDecreasingWindow && i >= 1);
+            break;
+        case ORDER_6: {
+            filterBackgroundOrder6(workingSpace, length, numberIterations, direction, smoothing);
         }
-
-        else if (filterOrder == kBackOrder6) {
-            do {
-                for (j = i; j < ssize - i; j++) {
-                    if (smoothing == true) {
-                        a = working_space[ssize + j];
-                        b = (working_space[ssize + j - i] + working_space[ssize + j + i]) / 2.0;
-                        c = 0;
-                        ai = i / 2;
-                        c -= working_space[ssize + j - (int) (2 * ai)] / 6;
-                        c += 4 * working_space[ssize + j - (int) ai] / 6;
-                        c += 4 * working_space[ssize + j + (int) ai] / 6;
-                        c -= working_space[ssize + j + (int) (2 * ai)] / 6;
-                        d = 0;
-                        ai = i / 3;
-                        d += working_space[ssize + j - (int) (3 * ai)] / 20;
-                        d -= 6 * working_space[ssize + j - (int) (2 * ai)] / 20;
-                        d += 15 * working_space[ssize + j - (int) ai] / 20;
-                        d += 15 * working_space[ssize + j + (int) ai] / 20;
-                        d -= 6 * working_space[ssize + j + (int) (2 * ai)] / 20;
-                        d += working_space[ssize + j + (int) (3 * ai)] / 20;
-                        if (b < d)
-                            b = d;
-                        if (b < c)
-                            b = c;
-                        if (b < a)
-                            a = b;
-                        working_space[j] = a;
-                    }
-
-                    else if (smoothing == true) {
-                        a = working_space[ssize + j];
-                        av = 0;
-                        men = 0;
-                        for (w = j - bw; w <= j + bw; w++) {
-                            if (w >= 0 && w < ssize) {
-                                av += working_space[ssize + w];
-                                men += 1;
-                            }
-                        }
-                        av = av / men;
-                        b = 0;
-                        men = 0;
-                        for (w = j - i - bw; w <= j - i + bw; w++) {
-                            if (w >= 0 && w < ssize) {
-                                b += working_space[ssize + w];
-                                men += 1;
-                            }
-                        }
-                        b = b / men;
-                        c = 0;
-                        men = 0;
-                        for (w = j + i - bw; w <= j + i + bw; w++) {
-                            if (w >= 0 && w < ssize) {
-                                c += working_space[ssize + w];
-                                men += 1;
-                            }
-                        }
-                        c = c / men;
-                        b = (b + c) / 2;
-                        ai = i / 2;
-                        b4 = 0;
-                        men = 0;
-                        for (w = j - (int) (2 * ai) - bw; w <= j - (int) (2 * ai) + bw; w++) {
-                            if (w >= 0 && w < ssize) {
-                                b4 += working_space[ssize + w];
-                                men += 1;
-                            }
-                        }
-                        b4 = b4 / men;
-                        c4 = 0;
-                        men = 0; // XX
-                        for (w = j - (int) ai - bw; w <= j - (int) ai + bw; w++) {
-                            if (w >= 0 && w < ssize) {
-                                c4 += working_space[ssize + w];
-                                men += 1;
-                            }
-                        }
-                        c4 = c4 / men;
-                        d4 = 0;
-                        men = 0; // XX
-                        for (w = j + (int) ai - bw; w <= j + (int) ai + bw; w++) {
-                            if (w >= 0 && w < ssize) {
-                                d4 += working_space[ssize + w];
-                                men += 1;
-                            }
-                        }
-                        d4 = d4 / men;
-                        e4 = 0;
-                        men = 0; // XX
-                        for (w = j + (int) (2 * ai) - bw; w <= j + (int) (2 * ai) + bw; w++) {
-                            if (w >= 0 && w < ssize) {
-                                e4 += working_space[ssize + w];
-                                men += 1;
-                            }
-                        }
-                        e4 = e4 / men;
-                        b4 = (-b4 + 4 * c4 + 4 * d4 - e4) / 6;
-                        ai = i / 3;
-                        b6 = 0;
-                        men = 0; // XX
-                        for (w = j - (int) (3 * ai) - bw; w <= j - (int) (3 * ai) + bw; w++) {
-                            if (w >= 0 && w < ssize) {
-                                b6 += working_space[ssize + w];
-                                men += 1;
-                            }
-                        }
-                        b6 = b6 / men;
-                        c6 = 0;
-                        men = 0; // XX
-                        for (w = j - (int) (2 * ai) - bw; w <= j - (int) (2 * ai) + bw; w++) {
-                            if (w >= 0 && w < ssize) {
-                                c6 += working_space[ssize + w];
-                                men += 1;
-                            }
-                        }
-                        c6 = c6 / men;
-                        d6 = 0;
-                        men = 0; // XX
-                        for (w = j - (int) ai - bw; w <= j - (int) ai + bw; w++) {
-                            if (w >= 0 && w < ssize) {
-                                d6 += working_space[ssize + w];
-                                men += 1;
-                            }
-                        }
-                        d6 = d6 / men;
-                        e6 = 0;
-                        men = 0; // XX
-                        for (w = j + (int) ai - bw; w <= j + (int) ai + bw; w++) {
-                            if (w >= 0 && w < ssize) {
-                                e6 += working_space[ssize + w];
-                                men += 1;
-                            }
-                        }
-                        e6 = e6 / men;
-                        f6 = 0;
-                        men = 0;
-                        for (w = j + (int) (2 * ai) - bw; w <= j + (int) (2 * ai) + bw; w++) {
-                            if (w >= 0 && w < ssize) {
-                                f6 += working_space[ssize + w];
-                                men += 1;
-                            }
-                        }
-                        f6 = f6 / men;
-                        g6 = 0;
-                        men = 0;
-                        for (w = j + (int) (3 * ai) - bw; w <= j + (int) (3 * ai) + bw; w++) {
-                            if (w >= 0 && w < ssize) {
-                                g6 += working_space[ssize + w];
-                                men += 1;
-                            }
-                        }
-                        g6 = g6 / men;
-                        b6 = (b6 - 6 * c6 + 15 * d6 + 15 * e6 - 6 * f6 + g6) / 20;
-                        if (b < b6)
-                            b = b6;
-                        if (b < b4)
-                            b = b4;
-                        if (b < a)
-                            av = b;
-                        working_space[j] = av;
-                    }
-                }
-                for (j = i; j < ssize - i; j++)
-                    working_space[ssize + j] = working_space[j];
-
-                if (direction == kBackIncreasingWindow)
-                    i += 1;
-                else if (direction == kBackDecreasingWindow)
-                    i -= 1;
-            } while (direction == kBackIncreasingWindow && i <= numberIterations
-                    || direction == kBackDecreasingWindow && i >= 1);
+            break;
+        case ORDER_8:
+        default: {
+            filterBackgroundOrder8(workingSpace, length, numberIterations, direction, smoothing);
         }
+            break;
+        } /* switch (filterOrder) {...} */
 
-        else if (filterOrder == kBackOrder8) {
-            do {
-                for (j = i; j < ssize - i; j++) {
-                    if (smoothing == false) {
-                        a = working_space[ssize + j];
-                        b = (working_space[ssize + j - i] + working_space[ssize + j + i]) / 2.0;
-                        c = 0;
-                        ai = i / 2;
-                        c -= working_space[ssize + j - (int) (2 * ai)] / 6;
-                        c += 4 * working_space[ssize + j - (int) ai] / 6;
-                        c += 4 * working_space[ssize + j + (int) ai] / 6;
-                        c -= working_space[ssize + j + (int) (2 * ai)] / 6;
-                        d = 0;
-                        ai = i / 3;
-                        d += working_space[ssize + j - (int) (3 * ai)] / 20;
-                        d -= 6 * working_space[ssize + j - (int) (2 * ai)] / 20;
-                        d += 15 * working_space[ssize + j - (int) ai] / 20;
-                        d += 15 * working_space[ssize + j + (int) ai] / 20;
-                        d -= 6 * working_space[ssize + j + (int) (2 * ai)] / 20;
-                        d += working_space[ssize + j + (int) (3 * ai)] / 20;
-                        e = 0;
-                        ai = i / 4;
-                        e -= working_space[ssize + j - (int) (4 * ai)] / 70;
-                        e += 8 * working_space[ssize + j - (int) (3 * ai)] / 70;
-                        e -= 28 * working_space[ssize + j - (int) (2 * ai)] / 70;
-                        e += 56 * working_space[ssize + j - (int) ai] / 70;
-                        e += 56 * working_space[ssize + j + (int) ai] / 70;
-                        e -= 28 * working_space[ssize + j + (int) (2 * ai)] / 70;
-                        e += 8 * working_space[ssize + j + (int) (3 * ai)] / 70;
-                        e -= working_space[ssize + j + (int) (4 * ai)] / 70;
-                        if (b < e)
-                            b = e;
-                        if (b < d)
-                            b = d;
-                        if (b < c)
-                            b = c;
-                        if (b < a)
-                            a = b;
-                        working_space[j] = a;
-                    }
-
-                    else if (smoothing == true) {
-                        a = working_space[ssize + j];
-                        av = 0;
-                        men = 0;
-                        for (w = j - bw; w <= j + bw; w++) {
-                            if (w >= 0 && w < ssize) {
-                                av += working_space[ssize + w];
-                                men += 1;
-                            }
-                        }
-                        av = av / men;
-                        b = 0;
-                        men = 0;
-                        for (w = j - i - bw; w <= j - i + bw; w++) {
-                            if (w >= 0 && w < ssize) {
-                                b += working_space[ssize + w];
-                                men += 1;
-                            }
-                        }
-                        b = b / men;
-                        c = 0;
-                        men = 0;
-                        for (w = j + i - bw; w <= j + i + bw; w++) {
-                            if (w >= 0 && w < ssize) {
-                                c += working_space[ssize + w];
-                                men += 1;
-                            }
-                        }
-                        c = c / men;
-                        b = (b + c) / 2;
-                        ai = i / 2;
-                        b4 = 0;
-                        men = 0;
-                        for (w = j - (int) (2 * ai) - bw; w <= j - (int) (2 * ai) + bw; w++) {
-                            if (w >= 0 && w < ssize) {
-                                b4 += working_space[ssize + w];
-                                men += 1;
-                            }
-                        }
-                        b4 = b4 / men;
-                        c4 = 0;
-                        men = 0;
-                        for (w = j - (int) ai - bw; w <= j - (int) ai + bw; w++) {
-                            if (w >= 0 && w < ssize) {
-                                c4 += working_space[ssize + w];
-                                men += 1;
-                            }
-                        }
-                        c4 = c4 / men;
-                        d4 = 0;
-                        men = 0;
-                        for (w = j + (int) ai - bw; w <= j + (int) ai + bw; w++) {
-                            if (w >= 0 && w < ssize) {
-                                d4 += working_space[ssize + w];
-                                men += 1;
-                            }
-                        }
-                        d4 = d4 / men;
-                        e4 = 0;
-                        men = 0;
-                        for (w = j + (int) (2 * ai) - bw; w <= j + (int) (2 * ai) + bw; w++) {
-                            if (w >= 0 && w < ssize) {
-                                e4 += working_space[ssize + w];
-                                men += 1;
-                            }
-                        }
-                        e4 = e4 / men;
-                        b4 = (-b4 + 4 * c4 + 4 * d4 - e4) / 6;
-                        ai = i / 3;
-                        b6 = 0;
-                        men = 0;
-                        for (w = j - (int) (3 * ai) - bw; w <= j - (int) (3 * ai) + bw; w++) {
-                            if (w >= 0 && w < ssize) {
-                                b6 += working_space[ssize + w];
-                                men += 1;
-                            }
-                        }
-                        b6 = b6 / men;
-                        c6 = 0;
-                        men = 0;
-                        for (w = j - (int) (2 * ai) - bw; w <= j - (int) (2 * ai) + bw; w++) {
-                            if (w >= 0 && w < ssize) {
-                                c6 += working_space[ssize + w];
-                                men += 1;
-                            }
-                        }
-                        c6 = c6 / men;
-                        d6 = 0;
-                        men = 0;
-                        for (w = j - (int) ai - bw; w <= j - (int) ai + bw; w++) {
-                            if (w >= 0 && w < ssize) {
-                                d6 += working_space[ssize + w];
-                                men += 1;
-                            }
-                        }
-                        d6 = d6 / men;
-                        e6 = 0;
-                        men = 0;
-                        for (w = j + (int) ai - bw; w <= j + (int) ai + bw; w++) {
-                            if (w >= 0 && w < ssize) {
-                                e6 += working_space[ssize + w];
-                                men += 1;
-                            }
-                        }
-                        e6 = e6 / men;
-                        f6 = 0;
-                        men = 0;
-                        for (w = j + (int) (2 * ai) - bw; w <= j + (int) (2 * ai) + bw; w++) {
-                            if (w >= 0 && w < ssize) {
-                                f6 += working_space[ssize + w];
-                                men += 1;
-                            }
-                        }
-                        f6 = f6 / men;
-                        g6 = 0;
-                        men = 0;
-                        for (w = j + (int) (3 * ai) - bw; w <= j + (int) (3 * ai) + bw; w++) {
-                            if (w >= 0 && w < ssize) {
-                                g6 += working_space[ssize + w];
-                                men += 1;
-                            }
-                        }
-                        g6 = g6 / men;
-                        b6 = (b6 - 6 * c6 + 15 * d6 + 15 * e6 - 6 * f6 + g6) / 20;
-                        ai = i / 4;
-                        b8 = 0;
-                        men = 0;
-                        for (w = j - (int) (4 * ai) - bw; w <= j - (int) (4 * ai) + bw; w++) {
-                            if (w >= 0 && w < ssize) {
-                                b8 += working_space[ssize + w];
-                                men += 1;
-                            }
-                        }
-                        b8 = b8 / men;
-                        c8 = 0;
-                        men = 0;
-                        for (w = j - (int) (3 * ai) - bw; w <= j - (int) (3 * ai) + bw; w++) {
-                            if (w >= 0 && w < ssize) {
-                                c8 += working_space[ssize + w];
-                                men += 1;
-                            }
-                        }
-                        c8 = c8 / men;
-                        d8 = 0;
-                        men = 0;
-                        for (w = j - (int) (2 * ai) - bw; w <= j - (int) (2 * ai) + bw; w++) {
-                            if (w >= 0 && w < ssize) {
-                                d8 += working_space[ssize + w];
-                                men += 1;
-                            }
-                        }
-                        d8 = d8 / men;
-                        e8 = 0;
-                        men = 0;
-                        for (w = j - (int) ai - bw; w <= j - (int) ai + bw; w++) {
-                            if (w >= 0 && w < ssize) {
-                                e8 += working_space[ssize + w];
-                                men += 1;
-                            }
-                        }
-                        e8 = e8 / men;
-                        f8 = 0;
-                        men = 0;
-                        for (w = j + (int) ai - bw; w <= j + (int) ai + bw; w++) {
-                            if (w >= 0 && w < ssize) {
-                                f8 += working_space[ssize + w];
-                                men += 1;
-                            }
-                        }
-                        f8 = f8 / men;
-                        g8 = 0;
-                        men = 0;
-                        for (w = j + (int) (2 * ai) - bw; w <= j + (int) (2 * ai) + bw; w++) {
-                            if (w >= 0 && w < ssize) {
-                                g8 += working_space[ssize + w];
-                                men += 1;
-                            }
-                        }
-                        g8 = g8 / men;
-                        h8 = 0;
-                        men = 0;
-                        for (w = j + (int) (3 * ai) - bw; w <= j + (int) (3 * ai) + bw; w++) {
-                            if (w >= 0 && w < ssize) {
-                                h8 += working_space[ssize + w];
-                                men += 1;
-                            }
-                        }
-                        h8 = h8 / men;
-                        i8 = 0;
-                        men = 0;
-                        for (w = j + (int) (4 * ai) - bw; w <= j + (int) (4 * ai) + bw; w++) {
-                            if (w >= 0 && w < ssize) {
-                                i8 += working_space[ssize + w];
-                                men += 1;
-                            }
-                        }
-                        i8 = i8 / men;
-                        b8 = (-b8 + 8 * c8 - 28 * d8 + 56 * e8 - 56 * f8 - 28 * g8 + 8 * h8 - i8) / 70;
-                        if (b < b8)
-                            b = b8;
-                        if (b < b6)
-                            b = b6;
-                        if (b < b4)
-                            b = b4;
-                        if (b < a)
-                            av = b;
-                        working_space[j] = av;
-                    }
-                }
-                for (j = i; j < ssize - i; j++)
-                    working_space[ssize + j] = working_space[j];
-
-                if (direction == kBackIncreasingWindow)
-                    i += 1;
-                else if (direction == kBackDecreasingWindow)
-                    i -= 1;
-            } while (direction == kBackIncreasingWindow && i <= numberIterations
-                    || direction == kBackDecreasingWindow && i >= 1);
-        }
-
-        if (compton == true) {
-            for (i = 0, b2 = 0; i < ssize; i++) {
-                b1 = b2;
-                a = working_space[i];
-                b = spectrum[i];
-                j = i;
+        if (compton) {
+            for (int i = 0; i < length; i++) {
+                double a = workingSpace[i];
+                double b = source[i];
                 if (Math.abs(a - b) >= 1) {
-                    b1 = i - 1;
-                    if (b1 < 0)
+                    int b1 = i - 1;
+                    if (b1 < 0) {
                         b1 = 0;
-                    yb1 = working_space[b1];
-                    for (b2 = b1 + 1, c = 0, priz = 0; priz == 0 && b2 < ssize; b2++) {
-                        a = working_space[b2];
-                        b = spectrum[b2];
+                    }
+                    double yb1 = workingSpace[b1];
+                    double c = 0;
+                    int priz = 0;
+                    int b2;
+                    for (b2 = b1 + 1; priz == 0 && b2 < length; b2++) {
+                        a = workingSpace[b2];
+                        b = source[b2];
                         c = c + b - yb1;
                         if (Math.abs(a - b) < 1) {
                             priz = 1;
-                            yb2 = b;
                         }
                     }
-                    if (b2 == ssize)
+                    if (b2 == length) {
                         b2 -= 1;
-                    yb2 = working_space[b2];
+                    }
+                    double yb2 = workingSpace[b2];
                     if (yb1 <= yb2) {
-                        for (j = b1, c = 0; j <= b2; j++) {
-                            b = spectrum[j];
+                        c = 0;
+                        for (int j = b1; j <= b2; j++) {
+                            b = source[j];
                             c = c + b - yb1;
                         }
                         if (c > 1) {
                             c = (yb2 - yb1) / c;
-                            for (j = b1, d = 0; j <= b2 && j < ssize; j++) {
-                                b = spectrum[j];
+                            double d = 0;
+                            for (int j = b1; j <= b2 && j < length; j++) {
+                                b = source[j];
                                 d = d + b - yb1;
                                 a = c * d + yb1;
-                                working_space[ssize + j] = a;
+                                workingSpace[length + j] = a;
                             }
                         }
-                    }
-
-                    else {
-                        for (j = b2, c = 0; j >= b1; j--) {
-                            b = spectrum[j];
+                    } else {
+                        c = 0;
+                        for (int j = b2; j >= b1; j--) {
+                            b = source[j];
                             c = c + b - yb2;
                         }
                         if (c > 1) {
                             c = (yb1 - yb2) / c;
-                            for (j = b2, d = 0; j >= b1 && j >= 0; j--) {
-                                b = spectrum[j];
+                            double d = 0;
+                            for (int j = b2; j >= b1 && j >= 0; j--) {
+                                b = source[j];
                                 d = d + b - yb2;
                                 a = c * d + yb2;
-                                working_space[ssize + j] = a;
+                                workingSpace[length + j] = a;
                             }
                         }
                     }
                     i = b2;
                 }
             }
-        }
+        } /* if (compton) {..} */
 
-        for (j = 0; j < ssize; j++)
-            spectrum[j] = working_space[ssize + j];
+        final double[] returnVector = destination == null || destination.length < length ? new double[length]
+                : destination;
+        System.arraycopy(workingSpace, 0, returnVector, 0, length);
+        ArrayCache.release(CACHED_ARRAY_BACKGROUND, workingSpace);
 
-        working_space = null;
-        return null;
-    }
-
-    /**
-     * ONE-DIMENSIONAL BACKGROUND ESTIMATION FUNCTION This function calculates the background spectrum in the input
-     * histogram h. The background is returned as a histogram. Function parameters:
-     * 
-     * @param h input 1-d histogram
-     * @param numberIterations (default value = 20) Increasing numberIterations make the result smoother and lower.
-     * @param option may contain one of the following options - to set the direction parameter "BackIncreasingWindow".
-     *        By default the direction is BackDecreasingWindow - filterOrder-order of clipping filter, (default
-     *        "BackOrder2" -possible values= "BackOrder4" "BackOrder6" "BackOrder8" - "nosmoothing"- if selected, the
-     *        background is not smoothed By default the background is smoothed. - smoothWindow-width of smoothing
-     *        window, (default is "BackSmoothing3") -possible values= "BackSmoothing5" "BackSmoothing7" "BackSmoothing9"
-     *        "BackSmoothing11" "BackSmoothing13" "BackSmoothing15" - "Compton" if selected the estimation of Compton
-     *        edge will be included. NOTE that the background is only evaluated in the current range of h. ie, if h has
-     *        a bin range (set via h->GetXaxis()->SetRange(binmin,binmax), the returned histogram will be created with
-     *        the same number of bins as the input histogram h, but only bins from binmin to binmax will be filled with
-     *        the estimated background.
-     * @return data set
-     */
-    double[] Background(double[] h, int numberIterations, String option) {
-
-        if (h == null) {
-            System.out.println("TSpectrum::Background() - dataset is null");
-            return null;
-        }
-        // TODO implement 2-D histograms
-        // if (!(h instanceOf(DefaultDataSet))) {
-        // System.out.println("Search: Only implemented for 1-d histograms");
-        // return null;
-        // }
-        String opt = option.toLowerCase();
-
-        // set options
-
-        int direction = kBackDecreasingWindow;
-        if (opt.indexOf("backincreasingwindow") >= 0)
-            direction = kBackIncreasingWindow;
-        int filterOrder = kBackOrder2;
-        if (opt.indexOf("backorder4") >= 0)
-            filterOrder = kBackOrder4;
-        if (opt.indexOf("backorder6") >= 0)
-            filterOrder = kBackOrder6;
-        if (opt.indexOf("backorder8") >= 0)
-            filterOrder = kBackOrder8;
-        boolean smoothing = true;
-        if (opt.indexOf("nosmoothing") >= 0)
-            smoothing = false;
-        int smoothWindow = kBackSmoothing3;
-        if (opt.indexOf("backsmoothing5") >= 0)
-            smoothWindow = kBackSmoothing5;
-        if (opt.indexOf("backsmoothing7") >= 0)
-            smoothWindow = kBackSmoothing7;
-        if (opt.indexOf("backsmoothing9") >= 0)
-            smoothWindow = kBackSmoothing9;
-        if (opt.indexOf("backsmoothing11") >= 0)
-            smoothWindow = kBackSmoothing11;
-        if (opt.indexOf("backsmoothing13") >= 0)
-            smoothWindow = kBackSmoothing13;
-        if (opt.indexOf("backsmoothing15") >= 0)
-            smoothWindow = kBackSmoothing15;
-        boolean compton = false;
-        if (opt.indexOf("compton") >= 0)
-            compton = true;
-
-        // Assume use all bins for background computation
-        // TODO: implement range selection
-        int first = 0;
-        int last = h.length - 1;
-        int size = last - first + 1;
-        double[] source = new double[size];
-        for (int i = 0; i < size; i++)
-            source[i] = h[i + first];
-
-        // find background (source is input and in output contains the background
-        Background(source, size, numberIterations, direction, filterOrder, smoothing, smoothWindow, compton);
-
-        return source;
+        return returnVector;
     }
 
     /**
      * ONE-DIMENSIONAL DECONVOLUTION FUNCTION This function calculates deconvolution from source spectrum according to
-     * response spectrum using Gold algorithm The result is placed in the vector pointed by source pointer.
+     * response spectrum using Gold algorithm The result is placed in the vector pointed by destination pointer.
      *
      * @param source vector of source spectrum
      * @param response vector of response spectrum
-     * @param ssize length of source and response spectra
+     * @param destination vector of response spectrum
+     * @param length length of source and response spectra
      * @param numberIterations for details we refer to the reference given below
      * @param numberRepetitions for repeated boosted deconvolution @boost, boosting coefficient M. Morhac, J. Kliman, V.
-     *        Matousek, M. Veselsk�, I. Turzo.: Efficient one- and two-dimensional Gold deconvolution and its
-     *        application to gamma-ray spectra decomposition. NIM, A401 (1997) 385-408.
+     *        Matousek, M. Veselsk, I. Turzo.: Efficient one- and two-dimensional Gold deconvolution and its application
+     *        to gamma-ray spectra decomposition. NIM, A401 (1997) 385-408.
      * @param boost ???
-     * @return algorithm return error message
+     * @return filtered array, N.B. if destination is null or has insufficient length a new array is being allocated,
+     *         otherwise calculations are done in-place.
      */
-    String Deconvolution(double[] source, double[] response, int ssize, int numberIterations, int numberRepetitions,
-            double boost) {
+    public static double[] deconvolution(double[] source, double[] response, double[] destination, int length,
+            int numberIterations, int numberRepetitions, double boost) {
 
-        if (ssize <= 0)
-            return "Wrong Parameters";
-        if (numberRepetitions <= 0)
-            return "Wrong Parameters";
+        if (length <= 0) {
+            throw new IllegalArgumentException("length '" + length + "'is <= 0");
+        }
+        if (numberRepetitions <= 0) {
+            throw new IllegalArgumentException("numberRepetitions '" + length + "'is <= 0");
+        }
 
-        // working_space-pointer to the working vector
-        // (its size must be 4*ssize of source spectrum)
-        double[] working_space = new double[4 * ssize];
-        int i, j, k, lindex, posit, lh_gold, l, repet;
-        double lda, ldb, ldc, area, maximum;
+        // working_space-pointer to the working vector (its size must be 4*length of source spectrum)
+        final double[] workingSpace = ArrayCache.getCachedDoubleArray(CACHED_ARRAY_DECONVOLUTION, 4 * length);
+        int i;
+        int j;
+        int k;
+        int lindex;
+        int posit;
+        int lhGold;
+        int l;
+        int repet;
+        double lda;
+        double ldb;
+        double ldc;
+        double area;
+        double maximum;
         area = 0;
-        lh_gold = -1;
+        lhGold = -1;
         posit = 0;
         maximum = 0;
 
         // read response vector
-        for (i = 0; i < ssize; i++) {
+        for (i = 0; i < length; i++) {
             lda = response[i];
-            if (lda != 0)
-                lh_gold = i + 1;
-            working_space[i] = lda;
+            if (lda != 0) {
+                lhGold = i + 1;
+            }
+            workingSpace[i] = lda;
             area += lda;
             if (lda > maximum) {
                 maximum = lda;
                 posit = i;
             }
         }
-        if (lh_gold == -1)
-            return "ZERO RESPONSE VECTOR";
+        if (lhGold == -1) {
+            throw new IllegalArgumentException("ZERO RESPONSE VECTOR");
+        }
 
         // read source vector
-        for (i = 0; i < ssize; i++)
-            working_space[2 * ssize + i] = source[i];
+        for (i = 0; i < length; i++) {
+            workingSpace[2 * length + i] = source[i];
+        }
 
         // create matrix at*a and vector at*y
-        for (i = 0; i < ssize; i++) {
+        for (i = 0; i < length; i++) {
             lda = 0;
-            for (j = 0; j < ssize; j++) {
-                ldb = working_space[j];
+            for (j = 0; j < length; j++) {
+                ldb = workingSpace[j];
                 k = i + j;
-                if (k < ssize) {
-                    ldc = working_space[k];
+                if (k < length) {
+                    ldc = workingSpace[k];
                     lda = lda + ldb * ldc;
                 }
             }
-            working_space[ssize + i] = lda;
+            workingSpace[length + i] = lda;
             lda = 0;
-            for (k = 0; k < ssize; k++) {
+            for (k = 0; k < length; k++) {
                 l = k - i;
                 if (l >= 0) {
-                    ldb = working_space[l];
-                    ldc = working_space[2 * ssize + k];
+                    ldb = workingSpace[l];
+                    ldc = workingSpace[2 * length + k];
                     lda = lda + ldb * ldc;
                 }
             }
-            working_space[3 * ssize + i] = lda;
+            workingSpace[3 * length + i] = lda;
         }
 
         // move vector at*y
-        for (i = 0; i < ssize; i++) {
-            working_space[2 * ssize + i] = working_space[3 * ssize + i];
+        for (i = 0; i < length; i++) {
+            workingSpace[2 * length + i] = workingSpace[3 * length + i];
         }
 
         // initialization of resulting vector
-        for (i = 0; i < ssize; i++)
-            working_space[i] = 1;
+        for (i = 0; i < length; i++) {
+            workingSpace[i] = 1;
+        }
 
         // **START OF ITERATIONS**
         for (repet = 0; repet < numberRepetitions; repet++) {
             if (repet != 0) {
-                for (i = 0; i < ssize; i++)
-                    working_space[i] = Math.pow(working_space[i], boost);
+                for (i = 0; i < length; i++) {
+                    workingSpace[i] = Math.pow(workingSpace[i], boost);
+                }
             }
             for (lindex = 0; lindex < numberIterations; lindex++) {
-                for (i = 0; i < ssize; i++) {
-                    if (working_space[2 * ssize + i] > 0.000001 && working_space[i] > 0.000001) {
+                for (i = 0; i < length; i++) {
+                    if (workingSpace[2 * length + i] > 0.000001 && workingSpace[i] > 0.000001) {
                         lda = 0;
-                        for (j = 0; j < lh_gold; j++) {
-                            ldb = working_space[j + ssize];
-                            if (j != 0) {
+                        for (j = 0; j < lhGold; j++) {
+                            ldb = workingSpace[j + length];
+                            if (j == 0) {
+                                ldc = workingSpace[i];
+                            } else {
                                 k = i + j;
                                 ldc = 0;
-                                if (k < ssize)
-                                    ldc = working_space[k];
+                                if (k < length) {
+                                    ldc = workingSpace[k];
+                                }
                                 k = i - j;
-                                if (k >= 0)
-                                    ldc += working_space[k];
-                            } else
-                                ldc = working_space[i];
+                                if (k >= 0) {
+                                    ldc += workingSpace[k];
+                                }
+                            }
 
                             lda = lda + ldb * ldc;
                         }
-                        ldb = working_space[2 * ssize + i];
+                        ldb = workingSpace[2 * length + i];
 
-                        if (lda != 0)
+                        if (lda != 0) {
                             lda = ldb / lda;
-                        else
-                            lda = 0;
+                        }
 
-                        ldb = working_space[i];
-                        lda = lda * ldb;
-                        working_space[3 * ssize + i] = lda;
+                        ldb = workingSpace[i];
+                        lda *= ldb;
+                        workingSpace[3 * length + i] = lda;
                     }
                 }
-                for (i = 0; i < ssize; i++)
-                    working_space[i] = working_space[3 * ssize + i];
+                for (i = 0; i < length; i++) {
+                    workingSpace[i] = workingSpace[3 * length + i];
+                }
             }
         }
 
         // shift resulting spectrum
-        for (i = 0; i < ssize; i++) {
-            lda = working_space[i];
+        for (i = 0; i < length; i++) {
+            lda = workingSpace[i];
             j = i + posit;
-            j = j % ssize;
-            working_space[ssize + j] = lda;
+            j = j % length;
+            workingSpace[length + j] = lda;
         }
 
-        // write back resulting spectrum
-        for (i = 0; i < ssize; i++)
-            source[i] = area * working_space[ssize + i];
-        working_space = null;
-        return null;
+        final double[] returnVector = destination == null || destination.length < length ? new double[length]
+                : destination;
+        System.arraycopy(workingSpace, 0, returnVector, 0, length);
+        ArrayMath.multiplyInPlace(returnVector, area);
+        ArrayCache.release(CACHED_ARRAY_DECONVOLUTION, workingSpace);
+        return returnVector;
     }
 
     /**
      * ONE-DIMENSIONAL DECONVOLUTION FUNCTION This function calculates deconvolution from source spectrum according to
-     * response spectrum using Richardson-Lucy algorithm The result is placed in the vector pointed by source pointer.
+     * response spectrum using Richardson-Lucy algorithm The result is placed in the vector pointed by destination pointer.
      *
      * @param source vector of source spectrum
      * @param response vector of response spectrum
-     * @param ssize length of source and response spectra
+     * @param destination vector
+     * @param length length of source and response spectra
      * @param numberIterations for details we refer to the reference given above
      * @param numberRepetitions for repeated boosted deconvolution
      * @param boost boosting coefficient
-     * @return algorithm return error message
+     * @return filtered array, N.B. if destination is null or has insufficient length a new array is being allocated,
+     *         otherwise calculations are done in-place.
      */
-    String DeconvolutionRL(double[] source, double[] response, int ssize, int numberIterations, int numberRepetitions,
-            double boost) {
+    public static double[] deconvolutionRL(double[] source, double[] response, double[] destination, int length,
+            int numberIterations, int numberRepetitions, double boost) {
 
-        if (ssize <= 0)
-            return "Wrong Parameters";
-        if (numberRepetitions <= 0)
-            return "Wrong Parameters";
+        if (length <= 0) {
+            throw new IllegalArgumentException("length '" + length + "'is <= 0");
+        }
+        if (numberRepetitions <= 0) {
+            throw new IllegalArgumentException("numberRepetitions '" + length + "'is <= 0");
+        }
 
         // working_space-pointer to the working vector
-        // (its size must be 4*ssize of source spectrum)
-        double[] working_space = new double[4 * ssize];
-        int i, j, k, lindex, posit, lh_gold, repet, kmin, kmax;
-        double lda, ldb, ldc, maximum;
-        lh_gold = -1;
+        // (its size must be 4*length of source spectrum)
+        final double[] workingSpace = ArrayCache.getCachedDoubleArray(CACHED_ARRAY_DECONVOLUTION_RL, 4 * length);
+        int i;
+        int j;
+        int k;
+        int lindex;
+        int posit;
+        int lhGold;
+        int repet;
+        int kmin;
+        int kmax;
+        double lda;
+        double ldb;
+        double ldc;
+        double maximum;
+        lhGold = -1;
         posit = 0;
         maximum = 0;
 
         // read response vector
-        for (i = 0; i < ssize; i++) {
+        for (i = 0; i < length; i++) {
             lda = response[i];
-            if (lda != 0)
-                lh_gold = i + 1;
-            working_space[ssize + i] = lda;
+            if (lda != 0) {
+                lhGold = i + 1;
+            }
+            workingSpace[length + i] = lda;
             if (lda > maximum) {
                 maximum = lda;
                 posit = i;
             }
         }
 
-        if (lh_gold == -1)
-            return "ZERO RESPONSE VECTOR";
+        if (lhGold == -1) {
+            throw new IllegalArgumentException("ZERO RESPONSE VECTOR");
+        }
 
         // read source vector
-        for (i = 0; i < ssize; i++)
-            working_space[2 * ssize + i] = source[i];
+        for (i = 0; i < length; i++) {
+            workingSpace[2 * length + i] = source[i];
+        }
 
         // initialization of resulting vector
-        for (i = 0; i < ssize; i++) {
-            if (i <= ssize - lh_gold)
-                working_space[i] = 1;
-            else
-                working_space[i] = 0;
+        for (i = 0; i < length; i++) {
+            if (i <= length - lhGold) {
+                workingSpace[i] = 1;
+            } else {
+                workingSpace[i] = 0;
+            }
         }
 
         // **START OF ITERATIONS**
         for (repet = 0; repet < numberRepetitions; repet++) {
             if (repet != 0) {
-                for (i = 0; i < ssize; i++)
-                    working_space[i] = Math.pow(working_space[i], boost);
+                for (i = 0; i < length; i++) {
+                    workingSpace[i] = Math.pow(workingSpace[i], boost);
+                }
             }
             for (lindex = 0; lindex < numberIterations; lindex++) {
-                for (i = 0; i <= ssize - lh_gold; i++) {
+                for (i = 0; i <= length - lhGold; i++) {
                     lda = 0;
-                    if (working_space[i] > 0) {// x[i]
-                        for (j = i; j < i + lh_gold; j++) {
-                            ldb = working_space[2 * ssize + j];// y[j]
-                            if (j < ssize) {
+                    if (workingSpace[i] > 0) {// x[i]
+                        for (j = i; j < i + lhGold; j++) {
+                            ldb = workingSpace[2 * length + j];// y[j]
+                            if (j < length) {
                                 if (ldb > 0) {// y[j]
                                     kmax = j;
-                                    if (kmax > lh_gold - 1)
-                                        kmax = lh_gold - 1;
-                                    kmin = j + lh_gold - ssize;
-                                    if (kmin < 0)
+                                    if (kmax > lhGold - 1) {
+                                        kmax = lhGold - 1;
+                                    }
+                                    kmin = j + lhGold - length;
+                                    if (kmin < 0) {
                                         kmin = 0;
+                                    }
                                     ldc = 0;
                                     for (k = kmax; k >= kmin; k--) {
-                                        ldc += working_space[ssize + k] * working_space[j - k];// h[k]*x[j-k]
+                                        ldc += workingSpace[length + k] * workingSpace[j - k];// h[k]*x[j-k]
                                     }
-                                    if (ldc > 0)
-                                        ldb = ldb / ldc;
-
-                                    else
+                                    if (ldc > 0) {
+                                        ldb /= ldc;
+                                    } else {
                                         ldb = 0;
+                                    }
                                 }
-                                ldb = ldb * working_space[ssize + j - i];// y[j]*h[j-i]/suma(h[j][k]x[k])
+                                ldb *= workingSpace[length + j - i];// y[j]*h[j-i]/suma(h[j][k]x[k])
                             }
                             lda += ldb;
                         }
-                        lda = lda * working_space[i];
+                        lda *= workingSpace[i];
                     }
-                    working_space[3 * ssize + i] = lda;
+                    workingSpace[3 * length + i] = lda;
                 }
-                for (i = 0; i < ssize; i++)
-                    working_space[i] = working_space[3 * ssize + i];
+                for (i = 0; i < length; i++) {
+                    workingSpace[i] = workingSpace[3 * length + i];
+                }
             }
         }
 
         // shift resulting spectrum
-        for (i = 0; i < ssize; i++) {
-            lda = working_space[i];
+        for (i = 0; i < length; i++) {
+            lda = workingSpace[i];
             j = i + posit;
-            j = j % ssize;
-            working_space[ssize + j] = lda;
+            j = j % length;
+            workingSpace[length + j] = lda;
         }
 
         // write back resulting spectrum
-        for (i = 0; i < ssize; i++)
-            source[i] = working_space[ssize + i];
+        for (i = 0; i < length; i++) {
+            source[i] = workingSpace[length + i];
+        }
+        final double[] returnVector = destination == null || destination.length < length ? new double[length]
+                : destination;
+        System.arraycopy(workingSpace, 0, returnVector, 0, length);
 
-        working_space = null;
-        return null;
+        ArrayCache.release(CACHED_ARRAY_DECONVOLUTION_RL, workingSpace);
+        return returnVector;
     }
 
-    /**
-     * TSpectrum desctructor
-     */
-    @Override
-    public void finalize() {
-        fPosition = null;
-        fPositionX = null;
-        fPositionY = null;
+    protected static void filterBackgroundOrder2(final double[] workingSpace, int length, int numberIterations,
+            Direction direction, SmoothWindow smoothing) {
+        double av;
+        double men;
+        int startIndex;
+        if (direction == Direction.INCREASING) {
+            startIndex = 1;
+        } else {
+            startIndex = numberIterations;
+        }
+        final int bw = (smoothing.getValue() - 1) / 2;
+        do {
+            for (int j = startIndex; j < length - startIndex; j++) {
+                if (smoothing.isSmoothing()) {
+                    // smoothing
+                    double a = workingSpace[length + j];
+                    av = 0;
+                    men = 0;
+                    for (int w = j - bw; w <= j + bw; w++) {
+                        if (w >= 0 && w < length) {
+                            av += workingSpace[length + w];
+                            men += 1;
+                        }
+                    }
+                    av /= men;
+                    double b = 0;
+                    men = 0;
+                    for (int w = j - startIndex - bw; w <= j - startIndex + bw; w++) {
+                        if (w >= 0 && w < length) {
+                            b += workingSpace[length + w];
+                            men += 1;
+                        }
+                    }
+                    b /= men;
+                    double c = 0;
+                    men = 0;
+                    for (int w = j + startIndex - bw; w <= j + startIndex + bw; w++) {
+                        if (w >= 0 && w < length) {
+                            c += workingSpace[length + w];
+                            men += 1;
+                        }
+                    }
+                    c /= men;
+                    b = (b + c) / 2;
+                    if (b < a) {
+                        av = b;
+                    }
+                    workingSpace[j] = av;
+                } else {
+                    // not smoothing
+                    double a = workingSpace[length + j];
+                    double b = (workingSpace[length + j - startIndex] + workingSpace[length + j + startIndex]) / 2.0;
+                    if (b < a) {
+                        a = b;
+                    }
+                    workingSpace[j] = a;
+                }
+            }
+            for (int j = startIndex; j < length - startIndex; j++) {
+                workingSpace[length + j] = workingSpace[j];
+            }
+            if (direction == Direction.INCREASING) {
+                startIndex += 1;
+            } else {
+                startIndex -= 1;
+            }
+        } while (direction == Direction.INCREASING && startIndex <= numberIterations
+                || direction == Direction.DECREASING && startIndex >= 1);
     }
 
-    /**
-     * @return number of peaks found
-     */
-    public int getNPeaks() {
-        return fNPeaks;
+    protected static void filterBackgroundOrder4(final double[] workingSpace, final int length,
+            final int numberIterations, final Direction direction, final SmoothWindow smoothing) {
+        int startIndex;
+        if (direction == Direction.INCREASING) {
+            startIndex = 1;
+        } else {
+            startIndex = numberIterations;
+        }
+        final int bw = (smoothing.getValue() - 1) / 2;
+        do {
+            for (int j = startIndex; j < length - startIndex; j++) {
+                if (smoothing.isSmoothing()) {
+                    // smoothing
+                    double a = workingSpace[length + j];
+                    double av = 0;
+                    double men = 0;
+                    for (int w = j - bw; w <= j + bw; w++) {
+                        if (w >= 0 && w < length) {
+                            av += workingSpace[length + w];
+                            men += 1;
+                        }
+                    }
+                    av /= men;
+                    double b = 0;
+                    men = 0;
+                    for (int w = j - startIndex - bw; w <= j - startIndex + bw; w++) {
+                        if (w >= 0 && w < length) {
+                            b += workingSpace[length + w];
+                            men += 1;
+                        }
+                    }
+                    b /= men;
+                    double c = 0;
+                    men = 0;
+                    for (int w = j + startIndex - bw; w <= j + startIndex + bw; w++) {
+                        if (w >= 0 && w < length) {
+                            c += workingSpace[length + w];
+                            men += 1;
+                        }
+                    }
+                    c /= men;
+                    b = (b + c) / 2;
+                    double ai = startIndex / 2.0;
+                    double b4 = 0;
+                    men = 0;
+                    for (int w = j - (int) (2 * ai) - bw; w <= j - (int) (2 * ai) + bw; w++) {
+                        if (w >= 0 && w < length) {
+                            b4 += workingSpace[length + w];
+                            men += 1;
+                        }
+                    }
+                    b4 /= men;
+                    double c4 = 0;
+                    men = 0;
+                    for (int w = j - (int) ai - bw; w <= j - (int) ai + bw; w++) {
+                        if (w >= 0 && w < length) {
+                            c4 += workingSpace[length + w];
+                            men += 1;
+                        }
+                    }
+                    c4 /= men;
+                    double d4 = 0;
+                    men = 0;
+                    for (int w = j + (int) ai - bw; w <= j + (int) ai + bw; w++) {
+                        if (w >= 0 && w < length) {
+                            d4 += workingSpace[length + w];
+                            men += 1;
+                        }
+                    }
+                    d4 /= men;
+                    double e4 = 0;
+                    men = 0;
+                    for (int w = j + (int) (2 * ai) - bw; w <= j + (int) (2 * ai) + bw; w++) {
+                        if (w >= 0 && w < length) {
+                            e4 += workingSpace[length + w];
+                            men += 1;
+                        }
+                    }
+                    e4 /= men;
+                    b4 = (-b4 + 4 * c4 + 4 * d4 - e4) / 6;
+                    if (b < b4) {
+                        b = b4;
+                    }
+                    if (b < a) {
+                        av = b;
+                    }
+                    workingSpace[j] = av;
+                } else {
+                    // not smoothing
+                    double a = workingSpace[length + j];
+                    double b = (workingSpace[length + j - startIndex] + workingSpace[length + j + startIndex]) / 2.0;
+                    double c = 0;
+                    double ai = startIndex / 2.0;
+                    c -= workingSpace[length + j - (int) (2 * ai)] / 6;
+                    c += 4 * workingSpace[length + j - (int) ai] / 6;
+                    c += 4 * workingSpace[length + j + (int) ai] / 6;
+                    c -= workingSpace[length + j + (int) (2 * ai)] / 6;
+                    if (b < c) {
+                        b = c;
+                    }
+                    if (b < a) {
+                        a = b;
+                    }
+                    workingSpace[j] = a;
+                }
+            }
+            for (int j = startIndex; j < length - startIndex; j++) {
+                workingSpace[length + j] = workingSpace[j];
+            }
+            if (direction == Direction.INCREASING) {
+                startIndex += 1;
+            } else {
+                startIndex -= 1;
+            }
+        } while (direction == Direction.INCREASING && startIndex <= numberIterations
+                || direction == Direction.DECREASING && startIndex >= 1);
     }
 
-    /**
-     * @return X coordinates of found peaks
-     */
-    public double[] getPeakX() {
-        double[] peakDouble = new double[fNPeaks];
-        for (int i = 0; i < fNPeaks; i++)
-            peakDouble[i] = fPositionX[i];
-        return peakDouble;
+    protected static void filterBackgroundOrder6(final double[] workingSpace, int length, int numberIterations,
+            Direction direction, SmoothWindow smoothing) {
+        int startIndex;
+        if (direction == Direction.INCREASING) {
+            startIndex = 1;
+        } else {
+            startIndex = numberIterations;
+        }
+        final int bw = (smoothing.getValue() - 1) / 2;
+        do {
+            for (int j = startIndex; j < length - startIndex; j++) {
+                if (smoothing.isSmoothing()) {
+                    // smoothing
+                    double a = workingSpace[length + j];
+                    double av = 0;
+                    double men = 0;
+                    for (int w = j - bw; w <= j + bw; w++) {
+                        if (w >= 0 && w < length) {
+                            av += workingSpace[length + w];
+                            men += 1;
+                        }
+                    }
+                    av /= men;
+                    double b = 0;
+                    men = 0;
+                    for (int w = j - startIndex - bw; w <= j - startIndex + bw; w++) {
+                        if (w >= 0 && w < length) {
+                            b += workingSpace[length + w];
+                            men += 1;
+                        }
+                    }
+                    b /= men;
+                    double c = 0;
+                    men = 0;
+                    for (int w = j + startIndex - bw; w <= j + startIndex + bw; w++) {
+                        if (w >= 0 && w < length) {
+                            c += workingSpace[length + w];
+                            men += 1;
+                        }
+                    }
+                    c /= men;
+                    b = (b + c) / 2;
+                    double ai = startIndex / 2.0;
+                    double b4 = 0;
+                    men = 0;
+                    for (int w = j - (int) (2 * ai) - bw; w <= j - (int) (2 * ai) + bw; w++) {
+                        if (w >= 0 && w < length) {
+                            b4 += workingSpace[length + w];
+                            men += 1;
+                        }
+                    }
+                    b4 /= men;
+                    double c4 = 0;
+                    men = 0; // XX
+                    for (int w = j - (int) ai - bw; w <= j - (int) ai + bw; w++) {
+                        if (w >= 0 && w < length) {
+                            c4 += workingSpace[length + w];
+                            men += 1;
+                        }
+                    }
+                    c4 /= men;
+                    double d4 = 0;
+                    men = 0; // XX
+                    for (int w = j + (int) ai - bw; w <= j + (int) ai + bw; w++) {
+                        if (w >= 0 && w < length) {
+                            d4 += workingSpace[length + w];
+                            men += 1;
+                        }
+                    }
+                    d4 /= men;
+                    double e4 = 0;
+                    men = 0; // XX
+                    for (int w = j + (int) (2 * ai) - bw; w <= j + (int) (2 * ai) + bw; w++) {
+                        if (w >= 0 && w < length) {
+                            e4 += workingSpace[length + w];
+                            men += 1;
+                        }
+                    }
+                    e4 /= men;
+                    b4 = (-b4 + 4 * c4 + 4 * d4 - e4) / 6;
+                    ai = startIndex / 3.0;
+                    double b6 = 0;
+                    men = 0; // XX
+                    for (int w = j - (int) (3 * ai) - bw; w <= j - (int) (3 * ai) + bw; w++) {
+                        if (w >= 0 && w < length) {
+                            b6 += workingSpace[length + w];
+                            men += 1;
+                        }
+                    }
+                    b6 /= men;
+                    double c6 = 0;
+                    men = 0; // XX
+                    for (int w = j - (int) (2 * ai) - bw; w <= j - (int) (2 * ai) + bw; w++) {
+                        if (w >= 0 && w < length) {
+                            c6 += workingSpace[length + w];
+                            men += 1;
+                        }
+                    }
+                    c6 /= men;
+                    double d6 = 0;
+                    men = 0; // XX
+                    for (int w = j - (int) ai - bw; w <= j - (int) ai + bw; w++) {
+                        if (w >= 0 && w < length) {
+                            d6 += workingSpace[length + w];
+                            men += 1;
+                        }
+                    }
+                    d6 /= men;
+                    double e6 = 0;
+                    men = 0; // XX
+                    for (int w = j + (int) ai - bw; w <= j + (int) ai + bw; w++) {
+                        if (w >= 0 && w < length) {
+                            e6 += workingSpace[length + w];
+                            men += 1;
+                        }
+                    }
+                    e6 /= men;
+                    double f6 = 0;
+                    men = 0;
+                    for (int w = j + (int) (2 * ai) - bw; w <= j + (int) (2 * ai) + bw; w++) {
+                        if (w >= 0 && w < length) {
+                            f6 += workingSpace[length + w];
+                            men += 1;
+                        }
+                    }
+                    f6 /= men;
+                    double g6 = 0;
+                    men = 0;
+                    for (int w = j + (int) (3 * ai) - bw; w <= j + (int) (3 * ai) + bw; w++) {
+                        if (w >= 0 && w < length) {
+                            g6 += workingSpace[length + w];
+                            men += 1;
+                        }
+                    }
+                    g6 /= men;
+                    b6 = (b6 - 6 * c6 + 15 * d6 + 15 * e6 - 6 * f6 + g6) / 20;
+                    if (b < b6) {
+                        b = b6;
+                    }
+                    if (b < b4) {
+                        b = b4;
+                    }
+                    if (b < a) {
+                        av = b;
+                    }
+                    workingSpace[j] = av;
+                } else {
+                    // not smoothing
+                    double a = workingSpace[length + j];
+                    double b = (workingSpace[length + j - startIndex] + workingSpace[length + j + startIndex]) / 2.0;
+                    double c = 0;
+                    double ai = startIndex / 2.0;
+                    c -= workingSpace[length + j - (int) (2 * ai)] / 6;
+                    c += 4 * workingSpace[length + j - (int) ai] / 6;
+                    c += 4 * workingSpace[length + j + (int) ai] / 6;
+                    c -= workingSpace[length + j + (int) (2 * ai)] / 6;
+                    double d = 0;
+                    ai = startIndex / 3.0;
+                    d += workingSpace[length + j - (int) (3 * ai)] / 20;
+                    d -= 6 * workingSpace[length + j - (int) (2 * ai)] / 20;
+                    d += 15 * workingSpace[length + j - (int) ai] / 20;
+                    d += 15 * workingSpace[length + j + (int) ai] / 20;
+                    d -= 6 * workingSpace[length + j + (int) (2 * ai)] / 20;
+                    d += workingSpace[length + j + (int) (3 * ai)] / 20;
+                    if (b < d) {
+                        b = d;
+                    }
+                    if (b < c) {
+                        b = c;
+                    }
+                    if (b < a) {
+                        a = b;
+                    }
+                    workingSpace[j] = a;
+                }
+            }
+            for (int j = startIndex; j < length - startIndex; j++) {
+                workingSpace[length + j] = workingSpace[j];
+            }
+
+            if (direction == Direction.INCREASING) {
+                startIndex += 1;
+            } else {
+                startIndex -= 1;
+            }
+        } while (direction == Direction.INCREASING && startIndex <= numberIterations
+                || direction == Direction.DECREASING && startIndex >= 1);
     }
 
-    /**
-     * @return Y coordinates of found peaks
-     */
-    public double[] getPeakY() {
-        double[] peakDouble = new double[fNPeaks];
-        for (int i = 0; i < fNPeaks; i++)
-            peakDouble[i] = fPositionY[i];
-        return peakDouble;
+    protected static void filterBackgroundOrder8(final double[] workingSpace, int length, int numberIterations,
+            Direction direction, SmoothWindow smoothing) {
+        int startIndex;
+        if (direction == Direction.INCREASING) {
+            startIndex = 1;
+        } else {
+            startIndex = numberIterations;
+        }
+        final int bw = (smoothing.getValue() - 1) / 2;
+        do {
+            for (int j = startIndex; j < length - startIndex; j++) {
+                if (smoothing.isSmoothing()) {
+                    // smoothing
+                    double a = workingSpace[length + j];
+                    double av = 0;
+                    double men = 0;
+                    for (int w = j - bw; w <= j + bw; w++) {
+                        if (w >= 0 && w < length) {
+                            av += workingSpace[length + w];
+                            men += 1;
+                        }
+                    }
+                    av /= men;
+                    double b = 0;
+                    men = 0;
+                    for (int w = j - startIndex - bw; w <= j - startIndex + bw; w++) {
+                        if (w >= 0 && w < length) {
+                            b += workingSpace[length + w];
+                            men += 1;
+                        }
+                    }
+                    b /= men;
+                    double c = 0;
+                    men = 0;
+                    for (int w = j + startIndex - bw; w <= j + startIndex + bw; w++) {
+                        if (w >= 0 && w < length) {
+                            c += workingSpace[length + w];
+                            men += 1;
+                        }
+                    }
+                    c /= men;
+                    b = (b + c) / 2;
+                    double ai = startIndex / 2.0;
+                    double b4 = 0;
+                    men = 0;
+                    for (int w = j - (int) (2 * ai) - bw; w <= j - (int) (2 * ai) + bw; w++) {
+                        if (w >= 0 && w < length) {
+                            b4 += workingSpace[length + w];
+                            men += 1;
+                        }
+                    }
+                    b4 /= men;
+                    double c4 = 0;
+                    men = 0;
+                    for (int w = j - (int) ai - bw; w <= j - (int) ai + bw; w++) {
+                        if (w >= 0 && w < length) {
+                            c4 += workingSpace[length + w];
+                            men += 1;
+                        }
+                    }
+                    c4 /= men;
+                    double d4 = 0;
+                    men = 0;
+                    for (int w = j + (int) ai - bw; w <= j + (int) ai + bw; w++) {
+                        if (w >= 0 && w < length) {
+                            d4 += workingSpace[length + w];
+                            men += 1;
+                        }
+                    }
+                    d4 /= men;
+                    double e4 = 0;
+                    men = 0;
+                    for (int w = j + (int) (2 * ai) - bw; w <= j + (int) (2 * ai) + bw; w++) {
+                        if (w >= 0 && w < length) {
+                            e4 += workingSpace[length + w];
+                            men += 1;
+                        }
+                    }
+                    e4 /= men;
+                    b4 = (-b4 + 4 * c4 + 4 * d4 - e4) / 6;
+                    ai = startIndex / 3.0;
+                    double b6 = 0;
+                    men = 0;
+                    for (int w = j - (int) (3 * ai) - bw; w <= j - (int) (3 * ai) + bw; w++) {
+                        if (w >= 0 && w < length) {
+                            b6 += workingSpace[length + w];
+                            men += 1;
+                        }
+                    }
+                    b6 /= men;
+                    double c6 = 0;
+                    men = 0;
+                    for (int w = j - (int) (2 * ai) - bw; w <= j - (int) (2 * ai) + bw; w++) {
+                        if (w >= 0 && w < length) {
+                            c6 += workingSpace[length + w];
+                            men += 1;
+                        }
+                    }
+                    c6 /= men;
+                    double d6 = 0;
+                    men = 0;
+                    for (int w = j - (int) ai - bw; w <= j - (int) ai + bw; w++) {
+                        if (w >= 0 && w < length) {
+                            d6 += workingSpace[length + w];
+                            men += 1;
+                        }
+                    }
+                    d6 /= men;
+                    double e6 = 0;
+                    men = 0;
+                    for (int w = j + (int) ai - bw; w <= j + (int) ai + bw; w++) {
+                        if (w >= 0 && w < length) {
+                            e6 += workingSpace[length + w];
+                            men += 1;
+                        }
+                    }
+                    e6 /= men;
+                    double f6 = 0;
+                    men = 0;
+                    for (int w = j + (int) (2 * ai) - bw; w <= j + (int) (2 * ai) + bw; w++) {
+                        if (w >= 0 && w < length) {
+                            f6 += workingSpace[length + w];
+                            men += 1;
+                        }
+                    }
+                    f6 /= men;
+                    double g6 = 0;
+                    men = 0;
+                    for (int w = j + (int) (3 * ai) - bw; w <= j + (int) (3 * ai) + bw; w++) {
+                        if (w >= 0 && w < length) {
+                            g6 += workingSpace[length + w];
+                            men += 1;
+                        }
+                    }
+                    g6 /= men;
+                    b6 = (b6 - 6 * c6 + 15 * d6 + 15 * e6 - 6 * f6 + g6) / 20;
+                    ai = startIndex / 4.0;
+                    double b8 = 0;
+                    men = 0;
+                    for (int w = j - (int) (4 * ai) - bw; w <= j - (int) (4 * ai) + bw; w++) {
+                        if (w >= 0 && w < length) {
+                            b8 += workingSpace[length + w];
+                            men += 1;
+                        }
+                    }
+                    b8 /= men;
+                    double c8 = 0;
+                    men = 0;
+                    for (int w = j - (int) (3 * ai) - bw; w <= j - (int) (3 * ai) + bw; w++) {
+                        if (w >= 0 && w < length) {
+                            c8 += workingSpace[length + w];
+                            men += 1;
+                        }
+                    }
+                    c8 /= men;
+                    double d8 = 0;
+                    men = 0;
+                    for (int w = j - (int) (2 * ai) - bw; w <= j - (int) (2 * ai) + bw; w++) {
+                        if (w >= 0 && w < length) {
+                            d8 += workingSpace[length + w];
+                            men += 1;
+                        }
+                    }
+                    d8 /= men;
+                    double e8 = 0;
+                    men = 0;
+                    for (int w = j - (int) ai - bw; w <= j - (int) ai + bw; w++) {
+                        if (w >= 0 && w < length) {
+                            e8 += workingSpace[length + w];
+                            men += 1;
+                        }
+                    }
+                    e8 /= men;
+                    double f8 = 0;
+                    men = 0;
+                    for (int w = j + (int) ai - bw; w <= j + (int) ai + bw; w++) {
+                        if (w >= 0 && w < length) {
+                            f8 += workingSpace[length + w];
+                            men += 1;
+                        }
+                    }
+                    f8 /= men;
+                    double g8 = 0;
+                    men = 0;
+                    for (int w = j + (int) (2 * ai) - bw; w <= j + (int) (2 * ai) + bw; w++) {
+                        if (w >= 0 && w < length) {
+                            g8 += workingSpace[length + w];
+                            men += 1;
+                        }
+                    }
+                    g8 /= men;
+                    double h8 = 0;
+                    men = 0;
+                    for (int w = j + (int) (3 * ai) - bw; w <= j + (int) (3 * ai) + bw; w++) {
+                        if (w >= 0 && w < length) {
+                            h8 += workingSpace[length + w];
+                            men += 1;
+                        }
+                    }
+                    h8 /= men;
+                    double i8 = 0;
+                    men = 0;
+                    for (int w = j + (int) (4 * ai) - bw; w <= j + (int) (4 * ai) + bw; w++) {
+                        if (w >= 0 && w < length) {
+                            i8 += workingSpace[length + w];
+                            men += 1;
+                        }
+                    }
+                    i8 /= men;
+                    b8 = (-b8 + 8 * c8 - 28 * d8 + 56 * e8 - 56 * f8 - 28 * g8 + 8 * h8 - i8) / 70;
+                    if (b < b8) {
+                        b = b8;
+                    }
+                    if (b < b6) {
+                        b = b6;
+                    }
+                    if (b < b4) {
+                        b = b4;
+                    }
+                    if (b < a) {
+                        av = b;
+                    }
+                    workingSpace[j] = av;
+                } else {
+                    // not smoothing
+                    double a = workingSpace[length + j];
+                    double b = (workingSpace[length + j - startIndex] + workingSpace[length + j + startIndex]) / 2.0;
+                    double c = 0;
+                    double ai = startIndex / 2.0;
+                    c -= workingSpace[length + j - (int) (2 * ai)] / 6;
+                    c += 4 * workingSpace[length + j - (int) ai] / 6;
+                    c += 4 * workingSpace[length + j + (int) ai] / 6;
+                    c -= workingSpace[length + j + (int) (2 * ai)] / 6;
+                    double d = 0;
+                    ai = startIndex / 3.0;
+                    d += workingSpace[length + j - (int) (3 * ai)] / 20;
+                    d -= 6 * workingSpace[length + j - (int) (2 * ai)] / 20;
+                    d += 15 * workingSpace[length + j - (int) ai] / 20;
+                    d += 15 * workingSpace[length + j + (int) ai] / 20;
+                    d -= 6 * workingSpace[length + j + (int) (2 * ai)] / 20;
+                    d += workingSpace[length + j + (int) (3 * ai)] / 20;
+                    double e = 0;
+                    ai = startIndex / 4.0;
+                    e -= workingSpace[length + j - (int) (4 * ai)] / 70;
+                    e += 8 * workingSpace[length + j - (int) (3 * ai)] / 70;
+                    e -= 28 * workingSpace[length + j - (int) (2 * ai)] / 70;
+                    e += 56 * workingSpace[length + j - (int) ai] / 70;
+                    e += 56 * workingSpace[length + j + (int) ai] / 70;
+                    e -= 28 * workingSpace[length + j + (int) (2 * ai)] / 70;
+                    e += 8 * workingSpace[length + j + (int) (3 * ai)] / 70;
+                    e -= workingSpace[length + j + (int) (4 * ai)] / 70;
+                    if (b < e) {
+                        b = e;
+                    }
+                    if (b < d) {
+                        b = d;
+                    }
+                    if (b < c) {
+                        b = c;
+                    }
+                    if (b < a) {
+                        a = b;
+                    }
+                    workingSpace[j] = a;
+                }
+            }
+            for (int j = startIndex; j < length - startIndex; j++) {
+                workingSpace[length + j] = workingSpace[j];
+            }
+
+            if (direction == Direction.INCREASING) {
+                startIndex += 1;
+            } else {
+                startIndex -= 1;
+            }
+        } while (direction == Direction.INCREASING && startIndex <= numberIterations
+                || direction == Direction.DECREASING && startIndex >= 1);
     }
 
-    /**
-     * Print the array of positions
-     */
-    void Print() {
-        System.out.println("Number of positions = " + fNPeaks);
-        for (int i = 0; i < fNPeaks; i++) {
-            System.out.println(" x[" + i + "] = " + fPositionX[i] + ", y[" + i + "] = " + fPositionY[i]);
-        }
-    }
-
-    /**
-     * ONE-DIMENSIONAL PEAK SEARCH FUNCTION This function searches for peaks in source spectrum in hin The number of
-     * found peaks and their positions are written into the members fNpeaks and fPositionX. The search is performed in
-     * the current histogram range. Function parameters:
-     * 
-     * @param hinX histogram x of source spectrum
-     * @param hinY histogram Y of source spectrum
-     * @param houtX out histogram of source spectrum
-     * @param houtY out histogram of source spectrum
-     * @param sigma sigma of searched peaks, for details we refer to manual
-     * @param option string options passed to the algorithms
-     * @param threshold (default=0.05) peaks with amplitude less than threshold*highest_peak are discarded. 0 &lt;
-     *        threshold &lt;1 By default, the background is removed before deconvolution. Specify the option
-     *        "nobackground" to not remove the background. By default the "Markov" chain algorithm is used. Specify the
-     *        option "noMarkov" to disable this algorithm Note that by default the source spectrum is replaced by a new
-     *        spectrum
-     * @return number of found peaks
-     */
-    public int Search(double[] hinX, double[] hinY, double[] houtX, double[] houtY, double sigma, String option,
-            double threshold) {
-
-        if (hinX == null || hinY == null)
-            return 0;
-        int dimension = 1;
-        // int dimension = hin.GetDimension();
-        // if (dimension > 2) {
-        // System.out.println("Search: Only implemented for 1-d and 2-d histograms");
-        // return 0;
-        // }
-        if (threshold <= 0 || threshold >= 1) {
-            System.out.println("Search: threshold must 0<threshold<1, threshol=0.05 assumed");
-            threshold = 0.05;
-        }
-        String opt = option.toLowerCase();
-
-        boolean background = true;
-        if (opt.indexOf("nobackground") >= 0) {
-            background = false;
-            opt = opt.replaceAll("nobackground", "");
-        }
-        boolean markov = true;
-        if (opt.indexOf("nomarkov") >= 0) {
-            markov = false;
-            opt = opt.replaceAll("nomarkov", "");
-        }
-        // TODO: update first last selection
-        // int first = hin.GetXaxis().GetFirst();
-        // int last = hin.GetXaxis().GetLast();
-        int first = 0;
-        int last = hinX.length - 1;
-        int size = last - first + 1;
-        double[] source = new double[size];
-        double[] dest = new double[size];
-        for (int i = 0; i < size - 1; i++) {
-            source[i] = hinY[i + first];
-        }
-        if (sigma <= 1) {
-            sigma = size / fMaxPeaks;
-            if (sigma < 1)
-                sigma = 1;
-            if (sigma > 8)
-                sigma = 8;
-        }
-
-        int npeaks = SearchHighRes(source, dest, size, sigma, 100 * threshold, background, fgIterations, markov,
-                fgAverageWindow);
-
-        System.out.println("N peaks is: " + npeaks);
-
-        // hout.clear();
-        houtX = new double[fPositionX.length];
-        houtY = new double[fPositionY.length];
-        for (int i = 0; i < npeaks; i++) {
-            int bin = first + (int) (fPositionX[i] + 0.5);
-            bin = bin - 1;
-            fPositionX[i] = hinX[bin];
-            fPositionY[i] = hinY[bin];
-            houtX[i] = fPositionX[i];
-            houtY[i] = fPositionY[i];
-        }
-
-        source = null;
-        dest = null;
-
-        if (opt.indexOf("goff") >= 0)
-            return npeaks;
-
-        if (npeaks == 0)
-            return 0;
-
-        return npeaks;
-    }
+    // STATIC functions (called by TH1)
 
     /**
      * ONE-DIMENSIONAL HIGH-RESOLUTION PEAK SEARCH FUNCTION This function searches for peaks in source spectrum It is
      * based on deconvolution method. First the background is removed (if desired), then Markov spectrum is calculated
      * (if desired), then the response function is generated according to given sigma and deconvolution is carried out.
-     * 
-     * @param source vector of source spectrum
+     *
+     * @param sourceX vector of source spectrum
+     * @param sourceY vector of source spectrum
      * @param destVector vector of resulting deconvolved spectrum
-     * @param ssize length of source spectrum
+     * @param length length of source spectrum
+     * @param nMaxPeaks maximum number of peaks to search for (upper bound)
      * @param sigma sigma of searched peaks, for details we refer to manual
      * @param threshold threshold value in % for selected peaks, peaks with amplitude less than
      *        threshold*highest_peak/100 are ignored, see manual
@@ -1276,284 +1218,300 @@ public class TSpectrum {
      *        using Markov chains method.
      * @param averWindow averaging window of searched peaks, for details we refer to manual (applies only for Markov
      *        method)
-     * @return number of found peaks
+     * @return list with identified peaks
      */
-    public int SearchHighRes(double[] source, double[] destVector, int ssize, double sigma, double threshold,
-            boolean backgroundRemove, int deconIterations, boolean markov, int averWindow) {
+    public static List<DoublePoint> search(final double[] sourceX, final double[] sourceY, final double[] destVector,
+            final int length, final int nMaxPeaks, final double sigma, final double threshold,
+            final boolean backgroundRemove, final int deconIterations, final boolean markov, final int averWindow) {
 
-        int i, j, numberIterations = (int) (7 * sigma + 0.5);
-        double a, b, c;
-        int k, lindex, posit, imin, imax, jmin, jmax, lh_gold, priz;
-        double lda, ldb, ldc, area, maximum, maximum_decon;
-        int xmin, xmax, l, peak_index = 0, size_ext = ssize + 2 * numberIterations, shift = numberIterations, bw = 2, w;
-        double maxch;
-        double nom, nip, nim, sp, sm, plocha = 0;
-        double m0low = 0, m1low = 0, m2low = 0, l0low = 0, l1low = 0, detlow, av, men;
+        if (sourceX == null || sourceY == null) {
+            throw new IllegalArgumentException(
+                    "neither sourceX '" + sourceX + "' nor sourceY '" + sourceY + "' must be null");
+        } else if (sourceX.length < length) {
+            throw new IllegalArgumentException(
+                    "sourceX.length too short is '" + sourceX.length + "' vs. should '" + length + "'");
+        } else if (sourceY.length < length) {
+            throw new IllegalArgumentException(
+                    "sourceY.length too short is '" + sourceY.length + "' vs. should '" + length + "'");
+        }
+
+        if ((destVector == null || destVector.length < length) && LOGGER.isDebugEnabled()) {
+            LOGGER.atDebug().addArgument(destVector == null ? Double.NaN : destVector.length).addArgument(length).log(
+                    "destination vector has insufficient length {} vs. {} needed, omitting copying background spectrum");
+        }
 
         if (sigma < 1) {
-            System.out.println("SearchHighRes" + " Invalid sigma, must be greater than or equal to 1");
-            return 0;
+            throw new IllegalArgumentException("Invalid sigma '" + sigma + "', must be greater than or equal to 1");
         }
 
         if (threshold <= 0 || threshold >= 100) {
-            System.out.println("SearchHighRes: Invalid threshold, must be positive and less than 100");
-            return 0;
+            throw new IllegalArgumentException(
+                    "invalid threshold '" + threshold + "', must be within ]0,100[");
         }
 
-        j = (int) (5.0 * sigma + 0.5);
-        if (j >= PEAK_WINDOW / 2) {
-            System.out.println("SearchHighRes: Too large sigma");
-            return 0;
+        if ((int) (5.0 * sigma + 0.5) >= PEAK_WINDOW / 2) {
+            throw new IllegalArgumentException("too large sigma");
         }
 
-        if (markov == true) {
-            if (averWindow <= 0) {
-                System.out.println("SearchHighRes: Averanging window must be positive");
-                return 0;
-            }
+        if (markov && averWindow <= 0) {
+            throw new IllegalArgumentException("averanging window must be positive");
         }
 
-        if (backgroundRemove == true) {
-            if (ssize < 2 * numberIterations + 1) {
-                System.out.println("SearchHighRes: Too large clipping window");
-                return 0;
-            }
+        final int numberIterations = (int) (7 * sigma + 0.5);
+        if (backgroundRemove && length < 2 * numberIterations + 1) {
+            throw new IllegalArgumentException("too large clipping window");
         }
+        final int sizeExt = length + 2 * numberIterations;
+        final int shift = numberIterations;
 
-        k = (int) (2 * sigma + 0.5);
-        if (k >= 2) {
-            for (i = 0; i < k; i++) {
-                a = i;
-                b = source[i];
+        final int searchK = (int) (2 * sigma + 0.5);
+        double l1low = 0;
+        if (searchK >= 2) {
+            double m0low = 0;
+            double m1low = 0;
+            double m2low = 0;
+            double l0low = 0;
+            for (int i = 0; i < searchK; i++) {
+                final int a = i;
+                double b = sourceY[i];
                 m0low += 1;
                 m1low += a;
                 m2low += a * a;
                 l0low += b;
                 l1low += a * b;
             }
-            detlow = m0low * m2low - m1low * m1low;
-            if (detlow != 0)
+            final double detlow = m0low * m2low - m1low * m1low;
+            if (detlow == 0) {
+                l1low = 0;
+            } else {
                 l1low = (-l0low * m1low + l1low * m0low) / detlow;
-
-            else
+            }
+            if (l1low > 0) {
                 l1low = 0;
-            if (l1low > 0)
-                l1low = 0;
-        }
-
-        else {
+            }
+        } else {
             l1low = 0;
         }
 
-        i = (int) (7 * sigma + 0.5);
-        i = 2 * i;
-        double[] working_space = new double[7 * (ssize + i)];
-        for (j = 0; j < 7 * (ssize + i); j++)
-            working_space[j] = 0;
-        for (i = 0; i < size_ext; i++) {
+        int nWidthSigma = (int) (7 * sigma + 0.5) * 2;
+        final double[] workingSpace = ArrayCache.getCachedDoubleArray(CACHED_ARRAY_SEARCH, 7 * (length + nWidthSigma));
+        ArrayUtils.fillArray(workingSpace, 0.0);
+
+        for (int i = 0; i < sizeExt; i++) {
             if (i < shift) {
-                a = i - shift;
-                working_space[i + size_ext] = source[0] + l1low * a;
-                if (working_space[i + size_ext] < 0)
-                    working_space[i + size_ext] = 0;
+                final int a = i - shift;
+                workingSpace[i + sizeExt] = sourceY[0] + l1low * a;
+                if (workingSpace[i + sizeExt] < 0) {
+                    workingSpace[i + sizeExt] = 0;
+                }
+            } else if (i >= length + shift) {
+                workingSpace[i + sizeExt] = sourceY[length - 1];
+                if (workingSpace[i + sizeExt] < 0) {
+                    workingSpace[i + sizeExt] = 0;
+                }
+            } else {
+                workingSpace[i + sizeExt] = sourceY[i - shift];
             }
-
-            else if (i >= ssize + shift) {
-                a = i - (ssize - 1 + shift);
-                working_space[i + size_ext] = source[ssize - 1];
-                if (working_space[i + size_ext] < 0)
-                    working_space[i + size_ext] = 0;
-            }
-
-            else
-                working_space[i + size_ext] = source[i - shift];
         }
 
-        if (backgroundRemove == true) {
-            for (i = 1; i <= numberIterations; i++) {
-                for (j = i; j < size_ext - i; j++) {
-                    if (markov == false) {
-                        a = working_space[size_ext + j];
-                        b = (working_space[size_ext + j - i] + working_space[size_ext + j + i]) / 2.0;
-                        if (b < a)
-                            a = b;
-
-                        working_space[j] = a;
-                    }
-
-                    else {
-                        a = working_space[size_ext + j];
-                        av = 0;
-                        men = 0;
-                        for (w = j - bw; w <= j + bw; w++) {
-                            if (w >= 0 && w < size_ext) {
-                                av += working_space[size_ext + w];
+        if (backgroundRemove) {
+            for (int i = 1; i <= numberIterations; i++) {
+                for (int j = i; j < sizeExt - i; j++) {
+                    if (markov) {
+                        final double a = workingSpace[sizeExt + j];
+                        double av = 0;
+                        double men = 0;
+                        final int bw = Math.min(averWindow / 2, 2);
+                        for (int w = j - bw; w <= j + bw; w++) {
+                            if (w >= 0 && w < sizeExt) {
+                                av += workingSpace[sizeExt + w];
                                 men += 1;
                             }
                         }
-                        av = av / men;
-                        b = 0;
+                        av /= men;
+                        double b = 0;
                         men = 0;
-                        for (w = j - i - bw; w <= j - i + bw; w++) {
-                            if (w >= 0 && w < size_ext) {
-                                b += working_space[size_ext + w];
+                        for (int w = j - i - bw; w <= j - i + bw; w++) {
+                            if (w >= 0 && w < sizeExt) {
+                                b += workingSpace[sizeExt + w];
                                 men += 1;
                             }
                         }
-                        b = b / men;
-                        c = 0;
+                        b /= men;
+                        double c = 0;
                         men = 0;
-                        for (w = j + i - bw; w <= j + i + bw; w++) {
-                            if (w >= 0 && w < size_ext) {
-                                c += working_space[size_ext + w];
+                        for (int w = j + i - bw; w <= j + i + bw; w++) {
+                            if (w >= 0 && w < sizeExt) {
+                                c += workingSpace[sizeExt + w];
                                 men += 1;
                             }
                         }
-                        c = c / men;
+                        c /= men;
                         b = (b + c) / 2;
-                        if (b < a)
+                        if (b < a) {
                             av = b;
-                        working_space[j] = av;
+                        }
+                        workingSpace[j] = av;
+                    } else {
+                        double a = workingSpace[sizeExt + j];
+                        final double b = (workingSpace[sizeExt + j - i] + workingSpace[sizeExt + j + i]) / 2.0;
+                        if (b < a) {
+                            a = b;
+                        }
+
+                        workingSpace[j] = a;
                     }
                 }
-                for (j = i; j < size_ext - i; j++)
-                    working_space[size_ext + j] = working_space[j];
+                for (int j = i; j < sizeExt - i; j++) {
+                    workingSpace[sizeExt + j] = workingSpace[j];
+                }
             }
-            for (j = 0; j < size_ext; j++) {
+            for (int j = 0; j < sizeExt; j++) {
                 if (j < shift) {
-                    a = j - shift;
-                    b = source[0] + l1low * a;
-                    if (b < 0)
+                    final int a = j - shift;
+                    double b = sourceY[0] + l1low * a;
+                    if (b < 0) {
                         b = 0;
-                    working_space[size_ext + j] = b - working_space[size_ext + j];
+                    }
+                    workingSpace[sizeExt + j] = b - workingSpace[sizeExt + j];
                 }
 
-                else if (j >= ssize + shift) {
-                    a = j - (ssize - 1 + shift);
-                    b = source[ssize - 1];
-                    if (b < 0)
+                else if (j >= length + shift) {
+                    double b = sourceY[length - 1];
+                    if (b < 0) {
                         b = 0;
-                    working_space[size_ext + j] = b - working_space[size_ext + j];
+                    }
+                    workingSpace[sizeExt + j] = b - workingSpace[sizeExt + j];
                 }
 
                 else {
-                    working_space[size_ext + j] = source[j - shift] - working_space[size_ext + j];
+                    workingSpace[sizeExt + j] = sourceY[j - shift] - workingSpace[sizeExt + j];
                 }
             }
-            for (j = 0; j < size_ext; j++) {
-                if (working_space[size_ext + j] < 0)
-                    working_space[size_ext + j] = 0;
+            for (int j = 0; j < sizeExt; j++) {
+                if (workingSpace[sizeExt + j] < 0) {
+                    workingSpace[sizeExt + j] = 0;
+                }
             }
         }
 
-        for (i = 0; i < size_ext; i++) {
-            working_space[i + 6 * size_ext] = working_space[i + size_ext];
+        for (int i = 0; i < sizeExt; i++) {
+            workingSpace[i + 6 * sizeExt] = workingSpace[i + sizeExt];
         }
 
-        if (markov == true) {
-            for (j = 0; j < size_ext; j++)
-                working_space[2 * size_ext + j] = working_space[size_ext + j];
-            xmin = 0;
-            xmax = size_ext - 1;
-            for (i = 0, maxch = 0; i < size_ext; i++) {
-                working_space[i] = 0;
-                if (maxch < working_space[2 * size_ext + i])
-                    maxch = working_space[2 * size_ext + i];
-                plocha += working_space[2 * size_ext + i];
-            }
-            if (maxch == 0) {
-                working_space = null;
-                return 0;
+        if (markov) {
+            for (int j = 0; j < sizeExt; j++) {
+                workingSpace[2 * sizeExt + j] = workingSpace[sizeExt + j];
             }
 
-            nom = 1;
-            working_space[xmin] = 1;
-            for (i = xmin; i < xmax; i++) {
-                nip = working_space[2 * size_ext + i] / maxch;
-                nim = working_space[2 * size_ext + i + 1] / maxch;
-                sp = 0;
-                sm = 0;
-                for (l = 1; l <= averWindow; l++) {
-                    if ((i + l) > xmax)
-                        a = working_space[2 * size_ext + xmax] / maxch;
+            double signalMax = 0;
+            double plocha = 0.0;
+            for (int i = 0; i < sizeExt; i++) {
+                workingSpace[i] = 0;
+                if (signalMax < workingSpace[2 * sizeExt + i]) {
+                    signalMax = workingSpace[2 * sizeExt + i];
+                }
+                plocha += workingSpace[2 * sizeExt + i];
+            }
+            if (signalMax == 0) {
+                ArrayCache.release(CACHED_ARRAY_SEARCH, workingSpace);
+                return Collections.emptyList();
+            }
 
-                    else
-                        a = working_space[2 * size_ext + i + l] / maxch;
+            double nom = 1;
+            final int xmin = 0;
+            final int xmax = sizeExt - 1;
+            workingSpace[xmin] = 1;
+            for (int i = xmin; i < xmax; i++) {
+                double nip = workingSpace[2 * sizeExt + i] / signalMax;
+                double nim = workingSpace[2 * sizeExt + i + 1] / signalMax;
+                double sp = 0;
+                double sm = 0;
+                double a;
+                for (int l = 1; l <= averWindow; l++) {
+                    if ((i + l) > xmax) {
+                        a = workingSpace[2 * sizeExt + xmax] / signalMax;
+                    } else {
+                        a = workingSpace[2 * sizeExt + i + l] / signalMax;
+                    }
 
-                    b = a - nip;
-                    if (a + nip <= 0)
+                    double b = a - nip;
+                    if (a + nip <= 0) {
                         a = 1;
-
-                    else
+                    } else {
                         a = Math.sqrt(a + nip);
+                    }
 
-                    b = b / a;
+                    b /= a;
                     b = Math.exp(b);
-                    sp = sp + b;
-                    if ((i - l + 1) < xmin)
-                        a = working_space[2 * size_ext + xmin] / maxch;
-
-                    else
-                        a = working_space[2 * size_ext + i - l + 1] / maxch;
+                    sp += b;
+                    if ((i - l + 1) < xmin) {
+                        a = workingSpace[2 * sizeExt + xmin] / signalMax;
+                    } else {
+                        a = workingSpace[2 * sizeExt + i - l + 1] / signalMax;
+                    }
 
                     b = a - nim;
-                    if (a + nim <= 0)
+                    if (a + nim <= 0) {
                         a = 1;
-
-                    else
+                    } else {
                         a = Math.sqrt(a + nim);
+                    }
 
-                    b = b / a;
+                    b /= a;
                     b = Math.exp(b);
-                    sm = sm + b;
+                    sm += b;
                 }
                 a = sp / sm;
-                a = working_space[i + 1] = working_space[i] * a;
-                nom = nom + a;
+                a = workingSpace[i + 1] = workingSpace[i] * a;
+                nom += a;
             }
-            for (i = xmin; i <= xmax; i++) {
-                working_space[i] = working_space[i] / nom;
+            for (int i = xmin; i <= xmax; i++) {
+                workingSpace[i] = workingSpace[i] / nom;
             }
-            for (j = 0; j < size_ext; j++)
-                working_space[size_ext + j] = working_space[j] * plocha;
-            for (j = 0; j < size_ext; j++) {
-                working_space[2 * size_ext + j] = working_space[size_ext + j];
+            for (int j = 0; j < sizeExt; j++) {
+                workingSpace[sizeExt + j] = workingSpace[j] * plocha;
             }
-            if (backgroundRemove == true) {
-                for (i = 1; i <= numberIterations; i++) {
-                    for (j = i; j < size_ext - i; j++) {
-                        a = working_space[size_ext + j];
-                        b = (working_space[size_ext + j - i] + working_space[size_ext + j + i]) / 2.0;
-                        if (b < a)
+            for (int j = 0; j < sizeExt; j++) {
+                workingSpace[2 * sizeExt + j] = workingSpace[sizeExt + j];
+            }
+            if (backgroundRemove) {
+                for (int i = 1; i <= numberIterations; i++) {
+                    for (int j = i; j < sizeExt - i; j++) {
+                        double a = workingSpace[sizeExt + j];
+                        double b = (workingSpace[sizeExt + j - i] + workingSpace[sizeExt + j + i]) / 2.0;
+                        if (b < a) {
                             a = b;
-                        working_space[j] = a;
+                        }
+                        workingSpace[j] = a;
                     }
-                    for (j = i; j < size_ext - i; j++)
-                        working_space[size_ext + j] = working_space[j];
+                    for (int j = i; j < sizeExt - i; j++) {
+                        workingSpace[sizeExt + j] = workingSpace[j];
+                    }
                 }
-                for (j = 0; j < size_ext; j++) {
-                    working_space[size_ext + j] = working_space[2 * size_ext + j] - working_space[size_ext + j];
+                for (int j = 0; j < sizeExt; j++) {
+                    workingSpace[sizeExt + j] = workingSpace[2 * sizeExt + j] - workingSpace[sizeExt + j];
                 }
             }
         }
 
         // deconvolution starts
-        area = 0;
-        lh_gold = -1;
-        posit = 0;
-        maximum = 0;
+        int area = 0;
+        int lhGold = -1;
+        int posit = 0;
+        double maximum = 0;
 
         // generate response vector
-        for (i = 0; i < size_ext; i++) {
-            lda = i - 3 * sigma;
+        for (int i = 0; i < sizeExt; i++) {
+            double lda = i - 3 * sigma;
             lda = lda * lda / (2 * sigma * sigma);
-            j = (int) (1000 * Math.exp(-lda));
-            lda = j;
-            if (lda != 0)
-                lh_gold = i + 1;
+            lda = (int) (1000 * Math.exp(-lda));
+            if (lda != 0) {
+                lhGold = i + 1;
+            }
 
-            working_space[i] = lda;
-            area = area + lda;
+            workingSpace[i] = lda;
+            area += lda;
             if (lda > maximum) {
                 maximum = lda;
                 posit = i;
@@ -1561,212 +1519,203 @@ public class TSpectrum {
         }
 
         // read source vector
-        for (i = 0; i < size_ext; i++)
-            working_space[2 * size_ext + i] = Math.abs(working_space[size_ext + i]);
-
-        // create matrix at*a(vector b)
-        i = lh_gold - 1;
-        if (i > size_ext)
-            i = size_ext;
-
-        imin = -i;
-        imax = i;
-        for (i = imin; i <= imax; i++) {
-            lda = 0;
-            jmin = 0;
-            if (i < 0)
-                jmin = -i;
-            jmax = lh_gold - 1 - i;
-            if (jmax > (lh_gold - 1))
-                jmax = lh_gold - 1;
-
-            for (j = jmin; j <= jmax; j++) {
-                ldb = working_space[j];
-                ldc = working_space[i + j];
-                lda = lda + ldb * ldc;
-            }
-            working_space[size_ext + i - imin] = lda;
+        for (int i = 0; i < sizeExt; i++) {
+            workingSpace[2 * sizeExt + i] = Math.abs(workingSpace[sizeExt + i]);
         }
 
-        // create vector p
-        i = lh_gold - 1;
-        imin = -i;
-        imax = size_ext + i - 1;
-        for (i = imin; i <= imax; i++) {
-            lda = 0;
-            for (j = 0; j <= (lh_gold - 1); j++) {
-                ldb = working_space[j];
-                k = i + j;
-                if (k >= 0 && k < size_ext) {
-                    ldc = working_space[2 * size_ext + k];
+        {
+            // create matrix at*a(vector b)
+            int startIndex = lhGold - 1;
+            if (startIndex > sizeExt) {
+                startIndex = sizeExt;
+            }
+
+            for (int i = -startIndex; i <= startIndex; i++) {
+                double lda = 0;
+                int jmin = 0;
+                if (i < 0) {
+                    jmin = -i;
+                }
+                int jmax = lhGold - 1 - i;
+                if (jmax > (lhGold - 1)) {
+                    jmax = lhGold - 1;
+                }
+
+                for (int j = jmin; j <= jmax; j++) {
+                    final double ldb = workingSpace[j];
+                    final double ldc = workingSpace[i + j];
                     lda = lda + ldb * ldc;
                 }
-
+                workingSpace[sizeExt + i + startIndex] = lda;
             }
-            working_space[4 * size_ext + i - imin] = lda;
         }
 
-        // move vector p
-        for (i = imin; i <= imax; i++)
-            working_space[2 * size_ext + i - imin] = working_space[4 * size_ext + i - imin];
-
-        // initialization of resulting vector
-        for (i = 0; i < size_ext; i++)
-            working_space[i] = 1;
-
-        // START OF ITERATIONS
-        for (lindex = 0; lindex < deconIterations; lindex++) {
-            for (i = 0; i < size_ext; i++) {
-                if (Math.abs(working_space[2 * size_ext + i]) > 0.00001 && Math.abs(working_space[i]) > 0.00001) {
-                    lda = 0;
-                    jmin = lh_gold - 1;
-                    if (jmin > i)
-                        jmin = i;
-
-                    jmin = -jmin;
-                    jmax = lh_gold - 1;
-                    if (jmax > (size_ext - 1 - i))
-                        jmax = size_ext - 1 - i;
-
-                    for (j = jmin; j <= jmax; j++) {
-                        ldb = working_space[j + lh_gold - 1 + size_ext];
-                        ldc = working_space[i + j];
+        {
+            // create vector p
+            int startIndex = lhGold - 1;
+            for (int i = -startIndex; i <= sizeExt + startIndex - 1; i++) {
+                double lda = 0;
+                for (int j = 0; j <= (lhGold - 1); j++) {
+                    final double ldb = workingSpace[j];
+                    final int k = i + j;
+                    if (k >= 0 && k < sizeExt) {
+                        final double ldc = workingSpace[2 * sizeExt + k];
                         lda = lda + ldb * ldc;
                     }
-                    ldb = working_space[2 * size_ext + i];
-                    if (lda != 0)
+
+                }
+                workingSpace[4 * sizeExt + i + startIndex] = lda;
+            }
+
+            // move vector p
+            for (int i = -startIndex; i <= sizeExt + startIndex - 1; i++) {
+                workingSpace[2 * sizeExt + i + startIndex] = workingSpace[4 * sizeExt + i + startIndex];
+            }
+        }
+
+        // initialization of resulting vector
+        for (int i = 0; i < sizeExt; i++) {
+            workingSpace[i] = 1;
+        }
+
+        // START OF ITERATIONS
+        for (int lindex = 0; lindex < deconIterations; lindex++) {
+            for (int i = 0; i < sizeExt; i++) {
+                if (Math.abs(workingSpace[2 * sizeExt + i]) > 0.00001 && Math.abs(workingSpace[i]) > 0.00001) {
+                    double lda = 0;
+                    int jmin = lhGold - 1;
+                    if (jmin > i) {
+                        jmin = i;
+                    }
+
+                    jmin = -jmin;
+                    int jmax = lhGold - 1;
+                    if (jmax > (sizeExt - 1 - i)) {
+                        jmax = sizeExt - 1 - i;
+                    }
+
+                    for (int j = jmin; j <= jmax; j++) {
+                        final double ldb = workingSpace[j + lhGold - 1 + sizeExt];
+                        final double ldc = workingSpace[i + j];
+                        lda = lda + ldb * ldc;
+                    }
+                    double ldb = workingSpace[2 * sizeExt + i];
+                    if (lda != 0) {
                         lda = ldb / lda;
+                    }
 
-                    else
-                        lda = 0;
-
-                    ldb = working_space[i];
-                    lda = lda * ldb;
-                    working_space[3 * size_ext + i] = lda;
+                    ldb = workingSpace[i];
+                    lda *= ldb;
+                    workingSpace[3 * sizeExt + i] = lda;
                 }
             }
-            for (i = 0; i < size_ext; i++) {
-                working_space[i] = working_space[3 * size_ext + i];
+            for (int i = 0; i < sizeExt; i++) {
+                workingSpace[i] = workingSpace[3 * sizeExt + i];
             }
         }
 
         // shift resulting spectrum
-        for (i = 0; i < size_ext; i++) {
-            lda = working_space[i];
-            j = i + posit;
-            j = j % size_ext;
-            working_space[size_ext + j] = lda;
+        for (int i = 0; i < sizeExt; i++) {
+            final int j = (i + posit) % sizeExt;
+            workingSpace[sizeExt + j] = workingSpace[i];
         }
 
         // write back resulting spectrum
         maximum = 0;
-        maximum_decon = 0;
-        j = lh_gold - 1;
-        for (i = 0; i < size_ext - j; i++) {
-            if (i >= shift && i < ssize + shift) {
-                working_space[i] = area * working_space[size_ext + i + j];
-                if (maximum_decon < working_space[i])
-                    maximum_decon = working_space[i];
-                if (maximum < working_space[6 * size_ext + i])
-                    maximum = working_space[6 * size_ext + i];
+        double maximumDecon = 0;
+        final int stop = lhGold - 1;
+        for (int i = 0; i < sizeExt - stop; i++) {
+            if (i >= shift && i < length + shift) {
+                workingSpace[i] = area * workingSpace[sizeExt + i + stop];
+                if (maximumDecon < workingSpace[i]) {
+                    maximumDecon = workingSpace[i];
+                }
+                if (maximum < workingSpace[6 * sizeExt + i]) {
+                    maximum = workingSpace[6 * sizeExt + i];
+                }
+            } else {
+                workingSpace[i] = 0;
             }
-
-            else
-                working_space[i] = 0;
         }
-        lda = 1;
-        if (lda > threshold)
+        double lda = 1;
+        if (lda > threshold) {
             lda = threshold;
-        lda = lda / 100;
+        }
+        lda /= 100;
 
-        // searching for peaks in deconvolved spectrum
-        for (i = 1; i < size_ext - 1; i++) {
-            if (working_space[i] > working_space[i - 1] && working_space[i] > working_space[i + 1]) {
-                if (i >= shift && i < ssize + shift) {
-                    if (working_space[i] > lda * maximum_decon
-                            && working_space[6 * size_ext + i] > threshold * maximum / 100.0) {
-                        for (j = i - 1, a = 0, b = 0; j <= i + 1; j++) {
-                            a += (j - shift) * working_space[j];
-                            b += working_space[j];
+        // searching for peaks in de-convolved spectrum
+        List<DoublePoint> peakList = new ArrayList<>();
+        int peakIndex = 0;
+        for (int i = 1; i < sizeExt - 1; i++) {
+            final boolean condition2 = workingSpace[i] > workingSpace[i - 1] && workingSpace[i] > workingSpace[i + 1]
+                    && i >= shift && i < length + shift && workingSpace[i] > lda * maximumDecon
+                    && workingSpace[6 * sizeExt + i] > threshold * maximum / 100.0;
+            if (condition2) {
+                double a = 0;
+                double b = 0;
+                for (int j = i - 1; j <= i + 1; j++) {
+                    a += (j - shift) * workingSpace[j];
+                    b += workingSpace[j];
+                }
+                a /= b;
+                if (a < 0) {
+                    a = 0;
+                }
+
+                if (a >= length) {
+                    a = length - 1;
+                }
+                if (peakIndex == 0) {
+                    peakList.add(new DoublePoint(sourceX[(int) a], sourceY[(int) a])); // NOPMD
+                    peakIndex = 1;
+                } else {
+                    int priz = 0;
+                    int searchIndex;
+                    for (searchIndex = 0; searchIndex < peakIndex && priz == 0; searchIndex++) {
+                        if (workingSpace[6 * sizeExt + shift + (int) a] > workingSpace[6 * sizeExt + shift
+                                + peakList.get(searchIndex).getX().intValue()]) {
+                            priz = 1;
                         }
-                        a = a / b;
-                        if (a < 0)
-                            a = 0;
-
-                        if (a >= ssize)
-                            a = ssize - 1;
-                        if (peak_index == 0) {
-                            fPositionX[0] = a;
-                            peak_index = 1;
-                        }
-
-                        else {
-                            for (j = 0, priz = 0; j < peak_index && priz == 0; j++) {
-                                if (working_space[6 * size_ext + shift + (int) a] > working_space[6 * size_ext + shift
-                                        + (int) fPositionX[j]])
-                                    priz = 1;
+                    }
+                    if (priz == 0) {
+                        if (searchIndex < nMaxPeaks) {
+                            final DoublePoint newPoint = new DoublePoint(sourceX[(int) a], sourceY[(int) a]); // NOPMD
+                            if (peakList.size() > searchIndex) {
+                                peakList.set(searchIndex, newPoint);
+                            } else {
+                                peakList.add(newPoint);
                             }
-                            if (priz == 0) {
-                                if (j < fMaxPeaks) {
-                                    fPositionX[j] = a;
+                        }
+                    } else {
+                        for (int k = peakIndex; k >= searchIndex; k--) {
+                            if (k < nMaxPeaks) {
+                                final DoublePoint prevPoint = peakList.get(k - 1);
+                                final DoublePoint newPoint = new DoublePoint(prevPoint.getX(), prevPoint.getY()); // NOPMD
+                                if (peakList.size() > k) {
+                                    peakList.set(k, newPoint);
+                                } else {
+                                    peakList.add(newPoint);
                                 }
                             }
-
-                            else {
-                                for (k = peak_index; k >= j; k--) {
-                                    if (k < fMaxPeaks) {
-                                        fPositionX[k] = fPositionX[k - 1];
-                                    }
-                                }
-                                fPositionX[j - 1] = a;
-                            }
-                            if (peak_index < fMaxPeaks)
-                                peak_index += 1;
                         }
+                        peakList.set(searchIndex - 1, new DoublePoint(sourceX[(int) a], sourceY[(int) a])); // NOPMD
+                    }
+                    if (peakIndex < nMaxPeaks) {
+                        peakIndex += 1;
                     }
                 }
             }
         }
 
-        for (i = 0; i < ssize; i++)
-            destVector[i] = working_space[i + shift];
+        if (destVector != null && destVector.length >= length) {
+            System.arraycopy(workingSpace, shift, destVector, 0, length);
+        }
 
-        working_space = null;
-        fNPeaks = peak_index;
-        if (peak_index == fMaxPeaks)
-            System.out.println("SearchHighRes: Peak buffer full");
-        return fNPeaks;
-    }
-
-    /**
-     * @param w average window of searched peaks
-     * @see #SearchHighRes
-     */
-    public void SetAverageWindow(int w) {
-        fgAverageWindow = w;
-    }
-
-    /**
-     * @param n max number of decon iterations in deconvolution operation
-     * @see #SearchHighRes
-     */
-    void SetDeconIterations(int n) {
-        fgIterations = n;
-    }
-
-    // STATIC functions (called by TH1)
-
-    /**
-     * @param resolution determines resolution of the neighboring peaks default value is 1 correspond to 3 sigma
-     *        distance between peaks. Higher values allow higher resolution (smaller distance between peaks. May be set
-     *        later through SetResolution.
-     */
-    public void SetResolution(double resolution) {
-
-        if (resolution > 1)
-            fResolution = resolution;
-        else
-            fResolution = 1;
+        ArrayCache.release(CACHED_ARRAY_SEARCH, workingSpace);
+        if (peakIndex == nMaxPeaks && LOGGER.isWarnEnabled()) {
+            LOGGER.atWarn().addArgument(nMaxPeaks).log("maximum specified number of peaks limit reached {}");
+        }
+        return peakList;
     }
 
     /**
@@ -1774,268 +1723,291 @@ public class TSpectrum {
      * spectrum based on Markov chain method. The result is placed in the array pointed by source pointer.
      *
      * @param source array of source spectrum
-     * @param ssize length of source array
+     * @param destination array where to store the filtered background
+     * @param length length of source array
      * @param averWindow width of averaging smoothing window
-     * @return algorithm return error message
+     * @return filtered array, N.B. if destination is null or has insufficient length a new array is being allocated,
+     *         otherwise calculations are done in-place.
      */
-    String SmoothMarkov(double[] source, int ssize, int averWindow) {
-        int xmin, xmax, i, l;
-        double a, b, maxch;
-        double nom, nip, nim, sp, sm, area = 0;
-        if (averWindow <= 0)
-            return "Averaging Window must be positive";
-        double[] working_space = new double[ssize];
-        xmin = 0;
-        xmax = ssize - 1;
-
-        for (i = 0, maxch = 0; i < ssize; i++) {
-            working_space[i] = 0;
-            if (maxch < source[i])
-                maxch = source[i];
-
-            area += source[i];
+    public static double[] smoothMarkov(final double[] source, final double[] destination, final int length,
+            final int averWindow) {
+        if (source == null || source.length < length) {
+            throw new IllegalArgumentException("source must not be null or length smaller than '" + length + "'");
+        }
+        if (averWindow <= 0) {
+            throw new IllegalArgumentException("averaging window must be positive");
         }
 
-        if (maxch == 0)
-            return null;
+        final double[] workingSpace = ArrayCache.getCachedDoubleArray(CACHED_ARRAY_SMOOTH_MARKOV, length);
+        ArrayUtils.fillArray(workingSpace, 0.0);
 
-        nom = 1;
-        working_space[xmin] = 1;
-        for (i = xmin; i < xmax; i++) {
-            nip = source[i] / maxch;
-            nim = source[i + 1] / maxch;
-            sp = 0;
-            sm = 0;
-            for (l = 1; l <= averWindow; l++) {
+        final double sourceMax = TMath.Maximum(source, length);
+        if (sourceMax == -Double.MAX_VALUE) {
+            throw new IllegalArgumentException("source vector is not finite, could not find maximum");
+        }
+        final double sourceMin = TMath.Minimum(source, length);
+        if (sourceMin == Double.MAX_VALUE) {
+            throw new IllegalArgumentException("source vector is not finite, could not find minimum");
+        }
 
-                if ((i + l) > xmax)
-                    a = source[xmax] / maxch;
-                else
-                    a = source[i + l] / maxch;
+        final int xmin = 0;
+        final int xmax = length - 1;
+        double nom = 1;
+        workingSpace[xmin] = 1;
+        for (int i = xmin; i < xmax; i++) {
+            double nip = source[i] / sourceMax;
+            double nim = source[i + 1] / sourceMax;
+            double sp = 0;
+            double sm = 0;
+            double a;
+            for (int l = 1; l <= averWindow; l++) {
+                double b;
+                if ((i + l) > xmax) {
+                    a = source[xmax] / sourceMax;
+                } else {
+                    a = source[i + l] / sourceMax;
+                }
                 b = a - nip;
 
-                if (a + nip <= 0)
+                if (a + nip <= 0) {
                     a = 1;
-                else
+                } else {
                     a = Math.sqrt(a + nip);
+                }
 
-                b = b / a;
+                b /= a;
                 b = Math.exp(b);
-                sp = sp + b;
-                if ((i - l + 1) < xmin)
-                    a = source[xmin] / maxch;
-                else
-                    a = source[i - l + 1] / maxch;
+                sp += b;
+                if ((i - l + 1) < xmin) {
+                    a = source[xmin] / sourceMax;
+                } else {
+                    a = source[i - l + 1] / sourceMax;
+                }
 
                 b = a - nim;
-                if (a + nim <= 0)
+                if (a + nim <= 0) {
                     a = 1;
-                else
+                } else {
                     a = Math.sqrt(a + nim);
+                }
 
-                b = b / a;
+                b /= a;
                 b = Math.exp(b);
-                sm = sm + b;
+                sm += b;
             }
             a = sp / sm;
-            a = working_space[i + 1] = working_space[i] * a;
-            nom = nom + a;
+            a = workingSpace[i + 1] = workingSpace[i] * a;
+            nom += a;
         }
-        for (i = xmin; i <= xmax; i++) {
-            working_space[i] = working_space[i] / nom;
+
+        double area = 0.0;
+        for (int i = 0; i < length; i++) {
+            area += source[i];
         }
-        for (i = 0; i < ssize; i++)
-            source[i] = working_space[i] * area;
+        ArrayMath.multiplyInPlace(workingSpace, area / nom);
 
-        working_space = null;
-        return null;
-    }
+        ArrayCache.release(CACHED_ARRAY_SMOOTH_MARKOV, workingSpace);
+        final double[] returnVector = destination == null || destination.length < length ? new double[length]
+                : destination;
+        System.arraycopy(workingSpace, 0, returnVector, 0, length);
 
-    /**
-     * static function, interface to TSpectrum::Background
-     * 
-     * @param hist input histogram
-     * @param niter number of search iterations
-     * @param option passed to the underlying algorithm
-     * @return array of background estimate
-     */
-    double[] StaticBackground(double[] hist, int niter, String option) {
-        TSpectrum s = new TSpectrum();
-        return s.Background(hist, niter, option);
-    }
-
-    /**
-     * static function, interface to TSpectrum::Search
-     * 
-     * @param histX histogram x of source spectrum
-     * @param histY histogram Y of source spectrum
-     * @param houtX out histogram of source spectrum
-     * @param houtY out histogram of source spectrum
-     * @param sigma sigma of searched peaks, for details we refer to manual
-     * @param option string options passed to the algorithms
-     * @param threshold (default=0.05) peaks with amplitude less than threshold*highest_peak are discarded.
-     *        0<threshold<1 By default, the background is removed before deconvolution. Specify the option
-     *        "nobackground" to not remove the background. By default the "Markov" chain algorithm is used. Specify the
-     *        option "noMarkov" to disable this algorithm Note that by default the source spectrum is replaced by a new
-     *        spectrum
-     * @return number of found peaks
-     */
-    int StaticSearch(double[] histX, double[] histY, double[] houtX, double[] houtY, double sigma, String option,
-            double threshold) {
-        TSpectrum s = new TSpectrum();
-        return s.Search(histX, histY, houtX, houtY, sigma, option, threshold);
+        return returnVector;
     }
 
     /**
      * ONE-DIMENSIONAL UNFOLDING FUNCTION This function unfolds source spectrum according to response matrix columns.
      * The result is placed in the vector pointed by source pointer.
-     * 
+     *
      * @param source vector of source spectrum
      * @param respMatrix matrix of response spectra
-     * @param ssizex length of source spectrum and # of columns of response matrix
-     * @param ssizey length of destination spectrum and # of rows of response matrix
-     * @param numberIterations Note!!! ssizex must be >= ssizey
-     * @param numberRepetitions repitition count
+     * @param destination vector of unfolded source spectrum
+     * @param lengthx length of source spectrum and # of columns of response matrix
+     * @param lengthy length of destination spectrum and # of rows of response matrix
+     * @param numberIterations Note!!! lengthx must be &gt;= lengthy
+     * @param numberRepetitions repetition count
      * @param boost boosting coefficient
-     * @return algorithm return error message
+     * @return filtered array, N.B. if destination is null or has insufficient length a new array is being allocated,
+     *         otherwise calculations are done in-place.
      */
-    String Unfolding(double[] source, double[][] respMatrix, int ssizex, int ssizey, int numberIterations,
-            int numberRepetitions, double boost) {
-        int i, j, k, lindex, lhx = 0, repet;
-        double lda, ldb, ldc, area;
-        if (ssizex <= 0 || ssizey <= 0)
-            return "Wrong Parameters";
-        if (ssizex < ssizey)
-            return "Sizex must be greater than sizey)";
-        if (numberIterations <= 0)
-            return "Number of iterations must be positive";
-        double[] working_space = new double[ssizex * ssizey + 2 * ssizey * ssizey + 4 * ssizex];
+    public static double[] unfolding(double[] source, double[][] respMatrix, final double[] destination, int lengthx,
+            int lengthy, int numberIterations, int numberRepetitions, double boost) {
+        int lindex;
+        int lhx = 0;
+        int repet;
+        double lda;
+        double ldb;
+        double ldc;
+        double area;
+        if (lengthx <= 0 || lengthy <= 0) {
+            throw new IllegalArgumentException("lengthx:" + lengthx + " lengthy" + lengthx + "<=0");
+        }
+        if (lengthx < lengthy) {
+            throw new IllegalArgumentException(
+                    "lengthx:" + lengthx + " must be greater than lengthy" + lengthx + "<=0");
+        }
+        if (numberIterations <= 0) {
+            throw new IllegalArgumentException("Number of iterations must be positive: is" + numberIterations);
+        }
+
+        final int workSpaceSize = lengthx * lengthy + 2 * lengthy * lengthy + 4 * lengthx;
+        final double[] workingSpace = ArrayCache.getCachedDoubleArray(CACHED_ARRAY_UNFOLDING, workSpaceSize);
 
         /* read response matrix */
-        for (j = 0; j < ssizey && lhx != -1; j++) {
+        for (int j = 0; j < lengthy && lhx != -1; j++) {
             area = 0;
             lhx = -1;
-            for (i = 0; i < ssizex; i++) {
+            for (int i = 0; i < lengthx; i++) {
                 lda = respMatrix[j][i];
                 if (lda != 0) {
                     lhx = i + 1;
                 }
-                working_space[j * ssizex + i] = lda;
-                area = area + lda;
+                workingSpace[j * lengthx + i] = lda;
+                area += lda;
             }
             if (lhx != -1) {
-                for (i = 0; i < ssizex; i++)
-                    working_space[j * ssizex + i] /= area;
+                for (int i = 0; i < lengthx; i++) {
+                    workingSpace[j * lengthx + i] /= area;
+                }
             }
         }
 
-        if (lhx == -1)
-            return ("ZERO COLUMN IN RESPONSE MATRIX");
+        if (lhx == -1) {
+            throw new IllegalArgumentException("ZERO COLUMN IN RESPONSE MATRIX");
+        }
 
         /* read source vector */
-        for (i = 0; i < ssizex; i++)
-            working_space[ssizex * ssizey + 2 * ssizey * ssizey + 2 * ssizex + i] = source[i];
+        for (int i = 0; i < lengthx; i++) {
+            workingSpace[lengthx * lengthy + 2 * lengthy * lengthy + 2 * lengthx + i] = source[i];
+        }
 
         /* create matrix at*a + at*y */
-        for (i = 0; i < ssizey; i++) {
-            for (j = 0; j < ssizey; j++) {
+        for (int i = 0; i < lengthy; i++) {
+            for (int j = 0; j < lengthy; j++) {
                 lda = 0;
-                for (k = 0; k < ssizex; k++) {
-                    ldb = working_space[ssizex * i + k];
-                    ldc = working_space[ssizex * j + k];
+                for (int k = 0; k < lengthx; k++) {
+                    ldb = workingSpace[lengthx * i + k];
+                    ldc = workingSpace[lengthx * j + k];
                     lda = lda + ldb * ldc;
                 }
-                working_space[ssizex * ssizey + ssizey * i + j] = lda;
+                workingSpace[lengthx * lengthy + lengthy * i + j] = lda;
             }
             lda = 0;
-            for (k = 0; k < ssizex; k++) {
-                ldb = working_space[ssizex * i + k];
-                ldc = working_space[ssizex * ssizey + 2 * ssizey * ssizey + 2 * ssizex + k];
+            for (int k = 0; k < lengthx; k++) {
+                ldb = workingSpace[lengthx * i + k];
+                ldc = workingSpace[lengthx * lengthy + 2 * lengthy * lengthy + 2 * lengthx + k];
                 lda = lda + ldb * ldc;
             }
-            working_space[ssizex * ssizey + 2 * ssizey * ssizey + 3 * ssizex + i] = lda;
+            workingSpace[lengthx * lengthy + 2 * lengthy * lengthy + 3 * lengthx + i] = lda;
         }
 
         /* move vector at*y */
-        for (i = 0; i < ssizey; i++)
-            working_space[ssizex * ssizey + 2 * ssizey * ssizey + 2 * ssizex + i] = working_space[ssizex * ssizey
-                    + 2 * ssizey * ssizey + 3 * ssizex + i];
+        for (int i = 0; i < lengthy; i++) {
+            workingSpace[lengthx * lengthy + 2 * lengthy * lengthy + 2 * lengthx + i] = workingSpace[lengthx * lengthy
+                    + 2 * lengthy * lengthy + 3 * lengthx + i];
+        }
 
         /* create matrix at*a*at*a + vector at*a*at*y */
-        for (i = 0; i < ssizey; i++) {
-            for (j = 0; j < ssizey; j++) {
+        for (int i = 0; i < lengthy; i++) {
+            for (int j = 0; j < lengthy; j++) {
                 lda = 0;
-                for (k = 0; k < ssizey; k++) {
-                    ldb = working_space[ssizex * ssizey + ssizey * i + k];
-                    ldc = working_space[ssizex * ssizey + ssizey * j + k];
+                for (int k = 0; k < lengthy; k++) {
+                    ldb = workingSpace[lengthx * lengthy + lengthy * i + k];
+                    ldc = workingSpace[lengthx * lengthy + lengthy * j + k];
                     lda = lda + ldb * ldc;
                 }
-                working_space[ssizex * ssizey + ssizey * ssizey + ssizey * i + j] = lda;
+                workingSpace[lengthx * lengthy + lengthy * lengthy + lengthy * i + j] = lda;
             }
             lda = 0;
-            for (k = 0; k < ssizey; k++) {
-                ldb = working_space[ssizex * ssizey + ssizey * i + k];
-                ldc = working_space[ssizex * ssizey + 2 * ssizey * ssizey + 2 * ssizex + k];
+            for (int k = 0; k < lengthy; k++) {
+                ldb = workingSpace[lengthx * lengthy + lengthy * i + k];
+                ldc = workingSpace[lengthx * lengthy + 2 * lengthy * lengthy + 2 * lengthx + k];
                 lda = lda + ldb * ldc;
             }
-            working_space[ssizex * ssizey + 2 * ssizey * ssizey + 3 * ssizex + i] = lda;
+            workingSpace[lengthx * lengthy + 2 * lengthy * lengthy + 3 * lengthx + i] = lda;
         }
 
         /* move at*a*at*y */
-        for (i = 0; i < ssizey; i++)
-            working_space[ssizex * ssizey + 2 * ssizey * ssizey + 2 * ssizex + i] = working_space[ssizex * ssizey
-                    + 2 * ssizey * ssizey + 3 * ssizex + i];
+        for (int i = 0; i < lengthy; i++) {
+            workingSpace[lengthx * lengthy + 2 * lengthy * lengthy + 2 * lengthx + i] = workingSpace[lengthx * lengthy
+                    + 2 * lengthy * lengthy + 3 * lengthx + i];
+        }
 
-        /* initialization in resulting vector */
-        for (i = 0; i < ssizey; i++)
-            working_space[ssizex * ssizey + 2 * ssizey * ssizey + i] = 1;
+        /* initialisation in resulting vector */
+        for (int i = 0; i < lengthy; i++) {
+            workingSpace[lengthx * lengthy + 2 * lengthy * lengthy + i] = 1;
+        }
 
         /*** START OF ITERATIONS ***/
         for (repet = 0; repet < numberRepetitions; repet++) {
             if (repet != 0) {
-                for (i = 0; i < ssizey; i++)
-                    working_space[ssizex * ssizey + 2 * ssizey * ssizey + i] = Math
-                            .pow(working_space[ssizex * ssizey + 2 * ssizey * ssizey + i], boost);
+                for (int i = 0; i < lengthy; i++) {
+                    workingSpace[lengthx * lengthy + 2 * lengthy * lengthy + i] = Math
+                            .pow(workingSpace[lengthx * lengthy + 2 * lengthy * lengthy + i], boost);
+                }
             }
             for (lindex = 0; lindex < numberIterations; lindex++) {
-                for (i = 0; i < ssizey; i++) {
+                for (int i = 0; i < lengthy; i++) {
                     lda = 0;
-                    for (j = 0; j < ssizey; j++) {
-                        ldb = working_space[ssizex * ssizey + ssizey * ssizey + ssizey * i + j];
-                        ldc = working_space[ssizex * ssizey + 2 * ssizey * ssizey + j];
+                    for (int j = 0; j < lengthy; j++) {
+                        ldb = workingSpace[lengthx * lengthy + lengthy * lengthy + lengthy * i + j];
+                        ldc = workingSpace[lengthx * lengthy + 2 * lengthy * lengthy + j];
                         lda = lda + ldb * ldc;
                     }
-                    ldb = working_space[ssizex * ssizey + 2 * ssizey * ssizey + 2 * ssizex + i];
+                    ldb = workingSpace[lengthx * lengthy + 2 * lengthy * lengthy + 2 * lengthx + i];
                     if (lda != 0) {
                         lda = ldb / lda;
                     }
-
-                    else
-                        lda = 0;
-                    ldb = working_space[ssizex * ssizey + 2 * ssizey * ssizey + i];
-                    lda = lda * ldb;
-                    working_space[ssizex * ssizey + 2 * ssizey * ssizey + 3 * ssizex + i] = lda;
+                    ldb = workingSpace[lengthx * lengthy + 2 * lengthy * lengthy + i];
+                    lda *= ldb;
+                    workingSpace[lengthx * lengthy + 2 * lengthy * lengthy + 3 * lengthx + i] = lda;
                 }
-                for (i = 0; i < ssizey; i++)
-                    working_space[ssizex * ssizey + 2 * ssizey * ssizey + i] = working_space[ssizex * ssizey
-                            + 2 * ssizey * ssizey + 3 * ssizex + i];
+                for (int i = 0; i < lengthy; i++) {
+                    workingSpace[lengthx * lengthy + 2 * lengthy * lengthy + i] = workingSpace[lengthx * lengthy
+                            + 2 * lengthy * lengthy + 3 * lengthx + i];
+                }
             }
         }
 
+        final double[] returnVector = destination == null || destination.length < source.length
+                ? new double[source.length]
+                : destination;
         /* write back resulting spectrum */
-        for (i = 0; i < ssizex; i++) {
-            if (i < ssizey)
-                source[i] = working_space[ssizex * ssizey + 2 * ssizey * ssizey + i];
-
-            else
-                source[i] = 0;
+        for (int i = 0; i < lengthx; i++) {
+            if (i < lengthy) {
+                returnVector[i] = workingSpace[lengthx * lengthy + 2 * lengthy * lengthy + i];
+            } else {
+                returnVector[i] = 0;
+            }
         }
-        return null;
+        ArrayCache.release(CACHED_ARRAY_UNFOLDING, workingSpace);
+
+        return returnVector;
     }
 
-    public static void main(String[] argv) {
-        // TODO: some simple test script to illustrate the function of TSpectrum
-        // maybe two gaussian peaks plus some noise ??
+    public enum Direction {
+        INCREASING, DECREASING;
     }
 
+    public enum FilterOrder {
+        ORDER_2, ORDER_4, ORDER_6, ORDER_8;
+    }
+
+    public enum SmoothWindow {
+        NO_SMOOTHING(1), SMOOTHING_WIDTH3(3), SMOOTHING_WIDTH5(5), SMOOTHING_WIDTH7(7), SMOOTHING_WIDTH9(9),
+        SMOOTHING_WIDTH11(11), SMOOTHING_WIDTH13(13), SMOOTHING_WIDTH15(15);
+
+        private final int value;
+
+        SmoothWindow(final int value) {
+            this.value = value;
+        }
+
+        public int getValue() {
+            return value;
+        }
+
+        public boolean isSmoothing() {
+            return !this.equals(NO_SMOOTHING);
+        }
+    }
 }

@@ -177,6 +177,7 @@ public class SpectrumTools {
      *
      * @see DoubleFFT_1D for the expected spectra layout
      * @param data the input data
+     * @param truncateDCNyq true: whether to smooth spectra and to ZOH the DC and Nyquist frequencies
      * @return computed magnitude spectrum in [dB]
      */
     public static float[] computeMagnitudeSpectrum_dB(final float[] data, final boolean truncateDCNyq) {
