@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
@@ -12,18 +13,18 @@
     <artifactId>chartfx-chart</artifactId>
     <name>chartfx-chart</name>
 
-    <description>This charting library ${project.artifactId}- is an extension 
-		in the spirit of Oracle's XYChart and performance/time-proven JDataViewer charting functionalities. 
-		Emphasis was put on plotting performance for both large number of data points and real-time displays, 
-		as well as scientific accuracies leading to error bar/surface plots, and other scientific plotting 
-		features (parameter measurements, fitting, multiple axes, zoom, ...). 
+    <description>This charting library ${project.artifactId}- is an extension
+		in the spirit of Oracle's XYChart and performance/time-proven JDataViewer charting functionalities.
+		Emphasis was put on plotting performance for both large number of data points and real-time displays,
+		as well as scientific accuracies leading to error bar/surface plots, and other scientific plotting
+		features (parameter measurements, fitting, multiple axes, zoom, ...).
 	</description>
 
     <dependencies>
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-base</artifactId>
-            <version>${chartfx.javafx.version}</version> 
+            <version>${chartfx.javafx.version}</version>
         </dependency>
         <dependency>
             <groupId>org.openjfx</groupId>
@@ -34,6 +35,18 @@
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-swing</artifactId> <!-- needed to for saving images to file -->
             <version>${chartfx.javafx.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.testfx</groupId>
+            <artifactId>testfx-junit5</artifactId>
+            <version>4.0.16-alpha</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testfx</groupId>
+            <artifactId>openjfx-monocle</artifactId>
+            <version>jdk-12.0.1+2</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>de.gsi.dataset</groupId>
