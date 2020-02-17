@@ -25,7 +25,6 @@ import de.gsi.chart.utils.FXUtils;
  * @author rstein
  */
 public class EditAxisTests extends ApplicationTest {
-
     private DefaultNumericAxis xAxis;
     private DefaultNumericAxis yAxis;
     private XYChart chart;
@@ -112,5 +111,4 @@ public class EditAxisTests extends ApplicationTest {
         assertEquals(-100, xAxis.getMin());
         xEditor.changeAxisRange(xAxis, true);
     }
-
 }
