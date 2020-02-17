@@ -28,7 +28,6 @@ public class EditAxisTests {
 
     @Test
     public void basicEditAxisInterfaceTests() {
-
         assertDoesNotThrow(() -> new EditAxis());
 
         assertDoesNotThrow(() -> {
@@ -55,7 +54,6 @@ public class EditAxisTests {
                 assertEquals(mode, plugin.getAxisMode());
             }
         });
-
     }
 
     @Test
@@ -86,7 +84,6 @@ public class EditAxisTests {
 
             // duplicates not allowed
             // assertThrows(IllegalArgumentException.class, () -> chart.getPlugins().add(plugin));
-
         }));
     }
 
@@ -111,7 +108,6 @@ public class EditAxisTests {
             assertDoesNotThrow(() -> xEditor.changeAxisRangeLimit(xAxis, true, true));
             // assertEquals(+110, xAxis.getMax());
             // assertEquals(-110, xAxis.getMin());
-
         }));
     }
 
@@ -146,5 +142,4 @@ public class EditAxisTests {
             throw new IllegalStateException(e);
         }
     }
-
 }
