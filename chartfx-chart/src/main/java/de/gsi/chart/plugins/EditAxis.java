@@ -116,11 +116,10 @@ public class EditAxis extends ChartPlugin {
             }
             if (oldChart != null) {
                 oldChart.getAxes().removeListener(this::axesChangedHandler);
-                removeMouseEventHandlers(oldChart);
+
             }
-            if (newChart != null) {
-                addMouseEventHandlers(newChart);
-            }
+            removeMouseEventHandlers();
+            addMouseEventHandlers(newChart);
         });
     }
 
@@ -134,12 +133,15 @@ public class EditAxis extends ChartPlugin {
     }
 
     private void addMouseEventHandlers(final Chart newChart) {
+        if (newChart == null) {
+            return;
+        }
         newChart.getAxes().forEach(axis -> popUpList.add(new MyPopOver(axis, axis.getSide().isHorizontal())));
         newChart.getAxes().addListener(this::axesChangedHandler);
     }
 
     private void axesChangedHandler(@SuppressWarnings("unused") Observable observable) { // parameter for EventHandler api
-        removeMouseEventHandlers(getChart());
+        removeMouseEventHandlers();
         addMouseEventHandlers(getChart());
     }
 
@@ -190,10 +192,8 @@ public class EditAxis extends ChartPlugin {
         return animatedProperty().get();
     }
 
-    private void removeMouseEventHandlers(final Chart oldChart) {
-        popUpList.forEach(popOver -> {
-            popOver.deregisterMouseEvents();
-        });
+    private void removeMouseEventHandlers() {
+        popUpList.forEach(MyPopOver::deregisterMouseEvents);
         popUpList.clear();
     }
 
@@ -637,7 +637,7 @@ public class EditAxis extends ChartPlugin {
 
             final Timeline checkMouseInsidePopUp = new Timeline(
                     new KeyFrame(Duration.millis(EditAxis.DEFAULT_UPDATE_PERIOD), event -> {
-                        if (!MyPopOver.this.isShowing()) {
+                        if (!isShowing()) {
                             return;
                         }
 
@@ -646,7 +646,7 @@ public class EditAxis extends ChartPlugin {
                             popOverShowStartTime = System.currentTimeMillis();
                         }
                         if (Math.abs(now - popOverShowStartTime) > EditAxis.DEFAULT_SHUTDOWN_PERIOD) {
-                            MyPopOver.this.hide();
+                            hide();
                         }
                     }));
             checkMouseInsidePopUp.play();
