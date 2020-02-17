@@ -3,6 +3,9 @@ os: linux
 dist: xenial
 jdk:
         - openjdk11
+env:
+        - _JAVA_OPTIONS="-Djava.awt.headless=true -Dtestfx.robot=glass -Dtestfx.headless=true -Dprism.order=sw"
+
 
 before_install:
   # setup pgp signing key
