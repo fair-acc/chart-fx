@@ -140,7 +140,9 @@ public class EditAxis extends ChartPlugin {
 
     private void axesChangedHandler(@SuppressWarnings("unused") Observable observable) { // parameter for EventHandler api
         removeMouseEventHandlers(getChart());
-        addMouseEventHandlers(getChart());
+        if (getChart() != null) {
+            addMouseEventHandlers(getChart());
+        }
     }
 
     /**
