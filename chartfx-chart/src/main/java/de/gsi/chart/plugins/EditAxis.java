@@ -7,12 +7,13 @@ import java.util.Objects;
 
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
-import javafx.beans.Observable;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.collections.ListChangeListener.Change;
 import javafx.event.EventHandler;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
@@ -63,7 +64,7 @@ public class EditAxis extends ChartPlugin {
     // "[\\x00-\\x20]*[+-]?(((((\\p{Digit}+)(\\.)?((\\p{Digit}+)?)([eE][+-]?(\\p{Digit}+))?)|(\\.((\\p{Digit}+))([eE][+-]?(\\p{Digit}+))?)|(((0[xX](\\p{XDigit}+)(\\.)?)|(0[xX](\\p{XDigit}+)?(\\.)(\\p{XDigit}+)))[pP][+-]?(\\p{Digit}+)))[fFdD]?))[\\x00-\\x20]*";
     private static final Duration DEFAULT_ANIMATION_DURATION = Duration.millis(500);
     private final BooleanProperty animated = new SimpleBooleanProperty(this, "animated", false);
-    private final List<MyPopOver> popUpList = new ArrayList<>();
+    protected final List<MyPopOver> popUpList = new ArrayList<>();
 
     private final ObjectProperty<Duration> fadeDuration = new SimpleObjectProperty<>(this, "fadeDuration",
             EditAxis.DEFAULT_ANIMATION_DURATION) {
@@ -111,14 +112,7 @@ public class EditAxis extends ChartPlugin {
         setAnimated(animated);
 
         chartProperty().addListener((obs, oldChart, newChart) -> {
-            if (oldChart == newChart) {
-                return;
-            }
-            if (oldChart != null) {
-                oldChart.getAxes().removeListener(this::axesChangedHandler);
-
-            }
-            removeMouseEventHandlers();
+            removeMouseEventHandlers(oldChart);
             addMouseEventHandlers(newChart);
         });
     }
@@ -132,7 +126,7 @@ public class EditAxis extends ChartPlugin {
         this(AxisMode.XY, animated);
     }
 
-    private void addMouseEventHandlers(final Chart newChart) {
+    protected void addMouseEventHandlers(final Chart newChart) {
         if (newChart == null) {
             return;
         }
@@ -140,8 +134,8 @@ public class EditAxis extends ChartPlugin {
         newChart.getAxes().addListener(this::axesChangedHandler);
     }
 
-    private void axesChangedHandler(@SuppressWarnings("unused") Observable observable) { // parameter for EventHandler api
-        removeMouseEventHandlers();
+    private void axesChangedHandler(@SuppressWarnings("unused") Change<? extends Axis> ch) { // parameter for EventHandler api
+        removeMouseEventHandlers(null);
         addMouseEventHandlers(getChart());
     }
 
@@ -192,9 +186,13 @@ public class EditAxis extends ChartPlugin {
         return animatedProperty().get();
     }
 
-    private void removeMouseEventHandlers() {
+    protected void removeMouseEventHandlers(final Chart oldChart) {
         popUpList.forEach(MyPopOver::deregisterMouseEvents);
         popUpList.clear();
+        if (oldChart == null) {
+            return;
+        }
+        oldChart.getAxes().removeListener(this::axesChangedHandler);
     }
 
     /**
@@ -235,7 +233,7 @@ public class EditAxis extends ChartPlugin {
         return fadeDuration;
     }
 
-    private class AxisEditor extends BorderPane {
+    class AxisEditor extends BorderPane {
         AxisEditor(final Axis axis, final boolean isHorizontal) {
             super();
 
@@ -266,7 +264,7 @@ public class EditAxis extends ChartPlugin {
             box.getChildren().add(getMinMaxButtons(axis, isHorizontal, false));
         }
 
-        private void changeAxisRange(final Axis axis, final boolean isIncrease) {
+        protected void changeAxisRange(final Axis axis, final boolean isIncrease) {
             final double width = Math.abs(axis.getMax() - axis.getMin());
 
             // TODO: check for linear and logarithmic axis
@@ -319,7 +317,7 @@ public class EditAxis extends ChartPlugin {
             }
         }
 
-        private void changeAxisRangeLinearScale(final double minTickDistance, final DoubleProperty property,
+        protected void changeAxisRangeLinearScale(final double minTickDistance, final DoubleProperty property,
                 final boolean isIncrease) {
             final double value = property.doubleValue();
             final double diff = minTickDistance;
@@ -592,6 +590,10 @@ public class EditAxis extends ChartPlugin {
         private long popOverShowStartTime;
         private boolean isMouseInPopOver;
         private Axis axis = null;
+        private final ChangeListener<Duration> fadeDurationListener = (ch, o, n) -> {
+            super.fadeInDurationProperty().set(n.multiply(2.0));
+            super.fadeOutDurationProperty().set(n);
+        };
 
         private final EventHandler<? super MouseEvent> axisClickEventHandler = evt -> {
             if (evt.getButton() == MouseButton.SECONDARY) {
@@ -609,7 +611,11 @@ public class EditAxis extends ChartPlugin {
             popOverShowStartTime = 0;
 
             super.setAutoHide(true);
-            super.setAnimated(true);
+            super.animatedProperty().bind(EditAxis.this.animatedProperty());
+            EditAxis.this.zoomDurationProperty().addListener(fadeDurationListener);
+            super.fadeInDurationProperty().set(EditAxis.this.getZoomDuration().multiply(2.0));
+            super.fadeOutDurationProperty().set(EditAxis.this.getZoomDuration());
+
             setFadeInDuration(Duration.millis(1000));
             setFadeOutDuration(Duration.millis(500));
             switch (axis.getSide()) {
@@ -656,6 +662,8 @@ public class EditAxis extends ChartPlugin {
 
         public void deregisterMouseEvents() {
             ((Node) axis).removeEventHandler(MouseEvent.MOUSE_CLICKED, axisClickEventHandler);
+            EditAxis.this.zoomDurationProperty().removeListener(fadeDurationListener);
+            super.animatedProperty().unbind();
         }
 
         public final void registerMouseEvents() {
