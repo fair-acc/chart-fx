@@ -198,7 +198,7 @@ public final class DataSetMath { // NOPMD - nomen est omen
     }
 
     public static DataSet inversedbFunction(final DataSet function) {
-        return mathFunction(function, 0.0, MathOp.INV_DB);
+        return mathFunction(function, 1.0, MathOp.INV_DB);
     }
 
     public static DataSet dbFunction(final DataSet function1, final DataSet function2) {
