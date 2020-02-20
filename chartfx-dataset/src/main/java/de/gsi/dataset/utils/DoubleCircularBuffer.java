@@ -13,9 +13,22 @@ public class DoubleCircularBuffer {
 
     /**
      * 
+     * @param initalElements adds element the buffer should be initialised with
+     * @param capacity maximum capacity of the buffer
+     */
+    public DoubleCircularBuffer(double[] initalElements, final int capacity) {
+        this(capacity);
+        put(initalElements, initalElements.length);
+    }
+
+    /**
+     * 
      * @param capacity maximum capacity of buffer
      */
     public DoubleCircularBuffer(final int capacity) {
+        if (capacity <= 0) {
+            throw new IllegalArgumentException("capcacity='" + capacity + "' must be larger than zero");
+        }
         this.capacity = capacity;
         elements = new double[capacity];
         flipped = false;
@@ -30,6 +43,29 @@ public class DoubleCircularBuffer {
             return capacity;
         }
         return writePos;
+    }
+
+    /**
+     * @return the maximum possible/filled number of available buffer elements
+     */
+    public int capacity() {
+        return capacity;
+    }
+
+    /**
+     * @return internal field array N.B. this is the raw internal double pointer do not use this unless you know what
+     *         you are doing
+     */
+    public double[] elements() {
+        return elements;
+    }
+
+    /**
+     * 
+     * @return value at head
+     */
+    public double get() {
+        return get(0);
     }
 
     /**
@@ -50,7 +86,7 @@ public class DoubleCircularBuffer {
      * @return either into or newly allocated array containing the result
      */
     public double[] get(final double[] into, final int readPos, final int length) {
-        final double[] retVal = into == null ? new double[length] : into;
+        final double[] retVal = into == null || into.length < length ? new double[length] : into;
         // N.B. actually there seem to be no numerically more efficient
         // implementation
         // since the order of the indices for 'into' need to be reverse order
@@ -68,17 +104,22 @@ public class DoubleCircularBuffer {
      * @return the value
      */
     public double get(final int readPos) {
-        int index = flipped ? writePos + readPos : readPos;
-        while (index >= capacity) {
-            index -= capacity;
-        }
-        if (!flipped) {
+        int index = getIndex(readPos);
+        return elements[index];
+    }
 
+    protected int getIndex(final int readPos) {
+        // int index = writePos - 1 - readPos;
+        int index = flipped ? writePos + readPos : readPos;
+        if (!flipped) {
             if (index >= 0) {
-                return elements[index];
+                return index;
             }
+            // return null;
             throw new IllegalArgumentException("writePos = '" + writePos + "' readPos = '" + readPos + "'/index = '"
                     + index + "' is beyond circular buffer capacity limits = [0," + capacity + "]");
+            // TODO: check whether it's better design to throw an exception for reading beyond the limits of
+            // a semi-filled buffer rather than returning a 'NaN'
         }
         // adjust for turn-around index
         while (index < 0) {
@@ -87,7 +128,14 @@ public class DoubleCircularBuffer {
         while (index >= capacity) {
             index -= capacity;
         }
-        return elements[index];
+        return index;
+    }
+
+    /**
+     * @return whether write position exceeded at least once the capacity
+     */
+    public boolean isBufferFlipped() {
+        return flipped;
     }
 
     /**
@@ -161,7 +209,27 @@ public class DoubleCircularBuffer {
      * @return number of elements that can be written before buffer wraps-around
      */
     public int remainingCapacity() {
-        return available();
+        return capacity - available();
+    }
+
+    /**
+     * @param element to replace an existing element at the head buffer position
+     * @return the previous element stored at that location
+     */
+    public double replace(final double element) {
+        return replace(element, 0);
+    }
+
+    /**
+     * @param element to replace an existing element at given buffer position
+     * @param atIndex index at which to replace the value
+     * @return the previous element stored at that location
+     */
+    public double replace(final double element, final int atIndex) {
+        final int internalIndex = getIndex(atIndex);
+        final double oldValue = elements[internalIndex];
+        elements[internalIndex] = element;
+        return oldValue;
     }
 
     /**
@@ -173,34 +241,10 @@ public class DoubleCircularBuffer {
     }
 
     /**
-     * meant for testing/illustrating usage
-     *
-     * @param args the command line arguments
+     * @return internal write position
      */
-    public static void main(final String[] args) {
-        final int bufferLength = 10;
-        final int fillBufferLength = 35;
-        final DoubleCircularBuffer buffer1 = new DoubleCircularBuffer(bufferLength);
-        final DoubleCircularBuffer buffer2 = new DoubleCircularBuffer(bufferLength);
-        final double[] input = new double[fillBufferLength];
-        final double[] output = new double[fillBufferLength];
-
-        buffer1.put(-2);
-        buffer1.put(-1);
-        buffer2.put(-2);
-        buffer2.put(-1);
-
-        for (int i = 0; i < fillBufferLength; i++) {
-            buffer1.put(i);
-            input[i] = i;
-        }
-        buffer2.put(input, fillBufferLength);
-        buffer2.get(output, 10);
-        System.out.println("demo print-out");
-        for (int i = 0; i < 30; i++) {
-            System.out.println(String.format("buffer[1,2].get(%d) = [%2.0f,%2.0f,%2.0f]", i, buffer1.get(i),
-                    buffer2.get(i), output[i]));
-        }
+    public int writePosition() {
+        return writePos;
     }
 
 }
