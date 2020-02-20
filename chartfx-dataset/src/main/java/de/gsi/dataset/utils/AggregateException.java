@@ -46,7 +46,7 @@ public class AggregateException extends RuntimeException {
     /**
      * @return the throwableList
      */
-    public List<Throwable> getThrowableList() {
+    public synchronized List<Throwable> getThrowableList() {
         return throwableList;
     }
 
