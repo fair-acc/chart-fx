@@ -147,7 +147,10 @@ public final class ArrayMath { // NOPMD - nomen est omen
     }
 
     public static double[] divide(final double[] in, final double divisor) {
-        return multiply(in, 1.0 / divisor);
+        if (divisor != 0.0) {
+            return multiply(in, 1.0 / divisor);
+        }
+        return notANumber(in);
     }
 
     public static double[] divide(final double[] in, final double[] divisor) {
@@ -157,19 +160,30 @@ public final class ArrayMath { // NOPMD - nomen est omen
         final double[] ret = new double[in.length];
 
         for (int i = 0; i < in.length; i++) {
-            ret[i] = in[i] / divisor[i];
+            if (divisor[i] != 0.0) {
+                ret[i] = in[i] / divisor[i];
+            } else {
+                ret[i] = Double.NaN;
+            }
         }
 
         return ret;
     }
 
     public static double[] divideInPlace(final double[] in, final double divisor) {
-        return multiplyInPlace(in, 1.0 / divisor);
+        if (divisor != 0.0) {
+            return multiplyInPlace(in, 1.0 / divisor);
+        }
+        return ArrayMath.notANumberInPlace(in);
     }
 
     public static double[] divideInPlace(final double[] in, final double[] divisor) {
         for (int i = 0; i < in.length; i++) {
-            in[i] /= divisor[i];
+            if (divisor[i] != 0.0) {
+                in[i] /= divisor[i];
+            } else {
+                in[i] = Double.NaN;
+            }
         }
         return in;
     }
@@ -182,7 +196,7 @@ public final class ArrayMath { // NOPMD - nomen est omen
      * @param filterOrder can be between 2 and 20
      * @param filterType 0: lowPass 1: highPass
      * @param ripplePercent ripplePercent is amount of ripple in Chebyshev filter (0-29) (ripplePercent == 0 -&gt;
-     *        Butterworth)
+     *            Butterworth)
      * @return filtered output signal
      */
     public static double[] filterSignal(final double[] signal, final double cutoffFraction, final double filterOrder,
@@ -330,6 +344,21 @@ public final class ArrayMath { // NOPMD - nomen est omen
         return in;
     }
 
+    public static double[] notANumber(final double[] in) {
+        if (in == null) {
+            return new double[0];
+        }
+        final double[] ret = new double[in.length];
+        ArrayUtils.fillArray(ret, Double.NaN);
+
+        return ret;
+    }
+
+    public static double[] notANumberInPlace(final double[] in) {
+        ArrayUtils.fillArray(in, Double.NaN);
+        return in;
+    }
+
     public static double[] sqr(final double[] in) {
         if (in == null) {
             return new double[0];
@@ -431,7 +460,8 @@ public final class ArrayMath { // NOPMD - nomen est omen
     }
 
     public enum FilterType {
-        LOW_PASS, HIGH_PASS
+        LOW_PASS,
+        HIGH_PASS
     }
 
 }
