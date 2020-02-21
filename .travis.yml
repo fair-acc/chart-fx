@@ -44,6 +44,7 @@ script:
 after_success:
   # create and upload coverage report
   - mvn jacoco:report-aggregate coveralls:report
+  - bash <(curl -s https://codecov.io/bash) -s chartfx-report/target/site/jacoco-aggregate/
   - java -jar codacy-coverage-reporter-assembly.jar report -l Java -r chartfx-report/target/site/jacoco-aggregate/jacoco.xml
   # upload runtime data to perform exhaustive statical analysis on coverity if enabled for this build
   - echo "TRAVIS_EVENT_TYPE = '${TRAVIS_EVENT_TYPE}'  TRAVIS_BRANCH = '${TRAVIS_BRANCH}' TRAVIS_TAG = '${TRAVIS_TAG}'"
