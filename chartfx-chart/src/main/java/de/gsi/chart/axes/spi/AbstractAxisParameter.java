@@ -1622,30 +1622,30 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
             }
         };
 
-        private static final CssMetaData<DefaultNumericAxis, Number> TICK_UNIT = new CssMetaData<>("-fx-tick-unit",
+        private static final CssMetaData<AbstractAxisParameter, Number> TICK_UNIT = new CssMetaData<>("-fx-tick-unit",
                 SizeConverter.getInstance(), 5.0) {
             @SuppressWarnings("unchecked")
             @Override
-            public StyleableProperty<Number> getStyleableProperty(final DefaultNumericAxis axis) {
+            public StyleableProperty<Number> getStyleableProperty(final AbstractAxisParameter axis) {
                 return (StyleableProperty<Number>) axis.tickUnitProperty();
             }
 
             @Override
-            public boolean isSettable(final DefaultNumericAxis axis) {
+            public boolean isSettable(final AbstractAxisParameter axis) {
                 return (axis != null) && !axis.tickUnit.isBound();
             }
         };
 
-        private static final CssMetaData<DefaultNumericAxis, Number> TICK_LABEL_ROTATION = new CssMetaData<>(
+        private static final CssMetaData<AbstractAxisParameter, Number> TICK_LABEL_ROTATION = new CssMetaData<>(
                 "-fx-tick-rotation", SizeConverter.getInstance(), 0.0) {
             @SuppressWarnings("unchecked")
             @Override
-            public StyleableProperty<Number> getStyleableProperty(final DefaultNumericAxis axis) {
+            public StyleableProperty<Number> getStyleableProperty(final AbstractAxisParameter axis) {
                 return (StyleableProperty<Number>) axis.tickLabelRotationProperty();
             }
 
             @Override
-            public boolean isSettable(final DefaultNumericAxis axis) {
+            public boolean isSettable(final AbstractAxisParameter axis) {
                 return (axis != null) && !axis.tickLabelRotationProperty().isBound();
             }
         };
