@@ -119,10 +119,10 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
                                                                       .observableArrayList(new NoDuplicatesList<TickMark>());
 
     /** if available (last) auto-range that has been computed */
-    protected AxisRange autoRange = new AxisRange();
+    private final AxisRange autoRange = new AxisRange();
 
     /** user-specified range (ie. limits based on [lower,upper]Bound) */
-    protected AxisRange userRange = new AxisRange();
+    private final AxisRange userRange = new AxisRange();
 
     /**
      * The side of the plot which this axis is being drawn on default axis orientation is BOTTOM, can be set latter to
@@ -495,7 +495,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
         // bind limits to user-specified axis range
         // userRange.set
         final ChangeListener<? super Number> userLimitChangeListener = (ch, o, n) -> {
-            userRange.set(getMin(), getMax());
+            getUserRange().set(getMin(), getMax());
             // axis range has been set manually -&gt; disable auto-ranging
             // TODO: enable once the new scheme checks out
             // setAutoRanging(false);
