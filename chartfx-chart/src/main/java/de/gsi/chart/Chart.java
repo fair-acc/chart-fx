@@ -289,45 +289,57 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
     };
 
     /**
-     * The node to display as the Legend. Subclasses can set a node here to be displayed on a side as the legend. If no
-     * legend is wanted then this can be set to null
-     */
-    private final ObjectProperty<Legend> legend = new SimpleObjectProperty<Legend>(this, "legend") {
-        private Legend oldLegend;
-
-        @Override
-        protected void invalidated() {
-            final Legend newLegend = get();
-            if (oldLegend != null) {
-                getChildren().remove(oldLegend);
-            }
-            if (newLegend != null) {
-                getChildren().add(newLegend.getNode());
-                newLegend.getNode().setVisible(isLegendVisible());
-            }
-            oldLegend = newLegend;
-        }
-    };
-
-    /**
      * The side of the chart where the legend should be displayed default value Side.BOTTOM
      */
-    private final ObjectProperty<Side> legendSide = new StylishObjectProperty<Side>(StyleableProperties.LEGEND_SIDE,
-            this, "legendSide", Side.BOTTOM, this::requestLayout) {
+    private final ObjectProperty<Side> legendSide = new StylishObjectProperty<>(StyleableProperties.LEGEND_SIDE, this,
+            "legendSide", Side.BOTTOM, this::requestLayout) {
         @Override
         public void set(final Side side) {
             AssertUtils.notNull("Side must not be null", side);
 
             final Legend legend = getLegend();
+            if (legend == null) {
+                super.set(side);
+                return;
+            }
             for (final Side s : Side.values()) {
-                getMeasurementBar(s).getChildren().remove(legend);
+                getMeasurementBar(s).getChildren().remove(legend.getNode());
             }
             getMeasurementBar(side).getChildren().add(legend.getNode());
-
-            if (legend instanceof Legend) {
-                legend.setVertical(side.isVertical());
-            }
+            legend.setVertical(side.isVertical());
             super.set(side);
+        }
+    };
+
+    /**
+     * The node to display as the Legend. Subclasses can set a node here to be displayed on a side as the legend. If no
+     * legend is wanted then this can be set to null
+     */
+    private final ObjectProperty<Legend> legend = new SimpleObjectProperty<>(this, "legend", new DefaultLegend()) {
+        private Legend oldLegend = get();
+        {
+            getMeasurementBar(getLegendSide()).getChildren().add(oldLegend.getNode());
+        }
+
+        @Override
+        protected void invalidated() {
+            Legend newLegend = get();
+            System.err.println("legend old =" + oldLegend + " new = " + newLegend);
+            if (oldLegend != null) {
+                for (final Side s : Side.values()) {
+                    getMeasurementBar(s).getChildren().remove(oldLegend.getNode());
+                }
+            }
+
+            if (newLegend != null) {
+                if (getLegendSide() != null) {
+                    getMeasurementBar(getLegendSide()).getChildren().add(newLegend.getNode());
+                }
+                newLegend.getNode().setVisible(isLegendVisible());
+            }
+            super.set(newLegend);
+            oldLegend = newLegend;
+            updateLegend(getDatasets(), getRenderers());
         }
     };
 
@@ -537,18 +549,16 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
         toolBar.registerListener();
         HBox topbox = new HBox(getToolBar());
         topbox.setAlignment(Pos.TOP_CENTER);
-        // getPlotArea().setTop(topbox);
         setTop(topbox);
 
         getTitleLegendPane(Side.TOP).getChildren().add(titleLabel);
-        setLegend(new DefaultLegend());
 
         legendVisibleProperty().addListener((ch, old, visible) -> {
             if (getLegend() == null) {
                 return;
             }
             getLegend().getNode().setVisible(visible);
-            if (visible) {
+            if (Boolean.TRUE.equals(visible)) {
                 if (!getTitleLegendPane(getLegendSide()).getChildren().contains(getLegend().getNode())) {
                     getTitleLegendPane(getLegendSide()).getChildren().add(getLegend().getNode());
                 }
@@ -556,7 +566,6 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
                 getTitleLegendPane(getLegendSide()).getChildren().remove(getLegend().getNode());
             }
         });
-        getTitleLegendPane(getLegendSide()).getChildren().add(getLegend().getNode());
 
         // set CSS stuff
         titleLabel.getStyleClass().add("chart-title");
@@ -890,7 +899,7 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
     }
 
     public final void setLegend(final Legend value) {
-        legend.setValue(value);
+        legend.set(value);
     }
 
     public final void setLegendSide(final Side value) {
