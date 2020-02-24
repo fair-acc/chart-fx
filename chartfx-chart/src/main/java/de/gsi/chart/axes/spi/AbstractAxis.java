@@ -372,32 +372,32 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         if (data.isEmpty()) {
             dataMaxValue = getMax();
             dataMinValue = getMin();
-            autoRange.set(getMin(), getMax());
+            getAutoRange().set(getMin(), getMax());
         } else {
             dataMinValue = Double.MAX_VALUE;
             // We need to init to the lowest negative double (which is NOT
             // Double.MIN_VALUE)
             // in order to find the maximum (positive or negative)
             dataMaxValue = -Double.MAX_VALUE;
-            autoRange.clear();
+            getAutoRange().clear();
         }
 
         for (final Number dataValue : data) {
             dataMinValue = Math.min(dataMinValue, dataValue.doubleValue());
             dataMaxValue = Math.max(dataMaxValue, dataValue.doubleValue());
-            autoRange.add(dataValue.doubleValue());
+            getAutoRange().add(dataValue.doubleValue());
         }
 
         final boolean oldState = autoNotification().getAndSet(false);
         final boolean change = set(dataMinValue, dataMaxValue);
         if (change) {
             data.clear();
-            autoRange.setAxisLength(getLength() == 0 ? 1 : getLength(), getSide());
+            getAutoRange().setAxisLength(getLength() == 0 ? 1 : getLength(), getSide());
             invalidate();
         }
 
-        if (autoRange.getMax() != getMax() || autoRange.getMin() != getMin()
-                || autoRange.getAxisLength() != getLength()) {
+        if (getAutoRange().getMax() != getMax() || getAutoRange().getMin() != getMin()
+                || getAutoRange().getAxisLength() != getLength()) {
             invalidate();
         }
 
@@ -478,7 +478,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
             // guess a sensible starting size for label size, that is approx 2
             // lines vertically or 2 charts horizontally
             final double labelSize = getTickLabelFont().getSize() * 1.2; // N.B. was '2' in earlier implementations
-            return autoRange(autoRange.getMin(), autoRange.getMax(), length, labelSize);
+            return autoRange(getAutoRange().getMin(), getAutoRange().getMax(), length, labelSize);
         }
         return getAxisRange();
     }
