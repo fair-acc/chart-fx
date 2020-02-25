@@ -1,6 +1,7 @@
 package de.gsi.dataset.event;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Timer;
@@ -15,10 +16,18 @@ import de.gsi.dataset.event.EventRateLimiter.UpdateStrategy;
 
 /**
  * Tests the EventRateLimiter
+ *
  * @author rstein
  */
 public class EventRateLimiterTests {
     private static final int MAX_UPDATE_PERIOD = 100;
+
+    @Test
+    public void constructorTests() {
+        assertDoesNotThrow(() -> new EventRateLimiter(evt -> { /* do nothing */ }, MAX_UPDATE_PERIOD));
+        assertDoesNotThrow(() -> new EventRateLimiter(evt -> { /* do nothing */ }, MAX_UPDATE_PERIOD, null));
+        assertDoesNotThrow(() -> new EventRateLimiter(evt -> { /* do nothing */ }, MAX_UPDATE_PERIOD, UpdateStrategy.INSTANTANEOUS_RATE));
+    }
 
     @Test
     public void rateLimiterTests() {
@@ -32,11 +41,9 @@ public class EventRateLimiterTests {
         // create anonymous listener
         evtSource.addListener(evt -> updateCount1.incrementAndGet());
         evtSource.addListener(new EventRateLimiter(evt -> updateCount2.incrementAndGet(), MAX_UPDATE_PERIOD, null));
-        evtSource.addListener(new EventRateLimiter(evt -> updateCount3.incrementAndGet(), MAX_UPDATE_PERIOD,
-                UpdateStrategy.INSTANTANEOUS_RATE));
+        evtSource.addListener(new EventRateLimiter(evt -> updateCount3.incrementAndGet(), MAX_UPDATE_PERIOD, UpdateStrategy.INSTANTANEOUS_RATE));
 
-        final EventRateLimiter rateLimitAvg = new EventRateLimiter(evt -> updateCount4.incrementAndGet(),
-                MAX_UPDATE_PERIOD, UpdateStrategy.AVERAGE_RATE);
+        final EventRateLimiter rateLimitAvg = new EventRateLimiter(evt -> updateCount4.incrementAndGet(), MAX_UPDATE_PERIOD, UpdateStrategy.AVERAGE_RATE);
         evtSource.addListener(rateLimitAvg);
 
         assert rateLimitAvg.getRateEstimate() > 0;
@@ -58,8 +65,7 @@ public class EventRateLimiterTests {
         assert updateCount3.get() <= 15;
         assert updateCount4.get() >= 5;
         assert updateCount4.get() <= 15;
-        assertAll("rate within [5,15] Hz limits", () -> assertTrue(rateLimit >= 5.0, "min limit"),
-                () -> assertTrue(rateLimit <= 15.0, "max limit"));
+        assertAll("rate within [5,15] Hz limits", () -> assertTrue(rateLimit >= 5.0, "min limit"), () -> assertTrue(rateLimit <= 15.0, "max limit"));
 
     }
 
