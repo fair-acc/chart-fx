@@ -16,7 +16,7 @@ public final class AssertUtils {
     /**
      * The method returns true if both values area equal. The method differs from simple == compare because it takes
      * into account that both values can be Double.NaN, in which case == operator returns <code>false</code>.
-     * 
+     *
      * @param v1 to be checked
      * @param v2 to be checked
      *
@@ -28,7 +28,7 @@ public final class AssertUtils {
 
     /**
      * Asserts if the specified object is an instance of the specified type.
-     * 
+     *
      * @param obj to be checked
      * @param type required class type
      *
@@ -92,9 +92,9 @@ public final class AssertUtils {
 
     /**
      * Asserts that the specified arrays have the same length.
-     * 
+     *
      * @param <T> generics object to be checked
-     * 
+     *
      * @param array1 to be checked
      * @param array2 to be checked
      */
@@ -106,7 +106,7 @@ public final class AssertUtils {
 
     /**
      * Asserts that the specified arrays have the same length.
-     * 
+     *
      * @param array1 to be checked
      * @param array2 to be checked
      */
@@ -119,7 +119,7 @@ public final class AssertUtils {
 
     /**
      * Asserts that the specified arrays have the same length or are at least min size.
-     * 
+     *
      * @param array1 to be checked
      * @param array2 to be checked
      * @param nMinSize minimum required size
@@ -135,7 +135,7 @@ public final class AssertUtils {
 
     /**
      * Asserts that the specified arrays have the same length.
-     * 
+     *
      * @param array1 to be checked
      * @param array2 to be checked
      */
@@ -148,7 +148,7 @@ public final class AssertUtils {
 
     /**
      * Asserts that the specified arrays have the same length or are at least min size.
-     * 
+     *
      * @param array1 to be checked
      * @param array2 to be checked
      * @param nMinSize minimum required size
@@ -188,7 +188,7 @@ public final class AssertUtils {
 
     /**
      * Checks if the value is &gt;= 0
-     * 
+     *
      * @param <T> generics object to be checked
      *
      * @param name name to be included in the exception message
@@ -214,7 +214,7 @@ public final class AssertUtils {
 
     /**
      * Checks if the value is &gt;= 0
-     * 
+     *
      * @param <T> generics object to be checked
      *
      * @param name name to be included in the exception message
@@ -228,7 +228,7 @@ public final class AssertUtils {
 
     /**
      * Checks if the index is &gt;= 0 and &lt; bounds
-     * 
+     *
      * @param index index to be checked
      * @param bounds maximum bound
      */
@@ -238,7 +238,7 @@ public final class AssertUtils {
 
     /**
      * Checks if the index is &gt;= 0 and &lt; bounds
-     * 
+     *
      * @param index index to be checked
      * @param bounds maximum bound
      * @param message exception message
@@ -264,7 +264,7 @@ public final class AssertUtils {
 
     /**
      * Checks if the index1 &lt;= index2
-     * 
+     *
      * @param index1 index1 to be checked
      * @param name1 name of index1
      * @param index2 index1 to be checked
@@ -276,6 +276,60 @@ public final class AssertUtils {
                     "Index " + name1 + "(" + index1 + ") is greated than index " + name2 + "(" + index2 + ")");
         }
     }
+
+    /**
+     * Checks if the variable is less or equal than the reference
+     *
+     * @param name name to be included in exception message.
+     * @param ref reference
+     * @param len object to be checked
+     */
+    public static void gtOrEqual(final String name, final double ref, final double len) {
+        if (len < ref) {
+            throw new IllegalArgumentException("The " + name + " len = '"+len+"' must be less or equal than " + ref);
+        }
+    }
+
+    /**
+     * Checks if the variable is less or equal than the reference
+     *
+     * @param name name to be included in exception message.
+     * @param ref reference
+     * @param len object to be checked
+     */
+    public static void gtOrEqual(final String name, final float ref, final float len) {
+        if (len < ref) {
+            throw new IllegalArgumentException("The " + name + " len = '"+len+"' must be less or equal than " + ref);
+        }
+    }
+
+    /**
+     * Checks if the variable is greater or equal than the reference
+     *
+     * @param name name to be included in exception message.
+     * @param ref reference
+     * @param len object to be checked
+     */
+    public static void gtOrEqual(final String name, final int ref, final int len) {
+        if (len < ref) {
+            throw new IllegalArgumentException("The " + name + " len = '"+len+"' must be greater or equal than " + ref);
+        }
+    }
+
+    /**
+     * Checks if the variable is less or equal than the reference
+     *
+     * @param name name to be included in exception message.
+     * @param ref reference
+     * @param len object to be checked
+     */
+    public static void gtOrEqual(final String name, final long ref, final long len) {
+        if (len < ref) {
+            throw new IllegalArgumentException("The " + name + " len = '"+len+"' must be less or equal than " + ref);
+        }
+    }
+
+
 
     public static void nonEmptyArray(final String name, final boolean[] array) {
         AssertUtils.notNull(name, array);
@@ -327,7 +381,7 @@ public final class AssertUtils {
 
     /**
      * Checks if the object is not null.
-     * 
+     *
      * @param <T> generics object to be checked
      *
      * @param name name to be included in exception message.
