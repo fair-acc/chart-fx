@@ -1,48 +1,83 @@
 package de.gsi.math;
 
+import de.gsi.dataset.utils.AssertUtils;
+
 /**
  * some double array convenience methods
  *
  * @author rstein
  */
 public final class ArrayMath { // NOPMD - nomen est omen
+    private static final String DIVISOR = "divisor";
+    private static final String IN = "in";
+    private static final String MULTIPLICATOR = "multiplicator";
+    private static final String VALUE = "value";
 
-    public static double[] add(final double[] in, final double add) {
-        if (in == null) {
-            return new double[0];
-        }
-        final double[] ret = new double[in.length];
+    ArrayMath() { // NOPMD - package private
+        throw new IllegalStateException("Utility class");
+    }
 
-        for (int i = 0; i < in.length; i++) {
-            ret[i] = in[i] + add;
+    public static double[] add(final double[] in, final double value) {
+        return add(in, in.length, value);
+    }
+
+    public static double[] add(final double[] in, final double[] value) {
+        return add(in, value, in.length);
+    }
+
+    public static double[] add(final double[] in, final double[] value, final int length) {
+        AssertUtils.notNull(IN, in);
+        AssertUtils.gtOrEqual(IN, length, in.length);
+        AssertUtils.notNull(VALUE, value);
+        AssertUtils.gtOrEqual(VALUE, length, value.length);
+
+        final double[] ret = new double[length];
+
+        for (int i = 0; i < length; i++) {
+            ret[i] = in[i] + value[i];
         }
 
         return ret;
     }
 
-    public static double[] add(final double[] in, final double[] add) {
-        if (in == null) {
-            return new double[0];
-        }
-        final double[] ret = new double[in.length];
+    public static double[] add(final double[] in, final int length, final double value) {
+        AssertUtils.notNull(IN, in);
+        AssertUtils.gtOrEqual(IN, length, in.length);
 
-        for (int i = 0; i < in.length; i++) {
-            ret[i] = in[i] + add[i];
+        final double[] ret = new double[length];
+
+        for (int i = 0; i < length; i++) {
+            ret[i] = in[i] + value;
         }
 
         return ret;
     }
 
     public static double[] addInPlace(final double[] in, final double value) {
-        for (int i = 0; i < in.length; i++) {
-            in[i] += value;
+        return addInPlace(in, in.length, value);
+    }
+
+    public static double[] addInPlace(final double[] in, final double[] value) {
+        return addInPlace(in, value, in.length);
+    }
+
+    public static double[] addInPlace(final double[] in, final double[] value, final int length) {
+        AssertUtils.notNull(IN, in);
+        AssertUtils.gtOrEqual(IN, length, in.length);
+        AssertUtils.notNull(VALUE, value);
+        AssertUtils.gtOrEqual(VALUE, length, value.length);
+
+        for (int i = 0; i < length; i++) {
+            in[i] += value[i];
         }
         return in;
     }
 
-    public static double[] addInPlace(final double[] in, final double[] value) {
-        for (int i = 0; i < in.length; i++) {
-            in[i] += value[i];
+    public static double[] addInPlace(final double[] in, final int length, final double value) {
+        AssertUtils.notNull(IN, in);
+
+        for (int i = 0; i < length; i++) {
+            in[i] += value;
         }
         return in;
     }
@@ -65,8 +100,8 @@ public final class ArrayMath { // NOPMD - nomen est omen
      * @param iteration (whether this is the i-th filter in the chain)
      * @return array of [A0, A1, A2, B1, B2]
      */
-    public static double[] calculateFilterParameters(final double cutoffFraction, final FilterType filterType,
-            final double rippleP, final double numberOfPoles, final int iteration) {
+    public static double[] calculateFilterParameters(final double cutoffFraction, final FilterType filterType, final double rippleP, final double numberOfPoles,
+            final int iteration) {
 
         // calculate the pole location on the unit circle - Butterworth filter response
         double rp = -Math.cos(Math.PI / (numberOfPoles * 2) + (iteration - 1) * (Math.PI / numberOfPoles));
@@ -127,12 +162,16 @@ public final class ArrayMath { // NOPMD - nomen est omen
     }
 
     public static double[] decibel(final double[] in) {
-        if (in == null) {
-            return new double[0];
-        }
-        final double[] ret = new double[in.length];
+        return decibel(in, in.length);
+    }
 
-        for (int i = 0; i < in.length; i++) {
+    public static double[] decibel(final double[] in, final int length) {
+        AssertUtils.notNull(IN, in);
+        AssertUtils.gtOrEqual(IN, length, in.length);
+
+        final double[] ret = new double[length];
+
+        for (int i = 0; i < length; i++) {
             ret[i] = 20 * TMathConstants.Log10(in[i]);
         }
 
@@ -140,50 +179,95 @@ public final class ArrayMath { // NOPMD - nomen est omen
     }
 
     public static double[] decibelInPlace(final double[] in) {
-        for (int i = 0; i < in.length; i++) {
+        return decibelInPlace(in, in.length);
+    }
+
+    public static double[] decibelInPlace(final double[] in, final int length) {
+        AssertUtils.notNull(IN, in);
+        AssertUtils.gtOrEqual(IN, length, in.length);
+
+        for (int i = 0; i < length; i++) {
             in[i] = 20 * TMathConstants.Log10(in[i]);
         }
         return in;
     }
 
     public static double[] divide(final double[] in, final double divisor) {
-        if (divisor != 0.0) {
-            return multiply(in, 1.0 / divisor);
-        }
-        return notANumber(in);
+        return divide(in, in.length, divisor);
     }
 
     public static double[] divide(final double[] in, final double[] divisor) {
-        if (in == null) {
-            return new double[0];
-        }
+        return divide(in, divisor, in.length);
+    }
+
+    public static double[] divide(final double[] in, final double[] divisor, final int length) {
+        AssertUtils.notNull(IN, in);
+        AssertUtils.gtOrEqual(IN, length, in.length);
+        AssertUtils.notNull(DIVISOR, divisor);
+        AssertUtils.gtOrEqual(DIVISOR, length, divisor.length);
+
         final double[] ret = new double[in.length];
 
         for (int i = 0; i < in.length; i++) {
-            if (divisor[i] != 0.0) {
-                ret[i] = in[i] / divisor[i];
-            } else {
+            if (divisor[i] == 0.0) {
                 ret[i] = Double.NaN;
+            } else {
+                ret[i] = in[i] / divisor[i];
             }
         }
 
         return ret;
     }
 
-    public static double[] divideInPlace(final double[] in, final double divisor) {
-        if (divisor != 0.0) {
-            return multiplyInPlace(in, 1.0 / divisor);
+    public static double[] divide(final double[] in, final int length, final double divisor) {
+        AssertUtils.notNull(IN, in);
+        AssertUtils.gtOrEqual(IN, length, in.length);
+
+        final double[] ret = new double[length];
+        if (divisor == 0.0) {
+            return notANumberInPlace(ret);
         }
-        return ArrayMath.notANumberInPlace(in);
+        final double invDivisor = 1.0 / divisor;
+        for (int i = 0; i < length; i++) {
+            ret[i] = in[i] * invDivisor;
+        }
+        return ret;
+    }
+
+    public static double[] divideInPlace(final double[] in, final double divisor) {
+        return divideInPlace(in, in.length, divisor);
     }
 
     public static double[] divideInPlace(final double[] in, final double[] divisor) {
-        for (int i = 0; i < in.length; i++) {
-            if (divisor[i] != 0.0) {
-                in[i] /= divisor[i];
-            } else {
+        return divideInPlace(in, divisor, in.length);
+    }
+
+    public static double[] divideInPlace(final double[] in, final double[] divisor, final int length) {
+        AssertUtils.notNull(IN, in);
+        AssertUtils.gtOrEqual(IN, length, in.length);
+        AssertUtils.notNull(DIVISOR, divisor);
+        AssertUtils.gtOrEqual(DIVISOR, length, divisor.length);
+
+        for (int i = 0; i < length; i++) {
+            if (divisor[i] == 0.0) {
                 in[i] = Double.NaN;
+            } else {
+                in[i] /= divisor[i];
             }
+        }
+        return in;
+    }
+
+    public static double[] divideInPlace(final double[] in, final int length, final double divisor) {
+        AssertUtils.notNull(IN, in);
+        AssertUtils.gtOrEqual(IN, length, in.length);
+
+        if (divisor == 0.0) {
+            return ArrayMath.notANumberInPlace(in);
+        }
+        final double invDivisor = 1.0 / divisor;
+        for (int i = 0; i < in.length; i++) {
+            in[i] *= invDivisor;
         }
         return in;
     }
@@ -192,6 +276,7 @@ public final class ArrayMath { // NOPMD - nomen est omen
      * filter from: "The Scientist and Engineer's Guide to DSP" Chapter 20
      *
      * @param signal input signal
+     * @param output output signal (if null a new vector is being allocated)
      * @param cutoffFraction cutoffFreq must be smaller than half the sample rate
      * @param filterOrder can be between 2 and 20
      * @param filterType 0: lowPass 1: highPass
@@ -199,8 +284,9 @@ public final class ArrayMath { // NOPMD - nomen est omen
      *            Butterworth)
      * @return filtered output signal
      */
-    public static double[] filterSignal(final double[] signal, final double cutoffFraction, final double filterOrder,
-            final FilterType filterType, final double ripplePercent) {
+    public static double[] filterSignal(final double[] signal, final double[] output, final double cutoffFraction, final int filterOrder, final FilterType filterType, final double ripplePercent) {
+        AssertUtils.notNull("signal", signal);
+
         final double[][] recursionCoefficients = new double[22][2];
 
         final double[] coeffA = new double[22]; // a coeffs
@@ -214,8 +300,7 @@ public final class ArrayMath { // NOPMD - nomen est omen
         // calling subroutine
         // loop for each pole-pair
         for (int i = 1; i < filterOrder / 2; i++) {
-            final double[] filterParameters = calculateFilterParameters(cutoffFraction, filterType, ripplePercent,
-                    filterOrder, i);
+            final double[] filterParameters = calculateFilterParameters(cutoffFraction, filterType, ripplePercent, filterOrder, i);
 
             // add coefficients to the cascade
             for (int j = 0; j < coeffA.length; j++) {
@@ -223,8 +308,7 @@ public final class ArrayMath { // NOPMD - nomen est omen
                 tB[j] = coeffB[j];
             }
             for (int j = 2; j < coeffA.length; j++) {
-                coeffA[j] = filterParameters[0] * tA[j] + filterParameters[1] * tA[j - 1]
-                        + filterParameters[2] * tA[j - 2];
+                coeffA[j] = filterParameters[0] * tA[j] + filterParameters[1] * tA[j - 1] + filterParameters[2] * tA[j - 2];
                 coeffB[j] = tB[j] - filterParameters[3] * tB[j - 1] - filterParameters[4] * tB[j - 2];
             }
         }
@@ -248,8 +332,8 @@ public final class ArrayMath { // NOPMD - nomen est omen
                 break;
             case LOW_PASS:
             default:
-                sA = sA + coeffA[i];
-                sB = sB + coeffB[i];
+                sA += coeffA[i];
+                sB += coeffB[i];
                 break;
             }
         }
@@ -263,12 +347,15 @@ public final class ArrayMath { // NOPMD - nomen est omen
             recursionCoefficients[i][0] = coeffA[i];
             recursionCoefficients[i][1] = coeffB[i];
         }
-        final double[] filteredSignal = new double[signal.length];
+        final double[] filteredSignal = output == null ? new double[signal.length] : output;
+        if (output != null) {
+            AssertUtils.gtOrEqual("output", signal.length, output.length);
+        }
         double filterSampleA = 0;
         double filterSampleB = 0;
 
         // loop for applying recursive filter
-        for (int i = (int) Math.round(filterOrder); i < signal.length; i++) {
+        for (int i = filterOrder; i < signal.length; i++) {
             for (int j = 0; j < filterOrder + 1; j++) {
                 filterSampleA = filterSampleA + coeffA[j] * signal[i - j];
             }
@@ -285,12 +372,16 @@ public final class ArrayMath { // NOPMD - nomen est omen
     }
 
     public static double[] inverseDecibel(final double[] in) {
-        if (in == null) {
-            return new double[0];
-        }
-        final double[] ret = new double[in.length];
+        return inverseDecibel(in, in.length);
+    }
 
-        for (int i = 0; i < in.length; i++) {
+    public static double[] inverseDecibel(final double[] in, final int length) {
+        AssertUtils.notNull(IN, in);
+        AssertUtils.gtOrEqual(IN, length, in.length);
+
+        final double[] ret = new double[length];
+
+        for (int i = 0; i < length; i++) {
             ret[i] = Math.pow(10, in[i] / 20);
         }
 
@@ -298,94 +389,152 @@ public final class ArrayMath { // NOPMD - nomen est omen
     }
 
     public static double[] inverseDecibelInPlace(final double[] in) {
-        for (int i = 0; i < in.length; i++) {
+        return inverseDecibelInPlace(in, in.length);
+    }
+
+    public static double[] inverseDecibelInPlace(final double[] in, final int length) {
+        AssertUtils.notNull(IN, in);
+        AssertUtils.gtOrEqual(IN, length, in.length);
+
+        for (int i = 0; i < length; i++) {
             in[i] = Math.pow(10, in[i] / 20);
         }
         return in;
     }
 
     public static double[] multiply(final double[] in, final double multiplicator) {
-        if (in == null) {
-            return new double[0];
-        }
-        final double[] ret = new double[in.length];
-
-        for (int i = 0; i < in.length; i++) {
-            ret[i] = in[i] * multiplicator;
-        }
-
-        return ret;
+        return multiply(in, in.length, multiplicator);
     }
 
     public static double[] multiply(final double[] in, final double[] multiplicator) {
-        if (in == null) {
-            return new double[0];
-        }
-        final double[] ret = new double[in.length];
+        return multiply(in, multiplicator, in.length);
+    }
 
-        for (int i = 0; i < in.length; i++) {
+    public static double[] multiply(final double[] in, final double[] multiplicator, final int length) {
+        AssertUtils.notNull(IN, in);
+        AssertUtils.gtOrEqual(IN, length, in.length);
+        AssertUtils.notNull(MULTIPLICATOR, multiplicator);
+        AssertUtils.gtOrEqual(MULTIPLICATOR, length, multiplicator.length);
+
+        final double[] ret = new double[length];
+
+        for (int i = 0; i < length; i++) {
             ret[i] = in[i] * multiplicator[i];
         }
 
         return ret;
     }
 
+    public static double[] multiply(final double[] in, final int length, final double multiplicator) {
+        AssertUtils.notNull(IN, in);
+        AssertUtils.gtOrEqual(IN, length, in.length);
+
+        final double[] ret = new double[length];
+        for (int i = 0; i < length; i++) {
+            ret[i] = in[i] * multiplicator;
+        }
+
+        return ret;
+    }
+
     public static double[] multiplyInPlace(final double[] in, final double multiplicator) {
+        return multiplyInPlace(in, in.length, multiplicator);
+    }
+
+    public static double[] multiplyInPlace(final double[] in, final double[] multiplicator) {
+        return multiplyInPlace(in, multiplicator, in.length);
+    }
+
+    public static double[] multiplyInPlace(final double[] in, final double[] multiplicator, final int length) {
+        AssertUtils.notNull(IN, in);
+        AssertUtils.gtOrEqual(IN, length, in.length);
+        AssertUtils.notNull(MULTIPLICATOR, multiplicator);
+        AssertUtils.gtOrEqual(MULTIPLICATOR, length, multiplicator.length);
+
+        for (int i = 0; i < length; i++) {
+            in[i] *= multiplicator[i];
+        }
+        return in;
+    }
+
+    public static double[] multiplyInPlace(final double[] in, final int length, final double multiplicator) {
+        AssertUtils.notNull(IN, in);
+        AssertUtils.gtOrEqual(IN, length, in.length);
+
         for (int i = 0; i < in.length; i++) {
             in[i] *= multiplicator;
         }
         return in;
     }
 
-    public static double[] multiplyInPlace(final double[] in, final double[] multiplicator) {
-        for (int i = 0; i < in.length; i++) {
-            in[i] *= multiplicator[i];
-        }
-        return in;
+    public static double[] notANumber(final double[] in) {
+        return notANumber(in, in.length);
     }
 
-    public static double[] notANumber(final double[] in) {
-        if (in == null) {
-            return new double[0];
-        }
-        final double[] ret = new double[in.length];
-        ArrayUtils.fillArray(ret, Double.NaN);
+    public static double[] notANumber(final double[] in, final int length) {
+        AssertUtils.notNull(IN, in);
+        AssertUtils.gtOrEqual(IN, length, in.length);
+
+        final double[] ret = new double[length];
+        ArrayUtils.fillArray(ret, 0, length, Double.NaN);
 
         return ret;
     }
 
     public static double[] notANumberInPlace(final double[] in) {
-        ArrayUtils.fillArray(in, Double.NaN);
+        return notANumberInPlace(in, in.length);
+    }
+
+    public static double[] notANumberInPlace(final double[] in, final int length) {
+        AssertUtils.notNull(IN, in);
+        AssertUtils.gtOrEqual(IN, length, in.length);
+
+        ArrayUtils.fillArray(in, 0, length, Double.NaN);
         return in;
     }
 
     public static double[] sqr(final double[] in) {
-        if (in == null) {
-            return new double[0];
-        }
-        final double[] ret = new double[in.length];
+        return sqr(in, in.length);
+    }
 
-        for (int i = 0; i < in.length; i++) {
-            ret[i] = TMathConstants.Sqr(in[i]);
+    public static double[] sqr(final double[] in, final int length) {
+        AssertUtils.notNull(IN, in);
+        AssertUtils.gtOrEqual(IN, length, in.length);
+
+        final double[] ret = new double[length];
+
+        for (int i = 0; i < length; i++) {
+            ret[i] = in[i]*in[i];
         }
 
         return ret;
     }
 
     public static double[] sqrInPlace(final double[] in) {
-        for (int i = 0; i < in.length; i++) {
-            in[i] = TMathConstants.Sqr(in[i]);
+        return sqrInPlace(in, in.length);
+    }
+
+    public static double[] sqrInPlace(final double[] in, final int length) {
+        AssertUtils.notNull(IN, in);
+        AssertUtils.gtOrEqual(IN, length, in.length);
+
+        for (int i = 0; i < length; i++) {
+            in[i] = in[i]*in[i];
         }
         return in;
     }
 
     public static double[] sqrt(final double[] in) {
-        if (in == null) {
-            return new double[0];
-        }
-        final double[] ret = new double[in.length];
+        return sqrt(in, in.length);
+    }
 
-        for (int i = 0; i < in.length; i++) {
+    public static double[] sqrt(final double[] in, final int length) {
+        AssertUtils.notNull(IN, in);
+        AssertUtils.gtOrEqual(IN, length, in.length);
+
+        final double[] ret = new double[length];
+
+        for (int i = 0; i < length; i++) {
             ret[i] = TMathConstants.Sqrt(in[i]);
         }
 
@@ -393,59 +542,93 @@ public final class ArrayMath { // NOPMD - nomen est omen
     }
 
     public static double[] sqrtInPlace(final double[] in) {
-        for (int i = 0; i < in.length; i++) {
+        return sqrtInPlace(in, in.length);
+    }
+
+    public static double[] sqrtInPlace(final double[] in, final int length) {
+        AssertUtils.notNull(IN, in);
+        AssertUtils.gtOrEqual(IN, length, in.length);
+        for (int i = 0; i < length; i++) {
             in[i] = TMathConstants.Sqrt(in[i]);
         }
         return in;
     }
 
     public static double[] subtract(final double[] in, final double value) {
-        if (in == null) {
-            return new double[0];
-        }
-        final double[] ret = new double[in.length];
+        return subtract(in, in.length, value);
+    }
+
+    public static double[] subtract(final double[] in, final double[] value) {
+        return subtract(in, value, in.length);
+    }
+
+    public static double[] subtract(final double[] in, final double[] value, final int length) {
+        AssertUtils.notNull(IN, in);
+        AssertUtils.gtOrEqual(IN, length, in.length);
+        AssertUtils.notNull(VALUE, value);
+        AssertUtils.gtOrEqual(VALUE, length, value.length);
+
+        final double[] ret = new double[length];
 
         for (int i = 0; i < in.length; i++) {
+            ret[i] = in[i] - value[i];
+        }
+
+        return ret;
+    }
+
+    public static double[] subtract(final double[] in, final int length, final double value) {
+        AssertUtils.notNull(IN, in);
+        final double[] ret = new double[length];
+
+        for (int i = 0; i < length; i++) {
             ret[i] = in[i] - value;
         }
 
         return ret;
     }
 
-    public static double[] subtract(final double[] in, final double[] value) {
-        if (in == null) {
-            return new double[0];
-        }
-        final double[] ret = new double[in.length];
-
-        for (int i = 0; i < in.length; i++) {
-            ret[i] = in[i] + value[i];
-        }
-
-        return ret;
-    }
-
     public static double[] subtractInPlace(final double[] in, final double value) {
-        for (int i = 0; i < in.length; i++) {
-            in[i] -= value;
-        }
-        return in;
+        return subtractInPlace(in, in.length, value);
     }
 
     public static double[] subtractInPlace(final double[] in, final double[] value) {
-        for (int i = 0; i < in.length; i++) {
+        return subtractInPlace(in, value, in.length);
+    }
+
+    public static double[] subtractInPlace(final double[] in, final double[] value, final int length) {
+        AssertUtils.notNull(IN, in);
+        AssertUtils.gtOrEqual(IN, length, in.length);
+        AssertUtils.notNull(VALUE, value);
+        AssertUtils.gtOrEqual(VALUE, length, value.length);
+
+        for (int i = 0; i < length; i++) {
             in[i] -= value[i];
         }
         return in;
     }
 
-    public static double[] tenLog10(final double[] in) {
-        if (in == null) {
-            return new double[0];
-        }
-        final double[] ret = new double[in.length];
+    public static double[] subtractInPlace(final double[] in, final int length, final double value) {
+        AssertUtils.notNull(IN, in);
+        AssertUtils.gtOrEqual(IN, length, in.length);
 
-        for (int i = 0; i < in.length; i++) {
+        for (int i = 0; i < length; i++) {
+            in[i] -= value;
+        }
+        return in;
+    }
+
+    public static double[] tenLog10(final double[] in) {
+        return tenLog10(in, in.length);
+    }
+
+    public static double[] tenLog10(final double[] in, final int length) {
+        AssertUtils.notNull(IN, in);
+        AssertUtils.gtOrEqual(IN, length, in.length);
+
+        final double[] ret = new double[length];
+
+        for (int i = 0; i < length; i++) {
             ret[i] = 10 * TMathConstants.Log10(in[i]);
         }
 
@@ -453,7 +636,14 @@ public final class ArrayMath { // NOPMD - nomen est omen
     }
 
     public static double[] tenLog10InPlace(final double[] in) {
-        for (int i = 0; i < in.length; i++) {
+        return tenLog10InPlace(in, in.length);
+    }
+
+    public static double[] tenLog10InPlace(final double[] in, final int length) {
+        AssertUtils.notNull(IN, in);
+        AssertUtils.gtOrEqual(IN, length, in.length);
+
+        for (int i = 0; i < length; i++) {
             in[i] = 10 * TMathConstants.Log10(in[i]);
         }
         return in;
