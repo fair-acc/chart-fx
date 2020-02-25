@@ -12,7 +12,7 @@ import javafx.scene.layout.VBox;
 
 /**
  * Sample to illustrate array-based Butterworth and Chebychev filters
- * 
+ *
  * @author rstein
  */
 public class FrequencyFilterSample extends AbstractDemoApplication {
@@ -40,15 +40,15 @@ public class FrequencyFilterSample extends AbstractDemoApplication {
         chartLP.getRenderer(0).getDatasets().addAll(DataSetMath.normalisedMagnitudeSpectrumDecibel(dataSet));
 
         DefaultDataSet butterWorthA = new DefaultDataSet("Butterworth(4th)", xValues,
-                ArrayMath.filterSignal(yValues, fcut, 4, FilterType.LOW_PASS, 0), xValues.length, true);
+                ArrayMath.filterSignal(yValues, null, fcut, 4, FilterType.LOW_PASS, 0), xValues.length, true);
         chartLP.getRenderer(0).getDatasets().addAll(DataSetMath.normalisedMagnitudeSpectrumDecibel(butterWorthA));
 
         DefaultDataSet butterWorthB = new DefaultDataSet("Butterworth(6th)", xValues,
-                ArrayMath.filterSignal(yValues, fcut, 6, FilterType.LOW_PASS, 0), xValues.length, true);
+                ArrayMath.filterSignal(yValues, null, fcut, 6, FilterType.LOW_PASS, 0), xValues.length, true);
         chartLP.getRenderer(0).getDatasets().addAll(DataSetMath.normalisedMagnitudeSpectrumDecibel(butterWorthB));
 
         DefaultDataSet butterWorthC = new DefaultDataSet("Butterworth(8th)", xValues,
-                ArrayMath.filterSignal(yValues, fcut, 8, FilterType.LOW_PASS, 0), xValues.length, true);
+                ArrayMath.filterSignal(yValues, null, fcut, 8, FilterType.LOW_PASS, 0), xValues.length, true);
         chartLP.getRenderer(0).getDatasets().addAll(DataSetMath.normalisedMagnitudeSpectrumDecibel(butterWorthC));
 
         final DemoChart chartHP = new DemoChart();
@@ -58,15 +58,15 @@ public class FrequencyFilterSample extends AbstractDemoApplication {
         chartHP.getRenderer(0).getDatasets().addAll(DataSetMath.normalisedMagnitudeSpectrumDecibel(dataSet));
 
         DefaultDataSet butterWorthA2 = new DefaultDataSet("Butterworth(4th)", xValues,
-                ArrayMath.filterSignal(yValues, fcut, 4, FilterType.HIGH_PASS, 0.0), xValues.length, true);
+                ArrayMath.filterSignal(yValues, null, fcut, 4, FilterType.HIGH_PASS, 0.0), xValues.length, true);
         chartHP.getRenderer(0).getDatasets().addAll(DataSetMath.normalisedMagnitudeSpectrumDecibel(butterWorthA2));
 
         DefaultDataSet butterWorthB2 = new DefaultDataSet("Butterworth(6th)", xValues,
-                ArrayMath.filterSignal(yValues, fcut, 6, FilterType.HIGH_PASS, 0.0), xValues.length, true);
+                ArrayMath.filterSignal(yValues, null, fcut, 6, FilterType.HIGH_PASS, 0.0), xValues.length, true);
         chartHP.getRenderer(0).getDatasets().addAll(DataSetMath.normalisedMagnitudeSpectrumDecibel(butterWorthB2));
 
         DefaultDataSet butterWorthC2 = new DefaultDataSet("Butterworth(8th)", xValues,
-                ArrayMath.filterSignal(yValues, fcut, 8, FilterType.HIGH_PASS, 0.0), xValues.length, true);
+                ArrayMath.filterSignal(yValues, null, fcut, 8, FilterType.HIGH_PASS, 0.0), xValues.length, true);
         chartHP.getRenderer(0).getDatasets().addAll(DataSetMath.normalisedMagnitudeSpectrumDecibel(butterWorthC2));
 
         return new VBox(chartLP, chartHP);
