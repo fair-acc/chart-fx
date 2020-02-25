@@ -35,7 +35,7 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
      *
      * @param another name of this DataSet.
      */
-    public DoubleErrorDataSet(final DataSet2D another) {
+    public DoubleErrorDataSet(final DataSet another) {
         super(another.getName(), another.getDimension(), ErrorType.NO_ERROR, ErrorType.ASYMMETRIC);
         this.set(another); // NOPMD by rstein on 25/06/19 07:42
     }
@@ -286,7 +286,7 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
 
     /**
      * clears all data
-     * 
+     *
      * @return itself (fluent design)
      */
     public DoubleErrorDataSet clearData() {
@@ -386,7 +386,7 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
 
     /**
      * remove sub-range of data points
-     * 
+     *
      * @param fromIndex start index
      * @param toIndex stop index
      * @return itself (fluent design)
@@ -415,7 +415,7 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
 
     /**
      * ensures minimum size, enlarges if necessary
-     * 
+     *
      * @param size the actually used array lengths
      * @return itself (fluent design)
      */
@@ -431,20 +431,20 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
 
     /**
      * clear old data and overwrite with data from 'other' data set (deep copy)
-     * 
+     *
      * @param other the other data set
      * @return itself (fluent design)
      */
-    public DoubleErrorDataSet set(final DataSet2D other) {
+    public DoubleErrorDataSet set(final DataSet other) {
         lock().writeLockGuard(() -> {
             other.lock().writeLockGuard(() -> {
                 // copy data
                 if (other instanceof DataSetError) {
-                    this.set(other.getXValues(), other.getYValues(), ((DataSetError) other).getErrorsNegative(DIM_Y),
+                    this.set(other.getValues(DIM_X), other.getValues(DIM_Y), ((DataSetError) other).getErrorsNegative(DIM_Y),
                             ((DataSetError) other).getErrorsPositive(DIM_Y), other.getDataCount(), true);
                 } else {
                     final int count = other.getDataCount();
-                    this.set(other.getXValues(), other.getYValues(), new double[count], new double[count],
+                    this.set(other.getValues(DIM_X), other.getValues(DIM_Y), new double[count], new double[count],
                             other.getDataCount(), true);
                 }
 
@@ -593,7 +593,7 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
 
     /**
      * replaces point coordinate of existing data point
-     * 
+     *
      * @param index the index of the data point
      * @param x new horizontal coordinate
      * @param y new vertical coordinate N.B. errors are implicitly assumed to be zero
@@ -605,7 +605,7 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
 
     /**
      * replaces point coordinate of existing data point
-     * 
+     *
      * @param index the index of the data point
      * @param x new horizontal coordinate
      * @param y new vertical coordinate
