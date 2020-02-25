@@ -4,17 +4,31 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
-
 import de.gsi.dataset.utils.DoubleCircularBuffer;
 
 /**
+ * EventRateLimiter that acts as an {@link EventListener} and forwards the received {@link UpdateEvent}s to a secondary
+ * {@link EventListener} at a predefined maximum rate. This class may be useful in an UI contexts where the
+ * visualisation cannot be updated in time due to its numerical complexity, or for contexts where the numerical
+ * post-processing can be skipped or dropped if new UpdateEvents arrive.
+ * <p>
+ * Basic usage:
+ *
+ * <pre>
+ * {@code
+ *  evtSource.addListener(new EventRateLimiter(evt -> {  ... do stuff with the event ... }, MAX_UPDATE_PERIOD));
+ *  // or, more explicitly:
+ *  evtSource.addListener(new EventRateLimiter(evt -> {  ... do stuff with the event ... }, MAX_UPDATE_PERIOD,
+ *              UpdateStrategy.INSTANTANEOUS_RATE));
+ * }
+ * </pre>
+ *
  * @author rstein
  */
 public class EventRateLimiter implements EventListener {
     private static final int MAX_RATE_BUFFER = 20;
     private static final AtomicInteger serialCounter = new AtomicInteger(0);
-    private final Timer timer = new Timer(EventRateLimiter.class.getSimpleName() + serialCounter.getAndIncrement(),
-            true);
+    private final Timer timer = new Timer(EventRateLimiter.class.getSimpleName() + serialCounter.getAndIncrement(), true);
     private final AtomicBoolean rateLimitActive = new AtomicBoolean(false);
     private final Object lock = new Object();
     private final DoubleCircularBuffer rateEstimatorBuffer = new DoubleCircularBuffer(MAX_RATE_BUFFER);
@@ -25,8 +39,26 @@ public class EventRateLimiter implements EventListener {
     private long lastUpdateMillis;
     private UpdateEvent lastUpdateEvent;
 
-    public EventRateLimiter(final EventListener eventListener, final long minUpdatePeriod,
-            final UpdateStrategy updateStrategy) {
+    /**
+     * @param eventListener the secondary event listener that should be called if the time-out or rate-limited is not
+     *            activated
+     * @param minUpdatePeriod the minimum time in milliseconds. With {@link UpdateStrategy#INSTANTANEOUS_RATE} this implies
+     *            a minimum update time-out
+     *            defaults to {@link UpdateStrategy#INSTANTANEOUS_RATE}, see {@link UpdateStrategy} for details
+     */
+    public EventRateLimiter(final EventListener eventListener, final long minUpdatePeriod) {
+        this(eventListener, minUpdatePeriod, null);
+    }
+
+    /**
+     * @param eventListener the secondary event listener that should be called if the time-out or rate-limited is not
+     *            activated
+     * @param minUpdatePeriod the minimum time in milliseconds. With {@link UpdateStrategy#INSTANTANEOUS_RATE} this implies
+     *            a minimum update time-out
+     * @param updateStrategy if null defaults to {@link UpdateStrategy#INSTANTANEOUS_RATE}, see {@link UpdateStrategy} for
+     *            details
+     */
+    public EventRateLimiter(final EventListener eventListener, final long minUpdatePeriod, final UpdateStrategy updateStrategy) {
         super();
         lastUpdateMillis = System.currentTimeMillis();
         this.eventListener = eventListener;
@@ -87,9 +119,18 @@ public class EventRateLimiter implements EventListener {
         eventListener.handle(event);
     }
 
+    /**
+     * EventRateLimter UpdateStrategy
+     * <ul>
+     * <li>{@link #INSTANTANEOUS_RATE} notify if the time w.r.t. the last {@link UpdateEvent} is larger than time threshold
+     * <li>{@link #AVERAGE_RATE} notify if the average {@link UpdateEvent} rate is smaller than frequency threshold
+     * </ul>
+     *
+     * @author rstein
+     */
     public enum UpdateStrategy {
-        INSTANTANEOUS_RATE,
-        AVERAGE_RATE;
+        INSTANTANEOUS_RATE, // update if diff time w.r.t. the last {@link UpdateEvent} is larger than time threshold
+        AVERAGE_RATE; // update if the average {@link UpdateEvent} rate is smaller than frequency threshold
     }
 
     protected class DelayedUpdateTask extends TimerTask {
