@@ -135,9 +135,10 @@ public class MidiWaveformSynthesizer {
         final int frameCount = data.length / frameSize;
         final float scale = 2 << Math.max(1, nBits + 1);
 
-        final FloatFFT_1D fft = new FloatFFT_1D(2 * frameSize);
-        final float[] apodization = new float[2 * frameSize];
-        for (int i = 0; i < apodization.length; i++) {
+        final int fftSize = 2 * frameSize;
+        final FloatFFT_1D fft = new FloatFFT_1D(fftSize);
+        final float[] apodization = new float[fftSize];
+        for (int i = 0; i < fftSize; i++) {
             apodization[i] = (float) Apodization.Hann.getIndex(i, apodization.length);
         }
 
