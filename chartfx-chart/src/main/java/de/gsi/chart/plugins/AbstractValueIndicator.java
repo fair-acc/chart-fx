@@ -4,8 +4,6 @@
 
 package de.gsi.chart.plugins;
 
-import de.gsi.chart.Chart;
-import de.gsi.chart.axes.Axis;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -22,6 +20,9 @@ import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 
+import de.gsi.chart.Chart;
+import de.gsi.chart.axes.Axis;
+
 /**
  * Base class for plugins indicating a specific value or range of values on a {@link Chart} with an optional
  * {@link #textProperty() text label} description.
@@ -32,8 +33,7 @@ public abstract class AbstractValueIndicator extends ChartPlugin {
     private final Axis axis;
     private final ChangeListener<? super Number> axisBoundsListener = (obs, oldVal, newVal) -> layoutChildren();
 
-    private final ListChangeListener<? super ChartPlugin> pluginsListListener = (
-            final Change<? extends ChartPlugin> change) -> updateStyleClass();
+    private final ListChangeListener<? super ChartPlugin> pluginsListListener = (final Change<? extends ChartPlugin> change) -> updateStyleClass();
 
     private double xOffset;
     private double yOffset;

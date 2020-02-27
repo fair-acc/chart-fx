@@ -32,10 +32,8 @@ public class DoubleCircularBufferTests {
         assertDoesNotThrow(() -> new DoubleCircularBuffer(5), "CircularBuffer(int)");
         assertDoesNotThrow(() -> new DoubleCircularBuffer(new double[5], 5), "CircularBuffer(int)");
         assertDoesNotThrow(() -> new DoubleCircularBuffer(new double[10], 5), "CircularBuffer(int)");
-        assertThrows(IllegalArgumentException.class, () -> new DoubleCircularBuffer(0),
-                "CircularBuffer(0) -> throws exception");
-        assertThrows(IllegalArgumentException.class, () -> new DoubleCircularBuffer(0),
-                "CircularBuffer(-1) -> throws exception");
+        assertThrows(IllegalArgumentException.class, () -> new DoubleCircularBuffer(0), "CircularBuffer(0) -> throws exception");
+        assertThrows(IllegalArgumentException.class, () -> new DoubleCircularBuffer(0), "CircularBuffer(-1) -> throws exception");
 
         final double[] initBuffer = new double[] { 1.0, 2.0, 3.0, 4.0, 5.0 };
         DoubleCircularBuffer buffer = new DoubleCircularBuffer(initBuffer, 6);

@@ -79,7 +79,6 @@ public class AxisRangeTests {
 
     @Test
     public void testAddDoubleMethods() {
-
         // test add(double) interface
         // initial range
         final AxisRange test1 = new AxisRange(-1.0, +1.0, 1000, 10, 100);
@@ -161,7 +160,6 @@ public class AxisRangeTests {
 
     @Test
     public void testConstructors() {
-
         {
             final AxisRange test1 = new AxisRange();
             assertFalse(test1.isDefined());
@@ -198,7 +196,6 @@ public class AxisRangeTests {
 
     @Test
     public void testSetMethods() {
-
         {
             // test set(double, double) methods
             // internally test also:
@@ -235,7 +232,6 @@ public class AxisRangeTests {
             assertFalse(test1.set(test1));
             assertEquals(-2.0, test1.getMin());
             assertEquals(+2.0, test1.getMax());
-
         }
 
         if (LOGGER.isDebugEnabled()) {
@@ -245,7 +241,6 @@ public class AxisRangeTests {
 
     @Test
     public void testSpecials() {
-
         {
             final AxisRange test1 = new AxisRange();
             assertEquals(Double.NaN, test1.getMin());

@@ -12,7 +12,6 @@ import org.junit.jupiter.api.Test;
  * @author rstein
  */
 public class MetricPrefixTests {
-
     @Test
     public void basicTests() {
         for (MetricPrefix prefix : MetricPrefix.values()) {
@@ -28,8 +27,8 @@ public class MetricPrefixTests {
                 }
                 final double power2 = prefix2.getPower();
                 assertNotEquals(power, power2, "power non-equality not confirmed for " //
-                        + prefix + "(" + power + ") vs. " //
-                        + prefix2 + "(" + power2 + ")");
+                                                       + prefix + "(" + power + ") vs. " //
+                                                       + prefix2 + "(" + power2 + ")");
             }
 
             assertEquals(prefix.getLongPrefix(), MetricPrefix.getLongPrefix(power));
@@ -46,5 +45,4 @@ public class MetricPrefixTests {
         assertEquals("*1.3", MetricPrefix.getLongPrefix(1.3));
         assertEquals("*1.5", MetricPrefix.getShortPrefix(1.5));
     }
-
 }

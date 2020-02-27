@@ -117,7 +117,7 @@ public class DoubleCircularBuffer {
             }
             // return null;
             throw new IllegalArgumentException("writePos = '" + writePos + "' readPos = '" + readPos + "'/index = '"
-                    + index + "' is beyond circular buffer capacity limits = [0," + capacity + "]");
+                                               + index + "' is beyond circular buffer capacity limits = [0," + capacity + "]");
             // TODO: check whether it's better design to throw an exception for reading beyond the limits of
             // a semi-filled buffer rather than returning a 'NaN'
         }
@@ -201,7 +201,6 @@ public class DoubleCircularBuffer {
 
         // writing the remained of the array to the circular buffer
         return put(newElements, startIndex + lengthUpperHalf, length - lengthUpperHalf);
-
     }
 
     /**
@@ -246,5 +245,4 @@ public class DoubleCircularBuffer {
     public int writePosition() {
         return writePos;
     }
-
 }

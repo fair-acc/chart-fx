@@ -21,7 +21,6 @@ import de.gsi.math.spectra.TSpectrum.FilterOrder;
 import de.gsi.math.spectra.TSpectrum.SmoothWindow;
 
 public class TSpectrumTests {
-
     @Test
     public void basicBackgroundTests() {
         DoubleDataSet testDataSet = generateSineWaveSpectrumData(12);
@@ -34,8 +33,7 @@ public class TSpectrumTests {
                 for (FilterOrder filterOrder : FilterOrder.values()) {
                     for (SmoothWindow smoothWindow : SmoothWindow.values()) {
                         for (int nIterations : new int[] { 1, 3 })
-                            assertDoesNotThrow(() -> TSpectrum.background(dataLin, destVector, dataLin.length,
-                                    nIterations, direction, filterOrder, smoothWindow, compton));
+                            assertDoesNotThrow(() -> TSpectrum.background(dataLin, destVector, dataLin.length, nIterations, direction, filterOrder, smoothWindow, compton));
                     }
                 }
             }
@@ -47,23 +45,15 @@ public class TSpectrumTests {
         final SmoothWindow smoothWindow = SmoothWindow.SMOOTHING_WIDTH3;
         final boolean compton = true;
 
-        assertDoesNotThrow(() -> TSpectrum.background(dataLin, destVector, dataLin.length, nIterations, direction,
-                filterOrder, smoothWindow, compton));
+        assertDoesNotThrow(() -> TSpectrum.background(dataLin, destVector, dataLin.length, nIterations, direction, filterOrder, smoothWindow, compton));
 
-        assertThrows(IllegalArgumentException.class, () -> TSpectrum.background(dataLin, destVector, 0, nIterations,
-                direction, filterOrder, smoothWindow, compton));
-        assertThrows(IllegalArgumentException.class, () -> TSpectrum.background(null, destVector, dataLin.length,
-                nIterations, direction, filterOrder, smoothWindow, compton));
-        assertThrows(IllegalArgumentException.class, () -> TSpectrum.background(new double[3], destVector,
-                dataLin.length, nIterations, direction, filterOrder, smoothWindow, compton));
-        assertThrows(IllegalArgumentException.class, () -> TSpectrum.background(dataLin, destVector, dataLin.length, 0,
-                direction, filterOrder, smoothWindow, compton));
-        assertThrows(IllegalArgumentException.class, () -> TSpectrum.background(dataLin, destVector, dataLin.length,
-                100, direction, filterOrder, smoothWindow, compton));
-        assertThrows(IllegalArgumentException.class, () -> TSpectrum.background(dataLin, destVector, dataLin.length,
-                nIterations, direction, null, smoothWindow, compton));
-        assertThrows(IllegalArgumentException.class, () -> TSpectrum.background(dataLin, destVector, dataLin.length,
-                nIterations, direction, filterOrder, null, compton));
+        assertThrows(IllegalArgumentException.class, () -> TSpectrum.background(dataLin, destVector, 0, nIterations, direction, filterOrder, smoothWindow, compton));
+        assertThrows(IllegalArgumentException.class, () -> TSpectrum.background(null, destVector, dataLin.length, nIterations, direction, filterOrder, smoothWindow, compton));
+        assertThrows(IllegalArgumentException.class, () -> TSpectrum.background(new double[3], destVector, dataLin.length, nIterations, direction, filterOrder, smoothWindow, compton));
+        assertThrows(IllegalArgumentException.class, () -> TSpectrum.background(dataLin, destVector, dataLin.length, 0, direction, filterOrder, smoothWindow, compton));
+        assertThrows(IllegalArgumentException.class, () -> TSpectrum.background(dataLin, destVector, dataLin.length, 100, direction, filterOrder, smoothWindow, compton));
+        assertThrows(IllegalArgumentException.class, () -> TSpectrum.background(dataLin, destVector, dataLin.length, nIterations, direction, null, smoothWindow, compton));
+        assertThrows(IllegalArgumentException.class, () -> TSpectrum.background(dataLin, destVector, dataLin.length, nIterations, direction, filterOrder, null, compton));
     }
 
     @ParameterizedTest
@@ -80,8 +70,7 @@ public class TSpectrumTests {
         final SmoothWindow smoothWindow = SmoothWindow.SMOOTHING_WIDTH3;
         final boolean compton = true;
 
-        assertDoesNotThrow(() -> TSpectrum.background(dataLin, destVector, dataLin.length, nIterations, direction,
-                filterOrder, smoothWindow, compton));
+        assertDoesNotThrow(() -> TSpectrum.background(dataLin, destVector, dataLin.length, nIterations, direction, filterOrder, smoothWindow, compton));
     }
 
     @Test
@@ -131,147 +120,147 @@ public class TSpectrumTests {
                 dataLin.length, nMaxPeaks, sigma, threshold, //
                 /* backgroundRemove */ false, //
                 /* deconIterations */ 1, //
-                /* markov */false, //
+                /* markov */ false, //
                 /* averWindow */ 5);
 
         assertEquals(2, peaks.size(), "peak finder with threshold = " + threshold);
 
         assertDoesNotThrow(() -> TSpectrum.search(freq, ArrayMath.inverseDecibel(rawDataDecibel), destVector, //
-                dataLin.length, nMaxPeaks, sigma, threshold, //
-                /* backgroundRemove */ false, //
-                /* deconIterations */ 1, //
-                /* markov */false, //
-                /* averWindow */ 5));
+                                      dataLin.length, nMaxPeaks, sigma, threshold, //
+                                      /* backgroundRemove */ false, //
+                                      /* deconIterations */ 1, //
+                                      /* markov */ false, //
+                                      /* averWindow */ 5));
 
         assertDoesNotThrow(() -> TSpectrum.search(freq, ArrayMath.inverseDecibel(rawDataDecibel), destVector, //
-                dataLin.length, nMaxPeaks, sigma, threshold, //
-                /* backgroundRemove */ true, //
-                /* deconIterations */ 1, //
-                /* markov */false, //
-                /* averWindow */ 5));
+                                      dataLin.length, nMaxPeaks, sigma, threshold, //
+                                      /* backgroundRemove */ true, //
+                                      /* deconIterations */ 1, //
+                                      /* markov */ false, //
+                                      /* averWindow */ 5));
 
         assertDoesNotThrow(() -> TSpectrum.search(freq, ArrayMath.inverseDecibel(rawDataDecibel), destVector, //
-                dataLin.length, nMaxPeaks, sigma, threshold, //
-                /* backgroundRemove */ false, //
-                /* deconIterations */ 1, //
-                /* markov */true, //
-                /* averWindow */ 5));
+                                      dataLin.length, nMaxPeaks, sigma, threshold, //
+                                      /* backgroundRemove */ false, //
+                                      /* deconIterations */ 1, //
+                                      /* markov */ true, //
+                                      /* averWindow */ 5));
 
         assertDoesNotThrow(() -> TSpectrum.search(freq, ArrayMath.inverseDecibel(rawDataDecibel), destVector, //
-                dataLin.length, nMaxPeaks, sigma, threshold, //
-                /* backgroundRemove */ true, //
-                /* deconIterations */ 1, //
-                /* markov */true, //
-                /* averWindow */ 5));
+                                      dataLin.length, nMaxPeaks, sigma, threshold, //
+                                      /* backgroundRemove */ true, //
+                                      /* deconIterations */ 1, //
+                                      /* markov */ true, //
+                                      /* averWindow */ 5));
 
         assertThrows(IllegalArgumentException.class,
                 () -> TSpectrum.search(null, ArrayMath.inverseDecibel(rawDataDecibel), destVector, //
-                        dataLin.length, nMaxPeaks, sigma, threshold, //
-                        /* backgroundRemove */ false, //
-                        /* deconIterations */ 1, //
-                        /* markov */false, //
-                        /* averWindow */ 5));
+                           dataLin.length, nMaxPeaks, sigma, threshold, //
+                           /* backgroundRemove */ false, //
+                           /* deconIterations */ 1, //
+                           /* markov */ false, //
+                           /* averWindow */ 5));
 
         assertThrows(IllegalArgumentException.class, () -> TSpectrum.search(freq, null, destVector, //
-                dataLin.length, nMaxPeaks, sigma, threshold, //
-                /* backgroundRemove */ false, //
-                /* deconIterations */ 1, //
-                /* markov */false, //
-                /* averWindow */ 5));
+                                                                dataLin.length, nMaxPeaks, sigma, threshold, //
+                                                                /* backgroundRemove */ false, //
+                                                                /* deconIterations */ 1, //
+                                                                /* markov */ false, //
+                                                                /* averWindow */ 5));
 
         assertThrows(IllegalArgumentException.class,
                 () -> TSpectrum.search(new double[freq.length - 1], ArrayMath.inverseDecibel(rawDataDecibel),
-                        destVector, //
-                        dataLin.length, nMaxPeaks, sigma, threshold, //
-                        /* backgroundRemove */ false, //
-                        /* deconIterations */ 1, //
-                        /* markov */false, //
-                        /* averWindow */ 5));
+                           destVector, //
+                           dataLin.length, nMaxPeaks, sigma, threshold, //
+                           /* backgroundRemove */ false, //
+                           /* deconIterations */ 1, //
+                           /* markov */ false, //
+                           /* averWindow */ 5));
 
         assertThrows(IllegalArgumentException.class,
                 () -> TSpectrum.search(freq, new double[freq.length - 1], destVector, //
-                        dataLin.length, nMaxPeaks, sigma, threshold, //
-                        /* backgroundRemove */ false, //
-                        /* deconIterations */ 1, //
-                        /* markov */false, //
-                        /* averWindow */ 5));
+                           dataLin.length, nMaxPeaks, sigma, threshold, //
+                           /* backgroundRemove */ false, //
+                           /* deconIterations */ 1, //
+                           /* markov */ false, //
+                           /* averWindow */ 5));
 
         assertThrows(IllegalArgumentException.class,
                 () -> TSpectrum.search(freq, ArrayMath.inverseDecibel(rawDataDecibel), destVector, //
-                        dataLin.length, nMaxPeaks, 0.5, threshold, //
-                        /* backgroundRemove */ false, //
-                        /* deconIterations */ 1, //
-                        /* markov */false, //
-                        /* averWindow */ 5));
+                           dataLin.length, nMaxPeaks, 0.5, threshold, //
+                           /* backgroundRemove */ false, //
+                           /* deconIterations */ 1, //
+                           /* markov */ false, //
+                           /* averWindow */ 5));
 
         assertDoesNotThrow(() -> TSpectrum.search(freq, ArrayMath.inverseDecibel(rawDataDecibel), null, //
-                dataLin.length, nMaxPeaks, sigma, threshold, //
-                /* backgroundRemove */ false, //
-                /* deconIterations */ 1, //
-                /* markov */false, //
-                /* averWindow */ 5));
+                                      dataLin.length, nMaxPeaks, sigma, threshold, //
+                                      /* backgroundRemove */ false, //
+                                      /* deconIterations */ 1, //
+                                      /* markov */ false, //
+                                      /* averWindow */ 5));
 
         assertDoesNotThrow(
                 () -> TSpectrum.search(freq, ArrayMath.inverseDecibel(rawDataDecibel), new double[freq.length - 1], //
-                        dataLin.length, nMaxPeaks, sigma, threshold, //
-                        /* backgroundRemove */ false, //
-                        /* deconIterations */ 1, //
-                        /* markov */false, //
-                        /* averWindow */ 5));
+                           dataLin.length, nMaxPeaks, sigma, threshold, //
+                           /* backgroundRemove */ false, //
+                           /* deconIterations */ 1, //
+                           /* markov */ false, //
+                           /* averWindow */ 5));
 
         assertThrows(IllegalArgumentException.class,
                 () -> TSpectrum.search(freq, ArrayMath.inverseDecibel(rawDataDecibel), destVector, //
-                        dataLin.length, nMaxPeaks, sigma, 0, //
-                        /* backgroundRemove */ false, //
-                        /* deconIterations */ 1, //
-                        /* markov */false, //
-                        /* averWindow */ 5));
+                           dataLin.length, nMaxPeaks, sigma, 0, //
+                           /* backgroundRemove */ false, //
+                           /* deconIterations */ 1, //
+                           /* markov */ false, //
+                           /* averWindow */ 5));
 
         assertThrows(IllegalArgumentException.class,
                 () -> TSpectrum.search(freq, ArrayMath.inverseDecibel(rawDataDecibel), destVector, //
-                        dataLin.length, nMaxPeaks, sigma, 100, //
-                        /* backgroundRemove */ false, //
-                        /* deconIterations */ 1, //
-                        /* markov */false, //
-                        /* averWindow */ 5));
+                           dataLin.length, nMaxPeaks, sigma, 100, //
+                           /* backgroundRemove */ false, //
+                           /* deconIterations */ 1, //
+                           /* markov */ false, //
+                           /* averWindow */ 5));
 
         assertThrows(IllegalArgumentException.class,
                 () -> TSpectrum.search(freq, ArrayMath.inverseDecibel(rawDataDecibel), destVector, //
-                        dataLin.length, nMaxPeaks, 1025, threshold, //
-                        /* backgroundRemove */ false, //
-                        /* deconIterations */ 1, //
-                        /* markov */false, //
-                        /* averWindow */ 5));
+                           dataLin.length, nMaxPeaks, 1025, threshold, //
+                           /* backgroundRemove */ false, //
+                           /* deconIterations */ 1, //
+                           /* markov */ false, //
+                           /* averWindow */ 5));
 
         assertThrows(IllegalArgumentException.class,
                 () -> TSpectrum.search(freq, ArrayMath.inverseDecibel(rawDataDecibel), destVector, //
-                        dataLin.length, nMaxPeaks, sigma, threshold, //
-                        /* backgroundRemove */ false, //
-                        /* deconIterations */ 1, //
-                        /* markov */true, //
-                        /* averWindow */ 0));
+                           dataLin.length, nMaxPeaks, sigma, threshold, //
+                           /* backgroundRemove */ false, //
+                           /* deconIterations */ 1, //
+                           /* markov */ true, //
+                           /* averWindow */ 0));
 
         assertDoesNotThrow(() -> TSpectrum.search(freq, ArrayMath.inverseDecibel(rawDataDecibel), destVector, //
-                dataLin.length, nMaxPeaks, sigma, threshold, //
-                /* backgroundRemove */ false, //
-                /* deconIterations */ 1, //
-                /* markov */true, //
-                /* averWindow */ 10));
+                                      dataLin.length, nMaxPeaks, sigma, threshold, //
+                                      /* backgroundRemove */ false, //
+                                      /* deconIterations */ 1, //
+                                      /* markov */ true, //
+                                      /* averWindow */ 10));
 
         assertThrows(IllegalArgumentException.class,
                 () -> TSpectrum.search(freq, ArrayMath.inverseDecibel(rawDataDecibel), destVector, //
-                        dataLin.length, nMaxPeaks, 24, threshold, //
-                        /* backgroundRemove */ true, //
-                        /* deconIterations */ 1, //
-                        /* markov */false, //
-                        /* averWindow */ 5));
+                           dataLin.length, nMaxPeaks, 24, threshold, //
+                           /* backgroundRemove */ true, //
+                           /* deconIterations */ 1, //
+                           /* markov */ false, //
+                           /* averWindow */ 5));
 
         assertDoesNotThrow(() -> TSpectrum.search(freq, ArrayMath.inverseDecibel(rawDataDecibel), destVector, //
-                dataLin.length, nMaxPeaks, 24, threshold, //
-                /* backgroundRemove */ false, //
-                /* deconIterations */ 1, //
-                /* markov */false, //
-                /* averWindow */ 5));
+                                      dataLin.length, nMaxPeaks, 24, threshold, //
+                                      /* backgroundRemove */ false, //
+                                      /* deconIterations */ 1, //
+                                      /* markov */ false, //
+                                      /* averWindow */ 5));
     }
 
     @ParameterizedTest
@@ -289,7 +278,7 @@ public class TSpectrumTests {
                 dataLin.length, nMaxPeaks, sigma, threshold, //
                 /* backgroundRemove */ false, //
                 /* deconIterations */ 1, //
-                /* markov */false, //
+                /* markov */ false, //
                 /* averWindow */ 5);
 
         assertEquals(nPeaks, peaks.size(), "peak finder with threshold = " + threshold);
