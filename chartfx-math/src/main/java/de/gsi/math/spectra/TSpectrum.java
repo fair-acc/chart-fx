@@ -214,7 +214,8 @@ public class TSpectrum {
                         if (c > 1) {
                             c = (yb1 - yb2) / c;
                             double d = 0;
-                            for (int j = b2; j >= b1 && j >= 0; j--) {
+                            //for (int j = b2; j >= b1 && j >= 0; j--) { // LGTM fix
+                            for (int j = b2; j >= b1; j--) { // LGTM fix
                                 b = source[j];
                                 d = d + b - yb2;
                                 a = c * d + yb2;
@@ -1225,8 +1226,7 @@ public class TSpectrum {
             final boolean backgroundRemove, final int deconIterations, final boolean markov, final int averWindow) {
 
         if (sourceX == null || sourceY == null) {
-            throw new IllegalArgumentException(
-                    "neither sourceX '" + sourceX + "' nor sourceY '" + sourceY + "' must be null");
+			throw new IllegalArgumentException("neither sourceX '" + (sourceX == null ? "null" : "OK") + "' nor sourceY '" + (sourceY == null ? "null" : "OK") + "' must be null");
         } else if (sourceX.length < length) {
             throw new IllegalArgumentException(
                     "sourceX.length too short is '" + sourceX.length + "' vs. should '" + length + "'");
@@ -1496,7 +1496,7 @@ public class TSpectrum {
         }
 
         // deconvolution starts
-        int area = 0;
+        double area = 0;
         int lhGold = -1;
         int posit = 0;
         double maximum = 0;
