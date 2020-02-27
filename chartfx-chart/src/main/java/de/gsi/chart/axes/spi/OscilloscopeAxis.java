@@ -49,7 +49,7 @@ public class OscilloscopeAxis extends AbstractAxis implements Axis {
     private static final int TICK_COUNT = 10; // by convention
     public static final SortedSet<Number> DEFAULT_MULTIPLIERS1 = Collections.unmodifiableSortedSet(new TreeSet<>(Arrays.asList(1.0, 2.0, 5.0)));
     public static final SortedSet<Number> DEFAULT_MULTIPLIERS2 = Collections
-            .unmodifiableSortedSet(new TreeSet<>(Arrays.asList(1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0, 6.5, 7.0, 7.5, 8.0, 8.5, 9.0, 9.5)));
+                                                                         .unmodifiableSortedSet(new TreeSet<>(Arrays.asList(1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0, 6.5, 7.0, 7.5, 8.0, 8.5, 9.0, 9.5)));
     private final DefaultAxisTransform axisTransform = new DefaultAxisTransform(this);
     private TickUnitSupplier tickUnitSupplier = new DefaultTickUnitSupplier(DEFAULT_MULTIPLIERS1);
     private final DataRange clampedRange = new DataRange();

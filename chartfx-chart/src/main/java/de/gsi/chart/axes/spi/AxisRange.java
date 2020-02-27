@@ -3,9 +3,10 @@ package de.gsi.chart.axes.spi;
 import java.security.InvalidParameterException;
 import java.util.Objects;
 
+import javafx.scene.chart.ValueAxis;
+
 import de.gsi.chart.ui.geometry.Side;
 import de.gsi.dataset.spi.DataRange;
-import javafx.scene.chart.ValueAxis;
 
 /**
  * Holds the range of the axis along with {@link ValueAxis#getScale() scale} and tick numbers format to be used.
@@ -13,7 +14,6 @@ import javafx.scene.chart.ValueAxis;
  * @author rstein
  */
 public class AxisRange extends DataRange {
-
     protected double axisLength;
     protected double scale = 1;
     protected double tickUnit;
@@ -143,5 +143,4 @@ public class AxisRange extends DataRange {
         return String.format("AxisRange [min=%f, max=%f, axisLength=%f, scale=%f, tickUnit=%f]", min, max, axisLength,
                 scale, tickUnit);
     }
-
 }

@@ -5,6 +5,22 @@ import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.List;
 
+import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.collections.FXCollections;
+import javafx.scene.Scene;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.RadioButton;
+import javafx.scene.control.Slider;
+import javafx.scene.control.Spinner;
+import javafx.scene.control.ToggleGroup;
+import javafx.scene.control.ToolBar;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,22 +44,6 @@ import de.gsi.math.spectra.TSpectrum;
 import de.gsi.math.spectra.TSpectrum.Direction;
 import de.gsi.math.spectra.TSpectrum.FilterOrder;
 import de.gsi.math.spectra.TSpectrum.SmoothWindow;
-
-import javafx.application.Application;
-import javafx.application.Platform;
-import javafx.collections.FXCollections;
-import javafx.scene.Scene;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.RadioButton;
-import javafx.scene.control.Slider;
-import javafx.scene.control.Spinner;
-import javafx.scene.control.ToggleGroup;
-import javafx.scene.control.ToolBar;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.VBox;
-import javafx.stage.Stage;
 
 /**
  * @author rstein

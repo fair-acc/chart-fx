@@ -94,7 +94,6 @@ public class TSpectrum {
      *        later through SetResolution.
      */
     public void setResolution(double resolution) {
-
         if (resolution > 1) {
             fResolution = resolution;
         } else {
@@ -123,7 +122,6 @@ public class TSpectrum {
     public static double[] background(final double[] source, final double[] destination, int length,
             int numberIterations, Direction direction, FilterOrder filterOrder, SmoothWindow smoothing,
             boolean compton) {
-
         if (source == null || length <= 0 || source.length < length) {
             throw new InvalidParameterException("input spectrum null or invalid vector size");
         }
@@ -132,7 +130,7 @@ public class TSpectrum {
         }
         if (length < 2 * numberIterations + 1) {
             throw new InvalidParameterException("clipping window is too large (length < 2 * numberIterations + 1) -> "
-                    + length + "< " + (2 * numberIterations + 1));
+                                                + length + "< " + (2 * numberIterations + 1));
         }
         if (filterOrder == null) {
             throw new InvalidParameterException("filterOrder must not be null");
@@ -151,17 +149,14 @@ public class TSpectrum {
             break;
         case ORDER_4: {
             filterBackgroundOrder4(workingSpace, length, numberIterations, direction, smoothing);
-        }
-            break;
+        } break;
         case ORDER_6: {
             filterBackgroundOrder6(workingSpace, length, numberIterations, direction, smoothing);
-        }
-            break;
+        } break;
         case ORDER_8:
         default: {
             filterBackgroundOrder8(workingSpace, length, numberIterations, direction, smoothing);
-        }
-            break;
+        } break;
         } /* switch (filterOrder) {...} */
 
         if (compton) {
@@ -228,7 +223,7 @@ public class TSpectrum {
         } /* if (compton) {..} */
 
         final double[] returnVector = destination == null || destination.length < length ? new double[length]
-                : destination;
+                                                                                         : destination;
         System.arraycopy(workingSpace, 0, returnVector, 0, length);
         ArrayCache.release(CACHED_ARRAY_BACKGROUND, workingSpace);
 
@@ -253,7 +248,6 @@ public class TSpectrum {
      */
     public static double[] deconvolution(double[] source, double[] response, double[] destination, int length,
             int numberIterations, int numberRepetitions, double boost) {
-
         if (length <= 0) {
             throw new IllegalArgumentException("length '" + length + "'is <= 0");
         }
@@ -392,7 +386,7 @@ public class TSpectrum {
         }
 
         final double[] returnVector = destination == null || destination.length < length ? new double[length]
-                : destination;
+                                                                                         : destination;
         System.arraycopy(workingSpace, 0, returnVector, 0, length);
         ArrayMath.multiplyInPlace(returnVector, area);
         ArrayCache.release(CACHED_ARRAY_DECONVOLUTION, workingSpace);
@@ -415,7 +409,6 @@ public class TSpectrum {
      */
     public static double[] deconvolutionRL(double[] source, double[] response, double[] destination, int length,
             int numberIterations, int numberRepetitions, double boost) {
-
         if (length <= 0) {
             throw new IllegalArgumentException("length '" + length + "'is <= 0");
         }
@@ -484,11 +477,11 @@ public class TSpectrum {
             for (lindex = 0; lindex < numberIterations; lindex++) {
                 for (i = 0; i <= length - lhGold; i++) {
                     lda = 0;
-                    if (workingSpace[i] > 0) {// x[i]
+                    if (workingSpace[i] > 0) { // x[i]
                         for (j = i; j < i + lhGold; j++) {
-                            ldb = workingSpace[2 * length + j];// y[j]
+                            ldb = workingSpace[2 * length + j]; // y[j]
                             if (j < length) {
-                                if (ldb > 0) {// y[j]
+                                if (ldb > 0) { // y[j]
                                     kmax = j;
                                     if (kmax > lhGold - 1) {
                                         kmax = lhGold - 1;
@@ -499,7 +492,7 @@ public class TSpectrum {
                                     }
                                     ldc = 0;
                                     for (k = kmax; k >= kmin; k--) {
-                                        ldc += workingSpace[length + k] * workingSpace[j - k];// h[k]*x[j-k]
+                                        ldc += workingSpace[length + k] * workingSpace[j - k]; // h[k]*x[j-k]
                                     }
                                     if (ldc > 0) {
                                         ldb /= ldc;
@@ -507,7 +500,7 @@ public class TSpectrum {
                                         ldb = 0;
                                     }
                                 }
-                                ldb *= workingSpace[length + j - i];// y[j]*h[j-i]/suma(h[j][k]x[k])
+                                ldb *= workingSpace[length + j - i]; // y[j]*h[j-i]/suma(h[j][k]x[k])
                             }
                             lda += ldb;
                         }
@@ -534,7 +527,7 @@ public class TSpectrum {
             source[i] = workingSpace[length + i];
         }
         final double[] returnVector = destination == null || destination.length < length ? new double[length]
-                : destination;
+                                                                                         : destination;
         System.arraycopy(workingSpace, 0, returnVector, 0, length);
 
         ArrayCache.release(CACHED_ARRAY_DECONVOLUTION_RL, workingSpace);
@@ -608,7 +601,7 @@ public class TSpectrum {
                 startIndex -= 1;
             }
         } while (direction == Direction.INCREASING && startIndex <= numberIterations
-                || direction == Direction.DECREASING && startIndex >= 1);
+                 || direction == Direction.DECREASING && startIndex >= 1);
     }
 
     protected static void filterBackgroundOrder4(final double[] workingSpace, final int length,
@@ -726,7 +719,7 @@ public class TSpectrum {
                 startIndex -= 1;
             }
         } while (direction == Direction.INCREASING && startIndex <= numberIterations
-                || direction == Direction.DECREASING && startIndex >= 1);
+                 || direction == Direction.DECREASING && startIndex >= 1);
     }
 
     protected static void filterBackgroundOrder6(final double[] workingSpace, int length, int numberIterations,
@@ -915,7 +908,7 @@ public class TSpectrum {
                 startIndex -= 1;
             }
         } while (direction == Direction.INCREASING && startIndex <= numberIterations
-                || direction == Direction.DECREASING && startIndex >= 1);
+                 || direction == Direction.DECREASING && startIndex >= 1);
     }
 
     protected static void filterBackgroundOrder8(final double[] workingSpace, int length, int numberIterations,
@@ -1194,7 +1187,7 @@ public class TSpectrum {
                 startIndex -= 1;
             }
         } while (direction == Direction.INCREASING && startIndex <= numberIterations
-                || direction == Direction.DECREASING && startIndex >= 1);
+                 || direction == Direction.DECREASING && startIndex >= 1);
     }
 
     // STATIC functions (called by TH1)
@@ -1223,7 +1216,6 @@ public class TSpectrum {
     public static List<DoublePoint> search(final double[] sourceX, final double[] sourceY, final double[] destVector,
             final int length, final int nMaxPeaks, final double sigma, final double threshold,
             final boolean backgroundRemove, final int deconIterations, final boolean markov, final int averWindow) {
-
         if (sourceX == null || sourceY == null) {
             throw new IllegalArgumentException(
                     "neither sourceX '" + sourceX + "' nor sourceY '" + sourceY + "' must be null");
@@ -1236,8 +1228,7 @@ public class TSpectrum {
         }
 
         if ((destVector == null || destVector.length < length) && LOGGER.isDebugEnabled()) {
-            LOGGER.atDebug().addArgument(destVector == null ? Double.NaN : destVector.length).addArgument(length).log(
-                    "destination vector has insufficient length {} vs. {} needed, omitting copying background spectrum");
+            LOGGER.atDebug().addArgument(destVector == null ? Double.NaN : destVector.length).addArgument(length).log("destination vector has insufficient length {} vs. {} needed, omitting copying background spectrum");
         }
 
         if (sigma < 1) {
@@ -1562,7 +1553,6 @@ public class TSpectrum {
                         final double ldc = workingSpace[2 * sizeExt + k];
                         lda = lda + ldb * ldc;
                     }
-
                 }
                 workingSpace[4 * sizeExt + i + startIndex] = lda;
             }
@@ -1648,8 +1638,8 @@ public class TSpectrum {
         int peakIndex = 0;
         for (int i = 1; i < sizeExt - 1; i++) {
             final boolean condition2 = workingSpace[i] > workingSpace[i - 1] && workingSpace[i] > workingSpace[i + 1]
-                    && i >= shift && i < length + shift && workingSpace[i] > lda * maximumDecon
-                    && workingSpace[6 * sizeExt + i] > threshold * maximum / 100.0;
+                                       && i >= shift && i < length + shift && workingSpace[i] > lda * maximumDecon
+                                       && workingSpace[6 * sizeExt + i] > threshold * maximum / 100.0;
             if (condition2) {
                 double a = 0;
                 double b = 0;
@@ -1673,7 +1663,7 @@ public class TSpectrum {
                     int searchIndex;
                     for (searchIndex = 0; searchIndex < peakIndex && priz == 0; searchIndex++) {
                         if (workingSpace[6 * sizeExt + shift + (int) a] > workingSpace[6 * sizeExt + shift
-                                + peakList.get(searchIndex).getX().intValue()]) {
+                                                                                       + peakList.get(searchIndex).getX().intValue()]) {
                             priz = 1;
                         }
                     }
@@ -1808,7 +1798,7 @@ public class TSpectrum {
 
         ArrayCache.release(CACHED_ARRAY_SMOOTH_MARKOV, workingSpace);
         final double[] returnVector = destination == null || destination.length < length ? new double[length]
-                : destination;
+                                                                                         : destination;
         System.arraycopy(workingSpace, 0, returnVector, 0, length);
 
         return returnVector;
@@ -1903,7 +1893,7 @@ public class TSpectrum {
         /* move vector at*y */
         for (int i = 0; i < lengthy; i++) {
             workingSpace[lengthx * lengthy + 2 * lengthy * lengthy + 2 * lengthx + i] = workingSpace[lengthx * lengthy
-                    + 2 * lengthy * lengthy + 3 * lengthx + i];
+                                                                                                     + 2 * lengthy * lengthy + 3 * lengthx + i];
         }
 
         /* create matrix at*a*at*a + vector at*a*at*y */
@@ -1929,7 +1919,7 @@ public class TSpectrum {
         /* move at*a*at*y */
         for (int i = 0; i < lengthy; i++) {
             workingSpace[lengthx * lengthy + 2 * lengthy * lengthy + 2 * lengthx + i] = workingSpace[lengthx * lengthy
-                    + 2 * lengthy * lengthy + 3 * lengthx + i];
+                                                                                                     + 2 * lengthy * lengthy + 3 * lengthx + i];
         }
 
         /* initialisation in resulting vector */
@@ -1942,7 +1932,7 @@ public class TSpectrum {
             if (repet != 0) {
                 for (int i = 0; i < lengthy; i++) {
                     workingSpace[lengthx * lengthy + 2 * lengthy * lengthy + i] = Math
-                            .pow(workingSpace[lengthx * lengthy + 2 * lengthy * lengthy + i], boost);
+                                                                                          .pow(workingSpace[lengthx * lengthy + 2 * lengthy * lengthy + i], boost);
                 }
             }
             for (lindex = 0; lindex < numberIterations; lindex++) {
@@ -1963,14 +1953,14 @@ public class TSpectrum {
                 }
                 for (int i = 0; i < lengthy; i++) {
                     workingSpace[lengthx * lengthy + 2 * lengthy * lengthy + i] = workingSpace[lengthx * lengthy
-                            + 2 * lengthy * lengthy + 3 * lengthx + i];
+                                                                                               + 2 * lengthy * lengthy + 3 * lengthx + i];
                 }
             }
         }
 
         final double[] returnVector = destination == null || destination.length < source.length
-                ? new double[source.length]
-                : destination;
+                                              ? new double[source.length]
+                                              : destination;
         /* write back resulting spectrum */
         for (int i = 0; i < lengthx; i++) {
             if (i < lengthy) {
@@ -1985,16 +1975,26 @@ public class TSpectrum {
     }
 
     public enum Direction {
-        INCREASING, DECREASING;
+        INCREASING,
+        DECREASING;
     }
 
     public enum FilterOrder {
-        ORDER_2, ORDER_4, ORDER_6, ORDER_8;
+        ORDER_2,
+        ORDER_4,
+        ORDER_6,
+        ORDER_8;
     }
 
     public enum SmoothWindow {
-        NO_SMOOTHING(1), SMOOTHING_WIDTH3(3), SMOOTHING_WIDTH5(5), SMOOTHING_WIDTH7(7), SMOOTHING_WIDTH9(9),
-        SMOOTHING_WIDTH11(11), SMOOTHING_WIDTH13(13), SMOOTHING_WIDTH15(15);
+        NO_SMOOTHING(1),
+        SMOOTHING_WIDTH3(3),
+        SMOOTHING_WIDTH5(5),
+        SMOOTHING_WIDTH7(7),
+        SMOOTHING_WIDTH9(9),
+        SMOOTHING_WIDTH11(11),
+        SMOOTHING_WIDTH13(13),
+        SMOOTHING_WIDTH15(15);
 
         private final int value;
 

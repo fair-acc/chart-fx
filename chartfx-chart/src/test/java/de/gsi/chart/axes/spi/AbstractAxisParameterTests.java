@@ -170,7 +170,6 @@ public class AbstractAxisParameterTests {
             public Number fromString(String string) {
                 return null;
             }
-
         };
         axis.setTickLabelFormatter(myConverter);
         assertEquals(myConverter, axis.getTickLabelFormatter());
@@ -226,17 +225,14 @@ public class AbstractAxisParameterTests {
     }
 
     protected class EmptyAbstractAxisParameter extends AbstractAxisParameter {
-
         @Override
         public void drawAxis(GraphicsContext gc, double axisWidth, double axisHeight) {
             // deliberately not implemented
-
         }
 
         @Override
         public void forceRedraw() {
             // deliberately not implemented
-
         }
 
         @Override
@@ -301,7 +297,5 @@ public class AbstractAxisParameterTests {
         public void fireInvalidated() {
             // deliberately not implemented
         }
-
     }
-
 }

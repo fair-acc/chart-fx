@@ -23,4 +23,3 @@ public class TestEventSource implements EventSource {
         return eventListener;
     }
 }
-

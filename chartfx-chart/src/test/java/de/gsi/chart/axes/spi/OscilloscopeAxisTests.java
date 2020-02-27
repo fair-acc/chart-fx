@@ -19,7 +19,6 @@ import de.gsi.chart.ui.geometry.Side;
  * @author rstein
  */
 public class OscilloscopeAxisTests {
-
     @Test
     public void computePreferredTickUnitTests() {
         final OscilloscopeAxis axis = new OscilloscopeAxis("axis title", -50.0, 50.0, 10.0);
@@ -96,7 +95,6 @@ public class OscilloscopeAxisTests {
 
         final double mOne = axis.getDisplayPosition(axis.getValueForDisplay(-1.0));
         assertEquals(-1.0, mOne);
-
     }
 
     @Test

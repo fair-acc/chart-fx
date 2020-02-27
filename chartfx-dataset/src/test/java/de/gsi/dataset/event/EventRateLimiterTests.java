@@ -66,7 +66,5 @@ public class EventRateLimiterTests {
         assert updateCount4.get() >= 5;
         assert updateCount4.get() <= 15;
         assertAll("rate within [5,15] Hz limits", () -> assertTrue(rateLimit >= 5.0, "min limit"), () -> assertTrue(rateLimit <= 15.0, "max limit"));
-
     }
-
 }
