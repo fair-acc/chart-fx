@@ -102,7 +102,6 @@ public final class ArrayMath { // NOPMD - nomen est omen
      */
     public static double[] calculateFilterParameters(final double cutoffFraction, final FilterType filterType, final double rippleP, final double numberOfPoles,
             final int iteration) {
-
         // calculate the pole location on the unit circle - Butterworth filter response
         double rp = -Math.cos(Math.PI / (numberOfPoles * 2) + (iteration - 1) * (Math.PI / numberOfPoles));
         double ip = Math.sin(Math.PI / (numberOfPoles * 2) + (iteration - 1) * Math.PI / numberOfPoles);
@@ -368,7 +367,6 @@ public final class ArrayMath { // NOPMD - nomen est omen
         }
 
         return filteredSignal;
-
     }
 
     public static double[] inverseDecibel(final double[] in) {
@@ -504,7 +502,7 @@ public final class ArrayMath { // NOPMD - nomen est omen
         final double[] ret = new double[length];
 
         for (int i = 0; i < length; i++) {
-            ret[i] = in[i]*in[i];
+            ret[i] = in[i] * in[i];
         }
 
         return ret;
@@ -519,7 +517,7 @@ public final class ArrayMath { // NOPMD - nomen est omen
         AssertUtils.gtOrEqual(IN, length, in.length);
 
         for (int i = 0; i < length; i++) {
-            in[i] = in[i]*in[i];
+            in[i] = in[i] * in[i];
         }
         return in;
     }
@@ -653,5 +651,4 @@ public final class ArrayMath { // NOPMD - nomen est omen
         LOW_PASS,
         HIGH_PASS
     }
-
 }

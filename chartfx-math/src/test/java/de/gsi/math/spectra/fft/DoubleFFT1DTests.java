@@ -24,8 +24,9 @@ public class DoubleFFT1DTests {
 
     @ParameterizedTest
     @ValueSource(ints = { 1, 2, 3, 4, 5, 1023, 1024, 1025, 4095, 4096, 4097, (2 << 16) - 100, 2 << 16,
-            (2 << 16) + 100 })
-    public void identityComplexlFFTTests(final int nSamples) {
+                         (2 << 16) + 100 })
+    public void
+    identityComplexlFFTTests(final int nSamples) {
         DoubleFFT_1D fft = new DoubleFFT_1D(nSamples);
         double[] testSignal1Ref = generateDelta(2 * nSamples);
         double[] testSignal1 = generateDelta(2 * nSamples);
@@ -44,9 +45,10 @@ public class DoubleFFT1DTests {
 
     @ParameterizedTest
     @CsvSource({ "1, true", "1, false", "2, true", "2, false", "3, true", "3, false", "4, true", "4, false", "5, true",
-        "5, false", "6, true", "6, false", "1023, true", "1023, false", "1024, true", "1024, false", "1025, true",
-        "1025, false", "66000, true", "66000, false" })
-    public void identityFullRealFFTTests(final int nSamples, final boolean forward) {
+            "5, false", "6, true", "6, false", "1023, true", "1023, false", "1024, true", "1024, false", "1025, true",
+            "1025, false", "66000, true", "66000, false" })
+    public void
+    identityFullRealFFTTests(final int nSamples, final boolean forward) {
         DoubleFFT_1D fft = new DoubleFFT_1D(nSamples);
 
         double[] testSignal1a = generateDelta(2 * nSamples);
@@ -83,8 +85,9 @@ public class DoubleFFT1DTests {
 
     @ParameterizedTest
     @ValueSource(ints = { 1, 2, 3, 4, 5, 1023, 1024, 1025, 4095, 4096, 4097, (2 << 10) - 100, 2 << 10,
-            (2 << 10) + 100 })
-    public void identityRealFFTTests(final int nSamples) {
+                         (2 << 10) + 100 })
+    public void
+    identityRealFFTTests(final int nSamples) {
         DoubleFFT_1D fft = new DoubleFFT_1D(nSamples);
 
         double[] testSignal1Ref = generateDelta(nSamples);
@@ -104,8 +107,9 @@ public class DoubleFFT1DTests {
 
     @ParameterizedTest
     @ValueSource(ints = { 1, 2, 3, 4, 5, 1023, 1024, 1025, 4095, 4096, 4097, (2 << 10) - 100, 2 << 10,
-            (2 << 10) + 100 })
-    public void threadFFTTests(final int nSamples) {
+                         (2 << 10) + 100 })
+    public void
+    threadFFTTests(final int nSamples) {
         DoubleFFT_1D fft = new DoubleFFT_1D(nSamples);
 
         double[] testSignal1Ref = generateDelta(nSamples);
@@ -139,5 +143,4 @@ public class DoubleFFT1DTests {
         }
         return retVal;
     }
-
 }

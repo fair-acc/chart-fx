@@ -14,7 +14,6 @@ import de.gsi.math.utils.ConcurrencyUtils;
  * @author rstein
  */
 public class Convolution {
-
     public DoubleFFT_1D f1dFFT;
 
     private void init(final int size) {
@@ -57,7 +56,8 @@ public class Convolution {
      */
     public double[] transform(final double[] data, final double[] filter, final boolean cyclicBoundary) {
         if (data == null || data.length == 0) {
-            throw new InvalidParameterException("Convolution::transform(double[], double[]-" + "data is null");
+            throw new InvalidParameterException("Convolution::transform(double[], double[]-"
+                                                + "data is null");
         }
         final int nsamples = (cyclicBoundary ? 1 : 3) * data.length;
 
@@ -67,8 +67,9 @@ public class Convolution {
 
         if (filter == null || filter.length == 0 || filter.length != fft_samples) {
             throw new InvalidParameterException(
-                    "Convolution::transform(double[], double[]-" + "filter is null or its dimension ("
-                            + (filter == null ? "null" : filter.length) + ") does not match the data");
+                    "Convolution::transform(double[], double[]-"
+                    + "filter is null or its dimension ("
+                    + (filter == null ? "null" : filter.length) + ") does not match the data");
         }
         init(fft_samples);
 
@@ -115,7 +116,8 @@ public class Convolution {
     public double[] transformFull(final double[] data, final double[] filter, final boolean cyclicBoundary) {
         if (data == null || data.length == 0) {
             throw new InvalidParameterException(
-                    "Convolution::transform(double[], double[], boolean)\n-" + "data is null");
+                    "Convolution::transform(double[], double[], boolean)\n-"
+                    + "data is null");
         }
         final int nsamples = (cyclicBoundary ? 1 : 3) * data.length;
 
@@ -125,8 +127,8 @@ public class Convolution {
 
         if (filter == null || filter.length == 0 || filter.length != 2 * fft_samples) {
             throw new InvalidParameterException("Convolution::transform(double[], double[], boolean)\n-"
-                    + "filter is null or its dimension (" + (filter == null ? "null" : filter.length)
-                    + ") does not match the data dimension (" + fft_samples + ")");
+                                                + "filter is null or its dimension (" + (filter == null ? "null" : filter.length)
+                                                + ") does not match the data dimension (" + fft_samples + ")");
         }
         init(fft_samples);
 
@@ -195,7 +197,8 @@ public class Convolution {
     public static double[] getDerivativeFilter(final int length) {
         if (length <= 0 || length % 2 != 0) {
             throw new InvalidParameterException(
-                    "getDerivativeFilter(" + length + ")" + " - length has to be positive and multiples of two");
+                    "getDerivativeFilter(" + length + ")"
+                    + " - length has to be positive and multiples of two");
         }
 
         final double[] ret = new double[length];
@@ -230,7 +233,8 @@ public class Convolution {
     public static double[] getHilbertFilter(final int length) {
         if (length <= 0 || !ConcurrencyUtils.isPowerOf2(length)) {
             throw new InvalidParameterException(
-                    "getHilbertFilter(" + length + ")" + " - length has to be positive and a power of two");
+                    "getHilbertFilter(" + length + ")"
+                    + " - length has to be positive and a power of two");
         }
 
         final double[] ret = new double[length];
@@ -266,11 +270,12 @@ public class Convolution {
     public static double[] getIdentityFilter(final int length) {
         if (length <= 0 || !ConcurrencyUtils.isPowerOf2(length)) {
             throw new InvalidParameterException(
-                    "getIdentityFilter(" + length + ")" + " - length has to be a power of two");
+                    "getIdentityFilter(" + length + ")"
+                    + " - length has to be a power of two");
         }
 
         final double[] ret = new double[length];
-        for (int i = 0; i < length >> 1; i++) {
+        for (int i = 0; i<length>> 1; i++) {
             ret[i << 1] = 1.0;
         }
         return ret;
@@ -286,7 +291,8 @@ public class Convolution {
     public static double[] getLowPassFilter(final int length, double frequency) {
         if (length <= 0 || length % 2 != 0) {
             throw new InvalidParameterException(
-                    "getLowPassFilter(" + length + ")" + " - length has to be positive and a power of two");
+                    "getLowPassFilter(" + length + ")"
+                    + " - length has to be positive and a power of two");
         }
 
         if (frequency > 0.5) {
@@ -324,11 +330,13 @@ public class Convolution {
     public static double[] getMorletFilter(final int length, final double f0, final double width) {
         if (length <= 0 || !ConcurrencyUtils.isPowerOf2(length)) {
             throw new InvalidParameterException(
-                    "getMorletFilter(" + length + "," + f0 + ")" + " - length has to be positive and multiples of two");
+                    "getMorletFilter(" + length + "," + f0 + ")"
+                    + " - length has to be positive and multiples of two");
         }
         if (f0 < 0 || f0 > 5.0 / TMathConstants.TwoPi()) {
             throw new InvalidParameterException(
-                    "getMorletFilter(" + length + "," + f0 + ")" + " - frequency has to be within [0,0.5]");
+                    "getMorletFilter(" + length + "," + f0 + ")"
+                    + " - frequency has to be within [0,0.5]");
         }
 
         final double[] ret = new double[2 * length];
@@ -359,10 +367,8 @@ public class Convolution {
         final double C_sigmaPi = TMathConstants.Power(TMathConstants.Pi(), 0.25);
 
         final double val = C_sigmaPi
-                * (TMathConstants.Exp(-0.5 * TMathConstants.Sqr(TMathConstants.TwoPi() * (f0 - frequency) * heisenberg))
-                        - K_sigma * TMathConstants
-                                .Exp(-0.5 * TMathConstants.Sqr(TMathConstants.TwoPi() * frequency * heisenberg)));
+                           * (TMathConstants.Exp(-0.5 * TMathConstants.Sqr(TMathConstants.TwoPi() * (f0 - frequency) * heisenberg))
+                                   - K_sigma * TMathConstants.Exp(-0.5 * TMathConstants.Sqr(TMathConstants.TwoPi() * frequency * heisenberg)));
         return val;
     }
-
 }

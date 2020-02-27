@@ -54,7 +54,7 @@ public class ConcurrencyUtils {
     }
 
     private static final ExecutorService THREAD_POOL = Executors
-            .newCachedThreadPool(new CustomThreadFactory(new CustomExceptionHandler()));
+                                                               .newCachedThreadPool(new CustomThreadFactory(new CustomExceptionHandler()));
 
     private static boolean forceThreads = false;
     private static int forceNThreads = 1;
@@ -107,7 +107,6 @@ public class ConcurrencyUtils {
     }
 
     public static int nextExp2(final int n) {
-
         final double e = Math.log(n) / Math.log(2.0);
         int p = (int) Math.ceil(e);
         final double f = n / Math.pow(2.0, p);

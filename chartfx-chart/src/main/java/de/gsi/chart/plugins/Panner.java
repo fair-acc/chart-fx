@@ -3,18 +3,19 @@ package de.gsi.chart.plugins;
 import java.util.Objects;
 import java.util.function.Predicate;
 
-import de.gsi.chart.Chart;
-import de.gsi.chart.XYChart;
-import de.gsi.chart.axes.Axis;
-import de.gsi.chart.axes.AxisMode;
-import de.gsi.chart.axes.spi.DefaultNumericAxis;
-import de.gsi.chart.ui.geometry.Side;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.event.EventHandler;
 import javafx.geometry.Point2D;
 import javafx.scene.Cursor;
 import javafx.scene.input.MouseEvent;
+
+import de.gsi.chart.Chart;
+import de.gsi.chart.XYChart;
+import de.gsi.chart.axes.Axis;
+import de.gsi.chart.axes.AxisMode;
+import de.gsi.chart.axes.spi.DefaultNumericAxis;
+import de.gsi.chart.ui.geometry.Side;
 
 /**
  * Allows dragging the visible plot area along X and/or Y axis, changing the visible axis range.
@@ -30,9 +31,9 @@ public class Panner extends ChartPlugin {
      * Default pan mouse filter passing on left mouse button with {@link MouseEvent#isControlDown() control key down}.
      */
     public static final Predicate<MouseEvent> DEFAULT_MOUSE_FILTER = event ->
-    // MouseEvents.isOnlyPrimaryButtonDown(event) &&
-    // MouseEvents.isOnlyCtrlModifierDown(event) ||
-    MouseEventsHelper.isOnlyMiddleButtonDown(event);
+            // MouseEvents.isOnlyPrimaryButtonDown(event) &&
+            // MouseEvents.isOnlyCtrlModifierDown(event) ||
+            MouseEventsHelper.isOnlyMiddleButtonDown(event);
 
     private Predicate<MouseEvent> mouseFilter = Panner.DEFAULT_MOUSE_FILTER;
     private Point2D previousMouseLocation = null;
@@ -153,7 +154,7 @@ public class Panner extends ChartPlugin {
             final double prevData = axis.getValueForDisplay(
                     side.isHorizontal() ? previousMouseLocation.getX() : previousMouseLocation.getY());
             final double newData = axis
-                    .getValueForDisplay(side.isHorizontal() ? mouseLocation.getX() : mouseLocation.getY());
+                                           .getValueForDisplay(side.isHorizontal() ? mouseLocation.getX() : mouseLocation.getY());
             final double offset = prevData - newData;
 
             final boolean allowsShift = side.isHorizontal() ? getAxisMode().allowsX() : getAxisMode().allowsY();

@@ -32,7 +32,7 @@ public class MathDataSetTests {
         final DoubleErrorDataSet rawDataSetRef = new DoubleErrorDataSet(generateSineWaveData(nBins));
         final double[] yErrorNeg = rawDataSetRef.getErrorsNegative(DataSet.DIM_Y);
         final double[] yErrorPos = rawDataSetRef.getErrorsPositive(DataSet.DIM_Y);
-        for (int i=0; i < nBins; i++) {
+        for (int i = 0; i < nBins; i++) {
             yErrorNeg[i] = i * nBins;
             yErrorPos[i] = i * nBins + 0.5;
         }
@@ -55,8 +55,7 @@ public class MathDataSetTests {
 
         assertThrows(IllegalArgumentException.class, () -> new MathDataSet("I", null, null, null, 20, UpdateStrategy.INSTANTANEOUS_RATE));
 
-        assertThrows(IllegalArgumentException.class, () -> new MathDataSet("I", null, null, identityValueFunction, 20,
-                UpdateStrategy.INSTANTANEOUS_RATE, dsRef1, dsRef2));
+        assertThrows(IllegalArgumentException.class, () -> new MathDataSet("I", null, null, identityValueFunction, 20, UpdateStrategy.INSTANTANEOUS_RATE, dsRef1, dsRef2));
 
         assertDoesNotThrow(() -> new MathDataSet("I", ds -> ds, null, null, 20, UpdateStrategy.INSTANTANEOUS_RATE, dsRef1));
 
@@ -120,7 +119,7 @@ public class MathDataSetTests {
             assertEquals(nBins, length);
             assertArrayEquals(rawDataSetRef.getYValues(), input, "yValue input equality with source");
 
-         // identity function
+            // identity function
             System.arraycopy(input, 0, output, 0, length);
         }, rawDataSetRef);
         assertArrayEquals(rawDataSetRef.getYValues(), identityDataSet.getYValues());
@@ -221,5 +220,4 @@ public class MathDataSetTests {
     protected static DoubleDataSet generateSineWaveSpectrumData(final int nData) {
         return new DoubleDataSet(DataSetMath.magnitudeSpectrumDecibel(generateSineWaveData(nData)));
     }
-
 }

@@ -246,7 +246,6 @@ public class OscilloscopeAxisSample extends Application {
     }
 
     private XYChart getChart(final boolean defaultAxis) {
-
         final DefaultNumericAxis xAxis = new DefaultNumericAxis("", "");
         xAxis.setAutoRangeRounding(false);
         xAxis.invertAxis(false);

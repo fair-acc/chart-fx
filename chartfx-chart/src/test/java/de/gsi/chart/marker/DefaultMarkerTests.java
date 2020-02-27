@@ -13,7 +13,6 @@ import org.junit.jupiter.api.Test;
  * @author rstein
  */
 public class DefaultMarkerTests {
-
     @Test
     public void defaultMarkerTests() {
         Canvas canvas = new Canvas();
@@ -28,5 +27,4 @@ public class DefaultMarkerTests {
         assertThrows(IllegalArgumentException.class, () -> DefaultMarker.get(null));
         assertThrows(IllegalArgumentException.class, () -> DefaultMarker.get("unknown marker name ObeyDoo"));
     }
-
 }
