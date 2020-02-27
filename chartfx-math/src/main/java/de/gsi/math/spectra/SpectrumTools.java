@@ -544,7 +544,8 @@ public class SpectrumTools {
         final double[] val2 = new double[noversampling * val1.length];
         System.arraycopy(val1, 0, val2, 0, val1.length - 2);
 
-        fft1D = new DoubleFFT_1D(noversampling * data.length);
+        final int fftLength = noversampling * data.length;
+        fft1D = new DoubleFFT_1D(fftLength);
         fft1D.realForward(val2);
 
         for (int i = 0; i < val2.length; i++) {
