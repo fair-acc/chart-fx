@@ -2,6 +2,17 @@ package de.gsi.math.samples;
 
 import java.util.Random;
 
+import javafx.application.Application;
+import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.property.SimpleIntegerProperty;
+import javafx.event.ActionEvent;
+import javafx.scene.Node;
+import javafx.scene.control.Button;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
+
 import org.controlsfx.control.PropertySheet;
 import org.controlsfx.property.BeanPropertyUtils;
 import org.slf4j.Logger;
@@ -23,16 +34,6 @@ import de.gsi.math.TMath;
 import de.gsi.math.samples.utils.AbstractDemoApplication;
 import de.gsi.math.spectra.fft.ShortTimeFourierTransform;
 import de.gsi.math.spectra.wavelet.ContinuousWavelet;
-import javafx.application.Application;
-import javafx.beans.property.DoubleProperty;
-import javafx.beans.property.IntegerProperty;
-import javafx.beans.property.SimpleDoubleProperty;
-import javafx.beans.property.SimpleIntegerProperty;
-import javafx.event.ActionEvent;
-import javafx.scene.Node;
-import javafx.scene.control.Button;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
 
 /**
  * example illustrating Short Term Fourier Transform
@@ -51,7 +52,7 @@ public class SFFTScalogram extends AbstractDemoApplication {
     public Node getContent() {
         final PropertySheet propertySheet = new PropertySheet();
         propertySheet.getItems().addAll(BeanPropertyUtils.getProperties(demoProperties));
-        
+
         chart1 = new XYChart();
         final ContourDataSetRenderer contourChartRenderer1 = new ContourDataSetRenderer();
         chart1.getRenderers().set(0, contourChartRenderer1);
@@ -74,7 +75,7 @@ public class SFFTScalogram extends AbstractDemoApplication {
         final ContourDataSetRenderer contourChartRenderer2 = new ContourDataSetRenderer();
         chart2.getRenderers().set(0, contourChartRenderer2);
         chart2.getRenderers().add(new MetaDataRenderer(chart2));
-        
+
         chart3 = new XYChart();
         chart3.getPlugins().add(new UpdateAxisLabels());
         chart3.getPlugins().add(new Zoomer());
@@ -108,26 +109,28 @@ public class SFFTScalogram extends AbstractDemoApplication {
 
         final Random rnd = new Random();
         for (int i = 0; i < yModel.length; i++) {
-            final double x = i * 1/SAMPLE_RATE;
+            final double x = i * 1 / SAMPLE_RATE;
             double offset = 0;
             final double error = 0.1 * rnd.nextGaussian();
 
             // linear chirp with discontinuity
             offset = (i > 0.5 * MAX_POINTS) ? -20e3 : 0;
             yModel[i] = (i > 0.2 * MAX_POINTS && i < 0.9 * MAX_POINTS)
-                    ? 0.7 * Math.sin(TMath.TwoPi() * 30e3 * x * (2e3 * x + offset)) : 0;
+                                ? 0.7 * Math.sin(TMath.TwoPi() * 30e3 * x * (2e3 * x + offset))
+                                : 0;
 
             // single tone
             yModel[i] += (i > demoProperties.getMockToneStart() * MAX_POINTS
-                    && i < demoProperties.getMockToneStop() * MAX_POINTS)
-                            ? demoProperties.getMockToneAmplitude()
-                                    * Math.sin(TMath.TwoPi() * demoProperties.getMockToneFrequency() * x)
-                            : 0;
+                                 && i < demoProperties.getMockToneStop() * MAX_POINTS)
+                                 ? demoProperties.getMockToneAmplitude()
+                                           * Math.sin(TMath.TwoPi() * demoProperties.getMockToneFrequency() * x)
+                                 : 0;
 
             // modulation around 0.4
             final double mod = Math.cos(TMath.TwoPi() * 0.01e6 * x);
             yModel[i] += (i > 0.3 * MAX_POINTS && i < 0.9 * MAX_POINTS)
-                    ? 1.0 * Math.sin(TMath.TwoPi() * (0.4 - 5e-4 * mod) * 45e4 * x) : 0;
+                                 ? 1.0 * Math.sin(TMath.TwoPi() * (0.4 - 5e-4 * mod) * 45e4 * x)
+                                 : 0;
 
             // quadratic chirp starting at 0.1
             yModel[i] += 0.5 * Math.sin(TMath.TwoPi() * ((0.1 + 5e3 * x * x) * 1e6 * x));
@@ -137,13 +140,12 @@ public class SFFTScalogram extends AbstractDemoApplication {
 
         double[] tValues = new double[yModel.length];
         for (int i = 0; i < tValues.length; i++) {
-            tValues[i] = i * 1/SAMPLE_RATE;
+            tValues[i] = i * 1 / SAMPLE_RATE;
         }
         DataSet rawDataSet = new DataSetBuilder("testData").setXValuesNoCopy(tValues).setYValues(yModel).build();
         rawDataSet.getAxisDescription(DataSet.DIM_X).set("time", "s");
         rawDataSet.getAxisDescription(DataSet.DIM_Y).set("amplitude", "a.u.");
-        ((DataSetMetaData) rawDataSet).getInfoList().add("testData: SamplingRate=" + demoProperties.getnSamples()
-                + ", nSamples=" + demoProperties.getnSamples());
+        ((DataSetMetaData) rawDataSet).getInfoList().add("testData: SamplingRate=" + demoProperties.getnSamples() + ", nSamples=" + demoProperties.getnSamples());
 
         return rawDataSet;
     }
@@ -357,7 +359,5 @@ public class SFFTScalogram extends AbstractDemoApplication {
         public double getMockToneStop() {
             return mockToneStop.get();
         }
-
     }
-
 }

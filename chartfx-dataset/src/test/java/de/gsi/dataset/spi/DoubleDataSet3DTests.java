@@ -1,10 +1,11 @@
 package de.gsi.dataset.spi;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 import static de.gsi.dataset.DataSet.DIM_X;
 import static de.gsi.dataset.DataSet.DIM_Y;
 import static de.gsi.dataset.DataSet.DIM_Z;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -34,7 +35,7 @@ public class DoubleDataSet3DTests {
         double[] xvalues = new double[] { 1, 2, 3, 4 };
         double[] yvalues = new double[] { -3, -2, -0, 2, 4 };
         double[][] zvalues = new double[][] { { 1, 2, 3, 4 }, { 5, 6, 7, 8 }, { 9, 10, 11, 12 }, { -1, -2, -3, -4 },
-                { 1337, 2337, 4242, 2323 } };
+            { 1337, 2337, 4242, 2323 } };
         DoubleDataSet3D dataset = new DoubleDataSet3D("testdataset", xvalues, yvalues, zvalues);
         assertEquals("testdataset", dataset.getName());
         assertEquals(20, dataset.getDataCount());
@@ -100,15 +101,10 @@ public class DoubleDataSet3DTests {
                 () -> new DoubleDataSet3D("test", new double[] { 1, 2, 3 }, null, null));
         assertThrows(IllegalArgumentException.class,
                 () -> new DoubleDataSet3D("test", new double[] { 3, 4, 5 }, new double[] { 1, 2, 3 }, null));
-        assertThrows(IllegalArgumentException.class, () -> new DoubleDataSet3D("test", new double[] {},
-                new double[] { 1, 2, 3 }, new double[][] { { 1, 2, 3 } }));
-        assertThrows(IllegalArgumentException.class, () -> new DoubleDataSet3D("test", new double[] { 1, 2, 3 },
-                new double[] {}, new double[][] { { 1, 2, 3 } }));
-        assertThrows(IllegalArgumentException.class, () -> new DoubleDataSet3D("test", new double[] { 1, 2, 3 },
-                new double[] { 4, 5, 6 }, new double[][] {}));
-        assertThrows(IllegalArgumentException.class, () -> new DoubleDataSet3D("test", new double[] { 1, 2 },
-                new double[] { 4, 5 }, new double[][] { { 8, 9 } }));
-        assertThrows(IllegalArgumentException.class, () -> new DoubleDataSet3D("test", new double[] { 1, 2 },
-                new double[] { 4, 5 }, new double[][] { { 8 }, { 9 } }));
+        assertThrows(IllegalArgumentException.class, () -> new DoubleDataSet3D("test", new double[] {}, new double[] { 1, 2, 3 }, new double[][] { { 1, 2, 3 } }));
+        assertThrows(IllegalArgumentException.class, () -> new DoubleDataSet3D("test", new double[] { 1, 2, 3 }, new double[] {}, new double[][] { { 1, 2, 3 } }));
+        assertThrows(IllegalArgumentException.class, () -> new DoubleDataSet3D("test", new double[] { 1, 2, 3 }, new double[] { 4, 5, 6 }, new double[][] {}));
+        assertThrows(IllegalArgumentException.class, () -> new DoubleDataSet3D("test", new double[] { 1, 2 }, new double[] { 4, 5 }, new double[][] { { 8, 9 } }));
+        assertThrows(IllegalArgumentException.class, () -> new DoubleDataSet3D("test", new double[] { 1, 2 }, new double[] { 4, 5 }, new double[][] { { 8 }, { 9 } }));
     }
 }

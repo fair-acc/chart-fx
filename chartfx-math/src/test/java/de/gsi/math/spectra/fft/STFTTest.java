@@ -1,6 +1,7 @@
 package de.gsi.math.spectra.fft;
 
 import static org.junit.jupiter.api.Assertions.*;
+
 import static de.gsi.dataset.DataSet.DIM_X;
 import static de.gsi.dataset.DataSet.DIM_Y;
 import static de.gsi.dataset.DataSet.DIM_Z;
@@ -21,7 +22,6 @@ import de.gsi.math.spectra.fft.ShortTimeFourierTransform.Padding;
  * @author Alexander Krimm
  */
 class STFTTest {
-
     @Test
     public void testRealSTFT() {
         final int N_FREQ = 1024;
@@ -67,11 +67,11 @@ class STFTTest {
         // check spectrogram
         assertEquals(0.0, sineSpectrogram.getZ(2, N_FREQ / 4));
         assertTrue(sineSpectrogram.getAxisDescription(DIM_Z).getMax() * 0.6 < //
-                sineSpectrogram.getZ(15, sineSpectrogram.getYIndex(F_SINE)));
+                   sineSpectrogram.getZ(15, sineSpectrogram.getYIndex(F_SINE)));
         assertTrue(sineSpectrogram.getAxisDescription(DIM_Z).getMax() * 0.2 > sineSpectrogram.getZ(15,
-                sineSpectrogram.getYIndex(F_SINE) + 2));
+                           sineSpectrogram.getYIndex(F_SINE) + 2));
         assertTrue(sineSpectrogram.getAxisDescription(DIM_Z).getMax() * 0.2 > sineSpectrogram.getZ(15,
-                sineSpectrogram.getYIndex(F_SINE) - 2));
+                           sineSpectrogram.getYIndex(F_SINE) - 2));
     }
 
     @Test
@@ -121,13 +121,12 @@ class STFTTest {
         // check spectrogram
         assertEquals(0.0, sineSpectrogram.getZ(2, N_FREQ / 4));
         assertTrue(sineSpectrogram.getAxisDescription(DIM_Z).getMax() * 0.6 < //
-                sineSpectrogram.getZ(15, sineSpectrogram.getYIndex(-F_SINE)));
+                   sineSpectrogram.getZ(15, sineSpectrogram.getYIndex(-F_SINE)));
         assertTrue(sineSpectrogram.getAxisDescription(DIM_Z).getMax() * 0.2 > //
-                sineSpectrogram.getZ(15, sineSpectrogram.getYIndex(F_SINE)));
+                   sineSpectrogram.getZ(15, sineSpectrogram.getYIndex(F_SINE)));
         assertTrue(sineSpectrogram.getAxisDescription(DIM_Z).getMax() * 0.2 > sineSpectrogram.getZ(15,
-                sineSpectrogram.getYIndex(F_SINE) + 2));
+                           sineSpectrogram.getYIndex(F_SINE) + 2));
         assertTrue(sineSpectrogram.getAxisDescription(DIM_Z).getMax() * 0.2 > sineSpectrogram.getZ(15,
-                sineSpectrogram.getYIndex(F_SINE) - 2));
+                           sineSpectrogram.getYIndex(F_SINE) - 2));
     }
-
 }

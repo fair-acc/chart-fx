@@ -7,6 +7,7 @@ import de.gsi.dataset.event.AddedDataEvent;
 import de.gsi.dataset.event.RemovedDataEvent;
 import de.gsi.dataset.event.UpdatedDataEvent;
 import de.gsi.dataset.utils.AssertUtils;
+
 import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
 
 /**
@@ -340,7 +341,6 @@ public class MultiDimDoubleDataSet extends AbstractDataSet<MultiDimDoubleDataSet
      */
     public MultiDimDoubleDataSet set(final DataSet other) {
         lock().writeLockGuard(() -> other.lock().writeLockGuard(() -> {
-
             // deep copy data point labels and styles
             getDataLabelMap().clear();
             for (int index = 0; index < other.getDataCount(); index++) {

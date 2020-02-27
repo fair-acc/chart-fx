@@ -112,5 +112,4 @@ public abstract class AbstractErrorDataSet<D extends AbstractErrorDataSet<D>> ex
         this.errorType[dimIndex] = errorType;
         return getThis();
     }
-
 }

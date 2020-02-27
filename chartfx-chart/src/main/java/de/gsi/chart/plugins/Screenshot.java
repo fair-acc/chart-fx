@@ -207,7 +207,7 @@ public class Screenshot extends ChartPlugin {
         } else if (getChart().getId() != null && !getChart().getId().isBlank()) {
             initName = getChart().getId();
         } else if (!getChart().getAllDatasets().isEmpty() && getChart().getAllDatasets().get(0).getName() != null
-                && !getChart().getAllDatasets().get(0).getName().isBlank()) {
+                   && !getChart().getAllDatasets().get(0).getName().isBlank()) {
             initName = getChart().getAllDatasets().get(0).getName();
         } else {
             initName = "UnknownChart";
@@ -279,19 +279,19 @@ public class Screenshot extends ChartPlugin {
             gridPane.add(new Label("pattern: "), 0, 1);
             gridPane.add(patternTextbox, 1, 1, 2, 1);
             patternTextbox.setTooltip(new Tooltip("Pattern:\n {datafield;type;format} style placeholders.\n" + //
-                    "Datafield:\n" + //
-                    " - systemTime: current system time\n" + //
-                    " - dataSetName\n" + //
-                    " - xMin, xMax, yMin, yMax\n" + //
-                    " - metadata field\n" + //
-                    "type:\n" + //
-                    " - string(default)\n" + //
-                    " - date\n" + //
-                    " - int long\n" + //
-                    " - float/double\n" + //
-                    "format:\n" + //
-                    " - date: e.g. yyyyMMdd_HHmmss\n" + //
-                    " - numeric data: printf formats e.g. %d, %e"));
+                                                  "Datafield:\n" + //
+                                                  " - systemTime: current system time\n" + //
+                                                  " - dataSetName\n" + //
+                                                  " - xMin, xMax, yMin, yMax\n" + //
+                                                  " - metadata field\n" + //
+                                                  "type:\n" + //
+                                                  " - string(default)\n" + //
+                                                  " - date\n" + //
+                                                  " - int long\n" + //
+                                                  " - float/double\n" + //
+                                                  "format:\n" + //
+                                                  " - date: e.g. yyyyMMdd_HHmmss\n" + //
+                                                  " - numeric data: printf formats e.g. %d, %e"));
             dirButton.setOnAction((evt) -> {
                 DirectoryChooser directoryChooser = new DirectoryChooser();
                 File currentDir = new File(dirTextbox.getText());
@@ -323,6 +323,5 @@ public class Screenshot extends ChartPlugin {
         public String getDirectory() {
             return dirTextbox.getText();
         }
-
     }
 }

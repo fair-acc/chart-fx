@@ -41,5 +41,4 @@ public class TriangleFunction extends AbstractTestFunction<TriangleFunction> {
         }
         return retVal;
     }
-
 }

@@ -4,14 +4,6 @@ import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.List;
 
-import de.gsi.chart.Chart;
-import de.gsi.chart.XYChart;
-import de.gsi.chart.XYChartCss;
-import de.gsi.chart.axes.Axis;
-import de.gsi.chart.renderer.Renderer;
-import de.gsi.chart.utils.StyleParser;
-import de.gsi.dataset.DataSet;
-import de.gsi.dataset.utils.ProcessingProfiler;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -24,6 +16,15 @@ import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.text.Font;
 import javafx.scene.text.TextAlignment;
+
+import de.gsi.chart.Chart;
+import de.gsi.chart.XYChart;
+import de.gsi.chart.XYChartCss;
+import de.gsi.chart.axes.Axis;
+import de.gsi.chart.renderer.Renderer;
+import de.gsi.chart.utils.StyleParser;
+import de.gsi.dataset.DataSet;
+import de.gsi.dataset.utils.ProcessingProfiler;
 
 public class LabelledMarkerRenderer extends AbstractDataSetManagement<LabelledMarkerRenderer> implements Renderer {
     private static final String STYLE_CLASS_LABELLED_MARKER = "chart-labelled-marker";
@@ -254,7 +255,6 @@ public class LabelledMarkerRenderer extends AbstractDataSetManagement<LabelledMa
     }
 
     protected void setGraphicsContextAttributes(final GraphicsContext gc, final String style) {
-
         final Color strokeColor = StyleParser.getColorPropertyValue(style, XYChartCss.STROKE_COLOR);
         if (strokeColor == null) {
             gc.setStroke(strokeColorMarker);
@@ -290,7 +290,6 @@ public class LabelledMarkerRenderer extends AbstractDataSetManagement<LabelledMa
         } else {
             gc.setLineDashes(dashPattern);
         }
-
     }
 
     public LabelledMarkerRenderer setStyle(final String newStyle) {
