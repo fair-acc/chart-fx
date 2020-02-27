@@ -72,7 +72,6 @@ public class AggregateException extends RuntimeException {
         Set<Throwable> dejaVu = Collections.newSetFromMap(new IdentityHashMap<>());
         dejaVu.add(this);
         synchronized (stream.lock()) {
-
             stream.println(this.getClass().getSimpleName() + " - primary exception cause:");
 
             // Print our stack trace
@@ -208,5 +207,4 @@ public class AggregateException extends RuntimeException {
             printWriter.println(o);
         }
     }
-
 }

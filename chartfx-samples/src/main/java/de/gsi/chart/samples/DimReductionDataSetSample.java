@@ -4,6 +4,17 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.Arrays;
 
+import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.geometry.HPos;
+import javafx.geometry.Orientation;
+import javafx.geometry.VPos;
+import javafx.scene.Scene;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.StackPane;
+import javafx.stage.Stage;
+
 import org.jtransforms.fft.DoubleFFT_1D;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,16 +38,6 @@ import de.gsi.dataset.spi.DimReductionDataSet;
 import de.gsi.dataset.spi.DimReductionDataSet.Option;
 import de.gsi.math.samples.EMDSample;
 import de.gsi.math.spectra.wavelet.ContinuousWavelet;
-import javafx.application.Application;
-import javafx.application.Platform;
-import javafx.geometry.HPos;
-import javafx.geometry.Orientation;
-import javafx.geometry.VPos;
-import javafx.scene.Scene;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.StackPane;
-import javafx.stage.Stage;
 
 public class DimReductionDataSetSample extends Application {
     private static final Logger LOGGER = LoggerFactory.getLogger(DimReductionDataSetSample.class);
@@ -45,7 +46,6 @@ public class DimReductionDataSetSample extends Application {
 
     @Override
     public void start(final Stage primaryStage) {
-
         final XYChart waveletChart1 = getChart(true);
         waveletChart1.getDatasets().add(waveletScalogram);
 
@@ -225,8 +225,7 @@ public class DimReductionDataSetSample extends Application {
         final String fileName = index <= 1 ? "./rawDataCPS2.dat" : "./rawDataLHCInj.dat";
         try {
             try (BufferedReader reader = new BufferedReader(
-                    new InputStreamReader(EMDSample.class.getResourceAsStream(fileName)))) {
-
+                         new InputStreamReader(EMDSample.class.getResourceAsStream(fileName)))) {
                 String line = reader.readLine();
                 final int nDim = line == null ? 0 : Integer.parseInt(line);
                 double[] ret = new double[nDim];
@@ -261,5 +260,4 @@ public class DimReductionDataSetSample extends Application {
             Thread.currentThread().interrupt();
         }
     }
-
 }

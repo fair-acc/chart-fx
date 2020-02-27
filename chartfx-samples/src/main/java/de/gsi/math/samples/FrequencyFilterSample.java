@@ -1,14 +1,15 @@
 package de.gsi.math.samples;
 
+import javafx.application.Application;
+import javafx.scene.Node;
+import javafx.scene.layout.VBox;
+
 import de.gsi.dataset.spi.DefaultDataSet;
 import de.gsi.math.ArrayMath;
 import de.gsi.math.ArrayMath.FilterType;
 import de.gsi.math.DataSetMath;
 import de.gsi.math.samples.utils.AbstractDemoApplication;
 import de.gsi.math.samples.utils.DemoChart;
-import javafx.application.Application;
-import javafx.scene.Node;
-import javafx.scene.layout.VBox;
 
 /**
  * Sample to illustrate array-based Butterworth and Chebychev filters

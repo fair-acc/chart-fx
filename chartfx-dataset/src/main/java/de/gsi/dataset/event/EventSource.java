@@ -122,7 +122,7 @@ public interface EventSource {
                 Thread.currentThread().interrupt();
                 throw new IllegalStateException("one parallel worker thread finished execution with error", e);
             }
-            
+
             if (!exceptions.isEmpty()) {
                 throw exceptions;
             }

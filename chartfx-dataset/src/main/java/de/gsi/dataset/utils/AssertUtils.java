@@ -113,7 +113,7 @@ public final class AssertUtils {
     public static void equalDoubleArrays(final double[] array1, final double[] array2) {
         if (array1.length != array2.length) {
             throw new IllegalArgumentException("The double arrays must have the same length! length1 = " + array1.length
-                    + " vs. length2 = " + array2.length);
+                                               + " vs. length2 = " + array2.length);
         }
     }
 
@@ -129,7 +129,7 @@ public final class AssertUtils {
         final int length2 = Math.min(nMinSize, array2.length);
         if (length1 != length2) {
             throw new IllegalArgumentException("The double arrays must have the same length! length1 = " + array1.length
-                    + " vs. length2 = " + array2.length + " (nMinSize = " + nMinSize + ")");
+                                               + " vs. length2 = " + array2.length + " (nMinSize = " + nMinSize + ")");
         }
     }
 
@@ -142,7 +142,7 @@ public final class AssertUtils {
     public static void equalFloatArrays(final float[] array1, final float[] array2) {
         if (array1.length != array2.length) {
             throw new IllegalArgumentException("The float arrays must have the same length! length1 = " + array1.length
-                    + " vs. length2 = " + array2.length);
+                                               + " vs. length2 = " + array2.length);
         }
     }
 
@@ -158,7 +158,7 @@ public final class AssertUtils {
         final int length2 = Math.min(nMinSize, array2.length);
         if (length1 != length2) {
             throw new IllegalArgumentException("The double arrays must have the same length! length1 = " + array1.length
-                    + " vs. length2 = " + array2.length + " (nMinSize = " + nMinSize + ")");
+                                               + " vs. length2 = " + array2.length + " (nMinSize = " + nMinSize + ")");
         }
     }
 
@@ -286,7 +286,7 @@ public final class AssertUtils {
      */
     public static void gtOrEqual(final String name, final double ref, final double len) {
         if (len < ref) {
-            throw new IllegalArgumentException("The " + name + " len = '"+len+"' must be less or equal than " + ref);
+            throw new IllegalArgumentException("The " + name + " len = '" + len + "' must be less or equal than " + ref);
         }
     }
 
@@ -299,7 +299,7 @@ public final class AssertUtils {
      */
     public static void gtOrEqual(final String name, final float ref, final float len) {
         if (len < ref) {
-            throw new IllegalArgumentException("The " + name + " len = '"+len+"' must be less or equal than " + ref);
+            throw new IllegalArgumentException("The " + name + " len = '" + len + "' must be less or equal than " + ref);
         }
     }
 
@@ -312,7 +312,7 @@ public final class AssertUtils {
      */
     public static void gtOrEqual(final String name, final int ref, final int len) {
         if (len < ref) {
-            throw new IllegalArgumentException("The " + name + " len = '"+len+"' must be greater or equal than " + ref);
+            throw new IllegalArgumentException("The " + name + " len = '" + len + "' must be greater or equal than " + ref);
         }
     }
 
@@ -325,11 +325,9 @@ public final class AssertUtils {
      */
     public static void gtOrEqual(final String name, final long ref, final long len) {
         if (len < ref) {
-            throw new IllegalArgumentException("The " + name + " len = '"+len+"' must be less or equal than " + ref);
+            throw new IllegalArgumentException("The " + name + " len = '" + len + "' must be less or equal than " + ref);
         }
     }
-
-
 
     public static void nonEmptyArray(final String name, final boolean[] array) {
         AssertUtils.notNull(name, array);

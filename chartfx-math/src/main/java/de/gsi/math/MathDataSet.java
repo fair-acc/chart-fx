@@ -125,7 +125,8 @@ public class MathDataSet extends DoubleErrorDataSet {
 
         if (dataSetValueFunction != null && sourceDataSets.size() > 1) {
             throw new IllegalArgumentException(
-                    "sources list may not be larger than one if the 'dataSetValueFunction' interface is used" + " -> try to use 'DataSetFunction' instead");
+                    "sources list may not be larger than one if the 'dataSetValueFunction' interface is used"
+                    + " -> try to use 'DataSetFunction' instead");
             // N.B. rationale is that if one combines data from more than one DataSet
             // that it's very likely that they have different x vectors/sampling.
             // This usually requires a more sophisticated approach better handled through
@@ -182,7 +183,7 @@ public class MathDataSet extends DoubleErrorDataSet {
         // operation is in place using the y-array values of 'this'
         dataSetValueFunction.transform(ySourceVector, yDestVector, length);
         this.set(xDestVector, yDestVector, ySourceErrorNeg, ySourceErrorPos, length, false); // N.B zero copy re-use of
-                                                                                             // existing array
+                // existing array
     }
 
     protected void handle(UpdateEvent event) {
@@ -219,9 +220,7 @@ public class MathDataSet extends DoubleErrorDataSet {
      * @author rstein
      */
     public interface DataSetFunction {
-
         DataSet transform(final DataSet input);
-
     }
 
     /**
@@ -230,9 +229,7 @@ public class MathDataSet extends DoubleErrorDataSet {
      * @author rstein
      */
     public interface DataSetsFunction {
-
         void transform(final List<DataSet> inputDataSet, final MathDataSet outputDataSet);
-
     }
 
     /**
@@ -242,7 +239,6 @@ public class MathDataSet extends DoubleErrorDataSet {
      * @author rstein
      */
     public interface DataSetValueFunction {
-
         void transform(final double[] inputY, final double[] outputY, final int length);
     }
 }
