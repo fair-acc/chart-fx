@@ -1218,7 +1218,7 @@ public class TSpectrum {
             final int length, final int nMaxPeaks, final double sigma, final double threshold,
             final boolean backgroundRemove, final int deconIterations, final boolean markov, final int averWindow) {
         if (sourceX == null || sourceY == null) {
-			throw new IllegalArgumentException("neither sourceX '" + (sourceX == null ? "null" : "OK") + "' nor sourceY '" + (sourceY == null ? "null" : "OK") + "' must be null");
+            throw new IllegalArgumentException("neither sourceX '" + (sourceX == null ? "null" : "OK") + "' nor sourceY '" + (sourceY == null ? "null" : "OK") + "' must be null");
         } else if (sourceX.length < length) {
             throw new IllegalArgumentException(
                     "sourceX.length too short is '" + sourceX.length + "' vs. should '" + length + "'");
