@@ -18,7 +18,6 @@ import de.gsi.chart.ui.geometry.Side;
  * @author rstein
  */
 public class TickMarkTests {
-
     @Test
     public void basicTickMarkTests() {
         assertDoesNotThrow(() -> new TickMark(Side.TOP, 0.0, 0.0, 0.0, "label"));
@@ -135,5 +134,4 @@ public class TickMarkTests {
         assertDoesNotThrow(() -> tickMark.fillProperty().set(Color.BLUE));
         assertDoesNotThrow(() -> tickMark.visibleProperty().set(false));
     }
-
 }

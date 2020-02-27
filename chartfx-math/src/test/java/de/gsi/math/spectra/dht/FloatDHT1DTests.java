@@ -21,8 +21,9 @@ public class FloatDHT1DTests {
 
     @ParameterizedTest
     @ValueSource(ints = { 1, 2, 3, 4, 5, 31, 32, 33, 34, 1023, 1024, 1025, 4095, 4096, 4097, (2 << 16) - 100, 2 << 16,
-            (2 << 16) + 100 })
-    public void identityDHTTests(final int nSamples) {
+                         (2 << 16) + 100 })
+    public void
+    identityDHTTests(final int nSamples) {
         FloatDHT_1D fft = new FloatDHT_1D(nSamples);
         float[] testSignal1Ref = generateDelta(2 * nSamples);
         float[] testSignal1 = generateDelta(2 * nSamples);
@@ -52,5 +53,4 @@ public class FloatDHT1DTests {
         }
         return retVal;
     }
-
 }

@@ -31,7 +31,6 @@ public class ArrayMathTests {
 
         assertArrayEquals(new double[] { 1, 1, 1 }, ArrayMath.addInPlace(new double[3], new double[] { 1.0, 1.0, 1.0 }));
         assertArrayEquals(new double[] { 1, 1, 1 }, ArrayMath.addInPlace(new double[3], new double[] { 1.0, 1.0, 1.0, 1.0 }, 3));
-
     }
 
     @Test
@@ -97,7 +96,6 @@ public class ArrayMathTests {
 
         assertArrayEquals(new double[] { 8, 8, 8 }, ArrayMath.multiplyInPlace(new double[] { 4.0, 4.0, 4.0 }, new double[] { 2.0, 2.0, 2.0 }));
         assertArrayEquals(new double[] { 8, 8, 8 }, ArrayMath.multiplyInPlace(new double[] { 4.0, 4.0, 4.0 }, new double[] { 2.0, 2.0, 2.0, 2.0 }, 3));
-
     }
 
     @Test
@@ -118,7 +116,6 @@ public class ArrayMathTests {
 
         assertArrayEquals(new double[] { 4, 4, 4 }, ArrayMath.sqrInPlace(new double[] { 2.0, 2.0, 2.0 }));
         assertArrayEquals(new double[] { 4, 4, 4, 2 }, ArrayMath.sqrInPlace(new double[] { 2.0, 2.0, 2.0, 2.0 }, 3));
-
     }
 
     @Test
@@ -128,7 +125,6 @@ public class ArrayMathTests {
 
         assertArrayEquals(new double[] { 2, 2, 2 }, ArrayMath.sqrtInPlace(new double[] { 4, 4, 4 }));
         assertArrayEquals(new double[] { 2, 2, 2, 4 }, ArrayMath.sqrtInPlace(new double[] { 4, 4, 4, 4. }, 3));
-
     }
 
     @Test
@@ -144,7 +140,6 @@ public class ArrayMathTests {
 
         assertArrayEquals(new double[] { -1, -1, -1 }, ArrayMath.subtractInPlace(new double[3], new double[] { 1.0, 1.0, 1.0 }));
         assertArrayEquals(new double[] { -1, -1, -1 }, ArrayMath.subtractInPlace(new double[3], new double[] { 1.0, 1.0, 1.0, 1.0 }, 3));
-
     }
 
     @Test
@@ -174,7 +169,6 @@ public class ArrayMathTests {
         assertDoesNotThrow(() -> ArrayMath.filterSignal(input, null, cutoffFraction, filterOrder, FilterType.HIGH_PASS, 1));
 
         assertDoesNotThrow(() -> ArrayMath.filterSignal(input, new double[input.length], cutoffFraction, filterOrder, FilterType.LOW_PASS, ripplePercent));
-
     }
 
     @Test

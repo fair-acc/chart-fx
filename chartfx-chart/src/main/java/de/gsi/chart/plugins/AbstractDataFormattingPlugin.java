@@ -1,15 +1,16 @@
 package de.gsi.chart.plugins;
 
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.geometry.Orientation;
+import javafx.util.StringConverter;
+
 import de.gsi.chart.Chart;
 import de.gsi.chart.XYChart;
 import de.gsi.chart.axes.Axis;
 import de.gsi.chart.axes.spi.MetricPrefix;
 import de.gsi.chart.ui.geometry.Side;
 import de.gsi.dataset.spi.utils.Tuple;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.geometry.Orientation;
-import javafx.util.StringConverter;
 
 /**
  * An abstract plugin with associated formatters for X and Y value of the data. For details see {@link #formatData}.
@@ -18,7 +19,6 @@ import javafx.util.StringConverter;
  * @author rstein
  */
 public abstract class AbstractDataFormattingPlugin extends ChartPlugin {
-
     private final ObjectProperty<StringConverter<Number>> xValueFormatter = new SimpleObjectProperty<>(this,
             "xValueFormatter");
 
@@ -41,9 +41,9 @@ public abstract class AbstractDataFormattingPlugin extends ChartPlugin {
                 }
 
                 defaultXValueFormatter = AbstractDataFormattingPlugin
-                        .createDefaultFormatter(newChart.getFirstAxis(Orientation.HORIZONTAL));
+                                                 .createDefaultFormatter(newChart.getFirstAxis(Orientation.HORIZONTAL));
                 defaultYValueFormatter = AbstractDataFormattingPlugin
-                        .createDefaultFormatter(newChart.getFirstAxis(Orientation.VERTICAL));
+                                                 .createDefaultFormatter(newChart.getFirstAxis(Orientation.VERTICAL));
             }
         });
     }
@@ -88,7 +88,7 @@ public abstract class AbstractDataFormattingPlugin extends ChartPlugin {
 
             result.append(axisPrimaryLabel).append(" = ");
             result.append(side.isHorizontal() ? getXValueFormatter(axis).toString(data.getXValue())
-                    : getYValueFormatter(axis).toString(data.getYValue()));
+                                              : getYValueFormatter(axis).toString(data.getYValue()));
             if (axisUnit != null) {
                 result.append(axisPrimaryLabel).append(" [").append(axisPrefix).append(axisUnit).append(']');
             }
@@ -188,7 +188,6 @@ public abstract class AbstractDataFormattingPlugin extends ChartPlugin {
     }
 
     private static class DefaultFormatter<T> extends StringConverter<T> {
-
         @Override
         public final T fromString(final String string) {
             throw new UnsupportedOperationException();

@@ -113,8 +113,7 @@ public class EventSourceTests {
             PrintStream ps = new PrintStream(os);
             e.printStackTrace(ps);
             if (LOGGER.isDebugEnabled()) {
-                LOGGER.atDebug().addArgument(os.toString())
-                        .log("test-case stack trace -- ignore this -- this is valid output:\n{}");
+                LOGGER.atDebug().addArgument(os.toString()).log("test-case stack trace -- ignore this -- this is valid output:\n{}");
             }
         }
 
@@ -135,5 +134,4 @@ public class EventSourceTests {
     protected void exceptionThrowingFunctionB() {
         throw new IllegalStateException("bad bad exception #3");
     }
-
 }

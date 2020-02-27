@@ -91,8 +91,8 @@ public final class DigitNumberArithmetic { //NOPMD nomen est omen
         System.out.println("");
 
         final double[][] test2 = { { 1.23, 1.24 }, { 1000, 1001 }, { 0.001, 0.0011 }, { 5.001, 5.0011 },
-                { 10.001, 10.0011 }, { 1, 1.0 + 1e-5 }, { 5.0 / 3.0, 5.0 / 3.0 + 1e-5 },
-                { 1.234567e9, 1.234567e9 + 0.001 }, { 1.234567e30, 1.234567e30 + 0.001 } };
+            { 10.001, 10.0011 }, { 1, 1.0 + 1e-5 }, { 5.0 / 3.0, 5.0 / 3.0 + 1e-5 },
+            { 1.234567e9, 1.234567e9 + 0.001 }, { 1.234567e30, 1.234567e30 + 0.001 } };
         for (final double[] pair : test2) {
             final int digits = DigitNumberArithmetic.numberDigitsUntilFirstSignificantDigit(pair[0], pair[1]);
             final String msg = String.format("%f %f differs in digit %d", pair[0], pair[1], digits);
@@ -107,7 +107,6 @@ public final class DigitNumberArithmetic { //NOPMD nomen est omen
         System.out.println("2: val2=" + String.format("%100.50f", val2));
         System.out.println("3: val1=" + BigDecimal.valueOf(val2).toPlainString());
         System.out.println("4: val1=" + BigDecimal.valueOf(val2).stripTrailingZeros());
-
     }
 
     public static int numberDigitsUntilFirstSignificantDigit(final double num1, final double num2) {
@@ -148,5 +147,4 @@ public final class DigitNumberArithmetic { //NOPMD nomen est omen
         final long shifted = Math.round(num * magnitude);
         return shifted / magnitude;
     }
-
 }
