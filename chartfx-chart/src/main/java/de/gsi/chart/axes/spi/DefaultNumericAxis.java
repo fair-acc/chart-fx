@@ -168,7 +168,7 @@ public class DefaultNumericAxis extends AbstractAxis implements Axis {
     public double computePreferredTickUnit(final double axisLength) {
         final double labelSize = getTickLabelFont().getSize() * 2;
         final int numOfFittingLabels = (int) Math.floor(axisLength / labelSize);
-        final int numOfTickMarks = Math.max(Math.min(numOfFittingLabels, getMaxMaxjorTickLabelCount()), 2);
+        final int numOfTickMarks = Math.max(Math.min(numOfFittingLabels, getMaxMajorTickLabelCount()), 2);
         double rawTickUnit = (getMax() - getMin()) / numOfTickMarks;
         if (rawTickUnit == 0 || Double.isNaN(rawTickUnit)) {
             rawTickUnit = 1e-3; // TODO: remove this hack (eventually) ;-)
@@ -365,7 +365,7 @@ public class DefaultNumericAxis extends AbstractAxis implements Axis {
     private AxisRange computeRangeImpl(final double min, final double max, final double axisLength,
             final double labelSize) {
         final int numOfFittingLabels = (int) Math.floor(axisLength / labelSize);
-        final int numOfTickMarks = Math.max(Math.min(numOfFittingLabels, getMaxMaxjorTickLabelCount()), 2);
+        final int numOfTickMarks = Math.max(Math.min(numOfFittingLabels, getMaxMajorTickLabelCount()), 2);
 
         double rawTickUnit = (max - min) / numOfTickMarks;
         if (rawTickUnit == 0 || Double.isNaN(rawTickUnit)) {
