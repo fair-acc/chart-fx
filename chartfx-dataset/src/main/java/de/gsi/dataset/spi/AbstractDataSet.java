@@ -24,6 +24,7 @@ import de.gsi.dataset.locks.DataSetLock;
 import de.gsi.dataset.locks.DefaultDataSetLock;
 import de.gsi.dataset.spi.utils.MathUtils;
 import de.gsi.dataset.spi.utils.StringHashMapList;
+import de.gsi.dataset.utils.AssertUtils;
 
 /**
  * <p>
@@ -69,6 +70,7 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
      */
     public AbstractDataSet(final String name, final int dimension) {
         super();
+        AssertUtils.gtThanZero("dimension", dimension);
         this.name = name;
         this.dimension = dimension;
         for (int i = 0; i < this.dimension; i++) {
