@@ -92,14 +92,14 @@ public class AbstractAxisParameterTests {
         assertTrue(axis.isAutoUnitScaling());
         axis.setAutoUnitScaling(false);
 
-        assertEquals(0.5, axis.getCenterAxisPosition()); //TODO: rename function w.r.t. setter
+        assertEquals(0.5, axis.getAxisCenterPosition());
         axis.setAxisCenterPosition(0.2);
-        assertEquals(0.2, axis.getCenterAxisPosition());
+        assertEquals(0.2, axis.getAxisCenterPosition());
         axis.setAxisCenterPosition(0.5);
 
-        assertEquals(TextAlignment.CENTER, axis.getaAxisLabelTextAlignment()); //TODO: rename function w.r.t. setter
+        assertEquals(TextAlignment.CENTER, axis.getAxisLabelTextAlignment()); //TODO: rename function w.r.t. setter
         axis.setAxisLabelTextAlignment(TextAlignment.LEFT);
-        assertEquals(TextAlignment.LEFT, axis.getaAxisLabelTextAlignment()); //TODO: rename function w.r.t. setter
+        assertEquals(TextAlignment.LEFT, axis.getAxisLabelTextAlignment()); //TODO: rename function w.r.t. setter
         axis.setAxisLabelTextAlignment(TextAlignment.CENTER);
 
         axis.setAxisLabelGap(5);
@@ -113,9 +113,9 @@ public class AbstractAxisParameterTests {
         assertFalse(axis.setMax(1.0));
         assertEquals(1.0, axis.getMax());
 
-        assertEquals(20, axis.getMaxMaxjorTickLabelCount());
+        assertEquals(20, axis.getMaxMajorTickLabelCount());
         axis.setMaxMajorTickLabelCount(9);
-        assertEquals(9, axis.getMaxMaxjorTickLabelCount());
+        assertEquals(9, axis.getMaxMajorTickLabelCount());
         axis.setMaxMajorTickLabelCount(20);
 
         axis.setMin(-0.5);
