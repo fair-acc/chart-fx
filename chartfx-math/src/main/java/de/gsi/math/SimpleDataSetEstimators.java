@@ -574,7 +574,7 @@ public final class SimpleDataSetEstimators { // NOPMD name is as is (ie. no Help
      * Sorts the input a array
      *
      * @param a the input array
-     * @param length <= data.length elements to be used
+     * @param length number of elements (less than data.length) to be used
      * @param down true: ascending , false: descending order
      * @return the sorted array
      */
