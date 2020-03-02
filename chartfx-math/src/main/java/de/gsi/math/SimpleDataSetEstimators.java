@@ -33,8 +33,10 @@ public final class SimpleDataSetEstimators { // NOPMD name is as is (ie. no Help
         for (int i = minIndex; i < maxIndex; i++) {
             double freq = dataSet.get(DIM_X, i);
             double val = dataSet.get(DIM_Y, i);
-            com += freq * val;
-            mass += val;
+            if (Double.isFinite(freq) && Double.isFinite(val)) {
+                com += freq * val;
+                mass += val;
+            }
         }
         return com / mass;
     }
@@ -83,6 +85,9 @@ public final class SimpleDataSetEstimators { // NOPMD name is as is (ie. no Help
         for (lowerLimit = index; lowerLimit > 0 && data[lowerLimit] > maxHalf; lowerLimit--) {
             // computation done in the abort condition
         }
+        if (upperLimit >= length || lowerLimit < 0) {
+            return Double.NaN;
+        }
         return upperLimit - lowerLimit;
     }
 
@@ -107,6 +112,9 @@ public final class SimpleDataSetEstimators { // NOPMD name is as is (ie. no Help
         for (lowerLimit = index; lowerLimit > 0 && data[lowerLimit] > maxHalf; lowerLimit--) {
             // computation done in the abort condition
         }
+        if (upperLimit >= length || lowerLimit < 0) {
+            return Double.NaN;
+        }
         final double lowerLimitRefined = SimpleDataSetEstimators.linearInterpolate(lowerLimit, lowerLimit + 1.0,
                 data[lowerLimit], data[lowerLimit + 1], maxHalf);
         final double upperLimitRefined = SimpleDataSetEstimators.linearInterpolate(upperLimit - 1.0, upperLimit,
@@ -117,7 +125,7 @@ public final class SimpleDataSetEstimators { // NOPMD name is as is (ie. no Help
     public static double getDistance(final DataSet dataSet, final int indexMin, final int indexMax,
             final boolean isHorizontal) {
         return isHorizontal ? dataSet.get(DIM_X, indexMax) - dataSet.get(DIM_X, indexMin)
-                            : dataSet.get(DIM_Y, indexMax) - dataSet.get(DIM_Y, indexMin);
+                : dataSet.get(DIM_Y, indexMax) - dataSet.get(DIM_Y, indexMin);
     }
 
     public static double[] getDoubleArray(final DataSet dataSet, final int indexMin, final int indexMax) {
@@ -230,7 +238,7 @@ public final class SimpleDataSetEstimators { // NOPMD name is as is (ie. no Help
                     }
                 }
             } else // last sample was below zero line
-                    if (actual < thresholdMin) {
+            if (actual < thresholdMin) {
                 // detected falling edge
                 actualState = 0.0;
                 final double time = dataSet.get(DIM_X, index);
@@ -259,9 +267,7 @@ public final class SimpleDataSetEstimators { // NOPMD name is as is (ie. no Help
             return Double.NaN;
         }
         final double[] data = SimpleDataSetEstimators.getDoubleArray(dataSet, indexMin, indexMax);
-        if (data.length == 0) {
-            return Double.NaN;
-        }
+        AssertUtils.gtThanZero("data.length", data.length);
 
         if (interpolate) {
             return SimpleDataSetEstimators.computeInterpolatedFWHM(data, data.length, locationMaximum - indexMin);
@@ -276,13 +282,7 @@ public final class SimpleDataSetEstimators { // NOPMD name is as is (ie. no Help
      * @return the Integral of the DataSet according to the trapezoidal rule
      */
     public static double getIntegral(final DataSet dataSet, final int indexMin, final int indexMax) {
-        if (Math.abs(indexMax - indexMin) < 0) {
-            return Double.NaN;
-        }
-        double sign = +1.0;
-        if (indexMin > indexMax) {
-            sign = -1.0;
-        }
+        final double sign = TMathConstants.Sign(1, indexMax - indexMin);
 
         double integral = 0;
         for (int index = Math.min(indexMin, indexMax); index < Math.max(indexMin, indexMax) - 1; index++) {
@@ -326,8 +326,8 @@ public final class SimpleDataSetEstimators { // NOPMD name is as is (ie. no Help
         }
 
         final double refinedValue = indexMin
-                                    + SimpleDataSetEstimators.interpolateGaussian(data, data.length, locationMaximum - indexMin)
-                                    - locationMaximum;
+                + SimpleDataSetEstimators.interpolateGaussian(data, data.length, locationMaximum - indexMin)
+                - locationMaximum;
         final double valX0 = dataSet.get(DIM_X, locationMaximum);
         final double valX1 = dataSet.get(DIM_X, locationMaximum + 1);
         final double diff = valX1 - valX0;
@@ -428,7 +428,8 @@ public final class SimpleDataSetEstimators { // NOPMD name is as is (ie. no Help
             final double min, final double max) {
         if (!Double.isFinite(min) || min < 0.0 || min > 1.0 || !Double.isFinite(max) || max < 0.0 || max > 1.0
                 || max <= min) {
-            throw new IllegalArgumentException(new StringBuilder().append("[min=").append(min).append(",max=").append(max).append("] must be within [0.0, 1.0]").toString());
+            throw new IllegalArgumentException(new StringBuilder().append("[min=").append(min).append(",max=")
+                    .append(max).append("] must be within [0.0, 1.0]").toString());
         }
         final double minVal = SimpleDataSetEstimators.getMinimum(dataSet, indexMin, indexMax);
         final double maxVal = SimpleDataSetEstimators.getMaximum(dataSet, indexMin, indexMax);
@@ -531,7 +532,7 @@ public final class SimpleDataSetEstimators { // NOPMD name is as is (ie. no Help
 
     /**
      * @param data the input vector
-     * @param length <= data.length elements to be used
+     * @param length number of elements (less than data.length) to be used
      * @return median value of vector element
      */
     private static synchronized double median(final double[] data, final int length) {
@@ -545,12 +546,14 @@ public final class SimpleDataSetEstimators { // NOPMD name is as is (ie. no Help
 
     /**
      * @param data the input vector
-     * @param length <= data.length elements to be used
+     * @param length number of elements (less than data.length) to be used
      * @return un-biased r.m.s. of vector elements
      */
-    private static double rootMeanSquare(final double[] data, final int length) {
-        if (length <= 0) {
-            return -1;
+    protected static double rootMeanSquare(final double[] data, final int length) {
+        AssertUtils.notNull("data", data);
+        AssertUtils.indexInBounds(length, data.length + 1, "length must be inside bounds of data");
+        if (length == 0) {
+            return Double.NaN;
         }
 
         final double norm = 1.0 / length;
@@ -575,9 +578,12 @@ public final class SimpleDataSetEstimators { // NOPMD name is as is (ie. no Help
      * @param down true: ascending , false: descending order
      * @return the sorted array
      */
-    private static synchronized double[] sort(final double[] a, final int length, final boolean down) {
+    protected static synchronized double[] sort(final double[] a, final int length, final boolean down) {
         if (a == null || a.length <= 0) {
             return new double[0];
+        }
+        if (length > a.length) {
+            throw new IllegalArgumentException("length must be smaller or equal to the size of the input array");
         }
         final double[] index = java.util.Arrays.copyOf(a, length);
         java.util.Arrays.sort(index);
