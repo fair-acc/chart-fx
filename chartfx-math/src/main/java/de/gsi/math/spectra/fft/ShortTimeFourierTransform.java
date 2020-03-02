@@ -128,7 +128,7 @@ public class ShortTimeFourierTransform {
      * 
      * @param input a DataSet with equidistantly spaced y(t) data
      * @param nQuantf the number of frequency bins
-     * @param overlap the overlap between consecutive ffts <1, negative values mean space between ffts
+     * @param overlap the overlap between consecutive ffts &lt;1, negative values mean space between ffts
      * @return the spectrogram, a DataSet3D with dimensions [nf = nQuantx x nY = ]
      */
     public static DataSet3D getSpectrogram(final DataSet input, final int nQuantf, final double overlap) {
