@@ -1,9 +1,10 @@
 package de.gsi.math;
 
-import static de.gsi.dataset.DataSet.DIM_Y;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import static de.gsi.dataset.DataSet.DIM_Y;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -84,8 +85,9 @@ class SimpleDataSetEstimatorsTest {
         assertEquals(0.0, SimpleDataSetEstimators.getIntegral(emptyDataSet, 0, emptyDataSet.getDataCount()));
         // dataset with discontinuities and jumps
         final DataSet dataset = new DataSetBuilder() //
-                .setXValues(new double[] { 0, 1, 2, 2, 3, 4, 5, Double.NaN })
-                .setYValues(new double[] { 1, 1, 0, 1, 1, Double.NaN, 1, 2 }).build();
+                                        .setXValues(new double[] { 0, 1, 2, 2, 3, 4, 5, Double.NaN })
+                                        .setYValues(new double[] { 1, 1, 0, 1, 1, Double.NaN, 1, 2 })
+                                        .build();
         assertEquals(2.5, SimpleDataSetEstimators.getIntegral(dataset, 0, dataset.getDataCount()));
     }
 
@@ -111,7 +113,7 @@ class SimpleDataSetEstimatorsTest {
         assertEquals(Double.NaN, SimpleDataSetEstimators.getMedian(emptyDataSet, 0, emptyDataSet.getDataCount()));
         // test odd number of elements
         assertEquals(2, SimpleDataSetEstimators
-                .getMedian(new DataSetBuilder().setYValues(new double[] { 1.5, 1.5, 5, 2, 6, 7, -4 }).build(), 0, 7));
+                                .getMedian(new DataSetBuilder().setYValues(new double[] { 1.5, 1.5, 5, 2, 6, 7, -4 }).build(), 0, 7));
     }
 
     @Test
@@ -126,18 +128,19 @@ class SimpleDataSetEstimatorsTest {
         // DataSet with infinite range
         assertEquals(Double.POSITIVE_INFINITY,
                 SimpleDataSetEstimators.getRange(new DataSetBuilder()
-                        .setYValues(
-                                new double[] { Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, Double.NaN, 0, 4 })
-                        .build(), 0, 5));
+                                                         .setYValues(
+                                                                 new double[] { Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, Double.NaN, 0, 4 })
+                                                         .build(),
+                        0, 5));
         assertEquals(Double.POSITIVE_INFINITY, SimpleDataSetEstimators.getRange(
-                new DataSetBuilder().setYValues(new double[] { Double.NEGATIVE_INFINITY, 5, Double.NaN, 0, 4 }).build(),
-                0, 5));
+                                                       new DataSetBuilder().setYValues(new double[] { Double.NEGATIVE_INFINITY, 5, Double.NaN, 0, 4 }).build(),
+                                                       0, 5));
         assertEquals(Double.POSITIVE_INFINITY, SimpleDataSetEstimators.getRange(
-                new DataSetBuilder().setYValues(new double[] { Double.POSITIVE_INFINITY, 5, Double.NaN, 0, 4 }).build(),
-                0, 5));
+                                                       new DataSetBuilder().setYValues(new double[] { Double.POSITIVE_INFINITY, 5, Double.NaN, 0, 4 }).build(),
+                                                       0, 5));
         // DataSet only containing NaNs
         assertEquals(Double.NaN, SimpleDataSetEstimators.getRange(
-                new DataSetBuilder().setYValues(new double[] { Double.NaN, Double.NaN, Double.NaN }).build(), 0, 3));
+                                         new DataSetBuilder().setYValues(new double[] { Double.NaN, Double.NaN, Double.NaN }).build(), 0, 3));
     }
 
     @Test
@@ -165,8 +168,7 @@ class SimpleDataSetEstimatorsTest {
                 () -> SimpleDataSetEstimators.getSimpleRiseTime(triangle, 0, N_SAMPLES - 1, Double.NaN, 0.9));
         assertThrows(IllegalArgumentException.class,
                 () -> SimpleDataSetEstimators.getSimpleRiseTime(triangle, 0, N_SAMPLES - 1, -0.1, 0.9));
-        assertThrows(IllegalArgumentException.class, () -> SimpleDataSetEstimators.getSimpleRiseTime(triangle, 0,
-                N_SAMPLES - 1, 0.1, Double.POSITIVE_INFINITY));
+        assertThrows(IllegalArgumentException.class, () -> SimpleDataSetEstimators.getSimpleRiseTime(triangle, 0, N_SAMPLES - 1, 0.1, Double.POSITIVE_INFINITY));
         assertThrows(IllegalArgumentException.class,
                 () -> SimpleDataSetEstimators.getSimpleRiseTime(triangle, 0, N_SAMPLES - 1, 0.1, 1.01));
         assertThrows(IllegalArgumentException.class,
@@ -192,9 +194,9 @@ class SimpleDataSetEstimatorsTest {
                 SimpleDataSetEstimators.getLocationMaximumGaussInterpolated(testGauss, 0, N_SAMPLES - 1));
         assertEquals(Double.NaN, SimpleDataSetEstimators.getLocationMaximumGaussInterpolated(emptyDataSet, 0, 0));
         assertEquals(Double.NaN, SimpleDataSetEstimators.getLocationMaximumGaussInterpolated(
-                new DataSetBuilder().setYValues(new double[] { 1, 2, 3, 4, 5 }).build(), 0, 4));
+                                         new DataSetBuilder().setYValues(new double[] { 1, 2, 3, 4, 5 }).build(), 0, 4));
         assertEquals(Double.NaN, SimpleDataSetEstimators.getLocationMaximumGaussInterpolated(
-                new DataSetBuilder().setYValues(new double[] { 5, 4, 3, 2, 1 }).build(), 0, 4));
+                                         new DataSetBuilder().setYValues(new double[] { 5, 4, 3, 2, 1 }).build(), 0, 4));
     }
 
     @Test
@@ -203,8 +205,7 @@ class SimpleDataSetEstimatorsTest {
         DataSet dataset = new DataSetBuilder().setYValues(new double[] { 0, 0, 0, 1, 1, 0, 0, 0, 1, 1 }).build();
         assertEquals(0.4, SimpleDataSetEstimators.getDutyCycle(dataset, 0, dataset.getDataCount()));
         //test hysteresis
-        dataset = new DataSetBuilder().setYValues(new double[] { 0, 0.4, 0.5, 0.6, 0.7, 1.0, 0, 0.3, 0.5, Double.NaN })
-                .build();
+        dataset = new DataSetBuilder().setYValues(new double[] { 0, 0.4, 0.5, 0.6, 0.7, 1.0, 0, 0.3, 0.5, Double.NaN }).build();
         assertEquals(3.0 / (4.0 + 3.0), SimpleDataSetEstimators.getDutyCycle(dataset, 0, dataset.getDataCount()));
         // empty dataSet
         assertEquals(Double.NaN, SimpleDataSetEstimators.getDutyCycle(emptyDataSet, 0, emptyDataSet.getDataCount()));
@@ -278,18 +279,18 @@ class SimpleDataSetEstimatorsTest {
         assertEquals(4, SimpleDataSetEstimators.interpolateGaussian(array, array.length, 4), 1e-3);
         assertEquals(-5, SimpleDataSetEstimators.interpolateGaussian(array, array.length, -5), 1e-3);
     }
-    
+
     @Test
     public void computeFWHM() {
         assertEquals(Double.NaN, SimpleDataSetEstimators.computeFWHM(new double[] {}, 0, 0));
         assertEquals(Double.NaN, SimpleDataSetEstimators.computeInterpolatedFWHM(new double[] {}, 0, 0));
-        assertEquals(4, SimpleDataSetEstimators.computeFWHM(new double[] {1,2,3,2,1}, 5, 2));
-        assertEquals(Double.NaN, SimpleDataSetEstimators.computeFWHM(new double[] {1,2,3,2}, 4, 2));
-        assertEquals(Double.NaN, SimpleDataSetEstimators.computeFWHM(new double[] {1,2,3,2,1}, 5, 0));
-        assertEquals(Double.NaN, SimpleDataSetEstimators.computeFWHM(new double[] {1,2,3,2,1}, 5, 5));
-        assertEquals(3, SimpleDataSetEstimators.computeInterpolatedFWHM(new double[] {1,2,3,2,1}, 5, 2));
-        assertEquals(Double.NaN, SimpleDataSetEstimators.computeInterpolatedFWHM(new double[] {1,2,3,2}, 4, 2));
-        assertEquals(Double.NaN, SimpleDataSetEstimators.computeInterpolatedFWHM(new double[] {1,2,3,2,1}, 5, 0));
-        assertEquals(Double.NaN, SimpleDataSetEstimators.computeInterpolatedFWHM(new double[] {1,2,3,2,1}, 5, 5));
+        assertEquals(4, SimpleDataSetEstimators.computeFWHM(new double[] { 1, 2, 3, 2, 1 }, 5, 2));
+        assertEquals(Double.NaN, SimpleDataSetEstimators.computeFWHM(new double[] { 1, 2, 3, 2 }, 4, 2));
+        assertEquals(Double.NaN, SimpleDataSetEstimators.computeFWHM(new double[] { 1, 2, 3, 2, 1 }, 5, 0));
+        assertEquals(Double.NaN, SimpleDataSetEstimators.computeFWHM(new double[] { 1, 2, 3, 2, 1 }, 5, 5));
+        assertEquals(3, SimpleDataSetEstimators.computeInterpolatedFWHM(new double[] { 1, 2, 3, 2, 1 }, 5, 2));
+        assertEquals(Double.NaN, SimpleDataSetEstimators.computeInterpolatedFWHM(new double[] { 1, 2, 3, 2 }, 4, 2));
+        assertEquals(Double.NaN, SimpleDataSetEstimators.computeInterpolatedFWHM(new double[] { 1, 2, 3, 2, 1 }, 5, 0));
+        assertEquals(Double.NaN, SimpleDataSetEstimators.computeInterpolatedFWHM(new double[] { 1, 2, 3, 2, 1 }, 5, 5));
     }
 }

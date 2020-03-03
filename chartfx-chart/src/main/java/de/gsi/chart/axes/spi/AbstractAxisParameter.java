@@ -756,12 +756,12 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
         if (isAutoScaling) {
             updateScaleAndUnitPrefix();
         }
-    
+
         final String axisPrefix = MetricPrefix.getShortPrefix(getUnitScaling());
         if ((axisUnit == null) && (axisPrefix != null)) {
             axisUnit = "a.u.";
         }
-    
+
         if (axisUnit == null) {
             axisLabel.setText(axisPrimaryLabel);
         } else {
@@ -1204,7 +1204,6 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
         return side;
     }
 
-    
     @Override
     public Side getSide() {
         return sideProperty().get();
@@ -1409,7 +1408,6 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
         unitScalingProperty().set(value);
     }
 
-    
     @Override
     public void setUnitScaling(final MetricPrefix prefix) {
         unitScalingProperty().set(prefix.getPower());

@@ -3,6 +3,12 @@ package de.gsi.chart.renderer.spi;
 import static de.gsi.dataset.DataSet.DIM_X;
 import static de.gsi.dataset.DataSet.DIM_Y;
 
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.geometry.Orientation;
+
 import de.gsi.chart.XYChart;
 import de.gsi.chart.axes.Axis;
 import de.gsi.chart.renderer.Renderer;
@@ -13,11 +19,6 @@ import de.gsi.dataset.spi.DoubleDataSet;
 import de.gsi.dataset.spi.DoubleErrorDataSet;
 import de.gsi.dataset.utils.NoDuplicatesList;
 import de.gsi.dataset.utils.ProcessingProfiler;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import javafx.geometry.Orientation;
 
 /**
  * @author rstein
@@ -148,7 +149,6 @@ public abstract class AbstractDataSetManagement<R extends Renderer> implements R
         final DoubleDataSet ret = new DoubleDataSet(dataSet.getName(), nLength);
 
         dataSet.lock().writeLockGuard(() -> {
-
             if (dataSet instanceof DoubleDataSet) {
                 final DoubleDataSet doubleDataSet = (DoubleDataSet) dataSet;
                 // known data set implementation, may use faster array copy
@@ -220,5 +220,4 @@ public abstract class AbstractDataSetManagement<R extends Renderer> implements R
 
         return ret;
     }
-
 }

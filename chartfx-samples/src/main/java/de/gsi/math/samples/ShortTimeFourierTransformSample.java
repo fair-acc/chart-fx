@@ -39,7 +39,6 @@ import de.gsi.math.spectra.wavelet.ContinuousWavelet;
  * @author akrimm
  */
 public class ShortTimeFourierTransformSample extends AbstractDemoApplication {
-
     protected STFTDemoProperties demoProperties = new STFTDemoProperties();
     protected XYChart chart1;
     protected XYChart chart2;
@@ -48,7 +47,7 @@ public class ShortTimeFourierTransformSample extends AbstractDemoApplication {
     public ShortTimeFourierTransformSample() {
         super(1200, 800);
     }
-    
+
     @Override
     public Node getContent() {
         final PropertySheet propertySheet = new PropertySheet();

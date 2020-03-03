@@ -179,14 +179,12 @@ public class DoubleDataSet3D extends AbstractDataSet3D<DoubleDataSet3D> {
      */
     public void set(final int xIndex, final int yIndex, final double z) {
         zValues[yIndex][xIndex] = z;
-
     }
 
     public void set(final int xIndex, final int yIndex, final double x, final double y, final double z) {
         xValues[xIndex] = x;
         yValues[yIndex] = y;
         zValues[yIndex][xIndex] = z;
-
     }
 
     /**
@@ -217,7 +215,7 @@ public class DoubleDataSet3D extends AbstractDataSet3D<DoubleDataSet3D> {
             throw new IllegalArgumentException("zValues array is null");
         }
         if (zValues.length == 0) {
-            if (0 != xValues.length || 0!= yValues.length) {
+            if (0 != xValues.length || 0 != yValues.length) {
                 final String msg = String.format(
                         "array zValues is empty but: xValues.length = %d and yValues.length = %d", xValues.length, yValues.length);
                 throw new IllegalArgumentException(msg);
@@ -260,5 +258,4 @@ public class DoubleDataSet3D extends AbstractDataSet3D<DoubleDataSet3D> {
             System.arraycopy(array, indexStart, array, indexStart + i, (len - i) < i ? len - i : i);
         }
     }
-
 }

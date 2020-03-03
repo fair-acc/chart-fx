@@ -336,7 +336,6 @@ public class MultiDimDoubleDataSet extends AbstractDataSet<MultiDimDoubleDataSet
      */
     public MultiDimDoubleDataSet set(final DataSet other) {
         lock().writeLockGuard(() -> other.lock().writeLockGuard(() -> {
-
             // copy data
             double[][] data = new double[other.getDimension()][];
             for (int i = 0; i < other.getDimension(); i++) {

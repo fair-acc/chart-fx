@@ -125,7 +125,7 @@ public final class SimpleDataSetEstimators { // NOPMD name is as is (ie. no Help
     public static double getDistance(final DataSet dataSet, final int indexMin, final int indexMax,
             final boolean isHorizontal) {
         return isHorizontal ? dataSet.get(DIM_X, indexMax) - dataSet.get(DIM_X, indexMin)
-                : dataSet.get(DIM_Y, indexMax) - dataSet.get(DIM_Y, indexMin);
+                            : dataSet.get(DIM_Y, indexMax) - dataSet.get(DIM_Y, indexMin);
     }
 
     public static double[] getDoubleArray(final DataSet dataSet, final int indexMin, final int indexMax) {
@@ -238,7 +238,7 @@ public final class SimpleDataSetEstimators { // NOPMD name is as is (ie. no Help
                     }
                 }
             } else // last sample was below zero line
-            if (actual < thresholdMin) {
+                    if (actual < thresholdMin) {
                 // detected falling edge
                 actualState = 0.0;
                 final double time = dataSet.get(DIM_X, index);
@@ -326,8 +326,8 @@ public final class SimpleDataSetEstimators { // NOPMD name is as is (ie. no Help
         }
 
         final double refinedValue = indexMin
-                + SimpleDataSetEstimators.interpolateGaussian(data, data.length, locationMaximum - indexMin)
-                - locationMaximum;
+                                    + SimpleDataSetEstimators.interpolateGaussian(data, data.length, locationMaximum - indexMin)
+                                    - locationMaximum;
         final double valX0 = dataSet.get(DIM_X, locationMaximum);
         final double valX1 = dataSet.get(DIM_X, locationMaximum + 1);
         final double diff = valX1 - valX0;
@@ -428,8 +428,7 @@ public final class SimpleDataSetEstimators { // NOPMD name is as is (ie. no Help
             final double min, final double max) {
         if (!Double.isFinite(min) || min < 0.0 || min > 1.0 || !Double.isFinite(max) || max < 0.0 || max > 1.0
                 || max <= min) {
-            throw new IllegalArgumentException(new StringBuilder().append("[min=").append(min).append(",max=")
-                    .append(max).append("] must be within [0.0, 1.0]").toString());
+            throw new IllegalArgumentException(new StringBuilder().append("[min=").append(min).append(",max=").append(max).append("] must be within [0.0, 1.0]").toString());
         }
         final double minVal = SimpleDataSetEstimators.getMinimum(dataSet, indexMin, indexMax);
         final double maxVal = SimpleDataSetEstimators.getMaximum(dataSet, indexMin, indexMax);
