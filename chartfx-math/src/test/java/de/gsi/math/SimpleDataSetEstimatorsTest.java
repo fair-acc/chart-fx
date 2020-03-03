@@ -296,9 +296,9 @@ class SimpleDataSetEstimatorsTest {
         assertEquals(Double.NaN, SimpleDataSetEstimators.computeInterpolatedFWHM(new double[] { 1, 2, 3, 2, 1 }, 5, 0));
         assertEquals(Double.NaN, SimpleDataSetEstimators.computeInterpolatedFWHM(new double[] { 1, 2, 3, 2, 1 }, 5, 5));
         // FWHM not inside data range
-        assertEquals(Double.NaN, SimpleDataSetEstimators.computeFWHM(new double[] {1,2,3,4,3}, 5, 3));
-        assertEquals(Double.NaN, SimpleDataSetEstimators.computeFWHM(new double[] {3,4,3,2,1}, 5, 1));
-        assertEquals(Double.NaN, SimpleDataSetEstimators.computeInterpolatedFWHM(new double[] {1,2,3,4,3}, 5, 3));
-        assertEquals(Double.NaN, SimpleDataSetEstimators.computeInterpolatedFWHM(new double[] {3,4,3,2,1}, 5, 1));
+        assertEquals(Double.NaN, SimpleDataSetEstimators.computeFWHM(new double[] { 1, 2, 3, 4, 3 }, 5, 3));
+        assertEquals(Double.NaN, SimpleDataSetEstimators.computeFWHM(new double[] { 3, 4, 3, 2, 1 }, 5, 1));
+        assertEquals(Double.NaN, SimpleDataSetEstimators.computeInterpolatedFWHM(new double[] { 1, 2, 3, 4, 3 }, 5, 3));
+        assertEquals(Double.NaN, SimpleDataSetEstimators.computeInterpolatedFWHM(new double[] { 3, 4, 3, 2, 1 }, 5, 1));
     }
 }

@@ -39,7 +39,6 @@ import de.gsi.dataset.testdata.spi.CosineFunction;
  */
 @ExtendWith(ApplicationExtension.class)
 class ScreenshotTest {
-
     private Scene scene;
     private final FxRobot fxRobot = new FxRobot();
     private XYChart chart;
@@ -121,7 +120,6 @@ class ScreenshotTest {
 
     @Test
     void settingsDialogTests() {
-
     }
 
     @Test
