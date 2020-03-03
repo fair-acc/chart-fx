@@ -1,15 +1,17 @@
 package de.gsi.dataset.spi;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import java.util.Arrays;
 
 import static de.gsi.dataset.DataSet.DIM_X;
 import static de.gsi.dataset.DataSet.DIM_Y;
 import static de.gsi.dataset.DataSet.DIM_Z;
 
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Checks for the DoubleDataSet3D
@@ -17,11 +19,10 @@ import org.slf4j.LoggerFactory;
  * @author Alexander Krimm
  */
 public class DoubleDataSet3DTests {
-    private static final Logger LOGGER = LoggerFactory.getLogger(DoubleDataSet3DTests.class);
 
     @Test
     public void testDefaultConstructor() {
-        DoubleDataSet3D dataset = new DoubleDataSet3D("testdataset");
+        final DoubleDataSet3D dataset = new DoubleDataSet3D("testdataset");
         assertEquals("testdataset", dataset.getName());
         assertEquals(0, dataset.getDataCount());
         assertEquals(0, dataset.getDataCount(DIM_X));
@@ -31,12 +32,22 @@ public class DoubleDataSet3DTests {
     }
 
     @Test
+    public void testZeroSizeConstructors() {
+        final DoubleDataSet3D dataset3 = new DoubleDataSet3D("testdataset", 0, 0);
+        final DoubleDataSet3D dataset2 = new DoubleDataSet3D("testdataset", new double[][] {});
+        final DoubleDataSet3D dataset1 = new DoubleDataSet3D("testdataset", new double[] {}, new double[] {},
+                new double[][] {});
+
+    }
+
+    @Test
     public void checkFullConstructor() {
-        double[] xvalues = new double[] { 1, 2, 3, 4 };
-        double[] yvalues = new double[] { -3, -2, -0, 2, 4 };
-        double[][] zvalues = new double[][] { { 1, 2, 3, 4 }, { 5, 6, 7, 8 }, { 9, 10, 11, 12 }, { -1, -2, -3, -4 },
-            { 1337, 2337, 4242, 2323 } };
+        final double[] xvalues = new double[] { 1, 2, 3, 4 };
+        final double[] yvalues = new double[] { -3, -2, -0, 2, 4 };
+        final double[][] zvalues = new double[][] { { 1, 2, 3, 4 }, { 5, 6, 7, 8 }, { 9, 10, 11, 12 },
+                { -1, -2, -3, -4 }, { 1337, 2337, 4242, 2323 } };
         DoubleDataSet3D dataset = new DoubleDataSet3D("testdataset", xvalues, yvalues, zvalues);
+        assertNull(dataset.getStyle(0));
         assertEquals("testdataset", dataset.getName());
         assertEquals(20, dataset.getDataCount());
         assertEquals(4, dataset.getDataCount(DIM_X));
@@ -55,6 +66,8 @@ public class DoubleDataSet3DTests {
         assertThrows(IndexOutOfBoundsException.class, () -> dataset.get(DIM_X, 4));
         assertThrows(IndexOutOfBoundsException.class, () -> dataset.getZ(1, 5));
         assertThrows(IndexOutOfBoundsException.class, () -> dataset.getZ(4, 0));
+        assertThrows(IndexOutOfBoundsException.class, () -> dataset.get(4, 0));
+        assertThrows(IndexOutOfBoundsException.class, () -> dataset.getValues(4));
         // test range max range computation
         dataset.recomputeLimits(DIM_X); // TODO: check if limits should be updated by methods
         assertEquals(4, dataset.getAxisDescription(DIM_X).getMax());
@@ -91,6 +104,32 @@ public class DoubleDataSet3DTests {
         dataset2.recomputeLimits(DIM_Y);
         dataset2.recomputeLimits(DIM_Z);
         assertEquals(dataset, dataset2);
+        // Test zValues only constructor
+        final double[][] zvalues2 = new double[][] { { 1, 2, 3, 4 }, { 5, 6, 7, 8 }, { 9, 10, 11, 12 },
+                { -1, -2, -3, -4 }, { 1337, 2337, 4242, 2323 } };
+        DoubleDataSet3D datasetZOnly = new DoubleDataSet3D("testdataset-zOnly", zvalues2);
+        assertEquals("testdataset-zOnly", datasetZOnly.getName());
+        assertEquals(20, datasetZOnly.getDataCount());
+        assertEquals(4, datasetZOnly.getDataCount(DIM_X));
+        assertEquals(5, datasetZOnly.getDataCount(DIM_Y));
+        assertEquals(20, datasetZOnly.getDataCount(DIM_Z));
+        assertEquals(4242, datasetZOnly.get(DIM_Z, 18));
+        assertEquals(6, datasetZOnly.get(DIM_Z, 5));
+        assertEquals(7, datasetZOnly.get(DIM_Z, 6));
+        assertEquals(4242, datasetZOnly.getZ(2, 4));
+        assertEquals(3, datasetZOnly.get(DIM_X, 3));
+        assertEquals(4, datasetZOnly.get(DIM_Y, 4));
+        assertEquals(3, datasetZOnly.getIndex(DIM_X, 3.9));
+        assertEquals(0, datasetZOnly.getIndex(DIM_Y, -0.5));
+        assertEquals(0, datasetZOnly.getIndex(DIM_X, -1000));
+        assertEquals(3, datasetZOnly.getIndex(DIM_X, 1000));
+        datasetZOnly.setX(2, 1.337);
+        assertEquals(1.337, datasetZOnly.getX(2));
+        datasetZOnly.setY(2, 23.42);
+        assertEquals(23.42, datasetZOnly.getY(2));
+        assertArrayEquals(
+                new double[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, -1, -2, -3, -4, 1337, 2337, 4242, 2323 },
+                datasetZOnly.getValues(DIM_Z));
     }
 
     @Test
@@ -101,10 +140,38 @@ public class DoubleDataSet3DTests {
                 () -> new DoubleDataSet3D("test", new double[] { 1, 2, 3 }, null, null));
         assertThrows(IllegalArgumentException.class,
                 () -> new DoubleDataSet3D("test", new double[] { 3, 4, 5 }, new double[] { 1, 2, 3 }, null));
-        assertThrows(IllegalArgumentException.class, () -> new DoubleDataSet3D("test", new double[] {}, new double[] { 1, 2, 3 }, new double[][] { { 1, 2, 3 } }));
-        assertThrows(IllegalArgumentException.class, () -> new DoubleDataSet3D("test", new double[] { 1, 2, 3 }, new double[] {}, new double[][] { { 1, 2, 3 } }));
-        assertThrows(IllegalArgumentException.class, () -> new DoubleDataSet3D("test", new double[] { 1, 2, 3 }, new double[] { 4, 5, 6 }, new double[][] {}));
-        assertThrows(IllegalArgumentException.class, () -> new DoubleDataSet3D("test", new double[] { 1, 2 }, new double[] { 4, 5 }, new double[][] { { 8, 9 } }));
-        assertThrows(IllegalArgumentException.class, () -> new DoubleDataSet3D("test", new double[] { 1, 2 }, new double[] { 4, 5 }, new double[][] { { 8 }, { 9 } }));
+        assertThrows(IllegalArgumentException.class, () -> new DoubleDataSet3D("test", new double[] {},
+                new double[] { 1, 2, 3 }, new double[][] { { 1, 2, 3 } }));
+        assertThrows(IllegalArgumentException.class, () -> new DoubleDataSet3D("test", new double[] { 1, 2, 3 },
+                new double[] {}, new double[][] { { 1, 2, 3 } }));
+        assertThrows(IllegalArgumentException.class, () -> new DoubleDataSet3D("test", new double[] { 1, 2, 3 },
+                new double[] { 4, 5, 6 }, new double[][] {}));
+        assertThrows(IllegalArgumentException.class, () -> new DoubleDataSet3D("test", new double[] { 1, 2 },
+                new double[] { 4, 5 }, new double[][] { { 8, 9 } }));
+        assertThrows(IllegalArgumentException.class, () -> new DoubleDataSet3D("test", new double[] { 1, 2 },
+                new double[] { 4, 5 }, new double[][] { { 8 }, { 9 } }));
+        assertThrows(IllegalArgumentException.class, () -> new DoubleDataSet3D("testdataset", new double[] {}, new double[] {1},
+                new double[][] {}));
+    }
+
+    @Test
+    public void helpersTest() {
+        final double[] array = new double[100];
+        final double[] arrayZero = new double[100];
+        final double[] arrayFilled = new double[100];
+        Arrays.fill(arrayFilled, 42.23);
+
+        DoubleDataSet3D.fillArray(array, 3, 3, 23.42);
+        assertArrayEquals(arrayZero, array);
+
+        DoubleDataSet3D.fillArray(array, 3, 5, 23.42);
+        assertEquals(0.0, array[2]);
+        assertEquals(23.42, array[3]);
+        assertEquals(23.42, array[4]);
+        assertEquals(0.0, array[5]);
+
+        DoubleDataSet3D.fillArray(array, 0, array.length, 42.23);
+        assertArrayEquals(arrayFilled, array);
+
     }
 }
