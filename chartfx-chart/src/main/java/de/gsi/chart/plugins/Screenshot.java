@@ -87,7 +87,7 @@ public class Screenshot extends ChartPlugin {
      * @param pattern A pattern to generate template filenames
      */
     public void setPattern(final String pattern) {
-        this.pattern.set(pattern);
+        patternProperty().set(pattern);
     }
 
     /**
@@ -97,7 +97,7 @@ public class Screenshot extends ChartPlugin {
      * @return The pattern to generate template filenames
      */
     public String getPattern() {
-        return pattern.get();
+        return patternProperty().get();
     }
 
     /**
@@ -115,7 +115,7 @@ public class Screenshot extends ChartPlugin {
      * @param directory The directory to save screenshots to
      */
     public void setDirectory(final String directory) {
-        this.directory.set(directory);
+        directoryProperty().set(directory);
     }
 
     /**
@@ -124,7 +124,7 @@ public class Screenshot extends ChartPlugin {
      * @return The directory where the screenshots will be saved
      */
     public String getDirectory() {
-        return directory.get();
+        return directoryProperty().get();
     }
 
     /**
@@ -139,7 +139,7 @@ public class Screenshot extends ChartPlugin {
                 new Glyph(FONT_AWESOME, FontAwesome.Glyph.CLIPBOARD).size(FONT_SIZE - 8)));
         button.setOnAction(evt -> {
             if (toFile) {
-                screenshotToFile();
+                screenshotToFile(true);
             } else {
                 screenshotToClipboard();
             }
@@ -159,7 +159,7 @@ public class Screenshot extends ChartPlugin {
             button.setGraphic(new HBox(0.1, new Glyph(FONT_AWESOME, FontAwesome.Glyph.CAMERA).size(FONT_SIZE),
                     new Glyph(FONT_AWESOME, FontAwesome.Glyph.FILE).size(FONT_SIZE - 8)));
             button.setTooltip(new Tooltip("Save plot as image"));
-            screenshotToFile();
+            screenshotToFile(true);
         });
         MenuItem settingsMenu = new MenuItem("Screenshot settings", new Glyph(FONT_AWESOME, FontAwesome.Glyph.WRENCH));
         settingsMenu.setOnAction(evt -> {
@@ -191,32 +191,42 @@ public class Screenshot extends ChartPlugin {
 
     /**
      * saves a screenshot to a file that can be chosen with a file opener
+     * 
+     * @param showDialog whether to show the file save dialog or to just save to the filename given by pattern
      */
-    public void screenshotToFile() {
+    public void screenshotToFile(final boolean showDialog) {
         Image image = getScreenshot();
-        String initName;
-
-        if (!pattern.get().isEmpty()) {
-            if (getChart().getAllDatasets().isEmpty()) {
-                initName = DataSetUtils.getFileName(null, pattern.get());
-            } else {
-                initName = DataSetUtils.getFileName(getChart().getAllDatasets().get(0), pattern.get());
-            }
-        } else if (getChart().getTitle() != null && !getChart().getTitle().isBlank()) {
-            initName = getChart().getTitle();
-        } else if (getChart().getId() != null && !getChart().getId().isBlank()) {
-            initName = getChart().getId();
-        } else if (!getChart().getAllDatasets().isEmpty() && getChart().getAllDatasets().get(0).getName() != null
-                   && !getChart().getAllDatasets().get(0).getName().isBlank()) {
-            initName = getChart().getAllDatasets().get(0).getName();
-        } else {
-            initName = "UnknownChart";
-        }
-        File file = showFileDialog(initName);
+        File file = showDialog ? showFileDialog(generateScreenshotName())
+                : new File(getDirectory(), generateScreenshotName());
         if (file == null)
             return;
         saveImage(image, file);
         LOGGER.atInfo().addArgument(file.getName()).log("Saved screenshot to {}");
+    }
+
+    /**
+     * @return a Default name for the Screenshot
+     */
+    public String generateScreenshotName() {
+        String initName;
+
+        if (!getPattern().isEmpty()) {
+            if (getChart().getAllDatasets().isEmpty()) {
+                initName = DataSetUtils.getFileName(null, getPattern());
+            } else {
+                initName = DataSetUtils.getFileName(getChart().getAllDatasets().get(0), getPattern());
+            }
+        } else if (getChart().getTitle() != null && !getChart().getTitle().isBlank()) {
+            initName = getChart().getTitle();
+        } else if (!getChart().getAllDatasets().isEmpty() && getChart().getAllDatasets().get(0).getName() != null
+                && !getChart().getAllDatasets().get(0).getName().isBlank()) {
+            initName = getChart().getAllDatasets().get(0).getName();
+        } else if (getChart().getId() != null && !getChart().getId().isBlank()) {
+            initName = getChart().getId();
+        } else {
+            initName = "UnknownChart";
+        }
+        return initName;
     }
 
     /**
@@ -279,19 +289,19 @@ public class Screenshot extends ChartPlugin {
             gridPane.add(new Label("pattern: "), 0, 1);
             gridPane.add(patternTextbox, 1, 1, 2, 1);
             patternTextbox.setTooltip(new Tooltip("Pattern:\n {datafield;type;format} style placeholders.\n" + //
-                                                  "Datafield:\n" + //
-                                                  " - systemTime: current system time\n" + //
-                                                  " - dataSetName\n" + //
-                                                  " - xMin, xMax, yMin, yMax\n" + //
-                                                  " - metadata field\n" + //
-                                                  "type:\n" + //
-                                                  " - string(default)\n" + //
-                                                  " - date\n" + //
-                                                  " - int long\n" + //
-                                                  " - float/double\n" + //
-                                                  "format:\n" + //
-                                                  " - date: e.g. yyyyMMdd_HHmmss\n" + //
-                                                  " - numeric data: printf formats e.g. %d, %e"));
+                    "Datafield:\n" + //
+                    " - systemTime: current system time\n" + //
+                    " - dataSetName\n" + //
+                    " - xMin, xMax, yMin, yMax\n" + //
+                    " - metadata field\n" + //
+                    "type:\n" + //
+                    " - string(default)\n" + //
+                    " - date\n" + //
+                    " - int long\n" + //
+                    " - float/double\n" + //
+                    "format:\n" + //
+                    " - date: e.g. yyyyMMdd_HHmmss\n" + //
+                    " - numeric data: printf formats e.g. %d, %e"));
             dirButton.setOnAction((evt) -> {
                 DirectoryChooser directoryChooser = new DirectoryChooser();
                 File currentDir = new File(dirTextbox.getText());
