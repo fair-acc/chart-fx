@@ -82,7 +82,7 @@ public final class SimpleDataSetEstimators { // NOPMD name is as is (ie. no Help
         for (upperLimit = index; upperLimit < length && data[upperLimit] > maxHalf; upperLimit++) {
             // computation done in the abort condition
         }
-        for (lowerLimit = index; lowerLimit > 0 && data[lowerLimit] > maxHalf; lowerLimit--) {
+        for (lowerLimit = index; lowerLimit >= 0 && data[lowerLimit] > maxHalf; lowerLimit--) {
             // computation done in the abort condition
         }
         if (upperLimit >= length || lowerLimit < 0) {
@@ -109,7 +109,7 @@ public final class SimpleDataSetEstimators { // NOPMD name is as is (ie. no Help
         for (upperLimit = index; upperLimit < length && data[upperLimit] > maxHalf; upperLimit++) {
             // computation done in the abort condition
         }
-        for (lowerLimit = index; lowerLimit > 0 && data[lowerLimit] > maxHalf; lowerLimit--) {
+        for (lowerLimit = index; lowerLimit >= 0 && data[lowerLimit] > maxHalf; lowerLimit--) {
             // computation done in the abort condition
         }
         if (upperLimit >= length || lowerLimit < 0) {

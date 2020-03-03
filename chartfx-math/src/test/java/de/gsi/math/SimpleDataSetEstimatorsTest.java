@@ -282,15 +282,23 @@ class SimpleDataSetEstimatorsTest {
 
     @Test
     public void computeFWHM() {
+        // zero size input array
         assertEquals(Double.NaN, SimpleDataSetEstimators.computeFWHM(new double[] {}, 0, 0));
         assertEquals(Double.NaN, SimpleDataSetEstimators.computeInterpolatedFWHM(new double[] {}, 0, 0));
+        // regular case
         assertEquals(4, SimpleDataSetEstimators.computeFWHM(new double[] { 1, 2, 3, 2, 1 }, 5, 2));
+        assertEquals(3, SimpleDataSetEstimators.computeInterpolatedFWHM(new double[] { 1, 2, 3, 2, 1 }, 5, 2));
+        // index to close at array bounds
         assertEquals(Double.NaN, SimpleDataSetEstimators.computeFWHM(new double[] { 1, 2, 3, 2 }, 4, 2));
         assertEquals(Double.NaN, SimpleDataSetEstimators.computeFWHM(new double[] { 1, 2, 3, 2, 1 }, 5, 0));
         assertEquals(Double.NaN, SimpleDataSetEstimators.computeFWHM(new double[] { 1, 2, 3, 2, 1 }, 5, 5));
-        assertEquals(3, SimpleDataSetEstimators.computeInterpolatedFWHM(new double[] { 1, 2, 3, 2, 1 }, 5, 2));
         assertEquals(Double.NaN, SimpleDataSetEstimators.computeInterpolatedFWHM(new double[] { 1, 2, 3, 2 }, 4, 2));
         assertEquals(Double.NaN, SimpleDataSetEstimators.computeInterpolatedFWHM(new double[] { 1, 2, 3, 2, 1 }, 5, 0));
         assertEquals(Double.NaN, SimpleDataSetEstimators.computeInterpolatedFWHM(new double[] { 1, 2, 3, 2, 1 }, 5, 5));
+        // FWHM not inside data range
+        assertEquals(Double.NaN, SimpleDataSetEstimators.computeFWHM(new double[] {1,2,3,4,3}, 5, 3));
+        assertEquals(Double.NaN, SimpleDataSetEstimators.computeFWHM(new double[] {3,4,3,2,1}, 5, 1));
+        assertEquals(Double.NaN, SimpleDataSetEstimators.computeInterpolatedFWHM(new double[] {1,2,3,4,3}, 5, 3));
+        assertEquals(Double.NaN, SimpleDataSetEstimators.computeInterpolatedFWHM(new double[] {3,4,3,2,1}, 5, 1));
     }
 }
