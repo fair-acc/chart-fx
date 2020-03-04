@@ -23,6 +23,9 @@ import de.gsi.chart.XYChartCss;
  */
 public final class StyleParser { // NOPMD
     private static final Logger LOGGER = LoggerFactory.getLogger(StyleParser.class);
+    private static final String COULD_NOT_PARSE_INTEGER = "could not parse integer for '{}'='{}' returning null";
+    private static final String COULD_NOT_PARSE_COLOR_DESCRIPTION = "could not parse color description for '{}'='{}' returning null";
+    private static final String COULD_NOT_PARSE_FLOATING_POINT = "could not parse floating point for '{}'='{}' returning null";
     private static final int DEFAULT_FONT_SIZE = 18;
     private static final String DEFAULT_FONT = "Helvetia";
     private static final Pattern AT_LEAST_ONE_WHITESPACE_PATTERN = Pattern.compile("\\s+");
@@ -43,15 +46,7 @@ public final class StyleParser { // NOPMD
             return null;
         }
 
-        try {
-            return Boolean.parseBoolean(value);
-        } catch (final NumberFormatException ex) {
-            if (LOGGER.isErrorEnabled()) {
-                StyleParser.LOGGER.error(
-                        "could not parse boolean description for '" + key + "'='" + value + "' returning null", ex);
-            }
-            return null;
-        }
+        return Boolean.parseBoolean(value);
     }
 
     public static Color getColorPropertyValue(final String style, final String key) {
@@ -68,9 +63,11 @@ public final class StyleParser { // NOPMD
         try {
             return Color.web(value);
         } catch (final IllegalArgumentException ex) {
+            if (LOGGER.isTraceEnabled()) {
+                LOGGER.atTrace().setCause(ex).addArgument(key).addArgument(value).log(COULD_NOT_PARSE_COLOR_DESCRIPTION);
+            }
             if (LOGGER.isErrorEnabled()) {
-                StyleParser.LOGGER.error(
-                        "could not parse color description for '" + key + "'='" + value + "' returning null", ex);
+                LOGGER.atError().addArgument(key).addArgument(value).log(COULD_NOT_PARSE_COLOR_DESCRIPTION);
             }
             return null;
         }
@@ -89,18 +86,17 @@ public final class StyleParser { // NOPMD
 
         try {
             final String[] splitValues = value.split(",");
-            if (splitValues == null || splitValues.length == 0) {
-                return null;
-            }
             final double[] retArray = new double[splitValues.length];
             for (int i = 0; i < splitValues.length; i++) {
                 retArray[i] = Double.parseDouble(splitValues[i]);
             }
             return retArray;
         } catch (final NumberFormatException ex) {
+            if (LOGGER.isTraceEnabled()) {
+                LOGGER.atTrace().setCause(ex).addArgument(key).addArgument(value).log(COULD_NOT_PARSE_FLOATING_POINT);
+            }
             if (LOGGER.isErrorEnabled()) {
-                StyleParser.LOGGER.error(
-                        "could not parse integer description for '" + key + "'='" + value + "' returning null", ex);
+                LOGGER.atError().addArgument(key).addArgument(value).log(COULD_NOT_PARSE_FLOATING_POINT);
             }
             return null;
         }
@@ -120,9 +116,11 @@ public final class StyleParser { // NOPMD
         try {
             return Double.parseDouble(value);
         } catch (final NumberFormatException ex) {
+            if (LOGGER.isTraceEnabled()) {
+                LOGGER.atTrace().setCause(ex).addArgument(key).addArgument(value).log(COULD_NOT_PARSE_FLOATING_POINT);
+            }
             if (LOGGER.isErrorEnabled()) {
-                StyleParser.LOGGER.error(
-                        "could not parse integer description for '" + key + "'='" + value + "' returning null", ex);
+                LOGGER.atError().addArgument(key).addArgument(value).log(COULD_NOT_PARSE_FLOATING_POINT);
             }
             return null;
         }
@@ -133,39 +131,30 @@ public final class StyleParser { // NOPMD
             return Font.font(StyleParser.DEFAULT_FONT, StyleParser.DEFAULT_FONT_SIZE);
         }
 
-        try {
-            double fontSize = StyleParser.DEFAULT_FONT_SIZE;
-            final Double fontSizeObj = StyleParser.getFloatingDecimalPropertyValue(style, XYChartCss.FONT_SIZE);
-            if (fontSizeObj != null) {
-                fontSize = fontSizeObj;
-            }
-
-            FontWeight fontWeight = null;
-            final String fontW = StyleParser.getPropertyValue(style, XYChartCss.FONT_WEIGHT);
-            if (fontW != null) {
-                fontWeight = FontWeight.findByName(fontW);
-            }
-
-            FontPosture fontPosture = null;
-            final String fontP = StyleParser.getPropertyValue(style, XYChartCss.FONT_POSTURE);
-            if (fontP != null) {
-                fontPosture = FontPosture.findByName(fontP);
-            }
-
-            final String font = StyleParser.getPropertyValue(style, XYChartCss.FONT);
-            if (font == null) {
-                return Font.font(StyleParser.DEFAULT_FONT, fontWeight, fontPosture, fontSize);
-            }
-
-            return Font.font(font, fontWeight, fontPosture, fontSize);
-
-        } catch (final NumberFormatException ex) {
-            if (LOGGER.isErrorEnabled()) {
-                StyleParser.LOGGER
-                        .error("could not parse font description style='" + style + "' returning default font", ex);
-            }
-            return Font.font(StyleParser.DEFAULT_FONT, StyleParser.DEFAULT_FONT_SIZE);
+        double fontSize = StyleParser.DEFAULT_FONT_SIZE;
+        final Double fontSizeObj = StyleParser.getFloatingDecimalPropertyValue(style, XYChartCss.FONT_SIZE);
+        if (fontSizeObj != null) {
+            fontSize = fontSizeObj;
         }
+
+        FontWeight fontWeight = null;
+        final String fontW = StyleParser.getPropertyValue(style, XYChartCss.FONT_WEIGHT);
+        if (fontW != null) {
+            fontWeight = FontWeight.findByName(fontW);
+        }
+
+        FontPosture fontPosture = null;
+        final String fontP = StyleParser.getPropertyValue(style, XYChartCss.FONT_POSTURE);
+        if (fontP != null) {
+            fontPosture = FontPosture.findByName(fontP);
+        }
+
+        final String font = StyleParser.getPropertyValue(style, XYChartCss.FONT);
+        if (font == null) {
+            return Font.font(StyleParser.DEFAULT_FONT, fontWeight, fontPosture, fontSize);
+        }
+
+        return Font.font(font, fontWeight, fontPosture, fontSize);
     }
 
     public static Integer getIntegerPropertyValue(final String style, final String key) {
@@ -182,9 +171,11 @@ public final class StyleParser { // NOPMD
         try {
             return Integer.decode(value);
         } catch (final NumberFormatException ex) {
+            if (LOGGER.isTraceEnabled()) {
+                LOGGER.atTrace().setCause(ex).addArgument(key).addArgument(value).log(COULD_NOT_PARSE_INTEGER);
+            }
             if (LOGGER.isErrorEnabled()) {
-                StyleParser.LOGGER.error(
-                        "could not parse integer description for '" + key + "'='" + value + "' returning null", ex);
+                LOGGER.atError().addArgument(key).addArgument(value).log(COULD_NOT_PARSE_INTEGER);
             }
             return null;
         }
@@ -214,9 +205,11 @@ public final class StyleParser { // NOPMD
         try {
             return Arrays.asList(value.split(",\\s*")).stream().map(String::trim).mapToDouble(Double::parseDouble).toArray();
         } catch (final IllegalArgumentException ex) {
+            if (LOGGER.isTraceEnabled()) {
+                LOGGER.atTrace().setCause(ex).addArgument(key).addArgument(value).log(COULD_NOT_PARSE_COLOR_DESCRIPTION);
+            }
             if (LOGGER.isErrorEnabled()) {
-                StyleParser.LOGGER.error(
-                        "could not parse color description for '" + key + "'='" + value + "' returning null", ex);
+                LOGGER.atError().addArgument(key).addArgument(value).log(COULD_NOT_PARSE_COLOR_DESCRIPTION);
             }
             return null;
         }
@@ -233,11 +226,12 @@ public final class StyleParser { // NOPMD
     }
 
     /**
-     * spits input string, converts keys and values to lower case, and replaces '"' and ''' if any
-     *
-     * @param style the input style string
-     * @return the sanitised map
-     */
+	 * spits input string, converts keys and values to lower case, and replaces '"'
+	 * and ''' if any
+	 *
+	 * @param style the input style string
+	 * @return the sanitised map
+	 */
     public static Map<String, String> splitIntoMap(final String style) {
         final ConcurrentHashMap<String, String> retVal = new ConcurrentHashMap<>();
         if (style == null) {
@@ -247,7 +241,7 @@ public final class StyleParser { // NOPMD
         final String[] keyVals = AT_LEAST_ONE_WHITESPACE_PATTERN.matcher(style.toLowerCase(Locale.UK)).replaceAll("").split(";");
         for (final String keyVal : keyVals) {
             final String[] parts = STYLE_ASSIGNMENT_PATTERN.split(keyVal, 2);
-            if (parts == null || parts[0] == null || parts.length <= 1) {
+            if (parts.length <= 1) {
                 continue;
             }
 
