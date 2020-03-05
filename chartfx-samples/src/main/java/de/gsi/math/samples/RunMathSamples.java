@@ -52,6 +52,8 @@ public class RunMathSamples extends Application {
         buttons.getChildren().add(new MyButton("GaussianFitSample", new GaussianFitSample()));
         // buttons.getChildren().add(new MyButton("IIRFilterSample", new IIRFilterSample()));
         buttons.getChildren().add(new MyButton("IIRFrequencyFilterSample", new IIRFrequencyFilterSample()));
+        buttons.getChildren().add(new MyButton("ShortTermFourierTransform", new ShortTimeFourierTransformSample()));
+        buttons.getChildren().add(new MyButton("TSpectrum", new TSpectrumSample()));
         buttons.getChildren().add(new MyButton("WaveletDenoising", new WaveletDenoising()));
         buttons.getChildren().add(new MyButton("WaveletScalogram", new WaveletScalogram()));
 
@@ -96,9 +98,9 @@ public class RunMathSamples extends Application {
                                                 DEFAULT_PERIOD, false);
                                         screenCapture.performScreenCapture();
                                     });
-                                } catch (final InterruptedException e) {
+                                } catch (final InterruptedException ex) {
                                     if (LOGGER.isErrorEnabled()) {
-                                        LOGGER.atError().setCause(e).log("InterruptedException");
+                                        LOGGER.atError().setCause(ex).log("InterruptedException");
                                     }
                                 }
                             }
