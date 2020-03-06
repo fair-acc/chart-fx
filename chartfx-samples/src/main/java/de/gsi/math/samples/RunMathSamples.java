@@ -3,10 +3,6 @@ package de.gsi.math.samples;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import de.gsi.chart.utils.PeriodicScreenCapture;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.geometry.Pos;
@@ -16,6 +12,11 @@ import javafx.scene.control.CheckBox;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
 import javafx.stage.Stage;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import de.gsi.chart.utils.PeriodicScreenCapture;
 
 /**
  * @author rstein
@@ -70,11 +71,9 @@ public class RunMathSamples extends Application {
      */
     public static void main(final String[] args) {
         Application.launch(args);
-
     }
 
     protected class MyButton extends Button {
-
         public MyButton(final String buttonText, final Application run) {
             super(buttonText);
             setOnAction(e -> {
@@ -85,7 +84,6 @@ public class RunMathSamples extends Application {
 
                     if (makeScreenShot.isSelected()) {
                         new Thread() {
-
                             @Override
                             public void run() {
                                 try {
@@ -105,14 +103,12 @@ public class RunMathSamples extends Application {
                                 }
                             }
                         }.start();
-
                     }
                 } catch (final Exception e1) {
                     if (LOGGER.isErrorEnabled()) {
                         LOGGER.atError().setCause(e1).log("InterruptedException");
                     }
                 }
-
             });
         }
     }

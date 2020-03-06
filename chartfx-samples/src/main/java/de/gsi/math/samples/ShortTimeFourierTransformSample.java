@@ -182,9 +182,7 @@ public class ShortTimeFourierTransformSample extends AbstractDemoApplication {
         toneStart.setEditable(true);
         gridPane.addRow(5, new Label("ToneStop"), toneStop, new Label("[s]"));
         toneStop.setEditable(true);
-        installEventHandlers((evt) -> updateRawData(rawData), nSamples.valueProperty(), sampleRate.valueProperty(),
-                toneFreq.valueProperty(), toneAmplitude.valueProperty(), toneStart.valueProperty(),
-                toneStop.valueProperty());
+        installEventHandlers((evt) -> updateRawData(rawData), nSamples.valueProperty(), sampleRate.valueProperty(), toneFreq.valueProperty(), toneAmplitude.valueProperty(), toneStart.valueProperty(), toneStop.valueProperty());
         return gridPane;
     }
 
@@ -206,7 +204,6 @@ public class ShortTimeFourierTransformSample extends AbstractDemoApplication {
                 outputData.getAxisDescription(DataSet.DIM_X).set(newData.getAxisDescription(DataSet.DIM_X));
                 outputData.getAxisDescription(DataSet.DIM_Y).set(newData.getAxisDescription(DataSet.DIM_Y));
                 outputData.getAxisDescription(DataSet.DIM_Z).set(newData.getAxisDescription(DataSet.DIM_Z));
-
             }
         } catch (Exception e) {
             outputData.set(new double[0], new double[0], new double[0][0]);
@@ -233,9 +230,7 @@ public class ShortTimeFourierTransformSample extends AbstractDemoApplication {
         gridPane.add(truncDCNyq, 0, 5, 3, 1);
         complex.setSelected(false);
         gridPane.add(complex, 0, 6, 3, 1);
-        installEventHandlers((evt) -> stft(rawData, stftData), nFFT.valueProperty(), step.valueProperty(),
-                apodizationWindow.valueProperty(), padding.valueProperty(), dbScale.selectedProperty(),
-                truncDCNyq.selectedProperty(), complex.selectedProperty());
+        installEventHandlers((evt) -> stft(rawData, stftData), nFFT.valueProperty(), step.valueProperty(), apodizationWindow.valueProperty(), padding.valueProperty(), dbScale.selectedProperty(), truncDCNyq.selectedProperty(), complex.selectedProperty());
         return gridPane;
     }
 
@@ -254,16 +249,19 @@ public class ShortTimeFourierTransformSample extends AbstractDemoApplication {
             // linear chirp with discontinuity
             offset = (i > 0.5 * maxPoints) ? -20e3 : 0;
             yModel[i] = (i > 0.2 * maxPoints && i < 0.9 * maxPoints)
-                    ? 0.7 * Math.sin(TMathConstants.TwoPi() * 30e3 * x * (2e3 * x + offset)) : 0;
+                                ? 0.7 * Math.sin(TMathConstants.TwoPi() * 30e3 * x * (2e3 * x + offset))
+                                : 0;
 
             // single tone
             yModel[i] += (i > toneStart.getValue() * maxPoints && i < toneStop.getValue() * maxPoints)
-                    ? toneAmplitude.getValue() * Math.sin(TMathConstants.TwoPi() * toneFreq.getValue() * x) : 0;
+                                 ? toneAmplitude.getValue() * Math.sin(TMathConstants.TwoPi() * toneFreq.getValue() * x)
+                                 : 0;
 
             // modulation around 0.4
             final double mod = Math.cos(TMathConstants.TwoPi() * 0.01e6 * x);
             yModel[i] += (i > 0.3 * maxPoints && i < 0.9 * maxPoints)
-                    ? 1.0 * Math.sin(TMathConstants.TwoPi() * (0.4 - 5e-4 * mod) * 45e4 * x) : 0;
+                                 ? 1.0 * Math.sin(TMathConstants.TwoPi() * (0.4 - 5e-4 * mod) * 45e4 * x)
+                                 : 0;
 
             // quadratic chirp starting at 0.1
             yModel[i] += 0.5 * Math.sin(TMathConstants.TwoPi() * ((0.1 + 5e3 * x * x) * 1e6 * x));
@@ -286,11 +284,9 @@ public class ShortTimeFourierTransformSample extends AbstractDemoApplication {
             final ContinuousWavelet wtrafo = new ContinuousWavelet();
             final DoubleDataSet3D newData = wtrafo.getScalogram(inputData.getValues(DataSet.DIM_Y), quantx.getValue(),
                     quanty.getValue(), nu.getValue(), waveletFMin.getValue(), waveletFMax.getValue());
-            outputData.getAxisDescription(DataSet.DIM_X).set(inputData.getAxisDescription(DataSet.DIM_X).getName(),
-                    inputData.getAxisDescription(DataSet.DIM_X).getUnit());
+            outputData.getAxisDescription(DataSet.DIM_X).set(inputData.getAxisDescription(DataSet.DIM_X).getName(), inputData.getAxisDescription(DataSet.DIM_X).getUnit());
             outputData.getAxisDescription(DataSet.DIM_Y).set("frequency", "Hz");
-            outputData.getAxisDescription(DataSet.DIM_Z).set("Amplitude",
-                    inputData.getAxisDescription(DataSet.DIM_Y).getUnit());
+            outputData.getAxisDescription(DataSet.DIM_Z).set("Amplitude", inputData.getAxisDescription(DataSet.DIM_Y).getUnit());
             final double[] yValues = newData.getValues(DataSet.DIM_Y);
             final double fs = sampleRate.getValue();
             for (int i = 0; i < yValues.length; i++) {
@@ -325,8 +321,7 @@ public class ShortTimeFourierTransformSample extends AbstractDemoApplication {
         quantx.setEditable(true);
         gridPane.addRow(4, new Label("quantY"), quanty, new Label("[samples]"));
         quanty.setEditable(true);
-        installEventHandlers((evt) -> wavelet(rawData, waveletData), nu.valueProperty(), waveletFMin.valueProperty(),
-                waveletFMax.valueProperty(), quantx.valueProperty(), quanty.valueProperty());
+        installEventHandlers((evt) -> wavelet(rawData, waveletData), nu.valueProperty(), waveletFMin.valueProperty(), waveletFMax.valueProperty(), quantx.valueProperty(), quanty.valueProperty());
         return gridPane;
     }
 

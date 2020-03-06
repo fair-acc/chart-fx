@@ -98,7 +98,7 @@ public class ShortTimeFourierTransform {
         final double[] oldFrequencyAxis = output == null ? null : output.getValues(DIM_Y);
         final double[] frequencyAxis = getFrequencyAxisComplex(dt, nFFT, oldFrequencyAxis);
         final double[][] oldAmplitudeData = output instanceof DoubleDataSet3D ? ((DoubleDataSet3D) output).getZValues()
-                : null;
+                                                                              : null;
         final double[][] amplitudeData = complex(real, imag, oldAmplitudeData, nFFT, step, apodization, padding,
                 dbScale, truncateDCNy);
 
@@ -140,7 +140,8 @@ public class ShortTimeFourierTransform {
         AssertUtils.equalDoubleArrays(real, imag); // check for same length
         final int nT = ceilDiv(real.length, step); // number of time steps
         final double[][] amplitudeData = output == null || output.length != nFFT || output[0].length != nT
-                ? new double[nFFT][nT] : output; // output array
+                                                 ? new double[nFFT][nT]
+                                                 : output; // output array
         // calculate spectrogram
         final DoubleFFT_1D fastFourierTrafo = new DoubleFFT_1D(nFFT);
         final double[] raw = new double[2 * nFFT]; // array to perform calculations in
@@ -148,7 +149,8 @@ public class ShortTimeFourierTransform {
             // obtain input data for FFT
             final int offset = i * step;
             final int validLength = real.length - offset;
-            fillraw: for (int j = 0; j < nFFT; j++) {
+        fillraw:
+            for (int j = 0; j < nFFT; j++) {
                 if (offset + j < real.length) {
                     raw[2 * j] = real[offset + j];
                     raw[2 * j + 1] = imag[offset + j];
@@ -175,7 +177,7 @@ public class ShortTimeFourierTransform {
             fastFourierTrafo.complexForward(raw);
             // calculate magnitude spectrum
             final double[] current = dbScale ? SpectrumTools.computeMagnitudeSpectrum_dB(raw, truncateDCNy)
-                    : SpectrumTools.computeMagnitudeSpectrum(raw, truncateDCNy);
+                                             : SpectrumTools.computeMagnitudeSpectrum(raw, truncateDCNy);
             // copy output into result array (layout of spectrum is 0, ..., fmax, 0, ..., fmin)
             // TODO: use more efficient copy, possibly transpose output?
             for (int j = 0; j < nFFT; j++) {
@@ -194,7 +196,8 @@ public class ShortTimeFourierTransform {
             final boolean truncateDCNy) {
         final int nT = ceilDiv(complexInput.length, 2 * step); // number of time steps
         final double[][] amplitudeData = output == null || output.length != nFFT || output[0].length != nT
-                ? new double[nFFT][nT] : output; // output array
+                                                 ? new double[nFFT][nT]
+                                                 : output; // output array
         // calculate spectrogram
         final DoubleFFT_1D fastFourierTrafo = new DoubleFFT_1D(nFFT);
         final double[] raw = new double[2 * nFFT]; // array to perform calculations in
@@ -231,7 +234,7 @@ public class ShortTimeFourierTransform {
             fastFourierTrafo.complexForward(raw);
             // calculate magnitude spectrum
             final double[] current = dbScale ? SpectrumTools.computeMagnitudeSpectrum_dB(raw, truncateDCNy)
-                    : SpectrumTools.computeMagnitudeSpectrum(raw, truncateDCNy);
+                                             : SpectrumTools.computeMagnitudeSpectrum(raw, truncateDCNy);
             // copy output into result array (layout of spectrum is 0, ..., fmax, 0, ..., fmin)
             // TODO: use more efficient copy, possibly transpose output?
             for (int j = 0; j < nFFT; j++) {
@@ -303,7 +306,7 @@ public class ShortTimeFourierTransform {
         final double[] oldFrequencyAxis = output == null ? null : output.getValues(DIM_Y);
         final double[] frequencyAxis = getFrequencyAxisReal(dt, nFFT, oldFrequencyAxis);
         final double[][] oldAmplitudeData = output instanceof DoubleDataSet3D ? ((DoubleDataSet3D) output).getZValues()
-                : null;
+                                                                              : null;
         final double[][] amplitudeData = real(yData, oldAmplitudeData, nFFT, step, apodization, padding, dbScale,
                 truncateDCNy);
 
@@ -343,7 +346,8 @@ public class ShortTimeFourierTransform {
             final Apodization apodization, final Padding padding, final boolean dbScale, final boolean truncateDCNy) {
         final int nT = ceilDiv(input.length, step); // number of time steps
         final double[][] amplitudeData = output == null || output.length != nFFT / 2 || output[0].length != nT
-                ? new double[nFFT / 2][nT] : output; // output array
+                                                 ? new double[nFFT / 2][nT]
+                                                 : output; // output array
         final DoubleFFT_1D fastFourierTrafo = new DoubleFFT_1D(nFFT);
         final double[] raw = new double[nFFT]; // array to perform calculations in
         for (int i = 0; i < nT; i++) {
@@ -375,7 +379,7 @@ public class ShortTimeFourierTransform {
             fastFourierTrafo.realForward(raw);
             // calculate magnitude spectrum
             final double[] current = dbScale ? SpectrumTools.computeMagnitudeSpectrum_dB(raw, truncateDCNy)
-                    : SpectrumTools.computeMagnitudeSpectrum(raw, truncateDCNy);
+                                             : SpectrumTools.computeMagnitudeSpectrum(raw, truncateDCNy);
             // copy output into result array (layout of spectrum is 0, ..., fmax, 0, ..., fmin)
             // TODO: use more efficient copy, possibly transpose output?
             for (int j = 0; j < nFFT / 2; j++) {

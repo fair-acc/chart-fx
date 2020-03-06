@@ -4,14 +4,13 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import java.util.Arrays;
-
-import org.jtransforms.fft.DoubleFFT_1D;
-
 import static de.gsi.dataset.DataSet.DIM_X;
 import static de.gsi.dataset.DataSet.DIM_Y;
 import static de.gsi.dataset.DataSet.DIM_Z;
 
+import java.util.Arrays;
+
+import org.jtransforms.fft.DoubleFFT_1D;
 import org.junit.jupiter.api.Test;
 
 import de.gsi.dataset.DataSet;
@@ -145,10 +144,7 @@ class ShortTimeFourierTransformTest {
 
         // test unconforming dataSets
         assertThrows(IllegalArgumentException.class,
-                () -> ShortTimeFourierTransform.real(
-                        new DoubleDataSet3D("illegal data set", new double[] { 1, 2 }, new double[] { 1, 2, 3 },
-                                new double[][] { { 1, 2 }, { 3, 4 }, { 5, 6 } }),
-                        null, 8, 8, Apodization.Hann, Padding.ZERO, true, false));
+                () -> ShortTimeFourierTransform.real(new DoubleDataSet3D("illegal data set", new double[] { 1, 2 }, new double[] { 1, 2, 3 }, new double[][] { { 1, 2 }, { 3, 4 }, { 5, 6 } }), null, 8, 8, Apodization.Hann, Padding.ZERO, true, false));
     }
 
     /**
@@ -284,24 +280,21 @@ class ShortTimeFourierTransformTest {
         ShortTimeFourierTransform.complex(sine, sineSpectrogram, 2 * nFreq, 2 * step, Apodization.Rectangular,
                 Padding.MIRROR, true, false);
         assertEquals(3, sineSpectrogram.getDataCount(DIM_X));
-        assertEquals(nFreq*2, sineSpectrogram.getDataCount(DIM_Y));
+        assertEquals(nFreq * 2, sineSpectrogram.getDataCount(DIM_Y));
 
         // test empty input dataSet (inplace and non-inplace)
-        ShortTimeFourierTransform.complex(new MultiDimDoubleDataSet("empty",3), sineSpectrogram, 2 * nFreq, 2 * step,
+        ShortTimeFourierTransform.complex(new MultiDimDoubleDataSet("empty", 3), sineSpectrogram, 2 * nFreq, 2 * step,
                 Apodization.Rectangular, Padding.MIRROR, true, false);
         assertEquals(0, sineSpectrogram.getDataCount(DIM_X));
         assertEquals(0, sineSpectrogram.getDataCount(DIM_Y));
-        final DataSet emptySpectrogram = ShortTimeFourierTransform.complex(new MultiDimDoubleDataSet("empty",3), null, 2 * nFreq,
+        final DataSet emptySpectrogram = ShortTimeFourierTransform.complex(new MultiDimDoubleDataSet("empty", 3), null, 2 * nFreq,
                 2 * step, Apodization.Rectangular, Padding.MIRROR, true, false);
         assertEquals(0, emptySpectrogram.getDataCount(DIM_X));
         assertEquals(0, emptySpectrogram.getDataCount(DIM_Y));
 
         // test non-conforming dataSets
         assertThrows(IllegalArgumentException.class,
-                () -> ShortTimeFourierTransform.complex(
-                        new DoubleDataSet3D("illegal data set", new double[] { 1, 2 }, new double[] { 1, 2, 3 },
-                                new double[][] { { 1, 2 }, { 3, 4 }, { 5, 6 } }),
-                        null, 8, 8, Apodization.Hann, Padding.ZERO, true, false));
+                () -> ShortTimeFourierTransform.complex(new DoubleDataSet3D("illegal data set", new double[] { 1, 2 }, new double[] { 1, 2, 3 }, new double[][] { { 1, 2 }, { 3, 4 }, { 5, 6 } }), null, 8, 8, Apodization.Hann, Padding.ZERO, true, false));
     }
 
     /**
