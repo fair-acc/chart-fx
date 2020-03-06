@@ -211,7 +211,7 @@ public class ShortTimeFourierTransform {
                 System.arraycopy(complexInput, offset, raw, 0, validLength);
                 switch (padding) {
                 case MIRROR:
-                    for (int j = validLength; j+1 < raw.length; j += 2) {
+                    for (int j = validLength; j + 1 < raw.length; j += 2) {
                         raw[j] = complexInput[complexInput.length - j + validLength - 1];
                         raw[j + 1] = complexInput[complexInput.length - j + validLength];
                     }
@@ -221,7 +221,7 @@ public class ShortTimeFourierTransform {
                     break;
                 default:
                 case ZOH:
-                    for (int j = validLength; j+1 < raw.length; j += 2) {
+                    for (int j = validLength; j + 1 < raw.length; j += 2) {
                         raw[j] = complexInput[complexInput.length - 2];
                         raw[j + 1] = complexInput[complexInput.length - 1];
                     }
