@@ -130,8 +130,7 @@ public class LabelledMarkerRenderer extends AbstractDataSetManagement<LabelledMa
         }
         if (xAxis == null) {
             if (LOGGER.isWarnEnabled()) {
-                LOGGER.atWarn().addArgument(LabelledMarkerRenderer.class.getSimpleName())
-                    .log("{}::drawVerticalLabelledMarker(...) getFirstAxis(HORIZONTAL) returned null skip plotting");
+                LOGGER.atWarn().addArgument(LabelledMarkerRenderer.class.getSimpleName()).log("{}::drawVerticalLabelledMarker(...) getFirstAxis(HORIZONTAL) returned null skip plotting");
             }
             return;
         }
@@ -235,8 +234,7 @@ public class LabelledMarkerRenderer extends AbstractDataSetManagement<LabelledMa
         }
         if (xAxis == null) {
             if (LOGGER.isWarnEnabled()) {
-                LOGGER.atWarn().addArgument(LabelledMarkerRenderer.class.getSimpleName())
-                    .log("{}::render(...) getFirstAxis(HORIZONTAL) returned null skip plotting");
+                LOGGER.atWarn().addArgument(LabelledMarkerRenderer.class.getSimpleName()).log("{}::render(...) getFirstAxis(HORIZONTAL) returned null skip plotting");
             }
             return;
         }
