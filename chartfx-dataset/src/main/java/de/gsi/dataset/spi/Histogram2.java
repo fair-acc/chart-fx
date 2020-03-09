@@ -79,28 +79,11 @@ public class Histogram2 extends AbstractHistogram implements Histogram2D, DataSe
 
     @Override
     public double get(final int dimIndex, final int binIndex) {
+        if (dimIndex == DIM_Z) {
+            return this.getBinContent(binIndex);
+        }
         return getBinCenter(dimIndex, binIndex + 1);
     }
-
-    // /*
-    // * (non-Javadoc)
-    // *
-    // * @see de.gsi.dataset.DataSet#getX(int)
-    // */
-    // @Override
-    // public double getX(int i) {
-    // return getBinCenter(DIM_X, i + 1);
-    // }
-    //
-    // /*
-    // * (non-Javadoc)
-    // *
-    // * @see de.gsi.dataset.DataSet#getY(int)
-    // */
-    // @Override
-    // public double getY(int i) {
-    // return getBinCenter(DIM_Y, i + 1);
-    // }
 
     @Override
     public int getDataCount() {
