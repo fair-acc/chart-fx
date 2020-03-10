@@ -19,6 +19,7 @@ import de.gsi.dataset.DataSet;
 import de.gsi.dataset.DataSet2D;
 import de.gsi.dataset.DataSet3D;
 import de.gsi.dataset.DataSetError;
+import de.gsi.dataset.event.AxisRangeChangeEvent;
 import de.gsi.dataset.event.EventListener;
 import de.gsi.dataset.locks.DataSetLock;
 import de.gsi.dataset.locks.DefaultDataSetLock;
@@ -184,8 +185,8 @@ public class MountainRangeRenderer extends ErrorDataSetRenderer implements Rende
         private double yShift;
         private final transient List<EventListener> updateListener = new ArrayList<>();
         private final transient List<AxisDescription> axesDescriptions = new ArrayList<>(Arrays.asList( //
-                new DefaultAxisDescription(Demux3dTo2dDataSet.this, "x-Axis", "a.u."), //
-                new DefaultAxisDescription(Demux3dTo2dDataSet.this, "y-Axis", "a.u.")));
+                new DefaultAxisDescription("x-Axis", "a.u."), //
+                new DefaultAxisDescription("y-Axis", "a.u.")));
 
         public Demux3dTo2dDataSet(final DataSet3D sourceDataSet, final int selectedYIndex) {
             super();
@@ -295,7 +296,8 @@ public class MountainRangeRenderer extends ErrorDataSetRenderer implements Rende
 
         @Override
         public DataSet recomputeLimits(int dimension) {
-            this.setYMax(dataSet.getAxisDescription(2));
+            this.setYMax(dataSet.getAxisDescription(DIM_Z));
+            notifyRangeChange();
             return this;
         }
 
@@ -309,6 +311,16 @@ public class MountainRangeRenderer extends ErrorDataSetRenderer implements Rende
 
             Demux3dTo2dDataSet.this.getAxisDescription(DIM_Y).set(zAxis.getName(), zAxis.getUnit(), zAxis.getMin(),
                     zRangeMax * (1 + mountainRaingeExtra));
+        }
+        
+        private final void notifyRangeChange() {
+            if (dataSet == null || !dataSet.autoNotification().get()) {
+                return;
+            }
+            final String name = Demux3dTo2dDataSet.this.getAxisDescription(DIM_Y).getName();
+            final String unit = Demux3dTo2dDataSet.this.getAxisDescription(DIM_Y).getUnit();
+            dataSet.invokeListener(
+                    new AxisRangeChangeEvent(dataSet, "updated axis range for '" + name + "' '[" + unit + "]'", -1));
         }
 
         @Override
