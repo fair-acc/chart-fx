@@ -46,32 +46,32 @@ public class HistoryDataSetRendererSample extends Application {
 
         long startTime = ProcessingProfiler.getTimeStamp();
 
-        dataSet.autoNotification().set(false);
-        dataSetNoError.autoNotification().set(false);
-        for (int n = 0; n < HistoryDataSetRendererSample.N_SAMPLES; n++) {
-            final double x = n;
-            final double phase = 2 * Math.PI * updateIteration / 40.0;
-            final double a1 = 1 + 0.5 * Math.sin(phase);
-            final double a2 = 1 + 0.5 * Math.cos(phase);
-            final double y1 = a1 * GaussFunction.gauss(x, HistoryDataSetRendererSample.N_SAMPLES * 1.0 / 3.0, HistoryDataSetRendererSample.N_SAMPLES / 20.0) * 1000;
-            final double y2 = a2 * GaussFunction.gauss(x, HistoryDataSetRendererSample.N_SAMPLES * 2.0 / 3.0, HistoryDataSetRendererSample.N_SAMPLES / 20.0) * 1000;
-            final double ey1 = 0.01 * y1;
+        dataSetNoError.lock().writeLockGuard(() -> dataSet.lock().writeLockGuard(() -> {
+            for (int n = 0; n < HistoryDataSetRendererSample.N_SAMPLES; n++) {
+                final double x = n;
+                final double phase = 2 * Math.PI * updateIteration / 40.0;
+                final double a1 = 1 + 0.5 * Math.sin(phase);
+                final double a2 = 1 + 0.5 * Math.cos(phase);
+                final double y1 = a1 * GaussFunction.gauss(x, HistoryDataSetRendererSample.N_SAMPLES * 1.0 / 3.0,
+                        HistoryDataSetRendererSample.N_SAMPLES / 20.0) * 1000;
+                final double y2 = a2 * GaussFunction.gauss(x, HistoryDataSetRendererSample.N_SAMPLES * 2.0 / 3.0,
+                        HistoryDataSetRendererSample.N_SAMPLES / 20.0) * 1000;
+                final double ey1 = 0.01 * y1;
 
-            // lin scale
-            dataSet.set(n, x, y1, ey1, ey1);
-            dataSetNoError.set(n, x, y2);
+                // lin scale
+                dataSet.set(n, x, y1, ey1, ey1);
+                dataSetNoError.set(n, x, y2);
 
-            // log scale
-            // dataSet.set(n, x, Math.exp(1e-4*x), 1e-3, 1e-3);
-            // dataSetNoError.set(n, x, Math.exp(2e-4*x));
-        }
-        dataSetNoError.setStyle("dsIndex=1;");
-        // dataSet.setStyle("strokeColor=red;");
-        // dataSet.setStyle("dsIndex=2;");
+                // log scale
+                // dataSet.set(n, x, Math.exp(1e-4*x), 1e-3, 1e-3);
+                // dataSetNoError.set(n, x, Math.exp(2e-4*x));
+            }
+            dataSetNoError.setStyle("dsIndex=1;");
+            // dataSet.setStyle("strokeColor=red;");
+            // dataSet.setStyle("dsIndex=2;");
 
-        updateIteration++;
-        dataSetNoError.autoNotification().set(true);
-        dataSet.autoNotification().set(true);
+            updateIteration++;
+        }));
 
         Platform.runLater(() -> {
             dataSet.fireInvalidated(null);
@@ -140,7 +140,7 @@ public class HistoryDataSetRendererSample extends Application {
         final HistoryDataSetRenderer historyRenderer2 = new HistoryDataSetRenderer(10);
         historyRenderer2.getAxes().add(yAxis2);
         chart.getRenderers().add(historyRenderer2);
-        historyRenderer2.setIntensityFading(0.8);
+        historyRenderer2.setIntensityFading(0.8); // default: 0.65
 
         chart.getPlugins().add(new Zoomer());
         chart.getPlugins().add(new EditAxis());
