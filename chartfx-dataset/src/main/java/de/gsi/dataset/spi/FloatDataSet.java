@@ -445,8 +445,8 @@ public class FloatDataSet extends AbstractDataSet<FloatDataSet> implements Edita
                 this.yValues = FloatArrayList.wrap(yValues, nSamplesToAdd);
             }
 
-            recomputeLimits(DIM_X);
-            recomputeLimits(DIM_Y);
+            // invalidate ranges
+            getAxisDescriptions().forEach(AxisDescription::clear);
         });
         return fireInvalidated(new UpdatedDataEvent(this));
     }
@@ -487,9 +487,8 @@ public class FloatDataSet extends AbstractDataSet<FloatDataSet> implements Edita
             getDataLabelMap().remove(index, index + x.length);
             getDataStyleMap().remove(index, index + x.length);
 
-            // invalidate and recompute ranges
-            recomputeLimits(DIM_X);
-            recomputeLimits(DIM_Y);
+            // invalidate ranges
+            getAxisDescriptions().forEach(AxisDescription::clear);
         });
         return fireInvalidated(new UpdatedDataEvent(this));
     }

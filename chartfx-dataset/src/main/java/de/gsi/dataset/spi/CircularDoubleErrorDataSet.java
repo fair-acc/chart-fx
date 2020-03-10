@@ -91,8 +91,8 @@ public class CircularDoubleErrorDataSet extends AbstractErrorDataSet<CircularDou
             dataTag.put(tag);
             dataStyles.put(style);
 
-            recomputeLimits(DIM_X);
-            recomputeLimits(DIM_Y);
+            // invalidate ranges
+            getAxisDescriptions().forEach(AxisDescription::clear);
         });
 
         return fireInvalidated(new AddedDataEvent(this));
@@ -128,8 +128,11 @@ public class CircularDoubleErrorDataSet extends AbstractErrorDataSet<CircularDou
             dataTag.put(new String[yErrPos.length], yErrPos.length);
             dataStyles.put(new String[yErrPos.length], yErrPos.length);
 
-            recomputeLimits(DIM_X);
-            recomputeLimits(DIM_Y);
+            getAxisDescription(DIM_X).add(xVals);
+            for (int i = 0; i < yVals.length; i++) {
+                getAxisDescription(DIM_Y).add(yVals[i]+ yErrPos[i]);
+                getAxisDescription(DIM_Y).add(yVals[i]- yErrNeg[i]);
+            }
         });
 
         return fireInvalidated(new AddedDataEvent(this));

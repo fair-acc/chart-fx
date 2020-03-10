@@ -204,8 +204,8 @@ public class LimitedIndexedTreeDataSet extends AbstractErrorDataSet<LimitedIndex
                 for (; data.size() > maxQueueSize || now - first.getX() > maxLength; first = data.first()) {
                     data.remove(first);
                 }
-                recomputeLimits(DIM_X);
-                recomputeLimits(DIM_Y);
+                // invalidate ranges
+                getAxisDescriptions().forEach(AxisDescription::clear);
             } catch (final NoSuchElementException cannotDoAnythingHere) {
                 // cannot do anything here
             }
@@ -326,10 +326,8 @@ public class LimitedIndexedTreeDataSet extends AbstractErrorDataSet<LimitedIndex
             }
             data.removeAll(tupleTobeRemovedReferences);
 
-            getAxisDescription(DIM_X).setMax(Double.NaN);
-            getAxisDescription(DIM_Y).setMax(Double.NaN);
-            recomputeLimits(DIM_X);
-            recomputeLimits(DIM_Y);
+            // invalidate ranges
+            getAxisDescriptions().forEach(AxisDescription::clear);
         });
         return fireInvalidated(new RemovedDataEvent(this));
     }

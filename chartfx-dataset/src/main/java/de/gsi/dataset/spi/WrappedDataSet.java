@@ -34,8 +34,8 @@ public class WrappedDataSet extends AbstractDataSet<WrappedDataSet> implements D
     }
 
     private void datasetInvalidated() {
-        recomputeLimits(DIM_X);
-        recomputeLimits(DIM_Y);
+        // invalidate ranges
+        getAxisDescriptions().forEach(AxisDescription::clear);
         fireInvalidated(new UpdatedDataEvent(this));
     }
 

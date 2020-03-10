@@ -362,10 +362,8 @@ public class ListErrorDataSet extends AbstractErrorDataSet<ListErrorDataSet> imp
             }
             data.removeAll(tupleTobeRemovedReferences);
 
-            getAxisDescription(DIM_X).add(Double.NaN);
-            getAxisDescription(DIM_Y).add(Double.NaN);
-            recomputeLimits(DIM_X);
-            recomputeLimits(DIM_Y);
+            // invalidate ranges
+            getAxisDescriptions().forEach(AxisDescription::clear);
         });
         return fireInvalidated(new RemovedDataEvent(this));
     }

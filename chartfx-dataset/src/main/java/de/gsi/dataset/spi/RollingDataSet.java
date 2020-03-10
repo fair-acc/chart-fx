@@ -8,6 +8,7 @@
  */
 package de.gsi.dataset.spi;
 
+import de.gsi.dataset.AxisDescription;
 import de.gsi.dataset.DataSet;
 import de.gsi.dataset.event.AddedDataEvent;
 import de.gsi.dataset.event.UpdatedDataEvent;
@@ -72,8 +73,8 @@ public class RollingDataSet extends FragmentedDataSet {
         list.add(new InternalDataSet(set));
         dataCount += set.getDataCount();
         lastLength = set.getAxisDescription(DIM_X).getMax();
-        recomputeLimits(DIM_X);
-        recomputeLimits(DIM_Y);
+        // invalidate ranges
+        getAxisDescriptions().forEach(AxisDescription::clear);
         fireInvalidated(new AddedDataEvent(this));
     }
 
@@ -104,8 +105,8 @@ public class RollingDataSet extends FragmentedDataSet {
 
         public InternalDataSet(DataSet ds) {
             super(ds);
-            recomputeLimits(DIM_X);
-            recomputeLimits(DIM_Y);
+            // invalidate ranges
+            getAxisDescriptions().forEach(AxisDescription::clear);
         }
 
         public void shift(double value) {

@@ -97,8 +97,8 @@ public class FifoDoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorData
             // remove old fields
             expire(x);
 
-            recomputeLimits(DIM_X);
-            recomputeLimits(DIM_Y);
+            // invalidate ranges
+            getAxisDescriptions().forEach(AxisDescription::clear);
         });
         fireInvalidated(new AddedDataEvent(this));
 
@@ -162,9 +162,8 @@ public class FifoDoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorData
             }
 
             data.removeAll(toRemoveList);
-            recomputeLimits(DIM_X);
-            recomputeLimits(DIM_Y);
-            // computeLimits(); // N.B. already computed above
+            // invalidate ranges
+            getAxisDescriptions().forEach(AxisDescription::clear);
             return toRemoveList.size();
         });
         if (dataPointsToRemove != 0) {

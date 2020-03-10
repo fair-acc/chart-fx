@@ -404,9 +404,8 @@ public class MultiDimDoubleDataSet extends AbstractDataSet<MultiDimDoubleDataSet
                 }
             }
 
-            for (int i = 0; i < this.values.length; i++) {
-                recomputeLimits(i);
-            }
+            // invalidate ranges
+            getAxisDescriptions().forEach(AxisDescription::clear);
         });
         return fireInvalidated(new UpdatedDataEvent(this));
     }
