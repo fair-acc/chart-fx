@@ -190,6 +190,9 @@ public class DefaultAxisDescription extends DataRange implements AxisDescription
         if (dataSet != null) {
             boolean notify = false;
             for (int dim = 0; dim < dataSet.getDimension(); dim++) {
+                if (dim >= dataSet.getAxisDescriptions().size()) {
+                    break;
+                }
                 if (dataSet.getAxisDescription(dim).isDefined()) {
                     continue;
                 }
@@ -216,6 +219,9 @@ public class DefaultAxisDescription extends DataRange implements AxisDescription
         if (dataSet != null) {
             boolean notify = false;
             for (int dim = 0; dim < dataSet.getDimension(); dim++) {
+                if (dim >= dataSet.getAxisDescriptions().size()) {
+                    break;
+                }
                 if (dataSet.getAxisDescription(dim).isDefined()) {
                     continue;
                 }

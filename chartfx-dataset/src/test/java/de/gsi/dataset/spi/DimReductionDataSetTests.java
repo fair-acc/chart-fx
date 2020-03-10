@@ -234,6 +234,12 @@ public class DimReductionDataSetTests {
         assertArrayEquals(testData.getZValues()[0], sliceDataSetX.getValues(DIM_Y), "first row match");
         assertArrayEquals(testData.getValues(DIM_Y), sliceDataSetY.getValues(DIM_X));
 
+        sliceDataSetX.setMinIndex(DIM_X, 2.0);
+        assertEquals(2, nEvent, "DataSet3D event propagated");
+
+        assertArrayEquals(testData.getZValues()[1], sliceDataSetX.getValues(DIM_Y), "first row match");
+        assertArrayEquals(testData.getValues(DIM_Y), sliceDataSetY.getValues(DIM_X));
+
         LOGGER.atDebug().log("testSliceOptions - done");
     }
 }
