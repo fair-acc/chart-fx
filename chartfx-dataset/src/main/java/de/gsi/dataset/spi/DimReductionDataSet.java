@@ -85,16 +85,22 @@ public class DimReductionDataSet extends DoubleDataSet implements EventListener 
     }
 
     public void setMaxIndex(final int dimIndex, double val) {
+        // disable notifications for the source dataSet, to prevent an infinite loop
+        source.removeListener(this);
         lock().writeLockGuard(() -> {
             indexMax = source.getIndex(dimIndex, val);
         });
+        source.addListener(this);
         this.handle(new UpdateEvent(this, "changed indexMax"));
     }
 
     public void setMinIndex(final int dimIndex, double val) {
+        // disable notifications for the source dataSet, to prevent an infinite loop
+        source.removeListener(this);
         lock().writeLockGuard(() -> {
             indexMin = source.getIndex(dimIndex, val);
         });
+        source.addListener(this);
         this.handle(new UpdateEvent(this, "changed indexMax"));
     }
 
