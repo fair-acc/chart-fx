@@ -2,6 +2,7 @@ package de.gsi.dataset.utils.serializer;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static de.gsi.dataset.DataSet.DIM_X;
 
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -109,7 +110,7 @@ public class IoSerialiserTests {
         LOGGER.atDebug().log("finished test#1 - uninitialised DataSet");
 
         inputObject.add(0.0, 1.0);
-        inputObject.getAxisDescription(0).set("time", "s");
+        inputObject.getAxisDescription(DIM_X).set("time", "s");
         try {
             buffer.reset();
             serialiser.serialiseObject(inputObject);

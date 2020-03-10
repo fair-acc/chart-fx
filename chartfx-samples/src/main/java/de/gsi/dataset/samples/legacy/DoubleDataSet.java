@@ -161,8 +161,8 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
             System.arraycopy(yValuesNew, 0, yValues, getDataCount(), xValuesNew.length);
 
             dataMaxIndex = Math.max(0, dataMaxIndex + xValuesNew.length);
-            recomputeLimits(0);
-            recomputeLimits(1);
+            recomputeLimits(DIM_X);
+            recomputeLimits(DIM_Y);
         });
         return fireInvalidated(new AddedDataEvent(this));
     }
@@ -232,8 +232,8 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
             }
             dataMaxIndex++;
 
-            getAxisDescription(0).add(x);
-            getAxisDescription(1).add(y);
+            getAxisDescription(DIM_X).add(x);
+            getAxisDescription(DIM_Y).add(y);
         });
         return fireInvalidated(new AddedDataEvent(this));
     }
@@ -399,8 +399,8 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
                 this.xValues = xValues;
                 this.yValues = yValues;
                 dataMaxIndex = xValues.length;
-                recomputeLimits(0);
-                recomputeLimits(1);
+                recomputeLimits(DIM_X);
+                recomputeLimits(DIM_Y);
                 return;
             }
 
@@ -415,8 +415,8 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
                 this.yValues = Arrays.copyOf(yValues, xValues.length);
             }
             dataMaxIndex = xValues.length;
-            recomputeLimits(0);
-            recomputeLimits(1);
+            recomputeLimits(DIM_X);
+            recomputeLimits(DIM_Y);
         });
 
         return fireInvalidated(new UpdatedDataEvent(this));

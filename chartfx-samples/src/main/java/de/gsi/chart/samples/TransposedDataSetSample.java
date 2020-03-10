@@ -1,5 +1,8 @@
 package de.gsi.chart.samples;
 
+import static de.gsi.dataset.DataSet.DIM_X;
+import static de.gsi.dataset.DataSet.DIM_Y;
+
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
@@ -71,8 +74,8 @@ public class TransposedDataSetSample extends Application {
         //                new double[] { 0, 1, 2, 3 },
         //                new double[][] { { 0.1, 0, 0, 0.2 }, { 0.3, 0.4, 0.5, 0.6 }, { 0.7, 0, 0, 1 }, { 1, 1, 1, 1 } });
         final DataSet3D dataSet2 = createTestData();
-        dataSet2.getAxisDescription(0).set("x-axis", "x-unit");
-        dataSet2.getAxisDescription(1).set("y-axis", "y-unit");
+        dataSet2.getAxisDescription(DIM_X).set("x-axis", "x-unit");
+        dataSet2.getAxisDescription(DIM_Y).set("y-axis", "y-unit");
         final TransposedDataSet transposedDataSet2 = TransposedDataSet.transpose(dataSet2, false);
         contourRenderer.getDatasets().add(transposedDataSet2);
 
@@ -192,8 +195,8 @@ public class TransposedDataSetSample extends Application {
                    + (pert * Math.sin(i * omega * 0.777) * Math.cos(i * omega));
         }
         final DataSet dataSet = new DataSetBuilder().setName("non-sorted 2D DataSet").setXValues(x).setYValues(y).build();
-        dataSet.getAxisDescription(0).set("x-axis", "x-unit");
-        dataSet.getAxisDescription(1).set("y-axis", "y-unit");
+        dataSet.getAxisDescription(DIM_X).set("x-axis", "x-unit");
+        dataSet.getAxisDescription(DIM_Y).set("y-axis", "y-unit");
 
         return dataSet;
     }

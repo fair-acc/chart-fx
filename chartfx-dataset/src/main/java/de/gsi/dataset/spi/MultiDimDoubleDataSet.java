@@ -204,7 +204,7 @@ public class MultiDimDoubleDataSet extends AbstractDataSet<MultiDimDoubleDataSet
             final int indexAt = Math.max(0, Math.min(index, getDataCount() + 1));
             for (int i = 0; i < this.values.length; i++) {
                 this.values[i].addElements(indexAt, newValues[i], 0, nPointsFinal);
-                getAxisDescription(0).add(newValues[i], nPointsFinal);
+                getAxisDescription(DIM_X).add(newValues[i], nPointsFinal);
             }
             getDataLabelMap().shiftKeys(indexAt, this.values[0].size());
             getDataStyleMap().shiftKeys(indexAt, this.values[0].size());

@@ -167,10 +167,10 @@ public class ListErrorDataSet extends AbstractErrorDataSet<ListErrorDataSet> imp
         lock().writeLockGuard(() -> {
             data.add(new DoublePointError(x, y, ex, ey));
 
-            getAxisDescription(0).add(x - ex);
-            getAxisDescription(0).add(x + ex);
-            getAxisDescription(1).add(y - ey);
-            getAxisDescription(1).add(y + ey);
+            getAxisDescription(DIM_X).add(x - ex);
+            getAxisDescription(DIM_X).add(x + ex);
+            getAxisDescription(DIM_Y).add(y - ey);
+            getAxisDescription(DIM_Y).add(y + ey);
         });
         return fireInvalidated(new AddedDataEvent(this));
     }
@@ -214,10 +214,10 @@ public class ListErrorDataSet extends AbstractErrorDataSet<ListErrorDataSet> imp
                 final double ey = yErrors[i];
                 data.add(new DoublePointError(x, y, ex, ey));
 
-                getAxisDescription(0).add(x - ex);
-                getAxisDescription(0).add(x + ex);
-                getAxisDescription(1).add(y - ey);
-                getAxisDescription(1).add(y + ey);
+                getAxisDescription(DIM_X).add(x - ex);
+                getAxisDescription(DIM_X).add(x + ex);
+                getAxisDescription(DIM_Y).add(y - ey);
+                getAxisDescription(DIM_Y).add(y + ey);
             }
         });
         return fireInvalidated(new AddedDataEvent(this));
@@ -337,8 +337,8 @@ public class ListErrorDataSet extends AbstractErrorDataSet<ListErrorDataSet> imp
 
             data.subList(fromIndex, toIndex).clear();
 
-            getAxisDescription(0).add(Double.NaN);
-            getAxisDescription(1).add(Double.NaN);
+            getAxisDescription(DIM_X).add(Double.NaN);
+            getAxisDescription(DIM_Y).add(Double.NaN);
         });
         return fireInvalidated(new RemovedDataEvent(this));
     }
@@ -362,10 +362,10 @@ public class ListErrorDataSet extends AbstractErrorDataSet<ListErrorDataSet> imp
             }
             data.removeAll(tupleTobeRemovedReferences);
 
-            getAxisDescription(0).add(Double.NaN);
-            getAxisDescription(1).add(Double.NaN);
-            recomputeLimits(0);
-            recomputeLimits(1);
+            getAxisDescription(DIM_X).add(Double.NaN);
+            getAxisDescription(DIM_Y).add(Double.NaN);
+            recomputeLimits(DIM_X);
+            recomputeLimits(DIM_Y);
         });
         return fireInvalidated(new RemovedDataEvent(this));
     }
@@ -441,10 +441,10 @@ public class ListErrorDataSet extends AbstractErrorDataSet<ListErrorDataSet> imp
                 final double y = yValues[i];
                 final double dx = xErrors[i];
                 final double dy = yValues[i];
-                getAxisDescription(0).add(x - dx);
-                getAxisDescription(0).add(x + dx);
-                getAxisDescription(1).add(y - dy);
-                getAxisDescription(1).add(y + dy);
+                getAxisDescription(DIM_X).add(x - dx);
+                getAxisDescription(DIM_X).add(x + dx);
+                getAxisDescription(DIM_Y).add(y - dy);
+                getAxisDescription(DIM_Y).add(y + dy);
                 data.add(new DoublePointError(x, y, dx, dy));
             }
         });
@@ -509,10 +509,10 @@ public class ListErrorDataSet extends AbstractErrorDataSet<ListErrorDataSet> imp
         lock().writeLockGuard(() -> {
             data.get(index).set(x, y, dy, dy);
 
-            getAxisDescription(0).add(x - dx);
-            getAxisDescription(0).add(x + dx);
-            getAxisDescription(1).add(y - dy);
-            getAxisDescription(1).add(y + dy);
+            getAxisDescription(DIM_X).add(x - dx);
+            getAxisDescription(DIM_X).add(x + dx);
+            getAxisDescription(DIM_Y).add(y - dy);
+            getAxisDescription(DIM_Y).add(y + dy);
         });
         return fireInvalidated(new UpdatedDataEvent(this));
     }

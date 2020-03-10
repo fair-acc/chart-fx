@@ -3,6 +3,8 @@ package de.gsi.dataset.utils;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static de.gsi.dataset.DataSet.DIM_X;
+import static de.gsi.dataset.DataSet.DIM_Y;
 
 import java.io.ByteArrayOutputStream;
 import java.util.Arrays;
@@ -59,8 +61,8 @@ public class DataSetUtilsTest {
         int n = 6;
         double[][] zvalues = new double[][] { { 1.3, 3.7, 4.2 }, { 2.3, 1.8, 5.0 } };
         DataSet3D dataSet = new DoubleDataSet3D("Test 3D Dataset", xvalues, yvalues, zvalues);
-        dataSet.getAxisDescription(0).set("U", "V", 1.0, 3.0);
-        dataSet.getAxisDescription(1).set("I", "A", 0.001, 4.2);
+        dataSet.getAxisDescription(DIM_X).set("U", "V", 1.0, 3.0);
+        dataSet.getAxisDescription(DIM_Y).set("I", "A", 0.001, 4.2);
         dataSet.getAxisDescription(2).set("P", "W", 1.3, 4.2);
         // assert that dataSet was created correctly
         assertArrayEquals(xvalues, dataSet.getXValues(), EPSILON);
@@ -131,7 +133,7 @@ public class DataSetUtilsTest {
                 notified.incrementAndGet();
             }
         });
-        dataSetRead.getAxisDescription(1).set("Test");
+        dataSetRead.getAxisDescription(DIM_Y).set("Test");
         assertEquals(1, notified.get());
     }
 
@@ -144,8 +146,8 @@ public class DataSetUtilsTest {
                 .setYValues(yvalues) //
                 .setMetaInfoMap(Map.of("test", "asdf", "testval", "5.24532")) //
                 .build();
-        result.getAxisDescription(0).set("index", "", 1.0, 5.0);
-        result.getAxisDescription(1).set("Voltage", "V", 1.3, 4.2);
+        result.getAxisDescription(DIM_X).set("index", "", 1.0, 5.0);
+        result.getAxisDescription(DIM_Y).set("Voltage", "V", 1.3, 4.2);
         return result;
     }
 

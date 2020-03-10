@@ -111,8 +111,8 @@ public class ListDataSet extends AbstractDataSet<ListDataSet> implements DataSet
         lock().writeLockGuard(() -> {
             data.add(new DoublePoint(x, y));
 
-            getAxisDescription(0).add(x);
-            getAxisDescription(1).add(y);
+            getAxisDescription(DIM_X).add(x);
+            getAxisDescription(DIM_Y).add(y);
         });
         return fireInvalidated(new AddedDataEvent(this));
     }
@@ -134,12 +134,12 @@ public class ListDataSet extends AbstractDataSet<ListDataSet> implements DataSet
 
         lock().writeLockGuard(() -> {
             data.clear();
-            getAxisDescription(0).setMax(Double.NaN);
-            getAxisDescription(1).setMax(Double.NaN);
+            getAxisDescription(DIM_X).setMax(Double.NaN);
+            getAxisDescription(DIM_Y).setMax(Double.NaN);
             for (int i = 0; i < xValues.length; i++) {
                 data.add(new DoublePoint(xValues[i], yValues[i]));
-                getAxisDescription(0).add(xValues[i]);
-                getAxisDescription(1).add(yValues[i]);
+                getAxisDescription(DIM_X).add(xValues[i]);
+                getAxisDescription(DIM_Y).add(yValues[i]);
             }
         });
         return fireInvalidated(new AddedDataEvent(this));
@@ -249,8 +249,8 @@ public class ListDataSet extends AbstractDataSet<ListDataSet> implements DataSet
 
             data.subList(fromIndex, toIndex).clear();
 
-            getAxisDescription(0).setMax(Double.NaN);
-            getAxisDescription(1).setMax(Double.NaN);
+            getAxisDescription(DIM_X).setMax(Double.NaN);
+            getAxisDescription(DIM_Y).setMax(Double.NaN);
         });
         return fireInvalidated(new RemovedDataEvent(this));
     }
@@ -273,8 +273,8 @@ public class ListDataSet extends AbstractDataSet<ListDataSet> implements DataSet
             }
             data.removeAll(tupleTobeRemovedReferences);
 
-            recomputeLimits(0);
-            recomputeLimits(1);
+            recomputeLimits(DIM_X);
+            recomputeLimits(DIM_Y);
         });
         return fireInvalidated(new UpdatedDataEvent(this));
     }
@@ -320,8 +320,8 @@ public class ListDataSet extends AbstractDataSet<ListDataSet> implements DataSet
             AssertUtils.indexInBounds(index, getDataCount());
             data.get(index).set(x, y);
 
-            getAxisDescription(0).add(x);
-            getAxisDescription(1).add(y);
+            getAxisDescription(DIM_X).add(x);
+            getAxisDescription(DIM_Y).add(y);
         });
         return fireInvalidated(new UpdatedDataEvent(this));
     }
@@ -338,8 +338,8 @@ public class ListDataSet extends AbstractDataSet<ListDataSet> implements DataSet
             data.clear();
             data.addAll(values);
 
-            recomputeLimits(0);
-            recomputeLimits(1);
+            recomputeLimits(DIM_X);
+            recomputeLimits(DIM_Y);
         });
         return fireInvalidated(new UpdatedDataEvent(this));
     }

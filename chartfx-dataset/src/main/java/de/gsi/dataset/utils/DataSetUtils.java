@@ -261,16 +261,16 @@ public class DataSetUtils extends DataSetUtilsHelper {
                 value = dataSet == null ? "noDataset" : dataSet.getName();
                 break;
             case "xMin":
-                value = dataSet == null ? "noDataset" : Double.toString(dataSet.getAxisDescription(0).getMin());
+                value = dataSet == null ? "noDataset" : Double.toString(dataSet.getAxisDescription(DIM_X).getMin());
                 break;
             case "xMax":
-                value = dataSet == null ? "noDataset" : Double.toString(dataSet.getAxisDescription(0).getMax());
+                value = dataSet == null ? "noDataset" : Double.toString(dataSet.getAxisDescription(DIM_X).getMax());
                 break;
             case "yMin":
-                value = dataSet == null ? "noDataset" : Double.toString(dataSet.getAxisDescription(1).getMin());
+                value = dataSet == null ? "noDataset" : Double.toString(dataSet.getAxisDescription(DIM_Y).getMin());
                 break;
             case "yMax":
-                value = dataSet == null ? "noDataset" : Double.toString(dataSet.getAxisDescription(1).getMax());
+                value = dataSet == null ? "noDataset" : Double.toString(dataSet.getAxisDescription(DIM_Y).getMax());
                 break;
             default:
                 if (!(dataSet instanceof DataSetMetaData)) {

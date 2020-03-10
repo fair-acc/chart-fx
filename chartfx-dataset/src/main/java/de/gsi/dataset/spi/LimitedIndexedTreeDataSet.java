@@ -78,10 +78,10 @@ public class LimitedIndexedTreeDataSet extends AbstractErrorDataSet<LimitedIndex
             final String... labelStyle) {
         lock().writeLockGuard(() -> {
             data.add(new DataAtom(x, y, ex, ey, labelStyle));
-            getAxisDescription(0).add(x - ex);
-            getAxisDescription(0).add(x + ex);
-            getAxisDescription(1).add(y - ey);
-            getAxisDescription(1).add(y + ey);
+            getAxisDescription(DIM_X).add(x - ex);
+            getAxisDescription(DIM_X).add(x + ex);
+            getAxisDescription(DIM_Y).add(y - ey);
+            getAxisDescription(DIM_Y).add(y + ey);
             expire();
         });
         return fireInvalidated(new AddedDataEvent(this));
@@ -126,10 +126,10 @@ public class LimitedIndexedTreeDataSet extends AbstractErrorDataSet<LimitedIndex
                 final double ey = yErrors[i];
                 data.add(new DataAtom(x, y, ex, ey, labelStyle)); // NOPMD need to initialise object in loop by design
 
-                getAxisDescription(0).add(x - ex);
-                getAxisDescription(0).add(x + ex);
-                getAxisDescription(1).add(y - ey);
-                getAxisDescription(1).add(y + ey);
+                getAxisDescription(DIM_X).add(x - ex);
+                getAxisDescription(DIM_X).add(x + ex);
+                getAxisDescription(DIM_Y).add(y - ey);
+                getAxisDescription(DIM_Y).add(y + ey);
             }
             expire();
         });
@@ -204,8 +204,8 @@ public class LimitedIndexedTreeDataSet extends AbstractErrorDataSet<LimitedIndex
                 for (; data.size() > maxQueueSize || now - first.getX() > maxLength; first = data.first()) {
                     data.remove(first);
                 }
-                recomputeLimits(0);
-                recomputeLimits(1);
+                recomputeLimits(DIM_X);
+                recomputeLimits(DIM_Y);
             } catch (final NoSuchElementException cannotDoAnythingHere) {
                 // cannot do anything here
             }
@@ -301,8 +301,8 @@ public class LimitedIndexedTreeDataSet extends AbstractErrorDataSet<LimitedIndex
             }
             data.removeAll(toRemove);
 
-            getAxisDescription(0).setMax(Double.NaN);
-            getAxisDescription(1).setMax(Double.NaN);
+            getAxisDescription(DIM_X).setMax(Double.NaN);
+            getAxisDescription(DIM_Y).setMax(Double.NaN);
         });
         return fireInvalidated(new RemovedDataEvent(this));
     }
@@ -326,10 +326,10 @@ public class LimitedIndexedTreeDataSet extends AbstractErrorDataSet<LimitedIndex
             }
             data.removeAll(tupleTobeRemovedReferences);
 
-            getAxisDescription(0).setMax(Double.NaN);
-            getAxisDescription(1).setMax(Double.NaN);
-            recomputeLimits(0);
-            recomputeLimits(1);
+            getAxisDescription(DIM_X).setMax(Double.NaN);
+            getAxisDescription(DIM_Y).setMax(Double.NaN);
+            recomputeLimits(DIM_X);
+            recomputeLimits(DIM_Y);
         });
         return fireInvalidated(new RemovedDataEvent(this));
     }
@@ -414,10 +414,10 @@ public class LimitedIndexedTreeDataSet extends AbstractErrorDataSet<LimitedIndex
                 final double y = yValues[i];
                 final double dx = xErrors[i];
                 final double dy = yValues[i];
-                getAxisDescription(0).add(x - dx);
-                getAxisDescription(0).add(x + dx);
-                getAxisDescription(1).add(y - dy);
-                getAxisDescription(1).add(y + dy);
+                getAxisDescription(DIM_X).add(x - dx);
+                getAxisDescription(DIM_X).add(x + dx);
+                getAxisDescription(DIM_Y).add(y - dy);
+                getAxisDescription(DIM_Y).add(y + dy);
                 data.add(new DataAtom(x, y, dx, dy)); // NOPMD need to initialise object in loop by design
             }
             expire();
@@ -484,10 +484,10 @@ public class LimitedIndexedTreeDataSet extends AbstractErrorDataSet<LimitedIndex
         lock().writeLockGuard(() -> {
             data.get(index).set(x, y, dy, dy);
 
-            getAxisDescription(0).add(x - dx);
-            getAxisDescription(0).add(x + dx);
-            getAxisDescription(1).add(y - dy);
-            getAxisDescription(1).add(y + dy);
+            getAxisDescription(DIM_X).add(x - dx);
+            getAxisDescription(DIM_X).add(x + dx);
+            getAxisDescription(DIM_Y).add(y - dy);
+            getAxisDescription(DIM_Y).add(y + dy);
             expire();
         });
         return fireInvalidated(new UpdatedDataEvent(this));

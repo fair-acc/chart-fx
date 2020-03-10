@@ -59,8 +59,8 @@ public class AveragingDataSet extends AbstractDataSet<AveragingDataSet> implemen
             deque.add(new InternalDataSet(ds));
             dataset.opScale(1.0 / deque.size());
         }
-        dataset.recomputeLimits(0);
-        dataset.recomputeLimits(1);
+        dataset.recomputeLimits(DIM_X);
+        dataset.recomputeLimits(DIM_Y);
         fireInvalidated(new AddedDataEvent(this));
     }
 

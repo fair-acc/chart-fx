@@ -66,8 +66,8 @@ public class Histogram extends AbstractHistogram implements Histogram1D {
         super(name, nBins, minX, maxX);
         isHorizontal = horizontal;
         if (!isHorizontal) {
-            getAxisDescription(0).clear();
-            getAxisDescription(1).set(minX, maxX);
+            getAxisDescription(DIM_X).clear();
+            getAxisDescription(DIM_Y).set(minX, maxX);
         }
     }
 
