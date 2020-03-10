@@ -179,6 +179,58 @@ public class DefaultAxisDescription extends DataRange implements AxisDescription
     }
 
     @Override
+    public final double getMax() {
+        if (this.isMaxDefined()) {
+            return super.getMax();
+        }
+        // axis range min value is invalid -- attempt to recompute
+        // the recomputeLimits is usually recomputed when validating the axis,
+        // this function is called in case e.g. a point has been modified and range invalidated
+
+        if (dataSet != null) {
+            boolean notify = false;
+            for (int dim = 0; dim < dataSet.getDimension(); dim++) {
+                if (dataSet.getAxisDescription(dim).isDefined()) {
+                    continue;
+                }
+                dataSet.recomputeLimits(dim);
+                notify = true;
+            }
+            if (notify) {
+                notifyRangeChange();
+            }
+        }
+
+        return super.getMax();
+    }
+
+    @Override
+    public final double getMin() {
+        if (this.isMinDefined()) {
+            return super.getMin();
+        }
+        // axis range min value is invalid -- attempt to recompute
+        // the recomputeLimits is usually recomputed when validating the axis,
+        // this function is called in case e.g. a point has been modified and range invalidated
+
+        if (dataSet != null) {
+            boolean notify = false;
+            for (int dim = 0; dim < dataSet.getDimension(); dim++) {
+                if (dataSet.getAxisDescription(dim).isDefined()) {
+                    continue;
+                }
+                dataSet.recomputeLimits(dim);
+                notify = true;
+            }
+            if (notify) {
+                notifyRangeChange();
+            }
+        }
+
+        return super.getMin();
+    }
+
+    @Override
     public final String getName() {
         return name;
     }

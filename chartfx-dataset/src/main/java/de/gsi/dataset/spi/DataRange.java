@@ -155,11 +155,9 @@ public class DataRange {
      * @return max - min or 0.0 if the range is not defined.
      */
     public double getLength() {
-        if (isDefined()) {
-            return max - min;
-        }
-
-        return 0.0;
+        double len = getMax() - getMin();
+        // subclasses of DataRange might override getMax/Min to recompute the range.
+        return isDefined() ? len : 0.0;
     }
 
     /**
