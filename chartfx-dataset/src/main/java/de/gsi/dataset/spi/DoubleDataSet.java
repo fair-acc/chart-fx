@@ -296,9 +296,8 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
             getDataLabelMap().remove(fromIndex, clampedToIndex);
             getDataStyleMap().remove(fromIndex, clampedToIndex);
 
-            // invalidate and recompute ranges
-            recomputeLimits(DIM_X);
-            recomputeLimits(DIM_Y);
+            // invalidate ranges
+            getAxisDescriptions().forEach(AxisDescription::clear);
         });
         return fireInvalidated(new RemovedDataEvent(this));
     }
@@ -424,8 +423,8 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
                 this.yValues = DoubleArrayList.wrap(yValues, nSamplesToAdd);
             }
 
-            recomputeLimits(DIM_X);
-            recomputeLimits(DIM_Y);
+            // invalidate ranges
+            getAxisDescriptions().forEach(AxisDescription::clear);
         });
         return fireInvalidated(new UpdatedDataEvent(this));
     }
@@ -460,9 +459,8 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
             getDataLabelMap().remove(index);
             getDataStyleMap().remove(index);
 
-            // invalidate and recompute ranges
-            recomputeLimits(DIM_X);
-            recomputeLimits(DIM_Y);
+            // invalidate ranges
+            getAxisDescriptions().forEach(AxisDescription::clear);
         });
         return fireInvalidated(new UpdatedDataEvent(this, "set - single"));
     }
@@ -475,9 +473,8 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
             getDataLabelMap().remove(index, index + x.length);
             getDataStyleMap().remove(index, index + x.length);
 
-            // invalidate and recompute ranges
-            recomputeLimits(DIM_X);
-            recomputeLimits(DIM_Y);
+            // invalidate ranges
+            getAxisDescriptions().forEach(AxisDescription::clear);
         });
         return fireInvalidated(new UpdatedDataEvent(this, "set - via arrays"));
     }

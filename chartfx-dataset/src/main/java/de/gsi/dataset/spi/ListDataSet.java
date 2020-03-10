@@ -273,8 +273,8 @@ public class ListDataSet extends AbstractDataSet<ListDataSet> implements DataSet
             }
             data.removeAll(tupleTobeRemovedReferences);
 
-            recomputeLimits(DIM_X);
-            recomputeLimits(DIM_Y);
+            // invalidate ranges
+            getAxisDescriptions().forEach(AxisDescription::clear);
         });
         return fireInvalidated(new UpdatedDataEvent(this));
     }
@@ -338,8 +338,8 @@ public class ListDataSet extends AbstractDataSet<ListDataSet> implements DataSet
             data.clear();
             data.addAll(values);
 
-            recomputeLimits(DIM_X);
-            recomputeLimits(DIM_Y);
+            // invalidate ranges
+            getAxisDescriptions().forEach(AxisDescription::clear);
         });
         return fireInvalidated(new UpdatedDataEvent(this));
     }

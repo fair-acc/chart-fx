@@ -42,9 +42,11 @@ public class FragmentedDataSet extends AbstractDataSet<FragmentedDataSet> implem
             Collections.sort(list,
                     (o1, o2) -> Double.compare(o1.getAxisDescription(DIM_X).getMin(), o2.getAxisDescription(DIM_X).getMin()));
             dataCount += set.getDataCount();
+            getAxisDescription(DIM_X).add(set.getAxisDescription(DIM_X).getMax());
+            getAxisDescription(DIM_X).add(set.getAxisDescription(DIM_X).getMin());
+            getAxisDescription(DIM_Y).add(set.getAxisDescription(DIM_Y).getMax());
+            getAxisDescription(DIM_Y).add(set.getAxisDescription(DIM_Y).getMin());
         });
-        recomputeLimits(DIM_X);
-        recomputeLimits(DIM_Y);
         fireInvalidated(new AddedDataEvent(this, "added data set"));
     }
 

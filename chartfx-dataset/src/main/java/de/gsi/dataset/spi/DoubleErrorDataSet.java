@@ -273,9 +273,9 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
             yErrorsNeg.addElements(indexAt, yErrorNeg, 0, min);
             yErrorsPos.addElements(indexAt, yErrorPos, 0, min);
 
-            // invalidate and recompute ranges
-            recomputeLimits(DIM_X);
-            recomputeLimits(DIM_Y);
+            // recompute ranges
+            getAxisDescription(DIM_X).add(x);
+            getAxisDescription(DIM_Y).add(y);
 
             getDataLabelMap().shiftKeys(indexAt, xValues.size());
             getDataStyleMap().shiftKeys(indexAt, xValues.size());
@@ -406,9 +406,8 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
             getDataLabelMap().remove(fromIndex, clampedToIndex);
             getDataLabelMap().remove(fromIndex, clampedToIndex);
 
-            // invalidate and recompute ranges
-            recomputeLimits(DIM_X);
-            recomputeLimits(DIM_Y);
+            // invalidate ranges
+            getAxisDescriptions().forEach(AxisDescription::clear);
         });
         return fireInvalidated(new RemovedDataEvent(this));
     }
@@ -570,8 +569,8 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
                 this.yErrorsPos = DoubleArrayList.wrap(yErrorsPos, nSamplesToAdd);
             }
 
-            recomputeLimits(DIM_X);
-            recomputeLimits(DIM_Y);
+            // invalidate ranges
+            getAxisDescriptions().forEach(AxisDescription::clear);
         });
         return fireInvalidated(new UpdatedDataEvent(this));
     }
@@ -628,9 +627,8 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
             getDataLabelMap().remove(index);
             getDataStyleMap().remove(index);
 
-            // invalidate and recompute ranges
-            recomputeLimits(DIM_X);
-            recomputeLimits(DIM_Y);
+            // invalidate ranges
+            getAxisDescriptions().forEach(AxisDescription::clear);
         });
 
         return fireInvalidated(new UpdatedDataEvent(this, "set - single"));
@@ -647,9 +645,8 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
             getDataLabelMap().remove(index, index + x.length);
             getDataStyleMap().remove(index, index + x.length);
 
-            // invalidate and recompute ranges
-            recomputeLimits(DIM_X);
-            recomputeLimits(DIM_Y);
+            // invalidate ranges
+            getAxisDescriptions().forEach(AxisDescription::clear);
         });
         return fireInvalidated(new UpdatedDataEvent(this, "set - via arrays"));
     }
