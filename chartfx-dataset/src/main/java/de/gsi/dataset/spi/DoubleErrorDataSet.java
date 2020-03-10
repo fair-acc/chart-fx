@@ -135,9 +135,9 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
                 addDataLabel(xValues.size() - 1, label);
             }
 
-            getAxisDescription(0).add(x);
-            getAxisDescription(1).add(y - yErrorNeg);
-            getAxisDescription(1).add(y + yErrorPos);
+            getAxisDescription(DIM_X).add(x);
+            getAxisDescription(DIM_Y).add(y - yErrorNeg);
+            getAxisDescription(DIM_Y).add(y + yErrorPos);
         });
         return fireInvalidated(new UpdatedDataEvent(this, "add"));
     }
@@ -239,9 +239,9 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
             yErrorsPos.add(indexAt, yErrorPos);
             getDataLabelMap().addValueAndShiftKeys(indexAt, xValues.size(), label);
             getDataStyleMap().shiftKeys(indexAt, xValues.size());
-            getAxisDescription(0).add(x);
-            getAxisDescription(1).add(y - yErrorNeg);
-            getAxisDescription(1).add(y + yErrorPos);
+            getAxisDescription(DIM_X).add(x);
+            getAxisDescription(DIM_Y).add(y - yErrorNeg);
+            getAxisDescription(DIM_Y).add(y + yErrorPos);
         });
         return fireInvalidated(new AddedDataEvent(this));
     }

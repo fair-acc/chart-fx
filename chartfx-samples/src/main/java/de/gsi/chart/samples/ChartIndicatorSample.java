@@ -1,5 +1,8 @@
 package de.gsi.chart.samples;
 
+import static de.gsi.dataset.DataSet.DIM_X;
+import static de.gsi.dataset.DataSet.DIM_Y;
+
 import java.time.ZoneOffset;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -195,12 +198,12 @@ public class ChartIndicatorSample extends Application {
         zoom.setSliderVisible(false);
         chart.getPlugins().add(zoom);
 
-        final double minX = rollingBufferDipoleCurrent.getAxisDescription(0).getMin();
-        final double maxX = rollingBufferDipoleCurrent.getAxisDescription(0).getMax();
-        final double minY1 = rollingBufferBeamIntensity.getAxisDescription(1).getMin();
-        final double maxY1 = rollingBufferBeamIntensity.getAxisDescription(1).getMax();
-        final double minY2 = rollingBufferDipoleCurrent.getAxisDescription(1).getMin();
-        final double maxY2 = rollingBufferDipoleCurrent.getAxisDescription(1).getMax();
+        final double minX = rollingBufferDipoleCurrent.getAxisDescription(DIM_X).getMin();
+        final double maxX = rollingBufferDipoleCurrent.getAxisDescription(DIM_X).getMax();
+        final double minY1 = rollingBufferBeamIntensity.getAxisDescription(DIM_Y).getMin();
+        final double maxY1 = rollingBufferBeamIntensity.getAxisDescription(DIM_Y).getMax();
+        final double minY2 = rollingBufferDipoleCurrent.getAxisDescription(DIM_Y).getMin();
+        final double maxY2 = rollingBufferDipoleCurrent.getAxisDescription(DIM_Y).getMax();
         final double rangeX = maxX - minX;
         final double rangeY1 = maxY1 - minY1;
         final double rangeY2 = maxY2 - minY2;

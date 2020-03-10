@@ -107,8 +107,8 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
                 addDataLabel(xValues.size() - 1, label);
             }
 
-            getAxisDescription(0).add(x);
-            getAxisDescription(1).add(y);
+            getAxisDescription(DIM_X).add(x);
+            getAxisDescription(DIM_Y).add(y);
         });
         return fireInvalidated(new UpdatedDataEvent(this, "add"));
     }
@@ -132,8 +132,8 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
             xValues.setElements(addAt, xValuesNew);
             yValues.setElements(addAt, yValuesNew);
 
-            getAxisDescription(0).add(xValuesNew);
-            getAxisDescription(1).add(yValuesNew);
+            getAxisDescription(DIM_X).add(xValuesNew);
+            getAxisDescription(DIM_Y).add(yValuesNew);
         });
 
         return fireInvalidated(new AddedDataEvent(this));
@@ -180,8 +180,8 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
             yValues.add(indexAt, y);
             getDataLabelMap().addValueAndShiftKeys(indexAt, xValues.size(), label);
             getDataStyleMap().shiftKeys(indexAt, xValues.size());
-            getAxisDescription(0).add(x);
-            getAxisDescription(1).add(y);
+            getAxisDescription(DIM_X).add(x);
+            getAxisDescription(DIM_Y).add(y);
         });
         return fireInvalidated(new AddedDataEvent(this));
     }
@@ -204,8 +204,8 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
             final int indexAt = Math.max(0, Math.min(index, getDataCount() + 1));
             xValues.addElements(indexAt, x, 0, min);
             yValues.addElements(indexAt, y, 0, min);
-            getAxisDescription(0).add(x, min);
-            getAxisDescription(0).add(y, min);
+            getAxisDescription(DIM_X).add(x, min);
+            getAxisDescription(DIM_Y).add(y, min);
             getDataLabelMap().shiftKeys(indexAt, xValues.size());
             getDataStyleMap().shiftKeys(indexAt, xValues.size());
         });

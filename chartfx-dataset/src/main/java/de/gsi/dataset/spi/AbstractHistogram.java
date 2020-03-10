@@ -36,9 +36,9 @@ public abstract class AbstractHistogram extends AbstractDataSet<AbstractHistogra
         Arrays.sort(xBinsSorted);
         for (int i = 0; i < nBins; i++) {
             axisBins[0][i + 1] = xBinsSorted[i];
-            getAxisDescription(0).add(xBinsSorted[i]);
+            getAxisDescription(DIM_X).add(xBinsSorted[i]);
         }
-        getAxisDescription(1).clear();
+        getAxisDescription(DIM_Y).clear();
         equidistant = false;
     }
 
@@ -56,8 +56,8 @@ public abstract class AbstractHistogram extends AbstractDataSet<AbstractHistogra
         nAxisBins[0] = nBins + 2; // N.B. one bin for underflow, one bin for overflow
         nAxisBins[1] = nBins + 2;
         data = new double[nAxisBins[0]];
-        getAxisDescription(0).set(minX, maxX);
-        getAxisDescription(1).clear();
+        getAxisDescription(DIM_X).set(minX, maxX);
+        getAxisDescription(DIM_Y).clear();
         equidistant = true;
     }
 
@@ -80,8 +80,8 @@ public abstract class AbstractHistogram extends AbstractDataSet<AbstractHistogra
         nAxisBins[1] = nBinsY + 2;
         nAxisBins[2] = nBinsX * nBinsY + 2;
         data = new double[nAxisBins[2]];
-        getAxisDescription(0).set(minX, maxX);
-        getAxisDescription(1).set(minY, maxY);
+        getAxisDescription(DIM_X).set(minX, maxX);
+        getAxisDescription(DIM_Y).set(minY, maxY);
         getAxisDescription(2).clear();
         equidistant = true;
     }

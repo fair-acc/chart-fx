@@ -92,8 +92,8 @@ public abstract class AbstractTestFunction<D extends AbstractTestFunction<D>> ex
     public D update() {
         lock().writeLockGuard(() -> {
             data = generateY(data.length);
-            recomputeLimits(0);
-            recomputeLimits(1);
+            recomputeLimits(DIM_X);
+            recomputeLimits(DIM_Y);
         });
         return fireInvalidated(new UpdatedDataEvent(this));
     }

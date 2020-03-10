@@ -1,5 +1,8 @@
 package de.gsi.silly.samples;
 
+import static de.gsi.dataset.DataSet.DIM_X;
+import static de.gsi.dataset.DataSet.DIM_Y;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -178,8 +181,8 @@ public class SnowFlakeSample extends Application {
             yStomp[i] /= scale;
         }
         final DataSet stomp = new DataSetBuilder().setName("tree").setXValues(xStomp).setYValues(yStomp).build();
-        stomp.getAxisDescription(0).set("X", "Mas");
-        stomp.getAxisDescription(1).set("Y", "Mas");
+        stomp.getAxisDescription(DIM_X).set("X", "Mas");
+        stomp.getAxisDescription(DIM_Y).set("Y", "Mas");
         stomp.setStyle("strokeColor=#B5651D; fillColor=#B5651D");
 
         final double[] xTree = { 2.0, 2.0, 8.0, 8.0, 12.0, 12.0, 16.0, 16.0, 21.0, /* the tip */
@@ -191,8 +194,8 @@ public class SnowFlakeSample extends Application {
             yTree[i] /= scale;
         }
         final DataSet tree = new DataSetBuilder().setName("tree").setXValues(xTree).setYValues(yTree).build();
-        tree.getAxisDescription(0).set("X", "Mas");
-        tree.getAxisDescription(1).set("Y", "Max");
+        tree.getAxisDescription(DIM_X).set("X", "Mas");
+        tree.getAxisDescription(DIM_Y).set("Y", "Max");
         tree.setStyle("strokeColor=darkGreen; fillColor=green");
 
         list.add(stomp);
@@ -208,8 +211,8 @@ public class SnowFlakeSample extends Application {
     public static DataSet treeOrnaments(final DataSet tree, final double spacing) {
         DoubleDataSet dataSet = new DoubleDataSet("ornaments");
         dataSet.setStyle("markerType=circle;");
-        tree.recomputeLimits(0);
-        tree.recomputeLimits(1);
+        tree.recomputeLimits(DIM_X);
+        tree.recomputeLimits(DIM_Y);
         final double xMin = tree.getAxisDescriptions().get(DataSet.DIM_X).getMin();
         final double xMax = tree.getAxisDescriptions().get(DataSet.DIM_X).getMax();
         final double yMin = tree.getAxisDescriptions().get(DataSet.DIM_Y).getMin();

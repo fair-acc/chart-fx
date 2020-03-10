@@ -1,5 +1,8 @@
 package de.gsi.chart.samples;
 
+import static de.gsi.dataset.DataSet.DIM_X;
+import static de.gsi.dataset.DataSet.DIM_Y;
+
 import de.gsi.chart.XYChart;
 import de.gsi.chart.axes.spi.DefaultNumericAxis;
 import de.gsi.chart.plugins.DataPointTooltip;
@@ -39,11 +42,11 @@ public class EditDataSetSample extends Application {
         root.getChildren().add(chart);
 
         final DoubleDataSet dataSet1 = new DoubleDataSet("data set #1 (full change)");
-        dataSet1.getAxisDescription(0).set("time", "s");
-        dataSet1.getAxisDescription(1).set("Voltage", "V");
+        dataSet1.getAxisDescription(DIM_X).set("time", "s");
+        dataSet1.getAxisDescription(DIM_Y).set("Voltage", "V");
         final DoubleDataSet dataSet2 = new DoubleDataSet("data set #2 (modify y-only)");
-        dataSet2.getAxisDescription(0).set("time", "s");
-        dataSet2.getAxisDescription(1).set("Current", "A");
+        dataSet2.getAxisDescription(DIM_X).set("time", "s");
+        dataSet2.getAxisDescription(DIM_Y).set("Current", "A");
         // chart.getDatasets().add(dataSet1); // for single data set
         // chart.getDatasets().addAll(dataSet1, dataSet2); // two data sets
 

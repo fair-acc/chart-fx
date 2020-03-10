@@ -40,11 +40,11 @@ public class FragmentedDataSet extends AbstractDataSet<FragmentedDataSet> implem
             list.add(set);
             /* Trace data is expected to be sorted in ascending order */
             Collections.sort(list,
-                    (o1, o2) -> Double.compare(o1.getAxisDescription(0).getMin(), o2.getAxisDescription(0).getMin()));
+                    (o1, o2) -> Double.compare(o1.getAxisDescription(DIM_X).getMin(), o2.getAxisDescription(DIM_X).getMin()));
             dataCount += set.getDataCount();
         });
-        recomputeLimits(0);
-        recomputeLimits(1);
+        recomputeLimits(DIM_X);
+        recomputeLimits(DIM_Y);
         fireInvalidated(new AddedDataEvent(this, "added data set"));
     }
 
@@ -119,12 +119,12 @@ public class FragmentedDataSet extends AbstractDataSet<FragmentedDataSet> implem
     @Override
     public int getXIndex(double x) {
         return lock().readLockGuard(() -> {
-            if (x < getAxisDescription(0).getMin()) {
+            if (x < getAxisDescription(DIM_X).getMin()) {
                 return 0;
             }
             int index = 0;
             for (final DataSet dataset : list) {
-                if (x >= dataset.getAxisDescription(0).getMin() && x <= dataset.getAxisDescription(0).getMax()) {
+                if (x >= dataset.getAxisDescription(DIM_X).getMin() && x <= dataset.getAxisDescription(DIM_X).getMax()) {
                     return index + dataset.getIndex(DIM_X, x);
                 }
                 index += dataset.getDataCount();

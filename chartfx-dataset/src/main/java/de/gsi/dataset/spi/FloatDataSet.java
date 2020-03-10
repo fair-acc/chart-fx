@@ -108,8 +108,8 @@ public class FloatDataSet extends AbstractDataSet<FloatDataSet> implements Edita
                 addDataLabel(xValues.size() - 1, label);
             }
 
-            getAxisDescription(0).add(x);
-            getAxisDescription(1).add(y);
+            getAxisDescription(DIM_X).add(x);
+            getAxisDescription(DIM_Y).add(y);
         });
         return fireInvalidated(new AddedDataEvent(this));
     }
@@ -134,10 +134,10 @@ public class FloatDataSet extends AbstractDataSet<FloatDataSet> implements Edita
             yValues.addElements(yValues.size(), yValuesNew);
 
             for (int i = 0; i < xValuesNew.length; i++) {
-                getAxisDescription(0).add(xValuesNew[i]);
+                getAxisDescription(DIM_X).add(xValuesNew[i]);
             }
             for (int i = 0; i < yValuesNew.length; i++) {
-                getAxisDescription(1).add(yValuesNew[i]);
+                getAxisDescription(DIM_Y).add(yValuesNew[i]);
             }
         });
         return fireInvalidated(new AddedDataEvent(this));
@@ -184,8 +184,8 @@ public class FloatDataSet extends AbstractDataSet<FloatDataSet> implements Edita
             yValues.add(indexAt, y);
             getDataLabelMap().addValueAndShiftKeys(indexAt, xValues.size(), label);
             getDataStyleMap().shiftKeys(indexAt, xValues.size());
-            getAxisDescription(0).add(x);
-            getAxisDescription(1).add(y);
+            getAxisDescription(DIM_X).add(x);
+            getAxisDescription(DIM_Y).add(y);
         });
         return fireInvalidated(new AddedDataEvent(this));
     }
@@ -209,8 +209,8 @@ public class FloatDataSet extends AbstractDataSet<FloatDataSet> implements Edita
             xValues.addElements(indexAt, x, 0, min);
             yValues.addElements(indexAt, y, 0, min);
             for (int i = 0; i < min; i++) {
-                getAxisDescription(0).add(x[i]);
-                getAxisDescription(1).add(y[i]);
+                getAxisDescription(DIM_X).add(x[i]);
+                getAxisDescription(DIM_Y).add(y[i]);
             }
 
             getDataLabelMap().shiftKeys(indexAt, xValues.size());

@@ -93,8 +93,8 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
             this.yErrorsPos = yErrorsPos;
             this.yErrorsNeg = yErrorsNeg;
         }
-        recomputeLimits(0);
-        recomputeLimits(1);
+        recomputeLimits(DIM_X);
+        recomputeLimits(DIM_Y);
     }
 
     /**
@@ -160,9 +160,9 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
             yErrorsNeg[dataMaxIndex] = yErrorNeg;
             dataMaxIndex++;
 
-            getAxisDescription(0).add(x);
-            getAxisDescription(1).add(y - yErrorNeg);
-            getAxisDescription(1).add(y + yErrorPos);
+            getAxisDescription(DIM_X).add(x);
+            getAxisDescription(DIM_Y).add(y - yErrorNeg);
+            getAxisDescription(DIM_Y).add(y + yErrorPos);
         });
         return fireInvalidated(new AddedDataEvent(this));
     }
@@ -216,8 +216,8 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
             System.arraycopy(yErrorsPos, 0, this.yErrorsPos, getDataCount(), newLength - getDataCount());
 
             dataMaxIndex = Math.max(0, dataMaxIndex + xValues.length);
-            recomputeLimits(0);
-            recomputeLimits(1);
+            recomputeLimits(DIM_X);
+            recomputeLimits(DIM_Y);
         });
         return fireInvalidated(new AddedDataEvent(this));
     }
@@ -242,8 +242,8 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
             getDataLabelMap().clear();
             getDataStyleMap().clear();
 
-            getAxisDescription(0).clear();
-            getAxisDescription(1).clear();
+            getAxisDescription(DIM_X).clear();
+            getAxisDescription(DIM_Y).clear();
         });
         return fireInvalidated(new RemovedDataEvent(this, "clearData()"));
     }
@@ -419,8 +419,8 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
                 this.yValues = yValues;
                 this.yErrorsNeg = yErrorsNeg;
                 this.yErrorsPos = yErrorsPos;
-                recomputeLimits(0);
-                recomputeLimits(1);
+                recomputeLimits(DIM_X);
+                recomputeLimits(DIM_Y);
                 return;
             }
 
@@ -439,8 +439,8 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
                 this.yErrorsPos = Arrays.copyOf(yErrorsPos, xValues.length);
             }
 
-            recomputeLimits(0);
-            recomputeLimits(1);
+            recomputeLimits(DIM_X);
+            recomputeLimits(DIM_Y);
         });
         return fireInvalidated(new UpdatedDataEvent(this));
     }
@@ -479,9 +479,9 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
                 this.add(x, y, yErrorNeg, yErrorPos);
             }
 
-            getAxisDescription(0).add(x);
-            getAxisDescription(1).add(y - yErrorNeg);
-            getAxisDescription(1).add(y + yErrorPos);
+            getAxisDescription(DIM_X).add(x);
+            getAxisDescription(DIM_Y).add(y - yErrorNeg);
+            getAxisDescription(DIM_Y).add(y + yErrorPos);
         });
         return fireInvalidated(new UpdatedDataEvent(this));
     }

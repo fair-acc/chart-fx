@@ -97,8 +97,8 @@ public class FifoDoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorData
             // remove old fields
             expire(x);
 
-            recomputeLimits(0);
-            recomputeLimits(1);
+            recomputeLimits(DIM_X);
+            recomputeLimits(DIM_Y);
         });
         fireInvalidated(new AddedDataEvent(this));
 
@@ -150,10 +150,10 @@ public class FifoDoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorData
                         // data.remove(blob);
                         toRemoveList.add(blob);
                     } else {
-                        getAxisDescription(0).add(x + blob.getErrorX());
-                        getAxisDescription(0).add(x - blob.getErrorX());
-                        getAxisDescription(1).add(y + blob.getErrorY());
-                        getAxisDescription(1).add(y - blob.getErrorY());
+                        getAxisDescription(DIM_X).add(x + blob.getErrorX());
+                        getAxisDescription(DIM_X).add(x - blob.getErrorX());
+                        getAxisDescription(DIM_Y).add(y + blob.getErrorY());
+                        getAxisDescription(DIM_Y).add(y - blob.getErrorY());
                     }
                 } else {
                     // data.remove(blob);
@@ -162,8 +162,8 @@ public class FifoDoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorData
             }
 
             data.removeAll(toRemoveList);
-            recomputeLimits(0);
-            recomputeLimits(1);
+            recomputeLimits(DIM_X);
+            recomputeLimits(DIM_Y);
             // computeLimits(); // N.B. already computed above
             return toRemoveList.size();
         });

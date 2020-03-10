@@ -46,7 +46,7 @@ public class LabelledMarkerDataSet extends AbstractDataSet<LabelledMarkerDataSet
         AssertUtils.notNull("marker", marker);
         lock().writeLockGuard(() -> {
             data.add(new DoublePoint(marker.getX(), marker.getY()));
-            getAxisDescription(0).add(marker.getX());
+            getAxisDescription(DIM_X).add(marker.getX());
             // yRange.add(marker.getY());
             dataLabels.add(marker.getLabel());
             dataStyles.add(marker.getStyle());
@@ -168,7 +168,7 @@ public class LabelledMarkerDataSet extends AbstractDataSet<LabelledMarkerDataSet
         AssertUtils.indexInBounds(index, getDataCount());
         lock().writeLockGuard(() -> {
             data.get(index).set(marker.getX(), marker.getY());
-            getAxisDescription(0).add(marker.getX());
+            getAxisDescription(DIM_X).add(marker.getX());
             // yRange.add(marker.getY());
             dataLabels.set(index, marker.getLabel());
             dataStyles.set(index, marker.getStyle());
@@ -205,7 +205,7 @@ public class LabelledMarkerDataSet extends AbstractDataSet<LabelledMarkerDataSet
                 final double x = marker.getX();
                 final double y = marker.getY();
                 data.add(new DoublePoint(x, y));
-                getAxisDescription(0).add(x);
+                getAxisDescription(DIM_X).add(x);
                 // yRange.add(y);
                 dataLabels.add(marker.getLabel());
                 dataStyles.add(marker.getStyle());
@@ -229,8 +229,8 @@ public class LabelledMarkerDataSet extends AbstractDataSet<LabelledMarkerDataSet
     // final int dataCount = getDataCount();
     //
     // for (int i = 0; i < dataCount; i++) {
-    // getAxisDescription(0).add(getX(i));
-    // // getAxisDescription(1).add(getY(i));
+    // getAxisDescription(DIM_X).add(getX(i));
+    // // getAxisDescription(DIM_Y).add(getY(i));
     // }
     //
     // return unlock();
