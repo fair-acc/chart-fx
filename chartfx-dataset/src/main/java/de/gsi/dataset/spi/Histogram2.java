@@ -86,11 +86,6 @@ public class Histogram2 extends AbstractHistogram implements Histogram2D, DataSe
     }
 
     @Override
-    public int getDataCount() {
-        return getDataCount(DIM_X);
-    }
-
-    @Override
     public List<String> getErrorList() {
         return Collections.<String>emptyList();
     }
