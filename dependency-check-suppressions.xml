@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.3.xsd">
+  <suppress>
+    <notes><![CDATA[
+    file name: JLargeArrays-1.5.jar
+    ]]></notes>
+    <packageUrl regex="true">^pkg:maven/pl\.edu\.icm/JLargeArrays@.*$</packageUrl>
+    <cpe>cpe:/a:gitlab:gitlab</cpe>
+  </suppress>
+</suppressions>
