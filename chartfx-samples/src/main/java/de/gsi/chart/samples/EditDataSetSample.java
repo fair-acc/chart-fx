@@ -3,6 +3,12 @@ package de.gsi.chart.samples;
 import static de.gsi.dataset.DataSet.DIM_X;
 import static de.gsi.dataset.DataSet.DIM_Y;
 
+import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.scene.Scene;
+import javafx.scene.layout.StackPane;
+import javafx.stage.Stage;
+
 import de.gsi.chart.XYChart;
 import de.gsi.chart.axes.spi.DefaultNumericAxis;
 import de.gsi.chart.plugins.DataPointTooltip;
@@ -15,11 +21,6 @@ import de.gsi.chart.renderer.spi.ErrorDataSetRenderer;
 import de.gsi.dataset.DataSet;
 import de.gsi.dataset.EditConstraints;
 import de.gsi.dataset.spi.DoubleDataSet;
-import javafx.application.Application;
-import javafx.application.Platform;
-import javafx.scene.Scene;
-import javafx.scene.layout.StackPane;
-import javafx.stage.Stage;
 
 /**
  * Simple example of how to edit data sets

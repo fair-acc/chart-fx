@@ -3,6 +3,7 @@ package de.gsi.dataset.utils;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import static de.gsi.dataset.DataSet.DIM_X;
 import static de.gsi.dataset.DataSet.DIM_Y;
 
@@ -35,7 +36,8 @@ public class DataSetUtilsTest {
     private static final double EPSILON = 1e-6;
 
     @ParameterizedTest()
-    @CsvSource({ //
+    @CsvSource({
+            //
             "test.csv,               test.csv               ", // plain filename
             "test_{dataSetName}.csv, test_TestSerialize.csv ", // data Set name
             "test_{xMin}-{xMax}.csv, test_1.0-5.0.csv ", // x min/max
@@ -44,7 +46,8 @@ public class DataSetUtilsTest {
             "val_{testval;float;%.2f}.csv, val_5.25.csv ", // metadata field with formated cast to double
     })
     @DisplayName("Test Filename Generation")
-    public void getFileNameTest(String pattern, String fileName) {
+    public void
+    getFileNameTest(String pattern, String fileName) {
         DataSet dataSet = getTestDataSet();
         assertEquals(fileName, DataSetUtils.getFileName(dataSet, pattern));
     }
@@ -141,11 +144,11 @@ public class DataSetUtilsTest {
         double[] xvalues = new double[] { 1.0, 2.0, 3.0, 4.0, 5.0 };
         double[] yvalues = new double[] { 1.3, 3.7, 4.2, 2.3, 1.8 };
         DataSet result = new DataSetBuilder() //
-                .setName("TestSerialize") //
-                .setXValues(xvalues) //
-                .setYValues(yvalues) //
-                .setMetaInfoMap(Map.of("test", "asdf", "testval", "5.24532")) //
-                .build();
+                                 .setName("TestSerialize") //
+                                 .setXValues(xvalues) //
+                                 .setYValues(yvalues) //
+                                 .setMetaInfoMap(Map.of("test", "asdf", "testval", "5.24532")) //
+                                 .build();
         result.getAxisDescription(DIM_X).set("index", "", 1.0, 5.0);
         result.getAxisDescription(DIM_Y).set("Voltage", "V", 1.3, 4.2);
         return result;
@@ -155,5 +158,4 @@ public class DataSetUtilsTest {
     public static void resetLocalization() {
         Locale.setDefault(Locale.US);
     }
-
 }

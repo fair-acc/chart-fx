@@ -130,8 +130,8 @@ public class CircularDoubleErrorDataSet extends AbstractErrorDataSet<CircularDou
 
             getAxisDescription(DIM_X).add(xVals);
             for (int i = 0; i < yVals.length; i++) {
-                getAxisDescription(DIM_Y).add(yVals[i]+ yErrPos[i]);
-                getAxisDescription(DIM_Y).add(yVals[i]- yErrNeg[i]);
+                getAxisDescription(DIM_Y).add(yVals[i] + yErrPos[i]);
+                getAxisDescription(DIM_Y).add(yVals[i] - yErrNeg[i]);
             }
         });
 
