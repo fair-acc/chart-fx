@@ -566,14 +566,12 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
      */
     @Override
     public D recomputeLimits(final int dimIndex) {
-        lock().writeLockGuard(() -> {
-            // Clear previous ranges
-            getAxisDescription(dimIndex).clear();
-            final int dataCount = getDataCount(dimIndex);
-            for (int i = 0; i < dataCount; i++) {
-                getAxisDescription(dimIndex).add(get(dimIndex, i));
-            }
-        });
+        // Clear previous ranges
+        getAxisDescription(dimIndex).clear();
+        final int dataCount = getDataCount(dimIndex);
+        for (int i = 0; i < dataCount; i++) {
+            getAxisDescription(dimIndex).add(get(dimIndex, i));
+        }
         return getThis();
     }
 
