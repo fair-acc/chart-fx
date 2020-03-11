@@ -13,7 +13,7 @@ before_install:
   - if [ -n "$GPG_KEY" ]; then echo $GPG_OWNERTRUST | base64 --decode | $GPG_EXECUTABLE --import-ownertrust; fi
   # setup version information
   - if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then export REVISION=${TRAVIS_BRANCH}; else export REVISION=${TRAVIS_BRANCH}PR${TRAVIS_PULL_REQUEST}; fi
-  - if [[ -z "$TRAVIS_TAG" ||  "$TRAVIS_TAG" =~ ^11\.[0-9]*\.[0-9]*$ ]]; then export CHANGELIST=$TRAVIS_TAG-SNAPSHOT; fi
+  - if [[ -z "$TRAVIS_TAG" || ! "$TRAVIS_TAG" =~ ^11\.[0-9]*\.[0-9]*$ ]]; then export CHANGELIST=-SNAPSHOT; fi
   # download coverity tools and determine if extended scans should be performed
   - export COVERITY_RESULTS_ARCHIVE=coverity_report.tar.bz2
   - if [ "$TRAVIS_EVENT_TYPE" == "cron" ]; then export COVERITY_SCAN_VERSION="cron"; else if [[ "$TRAVIS_TAG" =~ ^11\.[0-9]*\.[0-9]*$ ]]; then export COVERITY_SCAN_VERSION="$TRAVIS_TAG"; else if [ "$TRAVIS_BRANCH" == "coverity_scan" ]; then export COVERITY_SCAN_VERSION="$TRAVIS_BRANCH"; fi; fi; fi
