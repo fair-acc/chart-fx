@@ -76,5 +76,4 @@ public abstract class AbstractDataSet3D<D extends AbstractDataSet3D<D>> extends 
         }
         return getThis();
     }
-
 }

@@ -52,10 +52,8 @@ public class HistoryDataSetRendererSample extends Application {
                 final double phase = 2 * Math.PI * updateIteration / 40.0;
                 final double a1 = 1 + 0.5 * Math.sin(phase);
                 final double a2 = 1 + 0.5 * Math.cos(phase);
-                final double y1 = a1 * GaussFunction.gauss(x, HistoryDataSetRendererSample.N_SAMPLES * 1.0 / 3.0,
-                        HistoryDataSetRendererSample.N_SAMPLES / 20.0) * 1000;
-                final double y2 = a2 * GaussFunction.gauss(x, HistoryDataSetRendererSample.N_SAMPLES * 2.0 / 3.0,
-                        HistoryDataSetRendererSample.N_SAMPLES / 20.0) * 1000;
+                final double y1 = a1 * GaussFunction.gauss(x, HistoryDataSetRendererSample.N_SAMPLES * 1.0 / 3.0, HistoryDataSetRendererSample.N_SAMPLES / 20.0) * 1000;
+                final double y2 = a2 * GaussFunction.gauss(x, HistoryDataSetRendererSample.N_SAMPLES * 2.0 / 3.0, HistoryDataSetRendererSample.N_SAMPLES / 20.0) * 1000;
                 final double ey1 = 0.01 * y1;
 
                 // lin scale
