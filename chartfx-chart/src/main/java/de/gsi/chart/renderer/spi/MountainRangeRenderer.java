@@ -9,6 +9,12 @@ import java.util.List;
 import java.util.WeakHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.SimpleDoubleProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.scene.canvas.GraphicsContext;
+
 import de.gsi.chart.Chart;
 import de.gsi.chart.XYChart;
 import de.gsi.chart.axes.Axis;
@@ -26,11 +32,6 @@ import de.gsi.dataset.locks.DefaultDataSetLock;
 import de.gsi.dataset.spi.DefaultAxisDescription;
 import de.gsi.dataset.utils.AssertUtils;
 import de.gsi.dataset.utils.ProcessingProfiler;
-import javafx.beans.property.DoubleProperty;
-import javafx.beans.property.SimpleDoubleProperty;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import javafx.scene.canvas.GraphicsContext;
 
 /**
  * @author rstein
@@ -156,7 +157,6 @@ public class MountainRangeRenderer extends ErrorDataSetRenderer implements Rende
                     }
                 });
             }
-
         }
 
         ProcessingProfiler.getTimeDiff(start);
@@ -312,7 +312,7 @@ public class MountainRangeRenderer extends ErrorDataSetRenderer implements Rende
             Demux3dTo2dDataSet.this.getAxisDescription(DIM_Y).set(zAxis.getName(), zAxis.getUnit(), zAxis.getMin(),
                     zRangeMax * (1 + mountainRaingeExtra));
         }
-        
+
         private final void notifyRangeChange() {
             if (dataSet == null || !dataSet.autoNotification().get()) {
                 return;
@@ -351,6 +351,5 @@ public class MountainRangeRenderer extends ErrorDataSetRenderer implements Rende
                 throw new IndexOutOfBoundsException("dimIndex=" + dimIndex + " out of range");
             }
         }
-
     }
 }

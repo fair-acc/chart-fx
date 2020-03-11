@@ -267,9 +267,11 @@ public class DataRange {
     public String toString() {
         final StringBuilder sb = new StringBuilder(50);
         sb.append(this.getClass().getSimpleName()) //
-                .append(" [min=").append(isMinDefined() ? getMin() : "NotDefined") //
-                .append(", max=").append(isMaxDefined() ? getMax() : "NotDefined").append(']');
+                .append(" [min=")
+                .append(isMinDefined() ? getMin() : "NotDefined") //
+                .append(", max=")
+                .append(isMaxDefined() ? getMax() : "NotDefined")
+                .append(']');
         return sb.toString();
     }
-
 }

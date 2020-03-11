@@ -2,6 +2,7 @@ package de.gsi.dataset.utils.serializer;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+
 import static de.gsi.dataset.DataSet.DIM_X;
 
 import org.junit.jupiter.api.Test;
@@ -19,7 +20,6 @@ public class IoSerialiserTests {
 
     @Test
     public void simpleStreamerTest() {
-
         // check reading/writing
         final MyGenericClass inputObject = new MyGenericClass();
         MyGenericClass outputObject1 = new MyGenericClass();
@@ -140,8 +140,6 @@ public class IoSerialiserTests {
         assertEquals(inputObject, outputObject);
         LOGGER.atDebug().log("finished test#3 - initialised DataSet w/ single data point");
 
-        LOGGER.atInfo().addArgument(this.getClass().getSimpleName())
-                .log("{} - testIdentityDoubleDataSet() - completed successfully");
+        LOGGER.atInfo().addArgument(this.getClass().getSimpleName()).log("{} - testIdentityDoubleDataSet() - completed successfully");
     }
-
 }
