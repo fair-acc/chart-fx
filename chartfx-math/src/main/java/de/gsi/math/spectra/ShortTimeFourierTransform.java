@@ -103,33 +103,33 @@ public class ShortTimeFourierTransform {
                 dbScale, truncateDCNy);
 
         // initialize result dataset
-        DataSet result;
+        DoubleDataSet3D result;
         if (output == null) {
             result = new DoubleDataSet3D("STFT(" + input.getName() + ")", timeAxis, frequencyAxis, amplitudeData);
         } else if (output instanceof DoubleDataSet3D) {
-            result = output;
-            final DoubleDataSet3D output3D = (DoubleDataSet3D) output;
-            // only update data arrays if at least one array was newly allocated
-            if (oldTimeAxis != timeAxis || oldFrequencyAxis != frequencyAxis || oldAmplitudeData != amplitudeData) {
-                output3D.set(timeAxis, frequencyAxis, amplitudeData);
-            }
+            result = (DoubleDataSet3D) output;
         } else {
             // TODO: find generic way to modify data in place
             result = new DoubleDataSet3D("STFT(" + input.getName() + ")", timeAxis, frequencyAxis, amplitudeData);
         }
-        if (result instanceof DataSetMetaData) {
-            ((DataSetMetaData) result).getMetaInfo().put("ComplexSTFT-nFFT", Integer.toString(nFFT));
-            ((DataSetMetaData) result).getMetaInfo().put("ComplexSTFT-step", Integer.toString(step));
-        }
+        result.lock().writeLockGuard(() -> {
+            // only update data arrays if at least one array was newly allocated
+            if (oldTimeAxis != timeAxis || oldFrequencyAxis != frequencyAxis || oldAmplitudeData != amplitudeData) {
+                result.set(timeAxis, frequencyAxis, amplitudeData);
+            }
 
-        // Set Axis Labels and Units
-        final String timeUnit = input.getAxisDescription(DIM_X).getUnit();
-        result.getAxisDescription(DIM_X).set("Time", timeUnit, timeAxis[0], timeAxis[timeAxis.length - 1]);
-        final String freqUnit = timeUnit.equals("s") ? "Hz" : "1/" + timeUnit;
-        result.getAxisDescription(DIM_Y).set("Frequency", freqUnit, frequencyAxis[0],
-                frequencyAxis[frequencyAxis.length - 1]);
-        result.getAxisDescription(DIM_Z).set("Magnitude", input.getAxisDescription(DIM_Y).getUnit());
-        result.recomputeLimits(DIM_Z);
+            result.getMetaInfo().put("ComplexSTFT-nFFT", Integer.toString(nFFT));
+            result.getMetaInfo().put("ComplexSTFT-step", Integer.toString(step));
+
+            // Set Axis Labels and Units
+            final String timeUnit = input.getAxisDescription(DIM_X).getUnit();
+            result.getAxisDescription(DIM_X).set("Time", timeUnit, timeAxis[0], timeAxis[timeAxis.length - 1]);
+            final String freqUnit = timeUnit.equals("s") ? "Hz" : "1/" + timeUnit;
+            result.getAxisDescription(DIM_Y).set("Frequency", freqUnit, frequencyAxis[0],
+                    frequencyAxis[frequencyAxis.length - 1]);
+            result.getAxisDescription(DIM_Z).set("Magnitude", input.getAxisDescription(DIM_Y).getUnit());
+            result.recomputeLimits(DIM_Z);
+        });
 
         return result;
     }
@@ -311,33 +311,33 @@ public class ShortTimeFourierTransform {
                 truncateDCNy);
 
         // initialize result dataset
-        DataSet result;
+        DoubleDataSet3D result;
         if (output == null) {
             result = new DoubleDataSet3D("STFT(" + input.getName() + ")", timeAxis, frequencyAxis, amplitudeData);
         } else if (output instanceof DoubleDataSet3D) {
-            result = output;
-            final DoubleDataSet3D output3D = (DoubleDataSet3D) output;
-            // only update data arrays if at least one array was newly allocated
-            if (oldTimeAxis != timeAxis || oldFrequencyAxis != frequencyAxis || oldAmplitudeData != amplitudeData) {
-                output3D.set(timeAxis, frequencyAxis, amplitudeData);
-            }
+            result = (DoubleDataSet3D) output;
         } else {
             // TODO: find generic way to modify data in place
             result = new DoubleDataSet3D("STFT(" + input.getName() + ")", timeAxis, frequencyAxis, amplitudeData);
         }
-        if (result instanceof DataSetMetaData) {
-            ((DataSetMetaData) result).getMetaInfo().put("RealSTFT-nFFT", Integer.toString(nFFT));
-            ((DataSetMetaData) result).getMetaInfo().put("RealSTFT-step", Integer.toString(step));
-        }
+        result.lock().writeLockGuard(() -> {
+            // only update data arrays if at least one array was newly allocated
+            if (oldTimeAxis != timeAxis || oldFrequencyAxis != frequencyAxis || oldAmplitudeData != amplitudeData) {
+                result.set(timeAxis, frequencyAxis, amplitudeData);
+            }
 
-        // Set Axis Labels and Units
-        final String timeUnit = input.getAxisDescription(DIM_X).getUnit();
-        result.getAxisDescription(DIM_X).set("Time", timeUnit, timeAxis[0], timeAxis[timeAxis.length - 1]);
-        final String freqUnit = timeUnit.equals("s") ? "Hz" : "1/" + timeUnit;
-        result.getAxisDescription(DIM_Y).set("Frequency", freqUnit, frequencyAxis[0],
-                frequencyAxis[frequencyAxis.length - 1]);
-        result.getAxisDescription(DIM_Z).set("Magnitude", input.getAxisDescription(DIM_Y).getUnit());
-        result.recomputeLimits(DIM_Z);
+            result.getMetaInfo().put("RealSTFT-nFFT", Integer.toString(nFFT));
+            result.getMetaInfo().put("RealSTFT-step", Integer.toString(step));
+
+            // Set Axis Labels and Units
+            final String timeUnit = input.getAxisDescription(DIM_X).getUnit();
+            result.getAxisDescription(DIM_X).set("Time", timeUnit, timeAxis[0], timeAxis[timeAxis.length - 1]);
+            final String freqUnit = timeUnit.equals("s") ? "Hz" : "1/" + timeUnit;
+            result.getAxisDescription(DIM_Y).set("Frequency", freqUnit, frequencyAxis[0],
+                    frequencyAxis[frequencyAxis.length - 1]);
+            result.getAxisDescription(DIM_Z).set("Magnitude", input.getAxisDescription(DIM_Y).getUnit());
+            result.recomputeLimits(DIM_Z);
+        });
 
         return result;
     }
