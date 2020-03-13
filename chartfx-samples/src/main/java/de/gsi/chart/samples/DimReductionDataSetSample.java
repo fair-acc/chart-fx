@@ -53,7 +53,7 @@ public class DimReductionDataSetSample extends Application {
         DimReductionDataSet horizontalSlice = new DimReductionDataSet(waveletScalogram, DataSet.DIM_Y, Option.SLICE);
         XValueIndicator xValueIndicator = new XValueIndicator(waveletChart1.getXAxis(), 0.0, "slice-y");
         xValueIndicator.valueProperty()
-                .addListener((ch, o, n) -> horizontalSlice.setMinIndex(DataSet.DIM_X, n.doubleValue()));
+                .addListener((ch, o, n) -> horizontalSlice.setMinValue(n.doubleValue()));
         xValueIndicator.setValue(300.0);
         waveletChart1.getPlugins().addAll(xValueIndicator);
 
@@ -68,9 +68,9 @@ public class DimReductionDataSetSample extends Application {
         xRangeIndicator.upperBoundProperty().bindBidirectional(xRangeIndicatorMax.valueProperty());
         xRangeIndicator.setEditable(true);
         xRangeIndicator.lowerBoundProperty()
-                .addListener((ch, o, n) -> horizontalRange.setMinIndex(DataSet.DIM_X, n.doubleValue()));
+                .addListener((ch, o, n) -> horizontalRange.setMinValue(n.doubleValue()));
         xRangeIndicator.upperBoundProperty()
-                .addListener((ch, o, n) -> horizontalRange.setMaxIndex(DataSet.DIM_X, n.doubleValue()));
+                .addListener((ch, o, n) -> horizontalRange.setMaxValue(n.doubleValue()));
         xRangeIndicator.setLowerBound(200.0);
         xRangeIndicator.setUpperBound(600.0);
         waveletChart1.getPlugins().addAll(xRangeIndicator, xRangeIndicatorMin, xRangeIndicatorMax);
@@ -82,9 +82,9 @@ public class DimReductionDataSetSample extends Application {
         DimReductionDataSet verticalSlice = new DimReductionDataSet(waveletScalogram, DataSet.DIM_X, Option.SLICE);
         YValueIndicator yValueIndicator = new YValueIndicator(waveletChart1.getYAxis(), 0.0, "slice-x");
         yValueIndicator.valueProperty()
-                .addListener((ch, o, n) -> verticalSlice.setMinIndex(DataSet.DIM_Y, n.doubleValue()));
+                .addListener((ch, o, n) -> verticalSlice.setMinValue(n.doubleValue()));
         yValueIndicator.setValue(0.26);
-        verticalSlice.setMinIndex(DataSet.DIM_Y, 0.1);
+        verticalSlice.setMinValue(0.1);
         waveletChart2.getPlugins().add(yValueIndicator);
 
         // reduce wavelet data set to 2D by integrating over range
@@ -98,9 +98,9 @@ public class DimReductionDataSetSample extends Application {
         yRangeIndicator.upperBoundProperty().bindBidirectional(yRangeIndicatorMax.valueProperty());
         yRangeIndicator.setEditable(true);
         yRangeIndicator.lowerBoundProperty()
-                .addListener((ch, o, n) -> verticalRange.setMinIndex(DataSet.DIM_Y, n.doubleValue()));
+                .addListener((ch, o, n) -> verticalRange.setMinValue(n.doubleValue()));
         yRangeIndicator.upperBoundProperty()
-                .addListener((ch, o, n) -> verticalRange.setMaxIndex(DataSet.DIM_Y, n.doubleValue()));
+                .addListener((ch, o, n) -> verticalRange.setMaxValue(n.doubleValue()));
         yRangeIndicator.setLowerBound(0.175);
         yRangeIndicator.setUpperBound(0.225);
         waveletChart2.getPlugins().addAll(yRangeIndicator, yRangeIndicatorMin, yRangeIndicatorMax);

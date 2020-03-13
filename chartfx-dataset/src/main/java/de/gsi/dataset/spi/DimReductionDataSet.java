@@ -11,18 +11,39 @@ import de.gsi.dataset.event.UpdateEvent;
 
 /**
  * Reduces 3D data to 2D DataSet either via slicing, min, mean, max or integration
- * 
+ *
  * @author rstein
  */
 public class DimReductionDataSet extends DoubleDataSet implements EventListener {
+    /**
+     * The possible reduction options if integrated over a value range
+     *
+     * @author rstein
+     */
+    public enum Option {
+        MIN,
+        MEAN,
+        MAX,
+        INTEGRAL,
+        SLICE;
+    }
     private static final Logger LOGGER = LoggerFactory.getLogger(DimReductionDataSet.class);
     private static final long serialVersionUID = 1L;
     private final Option reductionOption;
     private final DataSet3D source;
     private final int dimIndex;
-    private int indexMin;
-    private int indexMax;
+    private int minIndex;
+    private int maxIndex;
+    private double minValue;
+    private double maxValue;
 
+    /**
+     * Reduces 3D data to 2D DataSet either via slicing, min, mean, max or integration
+     *
+     * @param source 3D DataSet to take projections from
+     * @param dimIndex the axis index onto which the projection should be performed (ie. DIM_X &lt;-&gt; integrate over the Y axis within given value ranges and vice versa)
+     * @param reductionOption one of the reduction options given in {@link Option}
+     */
     public DimReductionDataSet(final DataSet3D source, final int dimIndex, final Option reductionOption) {
         super(source.getName() + "-" + reductionOption + "-dim" + dimIndex);
 
@@ -33,12 +54,20 @@ public class DimReductionDataSet extends DoubleDataSet implements EventListener 
         this.source.addListener(this);
     }
 
-    public int getMaxIndex(final int dimIndex) {
-        return indexMax;
+    public int getMaxIndex() {
+        return maxIndex;
     }
 
-    public int getMinIndex(final int dimIndex) {
-        return indexMin;
+    public double getMaxValue() {
+        return maxValue;
+    }
+
+    public int getMinIndex() {
+        return minIndex;
+    }
+
+    public double getMinValue() {
+        return minValue;
     }
 
     public Option getReductionOption() {
@@ -57,7 +86,13 @@ public class DimReductionDataSet extends DoubleDataSet implements EventListener 
         if (LOGGER.isDebugEnabled()) {
             LOGGER.atDebug().addArgument(event).log("handle({})");
         }
-        source.lock().readLockGuard(() -> lock().writeLockGuard(() -> {
+        lock().writeLockGuard(() -> source.lock().readLockGuard(() -> {
+            // recompute min/max indices based on actual new value range
+            final boolean oldValue = source.autoNotification().getAndSet(false);
+            minIndex = source.getIndex(dimIndex == DIM_X ? DIM_Y : DIM_X, minValue);
+            maxIndex = source.getIndex(dimIndex == DIM_X ? DIM_Y : DIM_X, maxValue);
+            source.autoNotification().set(oldValue);
+
             switch (reductionOption) {
             case MIN:
                 updateMinMax(true);
@@ -77,36 +112,36 @@ public class DimReductionDataSet extends DoubleDataSet implements EventListener 
                 break;
             }
         }));
-        this.fireInvalidated(new AddedDataEvent(this,
-                "updated " + DimReductionDataSet.class.getSimpleName() + " name = " + this.getName()));
+
+        this.fireInvalidated(new AddedDataEvent(this, "updated " + DimReductionDataSet.class.getSimpleName() + " name = " + this.getName()));
         if (LOGGER.isDebugEnabled()) {
             LOGGER.atDebug().addArgument(event).log("handle({}) - done");
         }
     }
 
-    public void setMaxIndex(final int dimIndex, double val) {
-        // disable notifications for the source dataSet, to prevent an infinite loop
-        source.removeListener(this);
+    public void setMaxValue(final double val) {
         lock().writeLockGuard(() -> {
-            indexMax = source.getIndex(dimIndex, val);
+            maxValue = val;
         });
-        source.addListener(this);
         this.handle(new UpdateEvent(this, "changed indexMax"));
     }
 
-    public void setMinIndex(final int dimIndex, double val) {
-        // disable notifications for the source dataSet, to prevent an infinite loop
-        source.removeListener(this);
+    public void setMinValue(double val) {
+        lock().writeLockGuard(() -> minValue = val);
+        this.handle(new UpdateEvent(this, "changed indexMin"));
+    }
+
+    public void setRange(final double min, final double max) {
         lock().writeLockGuard(() -> {
-            indexMin = source.getIndex(dimIndex, val);
+            minValue = min;
+            maxValue = max;
         });
-        source.addListener(this);
-        this.handle(new UpdateEvent(this, "changed indexMax"));
+        this.handle(new UpdateEvent(this, "changed indexMin indexMax"));
     }
 
     protected void updateMeanIntegral(final boolean isMean) {
-        final int min = Math.min(indexMin, indexMax);
-        final int max = Math.max(Math.max(indexMin, indexMax), min + 1);
+        final int min = Math.min(minIndex, maxIndex);
+        final int max = Math.max(Math.max(minIndex, maxIndex), min + 1);
         this.clearData();
         final int nDataCount = source.getDataCount(dimIndex);
         if (dimIndex == DataSet.DIM_Y) {
@@ -135,8 +170,8 @@ public class DimReductionDataSet extends DoubleDataSet implements EventListener 
     }
 
     protected void updateMinMax(final boolean isMin) {
-        final int min = Math.min(indexMin, indexMax);
-        final int max = Math.max(Math.max(indexMin, indexMax), min + 1);
+        final int min = Math.min(minIndex, maxIndex);
+        final int max = Math.max(Math.max(minIndex, maxIndex), min + 1);
         this.clearData();
         final int nDataCount = source.getDataCount(dimIndex);
         if (dimIndex == DataSet.DIM_Y) {
@@ -168,23 +203,15 @@ public class DimReductionDataSet extends DoubleDataSet implements EventListener 
         if (dimIndex == DataSet.DIM_Y) {
             for (int index = 0; index < nDataCount; index++) {
                 final double x = source.get(dimIndex, index);
-                final double y = source.getZ(indexMin, index);
+                final double y = source.getZ(minIndex, index);
                 this.add(x, y);
             }
         } else {
             for (int index = 0; index < nDataCount; index++) {
                 final double x = source.get(dimIndex, index);
-                final double y = source.getZ(index, indexMin);
+                final double y = source.getZ(index, minIndex);
                 this.add(x, y);
             }
         }
-    }
-
-    public enum Option {
-        MIN,
-        MEAN,
-        MAX,
-        INTEGRAL,
-        SLICE;
     }
 }
