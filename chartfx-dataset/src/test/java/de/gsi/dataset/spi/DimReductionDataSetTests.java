@@ -26,6 +26,49 @@ public class DimReductionDataSetTests {
     private int nEvent = 0;
 
     @Test
+    public void testGetterSetterConsistency() {
+        LOGGER.atDebug().log("testGetterSetterConsistency");
+        DoubleDataSet3D testData = new DoubleDataSet3D("test", //
+                new double[] { 1, 2, 3 }, // x-array
+                new double[] { 6, 7, 8 }, // y-array
+                new double[][] { // z-array
+                        new double[] { 1, 2, 3 }, //
+                        new double[] { 6, 5, 4 }, //
+                        new double[] { 9, 8, 7 } });
+
+        DimReductionDataSet reducedDataSetX = new DimReductionDataSet(testData, DIM_X, Option.INTEGRAL);
+        DimReductionDataSet reducedDataSetY = new DimReductionDataSet(testData, DIM_Y, Option.INTEGRAL);
+
+        reducedDataSetX.setMinValue(0.0);
+        assertEquals(0.0, reducedDataSetX.getMinValue());
+        reducedDataSetX.setMinValue(2.0);
+        assertEquals(2.0, reducedDataSetX.getMinValue());
+
+        reducedDataSetX.setMaxValue(0.0);
+        assertEquals(0.0, reducedDataSetX.getMaxValue());
+        reducedDataSetX.setMaxValue(2.0);
+        assertEquals(2.0, reducedDataSetX.getMaxValue());
+
+        reducedDataSetX.setRange(1.5, 2.5);
+        assertEquals(1.5, reducedDataSetX.getMinValue());
+        assertEquals(2.5, reducedDataSetX.getMaxValue());
+
+        reducedDataSetY.setMinValue(0.0);
+        assertEquals(0.0, reducedDataSetY.getMinValue());
+        reducedDataSetY.setMinValue(2.0);
+        assertEquals(2.0, reducedDataSetY.getMinValue());
+
+        reducedDataSetY.setMaxValue(0.0);
+        assertEquals(0.0, reducedDataSetY.getMaxValue());
+        reducedDataSetY.setMaxValue(2.0);
+        assertEquals(2.0, reducedDataSetY.getMaxValue());
+
+        reducedDataSetY.setRange(1.5, 2.5);
+        assertEquals(1.5, reducedDataSetY.getMinValue());
+        assertEquals(2.5, reducedDataSetY.getMaxValue());
+    }
+
+    @Test
     public void testIntegralOptions() {
         LOGGER.atDebug().log("testIntegralOptions");
         DoubleDataSet3D testData = new DoubleDataSet3D("test", //
@@ -41,48 +84,49 @@ public class DimReductionDataSetTests {
 
         assertEquals(testData, sliceDataSetX.getSourceDataSet(), "equal source dataSet");
         assertEquals(testData, sliceDataSetY.getSourceDataSet(), "equal source dataSet");
-        assertEquals(Option.INTEGRAL, sliceDataSetX.getReductionOption(), "reduction option");
+        assertEquals(Option.INTEGRAL, sliceDataSetY.getReductionOption(), "reduction option");
 
-        sliceDataSetX.setMinIndex(DIM_X, 0);
-        assertEquals(0, sliceDataSetX.getMinIndex(DIM_X));
-        sliceDataSetX.setMinIndex(DIM_X, 2);
-        assertEquals(1, sliceDataSetX.getMinIndex(DIM_X));
-        sliceDataSetX.setMinIndex(DIM_X, 0);
-        assertEquals(0, sliceDataSetX.getMinIndex(DIM_X));
+        sliceDataSetY.setMinValue(0);
+        assertEquals(0, sliceDataSetY.getMinIndex());
+        sliceDataSetY.setMinValue(2);
+        assertEquals(1, sliceDataSetY.getMinIndex());
+        sliceDataSetY.setMinValue(0);
+        assertEquals(0, sliceDataSetY.getMinIndex());
 
-        sliceDataSetX.setMaxIndex(DIM_X, 2);
-        assertEquals(1, sliceDataSetX.getMaxIndex(DIM_X));
-        sliceDataSetX.setMaxIndex(DIM_X, 3);
-        assertEquals(2, sliceDataSetX.getMaxIndex(DIM_X));
+        sliceDataSetY.setMaxValue(2);
+        assertEquals(1, sliceDataSetY.getMaxIndex());
+        sliceDataSetY.setMaxValue(3);
+        assertEquals(2, sliceDataSetY.getMaxIndex());
 
-        sliceDataSetY.setMinIndex(DIM_Y, 5);
-        assertEquals(0, sliceDataSetY.getMinIndex(DIM_Y));
-        sliceDataSetY.setMinIndex(DIM_Y, 6);
-        assertEquals(0, sliceDataSetY.getMinIndex(DIM_Y));
-        sliceDataSetY.setMinIndex(DIM_Y, 7);
-        assertEquals(1, sliceDataSetY.getMinIndex(DIM_Y));
-        sliceDataSetY.setMinIndex(DIM_Y, 0);
+        sliceDataSetX.setMinValue(5);
+        assertEquals(0, sliceDataSetX.getMinIndex());
+        sliceDataSetX.setMinValue(6);
+        assertEquals(0, sliceDataSetX.getMinIndex());
+        sliceDataSetX.setMinValue(7);
+        assertEquals(1, sliceDataSetX.getMinIndex());
+        sliceDataSetX.setMinValue(0);
 
-        sliceDataSetY.setMaxIndex(DIM_Y, 7);
-        assertEquals(1, sliceDataSetY.getMaxIndex(DIM_Y));
-        sliceDataSetY.setMaxIndex(DIM_Y, 8);
-        assertEquals(2, sliceDataSetY.getMaxIndex(DIM_Y));
+        sliceDataSetX.setMaxValue(7);
+        assertEquals(1, sliceDataSetX.getMaxIndex());
+        sliceDataSetX.setMaxValue(8);
+        assertEquals(2, sliceDataSetX.getMaxIndex());
 
         // integral over full array
         final double[] integralX = new double[3];
         final double[] integralY = new double[3];
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 3; j++) {
-                integralX[i] += testData.getZ(j, i);
-                integralY[j] += testData.getZ(j, i);
+                integralX[j] += testData.getZ(j, i);
+                integralY[i] += testData.getZ(j, i);
             }
         }
-        sliceDataSetX.setMinIndex(DIM_X, 0);
-        sliceDataSetX.setMaxIndex(DIM_X, 4);
-        sliceDataSetY.setMinIndex(DIM_Y, 0);
-        sliceDataSetY.setMaxIndex(DIM_Y, 9);
-        assertArrayEquals(integralY, sliceDataSetX.getValues(DIM_Y), "x-integral");
-        assertArrayEquals(integralX, sliceDataSetY.getValues(DIM_Y), "x-integral");
+        sliceDataSetY.setMinValue(0);
+        sliceDataSetY.setMaxValue(4);
+        sliceDataSetX.setMinValue(0);
+        sliceDataSetX.setMaxValue(9);
+
+        assertArrayEquals(integralX, sliceDataSetX.getValues(DIM_Y), "x-integral");
+        assertArrayEquals(integralY, sliceDataSetY.getValues(DIM_Y), "y-integral");
 
         LOGGER.atDebug().log("testIntegralOptions - done");
     }
@@ -110,16 +154,18 @@ public class DimReductionDataSetTests {
         final double[] maxX = new double[3];
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 3; j++) {
-                maxX[i] = Math.max(testData.getZ(j, i), maxX[i]);
-                maxY[j] = Math.max(testData.getZ(j, i), maxY[i]);
+                maxX[j] = Math.max(testData.getZ(j, i), maxX[j]);
+                maxY[i] = Math.max(testData.getZ(j, i), maxY[i]);
             }
         }
-        sliceDataSetX.setMinIndex(DIM_X, 0);
-        sliceDataSetX.setMaxIndex(DIM_X, 4);
-        sliceDataSetY.setMinIndex(DIM_Y, 0);
-        sliceDataSetY.setMaxIndex(DIM_Y, 9);
-        assertArrayEquals(maxY, sliceDataSetX.getValues(DIM_Y), "x-max");
-        assertArrayEquals(maxX, sliceDataSetY.getValues(DIM_Y), "x-max");
+
+        sliceDataSetX.setMinValue(0);
+        sliceDataSetX.setMaxValue(10);
+        sliceDataSetY.setMinValue(0);
+        sliceDataSetY.setMaxValue(4);
+
+        assertArrayEquals(maxX, sliceDataSetX.getValues(DIM_Y), "x-max");
+        assertArrayEquals(maxY, sliceDataSetY.getValues(DIM_Y), "y-max");
 
         LOGGER.atDebug().log("testMaxOptions - done");
     }
@@ -147,17 +193,19 @@ public class DimReductionDataSetTests {
         final double[] meanY = new double[3];
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 3; j++) {
-                meanX[i] += testData.getZ(j, i) / 3.0;
-                meanY[j] += testData.getZ(j, i) / 3.0;
+                meanX[j] += testData.getZ(j, i) / 3.0;
+                meanY[i] += testData.getZ(j, i) / 3.0;
             }
         }
-        sliceDataSetX.setMinIndex(DIM_X, 0);
-        sliceDataSetX.setMaxIndex(DIM_X, 4);
-        sliceDataSetY.setMinIndex(DIM_Y, 0);
-        sliceDataSetY.setMaxIndex(DIM_Y, 9);
+
+        sliceDataSetX.setMinValue(0);
+        sliceDataSetX.setMaxValue(10);
+        sliceDataSetY.setMinValue(0);
+        sliceDataSetY.setMaxValue(4);
+
         for (int i = 0; i < 3; i++) {
-            assertTrue(MathUtils.nearlyEqual(meanY[i], sliceDataSetX.getValues(DIM_Y)[i]), "x-integral");
-            assertTrue(MathUtils.nearlyEqual(meanX[i], sliceDataSetY.getValues(DIM_Y)[i]), "y-integral");
+            assertTrue(MathUtils.nearlyEqual(meanX[i], sliceDataSetX.getValues(DIM_Y)[i]), "x-integral");
+            assertTrue(MathUtils.nearlyEqual(meanY[i], sliceDataSetY.getValues(DIM_Y)[i]), "y-integral");
         }
 
         LOGGER.atDebug().log("testMeanOptions - done");
@@ -186,17 +234,18 @@ public class DimReductionDataSetTests {
         final double[] minX = new double[] { Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE };
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 3; j++) {
-                minX[i] = Math.min(testData.getZ(j, i), minX[i]);
-                minY[j] = Math.min(testData.getZ(j, i), minY[j]);
+                minX[j] = Math.min(testData.getZ(j, i), minX[j]);
+                minY[i] = Math.min(testData.getZ(j, i), minY[i]);
             }
         }
-        sliceDataSetX.setMinIndex(DIM_X, 0);
-        sliceDataSetX.setMaxIndex(DIM_X, 4);
-        sliceDataSetY.setMinIndex(DIM_Y, 0);
-        sliceDataSetY.setMaxIndex(DIM_Y, 10);
 
-        assertArrayEquals(minY, sliceDataSetX.getValues(DIM_Y), "x-min");
-        assertArrayEquals(minX, sliceDataSetY.getValues(DIM_Y), "y-min");
+        sliceDataSetX.setMinValue(0);
+        sliceDataSetX.setMaxValue(10);
+        sliceDataSetY.setMinValue(0);
+        sliceDataSetY.setMaxValue(4);
+
+        assertArrayEquals(minX, sliceDataSetX.getValues(DIM_Y), "x-min");
+        assertArrayEquals(minY, sliceDataSetY.getValues(DIM_Y), "y-min");
 
         LOGGER.atDebug().log("testMinOptions - done");
     }
@@ -221,9 +270,7 @@ public class DimReductionDataSetTests {
 
         nEvent = 0;
         sliceDataSetX.addListener(evt -> {
-            if (evt.getSource().equals(sliceDataSetX)) {
-                nEvent++;
-            }
+            nEvent++;
         });
         testData.invokeListener(new UpdateEvent(testData, "testX"), true);
         assertEquals(1, nEvent, "DataSet3D event propagated");
@@ -234,11 +281,15 @@ public class DimReductionDataSetTests {
         assertArrayEquals(testData.getZValues()[0], sliceDataSetX.getValues(DIM_Y), "first row match");
         assertArrayEquals(testData.getValues(DIM_Y), sliceDataSetY.getValues(DIM_X));
 
-        sliceDataSetX.setMinIndex(DIM_X, 2.0);
+        sliceDataSetX.setMinValue(7.0);
         assertEquals(2, nEvent, "DataSet3D event propagated");
 
-        assertArrayEquals(testData.getZValues()[1], sliceDataSetX.getValues(DIM_Y), "first row match");
+        assertArrayEquals(testData.getZValues()[1], sliceDataSetX.getValues(DIM_Y), "second row match");
         assertArrayEquals(testData.getValues(DIM_Y), sliceDataSetY.getValues(DIM_X));
+
+        assertArrayEquals(new double[] { 1, 6, 9 }, sliceDataSetY.getValues(DIM_Y), "first column match");
+        sliceDataSetY.setMinValue(2.0);
+        assertArrayEquals(new double[] { 2, 5, 8 }, sliceDataSetY.getValues(DIM_Y), "second column match");
 
         LOGGER.atDebug().log("testSliceOptions - done");
     }
