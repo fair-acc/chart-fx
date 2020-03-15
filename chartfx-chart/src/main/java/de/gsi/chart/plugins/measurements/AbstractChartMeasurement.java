@@ -53,7 +53,7 @@ public abstract class AbstractChartMeasurement implements EventListener {
         title = AbstractChartMeasurement.this.getClass().getSimpleName();
         dataSet = null;
         VBox.setMargin(displayPane, Insets.EMPTY);
-        chart.getMeasurementBar(chart.getMeasurementBarSide()).getChildren().addAll(displayPane, new Pane());
+        chart.getMeasurementBar(chart.getMeasurementBarSide()).getChildren().addAll(displayPane);
 
         alert = new Alert(AlertType.CONFIRMATION);
         alert.setTitle("Measurement Config Dialog");
