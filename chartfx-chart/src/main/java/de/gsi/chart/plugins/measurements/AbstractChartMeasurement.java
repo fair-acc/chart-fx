@@ -4,13 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import de.gsi.chart.Chart;
-import de.gsi.chart.XYChart;
-import de.gsi.chart.plugins.measurements.utils.CheckedValueField;
-import de.gsi.chart.plugins.measurements.utils.DataSetSelector;
-import de.gsi.dataset.DataSet;
-import de.gsi.dataset.event.EventListener;
-import impl.org.controlsfx.skin.DecorationPane;
 import javafx.geometry.Insets;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
@@ -21,11 +14,19 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 
+import de.gsi.chart.Chart;
+import de.gsi.chart.XYChart;
+import de.gsi.chart.plugins.measurements.utils.CheckedValueField;
+import de.gsi.chart.plugins.measurements.utils.DataSetSelector;
+import de.gsi.dataset.DataSet;
+import de.gsi.dataset.event.EventListener;
+
+import impl.org.controlsfx.skin.DecorationPane;
+
 /**
  * @author rstein
  */
 public abstract class AbstractChartMeasurement implements EventListener {
-
     protected static final int PREFERRED_WIDTH = 300;
     protected static int markerCount;
 
@@ -146,5 +147,4 @@ public abstract class AbstractChartMeasurement implements EventListener {
         }
         alert.close();
     }
-
 }
