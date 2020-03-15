@@ -5,6 +5,13 @@ import static de.gsi.chart.axes.AxisMode.X;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 
+import javafx.application.Platform;
+import javafx.scene.Group;
+import javafx.scene.Node;
+import javafx.scene.control.Label;
+import javafx.scene.layout.HBox;
+import javafx.scene.paint.Color;
+
 import org.controlsfx.tools.Borders;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,12 +27,6 @@ import de.gsi.chart.plugins.YValueIndicator;
 import de.gsi.chart.utils.FXUtils;
 import de.gsi.dataset.DataSet;
 import de.gsi.dataset.event.UpdateEvent;
-import javafx.application.Platform;
-import javafx.scene.Group;
-import javafx.scene.Node;
-import javafx.scene.control.Label;
-import javafx.scene.layout.HBox;
-import javafx.scene.paint.Color;
 
 /**
  * @author rstein
@@ -36,7 +37,7 @@ public class ValueIndicator extends AbstractChartMeasurement {
     private static final String FORMAT_SMALL_SCALE = "0.###";
     private static final String FORMAT_LARGE_SCALE = "0.##E0";
     public static final int DEFAULT_SMALL_AXIS = 6; // [orders of magnitude],
-                                                    // e.g. '4' <-> [1,10000]
+            // e.g. '4' <-> [1,10000]
     protected final DecimalFormat formatterSmall = new DecimalFormat(ValueIndicator.FORMAT_SMALL_SCALE);
     protected final DecimalFormat formatterLarge = new DecimalFormat(ValueIndicator.FORMAT_LARGE_SCALE);
 
@@ -52,7 +53,7 @@ public class ValueIndicator extends AbstractChartMeasurement {
         final Axis axis = axisMode == X ? chart.getXAxis() : chart.getYAxis();
         if (!(axis instanceof Axis)) {
             ValueIndicator.LOGGER.warn("axis type " + axis.getClass().getSimpleName()
-                    + "not compatible with indicator (needs to derivce from Axis)");
+                                       + "not compatible with indicator (needs to derivce from Axis)");
             return;
         }
         final Axis numAxis = axis;
@@ -112,7 +113,6 @@ public class ValueIndicator extends AbstractChartMeasurement {
 
             valueLabel = axisFormatter.toString(val);
         } else {
-
             if (Math.abs(Math.log10(Math.abs(val))) < ValueIndicator.SMALL_FORMAT_THRESHOLD) {
                 formatter = formatterSmall;
             } else {
@@ -122,7 +122,6 @@ public class ValueIndicator extends AbstractChartMeasurement {
         }
 
         valueField.setValue(val, valueLabel);
-
     }
 
     @Override
@@ -155,5 +154,4 @@ public class ValueIndicator extends AbstractChartMeasurement {
         chart.getPlugins().remove(sliderIndicator1);
         chart.requestLayout();
     }
-
 }
