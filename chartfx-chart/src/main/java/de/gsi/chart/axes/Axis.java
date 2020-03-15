@@ -2,13 +2,6 @@ package de.gsi.chart.axes;
 
 import java.util.List;
 
-import de.gsi.chart.axes.spi.AxisRange;
-import de.gsi.chart.axes.spi.MetricPrefix;
-import de.gsi.chart.axes.spi.TickMark;
-import de.gsi.chart.ui.geometry.Side;
-import de.gsi.dataset.AxisDescription;
-import de.gsi.dataset.event.EventSource;
-import de.gsi.dataset.event.UpdateEvent;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;
@@ -19,8 +12,15 @@ import javafx.scene.paint.Paint;
 import javafx.scene.text.Font;
 import javafx.util.StringConverter;
 
-public interface Axis extends AxisDescription, EventSource {
+import de.gsi.chart.axes.spi.AxisRange;
+import de.gsi.chart.axes.spi.MetricPrefix;
+import de.gsi.chart.axes.spi.TickMark;
+import de.gsi.chart.ui.geometry.Side;
+import de.gsi.dataset.AxisDescription;
+import de.gsi.dataset.event.EventSource;
+import de.gsi.dataset.event.UpdateEvent;
 
+public interface Axis extends AxisDescription, EventSource {
     /**
      * This is true when the axis determines its range from the data automatically
      *
@@ -121,6 +121,11 @@ public interface Axis extends AxisDescription, EventSource {
      * @return the gap between tick labels and the tick mark lines
      */
     double getTickLabelGap();
+
+    /**
+     * @return the minimum gap between tick labels
+     */
+    double getTickLabelSpacing();
 
     /**
      * Get the string label name for a tick mark with the given value

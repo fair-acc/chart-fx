@@ -36,6 +36,7 @@ public class RotatedAxisLabelSample extends Application {
         chart.getPlugins().add(new Zoomer()); // standard plugin, useful for most cases
         final DoubleDataSet dataSet1 = new DoubleDataSet("data set #1");
         chart.getDatasets().addAll(dataSet1);
+        chart.setLegendVisible(false);
 
         // set additional axes
         for (AxisLabelOverlapPolicy policy : AxisLabelOverlapPolicy.values()) {
@@ -49,6 +50,21 @@ public class RotatedAxisLabelSample extends Application {
             yAxis1.setOverlapPolicy(policy);
 
             chart.getAxes().addAll(xAxis1, yAxis1);
+
+            if (policy.equals(AxisLabelOverlapPolicy.SKIP_ALT)) {
+                final DefaultNumericAxis xAxis2 = getSynchedAxis(xAxis0, "x-axis (" + policy + ") + extra label spacing");
+                xAxis2.setSide(Side.BOTTOM);
+                xAxis2.setOverlapPolicy(policy);
+                xAxis2.setTickLabelSpacing(10);
+
+                final DefaultNumericAxis yAxis2 = getSynchedAxis(yAxis0, "y-axis (-90°, " + policy + ") + extra label spacing");
+                yAxis2.setSide(Side.LEFT);
+                yAxis2.setTickLabelRotation(-90);
+                yAxis2.setOverlapPolicy(policy);
+                yAxis2.setTickLabelSpacing(10);
+
+                chart.getAxes().addAll(xAxis2, yAxis2);
+            }
         }
 
         final DefaultNumericAxis xAxis1 = getSynchedAxis(xAxis0, "x-axis (45°)");
