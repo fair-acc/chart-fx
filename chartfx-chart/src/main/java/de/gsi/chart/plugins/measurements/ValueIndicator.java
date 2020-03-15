@@ -21,6 +21,7 @@ import de.gsi.chart.utils.FXUtils;
 import de.gsi.dataset.DataSet;
 import de.gsi.dataset.event.UpdateEvent;
 import javafx.application.Platform;
+import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
@@ -128,7 +129,7 @@ public class ValueIndicator extends AbstractChartMeasurement {
     public void initialize() {
         final Node node = Borders.wrap(valueField).lineBorder().title(title).color(Color.BLACK).build().build();
         node.setMouseTransparent(true);
-        displayPane.getChildren().add(node);
+        displayPane.getChildren().add(new Group(node));
 
         sliderIndicator1.valueProperty().addListener((ch, oldValue, newValue) -> {
             if (oldValue != newValue) {

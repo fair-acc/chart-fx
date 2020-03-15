@@ -8,6 +8,7 @@ import static de.gsi.chart.plugins.measurements.SimpleMeasurements.MeasurementCa
 import static de.gsi.chart.plugins.measurements.SimpleMeasurements.MeasurementType.VALUE_HOR;
 import static de.gsi.chart.plugins.measurements.SimpleMeasurements.MeasurementType.VALUE_VER;
 
+import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.paint.Color;
 
@@ -218,7 +219,7 @@ public class SimpleMeasurements extends ValueIndicator {
     public void initialize() {
         final Node node = Borders.wrap(valueField).lineBorder().title(title).color(Color.BLACK).build().build();
         node.setMouseTransparent(true);
-        displayPane.getChildren().add(node);
+        displayPane.getChildren().add(new Group(node));
 
         sliderIndicator1.valueProperty().addListener((ch, oldValue, newValue) -> {
             if (oldValue != newValue) {
