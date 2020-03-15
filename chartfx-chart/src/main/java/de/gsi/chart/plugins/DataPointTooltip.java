@@ -193,7 +193,8 @@ public class DataPointTooltip extends AbstractDataFormattingPlugin {
      * Returns label of a data point specified by the index. The label can be used as a category name if
      * CategoryStepsDefinition is used or for annotations displayed for data points.
      *
-     * @param index data point index
+     * @param dataSet the given DataSet
+     * @param index data point index within the DataSet
      * @return label of a data point specified by the index or <code>null</code> if none label has been specified for
      *         this data point.
      */

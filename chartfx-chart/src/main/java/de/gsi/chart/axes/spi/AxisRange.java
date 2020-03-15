@@ -44,6 +44,7 @@ public class AxisRange extends DataRange {
      * Add the specified data range to this range.
      *
      * @param range range to be added
+     * @return true if added range causes a change in range
      */
     public boolean add(final AxisRange range) {
         boolean retVal = false;

@@ -2,12 +2,6 @@ package de.gsi.chart.axes.spi;
 
 import static javafx.scene.paint.CycleMethod.NO_CYCLE;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import de.gsi.chart.plugins.Zoomer;
-import de.gsi.chart.renderer.spi.utils.ColorGradient;
-import de.gsi.chart.ui.geometry.Side;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleDoubleProperty;
@@ -19,6 +13,13 @@ import javafx.scene.paint.LinearGradient;
 import javafx.scene.paint.Stop;
 import javafx.scene.shape.Path;
 import javafx.scene.shape.Rectangle;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import de.gsi.chart.plugins.Zoomer;
+import de.gsi.chart.renderer.spi.utils.ColorGradient;
+import de.gsi.chart.ui.geometry.Side;
 
 /**
  * An Axis with a color gradient e.g. for use with HeatMap plots. By default this axis is excluded from the Zoomer
@@ -37,9 +38,9 @@ public class ColorGradientAxis extends DefaultNumericAxis {
     private final DoubleProperty gradientWidth = new SimpleDoubleProperty(this, "gradientWidth", 20);
 
     /**
-     * @param lowerBound
-     * @param upperBound
-     * @param tickUnit
+     * @param lowerBound the mininum axis value
+     * @param upperBound the maximum axis value
+     * @param tickUnit the default user-defined tick-unit
      */
     public ColorGradientAxis(double lowerBound, double upperBound, double tickUnit) {
         super(lowerBound, upperBound, tickUnit);
@@ -53,7 +54,7 @@ public class ColorGradientAxis extends DefaultNumericAxis {
     }
 
     /**
-     * @param axisLabel
+     * @param axisLabel axis title
      */
     public ColorGradientAxis(String axisLabel) {
         super(axisLabel);
@@ -67,10 +68,10 @@ public class ColorGradientAxis extends DefaultNumericAxis {
     }
 
     /**
-     * @param axisLabel
-     * @param lowerBound
-     * @param upperBound
-     * @param tickUnit
+     * @param axisLabel the axis title
+     * @param lowerBound the minimum axis range
+     * @param upperBound the maximum axis range
+     * @param tickUnit the user-defined tick-unit
      */
     public ColorGradientAxis(String axisLabel, double lowerBound, double upperBound, double tickUnit) {
         super(axisLabel, lowerBound, upperBound, tickUnit);
@@ -85,8 +86,8 @@ public class ColorGradientAxis extends DefaultNumericAxis {
     }
 
     /**
-     * @param axisLabel
-     * @param unit
+     * @param axisLabel the axis title
+     * @param unit the unit label, e.g. 'm' or 's' please use SI-style units
      */
     public ColorGradientAxis(String axisLabel, String unit) {
         super(axisLabel, unit);
@@ -276,7 +277,7 @@ public class ColorGradientAxis extends DefaultNumericAxis {
      */
     public Color getColor(final double value) {
         final double offset = (value - getRange().getLowerBound())
-                / (getRange().getUpperBound() - getRange().getLowerBound());
+                              / (getRange().getUpperBound() - getRange().getLowerBound());
 
         double lowerOffset = 0.0;
         double upperOffset = 1.0;

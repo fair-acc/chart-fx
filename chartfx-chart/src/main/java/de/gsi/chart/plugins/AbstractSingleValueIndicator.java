@@ -4,7 +4,11 @@
 
 package de.gsi.chart.plugins;
 
-import de.gsi.chart.axes.Axis;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.scene.Cursor;
@@ -12,13 +16,18 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Polygon;
 
+import de.gsi.chart.axes.Axis;
+import de.gsi.dataset.event.EventListener;
+import de.gsi.dataset.event.EventSource;
+import de.gsi.dataset.event.UpdateEvent;
+
 /**
  * Plugin indicating a specific X or Y value as a line drawn on the plot area, with an optional {@link #textProperty()
  * text label} describing the value.
  *
  * @author mhrabia
  */
-public abstract class AbstractSingleValueIndicator extends AbstractValueIndicator {
+public abstract class AbstractSingleValueIndicator extends AbstractValueIndicator implements EventSource, ValueIndicator {
     /**
      * The default distance between the data point coordinates and mouse cursor that triggers shifting the line.
      */
@@ -28,6 +37,8 @@ public abstract class AbstractSingleValueIndicator extends AbstractValueIndicato
     protected static final String STYLE_CLASS_LINE = "value-indicator-line";
     protected static final String STYLE_CLASS_MARKER = "value-indicator-marker";
     protected static double triangleHalfWidth = 5.0;
+    private final transient AtomicBoolean autoNotification = new AtomicBoolean(true);
+    private final transient List<EventListener> updateListeners = Collections.synchronizedList(new LinkedList<>());
 
     /**
      * Line indicating the value.
@@ -90,6 +101,8 @@ public abstract class AbstractSingleValueIndicator extends AbstractValueIndicato
         // applied and we can calculate label's
         // width and height
         getChartChildren().addAll(line, triangle, label);
+
+        this.value.addListener((ch, o, n) -> invokeListener(new UpdateEvent(this, "value changed to " + n + " for axis " + axis)));
     }
 
     /**
@@ -115,6 +128,7 @@ public abstract class AbstractSingleValueIndicator extends AbstractValueIndicato
      *
      * @return indicated value
      */
+    @Override
     public final double getValue() {
         return valueProperty().get();
     }
@@ -157,6 +171,14 @@ public abstract class AbstractSingleValueIndicator extends AbstractValueIndicato
         });
     }
 
+    public AtomicBoolean autoNotification() {
+        return autoNotification;
+    }
+
+    public List<EventListener> updateEventListener() {
+        return updateListeners;
+    }
+
     /**
      * Relative position, between 0.0 (left, bottom) and 1.0 (right, top) of the description {@link #textProperty()
      * label} in the plot area.
@@ -190,7 +212,7 @@ public abstract class AbstractSingleValueIndicator extends AbstractValueIndicato
 
         addChildNodeIfNotPresent(line);
         addChildNodeIfNotPresent(pickLine);
-        pickLine.toBack();
+        // pickLine.toBack();
     }
 
     /**
@@ -244,6 +266,7 @@ public abstract class AbstractSingleValueIndicator extends AbstractValueIndicato
      *
      * @param newValue value to be indicated
      */
+    @Override
     public final void setValue(final double newValue) {
         valueProperty().set(newValue);
     }
@@ -271,8 +294,8 @@ public abstract class AbstractSingleValueIndicator extends AbstractValueIndicato
      *
      * @return value property
      */
+    @Override
     public final DoubleProperty valueProperty() {
         return value;
     }
-
 }

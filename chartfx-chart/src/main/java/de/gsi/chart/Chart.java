@@ -100,7 +100,7 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
     private static final Logger LOGGER = LoggerFactory.getLogger(Chart.class);
     private static final String CHART_CSS = Chart.class.getResource("chart.css").toExternalForm();
     private static final int DEFAULT_TRIGGER_DISTANCE = 50;
-    protected static boolean DEBUG; // for more verbose debugging
+    protected static final boolean DEBUG = false; // for more verbose debugging
 
     protected BooleanBinding showingBinding;
     protected final BooleanProperty showing = new SimpleBooleanProperty(this, "showing", false);
@@ -153,7 +153,7 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
 
     protected final Map<Corner, StackPane> axesCorner = new ConcurrentHashMap<>(4);
     protected final Map<Side, Pane> axesPane = new ConcurrentHashMap<>(4);
-    protected final Map<Side, Pane> parameterDisplayPane = new ConcurrentHashMap<>(4);
+    protected final Map<Side, Pane> measurementBar = new ConcurrentHashMap<>(4);
     protected final Map<Corner, StackPane> titleLegendCorner = new ConcurrentHashMap<>(4);
     protected final Map<Side, Pane> titleLegendPane = new ConcurrentHashMap<>(4);
     {
@@ -168,16 +168,7 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
                 axesPane.get(side).setMouseTransparent(true);
             }
 
-            // Stack multiple Measurements on top of each other by using a vertical FlowPane
-            if (side == Side.RIGHT) {
-                final FlowPane flowPane = new FlowPane(Orientation.VERTICAL); // NOPMD - default init
-                flowPane.setAlignment(Pos.TOP_LEFT);
-                flowPane.setPrefSize(Region.USE_COMPUTED_SIZE, Region.USE_COMPUTED_SIZE);
-                parameterDisplayPane.put(side, flowPane);
-                continue;
-            }
-            parameterDisplayPane.put(side, side.isVertical() ? new ChartHBox() : new ChartVBox()); // NOPMD - default
-            // init
+            measurementBar.put(side, side.isVertical() ? new ChartHBox() : new ChartVBox()); // NOPMD - default
         }
     }
 
@@ -260,7 +251,7 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
     /**
      * The side of the chart where the title is displayed default Side.TOP
      */
-    private final ObjectProperty<Side> measurementBarSide = new StyleableObjectProperty<Side>(Side.RIGHT) {
+    private final ObjectProperty<Side> measurementBarSide = new StyleableObjectProperty<>(Side.RIGHT) {
         @Override
         public Object getBean() {
             return Chart.this;
@@ -482,16 +473,16 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
         axesAndCanvasPane.add(hiddenPane, 2, 2); // centre-centre
         canvas.setStyle("-fx-background-color: rgba(200, 250, 200, 0.5);");
 
-        final int ROW_SPAN1 = 1;
-        final int COL_SPAN1 = 1;
-        final int ROW_SPAN3 = 3;
-        final int COL_SPAN3 = 3;
+        final int rowSpan1 = 1;
+        final int colSpan1 = 1;
+        final int rowSpan3 = 3;
+        final int colSpan3 = 3;
 
         // outer title/legend/parameter pane border (outer rim)
-        axesAndCanvasPane.add(getTitleLegendPane(Side.LEFT), 0, 1, COL_SPAN1, ROW_SPAN3); // left-centre
-        axesAndCanvasPane.add(getTitleLegendPane(Side.RIGHT), 4, 1, COL_SPAN1, ROW_SPAN3); // centre-centre
-        axesAndCanvasPane.add(getTitleLegendPane(Side.TOP), 1, 0, COL_SPAN3, ROW_SPAN1); // centre-top
-        axesAndCanvasPane.add(getTitleLegendPane(Side.BOTTOM), 1, 4, COL_SPAN3, ROW_SPAN1); // centre-bottom
+        axesAndCanvasPane.add(getTitleLegendPane(Side.LEFT), 0, 1, colSpan1, rowSpan3); // left-centre
+        axesAndCanvasPane.add(getTitleLegendPane(Side.RIGHT), 4, 1, colSpan1, rowSpan3); // centre-centre
+        axesAndCanvasPane.add(getTitleLegendPane(Side.TOP), 1, 0, colSpan3, rowSpan1); // centre-top
+        axesAndCanvasPane.add(getTitleLegendPane(Side.BOTTOM), 1, 4, colSpan3, rowSpan1); // centre-bottom
 
         // add default axis panes (inner rim)
         axesAndCanvasPane.add(getAxesPane(Side.LEFT), 1, 2); // left-centre
@@ -712,7 +703,7 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
     }
 
     public final Pane getMeasurementBar(final Side side) {
-        return parameterDisplayPane.get(side);
+        return measurementBar.get(side);
     }
 
     public final Side getMeasurementBarSide() {
@@ -884,8 +875,13 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
     @Override
     public void requestLayout() {
         if (DEBUG && LOGGER.isDebugEnabled()) {
-            LOGGER.debug("chart requestLayout() - called by {}", ProcessingProfiler.getCallingClassMethod(1));
+            // normal debugDepth = 1 but for more verbose logging (e.g. recursion) use > 10
+            for (int debugDepth = 1; debugDepth < 2; debugDepth++) {
+                LOGGER.atDebug().addArgument(debugDepth).addArgument(ProcessingProfiler.getCallingClassMethod(debugDepth)).log("chart requestLayout() - called by {}: {}");
+            }
+            LOGGER.atDebug().addArgument("[..]").log("chart requestLayout() - called by {}");
         }
+
         FXUtils.assertJavaFxThread();
         super.requestLayout();
     }

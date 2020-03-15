@@ -4,12 +4,14 @@
 
 package de.gsi.chart.plugins;
 
-import de.gsi.chart.axes.Axis;
 import javafx.geometry.BoundingBox;
 import javafx.geometry.Bounds;
 import javafx.geometry.HPos;
 import javafx.geometry.Point2D;
 import javafx.scene.input.MouseEvent;
+
+import de.gsi.chart.axes.Axis;
+import de.gsi.dataset.event.EventSource;
 
 /**
  * A horizontal line drawn on the plot area, indicating specified Y value, with an optional {@link #textProperty() text
@@ -26,8 +28,7 @@ import javafx.scene.input.MouseEvent;
  *
  * @author mhrabia
  */
-public class YValueIndicator extends AbstractSingleValueIndicator {
-
+public class YValueIndicator extends AbstractSingleValueIndicator implements EventSource, ValueIndicator {
     /**
      * Creates a new instance indicating given Y value belonging to the specified {@code yAxis}.
      *
@@ -86,7 +87,7 @@ public class YValueIndicator extends AbstractSingleValueIndicator {
         } else {
             layoutLine(minX, yPos, maxX, yPos);
             layoutMarker(maxX - 1.5 * AbstractSingleValueIndicator.triangleHalfWidth, yPos, minX, yPos); // +
-                                                                                                         // 1.5*TRIANGLE_HALF_WIDTH
+                    // 1.5*TRIANGLE_HALF_WIDTH
             layoutLabel(new BoundingBox(minX, yPos, maxX - minX, 0), getLabelPosition(),
                     AbstractSingleValueIndicator.MIDDLE_POSITION);
         }
@@ -98,5 +99,4 @@ public class YValueIndicator extends AbstractSingleValueIndicator {
         setStyleClasses(line, "y-", AbstractSingleValueIndicator.STYLE_CLASS_LINE);
         setStyleClasses(triangle, "x-", AbstractSingleValueIndicator.STYLE_CLASS_MARKER);
     }
-
 }

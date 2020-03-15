@@ -9,7 +9,7 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.MultipleSelectionModel;
 import javafx.scene.layout.HBox;
 
-import de.gsi.chart.XYChart;
+import de.gsi.chart.plugins.ParameterMeasurements;
 import de.gsi.dataset.DataSet;
 
 /**
@@ -17,27 +17,29 @@ import de.gsi.dataset.DataSet;
  */
 public class DataSetSelector extends HBox {
     private static final int DEFAULT_SELECTOR_HEIGHT = 50;
-    protected final ListView<DataSet> dataSets;
+    protected final ListView<DataSet> dataSetListView;
     protected final ObservableList<DataSet> allDataSets;
 
-    public DataSetSelector(final XYChart chart) {
+    public DataSetSelector(final ParameterMeasurements plugin) {
         super();
-        final Label label = new Label("Selected Dataset:");
+        if (plugin == null) {
+            throw new IllegalArgumentException("plugin must not be null");
+        }
 
         // wrap observable Array List, to prevent resetting the selection model whenever getAllDatasets() is called
         // somewhere in the code.
-        allDataSets = FXCollections.observableArrayList(chart.getAllDatasets());
-        dataSets = new ListView<>(allDataSets);
-        dataSets.setOrientation(Orientation.VERTICAL);
-        dataSets.setPrefSize(-1, DataSetSelector.DEFAULT_SELECTOR_HEIGHT);
-        MultipleSelectionModel<DataSet> selModel = dataSets.getSelectionModel();
-        if (!allDataSets.isEmpty() && selModel != null) {
+        allDataSets = plugin.getChart() != null ? FXCollections.observableArrayList(plugin.getChart().getAllDatasets()) : FXCollections.emptyObservableList();
+        dataSetListView = new ListView<>(allDataSets);
+        dataSetListView.setOrientation(Orientation.VERTICAL);
+        dataSetListView.setPrefSize(-1, DEFAULT_SELECTOR_HEIGHT);
+        MultipleSelectionModel<DataSet> selModel = dataSetListView.getSelectionModel();
+        if (!allDataSets.isEmpty()) {
             selModel.select(0);
         }
 
-        dataSets.setCellFactory(list -> new DataSetLabel());
-
-        getChildren().addAll(label, dataSets);
+        dataSetListView.setCellFactory(list -> new DataSetLabel());
+        final Label label = new Label("Selected Dataset:");
+        getChildren().addAll(label, dataSetListView);
     }
 
     public int getNumberDataSets() {
@@ -45,13 +47,11 @@ public class DataSetSelector extends HBox {
     }
 
     public DataSet getSelectedDataSet() {
-        MultipleSelectionModel<DataSet> selModel = dataSets.getSelectionModel();
-        if (selModel == null)
-            return null;
+        MultipleSelectionModel<DataSet> selModel = dataSetListView.getSelectionModel();
         return selModel.getSelectedItem();
     }
 
-    static protected class DataSetLabel extends ListCell<DataSet> {
+    protected static class DataSetLabel extends ListCell<DataSet> {
         @Override
         public void updateItem(final DataSet item, final boolean empty) {
             super.updateItem(item, empty);
@@ -60,15 +60,4 @@ public class DataSetSelector extends HBox {
             }
         }
     }
-
-    // protected final ObservableList<DataSet> getAllDataSets(final XYChartPane chartPane) {
-    // final ObservableList<DataSet> allDataSets = FXCollections.observableArrayList();
-    // allDataSets.addAll(chartPane.getChart().getAllDatasets());
-    // final ObservableList<XYChart> a = chartPane.getOverlayCharts();
-    // for (final XYChart chart : a) {
-    // allDataSets.addAll(chart.getAllDatasets());
-    // }
-    //
-    // return allDataSets;
-    // }
 }

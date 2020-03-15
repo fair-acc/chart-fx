@@ -23,6 +23,7 @@ public class TickMark extends Text {
      * @param side where tick mark is supposed to be drawn (N.B. controls text alignment together with rotation)
      * @param tickValue numeric value of tick
      * @param tickPosition position of tick in canvas pixel coordinates
+     * @param tickRotation rotation of the tick mark label in degree
      * @param tickMarkLabel string label associated with tick
      */
     public TickMark(final Side side, final double tickValue, final double tickPosition, final double tickRotation,
