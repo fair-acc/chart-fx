@@ -10,14 +10,17 @@ import de.gsi.dataset.DataSetError;
 import de.gsi.dataset.event.AddedDataEvent;
 import de.gsi.dataset.event.RemovedDataEvent;
 import de.gsi.dataset.spi.utils.DoublePointError;
+import de.gsi.dataset.utils.LimitedQueue;
 
 /**
+ * Limited Fifo DoubleErrorDataSet.
+ * Maximum number of samples and maximum horizontal span are configurable
  * @author rstein
  */
-public class FifoDoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
-        implements DataSet2D, DataSetError {
+public class FifoDoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet> implements DataSet2D, DataSetError {
+    private static final int SAFE_BET = 1;
     private static final long serialVersionUID = -7153702141838930486L;
-    protected LimitedQueue<DataBlob> data;
+    protected final LimitedQueue<DataBlob> data;
     protected double maxDistance = Double.MAX_VALUE;
 
     /**
@@ -40,7 +43,7 @@ public class FifoDoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorData
      * @throws IllegalArgumentException if <code>name</code> is <code>null</code>
      */
     public FifoDoubleErrorDataSet(final String name, final int initalSize, final double maxDistance) {
-        super(name, 2, ErrorType.SYMMETRIC, ErrorType.SYMMETRIC);
+        super(name, 2, ErrorType.NO_ERROR, ErrorType.SYMMETRIC);
         if (initalSize <= 0) {
             throw new IllegalArgumentException("negative or zero initalSize = " + initalSize);
         }
@@ -56,8 +59,8 @@ public class FifoDoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorData
      *
      * @param x the new x coordinate
      * @param y the new y coordinate
-     * @param yErrorNeg the +dy error
-     * @param yErrorPos the -dy error
+     * @param yErrorNeg the -dy error
+     * @param yErrorPos the +dy error
      * @return itself
      */
     public FifoDoubleErrorDataSet add(final double x, final double y, final double yErrorNeg, final double yErrorPos) {
@@ -69,8 +72,8 @@ public class FifoDoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorData
      *
      * @param x the new x coordinate
      * @param y the new y coordinate
-     * @param yErrorNeg the +dy error
-     * @param yErrorPos the -dy error
+     * @param yErrorNeg the -dy error
+     * @param yErrorPos the +dy error
      * @param tag the data tag
      * @return itself
      */
@@ -84,8 +87,8 @@ public class FifoDoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorData
      *
      * @param x the new x coordinate
      * @param y the new y coordinate
-     * @param yErrorNeg the +dy error
-     * @param yErrorPos the -dy error
+     * @param yErrorNeg the -dy error
+     * @param yErrorPos the +dy error
      * @param tag the data tag
      * @param style the data point style
      * @return itself
@@ -94,11 +97,12 @@ public class FifoDoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorData
             final String tag, final String style) {
         lock().writeLockGuard(() -> {
             data.add(new DataBlob(x, y, yErrorNeg, yErrorPos, tag, style));
-            // remove old fields
-            expire(x);
+            this.getAxisDescription(DIM_X).add(x);
+            this.getAxisDescription(DIM_Y).add(y - yErrorNeg);
+            this.getAxisDescription(DIM_Y).add(y + yErrorPos);
 
-            // invalidate ranges
-            getAxisDescriptions().forEach(AxisDescription::clear);
+            // remove old fields if necessary
+            expire(x);
         });
         fireInvalidated(new AddedDataEvent(this));
 
@@ -113,8 +117,8 @@ public class FifoDoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorData
      *
      * @param xValues the new x coordinates
      * @param yValues the new y coordinates
-     * @param yErrorsNeg the +dy errors
-     * @param yErrorsPos the -dy errors
+     * @param yErrorsNeg the -dy errors
+     * @param yErrorsPos the +dy errors
      * @return itself
      */
     public FifoDoubleErrorDataSet add(final double[] xValues, final double[] yValues, final double[] yErrorsNeg,
@@ -137,39 +141,38 @@ public class FifoDoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorData
      */
     public int expire(final double now) {
         final int dataPointsToRemove = lock().writeLockGuard(() -> {
-            getAxisDescriptions().forEach(AxisDescription::clear);
-
-            final List<DataBlob> toRemoveList = new ArrayList<>();
-            // for (final DataBlob blob : (LimitedQueue<DataBlob>) data.clone()) {
+            final List<DataBlob> toRemoveList = new ArrayList<>(SAFE_BET);
             for (final DataBlob blob : data) {
                 final double x = blob.getX();
-                final double y = blob.getX();
 
-                if (Double.isFinite(x) && Double.isFinite(y)) {
-                    if (Math.abs(now - x) > maxDistance) {
-                        // data.remove(blob);
-                        toRemoveList.add(blob);
-                    } else {
-                        getAxisDescription(DIM_X).add(x + blob.getErrorX());
-                        getAxisDescription(DIM_X).add(x - blob.getErrorX());
-                        getAxisDescription(DIM_Y).add(y + blob.getErrorY());
-                        getAxisDescription(DIM_Y).add(y - blob.getErrorY());
-                    }
-                } else {
-                    // data.remove(blob);
+                if (!Double.isFinite(x) || Math.abs(now - x) > maxDistance) {
                     toRemoveList.add(blob);
                 }
             }
 
-            data.removeAll(toRemoveList);
-            // invalidate ranges
-            getAxisDescriptions().forEach(AxisDescription::clear);
+            if (toRemoveList.size() > 0) {
+                // remove elements and invalidate ranges if necessary
+                data.removeAll(toRemoveList);
+                getAxisDescriptions().forEach(AxisDescription::clear);
+            }
             return toRemoveList.size();
         });
         if (dataPointsToRemove != 0) {
             fireInvalidated(new RemovedDataEvent(this, "expired data"));
         }
         return dataPointsToRemove;
+    }
+
+    @Override
+    public final double get(final int dimIndex, final int index) {
+        return dimIndex == DataSet.DIM_X ? data.get(index).getX() : data.get(index).getY();
+    }
+
+    /**
+     * @return the internal data container (N.B. this is not thread-safe)
+     */
+    public LimitedQueue<DataBlob> getData() {
+        return data;
     }
 
     @Override
@@ -184,12 +187,12 @@ public class FifoDoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorData
 
     @Override
     public double getErrorNegative(final int dimIndex, final int index) {
-        return dimIndex == DIM_X ? data.get(index).getErrorX() : data.get(index).getErrorY();
+        return dimIndex == DIM_X ? 0.0 : data.get(index).getErrorX();
     }
 
     @Override
     public double getErrorPositive(final int dimIndex, final int index) {
-        return dimIndex == DIM_X ? data.get(index).getErrorX() : data.get(index).getErrorY();
+        return dimIndex == DIM_X ? 0.0 : data.get(index).getErrorY();
     }
 
     /**
@@ -202,11 +205,6 @@ public class FifoDoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorData
     @Override
     public String getStyle(final int index) {
         return data.get(index).getStyle();
-    }
-
-    @Override
-    public final double get(final int dimIndex, final int index) {
-        return dimIndex == DataSet.DIM_X ? data.get(index).getX() : data.get(index).getY();
     }
 
     /**
@@ -228,13 +226,9 @@ public class FifoDoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorData
         protected String style;
         protected String tag;
 
-        protected DataBlob(final double x, final double y, final double errorX, final double errorY) {
-            this(x, y, errorX, errorY, null, null);
-        }
-
-        protected DataBlob(final double x, final double y, final double errorX, final double errorY, final String tag,
+        protected DataBlob(final double x, final double y, final double errorYNeg, final double errorYPos, final String tag,
                 final String style) {
-            super(x, y, errorX, errorY);
+            super(x, y, errorYNeg, errorYPos);
             this.tag = tag;
             this.style = style;
         }
@@ -245,34 +239,6 @@ public class FifoDoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorData
 
         public String getStyle() {
             return style;
-        }
-    }
-
-    /**
-     * @author rstein
-     * @param <E> generics template reference
-     */
-    public class LimitedQueue<E> extends ArrayList<E> {
-        private static final long serialVersionUID = -5751322669709687363L;
-        private final int limit;
-
-        /**
-         * @param limit size of queue
-         */
-        public LimitedQueue(final int limit) {
-            this.limit = limit;
-            if (limit < 1) {
-                throw new IllegalArgumentException("Queue limit must be greater than 0");
-            }
-        }
-
-        @Override
-        public boolean add(final E o) {
-            final boolean r = super.add(o);
-            if (size() > limit) {
-                super.remove(0);
-            }
-            return r;
         }
     }
 }
