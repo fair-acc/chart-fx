@@ -33,10 +33,10 @@ public class TimeAxisRangeSample extends Application {
         final VBox root = new VBox();
         root.setAlignment(Pos.CENTER);
 
-        final TimeAxis xAxis1 = new TimeAxis("standard time axis", now - 3600, now, 3600 / 10);
+        final TimeAxis xAxis1 = new TimeAxis("standard time axis", now - 3600, now, 3600 / 12);
         root.getChildren().add(xAxis1);
 
-        final TimeAxis xAxis2 = new TimeAxis("inverted time axis", now - 3600, now, 3600 / 10);
+        final TimeAxis xAxis2 = new TimeAxis("inverted time axis", now - 3600, now, 3600 / 12);
         xAxis2.invertAxis(true);
         root.getChildren().add(xAxis2);
 
@@ -72,7 +72,7 @@ public class TimeAxisRangeSample extends Application {
                     xAxisDyn.minProperty().set(now - range);
                     final String text = "actual range [s]: " + String.format("%#.3f", range) + " ("
                                         + String.format("%#.1f", range / 3600 / 24) + " days)";
-                    xAxisDyn.setTickUnit(range / 10);
+                    xAxisDyn.setTickUnit(range / 12);
                     xAxisDyn.forceRedraw();
                     xAxis9Text.setText(text);
                 });
@@ -83,7 +83,7 @@ public class TimeAxisRangeSample extends Application {
         };
         timer.scheduleAtFixedRate(task, 0, TimeUnit.SECONDS.toMillis(2));
 
-        final Scene scene = new Scene(root, 800, 900);
+        final Scene scene = new Scene(root, 1200, 1100);
         scene.getStylesheets().setAll(CHART_CSS);
 
         primaryStage.setTitle(this.getClass().getSimpleName());
