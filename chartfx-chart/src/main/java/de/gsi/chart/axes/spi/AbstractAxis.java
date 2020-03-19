@@ -140,9 +140,6 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         };
 
         axisPaddingProperty().addListener((ch, o, n) -> {
-            if (o == n) {
-                return;
-            }
             final double padding = getAxisPadding();
             if (getSide().isHorizontal()) {
                 canvas.resize(getWidth() + (2 * padding), getHeight());
@@ -1252,7 +1249,11 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
                 newAxisRange = getAxisRange();
             }
 
-            setTickUnit(computePreferredTickUnit(axisLength));
+            if (isAutoRanging() || isAutoGrowRanging() || isInvertedAxis()) {
+                setTickUnit(computePreferredTickUnit(axisLength));
+            }
+            // setTickUnit(computePreferredTickUnit(axisLength));
+
             newAxisRange.tickUnit = this.getTickUnit();
             updateAxisLabelAndUnit();
             recomputeTickMarks(newAxisRange);
