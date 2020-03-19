@@ -28,8 +28,6 @@ before_install:
       fi
     fi
   - sudo apt-get install jq
-  # download codacy coverage reporter:https://github.com/codacy/codacy-coverage-reporter#travis-ci
-  - curl -LSs $(curl -LSs https://api.github.com/repos/codacy/codacy-coverage-reporter/releases/latest | jq -r '.assets | map({name, browser_download_url} | select(.name | endswith(".jar"))) | .[0].browser_download_url') -o codacy-coverage-reporter-assembly.jar
 
 install:
   # Compile, test and install to local m2 repository
@@ -38,14 +36,12 @@ install:
 script:
   # deploy maven project
   - if [ -n "$GPG_KEY" ]; then mvn clean deploy --settings .maven.xml -Prelease -Drevision=${REVISION} -Dchangelist=${CHANGELIST}; fi
-  # check for vulnerable dependencies. Only performed in certain builds because downloading the CVE database takes a lot of time
-  - if [ -n "$COVERITY_SCAN_VERSION" ]; then mvn dependency-check:aggregate@owaspcheck; fi
 
 after_success:
   # create and upload coverage report
   - mvn jacoco:report-aggregate coveralls:report
+  - mvn -pl chartfx-report codacy:coverage
   - bash <(curl -s https://codecov.io/bash) -s chartfx-report/target/site/jacoco-aggregate/
-  - java -jar codacy-coverage-reporter-assembly.jar report -l Java -r chartfx-report/target/site/jacoco-aggregate/jacoco.xml
   # upload runtime data to perform exhaustive statical analysis on coverity if enabled for this build
   - echo "TRAVIS_EVENT_TYPE = '${TRAVIS_EVENT_TYPE}'  TRAVIS_BRANCH = '${TRAVIS_BRANCH}' TRAVIS_TAG = '${TRAVIS_TAG}'"
   - |-2
@@ -72,6 +68,8 @@ after_success:
     else
       echo "coverity scan not triggered for COVERITY_SCAN_VERSION = '${COVERITY_SCAN_VERSION}'"
     fi
+  # check for vulnerable dependencies. Only performed in certain builds because downloading the CVE database takes a lot of time
+  - if [ -n "$COVERITY_SCAN_VERSION" ]; then mvn dependency-check:aggregate@owaspcheck; fi
 
 # cache maven artifacts
 cache:
