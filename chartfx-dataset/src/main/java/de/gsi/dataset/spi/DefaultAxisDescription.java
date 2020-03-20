@@ -187,7 +187,7 @@ public class DefaultAxisDescription extends DataRange implements AxisDescription
         // the recomputeLimits is usually recomputed when validating the axis,
         // this function is called in case e.g. a point has been modified and range invalidated
 
-        if (dataSet != null) {
+        if (dataSet != null && dataSet.getDataCount() > 0) {
             boolean notify = false;
             for (int dim = 0; dim < dataSet.getDimension(); dim++) {
                 if (dim >= dataSet.getAxisDescriptions().size()) {
@@ -216,7 +216,7 @@ public class DefaultAxisDescription extends DataRange implements AxisDescription
         // the recomputeLimits is usually recomputed when validating the axis,
         // this function is called in case e.g. a point has been modified and range invalidated
 
-        if (dataSet != null) {
+        if (dataSet != null && dataSet.getDataCount() > 0) {
             boolean notify = false;
             for (int dim = 0; dim < dataSet.getDimension(); dim++) {
                 if (dim >= dataSet.getAxisDescriptions().size()) {
