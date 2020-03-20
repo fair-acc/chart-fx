@@ -361,7 +361,7 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
 
     /**
      * NaN compatible algorithm
-     * 
+     *
      * @param gc the graphics context from the Canvas parent
      * @param localCachedPoints reference to local cached data point object
      */
@@ -691,8 +691,8 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
                 int indexMin;
                 int indexMax; /* indexMax is excluded in the drawing */
                 if (isAssumeSortedData()) {
-                    indexMin = Math.max(0, dataSet.getIndex(DataSet.DIM_X, xMin));
-                    indexMax = Math.min(dataSet.getIndex(DataSet.DIM_X, xMax) + 1, dataSet.getDataCount(DataSet.DIM_X));
+                    indexMin = Math.max(0, dataSet.getIndex(DataSet.DIM_X, xMin) - 1);
+                    indexMax = Math.min(dataSet.getIndex(DataSet.DIM_X, xMax) + 2, dataSet.getDataCount(DataSet.DIM_X));
                 } else {
                     indexMin = 0;
                     indexMax = dataSet.getDataCount(DataSet.DIM_X);
