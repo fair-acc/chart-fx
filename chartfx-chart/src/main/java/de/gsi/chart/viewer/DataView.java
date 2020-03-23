@@ -99,7 +99,7 @@ public class DataView extends VBox {
         };
         this.contentPaneProperty().addListener((ch, o, n) -> {
             if (o != null) {
-                n.widthProperty().removeListener(widthChange);
+                o.widthProperty().removeListener(widthChange);
             }
             if (n != null) {
                 n.widthProperty().addListener(widthChange);

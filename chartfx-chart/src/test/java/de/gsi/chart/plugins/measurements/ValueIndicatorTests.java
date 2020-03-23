@@ -51,6 +51,9 @@ public class ValueIndicatorTests {
 
         assertThrows(IllegalArgumentException.class, () -> new ValueIndicator(null, AxisMode.X));
         assertThrows(IllegalArgumentException.class, () -> new ValueIndicator(null, AxisMode.Y));
+        // throws exception because chart not being defined yet
+        assertThrows(IllegalArgumentException.class, () -> new ValueIndicator(plugin, AxisMode.X));
+        assertThrows(IllegalArgumentException.class, () -> new ValueIndicator(plugin, AxisMode.Y));
 
         chart.getPlugins().add(plugin);
         // N.B. plugins need to be initialised after ParameterMeasurements has been added to the chart
