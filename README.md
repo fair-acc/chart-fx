@@ -32,8 +32,7 @@ The library offers a wide variety of plot types common in the scientific signal 
 
 In order to provide some of the scenegraph-level functionality while using a `Canvas` as graphics backend, the functionality of each module was extended to be readily customized through direct API methods as well as through external CSS-type style sheets.
 
-## Examples
-### Simple example
+## Example Usage
 
 <img src="docs/pics/SimpleChartSample.png" width=800 alt="simple ChartFx example"/>
 
@@ -117,25 +116,45 @@ To use different buildsystems or library versions, have a look at the snippets o
 mvn compile install
 mvn exec:java
 ```
-
-
 </details>
 
-### more examples
+### Using the snapshot repository
+
+<details><summary>
+If you only want to try out unreleased features from master or one of the feature branches, there is no need to download the source and build chart-fx yourself. You can just use the `<branchname>-SNAPSHOT` releases  from the sonatype snapshot repository for example by adding the following to your pom.xml if you want to use the current master:
+</summary>
+
+```xml
+<dependencies>
+    <dependency>
+        <groupId>de.gsi.chart</groupId>
+        <artifactId>chartfx-chart</artifactId>
+        <version>master-SNAPSHOT</version>
+        <!-- <version>master-20200320.180638-78</version> pin to a specific snapshot build-->
+    </dependency>
+</dependencies>
+<repositories>
+    <repository>
+        <id>oss.sonatype.org-snapshot</id>
+        <url>http://oss.sonatype.org/content/repositories/snapshots</url>
+        <releases>
+            <enabled>false</enabled>
+        </releases>
+        <snapshots>
+            <enabled>true</enabled>
+        </snapshots>
+    </repository>
+</repositories>
+```
+</details>
+
+## Examples
+The chart-fx samples submodule contains a lot of samples which illustrate the capabilities and usage of the library.
 If you want to try them yourself run:
 
 ```bash
 mvn compile install
 mvn exec:java
-```
-or for the individual sample groups:
-
-```bash
-mvn compile install
-mvn exec:java@chart
-mvn exec:java@math
-mvn exec:java@dataset
-mvn exec:java@acc-ui
 ```
 
 <table>
@@ -190,6 +209,7 @@ mvn exec:java@acc-ui
 If you want to try them yourself run:
 
 ```bash
+mvn compile install
 mvn exec:java@math
 ```
 
@@ -249,7 +269,7 @@ The gained experience and interfaces will provide a starting point for a planned
 If you want to work on the chart-fx sourcecode, either to play with the samples or to contribute some improvements to chartFX here are some instructions how to obtain the source and compile it using maven on the command line or using eclipse.
 
 ### Maven on the command line
-Just clone the repository and run maven from the top level directory. The `exec:java` target can be used to ececute the samples.
+Just clone the repository and run maven from the top level directory. The `exec:java` target can be used to execute the samples.
 Maven calls java with the corresponding options so that JavaFX is working. Because of the way the project is set up, only classes in the chartfx-samples project can be started this way.
 
 
@@ -283,7 +303,6 @@ modules available and accessible to chartfx:
 --add-opens javafx.graphics/com.sun.javafx.css=ALL-UNNAMED
 --add-opens javafx.base/com.sun.javafx.runtime=ALL-UNNAMED`
 ```
-
 
 ### Extending chartfx
 If you find yourself missing some feature or not being able to access specific chart interna, the way to go is often to
