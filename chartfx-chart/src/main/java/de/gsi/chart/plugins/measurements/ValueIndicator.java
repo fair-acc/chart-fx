@@ -37,7 +37,7 @@ public class ValueIndicator extends AbstractChartMeasurement {
 
     public ValueIndicator(final ParameterMeasurements plugin, final AxisMode axisMode) {
         super(plugin, "Marker", axisMode);
-        if (plugin.getChart() == null) {
+        if (plugin == null || plugin.getChart() == null) {
             throw new IllegalArgumentException("chart reference must not be null");
         }
 
