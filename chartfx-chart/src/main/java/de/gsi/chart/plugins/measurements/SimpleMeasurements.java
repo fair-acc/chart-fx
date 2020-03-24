@@ -178,7 +178,7 @@ public class SimpleMeasurements extends AbstractChartMeasurement {
             // convert value according to scale factor
             final double scaledValue = val / unitScale;
 
-            getValueField().setUnit(new StringBuilder().append(axisPrefix).append(unit).toString());
+            FXUtils.runFX(() -> getValueField().setUnit(new StringBuilder().append(axisPrefix).append(unit).toString()));
             final AxisLabelFormatter axisFormatter = ((DefaultNumericAxis) axis).getAxisLabelFormatter();
             valueLabel = axisFormatter.toString(scaledValue);
         } else {
@@ -188,7 +188,7 @@ public class SimpleMeasurements extends AbstractChartMeasurement {
                 valueLabel = formatterLarge.format(val);
             }
 
-            getValueField().setUnit(unit);
+            FXUtils.runFX(() -> getValueField().setUnit(unit));
         }
 
         final double tempVal = val;
