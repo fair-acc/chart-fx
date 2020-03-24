@@ -13,6 +13,7 @@ import javafx.application.Application;
 import javafx.beans.DefaultProperty;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.value.ChangeListener;
+import javafx.collections.FXCollections;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -49,6 +50,7 @@ import de.gsi.chart.ui.geometry.Side;
 import de.gsi.chart.utils.GlyphFactory;
 import de.gsi.chart.viewer.DataView;
 import de.gsi.chart.viewer.DataViewWindow;
+import de.gsi.chart.viewer.DataViewWindow.WindowDecoration;
 import de.gsi.chart.viewer.DataViewer;
 import de.gsi.chart.viewer.event.WindowClosedEvent;
 import de.gsi.chart.viewer.event.WindowUpdateEvent;
@@ -194,20 +196,14 @@ public class DataViewerSample extends Application {
         listView.setTooltip(new Tooltip("click to switch between button and list-style DataView selection"));
         listView.setSelected(viewer.showListStyleDataViewProperty().get());
         listView.selectedProperty().bindBidirectional(viewer.showListStyleDataViewProperty());
-        CheckBox windowDeco = new CheckBox();
-        windowDeco.setTooltip(new Tooltip("click to remove sub-window decorations"));
-        windowDeco.setSelected(viewer.windowDecorationVisible().get());
-        windowDeco.setGraphic(new Glyph(FONT_AWESOME, '\uf2d0').size(FONT_SIZE));
-        windowDeco.selectedProperty().bindBidirectional(viewer.windowDecorationVisible());
-        CheckBox closeDeco = new CheckBox();
-        closeDeco.setSelected(true);
-        closeDeco.setGraphic(new Glyph(FONT_AWESOME, FontAwesome.Glyph.CLOSE).size(FONT_SIZE));
-        closeDeco.selectedProperty().bindBidirectional(viewer.closeWindowButtonVisibleProperty());
+
+        ComboBox<WindowDecoration> windowDecoration = new ComboBox<>(FXCollections.observableArrayList(WindowDecoration.values()));
+        windowDecoration.getSelectionModel().select(viewer.getWindowDecoration());
+        windowDecoration.setOnAction(evt -> viewer.setWindowDecoration(windowDecoration.getSelectionModel().getSelectedItem()));
 
         Label focusedOwner = new Label();
 
-        viewer.getUserToolBarItems().addAll(newView, listView, windowDeco, closeDeco, initialWindowState,
-                new Separator());
+        viewer.getUserToolBarItems().addAll(newView, initialWindowState, new Label("Win-Decor:"), windowDecoration, listView);
         final Scene scene = new Scene(
                 new VBox(viewer.getToolBar(), viewer, new HBox(new Label("focus on: "), focusedOwner)), 800, 600);
         scene.focusOwnerProperty().addListener((ch, o, n) -> {

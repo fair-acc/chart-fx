@@ -43,6 +43,9 @@ public final class ProcessingProfiler { // NOPMD nomen est omen
         for (int i : recursionDepth) {
             // this number needs to be corrected if this class is refactored
             final int nLast = 2 + i;
+            if (nLast >= stacktrace.length) {
+                break;
+            }
             final StringBuilder strBuilder = new StringBuilder();
             final StackTraceElement stackTraceElement = stacktrace[nLast];
             final String fullClassName = stackTraceElement.getClassName();
@@ -50,8 +53,7 @@ public final class ProcessingProfiler { // NOPMD nomen est omen
             final String methodName = stackTraceElement.getMethodName();
             final int lineNumer = stackTraceElement.getLineNumber();
 
-            strBuilder.append(simpleClassName).append("::").append(methodName).append("(line:").append(lineNumer)
-                    .append(')');
+            strBuilder.append(simpleClassName).append("::").append(methodName).append("(line:").append(lineNumer).append(')');
             list.add(strBuilder.toString());
         }
 
@@ -68,8 +70,7 @@ public final class ProcessingProfiler { // NOPMD nomen est omen
         final String methodName = stackTraceElement.getMethodName();
         final int lineNumer = stackTraceElement.getLineNumber();
 
-        return new StringBuilder().append(simpleClassName).append("::").append(methodName).append("(line:")
-                .append(lineNumer).append(")").toString();
+        return new StringBuilder().append(simpleClassName).append("::").append(methodName).append("(line:").append(lineNumer).append(")").toString();
     }
 
     /**
@@ -113,7 +114,7 @@ public final class ProcessingProfiler { // NOPMD nomen est omen
                 ProcessingProfiler.LOGGER.info(message);
             } else {
                 System.out.println(message); // #NOPMD, this System.out is
-                                             // on purpose
+                        // on purpose
             }
         }
         // TODO: log statistic to HashMap/histogram, etc.

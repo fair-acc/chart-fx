@@ -480,14 +480,6 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         return getAxisRange();
     }
 
-    /**
-     * We suppress requestLayout() calls here by doing nothing as we don't want changes to our children to cause layout.
-     * If you really need to request layout then call requestAxisLayout(). TODO: re-enable
-     */
-    // @Override
-    // public void requestLayout() {
-    // }
-
     protected AxisRange autoRange(final double minValue, final double maxValue, final double length,
             final double labelSize) {
         return computeRange(minValue, maxValue, length, labelSize);

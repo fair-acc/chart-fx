@@ -1,12 +1,10 @@
-package de.gsi.chart.viewer;
+package de.gsi.chart.ui;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.controlsfx.glyphfont.Glyph;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ListChangeListener;
 import javafx.scene.Node;
 import javafx.scene.layout.ColumnConstraints;
@@ -14,27 +12,67 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 
+import org.controlsfx.glyphfont.Glyph;
+
 /**
- * DataViewTilingPane that to mimics HBox-, VBox-, or TilePane layout while consistently maximising it's children and
+ * TilingPane that to mimics HBox-, VBox-, or TilePane layout while consistently maximising it's children and
  * following layout constraints from its parent
  *
  * @author rstein
  */
-public class DataViewTilingPane extends GridPane {
-    private static final Logger LOGGER = LoggerFactory.getLogger(DataViewTilingPane.class);
+public class TilingPane extends GridPane {
     protected static final String FONT_AWESOME = "FontAwesome";
     protected static final int FONT_SIZE = 20;
-    public final Layout layout;
+    private final ObjectProperty<Layout> layout = new SimpleObjectProperty<>(this, "layout", Layout.GRID) {
+        @Override
+        public void set(final Layout newLayout) {
+            if (newLayout == null) {
+                throw new IllegalArgumentException("layout must not be null");
+            }
+            super.set(newLayout);
+        }
+    };
 
-    public DataViewTilingPane(final Layout layout) {
+    public TilingPane() {
+        this(Layout.GRID);
+    }
+
+    public TilingPane(final Layout layout) {
+        this(layout, (Node[]) null);
+    }
+
+    public TilingPane(final Layout layout, Node... nodes) {
         super();
-        this.layout = layout;
+        this.layout.set(layout);
         VBox.setVgrow(this, Priority.ALWAYS);
         getChildren().addListener((ListChangeListener<Node>) change -> {
             while (change.next()) {
                 layoutNormal();
             }
         });
+
+        this.layout.addListener((ch, o, n) -> layoutNormal());
+
+        if (nodes != null) {
+            getChildren().addAll(nodes);
+        }
+    }
+
+    public Layout getLayout() {
+        return layoutProperty().get();
+    }
+
+    public ObjectProperty<Layout> layoutProperty() {
+        return layout;
+    }
+
+    public void setLayout(final Layout value) {
+        layoutProperty().set(value);
+    }
+
+    @Override
+    public String toString() {
+        return TilingPane.class.getSimpleName() + "('" + getLayout() + "0')";
     }
 
     protected int getColumnsCount() {
@@ -42,7 +80,7 @@ public class DataViewTilingPane extends GridPane {
         if (childCount == 0) {
             return 1;
         }
-        switch (layout) {
+        switch (getLayout()) {
         case HBOX:
             return childCount;
         case MAXIMISE:
@@ -54,15 +92,8 @@ public class DataViewTilingPane extends GridPane {
                 return 2;
             }
             int ncols = (int) Math.ceil(Math.sqrt(childCount));
-            if (ncols == 0) {
-                ncols = 1;
-            }
             return ncols;
         }
-    }
-
-    public Layout getLayout() {
-        return layout;
     }
 
     protected void layoutNormal() {
@@ -81,9 +112,6 @@ public class DataViewTilingPane extends GridPane {
                 colConstraintList.add(colConstraints);
             }
             getColumnConstraints().setAll(colConstraintList);
-            if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("update column constraints");
-            }
         }
 
         int rowIndex = 0;
@@ -94,8 +122,6 @@ public class DataViewTilingPane extends GridPane {
         for (final Node child : getChildren()) {
             GridPane.setFillWidth(child, true);
             GridPane.setFillHeight(child, true);
-            GridPane.setHgrow(child, Priority.ALWAYS);
-            GridPane.setVgrow(child, Priority.ALWAYS);
             GridPane.setColumnIndex(child, colIndex);
             GridPane.setRowIndex(child, rowIndex);
 
@@ -116,11 +142,6 @@ public class DataViewTilingPane extends GridPane {
             }
             childCount++;
         }
-    }
-
-    @Override
-    public String toString() {
-        return DataViewTilingPane.class.getSimpleName() + "('" + layout + "0')";
     }
 
     public enum Layout {

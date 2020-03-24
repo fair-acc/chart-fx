@@ -3,17 +3,12 @@ package de.gsi.chart.viewer;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.controlsfx.glyphfont.FontAwesome;
-import org.controlsfx.glyphfont.Glyph;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import de.gsi.chart.viewer.DataViewTilingPane.Layout;
-import de.gsi.dataset.utils.NoDuplicatesList;
 import javafx.beans.DefaultProperty;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -32,34 +27,42 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 
+import org.controlsfx.glyphfont.FontAwesome;
+import org.controlsfx.glyphfont.Glyph;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import de.gsi.chart.ui.TilingPane;
+import de.gsi.chart.ui.TilingPane.Layout;
+import de.gsi.chart.viewer.DataViewWindow.WindowDecoration;
+import de.gsi.dataset.utils.NoDuplicatesList;
+
 /**
  * DataViewer to manage multiple 'DatavView's which contain either custom 'Pane' derived nodes and or managed
  * 'DataViewWindow' that can be detached and re-attached to the DataView
  * <p>
  * usage example:
- * <p>
- * 
  * <pre>
  * <code>
  * final DataView view1 = new DataView("ChartViews", chartIcon);
  * // [..] these nodes are detachable sub-windows (with decorated minimize, maximize, close buttons)
  * view1.getVisibleChildren().addAll(customNode1, customNode2, customNode3);
- * 
+ *
  *  // [..] add undecorated custom Pan
  * final DataView view2 = new DataView("Custom View", customViewIcon, getDemoPane());
- * 
+ *
  * final DataViewer viewer = new DataViewer();
  * viewer.getViews().addAll(view1, view2);
- * 
+ *
  * // [..] to switch between configurations one may use:
  * // a) Toolbar which contains the 'Text-Icon' Buttons for each view
  * viewer.getToolBar();
  * // b) directly/programmatically, e.g.:
  * viewer.setSelectedView(view2);
- *  
+ *
  * </code>
  * </pre>
- * 
+ *
  * @author Grzegorz Kruk
  * @author rstein
  */
@@ -68,7 +71,10 @@ public class DataViewer extends BorderPane {
     private static final Logger LOGGER = LoggerFactory.getLogger(DataViewer.class);
     protected static final String FONT_AWESOME = "FontAwesome";
     protected static final int FONT_SIZE = 20;
+    private final ObjectProperty<WindowDecoration> windowDecoration = new SimpleObjectProperty<>(this, "windowDecoration", WindowDecoration.BAR);
+    @Deprecated
     private final BooleanProperty decorationVisible = new SimpleBooleanProperty(this, "windowDecorationVisible", true);
+    @Deprecated
     private final BooleanProperty closeWindowButtonVisible = new SimpleBooleanProperty(this, "closeButtonVisible",
             true);
     private final Glyph rootGlyph = new Glyph(FONT_AWESOME, "\uf698").size(FONT_SIZE);
@@ -79,18 +85,49 @@ public class DataViewer extends BorderPane {
     private final ToolBar toolBar;
     private final ObservableList<Node> userToolBarItems = FXCollections.observableList(new NoDuplicatesList<Node>());
     private final BooleanProperty showListStyleDataViews = new SimpleBooleanProperty(this, "listStyleViews", false);
-
     // private final VisibleViewerPane visibleViewerPane = new VisibleViewerPane();
     // private final VBox viewerPane;
-
     // private final SplitPane splitPane = new SplitPane();
     // private final TreeView<Node> explorerTreeView = new TreeView<>();
-
-    private final BooleanProperty explorerVisible = new SimpleBooleanProperty(false) {
+    protected final BooleanProperty explorerVisible = new SimpleBooleanProperty(false) {
         @Override
         protected void invalidated() {
             // visibleViewerPane.getChildren().setAll(getValue().getViewerPanes());
             requestLayout();
+        }
+    };
+    protected final ListChangeListener<? super DataView> subDataViewChangeListener = change -> {
+        while (change.next()) {
+            final DataView activeView = dataViewRoot.getActiveView();
+            if (change.getAddedSize() > 0 && (activeView == null || activeView == dataViewRoot)) {
+                dataViewRoot.setActiveSubView(change.getAddedSubList().get(0));
+            }
+        }
+    };
+    protected final ChangeListener<? super DataView> activeSubDataViewChangeListener = (ch, o, n) -> {
+        if (n == null) {
+            dataViewRoot.getChildren().clear();
+            updateToolBar();
+            return;
+        }
+        dataViewRoot.getChildren().setAll(n);
+        if (!dataViewRoot.getSubDataViews().contains(n)) {
+            dataViewRoot.getSubDataViews().add(n);
+        }
+        updateToolBar();
+    };
+    protected final ChangeListener<? super Boolean> closeWindowButtonHandler = (ch, o, n) -> {
+        switch (getWindowDecoration()) {
+        case BAR:
+        case BAR_WO_CLOSE:
+            this.setWindowDecoration(Boolean.TRUE.equals(n) ? WindowDecoration.BAR : WindowDecoration.BAR_WO_CLOSE);
+            setWindowDecorationVisible(true);
+            break;
+        case NONE:
+        case FRAME:
+        default:
+            setWindowDecorationVisible(false);
+            break;
         }
     };
 
@@ -100,40 +137,26 @@ public class DataViewer extends BorderPane {
         VBox.setVgrow(this, Priority.ALWAYS);
         getStylesheets().add(getClass().getResource("DataViewer.css").toExternalForm());
 
-        dataViewRoot.getSubDataViews().addListener((ListChangeListener<DataView>) change -> {
-            while (change.next()) {
-                final DataView activeView = dataViewRoot.getActiveView();
-                if (change.getAddedSize() > 0 && (activeView == null || activeView == dataViewRoot)) {
-                    dataViewRoot.setActiveSubView(change.getAddedSubList().get(0));
-                }
-            }
-        });
-
-        dataViewRoot.activeSubViewProperty().addListener((ch, o, n) -> {
-            if (n == null) {
-                dataViewRoot.getChildren().clear();
-                updateToolBar();
-                return;
-            }
-            dataViewRoot.getChildren().setAll(n);
-            if (!dataViewRoot.getSubDataViews().contains(n)) {
-                dataViewRoot.getSubDataViews().add(n);
-            }
-            updateToolBar();
-        });
-
+        dataViewRoot.getSubDataViews().addListener(subDataViewChangeListener);
+        dataViewRoot.activeSubViewProperty().addListener(activeSubDataViewChangeListener);
         userToolBarItems.addListener((ListChangeListener<Node>) change -> updateToolBar());
         showListStyleDataViews.addListener((ch, o, n) -> updateToolBar());
         selectedViewProperty().addListener((ch, o, n) -> updateToolBar());
-        windowDecorationVisible().addListener((ch, o, n) -> this.updateWindowDecorations(dataViewRoot));
-        closeWindowButtonVisibleProperty().addListener((ch, o, n) -> this.updateCloseWindowButton(dataViewRoot, n));
+
+        windowDecorationProperty().addListener((ch, o, n) -> updateWindowDecorations(dataViewRoot));
+        windowDecorationVisible().addListener((ch, o, n) -> setWindowDecoration(Boolean.TRUE.equals(n) ? WindowDecoration.BAR : WindowDecoration.NONE));
+        closeWindowButtonVisibleProperty().addListener(closeWindowButtonHandler);
 
         final Label spacer = new Label();
         HBox.setHgrow(spacer, Priority.ALWAYS);
         toolBar = new ToolBar(separator1, viewList, separator2, spacer);
         this.setCenter(dataViewRoot);
         requestLayout();
+    }
 
+    public DataViewer(final DataView... views) {
+        this();
+        getViews().addAll(views);
     }
 
     public BooleanProperty closeWindowButtonVisibleProperty() {
@@ -170,6 +193,11 @@ public class DataViewer extends BorderPane {
         return dataViewRoot.getSubDataViews();
     }
 
+    public WindowDecoration getWindowDecoration() {
+        return windowDecorationProperty().get();
+    }
+
+    @Deprecated
     public boolean isCloseWindowButtonVisible() {
         return closeWindowButtonVisibleProperty().get();
     }
@@ -183,6 +211,7 @@ public class DataViewer extends BorderPane {
         return explorerVisibleProperty().get();
     }
 
+    @Deprecated
     public boolean isWindowDecorationVisible() {
         return windowDecorationVisible().get();
     }
@@ -191,6 +220,7 @@ public class DataViewer extends BorderPane {
         return dataViewRoot.activeSubViewProperty();
     }
 
+    @Deprecated
     public void setCloseWindowButtonVisible(final boolean state) {
         closeWindowButtonVisibleProperty().set(state);
     }
@@ -212,40 +242,25 @@ public class DataViewer extends BorderPane {
     }
 
     public final void setSelectedView(final String viewName) {
-        setSelectedView(viewName);
+        for (DataView view : getViews()) {
+            if (view.getName() != null && view.getName().equals(viewName)) {
+                setSelectedView(view);
+                return;
+            }
+        }
     }
 
+    public void setWindowDecoration(final WindowDecoration state) {
+        windowDecorationProperty().set(state);
+    }
+
+    @Deprecated
     public void setWindowDecorationVisible(final boolean state) {
         windowDecorationVisible().set(state);
     }
 
     public BooleanProperty showListStyleDataViewProperty() {
         return showListStyleDataViews;
-    }
-
-    protected void updateCloseWindowButton(final DataView root, final boolean state) {
-        for (DataView view : root.getSubDataViews()) {
-            updateCloseWindowButton(view, state);
-        }
-
-        List<Node> nodeList = new ArrayList<>();
-        if (root.getContentPane() != null) {
-            nodeList.add(root.getContentPane());
-        }
-        nodeList.addAll(root.getChildren());
-        nodeList.addAll(root.getContentPane().getChildren());
-        // check for child in content, DataView and Content itself
-        for (Node child : nodeList) {
-            if (!(child instanceof DataViewWindow)) {
-                continue;
-            }
-            DataViewWindow window = (DataViewWindow) child;
-            if (state) {
-                window.addCloseWindowButton();
-            } else {
-                window.removeCloseWindowButton();
-            }
-        }
     }
 
     public void updateMenuButton(Menu menuButton, DataView dataView) {
@@ -268,7 +283,7 @@ public class DataViewer extends BorderPane {
         }
     }
 
-    protected void updateToolBar() {
+    protected void updateToolBar() { // NOPMD
         toolBar.getItems().clear();
         toolBar.getItems().addAll(userToolBarItems);
         if (getSelectedView() == null) {
@@ -322,10 +337,10 @@ public class DataViewer extends BorderPane {
         // add layout buttons
 
         for (DataView view : getSelectedView().getSubDataViews()) {
-            if (!(view.getContentPane() instanceof DataViewTilingPane)) {
+            if (!(view.getContentPane() instanceof TilingPane)) {
                 continue;
             }
-            DataViewTilingPane tilingPane = (DataViewTilingPane) view.getContentPane();
+            TilingPane tilingPane = (TilingPane) view.getContentPane();
             Layout layout = tilingPane.getLayout();
             final Button selectionButton = new SquareButton(null, layout.getIcon()); // NOPMD
             selectionButton.setTooltip(new Tooltip("configure pane for " + layout.getName() + "-style layout")); // NOPMD
@@ -339,6 +354,9 @@ public class DataViewer extends BorderPane {
     }
 
     protected void updateWindowDecorations(final DataView root) {
+        //        this.setCloseWindowButtonVisible(!WindowDecoration.BAR_WO_CLOSE.equals(getWindowDecoration()));
+        //        this.setWindowDecorationVisible(!WindowDecoration.NONE.equals(getWindowDecoration()));
+
         for (DataView view : root.getSubDataViews()) {
             updateWindowDecorations(view);
         }
@@ -356,10 +374,15 @@ public class DataViewer extends BorderPane {
                 continue;
             }
             DataViewWindow window = (DataViewWindow) child;
-            window.setWindowDecorationVisible(this.isWindowDecorationVisible());
+            window.setWindowDecoration(getWindowDecoration());
         }
     }
 
+    public ObjectProperty<WindowDecoration> windowDecorationProperty() {
+        return windowDecoration;
+    }
+
+    @Deprecated
     public BooleanProperty windowDecorationVisible() {
         return decorationVisible;
     }

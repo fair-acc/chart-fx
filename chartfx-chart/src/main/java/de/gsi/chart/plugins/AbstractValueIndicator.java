@@ -174,7 +174,17 @@ public abstract class AbstractValueIndicator extends ChartPlugin {
      *
      * @return associated Axis
      */
+    @Deprecated
     protected Axis getNumericAxis() {
+        return axis;
+    }
+
+    /**
+     * Returns the Axis that this indicator is associated with.
+     *
+     * @return associated Axis
+     */
+    public Axis getAxis() {
         return axis;
     }
 

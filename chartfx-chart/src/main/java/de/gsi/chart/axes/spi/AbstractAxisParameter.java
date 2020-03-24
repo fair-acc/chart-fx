@@ -839,6 +839,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
 
     /**
      * Sets the value of the {@link #animationDuration} property
+     * @param value animation duration in milliseconds
      */
     public void setAnimationDuration(final int value) {
         animationDurationProperty().set(value);
@@ -1421,6 +1422,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
      * valid flag property.
      * This will cause anything that depends on the axis range or physical size to be recalculated on the next layout
      * iteration.
+     * @return the validProperty()
      */
     protected BooleanProperty validProperty() {
         return valid;

@@ -1,11 +1,13 @@
 package de.gsi.chart.plugins;
 
-import de.gsi.chart.axes.Axis;
 import javafx.geometry.BoundingBox;
 import javafx.geometry.Bounds;
 import javafx.geometry.Orientation;
 import javafx.geometry.Point2D;
 import javafx.scene.input.MouseEvent;
+
+import de.gsi.chart.axes.Axis;
+import de.gsi.dataset.event.EventSource;
 
 /**
  * A vertical line drawn on the plot area, indicating specified X value, with an optional {@link #textProperty() text
@@ -22,8 +24,7 @@ import javafx.scene.input.MouseEvent;
  *
  * @author mhrabia
  */
-public class XValueIndicator extends AbstractSingleValueIndicator {
-
+public class XValueIndicator extends AbstractSingleValueIndicator implements EventSource, ValueIndicator {
     /**
      * Creates a new instance of the indicator.
      *
@@ -83,7 +84,6 @@ public class XValueIndicator extends AbstractSingleValueIndicator {
             layoutLabel(new BoundingBox(xPos, minY, 0, maxY - minY), AbstractSingleValueIndicator.MIDDLE_POSITION,
                     getLabelPosition());
         }
-
     }
 
     @Override

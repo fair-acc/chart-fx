@@ -3,6 +3,7 @@ package de.gsi.chart.viewer;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Predicate;
 
@@ -25,6 +26,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
@@ -35,8 +37,11 @@ import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.gsi.chart.Chart;
 import de.gsi.chart.plugins.MouseEventsHelper;
+import de.gsi.chart.ui.BorderedTitledPane;
+import de.gsi.chart.utils.DragResizerUtil;
+import de.gsi.chart.utils.FXUtils;
+import de.gsi.chart.utils.MouseUtils;
 import de.gsi.chart.viewer.event.WindowClosedEvent;
 import de.gsi.chart.viewer.event.WindowClosingEvent;
 import de.gsi.chart.viewer.event.WindowDetachedEvent;
@@ -49,17 +54,17 @@ import de.gsi.chart.viewer.event.WindowRestoredEvent;
 import de.gsi.chart.viewer.event.WindowRestoringEvent;
 import de.gsi.dataset.event.EventListener;
 import de.gsi.dataset.event.EventSource;
-import de.gsi.dataset.utils.ProcessingProfiler;
 
 /**
- * DataViewWindow containing content pane (based on BorderPane) and window decorations to detach, minimise, maximise,
- * close the window.
+ * DataViewWindow containing content pane (based on BorderPane) and window
+ * decorations to detach, minimise, maximise, close the window.
  *
  * @author rstein
  */
 @DefaultProperty(value = "content")
 public class DataViewWindow extends BorderPane implements EventSource {
     private static final Logger LOGGER = LoggerFactory.getLogger(DataViewWindow.class);
+    private static final int MIN_DRAG_BORDER_WIDTH = 20;
     private static final String WINDOW_CSS = "DataViewer.css";
     private static final String CSS_WINDOW = "window";
     private static final String CSS_WINDOW_DETACH_ICON = "window-detach-icon";
@@ -80,13 +85,12 @@ public class DataViewWindow extends BorderPane implements EventSource {
     private final HBox leftButtons = new HBox();
     private final Label titleLabel = new Label();
     private final HBox rightButtons = new HBox();
-    private final HBox windowDecoration = new HBox();
+    private final HBox windowDecorationBar = new HBox();
     private final BooleanProperty minimisedWindow = new SimpleBooleanProperty(this, "minimisedWindow", false);
     private final BooleanProperty maximisedWindow = new SimpleBooleanProperty(this, "maximisedWindow", false);
     private final BooleanProperty restoredWindow = new SimpleBooleanProperty(this, "restoredWindow", true);
     private final BooleanProperty closedWindow = new SimpleBooleanProperty(this, "closedWindow", false);
-    private final ObjectProperty<WindowState> windowState = new SimpleObjectProperty<>(this, "windowState",
-            WindowState.WINDOW_RESTORED) {
+    private final ObjectProperty<WindowState> windowState = new SimpleObjectProperty<>(this, "windowState", WindowState.WINDOW_RESTORED) {
         @Override
         public void set(final WindowState state) {
             // arm and allow for new notifications
@@ -138,7 +142,7 @@ public class DataViewWindow extends BorderPane implements EventSource {
     };
 
     private final BooleanProperty detachedWindow = new SimpleBooleanProperty(this, "detachedWindow", false);
-    private final BooleanProperty decorationVisible = new SimpleBooleanProperty(this, "windowDecorationVisible", true);
+    private final ObjectProperty<WindowDecoration> windowDecoration = new SimpleObjectProperty<>(this, "windowDecoration");
     private final ObjectProperty<Node> content = new SimpleObjectProperty<>(this, "content");
 
     private final Button detachButton = new SquareButton(CSS_WINDOW_DETACH_ICON);
@@ -146,7 +150,8 @@ public class DataViewWindow extends BorderPane implements EventSource {
     private final Button maximizeRestoreButton = new SquareButton(CSS_WINDOW_MAXIMIZE_ICON);
     private final Button closeButton = new SquareButton(CSS_WINDOW_CLOSE_ICON);
 
-    // second stage per DataViewWindow to be used when content is requested to be detached
+    // second stage per DataViewWindow to be used when content is requested to be
+    // detached
     private final ExternalStage dialog = new ExternalStage();
 
     private transient double xOffset;
@@ -154,8 +159,7 @@ public class DataViewWindow extends BorderPane implements EventSource {
     private final ObjectProperty<DataView> parentView = new SimpleObjectProperty<>(this, "parentView");
     private final Predicate<MouseEvent> mouseFilter = MouseEventsHelper::isOnlyPrimaryButtonDown;
 
-    private final ObjectProperty<Cursor> dragCursor = new SimpleObjectProperty<>(this, "dragCursor",
-            Cursor.CLOSED_HAND);
+    private final ObjectProperty<Cursor> dragCursor = new SimpleObjectProperty<>(this, "dragCursor", Cursor.CLOSED_HAND);
     private Cursor originalCursor;
     private final ObjectProperty<Node> graphic = new SimpleObjectProperty<>(this, "graphic");
     protected final Runnable maximizeButtonAction = () -> {
@@ -163,6 +167,7 @@ public class DataViewWindow extends BorderPane implements EventSource {
             // update guard
             return;
         }
+
         updatingStage.set(true);
         if (LOGGER.isDebugEnabled()) {
             LOGGER.atDebug().log("maximizeButtonAction");
@@ -240,7 +245,6 @@ public class DataViewWindow extends BorderPane implements EventSource {
         getParentView().getVisibleChildren().remove(this);
         setWindowState(WindowState.WINDOW_MINIMISED);
         getParentView().getMinimisedChildren().add(this);
-
         updatingStage.set(false);
     };
 
@@ -257,6 +261,8 @@ public class DataViewWindow extends BorderPane implements EventSource {
         // asked to remove pane
         getParentView().getMinimisedChildren().remove(this);
         getParentView().getVisibleChildren().remove(this);
+        //TODO: investigate why there are duplicates in the list... following is a work-around
+        getParentView().getVisibleChildren().remove(this);
         getParentView().getUndockedChildren().remove(this);
 
         if (this.equals(getParentView().getMaximizedChild())) {
@@ -266,24 +272,31 @@ public class DataViewWindow extends BorderPane implements EventSource {
         updatingStage.set(false);
     };
 
-    public DataViewWindow(@NamedArg(value = "name") final String name,
-            @NamedArg(value = "content") final Node content) {
-        this(name, content, true, true);
+    public DataViewWindow(@NamedArg(value = "name") final String name, @NamedArg(value = "content") final Node content) {
+        this(name, content, WindowDecoration.BAR);
     }
 
-    public DataViewWindow(final String name, final Node content, final boolean windowDecorationsVisible,
-            final boolean addCloseButton) {
+    @Deprecated
+    public DataViewWindow(final String name, final Node content, final boolean windowDecorationsVisible, final boolean addCloseButton) {
+        this(name, content, windowDecorationsVisible ? (addCloseButton ? WindowDecoration.BAR : WindowDecoration.BAR_WO_CLOSE) : WindowDecoration.NONE);
+    }
+
+    public DataViewWindow(final String name, final Node content, final WindowDecoration windowDecoration) {
         super();
         if (content == null) {
             throw new IllegalArgumentException("content must not be null");
         }
+        setName(name);
+        GridPane.setHgrow(this, Priority.ALWAYS);
+        GridPane.setVgrow(this, Priority.ALWAYS);
 
         getStyleClass().setAll(CSS_WINDOW);
         final String css = DataViewWindow.class.getResource(WINDOW_CSS).toExternalForm();
         getStylesheets().clear();
         getStylesheets().add(css);
 
-        contentProperty().addListener((ch, o, newNode) -> setCenter(newNode));
+        contentProperty().addListener((ch, o, newNode) -> setLocalCenter(newNode));
+        DragResizerUtil.makeResizable(this);
 
         leftButtons.setPrefWidth(USE_COMPUTED_SIZE);
         HBox.setHgrow(leftButtons, Priority.SOMETIMES);
@@ -299,25 +312,39 @@ public class DataViewWindow extends BorderPane implements EventSource {
         rightButtons.setPrefWidth(USE_COMPUTED_SIZE);
         HBox.setHgrow(rightButtons, Priority.SOMETIMES);
 
-        windowDecoration.getChildren().addAll(leftButtons, spacer1, titleLabel, spacer2, rightButtons);
+        windowDecorationBar.getStyleClass().setAll(CSS_WINDOW_TITLE_BAR);
+        windowDecorationBar.getChildren().addAll(leftButtons, spacer1, titleLabel, spacer2, rightButtons);
+        getLeftIcons().add(detachButton);
+        getRightIcons().addAll(minimizeButton, maximizeRestoreButton);
+
         minimisedProperty().addListener((ch, o, n) -> {
             if (!isDetached()) {
-                setCenter(Boolean.TRUE.equals(n) ? null : getContent());
+                setLocalCenter(Boolean.TRUE.equals(n) ? null : getContent());
             }
         });
-        windowDecorationVisible().addListener((ch, o, n) -> setTop(Boolean.TRUE.equals(n) ? windowDecoration : null));
-        windowDecoration.getStyleClass().setAll(CSS_WINDOW_TITLE_BAR);
-        windowDecorationVisible().set(windowDecorationsVisible);
-        if (windowDecorationsVisible) {
-            setTop(windowDecoration);
-        }
 
-        getLeftIcons().add(detachButton);
-        getRightIcons().add(minimizeButton);
-        getRightIcons().add(maximizeRestoreButton);
-        if (addCloseButton) {
-            getRightIcons().add(closeButton);
-        }
+        windowDecorationProperty().addListener((ch, o, n) -> {
+            switch (n) {
+            case NONE:
+                setTop(null);
+                break;
+            case BAR_WO_CLOSE:
+                setTop(getWindowDecorationBar());
+                removeCloseWindowButton();
+                break;
+            case FRAME:
+                setTop(null);
+                break;
+            case BAR:
+            default:
+                setTop(getWindowDecorationBar());
+                addCloseWindowButton();
+                break;
+            }
+            this.setLocalCenter(getContent());
+        });
+        // initial setting
+        setWindowDecoration(windowDecoration); // NOPMD initialisation
 
         minimisedWindow.addListener((ch, o, n) -> minimizeButtonAction.run());
         maximisedWindow.addListener((ch, o, n) -> maximizeButtonAction.run());
@@ -338,19 +365,18 @@ public class DataViewWindow extends BorderPane implements EventSource {
         // set actions
         detachButton.setOnAction(evt -> setDetached(true));
         minimizeButton.setOnAction(evt -> minimizeButtonAction.run());
-        maximizeRestoreButton.setOnAction((evt) -> maximizeButtonAction.run());
-        closeButton.setOnAction((evt) -> closeButtonAction.run());
+        maximizeRestoreButton.setOnAction(evt -> maximizeButtonAction.run());
+        closeButton.setOnAction(evt -> closeButtonAction.run());
 
         // install drag handler
-        windowDecoration.setOnMouseReleased(this::dragFinish);
-        windowDecoration.setOnMousePressed(this::dragStart);
-        windowDecoration.setOnMouseDragged(this::dragOngoing);
+        windowDecorationBar.setOnMouseReleased(this::dragFinish);
+        windowDecorationBar.setOnMousePressed(this::dragStart);
+        windowDecorationBar.setOnMouseDragged(this::dragOngoing);
 
         // install hide function on external window
         dialog.setOnHiding(we -> dialog.hide(this));
 
         setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
-        setName(name);
         setContent(content);
     }
 
@@ -459,6 +485,27 @@ public class DataViewWindow extends BorderPane implements EventSource {
         return titleLabel;
     }
 
+    @Override
+    public int hashCode() {
+        return Objects.hash(graphic, name);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof DataViewWindow)) {
+            return false;
+        }
+        DataViewWindow other = (DataViewWindow) obj;
+        return Objects.equals(graphic, other.graphic) && Objects.equals(name, other.name);
+    }
+
+    public WindowDecoration getWindowDecoration() {
+        return windowDecorationProperty().get();
+    }
+
     public WindowState getWindowState() {
         return windowStateProperty().get();
     }
@@ -487,8 +534,9 @@ public class DataViewWindow extends BorderPane implements EventSource {
         return restoredProperty().get();
     }
 
+    @Deprecated
     public boolean isWindowDecorationVisible() {
-        return windowDecorationVisible().get();
+        return !(WindowDecoration.NONE.equals(windowDecorationProperty().get()) || WindowDecoration.FRAME.equals(windowDecorationProperty().get()));
     }
 
     public BooleanProperty maximisedProperty() {
@@ -562,11 +610,16 @@ public class DataViewWindow extends BorderPane implements EventSource {
         restoredProperty().set(state);
     }
 
-    public void setWindowDecorationVisible(final boolean state) {
-        windowDecorationVisible().set(state);
+    public void setWindowDecoration(final WindowDecoration state) {
+        windowDecorationProperty().set(state);
     }
 
-    public void setWindowState(final WindowState state) {
+    @Deprecated
+    public void setWindowDecorationVisible(final boolean state) {
+        windowDecorationProperty().set(state ? WindowDecoration.BAR : WindowDecoration.NONE);
+    }
+
+    protected void setWindowState(final WindowState state) {
         windowStateProperty().set(state);
     }
 
@@ -580,8 +633,8 @@ public class DataViewWindow extends BorderPane implements EventSource {
         return updateListeners;
     }
 
-    public BooleanProperty windowDecorationVisible() {
-        return decorationVisible;
+    public ObjectProperty<WindowDecoration> windowDecorationProperty() {
+        return windowDecoration;
     }
 
     public ObjectProperty<WindowState> windowStateProperty() {
@@ -598,8 +651,8 @@ public class DataViewWindow extends BorderPane implements EventSource {
         uninstallCursor();
 
         final Point2D mouseLoc = new Point2D(mevt.getScreenX(), mevt.getScreenY());
-        final Bounds screenBounds = localToScreen(windowDecoration.getBoundsInLocal());
-        if (!screenBounds.contains(mouseLoc)) {
+        final Bounds screenBounds = localToScreen(WindowDecoration.FRAME.equals(getWindowDecoration()) ? this.getBoundsInLocal() : getWindowDecorationBar().getBoundsInLocal());
+        if (MouseUtils.mouseOutsideBoundaryBoxDistance(screenBounds, mouseLoc) > MIN_DRAG_BORDER_WIDTH) {
             // mouse move outside window detected -- launch dialog
             // dropped outside of node window
             if (!dialog.isShowing()) {
@@ -640,6 +693,13 @@ public class DataViewWindow extends BorderPane implements EventSource {
         this.setCursor(originalCursor);
     }
 
+    /**
+     * @return the windowDecorationBar
+     */
+    protected HBox getWindowDecorationBar() {
+        return windowDecorationBar;
+    }
+
     protected void installCursor() {
         originalCursor = this.getCursor();
         if (getDragCursor() != null) {
@@ -647,19 +707,37 @@ public class DataViewWindow extends BorderPane implements EventSource {
         }
     }
 
-    @Override
-    protected void layoutChildren() {
-        final long start = ProcessingProfiler.getTimeStamp();
-        super.layoutChildren();
-        if (getContent() instanceof Chart) {
-            final Chart chart = ((Chart) getContent());
-            if (chart.getDatasets().isEmpty()) {
-                ProcessingProfiler.getTimeDiff(start, "pane updated for chart = " + chart.getTitle());
-            } else {
-                ProcessingProfiler.getTimeDiff(start,
-                        "pane updated with data set = " + chart.getDatasets().get(0).getName());
+    /**
+     * @param content node that put into the BoderPane centre and depending on
+     *            {@link #windowDecoration} with or w/o frame
+     */
+    protected void setLocalCenter(final Node content) {
+        switch (getWindowDecoration()) {
+        case FRAME:
+            if (content == null) {
+                setCenter(null);
+                break;
             }
+            final Node node = new BorderedTitledPane(getName(), content);
+            node.setOnMousePressed(this::dragStart);
+            node.setOnMouseDragged(this::dragOngoing);
+            node.setOnMouseReleased(this::dragFinish);
+            setCenter(node);
+            break;
+        case BAR:
+        case BAR_WO_CLOSE:
+        case NONE:
+        default:
+            setCenter(content);
+            break;
         }
+    }
+
+    public enum WindowDecoration {
+        NONE, // w/o any decoration
+        BAR, // classic window title bar with title label and min, max, close and detach buttons
+        BAR_WO_CLOSE, // classic window title bar w/o close buttons
+        FRAME; // decoration and window title as frame label
     }
 
     public enum WindowState {
@@ -687,7 +765,7 @@ public class DataViewWindow extends BorderPane implements EventSource {
             titleProperty().unbind();
             scene.setRoot(new StackPane());
 
-            dataViewWindow.setCenter(dataViewWindow.getContent());
+            dataViewWindow.setLocalCenter(dataViewWindow.getContent());
             dataViewWindow.getParentView().getUndockedChildren().remove(dataViewWindow);
             dataViewWindow.getParentView().getVisibleChildren().add(dataViewWindow);
 
@@ -765,8 +843,14 @@ public class DataViewWindow extends BorderPane implements EventSource {
             dataViewWindow.getParentView().getVisibleChildren().remove(dataViewWindow);
             dataViewWindow.getParentView().getUndockedChildren().add(dataViewWindow);
 
-            dataViewWindow.setCenter(null);
-            Node dataWindowContent = dataViewWindow.getContent();
+            dataViewWindow.setLocalCenter(null);
+            final Node dataWindowContent = dataViewWindow.getContent();
+            if (dataWindowContent.getParent() instanceof Pane) {
+                // make sure that the content in the DataViewWindow is not attached to the previous stage/scene graph
+                FXUtils.assertJavaFxThread();
+                ((Pane) dataWindowContent.getParent()).getChildren().remove(dataWindowContent);
+            }
+
             if (dataWindowContent instanceof Pane) {
                 scene.setRoot((Pane) dataWindowContent);
             } else {

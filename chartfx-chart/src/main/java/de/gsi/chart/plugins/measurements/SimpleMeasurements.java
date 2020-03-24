@@ -1,82 +1,79 @@
 package de.gsi.chart.plugins.measurements;
 
 import static de.gsi.chart.axes.AxisMode.X;
+import static de.gsi.chart.axes.AxisMode.Y;
 import static de.gsi.chart.plugins.measurements.SimpleMeasurements.MeasurementCategory.ACC;
 import static de.gsi.chart.plugins.measurements.SimpleMeasurements.MeasurementCategory.HORIZONTAL;
 import static de.gsi.chart.plugins.measurements.SimpleMeasurements.MeasurementCategory.INDICATOR;
 import static de.gsi.chart.plugins.measurements.SimpleMeasurements.MeasurementCategory.VERTICAL;
-import static de.gsi.chart.plugins.measurements.SimpleMeasurements.MeasurementType.VALUE_HOR;
-import static de.gsi.chart.plugins.measurements.SimpleMeasurements.MeasurementType.VALUE_VER;
 
-import javafx.scene.Group;
-import javafx.scene.Node;
-import javafx.scene.paint.Color;
+import java.util.Optional;
 
-import org.controlsfx.tools.Borders;
+import javafx.geometry.Orientation;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.Label;
+import javafx.scene.layout.HBox;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.gsi.chart.XYChart;
+import de.gsi.chart.Chart;
 import de.gsi.chart.axes.Axis;
 import de.gsi.chart.axes.AxisLabelFormatter;
 import de.gsi.chart.axes.spi.DefaultNumericAxis;
 import de.gsi.chart.axes.spi.MetricPrefix;
+import de.gsi.chart.plugins.ParameterMeasurements;
+import de.gsi.chart.utils.DragResizerUtil;
 import de.gsi.chart.utils.FXUtils;
 import de.gsi.dataset.DataSet;
 import de.gsi.dataset.event.UpdateEvent;
 import de.gsi.math.SimpleDataSetEstimators;
 
 /**
- * Simple DataSet parameter measurements N.B. this contains only algorithms w/o external library dependencies (ie.
- * fitting routines, etc.)
+ * Simple DataSet parameter measurements N.B. this contains only algorithms w/o
+ * external library dependencies (ie. fitting routines, etc.)
  *
  * @author rstein
  */
-public class SimpleMeasurements extends ValueIndicator {
+public class SimpleMeasurements extends AbstractChartMeasurement {
     private static final Logger LOGGER = LoggerFactory.getLogger(SimpleMeasurements.class);
     private static final double DEFAULT_MIN = Double.NEGATIVE_INFINITY;
     private static final double DEFAULT_MAX = Double.POSITIVE_INFINITY;
-
     private final MeasurementType measType;
 
-    public SimpleMeasurements(final XYChart chart, final MeasurementType measType) {
-        super(chart, X);
+    public SimpleMeasurements(final ParameterMeasurements plugin, final MeasurementType measType) {
+        super(plugin, measType.toString(), measType.isVertical ? X : Y);
         this.measType = measType;
-        title = new StringBuilder().append(measType).append(" [#").append(AbstractChartMeasurement.markerCount - 1).append(", #").append(AbstractChartMeasurement.markerCount).append("]").toString();
-        valueField.setMinRange(SimpleMeasurements.DEFAULT_MIN).setMaxRange(SimpleMeasurements.DEFAULT_MAX);
 
-        final Axis axis = axisMode == X ? chart.getXAxis() : chart.getYAxis();
-        final Axis numAxis = axis;
+        setTitle(measType.toString());
+        getValueField().setMinRange(SimpleMeasurements.DEFAULT_MIN).setMaxRange(SimpleMeasurements.DEFAULT_MAX);
 
-        final double lower = numAxis.getMin();
-        final double upper = numAxis.getMax();
-        final double middle = 0.5 * Math.abs(upper - lower);
-        final double min = Math.min(lower, upper);
-        sliderIndicator1.setValue(min + 0.5 * middle);
+        final Label minValueLabel = new Label(" " + getValueField().getMinRange());
+        getValueField().minRangeProperty().addListener((ch, o, n) -> minValueLabel.setText(" " + n.toString()));
+        final Label maxValueLabel = new Label(" " + getValueField().getMaxRange());
+        getValueField().maxRangeProperty().addListener((ch, o, n) -> maxValueLabel.setText(" " + n.toString()));
+        getDialogContentBox().getChildren().addAll(new HBox(new Label("Min. Range: "), getValueField().getMinRangeTextField(), minValueLabel),
+                new HBox(new Label("Max. Range: "), getValueField().getMaxRangeTextField(), maxValueLabel));
 
-        if (measType != VALUE_HOR && measType != VALUE_VER) {
-            // need two indicators
-            sliderIndicator2.setValue(min + 1.5 * middle);
-            chart.getPlugins().add(sliderIndicator2);
-            sliderIndicator2.setText("Marker#" + AbstractChartMeasurement.markerCount);
-            AbstractChartMeasurement.markerCount++;
-        } else {
-            sliderIndicator2.setValue(Double.MAX_VALUE);
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.atDebug().addArgument(SimpleMeasurements.class.getSimpleName()).addArgument(measType.getName()).log("{} type: '{}'- initialised");
         }
+    }
 
-        valueField.setMinRange(SimpleMeasurements.DEFAULT_MIN).setMaxRange(SimpleMeasurements.DEFAULT_MAX);
+    public MeasurementType getMeasType() {
+        return measType;
     }
 
     @Override
     public void handle(final UpdateEvent event) {
-        if (sliderIndicator2 == null) {
+        if (getValueIndicators().isEmpty() || getValueIndicatorsUser().size() < 2) {
             // not yet initialised
             return;
         }
+
         final DataSet selectedDataSet = getDataSet();
-        // final int nDim = selectedDataSet.getDimension();
-        final double newValueMarker1 = sliderIndicator1.getValue();
-        final double newValueMarker2 = sliderIndicator2.getValue();
+        final double newValueMarker1 = getValueIndicatorsUser().get(0).getValue();
+        final double newValueMarker2 = getValueIndicatorsUser().get(1).getValue();
 
         final int index0 = selectedDataSet.getIndex(DataSet.DIM_X, newValueMarker1);
         final int index1 = selectedDataSet.getIndex(DataSet.DIM_X, newValueMarker2);
@@ -85,17 +82,17 @@ public class SimpleMeasurements extends ValueIndicator {
 
         DataSet ds = selectedDataSet;
 
-        double val;
+        double val = Double.NaN;
         switch (measType) {
         // indicators
         case VALUE_HOR:
-            val = selectedDataSet.get(DataSet.DIM_X, indexMin);
+            val = SimpleDataSetEstimators.getZeroCrossing(ds, newValueMarker1);
             break;
         case VALUE_VER:
             val = selectedDataSet.get(DataSet.DIM_Y, indexMin);
             break;
         case DISTANCE_HOR:
-            val = SimpleDataSetEstimators.getDistance(ds, indexMin, indexMax, true);
+            val = SimpleDataSetEstimators.getZeroCrossing(ds, newValueMarker2) - SimpleDataSetEstimators.getZeroCrossing(ds, newValueMarker1);
             break;
         case DISTANCE_VER:
             val = SimpleDataSetEstimators.getDistance(ds, indexMin, indexMax, false);
@@ -149,8 +146,7 @@ public class SimpleMeasurements extends ValueIndicator {
             val = SimpleDataSetEstimators.getFullWidthHalfMaximum(ds, indexMin, indexMax, true);
             break;
         case LOCATION_MAXIMUM:
-            val = selectedDataSet.get(DataSet.DIM_X,
-                    SimpleDataSetEstimators.getLocationMaximum(ds, indexMin, indexMax));
+            val = selectedDataSet.get(DataSet.DIM_X, SimpleDataSetEstimators.getLocationMaximum(ds, indexMin, indexMax));
             break;
         case LOCATION_MAXIMUM_GAUSS:
             val = SimpleDataSetEstimators.getLocationMaximumGaussInterpolated(ds, indexMin, indexMax);
@@ -164,84 +160,79 @@ public class SimpleMeasurements extends ValueIndicator {
         case FREQUENCY:
             val = SimpleDataSetEstimators.getFrequencyEstimate(ds, indexMin, indexMax);
             break;
-
         default:
-            val = Double.NaN;
+            break;
         }
 
-        final Axis axis = measType.isVerticalMeasurement() ? chart.getYAxis() : chart.getXAxis();
-        final Axis altAxis = measType.isVerticalMeasurement() ? chart.getXAxis() : chart.getYAxis();
+        final Chart chart = getMeasurementPlugin().getChart();
+        final Axis axis = chart.getFirstAxis(measType.isVerticalMeasurement() ? Orientation.VERTICAL : Orientation.HORIZONTAL);
 
         final String axisUnit = axis.getUnit();
         final String unit = axisUnit == null ? "a.u." : axis.getUnit();
 
-        final double unitScale = ((DefaultNumericAxis) axis).getUnitScaling();
-
-        final String axisPrefix = MetricPrefix.getShortPrefix(unitScale);
-
-        // convert value according to scale factor
-        final double scaledValue = val / unitScale;
-
         // update label valueTextField
         String valueLabel;
         if (axis instanceof DefaultNumericAxis && axisUnit != null) {
-            valueField.setUnit(new StringBuilder().append(axisPrefix).append(unit).toString());
+            final double unitScale = ((DefaultNumericAxis) axis).getUnitScaling();
+            final String axisPrefix = MetricPrefix.getShortPrefix(unitScale);
+            // convert value according to scale factor
+            final double scaledValue = val / unitScale;
+
+            FXUtils.runFX(() -> getValueField().setUnit(new StringBuilder().append(axisPrefix).append(unit).toString()));
             final AxisLabelFormatter axisFormatter = ((DefaultNumericAxis) axis).getAxisLabelFormatter();
             valueLabel = axisFormatter.toString(scaledValue);
         } else {
-            if (Math.abs(Math.log10(Math.abs(val))) < ValueIndicator.SMALL_FORMAT_THRESHOLD) {
-                formatter = formatterSmall;
+            if (Math.abs(Math.log10(Math.abs(val))) < SMALL_FORMAT_THRESHOLD) {
+                valueLabel = formatterSmall.format(val);
             } else {
-                formatter = formatterLarge;
+                valueLabel = formatterLarge.format(val);
             }
-            valueLabel = formatter.format(val);
-            valueField.setUnit(unit);
+
+            FXUtils.runFX(() -> getValueField().setUnit(unit));
         }
 
-        FXUtils.runFX(() -> valueField.setValue(val, valueLabel));
+        final double tempVal = val;
+        FXUtils.runFX(() -> getValueField().setValue(tempVal, valueLabel));
 
-        final String altAxisLabel = altAxis.getName();
         switch (measType) {
         case TRANSMISSION_ABS:
         case TRANSMISSION_REL:
-            FXUtils.runFX(() -> valueField.setUnit("%"));
+            FXUtils.runFX(() -> getValueField().setUnit("%"));
             break;
         case INTEGRAL:
         default:
-            final String unit2 = altAxisLabel.replaceAll("\\[", "").replaceAll("\\]", "");
-            // valueField.setUnit(unit + "*" + unit2);
-            // valueField.setUnit(unit);
             break;
+        }
+
+        if (event != null) {
+            // republish updateEvent
+            invokeListener(event);
         }
     }
 
     @Override
     public void initialize() {
-        final Node node = Borders.wrap(valueField).lineBorder().title(title).color(Color.BLACK).build().build();
-        node.setMouseTransparent(true);
-        displayPane.getChildren().add(new Group(node));
+        getDataViewWindow().setContent(getValueField());
+        DragResizerUtil.makeResizable(getValueField());
 
-        sliderIndicator1.valueProperty().addListener((ch, oldValue, newValue) -> {
-            if (oldValue != newValue) {
-                handle(null);
-            }
-        });
+        Optional<ButtonType> result = super.showConfigDialogue();
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.atDebug().addArgument(result).log("config dialogue finished with result {}");
+            LOGGER.atDebug().addArgument(getValueIndicators()).log("detected getValueIndicators() = {}");
+            LOGGER.atDebug().addArgument(getValueIndicatorsUser()).log("detected getValueIndicatorsUser() = {}");
+        }
 
-        sliderIndicator2.valueProperty().addListener((ch, oldValue, newValue) -> {
-            if (oldValue != newValue) {
-                handle(null);
-            }
-        });
-        chart.addListener(e -> handle(null));
-        super.showConfigDialogue();
+        // initial update
         handle(null);
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.atDebug().log("initialised and called initial handle(null)");
+        }
     }
 
     @Override
     protected void removeAction() {
         super.removeAction();
-        chart.getPlugins().remove(sliderIndicator2);
-        chart.requestLayout();
+        getMeasurementPlugin().getChart().requestLayout();
     }
 
     public enum MeasurementCategory {
@@ -254,6 +245,10 @@ public class SimpleMeasurements extends ValueIndicator {
 
         MeasurementCategory(final String description) {
             name = description;
+        }
+
+        public String getName() {
+            return name;
         }
 
         @Override
@@ -296,8 +291,7 @@ public class SimpleMeasurements extends ValueIndicator {
         private MeasurementCategory category;
         private boolean isVertical;
 
-        MeasurementType(final boolean isVerticalMeasurement, final MeasurementCategory measurementCategory,
-                final String description) {
+        MeasurementType(final boolean isVerticalMeasurement, final MeasurementCategory measurementCategory, final String description) {
             isVertical = isVerticalMeasurement;
             category = measurementCategory;
             name = description;
@@ -309,6 +303,10 @@ public class SimpleMeasurements extends ValueIndicator {
 
         public boolean isVerticalMeasurement() {
             return isVertical;
+        }
+
+        public String getName() {
+            return name;
         }
 
         @Override

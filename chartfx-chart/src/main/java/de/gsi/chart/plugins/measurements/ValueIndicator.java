@@ -2,30 +2,28 @@ package de.gsi.chart.plugins.measurements;
 
 import static de.gsi.chart.axes.AxisMode.X;
 
-import java.text.DecimalFormat;
 import java.text.NumberFormat;
 
 import javafx.application.Platform;
-import javafx.scene.Group;
-import javafx.scene.Node;
+import javafx.geometry.Orientation;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
-import javafx.scene.paint.Color;
 
-import org.controlsfx.tools.Borders;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.gsi.chart.XYChart;
 import de.gsi.chart.axes.Axis;
 import de.gsi.chart.axes.AxisLabelFormatter;
 import de.gsi.chart.axes.AxisMode;
 import de.gsi.chart.axes.spi.DefaultNumericAxis;
 import de.gsi.chart.plugins.AbstractSingleValueIndicator;
+import de.gsi.chart.plugins.ParameterMeasurements;
 import de.gsi.chart.plugins.XValueIndicator;
 import de.gsi.chart.plugins.YValueIndicator;
+import de.gsi.chart.utils.DragResizerUtil;
 import de.gsi.chart.utils.FXUtils;
 import de.gsi.dataset.DataSet;
+import de.gsi.dataset.event.EventRateLimiter;
 import de.gsi.dataset.event.UpdateEvent;
 
 /**
@@ -33,67 +31,52 @@ import de.gsi.dataset.event.UpdateEvent;
  */
 public class ValueIndicator extends AbstractChartMeasurement {
     private static final Logger LOGGER = LoggerFactory.getLogger(ValueIndicator.class);
-    protected static final int SMALL_FORMAT_THRESHOLD = 3;
-    private static final String FORMAT_SMALL_SCALE = "0.###";
-    private static final String FORMAT_LARGE_SCALE = "0.##E0";
-    public static final int DEFAULT_SMALL_AXIS = 6; // [orders of magnitude],
-            // e.g. '4' <-> [1,10000]
-    protected final DecimalFormat formatterSmall = new DecimalFormat(ValueIndicator.FORMAT_SMALL_SCALE);
-    protected final DecimalFormat formatterLarge = new DecimalFormat(ValueIndicator.FORMAT_LARGE_SCALE);
-
     protected AbstractSingleValueIndicator sliderIndicator1;
     protected AbstractSingleValueIndicator sliderIndicator2;
-    protected AxisMode axisMode;
     protected NumberFormat formatter;
 
-    public ValueIndicator(final XYChart chart, final AxisMode axisMode) {
-        super(chart);
-        this.axisMode = axisMode;
-
-        final Axis axis = axisMode == X ? chart.getXAxis() : chart.getYAxis();
-        if (!(axis instanceof Axis)) {
-            ValueIndicator.LOGGER.warn("axis type " + axis.getClass().getSimpleName()
-                                       + "not compatible with indicator (needs to derivce from Axis)");
-            return;
+    public ValueIndicator(final ParameterMeasurements plugin, final AxisMode axisMode) {
+        super(plugin, "Marker", axisMode);
+        if (plugin == null || plugin.getChart() == null) {
+            throw new IllegalArgumentException("chart reference must not be null");
         }
-        final Axis numAxis = axis;
+
+        //TODO: add via chart change Listener
+        final Axis axis = plugin.getChart().getFirstAxis(axisMode == X ? Orientation.HORIZONTAL : Orientation.VERTICAL);
         formatter = formatterSmall;
 
         getDialogContentBox().getChildren().addAll(
-                new HBox(new Label("Min. Range: "), valueField.getMinRangeTextField()),
-                new HBox(new Label("Max. Range: "), valueField.getMaxRangeTextField()));
+                new HBox(new Label("Min. Range: "), getValueField().getMinRangeTextField()),
+                new HBox(new Label("Max. Range: "), getValueField().getMaxRangeTextField()));
 
-        final double lower = numAxis.getMin();
-        final double upper = numAxis.getMax();
+        final double lower = axis.getMin();
+        final double upper = axis.getMax();
         final double middle = 0.5 * Math.abs(upper - lower) + Math.min(lower, upper);
 
         if (axisMode == X) {
-            sliderIndicator1 = new XValueIndicator(numAxis, middle);
-            sliderIndicator2 = new XValueIndicator(numAxis, middle);
+            sliderIndicator1 = new XValueIndicator(axis, middle);
+            sliderIndicator2 = new XValueIndicator(axis, middle);
         } else {
-            sliderIndicator1 = new YValueIndicator(numAxis, middle);
-            sliderIndicator2 = new YValueIndicator(numAxis, middle);
+            sliderIndicator1 = new YValueIndicator(axis, middle);
+            sliderIndicator2 = new YValueIndicator(axis, middle);
         }
 
         sliderIndicator1.setText("Marker#" + AbstractChartMeasurement.markerCount);
-        chart.getPlugins().add(sliderIndicator1);
+        plugin.getChart().getPlugins().add(sliderIndicator1);
         AbstractChartMeasurement.markerCount++;
 
-        title = "Value@Marker#" + (AbstractChartMeasurement.markerCount - 1);
-        chart.requestLayout();
+        setTitle("Value@Marker#" + (AbstractChartMeasurement.markerCount - 1));
+
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.atDebug().log(ValueIndicator.class.getSimpleName() + " - initialised");
+        }
     }
 
     @Override
-    protected void defaultAction() {
-        super.defaultAction();
-        valueField.resetRanges();
-    }
-
-    @Override
-    public void handle(final UpdateEvent observable) {
+    public void handle(final UpdateEvent event) {
         if (!Platform.isFxApplicationThread()) {
             // not running from FX application thread restart via runLater...
-            FXUtils.runFX(() -> handle(observable));
+            FXUtils.runFX(() -> handle(event));
             return;
         }
         final DataSet selectedDataSet = getDataSet();
@@ -101,10 +84,10 @@ public class ValueIndicator extends AbstractChartMeasurement {
         final double newValue = sliderIndicator1.getValue();
         final int index = selectedDataSet.getIndex(axisMode == X ? DataSet.DIM_X : DataSet.DIM_Y, newValue);
         final double val = selectedDataSet.get(axisMode == X ? DataSet.DIM_Y : DataSet.DIM_X, index);
-        final Axis axis = axisMode == X ? chart.getYAxis() : chart.getXAxis();
+        final Axis axis = getMeasurementPlugin().getChart().getFirstAxis(axisMode == X ? Orientation.VERTICAL : Orientation.HORIZONTAL);
 
         // update label unitTextField
-        valueField.setUnit(axis.getUnit() == null ? "" : axis.getUnit());
+        getValueField().setUnit(axis.getUnit() == null ? "" : axis.getUnit());
 
         // update label valueTextField
         String valueLabel;
@@ -113,7 +96,7 @@ public class ValueIndicator extends AbstractChartMeasurement {
 
             valueLabel = axisFormatter.toString(val);
         } else {
-            if (Math.abs(Math.log10(Math.abs(val))) < ValueIndicator.SMALL_FORMAT_THRESHOLD) {
+            if (Math.abs(Math.log10(Math.abs(val))) < SMALL_FORMAT_THRESHOLD) {
                 formatter = formatterSmall;
             } else {
                 formatter = formatterLarge;
@@ -121,37 +104,29 @@ public class ValueIndicator extends AbstractChartMeasurement {
             valueLabel = formatter.format(val);
         }
 
-        valueField.setValue(val, valueLabel);
+        getValueField().setValue(val, valueLabel);
+
+        if (event != null) {
+            // republish updateEvent
+            invokeListener(event);
+        }
     }
 
     @Override
     public void initialize() {
-        final Node node = Borders.wrap(valueField).lineBorder().title(title).color(Color.BLACK).build().build();
-        node.setMouseTransparent(true);
-        displayPane.getChildren().add(new Group(node));
+        getDataViewWindow().setContent(getValueField());
+        DragResizerUtil.makeResizable(getValueField());
 
-        sliderIndicator1.valueProperty().addListener((ch, oldValue, newValue) -> {
-            if (oldValue != newValue) {
-                FXUtils.runFX(() -> handle(null));
-            }
-        });
-        // chartPane.addListener(e -> invalidated(null));
+        sliderIndicator1.addListener(new EventRateLimiter(this::handle, DEFAULT_UPDATE_RATE_LIMIT));
+
         super.showConfigDialogue();
-        FXUtils.runFX(() -> {
-            handle(null);
-            chart.requestLayout();
-        });
-    }
-
-    @Override
-    protected void nominalAction() {
-        super.nominalAction();
+        FXUtils.runFX(() -> handle(null));
     }
 
     @Override
     protected void removeAction() {
         super.removeAction();
-        chart.getPlugins().remove(sliderIndicator1);
-        chart.requestLayout();
+        getMeasurementPlugin().getChart().getPlugins().remove(sliderIndicator1);
+        getMeasurementPlugin().getChart().requestLayout();
     }
 }
