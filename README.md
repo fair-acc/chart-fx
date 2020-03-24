@@ -92,6 +92,8 @@ example pom.xml for current master (click to expand)
 
 ### Code Example
 
+The following minimal working example can be used as a boilerplate project to get started with chart-fx.
+
 <img src="docs/pics/SimpleChartSample.png" width=800 alt="simple ChartFx example"/>
 
 <details><summary>The corresponding source code `ChartFxSample.java` (expand)</summary>
@@ -233,7 +235,7 @@ mvn exec:java
 </table>
 
 ### Math- & Signal-Processing related examples
-If you want to try them yourself run:
+The math samples can be started by running:
 
 ```bash
 mvn compile install
@@ -259,6 +261,16 @@ mvn exec:java@math
 <td><figure><img src="docs/pics/WaveletScalogram.png" alt="WaveletScalogram" width=300/><figcaption><a href="chartfx-samples/src/main/java/de/gsi/math/samples/WaveletScalogram.java">WaveletScalogram.java</a></figcaption></figure></td>
 </tr>
 </table>
+
+### Other samples
+There are also samples for the dataset and the accelerator UI submodules which will be extended over time as new
+functionality is added.
+
+-```bash
+-mvn compile install
+-mvn exec:java@dataset
+-mvn exec:java@acc-ui
+-```
 
 ## Performance Comparison
 Besides the extended functionality outlined above, the ChartFx optimisation goal also included achieving real-time update rates of up to 25 Hz for data sets with a few 10k up to 5 million data points. In order to optimise and compare the performance with other charting libraries, especially those with only reduced functionality, a reduced simple oscilloscope-style test case has been chosen (see `RollingBufferSample` in demos) that displays two curves with independent auto-ranging y-axes, common sliding time-series axis, and without further `ChartPlugin`s. The test-case and direct performance comparison between the ChartFx and JavaFX charting library for update rates at 25 Hz and 2 Hz is shown below.
@@ -308,9 +320,9 @@ mvn exec:java
 ```
 
 ### Eclipse
-The following has been tested with eclipse-2019-03 and uses the m2e Maven Plugin. Other versions or IDEs might work simillar.
+The following has been tested with eclipse-2019-03 and uses the m2e maven plugin. Other versions or IDEs might work similar.
 Import the repository using `Import -> Existing Maven Project`.
-This should import the parent project and the four subprojects.
+This should import the parent project and the four sub-projects.
 Unfortunately, since chartfx does not use the jigsaw module system, but javafx does, running the samples using 'run as Java Application' will result in an error complaining about the missing JavaFX runtime.
 As a workaround we include a small helper class `de.gsi.samples.util.LaunchJFX`, which can be called with 'run as Java Application' and which launches the sample application.
 It accepts a class name as an argument, so if you edit the run configuration and put `${java_type_name}` as the argument, it will try to start the class selected in the project explorer as a JavaFX application.
@@ -332,13 +344,13 @@ modules available and accessible to chartfx:
 ```
 
 ### Extending chartfx
-If you find yourself missing some feature or not being able to access specific chart interna, the way to go is often to
+If you find yourself missing some feature or not being able to access specific chart internals, the way to go is often to
 implement a custom plugin or renderer.
 
 Plugins are a simple way to add new visualisation and interaction capabilities to chart-fx. In fact a lot of chart-fx' own features (e.g. zoom, data editing, measurements) are implemented as plugins, as you can see in the sample applications.
 Your plugin can directly extend ChartPlugin or extend any of the builtin plugins.
 The Plugin Base class provides you with access to the chart object using `getChart()`.
-Your plugin should always add a Listener to the chartProperty, because when it is created there will not be an accociated
+Your plugin should always add a Listener to the chartProperty, because when it is created there will not be an associated
 chart, so at creation time, calls to e.g. `getChart()` will return null.
 Using a custom plugin boils down to adding it to the chart by doing `chart.getPlugins().add(new MyPlugin())`.
 If you wrote a plugin which might be useful for other users of chart-fx please consider doing a pull request against chart-fx. 
@@ -349,7 +361,7 @@ There are renderers which visualise actual data like the `ErrorDataSetRenderer` 
 to new charts by default.
 These Renderers operate on all DatasSets added to the chart (`chart.getDatasets.add(...)`) as well as on the ones added
 to the renderer itself.
-As a rule of thumb, you need to implement a custom renderer if you need to visualize lots of datapoints or if you want
+As a rule of thumb, you need to implement a custom renderer if you need to visualize lots of data points or if you want
 to draw something behind the chart itself.
 
 ### Acknowledgements
