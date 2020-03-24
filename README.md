@@ -34,6 +34,64 @@ In order to provide some of the scenegraph-level functionality while using a `Ca
 
 ## Example Usage
 
+### Add the library to your project
+All chart-fx releases are deployed to maven central, for maven you can add it to your pom.xml like this:
+
+```Maven POM
+<dependencies>
+  <dependency>
+    <groupId>de.gsi.chart</groupId>
+    <artifactId>chartfx-chart</artifactId>
+    <version>11.1.3</version>
+  </dependency>
+</dependencies>
+```
+
+or your build.gradle like this:
+
+```gradle
+implementation 'de.gsi.chart:chartfx-chart:11.1.3'
+```
+
+To use different build systems or library versions, have a look at the snippets on [maven central](https://search.maven.org/search?q=g:de.gsi.chart%20AND%20a:chartfx-chart&core=gav).
+
+While most users will need the `chartfx-chart` artifact it is also possible to use the data containers from `chartfx-dataset`
+and the algorithms from `chartfx-math` independently without the quite heavy UI dependencies.
+
+#### Using the snapshot repository
+
+If you want to try out unreleased features from master or one of the feature branches, there is no need to download the source and build chart-fx yourself. You can just use the `<branchname>-SNAPSHOT` releases  from the sonatype snapshot repository for example by adding the following to your pom.xml if you want to use the current master.
+All available snapshot releases can be found in the [sonatype snapshot repository](https://oss.sonatype.org/content/repositories/snapshots/de/gsi/).
+<details><summary>
+example pom.xml for current master (click to expand)
+</summary>
+
+```xml
+<dependencies>
+    <dependency>
+        <groupId>de.gsi.chart</groupId>
+        <artifactId>chartfx-chart</artifactId>
+        <version>master-SNAPSHOT</version>
+        <!-- <version>master-20200320.180638-78</version> pin to a specific snapshot build-->
+    </dependency>
+</dependencies>
+<repositories>
+    <repository>
+        <id>oss.sonatype.org-snapshot</id>
+        <url>http://oss.sonatype.org/content/repositories/snapshots</url>
+        <releases>
+            <enabled>false</enabled>
+        </releases>
+        <snapshots>
+            <enabled>true</enabled>
+        </snapshots>
+    </repository>
+</repositories>
+```
+</details>
+
+### Code Example
+
 <img src="docs/pics/SimpleChartSample.png" width=800 alt="simple ChartFx example"/>
 
 <details><summary>The corresponding source code `ChartFxSample.java` (expand)</summary>
@@ -108,43 +166,12 @@ pom.xml:
 </dependencies>
 </project>
 ```
-To use different buildsystems or library versions, have a look at the snippets on [maven central](https://search.maven.org/search?q=g:de.gsi.chart%20AND%20a:chartfx-chart&core=gav).
 </details>
 </details><details><summary>run with (expand)</summary>
 
 ```bash
 mvn compile install
 mvn exec:java
-```
-</details>
-
-### Using the snapshot repository
-
-<details><summary>
-If you only want to try out unreleased features from master or one of the feature branches, there is no need to download the source and build chart-fx yourself. You can just use the `<branchname>-SNAPSHOT` releases  from the sonatype snapshot repository for example by adding the following to your pom.xml if you want to use the current master:
-</summary>
-
-```xml
-<dependencies>
-    <dependency>
-        <groupId>de.gsi.chart</groupId>
-        <artifactId>chartfx-chart</artifactId>
-        <version>master-SNAPSHOT</version>
-        <!-- <version>master-20200320.180638-78</version> pin to a specific snapshot build-->
-    </dependency>
-</dependencies>
-<repositories>
-    <repository>
-        <id>oss.sonatype.org-snapshot</id>
-        <url>http://oss.sonatype.org/content/repositories/snapshots</url>
-        <releases>
-            <enabled>false</enabled>
-        </releases>
-        <snapshots>
-            <enabled>true</enabled>
-        </snapshots>
-    </repository>
-</repositories>
 ```
 </details>
 
