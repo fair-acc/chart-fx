@@ -1241,10 +1241,10 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
                 newAxisRange = getAxisRange();
             }
 
-            if (isAutoRanging() || isAutoGrowRanging() || isInvertedAxis()) {
-                setTickUnit(computePreferredTickUnit(axisLength));
-            }
-            // setTickUnit(computePreferredTickUnit(axisLength));
+            // if (isAutoRanging() || isAutoGrowRanging() || isInvertedAxis()) {
+            //    setTickUnit(computePreferredTickUnit(axisLength));
+            //}
+            setTickUnit(computePreferredTickUnit(axisLength));
 
             newAxisRange.tickUnit = this.getTickUnit();
             updateAxisLabelAndUnit();
