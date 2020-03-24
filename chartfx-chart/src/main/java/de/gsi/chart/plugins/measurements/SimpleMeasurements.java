@@ -86,13 +86,13 @@ public class SimpleMeasurements extends AbstractChartMeasurement {
         switch (measType) {
         // indicators
         case VALUE_HOR:
-            val = selectedDataSet.get(DataSet.DIM_X, indexMin);
+            val = SimpleDataSetEstimators.getZeroCrossing(ds, newValueMarker1);
             break;
         case VALUE_VER:
             val = selectedDataSet.get(DataSet.DIM_Y, indexMin);
             break;
         case DISTANCE_HOR:
-            val = SimpleDataSetEstimators.getDistance(ds, indexMin, indexMax, true);
+            val = SimpleDataSetEstimators.getZeroCrossing(ds, newValueMarker2) - SimpleDataSetEstimators.getZeroCrossing(ds, newValueMarker1);
             break;
         case DISTANCE_VER:
             val = SimpleDataSetEstimators.getDistance(ds, indexMin, indexMax, false);

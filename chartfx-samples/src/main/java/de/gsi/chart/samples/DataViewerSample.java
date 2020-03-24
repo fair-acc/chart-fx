@@ -203,8 +203,7 @@ public class DataViewerSample extends Application {
 
         Label focusedOwner = new Label();
 
-        viewer.getUserToolBarItems().addAll(newView, listView, new Label("Win-Decor:"), windowDecoration, initialWindowState,
-                new Separator());
+        viewer.getUserToolBarItems().addAll(newView, initialWindowState, new Label("Win-Decor:"), windowDecoration, listView);
         final Scene scene = new Scene(
                 new VBox(viewer.getToolBar(), viewer, new HBox(new Label("focus on: "), focusedOwner)), 800, 600);
         scene.focusOwnerProperty().addListener((ch, o, n) -> {

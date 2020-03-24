@@ -18,6 +18,29 @@ public final class SimpleDataSetEstimators { // NOPMD name is as is (ie. no Help
     }
 
     /**
+     * Compute centre of mass over full DataSet
+     * 
+     * @param dataSet
+     * @return centre of mass
+     */
+    public static double computeCentreOfMass(DataSet dataSet) {
+        return computeCentreOfMass(dataSet, 0, dataSet.getDataCount(DIM_X));
+    }
+
+    /**
+     * Computes the centre of mass in a given x range.
+     * 
+     * @param dataSet
+     * @param min
+     * @param max
+     * @return centre of mass
+     */
+    public static double computeCentreOfMass(DataSet dataSet, double min, double max) {
+        AssertUtils.gtOrEqual("max must be greater than min", min, max);
+        return computeCentreOfMass(dataSet, dataSet.getIndex(DIM_X, min), dataSet.getIndex(DIM_X, max));
+    }
+
+    /**
      * Computes the centre of mass in a given index range.
      * 
      * @param dataSet
@@ -39,29 +62,6 @@ public final class SimpleDataSetEstimators { // NOPMD name is as is (ie. no Help
             }
         }
         return com / mass;
-    }
-
-    /**
-     * Computes the centre of mass in a given x range.
-     * 
-     * @param dataSet
-     * @param min
-     * @param max
-     * @return centre of mass
-     */
-    public static double computeCentreOfMass(DataSet dataSet, double min, double max) {
-        AssertUtils.gtOrEqual("max must be greater than min", min, max);
-        return computeCentreOfMass(dataSet, dataSet.getIndex(DIM_X, min), dataSet.getIndex(DIM_X, max));
-    }
-
-    /**
-     * Compute centre of mass over full DataSet
-     * 
-     * @param dataSet
-     * @return centre of mass
-     */
-    public static double computeCentreOfMass(DataSet dataSet) {
-        return computeCentreOfMass(dataSet, 0, dataSet.getDataCount(DIM_X));
     }
 
     /**
@@ -514,6 +514,33 @@ public final class SimpleDataSetEstimators { // NOPMD name is as is (ie. no Help
         final double val = dataSet.get(DIM_Y, indexMax);
 
         return (isAbsoluteTransmission ? val : val - valRef) / valRef * 100.0; // in [%]
+    }
+
+    public static double getZeroCrossing(final DataSet dataSet, final double threshold) {
+        final int nLength = dataSet.getDataCount();
+        if (nLength == 0) {
+            return Double.NaN;
+        }
+        final double initialValue = dataSet.get(DIM_Y, 0);
+        if (initialValue < threshold) {
+            for (int i = 0; i < nLength; i++) {
+                final double y = dataSet.get(DIM_Y, i);
+                if (Double.isFinite(y) && y >= threshold) {
+                    return dataSet.get(DIM_X, i);
+                }
+            }
+        } else if (initialValue > threshold) {
+            for (int i = 0; i < nLength; i++) {
+                final double y = dataSet.get(DIM_Y, i);
+                if (Double.isFinite(y) && y <= threshold) {
+                    return dataSet.get(DIM_X, i);
+                }
+            }
+        } else {
+            return dataSet.get(DIM_X, 0);
+        }
+
+        return Double.NaN;
     }
 
     /**

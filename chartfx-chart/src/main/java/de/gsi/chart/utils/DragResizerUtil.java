@@ -143,13 +143,14 @@ public class DragResizerUtil {
     }
 
     protected void resetNodeSize(final MouseEvent evt) {
-        if (evt.getButton() != MouseButton.SECONDARY || evt.getClickCount() < 2) {
+        if (!evt.isPrimaryButtonDown() || evt.getClickCount() < 2) {
             return;
         }
 
         if (!(node instanceof Region)) {
             return;
         }
+
         ((Region) node).setMinWidth(Region.USE_COMPUTED_SIZE);
         ((Region) node).setMinHeight(Region.USE_COMPUTED_SIZE);
         ((Region) node).setPrefWidth(Region.USE_COMPUTED_SIZE);
@@ -227,6 +228,7 @@ public class DragResizerUtil {
         if (isInResizeZone(event)) {
             setNewInitialEventCoordinates(event);
             state = currentMouseState(event);
+            resetNodeSize(event);
         } else if (isInDragZone(event)) {
             setNewInitialEventCoordinates(event);
             state = DragDirection.DRAG;

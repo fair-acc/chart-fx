@@ -115,13 +115,13 @@ public class ParameterMeasurements extends ChartPlugin {
         final Menu newCategory = new Menu("Misc");
         fileMenu.getItems().addAll(newCategory);
 
-        final MenuItem newMeasurement1 = new MenuItem("Hor. Indicator");
-        newMeasurement1.setOnAction(evt -> new ValueIndicator(this, AxisMode.X).initialize());
-        newCategory.getItems().addAll(newMeasurement1);
-
-        final MenuItem newMeasurement2 = new MenuItem("Ver. Indicator");
-        newMeasurement2.setOnAction(evt -> new ValueIndicator(this, AxisMode.Y).initialize());
-        newCategory.getItems().addAll(newMeasurement2);
+        //        final MenuItem newMeasurement1 = new MenuItem("Hor. Indicator");
+        //        newMeasurement1.setOnAction(evt -> new ValueIndicator(this, AxisMode.X).initialize());
+        //        newCategory.getItems().addAll(newMeasurement1);
+        //
+        //        final MenuItem newMeasurement2 = new MenuItem("Ver. Indicator");
+        //        newMeasurement2.setOnAction(evt -> new ValueIndicator(this, AxisMode.Y).initialize());
+        //        newCategory.getItems().addAll(newMeasurement2);
 
         // add further miscellaneous items here
 
