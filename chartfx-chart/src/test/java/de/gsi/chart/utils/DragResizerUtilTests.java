@@ -120,11 +120,11 @@ public class DragResizerUtilTests {
         assertEquals(20, region.getPrefHeight());
 
         // secondary single-click should not trigger
-        assertDoesNotThrow(() -> util.resetNodeSize(new MyMouseEvent(110, 60, MouseButton.SECONDARY, 1)));
+        assertDoesNotThrow(() -> util.resetNodeSize(new MyMouseEvent(110, 60, MouseButton.PRIMARY, 1)));
         assertEquals(10, region.getPrefWidth());
         assertEquals(20, region.getPrefHeight());
 
-        assertDoesNotThrow(() -> util.resetNodeSize(new MyMouseEvent(110, 60, MouseButton.SECONDARY, 2)));
+        assertDoesNotThrow(() -> util.resetNodeSize(new MyMouseEvent(110, 60, MouseButton.PRIMARY, 2)));
         assertEquals(-1, region.getPrefWidth());
         assertEquals(-1, region.getPrefHeight());
 
