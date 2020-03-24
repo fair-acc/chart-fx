@@ -266,11 +266,11 @@ mvn exec:java@math
 There are also samples for the dataset and the accelerator UI submodules which will be extended over time as new
 functionality is added.
 
--```bash
--mvn compile install
--mvn exec:java@dataset
--mvn exec:java@acc-ui
--```
+```bash
+mvn compile install
+mvn exec:java@dataset
+mvn exec:java@acc-ui
+```
 
 ## Performance Comparison
 Besides the extended functionality outlined above, the ChartFx optimisation goal also included achieving real-time update rates of up to 25 Hz for data sets with a few 10k up to 5 million data points. In order to optimise and compare the performance with other charting libraries, especially those with only reduced functionality, a reduced simple oscilloscope-style test case has been chosen (see `RollingBufferSample` in demos) that displays two curves with independent auto-ranging y-axes, common sliding time-series axis, and without further `ChartPlugin`s. The test-case and direct performance comparison between the ChartFx and JavaFX charting library for update rates at 25 Hz and 2 Hz is shown below.
