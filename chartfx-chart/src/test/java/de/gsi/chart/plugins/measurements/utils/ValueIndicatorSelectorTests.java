@@ -44,15 +44,18 @@ public class ValueIndicatorSelectorTests {
         chart = new XYChart();
         plugin = new ParameterMeasurements();
 
-        assertThrows(IllegalArgumentException.class, () -> new ValueIndicatorSelector(null, AxisMode.X));
-        assertThrows(IllegalArgumentException.class, () -> new ValueIndicatorSelector(null, AxisMode.Y));
-        assertDoesNotThrow(() -> new ValueIndicatorSelector(plugin, AxisMode.X));
-        assertDoesNotThrow(() -> new ValueIndicatorSelector(plugin, AxisMode.Y));
+        assertThrows(IllegalArgumentException.class, () -> new ValueIndicatorSelector(null, AxisMode.X, 0));
+        assertThrows(IllegalArgumentException.class, () -> new ValueIndicatorSelector(null, AxisMode.Y, 0));
+        for (int nIndicators = 0; nIndicators < 3; nIndicators++) {
+            final int nIndicatorsLocal = nIndicators;
+            assertDoesNotThrow(() -> new ValueIndicatorSelector(plugin, AxisMode.X, nIndicatorsLocal));
+            assertDoesNotThrow(() -> new ValueIndicatorSelector(plugin, AxisMode.Y, nIndicatorsLocal));
+        }
 
         chart.getDatasets().add(new SineFunction("sine", 1000));
         chart.getPlugins().add(plugin);
 
-        assertDoesNotThrow(() -> field = new ValueIndicatorSelector(plugin, AxisMode.X));
+        assertDoesNotThrow(() -> field = new ValueIndicatorSelector(plugin, AxisMode.X, 2));
         root = new VBox();
         root.getChildren().add(field);
         stage.setScene(new Scene(root, 100, 100));
@@ -77,7 +80,7 @@ public class ValueIndicatorSelectorTests {
         chart.getPlugins().remove(plugin);
         chart.getPlugins().add(plugin);
 
-        assertDoesNotThrow(() -> field2 = new ValueIndicatorSelector(plugin, AxisMode.X));
+        assertDoesNotThrow(() -> field2 = new ValueIndicatorSelector(plugin, AxisMode.X, 2));
         root.getChildren().add(field2);
     }
 }

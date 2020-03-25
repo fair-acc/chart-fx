@@ -49,13 +49,28 @@ public class CheckedValueFieldTests {
         field.setMaxRange(10.0);
         field.setMaxRange(10.0);
         assertEquals(10.0, field.getMaxRange());
+
+        field.setMaxRange(Double.NaN);
+        field.setMaxRange(Double.NaN);
+        assertEquals(Double.POSITIVE_INFINITY, field.getMaxRange());
+        field.setMaxRange(10.0);
+
         field.setMinRange(-10);
         field.setMinRange(-10);
         assertEquals(-10.0, field.getMinRange());
 
+        field.setMinRange(Double.NaN);
+        field.setMinRange(Double.NaN);
+        assertEquals(Double.NEGATIVE_INFINITY, field.getMinRange());
+        field.setMinRange(-10.0);
+
         field.setUnit("test unit");
         field.setUnit("test unit");
         assertEquals("test unit", field.getUnitLabel().getText());
+
+        field.setUnit(null);
+        assertEquals(null, field.getUnitLabel().getText());
+        field.setUnit("test unit");
 
         field.setValue(2.0, "2.0");
         field.setValue(2.0, "2.0");

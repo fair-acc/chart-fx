@@ -22,6 +22,7 @@ import javafx.event.EventHandler;
 import javafx.geometry.Bounds;
 import javafx.geometry.Orientation;
 import javafx.geometry.Point2D;
+import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonBar;
@@ -33,8 +34,8 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
-import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
+import javafx.stage.Stage;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -84,11 +85,14 @@ public abstract class AbstractChartMeasurement implements EventListener, EventSo
     protected final Alert alert;
     protected final ButtonType buttonOK = new ButtonType("OK", ButtonBar.ButtonData.OK_DONE);
     protected final ButtonType buttonDefault = new ButtonType("Defaults", ButtonBar.ButtonData.OK_DONE);
-    protected final ButtonType buttonRemove = new ButtonType("Remove");
+    protected final ButtonType buttonRemove = new ButtonType("Remove", ButtonBar.ButtonData.RIGHT);
     protected final DataSetSelector dataSetSelector;
     protected final ValueIndicatorSelector valueIndicatorSelector;
+    protected int lastLayoutRow = 0;
+    protected final int requiredNumberOfIndicators;
+    protected final int requiredNumberOfDataSets;
     private final EventListener sliderChanged = new EventRateLimiter(this::handle, DEFAULT_UPDATE_RATE_LIMIT);
-    protected final VBox vBox = new VBox();
+    protected final GridPane gridPane = new GridPane();
     private final ParameterMeasurements plugin;
     private final String measurementName;
     protected final AxisMode axisMode;
@@ -123,13 +127,18 @@ public abstract class AbstractChartMeasurement implements EventListener, EventSo
         }
     };
 
-    public AbstractChartMeasurement(final ParameterMeasurements plugin, final String measurementName, final AxisMode axisMode) {
+    public AbstractChartMeasurement(final ParameterMeasurements plugin, final String measurementName, final AxisMode axisMode, final int requiredNumberOfIndicators,
+            final int requiredNumberOfDataSets) {
         if (plugin == null) {
             throw new IllegalArgumentException("plugin is null");
         }
         this.plugin = plugin;
         this.measurementName = measurementName;
         this.axisMode = axisMode;
+        this.requiredNumberOfIndicators = requiredNumberOfIndicators;
+        this.requiredNumberOfDataSets = requiredNumberOfDataSets;
+
+        plugin.getChartMeasurements().add(this);
 
         alert = new Alert(AlertType.CONFIRMATION);
         alert.setTitle("Measurement Config Dialog");
@@ -137,19 +146,20 @@ public abstract class AbstractChartMeasurement implements EventListener, EventSo
         alert.initModality(Modality.APPLICATION_MODAL);
 
         final DecorationPane decorationPane = new DecorationPane();
-        decorationPane.getChildren().add(vBox);
+        decorationPane.getChildren().add(gridPane);
         alert.getDialogPane().setContent(decorationPane);
         alert.getButtonTypes().setAll(buttonOK, buttonDefault, buttonRemove);
         alert.setOnCloseRequest(evt -> alert.close());
         // add data set selector if necessary (ie. more than one data set available)
-        dataSetSelector = new DataSetSelector(plugin);
+        dataSetSelector = new DataSetSelector(plugin, requiredNumberOfDataSets);
         if (dataSetSelector.getNumberDataSets() >= 1) {
-            vBox.getChildren().add(dataSetSelector);
+            lastLayoutRow = shiftGridPaneRowOffset(dataSetSelector.getChildren(), lastLayoutRow);
+            gridPane.getChildren().addAll(dataSetSelector.getChildren());
         }
 
-        valueIndicatorSelector = new ValueIndicatorSelector(getMeasurementPlugin(), axisMode); // NOPMD
-        vBox.getChildren().add(valueIndicatorSelector);
-
+        valueIndicatorSelector = new ValueIndicatorSelector(plugin, axisMode, requiredNumberOfIndicators); // NOPMD
+        lastLayoutRow = shiftGridPaneRowOffset(valueIndicatorSelector.getChildren(), lastLayoutRow);
+        gridPane.getChildren().addAll(valueIndicatorSelector.getChildren());
         valueField.setMouseTransparent(true);
         GridPane.setVgrow(dataViewWindow, Priority.NEVER);
         dataViewWindow.setOnMouseClicked(mouseHandler);
@@ -246,9 +256,16 @@ public abstract class AbstractChartMeasurement implements EventListener, EventSo
             return Optional.empty();
         }
 
+        if (getMeasurementPlugin() != null && getMeasurementPlugin().getChart() != null && getMeasurementPlugin().getChart().getScene() != null) {
+            Stage stage = (Stage) getMeasurementPlugin().getChart().getScene().getWindow();
+            alert.setX(stage.getX() + stage.getWidth() / 5);
+            alert.setY(stage.getY() + stage.getHeight() / 5);
+        }
+
         final Optional<ButtonType> result = alert.showAndWait();
         if (!result.isPresent()) {
-            defaultAction();
+            defaultAction(result);
+            alert.close();
             return Optional.empty();
         }
 
@@ -260,7 +277,7 @@ public abstract class AbstractChartMeasurement implements EventListener, EventSo
             removeAction();
         } else {
             // default:
-            defaultAction();
+            defaultAction(result);
         }
         alert.close();
         return result;
@@ -279,25 +296,47 @@ public abstract class AbstractChartMeasurement implements EventListener, EventSo
         return valueField.valueProperty();
     }
 
-    protected void defaultAction() {
+    protected void defaultAction(Optional<ButtonType> result) {
         setDataSet(null);
         getValueField().resetRanges();
         updateSlider();
     }
 
-    protected VBox getDialogContentBox() {
-        return vBox;
+    protected void addMinMaxRangeFields() {
+        final Label minRangeTitleLabel = new Label("Min. Range: ");
+        GridPane.setConstraints(minRangeTitleLabel, 0, lastLayoutRow);
+        GridPane.setConstraints(getValueField().getMinRangeTextField(), 1, lastLayoutRow);
+        final Label minValueLabel = new Label(" " + getValueField().getMinRange());
+        getValueField().minRangeProperty().addListener((ch, o, n) -> minValueLabel.setText(" " + n.toString()));
+        GridPane.setConstraints(minValueLabel, 2, lastLayoutRow);
+        getDialogContentBox().getChildren().addAll(minRangeTitleLabel, getValueField().getMinRangeTextField(), minValueLabel);
+
+        lastLayoutRow++;
+        final Label maxRangeTitleLabel = new Label("Max. Range: ");
+        GridPane.setConstraints(maxRangeTitleLabel, 0, lastLayoutRow);
+        GridPane.setConstraints(getValueField().getMaxRangeTextField(), 1, lastLayoutRow);
+        final Label maxValueLabel = new Label(" " + getValueField().getMaxRange());
+        getValueField().maxRangeProperty().addListener((ch, o, n) -> maxValueLabel.setText(" " + n.toString()));
+        GridPane.setConstraints(maxValueLabel, 2, lastLayoutRow);
+        getDialogContentBox().getChildren().addAll(maxRangeTitleLabel, getValueField().getMaxRangeTextField(), maxValueLabel);
+    }
+
+    protected GridPane getDialogContentBox() {
+        return gridPane;
     }
 
     protected void nominalAction() {
+        valueField.evaluateMinRangeText(true);
+        valueField.evaluateMaxRangeText(true);
         setDataSet(dataSetSelector.getSelectedDataSet());
         updateSlider();
     }
 
     protected void removeAction() {
-        this.getMeasurementPlugin().getDataView().getChildren().remove(dataViewWindow);
-        this.getMeasurementPlugin().getDataView().getVisibleChildren().remove(dataViewWindow);
-        this.getMeasurementPlugin().getDataView().getUndockedChildren().remove(dataViewWindow);
+        getMeasurementPlugin().getChartMeasurements().remove(this);
+        getMeasurementPlugin().getDataView().getChildren().remove(dataViewWindow);
+        getMeasurementPlugin().getDataView().getVisibleChildren().remove(dataViewWindow);
+        getMeasurementPlugin().getDataView().getUndockedChildren().remove(dataViewWindow);
         for (AbstractSingleValueIndicator indicator : new ArrayList<>(getValueIndicatorsUser())) {
             indicator.removeListener(sliderChanged);
             getValueIndicatorsUser().remove(indicator);
@@ -316,8 +355,9 @@ public abstract class AbstractChartMeasurement implements EventListener, EventSo
             getValueIndicatorsUser().clear();
         }
 
-        updateSlider(0);
-        updateSlider(1);
+        for (int i = 0; i < requiredNumberOfIndicators; i++) {
+            updateSlider(i);
+        }
     }
 
     protected AbstractSingleValueIndicator updateSlider(final int requestedIndex) {
@@ -350,5 +390,20 @@ public abstract class AbstractChartMeasurement implements EventListener, EventSo
         }
 
         return sliderIndicator;
+    }
+
+    protected static int shiftGridPaneRowOffset(List<Node> nodes, final int minRowOffset) {
+        int maxRowIndex = 0;
+        for (Node node : nodes) {
+            final Integer rowIndex = GridPane.getRowIndex(node);
+            if (rowIndex == null) {
+                LOGGER.atWarn().addArgument(node).addArgument(minRowOffset).log("node {} has not a GridPane::rowIndex being set -> set to {}");
+                GridPane.setRowIndex(node, minRowOffset);
+            } else {
+                maxRowIndex = Math.max(maxRowIndex, rowIndex);
+                GridPane.setRowIndex(node, rowIndex + minRowOffset);
+            }
+        }
+        return minRowOffset + maxRowIndex + 1;
     }
 }

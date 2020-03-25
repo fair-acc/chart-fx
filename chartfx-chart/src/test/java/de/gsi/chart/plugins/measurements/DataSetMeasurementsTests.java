@@ -21,37 +21,38 @@ import org.testfx.framework.junit5.Start;
 
 import de.gsi.chart.XYChart;
 import de.gsi.chart.plugins.ParameterMeasurements;
-import de.gsi.chart.plugins.measurements.SimpleMeasurements.MeasurementCategory;
-import de.gsi.chart.plugins.measurements.SimpleMeasurements.MeasurementType;
+import de.gsi.chart.plugins.measurements.DataSetMeasurements.MeasurementCategory;
+import de.gsi.chart.plugins.measurements.DataSetMeasurements.MeasurementType;
 import de.gsi.chart.ui.utils.JavaFXInterceptorUtils.SelectiveJavaFxInterceptor;
 import de.gsi.chart.ui.utils.TestFx;
 import de.gsi.dataset.testdata.spi.SineFunction;
 
 /**
- * Tests {@link de.gsi.chart.plugins.measurements.SimpleMeasurements }
+ * Tests {@link de.gsi.chart.plugins.measurements.DataSetMeasurements }
  *
  * @author rstein
  *
  */
 @ExtendWith(ApplicationExtension.class)
 @ExtendWith(SelectiveJavaFxInterceptor.class)
-public class SimpleMeasurementsTests {
+public class DataSetMeasurementsTests {
     private ParameterMeasurements plugin;
-    private SimpleMeasurements field;
+    private DataSetMeasurements field;
 
     @Start
     public void start(Stage stage) {
         final XYChart chart = new XYChart();
-        chart.getDatasets().add(new SineFunction("sine", 1000));
+        chart.getDatasets().add(new SineFunction("sine1", 1000));
+        chart.getDatasets().add(new SineFunction("sine2", 1000));
 
         plugin = new ParameterMeasurements();
 
         for (MeasurementType type : MeasurementType.values()) {
-            assertThrows(IllegalArgumentException.class, () -> new SimpleMeasurements(null, type).initialize());
-            assertDoesNotThrow(() -> new SimpleMeasurements(plugin, type));
+            assertThrows(IllegalArgumentException.class, () -> new DataSetMeasurements(null, type).initialize());
+            assertDoesNotThrow(() -> new DataSetMeasurements(plugin, type));
         }
 
-        field = new SimpleMeasurements(plugin, MeasurementType.MEAN);
+        field = new DataSetMeasurements(plugin, MeasurementType.FFT_DB_RANGED);
         assertTrue(field.getMeasType().isVerticalMeasurement());
 
         chart.getPlugins().add(plugin);
@@ -64,9 +65,9 @@ public class SimpleMeasurementsTests {
     @TestFx
     public void testSetterGetter() throws InterruptedException, ExecutionException {
         for (MeasurementType type : MeasurementType.values()) {
-            assertThrows(IllegalArgumentException.class, () -> new SimpleMeasurements(null, type).nominalAction());
+            assertThrows(IllegalArgumentException.class, () -> new DataSetMeasurements(null, type).nominalAction());
             assertDoesNotThrow(() -> {
-                SimpleMeasurements meas = new SimpleMeasurements(plugin, type);
+                DataSetMeasurements meas = new DataSetMeasurements(plugin, type);
                 meas.nominalAction();
                 meas.handle(null);
                 meas.removeAction();
@@ -82,8 +83,8 @@ public class SimpleMeasurementsTests {
         assertNotNull(field.getDisplayPane());
         assertNotNull(field.valueProperty());
         assertNotNull(field.getTitle());
-        assertEquals(MeasurementType.MEAN.getName(), field.getTitle());
-        assertEquals(MeasurementType.MEAN, field.getMeasType());
+        assertEquals(MeasurementType.FFT_DB_RANGED.getName(), field.getTitle());
+        assertEquals(MeasurementType.FFT_DB_RANGED, field.getMeasType());
 
         assertDoesNotThrow(() -> field.nominalAction());
         Optional<ButtonType> emptyOptional = Optional.empty();
@@ -102,6 +103,17 @@ public class SimpleMeasurementsTests {
         assertEquals(2, field.getValueIndicatorsUser().size(), " - number of selected indicators");
         // TODO: investigate why '4' is being returned
         // assertEquals(2, field.getValueIndicators().size(), " - number of total indicators");
+
+        field.setGraphBelowOtherDataSets(true);
+        assertTrue(field.isGraphBelowOtherDataSets());
+        field.setGraphBelowOtherDataSets(false);
+        assertFalse(field.isGraphBelowOtherDataSets());
+
+        assertFalse(field.isGraphDetached());
+        assertDoesNotThrow(() -> field.setGraphDetached(true));
+        assertTrue(field.isGraphDetached());
+        assertDoesNotThrow(() -> field.setGraphDetached(false));
+        assertFalse(field.isGraphDetached());
 
         assertDoesNotThrow(() -> field.removeAction());
     }
