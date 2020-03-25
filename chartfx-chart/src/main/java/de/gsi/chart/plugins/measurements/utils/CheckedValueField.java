@@ -200,6 +200,9 @@ public class CheckedValueField extends VBox {
     public void setValue(final double val) {
         value.set(val);
         valueLabel.setText(Double.toString(getValue()));
+
+        // set color range
+        setValueWarning(val < getMinRange() || val > getMaxRange());
     }
 
     public void setValue(final double val, final String valString) {
@@ -208,9 +211,6 @@ public class CheckedValueField extends VBox {
         }
         setValue(val);
         getValueLabel().setText(valString);
-
-        // set color range
-        setValueWarning(val < getMinRange() || val > getMaxRange());
     }
 
     public void setValueToolTip(final String toolTip) {
