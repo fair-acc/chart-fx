@@ -37,8 +37,6 @@ import de.gsi.math.SimpleDataSetEstimators;
  */
 public class SimpleMeasurements extends AbstractChartMeasurement {
     private static final Logger LOGGER = LoggerFactory.getLogger(SimpleMeasurements.class);
-    private static final double DEFAULT_MIN = Double.NEGATIVE_INFINITY;
-    private static final double DEFAULT_MAX = Double.POSITIVE_INFINITY;
     private final MeasurementType measType;
 
     public SimpleMeasurements(final ParameterMeasurements plugin, final MeasurementType measType) {
@@ -46,7 +44,7 @@ public class SimpleMeasurements extends AbstractChartMeasurement {
         this.measType = measType;
 
         setTitle(measType.toString());
-        getValueField().setMinRange(SimpleMeasurements.DEFAULT_MIN).setMaxRange(SimpleMeasurements.DEFAULT_MAX);
+        getValueField().setMinRange(DEFAULT_MIN).setMaxRange(DEFAULT_MAX);
 
         final Label minValueLabel = new Label(" " + getValueField().getMinRange());
         getValueField().minRangeProperty().addListener((ch, o, n) -> minValueLabel.setText(" " + n.toString()));
