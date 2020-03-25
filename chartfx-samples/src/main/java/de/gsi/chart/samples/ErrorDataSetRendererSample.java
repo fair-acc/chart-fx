@@ -136,8 +136,8 @@ public class ErrorDataSetRendererSample extends Application {
         generateData(dataSet, dataSetNoError);
 
         long startTime = ProcessingProfiler.getTimeStamp();
-        chart.getDatasets().add(dataSet);
-        chart.getDatasets().add(dataSetNoError);
+        chart.getRenderers().get(0).getDatasets().add(dataSet);
+        chart.getRenderers().get(0).getDatasets().add(dataSetNoError);
         ProcessingProfiler.getTimeDiff(startTime, "adding data to chart");
 
         startTime = ProcessingProfiler.getTimeStamp();
