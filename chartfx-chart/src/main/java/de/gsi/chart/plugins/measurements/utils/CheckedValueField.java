@@ -16,6 +16,8 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 
+import de.gsi.chart.utils.FXUtils;
+
 /**
  * @author rstein
  */
@@ -38,40 +40,16 @@ public class CheckedValueField extends VBox {
     protected final Label dataSetName = new Label();
     protected CheckedNumberTextField dataRangeMin = new CheckedNumberTextField(minRange.get());
     protected CheckedNumberTextField dataRangeMax = new CheckedNumberTextField(maxRange.get());
-    protected final ChangeListener<Boolean> minRangeFocusLost = (ch, o, n) -> {
-        try {
-            setMinRange(Double.parseDouble(dataRangeMin.getText()));
-        } catch (final NumberFormatException e) {
-            // swallow NumberFormatException and update max range to benign max value
-            setMinRange(Double.NEGATIVE_INFINITY);
-        }
-    };
-    protected final ChangeListener<Boolean> maxRangeFocusLost = (ch, o, n) -> {
-        try {
-            setMaxRange(Double.parseDouble(dataRangeMax.getText()));
-        } catch (final NumberFormatException e) {
-            // swallow NumberFormatException and update max range to benign max value
-            setMaxRange(Double.POSITIVE_INFINITY);
-        }
-    };
+    protected final ChangeListener<Boolean> minRangeFocusLost = (ch, o, n) -> evaluateMinRangeText(true);
+    protected final ChangeListener<Boolean> maxRangeFocusLost = (ch, o, n) -> evaluateMaxRangeText(true);
     protected final EventHandler<? super KeyEvent> minRangeTyped = ke -> {
-        if (!ke.getCode().equals(KeyCode.ENTER)) {
-            return;
-        }
-        try {
-            setMinRange(Double.parseDouble(dataRangeMin.getText()));
-        } catch (final NumberFormatException e) {
-            // swallow NumberFormatException and ignore value
+        if (ke.getCode().equals(KeyCode.ENTER)) {
+            evaluateMinRangeText(false);
         }
     };
     protected final EventHandler<? super KeyEvent> maxRangeTyped = ke -> {
-        if (!ke.getCode().equals(KeyCode.ENTER)) {
-            return;
-        }
-        try {
-            setMaxRange(Double.parseDouble(dataRangeMax.getText()));
-        } catch (final NumberFormatException e) {
-            // swallow NumberFormatException and update max range to benign max value
+        if (ke.getCode().equals(KeyCode.ENTER)) {
+            evaluateMaxRangeText(false);
         }
     };
     protected final ChangeListener<Number> widthChangeListener = (obs, o, n) -> {
@@ -92,6 +70,27 @@ public class CheckedValueField extends VBox {
             unitLabel.setFont(Font.font(CheckedValueField.DEFAULT_UNIT_FONT, fontSizeSmall));
         }
     };
+
+    public void evaluateMinRangeText(final boolean applySafeDefaults) {
+        try {
+            setMinRange(Double.parseDouble(dataRangeMin.getText()));
+        } catch (final NumberFormatException e) {
+            // swallow NumberFormatException and update min range to benign min value if applicable
+            if (applySafeDefaults) {
+                setMinRange(Double.NEGATIVE_INFINITY);
+            }
+        }
+    }
+    public void evaluateMaxRangeText(final boolean applySafeDefaults) {
+        try {
+            setMaxRange(Double.parseDouble(dataRangeMax.getText()));
+        } catch (final NumberFormatException e) {
+            // swallow NumberFormatException and update max range to benign max value if applicable
+            if (applySafeDefaults) {
+                setMaxRange(Double.POSITIVE_INFINITY);
+            }
+        }
+    }
 
     public CheckedValueField() {
         super();
@@ -175,7 +174,7 @@ public class CheckedValueField extends VBox {
     }
 
     public void setDataSetName(final String name) {
-        dataSetName.setText(name);
+        FXUtils.runFX(() -> dataSetName.setText(name));
     }
 
     public CheckedValueField setMaxRange(final double value) {
@@ -201,12 +200,12 @@ public class CheckedValueField extends VBox {
         value.set(val);
         valueLabel.setText(Double.toString(getValue()));
 
-        // set color range
+        // set colour range
         setValueWarning(val < getMinRange() || val > getMaxRange());
     }
 
     public void setValue(final double val, final String valString) {
-        if (val == getValue() || valueLabel.getText().equals(valString)) {
+        if (val == getValue()) {
             return;
         }
         setValue(val);

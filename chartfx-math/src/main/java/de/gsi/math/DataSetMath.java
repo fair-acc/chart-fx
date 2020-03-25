@@ -11,6 +11,7 @@ import java.util.List;
 
 import org.jtransforms.fft.DoubleFFT_1D;
 
+import de.gsi.dataset.AxisDescription;
 import de.gsi.dataset.DataSet;
 import de.gsi.dataset.DataSet2D;
 import de.gsi.dataset.DataSetError;
@@ -376,8 +377,10 @@ public final class DataSetMath { // NOPMD - nomen est omen
         final int n = function.getDataCount();
         final DoubleErrorDataSet filteredFunction = new DoubleErrorDataSet(
                 filterType.getTag() + "(" + function.getName() + "," + Double.toString(width) + ")", n);
-        filteredFunction.getAxisDescription(DIM_X).set(function.getAxisDescription(DIM_X));
-        filteredFunction.getAxisDescription(DIM_Y).set(function.getAxisDescription(DIM_Y));
+        for (int dim = 0; dim < filteredFunction.getDimension(); dim++) {
+            final AxisDescription refAxisDescription = function.getAxisDescription(dim);
+            filteredFunction.getAxisDescription(dim).set(refAxisDescription.getName(), refAxisDescription.getUnit());
+        }
         final double[] subArrayY = new double[n];
         final double[] subArrayYn = new double[n];
         final double[] subArrayYp = new double[n];

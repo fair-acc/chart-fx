@@ -30,21 +30,26 @@ import de.gsi.dataset.testdata.spi.SineFunction;
 @ExtendWith(SelectiveJavaFxInterceptor.class)
 public class DataSetSelectorTests {
     private DataSetSelector field;
-    private DataSet testFunction;
+    private DataSet testFunction1;
+    private DataSet testFunction2;
 
     @Start
     public void start(Stage stage) {
         XYChart chart = new XYChart();
         ParameterMeasurements plugin = new ParameterMeasurements();
 
-        assertThrows(IllegalArgumentException.class, () -> new DataSetSelector(null));
-        assertDoesNotThrow(() -> new DataSetSelector(plugin));
+        assertThrows(IllegalArgumentException.class, () -> new DataSetSelector(null, 0));
+        for (int nDataSets = 0; nDataSets < 3; nDataSets++) {
+            final int nDataSetsLocal = nDataSets;
+            assertDoesNotThrow(() -> new DataSetSelector(plugin, nDataSetsLocal));
+        }
 
-        testFunction = new SineFunction("sine1", 1000);
-        chart.getDatasets().add(testFunction);
-        chart.getDatasets().add(new SineFunction("sine2", 1000));
+        testFunction1 = new SineFunction("sine1", 1000);
+        chart.getDatasets().add(testFunction1);
+        testFunction2 = new SineFunction("sine2", 1001);
+        chart.getDatasets().add(testFunction2);
         chart.getPlugins().add(plugin);
-        field = new DataSetSelector(plugin);
+        field = new DataSetSelector(plugin, 2);
 
         stage.setScene(new Scene(field, 100, 100));
         stage.show();
@@ -53,8 +58,15 @@ public class DataSetSelectorTests {
     @TestFx
     public void testSetterGetter() throws InterruptedException, ExecutionException {
         assertEquals(2, field.getNumberDataSets());
+        assertEquals(2, field.getSelectedDataSets().size());
 
         assertNotNull(field.getSelectedDataSet());
-        assertEquals(testFunction, field.getSelectedDataSet());
+        assertEquals(testFunction2, field.getSelectedDataSet());
+
+        assertNotNull(field.getDataSetListView());
+        assertEquals(2, field.getDataSetListView().getItems().size());
+
+        assertEquals(testFunction1, field.getSelectedDataSets().get(0));
+        assertEquals(testFunction2, field.getSelectedDataSets().get(1));
     }
 }
