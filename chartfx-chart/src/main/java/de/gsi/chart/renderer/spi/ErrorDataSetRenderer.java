@@ -634,7 +634,7 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
         }
 
         // make local copy and add renderer specific data sets
-        final List<DataSet> localDataSetList = new ArrayList<>(datasets);
+        final List<DataSet> localDataSetList = isDrawChartDataSets() ? new ArrayList<>(datasets) : new ArrayList<>();
         localDataSetList.addAll(super.getDatasets());
 
         // If there are no data sets

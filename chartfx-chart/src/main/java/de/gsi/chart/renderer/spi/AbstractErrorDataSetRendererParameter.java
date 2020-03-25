@@ -43,6 +43,7 @@ public abstract class AbstractErrorDataSetRendererParameter<R extends AbstractEr
     private final BooleanProperty drawMarker = new SimpleBooleanProperty(this, "drawMarker", true);
     private final ObjectProperty<LineStyle> polyLineStyle = new SimpleObjectProperty<>(this, "polyLineStyle",
             LineStyle.NORMAL);
+    private final BooleanProperty drawChartDataSets = new SimpleBooleanProperty(this, "drawChartDataSets", true);
     private final BooleanProperty drawBars = new SimpleBooleanProperty(this, "drawBars", false);
     private final BooleanProperty shiftBar = new SimpleBooleanProperty(this, "shiftBar", true);
     private final IntegerProperty shiftBarOffset = new SimpleIntegerProperty(this, "shiftBarOffset", 3);
@@ -76,37 +77,6 @@ public abstract class AbstractErrorDataSetRendererParameter<R extends AbstractEr
         return barWidth;
     }
 
-    protected R bind(final R other) {
-        errorStyleProperty().bind(other.errorStyleProperty());
-        pointReductionProperty().bind(other.pointReductionProperty());
-        assumeSortedDataProperty().bind(other.assumeSortedDataProperty());
-        dashSizeProperty().bind(other.dashSizeProperty());
-        minRequiredReductionSizeProperty().bind(other.minRequiredReductionSizeProperty());
-        markerSizeProperty().bind(other.markerSizeProperty());
-        drawMarkerProperty().bind(other.drawMarkerProperty());
-        polyLineStyleProperty().bind(other.polyLineStyleProperty());
-        drawBarsProperty().bind(other.drawBarsProperty());
-        drawBubblesProperty().bind(other.drawBubblesProperty());
-        allowNaNsProperty().bind(other.allowNaNsProperty());
-        shiftBarProperty().bind(other.shiftBarProperty());
-        shiftBarOffsetProperty().bind(other.shiftBarOffsetProperty());
-        dynamicBarWidthProperty().bind(other.dynamicBarWidthProperty());
-        barWidthPercentageProperty().bind(other.barWidthPercentageProperty());
-        barWidthProperty().bind(other.barWidthProperty());
-        getAxes().setAll(other.getAxes());
-        intensityFadingProperty().bind(other.intensityFadingProperty());
-
-        // Bindings.bindContent(axesList(), other.axesList());
-
-        other.getAxes().addListener((ListChangeListener<? super Axis>) change -> {
-            while (change.next()) {
-                getAxes().addAll(change.getAddedSubList());
-                getAxes().removeAll(change.getRemoved());
-            }
-        });
-        return getThis();
-    }
-
     public IntegerProperty dashSizeProperty() {
         return dashSize;
     }
@@ -123,6 +93,13 @@ public abstract class AbstractErrorDataSetRendererParameter<R extends AbstractEr
      */
     public BooleanProperty drawBubblesProperty() {
         return drawBubbles;
+    }
+
+    /**
+     * @return the drawChartDataSets state, ie. if all or only the DataSets attached to the Renderer shall be drawn 
+     */
+    public BooleanProperty drawChartDataSetsProperty() {
+        return drawChartDataSets;
     }
 
     /**
@@ -225,12 +202,6 @@ public abstract class AbstractErrorDataSetRendererParameter<R extends AbstractEr
         return shiftBarOffset.get();
     }
 
-    /**
-     * @return the instance of this AbstractErrorDataSetRendererParameter.
-     */
-    @Override
-    protected abstract R getThis();
-
     public DoubleProperty intensityFadingProperty() {
         return intensityFading;
     }
@@ -254,6 +225,14 @@ public abstract class AbstractErrorDataSetRendererParameter<R extends AbstractEr
      */
     public boolean isDrawBubbles() {
         return drawBubbles.get();
+    }
+
+    /**
+     * 
+     * @return whether all or only the DataSets attached to the Renderer shall be drawn 
+     */
+    public boolean isDrawChartDataSets() {
+        return drawChartDataSetsProperty().get();
     }
 
     /**
@@ -367,6 +346,14 @@ public abstract class AbstractErrorDataSetRendererParameter<R extends AbstractEr
     }
 
     /**
+     * 
+     * @param state whether all (true) or only the DataSets attached to the Renderer shall be drawn (false) 
+     */
+    public void setDrawChartDataSets(final boolean state) {
+        drawChartDataSetsProperty().set(state);
+    }
+
+    /**
      * @param state true -&gt; draws markers
      * @return itself (fluent design)
      */
@@ -477,6 +464,44 @@ public abstract class AbstractErrorDataSetRendererParameter<R extends AbstractEr
         return shiftBar;
     }
 
+    protected R bind(final R other) {
+        errorStyleProperty().bind(other.errorStyleProperty());
+        pointReductionProperty().bind(other.pointReductionProperty());
+        assumeSortedDataProperty().bind(other.assumeSortedDataProperty());
+        dashSizeProperty().bind(other.dashSizeProperty());
+        minRequiredReductionSizeProperty().bind(other.minRequiredReductionSizeProperty());
+        markerSizeProperty().bind(other.markerSizeProperty());
+        drawMarkerProperty().bind(other.drawMarkerProperty());
+        polyLineStyleProperty().bind(other.polyLineStyleProperty());
+        drawChartDataSetsProperty().bind(other.drawChartDataSetsProperty());
+        drawBarsProperty().bind(other.drawBarsProperty());
+        drawBubblesProperty().bind(other.drawBubblesProperty());
+        allowNaNsProperty().bind(other.allowNaNsProperty());
+        shiftBarProperty().bind(other.shiftBarProperty());
+        shiftBarOffsetProperty().bind(other.shiftBarOffsetProperty());
+        dynamicBarWidthProperty().bind(other.dynamicBarWidthProperty());
+        barWidthPercentageProperty().bind(other.barWidthPercentageProperty());
+        barWidthProperty().bind(other.barWidthProperty());
+        getAxes().setAll(other.getAxes());
+        intensityFadingProperty().bind(other.intensityFadingProperty());
+
+        // Bindings.bindContent(axesList(), other.axesList());
+
+        other.getAxes().addListener((ListChangeListener<? super Axis>) change -> {
+            while (change.next()) {
+                getAxes().addAll(change.getAddedSubList());
+                getAxes().removeAll(change.getRemoved());
+            }
+        });
+        return getThis();
+    }
+
+    /**
+     * @return the instance of this AbstractErrorDataSetRendererParameter.
+     */
+    @Override
+    protected abstract R getThis();
+
     protected R unbind() {
         errorStyleProperty().unbind();
         pointReductionProperty().unbind();
@@ -485,6 +510,7 @@ public abstract class AbstractErrorDataSetRendererParameter<R extends AbstractEr
         markerSizeProperty().unbind();
         drawMarkerProperty().unbind();
         polyLineStyleProperty().unbind();
+        drawChartDataSetsProperty().unbind();
         drawBarsProperty().unbind();
         drawBubblesProperty().unbind();
         allowNaNsProperty().unbind();
