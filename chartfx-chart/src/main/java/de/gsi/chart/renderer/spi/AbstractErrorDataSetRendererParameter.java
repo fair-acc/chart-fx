@@ -131,14 +131,14 @@ public abstract class AbstractErrorDataSetRendererParameter<R extends AbstractEr
      * @return the <code>barWidth</code> in case of constant width bards being drawn @see setDynamicBarWidth()
      */
     public int getBarWidth() {
-        return barWidth.get();
+        return barWidthProperty().get();
     }
 
     /**
      * @return the <code>barWidthPercentage</code> of the total X space should be taken to paint // bars.
      */
     public double getBarWidthPercentage() {
-        return barWidthPercentage.get();
+        return barWidthPercentageProperty().get();
     }
 
     /**
@@ -147,7 +147,7 @@ public abstract class AbstractErrorDataSetRendererParameter<R extends AbstractEr
      * @return the <code>dashSize</code>.
      */
     public int getDashSize() {
-        return dashSize.get();
+        return dashSizeProperty().get();
     }
 
     /**
@@ -155,7 +155,7 @@ public abstract class AbstractErrorDataSetRendererParameter<R extends AbstractEr
      * @see ErrorDataSetRenderer#setErrorType(ErrorStyle style) for details
      */
     public ErrorStyle getErrorType() {
-        return errorStyle.get();
+        return errorStyleProperty().get();
     }
 
     /**
@@ -164,7 +164,7 @@ public abstract class AbstractErrorDataSetRendererParameter<R extends AbstractEr
      * @return the <code>intensityFading</code>.
      */
     public double getIntensityFading() {
-        return intensityFading.get();
+        return intensityFadingProperty().get();
     }
 
     /**
@@ -173,7 +173,7 @@ public abstract class AbstractErrorDataSetRendererParameter<R extends AbstractEr
      * @return the <code>markerSize</code>.
      */
     public double getMarkerSize() {
-        return markerSize.get();
+        return markerSizeProperty().get();
     }
 
     /**
@@ -190,7 +190,7 @@ public abstract class AbstractErrorDataSetRendererParameter<R extends AbstractEr
      * @return the active data set reducer algorithm
      */
     public RendererDataReducer getRendererDataReducer() {
-        return rendererDataReducer.get();
+        return rendererDataReducerProperty().get();
     }
 
     /**
@@ -199,7 +199,7 @@ public abstract class AbstractErrorDataSetRendererParameter<R extends AbstractEr
      * @return the <code>shiftBarOffset</code>.
      */
     public int getShiftBarOffset() {
-        return shiftBarOffset.get();
+        return shiftBarOffsetProperty().get();
     }
 
     public DoubleProperty intensityFadingProperty() {
@@ -210,21 +210,21 @@ public abstract class AbstractErrorDataSetRendererParameter<R extends AbstractEr
      * @return true if NaN values are permitted
      */
     public boolean isallowNaNs() {
-        return allowNaNs.get();
+        return allowNaNsProperty().get();
     }
 
     /**
      * @return true if bars from the data points to the y==0 axis shall be drawn
      */
     public boolean isDrawBars() {
-        return drawBars.get();
+        return drawBarsProperty().get();
     }
 
     /**
      * @return true if bubbles shall be draw
      */
     public boolean isDrawBubbles() {
-        return drawBubbles.get();
+        return drawBubblesProperty().get();
     }
 
     /**
@@ -239,21 +239,21 @@ public abstract class AbstractErrorDataSetRendererParameter<R extends AbstractEr
      * @return true if point reduction is on (default) else false.
      */
     public boolean isDrawMarker() {
-        return drawMarker.get();
+        return drawMarkerProperty().get();
     }
 
     /**
      * @return true whether the width of bars drawn to the '0' shall be dynamically to the shown axis width
      */
     public boolean isDynamicBarWidth() {
-        return dynamicBarWidth.get();
+        return dynamicBarWidthProperty().get();
     }
 
     /**
      * @return true if bars drawn to the y==0 axis shall be horizontally shifted for each DataSet
      */
     public boolean isShiftBar() {
-        return shiftBar.get();
+        return shiftBarProperty().get();
     }
 
     public DoubleProperty markerSizeProperty() {
@@ -290,7 +290,7 @@ public abstract class AbstractErrorDataSetRendererParameter<R extends AbstractEr
      * @return itself (fluent design)
      */
     public R setAllowNaNs(final boolean state) {
-        allowNaNs.set(state);
+        allowNaNsProperty().set(state);
         return getThis();
     }
 
@@ -300,7 +300,7 @@ public abstract class AbstractErrorDataSetRendererParameter<R extends AbstractEr
      */
     public R setBarWidth(final int barWidth) {
         AssertUtils.gtEqThanZero("barWidth", barWidth);
-        this.barWidth.setValue(barWidth);
+        barWidthProperty().setValue(barWidth);
         return getThis();
     }
 
@@ -310,7 +310,7 @@ public abstract class AbstractErrorDataSetRendererParameter<R extends AbstractEr
      */
     public R setBarWidthPercentage(final double size) {
         AssertUtils.gtEqThanZero("barWidthPercentage", size);
-        barWidthPercentage.setValue(size);
+        barWidthPercentageProperty().setValue(size);
         return getThis();
     }
 
@@ -323,7 +323,7 @@ public abstract class AbstractErrorDataSetRendererParameter<R extends AbstractEr
      */
     public R setDashSize(final int dashSize) {
         AssertUtils.gtEqThanZero("dash size", dashSize);
-        this.dashSize.setValue(dashSize);
+        dashSizeProperty().setValue(dashSize);
         return getThis();
     }
 
@@ -332,7 +332,7 @@ public abstract class AbstractErrorDataSetRendererParameter<R extends AbstractEr
      * @return itself (fluent design)
      */
     public R setDrawBars(final boolean state) {
-        drawBars.set(state);
+        drawBarsProperty().set(state);
         return getThis();
     }
 
@@ -341,7 +341,7 @@ public abstract class AbstractErrorDataSetRendererParameter<R extends AbstractEr
      * @return itself (fluent design)
      */
     public R setDrawBubbles(final boolean state) {
-        drawBubbles.set(state);
+        drawBubblesProperty().set(state);
         return getThis();
     }
 
@@ -358,7 +358,7 @@ public abstract class AbstractErrorDataSetRendererParameter<R extends AbstractEr
      * @return itself (fluent design)
      */
     public R setDrawMarker(final boolean state) {
-        drawMarker.set(state);
+        drawMarkerProperty().set(state);
         return getThis();
     }
 
@@ -367,7 +367,7 @@ public abstract class AbstractErrorDataSetRendererParameter<R extends AbstractEr
      * @return itself (fluent design)
      */
     public R setDynamicBarWidth(final boolean state) {
-        dynamicBarWidth.set(state);
+        dynamicBarWidthProperty().set(state);
         return getThis();
     }
 
@@ -380,7 +380,7 @@ public abstract class AbstractErrorDataSetRendererParameter<R extends AbstractEr
      * @return itself (fluent design)
      */
     public R setErrorType(final ErrorStyle style) {
-        errorStyle.set(style);
+        errorStyleProperty().set(style);
         return getThis();
     }
 
@@ -391,7 +391,7 @@ public abstract class AbstractErrorDataSetRendererParameter<R extends AbstractEr
      * @return itself (fluent design)
      */
     public R setIntensityFading(final double size) {
-        intensityFading.setValue(size);
+        intensityFadingProperty().setValue(size);
         return getThis();
     }
 
@@ -403,7 +403,7 @@ public abstract class AbstractErrorDataSetRendererParameter<R extends AbstractEr
      */
     public R setMarkerSize(final double size) {
         AssertUtils.gtEqThanZero("marker size ", size);
-        markerSize.setValue(size);
+        markerSizeProperty().setValue(size);
         return getThis();
     }
 
@@ -425,9 +425,9 @@ public abstract class AbstractErrorDataSetRendererParameter<R extends AbstractEr
      */
     public R setRendererDataReducer(final RendererDataReducer algorithm) {
         if (algorithm == null) {
-            rendererDataReducer.set(new DefaultDataReducer());
+            rendererDataReducerProperty().set(new DefaultDataReducer());
         } else {
-            rendererDataReducer.set(algorithm);
+            rendererDataReducerProperty().set(algorithm);
         }
         return getThis();
     }
@@ -437,7 +437,7 @@ public abstract class AbstractErrorDataSetRendererParameter<R extends AbstractEr
      * @return itself (fluent design)
      */
     public R setShiftBar(final boolean state) {
-        shiftBar.set(state);
+        shiftBarProperty().set(state);
         return getThis();
     }
 
@@ -449,7 +449,7 @@ public abstract class AbstractErrorDataSetRendererParameter<R extends AbstractEr
      */
     public R setshiftBarOffset(final int shiftBarOffset) {
         AssertUtils.gtEqThanZero("shiftBarOffset", shiftBarOffset);
-        this.shiftBarOffset.setValue(shiftBarOffset);
+        shiftBarOffsetProperty().setValue(shiftBarOffset);
         return getThis();
     }
 
