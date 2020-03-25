@@ -65,6 +65,8 @@ import impl.org.controlsfx.skin.DecorationPane;
 public abstract class AbstractChartMeasurement implements EventListener, EventSource {
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractChartMeasurement.class);
     private static final int MIN_DRAG_BORDER_WIDTH = 30;
+    protected static final double DEFAULT_MIN = Double.NEGATIVE_INFINITY;
+    protected static final double DEFAULT_MAX = Double.POSITIVE_INFINITY;
     protected static final long DEFAULT_UPDATE_RATE_LIMIT = 40;
     protected static final int SMALL_FORMAT_THRESHOLD = 3;
     private static final String FORMAT_SMALL_SCALE = "0.###";
