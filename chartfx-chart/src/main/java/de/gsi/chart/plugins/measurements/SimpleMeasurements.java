@@ -11,8 +11,6 @@ import java.util.Optional;
 
 import javafx.geometry.Orientation;
 import javafx.scene.control.ButtonType;
-import javafx.scene.control.Label;
-import javafx.scene.layout.HBox;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,18 +38,14 @@ public class SimpleMeasurements extends AbstractChartMeasurement {
     private final MeasurementType measType;
 
     public SimpleMeasurements(final ParameterMeasurements plugin, final MeasurementType measType) {
-        super(plugin, measType.toString(), measType.isVertical ? X : Y);
+        super(plugin, measType.toString(), measType.isVertical ? X : Y, measType.getRequiredSelectors(), 1);
         this.measType = measType;
 
         setTitle(measType.toString());
         getValueField().setMinRange(DEFAULT_MIN).setMaxRange(DEFAULT_MAX);
 
-        final Label minValueLabel = new Label(" " + getValueField().getMinRange());
-        getValueField().minRangeProperty().addListener((ch, o, n) -> minValueLabel.setText(" " + n.toString()));
-        final Label maxValueLabel = new Label(" " + getValueField().getMaxRange());
-        getValueField().maxRangeProperty().addListener((ch, o, n) -> maxValueLabel.setText(" " + n.toString()));
-        getDialogContentBox().getChildren().addAll(new HBox(new Label("Min. Range: "), getValueField().getMinRangeTextField(), minValueLabel),
-                new HBox(new Label("Max. Range: "), getValueField().getMaxRangeTextField(), maxValueLabel));
+        // needs to be added here to be aesthetically the last fields in the GridPane
+        addMinMaxRangeFields();
 
         if (LOGGER.isDebugEnabled()) {
             LOGGER.atDebug().addArgument(SimpleMeasurements.class.getSimpleName()).addArgument(measType.getName()).log("{} type: '{}'- initialised");
@@ -64,20 +58,19 @@ public class SimpleMeasurements extends AbstractChartMeasurement {
 
     @Override
     public void handle(final UpdateEvent event) {
-        if (getValueIndicators().isEmpty() || getValueIndicatorsUser().size() < 2) {
+        if (getValueIndicatorsUser().size() < measType.getRequiredSelectors()) {
             // not yet initialised
             return;
         }
 
         final DataSet selectedDataSet = getDataSet();
-        final double newValueMarker1 = getValueIndicatorsUser().get(0).getValue();
-        final double newValueMarker2 = getValueIndicatorsUser().get(1).getValue();
+        final double newValueMarker1 = requiredNumberOfIndicators >= 1 && !getValueIndicatorsUser().isEmpty() ? getValueIndicatorsUser().get(0).getValue() : DEFAULT_MIN;
+        final double newValueMarker2 = requiredNumberOfIndicators >= 2 && getValueIndicatorsUser().size() >= 2 ? getValueIndicatorsUser().get(1).getValue() : DEFAULT_MAX;
 
         final int index0 = selectedDataSet.getIndex(DataSet.DIM_X, newValueMarker1);
         final int index1 = selectedDataSet.getIndex(DataSet.DIM_X, newValueMarker2);
-        final int indexMin = Math.min(index0, index1);
+        final int indexMin = requiredNumberOfIndicators == 1 ? index0 : Math.min(index0, index1);
         final int indexMax = Math.max(index0, index1);
-
         DataSet ds = selectedDataSet;
 
         double val = Double.NaN;
@@ -117,6 +110,9 @@ public class SimpleMeasurements extends AbstractChartMeasurement {
         case INTEGRAL:
             // N.B. use of non-sanitised indices index[0,1]
             val = SimpleDataSetEstimators.getIntegral(ds, index0, index1);
+            break;
+        case INTEGRAL_FULL:
+            val = SimpleDataSetEstimators.getIntegral(ds, 0, ds.getDataCount());
             break;
         case TRANSMISSION_ABS:
             // N.B. use of non-sanitised indices index[0,1]
@@ -257,9 +253,15 @@ public class SimpleMeasurements extends AbstractChartMeasurement {
 
     public enum MeasurementType {
         // indicators
-        VALUE_HOR(false, INDICATOR, "hor. value"),
-        VALUE_VER(true, INDICATOR, "ver. value"),
+        /** 
+         * horizontal value at indicatpr 
+         */
+        VALUE_HOR(false, INDICATOR, "hor. value", 1),
         DISTANCE_HOR(false, INDICATOR, "hor. distance"),
+        /** 
+         * vertical value at indicatpr 
+         */
+        VALUE_VER(true, INDICATOR, "ver. value", 1),
         DISTANCE_VER(true, INDICATOR, "ver. distance"),
 
         // vertical-type measurements
@@ -270,6 +272,7 @@ public class SimpleMeasurements extends AbstractChartMeasurement {
         RMS(true, VERTICAL, "R.M.S."),
         MEDIAN(true, VERTICAL, "Median"),
         INTEGRAL(true, VERTICAL, "Integral"),
+        INTEGRAL_FULL(true, VERTICAL, "Integral - full range", 0),
         TRANSMISSION_ABS(true, ACC, "Abs. Transmission"),
         TRANSMISSION_REL(true, ACC, "Rel. Transmission"),
 
@@ -288,11 +291,19 @@ public class SimpleMeasurements extends AbstractChartMeasurement {
         private String name;
         private MeasurementCategory category;
         private boolean isVertical;
+        private final int requiredSelectors;
+        private final int requiredDataSets;
 
         MeasurementType(final boolean isVerticalMeasurement, final MeasurementCategory measurementCategory, final String description) {
+            this(isVerticalMeasurement, measurementCategory, description, 2);
+        }
+
+        MeasurementType(final boolean isVerticalMeasurement, final MeasurementCategory measurementCategory, final String description, final int requiredSelectors) {
             isVertical = isVerticalMeasurement;
             category = measurementCategory;
             name = description;
+            this.requiredSelectors = requiredSelectors;
+            this.requiredDataSets = 1;
         }
 
         public MeasurementCategory getCategory() {
@@ -305,6 +316,14 @@ public class SimpleMeasurements extends AbstractChartMeasurement {
 
         public String getName() {
             return name;
+        }
+
+        public int getRequiredDataSets() {
+            return requiredDataSets;
+        }
+
+        public int getRequiredSelectors() {
+            return requiredSelectors;
         }
 
         @Override
