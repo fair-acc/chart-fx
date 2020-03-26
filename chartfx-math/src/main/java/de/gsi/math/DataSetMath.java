@@ -863,23 +863,19 @@ public final class DataSetMath { // NOPMD - nomen est omen
     public static DataSet mathFunction(final DataSet function, final double value, final MathOp op) {
         final String functionName = op.getTag() + "(" + function.getName() + ")";
         final double[] y = values(DIM_Y, function);
-        final double[] eyn = errors(function, EYN);
-        final double[] eyp = errors(function, EYP);
-        double norm;
+        final double[] eyn = Arrays.copyOf(errors(function, EYN), y.length);
+        final double[] eyp = Arrays.copyOf(errors(function, EYP), y.length);
+
         final int ncount = function.getDataCount();
         switch (op) {
         case ADD:
-            return new DoubleErrorDataSet(functionName, values(DIM_X, function), ArrayMath.add(y, value), eyn, eyp,
-                    ncount, true);
+            return new DoubleErrorDataSet(functionName, values(DIM_X, function), ArrayMath.add(y, value), eyn, eyp, ncount, true);
         case SUBTRACT:
-            return new DoubleErrorDataSet(functionName, values(DIM_X, function), ArrayMath.subtract(y, value), eyn, eyp,
-                    ncount, true);
+            return new DoubleErrorDataSet(functionName, values(DIM_X, function), ArrayMath.subtract(y, value), eyn, eyp, ncount, true);
         case MULTIPLY:
-            return new DoubleErrorDataSet(functionName, values(DIM_X, function), ArrayMath.multiply(y, value),
-                    ArrayMath.multiply(eyn, value), ArrayMath.multiply(eyp, value), ncount, true);
+            return new DoubleErrorDataSet(functionName, values(DIM_X, function), ArrayMath.multiply(y, value), ArrayMath.multiply(eyn, value), ArrayMath.multiply(eyp, value), ncount, true);
         case DIVIDE:
-            return new DoubleErrorDataSet(functionName, values(DIM_X, function), ArrayMath.divide(y, value),
-                    ArrayMath.divide(eyn, value), ArrayMath.divide(eyp, value), ncount, true);
+            return new DoubleErrorDataSet(functionName, values(DIM_X, function), ArrayMath.divide(y, value), ArrayMath.divide(eyn, value), ArrayMath.divide(eyp, value), ncount, true);
         case SQR:
             for (int i = 0; i < eyn.length; i++) {
                 eyn[i] = 2 * Math.abs(y[i]) * eyn[i];
