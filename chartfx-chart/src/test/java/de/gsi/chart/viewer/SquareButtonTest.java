@@ -19,8 +19,8 @@ import org.testfx.framework.junit5.ApplicationExtension;
 import org.testfx.framework.junit5.Start;
 
 import de.gsi.chart.ui.TilingPane.Layout;
+import de.gsi.chart.ui.utils.JavaFXInterceptorUtils.JavaFxInterceptor;
 import de.gsi.chart.utils.FXUtils;
-import de.gsi.chart.utils.JavaFxInterceptor;
 
 /**
  * Tests {@link de.gsi.chart.ui.SquareButton }
