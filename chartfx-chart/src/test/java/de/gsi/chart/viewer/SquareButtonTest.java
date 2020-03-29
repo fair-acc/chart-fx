@@ -23,7 +23,7 @@ import de.gsi.chart.ui.utils.JavaFXInterceptorUtils.JavaFxInterceptor;
 import de.gsi.chart.utils.FXUtils;
 
 /**
- * Tests {@link de.gsi.chart.ui.SquareButton }
+ * Tests {@link de.gsi.chart.viewer.SquareButton }
  *
  * @author rstein
  */

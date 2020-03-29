@@ -13,7 +13,6 @@ import javafx.scene.Scene;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.testfx.framework.junit5.ApplicationExtension;
 import org.testfx.framework.junit5.Start;
@@ -21,15 +20,9 @@ import org.testfx.framework.junit5.Start;
 import de.gsi.chart.XYChart;
 import de.gsi.chart.axes.AxisMode;
 import de.gsi.chart.plugins.ParameterMeasurements;
-import de.gsi.chart.utils.FXUtils;
+import de.gsi.chart.ui.utils.JavaFXInterceptorUtils.SelectiveJavaFxInterceptor;
+import de.gsi.chart.ui.utils.TestFx;
 import de.gsi.dataset.testdata.spi.SineFunction;
-
-// for library loggers
-//import org.slf4j.Logger;
-//import org.slf4j.LoggerFactory;
-
-// for application loggers
-//import de.gsi.cs.co.ap.common.gui.elements.logger.AppLogger;
 
 /**
  * Tests {@link de.gsi.chart.plugins.measurements.SimpleMeasurements }
@@ -38,6 +31,7 @@ import de.gsi.dataset.testdata.spi.SineFunction;
  *
  */
 @ExtendWith(ApplicationExtension.class)
+@ExtendWith(SelectiveJavaFxInterceptor.class)
 public class ValueIndicatorTests {
     private ParameterMeasurements plugin;
     private ValueIndicator field1;
@@ -69,7 +63,7 @@ public class ValueIndicatorTests {
         stage.show();
     }
 
-    @Test
+    @TestFx
     public void testSetterGetter() throws InterruptedException, ExecutionException {
         assertNotNull(field1.getDataSet());
         assertNotNull(field1.getDataViewWindow());
@@ -77,24 +71,24 @@ public class ValueIndicatorTests {
         assertNotNull(field1.valueProperty());
         assertNotNull(field1.getTitle());
 
-        FXUtils.runAndWait(() -> assertDoesNotThrow(() -> field1.nominalAction()));
-        FXUtils.runAndWait(() -> assertDoesNotThrow(() -> field1.defaultAction()));
-        FXUtils.runAndWait(() -> assertDoesNotThrow(() -> field1.nominalAction()));
-        FXUtils.runAndWait(() -> assertDoesNotThrow(() -> field1.handle(null)));
+        assertDoesNotThrow(() -> field1.nominalAction());
+        assertDoesNotThrow(() -> field1.defaultAction());
+        assertDoesNotThrow(() -> field1.nominalAction());
+        assertDoesNotThrow(() -> field1.handle(null));
 
-        FXUtils.runAndWait(() -> assertDoesNotThrow(() -> field1.updateSlider()));
+        assertDoesNotThrow(() -> field1.updateSlider());
         assertTrue(field1.valueIndicatorSelector.isReuseIndicators());
-        FXUtils.runAndWait(() -> assertDoesNotThrow(() -> field1.valueIndicatorSelector.getReuseIndicators().setSelected(false)));
-        FXUtils.runAndWait(() -> assertDoesNotThrow(() -> field1.updateSlider()));
+        assertDoesNotThrow(() -> field1.valueIndicatorSelector.getReuseIndicators().setSelected(false));
+        assertDoesNotThrow(() -> field1.updateSlider());
         assertFalse(field1.valueIndicatorSelector.isReuseIndicators());
-        FXUtils.runAndWait(() -> assertDoesNotThrow(() -> field1.valueIndicatorSelector.getReuseIndicators().setSelected(true)));
-        FXUtils.runAndWait(() -> assertDoesNotThrow(() -> field1.updateSlider()));
+        assertDoesNotThrow(() -> field1.valueIndicatorSelector.getReuseIndicators().setSelected(true));
+        assertDoesNotThrow(() -> field1.updateSlider());
         assertTrue(field1.valueIndicatorSelector.isReuseIndicators());
 
         assertEquals(2, field1.getValueIndicatorsUser().size(), " - number of selected indicators");
         // TODO: investigate why '4' is being returned
         // assertEquals(2, field.getValueIndicators().size(), " - number of total indicators");
 
-        FXUtils.runAndWait(() -> assertDoesNotThrow(() -> field1.removeAction()));
+        assertDoesNotThrow(() -> field1.removeAction());
     }
 }
