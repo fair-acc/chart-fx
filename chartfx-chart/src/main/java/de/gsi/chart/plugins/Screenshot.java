@@ -35,6 +35,7 @@ import org.controlsfx.glyphfont.Glyph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import de.gsi.dataset.DataSet; // NOPMD - needed for JavaDoc
 import de.gsi.dataset.utils.DataSetUtils;
 
 /**

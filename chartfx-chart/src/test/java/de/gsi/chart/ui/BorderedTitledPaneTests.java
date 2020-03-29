@@ -14,7 +14,7 @@ import org.testfx.framework.junit5.ApplicationExtension;
 import org.testfx.framework.junit5.Start;
 
 /**
- * Tests {@link de.gsi.chart.ui.BorderedTitlePane }
+ * Tests {@link de.gsi.chart.ui.BorderedTitledPane }
  * @author rstein
  *
  */
