@@ -543,11 +543,84 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     }
 
     /**
+     * @return {@link #animatedProperty} property
+     */
+    public BooleanProperty animatedProperty() {
+        return animated;
+    }
+
+    /**
+     * @return {@link #animationDurationProperty} property
+     */
+    public IntegerProperty animationDurationProperty() {
+        return animationDuration;
+    }
+
+    /**
+     * This is true when the axis determines its range from the data automatically
+     *
+     * @return {@link #autoGrowRangingProperty} property
+     */
+    @Override
+    public BooleanProperty autoGrowRangingProperty() {
+        return autoGrowRanging;
+    }
+
+    /**
      * {@inheritDoc}
      */
     @Override
     public AtomicBoolean autoNotification() {
         return autoNotification;
+    }
+
+    /**
+     * Fraction of the range to be applied as padding on both sides of the axis range. E.g. if set to 0.1 (10%) on axis
+     * with data range [10, 20], the new automatically calculated range will be [9, 21].
+     *
+     * @return autoRangePadding property
+     */
+    public DoubleProperty autoRangePaddingProperty() {
+        return autoRangePadding;
+    }
+
+    /**
+     * With {@link #autoRangingProperty()} on, defines if the range should be extended to the major tick unit value. For
+     * example with range [3, 74] and major tick unit [5], the range will be extended to [0, 75].
+     * <p>
+     * <b>Default value: {@code true}</b>
+     * </p>
+     *
+     * @return autoRangeRounding property
+     */
+    public BooleanProperty autoRangeRoundingProperty() {
+        return autoRangeRounding;
+    }
+
+    @Override
+    public BooleanProperty autoRangingProperty() {
+        return autoRanging;
+    }
+
+    @Override
+    public BooleanProperty autoUnitScalingProperty() {
+        return autoUnitScaling;
+    }
+
+    public DoubleProperty axisLabelGapProperty() {
+        return axisLabelGap;
+    }
+
+    public ObjectProperty<TextAlignment> axisLabelTextAlignmentProperty() {
+        return axisLabelTextAlignment;
+    }
+
+    public DoubleProperty axisPaddingProperty() {
+        return axisPadding;
+    }
+
+    public DoubleProperty centerAxisPositionProperty() {
+        return centerAxisPosition;
     }
 
     @Override
@@ -567,9 +640,34 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
 
     public abstract void fireInvalidated();
 
+    @Deprecated // do not break backward compatibility for corrected typo
+    public TextAlignment getaAxisLabelTextAlignment() {
+        return axisLabelTextAlignmentProperty().get();
+    }
+
+    /**
+     * @return value of the {@link #animationDurationProperty} property
+     */
+    public int getAnimationDuration() {
+        return animationDurationProperty().get();
+    }
+
     @Override
     public AxisRange getAutoRange() {
         return autoRange;
+    }
+
+    /**
+     * Returns the value of the {@link #autoRangePaddingProperty()}.
+     *
+     * @return the auto range padding
+     */
+    public double getAutoRangePadding() {
+        return autoRangePaddingProperty().get();
+    }
+
+    public double getAxisCenterPosition() {
+        return centerAxisPositionProperty().get();
     }
 
     /**
@@ -577,6 +675,23 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
      */
     public Text getAxisLabel() {
         return axisLabel;
+    }
+
+    public double getAxisLabelGap() {
+        return axisLabelGapProperty().get();
+    }
+
+    public TextAlignment getAxisLabelTextAlignment() {
+        return axisLabelTextAlignmentProperty().get();
+    }
+
+    public double getAxisPadding() {
+        return axisPaddingProperty().get();
+    }
+
+    @Deprecated // do not break backward compatibility for getter adjusted to property name
+    public double getCenterAxisPosition() {
+        return centerAxisPositionProperty().get();
     }
 
     /**
@@ -598,11 +713,41 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
         return getSide().isHorizontal() ? getWidth() : getHeight();
     }
 
+    // JavaFx Properties
+
     /**
      * @return the majorTickStyle for custom user-code based styling
      */
     public Path getMajorTickStyle() {
         return majorTickStyle;
+    }
+
+    @Override
+    public double getMax() {
+        return maxProperty().get();
+    }
+
+    public int getMaxMajorTickLabelCount() {
+        return this.maxMajorTickLabelCountProperty().get();
+    }
+
+    @Deprecated // do not break backward compatibility for corrected typo
+    public int getMaxMaxjorTickLabelCount() {
+        return this.maxMajorTickLabelCountProperty().get();
+    }
+
+    @Override
+    public double getMin() {
+        return minProperty().get();
+    }
+
+    @Override
+    public int getMinorTickCount() {
+        return minorTickCountProperty().get();
+    }
+
+    public double getMinorTickLength() {
+        return minorTickLengthProperty().get();
     }
 
     /**
@@ -627,6 +772,15 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
         return minorTickStyle;
     }
 
+    @Override
+    public String getName() {
+        return nameProperty().get();
+    }
+
+    public AxisLabelOverlapPolicy getOverlapPolicy() {
+        return overlapPolicyProperty().get();
+    }
+
     /**
      * on auto-ranging this returns getAutoRange(), otherwise the user-specified range getUserRange() (ie. limits based
      * on [lower,upper]Bound)
@@ -639,6 +793,48 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
             return getAutoRange();
         }
         return getUserRange();
+    }
+
+    public double getScale() {
+        return scaleProperty().get();
+    }
+
+    @Override
+    public Side getSide() {
+        return sideProperty().get();
+    }
+
+    @Override
+    public Paint getTickLabelFill() {
+        return tickLabelFillProperty().get();
+    }
+
+    @Override
+    public Font getTickLabelFont() {
+        return tickLabelFontProperty().get();
+    }
+
+    @Override
+    public StringConverter<Number> getTickLabelFormatter() {
+        return tickLabelFormatterProperty().getValue();
+    }
+
+    @Override
+    public double getTickLabelGap() {
+        return tickLabelGapProperty().get();
+    }
+
+    public double getTickLabelRotation() {
+        return tickLabelRotationProperty().getValue();
+    }
+
+    @Override
+    public double getTickLabelSpacing() {
+        return tickLabelSpacing().get();
+    }
+
+    public double getTickLength() {
+        return tickLengthProperty().get();
     }
 
     /**
@@ -656,6 +852,26 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
         return majorTickMarkValues;
     }
 
+    /**
+     * Returns tick unit value expressed in data units.
+     *
+     * @return major tick unit value
+     */
+    @Override
+    public double getTickUnit() {
+        return tickUnitProperty().get();
+    }
+
+    @Override
+    public String getUnit() {
+        return unitProperty().get();
+    }
+
+    @Override
+    public double getUnitScaling() {
+        return unitScalingProperty().get();
+    }
+
     @Override
     public AxisRange getUserRange() {
         return userRange;
@@ -668,6 +884,27 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
      */
     public void invalidate() {
         validProperty().set(false);
+    }
+
+    /**
+     * This is {@code true} when the axis labels and data point order should be inverted
+     *
+     * @param value {@code true} if axis shall be inverted (i.e. drawn from 'max-&gt;min', rather than the normal
+     *            'min-&gt;max')
+     */
+    @Override
+    public void invertAxis(final boolean value) {
+        invertAxisProperty().set(value);
+    }
+
+    /**
+     * This is {@code true} when the axis labels and data point order should be inverted
+     *
+     * @return property
+     */
+    @Override
+    public BooleanProperty invertAxisProperty() {
+        return invertAxis;
     }
 
     /**
@@ -688,9 +925,124 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
         Axis.super.invokeListener(updateEvent, executeParallel);
     }
 
+    /**
+     * @return value of {@link #animatedProperty} property
+     */
+    public boolean isAnimated() {
+        return animatedProperty().get();
+    }
+
+    /**
+     * This is true when the axis determines its range from the data automatically and grows it if necessary
+     *
+     * @return value of the {@link #autoGrowRangingProperty} property
+     */
+    @Override
+    public boolean isAutoGrowRanging() {
+        return autoGrowRangingProperty().get();
+    }
+
+    /**
+     * Returns the value of the {@link #autoRangeRoundingProperty()}.
+     *
+     * @return the auto range rounding flag
+     */
+    public boolean isAutoRangeRounding() {
+        return autoRangeRoundingProperty().get();
+    }
+
+    @Override
+    public boolean isAutoRanging() {
+        return autoRangingProperty().get();
+    }
+
+    @Override
+    public boolean isAutoUnitScaling() {
+        return autoUnitScalingProperty().get();
+    }
+
     @Override
     public boolean isDefined() {
         return Double.isFinite(getMin()) && Double.isFinite(getMax());
+    }
+
+    /**
+     * This is {@code true} when the axis labels and data point order should be inverted
+     *
+     * @return {@code true} if axis shall be inverted (i.e. drawn from 'max-&gt;min', rather than the normal
+     *         'min-&gt;max')
+     */
+    @Override
+    public boolean isInvertedAxis() {
+        return invertAxisProperty().get();
+    }
+
+    public boolean isMinorTickVisible() {
+        return minorTickVisibleProperty().get();
+    }
+
+    public boolean isTickLabelsVisible() {
+        return tickLabelsVisibleProperty().get();
+    }
+
+    public boolean isTickMarkVisible() {
+        return tickMarkVisibleProperty().get();
+    }
+
+    /**
+     * This is true when the axis corresponds to a time-axis
+     *
+     * @return true if axis is a time scale
+     */
+    @Override
+    public boolean isTimeAxis() {
+        return timeAxisProperty().get();
+    }
+
+    /**
+     * @return true if current axis range and physical size calculations are valid
+     */
+    public boolean isValid() {
+        return validProperty().get();
+    }
+
+    public IntegerProperty maxMajorTickLabelCountProperty() {
+        return maxMajorTickLabelCount;
+    }
+
+    @Override
+    public DoubleProperty maxProperty() {
+        return maxProp;
+    }
+
+    public IntegerProperty minorTickCountProperty() {
+        return minorTickCount;
+    }
+
+    public DoubleProperty minorTickLengthProperty() {
+        return minorTickLength;
+    }
+
+    public BooleanProperty minorTickVisibleProperty() {
+        return minorTickVisible;
+    }
+
+    @Override
+    public DoubleProperty minProperty() {
+        return minProp;
+    }
+
+    @Override
+    public StringProperty nameProperty() {
+        return axisName;
+    }
+
+    public ObjectProperty<AxisLabelOverlapPolicy> overlapPolicyProperty() {
+        return overlapPolicy;
+    }
+
+    public ReadOnlyDoubleProperty scaleProperty() {
+        return scale.getReadOnlyProperty();
     }
 
     @Override
@@ -741,6 +1093,284 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
         return changed;
     }
 
+    /**
+     * Sets {@link #animatedProperty} property
+     */
+    @Override
+    public void setAnimated(final boolean value) {
+        animatedProperty().set(value);
+    }
+
+    /**
+     * Sets the value of the {@link #animationDurationProperty} property
+     * @param value animation duration in milliseconds
+     */
+    public void setAnimationDuration(final int value) {
+        animationDurationProperty().set(value);
+    }
+
+    /**
+     * Sets the value of the {@link #autoGrowRangingProperty} property
+     *
+     * @param state true if axis shall be updated to the optimal data range and grows it if necessary
+     */
+    @Override
+    public void setAutoGrowRanging(final boolean state) {
+        // TODO: setter should probably be dumb and state changes should happen in property's invalidate
+        if (state) {
+            setAutoRanging(false);
+            invalidate();
+            requestAxisLayout();
+        }
+        autoGrowRangingProperty().set(state);
+    }
+
+    /**
+     * Sets the value of the {@link #autoRangePaddingProperty()}
+     *
+     * @param padding padding factor
+     */
+    public void setAutoRangePadding(final double padding) {
+        autoRangePaddingProperty().set(padding);
+    }
+
+    /**
+     * Sets the value of the {@link #autoRangeRoundingProperty()}
+     *
+     * @param round if {@code true}, lower and upper bound will be adjusted to the tick unit value
+     */
+    public void setAutoRangeRounding(final boolean round) {
+        autoRangeRoundingProperty().set(round);
+    }
+
+    @Override
+    public void setAutoRanging(final boolean value) {
+        autoRangingProperty().set(value);
+    }
+
+    @Override
+    public void setAutoUnitScaling(final boolean value) {
+        autoUnitScalingProperty().set(value);
+    }
+
+    public void setAxisCenterPosition(final double value) {
+        centerAxisPositionProperty().set(value);
+    }
+
+    public void setAxisLabelGap(final double value) {
+        axisLabelGapProperty().set(value);
+    }
+
+    public void setAxisLabelTextAlignment(final TextAlignment value) {
+        axisLabelTextAlignmentProperty().set(value);
+    }
+
+    public void setAxisPadding(final double value) {
+        axisPaddingProperty().set(value);
+    }
+
+    @Override
+    public boolean setMax(final double value) {
+        final double oldvalue = maxProperty().get();
+        maxProperty().set(value);
+        return oldvalue != value;
+    }
+
+    public void setMaxMajorTickLabelCount(final int value) {
+        this.maxMajorTickLabelCountProperty().set(value);
+    }
+
+    @Override
+    public boolean setMin(final double value) {
+        final double oldvalue = minProperty().get();
+        minProperty().set(value);
+        return oldvalue != value;
+    }
+
+    public void setMinorTickCount(final int value) {
+        minorTickCountProperty().set(value);
+    }
+
+    public void setMinorTickLength(final double value) {
+        minorTickLengthProperty().set(value);
+    }
+
+    public void setMinorTickVisible(final boolean value) {
+        minorTickVisibleProperty().set(value);
+    }
+
+    @Override
+    public void setName(final String value) {
+        nameProperty().set(value);
+    }
+
+    public void setOverlapPolicy(final AxisLabelOverlapPolicy value) {
+        overlapPolicyProperty().set(value);
+    }
+
+    @Override
+    public void setSide(final Side value) {
+        sideProperty().set(value);
+    }
+
+    public void setTickLabelFill(final Paint value) {
+        tickLabelFillProperty().set(value);
+    }
+
+    public void setTickLabelFont(final Font value) {
+        tickLabelFontProperty().set(value);
+    }
+
+    public void setTickLabelFormatter(final StringConverter<Number> value) {
+        tickLabelFormatterProperty().setValue(value);
+    }
+
+    public void setTickLabelGap(final double value) {
+        tickLabelGapProperty().set(value);
+    }
+
+    public void setTickLabelRotation(final double value) {
+        tickLabelRotationProperty().setValue(value);
+    }
+
+    public void setTickLabelSpacing(final double value) {
+        tickLabelSpacing().set(value);
+    }
+
+    public void setTickLabelsVisible(final boolean value) {
+        tickLabelsVisibleProperty().set(value);
+    }
+
+    public void setTickLength(final double value) {
+        tickLengthProperty().set(value);
+    }
+
+    public void setTickMarkVisible(final boolean value) {
+        tickMarkVisibleProperty().set(value);
+    }
+
+    /**
+     * Sets the value of the {@link #tickUnitProperty()}.
+     *
+     * @param unit major tick unit
+     */
+    @Override
+    public void setTickUnit(final double unit) {
+        tickUnitProperty().set(unit);
+    }
+
+    /**
+     * This is {@code true} when the axis labels and data point should be plotted according to some time-axis definition
+     *
+     * @param value {@code true} if axis shall be drawn with time-axis labels
+     */
+    @Override
+    public void setTimeAxis(final boolean value) {
+        timeAxisProperty().set(value);
+    }
+
+    @Override
+    public void setUnit(final String value) {
+        unitProperty().set(value);
+    }
+
+    @Override
+    public void setUnitScaling(final double value) {
+        if (!Double.isFinite(value) || (value == 0)) {
+            throw new IllegalArgumentException("provided number is not finite and/or zero: " + value);
+        }
+        setTickUnit(value);
+        unitScalingProperty().set(value);
+    }
+
+    @Override
+    public void setUnitScaling(final MetricPrefix prefix) {
+        unitScalingProperty().set(prefix.getPower());
+    }
+
+    @Override
+    public ObjectProperty<Side> sideProperty() {
+        return side;
+    }
+
+    public ObjectProperty<Paint> tickLabelFillProperty() {
+        return tickLabelFill;
+    }
+
+    public ObjectProperty<Font> tickLabelFontProperty() {
+        return tickLabelFont;
+    }
+
+    public ObjectProperty<StringConverter<Number>> tickLabelFormatterProperty() {
+        return tickLabelFormatter;
+    }
+
+    public DoubleProperty tickLabelGapProperty() {
+        return tickLabelGap;
+    }
+
+    public DoubleProperty tickLabelRotationProperty() {
+        return tickLabelRotation;
+    }
+
+    public DoubleProperty tickLabelSpacing() {
+        return tickLabelSpacing;
+    }
+
+    public BooleanProperty tickLabelsVisibleProperty() {
+        return tickLabelsVisible;
+    }
+
+    public DoubleProperty tickLengthProperty() {
+        return tickLength;
+    }
+
+    public BooleanProperty tickMarkVisibleProperty() {
+        return tickMarkVisible;
+    }
+
+    /**
+     * The value between each major tick mark in data units. This is automatically set if we are auto-ranging.
+     *
+     * @return tickUnit property
+     */
+    @Override
+    public DoubleProperty tickUnitProperty() {
+        return tickUnit;
+    }
+
+    /**
+     * This is {@code true} when the axis labels and data point should be plotted according to some time-axis definition
+     *
+     * @return time axis property reference
+     */
+    @Override
+    public BooleanProperty timeAxisProperty() {
+        return timeAxis;
+    }
+
+    @Override
+    public ObjectProperty<String> unitProperty() {
+        return axisUnit;
+    }
+
+    @Override
+    public DoubleProperty unitScalingProperty() {
+        return unitScaling;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<EventListener> updateEventListener() {
+        return updateListeners;
+    }
+
+    protected void setScale(final double scale) {
+        scalePropertyImpl().set(scale);
+    }
+
     protected void updateAxisLabelAndUnit() {
         final String axisPrimaryLabel = getName();
         String localAxisUnit = getUnit();
@@ -762,14 +1392,6 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
         invalidate();
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public List<EventListener> updateEventListener() {
-        return updateListeners;
-    }
-
     protected void updateScaleAndUnitPrefix() {
         final double range = Math.abs(getMax() - getMin());
         final double logRange = Math.log10(range);
@@ -788,636 +1410,6 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
         setTickUnit(range / getMinorTickCount());
     }
 
-    protected static boolean equalString(final String str1, final String str2) {
-        return (str1 == null ? str2 == null : str1.equals(str2));
-    }
-
-    /**
-     * @return The CssMetaData associated with this class, which may include the CssMetaData of its super classes.
-     */
-    public static List<CssMetaData<? extends Styleable, ?>> getClassCssMetaData() {
-        return StyleableProperties.STYLEABLES;
-    }
-
-    // JavaFx Properties
-
-    /**
-     * @return {@link #animated} property
-     */
-    public BooleanProperty animatedProperty() {
-        return animated;
-    }
-
-    /**
-     * @return value of {@link #animated} property
-     */
-    public boolean isAnimated() {
-        return animatedProperty().get();
-    }
-
-    /**
-     * Sets {@link #animated} property
-     */
-    @Override
-    public void setAnimated(final boolean value) {
-        animatedProperty().set(value);
-    }
-
-    /**
-     * @return {@link #animationDuration} property
-     */
-    public IntegerProperty animationDurationProperty() {
-        return animationDuration;
-    }
-
-    /**
-     * @return value of the {@link #animationDuration} property
-     */
-    public int getAnimationDuration() {
-        return animationDurationProperty().get();
-    }
-
-    /**
-     * Sets the value of the {@link #animationDuration} property
-     * @param value animation duration in milliseconds
-     */
-    public void setAnimationDuration(final int value) {
-        animationDurationProperty().set(value);
-    }
-
-    /**
-     * This is true when the axis determines its range from the data automatically
-     *
-     * @return {@link #autoGrowRanging} property
-     */
-    @Override
-    public BooleanProperty autoGrowRangingProperty() {
-        return autoGrowRanging;
-    }
-
-    /**
-     * This is true when the axis determines its range from the data automatically and grows it if necessary
-     *
-     * @return value of the {@link #autoGrowRanging} property
-     */
-    @Override
-    public boolean isAutoGrowRanging() {
-        return autoGrowRangingProperty().get();
-    }
-
-    /**
-     * Sets the value of the {@link #autoGrowRanging} property
-     *
-     * @param state true if axis shall be updated to the optimal data range and grows it if necessary
-     */
-    @Override
-    public void setAutoGrowRanging(final boolean state) {
-        // TODO: setter should probably be dumb and state changes should happen in property's invalidate
-        if (state) {
-            setAutoRanging(false);
-            invalidate();
-            requestAxisLayout();
-        }
-        autoGrowRangingProperty().set(state);
-    }
-
-    /**
-     * Fraction of the range to be applied as padding on both sides of the axis range. E.g. if set to 0.1 (10%) on axis
-     * with data range [10, 20], the new automatically calculated range will be [9, 21].
-     *
-     * @return autoRangePadding property
-     */
-    public DoubleProperty autoRangePaddingProperty() {
-        return autoRangePadding;
-    }
-
-    /**
-     * Returns the value of the {@link #autoRangePaddingProperty()}.
-     *
-     * @return the auto range padding
-     */
-    public double getAutoRangePadding() {
-        return autoRangePaddingProperty().get();
-    }
-
-    /**
-     * Sets the value of the {@link #autoRangePaddingProperty()}
-     *
-     * @param padding padding factor
-     */
-    public void setAutoRangePadding(final double padding) {
-        autoRangePaddingProperty().set(padding);
-    }
-
-    /**
-     * With {@link #autoRangingProperty()} on, defines if the range should be extended to the major tick unit value. For
-     * example with range [3, 74] and major tick unit [5], the range will be extended to [0, 75].
-     * <p>
-     * <b>Default value: {@code true}</b>
-     * </p>
-     *
-     * @return autoRangeRounding property
-     */
-    public BooleanProperty autoRangeRoundingProperty() {
-        return autoRangeRounding;
-    }
-
-    /**
-     * Returns the value of the {@link #autoRangeRoundingProperty()}.
-     *
-     * @return the auto range rounding flag
-     */
-    public boolean isAutoRangeRounding() {
-        return autoRangeRoundingProperty().get();
-    }
-
-    /**
-     * Sets the value of the {@link #autoRangeRoundingProperty()}
-     *
-     * @param round if {@code true}, lower and upper bound will be adjusted to the tick unit value
-     */
-    public void setAutoRangeRounding(final boolean round) {
-        autoRangeRoundingProperty().set(round);
-    }
-
-    @Override
-    public BooleanProperty autoRangingProperty() {
-        return autoRanging;
-    }
-
-    @Override
-    public boolean isAutoRanging() {
-        return autoRangingProperty().get();
-    }
-
-    @Override
-    public void setAutoRanging(final boolean value) {
-        autoRangingProperty().set(value);
-    }
-
-    @Override
-    public BooleanProperty autoUnitScalingProperty() {
-        return autoUnitScaling;
-    }
-
-    @Override
-    public boolean isAutoUnitScaling() {
-        return autoUnitScalingProperty().get();
-    }
-
-    @Override
-    public void setAutoUnitScaling(final boolean value) {
-        autoUnitScalingProperty().set(value);
-    }
-
-    public DoubleProperty axisLabelGapProperty() {
-        return axisLabelGap;
-    }
-
-    public double getAxisLabelGap() {
-        return axisLabelGapProperty().get();
-    }
-
-    public void setAxisLabelGap(final double value) {
-        axisLabelGapProperty().set(value);
-    }
-
-    public ObjectProperty<TextAlignment> axisLabelTextAlignmentProperty() {
-        return axisLabelTextAlignment;
-    }
-
-    @Deprecated // do not break backward compatibility for corrected typo
-    public TextAlignment getaAxisLabelTextAlignment() {
-        return axisLabelTextAlignmentProperty().get();
-    }
-
-    public TextAlignment getAxisLabelTextAlignment() {
-        return axisLabelTextAlignmentProperty().get();
-    }
-
-    public void setAxisLabelTextAlignment(final TextAlignment value) {
-        axisLabelTextAlignmentProperty().set(value);
-    }
-
-    public DoubleProperty axisPaddingProperty() {
-        return axisPadding;
-    }
-
-    public double getAxisPadding() {
-        return axisPaddingProperty().get();
-    }
-
-    public void setAxisPadding(final double value) {
-        axisPaddingProperty().set(value);
-    }
-
-    public DoubleProperty centerAxisPositionProperty() {
-        return centerAxisPosition;
-    }
-
-    public double getAxisCenterPosition() {
-        return centerAxisPositionProperty().get();
-    }
-
-    @Deprecated // do not break backward compatibility for getter adjusted to property name
-    public double getCenterAxisPosition() {
-        return centerAxisPositionProperty().get();
-    }
-
-    public void setAxisCenterPosition(final double value) {
-        centerAxisPositionProperty().set(value);
-    }
-
-    /**
-     * This is {@code true} when the axis labels and data point order should be inverted
-     *
-     * @return property
-     */
-    @Override
-    public BooleanProperty invertAxisProperty() {
-        return invertAxis;
-    }
-
-    /**
-     * This is {@code true} when the axis labels and data point order should be inverted
-     *
-     * @return {@code true} if axis shall be inverted (i.e. drawn from 'max-&gt;min', rather than the normal
-     *         'min-&gt;max')
-     */
-    @Override
-    public boolean isInvertedAxis() {
-        return invertAxisProperty().get();
-    }
-
-    /**
-     * This is {@code true} when the axis labels and data point order should be inverted
-     *
-     * @param value {@code true} if axis shall be inverted (i.e. drawn from 'max-&gt;min', rather than the normal
-     *            'min-&gt;max')
-     */
-    @Override
-    public void invertAxis(final boolean value) {
-        invertAxisProperty().set(value);
-    }
-
-    public IntegerProperty maxMajorTickLabelCountProperty() {
-        return maxMajorTickLabelCount;
-    }
-
-    @Deprecated // do not break backward compatibility for corrected typo
-    public int getMaxMaxjorTickLabelCount() {
-        return this.maxMajorTickLabelCountProperty().get();
-    }
-
-    public int getMaxMajorTickLabelCount() {
-        return this.maxMajorTickLabelCountProperty().get();
-    }
-
-    public void setMaxMajorTickLabelCount(final int value) {
-        this.maxMajorTickLabelCountProperty().set(value);
-    }
-
-    @Override
-    public DoubleProperty maxProperty() {
-        return maxProp;
-    }
-
-    @Override
-    public double getMax() {
-        return maxProperty().get();
-    }
-
-    @Override
-    public boolean setMax(final double value) {
-        final double oldvalue = maxProperty().get();
-        maxProperty().set(value);
-        return oldvalue != value;
-    }
-
-    public IntegerProperty minorTickCountProperty() {
-        return minorTickCount;
-    }
-
-    @Override
-    public int getMinorTickCount() {
-        return minorTickCountProperty().get();
-    }
-
-    public void setMinorTickCount(final int value) {
-        minorTickCountProperty().set(value);
-    }
-
-    public DoubleProperty minorTickLengthProperty() {
-        return minorTickLength;
-    }
-
-    public double getMinorTickLength() {
-        return minorTickLengthProperty().get();
-    }
-
-    public void setMinorTickLength(final double value) {
-        minorTickLengthProperty().set(value);
-    }
-
-    public BooleanProperty minorTickVisibleProperty() {
-        return minorTickVisible;
-    }
-
-    public boolean isMinorTickVisible() {
-        return minorTickVisibleProperty().get();
-    }
-
-    public void setMinorTickVisible(final boolean value) {
-        minorTickVisibleProperty().set(value);
-    }
-
-    @Override
-    public DoubleProperty minProperty() {
-        return minProp;
-    }
-
-    @Override
-    public double getMin() {
-        return minProperty().get();
-    }
-
-    @Override
-    public boolean setMin(final double value) {
-        final double oldvalue = minProperty().get();
-        minProperty().set(value);
-        return oldvalue != value;
-    }
-
-    @Override
-    public StringProperty nameProperty() {
-        return axisName;
-    }
-
-    @Override
-    public String getName() {
-        return nameProperty().get();
-    }
-
-    @Override
-    public void setName(final String value) {
-        nameProperty().set(value);
-    }
-
-    public ObjectProperty<AxisLabelOverlapPolicy> overlapPolicyProperty() {
-        return overlapPolicy;
-    }
-
-    public AxisLabelOverlapPolicy getOverlapPolicy() {
-        return overlapPolicyProperty().get();
-    }
-
-    public void setOverlapPolicy(final AxisLabelOverlapPolicy value) {
-        overlapPolicyProperty().set(value);
-    }
-
-    public ReadOnlyDoubleProperty scaleProperty() {
-        return scale.getReadOnlyProperty();
-    }
-
-    ReadOnlyDoubleWrapper scalePropertyImpl() {
-        return scale;
-    }
-
-    public double getScale() {
-        return scaleProperty().get();
-    }
-
-    protected void setScale(final double scale) {
-        scalePropertyImpl().set(scale);
-    }
-
-    @Override
-    public ObjectProperty<Side> sideProperty() {
-        return side;
-    }
-
-    @Override
-    public Side getSide() {
-        return sideProperty().get();
-    }
-
-    @Override
-    public void setSide(final Side value) {
-        sideProperty().set(value);
-    }
-
-    public ObjectProperty<Paint> tickLabelFillProperty() {
-        return tickLabelFill;
-    }
-
-    @Override
-    public Paint getTickLabelFill() {
-        return tickLabelFillProperty().get();
-    }
-
-    public void setTickLabelFill(final Paint value) {
-        tickLabelFillProperty().set(value);
-    }
-
-    public ObjectProperty<Font> tickLabelFontProperty() {
-        return tickLabelFont;
-    }
-
-    @Override
-    public Font getTickLabelFont() {
-        return tickLabelFontProperty().get();
-    }
-
-    public void setTickLabelFont(final Font value) {
-        tickLabelFontProperty().set(value);
-    }
-
-    public ObjectProperty<StringConverter<Number>> tickLabelFormatterProperty() {
-        return tickLabelFormatter;
-    }
-
-    @Override
-    public StringConverter<Number> getTickLabelFormatter() {
-        return tickLabelFormatterProperty().getValue();
-    }
-
-    public void setTickLabelFormatter(final StringConverter<Number> value) {
-        tickLabelFormatterProperty().setValue(value);
-    }
-
-    public DoubleProperty tickLabelGapProperty() {
-        return tickLabelGap;
-    }
-
-    @Override
-    public double getTickLabelGap() {
-        return tickLabelGapProperty().get();
-    }
-
-    public void setTickLabelGap(final double value) {
-        tickLabelGapProperty().set(value);
-    }
-
-    public DoubleProperty tickLabelSpacing() {
-        return tickLabelSpacing;
-    }
-
-    @Override
-    public double getTickLabelSpacing() {
-        return tickLabelSpacing().get();
-    }
-
-    public void setTickLabelSpacing(final double value) {
-        tickLabelSpacing().set(value);
-    }
-
-    public DoubleProperty tickLabelRotationProperty() {
-        return tickLabelRotation;
-    }
-
-    public double getTickLabelRotation() {
-        return tickLabelRotationProperty().getValue();
-    }
-
-    public void setTickLabelRotation(final double value) {
-        tickLabelRotationProperty().setValue(value);
-    }
-
-    public BooleanProperty tickLabelsVisibleProperty() {
-        return tickLabelsVisible;
-    }
-
-    public boolean isTickLabelsVisible() {
-        return tickLabelsVisibleProperty().get();
-    }
-
-    public void setTickLabelsVisible(final boolean value) {
-        tickLabelsVisibleProperty().set(value);
-    }
-
-    public DoubleProperty tickLengthProperty() {
-        return tickLength;
-    }
-
-    public double getTickLength() {
-        return tickLengthProperty().get();
-    }
-
-    public void setTickLength(final double value) {
-        tickLengthProperty().set(value);
-    }
-
-    public BooleanProperty tickMarkVisibleProperty() {
-        return tickMarkVisible;
-    }
-
-    public boolean isTickMarkVisible() {
-        return tickMarkVisibleProperty().get();
-    }
-
-    public void setTickMarkVisible(final boolean value) {
-        tickMarkVisibleProperty().set(value);
-    }
-
-    /**
-     * The value between each major tick mark in data units. This is automatically set if we are auto-ranging.
-     *
-     * @return tickUnit property
-     */
-    @Override
-    public DoubleProperty tickUnitProperty() {
-        return tickUnit;
-    }
-
-    /**
-     * Returns tick unit value expressed in data units.
-     *
-     * @return major tick unit value
-     */
-    @Override
-    public double getTickUnit() {
-        return tickUnitProperty().get();
-    }
-
-    /**
-     * Sets the value of the {@link #tickUnitProperty()}.
-     *
-     * @param unit major tick unit
-     */
-    @Override
-    public void setTickUnit(final double unit) {
-        tickUnitProperty().set(unit);
-    }
-
-    /**
-     * This is {@code true} when the axis labels and data point should be plotted according to some time-axis definition
-     *
-     * @return time axis property reference
-     */
-    @Override
-    public BooleanProperty timeAxisProperty() {
-        return timeAxis;
-    }
-
-    /**
-     * This is true when the axis corresponds to a time-axis
-     *
-     * @return true if axis is a time scale
-     */
-    @Override
-    public boolean isTimeAxis() {
-        return timeAxisProperty().get();
-    }
-
-    /**
-     * This is {@code true} when the axis labels and data point should be plotted according to some time-axis definition
-     *
-     * @param value {@code true} if axis shall be drawn with time-axis labels
-     */
-    @Override
-    public void setTimeAxis(final boolean value) {
-        timeAxisProperty().set(value);
-    }
-
-    @Override
-    public ObjectProperty<String> unitProperty() {
-        return axisUnit;
-    }
-
-    @Override
-    public String getUnit() {
-        return unitProperty().get();
-    }
-
-    @Override
-    public void setUnit(final String value) {
-        unitProperty().set(value);
-    }
-
-    @Override
-    public DoubleProperty unitScalingProperty() {
-        return unitScaling;
-    }
-
-    @Override
-    public double getUnitScaling() {
-        return unitScalingProperty().get();
-    }
-
-    @Override
-    public void setUnitScaling(final double value) {
-        if (!Double.isFinite(value) || (value == 0)) {
-            throw new IllegalArgumentException("provided number is not finite and/or zero: " + value);
-        }
-        setTickUnit(value);
-        unitScalingProperty().set(value);
-    }
-
-    @Override
-    public void setUnitScaling(final MetricPrefix prefix) {
-        unitScalingProperty().set(prefix.getPower());
-    }
-
     /**
      * valid flag property.
      * This will cause anything that depends on the axis range or physical size to be recalculated on the next layout
@@ -1428,11 +1420,19 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
         return valid;
     }
 
+    ReadOnlyDoubleWrapper scalePropertyImpl() {
+        return scale;
+    }
+
     /**
-     * @return true if current axis range and physical size calculations are valid
+     * @return The CssMetaData associated with this class, which may include the CssMetaData of its super classes.
      */
-    public boolean isValid() {
-        return validProperty().get();
+    public static List<CssMetaData<? extends Styleable, ?>> getClassCssMetaData() {
+        return StyleableProperties.STYLEABLES;
+    }
+
+    protected static boolean equalString(final String str1, final String str2) {
+        return (str1 == null ? str2 == null : str1.equals(str2));
     }
 
     /*

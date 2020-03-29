@@ -65,7 +65,7 @@ import de.gsi.dataset.utils.ProcessingProfiler;
  * {@link #setParallelImplementation(boolean)}. A data reduction is performed in case the number of data points exceed
  * the the underlying number Canvas pixels number in order to improve efficiency and required texture GPU buffer. This
  * data reduction is controlled via {@link #setPointReduction(boolean)} and the reduction type (MIN, MAX, AVERAGE,
- * DOWN_SAMPLE) via {@link #setReductionType(ReductionType)}, and the {@link #setReductionFactorX(int)} and
+ * DOWN_SAMPLE) via {@link #setReductionType}, and the {@link #setReductionFactorX(int)} and
  * {@link #setReductionFactorY(int)} functions.
  * 
  * N.B. Regarding implementation of user-level DataSet interfaces: While the DataSet3D::getZ(int) and

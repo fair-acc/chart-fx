@@ -4,26 +4,24 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import de.gsi.chart.axes.AxisLabelOverlapPolicy;
-import de.gsi.dataset.DataSet;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ObjectPropertyBase;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.util.StringConverter;
 
+import de.gsi.chart.axes.AxisLabelOverlapPolicy;
+import de.gsi.dataset.DataSet;
+
 /**
- * A axis implementation that will works on string categories where each value as a unique category(tick mark) along the
- * axis.
+ * A axis implementation that will works on string categories where each value as a unique category(tick mark) along the axis.
  */
 public final class CategoryAxis extends DefaultNumericAxis {
-
     private boolean forceAxisCategories = false;
 
     private boolean changeIsLocal = false;
 
     private final ObjectProperty<ObservableList<String>> categories = new ObjectPropertyBase<ObservableList<String>>() {
-
         @Override
         public Object getBean() {
             return CategoryAxis.this;
@@ -94,54 +92,15 @@ public final class CategoryAxis extends DefaultNumericAxis {
         changeIsLocal = false;
     }
 
-    // -------------- CONSTRUCTORS
-    // -------------------------------------------------------------------------------------
-
-    @Override
-    protected AxisRange autoRange(final double minValue, final double maxValue, final double length,
-            final double labelSize) {
-        double min = minValue > 0 && isForceZeroInRange() ? 0 : minValue;
-        if (isLogAxis && minValue <= 0) {
-            min = DefaultNumericAxis.DEFAULT_LOG_MIN_VALUE;
-            isUpdating = true;
-            setMin(DefaultNumericAxis.DEFAULT_LOG_MIN_VALUE);
-            isUpdating = false;
-        }
-        final double max = maxValue < 0 && isForceZeroInRange() ? 0 : maxValue;
-        final double padding = DefaultNumericAxis.getEffectiveRange(min, max) * getAutoRangePadding();
-        final double paddingScale = 1.0 + getAutoRangePadding();
-        // compared to DefaultNumericAxis clamping wasn't really necessary for
-        // CategoryAxis
-        // N.B. it was unnecessarily forcing the first bound to 0 (rather than
-        // -0.5)
-        final double paddedMin = isLogAxis ? minValue / paddingScale : min - padding;
-        final double paddedMax = isLogAxis ? maxValue * paddingScale : max + padding;
-
-        return computeRange(paddedMin, paddedMax, length, labelSize);
-    }
-
-    @Override
-    protected List<Double> calculateMinorTickValues() {
-        return Collections.emptyList();
-    }
-
-    @Override
-    protected double computeTickUnit(final double rawTickUnit) {
-        return 1.0;
-    }
-
     /**
      * Returns a {@link ObservableList} of categories plotted on this axis.
      *
      * @return ObservableList of categories for this axis.
-     * @see #categories
+     * 
      */
     public ObservableList<String> getCategories() {
         return categories.get();
     }
-
-    // -------------- METHODS
-    // ------------------------------------------------------------------------------------------
 
     /**
      * @param categories list of strings
@@ -172,7 +131,6 @@ public final class CategoryAxis extends DefaultNumericAxis {
         }
 
         setTickLabelFormatter(new StringConverter<Number>() {
-
             @Override
             public Number fromString(String string) {
                 for (int i = 0; i < getCategories().size(); i++) {
@@ -233,4 +191,36 @@ public final class CategoryAxis extends DefaultNumericAxis {
         return false;
     }
 
+    @Override
+    protected AxisRange autoRange(final double minValue, final double maxValue, final double length,
+            final double labelSize) {
+        double min = minValue > 0 && isForceZeroInRange() ? 0 : minValue;
+        if (isLogAxis && minValue <= 0) {
+            min = DefaultNumericAxis.DEFAULT_LOG_MIN_VALUE;
+            isUpdating = true;
+            setMin(DefaultNumericAxis.DEFAULT_LOG_MIN_VALUE);
+            isUpdating = false;
+        }
+        final double max = maxValue < 0 && isForceZeroInRange() ? 0 : maxValue;
+        final double padding = DefaultNumericAxis.getEffectiveRange(min, max) * getAutoRangePadding();
+        final double paddingScale = 1.0 + getAutoRangePadding();
+        // compared to DefaultNumericAxis clamping wasn't really necessary for
+        // CategoryAxis
+        // N.B. it was unnecessarily forcing the first bound to 0 (rather than
+        // -0.5)
+        final double paddedMin = isLogAxis ? minValue / paddingScale : min - padding;
+        final double paddedMax = isLogAxis ? maxValue * paddingScale : max + padding;
+
+        return computeRange(paddedMin, paddedMax, length, labelSize);
+    }
+
+    @Override
+    protected List<Double> calculateMinorTickValues() {
+        return Collections.emptyList();
+    }
+
+    @Override
+    protected double computeTickUnit(final double rawTickUnit) {
+        return 1.0;
+    }
 }

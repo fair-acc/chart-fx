@@ -41,6 +41,7 @@ import javafx.collections.ObservableList;
 /**
  * A mock observer that tracks calls to its onChanged() method,
  * combined with utility methods to make assertions on the calls made.
+ * @param <E> generic list argument
  *
  */
 public class MockListObserver<E> implements ListChangeListener<E> {

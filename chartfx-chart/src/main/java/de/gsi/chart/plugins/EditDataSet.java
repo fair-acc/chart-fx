@@ -5,17 +5,6 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
 
-import org.controlsfx.glyphfont.FontAwesome;
-import org.controlsfx.glyphfont.Glyph;
-
-import de.gsi.chart.Chart;
-import de.gsi.chart.XYChart;
-import de.gsi.chart.axes.Axis;
-import de.gsi.chart.renderer.Renderer;
-import de.gsi.chart.utils.FXUtils;
-import de.gsi.dataset.DataSet;
-import de.gsi.dataset.EditConstraints;
-import de.gsi.dataset.EditableDataSet;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;
@@ -55,7 +44,22 @@ import javafx.scene.shape.Rectangle;
 import javafx.stage.Popup;
 import javafx.util.Pair;
 
+import org.controlsfx.glyphfont.FontAwesome;
+import org.controlsfx.glyphfont.Glyph;
+
+import de.gsi.chart.Chart;
+import de.gsi.chart.XYChart;
+import de.gsi.chart.axes.Axis;
+import de.gsi.chart.renderer.Renderer;
+import de.gsi.chart.utils.FXUtils;
+import de.gsi.dataset.DataSet;
+import de.gsi.dataset.EditConstraints;
+import de.gsi.dataset.EditableDataSet;
+
 /**
+ * 
+ * Simple plugin to interact with DataSets implementing {@link de.gsi.dataset.EditableDataSet}.
+ * 
  * @author rstein
  */
 public class EditDataSet extends TableViewer {
@@ -70,8 +74,7 @@ public class EditDataSet extends TableViewer {
     private static boolean controlDown;
     protected boolean isPointDragActive;
     // Default mouse select filter: left mouse- and control-button down (only).
-    private final Predicate<MouseEvent> defaultSelectFilter = event -> MouseEventsHelper.isOnlyPrimaryButtonDown(event)
-            && event.isControlDown() && isMouseEventWithinCanvas(event) && !isPointDragActive;
+    protected final Predicate<MouseEvent> defaultSelectFilter = event -> MouseEventsHelper.isOnlyPrimaryButtonDown(event) && event.isControlDown() && isMouseEventWithinCanvas(event) && !isPointDragActive;
 
     protected final ConcurrentHashMap<EditableDataSet, ConcurrentHashMap<Integer, SelectedDataPoint>> markedPoints = new ConcurrentHashMap<>();
     protected final Rectangle selectRectangle = new Rectangle();
@@ -89,7 +92,6 @@ public class EditDataSet extends TableViewer {
     protected PointEditionPopup popup = new PointEditionPopup();
 
     private final EventHandler<KeyEvent> keyReleasedHandler = keyEvent -> {
-
         if (keyEvent.getCode() == KeyCode.CONTROL) {
             uninstallCursor();
             controlDown = false;
@@ -101,7 +103,6 @@ public class EditDataSet extends TableViewer {
     };
 
     private final EventHandler<KeyEvent> keyPressedHandler = keyEvent -> {
-
         if (keyEvent.getCode() == KeyCode.CONTROL) {
             installCursor();
             controlDown = true;
@@ -160,7 +161,6 @@ public class EditDataSet extends TableViewer {
 
     private final DoubleProperty pickingDistance = new SimpleDoubleProperty(this, "pickingDistance",
             DEFAULT_PICKING_DISTANCE) {
-
         @Override
         public void set(final double newValue) {
             super.set(Math.max(1, newValue));
@@ -198,7 +198,6 @@ public class EditDataSet extends TableViewer {
                 // markerPane.prefHeightProperty().bind(n.getCanvas().heightProperty());
             }
         });
-
     }
 
     protected void addPoint(final double x, final double y) {
@@ -318,7 +317,6 @@ public class EditDataSet extends TableViewer {
                 }
             }
         }
-
     }
 
     protected DataPoint findNearestDataPoint(final Chart chart, final Point2D mouseLocation) {
@@ -337,7 +335,7 @@ public class EditDataSet extends TableViewer {
                 final Point2D displayPoint = new Point2D(x, y);
                 dataPoint.setDistanceFromMouse(displayPoint.distance(mouseLocation));
                 if ((nearestDataPoint == null
-                        || dataPoint.getDistanceFromMouse() < nearestDataPoint.getDistanceFromMouse())) {
+                            || dataPoint.getDistanceFromMouse() < nearestDataPoint.getDistanceFromMouse())) {
                     nearestDataPoint = dataPoint;
                 }
             }
@@ -372,11 +370,11 @@ public class EditDataSet extends TableViewer {
             }
         }
         final DataPoint prevPoint = prevIndex == -1 ? null
-                : new DataPoint(getChart(), dataSet, prevIndex, dataSet.get(DataSet.DIM_X, prevIndex),
-                        dataSet.get(DataSet.DIM_Y, prevIndex), dataSet.getDataLabel(prevIndex));
+                                                    : new DataPoint(getChart(), dataSet, prevIndex, dataSet.get(DataSet.DIM_X, prevIndex),
+                                                            dataSet.get(DataSet.DIM_Y, prevIndex), dataSet.getDataLabel(prevIndex));
         final DataPoint nextPoint = nextIndex == -1 || nextIndex == prevIndex ? null
-                : new DataPoint(getChart(), dataSet, nextIndex, dataSet.get(DataSet.DIM_X, nextIndex),
-                        dataSet.get(DataSet.DIM_Y, nextIndex), dataSet.getDataLabel(nextIndex));
+                                                                              : new DataPoint(getChart(), dataSet, nextIndex, dataSet.get(DataSet.DIM_X, nextIndex),
+                                                                                      dataSet.get(DataSet.DIM_Y, nextIndex), dataSet.getDataLabel(nextIndex));
 
         return new Pair<>(prevPoint, nextPoint);
     }
@@ -496,7 +494,7 @@ public class EditDataSet extends TableViewer {
                 allowShiftX.set(true);
                 allowShiftY.set(false);
                 break;
-            case SHIFTY:// allow shifts in Y
+            case SHIFTY: // allow shifts in Y
                 allowShiftX.set(false);
                 allowShiftY.set(true);
                 break;
@@ -633,7 +631,6 @@ public class EditDataSet extends TableViewer {
         registerInputEventHandler(MouseEvent.MOUSE_PRESSED, selectionStartHandler);
         registerInputEventHandler(MouseEvent.MOUSE_DRAGGED, selectionDragHandler);
         registerInputEventHandler(MouseEvent.MOUSE_RELEASED, selectionEndHandler);
-
     }
 
     protected void selectionDragged(final MouseEvent event) {
@@ -752,7 +749,6 @@ public class EditDataSet extends TableViewer {
 
                 dataPoint.update();
                 markerPane.getChildren().add(dataPoint);
-
             }
         }
         if (markerPane.getChildren().isEmpty()) {
@@ -807,7 +803,6 @@ public class EditDataSet extends TableViewer {
     }
 
     public class DataPoint {
-
         private final Chart chart;
         private final double x;
         private final double y;
@@ -862,11 +857,9 @@ public class EditDataSet extends TableViewer {
         public String toString() {
             return "DataSet= '" + dataSet.getName() + "' index=" + index;
         }
-
     }
 
     protected class PointEditionPopup extends Popup {
-
         private final Button addPoint = new Button("add");
         private final Button deletePoint = new Button("delete");
         private final Button deletePoints = new Button("delete all");
@@ -917,7 +910,6 @@ public class EditDataSet extends TableViewer {
     }
 
     protected class SelectedDataPoint extends Circle {
-
         private final Axis xAxis;
         private final Axis yAxis;
         private final EditableDataSet dataSet;
