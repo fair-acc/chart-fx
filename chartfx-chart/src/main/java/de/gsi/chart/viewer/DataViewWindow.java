@@ -709,7 +709,7 @@ public class DataViewWindow extends BorderPane implements EventSource {
 
     /**
      * @param content node that put into the BoderPane centre and depending on
-     *            {@link #windowDecoration} with or w/o frame
+     *            {@link #windowDecorationProperty} with or w/o frame
      */
     protected void setLocalCenter(final Node content) {
         switch (getWindowDecoration()) {

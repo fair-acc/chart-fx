@@ -58,13 +58,15 @@ public class ShortTimeFourierTransform {
      * The complex data is expected to be supplied as a DataSet with dim() = 3 with
      * time axis data in DIM_X, real part in DIM_Y and imaginary part in DIM_Z.
      * All dimensions should have the same number of samples.
-     * 
+     *
      * @param input a dataset with equidistantly spaced y(t) = Re(c(t)) and z(t) = data
      * @param output optional output dataset, if not Null, data will be modified in place
      * @param nFFT the number of frequency bins
      * @param step The timestep size in samples
      * @param apodization function, by default Hann window is used
      * @param padding how to pad the slices at the start and end of the time axis: ZERO(default), ZOH or MIRROR
+     * @param dbScale {@code true} to convert the spectrum to dB scale
+     * @param truncateDCNy {@code true} to interpolate the DC- and Nyquist-bins to their respective nearest neighbours 
      * @return the spectrogram, a DataSet3D with dimensions [nf = nQuantx x nY = nQuantt]
      */
     public static DataSet complex(final DataSet input, final DataSet output, final int nFFT, final int step,

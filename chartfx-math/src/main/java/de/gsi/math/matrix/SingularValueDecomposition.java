@@ -349,12 +349,10 @@ public class SingularValueDecomposition {
         return fInverseEigenValues.copy();
     }
 
-    /***************************************************************************************************/
-    /******************
-     * the holy cow: the svd algorithm
-     ************************************************/
-    /***************************************************************************************************/
-
+    /**
+     * 
+     * @return arrays with computed singular values
+     */
     public double[] getSingularValues() {
         if (!fInitSVD) {
             decompose();
@@ -392,12 +390,6 @@ public class SingularValueDecomposition {
     private static double mySIGN(final double a, final double b) {
         return b >= 0.0 ? Math.abs(a) : -Math.abs(a);
     }
-
-    /***************************************************************************************************/
-    /******************
-     * the holy cow: the svd algorithm ***** end
-     **************************************/
-    /***************************************************************************************************/
 
     /**
      * Two norm
