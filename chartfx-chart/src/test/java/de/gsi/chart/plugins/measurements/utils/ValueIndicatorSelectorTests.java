@@ -12,7 +12,6 @@ import javafx.scene.Scene;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.testfx.framework.junit5.ApplicationExtension;
 import org.testfx.framework.junit5.Start;
@@ -21,7 +20,8 @@ import de.gsi.chart.XYChart;
 import de.gsi.chart.axes.AxisMode;
 import de.gsi.chart.plugins.ParameterMeasurements;
 import de.gsi.chart.plugins.XValueIndicator;
-import de.gsi.chart.utils.FXUtils;
+import de.gsi.chart.ui.utils.JavaFXInterceptorUtils.SelectiveJavaFxInterceptor;
+import de.gsi.chart.ui.utils.TestFx;
 import de.gsi.dataset.testdata.spi.SineFunction;
 
 /**
@@ -31,6 +31,7 @@ import de.gsi.dataset.testdata.spi.SineFunction;
  *
  */
 @ExtendWith(ApplicationExtension.class)
+@ExtendWith(SelectiveJavaFxInterceptor.class)
 public class ValueIndicatorSelectorTests {
     private XYChart chart;
     private ParameterMeasurements plugin;
@@ -58,25 +59,25 @@ public class ValueIndicatorSelectorTests {
         stage.show();
     }
 
-    @Test
+    @TestFx
     public void testSetterGetter() throws InterruptedException, ExecutionException {
         assertNotNull(field.getValueIndicators());
         assertNotNull(field.getValueIndicatorsUser());
         assertNotNull(field.getReuseIndicators());
-        FXUtils.runAndWait(() -> field.getReuseIndicators().setSelected(false));
+        field.getReuseIndicators().setSelected(false);
         assertEquals(field.getReuseIndicators().isSelected(), field.isReuseIndicators());
-        FXUtils.runAndWait(() -> field.getReuseIndicators().setSelected(true));
+        field.getReuseIndicators().setSelected(true);
         assertEquals(field.getReuseIndicators().isSelected(), field.isReuseIndicators());
 
         assertEquals(0, field.getValueIndicators().size());
-        FXUtils.runAndWait(() -> chart.getPlugins().add(new XValueIndicator(chart.getFirstAxis(Orientation.HORIZONTAL), 0.0, "xmin")));
-        FXUtils.runAndWait(() -> chart.getPlugins().add(new XValueIndicator(chart.getFirstAxis(Orientation.HORIZONTAL), 1.0, "xmax")));
+        chart.getPlugins().add(new XValueIndicator(chart.getFirstAxis(Orientation.HORIZONTAL), 0.0, "xmin"));
+        chart.getPlugins().add(new XValueIndicator(chart.getFirstAxis(Orientation.HORIZONTAL), 1.0, "xmax"));
         assertEquals(2, field.getValueIndicators().size());
 
-        FXUtils.runAndWait(() -> chart.getPlugins().remove(plugin));
-        FXUtils.runAndWait(() -> chart.getPlugins().add(plugin));
+        chart.getPlugins().remove(plugin);
+        chart.getPlugins().add(plugin);
 
         assertDoesNotThrow(() -> field2 = new ValueIndicatorSelector(plugin, AxisMode.X));
-        FXUtils.runAndWait(() -> root.getChildren().add(field2));
+        root.getChildren().add(field2);
     }
 }
