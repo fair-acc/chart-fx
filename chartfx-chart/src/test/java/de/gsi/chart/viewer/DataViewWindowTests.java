@@ -15,12 +15,12 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.testfx.framework.junit5.ApplicationExtension;
 import org.testfx.framework.junit5.Start;
 
-import de.gsi.chart.utils.FXUtils;
+import de.gsi.chart.ui.utils.JavaFXInterceptorUtils.SelectiveJavaFxInterceptor;
+import de.gsi.chart.ui.utils.TestFx;
 import de.gsi.chart.viewer.DataViewWindow.WindowDecoration;
 import de.gsi.chart.viewer.DataViewWindow.WindowState;
 
@@ -30,6 +30,7 @@ import de.gsi.chart.viewer.DataViewWindow.WindowState;
  * @author rstein
  */
 @ExtendWith(ApplicationExtension.class)
+@ExtendWith(SelectiveJavaFxInterceptor.class)
 public class DataViewWindowTests {
     private Node content;
     private DataViewWindow field;
@@ -50,7 +51,7 @@ public class DataViewWindowTests {
         stage.show();
     }
 
-    @Test
+    @TestFx
     public void testSetterGetter() throws InterruptedException, ExecutionException {
         assertEquals(null, field.getParentView(), "parent view is null - not attached");
         assertEquals("window name", field.getName(), "getText()");
@@ -72,11 +73,11 @@ public class DataViewWindowTests {
         assertNotNull(field.getDragCursor(), "getDragCursor()");
 
         final Node graphic = new Label("x");
-        FXUtils.runAndWait(() -> field.setGraphic(graphic));
+        field.setGraphic(graphic);
         assertEquals(graphic, field.getGraphic(), "getGraphic()");
 
         for (WindowDecoration decor : WindowDecoration.values()) {
-            FXUtils.runAndWait(() -> field.setWindowDecoration(decor));
+            field.setWindowDecoration(decor);
             assertEquals(decor, field.getWindowDecoration());
 
             switch (decor) {
@@ -107,7 +108,7 @@ public class DataViewWindowTests {
             }
         }
 
-        FXUtils.runAndWait(() -> field.setWindowState(WindowState.WINDOW_RESTORED));
+        field.setWindowState(WindowState.WINDOW_RESTORED);
         assertEquals(WindowState.WINDOW_RESTORED, field.getWindowState());
 
         assertFalse(field.isClosed());
@@ -116,7 +117,7 @@ public class DataViewWindowTests {
         assertFalse(field.isMinimised());
         assertTrue(field.isRestored());
 
-        FXUtils.runAndWait(() -> field.setClosed(true));
+        field.setClosed(true);
         assertTrue(field.isClosed());
     }
 }

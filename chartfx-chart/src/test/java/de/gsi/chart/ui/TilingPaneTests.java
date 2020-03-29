@@ -23,7 +23,8 @@ import org.testfx.framework.junit5.ApplicationExtension;
 import org.testfx.framework.junit5.Start;
 
 import de.gsi.chart.ui.TilingPane.Layout;
-import de.gsi.chart.utils.FXUtils;
+import de.gsi.chart.ui.utils.JavaFXInterceptorUtils.SelectiveJavaFxInterceptor;
+import de.gsi.chart.ui.utils.TestFx;
 
 /**
  * Tests {@link de.gsi.chart.ui.TilingPane }
@@ -31,6 +32,7 @@ import de.gsi.chart.utils.FXUtils;
  * @author rstein
  */
 @ExtendWith(ApplicationExtension.class)
+@ExtendWith(SelectiveJavaFxInterceptor.class)
 public class TilingPaneTests {
     private final List<Label> testLabels = new ArrayList<>(4);
     private TilingPane field;
@@ -50,14 +52,14 @@ public class TilingPaneTests {
         stage.show();
     }
 
-    @Test
+    @TestFx
     public void testSetterGetter() throws InterruptedException, ExecutionException {
         assertEquals(Layout.GRID, field.getLayout(), "getLayout()");
         assertNotNull(field.toString(), "toString()");
         assertEquals(4, field.getChildren().size());
         testChildFillAndColumnSpanValues();
 
-        FXUtils.runAndWait(() -> field.setLayout(Layout.VBOX));
+        field.setLayout(Layout.VBOX);
         assertEquals(Layout.VBOX, field.getLayout(), "getLayout() - VBOX");
         assertEquals(4, field.getChildren().size());
         assertEquals(1, field.getColumnsCount());
@@ -73,7 +75,7 @@ public class TilingPaneTests {
         assertEquals(0, GridPane.getColumnIndex(testLabels.get(3)), "child3 - colIndex");
         assertEquals(3, GridPane.getRowIndex(testLabels.get(3)), "child3 - rowIndex");
 
-        FXUtils.runAndWait(() -> field.setLayout(Layout.HBOX));
+        field.setLayout(Layout.HBOX);
         assertEquals(Layout.HBOX, field.getLayout(), "getLayout() - HBOX");
         assertEquals(4, field.getChildren().size());
         assertEquals(4, field.getColumnsCount());
@@ -89,7 +91,7 @@ public class TilingPaneTests {
         assertEquals(3, GridPane.getColumnIndex(testLabels.get(3)), "child3 - colIndex");
         assertEquals(0, GridPane.getRowIndex(testLabels.get(3)), "child3 - rowIndex");
 
-        FXUtils.runAndWait(() -> field.setLayout(Layout.GRID));
+        field.setLayout(Layout.GRID);
         assertEquals(Layout.GRID, field.getLayout(), "getLayout() - GRID");
         assertEquals(4, field.getChildren().size());
         assertEquals(2, field.getColumnsCount());
@@ -106,7 +108,7 @@ public class TilingPaneTests {
         assertEquals(1, GridPane.getRowIndex(testLabels.get(3)), "child3 - rowIndex");
 
         final Label newLabel = new Label("label4");
-        FXUtils.runAndWait(() -> field.getChildren().add(newLabel));
+        field.getChildren().add(newLabel);
         assertEquals(Layout.GRID, field.getLayout());
         assertEquals(5, field.getChildren().size());
         assertEquals(3, field.getColumnsCount());
@@ -126,7 +128,7 @@ public class TilingPaneTests {
         assertEquals(1, GridPane.getRowIndex(newLabel), "child4 - rowIndex");
         assertEquals(2, GridPane.getColumnSpan(newLabel), "child4 - columnSpan");
 
-        FXUtils.runAndWait(() -> field.getChildren().clear());
+        field.getChildren().clear();
         assertEquals(Layout.GRID, field.getLayout());
         assertEquals(0, field.getChildren().size());
         assertEquals(1, field.getColumnsCount());

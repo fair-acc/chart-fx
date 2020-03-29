@@ -10,26 +10,67 @@ import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
-import org.junit.jupiter.api.Test;
-import org.testfx.framework.junit5.ApplicationTest;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.testfx.framework.junit5.ApplicationExtension;
+import org.testfx.framework.junit5.Start;
 
 import de.gsi.chart.XYChart;
 import de.gsi.chart.axes.AxisMode;
 import de.gsi.chart.axes.spi.DefaultNumericAxis;
 import de.gsi.chart.plugins.EditAxis.AxisEditor;
-import de.gsi.chart.utils.FXUtils;
+import de.gsi.chart.ui.utils.JavaFXInterceptorUtils.SelectiveJavaFxInterceptor;
+import de.gsi.chart.ui.utils.TestFx;
 
 /**
  * Basic interface tests for EditAxis plugin
  *
  * @author rstein
  */
-public class EditAxisTests extends ApplicationTest {
+@ExtendWith(ApplicationExtension.class)
+@ExtendWith(SelectiveJavaFxInterceptor.class)
+public class EditAxisTests {
     private DefaultNumericAxis xAxis;
     private DefaultNumericAxis yAxis;
     private XYChart chart;
 
-    @Test
+    @Start
+    public void start(Stage stage) {
+        xAxis = new DefaultNumericAxis("x", -100, +100, 10);
+        yAxis = new DefaultNumericAxis("x", -100, +100, 10);
+        chart = new XYChart(xAxis, yAxis);
+
+        Scene scene = new Scene(new Pane(), 100, 100);
+        stage.setScene(scene);
+        stage.show();
+    }
+
+    @TestFx
+    public void attachChartTests() throws InterruptedException, ExecutionException {
+        assertEquals(2, chart.getAxes().size());
+
+        EditAxis plugin = new EditAxis();
+        assertEquals(0, plugin.popUpList.size());
+        chart.getPlugins().add(plugin);
+        assertEquals(2, plugin.popUpList.size());
+
+        chart.getPlugins().remove(plugin);
+        assertEquals(0, plugin.popUpList.size());
+
+        plugin.addMouseEventHandlers(chart);
+        assertEquals(2, plugin.popUpList.size());
+
+        chart.getAxes().remove(yAxis);
+        //TODO: check -- removes all axis references but does not leave the remaining axes
+        assertEquals(0, plugin.popUpList.size());
+
+        chart.getPlugins().add(plugin);
+        assertEquals(1, plugin.popUpList.size());
+
+        // duplicates not allowed
+        // assertThrows(IllegalArgumentException.class, () -> chart.getPlugins().add(plugin));
+    }
+
+    @TestFx
     public void basicEditAxisInterfaceTests() {
         assertDoesNotThrow(() -> new EditAxis());
 
@@ -59,50 +100,13 @@ public class EditAxisTests extends ApplicationTest {
         });
     }
 
-    @Override
-    public void start(Stage stage) {
-        xAxis = new DefaultNumericAxis("x", -100, +100, 10);
-        yAxis = new DefaultNumericAxis("x", -100, +100, 10);
-        chart = new XYChart(xAxis, yAxis);
-
-        Scene scene = new Scene(new Pane(), 100, 100);
-        stage.setScene(scene);
-        stage.show();
-    }
-
-    @Test
-    public void attachChartTests() throws InterruptedException, ExecutionException {
-        assertEquals(2, chart.getAxes().size());
-
-        EditAxis plugin = new EditAxis();
-        assertEquals(0, plugin.popUpList.size());
-        FXUtils.runAndWait(() -> chart.getPlugins().add(plugin));
-        assertEquals(2, plugin.popUpList.size());
-
-        FXUtils.runAndWait(() -> chart.getPlugins().remove(plugin));
-        assertEquals(0, plugin.popUpList.size());
-
-        FXUtils.runAndWait(() -> plugin.addMouseEventHandlers(chart));
-        assertEquals(2, plugin.popUpList.size());
-
-        FXUtils.runAndWait(() -> chart.getAxes().remove(yAxis));
-        //TODO: check -- removes all axis references but does not leave the remaining axes
-        assertEquals(0, plugin.popUpList.size());
-
-        FXUtils.runAndWait(() -> chart.getPlugins().add(plugin));
-        assertEquals(1, plugin.popUpList.size());
-
-        // duplicates not allowed
-        // assertThrows(IllegalArgumentException.class, () -> chart.getPlugins().add(plugin));
-    }
-
-    @Test
+    @TestFx
     public void changeAxisRangeTests() throws InterruptedException, ExecutionException {
         assertEquals(2, chart.getAxes().size());
 
         EditAxis plugin = new EditAxis();
         assertEquals(0, plugin.popUpList.size());
-        FXUtils.runAndWait(() -> chart.getPlugins().add(plugin));
+        chart.getPlugins().add(plugin);
         assertEquals(2, plugin.popUpList.size());
 
         AxisEditor xEditor = plugin.new AxisEditor(xAxis, true);

@@ -16,12 +16,12 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.testfx.framework.junit5.ApplicationExtension;
 import org.testfx.framework.junit5.Start;
 
-import de.gsi.chart.utils.FXUtils;
+import de.gsi.chart.ui.utils.JavaFXInterceptorUtils.SelectiveJavaFxInterceptor;
+import de.gsi.chart.ui.utils.TestFx;
 import de.gsi.chart.viewer.DataViewWindow.WindowState;
 
 /**
@@ -30,6 +30,7 @@ import de.gsi.chart.viewer.DataViewWindow.WindowState;
  * @author rstein
  */
 @ExtendWith(ApplicationExtension.class)
+@ExtendWith(SelectiveJavaFxInterceptor.class)
 public class DataViewTests {
     private Node icon;
     private DataViewWindow dataViewWindow;
@@ -53,7 +54,7 @@ public class DataViewTests {
         stage.show();
     }
 
-    @Test
+    @TestFx
     public void testStateMachine() throws InterruptedException, ExecutionException {
         assertEquals("dataView1", dataView.getName());
         assertEquals(icon, dataView.getIcon());
@@ -67,24 +68,24 @@ public class DataViewTests {
             assertNotNull(dataViewWindow);
             switch (state) {
             case WINDOW_RESTORED:
-                FXUtils.runAndWait(() -> dataViewWindow.setRestored(true));
+                dataViewWindow.setRestored(true);
                 testWindowNormalStates();
                 break;
             case WINDOW_MINIMISED:
                 assertNotNull(dataViewWindow.minimizeButtonAction);
-                FXUtils.runAndWait(dataViewWindow.minimizeButtonAction);
+                dataViewWindow.minimizeButtonAction.run();
                 testWindowMinimisedStates();
                 break;
             case WINDOW_MAXIMISED:
-                FXUtils.runAndWait(dataViewWindow.maximizeButtonAction);
-                FXUtils.runAndWait(dataViewWindow.maximizeButtonAction);
+                dataViewWindow.maximizeButtonAction.run();
+                dataViewWindow.maximizeButtonAction.run();
                 testWindowMaximisedStates();
                 // restore
-                FXUtils.runAndWait(dataViewWindow.maximizeButtonAction);
+                dataViewWindow.maximizeButtonAction.run();
                 break;
             case WINDOW_CLOSED:
                 assertTrue(dataView.getVisibleChildren().get(0).equals(dataView.getVisibleChildren().get(1)));
-                FXUtils.runAndWait(dataViewWindow.closeButtonAction);
+                dataViewWindow.closeButtonAction.run();
                 testWindowClosedStates();
                 break;
             default:
@@ -92,34 +93,34 @@ public class DataViewTests {
             }
         }
 
-        FXUtils.runAndWait(() -> dataView.getVisibleNodes().add(new Label("just a node")));
-        FXUtils.runAndWait(() -> dataView.getVisibleNodes().clear());
-        FXUtils.runAndWait(() -> dataView.getVisibleChildren().clear());
-        FXUtils.runAndWait(() -> dataViewWindow.setWindowState(WindowState.WINDOW_RESTORED));
-        FXUtils.runAndWait(() -> dataView.getVisibleNodes().add(dataViewWindow));
+        dataView.getVisibleNodes().add(new Label("just a node"));
+        dataView.getVisibleNodes().clear();
+        dataView.getVisibleChildren().clear();
+        dataViewWindow.setWindowState(WindowState.WINDOW_RESTORED);
+        dataView.getVisibleNodes().add(dataViewWindow);
 
         for (WindowState state : WindowState.values()) {
             assertNotNull(dataViewWindow);
             switch (state) {
             case WINDOW_RESTORED:
-                FXUtils.runAndWait(() -> dataViewWindow.setRestored(true));
+                dataViewWindow.setRestored(true);
                 testWindowNormalStates();
                 break;
             case WINDOW_MINIMISED:
                 assertNotNull(dataViewWindow.minimizeButtonAction);
-                FXUtils.runAndWait(dataViewWindow.minimizeButtonAction);
+                dataViewWindow.minimizeButtonAction.run();
                 testWindowMinimisedStates();
                 break;
             case WINDOW_MAXIMISED:
-                FXUtils.runAndWait(dataViewWindow.maximizeButtonAction);
-                FXUtils.runAndWait(dataViewWindow.maximizeButtonAction);
+                dataViewWindow.maximizeButtonAction.run();
+                dataViewWindow.maximizeButtonAction.run();
                 testWindowMaximisedStates();
                 // restore
-                FXUtils.runAndWait(dataViewWindow.maximizeButtonAction);
+                dataViewWindow.maximizeButtonAction.run();
                 break;
             case WINDOW_CLOSED:
                 assertTrue(dataView.getVisibleChildren().get(0).equals(dataView.getVisibleChildren().get(1)));
-                FXUtils.runAndWait(dataViewWindow.closeButtonAction);
+                dataViewWindow.closeButtonAction.run();
                 //testWindowClosedStates();
                 break;
             default:
@@ -127,17 +128,17 @@ public class DataViewTests {
             }
         }
 
-        FXUtils.runAndWait(() -> dataViewWindow.setWindowState(WindowState.WINDOW_RESTORED));
+        dataViewWindow.setWindowState(WindowState.WINDOW_RESTORED);
         assertEquals(WindowState.WINDOW_RESTORED, dataViewWindow.getWindowState());
 
-        FXUtils.runAndWait(() -> dataViewWindow.setDetached(true));
+        dataViewWindow.setDetached(true);
         assertTrue(dataViewWindow.isDetached());
-        FXUtils.runAndWait(() -> dataViewWindow.getDialog().maximizeRestore(dataViewWindow));
+        dataViewWindow.getDialog().maximizeRestore(dataViewWindow);
         assertEquals(WindowState.WINDOW_MAXIMISED, dataViewWindow.getWindowState());
-        FXUtils.runAndWait(() -> dataViewWindow.getDialog().maximizeRestore(dataViewWindow));
+        dataViewWindow.getDialog().maximizeRestore(dataViewWindow);
         assertEquals(WindowState.WINDOW_RESTORED, dataViewWindow.getWindowState());
 
-        FXUtils.runAndWait(() -> dataViewWindow.setDetached(false));
+        dataViewWindow.setDetached(false);
         assertFalse(dataViewWindow.isDetached());
     }
 

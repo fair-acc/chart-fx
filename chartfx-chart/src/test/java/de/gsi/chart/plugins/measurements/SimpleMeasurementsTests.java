@@ -13,7 +13,6 @@ import javafx.scene.Scene;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.testfx.framework.junit5.ApplicationExtension;
 import org.testfx.framework.junit5.Start;
@@ -22,7 +21,8 @@ import de.gsi.chart.XYChart;
 import de.gsi.chart.plugins.ParameterMeasurements;
 import de.gsi.chart.plugins.measurements.SimpleMeasurements.MeasurementCategory;
 import de.gsi.chart.plugins.measurements.SimpleMeasurements.MeasurementType;
-import de.gsi.chart.utils.FXUtils;
+import de.gsi.chart.ui.utils.JavaFXInterceptorUtils.SelectiveJavaFxInterceptor;
+import de.gsi.chart.ui.utils.TestFx;
 import de.gsi.dataset.testdata.spi.SineFunction;
 
 /**
@@ -32,6 +32,7 @@ import de.gsi.dataset.testdata.spi.SineFunction;
  *
  */
 @ExtendWith(ApplicationExtension.class)
+@ExtendWith(SelectiveJavaFxInterceptor.class)
 public class SimpleMeasurementsTests {
     private ParameterMeasurements plugin;
     private SimpleMeasurements field;
@@ -58,16 +59,16 @@ public class SimpleMeasurementsTests {
         stage.show();
     }
 
-    @Test
+    @TestFx
     public void testSetterGetter() throws InterruptedException, ExecutionException {
         for (MeasurementType type : MeasurementType.values()) {
-            FXUtils.runAndWait(() -> assertThrows(IllegalArgumentException.class, () -> new SimpleMeasurements(null, type).nominalAction()));
-            FXUtils.runAndWait(() -> assertDoesNotThrow(() -> {
+            assertThrows(IllegalArgumentException.class, () -> new SimpleMeasurements(null, type).nominalAction());
+            assertDoesNotThrow(() -> {
                 SimpleMeasurements meas = new SimpleMeasurements(plugin, type);
                 meas.nominalAction();
                 meas.handle(null);
                 meas.removeAction();
-            }));
+            });
         }
 
         for (MeasurementCategory cat : MeasurementCategory.values()) {
@@ -82,23 +83,23 @@ public class SimpleMeasurementsTests {
         assertEquals(MeasurementType.MEAN.getName(), field.getTitle());
         assertEquals(MeasurementType.MEAN, field.getMeasType());
 
-        FXUtils.runAndWait(() -> assertDoesNotThrow(() -> field.nominalAction()));
-        FXUtils.runAndWait(() -> assertDoesNotThrow(() -> field.defaultAction()));
-        FXUtils.runAndWait(() -> assertDoesNotThrow(() -> field.nominalAction()));
+        assertDoesNotThrow(() -> field.nominalAction());
+        assertDoesNotThrow(() -> field.defaultAction());
+        assertDoesNotThrow(() -> field.nominalAction());
 
-        FXUtils.runAndWait(() -> assertDoesNotThrow(() -> field.updateSlider()));
+        assertDoesNotThrow(() -> field.updateSlider());
         assertTrue(field.valueIndicatorSelector.isReuseIndicators());
-        FXUtils.runAndWait(() -> assertDoesNotThrow(() -> field.valueIndicatorSelector.getReuseIndicators().setSelected(false)));
-        FXUtils.runAndWait(() -> assertDoesNotThrow(() -> field.updateSlider()));
+        assertDoesNotThrow(() -> field.valueIndicatorSelector.getReuseIndicators().setSelected(false));
+        assertDoesNotThrow(() -> field.updateSlider());
         assertFalse(field.valueIndicatorSelector.isReuseIndicators());
-        FXUtils.runAndWait(() -> assertDoesNotThrow(() -> field.valueIndicatorSelector.getReuseIndicators().setSelected(true)));
-        FXUtils.runAndWait(() -> assertDoesNotThrow(() -> field.updateSlider()));
+        assertDoesNotThrow(() -> field.valueIndicatorSelector.getReuseIndicators().setSelected(true));
+        assertDoesNotThrow(() -> field.updateSlider());
         assertTrue(field.valueIndicatorSelector.isReuseIndicators());
 
         assertEquals(2, field.getValueIndicatorsUser().size(), " - number of selected indicators");
         // TODO: investigate why '4' is being returned
         // assertEquals(2, field.getValueIndicators().size(), " - number of total indicators");
 
-        FXUtils.runAndWait(() -> assertDoesNotThrow(() -> field.removeAction()));
+        assertDoesNotThrow(() -> field.removeAction());
     }
 }

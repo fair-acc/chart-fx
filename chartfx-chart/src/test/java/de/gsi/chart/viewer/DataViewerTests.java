@@ -16,12 +16,12 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.testfx.framework.junit5.ApplicationExtension;
 import org.testfx.framework.junit5.Start;
 
-import de.gsi.chart.utils.FXUtils;
+import de.gsi.chart.ui.utils.JavaFXInterceptorUtils.SelectiveJavaFxInterceptor;
+import de.gsi.chart.ui.utils.TestFx;
 import de.gsi.chart.viewer.DataViewWindow.WindowDecoration;
 
 /**
@@ -30,6 +30,7 @@ import de.gsi.chart.viewer.DataViewWindow.WindowDecoration;
  * @author rstein
  */
 @ExtendWith(ApplicationExtension.class)
+@ExtendWith(SelectiveJavaFxInterceptor.class)
 public class DataViewerTests {
     private DataView dataView1;
     private DataView dataView2;
@@ -60,36 +61,36 @@ public class DataViewerTests {
         stage.show();
     }
 
-    @Test
+    @TestFx
     public void testStateMachine() throws InterruptedException, ExecutionException {
         assertEquals(dataView1, dataViewer.getSelectedView());
-        FXUtils.runAndWait(() -> dataViewer.setSelectedView(dataView2));
+        dataViewer.setSelectedView(dataView2);
         assertEquals(dataView2, dataViewer.getSelectedView());
-        FXUtils.runAndWait(() -> dataViewer.setSelectedView(dataView1));
+        dataViewer.setSelectedView(dataView1);
         assertEquals(dataView1, dataViewer.getSelectedView());
 
         // by name
-        FXUtils.runAndWait(() -> dataViewer.setSelectedView("dataView2"));
+        dataViewer.setSelectedView("dataView2");
         assertEquals(dataView2, dataViewer.getSelectedView());
-        FXUtils.runAndWait(() -> dataViewer.setSelectedView("dataView1"));
+        dataViewer.setSelectedView("dataView1");
         assertEquals(dataView1, dataViewer.getSelectedView());
 
-        assertDoesNotThrow(() -> FXUtils.runAndWait(() -> dataViewer.setExplorerVisible(true)));
+        assertDoesNotThrow(() -> dataViewer.setExplorerVisible(true));
         assertTrue(dataViewer.isExplorerVisible());
 
         assertNotNull(dataViewer.getToolBar());
         assertNotNull(dataViewer.getUserToolBarItems());
 
         for (WindowDecoration deco : WindowDecoration.values()) {
-            FXUtils.runAndWait(() -> dataViewer.setWindowDecoration(deco));
+            dataViewer.setWindowDecoration(deco);
             assertEquals(deco, dataViewer.getWindowDecoration());
         }
-        FXUtils.runAndWait(() -> dataViewer.setWindowDecoration(WindowDecoration.BAR));
-        FXUtils.runAndWait(() -> dataViewer.setCloseWindowButtonVisible(false));
+        dataViewer.setWindowDecoration(WindowDecoration.BAR);
+        dataViewer.setCloseWindowButtonVisible(false);
         assertFalse(dataViewer.isCloseWindowButtonVisible());
-        FXUtils.runAndWait(() -> dataViewer.setCloseWindowButtonVisible(true));
+        dataViewer.setCloseWindowButtonVisible(true);
         assertTrue(dataViewer.isCloseWindowButtonVisible());
 
-        FXUtils.runAndWait(() -> dataViewer.setSelectedView((DataView) null));
+        dataViewer.setSelectedView((DataView) null);
     }
 }
