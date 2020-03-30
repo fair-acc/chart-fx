@@ -24,4 +24,5 @@ import org.junit.jupiter.api.Test;
 @API(status = STABLE, since = "5.0")
 @Test
 @Tag("TestWithinJavaFX")
-public @interface TestFx { }
+public @interface TestFx {
+}
