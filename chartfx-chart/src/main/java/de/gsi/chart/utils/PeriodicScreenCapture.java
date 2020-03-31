@@ -26,7 +26,6 @@ import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
-import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Scene;
@@ -47,7 +46,6 @@ public class PeriodicScreenCapture implements Observable {
     private static final Logger LOGGER = LoggerFactory.getLogger(PeriodicScreenCapture.class);
     private static final String DEFAULT_TIME_FORMAT = "yyyyMMdd_HHmmss";
     private static final String FILE_LOGGING_SUFFIX = ".png";
-    private static final String IMAGE_FORMAT = "png";
     private final Scene primaryScene;
     private final Path path;
     private final String fileName;
@@ -169,7 +167,7 @@ public class PeriodicScreenCapture implements Observable {
                 LOGGER.info("needed to create directory for file: " + longFileName);
             }
 
-            ImageIO.write(SwingFXUtils.fromFXImage(image, null), IMAGE_FORMAT, file);
+            WriteFxImage.savePng(image, file);
             Files.move(Paths.get(tempFileName), Paths.get(longFileName), REPLACE_EXISTING);
             fireInvalidated();
             LOGGER.debug("write screenshot to " + tempFileName + " -> " + longFileName);

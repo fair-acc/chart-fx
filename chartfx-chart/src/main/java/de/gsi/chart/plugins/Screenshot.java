@@ -3,11 +3,8 @@ package de.gsi.chart.plugins;
 import java.io.File;
 import java.io.IOException;
 
-import javax.imageio.ImageIO;
-
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import javafx.embed.swing.SwingFXUtils;
 import javafx.geometry.Orientation;
 import javafx.scene.SnapshotParameters;
 import javafx.scene.control.Alert;
@@ -35,6 +32,7 @@ import org.controlsfx.glyphfont.Glyph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import de.gsi.chart.utils.WriteFxImage;
 import de.gsi.dataset.DataSet; // NOPMD - needed for JavaDoc
 import de.gsi.dataset.utils.DataSetUtils;
 
@@ -198,7 +196,7 @@ public class Screenshot extends ChartPlugin {
     public void screenshotToFile(final boolean showDialog) {
         Image image = getScreenshot();
         File file = showDialog ? showFileDialog(generateScreenshotName())
-                               : new File(getDirectory(), generateScreenshotName());
+                : new File(getDirectory(), generateScreenshotName());
         if (file == null)
             return;
         saveImage(image, file);
@@ -220,7 +218,7 @@ public class Screenshot extends ChartPlugin {
         } else if (getChart().getTitle() != null && !getChart().getTitle().isBlank()) {
             initName = getChart().getTitle();
         } else if (!getChart().getAllDatasets().isEmpty() && getChart().getAllDatasets().get(0).getName() != null
-                   && !getChart().getAllDatasets().get(0).getName().isBlank()) {
+                && !getChart().getAllDatasets().get(0).getName().isBlank()) {
             initName = getChart().getAllDatasets().get(0).getName();
         } else if (getChart().getId() != null && !getChart().getId().isBlank()) {
             initName = getChart().getId();
@@ -253,7 +251,7 @@ public class Screenshot extends ChartPlugin {
      */
     private static void saveImage(final Image image, final File file) {
         try {
-            ImageIO.write(SwingFXUtils.fromFXImage(image, null), "png", file);
+            WriteFxImage.savePng(image, file);
         } catch (IOException e) {
             LOGGER.atError().addArgument(file.getName()).log("Error saving screenshot to {}");
         }
@@ -290,19 +288,19 @@ public class Screenshot extends ChartPlugin {
             gridPane.add(new Label("pattern: "), 0, 1);
             gridPane.add(patternTextbox, 1, 1, 2, 1);
             patternTextbox.setTooltip(new Tooltip("Pattern:\n {datafield;type;format} style placeholders.\n" + //
-                                                  "Datafield:\n" + //
-                                                  " - systemTime: current system time\n" + //
-                                                  " - dataSetName\n" + //
-                                                  " - xMin, xMax, yMin, yMax\n" + //
-                                                  " - metadata field\n" + //
-                                                  "type:\n" + //
-                                                  " - string(default)\n" + //
-                                                  " - date\n" + //
-                                                  " - int long\n" + //
-                                                  " - float/double\n" + //
-                                                  "format:\n" + //
-                                                  " - date: e.g. yyyyMMdd_HHmmss\n" + //
-                                                  " - numeric data: printf formats e.g. %d, %e"));
+                    "Datafield:\n" + //
+                    " - systemTime: current system time\n" + //
+                    " - dataSetName\n" + //
+                    " - xMin, xMax, yMin, yMax\n" + //
+                    " - metadata field\n" + //
+                    "type:\n" + //
+                    " - string(default)\n" + //
+                    " - date\n" + //
+                    " - int long\n" + //
+                    " - float/double\n" + //
+                    "format:\n" + //
+                    " - date: e.g. yyyyMMdd_HHmmss\n" + //
+                    " - numeric data: printf formats e.g. %d, %e"));
             dirButton.setOnAction((evt) -> {
                 DirectoryChooser directoryChooser = new DirectoryChooser();
                 File currentDir = new File(dirTextbox.getText());

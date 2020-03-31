@@ -32,11 +32,6 @@
             <version>${chartfx.javafx.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.openjfx</groupId>
-            <artifactId>javafx-swing</artifactId> <!-- needed to for saving images to file -->
-            <version>${chartfx.javafx.version}</version>
-        </dependency>
-        <dependency>
             <groupId>org.testfx</groupId>
             <artifactId>testfx-junit5</artifactId>
             <version>4.0.16-alpha</version>
