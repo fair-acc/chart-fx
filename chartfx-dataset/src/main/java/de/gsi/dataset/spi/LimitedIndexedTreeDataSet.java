@@ -28,6 +28,7 @@ public class LimitedIndexedTreeDataSet extends AbstractErrorDataSet<LimitedIndex
     protected IndexedNavigableSet<DataAtom> data = new IndexedTreeSet<>();
     protected int maxQueueSize = Integer.MAX_VALUE;
     protected double maxLength = Double.MAX_VALUE;
+    protected boolean subtractOffset = false;
 
     /**
      * Creates a new instance of <code>DefaultDataSet</code>.
@@ -214,7 +215,7 @@ public class LimitedIndexedTreeDataSet extends AbstractErrorDataSet<LimitedIndex
 
     @Override
     public double get(final int dimIndex, final int i) {
-        return dimIndex == DIM_X ? data.get(i).getX() : data.get(i).getY();
+        return dimIndex == DIM_X ? (subtractOffset ? data.get(i).getX() - data.get(data.size() - 1).getX() : data.get(i).getX()) : data.get(i).getY();
     }
 
     /**
@@ -280,6 +281,14 @@ public class LimitedIndexedTreeDataSet extends AbstractErrorDataSet<LimitedIndex
     @Override
     public String getStyle(final int index) {
         return data.get(index).getStyle();
+    }
+
+    /**
+     * 
+     * @return {@code true}: normalise x-Axis to last value
+     */
+    public boolean isSubtractOffset() {
+        return subtractOffset;
     }
 
     /**
@@ -507,6 +516,14 @@ public class LimitedIndexedTreeDataSet extends AbstractErrorDataSet<LimitedIndex
     public LimitedIndexedTreeDataSet setMaxQueueSize(final int maxQueueSize) {
         this.maxQueueSize = maxQueueSize;
         return this;
+    }
+
+    /**
+     * 
+     * @param subtractOffset {@code true}: normalise x-Axis to last value
+     */
+    public void setSubtractOffset(boolean subtractOffset) {
+        this.subtractOffset = subtractOffset;
     }
 
     protected class DataAtom implements Comparable<DataAtom> {
