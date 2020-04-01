@@ -538,9 +538,7 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
 
         // register listener in tool bar FlowPane
         toolBar.registerListener();
-        HBox topbox = new HBox(getToolBar());
-        topbox.setAlignment(Pos.TOP_CENTER);
-        setTop(topbox);
+        setTop(getToolBar());
 
         getTitleLegendPane(Side.TOP).getChildren().add(titleLabel);
 
@@ -1281,10 +1279,12 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
     }
 
     protected class ChartHBox extends HBox {
-        public ChartHBox() {
+        public ChartHBox(Node... nodes) {
             super();
             setAlignment(Pos.CENTER);
             setPrefSize(Region.USE_COMPUTED_SIZE, Region.USE_COMPUTED_SIZE);
+            getChildren().addAll(nodes);
+            visibleProperty().addListener((obs, o, n) -> getChildren().stream().forEach(node -> node.setVisible(n)));
         }
 
         public ChartHBox(final boolean fill) {
@@ -1294,10 +1294,12 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
     }
 
     protected class ChartVBox extends VBox {
-        public ChartVBox() {
+        public ChartVBox(Node... nodes) {
             super();
             setAlignment(Pos.CENTER);
             setPrefSize(Region.USE_COMPUTED_SIZE, Region.USE_COMPUTED_SIZE);
+            getChildren().addAll(nodes);
+            visibleProperty().addListener((obs, o, n) -> getChildren().stream().forEach(node -> node.setVisible(n)));
         }
 
         public ChartVBox(final boolean fill) {

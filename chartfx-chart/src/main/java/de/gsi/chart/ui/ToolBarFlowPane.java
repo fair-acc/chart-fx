@@ -13,6 +13,7 @@ import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 
@@ -24,6 +25,7 @@ import de.gsi.chart.Chart;
  * @author rstein
  */
 public class ToolBarFlowPane extends FlowPane {
+    private static final int DEFAULT_TOOLBAR_HEIGHT = 28;
     private static final double CORNER_SPACE_PADDING_FACTOR = 1.8;
     private Color defaultColour = Color.web("#f4f4f4", 0.85).deriveColor(0, 1.0, .94, 1.0);
     private Color selectedColour = Color.web("#f4f4f4", 0.85).deriveColor(0, 1.0, .92, 1.0);
@@ -38,12 +40,14 @@ public class ToolBarFlowPane extends FlowPane {
         super();
         this.chart = chart;
 
-        this.setPrefHeight(-1);
+        this.setId(this.getClass().getSimpleName() + "(Chart)"); // N.B. not a unique name but for testing this suffices
+        StackPane.setAlignment(this, Pos.TOP_CENTER);
+        this.setPrefHeight(USE_COMPUTED_SIZE);
         this.setBackground(new Background(new BackgroundFill(defaultColour, CornerRadii.EMPTY, Insets.EMPTY)));
         this.setMinHeight(0);
 
         this.setShape(ToolBarShapeHelper.getToolBarShape(this.getWidth(), this.getHeight(), cornerRadius.get()));
-        this.setPrefWidth(-1);
+        this.setPrefWidth(USE_PREF_SIZE);
 
         this.setAlignment(Pos.TOP_CENTER);
         this.setMinWidth(0);
@@ -68,13 +72,14 @@ public class ToolBarFlowPane extends FlowPane {
         final double maxLength = 0.90 * chart.getCanvas().getWidth();
         double length = 0.0;
         for (Node node : this.getChildren()) {
-            length += node.prefWidth(-2);
+            length += node.prefWidth(DEFAULT_TOOLBAR_HEIGHT);
         }
         length += 4 * cornerRadius.get();
         final double wrapLength = Math.min(maxLength, Math.max(length, 50));
 
         this.prefWrapLengthProperty().set(wrapLength);
         this.setMaxWidth(maxLength);
+        this.setWidth(length);
         this.setShape(ToolBarShapeHelper.getToolBarShape(wrapLength, this.getHeight(), cornerRadius.get()));
     }
 
