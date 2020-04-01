@@ -19,9 +19,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
 import org.testfx.framework.junit5.ApplicationExtension;
 
+import de.gsi.chart.ui.utils.JavaFXInterceptorUtils.SelectiveJavaFxInterceptor;
 import de.gsi.chart.ui.utils.TestFx;
 import de.gsi.chart.utils.WriteFxImage;
-import de.gsi.chart.ui.utils.JavaFXInterceptorUtils.SelectiveJavaFxInterceptor;
 
 /**
  * Tests for {@link de.gsi.chart.ui.utils.WriteFxImage}.
@@ -64,12 +64,12 @@ public class WriteFxImageTests {
             }
         }
     }
-    
+
     @TestFx // needs to be on the application thread for the snapshot method
     public void testWritingImageByteBuffer() throws IOException {
         int w = 200;
         int h = 300;
-        final ByteBuffer pngOutput = ByteBuffer.allocate(w*h*3 + 100);
+        final ByteBuffer pngOutput = ByteBuffer.allocate(w * h * 3 + 100);
         // generate test image
         final Canvas originalCanvas = new Canvas(w, h);
         final GraphicsContext originalContext = originalCanvas.getGraphicsContext2D();

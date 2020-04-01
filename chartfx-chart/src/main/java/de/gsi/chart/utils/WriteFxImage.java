@@ -8,11 +8,11 @@ import java.nio.channels.FileChannel;
 import java.util.zip.CRC32;
 import java.util.zip.Deflater;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import javafx.scene.image.Image;
 import javafx.scene.image.PixelReader;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Writes a JavaFx Image into a ByteBuffer or file
@@ -77,7 +77,7 @@ public class WriteFxImage {
         write(h, outputByteBuffer, crc); // height 4 bytes
         // Bit depth:          1 byte  1*,2*,4*,8,16° (*:indexed only, °: not indexed)
         // Color type:         1 byte  0 (grayscale), 2 (RGB), 3 (Indexed), 4 (grayscale+alpha), and 6 (RGBA).
-        // Compression method: 1 byte  0 (deflate/inflate compression with a 32K sliding window)  
+        // Compression method: 1 byte  0 (deflate/inflate compression with a 32K sliding window)
         // Filter method:      1 byte  0 (adaptive filtering with five basic filter types)
         // Interlace method:   1 byte  0 (no interlace) or 1 (Adam7 interlace)
         write(new byte[] { 8, 2, 0, 0, 0 }, outputByteBuffer, crc); // RGB Mode
@@ -125,7 +125,8 @@ public class WriteFxImage {
         if (LOGGER.isDebugEnabled()) {
             final float compression = (100.0f * compressor.getBytesWritten()) / compressor.getBytesRead();
             LOGGER.atDebug() //
-                    .addArgument(w).addArgument(h) //
+                    .addArgument(w)
+                    .addArgument(h) //
                     .addArgument(compressor.getBytesRead()) //
                     .addArgument(compressor.getBytesWritten()) //
                     .addArgument(compression) //
@@ -170,7 +171,7 @@ public class WriteFxImage {
      */
     private static void write(int i, ByteBuffer buffer) {
         byte b[] = { (byte) ((i >> 24) & 0xff), (byte) ((i >> 16) & 0xff), (byte) ((i >> 8) & 0xff),
-                (byte) (i & 0xff) };
+            (byte) (i & 0xff) };
         buffer.put(b);
     }
 
@@ -183,7 +184,7 @@ public class WriteFxImage {
      */
     private static void write(int i, ByteBuffer buffer, CRC32 crc) {
         byte b[] = { (byte) ((i >> 24) & 0xff), (byte) ((i >> 16) & 0xff), (byte) ((i >> 8) & 0xff),
-                (byte) (i & 0xff) };
+            (byte) (i & 0xff) };
         write(b, buffer, crc);
     }
 }
