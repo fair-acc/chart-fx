@@ -32,11 +32,10 @@ import org.slf4j.LoggerFactory;
 import org.testfx.framework.junit5.ApplicationExtension;
 import org.testfx.framework.junit5.Start;
 
-import de.gsi.chart.utils.WriteFxImage;
 import de.gsi.dataset.utils.ArrayCache;
 
 /**
- * Tests for {@link de.gsi.chart.ui.utils.WriteFxImage}.
+ * Tests for {@link de.gsi.chart.utils.WriteFxImage}.
  *
  * @author Alexander Krimm
  */
@@ -44,9 +43,10 @@ import de.gsi.dataset.utils.ArrayCache;
 @ExtendWith(ApplicationExtension.class)
 public class WriteFxImageTests {
     private static final Logger LOGGER = LoggerFactory.getLogger(WriteFxImageBenchmark.class);
-    Image imageOvals;
-    Image imageRandom;
-    Image image1x1;
+    private static final String INTERNAL_ARRAY_CACHE_NAME = "WriteFxImage-internalArray";
+    private Image imageOvals;
+    private Image imageRandom;
+    private Image image1x1;
 
     @Start
     public void setUp(@SuppressWarnings("unused") final Stage stage) {
@@ -100,10 +100,10 @@ public class WriteFxImageTests {
         int h = (int) imageOvals.getHeight();
         // Initialize cached array so implementation cannot rely on zero initialization
         final int rawDataSize = w * h * 4 + h; // image dimensions times bytesPerPixel + line filtering flag
-        final byte[] byteArray = ArrayCache.getCachedByteArray(WriteFxImage.INTERNAL_ARRAY_CACHE_NAME, rawDataSize);
+        final byte[] byteArray = ArrayCache.getCachedByteArray(INTERNAL_ARRAY_CACHE_NAME, rawDataSize);
         final byte fillByte = (byte) 0x03; // important to use a valid line filtering value (1-4) here, other values will be ignored
         Arrays.fill(byteArray, fillByte);
-        ArrayCache.release(WriteFxImage.INTERNAL_ARRAY_CACHE_NAME, byteArray); // allow WriteFxImage to use the buffer
+        ArrayCache.release(INTERNAL_ARRAY_CACHE_NAME, byteArray); // allow WriteFxImage to use the buffer
         // convert to png
         final ByteBuffer pngOutput = ByteBuffer.allocate(w * h * 4 + 100);
         final Map<String, Object> metaInfo = new HashMap<>();
@@ -128,13 +128,12 @@ public class WriteFxImageTests {
         assertEquals(1, metaInfo.get("compressionLevel"));
         assertTrue(w * h * 4 > (int) metaInfo.get("outputSize"));
         assertEquals(0.02, (double) metaInfo.get("compression"), 0.02);
-        
+
         // Check that the array we preinitialized was actually used
         assertNotEquals(fillByte, byteArray[15]);
 
         // load from png
-        try (final InputStream is = new ByteArrayInputStream(pngOutput.array(), pngOutput.position(),
-                pngOutput.limit())) {
+        try (final InputStream is = new ByteArrayInputStream(pngOutput.array(), pngOutput.position(), pngOutput.limit())) {
             final Image recovered = new Image(is);
             // compare against original
             assertImageEqual(imageOvals, recovered);
@@ -172,8 +171,7 @@ public class WriteFxImageTests {
         assertEquals(1, (double) metaInfo.get("compression"), 0.02);
 
         // load from png
-        try (final InputStream is = new ByteArrayInputStream(pngOutput.array(), pngOutput.position(),
-                pngOutput.limit())) {
+        try (final InputStream is = new ByteArrayInputStream(pngOutput.array(), pngOutput.position(), pngOutput.limit())) {
             final Image recovered = new Image(is);
             // compare against original
             assertImageEqual(imageOvals, recovered);
@@ -210,8 +208,7 @@ public class WriteFxImageTests {
         assertTrue(w * h * 4 > (int) metaInfo.get("outputSize"));
         assertEquals(0.21, (double) metaInfo.get("compression"), 0.02);
         // load from png
-        try (final InputStream is = new ByteArrayInputStream(pngOutput.array(), pngOutput.position(),
-                pngOutput.limit())) {
+        try (final InputStream is = new ByteArrayInputStream(pngOutput.array(), pngOutput.position(), pngOutput.limit())) {
             final Image recovered = new Image(is);
             // compare against original
             assertImageEqual(imageRandom, recovered);
@@ -244,8 +241,7 @@ public class WriteFxImageTests {
         assertEquals(1, metaInfo.get("compressionLevel"));
         assertEquals(3, (double) metaInfo.get("compression"), 1.0);
         // load from png
-        try (final InputStream is = new ByteArrayInputStream(pngOutput.array(), pngOutput.position(),
-                pngOutput.limit())) {
+        try (final InputStream is = new ByteArrayInputStream(pngOutput.array(), pngOutput.position(), pngOutput.limit())) {
             final Image recovered = new Image(is);
             // compare against original
             assertImageEqual(image1x1, recovered);
