@@ -62,6 +62,9 @@ public final class WriteFxImage {
      */
     public static ByteBuffer encode(final Image image, final ByteBuffer byteBuffer, final boolean alpha,
             final int compressionLevel, final Map<String, Object> metaInfo) {
+        if (image == null) {
+            throw new IllegalArgumentException("image must not be null");
+        }
         // get meta info
         final int w = (int) image.getWidth();
         final int h = (int) image.getHeight();
@@ -69,6 +72,9 @@ public final class WriteFxImage {
         final ByteBuffer outputByteBuffer = byteBuffer == null ? ByteBuffer.allocate(getCompressedSizeBound(w, h, alpha)) : byteBuffer;
         // get necessary helper classes
         final PixelReader pr = image.getPixelReader();
+        if (pr == null) {
+            throw new IllegalStateException("image PixelReader not available");
+        }
         final CRC32 crc = new CRC32();
         final Deflater compressor = new Deflater(compressionLevel);
         // actual PNG encoding

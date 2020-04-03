@@ -3,6 +3,7 @@ package de.gsi.chart.utils;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.ByteArrayInputStream;
@@ -258,5 +259,12 @@ public class WriteFxImageTests {
                 assertEquals(original.getPixelReader().getArgb(x, y), recovered.getPixelReader().getArgb(x, y));
             }
         }
+    }
+    
+    @Test
+    public void assertExceptions() {
+        final ByteBuffer pngOutput = ByteBuffer.allocate(100);
+        
+        assertThrows(IllegalArgumentException.class, () -> WriteFxImage.encode(null, pngOutput, true, Deflater.BEST_SPEED, null));
     }
 }
