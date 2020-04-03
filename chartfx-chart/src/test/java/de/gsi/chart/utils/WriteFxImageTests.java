@@ -260,11 +260,11 @@ public class WriteFxImageTests {
             }
         }
     }
-    
+
     @Test
     public void assertExceptions() {
         final ByteBuffer pngOutput = ByteBuffer.allocate(100);
-        
+
         assertThrows(IllegalArgumentException.class, () -> WriteFxImage.encode(null, pngOutput, true, Deflater.BEST_SPEED, null));
     }
 }
