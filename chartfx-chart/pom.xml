@@ -74,6 +74,12 @@
             <artifactId>icu4j</artifactId>
             <version>${chartfx.icu4j.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-swing</artifactId> <!-- needed to for benchmark saving images to file -->
+            <version>${chartfx.javafx.version}</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 </project>
 
