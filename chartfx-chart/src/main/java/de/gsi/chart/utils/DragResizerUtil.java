@@ -150,8 +150,6 @@ public class DragResizerUtil {
             return;
         }
 
-        ((Region) node).setMinWidth(Region.USE_COMPUTED_SIZE);
-        ((Region) node).setMinHeight(Region.USE_COMPUTED_SIZE);
         ((Region) node).setPrefWidth(Region.USE_COMPUTED_SIZE);
         ((Region) node).setPrefHeight(Region.USE_COMPUTED_SIZE);
     }
@@ -360,8 +358,6 @@ public class DragResizerUtil {
                 ((Rectangle) node).setWidth(width);
                 ((Rectangle) node).setHeight(height);
             } else if (node instanceof Region) {
-                ((Region) node).setMinWidth(width);
-                ((Region) node).setMinHeight(height);
                 ((Region) node).setPrefWidth(width);
                 ((Region) node).setPrefHeight(height);
             }
