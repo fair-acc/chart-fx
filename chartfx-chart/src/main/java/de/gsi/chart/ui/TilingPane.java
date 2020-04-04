@@ -107,7 +107,6 @@ public class TilingPane extends GridPane {
             for (int i = 0; i < colsCount; i++) {
                 final ColumnConstraints colConstraints = new ColumnConstraints(); // NOPMD
                 colConstraints.setPercentWidth(100.0 / colsCount);
-                colConstraints.setHgrow(Priority.ALWAYS); // allow column to grow
                 colConstraints.setFillWidth(true);
                 colConstraintList.add(colConstraints);
             }
