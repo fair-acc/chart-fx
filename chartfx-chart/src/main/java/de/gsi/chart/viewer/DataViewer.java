@@ -72,6 +72,7 @@ public class DataViewer extends BorderPane {
     protected static final String FONT_AWESOME = "FontAwesome";
     protected static final int FONT_SIZE = 20;
     private final ObjectProperty<WindowDecoration> windowDecoration = new SimpleObjectProperty<>(this, "windowDecoration", WindowDecoration.BAR);
+    private final BooleanProperty detachableWindow = new SimpleBooleanProperty(this, "detachableWindow", true);
     @Deprecated
     private final BooleanProperty decorationVisible = new SimpleBooleanProperty(this, "windowDecorationVisible", true);
     @Deprecated
@@ -144,6 +145,7 @@ public class DataViewer extends BorderPane {
         selectedViewProperty().addListener((ch, o, n) -> updateToolBar());
 
         windowDecorationProperty().addListener((ch, o, n) -> updateWindowDecorations(dataViewRoot));
+        detachableWindowProperty().addListener((ch, o, n) -> updateDetachableWindowProperty(dataViewRoot));
         windowDecorationVisible().addListener((ch, o, n) -> setWindowDecoration(Boolean.TRUE.equals(n) ? WindowDecoration.BAR : WindowDecoration.NONE));
         closeWindowButtonVisibleProperty().addListener(closeWindowButtonHandler);
 
@@ -161,6 +163,14 @@ public class DataViewer extends BorderPane {
 
     public BooleanProperty closeWindowButtonVisibleProperty() {
         return closeWindowButtonVisible;
+    }
+
+    /**
+     * 
+     * @return detachableWindow property that controls whether window can be detached by dragging or not
+     */
+    public BooleanProperty detachableWindowProperty() {
+        return detachableWindow;
     }
 
     /**
@@ -203,6 +213,14 @@ public class DataViewer extends BorderPane {
     }
 
     /**
+     * 
+     * @return true: window can be detached by dragging gesture
+     */
+    public boolean isDetachableWindow() {
+        return detachableWindowProperty().get();
+    }
+
+    /**
      * Returns the value of the {@link #explorerVisibleProperty()}.
      *
      * @return {@code true} if the explorer view is visible, {@code false} otherwise
@@ -223,6 +241,14 @@ public class DataViewer extends BorderPane {
     @Deprecated
     public void setCloseWindowButtonVisible(final boolean state) {
         closeWindowButtonVisibleProperty().set(state);
+    }
+
+    /**
+     * 
+     * @param state true: window can be detached by dragging gesture
+     */
+    public void setDetachableWindow(final boolean state) {
+        detachableWindowProperty().set(state);
     }
 
     /**
@@ -280,6 +306,37 @@ public class DataViewer extends BorderPane {
             subMenuButton.setOnAction(evt -> dataView.setView(view));
             menuButton.getItems().add(subMenuButton);
             updateMenuButton(subMenuButton, view);
+        }
+    }
+
+    public ObjectProperty<WindowDecoration> windowDecorationProperty() {
+        return windowDecoration;
+    }
+
+    @Deprecated
+    public BooleanProperty windowDecorationVisible() {
+        return decorationVisible;
+    }
+
+    protected void updateDetachableWindowProperty(final DataView root) {
+        for (DataView view : root.getSubDataViews()) {
+            updateDetachableWindowProperty(view);
+        }
+
+        if (root.getContentPane() == null) {
+            return;
+        }
+        List<Node> nodeList = new ArrayList<>();
+        nodeList.add(root.getContentPane());
+        nodeList.addAll(root.getChildren());
+        nodeList.addAll(root.getContentPane().getChildren());
+        // check for child in content, DataView and Content itself
+        for (Node child : nodeList) {
+            if (!(child instanceof DataViewWindow)) {
+                continue;
+            }
+            DataViewWindow window = (DataViewWindow) child;
+            window.setDetachableWindow(isDetachableWindow());
         }
     }
 
@@ -354,9 +411,6 @@ public class DataViewer extends BorderPane {
     }
 
     protected void updateWindowDecorations(final DataView root) {
-        //        this.setCloseWindowButtonVisible(!WindowDecoration.BAR_WO_CLOSE.equals(getWindowDecoration()));
-        //        this.setWindowDecorationVisible(!WindowDecoration.NONE.equals(getWindowDecoration()));
-
         for (DataView view : root.getSubDataViews()) {
             updateWindowDecorations(view);
         }
@@ -376,14 +430,5 @@ public class DataViewer extends BorderPane {
             DataViewWindow window = (DataViewWindow) child;
             window.setWindowDecoration(getWindowDecoration());
         }
-    }
-
-    public ObjectProperty<WindowDecoration> windowDecorationProperty() {
-        return windowDecoration;
-    }
-
-    @Deprecated
-    public BooleanProperty windowDecorationVisible() {
-        return decorationVisible;
     }
 }
