@@ -3,11 +3,8 @@ package de.gsi.chart.plugins;
 import java.io.File;
 import java.io.IOException;
 
-import javax.imageio.ImageIO;
-
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import javafx.embed.swing.SwingFXUtils;
 import javafx.geometry.Orientation;
 import javafx.scene.SnapshotParameters;
 import javafx.scene.control.Alert;
@@ -35,6 +32,7 @@ import org.controlsfx.glyphfont.Glyph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import de.gsi.chart.utils.WriteFxImage;
 import de.gsi.dataset.DataSet; // NOPMD - needed for JavaDoc
 import de.gsi.dataset.utils.DataSetUtils;
 
@@ -253,7 +251,7 @@ public class Screenshot extends ChartPlugin {
      */
     private static void saveImage(final Image image, final File file) {
         try {
-            ImageIO.write(SwingFXUtils.fromFXImage(image, null), "png", file);
+            WriteFxImage.savePng(image, file);
         } catch (IOException e) {
             LOGGER.atError().addArgument(file.getName()).log("Error saving screenshot to {}");
         }

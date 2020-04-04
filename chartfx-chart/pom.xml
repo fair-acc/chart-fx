@@ -32,11 +32,6 @@
             <version>${chartfx.javafx.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.openjfx</groupId>
-            <artifactId>javafx-swing</artifactId> <!-- needed to for saving images to file -->
-            <version>${chartfx.javafx.version}</version>
-        </dependency>
-        <dependency>
             <groupId>org.testfx</groupId>
             <artifactId>testfx-junit5</artifactId>
             <version>4.0.16-alpha</version>
@@ -78,6 +73,12 @@
             <groupId>com.ibm.icu</groupId>
             <artifactId>icu4j</artifactId>
             <version>${chartfx.icu4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-swing</artifactId> <!-- needed to for benchmark saving images to file -->
+            <version>${chartfx.javafx.version}</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 </project>

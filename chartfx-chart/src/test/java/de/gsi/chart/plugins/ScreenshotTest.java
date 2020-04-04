@@ -5,16 +5,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
-import java.nio.file.Files;
+import java.io.InputStream;
 import java.nio.file.Path;
 
-import javax.imageio.ImageIO;
-
-import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
-import javafx.scene.image.WritableImage;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.DataFormat;
 import javafx.scene.layout.FlowPane;
@@ -22,6 +19,7 @@ import javafx.stage.Stage;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.io.TempDir;
 import org.testfx.api.FxAssert;
 import org.testfx.api.FxRobot;
 import org.testfx.framework.junit5.ApplicationExtension;
@@ -56,10 +54,9 @@ class ScreenshotTest {
     }
 
     @Test
-    public void screenshotTests() throws IOException {
+    public void screenshotTests(@TempDir Path tmpdir) throws IOException {
         // setup some useful variables
         final FlowPane toolbar = chart.getToolBar();
-        Path tmpdir = Files.createTempDirectory("screenshotTest");
 
         // add Screenshot Plugin
         fxRobot.interact(() -> {
@@ -103,11 +100,13 @@ class ScreenshotTest {
         File[] filelist = tmpdir.toAbsolutePath().toFile().listFiles();
         assertEquals(1, filelist.length);
         assertEquals(new File(tmpdir.toAbsolutePath().toString(), "Cosine_-0.1.png"), filelist[0]);
-        WritableImage imageRecovered = SwingFXUtils.toFXImage(ImageIO.read(filelist[0]), null);
-        fxRobot.interact(() -> {
-            assertEquals(chart.getWidth(), imageRecovered.getWidth());
-            assertEquals(chart.getHeight(), imageRecovered.getHeight());
-        });
+        try (InputStream file = new FileInputStream(filelist[0])) {
+            Image imageRecovered = new Image(file);
+            fxRobot.interact(() -> {
+                assertEquals(chart.getWidth(), imageRecovered.getWidth());
+                assertEquals(chart.getHeight(), imageRecovered.getHeight());
+            });
+        }
 
         // remove plugin
         fxRobot.interact(() -> chart.getPlugins().remove(screenshotPlugin));
