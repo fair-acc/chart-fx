@@ -16,6 +16,7 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.ObservableList;
+import javafx.geometry.BoundingBox;
 import javafx.geometry.Bounds;
 import javafx.geometry.Point2D;
 import javafx.geometry.Rectangle2D;
@@ -33,6 +34,7 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
+import javafx.stage.Window;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -86,6 +88,7 @@ public class DataViewWindow extends BorderPane implements EventSource {
     private final Label titleLabel = new Label();
     private final HBox rightButtons = new HBox();
     private final HBox windowDecorationBar = new HBox();
+    private final BooleanProperty detachableWindow = new SimpleBooleanProperty(this, "detachableWindow", true);
     private final BooleanProperty minimisedWindow = new SimpleBooleanProperty(this, "minimisedWindow", false);
     private final BooleanProperty maximisedWindow = new SimpleBooleanProperty(this, "maximisedWindow", false);
     private final BooleanProperty restoredWindow = new SimpleBooleanProperty(this, "restoredWindow", true);
@@ -93,8 +96,9 @@ public class DataViewWindow extends BorderPane implements EventSource {
     private final ObjectProperty<WindowState> windowState = new SimpleObjectProperty<>(this, "windowState", WindowState.WINDOW_RESTORED) {
         @Override
         public void set(final WindowState state) {
+            // already armed, ignore redundant state changes
             // arm and allow for new notifications
-            if (windowState.get().equals(state)) {
+            if (windowState.get() == state) {
                 // already armed, ignore redundant state changes
                 return;
             }
@@ -282,7 +286,6 @@ public class DataViewWindow extends BorderPane implements EventSource {
     }
 
     public DataViewWindow(final String name, final Node content, final WindowDecoration windowDecoration) {
-        super();
         if (content == null) {
             throw new IllegalArgumentException("content must not be null");
         }
@@ -351,6 +354,9 @@ public class DataViewWindow extends BorderPane implements EventSource {
         restoredWindow.addListener((ch, o, n) -> maximizeButtonAction.run());
         detachedWindow.addListener((ch, o, n) -> {
             if (Boolean.TRUE.equals(n)) {
+                if (!isDetachableWindow()) {
+                    return;
+                }
                 dialog.show(this, null);
             } else {
                 dialog.hide();
@@ -364,9 +370,13 @@ public class DataViewWindow extends BorderPane implements EventSource {
 
         // set actions
         detachButton.setOnAction(evt -> setDetached(true));
+        detachButton.setId("detachButton");
         minimizeButton.setOnAction(evt -> minimizeButtonAction.run());
+        minimizeButton.setId("minimizeButton");
         maximizeRestoreButton.setOnAction(evt -> maximizeButtonAction.run());
+        maximizeRestoreButton.setId("maximizeRestoreButton");
         closeButton.setOnAction(evt -> closeButtonAction.run());
+        closeButton.setId("closeButton");
 
         // install drag handler
         windowDecorationBar.setOnMouseReleased(this::dragFinish);
@@ -400,6 +410,14 @@ public class DataViewWindow extends BorderPane implements EventSource {
         return content;
     }
 
+    /**
+     * 
+     * @return detachableWindow property that controls whether window can be detached by dragging or not
+     */
+    public BooleanProperty detachableWindowProperty() {
+        return detachableWindow;
+    }
+
     public BooleanProperty detachedProperty() {
         return detachedWindow;
     }
@@ -411,6 +429,18 @@ public class DataViewWindow extends BorderPane implements EventSource {
      */
     public final ObjectProperty<Cursor> dragCursorProperty() {
         return dragCursor;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof DataViewWindow)) {
+            return false;
+        }
+        final DataViewWindow other = (DataViewWindow) obj;
+        return Objects.equals(graphic, other.graphic) && Objects.equals(name, other.name);
     }
 
     /**
@@ -485,23 +515,6 @@ public class DataViewWindow extends BorderPane implements EventSource {
         return titleLabel;
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(graphic, name);
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (!(obj instanceof DataViewWindow)) {
-            return false;
-        }
-        DataViewWindow other = (DataViewWindow) obj;
-        return Objects.equals(graphic, other.graphic) && Objects.equals(name, other.name);
-    }
-
     public WindowDecoration getWindowDecoration() {
         return windowDecorationProperty().get();
     }
@@ -514,8 +527,21 @@ public class DataViewWindow extends BorderPane implements EventSource {
         return graphic;
     }
 
+    @Override
+    public int hashCode() {
+        return Objects.hash(graphic, name);
+    }
+
     public boolean isClosed() {
         return closedProperty().get();
+    }
+
+    /**
+     * 
+     * @return true: window can be detached by dragging gesture
+     */
+    public boolean isDetachableWindow() {
+        return detachableWindowProperty().get();
     }
 
     public boolean isDetached() {
@@ -536,7 +562,7 @@ public class DataViewWindow extends BorderPane implements EventSource {
 
     @Deprecated
     public boolean isWindowDecorationVisible() {
-        return !(WindowDecoration.NONE.equals(windowDecorationProperty().get()) || WindowDecoration.FRAME.equals(windowDecorationProperty().get()));
+        return !(WindowDecoration.NONE == windowDecorationProperty().get() || WindowDecoration.FRAME == windowDecorationProperty().get());
     }
 
     public BooleanProperty maximisedProperty() {
@@ -571,6 +597,14 @@ public class DataViewWindow extends BorderPane implements EventSource {
 
     public final void setContent(final Node content) {
         contentProperty().set(content);
+    }
+
+    /**
+     * 
+     * @param state true: window can be detached by dragging gesture
+     */
+    public void setDetachableWindow(final boolean state) {
+        detachableWindowProperty().set(state);
     }
 
     public void setDetached(final boolean state) {
@@ -619,13 +653,9 @@ public class DataViewWindow extends BorderPane implements EventSource {
         windowDecorationProperty().set(state ? WindowDecoration.BAR : WindowDecoration.NONE);
     }
 
-    protected void setWindowState(final WindowState state) {
-        windowStateProperty().set(state);
-    }
-
     @Override
     public String toString() {
-        return DataViewWindow.class.getSimpleName() + "(\"" + this.getName() + "\")";
+        return new StringBuilder().append(DataViewWindow.class.getSimpleName()).append("(\"").append(this.getName()).append("\")").toString();
     }
 
     @Override
@@ -639,58 +669,6 @@ public class DataViewWindow extends BorderPane implements EventSource {
 
     public ObjectProperty<WindowState> windowStateProperty() {
         return windowState;
-    }
-
-    private void dragFinish(final MouseEvent mevt) {
-        if (isMinimised() || getParentView() == null || getParentView().getMinimisedChildren().contains(this)) {
-            return;
-        }
-        if (!mouseFilter.test(mevt)) {
-            return;
-        }
-        uninstallCursor();
-
-        final Point2D mouseLoc = new Point2D(mevt.getScreenX(), mevt.getScreenY());
-        final Bounds screenBounds = localToScreen(WindowDecoration.FRAME.equals(getWindowDecoration()) ? this.getBoundsInLocal() : getWindowDecorationBar().getBoundsInLocal());
-        if (MouseUtils.mouseOutsideBoundaryBoxDistance(screenBounds, mouseLoc) > MIN_DRAG_BORDER_WIDTH) {
-            // mouse move outside window detected -- launch dialog
-            // dropped outside of node window
-            if (!dialog.isShowing()) {
-                dialog.show(this, mevt);
-                return;
-            }
-            dialog.setX(mevt.getScreenX() - xOffset);
-            dialog.setY(mevt.getScreenY() - yOffset);
-            return;
-        }
-        this.requestFocus();
-
-        if (dialog.isShowing()) {
-            dialog.setX(mevt.getScreenX() - xOffset);
-            dialog.setY(mevt.getScreenY() - yOffset);
-        }
-    }
-
-    private void dragOngoing(final MouseEvent mevt) {
-        if (!mouseFilter.test(mevt)) {
-            return;
-        }
-        // launch dragging dialogue
-        dialog.setX(mevt.getScreenX() - xOffset);
-        dialog.setY(mevt.getScreenY() - yOffset);
-    }
-
-    private void dragStart(final MouseEvent mevt) {
-        if (!mouseFilter.test(mevt)) {
-            return;
-        }
-        installCursor();
-        xOffset = mevt.getSceneX();
-        yOffset = mevt.getSceneY();
-    }
-
-    private void uninstallCursor() {
-        this.setCursor(originalCursor);
     }
 
     /**
@@ -733,6 +711,71 @@ public class DataViewWindow extends BorderPane implements EventSource {
         }
     }
 
+    protected void setWindowState(final WindowState state) {
+        windowStateProperty().set(state);
+    }
+
+    private void dragFinish(final MouseEvent mevt) {
+        if (isMinimised() || getParentView() == null || getParentView().getMinimisedChildren().contains(this)) {
+            return;
+        }
+        if (!mouseFilter.test(mevt)) {
+            return;
+        }
+        uninstallCursor();
+
+        if (!isDetachableWindow()) {
+            return;
+        }
+        // detach only if window is dragged outside Scene
+        if (getScene() == null) {
+            return;
+        }
+        final Point2D mouseLoc = new Point2D(mevt.getScreenX(), mevt.getScreenY());
+        final Window window = getScene().getWindow();
+        final Bounds sceneBounds = new BoundingBox(window.getX(), window.getY(), window.getWidth(), window.getHeight());
+
+        final Bounds screenBounds = localToScreen(WindowDecoration.FRAME.equals(getWindowDecoration()) ? this.getBoundsInLocal() : getWindowDecorationBar().getBoundsInLocal());
+        if (MouseUtils.mouseOutsideBoundaryBoxDistance(screenBounds, mouseLoc) > MIN_DRAG_BORDER_WIDTH && MouseUtils.mouseOutsideBoundaryBoxDistance(sceneBounds, mouseLoc) > MIN_DRAG_BORDER_WIDTH) {
+            // mouse move outside window and surrounding stage detected -- launch dialog
+            if (!dialog.isShowing()) {
+                dialog.show(this, mevt);
+                return;
+            }
+            dialog.setX(mevt.getScreenX() - xOffset);
+            dialog.setY(mevt.getScreenY() - yOffset);
+            return;
+        }
+
+        if (!dialog.isShowing()) {
+            return;
+        }
+        dialog.setX(mevt.getScreenX() - xOffset);
+        dialog.setY(mevt.getScreenY() - yOffset);
+    }
+
+    private void dragOngoing(final MouseEvent mevt) {
+        if (!mouseFilter.test(mevt)) {
+            return;
+        }
+        // launch dragging dialogue
+        dialog.setX(mevt.getScreenX() - xOffset);
+        dialog.setY(mevt.getScreenY() - yOffset);
+    }
+
+    private void dragStart(final MouseEvent mevt) {
+        if (!mouseFilter.test(mevt)) {
+            return;
+        }
+        installCursor();
+        xOffset = mevt.getSceneX();
+        yOffset = mevt.getSceneY();
+    }
+
+    private void uninstallCursor() {
+        this.setCursor(originalCursor);
+    }
+
     public enum WindowDecoration {
         NONE, // w/o any decoration
         BAR, // classic window title bar with title label and min, max, close and detach buttons
@@ -753,10 +796,9 @@ public class DataViewWindow extends BorderPane implements EventSource {
         private transient double width = 640;
         private transient double height = 480;
         private transient boolean maximized;
-        private transient final Scene scene = new Scene(new StackPane(), 640, 480);
+        private final transient Scene scene = new Scene(new StackPane(), 640, 480);
 
         public ExternalStage() {
-            super();
             setScene(scene);
         }
 

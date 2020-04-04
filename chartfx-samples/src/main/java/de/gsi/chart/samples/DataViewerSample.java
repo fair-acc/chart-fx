@@ -14,13 +14,14 @@ import javafx.beans.DefaultProperty;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
+import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Label;
-import javafx.scene.control.Separator;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
@@ -66,7 +67,7 @@ import de.gsi.dataset.utils.ProcessingProfiler;
  * @author Grzegorz Kruk
  * @author rstein
  */
-@DefaultProperty(value = "views")
+@DefaultProperty("views")
 public class DataViewerSample extends Application {
     private static final Logger LOGGER = LoggerFactory.getLogger(DataViewerSample.class);
     private static final String TITLE = DataViewerSample.class.getSimpleName();
@@ -79,7 +80,7 @@ public class DataViewerSample extends Application {
 
     private final EventListener dataWindowEventListener = evt -> {
         if (evt instanceof WindowUpdateEvent) {
-            WindowUpdateEvent wEvt = (WindowUpdateEvent) evt;
+            final WindowUpdateEvent wEvt = (WindowUpdateEvent) evt;
             LOGGER.atInfo().addArgument(wEvt).addArgument(wEvt.getType()).log("received window update event {} of type {}");
         } else {
             LOGGER.atInfo().addArgument(evt).addArgument(evt.getMessage()).log("received generic window update event {} with message {}");
@@ -136,18 +137,37 @@ public class DataViewerSample extends Application {
         view1.getVisibleChildren().addAll(energyView, currentView, jDataViewerPane);
         // view1.getVisibleNodes().addAll(energyChart, currentChart, jDataViewerChart);
 
-        ComboBox<InitialWindowState> initialWindowState = new ComboBox<>();
+        final ComboBox<InitialWindowState> initialWindowState = new ComboBox<>();
         initialWindowState.getItems().setAll(InitialWindowState.values());
         initialWindowState.setValue(InitialWindowState.VISIBLE);
 
-        final Button newView = new Button(null, new HBox( //
-                                                        new Glyph(FONT_AWESOME, FontAwesome.Glyph.PLUS).size(FONT_SIZE), //
-                                                        new Glyph(FONT_AWESOME, FontAwesome.Glyph.LINE_CHART).size(FONT_SIZE)));
+        // set default view
+        //        viewer.setSelectedView(view2);
+        // set user default interactors
+        final CheckBox listView = new CheckBox();
+        listView.setGraphic(new Glyph(FONT_AWESOME, '\uf022').size(FONT_SIZE));
+        listView.setTooltip(new Tooltip("click to switch between button and list-style DataView selection"));
+        listView.setSelected(viewer.showListStyleDataViewProperty().get());
+        listView.selectedProperty().bindBidirectional(viewer.showListStyleDataViewProperty());
+
+        final ComboBox<WindowDecoration> windowDecoration = new ComboBox<>(FXCollections.observableArrayList(WindowDecoration.values()));
+        windowDecoration.getSelectionModel().select(viewer.getWindowDecoration());
+        windowDecoration.setOnAction(evt -> viewer.setWindowDecoration(windowDecoration.getSelectionModel().getSelectedItem()));
+
+        final CheckBox detachable = new CheckBox();
+        final Label detachableBox = new Label("allow windows to detach: ", detachable);
+        detachableBox.setContentDisplay(ContentDisplay.RIGHT);
+        detachable.setAlignment(Pos.CENTER_RIGHT);
+        detachable.setTooltip(new Tooltip("enable/disable windows to detach"));
+        detachable.setSelected(viewer.isDetachableWindow());
+        detachable.selectedProperty().bindBidirectional(viewer.detachableWindowProperty());
+
+        final Button newView = new Button(null, new HBox(new Glyph(FONT_AWESOME, FontAwesome.Glyph.PLUS).size(FONT_SIZE), new Glyph(FONT_AWESOME, FontAwesome.Glyph.LINE_CHART).size(FONT_SIZE)));
         newView.setTooltip(new Tooltip("add new view"));
         newView.setOnAction(evt -> {
             final int count = view1.getVisibleChildren().size() + view1.getMinimisedChildren().size();
             final XYChart jChart = createChart();
-            final DataViewWindow newDataViewerPane = new DataViewWindow("Chart" + count, jChart);
+            final DataViewWindow newDataViewerPane = new DataViewWindow("Chart" + count, jChart, windowDecoration.getValue());
             switch (initialWindowState.getValue()) {
             case DETACHED:
                 // alternate: add immediately to undocked state
@@ -175,9 +195,13 @@ public class DataViewerSample extends Application {
             });
 
             // add listener on specific events
-            ChangeListener<Boolean> changeListener = (ch, o, n) -> {
+            final ChangeListener<Boolean> changeListener = (ch, o, n) -> {
                 // small debugging routine to check state-machine
-                LOGGER.atInfo().addArgument(newDataViewerPane.isMinimised()).addArgument(newDataViewerPane.isMaximised()).addArgument(newDataViewerPane.isRestored()).addArgument(newDataViewerPane.isDetached()).addArgument(newDataViewerPane.isClosed()).log("minimised: {}, maximised {}, restored {}, detached {}, closed {}");
+                LOGGER.atInfo().addArgument(newDataViewerPane.isMinimised()).addArgument(newDataViewerPane.isMaximised()) //
+                        .addArgument(newDataViewerPane.isRestored())
+                        .addArgument(newDataViewerPane.isDetached())
+                        .addArgument(newDataViewerPane.isClosed()) //
+                        .log("minimised: {}, maximised {}, restored {}, detached {}, closed {}");
             };
             newDataViewerPane.minimisedProperty().addListener(changeListener);
             newDataViewerPane.maximisedProperty().addListener(changeListener);
@@ -188,22 +212,9 @@ public class DataViewerSample extends Application {
             // view1.getVisibleNodes().add(jChart);
         });
 
-        // set default view
-        //        viewer.setSelectedView(view2);
-        // set user default interactors
-        CheckBox listView = new CheckBox();
-        listView.setGraphic(new Glyph(FONT_AWESOME, '\uf022').size(FONT_SIZE));
-        listView.setTooltip(new Tooltip("click to switch between button and list-style DataView selection"));
-        listView.setSelected(viewer.showListStyleDataViewProperty().get());
-        listView.selectedProperty().bindBidirectional(viewer.showListStyleDataViewProperty());
+        final Label focusedOwner = new Label();
 
-        ComboBox<WindowDecoration> windowDecoration = new ComboBox<>(FXCollections.observableArrayList(WindowDecoration.values()));
-        windowDecoration.getSelectionModel().select(viewer.getWindowDecoration());
-        windowDecoration.setOnAction(evt -> viewer.setWindowDecoration(windowDecoration.getSelectionModel().getSelectedItem()));
-
-        Label focusedOwner = new Label();
-
-        viewer.getUserToolBarItems().addAll(newView, initialWindowState, new Label("Win-Decor:"), windowDecoration, listView);
+        viewer.getUserToolBarItems().addAll(newView, initialWindowState, new Label("Win-Decor:"), windowDecoration, detachableBox, listView);
         final Scene scene = new Scene(
                 new VBox(viewer.getToolBar(), viewer, new HBox(new Label("focus on: "), focusedOwner)), 800, 600);
         scene.focusOwnerProperty().addListener((ch, o, n) -> {
@@ -267,30 +278,30 @@ public class DataViewerSample extends Application {
     }
 
     private static Pane getDemoPane() {
-        Rectangle rect = new Rectangle(-130, -40, 80, 80);
+        final Rectangle rect = new Rectangle(-130, -40, 80, 80);
         rect.setFill(Color.BLUE);
-        Circle circle = new Circle(0, 0, 40);
+        final Circle circle = new Circle(0, 0, 40);
         circle.setFill(Color.GREEN);
-        Polygon triangle = new Polygon(60, -40, 120, 0, 50, 40);
+        final Polygon triangle = new Polygon(60, -40, 120, 0, 50, 40);
         triangle.setFill(Color.RED);
 
-        Group group = new Group(rect, circle, triangle);
+        final Group group = new Group(rect, circle, triangle);
         group.setTranslateX(300);
         group.setTranslateY(200);
 
-        RotateTransition rotateTransition = new RotateTransition(Duration.millis(4000), group);
+        final RotateTransition rotateTransition = new RotateTransition(Duration.millis(4000), group);
         rotateTransition.setByAngle(3.0 * 360);
         rotateTransition.setCycleCount(Animation.INDEFINITE);
         rotateTransition.setAutoReverse(true);
         rotateTransition.play();
 
-        RotateTransition rotateTransition1 = new RotateTransition(Duration.millis(1000), rect);
+        final RotateTransition rotateTransition1 = new RotateTransition(Duration.millis(1000), rect);
         rotateTransition1.setByAngle(360);
         rotateTransition1.setCycleCount(Animation.INDEFINITE);
         rotateTransition1.setAutoReverse(false);
         rotateTransition1.play();
 
-        RotateTransition rotateTransition2 = new RotateTransition(Duration.millis(1000), triangle);
+        final RotateTransition rotateTransition2 = new RotateTransition(Duration.millis(1000), triangle);
         rotateTransition2.setByAngle(360);
         rotateTransition2.setCycleCount(Animation.INDEFINITE);
         rotateTransition2.setAutoReverse(false);
@@ -298,17 +309,17 @@ public class DataViewerSample extends Application {
         group.setManaged(true);
 
         HBox.setHgrow(group, Priority.ALWAYS);
-        HBox box = new HBox(group);
+        final HBox box = new HBox(group);
         VBox.setVgrow(box, Priority.ALWAYS);
         box.setId("demoPane");
         return box;
     }
 
-    private static void logPropertyChange(BooleanProperty property, String name) {
+    private static void logPropertyChange(final BooleanProperty property, final String name) {
         property.addListener((ch, o, n) -> LOGGER.atInfo().log("Property '{}' changed to '{}'", name, n));
     }
 
-    private static void logStatePropertyChanges(String windowName, final DataViewWindow currentView) {
+    private static void logStatePropertyChanges(final String windowName, final DataViewWindow currentView) {
         logPropertyChange(currentView.minimisedProperty(), windowName + " minimized");
         logPropertyChange(currentView.detachedProperty(), windowName + " detached");
         logPropertyChange(currentView.closedProperty(), windowName + " closed");
