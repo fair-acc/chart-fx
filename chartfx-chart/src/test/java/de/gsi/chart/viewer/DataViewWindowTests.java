@@ -64,6 +64,11 @@ public class DataViewWindowTests {
         assertNotNull(field.autoNotification());
         assertNotNull(field.updateEventListener());
 
+        assertTrue(field.isDetachableWindow());
+        field.setDetachableWindow(false);
+        assertFalse(field.isDetachableWindow());
+        field.setDetachableWindow(true);
+
         assertNotNull(field.getCloseButton(), "close button not null");
         assertNotNull(field.getDetachButton(), "detach button not null");
         assertNotNull(field.getMaximizeRestoreButton(), "maximise/restore button not null");
