@@ -34,13 +34,13 @@ install:
   - mvn --settings .maven.xml install -Dgpg.skip=true -Dmaven.javadoc.skip=true -B -V -Drevision=${REVISION} -Dchangelist=${CHANGELIST}
 
 script:
-  # deploy maven project
+  # deploy maven project if credentials are available
   - if [ -n "$GPG_KEY" ]; then mvn clean deploy --settings .maven.xml -Prelease -Drevision=${REVISION} -Dchangelist=${CHANGELIST}; fi
 
 after_success:
   # create and upload coverage report
   - mvn jacoco:report-aggregate coveralls:report
-  - mvn -pl chartfx-report codacy:coverage
+  - if [ -n "$CODACY_API_TOKEN" ]; then mvn -pl chartfx-report codacy:coverage; fi
   - bash <(curl -s https://codecov.io/bash) -s chartfx-report/target/site/jacoco-aggregate/
   # upload runtime data to perform exhaustive statical analysis on coverity if enabled for this build
   - echo "TRAVIS_EVENT_TYPE = '${TRAVIS_EVENT_TYPE}'  TRAVIS_BRANCH = '${TRAVIS_BRANCH}' TRAVIS_TAG = '${TRAVIS_TAG}'"

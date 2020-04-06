@@ -315,7 +315,7 @@ Maven calls java with the corresponding options so that JavaFX is working. Becau
 ```sh
 git clone
 cd chart-fx
-mvn compile install
+mvn compile install # -Djava.awt.headless=true -Dtestfx.robot=glass -Dtestfx.headless=true -Dprism.order=sw # <- add options to run tests in headless mode
 mvn exec:java
 ```
 
