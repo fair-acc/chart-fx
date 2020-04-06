@@ -54,15 +54,6 @@
                     <codacyApiBaseUrl>https://api.codacy.com</codacyApiBaseUrl>
                     <failOnMissingReportFile>false</failOnMissingReportFile>
                 </configuration>
-                <executions>
-                    <execution>
-                        <id>post-test</id>
-                        <phase>post-integration-test</phase>
-                        <goals>
-                            <goal>coverage</goal>
-                        </goals>
-                    </execution>
-                </executions>
             </plugin>
         </plugins>
     </build>
