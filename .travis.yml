@@ -39,7 +39,7 @@ script:
 
 after_success:
   # create and upload coverage report
-  - mvn jacoco:report-aggregate coveralls:report
+  - mvn jacoco:report-aggregate
   - if [ -n "$CODACY_API_TOKEN" ]; then mvn -pl chartfx-report codacy:coverage; fi
   - bash <(curl -s https://codecov.io/bash) -s chartfx-report/target/site/jacoco-aggregate/
   # upload runtime data to perform exhaustive statical analysis on coverity if enabled for this build
