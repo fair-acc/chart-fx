@@ -337,6 +337,7 @@ modules available and accessible to chartfx:
 --add-modules=javafx.swing,javafx.graphics,javafx.fxml,javafx.media,javafx.web
 --add-reads javafx.graphics=ALL-UNNAMED
 --add-opens javafx.controls/com.sun.javafx.charts=ALL-UNNAMED
+--add-opens javafx.controls/com.sun.javafx.scene.control.inputmap=ALL-UNNAMED
 --add-opens javafx.graphics/com.sun.javafx.iio=ALL-UNNAMED
 --add-opens javafx.graphics/com.sun.javafx.iio.common=ALL-UNNAMED
 --add-opens javafx.graphics/com.sun.javafx.css=ALL-UNNAMED
