@@ -45,7 +45,6 @@
         <chartfx.awaitility.version>4.0.2</chartfx.awaitility.version>
         <chartfx.jacoco.version>0.8.5</chartfx.jacoco.version>
         <chartfx.surefire.version>2.22.2</chartfx.surefire.version>
-        <chartfx.coveralls.version>3.2.0</chartfx.coveralls.version>
     </properties>
 
     <licenses>
@@ -266,11 +265,6 @@
                         </goals>
                     </execution>
                 </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.eluder.coveralls</groupId>
-                <artifactId>coveralls-maven-plugin</artifactId>
-                <version>${chartfx.coveralls.version}</version>
             </plugin>
         </plugins>
     </build>
