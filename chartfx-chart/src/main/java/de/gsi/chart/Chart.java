@@ -1144,13 +1144,18 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
         FXUtils.assertJavaFxThread();
         while (change.next()) {
             // handle added renderer
-            for (final Renderer renderer : change.getAddedSubList()) {
+            change.getAddedSubList().forEach(renderer -> {
                 // update legend and recalculateLayout on datasetChange
                 renderer.getDatasets().addListener(datasetChangeListener);
-            }
+                // add listeners to all datasets already in the renderer
+                renderer.getDatasets().forEach(set -> set.addListener(dataSetDataListener));
+            });
 
             // handle removed renderer
-            change.getRemoved().forEach(renderer -> renderer.getDatasets().removeListener(datasetChangeListener));
+            change.getRemoved().forEach(renderer -> {
+                renderer.getDatasets().removeListener(datasetChangeListener);
+                renderer.getDatasets().forEach(set -> set.addListener(dataSetDataListener));
+            });
         }
         // reset change to allow derived classes to add additional listeners to renderer changes
         change.reset();

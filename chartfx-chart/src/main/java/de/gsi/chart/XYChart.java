@@ -450,22 +450,20 @@ public class XYChart extends Chart {
         }
     }
 
-    protected void rendererChanged(final ListChangeListener.Change<? extends Renderer> change) {
-        FXUtils.assertJavaFxThread();
-        super.rendererChanged(change);
-
-        // while (change.next()) {
-        // // handle added renderer
-        // for (final Renderer renderer : change.getAddedSubList()) {
-        // // checkRendererForRequiredAxes(renderer);
-        // }
-        //
-        // // handle removed renderer
-        // change.getRemoved().forEach(renderer -> renderer.getDatasets().removeListener(datasetChangeListener));
-        // }
-        requestLayout();
-        updateLegend(getDatasets(), getRenderers());
-    }
+    // @Override
+    // protected void rendererChanged(final ListChangeListener.Change<? extends Renderer> change) {
+    //     super.rendererChanged(change);
+    //     while (change.next()) {
+    //         // handle added renderer
+    //         for (final Renderer renderer : change.getAddedSubList()) {
+    //         // checkRendererForRequiredAxes(renderer);
+    //         }
+    //         // handle removed renderer
+    //         change.getRemoved().forEach(renderer -> renderer.getDatasets().removeListener(datasetChangeListener));
+    //     }
+    //     requestLayout();
+    //     updateLegend(getDatasets(), getRenderers());
+    // }
 
     protected static void updateNumericAxis(final Axis axis, final List<DataSet> dataSets) {
         if (dataSets == null || dataSets.isEmpty()) {
