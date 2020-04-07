@@ -22,7 +22,6 @@ import de.gsi.math.storage.VoxelArrayND;
  */
 @Deprecated
 public class NonLinearRegressionFitter2 {
-
     // HISTOGRAM CONSTRUCTION
     // Tolerance used in including an upper point in last histogram bin when it is outside due to riunding erors
     protected static double histTol = 1.0001D;
@@ -49,8 +48,7 @@ public class NonLinearRegressionFitter2 {
     // if any weight[i] = zero,
     // weighOpt is set to false and
     // all weights set to unity
-    protected int weightFlag = 0; // weighting flag - weightOpt = false, weightFlag = 0; weightOpt = true, weightFlag =
-                                  // 1
+    protected int weightFlag = 0; // weighting flag - weightOpt = false, weightFlag = 0; weightOpt = true, weightFlag = 1
     protected double[] best = null; // best estimates vector of the unknown parameters
     protected double[] bestSd = null; // standard deviation estimates of the best estimates of the unknown parameters
     protected double[] pseudoSd = null; // Pseudo-nonlinear sd
@@ -147,8 +145,7 @@ public class NonLinearRegressionFitter2 {
 
     protected boolean[] fixed = null; // true if above values[i] is fixed, false if it is not
 
-    protected boolean ignoreDofFcheck = false; // when set to true, the check on whether degrees of freedom are greater
-                                               // than zero is ignored
+    protected boolean ignoreDofFcheck = false; // when set to true, the check on whether degrees of freedom are greater than zero is ignored
 
     protected boolean nFactorOption = false; // = true varaiance, covariance and standard deviation denominator = n
     // = false varaiance, covariance and standard deviation denominator = n-1
@@ -304,7 +301,6 @@ public class NonLinearRegressionFitter2 {
                  * }
                  */
             }
-
         }
 
         return weight;
@@ -567,7 +563,6 @@ public class NonLinearRegressionFitter2 {
 
     // Get the weighted residuals, (y(experimental) - y(calculated))/weight
     public double[] getWeightedResiduals() {
-
         final double[] temp = new double[nData];
         for (int i = 0; i < nData; i++) {
             // TODO: fix here
@@ -631,7 +626,7 @@ public class NonLinearRegressionFitter2 {
         final int np = start.length; // number of unknown parameters;
         if (maxConstraintIndex >= np) {
             throw new IllegalArgumentException("You have entered more constrained parameters (" + maxConstraintIndex
-                    + ") than minimisation parameters (" + np + ")");
+                                               + ") than minimisation parameters (" + np + ")");
         }
         nlrStatus = true; // -> false if convergence criterion not met
         nTerms = np; // number of parameters whose best estimates are to be determined
@@ -647,7 +642,7 @@ public class NonLinearRegressionFitter2 {
         }
         if (step.length != start.length) {
             throw new IllegalArgumentException("step array length " + step.length
-                    + " and initial estimate array length " + start.length + " are of different");
+                                               + " and initial estimate array length " + start.length + " are of different");
         }
 
         // check for zero step sizes
@@ -1029,7 +1024,6 @@ public class NonLinearRegressionFitter2 {
                 yy[nnp - 1] = ynewlo;
                 test = false;
             }
-
         }
 
         for (int i = 0; i < np; ++i) {
@@ -1195,7 +1189,6 @@ public class NonLinearRegressionFitter2 {
         double sc = 0.0D;
 
         for (int i = 0; i < yCalc.getLocalStorageDim(); i++) {
-
             if (regFun instanceof FunctionND) {
                 final double[] xd = xData.getLocal(i);
                 final double[] val = ((FunctionND) regFun).getValue(xd);
@@ -1340,7 +1333,6 @@ public class NonLinearRegressionFitter2 {
             tValues[i] = best[i] / bestSd[i];
             final double atv = Math.abs(tValues[i]);
             pValues[i] = 1.0 - TMath.Student(atv, degreesOfFreedom);
-
         }
 
         return flag;
@@ -1348,7 +1340,6 @@ public class NonLinearRegressionFitter2 {
 
     // remove all constraint boundaries for the non-linear regression
     public void removeConstraints() {
-
         // check if single parameter constraints already set
         if (!penalties.isEmpty()) {
             final int m = penalties.size();
@@ -1402,7 +1393,6 @@ public class NonLinearRegressionFitter2 {
         yCalc = yData.copy();
         residual = yData.copy();
         residualW = yData.copy();
-
     }
 
     // Set the non-linear regression fractional step size used in numerical differencing
@@ -1806,13 +1796,11 @@ public class NonLinearRegressionFitter2 {
                     break;
                 case 0:
                     if (param[k] < constraints[i] * (1.0 - constraintTolerance)) {
-                        ss = tempFunctVal + penaltyWeight
-                                * TMathConstants.Sqr(constraints[i] * (1.0 - constraintTolerance) - param[k]);
+                        ss = tempFunctVal + penaltyWeight * TMathConstants.Sqr(constraints[i] * (1.0 - constraintTolerance) - param[k]);
                         test = false;
                     }
                     if (param[k] > constraints[i] * (1.0 + constraintTolerance)) {
-                        ss = tempFunctVal + penaltyWeight
-                                * TMathConstants.Sqr(param[k] - constraints[i] * (1.0 + constraintTolerance));
+                        ss = tempFunctVal + penaltyWeight * TMathConstants.Sqr(param[k] - constraints[i] * (1.0 + constraintTolerance));
                         test = false;
                     }
                     break;
@@ -1846,13 +1834,11 @@ public class NonLinearRegressionFitter2 {
                     break;
                 case 0:
                     if (sumPenaltySum < sumConstraints[i] * (1.0 - constraintTolerance)) {
-                        ss = tempFunctVal + penaltyWeight
-                                * TMathConstants.Sqr(sumConstraints[i] * (1.0 - constraintTolerance) - sumPenaltySum);
+                        ss = tempFunctVal + penaltyWeight * TMathConstants.Sqr(sumConstraints[i] * (1.0 - constraintTolerance) - sumPenaltySum);
                         test = false;
                     }
                     if (sumPenaltySum > sumConstraints[i] * (1.0 + constraintTolerance)) {
-                        ss = tempFunctVal + penaltyWeight
-                                * TMathConstants.Sqr(sumPenaltySum - sumConstraints[i] * (1.0 + constraintTolerance));
+                        ss = tempFunctVal + penaltyWeight * TMathConstants.Sqr(sumPenaltySum - sumConstraints[i] * (1.0 + constraintTolerance));
                         test = false;
                     }
                     break;
@@ -1929,7 +1915,6 @@ public class NonLinearRegressionFitter2 {
                     for (int index = 0; index < vlength; index++) {
                         ss += TMathConstants.Sqr((yd[index] - ysim[index]) / weightd[index]);
                     }
-
                 }
             }
 
@@ -1938,11 +1923,9 @@ public class NonLinearRegressionFitter2 {
             if (regFun instanceof Function) {
                 ((Function) regFun).setFitterMode(false);
             }
-
         }
 
         return ss;
-
     }
 
     // returns estimate of half-height width
@@ -2096,7 +2079,6 @@ public class NonLinearRegressionFitter2 {
             return histogramBins(newData, binWidth, binZero);
         } else {
             return histogramBins(data, binWidth, binZero);
-
         }
     }
 
@@ -2159,5 +2141,4 @@ public class NonLinearRegressionFitter2 {
             w[lastIndex] = holdw;
         }
     }
-
 }

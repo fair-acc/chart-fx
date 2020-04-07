@@ -13,7 +13,6 @@ import de.gsi.math.utils.UpdateListener;
  * @author rstein
  */
 public abstract class AbstractFunction implements Function {
-
     private static Vector<Function> fallFunctions = new Vector<>();
     private String funcName = "none";
     private int fnbOfParameter = -1;
@@ -114,7 +113,7 @@ public abstract class AbstractFunction implements Function {
             fparameterFixed[id] = state;
         } else {
             throw new InvalidParameterException("AbstractFunction::fixParameter(" + id + "," + state + "):"
-                    + " invalid parameter index [0," + (fnbOfParameter - 1) + "}");
+                                                + " invalid parameter index [0," + (fnbOfParameter - 1) + "}");
         }
     }
 
@@ -163,14 +162,14 @@ public abstract class AbstractFunction implements Function {
         }
 
         throw new InvalidParameterException("AbstractFunction::GetParameterName(" + id + "):"
-                + " invalid parameter index [0," + (fnbOfParameter - 1) + "}");
+                                            + " invalid parameter index [0," + (fnbOfParameter - 1) + "}");
     }
 
     @Override
     public double getParameterRangeMaximum(final int id) {
         if (id < 0 || id >= fnbOfParameter) {
             throw new InvalidParameterException("AbstractFunction::getParameterRangeMaximum(" + id
-                    + "): invalid parameter index [0," + (fnbOfParameter - 1) + "}");
+                                                + "): invalid parameter index [0," + (fnbOfParameter - 1) + "}");
         }
         return fparameterMax[id];
     }
@@ -179,7 +178,7 @@ public abstract class AbstractFunction implements Function {
     public double getParameterRangeMinimum(final int id) {
         if (id < 0 || id >= fnbOfParameter) {
             throw new InvalidParameterException("AbstractFunction::getParameterRangeMinimum(" + id
-                    + "): invalid parameter index [0," + (fnbOfParameter - 1) + "}");
+                                                + "): invalid parameter index [0," + (fnbOfParameter - 1) + "}");
         }
         return fparameterMin[id];
     }
@@ -190,7 +189,7 @@ public abstract class AbstractFunction implements Function {
             return fparameter[id];
         }
         throw new InvalidParameterException("AbstractFunction::getParameterValue(" + id
-                + "): invalid parameter index [0," + (fnbOfParameter - 1) + "}");
+                                            + "): invalid parameter index [0," + (fnbOfParameter - 1) + "}");
     }
 
     /**
@@ -225,7 +224,7 @@ public abstract class AbstractFunction implements Function {
             return fparameterFixed[id];
         }
         throw new InvalidParameterException("AbstractFunction::isParameterFixed(" + id + "):"
-                + " invalid parameter index [0," + (fnbOfParameter - 1) + "}");
+                                            + " invalid parameter index [0," + (fnbOfParameter - 1) + "}");
     }
 
     public void printParameters() {
@@ -338,7 +337,7 @@ public abstract class AbstractFunction implements Function {
             fparameterName[id] = paramName;
         } else {
             throw new InvalidParameterException("AbstractFunction::setParameterName(" + id + "," + paramName
-                    + "): invalid parameter index [0," + (fnbOfParameter - 1) + "}");
+                                                + "): invalid parameter index [0," + (fnbOfParameter - 1) + "}");
         }
     }
 
@@ -346,7 +345,8 @@ public abstract class AbstractFunction implements Function {
     public void setParameterRange(final int id, final double minRange, final double maxRange) {
         if (id < 0 || id >= fnbOfParameter) {
             throw new InvalidParameterException("AbstractFunction::setParameterRangeMaximum(" + id + "," + minRange
-                    + "," + maxRange + "):" + " invalid parameter index [0," + (fnbOfParameter - 1) + "}");
+                                                + "," + maxRange + "):"
+                                                + " invalid parameter index [0," + (fnbOfParameter - 1) + "}");
         }
         fparameterMin[id] = minRange;
         fparameterMax[id] = maxRange;
@@ -358,7 +358,7 @@ public abstract class AbstractFunction implements Function {
             fparameter[id] = value;
         } else {
             throw new InvalidParameterException("AbstractFunction::setParameterValue(" + id + "," + value
-                    + "): invalid parameter index [0," + (fnbOfParameter - 1) + "}");
+                                                + "): invalid parameter index [0," + (fnbOfParameter - 1) + "}");
         }
     }
 
@@ -370,7 +370,7 @@ public abstract class AbstractFunction implements Function {
             }
         } else {
             throw new InvalidParameterException("AbstractFunction::setParameterValue(" + value.length + ","
-                    + Arrays.toString(value) + "): invalid parameter index [0," + (fnbOfParameter - 1) + "}");
+                                                + Arrays.toString(value) + "): invalid parameter index [0," + (fnbOfParameter - 1) + "}");
         }
     }
 }
