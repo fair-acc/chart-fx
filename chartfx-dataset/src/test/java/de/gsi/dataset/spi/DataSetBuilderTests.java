@@ -20,7 +20,7 @@ public class DataSetBuilderTests {
     @Test
     public void testDefaultConstructor() {
         final DataSetBuilder dataSetBuilder = new DataSetBuilder();
-        dataSetBuilder.setXValues(new double[] {1,2,3});
+        dataSetBuilder.setXValues(new double[] { 1, 2, 3 });
         final DoubleDataSet3D dataset = new DoubleDataSet3D("testdataset");
         assertEquals("testdataset", dataset.getName());
         assertEquals(0, dataset.getDataCount());
