@@ -702,7 +702,7 @@ public class NonLinearRegressionFitter2 {
                 yabscount++;
             }
         }
-        yabsmean /= yabscount;
+        yabsmean = yabscount == 0 ? 0.0 : yabsmean / yabscount;
 
         // Set any single parameter constraint parameters
         if (penalty) {

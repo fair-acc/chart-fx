@@ -435,7 +435,6 @@ public class WaveletTransform extends WaveletCoefficients {
                         sum += filter[j] * input[i - j];
                     }
 
-                    k = i + 1;
                     for (j = i + 1; j < F; ++j) {
                         sum += filter[j] * input[0];
                     }

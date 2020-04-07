@@ -55,7 +55,7 @@ public abstract class AbstractFunction implements Function {
         if (parameterNames.length != parameters.length) {
             throw new InvalidParameterException(
                     "AbstractFunction(" + name + ", double[], String[]) - parameter vs. name array dimension mismatch "
-                            + "( " + parameters.length + " vs. " + fparameterName.length + ")");
+                    + "( " + parameters.length + " vs. " + (fparameterName == null ? 0 : fparameterName.length) + ")");
         }
         fnbOfParameter = parameters.length;
         funcName = name;

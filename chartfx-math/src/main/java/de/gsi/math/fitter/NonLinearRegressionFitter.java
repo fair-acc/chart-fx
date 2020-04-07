@@ -3100,7 +3100,7 @@ public class NonLinearRegressionFitter {
                 peaki = maxi;
                 if (-min > max) {
                     peak = min;
-                    peak = mini;
+                    peaki = mini;
                 }
                 signFlag = 2;
                 shift = -min;
