@@ -276,7 +276,7 @@ public class SpectrumTools {
         }
 
         x[npeaks] = n - 1;
-        x[npeaks] = data[n - 1];
+        y[npeaks] = data[n - 1];
 
         if (npeaks >= 3) {
             final double slope1 = (y[1] - y[2]) / (x[1] - x[2]);
