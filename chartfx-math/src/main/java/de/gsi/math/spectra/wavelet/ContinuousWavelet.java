@@ -412,7 +412,7 @@ public class ContinuousWavelet {
     public static void main(final String[] args) {
         final ContinuousWavelet wTrafo = new ContinuousWavelet();
 
-        final Complex result = wTrafo.WaveletTransform(new double[] { 0.1, 0.2, 0.0, 3.0 }, 1 / 1000, 0, 0.8);
+        final Complex result = wTrafo.WaveletTransform(new double[] { 0.1, 0.2, 0.0, 3.0 }, 1.0 / 1000, 0, 0.8);
         System.err.println("result = " + result);
     }
 }
