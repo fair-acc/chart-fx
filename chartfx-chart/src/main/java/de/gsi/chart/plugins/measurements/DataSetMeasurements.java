@@ -34,6 +34,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -440,8 +441,8 @@ public class DataSetMeasurements extends AbstractChartMeasurement {
         xAxis.invalidateCaches();
         yAxis.invalidateCaches();
 
-        if (graphDetached.get() && externalStage != null) {
-            externalStage.getOnCloseRequest().handle(null);
+        if (graphDetached.get() && externalStage != null && externalStage.getOnCloseRequest() != null) {
+            externalStage.getOnCloseRequest().handle(new WindowEvent(externalStage, WindowEvent.WINDOW_CLOSE_REQUEST));
         }
 
         if (getMeasurementPlugin().getChart() != null) {

@@ -96,8 +96,7 @@ public class TMath extends TMathConstants {
      * @return the computed result
      */
     double KolmogorovTest(int na, double a[], int nb, double b[], String option) {
-        String opt = option;
-        opt.toUpperCase();
+        final String opt = option.toUpperCase();
 
         double prob = -1;
         // Require at least two points in each graph
