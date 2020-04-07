@@ -20,7 +20,7 @@ public class CircularDoubleErrorDataSet extends AbstractErrorDataSet<CircularDou
     protected DoubleCircularBuffer yValues;
     protected DoubleCircularBuffer yErrorsPos;
     protected DoubleCircularBuffer yErrorsNeg;
-    protected CircularBuffer<String> dataTag;
+    protected CircularBuffer<String> dataLabels;
     protected CircularBuffer<String> dataStyles;
 
     /**
@@ -37,7 +37,7 @@ public class CircularDoubleErrorDataSet extends AbstractErrorDataSet<CircularDou
         yValues = new DoubleCircularBuffer(initalSize);
         yErrorsPos = new DoubleCircularBuffer(initalSize);
         yErrorsNeg = new DoubleCircularBuffer(initalSize);
-        dataTag = new CircularBuffer<>(initalSize);
+        dataLabels = new CircularBuffer<>(initalSize);
         dataStyles = new CircularBuffer<>(initalSize);
     }
 
@@ -62,12 +62,12 @@ public class CircularDoubleErrorDataSet extends AbstractErrorDataSet<CircularDou
      * @param y the new y coordinate
      * @param yErrorNeg the +dy error
      * @param yErrorPos the -dy error
-     * @param tag the data tag
+     * @param label the data label
      * @return itself
      */
     public CircularDoubleErrorDataSet add(final double x, final double y, final double yErrorNeg,
-            final double yErrorPos, final String tag) {
-        return add(x, y, yErrorNeg, yErrorPos, tag, null);
+            final double yErrorPos, final String label) {
+        return add(x, y, yErrorNeg, yErrorPos, label, null);
     }
 
     /**
@@ -77,18 +77,18 @@ public class CircularDoubleErrorDataSet extends AbstractErrorDataSet<CircularDou
      * @param y the new y coordinate
      * @param yErrorNeg the +dy error
      * @param yErrorPos the -dy error
-     * @param tag the data tag
+     * @param label the data label
      * @param style the data style string
      * @return itself
      */
     public CircularDoubleErrorDataSet add(final double x, final double y, final double yErrorNeg,
-            final double yErrorPos, final String tag, final String style) {
+            final double yErrorPos, final String label, final String style) {
         lock().writeLockGuard(() -> {
             xValues.put(x);
             yValues.put(y);
             yErrorsPos.put(yErrorPos);
             yErrorsNeg.put(yErrorNeg);
-            dataTag.put(tag);
+            dataLabels.put(label);
             dataStyles.put(style);
 
             // invalidate ranges
@@ -125,7 +125,7 @@ public class CircularDoubleErrorDataSet extends AbstractErrorDataSet<CircularDou
             this.yValues.put(yVals, yVals.length);
             this.yErrorsNeg.put(yErrNeg, yErrNeg.length);
             this.yErrorsPos.put(yErrPos, yErrPos.length);
-            dataTag.put(new String[yErrPos.length], yErrPos.length);
+            dataLabels.put(new String[yErrPos.length], yErrPos.length);
             dataStyles.put(new String[yErrPos.length], yErrPos.length);
 
             getAxisDescription(DIM_X).add(xVals);
@@ -143,21 +143,9 @@ public class CircularDoubleErrorDataSet extends AbstractErrorDataSet<CircularDou
         return xValues.available();
     }
 
-    /**
-     * Returns label of a data point specified by the index. The label can be used as a category name if
-     * CategoryStepsDefinition is used or for annotations displayed for data points.
-     *
-     * @param index data point index
-     * @return label of a data point specified by the index or <code>null</code> if none label has been specified for
-     *         this data point.
-     */
     @Override
     public String getDataLabel(final int index) {
-        final String tag = dataTag.get(index);
-        if (tag == null) {
-            return getName() + "(" + index + "," + getX(index) + "," + getY(index) + ")";
-        }
-        return tag;
+        return dataLabels.get(index);
     }
 
     @Override
@@ -170,13 +158,6 @@ public class CircularDoubleErrorDataSet extends AbstractErrorDataSet<CircularDou
         return dimIndex == DIM_X ? 0.0 : yErrorsPos.get(index);
     }
 
-    /**
-     * A string representation of the CSS style associated with this specific {@code DataSet} data point. @see
-     * #getStyle()
-     *
-     * @param index the index of the specific data point
-     * @return user-specific data set style description (ie. may be set by user)
-     */
     @Override
     public String getStyle(final int index) {
         return dataStyles.get(index);
@@ -185,6 +166,26 @@ public class CircularDoubleErrorDataSet extends AbstractErrorDataSet<CircularDou
     @Override
     public final double get(final int dimIndex, final int index) {
         return dimIndex == DataSet.DIM_X ? xValues.get(index) : yValues.get(index);
+    }
+
+    @Override
+    public String addDataLabel(int index, String label) {
+        throw new UnsupportedOperationException("Adding data labels later is not supported, supply labels to add()");
+    }
+
+    @Override
+    public String addDataStyle(int index, String style) {
+        throw new UnsupportedOperationException("Adding data styles later is not supported, supply labels to add()");
+    }
+
+    @Override
+    public String removeStyle(int index) {
+        throw new UnsupportedOperationException("Removing data styles is not supported for this type of DataSet");
+    }
+
+    @Override
+    public String removeDataLabel(int index) {
+        throw new UnsupportedOperationException("Removing data labels is not supported for this type of DataSet");
     }
 
     /**
@@ -198,7 +199,7 @@ public class CircularDoubleErrorDataSet extends AbstractErrorDataSet<CircularDou
             yValues.reset();
             yErrorsNeg.reset();
             yErrorsPos.reset();
-            dataTag.reset();
+            dataLabels.reset();
             dataStyles.reset();
             getAxisDescriptions().forEach(AxisDescription::clear);
         });
