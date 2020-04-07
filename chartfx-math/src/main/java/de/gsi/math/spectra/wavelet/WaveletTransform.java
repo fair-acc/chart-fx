@@ -1,7 +1,6 @@
 package de.gsi.math.spectra.wavelet;
 
 public class WaveletTransform extends WaveletCoefficients {
-
     private final Wavelet fwavelet = Wavelet.Daubechies2;
 
     protected final double sqrt_3 = Math.sqrt(3);
@@ -49,7 +48,6 @@ public class WaveletTransform extends WaveletCoefficients {
 
         // allocate memory and copy input
         if (mode != MODE.MODE_PERIODIZATION) {
-
             N_extended_len = N + 2 * F_minus_1;
             N_extended_right_start = N + F_minus_1;
 
@@ -59,7 +57,6 @@ public class WaveletTransform extends WaveletCoefficients {
             stop = N_extended_len;
 
         } else {
-
             N_extended_len = N + F - 1;
             N_extended_right_start = N - 1 + F / 2;
 
@@ -78,13 +75,12 @@ public class WaveletTransform extends WaveletCoefficients {
 
         // copy extended signal elements
         switch (mode) {
-
         case MODE_PERIODIZATION:
             if (N % 2 > 0) { // odd - repeat last element
                 buffer[N_extended_right_start] = input[N - 1];
                 for (j = 1; j < F / 2; ++j) {
                     buffer[N_extended_right_start + j] = buffer[F / 2 - 2 + j]; // copy from begining of `input` to
-                                                                                // right
+                            // right
                 }
                 for (j = 0; j < F / 2 - 1; ++j) {
                     // copy from 'buffer' to left
@@ -182,7 +178,6 @@ public class WaveletTransform extends WaveletCoefficients {
 
     int d_dec_a(final double input[], final int input_len, final Wavelet wavelet, final double output[],
             final int output_len, final MODE mode) {
-
         // check output length
         if (output_len != dwt_buffer_length(input_len, wavelet.getDecompHP().length, mode)) {
             return -1;
@@ -195,7 +190,6 @@ public class WaveletTransform extends WaveletCoefficients {
     // Decomposition of input with highpass filter
     int d_dec_d(final double input[], final int input_len, final Wavelet wavelet, final double output[],
             final int output_len, final MODE mode) {
-
         // check output length
         if (output_len != dwt_buffer_length(input_len, wavelet.getDecompHP().length, mode)) {
             return -1;
@@ -213,14 +207,12 @@ public class WaveletTransform extends WaveletCoefficients {
     int d_idwt(final double coeffs_a[], final int coeffs_a_len, final double coeffs_d[], final int coeffs_d_len,
             final Wavelet wavelet, final double output[], final int output_len, final MODE mode,
             final int fix_size_diff) {
-
         int input_len;
 
         // If one of coeffs array is null then the reconstruction will be performed
         // using the other one
 
         if (coeffs_a != null && coeffs_d != null) {
-
             if (fix_size_diff > 0) {
                 if ((coeffs_a_len > coeffs_d_len ? coeffs_a_len - coeffs_d_len : coeffs_d_len - coeffs_a_len) > 1) { // abs(a-b)
                     return -1;
@@ -256,25 +248,25 @@ public class WaveletTransform extends WaveletCoefficients {
         // reconstruct approximation coeffs with lowpass reconstruction filter
         if (coeffs_a != null) {
             if (upsampling_convolution_valid_sf(coeffs_a, input_len, wavelet.getReconLP(), wavelet.getReconLP().length,
-                    output, output_len, mode) < 0) {
+                        output, output_len, mode)
+                    < 0) {
                 return -1;
             }
         }
         // and add reconstruction of details coeffs performed with highpass reconstruction filter
         if (coeffs_d != null) {
             if (upsampling_convolution_valid_sf(coeffs_d, input_len, wavelet.getReconHP(), wavelet.getReconHP().length,
-                    output, output_len, mode) < 0) {
+                        output, output_len, mode)
+                    < 0) {
                 return -1;
             }
         }
 
         return 0;
-
     }
 
     int d_rec_a(final double coeffs_a[], final int coeffs_len, final Wavelet wavelet, final double output[],
             final int output_len) {
-
         // check output length
         if (output_len != reconstruction_buffer_length(coeffs_len, wavelet.getReconLP().length)) {
             return -1;
@@ -288,7 +280,6 @@ public class WaveletTransform extends WaveletCoefficients {
 
     int d_rec_d(final double coeffs_d[], final int coeffs_len, final Wavelet wavelet, final double output[],
             final int output_len) {
-
         // check for output length
         if (output_len != reconstruction_buffer_length(coeffs_len, wavelet.getReconHP().length)) {
             return -1;
@@ -302,7 +293,6 @@ public class WaveletTransform extends WaveletCoefficients {
     // TODO: optimize
     int d_swt_(final double input[], final int input_len, final double filter[], final int filter_len,
             final double output[], final int output_len, final int level) {
-
         double[] e_filter;
         int i, e_filter_len;
 
@@ -373,7 +363,6 @@ public class WaveletTransform extends WaveletCoefficients {
 
     int downsampling_convolution(final double[] input, final int N, final double[] filter, final int F,
             final double[] output, final int step, final MODE mode) {
-
         // This convolution performs efficient down-sampling by computing every step'th
         // element of normal convolution (currently tested only for step=1 and step=2).
         //
@@ -394,7 +383,6 @@ public class WaveletTransform extends WaveletCoefficients {
         i = start = step - 1; // first element taken from input is input[step-1]
 
         if (F <= N) {
-
             ///////////////////////////////////////////////////////////////////////
             // 0 - F-1 - sliding in filter
 
@@ -892,7 +880,6 @@ public class WaveletTransform extends WaveletCoefficients {
 
     int upsampling_convolution_valid_sf(final double[] input, final int N, final double[] filter, final int F,
             final double[] output, final int O, final MODE mode) {
-
         double[] filter_even, filter_odd;
         double[] periodization_buf = null;
         // double[] periodization_buf_rear = null;
@@ -956,7 +943,6 @@ public class WaveletTransform extends WaveletCoefficients {
 
                 // The F_2%2==0 case needs special result fix (oh my, another one..)
             } else {
-
                 // Cheap result fix for short inputs
                 // Memory allocation for temporary output os done.
                 // Computed temporary result is rewrited to output*
@@ -972,7 +958,6 @@ public class WaveletTransform extends WaveletCoefficients {
                 }
                 // and the first element
                 output[0] += ptr_out[2 * N - 1];
-
             }
 
             return 0;
@@ -997,7 +982,6 @@ public class WaveletTransform extends WaveletCoefficients {
         // similar to those from Matlab(TM) Wavelet Toolbox
 
         if (mode == MODE.MODE_PERIODIZATION) {
-
             k = F_2 - 1;
 
             // Check if extending is really needed
@@ -1045,9 +1029,8 @@ public class WaveletTransform extends WaveletCoefficients {
              * upsampling_convolution_valid_sf(periodization_buf_rear, N_p, filter, F, ptr_out, O, MODE_ZEROPAD); } } }
              */
         } // MODE_PERIODIZATION
-          ///////////////////////////////////////////////////////////////////////////
+        ///////////////////////////////////////////////////////////////////////////
 
         return 0;
     }
-
 }
