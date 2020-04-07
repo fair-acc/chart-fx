@@ -655,11 +655,13 @@ public class DataSetMeasurements extends AbstractChartMeasurement {
                 outputDataSet.set(DataSetMath.magnitudeSpectrum(DataSetMath.getSubRange(firstDataSet, newValueMarker1, newValueMarker2)));
                 break;
             case CONVERT_TO_DB:
-                FXUtils.runFX(() -> yAxis.set(MAG + name1 + ")", "dB" + "(" + yAxisUnit + ")"));
+                FXUtils.runFX(() -> yAxis.set(MAG + name1 + ")", "dB"
+                                                                         + "(" + yAxisUnit + ")"));
                 outputDataSet.set(DataSetMath.dbFunction(firstDataSet));
                 break;
             case CONVERT2_TO_DB:
-                FXUtils.runFX(() -> yAxis.set(MAG + name1 + ")", "dB" + "(" + yAxisUnit + ")"));
+                FXUtils.runFX(() -> yAxis.set(MAG + name1 + ")", "dB"
+                                                                         + "(" + yAxisUnit + ")"));
                 outputDataSet.set(DataSetMath.dbFunction(firstDataSet, secondDataSet));
                 break;
             case CONVERT_FROM_DB:
