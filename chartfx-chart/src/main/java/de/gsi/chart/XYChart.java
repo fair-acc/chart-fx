@@ -450,21 +450,18 @@ public class XYChart extends Chart {
         }
     }
 
+    @Override
     protected void rendererChanged(final ListChangeListener.Change<? extends Renderer> change) {
-        FXUtils.assertJavaFxThread();
+        while (change.next()) {
+            // handle added renderer
+            //TODO: check if this function is still necessary (presently commented)
+            // for (final Renderer renderer : change.getAddedSubList()) {
+            // checkRendererForRequiredAxes(renderer);
+            //}
+        }
+        // reset change to allow derived classes to add additional listeners to renderer changes
+        change.reset();
         super.rendererChanged(change);
-
-        // while (change.next()) {
-        // // handle added renderer
-        // for (final Renderer renderer : change.getAddedSubList()) {
-        // // checkRendererForRequiredAxes(renderer);
-        // }
-        //
-        // // handle removed renderer
-        // change.getRemoved().forEach(renderer -> renderer.getDatasets().removeListener(datasetChangeListener));
-        // }
-        requestLayout();
-        updateLegend(getDatasets(), getRenderers());
     }
 
     protected static void updateNumericAxis(final Axis axis, final List<DataSet> dataSets) {
