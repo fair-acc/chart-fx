@@ -1,14 +1,15 @@
 package de.gsi.chart.samples;
 
+import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
+
 import de.gsi.chart.XYChart;
 import de.gsi.chart.XYChartCss;
 import de.gsi.chart.axes.spi.DefaultNumericAxis;
 import de.gsi.chart.renderer.spi.LabelledMarkerRenderer;
 import de.gsi.dataset.spi.DoubleDataSet;
-import javafx.application.Application;
-import javafx.application.Platform;
-import javafx.scene.Scene;
-import javafx.stage.Stage;
 
 /**
  * Example to illustrate the use and customisation of the LabelledMarkerRenderer
@@ -25,9 +26,17 @@ public class LabelledMarkerSample extends Application {
         chart.legendVisibleProperty().set(true);
 
         final DoubleDataSet dataSet = new DoubleDataSet("myData");
+
         for (int n = 0; n < LabelledMarkerSample.N_SAMPLES; n++) {
-            dataSet.add(n, n);
-            dataSet.addDataLabel(n, "DataLabel#" + n);
+            if (n != 4) {
+                dataSet.add(n, n, "DataLabel#" + n);
+            } else {
+                // index '4' has no label and is not drawn
+                dataSet.add(n, n);
+            }
+            // for DataSets where the add(..) does not allow for a label
+            // dataSet.add(n, n);
+            // dataSet.addDataLabel(n, "DataLabel#" + n);
 
             // n=0..2 -> default style
 
@@ -38,20 +47,22 @@ public class LabelledMarkerSample extends Application {
                 // dataSet.addDataStyle(n, "strokeColor:red");
             }
 
-            if (n == 4) {
+            // n == 4 has no label
+
+            if (n == 5) {
                 dataSet.addDataStyle(n, "strokeColor=blue; fillColor= blue; strokeDashPattern=3,5,8,5");
             }
 
-            if (n == 5) {
+            if (n == 6) {
                 dataSet.addDataStyle(n, "strokeColor=0xEE00EE; strokeDashPattern=5,8,5,16; fillColor=0xEE00EE");
             }
 
-            if (n == 6) {
+            if (n == 7) {
                 dataSet.addDataStyle(n, "strokeWidth=3;" + XYChartCss.FONT + "=\"Serif\";" + XYChartCss.FONT_SIZE
-                        + "=20;" + XYChartCss.FONT_POSTURE + "=italic;" + XYChartCss.FONT_WEIGHT + "=black;");
+                                                + "=20;" + XYChartCss.FONT_POSTURE + "=italic;" + XYChartCss.FONT_WEIGHT + "=black;");
             }
 
-            if (n == 7) {
+            if (n == 8) {
                 dataSet.addDataStyle(n,
                         "strokeWidth=3;" + XYChartCss.FONT + "=\"monospace\";" + XYChartCss.FONT_POSTURE + "=italic;");
             }
