@@ -80,6 +80,9 @@ public class LabelledMarkerRenderer extends AbstractDataSetManagement<LabelledMa
         for (int i = indexMin; i < indexMax; i++) {
             final double screenY = (int) yAxis.getDisplayPosition(dataSet.get(DataSet.DIM_Y, i));
             final String label = dataSet.getDataLabel(i);
+            if (label == null) {
+                continue;
+            }
 
             final String pointStyle = dataSet.getStyle(i);
             if (pointStyle != null) {
@@ -177,17 +180,17 @@ public class LabelledMarkerRenderer extends AbstractDataSetManagement<LabelledMa
     }
 
     public LabelledMarkerRenderer enableHorizontalMarker(final boolean state) {
-        horizontalMarker.set(state);
+        horizontalMarkerProperty().set(state);
         return getThis();
     }
 
     public LabelledMarkerRenderer enableVerticalMarker(final boolean state) {
-        verticalMarker.set(state);
+        verticalMarkerProperty().set(state);
         return getThis();
     }
 
     public String getStyle() {
-        return style.get();
+        return styleProperty().get();
     }
 
     @Override
@@ -200,11 +203,11 @@ public class LabelledMarkerRenderer extends AbstractDataSetManagement<LabelledMa
     }
 
     public boolean isHorizontalMarker() {
-        return horizontalMarker.get();
+        return horizontalMarkerProperty().get();
     }
 
     public boolean isVerticalMarker() {
-        return verticalMarker.get();
+        return verticalMarkerProperty().get();
     }
 
     @Override
@@ -258,12 +261,12 @@ public class LabelledMarkerRenderer extends AbstractDataSetManagement<LabelledMa
                     return;
                 }
 
-                if (horizontalMarker.get()) {
+                if (isHorizontalMarker()) {
                     // draw horizontal marker
                     drawHorizontalLabelledMarker(gc, xyChart, dataSet, indexMin, indexMax);
                 }
 
-                if (verticalMarker.get()) {
+                if (isVerticalMarker()) {
                     // draw vertical marker
                     drawVerticalLabelledMarker(gc, xyChart, dataSet, indexMin, indexMax);
                 }
@@ -313,15 +316,13 @@ public class LabelledMarkerRenderer extends AbstractDataSetManagement<LabelledMa
     }
 
     public LabelledMarkerRenderer setStyle(final String newStyle) {
-        style.set(newStyle);
+        styleProperty().set(newStyle);
         return getThis();
     }
 
     public StringProperty styleProperty() {
         return style;
     }
-
-    // ******************************* CSS Style Stuff *********************
 
     public final LabelledMarkerRenderer updateCSS() {
         // TODO add/complete CSS parser

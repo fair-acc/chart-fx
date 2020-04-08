@@ -1,11 +1,19 @@
 package de.gsi.chart.utils;
 
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import javafx.application.Platform;
+import javafx.scene.Scene;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Small tool to execute/call JavaFX GUI-related code from potentially non-JavaFX thread (equivalent to old:
@@ -14,6 +22,7 @@ import javafx.application.Platform;
  * @author rstein
  */
 public final class FXUtils {
+    private static final Logger LOGGER = LoggerFactory.getLogger(FXUtils.class);
 
     private FXUtils() {
         throw new UnsupportedOperationException("don't use this in a non-static context");
@@ -104,6 +113,84 @@ public final class FXUtils {
         } else {
             Platform.runLater(run);
         }
+    }
+
+    public static boolean waitForFxTicks(final Scene scene, final int nTicks) {
+        return waitForFxTicks(scene, nTicks, -1);
+    }
+
+    public static boolean waitForFxTicks(final Scene scene, final int nTicks, final long timeoutMillis) { // NOPMD
+        if (Platform.isFxApplicationThread()) {
+            for (int i = 0; i < nTicks; i++) {
+                Platform.requestNextPulse();
+            }
+            return true;
+        }
+        final Timer timer = new Timer("FXUtils-thread", true);
+        final AtomicBoolean run = new AtomicBoolean(true);
+        final AtomicInteger tickCount = new AtomicInteger(0);
+        final Lock lock = new ReentrantLock();
+        final Condition condition = lock.newCondition();
+
+        Runnable tickListener = () -> {
+            if (tickCount.incrementAndGet() >= nTicks) {
+                lock.lock();
+                try {
+                    run.getAndSet(false);
+                    condition.signal();
+                } finally {
+                    run.getAndSet(false);
+                    lock.unlock();
+                }
+            }
+            Platform.requestNextPulse();
+        };
+
+        lock.lock();
+        try {
+            FXUtils.runAndWait(() -> scene.addPostLayoutPulseListener(tickListener));
+        } catch (InterruptedException | ExecutionException e) {
+            if (LOGGER.isErrorEnabled()) {
+                LOGGER.atError().setCause(e).log("addPostLayoutPulseListener interrupted");
+            }
+        }
+        try {
+            Platform.requestNextPulse();
+            if (timeoutMillis > 0) {
+                timer.schedule(new TimerTask() {
+                    @Override
+                    public void run() {
+                        if (LOGGER.isErrorEnabled()) {
+                            LOGGER.atError().log("FXUtils::waitForTicks(..) interrupted by timeout");
+                        }
+                        lock.lock();
+                        try {
+                            run.getAndSet(false);
+                            condition.signal();
+                        } finally {
+                            run.getAndSet(false);
+                            lock.unlock();
+                        }
+                    } }, timeoutMillis);
+            }
+            condition.await();
+        } catch (InterruptedException e) {
+            if (LOGGER.isErrorEnabled()) {
+                LOGGER.atError().setCause(e).log("await interrupted");
+            }
+        } finally {
+            lock.unlock();
+            timer.cancel();
+        }
+        try {
+            FXUtils.runAndWait(() -> scene.removePostLayoutPulseListener(tickListener));
+        } catch (InterruptedException | ExecutionException e) {
+            if (LOGGER.isErrorEnabled()) {
+                LOGGER.atError().setCause(e).log("removePostLayoutPulseListener interrupted");
+            }
+        }
+
+        return tickCount.get() >= nTicks;
     }
 
     private static class ThrowableWrapper {
