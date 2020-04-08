@@ -82,7 +82,7 @@ public class FuzzyTestImageUtils {
         final PixelReader pixelReaderTest = img2.getPixelReader();
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
-                diff *= 1.0 - (1.0 - pixelDiff(pixelReaderRef.getColor(x, y), pixelReaderTest.getColor(x, y)))/nPixels;
+                diff *= 1.0 - (1.0 - pixelDiff(pixelReaderRef.getColor(x, y), pixelReaderTest.getColor(x, y))) / nPixels;
             }
         }
         return diff;

@@ -1,14 +1,18 @@
 package de.gsi.chart.renderer.spi;
 
-import static de.gsi.chart.ui.utils.FuzzyTestImageUtils.compareAndWriteReference;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import static de.gsi.chart.ui.utils.FuzzyTestImageUtils.compareAndWriteReference;
+
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
+
+import javafx.scene.Scene;
+import javafx.stage.Stage;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,9 +26,6 @@ import de.gsi.chart.ui.utils.JavaFXInterceptorUtils.SelectiveJavaFxInterceptor;
 import de.gsi.chart.ui.utils.TestFx;
 import de.gsi.chart.utils.FXUtils;
 import de.gsi.dataset.spi.DoubleDataSet;
-
-import javafx.scene.Scene;
-import javafx.stage.Stage;
 
 /**
  * Tests {@link de.gsi.chart.renderer.spi.LabelledMarkerRenderer }
