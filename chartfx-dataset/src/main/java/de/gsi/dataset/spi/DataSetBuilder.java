@@ -32,7 +32,7 @@ public class DataSetBuilder {
      * default DataSet factory
      */
     public DataSetBuilder() {
-        this("default data set");
+        super();
     }
 
     /**
