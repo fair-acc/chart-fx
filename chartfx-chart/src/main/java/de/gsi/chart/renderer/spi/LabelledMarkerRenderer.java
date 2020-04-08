@@ -80,6 +80,9 @@ public class LabelledMarkerRenderer extends AbstractDataSetManagement<LabelledMa
         for (int i = indexMin; i < indexMax; i++) {
             final double screenY = (int) yAxis.getDisplayPosition(dataSet.get(DataSet.DIM_Y, i));
             final String label = dataSet.getDataLabel(i);
+            if (label == null) {
+                continue;
+            }
 
             final String pointStyle = dataSet.getStyle(i);
             if (pointStyle != null) {
