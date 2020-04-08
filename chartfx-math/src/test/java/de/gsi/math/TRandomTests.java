@@ -188,7 +188,6 @@ public class TRandomTests {
         assertEquals(mean, sumr / N_SAMPLES, 1e-2); // test mean
         assertEquals(mean, sumi2 / N_SAMPLES, 1e-2); // test mean
         assertEquals(mean, sumr2 / N_SAMPLES, 1e-2); // test mean
-
     }
 
     @Test
