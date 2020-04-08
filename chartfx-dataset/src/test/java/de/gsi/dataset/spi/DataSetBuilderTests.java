@@ -2,15 +2,15 @@ package de.gsi.dataset.spi;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-
-import java.util.Collections;
-import java.util.Map;
 
 import static de.gsi.dataset.DataSet.DIM_X;
 import static de.gsi.dataset.DataSet.DIM_Y;
+
+import java.util.Collections;
+import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 
@@ -28,20 +28,22 @@ public class DataSetBuilderTests {
     @Test
     public void testYErrorDataSet() {
         final DataSet dataset = new DataSetBuilder() //
-                .setName("testdataset") //
-                .setXValues(new double[] { 1, 2, 3 }) //
-                .setYValues(new double[] { 1.337, 23.42, 0.0 }) //
-                .setYPosError(new double[] { 0.1, 0.2, 0.1 }) //
-                .setYNegError(new double[] { 0.1, 0.2, 0.1 }) //
-                .setAxisName(DIM_X, "test coverage") //
-                .setAxisUnit(DIM_X, "%") //
-                .setAxisName(DIM_Y, "awesomeness") //
-                .setAxisUnit(DIM_Y, "norris") //
-                .setAxisMin(DIM_Y, -2) //
-                .setAxisMax(DIM_Y, 25) //
-                .setMetaErrorList(new String[] { "no connection to device", "error reading config" })
-                .setMetaInfoList(new String[0]).setMetaWarningList(new String[] { "overrange" })
-                .setMetaInfoMap(Map.of("someParameter", "5")).build();
+                                        .setName("testdataset") //
+                                        .setXValues(new double[] { 1, 2, 3 }) //
+                                        .setYValues(new double[] { 1.337, 23.42, 0.0 }) //
+                                        .setYPosError(new double[] { 0.1, 0.2, 0.1 }) //
+                                        .setYNegError(new double[] { 0.1, 0.2, 0.1 }) //
+                                        .setAxisName(DIM_X, "test coverage") //
+                                        .setAxisUnit(DIM_X, "%") //
+                                        .setAxisName(DIM_Y, "awesomeness") //
+                                        .setAxisUnit(DIM_Y, "norris") //
+                                        .setAxisMin(DIM_Y, -2) //
+                                        .setAxisMax(DIM_Y, 25) //
+                                        .setMetaErrorList(new String[] { "no connection to device", "error reading config" })
+                                        .setMetaInfoList(new String[0])
+                                        .setMetaWarningList(new String[] { "overrange" })
+                                        .setMetaInfoMap(Map.of("someParameter", "5"))
+                                        .build();
         assertEquals("testdataset", dataset.getName());
         assertEquals(3, dataset.getDataCount());
         assertEquals(3, dataset.getDataCount(DIM_X));
@@ -73,12 +75,12 @@ public class DataSetBuilderTests {
     @Test
     public void testYErrorDataSetNoCopy() {
         final DataSet dataset = new DataSetBuilder() //
-                .setName("testdataset") //
-                .setXValuesNoCopy(new double[] { 1, 2, 3 }) //
-                .setYValuesNoCopy(new double[] { 1.337, 23.42, 0.0 }) //
-                .setYPosErrorNoCopy(new double[] { 0.1, 0.2, 0.1 }) //
-                .setYNegErrorNoCopy(new double[] { 0.1, 0.2, 0.1 }) //
-                .build();
+                                        .setName("testdataset") //
+                                        .setXValuesNoCopy(new double[] { 1, 2, 3 }) //
+                                        .setYValuesNoCopy(new double[] { 1.337, 23.42, 0.0 }) //
+                                        .setYPosErrorNoCopy(new double[] { 0.1, 0.2, 0.1 }) //
+                                        .setYNegErrorNoCopy(new double[] { 0.1, 0.2, 0.1 }) //
+                                        .build();
         assertEquals("testdataset", dataset.getName());
         assertEquals(3, dataset.getDataCount());
         assertEquals(3, dataset.getDataCount(DIM_X));
@@ -130,14 +132,14 @@ public class DataSetBuilderTests {
     @Test
     public void testImplicitXDataDataSet() {
         final DataSet dataset = new DataSetBuilder() //
-                .setYValues(new double[] { 1.337, 23.42, 0.0 }) //
-                .setAxisName(DIM_X, "test coverage") //
-                .setAxisUnit(DIM_X, "%") //
-                .setAxisName(DIM_Y, "awesomeness") //
-                .setAxisUnit(DIM_Y, "norris") //
-                .setDataLabelMap(Collections.EMPTY_MAP) //
-                .setDataStyleMap(Collections.EMPTY_MAP) //
-                .build();
+                                        .setYValues(new double[] { 1.337, 23.42, 0.0 }) //
+                                        .setAxisName(DIM_X, "test coverage") //
+                                        .setAxisUnit(DIM_X, "%") //
+                                        .setAxisName(DIM_Y, "awesomeness") //
+                                        .setAxisUnit(DIM_Y, "norris") //
+                                        .setDataLabelMap(Collections.EMPTY_MAP) //
+                                        .setDataStyleMap(Collections.EMPTY_MAP) //
+                                        .build();
         assertEquals("DataSet@", dataset.getName().substring(0, 8));
         assertArrayEquals(new double[] { 0, 1, 2 }, dataset.getValues(DIM_X));
         assertArrayEquals(new double[] { 1.337, 23.42, 0.0 }, dataset.getValues(DIM_Y));
@@ -152,7 +154,7 @@ public class DataSetBuilderTests {
     @Test
     public void testOnlyXDataException() {
         final DataSetBuilder dataSetBuilder = new DataSetBuilder("testdataset") //
-                .setXValues(new double[] { 1, 2, 3 });
+                                                      .setXValues(new double[] { 1, 2, 3 });
         assertThrows(IllegalStateException.class, () -> dataSetBuilder.build());
     }
 }

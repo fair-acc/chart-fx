@@ -16,7 +16,6 @@ import org.junit.jupiter.api.Test;
  * @author Alexander Krimm
  */
 public class CircularDoubleErrorDataSetTests {
-
     @Test
     public void defaultTests() {
         CircularDoubleErrorDataSet dataSet = new CircularDoubleErrorDataSet("test", 5);
