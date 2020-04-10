@@ -45,11 +45,7 @@ public class SimplePerformanceMeter extends AnimationTimer {
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
-                try {
-                    FXUtils.runLater(SimplePerformanceMeter.this::updateProperties);
-                } catch (ExecutionException e) {
-                    // not of concern
-                }
+                FXUtils.runFX(SimplePerformanceMeter.this::updateProperties);
             }
         }, 0, updateDuration);
     }

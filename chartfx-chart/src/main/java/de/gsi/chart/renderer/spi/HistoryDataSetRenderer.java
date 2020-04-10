@@ -113,8 +113,8 @@ public class HistoryDataSetRenderer extends ErrorDataSetRenderer implements Rend
                     super.getDatasets().removeAll(renderer.getDatasets());
                     renderer.getDatasets().clear();
                 });
-            } catch (InterruptedException | ExecutionException e) {
-                HistoryDataSetRenderer.LOGGER.error("error in clearHistory()", e);
+            } catch (final Exception e) {
+                LOGGER.atError().setCause(e).log("clearHistory()");
             }
         }
     }
@@ -199,8 +199,8 @@ public class HistoryDataSetRenderer extends ErrorDataSetRenderer implements Rend
         if (!oldDataSetsToRemove.isEmpty()) {
             try {
                 FXUtils.runAndWait(() -> getDatasets().removeAll(oldDataSetsToRemove));
-            } catch (InterruptedException | ExecutionException e) {
-                HistoryDataSetRenderer.LOGGER.error("remove oldDataSetsToRemove ", e);
+            } catch (final Exception e) {
+                LOGGER.atError().setCause(e).log("oldDataSetsToRemove listener");
             }
 
         }
@@ -231,16 +231,16 @@ public class HistoryDataSetRenderer extends ErrorDataSetRenderer implements Rend
                 if (!getDatasets().contains(ds)) {
                     try {
                         FXUtils.runAndWait(() -> getDatasets().add(ds));
-                    } catch (InterruptedException | ExecutionException e) {
-                        HistoryDataSetRenderer.LOGGER.error("add missing dataset", e);
+                    } catch (final Exception e) {
+                        LOGGER.atError().setCause(e).log("add missing dataset");
                     }
                 }
             }
 
             try {
                 FXUtils.runAndWait(() -> renderer.getDatasets().setAll(copyList));
-            } catch (InterruptedException | ExecutionException e) {
-                HistoryDataSetRenderer.LOGGER.error("add new copied dataset to getDatasets()", e);
+            } catch (final Exception e) {
+                LOGGER.atError().setCause(e).log("add new copied dataset to getDatasets()");
             }
         }
 
