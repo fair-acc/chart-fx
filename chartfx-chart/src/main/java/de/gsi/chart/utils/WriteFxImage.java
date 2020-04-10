@@ -11,6 +11,9 @@ import java.util.zip.Deflater;
 
 import javafx.scene.image.Image;
 import javafx.scene.image.PixelReader;
+import javafx.scene.image.PixelWriter;
+import javafx.scene.image.WritableImage;
+import javafx.scene.paint.Color;
 
 import de.gsi.dataset.utils.ArrayCache;
 
@@ -32,6 +35,28 @@ public final class WriteFxImage {
      * private constructor for static utility class
      */
     private WriteFxImage() {
+    }
+
+    /**
+     * copy the given Image to a WritableImage
+     * 
+     * @param image the input image
+     * @return clone of image
+     */
+    public static WritableImage clone(Image image) {
+        int height = (int) image.getHeight();
+        int width = (int) image.getWidth();
+        PixelReader pixelReader = image.getPixelReader();
+        WritableImage writableImage = new WritableImage(width, height);
+        PixelWriter pixelWriter = writableImage.getPixelWriter();
+
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                Color color = pixelReader.getColor(x, y);
+                pixelWriter.setColor(x, y, color);
+            }
+        }
+        return writableImage;
     }
 
     /**

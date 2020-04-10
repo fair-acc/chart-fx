@@ -249,6 +249,13 @@ public class WriteFxImageTests {
         }
     }
 
+    @Test
+    public void testHelperFunctions() {
+        assertImageEqual(image1x1, WriteFxImage.clone(image1x1));
+        assertImageEqual(imageOvals, WriteFxImage.clone(imageOvals));
+        assertImageEqual(imageRandom, WriteFxImage.clone(imageRandom));
+    }
+
     private static void assertImageEqual(Image original, Image recovered) {
         final int w = (int) original.getWidth();
         final int h = (int) original.getHeight();
