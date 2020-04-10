@@ -4,7 +4,11 @@ import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
+
+import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
+import javafx.collections.ObservableList;
+import javafx.scene.canvas.GraphicsContext;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,10 +23,6 @@ import de.gsi.chart.utils.StyleParser;
 import de.gsi.dataset.DataSet;
 import de.gsi.dataset.EditableDataSet;
 import de.gsi.dataset.utils.ProcessingProfiler;
-import javafx.collections.FXCollections;
-import javafx.collections.ListChangeListener;
-import javafx.collections.ObservableList;
-import javafx.scene.canvas.GraphicsContext;
 
 /**
  * Renders the data set with the pre-described
@@ -30,7 +30,6 @@ import javafx.scene.canvas.GraphicsContext;
  * @author R.J. Steinhagen
  */
 public class HistoryDataSetRenderer extends ErrorDataSetRenderer implements Renderer {
-
     private static final Logger LOGGER = LoggerFactory.getLogger(HistoryDataSetRenderer.class);
     protected static final int DEFAULT_HISTORY_DEPTH = 3;
     protected final ObservableList<DataSet> emptyList = FXCollections.observableArrayList();
@@ -113,8 +112,8 @@ public class HistoryDataSetRenderer extends ErrorDataSetRenderer implements Rend
                     super.getDatasets().removeAll(renderer.getDatasets());
                     renderer.getDatasets().clear();
                 });
-            } catch (InterruptedException | ExecutionException e) {
-                HistoryDataSetRenderer.LOGGER.error("error in clearHistory()", e);
+            } catch (final Exception e) {
+                LOGGER.atError().setCause(e).log("clearHistory()");
             }
         }
     }
@@ -149,7 +148,6 @@ public class HistoryDataSetRenderer extends ErrorDataSetRenderer implements Rend
             map.put(XYChartCss.DATASET_INDEX, Integer.toString(dataSetIndex));
             dataSet.setStyle(StyleParser.mapToString(map));
         }
-
     }
 
     @Override
@@ -199,10 +197,9 @@ public class HistoryDataSetRenderer extends ErrorDataSetRenderer implements Rend
         if (!oldDataSetsToRemove.isEmpty()) {
             try {
                 FXUtils.runAndWait(() -> getDatasets().removeAll(oldDataSetsToRemove));
-            } catch (InterruptedException | ExecutionException e) {
-                HistoryDataSetRenderer.LOGGER.error("remove oldDataSetsToRemove ", e);
+            } catch (final Exception e) {
+                LOGGER.atError().setCause(e).log("oldDataSetsToRemove listener");
             }
-
         }
 
         // create local copy of to be shifted data set
@@ -231,16 +228,16 @@ public class HistoryDataSetRenderer extends ErrorDataSetRenderer implements Rend
                 if (!getDatasets().contains(ds)) {
                     try {
                         FXUtils.runAndWait(() -> getDatasets().add(ds));
-                    } catch (InterruptedException | ExecutionException e) {
-                        HistoryDataSetRenderer.LOGGER.error("add missing dataset", e);
+                    } catch (final Exception e) {
+                        LOGGER.atError().setCause(e).log("add missing dataset");
                     }
                 }
             }
 
             try {
                 FXUtils.runAndWait(() -> renderer.getDatasets().setAll(copyList));
-            } catch (InterruptedException | ExecutionException e) {
-                HistoryDataSetRenderer.LOGGER.error("add new copied dataset to getDatasets()", e);
+            } catch (final Exception e) {
+                LOGGER.atError().setCause(e).log("add new copied dataset to getDatasets()");
             }
         }
 
@@ -257,5 +254,4 @@ public class HistoryDataSetRenderer extends ErrorDataSetRenderer implements Rend
         map.put(XYChartCss.DATASET_INDEX, Integer.toString(count));
         return StyleParser.mapToString(map);
     }
-
 }

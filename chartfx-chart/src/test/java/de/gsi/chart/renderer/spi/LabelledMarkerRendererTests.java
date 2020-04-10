@@ -10,7 +10,6 @@ import static de.gsi.chart.ui.utils.FuzzyTestImageUtils.compareAndWriteReference
 import static de.gsi.chart.ui.utils.FuzzyTestImageUtils.writeTestImage;
 
 import java.io.IOException;
-import java.util.concurrent.ExecutionException;
 
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
@@ -87,7 +86,7 @@ public class LabelledMarkerRendererTests {
     }
 
     @Test
-    public void defaultTests() throws IOException, InterruptedException, ExecutionException {
+    public void defaultTests() throws IOException, Exception {
         FXUtils.runAndWait(() -> chart.getDatasets().add(getTestDataSet()));
         FXUtils.runAndWait(() -> chart.requestLayout());
         assertTrue(FXUtils.waitForFxTicks(chart.getScene(), WAIT_N_FX_PULSES, MAX_TIMEOUT_MILLIS));

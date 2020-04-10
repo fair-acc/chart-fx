@@ -3,7 +3,6 @@ package de.gsi.chart.utils;
 import java.lang.management.ManagementFactory;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.concurrent.ExecutionException;
 
 import javafx.animation.AnimationTimer;
 import javafx.beans.property.DoubleProperty;
@@ -45,11 +44,7 @@ public class SimplePerformanceMeter extends AnimationTimer {
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
-                try {
-                    FXUtils.runLater(SimplePerformanceMeter.this::updateProperties);
-                } catch (ExecutionException e) {
-                    // not of concern
-                }
+                FXUtils.runFX(SimplePerformanceMeter.this::updateProperties);
             }
         }, 0, updateDuration);
     }
