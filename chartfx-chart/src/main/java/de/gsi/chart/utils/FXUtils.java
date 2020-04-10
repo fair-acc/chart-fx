@@ -2,12 +2,13 @@ package de.gsi.chart.utils;
 
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 import javafx.application.Platform;
 import javafx.scene.Scene;
@@ -23,10 +24,6 @@ import org.slf4j.LoggerFactory;
  */
 public final class FXUtils {
     private static final Logger LOGGER = LoggerFactory.getLogger(FXUtils.class);
-
-    private FXUtils() {
-        throw new UnsupportedOperationException("don't use this in a non-static context");
-    }
 
     public static void assertJavaFxThread() {
         if (!Platform.isFxApplicationThread()) {
@@ -46,70 +43,90 @@ public final class FXUtils {
      * Invokes a Runnable in JFX Thread and waits while it's finished. Like SwingUtilities.invokeAndWait does for EDT.
      *
      * @author hendrikebbers
-     * @param run The Runnable that has to be called on JFX thread.
-     * @throws InterruptedException if the execution is interrupted.
-     * @throws ExecutionException if a exception is occurred in the run method of the Runnable
+     * @author rstein
+     * @param function Runnable function that should be executed within the JavaFX thread
+     * @throws Exception if a exception is occurred in the run method of the Runnable
      */
-    public static void runAndWait(final Runnable run) throws InterruptedException, ExecutionException {
-        FXUtils.keepJavaFxAlive();
+    public static void runAndWait(final Runnable function) throws Exception {
+        runAndWait(null, t -> {
+            function.run();
+            return null;
+        });
+    }
+
+    /**
+     * Invokes a Runnable in JFX Thread and waits while it's finished. Like SwingUtilities.invokeAndWait does for EDT.
+     *
+     * @author hendrikebbers
+     * @author rstein
+     * @param function Supplier function that should be executed within the JavaFX thread
+     * @param <R> generic for return type
+     * @return function result of type R
+     * @throws Exception if a exception is occurred in the run method of the Runnable
+     */
+    public static <R> R runAndWait(final Supplier<R> function) throws Exception {
+        return runAndWait(null, t -> function.get());
+    }
+
+    /**
+     * Invokes a Runnable in JFX Thread and waits while it's finished. Like SwingUtilities.invokeAndWait does for EDT.
+     *
+     * @author hendrikebbers, original author
+     * @author rstein, extension to Function, Supplier, Runnable
+     * @param argument function argument
+     * @param function transform function that should be executed within the JavaFX thread
+     * @param <T> generic for argument type
+     * @param <R> generic for return type
+     * @return function result of type R
+     * @throws Exception if a exception is occurred in the run method of the Runnable
+     */
+    public static <T, R> R runAndWait(final T argument, final Function<T, R> function) throws Exception {
         if (Platform.isFxApplicationThread()) {
-            try {
-                run.run();
-            } catch (final Exception e) {
-                throw new ExecutionException(e);
-            }
+            return function.apply(argument);
         } else {
+            final AtomicBoolean runCondition = new AtomicBoolean(true);
             final Lock lock = new ReentrantLock();
             final Condition condition = lock.newCondition();
-            final ThrowableWrapper throwableWrapper = new ThrowableWrapper();
+            final ExceptionWrapper throwableWrapper = new ExceptionWrapper();
 
+            final RunnableWithReturn<R> run = new RunnableWithReturn<>(() -> {
+                R returnValue = null;
+                lock.lock();
+                try {
+                    returnValue = function.apply(argument);
+                } catch (final Exception e) {
+                    throwableWrapper.t = e;
+                } finally {
+                    try {
+                        runCondition.set(false);
+                        condition.signal();
+                    } finally {
+                        runCondition.set(false);
+                        lock.unlock();
+                    }
+                }
+                return returnValue;
+            });
             lock.lock();
             try {
-                Platform.runLater(() -> {
-                    lock.lock();
-                    try {
-                        run.run();
-                    } catch (final Throwable e) {
-                        throwableWrapper.t = e;
-                    } finally {
-                        try {
-                            condition.signal();
-                        } finally {
-                            lock.unlock();
-                        }
-                    }
-                });
-                condition.await();
+                Platform.runLater(run);
+                while (runCondition.get()) {
+                    condition.await();
+                }
                 if (throwableWrapper.t != null) {
-                    throw new ExecutionException(throwableWrapper.t);
+                    throw throwableWrapper.t;
                 }
             } finally {
                 lock.unlock();
             }
+            return run.getReturnValue();
         }
     }
 
     public static void runFX(final Runnable run) {
         FXUtils.keepJavaFxAlive();
         if (Platform.isFxApplicationThread()) {
-            try {
-                run.run();
-            } catch (final Exception e) {
-                throw new IllegalStateException(e);
-            }
-        } else {
-            Platform.runLater(run);
-        }
-    }
-
-    public static void runLater(final Runnable run) throws ExecutionException {
-        FXUtils.keepJavaFxAlive();
-        if (Platform.isFxApplicationThread()) {
-            try {
-                run.run();
-            } catch (final Exception e) {
-                throw new ExecutionException(e);
-            }
+            run.run();
         } else {
             Platform.runLater(run);
         }
@@ -132,7 +149,7 @@ public final class FXUtils {
         final Lock lock = new ReentrantLock();
         final Condition condition = lock.newCondition();
 
-        Runnable tickListener = () -> {
+        final Runnable tickListener = () -> {
             if (tickCount.incrementAndGet() >= nTicks) {
                 lock.lock();
                 try {
@@ -149,10 +166,10 @@ public final class FXUtils {
         lock.lock();
         try {
             FXUtils.runAndWait(() -> scene.addPostLayoutPulseListener(tickListener));
-        } catch (InterruptedException | ExecutionException e) {
-            if (LOGGER.isErrorEnabled()) {
-                LOGGER.atError().setCause(e).log("addPostLayoutPulseListener interrupted");
-            }
+        } catch (final Exception e) {
+            // cannot occur: tickListener is always non-null and
+            // addPostLayoutPulseListener through 'runaAndWait' always executed in JavaFX thread
+            LOGGER.atError().setCause(e).log("addPostLayoutPulseListener interrupted");
         }
         try {
             Platform.requestNextPulse();
@@ -160,9 +177,8 @@ public final class FXUtils {
                 timer.schedule(new TimerTask() {
                     @Override
                     public void run() {
-                        if (LOGGER.isErrorEnabled()) {
-                            LOGGER.atError().log("FXUtils::waitForTicks(..) interrupted by timeout");
-                        }
+                        LOGGER.atWarn().log("FXUtils::waitForTicks(..) interrupted by timeout");
+
                         lock.lock();
                         try {
                             run.getAndSet(false);
@@ -173,27 +189,45 @@ public final class FXUtils {
                         }
                     } }, timeoutMillis);
             }
-            condition.await();
-        } catch (InterruptedException e) {
-            if (LOGGER.isErrorEnabled()) {
-                LOGGER.atError().setCause(e).log("await interrupted");
+            while (run.get()) {
+                condition.await();
             }
+        } catch (final InterruptedException e) {
+            LOGGER.atError().setCause(e).log("await interrupted");
         } finally {
             lock.unlock();
             timer.cancel();
         }
         try {
             FXUtils.runAndWait(() -> scene.removePostLayoutPulseListener(tickListener));
-        } catch (InterruptedException | ExecutionException e) {
-            if (LOGGER.isErrorEnabled()) {
-                LOGGER.atError().setCause(e).log("removePostLayoutPulseListener interrupted");
-            }
+        } catch (final Exception e) {
+            // cannot occur: tickListener is always non-null and
+            // removePostLayoutPulseListener through 'runaAndWait' always executed in JavaFX thread
+            LOGGER.atError().setCause(e).log("removePostLayoutPulseListener interrupted");
         }
 
         return tickCount.get() >= nTicks;
     }
 
-    private static class ThrowableWrapper {
-        Throwable t;
+    private static class ExceptionWrapper {
+        private Exception t;
+    }
+
+    private static class RunnableWithReturn<R> implements Runnable {
+        private final Supplier<R> internalRunnable;
+        private R returnValue;
+
+        public RunnableWithReturn(final Supplier<R> run) {
+            internalRunnable = run;
+        }
+
+        public R getReturnValue() {
+            return returnValue;
+        }
+
+        @Override
+        public void run() {
+            returnValue = internalRunnable.get();
+        }
     }
 }
