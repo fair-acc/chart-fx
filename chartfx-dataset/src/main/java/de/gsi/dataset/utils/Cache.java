@@ -3,6 +3,7 @@ package de.gsi.dataset.utils;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -11,6 +12,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
 /**
@@ -24,7 +26,7 @@ import java.util.stream.Collectors;
  *         private Cache<String, Integer> cache;
  *
  *         public Demo() {
- *             cache = final Cache<String, Integer> cache = Cache.builder().withLimit(10)
+ *             cache = final Cache<String, Integer> cache = Cache.<String, Integer>builder().withLimit(10)
  *                  .withTimeout(100, TimeUnit.MILLISECONDS).build();
  *             // alternatively:
  *             // cache = new Cache(100, TimeUnit.MILLISECONDS, 10);
@@ -64,48 +66,48 @@ import java.util.stream.Collectors;
  *     }
  * }
  * </pre>
- * 
+ *
  *
  * Original code courtesy from: https://github.com/HanSolo/cache
  *
- * @author Gerrit Grunwald (aka. HanSolo)
+ * @author Gerrit Grunwald (aka. HanSolo, original concept)
+ * @author rstein
  *
  * @param <K> search key
  * @param <V> cached value
  */
 public class Cache<K, V> implements Map<K, V> {
-    private ConcurrentHashMap<K, V> cache;
-    private ChronoUnit chronoUnit;
-    private ScheduledExecutorService executor;
-    private ConcurrentHashMap<K, Instant> timeOutMap;
-    private int limit;
-    private long timeOut;
-    private TimeUnit timeUnit;
+    private final ConcurrentHashMap<K, V> dataCache;
+    private final ConcurrentHashMap<K, Instant> timeOutMap;
+    private final ChronoUnit chronoUnit;
+    private final TimeUnit timeUnit;
+    private final long timeOut;
+    private final int limit;
+    private final BiConsumer<K, V> preListener;
+    private final BiConsumer<K, V> postListener;
 
-    private Cache() {
-        super();
+    public Cache(final int limit) {
+        this(0, TimeUnit.MILLISECONDS, limit, null, null);
+    }
 
-        executor = Executors.newSingleThreadScheduledExecutor(r -> {
-            Thread t = Executors.defaultThreadFactory().newThread(r);
+    public Cache(final long timeOut, final TimeUnit timeUnit) {
+        this(timeOut, timeUnit, Integer.MAX_VALUE, null, null);
+    }
+
+    public Cache(final long timeOut, final TimeUnit timeUnit, final int limit) {
+        this(timeOut, timeUnit, limit, null, null);
+    }
+
+    private Cache(final long timeOut, final TimeUnit timeUnit, final int limit, final BiConsumer<K, V> preListener, final BiConsumer<K, V> postListener) {
+        final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor(r -> {
+            final Thread t = Executors.defaultThreadFactory().newThread(r);
             t.setName(Cache.class.getCanonicalName() + "-Thread");
             t.setDaemon(true);
             return t;
         }); // Daemon Service
 
-        cache = new ConcurrentHashMap<>();
+        dataCache = new ConcurrentHashMap<>();
         timeOutMap = new ConcurrentHashMap<>();
-    }
-
-    public Cache(final int limit) {
-        this(0, TimeUnit.MILLISECONDS, limit);
-    }
-
-    public Cache(final long timeOut, final TimeUnit timeUnit) {
-        this(timeOut, timeUnit, Integer.MAX_VALUE);
-    }
-
-    public Cache(final long timeOut, final TimeUnit timeUnit, final int limit) {
-        this();
 
         if (timeOut < 0) {
             throw new IllegalArgumentException("Timeout cannot be negative");
@@ -122,51 +124,33 @@ public class Cache<K, V> implements Map<K, V> {
         chronoUnit = convertToChronoUnit(timeUnit);
         this.limit = limit;
 
+        this.preListener = preListener;
+        this.postListener = postListener;
+
         if (timeOut != 0) {
             executor.scheduleAtFixedRate(this::checkTime, 0, timeOut, timeUnit);
         }
     }
 
-    protected void checkSize() {
-        checkSize(1);
-    }
-
-    protected void checkSize(final int nNewElements) {
-        if (cache.size() < limit) {
-            return;
-        }
-        int surplusEntries = Math.max(cache.size() - limit + nNewElements, 0);
-        List<K> toBeRemoved = timeOutMap.entrySet().stream().sorted(Map.Entry.<K, Instant>comparingByValue().reversed())
-                .limit(surplusEntries).map(Map.Entry::getKey).collect(Collectors.toList());
-        removeEntries(toBeRemoved);
-    }
-
-    protected void checkTime() {
-        Instant cutoffTime = Instant.now().minus(timeOut, chronoUnit);
-        List<K> toBeRemoved = timeOutMap.entrySet().stream().filter(entry -> entry.getValue().isBefore(cutoffTime))
-                .map(Map.Entry::getKey).collect(Collectors.toList());
-        removeEntries(toBeRemoved);
-    }
-
     @Override
     public void clear() {
-        cache.clear();
+        dataCache.clear();
         timeOutMap.clear();
     }
 
     @Override
-    public boolean containsKey(Object key) {
-        return cache.containsKey(key);
+    public boolean containsKey(final Object key) {
+        return dataCache.containsKey(key);
     }
 
     @Override
-    public boolean containsValue(Object value) {
-        return cache.containsValue(value);
+    public boolean containsValue(final Object value) {
+        return dataCache.containsValue(value);
     }
 
     @Override
     public Set<Entry<K, V>> entrySet() {
-        return cache.entrySet();
+        return dataCache.entrySet();
     }
 
     @Override
@@ -175,7 +159,7 @@ public class Cache<K, V> implements Map<K, V> {
     }
 
     public V getIfPresent(final Object key) {
-        return cache.getOrDefault(key, null);
+        return dataCache.getOrDefault(key, null);
     }
 
     public long getLimit() {
@@ -187,7 +171,7 @@ public class Cache<K, V> implements Map<K, V> {
     }
 
     public int getSize() {
-        return cache.size();
+        return dataCache.size();
     }
 
     public long getTimeout() {
@@ -200,73 +184,112 @@ public class Cache<K, V> implements Map<K, V> {
 
     @Override
     public boolean isEmpty() {
-        return cache.isEmpty();
+        return dataCache.isEmpty();
     }
 
     @Override
     public Set<K> keySet() {
-        return cache.keySet();
+        return dataCache.keySet();
     }
 
     @Override
-    public V put(final K key, final V VALUE) {
+    public V put(final K key, final V value) {
         checkSize();
-        final V val = cache.putIfAbsent(key, VALUE);
+        final V val = dataCache.putIfAbsent(key, value);
         timeOutMap.putIfAbsent(key, Instant.now());
         return val;
     }
 
     @Override
-    public void putAll(Map<? extends K, ? extends V> m) {
+    public void putAll(final Map<? extends K, ? extends V> m) {
         checkSize(m.size());
-        cache.putAll(m);
+        dataCache.putAll(m);
         final Instant now = Instant.now();
-        for (K key : m.keySet()) {
-            timeOutMap.putIfAbsent(key, now);
-        }
+        m.keySet().forEach(key -> timeOutMap.putIfAbsent(key, now));
     }
 
     @Override
     public V remove(final Object key) {
-        final V val = cache.remove(key);
+        final V val = dataCache.remove(key);
         timeOutMap.remove(key);
         return val;
     }
 
-    private void removeEntries(final List<K> toBeRemoved) {
-        toBeRemoved.forEach(key -> {
-            timeOutMap.remove(key);
-            cache.remove(key);
-        });
-    }
-
     @Override
     public int size() {
-        return cache.size();
+        return dataCache.size();
     }
 
     @Override
     public Collection<V> values() {
-        return cache.values();
+        return dataCache.values();
     }
 
-    public static CacheBuilder builder() {
-        return new CacheBuilder();
+    protected void checkSize() {
+        checkSize(1);
+    }
+
+    protected void checkSize(final int nNewElements) {
+        if (dataCache.size() < limit) {
+            return;
+        }
+        final int surplusEntries = Math.max(dataCache.size() - limit + nNewElements, 0);
+        final List<K> toBeRemoved = timeOutMap.entrySet().stream().sorted(Map.Entry.<K, Instant>comparingByValue().reversed()).limit(surplusEntries).map(Map.Entry::getKey).collect(Collectors.toList());
+        removeEntries(toBeRemoved);
+    }
+
+    protected void checkTime() {
+        final Instant cutoffTime = Instant.now().minus(timeOut, chronoUnit);
+        final List<K> toBeRemoved = timeOutMap.entrySet().stream().filter(entry -> entry.getValue().isBefore(cutoffTime)).map(Map.Entry::getKey).collect(Collectors.toList());
+        removeEntries(toBeRemoved);
+    }
+
+    private void removeEntries(final List<K> toBeRemoved) {
+        final HashMap<K, V> removalMap;
+        if (preListener == null && postListener == null) {
+            removalMap = null;
+        } else {
+            removalMap = new HashMap<>();
+            toBeRemoved.forEach(key -> removalMap.put(key, dataCache.get(key)));
+        }
+
+        // call registered pre-listener
+        if (preListener != null) {
+            removalMap.entrySet().forEach(entry -> preListener.accept(entry.getKey(), entry.getValue()));
+        }
+
+        toBeRemoved.forEach(key -> {
+            timeOutMap.remove(key);
+            dataCache.remove(key);
+        });
+
+        // call registered post-listener
+        if (postListener != null) {
+            removalMap.entrySet().forEach(entry -> postListener.accept(entry.getKey(), entry.getValue()));
+        }
+    }
+
+    public static <K3, V3> CacheBuilder<K3, V3> builder() {
+        return new CacheBuilder<>();
     }
 
     protected static int clamp(final int min, final int max, final int value) {
-        if (value < min)
+        if (value < min) {
             return min;
-        if (value > max)
+        }
+        if (value > max) {
             return max;
+        }
         return value;
     }
 
     protected static long clamp(final long min, final long max, final long value) {
-        if (value < min)
+        if (value < min) {
             return min;
-        if (value > max)
+        }
+        if (value > max) {
             return max;
+        }
         return value;
     }
 
@@ -290,20 +313,22 @@ public class Cache<K, V> implements Map<K, V> {
         }
     }
 
-    public static class CacheBuilder {
+    public static class CacheBuilder<K2, V2> {
         private int limit = Integer.MAX_VALUE;
         private long timeOut = 0;
         private TimeUnit timeUnit = TimeUnit.MILLISECONDS;
+        private BiConsumer<K2, V2> preListener = null;
+        private BiConsumer<K2, V2> postListener = null;
 
         private CacheBuilder() {
-            // only called via builder
+            // only called via builderCacheRemovalListener
         }
 
-        public <K,V> Cache<K,V> build() {
-            return new Cache<>(timeOut, timeUnit, limit);
+        public Cache<K2, V2> build() {
+            return new Cache<>(timeOut, timeUnit, limit, preListener, postListener);
         }
 
-        public CacheBuilder withLimit(final int limit) {
+        public CacheBuilder<K2, V2> withLimit(final int limit) {
             if (limit < 1) {
                 throw new IllegalArgumentException("Limit cannot be smaller than 1");
             }
@@ -311,7 +336,23 @@ public class Cache<K, V> implements Map<K, V> {
             return this;
         }
 
-        public CacheBuilder withTimeout(final long timeOut, final TimeUnit timeUnit) {
+        public CacheBuilder<K2, V2> withPostListener(final BiConsumer<K2, V2> listener) {
+            if (listener == null) {
+                throw new IllegalArgumentException("listener cannot be null");
+            }
+            this.postListener = listener;
+            return this;
+        }
+
+        public CacheBuilder<K2, V2> withPreListener(final BiConsumer<K2, V2> listener) {
+            if (listener == null) {
+                throw new IllegalArgumentException("listener cannot be null");
+            }
+            this.preListener = listener;
+            return this;
+        }
+
+        public CacheBuilder<K2, V2> withTimeout(final long timeOut, final TimeUnit timeUnit) {
             if (timeOut < 0) {
                 throw new IllegalArgumentException("Timeout cannot be negative");
             }
@@ -323,5 +364,4 @@ public class Cache<K, V> implements Map<K, V> {
             return this;
         }
     }
-
 }
