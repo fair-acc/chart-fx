@@ -12,6 +12,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -27,15 +28,19 @@ public class CacheTests {
 
     @Test
     public void demoTestCase() {
-        final Cache<String, Integer> cache = Cache.builder().withLimit(10).withTimeout(100, TimeUnit.MILLISECONDS)
-                .build();
+        AtomicBoolean preListenerCalled = new AtomicBoolean(false);
+        AtomicBoolean postListenerCalled = new AtomicBoolean(false);
+        final Cache<String, Integer> cache = Cache.<String, Integer>builder().withLimit(10).withTimeout(100, TimeUnit.MILLISECONDS) //
+                                                     .withPreListener((k, v) -> preListenerCalled.set(true))
+                                                     .withPostListener((k, v) -> postListenerCalled.set(true))
+                                                     .build();
 
         String name1 = "Han Solo";
 
         cache.put(name1, 10);
         assertTrue(isCached(cache, name1), "initial push");
 
-        // Wait 1 second
+        // wait 1 second
         try {
             Thread.sleep(50);
         } catch (InterruptedException e) {
@@ -43,14 +48,18 @@ public class CacheTests {
         }
 
         assertTrue(isCached(cache, name1), "check after 500 ms");
+        assertFalse(preListenerCalled.get());
+        assertFalse(postListenerCalled.get());
 
-        // Wait another second
+        // wait another second
         try {
             Thread.sleep(200);
         } catch (InterruptedException e) {
             LOGGER.atError().setCause(e).log("sleep");
         }
         assertFalse(isCached(cache, name1), "check after 500 ms");
+        assertTrue(preListenerCalled.get());
+        assertTrue(postListenerCalled.get());
     }
 
     private boolean isCached(Cache cache, final String KEY) {
@@ -82,7 +91,7 @@ public class CacheTests {
 
     @Test
     public void testCacheSizeLimit() {
-        Cache<String, Integer> cache = Cache.builder().withLimit(3).build();
+        Cache<String, Integer> cache = Cache.<String, Integer>builder().withLimit(3).build();
 
         assertEquals(3, cache.getLimit());
 
@@ -108,19 +117,19 @@ public class CacheTests {
         assertTrue(cache.containsKey(testString), "containsKey");
         assertTrue(cache.containsValue(42), "containsValue");
         Set<Entry<String, Integer>> entrySet = cache.entrySet();
-        
+
         assertEquals(1, entrySet.size(), "entrySet size");
         for (Entry<String, Integer> entry : entrySet) {
             assertEquals(testString, entry.getKey(), "entrySet - key");
             assertEquals(42, entry.getValue(), "entrySet - value");
         }
-        
+
         Set<String> keySet = cache.keySet();
         assertEquals(1, keySet.size(), "keySet size");
         for (String key : keySet) {
             assertEquals(testString, key, "keySet - key");
         }
-        
+
         Collection<Integer> values = cache.values();
         assertEquals(1, values.size(), "values size");
         for (Integer value : values) {
@@ -132,7 +141,7 @@ public class CacheTests {
         assertEquals(0, cache.size(), "cache size");
         assertFalse(isCached(cache, testString), testString + " being removed from cache");
         assertTrue(cache.isEmpty(), " cache being empty after clear");
-        
+
         Map<String, Integer> mapToAdd = new ConcurrentHashMap<>();
         mapToAdd.put("Test1", 1);
         mapToAdd.put("Test2", 2);
@@ -185,6 +194,16 @@ public class CacheTests {
         assertThrows(IllegalArgumentException.class, () -> {
             // limit < 1 check
             Cache.builder().withLimit(0).build();
+        });
+
+        assertThrows(IllegalArgumentException.class, () -> {
+            // null pre-listener
+            Cache.builder().withPreListener(null).build();
+        });
+
+        assertThrows(IllegalArgumentException.class, () -> {
+            // null post-listener
+            Cache.builder().withPostListener(null).build();
         });
 
         // Cache cache4 = Cache.builder().withLimit(20).withTimeout(100, TimeUnit.MILLISECONDS).build();
