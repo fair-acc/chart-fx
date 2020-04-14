@@ -9,9 +9,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import de.gsi.chart.XYChartCss;
-import de.gsi.chart.utils.StyleParser;
-import de.gsi.dataset.utils.AssertUtils;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.ObjectProperty;
@@ -26,6 +23,11 @@ import javafx.scene.paint.ImagePattern;
 import javafx.scene.paint.Paint;
 import javafx.scene.text.Font;
 
+import de.gsi.chart.XYChartCss;
+import de.gsi.chart.utils.StyleParser;
+import de.gsi.dataset.utils.AssertUtils;
+
+@SuppressWarnings("PMD.FieldNamingConventions")
 public final class DefaultRenderColorScheme {
     private static final String DEFAULT_FONT = "Helvetia";
     private static final int DEFAULT_FONT_SIZE = 18;
@@ -41,7 +43,7 @@ public final class DefaultRenderColorScheme {
             Color.valueOf("#B276B2"), // (purple)
             Color.valueOf("#DECF3F"), // (yellow)
             Color.valueOf("#4D4D4D") // (gray)
-    ));
+            ));
 
     public static final ObservableList<Color> ADOBE = FXCollections.observableList(Arrays.asList( //
             Color.valueOf("#00a4e4"), // blue
@@ -51,7 +53,7 @@ public final class DefaultRenderColorScheme {
             Color.valueOf("#c1d82f"), // green
             Color.valueOf("#8a7967"), // brown
             Color.valueOf("#6a737b") // darkbrown/black
-    ));
+            ));
 
     public static final ObservableList<Color> DELL = FXCollections.observableList(Arrays.asList( //
             Color.valueOf("#0085c3"), //
@@ -62,7 +64,7 @@ public final class DefaultRenderColorScheme {
             Color.valueOf("#71c6c1"), //
             Color.valueOf("#009bbb"), //
             Color.valueOf("#444444") //
-    ));
+            ));
 
     public static final ObservableList<Color> EQUIDISTANT = FXCollections.observableList(Arrays.asList( //
             Color.valueOf("#003f5c"), //
@@ -73,7 +75,7 @@ public final class DefaultRenderColorScheme {
             Color.valueOf("#f95d6a"), //
             Color.valueOf("#ff7c43"), //
             Color.valueOf("#ffa600") //
-    ));
+            ));
 
     public static final ObservableList<Color> TUNEVIEWER = FXCollections.observableList(Arrays.asList( //
             // old legacy colour scheme from an earlier project
@@ -86,16 +88,13 @@ public final class DefaultRenderColorScheme {
             Color.DARKGRAY, // dark grey
             Color.PINK, // pink
             Color.BLACK // black
-    ));
+            ));
 
-    private static final ListProperty<Color> strokeColours = new SimpleListProperty<>(SELF, "defaulStrokeColours",
-            FXCollections.observableList(TUNEVIEWER));
+    private static final ListProperty<Color> strokeColours = new SimpleListProperty<>(SELF, "defaulStrokeColours", FXCollections.observableList(TUNEVIEWER));
 
-    private static final ListProperty<Color> fillColours = new SimpleListProperty<>(SELF, "defaulFillColours",
-            FXCollections.observableList(TUNEVIEWER));
+    private static final ListProperty<Color> fillColours = new SimpleListProperty<>(SELF, "defaulFillColours", FXCollections.observableList(TUNEVIEWER));
     private static ListProperty<Paint> fillStyles = new SimpleListProperty<>(SELF, "fillStyles");
-    private static final ObjectProperty<Font> defaultFont = new SimpleObjectProperty<>(SELF, "defaultFontSize",
-            Font.font(DEFAULT_FONT, DEFAULT_FONT_SIZE));
+    private static final ObjectProperty<Font> defaultFont = new SimpleObjectProperty<>(SELF, "defaultFontSize", Font.font(DEFAULT_FONT, DEFAULT_FONT_SIZE));
     private static final DoubleProperty markerLineWidth = new SimpleDoubleProperty(SELF, "defaultLineWidth", 0.5);
     private static final DoubleProperty lineWidth = new SimpleDoubleProperty(SELF, "lineWidth", 1.5);
     private static final DoubleProperty hatchShiftByIndex = new SimpleDoubleProperty(SELF, "hatchShiftByIndex", 1.5);
@@ -105,7 +104,6 @@ public final class DefaultRenderColorScheme {
     }
 
     private DefaultRenderColorScheme() {
-
     }
 
     private SimpleImmutableEntry<String, String> splitQueryParameter(final String it) {
@@ -266,9 +264,7 @@ public final class DefaultRenderColorScheme {
             return Collections.emptyMap();
         }
 
-        return Arrays.stream(styleString.split(";")).map(SELF::splitQueryParameter)
-                .collect(Collectors.groupingBy(SimpleImmutableEntry::getKey, LinkedHashMap::new,
-                        Collectors.mapping(Map.Entry::getValue, Collectors.toList())));
+        return Arrays.stream(styleString.split(";")).map(SELF::splitQueryParameter).collect(Collectors.groupingBy(SimpleImmutableEntry::getKey, LinkedHashMap::new, Collectors.mapping(Map.Entry::getValue, Collectors.toList())));
     }
 
     public static ListProperty<Color> strokeColorProperty() {
@@ -276,7 +272,11 @@ public final class DefaultRenderColorScheme {
     }
 
     public enum Palette {
-        P_TUNEVIEWER(TUNEVIEWER), P_MISC(MISC), P_ADOBE(ADOBE), P_DELL(DELL), P_EQUIDISTANT(EQUIDISTANT);
+        P_TUNEVIEWER(TUNEVIEWER),
+        P_MISC(MISC),
+        P_ADOBE(ADOBE),
+        P_DELL(DELL),
+        P_EQUIDISTANT(EQUIDISTANT);
 
         ObservableList<Color> list;
 
@@ -296,6 +296,5 @@ public final class DefaultRenderColorScheme {
             }
             throw new IllegalArgumentException("unknown palette");
         }
-
     }
 }
