@@ -154,11 +154,13 @@ public class Cache<K, V> implements Map<K, V> {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public V get(final Object key) {
-        return getIfPresent(key);
+        return getIfPresent((K) key);
     }
 
-    public V getIfPresent(final Object key) {
+    public V getIfPresent(final K key) {
+        timeOutMap.put(key, Instant.now());
         return dataCache.getOrDefault(key, null);
     }
 
@@ -194,6 +196,14 @@ public class Cache<K, V> implements Map<K, V> {
 
     @Override
     public V put(final K key, final V value) {
+        checkSize();
+        final V val = dataCache.put(key, value);
+        timeOutMap.put(key, Instant.now());
+        return val;
+    }
+
+    @Override
+    public V putIfAbsent(final K key, final V value) {
         checkSize();
         final V val = dataCache.putIfAbsent(key, value);
         timeOutMap.putIfAbsent(key, Instant.now());
