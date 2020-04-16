@@ -2,6 +2,7 @@ package de.gsi.dataset.utils;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -60,33 +61,6 @@ public class CacheTests {
         assertFalse(isCached(cache, name1), "check after 500 ms");
         assertTrue(preListenerCalled.get());
         assertTrue(postListenerCalled.get());
-    }
-
-    private boolean isCached(Cache cache, final String KEY) {
-        return cache.getOptional(KEY).isPresent();
-    }
-
-    @Test
-    public void testHelperMethods() {
-        // TimeUnit to ChronoUnit conversions
-        for (TimeUnit timeUnit : TimeUnit.values()) {
-            ChronoUnit chronoUnit = Cache.convertToChronoUnit(timeUnit);
-            // timeUnit.toChronoUnit() would be faster but exists only since Java 9
-
-            long nanoTimeUnit = timeUnit.toNanos(1);
-            long nanoChrono = chronoUnit.getDuration().getNano() + 1000000000 * chronoUnit.getDuration().getSeconds();
-            assertEquals(nanoTimeUnit, nanoChrono, "ChronoUnit =" + chronoUnit);
-        }
-
-        // test clamp(int ... ) routine
-        assertEquals(1, Cache.clamp(1, 3, 0));
-        assertEquals(2, Cache.clamp(1, 3, 2));
-        assertEquals(3, Cache.clamp(1, 3, 4));
-
-        // test clamp(long ... ) routine
-        assertEquals(1l, Cache.clamp(1l, 3l, 0l));
-        assertEquals(2l, Cache.clamp(1l, 3l, 2l));
-        assertEquals(3l, Cache.clamp(1l, 3l, 4l));
     }
 
     @Test
@@ -207,5 +181,44 @@ public class CacheTests {
         });
 
         // Cache cache4 = Cache.builder().withLimit(20).withTimeout(100, TimeUnit.MILLISECONDS).build();
+    }
+
+    @Test
+    public void testHelperMethods() {
+        // TimeUnit to ChronoUnit conversions
+        for (TimeUnit timeUnit : TimeUnit.values()) {
+            ChronoUnit chronoUnit = Cache.convertToChronoUnit(timeUnit);
+            // timeUnit.toChronoUnit() would be faster but exists only since Java 9
+
+            long nanoTimeUnit = timeUnit.toNanos(1);
+            long nanoChrono = chronoUnit.getDuration().getNano() + 1000000000 * chronoUnit.getDuration().getSeconds();
+            assertEquals(nanoTimeUnit, nanoChrono, "ChronoUnit =" + chronoUnit);
+        }
+
+        // test clamp(int ... ) routine
+        assertEquals(1, Cache.clamp(1, 3, 0));
+        assertEquals(2, Cache.clamp(1, 3, 2));
+        assertEquals(3, Cache.clamp(1, 3, 4));
+
+        // test clamp(long ... ) routine
+        assertEquals(1l, Cache.clamp(1l, 3l, 0l));
+        assertEquals(2l, Cache.clamp(1l, 3l, 2l));
+        assertEquals(3l, Cache.clamp(1l, 3l, 4l));
+    }
+
+    @Test
+    public void testPutVariants() {
+        Cache<String, Integer> cache = Cache.<String, Integer>builder().withLimit(3).build();
+
+        assertNull(cache.put("key", 2));
+        assertEquals(2, cache.put("key", 3));
+        assertEquals(3, cache.putIfAbsent("key", 4));
+        cache.clear();
+        assertNull(cache.putIfAbsent("key", 4));
+        assertEquals(4, cache.putIfAbsent("key", 5));
+    }
+
+    private boolean isCached(Cache cache, final String KEY) {
+        return cache.getOptional(KEY).isPresent();
     }
 }
