@@ -28,10 +28,12 @@ import de.gsi.dataset.DataSet;
  * {@link #pickingDistanceProperty()} from the mouse cursor.
  * <p>
  * CSS style class name: {@value #STYLE_CLASS_LABEL}
+ * <p>
+ * TODO: extend so that label = new Label(); is a generic object and can also be overwritten with
+ * another implementation (&lt;-&gt; advanced interactor) additional add/remove listener are needed to
+ * edit/update the custom object based on DataPoint (for the time being private class)
  *
- * @author Grzegorz Kruk TODO: extend so that label = new Label(); is a generic object and can also be overwritten with
- *         another implementation (&lt;-&gt; advanced interactor) additional add/remove listener are needed to
- *         edit/update the custom object based on DataPoint (for the time being private class)
+ * @author Grzegorz Kruk
  */
 public class DataPointTooltip extends AbstractDataFormattingPlugin {
     /**
@@ -68,6 +70,8 @@ public class DataPointTooltip extends AbstractDataFormattingPlugin {
      */
     public DataPointTooltip() {
         label.getStyleClass().add(DataPointTooltip.STYLE_CLASS_LABEL);
+        label.setWrapText(true);
+        label.setMinWidth(0);
         registerInputEventHandler(MouseEvent.MOUSE_MOVED, mouseMoveHandler);
     }
 
@@ -87,7 +91,6 @@ public class DataPointTooltip extends AbstractDataFormattingPlugin {
         }
 
         final Point2D mouseLocation = getLocationInPlotArea(event);
-        DataPoint nearestDataPoint = null;
 
         Chart chart = getChart();
         return findNearestDataPointWithinPickingDistance(chart, mouseLocation);
@@ -171,14 +174,14 @@ public class DataPointTooltip extends AbstractDataFormattingPlugin {
         return points;
     }
 
-    private String formatDataPoint(final DataPoint dataPoint) {
+    private static String formatDataPoint(final DataPoint dataPoint) {
         return String.format("DataPoint@(%.3f,%.3f)", dataPoint.x, dataPoint.y);
         // return formatData(dataPoint.chart.getYAxis(), dataPoint.x,
         // dataPoint.y);
     }
 
     protected String formatLabel(DataPoint dataPoint) {
-        return String.format("'%s'\n%s", dataPoint.label, formatDataPoint(dataPoint));
+        return String.format("'%s'%n%s", dataPoint.label, formatDataPoint(dataPoint));
     }
 
     protected String getDataLabelSafe(final DataSet dataSet, final int index) {
@@ -225,7 +228,7 @@ public class DataPointTooltip extends AbstractDataFormattingPlugin {
     // @SuppressWarnings({ "rawtypes", "unchecked" })
     // private List<Data<? extends Number, Y>> castXToNumber(final Series
     // series) {
-    // return series.getData();
+    //     return series.getData();
     // }
 
     /**
@@ -239,20 +242,47 @@ public class DataPointTooltip extends AbstractDataFormattingPlugin {
 
     private void updateLabel(final MouseEvent event, final Bounds plotAreaBounds, final DataPoint dataPoint) {
         label.setText(formatLabel(dataPoint));
-        // TODO continue here (new formatting etc.)
         final double mouseX = event.getX();
-        final double mouseY = event.getY();
-        final double width = label.prefWidth(-1);
-        final double height = label.prefHeight(width);
+        final double spaceLeft = mouseX - plotAreaBounds.getMinX();
+        final double spaceRight = plotAreaBounds.getWidth() - spaceLeft;
+        double width = label.prefWidth(-1);
+        boolean atSide = true; // set to false if we cannot print the tooltip beside the point
 
-        double xLocation = mouseX + DataPointTooltip.LABEL_X_OFFSET;
-        double yLocation = mouseY - DataPointTooltip.LABEL_Y_OFFSET - height;
-
-        if (xLocation + width > plotAreaBounds.getMaxX()) {
+        double xLocation;
+        if (spaceRight >= width + LABEL_X_OFFSET) { // place to right if enough space
+            xLocation = mouseX + DataPointTooltip.LABEL_X_OFFSET;
+        } else if (spaceLeft >= width + LABEL_X_OFFSET) { // place left if enough space
             xLocation = mouseX - DataPointTooltip.LABEL_X_OFFSET - width;
+        } else if (width < plotAreaBounds.getWidth()) {
+            xLocation = spaceLeft > spaceRight ? plotAreaBounds.getMaxX() - width : plotAreaBounds.getMinX();
+            atSide = false;
+        } else {
+            width = plotAreaBounds.getWidth();
+            xLocation = plotAreaBounds.getMinX();
+            atSide = false;
         }
-        if (yLocation < plotAreaBounds.getMinY()) {
+
+        final double mouseY = event.getY();
+        final double spaceTop = mouseY - plotAreaBounds.getMinY();
+        final double spaceBottom = plotAreaBounds.getHeight() - spaceTop;
+        double height = label.prefHeight(width);
+
+        double yLocation;
+        if (height < spaceBottom) {
             yLocation = mouseY + DataPointTooltip.LABEL_Y_OFFSET;
+        } else if (height < spaceTop) {
+            yLocation = mouseY - DataPointTooltip.LABEL_Y_OFFSET - height;
+        } else if (atSide && height < plotAreaBounds.getHeight()) {
+            yLocation = spaceTop < spaceBottom ? plotAreaBounds.getMaxY() - height : plotAreaBounds.getMinY();
+        } else if (atSide) {
+            yLocation = plotAreaBounds.getMinY();
+            height = plotAreaBounds.getHeight();
+        } else if (spaceBottom > spaceTop) {
+            yLocation = mouseY + DataPointTooltip.LABEL_Y_OFFSET;
+            height = spaceBottom - LABEL_Y_OFFSET;
+        } else {
+            yLocation = plotAreaBounds.getMinY();
+            height = spaceTop - LABEL_Y_OFFSET;
         }
         label.resizeRelocate(xLocation, yLocation, width, height);
     }
