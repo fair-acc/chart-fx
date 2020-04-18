@@ -308,6 +308,8 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
                     k -> new TickMark(getSide(), tickValue, tickPosition, getTickLabelRotation(), k));
             tick.setValue(tickValue);
         }
+        tick.setFill(getTickLabelFill());
+        tick.setFont(getTickLabelFont());
         tick.setPosition(tickPosition);
         tick.setVisible(true);
 
