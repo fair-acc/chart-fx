@@ -47,7 +47,7 @@ compare_version () {
 
 compare_version ${CLANG_MIN_VERSION} ${CLANG_VERSION}
 
-files=$((git status --porcelain | awk 'match($1, "M??"){print $2}' | grep -Ei "\.(c|cc|cpp|cxx|c\+\+|h|hh|hpp|hxx|h\+\+|java)$") || true)
+files=$((git status -uall --porcelain | awk 'match($1, "M??"){print $2}' | grep -Ei "\.(c|cc|cpp|cxx|c\+\+|h|hh|hpp|hxx|h\+\+|java)$") || true)
 if [ -n "${files}" ]; then
 
     if [ -n "${CLANG_FORMAT}" ] && [ "$CLANG_MIN_VERSION_MATCH" != "<" ]; then
