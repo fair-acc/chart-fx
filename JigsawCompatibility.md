@@ -1,6 +1,6 @@
 # Jigsaw Compatibility
 
-To make chartfx usable for modularized projects, there are some points which have to be considered according to  [1].
+To make chartfx usable for modularized projects, there are some points which have to be considered according to this [blogpost](http://branchandbound.net/blog/java/2017/12/automatic-module-name/).
 
 > Addressing these concerns is a matter of good hygiene. If you encounter one of these issues and you can't address those, don't add the Automatic-Module-Name entry yet. For now, your library is better off on the classpath. It will only raise false expectations if you do add the entry.
 
@@ -24,16 +24,16 @@ JDK Internal API                         Suggested Replacement
 sun.misc.Unsafe                          See http://openjdk.java.net/jeps/260
 ```
 
-Unsafe replacement links to (http://openjdk.java.net/jeps/193)[Variable Handles].
+Unsafe replacement links to [Variable Handles](http://openjdk.java.net/jeps/193).
 
- -[ ] com.sun.javafx.perf.PerformanceTracker (chartfx-chart: SimplePerformanceMeter)
- -[ ] sun.misc.Unsafe (chartfx-datasets: FastByteBuffer)
+ - [ ] com.sun.javafx.perf.PerformanceTracker (chartfx-chart: SimplePerformanceMeter)
+ - [ ] sun.misc.Unsafe (chartfx-datasets: FastByteBuffer)
 
 ## unnamed packages
 
 > Your library can't have classes in the default (unnamed) package. This is a bad idea regardless, but when your library is used as automatic module, this rule is enforced by the module system.
 
-[x] no problems here
+  - [x] no problems here
 
 ## split packages
 
@@ -45,4 +45,4 @@ Are our testcases affecting this? They are in the same package as the implementa
 
 > When your library's JAR has a META-INF/services directory to specify service providers, then the specified providers must exist in this JAR (as described in the ModuleFinder JavaDoc)
 
-[x] check
+  - [x] check
