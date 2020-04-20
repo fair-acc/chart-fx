@@ -20,6 +20,7 @@ import de.gsi.chart.utils.FXUtils;
 import de.gsi.dataset.DataSet;
 import de.gsi.dataset.event.AxisChangeEvent;
 import de.gsi.dataset.event.EventListener;
+import de.gsi.dataset.event.EventRateLimiter;
 import de.gsi.dataset.event.UpdateEvent;
 
 /**
@@ -29,6 +30,8 @@ import de.gsi.dataset.event.UpdateEvent;
  * @author akrimm
  */
 public class UpdateAxisLabels extends ChartPlugin {
+    private static final int UPDATE_RATE_LIMIT = 200; // maximum label update rate
+
     private static final Logger LOGGER = LoggerFactory.getLogger(UpdateAxisLabels.class);
 
     // listener bookkeeping
@@ -154,8 +157,9 @@ public class UpdateAxisLabels extends ChartPlugin {
             if (change.wasAdded()) {
                 for (DataSet dataSet : change.getAddedSubList()) {
                     EventListener dataSetListener = update -> FXUtils.runFX(() -> dataSetChange(update, renderer));
-                    dataSet.addListener(dataSetListener);
-                    dataSetListeners.put(dataSet, dataSetListener);
+                    EventRateLimiter rateLimitedDataSetListener = new EventRateLimiter(dataSetListener, UPDATE_RATE_LIMIT);
+                    dataSet.addListener(rateLimitedDataSetListener);
+                    dataSetListeners.put(dataSet, rateLimitedDataSetListener);
                     dataSetChange(new AxisChangeEvent(dataSet, -1), renderer); // NOPMD - normal in-loop instantiation
                 }
             }
@@ -198,8 +202,9 @@ public class UpdateAxisLabels extends ChartPlugin {
 
         dataSets.forEach((DataSet dataSet) -> {
             EventListener dataSetListener = update -> FXUtils.runFX(() -> dataSetChange(update, renderer));
-            dataSet.addListener(dataSetListener);
-            dataSetListeners.put(dataSet, dataSetListener);
+            EventRateLimiter rateLimitedDataSetListener = new EventRateLimiter(dataSetListener, UPDATE_RATE_LIMIT);
+            dataSet.addListener(rateLimitedDataSetListener);
+            dataSetListeners.put(dataSet, rateLimitedDataSetListener);
             dataSetChange(new AxisChangeEvent(dataSet, -1), renderer);
         });
     }
