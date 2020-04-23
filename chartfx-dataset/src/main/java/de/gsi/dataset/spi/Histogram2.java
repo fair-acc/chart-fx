@@ -7,7 +7,6 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
-import de.gsi.dataset.DataSet3D;
 import de.gsi.dataset.DataSetMetaData;
 import de.gsi.dataset.Histogram1D;
 import de.gsi.dataset.Histogram2D;
@@ -16,7 +15,7 @@ import de.gsi.dataset.event.UpdatedDataEvent;
 /**
  * @author rstein
  */
-public class Histogram2 extends AbstractHistogram implements Histogram2D, DataSet3D {
+public class Histogram2 extends AbstractHistogram implements Histogram2D {
     private static final long serialVersionUID = -5583974934398282519L;
     protected final Histogram xProjection;
     protected final Histogram yProjection;

@@ -28,6 +28,7 @@ public class TransposedDataSet implements DataSet {
     protected final DataSet dataSet;
     protected int[] permutation;
     private boolean transposed;
+    private int grid = -1; // whether this data is structured as grid, to be replaced by GridApi
 
     private TransposedDataSet(final DataSet dataSet, final boolean transposed) {
         if (dataSet == null) {
@@ -42,6 +43,13 @@ public class TransposedDataSet implements DataSet {
         if (transposed) {
             permutation[0] = 1;
             permutation[1] = 0;
+        }
+        // Evaluate if the data should be interpreted as on a grid, to be replaced by GridApi
+        for (int i = dataSet.getDimension() - 1; i >= 0; i--) {
+            if (dataSet.getDataCount(i) != dataSet.getDataCount()) {
+                grid = i + 1;
+                break;
+            }
         }
     }
 
@@ -75,7 +83,23 @@ public class TransposedDataSet implements DataSet {
 
     @Override
     public double get(int dimIndex, int index) {
-        return dataSet.get(permutation[dimIndex], index);
+        if (grid > dimIndex || grid == -1) {
+            return dataSet.get(permutation[dimIndex], index);
+        }
+        if (dataSet.getDimension() == 3) {
+            if (permutation[0] == 0 && permutation[1] == 1 && permutation[2] == 2) {
+                return dataSet.get(permutation[dimIndex], index);
+            } else if (permutation[0] == 1 && permutation[1] == 0 && permutation[2] == 2) {
+                int ny = dataSet.getDataCount(DIM_Y);
+                int nx = dataSet.getDataCount(DIM_X);
+                int iy = (index / ny);
+                int ix = (index % ny);
+                int transposedX = iy + ix * nx;
+                return dataSet.get(permutation[dimIndex], transposedX);
+            }
+            throw new IllegalStateException("cannot permute between grid and non-grid dimensions");
+        }
+        throw new IllegalStateException("can only transpose 3 dim datasets");
     }
 
     @Override
@@ -133,7 +157,10 @@ public class TransposedDataSet implements DataSet {
 
     @Override
     public double getValue(int dimIndex, double x) {
-        return dataSet.getValue(permutation[dimIndex], x);
+        if (grid > dimIndex || grid == -1) {
+            return dataSet.getValue(permutation[dimIndex], x);
+        }
+        throw new UnsupportedOperationException("cannot interpolate values on grid");
     }
 
     /**
@@ -142,12 +169,15 @@ public class TransposedDataSet implements DataSet {
      */
     @Override
     public double[] getValues(final int dimIndex) {
-        final int n = getDataCount(permutation[dimIndex]);
-        final double[] retValues = new double[n];
-        for (int i = 0; i < n; i++) {
-            retValues[i] = get(dimIndex, i);
+        if (grid > dimIndex || grid == -1) {
+            final int n = getDataCount(permutation[dimIndex]);
+            final double[] retValues = new double[n];
+            for (int i = 0; i < n; i++) {
+                retValues[i] = get(dimIndex, i);
+            }
+            return retValues;
         }
-        return retValues;
+        return DataSet.super.getValues(permutation[dimIndex]);
     }
 
     public boolean isTransposed() {
@@ -161,6 +191,13 @@ public class TransposedDataSet implements DataSet {
 
     @Override
     public DataSet recomputeLimits(int dimension) {
+        // Evaluate if the data should be interpreted as on a grid, to be replaced by GridApi
+        for (int i = dataSet.getDimension() - 1; i >= 0; i--) {
+            if (dataSet.getDataCount(i) != dataSet.getDataCount()) {
+                grid = i + 1;
+                break;
+            }
+        }
         return dataSet.recomputeLimits(permutation[dimension]);
     }
 

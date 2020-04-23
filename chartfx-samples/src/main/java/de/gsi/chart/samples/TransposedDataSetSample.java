@@ -2,6 +2,7 @@ package de.gsi.chart.samples;
 
 import static de.gsi.dataset.DataSet.DIM_X;
 import static de.gsi.dataset.DataSet.DIM_Y;
+import static de.gsi.dataset.DataSet.DIM_Z;
 
 import java.util.Arrays;
 import java.util.stream.Collectors;
@@ -32,9 +33,7 @@ import de.gsi.chart.plugins.Zoomer;
 import de.gsi.chart.renderer.spi.ContourDataSetRenderer;
 import de.gsi.chart.renderer.spi.ErrorDataSetRenderer;
 import de.gsi.dataset.DataSet;
-import de.gsi.dataset.DataSet3D;
 import de.gsi.dataset.spi.DataSetBuilder;
-import de.gsi.dataset.spi.DoubleDataSet3D;
 import de.gsi.dataset.spi.TransposedDataSet;
 
 /**
@@ -70,10 +69,7 @@ public class TransposedDataSetSample extends Application {
         final ContourDataSetRenderer contourRenderer = new ContourDataSetRenderer();
         chart2.getRenderers().setAll(contourRenderer);
 
-        //        final DataSet3D dataSet2 = new DoubleDataSet3D("test 3D", new double[] { 0, 10, 20, 30 },
-        //                new double[] { 0, 1, 2, 3 },
-        //                new double[][] { { 0.1, 0, 0, 0.2 }, { 0.3, 0.4, 0.5, 0.6 }, { 0.7, 0, 0, 1 }, { 1, 1, 1, 1 } });
-        final DataSet3D dataSet2 = createTestData();
+        final DataSet dataSet2 = createTestData();
         dataSet2.getAxisDescription(DIM_X).set("x-axis", "x-unit");
         dataSet2.getAxisDescription(DIM_Y).set("y-axis", "y-unit");
         final TransposedDataSet transposedDataSet2 = TransposedDataSet.transpose(dataSet2, false);
@@ -133,7 +129,7 @@ public class TransposedDataSetSample extends Application {
         primaryStage.setOnCloseRequest(evt -> Platform.exit());
     }
 
-    private static DataSet3D createTestData() {
+    private static DataSet createTestData() {
         final int nPoints = 1000;
         final double f = 0.1;
         final double[] x = new double[nPoints];
@@ -159,7 +155,7 @@ public class TransposedDataSetSample extends Application {
             }
         }
 
-        return new DoubleDataSet3D("3D test data", x, y, z);
+        return new DataSetBuilder("3D test data").setValues(DIM_X, x).setValues(DIM_Y, y).setValues(DIM_Z, z).build();
     }
 
     private static XYChart getDefaultChart() {
@@ -194,7 +190,7 @@ public class TransposedDataSetSample extends Application {
             y[i] = yMin + (b * (Math.sin(i * omega * 2) + 1))
                    + (pert * Math.sin(i * omega * 0.777) * Math.cos(i * omega));
         }
-        final DataSet dataSet = new DataSetBuilder().setName("non-sorted 2D DataSet").setXValues(x).setYValues(y).build();
+        final DataSet dataSet = new DataSetBuilder().setName("non-sorted 2D DataSet").setValues(DIM_X, x).setValues(DIM_Y, y).build();
         dataSet.getAxisDescription(DIM_X).set("x-axis", "x-unit");
         dataSet.getAxisDescription(DIM_Y).set("y-axis", "y-unit");
 

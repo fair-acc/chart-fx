@@ -4,22 +4,22 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.Arrays;
 
+import javafx.application.Application;
+import javafx.scene.Node;
+import javafx.scene.layout.VBox;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.gsi.chart.renderer.spi.ContourDataSetRenderer;
 import de.gsi.chart.renderer.spi.utils.ColorGradient;
 import de.gsi.dataset.DataSet;
-import de.gsi.dataset.DataSet3D;
 import de.gsi.dataset.spi.DefaultErrorDataSet;
 import de.gsi.math.TMath;
 import de.gsi.math.matrix.MatrixD;
 import de.gsi.math.samples.utils.AbstractDemoApplication;
 import de.gsi.math.samples.utils.DemoChart;
 import de.gsi.math.spectra.EEMD;
-import javafx.application.Application;
-import javafx.scene.Node;
-import javafx.scene.layout.VBox;
 
 /**
  * example illustrating EMD-based spectrograms
@@ -30,12 +30,12 @@ public class EMDSample extends AbstractDemoApplication {
     private static final Logger LOGGER = LoggerFactory.getLogger(FourierSample.class);
     private static final int MAX_POINTS = 1024;
     private static final boolean LOAD_EXAMPLE_DATA = true;
-    private DataSet3D dataset;
+    private DataSet dataset;
     private DataSet[] fmodeDataSets = new DataSet[10];
     private double[][] fmodeData = new double[10][];
     private double[] yValues;
 
-    private DataSet3D createDataSet() {
+    private DataSet createDataSet() {
         final int nQuantx = 1024;
         final int nQuanty = 1024;
 
@@ -173,8 +173,7 @@ public class EMDSample extends AbstractDemoApplication {
         String fileName = index <= 1 ? "./rawDataCPS2.dat" : "./rawDataLHCInj.dat";
         try {
             try (BufferedReader reader = new BufferedReader(
-                    new InputStreamReader(EMDSample.class.getResourceAsStream(fileName)))) {
-
+                         new InputStreamReader(EMDSample.class.getResourceAsStream(fileName)))) {
                 String line = reader.readLine();
                 int nDim = line == null ? 0 : Integer.parseInt(line);
                 double[] ret = new double[nDim];
@@ -213,5 +212,4 @@ public class EMDSample extends AbstractDemoApplication {
     public static void main(final String[] args) {
         Application.launch(args);
     }
-
 }

@@ -180,7 +180,7 @@ public class SnowFlakeSample extends Application {
             xStomp[i] /= scale;
             yStomp[i] /= scale;
         }
-        final DataSet stomp = new DataSetBuilder().setName("tree").setXValues(xStomp).setYValues(yStomp).build();
+        final DataSet stomp = new DataSetBuilder().setName("tree").setValues(DIM_X, xStomp).setValues(DIM_Y, yStomp).build();
         stomp.getAxisDescription(DIM_X).set("X", "Mas");
         stomp.getAxisDescription(DIM_Y).set("Y", "Mas");
         stomp.setStyle("strokeColor=#B5651D; fillColor=#B5651D");
@@ -193,7 +193,7 @@ public class SnowFlakeSample extends Application {
             xTree[i] /= scale;
             yTree[i] /= scale;
         }
-        final DataSet tree = new DataSetBuilder().setName("tree").setXValues(xTree).setYValues(yTree).build();
+        final DataSet tree = new DataSetBuilder().setName("tree").setValues(DIM_X, xTree).setValues(DIM_Y, yTree).build();
         tree.getAxisDescription(DIM_X).set("X", "Mas");
         tree.getAxisDescription(DIM_Y).set("Y", "Max");
         tree.setStyle("strokeColor=darkGreen; fillColor=green");

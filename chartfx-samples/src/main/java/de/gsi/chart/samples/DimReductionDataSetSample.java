@@ -33,7 +33,6 @@ import de.gsi.chart.plugins.Zoomer;
 import de.gsi.chart.renderer.spi.ContourDataSetRenderer;
 import de.gsi.chart.utils.AxisSynchronizer;
 import de.gsi.dataset.DataSet;
-import de.gsi.dataset.DataSet3D;
 import de.gsi.dataset.spi.DimReductionDataSet;
 import de.gsi.dataset.spi.DimReductionDataSet.Option;
 import de.gsi.math.samples.EMDSample;
@@ -41,8 +40,8 @@ import de.gsi.math.spectra.wavelet.ContinuousWavelet;
 
 public class DimReductionDataSetSample extends Application {
     private static final Logger LOGGER = LoggerFactory.getLogger(DimReductionDataSetSample.class);
-    private static DataSet3D tempDataSet; // only needed as temporary storage
-    private final DataSet3D waveletScalogram = createDataSet();
+    private static DataSet tempDataSet; // only needed as temporary storage
+    private final DataSet waveletScalogram = createDataSet();
 
     @Override
     public void start(final Stage primaryStage) {
@@ -52,8 +51,7 @@ public class DimReductionDataSetSample extends Application {
         // reduce wavelet data set to 2D by using slices
         DimReductionDataSet horizontalSlice = new DimReductionDataSet(waveletScalogram, DataSet.DIM_Y, Option.SLICE);
         XValueIndicator xValueIndicator = new XValueIndicator(waveletChart1.getXAxis(), 0.0, "slice-y");
-        xValueIndicator.valueProperty()
-                .addListener((ch, o, n) -> horizontalSlice.setMinValue(n.doubleValue()));
+        xValueIndicator.valueProperty().addListener((ch, o, n) -> horizontalSlice.setMinValue(n.doubleValue()));
         xValueIndicator.setValue(300.0);
         waveletChart1.getPlugins().addAll(xValueIndicator);
 
@@ -67,10 +65,8 @@ public class DimReductionDataSetSample extends Application {
         xRangeIndicator.lowerBoundProperty().bindBidirectional(xRangeIndicatorMin.valueProperty());
         xRangeIndicator.upperBoundProperty().bindBidirectional(xRangeIndicatorMax.valueProperty());
         xRangeIndicator.setEditable(true);
-        xRangeIndicator.lowerBoundProperty()
-                .addListener((ch, o, n) -> horizontalRange.setMinValue(n.doubleValue()));
-        xRangeIndicator.upperBoundProperty()
-                .addListener((ch, o, n) -> horizontalRange.setMaxValue(n.doubleValue()));
+        xRangeIndicator.lowerBoundProperty().addListener((ch, o, n) -> horizontalRange.setMinValue(n.doubleValue()));
+        xRangeIndicator.upperBoundProperty().addListener((ch, o, n) -> horizontalRange.setMaxValue(n.doubleValue()));
         xRangeIndicator.setLowerBound(200.0);
         xRangeIndicator.setUpperBound(600.0);
         waveletChart1.getPlugins().addAll(xRangeIndicator, xRangeIndicatorMin, xRangeIndicatorMax);
@@ -81,8 +77,7 @@ public class DimReductionDataSetSample extends Application {
         // reduce wavelet data set to 2D by using slices
         DimReductionDataSet verticalSlice = new DimReductionDataSet(waveletScalogram, DataSet.DIM_X, Option.SLICE);
         YValueIndicator yValueIndicator = new YValueIndicator(waveletChart1.getYAxis(), 0.0, "slice-x");
-        yValueIndicator.valueProperty()
-                .addListener((ch, o, n) -> verticalSlice.setMinValue(n.doubleValue()));
+        yValueIndicator.valueProperty().addListener((ch, o, n) -> verticalSlice.setMinValue(n.doubleValue()));
         yValueIndicator.setValue(0.26);
         verticalSlice.setMinValue(0.1);
         waveletChart2.getPlugins().add(yValueIndicator);
@@ -97,10 +92,8 @@ public class DimReductionDataSetSample extends Application {
         yRangeIndicator.lowerBoundProperty().bindBidirectional(yRangeIndicatorMin.valueProperty());
         yRangeIndicator.upperBoundProperty().bindBidirectional(yRangeIndicatorMax.valueProperty());
         yRangeIndicator.setEditable(true);
-        yRangeIndicator.lowerBoundProperty()
-                .addListener((ch, o, n) -> verticalRange.setMinValue(n.doubleValue()));
-        yRangeIndicator.upperBoundProperty()
-                .addListener((ch, o, n) -> verticalRange.setMaxValue(n.doubleValue()));
+        yRangeIndicator.lowerBoundProperty().addListener((ch, o, n) -> verticalRange.setMinValue(n.doubleValue()));
+        yRangeIndicator.upperBoundProperty().addListener((ch, o, n) -> verticalRange.setMaxValue(n.doubleValue()));
         yRangeIndicator.setLowerBound(0.175);
         yRangeIndicator.setUpperBound(0.225);
         waveletChart2.getPlugins().addAll(yRangeIndicator, yRangeIndicatorMin, yRangeIndicatorMax);
@@ -136,7 +129,7 @@ public class DimReductionDataSetSample extends Application {
         primaryStage.setOnCloseRequest(evt -> Platform.exit());
     }
 
-    private static DataSet3D createDataSet() {
+    private static DataSet createDataSet() {
         final double nu = 2.0 * 25.0;
         final int nQuantx = 512;
         final int nQuanty = 1024;
@@ -180,7 +173,7 @@ public class DimReductionDataSetSample extends Application {
             double count = 0.0;
 
             for (int j = nboundary; j < tempDataSet.getDataCount(DataSet.DIM_X) - nboundary; j++) {
-                val += tempDataSet.getZ(j, i);
+                //val += tempDataSet.get(DataSet.DIM_Z, i * tempDataSet.getDataCount(DataSet.DIM_X) + j);
                 count += 1.0;
             }
             magWavelet[i] = count == 0.0 ? Double.NaN : (val / count);

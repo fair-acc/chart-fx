@@ -6,9 +6,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import static de.gsi.dataset.DataSet.DIM_X;
 import static de.gsi.dataset.DataSet.DIM_Y;
+import static de.gsi.dataset.DataSet.DIM_Z;
+
+import java.util.Arrays;
 
 import org.junit.jupiter.api.Test;
 
+import de.gsi.dataset.DataSet;
 import de.gsi.dataset.event.UpdateEvent;
 import de.gsi.dataset.spi.DimReductionDataSet.Option;
 import de.gsi.dataset.spi.utils.MathUtils;
@@ -24,13 +28,14 @@ public class DimReductionDataSetTests {
 
     @Test
     public void testGetterSetterConsistency() {
-        DoubleDataSet3D testData = new DoubleDataSet3D("test", //
-                new double[] { 1, 2, 3 }, // x-array
-                new double[] { 6, 7, 8 }, // y-array
-                new double[][] { // z-array
-                        new double[] { 1, 2, 3 }, //
-                        new double[] { 6, 5, 4 }, //
-                        new double[] { 9, 8, 7 } });
+        DataSet testData = new DataSetBuilder("test") //
+                                   .setValuesNoCopy(DIM_X, new double[] { 1, 2, 3 }) // x-array
+                                   .setValuesNoCopy(DIM_Y, new double[] { 6, 7, 8 }) // y-array
+                                   .setValues(DIM_Z, new double[][] { // z-array
+                                                             new double[] { 1, 2, 3 }, //
+                                                             new double[] { 6, 5, 4 }, //
+                                                             new double[] { 9, 8, 7 } }) //
+                                   .build();
 
         DimReductionDataSet reducedDataSetX = new DimReductionDataSet(testData, DIM_X, Option.INTEGRAL);
         DimReductionDataSet reducedDataSetY = new DimReductionDataSet(testData, DIM_Y, Option.INTEGRAL);
@@ -66,13 +71,14 @@ public class DimReductionDataSetTests {
 
     @Test
     public void testIntegralOptions() {
-        DoubleDataSet3D testData = new DoubleDataSet3D("test", //
-                new double[] { 1, 2, 3 }, // x-array
-                new double[] { 6, 7, 8 }, // y-array
-                new double[][] { // z-array
-                        new double[] { 1, 2, 3 }, //
-                        new double[] { 6, 5, 4 }, //
-                        new double[] { 9, 8, 7 } });
+        DataSet testData = new DataSetBuilder("test") //
+                                   .setValuesNoCopy(DIM_X, new double[] { 1, 2, 3 }) // x-array
+                                   .setValuesNoCopy(DIM_Y, new double[] { 6, 7, 8 }) // y-array
+                                   .setValues(DIM_Z, new double[][] { // z-array
+                                                             new double[] { 1, 2, 3 }, //
+                                                             new double[] { 6, 5, 4 }, //
+                                                             new double[] { 9, 8, 7 } }) //
+                                   .build();
 
         DimReductionDataSet sliceDataSetX = new DimReductionDataSet(testData, DIM_X, Option.INTEGRAL);
         DimReductionDataSet sliceDataSetY = new DimReductionDataSet(testData, DIM_Y, Option.INTEGRAL);
@@ -111,8 +117,8 @@ public class DimReductionDataSetTests {
         final double[] integralY = new double[3];
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 3; j++) {
-                integralX[j] += testData.getZ(j, i);
-                integralY[i] += testData.getZ(j, i);
+                integralX[j] += testData.get(DIM_Z, j + i * 3);
+                integralY[i] += testData.get(DIM_Z, j + i * 3);
             }
         }
         sliceDataSetY.setMinValue(0);
@@ -126,13 +132,14 @@ public class DimReductionDataSetTests {
 
     @Test
     public void testMaxOptions() {
-        DoubleDataSet3D testData = new DoubleDataSet3D("test", //
-                new double[] { 1, 2, 3 }, // x-array
-                new double[] { 6, 7, 8 }, // y-array
-                new double[][] { // z-array
-                        new double[] { 1, 2, 3 }, //
-                        new double[] { 6, 5, 4 }, //
-                        new double[] { 9, 8, 7 } });
+        DataSet testData = new DataSetBuilder("test") //
+                                   .setValuesNoCopy(DIM_X, new double[] { 1, 2, 3 }) // x-array
+                                   .setValuesNoCopy(DIM_Y, new double[] { 6, 7, 8 }) // y-array
+                                   .setValues(DIM_Z, new double[][] { // z-array
+                                                             new double[] { 1, 2, 3 }, //
+                                                             new double[] { 6, 5, 4 }, //
+                                                             new double[] { 9, 8, 7 } }) //
+                                   .build();
 
         DimReductionDataSet sliceDataSetX = new DimReductionDataSet(testData, DIM_X, Option.MAX);
         DimReductionDataSet sliceDataSetY = new DimReductionDataSet(testData, DIM_Y, Option.MAX);
@@ -146,8 +153,8 @@ public class DimReductionDataSetTests {
         final double[] maxX = new double[3];
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 3; j++) {
-                maxX[j] = Math.max(testData.getZ(j, i), maxX[j]);
-                maxY[i] = Math.max(testData.getZ(j, i), maxY[i]);
+                maxX[j] = Math.max(testData.get(DIM_Z, j + i * 3), maxX[j]);
+                maxY[i] = Math.max(testData.get(DIM_Z, j + i * 3), maxY[i]);
             }
         }
 
@@ -162,13 +169,14 @@ public class DimReductionDataSetTests {
 
     @Test
     public void testMeanOptions() {
-        DoubleDataSet3D testData = new DoubleDataSet3D("test", //
-                new double[] { 1, 2, 3 }, // x-array
-                new double[] { 6, 7, 8 }, // y-array
-                new double[][] { // z-array
-                        new double[] { 1, 2, 3 }, //
-                        new double[] { 6, 5, 4 }, //
-                        new double[] { 9, 8, 7 } });
+        DataSet testData = new DataSetBuilder("test") //
+                                   .setValuesNoCopy(DIM_X, new double[] { 1, 2, 3 }) // x-array
+                                   .setValuesNoCopy(DIM_Y, new double[] { 6, 7, 8 }) // y-array
+                                   .setValues(DIM_Z, new double[][] { // z-array
+                                                             new double[] { 1, 2, 3 }, //
+                                                             new double[] { 6, 5, 4 }, //
+                                                             new double[] { 9, 8, 7 } }) //
+                                   .build();
 
         DimReductionDataSet sliceDataSetX = new DimReductionDataSet(testData, DIM_X, Option.MEAN);
         DimReductionDataSet sliceDataSetY = new DimReductionDataSet(testData, DIM_Y, Option.MEAN);
@@ -182,8 +190,8 @@ public class DimReductionDataSetTests {
         final double[] meanY = new double[3];
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 3; j++) {
-                meanX[j] += testData.getZ(j, i) / 3.0;
-                meanY[i] += testData.getZ(j, i) / 3.0;
+                meanX[j] += testData.get(DIM_Z, j + i * 3) / 3.0;
+                meanY[i] += testData.get(DIM_Z, j + i * 3) / 3.0;
             }
         }
 
@@ -200,13 +208,14 @@ public class DimReductionDataSetTests {
 
     @Test
     public void testMinOptions() {
-        DoubleDataSet3D testData = new DoubleDataSet3D("test", //
-                new double[] { 1, 2, 3 }, // x-array
-                new double[] { 6, 7, 8 }, // y-array
-                new double[][] { // z-array
-                        new double[] { 1, 2, 3 }, //
-                        new double[] { 6, 5, 4 }, //
-                        new double[] { 9, 8, 7 } });
+        DataSet testData = new DataSetBuilder("test") //
+                                   .setValuesNoCopy(DIM_X, new double[] { 1, 2, 3 }) // x-array
+                                   .setValuesNoCopy(DIM_Y, new double[] { 6, 7, 8 }) // y-array
+                                   .setValues(DIM_Z, new double[][] { // z-array
+                                                             new double[] { 1, 2, 3 }, //
+                                                             new double[] { 6, 5, 4 }, //
+                                                             new double[] { 9, 8, 7 } }) //
+                                   .build();
 
         DimReductionDataSet sliceDataSetX = new DimReductionDataSet(testData, DIM_X, Option.MIN);
         DimReductionDataSet sliceDataSetY = new DimReductionDataSet(testData, DIM_Y, Option.MIN);
@@ -220,8 +229,8 @@ public class DimReductionDataSetTests {
         final double[] minX = new double[] { Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE };
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 3; j++) {
-                minX[j] = Math.min(testData.getZ(j, i), minX[j]);
-                minY[i] = Math.min(testData.getZ(j, i), minY[i]);
+                minX[j] = Math.min(testData.get(DIM_Z, j + i * 3), minX[j]);
+                minY[i] = Math.min(testData.get(DIM_Z, j + i * 3), minY[i]);
             }
         }
 
@@ -236,13 +245,14 @@ public class DimReductionDataSetTests {
 
     @Test
     public void testSliceOptions() {
-        DoubleDataSet3D testData = new DoubleDataSet3D("test", //
-                new double[] { 1, 2, 3 }, // x-array
-                new double[] { 6, 7, 8 }, // y-array
-                new double[][] { // z-array
-                        new double[] { 1, 2, 3 }, //
-                        new double[] { 6, 5, 4 }, //
-                        new double[] { 9, 8, 7 } });
+        DataSet testData = new DataSetBuilder("test") //
+                                   .setValuesNoCopy(DIM_X, new double[] { 1, 2, 3 }) // x-array
+                                   .setValuesNoCopy(DIM_Y, new double[] { 6, 7, 8 }) // y-array
+                                   .setValues(DIM_Z, new double[][] { // z-array
+                                                             new double[] { 1, 2, 3 }, //
+                                                             new double[] { 6, 5, 4 }, //
+                                                             new double[] { 9, 8, 7 } }) //
+                                   .build();
 
         DimReductionDataSet sliceDataSetX = new DimReductionDataSet(testData, DIM_X, Option.SLICE);
         DimReductionDataSet sliceDataSetY = new DimReductionDataSet(testData, DIM_Y, Option.SLICE);
@@ -261,13 +271,13 @@ public class DimReductionDataSetTests {
         assertArrayEquals(testData.getValues(DIM_X), sliceDataSetX.getValues(DIM_X));
         assertArrayEquals(testData.getValues(DIM_Y), sliceDataSetY.getValues(DIM_X));
 
-        assertArrayEquals(testData.getZValues()[0], sliceDataSetX.getValues(DIM_Y), "first row match");
+        assertArrayEquals(Arrays.copyOf(testData.getValues(DIM_Z), 3), sliceDataSetX.getValues(DIM_Y), "first row match");
         assertArrayEquals(testData.getValues(DIM_Y), sliceDataSetY.getValues(DIM_X));
 
         sliceDataSetX.setMinValue(7.0);
         assertEquals(2, nEvent, "DataSet3D event propagated");
 
-        assertArrayEquals(testData.getZValues()[1], sliceDataSetX.getValues(DIM_Y), "second row match");
+        assertArrayEquals(Arrays.copyOfRange(testData.getValues(DIM_Z), 3, 6), sliceDataSetX.getValues(DIM_Y), "second row match");
         assertArrayEquals(testData.getValues(DIM_Y), sliceDataSetY.getValues(DIM_X));
 
         assertArrayEquals(new double[] { 1, 6, 9 }, sliceDataSetY.getValues(DIM_Y), "first column match");
