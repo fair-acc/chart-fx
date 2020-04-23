@@ -145,8 +145,8 @@ public class DataSetUtilsTest {
         double[] yvalues = new double[] { 1.3, 3.7, 4.2, 2.3, 1.8 };
         DataSet result = new DataSetBuilder() //
                                  .setName("TestSerialize") //
-                                 .setXValues(xvalues) //
-                                 .setYValues(yvalues) //
+                                 .setValues(DIM_X, xvalues) //
+                                 .setValues(DIM_Y, yvalues) //
                                  .setMetaInfoMap(Map.of("test", "asdf", "testval", "5.24532")) //
                                  .build();
         result.getAxisDescription(DIM_X).set("index", "", 1.0, 5.0);

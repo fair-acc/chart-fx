@@ -248,15 +248,6 @@ public class MultiDimDoubleDataSet extends AbstractDataSet<MultiDimDoubleDataSet
     }
 
     @Override
-    public int getDataCount() {
-        int size = Integer.MAX_VALUE;
-        for (int i = 0; i < this.values.length; i++) {
-            size = Math.min(size, values[i].size());
-        }
-        return size;
-    }
-
-    @Override
     public final double[] getValues(final int dimIndex) {
         return values[dimIndex].toArray((double[]) null);
     }
