@@ -194,7 +194,7 @@ public class TransposedDataSetSample extends Application {
             y[i] = yMin + (b * (Math.sin(i * omega * 2) + 1))
                    + (pert * Math.sin(i * omega * 0.777) * Math.cos(i * omega));
         }
-        final DataSet dataSet = new DataSetBuilder().setName("non-sorted 2D DataSet").setXValues(x).setYValues(y).build();
+        final DataSet dataSet = new DataSetBuilder().setName("non-sorted 2D DataSet").setValues(DIM_X, x).setValues(DIM_Y, y).build();
         dataSet.getAxisDescription(DIM_X).set("x-axis", "x-unit");
         dataSet.getAxisDescription(DIM_Y).set("y-axis", "y-unit");
 

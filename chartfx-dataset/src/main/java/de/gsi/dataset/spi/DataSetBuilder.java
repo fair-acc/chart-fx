@@ -5,6 +5,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import de.gsi.dataset.AxisDescription;
 import de.gsi.dataset.DataSet;
@@ -13,12 +15,9 @@ import de.gsi.dataset.utils.AssertUtils;
 public class DataSetBuilder {
     private static final int MAX_AXIS_DIMENSION = 1000;
     protected String name;
-    protected double[] xValues;
-    protected double[] yValues;
-    protected double[] xErrorsPos;
-    protected double[] xErrorsNeg;
-    protected double[] yErrorsPos;
-    protected double[] yErrorsNeg;
+    protected Map<Integer, double[]> values = new HashMap<>();
+    protected Map<Integer, double[]> errorsPos = new HashMap<>();
+    protected Map<Integer, double[]> errorsNeg = new HashMap<>();
     protected List<String> infoList = new ArrayList<>();
     protected List<String> warningList = new ArrayList<>();
     protected List<String> errorList = new ArrayList<>();
@@ -27,6 +26,8 @@ public class DataSetBuilder {
     protected Map<Integer, String> dataStyles = new HashMap<>();
     protected List<AxisDescription> axisDescriptions = new ArrayList<>();
     protected int initialCapacity = -1;
+    private int dimension = -1;
+    private boolean errors = false;
 
     /**
      * default DataSet factory
@@ -97,54 +98,128 @@ public class DataSetBuilder {
     }
 
     protected DataSet buildRawDataSet(final String dsName) {
-        if (xValues == null && yValues == null) {
-            // no X/Y arrays provided
-            return new DefaultDataSet(dsName, Math.max(initialCapacity, 0));
-        }
-
-        if (xValues == null) {
-            // no X array provided
-            return buildWithYArrayOnly(dsName);
-        }
-
-        if (yValues == null) {
-            throw new IllegalStateException("yValues is null");
-        }
-
-        final int minArrays = Math.min(xValues.length, yValues.length);
+        int maxDim = values.keySet().stream().collect(Collectors.maxBy(Integer::compare)).orElse(-1);
+        maxDim = Math.max(maxDim, errorsNeg.keySet().stream().collect(Collectors.maxBy(Integer::compare)).orElse(-1));
+        maxDim = Math.max(maxDim, errorsPos.keySet().stream().collect(Collectors.maxBy(Integer::compare)).orElse(-1));
+        int minArrays = values.values().stream().map(e -> e.length).collect(Collectors.maxBy(Integer::compare)).orElse(-1);
+        minArrays = Math.max(minArrays, errorsNeg.values().stream().map(e -> e.length).collect(Collectors.maxBy(Integer::compare)).orElse(-1));
+        minArrays = Math.max(minArrays, errorsPos.values().stream().map(e -> e.length).collect(Collectors.maxBy(Integer::compare)).orElse(-1));
         final int size = initialCapacity < 0 ? minArrays : Math.min(minArrays, initialCapacity);
-        DataSet dataSet;
-        if (yErrorsNeg == null && yErrorsPos == null) {
-            // no error arrays -> build non-error data set
-            dataSet = new DefaultDataSet(dsName, xValues, yValues, size, false);
+        if (this.dimension == -1) {
+            this.dimension = maxDim + 1;
+        } else if (this.dimension <= maxDim) {
+            throw new IllegalStateException("Supplied data dimensions exceed requested number of dimensions");
+        }
+        switch (this.dimension) {
+        case 0:
+        case 1:
+        case 2:
+            if (values.size() == 0 && errorsNeg.size() == 0 && errorsPos.size() == 0 && initialCapacity <= 0) {
+                return new DefaultDataSet(dsName, Math.max(initialCapacity, 0));
+            }
+            return build2dDataSet(dsName, size);
+        case 3:
+            //            return build3dDataset(dsName, size);
+        default:
+            return buildMultiDimDataSet(dsName, size, dimension);
+        }
+    }
+
+    private DataSet build2dDataSet(final String dsName, final int size) {
+        if (errorsNeg.size() == 0 && errorsPos.size() == 0 && !this.errors)
+            return buildDefaultDataSet(dsName, size);
+        return buildDefaultErrorDataSet(dsName, size);
+    }
+
+    private DataSet buildDefaultErrorDataSet(final String dsName, final int size) {
+        double[] xvalues = values.get(DataSet.DIM_X);
+        if (xvalues == null) {
+            xvalues = IntStream.range(0, size).mapToDouble(x -> x).toArray();
+        }
+        double[] yvalues = values.get(DataSet.DIM_Y);
+        if (yvalues == null) {
+            yvalues = new double[size];
+        }
+        if (errorsNeg.containsKey(DataSet.DIM_X) || errorsPos.containsKey(DataSet.DIM_X)) {
+            throw new IllegalStateException("DataSetBuilder: X Errors not implemented for 2D DataSetBuilder");
+        }
+        double[] yen = errorsNeg.get(DataSet.DIM_Y);
+        if (yen == null) {
+            yen = new double[size];
+        }
+        double[] yep = errorsPos.get(DataSet.DIM_Y);
+        if (yep == null) {
+            yep = new double[size];
+        }
+        return new DefaultErrorDataSet(dsName, xvalues, yvalues, yen, yep, size, false);
+    }
+
+    private DataSet buildDefaultDataSet(final String dsName, final int size) {
+        double[] xvalues = values.get(DataSet.DIM_X);
+        if (xvalues == null) {
+            xvalues = IntStream.range(0, size).mapToDouble(x -> x).toArray();
+        }
+        double[] yvalues = values.get(DataSet.DIM_Y);
+        if (yvalues == null) {
+            yvalues = new double[size];
+        }
+        return new DefaultDataSet(dsName, xvalues, yvalues, size, false);
+    }
+
+    private DataSet build3dDataset(final String dsName, final int size) {
+        double[] xvalues = values.get(DataSet.DIM_X);
+        int xsize = 0; // TODO: determine real size
+        if (xvalues == null) {
+            xvalues = IntStream.range(0, xsize).mapToDouble(x -> x).toArray();
         } else {
-            // at least one error array has been provided
-            dataSet = buildWithYErrors(dsName, size);
+            xsize = xvalues.length;
         }
-
-        return dataSet;
+        double[] yvalues = values.get(DataSet.DIM_Y);
+        int ysize = 0; // TODO: determine real size
+        if (yvalues == null) {
+            yvalues = IntStream.range(0, ysize).mapToDouble(x -> x).toArray();
+        } else {
+            ysize = yvalues.length;
+        }
+        double[] zValuesLinear = values.get(DataSet.DIM_Z);
+        if (xsize == ysize && xsize == zValuesLinear.length) {
+            return buildMultiDimDataSet(dsName, xsize, 3);
+        }
+        double[][] zValues = new double[ysize][];
+        if (zValuesLinear == null) {
+            zValuesLinear = new double[xvalues.length * yvalues.length];
+        } else {
+            AssertUtils.checkArrayDimension("zData", zValuesLinear, xvalues.length * yvalues.length);
+            for (int i = 0; i < ysize; i++) {
+                zValues[i] = new double[xsize];
+                System.arraycopy(zValuesLinear, i * xsize, zValues[i], 0, xsize);
+            }
+        }
+        return new DoubleDataSet3D(dsName, xvalues, yvalues, zValues);
     }
 
-    protected DefaultDataSet buildWithYArrayOnly(final String dsName) {
-        final int size = initialCapacity < 0 ? yValues.length : Math.min(yValues.length, initialCapacity);
-        final double[] dsX = new double[size];
-        for (int i = 0; i < size; i++) {
-            dsX[i] = i;
+    private DataSet buildMultiDimDataSet(final String dsName, final int size, final int nDims) {
+        final double[][] inputValues = new double[nDims][];
+        int initialSize = this.initialCapacity;
+        for (int dimIndex = 0; dimIndex < nDims; dimIndex++) {
+            double[] val = values.get(dimIndex);
+            if (val == null) {
+                if (dimIndex == DataSet.DIM_X) {
+                    val = IntStream.range(0, initialSize).mapToDouble(x -> x).toArray();
+                } else {
+                    val = new double[initialSize];
+                }
+            } else if (val.length < initialSize) {
+                final double[] newVal = new double[initialSize];
+                System.arraycopy(val, 0, newVal, 0, val.length);
+                val = newVal;
+            }
+            inputValues[dimIndex] = val;
+            if (errorsNeg.containsKey(dimIndex) || errorsPos.containsKey(dimIndex)) {
+                throw new IllegalStateException("DataSetBuilder: X Errors not implemented for MultiDimDataSet");
+            }
         }
-        return new DefaultDataSet(dsName, dsX, yValues, size, false);
-    }
-
-    protected DefaultErrorDataSet buildWithYErrors(final String dsName, final int size) {
-        // at least one error array has been provided
-        if (yErrorsPos == null && yErrorsNeg == null) {
-            throw new IllegalStateException("yErrorsPos and yErrorsNeg cannot both be null");
-        }
-        final double[] dsYep = yErrorsPos == null ? yErrorsNeg : yErrorsPos;
-        final double[] dsYen = yErrorsNeg == null ? yErrorsPos : yErrorsNeg;
-        AssertUtils.equalDoubleArrays(xValues, dsYep, size);
-        AssertUtils.equalDoubleArrays(xValues, dsYen, size);
-
-        return new DefaultErrorDataSet(dsName, xValues, yValues, dsYen, dsYep, size, false);
+        return new MultiDimDoubleDataSet(dsName, inputValues, 0, false);
     }
 
     private AxisDescription getAxisDescription(int dimension) {
@@ -228,89 +303,74 @@ public class DataSetBuilder {
         return this;
     }
 
-    public DataSetBuilder setXNegError(final double[] xErrorValuesNeg) {
-        final int size = initialCapacity < 0 ? xErrorValuesNeg.length
-                                             : Math.min(initialCapacity, xErrorValuesNeg.length);
-        this.xErrorsNeg = new double[size];
-        System.arraycopy(xErrorValuesNeg, 0, this.xErrorsNeg, 0, size);
+    public DataSetBuilder setNegError(final int dimIndex, final double[] errors) {
+        final int size = initialCapacity < 0 ? errors.length : Math.min(initialCapacity, errors.length);
+        final double[] vals = new double[size];
+        this.errorsNeg.put(dimIndex, vals);
+        System.arraycopy(errors, 0, vals, 0, size);
         return this;
     }
 
-    public DataSetBuilder setXNegErrorNoCopy(final double[] xErrorValuesNeg) { // NOPMD
+    public DataSetBuilder setNegErrorNoCopy(final int dimIndex, final double[] errors) { // NOPMD
         // direct storage is on purpose
-        this.yErrorsNeg = xErrorValuesNeg;
+        this.errorsNeg.put(dimIndex, errors);
         return this;
     }
 
-    public final DataSetBuilder setXPosError(final double[] xErrorValuesPos) {
-        final int size = initialCapacity < 0 ? xErrorValuesPos.length
-                                             : Math.min(initialCapacity, xErrorValuesPos.length);
-        this.xErrorsPos = new double[size];
-        System.arraycopy(xErrorValuesPos, 0, this.xErrorsPos, 0, size);
+    public final DataSetBuilder setPosError(final int dimIndex, final double[] errors) {
+        final int size = initialCapacity < 0 ? errors.length : Math.min(initialCapacity, errors.length);
+        final double[] vals = new double[size];
+        this.errorsPos.put(dimIndex, vals);
+        System.arraycopy(errors, 0, vals, 0, size);
         return this;
     }
 
-    public final DataSetBuilder setXPosErrorNoCopy(final double[] xErrorValuesPos) { // NOPMD
+    public final DataSetBuilder setPosErrorNoCopy(final int dimIndex, final double[] errors) { // NOPMD
         // direct storage is on purpose
-        this.xErrorsPos = xErrorValuesPos;
+        this.errorsPos.put(dimIndex, errors);
         return this;
     }
 
-    public final DataSetBuilder setXValues(final double[] xValues) {
-        final int size = initialCapacity < 0 ? xValues.length : Math.min(initialCapacity, xValues.length);
-        this.xValues = new double[size];
-        System.arraycopy(xValues, 0, this.xValues, 0, size);
+    public final DataSetBuilder setValues(final int dimIndex, final double[] values) {
+        final int size = initialCapacity < 0 ? values.length : Math.min(initialCapacity, values.length);
+        final double[] vals = new double[size];
+        this.values.put(dimIndex, vals);
+        System.arraycopy(values, 0, vals, 0, size);
         return this;
     }
 
-    //
-    // -- BUILD OPERATIONS -------------------------------------------
-    //
-
-    public final DataSetBuilder setXValuesNoCopy(final double[] xValues) { // NOPMD
-        // direct storage is on purpose
-        this.xValues = xValues;
+    public final DataSetBuilder setValues(final int dimIndex, final double[][] values) {
+        AssertUtils.nonEmptyArray("values", values);
+        AssertUtils.nonEmptyArray("values first col", values[0]);
+        int ysize = values.length;
+        int xsize = values[0].length;
+        final int size = initialCapacity < 0 ? ysize * xsize : Math.min(initialCapacity, values.length);
+        final double[] vals = new double[size];
+        for (int i = 0; i < ysize; i++) {
+            AssertUtils.checkArrayDimension("column length", values[i], xsize);
+            System.arraycopy(values[i], 0, vals, i * xsize, xsize);
+        }
+        this.values.put(dimIndex, vals);
         return this;
     }
 
-    public DataSetBuilder setYNegError(final double[] yErrorValuesNeg) {
-        final int size = initialCapacity < 0 ? yErrorValuesNeg.length
-                                             : Math.min(initialCapacity, yErrorValuesNeg.length);
-        this.yErrorsNeg = new double[size];
-        System.arraycopy(yErrorValuesNeg, 0, this.yErrorsNeg, 0, size);
+    public DataSetBuilder setValuesNoCopy(int dimIndex, double[] values) {
+        this.values.put(dimIndex, values);
         return this;
     }
 
-    public DataSetBuilder setYNegErrorNoCopy(final double[] yErrorValuesNeg) { // NOPMD
-        // direct storage is on purpose
-        this.yErrorsNeg = yErrorValuesNeg;
+    public DataSetBuilder setDimension(final int dimension) {
+        this.dimension = dimension;
         return this;
     }
 
-    public final DataSetBuilder setYPosError(final double[] yErrorValuesPos) {
-        final int size = initialCapacity < 0 ? yErrorValuesPos.length
-                                             : Math.min(initialCapacity, yErrorValuesPos.length);
-        this.yErrorsPos = new double[size];
-        System.arraycopy(yErrorValuesPos, 0, this.yErrorsPos, 0, size);
+    public DataSetBuilder setEnableErrors(boolean enableErrors) {
+        this.errors = enableErrors;
         return this;
     }
 
-    public final DataSetBuilder setYPosErrorNoCopy(final double[] yErrorValuesPos) { // NOPMD
-        // direct storage is on purpose
-        this.yErrorsPos = yErrorValuesPos;
-        return this;
-    }
-
-    public final DataSetBuilder setYValues(final double[] yValues) {
-        final int size = initialCapacity < 0 ? yValues.length : Math.min(initialCapacity, yValues.length);
-        this.yValues = new double[size];
-        System.arraycopy(yValues, 0, this.yValues, 0, size);
-        return this;
-    }
-
-    public final DataSetBuilder setYValuesNoCopy(final double[] yValues) { // NOPMD
-        // direct storage is on purpose
-        this.yValues = yValues;
+    public DataSetBuilder setInitalCapacity(int newInitialCapacity) {
+        initialCapacity = newInitialCapacity;
         return this;
     }
 }

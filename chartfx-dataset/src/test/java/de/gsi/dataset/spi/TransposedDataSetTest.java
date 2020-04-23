@@ -23,7 +23,10 @@ public class TransposedDataSetTest {
 
     @Test
     public void testWithDataSet2D() {
-        DataSet dataSet = new DataSetBuilder().setName("Test Default Data Set").setXValuesNoCopy(new double[] { 1, 2, 3 }).setYValuesNoCopy(new double[] { 4, 7, 6 }).build();
+        DataSet dataSet = new DataSetBuilder().setName("Test Default Data Set") //
+                                  .setValuesNoCopy(DIM_X, new double[] { 1, 2, 3 })
+                                  .setValuesNoCopy(DIM_Y, new double[] { 4, 7, 6 })
+                                  .build();
 
         TransposedDataSet transposed0 = TransposedDataSet.transpose(dataSet, true);
         assertArrayEquals(new int[] { 1, 0 }, transposed0.getPermutation());
