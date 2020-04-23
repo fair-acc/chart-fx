@@ -16,6 +16,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import de.gsi.dataset.serializer.IoBuffer;
 import de.gsi.dataset.utils.AssertUtils;
+
 import sun.misc.Unsafe; // NOPMD by rstein
 
 /**
@@ -640,5 +641,4 @@ public class FastByteBuffer implements IoBuffer {
     public static FastByteBuffer wrap(final byte[] byteArray, final int length) {
         return new FastByteBuffer(byteArray, length);
     }
-
 }
