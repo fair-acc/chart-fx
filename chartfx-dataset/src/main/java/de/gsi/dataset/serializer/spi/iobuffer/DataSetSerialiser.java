@@ -41,12 +41,10 @@ import de.gsi.dataset.utils.DataSetUtilsHelper;
 public class DataSetSerialiser extends DataSetUtilsHelper {
     private static final Logger LOGGER = LoggerFactory.getLogger(DataSetSerialiser.class);
     private static final String DATA_SET_NAME = "dataSetName";
-    private static final String Y_ARRAY_NAME = "y";
-    private static final String X_ARRAY_NAME = "x";
-    private static final String XEN = "xen";
-    private static final String XEP = "xep";
-    private static final String YEP = "yep";
-    private static final String YEN = "yen";
+    private static final String DIMENSIONS = "nDims";
+    private static final String ARRAY_PREFIX = "array";
+    private static final String EN_PREFIX = "en";
+    private static final String EP_PREFIX = "ep";
     private static final String AXIS = "axis";
     private static final String NAME = "name";
     private static final String UNIT = "unit";
@@ -86,7 +84,7 @@ public class DataSetSerialiser extends DataSetUtilsHelper {
             }
             if (!foundMatchingDataType) {
                 throw new InputMismatchException(fieldName + " is type " + fieldHeader.get().getDataType()
-                        + " vs. required type " + Arrays.asList(requireDataTypes).toString());
+                                                 + " vs. required type " + Arrays.asList(requireDataTypes).toString());
             }
 
             final long dataPosition = fieldHeader.get().getDataBufferPosition();
@@ -126,6 +124,10 @@ public class DataSetSerialiser extends DataSetUtilsHelper {
             builder.setName(BinarySerialiser.getString(readBuffer));
         }
 
+        if (checkFieldCompatibility(readBuffer, fieldHeaderList, DIMENSIONS, DataType.INT).isPresent()) {
+            builder.setDimension(BinarySerialiser.getInteger(readBuffer));
+        }
+
         // check for axis descriptions
         // TODO: match any field variable starting with 'axis<int>.XXXX'
         for (FieldHeader fieldHeader : fieldHeaderList) {
@@ -143,8 +145,7 @@ public class DataSetSerialiser extends DataSetUtilsHelper {
                 dimension = Integer.parseInt(parsed[0].substring(AXIS.length()));
             } catch (NumberFormatException e) {
                 if (LOGGER.isErrorEnabled()) {
-                    LOGGER.atError().setCause(e).addArgument(parsed[0]).addArgument(fieldName)
-                            .log("could not parse sub-string {} of {} for integer");
+                    LOGGER.atError().setCause(e).addArgument(parsed[0]).addArgument(fieldName).log("could not parse sub-string {} of {} for integer");
                 }
                 continue;
             }
@@ -199,40 +200,53 @@ public class DataSetSerialiser extends DataSetUtilsHelper {
 
     protected static void parseNumericData(final IoBuffer readBuffer, final DataSetBuilder builder,
             final List<FieldHeader> fieldHeaderList) {
-        // read numeric data
-
-        Optional<FieldHeader> header;
-
-        header = checkFieldCompatibility(readBuffer, fieldHeaderList, X_ARRAY_NAME, DataType.DOUBLE_ARRAY,
-                DataType.FLOAT_ARRAY);
-        if (header.isPresent()) {
-            builder.setXValues(BinarySerialiser.getDoubleArray(readBuffer, header.get().getDataType()));
-        }
-
-        header = checkFieldCompatibility(readBuffer, fieldHeaderList, Y_ARRAY_NAME, DataType.DOUBLE_ARRAY,
-                DataType.FLOAT_ARRAY);
-        if (header.isPresent()) {
-            builder.setYValues(BinarySerialiser.getDoubleArray(readBuffer, header.get().getDataType()));
-        }
-
-        header = checkFieldCompatibility(readBuffer, fieldHeaderList, XEN, DataType.DOUBLE_ARRAY, DataType.FLOAT_ARRAY);
-        if (header.isPresent()) {
-            builder.setXNegErrorNoCopy(BinarySerialiser.getDoubleArray(readBuffer, header.get().getDataType()));
-        }
-
-        header = checkFieldCompatibility(readBuffer, fieldHeaderList, XEP, DataType.DOUBLE_ARRAY, DataType.FLOAT_ARRAY);
-        if (header.isPresent()) {
-            builder.setXPosErrorNoCopy(BinarySerialiser.getDoubleArray(readBuffer, header.get().getDataType()));
-        }
-
-        header = checkFieldCompatibility(readBuffer, fieldHeaderList, YEN, DataType.DOUBLE_ARRAY, DataType.FLOAT_ARRAY);
-        if (header.isPresent()) {
-            builder.setYNegErrorNoCopy(BinarySerialiser.getDoubleArray(readBuffer, header.get().getDataType()));
-        }
-
-        header = checkFieldCompatibility(readBuffer, fieldHeaderList, YEP, DataType.DOUBLE_ARRAY, DataType.FLOAT_ARRAY);
-        if (header.isPresent()) {
-            builder.setYPosErrorNoCopy(BinarySerialiser.getDoubleArray(readBuffer, header.get().getDataType()));
+        // check for numeric data
+        for (FieldHeader fieldHeader : fieldHeaderList) {
+            final String fieldName = fieldHeader.getFieldName();
+            if (fieldName == null) {
+                continue;
+            }
+            if (fieldHeader.getDataType() != DataType.DOUBLE_ARRAY
+                    && fieldHeader.getDataType() != DataType.FLOAT_ARRAY) {
+                continue;
+            }
+            if (fieldName.startsWith(ARRAY_PREFIX)) {
+                int dimIndex;
+                try {
+                    dimIndex = Integer.parseInt(fieldName.substring(ARRAY_PREFIX.length()));
+                } catch (NumberFormatException | IndexOutOfBoundsException e) {
+                    if (LOGGER.isWarnEnabled()) {
+                        LOGGER.atWarn().addArgument(fieldName).log("Invalid field name: {}");
+                    }
+                    continue;
+                }
+                readBuffer.position(fieldHeader.getDataBufferPosition());
+                builder.setValues(dimIndex, BinarySerialiser.getDoubleArray(readBuffer, fieldHeader.getDataType()));
+            } else if (fieldName.startsWith(EP_PREFIX)) {
+                int dimIndex;
+                try {
+                    dimIndex = Integer.parseInt(fieldName.substring(EP_PREFIX.length()));
+                } catch (NumberFormatException | IndexOutOfBoundsException e) {
+                    if (LOGGER.isWarnEnabled()) {
+                        LOGGER.atWarn().addArgument(fieldName).log("Invalid field name: {}");
+                    }
+                    continue;
+                }
+                readBuffer.position(fieldHeader.getDataBufferPosition());
+                builder.setPosError(dimIndex, BinarySerialiser.getDoubleArray(readBuffer, fieldHeader.getDataType()));
+            } else if (fieldName.startsWith(EN_PREFIX)) {
+                int dimIndex;
+                try {
+                    dimIndex = Integer.parseInt(fieldName.substring(EN_PREFIX.length()));
+                } catch (NumberFormatException | IndexOutOfBoundsException e) {
+                    if (LOGGER.isWarnEnabled()) {
+                        LOGGER.atWarn().addArgument(fieldName).log("Invalid field name: {}");
+                    }
+                    continue;
+                }
+                readBuffer.position(fieldHeader.getDataBufferPosition());
+                builder.setNegError(dimIndex, BinarySerialiser.getDoubleArray(readBuffer, fieldHeader.getDataType()));
+            }
         }
     }
 
@@ -317,7 +331,7 @@ public class DataSetSerialiser extends DataSetUtilsHelper {
      * @param dataSet The DataSet to export
      * @param buffer byte output buffer (N.B. keep caching this object)
      * @param asFloat {@code true}: encode data as binary floats (smaller size, performance), or {@code false} as double
-     *        (better precision)
+     *            (better precision)
      */
     public static void writeDataSetToByteArray(final DataSet dataSet, final IoBuffer buffer, final boolean asFloat) {
         AssertUtils.notNull("dataSet", dataSet);
@@ -345,6 +359,7 @@ public class DataSetSerialiser extends DataSetUtilsHelper {
     protected static void writeHeaderDataToStream(final IoBuffer buffer, final DataSet dataSet) {
         // common header data
         BinarySerialiser.put(buffer, DATA_SET_NAME, dataSet.getName());
+        BinarySerialiser.put(buffer, DIMENSIONS, dataSet.getDimension());
         final List<AxisDescription> axisDescriptions = dataSet.getAxisDescriptions();
         StringBuilder builder = new StringBuilder(60);
         for (int i = 0; i < axisDescriptions.size(); i++) {
@@ -389,57 +404,69 @@ public class DataSetSerialiser extends DataSetUtilsHelper {
      * @param buffer IoBuffer to write binary data into
      * @param dataSet to be exported
      * @param asFloat {@code true} use 32-bit floats (less memory, faster transfer) instead of 64-bit doubles (DataSet
-     *        default, higher precision)
+     *            default, higher precision)
      */
     protected static void writeNumericBinaryDataToBuffer(final IoBuffer buffer, final DataSet dataSet,
             final boolean asFloat) {
-        final int nsamples = dataSet.getDataCount(DIM_X);
+        final int nDim = dataSet.getDimension();
 
         if (asFloat) {
-            BinarySerialiser.put(buffer, X_ARRAY_NAME, toFloats(dataSet.getValues(DIM_X)), new int[] { nsamples });
-            BinarySerialiser.put(buffer, Y_ARRAY_NAME, toFloats(dataSet.getValues(DIM_Y)), new int[] { nsamples });
+            for (int dimIndex = 0; dimIndex < nDim; dimIndex++) {
+                final int nsamples = dataSet.getDataCount(dimIndex);
+                BinarySerialiser.put(buffer, ARRAY_PREFIX + dimIndex, toFloats(dataSet.getValues(dimIndex)),
+                        new int[] { nsamples });
+            }
+
             if (!(dataSet instanceof DataSetError)) {
                 // data set does not have any error definition
                 return;
             }
+
             final DataSetError ds = (DataSetError) dataSet;
-            for (int dimIndex = 0; dimIndex < 2; dimIndex++) {
+            for (int dimIndex = 0; dimIndex < nDim; dimIndex++) {
+                final int nsamples = dataSet.getDataCount(dimIndex);
                 switch (ds.getErrorType(dimIndex)) {
                 default:
                 case NO_ERROR:
                     break;
                 case SYMMETRIC:
-                    BinarySerialiser.put(buffer, dimIndex == DIM_X ? XEP : YEP,
-                            toFloats(ds.getErrorsPositive(dimIndex)), new int[] { nsamples });
+                    BinarySerialiser.put(buffer, EP_PREFIX + dimIndex, toFloats(ds.getErrorsPositive(dimIndex)),
+                            new int[] { nsamples });
                     break;
                 case ASYMMETRIC:
-                    BinarySerialiser.put(buffer, dimIndex == DIM_X ? XEN : YEN,
-                            toFloats(ds.getErrorsNegative(dimIndex)), new int[] { nsamples });
-                    BinarySerialiser.put(buffer, dimIndex == DIM_X ? XEP : YEP,
-                            toFloats(ds.getErrorsPositive(dimIndex)), new int[] { nsamples });
+                    BinarySerialiser.put(buffer, EN_PREFIX + dimIndex, toFloats(ds.getErrorsNegative(dimIndex)),
+                            new int[] { nsamples });
+                    BinarySerialiser.put(buffer, EP_PREFIX + dimIndex, toFloats(ds.getErrorsPositive(dimIndex)),
+                            new int[] { nsamples });
                     break;
                 }
             }
         } else {
-            BinarySerialiser.put(buffer, X_ARRAY_NAME, dataSet.getValues(DIM_X), new int[] { nsamples });
-            BinarySerialiser.put(buffer, Y_ARRAY_NAME, dataSet.getValues(DIM_Y), new int[] { nsamples });
+            for (int dimIndex = 0; dimIndex < nDim; dimIndex++) {
+                final int nsamples = dataSet.getDataCount(dimIndex);
+                BinarySerialiser.put(buffer, ARRAY_PREFIX + dimIndex, dataSet.getValues(dimIndex),
+                        new int[] { nsamples });
+            }
             if (!(dataSet instanceof DataSetError)) {
                 // data set does not have any error definition
                 return;
             }
             final DataSetError ds = (DataSetError) dataSet;
-            for (int dimIndex = 0; dimIndex < 2; dimIndex++) {
+            for (int dimIndex = 0; dimIndex < nDim; dimIndex++) {
+                final int nsamples = dataSet.getDataCount(dimIndex);
                 switch (ds.getErrorType(dimIndex)) {
-                default:
                 case SYMMETRIC:
-                    BinarySerialiser.put(buffer, dimIndex == DIM_X ? XEP : YEP, ds.getErrorsPositive(dimIndex),
+                    BinarySerialiser.put(buffer, EP_PREFIX + dimIndex, ds.getErrorsPositive(dimIndex),
                             new int[] { nsamples });
                     break;
                 case ASYMMETRIC:
-                    BinarySerialiser.put(buffer, dimIndex == DIM_X ? XEN : YEN, ds.getErrorsNegative(dimIndex),
+                    BinarySerialiser.put(buffer, EN_PREFIX + dimIndex, ds.getErrorsNegative(dimIndex),
                             new int[] { nsamples });
-                    BinarySerialiser.put(buffer, dimIndex == DIM_X ? XEP : YEP, ds.getErrorsPositive(dimIndex),
+                    BinarySerialiser.put(buffer, EP_PREFIX + dimIndex, ds.getErrorsPositive(dimIndex),
                             new int[] { nsamples });
+                    break;
+                case NO_ERROR:
+                default:
                     break;
                 }
             }
