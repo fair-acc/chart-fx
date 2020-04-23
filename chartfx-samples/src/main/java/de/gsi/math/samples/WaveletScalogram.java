@@ -17,7 +17,6 @@ import de.gsi.chart.renderer.spi.ContourDataSetRenderer;
 import de.gsi.chart.renderer.spi.utils.ColorGradient;
 import de.gsi.chart.utils.AxisSynchronizer;
 import de.gsi.dataset.DataSet;
-import de.gsi.dataset.DataSet3D;
 import de.gsi.dataset.spi.DefaultDataSet;
 import de.gsi.math.TMath;
 import de.gsi.math.samples.utils.AbstractDemoApplication;
@@ -34,12 +33,12 @@ public class WaveletScalogram extends AbstractDemoApplication {
     private static final Logger LOGGER = LoggerFactory.getLogger(WaveletScalogram.class);
     private static final int MAX_POINTS = 1024;
     public static final boolean LOAD_EXAMPLE_DATA = true;
-    private DataSet3D fdataset;
+    private DataSet fdataset;
     private DefaultDataSet fwavelet;
     private DefaultDataSet ffourier;
     private double[] yValues;
 
-    private DataSet3D createDataSet() {
+    private DataSet createDataSet() {
         final double nu = 2 * 25;
         final int nQuantx = 512;
         final int nQuanty = 1024;
@@ -92,7 +91,7 @@ public class WaveletScalogram extends AbstractDemoApplication {
             int count = 0;
 
             for (int j = nboundary; j < fdataset.getDataCount(DataSet.DIM_X) - nboundary; j++) {
-                val += fdataset.getZ(j, i);
+                val += fdataset.get(DataSet.DIM_Z, i * fdataset.getDataCount(DataSet.DIM_X) + j);
                 count++;
             }
             if (count > 0) {
@@ -117,6 +116,7 @@ public class WaveletScalogram extends AbstractDemoApplication {
         fwavelet = new DefaultDataSet("Wavelet magnitude", frequency1, magWavelet, frequency1.length, true);
         ffourier = new DefaultDataSet("Fourier magnitude", frequency2, magFourier, frequency2.length, true);
 
+        fdataset.recomputeLimits(DataSet.DIM_Y);
         return fdataset;
     }
 
@@ -145,8 +145,8 @@ public class WaveletScalogram extends AbstractDemoApplication {
         chart2.getDatasets().addAll(fwavelet, ffourier);
 
         final AxisSynchronizer sync = new AxisSynchronizer();
-        sync.add(chart2.getXAxis());
         sync.add(chart1.getYAxis());
+        sync.add(chart2.getXAxis());
 
         return new VBox(chart1, chart2);
     }

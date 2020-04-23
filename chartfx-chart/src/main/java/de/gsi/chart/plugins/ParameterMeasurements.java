@@ -31,7 +31,7 @@ import de.gsi.chart.viewer.DataView;
  * <li> relative signal change (ie. (S0 - S1)/S0)
  * <li> and many more.
  * </ul>
- * For a more complete list see {@link SimpleMeasurements.MeasurementType} or {@link DataSetMeasurements.MeasurementType} 
+ * For a more complete list see {@link de.gsi.chart.plugins.measurements.SimpleMeasurements.MeasurementType} or {@link de.gsi.chart.plugins.measurements.DataSetMeasurements.MeasurementType} 
  *
  * @author rstein
  */

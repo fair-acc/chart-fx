@@ -1,5 +1,6 @@
 package de.gsi.dataset.utils.serializer;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
@@ -11,7 +12,6 @@ import de.gsi.dataset.serializer.spi.FastByteBuffer;
 import de.gsi.dataset.serializer.spi.FieldHeader;
 
 /**
- *
  * @author rstein
  */
 public class BinarySerialiserTests {
@@ -35,7 +35,19 @@ public class BinarySerialiserTests {
 
         header = BinarySerialiser.getFieldHeader(buffer);
         assertTrue(header.getFieldName().equals("byte"), "byte type retrieval");
-        assertTrue(buffer.getByte() == 42, "byte retrieval");
+        assertEquals((byte) 42, buffer.getByte(), "byte retrieval");
+
+        header = BinarySerialiser.getFieldHeader(buffer);
+        assertTrue(header.getFieldName().equals("short"), "byte type retrieval");
+        assertEquals((short) 43, buffer.getShort(), "byte retrieval");
+
+        header = BinarySerialiser.getFieldHeader(buffer);
+        assertTrue(header.getFieldName().equals("int"), "byte type retrieval");
+        assertEquals(44, buffer.getInt(), "byte retrieval");
+
+        header = BinarySerialiser.getFieldHeader(buffer);
+        assertTrue(header.getFieldName().equals("long"), "byte type retrieval");
+        assertEquals(45l, buffer.getLong(), "byte retrieval");
 
         if (LOGGER.isDebugEnabled()) {
             LOGGER.atDebug().log("finished testBinarySerialiserSimple(..)");

@@ -25,7 +25,7 @@ import de.gsi.dataset.utils.ProcessingProfiler;
 
 public class DataSetToByteArraySample {
     private static final Logger LOGGER = LoggerFactory.getLogger(DataSetToByteArraySample.class);
-    private static final int N_SAMPLES = 100000; // default: 100000
+    private static final int N_SAMPLES = 100_000; // default: 100_000
     private final DoubleErrorDataSet original = new DoubleErrorDataSet("init", N_SAMPLES);
     private final ByteArrayOutputStream byteOutput = new ByteArrayOutputStream();
     private final FastByteBuffer byteBuffer = new FastByteBuffer();
@@ -53,11 +53,11 @@ public class DataSetToByteArraySample {
         LOGGER.atInfo().log("");
     }
 
-    private final String encodingBinary(final boolean isBinaryEncoding) {
+    private static final String encodingBinary(final boolean isBinaryEncoding) {
         return isBinaryEncoding ? "binary-based" : "string-based";
     }
 
-    private final String encodingBits(final boolean is32BitEncoding) {
+    private static final String encodingBits(final boolean is32BitEncoding) {
         return is32BitEncoding ? "32-bit" : "64-bit";
     }
 
@@ -66,7 +66,7 @@ public class DataSetToByteArraySample {
         return Math.abs((float) a - (float) b) <= 2 / Math.pow(2, 23);
     }
 
-    private void generateData(final DoubleErrorDataSet dataSet) {
+    private static void generateData(final DoubleErrorDataSet dataSet) {
         final long startTime = ProcessingProfiler.getTimeStamp();
 
         dataSet.autoNotification().set(false);
@@ -109,7 +109,7 @@ public class DataSetToByteArraySample {
 
         testIdentityCore(true, asFloat32, original, dataSet);
         testIdentityLabelsAndStyles(true, asFloat32, original, dataSet);
-        testIdentityMetaData(true, asFloat32, original, (DataSetMetaData) dataSet);
+        testIdentityMetaData(true, asFloat32, original, dataSet);
 
         LOGGER.atInfo().addArgument(encodingBits(asFloat32)).addArgument(encodingBinary(true)).addArgument(withMetaData ? "with" : "w/o").log("testDataSetSerialiserIdentity passed for {} {} encoding {} meta-data");
     }

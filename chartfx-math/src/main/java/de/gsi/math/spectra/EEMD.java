@@ -1,7 +1,7 @@
 package de.gsi.math.spectra;
 
-import de.gsi.dataset.DataSet3D;
-import de.gsi.dataset.spi.DoubleDataSet3D;
+import de.gsi.dataset.DataSet;
+import de.gsi.dataset.spi.DataSetBuilder;
 import de.gsi.math.Spline;
 import de.gsi.math.TMath;
 import de.gsi.math.TMathConstants;
@@ -148,7 +148,7 @@ public class EEMD {
      * @param nQuanty quantisation in Y
      * @return the complex HHT spectrum
      */
-    public synchronized DataSet3D getScalogram(final double[] data, final int nQuantx, final int nQuanty) {
+    public synchronized DataSet getScalogram(final double[] data, final int nQuantx, final int nQuanty) {
         // create and return data set.
         fstatus = 0;
         final int nsamples = data.length;
@@ -163,8 +163,11 @@ public class EEMD {
             frequency[i] = (double) i / (double) nsamples;
         }
 
-        final DoubleDataSet3D ds = new DoubleDataSet3D("HilbertSpectrum");
-        ds.set(time, frequency, getSpectrumArray(data, nQuantx, nQuanty));
+        final DataSet ds = new DataSetBuilder("HilbertSpectrum") //
+                                   .setValues(DataSet.DIM_X, time) //
+                                   .setValues(DataSet.DIM_Y, frequency) //
+                                   .setValues(DataSet.DIM_Z, getSpectrumArray(data, nQuantx, nQuanty)) //
+                                   .build();
 
         fstatus = 100;
         return ds;

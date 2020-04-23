@@ -51,25 +51,18 @@ public class MultiDimDoubleDataSet extends AbstractDataSet<MultiDimDoubleDataSet
      * copies of the input arrays.
      *
      * @param name name of this data set.
-     * @param values the values for the new dataset double[nDims][nDataPoints]
-     * @param initalSize how many data points are relevant to be taken
      * @param deepCopy if true, the input array is copied
+     * @param values the values for the new dataset double[nDims][nDataPoints]
      * @throws IllegalArgumentException if any of the parameters is {@code null} or if arrays with coordinates have
      *             different lengths
      */
-    public MultiDimDoubleDataSet(final String name, final double[][] values, final int initalSize,
-            final boolean deepCopy) {
+    public MultiDimDoubleDataSet(final String name, final boolean deepCopy, final double[]... values) {
         this(name, values.length);
-        int dataMaxIndex = initalSize;
-        for (int i = 0; i < values.length; i++) {
-            AssertUtils.notNull("data for dimension " + i, values[i]);
-            dataMaxIndex = Math.min(dataMaxIndex, values[i].length);
-        }
         this.values = new DoubleArrayList[values.length];
         for (int i = 0; i < values.length; i++) {
             if (deepCopy) {
-                this.values[i] = new DoubleArrayList(dataMaxIndex);
-                this.values[i].addElements(0, values[i], 0, dataMaxIndex);
+                this.values[i] = new DoubleArrayList(values[i].length);
+                this.values[i].addElements(0, values[i]);
             } else {
                 this.values[i] = DoubleArrayList.wrap(values[i]);
             }
@@ -82,16 +75,26 @@ public class MultiDimDoubleDataSet extends AbstractDataSet<MultiDimDoubleDataSet
      *
      * @param name name of this DataSet.
      * @param nDims the number of dimensions
-     * @param initalSize initial capacity of buffer (N.B. size=0)
+     * @param initialSizes initial capacity of buffer. If multiple sizes are supplied, they are used to after one another
+     *            and afterwards the product of all sizes is used, e.g. nDims=3 and initialSizes=4,5 results in a
+     *            three-dimensional dataset with 4 points in x, 5 points in y and 20 points in z direction.
      * @throws IllegalArgumentException if {@code name} is {@code null}
      */
-    public MultiDimDoubleDataSet(final String name, final int nDims, final int initalSize) {
+    public MultiDimDoubleDataSet(final String name, final int nDims, final int... initialSizes) {
         super(name, nDims);
         AssertUtils.gtThanZero("nDims", nDims);
-        AssertUtils.gtEqThanZero("initalSize", initalSize);
+        AssertUtils.nonEmptyArray("initialSizes", initialSizes);
         values = new DoubleArrayList[nDims];
+        int acumulatedSize = 1;
         for (int i = 0; i < nDims; i++) {
-            values[i] = new DoubleArrayList(initalSize);
+            if (initialSizes.length > i) {
+                values[i] = new DoubleArrayList(initialSizes[i]);
+                values[i].size(initialSizes[i]);
+                acumulatedSize *= initialSizes[i];
+            } else {
+                values[i] = new DoubleArrayList(acumulatedSize);
+                values[i].size(acumulatedSize);
+            }
         }
     }
 
@@ -248,17 +251,8 @@ public class MultiDimDoubleDataSet extends AbstractDataSet<MultiDimDoubleDataSet
     }
 
     @Override
-    public int getDataCount() {
-        int size = Integer.MAX_VALUE;
-        for (int i = 0; i < this.values.length; i++) {
-            size = Math.min(size, values[i].size());
-        }
-        return size;
-    }
-
-    @Override
     public final double[] getValues(final int dimIndex) {
-        return values[dimIndex].toArray((double[]) null);
+        return values[dimIndex].elements();
     }
 
     /**
@@ -411,6 +405,34 @@ public class MultiDimDoubleDataSet extends AbstractDataSet<MultiDimDoubleDataSet
     }
 
     /**
+     * <p>
+     * Update the data for a given dimension
+     *
+     * @param values coordinates
+     * @param copy true: makes an internal copy, false: use the pointer as is (saves memory allocation
+     * @return itself
+     */
+    public MultiDimDoubleDataSet setValues(final int dimIndex, final double[] values, final boolean copy) {
+        AssertUtils.notNull("X coordinates", values);
+        AssertUtils.gtOrEqual("Available dimensions", dimIndex, this.values.length);
+
+        lock().writeLockGuard(() -> {
+            getDataLabelMap().clear();
+            getDataStyleMap().clear();
+            if (copy) {
+                this.values[dimIndex].clear();
+                this.values[dimIndex].addElements(0, values);
+            } else {
+                this.values[dimIndex] = DoubleArrayList.wrap(values);
+            }
+
+            // invalidate ranges
+            getAxisDescriptions().forEach(AxisDescription::clear);
+        });
+        return fireInvalidated(new UpdatedDataEvent(this));
+    }
+
+    /**
      * replaces point coordinate of existing data point
      *
      * @param index data point index at which the new data point should be added
@@ -476,6 +498,9 @@ public class MultiDimDoubleDataSet extends AbstractDataSet<MultiDimDoubleDataSet
 
     @Override
     public int getDataCount(int dimIndex) {
+        if (values.length <= dimIndex) {
+            return 0;
+        }
         return values[dimIndex].size();
     }
 
@@ -498,5 +523,15 @@ public class MultiDimDoubleDataSet extends AbstractDataSet<MultiDimDoubleDataSet
         }
 
         return y1 + (((y2 - y1) * (x - x1)) / (x2 - x1));
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+        return super.equals(obj);
+    }
+
+    @Override
+    public int hashCode() {
+        return super.hashCode();
     }
 }

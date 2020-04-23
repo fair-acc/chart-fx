@@ -36,7 +36,6 @@ import de.gsi.chart.renderer.spi.LabelledMarkerRenderer;
 import de.gsi.chart.ui.geometry.Side;
 import de.gsi.chart.utils.FXUtils;
 import de.gsi.dataset.DataSet;
-import de.gsi.dataset.DataSet3D;
 import de.gsi.dataset.utils.AssertUtils;
 
 /**
@@ -478,13 +477,12 @@ public class XYChart extends Chart {
         final Side side = axis.getSide();
         axis.getAutoRange().clear();
         dataSets.forEach(dataset -> {
-            if (dataset instanceof DataSet3D && (side == Side.RIGHT || side == Side.TOP)) {
-                final DataSet3D mDataSet = (DataSet3D) dataset;
-                axis.getAutoRange().add(mDataSet.getAxisDescription(2).getMin());
-                axis.getAutoRange().add(mDataSet.getAxisDescription(2).getMax());
+            if (dataset.getDimension() > 2 && (side == Side.RIGHT || side == Side.TOP)) {
+                axis.getAutoRange().add(dataset.getAxisDescription(DataSet.DIM_Z).getMin());
+                axis.getAutoRange().add(dataset.getAxisDescription(DataSet.DIM_Z).getMax());
             } else {
-                axis.getAutoRange().add(dataset.getAxisDescription(isHorizontal ? 0 : 1).getMin());
-                axis.getAutoRange().add(dataset.getAxisDescription(isHorizontal ? 0 : 1).getMax());
+                axis.getAutoRange().add(dataset.getAxisDescription(isHorizontal ? DataSet.DIM_X : DataSet.DIM_Y).getMin());
+                axis.getAutoRange().add(dataset.getAxisDescription(isHorizontal ? DataSet.DIM_X : DataSet.DIM_Y).getMax());
             }
         });
         axis.getAutoRange().setAxisLength(axis.getLength() == 0 ? 1 : axis.getLength(), side);
@@ -505,13 +503,12 @@ public class XYChart extends Chart {
             // dataset.recomputeLimits(dataset.getAxisDescriptions().indexOf(axisDescription));
             // }
             // }
-            if (dataset instanceof DataSet3D && (side == Side.RIGHT || side == Side.TOP)) {
-                final DataSet3D mDataSet = (DataSet3D) dataset;
-                dataMinMax.add(mDataSet.getAxisDescription(DataSet.DIM_Z).getMin());
-                dataMinMax.add(mDataSet.getAxisDescription(DataSet.DIM_Z).getMax());
+            if (dataset.getDimension() > 2 && (side == Side.RIGHT || side == Side.TOP)) {
+                dataMinMax.add(dataset.getAxisDescription(DataSet.DIM_Z).getMin());
+                dataMinMax.add(dataset.getAxisDescription(DataSet.DIM_Z).getMax());
             } else {
-                dataMinMax.add(dataset.getAxisDescription(isHorizontal ? 0 : 1).getMin());
-                dataMinMax.add(dataset.getAxisDescription(isHorizontal ? 0 : 1).getMax());
+                dataMinMax.add(dataset.getAxisDescription(isHorizontal ? DataSet.DIM_X : DataSet.DIM_Y).getMin());
+                dataMinMax.add(dataset.getAxisDescription(isHorizontal ? DataSet.DIM_X : DataSet.DIM_Y).getMax());
             }
         }));
 

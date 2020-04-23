@@ -5,7 +5,8 @@ import java.util.concurrent.Future;
 
 import org.apache.commons.math3.complex.Complex;
 
-import de.gsi.dataset.spi.DoubleDataSet3D;
+import de.gsi.dataset.DataSet;
+import de.gsi.dataset.spi.DataSetBuilder;
 import de.gsi.math.TMath;
 import de.gsi.math.TMathConstants;
 import de.gsi.math.spectra.Convolution;
@@ -29,7 +30,7 @@ public class ContinuousWavelet {
      * @param fmax maximum scalogram frequency range
      * @return the complex scalogram spectrum
      */
-    public DoubleDataSet3D getScalogram(final double[] data, final int nQuantx, final int nQuanty, final double nu,
+    public DataSet getScalogram(final double[] data, final int nQuantx, final int nQuanty, final double nu,
             final double fmin, final double fmax) {
         if (data == null || data.length == 0) {
             throw new InvalidParameterException(
@@ -47,11 +48,11 @@ public class ContinuousWavelet {
         }
 
         // create and return data set.
-        final DoubleDataSet3D ds = new DoubleDataSet3D("Scalogram",
-                getScalogramTimeAxis(data, nQuantx, nQuanty, nu, fmin, fmax),
-                getScalogramFrequencyAxis(nQuantx, nQuanty, nu, fmin, fmax),
-                getScalogramArrayFourier(data, nQuantx, nQuanty, nu, fmin, fmax));
-        return ds;
+        return new DataSetBuilder("Scalogram") //
+                .setValues(DataSet.DIM_X, getScalogramTimeAxis(data, nQuantx, nQuanty, nu, fmin, fmax)) //
+                .setValues(DataSet.DIM_Y, getScalogramFrequencyAxis(nQuantx, nQuanty, nu, fmin, fmax)) //
+                .setValues(DataSet.DIM_Z, getScalogramArrayFourier(data, nQuantx, nQuanty, nu, fmin, fmax)) //
+                .build();
     }
 
     /**
@@ -384,13 +385,13 @@ public class ContinuousWavelet {
             final double nu) {
         double re = 0, im = 0;
         final double[] ret = new double[2]; // temp. real/imaginary storage for
-                // the morlet wavelet
+        // the morlet wavelet
         final double norm = 1.0 / Math.sqrt(scale);
 
         // reduce rank of multiplication (speed optimisation)
         final int centre = (int) translation + 1;
         final int width = (int) (10.0 * scale); // significant half-width
-                // (morlet)
+        // (morlet)
         final int min = Math.max(0, centre - width);
         final int max = Math.min(data.length, centre + width);
 

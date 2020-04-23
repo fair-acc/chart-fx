@@ -23,7 +23,10 @@ public class TransposedDataSetTest {
 
     @Test
     public void testWithDataSet2D() {
-        DataSet dataSet = new DataSetBuilder().setName("Test Default Data Set").setXValuesNoCopy(new double[] { 1, 2, 3 }).setYValuesNoCopy(new double[] { 4, 7, 6 }).build();
+        DataSet dataSet = new DataSetBuilder().setName("Test Default Data Set") //
+                                  .setValuesNoCopy(DIM_X, new double[] { 1, 2, 3 })
+                                  .setValuesNoCopy(DIM_Y, new double[] { 4, 7, 6 })
+                                  .build();
 
         TransposedDataSet transposed0 = TransposedDataSet.transpose(dataSet, true);
         assertArrayEquals(new int[] { 1, 0 }, transposed0.getPermutation());
@@ -104,6 +107,67 @@ public class TransposedDataSetTest {
         assertThrows(IndexOutOfBoundsException.class, () -> datasetTransposed.get(DIM_X, 4));
         assertThrows(IndexOutOfBoundsException.class, () -> ((TransposedDataSet3D) datasetTransposed).getZ(1, 5));
         assertThrows(IndexOutOfBoundsException.class, () -> ((TransposedDataSet3D) datasetTransposed).getZ(4, 0));
+        // TODO: check event generation. all events should be passed through and every transposition/permutation should
+        // also trigger an event
+    }
+
+    @Test
+    public void testWithMultiDimDataSet() {
+        // generate 3D dataset
+        final double[] xvalues = new double[] { 1, 2, 3, 4 };
+        final double[] yvalues = new double[] { -3, -2, -0, 2, 4 };
+        final double[] zvalues = new double[] { 1, 2, 3, 4, //
+            5, 6, 7, 8, //
+            9, 10, 11, 12, //
+            -1, -2, -3, -4, //
+            1337, 2337, 4242, 2323 };
+        final DataSet dataset = new DataSetBuilder("testdataset") //
+                                        .setValuesNoCopy(DIM_X, xvalues) //
+                                        .setValuesNoCopy(DIM_Y, yvalues) //
+                                        .setValuesNoCopy(DIM_Z, zvalues) //
+                                        .build();
+        // transpose dataset and test indexing
+        TransposedDataSet datasetTransposed = TransposedDataSet.transpose(dataset);
+        assertEquals("testdataset", datasetTransposed.getName());
+        assertEquals(20, datasetTransposed.getDataCount());
+        assertEquals(4, datasetTransposed.getDataCount(DIM_Y));
+        assertEquals(5, datasetTransposed.getDataCount(DIM_X));
+        assertEquals(20, datasetTransposed.getDataCount(DIM_Z));
+        assertEquals(4242, datasetTransposed.get(DIM_Z, 14));
+        assertEquals(6, datasetTransposed.get(DIM_Z, 6));
+        assertEquals(7, datasetTransposed.get(DIM_Z, 11));
+        assertEquals(4242, datasetTransposed.get(DIM_Z, 4 + 2 * datasetTransposed.getDataCount(DIM_X)));
+        assertEquals(4, datasetTransposed.get(DIM_Y, 3));
+        assertEquals(4, datasetTransposed.get(DIM_X, 4));
+        assertEquals(3, datasetTransposed.getIndex(DIM_Y, 3.9));
+        assertEquals(2, datasetTransposed.getIndex(DIM_X, -0.5));
+        assertEquals(0, datasetTransposed.getIndex(DIM_Y, -1000));
+        assertEquals(3, datasetTransposed.getIndex(DIM_Y, 1000));
+        // not possible to reliably throw index out of bounds without grid interface
+        // assertThrows(IndexOutOfBoundsException.class, () -> datasetTransposed.get(DIM_Y, 4));
+        // assertThrows(IndexOutOfBoundsException.class, () -> datasetTransposed.get(DIM_Z, 5 + 1 * datasetTransposed.getDataCount(DIM_X)));
+        // assertThrows(IndexOutOfBoundsException.class, () -> datasetTransposed.get(DIM_Z, 0 + 4 * datasetTransposed.getDataCount(DIM_X)));
+        // untranspose and check indexing again
+        datasetTransposed.setTransposed(false);
+        assertEquals("testdataset", dataset.getName());
+        assertEquals(20, datasetTransposed.getDataCount());
+        assertEquals(4, datasetTransposed.getDataCount(DIM_X));
+        assertEquals(5, datasetTransposed.getDataCount(DIM_Y));
+        assertEquals(20, datasetTransposed.getDataCount(DIM_Z));
+        assertEquals(4242, datasetTransposed.get(DIM_Z, 18));
+        assertEquals(6, datasetTransposed.get(DIM_Z, 5));
+        assertEquals(7, datasetTransposed.get(DIM_Z, 6));
+        assertEquals(4242, datasetTransposed.get(DIM_Z, 2 + 4 * datasetTransposed.getDataCount(DIM_X)));
+        assertEquals(4, datasetTransposed.get(DIM_X, 3));
+        assertEquals(4, datasetTransposed.get(DIM_Y, 4));
+        assertEquals(3, datasetTransposed.getIndex(DIM_X, 3.9));
+        assertEquals(2, datasetTransposed.getIndex(DIM_Y, -0.5));
+        assertEquals(0, datasetTransposed.getIndex(DIM_X, -1000));
+        assertEquals(3, datasetTransposed.getIndex(DIM_X, 1000));
+        // not possible to reliably throw index out of bounds without grid interface
+        // assertThrows(IndexOutOfBoundsException.class, () -> datasetTransposed.get(DIM_X, 4));
+        // assertThrows(IndexOutOfBoundsException.class, () -> datasetTransposed.get(DIM_Z, 1 + 5 * datasetTransposed.getDataCount(DIM_X)));
+        // assertThrows(IndexOutOfBoundsException.class, () -> datasetTransposed.get(DIM_Z, 4 + 0 * datasetTransposed.getDataCount(DIM_X)));
         // TODO: check event generation. all events should be passed through and every transposition/permutation should
         // also trigger an event
     }
