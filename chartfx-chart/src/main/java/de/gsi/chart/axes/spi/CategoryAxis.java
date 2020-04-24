@@ -14,7 +14,8 @@ import de.gsi.chart.axes.AxisLabelOverlapPolicy;
 import de.gsi.dataset.DataSet;
 
 /**
- * A axis implementation that will works on string categories where each value as a unique category(tick mark) along the axis.
+ * A axis implementation that will works on string categories where each value as a unique category(tick mark) along the
+ * axis.
  */
 public final class CategoryAxis extends DefaultNumericAxis {
     private boolean forceAxisCategories = false;
@@ -96,7 +97,6 @@ public final class CategoryAxis extends DefaultNumericAxis {
      * Returns a {@link ObservableList} of categories plotted on this axis.
      *
      * @return ObservableList of categories for this axis.
-     * 
      */
     public ObservableList<String> getCategories() {
         return categories.get();
@@ -130,6 +130,7 @@ public final class CategoryAxis extends DefaultNumericAxis {
             return;
         }
 
+        this.setMaxMajorTickLabelCount(categoryList.size() + 1); // number of categories + unknown category
         setTickLabelFormatter(new StringConverter<Number>() {
             @Override
             public Number fromString(String string) {
