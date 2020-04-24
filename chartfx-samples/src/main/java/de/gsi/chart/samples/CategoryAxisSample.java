@@ -6,6 +6,12 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
+import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.scene.Scene;
+import javafx.scene.layout.StackPane;
+import javafx.stage.Stage;
+
 import de.gsi.chart.XYChart;
 import de.gsi.chart.axes.AxisLabelOverlapPolicy;
 import de.gsi.chart.axes.spi.CategoryAxis;
@@ -17,11 +23,6 @@ import de.gsi.chart.renderer.LineStyle;
 import de.gsi.chart.renderer.spi.ErrorDataSetRenderer;
 import de.gsi.dataset.spi.DefaultErrorDataSet;
 import de.gsi.dataset.testdata.spi.RandomDataGenerator;
-import javafx.application.Application;
-import javafx.application.Platform;
-import javafx.scene.Scene;
-import javafx.scene.layout.StackPane;
-import javafx.stage.Stage;
 
 /**
  * @author rstein
@@ -31,12 +32,12 @@ public class CategoryAxisSample extends Application {
 
     @Override
     public void start(final Stage primaryStage) {
-
         final StackPane root = new StackPane();
         final CategoryAxis xAxis = new CategoryAxis("months");
         // xAxis.setTickLabelRotation(90);
         // alt:
         xAxis.setOverlapPolicy(AxisLabelOverlapPolicy.SHIFT_ALT);
+        xAxis.setMaxMajorTickLabelCount(N_SAMPLES + 1);
         final DefaultNumericAxis yAxis = new DefaultNumericAxis("yAxis");
 
         final XYChart lineChartPlot = new XYChart(xAxis, yAxis);
