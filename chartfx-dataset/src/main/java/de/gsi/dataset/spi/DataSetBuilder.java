@@ -25,7 +25,7 @@ public class DataSetBuilder {
     protected Map<Integer, String> dataLabels = new HashMap<>();
     protected Map<Integer, String> dataStyles = new HashMap<>();
     protected List<AxisDescription> axisDescriptions = new ArrayList<>();
-    protected int initialCapacity = -1;
+    protected int[] initialCapacity = null;
     private int dimension = -1;
     private boolean errors = false;
 
@@ -101,10 +101,13 @@ public class DataSetBuilder {
         int maxDim = values.keySet().stream().collect(Collectors.maxBy(Integer::compare)).orElse(-1);
         maxDim = Math.max(maxDim, errorsNeg.keySet().stream().collect(Collectors.maxBy(Integer::compare)).orElse(-1));
         maxDim = Math.max(maxDim, errorsPos.keySet().stream().collect(Collectors.maxBy(Integer::compare)).orElse(-1));
-        int minArrays = values.values().stream().map(e -> e.length).collect(Collectors.maxBy(Integer::compare)).orElse(-1);
-        minArrays = Math.max(minArrays, errorsNeg.values().stream().map(e -> e.length).collect(Collectors.maxBy(Integer::compare)).orElse(-1));
-        minArrays = Math.max(minArrays, errorsPos.values().stream().map(e -> e.length).collect(Collectors.maxBy(Integer::compare)).orElse(-1));
-        final int size = initialCapacity < 0 ? minArrays : Math.min(minArrays, initialCapacity);
+        int minArrays = values.values().stream().map(e -> e.length).collect(Collectors.maxBy(Integer::compare)).orElse(0);
+        minArrays = Math.max(minArrays,
+                errorsNeg.values().stream().map(e -> e.length).collect(Collectors.maxBy(Integer::compare)).orElse(0));
+        minArrays = Math.max(minArrays,
+                errorsPos.values().stream().map(e -> e.length).collect(Collectors.maxBy(Integer::compare)).orElse(0));
+        final int size = initialCapacity != null && initialCapacity.length > 0 ? Math.min(minArrays, initialCapacity[0])
+                                                                               : minArrays;
         if (this.dimension == -1) {
             this.dimension = maxDim + 1;
         } else if (this.dimension <= maxDim) {
@@ -114,8 +117,8 @@ public class DataSetBuilder {
         case 0:
         case 1:
         case 2:
-            if (values.size() == 0 && errorsNeg.size() == 0 && errorsPos.size() == 0 && initialCapacity <= 0) {
-                return new DefaultDataSet(dsName, Math.max(initialCapacity, 0));
+            if (values.size() == 0 && errorsNeg.size() == 0 && errorsPos.size() == 0 && initialCapacity != null) {
+                return new DefaultDataSet(dsName, Math.max(initialCapacity[0], 0));
             }
             return build2dDataSet(dsName, size);
         case 3:
@@ -166,42 +169,12 @@ public class DataSetBuilder {
         return new DefaultDataSet(dsName, xvalues, yvalues, size, false);
     }
 
-    private DataSet build3dDataset(final String dsName, final int size) {
-        double[] xvalues = values.get(DataSet.DIM_X);
-        int xsize = 0; // TODO: determine real size
-        if (xvalues == null) {
-            xvalues = IntStream.range(0, xsize).mapToDouble(x -> x).toArray();
-        } else {
-            xsize = xvalues.length;
-        }
-        double[] yvalues = values.get(DataSet.DIM_Y);
-        int ysize = 0; // TODO: determine real size
-        if (yvalues == null) {
-            yvalues = IntStream.range(0, ysize).mapToDouble(x -> x).toArray();
-        } else {
-            ysize = yvalues.length;
-        }
-        double[] zValuesLinear = values.get(DataSet.DIM_Z);
-        if (xsize == ysize && xsize == zValuesLinear.length) {
-            return buildMultiDimDataSet(dsName, xsize, 3);
-        }
-        double[][] zValues = new double[ysize][];
-        if (zValuesLinear == null) {
-            zValuesLinear = new double[xvalues.length * yvalues.length];
-        } else {
-            AssertUtils.checkArrayDimension("zData", zValuesLinear, xvalues.length * yvalues.length);
-            for (int i = 0; i < ysize; i++) {
-                zValues[i] = new double[xsize];
-                System.arraycopy(zValuesLinear, i * xsize, zValues[i], 0, xsize);
-            }
-        }
-        return new DoubleDataSet3D(dsName, xvalues, yvalues, zValues);
-    }
-
     private DataSet buildMultiDimDataSet(final String dsName, final int size, final int nDims) {
         final double[][] inputValues = new double[nDims][];
-        int initialSize = this.initialCapacity;
         for (int dimIndex = 0; dimIndex < nDims; dimIndex++) {
+            int initialSize = this.initialCapacity != null && this.initialCapacity.length > dimIndex
+                                      ? this.initialCapacity[dimIndex]
+                                      : 0;
             double[] val = values.get(dimIndex);
             if (val == null) {
                 if (dimIndex == DataSet.DIM_X) {
@@ -219,7 +192,7 @@ public class DataSetBuilder {
                 throw new IllegalStateException("DataSetBuilder: X Errors not implemented for MultiDimDataSet");
             }
         }
-        return new MultiDimDoubleDataSet(dsName, inputValues, 0, false);
+        return new MultiDimDoubleDataSet(dsName, false, inputValues);
     }
 
     private AxisDescription getAxisDescription(int dimension) {
@@ -304,10 +277,9 @@ public class DataSetBuilder {
     }
 
     public DataSetBuilder setNegError(final int dimIndex, final double[] errors) {
-        final int size = initialCapacity < 0 ? errors.length : Math.min(initialCapacity, errors.length);
-        final double[] vals = new double[size];
+        final double[] vals = new double[errors.length];
         this.errorsNeg.put(dimIndex, vals);
-        System.arraycopy(errors, 0, vals, 0, size);
+        System.arraycopy(errors, 0, vals, 0, errors.length);
         return this;
     }
 
@@ -318,10 +290,9 @@ public class DataSetBuilder {
     }
 
     public final DataSetBuilder setPosError(final int dimIndex, final double[] errors) {
-        final int size = initialCapacity < 0 ? errors.length : Math.min(initialCapacity, errors.length);
-        final double[] vals = new double[size];
+        final double[] vals = new double[errors.length];
         this.errorsPos.put(dimIndex, vals);
-        System.arraycopy(errors, 0, vals, 0, size);
+        System.arraycopy(errors, 0, vals, 0, errors.length);
         return this;
     }
 
@@ -332,10 +303,9 @@ public class DataSetBuilder {
     }
 
     public final DataSetBuilder setValues(final int dimIndex, final double[] values) {
-        final int size = initialCapacity < 0 ? values.length : Math.min(initialCapacity, values.length);
-        final double[] vals = new double[size];
+        final double[] vals = new double[values.length];
         this.values.put(dimIndex, vals);
-        System.arraycopy(values, 0, vals, 0, size);
+        System.arraycopy(values, 0, vals, 0, values.length);
         return this;
     }
 
@@ -344,7 +314,7 @@ public class DataSetBuilder {
         AssertUtils.nonEmptyArray("values first col", values[0]);
         int ysize = values.length;
         int xsize = values[0].length;
-        final int size = initialCapacity < 0 ? ysize * xsize : Math.min(initialCapacity, values.length);
+        final int size = ysize * xsize;
         final double[] vals = new double[size];
         for (int i = 0; i < ysize; i++) {
             AssertUtils.checkArrayDimension("column length", values[i], xsize);
@@ -369,7 +339,7 @@ public class DataSetBuilder {
         return this;
     }
 
-    public DataSetBuilder setInitalCapacity(int newInitialCapacity) {
+    public DataSetBuilder setInitalCapacity(int... newInitialCapacity) {
         initialCapacity = newInitialCapacity;
         return this;
     }

@@ -16,7 +16,6 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 
 import de.gsi.dataset.DataSet;
-import de.gsi.dataset.DataSet3D;
 import de.gsi.dataset.DataSetError;
 import de.gsi.dataset.DataSetError.ErrorType;
 import de.gsi.dataset.DataSetMetaData;
@@ -186,7 +185,7 @@ public class DataSetBuilderTests {
         assertEquals(6, dataset.getDataCount(DIM_Z));
         assertEquals(3, dataset.getDimension());
         assertThrows(IndexOutOfBoundsException.class, () -> dataset.get(DIM_X, 3));
-        assertTrue(dataset instanceof DataSet3D);
+        assertTrue(dataset instanceof MultiDimDoubleDataSet);
     }
 
     @Test

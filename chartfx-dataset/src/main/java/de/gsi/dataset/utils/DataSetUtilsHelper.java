@@ -11,7 +11,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.gsi.dataset.DataSet;
-import de.gsi.dataset.DataSet3D;
 
 /**
  * Small static helper routines to ease the reading of the DataSetUtils class
@@ -65,8 +64,8 @@ public class DataSetUtilsHelper {
         if (function.getDataCount(DataSet.DIM_X) <= 1) {
             return 0.0;
         }
-        if (function instanceof DataSet3D) {
-            LOGGER.warn("integral not implemented for DataSet3D");
+        if (function.getDimension() > 2) {
+            LOGGER.warn("integral not implemented for nDim > 2");
             return 0.0;
         }
         for (int i = 1; i < function.getDataCount(DataSet.DIM_X); i++) {
@@ -202,11 +201,11 @@ public class DataSetUtilsHelper {
         }
         if (byteBuffer.capacity() < nSamples * Float.BYTES) {
             throw new InvalidParameterException("byte buffer size (" + byteBuffer.capacity()
-                    + ") is smaller than double buffer size (" + nSamples * Float.BYTES + ")");
+                                                + ") is smaller than double buffer size (" + nSamples * Float.BYTES + ")");
         }
         if (doubleBuffer.length < nSamples) {
             throw new InvalidParameterException("double array contains less (" + doubleBuffer.length
-                    + ") than nsamples (" + nSamples + ") entries.");
+                                                + ") than nsamples (" + nSamples + ") entries.");
         }
         byteBuffer.position(0);
         for (int i = 0; i < nSamples; i++) {
@@ -227,11 +226,11 @@ public class DataSetUtilsHelper {
         }
         if (byteBuffer.capacity() < nSamples * Double.BYTES) {
             throw new InvalidParameterException("byte buffer size (" + byteBuffer.capacity()
-                    + ") is smaller than double buffer size (" + nSamples * Float.BYTES + ")");
+                                                + ") is smaller than double buffer size (" + nSamples * Float.BYTES + ")");
         }
         if (doubleBuffer.length < nSamples) {
             throw new InvalidParameterException("double array contains less (" + doubleBuffer.length
-                    + ") than nsamples (" + nSamples + ") entries.");
+                                                + ") than nsamples (" + nSamples + ") entries.");
         }
         byteBuffer.position(0);
         for (int i = 0; i < nSamples; i++) {

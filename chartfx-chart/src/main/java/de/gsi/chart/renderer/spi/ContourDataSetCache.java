@@ -26,7 +26,6 @@ import de.gsi.chart.renderer.datareduction.ReductionType;
 import de.gsi.chart.renderer.spi.utils.ColorGradient;
 import de.gsi.chart.utils.WritableImageCache;
 import de.gsi.dataset.DataSet;
-import de.gsi.dataset.DataSet3D;
 import de.gsi.dataset.spi.DataRange;
 import de.gsi.dataset.utils.ByteArrayCache;
 import de.gsi.dataset.utils.CachedDaemonThreadFactory;
@@ -83,9 +82,10 @@ class ContourDataSetCache extends WritableImageCache {
     protected final double[] reduced;
 
     public ContourDataSetCache(final XYChart chart, final ContourDataSetRenderer renderer, final DataSet dataSet) {
-        if (!(dataSet instanceof DataSet3D)) {
-            throw new IllegalArgumentException("dataSet not a DataSet3D but " + dataSet.getClass().getName());
+        if (dataSet.getDimension() < 3) {
+            throw new IllegalArgumentException("dataSet needs be at least 3D but is " + dataSet.getDimension());
         }
+        assertGridDimensions(dataSet);
         final long start = ProcessingProfiler.getTimeStamp();
         this.dataSet = dataSet;
         this.xAxis = chart.getXAxis();
@@ -166,6 +166,17 @@ class ContourDataSetCache extends WritableImageCache {
         final int nQuant = renderer.getNumberQuantisationLevels();
         quantizeData(reduced, xSize, ySize, zInverted, zMin, zMax, axisTransform, nQuant);
         ProcessingProfiler.getTimeDiff(start, "quantized data");
+    }
+
+    /**
+     * Assert that a dataSet has the correct dimensions to be rendered on a grid
+     * 
+     * @param dataSet the dataSet to assert
+     */
+    private static void assertGridDimensions(final DataSet dataSet) {
+        if (dataSet.getDataCount(DIM_Z) != dataSet.getDataCount(DIM_X) * dataSet.getDataCount(DIM_Y)) {
+            throw new IllegalArgumentException("n_z not equal to n_x * n_y");
+        }
     }
 
     protected static void quantizeData(final double[] input, final int width, final int height, final boolean inverted,
