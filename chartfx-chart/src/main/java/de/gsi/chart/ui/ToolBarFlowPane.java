@@ -48,7 +48,6 @@ public class ToolBarFlowPane extends FlowPane {
 
         this.setShape(ToolBarShapeHelper.getToolBarShape(this.getWidth(), this.getHeight(), cornerRadius.get()));
 
-
         this.setAlignment(Pos.TOP_CENTER);
         this.setMinWidth(0);
         setPadding(calculateInsets()); // NOPMD
@@ -78,7 +77,7 @@ public class ToolBarFlowPane extends FlowPane {
         this.setPrefWrapLength(wrapLength);
         this.setMaxWidth(wrapLength);
         this.setWidth(maxLength);
-        final int height = (int)Math.max(getHeight(), Math.max(getBoundsInParent().getHeight(), getBoundsInLocal().getHeight()));
+        final int height = (int) Math.max(getHeight(), Math.max(getBoundsInParent().getHeight(), getBoundsInLocal().getHeight()));
         this.setMinHeight(height);
 
         this.setShape(ToolBarShapeHelper.getToolBarShape(wrapLength, height, cornerRadius.get()));
