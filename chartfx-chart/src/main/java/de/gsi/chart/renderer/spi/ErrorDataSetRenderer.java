@@ -108,12 +108,13 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
 
         if (localCachedPoints.polarPlot) {
             for (int i = 0; i < localCachedPoints.actualDataCount; i++) {
-                if (localCachedPoints.selected[i]) {
+                if (localCachedPoints.styles[i] == null) {
                     gc.strokeLine(localCachedPoints.xZero, localCachedPoints.yZero, localCachedPoints.xValues[i],
                             localCachedPoints.yValues[i]);
                 } else {
                     // work-around: bar colour controlled by the marker color
                     gc.save();
+                    gc.setFill(StyleParser.getColorPropertyValue(localCachedPoints.styles[i], XYChartCss.FILL_COLOR));
                     gc.setLineWidth(barWidthHalf);
                     gc.strokeLine(localCachedPoints.xZero, localCachedPoints.yZero, localCachedPoints.xValues[i],
                             localCachedPoints.yValues[i]);
@@ -131,11 +132,14 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
                     yDiff = Math.abs(yDiff);
                 }
 
-                if (localCachedPoints.selected[i]) {
-                    gc.strokeRect(localCachedPoints.xValues[i] - barWidthHalf, yMin, localBarWidth, yDiff);
-                } else {
-                    // work-around: bar colour controlled by the marker color
+                if (localCachedPoints.styles[i] == null) {
                     gc.fillRect(localCachedPoints.xValues[i] - barWidthHalf, yMin, localBarWidth, yDiff);
+                    
+                } else {
+                    gc.save();
+                    gc.setFill(StyleParser.getColorPropertyValue(localCachedPoints.styles[i], XYChartCss.FILL_COLOR));
+                    gc.fillRect(localCachedPoints.xValues[i] - barWidthHalf, yMin, localBarWidth, yDiff);
+                    gc.restore();
                 }
             }
         }
