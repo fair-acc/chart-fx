@@ -47,12 +47,10 @@ public class ToolBarFlowPane extends FlowPane {
         this.setMinHeight(0);
 
         this.setShape(ToolBarShapeHelper.getToolBarShape(this.getWidth(), this.getHeight(), cornerRadius.get()));
-        this.setPrefWidth(USE_PREF_SIZE);
 
         this.setAlignment(Pos.TOP_CENTER);
         this.setMinWidth(0);
         setPadding(calculateInsets()); // NOPMD
-        VBox.setVgrow(this, Priority.ALWAYS);
         HBox.setHgrow(this, Priority.NEVER);
 
         ChangeListener<Number> toolBarSizeListener = (ch, o, n) -> {
@@ -69,18 +67,20 @@ public class ToolBarFlowPane extends FlowPane {
     }
 
     private void adjustToolBarWidth() {
-        final double maxLength = 0.90 * chart.getCanvas().getWidth();
+        final double maxLength = 0.60 * chart.getWidth();
         double length = 0.0;
         for (Node node : this.getChildren()) {
             length += node.prefWidth(DEFAULT_TOOLBAR_HEIGHT);
         }
         length += 4 * cornerRadius.get();
         final double wrapLength = Math.min(maxLength, Math.max(length, 50));
+        this.setPrefWrapLength(wrapLength);
+        this.setMaxWidth(wrapLength);
+        this.setWidth(maxLength);
+        final int height = (int) Math.max(getHeight(), Math.max(getBoundsInParent().getHeight(), getBoundsInLocal().getHeight()));
+        this.setMinHeight(height);
 
-        this.prefWrapLengthProperty().set(wrapLength);
-        this.setMaxWidth(maxLength);
-        this.setWidth(length);
-        this.setShape(ToolBarShapeHelper.getToolBarShape(wrapLength, this.getHeight(), cornerRadius.get()));
+        this.setShape(ToolBarShapeHelper.getToolBarShape(wrapLength, height, cornerRadius.get()));
     }
 
     /**
