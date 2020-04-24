@@ -11,7 +11,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.gsi.dataset.DataSet;
-import de.gsi.dataset.DataSet3D;
 
 /**
  * Small static helper routines to ease the reading of the DataSetUtils class
@@ -65,8 +64,8 @@ public class DataSetUtilsHelper {
         if (function.getDataCount(DataSet.DIM_X) <= 1) {
             return 0.0;
         }
-        if (function instanceof DataSet3D) {
-            LOGGER.warn("integral not implemented for DataSet3D");
+        if (function.getDimension() > 2) {
+            LOGGER.warn("integral not implemented for nDim > 2");
             return 0.0;
         }
         for (int i = 1; i < function.getDataCount(DataSet.DIM_X); i++) {

@@ -8,6 +8,7 @@ package de.gsi.dataset.utils;
 
 import static de.gsi.dataset.DataSet.DIM_X;
 import static de.gsi.dataset.DataSet.DIM_Y;
+import static de.gsi.dataset.DataSet.DIM_Z;
 import static de.gsi.dataset.utils.DataSetUtils.ErrType.EYN;
 import static de.gsi.dataset.utils.DataSetUtils.ErrType.EYP;
 
@@ -53,13 +54,12 @@ import org.slf4j.LoggerFactory;
 import de.gsi.dataset.AxisDescription;
 import de.gsi.dataset.DataSet;
 import de.gsi.dataset.DataSet2D;
-import de.gsi.dataset.DataSet3D;
 import de.gsi.dataset.DataSetError;
 import de.gsi.dataset.DataSetMetaData;
 import de.gsi.dataset.spi.AbstractDataSet;
+import de.gsi.dataset.spi.DataSetBuilder;
 import de.gsi.dataset.spi.DefaultAxisDescription;
 import de.gsi.dataset.spi.DefaultDataSet;
-import de.gsi.dataset.spi.DoubleDataSet3D;
 import de.gsi.dataset.spi.DoubleErrorDataSet;
 
 /**
@@ -402,8 +402,7 @@ public class DataSetUtils extends DataSetUtilsHelper {
             final ZipOutputStream zipOStream = new ZipOutputStream(Files.newOutputStream(file.toPath()));
             final String filename = file.getName();
             final String zipentryname = filename.toLowerCase(Locale.UK).endsWith(".zip")
-                                                ? filename.substring(0, filename.length() - 4)
-                                                : filename;
+                    ? filename.substring(0, filename.length() - 4) : filename;
             zipOStream.putNextEntry(new ZipEntry(zipentryname));
             return zipOStream;
         default:
@@ -428,12 +427,13 @@ public class DataSetUtils extends DataSetUtilsHelper {
         }
         DataSet dataSet = null;
         try (final SplitCharByteInputStream inputFile = new SplitCharByteInputStream(
-                     new PushbackInputStream(new ByteArrayInputStream(byteArray), 8192))) {
+                new PushbackInputStream(new ByteArrayInputStream(byteArray), 8192))) {
             dataSet = readDataSetFromStream(inputFile);
 
         } catch (final IOException e) {
             if (LOGGER.isErrorEnabled()) {
-                LOGGER.atError().setCause(e).addArgument(byteArray.length).log("could not open/parse byte array size = {}");
+                LOGGER.atError().setCause(e).addArgument(byteArray.length)
+                        .log("could not open/parse byte array size = {}");
             }
         }
         return dataSet;
@@ -471,7 +471,7 @@ public class DataSetUtils extends DataSetUtilsHelper {
         try {
             final File file = new File(fileName);
             try (SplitCharByteInputStream inputFile = openDatasetFileInput(file,
-                         compression == Compression.AUTO ? evaluateAutoCompression(fileName) : compression)) {
+                    compression == Compression.AUTO ? evaluateAutoCompression(fileName) : compression)) {
                 dataSet = readDataSetFromStream(inputFile);
 
             } catch (final IOException e) {
@@ -664,7 +664,7 @@ public class DataSetUtils extends DataSetUtilsHelper {
                 boolean isFloat32 = dataentry.type.toLowerCase(Locale.UK).contains("float32");
 
                 final ByteBuffer byteData = isFloat32 ? ByteBuffer.allocate(dataentry.nsamples * Float.BYTES)
-                                                      : ByteBuffer.allocate(dataentry.nsamples * Double.BYTES);
+                        : ByteBuffer.allocate(dataentry.nsamples * Double.BYTES);
                 int alreadyRead = 0;
                 if (isFloat32) {
                     dataentry.data32 = byteData.asFloatBuffer();
@@ -697,7 +697,8 @@ public class DataSetUtils extends DataSetUtilsHelper {
                     break;
                 default:
                     if (LOGGER.isDebugEnabled()) {
-                        LOGGER.atDebug().addArgument(dataentry.name).addArgument(dataentry.type).log("Got unused variable {} of type {}");
+                        LOGGER.atDebug().addArgument(dataentry.name).addArgument(dataentry.type)
+                                .log("Got unused variable {} of type {}");
                     }
                     break;
                 }
@@ -707,18 +708,10 @@ public class DataSetUtils extends DataSetUtilsHelper {
                         toRead.get(valindex[0]).data64);
                 final double[] y = readDoubleArrayFromBuffer(toRead.get(valindex[1]).data32,
                         toRead.get(valindex[1]).data64);
-                final double[][] z = new double[y.length][];
-                for (int iY = 0; iY < y.length; iY++) {
-                    z[iY] = new double[x.length];
-                    for (int iX = 0; iX < x.length; iX++) {
-                        if (toRead.get(valindex[4]).data32 == null) {
-                            z[iY][iX] = toRead.get(valindex[4]).data64.get(iY + iX * y.length);
-                        } else {
-                            z[iY][iX] = toRead.get(valindex[4]).data32.get(iY + iX * y.length);
-                        }
-                    }
-                }
-                result = new DoubleDataSet3D(dataSetName, x, y, z);
+                final double[] z = readDoubleArrayFromBuffer(toRead.get(valindex[4]).data32,
+                        toRead.get(valindex[4]).data64);
+                result = new DataSetBuilder(dataSetName).setValues(DIM_X, x).setValues(DIM_Y, y).setValues(DIM_Z, z)
+                        .build();
             } else { // 2D Dataset
                 final double[] x = readDoubleArrayFromBuffer(toRead.get(valindex[0]).data32,
                         toRead.get(valindex[0]).data64);
@@ -773,7 +766,8 @@ public class DataSetUtils extends DataSetUtilsHelper {
                 for (i = 0; i < zArray.length; i++) {
                     z.get(zArray[i]);
                 }
-                result = new DoubleDataSet3D(dataSetName, xArray, yArray, zArray);
+                result = new DataSetBuilder(dataSetName).setValues(DIM_X, xArray).setValues(DIM_Y, yArray)
+                        .setValues(DIM_Z, zArray).build();
             } else {
                 result = new DoubleErrorDataSet(dataSetName);
                 for (String line = inputFile.readLine(); line != null; line = inputFile.readLine()) {
@@ -791,7 +785,8 @@ public class DataSetUtils extends DataSetUtilsHelper {
             }
         } catch (final Exception e) {
             if (LOGGER.isErrorEnabled()) {
-                LOGGER.atError().setCause(e).addArgument(result == null ? "null" : result.getName()).log("readNumericDataFrom File could not parse numeric data for: '{}'");
+                LOGGER.atError().setCause(e).addArgument(result == null ? "null" : result.getName())
+                        .log("readNumericDataFrom File could not parse numeric data for: '{}'");
             }
         }
         return result;
@@ -966,7 +961,7 @@ public class DataSetUtils extends DataSetUtilsHelper {
             final ByteArrayOutputStream byteOutput = new ByteArrayOutputStream(8192);
             // TODO: cache ByteArrayOutputStream
             try (OutputStream outputfile = openDatasetFileOutput(file,
-                         compression == Compression.AUTO ? evaluateAutoCompression(fileName) : compression);) {
+                    compression == Compression.AUTO ? evaluateAutoCompression(fileName) : compression);) {
                 writeDataSetToByteArray(dataSet, byteOutput, binary, useFloat32BinaryStandard());
 
                 byteOutput.writeTo(outputfile);
@@ -979,7 +974,8 @@ public class DataSetUtils extends DataSetUtilsHelper {
             }
 
             if (LOGGER.isDebugEnabled()) {
-                LOGGER.atDebug().addArgument(dataSet.getName()).addArgument(longFileName).log("write data set '{}' to {}");
+                LOGGER.atDebug().addArgument(dataSet.getName()).addArgument(longFileName)
+                        .log("write data set '{}' to {}");
             }
 
             return longFileName;
@@ -1011,7 +1007,7 @@ public class DataSetUtils extends DataSetUtilsHelper {
                 }
             }
 
-            if (dataSet instanceof DataSet3D) {
+            if (dataSet.getDimension() > 2) {
                 buffer.append("## statistics disabled for DataSet3D, not yet implemented\n");
             } else {
                 try {
@@ -1019,14 +1015,12 @@ public class DataSetUtils extends DataSetUtilsHelper {
                     // opening the
                     // file with standard text-based viewers
                     buffer.append("#integral : ").append(integralSimple(dataSet)) //
-                            .append("\n#mean : ")
-                            .append(mean(dataSet.getValues(DIM_Y))) //
-                            .append("\n#rms : ")
-                            .append(rootMeanSquare(dataSet.getValues(DIM_Y)))
-                            .append('\n');
+                            .append("\n#mean : ").append(mean(dataSet.getValues(DIM_Y))) //
+                            .append("\n#rms : ").append(rootMeanSquare(dataSet.getValues(DIM_Y))).append('\n');
                 } catch (final Exception e) {
                     if (LOGGER.isErrorEnabled()) {
-                        LOGGER.atError().addArgument(dataSet.getName()).setCause(e).log("writeHeaderDataToFile - compute Math error for dataSet = '{}'");
+                        LOGGER.atError().addArgument(dataSet.getName()).setCause(e)
+                                .log("writeHeaderDataToFile - compute Math error for dataSet = '{}'");
                     }
                 }
             }
@@ -1036,7 +1030,8 @@ public class DataSetUtils extends DataSetUtilsHelper {
             release("headerDataCacheBuilder", buffer);
         } catch (final Exception e) {
             if (LOGGER.isErrorEnabled()) {
-                LOGGER.atError().setCause(e).addArgument(dataSet.getName()).log("writeHeaderDataToFile - error for dataSet = '{}'");
+                LOGGER.atError().setCause(e).addArgument(dataSet.getName())
+                        .log("writeHeaderDataToFile - error for dataSet = '{}'");
             }
         }
     }
@@ -1089,18 +1084,17 @@ public class DataSetUtils extends DataSetUtilsHelper {
 
         buffer.append("$binary\n");
         final String dataType = asFloat ? "float32[]" : "float64[]";
-        boolean is3D = dataSet instanceof DataSet3D;
+        boolean is3D = dataSet.getDimension() > 2
+                && dataSet.getDataCount(DIM_X) * dataSet.getDataCount(DIM_Y) == dataSet.getDataCount(DIM_Z);
         if (is3D) {
-            DataSet3D dataSet3D = (DataSet3D) dataSet;
-            buffer.append("$x;").append(dataType).append(';').append(dataSet3D.getDataCount(DIM_X));
-            buffer.append("\n$y;").append(dataType).append(';').append(dataSet3D.getDataCount(DIM_Y));
-            buffer.append("\n$z;").append(dataType).append(';').append(dataSet3D.getDataCount()).append('\n');
+            buffer.append("$x;").append(dataType).append(';').append(dataSet.getDataCount(DIM_X));
+            buffer.append("\n$y;").append(dataType).append(';').append(dataSet.getDataCount(DIM_Y));
+            buffer.append("\n$z;").append(dataType).append(';').append(dataSet.getDataCount(DIM_Z)).append('\n');
         } else {
-            final int nSamples = dataSet.getDataCount(DIM_X);
-            buffer.append("$x;").append(dataType).append(';').append(nSamples);
-            buffer.append("\n$y;").append(dataType).append(';').append(nSamples);
-            buffer.append("\n$eyn;").append(dataType).append(';').append(nSamples);
-            buffer.append("\n$eyp;").append(dataType).append(';').append(nSamples).append('\n');
+            buffer.append("$x;").append(dataType).append(';').append(dataSet.getDataCount(DIM_X));
+            buffer.append("\n$y;").append(dataType).append(';').append(dataSet.getDataCount(DIM_Y));
+            buffer.append("\n$eyn;").append(dataType).append(';').append(dataSet.getDataCount(DIM_X));
+            buffer.append("\n$eyp;").append(dataType).append(';').append(dataSet.getDataCount(DIM_Y)).append('\n');
         }
         try {
             outputStream.write(buffer.toString().getBytes());
@@ -1134,7 +1128,7 @@ public class DataSetUtils extends DataSetUtilsHelper {
                 outputStream.write(byteBuffer.array());
                 release(CACHED_WRITE_BYTE_BUFFER, byteBuffer);
             } else if (!asFloat && !is3D) {
-                final int nSamples = dataSet.getDataCount(DIM_X);
+                final int nSamples = dataSet.getDataCount();
                 final ByteBuffer byteBuffer = getCachedDoubleArray(CACHED_WRITE_BYTE_BUFFER, Double.BYTES * nSamples);
                 writeDoubleArrayToByteBuffer(byteBuffer, dataSet.getValues(DIM_X), nSamples);
                 outputStream.write(byteBuffer.array());
@@ -1149,44 +1143,38 @@ public class DataSetUtils extends DataSetUtilsHelper {
                 // TODO: check performance w.r.t. using 'DataOutputStream'
                 // directly
                 // TODO: efficient implementation using array access (needs API)
-                final DoubleDataSet3D dataSet3D = (DoubleDataSet3D) dataSet;
-                int nX = dataSet3D.getDataCount(DIM_X);
-                int nY = dataSet3D.getDataCount(DIM_Y);
-                int nZ = dataSet3D.getDataCount();
+                int nX = dataSet.getDataCount(DIM_X);
+                int nY = dataSet.getDataCount(DIM_Y);
+                int nZ = dataSet.getDataCount(DIM_Z);
 
                 final ByteBuffer byteBuffer = getCachedDoubleArray(CACHED_WRITE_BYTE_BUFFER,
                         Float.BYTES * (nX + nY + nZ));
                 for (int ix = 0; ix < nX; ix++) {
-                    byteBuffer.putFloat((float) dataSet3D.getX(ix));
+                    byteBuffer.putFloat((float) dataSet.get(DIM_X, ix));
                 }
                 for (int iy = 0; iy < nY; iy++) {
-                    byteBuffer.putFloat((float) dataSet3D.getY(iy));
+                    byteBuffer.putFloat((float) dataSet.get(DIM_Y, iy));
                 }
-                for (int ix = 0; ix < nX; ix++) {
-                    for (int iy = 0; iy < nY; iy++) {
-                        byteBuffer.putFloat((float) dataSet3D.getZ(ix, iy));
-                    }
+                for (int iz = 0; iz < nZ; iz++) {
+                    byteBuffer.putFloat((float) dataSet.get(DIM_Z, iz));
                 }
                 outputStream.write(byteBuffer.array());
                 release(CACHED_WRITE_BYTE_BUFFER, byteBuffer);
             } else if (!asFloat && is3D) {
-                // TODO: efficient implementation using array access (needs API)
-                final DoubleDataSet3D dataSet3D = (DoubleDataSet3D) dataSet;
-                int nX = dataSet3D.getDataCount(DIM_X);
-                int nY = dataSet3D.getDataCount(DIM_Y);
-                int nZ = dataSet3D.getDataCount();
+                int nX = dataSet.getDataCount(DIM_X);
+                int nY = dataSet.getDataCount(DIM_Y);
+                int nZ = dataSet.getDataCount(DIM_Z);
+
                 final ByteBuffer byteBuffer = getCachedDoubleArray(CACHED_WRITE_BYTE_BUFFER,
                         Double.BYTES * (nX + nY + nZ));
                 for (int ix = 0; ix < nX; ix++) {
-                    byteBuffer.putDouble(dataSet3D.getX(ix));
+                    byteBuffer.putDouble(dataSet.get(DIM_X, ix));
                 }
                 for (int iy = 0; iy < nY; iy++) {
-                    byteBuffer.putDouble(dataSet3D.getY(iy));
+                    byteBuffer.putDouble(dataSet.get(DIM_Y, iy));
                 }
-                for (int ix = 0; ix < nX; ix++) {
-                    for (int iy = 0; iy < nY; iy++) {
-                        byteBuffer.putDouble(dataSet3D.getZ(ix, iy));
-                    }
+                for (int iz = 0; iz < nZ; iz++) {
+                    byteBuffer.putDouble(dataSet.get(DIM_Z, iz));
                 }
                 outputStream.write(byteBuffer.array());
                 release(CACHED_WRITE_BYTE_BUFFER, byteBuffer);
@@ -1199,12 +1187,12 @@ public class DataSetUtils extends DataSetUtilsHelper {
     protected static void writeNumericDataToStream(final OutputStream outputFile, final DataSet dataSet) {
         try {
             // formatter definition, we always write the y errors to file
-            boolean is3D = dataSet instanceof DataSet3D;
+            boolean is3D = dataSet.getDimension() == 3
+                    && dataSet.getDataCount(DIM_X) * dataSet.getDataCount(DIM_Y) == dataSet.getDataCount(DIM_Z);
             if (is3D) {
-                final DataSet3D dataSet3D = (DataSet3D) dataSet;
-                int nX = dataSet3D.getDataCount(DIM_X);
-                int nY = dataSet3D.getDataCount(DIM_Y);
-                int nZ = dataSet3D.getDataCount();
+                int nX = dataSet.getDataCount(DIM_X);
+                int nY = dataSet.getDataCount(DIM_Y);
+                int nZ = dataSet.getDataCount(DIM_Z);
                 final StringBuilder buffer = getCachedStringBuilder(CACHED_STRING_BUILDER, Math.max(100, nZ * 45));
                 buffer.append("#nSamples : ").append(Integer.toString(nZ))
                         // use '$' sign as special indicator that from now on only numeric
@@ -1219,7 +1207,7 @@ public class DataSetUtils extends DataSetUtilsHelper {
                         buffer.append(',');
                         buffer.append(dataSet.get(DIM_Y, iY)); // y-coordinate
                         buffer.append(',');
-                        buffer.append(dataSet3D.getZ(iX, iY)); // negative error in y
+                        buffer.append(dataSet.get(DIM_Z, iX + iY * nX)); // negative error in y
                         buffer.append('\n');
                     }
                 }

@@ -11,7 +11,10 @@ import de.gsi.dataset.utils.AssertUtils;
  * d[y][x].
  *
  * @author braeun
+ * @deprecated Not very efficient due to the nested array storage of the data, consider using the generic
+ *             MultiDimDataSet or implement a custom data set. Will be removed in a future release.
  */
+@Deprecated(since = "11.1.4", forRemoval = true)
 public class DoubleDataSet3D extends AbstractDataSet3D<DoubleDataSet3D> {
     private static final long serialVersionUID = 1289344630607938420L;
     private double[] xValues;
@@ -217,7 +220,8 @@ public class DoubleDataSet3D extends AbstractDataSet3D<DoubleDataSet3D> {
         if (zValues.length == 0) {
             if (0 != xValues.length || 0 != yValues.length) {
                 final String msg = String.format(
-                        "array zValues is empty but: xValues.length = %d and yValues.length = %d", xValues.length, yValues.length);
+                        "array zValues is empty but: xValues.length = %d and yValues.length = %d", xValues.length,
+                        yValues.length);
                 throw new IllegalArgumentException(msg);
             }
         } else {

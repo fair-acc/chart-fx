@@ -36,7 +36,6 @@ import de.gsi.chart.renderer.spi.LabelledMarkerRenderer;
 import de.gsi.chart.ui.geometry.Side;
 import de.gsi.chart.utils.FXUtils;
 import de.gsi.dataset.DataSet;
-import de.gsi.dataset.DataSet3D;
 import de.gsi.dataset.utils.AssertUtils;
 
 /**
@@ -109,7 +108,8 @@ public class XYChart extends Chart {
 
         allDataSets.clear();
         allDataSets.addAll(getDatasets());
-        getRenderers().stream().filter(renderer -> !(renderer instanceof LabelledMarkerRenderer)).forEach(renderer -> allDataSets.addAll(renderer.getDatasets()));
+        getRenderers().stream().filter(renderer -> !(renderer instanceof LabelledMarkerRenderer))
+                .forEach(renderer -> allDataSets.addAll(renderer.getDatasets()));
 
         return allDataSets;
     }
@@ -246,11 +246,12 @@ public class XYChart extends Chart {
         // lock datasets to prevent writes while updating the axes
         ObservableList<DataSet> dataSets = this.getAllDatasets();
         // check that all registered data sets have proper ranges defined
-        dataSets.parallelStream().forEach(dataset -> dataset.getAxisDescriptions().parallelStream().filter(axisD -> !axisD.isDefined()).forEach(axisDescription -> {
-            dataset.lock().writeLockGuard(() -> {
-                dataset.recomputeLimits(dataset.getAxisDescriptions().indexOf(axisDescription));
-            });
-        }));
+        dataSets.parallelStream().forEach(dataset -> dataset.getAxisDescriptions().parallelStream()
+                .filter(axisD -> !axisD.isDefined()).forEach(axisDescription -> {
+                    dataset.lock().writeLockGuard(() -> {
+                        dataset.recomputeLimits(dataset.getAxisDescriptions().indexOf(axisDescription));
+                    });
+                }));
 
         // N.B. possible race condition on this line -> for the future to solve
         // recomputeLimits holds a writeLock the following sections need a read lock (for allowing parallel axis)
@@ -319,7 +320,8 @@ public class XYChart extends Chart {
 
                 final Side side = axis.getSide();
                 if (side == null) {
-                    throw new InvalidParameterException(new StringBuilder().append("axis '").append(axis.getName()).append("' has 'null' as side being set").toString());
+                    throw new InvalidParameterException(new StringBuilder().append("axis '").append(axis.getName())
+                            .append("' has 'null' as side being set").toString());
                 }
                 if (!getAxesPane(axis.getSide()).getChildren().contains((Node) axis)) {
                     getAxesPane(axis.getSide()).getChildren().add((Node) axis);
@@ -382,7 +384,8 @@ public class XYChart extends Chart {
             }
         }
         // check if there are assignable axes not yet present in the Chart's list
-        getAxes().addAll(renderer.getAxes().stream().limit(2).filter(a -> (a.getSide() != null && !getAxes().contains(a))).collect(Collectors.toList()));
+        getAxes().addAll(renderer.getAxes().stream().limit(2)
+                .filter(a -> (a.getSide() != null && !getAxes().contains(a))).collect(Collectors.toList()));
     }
 
     protected List<DataSet> getDataSetForAxis(final Axis axis) {
@@ -391,7 +394,8 @@ public class XYChart extends Chart {
             return retVal;
         }
         retVal.addAll(getDatasets());
-        getRenderers().forEach(renderer -> renderer.getAxes().stream().filter(axis::equals).forEach(rendererAxis -> retVal.addAll(renderer.getDatasets())));
+        getRenderers().forEach(renderer -> renderer.getAxes().stream().filter(axis::equals)
+                .forEach(rendererAxis -> retVal.addAll(renderer.getDatasets())));
         return retVal;
     }
 
@@ -478,13 +482,12 @@ public class XYChart extends Chart {
         final Side side = axis.getSide();
         axis.getAutoRange().clear();
         dataSets.forEach(dataset -> {
-            if (dataset instanceof DataSet3D && (side == Side.RIGHT || side == Side.TOP)) {
-                final DataSet3D mDataSet = (DataSet3D) dataset;
-                axis.getAutoRange().add(mDataSet.getAxisDescription(2).getMin());
-                axis.getAutoRange().add(mDataSet.getAxisDescription(2).getMax());
+            if (dataset.getDimension() > 2 && (side == Side.RIGHT || side == Side.TOP)) {
+                axis.getAutoRange().add(dataset.getAxisDescription(DataSet.DIM_Z).getMin());
+                axis.getAutoRange().add(dataset.getAxisDescription(DataSet.DIM_Z).getMax());
             } else {
-                axis.getAutoRange().add(dataset.getAxisDescription(isHorizontal ? 0 : 1).getMin());
-                axis.getAutoRange().add(dataset.getAxisDescription(isHorizontal ? 0 : 1).getMax());
+                axis.getAutoRange().add(dataset.getAxisDescription(isHorizontal ? DataSet.DIM_X : DataSet.DIM_Y).getMin());
+                axis.getAutoRange().add(dataset.getAxisDescription(isHorizontal ? DataSet.DIM_X : DataSet.DIM_Y).getMax());
             }
         });
         axis.getAutoRange().setAxisLength(axis.getLength() == 0 ? 1 : axis.getLength(), side);
@@ -505,13 +508,12 @@ public class XYChart extends Chart {
             // dataset.recomputeLimits(dataset.getAxisDescriptions().indexOf(axisDescription));
             // }
             // }
-            if (dataset instanceof DataSet3D && (side == Side.RIGHT || side == Side.TOP)) {
-                final DataSet3D mDataSet = (DataSet3D) dataset;
-                dataMinMax.add(mDataSet.getAxisDescription(DataSet.DIM_Z).getMin());
-                dataMinMax.add(mDataSet.getAxisDescription(DataSet.DIM_Z).getMax());
+            if (dataset.getDimension() > 2 && (side == Side.RIGHT || side == Side.TOP)) {
+                dataMinMax.add(dataset.getAxisDescription(DataSet.DIM_Z).getMin());
+                dataMinMax.add(dataset.getAxisDescription(DataSet.DIM_Z).getMax());
             } else {
-                dataMinMax.add(dataset.getAxisDescription(isHorizontal ? 0 : 1).getMin());
-                dataMinMax.add(dataset.getAxisDescription(isHorizontal ? 0 : 1).getMax());
+                dataMinMax.add(dataset.getAxisDescription(isHorizontal ? DataSet.DIM_X : DataSet.DIM_Y).getMin());
+                dataMinMax.add(dataset.getAxisDescription(isHorizontal ? DataSet.DIM_X : DataSet.DIM_Y).getMax());
             }
         }));
 

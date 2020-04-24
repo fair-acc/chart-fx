@@ -27,7 +27,8 @@ import de.gsi.chart.renderer.spi.utils.ColorGradient;
 import de.gsi.chart.ui.utils.JavaFXInterceptorUtils.SelectiveJavaFxInterceptor;
 import de.gsi.chart.ui.utils.TestFx;
 import de.gsi.chart.utils.FXUtils;
-import de.gsi.dataset.DataSet3D;
+import de.gsi.dataset.DataSet;
+import de.gsi.dataset.spi.DataSetBuilder;
 
 /**
  * Tests {@link de.gsi.chart.renderer.spi.ContourDataSetRenderer }
@@ -131,7 +132,8 @@ public class ContourDataSetRendererTests {
         assertDoesNotThrow(() -> cache.convertDataArrayToImage(TEST_DATA_Z, TEST_DATA_X.length, TEST_DATA_Y.length, ColorGradient.DEFAULT), "data to colour image conversion");
     }
 
-    private DataSet3D getTestDataSet() {
-        return new ContourDataSetCacheTests().new TestDataSet();
+    private static DataSet getTestDataSet() {
+        return new DataSetBuilder().setValues(DataSet.DIM_X, TEST_DATA_X).setValues(DataSet.DIM_Y, TEST_DATA_Y)
+                .setValues(DataSet.DIM_Z, TEST_DATA_Z).build();
     }
 }

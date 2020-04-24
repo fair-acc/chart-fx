@@ -16,7 +16,6 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 
 import de.gsi.dataset.DataSet;
-import de.gsi.dataset.DataSet3D;
 import de.gsi.dataset.DataSetError;
 import de.gsi.dataset.DataSetError.ErrorType;
 import de.gsi.dataset.DataSetMetaData;
@@ -30,20 +29,22 @@ public class DataSetBuilderTests {
     @Test
     public void testYErrorDataSet() {
         final DataSet dataset = new DataSetBuilder() //
-                .setName("testdataset") //
-                .setValues(DIM_X, new double[] { 1, 2, 3 }) //
-                .setValues(DIM_Y, new double[] { 1.337, 23.42, 0.0 }) //
-                .setPosError(DIM_Y, new double[] { 0.1, 0.2, 0.1 }) //
-                .setNegError(DIM_Y, new double[] { 0.1, 0.2, 0.1 }) //
-                .setAxisName(DIM_X, "test coverage") //
-                .setAxisUnit(DIM_X, "%") //
-                .setAxisName(DIM_Y, "awesomeness") //
-                .setAxisUnit(DIM_Y, "norris") //
-                .setAxisMin(DIM_Y, -2) //
-                .setAxisMax(DIM_Y, 25) //
-                .setMetaErrorList(new String[] { "no connection to device", "error reading config" })
-                .setMetaInfoList(new String[0]).setMetaWarningList(new String[] { "overrange" })
-                .setMetaInfoMap(Map.of("someParameter", "5")).build();
+                                        .setName("testdataset") //
+                                        .setValues(DIM_X, new double[] { 1, 2, 3 }) //
+                                        .setValues(DIM_Y, new double[] { 1.337, 23.42, 0.0 }) //
+                                        .setPosError(DIM_Y, new double[] { 0.1, 0.2, 0.1 }) //
+                                        .setNegError(DIM_Y, new double[] { 0.1, 0.2, 0.1 }) //
+                                        .setAxisName(DIM_X, "test coverage") //
+                                        .setAxisUnit(DIM_X, "%") //
+                                        .setAxisName(DIM_Y, "awesomeness") //
+                                        .setAxisUnit(DIM_Y, "norris") //
+                                        .setAxisMin(DIM_Y, -2) //
+                                        .setAxisMax(DIM_Y, 25) //
+                                        .setMetaErrorList(new String[] { "no connection to device", "error reading config" })
+                                        .setMetaInfoList(new String[0])
+                                        .setMetaWarningList(new String[] { "overrange" })
+                                        .setMetaInfoMap(Map.of("someParameter", "5"))
+                                        .build();
         assertEquals("testdataset", dataset.getName());
         assertEquals(3, dataset.getDataCount());
         assertEquals(3, dataset.getDataCount(DIM_X));
@@ -75,12 +76,12 @@ public class DataSetBuilderTests {
     @Test
     public void testYErrorDataSetNoCopy() {
         final DataSet dataset = new DataSetBuilder() //
-                .setName("testdataset") //
-                .setValuesNoCopy(DIM_X, new double[] { 1, 2, 3 }) //
-                .setValuesNoCopy(DIM_Y, new double[] { 1.337, 23.42, 0.0 }) //
-                .setPosErrorNoCopy(DIM_Y, new double[] { 0.1, 0.2, 0.1 }) //
-                .setNegErrorNoCopy(DIM_Y, new double[] { 0.1, 0.2, 0.1 }) //
-                .build();
+                                        .setName("testdataset") //
+                                        .setValuesNoCopy(DIM_X, new double[] { 1, 2, 3 }) //
+                                        .setValuesNoCopy(DIM_Y, new double[] { 1.337, 23.42, 0.0 }) //
+                                        .setPosErrorNoCopy(DIM_Y, new double[] { 0.1, 0.2, 0.1 }) //
+                                        .setNegErrorNoCopy(DIM_Y, new double[] { 0.1, 0.2, 0.1 }) //
+                                        .build();
         assertEquals("testdataset", dataset.getName());
         assertEquals(3, dataset.getDataCount());
         assertEquals(3, dataset.getDataCount(DIM_X));
@@ -131,15 +132,15 @@ public class DataSetBuilderTests {
     @Test
     public void testImplicitXDataDataSet() {
         final DataSet dataset = new DataSetBuilder() //
-                .setValues(DIM_Y, new double[] { 1.337, 23.42, 0.0 }) //
-                .setEnableErrors(true) //
-                .setAxisName(DIM_X, "test coverage") //
-                .setAxisUnit(DIM_X, "%") //
-                .setAxisName(DIM_Y, "awesomeness") //
-                .setAxisUnit(DIM_Y, "norris") //
-                .setDataLabelMap(Collections.EMPTY_MAP) //
-                .setDataStyleMap(Collections.EMPTY_MAP) //
-                .build();
+                                        .setValues(DIM_Y, new double[] { 1.337, 23.42, 0.0 }) //
+                                        .setEnableErrors(true) //
+                                        .setAxisName(DIM_X, "test coverage") //
+                                        .setAxisUnit(DIM_X, "%") //
+                                        .setAxisName(DIM_Y, "awesomeness") //
+                                        .setAxisUnit(DIM_Y, "norris") //
+                                        .setDataLabelMap(Collections.EMPTY_MAP) //
+                                        .setDataStyleMap(Collections.EMPTY_MAP) //
+                                        .build();
         assertEquals("DataSet@", dataset.getName().substring(0, 8));
         assertArrayEquals(new double[] { 0, 1, 2 }, dataset.getValues(DIM_X));
         assertArrayEquals(new double[] { 1.337, 23.42, 0.0 }, dataset.getValues(DIM_Y));
@@ -154,7 +155,8 @@ public class DataSetBuilderTests {
     @Test
     public void testOnlyXData() {
         final DataSet dataset = new DataSetBuilder("testdataset") //
-                .setValues(DIM_X, new double[] { 1, 2, 3 }).build();
+                                        .setValues(DIM_X, new double[] { 1, 2, 3 })
+                                        .build();
         assertEquals("testdataset", dataset.getName());
         assertArrayEquals(new double[] { 1, 2, 3 }, dataset.getValues(DIM_X));
         assertArrayEquals(new double[] { 0, 0, 0 }, dataset.getValues(DIM_Y));
@@ -168,9 +170,11 @@ public class DataSetBuilderTests {
 
     @Test
     public void test3DDataSet() {
-        final DataSet dataset = new DataSetBuilder("testdataset")//
-                .setValues(DIM_X, new double[] { 1, 2, 3 }).setValues(DIM_Y, new double[] { 10, 100 })
-                .setValues(DIM_Z, new double[] { 1, 2, 3, 10, 20, 30 }).build();
+        final DataSet dataset = new DataSetBuilder("testdataset") //
+                                        .setValues(DIM_X, new double[] { 1, 2, 3 })
+                                        .setValues(DIM_Y, new double[] { 10, 100 })
+                                        .setValues(DIM_Z, new double[][] { { 1, 2 }, { 3, 10 }, { 20, 30 } })
+                                        .build();
         assertEquals("testdataset", dataset.getName());
         assertArrayEquals(new double[] { 1, 2, 3 }, dataset.getValues(DIM_X));
         assertArrayEquals(new double[] { 10, 100 }, dataset.getValues(DIM_Y));
@@ -181,15 +185,16 @@ public class DataSetBuilderTests {
         assertEquals(6, dataset.getDataCount(DIM_Z));
         assertEquals(3, dataset.getDimension());
         assertThrows(IndexOutOfBoundsException.class, () -> dataset.get(DIM_X, 3));
-        assertTrue(dataset instanceof DataSet3D);
+        assertTrue(dataset instanceof MultiDimDoubleDataSet);
     }
 
     @Test
     public void testMultiDimDataSet3() {
-        final DataSet dataset = new DataSetBuilder("testdataset")//
-                .setValues(DIM_X, new double[] { 1, 2, 3, 4, 5, 6 })
-                .setValues(DIM_Y, new double[] { 10, 20, 30, 40, 50, 60 })
-                .setValues(DIM_Z, new double[] { 11, 22, 33, 44, 55, 66 }).build();
+        final DataSet dataset = new DataSetBuilder("testdataset") //
+                                        .setValues(DIM_X, new double[] { 1, 2, 3, 4, 5, 6 })
+                                        .setValues(DIM_Y, new double[] { 10, 20, 30, 40, 50, 60 })
+                                        .setValues(DIM_Z, new double[] { 11, 22, 33, 44, 55, 66 })
+                                        .build();
         assertEquals("testdataset", dataset.getName());
         assertArrayEquals(new double[] { 1, 2, 3, 4, 5, 6 }, dataset.getValues(DIM_X));
         assertArrayEquals(new double[] { 10, 20, 30, 40, 50, 60 }, dataset.getValues(DIM_Y));
@@ -205,9 +210,12 @@ public class DataSetBuilderTests {
 
     @Test
     public void testMultiDimDataSet5() {
-        final DataSet dataset = new DataSetBuilder("testdataset")//
-                .setValues(DIM_Y, new double[] { 10, 20, 30, 40, 50, 60 }).setInitalCapacity(6).setDimension(5)
-                .setValues(3, new double[] { 11, 22, 33, 44 }).build();
+        final DataSet dataset = new DataSetBuilder("testdataset") //
+                                        .setValues(DIM_Y, new double[] { 10, 20, 30, 40, 50, 60 })
+                                        .setInitalCapacity(6, 6, 6, 6, 6)
+                                        .setDimension(5)
+                                        .setValues(3, new double[] { 11, 22, 33, 44 })
+                                        .build();
         assertEquals("testdataset", dataset.getName());
         assertArrayEquals(new double[] { 0, 1, 2, 3, 4, 5 }, dataset.getValues(DIM_X));
         assertArrayEquals(new double[] { 10, 20, 30, 40, 50, 60 }, dataset.getValues(DIM_Y));
@@ -231,8 +239,7 @@ public class DataSetBuilderTests {
             new DataSetBuilder().setValues(DIM_Z, new double[] { 0.0, 3 }).setDimension(2).build();
         });
         assertThrows(IllegalStateException.class, () -> {
-            new DataSetBuilder().setPosError(DIM_X, new double[] { 0.0, 3 }).setInitalCapacity(2).setDimension(2)
-                    .build();
+            new DataSetBuilder().setPosError(DIM_X, new double[] { 0.0, 3 }).setInitalCapacity(2).setDimension(2).build();
         });
     }
 }

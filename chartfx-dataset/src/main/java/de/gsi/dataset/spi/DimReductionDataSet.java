@@ -4,7 +4,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.gsi.dataset.DataSet;
-import de.gsi.dataset.DataSet3D;
 import de.gsi.dataset.event.AddedDataEvent;
 import de.gsi.dataset.event.EventListener;
 import de.gsi.dataset.event.UpdateEvent;
@@ -27,10 +26,11 @@ public class DimReductionDataSet extends DoubleDataSet implements EventListener 
         INTEGRAL,
         SLICE;
     }
+
     private static final Logger LOGGER = LoggerFactory.getLogger(DimReductionDataSet.class);
     private static final long serialVersionUID = 1L;
     private final Option reductionOption;
-    private final DataSet3D source;
+    private final DataSet source;
     private final int dimIndex;
     private int minIndex;
     private int maxIndex;
@@ -41,10 +41,11 @@ public class DimReductionDataSet extends DoubleDataSet implements EventListener 
      * Reduces 3D data to 2D DataSet either via slicing, min, mean, max or integration
      *
      * @param source 3D DataSet to take projections from
-     * @param dimIndex the axis index onto which the projection should be performed (ie. DIM_X &lt;-&gt; integrate over the Y axis within given value ranges and vice versa)
+     * @param dimIndex the axis index onto which the projection should be performed (ie. DIM_X &lt;-&gt; integrate over
+     *            the Y axis within given value ranges and vice versa)
      * @param reductionOption one of the reduction options given in {@link Option}
      */
-    public DimReductionDataSet(final DataSet3D source, final int dimIndex, final Option reductionOption) {
+    public DimReductionDataSet(final DataSet source, final int dimIndex, final Option reductionOption) {
         super(source.getName() + "-" + reductionOption + "-dim" + dimIndex);
 
         this.source = source;
@@ -113,7 +114,8 @@ public class DimReductionDataSet extends DoubleDataSet implements EventListener 
             }
         }));
 
-        this.fireInvalidated(new AddedDataEvent(this, "updated " + DimReductionDataSet.class.getSimpleName() + " name = " + this.getName()));
+        this.fireInvalidated(new AddedDataEvent(this,
+                "updated " + DimReductionDataSet.class.getSimpleName() + " name = " + this.getName()));
         if (LOGGER.isDebugEnabled()) {
             LOGGER.atDebug().addArgument(event).log("handle({}) - done");
         }
@@ -150,7 +152,7 @@ public class DimReductionDataSet extends DoubleDataSet implements EventListener 
                 double integral = 0.0;
                 double nSlices = 0.0;
                 for (int i = min; i <= Math.min(max, nDataCount - 1); i++) {
-                    integral += source.getZ(i, index);
+                    integral += getZ(source, i, index);
                     nSlices += 1.0;
                 }
                 this.add(x, isMean ? (nSlices == 0.0 ? Double.NaN : (integral / nSlices)) : integral);
@@ -161,7 +163,7 @@ public class DimReductionDataSet extends DoubleDataSet implements EventListener 
                 double integral = 0.0;
                 double nSlices = 0.0;
                 for (int i = min; i <= Math.min(max, nDataCount - 1); i++) {
-                    integral += source.getZ(index, i);
+                    integral += getZ(source, index, i);
                     nSlices += 1.0;
                 }
                 this.add(x, isMean ? (nSlices == 0.0 ? Double.NaN : (integral / nSlices)) : integral);
@@ -177,9 +179,9 @@ public class DimReductionDataSet extends DoubleDataSet implements EventListener 
         if (dimIndex == DataSet.DIM_Y) {
             for (int index = 0; index < nDataCount; index++) {
                 final double x = source.get(dimIndex, index);
-                double ret = source.getZ(min, index);
+                double ret = getZ(source, min, index);
                 for (int i = min + 1; i <= Math.min(max, nDataCount - 1); i++) {
-                    final double val = source.getZ(i, index);
+                    final double val = getZ(source, i, index);
                     ret = isMin ? Math.min(val, ret) : Math.max(val, ret);
                 }
                 this.add(x, ret);
@@ -187,14 +189,24 @@ public class DimReductionDataSet extends DoubleDataSet implements EventListener 
         } else {
             for (int index = 0; index < nDataCount; index++) {
                 final double x = source.get(dimIndex, index);
-                double ret = source.getZ(index, min);
+                double ret = getZ(source, index, min);
                 for (int i = min + 1; i <= Math.min(max, nDataCount - 1); i++) {
-                    final double val = source.getZ(index, i);
+                    final double val = getZ(source, index, i);
                     ret = isMin ? Math.min(val, ret) : Math.max(val, ret);
                 }
                 this.add(x, ret);
             }
         }
+    }
+
+    /**
+     * @param ds input dataset, should have at least 3 dimensions and nz == nx * ny
+     * @param i x index
+     * @param j y index
+     * @return z-value ds(i,j)
+     */
+    private static double getZ(DataSet ds, int i, int j) {
+        return ds.get(DIM_Z, j * ds.getDataCount(DIM_X) + i);
     }
 
     protected void updateSlice() {
@@ -203,13 +215,13 @@ public class DimReductionDataSet extends DoubleDataSet implements EventListener 
         if (dimIndex == DataSet.DIM_Y) {
             for (int index = 0; index < nDataCount; index++) {
                 final double x = source.get(dimIndex, index);
-                final double y = source.getZ(minIndex, index);
+                final double y = getZ(source, minIndex, index);
                 this.add(x, y);
             }
         } else {
             for (int index = 0; index < nDataCount; index++) {
                 final double x = source.get(dimIndex, index);
-                final double y = source.getZ(index, minIndex);
+                final double y = getZ(source, index, minIndex);
                 this.add(x, y);
             }
         }

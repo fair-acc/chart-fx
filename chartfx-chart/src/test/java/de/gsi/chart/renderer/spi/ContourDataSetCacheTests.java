@@ -13,8 +13,9 @@ import java.util.Arrays;
 import org.junit.jupiter.api.Test;
 
 import de.gsi.chart.axes.AxisTransform;
-import de.gsi.dataset.spi.AbstractDataSet3D;
+import de.gsi.dataset.DataSet;
 import de.gsi.dataset.spi.DataRange;
+import de.gsi.dataset.spi.DataSetBuilder;
 import de.gsi.math.ArrayUtils;
 import de.gsi.math.TMath;
 
@@ -25,40 +26,35 @@ public class ContourDataSetCacheTests {
     private static final double[] TEST_DATA_X = { 1, 2, 3 };
     private static final double[] TEST_DATA_Y = { 1, 2, 3, 4 };
     private static final double[] TEST_DATA_Z = { //
-        1, 2, 3, //
-        4, 5, 6, //
-        7, 8, 9, //
-        10, 11, 12
-    };
+            1, 2, 3, //
+            4, 5, 6, //
+            7, 8, 9, //
+            10, 11, 12 };
     // test cases for inversion
     private static final double[] TEST_DATA_Z_X_INVERTED = { //
-        3, 2, 1, //
-        6, 5, 4, //
-        9, 8, 7, //
-        12, 11, 10
-    };
+            3, 2, 1, //
+            6, 5, 4, //
+            9, 8, 7, //
+            12, 11, 10 };
     private static final double[] TEST_DATA_Z_Y_INVERTED = { //
-        10, 11, 12, //
-        7, 8, 9, //
-        4, 5, 6, //
-        1, 2, 3
-    };
+            10, 11, 12, //
+            7, 8, 9, //
+            4, 5, 6, //
+            1, 2, 3 };
     private static final double[] TEST_DATA_Z_XY_INVERTED = { //
-        12, 11, 10, //
-        9, 8, 7, //
-        6, 5, 4, //
-        3, 2, 1
-    };
+            12, 11, 10, //
+            9, 8, 7, //
+            6, 5, 4, //
+            3, 2, 1 };
     private static final double[] TEST_DATA_Z_QUANT1 = { //
-        0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0
-    };
+            0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0 };
     private static final double[] TEST_DATA_Z_QUANT2 = { //
-        0.9, 0.8, 0.7, 0.6, 0.5, 0.5, 0.4, 0.3, 0.2, 0.1, 0.0, 0.0
-    };
+            0.9, 0.8, 0.7, 0.6, 0.5, 0.5, 0.4, 0.3, 0.2, 0.1, 0.0, 0.0 };
 
     @Test
     public void testDataSet() {
-        TestDataSet dataSet = new TestDataSet();
+        DataSet dataSet = new DataSetBuilder().setValues(DIM_X, TEST_DATA_X).setValues(DIM_Y, TEST_DATA_Y)
+                .setValues(DIM_Z, TEST_DATA_Z).build();
 
         assertEquals(TEST_DATA_X.length, dataSet.getDataCount(DIM_X));
         assertEquals(TEST_DATA_Y.length, dataSet.getDataCount(DIM_Y));
@@ -73,9 +69,8 @@ public class ContourDataSetCacheTests {
         for (int i = 0; i < dataSet.getDataCount(DIM_Z); i++) {
             assertEquals(TEST_DATA_Z[i], dataSet.get(DIM_Z, i));
         }
-        final int rowWidth = dataSet.getDataCount(DIM_X);
         for (int i = 0; i < dataSet.getDataCount(DIM_Z); i++) {
-            assertEquals(dataSet.get(DIM_Z, i), dataSet.getZ(i % rowWidth, i / rowWidth));
+            assertEquals(dataSet.get(DIM_Z, i), dataSet.get(DIM_Z, i));
         }
     }
 
@@ -126,7 +121,7 @@ public class ContourDataSetCacheTests {
 
             @Override
             public double getRoundedMaximumRange(double val) {
-                // TODO Auto-generated method stub
+                // not necessary for this test
                 return 0;
             }
 
@@ -158,8 +153,9 @@ public class ContourDataSetCacheTests {
     }
 
     @Test
-    public void testDataTransform() throws Exception {
-        TestDataSet dataSet = new TestDataSet();
+    public void testDataTransform() {
+        DataSet dataSet = new DataSetBuilder().setValues(DIM_X, TEST_DATA_X).setValues(DIM_Y, TEST_DATA_Y)
+                .setValues(DIM_Z, TEST_DATA_Z).build();
 
         assertEquals(TEST_DATA_X.length, dataSet.getDataCount(DIM_X), "data vector x length");
         assertEquals(TEST_DATA_Y.length, dataSet.getDataCount(DIM_Y), "data vector x length");
@@ -211,44 +207,5 @@ public class ContourDataSetCacheTests {
         // requires FX to be tested, now in ContourDataSetRendererTests
         // final ContourDataSetCache cache = FXUtils.runAndWait(() -> new ContourDataSetCache(new XYChart(), new ContourDataSetRenderer(), dataSet));
         // assertDoesNotThrow(() -> cache.convertDataArrayToImage(TEST_DATA_Z, TEST_DATA_X.length, TEST_DATA_Y.length, ColorGradient.DEFAULT), "data to colour image conversion");
-    }
-
-    public class TestDataSet extends AbstractDataSet3D<TestDataSet> {
-        private static final long serialVersionUID = 4176996086927034332L;
-
-        public TestDataSet() {
-            super(ContourDataSetCacheTests.class.getSimpleName() + "TestDataSet");
-        }
-
-        @Override
-        public double get(int dimIndex, int index) {
-            switch (dimIndex) {
-            case DIM_X:
-                return TEST_DATA_X[index];
-            case DIM_Y:
-                return TEST_DATA_Y[index];
-            case DIM_Z:
-            default:
-                return TEST_DATA_Z[index];
-            }
-        }
-
-        @Override
-        public int getDataCount(int dimIndex) {
-            switch (dimIndex) {
-            case DIM_X:
-                return TEST_DATA_X.length;
-            case DIM_Y:
-                return TEST_DATA_Y.length;
-            case DIM_Z:
-            default:
-                return TEST_DATA_Z.length;
-            }
-        }
-
-        @Override
-        public double getZ(int xIndex, int yIndex) {
-            return get(DIM_Z, yIndex * TEST_DATA_X.length + xIndex);
-        }
     }
 }

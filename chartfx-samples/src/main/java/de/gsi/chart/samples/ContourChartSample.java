@@ -147,7 +147,7 @@ public class ContourChartSample extends Application {
             // ContourChartSampleReference.class.getResourceAsStream("./testdata/image.txt")));
             @SuppressWarnings("unused")
             String skipLine; // NOPMD variable is needed to skip/check line that contains the dimension of the following
-                    // line to be read which we derive from the data itself
+            // line to be read which we derive from the data itself
             if ((skipLine = reader.readLine()) == null) {
                 throw new IllegalStateException("expected non-null line");
             }
@@ -329,10 +329,15 @@ public class ContourChartSample extends Application {
 
         @Override
         public int getDataCount(final int dimIndex) {
-            if (dimIndex == DataSet.DIM_X) {
+            switch (dimIndex) {
+            case DataSet.DIM_X:
                 return xValues.length;
+            case DataSet.DIM_Y:
+                return yValues.length;
+            case DataSet.DIM_Z:
+            default:
+                return zValues.length * zValues[0].length;
             }
-            return yValues.length;
         }
 
         @Override
