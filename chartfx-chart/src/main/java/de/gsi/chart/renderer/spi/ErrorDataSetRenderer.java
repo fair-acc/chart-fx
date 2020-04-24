@@ -7,6 +7,13 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
+import javafx.collections.ObservableList;
+import javafx.geometry.Orientation;
+import javafx.scene.canvas.Canvas;
+import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.FillRule;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,13 +35,6 @@ import de.gsi.dataset.spi.utils.Triple;
 import de.gsi.dataset.utils.ArrayCache;
 import de.gsi.dataset.utils.ProcessingProfiler;
 
-import javafx.collections.ObservableList;
-import javafx.geometry.Orientation;
-import javafx.scene.canvas.Canvas;
-import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.paint.Color;
-import javafx.scene.shape.FillRule;
-
 /**
  * Renders data points with error bars and/or error surfaces It can be used e.g. to render horizontal and/or vertical
  * errors additional functionality:
@@ -49,7 +49,7 @@ import javafx.scene.shape.FillRule;
 @SuppressWarnings({ "PMD.LongVariable", "PMD.ShortVariable" }) // short variables like x, y are perfectly fine, as well
 // as descriptive long ones
 public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<ErrorDataSetRenderer>
-implements Renderer {
+        implements Renderer {
     private static final Logger LOGGER = LoggerFactory.getLogger(ErrorDataSetRenderer.class);
     private static final String Y_BEZIER_SECOND_CONTROL_POINT = "yBezierSecondControlPoint";
     private static final String X_BEZIER_SECOND_CONTROL_POINT = "xBezierSecondControlPoint";
@@ -374,7 +374,7 @@ implements Renderer {
                 gc.fillOval(x, y, 2 * radius, 2 * radius);
             }
         } else if (localCachedPoints.errorType[DataSet.DIM_X] == ErrorType.NO_ERROR
-                || localCachedPoints.errorType[DataSet.DIM_Y] != ErrorType.NO_ERROR) {
+                   || localCachedPoints.errorType[DataSet.DIM_Y] != ErrorType.NO_ERROR) {
             // Y, Y_ASYMMETRIC
             for (int i = 0; i < localCachedPoints.actualDataCount; i++) {
                 final double radius = Math.max(minSize,
@@ -385,7 +385,7 @@ implements Renderer {
                 gc.fillOval(x, y, 2 * radius, 2 * radius);
             }
         } else if (localCachedPoints.errorType[DataSet.DIM_X] != ErrorType.NO_ERROR
-                || localCachedPoints.errorType[DataSet.DIM_Y] != ErrorType.NO_ERROR) {
+                   || localCachedPoints.errorType[DataSet.DIM_Y] != ErrorType.NO_ERROR) {
             // XY, XY_ASYMMETRIC
             for (int i = 0; i < localCachedPoints.actualDataCount; i++) {
                 final double width = Math.max(minSize, localCachedPoints.errorXPos[i] - localCachedPoints.errorXNeg[i]);
@@ -453,7 +453,7 @@ implements Renderer {
                 gc.strokeLine(lCacheP.errorXPos[i], lCacheP.yValues[i] - dashHalf, lCacheP.errorXPos[i],
                         lCacheP.yValues[i] + dashHalf);
             } else if (lCacheP.errorType[DataSet.DIM_X] == ErrorType.NO_ERROR
-                    && lCacheP.errorType[DataSet.DIM_Y] != ErrorType.NO_ERROR) {
+                       && lCacheP.errorType[DataSet.DIM_Y] != ErrorType.NO_ERROR) {
                 // draw error bars
                 gc.strokeLine(lCacheP.xValues[i], lCacheP.errorYNeg[i], lCacheP.xValues[i], lCacheP.errorYPos[i]);
 
@@ -463,7 +463,7 @@ implements Renderer {
                 gc.strokeLine(lCacheP.xValues[i] - dashHalf, lCacheP.errorYPos[i], lCacheP.xValues[i] + dashHalf,
                         lCacheP.errorYPos[i]);
             } else if (lCacheP.errorType[DataSet.DIM_X] != ErrorType.NO_ERROR
-                    && lCacheP.errorType[DataSet.DIM_Y] == ErrorType.NO_ERROR) {
+                       && lCacheP.errorType[DataSet.DIM_Y] == ErrorType.NO_ERROR) {
                 // draw error bars
                 gc.strokeLine(lCacheP.errorXNeg[i], lCacheP.yValues[i], lCacheP.errorXPos[i], lCacheP.yValues[i]);
 
@@ -624,7 +624,7 @@ implements Renderer {
                     gc.setFill(markerForPoint.getSecond());
                 }
                 final Marker pointMarker = markerForPoint.getFirst() == null ? defaultMarker
-                        : markerForPoint.getFirst();
+                                                                             : markerForPoint.getFirst();
                 pointMarker.draw(gc, x, y, markerForPoint.getThird());
                 gc.restore();
             }
