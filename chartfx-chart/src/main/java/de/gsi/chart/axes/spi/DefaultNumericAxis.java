@@ -490,7 +490,7 @@ public class DefaultNumericAxis extends AbstractAxis implements Axis {
 
     @Override
     protected List<Double> calculateMajorTickValues(final double axisLength, final AxisRange axisRange) {
-        final List<Double> tickValues = new ArrayList<>();
+        final List<Double> tickValues = new ArrayList<>(getMaxMajorTickLabelCount());
         if (isLogAxis) {
             if (axisRange.getLowerBound() >= axisRange.getUpperBound()) {
                 return Arrays.asList(axisRange.getLowerBound());
@@ -521,6 +521,9 @@ public class DefaultNumericAxis extends AbstractAxis implements Axis {
             return tickValues;
         }
         for (double major = firstTick; major <= axisRange.getUpperBound(); major += axisRange.getTickUnit()) {
+            if (tickValues.size() > getMaxMajorTickLabelCount()) {
+                break;
+            }
             tickValues.add(major);
         }
         return tickValues;
