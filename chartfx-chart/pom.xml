@@ -80,6 +80,11 @@
             <version>${chartfx.javafx.version}</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>ar.com.hjg</groupId>
+            <artifactId>pngj</artifactId>
+            <version>2.1.0</version>
+        </dependency>
     </dependencies>
 </project>
 
