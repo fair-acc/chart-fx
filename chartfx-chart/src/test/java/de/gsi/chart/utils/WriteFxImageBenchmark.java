@@ -1,5 +1,9 @@
 package de.gsi.chart.utils;
 
+import static de.gsi.chart.utils.WriteFxImageBenchmark.Implementation.NEWREF;
+import static de.gsi.chart.utils.WriteFxImageBenchmark.Implementation.OLDREF;
+import static de.gsi.chart.utils.WriteFxImageBenchmark.Implementation.PALETTE;
+
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -23,6 +27,8 @@ import javafx.scene.paint.Color;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ar.com.hjg.pngj.FilterType;
+
 /**
  * Checking the performance of writing a PNG image from a JavaFx Image
  * 
@@ -30,6 +36,7 @@ import org.slf4j.LoggerFactory;
  */
 public class WriteFxImageBenchmark {
     private static final Logger LOGGER = LoggerFactory.getLogger(WriteFxImageBenchmark.class);
+    private static final int DEFAULT_PALETTE_COLOR_COUNT = 8;
     private static final int N_ITER = 50;
 
     private static final int w = 333;
@@ -68,18 +75,94 @@ public class WriteFxImageBenchmark {
         initialized.set(true);
     }
 
-    private static void writeFxImage(Image image, boolean alpha, boolean keepBuffer, int compression) {
+    public static void main(String[] args) throws IOException {
+        // get the image on the javafx application thread for snapshot to work
+        Platform.startup(WriteFxImageBenchmark::initalizeImage);
+        while (!initialized.get()) {
+            //
+        }
+        Platform.exit();
+
+        LOGGER.atInfo().log("Image with noise data (difficult to compress)");
+        for (final boolean alpha : new boolean[] { false, true }) {
+            for (final boolean keepBuffer : new boolean[] { false, true }) {
+                writeFxImage(testimage, alpha, keepBuffer, Deflater.NO_COMPRESSION, NEWREF);
+                writeFxImage(testimage, alpha, keepBuffer, Deflater.BEST_SPEED, NEWREF);
+                writeFxImage(testimage, alpha, keepBuffer, Deflater.BEST_COMPRESSION, NEWREF);
+            }
+        }
+        writeImageIoImage(testimage, false, false);
+        writeImageIoImage(testimage, true, false);
+        writeImageIoImage(testimage, false, true);
+        writeImageIoImage(testimage, true, true);
+
+        LOGGER.atInfo().log("Image with simple shapes (easy to compress)");
+        for (final boolean alpha : new boolean[] { false, true }) {
+            for (final boolean keepBuffer : new boolean[] { false, true }) {
+                writeFxImage(testimage2, alpha, keepBuffer, Deflater.NO_COMPRESSION, NEWREF);
+                writeFxImage(testimage2, alpha, keepBuffer, Deflater.BEST_SPEED, NEWREF);
+                writeFxImage(testimage2, alpha, keepBuffer, Deflater.BEST_COMPRESSION, NEWREF);
+            }
+        }
+        writeImageIoImage(testimage2, false, false);
+        writeImageIoImage(testimage2, true, false);
+        writeImageIoImage(testimage2, false, true);
+        writeImageIoImage(testimage2, true, true);
+
+        testCompressionPerformance(testimage, "noise data (difficult to compress)");
+        testCompressionPerformance(testimage2, "simple shapes (easy to compress)");
+    }
+
+    public static void testCompressionPerformance(final Image image, final String description) {
+        LOGGER.atInfo().addArgument(description).log("Test compression level performance with image with {}");
+        // precompute typical palette
+        final PaletteQuantizer userPaletteRGBA = WriteFxImage.estimatePalette(image, true, DEFAULT_PALETTE_COLOR_COUNT);
+        final PaletteQuantizer userPaletteRGB = WriteFxImage.estimatePalette(image, false, DEFAULT_PALETTE_COLOR_COUNT);
+
+        for (final boolean alpha : new boolean[] { true, false }) {
+            LOGGER.atInfo().addArgument(alpha ? "with" : "without").log("{} alpha channel");
+            for (int compressionLevel = Deflater.NO_COMPRESSION; compressionLevel <= Deflater.BEST_COMPRESSION; compressionLevel++) {
+                writeFxImage(image, alpha, true, compressionLevel, OLDREF);
+                writeFxImage(image, alpha, true, compressionLevel, NEWREF);
+                // compute palette on-the-fly
+                writeFxImage(image, alpha, true, compressionLevel, PALETTE);
+                // use pre-computed palette
+                writeFxImage(image, alpha, true, compressionLevel, PALETTE, alpha ? userPaletteRGBA : userPaletteRGB);
+                LOGGER.atInfo().log(" "); // deliberatly empty line for better readability
+            }
+        }
+    }
+
+    private static void writeFxImage(Image image, boolean alpha, boolean keepBuffer, int compression, final Implementation implementation, PaletteQuantizer... quantizer) {
         final ByteBuffer byteBuffer = ByteBuffer.allocate(WriteFxImage.getCompressedSizeBound((int) image.getWidth(), (int) image.getHeight(), alpha));
         int size = 0;
         final long start = System.currentTimeMillis();
-        for (int i = 0; i < N_ITER; i++) {
-            final ByteBuffer bb = WriteFxImage.encode(image, keepBuffer ? byteBuffer : null, alpha, compression, null);
-            size += bb.limit();
+        switch (implementation) {
+        case OLDREF:
+            for (int i = 0; i < N_ITER; i++) {
+                final ByteBuffer bb = WriteFxImage.encodeAlt(image, keepBuffer ? byteBuffer : null, alpha, compression, null);
+                size += bb.limit();
+            }
+            break;
+        case PALETTE:
+            for (int i = 0; i < N_ITER; i++) {
+                final ByteBuffer bb = WriteFxImage.encodePalette(image, keepBuffer ? byteBuffer : null, alpha, compression, FilterType.FILTER_NONE, quantizer.length == 0 ? null : quantizer[0]);
+                size += bb.limit();
+            }
+            break;
+        case NEWREF:
+        default:
+            for (int i = 0; i < N_ITER; i++) {
+                final ByteBuffer bb = WriteFxImage.encode(image, keepBuffer ? byteBuffer : null, alpha, compression, FilterType.FILTER_NONE);
+                size += bb.limit();
+            }
+            break;
         }
         final long stop = System.currentTimeMillis();
         final double avgSize = size / (double) N_ITER;
         final double actualCompression = 100.0 * avgSize / (double) WriteFxImage.encode(image, null, alpha, Deflater.NO_COMPRESSION, null).limit();
         LOGGER.atInfo() //
+                .addArgument(implementation.getName())
                 .addArgument((int) image.getWidth())
                 .addArgument((int) image.getHeight()) //
                 .addArgument(String.format("%5.1f", actualCompression)) //
@@ -87,7 +170,7 @@ public class WriteFxImageBenchmark {
                 .addArgument(alpha ? "rgba" : "rgb ") //
                 .addArgument(keepBuffer ? "keepBuffer" : "discardBuffer") //
                 .addArgument(compression) //
-                .log("FxImage: size {}x{} \t compression: {}% \t {} ms/image    {} {} compressionLevel: {}");
+                .log("FxImage-{}: size {}x{} \t compression: {}% \t {} ms/image    {} {} compressionLevel: {}");
     }
 
     private static void writeImageIoImage(Image image, boolean keepStream, boolean keepBImg) throws IOException {
@@ -121,51 +204,22 @@ public class WriteFxImageBenchmark {
                 .log("ImageIO: size {}x{} \t compression: {}% \t {} ms/image    rgba {} {}");
     }
 
-    public static void testCompressionPerformance(final Image image, final String description) {
-        LOGGER.atInfo().addArgument(description).log("Test compression level performance with image with {}");
-        for (final boolean alpha : new boolean[] { true, false }) {
-            LOGGER.atInfo().addArgument(alpha ? "with" : "without").log("{} alpha channel");
-            for (int compressionLevel = Deflater.NO_COMPRESSION; compressionLevel <= Deflater.BEST_COMPRESSION; compressionLevel++) {
-                writeFxImage(image, alpha, true, compressionLevel);
+    public enum Implementation {
+        OLDREF,
+        NEWREF,
+        PALETTE;
+
+        public String getName() {
+            switch (this) {
+            case OLDREF:
+                return "OldRef ";
+            case NEWREF:
+                return "NewRef ";
+            case PALETTE:
+                return "Palette";
+            default:
+                return "unknown";
             }
         }
-    }
-
-    public static void main(String[] args) throws IOException {
-        // get the image on the javafx application thread for snapshot to work
-        Platform.startup(WriteFxImageBenchmark::initalizeImage);
-        while (!initialized.get()) {
-            //
-        }
-        Platform.exit();
-
-        LOGGER.atInfo().log("Image with noise data (difficult to compress)");
-        for (final boolean alpha : new boolean[] { false, true }) {
-            for (final boolean keepBuffer : new boolean[] { false, true }) {
-                writeFxImage(testimage, alpha, keepBuffer, Deflater.NO_COMPRESSION);
-                writeFxImage(testimage, alpha, keepBuffer, Deflater.BEST_SPEED);
-                writeFxImage(testimage, alpha, keepBuffer, Deflater.BEST_COMPRESSION);
-            }
-        }
-        writeImageIoImage(testimage, false, false);
-        writeImageIoImage(testimage, true, false);
-        writeImageIoImage(testimage, false, true);
-        writeImageIoImage(testimage, true, true);
-
-        LOGGER.atInfo().log("Image with simple shapes (easy to compress)");
-        for (final boolean alpha : new boolean[] { false, true }) {
-            for (final boolean keepBuffer : new boolean[] { false, true }) {
-                writeFxImage(testimage2, alpha, keepBuffer, Deflater.NO_COMPRESSION);
-                writeFxImage(testimage2, alpha, keepBuffer, Deflater.BEST_SPEED);
-                writeFxImage(testimage2, alpha, keepBuffer, Deflater.BEST_COMPRESSION);
-            }
-        }
-        writeImageIoImage(testimage2, false, false);
-        writeImageIoImage(testimage2, true, false);
-        writeImageIoImage(testimage2, false, true);
-        writeImageIoImage(testimage2, true, true);
-
-        testCompressionPerformance(testimage, "noise data (difficult to compress)");
-        testCompressionPerformance(testimage2, "simple shapes (easy to compress)");
     }
 }
