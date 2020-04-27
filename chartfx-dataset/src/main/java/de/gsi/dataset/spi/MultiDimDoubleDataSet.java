@@ -467,6 +467,9 @@ public class MultiDimDoubleDataSet extends AbstractDataSet<MultiDimDoubleDataSet
 
     @Override
     public int getDataCount(int dimIndex) {
+        if (values.length <= dimIndex) {
+            return 0;
+        }
         return values[dimIndex].size();
     }
 
