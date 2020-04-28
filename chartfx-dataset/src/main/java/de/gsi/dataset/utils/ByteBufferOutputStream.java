@@ -12,10 +12,10 @@ import java.nio.ByteBuffer;
 public class ByteBufferOutputStream extends OutputStream {
     private ByteBuffer wrappedBuffer;
     private final boolean autoEnlarge;
-    
-    public ByteBufferOutputStream(final ByteBuffer wrappedBuffer, final boolean ...autoEnlarge) {
+
+    public ByteBufferOutputStream(final ByteBuffer wrappedBuffer, final boolean... autoEnlarge) {
         this.wrappedBuffer = wrappedBuffer;
-        this.autoEnlarge = autoEnlarge.length>0 && autoEnlarge[0];
+        this.autoEnlarge = autoEnlarge.length > 0 && autoEnlarge[0];
     }
 
     public ByteBuffer buffer() {

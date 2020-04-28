@@ -8,11 +8,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import javafx.scene.image.WritableImage;
+
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javafx.scene.image.WritableImage;
 
 /**
  * 
@@ -44,15 +44,15 @@ public class WritableImageCacheTests {
         forceMemoryShortage();
         assertEquals(0, cache.size(), "zero-ing memory and SoftReferenes");
 
-        cache.add(new WritableImage(N_IMAGE_WIDTH-10, N_IMAGE_HEIGHT)); // to small
-        cache.add(new WritableImage(N_IMAGE_WIDTH, N_IMAGE_HEIGHT -10)); // to small
+        cache.add(new WritableImage(N_IMAGE_WIDTH - 10, N_IMAGE_HEIGHT)); // to small
+        cache.add(new WritableImage(N_IMAGE_WIDTH, N_IMAGE_HEIGHT - 10)); // to small
         cache.add(new WritableImage(N_IMAGE_WIDTH, N_IMAGE_HEIGHT)); // goldy locks, right size
-        cache.add(new WritableImage(N_IMAGE_WIDTH+10, N_IMAGE_HEIGHT)); // to large
+        cache.add(new WritableImage(N_IMAGE_WIDTH + 10, N_IMAGE_HEIGHT)); // to large
         assertEquals(4, cache.size());
 
         final WritableImage testImage = cache.getImage(N_IMAGE_WIDTH, N_IMAGE_HEIGHT);
-        assertEquals(N_IMAGE_WIDTH, (int)testImage.getWidth());
-        assertEquals(N_IMAGE_HEIGHT, (int)testImage.getHeight());
+        assertEquals(N_IMAGE_WIDTH, (int) testImage.getWidth());
+        assertEquals(N_IMAGE_HEIGHT, (int) testImage.getHeight());
         assertEquals(3, cache.size());
 
         cache.clear();
@@ -123,7 +123,7 @@ public class WritableImageCacheTests {
             WritableImage image = cache.getImage(N_IMAGE_WIDTH, N_IMAGE_HEIGHT);
 
             // simple check to minimise JIT optimisations
-            if ((int)image.getWidth() != N_IMAGE_WIDTH) {
+            if ((int) image.getWidth() != N_IMAGE_WIDTH) {
                 throw new IllegalStateException("should not occur");
             }
 
@@ -142,7 +142,7 @@ public class WritableImageCacheTests {
             WritableImage image = new WritableImage(N_IMAGE_WIDTH, N_IMAGE_HEIGHT);
 
             // simple check to minimise JIT optimisations
-            if ((int)image.getWidth() != N_IMAGE_WIDTH) {
+            if ((int) image.getWidth() != N_IMAGE_WIDTH) {
                 throw new IllegalStateException("should not occur");
             }
 

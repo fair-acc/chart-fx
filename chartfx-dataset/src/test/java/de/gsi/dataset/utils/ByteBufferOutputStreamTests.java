@@ -8,9 +8,7 @@ import java.nio.ByteBuffer;
 
 import org.junit.jupiter.api.Test;
 
-
 public class ByteBufferOutputStreamTests {
-
     @Test
     public void testExpandByteBufferOnPositionIncrease() throws Exception {
         testExpandByteBufferOnPositionIncrease(ByteBuffer.allocate(16));
@@ -62,44 +60,39 @@ public class ByteBufferOutputStreamTests {
         byte[] bytes = new byte[5];
         buffer.get(bytes);
         assertArrayEquals("Hello".getBytes(), bytes);
-        
+
         buffer.rewind();
         output.close();
-        
-
-        
-        
-        
     }
-    
+
     @Test
     public void testWriteByte() throws IOException {
         ByteBufferOutputStream output = new ByteBufferOutputStream(ByteBuffer.allocate(1), true);
         final byte[] secondMsg = "Hello World!".getBytes();
-        for (int byt: secondMsg) {
+        for (int byt : secondMsg) {
             output.write(byt);
         }
         output.buffer().position(0);
         output.buffer().limit(12);
-        
+
         // read result
         byte[] bytes = new byte[12];
         output.buffer().get(bytes);
         assertArrayEquals(secondMsg, bytes);
         output.buffer().rewind();
-        
+
         output.write(secondMsg, 0, secondMsg.length);
         output.write(secondMsg, 0, secondMsg.length);
-        
+
         output.buffer().position(0);
         output.buffer().limit(24);
-        
+
         // read result
         output.buffer().get(bytes);
         assertArrayEquals(secondMsg, bytes);
         output.buffer().get(bytes);
         assertArrayEquals(secondMsg, bytes);
-        
+
         output.close();
     }
 
@@ -125,5 +118,4 @@ public class ByteBufferOutputStreamTests {
         assertEquals(value, output.buffer().getLong(0));
         output.close();
     }
-
 }

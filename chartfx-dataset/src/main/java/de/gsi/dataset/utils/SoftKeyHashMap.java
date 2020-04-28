@@ -436,7 +436,8 @@ public class SoftKeyHashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>
      */
     @Override
     public V put(final K key, final V value) {
-        if (key == null || value == null) throw new NullPointerException();
+        if (key == null || value == null)
+            throw new NullPointerException();
         final Object k = maskNull(key);
         final int h = hash(k);
         final Entry<K, V>[] tab = getTable();
