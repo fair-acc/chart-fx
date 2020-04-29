@@ -73,6 +73,8 @@
         <exclude name="DataflowAnomalyAnalysis"/>
         <exclude name="EmptyCatchBlock"/>
         <exclude name="NonStaticInitializer"/>
+        <!--  suppressed since implementation is erroneous and also for the vast majority of non-serialisable classes -->
+        <exclude name="BeanMembersShouldSerialize"/> 
     </rule>
     <rule ref="category/java/errorprone.xml/AssignmentInOperand">
         <properties>
