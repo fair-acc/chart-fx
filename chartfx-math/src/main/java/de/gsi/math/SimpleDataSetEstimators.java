@@ -20,7 +20,7 @@ public final class SimpleDataSetEstimators { // NOPMD name is as is (ie. no Help
     /**
      * Compute centre of mass over full DataSet
      * 
-     * @param dataSet
+     * @param dataSet input dataset
      * @return centre of mass
      */
     public static double computeCentreOfMass(DataSet dataSet) {
@@ -30,9 +30,9 @@ public final class SimpleDataSetEstimators { // NOPMD name is as is (ie. no Help
     /**
      * Computes the centre of mass in a given x range.
      * 
-     * @param dataSet
-     * @param min
-     * @param max
+     * @param dataSet input dataset
+     * @param min min index
+     * @param max max index
      * @return centre of mass
      */
     public static double computeCentreOfMass(DataSet dataSet, double min, double max) {
@@ -43,9 +43,9 @@ public final class SimpleDataSetEstimators { // NOPMD name is as is (ie. no Help
     /**
      * Computes the centre of mass in a given index range.
      * 
-     * @param dataSet
-     * @param minIndex
-     * @param maxIndex
+     * @param dataSet input dataset
+     * @param minIndex min index
+     * @param maxIndex max index
      * @return centre of mass
      */
     public static double computeCentreOfMass(DataSet dataSet, int minIndex, int maxIndex) {
@@ -288,7 +288,7 @@ public final class SimpleDataSetEstimators { // NOPMD name is as is (ie. no Help
     }
 
     /**
-     * @param dataSet
+     * @param dataSet input dataset
      * @param indexMin the starting index
      * @param indexMax the end index (switching indices reverses sign of result)
      * @return the Integral of the DataSet according to the trapezoidal rule
@@ -397,9 +397,9 @@ public final class SimpleDataSetEstimators { // NOPMD name is as is (ie. no Help
      * Returns the range of the y Data of the dataSet between the given indices.
      * This equals the maximum value in the range minus the minimum value.
      * 
-     * @param dataSet
-     * @param indexMin
-     * @param indexMax
+     * @param dataSet input dataset
+     * @param indexMin min index
+     * @param indexMax max index
      * @return the range of yData between the given indices
      */
     public static double getRange(final DataSet dataSet, final int indexMin, final int indexMax) {
@@ -427,9 +427,9 @@ public final class SimpleDataSetEstimators { // NOPMD name is as is (ie. no Help
     }
 
     /**
-     * @param dataSet
-     * @param indexMin
-     * @param indexMax
+     * @param dataSet input dataset
+     * @param indexMin min index
+     * @param indexMax max index
      * @return the 20% to 80% rise time of the signal
      */
     public static double getSimpleRiseTime(final DataSet dataSet, final int indexMin, final int indexMax) {
