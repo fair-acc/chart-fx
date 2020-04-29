@@ -9,9 +9,9 @@ import javafx.scene.control.Button;
 import javafx.scene.layout.HBox;
 
 public class AcquisitionButtonBar extends HBox {
-    private static String DEFAULT_CSS = AcquisitionButtonBar.class.getResource("acq_button_small.css").toExternalForm();
-    private static PseudoClass PSEUDO_CLASS_ACTIVATED = PseudoClass.getPseudoClass("activated");
-    private static PseudoClass PSEUDO_CLASS_PAUSE = PseudoClass.getPseudoClass("paused");
+    private static final String DEFAULT_CSS = AcquisitionButtonBar.class.getResource("acq_button_small.css").toExternalForm();
+    private static final PseudoClass PSEUDO_CLASS_ACTIVATED = PseudoClass.getPseudoClass("activated");
+    private static final PseudoClass PSEUDO_CLASS_PAUSE = PseudoClass.getPseudoClass("paused");
     private final Button buttonPlayStop = new SquareButton("my-playstop-button");
     private final Button buttonPlay = new SquareButton("my-play-button");
     private final Button buttonStop = new SquareButton("my-stop-button");
@@ -33,22 +33,20 @@ public class AcquisitionButtonBar extends HBox {
         });
 
         buttonPlayStop.disableProperty().addListener((ch, o, n) -> {
-            if (n) {
+            if (Boolean.TRUE.equals(n)) {
                 playStopState.set(false);
             }
         });
         buttonPlay.disableProperty().addListener((ch, o, n) -> {
-            if (n) {
+            if (Boolean.TRUE.equals(n)) {
                 playState.set(false);
             }
         });
-        buttonStop.disableProperty().addListener((ch, o, n) -> {
-            stopState.set(!n);
-        });
+        buttonStop.disableProperty().addListener((ch, o, n) -> stopState.set(!n));
 
         pauseState.addListener((ch, o, n) -> {
             if (isPauseEnabled) {
-                if (n) {
+                if (Boolean.TRUE.equals(n)) {
                     playState.set(true);
                 }
                 buttonPlay.pseudoClassStateChanged(PSEUDO_CLASS_PAUSE, isPauseEnabled ? n : playState.get());
@@ -64,7 +62,7 @@ public class AcquisitionButtonBar extends HBox {
 
             buttonStop.pseudoClassStateChanged(PSEUDO_CLASS_ACTIVATED, n);
             buttonPlayStop.pseudoClassStateChanged(PSEUDO_CLASS_ACTIVATED, n);
-            if (n) {
+            if (Boolean.TRUE.equals(n)) {
                 buttonPlay.pseudoClassStateChanged(PSEUDO_CLASS_ACTIVATED, false);
                 buttonPlay.pseudoClassStateChanged(PSEUDO_CLASS_PAUSE, false);
             }
@@ -72,10 +70,10 @@ public class AcquisitionButtonBar extends HBox {
 
         buttonPlay.setOnAction(evt -> {
             if (isPauseEnabled) {
-                if (!playState.get()) {
-                    playState.set(true);
-                } else {
+                if (playState.get()) {
                     pauseState.set(!pauseState.get());
+                } else {
+                    playState.set(true);
                 }
             } else {
                 playState.set(!playState.get());
@@ -89,12 +87,12 @@ public class AcquisitionButtonBar extends HBox {
 
             buttonStop.pseudoClassStateChanged(PSEUDO_CLASS_ACTIVATED, n);
             buttonPlay.pseudoClassStateChanged(PSEUDO_CLASS_ACTIVATED, n);
-            buttonPlay.pseudoClassStateChanged(PSEUDO_CLASS_PAUSE, isPauseEnabled ? pauseState.get() : true);
+            buttonPlay.pseudoClassStateChanged(PSEUDO_CLASS_PAUSE, !isPauseEnabled || pauseState.get());
         });
 
         buttonStop.setOnAction(evt -> stopState.set(!stopState.get()));
         stopState.addListener((ch, o, n) -> {
-            if (n) {
+            if (Boolean.TRUE.equals(n)) {
                 pauseState.set(false);
                 playStopState.set(false);
                 playState.set(false);
