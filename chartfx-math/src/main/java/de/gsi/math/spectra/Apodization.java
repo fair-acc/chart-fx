@@ -37,6 +37,18 @@ public enum Apodization {
     }
 
     /**
+     * Applies the given apodization window to the given array (in-place)
+     * 
+     * @param data input data
+     */
+    public void apodize(final double[] data) {
+        final double[] window = getWindow(data.length);
+        for (int i = 0; i < data.length; i++) {
+            data[i] = data[i] * window[i];
+        }
+    }
+
+    /**
      * computes and returns the value of the apodization function for a given window index
      *
      * @param i index within window
@@ -165,18 +177,6 @@ public enum Apodization {
      * Applies the given apodization window to the given array (in-place)
      * 
      * @param data input data
-     */
-    public void apodize(final double[] data) {
-        final double[] window = getWindow(data.length);
-        for (int i = 0; i < data.length; i++) {
-            data[i] = data[i] * window[i];
-        }
-    }
-
-    /**
-     * Applies the given apodization window to the given array (in-place)
-     * 
-     * @param data input data
      * @param function the apodization function to use
      */
     public static void apodize(final double[] data, final Apodization function) {
@@ -214,8 +214,8 @@ public enum Apodization {
         final protected int length;
 
         /**
-         * @param apodization
-         * @param length
+         * @param apodization type
+         * @param length window length
          */
         public ApodizationArrayDescription(Apodization apodization, int length) {
             AssertUtils.notNull("apodization", apodization);
