@@ -10,6 +10,8 @@ import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,6 +24,7 @@ import de.gsi.dataset.spi.DefaultDataSet;
  * @see de.gsi.dataset.locks.DataSetLock
  * @see de.gsi.dataset.locks.DefaultDataSetLock
  */
+@Execution(ExecutionMode.SAME_THREAD)
 public class DataSetLockTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(DataSetLockTest.class);
     private static int readCount = 0;

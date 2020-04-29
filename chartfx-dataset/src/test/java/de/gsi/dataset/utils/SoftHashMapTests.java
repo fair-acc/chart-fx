@@ -17,6 +17,8 @@ import java.util.Set;
 import java.util.WeakHashMap;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.Logger;
@@ -27,6 +29,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author rstein
  */
+@Execution(ExecutionMode.SAME_THREAD)
 public class SoftHashMapTests {
     private static final Logger LOGGER = LoggerFactory.getLogger(SoftHashMapTests.class);
     private static final int N_ENTRIES = 100;
