@@ -31,7 +31,7 @@ public class JavaFXInterceptorUtils {
 	 * This is (strictly) necessary when testing setter and/or getter methods of JavaFX classes (ie. Node derived, properties etc).
 	 * <p>
 	 * Example usage:
-	 * <pre>{@code
+	 * <pre><code>
 	 * @ExtendWith(ApplicationExtension.class)
 	 * @ExtendWith(JavaFxInterceptor.class)
 	 * public class SquareButtonTest {
@@ -60,7 +60,7 @@ public class JavaFXInterceptorUtils {
 	 *    }
 	 * }
 	 *
-	 * }</pre>
+	 * </code></pre>
 	 *
 	 * @author rstein
 	 */
@@ -93,7 +93,7 @@ public class JavaFXInterceptorUtils {
 	 * This is (strictly) necessary when testing setter and/or getter methods of JavaFX classes (ie. Node derived, properties etc).
 	 * <p>
 	 * Example usage:
-	 * <pre>{@code
+	 * <pre><code>
 	 * @ExtendWith(ApplicationExtension.class)
 	 * @ExtendWith(SelectiveJavaFxInterceptor.class)
 	 * public class SquareButtonTest {
@@ -122,7 +122,7 @@ public class JavaFXInterceptorUtils {
 	 *    }
 	 * }
 	 *
-	 * }</pre>
+	 * </code></pre>
 	 *
 	 * @author rstein
 	 */
