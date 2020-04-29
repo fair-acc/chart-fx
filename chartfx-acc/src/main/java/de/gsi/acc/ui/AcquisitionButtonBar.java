@@ -1,12 +1,13 @@
 package de.gsi.acc.ui;
 
-import de.gsi.chart.viewer.SquareButton;
 import javafx.beans.NamedArg;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.css.PseudoClass;
 import javafx.scene.control.Button;
 import javafx.scene.layout.HBox;
+
+import de.gsi.chart.viewer.SquareButton;
 
 public class AcquisitionButtonBar extends HBox {
     private static final String DEFAULT_CSS = AcquisitionButtonBar.class.getResource("acq_button_small.css").toExternalForm();
