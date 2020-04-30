@@ -19,9 +19,17 @@ import javafx.scene.paint.Stop;
  */
 public class ColorGradient {
     /**
-     * Rainbow colors gradient: violet, indigo, blue, green, yellow, orange and red.
+     * Rainbow colors gradient: violet, indigo, blue, green, yellow, orange and red with transparent limits for data outside ]0, 1[
      */
     public static final ColorGradient RAINBOW = new ColorGradient("RAINBOW", new Stop(0.0, Color.TRANSPARENT),
+            new Stop(Double.MIN_VALUE, Color.VIOLET), new Stop(0.17, Color.INDIGO), new Stop(0.34, Color.BLUE),
+            new Stop(0.51, Color.GREEN), new Stop(0.68, Color.YELLOW), new Stop(0.85, Color.ORANGE),
+            new Stop(1.0, Color.RED));
+
+    /**
+     * Rainbow colors gradient: violet, indigo, blue, green, yellow, orange and red with opaque limits for data outside ]0, 1[
+     */
+    public static final ColorGradient RAINBOW_OPAQUE = new ColorGradient("RAINBOW_OPAQUE", new Stop(0.0, Color.DODGERBLUE),
             new Stop(Double.MIN_VALUE, Color.VIOLET), new Stop(0.17, Color.INDIGO), new Stop(0.34, Color.BLUE),
             new Stop(0.51, Color.GREEN), new Stop(0.68, Color.YELLOW), new Stop(0.85, Color.ORANGE),
             new Stop(1.0, Color.RED));
@@ -102,8 +110,8 @@ public class ColorGradient {
     public static final ColorGradient DEFAULT = RAINBOW;
     private final List<Stop> stops;
     private final String name;
-    private transient final WeakHashMap<Double, Color> colorMap = new WeakHashMap<>();
-    private transient final WeakHashMap<Double, int[]> colorMapBytes = new WeakHashMap<>();
+    private final WeakHashMap<Double, Color> colorMap = new WeakHashMap<>();
+    private final WeakHashMap<Double, int[]> colorMapBytes = new WeakHashMap<>();
 
     /**
      * Creates a new instance of ColorGradient.**
@@ -242,7 +250,7 @@ public class ColorGradient {
     }
 
     public static List<ColorGradient> colorGradients() {
-        return Arrays.asList(ColorGradient.RAINBOW, ColorGradient.JET, ColorGradient.TOPO, ColorGradient.TOPO_EXT,
+        return Arrays.asList(ColorGradient.RAINBOW, ColorGradient.RAINBOW_OPAQUE, ColorGradient.JET, ColorGradient.TOPO, ColorGradient.TOPO_EXT,
                 ColorGradient.WHITE_BLACK, ColorGradient.BLACK_WHITE, ColorGradient.HOT, ColorGradient.SUNRISE,
                 ColorGradient.VIRIDIS, ColorGradient.BLUERED, ColorGradient.PINK, ColorGradient.RAINBOW_EQ);
     }
