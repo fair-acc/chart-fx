@@ -58,145 +58,149 @@ public class SimpleMeasurements extends AbstractChartMeasurement {
 
     @Override
     public void handle(final UpdateEvent event) {
-        if (getValueIndicatorsUser().size() < measType.getRequiredSelectors()) {
+        final DataSet ds = getDataSet();
+        if (getValueIndicatorsUser().size() < measType.getRequiredSelectors() || ds == null) {
             // not yet initialised
             return;
         }
 
-        final DataSet selectedDataSet = getDataSet();
         final double newValueMarker1 = requiredNumberOfIndicators >= 1 && !getValueIndicatorsUser().isEmpty() ? getValueIndicatorsUser().get(0).getValue() : DEFAULT_MIN;
         final double newValueMarker2 = requiredNumberOfIndicators >= 2 && getValueIndicatorsUser().size() >= 2 ? getValueIndicatorsUser().get(1).getValue() : DEFAULT_MAX;
 
-        final int index0 = selectedDataSet.getIndex(DataSet.DIM_X, newValueMarker1);
-        final int index1 = selectedDataSet.getIndex(DataSet.DIM_X, newValueMarker2);
-        final int indexMin = requiredNumberOfIndicators == 1 ? index0 : Math.min(index0, index1);
-        final int indexMax = Math.max(index0, index1);
-        DataSet ds = selectedDataSet;
+        ds.lock().readLockGuard(() -> {
+            if (!ds.getAxisDescription(DataSet.DIM_X).isDefined()) {
+                ds.recomputeLimits(DataSet.DIM_X);
+            }
+            final int index0 = ds.getIndex(DataSet.DIM_X, newValueMarker1);
+            final int index1 = ds.getIndex(DataSet.DIM_X, newValueMarker2);
+            final int indexMin = requiredNumberOfIndicators == 1 ? index0 : Math.min(index0, index1);
+            final int indexMax = Math.max(index0, index1);
 
-        double val = Double.NaN;
-        switch (measType) {
-        // indicators
-        case VALUE_HOR:
-            val = SimpleDataSetEstimators.getZeroCrossing(ds, newValueMarker1);
-            break;
-        case VALUE_VER:
-            val = selectedDataSet.get(DataSet.DIM_Y, indexMin);
-            break;
-        case DISTANCE_HOR:
-            val = SimpleDataSetEstimators.getZeroCrossing(ds, newValueMarker2) - SimpleDataSetEstimators.getZeroCrossing(ds, newValueMarker1);
-            break;
-        case DISTANCE_VER:
-            val = SimpleDataSetEstimators.getDistance(ds, indexMin, indexMax, false);
-            break;
-        // vertical measurements
-        case MINIMUM:
-            val = SimpleDataSetEstimators.getMinimum(ds, indexMin, indexMax);
-            break;
-        case MAXIMUM:
-            val = SimpleDataSetEstimators.getMaximum(ds, indexMin, indexMax);
-            break;
-        case RANGE:
-            val = SimpleDataSetEstimators.getRange(ds, indexMin, indexMax);
-            break;
-        case MEAN:
-            val = SimpleDataSetEstimators.getMean(ds, indexMin, indexMax);
-            break;
-        case RMS:
-            val = SimpleDataSetEstimators.getRms(ds, indexMin, indexMax);
-            break;
-        case MEDIAN:
-            val = SimpleDataSetEstimators.getMedian(ds, indexMin, indexMax);
-            break;
-        case INTEGRAL:
-            // N.B. use of non-sanitised indices index[0,1]
-            val = SimpleDataSetEstimators.getIntegral(ds, index0, index1);
-            break;
-        case INTEGRAL_FULL:
-            val = SimpleDataSetEstimators.getIntegral(ds, 0, ds.getDataCount());
-            break;
-        case TRANSMISSION_ABS:
-            // N.B. use of non-sanitised indices index[0,1]
-            val = SimpleDataSetEstimators.getTransmission(ds, index0, index1, true);
-            break;
-        case TRANSMISSION_REL:
-            // N.B. use of non-sanitised indices index[0,1]
-            val = SimpleDataSetEstimators.getTransmission(ds, index0, index1, false);
-            break;
+            double val = Double.NaN;
+            switch (measType) {
+            // indicators
+            case VALUE_HOR:
+                val = SimpleDataSetEstimators.getZeroCrossing(ds, newValueMarker1);
+                break;
+            case VALUE_VER:
+                val = ds.get(DataSet.DIM_Y, indexMin);
+                break;
+            case DISTANCE_HOR:
+                val = SimpleDataSetEstimators.getZeroCrossing(ds, newValueMarker2) - SimpleDataSetEstimators.getZeroCrossing(ds, newValueMarker1);
+                break;
+            case DISTANCE_VER:
+                val = SimpleDataSetEstimators.getDistance(ds, indexMin, indexMax, false);
+                break;
+            // vertical measurements
+            case MINIMUM:
+                val = SimpleDataSetEstimators.getMinimum(ds, indexMin, indexMax);
+                break;
+            case MAXIMUM:
+                val = SimpleDataSetEstimators.getMaximum(ds, indexMin, indexMax);
+                break;
+            case RANGE:
+                val = SimpleDataSetEstimators.getRange(ds, indexMin, indexMax);
+                break;
+            case MEAN:
+                val = SimpleDataSetEstimators.getMean(ds, indexMin, indexMax);
+                break;
+            case RMS:
+                val = SimpleDataSetEstimators.getRms(ds, indexMin, indexMax);
+                break;
+            case MEDIAN:
+                val = SimpleDataSetEstimators.getMedian(ds, indexMin, indexMax);
+                break;
+            case INTEGRAL:
+                // N.B. use of non-sanitised indices index[0,1]
+                val = SimpleDataSetEstimators.getIntegral(ds, index0, index1);
+                break;
+            case INTEGRAL_FULL:
+                val = SimpleDataSetEstimators.getIntegral(ds, 0, ds.getDataCount());
+                break;
+            case TRANSMISSION_ABS:
+                // N.B. use of non-sanitised indices index[0,1]
+                val = SimpleDataSetEstimators.getTransmission(ds, index0, index1, true);
+                break;
+            case TRANSMISSION_REL:
+                // N.B. use of non-sanitised indices index[0,1]
+                val = SimpleDataSetEstimators.getTransmission(ds, index0, index1, false);
+                break;
 
-        // horizontal measurements
-        case EDGE_DETECT:
-            val = SimpleDataSetEstimators.getEdgeDetect(ds, indexMin, indexMax);
-            break;
-        case RISETIME_10_90:
-            val = SimpleDataSetEstimators.getSimpleRiseTime1090(ds, indexMin, indexMax);
-            break;
-        case RISETIME_20_80:
-            val = SimpleDataSetEstimators.getSimpleRiseTime2080(ds, indexMin, indexMax);
-            break;
-        case FWHM:
-            val = SimpleDataSetEstimators.getFullWidthHalfMaximum(ds, indexMin, indexMax, false);
-            break;
-        case FWHM_INTERPOLATED:
-            val = SimpleDataSetEstimators.getFullWidthHalfMaximum(ds, indexMin, indexMax, true);
-            break;
-        case LOCATION_MAXIMUM:
-            val = selectedDataSet.get(DataSet.DIM_X, SimpleDataSetEstimators.getLocationMaximum(ds, indexMin, indexMax));
-            break;
-        case LOCATION_MAXIMUM_GAUSS:
-            val = SimpleDataSetEstimators.getLocationMaximumGaussInterpolated(ds, indexMin, indexMax);
-            break;
-        case DUTY_CYCLE:
-            val = SimpleDataSetEstimators.getDutyCycle(ds, indexMin, indexMax);
-            break;
-        case PERIOD:
-            val = 1.0 / SimpleDataSetEstimators.getFrequencyEstimate(ds, indexMin, indexMax);
-            break;
-        case FREQUENCY:
-            val = SimpleDataSetEstimators.getFrequencyEstimate(ds, indexMin, indexMax);
-            break;
-        default:
-            break;
-        }
-
-        final Chart chart = getMeasurementPlugin().getChart();
-        final Axis axis = chart.getFirstAxis(measType.isVerticalMeasurement() ? Orientation.VERTICAL : Orientation.HORIZONTAL);
-
-        final String axisUnit = axis.getUnit();
-        final String unit = axisUnit == null ? "a.u." : axis.getUnit();
-
-        // update label valueTextField
-        String valueLabel;
-        if (axis instanceof DefaultNumericAxis && axisUnit != null) {
-            final double unitScale = ((DefaultNumericAxis) axis).getUnitScaling();
-            final String axisPrefix = MetricPrefix.getShortPrefix(unitScale);
-            // convert value according to scale factor
-            final double scaledValue = val / unitScale;
-
-            FXUtils.runFX(() -> getValueField().setUnit(new StringBuilder().append(axisPrefix).append(unit).toString()));
-            final AxisLabelFormatter axisFormatter = ((DefaultNumericAxis) axis).getAxisLabelFormatter();
-            valueLabel = axisFormatter.toString(scaledValue);
-        } else {
-            if (Math.abs(Math.log10(Math.abs(val))) < SMALL_FORMAT_THRESHOLD) {
-                valueLabel = formatterSmall.format(val);
-            } else {
-                valueLabel = formatterLarge.format(val);
+            // horizontal measurements
+            case EDGE_DETECT:
+                val = SimpleDataSetEstimators.getEdgeDetect(ds, indexMin, indexMax);
+                break;
+            case RISETIME_10_90:
+                val = SimpleDataSetEstimators.getSimpleRiseTime1090(ds, indexMin, indexMax);
+                break;
+            case RISETIME_20_80:
+                val = SimpleDataSetEstimators.getSimpleRiseTime2080(ds, indexMin, indexMax);
+                break;
+            case FWHM:
+                val = SimpleDataSetEstimators.getFullWidthHalfMaximum(ds, indexMin, indexMax, false);
+                break;
+            case FWHM_INTERPOLATED:
+                val = SimpleDataSetEstimators.getFullWidthHalfMaximum(ds, indexMin, indexMax, true);
+                break;
+            case LOCATION_MAXIMUM:
+                val = ds.get(DataSet.DIM_X, SimpleDataSetEstimators.getLocationMaximum(ds, indexMin, indexMax));
+                break;
+            case LOCATION_MAXIMUM_GAUSS:
+                val = SimpleDataSetEstimators.getLocationMaximumGaussInterpolated(ds, indexMin, indexMax);
+                break;
+            case DUTY_CYCLE:
+                val = SimpleDataSetEstimators.getDutyCycle(ds, indexMin, indexMax);
+                break;
+            case PERIOD:
+                val = 1.0 / SimpleDataSetEstimators.getFrequencyEstimate(ds, indexMin, indexMax);
+                break;
+            case FREQUENCY:
+                val = SimpleDataSetEstimators.getFrequencyEstimate(ds, indexMin, indexMax);
+                break;
+            default:
+                break;
             }
 
-            FXUtils.runFX(() -> getValueField().setUnit(unit));
-        }
+            final Chart chart = getMeasurementPlugin().getChart();
+            final Axis axis = chart.getFirstAxis(measType.isVerticalMeasurement() ? Orientation.VERTICAL : Orientation.HORIZONTAL);
 
-        final double tempVal = val;
-        FXUtils.runFX(() -> getValueField().setValue(tempVal, valueLabel));
+            final String axisUnit = axis.getUnit();
+            final String unit = axisUnit == null ? "a.u." : axis.getUnit();
 
-        switch (measType) {
-        case TRANSMISSION_ABS:
-        case TRANSMISSION_REL:
-            FXUtils.runFX(() -> getValueField().setUnit("%"));
-            break;
-        case INTEGRAL:
-        default:
-            break;
-        }
+            // update label valueTextField
+            String valueLabel;
+            if (axis instanceof DefaultNumericAxis && axisUnit != null) {
+                final double unitScale = ((DefaultNumericAxis) axis).getUnitScaling();
+                final String axisPrefix = MetricPrefix.getShortPrefix(unitScale);
+                // convert value according to scale factor
+                final double scaledValue = val / unitScale;
+
+                FXUtils.runFX(() -> getValueField().setUnit(new StringBuilder().append(axisPrefix).append(unit).toString()));
+                final AxisLabelFormatter axisFormatter = ((DefaultNumericAxis) axis).getAxisLabelFormatter();
+                valueLabel = axisFormatter.toString(scaledValue);
+            } else {
+                if (Math.abs(Math.log10(Math.abs(val))) < SMALL_FORMAT_THRESHOLD) {
+                    valueLabel = formatterSmall.format(val);
+                } else {
+                    valueLabel = formatterLarge.format(val);
+                }
+
+                FXUtils.runFX(() -> getValueField().setUnit(unit));
+            }
+
+            final double tempVal = val;
+            FXUtils.runFX(() -> getValueField().setValue(tempVal, valueLabel));
+
+            switch (measType) {
+            case TRANSMISSION_ABS:
+            case TRANSMISSION_REL:
+                FXUtils.runFX(() -> getValueField().setUnit("%"));
+                break;
+            case INTEGRAL:
+            default:
+                break;
+            }
+        });
 
         if (event != null) {
             // republish updateEvent
