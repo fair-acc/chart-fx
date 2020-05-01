@@ -291,12 +291,13 @@ public class DefaultAxisDescription extends DataRange implements AxisDescription
 
     @Override
     public boolean set(final double min, final double max) {
-        if (super.set(min, max)) {
-            return false;
+        final boolean a = super.setMin(min);
+        final boolean b = super.setMax(max);
+        if (a || b) {
+            notifyRangeChange();
+            return true;
         }
-
-        notifyRangeChange();
-        return true;
+        return false;
     }
 
     @Override
