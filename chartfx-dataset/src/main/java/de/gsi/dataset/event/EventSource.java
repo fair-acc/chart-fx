@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -73,59 +74,69 @@ public interface EventSource {
      * @param executeParallel {@code true} execute event listener via parallel executor service
      */
     default void invokeListener(final UpdateEvent updateEvent, final boolean executeParallel) {
-        synchronized (autoNotification()) {
-            if (!autoNotification().get() || updateEventListener() == null || updateEventListener().isEmpty()) {
-                return;
-            }
+        if (updateEventListener() == null) {
+            return;
         }
+        List<EventListener> eventListener;
         synchronized (updateEventListener()) {
-            if (!executeParallel) {
-                // alt implementation:
-                final AggregateException exceptions = new AggregateException(
-                        EventSource.class.getSimpleName() + "(NonParallel)");
-                for (EventListener listener : updateEventListener()) {
-                    try {
-                        listener.handle(updateEvent);
-                    } catch (Exception e) {
-                        exceptions.add(e);
-                    }
+            synchronized (autoNotification()) {
+                if (!isAutoNotification() || updateEventListener().isEmpty()) {
+                    return;
                 }
-                if (!exceptions.isEmpty()) {
-                    throw exceptions;
-                }
-                return;
             }
-
-            final UpdateEvent event = updateEvent == null ? new UpdateEvent(this) : updateEvent;
+            eventListener = new ArrayList<>(updateEventListener());
+        }
+        if (!executeParallel) {
+            // alt implementation:
             final AggregateException exceptions = new AggregateException(
-                    EventSource.class.getSimpleName() + "(Parallel)");
-            final List<Callable<Boolean>> workers = new ArrayList<>();
-            for (EventListener listener : updateEventListener()) {
-                workers.add(() -> {
-                    try {
-                        listener.handle(event);
-                        return Boolean.TRUE;
-                    } catch (Exception e) {
-                        exceptions.add(e);
-                        exceptions.fillInStackTrace();
-                    }
-                    return Boolean.FALSE;
-                });
-            }
-
-            try {
-                final List<Future<Boolean>> jobs = EventThreadHelper.getExecutorService().invokeAll(workers);
-                for (final Future<Boolean> future : jobs) {
-                    future.get();
+                    EventSource.class.getSimpleName() + "(NonParallel)");
+            for (EventListener listener : eventListener) {
+                try {
+                    listener.handle(updateEvent);
+                } catch (Exception e) {
+                    exceptions.add(e);
                 }
-            } catch (final InterruptedException | ExecutionException e) {
-                Thread.currentThread().interrupt();
-                throw new IllegalStateException("one parallel worker thread finished execution with error", e);
             }
-
             if (!exceptions.isEmpty()) {
                 throw exceptions;
             }
+            return;
+        }
+
+        final UpdateEvent event = updateEvent == null ? new UpdateEvent(this) : updateEvent;
+        final AggregateException exceptions = new AggregateException(
+                EventSource.class.getSimpleName() + "(Parallel)");
+        final List<Callable<Boolean>> workers = new ArrayList<>();
+        for (EventListener listener : eventListener) {
+            workers.add(() -> {
+                try {
+                    listener.handle(event);
+                    return Boolean.TRUE;
+                } catch (Exception e) {
+                    exceptions.add(e);
+                    exceptions.fillInStackTrace();
+                }
+                return Boolean.FALSE;
+            });
+        }
+
+        try {
+            ExecutorService es = EventThreadHelper.getExecutorService();
+            final List<Future<Boolean>> jobs = new ArrayList<>();
+            for (Callable<Boolean> worker : workers) {
+                jobs.add(es.submit(worker));
+            }
+            // submitted tasks
+            for (final Future<Boolean> future : jobs) {
+                future.get();
+            }
+        } catch (final InterruptedException | ExecutionException e) {
+            Thread.currentThread().interrupt();
+            throw new IllegalStateException("one parallel worker thread finished execution with error", e);
+        }
+
+        if (!exceptions.isEmpty()) {
+            throw exceptions;
         }
     }
 
