@@ -69,8 +69,8 @@ public abstract class AbstractErrorDataSet<D extends AbstractErrorDataSet<D>> ex
      */
     @Override
     public D recomputeLimits(final int dimIndex) {
-        // Clear previous ranges
-        getAxisDescription(dimIndex).clear();
+        // first compute range (does not trigger notify events)
+        DataRange newRange = new DataRange();
         final int dataCount = getDataCount(dimIndex);
         switch (getErrorType(dimIndex)) {
         case NO_ERROR:
@@ -81,18 +81,22 @@ public abstract class AbstractErrorDataSet<D extends AbstractErrorDataSet<D>> ex
                 final double value = get(dimIndex, i);
                 final double errorNeg = getErrorNegative(dimIndex, i);
                 final double errorPos = getErrorPositive(dimIndex, i);
-                getAxisDescription(dimIndex).add(value - errorNeg);
-                getAxisDescription(dimIndex).add(value + errorPos);
+                newRange.add(value - errorNeg);
+                newRange.add(value + errorPos);
             }
+            // set to new computed one and trigger notify event if different to old limits
+            getAxisDescription(dimIndex).set(newRange.getMin(), newRange.getMax());
             break;
         case SYMMETRIC:
         default:
             for (int i = 0; i < dataCount; i++) {
                 final double value = get(dimIndex, i);
                 final double error = getErrorPositive(dimIndex, i);
-                getAxisDescription(dimIndex).add(value - error);
-                getAxisDescription(dimIndex).add(value + error);
+                newRange.add(value - error);
+                newRange.add(value + error);
             }
+            // set to new computed one and trigger notify event if different to old limits
+            getAxisDescription(dimIndex).set(newRange.getMin(), newRange.getMax());
             break;
         }
         return getThis();
