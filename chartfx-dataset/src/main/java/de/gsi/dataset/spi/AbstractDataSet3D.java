@@ -21,7 +21,6 @@ public abstract class AbstractDataSet3D<D extends AbstractDataSet3D<D>> extends 
      */
     public AbstractDataSet3D(final String name) {
         super(name, 3);
-        getAxisDescriptions().add(new DefaultAxisDescription(this, "z-Axis", "a.u."));
     }
 
     /**
@@ -31,49 +30,5 @@ public abstract class AbstractDataSet3D<D extends AbstractDataSet3D<D>> extends 
     @Override
     public int getDataCount() {
         return getDataCount(DataSet.DIM_X) * getDataCount(DataSet.DIM_Y);
-    }
-
-    // @Override
-    // public DataRange getZRange() {
-    // if (!zRange.isDefined()) {
-    // computeLimits();
-    // }
-    // return zRange;
-    // }
-
-    /**
-     * recompute data set limits
-     */
-    @Override
-    public D recomputeLimits(final int dimension) {
-        // Clear previous ranges
-        getAxisDescription(dimension).clear();
-
-        if (dimension == 0) {
-            // x-range
-            final int dataCount = getDataCount(DataSet.DIM_X);
-            AxisDescription axisRange = getAxisDescription(dimension);
-            for (int i = 0; i < dataCount; i++) {
-                axisRange.add(getX(i));
-            }
-        } else if (dimension == 1) {
-            // x-range
-            final int dataCount = getDataCount(DataSet.DIM_Y);
-            AxisDescription axisRange = getAxisDescription(dimension);
-            for (int i = 0; i < dataCount; i++) {
-                axisRange.add(getY(i));
-            }
-        } else {
-            // z-range
-            final int xDataCount = getDataCount(DataSet.DIM_X);
-            final int yDataCount = getDataCount(DataSet.DIM_Y);
-            AxisDescription axisRange = getAxisDescription(dimension);
-            for (int i = 0; i < xDataCount; i++) {
-                for (int j = 0; j < yDataCount; j++) {
-                    axisRange.add(getZ(i, j));
-                }
-            }
-        }
-        return getThis();
     }
 }
