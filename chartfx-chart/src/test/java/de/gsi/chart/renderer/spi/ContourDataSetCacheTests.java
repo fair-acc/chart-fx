@@ -212,7 +212,7 @@ public class ContourDataSetCacheTests {
         assertDoesNotThrow(() -> ContourDataSetCache.convertDataArrayToImage(TEST_DATA_Z, TEST_DATA_X.length, TEST_DATA_Y.length, ColorGradient.DEFAULT), "data to colour image conversion");
     }
 
-    private class TestDataSet extends AbstractDataSet3D<TestDataSet> {
+    public class TestDataSet extends AbstractDataSet3D<TestDataSet> {
         private static final long serialVersionUID = 4176996086927034332L;
 
         public TestDataSet() {
