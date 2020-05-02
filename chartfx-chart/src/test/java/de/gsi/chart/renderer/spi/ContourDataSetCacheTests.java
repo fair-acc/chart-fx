@@ -13,7 +13,6 @@ import java.util.Arrays;
 import org.junit.jupiter.api.Test;
 
 import de.gsi.chart.axes.AxisTransform;
-import de.gsi.chart.renderer.spi.utils.ColorGradient;
 import de.gsi.dataset.spi.AbstractDataSet3D;
 import de.gsi.dataset.spi.DataRange;
 import de.gsi.math.ArrayUtils;
@@ -159,7 +158,7 @@ public class ContourDataSetCacheTests {
     }
 
     @Test
-    public void testDataTransform() {
+    public void testDataTransform() throws Exception {
         TestDataSet dataSet = new TestDataSet();
 
         assertEquals(TEST_DATA_X.length, dataSet.getDataCount(DIM_X), "data vector x length");
@@ -209,10 +208,12 @@ public class ContourDataSetCacheTests {
         ContourDataSetCache.copySubFrame(dataSet, dataBuffer, true, false, 0, 2, false, 0, 3);
         assertArrayEquals(TEST_DATA_Z, dataBuffer, "data buffer content - parallel copySubFrame");
 
-        assertDoesNotThrow(() -> ContourDataSetCache.convertDataArrayToImage(TEST_DATA_Z, TEST_DATA_X.length, TEST_DATA_Y.length, ColorGradient.DEFAULT), "data to colour image conversion");
+        // requires FX to be tested, now in ContourDataSetRendererTests
+        // final ContourDataSetCache cache = FXUtils.runAndWait(() -> new ContourDataSetCache(new XYChart(), new ContourDataSetRenderer(), dataSet));
+        // assertDoesNotThrow(() -> cache.convertDataArrayToImage(TEST_DATA_Z, TEST_DATA_X.length, TEST_DATA_Y.length, ColorGradient.DEFAULT), "data to colour image conversion");
     }
 
-    private class TestDataSet extends AbstractDataSet3D<TestDataSet> {
+    public class TestDataSet extends AbstractDataSet3D<TestDataSet> {
         private static final long serialVersionUID = 4176996086927034332L;
 
         public TestDataSet() {
