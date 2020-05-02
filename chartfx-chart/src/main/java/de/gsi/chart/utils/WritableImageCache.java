@@ -39,6 +39,8 @@ import de.gsi.dataset.utils.CacheCollection;
  *
  */
 public class WritableImageCache extends CacheCollection<WritableImage> {
+    private static final WritableImageCache SELF = new WritableImageCache();
+
     public WritableImage getImage(final int requiredWidth, final int requiredHeight) {
         synchronized (contents) {
             WritableImage bestFit = null;
@@ -66,5 +68,9 @@ public class WritableImageCache extends CacheCollection<WritableImage> {
             remove(bestFit);
             return bestFit;
         }
+    }
+
+    public static WritableImageCache getInstance() {
+        return SELF;
     }
 }
