@@ -32,7 +32,7 @@ import de.gsi.chart.utils.StyleParser;
 import de.gsi.dataset.DataSet;
 import de.gsi.dataset.DataSetError.ErrorType;
 import de.gsi.dataset.spi.utils.Triple;
-import de.gsi.dataset.utils.ArrayCache;
+import de.gsi.dataset.utils.DoubleArrayCache;
 import de.gsi.dataset.utils.ProcessingProfiler;
 
 /**
@@ -51,18 +51,6 @@ import de.gsi.dataset.utils.ProcessingProfiler;
 public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<ErrorDataSetRenderer>
         implements Renderer {
     private static final Logger LOGGER = LoggerFactory.getLogger(ErrorDataSetRenderer.class);
-    private static final String Y_BEZIER_SECOND_CONTROL_POINT = "yBezierSecondControlPoint";
-    private static final String X_BEZIER_SECOND_CONTROL_POINT = "xBezierSecondControlPoint";
-    private static final String Y_BEZIER_FIRST_CONTROL_POINT = "yBezierFirstControlPoint";
-    private static final String X_BEZIER_FIRST_CONTROL_POINT = "xBezierFirstControlPoint";
-    private static final String Y_DRAW_POLY_LINE_STAIR_CASE = "yDrawPolyLineStairCase";
-    private static final String X_DRAW_POLY_LINE_STAIR_CASE = "xDrawPolyLineStairCase";
-    private static final String Y_DRAW_POLY_LINE_AREA = "yDrawPolyLineArea";
-    private static final String X_DRAW_POLY_LINE_AREA = "xDrawPolyLineArea";
-    private static final String Y_VALUES_SURFACE = "yValuesSurface";
-    private static final String X_VALUES_SURFACE = "xValuesSurface";
-    private static final String Y_DRAW_POLY_LINE_HISTOGRAM = "yDrawPolyLineHistogram";
-    private static final String X_DRAW_POLY_LINE_HISTOGRAM = "xDrawPolyLineHistogram";
     private Marker marker = DefaultMarker.RECTANGLE; // default: rectangle
     private long stopStamp;
 
@@ -495,8 +483,8 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
 
         final int nDataCount = localCachedPoints.actualDataCount;
         final int nPolygoneEdges = 2 * nDataCount;
-        final double[] xValuesSurface = ArrayCache.getCachedDoubleArray(X_VALUES_SURFACE, nPolygoneEdges);
-        final double[] yValuesSurface = ArrayCache.getCachedDoubleArray(Y_VALUES_SURFACE, nPolygoneEdges);
+        final double[] xValuesSurface = DoubleArrayCache.getInstance().getArrayExact(nPolygoneEdges);
+        final double[] yValuesSurface = DoubleArrayCache.getInstance().getArrayExact(nPolygoneEdges);
 
         final int xend = nPolygoneEdges - 1;
         for (int i = 0; i < nDataCount; i++) {
@@ -520,8 +508,8 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
         drawMarker(gc, localCachedPoints);
         drawBubbles(gc, localCachedPoints);
 
-        ArrayCache.release(X_VALUES_SURFACE, xValuesSurface);
-        ArrayCache.release(Y_VALUES_SURFACE, yValuesSurface);
+        DoubleArrayCache.getInstance().add(xValuesSurface);
+        DoubleArrayCache.getInstance().add(yValuesSurface);
 
         ProcessingProfiler.getTimeDiff(start);
     }
@@ -542,8 +530,8 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
 
         final int nDataCount = localCachedPoints.actualDataCount;
         final int nPolygoneEdges = 2 * nDataCount;
-        final double[] xValuesSurface = ArrayCache.getCachedDoubleArray(X_VALUES_SURFACE, nPolygoneEdges);
-        final double[] yValuesSurface = ArrayCache.getCachedDoubleArray(Y_VALUES_SURFACE, nPolygoneEdges);
+        final double[] xValuesSurface = DoubleArrayCache.getInstance().getArrayExact(nPolygoneEdges);
+        final double[] yValuesSurface = DoubleArrayCache.getInstance().getArrayExact(nPolygoneEdges);
 
         final int xend = nPolygoneEdges - 1;
         int count = 0;
@@ -586,8 +574,8 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
         drawMarker(gc, localCachedPoints);
         drawBubbles(gc, localCachedPoints);
 
-        ArrayCache.release(X_VALUES_SURFACE, xValuesSurface);
-        ArrayCache.release(Y_VALUES_SURFACE, yValuesSurface);
+        DoubleArrayCache.getInstance().add(xValuesSurface);
+        DoubleArrayCache.getInstance().add(yValuesSurface);
 
         ProcessingProfiler.getTimeDiff(start);
     }
@@ -764,8 +752,8 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
         }
 
         // need to allocate new array :-(
-        final double[] newX = ArrayCache.getCachedDoubleArray(X_DRAW_POLY_LINE_AREA, n + 2);
-        final double[] newY = ArrayCache.getCachedDoubleArray(Y_DRAW_POLY_LINE_AREA, n + 2);
+        final double[] newX = DoubleArrayCache.getInstance().getArrayExact(n + 2);
+        final double[] newY = DoubleArrayCache.getInstance().getArrayExact(n + 2);
 
         final double zero = localCachedPoints.yZero;
         System.arraycopy(localCachedPoints.xValues, 0, newX, 0, n);
@@ -785,8 +773,8 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
         gc.restore();
 
         // release arrays to cache
-        ArrayCache.release(X_DRAW_POLY_LINE_AREA, newX);
-        ArrayCache.release(Y_DRAW_POLY_LINE_AREA, newY);
+        DoubleArrayCache.getInstance().add(newX);
+        DoubleArrayCache.getInstance().add(newY);
     }
 
     protected static void drawPolyLineHistogram(final GraphicsContext gc, final CachedDataPoints localCachedPoints) {
@@ -796,8 +784,8 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
         }
 
         // need to allocate new array :-(
-        final double[] newX = ArrayCache.getCachedDoubleArray(X_DRAW_POLY_LINE_HISTOGRAM, 2 * (n + 1));
-        final double[] newY = ArrayCache.getCachedDoubleArray(Y_DRAW_POLY_LINE_HISTOGRAM, 2 * (n + 1));
+        final double[] newX = DoubleArrayCache.getInstance().getArrayExact(2 * (n + 1));
+        final double[] newY = DoubleArrayCache.getInstance().getArrayExact(2 * (n + 1));
 
         final double xRange = localCachedPoints.xMax - localCachedPoints.xMin;
         double diffLeft;
@@ -836,8 +824,8 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
         gc.restore();
 
         // release arrays to cache
-        ArrayCache.release(X_DRAW_POLY_LINE_HISTOGRAM, newX);
-        ArrayCache.release(Y_DRAW_POLY_LINE_HISTOGRAM, newY);
+        DoubleArrayCache.getInstance().add(newX);
+        DoubleArrayCache.getInstance().add(newY);
     }
 
     protected static void drawPolyLineHistogramBezier(final GraphicsContext gc,
@@ -849,10 +837,10 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
         }
 
         // need to allocate new array :-(
-        final double[] xCp1 = ArrayCache.getCachedDoubleArray(X_BEZIER_FIRST_CONTROL_POINT, n);
-        final double[] yCp1 = ArrayCache.getCachedDoubleArray(Y_BEZIER_FIRST_CONTROL_POINT, n);
-        final double[] xCp2 = ArrayCache.getCachedDoubleArray(X_BEZIER_SECOND_CONTROL_POINT, n);
-        final double[] yCp2 = ArrayCache.getCachedDoubleArray(Y_BEZIER_SECOND_CONTROL_POINT, n);
+        final double[] xCp1 = DoubleArrayCache.getInstance().getArrayExact(n);
+        final double[] yCp1 = DoubleArrayCache.getInstance().getArrayExact(n);
+        final double[] xCp2 = DoubleArrayCache.getInstance().getArrayExact(n);
+        final double[] yCp2 = DoubleArrayCache.getInstance().getArrayExact(n);
 
         BezierCurve.calcCurveControlPoints(localCachedPoints.xValues, localCachedPoints.yValues, xCp1, yCp1, xCp2, yCp2,
                 localCachedPoints.actualDataCount);
@@ -886,10 +874,10 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
         gc.restore();
 
         // release arrays to Cache
-        ArrayCache.release(X_BEZIER_FIRST_CONTROL_POINT, xCp1);
-        ArrayCache.release(Y_BEZIER_FIRST_CONTROL_POINT, yCp1);
-        ArrayCache.release(X_BEZIER_SECOND_CONTROL_POINT, xCp2);
-        ArrayCache.release(Y_BEZIER_SECOND_CONTROL_POINT, yCp2);
+        DoubleArrayCache.getInstance().add(xCp1);
+        DoubleArrayCache.getInstance().add(yCp1);
+        DoubleArrayCache.getInstance().add(xCp2);
+        DoubleArrayCache.getInstance().add(yCp2);
     }
 
     protected static void drawPolyLineHistogramFilled(final GraphicsContext gc,
@@ -900,8 +888,8 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
         }
 
         // need to allocate new array :-(
-        final double[] newX = ArrayCache.getCachedDoubleArray(X_DRAW_POLY_LINE_HISTOGRAM, 2 * (n + 1));
-        final double[] newY = ArrayCache.getCachedDoubleArray(Y_DRAW_POLY_LINE_HISTOGRAM, 2 * (n + 1));
+        final double[] newX = DoubleArrayCache.getInstance().getArrayExact(2 * (n + 1));
+        final double[] newY = DoubleArrayCache.getInstance().getArrayExact(2 * (n + 1));
 
         final double xRange = localCachedPoints.xMax - localCachedPoints.xMin;
         double diffLeft;
@@ -934,8 +922,8 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
         gc.restore();
 
         // release arrays to cache
-        ArrayCache.release(X_DRAW_POLY_LINE_HISTOGRAM, newX);
-        ArrayCache.release(Y_DRAW_POLY_LINE_HISTOGRAM, newY);
+        DoubleArrayCache.getInstance().add(newX);
+        DoubleArrayCache.getInstance().add(newY);
     }
 
     protected static void drawPolyLineLine(final GraphicsContext gc, final CachedDataPoints localCachedPoints) {
@@ -994,8 +982,8 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
         }
 
         // need to allocate new array :-(
-        final double[] newX = ArrayCache.getCachedDoubleArray(X_DRAW_POLY_LINE_STAIR_CASE, 2 * n);
-        final double[] newY = ArrayCache.getCachedDoubleArray(Y_DRAW_POLY_LINE_STAIR_CASE, 2 * n);
+        final double[] newX = DoubleArrayCache.getInstance().getArrayExact(2 * n);
+        final double[] newY = DoubleArrayCache.getInstance().getArrayExact(2 * n);
 
         for (int i = 0; i < n - 1; i++) {
             newX[2 * i] = localCachedPoints.xValues[i];
@@ -1025,8 +1013,8 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
         gc.restore();
 
         // release arrays to cache
-        ArrayCache.release(X_DRAW_POLY_LINE_STAIR_CASE, newX);
-        ArrayCache.release(Y_DRAW_POLY_LINE_STAIR_CASE, newY);
+        DoubleArrayCache.getInstance().add(newX);
+        DoubleArrayCache.getInstance().add(newY);
     }
 
     private static void compactVector(final double[] input, final int stopIndex) {
