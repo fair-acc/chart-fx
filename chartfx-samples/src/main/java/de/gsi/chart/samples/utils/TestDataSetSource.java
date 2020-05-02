@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
 
 import de.gsi.dataset.event.AddedDataEvent;
 import de.gsi.dataset.spi.AbstractDataSet3D;
+import de.gsi.dataset.utils.ByteArrayCache;
 import de.gsi.dataset.utils.DoubleCircularBuffer;
 import de.gsi.math.ArrayUtils;
 import de.gsi.math.spectra.Apodization;
@@ -278,7 +279,7 @@ public class TestDataSetSource extends AbstractDataSet3D<TestDataSetSource> {
                 }
 
                 final int nAudioSamples = AUDIO_SAMPLING_RATE / 10;
-                final byte[] buffer = new byte[2 * nAudioSamples];
+                final byte[] buffer = ByteArrayCache.getInstance().getArrayExact(2 * nAudioSamples);
                 try (final AudioInputStream ais = new AudioInputStream(line)) {
                     int ret;
                     while ((ret = ais.read(buffer)) != 0 && running) {
@@ -298,6 +299,7 @@ public class TestDataSetSource extends AbstractDataSet3D<TestDataSetSource> {
                 } catch (final IOException e) {
                     LOGGER.atError().setCause(e).log("issue in audio IO loop");
                 }
+                ByteArrayCache.getInstance().add(buffer);
 
                 if (LOGGER.isDebugEnabled()) {
                     LOGGER.atDebug().log("stop recording...");
