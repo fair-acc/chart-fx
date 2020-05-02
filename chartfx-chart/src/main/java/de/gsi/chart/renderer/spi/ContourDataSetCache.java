@@ -10,7 +10,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
-import javafx.scene.image.Image;
 import javafx.scene.image.PixelFormat;
 import javafx.scene.image.PixelWriter;
 import javafx.scene.image.WritableImage;
@@ -25,23 +24,21 @@ import de.gsi.chart.renderer.ContourType;
 import de.gsi.chart.renderer.datareduction.DefaultDataReducer3D;
 import de.gsi.chart.renderer.datareduction.ReductionType;
 import de.gsi.chart.renderer.spi.utils.ColorGradient;
+import de.gsi.chart.utils.WritableImageCache;
 import de.gsi.dataset.DataSet;
 import de.gsi.dataset.DataSet3D;
 import de.gsi.dataset.spi.DataRange;
-import de.gsi.dataset.utils.ArrayCache;
+import de.gsi.dataset.utils.ByteArrayCache;
 import de.gsi.dataset.utils.CachedDaemonThreadFactory;
+import de.gsi.dataset.utils.DoubleArrayCache;
 import de.gsi.dataset.utils.ProcessingProfiler;
 
 /**
  * @author rstein
  */
-class ContourDataSetCache {
+class ContourDataSetCache extends WritableImageCache {
     private static final Logger LOGGER = LoggerFactory.getLogger(ContourDataSetCache.class);
     private static final String PARALLEL_WORKER_ERROR = "one parallel worker thread finished execution with error";
-    private static final String CLASS_NAME = ContourDataSetCache.class.getSimpleName() + System.currentTimeMillis();
-    private static final String DATA_COPY_BUFFER_NAME = CLASS_NAME + ":dataBuffer";
-    private static final String TEMP_DATA_COPY_BUFFER_NAME = CLASS_NAME + ":tempDataBuffer";
-    private static final String BGRA_BYTE_BUFFER_NAME = CLASS_NAME + ":bgraByteBuffer";
     private static final int BGRA_BYTE_SIZE = 4;
     private static final int REF_WIDTH_PARALLEL = 1024;
     private static final int REF_HEIGHT_PARALLEL = 1000;
@@ -51,39 +48,39 @@ class ContourDataSetCache {
     protected final Axis yAxis;
     protected final Axis zAxis;
 
-    protected transient double xAxisWidth;
-    protected transient double yAxisHeight;
-    protected transient double xMin;
-    protected transient double yMin;
-    protected transient double xMax;
-    protected transient double yMax;
+    protected double xAxisWidth;
+    protected double yAxisHeight;
+    protected double xMin;
+    protected double yMin;
+    protected double xMax;
+    protected double yMax;
 
-    protected transient double xDataPixelMin;
-    protected transient double xDataPixelMax;
-    protected transient double xDataPixelRange;
+    protected double xDataPixelMin;
+    protected double xDataPixelMax;
+    protected double xDataPixelRange;
 
-    protected transient double yDataPixelMin;
-    protected transient double yDataPixelMax;
-    protected transient double yDataPixelRange;
+    protected double yDataPixelMin;
+    protected double yDataPixelMax;
+    protected double yDataPixelRange;
 
-    protected transient int indexXMin;
-    protected transient int indexXMax;
-    protected transient int indexYMin;
-    protected transient int indexYMax;
+    protected int indexXMin;
+    protected int indexXMax;
+    protected int indexYMin;
+    protected int indexYMax;
 
-    protected transient int xSize;
-    protected transient int ySize;
-    protected transient double zMin;
-    protected transient double zMax;
+    protected int xSize;
+    protected int ySize;
+    protected double zMin;
+    protected double zMax;
 
-    protected final transient boolean xInverted;
-    protected final transient boolean yInverted;
-    protected final transient boolean zInverted;
+    protected final boolean xInverted;
+    protected final boolean yInverted;
+    protected final boolean zInverted;
 
     // temp data variables
-    protected transient final double[] dataBuffer;
-    protected transient double[] tempDataBuffer;
-    protected transient final double[] reduced;
+    protected final double[] dataBuffer;
+    protected double[] tempDataBuffer;
+    protected final double[] reduced;
 
     public ContourDataSetCache(final XYChart chart, final ContourDataSetRenderer renderer, final DataSet dataSet) {
         if (!(dataSet instanceof DataSet3D)) {
@@ -139,7 +136,7 @@ class ContourDataSetCache {
         this.ySize = Math.abs(this.indexYMax - this.indexYMin) + 1;
 
         // copy- transform data
-        dataBuffer = ArrayCache.getCachedDoubleArray(DATA_COPY_BUFFER_NAME, this.xSize * this.ySize);
+        dataBuffer = DoubleArrayCache.getInstance().getArrayExact(this.xSize * this.ySize);
         // TODO: tune this limit
         final int minSizeThreshold = REF_WIDTH_PARALLEL * REF_HEIGHT_PARALLEL;
         final boolean sufficientlyLarge = xSize * ySize < minSizeThreshold;
@@ -186,8 +183,8 @@ class ContourDataSetCache {
     }
 
     public void releaseCachedVariables() {
-        ArrayCache.release(DATA_COPY_BUFFER_NAME, dataBuffer);
-        ArrayCache.release(TEMP_DATA_COPY_BUFFER_NAME, tempDataBuffer);
+        DoubleArrayCache.getInstance().add(dataBuffer);
+        DoubleArrayCache.getInstance().add(tempDataBuffer);
     }
 
     protected double[] reduceDataArray(final double[] input, final int srcWidth, final int srcHeight,
@@ -217,7 +214,7 @@ class ContourDataSetCache {
 
             //            System.err.printf("image width = %d x %d - reduced from %d x %d\n", targetWidth, targetHeight, xSize, ySize);
 
-            tempDataBuffer = ArrayCache.getCachedDoubleArray(TEMP_DATA_COPY_BUFFER_NAME, targetWidth * targetHeight);
+            tempDataBuffer = DoubleArrayCache.getInstance().getArrayExact(targetWidth * targetHeight);
 
             DefaultDataReducer3D.resample(input, srcWidth, srcHeight, tempDataBuffer, targetWidth, targetHeight,
                     reductionType);
@@ -347,13 +344,13 @@ class ContourDataSetCache {
         // original: return Math.round(value * nLevels) / (double) nLevels;
     }
 
-    protected static Image convertDataArrayToImage(final double[] inputData, final int dataWidth, final int dataHeight,
+    protected WritableImage convertDataArrayToImage(final double[] inputData, final int dataWidth, final int dataHeight,
             final ColorGradient colorGradient) {
         final int length = dataWidth * dataHeight;
 
-        final byte[] byteBuffer = ArrayCache.getCachedByteArray(BGRA_BYTE_BUFFER_NAME, length * BGRA_BYTE_SIZE);
+        final byte[] byteBuffer = ByteArrayCache.getInstance().getArrayExact(length * BGRA_BYTE_SIZE);
         final int rowSizeInBytes = BGRA_BYTE_SIZE * dataWidth;
-        final WritableImage image = new WritableImage(dataWidth, dataHeight);
+        final WritableImage image = this.getImage(dataWidth, dataHeight);
         final PixelWriter pixelWriter = image.getPixelWriter();
         if (pixelWriter == null) {
             if (LOGGER.isErrorEnabled()) {
@@ -380,7 +377,7 @@ class ContourDataSetCache {
 
         pixelWriter.setPixels(0, 0, dataWidth, dataHeight, PixelFormat.getByteBgraPreInstance(), byteBuffer, 0,
                 rowSizeInBytes);
-        ArrayCache.release(BGRA_BYTE_BUFFER_NAME, byteBuffer);
+        ByteArrayCache.getInstance().add(byteBuffer);
         return image;
     }
 

@@ -17,6 +17,9 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.gsi.chart.utils.SimplePerformanceMeter;
 
 public abstract class AbstractTestApplication extends Application {
