@@ -3,14 +3,14 @@ package de.gsi.dataset.utils;
 import java.lang.ref.Reference;
 
 /**
- * Implements byte-array (byte[]) cache collection to minimise memory re-allocation.
+ * Implements double-array (double[]) cache collection to minimise memory re-allocation.
  *  
  * <p> 
  * N.B. This is useful to re-use short-lived data storage container to minimise the amount of garbage to be collected. This is used in situation replacing e.g.
  * <pre>
  *  {@code
  *      public returnValue frequentlyExecutedFunction(...) {
- *          final byte[] storage = new byte[10000]; // allocate new memory block (costly)
+ *          final double[] storage = new byte[10000]; // allocate new memory block (costly)
  *          // [...] do short-lived computation on storage
  *          // storage is implicitly finalised by garbage collector (costly)
  *      }
@@ -24,7 +24,7 @@ import java.lang.ref.Reference;
  *      // ...
  *      
  *      public returnValue frequentlyExecutedFunction(...) {
- *          final byte[] storage = cache.getArray(10000); // return previously allocated array (cheap) or allocated new if necessary 
+ *          final double[] storage = cache.getArray(10000); // return previously allocated array (cheap) or allocated new if necessary 
  *          // [...] do short-lived computation on storage
  *          cache.add(storage); // return object to cache
  *      }
@@ -34,24 +34,24 @@ import java.lang.ref.Reference;
  * @author rstein
  *
  */
-public class ByteArrayCache extends CacheCollection<byte[]> {
-    private static final ByteArrayCache SELF = new ByteArrayCache();
+public class DoubleArrayCache extends CacheCollection<double[]> {
+    private static final DoubleArrayCache SELF = new DoubleArrayCache();
 
-    public byte[] getArray(final int requiredSize) {
+    public double[] getArray(final int requiredSize) {
         return getArray(requiredSize, false);
     }
 
-    public byte[] getArrayExact(final int requiredSize) {
+    public double[] getArrayExact(final int requiredSize) {
         return getArray(requiredSize, true);
     }
 
-    private byte[] getArray(final int requiredSize, final boolean exact) {
+    private double[] getArray(final int requiredSize, final boolean exact) {
         synchronized (contents) {
-            byte[] bestFit = null;
+            double[] bestFit = null;
             int bestFitSize = Integer.MAX_VALUE;
 
-            for (final Reference<byte[]> candidate : contents) {
-                final byte[] localRef = candidate.get();
+            for (final Reference<double[]> candidate : contents) {
+                final double[] localRef = candidate.get();
                 if (localRef == null) {
                     continue;
                 }
@@ -69,8 +69,8 @@ public class ByteArrayCache extends CacheCollection<byte[]> {
             }
 
             if (bestFit == null) {
-                // could not find any cached, return new byte[]
-                bestFit = new byte[requiredSize];
+                // could not find any cached, return new double[]
+                bestFit = new double[requiredSize];
                 return bestFit;
             }
 
@@ -79,7 +79,7 @@ public class ByteArrayCache extends CacheCollection<byte[]> {
         }
     }
 
-    public static ByteArrayCache getInstance() {
+    public static DoubleArrayCache getInstance() {
         return SELF;
     }
 }
