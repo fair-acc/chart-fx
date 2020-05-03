@@ -3,6 +3,9 @@ package de.gsi.chart.samples.legacy.utils;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.scene.Scene;
@@ -23,6 +26,7 @@ import org.slf4j.LoggerFactory;
 import de.gsi.chart.utils.SimplePerformanceMeter;
 
 public abstract class AbstractTestApplication extends Application {
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractTestApplication.class);
     protected static final int MAX_DATA_POINTS_1K = 1000;
     protected static final int MAX_DATA_POINTS_10K = 10000;
     protected static final int MAX_DATA_POINTS_100K = 100000;
@@ -45,6 +49,8 @@ public abstract class AbstractTestApplication extends Application {
         newDataSet1k.setOnAction(evt -> {
             test.setNumberOfSamples(MAX_DATA_POINTS_1K);
             Platform.runLater(test::updateDataSet);
+            LOGGER.atInfo().log("reset FPS averages");
+            meter.resetAverages();
         });
 
         final Button newDataSet100k = new Button("100k");
@@ -53,6 +59,8 @@ public abstract class AbstractTestApplication extends Application {
         newDataSet100k.setOnAction(evt -> {
             test.setNumberOfSamples(MAX_DATA_POINTS_100K);
             Platform.runLater(test::updateDataSet);
+            LOGGER.atInfo().log("reset FPS averages");
+            meter.resetAverages();
         });
 
         final Button newDataSet10k = new Button("10k");
@@ -61,6 +69,8 @@ public abstract class AbstractTestApplication extends Application {
         newDataSet10k.setOnAction(evt -> {
             test.setNumberOfSamples(MAX_DATA_POINTS_10K);
             Platform.runLater(test::updateDataSet);
+            LOGGER.atInfo().log("reset FPS averages");
+            meter.resetAverages();
         });
 
         final Button newDataSet200k = new Button("200k");
@@ -69,6 +79,8 @@ public abstract class AbstractTestApplication extends Application {
         newDataSet200k.setOnAction(evt -> {
             test.setNumberOfSamples(MAX_DATA_POINTS_200K);
             Platform.runLater(test::updateDataSet);
+            LOGGER.atInfo().log("reset FPS averages");
+            meter.resetAverages();
         });
 
         final Button startTimer25Hz = new Button("T@25Hz");
@@ -87,6 +99,8 @@ public abstract class AbstractTestApplication extends Application {
                 timer.cancel();
                 timer = null;
             }
+            LOGGER.atInfo().log("reset FPS averages");
+            meter.resetAverages();
         });
 
         final Button startTimer1Hz = new Button("T@1Hz");
@@ -105,6 +119,8 @@ public abstract class AbstractTestApplication extends Application {
                 timer.cancel();
                 timer = null;
             }
+            LOGGER.atInfo().log("reset FPS averages");
+            meter.resetAverages();
         });
 
         // H-Spacer
