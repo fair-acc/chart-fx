@@ -31,5 +31,4 @@ public abstract class AbstractDataSet3D<D extends AbstractDataSet3D<D>> extends 
     public int getDataCount() {
         return getDataCount(DataSet.DIM_X) * getDataCount(DataSet.DIM_Y);
     }
-
 }

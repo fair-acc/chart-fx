@@ -207,7 +207,7 @@ public class ContourDataSetRenderer extends AbstractContourDataSetRendererParame
         }
 
         gc.drawImage(image, lCache.xDataPixelMin, lCache.yDataPixelMin, lCache.xDataPixelRange, lCache.yDataPixelRange);
-        
+
         WritableImageCache.getInstance().add(image);
         ProcessingProfiler.getTimeDiff(start, "sobel");
     }
