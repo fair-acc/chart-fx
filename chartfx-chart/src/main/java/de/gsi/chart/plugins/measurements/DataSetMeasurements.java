@@ -6,6 +6,7 @@ import static de.gsi.chart.plugins.measurements.DataSetMeasurements.MeasurementC
 import static de.gsi.chart.plugins.measurements.DataSetMeasurements.MeasurementCategory.FOURIER;
 import static de.gsi.chart.plugins.measurements.DataSetMeasurements.MeasurementCategory.MATH;
 import static de.gsi.chart.plugins.measurements.DataSetMeasurements.MeasurementCategory.MATH_FUNCTION;
+import static de.gsi.chart.plugins.measurements.DataSetMeasurements.MeasurementCategory.PROJECTION;
 import static de.gsi.chart.plugins.measurements.DataSetMeasurements.MeasurementCategory.TRENDING;
 
 import java.time.OffsetDateTime;
@@ -67,6 +68,7 @@ import de.gsi.math.DataSetMath.Filter;
 import de.gsi.math.DataSetMath.MathOp;
 import de.gsi.math.MathDataSet;
 import de.gsi.math.MathDataSet.DataSetsFunction;
+import de.gsi.math.MultiDimDataSetMath;
 
 public class DataSetMeasurements extends AbstractChartMeasurement {
     private static final Logger LOGGER = LoggerFactory.getLogger(DataSetMeasurements.class);
@@ -618,6 +620,88 @@ public class DataSetMeasurements extends AbstractChartMeasurement {
                 outputDataSet.set(DataSetMath.iirLowPassFilterFunction(firstDataSet, functionValue));
                 break;
 
+            // DataSet projections
+            case DATASET_SLICE_X:
+                if (firstDataSet.getDimension() <= 2) {
+                    break;
+                }
+                FXUtils.runFX(() -> xAxis.set(firstDataSet.getAxisDescription(DataSet.DIM_X)));
+                FXUtils.runFX(() -> yAxis.set(firstDataSet.getAxisDescription(DataSet.DIM_Z)));
+                MultiDimDataSetMath.computeSlice(firstDataSet, outputDataSet, DataSet.DIM_X, newValueMarker1);
+                break;
+            case DATASET_SLICE_Y:
+                if (firstDataSet.getDimension() <= 2) {
+                    break;
+                }
+                FXUtils.runFX(() -> xAxis.set(firstDataSet.getAxisDescription(DataSet.DIM_Y)));
+                FXUtils.runFX(() -> yAxis.set(firstDataSet.getAxisDescription(DataSet.DIM_Z)));
+                MultiDimDataSetMath.computeSlice(firstDataSet, outputDataSet, DataSet.DIM_Y, newValueMarker1);
+                break;
+            case DATASET_MEAN_X:
+                if (firstDataSet.getDimension() <= 2) {
+                    break;
+                }
+                FXUtils.runFX(() -> xAxis.set(firstDataSet.getAxisDescription(DataSet.DIM_Y)));
+                FXUtils.runFX(() -> yAxis.set(firstDataSet.getAxisDescription(DataSet.DIM_Z)));
+                MultiDimDataSetMath.computeMean(firstDataSet, outputDataSet, DataSet.DIM_X, newValueMarker1, newValueMarker2);
+                break;
+            case DATASET_MEAN_Y:
+                if (firstDataSet.getDimension() <= 2) {
+                    break;
+                }
+                FXUtils.runFX(() -> xAxis.set(firstDataSet.getAxisDescription(DataSet.DIM_Y)));
+                FXUtils.runFX(() -> yAxis.set(firstDataSet.getAxisDescription(DataSet.DIM_Z)));
+                MultiDimDataSetMath.computeMean(firstDataSet, outputDataSet, DataSet.DIM_Y, newValueMarker1, newValueMarker2);
+                break;
+            case DATASET_MIN_X:
+                if (firstDataSet.getDimension() <= 2) {
+                    break;
+                }
+                FXUtils.runFX(() -> xAxis.set(firstDataSet.getAxisDescription(DataSet.DIM_Y)));
+                FXUtils.runFX(() -> yAxis.set(firstDataSet.getAxisDescription(DataSet.DIM_Z)));
+                MultiDimDataSetMath.computeMin(firstDataSet, outputDataSet, DataSet.DIM_X, newValueMarker1, newValueMarker2);
+                break;
+            case DATASET_MIN_Y:
+                if (firstDataSet.getDimension() <= 2) {
+                    break;
+                }
+                FXUtils.runFX(() -> xAxis.set(firstDataSet.getAxisDescription(DataSet.DIM_Y)));
+                FXUtils.runFX(() -> yAxis.set(firstDataSet.getAxisDescription(DataSet.DIM_Z)));
+                MultiDimDataSetMath.computeMin(firstDataSet, outputDataSet, DataSet.DIM_Y, newValueMarker1, newValueMarker2);
+                break;
+            case DATASET_MAX_X:
+                if (firstDataSet.getDimension() <= 2) {
+                    break;
+                }
+                FXUtils.runFX(() -> xAxis.set(firstDataSet.getAxisDescription(DataSet.DIM_Y)));
+                FXUtils.runFX(() -> yAxis.set(firstDataSet.getAxisDescription(DataSet.DIM_Z)));
+                MultiDimDataSetMath.computeMax(firstDataSet, outputDataSet, DataSet.DIM_X, newValueMarker1, newValueMarker2);
+                break;
+            case DATASET_MAX_Y:
+                if (firstDataSet.getDimension() <= 2) {
+                    break;
+                }
+                FXUtils.runFX(() -> xAxis.set(firstDataSet.getAxisDescription(DataSet.DIM_Y)));
+                FXUtils.runFX(() -> yAxis.set(firstDataSet.getAxisDescription(DataSet.DIM_Z)));
+                MultiDimDataSetMath.computeMax(firstDataSet, outputDataSet, DataSet.DIM_Y, newValueMarker1, newValueMarker2);
+                break;
+            case DATASET_INTEGRAL_X:
+                if (firstDataSet.getDimension() <= 2) {
+                    break;
+                }
+                FXUtils.runFX(() -> xAxis.set(firstDataSet.getAxisDescription(DataSet.DIM_Y)));
+                FXUtils.runFX(() -> yAxis.set(firstDataSet.getAxisDescription(DataSet.DIM_Z)));
+                MultiDimDataSetMath.computeIntegral(firstDataSet, outputDataSet, DataSet.DIM_X, newValueMarker1, newValueMarker2);
+                break;
+            case DATASET_INTEGRAL_Y:
+                if (firstDataSet.getDimension() <= 2) {
+                    break;
+                }
+                FXUtils.runFX(() -> xAxis.set(firstDataSet.getAxisDescription(DataSet.DIM_Y)));
+                FXUtils.runFX(() -> yAxis.set(firstDataSet.getAxisDescription(DataSet.DIM_Z)));
+                MultiDimDataSetMath.computeIntegral(firstDataSet, outputDataSet, DataSet.DIM_Y, newValueMarker1, newValueMarker2);
+                break;
+
             // Fourier transforms
             case FFT_DB:
                 FXUtils.runFX(() -> xAxis.set(FREQUENCY, "Hz"));
@@ -710,6 +794,7 @@ public class DataSetMeasurements extends AbstractChartMeasurement {
         MATH("Math - Basic"),
         MATH_FUNCTION("Math - Functions"),
         FILTER("DataSet Filtering"),
+        PROJECTION("DataSet Projections"),
         FOURIER("Spectral Transforms"),
         TRENDING("Trending");
 
@@ -760,6 +845,18 @@ public class DataSetMeasurements extends AbstractChartMeasurement {
         FILTER_RMS(true, FILTER, "RMS", 0, 1, FILTER_CONSTANT_VARIABLE),
         FILTER_GEOMMEAN(true, FILTER, "GeometricMean", 0, 1, FILTER_CONSTANT_VARIABLE),
         FILTER_LOWPASS_IIR(true, FILTER, "low-pass (IIR)", 0, 1, FILTER_CONSTANT_VARIABLE),
+
+        // DataSet projections
+        DATASET_SLICE_X(false, PROJECTION, "hor. Slice", 1, 1),
+        DATASET_SLICE_Y(true, PROJECTION, "ver. Slice", 1, 1),
+        DATASET_MEAN_X(false, PROJECTION, "hor. Mean-Projection", 2, 1),
+        DATASET_MEAN_Y(true, PROJECTION, "ver. Mean-Projection", 2, 1),
+        DATASET_MIN_X(false, PROJECTION, "hor. Min-Projection", 2, 1),
+        DATASET_MIN_Y(true, PROJECTION, "ver. Min-Projection", 2, 1),
+        DATASET_MAX_X(false, PROJECTION, "hor. Max-Projection", 2, 1),
+        DATASET_MAX_Y(true, PROJECTION, "ver. Max-Projection", 2, 1),
+        DATASET_INTEGRAL_X(false, PROJECTION, "hor. Integral-Projection", 2, 1),
+        DATASET_INTEGRAL_Y(true, PROJECTION, "ver. Integral-Projection", 2, 1),
 
         // Fourier transforms
         FFT_DB(true, FOURIER, "FFT [dB]", 0, 1),
