@@ -1,11 +1,16 @@
 package de.gsi.chart.renderer.spi;
 
-import static de.gsi.chart.ui.utils.FuzzyTestImageUtils.compareAndWriteReference;
-import static de.gsi.chart.ui.utils.FuzzyTestImageUtils.writeTestImage;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import static de.gsi.chart.ui.utils.FuzzyTestImageUtils.compareAndWriteReference;
+import static de.gsi.chart.ui.utils.FuzzyTestImageUtils.writeTestImage;
+
 import java.io.IOException;
+
+import javafx.scene.Scene;
+import javafx.scene.image.Image;
+import javafx.stage.Stage;
 
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -21,10 +26,6 @@ import de.gsi.chart.renderer.ContourType;
 import de.gsi.chart.ui.utils.JavaFXInterceptorUtils.SelectiveJavaFxInterceptor;
 import de.gsi.chart.utils.FXUtils;
 import de.gsi.dataset.DataSet3D;
-
-import javafx.scene.Scene;
-import javafx.scene.image.Image;
-import javafx.stage.Stage;
 
 /**
  * Tests {@link de.gsi.chart.renderer.spi.ContourDataSetRenderer }

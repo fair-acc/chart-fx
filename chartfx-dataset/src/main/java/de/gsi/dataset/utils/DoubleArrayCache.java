@@ -36,7 +36,7 @@ import java.lang.ref.Reference;
  */
 public class DoubleArrayCache extends CacheCollection<double[]> {
     private static final DoubleArrayCache SELF = new DoubleArrayCache();
-    
+
     public double[] getArray(final int requiredSize) {
         return getArray(requiredSize, false);
     }

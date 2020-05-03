@@ -161,13 +161,12 @@ public final class MultiDimDataSetMath { // NOPMD -- nomen est omen
             throw new IllegalArgumentException("source is " + (source == null ? "null" : " has insufficient dimension = " + source.getDimension()));
         }
     }
-    
+
     private static void checkOutputDataSetCompatibility(final DataSet ouput) {
         if (ouput == null || ouput.getDimension() != 2) {
             throw new IllegalArgumentException("output is " + (ouput == null ? "null" : " has insufficient dimension = " + ouput.getDimension()));
         }
     }
-    
 
     private static void computeMeanIntegral(final DataSet source, final DoubleErrorDataSet output, final int dimIndex, final double xMin, final double xMax, final boolean isMean) {
         checkMultiDimDataSetCompatibility(source);

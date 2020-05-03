@@ -1,12 +1,17 @@
 package de.gsi.chart.renderer.spi;
 
-import static de.gsi.chart.ui.utils.FuzzyTestImageUtils.compareAndWriteReference;
-import static de.gsi.chart.ui.utils.FuzzyTestImageUtils.writeTestImage;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import static de.gsi.chart.ui.utils.FuzzyTestImageUtils.compareAndWriteReference;
+import static de.gsi.chart.ui.utils.FuzzyTestImageUtils.writeTestImage;
+
 import java.io.IOException;
 import java.util.Collections;
+
+import javafx.scene.Scene;
+import javafx.scene.image.Image;
+import javafx.stage.Stage;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -27,10 +32,6 @@ import de.gsi.dataset.DataSet;
 import de.gsi.dataset.spi.DoubleErrorDataSet;
 import de.gsi.dataset.testdata.spi.SineFunction;
 import de.gsi.math.DataSetMath;
-
-import javafx.scene.Scene;
-import javafx.scene.image.Image;
-import javafx.stage.Stage;
 
 /**
  * Tests {@link de.gsi.chart.renderer.spi.ErrorDataSetRenderer }
@@ -79,7 +80,7 @@ public class ErrorDataSetRendererTests {
             testRenderer(lineStyle);
         }
     }
-    
+
     @Test
     public void testRendererSepcialCases() throws IOException, Exception {
         final LineStyle lineStyle = LineStyle.NORMAL;
@@ -109,8 +110,7 @@ public class ErrorDataSetRendererTests {
         chart.setPolarPlot(false);
         testRenderer(lineStyle);
         FXUtils.runAndWait(() -> yAxis.setLogAxis(false));
-        
-        
+
         // perform NaN only on JDK >= 11 on JDK8 this will crash JavaFX
         final int jdkMajorVersion = Integer.parseInt(System.getProperty("java.version").split("\\.")[0]);
         if (jdkMajorVersion >= 11) {
@@ -173,11 +173,11 @@ public class ErrorDataSetRendererTests {
         final String referenceImage = referenceFileName + contourTypeString + options + referenceFileExtension;
         return referenceImage;
     }
-    
+
     private DataSet getTestDataSet() {
-        final DoubleErrorDataSet retVal = (DoubleErrorDataSet)DataSetMath.addFunction(new SineFunction("test-sine", N_SAMPLES), 5.0);
+        final DoubleErrorDataSet retVal = (DoubleErrorDataSet) DataSetMath.addFunction(new SineFunction("test-sine", N_SAMPLES), 5.0);
         retVal.setStyle("strokeColor=red;");
-        for (int i=10; i < 1000; i++) {
+        for (int i = 10; i < 1000; i++) {
             retVal.addDataLabel(i, "special point");
             retVal.addDataStyle(i, "strokeColor=green; fillColor=green; markerColor=green;");
         }

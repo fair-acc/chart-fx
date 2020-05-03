@@ -74,7 +74,7 @@ public class DoubleArrayCacheTests {
 
         // remove non-existent byte array
         assertFalse(cache.remove(new double[1]));
-        
+
         assertNotNull(DoubleArrayCache.getInstance());
     }
 

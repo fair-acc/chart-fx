@@ -78,7 +78,7 @@ public class ByteArrayCache extends CacheCollection<byte[]> {
             return bestFit;
         }
     }
-    
+
     public static ByteArrayCache getInstance() {
         return SELF;
     }
