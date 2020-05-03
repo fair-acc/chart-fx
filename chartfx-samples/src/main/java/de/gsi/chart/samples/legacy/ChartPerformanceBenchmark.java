@@ -114,8 +114,7 @@ public class ChartPerformanceBenchmark extends AbstractTestApplication {
         subStage.show();
 
         final HBox headerBar = getHeaderBar(scene);
-        headerBar.getChildren().add(2, new VBox(startTestButton("Series@25Hz", testSamples25Hz, 40),
-                                               startTestButton("Series@2Hz", testSamples1Hz, 500)));
+        headerBar.getChildren().add(2, new VBox(startTestButton("Series@25Hz", testSamples25Hz, 40), startTestButton("Series@2Hz", testSamples1Hz, 500)));
         headerBar.getChildren().add(3, switchToTestCase("A", chartTestCase1, chart1));
         headerBar.getChildren().add(4, switchToTestCase("B", chartTestCase2, chart2));
         headerBar.getChildren().add(5, switchToTestCase("C", chartTestCase3, chart3));
@@ -162,6 +161,7 @@ public class ChartPerformanceBenchmark extends AbstractTestApplication {
                                 final TestThread t3 = new TestThread(3, compute[2] ? samples : 1000, chart3,
                                         chartTestCase3, results3, updatePeriod, wait);
 
+                                meter.resetAverages();
                                 if (compute[0]) {
                                     t1.start();
                                     t1.join();
@@ -194,7 +194,8 @@ public class ChartPerformanceBenchmark extends AbstractTestApplication {
                     }
                 };
                 timer.start();
-
+                LOGGER.atInfo().log("reset FPS averages");
+                meter.resetAverages();
             } else {
                 timer.interrupt();
                 timer = null;
@@ -216,6 +217,8 @@ public class ChartPerformanceBenchmark extends AbstractTestApplication {
             test = testCase;
             root.setCenter(chart);
             test.updateDataSet();
+            LOGGER.atInfo().log("reset FPS averages");
+            meter.resetAverages();
         });
         return button;
     }
