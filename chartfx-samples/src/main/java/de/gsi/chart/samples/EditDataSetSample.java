@@ -94,7 +94,7 @@ public class EditDataSetSample extends Application {
             @Override
             public boolean isEditable(final int dimIndex) {
                 // only allow editing in Y
-                return dimIndex == DataSet.DIM_X ? false : true;
+                return dimIndex != DIM_X;
             }
         });
 
