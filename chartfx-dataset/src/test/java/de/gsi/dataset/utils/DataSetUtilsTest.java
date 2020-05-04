@@ -79,10 +79,10 @@ public class DataSetUtilsTest {
         DataSet3D dataSetRead3D = (DataSet3D) dataSetRead;
         assertEquals(n, dataSetRead.getDataCount(DataSet.DIM_Z));
         assertEquals(dataSet.getName(), dataSetRead.getName());
-        assertEquals(3, dataSetRead3D.getDataCount(DataSet.DIM_X));
-        assertEquals(2, dataSetRead3D.getDataCount(DataSet.DIM_Y));
-        assertArrayEquals(xvalues, dataSetRead.getValues(DataSet.DIM_X), EPSILON);
-        assertArrayEquals(yvalues, dataSetRead.getValues(DataSet.DIM_Y), EPSILON);
+        assertEquals(3, dataSetRead3D.getDataCount(DIM_X));
+        assertEquals(2, dataSetRead3D.getDataCount(DIM_Y));
+        assertArrayEquals(xvalues, dataSetRead.getValues(DIM_X), EPSILON);
+        assertArrayEquals(yvalues, dataSetRead.getValues(DIM_Y), EPSILON);
         for (int ix = 1; ix < nx; ix++) {
             for (int iy = 1; iy < ny; iy++) {
                 assertEquals(zvalues[iy][ix], dataSetRead3D.getZ(ix, iy), EPSILON);
