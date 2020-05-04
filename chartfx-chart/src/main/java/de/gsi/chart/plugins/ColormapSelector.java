@@ -1,9 +1,5 @@
 package de.gsi.chart.plugins;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import de.gsi.chart.renderer.spi.utils.ColorGradient;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -15,36 +11,34 @@ import javafx.scene.paint.CycleMethod;
 import javafx.scene.paint.LinearGradient;
 import javafx.scene.shape.Rectangle;
 
+import de.gsi.chart.renderer.spi.utils.ColorGradient;
+
 /**
- * Adds a Dropdown to the toolbar to select different Colormaps. The selected Colormap can be accessed from via
- * colormapProperty() and bound to Renderers/Axes.
- * 
+ * Adds a Dropdown to the toolbar to select different Colormaps. The selected Colormap can be accessed 
+ * from via colormapProperty() and bound to Renderers/Axes.
+ *
  * @author Alexander Krimm
  */
 public class ColormapSelector extends ChartPlugin {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ColormapSelector.class);
-
-    private BooleanProperty showInToolbar = new SimpleBooleanProperty(this, "show in toolbar", true);
-    private ComboBox<ColorGradient> dropdown = new ColormapComboBox();
+    private final BooleanProperty showInToolbar = new SimpleBooleanProperty(this, "show in toolbar", true);
+    private final ComboBox<ColorGradient> dropdown = new ColormapComboBox();
 
     public ColormapSelector() {
+        super();
         chartProperty().addListener((change, o, n) -> {
             if (o != null) {
                 o.getToolBar().getChildren().remove(dropdown);
             }
-            if (n != null) {
-                if (isShowInToolbar()) {
-                    n.getToolBar().getChildren().add(dropdown);
-                }
+            if (n != null && isShowInToolbar()) {
+                n.getToolBar().getChildren().add(dropdown);
             }
         });
         showInToolbar.addListener((prop, o, n) -> {
-            if (n) {
+            if (Boolean.TRUE.equals(n)) {
                 getChart().getToolBar().getChildren().add(dropdown);
             } else {
                 getChart().getToolBar().getChildren().remove(dropdown);
             }
-
         });
     }
 
@@ -81,7 +75,8 @@ public class ColormapSelector extends ChartPlugin {
 
     public static class ColormapComboBox extends ComboBox<ColorGradient> {
         public ColormapComboBox() {
-            setCellFactory((listView) -> new ColormapListCell());
+            super();
+            setCellFactory(listView -> new ColormapListCell());
             setButtonCell(new ColormapListCell());
             getItems().addAll(ColorGradient.colorGradients());
             setValue(ColorGradient.DEFAULT);
@@ -100,14 +95,13 @@ public class ColormapSelector extends ChartPlugin {
         }
 
         @Override
-        protected void updateItem(ColorGradient gradient, boolean empty) {
+        protected void updateItem(final ColorGradient gradient, final boolean empty) {
             super.updateItem(gradient, empty);
             if (gradient == null || empty) {
                 setGraphic(null);
                 setText("-");
             } else {
-                rect.setFill(
-                        new LinearGradient(0, 0, COLORMAP_WIDTH, 0, false, CycleMethod.NO_CYCLE, gradient.getStops()));
+                rect.setFill(new LinearGradient(0, 0, COLORMAP_WIDTH, 0, false, CycleMethod.NO_CYCLE, gradient.getStops()));
                 setGraphic(rect);
                 setText(gradient.toString());
             }
