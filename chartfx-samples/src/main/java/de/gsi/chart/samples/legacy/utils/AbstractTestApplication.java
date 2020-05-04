@@ -3,9 +3,6 @@ package de.gsi.chart.samples.legacy.utils;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.scene.Scene;
