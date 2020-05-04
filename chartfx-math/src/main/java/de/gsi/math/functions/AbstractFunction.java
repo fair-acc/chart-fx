@@ -172,7 +172,7 @@ public abstract class AbstractFunction implements Function {
     }
 
     private String exceptionForIdString(final String functionName, final int id, final String... parameter) {
-        return functionName + "(" + id + (parameter.length>0?", " + parameter[0]: "") + "): invalid parameter index [0," + (fnbOfParameter - 1) + "}";
+        return functionName + "(" + id + (parameter.length > 0 ? ", " + parameter[0] : "") + "): invalid parameter index [0," + (fnbOfParameter - 1) + "}";
     }
 
     @Override
