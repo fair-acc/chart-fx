@@ -15,7 +15,6 @@ import javafx.geometry.Orientation;
 import javafx.scene.Node;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.image.Image;
 import javafx.scene.image.PixelWriter;
 import javafx.scene.image.WritableImage;
 import javafx.scene.layout.HBox;
@@ -81,7 +80,6 @@ import de.gsi.dataset.utils.ProcessingProfiler;
 public class ContourDataSetRenderer extends AbstractContourDataSetRendererParameter<ContourDataSetRenderer>
         implements Renderer {
     private static final Logger LOGGER = LoggerFactory.getLogger(ContourDataSetRenderer.class);
-
     private ContourDataSetCache localCache;
     private Axis zAxis;
     protected final Rectangle gradientRect = new Rectangle();
@@ -177,7 +175,7 @@ public class ContourDataSetRenderer extends AbstractContourDataSetRendererParame
             input[x][y] = lCache.reduced[i];
         }
 
-        final WritableImage image = new WritableImage(xSize, ySize);
+        final WritableImage image = localCache.getImage(xSize, ySize);
         final PixelWriter pixelWriter = image.getPixelWriter();
         if (pixelWriter == null) {
             if (LOGGER.isErrorEnabled()) {
@@ -207,6 +205,8 @@ public class ContourDataSetRenderer extends AbstractContourDataSetRendererParame
         }
 
         gc.drawImage(image, lCache.xDataPixelMin, lCache.yDataPixelMin, lCache.xDataPixelRange, lCache.yDataPixelRange);
+
+        localCache.add(image);
         ProcessingProfiler.getTimeDiff(start, "sobel");
     }
 
@@ -217,12 +217,12 @@ public class ContourDataSetRenderer extends AbstractContourDataSetRendererParame
         gc.setImageSmoothing(isSmooth());
 
         // process z quantisation to colour transform
-        final Image image = ContourDataSetCache.convertDataArrayToImage(lCache.reduced, lCache.xSize, lCache.ySize,
-                getColorGradient());
+        final WritableImage image = localCache.convertDataArrayToImage(lCache.reduced, lCache.xSize, lCache.ySize, getColorGradient());
         ProcessingProfiler.getTimeDiff(start, "color map");
 
         gc.drawImage(image, lCache.xDataPixelMin, lCache.yDataPixelMin, lCache.xDataPixelRange, lCache.yDataPixelRange);
 
+        localCache.add(image);
         ProcessingProfiler.getTimeDiff(start, "drawHeatMap");
     }
 
@@ -251,7 +251,7 @@ public class ContourDataSetRenderer extends AbstractContourDataSetRendererParame
 
         final int nQuant = getNumberQuantisationLevels();
         final ColorGradient colorGradient = getColorGradient();
-        final WritableImage image = new WritableImage(xSize * scaleX, ySize * scaleY);
+        final WritableImage image = localCache.getImage(xSize * scaleX, ySize * scaleY);
 
         final PixelWriter pixelWriter = image.getPixelWriter();
         if (pixelWriter == null) {
@@ -285,8 +285,7 @@ public class ContourDataSetRenderer extends AbstractContourDataSetRendererParame
         final long start = ProcessingProfiler.getTimeStamp();
 
         // process z quantisation to colour transform
-        final Image image = ContourDataSetCache.convertDataArrayToImage(lCache.reduced, lCache.xSize, lCache.ySize,
-                getColorGradient());
+        final WritableImage image = localCache.convertDataArrayToImage(lCache.reduced, lCache.xSize, lCache.ySize, getColorGradient());
 
         final int tileSize = Math.max(getMinHexTileSizeProperty(), (int) lCache.xAxisWidth / lCache.xSize);
         final int nWidthInTiles = (int) (lCache.xAxisWidth / (tileSize * Math.sqrt(3))) + 1;
@@ -299,6 +298,7 @@ public class ContourDataSetRenderer extends AbstractContourDataSetRendererParame
             h.setStrokeWidth(0.5);
             map.addHexagon(h);
         });
+        localCache.add(image);
 
         ProcessingProfiler.getTimeDiff(start, "drawHexagonMap - prepare");
         final double scaleX = lCache.xDataPixelRange / lCache.xAxisWidth;
@@ -321,8 +321,7 @@ public class ContourDataSetRenderer extends AbstractContourDataSetRendererParame
         final long start = ProcessingProfiler.getTimeStamp();
 
         // process z quantisation to colour transform
-        final Image image = ContourDataSetCache.convertDataArrayToImage(lCache.reduced, lCache.xSize, lCache.ySize,
-                getColorGradient());
+        final WritableImage image = localCache.convertDataArrayToImage(lCache.reduced, lCache.xSize, lCache.ySize, getColorGradient());
 
         final int tileSize = Math.max(getMinHexTileSizeProperty(), (int) lCache.xAxisWidth / lCache.xSize);
         final int nWidthInTiles = (int) (lCache.xAxisWidth / (tileSize * Math.sqrt(3)));
@@ -335,6 +334,7 @@ public class ContourDataSetRenderer extends AbstractContourDataSetRendererParame
             h.setStrokeWidth(1);
             map.addHexagon(h);
         });
+        localCache.add(image);
 
         ProcessingProfiler.getTimeDiff(start, "drawHexagonMapContour - prepare");
 
@@ -672,20 +672,6 @@ public class ContourDataSetRenderer extends AbstractContourDataSetRendererParame
         sum += pixelMatrix[1][2];
         sum += pixelMatrix[2][0];
         sum += pixelMatrix[2][1];
-        sum += pixelMatrix[2][2];
-        return sum;
-    }
-
-    public static double erosionConvolution2(final double[][] pixelMatrix) {
-        double sum = 0.0;
-        sum += pixelMatrix[0][0];
-        // sum += pixelMatrix[0][1];
-        sum += pixelMatrix[0][2];
-        // sum += pixelMatrix[1][0];
-        sum += pixelMatrix[1][1];
-        // sum += pixelMatrix[1][2];
-        sum += pixelMatrix[2][0];
-        // sum += pixelMatrix[2][1];
         sum += pixelMatrix[2][2];
         return sum;
     }
