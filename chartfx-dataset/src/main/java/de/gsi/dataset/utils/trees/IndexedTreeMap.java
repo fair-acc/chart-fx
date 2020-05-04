@@ -91,12 +91,9 @@ import java.util.SortedSet;
  */
 
 @SuppressWarnings("unchecked")
-public class IndexedTreeMap<K, V> extends AbstractMap<K, V>
-        implements IndexedNavigableMap<K, V>, Cloneable, java.io.Serializable {
+public class IndexedTreeMap<K, V> extends AbstractMap<K, V> implements IndexedNavigableMap<K, V>, Cloneable, java.io.Serializable {
     private static final boolean RED = false;
-
     private static final boolean BLACK = true;
-
     private static final long serialVersionUID = 919286545866124006L;
 
     /**
@@ -105,29 +102,29 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V>
      */
     private final Comparator<? super K> comparator;
 
-    private transient Entry<K, V> root = null;
+    private Entry<K, V> root;
 
     /**
      * The number of entries in the tree
      */
-    private transient int size = 0;
+    private int size = 0;
 
     /**
      * The number of structural modifications to the tree.
      */
-    private transient int modCount = 0;
+    private int modCount = 0;
 
     /**
      * Fields initialized to contain an instance of the entry set view the first time this view is requested. Views are
      * stateless, so there's no reason to create more than one.
      */
-    private transient EntrySet entrySet = null;
+    private EntrySet entrySet;
 
     // Query Operations
 
-    private transient KeySet<K> navigableKeySet = null;
+    private KeySet<K> navigableKeySet;
 
-    private transient NavigableMap<K, V> descendingMap = null;
+    private NavigableMap<K, V> descendingMap;
 
     /**
      * Constructs a new, empty tree map, using the natural ordering of its keys. All keys inserted into the map must
@@ -138,6 +135,7 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V>
      * <code>put(Object key, Object value)</code> call will throw a <code>ClassCastException</code>.
      */
     public IndexedTreeMap() {
+        super();
         comparator = null;
     }
 
@@ -152,6 +150,7 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V>
      *        {@linkplain Comparable natural ordering} of the keys will be used.
      */
     public IndexedTreeMap(Comparator<? super K> comparator) {
+        super();
         this.comparator = comparator;
     }
 
@@ -552,7 +551,7 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V>
     @Override
     public Set<Map.Entry<K, V>> entrySet() {
         final EntrySet es = entrySet;
-        return es != null ? es : (entrySet = new EntrySet());
+        return es == null ? (entrySet = new EntrySet()) : es;
     }
 
     @Override
@@ -2267,23 +2266,21 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V>
         protected final boolean hiInclusive;
 
         // Views
-        protected transient NavigableMap<K, V> descendingMapView = null;
+        protected NavigableMap<K, V> descendingMapView = null;
 
         // internal utilities
 
-        protected transient EntrySetView entrySetView = null;
+        protected EntrySetView entrySetView = null;
 
-        protected transient KeySet<K> navigableKeySetView = null;
+        protected KeySet<K> navigableKeySetView = null;
 
         protected NavigableSubMap(IndexedTreeMap<K, V> m, boolean fromStart, K lo, boolean loInclusive, boolean toEnd,
                 K hi, boolean hiInclusive) {
             if (m == null) {
                 throw new IllegalStateException("m must not be null");
             }
-            if (!fromStart && !toEnd) {
-                if (m.compare(lo, hi) > 0) {
-                    throw new IllegalArgumentException("fromKey > toKey");
-                }
+            if (!fromStart && !toEnd && m.compare(lo, hi) > 0) {
+                throw new IllegalArgumentException("fromKey > toKey");
             }
             // TODO: dead code remove eventually
             //            else {
@@ -2610,8 +2607,8 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V>
         }
 
         protected abstract class EntrySetView extends AbstractSet<Map.Entry<K, V>> {
-            private transient int size = -1;
-            private transient int sizeModCount;
+            private int size = -1;
+            private int sizeModCount;
 
             @Override
             public boolean contains(Object o) {
