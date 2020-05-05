@@ -64,10 +64,13 @@ public final class WriteFxImage {
     public static WritableImage clone(Image image) {
         int height = (int) image.getHeight();
         int width = (int) image.getWidth();
-        PixelReader pixelReader = image.getPixelReader();
-        WritableImage writableImage = new WritableImage(width, height);
+        WritableImage writableImage = WritableImageCache.getInstance().getImage(width, height);
         PixelWriter pixelWriter = writableImage.getPixelWriter();
+        if (pixelWriter == null) {
+            throw new IllegalStateException(IMAGE_PIXEL_READER_NOT_AVAILABLE);
+        }
 
+        final PixelReader pixelReader = image.getPixelReader();
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
                 Color color = pixelReader.getColor(x, y);
@@ -260,7 +263,7 @@ public final class WriteFxImage {
             ImageInfo imageInfo = new ImageInfo(w, h, 8, false /*alpha*/, false, true);
             PngWriter pngWriter = new PngWriter(os, imageInfo);
             ((PixelsWriterDefault) pngWriter.getPixelsWriter()).setFilterType(filterType);
-            pngWriter.setIdatMaxSize(requiredSize > 2 * 0x10000 ? 0x10000 : 32000);
+            pngWriter.setIdatMaxSize(requiredSize > 2 * 0x10000 ? 0x10000 : 32_000);
             pngWriter.setCompLevel(compressionLevel);
 
             preparePaletteHeader(pngWriter, palette);

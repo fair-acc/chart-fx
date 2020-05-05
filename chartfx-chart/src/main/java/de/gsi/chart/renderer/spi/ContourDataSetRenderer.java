@@ -43,6 +43,7 @@ import de.gsi.chart.renderer.spi.marchingsquares.GeneralPath;
 import de.gsi.chart.renderer.spi.marchingsquares.MarchingSquares;
 import de.gsi.chart.renderer.spi.utils.ColorGradient;
 import de.gsi.chart.ui.geometry.Side;
+import de.gsi.chart.utils.WritableImageCache;
 import de.gsi.dataset.DataSet;
 import de.gsi.dataset.DataSet3D;
 import de.gsi.dataset.utils.ProcessingProfiler;
