@@ -1,6 +1,5 @@
 package de.gsi.dataset.spi;
 
-import de.gsi.dataset.AxisDescription;
 import de.gsi.dataset.DataSet;
 import de.gsi.dataset.DataSet3D;
 
@@ -10,8 +9,7 @@ import de.gsi.dataset.DataSet3D;
  * @author rstein
  * @param <D> java generics handling of DataSet for derived classes (needed for fluent design)
  */
-public abstract class AbstractDataSet3D<D extends AbstractDataSet3D<D>> extends AbstractDataSet<D>
-        implements DataSet3D {
+public abstract class AbstractDataSet3D<D extends AbstractDataSet3D<D>> extends AbstractDataSet<D> implements DataSet3D {
     private static final long serialVersionUID = 2766945109681463872L;
 
     /**

@@ -22,10 +22,6 @@ import de.gsi.chart.renderer.ErrorStyle;
 import de.gsi.chart.renderer.Renderer;
 import de.gsi.dataset.AxisDescription;
 import de.gsi.dataset.DataSet;
-import de.gsi.dataset.DataSet2D;
-import de.gsi.dataset.DataSet3D;
-import de.gsi.dataset.DataSetError;
-import de.gsi.dataset.event.AxisRangeChangeEvent;
 import de.gsi.dataset.event.EventListener;
 import de.gsi.dataset.locks.DataSetLock;
 import de.gsi.dataset.locks.DefaultDataSetLock;
@@ -37,14 +33,13 @@ import de.gsi.dataset.utils.ProcessingProfiler;
  * @author rstein
  */
 public class MountainRangeRenderer extends ErrorDataSetRenderer implements Renderer {
+    private static final int MIN_DIM = 3;
     protected DoubleProperty mountainRangeOffset = new SimpleDoubleProperty(this, "mountainRangeOffset", 0.5);
     private final ObservableList<ErrorDataSetRenderer> renderers = FXCollections.observableArrayList();
     private final ObservableList<DataSet> empty = FXCollections.observableArrayList();
     private final WeakHashMap<Double, Integer> xWeakIndexMap = new WeakHashMap<>();
     private final WeakHashMap<Double, Integer> yWeakIndexMap = new WeakHashMap<>();
-    private double zRangeMin = +Double.MAX_VALUE;
-    private double zRangeMax = -Double.MAX_VALUE;
-    private double mountainRaingeExtra = 0.0;
+    private double mountainRaingeExtra;
 
     public MountainRangeRenderer() {
         super();
@@ -58,32 +53,6 @@ public class MountainRangeRenderer extends ErrorDataSetRenderer implements Rende
     public MountainRangeRenderer(final double mountainRangeOffset) {
         this();
         setMountainRangeOffset(mountainRangeOffset);
-    }
-
-    private void checkAndRecreateRenderer(final int nRenderer) {
-        if (renderers.size() == nRenderer) {
-            // all OK
-            return;
-        }
-
-        if (nRenderer > renderers.size()) {
-            for (int i = renderers.size(); i < nRenderer; i++) {
-                final ErrorDataSetRenderer newRenderer = new ErrorDataSetRenderer();
-                newRenderer.bind(this);
-                // do not show history sets in legend (single exception to
-                // binding)
-                newRenderer.showInLegendProperty().unbind();
-                newRenderer.setShowInLegend(false);
-                renderers.add(newRenderer);
-            }
-            return;
-        }
-
-        // require less renderer -> remove first until we have the right number
-        // needed
-        while (nRenderer < renderers.size()) {
-            renderers.remove(0);
-        }
     }
 
     /**
@@ -102,12 +71,11 @@ public class MountainRangeRenderer extends ErrorDataSetRenderer implements Rende
     @Override
     public void render(final GraphicsContext gc, final Chart chart, final int dataSetOffset,
             final ObservableList<DataSet> datasets) {
-        final long start = ProcessingProfiler.getTimeStamp();
         if (!(chart instanceof XYChart)) {
             throw new InvalidParameterException(
                     "must be derivative of XYChart for renderer - " + this.getClass().getSimpleName());
         }
-
+        final long start = ProcessingProfiler.getTimeStamp(); // NOPMD - time keeping needs to be defined here
         final XYChart xyChart = (XYChart) chart;
 
         if (!(xyChart.getYAxis() instanceof Axis)) {
@@ -119,44 +87,50 @@ public class MountainRangeRenderer extends ErrorDataSetRenderer implements Rende
         final List<DataSet> localDataSetList = new ArrayList<>(datasets);
         localDataSetList.addAll(getDatasets());
 
-        zRangeMin = +Double.MAX_VALUE;
-        zRangeMax = -Double.MAX_VALUE;
+        final double zRangeMin = localDataSetList.stream().mapToDouble(ds -> ds.getAxisDescription(DIM_Z).getMin()).min().orElse(-1.0);
+        final double zRangeMax = localDataSetList.stream().mapToDouble(ds -> ds.getAxisDescription(DIM_Z).getMax()).max().orElse(+1.0);
 
         // render in reverse order
         for (int dataSetIndex = localDataSetList.size() - 1; dataSetIndex >= 0; dataSetIndex--) {
             final DataSet dataSet = localDataSetList.get(dataSetIndex);
 
-            // detect and fish-out DataSet3D, ignore others
-            if (dataSet instanceof DataSet3D) {
-                dataSet.lock().readLockGuardOptimistic(() -> {
-                    final DataSet3D mData = (DataSet3D) dataSet;
-                    xWeakIndexMap.clear();
-                    yWeakIndexMap.clear();
-                    zRangeMin = Math.min(zRangeMin, mData.getAxisDescription(DIM_Z).getMin());
-                    zRangeMax = Math.max(zRangeMin, mData.getAxisDescription(DIM_Z).getMax());
-                    mountainRaingeExtra = MountainRangeRenderer.this.getMountainRangeOffset();
-
-                    final double min = zRangeMin;
-                    final double max = zRangeMax * (1.0 + mountainRaingeExtra);
-                    final boolean autoRange = yAxis.isAutoRanging();
-                    if (autoRange && (min != yAxis.getMin() || max != yAxis.getMax())) {
-                        yAxis.setAutoRanging(false);
-                        yAxis.setMin(min);
-                        yAxis.setMax(max);
-                        yAxis.setTickUnit(Math.abs(max - min) / 10.0);
-                        yAxis.forceRedraw();
-                    }
-                    yAxis.setAutoRanging(autoRange);
-
-                    final int yCountMax = mData.getDataCount(DataSet.DIM_Y);
-                    checkAndRecreateRenderer(yCountMax);
-
-                    for (int index = yCountMax - 1; index >= 0; index--) {
-                        renderers.get(index).getDatasets().setAll(new Demux3dTo2dDataSet(mData, index));
-                        renderers.get(index).render(gc, chart, 0, empty);
-                    }
-                });
+            // detect and fish-out 3D DataSet, ignore others
+            if (dataSet.getDimension() < MIN_DIM) {
+                continue;
             }
+            final int nx = dataSet.getDataCount(DataSet.DIM_X);
+            final int ny = dataSet.getDataCount(DataSet.DIM_Y);
+            final int nz = dataSet.getDataCount(DIM_Z);
+            if (nz != nx * ny) {
+                // this renderer can handle only DataSets that are equidistantly-rastered
+                continue;
+            }
+
+            dataSet.lock().readLockGuardOptimistic(() -> {
+                xWeakIndexMap.clear();
+                yWeakIndexMap.clear();
+                mountainRaingeExtra = getMountainRangeOffset();
+
+                final double min = zRangeMin;
+                final double max = zRangeMax * (1.0 + mountainRaingeExtra);
+                final boolean autoRange = yAxis.isAutoRanging();
+                if (autoRange && (min != yAxis.getMin() || max != yAxis.getMax())) {
+                    yAxis.setAutoRanging(false);
+                    yAxis.setMin(min);
+                    yAxis.setMax(max);
+                    yAxis.setTickUnit(Math.abs(max - min) / 10.0);
+                    yAxis.forceRedraw();
+                }
+                yAxis.setAutoRanging(autoRange);
+
+                final int yCountMax = dataSet.getDataCount(DataSet.DIM_Y);
+                checkAndRecreateRenderer(yCountMax);
+
+                for (int index = yCountMax - 1; index >= 0; index--) {
+                    renderers.get(index).getDatasets().setAll(new Demux3dTo2dDataSet(dataSet, index, min, max)); // NOPMD -- new necessary here
+                    renderers.get(index).render(gc, chart, 0, empty);
+                }
+            });
         }
 
         ProcessingProfiler.getTimeDiff(start);
@@ -169,50 +143,82 @@ public class MountainRangeRenderer extends ErrorDataSetRenderer implements Rende
      * @param mountainRangeOffset t<code>mountainRangeOffset</code>, i.e. vertical offset between subsequent data sets
      * @return itself (fluent design)
      */
-    public final MountainRangeRenderer setMountainRangeOffset(final double mountainRangeOffset) {
+    public MountainRangeRenderer setMountainRangeOffset(final double mountainRangeOffset) { // NOPMD -- fluent design setter returns class
         AssertUtils.gtEqThanZero("mountainRangeOffset", mountainRangeOffset);
         this.mountainRangeOffset.setValue(mountainRangeOffset);
         return this;
     }
 
-    private class Demux3dTo2dDataSet implements DataSet2D, DataSetError {
+    private void checkAndRecreateRenderer(final int nRenderer) {
+        if (renderers.size() == nRenderer) {
+            // all OK
+            return;
+        }
+
+        if (nRenderer > renderers.size()) {
+            for (int i = renderers.size(); i < nRenderer; i++) {
+                final ErrorDataSetRenderer newRenderer = new ErrorDataSetRenderer(); // NOPMD -- 'new' needed in this context
+                newRenderer.bind(this);
+                // do not show history sets in legend (single exception to
+                // binding)
+                newRenderer.showInLegendProperty().unbind();
+                newRenderer.setShowInLegend(false);
+                renderers.add(newRenderer);
+            }
+            return;
+        }
+
+        // require less renderer -> remove first until we have the right number
+        // needed
+        while (nRenderer < renderers.size()) {
+            renderers.remove(0);
+        }
+    }
+
+    private class Demux3dTo2dDataSet implements DataSet {
         private static final long serialVersionUID = 3914728138839091421L;
-        private final transient DataSetLock<DataSet> lock = new DefaultDataSetLock<>(Demux3dTo2dDataSet.this);
-        private final AtomicBoolean autoNotification = new AtomicBoolean(true);
-        private final DataSet3D dataSet;
+        private final transient DataSetLock<DataSet> localLock = new DefaultDataSetLock<>(this);
+        private final transient AtomicBoolean autoNotify = new AtomicBoolean(true);
+        private final DataSet dataSet;
+        private final int nx;
+        private final int ny;
         private final int yIndex;
         private final int yMax;
-        private double yShift;
+        private final double zMin;
+        private final double zMax;
+        private final double yShift;
         private final transient List<EventListener> updateListener = new ArrayList<>();
         private final transient List<AxisDescription> axesDescriptions = new ArrayList<>(Arrays.asList( //
                 new DefaultAxisDescription("x-Axis", "a.u."), //
                 new DefaultAxisDescription("y-Axis", "a.u.")));
 
-        public Demux3dTo2dDataSet(final DataSet3D sourceDataSet, final int selectedYIndex) {
+        public Demux3dTo2dDataSet(final DataSet sourceDataSet, final int selectedYIndex, final double zMin, final double zMax) {
             super();
             dataSet = sourceDataSet;
+            nx = sourceDataSet.getDataCount(DIM_X);
+            ny = sourceDataSet.getDataCount(DIM_Y);
             yIndex = selectedYIndex;
-            yMax = dataSet.getDataCount(DataSet.DIM_Y);
-            yShift = 0.0; // just temporarily, will be recomputed
-
-            // listener on axis
-            final AxisDescription xAxis = dataSet.getAxisDescription(DIM_X);
-            dataSet.addListener(evt -> {
-                Demux3dTo2dDataSet.this.getAxisDescription(DIM_X).set(xAxis.getName(), xAxis.getUnit(), xAxis.getMin(),
-                        xAxis.getMax());
-                setYMax(dataSet.getAxisDescription(2));
-            });
-            setYMax(dataSet.getAxisDescription(DIM_Z)); // #NOPMD needed for init, cannot be overwritten by user
+            yMax = dataSet.getDataCount(DIM_Y);
+            this.zMin = zMin;
+            this.zMax = zMax;
+            yShift = mountainRaingeExtra * dataSet.getAxisDescription(DIM_Z).getMax() * yIndex / yMax;
         }
 
         @Override
         public AtomicBoolean autoNotification() {
-            return autoNotification;
+            return autoNotify;
         }
 
         @Override
         public double get(final int dimIndex, final int i) {
-            return dimIndex == DIM_Y ? this.getY(i) : dataSet.get(dimIndex, i);
+            switch (dimIndex) {
+            case DIM_X:
+                return dataSet.get(dimIndex, i);
+            case DIM_Y:
+                return dataSet.get(DIM_Z, yIndex * nx + i) + yShift;
+            default:
+                throw new IllegalArgumentException("dinIndex " + dimIndex + " not defined");
+            }
         }
 
         @Override
@@ -221,13 +227,15 @@ public class MountainRangeRenderer extends ErrorDataSetRenderer implements Rende
         }
 
         @Override
-        public int getDataCount() {
-            return dataSet.getDataCount(DataSet.DIM_X);
-        }
-
-        @Override
         public int getDataCount(int dimIndex) {
-            return this.getDataCount();
+            switch (dimIndex) {
+            case DIM_X:
+                return nx;
+            case DIM_Y:
+                return ny;
+            default:
+                throw new IndexOutOfBoundsException("dimIndex=" + dimIndex + " out of range");
+            }
         }
 
         @Override
@@ -236,24 +244,31 @@ public class MountainRangeRenderer extends ErrorDataSetRenderer implements Rende
         }
 
         @Override
-        public double getErrorNegative(final int dimIndex, final int index) {
-            return 0;
+        public int getDimension() {
+            return 2;
         }
 
         @Override
-        public double getErrorPositive(final int dimIndex, final int index) {
-            return 0;
-        }
-
-        @Override
-        public ErrorType getErrorType(final int dimIndex) {
+        public int getIndex(int dimIndex, double value) {
             switch (dimIndex) {
             case DIM_X:
-                return ErrorType.NO_ERROR;
+                // added computation of hash since this is recomputed quite often
+                // (and the same) for each slice
+                return xWeakIndexMap.computeIfAbsent(value, key -> {
+                    final int ret = dataSet.getIndex(DIM_X, value);
+                    xWeakIndexMap.put(value, ret);
+                    return ret;
+                });
             case DIM_Y:
-                return ErrorType.SYMMETRIC;
+                // added computation of hash since this is recomputed quite often
+                // (and the same) for each slice
+                return yWeakIndexMap.computeIfAbsent(value, key -> {
+                    final int ret = dataSet.getIndex(DIM_Y, value);
+                    yWeakIndexMap.put(value, ret);
+                    return ret;
+                });
             default:
-                throw new IndexOutOfBoundsException("DataSet only 2-dimensional");
+                throw new IndexOutOfBoundsException("dimIndex=" + dimIndex + " out of range");
             }
         }
 
@@ -273,31 +288,26 @@ public class MountainRangeRenderer extends ErrorDataSetRenderer implements Rende
         }
 
         @Override
-        public double getX(final int i) {
-            return dataSet.get(DIM_X, i);
-        }
-
-        @Override
-        public double getY(final int i) {
-            return dataSet.getZ(i, yIndex) + yShift;
+        public double getValue(int dimIndex, double x) {
+            return 0;
         }
 
         @Override
         public boolean isAutoNotification() {
-            return autoNotification.get();
+            return autoNotify.get();
         }
 
         @Override
         public DataSetLock<DataSet> lock() {
             // empty implementation since the superordinate DataSet3D lock is
             // being held/protecting this data set
-            return lock;
+            return localLock;
         }
 
         @Override
         public DataSet recomputeLimits(int dimension) {
-            this.setYMax(dataSet.getAxisDescription(DIM_Z));
-            notifyRangeChange();
+            this.getAxisDescription(DIM_X).set(dataSet.getAxisDescription(DIM_X));
+            this.getAxisDescription(DIM_Y).set(zMin, zMax);
             return this;
         }
 
@@ -306,50 +316,9 @@ public class MountainRangeRenderer extends ErrorDataSetRenderer implements Rende
             return dataSet.setStyle(style);
         }
 
-        private final void setYMax(AxisDescription zAxis) {
-            yShift = mountainRaingeExtra * zAxis.getMax() * yIndex / yMax;
-
-            Demux3dTo2dDataSet.this.getAxisDescription(DIM_Y).set(zAxis.getName(), zAxis.getUnit(), zAxis.getMin(),
-                    zRangeMax * (1 + mountainRaingeExtra));
-        }
-
-        private final void notifyRangeChange() {
-            if (dataSet == null || !dataSet.autoNotification().get()) {
-                return;
-            }
-            final String name = Demux3dTo2dDataSet.this.getAxisDescription(DIM_Y).getName();
-            final String unit = Demux3dTo2dDataSet.this.getAxisDescription(DIM_Y).getUnit();
-            dataSet.invokeListener(
-                    new AxisRangeChangeEvent(dataSet, "updated axis range for '" + name + "' '[" + unit + "]'", -1));
-        }
-
         @Override
         public List<EventListener> updateEventListener() {
             return updateListener;
-        }
-
-        @Override
-        public int getIndex(int dimIndex, double value) {
-            switch (dimIndex) {
-            case DIM_X:
-                // added computation of hash since this is recomputed quite often
-                // (and the same) for each slice
-                return xWeakIndexMap.computeIfAbsent(value, key -> {
-                    Integer ret = dataSet.getXIndex(value);
-                    xWeakIndexMap.put(value, ret);
-                    return ret;
-                });
-            case DIM_Y:
-                // added computation of hash since this is recomputed quite often
-                // (and the same) for each slice
-                return yWeakIndexMap.computeIfAbsent(value, key -> {
-                    Integer ret = dataSet.getYIndex(value);
-                    yWeakIndexMap.put(value, ret);
-                    return ret;
-                });
-            default:
-                throw new IndexOutOfBoundsException("dimIndex=" + dimIndex + " out of range");
-            }
         }
     }
 }

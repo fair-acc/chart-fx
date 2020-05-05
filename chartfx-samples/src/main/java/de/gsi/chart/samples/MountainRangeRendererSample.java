@@ -23,109 +23,14 @@ import de.gsi.chart.plugins.Panner;
 import de.gsi.chart.plugins.Zoomer;
 import de.gsi.chart.renderer.spi.MountainRangeRenderer;
 import de.gsi.dataset.DataSet;
-import de.gsi.dataset.DataSet3D;
-import de.gsi.dataset.spi.AbstractDataSet3D;
+import de.gsi.dataset.spi.AbstractDataSet;
 
 /**
  * @author rstein
  */
 public class MountainRangeRendererSample extends Application {
     private static final Logger LOGGER = LoggerFactory.getLogger(MountainRangeRendererSample.class);
-
-    public DataSet3D createData() {
-        final double[] x = { -12, -9, -8, -7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 12 };
-        final double[] y = x;
-        final double[][] z = new double[x.length][y.length];
-        for (int yIndex = 0; yIndex < y.length; yIndex++) {
-            for (int xIndex = 0; xIndex < x.length; xIndex++) {
-                z[xIndex][yIndex] = Math.sin(y[yIndex] * x[xIndex]);
-            }
-        }
-
-        return new DefaultData("demoDataSet", MountainRangeRendererSample.toNumbers(x),
-                MountainRangeRendererSample.toNumbers(y), z);
-    }
-
-    private DataSet3D createTestData(final double peakOffset) {
-        final int nPointsX = 2000;
-        final int nPointsY = 100;
-        final double[] x = new double[nPointsX];
-        final double[] y = new double[nPointsY];
-        for (int i = 0; i < x.length; i++) {
-            final double val = (i / (double) x.length - 0.5) * 10;
-            x[i] = val;
-        }
-
-        for (int i = 0; i < y.length; i++) {
-            final double val = (i / (double) y.length - 0.5) * 10;
-            y[i] = val;
-        }
-
-        final double[][] z = new double[x.length][y.length];
-        for (int yIndex = 0; yIndex < y.length; yIndex++) {
-            for (int xIndex = 0; xIndex < x.length; xIndex++) {
-                final double t = x[xIndex];
-                final double yRel = yIndex / (double) y.length;
-                final double mean1 = -3.5;
-                final double mean2 = -1.0;
-                final double mean3 = +1.0;
-                final double mean4 = +3.5;
-                final double width1 = 2 * (1 - yRel);
-                final double width4 = 0.2 + 0.05 * Math.sin(5 * Math.PI * yRel);
-                final double y1 = MountainRangeRendererSample.gaussian(t, mean1 + peakOffset, width1);
-                final double y2 = MountainRangeRendererSample.gaussian(t,
-                        mean2 + peakOffset + 0.3 * Math.sin(2.5 * Math.PI * yRel), 0.2);
-                final double y3 = MountainRangeRendererSample.gaussian(t,
-                        mean3 + peakOffset + 0.3 * Math.sin(2.5 * Math.PI * yRel), 0.2);
-                final double y4 = MountainRangeRendererSample.gaussian(t, mean4 + peakOffset, width4);
-                z[xIndex][yIndex] = y1 + y2 + y3 + y4;
-            }
-        }
-
-        return new DefaultData("demoDataSet", MountainRangeRendererSample.toNumbers(x),
-                MountainRangeRendererSample.toNumbers(y), z);
-    }
-
-    public DataSet3D readImage() {
-        try (final BufferedReader reader = new BufferedReader(
-                     new InputStreamReader(ContourChartSample.class.getResourceAsStream("./testdata/image.txt")))) {
-            // final BufferedReader reader = new BufferedReader(new InputStreamReader(
-            // ContourChartSampleReference.class.getResourceAsStream("./testdata/image.txt")));
-            @SuppressWarnings("unused")
-            String skipLine; // NOPMD variable is needed to skip/check line that contains the dimension of the following
-                    // line to be read which we derive from the data itself
-            if ((skipLine = reader.readLine()) == null) {
-                throw new IllegalStateException("expected non-null line");
-            }
-            final String[] x = reader.readLine().split(" ");
-            if ((skipLine = reader.readLine()) == null) {
-                throw new IllegalStateException("expected non-null line");
-            }
-            final String[] y = reader.readLine().split(" ");
-            if ((skipLine = reader.readLine()) == null) {
-                throw new IllegalStateException("expected non-null line");
-            }
-            final String[] z = reader.readLine().split(" ");
-
-            final Number[] xValues = MountainRangeRendererSample.toNumberArray(x);
-            final Number[] yValues = MountainRangeRendererSample.toNumberArray(y);
-
-            final double[][] zValues = new double[x.length][y.length];
-            int i = 0;
-            for (int yIdx = 0; yIdx < y.length; yIdx++) {
-                for (int xIdx = 0; xIdx < x.length; xIdx++) {
-                    zValues[xIdx][yIdx] = Double.parseDouble(z[i++]);
-                }
-            }
-            return new DefaultData("contour data", xValues, yValues, zValues);
-
-        } catch (final IOException | NullPointerException e) {
-            if (LOGGER.isErrorEnabled()) {
-                LOGGER.atError().setCause(e).log("error reading dataset");
-            }
-        }
-        return null;
-    }
+    private static final String EXPECTED_NON_NULL_LINE = "expected non-null line";
 
     @Override
     public void start(final Stage primaryStage) {
@@ -149,7 +54,7 @@ public class MountainRangeRendererSample extends Application {
         chart.getPlugins().add(new Panner());
         chart.getPlugins().add(new EditAxis());
 
-        Spinner<Double> mountainRangeOffset = new Spinner<>(0.0, 10.0, mountainRangeRenderer.getMountainRangeOffset(),
+        final Spinner<Double> mountainRangeOffset = new Spinner<>(0.0, 10.0, mountainRangeRenderer.getMountainRangeOffset(),
                 0.1);
         mountainRangeRenderer.mountainRangeOffsetProperty().bind(mountainRangeOffset.valueProperty());
         mountainRangeOffset.valueProperty().addListener((ch, o, n) -> {
@@ -166,12 +71,96 @@ public class MountainRangeRendererSample extends Application {
         primaryStage.setOnCloseRequest(evt -> Platform.exit());
     }
 
-    public static double gaussian(final double x, final double mean, final double sigma) {
-        final double norm = 1 / (sigma * Math.sqrt(2 * Math.PI));
-        final double is = 1 / sigma;
-        final double i2s2 = 0.5 * is * is;
-        final double xMinusMean = x - mean;
-        return norm * Math.exp(-xMinusMean * xMinusMean * i2s2);
+    protected DataSet createData() {
+        final double[] x = { -12, -9, -8, -7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 12 };
+        final double[] y = x;
+        final double[] z = new double[x.length * y.length];
+        final int i = 0;
+        for (final double anY : y) {
+            for (final double anX : x) {
+                z[i] = Math.sin(anY * anX);
+            }
+        }
+
+        return new DefaultData("demoDataSet", x, y, z);
+    }
+
+    protected DataSet createTestData(final double peakOffset) {
+        final int nPointsX = 2000;
+        final int nPointsY = 100;
+        final double[] x = new double[nPointsX];
+        final double[] y = new double[nPointsY];
+        for (int i = 0; i < x.length; i++) {
+            final double val = (i / (double) x.length - 0.5) * 10;
+            x[i] = val;
+        }
+
+        for (int i = 0; i < y.length; i++) {
+            final double val = (i / (double) y.length - 0.5) * 10;
+            y[i] = val;
+        }
+
+        final double[] z = new double[x.length * y.length];
+        int i = 0;
+        for (int yIndex = 0; yIndex < y.length; yIndex++) {
+            for (final double t : x) {
+                final double yRel = yIndex / (double) y.length;
+                final double mean1 = -3.5;
+                final double mean2 = -1.0;
+                final double mean3 = +1.0;
+                final double mean4 = +3.5;
+                final double width1 = 2 * (1 - yRel);
+                final double width4 = 0.2 + 0.05 * Math.sin(5 * Math.PI * yRel);
+                final double y1 = MountainRangeRendererSample.gaussian(t, mean1 + peakOffset, width1);
+                final double y2 = MountainRangeRendererSample.gaussian(t,
+                        mean2 + peakOffset + 0.3 * Math.sin(2.5 * Math.PI * yRel), 0.2);
+                final double y3 = MountainRangeRendererSample.gaussian(t,
+                        mean3 + peakOffset + 0.3 * Math.sin(2.5 * Math.PI * yRel), 0.2);
+                final double y4 = MountainRangeRendererSample.gaussian(t, mean4 + peakOffset, width4);
+                z[i++] = y1 + y2 + y3 + y4;
+            }
+        }
+
+        return new DefaultData("demoDataSet", x, y, z);
+    }
+
+    protected DataSet readImage() {
+        try (final BufferedReader reader = new BufferedReader(
+                     new InputStreamReader(ContourChartSample.class.getResourceAsStream("./testdata/image.txt")))) {
+            @SuppressWarnings("unused")
+            String skipLine; // NOPMD variable is needed to skip/check line that contains the dimension of the following
+                    // line to be read which we derive from the data itself
+            if ((skipLine = reader.readLine()) == null) {
+                throw new IllegalStateException(EXPECTED_NON_NULL_LINE);
+            }
+            final String[] x = reader.readLine().split(" ");
+            if ((skipLine = reader.readLine()) == null) {
+                throw new IllegalStateException(EXPECTED_NON_NULL_LINE);
+            }
+            final String[] y = reader.readLine().split(" ");
+            if ((skipLine = reader.readLine()) == null) {
+                throw new IllegalStateException(EXPECTED_NON_NULL_LINE);
+            }
+            final String[] z = reader.readLine().split(" ");
+
+            final double[] xValues = MountainRangeRendererSample.toDouble(x);
+            final double[] yValues = MountainRangeRendererSample.toDouble(y);
+
+            final double[] zValues = new double[x.length * y.length];
+            int i = 0;
+            for (int yIdx = 0; yIdx < y.length; yIdx++) {
+                for (int xIdx = 0; xIdx < x.length; xIdx++) {
+                    zValues[i] = Double.parseDouble(z[i++]);
+                }
+            }
+            return new DefaultData("contour data", xValues, yValues, zValues);
+
+        } catch (final IOException | NullPointerException e) {
+            if (LOGGER.isErrorEnabled()) {
+                LOGGER.atError().setCause(e).log("error reading dataset");
+            }
+        }
+        return null;
     }
 
     /**
@@ -181,30 +170,30 @@ public class MountainRangeRendererSample extends Application {
         Application.launch(args);
     }
 
-    private static Number[] toNumberArray(final String[] stringValues) {
-        final Number[] numberValues = new Number[stringValues.length];
+    private static double gaussian(final double x, final double mean, final double sigma) {
+        final double norm = 1 / (sigma * Math.sqrt(2 * Math.PI));
+        final double is = 1 / sigma;
+        final double i2s2 = 0.5 * is * is;
+        final double xMinusMean = x - mean;
+        return norm * Math.exp(-xMinusMean * xMinusMean * i2s2);
+    }
+
+    private static double[] toDouble(final String[] stringValues) {
+        final double[] numberValues = new double[stringValues.length];
         for (int i = 0; i < stringValues.length; i++) {
             numberValues[i] = Double.valueOf(stringValues[i]);
         }
         return numberValues;
     }
 
-    private static Number[] toNumbers(final double[] array) {
-        final Number[] result = new Number[array.length];
-        for (int i = 0; i < result.length; i++) {
-            result[i] = array[i];
-        }
-        return result;
-    }
-
-    public class DefaultData extends AbstractDataSet3D<DefaultData> {
+    public class DefaultData extends AbstractDataSet<DefaultData> {
         private static final long serialVersionUID = 2094218221674496366L;
-        private final Number[] xValues;
-        private final Number[] yValues;
-        private final double[][] zValues;
+        private final double[] xValues;
+        private final double[] yValues;
+        private final double[] zValues;
 
-        DefaultData(final String name, final Number[] xValues, final Number[] yValues, final double[][] zValues) {
-            super(name);
+        DefaultData(final String name, final double[] xValues, final double[] yValues, final double[] zValues) {
+            super(name, 3);
             this.xValues = xValues;
             this.yValues = yValues;
             this.zValues = zValues;
@@ -212,18 +201,30 @@ public class MountainRangeRendererSample extends Application {
 
         @Override
         public final double get(final int dimIndex, final int index) {
-            return dimIndex == DataSet.DIM_X ? xValues[index].doubleValue() : yValues[index].doubleValue();
+            switch (dimIndex) {
+            case DataSet.DIM_X:
+                return xValues[index];
+            case DataSet.DIM_Y:
+                return yValues[index];
+            case DataSet.DIM_Z:
+                return zValues[index];
+            default:
+                throw new IllegalArgumentException("dinIndex " + dimIndex + " not defined");
+            }
         }
 
         @Override
         public int getDataCount(final int dimIndex) {
-            if (dimIndex == DataSet.DIM_X) {
+            switch (dimIndex) {
+            case DataSet.DIM_X:
                 return xValues.length;
-            }
-            if (dimIndex == DataSet.DIM_Y) {
+            case DataSet.DIM_Y:
                 return yValues.length;
+            case DataSet.DIM_Z:
+                return xValues.length * yValues.length;
+            default:
+                throw new IllegalArgumentException("dinIndex " + dimIndex + " not defined");
             }
-            return xValues.length * yValues.length;
         }
 
         @Override
@@ -234,27 +235,6 @@ public class MountainRangeRendererSample extends Application {
         @Override
         public double getValue(int dimIndex, double x) {
             return 0;
-        }
-
-        @Override
-        public double getX(final int i) {
-            return xValues[i].doubleValue();
-        }
-
-        @Override
-        public double getY(final int i) {
-            return yValues[i].doubleValue();
-        }
-
-        @Override
-        public double getZ(final int xIndex, final int yIndex) {
-            return zValues[xIndex][yIndex];
-        }
-
-        public void set(final int xIndex, final int yIndex, final double x, final double y, final double z) {
-            xValues[xIndex] = x;
-            yValues[yIndex] = y;
-            zValues[xIndex][yIndex] = z;
         }
     }
 }
