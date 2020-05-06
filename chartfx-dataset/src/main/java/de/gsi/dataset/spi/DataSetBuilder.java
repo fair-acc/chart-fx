@@ -67,8 +67,8 @@ public class DataSetBuilder {
         // TODO: check if enough axes are already defined ie. via
         // DataSet::getDimension(...) to be implemented
         dataSet.getAxisDescriptions().clear();
-        for (int dimension = 0; dimension < axisDescriptions.size(); dimension++) {
-            dataSet.getAxisDescriptions().add(new DefaultAxisDescription(dataSet, getAxisDescription(dimension)));
+        for (int iDim = 0; iDim < axisDescriptions.size(); iDim++) {
+            dataSet.getAxisDescriptions().add(new DefaultAxisDescription(dataSet, getAxisDescription(iDim)));
         }
     }
 
@@ -121,10 +121,8 @@ public class DataSetBuilder {
                 return new DefaultDataSet(dsName, Math.max(initialCapacity[0], 0));
             }
             return build2dDataSet(dsName, size);
-        case 3:
-            //            return build3dDataset(dsName, size);
         default:
-            return buildMultiDimDataSet(dsName, size, dimension);
+            return buildMultiDimDataSet(dsName, dimension);
         }
     }
 
@@ -169,7 +167,7 @@ public class DataSetBuilder {
         return new DefaultDataSet(dsName, xvalues, yvalues, size, false);
     }
 
-    private DataSet buildMultiDimDataSet(final String dsName, final int size, final int nDims) {
+    private DataSet buildMultiDimDataSet(final String dsName, final int nDims) {
         final double[][] inputValues = new double[nDims][];
         for (int dimIndex = 0; dimIndex < nDims; dimIndex++) {
             int initialSize = this.initialCapacity != null && this.initialCapacity.length > dimIndex
@@ -283,10 +281,30 @@ public class DataSetBuilder {
         return this;
     }
 
+    @Deprecated
+    public DataSetBuilder setXNegError(final double[] errors) {
+        return setNegError(DataSet.DIM_X, errors);
+    }
+
+    @Deprecated
+    public DataSetBuilder setYNegError(final double[] errors) {
+        return setNegError(DataSet.DIM_Y, errors);
+    }
+
     public DataSetBuilder setNegErrorNoCopy(final int dimIndex, final double[] errors) { // NOPMD
         // direct storage is on purpose
         this.errorsNeg.put(dimIndex, errors);
         return this;
+    }
+
+    @Deprecated
+    public DataSetBuilder setXNegErrorNoCopy(final double[] errors) {
+        return setNegErrorNoCopy(DataSet.DIM_X, errors);
+    }
+
+    @Deprecated
+    public DataSetBuilder setYNegErrorNoCopy(final double[] errors) {
+        return setNegErrorNoCopy(DataSet.DIM_Y, errors);
     }
 
     public final DataSetBuilder setPosError(final int dimIndex, final double[] errors) {
@@ -296,10 +314,30 @@ public class DataSetBuilder {
         return this;
     }
 
+    @Deprecated
+    public DataSetBuilder setXPosError(final double[] errors) {
+        return setPosError(DataSet.DIM_X, errors);
+    }
+
+    @Deprecated
+    public DataSetBuilder setYPosError(final double[] errors) {
+        return setPosError(DataSet.DIM_Y, errors);
+    }
+
     public final DataSetBuilder setPosErrorNoCopy(final int dimIndex, final double[] errors) { // NOPMD
         // direct storage is on purpose
         this.errorsPos.put(dimIndex, errors);
         return this;
+    }
+
+    @Deprecated
+    public DataSetBuilder setXPosErrorNoCopy(final double[] errors) {
+        return setPosError(DataSet.DIM_X, errors);
+    }
+
+    @Deprecated
+    public DataSetBuilder setYPosErrorNoCopy(final double[] errors) {
+        return setPosError(DataSet.DIM_Y, errors);
     }
 
     public final DataSetBuilder setValues(final int dimIndex, final double[] values) {
@@ -307,6 +345,16 @@ public class DataSetBuilder {
         this.values.put(dimIndex, vals);
         System.arraycopy(values, 0, vals, 0, values.length);
         return this;
+    }
+
+    @Deprecated
+    public DataSetBuilder setXValues(final double[] values) {
+        return setValues(DataSet.DIM_X, values);
+    }
+
+    @Deprecated
+    public DataSetBuilder setYValues(final double[] values) {
+        return setValues(DataSet.DIM_Y, values);
     }
 
     public final DataSetBuilder setValues(final int dimIndex, final double[][] values) {
@@ -327,6 +375,16 @@ public class DataSetBuilder {
     public DataSetBuilder setValuesNoCopy(int dimIndex, double[] values) {
         this.values.put(dimIndex, values);
         return this;
+    }
+
+    @Deprecated
+    public DataSetBuilder setXValuesNoCopy(final double[] values) {
+        return setValuesNoCopy(DataSet.DIM_X, values);
+    }
+
+    @Deprecated
+    public DataSetBuilder setYValuesNoCopy(final double[] values) {
+        return setValuesNoCopy(DataSet.DIM_Y, values);
     }
 
     public DataSetBuilder setDimension(final int dimension) {
