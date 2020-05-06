@@ -137,7 +137,7 @@ public class TableViewer extends ChartPlugin {
             if (chartLocal == null || o.equals(n)) {
                 return;
             }
-            if (n) {
+            if (Boolean.TRUE.equals(n)) {
                 chartLocal.getToolBar().getChildren().add(interactorButtons);
             } else {
                 chartLocal.getToolBar().getChildren().remove(interactorButtons);
@@ -287,7 +287,7 @@ public class TableViewer extends ChartPlugin {
             super();
             columns.add(new RowIndexHeaderTableColumn());
             table.visibleProperty().addListener((prop, oldVal, newVal) -> {
-                if (newVal) {
+                if (Boolean.TRUE.equals(newVal)) {
                     datasetsChanged(null);
                 }
             });
@@ -372,13 +372,9 @@ public class TableViewer extends ChartPlugin {
             if (newChart != null) {
                 // register data set listeners
                 newChart.getDatasets().addListener(datasetChangeListener);
-                newChart.getDatasets().forEach(dataSet -> {
-                    dataSet.addListener(dataSetDataUpdateListener);
-                });
+                newChart.getDatasets().forEach(dataSet -> dataSet.addListener(dataSetDataUpdateListener));
                 newChart.getRenderers().addListener(rendererChangeListener);
-                newChart.getRenderers().forEach(renderer -> {
-                    renderer.getDatasets().addListener(datasetChangeListener);
-                });
+                newChart.getRenderers().forEach(renderer -> renderer.getDatasets().addListener(datasetChangeListener));
                 datasetsChanged(null);
             }
         }
@@ -507,9 +503,7 @@ public class TableViewer extends ChartPlugin {
             boolean dataSetChanges = false;
             while (change.next()) {
                 // handle added renderer
-                change.getAddedSubList().forEach(renderer -> {
-                    renderer.getDatasets().addListener(datasetChangeListener);
-                });
+                change.getAddedSubList().forEach(renderer -> renderer.getDatasets().addListener(datasetChangeListener));
                 if (!change.getAddedSubList().isEmpty()) {
                     dataSetChanges = true;
                 }
@@ -720,9 +714,7 @@ public class TableViewer extends ChartPlugin {
                 super();
                 this.setSortable(false);
                 this.setReorderable(false);
-                setCellValueFactory(dataSetsRow -> {
-                    return new ReadOnlyObjectWrapper<>(dataSetsRow.getValue().getRow());
-                });
+                setCellValueFactory(dataSetsRow -> new ReadOnlyObjectWrapper<>(dataSetsRow.getValue().getRow()));
                 getStyleClass().add("column-header"); // make the column look like a header
                 setEditable(false);
             }
