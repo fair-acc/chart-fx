@@ -5,11 +5,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.util.Arrays;
-
 import static de.gsi.dataset.DataSet.DIM_X;
 import static de.gsi.dataset.DataSet.DIM_Y;
 import static de.gsi.dataset.DataSet.DIM_Z;
+
+import java.util.Arrays;
 
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -33,13 +33,13 @@ public class MultiDimDatasetMathTests {
     public void testIntegralOptions() {
         LOGGER.atDebug().log("testIntegralOptions");
         DataSet testData = new DataSetBuilder("test") //
-                .setValuesNoCopy(DIM_X, new double[] { 1, 2, 3 }) // x-array
-                .setValuesNoCopy(DIM_Y, new double[] { 6, 7, 8 }) // y-array
-                .setValues(DIM_Z, new double[][] { // z-array
-                        new double[] { 1, 2, 3 }, //
-                        new double[] { 6, 5, 4 }, //
-                        new double[] { 9, 8, 7 } }) //
-                .build();
+                                   .setValuesNoCopy(DIM_X, new double[] { 1, 2, 3 }) // x-array
+                                   .setValuesNoCopy(DIM_Y, new double[] { 6, 7, 8 }) // y-array
+                                   .setValues(DIM_Z, new double[][] { // z-array
+                                                             new double[] { 1, 2, 3 }, //
+                                                             new double[] { 6, 5, 4 }, //
+                                                             new double[] { 9, 8, 7 } }) //
+                                   .build();
         DoubleErrorDataSet sliceDataSetX = new DoubleErrorDataSet("test_X");
         DoubleErrorDataSet sliceDataSetY = new DoubleErrorDataSet("test_Y");
         assertThrows(IllegalArgumentException.class,
@@ -80,13 +80,13 @@ public class MultiDimDatasetMathTests {
     public void testMaxOptions() {
         LOGGER.atDebug().log("testMaxOptions");
         DataSet testData = new DataSetBuilder("test") //
-                .setValuesNoCopy(DIM_X, new double[] { 1, 2, 3 }) // x-array
-                .setValuesNoCopy(DIM_Y, new double[] { 6, 7, 8 }) // y-array
-                .setValues(DIM_Z, new double[][] { // z-array
-                        new double[] { 1, 2, 3 }, //
-                        new double[] { 6, 5, 4 }, //
-                        new double[] { 9, 8, 7 } }) //
-                .build();
+                                   .setValuesNoCopy(DIM_X, new double[] { 1, 2, 3 }) // x-array
+                                   .setValuesNoCopy(DIM_Y, new double[] { 6, 7, 8 }) // y-array
+                                   .setValues(DIM_Z, new double[][] { // z-array
+                                                             new double[] { 1, 2, 3 }, //
+                                                             new double[] { 6, 5, 4 }, //
+                                                             new double[] { 9, 8, 7 } }) //
+                                   .build();
 
         DoubleErrorDataSet sliceDataSetX = new DoubleErrorDataSet("test_X");
         DoubleErrorDataSet sliceDataSetY = new DoubleErrorDataSet("test_Y");
@@ -128,13 +128,13 @@ public class MultiDimDatasetMathTests {
     public void testMeanOptions() {
         LOGGER.atDebug().log("testMeanOptions");
         DataSet testData = new DataSetBuilder("test") //
-                .setValuesNoCopy(DIM_X, new double[] { 1, 2, 3 }) // x-array
-                .setValuesNoCopy(DIM_Y, new double[] { 6, 7, 8 }) // y-array
-                .setValues(DIM_Z, new double[][] { // z-array
-                        new double[] { 1, 2, 3 }, //
-                        new double[] { 6, 5, 4 }, //
-                        new double[] { 9, 8, 7 } }) //
-                .build();
+                                   .setValuesNoCopy(DIM_X, new double[] { 1, 2, 3 }) // x-array
+                                   .setValuesNoCopy(DIM_Y, new double[] { 6, 7, 8 }) // y-array
+                                   .setValues(DIM_Z, new double[][] { // z-array
+                                                             new double[] { 1, 2, 3 }, //
+                                                             new double[] { 6, 5, 4 }, //
+                                                             new double[] { 9, 8, 7 } }) //
+                                   .build();
 
         DoubleErrorDataSet sliceDataSetX = new DoubleErrorDataSet("test_X");
         DoubleErrorDataSet sliceDataSetY = new DoubleErrorDataSet("test_Y");
@@ -178,13 +178,13 @@ public class MultiDimDatasetMathTests {
     public void testMinOptions() {
         LOGGER.atDebug().log("testMinOptions");
         DataSet testData = new DataSetBuilder("test") //
-                .setValuesNoCopy(DIM_X, new double[] { 1, 2, 3 }) // x-array
-                .setValuesNoCopy(DIM_Y, new double[] { 6, 7, 8 }) // y-array
-                .setValues(DIM_Z, new double[][] { // z-array
-                        new double[] { 1, 2, 3 }, //
-                        new double[] { 6, 5, 4 }, //
-                        new double[] { 9, 8, 7 } }) //
-                .build();
+                                   .setValuesNoCopy(DIM_X, new double[] { 1, 2, 3 }) // x-array
+                                   .setValuesNoCopy(DIM_Y, new double[] { 6, 7, 8 }) // y-array
+                                   .setValues(DIM_Z, new double[][] { // z-array
+                                                             new double[] { 1, 2, 3 }, //
+                                                             new double[] { 6, 5, 4 }, //
+                                                             new double[] { 9, 8, 7 } }) //
+                                   .build();
 
         DoubleErrorDataSet sliceDataSetX = new DoubleErrorDataSet("test_X");
         DoubleErrorDataSet sliceDataSetY = new DoubleErrorDataSet("test_Y");
@@ -226,13 +226,13 @@ public class MultiDimDatasetMathTests {
     public void testSliceOptions() {
         LOGGER.atDebug().log("testSliceOptions");
         DataSet testData = new DataSetBuilder("test") //
-                .setValuesNoCopy(DIM_X, new double[] { 1, 2, 3 }) // x-array
-                .setValuesNoCopy(DIM_Y, new double[] { 6, 7, 8 }) // y-array
-                .setValues(DIM_Z, new double[][] { // z-array
-                        new double[] { 1, 2, 3 }, //
-                        new double[] { 6, 5, 4 }, //
-                        new double[] { 9, 8, 7 } }) //
-                .build();
+                                   .setValuesNoCopy(DIM_X, new double[] { 1, 2, 3 }) // x-array
+                                   .setValuesNoCopy(DIM_Y, new double[] { 6, 7, 8 }) // y-array
+                                   .setValues(DIM_Z, new double[][] { // z-array
+                                                             new double[] { 1, 2, 3 }, //
+                                                             new double[] { 6, 5, 4 }, //
+                                                             new double[] { 9, 8, 7 } }) //
+                                   .build();
 
         DoubleErrorDataSet sliceDataSetX = new DoubleErrorDataSet("test_X");
         DoubleErrorDataSet sliceDataSetY = new DoubleErrorDataSet("test_Y");

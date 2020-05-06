@@ -108,8 +108,7 @@ public class XYChart extends Chart {
 
         allDataSets.clear();
         allDataSets.addAll(getDatasets());
-        getRenderers().stream().filter(renderer -> !(renderer instanceof LabelledMarkerRenderer))
-                .forEach(renderer -> allDataSets.addAll(renderer.getDatasets()));
+        getRenderers().stream().filter(renderer -> !(renderer instanceof LabelledMarkerRenderer)).forEach(renderer -> allDataSets.addAll(renderer.getDatasets()));
 
         return allDataSets;
     }
@@ -246,12 +245,11 @@ public class XYChart extends Chart {
         // lock datasets to prevent writes while updating the axes
         ObservableList<DataSet> dataSets = this.getAllDatasets();
         // check that all registered data sets have proper ranges defined
-        dataSets.parallelStream().forEach(dataset -> dataset.getAxisDescriptions().parallelStream()
-                .filter(axisD -> !axisD.isDefined()).forEach(axisDescription -> {
-                    dataset.lock().writeLockGuard(() -> {
-                        dataset.recomputeLimits(dataset.getAxisDescriptions().indexOf(axisDescription));
-                    });
-                }));
+        dataSets.parallelStream().forEach(dataset -> dataset.getAxisDescriptions().parallelStream().filter(axisD -> !axisD.isDefined()).forEach(axisDescription -> {
+            dataset.lock().writeLockGuard(() -> {
+                dataset.recomputeLimits(dataset.getAxisDescriptions().indexOf(axisDescription));
+            });
+        }));
 
         // N.B. possible race condition on this line -> for the future to solve
         // recomputeLimits holds a writeLock the following sections need a read lock (for allowing parallel axis)
@@ -320,8 +318,7 @@ public class XYChart extends Chart {
 
                 final Side side = axis.getSide();
                 if (side == null) {
-                    throw new InvalidParameterException(new StringBuilder().append("axis '").append(axis.getName())
-                            .append("' has 'null' as side being set").toString());
+                    throw new InvalidParameterException(new StringBuilder().append("axis '").append(axis.getName()).append("' has 'null' as side being set").toString());
                 }
                 if (!getAxesPane(axis.getSide()).getChildren().contains((Node) axis)) {
                     getAxesPane(axis.getSide()).getChildren().add((Node) axis);
@@ -384,8 +381,7 @@ public class XYChart extends Chart {
             }
         }
         // check if there are assignable axes not yet present in the Chart's list
-        getAxes().addAll(renderer.getAxes().stream().limit(2)
-                .filter(a -> (a.getSide() != null && !getAxes().contains(a))).collect(Collectors.toList()));
+        getAxes().addAll(renderer.getAxes().stream().limit(2).filter(a -> (a.getSide() != null && !getAxes().contains(a))).collect(Collectors.toList()));
     }
 
     protected List<DataSet> getDataSetForAxis(final Axis axis) {
@@ -394,8 +390,7 @@ public class XYChart extends Chart {
             return retVal;
         }
         retVal.addAll(getDatasets());
-        getRenderers().forEach(renderer -> renderer.getAxes().stream().filter(axis::equals)
-                .forEach(rendererAxis -> retVal.addAll(renderer.getDatasets())));
+        getRenderers().forEach(renderer -> renderer.getAxes().stream().filter(axis::equals).forEach(rendererAxis -> retVal.addAll(renderer.getDatasets())));
         return retVal;
     }
 

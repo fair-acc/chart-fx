@@ -101,14 +101,13 @@ public class DataSetBuilder {
         int maxDim = values.keySet().stream().collect(Collectors.maxBy(Integer::compare)).orElse(-1);
         maxDim = Math.max(maxDim, errorsNeg.keySet().stream().collect(Collectors.maxBy(Integer::compare)).orElse(-1));
         maxDim = Math.max(maxDim, errorsPos.keySet().stream().collect(Collectors.maxBy(Integer::compare)).orElse(-1));
-        int minArrays = values.values().stream().map(e -> e.length).collect(Collectors.maxBy(Integer::compare))
-                .orElse(0);
+        int minArrays = values.values().stream().map(e -> e.length).collect(Collectors.maxBy(Integer::compare)).orElse(0);
         minArrays = Math.max(minArrays,
                 errorsNeg.values().stream().map(e -> e.length).collect(Collectors.maxBy(Integer::compare)).orElse(0));
         minArrays = Math.max(minArrays,
                 errorsPos.values().stream().map(e -> e.length).collect(Collectors.maxBy(Integer::compare)).orElse(0));
         final int size = initialCapacity != null && initialCapacity.length > 0 ? Math.min(minArrays, initialCapacity[0])
-                : minArrays;
+                                                                               : minArrays;
         if (this.dimension == -1) {
             this.dimension = maxDim + 1;
         } else if (this.dimension <= maxDim) {
@@ -172,7 +171,8 @@ public class DataSetBuilder {
         final double[][] inputValues = new double[nDims][];
         for (int dimIndex = 0; dimIndex < nDims; dimIndex++) {
             int initialSize = this.initialCapacity != null && this.initialCapacity.length > dimIndex
-                    ? this.initialCapacity[dimIndex] : 0;
+                                      ? this.initialCapacity[dimIndex]
+                                      : 0;
             double[] val = values.get(dimIndex);
             if (val == null) {
                 if (dimIndex == DataSet.DIM_X) {

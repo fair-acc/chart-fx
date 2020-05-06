@@ -262,7 +262,7 @@ public class Screenshot extends ChartPlugin {
      */
     private File showFileDialog(final String initName) {
         FileChooser fileChooser = new FileChooser();
-        fileChooser.getExtensionFilters().setAll(new ExtensionFilter("PNG-Image", "*.png" ));
+        fileChooser.getExtensionFilters().setAll(new ExtensionFilter("PNG-Image", "*.png"));
         fileChooser.setInitialDirectory(new File(directory.get()));
         fileChooser.setInitialFileName(initName);
         File file = fileChooser.showSaveDialog(getChart().getScene().getWindow());

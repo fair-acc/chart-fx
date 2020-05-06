@@ -133,7 +133,6 @@ public class ContourDataSetRendererTests {
     }
 
     private static DataSet getTestDataSet() {
-        return new DataSetBuilder().setValues(DataSet.DIM_X, TEST_DATA_X).setValues(DataSet.DIM_Y, TEST_DATA_Y)
-                .setValues(DataSet.DIM_Z, TEST_DATA_Z).build();
+        return new DataSetBuilder().setValues(DataSet.DIM_X, TEST_DATA_X).setValues(DataSet.DIM_Y, TEST_DATA_Y).setValues(DataSet.DIM_Z, TEST_DATA_Z).build();
     }
 }

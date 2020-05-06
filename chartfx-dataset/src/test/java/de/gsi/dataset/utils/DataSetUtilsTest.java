@@ -63,8 +63,7 @@ public class DataSetUtilsTest {
         double[] yvalues = new double[] { 0.001, 4.2 };
         int n = nx * ny;
         double[][] zvalues = new double[][] { { 1.3, 3.7, 4.2 }, { 2.3, 1.8, 5.0 } };
-        DataSet dataSet = new DataSetBuilder("Test 3D Dataset").setValues(DIM_X, xvalues).
-                setValues(DIM_Y, yvalues).setValues(DIM_Z, zvalues).setDimension(3).build();
+        DataSet dataSet = new DataSetBuilder("Test 3D Dataset").setValues(DIM_X, xvalues).setValues(DIM_Y, yvalues).setValues(DIM_Z, zvalues).setDimension(3).build();
         dataSet.getAxisDescription(DIM_X).set("U", "V", 1.0, 3.0);
         dataSet.getAxisDescription(DIM_Y).set("I", "A", 0.001, 4.2);
         dataSet.getAxisDescription(2).set("P", "W", 1.3, 4.2);

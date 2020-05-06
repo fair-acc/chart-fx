@@ -208,7 +208,7 @@ class SimpleDataSetEstimatorsTest {
         // DataSet with infinite range
         assertEquals(Double.POSITIVE_INFINITY,
                 SimpleDataSetEstimators.getRange(new DataSetBuilder()
-                                                         .setValues(DIM_Y, 
+                                                         .setValues(DIM_Y,
                                                                  new double[] { Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, Double.NaN, 0, 4 })
                                                          .build(),
                         0, 5));

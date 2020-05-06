@@ -13,7 +13,6 @@ import de.gsi.math.utils.ConcurrencyUtils;
  * @author rstein
  */
 public class EEMD {
-
     private static TRandom rnd = new TRandom(0);
     private int fstatus = 100;
 
@@ -165,10 +164,10 @@ public class EEMD {
         }
 
         final DataSet ds = new DataSetBuilder("HilbertSpectrum") //
-                .setValues(DataSet.DIM_X, time) //
-                .setValues(DataSet.DIM_Y, frequency) //
-                .setValues(DataSet.DIM_Z, getSpectrumArray(data, nQuantx, nQuanty)) //
-                .build();
+                                   .setValues(DataSet.DIM_X, time) //
+                                   .setValues(DataSet.DIM_Y, frequency) //
+                                   .setValues(DataSet.DIM_Z, getSpectrumArray(data, nQuantx, nQuanty)) //
+                                   .build();
 
         fstatus = 100;
         return ds;
@@ -200,9 +199,7 @@ public class EEMD {
             final double[] frequency_filtered = decon.transform(frequency, lowPass, false);
 
             for (int j = 0; j < nsamples; j++) {
-
                 if (j < nsamples) {
-
                     int yIndex = (int) (frequency_filtered[j] * nsamples);
 
                     if (yIndex < 0) {
@@ -219,7 +216,6 @@ public class EEMD {
                     }
                 }
             }
-
         }
 
         return ret;
