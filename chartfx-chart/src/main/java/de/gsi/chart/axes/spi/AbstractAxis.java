@@ -1314,6 +1314,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
             }
 
             if (majorTickMarks.size() > 2) {
+                // check if the first or last two labels are overlapping
                 TickMark m1 = majorTickMarks.get(0);
                 TickMark m2 = majorTickMarks.get(1);
                 if (isTickLabelsOverlap(side, m1, m2, getTickLabelGap())) {
@@ -1455,7 +1456,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
      * @param gap minimum space between labels
      * @return true if labels overlap
      */
-    private static boolean isTickLabelsOverlap(final Side side, final TickMark m1, final TickMark m2,
+    private boolean isTickLabelsOverlap(final Side side, final TickMark m1, final TickMark m2,
             final double gap) {
         if (!m1.isVisible() || !m2.isVisible()) {
             return false;
@@ -1466,7 +1467,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         final double m1End = m1.getPosition() + (m1Size / 2);
         final double m2Start = m2.getPosition() - (m2Size / 2);
         final double m2End = m2.getPosition() + (m2Size / 2);
-        return side.isVertical() ? (m1Start - m2End) <= gap : (m2Start - m1End) <= gap;
+        return side.isVertical() && !isInvertedAxis() ? (m1Start - m2End) <= gap : (m2Start - m1End) <= gap;
     }
 
     protected static void drawAxisLabel(final GraphicsContext gc, final double x, final double y, final Text label) {
