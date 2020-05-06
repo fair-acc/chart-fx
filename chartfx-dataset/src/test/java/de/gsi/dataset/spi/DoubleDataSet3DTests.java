@@ -18,6 +18,7 @@ import org.junit.jupiter.api.Test;
  * 
  * @author Alexander Krimm
  */
+@Deprecated
 public class DoubleDataSet3DTests {
     @Test
     public void testDefaultConstructor() {
