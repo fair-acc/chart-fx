@@ -45,13 +45,13 @@ import de.gsi.dataset.utils.DataSetUtils;
 public class Screenshot extends ChartPlugin {
     private static final Logger LOGGER = LoggerFactory.getLogger(Screenshot.class);
     private static final String FONT_AWESOME = "FontAwesome";
-    private static final int FONT_SIZE = 20;
+    private static final double FONT_SIZE = 20.0;
 
     private final HBox screenshotButtons = getScreenshotInteractorBar();
     private final StringProperty pattern = new SimpleStringProperty(this, "pattern", "");
     private final StringProperty directory = new SimpleStringProperty(this, "directory",
             System.getProperty("user.home"));
-    private boolean toFile = false; // copy to clipboard by default;
+    private boolean toFile = false; // copy to clipboard by default
 
     /**
      * Create a screenshot plugin instance
@@ -135,7 +135,7 @@ public class Screenshot extends ChartPlugin {
         separator.setOrientation(Orientation.VERTICAL);
         SplitMenuButton button = new SplitMenuButton();
         button.setGraphic(new HBox(0.1, new Glyph(FONT_AWESOME, FontAwesome.Glyph.CAMERA).size(FONT_SIZE),
-                new Glyph(FONT_AWESOME, FontAwesome.Glyph.CLIPBOARD).size(FONT_SIZE - 8)));
+                new Glyph(FONT_AWESOME, FontAwesome.Glyph.CLIPBOARD).size(FONT_SIZE - 8.0)));
         button.setOnAction(evt -> {
             if (toFile) {
                 screenshotToFile(true);
@@ -148,7 +148,7 @@ public class Screenshot extends ChartPlugin {
         toClipMenu.setOnAction(evt -> {
             toFile = false;
             button.setGraphic(new HBox(0.1, new Glyph(FONT_AWESOME, FontAwesome.Glyph.CAMERA).size(FONT_SIZE),
-                    new Glyph(FONT_AWESOME, FontAwesome.Glyph.CLIPBOARD).size(FONT_SIZE - 8)));
+                    new Glyph(FONT_AWESOME, FontAwesome.Glyph.CLIPBOARD).size(FONT_SIZE - 8.8)));
             button.setTooltip(new Tooltip("Copy screenshot of plot to Clipboard"));
             screenshotToClipboard();
         });
@@ -156,7 +156,7 @@ public class Screenshot extends ChartPlugin {
         toFileMenu.setOnAction(evt -> {
             toFile = true;
             button.setGraphic(new HBox(0.1, new Glyph(FONT_AWESOME, FontAwesome.Glyph.CAMERA).size(FONT_SIZE),
-                    new Glyph(FONT_AWESOME, FontAwesome.Glyph.FILE).size(FONT_SIZE - 8)));
+                    new Glyph(FONT_AWESOME, FontAwesome.Glyph.FILE).size(FONT_SIZE - 8.0)));
             button.setTooltip(new Tooltip("Save plot as image"));
             screenshotToFile(true);
         });
@@ -262,7 +262,7 @@ public class Screenshot extends ChartPlugin {
      */
     private File showFileDialog(final String initName) {
         FileChooser fileChooser = new FileChooser();
-        fileChooser.getExtensionFilters().setAll(new ExtensionFilter("PNG-Image", new String[] { "*.png" }));
+        fileChooser.getExtensionFilters().setAll(new ExtensionFilter("PNG-Image", "*.png"));
         fileChooser.setInitialDirectory(new File(directory.get()));
         fileChooser.setInitialFileName(initName);
         File file = fileChooser.showSaveDialog(getChart().getScene().getWindow());
@@ -301,7 +301,7 @@ public class Screenshot extends ChartPlugin {
                                                   "format:\n" + //
                                                   " - date: e.g. yyyyMMdd_HHmmss\n" + //
                                                   " - numeric data: printf formats e.g. %d, %e"));
-            dirButton.setOnAction((evt) -> {
+            dirButton.setOnAction(evt -> {
                 DirectoryChooser directoryChooser = new DirectoryChooser();
                 File currentDir = new File(dirTextbox.getText());
                 if (!currentDir.isDirectory()) {
