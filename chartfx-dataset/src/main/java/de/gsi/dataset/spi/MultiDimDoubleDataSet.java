@@ -51,9 +51,8 @@ public class MultiDimDoubleDataSet extends AbstractDataSet<MultiDimDoubleDataSet
      * copies of the input arrays.
      *
      * @param name name of this data set.
-     * @param values the values for the new dataset double[nDims][nDataPoints]
-     * @param initalSize how many data points are relevant to be taken
      * @param deepCopy if true, the input array is copied
+     * @param values the values for the new dataset double[nDims][nDataPoints]
      * @throws IllegalArgumentException if any of the parameters is {@code null} or if arrays with coordinates have
      *             different lengths
      */
@@ -76,7 +75,7 @@ public class MultiDimDoubleDataSet extends AbstractDataSet<MultiDimDoubleDataSet
      *
      * @param name name of this DataSet.
      * @param nDims the number of dimensions
-     * @param initalSizes initial capacity of buffer. If multiple sizes are supplied, they are used to after one another
+     * @param initialSizes initial capacity of buffer. If multiple sizes are supplied, they are used to after one another
      *            and afterwards the product of all sizes is used, e.g. nDims=3 and initialSizes=4,5 results in a
      *            three-dimensional dataset with 4 points in x, 5 points in y and 20 points in z direction.
      * @throws IllegalArgumentException if {@code name} is {@code null}

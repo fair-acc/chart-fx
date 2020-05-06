@@ -180,9 +180,6 @@ public class HiddenSidesPaneSkin extends SkinBase<HiddenSidesPane> {
         return null;
     }
 
-    /**
-     * @return
-     */
     private boolean hasShowingChild(Node n) {
         if (n == null) {
             return false;
