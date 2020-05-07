@@ -49,7 +49,6 @@ class MultiDimDoubleDataSetTests {
         dataset.set(5, new double[][] { { -1, -2 }, { -3, -4 }, { -5, -6 }, { -7, -8 } });
         assertArrayEquals(new double[] { 2, 61, 62, 4, 15, -3, -4, 15, 21, 22 },
                 trimArray(dataset.getValues(DataSet.DIM_Y), dataset.getDataCount(DataSet.DIM_Y)));
-        ;
 
         // remove point
         dataset.remove(4);

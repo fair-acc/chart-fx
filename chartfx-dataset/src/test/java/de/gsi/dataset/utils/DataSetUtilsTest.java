@@ -78,11 +78,11 @@ public class DataSetUtilsTest {
         assertTrue(dataSetRead instanceof MultiDimDoubleDataSet);
         assertEquals(3, dataSetRead.getDimension());
         assertEquals(dataSet.getName(), dataSetRead.getName());
-        assertEquals(3, dataSetRead.getDataCount(DataSet.DIM_X));
-        assertEquals(2, dataSetRead.getDataCount(DataSet.DIM_Y));
+        assertEquals(3, dataSetRead.getDataCount(DIM_X));
+        assertEquals(2, dataSetRead.getDataCount(DIM_Y));
         assertEquals(n, dataSetRead.getDataCount(DIM_Z));
-        assertArrayEquals(xvalues, dataSetRead.getValues(DataSet.DIM_X), EPSILON);
-        assertArrayEquals(yvalues, dataSetRead.getValues(DataSet.DIM_Y), EPSILON);
+        assertArrayEquals(xvalues, dataSetRead.getValues(DIM_X), EPSILON);
+        assertArrayEquals(yvalues, dataSetRead.getValues(DIM_Y), EPSILON);
         for (int ix = 1; ix < nx; ix++) {
             for (int iy = 1; iy < ny; iy++) {
                 assertEquals(zvalues[iy][ix], dataSetRead.get(DIM_Z, ix + iy * nx), EPSILON);
