@@ -30,6 +30,9 @@ import javafx.scene.text.TextAlignment;
 import javafx.util.Duration;
 import javafx.util.StringConverter;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.gsi.chart.axes.Axis;
 import de.gsi.chart.axes.AxisLabelFormatter;
 import de.gsi.chart.axes.AxisLabelOverlapPolicy;
@@ -44,6 +47,7 @@ import de.gsi.dataset.event.AxisChangeEvent;
  * @author rstein
  */
 public abstract class AbstractAxis extends AbstractAxisParameter implements Axis {
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractAxis.class);
     protected static final double MIN_NARROW_FONT_SCALE = 0.7;
     protected static final double MAX_NARROW_FONT_SCALE = 1.0;
     protected static final int RANGE_ANIMATION_DURATION_MS = 700;
@@ -1313,18 +1317,22 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
                 break;
             }
 
-            if (majorTickMarks.size() > 2) {
-                // check if the first or last two labels are overlapping
-                TickMark m1 = majorTickMarks.get(0);
-                TickMark m2 = majorTickMarks.get(1);
-                if (isTickLabelsOverlap(side, m1, m2, getTickLabelGap())) {
-                    labelOverlap = true;
+            // set all Tick labels which are still overlapping to invisible
+            switch (getOverlapPolicy()) {
+            case SHIFT_ALT:
+                labelOverlap = checkOverlappingLabels(0, 1, majorTickMarks, getSide(), getTickLabelGap(),
+                        isInvertedAxis(), false);
+                if (!labelOverlap) {
+                    break;
                 }
-                m1 = majorTickMarks.get(majorTickMarks.size() - 2);
-                m2 = majorTickMarks.get(majorTickMarks.size() - 1);
-                if (isTickLabelsOverlap(side, m1, m2, getTickLabelGap())) {
-                    labelOverlap = true;
-                }
+                // fallthrough to forced case
+            case FORCED_SHIFT_ALT:
+                labelOverlap = true;
+                checkOverlappingLabels(0, 2, majorTickMarks, getSide(), getTickLabelGap(), isInvertedAxis(), true);
+                checkOverlappingLabels(1, 2, majorTickMarks, getSide(), getTickLabelGap(), isInvertedAxis(), true);
+                break;
+            default:
+                checkOverlappingLabels(0, 1, majorTickMarks, getSide(), getTickLabelGap(), isInvertedAxis(), true);
             }
 
             // update potential other functions before drawing
@@ -1342,6 +1350,25 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
 
         super.layoutChildren();
         validProperty().set(true);
+    }
+
+    private static boolean checkOverlappingLabels(final int start, final int stride,
+            ObservableList<TickMark> majorTickMarks, Side side, double gap, boolean isInverted, boolean makeInvisible) {
+        boolean labelHidden = false;
+        TickMark lastVisible = null;
+        for (int i = start; i < majorTickMarks.size(); i += stride) {
+            final TickMark current = majorTickMarks.get(i);
+            if (!current.isVisible()) {
+                continue;
+            }
+            if (lastVisible == null || !isTickLabelsOverlap(side, isInverted, lastVisible, current, gap)) {
+                lastVisible = current;
+            } else {
+                labelHidden = true;
+                current.setVisible(!makeInvisible);
+            }
+        }
+        return labelHidden;
     }
 
     protected double measureTickMarkLength(final Double major) {
@@ -1456,18 +1483,15 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
      * @param gap minimum space between labels
      * @return true if labels overlap
      */
-    private boolean isTickLabelsOverlap(final Side side, final TickMark m1, final TickMark m2,
-            final double gap) {
-        if (!m1.isVisible() || !m2.isVisible()) {
-            return false;
-        }
+    private static boolean isTickLabelsOverlap(final Side side, final boolean isInverted, final TickMark m1,
+            final TickMark m2, final double gap) {
         final double m1Size = side.isHorizontal() ? m1.getWidth() : m1.getHeight();
         final double m2Size = side.isHorizontal() ? m2.getWidth() : m2.getHeight();
         final double m1Start = m1.getPosition() - (m1Size / 2);
         final double m1End = m1.getPosition() + (m1Size / 2);
         final double m2Start = m2.getPosition() - (m2Size / 2);
         final double m2End = m2.getPosition() + (m2Size / 2);
-        return side.isVertical() && !isInvertedAxis() ? (m1Start - m2End) <= gap : (m2Start - m1End) <= gap;
+        return side.isVertical() && !isInverted ? (m1Start - m2End) <= gap : (m2Start - m1End) <= gap;
     }
 
     protected static void drawAxisLabel(final GraphicsContext gc, final double x, final double y, final Text label) {
