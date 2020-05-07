@@ -186,7 +186,7 @@ public class ChartIndicatorSample extends Application {
         chart.getYAxis().setName("beam intensity");
         chart.getYAxis().setAutoRanging(true);
         chart.getYAxis().setSide(Side.LEFT);
-        chart.getRenderers().set(0, beamIntensityRenderer);
+        chart.getRenderers().add(beamIntensityRenderer);
         chart.getRenderers().add(dipoleCurrentRenderer);
 
         chart.getPlugins().add(new ParameterMeasurements());

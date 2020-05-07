@@ -44,7 +44,8 @@ public class PolarPlotSample extends Application {
         chart.setPolarPlot(true);
         chart.setPolarStepSize(PolarTickStep.THIRTY);
 
-        final ErrorDataSetRenderer renderer = (ErrorDataSetRenderer) chart.getRenderers().get(0);
+        final ErrorDataSetRenderer renderer = new ErrorDataSetRenderer();
+        chart.getRenderers().add(renderer);
 
         // renderer.setDrawBars(true);
         renderer.setDrawMarker(true);

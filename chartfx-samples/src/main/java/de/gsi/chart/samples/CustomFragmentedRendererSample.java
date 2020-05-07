@@ -62,7 +62,6 @@ public class CustomFragmentedRendererSample extends Application {
                 super.render(gc, chart, dataSetOffset, filteredDataSets);
             }
         };
-        chart.getRenderers().clear();
         chart.getRenderers().add(renderer);
 
         FragmentedDataSet fragmentedDataSet = new FragmentedDataSet("FragmentedDataSet");

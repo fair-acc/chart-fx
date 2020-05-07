@@ -22,7 +22,7 @@ public class LabelledMarkerSample extends Application {
     @Override
     public void start(final Stage primaryStage) {
         final XYChart chart = new XYChart(new DefaultNumericAxis(), new DefaultNumericAxis());
-        chart.getRenderers().set(0, new LabelledMarkerRenderer());
+        chart.getRenderers().add(new LabelledMarkerRenderer());
         chart.legendVisibleProperty().set(true);
 
         final DoubleDataSet dataSet = new DoubleDataSet("myData");

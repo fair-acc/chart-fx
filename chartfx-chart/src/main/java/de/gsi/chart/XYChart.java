@@ -93,8 +93,6 @@ public class XYChart extends Chart {
 
         this.setAnimated(false);
         getRenderers().addListener(this::rendererChanged);
-
-        getRenderers().add(new ErrorDataSetRenderer());
     }
 
     /**
@@ -431,6 +429,9 @@ public class XYChart extends Chart {
             gridRenderer.render(gc, this, 0, null);
         }
 
+        if (getRenderers().isEmpty()) {
+            getRenderers().add(new ErrorDataSetRenderer());
+        }
         int dataSetOffset = 0;
         for (final Renderer renderer : getRenderers()) {
             // check for and add required axes

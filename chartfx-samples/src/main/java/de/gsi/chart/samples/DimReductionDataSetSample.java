@@ -192,7 +192,7 @@ public class DimReductionDataSetSample extends Application {
         chart.getYAxis().setUnit("fs");
         if (isWavelet) {
             final ContourDataSetRenderer contourChartRenderer = new ContourDataSetRenderer();
-            chart.getRenderers().set(0, contourChartRenderer);
+            chart.getRenderers().add(contourChartRenderer);
             xAxis.setAutoRangeRounding(false);
             xAxis.setAutoRangePadding(0.0);
             yAxis.setAutoRangeRounding(false);

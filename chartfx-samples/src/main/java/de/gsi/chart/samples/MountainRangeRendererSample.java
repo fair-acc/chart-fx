@@ -42,7 +42,7 @@ public class MountainRangeRendererSample extends Application {
         final XYChart chart = new XYChart(xAxis, yAxis);
         chart.setTitle("Test data");
         final MountainRangeRenderer mountainRangeRenderer = new MountainRangeRenderer();
-        chart.getRenderers().set(0, mountainRangeRenderer);
+        chart.getRenderers().add(mountainRangeRenderer);
         // mountainRangeRenderer.getDatasets().add(readImage());
         chart.getDatasets().setAll(createTestData(0.0));
         // DataSet3D additionalData = createTestData(1.0);

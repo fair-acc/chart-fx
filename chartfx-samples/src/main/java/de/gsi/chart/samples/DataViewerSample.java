@@ -112,7 +112,6 @@ public class DataViewerSample extends Application {
         energyChart.getDatasets().addAll(createSeries());
 
         final XYChart currentChart = new TestChart();
-        currentChart.getRenderers().clear();
         final ErrorDataSetRenderer errorDataSetRenderer = new ErrorDataSetRenderer();
         errorDataSetRenderer.setErrorType(ErrorStyle.NONE);
         currentChart.getRenderers().add(errorDataSetRenderer);

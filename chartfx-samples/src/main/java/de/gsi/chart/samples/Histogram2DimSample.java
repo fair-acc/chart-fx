@@ -105,7 +105,7 @@ public class Histogram2DimSample extends Application {
         final ContourDataSetRenderer heatMap = new ContourDataSetRenderer();
         heatMap.getAxes().addAll(xAxis, yAxis, zAxis);
         heatMap.getDatasets().addAll(histogram1, histogram2);
-        chart.getRenderers().set(0, heatMap);
+        chart.getRenderers().add(heatMap);
 
         final ErrorDataSetRenderer projectionRendererX = new ErrorDataSetRenderer();
         projectionRendererX.getAxes().setAll(xAxis, yAxis1);

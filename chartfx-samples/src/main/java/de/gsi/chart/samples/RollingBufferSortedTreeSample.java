@@ -168,7 +168,7 @@ public class RollingBufferSortedTreeSample extends Application {
         chart.legendVisibleProperty().set(true);
         chart.setAnimated(false);
         chart.getYAxis().setName(rollingBufferBeamIntensity.getName());
-        chart.getRenderers().set(0, beamIntensityRenderer);
+        chart.getRenderers().add(beamIntensityRenderer);
         chart.getRenderers().add(dipoleCurrentRenderer);
         chart.getPlugins().add(new EditAxis());
 

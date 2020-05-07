@@ -189,7 +189,7 @@ public class RollingBufferSample extends Application {
         final XYChart chart = new XYChart(xAxis1, yAxis1);
         chart.legendVisibleProperty().set(true);
         chart.setAnimated(false);
-        chart.getRenderers().set(0, beamIntensityRenderer);
+        chart.getRenderers().add(beamIntensityRenderer);
         chart.getRenderers().add(dipoleCurrentRenderer);
         chart.getPlugins().add(new EditAxis());
 

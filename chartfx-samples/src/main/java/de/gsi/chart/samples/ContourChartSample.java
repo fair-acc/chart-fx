@@ -102,7 +102,6 @@ public class ContourChartSample extends Application {
         chart.getAxes().add(zAxis);
         chart.setTitle("Test data");
         chart.setAnimated(false);
-        chart.getRenderers().clear();
         chart.setLegendVisible(false);
         final ContourDataSetRenderer contourRenderer = new ContourDataSetRenderer();
         contourRenderer.getAxes().addAll(xAxis, yAxis, zAxis);

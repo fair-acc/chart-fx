@@ -48,7 +48,8 @@ public class CustomColourSchemeSample extends Application {
         chart.getPlugins().add(new Zoomer()); // standard plugins, useful for most cases
         chart.getPlugins().add(new EditAxis()); // for editing axes
         VBox.setVgrow(chart, Priority.ALWAYS);
-        ErrorDataSetRenderer renderer = (ErrorDataSetRenderer) chart.getRenderers().get(0);
+        ErrorDataSetRenderer renderer = new ErrorDataSetRenderer();
+        chart.getRenderers().add(renderer);
 
         for (int i = 0; i < N_DATA_SETS_MAX; i++) {
             DoubleErrorDataSet dataSet = new DoubleErrorDataSet("Set#" + i); // NOPMD

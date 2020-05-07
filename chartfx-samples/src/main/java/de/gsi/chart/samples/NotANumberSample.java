@@ -37,7 +37,8 @@ public class NotANumberSample extends Application {
         chart.getPlugins().add(new Zoomer()); // standard plugin, useful for most cases
         chart.getPlugins().add(new EditAxis());
         chart.getPlugins().add(new DataPointTooltip());
-        final ErrorDataSetRenderer renderer = (ErrorDataSetRenderer) chart.getRenderers().get(0);
+        final ErrorDataSetRenderer renderer = new ErrorDataSetRenderer();
+        chart.getRenderers().add(renderer);
         renderer.setMarkerSize(3);
 
         // enables NaN support (N.B. may have some impact on the plotting

@@ -134,7 +134,7 @@ public class HistoryDataSetRendererSample extends Application {
         // set them false to make the plot faster
         chart.setAnimated(false);
         // set history renderer
-        chart.getRenderers().set(0, new HistoryDataSetRenderer(10));
+        chart.getRenderers().add(new HistoryDataSetRenderer(10));
         final HistoryDataSetRenderer historyRenderer2 = new HistoryDataSetRenderer(10);
         historyRenderer2.getAxes().add(yAxis2);
         chart.getRenderers().add(historyRenderer2);

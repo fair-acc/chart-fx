@@ -384,7 +384,7 @@ public class ErrorDataSetRendererStylingSample extends Application {
         // set them false to make the plot faster
         chart.setAnimated(false);
         final ErrorDataSetRenderer errorRenderer = new ErrorDataSetRenderer();
-        chart.getRenderers().set(0, errorRenderer);
+        chart.getRenderers().add(errorRenderer);
         chart.getPlugins().add(new Zoomer());
         chart.getPlugins().add(new Panner());
         chart.getPlugins().add(new EditAxis());

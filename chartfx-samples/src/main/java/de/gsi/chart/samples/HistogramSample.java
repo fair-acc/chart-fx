@@ -91,7 +91,7 @@ public class HistogramSample extends Application {
         renderer1.getDatasets().addAll(dataSet2);
         // renderer1.getDatasets().addAll(new GaussFunction("gauss", 100));
         renderer1.setPolyLineStyle(LineStyle.HISTOGRAM_FILLED);
-        chart.getRenderers().set(0, renderer1);
+        chart.getRenderers().add(renderer1);
 
         final ErrorDataSetRenderer renderer2 = new ErrorDataSetRenderer();
         renderer2.getDatasets().addAll(dataSet1, dataSet3);

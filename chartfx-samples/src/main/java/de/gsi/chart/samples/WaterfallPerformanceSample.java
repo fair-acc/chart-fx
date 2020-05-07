@@ -114,7 +114,6 @@ public class WaterfallPerformanceSample extends Application {
         chart.getAxes().add(zAxis);
         chart.setTitle("press 'timer', feel free to whistle and play with the contour and data reduction parameters");
         chart.setAnimated(false);
-        chart.getRenderers().clear();
         chart.setLegendVisible(false);
         final ContourDataSetRenderer contourRenderer = new ContourDataSetRenderer();
         contourRenderer.getAxes().addAll(xAxis, yAxis, zAxis);

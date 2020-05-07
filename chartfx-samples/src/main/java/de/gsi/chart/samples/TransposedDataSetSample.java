@@ -55,7 +55,8 @@ public class TransposedDataSetSample extends Application {
     public void start(final Stage primaryStage) {
         // init default 2D Chart
         final XYChart chart1 = getDefaultChart();
-        final ErrorDataSetRenderer renderer = (ErrorDataSetRenderer) chart1.getRenderers().get(0);
+        final ErrorDataSetRenderer renderer = new ErrorDataSetRenderer();
+        chart1.getRenderers().add(renderer);
         renderer.setAssumeSortedData(false); // necessary to suppress sorted-DataSet-only optimisations
 
         // alternate DataSet:

@@ -43,7 +43,6 @@ public class CategoryAxisSample extends Application {
         final XYChart lineChartPlot = new XYChart(xAxis, yAxis);
         // set them false to make the plot faster
         lineChartPlot.setAnimated(false);
-        lineChartPlot.getRenderers().clear();
         // lineChartPlot.getRenderers().add(new LineRenderer());
         // lineChartPlot.getRenderers().add(new ReducingLineRenderer());
         final ErrorDataSetRenderer renderer = new ErrorDataSetRenderer();
