@@ -26,7 +26,9 @@ import de.gsi.chart.plugins.EditAxis;
 import de.gsi.chart.plugins.Zoomer;
 import de.gsi.chart.renderer.Renderer;
 import de.gsi.chart.renderer.spi.ErrorDataSetRenderer;
+import de.gsi.chart.renderer.spi.LabelledMarkerRenderer;
 import de.gsi.chart.ui.geometry.Side;
+import de.gsi.dataset.spi.LabelledMarkerDataSet;
 import de.gsi.dataset.testdata.spi.CosineFunction;
 import de.gsi.dataset.testdata.spi.GaussFunction;
 import de.gsi.dataset.testdata.spi.RandomWalkFunction;
@@ -71,6 +73,8 @@ public class MultipleAxesSample extends Application {
 
         // N.B. it's important to set secondary axis on the 2nd renderer before
         // adding the renderer to the chart
+        final ErrorDataSetRenderer errorRenderer1 = new ErrorDataSetRenderer();
+        errorRenderer1.getAxes().add(yAxis1);
         final ErrorDataSetRenderer errorRenderer2 = new ErrorDataSetRenderer();
         errorRenderer2.getAxes().add(yAxis2);
         final ErrorDataSetRenderer errorRenderer3 = new ErrorDataSetRenderer();
@@ -89,7 +93,7 @@ public class MultipleAxesSample extends Application {
 
         final Button newDataSet = new Button("new DataSet");
         newDataSet.setOnAction(
-                evt -> Platform.runLater(getTask(chart.getRenderers().get(0), errorRenderer2, errorRenderer3)));
+                evt -> Platform.runLater(getTask(errorRenderer1, errorRenderer2, errorRenderer3)));
         final Button startTimer = new Button("timer");
         startTimer.setOnAction(evt -> {
             if (scheduledFuture == null || scheduledFuture.isCancelled()) {
