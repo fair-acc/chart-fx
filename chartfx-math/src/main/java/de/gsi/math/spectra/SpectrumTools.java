@@ -58,7 +58,7 @@ public class SpectrumTools {
      *
      * @see DoubleFFT_1D for the expected spectra layout
      * @param data the input data Since due to intrinsic uncertainties the DC and Nyquist frequency components are less
-     *        representative for the given spectrum, their values are set to their adjacent frequency bins.
+     *            representative for the given spectrum, their values are set to their adjacent frequency bins.
      * @return computed magnitude spectrum
      */
     public static double[] computeMagnitudeSpectrum(final double[] data) {
@@ -75,24 +75,7 @@ public class SpectrumTools {
      */
     public static double[] computeMagnitudeSpectrum(final double[] data, final boolean truncateDCNyq) {
         final double[] ret = new double[data.length / 2];
-        for (int i = 0; i < ret.length; i++) {
-            final int i2 = i << 1;
-            final double Re = data[i2];
-            final double Im = data[i2 + 1];
-
-            ret[i] = TMathConstants.Sqrt(TMathConstants.Sqr(Re) + TMathConstants.Sqr(Im)) / ret.length;
-        }
-        if (truncateDCNyq) {
-            // smooth spectra on both ends to minimise DC/Nyquist frequency
-            // artefacts
-            ret[0] = ret[1];
-            ret[ret.length - 1] = ret[ret.length - 2];
-        } else {
-            // full DC/Nyquist frequency treatment
-            ret[0] = data[0] / ret.length;
-            ret[ret.length - 1] = data[1] / ret.length;
-        }
-
+        computeMagnitudeSpectrum(data, 0, data.length, ret, 0, truncateDCNyq);
         return ret;
     }
 
@@ -100,8 +83,40 @@ public class SpectrumTools {
      * compute magnitude power spectra
      *
      * @see DoubleFFT_1D for the expected spectra layout
+     * @param data the input data
+     * @param fromPos start of the data to read
+     * @param length length to read of the input data
+     * @param ret the output data
+     * @param toPos the position to start writing the result to
+     * @param truncateDCNyq true: whether to smooth spectra and to ZOH the DC and Nyquist frequencies
+     */
+    public static void computeMagnitudeSpectrum(final double[] data, final int fromPos, final int length,
+            final double[] ret, final int toPos, final boolean truncateDCNyq) {
+        final int n2 = length / 2;
+        for (int i = 0; i < n2; i++) {
+            final int i2 = (i + fromPos) << 1;
+            final double Re = data[i2];
+            final double Im = data[i2 + 1];
+
+            ret[toPos + i] = TMathConstants.Sqrt(TMathConstants.Sqr(Re) + TMathConstants.Sqr(Im)) / n2;
+        }
+        if (truncateDCNyq) {
+            // smooth spectra on both ends to minimise DC/Nyquist frequency artefacts
+            ret[toPos] = ret[toPos + 1];
+            ret[toPos + n2 - 1] = ret[toPos + n2 - 2];
+        } else {
+            // full DC/Nyquist frequency treatment
+            ret[toPos] = data[fromPos] / n2;
+            ret[toPos + n2 - 1] = data[fromPos + 1] / n2;
+        }
+    }
+
+    /**
+     * compute magnitude power spectra
+     *
+     * @see DoubleFFT_1D for the expected spectra layout
      * @param data the input data Since due to intrinsic uncertainties the DC and Nyquist frequency components are less
-     *        representative for the given spectrum, their values are set to their adjacent frequency bins.
+     *            representative for the given spectrum, their values are set to their adjacent frequency bins.
      * @return computed magnitude spectrum
      */
     public static float[] computeMagnitudeSpectrum(final float[] data) {
@@ -118,25 +133,36 @@ public class SpectrumTools {
      */
     public static float[] computeMagnitudeSpectrum(final float[] data, final boolean truncateDCNyq) {
         final float[] ret = new float[data.length / 2];
-        for (int i = 0; i < ret.length; i++) {
-            final int i2 = i << 1;
+        computeMagnitudeSpectrum(data, 0, data.length, ret, 0, truncateDCNyq);
+        return ret;
+    }
+
+    /**
+     * compute magnitude power spectra
+     *
+     * @see DoubleFFT_1D for the expected spectra layout
+     * @param data the input data
+     * @param ret the output data, should be an array of data.length/2
+     * @param truncateDCNyq true: whether to smooth spectra and to ZOH the DC and Nyquist frequencies
+     */
+    public static void computeMagnitudeSpectrum(final float[] data, final int fromPos, final int length,
+            final float[] ret, final int toPos, final boolean truncateDCNyq) {
+        for (int i = 0; i < length; i++) {
+            final int i2 = (i + fromPos) << 1;
             final double Re = data[i2];
             final double Im = data[i2 + 1];
 
-            ret[i] = (float) (TMathConstants.Sqrt(TMathConstants.Sqr(Re) + TMathConstants.Sqr(Im)) / ret.length);
+            ret[i + toPos] = (float) (TMathConstants.Sqrt(TMathConstants.Sqr(Re) + TMathConstants.Sqr(Im)) / length);
         }
         if (truncateDCNyq) {
-            // smooth spectra on both ends to minimise DC/Nyquist frequency
-            // artefacts
-            ret[0] = ret[1];
-            ret[ret.length - 1] = ret[ret.length - 2];
+            // smooth spectra on both ends to minimise DC/Nyquist frequency artefacts
+            ret[toPos] = ret[toPos + 1];
+            ret[toPos + length - 1] = ret[toPos + length - 2];
         } else {
             // full DC/Nyquist frequency treatment
-            ret[0] = data[0] / ret.length;
-            ret[ret.length - 1] = data[1] / ret.length;
+            ret[toPos] = data[fromPos] / length;
+            ret[toPos + length - 1] = data[fromPos + 1] / length;
         }
-
-        return ret;
     }
 
     /**
@@ -150,26 +176,39 @@ public class SpectrumTools {
     public static double[] computeMagnitudeSpectrum_dB(final double[] data, final boolean truncateDCNyq) {
         final int n2 = data.length / 2;
         final double[] ret = new double[n2];
-        for (int i = 0; i < ret.length; i++) {
-            final int i2 = i << 1;
+        computeMagnitudeSpectrum_dB(data, 0, data.length, ret, 0, truncateDCNyq);
+        return ret;
+    }
+
+    /**
+     * compute magnitude power spectra in decibel
+     *
+     * @see DoubleFFT_1D for the expected spectra layout
+     * @param data the input data
+     * @param ret the output data, should be an array of data.length/2
+     * @param truncateDCNyq true: whether to smooth spectra and to ZOH the DC and Nyquist frequencies
+     */
+    public static void computeMagnitudeSpectrum_dB(final double[] data, final int fromPos, final int length,
+            final double[] ret, final int toPos, final boolean truncateDCNyq) {
+        int n2 = length / 2;
+        for (int i = 0; i < n2; i++) {
+            final int i2 = (i + fromPos) << 1;
             final double Re = data[i2];
             final double Im = data[i2 + 1];
 
-            ret[i] = 10 * TMathConstants.Log10((TMathConstants.Sqr(Re / n2) + TMathConstants.Sqr(Im / n2)));
+            ret[i + toPos] = 10 * TMathConstants.Log10((TMathConstants.Sqr(Re / n2) + TMathConstants.Sqr(Im / n2)));
         }
 
         if (truncateDCNyq) {
             // smooth spectra on both ends to minimise DC/Nyquist frequency
             // artifacts
-            ret[0] = ret[1];
-            ret[n2 - 1] = ret[n2 - 2];
+            ret[toPos] = ret[toPos + 1];
+            ret[toPos + n2 - 1] = ret[toPos + n2 - 2];
         } else {
             // full DC/Nyquist frequency treatment
-            ret[0] = data[0];
-            ret[ret.length - 1] = data[1];
+            ret[toPos] = data[fromPos];
+            ret[toPos + n2 - 1] = data[fromPos + 1];
         }
-
-        return ret;
     }
 
     /**
@@ -181,29 +220,41 @@ public class SpectrumTools {
      * @return computed magnitude spectrum in [dB]
      */
     public static float[] computeMagnitudeSpectrum_dB(final float[] data, final boolean truncateDCNyq) {
-        final int n2 = data.length / 2;
         final float[] ret = new float[data.length / 2];
-        for (int i = 0; i < ret.length; i++) {
-            final int i2 = i << 1;
+        computeMagnitudeSpectrum_dB(data, 0, data.length, ret, 0, truncateDCNyq);
+        return ret;
+    }
+
+    /**
+     * compute magnitude power spectra in decibel
+     *
+     * @see DoubleFFT_1D for the expected spectra layout
+     * @param data the input data
+     * @param ret the output data, should be an array of data.length/2
+     * @param truncateDCNyq true: whether to smooth spectra and to ZOH the DC and Nyquist frequencies
+     */
+    public static void computeMagnitudeSpectrum_dB(final float[] data, final int fromPos, final int length,
+            final float[] ret, final int toPos, final boolean truncateDCNyq) {
+        int n2 = length / 2;
+        for (int i = 0; i < n2; i++) {
+            final int i2 = (i + fromPos) << 1;
             final double Re = data[i2];
             final double Im = data[i2 + 1];
 
-            ret[i] = (float) (10
-                              * TMathConstants.Log10((TMathConstants.Sqr(Re) + TMathConstants.Sqr(Im)) / ret.length));
+            ret[toPos
+                    + i] = (float) (10 * TMathConstants.Log10((TMathConstants.Sqr(Re) + TMathConstants.Sqr(Im)) / n2));
         }
 
         if (truncateDCNyq) {
             // smooth spectra on both ends to minimise DC/Nyquist frequency
             // artifacts
-            ret[0] = ret[1];
-            ret[n2 - 1] = ret[n2 - 2];
+            ret[toPos] = ret[toPos + 1];
+            ret[toPos + n2 - 1] = ret[toPos + n2 - 2];
         } else {
             // full DC/Nyquist frequency treatment
-            ret[0] = data[0];
-            ret[ret.length - 1] = data[1];
+            ret[toPos + 0] = data[fromPos];
+            ret[toPos + n2 - 1] = data[fromPos + 1];
         }
-
-        return ret;
     }
 
     /**
@@ -503,11 +554,12 @@ public class SpectrumTools {
             final double right = Math.pow(data[index + 1], 1);
 
             if (left < right) {
-                return val + TMathConstants.ATan2(right * TMathConstants.Sin(pin), center + right * TMathConstants.Cos(pin)) / TMathConstants.Pi();
+                return val + TMathConstants.ATan2(right * TMathConstants.Sin(pin),
+                        center + right * TMathConstants.Cos(pin)) / TMathConstants.Pi();
             } else {
                 return val
                         - TMathConstants.ATan2(left * TMathConstants.Sin(pin), center + left * TMathConstants.Cos(pin))
-                                  / TMathConstants.Pi();
+                                / TMathConstants.Pi();
             }
         } else {
             return val;

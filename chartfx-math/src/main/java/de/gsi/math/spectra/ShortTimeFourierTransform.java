@@ -11,10 +11,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.gsi.dataset.DataSet;
-import de.gsi.dataset.DataSetMetaData;
 import de.gsi.dataset.spi.DataSetBuilder;
 import de.gsi.dataset.spi.MultiDimDoubleDataSet;
 import de.gsi.dataset.utils.AssertUtils;
+import de.gsi.dataset.utils.DoubleArrayCache;
 
 /**
  * Static utility class providing magnitude spectrograms from complex and real valued input data.
@@ -102,8 +102,7 @@ public class ShortTimeFourierTransform {
         final double[] oldFrequencyAxis = output == null ? null : output.getValues(DIM_Y);
         final double[] frequencyAxis = getFrequencyAxisComplex(dt, nFFT, oldFrequencyAxis);
         final double[] oldAmplitudeData = output instanceof MultiDimDoubleDataSet
-                                                  ? ((MultiDimDoubleDataSet) output).getValues(DIM_Z)
-                                                  : null;
+                ? ((MultiDimDoubleDataSet) output).getValues(DIM_Z) : null;
         final double[] amplitudeData = complex(real, imag, oldAmplitudeData, nFFT, step, apodization, padding, dbScale,
                 truncateDCNy);
 
@@ -113,37 +112,34 @@ public class ShortTimeFourierTransform {
             result = (MultiDimDoubleDataSet) output;
         } else {
             result = (MultiDimDoubleDataSet) new DataSetBuilder("STFT(" + input.getName() + ")")
-                             .setValues(DIM_X, timeAxis)
-                             .setValues(DIM_Y, frequencyAxis)
-                             .setValues(DIM_Z, amplitudeData)
-                             .build();
+                    .setValues(DIM_X, frequencyAxis).setValues(DIM_Y, timeAxis).setValues(DIM_Z, amplitudeData).build();
         }
         result.lock().writeLockGuard(() ->
 
-                {
-                    // only update data arrays if at least one array was newly allocated
-                    if (oldTimeAxis != timeAxis) {
-                        result.setValues(DIM_X, timeAxis, false);
-                    }
-                    if (oldFrequencyAxis != frequencyAxis) {
-                        result.setValues(DIM_Y, frequencyAxis, false);
-                    }
-                    if (oldAmplitudeData != amplitudeData) {
-                        result.setValues(DIM_Z, amplitudeData, false);
-                    }
+        {
+            // only update data arrays if at least one array was newly allocated
+            if (oldTimeAxis != timeAxis) {
+                result.setValues(DIM_X, frequencyAxis, false);
+            }
+            if (oldFrequencyAxis != frequencyAxis) {
+                result.setValues(DIM_Y, timeAxis, false);
+            }
+            if (oldAmplitudeData != amplitudeData) {
+                result.setValues(DIM_Z, amplitudeData, false);
+            }
 
-                    ((DataSetMetaData) result).getMetaInfo().put("ComplexSTFT-nFFT", Integer.toString(nFFT));
-                    ((DataSetMetaData) result).getMetaInfo().put("ComplexSTFT-step", Integer.toString(step));
+            result.getMetaInfo().put("ComplexSTFT-nFFT", Integer.toString(nFFT));
+            result.getMetaInfo().put("ComplexSTFT-step", Integer.toString(step));
 
-                    // Set Axis Labels and Units
-                    final String timeUnit = input.getAxisDescription(DIM_X).getUnit();
-                    result.getAxisDescription(DIM_X).set("Time", timeUnit, timeAxis[0], timeAxis[timeAxis.length - 1]);
-                    final String freqUnit = timeUnit.equals("s") ? "Hz" : "1/" + timeUnit;
-                    result.getAxisDescription(DIM_Y).set("Frequency", freqUnit, frequencyAxis[0],
-                            frequencyAxis[frequencyAxis.length - 1]);
-                    result.getAxisDescription(DIM_Z).set("Magnitude", input.getAxisDescription(DIM_Y).getUnit());
-                    result.recomputeLimits(DIM_Z);
-                });
+            // Set Axis Labels and Units
+            final String timeUnit = input.getAxisDescription(DIM_X).getUnit();
+            final String freqUnit = timeUnit.equals("s") ? "Hz" : "1/" + timeUnit;
+            result.getAxisDescription(DIM_X).set("Frequency", freqUnit, frequencyAxis[0],
+                    frequencyAxis[frequencyAxis.length - 1]);
+            result.getAxisDescription(DIM_Y).set("Time", timeUnit, timeAxis[0], timeAxis[timeAxis.length - 1]);
+            result.getAxisDescription(DIM_Z).set("Magnitude", input.getAxisDescription(DIM_Y).getUnit());
+            result.recomputeLimits(DIM_Z);
+        });
 
         return result;
     }
@@ -154,15 +150,15 @@ public class ShortTimeFourierTransform {
         AssertUtils.equalDoubleArrays(real, imag); // check for same length
         final int nT = ceilDiv(real.length, step); // number of time steps
         final double[] amplitudeData = output == null || output.length != nFFT * nT ? new double[nFFT * nT] : output; // output array
+        final double[] currentMagnitudeData = DoubleArrayCache.getInstance().getArray(nFFT);
         // calculate spectrogram
         final DoubleFFT_1D fastFourierTrafo = new DoubleFFT_1D(nFFT);
-        final double[] raw = new double[2 * nFFT]; // array to perform calculations in
+        final double[] raw = DoubleArrayCache.getInstance().getArrayExact(2 * nFFT); // array to perform calculations in
         for (int i = 0; i < nT; i++) {
             // obtain input data for FFT
             final int offset = i * step;
             final int validLength = real.length - offset;
-        fillraw:
-            for (int j = 0; j < nFFT; j++) {
+            fillraw: for (int j = 0; j < nFFT; j++) {
                 if (offset + j < real.length) {
                     raw[2 * j] = real[offset + j];
                     raw[2 * j + 1] = imag[offset + j];
@@ -173,7 +169,7 @@ public class ShortTimeFourierTransform {
                         raw[2 * j + 1] = imag[imag.length - j + validLength - 1];
                         break;
                     case ZERO:
-                        Arrays.fill(raw, 2 * j, raw.length, 0.0);
+                        Arrays.fill(raw, 2 * j, 2* nFFT, 0.0);
                         break fillraw; // break out of loop
                     default:
                     case ZOH:
@@ -188,18 +184,18 @@ public class ShortTimeFourierTransform {
             // perform Fourier transform
             fastFourierTrafo.complexForward(raw);
             // calculate magnitude spectrum
-            final double[] current = dbScale ? SpectrumTools.computeMagnitudeSpectrum_dB(raw, truncateDCNy)
-                                             : SpectrumTools.computeMagnitudeSpectrum(raw, truncateDCNy);
-            // copy output into result array (layout of spectrum is 0, ..., fmax, 0, ..., fmin)
-            // TODO: use more efficient copy, possibly transpose output?
-            for (int j = 0; j < nFFT; j++) {
-                if (j < nFFT / 2) {
-                    amplitudeData[(j + nFFT / 2) * nT + i] = current[j];
-                } else {
-                    amplitudeData[(j - nFFT / 2) * nT + i] = current[j];
-                }
+            if (dbScale) {
+                SpectrumTools.computeMagnitudeSpectrum_dB(raw, 0, 2 * nFFT, currentMagnitudeData, 0, truncateDCNy);
+            } else {
+                SpectrumTools.computeMagnitudeSpectrum(raw, 0, 2 * nFFT, currentMagnitudeData, 0, truncateDCNy);
             }
+            // copy output into result array (layout of spectrum is 0, ..., fmax, 0, ..., fmin)
+            System.arraycopy(currentMagnitudeData, 0, amplitudeData, i * nFFT + nFFT / 2, nFFT / 2);
+            System.arraycopy(currentMagnitudeData, nFFT / 2, amplitudeData, i * nFFT, nFFT / 2);
         }
+        // return cached arrays
+        DoubleArrayCache.getInstance().add(currentMagnitudeData);
+        DoubleArrayCache.getInstance().add(raw);
         return amplitudeData;
     }
 
@@ -207,9 +203,10 @@ public class ShortTimeFourierTransform {
             final Apodization apodization, final Padding padding, final boolean dbScale, final boolean truncateDCNy) {
         final int nT = ceilDiv(complexInput.length, 2 * step); // number of time steps
         final double[] amplitudeData = output == null || output.length != nFFT * nT ? new double[nFFT * nT] : output; // output array
+        final double[] currentMagnitudeData = DoubleArrayCache.getInstance().getArray(nFFT);
         // calculate spectrogram
         final DoubleFFT_1D fastFourierTrafo = new DoubleFFT_1D(nFFT);
-        final double[] raw = new double[2 * nFFT]; // array to perform calculations in
+        final double[] raw = DoubleArrayCache.getInstance().getArrayExact(2 * nFFT); // array to perform calculations in
         for (int i = 0; i < nT; i++) {
             // obtain input data for FFT
             final int offset = i * 2 * step;
@@ -242,18 +239,18 @@ public class ShortTimeFourierTransform {
             // perform Fourier transform
             fastFourierTrafo.complexForward(raw);
             // calculate magnitude spectrum
-            final double[] current = dbScale ? SpectrumTools.computeMagnitudeSpectrum_dB(raw, truncateDCNy)
-                                             : SpectrumTools.computeMagnitudeSpectrum(raw, truncateDCNy);
-            // copy output into result array (layout of spectrum is 0, ..., fmax, 0, ..., fmin)
-            // TODO: use more efficient copy, possibly transpose output?
-            for (int j = 0; j < nFFT; j++) {
-                if (j < nFFT / 2) {
-                    amplitudeData[(j + nFFT / 2) * nT + i] = current[j];
-                } else {
-                    amplitudeData[(j - nFFT / 2) * nT + i] = current[j];
-                }
+            if (dbScale) {
+                SpectrumTools.computeMagnitudeSpectrum_dB(raw, 0, 2 * nFFT, currentMagnitudeData, 0, truncateDCNy);
+            } else {
+                SpectrumTools.computeMagnitudeSpectrum(raw, 0, 2 * nFFT, currentMagnitudeData, 0, truncateDCNy);
             }
+            // copy output into result array (layout of spectrum is 0, ..., fmax, 0, ..., fmin)
+            System.arraycopy(currentMagnitudeData, 0, amplitudeData, i * nFFT + nFFT / 2, nFFT / 2);
+            System.arraycopy(currentMagnitudeData, nFFT / 2, amplitudeData, i * nFFT, nFFT / 2);
         }
+        // return cached arrays
+        DoubleArrayCache.getInstance().add(currentMagnitudeData);
+        DoubleArrayCache.getInstance().add(raw);
         return amplitudeData;
     }
 
@@ -316,8 +313,7 @@ public class ShortTimeFourierTransform {
         final double[] oldFrequencyAxis = output == null ? null : output.getValues(DIM_Y);
         final double[] frequencyAxis = getFrequencyAxisReal(dt, nFFT, oldFrequencyAxis);
         final double[] oldAmplitudeData = output instanceof MultiDimDoubleDataSet
-                                                  ? ((MultiDimDoubleDataSet) output).getValues(DIM_Z)
-                                                  : null;
+                ? ((MultiDimDoubleDataSet) output).getValues(DIM_Z) : null;
         final double[] amplitudeData = real(yData, oldAmplitudeData, nFFT, step, apodization, padding, dbScale,
                 truncateDCNy);
 
@@ -327,37 +323,34 @@ public class ShortTimeFourierTransform {
             result = (MultiDimDoubleDataSet) output;
         } else {
             result = (MultiDimDoubleDataSet) new DataSetBuilder("STFT(" + input.getName() + ")")
-                             .setValues(DIM_X, timeAxis)
-                             .setValues(DIM_Y, frequencyAxis)
-                             .setValues(DIM_Z, amplitudeData)
-                             .build();
+                    .setValues(DIM_X, frequencyAxis).setValues(DIM_Y, timeAxis).setValues(DIM_Z, amplitudeData).build();
         }
         result.lock().writeLockGuard(() ->
 
-                {
-                    // only update data arrays if at least one array was newly allocated
-                    if (oldTimeAxis != timeAxis) {
-                        result.setValues(DIM_X, timeAxis, false);
-                    }
-                    if (oldFrequencyAxis != frequencyAxis) {
-                        result.setValues(DIM_Y, frequencyAxis, false);
-                    }
-                    if (oldAmplitudeData != amplitudeData) {
-                        result.setValues(DIM_Z, amplitudeData, false);
-                    }
+        {
+            // only update data arrays if at least one array was newly allocated
+            if (oldFrequencyAxis != frequencyAxis) {
+                result.setValues(DIM_X, frequencyAxis, false);
+            }
+            if (oldTimeAxis != timeAxis) {
+                result.setValues(DIM_Y, timeAxis, false);
+            }
+            if (oldAmplitudeData != amplitudeData) {
+                result.setValues(DIM_Z, amplitudeData, false);
+            }
 
-                    result.getMetaInfo().put("RealSTFT-nFFT", Integer.toString(nFFT));
-                    result.getMetaInfo().put("RealSTFT-step", Integer.toString(step));
+            result.getMetaInfo().put("RealSTFT-nFFT", Integer.toString(nFFT));
+            result.getMetaInfo().put("RealSTFT-step", Integer.toString(step));
 
-                    // Set Axis Labels and Units
-                    final String timeUnit = input.getAxisDescription(DIM_X).getUnit();
-                    result.getAxisDescription(DIM_X).set("Time", timeUnit, timeAxis[0], timeAxis[timeAxis.length - 1]);
-                    final String freqUnit = timeUnit.equals("s") ? "Hz" : "1/" + timeUnit;
-                    result.getAxisDescription(DIM_Y).set("Frequency", freqUnit, frequencyAxis[0],
-                            frequencyAxis[frequencyAxis.length - 1]);
-                    result.getAxisDescription(DIM_Z).set("Magnitude", input.getAxisDescription(DIM_Y).getUnit());
-                    result.recomputeLimits(DIM_Z);
-                });
+            // Set Axis Labels and Units
+            final String timeUnit = input.getAxisDescription(DIM_X).getUnit();
+            final String freqUnit = timeUnit.equals("s") ? "Hz" : "1/" + timeUnit;
+            result.getAxisDescription(DIM_X).set("Frequency", freqUnit, frequencyAxis[0],
+                    frequencyAxis[frequencyAxis.length - 1]);
+            result.getAxisDescription(DIM_Y).set("Time", timeUnit, timeAxis[0], timeAxis[timeAxis.length - 1]);
+            result.getAxisDescription(DIM_Z).set("Magnitude", input.getAxisDescription(DIM_Y).getUnit());
+            result.recomputeLimits(DIM_Z);
+        });
 
         return result;
     }
@@ -366,9 +359,11 @@ public class ShortTimeFourierTransform {
             final Apodization apodization, final Padding padding, final boolean dbScale, final boolean truncateDCNy) {
         final int nT = ceilDiv(input.length, step); // number of time steps
         final double[] amplitudeData = output == null || output.length != nFFT / 2 * nT ? new double[nFFT / 2 * nT]
-                                                                                        : output; // output array
+                : output; // output array
+        final double[] currentMagnitudeData = DoubleArrayCache.getInstance().getArray(nFFT / 2);
+        // calculate spectrogram
         final DoubleFFT_1D fastFourierTrafo = new DoubleFFT_1D(nFFT);
-        final double[] raw = new double[nFFT]; // array to perform calculations in
+        final double[] raw = DoubleArrayCache.getInstance().getArrayExact(nFFT); // array to perform calculations in
         for (int i = 0; i < nT; i++) {
             // obtain input data for FFT
             final int offset = i * step;
@@ -397,14 +392,17 @@ public class ShortTimeFourierTransform {
             // perform Fourier transform
             fastFourierTrafo.realForward(raw);
             // calculate magnitude spectrum
-            final double[] current = dbScale ? SpectrumTools.computeMagnitudeSpectrum_dB(raw, truncateDCNy)
-                                             : SpectrumTools.computeMagnitudeSpectrum(raw, truncateDCNy);
-            // copy output into result array (layout of spectrum is 0, ..., fmax, 0, ..., fmin)
-            // TODO: use more efficient copy, possibly transpose output?
-            for (int j = 0; j < nFFT / 2; j++) {
-                amplitudeData[j * nT + i] = current[j];
+            if (dbScale) {
+                SpectrumTools.computeMagnitudeSpectrum_dB(raw, 0, nFFT, currentMagnitudeData, 0, truncateDCNy);
+            } else {
+                SpectrumTools.computeMagnitudeSpectrum(raw, 0, nFFT, currentMagnitudeData, 0, truncateDCNy);
             }
+            System.arraycopy(currentMagnitudeData, 0, amplitudeData, i * nFFT / 2, nFFT / 2);
         }
+        // return cached arrays
+        DoubleArrayCache.getInstance().add(currentMagnitudeData);
+        DoubleArrayCache.getInstance().add(raw);
+
         return amplitudeData;
     }
 
