@@ -177,6 +177,7 @@ public class DefaultLegend extends FlowPane implements Legend {
         // process data sets within the given renderer
         for (final Renderer renderer : renderers) {
             if (!renderer.showInLegend()) {
+                legendItemCount += renderer.getDatasets().size();
                 continue;
             }
             for (final DataSet series : renderer.getDatasets()) {
