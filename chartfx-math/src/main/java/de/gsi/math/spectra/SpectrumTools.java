@@ -242,7 +242,8 @@ public class SpectrumTools {
             final double Im = data[i2 + 1];
 
             ret[toPos
-                    + i] = (float) (10 * TMathConstants.Log10((TMathConstants.Sqr(Re) + TMathConstants.Sqr(Im)) / n2));
+                    + i]
+                    = (float) (10 * TMathConstants.Log10((TMathConstants.Sqr(Re) + TMathConstants.Sqr(Im)) / n2));
         }
 
         if (truncateDCNyq) {
@@ -554,12 +555,11 @@ public class SpectrumTools {
             final double right = Math.pow(data[index + 1], 1);
 
             if (left < right) {
-                return val + TMathConstants.ATan2(right * TMathConstants.Sin(pin),
-                        center + right * TMathConstants.Cos(pin)) / TMathConstants.Pi();
+                return val + TMathConstants.ATan2(right * TMathConstants.Sin(pin), center + right * TMathConstants.Cos(pin)) / TMathConstants.Pi();
             } else {
                 return val
                         - TMathConstants.ATan2(left * TMathConstants.Sin(pin), center + left * TMathConstants.Cos(pin))
-                                / TMathConstants.Pi();
+                                  / TMathConstants.Pi();
             }
         } else {
             return val;

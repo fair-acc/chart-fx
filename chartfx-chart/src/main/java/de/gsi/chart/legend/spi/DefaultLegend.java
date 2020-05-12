@@ -4,11 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import de.gsi.chart.XYChartCss;
-import de.gsi.chart.legend.Legend;
-import de.gsi.chart.renderer.Renderer;
-import de.gsi.chart.utils.StyleParser;
-import de.gsi.dataset.DataSet;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -23,6 +18,12 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Label;
 import javafx.scene.layout.FlowPane;
+
+import de.gsi.chart.XYChartCss;
+import de.gsi.chart.legend.Legend;
+import de.gsi.chart.renderer.Renderer;
+import de.gsi.chart.utils.StyleParser;
+import de.gsi.dataset.DataSet;
 
 /**
  * A chart legend that displays a list of items with symbols in a box
@@ -148,7 +149,6 @@ public class DefaultLegend extends FlowPane implements Legend {
      */
     @Override
     public void updateLegend(final List<DataSet> dataSets, final List<Renderer> renderers, final boolean forceUpdate) {
-
         // list of already drawn data sets in the legend
         final List<DataSet> alreadyDrawnDataSets = new ArrayList<>();
         final List<LegendItem> legendItems = new ArrayList<>();
@@ -220,7 +220,6 @@ public class DefaultLegend extends FlowPane implements Legend {
 
     /** A item to be displayed on a Legend */
     public static class LegendItem extends Label {
-
         public LegendItem(final String text, final Node symbol) {
             setText(text);
             getStyleClass().add("chart-legend-item");

@@ -102,7 +102,8 @@ public class ShortTimeFourierTransform {
         final double[] oldFrequencyAxis = output == null ? null : output.getValues(DIM_Y);
         final double[] frequencyAxis = getFrequencyAxisComplex(dt, nFFT, oldFrequencyAxis);
         final double[] oldAmplitudeData = output instanceof MultiDimDoubleDataSet
-                ? ((MultiDimDoubleDataSet) output).getValues(DIM_Z) : null;
+                                                  ? ((MultiDimDoubleDataSet) output).getValues(DIM_Z)
+                                                  : null;
         final double[] amplitudeData = complex(real, imag, oldAmplitudeData, nFFT, step, apodization, padding, dbScale,
                 truncateDCNy);
 
@@ -112,34 +113,37 @@ public class ShortTimeFourierTransform {
             result = (MultiDimDoubleDataSet) output;
         } else {
             result = (MultiDimDoubleDataSet) new DataSetBuilder("STFT(" + input.getName() + ")")
-                    .setValues(DIM_X, frequencyAxis).setValues(DIM_Y, timeAxis).setValues(DIM_Z, amplitudeData).build();
+                             .setValues(DIM_X, frequencyAxis)
+                             .setValues(DIM_Y, timeAxis)
+                             .setValues(DIM_Z, amplitudeData)
+                             .build();
         }
         result.lock().writeLockGuard(() ->
 
-        {
-            // only update data arrays if at least one array was newly allocated
-            if (oldTimeAxis != timeAxis) {
-                result.setValues(DIM_X, frequencyAxis, false);
-            }
-            if (oldFrequencyAxis != frequencyAxis) {
-                result.setValues(DIM_Y, timeAxis, false);
-            }
-            if (oldAmplitudeData != amplitudeData) {
-                result.setValues(DIM_Z, amplitudeData, false);
-            }
+                {
+                    // only update data arrays if at least one array was newly allocated
+                    if (oldTimeAxis != timeAxis) {
+                        result.setValues(DIM_X, frequencyAxis, false);
+                    }
+                    if (oldFrequencyAxis != frequencyAxis) {
+                        result.setValues(DIM_Y, timeAxis, false);
+                    }
+                    if (oldAmplitudeData != amplitudeData) {
+                        result.setValues(DIM_Z, amplitudeData, false);
+                    }
 
-            result.getMetaInfo().put("ComplexSTFT-nFFT", Integer.toString(nFFT));
-            result.getMetaInfo().put("ComplexSTFT-step", Integer.toString(step));
+                    result.getMetaInfo().put("ComplexSTFT-nFFT", Integer.toString(nFFT));
+                    result.getMetaInfo().put("ComplexSTFT-step", Integer.toString(step));
 
-            // Set Axis Labels and Units
-            final String timeUnit = input.getAxisDescription(DIM_X).getUnit();
-            final String freqUnit = timeUnit.equals("s") ? "Hz" : "1/" + timeUnit;
-            result.getAxisDescription(DIM_X).set("Frequency", freqUnit, frequencyAxis[0],
-                    frequencyAxis[frequencyAxis.length - 1]);
-            result.getAxisDescription(DIM_Y).set("Time", timeUnit, timeAxis[0], timeAxis[timeAxis.length - 1]);
-            result.getAxisDescription(DIM_Z).set("Magnitude", input.getAxisDescription(DIM_Y).getUnit());
-            result.recomputeLimits(DIM_Z);
-        });
+                    // Set Axis Labels and Units
+                    final String timeUnit = input.getAxisDescription(DIM_X).getUnit();
+                    final String freqUnit = timeUnit.equals("s") ? "Hz" : "1/" + timeUnit;
+                    result.getAxisDescription(DIM_X).set("Frequency", freqUnit, frequencyAxis[0],
+                            frequencyAxis[frequencyAxis.length - 1]);
+                    result.getAxisDescription(DIM_Y).set("Time", timeUnit, timeAxis[0], timeAxis[timeAxis.length - 1]);
+                    result.getAxisDescription(DIM_Z).set("Magnitude", input.getAxisDescription(DIM_Y).getUnit());
+                    result.recomputeLimits(DIM_Z);
+                });
 
         return result;
     }
@@ -158,7 +162,8 @@ public class ShortTimeFourierTransform {
             // obtain input data for FFT
             final int offset = i * step;
             final int validLength = real.length - offset;
-            fillraw: for (int j = 0; j < nFFT; j++) {
+        fillraw:
+            for (int j = 0; j < nFFT; j++) {
                 if (offset + j < real.length) {
                     raw[2 * j] = real[offset + j];
                     raw[2 * j + 1] = imag[offset + j];
@@ -169,7 +174,7 @@ public class ShortTimeFourierTransform {
                         raw[2 * j + 1] = imag[imag.length - j + validLength - 1];
                         break;
                     case ZERO:
-                        Arrays.fill(raw, 2 * j, 2* nFFT, 0.0);
+                        Arrays.fill(raw, 2 * j, 2 * nFFT, 0.0);
                         break fillraw; // break out of loop
                     default:
                     case ZOH:
@@ -313,7 +318,8 @@ public class ShortTimeFourierTransform {
         final double[] oldFrequencyAxis = output == null ? null : output.getValues(DIM_Y);
         final double[] frequencyAxis = getFrequencyAxisReal(dt, nFFT, oldFrequencyAxis);
         final double[] oldAmplitudeData = output instanceof MultiDimDoubleDataSet
-                ? ((MultiDimDoubleDataSet) output).getValues(DIM_Z) : null;
+                                                  ? ((MultiDimDoubleDataSet) output).getValues(DIM_Z)
+                                                  : null;
         final double[] amplitudeData = real(yData, oldAmplitudeData, nFFT, step, apodization, padding, dbScale,
                 truncateDCNy);
 
@@ -323,34 +329,37 @@ public class ShortTimeFourierTransform {
             result = (MultiDimDoubleDataSet) output;
         } else {
             result = (MultiDimDoubleDataSet) new DataSetBuilder("STFT(" + input.getName() + ")")
-                    .setValues(DIM_X, frequencyAxis).setValues(DIM_Y, timeAxis).setValues(DIM_Z, amplitudeData).build();
+                             .setValues(DIM_X, frequencyAxis)
+                             .setValues(DIM_Y, timeAxis)
+                             .setValues(DIM_Z, amplitudeData)
+                             .build();
         }
         result.lock().writeLockGuard(() ->
 
-        {
-            // only update data arrays if at least one array was newly allocated
-            if (oldFrequencyAxis != frequencyAxis) {
-                result.setValues(DIM_X, frequencyAxis, false);
-            }
-            if (oldTimeAxis != timeAxis) {
-                result.setValues(DIM_Y, timeAxis, false);
-            }
-            if (oldAmplitudeData != amplitudeData) {
-                result.setValues(DIM_Z, amplitudeData, false);
-            }
+                {
+                    // only update data arrays if at least one array was newly allocated
+                    if (oldFrequencyAxis != frequencyAxis) {
+                        result.setValues(DIM_X, frequencyAxis, false);
+                    }
+                    if (oldTimeAxis != timeAxis) {
+                        result.setValues(DIM_Y, timeAxis, false);
+                    }
+                    if (oldAmplitudeData != amplitudeData) {
+                        result.setValues(DIM_Z, amplitudeData, false);
+                    }
 
-            result.getMetaInfo().put("RealSTFT-nFFT", Integer.toString(nFFT));
-            result.getMetaInfo().put("RealSTFT-step", Integer.toString(step));
+                    result.getMetaInfo().put("RealSTFT-nFFT", Integer.toString(nFFT));
+                    result.getMetaInfo().put("RealSTFT-step", Integer.toString(step));
 
-            // Set Axis Labels and Units
-            final String timeUnit = input.getAxisDescription(DIM_X).getUnit();
-            final String freqUnit = timeUnit.equals("s") ? "Hz" : "1/" + timeUnit;
-            result.getAxisDescription(DIM_X).set("Frequency", freqUnit, frequencyAxis[0],
-                    frequencyAxis[frequencyAxis.length - 1]);
-            result.getAxisDescription(DIM_Y).set("Time", timeUnit, timeAxis[0], timeAxis[timeAxis.length - 1]);
-            result.getAxisDescription(DIM_Z).set("Magnitude", input.getAxisDescription(DIM_Y).getUnit());
-            result.recomputeLimits(DIM_Z);
-        });
+                    // Set Axis Labels and Units
+                    final String timeUnit = input.getAxisDescription(DIM_X).getUnit();
+                    final String freqUnit = timeUnit.equals("s") ? "Hz" : "1/" + timeUnit;
+                    result.getAxisDescription(DIM_X).set("Frequency", freqUnit, frequencyAxis[0],
+                            frequencyAxis[frequencyAxis.length - 1]);
+                    result.getAxisDescription(DIM_Y).set("Time", timeUnit, timeAxis[0], timeAxis[timeAxis.length - 1]);
+                    result.getAxisDescription(DIM_Z).set("Magnitude", input.getAxisDescription(DIM_Y).getUnit());
+                    result.recomputeLimits(DIM_Z);
+                });
 
         return result;
     }
@@ -359,7 +368,7 @@ public class ShortTimeFourierTransform {
             final Apodization apodization, final Padding padding, final boolean dbScale, final boolean truncateDCNy) {
         final int nT = ceilDiv(input.length, step); // number of time steps
         final double[] amplitudeData = output == null || output.length != nFFT / 2 * nT ? new double[nFFT / 2 * nT]
-                : output; // output array
+                                                                                        : output; // output array
         final double[] currentMagnitudeData = DoubleArrayCache.getInstance().getArray(nFFT / 2);
         // calculate spectrogram
         final DoubleFFT_1D fastFourierTrafo = new DoubleFFT_1D(nFFT);

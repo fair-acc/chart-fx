@@ -1,5 +1,10 @@
 package de.gsi.chart.samples;
 
+import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,10 +16,6 @@ import de.gsi.chart.plugins.Zoomer;
 import de.gsi.chart.renderer.spi.ErrorDataSetRenderer;
 import de.gsi.dataset.spi.DoubleDataSet;
 import de.gsi.dataset.spi.DoubleErrorDataSet;
-import javafx.application.Application;
-import javafx.application.Platform;
-import javafx.scene.Scene;
-import javafx.stage.Stage;
 
 /**
  * Test/demo that explicitly allows to draw NaN values in DataSets as well as custom dash-based line-styling

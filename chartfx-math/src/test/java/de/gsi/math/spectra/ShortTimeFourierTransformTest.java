@@ -145,9 +145,7 @@ class ShortTimeFourierTransformTest {
 
         // test unconforming dataSets
         assertThrows(IllegalArgumentException.class,
-                () -> ShortTimeFourierTransform.real(
-                        new DataSetBuilder("illegal data set").setDimension(3).setInitalCapacity(6).build(), null, 8, 8,
-                        Apodization.Hann, Padding.ZERO, true, false));
+                () -> ShortTimeFourierTransform.real(new DataSetBuilder("illegal data set").setDimension(3).setInitalCapacity(6).build(), null, 8, 8, Apodization.Hann, Padding.ZERO, true, false));
     }
 
     /**
@@ -298,12 +296,12 @@ class ShortTimeFourierTransformTest {
 
         // test non-conforming dataSets
         assertThrows(IllegalArgumentException.class, () -> ShortTimeFourierTransform.complex( //
-                new DataSetBuilder("illegal data set") //
-                        .setValues(DIM_X, new double[] { 1, 2 }) //
-                        .setValues(DIM_Y, new double[] { 1, 2, 3 }) //
-                        .setValues(DIM_Z, new double[][] { { 1, 2 }, { 3, 4 }, { 5, 6 } }) //
-                        .build(), //
-                null, 8, 8, Apodization.Hann, Padding.ZERO, true, false));
+                                                                new DataSetBuilder("illegal data set") //
+                                                                        .setValues(DIM_X, new double[] { 1, 2 }) //
+                                                                        .setValues(DIM_Y, new double[] { 1, 2, 3 }) //
+                                                                        .setValues(DIM_Z, new double[][] { { 1, 2 }, { 3, 4 }, { 5, 6 } }) //
+                                                                        .build(), //
+                                                                null, 8, 8, Apodization.Hann, Padding.ZERO, true, false));
     }
 
     /**

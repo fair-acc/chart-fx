@@ -1,5 +1,15 @@
 package de.gsi.chart.samples;
 
+import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.scene.Scene;
+import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,15 +24,6 @@ import de.gsi.dataset.DataSet;
 import de.gsi.dataset.spi.DoubleErrorDataSet;
 import de.gsi.dataset.spi.FragmentedDataSet;
 import de.gsi.dataset.testdata.spi.CosineFunction;
-import javafx.application.Application;
-import javafx.application.Platform;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import javafx.scene.Scene;
-import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.VBox;
-import javafx.stage.Stage;
 
 /**
  * Example illustrating the use of a custom renderer to plot graphs with gaps
