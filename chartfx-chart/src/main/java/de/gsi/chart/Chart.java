@@ -241,9 +241,9 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
             AssertUtils.notNull("Side must not be null", side);
 
             for (final Side s : Side.values()) {
-                getMeasurementBar(s).getChildren().remove(titleLabel);
+                getTitleLegendPane(s).getChildren().remove(titleLabel);
             }
-            getMeasurementBar(side).getChildren().add(titleLabel);
+            getTitleLegendPane(side).getChildren().add(titleLabel);
             super.set(side);
         }
     };
@@ -294,9 +294,9 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
                 return;
             }
             for (final Side s : Side.values()) {
-                getMeasurementBar(s).getChildren().remove(legend.getNode());
+                getTitleLegendPane(s).getChildren().remove(legend.getNode());
             }
-            getMeasurementBar(side).getChildren().add(legend.getNode());
+            getTitleLegendPane(side).getChildren().add(legend.getNode());
             legend.setVertical(side.isVertical());
             super.set(side);
         }
@@ -309,7 +309,7 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
     private final ObjectProperty<Legend> legend = new SimpleObjectProperty<>(this, "legend", new DefaultLegend()) {
         private Legend oldLegend = get();
         {
-            getMeasurementBar(getLegendSide()).getChildren().add(oldLegend.getNode());
+            getTitleLegendPane(getLegendSide()).getChildren().add(oldLegend.getNode());
         }
 
         @Override
@@ -318,13 +318,13 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
 
             if (oldLegend != null) {
                 for (final Side s : Side.values()) {
-                    getMeasurementBar(s).getChildren().remove(oldLegend.getNode());
+                    getTitleLegendPane(s).getChildren().remove(oldLegend.getNode());
                 }
             }
 
             if (newLegend != null) {
-                if (getLegendSide() != null) {
-                    getMeasurementBar(getLegendSide()).getChildren().add(newLegend.getNode());
+                if (getLegendSide() != null && isLegendVisible()) {
+                    getTitleLegendPane(getLegendSide()).getChildren().add(newLegend.getNode());
                 }
                 newLegend.getNode().setVisible(isLegendVisible());
             }
