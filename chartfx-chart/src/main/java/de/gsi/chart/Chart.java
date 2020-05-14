@@ -315,7 +315,7 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
         @Override
         protected void invalidated() {
             Legend newLegend = get();
-            System.err.println("legend old =" + oldLegend + " new = " + newLegend);
+
             if (oldLegend != null) {
                 for (final Side s : Side.values()) {
                     getMeasurementBar(s).getChildren().remove(oldLegend.getNode());
