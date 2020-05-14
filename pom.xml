@@ -231,7 +231,7 @@
                     <!-- which jacoco will not instrument. Hence it is important
                         to add -->
                     <!-- those command-line params here (${argLine} holds those params) -->
-                    <argLine>${argLine} -Xms256m -Xmx2048m -Djava.awt.headless=true -Dtestfx.robot=glass -Dtestfx.headless=true -Dprism.order=sw</argLine>
+                    <argLine>${argLine} -Xms256m -Xmx2048m -XX:G1HeapRegionSize=32m -Djava.awt.headless=true -Dtestfx.robot=glass -Dtestfx.headless=true -Dprism.order=sw</argLine>
                     <forkCount>1</forkCount>
                     <runOrder>random</runOrder>
                 </configuration>
