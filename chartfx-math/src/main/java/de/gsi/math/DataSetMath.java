@@ -2,6 +2,7 @@ package de.gsi.math;
 
 import static de.gsi.dataset.DataSet.DIM_X;
 import static de.gsi.dataset.DataSet.DIM_Y;
+import static de.gsi.dataset.DataSet.DIM_Z;
 import static de.gsi.math.DataSetMath.ErrType.EXP;
 import static de.gsi.math.DataSetMath.ErrType.EYN;
 import static de.gsi.math.DataSetMath.ErrType.EYP;
@@ -780,6 +781,45 @@ public final class DataSetMath { // NOPMD - nomen est omen
         return ret;
     }
 
+    public static DataSet magnitudeSpectrumComplex(final DataSet function) {
+        return magnitudeSpectrumComplex(function, Apodization.Hann, false, false);
+    }
+
+    public static DataSet magnitudeSpectrumComplex(final DataSet function, final Apodization apodization,
+            final boolean dbScale, final boolean normalisedFrequency) {
+        final int n = function.getDataCount();
+
+        final DoubleFFT_1D fastFourierTrafo = new DoubleFFT_1D(n);
+
+        // N.B. since realForward computes the FFT in-place -> generate a copy
+        final double[] fftSpectra = new double[2 * n];
+        for (int i = 0; i < n; i++) {
+            final double window = apodization.getIndex(i, n);
+            fftSpectra[2 * i] = function.get(DIM_Y, i) * window;
+            fftSpectra[2 * i + 1] = function.get(DIM_Z, i) * window;
+        }
+
+        fastFourierTrafo.complexForward(fftSpectra);
+        final double[] mag = dbScale ? SpectrumTools.computeMagnitudeSpectrum_dB(fftSpectra, true)
+                                     : SpectrumTools.computeMagnitudeSpectrum(fftSpectra, true);
+        final double dt = function.get(DIM_X, function.getDataCount() - 1) - function.get(DIM_X, 0);
+        final double fsampling = normalisedFrequency || dt <= 0 ? 0.5 / mag.length : 1.0 / dt;
+
+        final String functionName = "Mag" + (dbScale ? "[dB]" : "") + "(" + function.getName() + ")";
+
+        final DoubleErrorDataSet ret = new DoubleErrorDataSet(functionName, mag.length);
+        for (int i = 0; i < mag.length; i++) {
+            // TODO: consider magnitude error estimate
+            if (i < mag.length / 2) {
+                ret.add((i - mag.length / 2) * fsampling, mag[i + mag.length / 2], 0, 0);
+            } else {
+                ret.add((i - mag.length / 2) * fsampling, mag[i - mag.length / 2], 0, 0);
+            }
+        }
+
+        return ret;
+    }
+
     public static DataSet magnitudeSpectrumDecibel(final DataSet function) {
         return magnitudeSpectrum(function, Apodization.Hann, true, false);
     }
@@ -872,13 +912,17 @@ public final class DataSetMath { // NOPMD - nomen est omen
         final int ncount = function.getDataCount();
         switch (op) {
         case ADD:
-            return new DoubleErrorDataSet(functionName, values(DIM_X, function), ArrayMath.add(y, value), eyn, eyp, ncount, true);
+            return new DoubleErrorDataSet(functionName, values(DIM_X, function), ArrayMath.add(y, value), eyn, eyp,
+                    ncount, true);
         case SUBTRACT:
-            return new DoubleErrorDataSet(functionName, values(DIM_X, function), ArrayMath.subtract(y, value), eyn, eyp, ncount, true);
+            return new DoubleErrorDataSet(functionName, values(DIM_X, function), ArrayMath.subtract(y, value), eyn, eyp,
+                    ncount, true);
         case MULTIPLY:
-            return new DoubleErrorDataSet(functionName, values(DIM_X, function), ArrayMath.multiply(y, value), ArrayMath.multiply(eyn, value), ArrayMath.multiply(eyp, value), ncount, true);
+            return new DoubleErrorDataSet(functionName, values(DIM_X, function), ArrayMath.multiply(y, value),
+                    ArrayMath.multiply(eyn, value), ArrayMath.multiply(eyp, value), ncount, true);
         case DIVIDE:
-            return new DoubleErrorDataSet(functionName, values(DIM_X, function), ArrayMath.divide(y, value), ArrayMath.divide(eyn, value), ArrayMath.divide(eyp, value), ncount, true);
+            return new DoubleErrorDataSet(functionName, values(DIM_X, function), ArrayMath.divide(y, value),
+                    ArrayMath.divide(eyn, value), ArrayMath.divide(eyp, value), ncount, true);
         case SQR:
             for (int i = 0; i < eyn.length; i++) {
                 eyn[i] = 2 * Math.abs(y[i]) * eyn[i];
@@ -912,8 +956,8 @@ public final class DataSetMath { // NOPMD - nomen est omen
                 eyn[i] = 0.0; // 0.0 as a work-around
                 eyp[i] = 0.0;
             }
-            return new DoubleErrorDataSet(functionName, values(DIM_X, function), ArrayMath.inverseDecibel(y), eyn, eyp, ncount,
-                    true);
+            return new DoubleErrorDataSet(functionName, values(DIM_X, function), ArrayMath.inverseDecibel(y), eyn, eyp,
+                    ncount, true);
         default:
             // return copy if nothing else matches
             return new DoubleErrorDataSet(functionName, values(DIM_X, function), values(DIM_Y, function),
