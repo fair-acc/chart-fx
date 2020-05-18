@@ -4,6 +4,7 @@ import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -1634,7 +1635,7 @@ public class TSpectrum {
         lda /= 100;
 
         // searching for peaks in de-convolved spectrum
-        List<DoublePoint> peakList = new ArrayList<>();
+        List<Integer> peakList = new ArrayList<>();
         int peakIndex = 0;
         for (int i = 1; i < sizeExt - 1; i++) {
             final boolean condition2 = workingSpace[i] > workingSpace[i - 1] && workingSpace[i] > workingSpace[i + 1]
@@ -1656,39 +1657,36 @@ public class TSpectrum {
                     a = length - 1;
                 }
                 if (peakIndex == 0) {
-                    peakList.add(new DoublePoint(sourceX[(int) a], sourceY[(int) a])); // NOPMD
+                    peakList.add((int) a);
                     peakIndex = 1;
                 } else {
                     int priz = 0;
                     int searchIndex;
                     for (searchIndex = 0; searchIndex < peakIndex && priz == 0; searchIndex++) {
-                        if (workingSpace[6 * sizeExt + shift + (int) a] > workingSpace[6 * sizeExt + shift
-                                                                                       + peakList.get(searchIndex).getX().intValue()]) {
+                        if (workingSpace[6 * sizeExt + shift + (int) a] > workingSpace[6 * sizeExt + shift + peakList.get(searchIndex)]) {
                             priz = 1;
                         }
                     }
                     if (priz == 0) {
                         if (searchIndex < nMaxPeaks) {
-                            final DoublePoint newPoint = new DoublePoint(sourceX[(int) a], sourceY[(int) a]); // NOPMD
                             if (peakList.size() > searchIndex) {
-                                peakList.set(searchIndex, newPoint);
+                                peakList.set(searchIndex, (int) a);
                             } else {
-                                peakList.add(newPoint);
+                                peakList.add((int) a);
                             }
                         }
                     } else {
                         for (int k = peakIndex; k >= searchIndex; k--) {
                             if (k < nMaxPeaks) {
-                                final DoublePoint prevPoint = peakList.get(k - 1);
-                                final DoublePoint newPoint = new DoublePoint(prevPoint.getX(), prevPoint.getY()); // NOPMD
+                                final Integer prevPoint = peakList.get(k - 1);
                                 if (peakList.size() > k) {
-                                    peakList.set(k, newPoint);
+                                    peakList.set(k, prevPoint);
                                 } else {
-                                    peakList.add(newPoint);
+                                    peakList.add(prevPoint);
                                 }
                             }
                         }
-                        peakList.set(searchIndex - 1, new DoublePoint(sourceX[(int) a], sourceY[(int) a])); // NOPMD
+                        peakList.set(searchIndex - 1, (int) a); // NOPMD
                     }
                     if (peakIndex < nMaxPeaks) {
                         peakIndex += 1;
@@ -1705,7 +1703,8 @@ public class TSpectrum {
         if (peakIndex == nMaxPeaks && LOGGER.isWarnEnabled()) {
             LOGGER.atWarn().addArgument(nMaxPeaks).log("maximum specified number of peaks limit reached {}");
         }
-        return peakList;
+
+        return peakList.stream().map(p -> new DoublePoint(sourceX[p], sourceY[p])).collect(Collectors.toList());
     }
 
     /**
