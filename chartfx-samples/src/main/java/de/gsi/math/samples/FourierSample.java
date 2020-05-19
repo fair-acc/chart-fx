@@ -100,12 +100,11 @@ public class FourierSample extends AbstractDemoApplication {
             frequency3[i] = i * scaling3;
         }
 
-        final LombPeriodogram lombTrafo = new LombPeriodogram();
         final DiscreteTimeFourierTransform trafoDTFT = new DiscreteTimeFourierTransform();
         final DoubleFFT_1D fastFourierTrafo = new DoubleFFT_1D(yValues.length);
 
         LOGGER.atInfo().log("compute spectrum for %d test frequencies\n", frequency1.length);
-        final double[] lomb = lombTrafo.computePeridodogram(xValues, yValues, frequency2);
+        final double[] lomb = LombPeriodogram.computePeridodogram(xValues, yValues, frequency2);
         final double[] dtft1 = trafoDTFT.computeMagnitudeSpectrum(xValues, yValues, frequency1);
         final double[] dtft2 = trafoDTFT.computeMagnitudeSpectrum(xValues, yValues, frequency2);
 
