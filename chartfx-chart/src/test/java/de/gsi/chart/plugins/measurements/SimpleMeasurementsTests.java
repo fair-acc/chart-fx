@@ -1,58 +1,75 @@
 package de.gsi.chart.plugins.measurements;
 
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.hasProperty;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
+import javafx.application.Platform;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
+import org.awaitility.Awaitility;
+import org.hamcrest.Matchers;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.testfx.api.FxAssert;
+import org.testfx.api.FxRobot;
 import org.testfx.framework.junit5.ApplicationExtension;
 import org.testfx.framework.junit5.Start;
+import org.testfx.util.WaitForAsyncUtils;
 
 import de.gsi.chart.XYChart;
 import de.gsi.chart.plugins.ParameterMeasurements;
+import de.gsi.chart.plugins.XValueIndicator;
 import de.gsi.chart.plugins.measurements.SimpleMeasurements.MeasurementCategory;
 import de.gsi.chart.plugins.measurements.SimpleMeasurements.MeasurementType;
+import de.gsi.chart.plugins.measurements.utils.CheckedValueField;
 import de.gsi.chart.ui.utils.JavaFXInterceptorUtils.SelectiveJavaFxInterceptor;
 import de.gsi.chart.ui.utils.TestFx;
+import de.gsi.dataset.event.UpdatedDataEvent;
 import de.gsi.dataset.testdata.spi.SineFunction;
+import de.gsi.dataset.testdata.spi.TriangleFunction;
 
 /**
  * Tests {@link de.gsi.chart.plugins.measurements.SimpleMeasurements }
  *
  * @author rstein
- *
  */
 @ExtendWith(ApplicationExtension.class)
 @ExtendWith(SelectiveJavaFxInterceptor.class)
 public class SimpleMeasurementsTests {
+    private static final Logger LOGGER = LoggerFactory.getLogger(SimpleMeasurementsTests.class);
     private ParameterMeasurements plugin;
     private SimpleMeasurements field;
+    private XYChart chart;
 
     @Start
     public void start(Stage stage) {
-        final XYChart chart = new XYChart();
-        chart.getDatasets().add(new SineFunction("sine", 1000));
+        chart = new XYChart();
 
         plugin = new ParameterMeasurements();
-
-        for (MeasurementType type : MeasurementType.values()) {
-            assertThrows(IllegalArgumentException.class, () -> new SimpleMeasurements(null, type).initialize());
-            assertDoesNotThrow(() -> new SimpleMeasurements(plugin, type));
-        }
-
-        field = new SimpleMeasurements(plugin, MeasurementType.MEAN);
-        assertTrue(field.getMeasType().isVerticalMeasurement());
 
         chart.getPlugins().add(plugin);
         final VBox root = new VBox(chart);
@@ -63,6 +80,15 @@ public class SimpleMeasurementsTests {
 
     @TestFx
     public void testSetterGetter() throws InterruptedException, ExecutionException {
+        chart.getDatasets().add(new SineFunction("sine", 1000));
+        field = new SimpleMeasurements(plugin, MeasurementType.MEAN);
+        assertTrue(field.getMeasType().isVerticalMeasurement());
+
+        for (MeasurementType type : MeasurementType.values()) {
+            assertThrows(IllegalArgumentException.class, () -> new SimpleMeasurements(null, type).initialize());
+            assertDoesNotThrow(() -> new SimpleMeasurements(plugin, type));
+        }
+
         for (MeasurementType type : MeasurementType.values()) {
             assertThrows(IllegalArgumentException.class, () -> new SimpleMeasurements(null, type).nominalAction());
             assertDoesNotThrow(() -> {
@@ -104,5 +130,84 @@ public class SimpleMeasurementsTests {
         // assertEquals(2, field.getValueIndicators().size(), " - number of total indicators");
 
         assertDoesNotThrow(() -> field.removeAction());
+    }
+
+    @Test
+    public void testSimpleMeasurements(FxRobot fxRobot) {
+        TriangleFunction sine = new TriangleFunction("Triangle", 16, 0.0);
+        fxRobot.interact(() -> chart.getDatasets().setAll(sine));
+
+        Map<MeasurementType, Double> typeResults = new HashMap<>();
+        typeResults.put(MeasurementType.TRANSMISSION_ABS, 50.0);
+        typeResults.put(MeasurementType.TRANSMISSION_REL, -50.0);
+        typeResults.put(MeasurementType.MEAN, 0.5625);
+        typeResults.put(MeasurementType.VALUE_VER, 0.125);
+        typeResults.put(MeasurementType.DISTANCE_VER, -0.125);
+        typeResults.put(MeasurementType.MINIMUM, 0.25);
+        typeResults.put(MeasurementType.DUTY_CYCLE, 0.5);
+        typeResults.put(MeasurementType.EDGE_DETECT, 3.0);
+        typeResults.put(MeasurementType.INTEGRAL, 6.5);
+        typeResults.put(MeasurementType.INTEGRAL_FULL, 7.0);
+        typeResults.put(MeasurementType.LOCATION_MAXIMUM, 7.0);
+        typeResults.put(MeasurementType.LOCATION_MAXIMUM_GAUSS, 7.5);
+        typeResults.put(MeasurementType.MAXIMUM, 0.875);
+        typeResults.put(MeasurementType.RANGE, 0.625);
+        typeResults.put(MeasurementType.RMS, 0.21347814095749154);
+        typeResults.put(MeasurementType.MEDIAN, 0.625);
+        typeResults.put(MeasurementType.RISETIME_10_90, 11.0);
+        typeResults.put(MeasurementType.RISETIME_20_80, 11.0);
+        typeResults.put(MeasurementType.VALUE_HOR, 2.0);
+        typeResults.put(MeasurementType.DISTANCE_HOR, 5.0);
+        typeResults.put(MeasurementType.FWHM, 9.0);
+        typeResults.put(MeasurementType.FWHM_INTERPOLATED, 8.0);
+        typeResults.put(MeasurementType.PERIOD, Double.NaN); // Period and frequency cannot be obtained from triangle
+        typeResults.put(MeasurementType.FREQUENCY, Double.NaN);
+
+        for (MeasurementType type : typeResults.keySet()) {
+            fxRobot.interact(() -> {
+                field = new SimpleMeasurements(plugin, type);
+            });
+            autoCloseAlert(field.alert, ButtonType.APPLY);
+            double minValue = type.isVerticalMeasurement() ? 2 : 0.2;
+            double maxValue = type.isVerticalMeasurement() ? 14 : 0.8;
+            fxRobot.interact(() -> field.initialize());
+            fxRobot.interact(() -> {
+                       field.getValueIndicators().get(0).setValue(minValue);
+                       if (type.getRequiredSelectors() > 1)
+                           field.getValueIndicators().get(1).setValue(maxValue);
+                   })
+                    .interrupt();
+            LOGGER.atDebug().addArgument(type).addArgument(field.getValueField().getValue()).log("{}, {}");
+            double result = typeResults.get(type);
+            //            fxRobot.sleep(10_000);
+            FxAssert.verifyThat(field.getValueField().getValue(), equalTo(result));
+            fxRobot.interact(() -> {
+                field.removeAction();
+                field = null;
+            });
+        }
+    }
+
+    /**
+     * Waits at most 1 second for the alert to be shown and then closes it automatically.
+     * This is needed because alert.showAndWait blocks the fx application thread.
+     * 
+     * @param alert The alert to be closed
+     * @param result The result which should be reported back
+     */
+    private static void autoCloseAlert(final Alert alert, final ButtonType result) {
+        Thread thread = new Thread(() -> {
+            try {
+                Awaitility.await().atMost(1, TimeUnit.SECONDS).until(() -> alert.isShowing());
+            } catch (Exception exp) {
+                fail("Alert was not shown within 1 second", exp);
+            }
+            Platform.runLater(() -> {
+                alert.setResult(result);
+                alert.close();
+            });
+        });
+        thread.setDaemon(true);
+        thread.start();
     }
 }
