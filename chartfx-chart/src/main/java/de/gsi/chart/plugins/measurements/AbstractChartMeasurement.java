@@ -61,6 +61,8 @@ import de.gsi.dataset.event.EventSource;
 import impl.org.controlsfx.skin.DecorationPane;
 
 /**
+ * Measurements that can be added to a chart and show a scalar result value in the measurement pane.
+ * 
  * @author rstein
  */
 public abstract class AbstractChartMeasurement implements EventListener, EventSource {
@@ -168,7 +170,7 @@ public abstract class AbstractChartMeasurement implements EventListener, EventSo
             while (change.next()) {
                 change.getRemoved().forEach(oldIndicator -> {
                     oldIndicator.removeListener(sliderChanged);
-                    if (oldIndicator.updateEventListener().isEmpty()) {
+                    if (oldIndicator.isAutoRemove() && oldIndicator.updateEventListener().isEmpty()) {
                         getMeasurementPlugin().getChart().getPlugins().remove(oldIndicator);
                     }
                 });
@@ -340,7 +342,7 @@ public abstract class AbstractChartMeasurement implements EventListener, EventSo
         for (AbstractSingleValueIndicator indicator : new ArrayList<>(getValueIndicatorsUser())) {
             indicator.removeListener(sliderChanged);
             getValueIndicatorsUser().remove(indicator);
-            if (indicator.updateEventListener().isEmpty()) {
+            if (indicator.isAutoRemove() && indicator.updateEventListener().isEmpty()) {
                 getMeasurementPlugin().getChart().getPlugins().remove(indicator);
             }
         }
@@ -377,6 +379,7 @@ public abstract class AbstractChartMeasurement implements EventListener, EventSo
             sliderIndicator = axisMode == X ? new XValueIndicator(axis, min) : new YValueIndicator(axis, min);
             sliderIndicator.setText(new StringBuilder().append(measurementName).append('#').append(requestedIndex).toString());
             sliderIndicator.setValue(min + (requestedIndex + 0.5) * middle);
+            sliderIndicator.setAutoRemove(true);
 
             getValueIndicatorsUser().add(sliderIndicator);
             getMeasurementPlugin().getChart().getPlugins().add(sliderIndicator);
