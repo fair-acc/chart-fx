@@ -24,6 +24,8 @@ import de.gsi.chart.plugins.EditAxis;
 import de.gsi.chart.renderer.ErrorStyle;
 import de.gsi.chart.renderer.datareduction.DefaultDataReducer;
 import de.gsi.chart.renderer.spi.ErrorDataSetRenderer;
+import de.gsi.chart.ui.ProfilerInfoBox;
+import de.gsi.chart.ui.ProfilerInfoBox.DebugLevel;
 import de.gsi.chart.ui.geometry.Side;
 import de.gsi.dataset.event.AddedDataEvent;
 import de.gsi.dataset.spi.CircularDoubleErrorDataSet;
@@ -144,7 +146,10 @@ public class RollingBufferSample extends Application {
         spacer.setMinWidth(Region.USE_PREF_SIZE);
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
-        return new HBox(newDataSet, startTimer, spacer, new ProfilerInfoBox(scene, DEBUG_UPDATE_RATE));
+        final ProfilerInfoBox profilerInfoBox = new ProfilerInfoBox(DEBUG_UPDATE_RATE);
+        profilerInfoBox.setDebugLevel(DebugLevel.VERSION);
+
+        return new HBox(newDataSet, startTimer, spacer, profilerInfoBox);
     }
 
     protected TimerTask getTask(final int updateItem) {

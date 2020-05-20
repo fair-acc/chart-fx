@@ -39,6 +39,8 @@ import de.gsi.chart.renderer.ErrorStyle;
 import de.gsi.chart.renderer.LineStyle;
 import de.gsi.chart.renderer.datareduction.DefaultDataReducer;
 import de.gsi.chart.renderer.spi.ErrorDataSetRenderer;
+import de.gsi.chart.ui.ProfilerInfoBox;
+import de.gsi.chart.ui.ProfilerInfoBox.DebugLevel;
 import de.gsi.dataset.DataSetError;
 import de.gsi.dataset.testdata.spi.CosineFunction;
 import de.gsi.dataset.testdata.spi.GaussFunction;
@@ -193,7 +195,7 @@ public class ErrorDataSetRendererStylingSample extends Application {
         return pane;
     }
 
-    private HBox getHeaderBar(final XYChart chart, final Scene scene) {
+    private HBox getHeaderBar(final XYChart chart) {
         final Button newDataSet = new Button("new DataSet");
         newDataSet.setOnAction(evt -> Platform.runLater(getTimerTask(chart)));
 
@@ -223,9 +225,10 @@ public class ErrorDataSetRendererStylingSample extends Application {
         final Region spacer = new Region();
         spacer.setMinWidth(Region.USE_PREF_SIZE);
         HBox.setHgrow(spacer, Priority.ALWAYS);
+        final ProfilerInfoBox profilerInfoBox = new ProfilerInfoBox(DEBUG_UPDATE_RATE);
+        profilerInfoBox.setDebugLevel(DebugLevel.VERSION);
 
-        return new HBox(new Label("Function Type: "), dataSetTypeSelector, newDataSet, startTimer, spacer,
-                new ProfilerInfoBox(scene, DEBUG_UPDATE_RATE));
+        return new HBox(new Label("Function Type: "), dataSetTypeSelector, newDataSet, startTimer, spacer, profilerInfoBox);
     }
 
     private ParameterTab getRendererTab(final XYChart chart, final ErrorDataSetRenderer errorRenderer) {
@@ -394,7 +397,7 @@ public class ErrorDataSetRendererStylingSample extends Application {
         // yAxis.lookup(".axis-label")
         // .setStyle("-fx-label-padding: +10 0 +10 0;");
 
-        final HBox headerBar = getHeaderBar(chart, scene);
+        final HBox headerBar = getHeaderBar(chart);
 
         final Label sampleIndicator = new Label();
         sampleIndicator.setText(String.valueOf(nSamples));

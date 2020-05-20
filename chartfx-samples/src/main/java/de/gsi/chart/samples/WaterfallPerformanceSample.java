@@ -36,6 +36,8 @@ import de.gsi.chart.renderer.datareduction.ReductionType;
 import de.gsi.chart.renderer.spi.ContourDataSetRenderer;
 import de.gsi.chart.samples.utils.TestDataSetSource;
 import de.gsi.chart.samples.utils.TestDataSetSource.DataInput;
+import de.gsi.chart.ui.ProfilerInfoBox;
+import de.gsi.chart.ui.ProfilerInfoBox.DebugLevel;
 import de.gsi.chart.ui.geometry.Side;
 import de.gsi.dataset.DataSet;
 import de.gsi.dataset.utils.ProcessingProfiler;
@@ -300,10 +302,12 @@ public class WaterfallPerformanceSample extends Application {
         updatePeriod.setEditable(true);
         updatePeriod.setPrefWidth(80);
 
+        final ProfilerInfoBox profilerInfoBox = new ProfilerInfoBox(DEBUG_UPDATE_RATE);
+        profilerInfoBox.setDebugLevel(DebugLevel.VERSION);
+
         final Pane spacer = new Pane();
         HBox.setHgrow(spacer, Priority.ALWAYS);
-        testVariableToolBar.getItems().addAll(fillDataSet, stepDataSet, periodicTimer, updatePeriod, new Label("[ms]"),
-                spacer, new ProfilerInfoBox(scene, DEBUG_UPDATE_RATE));
+        testVariableToolBar.getItems().addAll(fillDataSet, stepDataSet, periodicTimer, updatePeriod, new Label("[ms]"), spacer, profilerInfoBox);
         return testVariableToolBar;
     }
 
@@ -313,7 +317,7 @@ public class WaterfallPerformanceSample extends Application {
         ProcessingProfiler.setLoggerOutputState(false);
 
         VBox root = new VBox();
-        final Scene scene = new Scene(root, 1100, 800);
+        final Scene scene = new Scene(root, 1150, 800);
         primaryStage.setTitle(getClass().getSimpleName());
         primaryStage.setScene(scene);
         primaryStage.show();

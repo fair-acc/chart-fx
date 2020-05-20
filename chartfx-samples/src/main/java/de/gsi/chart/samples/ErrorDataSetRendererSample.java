@@ -25,6 +25,8 @@ import de.gsi.chart.plugins.TableViewer;
 import de.gsi.chart.plugins.Zoomer;
 import de.gsi.chart.renderer.ErrorStyle;
 import de.gsi.chart.renderer.spi.ErrorDataSetRenderer;
+import de.gsi.chart.ui.ProfilerInfoBox;
+import de.gsi.chart.ui.ProfilerInfoBox.DebugLevel;
 import de.gsi.dataset.event.AddedDataEvent;
 import de.gsi.dataset.spi.DoubleDataSet;
 import de.gsi.dataset.spi.DoubleErrorDataSet;
@@ -36,7 +38,7 @@ import de.gsi.dataset.utils.ProcessingProfiler;
  */
 public class ErrorDataSetRendererSample extends Application {
     private static final Logger LOGGER = LoggerFactory.getLogger(ErrorDataSetRendererSample.class);
-    private static final int DEBUG_UPDATE_RATE = 500;
+    private static final int DEBUG_UPDATE_RATE = 1000;
     private static final int N_SAMPLES = 1_000_000; // default: 1000000
     private static final int UPDATE_DELAY = 1000; // [ms]
     private static final int UPDATE_PERIOD = 1000; // [ms]
@@ -45,7 +47,7 @@ public class ErrorDataSetRendererSample extends Application {
             ErrorDataSetRendererSample.N_SAMPLES);
     private Timer timer;
 
-    private HBox getHeaderBar(final Scene scene) {
+    private HBox getHeaderBar() {
         final Button newDataSet = new Button("new DataSet");
         newDataSet.setOnAction(evt -> getTimerTask().run());
 
@@ -65,8 +67,10 @@ public class ErrorDataSetRendererSample extends Application {
         final Region spacer = new Region();
         spacer.setMinWidth(Region.USE_PREF_SIZE);
         HBox.setHgrow(spacer, Priority.ALWAYS);
+        final ProfilerInfoBox profilerInfoBox = new ProfilerInfoBox(DEBUG_UPDATE_RATE);
+        profilerInfoBox.setDebugLevel(DebugLevel.VERSION);
 
-        return new HBox(newDataSet, startTimer, spacer, new ProfilerInfoBox(scene, DEBUG_UPDATE_RATE));
+        return new HBox(newDataSet, startTimer, spacer, profilerInfoBox);
     }
 
     private TimerTask getTimerTask() {
@@ -131,7 +135,7 @@ public class ErrorDataSetRendererSample extends Application {
         // dataSetNoError.setStyle("strokeColor=cyan; fillColor=darkgreen");
 
         // init menu bar
-        root.setTop(getHeaderBar(scene));
+        root.setTop(getHeaderBar());
 
         generateData(dataSet, dataSetNoError);
 
