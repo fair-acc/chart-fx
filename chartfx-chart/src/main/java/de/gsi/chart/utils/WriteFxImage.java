@@ -71,6 +71,9 @@ public final class WriteFxImage {
         }
 
         final PixelReader pixelReader = image.getPixelReader();
+        if (pixelReader == null) {
+            throw new IllegalStateException(IMAGE_PIXEL_READER_NOT_AVAILABLE);
+        }
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
                 Color color = pixelReader.getColor(x, y);
