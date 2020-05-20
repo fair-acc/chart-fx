@@ -160,10 +160,11 @@ public class SimpleMeasurementsTests {
             double maxValue = type.isVerticalMeasurement() ? 14 : 0.8;
             fxRobot.interact(() -> field.initialize());
             fxRobot.interact(() -> {
-                field.getValueIndicators().get(0).setValue(minValue);
-                if (type.getRequiredSelectors() > 1)
-                    field.getValueIndicators().get(1).setValue(maxValue);
-            }).interrupt();
+                       field.getValueIndicators().get(0).setValue(minValue);
+                       if (type.getRequiredSelectors() > 1)
+                           field.getValueIndicators().get(1).setValue(maxValue);
+                   })
+                    .interrupt();
             LOGGER.atDebug().addArgument(type).addArgument(field.getValueField().getValue()).log("{}, {}");
             double result = typeResults.get(type);
             //            fxRobot.sleep(10_000);
