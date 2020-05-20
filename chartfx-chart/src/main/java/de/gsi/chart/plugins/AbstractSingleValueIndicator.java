@@ -105,6 +105,7 @@ public abstract class AbstractSingleValueIndicator extends AbstractValueIndicato
                 (ch, o, n) -> invokeListener(new UpdateEvent(this, "value changed to " + n + " for axis " + axis)));
     }
 
+    @Override
     public AtomicBoolean autoNotification() {
         return autoNotification;
     }
@@ -246,9 +247,6 @@ public abstract class AbstractSingleValueIndicator extends AbstractValueIndicato
         return pickingDistance;
     }
 
-    public void removeSelfListener() {
-    }
-
     /**
      * @param autoRemove {@code true} indicator should be removed if there is no listener attached to it
      */
@@ -284,6 +282,7 @@ public abstract class AbstractSingleValueIndicator extends AbstractValueIndicato
         valueProperty().set(newValue);
     }
 
+    @Override
     public List<EventListener> updateEventListener() {
         return updateListeners;
     }
