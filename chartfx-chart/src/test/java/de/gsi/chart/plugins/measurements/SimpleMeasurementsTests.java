@@ -159,6 +159,7 @@ public class SimpleMeasurementsTests {
             double minValue = type.isVerticalMeasurement() ? 2 : 0.2;
             double maxValue = type.isVerticalMeasurement() ? 14 : 0.8;
             fxRobot.interact(() -> field.initialize());
+            fxRobot.interrupt();
             fxRobot.interact(() -> {
                        field.getValueIndicators().get(0).setValue(minValue);
                        if (type.getRequiredSelectors() > 1)
