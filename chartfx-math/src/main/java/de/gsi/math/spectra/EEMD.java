@@ -13,7 +13,6 @@ import de.gsi.math.utils.ConcurrencyUtils;
  * @author rstein
  */
 public class EEMD {
-
     private static TRandom rnd = new TRandom(0);
     private int fstatus = 100;
 
@@ -147,7 +146,6 @@ public class EEMD {
      * @param data input data
      * @param nQuantx quantisation in X
      * @param nQuanty quantisation in Y
-     *
      * @return the complex HHT spectrum
      */
     public synchronized DataSet3D getScalogram(final double[] data, final int nQuantx, final int nQuanty) {
@@ -198,9 +196,7 @@ public class EEMD {
             final double[] frequency_filtered = decon.transform(frequency, lowPass, false);
 
             for (int j = 0; j < nsamples; j++) {
-
                 if (j < nsamples) {
-
                     int yIndex = (int) (frequency_filtered[j] * nsamples);
 
                     if (yIndex < 0) {
@@ -217,7 +213,6 @@ public class EEMD {
                     }
                 }
             }
-
         }
 
         return ret;
@@ -234,7 +229,7 @@ public class EEMD {
      * @return whether class is busy computing a spectra
      */
     public boolean isBusy() {
-        return fstatus < 100 ? true : false;
+        return fstatus < 100;
     }
 
     public static int computeZeroCrossings(final double[] data) {
@@ -259,79 +254,54 @@ public class EEMD {
         return val;
     }
 
+    /**
+     * Find all extrema in a double array.
+     * 
+     * @param data double array with the input data
+     * @param spmax array double[2][nMaxima] with index and value of all maxima (+ first and last point)
+     * @param spmin array double[2][nMaxima] with index and value of all minima (+ first and last point)
+     * @return 1 if inner maxima and minima where found, -1 elsewise
+     */
     public static int extrema(final double[] data, final double[][] spmax, final double[][] spmin) {
-        int flag = 1;
         int dsize = data.length;
 
-        spmax[0][0] = 0;
-        spmax[1][0] = data[1];
-        int jj = 1;
-        int kk = 1;
+        // find all extrema
+        int kk = 0; // number of found maxima
+        int ll = 0; // number of found minima
+        // determine if first point is maximum or minimum
+        if (data[0] >= data[1]) {
+            spmax[0][0] = 0;
+            spmax[1][0] = data[0];
+            kk++;
+        } else {
+            spmin[0][0] = 0;
+            spmin[1][0] = data[0];
+            ll++;
+        }
+        int jj = 1; // data index
         while (jj < dsize - 1) {
-            if (data[jj - 1] <= data[jj] & data[jj] >= data[jj + 1]) {
+            if (data[jj - 1] <= data[jj] && data[jj] >= data[jj + 1]) { // maximum
                 spmax[0][kk] = jj;
                 spmax[1][kk] = data[jj];
                 kk = kk + 1;
+            } else if (data[jj - 1] >= data[jj] && data[jj] <= data[jj + 1]) { // minimum
+                spmin[0][ll] = jj;
+                spmin[1][ll] = data[jj];
+                ll++;
             }
             jj = jj + 1;
         }
-
-        spmax[0][kk] = dsize - 1;
-        spmax[1][kk] = data[dsize - 1];
-
-        if (kk >= 3) {
-            final double slope1 = (spmax[1][1] - spmax[1][2]) / (spmax[0][1] - spmax[0][2]);
-            final double tmp1 = slope1 * (spmax[0][0] - spmax[0][1]) + spmax[1][1];
-            if (tmp1 > spmax[1][0]) {
-                spmax[1][0] = tmp1;
-            }
-
-            final double slope2 = (spmax[1][kk - 1] - spmax[1][kk - 2]) / (spmax[0][kk - 1] - spmax[0][kk - 2]);
-            final double tmp2 = slope2 * (spmax[0][kk] - spmax[0][kk - 1]) + spmax[1][kk - 1];
-            if (tmp2 > spmax[1][kk]) {
-                spmax[1][kk] = tmp2;
-            }
+        // determine if last point is minumum or maximum
+        if (data[dsize - 2] <= data[dsize - 1]) {
+            spmax[0][kk] = dsize - 1.0;
+            spmax[1][kk] = data[dsize - 1];
+            kk++;
         } else {
-            flag = -1;
+            spmin[0][ll] = dsize - 1.0;
+            spmin[1][ll] = data[dsize - 1];
+            ll++;
         }
 
-        dsize = data.length;
-
-        spmin[0][0] = 0;
-        spmin[1][0] = data[0];
-        jj = 2;
-        kk = 2;
-        while (jj < dsize - 1) {
-            if (data[jj - 1] >= data[jj] && data[jj] <= data[jj + 1]) {
-                spmin[0][kk] = jj;
-                spmin[1][kk] = data[jj];
-                kk++;
-            }
-            jj = jj + 1;
-        }
-
-        spmin[0][kk] = dsize - 1;
-        spmin[1][kk] = data[dsize - 1];
-
-        if (kk >= 3) {
-            final double slope1 = (spmin[1][1] - spmin[1][2]) / (spmin[0][1] - spmin[0][2]);
-            final double tmp1 = slope1 * (spmin[0][0] - spmin[0][1]) + spmin[1][1];
-            if (tmp1 < spmin[1][0]) {
-                spmin[1][0] = tmp1;
-            }
-
-            final double slope2 = (spmin[1][kk - 1] - spmin[1][kk - 2]) / (spmin[0][kk - 1] - spmin[0][kk - 2]);
-            final double tmp2 = slope2 * (spmin[0][kk] - spmin[0][kk - 1]) + spmin[1][kk - 1];
-
-            if (tmp2 < spmin[1][kk]) {
-                spmin[1][kk] = tmp2;
-            }
-        } else {
-            flag = -1;
-        }
-
-        flag = 1;
-
-        return flag;
+        return kk + ll > 2 ? 1 : -1;
     }
 }
