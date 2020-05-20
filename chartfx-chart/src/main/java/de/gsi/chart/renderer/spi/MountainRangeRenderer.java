@@ -1,5 +1,7 @@
 package de.gsi.chart.renderer.spi;
 
+import static de.gsi.dataset.DataSet.DIM_X;
+import static de.gsi.dataset.DataSet.DIM_Y;
 import static de.gsi.dataset.DataSet.DIM_Z;
 
 import java.security.InvalidParameterException;
@@ -39,7 +41,7 @@ public class MountainRangeRenderer extends ErrorDataSetRenderer implements Rende
     private final ObservableList<DataSet> empty = FXCollections.observableArrayList();
     private final WeakHashMap<Double, Integer> xWeakIndexMap = new WeakHashMap<>();
     private final WeakHashMap<Double, Integer> yWeakIndexMap = new WeakHashMap<>();
-    private double mountainRaingeExtra;
+    private double mountainRangeExtra;
 
     public MountainRangeRenderer() {
         super();
@@ -98,8 +100,8 @@ public class MountainRangeRenderer extends ErrorDataSetRenderer implements Rende
             if (dataSet.getDimension() < MIN_DIM) {
                 continue;
             }
-            final int nx = dataSet.getDataCount(DataSet.DIM_X);
-            final int ny = dataSet.getDataCount(DataSet.DIM_Y);
+            final int nx = dataSet.getDataCount(DIM_X);
+            final int ny = dataSet.getDataCount(DIM_Y);
             final int nz = dataSet.getDataCount(DIM_Z);
             if (nz != nx * ny) {
                 // this renderer can handle only DataSets that are equidistantly-rastered
@@ -109,10 +111,10 @@ public class MountainRangeRenderer extends ErrorDataSetRenderer implements Rende
             dataSet.lock().readLockGuardOptimistic(() -> {
                 xWeakIndexMap.clear();
                 yWeakIndexMap.clear();
-                mountainRaingeExtra = getMountainRangeOffset();
+                mountainRangeExtra = getMountainRangeOffset();
 
                 final double min = zRangeMin;
-                final double max = zRangeMax * (1.0 + mountainRaingeExtra);
+                final double max = zRangeMax * (1.0 + mountainRangeExtra);
                 final boolean autoRange = yAxis.isAutoRanging();
                 if (autoRange && (min != yAxis.getMin() || max != yAxis.getMax())) {
                     yAxis.setAutoRanging(false);
@@ -123,7 +125,7 @@ public class MountainRangeRenderer extends ErrorDataSetRenderer implements Rende
                 }
                 yAxis.setAutoRanging(autoRange);
 
-                final int yCountMax = dataSet.getDataCount(DataSet.DIM_Y);
+                final int yCountMax = dataSet.getDataCount(DIM_Y);
                 checkAndRecreateRenderer(yCountMax);
 
                 for (int index = yCountMax - 1; index >= 0; index--) {
@@ -183,7 +185,6 @@ public class MountainRangeRenderer extends ErrorDataSetRenderer implements Rende
         private final int nx;
         private final int ny;
         private final int yIndex;
-        private final int yMax;
         private final double zMin;
         private final double zMax;
         private final double yShift;
@@ -192,16 +193,16 @@ public class MountainRangeRenderer extends ErrorDataSetRenderer implements Rende
                 new DefaultAxisDescription("x-Axis", "a.u."), //
                 new DefaultAxisDescription("y-Axis", "a.u.")));
 
-        public Demux3dTo2dDataSet(final DataSet sourceDataSet, final int selectedYIndex, final double zMin, final double zMax) {
+        public Demux3dTo2dDataSet(final DataSet sourceDataSet, final int selectedYIndex, final double zMin,
+                final double zMax) {
             super();
             dataSet = sourceDataSet;
-            nx = sourceDataSet.getDataCount(DIM_X);
-            ny = sourceDataSet.getDataCount(DIM_Y);
+            nx = dataSet.getDataCount(DIM_X);
+            ny = dataSet.getDataCount(DIM_Y);
             yIndex = selectedYIndex;
-            yMax = dataSet.getDataCount(DIM_Y);
             this.zMin = zMin;
             this.zMax = zMax;
-            yShift = mountainRaingeExtra * dataSet.getAxisDescription(DIM_Z).getMax() * yIndex / yMax;
+            yShift = ny > 0 ? mountainRangeExtra * dataSet.getAxisDescription(DIM_Z).getMax() * yIndex / ny : 0;
         }
 
         @Override
