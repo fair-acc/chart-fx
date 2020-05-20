@@ -281,16 +281,16 @@ public class SimpleMeasurements extends AbstractChartMeasurement {
         TRANSMISSION_REL(true, ACC, "Rel. Transmission"),
 
         // horizontal-type measurements
-        EDGE_DETECT(false, HORIZONTAL, "Edge-Detect"),
-        RISETIME_10_90(false, HORIZONTAL, "10%-90% Rise-/Fall-Time\n (simple)"),
-        RISETIME_20_80(false, HORIZONTAL, "20%-80% Rise-/Fall-Time\n (simple)"),
-        FWHM(false, HORIZONTAL, "FWHM"),
-        FWHM_INTERPOLATED(false, HORIZONTAL, "FWHM (interp.)"),
-        LOCATION_MAXIMUM(false, HORIZONTAL, "Loc. Maximum"),
-        LOCATION_MAXIMUM_GAUSS(false, HORIZONTAL, "Loc. Maximum\n(Gauss-interp.)"),
-        DUTY_CYCLE(false, HORIZONTAL, "Duty Cycle\n(10% hysteresis)"),
+        EDGE_DETECT(true, HORIZONTAL, "Edge-Detect"),
+        RISETIME_10_90(true, HORIZONTAL, "10%-90% Rise-/Fall-Time\n (simple)"),
+        RISETIME_20_80(true, HORIZONTAL, "20%-80% Rise-/Fall-Time\n (simple)"),
+        FWHM(true, HORIZONTAL, "FWHM"),
+        FWHM_INTERPOLATED(true, HORIZONTAL, "FWHM (interp.)"),
+        LOCATION_MAXIMUM(true, HORIZONTAL, "Loc. Maximum"),
+        LOCATION_MAXIMUM_GAUSS(true, HORIZONTAL, "Loc. Maximum\n(Gauss-interp.)"),
+        DUTY_CYCLE(true, HORIZONTAL, "Duty Cycle\n(10% hysteresis)"),
         PERIOD(true, HORIZONTAL, "Period"),
-        FREQUENCY(false, HORIZONTAL, "Frequency");
+        FREQUENCY(true, HORIZONTAL, "Frequency");
 
         private String name;
         private MeasurementCategory category;
