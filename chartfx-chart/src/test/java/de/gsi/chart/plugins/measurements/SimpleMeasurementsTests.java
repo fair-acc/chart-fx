@@ -1,8 +1,6 @@
 package de.gsi.chart.plugins.measurements;
 
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.hasProperty;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -14,41 +12,31 @@ import static org.junit.jupiter.api.Assertions.fail;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
-import javafx.scene.input.KeyCode;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 import org.awaitility.Awaitility;
-import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testfx.api.FxAssert;
 import org.testfx.api.FxRobot;
 import org.testfx.framework.junit5.ApplicationExtension;
 import org.testfx.framework.junit5.Start;
-import org.testfx.util.WaitForAsyncUtils;
 
 import de.gsi.chart.XYChart;
 import de.gsi.chart.plugins.ParameterMeasurements;
-import de.gsi.chart.plugins.XValueIndicator;
 import de.gsi.chart.plugins.measurements.SimpleMeasurements.MeasurementCategory;
 import de.gsi.chart.plugins.measurements.SimpleMeasurements.MeasurementType;
-import de.gsi.chart.plugins.measurements.utils.CheckedValueField;
 import de.gsi.chart.ui.utils.JavaFXInterceptorUtils.SelectiveJavaFxInterceptor;
 import de.gsi.chart.ui.utils.TestFx;
-import de.gsi.dataset.event.UpdatedDataEvent;
 import de.gsi.dataset.testdata.spi.SineFunction;
 import de.gsi.dataset.testdata.spi.TriangleFunction;
 
@@ -79,7 +67,7 @@ public class SimpleMeasurementsTests {
     }
 
     @TestFx
-    public void testSetterGetter() throws InterruptedException, ExecutionException {
+    public void testSetterGetter() {
         chart.getDatasets().add(new SineFunction("sine", 1000));
         field = new SimpleMeasurements(plugin, MeasurementType.MEAN);
         assertTrue(field.getMeasType().isVerticalMeasurement());
