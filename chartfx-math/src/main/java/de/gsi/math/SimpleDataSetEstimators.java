@@ -181,7 +181,7 @@ public final class SimpleDataSetEstimators { // NOPMD name is as is (ie. no Help
      * @return time from indexMin to 50% of data range reached
      */
     public static double getEdgeDetect(final DataSet dataSet, final int indexMin, final int indexMax) {
-        if (dataSet.getDataCount() == 0) {
+        if (dataSet.getDataCount() == 0 || indexMin == indexMax) {
             return Double.NaN;
         }
         final double minVal = SimpleDataSetEstimators.getMinimum(dataSet, indexMin, indexMax);
