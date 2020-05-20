@@ -13,7 +13,6 @@ import de.gsi.math.utils.ConcurrencyUtils;
  * @author rstein
  */
 public class EEMD {
-
     private static TRandom rnd = new TRandom(0);
     private int fstatus = 100;
 
@@ -197,9 +196,7 @@ public class EEMD {
             final double[] frequency_filtered = decon.transform(frequency, lowPass, false);
 
             for (int j = 0; j < nsamples; j++) {
-
                 if (j < nsamples) {
-
                     int yIndex = (int) (frequency_filtered[j] * nsamples);
 
                     if (yIndex < 0) {
@@ -216,7 +213,6 @@ public class EEMD {
                     }
                 }
             }
-
         }
 
         return ret;
@@ -288,7 +284,7 @@ public class EEMD {
                 spmax[0][kk] = jj;
                 spmax[1][kk] = data[jj];
                 kk = kk + 1;
-            }else if (data[jj - 1] >= data[jj] && data[jj] <= data[jj + 1]) { // minimum
+            } else if (data[jj - 1] >= data[jj] && data[jj] <= data[jj + 1]) { // minimum
                 spmin[0][ll] = jj;
                 spmin[1][ll] = data[jj];
                 ll++;
@@ -296,13 +292,13 @@ public class EEMD {
             jj = jj + 1;
         }
         // determine if last point is minumum or maximum
-        if (data[dsize -2] <= data[dsize-1]) {
+        if (data[dsize - 2] <= data[dsize - 1]) {
             spmax[0][kk] = dsize - 1.0;
-            spmax[1][kk] = data[dsize-1];
+            spmax[1][kk] = data[dsize - 1];
             kk++;
         } else {
             spmin[0][ll] = dsize - 1.0;
-            spmin[1][ll] = data[dsize-1];
+            spmin[1][ll] = data[dsize - 1];
             ll++;
         }
 
