@@ -27,7 +27,8 @@ import de.gsi.dataset.event.UpdateEvent;
  *
  * @author mhrabia
  */
-public abstract class AbstractSingleValueIndicator extends AbstractValueIndicator implements EventSource, ValueIndicator {
+public abstract class AbstractSingleValueIndicator extends AbstractValueIndicator
+        implements EventSource, ValueIndicator {
     /**
      * The default distance between the data point coordinates and mouse cursor that triggers shifting the line.
      */
@@ -39,6 +40,7 @@ public abstract class AbstractSingleValueIndicator extends AbstractValueIndicato
     protected static double triangleHalfWidth = 5.0;
     private final transient AtomicBoolean autoNotification = new AtomicBoolean(true);
     private final transient List<EventListener> updateListeners = Collections.synchronizedList(new LinkedList<>());
+    private boolean autoRemove = false;
 
     /**
      * Line indicating the value.
@@ -50,7 +52,6 @@ public abstract class AbstractSingleValueIndicator extends AbstractValueIndicato
      * small triangle marker as handler to shift the line marker
      */
     protected final Polygon triangle = new Polygon();
-
     private final DoubleProperty pickingDistance = new SimpleDoubleProperty(this, "pickingDistance",
             DEFAULT_PICKING_DISTANCE) {
         @Override
@@ -82,7 +83,6 @@ public abstract class AbstractSingleValueIndicator extends AbstractValueIndicato
      * Creates a new instance of AbstractSingleValueIndicator.
      * 
      * @param axis reference axis
-     * 
      * @param value a X value to be indicated
      * @param text the text to be shown by the label. Value of {@link #textProperty()}.
      */
@@ -101,8 +101,12 @@ public abstract class AbstractSingleValueIndicator extends AbstractValueIndicato
         // applied and we can calculate label's
         // width and height
         getChartChildren().addAll(line, triangle, label);
+        this.value.addListener(
+                (ch, o, n) -> invokeListener(new UpdateEvent(this, "value changed to " + n + " for axis " + axis)));
+    }
 
-        this.value.addListener((ch, o, n) -> invokeListener(new UpdateEvent(this, "value changed to " + n + " for axis " + axis)));
+    public AtomicBoolean autoNotification() {
+        return autoNotification;
     }
 
     /**
@@ -171,12 +175,11 @@ public abstract class AbstractSingleValueIndicator extends AbstractValueIndicato
         });
     }
 
-    public AtomicBoolean autoNotification() {
-        return autoNotification;
-    }
-
-    public List<EventListener> updateEventListener() {
-        return updateListeners;
+    /**
+     * @return {@code true} indicator should be removed if there is no listener attached to it
+     */
+    public boolean isAutoRemove() {
+        return autoRemove;
     }
 
     /**
@@ -243,6 +246,16 @@ public abstract class AbstractSingleValueIndicator extends AbstractValueIndicato
         return pickingDistance;
     }
 
+    public void removeSelfListener() {
+    }
+
+    /**
+     * @param autoRemove {@code true} indicator should be removed if there is no listener attached to it
+     */
+    public void setAutoRemove(boolean autoRemove) {
+        this.autoRemove = autoRemove;
+    }
+
     /**
      * Sets the new value of the {@link #labelPositionProperty()}.
      *
@@ -269,6 +282,10 @@ public abstract class AbstractSingleValueIndicator extends AbstractValueIndicato
     @Override
     public final void setValue(final double newValue) {
         valueProperty().set(newValue);
+    }
+
+    public List<EventListener> updateEventListener() {
+        return updateListeners;
     }
 
     private void updateMouseListener(final boolean state) {
