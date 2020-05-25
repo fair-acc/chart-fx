@@ -14,8 +14,6 @@ import javafx.scene.text.FontWeight;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Test StyleParser
@@ -24,8 +22,6 @@ import org.slf4j.LoggerFactory;
  * @author rstein
  */
 class StyleParserTest {
-    private static final Logger LOGGER = LoggerFactory.getLogger(StyleParserTest.class);
-
     @Test
     @DisplayName("Test parsing styles")
     public void testStyleParser() {
@@ -65,7 +61,7 @@ class StyleParserTest {
         assertEquals(null, StyleParser.getFloatingDecimalArrayPropertyValue(null, "stroke"));
         assertEquals(null, StyleParser.getFloatingDecimalArrayPropertyValue(testStyle, "malformedInt"));
 
-        Map<String, String> emptyMap = StyleParser.splitIntoMap(null);
+        final Map<String, String> emptyMap = StyleParser.splitIntoMap(null);
         assertTrue(emptyMap.isEmpty());
         StyleParser.splitIntoMap("=2");
         emptyMap.put("property1", "value");
@@ -103,10 +99,8 @@ class StyleParserTest {
         final String fontTestStyle1 = "font=Helvetica; fontWeight=bold; fontSize=18; fontPosture = italic;";
         final String fontTestStyle2 = "font=; fontWeight=bold; fontSize=18; fontPosture = italic;";
         assertEquals(Font.font("Helvetia", 18.0), StyleParser.getFontPropertyValue(null));
-        assertEquals(Font.font("system", FontWeight.BOLD, FontPosture.ITALIC, 18),
-                StyleParser.getFontPropertyValue(fontTestStyle1));
-        assertEquals(Font.font("system", FontWeight.BOLD, FontPosture.ITALIC, 18),
-                StyleParser.getFontPropertyValue(fontTestStyle2));
+        assertEquals(Font.font("system", FontWeight.BOLD, FontPosture.ITALIC, 18), StyleParser.getFontPropertyValue(fontTestStyle1));
+        assertEquals(Font.font("system", FontWeight.BOLD, FontPosture.ITALIC, 18), StyleParser.getFontPropertyValue(fontTestStyle2));
         assertNotNull(StyleParser.getFontPropertyValue("font=Helvetica"));
         assertNotNull(StyleParser.getFontPropertyValue("font2=Helvetica"));
     }
