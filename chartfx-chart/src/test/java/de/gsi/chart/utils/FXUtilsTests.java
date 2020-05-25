@@ -2,6 +2,7 @@ package de.gsi.chart.utils;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -32,8 +33,7 @@ import de.gsi.chart.ui.utils.TestFx;
 @ExtendWith(ApplicationExtension.class)
 @ExtendWith(SelectiveJavaFxInterceptor.class)
 public class FXUtilsTests {
-    private static final Class<?> clazz = FXUtilsTests.class;
-    private static final Logger LOGGER = LoggerFactory.getLogger(clazz);
+    private static final Logger LOGGER = LoggerFactory.getLogger(FXUtilsTests.class);
     private static final int WIDTH = 300;
     private static final int HEIGHT = 200;
     private Label testLabel;
@@ -52,24 +52,24 @@ public class FXUtilsTests {
         FXUtils.keepJavaFxAlive();
 
         FXUtils.runAndWait(() -> {
-            LOGGER.atTrace().log("execute Runnable in JavaFX thread");
+            // execute Runnable in JavaFX thread
             FXUtils.assertJavaFxThread();
         });
 
         assertTrue(FXUtils.runAndWait(() -> {
-            LOGGER.atTrace().log("execute Supplier in JavaFX thread");
+            // execute Supplier in JavaFX thread
             FXUtils.assertJavaFxThread();
             return true;
         }));
 
         assertEquals(42.0, FXUtils.runAndWait(42.0, a -> {
-            LOGGER.atTrace().log("execute Function<R,T> in JavaFX thread");
+            // execute Function<R,T> in JavaFX thread
             FXUtils.assertJavaFxThread();
             return a;
         }));
 
         FXUtils.runFX(() -> {
-            LOGGER.atTrace().log("execute Runnable in runLater in JavaFX thread");
+            // execute Runnable in runLater in JavaFX thread
             FXUtils.assertJavaFxThread();
         });
 
@@ -86,12 +86,12 @@ public class FXUtilsTests {
 
         // test assertions
         assertThrows(IllegalStateException.class, () -> FXUtils.runFX(() -> {
-            LOGGER.atTrace().log("execute Runnable with exception in runFX in JavaFX thread");
+            // execute Runnable with exception in runFX in JavaFX thread
             throw new IllegalStateException("should be caught and swallowed by unit-test");
         }));
 
         assertThrows(IllegalStateException.class, () -> FXUtils.runAndWait(() -> {
-            LOGGER.atTrace().log("execute Runnable with exception in runAndWait in JavaFX thread");
+            // execute Runnable with exception in runAndWait in JavaFX thread
             throw new IllegalStateException("should be caught and swallowed by unit-test");
         }));
     }
@@ -103,24 +103,35 @@ public class FXUtilsTests {
         assertThrows(IllegalStateException.class, () -> FXUtils.assertJavaFxThread());
 
         FXUtils.runAndWait(() -> {
-            LOGGER.atTrace().log("execute Runnable in JavaFX thread");
+            // execute Runnable in JavaFX thread
             FXUtils.assertJavaFxThread();
         });
 
-        assertTrue(FXUtils.runAndWait(() -> {
-            LOGGER.atTrace().log("execute Supplier in JavaFX thread");
-            FXUtils.assertJavaFxThread();
-            return true;
-        }));
+        try {
+            final Boolean result = FXUtils.runAndWait(() -> {
+                // execute Supplier in JavaFX thread
+                try {
+                    FXUtils.assertJavaFxThread();
+                } catch (Exception e) {
+                    LOGGER.atError().setCause(e).log("error in FXUtils.assertJavaFxThread()");
+                }
+                return true;
+            });
+            assertNotNull(result, "return value of executed Supplier in JavaFX thread");
+            assertTrue(result);
+        } catch (Exception e) {
+            LOGGER.atError().setCause(e).log("error in FXUtils.runAndWait(() -> { FXUtils.assertJavaFxThread(); ...}");
+            throw e;
+        }
 
         assertEquals(42.0, FXUtils.runAndWait(42.0, a -> {
-            LOGGER.atTrace().log("execute Function<R,T> in JavaFX thread");
+            // execute Function<R,T> in JavaFX thread
             FXUtils.assertJavaFxThread();
             return a;
         }));
 
         FXUtils.runFX(() -> {
-            LOGGER.atTrace().log("execute Runnable in runLater in JavaFX thread");
+            // execute Runnable in runLater in JavaFX thread
             FXUtils.assertJavaFxThread();
         });
 
@@ -147,7 +158,7 @@ public class FXUtilsTests {
         // }));
 
         assertThrows(IllegalStateException.class, () -> FXUtils.runAndWait(() -> {
-            LOGGER.atTrace().log("execute Runnable with exception in runAndWait in JavaFX thread");
+            // execute Runnable with exception in runAndWait in JavaFX thread
             throw new IllegalStateException("should be caught and swallowed by unit-test");
         }));
     }
