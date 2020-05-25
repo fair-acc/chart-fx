@@ -30,7 +30,6 @@ import org.apache.commons.math3.complex.ComplexUtils;
  * stopband filters. For example: butterworth.bandPass(2,250,50,5);
  */
 public class Butterworth extends Cascade {
-
     /**
      * Band-pass filter with default topology
      *
@@ -135,7 +134,6 @@ public class Butterworth extends Cascade {
 
     private void setupBandPass(final int order, final double sampleRate, final double centerFrequency,
             final double widthFrequency, final int directFormType) {
-
         final AnalogLowPass analogProto = new AnalogLowPass(order);
         analogProto.design();
 
@@ -145,12 +143,10 @@ public class Butterworth extends Cascade {
                 analogProto);
 
         setLayout(digitalProto, directFormType);
-
     }
 
     private void setupBandStop(final int order, final double sampleRate, final double centerFrequency,
             final double widthFrequency, final int directFormType) {
-
         final AnalogLowPass analogProto = new AnalogLowPass(order);
         analogProto.design();
 
@@ -164,7 +160,6 @@ public class Butterworth extends Cascade {
 
     private void setupHighPass(final int order, final double sampleRate, final double cutoffFrequency,
             final int directFormType) {
-
         final AnalogLowPass analogProto = new AnalogLowPass(order);
         analogProto.design();
 
@@ -177,7 +172,6 @@ public class Butterworth extends Cascade {
 
     private void setupLowPass(final int order, final double sampleRate, final double cutoffFrequency,
             final int directFormType) {
-
         final AnalogLowPass analogProto = new AnalogLowPass(order);
         analogProto.design();
 
@@ -188,13 +182,12 @@ public class Butterworth extends Cascade {
         setLayout(digitalProto, directFormType);
     }
 
-    class AnalogLowPass extends LayoutBase {
-
+    private class AnalogLowPass extends LayoutBase {
         private final int nPoles;
 
-        public AnalogLowPass(final int _nPoles) {
-            super(_nPoles);
-            nPoles = _nPoles;
+        public AnalogLowPass(final int nPoles) {
+            super(nPoles);
+            this.nPoles = nPoles;
             setNormal(0, 1);
         }
 
@@ -212,5 +205,4 @@ public class Butterworth extends Cascade {
             }
         }
     }
-
 }

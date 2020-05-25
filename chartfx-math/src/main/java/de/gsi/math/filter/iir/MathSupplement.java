@@ -25,10 +25,15 @@ import org.apache.commons.math3.complex.Complex;
 
 /**
  * Useful math functions which come back over and over again
+ * 
+ * @deprecated does not seem to be used elsewhere, targeted for removal
  */
-public class MathSupplement {
+@Deprecated
+public final class MathSupplement { // NOPMD - nomen est omen
 
-    public static double doubleLn10 = 2.3025850929940456840179914546844;
+    private MathSupplement() {
+        // utility class
+    }
 
     public static double acosh(final double x) {
         return Math.log(x + Math.sqrt(x * x - 1));
@@ -38,8 +43,8 @@ public class MathSupplement {
         return new Complex(c.getReal() + v * c1.getReal(), c.getImaginary() + v * c1.getImaginary());
     }
 
-    public static Complex adjust_imag(final Complex c) {
-        if (Math.abs(c.getImaginary()) < 1e-30) {
+    public static Complex adjustImag(final Complex c) {
+        if (Math.abs(c.getImaginary()) < 1e-30) { // NOPMD - required for numeric stability
             return new Complex(c.getReal(), 0);
         } else {
             return c;
@@ -56,12 +61,11 @@ public class MathSupplement {
         return new Complex(n * c.getReal(), n * c.getImaginary());
     }
 
-    public static Complex solve_quadratic_1(final double a, final double b, final double c) {
+    public static Complex solveQuadratic1(final double a, final double b, final double c) {
         return new Complex(-b).add(new Complex(b * b - 4 * a * c, 0)).sqrt().divide(2. * a);
     }
 
-    public static Complex solve_quadratic_2(final double a, final double b, final double c) {
+    public static Complex solveQuadratic2(final double a, final double b, final double c) {
         return new Complex(-b).subtract(new Complex(b * b - 4 * a * c, 0)).sqrt().divide(2. * a);
     }
-
 }

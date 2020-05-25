@@ -28,7 +28,6 @@ import org.apache.commons.math3.complex.ComplexUtils;
  * Contains the coefficients of a 2nd order digital filter with two poles and two zeros
  */
 public class Biquad {
-
     public double mA0;
     public double mA1;
     public double mA2;
@@ -137,28 +136,24 @@ public class Biquad {
         double a1;
         double a2;
 
-        if (pole1.getImaginary() != 0) {
-
-            a1 = -2 * pole1.getReal();
-            a2 = pole1.abs() * pole1.abs();
-        } else {
-
+        if (pole1.getImaginary() == 0) {
             a1 = -(pole1.getReal() + pole2.getReal());
             a2 = pole1.getReal() * pole2.getReal();
+        } else {
+            a1 = -2 * pole1.getReal();
+            a2 = pole1.abs() * pole1.abs();
         }
 
         final double b0 = 1;
         double b1;
         double b2;
 
-        if (zero1.getImaginary() != 0) {
-
-            b1 = -2 * zero1.getReal();
-            b2 = zero1.abs() * zero1.abs();
-        } else {
-
+        if (zero1.getImaginary() == 0) {
             b1 = -(zero1.getReal() + zero2.getReal());
             b2 = zero1.getReal() * zero2.getReal();
+        } else {
+            b1 = -2 * zero1.getReal();
+            b2 = zero1.abs() * zero1.abs();
         }
 
         setCoefficients(a0, a1, a2, b0, b1, b2);

@@ -29,7 +29,6 @@ import org.apache.commons.math3.complex.ComplexUtils;
  * the states of the 2nd order filters which also imply if it's direct form I or II
  */
 public class Cascade {
-
     // coefficients
     private Biquad[] mBiquads;
 
@@ -41,8 +40,6 @@ public class Cascade {
 
     public Cascade() {
         mNumBiquads = 0;
-        mBiquads = null;
-        mStates = null;
     }
 
     public void applyScale(final double scale) {
@@ -87,11 +84,11 @@ public class Cascade {
         for (int i = 0; i < mNumBiquads; i++) {
             final Biquad stage = mBiquads[i];
 
-            Complex ct = new Complex(stage.getB0() / stage.getA0());
+            Complex ct = new Complex(stage.getB0() / stage.getA0()); // NOPMD
             ct = ct.add(czn1.multiply(stage.getB1() / stage.getA0()));
             ct = ct.add(czn2.multiply(stage.getB2() / stage.getA0()));
 
-            Complex cb = new Complex(1);
+            Complex cb = new Complex(1); // NOPMD
             cb = cb.add(czn1.multiply(stage.getA1() / stage.getA0()));
             cb = cb.add(czn2.multiply(stage.getA2() / stage.getA0()));
 
@@ -110,20 +107,20 @@ public class Cascade {
         case DirectFormAbstract.DIRECT_FORM_I:
             mStates = new DirectFormI[mNumBiquads];
             for (int i = 0; i < mNumBiquads; i++) {
-                mStates[i] = new DirectFormI();
+                mStates[i] = new DirectFormI(); // NOPMD
             }
             break;
         case DirectFormAbstract.DIRECT_FORM_II:
         default:
             mStates = new DirectFormII[mNumBiquads];
             for (int i = 0; i < mNumBiquads; i++) {
-                mStates[i] = new DirectFormII();
+                mStates[i] = new DirectFormII(); // NOPMD
             }
             break;
         }
         for (int i = 0; i < mNumBiquads; ++i) {
             final PoleZeroPair p = proto.getPair(i);
-            mBiquads[i] = new Biquad();
+            mBiquads[i] = new Biquad(); // NOPMD
             mBiquads[i].setPoleZeroPair(p);
         }
         applyScale(proto.getNormalGain() / response(proto.getNormalW() / (2 * Math.PI)).abs());

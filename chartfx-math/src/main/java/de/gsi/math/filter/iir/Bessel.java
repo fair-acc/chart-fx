@@ -30,7 +30,6 @@ import org.apache.commons.math3.complex.Complex;
  * example: bessel.bandPass(2,250,50,5);
  */
 public class Bessel extends Cascade {
-
     /**
      * Bandpass filter with default topology
      *
@@ -135,49 +134,43 @@ public class Bessel extends Cascade {
 
     private void setupBandPass(final int order, final double sampleRate, final double centerFrequency,
             final double widthFrequency, final int directFormType) {
+        final AnalogLowPass analogProtoFilter = new AnalogLowPass(order);
+        analogProtoFilter.design();
 
-        final AnalogLowPass m_analogProto = new AnalogLowPass(order);
-        m_analogProto.design();
+        final LayoutBase digitalProtoFilter = new LayoutBase(order * 2);
 
-        final LayoutBase m_digitalProto = new LayoutBase(order * 2);
+        BandPassTransform.transform(centerFrequency / sampleRate, widthFrequency / sampleRate, digitalProtoFilter, analogProtoFilter);
 
-        BandPassTransform.transform(centerFrequency / sampleRate, widthFrequency / sampleRate, m_digitalProto,
-                m_analogProto);
-
-        setLayout(m_digitalProto, directFormType);
-
+        setLayout(digitalProtoFilter, directFormType);
     }
 
     private void setupBandStop(final int order, final double sampleRate, final double centerFrequency,
             final double widthFrequency, final int directFormType) {
+        final AnalogLowPass analogProtoFilter = new AnalogLowPass(order);
+        analogProtoFilter.design();
 
-        final AnalogLowPass m_analogProto = new AnalogLowPass(order);
-        m_analogProto.design();
+        final LayoutBase digitalProtoFilter = new LayoutBase(order * 2);
 
-        final LayoutBase m_digitalProto = new LayoutBase(order * 2);
+        BandStopTransform.transform(centerFrequency / sampleRate, widthFrequency / sampleRate, digitalProtoFilter,
+                analogProtoFilter);
 
-        BandStopTransform.transform(centerFrequency / sampleRate, widthFrequency / sampleRate, m_digitalProto,
-                m_analogProto);
-
-        setLayout(m_digitalProto, directFormType);
+        setLayout(digitalProtoFilter, directFormType);
     }
 
     private void setupHighPass(final int order, final double sampleRate, final double cutoffFrequency,
             final int directFormType) {
+        final AnalogLowPass analogProtoFilter = new AnalogLowPass(order);
+        analogProtoFilter.design();
 
-        final AnalogLowPass m_analogProto = new AnalogLowPass(order);
-        m_analogProto.design();
+        final LayoutBase digitalProtoFilter = new LayoutBase(order);
 
-        final LayoutBase m_digitalProto = new LayoutBase(order);
+        HighPassTransform.transform(cutoffFrequency / sampleRate, digitalProtoFilter, analogProtoFilter);
 
-        HighPassTransform.transform(cutoffFrequency / sampleRate, m_digitalProto, m_analogProto);
-
-        setLayout(m_digitalProto, directFormType);
+        setLayout(digitalProtoFilter, directFormType);
     }
 
     private void setupLowPass(final int order, final double sampleRate, final double cutoffFrequency,
             final int directFormType) {
-
         final AnalogLowPass analogProto = new AnalogLowPass(order);
 
         analogProto.design();
@@ -189,17 +182,16 @@ public class Bessel extends Cascade {
         setLayout(digitalProto, directFormType);
     }
 
-    class AnalogLowPass extends LayoutBase {
-
-        private int degree;
-        private double[] mA;
+    private class AnalogLowPass extends LayoutBase {
+        private final int degree;
+        private final double[] mA;
         private Complex[] mRoot;
 
-        public AnalogLowPass(final int _degree) {
-            super(_degree);
-            degree = _degree;
-            mA = new double[degree + 1]; // input coefficients (degree+1 elements)
-            mRoot = new Complex[degree]; // array of roots (degree elements)
+        public AnalogLowPass(final int degree) {
+            super(degree);
+            this.degree = degree;
+            mA = new double[this.degree + 1]; // input coefficients (degree+1 elements)
+            mRoot = new Complex[this.degree]; // array of roots (degree elements)
             setNormal(0, 1);
         }
 
@@ -248,7 +240,5 @@ public class Bessel extends Cascade {
             final int diff = n - k;
             return factorial(2 * n - k) / (factorial(diff) * factorial(k) * Math.pow(2.0, diff));
         }
-
     }
-
 }

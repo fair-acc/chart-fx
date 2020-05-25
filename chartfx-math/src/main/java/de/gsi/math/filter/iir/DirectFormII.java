@@ -29,10 +29,6 @@ public class DirectFormII extends DirectFormAbstract {
     public double mV1; // v[-1]
     public double mV2; // v[-2]
 
-    public DirectFormII() {
-        reset();
-    }
-
     @Override
     public double process1(final double in, final Biquad s) {
         if (s != null) {

@@ -26,10 +26,10 @@ import org.apache.commons.math3.complex.Complex;
 /**
  * Transforms from an analogue lowpass filter to a digital lowpass filter
  */
-public class LowPassTransform {
+public final class LowPassTransform { // NOPMD - nomen est omen
 
     private LowPassTransform() {
-
+        // utility class
     }
 
     private static Complex transform(final Complex in, final double f) {
@@ -67,5 +67,4 @@ public class LowPassTransform {
 
         digital.setNormal(analog.getNormalW(), analog.getNormalGain());
     }
-
 }

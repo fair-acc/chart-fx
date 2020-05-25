@@ -30,7 +30,6 @@ import org.apache.commons.math3.util.FastMath;
  * stop-band filters. For example: chebyshevII.bandPass(2,250,50,5,0.5);
  */
 public class ChebyshevII extends Cascade {
-
     /**
      * Bandpass filter with default topology
      *
@@ -144,7 +143,6 @@ public class ChebyshevII extends Cascade {
 
     private void setupBandPass(final int order, final double sampleRate, final double centerFrequency,
             final double widthFrequency, final double rippleDb, final int directFormType) {
-
         final AnalogLowPass analogProto = new AnalogLowPass(order);
         analogProto.design(rippleDb);
 
@@ -154,12 +152,10 @@ public class ChebyshevII extends Cascade {
                 analogProto);
 
         setLayout(digitalProto, directFormType);
-
     }
 
     private void setupBandStop(final int order, final double sampleRate, final double centerFrequency,
             final double widthFrequency, final double rippleDb, final int directFormType) {
-
         final AnalogLowPass analogProto = new AnalogLowPass(order);
         analogProto.design(rippleDb);
 
@@ -173,7 +169,6 @@ public class ChebyshevII extends Cascade {
 
     private void setupHighPass(final int order, final double sampleRate, final double cutoffFrequency,
             final double rippleDb, final int directFormType) {
-
         final AnalogLowPass analogProto = new AnalogLowPass(order);
         analogProto.design(rippleDb);
 
@@ -186,7 +181,6 @@ public class ChebyshevII extends Cascade {
 
     private void setupLowPass(final int order, final double sampleRate, final double cutoffFrequency,
             final double rippleDb, final int directFormType) {
-
         final AnalogLowPass analogProto = new AnalogLowPass(order);
         analogProto.design(rippleDb);
 
@@ -197,15 +191,14 @@ public class ChebyshevII extends Cascade {
         setLayout(digitalProto, directFormType);
     }
 
-    class AnalogLowPass extends LayoutBase {
-
+    private class AnalogLowPass extends LayoutBase {
         private final int nPoles;
 
         // ------------------------------------------------------------------------------
 
-        public AnalogLowPass(final int _nPoles) {
-            super(_nPoles);
-            nPoles = _nPoles;
+        public AnalogLowPass(final int nPoles) {
+            super(nPoles);
+            this.nPoles = nPoles;
         }
 
         public void design(final double stopBandDb) {
@@ -213,26 +206,25 @@ public class ChebyshevII extends Cascade {
 
             final double eps = Math.sqrt(1. / (Math.exp(stopBandDb * 0.1 * Math.log(10)) - 1));
             final double v0 = FastMath.asinh(1 / eps) / nPoles;
-            final double sinh_v0 = -Math.sinh(v0);
-            final double cosh_v0 = Math.cosh(v0);
+            final double sinhv0 = -Math.sinh(v0);
+            final double coshv0 = Math.cosh(v0);
             final double fn = Math.PI / (2 * nPoles);
 
             int k = 1;
             for (int i = nPoles / 2; --i >= 0; k += 2) {
-                final double a = sinh_v0 * Math.cos((k - nPoles) * fn);
-                final double b = cosh_v0 * Math.sin((k - nPoles) * fn);
+                final double a = sinhv0 * Math.cos((k - nPoles) * fn);
+                final double b = coshv0 * Math.sin((k - nPoles) * fn);
                 final double d2 = a * a + b * b;
                 final double im = 1 / Math.cos(k * fn);
-                final Complex pole = new Complex(a / d2, b / d2);
-                final Complex zero = new Complex(0.0, im);
+                final Complex pole = new Complex(a / d2, b / d2); // NOPMD
+                final Complex zero = new Complex(0.0, im); // NOPMD
                 addPoleZeroConjugatePairs(pole, zero);
             }
 
             if ((nPoles & 1) == 1) {
-                add(new Complex(1 / sinh_v0), new Complex(Double.POSITIVE_INFINITY));
+                add(new Complex(1 / sinhv0), new Complex(Double.POSITIVE_INFINITY));
             }
             setNormal(0, 1);
         }
     }
-
 }
