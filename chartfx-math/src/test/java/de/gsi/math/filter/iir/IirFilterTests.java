@@ -489,7 +489,7 @@ public class IirFilterTests {
         assertDoesNotThrow(() -> new Biquad());
         assertDoesNotThrow(() -> new Biquad().setIdentity());
     }
-    
+
     @Test
     public void testHelperMethodComplexPair() {
         assertDoesNotThrow(() -> new Complex(1, 0));
@@ -516,25 +516,25 @@ public class IirFilterTests {
         assertFalse(new ComplexPair(new Complex(0, 1), new Complex(2, 0)).isReal());
         assertFalse(new ComplexPair(new Complex(0, 1), new Complex(2, 1)).isReal());
     }
-    
+
     @Test
     public void testHelperMethodLayoutBase() {
         assertDoesNotThrow(() -> new LayoutBase(new PoleZeroPair(new Complex(1, +1), new Complex(1, +1))));
-                
+
         assertTrue(new PoleZeroPair(new Complex(Double.NaN, 0), new Complex(Double.NaN, 0)).isNaN());
         assertTrue(new PoleZeroPair(new Complex(Double.NaN, 0), new Complex(1, 0)).isNaN());
         assertTrue(new PoleZeroPair(new Complex(1, 0), new Complex(Double.NaN, 0)).isNaN());
         assertFalse(new PoleZeroPair(new Complex(0, 0), new Complex(2, 1)).isNaN());
-        
+
         assertTrue(new PoleZeroPair(new Complex(0, 0), new Complex(0, 0)).isSinglePole());
         assertTrue(new PoleZeroPair(new Complex(0, 0), new Complex(0, 0)).isSinglePole());
         assertTrue(new PoleZeroPair(new Complex(1, 0), new Complex(Double.NaN, 0)).isSinglePole());
-        
+
         final LayoutBase normalBase = new LayoutBase(4);
         assertEquals(0, normalBase.getNumPoles());
-        assertDoesNotThrow(() -> normalBase.addPoleZeroConjugatePairs(new Complex(1,0), new Complex(0, 0)));
-        assertThrows(IllegalArgumentException.class, () -> normalBase.addPoleZeroConjugatePairs(null, new Complex(1,0)));
-        assertThrows(IllegalArgumentException.class, () -> normalBase.addPoleZeroConjugatePairs(new Complex(1,0), null));
+        assertDoesNotThrow(() -> normalBase.addPoleZeroConjugatePairs(new Complex(1, 0), new Complex(0, 0)));
+        assertThrows(IllegalArgumentException.class, () -> normalBase.addPoleZeroConjugatePairs(null, new Complex(1, 0)));
+        assertThrows(IllegalArgumentException.class, () -> normalBase.addPoleZeroConjugatePairs(new Complex(1, 0), null));
     }
 
     private static DataSet filterAndGetMagnitudeSpectrum(final Cascade filter, final DataSet input) {
