@@ -118,11 +118,6 @@ public class Biquad {
         setCoefficients(a0, a1, a2, b0, b1, b2);
     }
 
-    public void setPoleZeroForm(final BiquadPoleState bps) {
-        setPoleZeroPair(bps);
-        applyScale(bps.gain);
-    }
-
     public void setPoleZeroPair(final PoleZeroPair pair) {
         if (pair.isSinglePole()) {
             setOnePole(pair.poles.first, pair.zeros.first);

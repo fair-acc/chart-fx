@@ -42,7 +42,7 @@ public class LayoutBase {
         }
     }
 
-    public LayoutBase(final PoleZeroPair[] pairs) { // NOPMD
+    public LayoutBase(final PoleZeroPair... pairs) { // NOPMD
         mNumPoles = pairs.length * 2;
         mPair = pairs;
     }
@@ -64,9 +64,7 @@ public class LayoutBase {
         if (zero == null) {
             throw new IllegalArgumentException("LayoutBase addConj() zero == null");
         }
-        if (mPair == null) {
-            throw new IllegalArgumentException("LayoutBase addConj() m_pair == null");
-        }
+
         mPair[mNumPoles / 2] = new PoleZeroPair(pole, zero, pole.conjugate(), zero.conjugate());
         mNumPoles += 2;
     }
