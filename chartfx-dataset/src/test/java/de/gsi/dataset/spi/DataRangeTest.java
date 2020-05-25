@@ -5,15 +5,11 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * @author rstein
  */
 public class DataRangeTest {
-    private static final Logger LOGGER = LoggerFactory.getLogger(DataRangeTest.class);
-
     @Test
     public void testAddDoubleArrayMethods() {
         {
@@ -59,15 +55,10 @@ public class DataRangeTest {
             assertEquals(-1.0, test1.getMin());
             assertEquals(+2.0, test1.getMax());
         }
-
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.atDebug().log("finished testAddDoubleArrayMethods()");
-        }
     }
 
     @Test
     public void testAddDoubleMethods() {
-
         // test add(double) interface
         // initial range
         final DataRange test1 = new DataRange(-1.0, +1.0);
@@ -114,10 +105,6 @@ public class DataRangeTest {
         assertTrue(resultE);
         assertEquals(-3.0, test1.getMin());
         assertEquals(+2.0, test1.getMax());
-
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.atDebug().log("finished testAddDoubleMethods()");
-        }
     }
 
     @Test
@@ -141,15 +128,10 @@ public class DataRangeTest {
         assertFalse(resultC);
         assertEquals(-1.0, test1.getMin());
         assertEquals(+1.0, test1.getMax());
-
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.atDebug().log("finished testAddInvalidNumberMethods()");
-        }
     }
 
     @Test
     public void testConstructors() {
-
         {
             final DataRange test1 = new DataRange();
             assertFalse(test1.isDefined());
@@ -178,15 +160,10 @@ public class DataRangeTest {
             assertEquals(-1.0, test1.getMin());
             assertEquals(+1.0, test1.getMax());
         }
-
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.atDebug().log("finished testConstructors()");
-        }
     }
 
     @Test
     public void testSetMethods() {
-
         {
             // test set(double, double) methods
             // internally test also:
@@ -223,17 +200,11 @@ public class DataRangeTest {
             assertFalse(test1.set(test1));
             assertEquals(-2.0, test1.getMin());
             assertEquals(+2.0, test1.getMax());
-
-        }
-
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.atDebug().log("finished testSetMethods()");
         }
     }
 
     @Test
     public void testSpecials() {
-
         {
             final DataRange test1 = new DataRange();
             assertEquals(Double.NaN, test1.getMin());
@@ -275,10 +246,5 @@ public class DataRangeTest {
 
             assertFalse(test1.equals(new Object()));
         }
-
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.atDebug().log("finished testSpecials()");
-        }
     }
-
 }
