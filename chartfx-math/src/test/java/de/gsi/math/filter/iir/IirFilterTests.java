@@ -4,14 +4,16 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.lessThan;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-
-import org.apache.commons.math3.complex.Complex;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import static de.gsi.dataset.DataSet.DIM_X;
 import static de.gsi.dataset.DataSet.DIM_Y;
 import static de.gsi.math.SimpleDataSetEstimators.getMaximum;
 import static de.gsi.math.SimpleDataSetEstimators.getRange;
 
+import org.apache.commons.math3.complex.Complex;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -65,7 +67,7 @@ public class IirFilterTests {
                 magBandPass.getIndex(DIM_X, (F_BAND_CENTRE + 0.1 * F_BAND_WIDTH)));
         assertThat("band-pass pass-band ripple", rangePassBand, lessThan(10 * EPSILON_DB));
     }
-    
+
     @DisplayName("Bessel - Band-Stop")
     @ParameterizedTest(name = "{displayName}: filter-order: {0}, algorithm: {1}")
     @CsvSource({ "2, 0", "3, 0", "4, 0", "2, 1", "3, 1", "4, 1", "2, 2", "3, 2", "4, 2" })
@@ -94,7 +96,7 @@ public class IirFilterTests {
                 magBandStop.getIndex(DIM_X, (F_BAND_CENTRE + 0.03 * F_BAND_WIDTH)));
         assertThat("band-pass stop-band ripple", rangeStopBand, lessThan(3.0 + EPSILON_DB - 10 * filterOrder));
     }
-    
+
     @DisplayName("Bessel - High-Pass")
     @ParameterizedTest(name = "{displayName}: filter-order: {0}, algorithm: {1}")
     @CsvSource({ "2, 0", "3, 0", "4, 0", "2, 1", "3, 1", "4, 1", "2, 2", "3, 2", "4, 2" })
@@ -246,6 +248,26 @@ public class IirFilterTests {
         assertThat("low-pass pass-band ripple", getRange(magLowPass, 0, magLowPass.getIndex(DIM_X, F_CUT_LOW * 0.1)), lessThan(EPSILON_DB));
     }
 
+    @Test
+    public void testButterworthResponse() {
+        final int filterOrder = 4;
+        final Butterworth iirLowPass = new Butterworth();
+        iirLowPass.lowPass(filterOrder, 1.0, F_CUT_LOW);
+        final DataSet magLowPass = filterAndGetMagnitudeSpectrum(iirLowPass, demoDataSet);
+        assertThat("low-pass cut-off", magLowPass.getValue(DIM_X, F_CUT_LOW), lessThan(-3.0 + EPSILON_DB));
+        assertThat("low-pass rejection", magLowPass.getValue(DIM_X, 10 * F_CUT_LOW), lessThan(-3.0 + EPSILON_DB - 20 * filterOrder));
+        assertThat("low-pass pass-band ripple", getRange(magLowPass, 0, magLowPass.getIndex(DIM_X, F_CUT_LOW * 0.1)), lessThan(EPSILON_DB));
+
+        // response
+        assertEquals(filterOrder / 2, iirLowPass.getNumBiquads());
+        Complex cornerFrequency = new Complex(1, 0);
+        for (int i = 0; i < iirLowPass.getNumBiquads(); i++) {
+            cornerFrequency = cornerFrequency.multiply(iirLowPass.getBiquad(i).response(F_CUT_LOW));
+        }
+        final double valueAtCutOff = 20 * TMathConstants.Log10(cornerFrequency.abs());
+        assertThat("low-pass cut-off (response calculation)", valueAtCutOff, lessThan(-3.0 + EPSILON_DB));
+    }
+
     @DisplayName("ChebyshevI - Band-Pass")
     @ParameterizedTest(name = "{displayName}: filter-order: {0}, algorithm: {1}")
     @CsvSource({ "2, 0", "3, 0", "4, 0", "2, 1", "3, 1", "4, 1", "2, 2", "3, 2", "4, 2" })
@@ -274,7 +296,6 @@ public class IirFilterTests {
                 magBandPass.getIndex(DIM_X, (F_BAND_CENTRE + 0.1 * F_BAND_WIDTH)));
         assertThat("band-pass pass-band ripple", rangePassBand, lessThan(ALLOWED_IN_BAND_RIPPLE_DB + EPSILON_DB));
     }
-
     @DisplayName("ChebyshevI - Band-Stop")
     @ParameterizedTest(name = "{displayName}: filter-order: {0}, algorithm: {1}")
     @CsvSource({ "2, 0", "3, 0", "4, 0", "2, 1", "3, 1", "4, 1", "2, 2", "3, 2", "4, 2" })
@@ -326,6 +347,7 @@ public class IirFilterTests {
         assertThat("high-pass rejection", magHighPass.getValue(DIM_X, 0.1 * F_CUT_HIGH), lessThan(-3.0 + EPSILON_DB - 20 * filterOrder));
         assertThat("high-pass pass-band ripple", getRange(magHighPass, (int) (N_SAMPLES_FFT * 0.95), N_SAMPLES_FFT), lessThan(ALLOWED_IN_BAND_RIPPLE_DB + EPSILON_DB));
     }
+
     @DisplayName("ChebyshevII - Band-Pass")
     @ParameterizedTest(name = "{displayName}: filter-order: {0}, algorithm: {1}")
     @CsvSource({ "2, 0", "3, 0", "4, 0", "2, 1", "3, 1", "4, 1", "2, 2", "3, 2", "4, 2" })
@@ -461,25 +483,58 @@ public class IirFilterTests {
         assertDoesNotThrow(() -> new ChebyshevI());
         assertDoesNotThrow(() -> new ChebyshevII());
     }
+
+    @Test
+    public void testHelperMethodBiquad() {
+        assertDoesNotThrow(() -> new Biquad());
+        assertDoesNotThrow(() -> new Biquad().setIdentity());
+    }
     
     @Test
-    public void testButterworthResponse() {
-        final int filterOrder = 4;
-        final Butterworth iirLowPass = new Butterworth();
-        iirLowPass.lowPass(filterOrder, 1.0, F_CUT_LOW);
-        final DataSet magLowPass = filterAndGetMagnitudeSpectrum(iirLowPass, demoDataSet);
-        assertThat("low-pass cut-off", magLowPass.getValue(DIM_X, F_CUT_LOW), lessThan(-3.0 + EPSILON_DB));
-        assertThat("low-pass rejection", magLowPass.getValue(DIM_X, 10 * F_CUT_LOW), lessThan(-3.0 + EPSILON_DB - 20 * filterOrder));
-        assertThat("low-pass pass-band ripple", getRange(magLowPass, 0, magLowPass.getIndex(DIM_X, F_CUT_LOW * 0.1)), lessThan(EPSILON_DB));
+    public void testHelperMethodComplexPair() {
+        assertDoesNotThrow(() -> new Complex(1, 0));
+        assertDoesNotThrow(() -> new ComplexPair(new Complex(1, 0), new Complex(2, 0)));
+
+        assertFalse(new ComplexPair(new Complex(1, 0), new Complex(2, 0)).isNaN());
+        assertTrue(new ComplexPair(new Complex(Double.NaN, 0), new Complex(2, 0)).isNaN());
+        assertTrue(new ComplexPair(new Complex(Double.NaN, 0), new Complex(2, Double.NaN)).isNaN());
+        assertTrue(new ComplexPair(new Complex(1, 0), new Complex(2, Double.NaN)).isNaN());
+
+        assertFalse(new ComplexPair(new Complex(1, +1), new Complex(1, +1)).isConjugate());
+        assertTrue(new ComplexPair(new Complex(1, +1), new Complex(1, -1)).isConjugate());
+
+        assertFalse(new ComplexPair(new Complex(1, +1), new Complex(1, +1)).isMatchedPair());
+        assertFalse(new ComplexPair(new Complex(1, 0), new Complex(1, +1)).isMatchedPair());
+        assertFalse(new ComplexPair(new Complex(1, 1), new Complex(2, 0)).isMatchedPair());
+        assertTrue(new ComplexPair(new Complex(1, +1), new Complex(1, -1)).isMatchedPair());
+        assertTrue(new ComplexPair(new Complex(1, 0), new Complex(2, 0)).isMatchedPair());
+        assertFalse(new ComplexPair(new Complex(0, 0), new Complex(2, 0)).isMatchedPair());
+        assertFalse(new ComplexPair(new Complex(0, 0), new Complex(0, 0)).isMatchedPair());
+
+        assertTrue(new ComplexPair(new Complex(0, 0), new Complex(2, 0)).isReal());
+        assertFalse(new ComplexPair(new Complex(0, 0), new Complex(2, 1)).isReal());
+        assertFalse(new ComplexPair(new Complex(0, 1), new Complex(2, 0)).isReal());
+        assertFalse(new ComplexPair(new Complex(0, 1), new Complex(2, 1)).isReal());
+    }
+    
+    @Test
+    public void testHelperMethodLayoutBase() {
+        assertDoesNotThrow(() -> new LayoutBase(new PoleZeroPair(new Complex(1, +1), new Complex(1, +1))));
+                
+        assertTrue(new PoleZeroPair(new Complex(Double.NaN, 0), new Complex(Double.NaN, 0)).isNaN());
+        assertTrue(new PoleZeroPair(new Complex(Double.NaN, 0), new Complex(1, 0)).isNaN());
+        assertTrue(new PoleZeroPair(new Complex(1, 0), new Complex(Double.NaN, 0)).isNaN());
+        assertFalse(new PoleZeroPair(new Complex(0, 0), new Complex(2, 1)).isNaN());
         
-        // response
-        assertEquals(filterOrder/2, iirLowPass.getNumBiquads());
-        Complex cornerFrequency = new Complex(1,0);
-        for (int i=0; i < iirLowPass.getNumBiquads(); i++) {
-            cornerFrequency = cornerFrequency.multiply(iirLowPass.getBiquad(i).response(F_CUT_LOW));
-        }
-        final double valueAtCutOff = 20 * TMathConstants.Log10(cornerFrequency.abs());
-        assertThat("low-pass cut-off (response calculation)", valueAtCutOff, lessThan(-3.0 + EPSILON_DB));
+        assertTrue(new PoleZeroPair(new Complex(0, 0), new Complex(0, 0)).isSinglePole());
+        assertTrue(new PoleZeroPair(new Complex(0, 0), new Complex(0, 0)).isSinglePole());
+        assertTrue(new PoleZeroPair(new Complex(1, 0), new Complex(Double.NaN, 0)).isSinglePole());
+        
+        final LayoutBase normalBase = new LayoutBase(4);
+        assertEquals(0, normalBase.getNumPoles());
+        assertDoesNotThrow(() -> normalBase.addPoleZeroConjugatePairs(new Complex(1,0), new Complex(0, 0)));
+        assertThrows(IllegalArgumentException.class, () -> normalBase.addPoleZeroConjugatePairs(null, new Complex(1,0)));
+        assertThrows(IllegalArgumentException.class, () -> normalBase.addPoleZeroConjugatePairs(new Complex(1,0), null));
     }
 
     private static DataSet filterAndGetMagnitudeSpectrum(final Cascade filter, final DataSet input) {
