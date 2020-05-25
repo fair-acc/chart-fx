@@ -9,8 +9,6 @@ import static de.gsi.dataset.DataSet.DIM_X;
 import java.util.Arrays;
 
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Checks for FloatDataSet interfaces and constructors.
@@ -18,7 +16,6 @@ import org.slf4j.LoggerFactory;
  * @author rstein
  */
 public class FloatDataSetTests extends EditableDataSetTests {
-    private static final Logger LOGGER = LoggerFactory.getLogger(FloatDataSetTests.class);
     protected static final float[][] testCoordinate = { { 1.0f, 2.0f, 3.0f }, { 2.0f, 4.0f, 6.0f } };
     private static final int n = testCoordinate[0].length;
 
@@ -27,7 +24,7 @@ public class FloatDataSetTests extends EditableDataSetTests {
         // re-check EditableDataSet interface consistency
         EditableDataSetTests.checkEditableDataSetInterface(new FloatDataSet("test"));
 
-        FloatDataSet firstDataSet = new FloatDataSet("test");
+        final FloatDataSet firstDataSet = new FloatDataSet("test");
         checkAddPoints(firstDataSet, 0); // w/o errors
 
         final FloatDataSet secondDataSetA = new FloatDataSet("test", testCoordinate[0], testCoordinate[1], n, true);
@@ -59,15 +56,10 @@ public class FloatDataSetTests extends EditableDataSetTests {
 
     public static void checkAddPoints(final FloatDataSet dataSet, final int testCase) {
         final String dsType = dataSet.getClass().getSimpleName();
-
-        final int nDim = dataSet.getDimension();
         final int nData = dataSet.getDataCount();
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.atDebug().addArgument(dsType).addArgument(nDim).addArgument(nData).log("info: data set '{}' with nDim = {} and nData = {}");
-        }
 
         for (int i = 0; i < testCoordinate[0].length; i++) {
-            FloatDataSet ret;
+            final FloatDataSet ret;
 
             if (testCase == 0) {
                 // X & Y coordinates only
@@ -136,7 +128,7 @@ public class FloatDataSetTests extends EditableDataSetTests {
 
     @Test
     public void trimTest() {
-        FloatDataSet dataSet = new FloatDataSet("test");
+        final FloatDataSet dataSet = new FloatDataSet("test");
 
         checkAddPoints(dataSet, 2); // with errors and label but w/o style
         assertEquals(testCoordinate[0].length, dataSet.getCapacity(), "capacity after adding data points");
@@ -152,13 +144,13 @@ public class FloatDataSetTests extends EditableDataSetTests {
     public void setterTests() {
         final FloatDataSet firstDataSet = new FloatDataSet("test", testCoordinate[0], testCoordinate[1], n, true);
 
-        FloatDataSet secondDataSet = new FloatDataSet("test", testCoordinate[0].length);
+        final FloatDataSet secondDataSet = new FloatDataSet("test", testCoordinate[0].length);
         assertNotEquals(firstDataSet, secondDataSet);
 
         secondDataSet.set(0, FloatDataSet.toDoubles(testCoordinate[0]), FloatDataSet.toDoubles(testCoordinate[1]));
         assertEquals(firstDataSet, secondDataSet);
 
-        FloatDataSet thirdDataSet = new FloatDataSet("test", testCoordinate[0].length);
+        final FloatDataSet thirdDataSet = new FloatDataSet("test", testCoordinate[0].length);
         assertNotEquals(firstDataSet, thirdDataSet);
 
         thirdDataSet.set(testCoordinate[0], testCoordinate[1]);
