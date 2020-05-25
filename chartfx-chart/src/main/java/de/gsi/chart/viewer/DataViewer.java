@@ -100,7 +100,7 @@ public class DataViewer extends BorderPane {
     protected final ListChangeListener<? super DataView> subDataViewChangeListener = change -> {
         while (change.next()) {
             final DataView activeView = dataViewRoot.getActiveView();
-            if (change.getAddedSize() > 0 && (activeView == null || activeView == dataViewRoot)) {
+            if (change.getAddedSize() > 0 && (activeView == null || activeView == dataViewRoot)) { // NOPMD
                 dataViewRoot.setActiveSubView(change.getAddedSubList().get(0));
             }
         }
@@ -261,9 +261,6 @@ public class DataViewer extends BorderPane {
     }
 
     public final void setSelectedView(final DataView selectedView) {
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.atDebug().addArgument(selectedView).log("setSelectedView('{}')");
-        }
         selectedViewProperty().set(selectedView);
     }
 
@@ -295,14 +292,14 @@ public class DataViewer extends BorderPane {
             final Node icon = view.getIcon();
 
             if (view.getSubDataViews().isEmpty()) {
-                MenuItem menuItem = new MenuItem(name, icon);
+                MenuItem menuItem = new MenuItem(name, icon); // NOPMD - allocation within loop ok in this context
 
                 menuItem.setOnAction(evt -> dataView.setView(view));
                 menuButton.getItems().add(menuItem);
                 continue;
             }
 
-            Menu subMenuButton = new Menu(name, icon);
+            Menu subMenuButton = new Menu(name, icon); // NOPMD - allocation within loop ok in this context
             subMenuButton.setOnAction(evt -> dataView.setView(view));
             menuButton.getItems().add(subMenuButton);
             updateMenuButton(subMenuButton, view);
@@ -355,13 +352,13 @@ public class DataViewer extends BorderPane {
             final Node icon = view.getIcon();
             final Button viewButton;
             if (icon == null && name == null) {
-                viewButton = new Button(null, new Glyph(FONT_AWESOME, FontAwesome.Glyph.QUESTION));
+                viewButton = new Button(null, new Glyph(FONT_AWESOME, FontAwesome.Glyph.QUESTION)); // NOPMD - allocation within loop ok in this context
             } else if (icon == null) {
-                viewButton = new Button(name, null);
+                viewButton = new Button(name, null); // NOPMD - allocation within loop ok in this context
             } else {
-                viewButton = new Button(null, icon);
+                viewButton = new Button(null, icon); // NOPMD - allocation within loop ok in this context
             }
-            viewButton.setTooltip(new Tooltip("activates view '" + name + "'"));
+            viewButton.setTooltip(new Tooltip("activates view '" + name + "'")); // NOPMD - allocation within loop ok in this context
 
             if (!showListStyleDataViewProperty().get()) {
                 viewButton.setOnAction(evt -> this.setSelectedView(view));

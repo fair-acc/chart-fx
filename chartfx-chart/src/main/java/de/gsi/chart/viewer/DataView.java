@@ -112,9 +112,6 @@ public class DataView extends VBox {
         registerListListener(); // NOPMD, calling of overridable protected method
 
         activeSubView.addListener((ch, o, n) -> {
-            if (LOGGER.isDebugEnabled()) {
-                LOGGER.atDebug().addArgument(n).log("set active DataView '{}'");
-            }
             if (n == null) {
                 getChildren().clear();
                 return;
@@ -125,16 +122,10 @@ public class DataView extends VBox {
             }
 
             if (n.isStandalone()) {
-                if (LOGGER.isDebugEnabled()) {
-                    LOGGER.atDebug().addArgument(n).log("set standalone DataView '{}'" + n + " - content " + n.getContentPane());
-                }
                 getChildren().setAll(n);
                 return;
             }
 
-            if (LOGGER.isDebugEnabled()) {
-                LOGGER.atDebug().addArgument(n).log("set non-standalone DataView '{}'");
-            }
             // add dependent sub-DataView (e.g. HBox, VBox, Grid-style layout)
             for (final DataView subView : getSubDataViews()) {
                 if (!subView.isStandalone()) {
@@ -153,10 +144,6 @@ public class DataView extends VBox {
             }
 
             getChildren().setAll(getActiveView().getContentPane(), minimisedElements);
-
-            if (LOGGER.isDebugEnabled()) {
-                LOGGER.atDebug().addArgument(n).log("set non-standalone DataView '{}' - done");
-            }
         });
 
         setName(name == null ? "" : name);
