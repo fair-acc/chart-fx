@@ -30,13 +30,8 @@ public class DirectFormI extends DirectFormAbstract {
     public double mX1; // x[n-1]
     public double mY1; // y[n-1]
 
-    public DirectFormI() {
-        reset();
-    }
-
     @Override
     public double process1(final double input, final Biquad s) {
-
         final double output = s.mB0 * input + s.mB1 * mX1 + s.mB2 * mX2 - s.mA1 * mY1 - s.mA2 * mY2;
         mX2 = mX1;
         mY2 = mY1;

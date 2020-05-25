@@ -26,10 +26,10 @@ import org.apache.commons.math3.complex.Complex;
 /**
  * Transforms from an analogue low-pass filter to a digital high-pass filter
  */
-public class HighPassTransform {
+public final class HighPassTransform { // NOPMD - nomen est omen
 
     private HighPassTransform() {
-
+        // utility class
     }
 
     private static Complex transform(final Complex in, final double f) {
@@ -65,5 +65,4 @@ public class HighPassTransform {
 
         digital.setNormal(Math.PI - analog.getNormalW(), analog.getNormalGain());
     }
-
 }

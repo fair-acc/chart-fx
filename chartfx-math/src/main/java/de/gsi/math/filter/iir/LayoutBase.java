@@ -28,7 +28,6 @@ import org.apache.commons.math3.complex.Complex;
  * 2nd order filter
  */
 public class LayoutBase {
-
     private int mNumPoles;
     private PoleZeroPair[] mPair;
     private double mNormalW;
@@ -43,7 +42,7 @@ public class LayoutBase {
         }
     }
 
-    public LayoutBase(final PoleZeroPair[] pairs) {
+    public LayoutBase(final PoleZeroPair[] pairs) { // NOPMD
         mNumPoles = pairs.length * 2;
         mPair = pairs;
     }

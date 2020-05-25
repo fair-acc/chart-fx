@@ -30,7 +30,6 @@ import org.apache.commons.math3.util.FastMath;
  * filters. For example: chebyshevI.bandPass(2,250,50,5,0.5);
  */
 public class ChebyshevI extends Cascade {
-
     /**
      * Bandpass filter with default topology
      * 
@@ -144,7 +143,6 @@ public class ChebyshevI extends Cascade {
 
     private void setupBandPass(final int order, final double sampleRate, final double centerFrequency,
             final double widthFrequency, final double rippleDb, final int directFormType) {
-
         final AnalogLowPass analogProto = new AnalogLowPass(order);
         analogProto.design(rippleDb);
 
@@ -154,12 +152,10 @@ public class ChebyshevI extends Cascade {
                 analogProto);
 
         setLayout(digitalProto, directFormType);
-
     }
 
     private void setupBandStop(final int order, final double sampleRate, final double centerFrequency,
             final double widthFrequency, final double rippleDb, final int directFormType) {
-
         final AnalogLowPass analogProto = new AnalogLowPass(order);
         analogProto.design(rippleDb);
 
@@ -173,7 +169,6 @@ public class ChebyshevI extends Cascade {
 
     private void setupHighPass(final int order, final double sampleRate, final double cutoffFrequency,
             final double rippleDb, final int directFormType) {
-
         final AnalogLowPass analogProto = new AnalogLowPass(order);
         analogProto.design(rippleDb);
 
@@ -186,7 +181,6 @@ public class ChebyshevI extends Cascade {
 
     private void setupLowPass(final int order, final double sampleRate, final double cutoffFrequency,
             final double rippleDb, final int directFormType) {
-
         final AnalogLowPass analogProto = new AnalogLowPass(order);
         analogProto.design(rippleDb);
 
@@ -197,40 +191,38 @@ public class ChebyshevI extends Cascade {
         setLayout(digitalProto, directFormType);
     }
 
-    class AnalogLowPass extends LayoutBase {
+    private class AnalogLowPass extends LayoutBase {
         private final int nPoles;
 
-        public AnalogLowPass(final int _nPoles) {
-            super(_nPoles);
-            nPoles = _nPoles;
+        public AnalogLowPass(final int nPoles) {
+            super(nPoles);
+            this.nPoles = nPoles;
         }
 
         public void design(final double rippleDb) {
-
             reset();
 
             final double eps = Math.sqrt(1. / Math.exp(-rippleDb * 0.1 * Math.log(10)) - 1);
             final double v0 = FastMath.asinh(1 / eps) / nPoles;
-            final double sinh_v0 = -Math.sinh(v0);
-            final double cosh_v0 = Math.cosh(v0);
+            final double sinhv0 = -Math.sinh(v0);
+            final double coshv0 = Math.cosh(v0);
 
-            final double n2 = 2 * nPoles;
+            final double n2 = 2.0 * nPoles;
             final int pairs = nPoles / 2;
             for (int i = 0; i < pairs; ++i) {
                 final int k = 2 * i + 1 - nPoles;
-                final double a = sinh_v0 * Math.cos(k * Math.PI / n2);
-                final double b = cosh_v0 * Math.sin(k * Math.PI / n2);
+                final double a = sinhv0 * Math.cos(k * Math.PI / n2);
+                final double b = coshv0 * Math.sin(k * Math.PI / n2);
 
-                addPoleZeroConjugatePairs(new Complex(a, b), new Complex(Double.POSITIVE_INFINITY));
+                addPoleZeroConjugatePairs(new Complex(a, b), new Complex(Double.POSITIVE_INFINITY)); // NOPMD
             }
 
             if ((nPoles & 1) == 1) {
-                add(new Complex(sinh_v0, 0), new Complex(Double.POSITIVE_INFINITY));
+                add(new Complex(sinhv0, 0), new Complex(Double.POSITIVE_INFINITY));
                 setNormal(0, 1);
             } else {
                 setNormal(0, Math.pow(10, -rippleDb / 20.));
             }
         }
     }
-
 }

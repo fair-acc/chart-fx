@@ -26,36 +26,10 @@ import org.apache.commons.math3.complex.Complex;
 /**
  * Transforms from an analogue bandpass filter to a digital band-stop filter
  */
-public class BandPassTransform {
+public final class BandPassTransform { // NOPMD - nomen est omen
 
     private BandPassTransform() {
-    }
-
-    private static ComplexPair transform(final Complex in, final double a, final double b) {
-        Complex c;
-        if (in.isInfinite()) {
-            return new ComplexPair(new Complex(-1), new Complex(1));
-        }
-
-        c = new Complex(1).add(in).divide(new Complex(1).subtract(in)); // bilinear
-
-        final double a2 = a * a;
-        final double b2 = b * b;
-        final double ab = a * b;
-        final double ab_2 = 2 * ab;
-        Complex v = new Complex(0).add(c.multiply(4 * (b2 * (a2 - 1) + 1)));
-        v = v.add(8 * (b2 * (a2 - 1) - 1));
-        v = v.multiply(c);
-        v = v.add(4 * (b2 * (a2 - 1) + 1));
-        v = v.sqrt();
-
-        Complex u = v.multiply(-1).add(c.multiply(ab_2)).add(ab_2);
-
-        v = v.add(c.multiply(ab_2)).add(ab_2);
-
-        Complex d = new Complex(0).add(c.multiply(2 * (b - 1))).add(2 * (1 + b));
-
-        return new ComplexPair(u.divide(d), v.divide(d));
+        // utility class
     }
 
     public static void transform(final double fc, final double fw, final LayoutBase digital, final LayoutBase analog) {
@@ -73,7 +47,7 @@ public class BandPassTransform {
         wc = wc2 + ww;
 
         // what is this crap?
-        if (wc2 < 1e-8) {
+        if (wc2 < 1e-8) { // NOPMD - needed apparently for numeric stability
             wc2 = 1e-8;
         }
         if (wc > Math.PI - 1e-8) {
@@ -106,4 +80,29 @@ public class BandPassTransform {
                 analog.getNormalGain());
     }
 
+    private static ComplexPair transform(final Complex in, final double a, final double b) {
+        if (in.isInfinite()) {
+            return new ComplexPair(new Complex(-1), new Complex(1));
+        }
+
+        final Complex c = new Complex(1).add(in).divide(new Complex(1).subtract(in)); // bilinear
+
+        final double a2 = a * a;
+        final double b2 = b * b;
+        final double ab = a * b;
+        final double ab2 = 2 * ab;
+        Complex v = new Complex(0).add(c.multiply(4 * (b2 * (a2 - 1) + 1)));
+        v = v.add(8 * (b2 * (a2 - 1) - 1));
+        v = v.multiply(c);
+        v = v.add(4 * (b2 * (a2 - 1) + 1));
+        v = v.sqrt();
+
+        final Complex u = v.multiply(-1).add(c.multiply(ab2)).add(ab2);
+
+        v = v.add(c.multiply(ab2)).add(ab2);
+
+        final Complex d = new Complex(0).add(c.multiply(2 * (b - 1))).add(2 * (1 + b));
+
+        return new ComplexPair(u.divide(d), v.divide(d));
+    }
 }
