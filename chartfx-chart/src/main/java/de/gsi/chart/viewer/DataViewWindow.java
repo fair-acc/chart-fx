@@ -173,9 +173,6 @@ public class DataViewWindow extends BorderPane implements EventSource {
         }
 
         updatingStage.set(true);
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.atDebug().log("maximizeButtonAction");
-        }
         if (this.isMaximised()) {
             invokeListener(new WindowRestoringEvent(this), parallelListeners);
         } else {
@@ -229,9 +226,6 @@ public class DataViewWindow extends BorderPane implements EventSource {
         updatingStage.set(true);
 
         invokeListener(new WindowMinimisingEvent(this), parallelListeners);
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.atDebug().log("minimizeButtonAction");
-        }
         if (dialog.isShowing()) {
             dialog.hide();
             maximizeRestoreButton.getStyleClass().setAll(CSS_WINDOW_MAXIMIZE_ICON);
@@ -259,9 +253,7 @@ public class DataViewWindow extends BorderPane implements EventSource {
         }
         updatingStage.set(true);
         invokeListener(new WindowClosingEvent(this), parallelListeners);
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.atDebug().log("closeButtonAction");
-        }
+
         // asked to remove pane
         getParentView().getMinimisedChildren().remove(this);
         getParentView().getVisibleChildren().remove(this);
@@ -821,9 +813,6 @@ public class DataViewWindow extends BorderPane implements EventSource {
         public void maximizeRestore(final DataViewWindow dataViewWindow) {
             if (maximized) {
                 // restore
-                if (LOGGER.isDebugEnabled()) {
-                    LOGGER.atDebug().addArgument(getName()).log("restore window '{}'");
-                }
                 setWidth(width);
                 setHeight(height);
                 setX(posX);
@@ -838,9 +827,7 @@ public class DataViewWindow extends BorderPane implements EventSource {
             height = getHeight();
             posX = getX();
             posY = getY();
-            if (LOGGER.isDebugEnabled()) {
-                LOGGER.atDebug().addArgument(getName()).log("maximise window '{}'");
-            }
+
             // set Stage boundaries to visible bounds of the main screen
             setX(primaryScreenBounds.getMinX());
             setY(primaryScreenBounds.getMinY());
@@ -868,9 +855,6 @@ public class DataViewWindow extends BorderPane implements EventSource {
 
             posX = getX();
             posY = getY();
-            if (LOGGER.isDebugEnabled()) {
-                LOGGER.atDebug().addArgument(getName()).log("show window '{}'");
-            }
 
             titleProperty().set(dataViewWindow.getName());
             titleProperty().bind(dataViewWindow.nameProperty());

@@ -8,8 +8,6 @@ import static de.gsi.dataset.DataSet.DIM_X;
 import static de.gsi.dataset.DataSet.DIM_Y;
 
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import de.gsi.dataset.DataSetError;
 import de.gsi.dataset.EditConstraints;
@@ -21,7 +19,6 @@ import de.gsi.dataset.EditableDataSet;
  * @author rstein
  */
 public class EditableDataSetTests {
-    private static final Logger LOGGER = LoggerFactory.getLogger(EditableDataSetTests.class);
     protected static final int N_POINTS_INSERT_FRONT = 3;
     protected static final int N_POINTS_ADD_BACK = 5;
     protected static final double[] testCoordinates = { 1.0, 2.0 };
@@ -47,9 +44,6 @@ public class EditableDataSetTests {
 
         final int nDim = dataSet.getDimension();
         final int nData = dataSet.getDataCount();
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.atDebug().addArgument(dsType).addArgument(nDim).addArgument(nData).log("info: data set '{}' with n-dimd = {} and n-data-count = {}");
-        }
         if (nDim != 2) {
             fail("this test is not designed for '" + dsType + "' with dimension = " + nDim);
             return;
@@ -132,11 +126,7 @@ public class EditableDataSetTests {
     public static void checkEditConstraints(final EditableDataSet dataSet) {
         final String dsType = dataSet.getClass().getSimpleName();
 
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.atDebug().addArgument(dsType).log("info: data set '{}'");
-        }
-
-        EditConstraints newCustomEditConstraints = new EditConstraints() {
+        final EditConstraints newCustomEditConstraints = new EditConstraints() {
             @Override
             public boolean canAdd(int index) {
                 return false;
@@ -173,16 +163,14 @@ public class EditableDataSetTests {
 
         final int nDim = dataSet.getDimension();
         final int nData = dataSet.getDataCount();
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.atDebug().addArgument(dsType).addArgument(nDim).addArgument(nData).log("info: data set '{}' with n-dimd = {} and n-data-count = {}");
-        }
+
         if (nDim != 2) {
             fail("this test is not designed for '" + dsType + "' with dimension = " + nDim);
             return;
         }
 
         for (int i = 0; i < nCount; i++) {
-            EditableDataSet ret;
+            final EditableDataSet ret;
             if (withErrors) {
                 ret = dataSet.add(0, i + testCoordinates[DIM_X], i + testCoordinates[DIM_Y], // X & Y coordinates
                         errorCoordinates[0] + i, errorCoordinates[1] + i, errorCoordinates[2] + i,
@@ -220,9 +208,6 @@ public class EditableDataSetTests {
                         break;
                     case NO_ERROR: // no error attached to this dimension
                     default:
-                        if (LOGGER.isDebugEnabled()) {
-                            LOGGER.atDebug().addArgument(dsType).addArgument(dimIndex).log("data set '{}' dimIndex = {} has no error definition");
-                        }
                         break;
                     }
                 }
@@ -238,9 +223,7 @@ public class EditableDataSetTests {
 
         final int nDim = dataSet.getDimension();
         final int nData = dataSet.getDataCount();
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.atDebug().addArgument(dsType).addArgument(nDim).addArgument(nData).log("info: data set '{}' with n-dimd = {} and n-data-count = {}");
-        }
+
         if (nDim != 2) {
             fail("this test is not designed for '" + dsType + "' with dimension = " + nDim);
             return;
@@ -263,16 +246,14 @@ public class EditableDataSetTests {
 
         final int nDim = dataSet.getDimension();
         final int nData = dataSet.getDataCount();
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.atDebug().addArgument(dsType).addArgument(nDim).addArgument(nData).log("info: data set '{}' with n-dimd = {} and n-data-count = {}");
-        }
+
         if (nDim != 2) {
             fail("this test is not designed for '" + dsType + "' with dimension = " + nDim);
             return;
         }
 
         for (int i = 0; i < nCount; i++) {
-            EditableDataSet ret;
+            final EditableDataSet ret;
             if (withErrors) {
                 ret = dataSet.set(0, i + (2 * testCoordinates[DIM_X]), i + (2 * testCoordinates[DIM_Y]), // X & Y coordinates
                         (2 * errorCoordinates[0]) + i, (2 * errorCoordinates[1]) + i, (2 * errorCoordinates[2]) + i,
@@ -314,9 +295,6 @@ public class EditableDataSetTests {
                         break;
                     case NO_ERROR: // no error attached to this dimension
                     default:
-                        if (LOGGER.isDebugEnabled()) {
-                            LOGGER.atDebug().addArgument(dsType).addArgument(dimIndex).log("data set '{}' dimIndex = {} has no error definition");
-                        }
                         break;
                     }
                 }

@@ -78,7 +78,7 @@ public abstract class AbstractChartMeasurement implements EventListener, EventSo
     protected static int markerCount;
     protected final DecimalFormat formatterSmall = new DecimalFormat(FORMAT_SMALL_SCALE);
     protected final DecimalFormat formatterLarge = new DecimalFormat(FORMAT_LARGE_SCALE);
-    private final AtomicBoolean autoNotification = new AtomicBoolean(true);
+    private final AtomicBoolean autoNotify = new AtomicBoolean(true);
     private final List<EventListener> updateListeners = Collections.synchronizedList(new LinkedList<>());
     private final CheckedValueField valueField = new CheckedValueField();
     private final StringProperty title = new SimpleStringProperty(this, "title", null);
@@ -90,7 +90,7 @@ public abstract class AbstractChartMeasurement implements EventListener, EventSo
     protected final ButtonType buttonRemove = new ButtonType("Remove", ButtonBar.ButtonData.RIGHT);
     protected final DataSetSelector dataSetSelector;
     protected final ValueIndicatorSelector valueIndicatorSelector;
-    protected int lastLayoutRow = 0;
+    protected int lastLayoutRow;
     protected final int requiredNumberOfIndicators;
     protected final int requiredNumberOfDataSets;
     private final EventListener sliderChanged = new EventRateLimiter(this::handle, DEFAULT_UPDATE_RATE_LIMIT);
@@ -190,14 +190,11 @@ public abstract class AbstractChartMeasurement implements EventListener, EventSo
         dataSetChangeListener.changed(dataSet, null, null);
 
         getMeasurementPlugin().getDataView().getVisibleChildren().add(dataViewWindow);
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.atDebug().log("constructor");
-        }
     }
 
     @Override
     public AtomicBoolean autoNotification() {
-        return autoNotification;
+        return autoNotify;
     }
 
     public ObjectProperty<DataSet> dataSetProperty() {
@@ -349,10 +346,6 @@ public abstract class AbstractChartMeasurement implements EventListener, EventSo
     }
 
     protected void updateSlider() {
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.atDebug().addArgument(measurementName).log("update sliders for '{}'");
-        }
-
         if (!valueIndicatorSelector.isReuseIndicators()) {
             getValueIndicatorsUser().clear();
         }
@@ -383,9 +376,6 @@ public abstract class AbstractChartMeasurement implements EventListener, EventSo
 
             getValueIndicatorsUser().add(sliderIndicator);
             getMeasurementPlugin().getChart().getPlugins().add(sliderIndicator);
-            if (LOGGER.isDebugEnabled()) {
-                LOGGER.atDebug().addArgument(requestedIndex + 1).addArgument(measurementName).log("added slider1 for '{}'");
-            }
         }
 
         if (!sliderIndicator.updateEventListener().contains(sliderChanged)) {
