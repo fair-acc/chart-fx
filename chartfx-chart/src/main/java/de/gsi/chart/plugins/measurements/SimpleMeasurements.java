@@ -46,10 +46,6 @@ public class SimpleMeasurements extends AbstractChartMeasurement {
 
         // needs to be added here to be aesthetically the last fields in the GridPane
         addMinMaxRangeFields();
-
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.atDebug().addArgument(SimpleMeasurements.class.getSimpleName()).addArgument(measType.getName()).log("{} type: '{}'- initialised");
-        }
     }
 
     public MeasurementType getMeasType() {
@@ -214,16 +210,16 @@ public class SimpleMeasurements extends AbstractChartMeasurement {
         DragResizerUtil.makeResizable(getValueField());
 
         Optional<ButtonType> result = super.showConfigDialogue();
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.atDebug().addArgument(result).log("config dialogue finished with result {}");
-            LOGGER.atDebug().addArgument(getValueIndicators()).log("detected getValueIndicators() = {}");
-            LOGGER.atDebug().addArgument(getValueIndicatorsUser()).log("detected getValueIndicatorsUser() = {}");
+        if (LOGGER.isTraceEnabled()) {
+            LOGGER.atTrace().addArgument(result).log("config dialogue finished with result {}");
+            LOGGER.atTrace().addArgument(getValueIndicators()).log("detected getValueIndicators() = {}");
+            LOGGER.atTrace().addArgument(getValueIndicatorsUser()).log("detected getValueIndicatorsUser() = {}");
         }
 
         // initial update
         handle(null);
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.atDebug().log("initialised and called initial handle(null)");
+        if (LOGGER.isTraceEnabled()) {
+            LOGGER.atTrace().log("initialised and called initial handle(null)");
         }
     }
 

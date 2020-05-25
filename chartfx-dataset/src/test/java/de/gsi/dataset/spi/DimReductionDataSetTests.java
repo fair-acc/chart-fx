@@ -8,8 +8,6 @@ import static de.gsi.dataset.DataSet.DIM_X;
 import static de.gsi.dataset.DataSet.DIM_Y;
 
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import de.gsi.dataset.event.UpdateEvent;
 import de.gsi.dataset.spi.DimReductionDataSet.Option;
@@ -22,12 +20,10 @@ import de.gsi.dataset.spi.utils.MathUtils;
  * @author rstein
  */
 public class DimReductionDataSetTests {
-    private static final Logger LOGGER = LoggerFactory.getLogger(DataSetEqualityTests.class);
     private int nEvent = 0;
 
     @Test
     public void testGetterSetterConsistency() {
-        LOGGER.atDebug().log("testGetterSetterConsistency");
         DoubleDataSet3D testData = new DoubleDataSet3D("test", //
                 new double[] { 1, 2, 3 }, // x-array
                 new double[] { 6, 7, 8 }, // y-array
@@ -70,7 +66,6 @@ public class DimReductionDataSetTests {
 
     @Test
     public void testIntegralOptions() {
-        LOGGER.atDebug().log("testIntegralOptions");
         DoubleDataSet3D testData = new DoubleDataSet3D("test", //
                 new double[] { 1, 2, 3 }, // x-array
                 new double[] { 6, 7, 8 }, // y-array
@@ -127,13 +122,10 @@ public class DimReductionDataSetTests {
 
         assertArrayEquals(integralX, sliceDataSetX.getValues(DIM_Y), "x-integral");
         assertArrayEquals(integralY, sliceDataSetY.getValues(DIM_Y), "y-integral");
-
-        LOGGER.atDebug().log("testIntegralOptions - done");
     }
 
     @Test
     public void testMaxOptions() {
-        LOGGER.atDebug().log("testMaxOptions");
         DoubleDataSet3D testData = new DoubleDataSet3D("test", //
                 new double[] { 1, 2, 3 }, // x-array
                 new double[] { 6, 7, 8 }, // y-array
@@ -166,13 +158,10 @@ public class DimReductionDataSetTests {
 
         assertArrayEquals(maxX, sliceDataSetX.getValues(DIM_Y), "x-max");
         assertArrayEquals(maxY, sliceDataSetY.getValues(DIM_Y), "y-max");
-
-        LOGGER.atDebug().log("testMaxOptions - done");
     }
 
     @Test
     public void testMeanOptions() {
-        LOGGER.atDebug().log("testMeanOptions");
         DoubleDataSet3D testData = new DoubleDataSet3D("test", //
                 new double[] { 1, 2, 3 }, // x-array
                 new double[] { 6, 7, 8 }, // y-array
@@ -207,13 +196,10 @@ public class DimReductionDataSetTests {
             assertTrue(MathUtils.nearlyEqual(meanX[i], sliceDataSetX.getValues(DIM_Y)[i]), "x-integral");
             assertTrue(MathUtils.nearlyEqual(meanY[i], sliceDataSetY.getValues(DIM_Y)[i]), "y-integral");
         }
-
-        LOGGER.atDebug().log("testMeanOptions - done");
     }
 
     @Test
     public void testMinOptions() {
-        LOGGER.atDebug().log("testMinOptions");
         DoubleDataSet3D testData = new DoubleDataSet3D("test", //
                 new double[] { 1, 2, 3 }, // x-array
                 new double[] { 6, 7, 8 }, // y-array
@@ -246,13 +232,10 @@ public class DimReductionDataSetTests {
 
         assertArrayEquals(minX, sliceDataSetX.getValues(DIM_Y), "x-min");
         assertArrayEquals(minY, sliceDataSetY.getValues(DIM_Y), "y-min");
-
-        LOGGER.atDebug().log("testMinOptions - done");
     }
 
     @Test
     public void testSliceOptions() {
-        LOGGER.atDebug().log("testSliceOptions");
         DoubleDataSet3D testData = new DoubleDataSet3D("test", //
                 new double[] { 1, 2, 3 }, // x-array
                 new double[] { 6, 7, 8 }, // y-array
@@ -290,7 +273,5 @@ public class DimReductionDataSetTests {
         assertArrayEquals(new double[] { 1, 6, 9 }, sliceDataSetY.getValues(DIM_Y), "first column match");
         sliceDataSetY.setMinValue(2.0);
         assertArrayEquals(new double[] { 2, 5, 8 }, sliceDataSetY.getValues(DIM_Y), "second column match");
-
-        LOGGER.atDebug().log("testSliceOptions - done");
     }
 }

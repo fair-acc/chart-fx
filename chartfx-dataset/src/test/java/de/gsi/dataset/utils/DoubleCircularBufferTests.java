@@ -11,8 +11,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Tests DoubleCircularBuffer
@@ -20,8 +18,6 @@ import org.slf4j.LoggerFactory;
  * @author rstein
  */
 public class DoubleCircularBufferTests {
-    private static final Logger LOGGER = LoggerFactory.getLogger(DoubleCircularBuffer.class);
-
     private DoubleCircularBuffer buffer1;
     private final int bufferLength = 10;
     private DoubleCircularBuffer buffer2;
@@ -103,7 +99,6 @@ public class DoubleCircularBufferTests {
         assertEquals(0, buffer1.available());
         final double[] input = new double[fillBufferLength];
         final double[] input2 = new double[fillBufferLength + 5];
-        final double[] output = new double[fillBufferLength];
 
         buffer1.put(-2.0);
         buffer1.put(-1.0);
@@ -140,13 +135,6 @@ public class DoubleCircularBufferTests {
         buffer2.put(input2, fillBufferLength);
         assertEquals(5, buffer2.writePosition());
         assertEquals(bufferLength, buffer2.available());
-
-        if (LOGGER.isDebugEnabled()) {
-            for (int i = 0; i < 30; i++) {
-                LOGGER.atDebug().log("buffer[1,2,output].get({}) = [{},{},{}]", i, buffer1.get(i), buffer2.get(i),
-                        output[i]);
-            }
-        }
     }
 
     /**
@@ -175,14 +163,5 @@ public class DoubleCircularBufferTests {
         }
         buffer2.put(input, fillBufferLength);
         buffer2.get(output, 10);
-
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.atDebug().log("demo print-out");
-            for (int i = 0; i < 30; i++) {
-                final String msg = String.format("buffer[1,2].get(%d) = [%2.0f,%2.0f,%2.0f]", i, buffer1.get(i),
-                        buffer2.get(i), output[i]);
-                LOGGER.atDebug().addArgument(msg).log("{}");
-            }
-        }
     }
 }

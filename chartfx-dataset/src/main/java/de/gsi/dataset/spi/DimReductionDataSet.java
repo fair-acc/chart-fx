@@ -1,8 +1,5 @@
 package de.gsi.dataset.spi;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import de.gsi.dataset.DataSet;
 import de.gsi.dataset.DataSet3D;
 import de.gsi.dataset.event.AddedDataEvent;
@@ -27,7 +24,6 @@ public class DimReductionDataSet extends DoubleDataSet implements EventListener 
         INTEGRAL,
         SLICE;
     }
-    private static final Logger LOGGER = LoggerFactory.getLogger(DimReductionDataSet.class);
     private static final long serialVersionUID = 1L;
     private final Option reductionOption;
     private final DataSet3D source;
@@ -83,9 +79,6 @@ public class DimReductionDataSet extends DoubleDataSet implements EventListener 
 
     @Override
     public void handle(UpdateEvent event) {
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.atDebug().addArgument(event).log("handle({})");
-        }
         lock().writeLockGuard(() -> source.lock().readLockGuard(() -> {
             // recompute min/max indices based on actual new value range
             final boolean oldValue = source.autoNotification().getAndSet(false);
@@ -114,9 +107,6 @@ public class DimReductionDataSet extends DoubleDataSet implements EventListener 
         }));
 
         this.fireInvalidated(new AddedDataEvent(this, "updated " + DimReductionDataSet.class.getSimpleName() + " name = " + this.getName()));
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.atDebug().addArgument(event).log("handle({}) - done");
-        }
     }
 
     public void setMaxValue(final double val) {

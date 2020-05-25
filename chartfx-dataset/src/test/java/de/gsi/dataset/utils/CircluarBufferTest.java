@@ -11,8 +11,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Test CircularBuffer
@@ -20,8 +18,6 @@ import org.slf4j.LoggerFactory;
  * @author Alexander Krimm
  */
 class CircluarBufferTest {
-    private static final Logger LOGGER = LoggerFactory.getLogger(CircluarBufferTest.class);
-
     private CircularBuffer<Double> buffer1;
     private final int bufferLength = 10;
     private CircularBuffer<Double> buffer2;
@@ -36,14 +32,14 @@ class CircluarBufferTest {
         assertThrows(IllegalArgumentException.class, () -> new CircularBuffer<>(0), "CircularBuffer(-1) -> throws exception");
 
         final Double[] initBuffer = new Double[] { 1.0, 2.0, 3.0, 4.0, 5.0 };
-        CircularBuffer<Double> buffer = new CircularBuffer<>(initBuffer, 6);
+        final CircularBuffer<Double> buffer = new CircularBuffer<>(initBuffer, 6);
         int count = 0;
-        for (Double value : initBuffer) {
+        for (final Double value : initBuffer) {
             assertEquals(value, buffer.get(count++), count + ": equals get");
         }
 
-        Double newValue1 = Double.valueOf(-42.0);
-        Double newValue2 = Double.valueOf(-43.0);
+        final Double newValue1 = Double.valueOf(-42.0);
+        final Double newValue2 = Double.valueOf(-43.0);
         Double oldValue = buffer.replace(newValue1);
         assertEquals(initBuffer[0], oldValue, "replace old value");
         assertEquals(newValue1, buffer.get(), "new value after replace via get()");
@@ -65,7 +61,7 @@ class CircluarBufferTest {
         assertTrue(buffer.isBufferFlipped(), "buffer flipped");
 
         final Double[] readBuffer = new Double[5];
-        Double[] returnBuffer1 = buffer.get(readBuffer, readBuffer.length);
+        final Double[] returnBuffer1 = buffer.get(readBuffer, readBuffer.length);
         assertEquals(readBuffer, returnBuffer1, "return same array");
         assertArrayEquals(readBuffer, returnBuffer1, "array content equals");
 
@@ -73,12 +69,12 @@ class CircluarBufferTest {
         returnBuffer2 = buffer.get(returnBuffer2, readBuffer.length);
         assertNotEquals(readBuffer, returnBuffer2, "return different array");
 
-        Double[] returnBuffer3 = buffer.get(null, readBuffer.length);
+        final Double[] returnBuffer3 = buffer.get(null, readBuffer.length);
         assertNotEquals(readBuffer, returnBuffer3, "return different array");
 
-        Double[] elements = buffer.elements(new Double[2]);
+        final Double[] elements = buffer.elements(new Double[2]);
         assertNotNull(elements);
-        int length = elements.length;
+        final int length = elements.length;
         assertEquals(6, length);
 
         buffer.reset();
@@ -103,7 +99,6 @@ class CircluarBufferTest {
         assertEquals(0, buffer1.available());
         final Double[] input = new Double[fillBufferLength];
         final Double[] input2 = new Double[fillBufferLength + 5];
-        final Double[] output = new Double[fillBufferLength];
 
         buffer1.put(-2.0);
         buffer1.put(-1.0);
@@ -140,12 +135,5 @@ class CircluarBufferTest {
         buffer2.put(input2, fillBufferLength);
         assertEquals(5, buffer2.writePosition());
         assertEquals(bufferLength, buffer2.available());
-
-        if (LOGGER.isDebugEnabled()) {
-            for (int i = 0; i < 30; i++) {
-                LOGGER.atDebug().log("buffer[1,2,output].get({}) = [{},{},{}]", i, buffer1.get(i), buffer2.get(i),
-                        output[i]);
-            }
-        }
     }
 }

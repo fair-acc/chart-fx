@@ -10,8 +10,6 @@ import static de.gsi.dataset.DataSet.DIM_Y;
 import java.util.Arrays;
 
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Checks for DoubleErrorDataSet interfaces and constructors.
@@ -19,7 +17,6 @@ import org.slf4j.LoggerFactory;
  * @author rstein
  */
 public class DoubleErrorDataSetTests extends EditableDataSetTests {
-    private static final Logger LOGGER = LoggerFactory.getLogger(DoubleErrorDataSetTests.class);
     protected static final double[][] testCoordinate = { { 1.0, 2.0, 3.0 }, { 2.0, 4.0, 6.0 } };
     protected static final double[] testEYZERO = { 0.0, 0.0, 0.0 };
     protected static final double[] testEYN = { 0.2, 0.3, 0.4 };
@@ -31,7 +28,7 @@ public class DoubleErrorDataSetTests extends EditableDataSetTests {
         // re-check EditableDataSet interface consistency
         EditableDataSetTests.checkEditableDataSetInterface(new DoubleErrorDataSet("test"));
 
-        DoubleErrorDataSet firstDataSet = new DoubleErrorDataSet("test");
+        final DoubleErrorDataSet firstDataSet = new DoubleErrorDataSet("test");
         checkAddPoints(firstDataSet, 0); // w/o errors
 
         final DoubleErrorDataSet secondDataSetA = new DoubleErrorDataSet("test", testCoordinate[0], testCoordinate[1],
@@ -63,15 +60,10 @@ public class DoubleErrorDataSetTests extends EditableDataSetTests {
 
     public static void checkAddPoints(final DoubleErrorDataSet dataSet, final int testCase) {
         final String dsType = dataSet.getClass().getSimpleName();
-
-        final int nDim = dataSet.getDimension();
         final int nData = dataSet.getDataCount();
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.atDebug().addArgument(dsType).addArgument(nDim).addArgument(nData).log("info: data set '{}' with nDim = {} and nData = {}");
-        }
 
         for (int i = 0; i < testCoordinate[0].length; i++) {
-            DoubleErrorDataSet ret;
+            final DoubleErrorDataSet ret;
 
             if (testCase == 0) {
                 // X & Y coordinates only
@@ -140,7 +132,7 @@ public class DoubleErrorDataSetTests extends EditableDataSetTests {
 
     @Test
     public void trimTest() {
-        DoubleErrorDataSet dataSet = new DoubleErrorDataSet("test");
+        final DoubleErrorDataSet dataSet = new DoubleErrorDataSet("test");
 
         checkAddPoints(dataSet, 2); // with errors and label but w/o style
         assertEquals(testCoordinate[0].length, dataSet.getCapacity(), "capacity after adding data points");
@@ -157,13 +149,13 @@ public class DoubleErrorDataSetTests extends EditableDataSetTests {
         final DoubleErrorDataSet firstDataSet = new DoubleErrorDataSet("test", testCoordinate[0], testCoordinate[1],
                 testEYN, testEYP, testEYN.length, true);
 
-        DoubleErrorDataSet secondDataSet = new DoubleErrorDataSet("test", testCoordinate[0].length);
+        final DoubleErrorDataSet secondDataSet = new DoubleErrorDataSet("test", testCoordinate[0].length);
         assertNotEquals(firstDataSet, secondDataSet);
 
         secondDataSet.set(0, testCoordinate[0], testCoordinate[1], testEYN, testEYP);
         assertEquals(firstDataSet, secondDataSet);
 
-        DoubleErrorDataSet thirdDataSet = new DoubleErrorDataSet("test", testCoordinate[0].length);
+        final DoubleErrorDataSet thirdDataSet = new DoubleErrorDataSet("test", testCoordinate[0].length);
         assertNotEquals(firstDataSet, thirdDataSet);
 
         thirdDataSet.set(testCoordinate[0], testCoordinate[1], testEYN, testEYP);
