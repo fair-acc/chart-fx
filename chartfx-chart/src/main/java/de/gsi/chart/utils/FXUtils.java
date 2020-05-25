@@ -48,9 +48,9 @@ public final class FXUtils {
      * @throws Exception if a exception is occurred in the run method of the Runnable
      */
     public static void runAndWait(final Runnable function) throws Exception {
-        runAndWait(null, t -> {
+        runAndWait("runAndWait(Runnable)", t -> {
             function.run();
-            return null;
+            return "FXUtils::runAndWait - null Runnable return";
         });
     }
 
@@ -65,7 +65,7 @@ public final class FXUtils {
      * @throws Exception if a exception is occurred in the run method of the Runnable
      */
     public static <R> R runAndWait(final Supplier<R> function) throws Exception {
-        return runAndWait(null, t -> function.get());
+        return runAndWait("runAndWait(Supplier<R>)", t -> function.get());
     }
 
     /**
@@ -215,6 +215,7 @@ public final class FXUtils {
 
     private static class RunnableWithReturn<R> implements Runnable {
         private final Supplier<R> internalRunnable;
+        private final Object lock = new Object();
         private R returnValue;
 
         public RunnableWithReturn(final Supplier<R> run) {
@@ -222,12 +223,16 @@ public final class FXUtils {
         }
 
         public R getReturnValue() {
-            return returnValue;
+            synchronized (lock) {
+                return returnValue;
+            }
         }
 
         @Override
         public void run() {
-            returnValue = internalRunnable.get();
+            synchronized (lock) {
+                returnValue = internalRunnable.get();
+            }
         }
     }
 }
