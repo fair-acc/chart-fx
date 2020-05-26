@@ -14,6 +14,7 @@ import de.gsi.dataset.utils.AggregateException;
 /**
  * @author rstein
  */
+@SuppressWarnings("PMD.DoNotUseThreads") // thread handling is the declared purpose of this class
 public interface EventSource {
     /**
      * Adds an {@link EventListener} which will be notified whenever the {@code Observable} becomes invalid. If the same
@@ -73,6 +74,7 @@ public interface EventSource {
      * @param updateEvent the event the listeners are notified with
      * @param executeParallel {@code true} execute event listener via parallel executor service
      */
+    @SuppressWarnings("PMD.NPathComplexity") // cannot be further split w/o adding unwanted further public default implementations (N.B. 'private default' ... is forbidden)
     default void invokeListener(final UpdateEvent updateEvent, final boolean executeParallel) {
         if (updateEventListener() == null) {
             return;
@@ -93,7 +95,7 @@ public interface EventSource {
             for (EventListener listener : eventListener) {
                 try {
                     listener.handle(updateEvent);
-                } catch (Exception e) {
+                } catch (Exception e) { // NOPMD -- necessary since these are forwarded
                     exceptions.add(e);
                 }
             }
@@ -112,7 +114,7 @@ public interface EventSource {
                 try {
                     listener.handle(event);
                     return Boolean.TRUE;
-                } catch (Exception e) {
+                } catch (Exception e) { // NOPMD -- necessary since these are forwarded
                     exceptions.add(e);
                     exceptions.fillInStackTrace();
                 }
@@ -131,10 +133,8 @@ public interface EventSource {
                 future.get();
             }
         } catch (final InterruptedException | ExecutionException e) {
-            Thread.currentThread().interrupt();
-            throw new IllegalStateException("one parallel worker thread finished execution with error", e);
+            exceptions.add(new IllegalStateException("one parallel worker thread finished execution with error", e));
         }
-
         if (!exceptions.isEmpty()) {
             throw exceptions;
         }

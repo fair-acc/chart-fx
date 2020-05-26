@@ -52,8 +52,8 @@ public class EventSourceTests {
         for (int i = 0; i < 3; i++) {
             final int listenerCount = i;
             evtSource.addListener(evt -> {
-                if (LOGGER.isDebugEnabled()) {
-                    LOGGER.atDebug().addArgument(listenerCount).log("invoked listener #{}");
+                if (LOGGER.isTraceEnabled()) {
+                    LOGGER.atTrace().addArgument(listenerCount).log("invoked listener #{}");
                 }
                 updateCount.incrementAndGet();
             });
@@ -112,8 +112,8 @@ public class EventSourceTests {
             ByteArrayOutputStream os = new ByteArrayOutputStream();
             PrintStream ps = new PrintStream(os);
             e.printStackTrace(ps);
-            if (LOGGER.isDebugEnabled()) {
-                LOGGER.atDebug().addArgument(os.toString()).log("test-case stack trace -- ignore this -- this is valid output:\n{}");
+            if (LOGGER.isTraceEnabled()) {
+                LOGGER.atTrace().addArgument(os.toString()).log("test-case stack trace -- ignore this -- this is valid output:\n{}");
             }
         }
 
@@ -121,10 +121,6 @@ public class EventSourceTests {
         assertEquals(true, evtSource.isAutoNotification(), "initial autonotification()");
         evtSource.eventListener = null;
         evtSource.invokeListener(updateEvent, false);
-
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.atDebug().log("basicTests() - done");
-        }
     }
 
     protected void exceptionThrowingFunctionA() {
