@@ -142,7 +142,10 @@ public class SpectrumTools {
      *
      * @see DoubleFFT_1D for the expected spectra layout
      * @param data the input data
+     * @param fromPos starting position of the data
+     * @param length length of the data
      * @param ret the output data, should be an array of data.length/2
+     * @param toPos position to write to in the output array
      * @param truncateDCNyq true: whether to smooth spectra and to ZOH the DC and Nyquist frequencies
      */
     public static void computeMagnitudeSpectrum(final float[] data, final int fromPos, final int length,
@@ -185,7 +188,10 @@ public class SpectrumTools {
      *
      * @see DoubleFFT_1D for the expected spectra layout
      * @param data the input data
+     * @param fromPos starting position of the data
+     * @param length length of the data
      * @param ret the output data, should be an array of data.length/2
+     * @param toPos position to write to in the output array
      * @param truncateDCNyq true: whether to smooth spectra and to ZOH the DC and Nyquist frequencies
      */
     public static void computeMagnitudeSpectrum_dB(final double[] data, final int fromPos, final int length,
@@ -230,7 +236,10 @@ public class SpectrumTools {
      *
      * @see DoubleFFT_1D for the expected spectra layout
      * @param data the input data
+     * @param fromPos starting position of the data
+     * @param length length of the data
      * @param ret the output data, should be an array of data.length/2
+     * @param toPos position to write to in the output array
      * @param truncateDCNyq true: whether to smooth spectra and to ZOH the DC and Nyquist frequencies
      */
     public static void computeMagnitudeSpectrum_dB(final float[] data, final int fromPos, final int length,

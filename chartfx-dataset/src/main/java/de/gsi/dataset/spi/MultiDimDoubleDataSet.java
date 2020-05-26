@@ -407,8 +407,8 @@ public class MultiDimDoubleDataSet extends AbstractDataSet<MultiDimDoubleDataSet
     /**
      * <p>
      * Update the data for a given dimension
-     *
-     * @param values coordinates
+     * @param dimIndex dimension index (e.g. DataSet.DIM_X)
+     * @param values values for dimension
      * @param copy true: makes an internal copy, false: use the pointer as is (saves memory allocation
      * @return itself
      */

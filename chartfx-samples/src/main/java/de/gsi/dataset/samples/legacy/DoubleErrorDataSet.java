@@ -18,7 +18,7 @@ import de.gsi.dataset.utils.AssertUtils;
  * User provides X and Y coordinates or only Y coordinates. In the former case X coordinates have value of data point
  * index. This version being optimised for native double arrays.
  *
- * @see DoubleDataSet for an equivalent implementation without errors
+ * @see de.gsi.dataset.spi.DoubleDataSet for an equivalent implementation without errors
  * @author rstein
  * @deprecated this is kept for reference/performance comparisons only
  */
