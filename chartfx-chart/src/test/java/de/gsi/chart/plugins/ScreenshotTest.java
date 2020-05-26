@@ -44,10 +44,10 @@ class ScreenshotTest {
     public void start(Stage stage) {
         chart = new XYChart();
         chart.setId("myChart");
-        Scene scene = new Scene(chart, 800, 600);
+        Scene scene = new Scene(chart, 400, 300);
         screenshotPlugin = new Screenshot();
-        chart.setPrefWidth(800);
-        chart.setPrefHeight(600);
+        chart.setPrefWidth(350);
+        chart.setPrefHeight(250);
         chart.getDatasets().add(new CosineFunction("Cosine", 50));
         stage.setScene(scene);
         stage.show();
