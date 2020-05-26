@@ -64,8 +64,4 @@ public class AxisChangeEvent extends UpdateEvent {
     public int getDimension() {
         return dim;
     }
-
-    public void setDimension(int dimension) {
-        dim = dimension;
-    }
 }
