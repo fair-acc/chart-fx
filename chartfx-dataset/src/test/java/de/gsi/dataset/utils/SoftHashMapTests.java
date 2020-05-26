@@ -16,6 +16,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.WeakHashMap;
 
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
@@ -37,6 +38,7 @@ public class SoftHashMapTests {
 
     // @Test // N.B. also covered by other tests
     public void basicTests() {
+        initGC();
         testMap(new HashMap<String, byte[]>(2));
         testMap(new WeakHashMap<String, byte[]>(2));
         testMap(new SoftHashMap<String, byte[]>(2));
@@ -44,6 +46,7 @@ public class SoftHashMapTests {
     }
 
     @Test
+    @Order(1)
     public void constructorTests() {
         final HashMap<String, byte[]> test = new HashMap<>();
         initMap(test, 2);
@@ -62,7 +65,10 @@ public class SoftHashMapTests {
      * this test probably best illustrates the differen Map implementations
      */
     @Test
+    @Order(2)
     public void dataRetentionTests() {
+        initGC();
+
         final int retentionDepth = 10;
         final Map<String, byte[]> hashMap = new HashMap<>();
         final Map<String, byte[]> weakMap = new WeakHashMap<>(retentionDepth);
@@ -100,12 +106,15 @@ public class SoftHashMapTests {
     }
 
     @ParameterizedTest
+    @Order(3)
     @ValueSource(classes = { SoftHashMap.class, SoftKeyHashMap.class })
     public void extendedTests(final Class<?> testClass) throws Exception {
         if (!Map.class.isAssignableFrom(testClass)) {
             // config error: testClass is not derived from Map
             throw new IllegalArgumentException("testClass " + testClass.getCanonicalName() + " is not derived from " + Map.class.getCanonicalName());
         }
+        initGC();
+
         @SuppressWarnings("unchecked")
         final Map<String, byte[]> map = (Map<String, byte[]>) testClass.getDeclaredConstructor().newInstance();
 
@@ -149,6 +158,34 @@ public class SoftHashMapTests {
         obj = null;
         while (ref.get() != null) {
             System.gc();
+            System.runFinalization();
+        }
+    }
+
+    public static void forceMemoryShortage() {
+        boolean run = true;
+        List<byte[]> strongReference = Collections.synchronizedList(new ArrayList<>(10_000_000));
+
+        while (run) {
+            try {
+                strongReference.add(new byte[DEFAULT_ARRAY_SIZE]);
+            } catch (final OutOfMemoryError e) {
+                run = false;
+            }
+        }
+        // to be garbage collected
+        strongReference = null;
+        System.runFinalization();
+    }
+
+    public static void initGC() {
+        // force an out-of-memory situation and garbage collection - initialises gc
+        forceMemoryShortage();
+        forceGC();
+        try {
+            Thread.sleep(1000); // NOPMD
+        } catch (InterruptedException ignore) {
+            // not relevant
         }
     }
 
@@ -171,21 +208,6 @@ public class SoftHashMapTests {
             }
         }
         return nonNullEntries;
-    }
-
-    private static void forceMemoryShortage() {
-        boolean run = true;
-        List<byte[]> strongReference = Collections.synchronizedList(new ArrayList<>(10_000_000));
-
-        while (run) {
-            try {
-                strongReference.add(new byte[DEFAULT_ARRAY_SIZE]);
-            } catch (final OutOfMemoryError e) {
-                run = false;
-            }
-        }
-        // to be garbage collected
-        strongReference = null;
     }
 
     private static void testMap(final Map<String, byte[]> map) {
