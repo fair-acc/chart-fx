@@ -115,8 +115,11 @@ public class DataSetBuilder {
 
     private int getResultDimension() {
         int maxDim = values.keySet().stream().collect(Collectors.maxBy(Integer::compare)).orElse(-1);
+        maxDim = Math.max(maxDim, valuesFloat.keySet().stream().collect(Collectors.maxBy(Integer::compare)).orElse(-1));
         maxDim = Math.max(maxDim, errorsNeg.keySet().stream().collect(Collectors.maxBy(Integer::compare)).orElse(-1));
+        maxDim = Math.max(maxDim, errorsNegFloat.keySet().stream().collect(Collectors.maxBy(Integer::compare)).orElse(-1));
         maxDim = Math.max(maxDim, errorsPos.keySet().stream().collect(Collectors.maxBy(Integer::compare)).orElse(-1));
+        maxDim = Math.max(maxDim, errorsPosFloat.keySet().stream().collect(Collectors.maxBy(Integer::compare)).orElse(-1));
         maxDim = Math.max(maxDim,
                 axisDescriptions.keySet().stream().collect(Collectors.maxBy(Integer::compare)).orElse(-1));
         if (this.dimension == -1) {
