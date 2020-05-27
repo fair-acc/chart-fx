@@ -271,17 +271,44 @@ public class DimReductionDataSetTests {
         assertArrayEquals(testData.getValues(DIM_X), sliceDataSetX.getValues(DIM_X));
         assertArrayEquals(testData.getValues(DIM_Y), sliceDataSetY.getValues(DIM_X));
 
-        assertArrayEquals(Arrays.copyOf(testData.getValues(DIM_Z), 3), sliceDataSetX.getValues(DIM_Y), "first row match");
+        assertArrayEquals(Arrays.copyOf(testData.getValues(DIM_Z), 3), sliceDataSetX.getValues(DIM_Y),
+                "first row match");
         assertArrayEquals(testData.getValues(DIM_Y), sliceDataSetY.getValues(DIM_X));
 
         sliceDataSetX.setMinValue(7.0);
         assertEquals(2, nEvent, "DataSet3D event propagated");
 
-        assertArrayEquals(Arrays.copyOfRange(testData.getValues(DIM_Z), 3, 6), sliceDataSetX.getValues(DIM_Y), "second row match");
+        assertArrayEquals(Arrays.copyOfRange(testData.getValues(DIM_Z), 3, 6), sliceDataSetX.getValues(DIM_Y),
+                "second row match");
         assertArrayEquals(testData.getValues(DIM_Y), sliceDataSetY.getValues(DIM_X));
 
         assertArrayEquals(new double[] { 1, 6, 9 }, sliceDataSetY.getValues(DIM_Y), "first column match");
         sliceDataSetY.setMinValue(2.0);
         assertArrayEquals(new double[] { 2, 5, 8 }, sliceDataSetY.getValues(DIM_Y), "second column match");
+    }
+
+    @Test
+    public void testInvalid2DInputDataSet() {
+        DataSet testData = new DataSetBuilder("test") //
+                                   .setValuesNoCopy(DIM_X, new double[] { 1, 2, 3 }) // x-array
+                                   .setValuesNoCopy(DIM_Y, new double[] { 6, 7, 8 }) // y-array
+                                   .build();
+
+        DimReductionDataSet sliceDataSetX = new DimReductionDataSet(testData, DIM_X, Option.SLICE);
+        testData.invokeListener(new UpdateEvent(testData, "testX"), true);
+        assertEquals("input dataSet nDim < 3", sliceDataSetX.getWarningList().get(0));
+    }
+
+    @Test
+    public void testInvalidNonGrid3DInputDataSet() {
+        DataSet testData = new DataSetBuilder("test") //
+                                   .setValuesNoCopy(DIM_X, new double[] { 1, 2, 3 }) // x-array
+                                   .setValuesNoCopy(DIM_Y, new double[] { 6, 7, 8 }) // y-array
+                                   .setValuesNoCopy(DIM_Z, new double[] { 1, 5, 9 }) // z-array
+                                   .build();
+
+        DimReductionDataSet sliceDataSetX = new DimReductionDataSet(testData, DIM_X, Option.SLICE);
+        testData.invokeListener(new UpdateEvent(testData, "testX"), true);
+        assertEquals("input dataSet n_x * n_y != n_z", sliceDataSetX.getWarningList().get(0));
     }
 }

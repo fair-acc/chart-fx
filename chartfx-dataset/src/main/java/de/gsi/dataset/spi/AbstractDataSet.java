@@ -36,7 +36,6 @@ import de.gsi.dataset.utils.AssertUtils;
  * events.
  * <li>It maintains ranges for all dimensions of the DataSet.
  * <li>It maintains the names and units for the axes
- * <li>It gives a possibility to specify an undefined value.
  * </ul>
  * 
  * @param <D> java generics handling of DataSet for derived classes (needed for fluent design)
