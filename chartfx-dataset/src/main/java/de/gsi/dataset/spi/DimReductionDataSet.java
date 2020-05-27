@@ -80,6 +80,16 @@ public class DimReductionDataSet extends DoubleDataSet implements EventListener 
     @Override
     public void handle(UpdateEvent event) {
         lock().writeLockGuard(() -> source.lock().readLockGuard(() -> {
+            // assert that the dataSet is grid based. TODO: use GridDataSet API
+            this.getWarningList().clear();
+            if (source.getDimension() < 3) {
+                this.getWarningList().add("input dataSet nDim < 3");
+                return;
+            }
+            if (source.getDataCount(DIM_X) * source.getDataCount(DIM_Y) != source.getDataCount(DIM_Z)) {
+                this.getWarningList().add("input dataSet n_x * n_y != n_z");
+                return;
+            }
             // recompute min/max indices based on actual new value range
             final boolean oldValue = source.autoNotification().getAndSet(false);
             minIndex = source.getIndex(dimIndex == DIM_X ? DIM_Y : DIM_X, minValue);
