@@ -1,5 +1,6 @@
 package de.gsi.dataset.spi;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -9,8 +10,13 @@ import java.util.Map.Entry;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.gsi.dataset.AxisDescription;
 import de.gsi.dataset.DataSet;
+import de.gsi.dataset.DataSetMetaData;
+import de.gsi.dataset.EditableDataSet;
 import de.gsi.dataset.utils.AssertUtils;
 
 /**
@@ -26,9 +32,11 @@ import de.gsi.dataset.utils.AssertUtils;
  * <li>dim:3+, useFloat=false, errors=false: {@link MultiDimDoubleDataSet}
  * <li>All other combinations throw a {@code UnsupportedOperationException}
  * </ul>
+ * 
  * @author Alexander Krimm
  */
 public class DataSetBuilder {
+    static final Logger LOGGER = LoggerFactory.getLogger(DataSetBuilder.class);
     protected String name;
     // double values
     protected Map<Integer, double[]> values = new HashMap<>();
@@ -71,14 +79,15 @@ public class DataSetBuilder {
     }
 
     protected void addDataLabelStyleMap(final DataSet dataSet) {
-        AssertUtils.assertType(dataSet, AbstractDataSet.class);
+        if (!(dataSet instanceof AbstractDataSet)) {
+            if (!dataLabels.isEmpty() || !dataStyles.isEmpty()) {
+                LOGGER.atWarn().addArgument(dataSet.getClass().getCanonicalName()).log("Dropping MetaData because return type does not implement DataSetMetaData: {}");
+            }
+            return;
+        }
         AbstractDataSet<?> ds = (AbstractDataSet<?>) dataSet;
-        if (!dataLabels.isEmpty()) {
-            dataLabels.forEach(ds::addDataLabel);
-        }
-        if (!dataStyles.isEmpty()) {
-            dataStyles.forEach(ds::addDataStyle);
-        }
+        dataLabels.forEach(ds::addDataLabel);
+        dataStyles.forEach(ds::addDataStyle);
     }
 
     protected void addDataRanges(final DataSet dataSet) {
@@ -88,8 +97,13 @@ public class DataSetBuilder {
     }
 
     protected void addMetaData(final DataSet dataSet) {
-        AssertUtils.assertType(dataSet, AbstractDataSet.class);
-        AbstractDataSet<?> ds = (AbstractDataSet<?>) dataSet;
+        if (!(dataSet instanceof DataSetMetaData)) {
+            if (!infoList.isEmpty() || !warningList.isEmpty() || !errorList.isEmpty() || !metaInfoMap.isEmpty()) {
+                LOGGER.atWarn().addArgument(dataSet.getClass().getCanonicalName()).log("Dropping MetaData because return type does not implement DataSetMetaData: {}");
+            }
+            return;
+        }
+        DataSetMetaData ds = (DataSetMetaData) dataSet;
         ds.getInfoList().addAll(infoList);
         ds.getWarningList().addAll(warningList);
         ds.getErrorList().addAll(errorList);
@@ -101,7 +115,9 @@ public class DataSetBuilder {
      */
     public DataSet build() {
         final String dsName = name == null ? ("DataSet@" + System.currentTimeMillis()) : name;
-        DataSet dataSet = buildRawDataSet(dsName);
+        int dim = getResultDimension();
+        int[] size = getResultSize(dim);
+        DataSet dataSet = buildRawDataSet(dsName, dim, size);
 
         // add meta data
         addMetaData(dataSet);
@@ -113,13 +129,66 @@ public class DataSetBuilder {
         return dataSet;
     }
 
+    /**
+     * Tries to build a DataSet of the specified type
+     * 
+     * @param <T> The DataSet return type
+     * @param clazz type of the return value
+     * @return The initialized DataSet of type T
+     */
+    public <T extends DataSet> T build(Class<T> clazz) {
+        final String dsName = name == null ? ("DataSet@" + System.currentTimeMillis()) : name;
+        int nDim = getResultDimension();
+        int[] size = getResultSize(nDim);
+        int dataCount = 0; // 2D datasets always have same number of points for x and y
+        for (int i = 0; i < nDim; i++) {
+            dataCount = Math.max(dataCount, size[i]);
+        }
+        DataSet result;
+        if (clazz.isAssignableFrom(DefaultDataSet.class) && nDim <= 2 && !useErrors && !useFloat) {
+            result = buildDefaultDataSet(dsName, dataCount);
+        } else if (clazz.isAssignableFrom(DefaultErrorDataSet.class) && nDim <= 2 && useErrors && !useFloat) {
+            result = buildDefaultErrorDataSet(dsName, dataCount);
+        } else if (clazz.isAssignableFrom(FloatDataSet.class) && nDim <= 2 && !useErrors && useFloat) {
+            result = buildDefaultDataSetFloat(dsName, dataCount);
+        } else if (clazz.isAssignableFrom(MultiDimDoubleDataSet.class) && !useErrors && !useFloat) {
+            result = buildMultiDimDataSet(dsName, size);
+        } else if (EditableDataSet.class.isAssignableFrom(clazz) && !useErrors) {
+            try {
+                result = clazz.getConstructor(String.class).newInstance(name);
+                EditableDataSet resultEditable = (EditableDataSet) result;
+                // TODO: implement using setters for custom DataSet types
+                // initializeEditableDataSet(resultEditable);
+            } catch (InstantiationException | IllegalAccessException | IllegalArgumentException
+                     | InvocationTargetException | NoSuchMethodException | SecurityException e) {
+                throw new UnsupportedOperationException(
+                        "Cannot instantiate requested DataSet type: " + clazz.getCanonicalName(), e);
+            }
+            throw new UnsupportedOperationException("Instantiation of generic editable DataSet not implemented yet");
+        } else {
+            throw new UnsupportedOperationException(
+                    "Return type not supported for DataSet Builder: " + clazz.getCanonicalName());
+        }
+
+        // add meta data
+        addMetaData(result);
+
+        addDataRanges(result);
+
+        addDataLabelStyleMap(result);
+
+        return (T) result;
+    }
+
     private int getResultDimension() {
         int maxDim = values.keySet().stream().collect(Collectors.maxBy(Integer::compare)).orElse(-1);
         maxDim = Math.max(maxDim, valuesFloat.keySet().stream().collect(Collectors.maxBy(Integer::compare)).orElse(-1));
         maxDim = Math.max(maxDim, errorsNeg.keySet().stream().collect(Collectors.maxBy(Integer::compare)).orElse(-1));
-        maxDim = Math.max(maxDim, errorsNegFloat.keySet().stream().collect(Collectors.maxBy(Integer::compare)).orElse(-1));
+        maxDim = Math.max(maxDim,
+                errorsNegFloat.keySet().stream().collect(Collectors.maxBy(Integer::compare)).orElse(-1));
         maxDim = Math.max(maxDim, errorsPos.keySet().stream().collect(Collectors.maxBy(Integer::compare)).orElse(-1));
-        maxDim = Math.max(maxDim, errorsPosFloat.keySet().stream().collect(Collectors.maxBy(Integer::compare)).orElse(-1));
+        maxDim = Math.max(maxDim,
+                errorsPosFloat.keySet().stream().collect(Collectors.maxBy(Integer::compare)).orElse(-1));
         maxDim = Math.max(maxDim,
                 axisDescriptions.keySet().stream().collect(Collectors.maxBy(Integer::compare)).orElse(-1));
         if (this.dimension == -1) {
@@ -138,7 +207,7 @@ public class DataSetBuilder {
         return result;
     }
 
-    private int getResultSize(final int nDims, final int dimIndex) { // NOPMD
+    private int getResultSize(final int nDims, final int dimIndex) { // NOPMD (n-path complexity)
         if (initialCapacity != null && dimIndex < initialCapacity.length) { // use given capacity
             return initialCapacity[dimIndex];
         } else if (initialCapacity != null && initialCapacity.length > 0) { // use last given dimension
@@ -173,9 +242,7 @@ public class DataSetBuilder {
         return result;
     }
 
-    protected DataSet buildRawDataSet(final String dsName) {
-        int dim = getResultDimension();
-        int[] size = getResultSize(dim);
+    protected DataSet buildRawDataSet(final String dsName, final int dim, final int[] size) {
         switch (dim) {
         case 0:
         case 1:
@@ -217,7 +284,8 @@ public class DataSetBuilder {
     private DataSet buildDefaultErrorDataSet(final String dsName, final int size) {
         double[] xvalues = getValues(DataSet.DIM_X, size);
         double[] yvalues = getValues(DataSet.DIM_Y, size);
-        if (errorsNeg.containsKey(DataSet.DIM_X) || errorsPos.containsKey(DataSet.DIM_X)) {
+        if (errorsNeg.containsKey(DataSet.DIM_X) || errorsPos.containsKey(DataSet.DIM_X)
+                || errorsNegFloat.containsKey(DataSet.DIM_X) || errorsPosFloat.containsKey(DataSet.DIM_X)) {
             throw new UnsupportedOperationException("DataSetBuilder: X Errors not implemented for 2D DataSetBuilder");
         }
         double[] yen = getErrors(DataSet.DIM_Y, size, false);
@@ -334,12 +402,12 @@ public class DataSetBuilder {
         return this;
     }
 
-    public DataSetBuilder setMetaErrorList(final String[] errors) {
+    public DataSetBuilder setMetaErrorList(final String... errors) {
         this.errorList.addAll(Arrays.asList(errors));
         return this;
     }
 
-    public DataSetBuilder setMetaInfoList(final String[] infos) {
+    public DataSetBuilder setMetaInfoList(final String... infos) {
         this.infoList.addAll(Arrays.asList(infos));
         return this;
     }
@@ -351,7 +419,7 @@ public class DataSetBuilder {
         return this;
     }
 
-    public DataSetBuilder setMetaWarningList(final String[] warning) {
+    public DataSetBuilder setMetaWarningList(final String... warning) {
         this.warningList.addAll(Arrays.asList(warning));
         return this;
     }
