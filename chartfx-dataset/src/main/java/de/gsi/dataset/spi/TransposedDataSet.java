@@ -26,9 +26,10 @@ public class TransposedDataSet implements DataSet {
     private static final Logger LOGGER = LoggerFactory.getLogger(TransposedDataSet.class);
     private static final long serialVersionUID = 2019092401;
     protected final DataSet dataSet;
+    protected final int nDims;
     protected int[] permutation;
     private boolean transposed;
-    private int grid = -1; // TODO: whether this data is structured as grid, to be replaced by GridApi
+    protected int grid = -1; // TODO: whether this data is structured as grid, to be replaced by GridApi
 
     private TransposedDataSet(final DataSet dataSet, final boolean transposed) {
         if (dataSet == null) {
@@ -37,6 +38,7 @@ public class TransposedDataSet implements DataSet {
         this.dataSet = dataSet;
         permutation = new int[dataSet.getDimension()];
         this.transposed = transposed;
+        nDims = dataSet.getDimension();
         for (int i = 0; i < permutation.length; i++) {
             permutation[i] = i;
         }
@@ -60,10 +62,6 @@ public class TransposedDataSet implements DataSet {
         if (permutation == null) {
             throw new IllegalArgumentException("permutation is null");
         }
-        if (permutation.length < dataSet.getDimension()) {
-            throw new IllegalArgumentException("insufficient permutation.lenght='" + permutation.length
-                                               + "' w.r.t. DataSet dimensions (" + dataSet.getDimension() + ")");
-        }
         for (int i = 0; i < dataSet.getDimension(); i++) {
             if (permutation[i] >= dataSet.getDimension()) {
                 throw new IndexOutOfBoundsException("permutation[" + i + "] contains dimIndex='" + permutation[i]
@@ -72,6 +70,7 @@ public class TransposedDataSet implements DataSet {
         }
 
         this.dataSet = dataSet;
+        this.nDims = permutation.length;
         this.permutation = Arrays.copyOf(permutation, this.dataSet.getDimension());
         this.transposed = false;
     }
@@ -86,20 +85,22 @@ public class TransposedDataSet implements DataSet {
         if (grid > dimIndex || grid == -1) {
             return dataSet.get(permutation[dimIndex], index);
         }
-        if (dataSet.getDimension() == 3) {
-            if (permutation[0] == 0 && permutation[1] == 1 && permutation[2] == 2) {
-                return dataSet.get(permutation[dimIndex], index);
-            } else if (permutation[0] == 1 && permutation[1] == 0 && permutation[2] == 2) {
-                int ny = dataSet.getDataCount(DIM_Y);
-                int nx = dataSet.getDataCount(DIM_X);
-                int iy = (index / ny);
-                int ix = (index % ny);
-                int transposedX = iy + ix * nx;
-                return dataSet.get(permutation[dimIndex], transposedX);
-            }
-            throw new IllegalStateException("cannot permute between grid and non-grid dimensions");
+        final int[] stridePermuted = new int[grid];
+        final int[] strideOriginal = new int[grid];
+        stridePermuted[0] = 1;
+        strideOriginal[0] = 1;
+        for (int k = 1; k < grid; k++) {
+            stridePermuted[k] = stridePermuted[k - 1] * dataSet.getDataCount(permutation[k - 1]);
+            strideOriginal[k] = strideOriginal[k - 1] * dataSet.getDataCount(k - 1);
         }
-        throw new IllegalStateException("can only transpose 3 dim datasets");
+        int indexRemaining = index;
+        int newIndex = 0;
+        for (int k = grid - 1; k >= 0; k--) {
+            int currentIndex = indexRemaining / stridePermuted[k];
+            indexRemaining = indexRemaining % stridePermuted[k];
+            newIndex += strideOriginal[permutation[k]] * currentIndex;
+        }
+        return dataSet.get(permutation[dimIndex], newIndex);
     }
 
     @Override
@@ -169,7 +170,7 @@ public class TransposedDataSet implements DataSet {
      */
     @Override
     public double[] getValues(final int dimIndex) {
-        if (grid > dimIndex || grid == -1) {
+        if (grid <= dimIndex || grid == -1) {
             final int n = getDataCount(permutation[dimIndex]);
             final double[] retValues = new double[n];
             for (int i = 0; i < n; i++) {
@@ -177,7 +178,7 @@ public class TransposedDataSet implements DataSet {
             }
             return retValues;
         }
-        return DataSet.super.getValues(permutation[dimIndex]);
+        return dataSet.getValues(permutation[dimIndex]);
     }
 
     public boolean isTransposed() {
@@ -191,7 +192,7 @@ public class TransposedDataSet implements DataSet {
 
     @Override
     public DataSet recomputeLimits(int dimension) {
-        // Evaluate if the data should be interpreted as on a grid, to be replaced by GridApi
+        // TODO: Evaluate if the data should be interpreted as on a grid, to be replaced by GridApi
         for (int i = dataSet.getDimension() - 1; i >= 0; i--) {
             if (dataSet.getDataCount(i) != dataSet.getDataCount()) {
                 grid = i + 1;
@@ -206,14 +207,16 @@ public class TransposedDataSet implements DataSet {
             throw new IllegalArgumentException("permutation is null");
         }
         this.lock().writeLockGuard(() -> {
-            if (permutation.length < dataSet.getDimension()) {
-                throw new IllegalArgumentException("insufficient permutation.lenght='" + permutation.length
-                                                   + "' w.r.t. DataSet dimensions (" + dataSet.getDimension() + ")");
+            if (permutation.length != nDims) {
+                throw new IllegalArgumentException("Cannot change number of output dimensions");
             }
             for (int i = 0; i < dataSet.getDimension(); i++) {
                 if (permutation[i] >= dataSet.getDimension()) {
                     throw new IndexOutOfBoundsException("permutation[" + i + "] contains dimIndex='" + permutation[i]
                                                         + "' outside DataSet dimension (" + dataSet.getDimension() + ")");
+                }
+                if ((i < grid && permutation[i] >= grid) || (i >= grid && permutation[i] < grid)) {
+                    throw new IllegalArgumentException("permutation mixes grid and non grid dimensions");
                 }
             }
 
@@ -270,12 +273,6 @@ public class TransposedDataSet implements DataSet {
         return new TransposedDataSet(dataSet, transpose);
     }
 
-    /**
-     * TODO: allow permutations to change number of grid dimensions, while enforcing contract, that all grid axes must
-     * come before data axes.
-     * 
-     * @author Alexander Krimm
-     */
     public static class TransposedDataSet3D extends TransposedDataSet implements DataSet3D {
         private static final long serialVersionUID = 19092601;
 
@@ -306,9 +303,8 @@ public class TransposedDataSet implements DataSet {
             case 0:
                 return ((DataSet3D) dataSet).getXIndex(x);
             case 1:
-                return ((DataSet3D) dataSet).getYIndex(x);
             default:
-                return 0;
+                return ((DataSet3D) dataSet).getYIndex(x);
             }
         }
 
@@ -318,9 +314,8 @@ public class TransposedDataSet implements DataSet {
             case 0:
                 return ((DataSet3D) dataSet).getXIndex(y);
             case 1:
-                return ((DataSet3D) dataSet).getYIndex(y);
             default:
-                return 0;
+                return ((DataSet3D) dataSet).getYIndex(y);
             }
         }
 
@@ -333,8 +328,9 @@ public class TransposedDataSet implements DataSet {
         public double get(int dimIndex, int index) {
             if (dimIndex == DIM_Z && permutation[DIM_X] != DIM_X) {
                 int ny = dataSet.getDataCount(DIM_Y);
-                if (ny == 0)
+                if (ny == 0) {
                     throw new IndexOutOfBoundsException("ny = 0");
+                }
                 return ((DataSet3D) dataSet).getZ(index / ny, index % ny);
             }
             return super.get(dimIndex, index);
