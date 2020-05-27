@@ -17,7 +17,12 @@ import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
  * @author rstein
  * @author akrimm
  */
-@SuppressWarnings("PMD.TooManyMethods") // part of the flexible class nature
+@SuppressWarnings({
+        //
+        "PMD.TooManyMethods" // part of the flexible class nature
+        ,
+        "java:S2160" // equals is still valid because of DataSet interface
+})
 public class MultiDimDoubleDataSet extends AbstractDataSet<MultiDimDoubleDataSet> implements EditableDataSet {
     private static final long serialVersionUID = -493232313124620828L;
     protected DoubleArrayList[] values; // way faster than java default lists
@@ -75,7 +80,8 @@ public class MultiDimDoubleDataSet extends AbstractDataSet<MultiDimDoubleDataSet
      *
      * @param name name of this DataSet.
      * @param nDims the number of dimensions
-     * @param initialSizes initial capacity of buffer. If multiple sizes are supplied, they are used to after one another
+     * @param initialSizes initial capacity of buffer. If multiple sizes are supplied, they are used to after one
+     *            another
      *            and afterwards the product of all sizes is used, e.g. nDims=3 and initialSizes=4,5 results in a
      *            three-dimensional dataset with 4 points in x, 5 points in y and 20 points in z direction.
      * @throws IllegalArgumentException if {@code name} is {@code null}
@@ -407,6 +413,7 @@ public class MultiDimDoubleDataSet extends AbstractDataSet<MultiDimDoubleDataSet
     /**
      * <p>
      * Update the data for a given dimension
+     * 
      * @param dimIndex dimension index (e.g. DataSet.DIM_X)
      * @param values values for dimension
      * @param copy true: makes an internal copy, false: use the pointer as is (saves memory allocation
@@ -523,15 +530,5 @@ public class MultiDimDoubleDataSet extends AbstractDataSet<MultiDimDoubleDataSet
         }
 
         return y1 + (((y2 - y1) * (x - x1)) / (x2 - x1));
-    }
-
-    @Override
-    public boolean equals(final Object obj) {
-        return super.equals(obj);
-    }
-
-    @Override
-    public int hashCode() {
-        return super.hashCode();
     }
 }
