@@ -11,6 +11,8 @@ import de.gsi.dataset.DataSet;
 /**
  * Tests for the MultiDimDoubleDataSet
  * TODO: Test EventListeners
+ * setValues
+ * dataCount for dimIndex>dimensions
  * 
  * @author Alexander Krimm
  */
@@ -20,6 +22,13 @@ class MultiDimDoubleDataSetTests {
         MultiDimDoubleDataSet dataset = new MultiDimDoubleDataSet("Test Dataset", false,
                 new double[][] { { 1, 2, 3, 4 }, { 2, 4, 6, 8 }, { 3, 3, 6, 8 }, { 1, 5, 7, 1 } });
         assertEquals(3, dataset.get(2, 0));
+        assertEquals(4, dataset.getDimension());
+        assertEquals(4, dataset.getDataCount());
+        assertEquals(4, dataset.getDataCount(DataSet.DIM_X));
+        assertEquals(4, dataset.getDataCount(DataSet.DIM_Y));
+        assertEquals(4, dataset.getDataCount(DataSet.DIM_Z));
+        assertEquals(4, dataset.getDataCount(3));
+        assertEquals(0, dataset.getDataCount(4));
 
         // Add points (single)
         dataset.add(2, 14, 15, 16, 17); // single Point
@@ -77,6 +86,14 @@ class MultiDimDoubleDataSetTests {
         assertEquals(0, dataset.getDataCount());
         assertArrayEquals(new double[] {},
                 trimArray(dataset.getValues(DataSet.DIM_Z), dataset.getDataCount(DataSet.DIM_Z)));
+
+        // setValues
+        dataset.setValues(DataSet.DIM_X, new double[] { 1, 2, 3 }, false);
+        dataset.setValues(DataSet.DIM_Y, new double[] { 6, 7, 8, 9 }, true);
+        assertArrayEquals(new double[] { 1, 2, 3 },
+                trimArray(dataset.getValues(DataSet.DIM_X), dataset.getDataCount(DataSet.DIM_X)));
+        assertArrayEquals(new double[] { 6, 7, 8, 9 },
+                trimArray(dataset.getValues(DataSet.DIM_Y), dataset.getDataCount(DataSet.DIM_Y)));
     }
 
     private static double[] trimArray(final double[] values, final int dataCount) {
