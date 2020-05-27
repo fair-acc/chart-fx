@@ -28,7 +28,7 @@ public class TransposedDataSet implements DataSet {
     protected final DataSet dataSet;
     protected int[] permutation;
     private boolean transposed;
-    private int grid = -1; // whether this data is structured as grid, to be replaced by GridApi
+    private int grid = -1; // TODO: whether this data is structured as grid, to be replaced by GridApi
 
     private TransposedDataSet(final DataSet dataSet, final boolean transposed) {
         if (dataSet == null) {
@@ -44,7 +44,7 @@ public class TransposedDataSet implements DataSet {
             permutation[0] = 1;
             permutation[1] = 0;
         }
-        // Evaluate if the data should be interpreted as on a grid, to be replaced by GridApi
+        // TODO: Evaluate if the data should be interpreted as on a grid, to be replaced by GridApi
         for (int i = dataSet.getDimension() - 1; i >= 0; i--) {
             if (dataSet.getDataCount(i) != dataSet.getDataCount()) {
                 grid = i + 1;
