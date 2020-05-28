@@ -8,7 +8,6 @@ package de.gsi.dataset.serializer;
  */
 @SuppressWarnings("PMD.TooManyMethods") // NOPMD - these are short-hand convenience methods
 public interface IoBuffer extends IoBufferHeader<IoBuffer> {
-
     boolean getBoolean(); // NOPMD by rstein
 
     default boolean[] getBooleanArray() {
@@ -224,5 +223,4 @@ public interface IoBuffer extends IoBufferHeader<IoBuffer> {
     }
 
     IoBuffer putStringArray(final String[] src, final long offset, final int nToCopy);
-
 }

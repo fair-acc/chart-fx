@@ -1,4 +1,4 @@
-package de.gsi.dataset.utils.serializer.helper;
+package de.gsi.dataset.serializer.spi.helper;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -8,7 +8,10 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.spi.LoggingEventBuilder;
 
 /**
+ * Generic test class to verify serialiser forward/backward identities.
+ * 
  * @author rstein
+ * @see de.gsi.dataset.serializer.spi.BinarySerialiser
  */
 public class MyGenericClass {
     private static final Logger LOGGER = LoggerFactory.getLogger(MyGenericClass.class);
@@ -211,7 +214,7 @@ public class MyGenericClass {
     }
 
     private static LoggingEventBuilder logBackEnd() {
-        return verboseLogging ? LOGGER.atError() : LOGGER.atDebug();
+        return verboseLogging ? LOGGER.atError() : LOGGER.atTrace();
     }
 
     public static void setEnableExtendedTestCase(final boolean state) {

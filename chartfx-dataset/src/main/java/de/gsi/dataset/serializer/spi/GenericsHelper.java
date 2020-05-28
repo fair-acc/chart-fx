@@ -7,7 +7,6 @@ package de.gsi.dataset.serializer.spi;
  * @author rstein
  */
 public final class GenericsHelper {
-
     private GenericsHelper() {
         // only static methods are used
     }
@@ -30,7 +29,7 @@ public final class GenericsHelper {
 
         if (!prototype.isAssignableFrom(array[0].getClass())) {
             throw new IllegalArgumentException("array class type '" + array[0].getClass().getName()
-                    + "' mismatch with '" + prototype.getName() + "'");
+                                               + "' mismatch with '" + prototype.getName() + "'");
         }
     }
 
@@ -48,6 +47,15 @@ public final class GenericsHelper {
         final byte[] result = new byte[array.length];
         for (int i = 0; i < array.length; i++) {
             result[i] = array[i] == null ? 0 : ((Byte) array[i]).byteValue();
+        }
+        return result;
+    }
+
+    public static char[] toCharPrimitive(final Object[] array) {
+        checkForNonConformity(array, Character.class);
+        final char[] result = new char[array.length];
+        for (int i = 0; i < array.length; i++) {
+            result[i] = array[i] == null ? 0 : ((Character) array[i]).charValue();
         }
         return result;
     }
@@ -89,7 +97,6 @@ public final class GenericsHelper {
     }
 
     public static Boolean[] toObject(final boolean[] array) {
-
         final Boolean[] result = new Boolean[array.length];
         for (int i = 0; i < array.length; i++) {
             result[i] = Boolean.valueOf(array[i]);
@@ -98,7 +105,6 @@ public final class GenericsHelper {
     }
 
     public static Byte[] toObject(final byte[] array) {
-
         final Byte[] result = new Byte[array.length];
         for (int i = 0; i < array.length; i++) {
             result[i] = Byte.valueOf(array[i]);
@@ -106,8 +112,15 @@ public final class GenericsHelper {
         return result;
     }
 
-    public static Double[] toObject(final double[] array) {
+    public static Character[] toObject(final char[] array) {
+        final Character[] result = new Character[array.length];
+        for (int i = 0; i < array.length; i++) {
+            result[i] = Character.valueOf(array[i]);
+        }
+        return result;
+    }
 
+    public static Double[] toObject(final double[] array) {
         final Double[] result = new Double[array.length];
         for (int i = 0; i < array.length; i++) {
             result[i] = Double.valueOf(array[i]);
@@ -116,7 +129,6 @@ public final class GenericsHelper {
     }
 
     public static Float[] toObject(final float[] array) {
-
         final Float[] result = new Float[array.length];
         for (int i = 0; i < array.length; i++) {
             result[i] = Float.valueOf(array[i]);
@@ -125,7 +137,6 @@ public final class GenericsHelper {
     }
 
     public static Integer[] toObject(final int[] array) {
-
         final Integer[] result = new Integer[array.length];
         for (int i = 0; i < array.length; i++) {
             result[i] = Integer.valueOf(array[i]);
@@ -134,7 +145,6 @@ public final class GenericsHelper {
     }
 
     public static Long[] toObject(final long[] array) {
-
         final Long[] result = new Long[array.length];
         for (int i = 0; i < array.length; i++) {
             result[i] = Long.valueOf(array[i]);
@@ -152,7 +162,6 @@ public final class GenericsHelper {
     }
 
     public static boolean[] toPrimitive(final Boolean[] array) {
-
         final boolean[] result = new boolean[array.length];
         for (int i = 0; i < array.length; i++) {
             result[i] = array[i].booleanValue();
@@ -161,7 +170,6 @@ public final class GenericsHelper {
     }
 
     public static byte[] toPrimitive(final Byte[] array) {
-
         final byte[] result = new byte[array.length];
         for (int i = 0; i < array.length; i++) {
             result[i] = array[i].byteValue();
@@ -170,7 +178,6 @@ public final class GenericsHelper {
     }
 
     public static double[] toPrimitive(final Double[] array) {
-
         final double[] result = new double[array.length];
         for (int i = 0; i < array.length; i++) {
             result[i] = array[i].doubleValue();
@@ -179,7 +186,6 @@ public final class GenericsHelper {
     }
 
     public static float[] toPrimitive(final Float[] array) {
-
         final float[] result = new float[array.length];
         for (int i = 0; i < array.length; i++) {
             result[i] = array[i].floatValue();
@@ -188,7 +194,6 @@ public final class GenericsHelper {
     }
 
     public static int[] toPrimitive(final Integer[] array) {
-
         final int[] result = new int[array.length];
         for (int i = 0; i < array.length; i++) {
             result[i] = array[i].intValue();
@@ -197,7 +202,6 @@ public final class GenericsHelper {
     }
 
     public static long[] toPrimitive(final Long[] array) {
-
         final long[] result = new long[array.length];
         for (int i = 0; i < array.length; i++) {
             result[i] = array[i].longValue();
@@ -224,12 +228,10 @@ public final class GenericsHelper {
     }
 
     public static String[] toStringPrimitive(final Object[] array) {
-
         final String[] result = new String[array.length];
         for (int i = 0; i < array.length; i++) {
             result[i] = (String) array[i];
         }
         return result;
     }
-
 }
