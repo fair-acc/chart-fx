@@ -27,7 +27,6 @@ import java.nio.DoubleBuffer;
 import java.nio.FloatBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.security.InvalidParameterException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -41,6 +40,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 import java.util.zip.ZipEntry;
@@ -219,7 +219,7 @@ public class DataSetUtils extends DataSetUtilsHelper {
      * @param fileName to be opened
      * @return Compression Enum for the extension of the supplied filename. Defaults to Compression.NONE
      */
-    private static Compression evaluateAutoCompression(final String fileName) {
+    protected static Compression evaluateAutoCompression(final String fileName) {
         if (fileName.toLowerCase(Locale.UK).endsWith(".gz")) {
             return Compression.GZIP;
         }
@@ -421,10 +421,10 @@ public class DataSetUtils extends DataSetUtilsHelper {
      */
     public static DataSet readDataSetFromByteArray(final byte[] byteArray) {
         if (byteArray == null) {
-            throw new InvalidParameterException("null byteArray");
+            throw new IllegalArgumentException("null byteArray");
         }
         if (byteArray.length == 0) {
-            throw new InvalidParameterException("byteArray with zero length");
+            throw new IllegalArgumentException("byteArray with zero length");
         }
         DataSet dataSet = null;
         try (final SplitCharByteInputStream inputFile = new SplitCharByteInputStream(
@@ -466,20 +466,12 @@ public class DataSetUtils extends DataSetUtilsHelper {
         if ((fileName == null) || fileName.isEmpty()) {
             throw new IllegalArgumentException("fileName must not be null or empty");
         }
-
         DataSet dataSet = null;
-        try {
-            final File file = new File(fileName);
-            try (SplitCharByteInputStream inputFile = openDatasetFileInput(file,
-                         compression == Compression.AUTO ? evaluateAutoCompression(fileName) : compression)) {
-                dataSet = readDataSetFromStream(inputFile);
+        try (SplitCharByteInputStream inputFile = openDatasetFileInput(new File(fileName),
+                     compression == Compression.AUTO ? evaluateAutoCompression(fileName) : compression)) {
+            dataSet = readDataSetFromStream(inputFile);
 
-            } catch (final IOException e) {
-                if (LOGGER.isErrorEnabled()) {
-                    LOGGER.error("could not open/parse file: '" + fileName + "'", e);
-                }
-            }
-        } catch (final Exception e) {
+        } catch (final IOException e) {
             if (LOGGER.isErrorEnabled()) {
                 LOGGER.error("could not open/parse file: '" + fileName + "'", e);
             }
@@ -511,7 +503,7 @@ public class DataSetUtils extends DataSetUtilsHelper {
 
             // skip first file format header
             String line = inputReader.readLine();
-            for (; (line = inputReader.readLine()) != null;) {
+            while ((line = inputReader.readLine()) != null) {
                 if (line.startsWith("$")) {
                     if (line.startsWith("$binary")) {
                         binary = true;
@@ -592,7 +584,6 @@ public class DataSetUtils extends DataSetUtilsHelper {
                     } else {
                         metaInfoMap.put(key, value);
                     }
-                    continue;
                 }
             }
 
@@ -633,99 +624,62 @@ public class DataSetUtils extends DataSetUtilsHelper {
      */
     private static DataSet readNumericDataFromBinaryFile(final BufferedReader inputReader,
             final SplitCharByteInputStream inputFile, final String dataSetName) throws IOException {
-        DataSet result = null;
-        String line;
-        class DataEntry {
-            public String name;
-            public String type;
-            public int nsamples;
-            public FloatBuffer data32;
-            public DoubleBuffer data64;
-        }
-        final List<DataEntry> toRead = new ArrayList<>();
-        while ((line = inputReader.readLine()) != null) {
-            final String[] tokens = line.substring(1).split(";");
-            toRead.add(new DataEntry() {
-                {
-                    name = tokens[0];
-                    type = tokens[1];
-                    nsamples = Integer.valueOf(tokens[2]);
-                }
-            });
-        }
+        final DataSetBuilder builder = new DataSetBuilder();
+        final List<String> toRead = inputReader.lines().collect(Collectors.toList());
         if (inputFile.reachedSplit()) {
             inputFile.switchToBinary();
-            final int[] valindex = { -1, -1, -1, -1, -1 };
             for (int i = 0; i < toRead.size(); i++) {
-                final DataEntry dataentry = toRead.get(i);
-                if (LOGGER.isDebugEnabled()) {
-                    LOGGER.atDebug().addArgument(dataentry.name).log("Read data: {}");
-                }
-                boolean isFloat32 = dataentry.type.toLowerCase(Locale.UK).contains("float32");
-
-                final ByteBuffer byteData = isFloat32 ? ByteBuffer.allocate(dataentry.nsamples * Float.BYTES)
-                                                      : ByteBuffer.allocate(dataentry.nsamples * Double.BYTES);
+                final String[] dataentry = toRead.get(i).substring(1).split(";");
+                final String name = dataentry[0];
+                final String type = dataentry[1];
+                final int nSamples = Integer.parseInt(dataentry[2]);
+                boolean isFloat32 = type.toLowerCase(Locale.UK).contains("float32");
+                final ByteBuffer byteData = isFloat32 ? ByteBuffer.allocate(nSamples * Float.BYTES)
+                                                      : ByteBuffer.allocate(nSamples * Double.BYTES);
                 int alreadyRead = 0;
+                DoubleBuffer data64 = null;
+                FloatBuffer data32 = null;
                 if (isFloat32) {
-                    dataentry.data32 = byteData.asFloatBuffer();
-                    while (alreadyRead < (dataentry.nsamples * Float.BYTES)) {
+                    data32 = byteData.asFloatBuffer();
+                    while (alreadyRead < (nSamples * Float.BYTES)) {
                         alreadyRead += inputFile.read(byteData.array(), alreadyRead,
-                                dataentry.nsamples * Float.BYTES - alreadyRead);
+                                nSamples * Float.BYTES - alreadyRead);
                     }
                 } else {
-                    dataentry.data64 = byteData.asDoubleBuffer();
-                    while (alreadyRead < (dataentry.nsamples * Double.BYTES)) {
+                    data64 = byteData.asDoubleBuffer();
+                    while (alreadyRead < (nSamples * Double.BYTES)) {
                         alreadyRead += inputFile.read(byteData.array(), alreadyRead,
-                                dataentry.nsamples * Double.BYTES - alreadyRead);
+                                nSamples * Double.BYTES - alreadyRead);
                     }
                 }
-                switch (dataentry.name) {
+                switch (name) {
                 case "x":
-                    valindex[0] = i;
+                    builder.setValuesNoCopy(DIM_X, readDoubleArrayFromBuffer(data32, data64));
                     break;
                 case "y":
-                    valindex[1] = i;
+                    builder.setValuesNoCopy(DIM_Y, readDoubleArrayFromBuffer(data32, data64));
                     break;
                 case "eyn":
-                    valindex[2] = i;
+                    builder.setNegErrorNoCopy(DIM_Y, readDoubleArrayFromBuffer(data32, data64));
                     break;
                 case "eyp":
-                    valindex[3] = i;
+                    builder.setPosErrorNoCopy(DIM_Y, readDoubleArrayFromBuffer(data32, data64));
                     break;
                 case "z":
-                    valindex[4] = i;
+                    builder.setValuesNoCopy(DIM_Z, readDoubleArrayFromBuffer(data32, data64));
                     break;
                 default:
                     if (LOGGER.isDebugEnabled()) {
-                        LOGGER.atDebug().addArgument(dataentry.name).addArgument(dataentry.type).log("Got unused variable {} of type {}");
+                        LOGGER.atDebug().addArgument(name).addArgument(type).log("Got unused variable {} of type {}");
                     }
                     break;
                 }
             }
-            if (valindex[4] > -1) { // 3D Dataset
-                final double[] x = readDoubleArrayFromBuffer(toRead.get(valindex[0]).data32,
-                        toRead.get(valindex[0]).data64);
-                final double[] y = readDoubleArrayFromBuffer(toRead.get(valindex[1]).data32,
-                        toRead.get(valindex[1]).data64);
-                final double[] z = readDoubleArrayFromBuffer(toRead.get(valindex[4]).data32,
-                        toRead.get(valindex[4]).data64);
-                result = new DataSetBuilder(dataSetName).setValues(DIM_X, x).setValues(DIM_Y, y).setValues(DIM_Z, z).build();
-            } else { // 2D Dataset
-                final double[] x = readDoubleArrayFromBuffer(toRead.get(valindex[0]).data32,
-                        toRead.get(valindex[0]).data64);
-                final double[] y = readDoubleArrayFromBuffer(toRead.get(valindex[1]).data32,
-                        toRead.get(valindex[1]).data64);
-                final double[] eyn = readDoubleArrayFromBuffer(toRead.get(valindex[2]).data32,
-                        toRead.get(valindex[2]).data64);
-                final double[] eyp = readDoubleArrayFromBuffer(toRead.get(valindex[3]).data32,
-                        toRead.get(valindex[3]).data64);
-                result = new DoubleErrorDataSet(dataSetName, x, y, eyn, eyp, x.length, false);
-            }
-            return result;
+            return builder.setName(dataSetName).build();
         }
 
         LOGGER.error("File seems to be corrupted, Split marker not found");
-        return result;
+        return builder.setName("CorruptedDataSet").setMetaErrorList("Error reading file").build();
     }
 
     protected static DataSet readNumericDataFromFile(final BufferedReader inputFile, final String dataSetName,
@@ -938,16 +892,15 @@ public class DataSetUtils extends DataSetUtilsHelper {
      */
     public static String writeDataSetToFile(final DataSet dataSet, final Path path, final String fileName,
             final Compression compression, final boolean binary) {
-        if (dataSet == null) {
-            throw new IllegalArgumentException("dataSet must not be null or empty");
-        }
+        AssertUtils.notNull("dataSet", dataSet);
+        AssertUtils.notNull("path", path);
         if ((fileName == null) || fileName.isEmpty()) {
             throw new IllegalArgumentException("fileName must not be null or empty");
         }
 
         try {
             final String realFileName = getFileName(dataSet, fileName);
-            final String longFileName = path.toFile() + "/" + realFileName;
+            final String longFileName = new File(path.toFile(), realFileName).getAbsolutePath();
             final File file = new File(longFileName);
             if (file.getParentFile() != null && file.getParentFile().mkdirs() && LOGGER.isInfoEnabled()) {
                 LOGGER.atInfo().addArgument(longFileName).log("needed to create directory for file: {}");
@@ -1006,9 +959,7 @@ public class DataSetUtils extends DataSetUtilsHelper {
                 buffer.append("## statistics disabled for DataSet3D, not yet implemented\n");
             } else {
                 try {
-                    // write some statistics for the human readable benefit when
-                    // opening the
-                    // file with standard text-based viewers
+                    // write some statistics for the human readable benefit when opening the file with standard text-based viewers
                     buffer.append("#integral : ").append(integralSimple(dataSet)) //
                             .append("\n#mean : ")
                             .append(mean(dataSet.getValues(DIM_Y))) //
@@ -1021,9 +972,7 @@ public class DataSetUtils extends DataSetUtilsHelper {
                     }
                 }
             }
-
             outputStream.write(buffer.toString().getBytes());
-
             release("headerDataCacheBuilder", buffer);
         } catch (final Exception e) {
             if (LOGGER.isErrorEnabled()) {
@@ -1101,17 +1050,12 @@ public class DataSetUtils extends DataSetUtilsHelper {
 
         // Write binary data after separation character 0xFE
         // this would be nicer, because it does not copy the byte array, but
-        // there is no way to get the byteBuffer
-        // from the DoubleBuffer:
+        // there is no way to get the byteBuffer from the DoubleBuffer:
         // https://stackoverflow.com/questions/27492161/convert-floatbuffer-to-bytebuffer
-        // final DoubleBuffer doubleValues =
-        // DoubleBuffer.wrap(dataSet.getXValues());
         try {
             outputStream.write(SWITCH_TO_BINARY_KEY); // magic byte to switch to
             // binary data
             if (asFloat && !is3D) {
-                // TODO: check performance w.r.t. using 'DataOutputStream'
-                // directly
                 final int nSamples = dataSet.getDataCount(DIM_X);
                 final ByteBuffer byteBuffer = getCachedDoubleArray(CACHED_WRITE_BYTE_BUFFER, Float.BYTES * nSamples);
                 writeDoubleArrayAsFloatToByteBuffer(byteBuffer, dataSet.getValues(DIM_X), nSamples);
@@ -1135,10 +1079,7 @@ public class DataSetUtils extends DataSetUtilsHelper {
                 writeDoubleArrayToByteBuffer(byteBuffer, errors(dataSet, EYP), nSamples);
                 outputStream.write(byteBuffer.array());
                 release(CACHED_WRITE_BYTE_BUFFER, byteBuffer);
-            } else if (asFloat && is3D) {
-                // TODO: check performance w.r.t. using 'DataOutputStream'
-                // directly
-                // TODO: efficient implementation using array access (needs API)
+            } else if (asFloat) { // && !is3D
                 int nX = dataSet.getDataCount(DIM_X);
                 int nY = dataSet.getDataCount(DIM_Y);
                 int nZ = dataSet.getDataCount(DIM_Z);
@@ -1156,7 +1097,7 @@ public class DataSetUtils extends DataSetUtilsHelper {
                 }
                 outputStream.write(byteBuffer.array());
                 release(CACHED_WRITE_BYTE_BUFFER, byteBuffer);
-            } else if (!asFloat && is3D) {
+            } else { // !asFloat && !is3D
                 int nX = dataSet.getDataCount(DIM_X);
                 int nY = dataSet.getDataCount(DIM_Y);
                 int nZ = dataSet.getDataCount(DIM_Z);
@@ -1287,8 +1228,8 @@ public class DataSetUtils extends DataSetUtilsHelper {
         EYP;
     }
 
-    private static class SplitCharByteInputStream extends FilterInputStream {
-        private static final byte MARKER = (byte) SWITCH_TO_BINARY_KEY;
+    protected static class SplitCharByteInputStream extends FilterInputStream {
+        protected static final byte MARKER = (byte) SWITCH_TO_BINARY_KEY;
         private boolean binary;
         private boolean hasMarker;
         private final PushbackInputStream pbin;
@@ -1304,12 +1245,15 @@ public class DataSetUtils extends DataSetUtilsHelper {
 
         @Override
         public int read() throws IOException {
-            byte b = (byte) in.read();
-            if (b == MARKER) {
-                pbin.unread(b);
-                b = -1;
+            if (hasMarker && !binary) {
+                return -1;
             }
-            return b & 0xFF;
+            byte b = (byte) in.read();
+            if (!binary && b == MARKER) {
+                hasMarker = true;
+                return -1;
+            }
+            return b == -1 ? -1 : b & 0xFF;
         }
 
         @Override
@@ -1347,7 +1291,7 @@ public class DataSetUtils extends DataSetUtilsHelper {
                     if (b[i] == MARKER) {
                         pbin.unread(b, i + 1, (off + nread) - i - 1);
                         hasMarker = true;
-                        return i;
+                        return i - off;
                     }
                 }
             }
