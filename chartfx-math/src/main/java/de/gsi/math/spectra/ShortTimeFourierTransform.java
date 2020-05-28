@@ -26,8 +26,6 @@ import de.gsi.dataset.utils.DoubleArrayCache;
  * @author Alexander Krimm
  */
 public class ShortTimeFourierTransform {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ShortTimeFourierTransform.class);
-
     /**
      * Applies the apodization function to data in "interleaved" complex array.
      * 
@@ -223,8 +221,8 @@ public class ShortTimeFourierTransform {
                 switch (padding) {
                 case MIRROR:
                     for (int j = validLength; j + 1 < raw.length; j += 2) {
-                        raw[j] = complexInput[complexInput.length - j + validLength - 1];
-                        raw[j + 1] = complexInput[complexInput.length - j + validLength];
+                        raw[j] = complexInput[complexInput.length - j + validLength - 2];
+                        raw[j + 1] = complexInput[complexInput.length - j + validLength - 1];
                     }
                     break;
                 case ZERO:
