@@ -1,4 +1,4 @@
-package de.gsi.dataset.utils.serializer;
+package de.gsi.dataset.serializer;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -9,11 +9,10 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.gsi.dataset.serializer.IoBuffer;
 import de.gsi.dataset.serializer.spi.FastByteBuffer;
+import de.gsi.dataset.serializer.spi.helper.MyGenericClass;
 import de.gsi.dataset.serializer.spi.iobuffer.IoBufferSerialiser;
 import de.gsi.dataset.spi.DoubleDataSet;
-import de.gsi.dataset.utils.serializer.helper.MyGenericClass;
 
 public class IoSerialiserTests {
     private static final Logger LOGGER = LoggerFactory.getLogger(IoSerialiserTests.class);

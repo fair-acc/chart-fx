@@ -1,4 +1,4 @@
-package de.gsi.dataset.utils.serializer.helper;
+package de.gsi.dataset.serializer.spi.helper;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -8,7 +8,10 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.spi.LoggingEventBuilder;
 
 /**
+ * Generic test class to verify serialiser forward/backward identities.
+ * 
  * @author rstein
+ * @see de.gsi.dataset.serializer.spi.BinarySerialiser
  */
 public class MyGenericClass {
     private static final Logger LOGGER = LoggerFactory.getLogger(MyGenericClass.class);
@@ -58,56 +61,44 @@ public class MyGenericClass {
         boolean state = true;
         MyGenericClass other = (MyGenericClass) obj;
         if (this.hashCode() != other.hashCode()) {
-            logBackEnd().addArgument(this.getClass().getSimpleName()).addArgument(this.hashCode())
-                    .addArgument(other.hashCode()).log("{} - hashCode is not equal: this '{}' vs. other '{}'");
+            logBackEnd().addArgument(this.getClass().getSimpleName()).addArgument(this.hashCode()).addArgument(other.hashCode()).log("{} - hashCode is not equal: this '{}' vs. other '{}'");
             state = false;
         }
         if (dummyBoolean != other.dummyBoolean) {
-            logBackEnd().addArgument(this.getClass().getSimpleName()).addArgument(dummyBoolean)
-                    .addArgument(other.dummyBoolean).log("{} - dummyBoolean is not equal: this '{}' vs. other '{}'");
+            logBackEnd().addArgument(this.getClass().getSimpleName()).addArgument(dummyBoolean).addArgument(other.dummyBoolean).log("{} - dummyBoolean is not equal: this '{}' vs. other '{}'");
             state = false;
         }
         if (dummyByte != other.dummyByte) {
-            logBackEnd().addArgument(this.getClass().getSimpleName()).addArgument(dummyByte)
-                    .addArgument(other.dummyByte).log("{} - dummyByte is not equal: this '{}' vs. other '{}'");
+            logBackEnd().addArgument(this.getClass().getSimpleName()).addArgument(dummyByte).addArgument(other.dummyByte).log("{} - dummyByte is not equal: this '{}' vs. other '{}'");
             state = false;
         }
         if (dummyShort != other.dummyShort) {
-            logBackEnd().addArgument(this.getClass().getSimpleName()).addArgument(dummyShort)
-                    .addArgument(other.dummyShort).log("{} - dummyShort is not equal: this '{}' vs. other '{}'");
+            logBackEnd().addArgument(this.getClass().getSimpleName()).addArgument(dummyShort).addArgument(other.dummyShort).log("{} - dummyShort is not equal: this '{}' vs. other '{}'");
             state = false;
         }
         if (dummyInt != other.dummyInt) {
-            logBackEnd().addArgument(this.getClass().getSimpleName()).addArgument(dummyInt).addArgument(other.dummyInt)
-                    .log("{} - dummyInt is not equal: this '{}' vs. other '{}'");
+            logBackEnd().addArgument(this.getClass().getSimpleName()).addArgument(dummyInt).addArgument(other.dummyInt).log("{} - dummyInt is not equal: this '{}' vs. other '{}'");
             state = false;
         }
         if (dummyLong != other.dummyLong) {
-            logBackEnd().addArgument(this.getClass().getSimpleName()).addArgument(dummyLong)
-                    .addArgument(other.dummyLong).log("{} - dummyLong is not equal: this '{}' vs. other '{}'");
+            logBackEnd().addArgument(this.getClass().getSimpleName()).addArgument(dummyLong).addArgument(other.dummyLong).log("{} - dummyLong is not equal: this '{}' vs. other '{}'");
             state = false;
         }
         if (dummyFloat != other.dummyFloat) {
-            logBackEnd().addArgument(this.getClass().getSimpleName()).addArgument(dummyFloat)
-                    .addArgument(other.dummyFloat).log("{} - dummyFloat is not equal: this '{}' vs. other '{}'");
+            logBackEnd().addArgument(this.getClass().getSimpleName()).addArgument(dummyFloat).addArgument(other.dummyFloat).log("{} - dummyFloat is not equal: this '{}' vs. other '{}'");
             state = false;
         }
         if (dummyDouble != other.dummyDouble) {
-            logBackEnd().addArgument(this.getClass().getSimpleName()).addArgument(dummyDouble)
-                    .addArgument(other.dummyDouble).log("{} - dummyDouble is not equal: this '{}' vs. other '{}'");
+            logBackEnd().addArgument(this.getClass().getSimpleName()).addArgument(dummyDouble).addArgument(other.dummyDouble).log("{} - dummyDouble is not equal: this '{}' vs. other '{}'");
             state = false;
         }
         if (dummyString == null || !dummyString.contentEquals(other.dummyString)) {
-            logBackEnd().addArgument(this.getClass().getSimpleName()).addArgument(dummyString)
-                    .addArgument(other.dummyString).addArgument(dummyString).addArgument(other.dummyString)
-                    .log("{} - dummyString is not equal {} vs {}'");
+            logBackEnd().addArgument(this.getClass().getSimpleName()).addArgument(dummyString).addArgument(other.dummyString).addArgument(dummyString).addArgument(other.dummyString).log("{} - dummyString is not equal {} vs {}'");
             state = false;
         }
 
         if (!boxedPrimitives.equals(other.boxedPrimitives)) {
-            logBackEnd().addArgument(this.getClass().getSimpleName()).addArgument(boxedPrimitives)
-                    .addArgument(other.boxedPrimitives)
-                    .log("{} - boxedPrimitives are not equal: this '{}' vs. other '{}'");
+            logBackEnd().addArgument(this.getClass().getSimpleName()).addArgument(boxedPrimitives).addArgument(other.boxedPrimitives).log("{} - boxedPrimitives are not equal: this '{}' vs. other '{}'");
             state = false;
         }
 
@@ -121,15 +112,11 @@ public class MyGenericClass {
         }
 
         if (!arrayListInteger.equals(other.arrayListInteger)) {
-            logBackEnd().addArgument(this.getClass().getSimpleName()).addArgument(arrayListInteger)
-                    .addArgument(other.arrayListInteger)
-                    .log("{} - arrayListInteger is not equal: this '{}' vs. other '{}'");
+            logBackEnd().addArgument(this.getClass().getSimpleName()).addArgument(arrayListInteger).addArgument(other.arrayListInteger).log("{} - arrayListInteger is not equal: this '{}' vs. other '{}'");
             state = false;
         }
         if (!arrayListString.equals(other.arrayListString)) {
-            logBackEnd().addArgument(this.getClass().getSimpleName()).addArgument(arrayListString)
-                    .addArgument(other.arrayListString)
-                    .log("{} - arrayListString is not equal: this '{}' vs. other '{}'");
+            logBackEnd().addArgument(this.getClass().getSimpleName()).addArgument(arrayListString).addArgument(other.arrayListString).log("{} - arrayListString is not equal: this '{}' vs. other '{}'");
             state = false;
         }
         if (!arrays.equals(other.arrays)) {
@@ -186,20 +173,33 @@ public class MyGenericClass {
 
     @Override
     public String toString() {
-        return new StringBuilder()//
-                .append("[dummyBoolean=").append(dummyBoolean)//
-                .append(", dummyByte=").append(dummyByte)//
-                .append(", dummyShort=").append(dummyShort)//
-                .append(", dummyInt=").append(dummyInt)//
-                .append(", dummyFloat=").append(dummyFloat)//
-                .append(", dummyDouble=").append(dummyDouble)//
-                .append(", dummyString=").append(dummyString)//
-                .append(", arrayListInteger=").append(arrayListInteger)//
-                .append(", arrayListString=").append(arrayListString)//
-                .append(", hash(boxedPrimitives)=").append(boxedPrimitives.hashCode())//
-                .append(", hash(arrays)=").append(arrays.hashCode())//
-                .append(", hash(objArrays)=").append(objArrays.hashCode())//
-                .append(']').toString();
+        return new StringBuilder() //
+                .append("[dummyBoolean=")
+                .append(dummyBoolean) //
+                .append(", dummyByte=")
+                .append(dummyByte) //
+                .append(", dummyShort=")
+                .append(dummyShort) //
+                .append(", dummyInt=")
+                .append(dummyInt) //
+                .append(", dummyFloat=")
+                .append(dummyFloat) //
+                .append(", dummyDouble=")
+                .append(dummyDouble) //
+                .append(", dummyString=")
+                .append(dummyString) //
+                .append(", arrayListInteger=")
+                .append(arrayListInteger) //
+                .append(", arrayListString=")
+                .append(arrayListString) //
+                .append(", hash(boxedPrimitives)=")
+                .append(boxedPrimitives.hashCode()) //
+                .append(", hash(arrays)=")
+                .append(arrays.hashCode()) //
+                .append(", hash(objArrays)=")
+                .append(objArrays.hashCode()) //
+                .append(']')
+                .toString();
     }
 
     public static boolean isExtendedTestCase() {
@@ -211,7 +211,7 @@ public class MyGenericClass {
     }
 
     private static LoggingEventBuilder logBackEnd() {
-        return verboseLogging ? LOGGER.atError() : LOGGER.atDebug();
+        return verboseLogging ? LOGGER.atError() : LOGGER.atTrace();
     }
 
     public static void setEnableExtendedTestCase(final boolean state) {
@@ -245,57 +245,40 @@ public class MyGenericClass {
             boolean state = true;
             ArraySubClass other = (ArraySubClass) obj;
             if (this.hashCode() != other.hashCode()) {
-                logBackEnd().addArgument(this.getClass().getSimpleName()).addArgument(this.hashCode())
-                        .addArgument(other.hashCode()).log("{} - hashCode is not equal: this '{}' vs. other '{}'");
+                logBackEnd().addArgument(this.getClass().getSimpleName()).addArgument(this.hashCode()).addArgument(other.hashCode()).log("{} - hashCode is not equal: this '{}' vs. other '{}'");
                 state = false;
             }
 
             if (!Arrays.equals(dummyBooleanArray, other.dummyBooleanArray)) {
-                logBackEnd().addArgument(this.getClass().getSimpleName()).addArgument(dummyBooleanArray)
-                        .addArgument(other.dummyBooleanArray)
-                        .log("{} - dummyBooleanArray is not equal: this '{}' vs. other '{}'");
+                logBackEnd().addArgument(this.getClass().getSimpleName()).addArgument(dummyBooleanArray).addArgument(other.dummyBooleanArray).log("{} - dummyBooleanArray is not equal: this '{}' vs. other '{}'");
                 state = false;
             }
             if (!Arrays.equals(dummyByteArray, other.dummyByteArray)) {
-                logBackEnd().addArgument(this.getClass().getSimpleName()).addArgument(dummyByteArray)
-                        .addArgument(other.dummyByteArray)
-                        .log("{} - dummyByteArray is not equal: this '{}' vs. other '{}'");
+                logBackEnd().addArgument(this.getClass().getSimpleName()).addArgument(dummyByteArray).addArgument(other.dummyByteArray).log("{} - dummyByteArray is not equal: this '{}' vs. other '{}'");
                 state = false;
             }
             if (!Arrays.equals(dummyShortArray, other.dummyShortArray)) {
-                logBackEnd().addArgument(this.getClass().getSimpleName()).addArgument(dummyShortArray)
-                        .addArgument(other.dummyShortArray)
-                        .log("{} - dummyShortArray is not equal: this '{}' vs. other '{}'");
+                logBackEnd().addArgument(this.getClass().getSimpleName()).addArgument(dummyShortArray).addArgument(other.dummyShortArray).log("{} - dummyShortArray is not equal: this '{}' vs. other '{}'");
                 state = false;
             }
             if (!Arrays.equals(dummyIntArray, other.dummyIntArray)) {
-                logBackEnd().addArgument(this.getClass().getSimpleName()).addArgument(dummyIntArray)
-                        .addArgument(other.dummyIntArray)
-                        .log("{} - dummyIntArray is not equal: this '{}' vs. other '{}'");
+                logBackEnd().addArgument(this.getClass().getSimpleName()).addArgument(dummyIntArray).addArgument(other.dummyIntArray).log("{} - dummyIntArray is not equal: this '{}' vs. other '{}'");
                 state = false;
             }
             if (!Arrays.equals(dummyLongArray, other.dummyLongArray)) {
-                logBackEnd().addArgument(this.getClass().getSimpleName()).addArgument(dummyLongArray)
-                        .addArgument(other.dummyLongArray)
-                        .log("{} - dummyLongArray is not equal: this '{}' vs. other '{}'");
+                logBackEnd().addArgument(this.getClass().getSimpleName()).addArgument(dummyLongArray).addArgument(other.dummyLongArray).log("{} - dummyLongArray is not equal: this '{}' vs. other '{}'");
                 state = false;
             }
             if (!Arrays.equals(dummyFloatArray, other.dummyFloatArray)) {
-                logBackEnd().addArgument(this.getClass().getSimpleName()).addArgument(dummyFloatArray)
-                        .addArgument(other.dummyFloatArray)
-                        .log("{} - dummyFloatArray is not equal: this '{}' vs. other '{}'");
+                logBackEnd().addArgument(this.getClass().getSimpleName()).addArgument(dummyFloatArray).addArgument(other.dummyFloatArray).log("{} - dummyFloatArray is not equal: this '{}' vs. other '{}'");
                 state = false;
             }
             if (!Arrays.equals(dummyDoubleArray, other.dummyDoubleArray)) {
-                logBackEnd().addArgument(this.getClass().getSimpleName()).addArgument(dummyDoubleArray)
-                        .addArgument(other.dummyDoubleArray)
-                        .log("{} - dummyDoubleArray is not equal: this '{}' vs. other '{}'");
+                logBackEnd().addArgument(this.getClass().getSimpleName()).addArgument(dummyDoubleArray).addArgument(other.dummyDoubleArray).log("{} - dummyDoubleArray is not equal: this '{}' vs. other '{}'");
                 state = false;
             }
             if (!Arrays.equals(dummyStringArray, other.dummyStringArray)) {
-                logBackEnd().addArgument(this.getClass().getSimpleName()).addArgument(dummyStringArray)
-                        .addArgument(other.dummyStringArray)
-                        .log("{} - dummyStringArray is not equal: this '{}' vs. other '{}'");
+                logBackEnd().addArgument(this.getClass().getSimpleName()).addArgument(dummyStringArray).addArgument(other.dummyStringArray).log("{} - dummyStringArray is not equal: this '{}' vs. other '{}'");
                 state = false;
             }
 
@@ -352,57 +335,39 @@ public class MyGenericClass {
             boolean state = true;
             BoxedObjectArraySubClass other = (BoxedObjectArraySubClass) obj;
             if (this.hashCode() != other.hashCode()) {
-                logBackEnd().addArgument(this.getClass().getSimpleName()).addArgument(this.hashCode())
-                        .addArgument(other.hashCode()).log("{} - hashCode is not equal: this '{}' vs. other '{}'");
+                logBackEnd().addArgument(this.getClass().getSimpleName()).addArgument(this.hashCode()).addArgument(other.hashCode()).log("{} - hashCode is not equal: this '{}' vs. other '{}'");
                 state = false;
             }
             if (!Arrays.equals(dummyBoxedBooleanArray, other.dummyBoxedBooleanArray)) {
-                logBackEnd().addArgument(this.getClass().getSimpleName()).addArgument(dummyBoxedBooleanArray)
-                        .addArgument(other.dummyBoxedBooleanArray)
-                        .log("{} - dummyBoxedBooleanArray is not equal: this '{}' vs. other '{}'");
+                logBackEnd().addArgument(this.getClass().getSimpleName()).addArgument(dummyBoxedBooleanArray).addArgument(other.dummyBoxedBooleanArray).log("{} - dummyBoxedBooleanArray is not equal: this '{}' vs. other '{}'");
                 state = false;
             }
             if (!Arrays.equals(dummyBoxedByteArray, other.dummyBoxedByteArray)) {
-                logBackEnd().addArgument(this.getClass().getSimpleName()).addArgument(dummyBoxedByteArray)
-                        .addArgument(other.dummyBoxedByteArray)
-                        .log("{} - dummyBoxedByteArray is not equal: this '{}' vs. other '{}'");
+                logBackEnd().addArgument(this.getClass().getSimpleName()).addArgument(dummyBoxedByteArray).addArgument(other.dummyBoxedByteArray).log("{} - dummyBoxedByteArray is not equal: this '{}' vs. other '{}'");
                 state = false;
             }
             if (!Arrays.equals(dummyBoxedDoubleArray, other.dummyBoxedDoubleArray)) {
-                logBackEnd().addArgument(this.getClass().getSimpleName()).addArgument(dummyBoxedDoubleArray)
-                        .addArgument(other.dummyBoxedDoubleArray)
-                        .log("{} - dummyBoxedDoubleArray is not equal: this '{}' vs. other '{}'");
+                logBackEnd().addArgument(this.getClass().getSimpleName()).addArgument(dummyBoxedDoubleArray).addArgument(other.dummyBoxedDoubleArray).log("{} - dummyBoxedDoubleArray is not equal: this '{}' vs. other '{}'");
                 state = false;
             }
             if (!Arrays.equals(dummyBoxedFloatArray, other.dummyBoxedFloatArray)) {
-                logBackEnd().addArgument(this.getClass().getSimpleName()).addArgument(dummyBoxedFloatArray)
-                        .addArgument(other.dummyBoxedFloatArray)
-                        .log("{} - dummyBoxedFloatArray is not equal: this '{}' vs. other '{}'");
+                logBackEnd().addArgument(this.getClass().getSimpleName()).addArgument(dummyBoxedFloatArray).addArgument(other.dummyBoxedFloatArray).log("{} - dummyBoxedFloatArray is not equal: this '{}' vs. other '{}'");
                 state = false;
-
             }
             if (!Arrays.equals(dummyBoxedIntArray, other.dummyBoxedIntArray)) {
-                logBackEnd().addArgument(this.getClass().getSimpleName()).addArgument(dummyBoxedIntArray)
-                        .addArgument(other.dummyBoxedIntArray)
-                        .log("{} - dummyBoxedIntArray is not equal: this '{}' vs. other '{}'");
+                logBackEnd().addArgument(this.getClass().getSimpleName()).addArgument(dummyBoxedIntArray).addArgument(other.dummyBoxedIntArray).log("{} - dummyBoxedIntArray is not equal: this '{}' vs. other '{}'");
                 state = false;
             }
             if (!Arrays.equals(dummyBoxedLongArray, other.dummyBoxedLongArray)) {
-                logBackEnd().addArgument(this.getClass().getSimpleName()).addArgument(dummyBoxedLongArray)
-                        .addArgument(other.dummyBoxedLongArray)
-                        .log("{} - dummyBoxedLongArray is not equal: this '{}' vs. other '{}'");
+                logBackEnd().addArgument(this.getClass().getSimpleName()).addArgument(dummyBoxedLongArray).addArgument(other.dummyBoxedLongArray).log("{} - dummyBoxedLongArray is not equal: this '{}' vs. other '{}'");
                 state = false;
             }
             if (!Arrays.equals(dummyBoxedShortArray, other.dummyBoxedShortArray)) {
-                logBackEnd().addArgument(this.getClass().getSimpleName()).addArgument(dummyBoxedShortArray)
-                        .addArgument(other.dummyBoxedShortArray)
-                        .log("{} - dummyBoxedShortArray is not equal: this '{}' vs. other '{}'");
+                logBackEnd().addArgument(this.getClass().getSimpleName()).addArgument(dummyBoxedShortArray).addArgument(other.dummyBoxedShortArray).log("{} - dummyBoxedShortArray is not equal: this '{}' vs. other '{}'");
                 state = false;
             }
             if (!Arrays.equals(dummyBoxedStringArray, other.dummyBoxedStringArray)) {
-                logBackEnd().addArgument(this.getClass().getSimpleName()).addArgument(dummyBoxedStringArray)
-                        .addArgument(other.dummyBoxedStringArray)
-                        .log("{} - dummyBoxedStringArray is not equal: this '{}' vs. other '{}'");
+                logBackEnd().addArgument(this.getClass().getSimpleName()).addArgument(dummyBoxedStringArray).addArgument(other.dummyBoxedStringArray).log("{} - dummyBoxedStringArray is not equal: this '{}' vs. other '{}'");
                 state = false;
             }
 
@@ -462,64 +427,39 @@ public class MyGenericClass {
             boolean state = true;
             BoxedPrimitivesSubClass other = (BoxedPrimitivesSubClass) obj;
             if (this.hashCode() != other.hashCode()) {
-                logBackEnd().addArgument(this.getClass().getSimpleName()).addArgument(this.hashCode())
-                        .addArgument(other.hashCode()).log("{} - hashCode is not equal: this '{}' vs. other '{}'");
+                logBackEnd().addArgument(this.getClass().getSimpleName()).addArgument(this.hashCode()).addArgument(other.hashCode()).log("{} - hashCode is not equal: this '{}' vs. other '{}'");
                 state = false;
             }
-            if (!(dummyBoxedBoolean == null && other.dummyBoxedBoolean == null) && (dummyBoxedBoolean == null
-                    || other.dummyBoxedBoolean == null || !dummyBoxedBoolean.equals(other.dummyBoxedBoolean))) {
-                logBackEnd().addArgument(this.getClass().getSimpleName()).addArgument(dummyBoxedBoolean)
-                        .addArgument(other.dummyBoxedBoolean)
-                        .log("{} - dummyBoxedBoolean is not equal: this '{}' vs. other '{}'");
+            if (!(dummyBoxedBoolean == null && other.dummyBoxedBoolean == null) && (dummyBoxedBoolean == null || other.dummyBoxedBoolean == null || !dummyBoxedBoolean.equals(other.dummyBoxedBoolean))) {
+                logBackEnd().addArgument(this.getClass().getSimpleName()).addArgument(dummyBoxedBoolean).addArgument(other.dummyBoxedBoolean).log("{} - dummyBoxedBoolean is not equal: this '{}' vs. other '{}'");
                 state = false;
             }
-            if (!(dummyBoxedByte == null && other.dummyBoxedByte == null) && (dummyBoxedByte == null
-                    || other.dummyBoxedByte == null || !dummyBoxedByte.equals(other.dummyBoxedByte))) {
-                logBackEnd().addArgument(this.getClass().getSimpleName()).addArgument(dummyBoxedByte)
-                        .addArgument(other.dummyBoxedByte)
-                        .log("{} - dummyBoxedByte is not equal: this '{}' vs. other '{}'");
+            if (!(dummyBoxedByte == null && other.dummyBoxedByte == null) && (dummyBoxedByte == null || other.dummyBoxedByte == null || !dummyBoxedByte.equals(other.dummyBoxedByte))) {
+                logBackEnd().addArgument(this.getClass().getSimpleName()).addArgument(dummyBoxedByte).addArgument(other.dummyBoxedByte).log("{} - dummyBoxedByte is not equal: this '{}' vs. other '{}'");
                 state = false;
             }
-            if (!(dummyBoxedShort == null && other.dummyBoxedShort == null) && (dummyBoxedShort == null
-                    || other.dummyBoxedShort == null || !dummyBoxedShort.equals(other.dummyBoxedShort))) {
-                logBackEnd().addArgument(this.getClass().getSimpleName()).addArgument(dummyBoxedShort)
-                        .addArgument(other.dummyBoxedShort)
-                        .log("{} - dummyBoxedShort is not equal: this '{}' vs. other '{}'");
+            if (!(dummyBoxedShort == null && other.dummyBoxedShort == null) && (dummyBoxedShort == null || other.dummyBoxedShort == null || !dummyBoxedShort.equals(other.dummyBoxedShort))) {
+                logBackEnd().addArgument(this.getClass().getSimpleName()).addArgument(dummyBoxedShort).addArgument(other.dummyBoxedShort).log("{} - dummyBoxedShort is not equal: this '{}' vs. other '{}'");
                 state = false;
             }
-            if (!(dummyBoxedInt == null && other.dummyBoxedInt == null) && (dummyBoxedInt == null
-                    || other.dummyBoxedInt == null || !dummyBoxedInt.equals(other.dummyBoxedInt))) {
-                logBackEnd().addArgument(this.getClass().getSimpleName()).addArgument(dummyBoxedInt)
-                        .addArgument(other.dummyBoxedInt)
-                        .log("{} - dummyBoxedInt is not equal: this '{}' vs. other '{}'");
+            if (!(dummyBoxedInt == null && other.dummyBoxedInt == null) && (dummyBoxedInt == null || other.dummyBoxedInt == null || !dummyBoxedInt.equals(other.dummyBoxedInt))) {
+                logBackEnd().addArgument(this.getClass().getSimpleName()).addArgument(dummyBoxedInt).addArgument(other.dummyBoxedInt).log("{} - dummyBoxedInt is not equal: this '{}' vs. other '{}'");
                 state = false;
             }
-            if (!(dummyBoxedLong == null && other.dummyBoxedLong == null) && (dummyBoxedLong == null
-                    || other.dummyBoxedLong == null || !dummyBoxedLong.equals(other.dummyBoxedLong))) {
-                logBackEnd().addArgument(this.getClass().getSimpleName()).addArgument(dummyBoxedLong)
-                        .addArgument(other.dummyBoxedLong)
-                        .log("{} - dummyBoxedLong is not equal: this '{}' vs. other '{}'");
+            if (!(dummyBoxedLong == null && other.dummyBoxedLong == null) && (dummyBoxedLong == null || other.dummyBoxedLong == null || !dummyBoxedLong.equals(other.dummyBoxedLong))) {
+                logBackEnd().addArgument(this.getClass().getSimpleName()).addArgument(dummyBoxedLong).addArgument(other.dummyBoxedLong).log("{} - dummyBoxedLong is not equal: this '{}' vs. other '{}'");
                 state = false;
             }
-            if (!(dummyBoxedFloat == null && other.dummyBoxedFloat == null) && (dummyBoxedFloat == null
-                    || other.dummyBoxedFloat == null || !dummyBoxedFloat.equals(other.dummyBoxedFloat))) {
-                logBackEnd().addArgument(this.getClass().getSimpleName()).addArgument(dummyBoxedFloat)
-                        .addArgument(other.dummyBoxedFloat)
-                        .log("{} - dummyBoxedFloat is not equal: this '{}' vs. other '{}'");
+            if (!(dummyBoxedFloat == null && other.dummyBoxedFloat == null) && (dummyBoxedFloat == null || other.dummyBoxedFloat == null || !dummyBoxedFloat.equals(other.dummyBoxedFloat))) {
+                logBackEnd().addArgument(this.getClass().getSimpleName()).addArgument(dummyBoxedFloat).addArgument(other.dummyBoxedFloat).log("{} - dummyBoxedFloat is not equal: this '{}' vs. other '{}'");
                 state = false;
             }
-            if (!(dummyBoxedDouble == null && other.dummyBoxedDouble == null) && (dummyBoxedDouble == null
-                    || other.dummyBoxedDouble == null || !dummyBoxedDouble.equals(other.dummyBoxedDouble))) {
-                logBackEnd().addArgument(this.getClass().getSimpleName()).addArgument(dummyBoxedDouble)
-                        .addArgument(other.dummyBoxedDouble)
-                        .log("{} - dummyBoxedDouble is not equal: this '{}' vs. other '{}'");
+            if (!(dummyBoxedDouble == null && other.dummyBoxedDouble == null) && (dummyBoxedDouble == null || other.dummyBoxedDouble == null || !dummyBoxedDouble.equals(other.dummyBoxedDouble))) {
+                logBackEnd().addArgument(this.getClass().getSimpleName()).addArgument(dummyBoxedDouble).addArgument(other.dummyBoxedDouble).log("{} - dummyBoxedDouble is not equal: this '{}' vs. other '{}'");
                 state = false;
             }
-            if (!(dummyBoxedString == null && other.dummyBoxedString == null) && (dummyBoxedString == null
-                    || other.dummyBoxedString == null || !dummyBoxedString.equals(other.dummyBoxedString))) {
-                logBackEnd().addArgument(this.getClass().getSimpleName()).addArgument(dummyBoxedString)
-                        .addArgument(other.dummyBoxedString)
-                        .log("{} - dummyBoxedString is not equal: this '{}' vs. other '{}'");
+            if (!(dummyBoxedString == null && other.dummyBoxedString == null) && (dummyBoxedString == null || other.dummyBoxedString == null || !dummyBoxedString.equals(other.dummyBoxedString))) {
+                logBackEnd().addArgument(this.getClass().getSimpleName()).addArgument(dummyBoxedString).addArgument(other.dummyBoxedString).log("{} - dummyBoxedString is not equal: this '{}' vs. other '{}'");
                 state = false;
             }
 
@@ -556,15 +496,23 @@ public class MyGenericClass {
 
         @Override
         public String toString() {
-            return new StringBuilder()//
-                    .append("[dummyBoxedBoolean=").append(dummyBoxedBoolean)//
-                    .append(", dummyBoxedByte=").append(dummyBoxedByte)//
-                    .append(", dummyBoxedShort=").append(dummyBoxedShort)//
-                    .append(", dummyBoxedInt=").append(dummyBoxedInt)//
-                    .append(", dummyBoxedFloat=").append(dummyBoxedFloat)//
-                    .append(", dummyBoxedDouble=").append(dummyBoxedDouble)//
-                    .append(", dummyBoxedString=").append(dummyBoxedString)//
-                    .append(']').toString();
+            return new StringBuilder() //
+                    .append("[dummyBoxedBoolean=")
+                    .append(dummyBoxedBoolean) //
+                    .append(", dummyBoxedByte=")
+                    .append(dummyBoxedByte) //
+                    .append(", dummyBoxedShort=")
+                    .append(dummyBoxedShort) //
+                    .append(", dummyBoxedInt=")
+                    .append(dummyBoxedInt) //
+                    .append(", dummyBoxedFloat=")
+                    .append(dummyBoxedFloat) //
+                    .append(", dummyBoxedDouble=")
+                    .append(dummyBoxedDouble) //
+                    .append(", dummyBoxedString=")
+                    .append(dummyBoxedString) //
+                    .append(']')
+                    .toString();
         }
 
         @SuppressWarnings("hiding")
@@ -593,10 +541,12 @@ public class MyGenericClass {
                 protected String dummyBoxedStringL3 = "Test";
             }
         }
-
     }
 
     public enum TestEnum {
-        TEST_CASE_1, TEST_CASE_2, TEST_CASE_3, TEST_CASE_4;
+        TEST_CASE_1,
+        TEST_CASE_2,
+        TEST_CASE_3,
+        TEST_CASE_4;
     }
 }
