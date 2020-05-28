@@ -8,12 +8,25 @@ import java.util.Queue;
 import java.util.Set;
 
 /**
- * Enum defining the data primitives that can be serialised. Arrays are always handled as multi-dimensional arrays.
+ * Enum definition for data primitives in the context of serialisation and includes definitions for: 
+ * <ul>
+ * <li> primitives (byte, short, ..., float, double, and String), and 
+ * <li> arrays thereof (ie. byte[], short[], ..., float[], double[], and String[]), as well as 
+ * <li> complex objects implementing Collections (ie. Set, List, Queues), Enums or Maps.
+ * </ul> 
+ * Any other complex data objects can be stored/extended using the {@link DataType#OTHER OTHER} sub-type.
+ *
+ * <p>
+ * N.B. Multi-dimensional arrays are handled through one-dimensional striding arrays with the additional
+ * infos on number of dimensions and size for each individual dimension.
  *
  * @author rstein
+ * @see de.gsi.dataset.serializer.spi.BinarySerialiser
+ * @see <a href="https://en.wikipedia.org/wiki/Stride_of_an_array">striding arrays</a>
  */
 public enum DataType {
     // @formatter:off
+    // clang-format off
     // start marker
     START_MARKER(0, "bool", "boolean", 1, Cat.SINGLE_VALUE),
     // primitive types
@@ -40,17 +53,20 @@ public enum DataType {
 
     // complex objects
     COLLECTION(200, "collection", "", 1, Cat.ARRAY, Collection.class),
-    ENUM(201, "enum", "java.lang.Enum", 4, Cat.ARRAY, Enum.class), LIST(202, "list", "", 1, Cat.ARRAY, List.class),
+    ENUM(201, "enum", "java.lang.Enum", 4, Cat.ARRAY, Enum.class),
+    LIST(202, "list", "", 1, Cat.ARRAY, List.class),
     MAP(203, "map", "", 1, Cat.ARRAY, Map.class), QUEUE(204, "queue", "", 1, Cat.ARRAY, Queue.class),
     SET(205, "set", "", 1, Cat.ARRAY, Set.class),
 
-    // default for future extensions (e.g. moving to short
+    /** default for any other complex or object-type custom data structure, usually followed/refined 
+     * by an additional user-provided custom type ID */
     OTHER(0xFD, "other", "", 1, Cat.COMPLEX_OBJECT, Object.class),
     // end marker
     END_MARKER(0xFE, "end_marker", "", 1, Cat.SINGLE_VALUE);
+    // clang-format on
     // @formatter:on
 
-    private final byte byteValue;
+    private final byte uniqueType;
     private final long primitiveSize;
     private final String stringValue;
     private final String javaName;
@@ -59,9 +75,9 @@ public enum DataType {
     private final boolean array;
     private final boolean object;
 
-    DataType(final int byteValue, final String stringValue, final String javaName, final long primitiveSize,
+    DataType(final int uniqueType, final String stringValue, final String javaName, final long primitiveSize,
             final Cat type, final Class<?>... classType) {
-        this.byteValue = (byte) byteValue;
+        this.uniqueType = (byte) uniqueType;
         this.stringValue = stringValue;
         this.javaName = javaName;
         this.primitiveSize = primitiveSize;
@@ -77,7 +93,7 @@ public enum DataType {
      * @return the byte representation
      */
     public byte getAsByte() {
-        return byteValue;
+        return uniqueType;
     }
 
     /**
@@ -131,7 +147,7 @@ public enum DataType {
      */
     public static DataType fromByte(final byte value) {
         for (final DataType type : DataType.values()) {
-            if (type.byteValue == value) {
+            if (type.uniqueType == value) {
                 return type;
             }
         }
