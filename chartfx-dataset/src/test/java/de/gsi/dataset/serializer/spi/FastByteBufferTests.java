@@ -25,10 +25,10 @@ public class FastByteBufferTests {
     protected static final long[] longTestArrray = { Integer.MAX_VALUE, Integer.MAX_VALUE + 1, -Integer.MAX_VALUE - 2 };
     protected static final float[] floatTestArrray = { 1.1e9f, 1.2e9f, 1.3e9f, -1.1e9f, -1.2e9f, -1.3e9f };
     protected static final double[] doubleTestArrray = { Float.MAX_VALUE + 1.1e9, Float.MAX_VALUE + 1.2e9,
-            Float.MAX_VALUE + 1.3e9f, -Float.MAX_VALUE - 1.1e9f, -Float.MAX_VALUE - 1.2e9f, Float.MAX_VALUE - 1.3e9f };
+        Float.MAX_VALUE + 1.3e9f, -Float.MAX_VALUE - 1.1e9f, -Float.MAX_VALUE - 1.2e9f, Float.MAX_VALUE - 1.3e9f };
     protected static final char[] charTestArrray = { 'a', 'b', 'c', 'd' };
     protected static final String[] stringTestArrray = { "Is", "this", "the", "real", "life?", "Is", "this", "just",
-            "fantasy?" };
+        "fantasy?" };
 
     @Test
     public void testByteBufferMixed() {
@@ -56,7 +56,6 @@ public class FastByteBufferTests {
 
     @Test
     public void testFastByteBufferAllocators() {
-
         {
             FastByteBuffer buffer = new FastByteBuffer();
             assertTrue(buffer.capacity() > 0);
@@ -114,7 +113,6 @@ public class FastByteBufferTests {
 
     @Test
     public void testFastByteBufferResizing() {
-
         {
             FastByteBuffer buffer = new FastByteBuffer(300);
             assertEquals(buffer.capacity(), 300);
@@ -162,7 +160,6 @@ public class FastByteBufferTests {
     }
 
     private static boolean testPrimitivesArrays(IoBuffer buffer) {
-
         {
             buffer.reset();
             buffer.putBooleanArray(booleanTestArrray);
@@ -301,7 +298,6 @@ public class FastByteBufferTests {
     }
 
     private static boolean testPrimitivesSimple(IoBuffer buffer) {
-
         buffer.reset();
         buffer.putBoolean(true);
         buffer.reset();
@@ -360,5 +356,4 @@ public class FastByteBufferTests {
 
         return true;
     }
-
 }
