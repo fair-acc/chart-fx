@@ -2,6 +2,7 @@ package de.gsi.math.spectra;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.List;
@@ -11,8 +12,11 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import de.gsi.dataset.DataSet;
+import de.gsi.dataset.spi.DefaultDataSet;
 import de.gsi.dataset.spi.DoubleDataSet;
 import de.gsi.dataset.spi.utils.DoublePoint;
+import de.gsi.dataset.testdata.spi.GaussFunction;
 import de.gsi.math.ArrayMath;
 import de.gsi.math.ArrayUtils;
 import de.gsi.math.DataSetMath;
@@ -282,6 +286,102 @@ public class TSpectrumTests {
                 /* averWindow */ 5);
 
         assertEquals(nPeaks, peaks.size(), "peak finder with threshold = " + threshold);
+    }
+
+    @Test
+    public void testDeconvolution() {
+        int nIter = 2;
+        int nRep = 2;
+        double boost = 1.0;
+        // check invalid inputs
+        //  length = 0
+        assertThrows(IllegalArgumentException.class,
+                () -> TSpectrum.deconvolution(new double[10], new double[10], null, 0, nIter, nRep, boost));
+        //  nRep = 0
+        assertThrows(IllegalArgumentException.class,
+                () -> TSpectrum.deconvolution(new double[10], new double[10], null, 10, nIter, 0, boost));
+        //  distribution all zeroes
+        assertThrows(IllegalArgumentException.class,
+                () -> TSpectrum.deconvolution(new double[10], new double[10], null, 10, nIter, nRep, boost));
+
+        // get input data
+        DoubleDataSet dataSet = new DefaultDataSet(new GaussFunction("test", 50));
+        DoubleDataSet dist = new DefaultDataSet(new GaussFunction("test", 50));
+        assertDoesNotThrow(() -> TSpectrum.deconvolution(dataSet.getValues(DataSet.DIM_Y), dist.getValues(DataSet.DIM_Y), null, 50, nIter, nRep, boost));
+        double[] output = new double[50]; // exact size
+        assertSame(output, TSpectrum.deconvolution(dataSet.getValues(DataSet.DIM_Y), dist.getValues(DataSet.DIM_Y),
+                                   output, 50, nIter, nRep, boost));
+        output = new double[54]; // bigger return array
+        assertSame(output, TSpectrum.deconvolution(dataSet.getValues(DataSet.DIM_Y), dist.getValues(DataSet.DIM_Y),
+                                   output, 50, nIter, nRep, boost));
+        output = new double[40]; // return array too small
+        assertEquals(50, TSpectrum.deconvolution(dataSet.getValues(DataSet.DIM_Y), dist.getValues(DataSet.DIM_Y),
+                                          output, 50, nIter, nRep, boost)
+                                 .length);
+    }
+
+    @Test
+    public void testDeconvolutionRL() {
+        int nIter = 2;
+        int nRep = 2;
+        double boost = 1.0;
+        // check invalid inputs
+        //  length = 0
+        assertThrows(IllegalArgumentException.class,
+                () -> TSpectrum.deconvolutionRL(new double[10], new double[10], null, 0, nIter, nRep, boost));
+        //  nRep = 0
+        assertThrows(IllegalArgumentException.class,
+                () -> TSpectrum.deconvolutionRL(new double[10], new double[10], null, 10, nIter, 0, boost));
+        //  distribution all zeroes
+        assertThrows(IllegalArgumentException.class,
+                () -> TSpectrum.deconvolutionRL(new double[10], new double[10], null, 10, nIter, nRep, boost));
+
+        // get input data
+        DoubleDataSet dataSet = new DefaultDataSet(new GaussFunction("test", 50));
+        DoubleDataSet dist = new DefaultDataSet(new GaussFunction("test", 50));
+        assertDoesNotThrow(() -> TSpectrum.deconvolutionRL(dataSet.getValues(DataSet.DIM_Y), dist.getValues(DataSet.DIM_Y), null, 50, nIter, nRep, boost));
+        double[] output = new double[50]; // exact size
+        assertSame(output, TSpectrum.deconvolutionRL(dataSet.getValues(DataSet.DIM_Y), dist.getValues(DataSet.DIM_Y),
+                                   output, 50, nIter, nRep, boost));
+        output = new double[54]; // bigger return array
+        assertSame(output, TSpectrum.deconvolutionRL(dataSet.getValues(DataSet.DIM_Y), dist.getValues(DataSet.DIM_Y),
+                                   output, 50, nIter, nRep, boost));
+        output = new double[40]; // return array too small
+        assertEquals(50, TSpectrum.deconvolutionRL(dataSet.getValues(DataSet.DIM_Y), dist.getValues(DataSet.DIM_Y),
+                                          output, 50, nIter, nRep, boost)
+                                 .length);
+    }
+
+    @Test
+    public void testUnfolding() {
+        int numberIterations = 2;
+        int numberRepetitions = 2;
+        double boost = 1.2;
+        int lenx = 50;
+        int leny = 10;
+        double[] source = new GaussFunction("gauss", lenx).getValues(DataSet.DIM_X);
+        double[][] respMatrix = new double[leny][lenx];
+        for (int i = 0; i < leny; i++) {
+            System.arraycopy(new GaussFunction("gauss", leny + 2 * i).getValues(DataSet.DIM_X), 0, respMatrix[i], 0, leny + i);
+        }
+        // check valid inputs
+        assertDoesNotThrow(() -> TSpectrum.unfolding(source, respMatrix, null, lenx, leny, numberIterations, numberRepetitions, boost));
+        double[] output = new double[50]; // exact size
+        assertSame(output, TSpectrum.unfolding(source, respMatrix, output, lenx, leny, numberIterations,
+                                   numberRepetitions, boost));
+        output = new double[54]; // bigger return array
+        assertSame(output, TSpectrum.unfolding(source, respMatrix, output, lenx, leny, numberIterations,
+                                   numberRepetitions, boost));
+        output = new double[40]; // return array too small
+        assertEquals(50, TSpectrum.unfolding(source, respMatrix, output, lenx, leny, numberIterations,
+                                          numberRepetitions, boost)
+                                 .length);
+
+        // check invalid inputs
+        assertThrows(IllegalArgumentException.class, // lenx < leny
+                () -> TSpectrum.unfolding(source, respMatrix, null, 5, leny, numberIterations, numberRepetitions, boost));
+        assertThrows(IllegalArgumentException.class, // empty column in resp matrix
+                () -> TSpectrum.unfolding(source, new double[leny][lenx], null, lenx, leny, numberIterations, numberRepetitions, boost));
     }
 
     protected static DoubleDataSet generateSineWaveSpectrumData(final int nData) {

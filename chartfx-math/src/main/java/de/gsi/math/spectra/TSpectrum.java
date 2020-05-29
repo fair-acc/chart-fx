@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 
 import de.gsi.dataset.spi.utils.DoublePoint;
 import de.gsi.dataset.utils.ArrayCache;
+import de.gsi.dataset.utils.AssertUtils;
 import de.gsi.math.ArrayMath;
 import de.gsi.math.ArrayUtils;
 import de.gsi.math.TMath;
@@ -34,7 +35,7 @@ import de.gsi.math.TMath;
  * http://root.cern.ch/
  */
 
-public class TSpectrum {
+public class TSpectrum { // NOPMD - nomen est omen
     private static final Logger LOGGER = LoggerFactory.getLogger(TSpectrum.class);
     private static final String CACHED_ARRAY_BACKGROUND = "TSpectrum::background:workingSpace";
     private static final String CACHED_ARRAY_SMOOTH_MARKOV = "TSpectrum::smoothMarkov:workingSpace";
@@ -43,63 +44,12 @@ public class TSpectrum {
     private static final String CACHED_ARRAY_DECONVOLUTION_RL = "TSpectrum::deconvolutionLR:workingSpace";
     private static final String CACHED_ARRAY_UNFOLDING = "TSpectrum::unfolding:workingSpace";
     private static final int PEAK_WINDOW = 1024;
-    protected int fgAverageWindow = 3; // Average window of searched peaks
-    protected int fgIterations = 3; // Maximum number of decon iterations (default=3)
-
-    protected int fMaxPeaks; // Maximum number of peaks to be found
-    protected double fResolution; // resolution of the neighbouring peaks
 
     /**
      * The TSpectrum() default constructor
      */
-    public TSpectrum() {
-        final int n = 100;
-        fMaxPeaks = n;
-        fResolution = 1;
-    }
-
-    /**
-     * @param maxpositions maximum number of peaks
-     * @param resolution determines resolution of the neighboring peaks default value is 1 correspond to 3 sigma
-     *        distance between peaks. Higher values allow higher resolution (smaller distance between peaks. May be set
-     *        later through SetResolution.)
-     */
-    public TSpectrum(int maxpositions, double resolution) {
-        int n = maxpositions;
-        if (n <= 0) {
-            n = 1;
-        }
-        fMaxPeaks = n;
-        setResolution(resolution);
-    }
-
-    /**
-     * @param w average window of searched peaks
-     * @see #search
-     */
-    public void setAverageWindow(int w) {
-        fgAverageWindow = w;
-    }
-
-    /**
-     * @param n max number of decon iterations in deconvolution operation
-     * @see #search
-     */
-    public void setDeconIterations(int n) {
-        fgIterations = n;
-    }
-
-    /**
-     * @param resolution determines resolution of the neighboring peaks default value is 1 correspond to 3 sigma
-     *        distance between peaks. Higher values allow higher resolution (smaller distance between peaks. May be set
-     *        later through SetResolution.
-     */
-    public void setResolution(double resolution) {
-        if (resolution > 1) {
-            fResolution = resolution;
-        } else {
-            fResolution = 1;
-        }
+    private TSpectrum() {
+        // static utility class
     }
 
     /**
@@ -111,12 +61,12 @@ public class TSpectrum {
      * @param length length of the spectrum vector
      * @param numberIterations maximal width of clipping window,
      * @param direction direction of change of clipping window - possible values=kBackIncreasingWindow
-     *        kBackDecreasingWindow
+     *            kBackDecreasingWindow
      * @param filterOrder order of clipping filter, -possible values=kBackOrder2 kBackOrder4 kBackOrder6 kBackOrder8
      * @param smoothing logical variable whether the smoothing operation in the estimation of background will be
-     *        included resp. smoothing window
+     *            included resp. smoothing window
      * @param compton logical variable whether the estimation of Compton edge will be included - possible values=kFALSE
-     *        kTRUE
+     *            kTRUE
      * @return filtered array, N.B. if destination is null or has insufficient length a new array is being allocated,
      *         otherwise calculations are done in-place.
      */
@@ -126,19 +76,13 @@ public class TSpectrum {
         if (source == null || length <= 0 || source.length < length) {
             throw new InvalidParameterException("input spectrum null or invalid vector size");
         }
-        if (numberIterations < 1) {
-            throw new InvalidParameterException("width of clipping window must be positive, is: " + numberIterations);
-        }
+        AssertUtils.gtOrEqual("numberIterations", 1, numberIterations);
         if (length < 2 * numberIterations + 1) {
             throw new InvalidParameterException("clipping window is too large (length < 2 * numberIterations + 1) -> "
                                                 + length + "< " + (2 * numberIterations + 1));
         }
-        if (filterOrder == null) {
-            throw new InvalidParameterException("filterOrder must not be null");
-        }
-        if (smoothing == null) {
-            throw new InvalidParameterException("smoothing must not be null");
-        }
+        AssertUtils.notNull("filterOrder", filterOrder);
+        AssertUtils.notNull("smoothing", smoothing);
 
         final double[] workingSpace = ArrayCache.getCachedDoubleArray(CACHED_ARRAY_BACKGROUND, 2 * length);
         System.arraycopy(source, 0, workingSpace, 0, length);
@@ -148,17 +92,17 @@ public class TSpectrum {
         case ORDER_2:
             filterBackgroundOrder2(workingSpace, length, numberIterations, direction, smoothing);
             break;
-        case ORDER_4: {
+        case ORDER_4:
             filterBackgroundOrder4(workingSpace, length, numberIterations, direction, smoothing);
-        } break;
-        case ORDER_6: {
+            break;
+        case ORDER_6:
             filterBackgroundOrder6(workingSpace, length, numberIterations, direction, smoothing);
-        } break;
+            break;
         case ORDER_8:
-        default: {
+        default:
             filterBackgroundOrder8(workingSpace, length, numberIterations, direction, smoothing);
-        } break;
-        } /* switch (filterOrder) {...} */
+            break;
+        }
 
         if (compton) {
             for (int i = 0; i < length; i++) {
@@ -222,7 +166,7 @@ public class TSpectrum {
                     i = b2;
                 }
             }
-        } /* if (compton) {..} */
+        } // endif (compton)
 
         final double[] returnVector = destination == null || destination.length < length ? new double[length]
                                                                                          : destination;
@@ -238,48 +182,32 @@ public class TSpectrum {
      *
      * @param source vector of source spectrum
      * @param response vector of response spectrum
-     * @param destination vector of response spectrum
+     * @param destination vector to store result (if null or too small, new vector is allocated and returned)
      * @param length length of source and response spectra
      * @param numberIterations for details we refer to the reference given below
      * @param numberRepetitions for repeated boosted deconvolution @boost, boosting coefficient M. Morhac, J. Kliman, V.
-     *        Matousek, M. Veselsk, I. Turzo.: Efficient one- and two-dimensional Gold deconvolution and its application
-     *        to gamma-ray spectra decomposition. NIM, A401 (1997) 385-408.
+     *            Matousek, M. Veselsk, I. Turzo.: Efficient one- and two-dimensional Gold deconvolution and its
+     *            application
+     *            to gamma-ray spectra decomposition. NIM, A401 (1997) 385-408.
      * @param boost ???
      * @return filtered array, N.B. if destination is null or has insufficient length a new array is being allocated,
      *         otherwise calculations are done in-place.
      */
     public static double[] deconvolution(double[] source, double[] response, double[] destination, int length,
             int numberIterations, int numberRepetitions, double boost) {
-        if (length <= 0) {
-            throw new IllegalArgumentException("length '" + length + "'is <= 0");
-        }
-        if (numberRepetitions <= 0) {
-            throw new IllegalArgumentException("numberRepetitions '" + length + "'is <= 0");
-        }
+        AssertUtils.gtThanZero("length", length);
+        AssertUtils.gtThanZero("numberRepetitions", numberRepetitions);
 
         // working_space-pointer to the working vector (its size must be 4*length of source spectrum)
         final double[] workingSpace = ArrayCache.getCachedDoubleArray(CACHED_ARRAY_DECONVOLUTION, 4 * length);
-        int i;
-        int j;
-        int k;
-        int lindex;
-        int posit;
-        int lhGold;
-        int l;
-        int repet;
-        double lda;
-        double ldb;
-        double ldc;
-        double area;
-        double maximum;
-        area = 0;
-        lhGold = -1;
-        posit = 0;
-        maximum = 0;
 
         // read response vector
-        for (i = 0; i < length; i++) {
-            lda = response[i];
+        double maximum = 0;
+        double area = 0;
+        int lhGold = -1;
+        int posit = 0;
+        for (int i = 0; i < length; i++) {
+            double lda = response[i];
             if (lda != 0) {
                 lhGold = i + 1;
             }
@@ -295,28 +223,28 @@ public class TSpectrum {
         }
 
         // read source vector
-        for (i = 0; i < length; i++) {
+        for (int i = 0; i < length; i++) {
             workingSpace[2 * length + i] = source[i];
         }
 
         // create matrix at*a and vector at*y
-        for (i = 0; i < length; i++) {
-            lda = 0;
-            for (j = 0; j < length; j++) {
-                ldb = workingSpace[j];
-                k = i + j;
+        for (int i = 0; i < length; i++) {
+            double lda = 0;
+            for (int j = 0; j < length; j++) {
+                double ldb = workingSpace[j];
+                int k = i + j;
                 if (k < length) {
-                    ldc = workingSpace[k];
+                    double ldc = workingSpace[k];
                     lda = lda + ldb * ldc;
                 }
             }
             workingSpace[length + i] = lda;
             lda = 0;
-            for (k = 0; k < length; k++) {
-                l = k - i;
+            for (int k = 0; k < length; k++) {
+                int l = k - i;
                 if (l >= 0) {
-                    ldb = workingSpace[l];
-                    ldc = workingSpace[2 * length + k];
+                    double ldb = workingSpace[l];
+                    double ldc = workingSpace[2 * length + k];
                     lda = lda + ldb * ldc;
                 }
             }
@@ -324,32 +252,34 @@ public class TSpectrum {
         }
 
         // move vector at*y
-        for (i = 0; i < length; i++) {
+        for (int i = 0; i < length; i++) {
             workingSpace[2 * length + i] = workingSpace[3 * length + i];
         }
 
         // initialization of resulting vector
-        for (i = 0; i < length; i++) {
+        for (int i = 0; i < length; i++) {
             workingSpace[i] = 1;
         }
 
         // **START OF ITERATIONS**
-        for (repet = 0; repet < numberRepetitions; repet++) {
+        int j;
+        for (int repet = 0; repet < numberRepetitions; repet++) {
             if (repet != 0) {
-                for (i = 0; i < length; i++) {
+                for (int i = 0; i < length; i++) {
                     workingSpace[i] = Math.pow(workingSpace[i], boost);
                 }
             }
-            for (lindex = 0; lindex < numberIterations; lindex++) {
-                for (i = 0; i < length; i++) {
+            for (int lindex = 0; lindex < numberIterations; lindex++) {
+                for (int i = 0; i < length; i++) {
                     if (workingSpace[2 * length + i] > 0.000001 && workingSpace[i] > 0.000001) {
-                        lda = 0;
+                        double lda = 0;
                         for (j = 0; j < lhGold; j++) {
-                            ldb = workingSpace[j + length];
+                            double ldb = workingSpace[j + length];
+                            double ldc;
                             if (j == 0) {
                                 ldc = workingSpace[i];
                             } else {
-                                k = i + j;
+                                int k = i + j;
                                 ldc = 0;
                                 if (k < length) {
                                     ldc = workingSpace[k];
@@ -362,7 +292,7 @@ public class TSpectrum {
 
                             lda = lda + ldb * ldc;
                         }
-                        ldb = workingSpace[2 * length + i];
+                        double ldb = workingSpace[2 * length + i];
 
                         if (lda != 0) {
                             lda = ldb / lda;
@@ -373,15 +303,15 @@ public class TSpectrum {
                         workingSpace[3 * length + i] = lda;
                     }
                 }
-                for (i = 0; i < length; i++) {
+                for (int i = 0; i < length; i++) {
                     workingSpace[i] = workingSpace[3 * length + i];
                 }
             }
         }
 
         // shift resulting spectrum
-        for (i = 0; i < length; i++) {
-            lda = workingSpace[i];
+        for (int i = 0; i < length; i++) {
+            double lda = workingSpace[i];
             j = i + posit;
             j = j % length;
             workingSpace[length + j] = lda;
@@ -397,11 +327,12 @@ public class TSpectrum {
 
     /**
      * ONE-DIMENSIONAL DECONVOLUTION FUNCTION This function calculates deconvolution from source spectrum according to
-     * response spectrum using Richardson-Lucy algorithm The result is placed in the vector pointed by destination pointer.
+     * response spectrum using Richardson-Lucy algorithm The result is placed in the vector pointed by destination
+     * pointer.
      *
      * @param source vector of source spectrum
      * @param response vector of response spectrum
-     * @param destination vector
+     * @param destination vector to store result (if null or too small, new vector is allocated and returned)
      * @param length length of source and response spectra
      * @param numberIterations for details we refer to the reference given above
      * @param numberRepetitions for repeated boosted deconvolution
@@ -411,36 +342,18 @@ public class TSpectrum {
      */
     public static double[] deconvolutionRL(double[] source, double[] response, double[] destination, int length,
             int numberIterations, int numberRepetitions, double boost) {
-        if (length <= 0) {
-            throw new IllegalArgumentException("length '" + length + "'is <= 0");
-        }
-        if (numberRepetitions <= 0) {
-            throw new IllegalArgumentException("numberRepetitions '" + length + "'is <= 0");
-        }
+        AssertUtils.gtThanZero("length", length);
+        AssertUtils.gtThanZero("numberRepetitions", numberRepetitions);
 
-        // working_space-pointer to the working vector
-        // (its size must be 4*length of source spectrum)
+        // working_space-pointer to the working vector (its size must be 4*length of source spectrum)
         final double[] workingSpace = ArrayCache.getCachedDoubleArray(CACHED_ARRAY_DECONVOLUTION_RL, 4 * length);
-        int i;
-        int j;
-        int k;
-        int lindex;
-        int posit;
-        int lhGold;
-        int repet;
-        int kmin;
-        int kmax;
-        double lda;
-        double ldb;
-        double ldc;
-        double maximum;
-        lhGold = -1;
-        posit = 0;
-        maximum = 0;
 
         // read response vector
-        for (i = 0; i < length; i++) {
-            lda = response[i];
+        int posit = 0;
+        int lhGold = -1;
+        double maximum = 0;
+        for (int i = 0; i < length; i++) {
+            double lda = response[i];
             if (lda != 0) {
                 lhGold = i + 1;
             }
@@ -456,12 +369,12 @@ public class TSpectrum {
         }
 
         // read source vector
-        for (i = 0; i < length; i++) {
+        for (int i = 0; i < length; i++) {
             workingSpace[2 * length + i] = source[i];
         }
 
         // initialization of resulting vector
-        for (i = 0; i < length; i++) {
+        for (int i = 0; i < length; i++) {
             if (i <= length - lhGold) {
                 workingSpace[i] = 1;
             } else {
@@ -469,31 +382,32 @@ public class TSpectrum {
             }
         }
 
+        int j;
         // **START OF ITERATIONS**
-        for (repet = 0; repet < numberRepetitions; repet++) {
+        for (int repet = 0; repet < numberRepetitions; repet++) {
             if (repet != 0) {
-                for (i = 0; i < length; i++) {
+                for (int i = 0; i < length; i++) {
                     workingSpace[i] = Math.pow(workingSpace[i], boost);
                 }
             }
-            for (lindex = 0; lindex < numberIterations; lindex++) {
-                for (i = 0; i <= length - lhGold; i++) {
-                    lda = 0;
+            for (int lindex = 0; lindex < numberIterations; lindex++) {
+                for (int i = 0; i <= length - lhGold; i++) {
+                    double lda = 0;
                     if (workingSpace[i] > 0) { // x[i]
                         for (j = i; j < i + lhGold; j++) {
-                            ldb = workingSpace[2 * length + j]; // y[j]
+                            double ldb = workingSpace[2 * length + j]; // y[j]
                             if (j < length) {
                                 if (ldb > 0) { // y[j]
-                                    kmax = j;
+                                    int kmax = j;
                                     if (kmax > lhGold - 1) {
                                         kmax = lhGold - 1;
                                     }
-                                    kmin = j + lhGold - length;
+                                    int kmin = j + lhGold - length;
                                     if (kmin < 0) {
                                         kmin = 0;
                                     }
-                                    ldc = 0;
-                                    for (k = kmax; k >= kmin; k--) {
+                                    double ldc = 0;
+                                    for (int k = kmax; k >= kmin; k--) {
                                         ldc += workingSpace[length + k] * workingSpace[j - k]; // h[k]*x[j-k]
                                     }
                                     if (ldc > 0) {
@@ -510,22 +424,22 @@ public class TSpectrum {
                     }
                     workingSpace[3 * length + i] = lda;
                 }
-                for (i = 0; i < length; i++) {
+                for (int i = 0; i < length; i++) {
                     workingSpace[i] = workingSpace[3 * length + i];
                 }
             }
         }
 
         // shift resulting spectrum
-        for (i = 0; i < length; i++) {
-            lda = workingSpace[i];
+        for (int i = 0; i < length; i++) {
+            double lda = workingSpace[i];
             j = i + posit;
             j = j % length;
             workingSpace[length + j] = lda;
         }
 
         // write back resulting spectrum
-        for (i = 0; i < length; i++) {
+        for (int i = 0; i < length; i++) {
             source[i] = workingSpace[length + i];
         }
         final double[] returnVector = destination == null || destination.length < length ? new double[length]
@@ -1206,20 +1120,21 @@ public class TSpectrum {
      * @param nMaxPeaks maximum number of peaks to search for (upper bound)
      * @param sigma sigma of searched peaks, for details we refer to manual
      * @param threshold threshold value in % for selected peaks, peaks with amplitude less than
-     *        threshold*highest_peak/100 are ignored, see manual
+     *            threshold*highest_peak/100 are ignored, see manual
      * @param backgroundRemove logical variable, set if the removal of background before deconvolution is desired
      * @param deconIterations number of iterations in deconvolution operation
      * @param markov logical variable, if it is true, first the source spectrum is replaced by new spectrum calculated
-     *        using Markov chains method.
+     *            using Markov chains method.
      * @param averWindow averaging window of searched peaks, for details we refer to manual (applies only for Markov
-     *        method)
+     *            method)
      * @return list with identified peaks
      */
     public static List<DoublePoint> search(final double[] sourceX, final double[] sourceY, final double[] destVector,
             final int length, final int nMaxPeaks, final double sigma, final double threshold,
             final boolean backgroundRemove, final int deconIterations, final boolean markov, final int averWindow) {
         if (sourceX == null || sourceY == null) {
-            throw new IllegalArgumentException("neither sourceX '" + (sourceX == null ? "null" : "OK") + "' nor sourceY '" + (sourceY == null ? "null" : "OK") + "' must be null");
+            throw new IllegalArgumentException("neither sourceX '" + (sourceX == null ? "null" : "OK")
+                                               + "' nor sourceY '" + (sourceY == null ? "null" : "OK") + "' must be null");
         } else if (sourceX.length < length) {
             throw new IllegalArgumentException(
                     "sourceX.length too short is '" + sourceX.length + "' vs. should '" + length + "'");
@@ -1237,8 +1152,7 @@ public class TSpectrum {
         }
 
         if (threshold <= 0 || threshold >= 100) {
-            throw new IllegalArgumentException(
-                    "invalid threshold '" + threshold + "', must be within ]0,100[");
+            throw new IllegalArgumentException("invalid threshold '" + threshold + "', must be within ]0,100[");
         }
 
         if ((int) (5.0 * sigma + 0.5) >= PEAK_WINDOW / 2) {
@@ -1654,7 +1568,7 @@ public class TSpectrum {
                 }
 
                 if (a >= length) {
-                    a = length - 1;
+                    a = length - 1.0;
                 }
                 if (peakIndex == 0) {
                     peakList.add((int) a);
@@ -1663,7 +1577,8 @@ public class TSpectrum {
                     int priz = 0;
                     int searchIndex;
                     for (searchIndex = 0; searchIndex < peakIndex && priz == 0; searchIndex++) {
-                        if (workingSpace[6 * sizeExt + shift + (int) a] > workingSpace[6 * sizeExt + shift + peakList.get(searchIndex)]) {
+                        if (workingSpace[6 * sizeExt + shift + (int) a] > workingSpace[6 * sizeExt + shift
+                                                                                       + peakList.get(searchIndex)]) {
                             priz = 1;
                         }
                     }
@@ -1820,33 +1735,24 @@ public class TSpectrum {
      */
     public static double[] unfolding(double[] source, double[][] respMatrix, final double[] destination, int lengthx,
             int lengthy, int numberIterations, int numberRepetitions, double boost) {
-        int lindex;
-        int lhx = 0;
-        int repet;
-        double lda;
-        double ldb;
-        double ldc;
-        double area;
-        if (lengthx <= 0 || lengthy <= 0) {
-            throw new IllegalArgumentException("lengthx:" + lengthx + " lengthy" + lengthx + "<=0");
-        }
+        AssertUtils.gtThanZero("lengthx", lengthx);
+        AssertUtils.gtThanZero("lengthy", lengthy);
         if (lengthx < lengthy) {
             throw new IllegalArgumentException(
                     "lengthx:" + lengthx + " must be greater than lengthy" + lengthx + "<=0");
         }
-        if (numberIterations <= 0) {
-            throw new IllegalArgumentException("Number of iterations must be positive: is" + numberIterations);
-        }
+        AssertUtils.gtThanZero("numberIterations", numberIterations);
 
         final int workSpaceSize = lengthx * lengthy + 2 * lengthy * lengthy + 4 * lengthx;
         final double[] workingSpace = ArrayCache.getCachedDoubleArray(CACHED_ARRAY_UNFOLDING, workSpaceSize);
 
         /* read response matrix */
+        int lhx = 0;
         for (int j = 0; j < lengthy && lhx != -1; j++) {
-            area = 0;
+            double area = 0;
             lhx = -1;
             for (int i = 0; i < lengthx; i++) {
-                lda = respMatrix[j][i];
+                final double lda = respMatrix[j][i];
                 if (lda != 0) {
                     lhx = i + 1;
                 }
@@ -1872,18 +1778,18 @@ public class TSpectrum {
         /* create matrix at*a + at*y */
         for (int i = 0; i < lengthy; i++) {
             for (int j = 0; j < lengthy; j++) {
-                lda = 0;
+                double lda = 0;
                 for (int k = 0; k < lengthx; k++) {
-                    ldb = workingSpace[lengthx * i + k];
-                    ldc = workingSpace[lengthx * j + k];
+                    final double ldb = workingSpace[lengthx * i + k];
+                    final double ldc = workingSpace[lengthx * j + k];
                     lda = lda + ldb * ldc;
                 }
                 workingSpace[lengthx * lengthy + lengthy * i + j] = lda;
             }
-            lda = 0;
+            double lda = 0;
             for (int k = 0; k < lengthx; k++) {
-                ldb = workingSpace[lengthx * i + k];
-                ldc = workingSpace[lengthx * lengthy + 2 * lengthy * lengthy + 2 * lengthx + k];
+                final double ldb = workingSpace[lengthx * i + k];
+                final double ldc = workingSpace[lengthx * lengthy + 2 * lengthy * lengthy + 2 * lengthx + k];
                 lda = lda + ldb * ldc;
             }
             workingSpace[lengthx * lengthy + 2 * lengthy * lengthy + 3 * lengthx + i] = lda;
@@ -1898,18 +1804,18 @@ public class TSpectrum {
         /* create matrix at*a*at*a + vector at*a*at*y */
         for (int i = 0; i < lengthy; i++) {
             for (int j = 0; j < lengthy; j++) {
-                lda = 0;
+                double lda = 0;
                 for (int k = 0; k < lengthy; k++) {
-                    ldb = workingSpace[lengthx * lengthy + lengthy * i + k];
-                    ldc = workingSpace[lengthx * lengthy + lengthy * j + k];
+                    final double ldb = workingSpace[lengthx * lengthy + lengthy * i + k];
+                    final double ldc = workingSpace[lengthx * lengthy + lengthy * j + k];
                     lda = lda + ldb * ldc;
                 }
                 workingSpace[lengthx * lengthy + lengthy * lengthy + lengthy * i + j] = lda;
             }
-            lda = 0;
+            double lda = 0;
             for (int k = 0; k < lengthy; k++) {
-                ldb = workingSpace[lengthx * lengthy + lengthy * i + k];
-                ldc = workingSpace[lengthx * lengthy + 2 * lengthy * lengthy + 2 * lengthx + k];
+                final double ldb = workingSpace[lengthx * lengthy + lengthy * i + k];
+                final double ldc = workingSpace[lengthx * lengthy + 2 * lengthy * lengthy + 2 * lengthx + k];
                 lda = lda + ldb * ldc;
             }
             workingSpace[lengthx * lengthy + 2 * lengthy * lengthy + 3 * lengthx + i] = lda;
@@ -1917,8 +1823,7 @@ public class TSpectrum {
 
         /* move at*a*at*y */
         for (int i = 0; i < lengthy; i++) {
-            workingSpace[lengthx * lengthy + 2 * lengthy * lengthy + 2 * lengthx + i] = workingSpace[lengthx * lengthy
-                                                                                                     + 2 * lengthy * lengthy + 3 * lengthx + i];
+            workingSpace[lengthx * lengthy + 2 * lengthy * lengthy + 2 * lengthx + i] = workingSpace[lengthx * lengthy + 2 * lengthy * lengthy + 3 * lengthx + i];
         }
 
         /* initialisation in resulting vector */
@@ -1927,27 +1832,26 @@ public class TSpectrum {
         }
 
         /*** START OF ITERATIONS ***/
-        for (repet = 0; repet < numberRepetitions; repet++) {
+        for (int repet = 0; repet < numberRepetitions; repet++) {
             if (repet != 0) {
                 for (int i = 0; i < lengthy; i++) {
-                    workingSpace[lengthx * lengthy + 2 * lengthy * lengthy + i] = Math
-                                                                                          .pow(workingSpace[lengthx * lengthy + 2 * lengthy * lengthy + i], boost);
+                    workingSpace[lengthx * lengthy + 2 * lengthy * lengthy + i] = Math.pow(workingSpace[lengthx * lengthy + 2 * lengthy * lengthy + i], boost);
                 }
             }
-            for (lindex = 0; lindex < numberIterations; lindex++) {
+            for (int lindex = 0; lindex < numberIterations; lindex++) {
                 for (int i = 0; i < lengthy; i++) {
-                    lda = 0;
+                    double lda = 0;
                     for (int j = 0; j < lengthy; j++) {
-                        ldb = workingSpace[lengthx * lengthy + lengthy * lengthy + lengthy * i + j];
-                        ldc = workingSpace[lengthx * lengthy + 2 * lengthy * lengthy + j];
+                        final double ldb = workingSpace[lengthx * lengthy + lengthy * lengthy + lengthy * i + j];
+                        final double ldc = workingSpace[lengthx * lengthy + 2 * lengthy * lengthy + j];
                         lda = lda + ldb * ldc;
                     }
-                    ldb = workingSpace[lengthx * lengthy + 2 * lengthy * lengthy + 2 * lengthx + i];
+                    final double ldb = workingSpace[lengthx * lengthy + 2 * lengthy * lengthy + 2 * lengthx + i];
                     if (lda != 0) {
                         lda = ldb / lda;
                     }
-                    ldb = workingSpace[lengthx * lengthy + 2 * lengthy * lengthy + i];
-                    lda *= ldb;
+                    final double ldc = workingSpace[lengthx * lengthy + 2 * lengthy * lengthy + i];
+                    lda *= ldc;
                     workingSpace[lengthx * lengthy + 2 * lengthy * lengthy + 3 * lengthx + i] = lda;
                 }
                 for (int i = 0; i < lengthy; i++) {
