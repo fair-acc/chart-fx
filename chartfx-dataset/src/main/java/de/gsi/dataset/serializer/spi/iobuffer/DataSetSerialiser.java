@@ -223,9 +223,7 @@ public class DataSetSerialiser { // NOPMD
         try {
             return Integer.parseInt(fieldName.substring(prefix.length()));
         } catch (NumberFormatException | IndexOutOfBoundsException e) {
-            if (LOGGER.isWarnEnabled()) {
-                LOGGER.atWarn().addArgument(fieldName).log("Invalid field name: {}");
-            }
+            LOGGER.atWarn().addArgument(fieldName).log("Invalid field name: {}");
             return -1;
         }
     }
@@ -242,9 +240,7 @@ public class DataSetSerialiser { // NOPMD
         final DataSetBuilder builder = new DataSetBuilder();
 
         final HeaderInfo bufferHeader = BinarySerialiser.checkHeaderInfo(readBuffer);
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.atDebug().addArgument(bufferHeader).log("read header = {}");
-        }
+        LOGGER.atTrace().addArgument(bufferHeader).log("read header = {}");
 
         FieldHeader fieldRoot = BinarySerialiser.parseIoStream(readBuffer);
         // parsed until end of buffer

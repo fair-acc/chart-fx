@@ -1,18 +1,14 @@
 package de.gsi.dataset.serializer.spi.iobuffer;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import de.gsi.dataset.DataSet;
 import de.gsi.dataset.serializer.DataType;
 import de.gsi.dataset.serializer.IoBuffer;
 import de.gsi.dataset.serializer.spi.AbstractSerialiser;
 import de.gsi.dataset.serializer.spi.BinarySerialiser;
+
 import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
 
 public final class FieldDataSetHelper {
-    private static final Logger LOGGER = LoggerFactory.getLogger(FieldDataSetHelper.class);
-
     private FieldDataSetHelper() {
         // utility class
     }
@@ -24,11 +20,10 @@ public final class FieldDataSetHelper {
      * @param ioBuffer reference to the IoBuffer back-ends
      */
     public static void register(final AbstractSerialiser serialiser, final IoBuffer ioBuffer) {
-
         // DoubleArrayList serialiser mapper to IoBuffer
         serialiser.addClassDefinition(new IoBufferFieldSerialiser(ioBuffer, //
                 (obj, field) -> field.getField().set(obj,
-                        DoubleArrayList.wrap(BinarySerialiser.getDoubleArray(ioBuffer))), // reader
+                                     DoubleArrayList.wrap(BinarySerialiser.getDoubleArray(ioBuffer))), // reader
                 (obj, field) -> {
                     final DoubleArrayList retVal = (DoubleArrayList) field.getField().get(obj);
                     BinarySerialiser.put(ioBuffer, field.getFieldName(), retVal.elements(),
@@ -58,8 +53,5 @@ public final class FieldDataSetHelper {
 
         // List<AxisDescription> serialiser mapper to IoBuffer
         serialiser.addClassDefinition(new FieldListAxisDescription(ioBuffer));
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.atDebug().addArgument(FieldDataSetHelper.class.getName()).log("initialised serialiser '{}'");
-        }
     }
 }

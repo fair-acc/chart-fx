@@ -48,17 +48,12 @@ public class FieldSerialiser {
         cachedHashCode = AbstractSerialiser.computeHashCode(classPrototype, this.classGenericArguments);
 
         String genericFieldString = this.classGenericArguments.isEmpty() ? ""
-                : this.classGenericArguments.stream().map(Class::getName).collect(Collectors.joining(", ", "<", ">"));
+                                                                         : this.classGenericArguments.stream().map(Class::getName).collect(Collectors.joining(", ", "<", ">"));
 
         canonicalName = classPrototype.getCanonicalName() + genericFieldString;
         simpleName = classPrototype.getSimpleName()
-                + AbstractSerialiser.getGenericFieldSimpleTypeString(this.classGenericArguments);
+                     + AbstractSerialiser.getGenericFieldSimpleTypeString(this.classGenericArguments);
         name = "Serialiser for " + canonicalName;
-
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.atDebug().addArgument(classPrototype.getName()).addArgument(genericFieldString)
-                    .log("init class {}{}");
-        }
     }
 
     @Override
