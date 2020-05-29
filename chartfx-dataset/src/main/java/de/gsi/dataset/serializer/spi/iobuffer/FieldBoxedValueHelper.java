@@ -1,8 +1,5 @@
 package de.gsi.dataset.serializer.spi.iobuffer;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import de.gsi.dataset.serializer.IoBuffer;
 import de.gsi.dataset.serializer.spi.AbstractSerialiser;
 import de.gsi.dataset.serializer.spi.BinarySerialiser;
@@ -14,8 +11,6 @@ import de.gsi.dataset.serializer.spi.BinarySerialiser;
  * @author rstein
  */
 public final class FieldBoxedValueHelper {
-    private static final Logger LOGGER = LoggerFactory.getLogger(FieldBoxedValueHelper.class);
-
     private FieldBoxedValueHelper() {
         // utility class
     }
@@ -28,11 +23,10 @@ public final class FieldBoxedValueHelper {
      * @param ioBuffer reference to the IoBuffer back-ends
      */
     public static void register(final AbstractSerialiser serialiser, final IoBuffer ioBuffer) {
-
         serialiser.addClassDefinition(new IoBufferFieldSerialiser(ioBuffer, //
                 (obj, field) -> field.getField().set(obj, ioBuffer.getBoolean()), // reader
                 (obj, field) -> BinarySerialiser.put(ioBuffer, field.getFieldName(),
-                        (Boolean) field.getField().get(obj)), // writer
+                                     (Boolean) field.getField().get(obj)), // writer
                 Boolean.class));
 
         serialiser.addClassDefinition(new IoBufferFieldSerialiser(ioBuffer, //
@@ -48,7 +42,7 @@ public final class FieldBoxedValueHelper {
         serialiser.addClassDefinition(new IoBufferFieldSerialiser(ioBuffer, //
                 (obj, field) -> field.getField().set(obj, ioBuffer.getInt()), // reader
                 (obj, field) -> BinarySerialiser.put(ioBuffer, field.getFieldName(),
-                        (Integer) field.getField().get(obj)), // writer
+                                     (Integer) field.getField().get(obj)), // writer
                 Integer.class));
 
         serialiser.addClassDefinition(new IoBufferFieldSerialiser(ioBuffer, //
@@ -64,17 +58,13 @@ public final class FieldBoxedValueHelper {
         serialiser.addClassDefinition(new IoBufferFieldSerialiser(ioBuffer, //
                 (obj, field) -> field.getField().set(obj, ioBuffer.getDouble()), // reader
                 (obj, field) -> BinarySerialiser.put(ioBuffer, field.getFieldName(),
-                        (Double) field.getField().get(obj)), // writer
+                                     (Double) field.getField().get(obj)), // writer
                 Double.class));
 
-//        serialiser.addClassDefinition(new IoBufferFieldSerialiser(ioBuffer, //
-//                (obj, field) -> field.getField().set(obj, ioBuffer.getString()), // reader
-//                (obj, field) -> BinarySerialiser.put(ioBuffer, field.getFieldName(),
-//                        (String) field.getField().get(obj)), // writer
-//                String.class));
-
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.atDebug().addArgument(serialiser).addArgument(ioBuffer).log("initialised({}, {}");
-        }
+        //        serialiser.addClassDefinition(new IoBufferFieldSerialiser(ioBuffer, //
+        //                (obj, field) -> field.getField().set(obj, ioBuffer.getString()), // reader
+        //                (obj, field) -> BinarySerialiser.put(ioBuffer, field.getFieldName(),
+        //                        (String) field.getField().get(obj)), // writer
+        //                String.class));
     }
 }

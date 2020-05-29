@@ -3,9 +3,6 @@ package de.gsi.dataset.serializer.spi.iobuffer;
 import java.util.Collection;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import de.gsi.dataset.AxisDescription;
 import de.gsi.dataset.serializer.DataType;
 import de.gsi.dataset.serializer.IoBuffer;
@@ -19,8 +16,6 @@ import de.gsi.dataset.spi.DefaultAxisDescription;
  * @author rstein
  */
 public class FieldListAxisDescription extends IoBufferFieldSerialiser {
-    protected static final Logger LOGGER = LoggerFactory.getLogger(FieldListAxisDescription.class);
-
     /**
      * FieldSerialiser implementation for List&lt;AxisDescription&gt; to IoBuffer-backed byte-buffer
      * 
@@ -28,15 +23,9 @@ public class FieldListAxisDescription extends IoBufferFieldSerialiser {
      * 
      */
     public FieldListAxisDescription(IoBuffer buffer) {
-        super(buffer, (obj, field) -> {
-        }, (obj, field) -> {
-        }, List.class, AxisDescription.class);
+        super(buffer, (obj, field) -> {}, (obj, field) -> {}, List.class, AxisDescription.class);
         readerFunction = this::execFieldReader;
         writerFunction = this::execFieldWriter;
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.atDebug().addArgument(buffer).addArgument(getClassPrototype()).addArgument(getGenericsPrototypes())
-                    .log("initialised({}, {}, {}");
-        }
     }
 
     protected final void execFieldReader(final Object obj, ClassFieldDescription field) throws IllegalAccessException {
@@ -50,7 +39,7 @@ public class FieldListAxisDescription extends IoBufferFieldSerialiser {
             final byte startMarker = ioBuffer.getByte();
             if (startMarker != DataType.START_MARKER.getAsByte()) {
                 throw new IllegalStateException("corrupt start marker, value is " + startMarker + " vs. should "
-                        + DataType.START_MARKER.getAsByte());
+                                                + DataType.START_MARKER.getAsByte());
             }
 
             BinarySerialiser.getFieldHeader(ioBuffer);
