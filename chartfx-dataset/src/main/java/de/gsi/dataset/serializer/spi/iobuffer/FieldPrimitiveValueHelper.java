@@ -1,8 +1,5 @@
 package de.gsi.dataset.serializer.spi.iobuffer;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import de.gsi.dataset.serializer.IoBuffer;
 import de.gsi.dataset.serializer.spi.AbstractSerialiser;
 import de.gsi.dataset.serializer.spi.BinarySerialiser;
@@ -13,8 +10,6 @@ import de.gsi.dataset.serializer.spi.BinarySerialiser;
  * @author rstein
  */
 public final class FieldPrimitiveValueHelper {
-    private static final Logger LOGGER = LoggerFactory.getLogger(FieldPrimitiveValueHelper.class);
-
     private FieldPrimitiveValueHelper() {
         // utility class
     }
@@ -26,7 +21,6 @@ public final class FieldPrimitiveValueHelper {
      * @param ioBuffer reference to the IoBuffer back-ends
      */
     public static void register(final AbstractSerialiser serialiser, final IoBuffer ioBuffer) {
-
         serialiser.addClassDefinition(new IoBufferFieldSerialiser(ioBuffer, //
                 (obj, field) -> field.getField().setBoolean(obj, ioBuffer.getBoolean()), // reader
                 (obj, field) -> BinarySerialiser.put(ioBuffer, field.getFieldName(), field.getField().getBoolean(obj)), // writer
@@ -65,13 +59,7 @@ public final class FieldPrimitiveValueHelper {
         serialiser.addClassDefinition(new IoBufferFieldSerialiser(ioBuffer, //
                 (obj, field) -> field.getField().set(obj, ioBuffer.getString()), // reader
                 (obj, field) -> BinarySerialiser.put(ioBuffer, field.getFieldName(),
-                        (String) field.getField().get(obj)), // writer
+                                     (String) field.getField().get(obj)), // writer
                 String.class));
-
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.atDebug().addArgument(serialiser).addArgument(ioBuffer).log("initialised({}, {}");
-        }
-
     }
-
 }

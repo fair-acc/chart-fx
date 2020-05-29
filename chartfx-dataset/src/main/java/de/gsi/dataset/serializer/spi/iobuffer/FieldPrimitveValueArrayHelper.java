@@ -1,8 +1,5 @@
 package de.gsi.dataset.serializer.spi.iobuffer;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import de.gsi.dataset.serializer.IoBuffer;
 import de.gsi.dataset.serializer.spi.AbstractSerialiser;
 import de.gsi.dataset.serializer.spi.BinarySerialiser;
@@ -14,8 +11,6 @@ import de.gsi.dataset.serializer.spi.BinarySerialiser;
  * @author rstein
  */
 public final class FieldPrimitveValueArrayHelper {
-    private static final Logger LOGGER = LoggerFactory.getLogger(FieldPrimitveValueArrayHelper.class);
-
     private FieldPrimitveValueArrayHelper() {
         // utility class
     }
@@ -28,24 +23,23 @@ public final class FieldPrimitveValueArrayHelper {
      * @param ioBuffer reference to the IoBuffer back-ends
      */
     public static void register(final AbstractSerialiser serialiser, final IoBuffer ioBuffer) {
-
         serialiser.addClassDefinition(new IoBufferFieldSerialiser(ioBuffer, //
                 (obj, field) -> field.getField().set(obj,
-                        ioBuffer.getBooleanArray((boolean[]) field.getField().get(obj))), // reader
+                                     ioBuffer.getBooleanArray((boolean[]) field.getField().get(obj))), // reader
                 (obj, field) -> BinarySerialiser.put(ioBuffer, field.getFieldName(),
-                        (boolean[]) field.getField().get(obj)), // writer
+                                     (boolean[]) field.getField().get(obj)), // writer
                 boolean[].class));
 
         serialiser.addClassDefinition(new IoBufferFieldSerialiser(ioBuffer, //
                 (obj, field) -> field.getField().set(obj, ioBuffer.getByteArray((byte[]) field.getField().get(obj))), // reader
                 (obj, field) -> BinarySerialiser.put(ioBuffer, field.getFieldName(),
-                        (byte[]) field.getField().get(obj)), // writer
+                                     (byte[]) field.getField().get(obj)), // writer
                 byte[].class));
 
         serialiser.addClassDefinition(new IoBufferFieldSerialiser(ioBuffer, //
                 (obj, field) -> field.getField().set(obj, ioBuffer.getShortArray((short[]) field.getField().get(obj))), // reader
                 (obj, field) -> BinarySerialiser.put(ioBuffer, field.getFieldName(),
-                        (short[]) field.getField().get(obj)), // writer
+                                     (short[]) field.getField().get(obj)), // writer
                 short[].class));
 
         serialiser.addClassDefinition(new IoBufferFieldSerialiser(ioBuffer, //
@@ -56,32 +50,27 @@ public final class FieldPrimitveValueArrayHelper {
         serialiser.addClassDefinition(new IoBufferFieldSerialiser(ioBuffer, //
                 (obj, field) -> field.getField().set(obj, ioBuffer.getLongArray((long[]) field.getField().get(obj))), // reader
                 (obj, field) -> BinarySerialiser.put(ioBuffer, field.getFieldName(),
-                        (long[]) field.getField().get(obj)), // writer
+                                     (long[]) field.getField().get(obj)), // writer
                 long[].class));
 
         serialiser.addClassDefinition(new IoBufferFieldSerialiser(ioBuffer, //
                 (obj, field) -> field.getField().set(obj, ioBuffer.getFloatArray((float[]) field.getField().get(obj))), // reader
                 (obj, field) -> BinarySerialiser.put(ioBuffer, field.getFieldName(),
-                        (float[]) field.getField().get(obj)), // writer
+                                     (float[]) field.getField().get(obj)), // writer
                 float[].class));
 
         serialiser.addClassDefinition(new IoBufferFieldSerialiser(ioBuffer, //
                 (obj, field) -> field.getField().set(obj,
-                        ioBuffer.getDoubleArray((double[]) field.getField().get(obj))), // reader
+                                     ioBuffer.getDoubleArray((double[]) field.getField().get(obj))), // reader
                 (obj, field) -> BinarySerialiser.put(ioBuffer, field.getFieldName(),
-                        (double[]) field.getField().get(obj)), // writer
+                                     (double[]) field.getField().get(obj)), // writer
                 double[].class));
 
         serialiser.addClassDefinition(new IoBufferFieldSerialiser(ioBuffer, //
                 (obj, field) -> field.getField().set(obj,
-                        ioBuffer.getStringArray((String[]) field.getField().get(obj))), // reader
+                                     ioBuffer.getStringArray((String[]) field.getField().get(obj))), // reader
                 (obj, field) -> BinarySerialiser.put(ioBuffer, field.getFieldName(),
-                        (String[]) field.getField().get(obj)), // writer
+                                     (String[]) field.getField().get(obj)), // writer
                 String[].class));
-
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.atDebug().addArgument(serialiser).addArgument(ioBuffer).log("initialised({}, {}");
-        }
     }
-
 }
