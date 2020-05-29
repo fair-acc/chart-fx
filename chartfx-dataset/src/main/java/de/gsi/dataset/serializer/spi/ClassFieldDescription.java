@@ -182,8 +182,10 @@ public class ClassFieldDescription implements Iterable<ClassFieldDescription> {
             throws IllegalAccessException {
         try {
             // need to allocate new object
-            final Constructor<?> constr = getParent(this, 1).getType().getDeclaredConstructor(fieldParent.getClass());
-            final Object newFieldObj = constr.newInstance(fieldParent);
+//            final Constructor<?> constr = getParent(this, 1).getType().getDeclaredConstructor(fieldParent.getClass());
+//            final Object newFieldObj = constr.newInstance(fieldParent);
+            final Constructor<?> constr = getParent(this, 1).getType().getDeclaredConstructor();
+          final Object newFieldObj = constr.newInstance();
             localParent.getField().set(fieldParent, newFieldObj);
 
             return newFieldObj;
@@ -621,8 +623,7 @@ public class ClassFieldDescription implements Iterable<ClassFieldDescription> {
         // loop over member fields and inner classes
         for (final Field pfield : classType.getDeclaredFields()) {
             final Optional<ClassFieldDescription> localParent = parent.getParent();
-            if ((localParent.isPresent() && pfield.getType().equals(localParent.get().getType()))
-                    || pfield.getName().startsWith("this$")) {
+            if ((localParent.isPresent() && pfield.getType().equals(localParent.get().getType()) && recursionLevel >= maxRecursionLevel) || pfield.getName().startsWith("this$")) {
                 // inner classes contain parent as part of declared fields
                 continue;
             }
