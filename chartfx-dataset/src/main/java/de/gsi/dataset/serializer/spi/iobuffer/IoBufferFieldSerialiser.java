@@ -1,8 +1,5 @@
 package de.gsi.dataset.serializer.spi.iobuffer;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import de.gsi.dataset.serializer.IoBuffer;
 import de.gsi.dataset.serializer.spi.FieldSerialiser;
 
@@ -12,7 +9,6 @@ import de.gsi.dataset.serializer.spi.FieldSerialiser;
  *
  */
 public class IoBufferFieldSerialiser extends FieldSerialiser {
-    private static final Logger LOGGER = LoggerFactory.getLogger(IoBufferFieldSerialiser.class);
     protected final IoBuffer ioBuffer;
 
     /**
@@ -33,10 +29,6 @@ public class IoBufferFieldSerialiser extends FieldSerialiser {
             throw new IllegalArgumentException("buffer must not be null");
         }
         ioBuffer = buffer;
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.atDebug().addArgument(buffer).addArgument(classPrototype).addArgument(classGenericArguments)
-                    .log("IoBufferFieldSerialiser({}, {}, {}) -- initialised");
-        }
     }
 
     /**
