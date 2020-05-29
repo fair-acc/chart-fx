@@ -57,9 +57,7 @@ public final class ClassDescriptions { // NOPMD - nomen est omen
             try {
                 return Class.forName(key);
             } catch (ClassNotFoundException | SecurityException e) {
-                if (LOGGER.isErrorEnabled()) {
-                    LOGGER.atError().setCause(e).addArgument(name).log("exception while getting class {}");
-                }
+                LOGGER.atError().setCause(e).addArgument(name).log("exception while getting class {}");
                 return null;
             }
         });
@@ -88,14 +86,13 @@ public final class ClassDescriptions { // NOPMD - nomen est omen
     }
 
     public static Method getMethod(final Class<?> clazz, final String methodName) {
-        return CLASS_METHOD_MAP.computeIfAbsent(clazz, c -> new ConcurrentHashMap<>()).computeIfAbsent(methodName,
-                name -> {
-                    try {
-                        return clazz.getMethod(methodName);
-                    } catch (NoSuchMethodException | SecurityException e) {
-                        return null;
-                    }
-                });
+        return CLASS_METHOD_MAP.computeIfAbsent(clazz, c -> new ConcurrentHashMap<>()).computeIfAbsent(methodName, name -> {
+            try {
+                return clazz.getMethod(methodName);
+            } catch (NoSuchMethodException | SecurityException e) {
+                return null;
+            }
+        });
     }
 
     public static void initNullMemberFields(final Object rootObject) {
@@ -124,10 +121,8 @@ public final class ClassDescriptions { // NOPMD - nomen est omen
                     field.getField().set(rootObject, localRoot);
                 }
             } catch (IllegalArgumentException | IllegalAccessException | InstantiationException
-                    | InvocationTargetException | SecurityException | NoSuchMethodException e) {
-                if (LOGGER.isErrorEnabled()) {
-                    LOGGER.atError().setCause(e).log("could not initialise inner class:" + field.toString());
-                }
+                     | InvocationTargetException | SecurityException | NoSuchMethodException e) {
+                LOGGER.atError().setCause(e).log("could not initialise inner class:" + field.toString());
             }
 
             if (localRoot == null) {
@@ -135,7 +130,6 @@ public final class ClassDescriptions { // NOPMD - nomen est omen
             }
 
             initNullMemberFields(localRoot, field);
-
         }
     }
 
@@ -152,9 +146,7 @@ public final class ClassDescriptions { // NOPMD - nomen est omen
         final boolean isSerialisable = field.isSerializable();
 
         if (isSerialisable || fullView) {
-            LOGGER.atInfo().addArgument(mspace).addArgument(isSerialisable ? "  " : "//")
-                    .addArgument(field.getModifierString()).addArgument(typeCategorgy).addArgument(typeName)
-                    .addArgument(field.getFieldNameRelative()).log("{} {} {} {}{} {}");
+            LOGGER.atInfo().addArgument(mspace).addArgument(isSerialisable ? "  " : "//").addArgument(field.getModifierString()).addArgument(typeCategorgy).addArgument(typeName).addArgument(field.getFieldNameRelative()).log("{} {} {} {}{} {}");
 
             field.getChildren().stream().forEach(f -> printClassStructure(f, fullView, recursionLevel + 1));
         }

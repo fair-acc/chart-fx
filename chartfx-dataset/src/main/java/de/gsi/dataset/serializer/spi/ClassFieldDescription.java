@@ -109,7 +109,7 @@ public class ClassFieldDescription implements Iterable<ClassFieldDescription> {
             fieldName = field.getName();
             if (this.parent.isPresent()) {
                 final String relativeName = this.parent.get().isRoot() ? ""
-                        : (this.parent.get().getFieldNameRelative() + ".");
+                                                                       : (this.parent.get().getFieldNameRelative() + ".");
                 fieldNameRelative = relativeName + fieldName;
             } else {
                 fieldNameRelative = fieldName;
@@ -147,7 +147,6 @@ public class ClassFieldDescription implements Iterable<ClassFieldDescription> {
         isclass = !isprimitive && !modInterface;
         isEnum = Enum.class.isAssignableFrom(classType);
         serializable = !modTransient && !modStatic;
-
     }
 
     /**
@@ -182,8 +181,10 @@ public class ClassFieldDescription implements Iterable<ClassFieldDescription> {
             throws IllegalAccessException {
         try {
             // need to allocate new object
-            final Constructor<?> constr = getParent(this, 1).getType().getDeclaredConstructor(fieldParent.getClass());
-            final Object newFieldObj = constr.newInstance(fieldParent);
+            //            final Constructor<?> constr = getParent(this, 1).getType().getDeclaredConstructor(fieldParent.getClass());
+            //            final Object newFieldObj = constr.newInstance(fieldParent);
+            final Constructor<?> constr = getParent(this, 1).getType().getDeclaredConstructor();
+            final Object newFieldObj = constr.newInstance();
             localParent.getField().set(fieldParent, newFieldObj);
 
             return newFieldObj;
@@ -201,8 +202,7 @@ public class ClassFieldDescription implements Iterable<ClassFieldDescription> {
      */
     public List<String> getActualTypeArgumentNames() {
         if (genericTypeNameList == null) {
-            genericTypeNameList = getActualTypeArguments().stream()
-                    .map(t -> ClassDescriptions.translateClassName(t.getTypeName())).collect(Collectors.toList());
+            genericTypeNameList = getActualTypeArguments().stream().map(t -> ClassDescriptions.translateClassName(t.getTypeName())).collect(Collectors.toList());
         }
 
         return genericTypeNameList;
@@ -341,8 +341,7 @@ public class ClassFieldDescription implements Iterable<ClassFieldDescription> {
                 parent1 = temp;
             } catch (IllegalArgumentException | IllegalAccessException e) {
                 if (LOGGER.isErrorEnabled()) {
-                    LOGGER.atError().setCause(e)
-                            .log("could not retrieve inner loop object for field '" + field.toString());
+                    LOGGER.atError().setCause(e).log("could not retrieve inner loop object for field '" + field.toString());
                 }
             }
         }
@@ -566,7 +565,7 @@ public class ClassFieldDescription implements Iterable<ClassFieldDescription> {
     public String toString() {
         if (toStringName == null) {
             toStringName = ClassFieldDescription.class.getSimpleName() + " for: " + getModifierString() + " "
-                    + getTypeName() + " " + getFieldNameRelative() + " (hierarchyDepth = " + getHierarchyDepth() + ")";
+                           + getTypeName() + " " + getFieldNameRelative() + " (hierarchyDepth = " + getHierarchyDepth() + ")";
         }
         return toStringName;
     }
@@ -606,8 +605,8 @@ public class ClassFieldDescription implements Iterable<ClassFieldDescription> {
 
         if (recursionLevel > maxRecursionLevel) {
             throw new IllegalStateException("recursion error while scanning object structure: recursionLevel = '"
-                    + recursionLevel + "' > " + ClassFieldDescription.class.getSimpleName() + ".maxRecursionLevel ='"
-                    + ClassFieldDescription.maxRecursionLevel + "'");
+                                            + recursionLevel + "' > " + ClassFieldDescription.class.getSimpleName() + ".maxRecursionLevel ='"
+                                            + ClassFieldDescription.maxRecursionLevel + "'");
         }
 
         // call super types
@@ -621,8 +620,7 @@ public class ClassFieldDescription implements Iterable<ClassFieldDescription> {
         // loop over member fields and inner classes
         for (final Field pfield : classType.getDeclaredFields()) {
             final Optional<ClassFieldDescription> localParent = parent.getParent();
-            if ((localParent.isPresent() && pfield.getType().equals(localParent.get().getType()))
-                    || pfield.getName().startsWith("this$")) {
+            if ((localParent.isPresent() && pfield.getType().equals(localParent.get().getType()) && recursionLevel >= maxRecursionLevel) || pfield.getName().startsWith("this$")) {
                 // inner classes contain parent as part of declared fields
                 continue;
             }
@@ -636,7 +634,7 @@ public class ClassFieldDescription implements Iterable<ClassFieldDescription> {
             // (e.g. for classes with static references to themselves or
             // maps-of-maps-of-maps-....)
             final boolean isClassAndNotObjectOrEnmum = field.isClass()
-                    && (!field.getType().equals(Object.class) || !field.getType().equals(Enum.class));
+                                                       && (!field.getType().equals(Object.class) || !field.getType().equals(Enum.class));
             if (field.isSerializable() && (isClassAndNotObjectOrEnmum || field.isInterface())
                     && field.getDataType().equals(DataType.OTHER)) {
                 // object is a (technically) Serializable, unknown (ie 'OTHER) compound object
