@@ -553,11 +553,14 @@ public class BinarySerialiser { // NOPMD - omen est omen
     }
 
     public static void put(final IoBuffer buffer, final String fieldName, final boolean[] arrayValue) {
-        put(buffer, fieldName, arrayValue, new int[] { arrayValue.length });
+        put(buffer, fieldName, arrayValue, new int[] { arrayValue == null ? 0 : arrayValue.length });
     }
 
     public static void put(final IoBuffer buffer, final String fieldName, final boolean[] arrayValue,
             final int[] dims) {
+        if (arrayValue == null) {
+            return;
+        }
         final int nElements = Math.min(getNumberOfElements(dims), arrayValue.length);
         final long sizeMarkerStart = putArrayHeader(buffer, fieldName, DataType.BOOL_ARRAY, dims, nElements);
         buffer.putBooleanArray(arrayValue, nElements);
@@ -570,10 +573,13 @@ public class BinarySerialiser { // NOPMD - omen est omen
     }
 
     public static void put(final IoBuffer buffer, final String fieldName, final byte[] arrayValue) {
-        put(buffer, fieldName, arrayValue, new int[] { arrayValue.length });
+        put(buffer, fieldName, arrayValue, new int[] { arrayValue == null ? 0 : arrayValue.length });
     }
 
     public static void put(final IoBuffer buffer, final String fieldName, final byte[] arrayValue, final int[] dims) {
+        if (arrayValue == null) {
+            return;
+        }
         final int nElements = Math.min(getNumberOfElements(dims), arrayValue.length);
         final long sizeMarkerStart = putArrayHeader(buffer, fieldName, DataType.BYTE_ARRAY, dims, nElements);
         buffer.putByteArray(arrayValue, nElements);
@@ -586,10 +592,13 @@ public class BinarySerialiser { // NOPMD - omen est omen
     }
 
     public static void put(final IoBuffer buffer, final String fieldName, final char[] arrayValue) {
-        put(buffer, fieldName, arrayValue, new int[] { arrayValue.length });
+        put(buffer, fieldName, arrayValue, new int[] { arrayValue == null ? 0 : arrayValue.length });
     }
 
     public static void put(final IoBuffer buffer, final String fieldName, final char[] arrayValue, final int[] dims) {
+        if (arrayValue == null) {
+            return;
+        }
         final int nElements = Math.min(getNumberOfElements(dims), arrayValue.length);
         final long sizeMarkerStart = putArrayHeader(buffer, fieldName, DataType.CHAR_ARRAY, dims, nElements);
         buffer.putCharArray(arrayValue, nElements);
@@ -597,7 +606,7 @@ public class BinarySerialiser { // NOPMD - omen est omen
     }
 
     public static <E> void put(final IoBuffer buffer, final String fieldName, final Collection<E> collection) {
-        if ((collection == null) || collection.isEmpty()) {
+        if (collection == null || collection.isEmpty()) {
             return;
         }
         final Object[] values = collection.toArray();
@@ -628,10 +637,13 @@ public class BinarySerialiser { // NOPMD - omen est omen
     }
 
     public static void put(final IoBuffer buffer, final String fieldName, final double[] arrayValue) {
-        put(buffer, fieldName, arrayValue, new int[] { arrayValue.length });
+        put(buffer, fieldName, arrayValue, new int[] { arrayValue == null ? 0 : arrayValue.length });
     }
 
     public static void put(final IoBuffer buffer, final String fieldName, final double[] arrayValue, final int[] dims) {
+        if (arrayValue == null) {
+            return;
+        }
         final int nElements = Math.min(getNumberOfElements(dims), arrayValue.length);
         final long sizeMarkerStart = putArrayHeader(buffer, fieldName, DataType.DOUBLE_ARRAY, dims, nElements);
         buffer.putDoubleArray(arrayValue, nElements);
@@ -672,10 +684,13 @@ public class BinarySerialiser { // NOPMD - omen est omen
     }
 
     public static void put(final IoBuffer buffer, final String fieldName, final float[] arrayValue) {
-        put(buffer, fieldName, arrayValue, new int[] { arrayValue.length });
+        put(buffer, fieldName, arrayValue, new int[] { arrayValue == null ? 0 : arrayValue.length });
     }
 
     public static void put(final IoBuffer buffer, final String fieldName, final float[] arrayValue, final int[] dims) {
+        if (arrayValue == null) {
+            return;
+        }
         final int nElements = Math.min(getNumberOfElements(dims), arrayValue.length);
         final long sizeMarkerStart = putArrayHeader(buffer, fieldName, DataType.FLOAT_ARRAY, dims, nElements);
         buffer.putFloatArray(arrayValue, nElements);
@@ -688,10 +703,13 @@ public class BinarySerialiser { // NOPMD - omen est omen
     }
 
     public static void put(final IoBuffer buffer, final String fieldName, final int[] arrayValue) {
-        put(buffer, fieldName, arrayValue, new int[] { arrayValue.length });
+        put(buffer, fieldName, arrayValue, new int[] { arrayValue == null ? 0 : arrayValue.length });
     }
 
     public static void put(final IoBuffer buffer, final String fieldName, final int[] arrayValue, final int[] dims) {
+        if (arrayValue == null) {
+            return;
+        }
         final int nElements = Math.min(getNumberOfElements(dims), arrayValue.length);
         final long sizeMarkerStart = putArrayHeader(buffer, fieldName, DataType.INT_ARRAY, dims, nElements);
         buffer.putIntArray(arrayValue, nElements);
@@ -704,10 +722,13 @@ public class BinarySerialiser { // NOPMD - omen est omen
     }
 
     public static void put(final IoBuffer buffer, final String fieldName, final long[] arrayValue) {
-        put(buffer, fieldName, arrayValue, new int[] { arrayValue.length });
+        put(buffer, fieldName, arrayValue, new int[] { arrayValue == null ? 0 : arrayValue.length });
     }
 
     public static void put(final IoBuffer buffer, final String fieldName, final long[] arrayValue, final int[] dims) {
+        if (arrayValue == null) {
+            return;
+        }
         final int nElements = Math.min(getNumberOfElements(dims), arrayValue.length);
         final long sizeMarkerStart = putArrayHeader(buffer, fieldName, DataType.LONG_ARRAY, dims, nElements);
         buffer.putLongArray(arrayValue, nElements);
@@ -715,7 +736,7 @@ public class BinarySerialiser { // NOPMD - omen est omen
     }
 
     public static <K, V> void put(final IoBuffer buffer, final String fieldName, final Map<K, V> map) {
-        if ((map == null) || map.isEmpty()) {
+        if (map == null || map.isEmpty()) {
             return;
         }
         final Object[] keySet = map.keySet().toArray();
@@ -744,11 +765,14 @@ public class BinarySerialiser { // NOPMD - omen est omen
     }
 
     public static void put(final IoBuffer buffer, final String fieldName, final short[] arrayValue) { // NOPMD
-        put(buffer, fieldName, arrayValue, new int[] { arrayValue.length });
+        put(buffer, fieldName, arrayValue, new int[] { arrayValue == null ? 0 : arrayValue.length });
     }
 
     public static void put(final IoBuffer buffer, final String fieldName, final short[] arrayValue, // NOPMD
             final int[] dims) {
+        if (arrayValue == null) {
+            return;
+        }
         final int nElements = Math.min(getNumberOfElements(dims), arrayValue.length);
         final long sizeMarkerStart = putArrayHeader(buffer, fieldName, DataType.SHORT_ARRAY, dims, nElements);
         buffer.putShortArray(arrayValue, nElements);
@@ -761,11 +785,11 @@ public class BinarySerialiser { // NOPMD - omen est omen
     }
 
     public static void put(final IoBuffer buffer, final String fieldName, final String[] arrayValue) {
-        put(buffer, fieldName, arrayValue, new int[] { arrayValue.length });
+        put(buffer, fieldName, arrayValue, new int[] { arrayValue == null ? 0 : arrayValue.length });
     }
 
     public static void put(final IoBuffer buffer, final String fieldName, final String[] arrayValue, final int[] dims) {
-        if ((arrayValue == null) || (arrayValue.length == 0)) {
+        if (arrayValue == null) {
             return;
         }
         final int nElements = Math.min(getNumberOfElements(dims), arrayValue.length);
@@ -858,8 +882,7 @@ public class BinarySerialiser { // NOPMD - omen est omen
      */
     public static void putHeaderInfo(final IoBuffer buffer) {
         AssertUtils.notNull("buffer", buffer);
-        final long addCapacity = 20 + "OBJ_ROOT_START".length() + "#file producer : ".length()
-                                 + BinarySerialiser.class.getCanonicalName().length();
+        final long addCapacity = 20 + "OBJ_ROOT_START".length() + "#file producer : ".length() + BinarySerialiser.class.getCanonicalName().length();
         buffer.ensureAdditionalCapacity(addCapacity);
         putStartMarker(buffer, "OBJ_ROOT_START");
         buffer.putString("#file producer : ");
