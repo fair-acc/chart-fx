@@ -101,15 +101,16 @@ public abstract class AbstractSerialiser {
         // did not find FieldSerialiser entry by specific class -> search for assignable
         // interface definitions
 
-        List<Class<?>> potentialMatchingKeys = this.knownClasses().keySet().stream()
-                .filter(k -> k.isAssignableFrom(clazz)).collect(Collectors.toList());
+        List<Class<?>> potentialMatchingKeys = this.knownClasses().keySet().stream().filter(k -> k.isAssignableFrom(clazz)).collect(Collectors.toList());
         if (potentialMatchingKeys == null || potentialMatchingKeys.isEmpty()) {
             // did not find any matching clazz/interface FieldSerialiser entries
             return Optional.empty();
         }
 
         List<FieldSerialiser> interfaceMatchList = potentialMatchingKeys.stream()
-                .map(key -> this.knownClasses().get(key)).flatMap(List::stream).collect(Collectors.toList());
+                                                           .map(key -> this.knownClasses().get(key))
+                                                           .flatMap(List::stream)
+                                                           .collect(Collectors.toList());
 
         if (interfaceMatchList.size() == 1 || classGenericArguments == null || classGenericArguments.isEmpty()) {
             // found single match FieldSerialiser entry type w/o specific generics
@@ -160,18 +161,17 @@ public abstract class AbstractSerialiser {
                     root.getActualTypeArguments());
 
             if (serialiser.isPresent()) {
-                Object classObj = root.getMemberClassObject(obj);
+                Object classObj = root.getMemberClassObject(obj, false);
                 if (classObj == null) {
-                    throw new IllegalStateException("classObj of type '" + root.getTypeName() + "' for '"
-                            + root.getFieldNameRelative() + "' is null");
+                    // do not serialise 'null' references
+                    return;
                 }
                 serialiser.get().getWriterFunction().exec(classObj, root);
                 return;
             }
 
             // should not happen (because of 'isClassKnown')
-            throw new IllegalStateException("should not happen -- cannot serialise field - "
-                    + root.getFieldNameRelative() + " - class type = " + root.getTypeName());
+            throw new IllegalStateException("should not happen -- cannot serialise field - " + root.getFieldNameRelative() + " - class type = " + root.getTypeName());
         }
         // cannot serialise field check whether this is a container class and contains
         // serialisable children
@@ -218,8 +218,7 @@ public abstract class AbstractSerialiser {
                         .getDeclaredConstructor(parameterTypes);
             } catch (SecurityException | NoSuchMethodException e) {
                 if (LOGGER.isErrorEnabled()) {
-                    LOGGER.atError().setCause(e).addArgument(Arrays.toString(parameterTypes)).addArgument(name)
-                            .log("exception while getting constructor{} for class {}");
+                    LOGGER.atError().setCause(e).addArgument(Arrays.toString(parameterTypes)).addArgument(name).log("exception while getting constructor{} for class {}");
                 }
                 return null;
             }

@@ -15,7 +15,7 @@ public interface IoBuffer extends IoBufferHeader<IoBuffer> {
     }
 
     default boolean[] getBooleanArray(final boolean[] dst) {
-        return getBooleanArray(dst, 0, dst.length);
+        return getBooleanArray(dst, 0, dst == null ? -1 : dst.length);
     }
 
     boolean[] getBooleanArray(final boolean[] dst, final long offset, final int length);
@@ -27,7 +27,7 @@ public interface IoBuffer extends IoBufferHeader<IoBuffer> {
     }
 
     default byte[] getByteArray(final byte[] dst) {
-        return getByteArray(dst, 0, dst.length);
+        return getByteArray(dst, 0, dst == null ? -1 : dst.length);
     }
 
     byte[] getByteArray(final byte[] dst, final long offset, final int length);
@@ -39,7 +39,7 @@ public interface IoBuffer extends IoBufferHeader<IoBuffer> {
     }
 
     default char[] getCharArray(final char[] dst) {
-        return getCharArray(dst, 0, dst.length);
+        return getCharArray(dst, 0, dst == null ? -1 : dst.length);
     }
 
     char[] getCharArray(final char[] dst, final long offset, final int length);
@@ -51,7 +51,7 @@ public interface IoBuffer extends IoBufferHeader<IoBuffer> {
     }
 
     default double[] getDoubleArray(final double[] dst) {
-        return getDoubleArray(dst, 0, dst.length);
+        return getDoubleArray(dst, 0, dst == null ? -1 : dst.length);
     }
 
     double[] getDoubleArray(final double[] dst, final long offset, final int length);
@@ -63,7 +63,7 @@ public interface IoBuffer extends IoBufferHeader<IoBuffer> {
     }
 
     default float[] getFloatArray(final float[] dst) {
-        return getFloatArray(dst, 0, dst.length);
+        return getFloatArray(dst, 0, dst == null ? -1 : dst.length);
     }
 
     float[] getFloatArray(final float[] dst, final long offset, final int length);
@@ -75,7 +75,7 @@ public interface IoBuffer extends IoBufferHeader<IoBuffer> {
     }
 
     default int[] getIntArray(final int[] dst) {
-        return getIntArray(dst, 0, dst.length);
+        return getIntArray(dst, 0, dst == null ? -1 : dst.length);
     }
 
     int[] getIntArray(final int[] dst, final long offset, final int length);
@@ -87,7 +87,7 @@ public interface IoBuffer extends IoBufferHeader<IoBuffer> {
     }
 
     default long[] getLongArray(final long[] dst) {
-        return getLongArray(dst, 0, dst.length);
+        return getLongArray(dst, 0, dst == null ? -1 : dst.length);
     }
 
     long[] getLongArray(final long[] dst, final long offset, final int length);
@@ -99,7 +99,7 @@ public interface IoBuffer extends IoBufferHeader<IoBuffer> {
     }
 
     default short[] getShortArray(final short[] dst) { // NOPMD by rstein
-        return getShortArray(dst, 0, dst.length);
+        return getShortArray(dst, 0, dst == null ? -1 : dst.length);
     }
 
     short[] getShortArray(final short[] dst, final long offset, final int length); // NOPMD by rstein
@@ -111,7 +111,7 @@ public interface IoBuffer extends IoBufferHeader<IoBuffer> {
     }
 
     default String[] getStringArray(final String[] dst) {
-        return getStringArray(dst, 0, dst.length);
+        return getStringArray(dst, 0, dst == null ? -1 : dst.length);
     }
 
     String[] getStringArray(final String[] dst, final long offset, final int length);
