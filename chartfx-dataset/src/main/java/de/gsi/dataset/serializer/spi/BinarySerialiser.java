@@ -190,6 +190,13 @@ public class BinarySerialiser { // NOPMD - omen est omen
         throw new IndexOutOfBoundsException(READ_POSITION_AT_BUFFER_END);
     }
 
+    public static char getCharacter(final IoBuffer readBuffer) {
+        if (readBuffer.hasRemaining()) {
+            return readBuffer.getChar();
+        }
+        throw new IndexOutOfBoundsException(READ_POSITION_AT_BUFFER_END);
+    }
+
     public static char[] getCharArray(final IoBuffer readBuffer) {
         return readBuffer.getCharArray();
     }
@@ -570,6 +577,22 @@ public class BinarySerialiser { // NOPMD - omen est omen
         final int nElements = Math.min(getNumberOfElements(dims), arrayValue.length);
         final long sizeMarkerStart = putArrayHeader(buffer, fieldName, DataType.BYTE_ARRAY, dims, nElements);
         buffer.putByteArray(arrayValue, nElements);
+        adjustDataByteSizeBlock(buffer, sizeMarkerStart);
+    }
+
+    public static void put(final IoBuffer buffer, final String fieldName, final char value) {
+        putFieldHeader(buffer, fieldName, DataType.CHAR);
+        buffer.putChar(value);
+    }
+
+    public static void put(final IoBuffer buffer, final String fieldName, final char[] arrayValue) {
+        put(buffer, fieldName, arrayValue, new int[] { arrayValue.length });
+    }
+
+    public static void put(final IoBuffer buffer, final String fieldName, final char[] arrayValue, final int[] dims) {
+        final int nElements = Math.min(getNumberOfElements(dims), arrayValue.length);
+        final long sizeMarkerStart = putArrayHeader(buffer, fieldName, DataType.CHAR_ARRAY, dims, nElements);
+        buffer.putCharArray(arrayValue, nElements);
         adjustDataByteSizeBlock(buffer, sizeMarkerStart);
     }
 
