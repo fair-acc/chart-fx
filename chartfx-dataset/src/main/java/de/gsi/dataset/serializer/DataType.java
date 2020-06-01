@@ -28,7 +28,7 @@ public enum DataType {
     // @formatter:off
     // clang-format off
     // start marker
-    START_MARKER(0, "bool", "boolean", 1, Cat.SINGLE_VALUE),
+    START_MARKER(0, "start_marker", "", 1, Cat.SINGLE_VALUE),
     // primitive types
     BOOL(1, "bool", "boolean", 1, Cat.SINGLE_VALUE, boolean.class, Boolean.class),
     BYTE(2, "byte", "byte", 1, Cat.SINGLE_VALUE, byte.class, Byte.class),
