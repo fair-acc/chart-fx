@@ -11,6 +11,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Set;
@@ -136,7 +137,7 @@ public class BinarySerialiser { // NOPMD - omen est omen
         final byte minor = readBuffer.getByte();
         final byte micro = readBuffer.getByte();
 
-        final HeaderInfo header = SELF.new HeaderInfo(producer, major, minor, micro);
+        final HeaderInfo header = SELF.new HeaderInfo(headerStartField, producer, major, minor, micro);
 
         if (!header.isCompatible()) {
             final String msg = String.format("byte buffer version incompatible: reveived '%s' vs. this '%s'", header.toString(), THIS_HEADER.toString());
@@ -153,10 +154,6 @@ public class BinarySerialiser { // NOPMD - omen est omen
         }
         return dims;
     }
-
-    //
-    // -- WRITE OPERATIONS -------------------------------------------
-    //
 
     public static boolean getBoolean(final IoBuffer readBuffer) {
         if (readBuffer.hasRemaining()) {
@@ -276,9 +273,7 @@ public class BinarySerialiser { // NOPMD - omen est omen
             final Method valueOf = enumClass.getMethod("valueOf", String.class);
             return (Enum<E>) valueOf.invoke(null, enumState);
         } catch (final ReflectiveOperationException e) {
-            if (LOGGER.isErrorEnabled()) {
-                LOGGER.atError().setCause(e).addArgument(enumClass).log("could not match 'valueOf(String)' function for class/(supposedly) enum of {}");
-            }
+            LOGGER.atError().setCause(e).addArgument(enumClass).log("could not match 'valueOf(String)' function for class/(supposedly) enum of {}");
         }
 
         return null;
@@ -302,8 +297,8 @@ public class BinarySerialiser { // NOPMD - omen est omen
 
         if (dataType.isScalar()) {
             final long pos = readBuffer.position();
-            final long nBytesToRead = dataType.equals(DataType.STRING) ? readBuffer.getInt() + 4
-                                                                       : dataType.getPrimitiveSize();
+            final long nBytesToRead = dataType == DataType.STRING ? readBuffer.getInt() + 4
+                                                                  : dataType.getPrimitiveSize();
             readBuffer.position(pos);
 
             return new FieldHeader(fieldName, dataType, new int[] { 1 }, readBuffer.position(), nBytesToRead);
@@ -335,7 +330,7 @@ public class BinarySerialiser { // NOPMD - omen est omen
     }
 
     protected static Object[] getGenericArrayAsBoxedPrimitive(final IoBuffer readBuffer, final DataType dataType) {
-        Object[] retVal;
+        final Object[] retVal;
         // @formatter:off
         switch (dataType) {
         case BOOL:
@@ -434,8 +429,7 @@ public class BinarySerialiser { // NOPMD - omen est omen
     protected static int getNumberOfElements(final int[] dimensions) {
         AssertUtils.notNull("dimensions", dimensions);
         int ret = 1;
-        for (int i = 0; i < dimensions.length; i++) {
-            final int dim = dimensions[i];
+        for (int dim : dimensions) {
             ret *= dim;
         }
         return ret;
@@ -498,10 +492,12 @@ public class BinarySerialiser { // NOPMD - omen est omen
     }
 
     public static FieldHeader parseIoStream(final IoBuffer buffer) {
-        final FieldHeader fieldRoot = new FieldHeader("ROOT", DataType.START_MARKER, new int[] { 0 }, buffer.position(),
-                100);
+        final FieldHeader fieldRoot = new FieldHeader("ROOT", DataType.OTHER, new int[] { 0 }, buffer.position(), 100);
+        final HeaderInfo headerRoot = checkHeaderInfo(buffer);
+        headerRoot.setParent(fieldRoot);
+        fieldRoot.getChildren().add(headerRoot);
 
-        parseIoStream(buffer, fieldRoot, 0);
+        parseIoStream(buffer, headerRoot, 0);
         return fieldRoot;
     }
 
@@ -510,22 +506,29 @@ public class BinarySerialiser { // NOPMD - omen est omen
         while ((fieldHeader = BinarySerialiser.getFieldHeader(buffer)) != null) {
             final long bytesToSkip = fieldHeader.getExpectedNumberOfDataBytes();
             final long skipPosition = buffer.position() + bytesToSkip;
-            fieldRoot.getChildren().add(fieldHeader);
+            fieldHeader.setParent(fieldRoot);
 
-            if (fieldHeader.getDataType().equals(DataType.END_MARKER)) {
-                // reached end of (sub-)class
-                // check marker value
+            // reached end of (sub-)class - check marker value and close nested hierarchy
+            if (fieldHeader.getDataType() == DataType.END_MARKER) {
+                // reached end of (sub-)class - check marker value and close nested hierarchy
                 final byte markerValue = buffer.getByte();
+                final Optional<FieldHeader> superParent = fieldRoot.getParent();
                 if (DataType.END_MARKER.getAsByte() != markerValue) {
                     throw new IllegalStateException("reached end marker, mismatched value '" + markerValue + "' vs. should '" + DataType.END_MARKER.getAsByte() + "'");
+                }
+
+                if (superParent.isEmpty()) {
+                    fieldRoot.getChildren().add(fieldHeader);
+                } else {
+                    superParent.get().getChildren().add(fieldHeader);
                 }
                 break;
             }
 
+            fieldRoot.getChildren().add(fieldHeader);
+
             if (bytesToSkip < 0) {
-                if (LOGGER.isWarnEnabled()) {
-                    LOGGER.atWarn().addArgument(fieldHeader.getFieldName()).addArgument(fieldHeader.getDataType()).addArgument(bytesToSkip).log("FieldHeader for '{}' type '{}' has bytesToSkip '{} <= 0'");
-                }
+                LOGGER.atWarn().addArgument(fieldHeader.getFieldName()).addArgument(fieldHeader.getDataType()).addArgument(bytesToSkip).log("FieldHeader for '{}' type '{}' has bytesToSkip '{} <= 0'");
 
                 // fall-back option in case of
                 swallowRest(buffer, fieldHeader);
@@ -533,7 +536,9 @@ public class BinarySerialiser { // NOPMD - omen est omen
                 buffer.position(skipPosition);
             }
 
-            if (fieldHeader.getDataType().equals(DataType.START_MARKER)) {
+            // detected sub-class start marker
+            // check marker value
+            if (fieldHeader.getDataType() == DataType.START_MARKER) {
                 buffer.position(fieldHeader.getDataBufferPosition());
                 // detected sub-class start marker
                 // check marker value
@@ -658,7 +663,7 @@ public class BinarySerialiser { // NOPMD - omen est omen
         if (clazz == null) {
             return;
         }
-        Enum<?>[] enumConsts = clazz.getEnumConstants();
+        final Enum<?>[] enumConsts = clazz.getEnumConstants();
         if (enumConsts == null) {
             return;
         }
@@ -978,9 +983,6 @@ public class BinarySerialiser { // NOPMD - omen est omen
             leftOver = BinarySerialiser.getEnumTypeList(readBuffer);
             break;
         case START_MARKER:
-            size = 1;
-            leftOver = BinarySerialiser.getByte(readBuffer);
-            break;
         case END_MARKER:
             size = 1;
             leftOver = BinarySerialiser.getByte(readBuffer);
@@ -993,9 +995,7 @@ public class BinarySerialiser { // NOPMD - omen est omen
             throw new IllegalStateException("read beyond buffer capacity, position = " + readBuffer.position() + " vs capacity = " + readBuffer.capacity());
         }
 
-        if (LOGGER.isTraceEnabled()) {
-            LOGGER.atTrace().addArgument(fieldHeader).addArgument(leftOver).addArgument(size).log("swallowed unused element '{}'='{}' size = {}");
-        }
+        LOGGER.atTrace().addArgument(fieldHeader).addArgument(leftOver).addArgument(size).log("swallowed unused element '{}'='{}' size = {}");
     }
 
     @Deprecated // to be refactored into generics helper class
@@ -1070,13 +1070,22 @@ public class BinarySerialiser { // NOPMD - omen est omen
         return doubleArray;
     }
 
-    public class HeaderInfo {
+    public class HeaderInfo extends FieldHeader {
         private final String producerName;
         private final byte versionMajor;
         private final byte versionMinor;
         private final byte versionMicro;
 
         private HeaderInfo(final String producer, final byte major, final byte minor, final byte micro) {
+            super(producer, DataType.START_MARKER, new int[] {}, -1, -1);
+            producerName = producer;
+            versionMajor = major;
+            versionMinor = minor;
+            versionMicro = micro;
+        }
+
+        private HeaderInfo(FieldHeader fieldHeader, final String producer, final byte major, final byte minor, final byte micro) {
+            super(fieldHeader.getFieldName(), fieldHeader.getDataType(), fieldHeader.getDataDimensions(), fieldHeader.getDataBufferPosition(), fieldHeader.getExpectedNumberOfDataBytes());
             producerName = producer;
             versionMajor = major;
             versionMinor = minor;
@@ -1121,8 +1130,7 @@ public class BinarySerialiser { // NOPMD - omen est omen
 
         @Override
         public String toString() {
-            return String.format("%s-v%d.%d.%d", getProducerName(), getVersionMajor(), getVersionMinor(),
-                    getVersionMicro());
+            return super.toString() + String.format(" serialiser: %s-v%d.%d.%d", getProducerName(), getVersionMajor(), getVersionMinor(), getVersionMicro());
         }
     }
 }
