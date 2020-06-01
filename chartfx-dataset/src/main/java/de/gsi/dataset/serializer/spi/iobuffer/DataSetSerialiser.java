@@ -238,11 +238,13 @@ public class DataSetSerialiser { // NOPMD
      */
     public static DataSet readDataSetFromByteArray(final IoBuffer readBuffer) { // NOPMD
         final DataSetBuilder builder = new DataSetBuilder();
-
+        final long initialPosition = readBuffer.position();
         final HeaderInfo bufferHeader = BinarySerialiser.checkHeaderInfo(readBuffer);
         LOGGER.atTrace().addArgument(bufferHeader).log("read header = {}");
 
+        readBuffer.position(initialPosition);
         FieldHeader fieldRoot = BinarySerialiser.parseIoStream(readBuffer);
+        fieldRoot = fieldRoot.getChildren().get(0); // N.B. old convention did not have a ROOT object
         // parsed until end of buffer
 
         parseHeaders(readBuffer, builder, fieldRoot.getChildren());

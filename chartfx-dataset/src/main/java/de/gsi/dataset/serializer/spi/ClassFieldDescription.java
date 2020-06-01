@@ -7,7 +7,6 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -23,7 +22,7 @@ import de.gsi.dataset.serializer.DataType;
 /**
  * @author rstein
  */
-public class ClassFieldDescription implements Iterable<ClassFieldDescription> {
+public class ClassFieldDescription {
     private static final Logger LOGGER = LoggerFactory.getLogger(ClassFieldDescription.class);
     private static final int WILDCARD_EXTENDS_LENGTH = "? extends ".length();
     /**
@@ -108,8 +107,7 @@ public class ClassFieldDescription implements Iterable<ClassFieldDescription> {
             classType = field.getType();
             fieldName = field.getName();
             if (this.parent.isPresent()) {
-                final String relativeName = this.parent.get().isRoot() ? ""
-                                                                       : (this.parent.get().getFieldNameRelative() + ".");
+                final String relativeName = this.parent.get().isRoot() ? "" : (this.parent.get().getFieldNameRelative() + ".");
                 fieldNameRelative = relativeName + fieldName;
             } else {
                 fieldNameRelative = fieldName;
@@ -177,21 +175,24 @@ public class ClassFieldDescription implements Iterable<ClassFieldDescription> {
         }
     }
 
-    protected Object allocateMemberClassField(final Object fieldParent, final ClassFieldDescription localParent)
+    public Object allocateMemberClassField(final Object fieldParent)
             throws IllegalAccessException {
         try {
-            // need to allocate new object
-            //            final Constructor<?> constr = getParent(this, 1).getType().getDeclaredConstructor(fieldParent.getClass());
-            //            final Object newFieldObj = constr.newInstance(fieldParent);
-            final Constructor<?> constr = getParent(this, 1).getType().getDeclaredConstructor();
-            final Object newFieldObj = constr.newInstance();
-            localParent.getField().set(fieldParent, newFieldObj);
+            // need to allocate new class object
+            Class<?> fieldParentClass = getParent(this, 1).getType();
+            final Object newFieldObj;
+            if (fieldParentClass.getDeclaringClass() == null) {
+                final Constructor<?> constr = fieldParentClass.getDeclaredConstructor();
+                newFieldObj = constr.newInstance();
+            } else {
+                final Constructor<?> constr = fieldParentClass.getDeclaredConstructor(fieldParent.getClass());
+                newFieldObj = constr.newInstance(fieldParent);
+            }
+            this.getField().set(fieldParent, newFieldObj);
 
             return newFieldObj;
         } catch (InstantiationException | InvocationTargetException | SecurityException | NoSuchMethodException e) {
-            if (LOGGER.isErrorEnabled()) {
-                LOGGER.atError().setCause(e).log("error initialising inner class object");
-            }
+            LOGGER.atError().setCause(e).log("error initialising inner class object");
         }
         return null;
     }
@@ -311,7 +312,9 @@ public class ClassFieldDescription implements Iterable<ClassFieldDescription> {
     /**
      * @param rootObject reference to the root object
      * @return the specific object link corresponding to this field
+     * @deprecated not needed anymore --- probably
      */
+    @Deprecated
     public Object getMemberClassObject(final Object rootObject) {
         if (rootObject == null) {
             throw new IllegalArgumentException("rootObject is null");
@@ -331,8 +334,11 @@ public class ClassFieldDescription implements Iterable<ClassFieldDescription> {
                 }
                 temp = localParent.getField().get(parent1);
                 if (temp == null) {
-                    temp = allocateMemberClassField(parent1, localParent);
+                    temp = localParent.allocateMemberClassField(parent1);
+                } else {
+                    return null;
                 }
+
                 if ((temp = localParent.getField().get(parent1)) == null) {
                     throw new IllegalStateException(
                             "could not allocate inner class object field = " + field.toString());
@@ -340,9 +346,7 @@ public class ClassFieldDescription implements Iterable<ClassFieldDescription> {
 
                 parent1 = temp;
             } catch (IllegalArgumentException | IllegalAccessException e) {
-                if (LOGGER.isErrorEnabled()) {
-                    LOGGER.atError().setCause(e).log("could not retrieve inner loop object for field '" + field.toString());
-                }
+                LOGGER.atError().setCause(e).log("could not retrieve inner loop object for field '" + field.toString());
             }
         }
         return temp;
@@ -525,11 +529,6 @@ public class ClassFieldDescription implements Iterable<ClassFieldDescription> {
         return modVolatile;
     }
 
-    @Override
-    public Iterator<ClassFieldDescription> iterator() {
-        return new ClassFieldDescriptionIterator<>(this);
-    }
-
     /**
      * @return the readCount
      */
@@ -633,8 +632,7 @@ public class ClassFieldDescription implements Iterable<ClassFieldDescription> {
             // dependency loops
             // (e.g. for classes with static references to themselves or
             // maps-of-maps-of-maps-....)
-            final boolean isClassAndNotObjectOrEnmum = field.isClass()
-                                                       && (!field.getType().equals(Object.class) || !field.getType().equals(Enum.class));
+            final boolean isClassAndNotObjectOrEnmum = field.isClass() && (!field.getType().equals(Object.class) || !field.getType().equals(Enum.class));
             if (field.isSerializable() && (isClassAndNotObjectOrEnmum || field.isInterface())
                     && field.getDataType().equals(DataType.OTHER)) {
                 // object is a (technically) Serializable, unknown (ie 'OTHER) compound object

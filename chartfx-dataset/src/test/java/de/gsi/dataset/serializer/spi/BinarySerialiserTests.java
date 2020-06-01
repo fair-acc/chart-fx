@@ -661,8 +661,6 @@ public class BinarySerialiserTests {
         buffer.reset();
 
         // and read back streamed items
-        final HeaderInfo bufferHeader = BinarySerialiser.checkHeaderInfo(buffer);
-        assertNotNull(bufferHeader);
         final FieldHeader objectRoot = BinarySerialiser.parseIoStream(buffer);
         assertNotNull(objectRoot);
 
