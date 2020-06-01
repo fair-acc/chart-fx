@@ -96,25 +96,11 @@ public class IoBufferSerialiser extends AbstractSerialiser {
     protected void deserialise(final Object obj, final FieldHeader fieldRoot, final ClassFieldDescription classFieldDescription, final int recursionDepth) throws IllegalAccessException {
         final String ioName = fieldRoot.getFieldName();
 
-        ClassFieldDescription firstMatchingField = null;
-
-        // TODO: check expression below (should be correct -> allows for multiple
-        // variables in hierarchy with same name)
-        // firstMatchingField = classFieldDescription.getChildren().stream()
-        // .filter(e -> e.getFieldName().equals(ioName)).findFirst().orElse(null);
-        for (final ClassFieldDescription field : classFieldDescription) {
-            if (field.getFieldName().equals(ioName)) {
-                firstMatchingField = field;
-                break;
-            }
-        }
-
-        if (firstMatchingField == null) {
+        if (!ioName.equals(classFieldDescription.getFieldName())) {
             // did not find matching (sub-)field in class
-            if (LOGGER.isTraceEnabled()) {
-                LOGGER.atTrace().addArgument(ioName).log("did not find matching field: '{}'");
+            if (fieldRoot.getChildren().isEmpty()) {
+                return;
             }
-
             // check for potential inner fields
             for (final FieldHeader fieldHeader : fieldRoot.getChildren()) {
                 final String fieldName = fieldHeader.getFieldName();
@@ -126,43 +112,43 @@ public class IoBufferSerialiser extends AbstractSerialiser {
             return;
         }
 
-        final Class<?> fieldClass = firstMatchingField.getType();
-        if (firstMatchingField.isFinal() && !fieldClass.isInterface()) {
+        final Class<?> fieldClass = classFieldDescription.getType();
+        if (classFieldDescription.isFinal() && !fieldClass.isInterface()) {
             // cannot set final variables
-            LOGGER.atWarn().addArgument(firstMatchingField.getFieldNameRelative()).log("cannot set final field '{}'");
+            LOGGER.atWarn().addArgument(classFieldDescription.getFieldNameRelative()).log("cannot set final field '{}'");
             return;
         }
 
-        // LOGGER.atInfo().addArgument(firstMatchingField.getFieldName()).log("found
-        // matching field: '{}'");
-
-        // final List<FieldSerialiser> serialiserList =
-        // this.knownClasses().get(fieldClass);
-        final Optional<FieldSerialiser> serialiser = findFieldSerialiserForKnownClassOrInterface(fieldClass,
-                firstMatchingField.getActualTypeArguments());
+        final Optional<FieldSerialiser> serialiser = findFieldSerialiserForKnownClassOrInterface(fieldClass, classFieldDescription.getActualTypeArguments());
 
         if (serialiser.isEmpty()) {
-            // no specific serialiser present
-            // check for potential inner fields
+            final Object ref = classFieldDescription.getField().get(obj);
+            final Object subRef;
+            if (ref == null) {
+                subRef = classFieldDescription.allocateMemberClassField(obj);
+            } else {
+                subRef = ref;
+            }
+
+            // no specific deserialiser present check for potential inner fields
             for (final FieldHeader fieldHeader : fieldRoot.getChildren()) {
                 final String fieldName = fieldHeader.getFieldName();
                 final Optional<ClassFieldDescription> subFieldDescription = classFieldDescription.getChildren().stream().filter(e -> e.getFieldName().equals(fieldName)).findFirst();
                 if (subFieldDescription.isPresent()) {
-                    deserialise(obj, fieldHeader, subFieldDescription.get(), recursionDepth + 1);
+                    deserialise(subRef, fieldHeader, subFieldDescription.get(), recursionDepth + 1);
                 }
             }
             return;
         }
 
         ioBuffer.position(fieldRoot.getDataBufferPosition());
-        if (serialiser.isPresent()) {
-            serialiser.get().getReaderFunction().exec(firstMatchingField.getMemberClassObject(obj), firstMatchingField);
-            return;
+        final Object fieldObjReference = classFieldDescription.getField().get(obj);
+        if (fieldObjReference == null) {
+            // allocate missing field
+            serialiser.get().getReaderFunction().exec(obj, classFieldDescription);
+        } else {
+            serialiser.get().getReaderFunction().exec(obj, classFieldDescription);
         }
-
-        // should not happen/reach here (because of 'serialiser.isEmpty()' above)
-        throw new IllegalStateException("should not happen -- cannot serialise field - "
-                                        + firstMatchingField.getFieldNameRelative() + " - class type = " + firstMatchingField.getTypeName());
     }
 
     @Override
@@ -171,17 +157,18 @@ public class IoBufferSerialiser extends AbstractSerialiser {
             throw new IllegalArgumentException("obj must not be null (yet)");
         }
 
+        final long startPosition = ioBuffer.position();
         final HeaderInfo bufferHeader = BinarySerialiser.checkHeaderInfo(ioBuffer);
-        if (LOGGER.isTraceEnabled()) {
-            LOGGER.atTrace().addArgument(bufferHeader).log("read header = {}");
-        }
 
         // match field header with class field description
         final ClassFieldDescription classFieldDescription = ClassDescriptions.get(obj.getClass());
 
+        ioBuffer.position(startPosition);
         final FieldHeader fieldRoot = BinarySerialiser.parseIoStream(ioBuffer);
         // deserialise into object
-        deserialise(obj, fieldRoot, classFieldDescription, 0);
+        for (final FieldHeader child : fieldRoot.getChildren()) {
+            deserialise(obj, child, classFieldDescription, 0);
+        }
 
         return obj;
     }
