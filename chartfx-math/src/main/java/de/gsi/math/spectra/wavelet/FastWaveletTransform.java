@@ -1,5 +1,8 @@
 package de.gsi.math.spectra.wavelet;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /************************
  * This is a very fast implementation of the Fast Wavelet Transform. It uses in-place computations for less memory
  * usage. Data length should be a power of 2 a be at least of length 8. Handles boundaries by assuming periodicity.
@@ -7,34 +10,33 @@ package de.gsi.math.spectra.wavelet;
  * 
  * @author Daniel Lemire
  *************************/
-public final class FastWaveletTransform {
-
+public final class FastWaveletTransform { // NOPMD - nomen est omen
+    private static final Logger LOGGER = LoggerFactory.getLogger(FastWaveletTransform.class);
     static final double[] scale = { 0.0322231006040782f, -0.0126039672622638f, -0.0992195435769564f, 0.297857795605605f,
-            0.803738751805386f, 0.497618667632563f, -0.0296355276459604f, -0.0757657147893567f };
+        0.803738751805386f, 0.497618667632563f, -0.0296355276459604f, -0.0757657147893567f };
+    static final double[] wavelet = { -scale[7], scale[6], -scale[5], scale[4], -scale[3], scale[2], -scale[1], scale[0] };
 
-    static final double[] wavelet = { -scale[7], scale[6], -scale[5], scale[4], -scale[3], scale[2], -scale[1],
-            scale[0] };
-
-    public FastWaveletTransform() {
+    private FastWaveletTransform() {
+        // utilityClass
     }
 
-    public void invTransform(final double[] v) {
+    public static void invTransform(final double[] v) {
         int last;
         for (last = 8; 2 * last <= v.length; last *= 2) {
             invTransform(v, last);
         }
         if (last != v.length) {
-            System.err.println("Careful! this should be a power of 2 : " + v.length);
+            LOGGER.atWarn().addArgument(v.length).log("Careful! this should be a power of 2 : {}");
         }
     }
 
-    public void transform(final double[] v) {
+    public static void transform(final double[] v) {
         int last;
         for (last = v.length; last > 8; last /= 2) {
             transform(v, last);
         }
         if (last != 8) {
-            System.err.println("Careful! this should be a power of 2 : " + v.length);
+            LOGGER.atWarn().addArgument(v.length).log("Careful! this should be a power of 2 : {}");
         }
     }
 
@@ -43,13 +45,12 @@ public final class FastWaveletTransform {
         final double[] ans = new double[ResultingLength];
         try {
             for (int k = 0; k < v.length / 2 - scale.length; k++) {
-                // System.err.println(" got " + k + " till " + (v.length/2 - scale.length));
                 for (int i = wavelet.length - 1; i >= 0; i--) {
                     ans[2 * k + i] += scale[i] * v[k] + wavelet[i] * v[k + n];
                 }
             }
         } catch (final IndexOutOfBoundsException e) {
-            System.err.println("exception " + n + "  message " + e.getLocalizedMessage());
+            LOGGER.atWarn().addArgument(n).setCause(e).log("exception {}  message:");
         }
 
         ans[ResultingLength - 6] += scale[0] * v[n - 3] + wavelet[0] * v[ResultingLength - 3];
@@ -85,9 +86,8 @@ public final class FastWaveletTransform {
     public static int mirror(final int i, final int n) {
         if (i < n) {
             return i;
-        } else {
-            return 2 * n - i;
         }
+        return 2 * n - i;
     }
 
     public static void transform(final double[] data, final int n) {
@@ -104,7 +104,7 @@ public final class FastWaveletTransform {
                 }
             }
         } catch (final IndexOutOfBoundsException e) {
-            System.err.println("exception " + n + "  message " + e.getLocalizedMessage());
+            LOGGER.atWarn().addArgument(n).setCause(e).log("exception {}  message:");
         }
 
         /*
