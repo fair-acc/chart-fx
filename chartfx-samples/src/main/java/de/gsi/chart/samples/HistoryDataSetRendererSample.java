@@ -38,12 +38,12 @@ public class HistoryDataSetRendererSample extends Application {
     private static final int UPDATE_PERIOD = 100; // [ms]
     private Timer timer;
     private double updateIteration;
+    private final DoubleErrorDataSet dataSet = new DoubleErrorDataSet("TestData",
+            HistoryDataSetRendererSample.N_SAMPLES);
+    private final DoubleDataSet dataSetNoError = new DoubleDataSet("TestDataNoErrors",
+            HistoryDataSetRendererSample.N_SAMPLES);
 
     private void generateData(final XYChart chart) {
-        final DoubleErrorDataSet dataSet = new DoubleErrorDataSet("TestData", HistoryDataSetRendererSample.N_SAMPLES);
-        final DoubleDataSet dataSetNoError = new DoubleDataSet("TestDataNoErrors",
-                HistoryDataSetRendererSample.N_SAMPLES);
-
         long startTime = ProcessingProfiler.getTimeStamp();
 
         dataSetNoError.lock().writeLockGuard(() -> dataSet.lock().writeLockGuard(() -> {
@@ -64,7 +64,8 @@ public class HistoryDataSetRendererSample extends Application {
                 // dataSet.set(n, x, Math.exp(1e-4*x), 1e-3, 1e-3);
                 // dataSetNoError.set(n, x, Math.exp(2e-4*x));
             }
-            dataSetNoError.setStyle("dsIndex=1;");
+
+            // dataSetNoError.setStyle("dsIndex=1;");
             // dataSet.setStyle("strokeColor=red;");
             // dataSet.setStyle("dsIndex=2;");
 
@@ -72,8 +73,6 @@ public class HistoryDataSetRendererSample extends Application {
         }));
 
         Platform.runLater(() -> {
-            dataSet.fireInvalidated(null);
-            dataSetNoError.fireInvalidated(null);
             chart.requestLayout();
             final ObservableList<Renderer> rendererList = chart.getRenderers();
             for (final Renderer rend : rendererList) {
@@ -86,8 +85,6 @@ public class HistoryDataSetRendererSample extends Application {
             // preferred method (final ie. data set attached final to renderer
             // rendererList.get(0).getDatasets().setAll(dataSet,
             // dataSetNoError);
-            rendererList.get(0).getDatasets().setAll(dataSet);
-            rendererList.get(1).getDatasets().setAll(dataSetNoError);
             // chart.getDatasets().setAll(dataSet, dataSetNoError);
             // chart.getDatasets().setAll(dataSet, dataSetNoError);
         });
@@ -103,7 +100,7 @@ public class HistoryDataSetRendererSample extends Application {
                 generateData(chart);
 
                 if (updateCount % 100 == 0) {
-                    LOGGER.atInfo().log("update iteration #" + updateCount);
+                    LOGGER.atInfo().addArgument(updateCount).log("update iteration #{}");
                 }
                 updateCount++;
             }
@@ -139,6 +136,9 @@ public class HistoryDataSetRendererSample extends Application {
         historyRenderer2.getAxes().add(yAxis2);
         chart.getRenderers().add(historyRenderer2);
         historyRenderer2.setIntensityFading(0.8); // default: 0.65
+
+        chart.getRenderers().get(0).getDatasets().setAll(dataSet);
+        historyRenderer2.getDatasets().setAll(dataSetNoError);
 
         chart.getPlugins().add(new Zoomer());
         chart.getPlugins().add(new EditAxis());
