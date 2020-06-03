@@ -1,5 +1,8 @@
 package de.gsi.math.samples;
 
+import javafx.application.Application;
+import javafx.scene.Node;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -7,12 +10,11 @@ import de.gsi.dataset.DataSet;
 import de.gsi.dataset.spi.DefaultDataSet;
 import de.gsi.dataset.spi.DefaultErrorDataSet;
 import de.gsi.math.TMath;
+import de.gsi.math.TMathConstants;
 import de.gsi.math.fitter.NonLinearRegressionFitter;
 import de.gsi.math.functions.AbstractFunction1D;
 import de.gsi.math.samples.utils.AbstractDemoApplication;
 import de.gsi.math.samples.utils.DemoChart;
-import javafx.application.Application;
-import javafx.scene.Node;
 
 /**
  * example illustrating fitting of a Gaussian Distribution
@@ -52,7 +54,7 @@ public class GaussianFitSample extends AbstractDemoApplication {
         for (int i = 0; i < xValues.length; i++) {
             final double error = 0.5 * RANDOM.nextGaussian();
             xValues[i] = (i - xValues.length / 2.0) * 30.0 / MAX_POINTS; // equidistant
-                                                                         // sampling
+                    // sampling
 
             final double value = func.getValue(xValues[i]);
             // add some slope and offset to make the fit a bit more tricky
@@ -66,7 +68,6 @@ public class GaussianFitSample extends AbstractDemoApplication {
             yModel[i] = value;
             yValues[i] = value + error;
             yErrors[i] = Math.abs(error);
-
         }
 
         final NonLinearRegressionFitter fitter = new NonLinearRegressionFitter(xValues, yValues, yErrors);
@@ -102,8 +103,7 @@ public class GaussianFitSample extends AbstractDemoApplication {
 
         LOGGER.atInfo().log("fit results chi^2 =" + fitter.getChiSquare() + ":");
         for (int i = 0; i < 3; i++) {
-            LOGGER.atInfo().log("fitted-parameter  '%s' = %f -> %f +- %f\n", func.getParameterName(i), start[i],
-                    fittedParameter[i], fittedParameterError[i]);
+            LOGGER.atInfo().addArgument(func.getParameterName(i)).addArgument(start[i]).addArgument(fittedParameter[i]).addArgument(fittedParameterError[i]).log("fitted-parameter  '{}' = {} -> {} +- {}");
         }
 
         fmodel = new DefaultDataSet("design model", xValues, yModel, xValues.length, true);
@@ -113,11 +113,12 @@ public class GaussianFitSample extends AbstractDemoApplication {
                 xValues.length, true);
 
         // plot fitting results
-        /*
-         * for (int i=0; i < func.getParameterCount(); i++) { LOGGER.atInfo().log("fitted parameter '%s': %f +- %f\n",
-         * func.getParameterName(i), func.getParameterValue(i),
-         * 0.5*(func.getParameterRangeMaximum(i)-func.getParameterRangeMinimum(i ))); }
-         */
+        // for (int i = 0; i < func.getParameterCount(); i++) {
+        //     LOGGER.atInfo().addArgument(func.getParameterName(i)) //
+        //             .addArgument(func.getParameterValue(i)) //
+        //             .addArgument(0.5 * (func.getParameterRangeMaximum(i) - func.getParameterRangeMinimum(i))) //
+        //             .log("fitted parameter '{}': {} +- {}"); //
+        // }
     }
 
     public static void main(final String[] args) {
@@ -128,7 +129,6 @@ public class GaussianFitSample extends AbstractDemoApplication {
      * example fitting function y = scale/(sqrt(2*pi*sigma)*exp(- 0.5*(x-mu)^2/sigma^2)
      */
     protected class MyGaussianFunction extends AbstractFunction1D {
-
         public MyGaussianFunction(final String name, final double[] parameter) {
             super(name, new double[3]);
             // declare parameter names
@@ -145,7 +145,7 @@ public class GaussianFitSample extends AbstractDemoApplication {
             }
 
             // assign default values
-            final int maxIndex = TMath.Min(parameter.length, this.getParameterCount());
+            final int maxIndex = TMathConstants.Min(parameter.length, this.getParameterCount());
             for (int i = 0; i < maxIndex; i++) {
                 setParameterValue(i, parameter[i]);
             }
@@ -157,8 +157,7 @@ public class GaussianFitSample extends AbstractDemoApplication {
             final double sigma = fparameter[1];
             final double scale = fparameter[2];
 
-            return scale * 1.0 / (Math.sqrt(TMath.TwoPi()) * sigma) * Math.exp(-0.5 * Math.pow((x - mu) / sigma, 2));
+            return scale * 1.0 / (Math.sqrt(TMathConstants.TwoPi()) * sigma) * Math.exp(-0.5 * Math.pow((x - mu) / sigma, 2));
         }
     }
-
 }

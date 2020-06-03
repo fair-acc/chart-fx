@@ -34,6 +34,7 @@ import de.gsi.dataset.DataSet;
 import de.gsi.dataset.DataSetMetaData;
 import de.gsi.dataset.spi.DataSetBuilder;
 import de.gsi.dataset.spi.MultiDimDoubleDataSet;
+import de.gsi.dataset.spi.TransposedDataSet;
 import de.gsi.math.TMathConstants;
 import de.gsi.math.samples.utils.AbstractDemoApplication;
 import de.gsi.math.spectra.Apodization;
@@ -139,7 +140,7 @@ public class ShortTimeFourierTransformSample extends AbstractDemoApplication {
         chart1.getPlugins().add(new UpdateAxisLabels());
         chart1.getPlugins().add(new Zoomer());
         chart1.getPlugins().add(new EditAxis());
-        chart1.getDatasets().add(stftData);
+        chart1.getDatasets().add(TransposedDataSet.transpose(stftData, true));
 
         rawData.addListener(evt -> wavelet(rawData, waveletData));
         // Wavelet Transform Chart
@@ -239,7 +240,7 @@ public class ShortTimeFourierTransformSample extends AbstractDemoApplication {
         gridPane.addRow(0, new Label("n_FFT"), nFFT, new Label("[samples]"));
         nFFT.setEditable(true);
         gridPane.addRow(1, new Label("step"), step, new Label("[samples]"));
-        nSamples.setEditable(true);
+        step.setEditable(true);
         apodizationWindow.setValue(Apodization.Hann);
         gridPane.addRow(2, new Label("window function"), apodizationWindow, new Label(""));
         padding.setValue(Padding.ZERO);

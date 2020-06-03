@@ -4,14 +4,6 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import de.gsi.chart.XYChart;
-import de.gsi.chart.renderer.spi.ErrorDataSetRenderer;
-import de.gsi.dataset.testdata.spi.CosineFunction;
-import de.gsi.dataset.testdata.spi.GaussFunction;
-import de.gsi.dataset.testdata.spi.RandomWalkFunction;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -23,14 +15,18 @@ import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.stage.Stage;
 
+import de.gsi.chart.XYChart;
+import de.gsi.chart.renderer.spi.ErrorDataSetRenderer;
+import de.gsi.dataset.testdata.spi.CosineFunction;
+import de.gsi.dataset.testdata.spi.GaussFunction;
+import de.gsi.dataset.testdata.spi.RandomWalkFunction;
+
 /**
  * Example on how to use chart-fx from fxml.
  * 
  * @author Alexander Krimm
  */
 public class FxmlSample extends Application implements Initializable {
-    private static final Logger LOGGER = LoggerFactory.getLogger(SimpleChartSample.class);
-
     private static final int N_SAMPLES = 500;
 
     @FXML
