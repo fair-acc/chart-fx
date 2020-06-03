@@ -207,7 +207,8 @@ public class TransposedDataSetTest {
         assertThrows(IllegalArgumentException.class, () -> datasetPermuted.setPermutation(new int[] { 2, 1, 0 }));
         assertThrows(IllegalArgumentException.class, () -> TransposedDataSet.permute(dataset, new int[] { 2, 0, 1 }));
         // check empty 3D data set
-        TransposedDataSet emptyTransposedDataSet = TransposedDataSet.transpose(new DoubleDataSet3D("empty", new double[0], new double[0], new double[0][0]));
+        TransposedDataSet emptyTransposedDataSet = TransposedDataSet
+                                                           .transpose(new DoubleDataSet3D("empty", new double[0], new double[0], new double[0][0]));
         assertEquals("empty", emptyTransposedDataSet.getName());
         assertEquals(0, emptyTransposedDataSet.getDataCount());
         assertEquals(0, emptyTransposedDataSet.getDataCount(DIM_Y));
@@ -218,7 +219,7 @@ public class TransposedDataSetTest {
     }
 
     @Test
-    public void testWithMultiDimDataSet() {
+    public void testWithMultiDimDataSetGrid() {
         // generate 3D dataset
         final double[] xvalues = new double[] { 1, 2, 3, 4 };
         final double[] yvalues = new double[] { -3, -2, -0, 2, 4 };
@@ -300,6 +301,55 @@ public class TransposedDataSetTest {
         assertThrows(IndexOutOfBoundsException.class, () -> datasetTransposed.setPermutation(new int[] { 0, 1, 3 }));
         assertThrows(IllegalArgumentException.class, () -> datasetTransposed.setPermutation(new int[] { 0, 2, 1 }));
         assertThrows(IllegalArgumentException.class, () -> datasetTransposed.setPermutation(null));
+    }
+
+    @Test
+    public void testWithMultiDimDataSet() {
+        // generate 3D dataset
+        final double[] xvalues = new double[] { 1, 2, 3, 4, 5, 6 };
+        final double[] yvalues = new double[] { -3, -2, -0, 2, 4, 5 };
+        final double[] zvalues = new double[] { 2, 4, 6, 8, 10, 12 };
+        final MultiDimDoubleDataSet dataset = new DataSetBuilder("testdataset") //
+                                                      .setValuesNoCopy(DIM_X, xvalues) //
+                                                      .setValuesNoCopy(DIM_Y, yvalues) //
+                                                      .setValuesNoCopy(DIM_Z, zvalues) //
+                                                      .build(MultiDimDoubleDataSet.class);
+        // transpose dataset and test indexing
+        TransposedDataSet datasetTransposed = TransposedDataSet.transpose(dataset);
+        assertEquals(-1, datasetTransposed.grid);
+        assertEquals("testdataset", datasetTransposed.getName());
+        assertEquals(6, datasetTransposed.getDataCount());
+        assertEquals(6, datasetTransposed.getDataCount(DIM_Y));
+        assertEquals(6, datasetTransposed.getDataCount(DIM_X));
+        assertEquals(6, datasetTransposed.getDataCount(DIM_Z));
+        assertEquals(dataset.get(DIM_Z, 5), datasetTransposed.get(DIM_Z, 5));
+        assertEquals(dataset.get(DIM_Z, 4), datasetTransposed.get(DIM_Z, 4));
+        assertEquals(dataset.get(DIM_Z, 2), datasetTransposed.get(DIM_Z, 2));
+        assertEquals(dataset.get(DIM_X, 3), datasetTransposed.get(DIM_Y, 3));
+        assertEquals(dataset.get(DIM_Y, 4), datasetTransposed.get(DIM_X, 4));
+        assertEquals(dataset.getIndex(DIM_X, 3.9), datasetTransposed.getIndex(DIM_Y, 3.9));
+        assertEquals(dataset.getIndex(DIM_Y, -0.5), datasetTransposed.getIndex(DIM_X, -0.5));
+        assertEquals(dataset.getIndex(DIM_X, -1000), datasetTransposed.getIndex(DIM_Y, -1000));
+        assertEquals(dataset.getIndex(DIM_X, 1000), datasetTransposed.getIndex(DIM_Y, 1000));
+
+        assertArrayEquals(dataset.getValues(DIM_X),
+                trimArray(datasetTransposed.getValues(DIM_Y), datasetTransposed.getDataCount(DIM_Y)));
+        assertArrayEquals(dataset.getValues(DIM_Y),
+                trimArray(datasetTransposed.getValues(DIM_X), datasetTransposed.getDataCount(DIM_X)));
+        assertArrayEquals(dataset.getValues(DIM_Z),
+                trimArray(datasetTransposed.getValues(DIM_Z), datasetTransposed.getDataCount(DIM_Z))); //
+
+        assertEquals(dataset.getValue(DIM_X, 1.9), datasetTransposed.getValue(DIM_Y, 1.9));
+        assertEquals(dataset.getValue(DIM_Y, 0.1), datasetTransposed.getValue(DIM_X, 0.1));
+
+        assertDoesNotThrow(() -> datasetTransposed.recomputeLimits(DIM_X));
+        assertDoesNotThrow(() -> datasetTransposed.recomputeLimits(DIM_Y));
+        assertDoesNotThrow(() -> datasetTransposed.recomputeLimits(DIM_Z));
+        assertThrows(IndexOutOfBoundsException.class, () -> datasetTransposed.recomputeLimits(3));
+
+        // change to grid data dynamically
+        assertDoesNotThrow(() -> dataset.set(new double[][] { { 1, 2 }, { 3, 4 }, { 9, 8, 7, 6 } }));
+        assertEquals(2, datasetTransposed.grid);
     }
 
     private static double[] transposeArray(double[] data, int nx) {
