@@ -46,13 +46,8 @@ public class TransposedDataSet implements DataSet {
             permutation[0] = 1;
             permutation[1] = 0;
         }
-        // TODO: Evaluate if the data should be interpreted as on a grid, to be replaced by GridApi
-        for (int i = dataSet.getDimension() - 1; i >= 0; i--) {
-            if (dataSet.getDataCount(i) != dataSet.getDataCount()) {
-                grid = i + 1;
-                break;
-            }
-        }
+        evaluateGridType();
+        dataSet.addListener(event -> evaluateGridType());
     }
 
     private TransposedDataSet(final DataSet dataSet, final int[] permutation) {
@@ -73,6 +68,18 @@ public class TransposedDataSet implements DataSet {
         this.nDims = permutation.length;
         this.permutation = Arrays.copyOf(permutation, this.dataSet.getDimension());
         this.transposed = false;
+        evaluateGridType();
+        dataSet.addListener(event -> evaluateGridType());
+    }
+
+    private void evaluateGridType() {
+        // TODO: Evaluate if the data should be interpreted as on a grid, to be replaced by GridApi
+        for (int i = dataSet.getDimension() - 1; i >= 0; i--) {
+            if (dataSet.getDataCount(i) != dataSet.getDataCount()) {
+                grid = i + 1;
+                break;
+            }
+        }
     }
 
     @Override
@@ -192,13 +199,7 @@ public class TransposedDataSet implements DataSet {
 
     @Override
     public DataSet recomputeLimits(int dimension) {
-        // TODO: Evaluate if the data should be interpreted as on a grid, to be replaced by GridApi
-        for (int i = dataSet.getDimension() - 1; i >= 0; i--) {
-            if (dataSet.getDataCount(i) != dataSet.getDataCount()) {
-                grid = i + 1;
-                break;
-            }
-        }
+        evaluateGridType();
         return dataSet.recomputeLimits(permutation[dimension]);
     }
 
