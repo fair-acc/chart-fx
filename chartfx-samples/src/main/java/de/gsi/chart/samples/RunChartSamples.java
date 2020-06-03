@@ -49,6 +49,7 @@ public class RunChartSamples extends Application {
         buttons.getChildren().add(new MyButton("CustomColourSchemeSample", new CustomColourSchemeSample()));
         buttons.getChildren().add(new MyButton("CustomFragmentedRendererSample", new CustomFragmentedRendererSample()));
         buttons.getChildren().add(new MyButton("DataViewerSample", new DataViewerSample()));
+        buttons.getChildren().add(new MyButton("DimReductionDataSetSample", new DimReductionDataSetSample()));
         buttons.getChildren().add(new MyButton("EditDataSetSample", new EditDataSetSample()));
         buttons.getChildren().add(new MyButton("ErrorDataSetRendererSample", new ErrorDataSetRendererSample()));
         buttons.getChildren()
@@ -65,6 +66,7 @@ public class RunChartSamples extends Application {
         buttons.getChildren().add(new MyButton("MountainRangeRendererSample", new MountainRangeRendererSample()));
         buttons.getChildren().add(new MyButton("MultipleAxesSample", new MultipleAxesSample()));
         buttons.getChildren().add(new MyButton("NotANumberSample", new NotANumberSample()));
+        buttons.getChildren().add(new MyButton("OscilloscopeAxisSample", new OscilloscopeAxisSample()));
         buttons.getChildren().add(new MyButton("PolarPlotSample", new PolarPlotSample()));
         buttons.getChildren().add(new MyButton("RollingBufferSample", new RollingBufferSample()));
         buttons.getChildren().add(new MyButton("RollingBufferSortedTreeSample", new RollingBufferSortedTreeSample()));

@@ -21,7 +21,7 @@ import de.gsi.dataset.utils.ProcessingProfiler;
 public class TimeAxisSample extends Application {
     private static final int N_SAMPLES = 10_000; // default: 10000
 
-    private void generateData(final DefaultErrorDataSet dataSet) {
+    private static void generateData(final DefaultErrorDataSet dataSet) {
         final long startTime = ProcessingProfiler.getTimeStamp();
 
         dataSet.autoNotification().set(false);

@@ -137,13 +137,13 @@ public class WriteDataSetToFileSample extends Application {
         // screenCapture.stop();
     }
 
-    private static DoubleDataSet getDemoDataSet(final long now, final boolean isSine) {
-        final DoubleDataSet dataSet = new DoubleDataSet((isSine ? "sine" : "cosine") + "data set #1 @t=" + now);
+    private static DoubleDataSet getDemoDataSet(final long timestamp, final boolean isSine) {
+        final DoubleDataSet dataSet = new DoubleDataSet((isSine ? "sine" : "cosine") + "data set #1 @t=" + timestamp);
 
         final double[] xValues = new double[N_SAMPLES];
         final double[] yValues = new double[N_SAMPLES];
         for (int n = 0; n < N_SAMPLES; n++) {
-            final double phase = Math.toRadians((10.0 * n) + (now / 1000.0));
+            final double phase = Math.toRadians((10.0 * n) + (timestamp / 1000.0));
             xValues[n] = n;
             yValues[n] = isSine ? Math.sin(phase) : Math.cos(phase);
         }

@@ -130,12 +130,12 @@ public class TransposedDataSetSample extends Application {
     }
 
     private static DataSet createTestData() {
-        final int nPoints = 1000;
+        final int nPoints = 300;
         final double f = 0.1;
         final double[] x = new double[nPoints];
         final double[] y = new double[2 * nPoints];
         for (int i = 0; i < x.length; i++) {
-            final double val = (i / (double) x.length - 0.5) * 10;
+            final double val = (i / (double) x.length + 0.5) * 10;
             x[i] = val;
         }
         for (int i = 0; i < y.length; i++) {
@@ -151,7 +151,7 @@ public class TransposedDataSetSample extends Application {
                 // } else {
                 // z[xIndex][yIndex] = 1000.0;
                 // }
-                z[yIndex][xIndex] = Math.sin(5.0 * Math.PI * f * x[xIndex]) * Math.cos(2.0 * Math.PI * f * y[yIndex]);
+                z[yIndex][xIndex] = (x[xIndex]) * (y[yIndex] - 3) * Math.sin(5.0 * Math.PI * f * x[xIndex]) * Math.cos(2.0 * Math.PI * f * y[yIndex]);
             }
         }
 

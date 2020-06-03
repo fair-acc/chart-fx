@@ -59,7 +59,7 @@ public class DimReductionDataSetSample extends Application {
         DimReductionDataSet horizontalRange = new DimReductionDataSet(waveletScalogram, DataSet.DIM_Y, Option.MEAN);
         XValueIndicator xRangeIndicatorMin = new XValueIndicator(waveletChart1.getXAxis(), 0.0);
         XValueIndicator xRangeIndicatorMax = new XValueIndicator(waveletChart1.getXAxis(), 0.0);
-        XRangeIndicator xRangeIndicator = new XRangeIndicator(waveletChart1.getXAxis(), 0.0, 0.0, "range-x");
+        XRangeIndicator xRangeIndicator = new XRangeIndicator(waveletChart1.getXAxis(), 0.0, 0.0, "range-y");
         xRangeIndicator.setLabelVerticalAnchor(VPos.TOP);
         xRangeIndicator.setLabelVerticalPosition(1.0);
         xRangeIndicator.lowerBoundProperty().bindBidirectional(xRangeIndicatorMin.valueProperty());
@@ -76,7 +76,7 @@ public class DimReductionDataSetSample extends Application {
 
         // reduce wavelet data set to 2D by using slices
         DimReductionDataSet verticalSlice = new DimReductionDataSet(waveletScalogram, DataSet.DIM_X, Option.SLICE);
-        YValueIndicator yValueIndicator = new YValueIndicator(waveletChart1.getYAxis(), 0.0, "slice-x");
+        YValueIndicator yValueIndicator = new YValueIndicator(waveletChart2.getYAxis(), 0.0, "slice-x");
         yValueIndicator.valueProperty().addListener((ch, o, n) -> verticalSlice.setMinValue(n.doubleValue()));
         yValueIndicator.setValue(0.26);
         verticalSlice.setMinValue(0.1);
@@ -84,9 +84,9 @@ public class DimReductionDataSetSample extends Application {
 
         // reduce wavelet data set to 2D by integrating over range
         DimReductionDataSet verticalRange = new DimReductionDataSet(waveletScalogram, DataSet.DIM_X, Option.MEAN);
-        YValueIndicator yRangeIndicatorMin = new YValueIndicator(waveletChart1.getYAxis(), 0.0);
-        YValueIndicator yRangeIndicatorMax = new YValueIndicator(waveletChart1.getYAxis(), 0.0);
-        YRangeIndicator yRangeIndicator = new YRangeIndicator(waveletChart1.getYAxis(), 0.0, 0.0, "range-y");
+        YValueIndicator yRangeIndicatorMin = new YValueIndicator(waveletChart2.getYAxis(), 0.0);
+        YValueIndicator yRangeIndicatorMax = new YValueIndicator(waveletChart2.getYAxis(), 0.0);
+        YRangeIndicator yRangeIndicator = new YRangeIndicator(waveletChart2.getYAxis(), 0.0, 0.0, "range-x");
         yRangeIndicator.setLabelHorizontalAnchor(HPos.RIGHT);
         yRangeIndicator.setLabelHorizontalPosition(1.0);
         yRangeIndicator.lowerBoundProperty().bindBidirectional(yRangeIndicatorMin.valueProperty());

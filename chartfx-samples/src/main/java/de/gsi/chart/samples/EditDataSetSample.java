@@ -18,7 +18,6 @@ import de.gsi.chart.plugins.UpdateAxisLabels;
 import de.gsi.chart.plugins.Zoomer;
 import de.gsi.chart.renderer.Renderer;
 import de.gsi.chart.renderer.spi.ErrorDataSetRenderer;
-import de.gsi.dataset.DataSet;
 import de.gsi.dataset.EditConstraints;
 import de.gsi.dataset.spi.DoubleDataSet;
 

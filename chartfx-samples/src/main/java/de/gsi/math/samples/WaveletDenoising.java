@@ -93,7 +93,6 @@ public class WaveletDenoising extends AbstractDemoApplication {
         }
 
         final CDFWavelet wvTrafo1 = new CDFWavelet();
-        final FastWaveletTransform wvTrafo3 = new FastWaveletTransform();
         final boolean trafo1 = false;
 
         final double[] ySmooth = Arrays.copyOf(yValues, yValues.length);
@@ -105,9 +104,9 @@ public class WaveletDenoising extends AbstractDemoApplication {
         } else {
             // wvTrafo1.fwt53(ySmooth, ySmooth.length);
             // wvTrafo1.fwt53(ySModel, ySModel.length);
-            wvTrafo3.transform(ySmooth);
+            FastWaveletTransform.transform(ySmooth);
             // wvTrafo3.daubTrans(ySModel);
-            wvTrafo3.transform(ySModel);
+            FastWaveletTransform.transform(ySModel);
         }
 
         final double[] recon = Arrays.copyOf(ySmooth, yValues.length);
@@ -175,19 +174,21 @@ public class WaveletDenoising extends AbstractDemoApplication {
             wvTrafo1.iwt97(recon, recon.length);
         } else {
             // wvTrafo1.iwt53(recon, recon.length);
-            wvTrafo3.invTransform(recon);
+            FastWaveletTransform.invTransform(recon);
         }
 
         final double[] diff1 = TMath.Difference(yValues, yModel);
         final double error1 = diff1 == null ? 0.0 : TMath.RMS(diff1);
         final double[] diff2 = TMath.Difference(recon, yModel);
         final double error2 = diff2 == null ? 0.0 : TMath.RMS(diff2);
-        if (error1 > error2) {
-            LOGGER.atInfo().log("improved noise floor from %f \t-> %f \t(%f %%)\n", error1, error2,
-                    (error1 - error2) / error1 * 100);
+        if (error1 > error2 && error1 != 0.0) {
+            LOGGER.atInfo().addArgument(error1).addArgument(error2).addArgument((error1 - error2) / error1 * 100) //
+                    .log("improved noise floor from {} \t-> {} \t({}%)");
+        } else if (error1 != 0.0) {
+            LOGGER.atInfo().addArgument(error1).addArgument(error2).addArgument((error1 - error2) / error1 * 100) //
+                    .log("deteriorated noise floor from {} \t-> {} \\t({}%)");
         } else {
-            LOGGER.atInfo().log("deteriorated noise floor from %f \t-> %f \t(%f %%)\n", error1, error2,
-                    (error1 - error2) / error1 * 100);
+            LOGGER.atInfo().addArgument(error1).addArgument(error2).log("changed noise floor from {} \\t-> {}");
         }
 
         fdata = new DefaultDataSet("model ", xValues, yModel, xValues.length, true);
@@ -195,7 +196,7 @@ public class WaveletDenoising extends AbstractDemoApplication {
         freconstructed = new DefaultDataSet("reconstructed", xValues, recon, xValues.length, true);
     }
 
-    private double[][] readDemoData() {
+    private static double[][] readDemoData() {
         final String fileName = "./BBQSpectra.dat";
         try (BufferedReader reader = new BufferedReader(
                      new InputStreamReader(WaveletScalogram.class.getResourceAsStream(fileName)))) {

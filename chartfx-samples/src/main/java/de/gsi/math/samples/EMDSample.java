@@ -27,7 +27,7 @@ import de.gsi.math.spectra.EEMD;
  * @author rstein TODO: some fixes in EMD necessary
  */
 public class EMDSample extends AbstractDemoApplication {
-    private static final Logger LOGGER = LoggerFactory.getLogger(FourierSample.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(EMDSample.class);
     private static final int MAX_POINTS = 1024;
     private static final boolean LOAD_EXAMPLE_DATA = true;
     private DataSet dataset;
@@ -54,7 +54,7 @@ public class EMDSample extends AbstractDemoApplication {
                 sleep(100);
                 int status = trafoHHT.getStatus();
                 if (status > 10) {
-                    LOGGER.atInfo().log(status + " % of computation done");
+                    LOGGER.atInfo().addArgument(status).log("{}% of computation done");
                 }
             } while (trafoHHT.isBusy());
         } catch (Exception e) {
@@ -82,8 +82,9 @@ public class EMDSample extends AbstractDemoApplication {
                 for (int j = 0; j < fmodeData[nmode].length; j++) {
                     fmodeData[nmode][j] = emd.get(j, nmode) - 5 * nmode;
                 }
-                LOGGER.atInfo().log("%s mean = %f\n", name,
-                        (TMath.Mean(fmodeData[nmode]) + 2 * nmode) / TMath.PeakToPeak(fmodeData[nmode]));
+                LOGGER.atInfo().addArgument(name) //
+                        .addArgument((TMath.Mean(fmodeData[nmode]) + 2 * nmode) / TMath.PeakToPeak(fmodeData[nmode])) //
+                        .log("{} mean = {}");
                 fmodeDataSets[nmode] = new DefaultErrorDataSet(name, time, fmodeData[nmode], new double[time.length],
                         new double[time.length], time.length, true);
             }

@@ -1,7 +1,14 @@
 package de.gsi.chart.samples;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.scene.Scene;
+import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
 
 import de.gsi.chart.Chart;
 import de.gsi.chart.XYChart;
@@ -14,15 +21,6 @@ import de.gsi.dataset.DataSet;
 import de.gsi.dataset.spi.DoubleErrorDataSet;
 import de.gsi.dataset.spi.FragmentedDataSet;
 import de.gsi.dataset.testdata.spi.CosineFunction;
-import javafx.application.Application;
-import javafx.application.Platform;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import javafx.scene.Scene;
-import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.VBox;
-import javafx.stage.Stage;
 
 /**
  * Example illustrating the use of a custom renderer to plot graphs with gaps
@@ -30,7 +28,6 @@ import javafx.stage.Stage;
  * @author akrimm
  */
 public class CustomFragmentedRendererSample extends Application {
-    private static final Logger LOGGER = LoggerFactory.getLogger(CustomFragmentedRendererSample.class);
     private static final int N_SAMPLES = 500; // default number of data points
     private static final int N_DATA_SETS_MAX = 3;
 
@@ -42,7 +39,7 @@ public class CustomFragmentedRendererSample extends Application {
         VBox.setVgrow(chart, Priority.ALWAYS);
         ErrorDataSetRenderer renderer = new ErrorDataSetRenderer() {
             @Override
-            public void render(final GraphicsContext gc, final Chart chart, final int dataSetOffset,
+            public void render(final GraphicsContext gc, final Chart renderChart, final int dataSetOffset,
                     final ObservableList<DataSet> datasets) {
                 ObservableList<DataSet> filteredDataSets = FXCollections.observableArrayList();
                 int dsIndex = 0;
@@ -59,7 +56,7 @@ public class CustomFragmentedRendererSample extends Application {
                     }
                     dsIndex++;
                 }
-                super.render(gc, chart, dataSetOffset, filteredDataSets);
+                super.render(gc, renderChart, dataSetOffset, filteredDataSets);
             }
         };
         chart.getRenderers().clear();
