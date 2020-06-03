@@ -566,9 +566,9 @@ public class ContourDataSetRenderer extends AbstractContourDataSetRendererParame
             break;
         case CONTOUR_HEXAGON:
             if (isAltImplementation()) {
-                drawHexagonMapContour(gc, localCache);
-            } else {
                 drawHexagonMapContourAlt(gc, axisTransform, localCache);
+            } else {
+                drawHexagonMapContour(gc, localCache);
             }
             break;
         case HEATMAP_HEXAGON:
@@ -614,6 +614,11 @@ public class ContourDataSetRenderer extends AbstractContourDataSetRendererParame
                 // minimum dimension criteria not met
                 continue;
             }
+            if (dataSet.getDataCount(DataSet.DIM_Z) != dataSet.getDataCount(DIM_X) * dataSet.getDataCount(DIM_Y)) {
+                // dataSet does not have grid Topology
+                continue;
+            }
+
             final boolean result = dataSet.lock().readLockGuard(() -> {
                 long stop = ProcessingProfiler.getTimeDiff(mid, "dataSet.lock()");
 
