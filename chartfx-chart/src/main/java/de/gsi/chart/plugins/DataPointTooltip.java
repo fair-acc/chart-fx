@@ -128,7 +128,7 @@ public class DataPointTooltip extends AbstractDataFormattingPlugin {
      * 
      * @param dataSet data set
      * @param searchedX x coordinate
-     * @return return neighouring data points
+     * @return return neighbouring data points
      */
     private Pair<DataPoint, DataPoint> findNeighborPoints(final DataSet dataSet, final double searchedX) {
         int prevIndex = -1;
@@ -137,15 +137,16 @@ public class DataPointTooltip extends AbstractDataFormattingPlugin {
         double nextX = Double.MAX_VALUE;
 
         final int nDataCount = dataSet.getDataCount(DataSet.DIM_X);
+        final int ny = dataSet.getDataCount(DataSet.DIM_Y); // ensure that the point is within data range. TODO: correctly handle 3D Data
         for (int i = 0, size = nDataCount; i < size; i++) {
             final double currentX = dataSet.get(DataSet.DIM_X, i);
 
             if (currentX < searchedX) {
-                if (prevX < currentX) {
+                if (prevX < currentX && i < ny) {
                     prevIndex = i;
                     prevX = currentX;
                 }
-            } else if (nextX > currentX) {
+            } else if (nextX > currentX && i < ny) {
                 nextIndex = i;
                 nextX = currentX;
             }
