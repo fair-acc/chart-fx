@@ -35,7 +35,7 @@ public class FieldSerialiser {
      */
     public FieldSerialiser(final FieldSerialiserFunction reader, final FieldSerialiserFunction writer,
             final Class<?> classPrototype, Class<?>... classGenericArguments) {
-        if ((reader == null || writer == null) && LOGGER.isDebugEnabled()) {
+        if ((reader == null || writer == null)) {
             LOGGER.atDebug().addArgument(reader).addArgument(writer).log("caution: reader {} or writer {} is null");
         }
         if (classPrototype == null) {
