@@ -169,18 +169,19 @@ public class SimpleMeasurementsTests {
             LOGGER.atTrace().addArgument(field.getMeasurementPlugin().getChartMeasurements()).log("=== measurement type: {} ===");
             for (AbstractSingleValueIndicator indicator : field.getValueIndicators()) {
                 LOGGER.atTrace().addArgument(indicator).addArgument(indicator.updateEventListener()).log("Indicator: {} listeners: {}");
-                assertEquals(1,  indicator.updateEventListener().size());
+                assertEquals(1, indicator.updateEventListener().size());
             }
             final int nXIndicators = (int) chart.getPlugins().stream().filter(p -> p instanceof XValueIndicator).count();
             assertEquals(type.isVerticalMeasurement() ? type.getRequiredSelectors() : 0, nXIndicators);
             final int nYIndicators = (int) chart.getPlugins().stream().filter(p -> p instanceof YValueIndicator).count();
             assertEquals(type.isVerticalMeasurement() ? 0 : type.getRequiredSelectors(), nYIndicators);
             fxRobot.interact(() -> {
-                if (type.getRequiredSelectors() > 0)
-                    field.getValueIndicators().get(0).setValue(minValue);
-                if (type.getRequiredSelectors() > 1)
-                    field.getValueIndicators().get(1).setValue(maxValue);
-            }).interrupt();
+                       if (type.getRequiredSelectors() > 0)
+                           field.getValueIndicators().get(0).setValue(minValue);
+                       if (type.getRequiredSelectors() > 1)
+                           field.getValueIndicators().get(1).setValue(maxValue);
+                   })
+                    .interrupt();
             LOGGER.atTrace().addArgument(type).addArgument(field.getValueField().getValue()).log("{}, {}");
             double result = typeResults.get(type);
             FxAssert.verifyThat(field.getValueField().getValue(), equalTo(result));
@@ -190,7 +191,7 @@ public class SimpleMeasurementsTests {
             });
             for (AbstractSingleValueIndicator indicator : tmp) {
                 LOGGER.atTrace().addArgument(indicator).addArgument(indicator.updateEventListener()).log("Indicator: {} listeners: {}");
-                assertEquals(0,  indicator.updateEventListener().size());
+                assertEquals(0, indicator.updateEventListener().size());
             }
 
             // Assert that there are no Indicators left after removing the measurement
