@@ -9,7 +9,9 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -32,7 +34,10 @@ import org.testfx.framework.junit5.ApplicationExtension;
 import org.testfx.framework.junit5.Start;
 
 import de.gsi.chart.XYChart;
+import de.gsi.chart.plugins.AbstractSingleValueIndicator;
 import de.gsi.chart.plugins.ParameterMeasurements;
+import de.gsi.chart.plugins.XValueIndicator;
+import de.gsi.chart.plugins.YValueIndicator;
 import de.gsi.chart.plugins.measurements.SimpleMeasurements.MeasurementCategory;
 import de.gsi.chart.plugins.measurements.SimpleMeasurements.MeasurementType;
 import de.gsi.chart.ui.utils.JavaFXInterceptorUtils.SelectiveJavaFxInterceptor;
@@ -129,7 +134,7 @@ public class SimpleMeasurementsTests {
         typeResults.put(MeasurementType.TRANSMISSION_ABS, 50.0);
         typeResults.put(MeasurementType.TRANSMISSION_REL, -50.0);
         typeResults.put(MeasurementType.MEAN, 0.5625);
-        typeResults.put(MeasurementType.VALUE_VER, 0.125);
+        typeResults.put(MeasurementType.VALUE_VER, 0.25);
         typeResults.put(MeasurementType.DISTANCE_VER, -0.125);
         typeResults.put(MeasurementType.MINIMUM, 0.25);
         typeResults.put(MeasurementType.DUTY_CYCLE, 0.5);
@@ -152,28 +157,45 @@ public class SimpleMeasurementsTests {
         typeResults.put(MeasurementType.FREQUENCY, Double.NaN);
 
         for (MeasurementType type : typeResults.keySet()) {
+            LOGGER.atTrace().addArgument(type.getName()).log("testing measurement type: {}");
+            double minValue = type.isVerticalMeasurement() ? 2 : 0.2;
+            double maxValue = type.isVerticalMeasurement() ? 14 : 0.8;
             fxRobot.interact(() -> {
                 field = new SimpleMeasurements(plugin, type);
             });
             autoCloseAlert(field.alert, ButtonType.APPLY);
-            double minValue = type.isVerticalMeasurement() ? 2 : 0.2;
-            double maxValue = type.isVerticalMeasurement() ? 14 : 0.8;
             fxRobot.interact(() -> field.initialize());
-            Awaitility.await().atMost(1, TimeUnit.SECONDS).until(() -> field.getValueIndicators().size() >= type.getRequiredSelectors());
+            Awaitility.await().atMost(1, TimeUnit.SECONDS).until(() -> field.getValueIndicators().size() == type.getRequiredSelectors());
+            LOGGER.atTrace().addArgument(field.getMeasurementPlugin().getChartMeasurements()).log("=== measurement type: {} ===");
+            for (AbstractSingleValueIndicator indicator : field.getValueIndicators()) {
+                LOGGER.atTrace().addArgument(indicator).addArgument(indicator.updateEventListener()).log("Indicator: {} listeners: {}");
+                assertEquals(1,  indicator.updateEventListener().size());
+            }
+            final int nXIndicators = (int) chart.getPlugins().stream().filter(p -> p instanceof XValueIndicator).count();
+            assertEquals(type.isVerticalMeasurement() ? type.getRequiredSelectors() : 0, nXIndicators);
+            final int nYIndicators = (int) chart.getPlugins().stream().filter(p -> p instanceof YValueIndicator).count();
+            assertEquals(type.isVerticalMeasurement() ? 0 : type.getRequiredSelectors(), nYIndicators);
             fxRobot.interact(() -> {
-                       field.getValueIndicators().get(0).setValue(minValue);
-                       if (type.getRequiredSelectors() > 1)
-                           field.getValueIndicators().get(1).setValue(maxValue);
-                   })
-                    .interrupt();
-            LOGGER.atDebug().addArgument(type).addArgument(field.getValueField().getValue()).log("{}, {}");
+                if (type.getRequiredSelectors() > 0)
+                    field.getValueIndicators().get(0).setValue(minValue);
+                if (type.getRequiredSelectors() > 1)
+                    field.getValueIndicators().get(1).setValue(maxValue);
+            }).interrupt();
+            LOGGER.atTrace().addArgument(type).addArgument(field.getValueField().getValue()).log("{}, {}");
             double result = typeResults.get(type);
-            //            fxRobot.sleep(10_000);
             FxAssert.verifyThat(field.getValueField().getValue(), equalTo(result));
+            List<AbstractSingleValueIndicator> tmp = new ArrayList<>(field.getValueIndicators());
             fxRobot.interact(() -> {
                 field.removeAction();
-                field = null;
             });
+            for (AbstractSingleValueIndicator indicator : tmp) {
+                LOGGER.atTrace().addArgument(indicator).addArgument(indicator.updateEventListener()).log("Indicator: {} listeners: {}");
+                assertEquals(0,  indicator.updateEventListener().size());
+            }
+
+            // Assert that there are no Indicators left after removing the measurement
+            assertEquals(0, chart.getPlugins().stream().filter(p -> p instanceof AbstractSingleValueIndicator).count());
+            LOGGER.atTrace().addArgument(chart.getPlugins()).log("plugins in chart: {}");
         }
     }
 
