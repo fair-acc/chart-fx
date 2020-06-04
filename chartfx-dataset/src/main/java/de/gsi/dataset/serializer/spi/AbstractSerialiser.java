@@ -105,9 +105,9 @@ public abstract class AbstractSerialiser {
         }
 
         final List<FieldSerialiser> interfaceMatchList = potentialMatchingKeys.stream()
-                                                           .map(key -> this.knownClasses().get(key))
-                                                           .flatMap(List::stream)
-                                                           .collect(Collectors.toList());
+                                                                 .map(key -> this.knownClasses().get(key))
+                                                                 .flatMap(List::stream)
+                                                                 .collect(Collectors.toList());
 
         if (interfaceMatchList.size() == 1 || classGenericArguments == null || classGenericArguments.isEmpty()) {
             // found single match FieldSerialiser entry type w/o specific generics requirements

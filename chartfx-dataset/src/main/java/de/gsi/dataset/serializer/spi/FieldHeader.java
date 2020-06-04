@@ -122,7 +122,7 @@ public class FieldHeader {
         return builder.toString();
     }
 
-    void setParent(final FieldHeader parent) { // NOPMD - explicitly package private -> TODO: will be refactored 
+    void setParent(final FieldHeader parent) { // NOPMD - explicitly package private -> TODO: will be refactored
         this.parent = Optional.of(parent);
     }
 

@@ -30,7 +30,7 @@ public final class FieldPrimitiveValueHelper {
                 (obj, field) -> field.getField().setByte(obj, ioBuffer.getByte()), // reader
                 (obj, field) -> BinarySerialiser.put(ioBuffer, field.getFieldName(), field.getField().getByte(obj)), // writer
                 byte.class));
-        
+
         serialiser.addClassDefinition(new IoBufferFieldSerialiser(ioBuffer, //
                 (obj, field) -> field.getField().setChar(obj, ioBuffer.getChar()), // reader
                 (obj, field) -> BinarySerialiser.put(ioBuffer, field.getFieldName(), field.getField().getChar(obj)), // writer

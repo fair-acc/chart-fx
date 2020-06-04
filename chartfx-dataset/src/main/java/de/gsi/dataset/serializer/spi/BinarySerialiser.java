@@ -298,7 +298,7 @@ public class BinarySerialiser { // NOPMD - omen est omen
         if (dataType.isScalar()) {
             final long pos = readBuffer.position();
             final long nBytesToRead = dataType == DataType.STRING ? readBuffer.getInt() + 4
-                                                                       : dataType.getPrimitiveSize();
+                                                                  : dataType.getPrimitiveSize();
             readBuffer.position(pos);
 
             return new FieldHeader(fieldName, dataType, new int[] { 1 }, readBuffer.position(), nBytesToRead);

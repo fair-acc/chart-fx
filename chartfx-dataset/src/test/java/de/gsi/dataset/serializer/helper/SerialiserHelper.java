@@ -5,7 +5,7 @@ import de.gsi.dataset.serializer.IoBuffer;
 import de.gsi.dataset.serializer.spi.BinarySerialiser;
 import de.gsi.dataset.serializer.spi.FieldHeader;
 
-@SuppressWarnings("PMD") // complexity is part of the very large use-case surface that is being tested 
+@SuppressWarnings("PMD") // complexity is part of the very large use-case surface that is being tested
 public final class SerialiserHelper {
     public static void serialiseCustom(IoBuffer bytebuffer, final TestDataClass pojo) {
         serialiseCustom(bytebuffer, pojo, true);
