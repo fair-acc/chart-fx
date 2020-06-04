@@ -16,6 +16,7 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ListChangeListener.Change;
 import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
@@ -75,7 +76,6 @@ public abstract class AbstractChartMeasurement implements EventListener, EventSo
     private static final String FORMAT_SMALL_SCALE = "0.###";
     private static final String FORMAT_LARGE_SCALE = "0.##E0";
     public static final int DEFAULT_SMALL_AXIS = 6; // [orders of magnitude], e.g. '4' <-> [1,10000]
-    protected static int markerCount;
     protected final DecimalFormat formatterSmall = new DecimalFormat(FORMAT_SMALL_SCALE);
     protected final DecimalFormat formatterLarge = new DecimalFormat(FORMAT_LARGE_SCALE);
     private final AtomicBoolean autoNotify = new AtomicBoolean(true);
@@ -128,6 +128,22 @@ public abstract class AbstractChartMeasurement implements EventListener, EventSo
             getValueField().setDataSetName(new StringBuilder().append('<').append(n.getName()).append('>').toString());
         }
     };
+    private final ListChangeListener<? super AbstractSingleValueIndicator> valueIndicatorsUserChangeListener = (Change<? extends AbstractSingleValueIndicator> change) -> {
+        while (change.next()) {
+            change.getRemoved().forEach(oldIndicator -> {
+                oldIndicator.removeListener(sliderChanged);
+                if (oldIndicator.isAutoRemove() && oldIndicator.updateEventListener().isEmpty()) {
+                    getMeasurementPlugin().getChart().getPlugins().remove(oldIndicator);
+                }
+            });
+
+            change.getAddedSubList().forEach(newIndicator -> {
+                if (!newIndicator.updateEventListener().contains(sliderChanged)) {
+                    newIndicator.addListener(sliderChanged);
+                }
+            });
+        }
+    };
 
     public AbstractChartMeasurement(final ParameterMeasurements plugin, final String measurementName, final AxisMode axisMode, final int requiredNumberOfIndicators,
             final int requiredNumberOfDataSets) {
@@ -166,22 +182,7 @@ public abstract class AbstractChartMeasurement implements EventListener, EventSo
         GridPane.setVgrow(dataViewWindow, Priority.NEVER);
         dataViewWindow.setOnMouseClicked(mouseHandler);
 
-        getValueIndicatorsUser().addListener((Change<? extends AbstractSingleValueIndicator> change) -> {
-            while (change.next()) {
-                change.getRemoved().forEach(oldIndicator -> {
-                    oldIndicator.removeListener(sliderChanged);
-                    if (oldIndicator.isAutoRemove() && oldIndicator.updateEventListener().isEmpty()) {
-                        getMeasurementPlugin().getChart().getPlugins().remove(oldIndicator);
-                    }
-                });
-
-                change.getAddedSubList().forEach(newIndicator -> {
-                    if (!newIndicator.updateEventListener().contains(sliderChanged)) {
-                        newIndicator.addListener(sliderChanged);
-                    }
-                });
-            }
-        });
+        getValueIndicatorsUser().addListener(valueIndicatorsUserChangeListener);
 
         dataViewWindow.nameProperty().bindBidirectional(title);
         setTitle(AbstractChartMeasurement.this.getClass().getSimpleName()); // NOPMD
@@ -336,6 +337,7 @@ public abstract class AbstractChartMeasurement implements EventListener, EventSo
         getMeasurementPlugin().getDataView().getChildren().remove(dataViewWindow);
         getMeasurementPlugin().getDataView().getVisibleChildren().remove(dataViewWindow);
         getMeasurementPlugin().getDataView().getUndockedChildren().remove(dataViewWindow);
+        getValueIndicatorsUser().removeListener(valueIndicatorsUserChangeListener);
         for (AbstractSingleValueIndicator indicator : new ArrayList<>(getValueIndicatorsUser())) {
             indicator.removeListener(sliderChanged);
             getValueIndicatorsUser().remove(indicator);
