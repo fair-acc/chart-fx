@@ -1,11 +1,13 @@
 package de.gsi.dataset.serializer.spi.iobuffer;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.Set;
+import java.util.WeakHashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,6 +29,7 @@ import de.gsi.dataset.serializer.spi.FieldSerialiser.FieldSerialiserFunction;
  */
 public class IoBufferSerialiser extends AbstractSerialiser {
     private static final Logger LOGGER = LoggerFactory.getLogger(IoBufferSerialiser.class);
+    private final Map<Integer, WeakHashMap<String, ClassFieldDescription>> fieldToClassFieldDescription = new HashMap<>();
     private final IoBuffer ioBuffer;
 
     /**
@@ -104,9 +107,11 @@ public class IoBufferSerialiser extends AbstractSerialiser {
             // check for potential inner fields
             for (final FieldHeader fieldHeader : fieldRoot.getChildren()) {
                 final String fieldName = fieldHeader.getFieldName();
-                final Optional<ClassFieldDescription> subFieldDescription = classFieldDescription.getChildren().stream().filter(e -> e.getFieldName().equals(fieldName)).findFirst();
-                if (subFieldDescription.isPresent()) {
-                    deserialise(obj, fieldHeader, subFieldDescription.get(), recursionDepth + 1);
+                Map<String, ClassFieldDescription> rMap = fieldToClassFieldDescription.computeIfAbsent(recursionDepth, depth -> new WeakHashMap<>());
+                final ClassFieldDescription subFieldDescription = rMap.computeIfAbsent(fieldName, name -> classFieldDescription.getChildren().stream().filter(e -> e.getFieldName().equals(fieldName)).findFirst().get());
+
+                if (subFieldDescription != null) {
+                    deserialise(obj, fieldHeader, subFieldDescription, recursionDepth + 1);
                 }
             }
             return;
@@ -133,22 +138,18 @@ public class IoBufferSerialiser extends AbstractSerialiser {
             // no specific deserialiser present check for potential inner fields
             for (final FieldHeader fieldHeader : fieldRoot.getChildren()) {
                 final String fieldName = fieldHeader.getFieldName();
-                final Optional<ClassFieldDescription> subFieldDescription = classFieldDescription.getChildren().stream().filter(e -> e.getFieldName().equals(fieldName)).findFirst();
-                if (subFieldDescription.isPresent()) {
-                    deserialise(subRef, fieldHeader, subFieldDescription.get(), recursionDepth + 1);
+                Map<String, ClassFieldDescription> rMap = fieldToClassFieldDescription.computeIfAbsent(recursionDepth, depth -> new WeakHashMap<>());
+                final ClassFieldDescription subFieldDescription = rMap.computeIfAbsent(fieldName, name -> classFieldDescription.getChildren().stream().filter(e -> e.getFieldName().equals(fieldName)).findFirst().get());
+
+                if (subFieldDescription != null) {
+                    deserialise(subRef, fieldHeader, subFieldDescription, recursionDepth + 1);
                 }
             }
             return;
         }
 
         ioBuffer.position(fieldRoot.getDataBufferPosition());
-        final Object fieldObjReference = classFieldDescription.getField().get(obj);
-        if (fieldObjReference == null) {
-            // allocate missing field
-            serialiser.get().getReaderFunction().exec(obj, classFieldDescription);
-        } else {
-            serialiser.get().getReaderFunction().exec(obj, classFieldDescription);
-        }
+        serialiser.get().getReaderFunction().exec(obj, classFieldDescription);
     }
 
     @Override
