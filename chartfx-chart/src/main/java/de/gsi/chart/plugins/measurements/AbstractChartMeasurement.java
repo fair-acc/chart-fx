@@ -51,6 +51,7 @@ import de.gsi.chart.plugins.YValueIndicator;
 import de.gsi.chart.plugins.measurements.utils.CheckedValueField;
 import de.gsi.chart.plugins.measurements.utils.DataSetSelector;
 import de.gsi.chart.plugins.measurements.utils.ValueIndicatorSelector;
+import de.gsi.chart.renderer.Renderer;
 import de.gsi.chart.utils.MouseUtils;
 import de.gsi.chart.viewer.DataViewWindow;
 import de.gsi.chart.viewer.DataViewWindow.WindowDecoration;
@@ -237,6 +238,7 @@ public abstract class AbstractChartMeasurement implements EventListener, EventSo
         return valueIndicatorSelector.getValueIndicators();
     }
 
+    @Deprecated // replace with 'getValueIndicators()'
     public ObservableList<AbstractSingleValueIndicator> getValueIndicatorsUser() {
         return valueIndicatorSelector.getValueIndicatorsUser();
     }
@@ -257,7 +259,7 @@ public abstract class AbstractChartMeasurement implements EventListener, EventSo
         }
 
         if (getMeasurementPlugin() != null && getMeasurementPlugin().getChart() != null && getMeasurementPlugin().getChart().getScene() != null) {
-            Stage stage = (Stage) getMeasurementPlugin().getChart().getScene().getWindow();
+            final Stage stage = (Stage) getMeasurementPlugin().getChart().getScene().getWindow();
             alert.setX(stage.getX() + stage.getWidth() / 5);
             alert.setY(stage.getY() + stage.getHeight() / 5);
         }
@@ -296,12 +298,6 @@ public abstract class AbstractChartMeasurement implements EventListener, EventSo
         return valueField.valueProperty();
     }
 
-    protected void defaultAction(Optional<ButtonType> result) {
-        setDataSet(null);
-        getValueField().resetRanges();
-        updateSlider();
-    }
-
     protected void addMinMaxRangeFields() {
         final Label minRangeTitleLabel = new Label("Min. Range: ");
         GridPane.setConstraints(minRangeTitleLabel, 0, lastLayoutRow);
@@ -321,6 +317,12 @@ public abstract class AbstractChartMeasurement implements EventListener, EventSo
         getDialogContentBox().getChildren().addAll(maxRangeTitleLabel, getValueField().getMaxRangeTextField(), maxValueLabel);
     }
 
+    protected void defaultAction(Optional<ButtonType> result) {
+        setDataSet(null);
+        getValueField().resetRanges();
+        updateSlider();
+    }
+
     protected GridPane getDialogContentBox() {
         return gridPane;
     }
@@ -338,7 +340,7 @@ public abstract class AbstractChartMeasurement implements EventListener, EventSo
         getMeasurementPlugin().getDataView().getVisibleChildren().remove(dataViewWindow);
         getMeasurementPlugin().getDataView().getUndockedChildren().remove(dataViewWindow);
         getValueIndicatorsUser().removeListener(valueIndicatorsUserChangeListener);
-        for (AbstractSingleValueIndicator indicator : new ArrayList<>(getValueIndicatorsUser())) {
+        for (final AbstractSingleValueIndicator indicator : new ArrayList<>(getValueIndicatorsUser())) {
             indicator.removeListener(sliderChanged);
             getValueIndicatorsUser().remove(indicator);
             if (indicator.isAutoRemove() && indicator.updateEventListener().isEmpty()) {
@@ -365,7 +367,7 @@ public abstract class AbstractChartMeasurement implements EventListener, EventSo
 
         if (sliderIndicator == null) {
             final Chart chart = getMeasurementPlugin().getChart();
-            final Axis axis = chart.getFirstAxis(axisMode == X ? Orientation.HORIZONTAL : Orientation.VERTICAL);
+            final Axis axis = getFirstAxisForDataSet(chart, getDataSet(), axisMode == X);
             final double lower = axis.getMin();
             final double upper = axis.getMax();
             final double middle = 0.5 * Math.abs(upper - lower);
@@ -387,9 +389,24 @@ public abstract class AbstractChartMeasurement implements EventListener, EventSo
         return sliderIndicator;
     }
 
+    protected static Axis getFirstAxisForDataSet(final Chart chart, final DataSet dataSet, final boolean isHorizontal) {
+        for (final Renderer renderer : chart.getRenderers()) {
+            if (!renderer.getDatasets().contains(dataSet)) {
+                continue;
+            }
+            for (final Axis axis : renderer.getAxes()) {
+                if ((axis.getSide().isHorizontal() && isHorizontal) || (axis.getSide().isVertical() && !isHorizontal)) {
+                    return axis;
+                }
+            }
+        }
+
+        return chart.getFirstAxis(isHorizontal ? Orientation.HORIZONTAL : Orientation.VERTICAL);
+    }
+
     protected static int shiftGridPaneRowOffset(List<Node> nodes, final int minRowOffset) {
         int maxRowIndex = 0;
-        for (Node node : nodes) {
+        for (final Node node : nodes) {
             final Integer rowIndex = GridPane.getRowIndex(node);
             if (rowIndex == null) {
                 LOGGER.atWarn().addArgument(node).addArgument(minRowOffset).log("node {} has not a GridPane::rowIndex being set -> set to {}");

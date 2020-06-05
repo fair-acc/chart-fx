@@ -1,6 +1,5 @@
 package de.gsi.chart.plugins.measurements;
 
-import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -28,7 +27,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.testfx.api.FxAssert;
 import org.testfx.api.FxRobot;
 import org.testfx.framework.junit5.ApplicationExtension;
 import org.testfx.framework.junit5.Start;
@@ -131,6 +129,10 @@ public class SimpleMeasurementsTests {
         fxRobot.interact(() -> chart.getDatasets().setAll(sine));
 
         Map<MeasurementType, Double> typeResults = new HashMap<>();
+        typeResults.put(MeasurementType.MARKER_HOR, 2.0);
+        typeResults.put(MeasurementType.MARKER_DISTANCE_HOR, 12.0);
+        typeResults.put(MeasurementType.MARKER_VER, 0.2);
+        typeResults.put(MeasurementType.MARKER_DISTANCE_VER, 0.6);
         typeResults.put(MeasurementType.TRANSMISSION_ABS, 50.0);
         typeResults.put(MeasurementType.TRANSMISSION_REL, -50.0);
         typeResults.put(MeasurementType.MEAN, 0.5625);
@@ -184,7 +186,7 @@ public class SimpleMeasurementsTests {
                     .interrupt();
             LOGGER.atTrace().addArgument(type).addArgument(field.getValueField().getValue()).log("{}, {}");
             double result = typeResults.get(type);
-            FxAssert.verifyThat(field.getValueField().getValue(), equalTo(result));
+            assertEquals(field.getValueField().getValue(), result, 1e-9);
             List<AbstractSingleValueIndicator> tmp = new ArrayList<>(field.getValueIndicators());
             fxRobot.interact(() -> {
                 field.removeAction();
