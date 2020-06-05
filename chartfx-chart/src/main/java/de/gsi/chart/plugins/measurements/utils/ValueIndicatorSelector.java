@@ -67,15 +67,17 @@ public class ValueIndicatorSelector extends GridPane {
             throw new IllegalArgumentException("plugin must not be null");
         }
         this.axisMode = axisMode;
+        reuseIndicators.setSelected(true);
+
         plugin.chartProperty().addListener(chartChangeListener);
         if (plugin.getChart() != null) {
             plugin.getChart().getPlugins().addListener(pluginsChanged);
             plugin.getChart().getPlugins().forEach(this::addNewIndicators);
+            reuseIndicators.setSelected(plugin.getChart().getAxes().size() <= 2);
         }
 
         final Label label = new Label("re-use inidcators: ");
         GridPane.setConstraints(label, 0, 0);
-        reuseIndicators.setSelected(true);
         GridPane.setConstraints(reuseIndicators, 1, 0);
         reuseIndicators.selectedProperty().addListener((ch, o, n) -> indicatorListView.setDisable(!n));
 
