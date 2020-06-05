@@ -1,5 +1,6 @@
 package de.gsi.dataset.serializer.spi;
 
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -36,7 +37,6 @@ public class ByteBuffer implements IoBuffer {
     public ByteBuffer(final int nCapacity) {
         nioByteBuffer = java.nio.ByteBuffer.wrap(new byte[nCapacity]);
         nioByteBuffer.mark();
-
     }
 
     @Override
@@ -211,7 +211,7 @@ public class ByteBuffer implements IoBuffer {
         final byte[] values = new byte[arraySize];
         nioByteBuffer.get(values, 0, arraySize);
         getByte(); // For C++ zero terminated string
-        return new String(values);
+        return new String(values, 0, arraySize, StandardCharsets.ISO_8859_1);
     }
 
     @Override
@@ -400,7 +400,7 @@ public class ByteBuffer implements IoBuffer {
         final int strLength = string == null ? 0 : string.length();
         putInt(strLength + 1); // for C++ zero terminated string$
         for (int i = 0; i < strLength; ++i) {
-            putByte((byte) string.charAt(i));
+            putByte((byte) (string.charAt(i) & 0xFF)); // ISO-8859-1 encoding
         }
         putByte((byte) 0); // For C++ zero terminated string
         return this;
@@ -437,5 +437,4 @@ public class ByteBuffer implements IoBuffer {
     public IoBuffer trim(final int requestedCapacity) {
         return this;
     }
-
 }

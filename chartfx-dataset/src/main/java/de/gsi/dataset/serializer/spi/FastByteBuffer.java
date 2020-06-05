@@ -11,6 +11,7 @@ import static sun.misc.Unsafe.ARRAY_LONG_BASE_OFFSET; // NOPMD by rstein
 import static sun.misc.Unsafe.ARRAY_SHORT_BASE_OFFSET; // NOPMD by rstein
 
 import java.lang.reflect.Field;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -320,13 +321,10 @@ public class FastByteBuffer implements IoBuffer {
 
     @Override
     public String getString() {
-        final int arraySize = getInt() - 1; // for C++ zero terminated string
-        final byte[] values = new byte[arraySize];
-
-        final long bytesToCopy = values.length;
-        copyMemory(buffer, ARRAY_BYTE_BASE_OFFSET + position, values, ARRAY_BYTE_BASE_OFFSET, bytesToCopy);
-        position += bytesToCopy + 1; // For C++ zero terminated string
-        return new String(values);
+        final int arraySize = getInt(); // for C++ zero terminated string
+        final String str = new String(buffer, (int) (position), arraySize - 1, StandardCharsets.ISO_8859_1);
+        position += arraySize; // N.B. +1 larger to be compatible with C++ zero terminated string
+        return str;
     }
 
     @Override
@@ -546,11 +544,17 @@ public class FastByteBuffer implements IoBuffer {
 
     @Override
     public IoBuffer putString(final String string) {
-        final int strLength = string == null ? 0 : string.length();
-        putInt(strLength + 1); // for C++ zero terminated string
-        for (int i = 0; i < strLength; ++i) {
-            putByte((byte) string.charAt(i));
-        }
+        final long initialPos = position;
+        position += SIZE_OF_INT;
+        // write string-to-byte (in-place)
+        final int strLength = encodeISO8859(string, buffer, ARRAY_BYTE_BASE_OFFSET, position, string.length());
+        final long endPos = position + strLength;
+
+        // write length of string byte representation
+        position = initialPos;
+        putInt(strLength + 1);
+        position = endPos;
+
         putByte((byte) 0); // For C++ zero terminated string
         return getSelf();
     }
@@ -640,5 +644,18 @@ public class FastByteBuffer implements IoBuffer {
      */
     public static FastByteBuffer wrap(final byte[] byteArray, final int length) {
         return new FastByteBuffer(byteArray, length);
+    }
+
+    protected static int encodeISO8859(final CharSequence sequence, final byte[] bytes, final long baseOffset, final long offset, final int length) {
+        // encode to ISO_8859_1
+        if (sequence == null) {
+            return 0;
+        }
+        final int utf16Length = sequence.length();
+        final long j = baseOffset + offset;
+        for (int i = 0; i < utf16Length; i++) {
+            unsafe.putByte(bytes, j + i, (byte) (sequence.charAt(i) & 0xFF));
+        }
+        return utf16Length;
     }
 }
