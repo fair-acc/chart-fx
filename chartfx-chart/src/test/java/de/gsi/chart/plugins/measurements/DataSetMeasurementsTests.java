@@ -53,6 +53,7 @@ public class DataSetMeasurementsTests {
         }
 
         field = new DataSetMeasurements(plugin, MeasurementType.FFT_DB_RANGED);
+        field.setDataSet(chart.getAllDatasets().get(0));
         assertTrue(field.getMeasType().isVerticalMeasurement());
 
         chart.getPlugins().add(plugin);
