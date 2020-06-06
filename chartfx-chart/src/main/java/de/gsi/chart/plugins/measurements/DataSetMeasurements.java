@@ -453,7 +453,7 @@ public class DataSetMeasurements extends AbstractChartMeasurement {
     }
 
     protected void transform(final List<DataSet> inputDataSets, final MathDataSet outputDataSet) { // NOPMD - long function by necessity/functionality
-        if ((inputDataSets.isEmpty() || inputDataSets.get(0).getDataCount() < 4)) {
+        if ((inputDataSets.isEmpty() || inputDataSets.get(0) == null || inputDataSets.get(0).getDataCount() < 4)) {
             outputDataSet.clearMetaInfo();
             outputDataSet.clearData();
             outputDataSet.getWarningList().add(outputDataSet.getName() + " - insufficient/no source data sets");

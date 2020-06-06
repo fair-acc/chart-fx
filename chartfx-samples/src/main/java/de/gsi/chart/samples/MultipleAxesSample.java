@@ -80,6 +80,7 @@ public class MultipleAxesSample extends Application {
         errorRenderer3.getAxes().add(yAxis3);
         chart.getRenderers().addAll(errorRenderer2, errorRenderer3);
 
+        chart.getPlugins().add(new ParameterMeasurements());
         final Zoomer zoom = new Zoomer();
         // add axes that shall be excluded from the zoom action
         zoom.omitAxisZoomList().add(yAxis3);
@@ -87,9 +88,7 @@ public class MultipleAxesSample extends Application {
         // Zoomer.setOmitZoom(yAxis3, true);
         chart.getPlugins().add(zoom);
         chart.getToolBar().getChildren().add(new MyZoomCheckBox(zoom, yAxis3));
-
         chart.getPlugins().add(new EditAxis());
-        chart.getPlugins().add(new ParameterMeasurements());
 
         final Button newDataSet = new Button("new DataSet");
         newDataSet.setOnAction(
