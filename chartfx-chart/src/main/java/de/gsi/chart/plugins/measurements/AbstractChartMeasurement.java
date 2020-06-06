@@ -9,6 +9,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
 
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;
@@ -133,9 +134,6 @@ public abstract class AbstractChartMeasurement implements EventListener, EventSo
         while (change.next()) {
             change.getRemoved().forEach(oldIndicator -> {
                 oldIndicator.removeListener(sliderChanged);
-                if (oldIndicator.isAutoRemove() && oldIndicator.updateEventListener().isEmpty()) {
-                    getMeasurementPlugin().getChart().getPlugins().remove(oldIndicator);
-                }
             });
 
             change.getAddedSubList().forEach(newIndicator -> {
@@ -204,12 +202,6 @@ public abstract class AbstractChartMeasurement implements EventListener, EventSo
     }
 
     public DataSet getDataSet() {
-        // initialisation safe-guard
-        if (dataSetProperty().get() == null) {
-            final List<DataSet> allDataSets = new ArrayList<>(getMeasurementPlugin().getChart().getAllDatasets());
-            dataSetProperty().set(allDataSets.get(0));
-        }
-
         return dataSetProperty().get();
     }
 
@@ -340,7 +332,12 @@ public abstract class AbstractChartMeasurement implements EventListener, EventSo
         getMeasurementPlugin().getDataView().getVisibleChildren().remove(dataViewWindow);
         getMeasurementPlugin().getDataView().getUndockedChildren().remove(dataViewWindow);
         getValueIndicatorsUser().removeListener(valueIndicatorsUserChangeListener);
-        for (final AbstractSingleValueIndicator indicator : new ArrayList<>(getValueIndicatorsUser())) {
+        final Chart chart = getMeasurementPlugin().getChart();
+        if (chart == null) {
+            return;
+        }
+        final List<AbstractSingleValueIndicator> allIndicators = chart.getPlugins().stream().filter(p -> p instanceof AbstractSingleValueIndicator).map(p -> (AbstractSingleValueIndicator)p).collect(Collectors.toList());
+        for (final AbstractSingleValueIndicator indicator : allIndicators) {
             indicator.removeListener(sliderChanged);
             getValueIndicatorsUser().remove(indicator);
             if (indicator.isAutoRemove() && indicator.updateEventListener().isEmpty()) {
@@ -390,6 +387,10 @@ public abstract class AbstractChartMeasurement implements EventListener, EventSo
     }
 
     protected static Axis getFirstAxisForDataSet(final Chart chart, final DataSet dataSet, final boolean isHorizontal) {
+        if (dataSet == null) {
+            return chart.getFirstAxis(isHorizontal ? Orientation.HORIZONTAL : Orientation.VERTICAL);
+        }
+
         for (final Renderer renderer : chart.getRenderers()) {
             if (!renderer.getDatasets().contains(dataSet)) {
                 continue;
