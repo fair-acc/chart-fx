@@ -89,7 +89,6 @@ public class MultipleAxesSample extends Application {
         chart.getPlugins().add(zoom);
         chart.getToolBar().getChildren().add(new MyZoomCheckBox(zoom, yAxis3));
         chart.getPlugins().add(new EditAxis());
-        
 
         final Button newDataSet = new Button("new DataSet");
         newDataSet.setOnAction(

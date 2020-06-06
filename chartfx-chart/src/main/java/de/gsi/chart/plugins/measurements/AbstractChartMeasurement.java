@@ -336,7 +336,7 @@ public abstract class AbstractChartMeasurement implements EventListener, EventSo
         if (chart == null) {
             return;
         }
-        final List<AbstractSingleValueIndicator> allIndicators = chart.getPlugins().stream().filter(p -> p instanceof AbstractSingleValueIndicator).map(p -> (AbstractSingleValueIndicator)p).collect(Collectors.toList());
+        final List<AbstractSingleValueIndicator> allIndicators = chart.getPlugins().stream().filter(p -> p instanceof AbstractSingleValueIndicator).map(p -> (AbstractSingleValueIndicator) p).collect(Collectors.toList());
         for (final AbstractSingleValueIndicator indicator : allIndicators) {
             indicator.removeListener(sliderChanged);
             getValueIndicatorsUser().remove(indicator);
