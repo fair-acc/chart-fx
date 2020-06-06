@@ -9,8 +9,6 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.Tooltip;
 
 import org.controlsfx.glyphfont.Glyph;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import de.gsi.chart.plugins.measurements.AbstractChartMeasurement;
 import de.gsi.chart.plugins.measurements.DataSetMeasurements;
@@ -23,7 +21,7 @@ import de.gsi.chart.viewer.DataView;
  * Plugin to implement simple measurements and valueTextField indicators such as
  * <p>
  * <ul>
- * <li> value at horizontal/vertical marker position with coloured indication if min/max thresholds are exceeded, 
+ * <li> value at horizontal/vertical marker position with coloured indication if min/max thresholds are exceeded,
  * <li> min/max/rms/median/... values of functions
  * <li> rise-time estiamtes
  * <li> trigger-to-rising edge detector
@@ -31,12 +29,11 @@ import de.gsi.chart.viewer.DataView;
  * <li> relative signal change (ie. (S0 - S1)/S0)
  * <li> and many more.
  * </ul>
- * For a more complete list see {@link de.gsi.chart.plugins.measurements.SimpleMeasurements.MeasurementType} or {@link de.gsi.chart.plugins.measurements.DataSetMeasurements.MeasurementType} 
+ * For a more complete list see {@link de.gsi.chart.plugins.measurements.SimpleMeasurements.MeasurementType} or {@link de.gsi.chart.plugins.measurements.DataSetMeasurements.MeasurementType}
  *
  * @author rstein
  */
 public class ParameterMeasurements extends ChartPlugin {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ParameterMeasurements.class);
     private static final String FONT_AWESOME = "FontAwesome";
     private static final int FONT_SIZE = 20;
     // private static final char TOOLBUTTON_DRAFTING_COMPASS = '\uf568'; // drafting compass
@@ -62,7 +59,7 @@ public class ParameterMeasurements extends ChartPlugin {
 
     /**
      * Creates a new instance of ParameterMeasurements.
-     * 
+     *
      * @param side where to place the measurement results
      * @param addToToolBar true: add to internal ToolBar; false: optionally add ToolBar to another other Pane
      */
@@ -100,9 +97,6 @@ public class ParameterMeasurements extends ChartPlugin {
         });
 
         dataView.setNodeLayout(Layout.VBOX);
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.atDebug().log(ParameterMeasurements.class.getSimpleName() + " - initialised");
-        }
     }
 
     public ObservableList<AbstractChartMeasurement> getChartMeasurements() {
