@@ -25,6 +25,7 @@
         <module>chartfx-math</module>
         <module>chartfx-samples</module>
         <module>chartfx-report</module>
+        <module>chartfx-generate</module>
     </modules>
 
     <properties>

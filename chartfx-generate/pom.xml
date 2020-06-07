@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>de.gsi</groupId>
+        <artifactId>chartfx</artifactId>
+        <version>${revision}${sha1}${changelist}</version>
+        <relativePath>..</relativePath>
+    </parent>
+    <groupId>de.gsi.generate</groupId>
+    <artifactId>chartfx-generate</artifactId>
+    <name>chartfx-generate</name>
+
+    <description>
+        Code generation utilities that generate implementations or various Java primitives
+        (e.g. int/float/double) in order to avoid boxed types and simplify maintenance efforts.
+    </description>
+
+</project>
