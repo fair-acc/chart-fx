@@ -1,9 +1,8 @@
 package de.gsi.math.functions;
 
-import de.gsi.math.TMath;
+import de.gsi.math.Math;
 
 public class PoissonFunction extends AbstractFunction1D implements Function1D {
-
     /**
      * initialise Poisson function parameter order: parameter[0] = par (default: 1.0)
      * 
@@ -28,13 +27,13 @@ public class PoissonFunction extends AbstractFunction1D implements Function1D {
             return;
         }
 
-        for (int i = 0; i < Math.min(parameter.length, 1); i++) {
+        for (int i = 0; i < java.lang.Math.min(parameter.length, 1); i++) {
             setParameterValue(i, parameter[i]);
         }
     }
 
     @Override
     public double getValue(final double x) {
-        return TMath.PoissonI(x, fparameter[0]);
+        return Math.poissonI(x, fparameter[0]);
     }
 }

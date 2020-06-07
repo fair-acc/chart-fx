@@ -6,8 +6,7 @@ import java.util.stream.IntStream;
 import de.gsi.dataset.DataSet3D;
 import de.gsi.dataset.GridDataSet;
 import de.gsi.dataset.event.UpdatedDataEvent;
-import de.gsi.dataset.spi.utils.MultiArray;
-import de.gsi.dataset.spi.utils.MultiArrayDouble;
+import de.gsi.dataset.spi.utils.MultiArrayDoubleProto;
 
 /**
  * Implementation of the GridDataSet. Allows data on n-dimensional Cartesian grids with m values per point.
@@ -20,7 +19,7 @@ public class DoubleGridDataSet extends AbstractDataSet<DoubleGridDataSet> implem
     private static final long serialVersionUID = -493232313124620828L;
 
     protected transient double[][] grid; // grid values
-    protected transient MultiArrayDouble[] values; // the values on the grid
+    protected transient MultiArrayDoubleProto[] values; // the values on the grid
     protected transient int[] shape; // the sizes of the grid for each dimension [nx, ny ...]
     protected transient int dataCount; // the number of point on the grid nx * ny * ...
 
@@ -58,7 +57,7 @@ public class DoubleGridDataSet extends AbstractDataSet<DoubleGridDataSet> implem
         }
 
         grid = new double[shape.length][];
-        values = new MultiArrayDouble[nDims - shape.length];
+        values = new MultiArrayDoubleProto[nDims - shape.length];
 
         dataCount = 1;
         for (int i = 0; i < shape.length; i++) {
@@ -66,7 +65,7 @@ public class DoubleGridDataSet extends AbstractDataSet<DoubleGridDataSet> implem
             grid[i] = IntStream.range(0, shape[i]).asDoubleStream().toArray();
         }
         for (int i = shape.length; i < nDims; i++) {
-            values[i - shape.length] = MultiArrayDouble.of(new double[dataCount], shape, 0);
+            values[i - shape.length] = MultiArrayDoubleProto.wrap(new double[dataCount], 0, shape);
         }
     }
 
@@ -82,7 +81,7 @@ public class DoubleGridDataSet extends AbstractDataSet<DoubleGridDataSet> implem
         this.shape = shape.clone();
 
         grid = new double[shape.length][];
-        values = new MultiArrayDouble[vals.length];
+        values = new MultiArrayDoubleProto[vals.length];
 
         dataCount = 1;
         for (int i = 0; i < shape.length; i++) {
@@ -93,7 +92,7 @@ public class DoubleGridDataSet extends AbstractDataSet<DoubleGridDataSet> implem
             if (vals[i - shape.length].length != dataCount) {
                 throw new IllegalArgumentException("Dimension missmatch between grid and values");
             }
-            values[i - shape.length] = MultiArrayDouble.of(copy ? vals[i - shape.length].clone() : vals[i - shape.length], shape, 0);
+            values[i - shape.length] = MultiArrayDoubleProto.wrap(copy ? vals[i - shape.length].clone() : vals[i - shape.length], 0, shape);
         }
     }
 
@@ -158,7 +157,7 @@ public class DoubleGridDataSet extends AbstractDataSet<DoubleGridDataSet> implem
     @Override
     public double[] getValues(int dimIndex) {
         if (dimIndex >= shape.length) {
-            return values[dimIndex - shape.length].getStridedArray();
+            return values[dimIndex - shape.length].elements();
         }
         return super.getValues(dimIndex); // return new list with full coordinates
     }
@@ -179,12 +178,12 @@ public class DoubleGridDataSet extends AbstractDataSet<DoubleGridDataSet> implem
                     this.grid[i] = grid[i].clone();
                 }
             }
-            values = new MultiArrayDouble[vals.length];
+            values = new MultiArrayDoubleProto[vals.length];
             for (int i = shape.length; i < nDims; i++) {
                 if (vals[i - shape.length].length != dataCount) {
                     throw new IllegalArgumentException("Dimension missmatch between grid and values");
                 }
-                values[i - shape.length] = MultiArrayDouble.of(copy ? vals[i - shape.length].clone() : vals[i - shape.length], shape, 0);
+                values[i - shape.length] = MultiArrayDoubleProto.wrap(copy ? vals[i - shape.length].clone() : vals[i - shape.length], 0, shape);
             }
         });
         fireInvalidated(new UpdatedDataEvent(this));
@@ -201,7 +200,7 @@ public class DoubleGridDataSet extends AbstractDataSet<DoubleGridDataSet> implem
             // copy data
             this.shape = another.getShape().clone();
             this.grid = new double[shape.length][];
-            this.values = new MultiArrayDouble[nDims - shape.length];
+            this.values = new MultiArrayDoubleProto[nDims - shape.length];
 
             dataCount = 1;
             for (int i = 0; i < shape.length; i++) {
@@ -209,7 +208,7 @@ public class DoubleGridDataSet extends AbstractDataSet<DoubleGridDataSet> implem
                 this.grid[i] = another.getGridValues(i).clone();
             }
             for (int i = shape.length; i < nDims; i++) {
-                values[i - shape.length] = MultiArrayDouble.of(another.getValues(i).clone(), shape, 0);
+                values[i - shape.length] = MultiArrayDoubleProto.wrap(another.getValues(i).clone(), 0, shape);
             }
 
             // deep copy data point labels and styles

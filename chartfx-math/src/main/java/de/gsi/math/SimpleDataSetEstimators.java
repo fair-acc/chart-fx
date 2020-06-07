@@ -294,7 +294,7 @@ public final class SimpleDataSetEstimators { // NOPMD name is as is (ie. no Help
      * @return the Integral of the DataSet according to the trapezoidal rule
      */
     public static double getIntegral(final DataSet dataSet, final int indexMin, final int indexMax) {
-        final double sign = TMathConstants.Sign(1, indexMax - indexMin);
+        final double sign = MathBase.sign(1, indexMax - indexMin);
 
         double integral = 0;
         for (int index = Math.min(indexMin, indexMax); index < Math.max(indexMin, indexMax) - 1; index++) {

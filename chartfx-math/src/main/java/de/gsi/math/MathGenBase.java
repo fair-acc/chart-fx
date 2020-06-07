@@ -10,11 +10,7 @@ package de.gsi.math;
 
 import java.util.Locale;
 
-//suppression rationale: class originates from ROOT which uses a Taligent convention, keeping this for better comparison, math complexity is by design (in this class only!!)
-@SuppressWarnings({ "PMD.MethodNamingConventions", "PMD.FieldNamingConventions", "PMD.FormalParameterNamingConventions", "PMD.LocalVariableNamingConventions",
-        "PMD.CommentSize", "PMD.AvoidUsingShortType", "PMD.UseUnderscoresInNumericLiterals", "PMD.AvoidLiteralsInIfCondition", "PMD.NPathComplexity", "PMD.NcssCount",
-        "PMD.ExcessiveMethodLength" })
-public class TMath extends TMathConstants {
+public class MathGenBase extends MathBase {
     private static final int kWorkMax = 100;
 
     /**
@@ -31,7 +27,7 @@ public class TMath extends TMathConstants {
      * @param z input value
      * @return the computed result
      */
-    public double KolmogorovProb(double z) {
+    public double kolmogorovProb(double z) {
         final double[] fj = { -2, -8, -18, -32 };
         final double[] r = new double[4];
         final double w = 2.50662827;
@@ -40,21 +36,21 @@ public class TMath extends TMathConstants {
         final double c2 = -11.103304951225528;
         final double c3 = -30.842513753404244;
 
-        final double u = Abs(z);
+        final double u = abs(z);
         final double p;
         if (u < 0.2) {
             p = 1;
         } else if (u < 0.755) {
             final double v = 1. / (u * u);
-            p = 1 - w * (Exp(c1 * v) + Exp(c2 * v) + Exp(c3 * v)) / u;
+            p = 1 - w * (exp(c1 * v) + exp(c2 * v) + exp(c3 * v)) / u;
         } else if (u < 6.8116) {
             r[1] = 0;
             r[2] = 0;
             r[3] = 0;
             final double v = u * u;
-            final int maxj = Max(1, Nint(3. / u));
+            final int maxj = max(1, nInt(3. / u));
             for (int j = 0; j < maxj; j++) {
-                r[j] = Exp(fj[j] * v);
+                r[j] = exp(fj[j] * v);
             }
             p = 2 * (r[0] - r[1] + r[2] - r[3]);
         } else {
@@ -63,7 +59,7 @@ public class TMath extends TMathConstants {
         return p;
     }
 
-    /*
+    /**
      * Statistical test whether two one-dimensional sets of points are compatible with coming from the same parent
      * distribution, using the Kolmogorov test. That is, it is used to compare two experimental distributions of
      * unbinned data. Input: a,b: One-dimensional arrays of length na, nb, respectively. The elements of a and b must be
@@ -101,7 +97,7 @@ public class TMath extends TMathConstants {
      * @param option see above
      * @return the computed result
      */
-    public double KolmogorovTest(int na, double[] a, int nb, double[] b, String option) {
+    public double kolmogorovTest(int na, double[] a, int nb, double[] b, String option) {
         double prob = -1;
         // Require at least two points in each graph
         if (a == null || b == null || na <= 2 || nb <= 2) {
@@ -128,7 +124,7 @@ public class TMath extends TMathConstants {
             ia = 1;
         }
 
-        double rdmax = Abs(rdiff);
+        double rdmax = abs(rdiff);
 
         // Main loop over point sets to find max distance
         // rdiff is the running difference, and rdmax the max.
@@ -168,14 +164,14 @@ public class TMath extends TMathConstants {
                 }
             }
 
-            rdmax = Max(rdmax, Abs(rdiff));
+            rdmax = max(rdmax, abs(rdiff));
         }
         // Should never terminate this loop with ok = false!
 
         if (ok) {
-            rdmax = Max(rdmax, Abs(rdiff));
-            final double z = rdmax * Sqrt(rna * rnb / (rna + rnb));
-            prob = KolmogorovProb(z);
+            rdmax = max(rdmax, abs(rdiff));
+            final double z = rdmax * sqrt(rna * rnb / (rna + rnb));
+            prob = kolmogorovProb(z);
         }
         // debug printout
         final String opt = option.toUpperCase(Locale.UK);
@@ -202,7 +198,7 @@ public class TMath extends TMathConstants {
      * @param work see above
      * @return the computed result
      */
-    double KOrdStat(int n, double[] a, int k, int[] work) {
+    double kOrdStat(int n, double[] a, int k, int[] work) {
         boolean isAllocated = false;
         int i;
         int ir;
@@ -323,7 +319,7 @@ public class TMath extends TMathConstants {
      * @param index see above
      * @param type see above
      */
-    void Quantiles(int n, int nprob, double[] x, double[] quantiles, double[] prob, boolean isSorted, int[] index, int type) {
+    void quantiles(int n, int nprob, double[] x, double[] quantiles, double[] prob, boolean isSorted, int[] index, int type) {
         if (type < 1 || type > 9) {
             System.err.println("illegal value of type");
             return;
@@ -352,21 +348,21 @@ public class TMath extends TMathConstants {
                     if (isSorted) {
                         quantiles[i] = x[0];
                     } else {
-                        quantiles[i] = KOrdStat(n, x, 0, ind);
+                        quantiles[i] = kOrdStat(n, x, 0, ind);
                     }
                 } else {
-                    j = Max(FloorNint(npm) - 1, 0);
+                    j = max(floorNint(npm) - 1, 0);
                     if (npm - j - 1 > 1e-14) {
                         if (isSorted) {
                             quantiles[i] = x[j + 1];
                         } else {
-                            quantiles[i] = KOrdStat(n, x, j + 1, ind);
+                            quantiles[i] = kOrdStat(n, x, j + 1, ind);
                         }
                     } else {
                         if (isSorted) {
                             xj = x[j];
                         } else {
-                            xj = KOrdStat(n, x, j, ind);
+                            xj = kOrdStat(n, x, j, ind);
                         }
                         if (type == 1) {
                             quantiles[i] = xj;
@@ -375,17 +371,17 @@ public class TMath extends TMathConstants {
                             if (isSorted) {
                                 xjj = x[j + 1];
                             } else {
-                                xjj = KOrdStat(n, x, j + 1, ind);
+                                xjj = kOrdStat(n, x, j + 1, ind);
                             }
                             quantiles[i] = 0.5 * (xj + xjj);
                         }
 
                         if (type == 3) {
-                            if (!Even(j - 1)) {
+                            if (!even(j - 1)) {
                                 if (isSorted) {
                                     xjj = x[j + 1];
                                 } else {
-                                    xjj = KOrdStat(n, x, j + 1, ind);
+                                    xjj = kOrdStat(n, x, j + 1, ind);
                                 }
                                 quantiles[i] = xjj;
                             } else {
@@ -401,7 +397,7 @@ public class TMath extends TMathConstants {
             for (int i = 0; i < nprob; i++) {
                 np = n * prob[i];
                 if (np < 1 && type != 7 && type != 4) {
-                    quantiles[i] = KOrdStat(n, x, 0, ind);
+                    quantiles[i] = kOrdStat(n, x, 0, ind);
                 } else {
                     if (type == 4) {
                         npm = np;
@@ -421,15 +417,15 @@ public class TMath extends TMathConstants {
                     if (type == 9) {
                         npm = np + 0.25 * prob[i] + 0.375;
                     }
-                    intnpm = FloorNint(npm);
-                    j = Max(intnpm - 1, 0);
+                    intnpm = floorNint(npm);
+                    j = max(intnpm - 1, 0);
                     g = npm - intnpm;
                     if (isSorted) {
                         xj = x[j];
                         xjj = x[j + 1];
                     } else {
-                        xj = KOrdStat(n, x, j, ind);
-                        xjj = KOrdStat(n, x, j + 1, ind);
+                        xj = kOrdStat(n, x, j, ind);
+                        xjj = kOrdStat(n, x, j + 1, ind);
                     }
                     quantiles[i] = (1 - g) * xj + g * xjj;
                 }
@@ -437,7 +433,7 @@ public class TMath extends TMathConstants {
         }
     }
 
-    /*
+    /**
      * Calculates roots of polynomial of 3rd order a*x^3 + b*x^2 + c*x + d, where a == coef[3], b == coef[2], c ==
      * coef[1], d == coef[0] coef[3] must be different from 0 If the boolean returned by the method is false: ==> there
      * are 3 real roots a,b,c stored in roots If the boolean returned by the method is true: ==> there is one real root
@@ -447,7 +443,7 @@ public class TMath extends TMathConstants {
      * @param roots vector containing the computed result
      * @return true if successful
      */
-    public boolean RootsCubic(double[] coef, double[] roots) {
+    public boolean rootsCubic(double[] coef, double[] roots) {
         if (coef[3] == 0) {
             return false;
         }
@@ -486,19 +482,19 @@ public class TMath extends TMathConstants {
         d = ps33 + qs2 * qs2;
         if (d >= 0) {
             complex = true;
-            d = Sqrt(d);
+            d = sqrt(d);
             u = -qs2 + d;
             v = -qs2 - d;
             tmp = 1. / 3.;
-            lnu = Log(Abs(u));
-            lnv = Log(Abs(v));
-            su = Sign(1., u);
-            sv = Sign(1., v);
-            u = su * Exp(tmp * lnu);
-            v = sv * Exp(tmp * lnv);
+            lnu = log(abs(u));
+            lnv = log(abs(v));
+            su = sign(1., u);
+            sv = sign(1., v);
+            u = su * exp(tmp * lnu);
+            v = sv * exp(tmp * lnv);
             y1 = u + v;
             y2 = -y1 / 2;
-            y3 = ((u - v) * Sqrt(3.)) / 2;
+            y3 = ((u - v) * sqrt(3.)) / 2;
             tmp = r / 3;
             a = y1 - tmp;
             b = y2 - tmp;
@@ -513,14 +509,14 @@ public class TMath extends TMathConstants {
             final double pis3;
             ps3 = -ps3;
             ps33 = -ps33;
-            cphi = -qs2 / Sqrt(ps33);
-            phi = ACos(cphi);
+            cphi = -qs2 / sqrt(ps33);
+            phi = aCos(cphi);
             phis3 = phi / 3;
-            pis3 = Pi() / 3;
-            c1 = Cos(phis3);
-            c2 = Cos(pis3 + phis3);
-            c3 = Cos(pis3 - phis3);
-            tmp = Sqrt(ps3);
+            pis3 = pi() / 3;
+            c1 = cos(phis3);
+            c2 = cos(pis3 + phis3);
+            c3 = cos(pis3 - phis3);
+            tmp = sqrt(ps3);
             y1 = 2 * tmp * c1;
             y2 = -2 * tmp * c2;
             y3 = -2 * tmp * c3;
@@ -536,7 +532,7 @@ public class TMath extends TMathConstants {
         return complex;
     }
 
-    /*
+    /**
      * Computation of Voigt function (normalised). Voigt is a convolution of gauss(xx) = 1/(sqrt(2*pi)*sigma) *
      * exp(xx*xx/(2*sigma*sigma) and lorentz(xx) = (1/pi) * (lg/2) / (xx*xx + g*g/4) functions. The Voigt function is
      * known to be the real part of Faddeeva function also called complex error function [2]. The algoritm was developed
@@ -552,7 +548,7 @@ public class TMath extends TMathConstants {
      * @param r see above
      * @return the computed result
      */
-    public double Voigt(double xx, double sigma, double lg, int r) {
+    public double voigt(double xx, double sigma, double lg, int r) {
         if ((sigma < 0 || lg < 0) || (sigma == 0 && lg == 0)) {
             return 0; // Not meant to be for those who want to be thinner than 0
         }
@@ -562,7 +558,7 @@ public class TMath extends TMathConstants {
         }
 
         if (lg == 0) { // pure gauss
-            return 0.39894228 / sigma * Exp(-xx * xx / (2 * sigma * sigma));
+            return 0.39894228 / sigma * exp(-xx * xx / (2 * sigma * sigma));
         }
 
         final double x;
@@ -581,8 +577,8 @@ public class TMath extends TMathConstants {
             r = 5;
         }
 
-        r0 = 1.51 * Exp(1.144 * r);
-        r1 = 1.60 * Exp(0.554 * r);
+        r0 = 1.51 * exp(1.144 * r);
+        r1 = 1.60 * exp(0.554 * r);
 
         // Constants
 
@@ -668,7 +664,7 @@ public class TMath extends TMathConstants {
             xlim2 = xlim0;
         }
 
-        abx = Abs(x); // |x|
+        abx = abs(x); // |x|
         xq = abx * abx; // x^2
         if (abx > xlim0) { // Region 0 algorithm
             k = yrrtpi / (xq + yq);
@@ -736,27 +732,29 @@ public class TMath extends TMathConstants {
                     k = k + (c[j] * (mq[j] * mf[j] - y0 * ym[j]) + s[j] * yf * xm[j]) / (mq[j] + y0q)
                         + (c[j] * (pq[j] * pf[j] - y0 * yp[j]) - s[j] * yf * xp[j]) / (pq[j] + y0q);
                 }
-                k = y * k + Exp(-xq);
+                k = y * k + exp(-xq);
             }
         }
 
         return k / 2.506628 / sigma; // Normalize by dividing by sqrt(2*pi)*sigma.
     }
 
-    public static double BesselI(int n, double x) {
-        // Compute the Integer Order Modified Bessel function I_n(x)
-        // for n=0,1,2,... and any real x.
-        //
-        // --- NvE 12-mar-2000 UU-SAP Utrecht
+    /**
+    *  Compute the Integer Order Modified Bessel function I_n(x)
+    *  for n=0,1,2,... and any real x.
+    *
+    *  --- NvE 12-mar-2000 UU-SAP Utrecht
+     */
+    public static double besselI(int n, double x) {
         if (n < 0) {
             System.err.println("BesselI(): *I* Invalid argument(s) (n,x) = (" + n + ", " + x + ")");
             return 0;
         }
         if (n == 0) {
-            return BesselI0(x);
+            return besselI0(x);
         }
         if (n == 1) {
-            return BesselI1(x);
+            return besselI1(x);
         }
 
         if (x == 0) {
@@ -764,7 +762,7 @@ public class TMath extends TMathConstants {
         }
 
         final double kBigPositive = 1.e10;
-        if (Abs(x) > kBigPositive) {
+        if (abs(x) > kBigPositive) {
             return 0;
         }
 
@@ -772,18 +770,18 @@ public class TMath extends TMathConstants {
 
         final double kBigNegative = 1.e-10;
 
-        final double tox = 2 / Abs(x);
+        final double tox = 2 / abs(x);
         double bip = 0;
         double bim = 0;
         double bi = 1;
         double result = 0;
-        final int m = 2 * (n + (int) (Sqrt(iacc * n)));
+        final int m = 2 * (n + (int) (sqrt(iacc * n)));
         for (int j = m; j >= 1; j--) {
             bim = bip + (j) *tox * bi;
             bip = bi;
             bi = bim;
             // Renormalise to prevent overflows
-            if (Abs(bi) > kBigPositive) {
+            if (abs(bi) > kBigPositive) {
                 result *= kBigNegative;
                 bi *= kBigNegative;
                 bip *= kBigNegative;
@@ -793,7 +791,7 @@ public class TMath extends TMathConstants {
             }
         }
 
-        result *= BesselI0(x) / bi; // Normalise with BesselI0(x)
+        result *= besselI0(x) / bi; // Normalise with BesselI0(x)
         if ((x < 0) && (n % 2 == 1)) {
             result = -result;
         }
@@ -801,14 +799,14 @@ public class TMath extends TMathConstants {
         return result;
     }
 
-    public static double BesselI0(double x) {
-        //
-        // --- NvE 12-mar-2000 UU-SAP Utrecht
-        // Parameters of the polynomial approximation
-        // Compute the modified Bessel function I_0(x) for any real x.
-        //
-        // --- NvE 12-mar-2000 UU-SAP Utrecht
-
+    /**
+    *  --- NvE 12-mar-2000 UU-SAP Utrecht
+    *  Parameters of the polynomial approximation
+    *  Compute the modified Bessel function I_0(x) for any real x.
+    *
+    *  --- NvE 12-mar-2000 UU-SAP Utrecht
+     */
+    public static double besselI0(double x) {
         // Parameters of the polynomial approximation
         final double p1 = 1.0;
         final double p2 = 3.5156229;
@@ -829,7 +827,7 @@ public class TMath extends TMathConstants {
         final double q9 = 3.92377e-3;
 
         final double k1 = 3.75;
-        final double ax = Abs(x);
+        final double ax = abs(x);
 
         double y = 0;
         double result = 0;
@@ -840,26 +838,26 @@ public class TMath extends TMathConstants {
             result = p1 + y * (p2 + y * (p3 + y * (p4 + y * (p5 + y * (p6 + y * p7)))));
         } else {
             y = k1 / ax;
-            result = (Exp(ax) / Sqrt(ax))
+            result = (exp(ax) / sqrt(ax))
                      * (q1 + y * (q2 + y * (q3 + y * (q4 + y * (q5 + y * (q6 + y * (q7 + y * (q8 + y * q9))))))));
         }
         return result;
     }
 
-    public static double BesselI1(double x) {
-        //
-        // M.Abramowitz and I.A.Stegun, Handbook of Mathematical Functions,
-        // Applied Mathematics Series vol. 55 (1964), Washington.
-        //
-        // --- NvE 12-mar-2000 UU-SAP Utrecht
-        // Parameters of the polynomial approximation
-        // Compute the modified Bessel function I_1(x) for any real x.
-        //
-        // M.Abramowitz and I.A.Stegun, Handbook of Mathematical Functions,
-        // Applied Mathematics Series vol. 55 (1964), Washington.
-        //
-        // --- NvE 12-mar-2000 UU-SAP Utrecht
-
+    /**
+    * M.Abramowitz and I.A.Stegun, Handbook of Mathematical Functions,
+    * Applied Mathematics Series vol. 55 (1964), Washington.
+    *
+    * --- NvE 12-mar-2000 UU-SAP Utrecht
+    * Parameters of the polynomial approximation
+    * Compute the modified Bessel function I_1(x) for any real x.
+    *
+    * M.Abramowitz and I.A.Stegun, Handbook of Mathematical Functions,
+    * Applied Mathematics Series vol. 55 (1964), Washington.
+    *
+    * --- NvE 12-mar-2000 UU-SAP Utrecht
+     */
+    public static double besselI1(double x) {
         // Parameters of the polynomial approximation
         final double p1 = 0.5;
         final double p2 = 0.87890594;
@@ -880,7 +878,7 @@ public class TMath extends TMathConstants {
         final double q9 = -4.20059e-3;
 
         final double k1 = 3.75;
-        final double ax = Abs(x);
+        final double ax = abs(x);
 
         double y = 0;
         double result = 0;
@@ -891,7 +889,7 @@ public class TMath extends TMathConstants {
             result = x * (p1 + y * (p2 + y * (p3 + y * (p4 + y * (p5 + y * (p6 + y * p7))))));
         } else {
             y = k1 / ax;
-            result = (Exp(ax) / Sqrt(ax))
+            result = (exp(ax) / sqrt(ax))
                      * (q1 + y * (q2 + y * (q3 + y * (q4 + y * (q5 + y * (q6 + y * (q7 + y * (q8 + y * q9))))))));
             if (x < 0) {
                 result = -result;
@@ -900,9 +898,10 @@ public class TMath extends TMathConstants {
         return result;
     }
 
-    public static double BesselJ0(double x) {
-        // Returns the Bessel function J0(x) for any real x.
-
+    /**
+    * Returns the Bessel function J0(x) for any real x.
+     */
+    public static double besselJ0(double x) {
         final double ax;
         final double z;
         final double xx;
@@ -934,7 +933,7 @@ public class TMath extends TMathConstants {
         final double q10 = 0.934935152e-7;
         final double q11 = 0.636619772;
 
-        if ((ax = Abs(x)) < 8) {
+        if ((ax = abs(x)) < 8) {
             y = x * x;
             result1 = p1 + y * (p2 + y * (p3 + y * (p4 + y * (p5 + y * p6))));
             result2 = p7 + y * (p8 + y * (p9 + y * (p10 + y * (p11 + y))));
@@ -945,14 +944,15 @@ public class TMath extends TMathConstants {
             xx = ax - q1;
             result1 = 1 + y * (q2 + y * (q3 + y * (q4 + y * q5)));
             result2 = q6 + y * (q7 + y * (q8 + y * (q9 - y * q10)));
-            result = Sqrt(q11 / ax) * (Cos(xx) * result1 - z * Sin(xx) * result2);
+            result = sqrt(q11 / ax) * (cos(xx) * result1 - z * sin(xx) * result2);
         }
         return result;
     }
 
-    public static double BesselJ1(double x) {
-        // Returns the Bessel function J1(x) for any real x.
-
+    /**
+    * Returns the Bessel function J1(x) for any real x.
+     */
+    public static double besselJ1(double x) {
         final double ax;
         final double z;
         final double xx;
@@ -984,7 +984,7 @@ public class TMath extends TMathConstants {
         final double q10 = 0.105787412e-6;
         final double q11 = 0.636619772;
 
-        if ((ax = Abs(x)) < 8) {
+        if ((ax = abs(x)) < 8) {
             y = x * x;
             result1 = x * (p1 + y * (p2 + y * (p3 + y * (p4 + y * (p5 + y * p6)))));
             result2 = p7 + y * (p8 + y * (p9 + y * (p10 + y * (p11 + y))));
@@ -995,7 +995,7 @@ public class TMath extends TMathConstants {
             xx = ax - q1;
             result1 = 1 + y * (q2 + y * (q3 + y * (q4 + y * q5)));
             result2 = q6 + y * (q7 + y * (q8 + y * (q9 + y * q10)));
-            result = Sqrt(q11 / ax) * (Cos(xx) * result1 - z * Sin(xx) * result2);
+            result = sqrt(q11 / ax) * (cos(xx) * result1 - z * sin(xx) * result2);
             if (x < 0) {
                 result = -result;
             }
@@ -1003,28 +1003,29 @@ public class TMath extends TMathConstants {
         return result;
     }
 
-    public static double BesselK(int n, double x) {
-        // Compute the Integer Order Modified Bessel function K_n(x)
-        // for n=0,1,2,... and positive real x.
-        //
-        // --- NvE 12-mar-2000 UU-SAP Utrecht
-
+    /**
+    * Compute the Integer Order Modified Bessel function K_n(x)
+    * for n=0,1,2,... and positive real x.
+    *
+    * --- NvE 12-mar-2000 UU-SAP Utrecht
+    */
+    public static double besselK(int n, double x) {
         if (x <= 0 || n < 0) {
             System.err.println("BesselK(): *K* Invalid argument(s) (n,x) = (" + n + ", " + x + ")");
             return 0;
         }
 
         if (n == 0) {
-            return BesselK0(x);
+            return besselK0(x);
         }
         if (n == 1) {
-            return BesselK1(x);
+            return besselK1(x);
         }
 
         // Perform upward recurrence for all x
         final double tox = 2 / x;
-        double bkm = BesselK0(x);
-        double bk = BesselK1(x);
+        double bkm = besselK0(x);
+        double bk = besselK1(x);
         double bkp = 0;
         for (int j = 1; j < n; j++) {
             bkp = bkm + (j) *tox * bk;
@@ -1034,24 +1035,19 @@ public class TMath extends TMathConstants {
         return bk;
     }
 
-    public static double BesselK0(double x) {
+    /*
+    * Compute the modified Bessel function K_0(x) for positive real x.
+    *
+    * M.Abramowitz and I.A.Stegun, Handbook of Mathematical Functions,
+    * Applied Mathematics Series vol. 55 (1964), Washington.
+    *
+    * --- NvE 12-mar-2000 UU-SAP Utrecht
+    */
+    public static double besselK0(double x) {
         if (x <= 0) {
             System.err.println("BesselK0(): *K0* Invalid argument x = " + x);
             return 0;
         }
-        //
-        // M.Abramowitz and I.A.Stegun, Handbook of Mathematical Functions,
-        // Applied Mathematics Series vol. 55 (1964), Washington.
-        //
-        // --- NvE 12-mar-2000 UU-SAP Utrecht
-        // Parameters of the polynomial approximation
-        // Compute the modified Bessel function K_0(x) for positive real x.
-        //
-        // M.Abramowitz and I.A.Stegun, Handbook of Mathematical Functions,
-        // Applied Mathematics Series vol. 55 (1964), Washington.
-        //
-        // --- NvE 12-mar-2000 UU-SAP Utrecht
-
         // Parameters of the polynomial approximation
         final double p1 = -0.57721566;
         final double p2 = 0.42278420;
@@ -1074,33 +1070,28 @@ public class TMath extends TMathConstants {
 
         if (x <= 2) {
             y = x * x / 4;
-            result = (-Log(x / 2.) * BesselI0(x))
+            result = (-log(x / 2.) * besselI0(x))
                      + (p1 + y * (p2 + y * (p3 + y * (p4 + y * (p5 + y * (p6 + y * p7))))));
         } else {
             y = 2 / x;
-            result = (Exp(-x) / Sqrt(x)) * (q1 + y * (q2 + y * (q3 + y * (q4 + y * (q5 + y * (q6 + y * q7))))));
+            result = (exp(-x) / sqrt(x)) * (q1 + y * (q2 + y * (q3 + y * (q4 + y * (q5 + y * (q6 + y * q7))))));
         }
         return result;
     }
 
-    public static double BesselK1(double x) {
+    /**
+    * Compute the modified Bessel function K_1(x) for positive real x.
+    *
+    * M.Abramowitz and I.A.Stegun, Handbook of Mathematical Functions,
+    * Applied Mathematics Series vol. 55 (1964), Washington.
+    *
+    * --- NvE 12-mar-2000 UU-SAP Utrecht
+    */
+    public static double besselK1(double x) {
         if (x <= 0) {
             System.err.println("BesselK1(): *K1* Invalid argument x = " + x);
             return 0;
         }
-        //
-        // M.Abramowitz and I.A.Stegun, Handbook of Mathematical Functions,
-        // Applied Mathematics Series vol. 55 (1964), Washington.
-        //
-        // --- NvE 12-mar-2000 UU-SAP Utrecht
-        // Parameters of the polynomial approximation
-        // Compute the modified Bessel function K_1(x) for positive real x.
-        //
-        // M.Abramowitz and I.A.Stegun, Handbook of Mathematical Functions,
-        // Applied Mathematics Series vol. 55 (1964), Washington.
-        //
-        // --- NvE 12-mar-2000 UU-SAP Utrecht
-
         // Parameters of the polynomial approximation
         final double p1 = 1.;
         final double p2 = 0.15443144;
@@ -1123,18 +1114,19 @@ public class TMath extends TMathConstants {
 
         if (x <= 2) {
             y = x * x / 4;
-            result = (Log(x / 2.) * BesselI1(x))
+            result = (log(x / 2.) * besselI1(x))
                      + (1. / x) * (p1 + y * (p2 + y * (p3 + y * (p4 + y * (p5 + y * (p6 + y * p7))))));
         } else {
             y = 2 / x;
-            result = (Exp(-x) / Sqrt(x)) * (q1 + y * (q2 + y * (q3 + y * (q4 + y * (q5 + y * (q6 + y * q7))))));
+            result = (exp(-x) / sqrt(x)) * (q1 + y * (q2 + y * (q3 + y * (q4 + y * (q5 + y * (q6 + y * q7))))));
         }
         return result;
     }
 
-    public static double BesselY0(double x) {
-        // Returns the Bessel function Y0(x) for positive x.
-
+    /**
+     * Returns the Bessel function Y0(x) for positive x.
+     */
+    public static double besselY0(double x) {
         final double z;
         final double xx;
         final double y;
@@ -1170,21 +1162,22 @@ public class TMath extends TMathConstants {
             y = x * x;
             result1 = p1 + y * (p2 + y * (p3 + y * (p4 + y * (p5 + y * p6))));
             result2 = p7 + y * (p8 + y * (p9 + y * (p10 + y * (p11 + y))));
-            result = (result1 / result2) + p12 * BesselJ0(x) * Log(x);
+            result = (result1 / result2) + p12 * besselJ0(x) * log(x);
         } else {
             z = 8 / x;
             y = z * z;
             xx = x - q1;
             result1 = 1 + y * (q2 + y * (q3 + y * (q4 + y * q5)));
             result2 = q6 + y * (q7 + y * (q8 + y * (q9 + y * q10)));
-            result = Sqrt(q11 / x) * (Sin(xx) * result1 + z * Cos(xx) * result2);
+            result = sqrt(q11 / x) * (sin(xx) * result1 + z * cos(xx) * result2);
         }
         return result;
     }
 
-    public static double BesselY1(double x) {
-        // Returns the Bessel function Y1(x) for positive x.
-
+    /**
+     * Returns the Bessel function Y1(x) for positive x.
+     */
+    public static double besselY1(double x) {
         final double z;
         final double xx;
         final double y;
@@ -1220,28 +1213,29 @@ public class TMath extends TMathConstants {
             y = x * x;
             result1 = x * (p1 + y * (p2 + y * (p3 + y * (p4 + y * (p5 + y * p6)))));
             result2 = p7 + y * (p8 + y * (p9 + y * (p10 + y * (p11 + y * (p12 + y)))));
-            result = (result1 / result2) + p13 * (BesselJ1(x) * Log(x) - 1 / x);
+            result = (result1 / result2) + p13 * (besselJ1(x) * log(x) - 1 / x);
         } else {
             z = 8 / x;
             y = z * z;
             xx = x - q1;
             result1 = 1 + y * (q2 + y * (q3 + y * (q4 + y * q5)));
             result2 = q6 + y * (q7 + y * (q8 + y * (q9 + y * q10)));
-            result = Sqrt(q11 / x) * (Sin(xx) * result1 + z * Cos(xx) * result2);
+            result = sqrt(q11 / x) * (sin(xx) * result1 + z * cos(xx) * result2);
         }
         return result;
     }
 
-    public static double Beta(double p, double q) {
-        // Calculates Beta-function Gamma(p)*Gamma(q)/Gamma(p+q).
-
-        return Exp(LnGamma(p) + LnGamma(q) - LnGamma(p + q));
+    /**
+     * Calculates Beta-function Gamma(p)*Gamma(q)/Gamma(p+q).
+     */
+    public static double beta(double p, double q) {
+        return exp(lnGamma(p) + lnGamma(q) - lnGamma(p + q));
     }
 
-    public static double BetaCf(double x, double a, double b) {
-        // Continued fraction evaluation by modified Lentz's method
-        // used in calculation of incomplete Beta function.
-
+    /**
+     * Continued fraction evaluation by modified Lentz's method used in calculation of incomplete Beta function.
+     */
+    public static double betaCf(double x, double a, double b) {
         final int itmax = 500;
         final double eps = 3.e-14;
         final double fpmin = 1.e-30;
@@ -1261,7 +1255,7 @@ public class TMath extends TMathConstants {
         qam = a - 1.0;
         c = 1.0;
         d = 1.0 - qab * x / qap;
-        if (Abs(d) < fpmin) {
+        if (abs(d) < fpmin) {
             d = fpmin;
         }
         d = 1.0 / d;
@@ -1270,28 +1264,28 @@ public class TMath extends TMathConstants {
             m2 = m * 2;
             aa = m * (b - m) * x / ((qam + m2) * (a + m2));
             d = 1.0 + aa * d;
-            if (Abs(d) < fpmin) {
+            if (abs(d) < fpmin) {
                 d = fpmin;
             }
             c = 1 + aa / c;
-            if (Abs(c) < fpmin) {
+            if (abs(c) < fpmin) {
                 c = fpmin;
             }
             d = 1.0 / d;
             h *= d * c;
             aa = -(a + m) * (qab + m) * x / ((a + m2) * (qap + m2));
             d = 1.0 + aa * d;
-            if (Abs(d) < fpmin) {
+            if (abs(d) < fpmin) {
                 d = fpmin;
             }
             c = 1.0 + aa / c;
-            if (Abs(c) < fpmin) {
+            if (abs(c) < fpmin) {
                 c = fpmin;
             }
             d = 1.0 / d;
             del = d * c;
             h *= del;
-            if (Abs(del - 1) <= eps) {
+            if (abs(del - 1) <= eps) {
                 break;
             }
         }
@@ -1304,8 +1298,6 @@ public class TMath extends TMathConstants {
         return h;
     }
 
-    // TODO: continue here
-
     /**
      * Computes the probability density function of the Beta distribution (the distribution function is computed in
      * BetaDistI). The first argument is the point, where the function will be computed, second and third are the
@@ -1317,34 +1309,37 @@ public class TMath extends TMathConstants {
      * @param q q parameter of beta function
      * @return probability density function of the Beta distribution
      */
-    public static double BetaDist(double x, double p, double q) {
+    public static double betaDist(double x, double p, double q) {
         if ((x < 0) || (x > 1) || (p <= 0) || (q <= 0)) {
             System.err.println("BetaDist(): - parameter value outside allowed range");
             return 0;
         }
-        final double beta = Beta(p, q);
-        final double r = Power(x, p - 1) * Power(1 - x, q - 1) / beta;
+        final double beta = beta(p, q);
+        final double r = pow(x, p - 1) * pow(1 - x, q - 1) / beta;
         return r;
     }
 
-    public static double BetaDistI(double x, double p, double q) {
-        // Computes the distribution function of the Beta distribution.
-        // The first argument is the point, where the function will be
-        // computed, second and third are the function parameters.
-        // Since the Beta distribution is bounded on both sides, it's often
-        // used to represent processes with natural lower and upper limits.
-
+    /**
+     * Computes the distribution function of the Beta distribution.
+     * The first argument is the point, where the function will be
+     * computed, second and third are the function parameters.
+     * Since the Beta distribution is bounded on both sides, it's often
+     * used to represent processes with natural lower and upper limits.
+     */
+    public static double betaDistI(double x, double p, double q) {
         if ((x < 0) || (x > 1) || (p <= 0) || (q <= 0)) {
             System.err.println("BetaDistI(): parameter value outside allowed range");
             return 0;
         }
-        final double betai = BetaIncomplete(x, p, q);
+        final double betai = betaIncomplete(x, p, q);
         return betai;
     }
 
-    public static double BetaIncomplete(double x, double a, double b) {
-        // Calculates the incomplete Beta-function.
-        // -- implementation by Anna Kreshuk
+    /**
+    * Calculates the incomplete Beta-function.
+    * -- implementation by Anna Kreshuk
+     */
+    public static double betaIncomplete(double x, double a, double b) {
         if ((x < 0.0) || (x > 1.0)) {
             System.err.println("BetaIncomplete(): X must between 0 and 1");
             return 0.0;
@@ -1353,13 +1348,27 @@ public class TMath extends TMathConstants {
         if ((x == 0.0) || (x == 1.0)) {
             bt = 0.0;
         } else {
-            bt = Power(x, a) * Power(1 - x, b) / Beta(a, b);
+            bt = pow(x, a) * pow(1 - x, b) / beta(a, b);
         }
         if (x < (a + 1) / (a + b + 2)) {
-            return bt * BetaCf(x, a, b) / a;
+            return bt * betaCf(x, a, b) / a;
         } else {
-            return (1 - bt * BetaCf(1 - x, b, a) / b);
+            return (1 - bt * betaCf(1 - x, b, a) / b);
         }
+    }
+
+    //// codegen: double -> float, int, long, short
+    /**
+     * Binary search in an array of n values to locate value. Array is supposed to be sorted prior to this call. If
+     * match is found, function returns position of element. If no match found, function gives nearest element smaller
+     * than value.
+     *
+     * @param array input vector
+     * @param value to be searched
+     * @return index of found value, -1 otherwise
+     */
+    public static long binarySearch(double[] array, double value) {
+        return binarySearch(array, 0, array.length, value);
     }
 
     /**
@@ -1369,10 +1378,11 @@ public class TMath extends TMathConstants {
      * 
      * @param array input vector
      * @param length &lt;= data.length elements to be used
+     * @param offset starting index in the array
      * @param value to be searched
      * @return index of found value, -1 otherwise
      */
-    public static long BinarySearch(double array[], int length, double value) {
+    public static long binarySearch(double[] array, int offset, int length, double value) {
         if (array == null || array.length <= 0) {
             return -1;
         }
@@ -1380,8 +1390,8 @@ public class TMath extends TMathConstants {
         int nabove;
         int nbelow;
         int middle;
-        nabove = n + 1;
-        nbelow = 0;
+        nabove = n + offset + 1;
+        nbelow = offset;
 
         while (nabove - nbelow > 1) {
             middle = (nabove + nbelow) / 2;
@@ -1397,153 +1407,12 @@ public class TMath extends TMathConstants {
 
         return nbelow - 1;
     }
+    //// end codegen
 
     /**
-     * Binary search in an array of n values to locate value. Array is supposed to be sorted prior to this call. If
-     * match is found, function returns position of element. If no match found, function gives nearest element smaller
-     * than value.
-     * 
-     * @param array input vector
-     * @param length &lt;= data.length elements to be used
-     * @param value to be searched
-     * @return index of found value, -1 otherwise
+     * Calculate the binomial coefficient n over k.
      */
-    public static long BinarySearch(float array[], int length, float value) {
-        if (array == null || array.length <= 0) {
-            return -1;
-        }
-        final int n = length;
-        int nabove;
-        int nbelow;
-        int middle;
-        nabove = n + 1;
-        nbelow = 0;
-
-        while (nabove - nbelow > 1) {
-            middle = (nabove + nbelow) / 2;
-            if (value == array[middle - 1]) {
-                return middle - 1;
-            }
-            if (value < array[middle - 1]) {
-                nabove = middle;
-            } else {
-                nbelow = middle;
-            }
-        }
-
-        return nbelow - 1;
-    }
-
-    /**
-     * Binary search in an array of n values to locate value. Array is supposed to be sorted prior to this call. If
-     * match is found, function returns position of element. If no match found, function gives nearest element smaller
-     * than value.
-     * 
-     * @param array input vector
-     * @param length &lt;= data.length elements to be used
-     * @param value to be searched
-     * @return index of found value, -1 otherwise
-     */
-    public static long BinarySearch(int array[], int length, int value) {
-        if (array == null || array.length <= 0) {
-            return -1;
-        }
-        final int n = length;
-        int nabove;
-        int nbelow;
-        int middle;
-        nabove = n + 1;
-        nbelow = 0;
-
-        while (nabove - nbelow > 1) {
-            middle = (nabove + nbelow) / 2;
-            if (value == array[middle - 1]) {
-                return middle - 1;
-            }
-            if (value < array[middle - 1]) {
-                nabove = middle;
-            } else {
-                nbelow = middle;
-            }
-        }
-
-        return nbelow - 1;
-    }
-
-    /**
-     * Binary search in an array of n values to locate value. Array is supposed to be sorted prior to this call. If
-     * match is found, function returns position of element. If no match found, function gives nearest element smaller
-     * than value.
-     * 
-     * @param array input vector
-     * @param length &lt;= data.length elements to be used
-     * @param value to be searched
-     * @return index of found value, -1 otherwise
-     */
-    public static long BinarySearch(long[] array, int length, long value) {
-        if (array == null || array.length <= 0) {
-            return -1;
-        }
-        final int n = length;
-        int nabove;
-        int nbelow;
-        int middle;
-        nabove = n + 1;
-        nbelow = 0;
-
-        while (nabove - nbelow > 1) {
-            middle = (nabove + nbelow) / 2;
-            if (value == array[middle - 1]) {
-                return middle - 1;
-            }
-            if (value < array[middle - 1]) {
-                nabove = middle;
-            } else {
-                nbelow = middle;
-            }
-        }
-
-        return nbelow - 1;
-    }
-
-    /**
-     * Binary search in an array of n values to locate value. Array is supposed to be sorted prior to this call. If
-     * match is found, function returns position of element. If no match found, function gives nearest element smaller
-     * than value.
-     * 
-     * @param array input vector
-     * @param length &lt;= data.length elements to be used
-     * @param value to be searched
-     * @return index of found value, -1 otherwise
-     */
-    public static long BinarySearch(short array[], int length, short value) {
-        if (array == null || array.length <= 0) {
-            return -1;
-        }
-        final int n = length;
-        int nabove;
-        int nbelow;
-        int middle;
-
-        nabove = n + 1;
-        nbelow = 0;
-        while (nabove - nbelow > 1) {
-            middle = (nabove + nbelow) / 2;
-            if (value == array[middle - 1]) {
-                return middle - 1;
-            }
-            if (value < array[middle - 1]) {
-                nabove = middle;
-            } else {
-                nbelow = middle;
-            }
-        }
-        return nbelow - 1;
-    }
-
-    public static double Binomial(int n, int k) {
-        // Calculate the binomial coefficient n over k.
-
+    public static double binomial(int n, int k) {
         if (k == 0 || n == k) {
             return 1;
         }
@@ -1551,7 +1420,7 @@ public class TMath extends TMathConstants {
             return 0;
         }
 
-        final int k1 = Min(k, n - k);
+        final int k1 = min(k, n - k);
         final int k2 = n - k1;
         double fact = k2 + 1;
         for (int i = k1; i > 1; i--) {
@@ -1560,18 +1429,15 @@ public class TMath extends TMathConstants {
         return fact;
     }
 
-    public static double BinomialI(double p, int n, int k) {
-        // Suppose an event occurs with probability _p_ per trial
-        // Then the probability P of its occuring _k_ or more times
-        // in _n_ trials is termed a cumulative binomial probability
-        // the formula is P = sum_from_j=k_to_n(Binomial(n, j)*
-        // *Power(p, j)*Power(1-p, n-j)
-        // For _n_ larger than 12 BetaIncomplete is a much better way
-        // to evaluate the sum than would be the straightforward sum calculation
-        // for _n_ smaller than 12 either method is acceptable
-        // ("Numerical Recipes")
-        // --implementation by Anna Kreshuk
-
+    /**
+    * Suppose an event occurs with probability _p_ per trial Then the probability P of its occuring _k_ or more times
+    * in _n_ trials is termed a cumulative binomial probability the formula is P = sum_from_j=k_to_n(Binomial(n, j)*
+    * *Power(p, j)*Power(1-p, n-j) For _n_ larger than 12 BetaIncomplete is a much better way
+    * to evaluate the sum than would be the straightforward sum calculation for _n_ smaller than 12 either method is acceptable
+    * ("Numerical Recipes")
+    * --implementation by Anna Kreshuk
+    */
+    public static double binomialI(double p, int n, int k) {
         if (k <= 0) {
             return 1.0;
         }
@@ -1579,10 +1445,10 @@ public class TMath extends TMathConstants {
             return 0.0;
         }
         if (k == n) {
-            return Power(p, n);
+            return pow(p, n);
         }
 
-        return BetaIncomplete(p, k, n - k + 1);
+        return betaIncomplete(p, k, n - k + 1);
     }
 
     /**
@@ -1593,9 +1459,9 @@ public class TMath extends TMathConstants {
      * @param gamma width of distribution
      * @return the computed result
      */
-    public static double BreitWigner(double x, double mean, double gamma) {
+    public static double breitWigner(double x, double mean, double gamma) {
         final double bw = gamma / ((x - mean) * (x - mean) + gamma * gamma / 4);
-        return bw / (2 * Pi());
+        return bw / (2 * pi());
     }
 
     /**
@@ -1611,13 +1477,11 @@ public class TMath extends TMathConstants {
      * @param s the scale parameter
      * @return Cauchy distribution at point x
      */
-    public static double CauchyDist(double x, double t, double s) {
+    public static double cauchyDist(double x, double t, double s) {
         final double temp = (x - t) * (x - t) / (s * s);
-        final double result = 1 / (s * Pi() * (1 + temp));
+        final double result = 1 / (s * pi() * (1 + temp));
         return result;
     }
-
-    // TODO: add array statistics here
 
     /**
      * Evaluate the quantiles of the chi-squared probability distribution function. Algorithm AS 91 Appl. Statist.
@@ -1628,7 +1492,7 @@ public class TMath extends TMathConstants {
      * @param ndf number of degrees of freedom
      * @return quantiles of the chi-squared probability distribution
      */
-    public static double ChisquareQuantile(double p, double ndf) {
+    public static double chisquareQuantile(double p, double ndf) {
         if (ndf <= 0) {
             return 0;
         }
@@ -1644,33 +1508,33 @@ public class TMath extends TMathConstants {
         double t;
         double a;
         final double x;
-        final double g = LnGamma(0.5 * ndf);
+        final double g = lnGamma(0.5 * ndf);
 
         final double xx = 0.5 * ndf;
         final double cp = xx - 1;
-        if (ndf >= Log(p) * (-c[5])) {
+        if (ndf >= log(p) * (-c[5])) {
             // starting approximation for ndf less than or equal to 0.32
             if (ndf > c[3]) {
-                x = NormQuantile(p);
+                x = normQuantile(p);
                 // starting approximation using Wilson and Hilferty estimate
                 p1 = c[2] / ndf;
-                ch = ndf * Power((x * Sqrt(p1) + 1 - p1), 3);
+                ch = ndf * pow((x * sqrt(p1) + 1 - p1), 3);
                 if (ch > c[6] * ndf + 6) {
-                    ch = -2 * (Log(1 - p) - cp * Log(0.5 * ch) + g);
+                    ch = -2 * (log(1 - p) - cp * log(0.5 * ch) + g);
                 }
             } else {
                 ch = c[4];
-                a = Log(1 - p);
+                a = log(1 - p);
                 do {
                     q = ch;
                     p1 = 1 + ch * (c[7] + ch);
                     p2 = ch * (c[9] + ch * (c[8] + ch));
                     t = -0.5 + (c[7] + 2 * ch) / p1 - (c[9] + ch * (c[10] + 3 * ch)) / p2;
-                    ch = ch - (1 - Exp(a + g + 0.5 * ch + cp * aa) * p2 / p1) / t;
-                } while (Abs(q / ch - 1) > c[1]);
+                    ch = ch - (1 - exp(a + g + 0.5 * ch + cp * aa) * p2 / p1) / t;
+                } while (abs(q / ch - 1) > c[1]);
             }
         } else {
-            ch = Power((p * xx * Exp(g + xx * aa)), (1. / xx));
+            ch = pow((p * xx * exp(g + xx * aa)), (1. / xx));
             if (ch < e) {
                 return ch;
             }
@@ -1687,9 +1551,9 @@ public class TMath extends TMathConstants {
         for (int i = 0; i < maxit; i++) {
             q = ch;
             p1 = 0.5 * ch;
-            p2 = p - Gamma(xx, p1);
+            p2 = p - gamma(xx, p1);
 
-            t = p2 * Exp(xx * aa + g + p1 - cp * Log(ch));
+            t = p2 * exp(xx * aa + g + p1 - cp * log(ch));
             b = t / ch;
             a = 0.5 * t - b * cp;
             s1 = (c[19] + a * (c[17] + a * (c[14] + a * (c[13] + a * (c[12] + c[11] * a))))) / c[24];
@@ -1699,7 +1563,7 @@ public class TMath extends TMathConstants {
             s5 = (c[13] + c[21] * a + cp * (c[18] + c[26] * a)) / c[37];
             s6 = (c[15] + cp * (c[23] + c[16] * cp)) / c[38];
             ch = ch + t * (1 + 0.5 * t * s1 - b * cp * (s1 - b * (s2 - b * (s3 - b * (s4 - b * (s5 - b * s6))))));
-            if (Abs(q / ch - 1) > e) {
+            if (abs(q / ch - 1) > e) {
                 break;
             }
         }
@@ -1714,7 +1578,7 @@ public class TMath extends TMathConstants {
      * @param w wheights weight vector
      * @return weighted correlation coefficient
      */
-    public static double CorrelationCoefficient(double[] x, double[] y, double[] w) {
+    public static double correlationCoefficient(double[] x, double[] y, double[] w) {
         final int n = x.length;
         if (y.length != n) {
             throw new IllegalArgumentException("x and y array lengths must be equal");
@@ -1723,10 +1587,10 @@ public class TMath extends TMathConstants {
             throw new IllegalArgumentException("x and weight array lengths must be equal");
         }
 
-        final double sxy = Covariance(x, y, w);
-        final double sx = Variance(x, w);
-        final double sy = Variance(y, w);
-        return sxy / Math.sqrt(sx * sy);
+        final double sxy = covariance(x, y, w);
+        final double sx = variance(x, w);
+        final double sy = variance(y, w);
+        return sxy / java.lang.Math.sqrt(sx * sy);
     }
 
     /**
@@ -1737,7 +1601,7 @@ public class TMath extends TMathConstants {
      * @param ww weights
      * @return weighted covariance
      */
-    public static double Covariance(double[] xx, double[] yy, double[] ww) {
+    public static double covariance(double[] xx, double[] yy, double[] ww) {
         final int n = xx.length;
         if (n != yy.length) {
             throw new IllegalArgumentException(
@@ -1747,7 +1611,7 @@ public class TMath extends TMathConstants {
             throw new IllegalArgumentException("length of x variable array, " + n + " and length of weight array, "
                                                + yy.length + " are different");
         }
-        final double nn = TMath.effectiveSampleNumber(ww);
+        final double nn = Math.effectiveSampleNumber(ww);
         final double nterm = nn / (nn - 1.0);
         if (/* n-factor tue: */ true) {
             // nterm = 1.0;
@@ -1774,6 +1638,7 @@ public class TMath extends TMathConstants {
         return sum * nterm / sumw;
     }
 
+    //// codegen: double -> float
     /**
      * Calculate the Cross Product of two vectors:
      * 
@@ -1782,148 +1647,13 @@ public class TMath extends TMathConstants {
      * @param out output vector
      * @return out = [v1 x v2]
      */
-    public static double[] Cross(double v1[], double v2[], double out[]) {
+    public static double[] cross(double v1[], double v2[], double out[]) {
         out[0] = v1[1] * v2[2] - v1[2] * v2[1];
         out[1] = v1[2] * v2[0] - v1[0] * v2[2];
         out[2] = v1[0] * v2[1] - v1[1] * v2[0];
         return out;
     }
-
-    /**
-     * Calculate the Cross Product of two vectors:
-     * 
-     * @param v1 input vector1
-     * @param v2 input vector2
-     * @param out output vector
-     * @return out = [v1 x v2]
-     */
-    public static float[] Cross(float v1[], float v2[], float out[]) {
-        out[0] = v1[1] * v2[2] - v1[2] * v2[1];
-        out[1] = v1[2] * v2[0] - v1[0] * v2[2];
-        out[2] = v1[0] * v2[1] - v1[1] * v2[0];
-
-        return out;
-    }
-
-    public static double[] Difference(double[] a, double[] b) {
-        return Difference(a, b, a.length);
-    }
-
-    /**
-     * computes the difference between vectors
-     * 
-     * @param a input vector a
-     * @param b input vector b
-     * @param length minimum length to be taken into account
-     * @return ret[] = a[] - b[]
-     */
-    public static double[] Difference(double[] a, double[] b, int length) {
-        if (length <= 0 || a == null || b == null || a.length < length || b.length < length) {
-            return new double[0];
-        }
-        final double[] ret = new double[length];
-        for (int i = 0; i < length; i++) {
-            ret[i] = (a[i] - b[i]);
-        }
-
-        return ret;
-    }
-
-    public static float[] Difference(float[] a, float[] b) {
-        return Difference(a, b, a.length);
-    }
-
-    /**
-     * computes the difference between vectors
-     * 
-     * @param a input vector a
-     * @param b input vector b
-     * @param length minimum length to be taken into account
-     * @return ret[] = a[] - b[]
-     */
-    public static float[] Difference(float[] a, float[] b, int length) {
-        if (length <= 0 || a == null || b == null || a.length < length || b.length < length) {
-            return new float[0];
-        }
-        final float[] ret = new float[length];
-        for (int i = 0; i < length; i++) {
-            ret[i] = (a[i] - b[i]);
-        }
-
-        return ret;
-    }
-
-    public static int[] Difference(int[] a, int[] b) {
-        return Difference(a, b, a.length);
-    }
-
-    /**
-     * computes the difference between vectors
-     * 
-     * @param a input vector a
-     * @param b input vector b
-     * @param length minimum length to be taken into account
-     * @return ret[] = a[] - b[]
-     */
-    public static int[] Difference(int[] a, int[] b, int length) {
-        if (length <= 0 || a == null || b == null || a.length < length || b.length < length) {
-            return new int[0];
-        }
-        final int[] ret = new int[length];
-        for (int i = 0; i < length; i++) {
-            ret[i] = (a[i] - b[i]);
-        }
-
-        return ret;
-    }
-
-    public static long[] Difference(long[] a, long[] b) {
-        return Difference(a, b, a.length);
-    }
-
-    /**
-     * computes the difference between vectors
-     * 
-     * @param a input vector a
-     * @param b input vector b
-     * @param length minimum length to be taken into account
-     * @return ret[] = a[] - b[]
-     */
-    public static long[] Difference(long[] a, long[] b, int length) {
-        if (length <= 0 || a == null || b == null || a.length < length || b.length < length) {
-            return new long[0];
-        }
-        final long[] ret = new long[length];
-        for (int i = 0; i < length; i++) {
-            ret[i] = (a[i] - b[i]);
-        }
-
-        return ret;
-    }
-
-    public static short[] Difference(short[] a, short[] b) {
-        return Difference(a, b, a.length);
-    }
-
-    /**
-     * computes the difference between vectors
-     * 
-     * @param a input vector a
-     * @param b input vector b
-     * @param length minimum length to be taken into account
-     * @return ret[] = a[] - b[]
-     */
-    public static short[] Difference(short[] a, short[] b, int length) {
-        if (length <= 0 || a == null || b == null || a.length < length || b.length < length) {
-            return new short[0];
-        }
-        final short[] ret = new short[length];
-        for (int i = 0; i < length; i++) {
-            ret[i] = (short) (a[i] - b[i]);
-        }
-
-        return ret;
-    }
+    //// end codegen
 
     /**
      * The DiLogarithm function Code translated by from CERNLIB DILOG function C332
@@ -1931,9 +1661,9 @@ public class TMath extends TMathConstants {
      * @param x input
      * @return the computed result
      */
-    public static double DiLog(double x) {
+    public static double diLog(double x) {
         final double hf = 0.5;
-        final double pi = Pi();
+        final double pi = pi();
         final double pi2 = pi * pi;
         final double pi3 = pi2 / 3;
         final double pi6 = pi2 / 6;
@@ -1963,23 +1693,23 @@ public class TMath extends TMathConstants {
             if (t <= -2) {
                 y = -1 / (1 + t);
                 s = 1;
-                b1 = Log(-t);
-                b2 = Log(1 + 1 / t);
+                b1 = log(-t);
+                b2 = log(1 + 1 / t);
                 a = -pi3 + hf * (b1 * b1 - b2 * b2);
             } else if (t < -1) {
                 y = -1 - t;
                 s = -1;
-                a = Log(-t);
-                a = -pi6 + a * (a + Log(1 + 1 / t));
+                a = log(-t);
+                a = -pi6 + a * (a + log(1 + 1 / t));
             } else if (t <= -0.5) {
                 y = -(1 + t) / t;
                 s = 1;
-                a = Log(-t);
-                a = -pi6 + a * (-hf * a + Log(1 + t));
+                a = log(-t);
+                a = -pi6 + a * (-hf * a + log(1 + t));
             } else if (t < 0) {
                 y = -t / (1 + t);
                 s = -1;
-                b1 = Log(1 + t);
+                b1 = log(1 + t);
                 a = hf * b1 * b1;
             } else if (t <= 1) {
                 y = t;
@@ -1988,7 +1718,7 @@ public class TMath extends TMathConstants {
             } else {
                 y = 1 / t;
                 s = -1;
-                b1 = Log(t);
+                b1 = log(t);
                 a = pi6 + hf * b1 * b1;
             }
 
@@ -2009,11 +1739,13 @@ public class TMath extends TMathConstants {
         return h;
     }
 
-    // Calculation of the effective sample number (double)
+    /**
+     * Calculation of the effective sample number (double)
+     */
     public static double effectiveSampleNumber(double[] ww) {
         final double[] weight = ww.clone();
         for (int i = 0; i < weight.length; i++) {
-            weight[i] = 1.0 / TMathConstants.Sqr(weight[i]);
+            weight[i] = 1.0 / MathBase.sqr(weight[i]);
         }
         final int n = weight.length;
 
@@ -2037,8 +1769,8 @@ public class TMath extends TMathConstants {
      * @param x input
      * @return the computed result
      */
-    public static double Erf(double x) {
-        return (1 - Erfc(x));
+    public static double erf(double x) {
+        return (1 - erfc(x));
     }
 
     /**
@@ -2048,9 +1780,9 @@ public class TMath extends TMathConstants {
      * @param x input parameter
      * @return the computed result
      */
-    public static double Erfc(double x) {
+    public static double erfc(double x) {
         double v = 1; // The return value
-        final double z = Math.abs(x);
+        final double z = java.lang.Math.abs(x);
 
         if (z <= 0) {
             return v; // erfc(0)=1
@@ -2070,7 +1802,7 @@ public class TMath extends TMathConstants {
 
         final double t = 1 / (1 + 0.5 * z);
 
-        v = t * Exp((-z * z) + a1 + t * (a2 + t * (a3 + t * (a4 + t * (a5 + t * (a6 + t * (a7 + t * (a8 + t * (a9 + t * a10)))))))));
+        v = t * exp((-z * z) + a1 + t * (a2 + t * (a3 + t * (a4 + t * (a5 + t * (a6 + t * (a7 + t * (a8 + t * (a9 + t * a10)))))))));
 
         if (x < 0) {
             v = 2 - v; // erfc(-x)=2-erfc(x)
@@ -2085,11 +1817,11 @@ public class TMath extends TMathConstants {
      * @param x must be &lt;-1&lt;x&lt;1
      * @return the computed result
      */
-    public static double ErfInverse(double x) {
+    public static double erfInverse(double x) {
         final double kEps = 1e-14;
         final double kConst = 0.8862269254527579; // sqrt(pi)/2.0
 
-        if (Abs(x) <= kEps) {
+        if (abs(x) <= kEps) {
             return kConst * x;
         }
 
@@ -2101,14 +1833,14 @@ public class TMath extends TMathConstants {
         double dy0;
         double dy1;
         final int kMaxit = 50;
-        if (Abs(x) < 1.0) {
-            erfi = kConst * Abs(x);
-            y0 = Erf(0.9 * erfi);
+        if (abs(x) < 1.0) {
+            erfi = kConst * abs(x);
+            y0 = erf(0.9 * erfi);
             derfi = 0.1 * erfi;
             for (int iter = 0; iter < kMaxit; iter++) {
-                y1 = 1. - Erfc(erfi);
-                dy1 = Abs(x) - y1;
-                if (Abs(dy1) < kEps) {
+                y1 = 1. - erfc(erfi);
+                dy1 = abs(x) - y1;
+                if (abs(dy1) < kEps) {
                     if (x < 0) {
                         return -erfi;
                     } else {
@@ -2120,7 +1852,7 @@ public class TMath extends TMathConstants {
                 y0 = y1;
                 erfi += derfi;
 
-                if (Abs(derfi / erfi) < kEps) {
+                if (abs(derfi / erfi) < kEps) {
                     if (x < 0) {
                         return -erfi;
                     } else {
@@ -2139,7 +1871,7 @@ public class TMath extends TMathConstants {
      * @param n input parameter
      * @return the computed result
      */
-    public static double Factorial(int n) {
+    public static double factorial(int n) {
         if (n <= 0) {
             return 1.;
         }
@@ -2152,46 +1884,41 @@ public class TMath extends TMathConstants {
         return x;
     }
 
-    public static double FDist(double F, double N, double M) {
-        // Computes the density function of F-distribution
-        // (probability function, integral of density, is computed in FDistI).
-        //
-        // Parameters N and M stand for degrees of freedom of chi-squares
-        // mentioned above parameter F is the actual variable x of the
-        // density function p(x) and the point at which the density function
-        // is calculated.
-        //
-        // About F distribution:
-        // F-distribution arises in testing whether two random samples
-        // have the same variance. It is the ratio of two chi-square
-        // distributions, with N and M degrees of freedom respectively,
-        // where each chi-square is first divided by it's number of degrees
-        // of freedom.
-        // Implementation by Anna Kreshuk.
-
+    /**
+     * Computes the density function of F-distribution * (probability function, integral of density, is computed in FDistI).
+     *
+     * Parameters N and M stand for degrees of freedom of chi-squares * mentioned above parameter F is the actual
+     * variable x of the density function p(x) and the point at which the density function is calculated.
+     *
+     * About F distribution:
+     * F-distribution arises in testing whether two random samples have the same variance. It is the ratio of two
+     * chi-square distributions, with N and M degrees of freedom respectively, where each chi-square is first divided
+     * by it's number of degrees of freedom.
+     *
+     * Implementation by Anna Kreshuk.
+     */
+    public static double fDist(double F, double N, double M) {
         if ((F < 0) || (N < 1) || (M < 1)) {
             return 0;
         } else {
-            final double denom = Gamma(N / 2) * Gamma(M / 2) * Power(M + N * F, (N + M) / 2);
-            final double div = Gamma((N + M) / 2) * Power(N, N / 2) * Power(M, M / 2) * Power(F, 0.5 * N - 1);
+            final double denom = gamma(N / 2) * gamma(M / 2) * pow(M + N * F, (N + M) / 2);
+            final double div = gamma((N + M) / 2) * pow(N, N / 2) * pow(M, M / 2) * pow(F, 0.5 * N - 1);
             return div / denom;
         }
     }
 
-    public static double FDistI(double F, double N, double M) {
-        // Calculates the cumulative distribution function of F-distribution,
-        // this function occurs in the statistical test of whether two observed
-        // samples have the same variance. For this test a certain statistic F,
-        // the ratio of observed dispersion of the first sample to that of the
-        // second sample, is calculated. N and M stand for numbers of degrees
-        // of freedom in the samples 1-FDistI() is the significance level at
-        // which the hypothesis "1 has smaller variance than 2" can be rejected.
-        // A small numerical value of 1 - FDistI() implies a very significant
-        // rejection, in turn implying high confidence in the hypothesis
-        // "1 has variance greater than 2".
-        // Implementation by Anna Kreshuk.
-
-        final double fi = 1 - BetaIncomplete((M / (M + N * F)), M * 0.5, N * 0.5);
+    /**
+     * Calculates the cumulative distribution function of F-distribution, this function occurs in the statistical test
+     * of whether two observed samples have the same variance. For this test a certain statistic F, the ratio of
+     * observed dispersion of the first sample to that of the second sample, is calculated. N and M stand for numbers
+     * of degrees of freedom in the samples 1-FDistI() is the significance level at which the hypothesis "1 has smaller
+     * variance than 2" can be rejected. A small numerical value of 1 - FDistI() implies a very significant rejection,
+     * in turn implying high confidence in the hypothesis "1 has variance greater than 2".
+     *
+     * Implementation by Anna Kreshuk.
+     */
+    public static double fDistI(double F, double N, double M) {
+        final double fi = 1 - betaIncomplete((M / (M + N * F)), M * 0.5, N * 0.5);
         return fi;
     }
 
@@ -2202,7 +1929,7 @@ public class TMath extends TMathConstants {
      * @param x input parameter
      * @return the computed result
      */
-    public static double Freq(double x) {
+    public static double freq(double x) {
         final double c1 = 0.56418958354775629;
         final double w2 = 1.41421356237309505;
 
@@ -2243,7 +1970,7 @@ public class TMath extends TMathConstants {
         final double p34 = -2.23192459734184686e-2;
         final double q34 = 1;
 
-        final double v = Abs(x) / w2;
+        final double v = abs(x) / w2;
         final double vv = v * v;
         double ap;
         double aq;
@@ -2280,7 +2007,7 @@ public class TMath extends TMathConstants {
             aq = q22 + v * aq;
             aq = q21 + v * aq;
             aq = q20 + v * aq;
-            hc = Exp(-vv) * ap / aq;
+            hc = exp(-vv) * ap / aq;
             h = 1 - hc;
         } else {
             y = 1 / vv;
@@ -2294,7 +2021,7 @@ public class TMath extends TMathConstants {
             aq = q32 + y * aq;
             aq = q31 + y * aq;
             aq = q30 + y * aq;
-            hc = Exp(-vv) * (c1 + y * ap / aq) / v;
+            hc = exp(-vv) * (c1 + y * ap / aq) / v;
             h = 1 - hc;
         }
 
@@ -2313,7 +2040,7 @@ public class TMath extends TMathConstants {
      * @param x input parameter
      * @return the computed result
      */
-    public static double GamCf(double a, double x) {
+    public static double gamCf(double a, double x) {
         if (a <= 0 || x <= 0) {
             return 0;
         }
@@ -2322,7 +2049,7 @@ public class TMath extends TMathConstants {
         final double eps = 3.e-14; // Relative accuracy
         final double fpmin = 1.e-30; // Smallest double value allowed here
 
-        final double gln = LnGamma(a);
+        final double gln = lnGamma(a);
         double b = x + 1 - a;
         double c = 1 / fpmin;
         double d = 1 / b;
@@ -2333,23 +2060,23 @@ public class TMath extends TMathConstants {
             an = (-i) * ((i) -a);
             b += 2;
             d = an * d + b;
-            if (Abs(d) < fpmin) {
+            if (abs(d) < fpmin) {
                 d = fpmin;
             }
             c = b + an / c;
-            if (Abs(c) < fpmin) {
+            if (abs(c) < fpmin) {
                 c = fpmin;
             }
             d = 1 / d;
             del = d * c;
             h *= del;
-            if (Abs(del - 1) < eps) {
+            if (abs(del - 1) < eps) {
                 break;
                 // if (i==itmax) cout << "*GamCf(a,x)* a too large or itmax too
                 // small" << endl;
             }
         }
-        final double v = Exp(-x + a * Log(x) - gln) * h;
+        final double v = exp(-x + a * log(x) - gln) * h;
         return (1 - v);
     }
 
@@ -2360,13 +2087,13 @@ public class TMath extends TMathConstants {
      * @param z input parameter
      * @return gamma(z)
      */
-    public static double Gamma(double z) {
+    public static double gamma(double z) {
         if (z <= 0) {
             return 0;
         }
 
-        final double v = LnGamma(z);
-        return Exp(v);
+        final double v = lnGamma(z);
+        return exp(v);
     }
 
     /**
@@ -2379,34 +2106,38 @@ public class TMath extends TMathConstants {
      * @param x input parameter
      * @return the computed result
      */
-    public static double Gamma(double a, double x) {
+    public static double gamma(double a, double x) {
         if (a <= 0 || x <= 0) {
             return 0;
         }
 
         if (x < (a + 1)) {
-            return GamSer(a, x);
+            return gamSer(a, x);
         } else {
-            return GamCf(a, x);
+            return gamCf(a, x);
         }
     }
 
-    public static double GammaDist(double x, double gamma, double mu, double beta) {
-        // Computes the density function of Gamma distribution at point x.
-        // gamma - shape parameter
-        // mu - location parameter
-        // beta - scale parameter
-        // The formula was taken from "Engineering Statistics Handbook" on site
-        // http://www.itl.nist.gov/div898/handbook/eda/section3/eda366b.htm
-        // Implementation by Anna Kreshuk.
-
+    /**
+     * Computes the density function of Gamma distribution at point x.
+     *
+     * The formula was taken from "Engineering Statistics Handbook" on site
+     * http://www.itl.nist.gov/div898/handbook/eda/section3/eda366b.htm
+     * Implementation by Anna Kreshuk.
+     *
+     * @param x
+     * @param gamma shape parameter
+     * @param mu location parameter
+     * @param beta scale parameter
+     */
+    public static double gammaDist(double x, double gamma, double mu, double beta) {
         if ((x < mu) || (gamma <= 0) || (beta <= 0)) {
             System.err.println("GammaDist(): illegal parameter values");
             return 0;
         }
         final double temp = (x - mu) / beta;
-        final double temp2 = beta * Gamma(gamma);
-        final double result = (Power(temp, gamma - 1) * Exp(-temp)) / temp2;
+        final double temp2 = beta * gamma(gamma);
+        final double result = (pow(temp, gamma - 1) * exp(-temp)) / temp2;
         return result;
     }
 
@@ -2418,14 +2149,14 @@ public class TMath extends TMathConstants {
      * @param x input parameter
      * @return the computed result
      */
-    public static double GamSer(double a, double x) {
+    public static double gamSer(double a, double x) {
         if (a <= 0 || x <= 0) {
             return 0;
         }
         final int itmax = 100; // Maximum number of iterations
         final double eps = 3.e-14; // Relative accuracy
 
-        final double gln = LnGamma(a);
+        final double gln = lnGamma(a);
         double ap = a;
         double sum = 1 / a;
         double del = sum;
@@ -2433,13 +2164,13 @@ public class TMath extends TMathConstants {
             ap += 1;
             del = del * x / ap;
             sum += del;
-            if (Abs(del) < Abs(sum * eps)) {
+            if (abs(del) < abs(sum * eps)) {
                 break;
                 // if (n==itmax) cout << "*GamSer(a,x)* a too large or itmax too
                 // small" << endl;
             }
         }
-        final double v = sum * Exp(-x + a * Log(x) - gln);
+        final double v = sum * exp(-x + a * log(x) - gln);
         return v;
     }
 
@@ -2453,167 +2184,49 @@ public class TMath extends TMathConstants {
      * @param norm normalisation factor
      * @return the computed result
      */
-    public static double Gauss(double x, double mean, double sigma, boolean norm) {
+    public static double gauss(double x, double mean, double sigma, boolean norm) {
         if (sigma == 0) {
             return 1.e30;
         }
         final double arg = (x - mean) / sigma;
-        final double res = Exp(-0.5 * arg * arg);
+        final double res = exp(-0.5 * arg * arg);
         if (!norm) {
             return res;
         }
         return res / (2.50662827463100024 * sigma); // sqrt(2*Pi)=2.50662827463100024
     }
 
+    //// codegen: double -> float, int, long, short
     /**
      * geometric_mean = (\Prod_{i=0}^{n-1} \abs{a[i]})^{1/n}
      * 
      * @param a input vector
+     * @param offset starting index in the array
      * @param length &lt;= data.length elements to be used
      * @return geometric mean of an array a with length n.
      */
-    public static double GeometricMean(double[] a, int length) {
+    public static double geometricMean(double[] a, int offset, int length) {
         if (a == null || a.length <= 0) {
             return -1;
         }
-        double logsum = 0.0;
+        double logsum = 0.0; //// codegen: skip all
 
-        // use logarithm represenation:
-        // product in linear regime -> sum in logarithmic scale
-        for (int i = 0; i < length; i++) {
-            if (a[i] == 0) {
-                return 0.;
-            }
-            final double absa = Math.abs(a[i]);
-            logsum += Math.log(absa);
-        }
-
-        return Math.exp(logsum / length);
-    }
-
-    public static double GeometricMean(double[] data) {
-        return GeometricMean(data, data.length);
-    }
-
-    /**
-     * geometric_mean = (\Prod_{i=0}^{n-1} \abs{a[i]})^{1/n}
-     * 
-     * @param a input vector
-     * @param length &lt;= data.length elements to be used
-     * @return geometric mean of an array a with length n.
-     */
-    public static float GeometricMean(float[] a, int length) {
-        if (a == null || a.length <= 0) {
-            return -1;
-        }
-        double logsum = 0.0;
-
-        // use logarithm represenation:
-        // product in linear regime -> sum in logarithmic scale
-        for (int i = 0; i < length; i++) {
-            if (a[i] == 0) {
-                return 0.f;
-            }
-            final double absa = Math.abs(a[i]);
-            logsum += Math.log(absa);
-        }
-
-        return (float) Math.exp(logsum / length);
-    }
-
-    public static float GeometricMean(float[] data) {
-        return GeometricMean(data, data.length);
-    }
-
-    /**
-     * geometric_mean = (\Prod_{i=0}^{n-1} \abs{a[i]})^{1/n}
-     * 
-     * @param a input vector
-     * @param length &lt;= data.length elements to be used
-     * @return geometric mean of an array a with length n.
-     */
-    public static int GeometricMean(int[] a, int length) {
-        if (a == null || a.length <= 0) {
-            return -1;
-        }
-        double logsum = 0.0;
-
-        // use logarithm represenation:
-        // product in linear regime -> sum in logarithmic scale
-        for (int i = 0; i < length; i++) {
+        // use logarithm representation: product in linear regime -> sum in logarithmic scale
+        for (int i = offset; i < length + offset; i++) {
             if (a[i] == 0) {
                 return 0;
             }
-            final double absa = Math.abs(a[i]);
-            logsum += Math.log(absa);
+            final double absa = java.lang.Math.abs(a[i]); //// codegen: skip all
+            logsum += java.lang.Math.log(absa);
         }
 
-        return (int) Math.exp(logsum / length);
+        return java.lang.Math.exp(logsum / length); //// codegen: returncast all
     }
 
-    public static int GeometricMean(int[] data) {
-        return GeometricMean(data, data.length);
+    public static double geometricMean(double[] data) {
+        return geometricMean(data, 0, data.length);
     }
-
-    /**
-     * geometric_mean = (\Prod_{i=0}^{n-1} \abs{a[i]})^{1/n}
-     * 
-     * @param a input vector
-     * @param length &lt;= data.length elements to be used
-     * @return geometric mean of an array a with length n.
-     */
-    public static long GeometricMean(long[] a, int length) {
-        if (a == null || a.length <= 0) {
-            return -1;
-        }
-        double logsum = 0.0;
-
-        // use logarithm represenation:
-        // product in linear regime -> sum in logarithmic scale
-        for (int i = 0; i < length; i++) {
-            if (a[i] == 0) {
-                return 0;
-            }
-            final double absa = Math.abs(a[i]);
-            logsum += Math.log(absa);
-        }
-
-        return (long) Math.exp(logsum / length);
-    }
-
-    public static long GeometricMean(long[] data) {
-        return GeometricMean(data, data.length);
-    }
-
-    /**
-     * geometric_mean = (\Prod_{i=0}^{n-1} \abs{a[i]})^{1/n}
-     * 
-     * @param a input vector
-     * @param length &lt;= data.length elements to be used
-     * @return geometric mean of an array a with length n.
-     */
-    public static short GeometricMean(short[] a, int length) {
-        if (a == null || a.length <= 0) {
-            return -1;
-        }
-        double logsum = 0.0;
-
-        // use logarithm represenation:
-        // product in linear regime -> sum in logarithmic scale
-        for (int i = 0; i < length; i++) {
-            if (a[i] == 0) {
-                return 0;
-            }
-            final double absa = Math.abs(a[i]);
-            logsum += Math.log(absa);
-        }
-
-        return (short) Math.exp(logsum / a.length);
-    }
-
-    public static short GeometricMean(short[] data) {
-        return GeometricMean(data, data.length);
-    }
+    //// end codegen
 
     private static double[] invertAndSquare(double[] values) {
         final double[] ret = new double[values.length];
@@ -2628,12 +2241,13 @@ public class TMath extends TMathConstants {
             } else if (Double.isInfinite(val)) {
                 ret[i] = 0.0;
             } else {
-                ret[i] = 1.0 / TMathConstants.Power(val, 2);
+                ret[i] = 1.0 / MathBase.pow(val, 2);
             }
         }
         return ret;
     }
 
+    //// codegen: double -> float, int
     /**
      * Function which returns true if point xp,yp lies inside the polygon defined by the np points in arrays x and y,
      * false otherwise NOTE that the polygon must be a closed polygon (1st and last point must be identical).
@@ -2645,7 +2259,7 @@ public class TMath extends TMathConstants {
      * @param y y coordinates of polygon
      * @return true if point xp,yp lies inside
      */
-    public static boolean IsInside(double xp, double yp, int np, double x[], double y[]) {
+    public static boolean isInside(double xp, double yp, int np, double x[], double y[]) {
         double xint;
         int inter = 0;
         double xn;
@@ -2687,7 +2301,7 @@ public class TMath extends TMathConstants {
      * @param y y coordinates of polygon
      * @return true if point xp, yp lies inside the polygon defined
      */
-    public static boolean IsInside(float xp, float yp, int np, float x[], float y[]) {
+    public static boolean isInside(float xp, float yp, int np, float x[], float y[]) {
         double xint;
         int inter = 0;
         for (int i = 0; i < np - 1; i++) {
@@ -2720,7 +2334,7 @@ public class TMath extends TMathConstants {
      * @param y y coordinates of polygon
      * @return true if point xp, yp lies inside the polygon defined
      */
-    public static boolean IsInside(int xp, int yp, int np, int x[], int y[]) {
+    public static boolean isInside(int xp, int yp, int np, int x[], int y[]) {
         double xint;
         int inter = 0;
         for (int i = 0; i < np - 1; i++) {
@@ -2752,7 +2366,7 @@ public class TMath extends TMathConstants {
      * @param norm normalisation of distribution
      * @return the computed result
      */
-    public static double Landau(double x, double mpv, double sigma, boolean norm) {
+    public static double landau(double x, double mpv, double sigma, boolean norm) {
         if (sigma <= 0) {
             return 0;
         }
@@ -2783,16 +2397,16 @@ public class TMath extends TMathConstants {
         final double us;
         final double den;
         if (v < -5.5) {
-            u = Exp(v + 1.0);
+            u = exp(v + 1.0);
             if (u < 1e-10) {
                 return 0.0;
             }
-            ue = Exp(-1 / u);
-            us = Sqrt(u);
+            ue = exp(-1 / u);
+            us = sqrt(u);
             den = 0.3989422803 * (ue / us) * (1 + (a1[0] + (a1[1] + a1[2] * u) * u) * u);
         } else if (v < -1) {
-            u = Exp(-v - 1);
-            den = Exp(-u) * Sqrt(u) * (p1[0] + (p1[1] + (p1[2] + (p1[3] + p1[4] * v) * v) * v) * v)
+            u = exp(-v - 1);
+            den = exp(-u) * sqrt(u) * (p1[0] + (p1[1] + (p1[2] + (p1[3] + p1[4] * v) * v) * v) * v)
                   / (q1[0] + (q1[1] + (q1[2] + (q1[3] + q1[4] * v) * v) * v) * v);
         } else if (v < 1) {
             den = (p2[0] + (p2[1] + (p2[2] + (p2[3] + p2[4] * v) * v) * v) * v)
@@ -2813,7 +2427,7 @@ public class TMath extends TMathConstants {
             den = u * u * (p6[0] + (p6[1] + (p6[2] + (p6[3] + p6[4] * u) * u) * u) * u)
                   / (q6[0] + (q6[1] + (q6[2] + (q6[3] + q6[4] * u) * u) * u) * u);
         } else {
-            u = 1 / (v - v * Log(v) / (v + 1));
+            u = 1 / (v - v * log(v) / (v + 1));
             den = u * u * (1 + (a2[0] + a2[1] * u) * u);
         }
 
@@ -2824,12 +2438,12 @@ public class TMath extends TMathConstants {
         return den / sigma;
     }
 
-    public static double LandauI(double x) {
-        // Returns the value of the Landau distribution function at point x.
-        // The algorithm was taken from the Cernlib function dislan(G110)
-        // Reference: K.S.Kolbig and B.Schorr, "A program package for the Landau
-        // distribution", Computer Phys.Comm., 31(1984), 97-111
-
+    /**
+     * Returns the value of the Landau distribution function at point x.
+     * The algorithm was taken from the Cernlib function dislan(G110)
+     * Reference: K.S.Kolbig and B.Schorr, "A program package for the Landau distribution", Computer Phys.Comm., 31(1984), 97-111
+     */
+    public static double landauI(double x) {
         final double[] p1 = { 0.2514091491e+0, -0.6250580444e-1, 0.1458381230e-1, -0.2108817737e-2, 0.7411247290e-3 };
         final double[] q1 = { 1.0, -0.5571175625e-2, 0.6225310236e-1, -0.3137378427e-2, 0.1931496439e-2 };
 
@@ -2857,11 +2471,11 @@ public class TMath extends TMathConstants {
         final double lan;
         v = x;
         if (v < -5.5) {
-            u = Exp(v + 1);
-            lan = 0.3989422803 * Exp(-1. / u) * Sqrt(u) * (1 + (a1[1] + (a1[2] + a1[3] * u) * u) * u);
+            u = exp(v + 1);
+            lan = 0.3989422803 * exp(-1. / u) * sqrt(u) * (1 + (a1[1] + (a1[2] + a1[3] * u) * u) * u);
         } else if (v < -1) {
-            u = Exp(-v - 1);
-            lan = (Exp(-u) / Sqrt(u)) * (p1[0] + (p1[1] + (p1[2] + (p1[3] + p1[4] * v) * v) * v) * v)
+            u = exp(-v - 1);
+            lan = (exp(-u) / sqrt(u)) * (p1[0] + (p1[1] + (p1[2] + (p1[3] + p1[4] * v) * v) * v) * v)
                   / (q1[0] + (q1[1] + (q1[2] + (q1[3] + q1[4] * v) * v) * v) * v);
         } else if (v < 1) {
             lan = (p2[0] + (p2[1] + (p2[2] + p2[3] * v) * v) * v) / (q2[0] + (q2[1] + (q2[2] + q2[3] * v) * v) * v);
@@ -2877,38 +2491,41 @@ public class TMath extends TMathConstants {
             u = 1. / v;
             lan = (p6[0] + (p6[1] + (p6[2] + p6[3] * u) * u) * u) / (q6[0] + (q6[1] + (q6[2] + q6[3] * u) * u) * u);
         } else {
-            u = 1. / (v - v * Log(v) / (v + 1));
+            u = 1. / (v - v * log(v) / (v + 1));
             lan = 1 - (a2[1] + (a2[2] + a2[3] * u) * u) * u;
         }
         return lan;
     }
 
-    public static double LaplaceDist(double x, double alpha, double beta) {
-        // Computes the probability density funciton of Laplace distribution
-        // at point x, with location parameter alpha and shape parameter beta.
-        // By default, alpha=0, beta=1
-        // This distribution is known under different names, most common is
-        // double exponential distribution, but it also appears as
-        // the two-tailed exponential or the bilateral exponential distribution
+    /**
+     * Computes the probability density funciton of Laplace distribution
+     * at point x, with location parameter alpha and shape parameter beta.
+     * By default, alpha=0, beta=1
+     * This distribution is known under different names, most common is
+     * double exponential distribution, but it also appears as
+     * the two-tailed exponential or the bilateral exponential distribution
+     */
+    public static double laplaceDist(double x, double alpha, double beta) {
         double temp;
-        temp = Exp(-Abs((x - alpha) / beta));
+        temp = exp(-abs((x - alpha) / beta));
         temp /= (2. * beta);
         return temp;
     }
 
-    public static double LaplaceDistI(double x, double alpha, double beta) {
-        // Computes the distribution funciton of Laplace distribution
-        // at point x, with location parameter alpha and shape parameter beta.
-        // By default, alpha=0, beta=1
-        // This distribution is known under different names, most common is
-        // double exponential distribution, but it also appears as
-        // the two-tailed exponential or the bilateral exponential distribution
-
+    /**
+     * Computes the distribution funciton of Laplace distribution
+     * at point x, with location parameter alpha and shape parameter beta.
+     * By default, alpha=0, beta=1
+     * This distribution is known under different names, most common is
+     * double exponential distribution, but it also appears as
+     * the two-tailed exponential or the bilateral exponential distribution
+     */
+    public static double laplaceDistI(double x, double alpha, double beta) {
         final double temp;
         if (x <= alpha) {
-            temp = 0.5 * Exp(-Abs((x - alpha) / beta));
+            temp = 0.5 * exp(-abs((x - alpha) / beta));
         } else {
-            temp = 1 - 0.5 * Exp(-Abs((x - alpha) / beta));
+            temp = 1 - 0.5 * exp(-abs((x - alpha) / beta));
         }
         return temp;
     }
@@ -2920,7 +2537,7 @@ public class TMath extends TMathConstants {
      * @param z input paramater
      * @return ln[gamma(z)]
      */
-    public static double LnGamma(double z) {
+    public static double lnGamma(double z) {
         if (z <= 0) {
             return 0.0;
         }
@@ -2932,21 +2549,22 @@ public class TMath extends TMathConstants {
         final double x = z;
         double y = x;
         double tmp = x + 5.5;
-        tmp = (x + 0.5) * Log(tmp) - tmp;
+        tmp = (x + 0.5) * log(tmp) - tmp;
         double ser = 1.000000000190015;
         for (int i = 1; i < 7; i++) {
             y += 1;
             ser += c[i] / y;
         }
-        return tmp + Log(c[0] * ser / x);
+        return tmp + log(c[0] * ser / x);
     }
 
+    //// codegen: double -> float, int, long, short
     /**
      * @param a input vector
      * @param length &lt;= data.length elements to be used
      * @return index of array with the minimum element. If more than one element is minimum returns first found.
      */
-    public static long LocationMaximum(double[] a, int length) {
+    public static long locationMaximum(double[] a, int length) {
         if (a == null || a.length <= 0) {
             return -1;
         }
@@ -2966,67 +2584,7 @@ public class TMath extends TMathConstants {
      * @param length &lt;= data.length elements to be used
      * @return index of array with the minimum element. If more than one element is minimum returns first found.
      */
-    public static long LocationMaximum(float[] a, int length) {
-        if (a == null || a.length <= 0) {
-            return -1;
-        }
-        float xmax = a[0];
-        long location = 0;
-        for (int i = 1; i < length; i++) {
-            if (xmax < a[i]) {
-                xmax = a[i];
-                location = i;
-            }
-        }
-        return location;
-    }
-
-    /**
-     * @param a input vector
-     * @param length &lt;= data.length elements to be used
-     * @return index of array with the minimum element. If more than one element is minimum returns first found.
-     */
-    public static long LocationMaximum(int[] a, int length) {
-        if (a == null || a.length <= 0) {
-            return -1;
-        }
-        int xmax = a[0];
-        long location = 0;
-        for (int i = 1; i < length; i++) {
-            if (xmax < a[i]) {
-                xmax = a[i];
-                location = i;
-            }
-        }
-        return location;
-    }
-
-    /**
-     * @param a input vector
-     * @param length &lt;= data.length elements to be used
-     * @return index of array with the minimum element. If more than one element is minimum returns first found.
-     */
-    public static long LocationMaximum(long[] a, int length) {
-        if (a == null || a.length <= 0) {
-            return -1;
-        }
-        long xmax = a[0];
-        long location = 0;
-        for (int i = 1; i < length; i++) {
-            if (xmax < a[i]) {
-                xmax = a[i];
-                location = i;
-            }
-        }
-        return location;
-    }
-
-    /**
-     * @param a input vector
-     * @param length &lt;= data.length elements to be used
-     * @return index of array with the minimum element. If more than one element is minimum returns first found.
-     */
-    public static long LocationMinimum(double[] a, int length) {
+    public static long locationMinimum(double[] a, int length) {
         if (a == null || a.length <= 0) {
             return -1;
         }
@@ -3040,86 +2598,7 @@ public class TMath extends TMathConstants {
         }
         return location;
     }
-
-    /**
-     * @param a input vector
-     * @param length &lt;= data.length elements to be used
-     * @return index of array with the minimum element. If more than one element is minimum returns first found.
-     */
-    public static long LocationMinimum(float[] a, int length) {
-        if (a == null || a.length <= 0) {
-            return -1;
-        }
-        float xmin = a[0];
-        long location = 0;
-        for (int i = 1; i < length; i++) {
-            if (xmin > a[i]) {
-                xmin = a[i];
-                location = i;
-            }
-        }
-        return location;
-    }
-
-    /**
-     * @param a input vector
-     * @param length &lt;= data.length elements to be used
-     * @return index of array with the minimum element. If more than one element is minimum returns first found.
-     */
-    public static long LocationMinimum(int[] a, int length) {
-        if (a == null || a.length <= 0) {
-            return -1;
-        }
-        int xmin = a[0];
-        long location = 0;
-        for (int i = 1; i < length; i++) {
-            if (xmin > a[i]) {
-                xmin = a[i];
-                location = i;
-            }
-        }
-        return location;
-    }
-
-    /**
-     * @param a input vector
-     * @param length &lt;= data.length elements to be used
-     * @return index of array with the minimum element. If more than one element is minimum returns first found.
-     */
-    public static long LocationMinimum(long[] a, int length) {
-        if (a == null || a.length <= 0) {
-            return -1;
-        }
-        long xmin = a[0];
-        long location = 0;
-        for (int i = 1; i < length; i++) {
-            if (xmin > a[i]) {
-                xmin = a[i];
-                location = i;
-            }
-        }
-        return location;
-    }
-
-    /**
-     * @param a input vector
-     * @param length &lt;= data.length elements to be used
-     * @return index of array with the minimum element. If more than one element is minimum returns first found.
-     */
-    public static long LocationMinimum(short[] a, int length) {
-        if (a == null || a.length <= 0) {
-            return -1;
-        }
-        short xmin = a[0];
-        long location = 0;
-        for (int i = 1; i < length; i++) {
-            if (xmin > a[i]) {
-                xmin = a[i];
-                location = i;
-            }
-        }
-        return location;
-    }
+    //// end codegen
 
     /**
      * Computes the density of LogNormal distribution at point x. Variable X has lognormal distribution if Y=Ln(X) has
@@ -3132,35 +2611,21 @@ public class TMath extends TMathConstants {
      * @param m the scale parameter
      * @return density of LogNormal distribution at point x
      */
-    public static double LogNormal(double x, double sigma, double theta, double m) {
+    public static double logNormal(double x, double sigma, double theta, double m) {
         if ((x < theta) || (sigma <= 0) || (m <= 0)) {
             System.err.println("Lognormal(): illegal parameter values");
             return 0;
         }
-        final double templog2 = Log((x - theta) / m) * Log((x - theta) / m);
-        final double temp1 = Exp(-templog2 / (2 * sigma * sigma));
-        final double temp2 = (x - theta) * sigma * Sqrt(2 * Pi());
+        final double templog2 = log((x - theta) / m) * log((x - theta) / m);
+        final double temp1 = exp(-templog2 / (2 * sigma * sigma));
+        final double temp2 = (x - theta) * sigma * sqrt(2 * pi());
 
         return temp1 / temp2;
     }
 
-    public static void main(String argv[]) {
-        // Some simple test cases
-
-        final double[] a = new double[11];
-        for (int i = 0; i < a.length; i++) {
-            a[i] = i + 1;
-        }
-        System.out.println("mean      = " + TMath.Mean(a));
-        System.out.println("rms       = " + TMath.RMS(a));
-        System.out.println("min       = " + TMath.Minimum(a));
-        System.out.println("max       = " + TMath.Maximum(a));
-        System.out.println("median    = " + TMath.Median(a));
-        System.out.println("geo. mean = " + TMath.GeometricMean(a));
-    }
-
-    public static double Maximum(double[] data) {
-        return Maximum(data, data.length);
+    //// codegen: double -> float, int, long, short
+    public static double maximum(double[] data) {
+        return maximum(data, data.length);
     }
 
     /**
@@ -3168,86 +2633,16 @@ public class TMath extends TMathConstants {
      * @param length &lt;= data.length elements to be used
      * @return value of largest vector element
      */
-    public static double Maximum(double[] data, int length) {
-        double val = -Double.MAX_VALUE;
+    public static double maximum(double[] data, int length) {
+        double val = -Double.MAX_VALUE; //// codegen: subst:int:Int:Integer
         for (int i = 0; i < length; i++) {
             val = Math.max(val, data[i]);
         }
         return val;
     }
 
-    public static float Maximum(float[] data) {
-        return Maximum(data, data.length);
-    }
-
-    /**
-     * @param data the input vector
-     * @param length &lt;= data.length elements to be used
-     * @return value of largest vector element
-     */
-    public static float Maximum(float[] data, int length) {
-        float val = -Float.MAX_VALUE;
-        for (int i = 0; i < length; i++) {
-            val = Math.max(val, data[i]);
-        }
-        return val;
-    }
-
-    public static int Maximum(int[] data) {
-        return Maximum(data, data.length);
-    }
-
-    /**
-     * @param data the input vector
-     * @param length &lt;= data.length elements to be used
-     * @return value of largest vector element
-     */
-    public static int Maximum(int[] data, int length) {
-        int val = -Integer.MAX_VALUE;
-        for (int i = 0; i < length; i++) {
-            val = Math.max(val, data[i]);
-        }
-        return val;
-    }
-
-    public static long Maximum(long[] data) {
-        return Maximum(data, data.length);
-    }
-
-    /**
-     * @param data the input vector
-     * @param length &lt;= data.length elements to be used
-     * @return value of largest vector element
-     */
-    public static long Maximum(long[] data, int length) {
-        long val = -Long.MAX_VALUE;
-        for (int i = 0; i < length; i++) {
-            val = Math.max(val, data[i]);
-        }
-        return val;
-    }
-
-    public static short Maximum(short[] data) {
-        return Maximum(data, data.length);
-    }
-
-    /**
-     * @param data the input vector
-     * @param length &lt;= data.length elements to be used
-     * @return value of largest vector element
-     */
-    public static short Maximum(short[] data, int length) {
-        short val = -Short.MAX_VALUE;
-        for (int i = 0; i < length; i++) {
-            if (val > data[i]) {
-                val = data[i];
-            }
-        }
-        return val;
-    }
-
-    public static double Mean(double[] data) {
-        return Mean(data, data.length);
+    public static double mean(double[] data) {
+        return mean(data, data.length);
     }
 
     /**
@@ -3255,89 +2650,17 @@ public class TMath extends TMathConstants {
      * @param length &lt;= data.length elements to be used
      * @return average of vector elements
      */
-    public static double Mean(double[] data, int length) {
-        final double norm = 1.0 / (length);
-        double val = 0.0;
+    public static double mean(double[] data, int length) {
+        final double norm = 1.0 / (length); //// codegen: skip int, long, short //// subst:float:1.0:1.0f
+        double val = 0.0; //// codegen: skip int, long, short //// subst:float:0.0:0.0f
         for (int i = 0; i < length; i++) {
             val += norm * data[i];
         }
-        return val;
+        return val; //// codegen: returncast int, long, short
     }
 
-    public static float Mean(float[] data) {
-        return Mean(data, data.length);
-    }
-
-    /**
-     * @param data the input vector
-     * @param length of the input vector
-     * @return average of vector elements
-     */
-    public static float Mean(float[] data, int length) {
-        final float norm = 1.0f / (length);
-        float val = 0.0f;
-        for (int i = 0; i < length; i++) {
-            val += norm * data[i];
-        }
-        return val;
-    }
-
-    public static int Mean(int[] data) {
-        return Mean(data, data.length);
-    }
-
-    /**
-     * @param data the input vector
-     * @param length of the input vector
-     * @return average of vector elements
-     */
-    public static int Mean(int[] data, int length) {
-        final double norm = 1.0 / (length);
-        double val = 0.0;
-        for (int i = 0; i < length; i++) {
-            val += norm * data[i];
-        }
-        return (int) val;
-    }
-
-    public static long Mean(long[] data) {
-        return Mean(data, data.length);
-    }
-
-    /**
-     * @param data the input vector
-     * @param length &lt;= data.length elements to be used
-     * @return average of vector elements
-     */
-    public static long Mean(long[] data, int length) {
-        final double norm = 1.0 / (length);
-        double val = 0.0;
-        for (int i = 0; i < length; i++) {
-            val += norm * data[i];
-        }
-        return (long) val;
-    }
-
-    public static short Mean(short[] data) {
-        return Mean(data, data.length);
-    }
-
-    /**
-     * @param data the input vector
-     * @param length of the input vector
-     * @return average of vector elements
-     */
-    public static short Mean(short[] data, int length) {
-        final double norm = 1.0 / (length);
-        double val = 0.0;
-        for (int i = 0; i < length; i++) {
-            val += norm * data[i];
-        }
-        return (short) val;
-    }
-
-    public static double Median(double[] data) {
-        return Median(data, data.length);
+    public static double median(double[] data) {
+        return median(data, data.length);
     }
 
     /**
@@ -3345,93 +2668,18 @@ public class TMath extends TMathConstants {
      * @param length &lt;= data.length elements to be used
      * @return median value of vector element
      */
-    public static double Median(double[] data, int length) {
-        final double[] temp = Sort(data, length, false);
+    public static double median(double[] data, int length) {
+        final double[] temp = sort(data, length, false);
 
         if (length % 2 == 0) {
-            return 0.5 * (temp[length / 2] + temp[length / 2 + 1]);
+            return (0.5 * (temp[length / 2] + temp[length / 2 + 1])); //// codegen: returncast all
         } else {
             return temp[length / 2];
         }
     }
 
-    public static float Median(float[] data) {
-        return Median(data, data.length);
-    }
-
-    /**
-     * @param data the input vector
-     * @param length &lt;= data.length elements to be used
-     * @return median value of vector element
-     */
-    public static float Median(float[] data, int length) {
-        final float[] temp = Sort(data, length, false);
-        if (length % 2 == 0) {
-            return 0.5f * (temp[length / 2] + temp[length / 2 + 1]);
-        } else {
-            return data[length / 2];
-        }
-    }
-
-    public static int Median(int[] data) {
-        return Median(data, data.length);
-    }
-
-    /**
-     * @param data the input vector
-     * @param length &lt;= data.length elements to be used
-     * @return median value of vector element
-     */
-    public static int Median(int[] data, int length) {
-        final int[] temp = Sort(data, length, false);
-        if (length % 2 == 0) {
-            return (int) (0.5 * (temp[length / 2] + temp[length / 2 + 1]));
-        } else {
-            return temp[length / 2];
-        }
-    }
-
-    // TODO: check whether we need harmonic mean as well.
-    // hm = n / \sum_i^{n} 1/x_i
-
-    public static long Median(long[] data) {
-        return Median(data, data.length);
-    }
-
-    /**
-     * @param data the input vector
-     * @param length &lt;= data.length elements to be used
-     * @return median value of vector element
-     */
-    public static long Median(long[] data, int length) {
-        final long[] temp = Sort(data, length, false);
-        if (length % 2 == 0) {
-            return (long) (0.5 * (temp[length / 2] + data[length / 2 + 1]));
-        } else {
-            return temp[length / 2];
-        }
-    }
-
-    public static short Median(short[] data) {
-        return Median(data, data.length);
-    }
-
-    /**
-     * @param data the input vector
-     * @param length &lt;= data.length elements to be used
-     * @return median value of vector element
-     */
-    public static short Median(short[] data, int length) {
-        final short[] temp = Sort(data, length, false);
-        if (length % 2 == 0) {
-            return (short) (0.5 * (temp[length / 2] + temp[length / 2 + 1]));
-        } else {
-            return temp[length / 2];
-        }
-    }
-
-    public static double Minimum(double[] data) {
-        return Minimum(data, data.length);
+    public static double minimum(double[] data) {
+        return minimum(data, data.length);
     }
 
     /**
@@ -3439,84 +2687,16 @@ public class TMath extends TMathConstants {
      * @param length &lt;= data.length elements to be used
      * @return value of smallest vector element
      */
-    public static double Minimum(double[] data, int length) {
-        double val = +Double.MAX_VALUE;
+    public static double minimum(double[] data, int length) {
+        double val = +Double.MAX_VALUE; //// codegen: subst:int:Int:Integer
         for (int i = 0; i < length; i++) {
-            val = Math.min(val, data[i]);
+            val = min(val, data[i]);
         }
         return val;
     }
+    //// end codegen
 
-    public static float Minimum(float[] data) {
-        return Minimum(data, data.length);
-    }
-
-    /**
-     * @param data the input vector
-     * @param length &lt;= data.length elements to be used
-     * @return value of smallest vector element
-     */
-    public static float Minimum(float[] data, int length) {
-        float val = +Float.MAX_VALUE;
-        for (int i = 0; i < length; i++) {
-            val = Math.min(val, data[i]);
-        }
-        return val;
-    }
-
-    public static int Minimum(int[] data) {
-        return Minimum(data, data.length);
-    }
-
-    /**
-     * @param data the input vector
-     * @param length &lt;= data.length elements to be used
-     * @return value of smallest vector element
-     */
-    public static int Minimum(int[] data, int length) {
-        int val = +Integer.MAX_VALUE;
-        for (int i = 0; i < length; i++) {
-            val = Math.min(val, data[i]);
-        }
-        return val;
-    }
-
-    public static long Minimum(long[] data) {
-        return Minimum(data, data.length);
-    }
-
-    /**
-     * @param data the input vector
-     * @param length &lt;= data.length elements to be used
-     * @return value of smallest vector element
-     */
-    public static long Minimum(long[] data, int length) {
-        long val = +Long.MAX_VALUE;
-        for (int i = 0; i < length; i++) {
-            val = Math.min(val, data[i]);
-        }
-        return val;
-    }
-
-    public static short Minimum(short[] data) {
-        return Minimum(data, data.length);
-    }
-
-    /**
-     * @param data the input vector
-     * @param length &lt;= data.length elements to be used
-     * @return value of smallest vector element
-     */
-    public static short Minimum(short[] data, int length) {
-        short val = +Short.MAX_VALUE;
-        for (int i = 0; i < length; i++) {
-            if (val < data[i]) {
-                val = data[i];
-            }
-        }
-        return val;
-    }
-
+    //// codegen: double -> float
     /**
      * Calculate a normal vector of a plane.
      * 
@@ -3526,7 +2706,7 @@ public class TMath extends TMathConstants {
      * @param normal Pointer to 3D normal vector (normalised)
      * @return the computed result
      */
-    public static double[] Normal2Plane(double p1[], double p2[], double p3[], double normal[]) {
+    public static double[] normal2Plane(double p1[], double p2[], double p3[], double normal[]) {
         final double[] v1 = new double[3];
         final double[] v2 = new double[3];
 
@@ -3538,34 +2718,10 @@ public class TMath extends TMathConstants {
         v2[1] = p3[1] - p1[1];
         v2[2] = p3[2] - p1[2];
 
-        NormCross(v1, v2, normal);
+        normCross(v1, v2, normal);
         return normal;
     }
-
-    /**
-     * Calculate a normal vector of a plane.
-     * 
-     * @param p1 first 3D points belonged the plane to define it.
-     * @param p2 second 3D points belonged the plane to define it.
-     * @param p3 third 3D points belonged the plane to define it.
-     * @param normal Pointer to 3D normal vector (normalised)
-     * @return the computed result
-     */
-    public static float[] Normal2Plane(float p1[], float p2[], float p3[], float normal[]) {
-        final float[] v1 = new float[3];
-        final float[] v2 = new float[3];
-
-        v1[0] = p2[0] - p1[0];
-        v1[1] = p2[1] - p1[1];
-        v1[2] = p2[2] - p1[2];
-
-        v2[0] = p3[0] - p1[0];
-        v2[1] = p3[1] - p1[1];
-        v2[2] = p3[2] - p1[2];
-
-        NormCross(v1, v2, normal);
-        return normal;
-    }
+    //// end codegen
 
     /**
      * Normalise a vector v in place. Returns the norm of the original vector. This implementation (thanks Kevin Lynch
@@ -3575,10 +2731,10 @@ public class TMath extends TMathConstants {
      * @param v input parameter vector
      * @return the computed result
      */
-    public static double Normalize(double[] v) {
-        final double av0 = Abs(v[0]);
-        final double av1 = Abs(v[1]);
-        final double av2 = Abs(v[2]);
+    public static double normalize(double[] v) {
+        final double av0 = abs(v[0]);
+        final double av1 = abs(v[1]);
+        final double av2 = abs(v[2]);
 
         final double amax;
         final double foo;
@@ -3610,7 +2766,7 @@ public class TMath extends TMathConstants {
 
         final double foofrac = foo / amax;
         final double barfrac = bar / amax;
-        final double d = amax * Sqrt(1. + foofrac * foofrac + barfrac * barfrac);
+        final double d = amax * sqrt(1. + foofrac * foofrac + barfrac * barfrac);
 
         v[0] /= d;
         v[1] /= d;
@@ -3624,8 +2780,8 @@ public class TMath extends TMathConstants {
      * @param v input parameter vector
      * @return the computed result the norm of the original vector.
      */
-    public static float Normalize(float v[]) {
-        final float d = (float) Math.sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
+    public static float normalize(float v[]) {
+        final float d = (float) java.lang.Math.sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
         if (d != 0) {
             v[0] /= d;
             v[1] /= d;
@@ -3634,6 +2790,7 @@ public class TMath extends TMathConstants {
         return d;
     }
 
+    //// codegen: double -> float
     /**
      * Calculate the Normalized Cross Product of two vectors
      * 
@@ -3642,21 +2799,10 @@ public class TMath extends TMathConstants {
      * @param out output vector
      * @return the computed result
      */
-    public static double NormCross(double v1[], double v2[], double out[]) {
-        return Normalize(Cross(v1, v2, out));
+    public static double normCross(double v1[], double v2[], double out[]) {
+        return normalize(cross(v1, v2, out));
     }
-
-    /**
-     * Calculate the Normalized Cross Product of two vectors
-     * 
-     * @param v1 input vector1
-     * @param v2 input vector2
-     * @param out output vector
-     * @return the computed result
-     */
-    public static float NormCross(float[] v1, float[] v2, float[] out) {
-        return Normalize(Cross(v1, v2, out));
-    }
+    //// end codegen
 
     /**
      * Computes quantiles for standard normal distribution N(0, 1) at probability p ALGORITHM AS241 APPL. STATIST.
@@ -3665,7 +2811,7 @@ public class TMath extends TMathConstants {
      * @param p input value
      * @return quantiles for standard normal distribution N(0, 1) at probability p
      */
-    public static double NormQuantile(double p) {
+    public static double normQuantile(double p) {
         if ((p <= 0) || (p >= 1)) {
             System.err.println("NormQuantile(): probability outside (0, 1)");
             return 0;
@@ -3726,7 +2872,7 @@ public class TMath extends TMathConstants {
         double r;
         double quantile;
         q = p - 0.5;
-        if (Abs(q) < split1) {
+        if (abs(q) < split1) {
             r = konst1 - q * q;
             quantile = q * (((((((a7 * r + a6) * r + a5) * r + a4) * r + a3) * r + a2) * r + a1) * r + a0)
                        / (((((((b7 * r + b6) * r + b5) * r + b4) * r + b3) * r + b2) * r + b1) * r + 1.);
@@ -3740,7 +2886,7 @@ public class TMath extends TMathConstants {
             if (r <= 0) {
                 quantile = 0;
             } else {
-                r = Sqrt(-Log(r));
+                r = sqrt(-log(r));
                 if (r <= split2) {
                     r -= konst2;
                     quantile = (((((((c7 * r + c6) * r + c5) * r + c4) * r + c3) * r + c2) * r + c1) * r + c0)
@@ -3758,8 +2904,9 @@ public class TMath extends TMathConstants {
         return quantile;
     }
 
-    public static double PeakToPeak(double[] data) {
-        return PeakToPeak(data, data.length);
+    //// codegen: double -> float, int, long, short
+    public static double peakToPeak(double[] data) {
+        return peakToPeak(data, data.length);
     }
 
     /**
@@ -3767,61 +2914,10 @@ public class TMath extends TMathConstants {
      * @param length &lt;= data.length elements to be used
      * @return peak-to-peak value of vector element
      */
-    public static double PeakToPeak(double[] data, int length) {
-        return Math.abs(Maximum(data, length) - Minimum(data, length));
+    public static double peakToPeak(double[] data, int length) {
+        return java.lang.Math.abs(maximum(data, length) - minimum(data, length)); //// codegen: returncast short
     }
-
-    public static float PeakToPeak(float[] data) {
-        return PeakToPeak(data, data.length);
-    }
-
-    /**
-     * @param data the input vector
-     * @param length &lt;= data.length elements to be used
-     * @return peak-to-peak value of vector element
-     */
-    public static float PeakToPeak(float[] data, int length) {
-        return Math.abs(Maximum(data, length) - Minimum(data, length));
-    }
-
-    public static int PeakToPeak(int[] data) {
-        return PeakToPeak(data, data.length);
-    }
-
-    /**
-     * @param data the input vector
-     * @param length &lt;= data.length elements to be used
-     * @return peak-to-peak value of vector element
-     */
-    public static int PeakToPeak(int[] data, int length) {
-        return Math.abs(Maximum(data, length) - Minimum(data, length));
-    }
-
-    public static long PeakToPeak(long[] data) {
-        return PeakToPeak(data, data.length);
-    }
-
-    /**
-     * @param data the input vector
-     * @param length &lt;= data.length elements to be used
-     * @return peak-to-peak value of vector element
-     */
-    public static long PeakToPeak(long[] data, int length) {
-        return Math.abs(Maximum(data, length) - Minimum(data, length));
-    }
-
-    public static short PeakToPeak(short[] data) {
-        return PeakToPeak(data, data.length);
-    }
-
-    /**
-     * @param data the input vector
-     * @param length &lt;= data.length elements to be used
-     * @return peak-to-peak value of vector element
-     */
-    public static short PeakToPeak(short[] data, int length) {
-        return (short) Math.abs(Maximum(data, length) - Minimum(data, length));
-    }
+    //// end codegen
 
     /**
      * Simple recursive algorithm to find the permutations of n natural numbers, not necessarily all distinct adapted
@@ -3832,7 +2928,7 @@ public class TMath extends TMathConstants {
      * @param a input vector
      * @return false when all combinations are exhausted
      */
-    public static boolean Permute(int n, int[] a) {
+    public static boolean permute(int n, int[] a) {
         int i;
         int itmp;
         int i1 = -1;
@@ -3882,14 +2978,14 @@ public class TMath extends TMathConstants {
      * @param par input parameter
      * @return the computed result
      */
-    public static double Poisson(double x, double par) {
+    public static double poisson(double x, double par) {
         if (x < 0) {
             return 0;
         } else if (x == 0.0) {
-            return 1. / Exp(par);
+            return 1. / exp(par);
         } else {
-            final double lnpoisson = x * Log(par) - par - LnGamma(x + 1.);
-            return Exp(lnpoisson);
+            final double lnpoisson = x * log(par) - par - lnGamma(x + 1.);
+            return exp(lnpoisson);
         }
         // An alternative strategy is to transition to a Gaussian approximation
         // for
@@ -3906,22 +3002,22 @@ public class TMath extends TMathConstants {
      * @param par input parameter
      * @return the computed result
      */
-    public static double PoissonI(double x, double par) {
+    public static double poissonI(double x, double par) {
         if (x < 0) {
             return 0;
         }
         if (x < 1) {
-            return Exp(-par);
+            return exp(-par);
         }
         final double gam;
         final int ix = (int) (x);
         final double kMaxInt = 2e6;
         if (x < kMaxInt) {
-            gam = Power(par, ix) / Gamma(ix + 1);
+            gam = pow(par, ix) / gamma(ix + 1);
         } else {
-            gam = Power(par, x) / Gamma(x + 1);
+            gam = pow(par, x) / gamma(x + 1);
         }
-        return gam / Exp(par);
+        return gam / exp(par);
     }
 
     /**
@@ -3935,7 +3031,7 @@ public class TMath extends TMathConstants {
      * @param ndf number of degrees of freedom
      * @return the computed result
      */
-    public static double Prob(double chi2, int ndf) {
+    public static double prob(double chi2, int ndf) {
         if (ndf <= 0) {
             return 0; // Set CL to zero in case ndf<=0
         }
@@ -3949,20 +3045,21 @@ public class TMath extends TMathConstants {
         }
 
         if (ndf == 1) {
-            return 1.0 - Erf(Sqrt(chi2) / Sqrt(2.));
+            return 1.0 - erf(sqrt(chi2) / sqrt(2.));
         }
 
         // Gaussian approximation for large ndf
-        final double q = Sqrt(2 * chi2) - Sqrt(2 * ndf - 1);
+        final double q = sqrt(2 * chi2) - sqrt(2 * ndf - 1);
         if (!(ndf > 30 && q > 5)) {
             // Evaluate the incomplete gamma function
-            return (1 - Gamma(0.5 * ndf, 0.5 * chi2));
+            return (1 - gamma(0.5 * ndf, 0.5 * chi2));
         }
-        return 0.5 * (1 - Erf(q / Sqrt(2.)));
+        return 0.5 * (1 - erf(q / sqrt(2.)));
     }
 
-    public static double RMS(double[] data) {
-        return RMS(data, data.length);
+    //// codegen: double -> float, int, long, short
+    public static double rms(double[] data) {
+        return rms(data, data.length);
     }
 
     /**
@@ -3970,14 +3067,14 @@ public class TMath extends TMathConstants {
      * @param length &lt;= data.length elements to be used
      * @return un-biased r.m.s. of vector elements
      */
-    public static double RMS(double[] data, int length) {
+    public static double rms(double[] data, int length) {
         if (length <= 0) {
             return -1;
         }
 
-        final double norm = 1.0 / (length);
-        double val1 = 0.0;
-        double val2 = 0.0;
+        final double norm = 1.0 / (length); //// codegen: skip all
+        double val1 = 0.0; //// codegen: skip all
+        double val2 = 0.0; //// codegen: skip all
         for (int i = 0; i < length; i++) {
             val1 += data[i];
             val2 += data[i] * data[i];
@@ -3986,120 +3083,9 @@ public class TMath extends TMathConstants {
         val1 *= norm;
         val2 *= norm;
         // un-biased rms!
-        return Math.sqrt(Math.abs(val2 - val1 * val1));
+        return sqrt(java.lang.Math.abs(val2 - val1 * val1)); //// codegen: returncast all
     }
-
-    public static float RMS(float[] data) {
-        return RMS(data, data.length);
-    }
-
-    /**
-     * @param data the input vector
-     * @param length &lt;= data.length elements to be used
-     * @return un-biased r.m.s. of vector elements
-     */
-    public static float RMS(float[] data, int length) {
-        if (length <= 0) {
-            return -1;
-        }
-
-        final double norm = 1.0 / (length);
-        double val1 = 0.0;
-        double val2 = 0.0;
-        for (int i = 0; i < length; i++) {
-            val1 += data[i];
-            val2 += data[i] * data[i];
-        }
-
-        val1 *= norm;
-        val2 *= norm;
-        // un-biased rms!
-        return (float) Math.sqrt(Math.abs(val2 - val1 * val1));
-    }
-
-    public static int RMS(int[] data) {
-        return RMS(data, data.length);
-    }
-
-    /**
-     * @param data the input vector
-     * @param length &lt;= data.length elements to be used
-     * @return un-biased r.m.s. of vector elements
-     */
-    public static int RMS(int[] data, int length) {
-        if (length <= 0) {
-            return -1;
-        }
-
-        final double norm = 1.0 / (length);
-        double val1 = 0.0;
-        double val2 = 0.0;
-        for (final int aData : data) {
-            val1 += aData;
-            val2 += aData * aData;
-        }
-
-        val1 *= norm;
-        val2 *= norm;
-        // un-biased rms!
-        return (int) Math.sqrt(Math.abs(val2 - val1 * val1));
-    }
-
-    public static long RMS(long[] data) {
-        return RMS(data, data.length);
-    }
-
-    /**
-     * @param data the input vector
-     * @param length &lt;= d data.length elements to be used
-     * @return un-biased r.m.s. of vector elements
-     */
-    public static long RMS(long[] data, int length) {
-        if (length <= 0) {
-            return -1;
-        }
-
-        final double norm = 1.0 / (length);
-        double val1 = 0.0;
-        double val2 = 0.0;
-        for (int i = 0; i < length; i++) {
-            val1 += data[i];
-            val2 += data[i] * data[i];
-        }
-
-        val1 *= norm;
-        val2 *= norm;
-        // un-biased rms!
-        return (long) Math.sqrt(Math.abs(val2 - val1 * val1));
-    }
-
-    public static short RMS(short[] data) {
-        return RMS(data, data.length);
-    }
-
-    /**
-     * @param data the input vector
-     * @param length &lt;= data.length elements to be used
-     * @return un-biased r.m.s. of vector elements
-     */
-    public static short RMS(short[] data, int length) {
-        if (length <= 0) {
-            return -1;
-        }
-
-        final double norm = 1.0 / (length);
-        double val1 = 0.0;
-        double val2 = 0.0;
-        for (int i = 0; i < length; i++) {
-            val1 += data[i];
-            val2 += data[i] * data[i];
-        }
-
-        val1 *= norm;
-        val2 *= norm;
-        // un-biased rms!
-        return (short) Math.sqrt(Math.abs(val2 - val1 * val1));
-    }
+    //// end codegen
 
     /**
      * Calculate the sinc = sin(x)/x function if norm ==true then sinc = sinc(pi*x)/(pi*x) is used
@@ -4108,14 +3094,15 @@ public class TMath extends TMathConstants {
      * @param norm normalisation factor
      * @return the computed result
      */
-    public static double Sinc(double x, boolean norm) {
+    public static double sinc(double x, boolean norm) {
         if (x == 0) {
             return 1.0;
         }
-        final double val = norm ? TMathConstants.Pi() : 1.0;
-        return TMathConstants.Sin(val * x) / (val * x);
+        final double val = norm ? MathBase.pi() : 1.0;
+        return MathBase.sin(val * x) / (val * x);
     }
 
+    //// codegen: double -> float, int, long, short
     /**
      * Sorts the input a array
      * 
@@ -4124,7 +3111,7 @@ public class TMath extends TMathConstants {
      * @param down true: ascending , false: descending order
      * @return the sorted array
      */
-    public static double[] Sort(double[] a, int length, boolean down) {
+    public static double[] sort(double[] a, int length, boolean down) {
         if (a == null || a.length <= 0) {
             return new double[0];
         }
@@ -4143,124 +3130,14 @@ public class TMath extends TMathConstants {
         }
         return index;
     }
+    //// end codegen
 
     /**
-     * Sorts the input a array
-     * 
-     * @param a the input array
-     * @param length &lt;= data.length elements to be used
-     * @param down true: ascending , false: descending order
-     * @return the sorted array
+     * Struve Functions of Order 0
+     *
+     * Converted from CERNLIB M342 by Rene Brun.
      */
-    public static float[] Sort(float[] a, int length, boolean down) {
-        if (a == null || a.length <= 0) {
-            return new float[0];
-        }
-        final float[] index = java.util.Arrays.copyOf(a, length);
-        java.util.Arrays.sort(index);
-
-        if (down) {
-            float temp;
-            final int nlast = length - 1;
-            for (int i = 0; i < (length / 2); i++) {
-                // swap values
-                temp = index[i];
-                index[i] = index[nlast - i];
-                index[nlast - i] = temp;
-            }
-        }
-        return index;
-    }
-
-    /**
-     * Sorts the input a array
-     * 
-     * @param a the input array
-     * @param length &lt;= data.length elements to be used
-     * @param down true: ascending , false: descending order
-     * @return the sorted array
-     */
-    public static int[] Sort(int[] a, int length, boolean down) {
-        if (a == null || a.length <= 0) {
-            return new int[0];
-        }
-        final int[] index = java.util.Arrays.copyOf(a, length);
-        java.util.Arrays.sort(index);
-
-        if (down) {
-            int temp;
-            final int nlast = length - 1;
-            for (int i = 0; i < (length / 2); i++) {
-                // swap values
-                temp = index[i];
-                index[i] = index[nlast - i];
-                index[nlast - i] = temp;
-            }
-        }
-        return index;
-    }
-
-    /**
-     * Sorts the input a array
-     * 
-     * @param a the input array
-     * @param length &lt;= data.length elements to be used
-     * @param down true: ascending , false: descending order
-     * @return the sorted array
-     */
-    public static long[] Sort(long[] a, int length, boolean down) {
-        if (a == null || a.length <= 0) {
-            return new long[0];
-        }
-        final long[] index = java.util.Arrays.copyOf(a, length);
-        java.util.Arrays.sort(index);
-
-        if (down) {
-            long temp;
-            final int nlast = length - 1;
-            for (int i = 0; i < (length / 2); i++) {
-                // swap values
-                temp = index[i];
-                index[i] = index[nlast - i];
-                index[nlast - i] = temp;
-            }
-        }
-        return index;
-    }
-
-    /**
-     * Sorts the input a array
-     * 
-     * @param a the input array
-     * @param length &lt;= data.length elements to be used
-     * @param down true: ascending , false: descending order
-     * @return the sorted array
-     */
-    public static short[] Sort(short[] a, int length, boolean down) {
-        if (a == null || a.length <= 0) {
-            return new short[0];
-        }
-        final short[] index = java.util.Arrays.copyOf(a, length);
-        java.util.Arrays.sort(index);
-
-        if (down) {
-            short temp;
-            final int nlast = length - 1;
-            for (int i = 0; i < (length / 2); i++) {
-                // swap values
-                temp = index[i];
-                index[i] = index[nlast - i];
-                index[nlast - i] = temp;
-            }
-        }
-        return index;
-    }
-
-    public static double StruveH0(double x) {
-        // Struve Functions of Order 0
-        //
-        // Converted from CERNLIB M342 by Rene Brun.
-
+    public static double struveH0(double x) {
         final int n1 = 15;
         final int n2 = 25;
         final double c1[] = { 1.00215845609911981, -1.63969292681309147, 1.50236939618292819, -.72485115302121872,
@@ -4271,7 +3148,7 @@ public class TMath extends TMathConstants {
             4.065681e-11, -1.091505e-11, 3.12005e-12, -9.4202e-13, 2.9848e-13, -9.872e-14, 3.394e-14, -1.208e-14,
             4.44e-15, -1.68e-15, 6.5e-16, -2.6e-16, 1.1e-16, -4e-17, 2e-17, -1e-17 };
 
-        final double c0 = 2 / Pi();
+        final double c0 = 2 / pi();
 
         int i;
         final double alfa;
@@ -4281,9 +3158,9 @@ public class TMath extends TMathConstants {
         double b0;
         double b1;
         double b2;
-        double v = Abs(x);
+        double v = abs(x);
 
-        v = Abs(x);
+        v = abs(x);
         if (v < 8) {
             y = v / 8;
             h = 2 * y * y - 1;
@@ -4309,7 +3186,7 @@ public class TMath extends TMathConstants {
                 b2 = b1;
                 b1 = b0;
             }
-            h = BesselY0(v) + r * c0 * (b0 - h * b2);
+            h = besselY0(v) + r * c0 * (b0 - h * b2);
         }
         if (x < 0) {
             h = -h;
@@ -4317,11 +3194,12 @@ public class TMath extends TMathConstants {
         return h;
     }
 
-    public static double StruveH1(double x) {
-        // Struve Functions of Order 1
-        //
-        // Converted from CERNLIB M342 by Rene Brun.
-
+    /**
+     * Struve Functions of Order 1
+     *
+     * Converted from CERNLIB M342 by Rene Brun.
+     */
+    public static double struveH1(double x) {
         final int n3 = 16;
         final int n4 = 22;
         final double[] c3 = { .5578891446481605, -.11188325726569816, -.16337958125200939, .32256932072405902,
@@ -4333,8 +3211,8 @@ public class TMath extends TMathConstants {
             -2.6636e-13, 7.645e-14, -2.313e-14, 7.33e-15, -2.42e-15, 8.3e-16, -3e-16, 1.1e-16, -4e-17, 2e-17,
             -1e-17 };
 
-        final double c0 = 2 / Pi();
-        final double cc = 2 / (3 * Pi());
+        final double c0 = 2 / pi();
+        final double cc = 2 / (3 * pi());
 
         int i;
         final int i1;
@@ -4345,7 +3223,7 @@ public class TMath extends TMathConstants {
         double b0;
         double b1;
         double b2;
-        final double v = Abs(x);
+        final double v = abs(x);
 
         if (v == 0) {
             h = 0;
@@ -4353,7 +3231,7 @@ public class TMath extends TMathConstants {
             y = v * v;
             r = 1;
             h = 1;
-            i1 = (int) (-8. / Log10(v));
+            i1 = (int) (-8. / log10(v));
             for (i = 1; i <= i1; ++i) {
                 h = -h * y / ((2 * i + 1) * (2 * i + 3));
                 r += h;
@@ -4382,16 +3260,17 @@ public class TMath extends TMathConstants {
                 b2 = b1;
                 b1 = b0;
             }
-            h = BesselY1(v) + c0 * (b0 - h * b2);
+            h = besselY1(v) + c0 * (b0 - h * b2);
         }
         return h;
     }
 
-    public static double StruveL0(double x) {
-        // Modified Struve Function of Order 0.
-        // By Kirill Filimonov.
-
-        final double pi = Pi();
+    /**
+     * Modified Struve Function of Order 0.
+     * By Kirill Filimonov.
+     */
+    public static double struveL0(double x) {
+        final double pi = pi();
 
         double s = 1.0;
         double r = 1.0;
@@ -4408,7 +3287,7 @@ public class TMath extends TMathConstants {
             for (int i = 1; i <= 60; i++) {
                 r *= (x / (2 * i + 1)) * (x / (2 * i + 1));
                 s += r;
-                if (Abs(r / s) < 1.e-12) {
+                if (abs(r / s) < 1.e-12) {
                     break;
                 }
             }
@@ -4421,17 +3300,17 @@ public class TMath extends TMathConstants {
             for (int i = 1; i <= km; i++) {
                 r *= (2 * i - 1) * (2 * i - 1) / x / x;
                 s += r;
-                if (Abs(r / s) < 1.0e-12) {
+                if (abs(r / s) < 1.0e-12) {
                     break;
                 }
             }
-            a1 = Exp(x) / Sqrt(2 * pi * x);
+            a1 = exp(x) / sqrt(2 * pi * x);
             r = 1.0;
             bi0 = 1.0;
             for (int i = 1; i <= 16; i++) {
                 r = 0.125 * r * (2.0 * i - 1.0) * (2.0 * i - 1.0) / (i * x);
                 bi0 += r;
-                if (Abs(r / bi0) < 1.0e-12) {
+                if (abs(r / bi0) < 1.0e-12) {
                     break;
                 }
             }
@@ -4442,11 +3321,12 @@ public class TMath extends TMathConstants {
         return sl0;
     }
 
-    public static double StruveL1(double x) {
-        // Modified Struve Function of Order 1.
-        // By Kirill Filimonov.
-
-        final double pi = Pi();
+    /**
+     * Modified Struve Function of Order 1.
+     * By Kirill Filimonov.
+     */
+    public static double struveL1(double x) {
+        final double pi = pi();
         final double a1;
         double sl1;
         double bi1;
@@ -4460,7 +3340,7 @@ public class TMath extends TMathConstants {
             for (i = 1; i <= 60; i++) {
                 r *= x * x / (4.0 * i * i - 1.0);
                 s += r;
-                if (Abs(r) < Abs(s) * 1.e-12) {
+                if (abs(r) < abs(s) * 1.e-12) {
                     break;
                 }
             }
@@ -4474,18 +3354,18 @@ public class TMath extends TMathConstants {
             for (i = 1; i <= km; i++) {
                 r *= (2 * i + 3) * (2 * i + 1) / x / x;
                 s += r;
-                if (Abs(r / s) < 1.0e-12) {
+                if (abs(r / s) < 1.0e-12) {
                     break;
                 }
             }
             sl1 = 2.0 / pi * (-1.0 + 1.0 / (x * x) + 3.0 * s / (x * x * x * x));
-            a1 = Exp(x) / Sqrt(2 * pi * x);
+            a1 = exp(x) / sqrt(2 * pi * x);
             r = 1.0;
             bi1 = 1.0;
             for (i = 1; i <= 16; i++) {
                 r = -0.125 * r * (4.0 - (2.0 * i - 1.0) * (2.0 * i - 1.0)) / (i * x);
                 bi1 += r;
-                if (Abs(r / bi1) < 1.0e-12) {
+                if (abs(r / bi1) < 1.0e-12) {
                     break;
                 }
             }
@@ -4510,7 +3390,7 @@ public class TMath extends TMathConstants {
      * @param ndf number of degrees of freedom
      * @return value of the density function for Student's t- distribution
      */
-    public static double Student(double T, double ndf) {
+    public static double student(double T, double ndf) {
         if (ndf < 1) {
             return 0;
         }
@@ -4518,8 +3398,8 @@ public class TMath extends TMathConstants {
         final double r = ndf;
         final double rh = 0.5 * r;
         final double rh1 = rh + 0.5;
-        final double denom = Sqrt(r * Pi()) * Gamma(rh) * Power(1 + T * T / r, rh1);
-        return Gamma(rh1) / denom;
+        final double denom = sqrt(r * pi()) * gamma(rh) * pow(1 + T * T / r, rh1);
+        return gamma(rh1) / denom;
     }
 
     /**
@@ -4531,31 +3411,30 @@ public class TMath extends TMathConstants {
      * @param ndf number of degrees of freedom
      * @return cumulative distribution function of Student's t-distribution
      */
-    public static double StudentI(double T, double ndf) {
+    public static double studentI(double T, double ndf) {
         final double r = ndf;
-        final double si = (T > 0) ? (1 - 0.5 * BetaIncomplete((r / (r + T * T)), r * 0.5, 0.5))
-                                  : 0.5 * BetaIncomplete((r / (r + T * T)), r * 0.5, 0.5);
+        final double si = (T > 0) ? (1 - 0.5 * betaIncomplete((r / (r + T * T)), r * 0.5, 0.5))
+                                  : 0.5 * betaIncomplete((r / (r + T * T)), r * 0.5, 0.5);
         return si;
     }
 
-    // TODO: continue here
-    public static double StudentQuantile(double p, double ndf, boolean lower_tail) {
+    /**
+     * Computes quantiles of the Student's t-distribution
+     *  When the 3rd argument lower_tail is true (default)-  the algorithm returns such x0, that  P(x < x0)=p
+     *  upper tail (lower_tail is false)- the algorithm returns such x0, that  P(x > x0)=p
+     *
+     * the algorithm was taken from
+     * G.W.Hill, "Algorithm 396, Student's t-quantiles"
+     * "Communications of the ACM", 13(10), October 1970
+     * @param p the probability, at which the quantile is computed
+     * @param ndf the number of degrees of freedom of the
+     * @param lower_tail
+     */
+    public static double studentQuantile(double p, double ndf, boolean lower_tail) {
         if (ndf < 1 || p >= 1 || p <= 0) {
             System.err.println("StudentQuantile() - illegal parameter values");
             return 0;
         }
-        // Computes quantiles of the Student's t-distribution
-        // 1st argument is the probability, at which the quantile is computed
-        // 2nd argument - the number of degrees of freedom of the
-        // Student distribution
-        // When the 3rd argument lower_tail is true (default)-
-        // the algorithm returns such x0, that
-        // P(x < x0)=p
-        // upper tail (lower_tail is false)- the algorithm returns such x0, that
-        // P(x > x0)=p
-        // the algorithm was taken from
-        // G.W.Hill, "Algorithm 396, Student's t-quantiles"
-        // "Communications of the ACM", 13(10), October 1970
 
         double quantile;
         final double temp;
@@ -4570,21 +3449,21 @@ public class TMath extends TMathConstants {
         }
 
         if ((ndf - 1) < 1e-8) {
-            temp = PiOver2() * q;
-            quantile = Cos(temp) / Sin(temp);
+            temp = piOver2() * q;
+            quantile = cos(temp) / sin(temp);
         } else {
             if ((ndf - 2) < 1e-8) {
-                quantile = Sqrt(2. / (q * (2 - q)) - 2);
+                quantile = sqrt(2. / (q * (2 - q)) - 2);
             } else {
                 final double a = 1. / (ndf - 0.5);
                 final double b = 48. / (a * a);
                 double c = ((20700 * a / b - 98) * a - 16) * a + 96.36;
-                final double d = ((94.5 / (b + c) - 3.) / b + 1) * Sqrt(a * PiOver2()) * ndf;
+                final double d = ((94.5 / (b + c) - 3.) / b + 1) * sqrt(a * piOver2()) * ndf;
                 double x = q * d;
-                double y = Power(x, (2. / ndf));
+                double y = pow(x, (2. / ndf));
                 if (y > 0.05 + a) {
                     // asymptotic inverse expansion about normal
-                    x = NormQuantile(q * 0.5);
+                    x = normQuantile(q * 0.5);
                     y = x * x;
                     if (ndf < 5) {
                         c += 0.3 * (ndf - 4.5) * (x + 0.6);
@@ -4593,7 +3472,7 @@ public class TMath extends TMathConstants {
                     y = (((((0.4 * y + 6.3) * y + 36.) * y + 94.5) / c - y - 3.) / b + 1) * x;
                     y = a * y * y;
                     if (y > 0.002) {
-                        y = Exp(y) - 1;
+                        y = exp(y) - 1;
                     } else {
                         y += 0.5 * y * y;
                     }
@@ -4602,7 +3481,7 @@ public class TMath extends TMathConstants {
                                 * (ndf + 1.) / (ndf + 2.)
                         + 1 / y;
                 }
-                quantile = Sqrt(ndf * y);
+                quantile = sqrt(ndf * y);
             }
         }
         if (neg) {
@@ -4611,133 +3490,13 @@ public class TMath extends TMathConstants {
         return quantile;
     }
 
-    public static double[] Sum(double[] a, double[] b) {
-        return Sum(a, b, a.length);
-    }
-
-    /**
-     * computes the sum of vectors
-     * 
-     * @param a input vector a
-     * @param b input vector b
-     * @param length minimum length to be taken into account
-     * @return ret[] =[] a + b[]
-     */
-    public static double[] Sum(double[] a, double[] b, int length) {
-        if (length <= 0 || a == null || b == null || a.length < length || b.length < length) {
-            return new double[0];
-        }
-        final double[] ret = new double[length];
-        for (int i = 0; i < length; i++) {
-            ret[i] = (a[i] - b[i]);
-        }
-
-        return ret;
-    }
-
-    public static float[] Sum(float[] a, float[] b) {
-        return Sum(a, b, a.length);
-    }
-
-    /**
-     * computes the sum of vectors
-     * 
-     * @param a input vector a
-     * @param b input vector b
-     * @param length minimum length to be taken into account
-     * @return ret[] = a[] + b[]
-     */
-    public static float[] Sum(float[] a, float[] b, int length) {
-        if (length <= 0 || a == null || b == null || a.length < length || b.length < length) {
-            return new float[0];
-        }
-        final float[] ret = new float[length];
-        for (int i = 0; i < length; i++) {
-            ret[i] = (a[i] - b[i]);
-        }
-
-        return ret;
-    }
-
-    public static int[] Sum(int[] a, int[] b) {
-        return Sum(a, b, a.length);
-    }
-
-    /**
-     * computes the sum of vectors
-     * 
-     * @param a input vector a
-     * @param b input vector b
-     * @param length minimum length to be taken into account
-     * @return ret[] = a[] + b[]
-     */
-    public static int[] Sum(int[] a, int[] b, int length) {
-        if (length <= 0 || a == null || b == null || a.length < length || b.length < length) {
-            return new int[0];
-        }
-        final int[] ret = new int[length];
-        for (int i = 0; i < length; i++) {
-            ret[i] = (a[i] - b[i]);
-        }
-
-        return ret;
-    }
-
-    public static long[] Sum(long[] a, long[] b) {
-        return Sum(a, b, a.length);
-    }
-
-    /**
-     * computes the sum of vectors
-     * 
-     * @param a input vector a
-     * @param b input vector b
-     * @param length minimum length to be taken into account
-     * @return ret[] = a[] + b[]
-     */
-    public static long[] Sum(long[] a, long[] b, int length) {
-        if (length <= 0 || a == null || b == null || a.length < length || b.length < length) {
-            return new long[0];
-        }
-        final long[] ret = new long[length];
-        for (int i = 0; i < length; i++) {
-            ret[i] = (a[i] - b[i]);
-        }
-
-        return ret;
-    }
-
-    public static short[] Sum(short[] a, short[] b) {
-        return Sum(a, b, a.length);
-    }
-
-    /**
-     * computes the sum of vectors
-     * 
-     * @param a input vector a
-     * @param b input vector b
-     * @param length minimum length to be taken into account
-     * @return ret[] = a[] + b[]
-     */
-    public static short[] Sum(short[] a, short[] b, int length) {
-        if (length <= 0 || a == null || b == null || a.length < length || b.length < length) {
-            return new short[0];
-        }
-        final short[] ret = new short[length];
-        for (int i = 0; i < length; i++) {
-            ret[i] = (short) (a[i] - b[i]);
-        }
-
-        return ret;
-    }
-
-    public static double Variance(double[] aa, double[] ww) {
+    public static double variance(double[] aa, double[] ww) {
         final int n = aa.length;
         if (n != ww.length) {
             throw new IllegalArgumentException(
                     "length of variable array, " + n + " and length of weight array, " + ww.length + " are different");
         }
-        final double nn = TMath.effectiveSampleNumber(ww);
+        final double nn = Math.effectiveSampleNumber(ww);
         final double nterm = nn / (nn - 1.0);
         // nterm = 1.0; // n
 
@@ -4752,37 +3511,34 @@ public class TMath extends TMathConstants {
         mean = sumx / sumw;
         sumx = 0.0D;
         for (int i = 0; i < n; i++) {
-            sumx += weight[i] * TMathConstants.Sqr(aa[i] - mean);
+            sumx += weight[i] * MathBase.sqr(aa[i] - mean);
         }
         return sumx * nterm / sumw;
     }
 
-    public static double Vavilov(double x, double kappa, double beta2) {
-        // Returns the value of the Vavilov density function
-        // Parameters: 1st - the point were the density function is evaluated
-        // 2nd - value of kappa (distribution parameter)
-        // 3rd - value of beta2 (distribution parameter)
-        // The algorithm was taken from the CernLib function vavden(G115)
-        // Reference: A.Rotondi and P.Montagna, Fast Calculation of Vavilov
-        // distribution
-        // Nucl.Instr. and Meth. B47(1990), 215-224
-        // Accuracy: quote from the reference above:
-        // "The resuls of our code have been compared with the values of the
-        // Vavilov
-        // density function computed numerically in an accurate way: our
-        // approximation
-        // shows a difference of less than 3% around the peak of the density
-        // function, slowly
-        // increasing going towards the extreme tails to the right and to the
-        // left"
-
+    /**
+     * Returns the value of the Vavilov density function
+     *
+     * The algorithm was taken from the CernLib function vavden(G115)
+     * Reference: A.Rotondi and P.Montagna, Fast Calculation of Vavilov distribution Nucl.Instr. and Meth. B47(1990), 215-224
+     * Accuracy: quote from the reference above:
+     * "The resuls of our code have been compared with the values of the Vavilov density function computed numerically
+     * in an accurate way: our approximation shows a difference of less than 3% around the peak of the density
+     * function, slowly increasing going towards the extreme tails to the right and to the left"
+     *
+     * @param x the point were the density function is evaluated
+     * @param kappa value of kappa (distribution parameter)
+     * @param beta2 value of beta2 (distribution parameter)
+     * @return
+     */
+    public static double vavilov(double x, double kappa, double beta2) {
         final double[] ac = new double[14];
         final double[] hc = new double[9];
 
         final int[] itype = new int[1];
         final int[] npt = new int[1];
-        VavilovSet(kappa, beta2, false, null, ac, hc, itype, npt);
-        final double v = VavilovDenEval(x, ac, hc, itype[0]);
+        vavilovSet(kappa, beta2, false, null, ac, hc, itype, npt);
+        final double v = vavilovDenEval(x, ac, hc, itype[0]);
         return v;
     }
 
@@ -4795,7 +3551,7 @@ public class TMath extends TMathConstants {
      * @param itype ???
      * @return internal value
      */
-    protected static double VavilovDenEval(double rlam, double[] AC, double[] HC, int itype) {
+    protected static double vavilovDenEval(double rlam, double[] AC, double[] HC, int itype) {
         if (rlam < AC[0] || rlam > AC[8]) {
             return 0;
         }
@@ -4818,14 +3574,14 @@ public class TMath extends TMathConstants {
             for (k = 2; k <= 6; k++) {
                 s += HC[k] * h[k + 1];
             }
-            v = HC[8] * Exp(-0.5 * x * x) * Max(s, 0.);
+            v = HC[8] * exp(-0.5 * x * x) * max(s, 0.);
         } else if (itype == 2) {
             x = rlam * rlam;
-            v = AC[1] * Exp(-AC[2] * (rlam + AC[5] * x) - AC[3] * Exp(-AC[4] * (rlam + AC[6] * x)));
+            v = AC[1] * exp(-AC[2] * (rlam + AC[5] * x) - AC[3] * exp(-AC[4] * (rlam + AC[6] * x)));
         } else if (itype == 3) {
             if (rlam < AC[7]) {
                 x = rlam * rlam;
-                v = AC[1] * Exp(-AC[2] * (rlam + AC[5] * x) - AC[3] * Exp(-AC[4] * (rlam + AC[6] * x)));
+                v = AC[1] * exp(-AC[2] * (rlam + AC[5] * x) - AC[3] * exp(-AC[4] * (rlam + AC[6] * x)));
             } else {
                 x = 1. / rlam;
                 v = (AC[11] * x + AC[12]) * x;
@@ -4837,25 +3593,22 @@ public class TMath extends TMathConstants {
         return v;
     }
 
-    public static double VavilovI(double x, double kappa, double beta2) {
-        // Returns the value of the Vavilov distribution function
-        // Parameters: 1st - the point were the density function is evaluated
-        // 2nd - value of kappa (distribution parameter)
-        // 3rd - value of beta2 (distribution parameter)
-        // The algorithm was taken from the CernLib function vavden(G115)
-        // Reference: A.Rotondi and P.Montagna, Fast Calculation of Vavilov
-        // distribution
-        // Nucl.Instr. and Meth. B47(1990), 215-224
-        // Accuracy: quote from the reference above:
-        // "The resuls of our code have been compared with the values of the
-        // Vavilov
-        // density function computed numerically in an accurate way: our
-        // approximation
-        // shows a difference of less than 3% around the peak of the density
-        // function, slowly
-        // increasing going towards the extreme tails to the right and to the
-        // left"
-
+    /**
+     * Returns the value of the Vavilov distribution function
+     *
+     * The algorithm was taken from the CernLib function vavden(G115)
+     * Reference: A.Rotondi and P.Montagna, Fast Calculation of Vavilov distribution Nucl.Instr. and Meth. B47(1990), 215-224
+     * Accuracy: quote from the reference above:
+     * "The resuls of our code have been compared with the values of the Vavilov density function computed numerically
+     * in an accurate way: our approximation shows a difference of less than 3% around the peak of the density
+     * function, slowly increasing going towards the extreme tails to the right and to the left"
+     *
+     * @param x the point were the density function is evaluated
+     * @param kappa value of kappa (distribution parameter)
+     * @param beta2 value of beta2 (distribution parameter)
+     * @return
+     */
+    public static double vavilovI(double x, double kappa, double beta2) {
         final double[] ac = new double[14];
         final double[] hc = new double[9];
         final double[] wcm = new double[200];
@@ -4864,7 +3617,7 @@ public class TMath extends TMathConstants {
         final int k;
         final double xx;
         final double v;
-        VavilovSet(kappa, beta2, true, wcm, ac, hc, itype, npt);
+        vavilovSet(kappa, beta2, true, wcm, ac, hc, itype, npt);
         if (x < ac[0]) {
             v = 0;
         } else if (x >= ac[8]) {
@@ -4872,7 +3625,7 @@ public class TMath extends TMathConstants {
         } else {
             xx = x - ac[0];
             k = (int) (xx * ac[10]);
-            v = Min(wcm[k] + (xx - k * ac[9]) * (wcm[k + 1] - wcm[k]) * ac[10], 1.);
+            v = min(wcm[k] + (xx - k * ac[9]) * (wcm[k + 1] - wcm[k]) * ac[10], 1.);
         }
 
         return v;
@@ -4890,7 +3643,7 @@ public class TMath extends TMathConstants {
      * @param itype ???
      * @param npt ???
      */
-    public static void VavilovSet(double rkappa, double beta2, boolean mode, double[] WCM, double[] AC, double[] HC, int[] itype, int[] npt) {
+    public static void vavilovSet(double rkappa, double beta2, boolean mode, double[] WCM, double[] AC, double[] HC, int[] itype, int[] npt) {
         if (rkappa < 0.01 || rkappa > 12) {
             System.err.println("Vavilov distribution - illegal value of kappa");
             return;
@@ -5020,20 +3773,20 @@ public class TMath extends TMathConstants {
         if (rkappa >= 0.29) {
             itype[0] = 1;
             npt[0] = 100;
-            final double wk = 1. / Sqrt(rkappa);
+            final double wk = 1. / sqrt(rkappa);
 
             AC[0] = (-0.032227 * beta2 - 0.074275) * rkappa + (0.24533 * beta2 + 0.070152) * wk
                     + (-0.55610 * beta2 - 3.1579);
             AC[8] = (-0.013483 * beta2 - 0.048801) * rkappa + (-1.6921 * beta2 + 8.3656) * wk
                     + (-0.73275 * beta2 - 3.5226);
             DRK[1] = wk * wk;
-            DSIGM[1] = Sqrt(rkappa / (1 - 0.5 * beta2));
+            DSIGM[1] = sqrt(rkappa / (1 - 0.5 * beta2));
             for (j = 1; j <= 4; j++) {
                 DRK[j + 1] = DRK[1] * DRK[j];
                 DSIGM[j + 1] = DSIGM[1] * DSIGM[j];
                 ALFA[j + 1] = (FNINV[j] - beta2 * FNINV[j + 1]) * DRK[j];
             }
-            HC[0] = Log(rkappa) + beta2 + 0.42278434;
+            HC[0] = log(rkappa) + beta2 + 0.42278434;
             HC[1] = DSIGM[1];
             HC[2] = ALFA[3] * DSIGM[3];
             HC[3] = (3 * ALFA[2] * ALFA[2] + ALFA[4]) * DSIGM[4] - 3;
@@ -5049,7 +3802,7 @@ public class TMath extends TMathConstants {
             itype[0] = 2;
             npt[0] = 150;
             x = 1 + (rkappa - BKMXX3) * FBKX3;
-            y = 1 + (Sqrt(beta2) - BKMXY3) * FBKY3;
+            y = 1 + (sqrt(beta2) - BKMXY3) * FBKY3;
             xx = 2 * x;
             yy = 2 * y;
             x2 = xx * x - 1;
@@ -5080,7 +3833,7 @@ public class TMath extends TMathConstants {
             itype[0] = 3;
             npt[0] = 200;
             x = 1 + (rkappa - BKMXX2) * FBKX2;
-            y = 1 + (Sqrt(beta2) - BKMXY2) * FBKY2;
+            y = 1 + (sqrt(beta2) - BKMXY2) * FBKY2;
             xx = 2 * x;
             yy = 2 * y;
             x2 = xx * x - 1;
@@ -5115,7 +3868,7 @@ public class TMath extends TMathConstants {
             }
             npt[0] = 200;
             x = 1 + (rkappa - BKMXX1) * FBKX1;
-            y = 1 + (Sqrt(beta2) - BKMXY1) * FBKY1;
+            y = 1 + (sqrt(beta2) - BKMXY1) * FBKY1;
             xx = 2 * x;
             yy = 2 * y;
             x2 = xx * x - 1;
@@ -5153,13 +3906,13 @@ public class TMath extends TMathConstants {
         AC[10] = 1. / AC[9];
         if (itype[0] == 3) {
             x = (AC[7] - AC[8]) / (AC[7] * AC[8]);
-            y = 1. / Log(AC[8] / AC[7]);
+            y = 1. / log(AC[8] / AC[7]);
             p2 = AC[7] * AC[7];
-            AC[11] = p2 * (AC[1] * Exp(-AC[2] * (AC[7] + AC[5] * p2) - AC[3] * Exp(-AC[4] * (AC[7] + AC[6] * p2))) - 0.045 * y / AC[7]) / (1 + x * y * AC[7]);
+            AC[11] = p2 * (AC[1] * exp(-AC[2] * (AC[7] + AC[5] * p2) - AC[3] * exp(-AC[4] * (AC[7] + AC[6] * p2))) - 0.045 * y / AC[7]) / (1 + x * y * AC[7]);
             AC[12] = (0.045 + x * AC[11]) * y;
         }
         if (itype[0] == 4) {
-            AC[13] = 0.995 / LandauI(AC[8]);
+            AC[13] = 0.995 / landauI(AC[8]);
         }
 
         if (!mode) {
@@ -5174,10 +3927,10 @@ public class TMath extends TMathConstants {
         double fl;
         double fu;
         int k;
-        fl = VavilovDenEval(x, AC, HC, itype[0]);
+        fl = vavilovDenEval(x, AC, HC, itype[0]);
         for (k = 1; k <= npt[0]; k++) {
             x += AC[9];
-            fu = VavilovDenEval(x, AC, HC, itype[0]);
+            fu = vavilovDenEval(x, AC, HC, itype[0]);
             WCM[k] = WCM[k - 1] + fl + fu;
             fl = fu;
         }

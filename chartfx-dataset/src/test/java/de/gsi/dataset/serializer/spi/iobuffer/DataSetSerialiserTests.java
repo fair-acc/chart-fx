@@ -10,7 +10,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.stream.Stream;
 
-import de.gsi.dataset.spi.*;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -28,6 +27,7 @@ import de.gsi.dataset.serializer.IoClassSerialiser;
 import de.gsi.dataset.serializer.spi.BinarySerialiser;
 import de.gsi.dataset.serializer.spi.ByteBuffer;
 import de.gsi.dataset.serializer.spi.FastByteBuffer;
+import de.gsi.dataset.spi.*;
 import de.gsi.dataset.testdata.spi.TriangleFunction;
 
 /**
@@ -67,9 +67,9 @@ class DataSetSerialiserTests {
         final IoBuffer buffer = bufferClass.getConstructor(int.class).newInstance(2 * BUFFER_SIZE);
 
         final DoubleGridDataSet original = asFloat32 ? new DoubleGridDataSet("test", false,
-                new double[][] {{1f,2f}, {0.1f,0.2f,0.3f}}, new double[]{9.9f,8.8f,7.7f,6.6f,5.5f,4.4f})
-                : new DoubleGridDataSet("test", false,
-                new double[][] {{1.0,2.0}, {0.1,0.2,0.3}}, new double[]{9.9,8.8,7.7,6.6,5.5,4.4});
+                                                   new double[][] { { 1f, 2f }, { 0.1f, 0.2f, 0.3f } }, new double[] { 9.9f, 8.8f, 7.7f, 6.6f, 5.5f, 4.4f })
+                                                     : new DoubleGridDataSet("test", false,
+                                                             new double[][] { { 1.0, 2.0 }, { 0.1, 0.2, 0.3 } }, new double[] { 9.9, 8.8, 7.7, 6.6, 5.5, 4.4 });
 
         final DataSetSerialiser ioSerialiser = new DataSetSerialiser(new BinarySerialiser(buffer));
 
@@ -84,8 +84,7 @@ class DataSetSerialiserTests {
                 Arguments.arguments(ByteBuffer.class, true),
                 Arguments.arguments(ByteBuffer.class, false),
                 Arguments.arguments(FastByteBuffer.class, true),
-                Arguments.arguments(FastByteBuffer.class, false)
-        );
+                Arguments.arguments(FastByteBuffer.class, false));
     }
 
     @ParameterizedTest(name = "IoBuffer class - {0}")
