@@ -2,12 +2,11 @@ package de.gsi.math.spectra.dtft;
 
 import java.util.concurrent.Future;
 
-import de.gsi.math.TMath;
-import de.gsi.math.TMathConstants;
+import de.gsi.math.Math;
+import de.gsi.math.MathBase;
 import de.gsi.math.utils.ConcurrencyUtils;
 
 public class DiscreteTimeFourierTransform {
-
     protected int START_THREADS = 128;
     protected boolean DEBUG = false;
 
@@ -19,13 +18,12 @@ public class DiscreteTimeFourierTransform {
      * @return frequency range vector
      */
     public double[] computeFrequencyRange(final double[] time) {
-
-        final double t_range = TMath.Maximum(time) - TMath.Minimum(time);
+        final double t_range = Math.maximum(time) - Math.minimum(time);
         double t_min = Double.MAX_VALUE;
 
         // detect minimum time interval
         for (int i = 1; i < time.length; i++) {
-            final double diff = TMathConstants.Abs(time[i] - time[i - 1]);
+            final double diff = MathBase.abs(time[i] - time[i - 1]);
             if (t_min > diff && t_min > 0) {
                 t_min = diff;
             }
@@ -77,40 +75,38 @@ public class DiscreteTimeFourierTransform {
                 final int firstIdx = thread * k;
                 final int lastIdx = thread == nthreads - 1 ? n : firstIdx + k;
                 futures[thread] = ConcurrencyUtils.submit(new Runnable() {
-
                     @Override
                     public void run() {
                         for (int i = firstIdx; i < lastIdx; i++) {
-                            final double omega = TMathConstants.TwoPi() * testFrequencies[i];
+                            final double omega = MathBase.twoPi() * testFrequencies[i];
                             double sum1 = 0.0;
                             double sum2 = 0.0;
 
                             for (int j = 0; j < tn; j++) {
-                                sum1 += val[j] * TMathConstants.Cos(omega * t[j]);
-                                sum2 += val[j] * TMathConstants.Sin(omega * t[j]);
+                                sum1 += val[j] * MathBase.cos(omega * t[j]);
+                                sum2 += val[j] * MathBase.sin(omega * t[j]);
                             }
 
                             sum1 /= tn;
                             sum2 /= tn;
 
-                            ret[i] = 2 * TMathConstants.Sqrt(TMathConstants.Sqr(sum1) + TMathConstants.Sqr(sum2));
+                            ret[i] = 2 * MathBase.sqrt(MathBase.sqr(sum1) + MathBase.sqr(sum2));
                         }
                     }
                 });
             }
         } else {
-
             double sum1 = 0.0;
             double sum2 = 0.0;
             for (int i = 0; i < n; i++) {
-                final double omega = TMathConstants.TwoPi() * testFrequencies[i];
+                final double omega = MathBase.twoPi() * testFrequencies[i];
                 for (int j = 0; j < t.length; j++) {
-                    sum1 += val[j] * TMathConstants.Cos(omega * t[j]);
-                    sum2 += val[j] * TMathConstants.Sin(omega * t[j]);
+                    sum1 += val[j] * MathBase.cos(omega * t[j]);
+                    sum2 += val[j] * MathBase.sin(omega * t[j]);
                 }
                 sum1 /= t.length;
                 sum2 /= t.length;
-                ret[i] = 2 * TMathConstants.Sqrt(TMathConstants.Sqr(sum1) + TMathConstants.Sqr(sum2));
+                ret[i] = 2 * MathBase.sqrt(MathBase.sqr(sum1) + MathBase.sqr(sum2));
             }
         }
 

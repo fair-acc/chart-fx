@@ -1,6 +1,6 @@
 package de.gsi.math.functions;
 
-import de.gsi.math.TMath;
+import de.gsi.math.Math;
 
 /**
  * class implementing the Gaussian function (/normal distribution)
@@ -46,17 +46,16 @@ public class TruncatedGaussianFunction extends AbstractFunction1D implements Fun
             return;
         }
 
-        for (int i = 0; i < Math.min(parameter.length, 4); i++) {
+        for (int i = 0; i < java.lang.Math.min(parameter.length, 4); i++) {
             setParameterValue(i, parameter[i]);
         }
     }
 
     @Override
     public double getValue(final double x) {
-        if (Math.abs(x - fparameter[0]) < fparameter[3] * fparameter[1]) {
-            return fparameter[2] * TMath.Gauss(x, fparameter[0], fparameter[1], true);
+        if (java.lang.Math.abs(x - fparameter[0]) < fparameter[3] * fparameter[1]) {
+            return fparameter[2] * Math.gauss(x, fparameter[0], fparameter[1], true);
         }
         return 0.0;
     }
-
 }

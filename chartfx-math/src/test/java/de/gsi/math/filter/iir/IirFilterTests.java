@@ -22,7 +22,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 import de.gsi.dataset.DataSet;
 import de.gsi.dataset.spi.DefaultDataSet;
 import de.gsi.math.DataSetMath;
-import de.gsi.math.TMathConstants;
+import de.gsi.math.MathBase;
 
 public class IirFilterTests {
     private static final double EPSILON_DB = 0.01;
@@ -264,7 +264,7 @@ public class IirFilterTests {
         for (int i = 0; i < iirLowPass.getNumBiquads(); i++) {
             cornerFrequency = cornerFrequency.multiply(iirLowPass.getBiquad(i).response(F_CUT_LOW));
         }
-        final double valueAtCutOff = 20 * TMathConstants.Log10(cornerFrequency.abs());
+        final double valueAtCutOff = 20 * MathBase.log10(cornerFrequency.abs());
         assertThat("low-pass cut-off (response calculation)", valueAtCutOff, lessThan(-3.0 + EPSILON_DB));
     }
 

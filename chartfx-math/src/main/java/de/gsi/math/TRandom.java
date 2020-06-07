@@ -64,7 +64,7 @@ public class TRandom {
         final double rval;
         final double displ;
         rval = 2 * Rndm() - 1;
-        displ = 0.5 * gamma * TMathConstants.Tan(rval * TMathConstants.PiOver2());
+        displ = 0.5 * gamma * MathBase.tan(rval * MathBase.piOver2());
 
         return (mean + displ);
     }
@@ -76,9 +76,9 @@ public class TRandom {
      * @param r   circle radius
      */
     public static void Circle(final double[] val, final double r) {
-        final double phi = Uniform(0, TMathConstants.TwoPi());
-        val[0] = r * TMathConstants.Cos(phi);
-        val[1] = r * TMathConstants.Sin(phi);
+        final double phi = Uniform(0, MathBase.twoPi());
+        val[0] = r * MathBase.cos(phi);
+        val[1] = r * MathBase.sin(phi);
     }
 
     /**
@@ -87,7 +87,7 @@ public class TRandom {
      */
     public static double Exp(final double tau) {
         final double x = Uniform(1); // uniform on ] 0, 1 ]
-        return -tau * TMathConstants.Log(x); // convert to exponential distribution
+        return -tau * MathBase.log(x); // convert to exponential distribution
     }
 
     /**
@@ -151,15 +151,15 @@ public class TRandom {
                 rn = Rndm();
                 rn = rn - 1 + rn;
                 z = (rn > 0) ? 2 - rn : -2 - rn;
-                if ((kC1 - y) * (kC3 + TMathConstants.Abs(z)) < kC2) {
+                if ((kC1 - y) * (kC3 + MathBase.abs(z)) < kC2) {
                     result = z;
                     break;
                 } else {
                     x = rn * rn;
-                    if (((y + kD1) * (kD3 + x) < kD2) || (y + kHzm < Math.exp(-(x + kPhln) / 2))) {
+                    if (((y + kD1) * (kD3 + x) < kD2) || (y + kHzm < java.lang.Math.exp(-(x + kPhln) / 2))) {
                         result = rn;
                         break;
-                    } else if (kHzmp - y < Math.exp(-(z * z + kPhln) / 2)) {
+                    } else if (kHzmp - y < java.lang.Math.exp(-(z * z + kPhln) / 2)) {
                         result = z;
                         break;
                     }
@@ -178,7 +178,7 @@ public class TRandom {
                     rn = -(2 + y / x);
                 }
 
-                if (((y - kAs + x) * (kCs + x) + kBs < 0) || (y < x + kT && rn * rn < 4 * (kB - Math.log(x)))) {
+                if (((y - kAs + x) * (kCs + x) + kBs < 0) || (y < x + kT && rn * rn < 4 * (kB - java.lang.Math.log(x)))) {
                     result = rn;
                     break;
                 }
@@ -280,9 +280,9 @@ public class TRandom {
         } else if (i >= 7 && i <= 980) {
             ranlan = f[i - 1] + u * (f[i] - f[i - 1] - 0.25 * (1 - u) * (f[i + 1] - f[i] - f[i - 1] + f[i - 2]));
         } else if (i < 7) {
-            v = TMathConstants.Log(x);
+            v = MathBase.log(x);
             u = 1 / v;
-            ranlan = ((0.99858950 + (3.45213058E1 + 1.70854528E1 * u) * u) / (1 + (3.41760202E1 + 4.01244582 * u) * u)) * (-TMathConstants.Log(-0.91893853 - v) - 1);
+            ranlan = ((0.99858950 + (3.45213058E1 + 1.70854528E1 * u) * u) / (1 + (3.41760202E1 + 4.01244582 * u) * u)) * (-MathBase.log(-0.91893853 - v) - 1);
         } else {
             u = 1 - x;
             v = u * u;
@@ -309,7 +309,7 @@ public class TRandom {
             return 0;
         }
         if (mean < 25) {
-            final double expmean = TMathConstants.Exp(-mean);
+            final double expmean = MathBase.exp(-mean);
             double pir = 1;
             n = -1;
             while (true) {
@@ -329,27 +329,27 @@ public class TRandom {
             final double sq;
             final double alxm;
             final double g;
-            final double pi = TMathConstants.Pi();
+            final double pi = MathBase.pi();
 
-            sq = TMathConstants.Sqrt(2.0 * mean);
-            alxm = TMathConstants.Log(mean);
-            g = mean * alxm - TMath.LnGamma(mean + 1.0);
+            sq = MathBase.sqrt(2.0 * mean);
+            alxm = MathBase.log(mean);
+            g = mean * alxm - Math.lnGamma(mean + 1.0);
 
             do {
                 do {
-                    y = TMathConstants.Tan(pi * Rndm());
+                    y = MathBase.tan(pi * Rndm());
                     em = sq * y + mean;
                 } while (em < 0.0);
 
-                em = TMathConstants.Floor(em);
-                t = 0.9 * (1.0 + y * y) * TMathConstants.Exp(em * alxm - TMath.LnGamma(em + 1.0) - g);
+                em = MathBase.floor(em);
+                t = 0.9 * (1.0 + y * y) * MathBase.exp(em * alxm - Math.lnGamma(em + 1.0) - g);
             } while (Rndm() > t);
 
             return (int) em;
 
         } else {
             // use Gaussian approximation vor very large values
-            n = (int) (Gaus(0, 1) * TMathConstants.Sqrt(mean) + mean + 0.5);
+            n = (int) (Gaus(0, 1) * MathBase.sqrt(mean) + mean + 0.5);
             return n;
         }
     }
@@ -366,7 +366,7 @@ public class TRandom {
             return 0;
         }
         if (mean < 25) {
-            final double expmean = TMathConstants.Exp(-mean);
+            final double expmean = MathBase.exp(-mean);
             double pir = 1;
             n = -1;
             while (true) {
@@ -386,27 +386,27 @@ public class TRandom {
             final double sq;
             final double alxm;
             final double g;
-            final double pi = TMathConstants.Pi();
+            final double pi = MathBase.pi();
 
-            sq = TMathConstants.Sqrt(2.0 * mean);
-            alxm = TMathConstants.Log(mean);
-            g = mean * alxm - TMath.LnGamma(mean + 1.0);
+            sq = MathBase.sqrt(2.0 * mean);
+            alxm = MathBase.log(mean);
+            g = mean * alxm - Math.lnGamma(mean + 1.0);
 
             do {
                 do {
-                    y = TMathConstants.Tan(pi * Rndm());
+                    y = MathBase.tan(pi * Rndm());
                     em = sq * y + mean;
                 } while (em < 0.0);
 
-                em = TMathConstants.Floor(em);
-                t = 0.9 * (1.0 + y * y) * TMathConstants.Exp(em * alxm - TMath.LnGamma(em + 1.0) - g);
+                em = MathBase.floor(em);
+                t = 0.9 * (1.0 + y * y) * MathBase.exp(em * alxm - Math.lnGamma(em + 1.0) - g);
             } while (Rndm() > t);
 
             return em;
 
         } else {
             // use Gaussian approximation vor very large values
-            return Gaus(0, 1) * TMathConstants.Sqrt(mean) + mean + 0.5;
+            return Gaus(0, 1) * MathBase.sqrt(mean) + mean + 0.5;
         }
     }
 
@@ -424,9 +424,9 @@ public class TRandom {
         y = Rndm();
         z = Rndm();
         x = z * 6.28318530717958623;
-        r = TMathConstants.Sqrt(-2 * TMathConstants.Log(y));
-        val[0] = r * TMathConstants.Sin(x);
-        val[1] = r * TMathConstants.Cos(x);
+        r = MathBase.sqrt(-2 * MathBase.log(y));
+        val[0] = r * MathBase.sin(x);
+        val[1] = r * MathBase.cos(x);
     }
 
     /**
@@ -443,9 +443,9 @@ public class TRandom {
         y = Rndm();
         z = Rndm();
         x = z * 6.28318530717958623;
-        r = TMathConstants.Sqrt(-2 * TMathConstants.Log(y));
-        val[0] = (float) (r * TMathConstants.Sin(x));
-        val[0] = (float) (r * TMathConstants.Cos(x));
+        r = MathBase.sqrt(-2 * MathBase.log(y));
+        val[0] = (float) (r * MathBase.sin(x));
+        val[0] = (float) (r * MathBase.cos(x));
     }
 
     /**
@@ -515,7 +515,7 @@ public class TRandom {
         }
         val[2] = r * (-1. + 8.0 * r2);
 
-        final double scale = 8.0 * r * TMathConstants.Sqrt(0.25 - r2);
+        final double scale = 8.0 * r * MathBase.sqrt(0.25 - r2);
         val[0] = a * scale;
         val[1] = b * scale;
     }

@@ -8,8 +8,8 @@ import org.apache.commons.math3.complex.Complex;
 import de.gsi.dataset.DataSet;
 import de.gsi.dataset.GridDataSet;
 import de.gsi.dataset.spi.DataSetBuilder;
-import de.gsi.math.TMath;
-import de.gsi.math.TMathConstants;
+import de.gsi.math.Math;
+import de.gsi.math.MathBase;
 import de.gsi.math.spectra.Convolution;
 import de.gsi.math.utils.ConcurrencyUtils;
 
@@ -67,7 +67,7 @@ public class ContinuousWavelet {
      */
     public synchronized double[][] getScalogramArray(final double[] data, final int nQuantx, final int nQuanty,
             final double nu, final double fmin, final double fmax) {
-        final int nQuantyInternal = (int) Math.floor(nQuanty * (fmax - fmin) / 0.5) + 1;
+        final int nQuantyInternal = (int) java.lang.Math.floor(nQuanty * (fmax - fmin) / 0.5) + 1;
         final double[][] ret = new double[nQuantx][nQuantyInternal];
 
         fstatus = 0;
@@ -90,7 +90,7 @@ public class ContinuousWavelet {
                     final Complex val = WaveletTransform(data, scale, t, nu);
 
                     final double power = val.getReal() * val.getReal() + val.getImaginary() * val.getImaginary();
-                    ret[i][j - min] = 10 * TMathConstants.Log10(power + 1e-99);
+                    ret[i][j - min] = 10 * MathBase.log10(power + 1e-99);
                 } else {
                     ret[i][j - min] = Double.NaN;
                 }
@@ -111,7 +111,7 @@ public class ContinuousWavelet {
      */
     public synchronized double[][] getScalogramArrayFourier(final double[] data, final int nQuantx, final int nQuanty,
             final double nu, final double fmin, final double fmax) {
-        final int nQuantyInternal = (int) Math.floor(nQuanty * (fmax - fmin) / 0.5) + 1;
+        final int nQuantyInternal = (int) java.lang.Math.floor(nQuanty * (fmax - fmin) / 0.5) + 1;
         final double[][] ret = new double[nQuantyInternal][nQuantx];
         final boolean cyclicBoundaries = true;
 
@@ -163,11 +163,11 @@ public class ContinuousWavelet {
                                             final double Re = wtransformed[i2 + l2];
                                             final double Im = wtransformed[i2 + l2 + 1];
 
-                                            power += TMathConstants.Sqr(Re) + TMathConstants.Sqr(Im);
+                                            power += MathBase.sqr(Re) + MathBase.sqr(Im);
                                         }
                                         power /= nbin;
 
-                                        ret[j - min][i] = 10 * TMathConstants.Log10(power + 1e-99);
+                                        ret[j - min][i] = 10 * MathBase.log10(power + 1e-99);
                                     }
                                 } else {
                                     for (int i = 0; i < filterDim; i++) {
@@ -176,8 +176,8 @@ public class ContinuousWavelet {
                                         final double Re = wtransformed[i2];
                                         final double Im = wtransformed[i2 + 1];
 
-                                        final double power = TMathConstants.Sqr(Re) + TMathConstants.Sqr(Im);
-                                        ret[j - min][i] = 10 * TMathConstants.Log10(power + 1e-99);
+                                        final double power = MathBase.sqr(Re) + MathBase.sqr(Im);
+                                        ret[j - min][i] = 10 * MathBase.log10(power + 1e-99);
                                     }
                                 }
 
@@ -218,11 +218,11 @@ public class ContinuousWavelet {
                                 final double Re = wtransformed[i2 + k2];
                                 final double Im = wtransformed[i2 + k2 + 1];
 
-                                power += TMathConstants.Sqr(Re) + TMathConstants.Sqr(Im);
+                                power += MathBase.sqr(Re) + MathBase.sqr(Im);
                             }
                             power /= nbin;
 
-                            ret[j - min][i] = 10 * TMathConstants.Log10(power + 1e-99);
+                            ret[j - min][i] = 10 * MathBase.log10(power + 1e-99);
                         }
                     } else {
                         for (int i = 0; i < filterDim; i++) {
@@ -231,8 +231,8 @@ public class ContinuousWavelet {
                             final double Re = wtransformed[i2];
                             final double Im = wtransformed[i2 + 1];
 
-                            final double power = TMathConstants.Sqr(Re) + TMathConstants.Sqr(Im);
-                            ret[j - min][i] = 10 * TMathConstants.Log10(power + 1e-99);
+                            final double power = MathBase.sqr(Re) + MathBase.sqr(Im);
+                            ret[j - min][i] = 10 * MathBase.log10(power + 1e-99);
                         }
                     }
 
@@ -256,7 +256,7 @@ public class ContinuousWavelet {
 
     public double[] getScalogramFrequencyAxis(final int nQuantx, final int nQuanty, final double nu, final double fmin,
             final double fmax) {
-        final double[] ret = new double[(int) Math.floor(nQuanty * (fmax - fmin) / 0.5) + 1];
+        final double[] ret = new double[(int) java.lang.Math.floor(nQuanty * (fmax - fmin) / 0.5) + 1];
         for (int i = 0; i < ret.length; i++) {
             ret[i] = fmin + i * (fmax - fmin) / ret.length;
         }
@@ -288,7 +288,7 @@ public class ContinuousWavelet {
 
     public Complex MexicanHat(final double x) {
         final double x2 = x * x;
-        final double im = (1.0 - x2) * Math.exp(-0.5 * x2);
+        final double im = (1.0 - x2) * java.lang.Math.exp(-0.5 * x2);
         return new Complex(0, im);
     }
 
@@ -301,11 +301,11 @@ public class ContinuousWavelet {
      *         Signal Analysis., Geoexploration, 23:85-102, 1984
      */
     public Complex Morlet(final double x, final double nu) {
-        final double val1 = 1.0 / Math.sqrt(TMathConstants.TwoPi())
-                            * TMathConstants.Exp(-2 * TMathConstants.Sqr(TMathConstants.Sqr(TMathConstants.TwoPi()) * x / nu));
-        final double val2 = TMathConstants.TwoPi() * nu * x;
-        final double re = val1 * Math.sin(val2);
-        final double im = val1 * Math.cos(val2);
+        final double val1 = 1.0 / java.lang.Math.sqrt(MathBase.twoPi())
+                            * MathBase.exp(-2 * MathBase.sqr(MathBase.sqr(MathBase.twoPi()) * x / nu));
+        final double val2 = MathBase.twoPi() * nu * x;
+        final double re = val1 * java.lang.Math.sin(val2);
+        final double im = val1 * java.lang.Math.cos(val2);
         return new Complex(re, im);
     }
 
@@ -319,11 +319,11 @@ public class ContinuousWavelet {
      *            Analysis., Geoexploration, 23:85-102, 1984
      */
     public void Morlet(final double x, final double nu, final double[] ret) {
-        final double val1 = 1.0 / Math.sqrt(TMathConstants.TwoPi())
-                            * TMathConstants.Exp(-2 * TMathConstants.Sqr(TMathConstants.Sqr(TMathConstants.TwoPi()) * x / nu));
-        final double val2 = TMathConstants.TwoPi() * nu * x;
-        ret[0] = val1 * Math.cos(val2);
-        ret[1] = val1 * Math.sin(val2);
+        final double val1 = 1.0 / java.lang.Math.sqrt(MathBase.twoPi())
+                            * MathBase.exp(-2 * MathBase.sqr(MathBase.sqr(MathBase.twoPi()) * x / nu));
+        final double val2 = MathBase.twoPi() * nu * x;
+        ret[0] = val1 * java.lang.Math.cos(val2);
+        ret[1] = val1 * java.lang.Math.sin(val2);
     }
 
     /**
@@ -334,8 +334,8 @@ public class ContinuousWavelet {
      * @return complex Paul wavelet function
      */
     public Complex Paul(final double x, final int m) {
-        final double val = Math.pow(2, m) * TMath.Factorial(m)
-                           / Math.sqrt(TMathConstants.Pi() * TMath.Factorial(2 * m));
+        final double val = java.lang.Math.pow(2, m) * Math.factorial(m)
+                           / java.lang.Math.sqrt(MathBase.pi() * Math.factorial(2 * m));
         Complex c1 = new Complex(1, 0);
         Complex c2 = new Complex(1, 0);
         for (int i = 0; i < m + 1; i++) {
@@ -361,7 +361,7 @@ public class ContinuousWavelet {
             final double nu) {
         double re = 0;
         double im = 0;
-        final double norm = 1.0 / Math.sqrt(scale);
+        final double norm = 1.0 / java.lang.Math.sqrt(scale);
 
         for (int i = 0; i < data.length; i++) {
             final Complex morlet = Morlet((i - translation) / scale, nu).multiply(norm);
@@ -387,14 +387,14 @@ public class ContinuousWavelet {
         double re = 0, im = 0;
         final double[] ret = new double[2]; // temp. real/imaginary storage for
         // the morlet wavelet
-        final double norm = 1.0 / Math.sqrt(scale);
+        final double norm = 1.0 / java.lang.Math.sqrt(scale);
 
         // reduce rank of multiplication (speed optimisation)
         final int centre = (int) translation + 1;
         final int width = (int) (10.0 * scale); // significant half-width
         // (morlet)
-        final int min = Math.max(0, centre - width);
-        final int max = Math.min(data.length, centre + width);
+        final int min = java.lang.Math.max(0, centre - width);
+        final int max = java.lang.Math.min(data.length, centre + width);
 
         // implements the scalogram spectrum
         // W(tau, scale) =

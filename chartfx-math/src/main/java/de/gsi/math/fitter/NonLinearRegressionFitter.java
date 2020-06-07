@@ -3,8 +3,8 @@ package de.gsi.math.fitter;
 import java.util.ArrayList;
 
 import de.gsi.math.ArrayConversion;
-import de.gsi.math.TMath;
-import de.gsi.math.TMathConstants;
+import de.gsi.math.Math;
+import de.gsi.math.MathBase;
 import de.gsi.math.functions.Function;
 import de.gsi.math.functions.Function1D;
 import de.gsi.math.functions.FunctionND;
@@ -486,7 +486,7 @@ public class NonLinearRegressionFitter {
         sumPenalties.add(plusOrMinus);
         sumPenalties.add(Integer.valueOf(conDir));
         sumPenalties.add(Double.valueOf(constraint));
-        final int maxI = TMath.Maximum(paramIndices);
+        final int maxI = Math.maximum(paramIndices);
         if (maxI > maxConstraintIndex) {
             maxConstraintIndex = maxI;
         }
@@ -974,7 +974,7 @@ public class NonLinearRegressionFitter {
             residual[i] = yCalctemp;
             residualW[i] = yCalctemp / weight[i];
             if (weightOpt) {
-                chiSquare += TMathConstants.Sqr(yCalctemp / weight[i]);
+                chiSquare += MathBase.sqr(yCalctemp / weight[i]);
             }
             sumOfSquares += yCalctemp * yCalctemp;
         }
@@ -982,7 +982,7 @@ public class NonLinearRegressionFitter {
             reducedChiSquare = chiSquare / degreesOfFreedom;
         }
         final double varY = sumOfSquares / degreesOfFreedom;
-        final double sdY = Math.sqrt(varY);
+        final double sdY = java.lang.Math.sqrt(varY);
 
         if (sumOfSquares == 0.0D) {
             for (int i = 0; i < nTerms; i++) {
@@ -1016,7 +1016,7 @@ public class NonLinearRegressionFitter {
             hh = hh.inverse();
             stat = hh.getArrayCopy();
             for (int j = 0; j < nTerms; ++j) {
-                coeffSd[j] = Math.sqrt(stat[j][j]);
+                coeffSd[j] = java.lang.Math.sqrt(stat[j][j]);
             }
 
             for (int i = 0; i < nTerms; i++) {
@@ -1039,12 +1039,12 @@ public class NonLinearRegressionFitter {
         for (int i = 0; i < nTerms; i++) {
             bestSd[i] = coeffSd[i];
             tValues[i] = best[i] / bestSd[i];
-            final double atv = Math.abs(tValues[i]);
-            pValues[i] = 1.0 - TMath.Student(atv, degreesOfFreedom);
+            final double atv = java.lang.Math.abs(tValues[i]);
+            pValues[i] = 1.0 - Math.student(atv, degreesOfFreedom);
         }
 
         if (nXarrays == 1 && nYarrays == 1) {
-            sampleR = TMath.CorrelationCoefficient(xData[0], yData, weight);
+            sampleR = Math.correlationCoefficient(xData[0], yData, weight);
             sampleR2 = sampleR * sampleR;
             adjustedR = sampleR;
             adjustedR2 = sampleR2;
@@ -1123,7 +1123,7 @@ public class NonLinearRegressionFitter {
     public double getchiSquareProb() {
         double ret = 0.0D;
         if (weightOpt) {
-            ret = 1.0D - TMath.ChisquareQuantile(chiSquare, nData - nXarrays);
+            ret = 1.0D - Math.chisquareQuantile(chiSquare, nData - nXarrays);
         } else {
             System.out.println(
                     "A Chi Square probablity cannot be calculated as data are neither true frequencies nor weighted");
@@ -1536,13 +1536,13 @@ public class NonLinearRegressionFitter {
         // sum of reciprocal weights squared
         double sumRecipW = 0.0D;
         for (int i = 0; i < nData; i++) {
-            sumRecipW += 1.0D / TMathConstants.Sqr(ww[i]);
+            sumRecipW += 1.0D / MathBase.sqr(ww[i]);
         }
 
         // weighted mean of yy
         double my = 0.0D;
         for (int j = 0; j < nData; j++) {
-            my += yy[j] / TMathConstants.Sqr(ww[j]);
+            my += yy[j] / MathBase.sqr(ww[j]);
         }
         my /= sumRecipW;
 
@@ -1551,29 +1551,29 @@ public class NonLinearRegressionFitter {
         final double[] residuals = new double[nData];
         for (int j = 0; j < nData; j++) {
             residuals[j] = yy[j] - yyCalc[j];
-            mr += residuals[j] / TMathConstants.Sqr(ww[j]);
+            mr += residuals[j] / MathBase.sqr(ww[j]);
         }
         mr /= sumRecipW;
 
         // calculate yy weighted sum of squares
         double s2yy = 0.0D;
         for (int k = 0; k < nData; k++) {
-            s2yy += TMathConstants.Sqr((yy[k] - my) / ww[k]);
+            s2yy += MathBase.sqr((yy[k] - my) / ww[k]);
         }
 
         // calculate residual weighted sum of squares
         double s2r = 0.0D;
         for (int k = 0; k < nData; k++) {
-            s2r += TMathConstants.Sqr((residuals[k] - mr) / ww[k]);
+            s2r += MathBase.sqr((residuals[k] - mr) / ww[k]);
         }
 
         // calculate multiple coefficient of determination
         sampleR2 = 1.0D - s2r / s2yy;
-        sampleR = Math.sqrt(sampleR2);
+        sampleR = java.lang.Math.sqrt(sampleR2);
 
         // Calculate adjusted multiple coefficient of determination
         adjustedR2 = ((nData - 1) * sampleR2 - nXarrays) / (nData - nXarrays - 1);
-        adjustedR = Math.sqrt(adjustedR2);
+        adjustedR = java.lang.Math.sqrt(adjustedR2);
 
         // F-ratio
         if (nXarrays > 1) {
@@ -1659,7 +1659,7 @@ public class NonLinearRegressionFitter {
         // mean of abs values of yData (for testing for minimum)
         double yabsmean = 0.0D;
         for (int i = 0; i < nData; i++) {
-            yabsmean += Math.abs(yData[i]);
+            yabsmean += java.lang.Math.abs(yData[i]);
         }
         yabsmean /= nData;
 
@@ -1931,7 +1931,7 @@ public class NonLinearRegressionFitter {
                 zn = yy[i] - sumnm;
                 summnm += zn * zn;
             }
-            curMin = Math.sqrt(summnm / np);
+            curMin = java.lang.Math.sqrt(summnm / np);
 
             // test simplex sd
             switch (minTest) {
@@ -1941,7 +1941,7 @@ public class NonLinearRegressionFitter {
                 }
                 break;
             case 1:
-                if (Math.sqrt(ynewlo / degreesOfFreedom) < yabsmean * fTol) {
+                if (java.lang.Math.sqrt(ynewlo / degreesOfFreedom) < yabsmean * fTol) {
                     test = false;
                 }
                 break;
@@ -2052,8 +2052,8 @@ public class NonLinearRegressionFitter {
             f[i] = hold0 * (1.0 + delta);
             lastSSnoConstraint = sumOfSquares;
             f2 = sumSquares(regFun, f);
-            grad[i][0] = (fMin - f1) / Math.abs(delta * hold0);
-            grad[i][1] = (f2 - fMin) / Math.abs(delta * hold0);
+            grad[i][0] = (fMin - f1) / java.lang.Math.abs(delta * hold0);
+            grad[i][1] = (f2 - fMin) / java.lang.Math.abs(delta * hold0);
         }
 
         // second patial derivatives at the minimum
@@ -2154,9 +2154,9 @@ public class NonLinearRegressionFitter {
                 // this.yCalc[i] = ((Function1D) regFun).function(pmin, xd);
             }
             residual[i] = yCalc[i] - yData[i];
-            ss += TMathConstants.Sqr(residual[i]);
+            ss += MathBase.sqr(residual[i]);
             residualW[i] = residual[i] / weight[i];
-            sc += TMathConstants.Sqr(residualW[i]);
+            sc += MathBase.sqr(residualW[i]);
         }
 
         if (regFun instanceof Function) {
@@ -2178,9 +2178,9 @@ public class NonLinearRegressionFitter {
 
         // calculate pseudo errors - reduced sum of squares over second partial derivative
         for (int i = 0; i < np; i++) {
-            pseudoSd[i] = 2.0D * delta * red * Math.abs(pmin[i]) / (grad[i][1] - grad[i][0]);
+            pseudoSd[i] = 2.0D * delta * red * java.lang.Math.abs(pmin[i]) / (grad[i][1] - grad[i][0]);
             if (pseudoSd[i] >= 0.0D) {
-                pseudoSd[i] = Math.sqrt(pseudoSd[i]);
+                pseudoSd[i] = java.lang.Math.sqrt(pseudoSd[i]);
             } else {
                 pseudoSd[i] = Double.NaN;
             }
@@ -2195,7 +2195,7 @@ public class NonLinearRegressionFitter {
             stat[0][0] = 1.0D / stat[0][0];
             covar[0][0] = stat[0][0] * red * hold0 * hold0;
             if (covar[0][0] >= 0.0D) {
-                coeffSd[0] = Math.sqrt(covar[0][0]);
+                coeffSd[0] = java.lang.Math.sqrt(covar[0][0]);
                 corrCoeff[0][0] = 1.0D;
             } else {
                 coeffSd[0] = Double.NaN;
@@ -2234,7 +2234,7 @@ public class NonLinearRegressionFitter {
                         covar[j][i] = covar[i][j];
                     }
                     if (covar[i][i] >= 0.0D) {
-                        coeffSd[i] = Math.sqrt(covar[i][i]);
+                        coeffSd[i] = java.lang.Math.sqrt(covar[i][i]);
                     } else {
                         coeffSd[i] = Double.NaN;
                         posVarFlag = false;
@@ -2268,8 +2268,8 @@ public class NonLinearRegressionFitter {
         for (int i = 0; i < nTerms; i++) {
             bestSd[i] = coeffSd[i];
             tValues[i] = best[i] / bestSd[i];
-            final double atv = Math.abs(tValues[i]);
-            pValues[i] = 1.0 - TMath.Student(atv, degreesOfFreedom);
+            final double atv = java.lang.Math.abs(tValues[i]);
+            pValues[i] = 1.0 - Math.student(atv, degreesOfFreedom);
         }
 
         multCorrelCoeff(yData, yCalc, weight);
@@ -2891,23 +2891,23 @@ public class NonLinearRegressionFitter {
                 switch (penaltyCheck[i]) {
                 case -1:
                     if (param[k] < constraints[i]) {
-                        ss = tempFunctVal + penaltyWeight * TMathConstants.Sqr(constraints[i] - param[k]);
+                        ss = tempFunctVal + penaltyWeight * MathBase.sqr(constraints[i] - param[k]);
                         test = false;
                     }
                     break;
                 case 0:
                     if (param[k] < constraints[i] * (1.0 - constraintTolerance)) {
-                        ss = tempFunctVal + penaltyWeight * TMathConstants.Sqr(constraints[i] * (1.0 - constraintTolerance) - param[k]);
+                        ss = tempFunctVal + penaltyWeight * MathBase.sqr(constraints[i] * (1.0 - constraintTolerance) - param[k]);
                         test = false;
                     }
                     if (param[k] > constraints[i] * (1.0 + constraintTolerance)) {
-                        ss = tempFunctVal + penaltyWeight * TMathConstants.Sqr(param[k] - constraints[i] * (1.0 + constraintTolerance));
+                        ss = tempFunctVal + penaltyWeight * MathBase.sqr(param[k] - constraints[i] * (1.0 + constraintTolerance));
                         test = false;
                     }
                     break;
                 case 1:
                     if (param[k] > constraints[i]) {
-                        ss = tempFunctVal + penaltyWeight * TMathConstants.Sqr(param[k] - constraints[i]);
+                        ss = tempFunctVal + penaltyWeight * MathBase.sqr(param[k] - constraints[i]);
                         test = false;
                     }
                     break;
@@ -2929,23 +2929,23 @@ public class NonLinearRegressionFitter {
                 switch (sumPenaltyCheck[i]) {
                 case -1:
                     if (sumPenaltySum < sumConstraints[i]) {
-                        ss = tempFunctVal + penaltyWeight * TMathConstants.Sqr(sumConstraints[i] - sumPenaltySum);
+                        ss = tempFunctVal + penaltyWeight * MathBase.sqr(sumConstraints[i] - sumPenaltySum);
                         test = false;
                     }
                     break;
                 case 0:
                     if (sumPenaltySum < sumConstraints[i] * (1.0 - constraintTolerance)) {
-                        ss = tempFunctVal + penaltyWeight * TMathConstants.Sqr(sumConstraints[i] * (1.0 - constraintTolerance) - sumPenaltySum);
+                        ss = tempFunctVal + penaltyWeight * MathBase.sqr(sumConstraints[i] * (1.0 - constraintTolerance) - sumPenaltySum);
                         test = false;
                     }
                     if (sumPenaltySum > sumConstraints[i] * (1.0 + constraintTolerance)) {
-                        ss = tempFunctVal + penaltyWeight * TMathConstants.Sqr(sumPenaltySum - sumConstraints[i] * (1.0 + constraintTolerance));
+                        ss = tempFunctVal + penaltyWeight * MathBase.sqr(sumPenaltySum - sumConstraints[i] * (1.0 + constraintTolerance));
                         test = false;
                     }
                     break;
                 case 1:
                     if (sumPenaltySum > sumConstraints[i]) {
-                        ss = tempFunctVal + penaltyWeight * TMathConstants.Sqr(sumPenaltySum - sumConstraints[i]);
+                        ss = tempFunctVal + penaltyWeight * MathBase.sqr(sumPenaltySum - sumConstraints[i]);
                         test = false;
                     }
                     break;
@@ -2979,7 +2979,7 @@ public class NonLinearRegressionFitter {
                         xd[j] = xData[j][i];
                     }
 
-                    ss += TMathConstants.Sqr((yData[i] - g1.getValue(xd[0])) / weight[i]);
+                    ss += MathBase.sqr((yData[i] - g1.getValue(xd[0])) / weight[i]);
                 }
             } else {
                 final FunctionND g2 = (FunctionND) regFun;
@@ -3003,7 +3003,7 @@ public class NonLinearRegressionFitter {
                     for (int dim = 0; dim < dimIn; dim++) {
                         int index = dim * length + i;
                         index = i;
-                        ss += TMathConstants.Sqr((yData[index] - g2.getValue(xd, index)) / weight[index]);
+                        ss += MathBase.sqr((yData[index] - g2.getValue(xd, index)) / weight[index]);
                     }
                 }
             }
@@ -3125,15 +3125,15 @@ public class NonLinearRegressionFitter {
         int ihl = -1;
         if (imax > 0) {
             ihl = imax - 1;
-            halflow = Math.abs(ymax - yData[ihl]);
+            halflow = java.lang.Math.abs(ymax - yData[ihl]);
             for (int i = imax - 2; i >= 0; i--) {
-                temp = Math.abs(ymax - yData[i]);
+                temp = java.lang.Math.abs(ymax - yData[i]);
                 if (temp < halflow) {
                     halflow = temp;
                     ihl = i;
                 }
             }
-            halflow = Math.abs(xData[ihl] - xData[imax]);
+            halflow = java.lang.Math.abs(xData[ihl] - xData[imax]);
         }
 
         double halfhigh = -1.0D;
@@ -3141,15 +3141,15 @@ public class NonLinearRegressionFitter {
         int ihh = -1;
         if (imax < n - 1) {
             ihh = imax + 1;
-            halfhigh = Math.abs(ymax - yData[ihh]);
+            halfhigh = java.lang.Math.abs(ymax - yData[ihh]);
             for (int i = imax + 2; i < n; i++) {
-                temp = Math.abs(ymax - yData[i]);
+                temp = java.lang.Math.abs(ymax - yData[i]);
                 if (temp < halfhigh) {
                     halfhigh = temp;
                     ihh = i;
                 }
             }
-            halfhigh = Math.abs(xData[ihh] - xData[imax]);
+            halfhigh = java.lang.Math.abs(xData[ihh] - xData[imax]);
         }
 
         double halfw = 0.0D;
@@ -3173,7 +3173,7 @@ public class NonLinearRegressionFitter {
 
         // Set all weights to square root of frequency of occurence
         for (int ii = 0; ii < nData; ii++) {
-            weight[ii] = Math.sqrt(Math.abs(yData[ii]));
+            weight[ii] = java.lang.Math.sqrt(java.lang.Math.abs(yData[ii]));
         }
 
         // Check for zero weights and take average of neighbours as weight if it is zero
