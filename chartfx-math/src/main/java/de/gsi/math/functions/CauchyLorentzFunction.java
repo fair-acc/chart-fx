@@ -1,9 +1,8 @@
 package de.gsi.math.functions;
 
-import de.gsi.math.TMath;
+import de.gsi.math.Math;
 
 public class CauchyLorentzFunction extends AbstractFunction1D implements Function1D {
-
     /**
      * initialise the Cauchy-Lorentz distribution function parameter order: parameter[0] = location (default: 0.0)
      * parameter[1] = scale (default: 1.0)
@@ -39,6 +38,6 @@ public class CauchyLorentzFunction extends AbstractFunction1D implements Functio
 
     @Override
     public double getValue(final double x) {
-        return TMath.CauchyDist(x, fparameter[0], fparameter[1]);
+        return Math.cauchyDist(x, fparameter[0], fparameter[1]);
     }
 }

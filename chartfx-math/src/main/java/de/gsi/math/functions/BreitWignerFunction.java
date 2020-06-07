@@ -1,9 +1,8 @@
 package de.gsi.math.functions;
 
-import de.gsi.math.TMath;
+import de.gsi.math.Math;
 
 public class BreitWignerFunction extends AbstractFunction1D implements Function1D {
-
     /**
      * initialise the Breit-Wigner distribution function parameter order: parameter[0] = mean (default: 0.0)
      * parameter[1] = gamma (default: 1.0)
@@ -39,6 +38,6 @@ public class BreitWignerFunction extends AbstractFunction1D implements Function1
 
     @Override
     public double getValue(final double x) {
-        return TMath.BreitWigner(x, fparameter[0], fparameter[1]);
+        return Math.breitWigner(x, fparameter[0], fparameter[1]);
     }
 }

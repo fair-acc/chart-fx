@@ -1,6 +1,6 @@
 package de.gsi.dataset.spi.utils;
 
-import java.util.Arrays;
+import java.util.Collections;
 
 import de.gsi.dataset.utils.AssertUtils;
 
@@ -25,24 +25,41 @@ public abstract class MultiArray<T> {
      * Creates a MultiArray of the given type and dimension if supported
      * @param elements Array of the data in row major storage
      * @param dimensions int array of the dimensions
-     * @param <TT> Type of the underlying array
+     * @param <O> Type of the underlying array
      * @return A specific MultiArray implementation
      */
-    public static <TT> MultiArray<TT> of(final TT elements, final int[] dimensions) {
-        return of(elements, dimensions, 0);
+    public static <O> MultiArray<O> of(final O elements, final int[] dimensions) {
+        return of(elements, 0, dimensions);
     }
 
     /**
      * Creates a MultiArray of the given type and dimension if supported
+     * @param <O> Type of the underlying array
      * @param elements Array of the data in row major storage
-     * @param dimensions int array of the dimensions
      * @param offset where in the backing array the element data starts
-     * @param <TT> Type of the underlying array
+     * @param dimensions int array of the dimensions
      * @return A specific MultiArray implementation
      */
-    public static <TT> MultiArray<TT> of(final TT elements, final int[] dimensions, final int offset) {
+    @SuppressWarnings("unchecked")
+    public static <O> MultiArray<O> of(final O elements, final int offset, final int[] dimensions) {
         if (elements instanceof double[]) {
-            return (MultiArray<TT>) MultiArrayDouble.of((double[]) elements, dimensions, offset);
+            return (MultiArray<O>) MultiArrayDouble.wrap((double[]) elements, offset, dimensions);
+        } else if (elements instanceof float[]) {
+            return (MultiArray<O>) MultiArrayFloat.wrap((float[]) elements, offset, dimensions);
+        } else if (elements instanceof int[]) {
+            return (MultiArray<O>) MultiArrayInt.wrap((int[]) elements, offset, dimensions);
+        } else if (elements instanceof byte[]) {
+            return (MultiArray<O>) MultiArrayByte.wrap((byte[]) elements, offset, dimensions);
+        } else if (elements instanceof char[]) {
+            return (MultiArray<O>) MultiArrayChar.wrap((char[]) elements, offset, dimensions);
+        } else if (elements instanceof long[]) {
+            return (MultiArray<O>) MultiArrayLong.wrap((long[]) elements, offset, dimensions);
+        } else if (elements instanceof short[]) {
+            return (MultiArray<O>) MultiArrayShort.wrap((short[]) elements, offset, dimensions);
+        } else if (elements instanceof boolean[]) {
+            return (MultiArray<O>) MultiArrayBoolean.wrap((boolean[]) elements, offset, dimensions);
+        } else if (elements instanceof Object[]) {
+            return (MultiArray<O>) MultiArrayObject.wrap((Object[]) elements, offset, dimensions);
         }
         throw new IllegalArgumentException("Data type not supported for MultiDimArray");
     }
@@ -50,10 +67,10 @@ public abstract class MultiArray<T> {
     /**
      * Creates a 1D MultiArray of the given type if supported.
      * @param elements Array of the data in row major storage
-     * @param <TT> Type of the underlying array
+     * @param <O> Type of the underlying array
      * @return A specific MultiArray implementation
      */
-    public static <TT> MultiArray<TT> of(final TT elements) {
+    public static <O> MultiArray<O> of(final O elements) {
         return of(elements, 0);
     }
 
@@ -61,12 +78,29 @@ public abstract class MultiArray<T> {
      * Creates a 1D MultiArray of the given type if supported.
      * @param elements Array of the data in row major storage
      * @param offset where in the backing array the element data starts
-     * @param <TT> Type of the underlying array
+     * @param <O> Type of the underlying array
      * @return A specific MultiArray implementation
      */
-    public static <TT> MultiArray<TT> of(final TT elements, final int offset) {
+    @SuppressWarnings("unchecked")
+    public static <O> MultiArray<O> of(final O elements, final int offset) {
         if (elements instanceof double[]) {
-            return (MultiArray<TT>) MultiArrayDouble.of((double[]) elements, offset);
+            return (MultiArray<O>) MultiArrayDouble.wrap((double[]) elements, offset, ((double[]) elements).length);
+        } else if (elements instanceof float[]) {
+            return (MultiArray<O>) MultiArrayFloat.wrap((float[]) elements, offset, ((float[]) elements).length);
+        } else if (elements instanceof int[]) {
+            return (MultiArray<O>) MultiArrayInt.wrap((int[]) elements, offset, ((int[]) elements).length);
+        } else if (elements instanceof byte[]) {
+            return (MultiArray<O>) MultiArrayByte.wrap((byte[]) elements, offset, ((byte[]) elements).length);
+        } else if (elements instanceof char[]) {
+            return (MultiArray<O>) MultiArrayChar.wrap((char[]) elements, offset, ((char[]) elements).length);
+        } else if (elements instanceof long[]) {
+            return (MultiArray<O>) MultiArrayLong.wrap((long[]) elements, offset, ((long[]) elements).length);
+        } else if (elements instanceof short[]) {
+            return (MultiArray<O>) MultiArrayShort.wrap((short[]) elements, offset, ((short[]) elements).length);
+        } else if (elements instanceof boolean[]) {
+            return (MultiArray<O>) MultiArrayBoolean.wrap((boolean[]) elements, offset, ((boolean[]) elements).length);
+        } else if (elements instanceof Object[]) {
+            return (MultiArray<O>) MultiArrayObject.wrap((Object[]) elements, offset, ((Object[]) elements).length);
         }
         throw new IllegalArgumentException("Data type not supported for MultiDimArray");
     }
@@ -145,14 +179,14 @@ public abstract class MultiArray<T> {
     }
 
     /**
-     * @return The underlying strided array
+     * @return the underlying raw array
      */
-    public T getStridedArray() {
+    public T elements() {
         return elements;
     }
 
     @Override
     public String toString() {
-        return String.format("MultiArray [dimensions = %s, elements = %s]", Arrays.asList(this.dimensions).toString(), Arrays.asList(this.elements).toString());
+        return String.format("MultiArray [dimensions = %s, elements = %s]", Collections.singletonList(this.dimensions).toString(), Collections.singletonList(this.elements).toString());
     }
 }

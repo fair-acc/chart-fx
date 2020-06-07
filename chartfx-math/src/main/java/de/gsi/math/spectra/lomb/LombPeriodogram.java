@@ -5,8 +5,8 @@ import java.util.concurrent.Future;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.gsi.math.TMath;
-import de.gsi.math.TMathConstants;
+import de.gsi.math.Math;
+import de.gsi.math.MathBase;
 import de.gsi.math.utils.ConcurrencyUtils;
 
 /**
@@ -35,12 +35,12 @@ public class LombPeriodogram {
      * @return vector containing frequency range
      */
     public static double[] computeFrequencyRange(final double[] time) {
-        final double t_range = TMath.Maximum(time) - TMath.Minimum(time);
+        final double t_range = Math.maximum(time) - Math.minimum(time);
         double tMin = Double.MAX_VALUE;
 
         // detect minimum time interval
         for (int i = 1; i < time.length; i++) {
-            final double diff = TMathConstants.Abs(time[i] - time[i - 1]);
+            final double diff = MathBase.abs(time[i] - time[i - 1]);
             if (tMin > diff && tMin > 0) {
                 tMin = diff;
             }
@@ -87,10 +87,10 @@ public class LombPeriodogram {
         double sum1 = 0.0;
         double sum2 = 0.0;
         for (int i = 0; i < t.length; i++) {
-            sum1 += TMathConstants.Sin(TMathConstants.TwoPi() * t[i]);
-            sum2 += TMathConstants.Cos(TMathConstants.TwoPi() * t[i]);
+            sum1 += MathBase.sin(MathBase.TWO_PI * t[i]);
+            sum2 += MathBase.cos(MathBase.TWO_PI * t[i]);
         }
-        final double tau = TMathConstants.ATan2(sum1, sum2) / TMathConstants.TwoPi();
+        final double tau = MathBase.aTan2(sum1, sum2) / MathBase.TWO_PI;
 
         final int nthreads = ConcurrencyUtils.getNumberOfThreads();
         if (nthreads > 1 && n > START_THREADS) {
@@ -101,23 +101,23 @@ public class LombPeriodogram {
                 final int lastIdx = thread == nthreads - 1 ? n : firstIdx + k;
                 futures[thread] = ConcurrencyUtils.submit(() -> {
                     for (int i = firstIdx; i < lastIdx; i++) {
-                        final double omega = TMathConstants.TwoPi() * testFrequencies[i];
+                        final double omega = MathBase.TWO_PI * testFrequencies[i];
                         double sum11 = 0.0;
                         double sum12 = 0.0;
                         double sum21 = 0.0;
                         double sum22 = 0.0;
                         for (int j = 0; j < t.length; j++) {
-                            sum11 += val[j] * TMathConstants.Cos(omega * (t[j] - tau));
-                            sum21 += val[j] * TMathConstants.Sin(omega * (t[j] - tau));
+                            sum11 += val[j] * MathBase.cos(omega * (t[j] - tau));
+                            sum21 += val[j] * MathBase.sin(omega * (t[j] - tau));
 
-                            sum12 += TMathConstants.Sqr(TMathConstants.Cos(omega * (t[j] - tau)));
-                            sum22 += TMathConstants.Sqr(TMathConstants.Sin(omega * (t[j] - tau)));
+                            sum12 += MathBase.sqr(MathBase.cos(omega * (t[j] - tau)));
+                            sum22 += MathBase.sqr(MathBase.sin(omega * (t[j] - tau)));
                         }
                         if (sum12 <= 0 || sum22 <= 0) {
                             ret[i] = 0.0;
                         } else {
-                            ret[i] = TMathConstants
-                                             .Sqrt(2 * (TMathConstants.Sqr(sum11) / sum12 + TMathConstants.Sqr(sum21) / sum22)
+                            ret[i] = MathBase
+                                             .sqrt(2 * (MathBase.sqr(sum11) / sum12 + MathBase.sqr(sum21) / sum22)
                                                      / t.length);
                         }
                     }
@@ -127,24 +127,24 @@ public class LombPeriodogram {
 
         } else {
             for (int i = 0; i < n; i++) {
-                final double omega = TMathConstants.TwoPi() * testFrequencies[i];
+                final double omega = MathBase.TWO_PI * testFrequencies[i];
                 double sum11 = 0.0;
                 double sum12 = 0.0;
                 double sum21 = 0.0;
                 double sum22 = 0.0;
                 for (int j = 0; j < t.length; j++) {
-                    sum11 += val[j] * TMathConstants.Cos(omega * (t[j] - tau));
-                    sum21 += val[j] * TMathConstants.Sin(omega * (t[j] - tau));
+                    sum11 += val[j] * MathBase.cos(omega * (t[j] - tau));
+                    sum21 += val[j] * MathBase.sin(omega * (t[j] - tau));
 
-                    sum12 += TMathConstants.Sqr(TMathConstants.Cos(omega * (t[j] - tau)));
-                    sum22 += TMathConstants.Sqr(TMathConstants.Sin(omega * (t[j] - tau)));
+                    sum12 += MathBase.sqr(MathBase.cos(omega * (t[j] - tau)));
+                    sum22 += MathBase.sqr(MathBase.sin(omega * (t[j] - tau)));
                 }
 
                 if (sum12 <= 0 || sum22 <= 0) {
                     ret[i] = 0.0;
                 } else {
-                    ret[i] = TMathConstants.Sqrt(
-                            2 * (TMathConstants.Sqr(sum11) / sum12 + TMathConstants.Sqr(sum21) / sum22) / t.length);
+                    ret[i] = MathBase.sqrt(
+                            2 * (MathBase.sqr(sum11) / sum12 + MathBase.sqr(sum21) / sum22) / t.length);
                 }
             }
         }

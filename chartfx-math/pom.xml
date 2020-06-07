@@ -1,6 +1,6 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -14,9 +14,9 @@
     <name>math</name>
 
     <description>
-		A small set of math routines that can operate directly on the DataSet primitive for fitting,
-		computing spectra, linear algebra, FIR/IIR filtering, and other functionalities common to signal processing.
-	</description>
+        A small set of math routines that can operate directly on the DataSet primitive for fitting,
+        computing spectra, linear algebra, FIR/IIR filtering, and other functionalities common to signal processing.
+    </description>
 
     <dependencies>
         <dependency>
@@ -41,4 +41,25 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>de.gsi.generate</groupId>
+                <artifactId>chartfx-generate</artifactId>
+                <version>${revision}${sha1}${changelist}</version>
+                <executions>
+                    <execution>
+                        <id>generate-sources</id>
+                        <goals>
+                            <goal>generate-sources</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <input>${project.basedir}/src/main/codegen</input>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>

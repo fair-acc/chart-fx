@@ -1,9 +1,8 @@
 package de.gsi.math.functions;
 
-import de.gsi.math.TMathConstants;
+import de.gsi.math.MathBase;
 
 public class SigmoidFunction extends AbstractFunction1D implements Function1D {
-
     /**
      * initialise the sigmoid function y = 1.0/(1.0*exp(-slope*(x-location)))) parameter order: parameter[0] = location
      * (default: 0.0) parameter[1] = slope (default: 1.0) parameter[2] = scaling (default: 1.0 (fixed))
@@ -42,6 +41,6 @@ public class SigmoidFunction extends AbstractFunction1D implements Function1D {
 
     @Override
     public double getValue(final double x) {
-        return fparameter[2] / (1.0 + TMathConstants.Exp(-fparameter[1] * (x - fparameter[0])));
+        return fparameter[2] / (1.0 + MathBase.exp(-fparameter[1] * (x - fparameter[0])));
     }
 }

@@ -14,8 +14,9 @@ import org.slf4j.LoggerFactory;
 
 import de.gsi.dataset.DataSet;
 import de.gsi.dataset.spi.DefaultDataSet;
-import de.gsi.math.TMath;
-import de.gsi.math.TMathConstants;
+import de.gsi.math.ArrayMath;
+import de.gsi.math.Math;
+import de.gsi.math.MathBase;
 import de.gsi.math.functions.RandomWalkFunction;
 import de.gsi.math.samples.utils.AbstractDemoApplication;
 import de.gsi.math.samples.utils.DemoChart;
@@ -81,8 +82,8 @@ public class WaveletDenoising extends AbstractDemoApplication {
                 }
                 xValues[i] = x;
                 yValues[i] = func.getValue(0);
-                yModel[i] = Math.sin(TMathConstants.TwoPi() * 3e-4 * x * (x + offset));
-                yModel[i] = Math.sin(TMathConstants.TwoPi() * 0.05 * x);
+                yModel[i] = Math.sin(MathBase.TWO_PI * 3e-4 * x * (x + offset));
+                yModel[i] = Math.sin(MathBase.TWO_PI * 0.05 * x);
 
                 if (i < 100 || i > 400) {
                     yModel[i] = 0;
@@ -177,10 +178,10 @@ public class WaveletDenoising extends AbstractDemoApplication {
             FastWaveletTransform.invTransform(recon);
         }
 
-        final double[] diff1 = TMath.Difference(yValues, yModel);
-        final double error1 = diff1 == null ? 0.0 : TMath.RMS(diff1);
-        final double[] diff2 = TMath.Difference(recon, yModel);
-        final double error2 = diff2 == null ? 0.0 : TMath.RMS(diff2);
+        final double[] diff1 = ArrayMath.subtract(yValues, yModel);
+        final double error1 = diff1 == null ? 0.0 : Math.rms(diff1);
+        final double[] diff2 = ArrayMath.subtract(recon, yModel);
+        final double error2 = diff2 == null ? 0.0 : Math.rms(diff2);
         if (error1 > error2 && error1 != 0.0) {
             LOGGER.atInfo().addArgument(error1).addArgument(error2).addArgument((error1 - error2) / error1 * 100) //
                     .log("improved noise floor from {} \t-> {} \t({}%)");

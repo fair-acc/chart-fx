@@ -200,8 +200,8 @@ public final class ArrayUtils {
             array[indexStart] = value;
         }
 
-        for (int i = 1; i < len; i += i) {
-            System.arraycopy(array, indexStart, array, i, (len - i) < i ? len - i : i);
+        for (int i = 1; i < len; i = i << 1) {
+            System.arraycopy(array, indexStart, array, indexStart + i, (len - i) < i ? len - i : i);
         }
     }
 

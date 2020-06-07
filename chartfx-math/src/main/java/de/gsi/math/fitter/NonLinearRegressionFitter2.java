@@ -3,8 +3,9 @@ package de.gsi.math.fitter;
 import java.util.ArrayList;
 
 import de.gsi.math.ArrayConversion;
-import de.gsi.math.TMath;
-import de.gsi.math.TMathConstants;
+import de.gsi.math.ArrayMath;
+import de.gsi.math.Math;
+import de.gsi.math.MathBase;
 import de.gsi.math.functions.Function;
 import de.gsi.math.functions.Function1D;
 import de.gsi.math.functions.FunctionND;
@@ -226,7 +227,7 @@ public class NonLinearRegressionFitter2 {
         sumPenalties.add(plusOrMinus);
         sumPenalties.add(Integer.valueOf(conDir));
         sumPenalties.add(Double.valueOf(constraint));
-        final int maxI = TMath.Maximum(paramIndices);
+        final int maxI = Math.maximum(paramIndices);
         if (maxI > maxConstraintIndex) {
             maxConstraintIndex = maxI;
         }
@@ -379,7 +380,7 @@ public class NonLinearRegressionFitter2 {
     public double getchiSquareProb() {
         double ret = 0.0D;
         if (weightOpt) {
-            ret = 1.0D - TMath.ChisquareQuantile(chiSquare, nData - 1);
+            ret = 1.0D - Math.chisquareQuantile(chiSquare, nData - 1);
         } else {
             System.out.println(
                     "A Chi Square probablity cannot be calculated as data are neither true frequencies nor weighted");
@@ -1208,15 +1209,15 @@ public class NonLinearRegressionFitter2 {
         }
 
         for (int i = 0; i < yCalc.getLocalStorageDim(); i++) {
-            final double[] val = TMath.Difference(yCalc.getLocal(i), yData.getLocal(i));
+            final double[] val = ArrayMath.subtract(yCalc.getLocal(i), yData.getLocal(i));
             final double[] val2 = residualW.getLocal(i);
             final double[] weightLocal = weight.getLocal(i);
             residual.setLocal(i, val);
 
             for (int j = 0; j < val.length; j++) {
-                ss += TMathConstants.Sqr(val[j]);
+                ss += MathBase.sqr(val[j]);
                 val2[j] = val[j] / weightLocal[j];
-                sc += TMathConstants.Sqr(val2[j]);
+                sc += MathBase.sqr(val2[j]);
             }
         }
 
@@ -1332,7 +1333,7 @@ public class NonLinearRegressionFitter2 {
             bestSd[i] = coeffSd[i];
             tValues[i] = best[i] / bestSd[i];
             final double atv = Math.abs(tValues[i]);
-            pValues[i] = 1.0 - TMath.Student(atv, degreesOfFreedom);
+            pValues[i] = 1.0 - Math.student(atv, degreesOfFreedom);
         }
 
         return flag;
@@ -1790,23 +1791,23 @@ public class NonLinearRegressionFitter2 {
                 switch (penaltyCheck[i]) {
                 case -1:
                     if (param[k] < constraints[i]) {
-                        ss = tempFunctVal + penaltyWeight * TMathConstants.Sqr(constraints[i] - param[k]);
+                        ss = tempFunctVal + penaltyWeight * MathBase.sqr(constraints[i] - param[k]);
                         test = false;
                     }
                     break;
                 case 0:
                     if (param[k] < constraints[i] * (1.0 - constraintTolerance)) {
-                        ss = tempFunctVal + penaltyWeight * TMathConstants.Sqr(constraints[i] * (1.0 - constraintTolerance) - param[k]);
+                        ss = tempFunctVal + penaltyWeight * MathBase.sqr(constraints[i] * (1.0 - constraintTolerance) - param[k]);
                         test = false;
                     }
                     if (param[k] > constraints[i] * (1.0 + constraintTolerance)) {
-                        ss = tempFunctVal + penaltyWeight * TMathConstants.Sqr(param[k] - constraints[i] * (1.0 + constraintTolerance));
+                        ss = tempFunctVal + penaltyWeight * MathBase.sqr(param[k] - constraints[i] * (1.0 + constraintTolerance));
                         test = false;
                     }
                     break;
                 case 1:
                     if (param[k] > constraints[i]) {
-                        ss = tempFunctVal + penaltyWeight * TMathConstants.Sqr(param[k] - constraints[i]);
+                        ss = tempFunctVal + penaltyWeight * MathBase.sqr(param[k] - constraints[i]);
                         test = false;
                     }
                     break;
@@ -1828,23 +1829,23 @@ public class NonLinearRegressionFitter2 {
                 switch (sumPenaltyCheck[i]) {
                 case -1:
                     if (sumPenaltySum < sumConstraints[i]) {
-                        ss = tempFunctVal + penaltyWeight * TMathConstants.Sqr(sumConstraints[i] - sumPenaltySum);
+                        ss = tempFunctVal + penaltyWeight * MathBase.sqr(sumConstraints[i] - sumPenaltySum);
                         test = false;
                     }
                     break;
                 case 0:
                     if (sumPenaltySum < sumConstraints[i] * (1.0 - constraintTolerance)) {
-                        ss = tempFunctVal + penaltyWeight * TMathConstants.Sqr(sumConstraints[i] * (1.0 - constraintTolerance) - sumPenaltySum);
+                        ss = tempFunctVal + penaltyWeight * MathBase.sqr(sumConstraints[i] * (1.0 - constraintTolerance) - sumPenaltySum);
                         test = false;
                     }
                     if (sumPenaltySum > sumConstraints[i] * (1.0 + constraintTolerance)) {
-                        ss = tempFunctVal + penaltyWeight * TMathConstants.Sqr(sumPenaltySum - sumConstraints[i] * (1.0 + constraintTolerance));
+                        ss = tempFunctVal + penaltyWeight * MathBase.sqr(sumPenaltySum - sumConstraints[i] * (1.0 + constraintTolerance));
                         test = false;
                     }
                     break;
                 case 1:
                     if (sumPenaltySum > sumConstraints[i]) {
-                        ss = tempFunctVal + penaltyWeight * TMathConstants.Sqr(sumPenaltySum - sumConstraints[i]);
+                        ss = tempFunctVal + penaltyWeight * MathBase.sqr(sumPenaltySum - sumConstraints[i]);
                         test = false;
                     }
                     break;
@@ -1895,7 +1896,7 @@ public class NonLinearRegressionFitter2 {
                 }
 
                 for (int i = 0; i < yd.length; i++) {
-                    ss += TMathConstants.Sqr((yd[i] - g1.getValue(xd[i])) / weightd[i]);
+                    ss += MathBase.sqr((yd[i] - g1.getValue(xd[i])) / weightd[i]);
                 }
 
             } else {
@@ -1913,7 +1914,7 @@ public class NonLinearRegressionFitter2 {
 
                     final int vlength = ysim.length;
                     for (int index = 0; index < vlength; index++) {
-                        ss += TMathConstants.Sqr((yd[index] - ysim[index]) / weightd[index]);
+                        ss += MathBase.sqr((yd[index] - ysim[index]) / weightd[index]);
                     }
                 }
             }
@@ -1992,7 +1993,7 @@ public class NonLinearRegressionFitter2 {
     // Distribute data into bins to obtain histogram
     // zero bin position provided
     public static double[][] histogramBins(final double[] data, final double binWidth, final double binZero) {
-        final double dmax = TMath.Maximum(data);
+        final double dmax = Math.maximum(data);
         int nBins = (int) Math.ceil((dmax - binZero) / binWidth);
         if (binZero + nBins * binWidth > dmax) {
             nBins++;

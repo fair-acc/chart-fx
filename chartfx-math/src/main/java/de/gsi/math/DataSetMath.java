@@ -251,13 +251,13 @@ public final class DataSetMath { // NOPMD - nomen est omen
             final double yenL = error(function, EYN, i - 1);
             final double yenC = error(function, EYN, i);
             final double yenR = error(function, EYN, i + 1);
-            final double yen = Math.sqrt(TMathConstants.Sqr(yenL) + TMathConstants.Sqr(yenC) + TMathConstants.Sqr(yenR))
+            final double yen = Math.sqrt(MathBase.sqr(yenL) + MathBase.sqr(yenC) + MathBase.sqr(yenR))
                                / 4;
 
             final double yepL = error(function, EYP, i - 1);
             final double yepC = error(function, EYP, i);
             final double yepR = error(function, EYP, i + 1);
-            final double yep = Math.sqrt(TMathConstants.Sqr(yepL) + TMathConstants.Sqr(yepC) + TMathConstants.Sqr(yepR))
+            final double yep = Math.sqrt(MathBase.sqr(yepL) + MathBase.sqr(yepC) + MathBase.sqr(yepR))
                                / 4;
 
             // simple derivative computation
@@ -408,33 +408,33 @@ public final class DataSetMath { // NOPMD - nomen est omen
 
             switch (filterType) {
             case MEDIAN:
-                filteredFunction.add(time0, TMath.Median(subArrayY, count), TMath.Median(subArrayYn, count),
-                        TMath.Median(subArrayYp, count));
+                filteredFunction.add(time0, Math.median(subArrayY, count), Math.median(subArrayYn, count),
+                        Math.median(subArrayYp, count));
                 break;
             case MIN:
-                filteredFunction.add(time0, TMath.Minimum(subArrayY, count), TMath.Minimum(subArrayYn, count),
-                        TMath.Minimum(subArrayYp, count));
+                filteredFunction.add(time0, Math.minimum(subArrayY, count), Math.minimum(subArrayYn, count),
+                        Math.minimum(subArrayYp, count));
                 break;
             case MAX:
-                filteredFunction.add(time0, TMath.Maximum(subArrayY, count), TMath.Maximum(subArrayYn, count),
-                        TMath.Maximum(subArrayYp, count));
+                filteredFunction.add(time0, Math.maximum(subArrayY, count), Math.maximum(subArrayYn, count),
+                        Math.maximum(subArrayYp, count));
                 break;
             case P2P:
-                filteredFunction.add(time0, TMath.PeakToPeak(subArrayY, count), TMath.PeakToPeak(subArrayYn, count),
-                        TMath.PeakToPeak(subArrayYp, count));
+                filteredFunction.add(time0, Math.peakToPeak(subArrayY, count), Math.peakToPeak(subArrayYn, count),
+                        Math.peakToPeak(subArrayYp, count));
                 break;
             case RMS:
-                filteredFunction.add(time0, TMath.RMS(subArrayY, count), TMath.RMS(subArrayYn, count),
-                        TMath.RMS(subArrayYp, count));
+                filteredFunction.add(time0, Math.rms(subArrayY, count), Math.rms(subArrayYn, count),
+                        Math.rms(subArrayYp, count));
                 break;
             case GEOMMEAN:
-                filteredFunction.add(time0, TMath.GeometricMean(subArrayY, count),
-                        TMath.GeometricMean(subArrayYn, count), TMath.GeometricMean(subArrayYp, count));
+                filteredFunction.add(time0, Math.geometricMean(subArrayY, 0, count),
+                        Math.geometricMean(subArrayYn, 0, count), Math.geometricMean(subArrayYp, 0, count));
                 break;
             case MEAN:
             default:
-                filteredFunction.add(time0, TMath.Mean(subArrayY, count), TMath.Mean(subArrayYn, count) * norm,
-                        TMath.Mean(subArrayYp, count) * norm);
+                filteredFunction.add(time0, Math.mean(subArrayY, count), Math.mean(subArrayYn, count) * norm,
+                        Math.mean(subArrayYp, count) * norm);
                 break;
             }
         }
@@ -868,24 +868,24 @@ public final class DataSetMath { // NOPMD - nomen est omen
                 nEYP = Math.hypot(eyp1 / Y2, newY * eyp2 / Y2);
                 break;
             case SQR:
-                newY = TMathConstants.Sqr(Y1 + Y2);
+                newY = MathBase.sqr(Y1 + Y2);
                 nEYN = 2 * Math.abs(Y1 + Y2) * Math.hypot(eyn1, eyn2);
                 nEYP = 2 * Math.abs(Y1 + Y2) * Math.hypot(eyp1, eyp2);
                 break;
             case SQRT:
-                newY = TMathConstants.Sqrt(Y1 + Y2);
+                newY = MathBase.sqrt(Y1 + Y2);
                 nEYN = Math.sqrt(Math.abs(Y1 + Y2)) * Math.hypot(eyn1, eyn2);
                 nEYP = Math.sqrt(Math.abs(Y1 + Y2)) * Math.hypot(eyp1, eyp2);
                 break;
             case LOG10:
                 norm = 1.0 / Math.log(10);
-                newY = TMathConstants.Log10(Y1 + Y2);
+                newY = MathBase.log10(Y1 + Y2);
                 nEYN = Y1 + Y2 > 0 ? norm / Math.abs(Y1 + Y2) * Math.hypot(eyn1, eyn2) : Double.NaN;
                 nEYP = Y1 + Y2 > 0 ? norm / Math.abs(Y1 + Y2) * Math.hypot(eyp1, eyp2) : Double.NaN;
                 break;
             case DB:
                 norm = 20.0 / Math.log(10);
-                newY = 20 * TMathConstants.Log10(Y1 + Y2);
+                newY = 20 * MathBase.log10(Y1 + Y2);
                 nEYN = Y1 + Y2 > 0 ? norm / Math.abs(Y1 + Y2) * Math.hypot(eyn1, eyn2) : Double.NaN;
                 nEYP = Y1 + Y2 > 0 ? norm / Math.abs(Y1 + Y2) * Math.hypot(eyp1, eyp2) : Double.NaN;
                 break;

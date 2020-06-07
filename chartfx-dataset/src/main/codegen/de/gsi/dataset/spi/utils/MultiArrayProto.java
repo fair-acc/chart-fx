@@ -1,3 +1,4 @@
+//// codegen container: double -> float, char, short, int, long, boolean, byte
 package de.gsi.dataset.spi.utils;
 
 import java.util.Arrays;
@@ -12,22 +13,23 @@ import de.gsi.dataset.utils.AssertUtils;
  *
  * @author Alexander Krimm
  */
-public class MultiArrayDouble extends MultiArray<double[]> {
+public class MultiArrayProto extends MultiArray<double[]> {
     /**
      * @param elements Elements for the new MultiArray
      * @return A MultiArrayDouble1D with the supplied elements
      */
-    public static MultiArrayDouble of(final double[] elements) {
-        return of(elements, 0);
+    public static MultiArrayProto wrap(final double[] elements) {
+        return wrap(elements, 0, elements.length);
     }
 
     /**
      * @param elements Elements for the new MultiArray
      * @param offset where in the backing array the element data starts
+     * @param length number of elements to use from the elements array
      * @return A MultiArrayDouble1D with the supplied elements
      */
-    public static MultiArrayDouble of(final double[] elements, final int offset) {
-        return new MultiArrayDouble1D(elements, new int[] { elements.length }, offset);
+    public static MultiArrayProto wrap(final double[] elements, final int offset, final int length) {
+        return new MultiArray1DProto(elements, new int[] { length }, offset);
     }
 
     /**
@@ -35,17 +37,17 @@ public class MultiArrayDouble extends MultiArray<double[]> {
      * @param elements   The element data of the MultiArrayDouble in row-major storage
      * @return A MultiArrayDouble or specialisation of it for the 1D and 2D case
      */
-    public static MultiArrayDouble of(final double[] elements, final int[] dimensions) {
-        return of(elements, dimensions, 0);
+    public static MultiArrayProto wrap(final double[] elements, final int[] dimensions) {
+        return wrap(elements, 0, dimensions);
     }
 
     /**
-     * @param dimensions The size of the new MultiArrayDouble
      * @param elements   The element data of the MultiArrayDouble in row-major storage
      * @param offset where in the backing array the element data starts
+     * @param dimensions The size of the new MultiArrayDouble
      * @return A MultiArrayDouble or specialisation of it for the 1D and 2D case
      */
-    public static MultiArrayDouble of(final double[] elements, final int[] dimensions, final int offset) {
+    public static MultiArrayProto wrap(final double[] elements, final int offset, final int[] dimensions) {
         int nElements = 1;
         for (int ni : dimensions) {
             nElements *= ni;
@@ -53,11 +55,11 @@ public class MultiArrayDouble extends MultiArray<double[]> {
         AssertUtils.gtOrEqual("Array size", nElements + offset, elements.length);
         switch (dimensions.length) {
         case 1:
-            return new MultiArrayDouble1D(elements, dimensions, offset);
+            return new MultiArray1DProto(elements, dimensions, offset);
         case 2:
-            return new MultiArrayDouble2D(elements, dimensions, offset);
+            return new MultiArray2DProto(elements, dimensions, offset);
         default:
-            return new MultiArrayDouble(elements, dimensions, offset);
+            return new MultiArrayProto(elements, dimensions, offset);
         }
     }
 
@@ -65,31 +67,22 @@ public class MultiArrayDouble extends MultiArray<double[]> {
      * @param dimensions Dimensions for the new MultiArray
      * @return A new MultiArrayDouble with a new empty backing array
      */
-    public static MultiArrayDouble of(final int[] dimensions) {
-        return of(dimensions, 0);
-    }
-
-    /**
-     * @param dimensions Dimensions for the new MultiArray
-     * @param offset where in the backing array the element data starts
-     * @return A new MultiArrayDouble with a new empty backing array
-     */
-    public static MultiArrayDouble of(final int[] dimensions, final int offset) {
+    public static MultiArrayProto allocate(final int[] dimensions) {
         switch (dimensions.length) {
         case 1:
-            return new MultiArrayDouble1D(new double[dimensions[0] + offset], dimensions, offset);
+            return new MultiArray1DProto(new double[dimensions[0]], dimensions, 0);
         case 2:
-            return new MultiArrayDouble2D(new double[dimensions[1] * dimensions[0] + offset], dimensions, offset);
+            return new MultiArray2DProto(new double[dimensions[1] * dimensions[0]], dimensions, 0);
         default:
             int nElements = 1;
             for (int ni : dimensions) {
                 nElements *= ni;
             }
-            return new MultiArrayDouble(new double[nElements + offset], dimensions, offset);
+            return new MultiArrayProto(new double[nElements], dimensions, 0);
         }
     }
 
-    protected MultiArrayDouble(final double[] elements, final int[] dimensions, final int offset) {
+    protected MultiArrayProto(final double[] elements, final int[] dimensions, final int offset) {
         super(elements, dimensions, offset);
     }
 
@@ -136,8 +129,8 @@ public class MultiArrayDouble extends MultiArray<double[]> {
     /**
      * Specialisation for the 1D case to allow for easier and more efficient usage
      */
-    public static class MultiArrayDouble1D extends MultiArrayDouble {
-        protected MultiArrayDouble1D(final double[] elements, final int[] dimensions, final int offset) {
+    public static class MultiArray1DProto extends MultiArrayProto {
+        protected MultiArray1DProto(final double[] elements, final int[] dimensions, final int offset) {
             super(elements, dimensions, offset);
         }
 
@@ -145,7 +138,7 @@ public class MultiArrayDouble extends MultiArray<double[]> {
             return getStrided(index);
         }
 
-        public void set(final double value, final int index) {
+        public void set(final int index, final double value) {
             setStrided(index, value);
         }
     }
@@ -153,10 +146,10 @@ public class MultiArrayDouble extends MultiArray<double[]> {
     /**
      * Specialisation for the 2D case to allow for easier and more efficient usage
      */
-    public static class MultiArrayDouble2D extends MultiArrayDouble {
+    public static class MultiArray2DProto extends MultiArrayProto {
         private final int stride;
 
-        protected MultiArrayDouble2D(final double[] elements, final int[] dimensions, final int offset) {
+        protected MultiArray2DProto(final double[] elements, final int[] dimensions, final int offset) {
             super(elements, dimensions, offset);
             stride = dimensions[0];
         }

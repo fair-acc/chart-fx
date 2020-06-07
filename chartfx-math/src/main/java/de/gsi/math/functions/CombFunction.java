@@ -1,9 +1,8 @@
 package de.gsi.math.functions;
 
-import de.gsi.math.TMathConstants;
+import de.gsi.math.MathBase;
 
 public class CombFunction extends AbstractFunction1D {
-
     public CombFunction(final String name, final double[] parameter) {
         super(name, new double[3]);
         // declare parameter names
@@ -16,7 +15,7 @@ public class CombFunction extends AbstractFunction1D {
         }
 
         // assign default values
-        final int maxIndex = TMathConstants.Min(parameter.length, getParameterCount());
+        final int maxIndex = MathBase.min(parameter.length, getParameterCount());
         for (int i = 0; i < maxIndex; i++) {
             setParameterValue(i, parameter[i]);
         }
