@@ -82,7 +82,7 @@ public final class DataSetMath { // NOPMD - nomen est omen
                     new double[ncount], new double[ncount], ncount, true);
         }
 
-        final int nAvg = Math.min(nUpdates, dataSets.size());
+        final int nAvg = java.lang.Math.min(nUpdates, dataSets.size());
         final DataSet newFunction = dataSets.get(dataSets.size() - 1);
         final DoubleErrorDataSet retFunction = new DoubleErrorDataSet(functionName, newFunction.getDataCount() + 2);
 
@@ -94,7 +94,7 @@ public final class DataSetMath { // NOPMD - nomen est omen
             double eyp = 0.0;
 
             int count = 0;
-            for (int j = Math.max(0, dataSets.size() - nAvg); j < dataSets.size(); j++) {
+            for (int j = java.lang.Math.max(0, dataSets.size() - nAvg); j < dataSets.size(); j++) {
                 final DataSet oldFunction = dataSets.get(j);
                 final double oldX = oldFunction.get(DIM_X, i);
                 final double oldY = oldX == newX ? oldFunction.get(DIM_Y, i) : oldFunction.getValue(DIM_X, newX);
@@ -116,9 +116,9 @@ public final class DataSetMath { // NOPMD - nomen est omen
                 eyp /= count;
                 var /= count;
                 final double mean2 = mean * mean;
-                final double diff = Math.abs(var - mean2);
-                eyn = Math.sqrt(eyn * eyn + diff);
-                eyp = Math.sqrt(eyp * eyp + diff);
+                final double diff = java.lang.Math.abs(var - mean2);
+                eyn = java.lang.Math.sqrt(eyn * eyn + diff);
+                eyp = java.lang.Math.sqrt(eyp * eyp + diff);
                 retFunction.add(newX, mean, eyn, eyp);
             }
         }
@@ -178,8 +178,8 @@ public final class DataSetMath { // NOPMD - nomen est omen
                     ((DoubleErrorDataSet) prevAverage2).set(i, newX, newY2, eyn, eyp);
                 }
             }
-            final double newEYN = Math.sqrt(Math.abs(newY2 - Math.pow(newY, 2)) + eyn * eyn);
-            final double newEYP = Math.sqrt(Math.abs(newY2 - Math.pow(newY, 2)) + eyp * eyp);
+            final double newEYN = java.lang.Math.sqrt(java.lang.Math.abs(newY2 - java.lang.Math.pow(newY, 2)) + eyn * eyn);
+            final double newEYP = java.lang.Math.sqrt(java.lang.Math.abs(newY2 - java.lang.Math.pow(newY, 2)) + eyp * eyp);
             retFunction.set(i, oldX, newY, newEYN, newEYP);
         }
 
@@ -251,13 +251,13 @@ public final class DataSetMath { // NOPMD - nomen est omen
             final double yenL = error(function, EYN, i - 1);
             final double yenC = error(function, EYN, i);
             final double yenR = error(function, EYN, i + 1);
-            final double yen = Math.sqrt(TMathConstants.Sqr(yenL) + TMathConstants.Sqr(yenC) + TMathConstants.Sqr(yenR))
+            final double yen = java.lang.Math.sqrt(MathBase.sqr(yenL) + MathBase.sqr(yenC) + MathBase.sqr(yenR))
                                / 4;
 
             final double yepL = error(function, EYP, i - 1);
             final double yepC = error(function, EYP, i);
             final double yepR = error(function, EYP, i + 1);
-            final double yep = Math.sqrt(TMathConstants.Sqr(yepL) + TMathConstants.Sqr(yepC) + TMathConstants.Sqr(yepR))
+            final double yep = java.lang.Math.sqrt(MathBase.sqr(yepL) + MathBase.sqr(yepC) + MathBase.sqr(yepR))
                                / 4;
 
             // simple derivative computation
@@ -396,7 +396,7 @@ public final class DataSetMath { // NOPMD - nomen est omen
             int count = 0;
             for (int j = 0; j < n; j++) {
                 final double time = xValues[j];
-                if (Math.abs(time0 - time) <= width) {
+                if (java.lang.Math.abs(time0 - time) <= width) {
                     subArrayY[count] = yValues[j];
                     subArrayYn[count] = yen[j];
                     subArrayYp[count] = yep[j];
@@ -404,37 +404,37 @@ public final class DataSetMath { // NOPMD - nomen est omen
                 }
             }
 
-            final double norm = count > 0 ? 1.0 / Math.sqrt(count) : 0.0;
+            final double norm = count > 0 ? 1.0 / java.lang.Math.sqrt(count) : 0.0;
 
             switch (filterType) {
             case MEDIAN:
-                filteredFunction.add(time0, TMath.Median(subArrayY, count), TMath.Median(subArrayYn, count),
-                        TMath.Median(subArrayYp, count));
+                filteredFunction.add(time0, Math.median(subArrayY, count), Math.median(subArrayYn, count),
+                        Math.median(subArrayYp, count));
                 break;
             case MIN:
-                filteredFunction.add(time0, TMath.Minimum(subArrayY, count), TMath.Minimum(subArrayYn, count),
-                        TMath.Minimum(subArrayYp, count));
+                filteredFunction.add(time0, Math.minimum(subArrayY, count), Math.minimum(subArrayYn, count),
+                        Math.minimum(subArrayYp, count));
                 break;
             case MAX:
-                filteredFunction.add(time0, TMath.Maximum(subArrayY, count), TMath.Maximum(subArrayYn, count),
-                        TMath.Maximum(subArrayYp, count));
+                filteredFunction.add(time0, Math.maximum(subArrayY, count), Math.maximum(subArrayYn, count),
+                        Math.maximum(subArrayYp, count));
                 break;
             case P2P:
-                filteredFunction.add(time0, TMath.PeakToPeak(subArrayY, count), TMath.PeakToPeak(subArrayYn, count),
-                        TMath.PeakToPeak(subArrayYp, count));
+                filteredFunction.add(time0, Math.peakToPeak(subArrayY, count), Math.peakToPeak(subArrayYn, count),
+                        Math.peakToPeak(subArrayYp, count));
                 break;
             case RMS:
-                filteredFunction.add(time0, TMath.RMS(subArrayY, count), TMath.RMS(subArrayYn, count),
-                        TMath.RMS(subArrayYp, count));
+                filteredFunction.add(time0, Math.rms(subArrayY, count), Math.rms(subArrayYn, count),
+                        Math.rms(subArrayYp, count));
                 break;
             case GEOMMEAN:
-                filteredFunction.add(time0, TMath.GeometricMean(subArrayY, count),
-                        TMath.GeometricMean(subArrayYn, count), TMath.GeometricMean(subArrayYp, count));
+                filteredFunction.add(time0, Math.geometricMean(subArrayY, count),
+                        Math.geometricMean(subArrayYn, count), Math.geometricMean(subArrayYp, count));
                 break;
             case MEAN:
             default:
-                filteredFunction.add(time0, TMath.Mean(subArrayY, count), TMath.Mean(subArrayYn, count) * norm,
-                        TMath.Mean(subArrayYp, count) * norm);
+                filteredFunction.add(time0, Math.mean(subArrayY, count), Math.mean(subArrayYn, count) * norm,
+                        Math.mean(subArrayYp, count) * norm);
                 break;
             }
         }
@@ -546,10 +546,10 @@ public final class DataSetMath { // NOPMD - nomen est omen
             final double x1 = xValues[i];
             final double y = 0.5 * (yUp[i] + yDown[i]);
             final double mean2 = y * y;
-            final double y2 = 0.5 * Math.pow(ye1[i] + ye2[i], 1);
-            final double avgError2 = Math.abs(y2 - mean2);
-            final double newEYN = Math.sqrt(avgError2 + yen[i] * yen[i]);
-            final double newEYP = Math.sqrt(avgError2 + yep[i] * yep[i]);
+            final double y2 = 0.5 * java.lang.Math.pow(ye1[i] + ye2[i], 1);
+            final double avgError2 = java.lang.Math.abs(y2 - mean2);
+            final double newEYN = java.lang.Math.sqrt(avgError2 + yen[i] * yen[i]);
+            final double newEYP = java.lang.Math.sqrt(avgError2 + yep[i] * yep[i]);
 
             filteredFunction.add(x1, y, newEYN, newEYP);
         }
@@ -627,8 +627,8 @@ public final class DataSetMath { // NOPMD - nomen est omen
         double sign = 1.0;
 
         if (Double.isFinite(xMin) && Double.isFinite(xMax)) {
-            xMinLocal = Math.min(xMin, xMax);
-            xMaxLocal = Math.max(xMin, xMax);
+            xMinLocal = java.lang.Math.min(xMin, xMax);
+            xMaxLocal = java.lang.Math.max(xMin, xMax);
             if (xMin > xMax) {
                 sign = -1;
             }
@@ -663,8 +663,8 @@ public final class DataSetMath { // NOPMD - nomen est omen
             final double ep1 = error(function, EYP, 0);
 
             // assuming uncorrelated errors between bins
-            integralEN = Math.hypot(integralEN, step * en1);
-            integralEP = Math.hypot(integralEP, step * ep1);
+            integralEN = java.lang.Math.hypot(integralEN, step * en1);
+            integralEP = java.lang.Math.hypot(integralEP, step * ep1);
 
             retFunction.add(x0, integral, 0, 0);
         }
@@ -686,8 +686,8 @@ public final class DataSetMath { // NOPMD - nomen est omen
                 integral += sign * 0.5 * step * (y0 + y1);
 
                 // assuming uncorrelated errors between bins
-                integralEN = Math.hypot(integralEN, 0.5 * step * (en1 + en2));
-                integralEP = Math.hypot(integralEP, 0.5 * step * (ep1 + ep2));
+                integralEN = java.lang.Math.hypot(integralEN, 0.5 * step * (en1 + en2));
+                integralEP = java.lang.Math.hypot(integralEP, 0.5 * step * (ep1 + ep2));
 
             } else if (x1 < xMinLocal && x0 < xMinLocal) {
                 // see below
@@ -697,16 +697,16 @@ public final class DataSetMath { // NOPMD - nomen est omen
                 integral += sign * 0.5 * step * (function.getValue(DIM_X, xMinLocal) + y1);
 
                 // assuming uncorrelated errors between bins
-                integralEN = Math.hypot(integralEN, 0.5 * step * (en1 + en2));
-                integralEP = Math.hypot(integralEP, 0.5 * step * (ep1 + ep2));
+                integralEN = java.lang.Math.hypot(integralEN, 0.5 * step * (en1 + en2));
+                integralEP = java.lang.Math.hypot(integralEP, 0.5 * step * (ep1 + ep2));
             } else if (x0 < xMaxLocal && x1 > xMaxLocal) {
                 step = xMaxLocal - x0;
                 final double yAtMax = function.getValue(DIM_X, xMaxLocal);
                 integral += sign * 0.5 * step * (y0 + yAtMax);
 
                 // assuming uncorrelated errors between bins
-                integralEN = Math.hypot(integralEN, 0.5 * step * (en1 + en2));
-                integralEP = Math.hypot(integralEP, 0.5 * step * (ep1 + ep2));
+                integralEN = java.lang.Math.hypot(integralEN, 0.5 * step * (en1 + en2));
+                integralEP = java.lang.Math.hypot(integralEP, 0.5 * step * (ep1 + ep2));
 
                 retFunction.add(xMaxLocal, integral, integralEN, integralEP);
             }
@@ -724,8 +724,8 @@ public final class DataSetMath { // NOPMD - nomen est omen
             final double en1 = error(function, EYN, nLength - 1);
             final double ep1 = error(function, EYP, nLength - 1);
             // assuming uncorrelated errors between bins
-            integralEN = Math.hypot(integralEN, step * en1);
-            integralEP = Math.hypot(integralEP, step * ep1);
+            integralEN = java.lang.Math.hypot(integralEN, step * en1);
+            integralEP = java.lang.Math.hypot(integralEP, step * ep1);
 
             integral += 0.5 * step * (val1 + val2);
             retFunction.add(xMax, integral, integralEN, integralEP);
@@ -849,45 +849,45 @@ public final class DataSetMath { // NOPMD - nomen est omen
             switch (op) {
             case ADD:
                 newY = Y1 + Y2;
-                nEYN = Math.hypot(eyn1, eyn2);
-                nEYP = Math.hypot(eyp1, eyp2);
+                nEYN = java.lang.Math.hypot(eyn1, eyn2);
+                nEYP = java.lang.Math.hypot(eyp1, eyp2);
                 break;
             case SUBTRACT:
                 newY = Y1 - Y2;
-                nEYN = Math.hypot(eyn1, eyn2);
-                nEYP = Math.hypot(eyp1, eyp2);
+                nEYN = java.lang.Math.hypot(eyn1, eyn2);
+                nEYP = java.lang.Math.hypot(eyp1, eyp2);
                 break;
             case MULTIPLY:
                 newY = Y1 * Y2;
-                nEYN = Math.hypot(Y2 * eyn1, Y1 * eyn2);
-                nEYP = Math.hypot(Y2 * eyp1, Y1 * eyp2);
+                nEYN = java.lang.Math.hypot(Y2 * eyn1, Y1 * eyn2);
+                nEYP = java.lang.Math.hypot(Y2 * eyp1, Y1 * eyp2);
                 break;
             case DIVIDE:
                 newY = Y1 / Y2;
-                nEYN = Math.hypot(eyn1 / Y2, newY * eyn2 / Y2);
-                nEYP = Math.hypot(eyp1 / Y2, newY * eyp2 / Y2);
+                nEYN = java.lang.Math.hypot(eyn1 / Y2, newY * eyn2 / Y2);
+                nEYP = java.lang.Math.hypot(eyp1 / Y2, newY * eyp2 / Y2);
                 break;
             case SQR:
-                newY = TMathConstants.Sqr(Y1 + Y2);
-                nEYN = 2 * Math.abs(Y1 + Y2) * Math.hypot(eyn1, eyn2);
-                nEYP = 2 * Math.abs(Y1 + Y2) * Math.hypot(eyp1, eyp2);
+                newY = MathBase.sqr(Y1 + Y2);
+                nEYN = 2 * java.lang.Math.abs(Y1 + Y2) * java.lang.Math.hypot(eyn1, eyn2);
+                nEYP = 2 * java.lang.Math.abs(Y1 + Y2) * java.lang.Math.hypot(eyp1, eyp2);
                 break;
             case SQRT:
-                newY = TMathConstants.Sqrt(Y1 + Y2);
-                nEYN = Math.sqrt(Math.abs(Y1 + Y2)) * Math.hypot(eyn1, eyn2);
-                nEYP = Math.sqrt(Math.abs(Y1 + Y2)) * Math.hypot(eyp1, eyp2);
+                newY = MathBase.sqrt(Y1 + Y2);
+                nEYN = java.lang.Math.sqrt(java.lang.Math.abs(Y1 + Y2)) * java.lang.Math.hypot(eyn1, eyn2);
+                nEYP = java.lang.Math.sqrt(java.lang.Math.abs(Y1 + Y2)) * java.lang.Math.hypot(eyp1, eyp2);
                 break;
             case LOG10:
-                norm = 1.0 / Math.log(10);
-                newY = TMathConstants.Log10(Y1 + Y2);
-                nEYN = Y1 + Y2 > 0 ? norm / Math.abs(Y1 + Y2) * Math.hypot(eyn1, eyn2) : Double.NaN;
-                nEYP = Y1 + Y2 > 0 ? norm / Math.abs(Y1 + Y2) * Math.hypot(eyp1, eyp2) : Double.NaN;
+                norm = 1.0 / java.lang.Math.log(10);
+                newY = MathBase.log10(Y1 + Y2);
+                nEYN = Y1 + Y2 > 0 ? norm / java.lang.Math.abs(Y1 + Y2) * java.lang.Math.hypot(eyn1, eyn2) : Double.NaN;
+                nEYP = Y1 + Y2 > 0 ? norm / java.lang.Math.abs(Y1 + Y2) * java.lang.Math.hypot(eyp1, eyp2) : Double.NaN;
                 break;
             case DB:
-                norm = 20.0 / Math.log(10);
-                newY = 20 * TMathConstants.Log10(Y1 + Y2);
-                nEYN = Y1 + Y2 > 0 ? norm / Math.abs(Y1 + Y2) * Math.hypot(eyn1, eyn2) : Double.NaN;
-                nEYP = Y1 + Y2 > 0 ? norm / Math.abs(Y1 + Y2) * Math.hypot(eyp1, eyp2) : Double.NaN;
+                norm = 20.0 / java.lang.Math.log(10);
+                newY = 20 * MathBase.log10(Y1 + Y2);
+                nEYN = Y1 + Y2 > 0 ? norm / java.lang.Math.abs(Y1 + Y2) * java.lang.Math.hypot(eyn1, eyn2) : Double.NaN;
+                nEYP = Y1 + Y2 > 0 ? norm / java.lang.Math.abs(Y1 + Y2) * java.lang.Math.hypot(eyp1, eyp2) : Double.NaN;
                 break;
             default:
                 newY = Y1;
@@ -924,15 +924,15 @@ public final class DataSetMath { // NOPMD - nomen est omen
                     ArrayMath.divide(eyn, value), ArrayMath.divide(eyp, value), ncount, true);
         case SQR:
             for (int i = 0; i < eyn.length; i++) {
-                eyn[i] = 2 * Math.abs(y[i]) * eyn[i];
-                eyp[i] = 2 * Math.abs(y[i]) * eyp[i];
+                eyn[i] = 2 * java.lang.Math.abs(y[i]) * eyn[i];
+                eyp[i] = 2 * java.lang.Math.abs(y[i]) * eyp[i];
             }
             return new DoubleErrorDataSet(functionName, function.getValues(DIM_X), ArrayMath.sqr(y), eyn, eyp, ncount,
                     true);
         case SQRT:
             for (int i = 0; i < eyn.length; i++) {
-                eyn[i] = Math.sqrt(Math.abs(y[i])) * eyn[i];
-                eyp[i] = Math.sqrt(Math.abs(y[i])) * eyp[i];
+                eyn[i] = java.lang.Math.sqrt(java.lang.Math.abs(y[i])) * eyn[i];
+                eyp[i] = java.lang.Math.sqrt(java.lang.Math.abs(y[i])) * eyp[i];
             }
             return new DoubleErrorDataSet(functionName, function.getValues(DIM_X), ArrayMath.sqrt(y), eyn, eyp, ncount,
                     true);
@@ -1025,8 +1025,8 @@ public final class DataSetMath { // NOPMD - nomen est omen
         double xMaxLocal = function.get(DIM_X, nLength - 1);
 
         if (Double.isFinite(xMin) && Double.isFinite(xMax)) {
-            xMinLocal = Math.min(xMin, xMax);
-            xMaxLocal = Math.max(xMin, xMax);
+            xMinLocal = java.lang.Math.min(xMin, xMax);
+            xMaxLocal = java.lang.Math.max(xMin, xMax);
         } else if (Double.isFinite(xMin)) {
             xMinLocal = xMin;
         } else if (Double.isFinite(xMax)) {

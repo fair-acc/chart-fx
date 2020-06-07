@@ -7,10 +7,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import de.gsi.dataset.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import de.gsi.dataset.*;
 import de.gsi.dataset.serializer.DataType;
 import de.gsi.dataset.serializer.FieldDescription;
 import de.gsi.dataset.serializer.IoSerialiser;

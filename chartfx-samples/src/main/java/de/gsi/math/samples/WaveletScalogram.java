@@ -19,7 +19,7 @@ import de.gsi.chart.utils.AxisSynchronizer;
 import de.gsi.dataset.DataSet;
 import de.gsi.dataset.GridDataSet;
 import de.gsi.dataset.spi.DefaultDataSet;
-import de.gsi.math.TMath;
+import de.gsi.math.Math;
 import de.gsi.math.samples.utils.AbstractDemoApplication;
 import de.gsi.math.samples.utils.DemoChart;
 import de.gsi.math.spectra.SpectrumTools;
@@ -104,12 +104,12 @@ public class WaveletScalogram extends AbstractDemoApplication {
         final double[] frequency2 = SpectrumTools.computeFrequencyScale(fftSpectra.length / 2);
 
         // normalise FFT and wavelet spectra for better comparison
-        final double maxWavelet = TMath.Maximum(magWavelet);
+        final double maxWavelet = Math.maximum(magWavelet);
         for (int i = 0; i < magWavelet.length; i++) {
             magWavelet[i] -= maxWavelet;
         }
 
-        final double maxFourier = TMath.Maximum(magFourier);
+        final double maxFourier = Math.maximum(magFourier);
         for (int i = 0; i < magFourier.length; i++) {
             magFourier[i] -= maxFourier;
         }
@@ -164,17 +164,17 @@ public class WaveletScalogram extends AbstractDemoApplication {
 
             // linear chirp with discontinuity
             offset = (i > 500) ? -20 : 0;
-            yModel[i] = (i > 100 && i < 700) ? 0.7 * Math.sin(TMath.TwoPi() * 2e-4 * x * (x + offset)) : 0;
+            yModel[i] = (i > 100 && i < 700) ? 0.7 * java.lang.Math.sin(Math.twoPi() * 2e-4 * x * (x + offset)) : 0;
 
             // single tone at 0.25
-            yModel[i] += (i > 50 && i < 500) ? 1.0 * Math.sin(TMath.TwoPi() * 0.25 * x) : 0;
+            yModel[i] += (i > 50 && i < 500) ? 1.0 * java.lang.Math.sin(Math.twoPi() * 0.25 * x) : 0;
 
             // modulation around 0.4
-            final double mod = Math.cos(TMath.TwoPi() * 0.01 * x);
-            yModel[i] += (i > 300 && i < 900) ? 1.0 * Math.sin(TMath.TwoPi() * (0.4 - 5e-4 * mod) * x) : 0;
+            final double mod = java.lang.Math.cos(Math.twoPi() * 0.01 * x);
+            yModel[i] += (i > 300 && i < 900) ? 1.0 * java.lang.Math.sin(Math.twoPi() * (0.4 - 5e-4 * mod) * x) : 0;
 
             // quadratic chirp starting at 0.1
-            yModel[i] += 0.5 * Math.sin(TMath.TwoPi() * ((0.1 + 5e-8 * x * x) * x));
+            yModel[i] += 0.5 * java.lang.Math.sin(Math.twoPi() * ((0.1 + 5e-8 * x * x) * x));
 
             yModel[i] = yModel[i] + error;
         }

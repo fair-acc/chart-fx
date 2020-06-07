@@ -22,87 +22,87 @@ public class FastMathTests {
 
     @Test
     public void cosineIdentityChecks() {
-        double precision = FastMath.getPrecision();
-        int range = FastMath.getPrecision();
+        double precision = MathBaseFast.getPrecision();
+        int range = MathBaseFast.getPrecision();
         for (int i = -range; i < range; i++) {
-            final float x = (float) (2.0 * Math.PI * i / precision);
-            final float val1 = (float) Math.cos(x);
-            final float val2 = FastMath.cos(x);
-            final float diffApproximation = Math.abs(val1 - val2);
+            final float x = (float) (2.0 * java.lang.Math.PI * i / precision);
+            final float val1 = (float) java.lang.Math.cos(x);
+            final float val2 = MathBaseFast.cos(x);
+            final float diffApproximation = java.lang.Math.abs(val1 - val2);
             assertTrue(diffApproximation <= 2e-3, i + ": cos(" + x + ") diff (float) = " + diffApproximation);
         }
 
         for (int i = -range; i < range; i++) {
-            final double x = 2.0 * Math.PI * i / precision;
-            final double val1 = Math.cos(x);
-            final double val2 = FastMath.cos(x);
-            final double diffApproximation = Math.abs(val1 - val2);
+            final double x = 2.0 * java.lang.Math.PI * i / precision;
+            final double val1 = java.lang.Math.cos(x);
+            final double val2 = MathBaseFast.cos(x);
+            final double diffApproximation = java.lang.Math.abs(val1 - val2);
             assertTrue(diffApproximation <= 2e-3, i + ": cos(" + x + ") diff (double) = " + diffApproximation);
         }
 
         for (int i = -360; i < 360; i++) {
-            final float x = (float) Math.toRadians(i);
-            final float val1 = (float) Math.cos(x);
-            final float val2 = FastMath.cosDeg((float) i);
-            final float diffApproximation = Math.abs(val1 - val2);
+            final float x = (float) java.lang.Math.toRadians(i);
+            final float val1 = (float) java.lang.Math.cos(x);
+            final float val2 = MathBaseFast.cosDeg((float) i);
+            final float diffApproximation = java.lang.Math.abs(val1 - val2);
             assertTrue(diffApproximation <= 2e-3, i + ": cos(" + x + ") diff (float, deg) = " + diffApproximation);
         }
 
         for (int i = -360; i < 360; i++) {
-            final double x = Math.toRadians(i);
-            final double val1 = Math.cos(x);
-            final double val2 = FastMath.cosDeg((double) i);
-            final double diffApproximation = Math.abs(val1 - val2);
+            final double x = java.lang.Math.toRadians(i);
+            final double val1 = java.lang.Math.cos(x);
+            final double val2 = MathBaseFast.cosDeg((double) i);
+            final double diffApproximation = java.lang.Math.abs(val1 - val2);
             assertTrue(diffApproximation <= 2e-3, i + ": cos(" + x + ") diff (double, deg) = " + diffApproximation);
         }
     }
 
     @Test
     public void simpleTest() {
-        final int oldPrecision = FastMath.getPrecision();
-        FastMath.setPrecision(100);
-        assertEquals(100, FastMath.getPrecision(), "set precision");
+        final int oldPrecision = MathBaseFast.getPrecision();
+        MathBaseFast.setPrecision(100);
+        assertEquals(100, MathBaseFast.getPrecision(), "set precision");
 
-        FastMath.setPrecision(oldPrecision);
+        MathBaseFast.setPrecision(oldPrecision);
 
         assertThrows(IllegalArgumentException.class, () -> {
-            FastMath.setPrecision(-1);
+            MathBaseFast.setPrecision(-1);
         });
     }
 
     @Test
     public void sineIdentityChecks() {
-        double precision = FastMath.getPrecision();
-        int range = FastMath.getPrecision();
+        double precision = MathBaseFast.getPrecision();
+        int range = MathBaseFast.getPrecision();
         for (int i = -range; i < range; i++) {
-            final float x = (float) (2.0 * Math.PI * i / precision);
-            final float val1 = (float) Math.sin(x);
-            final float val2 = FastMath.sin(x);
-            final float diffApproximation = Math.abs(val1 - val2);
+            final float x = (float) (2.0 * java.lang.Math.PI * i / precision);
+            final float val1 = (float) java.lang.Math.sin(x);
+            final float val2 = MathBaseFast.sin(x);
+            final float diffApproximation = java.lang.Math.abs(val1 - val2);
             assertTrue(diffApproximation <= 1e-3, i + ": cos(" + x + ") diff (float) = " + diffApproximation);
         }
 
         for (int i = -range; i < range; i++) {
-            final double x = 2.0 * Math.PI * i / precision;
-            final double val1 = Math.sin(x);
-            final double val2 = FastMath.sin(x);
-            final double diffApproximation = Math.abs(val1 - val2);
+            final double x = 2.0 * java.lang.Math.PI * i / precision;
+            final double val1 = java.lang.Math.sin(x);
+            final double val2 = MathBaseFast.sin(x);
+            final double diffApproximation = java.lang.Math.abs(val1 - val2);
             assertTrue(diffApproximation <= 1e-3, i + ": cos(" + x + ") diff (double) = " + diffApproximation);
         }
 
         for (int i = -360; i < 360; i++) {
-            final float x = (float) Math.toRadians(i);
-            final float val1 = (float) Math.sin(x);
-            final float val2 = FastMath.sinDeg((float) i);
-            final float diffApproximation = Math.abs(val1 - val2);
+            final float x = (float) java.lang.Math.toRadians(i);
+            final float val1 = (float) java.lang.Math.sin(x);
+            final float val2 = MathBaseFast.sinDeg((float) i);
+            final float diffApproximation = java.lang.Math.abs(val1 - val2);
             assertTrue(diffApproximation <= 2e-3, i + ": sin(" + x + ") diff (float, deg) = " + diffApproximation);
         }
 
         for (int i = -360; i < 360; i++) {
-            final double x = Math.toRadians(i);
-            final double val1 = Math.sin(x);
-            final double val2 = FastMath.sinDeg((double) i);
-            final double diffApproximation = Math.abs(val1 - val2);
+            final double x = java.lang.Math.toRadians(i);
+            final double val1 = java.lang.Math.sin(x);
+            final double val2 = MathBaseFast.sinDeg((double) i);
+            final double diffApproximation = java.lang.Math.abs(val1 - val2);
             assertTrue(diffApproximation <= 2e-3, i + ": sin(" + x + ") diff (double, deg) = " + diffApproximation);
         }
     }
@@ -158,7 +158,7 @@ public class FastMathTests {
         float[] sample = sample(n);
         long time = -System.nanoTime();
         for (int i = 0; i < n; i++) {
-            sample[i] = FastMath.cos(sample[i]);
+            sample[i] = MathBaseFast.cos(sample[i]);
         }
         time += System.nanoTime();
         return time / n;
@@ -188,7 +188,7 @@ public class FastMathTests {
         float[] sample = sample(n);
         long time = -System.nanoTime();
         for (int i = 0; i < n; i++) {
-            sample[i] = (float) Math.sin(sample[i]);
+            sample[i] = (float) java.lang.Math.sin(sample[i]);
         }
         time += System.nanoTime();
         return time / n;
@@ -198,7 +198,7 @@ public class FastMathTests {
         float[] sample = sample(n);
         long time = -System.nanoTime();
         for (int i = 0; i < n; i++) {
-            sample[i] = FastMath.sin(sample[i]);
+            sample[i] = MathBaseFast.sin(sample[i]);
         }
         time += System.nanoTime();
         return time / n;

@@ -25,6 +25,7 @@
         <module>chartfx-math</module>
         <module>chartfx-samples</module>
         <module>chartfx-report</module>
+        <module>chartfx-generate</module>
     </modules>
 
     <properties>
@@ -181,6 +182,11 @@
                             </goals>
                         </execution>
                     </executions>
+                </plugin>
+                <plugin> <!-- Use current plugin version because of MNG-5346-->
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-plugin-plugin</artifactId>
+                    <version>3.6.0</version>
                 </plugin>
             </plugins>
         </pluginManagement>

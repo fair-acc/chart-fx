@@ -1,6 +1,6 @@
 package de.gsi.math.functions;
 
-import de.gsi.math.TMath;
+import de.gsi.math.Math;
 
 /**
  * class implementing the lognormal function see http://en.wikipedia.org/wiki/Log-normal_distribution Howe
@@ -8,7 +8,6 @@ import de.gsi.math.TMath;
  * @author rstein
  */
 public class LogNormalFunction extends AbstractFunction1D implements Function1D {
-
     /**
      * LogNormal function default parameter: parameter[0] = theta = 0.0 parameter[1] = sigma = 1.0 parameter[2] = scale
      * = 1.0
@@ -39,14 +38,13 @@ public class LogNormalFunction extends AbstractFunction1D implements Function1D 
             return;
         }
 
-        for (int i = 0; i < Math.min(parameter.length, 3); i++) {
+        for (int i = 0; i < java.lang.Math.min(parameter.length, 3); i++) {
             setParameterValue(i, parameter[i]);
         }
     }
 
     @Override
     public double getValue(final double x) {
-        return TMath.LogNormal(x, fparameter[0], fparameter[1], fparameter[2]);
+        return Math.logNormal(x, fparameter[0], fparameter[1], fparameter[2]);
     }
-
 }

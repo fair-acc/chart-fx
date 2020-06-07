@@ -14,7 +14,7 @@ import de.gsi.dataset.utils.ArrayCache;
 import de.gsi.dataset.utils.AssertUtils;
 import de.gsi.math.ArrayMath;
 import de.gsi.math.ArrayUtils;
-import de.gsi.math.TMath;
+import de.gsi.math.Math;
 
 /**************************************************************************
  * Original Author: Miroslav Morhac 27/05/99 clean up/java port: Ralph Steinhagen 18/04/18 THIS CLASS CONTAINS ADVANCED
@@ -108,7 +108,7 @@ public class TSpectrum { // NOPMD - nomen est omen
             for (int i = 0; i < length; i++) {
                 double a = workingSpace[i];
                 double b = source[i];
-                if (Math.abs(a - b) >= 1) {
+                if (java.lang.Math.abs(a - b) >= 1) {
                     int b1 = i - 1;
                     if (b1 < 0) {
                         b1 = 0;
@@ -121,7 +121,7 @@ public class TSpectrum { // NOPMD - nomen est omen
                         a = workingSpace[b2];
                         b = source[b2];
                         c = c + b - yb1;
-                        if (Math.abs(a - b) < 1) {
+                        if (java.lang.Math.abs(a - b) < 1) {
                             priz = 1;
                         }
                     }
@@ -266,7 +266,7 @@ public class TSpectrum { // NOPMD - nomen est omen
         for (int repet = 0; repet < numberRepetitions; repet++) {
             if (repet != 0) {
                 for (int i = 0; i < length; i++) {
-                    workingSpace[i] = Math.pow(workingSpace[i], boost);
+                    workingSpace[i] = java.lang.Math.pow(workingSpace[i], boost);
                 }
             }
             for (int lindex = 0; lindex < numberIterations; lindex++) {
@@ -387,7 +387,7 @@ public class TSpectrum { // NOPMD - nomen est omen
         for (int repet = 0; repet < numberRepetitions; repet++) {
             if (repet != 0) {
                 for (int i = 0; i < length; i++) {
-                    workingSpace[i] = Math.pow(workingSpace[i], boost);
+                    workingSpace[i] = java.lang.Math.pow(workingSpace[i], boost);
                 }
             }
             for (int lindex = 0; lindex < numberIterations; lindex++) {
@@ -1227,7 +1227,7 @@ public class TSpectrum { // NOPMD - nomen est omen
                         final double a = workingSpace[sizeExt + j];
                         double av = 0;
                         double men = 0;
-                        final int bw = Math.min(averWindow / 2, 2);
+                        final int bw = java.lang.Math.min(averWindow / 2, 2);
                         for (int w = j - bw; w <= j + bw; w++) {
                             if (w >= 0 && w < sizeExt) {
                                 av += workingSpace[sizeExt + w];
@@ -1345,11 +1345,11 @@ public class TSpectrum { // NOPMD - nomen est omen
                     if (a + nip <= 0) {
                         a = 1;
                     } else {
-                        a = Math.sqrt(a + nip);
+                        a = java.lang.Math.sqrt(a + nip);
                     }
 
                     b /= a;
-                    b = Math.exp(b);
+                    b = java.lang.Math.exp(b);
                     sp += b;
                     if ((i - l + 1) < xmin) {
                         a = workingSpace[2 * sizeExt + xmin] / signalMax;
@@ -1361,11 +1361,11 @@ public class TSpectrum { // NOPMD - nomen est omen
                     if (a + nim <= 0) {
                         a = 1;
                     } else {
-                        a = Math.sqrt(a + nim);
+                        a = java.lang.Math.sqrt(a + nim);
                     }
 
                     b /= a;
-                    b = Math.exp(b);
+                    b = java.lang.Math.exp(b);
                     sm += b;
                 }
                 a = sp / sm;
@@ -1411,7 +1411,7 @@ public class TSpectrum { // NOPMD - nomen est omen
         for (int i = 0; i < sizeExt; i++) {
             double lda = i - 3 * sigma;
             lda = lda * lda / (2 * sigma * sigma);
-            lda = (int) (1000 * Math.exp(-lda));
+            lda = (int) (1000 * java.lang.Math.exp(-lda));
             if (lda != 0) {
                 lhGold = i + 1;
             }
@@ -1426,7 +1426,7 @@ public class TSpectrum { // NOPMD - nomen est omen
 
         // read source vector
         for (int i = 0; i < sizeExt; i++) {
-            workingSpace[2 * sizeExt + i] = Math.abs(workingSpace[sizeExt + i]);
+            workingSpace[2 * sizeExt + i] = java.lang.Math.abs(workingSpace[sizeExt + i]);
         }
 
         {
@@ -1486,7 +1486,7 @@ public class TSpectrum { // NOPMD - nomen est omen
         // START OF ITERATIONS
         for (int lindex = 0; lindex < deconIterations; lindex++) {
             for (int i = 0; i < sizeExt; i++) {
-                if (Math.abs(workingSpace[2 * sizeExt + i]) > 0.00001 && Math.abs(workingSpace[i]) > 0.00001) {
+                if (java.lang.Math.abs(workingSpace[2 * sizeExt + i]) > 0.00001 && java.lang.Math.abs(workingSpace[i]) > 0.00001) {
                     double lda = 0;
                     int jmin = lhGold - 1;
                     if (jmin > i) {
@@ -1645,11 +1645,11 @@ public class TSpectrum { // NOPMD - nomen est omen
         final double[] workingSpace = ArrayCache.getCachedDoubleArray(CACHED_ARRAY_SMOOTH_MARKOV, length);
         ArrayUtils.fillArray(workingSpace, 0.0);
 
-        final double sourceMax = TMath.Maximum(source, length);
+        final double sourceMax = Math.maximum(source, length);
         if (sourceMax == -Double.MAX_VALUE) {
             throw new IllegalArgumentException("source vector is not finite, could not find maximum");
         }
-        final double sourceMin = TMath.Minimum(source, length);
+        final double sourceMin = Math.minimum(source, length);
         if (sourceMin == Double.MAX_VALUE) {
             throw new IllegalArgumentException("source vector is not finite, could not find minimum");
         }
@@ -1676,11 +1676,11 @@ public class TSpectrum { // NOPMD - nomen est omen
                 if (a + nip <= 0) {
                     a = 1;
                 } else {
-                    a = Math.sqrt(a + nip);
+                    a = java.lang.Math.sqrt(a + nip);
                 }
 
                 b /= a;
-                b = Math.exp(b);
+                b = java.lang.Math.exp(b);
                 sp += b;
                 if ((i - l + 1) < xmin) {
                     a = source[xmin] / sourceMax;
@@ -1692,11 +1692,11 @@ public class TSpectrum { // NOPMD - nomen est omen
                 if (a + nim <= 0) {
                     a = 1;
                 } else {
-                    a = Math.sqrt(a + nim);
+                    a = java.lang.Math.sqrt(a + nim);
                 }
 
                 b /= a;
-                b = Math.exp(b);
+                b = java.lang.Math.exp(b);
                 sm += b;
             }
             a = sp / sm;
@@ -1835,7 +1835,7 @@ public class TSpectrum { // NOPMD - nomen est omen
         for (int repet = 0; repet < numberRepetitions; repet++) {
             if (repet != 0) {
                 for (int i = 0; i < lengthy; i++) {
-                    workingSpace[lengthx * lengthy + 2 * lengthy * lengthy + i] = Math.pow(workingSpace[lengthx * lengthy + 2 * lengthy * lengthy + i], boost);
+                    workingSpace[lengthx * lengthy + 2 * lengthy * lengthy + i] = java.lang.Math.pow(workingSpace[lengthx * lengthy + 2 * lengthy * lengthy + i], boost);
                 }
             }
             for (int lindex = 0; lindex < numberIterations; lindex++) {
