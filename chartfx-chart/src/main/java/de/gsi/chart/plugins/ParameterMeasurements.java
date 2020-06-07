@@ -1,5 +1,13 @@
 package de.gsi.chart.plugins;
 
+import javafx.beans.value.ChangeListener;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.scene.control.Menu;
+import javafx.scene.control.MenuBar;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.Tooltip;
+
 import org.controlsfx.glyphfont.Glyph;
 
 import de.gsi.chart.plugins.measurements.AbstractChartMeasurement;
@@ -8,14 +16,6 @@ import de.gsi.chart.plugins.measurements.SimpleMeasurements;
 import de.gsi.chart.ui.TilingPane.Layout;
 import de.gsi.chart.ui.geometry.Side;
 import de.gsi.chart.viewer.DataView;
-
-import javafx.beans.value.ChangeListener;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import javafx.scene.control.Menu;
-import javafx.scene.control.MenuBar;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.Tooltip;
 
 /**
  * Plugin to implement simple measurements and valueTextField indicators such as

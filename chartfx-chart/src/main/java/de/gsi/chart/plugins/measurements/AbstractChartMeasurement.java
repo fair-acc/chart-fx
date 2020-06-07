@@ -10,29 +10,6 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import de.gsi.chart.Chart;
-import de.gsi.chart.axes.Axis;
-import de.gsi.chart.axes.AxisMode;
-import de.gsi.chart.plugins.AbstractSingleValueIndicator;
-import de.gsi.chart.plugins.ParameterMeasurements;
-import de.gsi.chart.plugins.XValueIndicator;
-import de.gsi.chart.plugins.YValueIndicator;
-import de.gsi.chart.plugins.measurements.utils.CheckedValueField;
-import de.gsi.chart.plugins.measurements.utils.DataSetSelector;
-import de.gsi.chart.plugins.measurements.utils.ValueIndicatorSelector;
-import de.gsi.chart.renderer.Renderer;
-import de.gsi.chart.utils.MouseUtils;
-import de.gsi.chart.viewer.DataViewWindow;
-import de.gsi.chart.viewer.DataViewWindow.WindowDecoration;
-import de.gsi.dataset.DataSet;
-import de.gsi.dataset.event.EventListener;
-import de.gsi.dataset.event.EventRateLimiter;
-import de.gsi.dataset.event.EventSource;
-
-import impl.org.controlsfx.skin.DecorationPane;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -60,6 +37,30 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import de.gsi.chart.Chart;
+import de.gsi.chart.axes.Axis;
+import de.gsi.chart.axes.AxisMode;
+import de.gsi.chart.plugins.AbstractSingleValueIndicator;
+import de.gsi.chart.plugins.ParameterMeasurements;
+import de.gsi.chart.plugins.XValueIndicator;
+import de.gsi.chart.plugins.YValueIndicator;
+import de.gsi.chart.plugins.measurements.utils.CheckedValueField;
+import de.gsi.chart.plugins.measurements.utils.DataSetSelector;
+import de.gsi.chart.plugins.measurements.utils.ValueIndicatorSelector;
+import de.gsi.chart.renderer.Renderer;
+import de.gsi.chart.utils.MouseUtils;
+import de.gsi.chart.viewer.DataViewWindow;
+import de.gsi.chart.viewer.DataViewWindow.WindowDecoration;
+import de.gsi.dataset.DataSet;
+import de.gsi.dataset.event.EventListener;
+import de.gsi.dataset.event.EventRateLimiter;
+import de.gsi.dataset.event.EventSource;
+
+import impl.org.controlsfx.skin.DecorationPane;
 
 /**
  * Measurements that can be added to a chart and show a scalar result value in the measurement pane.
