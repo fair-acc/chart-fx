@@ -3,8 +3,8 @@ package de.gsi.math.fitter;
 import java.util.ArrayList;
 
 import de.gsi.math.ArrayConversion;
-import de.gsi.math.TMath;
-import de.gsi.math.TMathConstants;
+import de.gsi.math.Math;
+import de.gsi.math.MathBase;
 import de.gsi.math.functions.Function;
 import de.gsi.math.functions.Function1D;
 import de.gsi.math.functions.FunctionND;
@@ -486,7 +486,7 @@ public class NonLinearRegressionFitter {
         sumPenalties.add(plusOrMinus);
         sumPenalties.add(Integer.valueOf(conDir));
         sumPenalties.add(Double.valueOf(constraint));
-        final int maxI = TMath.Maximum(paramIndices);
+        final int maxI = Math.maximum(paramIndices);
         if (maxI > maxConstraintIndex) {
             maxConstraintIndex = maxI;
         }
@@ -974,7 +974,7 @@ public class NonLinearRegressionFitter {
             residual[i] = yCalctemp;
             residualW[i] = yCalctemp / weight[i];
             if (weightOpt) {
-                chiSquare += TMathConstants.Sqr(yCalctemp / weight[i]);
+                chiSquare += MathBase.sqr(yCalctemp / weight[i]);
             }
             sumOfSquares += yCalctemp * yCalctemp;
         }
@@ -1040,11 +1040,11 @@ public class NonLinearRegressionFitter {
             bestSd[i] = coeffSd[i];
             tValues[i] = best[i] / bestSd[i];
             final double atv = Math.abs(tValues[i]);
-            pValues[i] = 1.0 - TMath.Student(atv, degreesOfFreedom);
+            pValues[i] = 1.0 - Math.student(atv, degreesOfFreedom);
         }
 
         if (nXarrays == 1 && nYarrays == 1) {
-            sampleR = TMath.CorrelationCoefficient(xData[0], yData, weight);
+            sampleR = Math.correlationCoefficient(xData[0], yData, weight);
             sampleR2 = sampleR * sampleR;
             adjustedR = sampleR;
             adjustedR2 = sampleR2;
@@ -1123,7 +1123,7 @@ public class NonLinearRegressionFitter {
     public double getchiSquareProb() {
         double ret = 0.0D;
         if (weightOpt) {
-            ret = 1.0D - TMath.ChisquareQuantile(chiSquare, nData - nXarrays);
+            ret = 1.0D - Math.chisquareQuantile(chiSquare, nData - nXarrays);
         } else {
             System.out.println(
                     "A Chi Square probablity cannot be calculated as data are neither true frequencies nor weighted");
@@ -1536,13 +1536,13 @@ public class NonLinearRegressionFitter {
         // sum of reciprocal weights squared
         double sumRecipW = 0.0D;
         for (int i = 0; i < nData; i++) {
-            sumRecipW += 1.0D / TMathConstants.Sqr(ww[i]);
+            sumRecipW += 1.0D / MathBase.sqr(ww[i]);
         }
 
         // weighted mean of yy
         double my = 0.0D;
         for (int j = 0; j < nData; j++) {
-            my += yy[j] / TMathConstants.Sqr(ww[j]);
+            my += yy[j] / MathBase.sqr(ww[j]);
         }
         my /= sumRecipW;
 
@@ -1551,20 +1551,20 @@ public class NonLinearRegressionFitter {
         final double[] residuals = new double[nData];
         for (int j = 0; j < nData; j++) {
             residuals[j] = yy[j] - yyCalc[j];
-            mr += residuals[j] / TMathConstants.Sqr(ww[j]);
+            mr += residuals[j] / MathBase.sqr(ww[j]);
         }
         mr /= sumRecipW;
 
         // calculate yy weighted sum of squares
         double s2yy = 0.0D;
         for (int k = 0; k < nData; k++) {
-            s2yy += TMathConstants.Sqr((yy[k] - my) / ww[k]);
+            s2yy += MathBase.sqr((yy[k] - my) / ww[k]);
         }
 
         // calculate residual weighted sum of squares
         double s2r = 0.0D;
         for (int k = 0; k < nData; k++) {
-            s2r += TMathConstants.Sqr((residuals[k] - mr) / ww[k]);
+            s2r += MathBase.sqr((residuals[k] - mr) / ww[k]);
         }
 
         // calculate multiple coefficient of determination
@@ -2154,9 +2154,9 @@ public class NonLinearRegressionFitter {
                 // this.yCalc[i] = ((Function1D) regFun).function(pmin, xd);
             }
             residual[i] = yCalc[i] - yData[i];
-            ss += TMathConstants.Sqr(residual[i]);
+            ss += MathBase.sqr(residual[i]);
             residualW[i] = residual[i] / weight[i];
-            sc += TMathConstants.Sqr(residualW[i]);
+            sc += MathBase.sqr(residualW[i]);
         }
 
         if (regFun instanceof Function) {
@@ -2269,7 +2269,7 @@ public class NonLinearRegressionFitter {
             bestSd[i] = coeffSd[i];
             tValues[i] = best[i] / bestSd[i];
             final double atv = Math.abs(tValues[i]);
-            pValues[i] = 1.0 - TMath.Student(atv, degreesOfFreedom);
+            pValues[i] = 1.0 - Math.student(atv, degreesOfFreedom);
         }
 
         multCorrelCoeff(yData, yCalc, weight);
@@ -2891,23 +2891,23 @@ public class NonLinearRegressionFitter {
                 switch (penaltyCheck[i]) {
                 case -1:
                     if (param[k] < constraints[i]) {
-                        ss = tempFunctVal + penaltyWeight * TMathConstants.Sqr(constraints[i] - param[k]);
+                        ss = tempFunctVal + penaltyWeight * MathBase.sqr(constraints[i] - param[k]);
                         test = false;
                     }
                     break;
                 case 0:
                     if (param[k] < constraints[i] * (1.0 - constraintTolerance)) {
-                        ss = tempFunctVal + penaltyWeight * TMathConstants.Sqr(constraints[i] * (1.0 - constraintTolerance) - param[k]);
+                        ss = tempFunctVal + penaltyWeight * MathBase.sqr(constraints[i] * (1.0 - constraintTolerance) - param[k]);
                         test = false;
                     }
                     if (param[k] > constraints[i] * (1.0 + constraintTolerance)) {
-                        ss = tempFunctVal + penaltyWeight * TMathConstants.Sqr(param[k] - constraints[i] * (1.0 + constraintTolerance));
+                        ss = tempFunctVal + penaltyWeight * MathBase.sqr(param[k] - constraints[i] * (1.0 + constraintTolerance));
                         test = false;
                     }
                     break;
                 case 1:
                     if (param[k] > constraints[i]) {
-                        ss = tempFunctVal + penaltyWeight * TMathConstants.Sqr(param[k] - constraints[i]);
+                        ss = tempFunctVal + penaltyWeight * MathBase.sqr(param[k] - constraints[i]);
                         test = false;
                     }
                     break;
@@ -2929,23 +2929,23 @@ public class NonLinearRegressionFitter {
                 switch (sumPenaltyCheck[i]) {
                 case -1:
                     if (sumPenaltySum < sumConstraints[i]) {
-                        ss = tempFunctVal + penaltyWeight * TMathConstants.Sqr(sumConstraints[i] - sumPenaltySum);
+                        ss = tempFunctVal + penaltyWeight * MathBase.sqr(sumConstraints[i] - sumPenaltySum);
                         test = false;
                     }
                     break;
                 case 0:
                     if (sumPenaltySum < sumConstraints[i] * (1.0 - constraintTolerance)) {
-                        ss = tempFunctVal + penaltyWeight * TMathConstants.Sqr(sumConstraints[i] * (1.0 - constraintTolerance) - sumPenaltySum);
+                        ss = tempFunctVal + penaltyWeight * MathBase.sqr(sumConstraints[i] * (1.0 - constraintTolerance) - sumPenaltySum);
                         test = false;
                     }
                     if (sumPenaltySum > sumConstraints[i] * (1.0 + constraintTolerance)) {
-                        ss = tempFunctVal + penaltyWeight * TMathConstants.Sqr(sumPenaltySum - sumConstraints[i] * (1.0 + constraintTolerance));
+                        ss = tempFunctVal + penaltyWeight * MathBase.sqr(sumPenaltySum - sumConstraints[i] * (1.0 + constraintTolerance));
                         test = false;
                     }
                     break;
                 case 1:
                     if (sumPenaltySum > sumConstraints[i]) {
-                        ss = tempFunctVal + penaltyWeight * TMathConstants.Sqr(sumPenaltySum - sumConstraints[i]);
+                        ss = tempFunctVal + penaltyWeight * MathBase.sqr(sumPenaltySum - sumConstraints[i]);
                         test = false;
                     }
                     break;
@@ -2979,7 +2979,7 @@ public class NonLinearRegressionFitter {
                         xd[j] = xData[j][i];
                     }
 
-                    ss += TMathConstants.Sqr((yData[i] - g1.getValue(xd[0])) / weight[i]);
+                    ss += MathBase.sqr((yData[i] - g1.getValue(xd[0])) / weight[i]);
                 }
             } else {
                 final FunctionND g2 = (FunctionND) regFun;
@@ -3003,7 +3003,7 @@ public class NonLinearRegressionFitter {
                     for (int dim = 0; dim < dimIn; dim++) {
                         int index = dim * length + i;
                         index = i;
-                        ss += TMathConstants.Sqr((yData[index] - g2.getValue(xd, index)) / weight[index]);
+                        ss += MathBase.sqr((yData[index] - g2.getValue(xd, index)) / weight[index]);
                     }
                 }
             }

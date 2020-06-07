@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
 
 import de.gsi.dataset.DataSet;
 import de.gsi.dataset.spi.DefaultDataSet;
-import de.gsi.math.TMath;
+import de.gsi.math.Math;
 import de.gsi.math.TRandom;
 import de.gsi.math.samples.utils.AbstractDemoApplication;
 import de.gsi.math.samples.utils.DemoChart;
@@ -39,10 +39,10 @@ public class FourierSample extends AbstractDemoApplication {
     private double computeSignal(final double t) {
         double val = 0.0;
         final double error = rnd.Gaus(0.0, 0.2);
-        val += TMath.Sin(TMath.TwoPi() * 0.22 * t);
-        val += Math.sin(TMath.TwoPi() * 3e-4 * t * t);
-        val += Math.sin(TMath.TwoPi() * 0.05 * t);
-        val += 0.8 * Math.sin(TMath.TwoPi() * (0.3 + 1e-3 * TMath.Sin(TMath.TwoPi() * 0.01 * t)) * t);
+        val += Math.sin(Math.TWO_PI * 0.22 * t);
+        val += Math.sin(Math.TWO_PI * 3e-4 * t * t);
+        val += Math.sin(Math.TWO_PI * 0.05 * t);
+        val += 0.8 * Math.sin(Math.TWO_PI * (0.3 + 1e-3 * Math.sin(Math.TWO_PI * 0.01 * t)) * t);
         val += error;
         return val;
     }

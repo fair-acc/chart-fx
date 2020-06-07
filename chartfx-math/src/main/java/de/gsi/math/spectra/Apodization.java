@@ -4,7 +4,7 @@ import java.util.Map;
 import java.util.WeakHashMap;
 
 import de.gsi.dataset.utils.AssertUtils;
-import de.gsi.math.TMathConstants;
+import de.gsi.math.MathBase;
 
 /**
  * implementation of frequenty used apodization (aka. windowing) functions reference:
@@ -74,8 +74,8 @@ public enum Apodization {
         case Hann:
             return getIndex(i, n);
         case HannExp: {
-            final double a = TMathConstants.TwoPi() / (n - 1);
-            return 1.0 * TMathConstants.Power(TMathConstants.Sin(a * i), m);
+            final double a = MathBase.TWO_PI / (n - 1);
+            return 1.0 * Math.pow(Math.sin(a * i), m);
         }
         case Nuttall:
             return getIndex(i, n);
@@ -108,44 +108,44 @@ public enum Apodization {
         case Hamming: {
             // final double a = TMath.TwoPi()/(n-1);
             // the following Hamming window definition is more common
-            final double a = TMathConstants.TwoPi() / n;
-            return 0.53836 - 0.46164 * TMathConstants.Cos(a * i);
+            final double a = MathBase.TWO_PI / n;
+            return 0.53836 - 0.46164 * MathBase.cos(a * i);
         }
         case Hann: {
-            final double a = TMathConstants.TwoPi() / (n - 1);
-            return 0.5 - 0.5 * TMathConstants.Cos(a * i);
+            final double a = MathBase.TWO_PI / (n - 1);
+            return 0.5 - 0.5 * MathBase.cos(a * i);
         }
         case HannExp: {
-            final double a = TMathConstants.TwoPi() / (n - 1);
-            return 1.0 * TMathConstants.Power(TMathConstants.Sin(a * i), 2.0);
+            final double a = MathBase.TWO_PI / (n - 1);
+            return 1.0 * Math.pow(MathBase.sin(a * i), 2.0);
         }
         case Blackman: {
-            final double a = TMathConstants.TwoPi() / (n - 1);
-            return 0.42 - 0.5 * TMathConstants.Cos(a * i) + 0.08 * TMathConstants.Cos(2 * a * i);
+            final double a = MathBase.TWO_PI / (n - 1);
+            return 0.42 - 0.5 * MathBase.cos(a * i) + 0.08 * MathBase.cos(2 * a * i);
         }
         case Nuttall: {
-            final double a = TMathConstants.TwoPi() / (n - 1);
-            return 0.355768 - 0.487396 * TMathConstants.Cos(a * i) + 0.144232 * TMathConstants.Cos(2 * a * i)
-                    - 0.012604 * TMathConstants.Cos(3 * a * i);
+            final double a = MathBase.TWO_PI / (n - 1);
+            return 0.355768 - 0.487396 * MathBase.cos(a * i) + 0.144232 * MathBase.cos(2 * a * i)
+                    - 0.012604 * MathBase.cos(3 * a * i);
         }
         case BlackmanHarris: {
-            final double a = TMathConstants.TwoPi() / (n - 1);
-            return 0.35875 - 0.48829 * TMathConstants.Cos(a * i) + 0.14128 * TMathConstants.Cos(2 * a * i)
-                    - 0.01168 * TMathConstants.Cos(3 * a * i);
+            final double a = MathBase.TWO_PI / (n - 1);
+            return 0.35875 - 0.48829 * MathBase.cos(a * i) + 0.14128 * MathBase.cos(2 * a * i)
+                    - 0.01168 * MathBase.cos(3 * a * i);
         }
         case BlackmanNuttall: {
-            final double a = TMathConstants.TwoPi() / (n - 1);
-            return 0.3635819 - 0.4891775 * TMathConstants.Cos(a * i) + 0.1365995 * TMathConstants.Cos(2 * a * i)
-                    - 0.0106411 * TMathConstants.Cos(3 * a * i);
+            final double a = MathBase.TWO_PI / (n - 1);
+            return 0.3635819 - 0.4891775 * MathBase.cos(a * i) + 0.1365995 * MathBase.cos(2 * a * i)
+                    - 0.0106411 * MathBase.cos(3 * a * i);
         }
         case FlatTop: {
-            final double a = TMathConstants.TwoPi() / (n - 1);
-            return 1 - 1.93 * TMathConstants.Cos(a * i) + 1.29 * TMathConstants.Cos(2 * a * i)
-                    - 0.388 * TMathConstants.Cos(3 * a * i) + 0.032 * TMathConstants.Cos(4 * a * i);
+            final double a = MathBase.TWO_PI / (n - 1);
+            return 1 - 1.93 * MathBase.cos(a * i) + 1.29 * MathBase.cos(2 * a * i)
+                    - 0.388 * MathBase.cos(3 * a * i) + 0.032 * MathBase.cos(4 * a * i);
         }
         case Exponential: {
-            final double a = 3 * n, exp0 = TMathConstants.Exp(0);
-            return TMathConstants.Exp(i / a) / exp0;
+            final double a = 3 * n, exp0 = MathBase.exp(0);
+            return MathBase.exp(i / a) / exp0;
         }
         default:
         case Rectangular:

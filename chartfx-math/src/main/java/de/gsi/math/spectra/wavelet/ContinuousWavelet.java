@@ -8,8 +8,8 @@ import org.apache.commons.math3.complex.Complex;
 import de.gsi.dataset.DataSet;
 import de.gsi.dataset.GridDataSet;
 import de.gsi.dataset.spi.DataSetBuilder;
-import de.gsi.math.TMath;
-import de.gsi.math.TMathConstants;
+import de.gsi.math.Math;
+import de.gsi.math.MathBase;
 import de.gsi.math.spectra.Convolution;
 import de.gsi.math.utils.ConcurrencyUtils;
 
@@ -90,7 +90,7 @@ public class ContinuousWavelet {
                     final Complex val = WaveletTransform(data, scale, t, nu);
 
                     final double power = val.getReal() * val.getReal() + val.getImaginary() * val.getImaginary();
-                    ret[i][j - min] = 10 * TMathConstants.Log10(power + 1e-99);
+                    ret[i][j - min] = 10 * MathBase.log10(power + 1e-99);
                 } else {
                     ret[i][j - min] = Double.NaN;
                 }
@@ -163,11 +163,11 @@ public class ContinuousWavelet {
                                             final double Re = wtransformed[i2 + l2];
                                             final double Im = wtransformed[i2 + l2 + 1];
 
-                                            power += TMathConstants.Sqr(Re) + TMathConstants.Sqr(Im);
+                                            power += MathBase.sqr(Re) + MathBase.sqr(Im);
                                         }
                                         power /= nbin;
 
-                                        ret[j - min][i] = 10 * TMathConstants.Log10(power + 1e-99);
+                                        ret[j - min][i] = 10 * MathBase.log10(power + 1e-99);
                                     }
                                 } else {
                                     for (int i = 0; i < filterDim; i++) {
@@ -176,8 +176,8 @@ public class ContinuousWavelet {
                                         final double Re = wtransformed[i2];
                                         final double Im = wtransformed[i2 + 1];
 
-                                        final double power = TMathConstants.Sqr(Re) + TMathConstants.Sqr(Im);
-                                        ret[j - min][i] = 10 * TMathConstants.Log10(power + 1e-99);
+                                        final double power = MathBase.sqr(Re) + MathBase.sqr(Im);
+                                        ret[j - min][i] = 10 * MathBase.log10(power + 1e-99);
                                     }
                                 }
 
@@ -218,11 +218,11 @@ public class ContinuousWavelet {
                                 final double Re = wtransformed[i2 + k2];
                                 final double Im = wtransformed[i2 + k2 + 1];
 
-                                power += TMathConstants.Sqr(Re) + TMathConstants.Sqr(Im);
+                                power += MathBase.sqr(Re) + MathBase.sqr(Im);
                             }
                             power /= nbin;
 
-                            ret[j - min][i] = 10 * TMathConstants.Log10(power + 1e-99);
+                            ret[j - min][i] = 10 * MathBase.log10(power + 1e-99);
                         }
                     } else {
                         for (int i = 0; i < filterDim; i++) {
@@ -231,8 +231,8 @@ public class ContinuousWavelet {
                             final double Re = wtransformed[i2];
                             final double Im = wtransformed[i2 + 1];
 
-                            final double power = TMathConstants.Sqr(Re) + TMathConstants.Sqr(Im);
-                            ret[j - min][i] = 10 * TMathConstants.Log10(power + 1e-99);
+                            final double power = MathBase.sqr(Re) + MathBase.sqr(Im);
+                            ret[j - min][i] = 10 * MathBase.log10(power + 1e-99);
                         }
                     }
 
@@ -301,9 +301,9 @@ public class ContinuousWavelet {
      *         Signal Analysis., Geoexploration, 23:85-102, 1984
      */
     public Complex Morlet(final double x, final double nu) {
-        final double val1 = 1.0 / Math.sqrt(TMathConstants.TwoPi())
-                            * TMathConstants.Exp(-2 * TMathConstants.Sqr(TMathConstants.Sqr(TMathConstants.TwoPi()) * x / nu));
-        final double val2 = TMathConstants.TwoPi() * nu * x;
+        final double val1 = 1.0 / Math.sqrt(MathBase.TWO_PI)
+                            * MathBase.exp(-2 * MathBase.sqr(MathBase.sqr(MathBase.TWO_PI) * x / nu));
+        final double val2 = MathBase.TWO_PI * nu * x;
         final double re = val1 * Math.sin(val2);
         final double im = val1 * Math.cos(val2);
         return new Complex(re, im);
@@ -319,9 +319,9 @@ public class ContinuousWavelet {
      *            Analysis., Geoexploration, 23:85-102, 1984
      */
     public void Morlet(final double x, final double nu, final double[] ret) {
-        final double val1 = 1.0 / Math.sqrt(TMathConstants.TwoPi())
-                            * TMathConstants.Exp(-2 * TMathConstants.Sqr(TMathConstants.Sqr(TMathConstants.TwoPi()) * x / nu));
-        final double val2 = TMathConstants.TwoPi() * nu * x;
+        final double val1 = 1.0 / Math.sqrt(MathBase.TWO_PI)
+                            * MathBase.exp(-2 * MathBase.sqr(MathBase.sqr(MathBase.TWO_PI) * x / nu));
+        final double val2 = MathBase.TWO_PI * nu * x;
         ret[0] = val1 * Math.cos(val2);
         ret[1] = val1 * Math.sin(val2);
     }
@@ -334,8 +334,8 @@ public class ContinuousWavelet {
      * @return complex Paul wavelet function
      */
     public Complex Paul(final double x, final int m) {
-        final double val = Math.pow(2, m) * TMath.Factorial(m)
-                           / Math.sqrt(TMathConstants.Pi() * TMath.Factorial(2 * m));
+        final double val = Math.pow(2, m) * Math.factorial(m)
+                           / Math.sqrt(MathBase.PI * Math.factorial(2 * m));
         Complex c1 = new Complex(1, 0);
         Complex c2 = new Complex(1, 0);
         for (int i = 0; i < m + 1; i++) {

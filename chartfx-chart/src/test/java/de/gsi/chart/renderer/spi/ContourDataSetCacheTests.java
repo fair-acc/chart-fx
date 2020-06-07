@@ -17,7 +17,7 @@ import de.gsi.dataset.GridDataSet;
 import de.gsi.dataset.spi.DataRange;
 import de.gsi.dataset.spi.DataSetBuilder;
 import de.gsi.math.ArrayUtils;
-import de.gsi.math.TMath;
+import de.gsi.math.Math;
 
 /**
  * @author rstein
@@ -90,8 +90,8 @@ public class ContourDataSetCacheTests {
 
         DataRange range = ContourDataSetCache.computeLocalRange(TEST_DATA_Z, TEST_DATA_X.length, TEST_DATA_Y.length,
                 true);
-        assertEquals(TMath.Minimum(TEST_DATA_Z), range.getMin());
-        assertEquals(TMath.Maximum(TEST_DATA_Z), range.getMax());
+        assertEquals(Math.minimum(TEST_DATA_Z), range.getMin());
+        assertEquals(Math.maximum(TEST_DATA_Z), range.getMax());
         assertEquals(true, range.isDefined());
 
         range = ContourDataSetCache.computeLocalRange(TEST_DATA_Z, TEST_DATA_X.length, TEST_DATA_Y.length, false);

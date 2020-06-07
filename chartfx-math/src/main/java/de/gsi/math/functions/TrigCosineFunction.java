@@ -1,6 +1,6 @@
 package de.gsi.math.functions;
 
-import de.gsi.math.TMath;
+import de.gsi.math.Math;
 
 /**
  * class implementing the trigonometric Cosine function
@@ -43,7 +43,6 @@ public class TrigCosineFunction extends AbstractFunction1D implements Function1D
 
     @Override
     public double getValue(final double x) {
-        return fparameter[0] * TMath.Cos(TMath.TwoPi() * (fparameter[1] * x + fparameter[2]));
+        return fparameter[0] * Math.cos(Math.TWO_PI * (fparameter[1] * x + fparameter[2]));
     }
-
 }

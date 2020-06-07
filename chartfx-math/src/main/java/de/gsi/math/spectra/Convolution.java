@@ -5,7 +5,7 @@ import java.util.Arrays;
 
 import org.jtransforms.fft.DoubleFFT_1D;
 
-import de.gsi.math.TMathConstants;
+import de.gsi.math.MathBase;
 import de.gsi.math.utils.ConcurrencyUtils;
 
 /**
@@ -203,10 +203,10 @@ public class Convolution {
 
         final double[] ret = new double[length];
         final int half = length >> 1;
-        final double norm = TMathConstants.TwoPi() / length;
+        final double norm = MathBase.TWO_PI / length;
         for (int i = 0; i < half; i++) {
             final int i2 = i << 1;
-            final double window = Math.cos(TMathConstants.Pi() * i / (length - 1));
+            final double window = Math.cos(MathBase.PI * i / (length - 1));
             final double val = window * norm * i;
 
             if (i < half) {
@@ -300,7 +300,7 @@ public class Convolution {
         }
         final double[] ret = new double[length];
         final int half = length >> 1;
-        final double TwoPiTau = TMathConstants.TwoPi() / frequency;
+        final double TwoPiTau = MathBase.TWO_PI / frequency;
         for (int i = 0; i < half; i++) {
             final int i2 = i << 1;
             final double f = (double) i / (double) length;
@@ -312,7 +312,7 @@ public class Convolution {
              * (1.0-Math.sin(TMath.Pi() * (f - frequency)/(0.4*frequency))); val = Math.pow(val2,2); } else if (f > 1.2
              * * frequency) { val = 0.0; } } ret[i2] = +val; ret[i2 + 1] = 0;
              */
-            final double Re = 1.0 / (1 + TMathConstants.Sqr(TwoPiTau * f));
+            final double Re = 1.0 / (1 + MathBase.sqr(TwoPiTau * f));
             final double Im = Re * TwoPiTau * f;
 
             // first order
@@ -333,7 +333,7 @@ public class Convolution {
                     "getMorletFilter(" + length + "," + f0 + ")"
                     + " - length has to be positive and multiples of two");
         }
-        if (f0 < 0 || f0 > 5.0 / TMathConstants.TwoPi()) {
+        if (f0 < 0 || f0 > 5.0 / MathBase.TWO_PI) {
             throw new InvalidParameterException(
                     "getMorletFilter(" + length + "," + f0 + ")"
                     + " - frequency has to be within [0,0.5]");
@@ -363,12 +363,12 @@ public class Convolution {
 
     protected static double MorletWaveletFunctionFourier(final double frequency, final double f0, final double width) {
         final double heisenberg = width / 2; // implements Heisenberg-box scaling
-        final double K_sigma = TMathConstants.Exp(-0.5 * TMathConstants.Sqr(TMathConstants.TwoPi() * f0 * heisenberg));
-        final double C_sigmaPi = TMathConstants.Power(TMathConstants.Pi(), 0.25);
+        final double K_sigma = MathBase.exp(-0.5 * MathBase.sqr(MathBase.TWO_PI * f0 * heisenberg));
+        final double C_sigmaPi = MathBase.pow(MathBase.PI, 0.25);
 
         final double val = C_sigmaPi
-                           * (TMathConstants.Exp(-0.5 * TMathConstants.Sqr(TMathConstants.TwoPi() * (f0 - frequency) * heisenberg))
-                                   - K_sigma * TMathConstants.Exp(-0.5 * TMathConstants.Sqr(TMathConstants.TwoPi() * frequency * heisenberg)));
+                           * (MathBase.exp(-0.5 * MathBase.sqr(MathBase.TWO_PI * (f0 - frequency) * heisenberg))
+                                   - K_sigma * MathBase.exp(-0.5 * MathBase.sqr(MathBase.TWO_PI * frequency * heisenberg)));
         return val;
     }
 }

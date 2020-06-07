@@ -1,6 +1,6 @@
 package de.gsi.math.functions;
 
-import de.gsi.math.TMath;
+import de.gsi.math.Math;
 
 /**
  * class implementing the Gaussian function (/normal distribution)
@@ -54,9 +54,8 @@ public class TruncatedGaussianFunction extends AbstractFunction1D implements Fun
     @Override
     public double getValue(final double x) {
         if (Math.abs(x - fparameter[0]) < fparameter[3] * fparameter[1]) {
-            return fparameter[2] * TMath.Gauss(x, fparameter[0], fparameter[1], true);
+            return fparameter[2] * Math.gauss(x, fparameter[0], fparameter[1], true);
         }
         return 0.0;
     }
-
 }

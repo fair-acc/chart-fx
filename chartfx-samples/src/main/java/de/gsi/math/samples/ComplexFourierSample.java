@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
 
 import de.gsi.dataset.DataSet;
 import de.gsi.dataset.spi.DefaultDataSet;
-import de.gsi.math.TMathConstants;
+import de.gsi.math.MathBase;
 import de.gsi.math.samples.utils.AbstractDemoApplication;
 import de.gsi.math.samples.utils.DemoChart;
 import de.gsi.math.spectra.SpectrumTools;
@@ -40,10 +40,10 @@ public class ComplexFourierSample extends AbstractDemoApplication {
         for (int i = 0; i < nSamples; i++) {
             final int i2 = i << 1;
             final double t = i * T / nSamples;
-            double a1 = TMathConstants.Sin(TMathConstants.TwoPi() * f1 * t);
-            double b1 = TMathConstants.Cos(TMathConstants.TwoPi() * f1 * t);
-            double a2 = TMathConstants.Cos(TMathConstants.TwoPi() * f2 * t);
-            double b2 = TMathConstants.Sin(TMathConstants.TwoPi() * f2 * t);
+            double a1 = MathBase.sin(MathBase.TWO_PI * f1 * t);
+            double b1 = MathBase.cos(MathBase.TWO_PI * f1 * t);
+            double a2 = MathBase.cos(MathBase.TWO_PI * f2 * t);
+            double b2 = MathBase.sin(MathBase.TWO_PI * f2 * t);
             val[i2] = a1 + a2;
             val[i2 + 1] = b1 + b2;
         }

@@ -14,7 +14,7 @@ import de.gsi.dataset.utils.ArrayCache;
 import de.gsi.dataset.utils.AssertUtils;
 import de.gsi.math.ArrayMath;
 import de.gsi.math.ArrayUtils;
-import de.gsi.math.TMath;
+import de.gsi.math.Math;
 
 /**************************************************************************
  * Original Author: Miroslav Morhac 27/05/99 clean up/java port: Ralph Steinhagen 18/04/18 THIS CLASS CONTAINS ADVANCED
@@ -1645,11 +1645,11 @@ public class TSpectrum { // NOPMD - nomen est omen
         final double[] workingSpace = ArrayCache.getCachedDoubleArray(CACHED_ARRAY_SMOOTH_MARKOV, length);
         ArrayUtils.fillArray(workingSpace, 0.0);
 
-        final double sourceMax = TMath.Maximum(source, length);
+        final double sourceMax = Math.maximum(source, length);
         if (sourceMax == -Double.MAX_VALUE) {
             throw new IllegalArgumentException("source vector is not finite, could not find maximum");
         }
-        final double sourceMin = TMath.Minimum(source, length);
+        final double sourceMin = Math.minimum(source, length);
         if (sourceMin == Double.MAX_VALUE) {
             throw new IllegalArgumentException("source vector is not finite, could not find minimum");
         }

@@ -8,7 +8,7 @@ package de.gsi.math;
  *
  * @author rstein
  */
-public class FastMath {
+public class MathBaseFast extends MathBase {
     private static final int DEFAULT_TRIG_RESOLUTION = 3600; // gradations full circle (2*\pi, 360 deg resp)
     private static int precision = DEFAULT_TRIG_RESOLUTION;
     private static int modulusRad;
@@ -20,7 +20,7 @@ public class FastMath {
         init();
     }
 
-    private FastMath() {
+    private MathBaseFast() {
         // static helper class
     }
 
@@ -48,7 +48,7 @@ public class FastMath {
         if (precision <= 0) {
             throw new IllegalArgumentException("precision '" + precision + "'must be positive");
         }
-        FastMath.precision = precision;
+        MathBaseFast.precision = precision;
         init();
     }
 
@@ -69,17 +69,17 @@ public class FastMath {
     }
 
     private static void init() {
-        modulusRad = (int) (2.0 * Math.PI * precision);
+        modulusRad = (int) (2.0 * java.lang.Math.PI * precision);
         modulusRadQuater = modulusRad >> 2;
         modulusDeg = 360 * precision;
         sinRadLookup = new float[modulusRad]; // sine lookup table [rad]
         sinDegLockup = new float[modulusDeg]; // sine lookup table [deg]
 
         for (int i = 0; i < modulusRad; i++) {
-            sinRadLookup[i] = (float) Math.sin((double) i / precision);
+            sinRadLookup[i] = (float) java.lang.Math.sin((double) i / precision);
         }
         for (int i = 0; i < modulusDeg; i++) {
-            sinDegLockup[i] = (float) Math.sin(Math.toRadians((double) i / precision));
+            sinDegLockup[i] = (float) java.lang.Math.sin(java.lang.Math.toRadians((double) i / precision));
         }
     }
 

@@ -15,7 +15,7 @@ import de.gsi.chart.renderer.spi.ContourDataSetRenderer;
 import de.gsi.chart.renderer.spi.utils.ColorGradient;
 import de.gsi.dataset.DataSet;
 import de.gsi.dataset.spi.DefaultErrorDataSet;
-import de.gsi.math.TMath;
+import de.gsi.math.Math;
 import de.gsi.math.matrix.MatrixD;
 import de.gsi.math.samples.utils.AbstractDemoApplication;
 import de.gsi.math.samples.utils.DemoChart;
@@ -83,7 +83,7 @@ public class EMDSample extends AbstractDemoApplication {
                     fmodeData[nmode][j] = emd.get(j, nmode) - 5 * nmode;
                 }
                 LOGGER.atInfo().addArgument(name) //
-                        .addArgument((TMath.Mean(fmodeData[nmode]) + 2 * nmode) / TMath.PeakToPeak(fmodeData[nmode])) //
+                        .addArgument((Math.mean(fmodeData[nmode]) + 2 * nmode) / Math.peakToPeak(fmodeData[nmode])) //
                         .log("{} mean = {}");
                 fmodeDataSets[nmode] = new DefaultErrorDataSet(name, time, fmodeData[nmode], new double[time.length],
                         new double[time.length], time.length, true);
@@ -149,21 +149,21 @@ public class EMDSample extends AbstractDemoApplication {
 
             // linear chirp with discontinuity
             offset = (i > 500) ? -20 : 0;
-            yModel[i] = (i > 100 && i < 700) ? 0.7 * Math.sin(TMath.TwoPi() * 2e-4 * x * (x + offset)) : 0;
+            yModel[i] = (i > 100 && i < 700) ? 0.7 * Math.sin(Math.TWO_PI * 2e-4 * x * (x + offset)) : 0;
 
             // single tone at 0.25
-            yModel[i] += (i > 50 && i < 500) ? 1.0 * Math.sin(TMath.TwoPi() * 0.25 * x) : 0;
+            yModel[i] += (i > 50 && i < 500) ? 1.0 * Math.sin(Math.TWO_PI * 0.25 * x) : 0;
             // yModel[i] = Math.sin(TMath.TwoPi() * 0.3* x);
 
             // modulation around 0.4
-            double mod = Math.cos(TMath.TwoPi() * 0.01 * x);
+            double mod = Math.cos(Math.TWO_PI * 0.01 * x);
             if (i < 470) {
                 mod = 0.0;
             }
-            yModel[i] += (i > 300 && i < 900) ? 1.0 * Math.sin(TMath.TwoPi() * (0.4 - 5e-4 * mod) * x) : 0;
+            yModel[i] += (i > 300 && i < 900) ? 1.0 * Math.sin(Math.TWO_PI * (0.4 - 5e-4 * mod) * x) : 0;
 
             // quadratic chirp starting at 0.1
-            yModel[i] += 0.5 * Math.sin(TMath.TwoPi() * ((0.1 + 5e-8 * x * x) * x));
+            yModel[i] += 0.5 * Math.sin(Math.TWO_PI * ((0.1 + 5e-8 * x * x) * x));
 
             yModel[i] = yModel[i] + error;
         }
