@@ -2,9 +2,9 @@ package de.gsi.math.spectra;
 
 import de.gsi.dataset.DataSet;
 import de.gsi.dataset.spi.DataSetBuilder;
+import de.gsi.math.Math;
+import de.gsi.math.MathBase;
 import de.gsi.math.Spline;
-import de.gsi.math.TMath;
-import de.gsi.math.TMathConstants;
 import de.gsi.math.TRandom;
 import de.gsi.math.matrix.MatrixD;
 import de.gsi.math.utils.ConcurrencyUtils;
@@ -24,9 +24,9 @@ public class EEMD {
         final double[] xstart_old = new double[xsize];
         final double[] xend = new double[xsize];
         // dd=1:1:xsize;
-        final double Ystd = TMath.RMS(data);
+        final double Ystd = Math.rms(data);
 
-        final int TNM = (int) Math.floor(TMathConstants.Log2(xsize)) - 1;
+        final int TNM = (int) Math.floor(MathBase.log2(xsize)) - 1;
         final int TNM2 = TNM + 2;
 
         final MatrixD allmode = new MatrixD(xsize, TNM2 + 1);
@@ -85,8 +85,8 @@ public class EEMD {
                     // check breaking condition
                     double sum_sqr = 0, diff_sqr = 0;
                     for (int i = 0; i < xstart.length; i++) {
-                        diff_sqr += TMathConstants.Sqr(xstart_old[i] - xstart[i]);
-                        sum_sqr += TMathConstants.Sqr(xstart_old[i]);
+                        diff_sqr += MathBase.sqr(xstart_old[i] - xstart[i]);
+                        sum_sqr += MathBase.sqr(xstart_old[i]);
                     }
 
                     final double break_crit = 1e-12; // 0.3;

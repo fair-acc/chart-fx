@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
 import de.gsi.dataset.DataSet;
 import de.gsi.dataset.spi.DefaultDataSet;
 import de.gsi.dataset.spi.DefaultErrorDataSet;
-import de.gsi.math.TMathConstants;
+import de.gsi.math.MathBase;
 import de.gsi.math.fitter.NonLinearRegressionFitter;
 import de.gsi.math.functions.AbstractFunction1D;
 import de.gsi.math.samples.utils.AbstractDemoApplication;
@@ -144,7 +144,7 @@ public class GaussianFitSample extends AbstractDemoApplication {
             }
 
             // assign default values
-            final int maxIndex = TMathConstants.Min(parameter.length, this.getParameterCount());
+            final int maxIndex = MathBase.min(parameter.length, this.getParameterCount());
             for (int i = 0; i < maxIndex; i++) {
                 setParameterValue(i, parameter[i]);
             }
@@ -156,7 +156,7 @@ public class GaussianFitSample extends AbstractDemoApplication {
             final double sigma = fparameter[1];
             final double scale = fparameter[2];
 
-            return scale * 1.0 / (Math.sqrt(TMathConstants.TwoPi()) * sigma) * Math.exp(-0.5 * Math.pow((x - mu) / sigma, 2));
+            return scale * 1.0 / (Math.sqrt(MathBase.TWO_PI) * sigma) * Math.exp(-0.5 * Math.pow((x - mu) / sigma, 2));
         }
     }
 }

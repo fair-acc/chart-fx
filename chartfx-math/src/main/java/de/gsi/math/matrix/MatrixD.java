@@ -8,7 +8,7 @@ import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
 import java.util.Locale;
 
-import de.gsi.math.TMathConstants;
+import de.gsi.math.MathBase;
 import de.gsi.math.functions.Function1D;
 
 /**
@@ -57,7 +57,6 @@ import de.gsi.math.functions.Function1D;
  */
 
 public class MatrixD extends AbstractMatrix {
-
     private static final long serialVersionUID = 491870425070247870L;
     private final double[][] element; // internal array storage
 
@@ -683,7 +682,7 @@ public class MatrixD extends AbstractMatrix {
         final MatrixD newS = new MatrixD(sig.length, sig.length);
         final double first = sig[0];
         for (int i = 0; i < sig.length; i++) {
-            if (sig[i] / first < invCondition || TMathConstants.Abs(sig[i]) < 2 * Double.MIN_VALUE) {
+            if (sig[i] / first < invCondition || MathBase.abs(sig[i]) < 2 * Double.MIN_VALUE) {
                 // discard eigenvalue
                 if (true) {
                     System.out.println("TMatrixD::drop singluar eigenvalue " + i);
@@ -847,7 +846,7 @@ public class MatrixD extends AbstractMatrix {
     public void squareElements() {
         for (int i = 0; i < m; i++) {
             for (int j = 0; j < n; j++) {
-                element[i][j] = TMathConstants.Sqr(element[i][j]);
+                element[i][j] = MathBase.sqr(element[i][j]);
             }
         }
     }
@@ -1058,5 +1057,4 @@ public class MatrixD extends AbstractMatrix {
         v.copyInto(A); // copy the rows out of the vector
         return new MatrixD(A);
     }
-
 }

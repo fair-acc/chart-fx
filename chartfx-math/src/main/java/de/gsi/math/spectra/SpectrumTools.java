@@ -4,8 +4,8 @@ import java.util.Arrays;
 
 import org.jtransforms.fft.DoubleFFT_1D;
 
-import de.gsi.math.TMath;
-import de.gsi.math.TMathConstants;
+import de.gsi.math.Math;
+import de.gsi.math.MathBase;
 import de.gsi.math.fitter.NonLinearRegressionFitter;
 import de.gsi.math.functions.CombFunction;
 
@@ -98,7 +98,7 @@ public class SpectrumTools {
             final double Re = data[i2];
             final double Im = data[i2 + 1];
 
-            ret[toPos + i] = TMathConstants.Sqrt(TMathConstants.Sqr(Re) + TMathConstants.Sqr(Im)) / n2;
+            ret[toPos + i] = MathBase.sqrt(MathBase.sqr(Re) + MathBase.sqr(Im)) / n2;
         }
         if (truncateDCNyq) {
             // smooth spectra on both ends to minimise DC/Nyquist frequency artefacts
@@ -155,7 +155,7 @@ public class SpectrumTools {
             final double Re = data[i2];
             final double Im = data[i2 + 1];
 
-            ret[i + toPos] = (float) (TMathConstants.Sqrt(TMathConstants.Sqr(Re) + TMathConstants.Sqr(Im)) / length);
+            ret[i + toPos] = (float) (MathBase.sqrt(MathBase.sqr(Re) + MathBase.sqr(Im)) / length);
         }
         if (truncateDCNyq) {
             // smooth spectra on both ends to minimise DC/Nyquist frequency artefacts
@@ -202,7 +202,7 @@ public class SpectrumTools {
             final double Re = data[i2];
             final double Im = data[i2 + 1];
 
-            ret[i + toPos] = 10 * TMathConstants.Log10((TMathConstants.Sqr(Re / n2) + TMathConstants.Sqr(Im / n2)));
+            ret[i + toPos] = 10 * MathBase.log10((MathBase.sqr(Re / n2) + MathBase.sqr(Im / n2)));
         }
 
         if (truncateDCNyq) {
@@ -252,7 +252,7 @@ public class SpectrumTools {
 
             ret[toPos
                     + i]
-                    = (float) (10 * TMathConstants.Log10((TMathConstants.Sqr(Re) + TMathConstants.Sqr(Im)) / n2));
+                    = (float) (10 * MathBase.log10((MathBase.sqr(Re) + MathBase.sqr(Im)) / n2));
         }
 
         if (truncateDCNyq) {
@@ -374,7 +374,7 @@ public class SpectrumTools {
             final double Re = data[i2];
             final double Im = data[i2 + 1];
 
-            ret[i] = TMathConstants.ATan2(Im, Re);
+            ret[i] = MathBase.aTan2(Im, Re);
         }
 
         // smooth spectra on both ends to minimise DC/Nyquist frequency
@@ -399,7 +399,7 @@ public class SpectrumTools {
             final double Re = data[i2];
             final double Im = data[i2 + 1];
 
-            ret[i] = (float) TMathConstants.ATan2(Im, Re);
+            ret[i] = (float) MathBase.aTan2(Im, Re);
         }
 
         // smooth spectra on both ends to minimise DC/Nyquist frequency
@@ -477,7 +477,7 @@ public class SpectrumTools {
         final double[] x = peaks[0];
         final double[] y = peaks[1];
         int count = 0;
-        final double max = TMath.Maximum(y);
+        final double max = Math.maximum(y);
         if (!dBScale) {
             for (int i = 0; i < peaks[0].length; i++) {
                 if (y[i] > max / snRatio) {
@@ -558,17 +558,17 @@ public class SpectrumTools {
     public static double interpolateNAFF(final double[] data, final int index) {
         final double val = index / (double) (2 * data.length);
         if (index > 0 && index < data.length - 1) {
-            final double pin = TMathConstants.Pi() / data.length;
+            final double pin = MathBase.PI / data.length;
             final double left = Math.pow(data[index - 1], 1);
             final double center = Math.pow(data[index - 0], 1);
             final double right = Math.pow(data[index + 1], 1);
 
             if (left < right) {
-                return val + TMathConstants.ATan2(right * TMathConstants.Sin(pin), center + right * TMathConstants.Cos(pin)) / TMathConstants.Pi();
+                return val + MathBase.aTan2(right * MathBase.sin(pin), center + right * MathBase.cos(pin)) / MathBase.PI;
             } else {
                 return val
-                        - TMathConstants.ATan2(left * TMathConstants.Sin(pin), center + left * TMathConstants.Cos(pin))
-                                  / TMathConstants.Pi();
+                        - MathBase.aTan2(left * MathBase.sin(pin), center + left * MathBase.cos(pin))
+                                  / MathBase.PI;
             }
         } else {
             return val;
@@ -624,7 +624,7 @@ public class SpectrumTools {
         for (int i = 0; i < 1024; i++) {
             final double x = i; // [bins]
             // Gaussian Peak
-            data[i] = TMath.Gauss(x, mean, sigma, true);
+            data[i] = Math.gauss(x, mean, sigma, true);
 
             // Sinc Peak
             // data[i] = TMath.Abs(TMath.Sinc(TMath.Pi()*(x-mean)/sigma, true));
@@ -634,7 +634,7 @@ public class SpectrumTools {
             // data[i] = TMath.BreitWigner(x, mean, sigma);
         }
 
-        final int lmax = (int) TMath.LocationMaximum(data, data.length);
+        final int lmax = (int) Math.locationMaximum(data, data.length);
         System.out.println("found highest peak at bin = " + lmax);
         final double interGauss = SpectrumTools.interpolateGaussian(data, lmax) * 2 * data.length;
         final double interBary = SpectrumTools.interpolateBaryCentre(data, lmax) * 2 * data.length;

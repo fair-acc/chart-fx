@@ -1,9 +1,8 @@
 package de.gsi.math.functions;
 
-import de.gsi.math.TMath;
+import de.gsi.math.Math;
 
 public class BetaDistributionFunction extends AbstractFunction1D implements Function1D {
-
     /**
      * initialise the Beta distribution function parameter order: parameter[0] = p (default: 5.0) parameter[1] = q
      * (default: 1.0)
@@ -39,6 +38,6 @@ public class BetaDistributionFunction extends AbstractFunction1D implements Func
 
     @Override
     public double getValue(final double x) {
-        return TMath.BetaDist(x, fparameter[0], fparameter[1]);
+        return Math.betaDist(x, fparameter[0], fparameter[1]);
     }
 }
