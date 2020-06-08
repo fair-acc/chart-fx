@@ -140,7 +140,7 @@ public class BinarySerialiser { // NOPMD - omen est omen
         final HeaderInfo header = SELF.new HeaderInfo(headerStartField, producer, major, minor, micro);
 
         if (!header.isCompatible()) {
-            final String msg = String.format("byte buffer version incompatible: reveived '%s' vs. this '%s'", header.toString(), THIS_HEADER.toString());
+            final String msg = String.format("byte buffer version incompatible: received '%s' vs. this '%s'", header.toString(), THIS_HEADER.toString());
             throw new IllegalStateException(msg);
         }
         return header;
