@@ -328,7 +328,7 @@ public abstract class AbstractChartMeasurement implements EventListener, EventSo
         removeSliderChangeListener();
         cleanUpSuperfluousIndicators();
     }
-    
+
     protected void removeSliderChangeListener() {
         final Chart chart = getMeasurementPlugin().getChart();
         if (chart == null) {
