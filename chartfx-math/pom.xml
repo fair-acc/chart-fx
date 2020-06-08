@@ -49,6 +49,7 @@
     </dependencies>
 
     <build>
+        <!-- Call parser on input module sources and generate output -->
         <plugins>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
@@ -56,7 +57,7 @@
                 <executions>
                     <execution>
                         <id>codegen</id>
-                        <phase>generate-resources</phase>
+                        <phase>generate-sources</phase>
                         <goals>
                             <goal>java</goal>
                         </goals>
@@ -64,9 +65,28 @@
                             <mainClass>de.gsi.generate.CodeGenerator</mainClass>
                             <skip>false</skip>
                             <arguments>
-                                <argument>${project.build.sourceDirectory}</argument> <!-- Input Sources -->
-                                <argument>${project.build.directory}/generated-sources/annotations</argument> <!-- Output Sources -->
+                                <argument>${project.build.sourceDirectory}</argument>
+                                <argument>${project.build.directory}/generated-sources/codegen</argument>
                             </arguments>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <!-- Add generated sources to project sources -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <version>3.0.0</version>
+                <executions>
+                    <execution>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>add-source</goal>
+                        </goals>
+                        <configuration>
+                            <sources>
+                                <source>${project.build.directory}/generated-sources/codegen</source>
+                            </sources>
                         </configuration>
                     </execution>
                 </executions>
