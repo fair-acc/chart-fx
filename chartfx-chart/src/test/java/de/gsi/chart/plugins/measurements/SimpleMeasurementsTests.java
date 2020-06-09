@@ -184,7 +184,7 @@ public class SimpleMeasurementsTests {
                     .until(() -> field.alert != null && field.alert.isShowing());
             // close Alert
             FXUtils.runAndWait(() -> {
-                field.alert.setResult(ButtonType.OK);
+                field.alert.setResult(field.buttonOK);
                 field.alert.close();
             });
 

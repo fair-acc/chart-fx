@@ -255,10 +255,10 @@ public abstract class AbstractChartMeasurement implements EventListener, EventSo
             return Optional.empty();
         }
 
-        if (result.get().getButtonData() == buttonOK.getButtonData()) {
+        if (result.get().equals(buttonOK)) {
             // ... user chose "OK"
             nominalAction();
-        } else if (result.get().getButtonData() == buttonRemove.getButtonData()) {
+        } else if (result.get().equals(buttonRemove)) {
             // ... user chose "Remove"
             removeAction();
         } else {
