@@ -23,6 +23,7 @@ import de.gsi.chart.XYChart;
 import de.gsi.chart.axes.Axis;
 import de.gsi.chart.axes.spi.DefaultNumericAxis;
 import de.gsi.chart.plugins.EditAxis;
+import de.gsi.chart.plugins.ParameterMeasurements;
 import de.gsi.chart.plugins.Zoomer;
 import de.gsi.chart.renderer.Renderer;
 import de.gsi.chart.renderer.spi.ErrorDataSetRenderer;
@@ -57,13 +58,13 @@ public class MultipleAxesSample extends Application {
 
         final DefaultNumericAxis xAxis1 = new DefaultNumericAxis("x axis");
         xAxis1.setAnimated(false);
-        final DefaultNumericAxis yAxis1 = new DefaultNumericAxis("y axis (random)");
+        final DefaultNumericAxis yAxis1 = new DefaultNumericAxis("y axis", "random");
         yAxis1.setAnimated(false);
-        final DefaultNumericAxis yAxis2 = new DefaultNumericAxis("y axis (sine/cosine)");
+        final DefaultNumericAxis yAxis2 = new DefaultNumericAxis("y axis", "sine/cosine");
         // yAxis2.setSide(Side.LEFT); // unusual but possible case
         yAxis2.setSide(Side.RIGHT);
         yAxis2.setAnimated(false);
-        final DefaultNumericAxis yAxis3 = new DefaultNumericAxis("y axis (gauss)");
+        final DefaultNumericAxis yAxis3 = new DefaultNumericAxis("y axis", "gauss");
         yAxis3.setSide(Side.RIGHT);
         yAxis3.invertAxis(true);
         yAxis3.setAnimated(false);
@@ -79,6 +80,7 @@ public class MultipleAxesSample extends Application {
         errorRenderer3.getAxes().add(yAxis3);
         chart.getRenderers().addAll(errorRenderer2, errorRenderer3);
 
+        chart.getPlugins().add(new ParameterMeasurements());
         final Zoomer zoom = new Zoomer();
         // add axes that shall be excluded from the zoom action
         zoom.omitAxisZoomList().add(yAxis3);
@@ -86,7 +88,6 @@ public class MultipleAxesSample extends Application {
         // Zoomer.setOmitZoom(yAxis3, true);
         chart.getPlugins().add(zoom);
         chart.getToolBar().getChildren().add(new MyZoomCheckBox(zoom, yAxis3));
-
         chart.getPlugins().add(new EditAxis());
 
         final Button newDataSet = new Button("new DataSet");

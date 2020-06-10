@@ -9,7 +9,6 @@ import static de.gsi.chart.plugins.measurements.SimpleMeasurements.MeasurementCa
 
 import java.util.Optional;
 
-import javafx.geometry.Orientation;
 import javafx.scene.control.ButtonType;
 
 import org.slf4j.Logger;
@@ -71,9 +70,28 @@ public class SimpleMeasurements extends AbstractChartMeasurement {
             final int index1 = ds.getIndex(DataSet.DIM_X, newValueMarker2);
             final int indexMin = requiredNumberOfIndicators == 1 ? index0 : Math.min(index0, index1);
             final int indexMax = Math.max(index0, index1);
+            final Chart chart = getMeasurementPlugin().getChart();
+            Axis axis = getFirstAxisForDataSet(chart, ds, !measType.isVerticalMeasurement());
 
             double val = Double.NaN;
             switch (measType) {
+            // simple marker w/o computations
+            case MARKER_HOR:
+                val = newValueMarker1;
+                axis = getFirstAxisForDataSet(chart, ds, true);
+                break;
+            case MARKER_DISTANCE_HOR:
+                val = newValueMarker2 - newValueMarker1;
+                axis = getFirstAxisForDataSet(chart, ds, true);
+                break;
+            case MARKER_VER:
+                val = newValueMarker1;
+                axis = getFirstAxisForDataSet(chart, ds, false);
+                break;
+            case MARKER_DISTANCE_VER:
+                val = newValueMarker2 - newValueMarker1;
+                axis = getFirstAxisForDataSet(chart, ds, false);
+                break;
             // indicators
             case VALUE_HOR:
                 val = SimpleDataSetEstimators.getZeroCrossing(ds, newValueMarker1);
@@ -157,11 +175,8 @@ public class SimpleMeasurements extends AbstractChartMeasurement {
                 break;
             }
 
-            final Chart chart = getMeasurementPlugin().getChart();
-            final Axis axis = chart.getFirstAxis(measType.isVerticalMeasurement() ? Orientation.VERTICAL : Orientation.HORIZONTAL);
-
             final String axisUnit = axis.getUnit();
-            final String unit = axisUnit == null ? "a.u." : axis.getUnit();
+            final String unit = axisUnit == null ? "a.u." : axisUnit;
 
             // update label valueTextField
             String valueLabel;
@@ -253,13 +268,19 @@ public class SimpleMeasurements extends AbstractChartMeasurement {
 
     public enum MeasurementType {
         // indicators
+        // simple non-computing marker
+        MARKER_HOR(true, INDICATOR, "Marker X", 1),
+        MARKER_DISTANCE_HOR(true, INDICATOR, "Marker ∆X"),
+        MARKER_VER(false, INDICATOR, "Marker Y", 1),
+        MARKER_DISTANCE_VER(false, INDICATOR, "Marker ∆Y"),
+
         /** 
-         * horizontal value at indicatpr 
+         * horizontal value at indicator 
          */
         VALUE_HOR(false, INDICATOR, "hor. value", 1),
         DISTANCE_HOR(false, INDICATOR, "hor. distance"),
         /** 
-         * vertical value at indicatpr 
+         * vertical value at indicator 
          */
         VALUE_VER(true, INDICATOR, "ver. value", 1),
         DISTANCE_VER(true, INDICATOR, "ver. distance"),
