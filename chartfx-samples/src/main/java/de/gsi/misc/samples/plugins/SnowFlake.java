@@ -1,4 +1,4 @@
-package de.gsi.silly.samples.plugins;
+package de.gsi.misc.samples.plugins;
 
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.IntegerProperty;

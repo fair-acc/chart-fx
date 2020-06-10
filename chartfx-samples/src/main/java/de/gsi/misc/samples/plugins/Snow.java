@@ -1,4 +1,4 @@
-package de.gsi.silly.samples.plugins;
+package de.gsi.misc.samples.plugins;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,4 +1,4 @@
-package de.gsi.silly.samples;
+package de.gsi.misc.samples;
 
 import static de.gsi.dataset.DataSet.DIM_X;
 import static de.gsi.dataset.DataSet.DIM_Y;
@@ -22,6 +22,7 @@ import javafx.scene.control.Spinner;
 import javafx.scene.control.ToolBar;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.TextAlignment;
@@ -37,12 +38,14 @@ import de.gsi.chart.plugins.EditAxis;
 import de.gsi.chart.plugins.Zoomer;
 import de.gsi.chart.renderer.LineStyle;
 import de.gsi.chart.renderer.spi.ErrorDataSetRenderer;
+import de.gsi.chart.ui.ProfilerInfoBox;
+import de.gsi.chart.ui.ProfilerInfoBox.DebugLevel;
 import de.gsi.chart.ui.geometry.Side;
 import de.gsi.dataset.DataSet;
 import de.gsi.dataset.spi.DataSetBuilder;
 import de.gsi.dataset.spi.DoubleDataSet;
 import de.gsi.dataset.spi.TransposedDataSet;
-import de.gsi.silly.samples.plugins.Snow;
+import de.gsi.misc.samples.plugins.Snow;
 
 /**
  * Happy Christmas and a Happy Coding 2020
@@ -84,22 +87,31 @@ public class SnowFlakeSample extends Application {
         cbSnow.selectedProperty().bindBidirectional(snowProperty);
 
         Slider nFlakeSpeed = new Slider(0.0, 2, velocityProperty.get());
+        nFlakeSpeed.setMaxWidth(100);
         nFlakeSpeed.setBlockIncrement(0.1);
         nFlakeSpeed.setMajorTickUnit(0.1);
         velocityProperty.bind(nFlakeSpeed.valueProperty());
 
         Spinner<Integer> nSnowFlakes = new Spinner<>(10, 1000, 200, numberOfFlakesProperty.get());
+        nSnowFlakes.setMaxWidth(75);
         numberOfFlakesProperty.bind(nSnowFlakes.valueProperty());
 
         Spinner<Double> meanFlakeSize = new Spinner<>(0.1, 20.0, meanSizeProperty.get(), 0.1);
+        meanFlakeSize.setMaxWidth(75);
         meanSizeProperty.bind(meanFlakeSize.valueProperty());
 
         Spinner<Double> rmsFlakeSize = new Spinner<>(0.1, 20.0, rmsSizeProperty.get(), 0.1);
+        rmsFlakeSize.setMaxWidth(75);
         rmsSizeProperty.bind(rmsFlakeSize.valueProperty());
+
+        final Pane spacer = new Pane();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+        final ProfilerInfoBox profilerInfoBox = new ProfilerInfoBox();
+        profilerInfoBox.setDebugLevel(DebugLevel.NONE);
 
         final ToolBar toolBar = new ToolBar(cbTransposed, cbSnow, new Label("speed:"), nFlakeSpeed, //
                 new Label("n-flakes:"), nSnowFlakes, new Label("mean-size:"), meanFlakeSize, //
-                new Label("rms-size:"), rmsFlakeSize);
+                new Label("rms-size:"), rmsFlakeSize, spacer, profilerInfoBox);
         final HBox hBox = new HBox(chart1, chart2);
 
         VBox.setVgrow(hBox, Priority.ALWAYS);
