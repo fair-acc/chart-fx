@@ -150,8 +150,9 @@ public class ProfilerInfoBox extends BreadCrumbBar<VBox> {
         return treeRoot;
     }
 
-    public void setDebugLevel(final DebugLevel level) {
+    public ProfilerInfoBox setDebugLevel(final DebugLevel level) {
         debugLevelProperty().set(level);
+        return this;
     }
 
     private EventHandler<BreadCrumbActionEvent<VBox>> updateSelectedCrumbActionListener() {
