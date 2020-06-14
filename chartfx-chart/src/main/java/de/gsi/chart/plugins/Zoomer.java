@@ -571,7 +571,7 @@ public class Zoomer extends ChartPlugin {
     }
 
     /**
-     * Sets the value of the {@link #sliderVisibleProperty()}.
+     * Sets the value of the {@link #pannerEnabledProperty()}.
      *
      * @param state if {@code true} the panner (middle mouse button is enabled
      */
