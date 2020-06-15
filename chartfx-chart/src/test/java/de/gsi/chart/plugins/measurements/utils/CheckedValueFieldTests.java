@@ -9,13 +9,12 @@ import java.util.concurrent.ExecutionException;
 import javafx.scene.Scene;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.testfx.framework.junit5.ApplicationExtension;
 import org.testfx.framework.junit5.Start;
-
-import com.sun.prism.paint.Color;
 
 import de.gsi.chart.ui.utils.JavaFXInterceptorUtils.SelectiveJavaFxInterceptor;
 import de.gsi.chart.ui.utils.TestFx;
@@ -185,7 +184,7 @@ public class CheckedValueFieldTests {
     }
 
     private String toHexString(Color value) {
-        return "0x" + (format(value.getRed()) + format(value.getGreen()) + format(value.getBlue()) + format(value.getAlpha())).toLowerCase();
+        return "0x" + (format(value.getRed()) + format(value.getGreen()) + format(value.getBlue()) + format(value.getOpacity())).toLowerCase();
     }
 
     private KeyEvent getKeyEvent(final KeyCode keyCode) {

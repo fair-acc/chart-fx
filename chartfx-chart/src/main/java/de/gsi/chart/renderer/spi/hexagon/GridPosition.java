@@ -4,14 +4,16 @@ import java.io.Serializable;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Stores coordinates and has functions for grid calculations, e.g. getLine, ring and distance. These calculations do
  * not depend on how you have placed the Hexagons on the HexagonMap. The axial coordinate system is used.
  */
 public class GridPosition implements Cloneable, Serializable {
+    private static final Logger LOGGER = LoggerFactory.getLogger(GridPosition.class);
 
     private static final long serialVersionUID = -6932865381701419097L;
 
@@ -39,7 +41,7 @@ public class GridPosition implements Cloneable, Serializable {
         try {
             return (GridPosition) super.clone();
         } catch (final CloneNotSupportedException ex) {
-            Logger.getLogger(GridPosition.class.getName()).log(Level.SEVERE, null, ex);
+            LOGGER.atError().setCause(ex).log("Error cloning GridPosition");
             return null;
         }
     }
@@ -137,7 +139,7 @@ public class GridPosition implements Cloneable, Serializable {
                 try {
                     result.add(h.clone());
                 } catch (final CloneNotSupportedException ex) {
-                    Logger.getLogger(GridPosition.class.getName()).log(Level.SEVERE, null, ex);
+                    LOGGER.atError().setCause(ex).log("Error cloning GridPosition");
                 }
                 h = h.getNeighborPosition(GridPosition.getDirectionFromNumber(i));
             }
@@ -195,7 +197,6 @@ public class GridPosition implements Cloneable, Serializable {
             rCalculated = r * (1.0 - j / n) + destination.r * j / n;
             p = GridPosition.hexRound(qCalculated, rCalculated);
             result.add(p);
-
         }
         result.add(destination);
         return result;

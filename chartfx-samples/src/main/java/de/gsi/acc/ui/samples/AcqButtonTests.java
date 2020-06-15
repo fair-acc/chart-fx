@@ -1,6 +1,9 @@
 package de.gsi.acc.ui.samples;
 
-import de.gsi.acc.ui.AcquisitionButtonBar;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.scene.Scene;
@@ -13,7 +16,13 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import de.gsi.acc.ui.AcquisitionButtonBar;
+
 public class AcqButtonTests extends Application {
+    private static final Logger LOGGER = LoggerFactory.getLogger(AcqButtonTests.class);
 
     public Pane getAcquisitionBarTest(final boolean isPauseEnabled) {
         final VBox root = new VBox();
@@ -22,8 +31,7 @@ public class AcqButtonTests extends Application {
 
         AcquisitionButtonBar acqBar = new AcquisitionButtonBar(isPauseEnabled);
         // overwrite default style with local preference
-        acqBar.getStylesheets().setAll(AcquisitionButtonBar.class.getResource("acq_button_small.css").toExternalForm());
-        //acqBar.getStylesheets().setAll(AcquisitionButtonBar.class.getResource("acq_button_medium.css").toExternalForm());
+        acqBar.getStylesheets().setAll(AcquisitionButtonBar.class.getResource("acq_button_medium.css").toExternalForm());
 
         cbDisabled.setOnAction(evt -> acqBar.setDisable(cbDisabled.isSelected()));
 
@@ -38,7 +46,8 @@ public class AcqButtonTests extends Application {
 
         root.getChildren()
                 .addAll(new Label("AcquisitionButtonBar " + (isPauseEnabled ? "with" : "without")
-                        + " pause button functionality "), new HBox(cbDisabled), acqBar,
+                                  + " pause button functionality "),
+                        new HBox(cbDisabled), acqBar,
                         new VBox(new Label("AcquisitionButtonBar state property values:"), cb1, cb2, cb3, cb4));
 
         return root;
@@ -65,5 +74,4 @@ public class AcqButtonTests extends Application {
     public static void main(String[] args) {
         Application.launch(args);
     }
-
 }

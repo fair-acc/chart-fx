@@ -36,7 +36,7 @@
         <maven.compiler.target>11</maven.compiler.target>
 
         <chartfx.javafx.version>13.0.1</chartfx.javafx.version>
-        <chartfx.controlsfx.version>11.0.0</chartfx.controlsfx.version>
+        <chartfx.controlsfx.version>11.0.1</chartfx.controlsfx.version>
         <chartfx.icu4j.version>65.1</chartfx.icu4j.version>
         <chartfx.javafxsvg.version>1.3.0</chartfx.javafxsvg.version>
 

@@ -60,8 +60,6 @@ import de.gsi.dataset.event.EventListener;
 import de.gsi.dataset.event.EventRateLimiter;
 import de.gsi.dataset.event.EventSource;
 
-import impl.org.controlsfx.skin.DecorationPane;
-
 /**
  * Measurements that can be added to a chart and show a scalar result value in the measurement pane.
  *
@@ -84,7 +82,8 @@ public abstract class AbstractChartMeasurement implements EventListener, EventSo
     private final CheckedValueField valueField = new CheckedValueField();
     private final StringProperty title = new SimpleStringProperty(this, "title", null);
     private final ObjectProperty<DataSet> dataSet = new SimpleObjectProperty<>(this, "dataSet", null);
-    private final DataViewWindow dataViewWindow = new DataViewWindow("not initialised", new Label("content to be filled"), WindowDecoration.FRAME);
+    private final DataViewWindow dataViewWindow = new DataViewWindow("not initialised",
+            new Label("content to be filled"), WindowDecoration.FRAME);
     protected final Alert alert;
     protected final ButtonType buttonOK = new ButtonType("OK", ButtonBar.ButtonData.OK_DONE);
     protected final ButtonType buttonDefault = new ButtonType("Defaults", ButtonBar.ButtonData.OK_DONE);
@@ -137,8 +136,8 @@ public abstract class AbstractChartMeasurement implements EventListener, EventSo
         }
     };
 
-    public AbstractChartMeasurement(final ParameterMeasurements plugin, final String measurementName, final AxisMode axisMode, final int requiredNumberOfIndicators,
-            final int requiredNumberOfDataSets) {
+    public AbstractChartMeasurement(final ParameterMeasurements plugin, final String measurementName,
+            final AxisMode axisMode, final int requiredNumberOfIndicators, final int requiredNumberOfDataSets) {
         if (plugin == null) {
             throw new IllegalArgumentException("plugin is null");
         }
@@ -155,9 +154,10 @@ public abstract class AbstractChartMeasurement implements EventListener, EventSo
         alert.setHeaderText("Please, select data set and/or other parameters:");
         alert.initModality(Modality.APPLICATION_MODAL);
 
-        final DecorationPane decorationPane = new DecorationPane();
-        decorationPane.getChildren().add(gridPane);
-        alert.getDialogPane().setContent(decorationPane);
+        // final DecorationPane decorationPane = new DecorationPane();
+        // decorationPane.getChildren().add(gridPane);
+        // alert.getDialogPane().setContent(decorationPane);
+        alert.getDialogPane().setContent(gridPane);
         alert.getButtonTypes().setAll(buttonOK, buttonDefault, buttonRemove);
         alert.setOnCloseRequest(evt -> alert.close());
         // add data set selector if necessary (ie. more than one data set available)
@@ -242,7 +242,8 @@ public abstract class AbstractChartMeasurement implements EventListener, EventSo
             return Optional.empty();
         }
 
-        if (getMeasurementPlugin() != null && getMeasurementPlugin().getChart() != null && getMeasurementPlugin().getChart().getScene() != null) {
+        if (getMeasurementPlugin() != null && getMeasurementPlugin().getChart() != null
+                && getMeasurementPlugin().getChart().getScene() != null) {
             final Stage stage = (Stage) getMeasurementPlugin().getChart().getScene().getWindow();
             alert.setX(stage.getX() + stage.getWidth() / 5);
             alert.setY(stage.getY() + stage.getHeight() / 5);
@@ -289,7 +290,8 @@ public abstract class AbstractChartMeasurement implements EventListener, EventSo
         final Label minValueLabel = new Label(" " + getValueField().getMinRange());
         getValueField().minRangeProperty().addListener((ch, o, n) -> minValueLabel.setText(" " + n.toString()));
         GridPane.setConstraints(minValueLabel, 2, lastLayoutRow);
-        getDialogContentBox().getChildren().addAll(minRangeTitleLabel, getValueField().getMinRangeTextField(), minValueLabel);
+        getDialogContentBox().getChildren().addAll(minRangeTitleLabel, getValueField().getMinRangeTextField(),
+                minValueLabel);
 
         lastLayoutRow++;
         final Label maxRangeTitleLabel = new Label("Max. Range: ");
@@ -298,7 +300,8 @@ public abstract class AbstractChartMeasurement implements EventListener, EventSo
         final Label maxValueLabel = new Label(" " + getValueField().getMaxRange());
         getValueField().maxRangeProperty().addListener((ch, o, n) -> maxValueLabel.setText(" " + n.toString()));
         GridPane.setConstraints(maxValueLabel, 2, lastLayoutRow);
-        getDialogContentBox().getChildren().addAll(maxRangeTitleLabel, getValueField().getMaxRangeTextField(), maxValueLabel);
+        getDialogContentBox().getChildren().addAll(maxRangeTitleLabel, getValueField().getMaxRangeTextField(),
+                maxValueLabel);
     }
 
     protected void defaultAction(final Optional<ButtonType> result) {
@@ -347,7 +350,9 @@ public abstract class AbstractChartMeasurement implements EventListener, EventSo
             return;
         }
         final List<AbstractSingleValueIndicator> allIndicators = chart.getPlugins().stream().filter(p -> p instanceof AbstractSingleValueIndicator).map(p -> (AbstractSingleValueIndicator) p).collect(Collectors.toList());
-        allIndicators.stream().filter((final AbstractSingleValueIndicator indicator) -> indicator.isAutoRemove() && indicator.updateEventListener().isEmpty()).forEach((final AbstractSingleValueIndicator indicator) -> getMeasurementPlugin().getChart().getPlugins().remove(indicator));
+        allIndicators.stream()
+                .filter((final AbstractSingleValueIndicator indicator) -> indicator.isAutoRemove() && indicator.updateEventListener().isEmpty())
+                .forEach((final AbstractSingleValueIndicator indicator) -> getMeasurementPlugin().getChart().getPlugins().remove(indicator));
     }
 
     protected void updateSlider() {
@@ -365,7 +370,9 @@ public abstract class AbstractChartMeasurement implements EventListener, EventSo
         final ObservableList<AbstractSingleValueIndicator> selectedIndicators = getValueIndicatorsUser();
         final boolean reuse = valueIndicatorSelector.isReuseIndicators();
         final int nSelected = selectedIndicators.size();
-        AbstractSingleValueIndicator sliderIndicator = reuse && nSelected >= requestedIndex + 1 ? selectedIndicators.get(requestedIndex) : null;
+        AbstractSingleValueIndicator sliderIndicator = reuse && nSelected >= requestedIndex + 1
+                                                               ? selectedIndicators.get(requestedIndex)
+                                                               : null;
 
         if (sliderIndicator == null) {
             final Chart chart = getMeasurementPlugin().getChart();
@@ -376,7 +383,8 @@ public abstract class AbstractChartMeasurement implements EventListener, EventSo
             final double min = Math.min(lower, upper);
 
             sliderIndicator = axisMode == X ? new XValueIndicator(axis, min) : new YValueIndicator(axis, min);
-            sliderIndicator.setText(new StringBuilder().append(measurementName).append('#').append(requestedIndex).toString());
+            sliderIndicator
+                    .setText(new StringBuilder().append(measurementName).append('#').append(requestedIndex).toString());
             sliderIndicator.setValue(min + (requestedIndex + 0.5) * middle);
             sliderIndicator.setAutoRemove(true);
 
