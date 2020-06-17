@@ -171,7 +171,7 @@ public class EMDSample extends AbstractDemoApplication {
     }
 
     private double[] readDemoData(int index) {
-        String fileName = index <= 1 ? "./rawDataCPS2.dat" : "./rawDataLHCInj.dat";
+        String fileName = index <= 1 ? "rawDataCPS2.dat" : "rawDataLHCInj.dat";
         try {
             try (BufferedReader reader = new BufferedReader(
                          new InputStreamReader(EMDSample.class.getResourceAsStream(fileName)))) {

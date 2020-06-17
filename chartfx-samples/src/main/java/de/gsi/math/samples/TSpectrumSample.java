@@ -50,9 +50,9 @@ import de.gsi.math.spectra.TSpectrum.SmoothWindow;
  */
 public class TSpectrumSample extends Application {
     private static final Logger LOGGER = LoggerFactory.getLogger(TSpectrumSample.class);
-    private static final String SOURCE1 = "./BBQSpectra.dat";
-    private static final String SOURCE2 = "./rawDataCPS2.dat";
-    private static final String SOURCE3 = "./rawDataLHCInj.dat";
+    private static final String SOURCE1 = "BBQSpectra.dat";
+    private static final String SOURCE2 = "rawDataCPS2.dat";
+    private static final String SOURCE3 = "rawDataLHCInj.dat";
     private final DoubleDataSet demoDataSet = readDemoData(SOURCE1);
     private ErrorDataSetRenderer backgroundRenderer;
     private ErrorDataSetRenderer peakRenderer;

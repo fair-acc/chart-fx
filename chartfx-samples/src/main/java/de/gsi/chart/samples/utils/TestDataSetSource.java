@@ -34,7 +34,7 @@ import it.unimi.dsi.fastutil.floats.FloatArrayList;
 public class TestDataSetSource extends AbstractDataSet3D<TestDataSetSource> {
     private static final long serialVersionUID = 5374805363297317245L;
     private static final Logger LOGGER = LoggerFactory.getLogger(TestDataSetSource.class);
-    private static final String DATA_SOURCE_FILE = "../testdata/alla-turca.mid";
+    private static final String DATA_SOURCE_FILE = "alla-turca.mid";
     private static final int AUDIO_SAMPLING_RATE = 11000;
     private static final int N_SYNTHESISER_BITS = 16;
     private static final int INITIAL_FRAME_SIZE = 1024;

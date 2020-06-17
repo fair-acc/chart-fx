@@ -1,6 +1,7 @@
 package de.gsi.chart.samples;
 
 import java.io.BufferedReader;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Arrays;
 
@@ -139,12 +140,10 @@ public class ContourChartSample extends Application {
         return chart;
     }
 
-    public DataSet readImage() {
-        try (BufferedReader reader = new BufferedReader(
-                     new InputStreamReader(ContourChartSample.class.getResourceAsStream("./testdata/image.txt")))) {
-            // final BufferedReader reader = new BufferedReader(new
-            // InputStreamReader(
-            // ContourChartSampleReference.class.getResourceAsStream("./testdata/image.txt")));
+    private static DataSet readImage() {
+        // try (BufferedReader reader = new BufferedReader( new InputStreamReader(ContourChartSample.class.getResourceAsStream("./testdata/image.txt")))) {
+        InputStream resource = ContourChartSample.class.getResourceAsStream("testdata/image.txt");
+        try (final BufferedReader reader = new BufferedReader(new InputStreamReader(resource))) {
             @SuppressWarnings("unused")
             String skipLine; // NOPMD variable is needed to skip/check line that contains the dimension of the following
             // line to be read which we derive from the data itself
@@ -168,9 +167,7 @@ public class ContourChartSample extends Application {
             return new DataSetBuilder("contour data").setValues(DataSet.DIM_X, xValues).setValues(DataSet.DIM_Y, yValues).setValues(DataSet.DIM_Z, zValues).build();
 
         } catch (final Exception e) {
-            if (LOGGER.isErrorEnabled()) {
-                LOGGER.atError().setCause(e).log("data read error");
-            }
+            LOGGER.atError().setCause(e).log("data read error");
         }
         return null;
     }

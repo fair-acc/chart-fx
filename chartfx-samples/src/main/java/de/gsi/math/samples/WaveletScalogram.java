@@ -181,7 +181,7 @@ public class WaveletScalogram extends AbstractDemoApplication {
     }
 
     private double[] readDemoData(int index) {
-        final String fileName = index <= 1 ? "./rawDataCPS2.dat" : "./rawDataLHCInj.dat";
+        final String fileName = index <= 1 ? "rawDataCPS2.dat" : "rawDataLHCInj.dat";
         try {
             try (BufferedReader reader = new BufferedReader(
                          new InputStreamReader(EMDSample.class.getResourceAsStream(fileName)))) {

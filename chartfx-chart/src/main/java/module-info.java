@@ -18,11 +18,6 @@ open module de.gsi.chartfx.chart {
 
     requires javafxsvg;
     requires pngj;
-    // Test dependencies
-//     requires org.junit.jupiter.api;
-//     requires org.junit.jupiter.params;
-//     requires org.testfx.junit5;
-//     requires javafx.swing;
 
     exports de.gsi.chart;
     exports de.gsi.chart.axes;
