@@ -1,7 +1,5 @@
 package de.gsi.chart.samples.legacy;
 
-import com.sun.javafx.tk.Toolkit;
-
 import de.gsi.chart.samples.RollingBufferSample;
 import javafx.application.Application;
 import javafx.scene.Scene;
@@ -25,15 +23,6 @@ public class ChartHighUpdateRateSample extends RollingBufferSample {
         BorderPane pane = super.initComponents(scene);
         rollingBufferDipoleCurrent.autoNotification().set(true);
         rollingBufferBeamIntensity.autoNotification().set(true);
-        Toolkit.getToolkit().addSceneTkPulseListener(() -> {
-            counter = (counter + 1) % 100;
-            if (counter == 0) {
-                System.err.println("pulse auto dipole = " + rollingBufferDipoleCurrent.autoNotification().get()
-                        + " auto beam " + rollingBufferBeamIntensity.autoNotification().get());
-            }
-        });
-
-        Toolkit.getToolkit().checkFxUserThread();
         return pane;
     }
 

@@ -10,6 +10,7 @@ import static de.gsi.dataset.DataSet.DIM_X;
 import java.lang.reflect.InvocationTargetException;
 import java.util.stream.Stream;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -30,6 +31,7 @@ public class IoSerialiserTests {
     private static final int BUFFER_SIZE = 20000;
 
     @Test
+    @Disabled
     public void simpleStreamerTest() throws IllegalAccessException {
         // check reading/writing
         final MyGenericClass inputObject = new MyGenericClass();

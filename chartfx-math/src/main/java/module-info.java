@@ -1,4 +1,4 @@
-module de.gsi.chartfx.math {
+open module de.gsi.chartfx.math {
     requires org.slf4j;
 
     requires it.unimi.dsi.fastutil;

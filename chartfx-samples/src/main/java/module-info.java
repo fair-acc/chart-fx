@@ -17,10 +17,11 @@ module de.gsi.chartfx.samples {
     requires jafama;
     requires JTransforms;
 
-    opens de.gsi.chart.samples to javafx.graphics;
-    opens de.gsi.chart.samples.legacy to javafx.graphics;
-    opens de.gsi.acc.ui.samples to javafx.graphics;
-    opens de.gsi.math.samples to javafx.graphics;
+    opens de.gsi.chart.samples to javafx.graphics, javafx.fxml;
+    opens de.gsi.chart.samples.legacy to javafx.graphics, javafx.fxml;
+    opens de.gsi.acc.ui.samples to javafx.graphics, javafx.fxml;
+    opens de.gsi.math.samples to javafx.graphics, javafx.fxml;
+    opens de.gsi.misc.samples to javafx.graphics, javafx.fxml;
 
     exports de.gsi.chart.samples;
     exports de.gsi.math.samples;

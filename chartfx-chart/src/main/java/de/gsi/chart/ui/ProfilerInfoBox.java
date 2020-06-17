@@ -7,7 +7,6 @@ import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.Tooltip;
 import javafx.scene.control.TreeItem;
@@ -15,12 +14,13 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
-import javafx.util.Callback;
 
 import org.controlsfx.control.BreadCrumbBar;
 import org.controlsfx.glyphfont.Glyph;
 
 import de.gsi.chart.utils.SimplePerformanceMeter;
+
+import impl.org.controlsfx.skin.BreadCrumbBarSkin;
 
 /**
  * Simple JavaFX and Chart Performance metrics indicator. To be added into e.g. a ToolBar 
@@ -66,16 +66,7 @@ public class ProfilerInfoBox extends BreadCrumbBar<VBox> {
      */
     public ProfilerInfoBox(final Scene scene, final int updateRateMillis) {
         super();
-        // get the original factory since the constructor for the bread crumb button is inaccessible implementation
-        // see: https://github.com/controlsfx/controlsfx/issues/1109
-        final Callback<TreeItem<VBox>, Button> factory = getCrumbFactory();
-        setCrumbFactory((TreeItem<VBox> param) -> {
-            final Button result = factory.call(param);
-            result.setId(param.getValue().getId());
-            final double arrowWidth = 20.0; // getArrowWidth() <- inaccessible implementation detail
-            result.setPadding(new Insets(0, arrowWidth, 0, arrowWidth));
-            return result;
-        });
+        setCrumbFactory((TreeItem<VBox> param) -> new CustomBreadCrumbButton(param.getValue()));
         setAutoNavigationEnabled(false);
 
         final Label chevron = new Label(null, chevronIcon);
@@ -199,6 +190,14 @@ public class ProfilerInfoBox extends BreadCrumbBar<VBox> {
         FRAMES_PER_SECOND,
         CPU_LOAD,
         VERSION;
+    }
+
+    protected static class CustomBreadCrumbButton extends BreadCrumbBarSkin.BreadCrumbButton {
+        public CustomBreadCrumbButton(Node gfx) {
+            super(null, gfx);
+            setId(gfx.getId());
+            setPadding(new Insets(0, getArrowWidth(), 0, getArrowWidth()));
+        }
     }
 
     protected static class CustomLabel extends Label {

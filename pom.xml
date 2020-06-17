@@ -44,7 +44,7 @@
         <chartfx.junit.jupiter.version>5.6.2</chartfx.junit.jupiter.version>
         <chartfx.awaitility.version>4.0.3</chartfx.awaitility.version>
         <chartfx.jacoco.version>0.8.5</chartfx.jacoco.version>
-        <chartfx.surefire.version>2.22.2</chartfx.surefire.version>
+        <chartfx.surefire.version>3.0.0-M1</chartfx.surefire.version><!-- TODO: Check if this is better for jigsaw -->
     </properties>
 
     <licenses>
@@ -110,7 +110,6 @@
                     <artifactId>maven-compiler-plugin</artifactId>
                     <version>3.8.1</version>
                     <configuration>
-                        <!-- put your configurations here -->
                     </configuration>
                 </plugin>
                 <!-- add automatic module name to manifest -->
@@ -247,8 +246,14 @@
                     <!-- which jacoco will not instrument. Hence it is important
                         to add -->
                     <!-- those command-line params here (${argLine} holds those params) -->
-                    <argLine>${argLine} -Xms256m -Xmx2048m -XX:G1HeapRegionSize=32m -Djava.awt.headless=true -Dtestfx.robot=glass -Dtestfx.headless=true -Dprism.order=sw</argLine>
-                    <forkCount>1</forkCount>
+                    <argLine>
+                        ${argLine}
+                        -Xms256m -Xmx2048m -XX:G1HeapRegionSize=32m
+                        -Djava.awt.headless=true -Dtestfx.robot=glass -Dtestfx.headless=true -Dprism.order=sw
+                        --add-module=org.testfx
+                        --add-opens=javafx.graphics/com.sun.javafx.application=org.testfx
+                    </argLine>
+                    <forkCount>0</forkCount>
                     <runOrder>random</runOrder>
                 </configuration>
             </plugin>

@@ -1,4 +1,4 @@
-module de.gsi.chartfx.dataset {
+open module de.gsi.chartfx.dataset {
     requires org.slf4j;
 
     requires it.unimi.dsi.fastutil;

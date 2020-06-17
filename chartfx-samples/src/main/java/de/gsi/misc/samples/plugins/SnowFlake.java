@@ -9,9 +9,6 @@ import javafx.scene.shape.LineTo;
 import javafx.scene.shape.MoveTo;
 import javafx.scene.shape.Path;
 
-import com.sun.javafx.scene.DirtyBits;
-import com.sun.javafx.scene.NodeHelper;
-
 /**
  * Basic implementation of a fractal Koch snowflake.
  * For details see: https://en.wikipedia.org/wiki/Koch_snowflake
@@ -27,8 +24,6 @@ public class SnowFlake extends Path {
     private final DoubleProperty centerX = new SimpleDoubleProperty(this, "centerX", 0.0) {
         @Override
         public void invalidated() {
-            NodeHelper.markDirty(SnowFlake.this, DirtyBits.NODE_GEOMETRY);
-            NodeHelper.geomChanged(SnowFlake.this);
             setTranslateX(get() - radius.get());
         }
     };
@@ -41,8 +36,6 @@ public class SnowFlake extends Path {
     private final DoubleProperty centerY = new SimpleDoubleProperty(this, "centerY", 0.0) {
         @Override
         public void invalidated() {
-            NodeHelper.markDirty(SnowFlake.this, DirtyBits.NODE_GEOMETRY);
-            NodeHelper.geomChanged(SnowFlake.this);
             setTranslateX(get() - radius.get());
         }
     };
@@ -55,8 +48,6 @@ public class SnowFlake extends Path {
     private final DoubleProperty radius = new SimpleDoubleProperty(this, "radius", 5.0) {
         @Override
         public void invalidated() {
-            NodeHelper.markDirty(SnowFlake.this, DirtyBits.NODE_GEOMETRY);
-            NodeHelper.geomChanged(SnowFlake.this);
             updatePath();
         }
     };
@@ -69,8 +60,6 @@ public class SnowFlake extends Path {
     private final IntegerProperty nIterations = new SimpleIntegerProperty(this, "nIterations", 3) {
         @Override
         public void invalidated() {
-            NodeHelper.markDirty(SnowFlake.this, DirtyBits.NODE_GEOMETRY);
-            NodeHelper.geomChanged(SnowFlake.this);
             updatePath();
         }
     };
