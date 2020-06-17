@@ -1,9 +1,10 @@
 package de.gsi.chart.samples.legacy;
 
-import de.gsi.chart.samples.RollingBufferSample;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
+
+import de.gsi.chart.samples.RollingBufferSample;
 
 /**
  * chart-fx stress test for updates at 100 Hz to 1 kHz
@@ -28,6 +29,5 @@ public class ChartHighUpdateRateSample extends RollingBufferSample {
 
     public static void main(final String[] args) {
         Application.launch(args);
-
     }
 }

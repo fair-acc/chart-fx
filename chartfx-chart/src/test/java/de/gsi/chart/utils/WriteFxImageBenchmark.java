@@ -91,10 +91,10 @@ public class WriteFxImageBenchmark {
                 writeFxImage(testimage, alpha, keepBuffer, Deflater.BEST_COMPRESSION, NEWREF);
             }
         }
-//        writeImageIoImage(testimage, false, false);
-//        writeImageIoImage(testimage, true, false);
-//        writeImageIoImage(testimage, false, true);
-//        writeImageIoImage(testimage, true, true);
+        //        writeImageIoImage(testimage, false, false);
+        //        writeImageIoImage(testimage, true, false);
+        //        writeImageIoImage(testimage, false, true);
+        //        writeImageIoImage(testimage, true, true);
 
         LOGGER.atInfo().log("Image with simple shapes (easy to compress)");
         for (final boolean alpha : new boolean[] { false, true }) {
@@ -104,10 +104,10 @@ public class WriteFxImageBenchmark {
                 writeFxImage(testimage2, alpha, keepBuffer, Deflater.BEST_COMPRESSION, NEWREF);
             }
         }
-//        writeImageIoImage(testimage2, false, false);
-//        writeImageIoImage(testimage2, true, false);
-//        writeImageIoImage(testimage2, false, true);
-//        writeImageIoImage(testimage2, true, true);
+        //        writeImageIoImage(testimage2, false, false);
+        //        writeImageIoImage(testimage2, true, false);
+        //        writeImageIoImage(testimage2, false, true);
+        //        writeImageIoImage(testimage2, true, true);
 
         testCompressionPerformance(testimage, "noise data (difficult to compress)");
         testCompressionPerformance(testimage2, "simple shapes (easy to compress)");
@@ -173,36 +173,36 @@ public class WriteFxImageBenchmark {
                 .log("FxImage-{}: size {}x{} \t compression: {}% \t {} ms/image    {} {} compressionLevel: {}");
     }
 
-//    private static void writeImageIoImage(Image image, boolean keepStream, boolean keepBImg) throws IOException {
-//        ByteArrayOutputStream os = new ByteArrayOutputStream(w * h * 4);
-//        BufferedImage bimg = null;
-//        int size = 0;
-//        final long start = System.currentTimeMillis();
-//        for (int i = 0; i < N_ITER; i++) {
-//            final BufferedImage newbimg = SwingFXUtils.fromFXImage(image, bimg);
-//            ImageIO.write(newbimg, "PNG", os);
-//            if (keepBImg) {
-//                bimg = newbimg;
-//            }
-//            size += os.size();
-//            if (keepStream) {
-//                os.reset();
-//            } else {
-//                os = new ByteArrayOutputStream(w * h * 4);
-//            }
-//        }
-//        final long stop = System.currentTimeMillis();
-//        final double avgSize = size / (double) N_ITER;
-//        final double actualCompression = 100.0 * avgSize / (double) WriteFxImage.encode(image, null, true, Deflater.NO_COMPRESSION, null).limit();
-//        LOGGER.atInfo() //
-//                .addArgument((int) image.getWidth())
-//                .addArgument((int) image.getHeight()) //
-//                .addArgument(String.format("%5.1f", actualCompression)) //
-//                .addArgument(String.format("%5.2f", (stop - start) / (double) N_ITER)) //
-//                .addArgument(keepStream ? "keepStream" : "reallocateStream") //
-//                .addArgument(keepBImg ? "keepBufferedImage" : "reallocateBufferedImage") //
-//                .log("ImageIO: size {}x{} \t compression: {}% \t {} ms/image    rgba {} {}");
-//    }
+    //    private static void writeImageIoImage(Image image, boolean keepStream, boolean keepBImg) throws IOException {
+    //        ByteArrayOutputStream os = new ByteArrayOutputStream(w * h * 4);
+    //        BufferedImage bimg = null;
+    //        int size = 0;
+    //        final long start = System.currentTimeMillis();
+    //        for (int i = 0; i < N_ITER; i++) {
+    //            final BufferedImage newbimg = SwingFXUtils.fromFXImage(image, bimg);
+    //            ImageIO.write(newbimg, "PNG", os);
+    //            if (keepBImg) {
+    //                bimg = newbimg;
+    //            }
+    //            size += os.size();
+    //            if (keepStream) {
+    //                os.reset();
+    //            } else {
+    //                os = new ByteArrayOutputStream(w * h * 4);
+    //            }
+    //        }
+    //        final long stop = System.currentTimeMillis();
+    //        final double avgSize = size / (double) N_ITER;
+    //        final double actualCompression = 100.0 * avgSize / (double) WriteFxImage.encode(image, null, true, Deflater.NO_COMPRESSION, null).limit();
+    //        LOGGER.atInfo() //
+    //                .addArgument((int) image.getWidth())
+    //                .addArgument((int) image.getHeight()) //
+    //                .addArgument(String.format("%5.1f", actualCompression)) //
+    //                .addArgument(String.format("%5.2f", (stop - start) / (double) N_ITER)) //
+    //                .addArgument(keepStream ? "keepStream" : "reallocateStream") //
+    //                .addArgument(keepBImg ? "keepBufferedImage" : "reallocateBufferedImage") //
+    //                .log("ImageIO: size {}x{} \t compression: {}% \t {} ms/image    rgba {} {}");
+    //    }
 
     public enum Implementation {
         OLDREF,
