@@ -2,7 +2,6 @@ package de.gsi.math.samples;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import java.util.Arrays;
 import java.util.List;
 
 import javafx.application.Application;

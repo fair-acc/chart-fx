@@ -1,8 +1,9 @@
 package de.gsi.chart.plugins;
 
-import de.gsi.chart.axes.Axis;
 import javafx.geometry.BoundingBox;
 import javafx.geometry.Bounds;
+
+import de.gsi.chart.axes.Axis;
 
 /**
  * A rectangle drawn on the plot area, covering specified range of X values, with an optional {@link #textProperty()
@@ -20,7 +21,6 @@ import javafx.geometry.Bounds;
  * @author mhrabia
  */
 public class XRangeIndicator extends AbstractRangeValueIndicator {
-
     /**
      * Creates a new instance of the indicator.
      *
@@ -55,7 +55,7 @@ public class XRangeIndicator extends AbstractRangeValueIndicator {
         final double minY = plotAreaBounds.getMinY();
         final double maxY = plotAreaBounds.getMaxY();
 
-        final Axis xAxis = getNumericAxis();
+        final Axis xAxis = getAxis();
         final double value1 = xAxis.getDisplayPosition(getLowerBound());
         final double value2 = xAxis.getDisplayPosition(getUpperBound());
 

@@ -202,11 +202,6 @@ public abstract class AbstractChartMeasurement implements EventListener, EventSo
         return dataViewWindow;
     }
 
-    @Deprecated
-    public Pane getDisplayPane() {
-        return getMeasurementPlugin().getDataView();
-    }
-
     public ParameterMeasurements getMeasurementPlugin() {
         return plugin;
     }

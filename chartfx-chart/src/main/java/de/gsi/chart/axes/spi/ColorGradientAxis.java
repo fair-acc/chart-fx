@@ -211,7 +211,7 @@ public class ColorGradientAxis extends DefaultNumericAxis {
         final double paddingX = getSide().isHorizontal() ? getAxisPadding() : 0.0;
         final double paddingY = getSide().isVertical() ? getAxisPadding() : 0.0;
         // for relative positioning of axes drawn on top of the main canvas
-        final double axisCentre = getCenterAxisPosition();
+        final double axisCentre = getAxisCenterPosition();
 
         final double gradientWidth = getGradientWidth();
 

@@ -11,8 +11,6 @@ import static de.gsi.dataset.DataSet.DIM_Y;
 import java.util.Arrays;
 
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import de.gsi.dataset.DataSet;
 import de.gsi.dataset.DataSetError.ErrorType;
@@ -25,8 +23,6 @@ import de.gsi.dataset.spi.DimReductionDataSet.Option;
  * @author rstein
  */
 public class DataSetEqualityTests {
-    private static final Logger LOGGER = LoggerFactory.getLogger(DataSetEqualityTests.class);
-
     @Test
     public void testDataSetEquality() {
         // check for helper classes
@@ -69,8 +65,6 @@ public class DataSetEqualityTests {
                         new DoubleDataSet3D("test", new double[] { 1, 2, 3 }, new double[] { 6, 7, 8 }, new double[][] { new double[] { 1, 2, 3 }, new double[] { 6, 5, 4 }, new double[] { 9, 8, 7 } }),
                         DIM_X, Option.SLICE));
 
-        assertEquals(new ListDataSet("default"), new ListDataSet("default"));
-        assertEquals(new ListErrorDataSet("default"), new ListErrorDataSet("default"));
         assertEquals(new LimitedIndexedTreeDataSet("default", 100), new LimitedIndexedTreeDataSet("default", 100));
     }
 
@@ -85,7 +79,7 @@ public class DataSetEqualityTests {
         assertEquals(ds1, ds1);
         assertNotEquals(ds1, null);
         assertNotEquals(ds1, new OneDimDataSet());
-        assertNotEquals(ds1, new String());
+        assertNotEquals(ds1, "");
         assertEquals(ds1, ds2);
 
         ds1.setName(null);

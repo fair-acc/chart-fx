@@ -73,11 +73,6 @@ public class DataViewer extends BorderPane {
     protected static final int FONT_SIZE = 20;
     private final ObjectProperty<WindowDecoration> windowDecoration = new SimpleObjectProperty<>(this, "windowDecoration", WindowDecoration.BAR);
     private final BooleanProperty detachableWindow = new SimpleBooleanProperty(this, "detachableWindow", true);
-    @Deprecated
-    private final BooleanProperty decorationVisible = new SimpleBooleanProperty(this, "windowDecorationVisible", true);
-    @Deprecated
-    private final BooleanProperty closeWindowButtonVisible = new SimpleBooleanProperty(this, "closeButtonVisible",
-            true);
     private final Glyph rootGlyph = new Glyph(FONT_AWESOME, "\uf698").size(FONT_SIZE);
     private final DataView dataViewRoot = new DataView("root", rootGlyph, null);
     private final HBox viewList = new HBox();
@@ -122,12 +117,10 @@ public class DataViewer extends BorderPane {
         case BAR:
         case BAR_WO_CLOSE:
             this.setWindowDecoration(Boolean.TRUE.equals(n) ? WindowDecoration.BAR : WindowDecoration.BAR_WO_CLOSE);
-            setWindowDecorationVisible(true);
             break;
         case NONE:
         case FRAME:
         default:
-            setWindowDecorationVisible(false);
             break;
         }
     };
@@ -146,8 +139,6 @@ public class DataViewer extends BorderPane {
 
         windowDecorationProperty().addListener((ch, o, n) -> updateWindowDecorations(dataViewRoot));
         detachableWindowProperty().addListener((ch, o, n) -> updateDetachableWindowProperty(dataViewRoot));
-        windowDecorationVisible().addListener((ch, o, n) -> setWindowDecoration(Boolean.TRUE.equals(n) ? WindowDecoration.BAR : WindowDecoration.NONE));
-        closeWindowButtonVisibleProperty().addListener(closeWindowButtonHandler);
 
         final Label spacer = new Label();
         HBox.setHgrow(spacer, Priority.ALWAYS);
@@ -159,10 +150,6 @@ public class DataViewer extends BorderPane {
     public DataViewer(final DataView... views) {
         this();
         getViews().addAll(views);
-    }
-
-    public BooleanProperty closeWindowButtonVisibleProperty() {
-        return closeWindowButtonVisible;
     }
 
     /**
@@ -207,11 +194,6 @@ public class DataViewer extends BorderPane {
         return windowDecorationProperty().get();
     }
 
-    @Deprecated
-    public boolean isCloseWindowButtonVisible() {
-        return closeWindowButtonVisibleProperty().get();
-    }
-
     /**
      * 
      * @return true: window can be detached by dragging gesture
@@ -229,18 +211,8 @@ public class DataViewer extends BorderPane {
         return explorerVisibleProperty().get();
     }
 
-    @Deprecated
-    public boolean isWindowDecorationVisible() {
-        return windowDecorationVisible().get();
-    }
-
     public final ObjectProperty<DataView> selectedViewProperty() {
         return dataViewRoot.activeSubViewProperty();
-    }
-
-    @Deprecated
-    public void setCloseWindowButtonVisible(final boolean state) {
-        closeWindowButtonVisibleProperty().set(state);
     }
 
     /**
@@ -277,11 +249,6 @@ public class DataViewer extends BorderPane {
         windowDecorationProperty().set(state);
     }
 
-    @Deprecated
-    public void setWindowDecorationVisible(final boolean state) {
-        windowDecorationVisible().set(state);
-    }
-
     public BooleanProperty showListStyleDataViewProperty() {
         return showListStyleDataViews;
     }
@@ -308,11 +275,6 @@ public class DataViewer extends BorderPane {
 
     public ObjectProperty<WindowDecoration> windowDecorationProperty() {
         return windowDecoration;
-    }
-
-    @Deprecated
-    public BooleanProperty windowDecorationVisible() {
-        return decorationVisible;
     }
 
     protected void updateDetachableWindowProperty(final DataView root) {

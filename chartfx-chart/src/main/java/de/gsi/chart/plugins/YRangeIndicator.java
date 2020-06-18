@@ -1,8 +1,9 @@
 package de.gsi.chart.plugins;
 
-import de.gsi.chart.axes.Axis;
 import javafx.geometry.BoundingBox;
 import javafx.geometry.Bounds;
+
+import de.gsi.chart.axes.Axis;
 
 /**
  * A rectangle drawn on the plot area, covering specified range of Y values, with an optional {@link #textProperty()
@@ -20,7 +21,6 @@ import javafx.geometry.Bounds;
  * @author mhrabia
  */
 public class YRangeIndicator extends AbstractRangeValueIndicator {
-
     /**
      * Creates a new instance that indicates given Y range of the specified Y axis.
      *
@@ -42,7 +42,6 @@ public class YRangeIndicator extends AbstractRangeValueIndicator {
      */
     public YRangeIndicator(final Axis axis, final double lowerBound, final double upperBound, final String text) {
         super(axis, lowerBound, upperBound, text);
-
     }
 
     @Override
@@ -57,7 +56,7 @@ public class YRangeIndicator extends AbstractRangeValueIndicator {
         final double minY = plotAreaBounds.getMinY();
         final double maxY = plotAreaBounds.getMaxY();
 
-        final Axis yAxis = getNumericAxis();
+        final Axis yAxis = getAxis();
         final double value1 = yAxis.getDisplayPosition(getLowerBound());
         final double value2 = yAxis.getDisplayPosition(getUpperBound());
 

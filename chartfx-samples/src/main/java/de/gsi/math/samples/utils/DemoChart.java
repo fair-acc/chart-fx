@@ -3,11 +3,14 @@ package de.gsi.math.samples.utils;
 import java.util.ArrayList;
 import java.util.List;
 
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.VBox;
+
 import de.gsi.chart.XYChart;
 import de.gsi.chart.axes.spi.DefaultNumericAxis;
 import de.gsi.chart.plugins.DataPointTooltip;
 import de.gsi.chart.plugins.EditAxis;
-import de.gsi.chart.plugins.Panner;
 import de.gsi.chart.plugins.ParameterMeasurements;
 import de.gsi.chart.plugins.TableViewer;
 import de.gsi.chart.plugins.Zoomer;
@@ -15,9 +18,6 @@ import de.gsi.chart.renderer.ErrorStyle;
 import de.gsi.chart.renderer.LineStyle;
 import de.gsi.chart.renderer.spi.ErrorDataSetRenderer;
 import de.gsi.chart.ui.geometry.Side;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.VBox;
 
 /**
  * Short hand extension/configuration of the standard XYChart functionalities to make the samples more readable
@@ -25,8 +25,8 @@ import javafx.scene.layout.VBox;
  * @author rstein
  */
 public class DemoChart extends XYChart {
-    private List<DefaultNumericAxis> yAxes = new ArrayList<>();
-    private List<ErrorDataSetRenderer> renderer = new ArrayList<>();
+    private final List<DefaultNumericAxis> yAxes = new ArrayList<>();
+    private final List<ErrorDataSetRenderer> renderer = new ArrayList<>();
 
     public DemoChart() {
         this(1);
@@ -90,5 +90,4 @@ public class DemoChart extends XYChart {
     public DefaultNumericAxis getYAxis(final int index) {
         return yAxes.get(index);
     }
-
 }

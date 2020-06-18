@@ -60,9 +60,9 @@ public class YValueIndicator extends AbstractSingleValueIndicator implements Eve
 
     protected void handleDragMouseEvent(final MouseEvent mouseEvent) {
         Point2D c = getChart().getPlotArea().sceneToLocal(mouseEvent.getSceneX(), mouseEvent.getSceneY());
-        final double yPosData = getNumericAxis().getValueForDisplay(c.getY() - dragDelta.y);
+        final double yPosData = getAxis().getValueForDisplay(c.getY() - dragDelta.y);
 
-        if (getNumericAxis().isValueOnAxis(yPosData)) {
+        if (getAxis().isValueOnAxis(yPosData)) {
             valueProperty().set(yPosData);
         }
 
@@ -80,7 +80,7 @@ public class YValueIndicator extends AbstractSingleValueIndicator implements Eve
         final double minY = plotAreaBounds.getMinY();
         final double maxY = plotAreaBounds.getMaxY();
 
-        final double yPos = minY + getNumericAxis().getDisplayPosition(getValue());
+        final double yPos = minY + getAxis().getDisplayPosition(getValue());
 
         if (yPos < minY || yPos > maxY) {
             getChartChildren().clear();

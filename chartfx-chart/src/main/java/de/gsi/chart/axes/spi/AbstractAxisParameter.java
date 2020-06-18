@@ -187,7 +187,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
      * The relative alignment (N.B. clamped to [0.0,1.0]) of the axis if drawn on top of the main canvas (N.B. side ==
      * CENTER_HOR or CENTER_VER
      */
-    private final DoubleProperty centerAxisPosition = new StylishDoubleProperty(
+    private final DoubleProperty axisCenterPosition = new StylishDoubleProperty(
             StyleableProperties.CENTER_AXIS_POSITION, this, "centerAxisPosition", 0.5, this::requestAxisLayout) {
         @Override
         public void set(final double value) {
@@ -619,8 +619,8 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
         return axisPadding;
     }
 
-    public DoubleProperty centerAxisPositionProperty() {
-        return centerAxisPosition;
+    public DoubleProperty axisCenterPositionProperty() {
+        return axisCenterPosition;
     }
 
     @Override
@@ -639,11 +639,6 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     }
 
     public abstract void fireInvalidated();
-
-    @Deprecated // do not break backward compatibility for corrected typo
-    public TextAlignment getaAxisLabelTextAlignment() {
-        return axisLabelTextAlignmentProperty().get();
-    }
 
     /**
      * @return value of the {@link #animationDurationProperty} property
@@ -667,7 +662,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     }
 
     public double getAxisCenterPosition() {
-        return centerAxisPositionProperty().get();
+        return axisCenterPositionProperty().get();
     }
 
     /**
@@ -687,11 +682,6 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
 
     public double getAxisPadding() {
         return axisPaddingProperty().get();
-    }
-
-    @Deprecated // do not break backward compatibility for getter adjusted to property name
-    public double getCenterAxisPosition() {
-        return centerAxisPositionProperty().get();
     }
 
     /**
@@ -728,11 +718,6 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     }
 
     public int getMaxMajorTickLabelCount() {
-        return this.maxMajorTickLabelCountProperty().get();
-    }
-
-    @Deprecated // do not break backward compatibility for corrected typo
-    public int getMaxMaxjorTickLabelCount() {
         return this.maxMajorTickLabelCountProperty().get();
     }
 
@@ -1154,7 +1139,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     }
 
     public void setAxisCenterPosition(final double value) {
-        centerAxisPositionProperty().set(value);
+        axisCenterPositionProperty().set(value);
     }
 
     public void setAxisLabelGap(final double value) {
@@ -1516,12 +1501,12 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
             @SuppressWarnings("unchecked")
             @Override
             public StyleableProperty<Number> getStyleableProperty(final AbstractAxisParameter n) {
-                return (StyleableProperty<Number>) n.centerAxisPositionProperty();
+                return (StyleableProperty<Number>) n.axisCenterPositionProperty();
             }
 
             @Override
             public boolean isSettable(final AbstractAxisParameter n) {
-                return (n != null) && !n.centerAxisPosition.isBound();
+                return (n != null) && !n.axisCenterPosition.isBound();
             }
         };
 

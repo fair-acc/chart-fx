@@ -86,10 +86,6 @@ public class DataViewerTests {
             assertEquals(deco, dataViewer.getWindowDecoration());
         }
         dataViewer.setWindowDecoration(WindowDecoration.BAR);
-        dataViewer.setCloseWindowButtonVisible(false);
-        assertFalse(dataViewer.isCloseWindowButtonVisible());
-        dataViewer.setCloseWindowButtonVisible(true);
-        assertTrue(dataViewer.isCloseWindowButtonVisible());
 
         dataViewer.setSelectedView((DataView) null);
     }

@@ -310,49 +310,6 @@ public class ClassFieldDescription {
     }
 
     /**
-     * @param rootObject reference to the root object
-     * @return the specific object link corresponding to this field
-     * @deprecated not needed anymore --- probably
-     */
-    @Deprecated
-    public Object getMemberClassObject(final Object rootObject) {
-        if (rootObject == null) {
-            throw new IllegalArgumentException("rootObject is null");
-        }
-        if (isRoot()) {
-            return rootObject;
-        }
-        final int depth = getHierarchyDepth() - 1;
-        Object temp = rootObject;
-        Object parent1 = rootObject;
-        for (int i = 0; i < depth; i++) {
-            final ClassFieldDescription localParent = getParent(this, depth - i);
-
-            try {
-                if (localParent.getField() == null) {
-                    return rootObject;
-                }
-                temp = localParent.getField().get(parent1);
-                if (temp == null) {
-                    temp = localParent.allocateMemberClassField(parent1);
-                } else {
-                    return null;
-                }
-
-                if ((temp = localParent.getField().get(parent1)) == null) {
-                    throw new IllegalStateException(
-                            "could not allocate inner class object field = " + field.toString());
-                }
-
-                parent1 = temp;
-            } catch (IllegalArgumentException | IllegalAccessException e) {
-                LOGGER.atError().setCause(e).log("could not retrieve inner loop object for field '" + field.toString());
-            }
-        }
-        return temp;
-    }
-
-    /**
      * @return the modifierID
      */
     public int getModifierID() {
@@ -391,8 +348,7 @@ public class ClassFieldDescription {
         if ((hierarchyLevel == 0) || field.getParent().isEmpty()) {
             return field;
         }
-        final Optional<ClassFieldDescription> localParent = field.getParent();
-        return getParent(localParent.isPresent() ? localParent.get() : null, hierarchyLevel - 1);
+        return getParent(field.getParent().orElse(null), hierarchyLevel - 1);
     }
 
     /**
@@ -549,7 +505,7 @@ public class ClassFieldDescription {
      */
     public void resetReadCount() {
         readCount.set(0);
-        getChildren().stream().forEach(ClassFieldDescription::resetReadCount);
+        getChildren().forEach(ClassFieldDescription::resetReadCount);
     }
 
     /**
@@ -557,7 +513,7 @@ public class ClassFieldDescription {
      */
     public void resetWriteCount() {
         writeCount.set(0);
-        getChildren().stream().forEach(ClassFieldDescription::resetWriteCount);
+        getChildren().forEach(ClassFieldDescription::resetWriteCount);
     }
 
     @Override
@@ -593,8 +549,7 @@ public class ClassFieldDescription {
         return DataType.OTHER;
     }
 
-    protected static void exploreClass(final Class<? extends Object> classType, final ClassFieldDescription parent,
-            final int recursionLevel, final boolean fullScan) {
+    protected static void exploreClass(final Class<?> classType, final ClassFieldDescription parent, final int recursionLevel, final boolean fullScan) {
         if (classType == null) {
             throw new IllegalArgumentException("classType must not be null");
         }

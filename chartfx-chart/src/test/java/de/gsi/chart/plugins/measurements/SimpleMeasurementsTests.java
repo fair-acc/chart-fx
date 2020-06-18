@@ -74,7 +74,6 @@ public class SimpleMeasurementsTests {
         assertEquals(0, field.getValueIndicatorsUser().size(), " - number of selected indicators");
 
         assertNotNull(field.getDataViewWindow());
-        assertNotNull(field.getDisplayPane());
         assertNotNull(field.valueProperty());
         assertNotNull(field.getTitle());
         assertEquals(MeasurementType.MEAN.getName(), field.getTitle());
