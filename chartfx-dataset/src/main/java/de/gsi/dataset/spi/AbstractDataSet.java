@@ -49,15 +49,15 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
     private static final String[] DEFAULT_AXES_NAME = { "x-Axis", "y-Axis", "z-Axis" };
     private final transient AtomicBoolean autoNotification = new AtomicBoolean(true);
     private String name;
-    private int dimension;
+    protected int dimension;
     private final List<AxisDescription> axesDescriptions = new ArrayList<>();
     private final transient List<EventListener> updateListeners = Collections.synchronizedList(new LinkedList<>());
     private final transient DataSetLock<? extends DataSet> lock = new DefaultDataSetLock<>(this);
-    private StringHashMapList dataLabels = new StringHashMapList();
-    private StringHashMapList dataStyles = new StringHashMapList();
-    private List<String> infoList = new ArrayList<>();
-    private List<String> warningList = new ArrayList<>();
-    private List<String> errorList = new ArrayList<>();
+    protected StringHashMapList dataLabels = new StringHashMapList();
+    protected StringHashMapList dataStyles = new StringHashMapList();
+    protected List<String> infoList = new ArrayList<>();
+    protected List<String> warningList = new ArrayList<>();
+    protected List<String> errorList = new ArrayList<>();
     private EditConstraints editConstraints;
     private final Map<String, String> metaInfoMap = new ConcurrentHashMap<>();
 
@@ -148,9 +148,7 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
     protected boolean equalDataLabels(final DataSet other) {
         if (other instanceof AbstractDataSet) {
             AbstractDataSet<?> otherAbsDs = (AbstractDataSet<?>) other;
-            if (!getDataLabelMap().equals(otherAbsDs.getDataLabelMap())) {
-                return false;
-            }
+            return getDataLabelMap().equals(otherAbsDs.getDataLabelMap());
         } else {
             for (int index = 0; index < getDataCount(); index++) {
                 final String label1 = this.getDataLabel(index);
@@ -183,9 +181,7 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
                 return false;
             }
 
-            if (editConstraints != null && !editConstraints.equals(otherEditDs.getEditConstraints())) {
-                return false;
-            }
+            return editConstraints == null || editConstraints.equals(otherEditDs.getEditConstraints());
         }
         return true;
     }
@@ -257,9 +253,7 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
             if (!getInfoList().equals(otherMetaDs.getInfoList())) {
                 return false;
             }
-            if (!getMetaInfo().equals(otherMetaDs.getMetaInfo())) {
-                return false;
-            }
+            return getMetaInfo().equals(otherMetaDs.getMetaInfo());
         }
         return true;
     }
@@ -493,12 +487,12 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
             return 0;
         }
 
-        if (x < this.getAxisDescription(dimIndex).getMin()) {
+        if (x <= this.getAxisDescription(dimIndex).getMin()) {
             return 0;
         }
 
         final int lastIndex = getDataCount(dimIndex) - 1;
-        if (x > this.getAxisDescription(dimIndex).getMax()) {
+        if (x >= this.getAxisDescription(dimIndex).getMax()) {
             return lastIndex;
         }
 
