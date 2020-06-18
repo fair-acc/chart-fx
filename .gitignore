@@ -15,6 +15,12 @@ local.properties
 .settings/
 .loadpath
 .recommenders
+.project
+.pmd
+
+### IntelliJ ###
+/.idea/
+*.iml
 
 # External tool builders
 .externalToolBuilders/
@@ -155,3 +161,4 @@ $RECYCLE.BIN/
 
 # intermediated scan results for coverity
 /*.tgz
+
