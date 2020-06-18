@@ -7,8 +7,6 @@ import static de.gsi.dataset.DataSet.DIM_Z;
 import java.util.Arrays;
 
 import org.jtransforms.fft.DoubleFFT_1D;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import de.gsi.dataset.DataSet;
 import de.gsi.dataset.spi.DataSetBuilder;
@@ -100,7 +98,7 @@ public class ShortTimeFourierTransform {
         final double[] oldFrequencyAxis = output == null ? null : output.getValues(DIM_Y);
         final double[] frequencyAxis = getFrequencyAxisComplex(dt, nFFT, oldFrequencyAxis);
         final double[] oldAmplitudeData = output instanceof MultiDimDoubleDataSet
-                                                  ? ((MultiDimDoubleDataSet) output).getValues(DIM_Z)
+                                                  ? output.getValues(DIM_Z)
                                                   : null;
         final double[] amplitudeData = complex(real, imag, oldAmplitudeData, nFFT, step, apodization, padding, dbScale,
                 truncateDCNy);
@@ -316,7 +314,7 @@ public class ShortTimeFourierTransform {
         final double[] oldFrequencyAxis = output == null ? null : output.getValues(DIM_Y);
         final double[] frequencyAxis = getFrequencyAxisReal(dt, nFFT, oldFrequencyAxis);
         final double[] oldAmplitudeData = output instanceof MultiDimDoubleDataSet
-                                                  ? ((MultiDimDoubleDataSet) output).getValues(DIM_Z)
+                                                  ? output.getValues(DIM_Z)
                                                   : null;
         final double[] amplitudeData = real(yData, oldAmplitudeData, nFFT, step, apodization, padding, dbScale,
                 truncateDCNy);
@@ -416,6 +414,6 @@ public class ShortTimeFourierTransform {
     public enum Padding {
         ZERO,
         ZOH,
-        MIRROR;
+        MIRROR
     }
 }

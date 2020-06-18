@@ -46,9 +46,9 @@ public class DataSetBuilderTests {
                                         .setAxisUnit(DIM_Y, "norris") //
                                         .setAxisMin(DIM_Y, -2) //
                                         .setAxisMax(DIM_Y, 25) //
-                                        .setMetaErrorList(new String[] { "no connection to device", "error reading config" })
-                                        .setMetaInfoList(new String[0])
-                                        .setMetaWarningList(new String[] { "overrange" })
+                                        .setMetaErrorList("no connection to device", "error reading config")
+                                        .setMetaInfoList()
+                                        .setMetaWarningList("overrange")
                                         .setMetaInfoMap(Map.of("someParameter", "5"))
                                         .build();
         assertEquals("testdataset", dataset.getName());
@@ -83,10 +83,10 @@ public class DataSetBuilderTests {
     public void testLegacySetters() {
         final DataSet dataset = new DataSetBuilder() //
                                         .setName("testdataset") //
-                                        .setXValues(new double[] { 1, 2, 3 }) //
-                                        .setYValues(new double[] { 1.337, 23.42, 0.0 }) //
-                                        .setYPosError(new double[] { 0.1, 0.2, 0.1 }) //
-                                        .setYNegError(new double[] { 0.1, 0.2, 0.1 }) //
+                                        .setValues(DIM_X, new double[] { 1, 2, 3 }) //
+                                        .setValues(DIM_Y, new double[] { 1.337, 23.42, 0.0 }) //
+                                        .setPosError(DIM_Y, new double[] { 0.1, 0.2, 0.1 }) //
+                                        .setNegError(DIM_Y, new double[] { 0.1, 0.2, 0.1 }) //
                                         .build();
         assertEquals("testdataset", dataset.getName());
         assertEquals(3, dataset.getDataCount());
@@ -107,10 +107,10 @@ public class DataSetBuilderTests {
         // noCopy
         final DataSet dataset3 = new DataSetBuilder() //
                                          .setName("testdataset") //
-                                         .setXValuesNoCopy(new double[] { 1, 2, 3 }) //
-                                         .setYValuesNoCopy(new double[] { 1.337, 23.42, 0.0 }) //
-                                         .setYPosErrorNoCopy(new double[] { 0.1, 0.2, 0.1 }) //
-                                         .setYNegErrorNoCopy(new double[] { 0.1, 0.2, 0.1 }) //
+                                         .setValuesNoCopy(DIM_X, new double[] { 1, 2, 3 }) //
+                                         .setValuesNoCopy(DIM_Y, new double[] { 1.337, 23.42, 0.0 }) //
+                                         .setPosErrorNoCopy(DIM_Y, new double[] { 0.1, 0.2, 0.1 }) //
+                                         .setNegErrorNoCopy(DIM_Y, new double[] { 0.1, 0.2, 0.1 }) //
                                          .build();
         assertEquals("testdataset", dataset3.getName());
         assertEquals(3, dataset3.getDataCount());
@@ -130,17 +130,17 @@ public class DataSetBuilderTests {
         assertEquals(ErrorType.ASYMMETRIC, errordataset3.getErrorType(DIM_Y));
         // unsupported X errors
         assertThrows(UnsupportedOperationException.class, () -> {
-            new DataSetBuilder().setXPosError(new double[] { 0.0, 3 }).setXNegError(new double[] { 1, 2 }).setDimension(2).build();
+            new DataSetBuilder().setPosError(DIM_X, new double[] { 0.0, 3 }).setNegError(DIM_X, new double[] { 1, 2 }).setDimension(2).build();
         });
         assertThrows(UnsupportedOperationException.class, () -> {
-            new DataSetBuilder().setXPosErrorNoCopy(new double[] { 0.0, 3 }).setXNegErrorNoCopy(new double[] { 1, 2 }).setDimension(2).build();
+            new DataSetBuilder().setPosErrorNoCopy(DIM_X, new double[] { 0.0, 3 }).setNegErrorNoCopy(DIM_X, new double[] { 1, 2 }).setDimension(2).build();
         });
 
         // 3D
         final DataSet dataset2 = new DataSetBuilder() //
                                          .setName("testdataset") //
-                                         .setXValuesNoCopy(new double[] { 1, 2, 3 }) //
-                                         .setYValuesNoCopy(new double[] { 1.337, 23.42 }) //
+                                         .setValuesNoCopy(DIM_X, new double[] { 1, 2, 3 }) //
+                                         .setValuesNoCopy(DIM_Y, new double[] { 1.337, 23.42 }) //
                                          .setValues(DIM_Z, new double[][] { { 1, 2, 3 }, { 4, 5, 6 } }) //
                                          .build();
         assertEquals("testdataset", dataset2.getName());

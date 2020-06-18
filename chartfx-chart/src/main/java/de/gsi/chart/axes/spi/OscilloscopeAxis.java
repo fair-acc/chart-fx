@@ -319,7 +319,7 @@ public class OscilloscopeAxis extends AbstractAxis implements Axis {
      * reinitialises clamped range based on {@link #getMin()}, {@link #getMax()}, {@link #getMinRange()} and {@link #getMaxRange()}.
      */
     protected void recomputeClamedRange() {
-    	final AxisRange effectiveRange = getRange();
+        final AxisRange effectiveRange = getRange();
         clampedRange.set(getMinRange());
         if (getMaxRange().isMaxDefined()) {
             clampedRange.add(Math.min(effectiveRange.getMax(), getMaxRange().getMax()));
@@ -358,7 +358,7 @@ public class OscilloscopeAxis extends AbstractAxis implements Axis {
             @SuppressWarnings("unchecked")
             @Override
             public StyleableProperty<Number> getStyleableProperty(final OscilloscopeAxis n) {
-                return (StyleableProperty<Number>) n.centerAxisPositionProperty();
+                return (StyleableProperty<Number>) n.axisCenterPositionProperty();
             }
 
             @Override

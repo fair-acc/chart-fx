@@ -111,7 +111,7 @@ public class ProfilerInfoBoxTests {
         assertThrows(IllegalArgumentException.class, () -> new SimplePerformanceMeter(null, 20));
         final SimplePerformanceMeter meter = new SimplePerformanceMeter(scene, 20);
 
-        assertDoesNotThrow(() -> meter.getProcessCpuLoadInternal());
+        assertDoesNotThrow(() -> SimplePerformanceMeter.getProcessCpuLoadInternal());
         assertDoesNotThrow(() -> meter.isSceneDirty());
         assertDoesNotThrow(() -> meter.getActualFrameRate());
         assertDoesNotThrow(() -> meter.getAverageFrameRate());
@@ -119,8 +119,6 @@ public class ProfilerInfoBoxTests {
         assertDoesNotThrow(() -> meter.getAverageProcessCpuLoad());
         assertDoesNotThrow(() -> meter.getAverageSystemCpuLoad());
         assertDoesNotThrow(() -> meter.getFxFrameRate());
-        assertDoesNotThrow(() -> meter.getMaxProcessCpuLoad());
-        assertDoesNotThrow(() -> meter.getMinProcessCpuLoad());
         assertDoesNotThrow(() -> meter.getProcessCpuLoad());
         assertDoesNotThrow(() -> meter.getSystemCpuLoad());
         assertDoesNotThrow(() -> meter.resetAverages());
@@ -131,8 +129,6 @@ public class ProfilerInfoBoxTests {
         assertNotNull(meter.averageFxFrameRateProperty());
         assertNotNull(meter.averageProcessCpuLoadProperty());
         assertNotNull(meter.averageSystemCpuLoadProperty());
-        assertNotNull(meter.maxProcessCpuLoadProperty());
-        assertNotNull(meter.minProcessCpuLoadProperty());
 
         assertDoesNotThrow(() -> meter.deregisterListener());
         assertDoesNotThrow(() -> meter.deregisterListener());

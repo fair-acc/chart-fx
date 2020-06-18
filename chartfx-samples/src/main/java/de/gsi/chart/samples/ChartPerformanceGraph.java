@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -69,7 +70,7 @@ public class ChartPerformanceGraph extends Application {
         InputStream inputStream = ChartPerformanceGraph.class.getResourceAsStream(fileName);
         DoubleDataSet dataSet = new DoubleDataSet(fileName.replace(".csv", ""));
 
-        try (BufferedReader csvReader = new BufferedReader(new InputStreamReader(inputStream, "UTF-8"))) {
+        try (BufferedReader csvReader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
             int lineCount = 0;
             String row;
             while ((row = csvReader.readLine()) != null) {
@@ -82,7 +83,7 @@ public class ChartPerformanceGraph extends Application {
 
                 final String[] data = row.split(",");
                 // quick hack, we know that the data has the format of
-                // JavaFx-Chart, ErrorDataSetRenderer, and Reducing LineRenderer each with (n-samples,cpu) tuples
+                // JavaFx-Chart, ErrorDataSetRenderer, and ReducingLineRenderer each with (n-samples,cpu) tuples
                 if (data[3] == null || data[4] == null) {
                     break;
                 }

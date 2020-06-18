@@ -81,7 +81,6 @@ public class DataSetMeasurementsTests {
 
         assertNotNull(field.getDataSet());
         assertNotNull(field.getDataViewWindow());
-        assertNotNull(field.getDisplayPane());
         assertNotNull(field.valueProperty());
         assertNotNull(field.getTitle());
         assertEquals(MeasurementType.FFT_DB_RANGED.getName(), field.getTitle());

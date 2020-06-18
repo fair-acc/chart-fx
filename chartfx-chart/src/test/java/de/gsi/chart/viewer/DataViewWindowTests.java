@@ -38,10 +38,10 @@ public class DataViewWindowTests {
     @Start
     public void start(Stage stage) {
         assertDoesNotThrow(() -> new DataViewWindow("window name", new Pane()));
-        assertDoesNotThrow(() -> new DataViewWindow("window name", new Pane(), true, true));
-        assertDoesNotThrow(() -> new DataViewWindow("window name", new Pane(), true, false));
-        assertDoesNotThrow(() -> new DataViewWindow("window name", new Pane(), false, true));
-        assertDoesNotThrow(() -> new DataViewWindow("window name", new Pane(), false, false));
+        assertDoesNotThrow(() -> new DataViewWindow("window name", new Pane(), WindowDecoration.BAR));
+        assertDoesNotThrow(() -> new DataViewWindow("window name", new Pane(), WindowDecoration.FRAME));
+        assertDoesNotThrow(() -> new DataViewWindow("window name", new Pane(), WindowDecoration.BAR_WO_CLOSE));
+        assertDoesNotThrow(() -> new DataViewWindow("window name", new Pane(), WindowDecoration.NONE));
         assertThrows(IllegalArgumentException.class, () -> new DataViewWindow("window name", null));
 
         content = new Label("test content");
@@ -89,7 +89,6 @@ public class DataViewWindowTests {
             case NONE:
             case FRAME:
                 assertFalse(field.getChildren().contains(field.getWindowDecorationBar()), "NONE/FRAME: content in children list");
-                assertFalse(field.isWindowDecorationVisible());
                 break;
             case BAR:
                 assertTrue(field.getChildren().contains(field.getWindowDecorationBar()), "BAR: content in children list");
@@ -97,7 +96,6 @@ public class DataViewWindowTests {
                 assertTrue(field.getRightIcons().contains(field.getMinimizeButton()), "BAR: min button present");
                 assertTrue(field.getRightIcons().contains(field.getMaximizeRestoreButton()), "BAR: max/restore button present");
                 assertTrue(field.getRightIcons().contains(field.getCloseButton()), "BAR: close button present");
-                assertTrue(field.isWindowDecorationVisible());
                 break;
             case BAR_WO_CLOSE:
                 assertTrue(field.getChildren().contains(field.getWindowDecorationBar()), "BAR: content in children list");
@@ -105,7 +103,6 @@ public class DataViewWindowTests {
                 assertTrue(field.getRightIcons().contains(field.getMinimizeButton()), "BAR: min button present");
                 assertTrue(field.getRightIcons().contains(field.getMaximizeRestoreButton()), "BAR: max/restore button present");
                 assertFalse(field.getRightIcons().contains(field.getCloseButton()), "BAR: close button present");
-                assertTrue(field.isWindowDecorationVisible());
                 break;
             default:
 
