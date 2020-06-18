@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 import de.gsi.dataset.DataSet;
 import de.gsi.dataset.spi.DefaultDataSet;
 import de.gsi.dataset.spi.DefaultErrorDataSet;
-import de.gsi.math.TMath;
 import de.gsi.math.TMathConstants;
 import de.gsi.math.fitter.NonLinearRegressionFitter;
 import de.gsi.math.functions.AbstractFunction1D;

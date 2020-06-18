@@ -44,7 +44,6 @@ public class CategoryAxisSample extends Application {
         // set them false to make the plot faster
         lineChartPlot.setAnimated(false);
         lineChartPlot.getRenderers().clear();
-        // lineChartPlot.getRenderers().add(new LineRenderer());
         // lineChartPlot.getRenderers().add(new ReducingLineRenderer());
         final ErrorDataSetRenderer renderer = new ErrorDataSetRenderer();
         renderer.setPolyLineStyle(LineStyle.NORMAL);

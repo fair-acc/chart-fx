@@ -41,9 +41,7 @@ public class SimplePerformanceMeter {
     private final DoubleProperty trackerFrameRate = new SimpleDoubleProperty(this, "trackerFrameRate", 0);
     private final DoubleProperty avgTrackerFrameRate = new SimpleDoubleProperty(this, "avgTrackerFrameRate", 0);
     private final DoubleProperty processCpuLoad = new SimpleDoubleProperty(this, "processCpuLoad", 0);
-    private final DoubleProperty minProcessCpuLoad = new SimpleDoubleProperty(this, "minProcessCpuLoad", -1);
     private final DoubleProperty avgProcessCpuLoad = new SimpleDoubleProperty(this, "avgProcessCpuLoad", -1);
-    private final DoubleProperty maxProcessCpuLoad = new SimpleDoubleProperty(this, "maxProcessCpuLoad", -1);
     private final DoubleProperty systemCpuLoad = new SimpleDoubleProperty(this, "systemCpuLoad", 0);
     private final DoubleProperty avgSystemCpuLoad = new SimpleDoubleProperty(this, "avgSystemCpuLoad", -1);
     private double pulseRateInternal;
@@ -169,32 +167,12 @@ public class SimplePerformanceMeter {
         return fxFrameRateProperty().get();
     }
 
-    @Deprecated
-    public double getMaxProcessCpuLoad() {
-        return minProcessCpuLoadProperty().get();
-    }
-
-    @Deprecated
-    public double getMinProcessCpuLoad() {
-        return minProcessCpuLoadProperty().get();
-    }
-
     public double getProcessCpuLoad() {
         return processCpuLoadProperty().get();
     }
 
     public double getSystemCpuLoad() {
         return systemCpuLoadProperty().get();
-    }
-
-    @Deprecated // remove for next x.2.y release
-    public ReadOnlyDoubleProperty maxProcessCpuLoadProperty() {
-        return maxProcessCpuLoad;
-    }
-
-    @Deprecated // remove for next x.2.y release
-    public ReadOnlyDoubleProperty minProcessCpuLoadProperty() {
-        return minProcessCpuLoad;
     }
 
     public ReadOnlyDoubleProperty processCpuLoadProperty() {
@@ -263,18 +241,6 @@ public class SimplePerformanceMeter {
         avgProcessCpuLoad.set(cpuLoadProcessAvgInternal);
         systemCpuLoad.set(cpuLoadSystemInternal);
         avgSystemCpuLoad.set(cpuLoadSystemAvgInternal);
-
-        // TODO: following methods are deprecated and will be removed for x.2.y
-        if (minProcessCpuLoad.get() < 0) {
-            minProcessCpuLoad.set(processCpuLoad.get());
-        } else {
-            minProcessCpuLoad.set(Math.min(minProcessCpuLoad.get(), processCpuLoad.get()));
-        }
-        if (maxProcessCpuLoad.get() < 0) {
-            maxProcessCpuLoad.set(processCpuLoad.get());
-        } else {
-            maxProcessCpuLoad.set(Math.max(maxProcessCpuLoad.get(), processCpuLoad.get()));
-        }
     }
 
     public boolean isSceneDirty() {

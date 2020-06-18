@@ -716,7 +716,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         final double axisLabelGap = getAxisLabelGap();
 
         // for relative positioning of axes drawn on top of the main canvas
-        final double axisCentre = getCenterAxisPosition();
+        final double axisCentre = getAxisCenterPosition();
         double labelPosition;
         double labelGap;
         switch (axisName.getTextAlignment()) {
@@ -816,7 +816,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         final double paddingX = getSide().isHorizontal() ? getAxisPadding() : 0.0;
         final double paddingY = getSide().isVertical() ? getAxisPadding() : 0.0;
         // for relative positioning of axes drawn on top of the main canvas
-        final double axisCentre = getCenterAxisPosition();
+        final double axisCentre = getAxisCenterPosition();
 
         // save css-styled line parameters
         final Path tickStyle = getMajorTickStyle();
@@ -885,7 +885,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         final double paddingX = getSide().isHorizontal() ? getAxisPadding() : 0.0;
         final double paddingY = getSide().isVertical() ? getAxisPadding() : 0.0;
         // for relative positioning of axes drawn on top of the main canvas
-        final double axisCentre = getCenterAxisPosition();
+        final double axisCentre = getAxisCenterPosition();
         final AxisLabelOverlapPolicy overlapPolicy = getOverlapPolicy();
         final double tickLabelGap = getTickLabelGap();
 
@@ -1075,7 +1075,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         final double paddingX = getSide().isHorizontal() ? getAxisPadding() : 0.0;
         final double paddingY = getSide().isVertical() ? getAxisPadding() : 0.0;
         // for relative positioning of axes drawn on top of the main canvas
-        final double axisCentre = getCenterAxisPosition();
+        final double axisCentre = getAxisCenterPosition();
 
         gc.save();
         // save css-styled line parameters

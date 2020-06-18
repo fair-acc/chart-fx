@@ -272,11 +272,6 @@ public class DataViewWindow extends BorderPane implements EventSource {
         this(name, content, WindowDecoration.BAR);
     }
 
-    @Deprecated
-    public DataViewWindow(final String name, final Node content, final boolean windowDecorationsVisible, final boolean addCloseButton) {
-        this(name, content, windowDecorationsVisible ? (addCloseButton ? WindowDecoration.BAR : WindowDecoration.BAR_WO_CLOSE) : WindowDecoration.NONE);
-    }
-
     public DataViewWindow(final String name, final Node content, final WindowDecoration windowDecoration) {
         if (content == null) {
             throw new IllegalArgumentException("content must not be null");
@@ -552,11 +547,6 @@ public class DataViewWindow extends BorderPane implements EventSource {
         return restoredProperty().get();
     }
 
-    @Deprecated
-    public boolean isWindowDecorationVisible() {
-        return !(WindowDecoration.NONE == windowDecorationProperty().get() || WindowDecoration.FRAME == windowDecorationProperty().get());
-    }
-
     public BooleanProperty maximisedProperty() {
         return maximisedWindow;
     }
@@ -638,11 +628,6 @@ public class DataViewWindow extends BorderPane implements EventSource {
 
     public void setWindowDecoration(final WindowDecoration state) {
         windowDecorationProperty().set(state);
-    }
-
-    @Deprecated
-    public void setWindowDecorationVisible(final boolean state) {
-        windowDecorationProperty().set(state ? WindowDecoration.BAR : WindowDecoration.NONE);
     }
 
     @Override
@@ -772,14 +757,14 @@ public class DataViewWindow extends BorderPane implements EventSource {
         NONE, // w/o any decoration
         BAR, // classic window title bar with title label and min, max, close and detach buttons
         BAR_WO_CLOSE, // classic window title bar w/o close buttons
-        FRAME; // decoration and window title as frame label
+        FRAME // decoration and window title as frame label
     }
 
     public enum WindowState {
         WINDOW_RESTORED, // normal state
         WINDOW_MINIMISED, // minimised window
         WINDOW_MAXIMISED, // maximised window
-        WINDOW_CLOSED; // closed and final window state
+        WINDOW_CLOSED // closed and final window state
     }
 
     protected static class ExternalStage extends Stage {

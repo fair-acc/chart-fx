@@ -109,7 +109,7 @@ public abstract class AbstractValueIndicator extends ChartPlugin {
     }
 
     private void addAxisListener() {
-        final Axis valueAxis = getNumericAxis();
+        final Axis valueAxis = getAxis();
         valueAxis.minProperty().addListener(axisBoundsListener);
         valueAxis.maxProperty().addListener(axisBoundsListener);
     }
@@ -148,7 +148,7 @@ public abstract class AbstractValueIndicator extends ChartPlugin {
                 break;
             }
         }
-        return instanceIndex < 0 ? 0 : instanceIndex;
+        return Math.max(instanceIndex, 0);
     }
 
     /**
@@ -167,16 +167,6 @@ public abstract class AbstractValueIndicator extends ChartPlugin {
      */
     public final VPos getLabelVerticalAnchor() {
         return labelVerticalAnchorProperty().get();
-    }
-
-    /**
-     * Returns the Axis that this indicator is associated with.
-     *
-     * @return associated Axis
-     */
-    @Deprecated
-    protected Axis getNumericAxis() {
-        return axis;
     }
 
     /**
@@ -274,7 +264,7 @@ public abstract class AbstractValueIndicator extends ChartPlugin {
     }
 
     private void removeAxisListener() {
-        final Axis valueAxis = getNumericAxis();
+        final Axis valueAxis = getAxis();
         valueAxis.minProperty().removeListener(axisBoundsListener);
         valueAxis.maxProperty().removeListener(axisBoundsListener);
     }
@@ -350,7 +340,7 @@ public abstract class AbstractValueIndicator extends ChartPlugin {
     public abstract void updateStyleClass();
 
     // records relative x and y co-ordinates.
-    protected class Delta {
+    protected static class Delta {
         protected double x;
         protected double y;
     }
