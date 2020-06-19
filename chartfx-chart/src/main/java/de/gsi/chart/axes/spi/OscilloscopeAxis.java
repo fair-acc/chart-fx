@@ -10,9 +10,7 @@ import java.util.TreeSet;
 import javafx.beans.property.DoubleProperty;
 import javafx.css.CssMetaData;
 import javafx.css.Styleable;
-import javafx.css.StyleableProperty;
-import javafx.css.converter.SizeConverter;
-import javafx.scene.layout.Region;
+import javafx.css.StyleableDoubleProperty;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,7 +21,7 @@ import de.gsi.chart.axes.LogAxisType;
 import de.gsi.chart.axes.TickUnitSupplier;
 import de.gsi.chart.axes.spi.format.DefaultTickUnitSupplier;
 import de.gsi.chart.axes.spi.transforms.DefaultAxisTransform;
-import de.gsi.chart.ui.css.StylishDoubleProperty;
+import de.gsi.chart.ui.css.CssPropertyFactory;
 import de.gsi.dataset.spi.DataRange;
 
 /**
@@ -45,6 +43,7 @@ import de.gsi.dataset.spi.DataRange;
  */
 public class OscilloscopeAxis extends AbstractAxis implements Axis {
     private static final Logger LOGGER = LoggerFactory.getLogger(OscilloscopeAxis.class);
+    private static final CssPropertyFactory<OscilloscopeAxis> CSS = new CssPropertyFactory<>(AbstractAxisParameter.getClassCssMetaData());
     private static final int DEFAULT_RANGE_LENGTH = 1; // default min min length
     private static final int TICK_COUNT = 10; // by convention
     public static final SortedSet<Number> DEFAULT_MULTIPLIERS1 = Collections.unmodifiableSortedSet(new TreeSet<>(Arrays.asList(1.0, 2.0, 5.0)));
@@ -56,13 +55,10 @@ public class OscilloscopeAxis extends AbstractAxis implements Axis {
 
     private final DataRange minRange = new DataRange();
     private final DataRange maxRange = new DataRange();
-    private final DoubleProperty axisZeroPosition = new StylishDoubleProperty(StyleableProperties.CENTER_AXIS_POSITION, this, "centerAxisPosition", 0.5, this::requestAxisLayout) {
-        @Override
-        public void set(final double value) {
-            super.set(Math.max(0.0, Math.min(value, 1.0)));
-        }
-    };
-    private final DoubleProperty axisZeroValue = new StylishDoubleProperty(StyleableProperties.CENTER_AXIS_VALUE, this, "axisZeroValue", 0.0, this::requestAxisLayout);
+    private final DoubleProperty axisZeroPosition = CSS.createDoubleProperty(this, "centerAxisPosition", "-fx-centre-axis-zero-position",
+            s -> (StyleableDoubleProperty) s.centerAxisZeroPositionProperty(), 0.5, true, (oldVal, newVal) -> Math.max(0.0, Math.min(newVal, 1.0)), this::requestAxisLayout);
+    private final DoubleProperty axisZeroValue = CSS.createDoubleProperty(this, "axisZeroValue", "-fx-centre-axis-zero-value",
+            s -> (StyleableDoubleProperty) s.axisZeroValueProperty(), 0.0, true, null, this::requestAxisLayout);
     private final Cache cache = new Cache();
     private double offset;
     protected boolean isUpdating = true;
@@ -316,7 +312,8 @@ public class OscilloscopeAxis extends AbstractAxis implements Axis {
     }
 
     /**
-     * reinitialises clamped range based on {@link #getMin()}, {@link #getMax()}, {@link #getMinRange()} and {@link #getMaxRange()}.
+     * reinitialises clamped range based on {@link #getMin()}, {@link #getMax()}, {@link #getMinRange()} and
+     * {@link #getMaxRange()}.
      */
     protected void recomputeClamedRange() {
         final AxisRange effectiveRange = getRange();
@@ -342,7 +339,7 @@ public class OscilloscopeAxis extends AbstractAxis implements Axis {
      * @return The CssMetaData associated with this class, which may include the CssMetaData of its super classes.
      */
     public static List<CssMetaData<? extends Styleable, ?>> getClassCssMetaData() {
-        return StyleableProperties.STYLEABLES;
+        return CSS.getCssMetaData();
     }
 
     protected static double getEffectiveRange(final double min, final double max) {
@@ -351,42 +348,6 @@ public class OscilloscopeAxis extends AbstractAxis implements Axis {
             effectiveRange = DEFAULT_RANGE_LENGTH;
         }
         return effectiveRange;
-    }
-
-    private static class StyleableProperties {
-        private static final CssMetaData<OscilloscopeAxis, Number> CENTER_AXIS_POSITION = new CssMetaData<>("-fx-centre-axis-zero-position", SizeConverter.getInstance(), 0.5) {
-            @SuppressWarnings("unchecked")
-            @Override
-            public StyleableProperty<Number> getStyleableProperty(final OscilloscopeAxis n) {
-                return (StyleableProperty<Number>) n.axisCenterPositionProperty();
-            }
-
-            @Override
-            public boolean isSettable(final OscilloscopeAxis n) {
-                return (n != null) && !n.axisZeroPosition.isBound();
-            }
-        };
-
-        private static final CssMetaData<OscilloscopeAxis, Number> CENTER_AXIS_VALUE = new CssMetaData<>("-fx-centre-axis-zero-value", SizeConverter.getInstance(), 0.5) {
-            @SuppressWarnings("unchecked")
-            @Override
-            public StyleableProperty<Number> getStyleableProperty(final OscilloscopeAxis n) {
-                return (StyleableProperty<Number>) n.axisZeroValueProperty();
-            }
-
-            @Override
-            public boolean isSettable(final OscilloscopeAxis n) {
-                return (n != null) && !n.axisZeroValue.isBound();
-            }
-        };
-
-        private static final List<CssMetaData<? extends Styleable, ?>> STYLEABLES;
-        static {
-            final List<CssMetaData<? extends Styleable, ?>> styleables = new ArrayList<>(Region.getClassCssMetaData());
-            styleables.add(StyleableProperties.CENTER_AXIS_POSITION);
-            styleables.add(StyleableProperties.CENTER_AXIS_VALUE);
-            STYLEABLES = Collections.unmodifiableList(styleables);
-        }
     }
 
     protected class Cache {

@@ -340,7 +340,7 @@ public interface Axis extends AxisDescription, EventSource {
     /**
      * @return the primary unit name property
      */
-    ObjectProperty<String> unitProperty();
+    StringProperty unitProperty();
 
     /**
      * @return the primary unit label property
