@@ -28,8 +28,8 @@ public class RunChartSamples extends Application {
     private final String userHome = System.getProperty("user.home");
     private final Path path = Paths.get(userHome + "/ChartSamples");
 
-    private Stage stage = new Stage();
-    private CheckBox makeScreenShot = new CheckBox("make screenshot to home directory");
+    private final Stage stage = new Stage();
+    private final CheckBox makeScreenShot = new CheckBox("make screenshot to home directory");
 
     @Override
     public void start(final Stage primaryStage) {
