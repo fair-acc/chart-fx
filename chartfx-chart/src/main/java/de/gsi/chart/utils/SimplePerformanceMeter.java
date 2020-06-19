@@ -24,7 +24,7 @@ import javafx.scene.Scene;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sun.javafx.perf.PerformanceTracker; // keep for the future in case this becomes public API
+// import com.sun.javafx.perf.PerformanceTracker; // keep for the future in case this becomes public API
 import com.sun.management.OperatingSystemMXBean;
 
 public class SimplePerformanceMeter {
@@ -58,7 +58,7 @@ public class SimplePerformanceMeter {
     private final Field dirtyRootBits;
     private final Field dirtyNodesSize;
     private final long updateDuration;
-    private final PerformanceTracker fxPerformanceTracker; // keep for the future in case this becomes public
+    // private final PerformanceTracker fxPerformanceTracker; // keep for the future in case this becomes public
     private Timer timer;
     private final AnimationTimer animationTimer;
     private long timerIterationLast = System.currentTimeMillis();
@@ -76,7 +76,7 @@ public class SimplePerformanceMeter {
         }
         this.scene = scene;
         this.updateDuration = Math.max(MIN_UPDATE_PERIOD, Math.min(updateDuration, MAX_UPDATE_PERIOD));
-        fxPerformanceTracker = PerformanceTracker.getSceneTracker(scene); // keep for the future in case this becomes public
+        // fxPerformanceTracker = PerformanceTracker.getSceneTracker(scene); // keep for the future in case this becomes public
 
         animationTimer = new AnimationTimer() {
             @Override
@@ -215,8 +215,8 @@ public class SimplePerformanceMeter {
                 pulseRateInternal = diff > 0 ? pulseCount / diff : -1;
                 frameRateInternal = diff > 0 ? frameCount / diff : -1;
                 // alt via fxPerformanceTracker - keep for the future in case this becomes public
-                pulseRateInternal = fxPerformanceTracker.getInstantPulses();
-                frameRateInternal = fxPerformanceTracker.getInstantFPS();
+                // pulseRateInternal = fxPerformanceTracker.getInstantPulses();
+                // frameRateInternal = fxPerformanceTracker.getInstantFPS();
 
                 cpuLoadProcessInternal = OS_BEAN.getProcessCpuLoad() * 100 * N_CORES;
                 cpuLoadSystemInternal = OS_BEAN.getSystemCpuLoad() * 100 * N_CORES;
