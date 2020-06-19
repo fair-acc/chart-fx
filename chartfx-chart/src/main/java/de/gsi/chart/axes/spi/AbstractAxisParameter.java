@@ -1,6 +1,5 @@
 package de.gsi.chart.axes.spi;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -20,16 +19,14 @@ import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.css.CssMetaData;
-import javafx.css.FontCssMetaData;
 import javafx.css.PseudoClass;
-import javafx.css.SimpleStyleableDoubleProperty;
+import javafx.css.StyleConverter;
 import javafx.css.Styleable;
-import javafx.css.StyleableObjectProperty;
+import javafx.css.StyleableBooleanProperty;
+import javafx.css.StyleableDoubleProperty;
+import javafx.css.StyleableIntegerProperty;
 import javafx.css.StyleableProperty;
-import javafx.css.converter.BooleanConverter;
-import javafx.css.converter.EnumConverter;
-import javafx.css.converter.PaintConverter;
-import javafx.css.converter.SizeConverter;
+import javafx.css.StyleableStringProperty;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
@@ -43,11 +40,7 @@ import javafx.util.StringConverter;
 import de.gsi.chart.Chart;
 import de.gsi.chart.axes.Axis;
 import de.gsi.chart.axes.AxisLabelOverlapPolicy;
-import de.gsi.chart.ui.css.StylishBooleanProperty;
-import de.gsi.chart.ui.css.StylishDoubleProperty;
-import de.gsi.chart.ui.css.StylishIntegerProperty;
-import de.gsi.chart.ui.css.StylishObjectProperty;
-import de.gsi.chart.ui.css.StylishStringProperty;
+import de.gsi.chart.ui.css.CssPropertyFactory;
 import de.gsi.chart.ui.geometry.Side;
 import de.gsi.dataset.event.AxisChangeEvent;
 import de.gsi.dataset.event.EventListener;
@@ -63,13 +56,14 @@ import de.gsi.dataset.utils.NoDuplicatesList;
  */
 public abstract class AbstractAxisParameter extends Pane implements Axis {
     private static final String CHART_CSS = Chart.class.getResource("chart.css").toExternalForm();
+    private static final CssPropertyFactory<AbstractAxisParameter> CSS = new CssPropertyFactory<>(Region.getClassCssMetaData());
     private static final int MAX_TICK_COUNT = 20;
     private static final double DEFAULT_MIN_RANGE = -1.0;
     private static final double DEFAULT_MAX_RANGE = +1.0;
     private static final double DEFAULT_TICK_UNIT = +5d;
 
     // N.B. number of divisions, minor tick mark is not drawn if minorTickMark
-    // == majorTickMark
+    // == majorTickMarkd
     protected static final int DEFAULT_MINOR_TICK_COUNT = 10;
     /** pseudo-class indicating this is a vertical Top side Axis. */
     private static final PseudoClass TOP_PSEUDOCLASS_STATE = PseudoClass.getPseudoClass("top");
@@ -109,14 +103,10 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     protected double oldTickUnit = -Double.MAX_VALUE;
 
     protected BooleanProperty valid = new SimpleBooleanProperty(this, "valid", false);
-    protected final ObservableList<Double> majorTickMarkValues = FXCollections
-                                                                         .observableArrayList(new NoDuplicatesList<Double>());
-    protected final ObservableList<Double> minorTickMarkValues = FXCollections
-                                                                         .observableArrayList(new NoDuplicatesList<Double>());
-    protected final ObservableList<TickMark> majorTickMarks = FXCollections
-                                                                      .observableArrayList(new NoDuplicatesList<TickMark>());
-    protected final ObservableList<TickMark> minorTickMarks = FXCollections
-                                                                      .observableArrayList(new NoDuplicatesList<TickMark>());
+    protected final ObservableList<Double> majorTickMarkValues = FXCollections.observableArrayList(new NoDuplicatesList<Double>());
+    protected final ObservableList<Double> minorTickMarkValues = FXCollections.observableArrayList(new NoDuplicatesList<Double>());
+    protected final ObservableList<TickMark> majorTickMarks = FXCollections.observableArrayList(new NoDuplicatesList<TickMark>());
+    protected final ObservableList<TickMark> minorTickMarks = FXCollections.observableArrayList(new NoDuplicatesList<TickMark>());
 
     /** if available (last) auto-range that has been computed */
     private final AxisRange autoRange = new AxisRange();
@@ -128,113 +118,68 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
      * The side of the plot which this axis is being drawn on default axis orientation is BOTTOM, can be set latter to
      * another side
      */
-    private final ObjectProperty<Side> side = new StyleableObjectProperty<>(Side.BOTTOM) {
-        @Override
-        public Object getBean() {
-            return AbstractAxisParameter.this;
-        }
+    private final ObjectProperty<Side> side = CSS.createObjectProperty(this, "side", "-fx-side", s -> (StyleableProperty<Side>) s.sideProperty(), Side.BOTTOM, true, null, edge -> {
+        // cause refreshTickMarks
+        pseudoClassStateChanged(AbstractAxisParameter.TOP_PSEUDOCLASS_STATE, edge == Side.TOP);
+        pseudoClassStateChanged(AbstractAxisParameter.RIGHT_PSEUDOCLASS_STATE, edge == Side.RIGHT);
+        pseudoClassStateChanged(AbstractAxisParameter.BOTTOM_PSEUDOCLASS_STATE, edge == Side.BOTTOM);
+        pseudoClassStateChanged(AbstractAxisParameter.LEFT_PSEUDOCLASS_STATE, edge == Side.LEFT);
+        pseudoClassStateChanged(AbstractAxisParameter.CENTRE_HOR_PSEUDOCLASS_STATE, edge == Side.CENTER_HOR);
+        pseudoClassStateChanged(AbstractAxisParameter.CENTRE_VER_PSEUDOCLASS_STATE, edge == Side.CENTER_VER);
 
-        @Override
-        public CssMetaData<AbstractAxisParameter, Side> getCssMetaData() {
-            return StyleableProperties.SIDE;
-        }
-
-        @Override
-        public String getName() {
-            return "side";
-        }
-
-        @Override
-        protected void invalidated() {
-            // cause refreshTickMarks
-            final Side edge = get();
-            pseudoClassStateChanged(AbstractAxisParameter.TOP_PSEUDOCLASS_STATE, edge == Side.TOP);
-            pseudoClassStateChanged(AbstractAxisParameter.RIGHT_PSEUDOCLASS_STATE, edge == Side.RIGHT);
-            pseudoClassStateChanged(AbstractAxisParameter.BOTTOM_PSEUDOCLASS_STATE, edge == Side.BOTTOM);
-            pseudoClassStateChanged(AbstractAxisParameter.LEFT_PSEUDOCLASS_STATE, edge == Side.LEFT);
-            pseudoClassStateChanged(AbstractAxisParameter.CENTRE_HOR_PSEUDOCLASS_STATE, edge == Side.CENTER_HOR);
-            pseudoClassStateChanged(AbstractAxisParameter.CENTRE_VER_PSEUDOCLASS_STATE, edge == Side.CENTER_VER);
-
-            invokeListener(new AxisChangeEvent(AbstractAxisParameter.this));
-        }
-    };
+        invokeListener(new AxisChangeEvent(AbstractAxisParameter.this));
+        return edge;
+    }, StyleConverter.getEnumConverter(Side.class));
 
     /** The side of the plot which this axis is being drawn on */
-    private final ObjectProperty<AxisLabelOverlapPolicy> overlapPolicy = new StyleableObjectProperty<>(
-            AxisLabelOverlapPolicy.SKIP_ALT) {
-        @Override
-        public Object getBean() {
-            return AbstractAxisParameter.this;
-        }
-
-        @Override
-        public CssMetaData<AbstractAxisParameter, AxisLabelOverlapPolicy> getCssMetaData() {
-            return StyleableProperties.OVERLAP_POLICY;
-        }
-
-        @Override
-        public String getName() {
-            return "overlapPolcy";
-        }
-
-        @Override
-        protected void invalidated() {
-            invokeListener(new AxisChangeEvent(AbstractAxisParameter.this));
-        }
-    };
+    private final ObjectProperty<AxisLabelOverlapPolicy> overlapPolicy = CSS.createObjectProperty(this, "overlapPolicy", "-fx-overlap-policy",
+            s -> (StyleableProperty<AxisLabelOverlapPolicy>) s.overlapPolicyProperty(), AxisLabelOverlapPolicy.SKIP_ALT, true, () -> invokeListener(new AxisChangeEvent(AbstractAxisParameter.this)), null, StyleConverter.getEnumConverter(AxisLabelOverlapPolicy.class));
 
     /**
      * The relative alignment (N.B. clamped to [0.0,1.0]) of the axis if drawn on top of the main canvas (N.B. side ==
      * CENTER_HOR or CENTER_VER
      */
-    private final DoubleProperty axisCenterPosition = new StylishDoubleProperty(
-            StyleableProperties.CENTER_AXIS_POSITION, this, "centerAxisPosition", 0.5, this::requestAxisLayout) {
-        @Override
-        public void set(final double value) {
-            super.set(Math.max(0.0, Math.min(value, 1.0)));
-        }
-    };
+    private final StyleableDoubleProperty axisCenterPosition = CSS.createDoubleProperty(this, "centerAxisPosition", "-fx-centre-axis-position",
+            s -> (StyleableDoubleProperty) s.axisCenterPositionProperty(), 0.5, true, (oldVal, newVal) -> Math.max(0.0, Math.min(newVal, 1.0)), this::requestAxisLayout);
 
     /** axis label alignment */
-    private final ObjectProperty<TextAlignment> axisLabelTextAlignment = new StylishObjectProperty<>(
-            StyleableProperties.AXIS_LABEL_ALIGNMENT, this, "axisLabelTextAlignment", TextAlignment.CENTER,
-            this::requestAxisLayout);
+    private final ObjectProperty<TextAlignment> axisLabelTextAlignment = CSS.createObjectProperty(this, "axisLabelTextAlignment",
+            "-fx-axis-label-alignment", s -> (StyleableProperty<TextAlignment>) s.axisLabelTextAlignmentProperty(), TextAlignment.CENTER, true, this::requestAxisLayout, null, StyleConverter.getEnumConverter(TextAlignment.class));
 
     /** The axis label */
-    private final StringProperty axisName = new StylishStringProperty(StyleableProperties.AXIS_LABEL, this, "label",
-            null, this::requestAxisLayout);
+    private final StringProperty axisName = CSS.createStringProperty(this, "axisLabel", "-fx-axis-label", s -> (StyleableStringProperty) s.nameProperty(), "label", true, this::requestAxisLayout, null);
 
     /** true if tick marks should be displayed */
-    private final BooleanProperty tickMarkVisible = new StylishBooleanProperty(StyleableProperties.TICK_MARK_VISIBLE,
-            this, "tickMarkVisible", true, this::requestAxisLayout);
+    private final BooleanProperty tickMarkVisible = CSS.createBooleanProperty(this, "tickMarkVisible", "-fx-tick-mark-visible",
+            s -> (StyleableBooleanProperty) s.tickMarkVisibleProperty(), true, true, this::requestAxisLayout, null);
 
     /** true if tick mark labels should be displayed */
-    private final BooleanProperty tickLabelsVisible = new StylishBooleanProperty(
-            StyleableProperties.TICK_LABELS_VISIBLE, this, "tickLabelsVisible", true, () -> { // update tick
+    private final BooleanProperty tickLabelsVisible = CSS.createBooleanProperty(this, "tickLabelsVisible", "-fx-tick-labels-visible",
+            s -> (StyleableBooleanProperty) s.tickLabelsVisibleProperty(), true, true, () -> {
                 for (final TickMark tick : getTickMarks()) {
                     tick.setVisible(AbstractAxisParameter.this.tickLabelsVisible.get());
                 }
                 invalidate();
                 invokeListener(new AxisChangeEvent(this));
-            });
+            }, null);
 
     /** The length of tick mark lines */
-    private final DoubleProperty axisPadding = new StylishDoubleProperty(StyleableProperties.AXIS_PADDING, this,
-            "axisPadding", 15.0, this::requestAxisLayout);
+    private final DoubleProperty axisPadding = CSS.createDoubleProperty(this, "axisPadding", "-fx-axis-padding",
+            s -> (StyleableDoubleProperty) s.axisPaddingProperty(), 15.0, true, null, this::requestAxisLayout);
 
     /** The length of tick mark lines */
-    private final DoubleProperty tickLength = new StylishDoubleProperty(StyleableProperties.TICK_LENGTH, this,
-            "tickLength", 8.0, this::requestAxisLayout);
+    private final DoubleProperty tickLength = CSS.createDoubleProperty(this, "tickLength", "-fx-tick-length",
+            s -> (StyleableDoubleProperty) s.tickLengthProperty(), 8.0, true, null, this::requestAxisLayout);
 
     /**
      * This is true when the axis determines its range from the data automatically
      */
-    private final BooleanProperty autoRanging = new StylishBooleanProperty(StyleableProperties.AUTO_RANGING, this,
-            "autoRanging", true, this::requestAxisLayout);
+    private final BooleanProperty autoRanging = CSS.createBooleanProperty(this, "autoRanging", "-fx-auto-ranging",
+            s -> (StyleableBooleanProperty) s.autoRangeRoundingProperty(), true, true, this::requestAxisLayout, null);
 
     /** The font for all tick labels */
-    private final ObjectProperty<Font> tickLabelFont = new StylishObjectProperty<>(StyleableProperties.TICK_LABEL_FONT,
-            this, "tickLabelFont", Font.font("System", 8), () -> {
+    private final ObjectProperty<Font> tickLabelFont = CSS.createObjectProperty(this, "tickLabelFont", "-fx-tick-label-font",
+            s -> (StyleableProperty<Font>) s.tickLabelFontProperty(), Font.font("System", 8), false, () -> {
                 // TODO: remove once verified that measure isn't needed anymore
                 final Font f = tickLabelFontProperty().get();
                 for (final TickMark tm : getTickMarks()) {
@@ -242,32 +187,31 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
                 }
                 invalidate();
                 invokeListener(new AxisChangeEvent(this));
-            });
+            }, null, StyleConverter.getFontConverter());
 
     /** The fill for all tick labels */
-    private final ObjectProperty<Paint> tickLabelFill = new StylishObjectProperty<>(StyleableProperties.TICK_LABEL_FILL,
-            this, "tickLabelFill", Color.BLACK, this::requestAxisLayout);
+    private final ObjectProperty<Paint> tickLabelFill = CSS.createObjectProperty(this, "tickLabelFill", "-fx-tick-label-fill",
+            s -> (StyleableProperty<Paint>) s.tickLabelFillProperty(), Color.BLACK, true, null, null, StyleConverter.getPaintConverter());
 
     /** The gap between tick labels and the tick mark lines */
-    private final DoubleProperty tickLabelGap = new StylishDoubleProperty(StyleableProperties.TICK_LABEL_TICK_GAP, this,
-            "tickLabelGap", 3.0, this::requestAxisLayout);
+    private final DoubleProperty tickLabelGap = CSS.createDoubleProperty(this, "tickLabelGap", "-fx-tick-label-gap",
+            s -> (StyleableDoubleProperty) s.tickLabelGapProperty(), 3.0, true, null, this::requestAxisLayout);
 
     /** The minimum gap between tick labels */
-    private final DoubleProperty tickLabelSpacing = new StylishDoubleProperty(StyleableProperties.TICK_LABEL_SPACING, this,
-            "tickLabelSpacing", 3.0, this::requestAxisLayout);
+    private final DoubleProperty tickLabelSpacing = CSS.createDoubleProperty(this, "tickLabelSpacing", "-fx-tick-label-spacing",
+            s -> (StyleableDoubleProperty) s.tickLabelSpacingProperty(), 3.0, true, null, this::requestAxisLayout);
 
     /** The gap between tick labels and the axis label */
-    private final DoubleProperty axisLabelGap = new StylishDoubleProperty(StyleableProperties.AXIS_LABEL_TICK_GAP, this,
-            "axisLabelGap", 3.0, this::requestAxisLayout);
+    private final DoubleProperty axisLabelGap = CSS.createDoubleProperty(this, "axisLabelGap", "-fx-axis-label-gap",
+            s -> (StyleableDoubleProperty) s.axisLabelGapProperty(), 3.0, true, null, this::requestAxisLayout);
 
     /** The animation duration in MS */
-    private final IntegerProperty animationDuration = new StylishIntegerProperty(StyleableProperties.ANIMATION_DURATION,
-            this, "animationDuration", 250, this::requestAxisLayout);
+    private final IntegerProperty animationDuration = CSS.createIntegerProperty(this, "animationDuration", "-fx-axis-animation-duration",
+            s -> (StyleableIntegerProperty) s.animationDurationProperty(), 250, true, this::requestAxisLayout, null);
 
     /** The maximum number of ticks */
-    private final IntegerProperty maxMajorTickLabelCount = new StylishIntegerProperty(
-            StyleableProperties.MAX_TICK_LABEL_COUNT, this, "maxMaxjorTickLabelCount", MAX_TICK_COUNT,
-            this::requestAxisLayout);
+    private final IntegerProperty maxMajorTickLabelCount = CSS.createIntegerProperty(this, "maxMaxjorTickLabelCount",
+            "-fx-axis-max-major-tick-label-count", s -> (StyleableIntegerProperty) s.maxMajorTickLabelCountProperty(), MAX_TICK_COUNT, true, this::requestAxisLayout, null);
 
     /**
      * When true any changes to the axis and its range will be animated.
@@ -277,12 +221,12 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     /**
      * Rotation in degrees of tick mark labels from their normal horizontal.
      */
-    protected final DoubleProperty tickLabelRotation = new StylishDoubleProperty(
-            StyleableProperties.TICK_LABEL_ROTATION, this, "tickLabelRotation", 0.0, this::requestAxisLayout);
+    protected final DoubleProperty tickLabelRotation = CSS.createDoubleProperty(this, "tickLabelRotation", "-fx-tick-rotation",
+            s -> (StyleableDoubleProperty) s.tickLabelRotationProperty(), 0.0, true, null, this::requestAxisLayout);
 
     /** true if minor tick marks should be displayed */
-    private final BooleanProperty minorTickVisible = new StylishBooleanProperty(StyleableProperties.MINOR_TICK_VISIBLE,
-            this, "minorTickVisible", true, this::requestAxisLayout);
+    private final BooleanProperty minorTickVisible = CSS.createBooleanProperty(this, "minorTickVisible", "-fx-minor-tick-visible",
+            s -> (StyleableBooleanProperty) s.minorTickVisibleProperty(), true, true, this::requestAxisLayout, null);
 
     /** The scale factor from data units to visual units */
     private final ReadOnlyDoubleWrapper scale = new ReadOnlyDoubleWrapper(this, "scale", 1) {
@@ -345,17 +289,16 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     /**
      * The length of minor tick mark lines. Set to 0 to not display minor tick marks.
      */
-    private final DoubleProperty minorTickLength = new StylishDoubleProperty(StyleableProperties.MINOR_TICK_LENGTH,
-            this, "minorTickLength", 5.0, this::requestAxisLayout);
+    private final DoubleProperty minorTickLength = CSS.createDoubleProperty(this, "minorTickLength", "-fx-minor-tick-length",
+            s -> (StyleableDoubleProperty) s.minorTickLengthProperty(), 5.0, true, null, this::requestAxisLayout);
 
     /**
      * The number of minor tick divisions to be displayed between each major tick mark. The number of actual minor tick
      * marks will be one less than this. N.B. number of divisions, minor tick mark is not drawn if minorTickMark ==
      * majorTickMark
      */
-    private final IntegerProperty minorTickCount = new StylishIntegerProperty(StyleableProperties.MINOR_TICK_COUNT,
-            this, "minorTickCount", DEFAULT_MINOR_TICK_COUNT, this::requestAxisLayout);
-
+    private final IntegerProperty minorTickCount = CSS.createIntegerProperty(this, "minorTickCount", "-fx-minor-tick-count",
+            s -> (StyleableIntegerProperty) s.minorTickCountProperty(), 5, true, this::requestAxisLayout, null);
     /**
      * Used to update scale property in AbstractAxisParameter (that is read-only) TODO: remove is possible
      */
@@ -366,8 +309,8 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
         }
     };
 
-    private final BooleanProperty autoGrowRanging = new StylishBooleanProperty(StyleableProperties.AUTO_GROW_RANGING,
-            this, "autoGrowRanging", false, this::requestAxisLayout);
+    private final BooleanProperty autoGrowRanging = CSS.createBooleanProperty(this, "autoGrowRanging", "-fx-auto-grow-ranging",
+            s -> (StyleableBooleanProperty) s.autoGrowRangingProperty(), false, true, this::requestAxisLayout, null);
 
     protected boolean isInvertedAxis = false; // internal use (for performance reason)
     private final BooleanProperty invertAxis = new SimpleBooleanProperty(this, "invertAxis", false) {
@@ -398,21 +341,16 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
         }
     };
 
-    private final BooleanProperty autoRangeRounding = new StylishBooleanProperty(
-            StyleableProperties.AUTO_RANGE_ROUNDING, this, "autoRangeRounding", false, this::requestAxisLayout);
-    // TODO: check default (normally true)
+    private final BooleanProperty autoRangeRounding = CSS.createBooleanProperty(this, "autoRangeRounding", "-fx-auto-range-rounding",
+            s -> (StyleableBooleanProperty) s.autoRangeRoundingProperty(), false, true, this::requestAxisLayout, null);
 
     private final DoubleProperty autoRangePadding = new SimpleDoubleProperty(0);
 
     /** The axis unit label */
-    private final ObjectProperty<String> axisUnit = new StylishObjectProperty<>(
-            StyleableProperties.AXIS_UNIT, this, "axisUnit", null, this::requestAxisLayout) {
-        @Override
-        protected void invalidated() {
-            updateAxisLabelAndUnit();
-            super.invalidated();
-        }
-    };
+    private final StringProperty axisUnit = CSS.createStringProperty(this, "axisUnit", "-fx-axis-unit", s -> (StyleableStringProperty) s.unitProperty(), "", true, () -> {
+        updateAxisLabelAndUnit();
+        requestAxisLayout();
+    }, null);
 
     /** The axis unit label */
     private final BooleanProperty autoUnitScaling = new SimpleBooleanProperty(this, "autoUnitScaling", false) {
@@ -432,17 +370,14 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
         }
     };
 
-    protected final SimpleStyleableDoubleProperty tickUnit = new SimpleStyleableDoubleProperty(
-            StyleableProperties.TICK_UNIT, this, "tickUnit", DEFAULT_TICK_UNIT) {
-        @Override
-        protected void invalidated() {
-            if (isAutoRanging() || isAutoGrowRanging()) {
-                return;
-            }
-            invalidate();
-            invokeListener(new AxisChangeEvent(AbstractAxisParameter.this));
-        }
-    };
+    protected final DoubleProperty tickUnit = CSS.createDoubleProperty(this, "tickUnit", "-fx-tick-unit",
+            s -> (StyleableDoubleProperty) s.minorTickLengthProperty(), DEFAULT_TICK_UNIT, true, null, () -> {
+                if (isAutoRanging() || isAutoGrowRanging()) {
+                    return;
+                }
+                invalidate();
+                invokeListener(new AxisChangeEvent(AbstractAxisParameter.this));
+            });
 
     /**
      * Create a auto-ranging AbstractAxisParameter
@@ -815,7 +750,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
 
     @Override
     public double getTickLabelSpacing() {
-        return tickLabelSpacing().get();
+        return tickLabelSpacingProperty().get();
     }
 
     public double getTickLength() {
@@ -1088,6 +1023,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
 
     /**
      * Sets the value of the {@link #animationDurationProperty} property
+     * 
      * @param value animation duration in milliseconds
      */
     public void setAnimationDuration(final int value) {
@@ -1219,7 +1155,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     }
 
     public void setTickLabelSpacing(final double value) {
-        tickLabelSpacing().set(value);
+        tickLabelSpacingProperty().set(value);
     }
 
     public void setTickLabelsVisible(final boolean value) {
@@ -1298,7 +1234,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
         return tickLabelRotation;
     }
 
-    public DoubleProperty tickLabelSpacing() {
+    public DoubleProperty tickLabelSpacingProperty() {
         return tickLabelSpacing;
     }
 
@@ -1335,7 +1271,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     }
 
     @Override
-    public ObjectProperty<String> unitProperty() {
+    public StringProperty unitProperty() {
         return axisUnit;
     }
 
@@ -1399,6 +1335,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
      * valid flag property.
      * This will cause anything that depends on the axis range or physical size to be recalculated on the next layout
      * iteration.
+     * 
      * @return the validProperty()
      */
     protected BooleanProperty validProperty() {
@@ -1413,397 +1350,10 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
      * @return The CssMetaData associated with this class, which may include the CssMetaData of its super classes.
      */
     public static List<CssMetaData<? extends Styleable, ?>> getClassCssMetaData() {
-        return StyleableProperties.STYLEABLES;
+        return CSS.getCssMetaData();
     }
 
     protected static boolean equalString(final String str1, final String str2) {
         return (str1 == null ? str2 == null : str1.equals(str2));
-    }
-
-    /*
-     *
-     * TODO: follow-up idea of simplifying CSS handling: add/make css collector to StylishXXXProperty handling and put
-     * below code inside
-     *
-     */
-    private static class StyleableProperties {
-        private static final CssMetaData<AbstractAxisParameter, String> AXIS_LABEL = new CssMetaData<>("-fx-axis-label",
-                javafx.css.converter.StringConverter.getInstance()) {
-            @Override
-            public StyleableProperty<String> getStyleableProperty(final AbstractAxisParameter n) {
-                return (StyleableProperty<String>) n.nameProperty();
-            }
-
-            @Override
-            public boolean isSettable(final AbstractAxisParameter n) {
-                return (n != null) && !n.axisName.isBound();
-            }
-        };
-
-        private static final CssMetaData<AbstractAxisParameter, String> AXIS_UNIT = new CssMetaData<>("-fx-axis-unit",
-                javafx.css.converter.StringConverter.getInstance()) {
-            @Override
-            public StyleableProperty<String> getStyleableProperty(final AbstractAxisParameter n) {
-                return (StyleableProperty<String>) n.unitProperty();
-            }
-
-            @Override
-            public boolean isSettable(final AbstractAxisParameter n) {
-                return (n != null) && !n.unitProperty().isBound();
-            }
-        };
-
-        private static final CssMetaData<AbstractAxisParameter, Side> SIDE = new CssMetaData<>("-fx-side",
-                new EnumConverter<>(Side.class)) {
-            @SuppressWarnings("unchecked") // sideProperty() is StyleableProperty<Side>
-            @Override
-            public StyleableProperty<Side> getStyleableProperty(final AbstractAxisParameter n) {
-                return (StyleableProperty<Side>) n.sideProperty();
-            }
-
-            @Override
-            public boolean isSettable(final AbstractAxisParameter n) {
-                return (n != null) && !n.sideProperty().isBound();
-            }
-        };
-
-        private static final CssMetaData<AbstractAxisParameter, AxisLabelOverlapPolicy> OVERLAP_POLICY = new CssMetaData<>(
-                "-fx-overlap-policy", new EnumConverter<>(AxisLabelOverlapPolicy.class)) {
-            @SuppressWarnings("unchecked") // sideProperty() is
-            // StyleableProperty<Side>
-            @Override
-            public StyleableProperty<AxisLabelOverlapPolicy> getStyleableProperty(final AbstractAxisParameter n) {
-                return (StyleableProperty<AxisLabelOverlapPolicy>) n.overlapPolicyProperty();
-            }
-
-            @Override
-            public boolean isSettable(final AbstractAxisParameter n) {
-                return (n != null) && !n.overlapPolicy.isBound();
-            }
-        };
-
-        private static final CssMetaData<AbstractAxisParameter, TextAlignment> AXIS_LABEL_ALIGNMENT = new CssMetaData<>(
-                "-fx-axis-label-alignment", new EnumConverter<>(TextAlignment.class)) {
-            @SuppressWarnings("unchecked") // class type matched by design
-            @Override
-            public StyleableProperty<TextAlignment> getStyleableProperty(final AbstractAxisParameter n) {
-                return (StyleableProperty<TextAlignment>) n.axisLabelTextAlignmentProperty();
-            }
-
-            @Override
-            public boolean isSettable(final AbstractAxisParameter n) {
-                return (n != null) && !n.axisLabelTextAlignment.isBound();
-            }
-        };
-
-        private static final CssMetaData<AbstractAxisParameter, Number> CENTER_AXIS_POSITION = new CssMetaData<>(
-                "-fx-centre-axis-position", SizeConverter.getInstance(), 0.5) {
-            @SuppressWarnings("unchecked")
-            @Override
-            public StyleableProperty<Number> getStyleableProperty(final AbstractAxisParameter n) {
-                return (StyleableProperty<Number>) n.axisCenterPositionProperty();
-            }
-
-            @Override
-            public boolean isSettable(final AbstractAxisParameter n) {
-                return (n != null) && !n.axisCenterPosition.isBound();
-            }
-        };
-
-        private static final CssMetaData<AbstractAxisParameter, Number> AXIS_PADDING = new CssMetaData<>(
-                "-fx-axis-padding", SizeConverter.getInstance(), 15.0) {
-            @SuppressWarnings("unchecked")
-            @Override
-            public StyleableProperty<Number> getStyleableProperty(final AbstractAxisParameter n) {
-                return (StyleableProperty<Number>) n.axisPaddingProperty();
-            }
-
-            @Override
-            public boolean isSettable(final AbstractAxisParameter n) {
-                return (n != null) && !n.axisPadding.isBound();
-            }
-        };
-
-        private static final CssMetaData<AbstractAxisParameter, Number> TICK_LENGTH = new CssMetaData<>(
-                "-fx-tick-length", SizeConverter.getInstance(), 8.0) {
-            @SuppressWarnings("unchecked")
-            @Override
-            public StyleableProperty<Number> getStyleableProperty(final AbstractAxisParameter n) {
-                return (StyleableProperty<Number>) n.tickLengthProperty();
-            }
-
-            @Override
-            public boolean isSettable(final AbstractAxisParameter n) {
-                return (n != null) && !n.tickLength.isBound();
-            }
-        };
-
-        private static final CssMetaData<AbstractAxisParameter, Font> TICK_LABEL_FONT = new FontCssMetaData<>(
-                "-fx-tick-label-font", Font.font("system", 8.0)) {
-            @SuppressWarnings("unchecked") // tickLabelFontProperty() is
-            // StyleableProperty<Font>
-            @Override
-            public StyleableProperty<Font> getStyleableProperty(final AbstractAxisParameter n) {
-                return (StyleableProperty<Font>) n.tickLabelFontProperty();
-            }
-
-            @Override
-            public boolean isSettable(final AbstractAxisParameter n) {
-                return (n != null) && !n.tickLabelFont.isBound();
-            }
-        };
-
-        private static final CssMetaData<AbstractAxisParameter, Paint> TICK_LABEL_FILL = new CssMetaData<>(
-                "-fx-tick-label-fill", PaintConverter.getInstance(), Color.BLACK) {
-            @SuppressWarnings("unchecked") // tickLabelFillProperty() is StyleableProperty<Paint>
-            @Override
-            public StyleableProperty<Paint> getStyleableProperty(final AbstractAxisParameter n) {
-                return (StyleableProperty<Paint>) n.tickLabelFillProperty();
-            }
-
-            @Override
-            public boolean isSettable(final AbstractAxisParameter n) {
-                return (n != null) && !n.tickLabelFillProperty().isBound();
-            }
-        };
-
-        private static final CssMetaData<AbstractAxisParameter, Number> TICK_LABEL_TICK_GAP = new CssMetaData<>(
-                "-fx-tick-label-gap", SizeConverter.getInstance(), 3.0) {
-            @SuppressWarnings("unchecked")
-            @Override
-            public StyleableProperty<Number> getStyleableProperty(final AbstractAxisParameter n) {
-                return (StyleableProperty<Number>) n.tickLabelGapProperty();
-            }
-
-            @Override
-            public boolean isSettable(final AbstractAxisParameter n) {
-                return (n != null) && !n.tickLabelGapProperty().isBound();
-            }
-        };
-
-        private static final CssMetaData<AbstractAxisParameter, Number> TICK_LABEL_SPACING = new CssMetaData<>(
-                "-fx-tick-label-spacing", SizeConverter.getInstance(), 3.0) {
-            @SuppressWarnings("unchecked")
-            @Override
-            public StyleableProperty<Number> getStyleableProperty(final AbstractAxisParameter n) {
-                return (StyleableProperty<Number>) n.tickLabelSpacing();
-            }
-
-            @Override
-            public boolean isSettable(final AbstractAxisParameter n) {
-                return (n != null) && !n.tickLabelSpacing().isBound();
-            }
-        };
-
-        private static final CssMetaData<AbstractAxisParameter, Number> AXIS_LABEL_TICK_GAP = new CssMetaData<>(
-                "-fx-axis-label-gap", SizeConverter.getInstance(), 3.0) {
-            @SuppressWarnings("unchecked")
-            @Override
-            public StyleableProperty<Number> getStyleableProperty(final AbstractAxisParameter n) {
-                return (StyleableProperty<Number>) n.tickLabelGapProperty();
-            }
-
-            @Override
-            public boolean isSettable(final AbstractAxisParameter n) {
-                return (n != null) && !n.tickLabelGap.isBound();
-            }
-        };
-
-        private static final CssMetaData<AbstractAxisParameter, Number> MAX_TICK_LABEL_COUNT = new CssMetaData<>(
-                "-fx-axis-max-major-tick-label-count", SizeConverter.getInstance(), MAX_TICK_COUNT) {
-            @SuppressWarnings("unchecked")
-            @Override
-            public StyleableProperty<Number> getStyleableProperty(final AbstractAxisParameter n) {
-                return (StyleableProperty<Number>) n.maxMajorTickLabelCountProperty();
-            }
-
-            @Override
-            public boolean isSettable(final AbstractAxisParameter n) {
-                return (n != null) && !n.maxMajorTickLabelCount.isBound();
-            }
-        };
-
-        private static final CssMetaData<AbstractAxisParameter, Number> ANIMATION_DURATION = new CssMetaData<>(
-                "-fx-axis-animation-duration", SizeConverter.getInstance(), 250) {
-            @SuppressWarnings("unchecked")
-            @Override
-            public StyleableProperty<Number> getStyleableProperty(final AbstractAxisParameter n) {
-                return (StyleableProperty<Number>) n.animationDurationProperty();
-            }
-
-            @Override
-            public boolean isSettable(final AbstractAxisParameter n) {
-                return (n != null) && !n.animationDuration.isBound();
-            }
-        };
-
-        private static final CssMetaData<AbstractAxisParameter, Boolean> TICK_MARK_VISIBLE = new CssMetaData<>(
-                "-fx-tick-mark-visible", BooleanConverter.getInstance(), Boolean.TRUE) {
-            @SuppressWarnings("unchecked")
-            @Override
-            public StyleableProperty<Boolean> getStyleableProperty(final AbstractAxisParameter n) {
-                return (StyleableProperty<Boolean>) n.tickMarkVisibleProperty();
-            }
-
-            @Override
-            public boolean isSettable(final AbstractAxisParameter n) {
-                return (n != null) && !n.tickMarkVisible.isBound();
-            }
-        };
-
-        private static final CssMetaData<AbstractAxisParameter, Boolean> TICK_LABELS_VISIBLE = new CssMetaData<>(
-                "-fx-tick-labels-visible", BooleanConverter.getInstance(), Boolean.TRUE) {
-            @SuppressWarnings("unchecked")
-            @Override
-            public StyleableProperty<Boolean> getStyleableProperty(final AbstractAxisParameter n) {
-                return (StyleableProperty<Boolean>) n.tickLabelsVisibleProperty();
-            }
-
-            @Override
-            public boolean isSettable(final AbstractAxisParameter n) {
-                return (n != null) && !n.tickLabelsVisible.isBound();
-            }
-        };
-
-        private static final CssMetaData<AbstractAxisParameter, Number> TICK_UNIT = new CssMetaData<>("-fx-tick-unit",
-                SizeConverter.getInstance(), 5.0) {
-            @SuppressWarnings("unchecked")
-            @Override
-            public StyleableProperty<Number> getStyleableProperty(final AbstractAxisParameter axis) {
-                return (StyleableProperty<Number>) axis.tickUnitProperty();
-            }
-
-            @Override
-            public boolean isSettable(final AbstractAxisParameter axis) {
-                return (axis != null) && !axis.tickUnit.isBound();
-            }
-        };
-
-        private static final CssMetaData<AbstractAxisParameter, Number> TICK_LABEL_ROTATION = new CssMetaData<>(
-                "-fx-tick-rotation", SizeConverter.getInstance(), 0.0) {
-            @SuppressWarnings("unchecked")
-            @Override
-            public StyleableProperty<Number> getStyleableProperty(final AbstractAxisParameter axis) {
-                return (StyleableProperty<Number>) axis.tickLabelRotationProperty();
-            }
-
-            @Override
-            public boolean isSettable(final AbstractAxisParameter axis) {
-                return (axis != null) && !axis.tickLabelRotationProperty().isBound();
-            }
-        };
-
-        private static final CssMetaData<AbstractAxisParameter, Number> MINOR_TICK_LENGTH = new CssMetaData<>(
-                "-fx-minor-tick-length", SizeConverter.getInstance(), 5.0) {
-            @SuppressWarnings("unchecked")
-            @Override
-            public StyleableProperty<Number> getStyleableProperty(final AbstractAxisParameter n) {
-                return (StyleableProperty<Number>) n.minorTickLengthProperty();
-            }
-
-            @Override
-            public boolean isSettable(final AbstractAxisParameter n) {
-                return (n != null) && !n.minorTickLength.isBound();
-            }
-        };
-
-        private static final CssMetaData<AbstractAxisParameter, Number> MINOR_TICK_COUNT = new CssMetaData<>(
-                "-fx-minor-tick-count", SizeConverter.getInstance(), 5) {
-            @SuppressWarnings("unchecked")
-            @Override
-            public StyleableProperty<Number> getStyleableProperty(final AbstractAxisParameter n) {
-                return (StyleableProperty<Number>) n.minorTickCountProperty();
-            }
-
-            @Override
-            public boolean isSettable(final AbstractAxisParameter n) {
-                return (n != null) && !n.minorTickCount.isBound();
-            }
-        };
-
-        private static final CssMetaData<AbstractAxisParameter, Boolean> MINOR_TICK_VISIBLE = new CssMetaData<>(
-                "-fx-minor-tick-visible", BooleanConverter.getInstance(), Boolean.TRUE) {
-            @SuppressWarnings("unchecked")
-            @Override
-            public StyleableProperty<Boolean> getStyleableProperty(final AbstractAxisParameter n) {
-                return (StyleableProperty<Boolean>) n.minorTickVisibleProperty();
-            }
-
-            @Override
-            public boolean isSettable(final AbstractAxisParameter n) {
-                return (n != null) && !n.minorTickVisible.isBound();
-            }
-        };
-
-        private static final CssMetaData<AbstractAxisParameter, Boolean> AUTO_RANGING = new CssMetaData<>(
-                "-fx-auto-ranging", BooleanConverter.getInstance(), Boolean.TRUE) {
-            @SuppressWarnings("unchecked")
-            @Override
-            public StyleableProperty<Boolean> getStyleableProperty(final AbstractAxisParameter n) {
-                return (StyleableProperty<Boolean>) n.autoRangingProperty();
-            }
-
-            @Override
-            public boolean isSettable(final AbstractAxisParameter n) {
-                return (n != null) && !n.autoRangingProperty().isBound();
-            }
-        };
-
-        private static final CssMetaData<AbstractAxisParameter, Boolean> AUTO_GROW_RANGING = new CssMetaData<>(
-                "-fx-auto-grow-ranging", BooleanConverter.getInstance(), Boolean.FALSE) {
-            @SuppressWarnings("unchecked")
-            @Override
-            public StyleableProperty<Boolean> getStyleableProperty(final AbstractAxisParameter n) {
-                return (StyleableProperty<Boolean>) n.autoGrowRangingProperty();
-            }
-
-            @Override
-            public boolean isSettable(final AbstractAxisParameter n) {
-                return (n != null) && !n.autoGrowRanging.isBound();
-            }
-        };
-
-        private static final CssMetaData<AbstractAxisParameter, Boolean> AUTO_RANGE_ROUNDING = new CssMetaData<>(
-                "-fx-auto-range-rounding", BooleanConverter.getInstance(), Boolean.FALSE) {
-            @SuppressWarnings("unchecked")
-            @Override
-            public StyleableProperty<Boolean> getStyleableProperty(final AbstractAxisParameter n) {
-                return (StyleableProperty<Boolean>) n.autoRangeRoundingProperty();
-            }
-
-            @Override
-            public boolean isSettable(final AbstractAxisParameter n) {
-                return (n != null) && !n.autoRangeRounding.isBound();
-            }
-        };
-
-        private static final List<CssMetaData<? extends Styleable, ?>> STYLEABLES;
-        static {
-            final List<CssMetaData<? extends Styleable, ?>> styleables = new ArrayList<>(Region.getClassCssMetaData());
-            styleables.add(StyleableProperties.AXIS_LABEL);
-            styleables.add(StyleableProperties.AXIS_UNIT);
-            styleables.add(StyleableProperties.SIDE);
-            styleables.add(StyleableProperties.CENTER_AXIS_POSITION);
-            styleables.add(StyleableProperties.AXIS_PADDING);
-            styleables.add(StyleableProperties.AXIS_LABEL_TICK_GAP);
-            styleables.add(StyleableProperties.AXIS_LABEL_ALIGNMENT);
-            styleables.add(StyleableProperties.ANIMATION_DURATION);
-            styleables.add(StyleableProperties.TICK_LENGTH);
-            styleables.add(StyleableProperties.TICK_LABEL_FONT);
-            styleables.add(StyleableProperties.TICK_LABEL_FILL);
-            styleables.add(StyleableProperties.TICK_LABEL_TICK_GAP);
-            styleables.add(StyleableProperties.TICK_LABEL_SPACING);
-            styleables.add(StyleableProperties.TICK_MARK_VISIBLE);
-            styleables.add(StyleableProperties.TICK_LABELS_VISIBLE);
-            styleables.add(StyleableProperties.TICK_LABEL_ROTATION);
-            styleables.add(StyleableProperties.TICK_UNIT);
-            styleables.add(StyleableProperties.MINOR_TICK_COUNT);
-            styleables.add(StyleableProperties.MINOR_TICK_LENGTH);
-            styleables.add(StyleableProperties.MINOR_TICK_VISIBLE);
-            styleables.add(AUTO_RANGING);
-            styleables.add(AUTO_GROW_RANGING);
-            styleables.add(AUTO_RANGE_ROUNDING);
-            STYLEABLES = Collections.unmodifiableList(styleables);
-        }
     }
 }
