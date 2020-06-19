@@ -34,6 +34,11 @@ public class FuzzyTestImageUtils {
         return new File(resourceBase + referenceImageLocation);
     }
 
+    public static File getReferencePath(Class<?> rootClass) {
+        final String resourceBase = rootClass.getResource("").getPath().replace(targetResourceFolder, srcResourceFolder);
+        return new File(resourceBase);
+    }
+
     public static Image getTestImage(Class<?> rootClass, final String referenceImageLocation) {
         try (InputStream is = new FileInputStream(getReferenceFile(rootClass, referenceImageLocation))) {
             return new Image(is);
@@ -45,7 +50,12 @@ public class FuzzyTestImageUtils {
     }
 
     public static void writeTestImage(Class<?> rootClass, final String referenceImageLocation, final Image testImage) {
-        try (OutputStream os = Files.newOutputStream(getReferenceFile(rootClass, referenceImageLocation).toPath())) {
+        final File file = getReferenceFile(rootClass, referenceImageLocation);
+        final File fileParent = getReferencePath(rootClass);
+        if (fileParent.mkdirs()) {
+            LOGGER.atInfo().addArgument(fileParent.getPath()).addArgument(referenceImageLocation).log("needed to create directory '{}' for file {}");
+        }
+        try (OutputStream os = Files.newOutputStream(file.toPath())) {
             final ByteBuffer buffer = WriteFxImage.encode(testImage);
             os.write(buffer.array(), 0, buffer.limit());
         } catch (IOException e) {
