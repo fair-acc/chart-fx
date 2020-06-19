@@ -63,23 +63,8 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     private static final double DEFAULT_TICK_UNIT = +5d;
 
     // N.B. number of divisions, minor tick mark is not drawn if minorTickMark
-    // == majorTickMarkd
+    // == majorTickMark
     protected static final int DEFAULT_MINOR_TICK_COUNT = 10;
-    /** pseudo-class indicating this is a vertical Top side Axis. */
-    private static final PseudoClass TOP_PSEUDOCLASS_STATE = PseudoClass.getPseudoClass("top");
-    /** pseudo-class indicating this is a vertical Bottom side Axis. */
-    private static final PseudoClass BOTTOM_PSEUDOCLASS_STATE = PseudoClass.getPseudoClass("bottom");
-    /** pseudo-class indicating this is a vertical Left side Axis. */
-    private static final PseudoClass LEFT_PSEUDOCLASS_STATE = PseudoClass.getPseudoClass("left");
-
-    /** pseudo-class indicating this is a vertical Right side Axis. */
-    private static final PseudoClass RIGHT_PSEUDOCLASS_STATE = PseudoClass.getPseudoClass("right");
-
-    /** pseudo-class indicating this is a horizontal centre Axis. */
-    private static final PseudoClass CENTRE_HOR_PSEUDOCLASS_STATE = PseudoClass.getPseudoClass("horCentre");
-
-    /** pseudo-class indicating this is a vertical centre Axis. */
-    private static final PseudoClass CENTRE_VER_PSEUDOCLASS_STATE = PseudoClass.getPseudoClass("verCentre");
 
     private final transient AtomicBoolean autoNotification = new AtomicBoolean(true);
     private final List<EventListener> updateListeners = Collections.synchronizedList(new LinkedList<>());
@@ -118,18 +103,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
      * The side of the plot which this axis is being drawn on default axis orientation is BOTTOM, can be set latter to
      * another side
      */
-    private final ObjectProperty<Side> side = CSS.createObjectProperty(this, "side", "-fx-side", s -> (StyleableProperty<Side>) s.sideProperty(), Side.BOTTOM, true, null, edge -> {
-        // cause refreshTickMarks
-        pseudoClassStateChanged(AbstractAxisParameter.TOP_PSEUDOCLASS_STATE, edge == Side.TOP);
-        pseudoClassStateChanged(AbstractAxisParameter.RIGHT_PSEUDOCLASS_STATE, edge == Side.RIGHT);
-        pseudoClassStateChanged(AbstractAxisParameter.BOTTOM_PSEUDOCLASS_STATE, edge == Side.BOTTOM);
-        pseudoClassStateChanged(AbstractAxisParameter.LEFT_PSEUDOCLASS_STATE, edge == Side.LEFT);
-        pseudoClassStateChanged(AbstractAxisParameter.CENTRE_HOR_PSEUDOCLASS_STATE, edge == Side.CENTER_HOR);
-        pseudoClassStateChanged(AbstractAxisParameter.CENTRE_VER_PSEUDOCLASS_STATE, edge == Side.CENTER_VER);
-
-        invokeListener(new AxisChangeEvent(AbstractAxisParameter.this));
-        return edge;
-    }, StyleConverter.getEnumConverter(Side.class));
+    private final ObjectProperty<Side> side = CSS.createEnumPropertyWithPseudoclasses(this, "side", "-fx-side", s -> (StyleableProperty<Side>) s.sideProperty(), Side.BOTTOM, true, () -> invokeListener(new AxisChangeEvent(AbstractAxisParameter.this)), null, Side.class);
 
     /** The side of the plot which this axis is being drawn on */
     private final ObjectProperty<AxisLabelOverlapPolicy> overlapPolicy = CSS.createObjectProperty(this, "overlapPolicy", "-fx-overlap-policy",
@@ -143,8 +117,8 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
             s -> (StyleableDoubleProperty) s.axisCenterPositionProperty(), 0.5, true, (oldVal, newVal) -> Math.max(0.0, Math.min(newVal, 1.0)), this::requestAxisLayout);
 
     /** axis label alignment */
-    private final ObjectProperty<TextAlignment> axisLabelTextAlignment = CSS.createObjectProperty(this, "axisLabelTextAlignment",
-            "-fx-axis-label-alignment", s -> (StyleableProperty<TextAlignment>) s.axisLabelTextAlignmentProperty(), TextAlignment.CENTER, true, this::requestAxisLayout, null, StyleConverter.getEnumConverter(TextAlignment.class));
+    private final ObjectProperty<TextAlignment> axisLabelTextAlignment = CSS.createObjectProperty(this, "axisLabelTextAlignment", "-fx-axis-label-alignment",
+            s -> (StyleableProperty<TextAlignment>) s.axisLabelTextAlignmentProperty(), TextAlignment.CENTER, true, this::requestAxisLayout, null, StyleConverter.getEnumConverter(TextAlignment.class));
 
     /** The axis label */
     private final StringProperty axisName = CSS.createStringProperty(this, "axisLabel", "-fx-axis-label", s -> (StyleableStringProperty) s.nameProperty(), "label", true, this::requestAxisLayout, null);
@@ -210,8 +184,8 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
             s -> (StyleableIntegerProperty) s.animationDurationProperty(), 250, true, this::requestAxisLayout, null);
 
     /** The maximum number of ticks */
-    private final IntegerProperty maxMajorTickLabelCount = CSS.createIntegerProperty(this, "maxMaxjorTickLabelCount",
-            "-fx-axis-max-major-tick-label-count", s -> (StyleableIntegerProperty) s.maxMajorTickLabelCountProperty(), MAX_TICK_COUNT, true, this::requestAxisLayout, null);
+    private final IntegerProperty maxMajorTickLabelCount = CSS.createIntegerProperty(this, "maxMaxjorTickLabelCount", "-fx-axis-max-major-tick-label-count",
+            s -> (StyleableIntegerProperty) s.maxMajorTickLabelCountProperty(), MAX_TICK_COUNT, true, this::requestAxisLayout, null);
 
     /**
      * When true any changes to the axis and its range will be animated.
