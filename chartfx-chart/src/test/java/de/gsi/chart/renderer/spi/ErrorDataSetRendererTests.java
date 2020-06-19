@@ -15,6 +15,7 @@ import javafx.stage.Stage;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.function.ThrowingSupplier;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.slf4j.Logger;
@@ -45,7 +46,7 @@ public class ErrorDataSetRendererTests {
     private static final Class<?> clazz = ErrorDataSetRendererTests.class;
     private static final Logger LOGGER = LoggerFactory.getLogger(clazz);
     private static final String className = clazz.getSimpleName();
-    private static final String referenceFileName = "./Reference_" + className;
+    private static final String referenceFileName = "Reference_" + className;
     private static final String referenceFileExtension = ".png";
     private static final int MAX_TIMEOUT_MILLIS = 1000;
     private static final int WAIT_N_FX_PULSES = 3;
@@ -61,7 +62,7 @@ public class ErrorDataSetRendererTests {
 
     @Start
     public void start(Stage stage) {
-        assertDoesNotThrow(() -> new ErrorDataSetRenderer());
+        assertDoesNotThrow((ThrowingSupplier<ErrorDataSetRenderer>) ErrorDataSetRenderer::new);
         renderer = new ErrorDataSetRenderer();
         renderer.getDatasets().setAll(getTestDataSet());
         chart = new XYChart(xAxis, yAxis);
@@ -74,7 +75,7 @@ public class ErrorDataSetRendererTests {
 
     @ParameterizedTest
     @EnumSource(LineStyle.class)
-    public void testRendererNominal(final LineStyle lineStyle) throws IOException, Exception {
+    public void testRendererNominal(final LineStyle lineStyle) throws Exception {
         for (ErrorStyle eStyle : ErrorStyle.values()) {
             renderer.setErrorType(eStyle);
             testRenderer(lineStyle);
@@ -82,7 +83,7 @@ public class ErrorDataSetRendererTests {
     }
 
     @Test
-    public void testRendererSepcialCases() throws IOException, Exception {
+    public void testRendererSepcialCases() throws Exception {
         final LineStyle lineStyle = LineStyle.NORMAL;
 
         renderer.setPointReduction(false);
@@ -114,14 +115,13 @@ public class ErrorDataSetRendererTests {
         // perform NaN only on JDK >= 11 on JDK8 this will crash JavaFX
         final int jdkMajorVersion = Integer.parseInt(System.getProperty("java.version").split("\\.")[0]);
         if (jdkMajorVersion >= 11) {
-            assertTrue(jdkMajorVersion >= 11);
             renderer.setAllowNaNs(true);
             testRenderer(lineStyle);
             renderer.setAllowNaNs(false);
         }
     }
 
-    private void testRenderer(final LineStyle lineStyle) throws IOException, Exception {
+    private void testRenderer(final LineStyle lineStyle) throws Exception {
         renderer.setPolyLineStyle(lineStyle);
         final String referenceImage = getReferenceImageFileName();
         FXUtils.runAndWait(() -> renderer.getDatasets().setAll(getTestDataSet()));
@@ -170,8 +170,7 @@ public class ErrorDataSetRendererTests {
         final String marker = renderer.isDrawMarker() ? "_MARKER" : "";
         final String nan = renderer.isallowNaNs() ? "_NANALLOWED" : "";
         final String options = reduced + errorStyle + bars + bubbles + marker + nan;
-        final String referenceImage = referenceFileName + contourTypeString + options + referenceFileExtension;
-        return referenceImage;
+        return referenceFileName + contourTypeString + options + referenceFileExtension;
     }
 
     private DataSet getTestDataSet() {
