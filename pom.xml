@@ -37,6 +37,7 @@
 
         <chartfx.javafx.version>13.0.1</chartfx.javafx.version>
         <chartfx.controlsfx.version>11.0.0</chartfx.controlsfx.version>
+        <chartfx.ikonli.version>11.5.0</chartfx.ikonli.version>
         <chartfx.icu4j.version>65.1</chartfx.icu4j.version>
         <chartfx.javafxsvg.version>1.3.0</chartfx.javafxsvg.version>
 
