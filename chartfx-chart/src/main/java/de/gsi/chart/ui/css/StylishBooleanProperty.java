@@ -36,6 +36,8 @@ public class StylishBooleanProperty extends SimpleStyleableBooleanProperty {
 
     @Override
     protected void invalidated() {
-        invalidateAction.run();
+        if (invalidateAction != null) {
+            invalidateAction.run();
+        }
     }
 }

@@ -36,6 +36,8 @@ public class StylishObjectProperty<T> extends SimpleStyleableObjectProperty<T> {
 
     @Override
     protected void invalidated() {
-        invalidateAction.run();
+        if (invalidateAction != null) {
+            invalidateAction.run();
+        }
     }
 }

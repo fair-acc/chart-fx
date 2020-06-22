@@ -36,6 +36,8 @@ public class StylishLongProperty extends SimpleStyleableLongProperty {
 
     @Override
     protected void invalidated() {
-        invalidateAction.run();
+        if (invalidateAction != null) {
+            invalidateAction.run();
+        }
     }
 }
