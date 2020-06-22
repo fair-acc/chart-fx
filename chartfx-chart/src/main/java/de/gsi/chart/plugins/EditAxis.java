@@ -36,7 +36,7 @@ import javafx.util.Duration;
 import javafx.util.converter.NumberStringConverter;
 
 import org.controlsfx.control.PopOver;
-import org.controlsfx.glyphfont.Glyph;
+import org.kordamp.ikonli.javafx.FontIcon;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,7 +54,6 @@ import de.gsi.chart.axes.spi.DefaultNumericAxis;
  */
 public class EditAxis extends ChartPlugin {
     private static final Logger LOGGER = LoggerFactory.getLogger(EditAxis.class);
-    private static final String FONT_AWESOME = "FontAwesome";
     public static final String STYLE_CLASS_AXIS_EDITOR = "chart-axis-editor";
     protected static final int DEFAULT_SHUTDOWN_PERIOD = 5000; // [ms]
     protected static final int DEFAULT_UPDATE_PERIOD = 100; // [ms]
@@ -70,16 +69,14 @@ public class EditAxis extends ChartPlugin {
             EditAxis.DEFAULT_ANIMATION_DURATION) {
         @Override
         protected void invalidated() {
-            Objects.requireNonNull(get(),
-                    new StringBuilder().append("The ").append(getName()).append(" must not be null").toString());
+            Objects.requireNonNull(get(), "The " + getName() + " must not be null");
         }
     };
 
     private final ObjectProperty<AxisMode> axisMode = new SimpleObjectProperty<>(this, "axisMode", AxisMode.XY) {
         @Override
         protected void invalidated() {
-            Objects.requireNonNull(get(),
-                    new StringBuilder().append("The ").append(getName()).append(" must not be null").toString());
+            Objects.requireNonNull(get(), "The " + getName() + " must not be null");
         }
     };
 
@@ -233,7 +230,7 @@ public class EditAxis extends ChartPlugin {
         return fadeDuration;
     }
 
-    class AxisEditor extends BorderPane {
+    protected static class AxisEditor extends BorderPane {
         AxisEditor(final Axis axis, final boolean isHorizontal) {
             super();
 
@@ -286,7 +283,7 @@ public class EditAxis extends ChartPlugin {
             axis.getTickMarks().forEach(tickMark -> tickList.add(tickMark.getValue()));
 
             if (!axis.isLogAxis()) {
-                axis.getMinorTickMarks().forEach(minorTick -> tickList.add(Double.valueOf(minorTick.getPosition())));
+                axis.getMinorTickMarks().forEach(minorTick -> tickList.add(minorTick.getPosition()));
             }
 
             for (final Number check1 : tickList) {
@@ -320,11 +317,10 @@ public class EditAxis extends ChartPlugin {
         protected void changeAxisRangeLinearScale(final double minTickDistance, final DoubleProperty property,
                 final boolean isIncrease) {
             final double value = property.doubleValue();
-            final double diff = minTickDistance;
             if (isIncrease) {
-                property.set(value + diff);
+                property.set(value + minTickDistance);
             } else {
-                property.set(value - diff);
+                property.set(value - minTickDistance);
             }
         }
 
@@ -359,7 +355,7 @@ public class EditAxis extends ChartPlugin {
             return boxMax;
         }
 
-        private final TextField getBoundField(final Axis axis, final boolean isLowerBound) {
+        private TextField getBoundField(final Axis axis, final boolean isLowerBound) {
             final TextField textField = new TextField();
 
             // ValidationSupport has a slow memory leak
@@ -467,8 +463,8 @@ public class EditAxis extends ChartPlugin {
             final CheckBox autoUnitScaling = new CheckBox(" auto");
             if (axis instanceof DefaultNumericAxis) {
                 autoUnitScaling.selectedProperty()
-                        .bindBidirectional(((DefaultNumericAxis) axis).autoUnitScalingProperty());
-                unitScaling.textProperty().bindBidirectional(((DefaultNumericAxis) axis).unitScalingProperty(),
+                        .bindBidirectional(axis.autoUnitScalingProperty());
+                unitScaling.textProperty().bindBidirectional(axis.unitScalingProperty(),
                         new NumberStringConverter(new DecimalFormat("0.0####E0")));
                 unitScaling.disableProperty().bind(autoUnitScaling.selectedProperty());
             } else {
@@ -510,7 +506,7 @@ public class EditAxis extends ChartPlugin {
             boxMax.getChildren().add(invertedAxis);
 
             if (axis instanceof DefaultNumericAxis) {
-                invertedAxis.selectedProperty().bindBidirectional(((DefaultNumericAxis) axis).invertAxisProperty());
+                invertedAxis.selectedProperty().bindBidirectional(axis.invertAxisProperty());
             } else {
                 // TODO: consider adding an interface on whether
                 // invertedAxis is editable
@@ -525,7 +521,7 @@ public class EditAxis extends ChartPlugin {
             boxMax.getChildren().add(timeAxis);
 
             if (axis instanceof DefaultNumericAxis) {
-                timeAxis.selectedProperty().bindBidirectional(((DefaultNumericAxis) axis).timeAxisProperty());
+                timeAxis.selectedProperty().bindBidirectional(axis.timeAxisProperty());
             } else {
                 // TODO: consider adding an interface on whether
                 // timeAxis is editable
@@ -536,23 +532,23 @@ public class EditAxis extends ChartPlugin {
         }
 
         private Pane getMinMaxButtons(final Axis axis, final boolean isHorizontal, final boolean isMin) {
-            final Button incMaxButton = new Button("", new Glyph(EditAxis.FONT_AWESOME, "\uf077"));
+            final Button incMaxButton = new Button("", new FontIcon("fa-chevron-up"));
             incMaxButton.setMaxWidth(Double.MAX_VALUE);
             VBox.setVgrow(incMaxButton, Priority.ALWAYS);
             HBox.setHgrow(incMaxButton, Priority.ALWAYS);
             incMaxButton.setOnAction(evt -> {
                 axis.setAutoRanging(false);
-                changeAxisRangeLimit(axis, isHorizontal ? isMin : !isMin, true);
+                changeAxisRangeLimit(axis, isHorizontal == isMin, true);
             });
 
-            final Button decMaxButton = new Button("", new Glyph(EditAxis.FONT_AWESOME, "\uf078"));
+            final Button decMaxButton = new Button("", new FontIcon("fa-chevron-down"));
             decMaxButton.setMaxWidth(Double.MAX_VALUE);
             VBox.setVgrow(decMaxButton, Priority.ALWAYS);
             HBox.setHgrow(decMaxButton, Priority.ALWAYS);
 
             decMaxButton.setOnAction(evt -> {
                 axis.setAutoRanging(false);
-                changeAxisRangeLimit(axis, isHorizontal ? isMin : !isMin, false);
+                changeAxisRangeLimit(axis, isHorizontal == isMin, false);
             });
             final Pane box = isHorizontal ? new VBox() : new HBox();
             box.getChildren().addAll(incMaxButton, decMaxButton);
@@ -561,7 +557,7 @@ public class EditAxis extends ChartPlugin {
         }
 
         private Pane getRangeChangeButtons(final Axis axis, final boolean isHorizontal) {
-            final Button incMaxButton = new Button("", new Glyph(EditAxis.FONT_AWESOME, "expand"));
+            final Button incMaxButton = new Button("", new FontIcon("fa-expand"));
             incMaxButton.setMaxWidth(Double.MAX_VALUE);
             VBox.setVgrow(incMaxButton, Priority.NEVER);
             HBox.setHgrow(incMaxButton, Priority.NEVER);
@@ -570,7 +566,7 @@ public class EditAxis extends ChartPlugin {
                 changeAxisRange(axis, true);
             });
 
-            final Button decMaxButton = new Button("", new Glyph(EditAxis.FONT_AWESOME, "compress"));
+            final Button decMaxButton = new Button("", new FontIcon("fa-compress"));
             decMaxButton.setMaxWidth(Double.MAX_VALUE);
             VBox.setVgrow(decMaxButton, Priority.NEVER);
             HBox.setHgrow(decMaxButton, Priority.NEVER);
@@ -589,7 +585,7 @@ public class EditAxis extends ChartPlugin {
     private class MyPopOver extends PopOver {
         private long popOverShowStartTime;
         private boolean isMouseInPopOver;
-        private Axis axis = null;
+        private Axis axis;
         private final ChangeListener<Duration> fadeDurationListener = (ch, o, n) -> {
             super.fadeInDurationProperty().set(n.multiply(2.0));
             super.fadeOutDurationProperty().set(n);
@@ -609,6 +605,7 @@ public class EditAxis extends ChartPlugin {
             super(new AxisEditor(axis, isHorizontal));
             this.axis = axis;
             popOverShowStartTime = 0;
+            getStyleClass().add(STYLE_CLASS_AXIS_EDITOR);
 
             super.setAutoHide(true);
             super.animatedProperty().bind(EditAxis.this.animatedProperty());

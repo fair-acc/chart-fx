@@ -8,7 +8,7 @@ import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.Tooltip;
 
-import org.controlsfx.glyphfont.Glyph;
+import org.kordamp.ikonli.javafx.FontIcon;
 
 import de.gsi.chart.plugins.measurements.AbstractChartMeasurement;
 import de.gsi.chart.plugins.measurements.DataSetMeasurements;
@@ -34,14 +34,9 @@ import de.gsi.chart.viewer.DataView;
  * @author rstein
  */
 public class ParameterMeasurements extends ChartPlugin {
-    private static final String FONT_AWESOME = "FontAwesome";
-    private static final int FONT_SIZE = 20;
-    // private static final char TOOLBUTTON_DRAFTING_COMPASS = '\uf568'; // drafting compass
-    private static final char TOOLBUTTON_ALT = '\uf0ad'; // wrench
-    private static final char TOOLBUTTON = TOOLBUTTON_ALT; // TODO: replace by drafting compass
+    private static final String TOOL_BUTTON = "fas-drafting-compass:18";
     protected final ObservableList<AbstractChartMeasurement> chartMeasurements = FXCollections.observableArrayList();
-    private final Glyph chartIcon = new Glyph(FONT_AWESOME, TOOLBUTTON).size(FONT_SIZE);
-    private final DataView dataView = new DataView("ChartViews", chartIcon);
+    private final DataView dataView = new DataView("ChartViews", new FontIcon(TOOL_BUTTON));
     private MenuBar parameterMenu;
 
     private final ChangeListener<Boolean> parentVisibleListener = (obs, o, n) -> {
@@ -113,7 +108,7 @@ public class ParameterMeasurements extends ChartPlugin {
         }
         parameterMenu = new MenuBar();
 
-        final Menu measurementMenu = new Menu(null, new Glyph(FONT_AWESOME, TOOLBUTTON).size(FONT_SIZE));
+        final Menu measurementMenu = new Menu(null, new FontIcon(TOOL_BUTTON));
         measurementMenu.getProperties().put("TOOL_TIP", new Tooltip("add measurement indicator"));
         measurementMenu.setId("ParameterMeasurements::measurementMenu"); // N.B. not a unique name but for testing this suffices
 

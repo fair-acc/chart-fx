@@ -12,7 +12,7 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 
-import org.controlsfx.glyphfont.Glyph;
+import org.kordamp.ikonli.javafx.FontIcon;
 
 /**
  * TilingPane that to mimics HBox-, VBox-, or TilePane layout while consistently maximising it's children and
@@ -91,8 +91,8 @@ public class TilingPane extends GridPane {
             if (childCount < 4) {
                 return 2;
             }
-            int ncols = (int) Math.ceil(Math.sqrt(childCount));
-            return ncols;
+
+            return (int) Math.ceil(Math.sqrt(childCount)); // n-columns
         }
     }
 
@@ -144,21 +144,21 @@ public class TilingPane extends GridPane {
     }
 
     public enum Layout {
-        HBOX("HBox", new Glyph(FONT_AWESOME, "\uf07e").size(FONT_SIZE)), // TODO: change to more appropriate icon
-        VBOX("VBox", new Glyph(FONT_AWESOME, "\uf07d").size(FONT_SIZE)), // TODO: change to more appropriate icon
-        GRID("Grid", new Glyph(FONT_AWESOME, "\uf009").size(FONT_SIZE)), // TODO: change to more appropriate icon
-        MAXIMISE("Maximise", new Glyph(FONT_AWESOME, "\uf2d0").size(FONT_SIZE));
+        HBOX("HBox", "fas-arrows-alt-h:" + FONT_SIZE),
+        VBOX("VBox", "fas-arrows-alt-v:" + FONT_SIZE),
+        GRID("Grid", "fas-th:" + FONT_SIZE),
+        MAXIMISE("Maximise", "fas-window-maximize:" + FONT_SIZE);
 
         private final String name;
-        private final Glyph glyph;
+        private final String iconCode;
 
-        Layout(final String name, final Glyph glyph) {
+        Layout(final String name, final String iconCode) {
             this.name = name;
-            this.glyph = glyph;
+            this.iconCode = iconCode;
         }
 
         public Node getIcon() {
-            return glyph.duplicate();
+            return new FontIcon(iconCode);
         }
 
         public String getName() {

@@ -27,8 +27,7 @@ import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 
-import org.controlsfx.glyphfont.FontAwesome;
-import org.controlsfx.glyphfont.Glyph;
+import org.kordamp.ikonli.javafx.FontIcon;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,8 +43,12 @@ import de.gsi.dataset.utils.DataSetUtils;
  */
 public class Screenshot extends ChartPlugin {
     private static final Logger LOGGER = LoggerFactory.getLogger(Screenshot.class);
-    private static final String FONT_AWESOME = "FontAwesome";
-    private static final double FONT_SIZE = 20.0;
+    private static final String ICON_CAMERA = "fas-camera-retro:20";
+    private static final String ICON_CLIPBOARD = "far-clipboard:20";
+    private static final String ICON_CLIPBOARD_SMALL = "far-clipboard:11";
+    private static final String ICON_FILE = "fa-files-o:20";
+    private static final String ICON_FILE_SMALL = "fa-files-o:11";
+    private static final String ICON_WRENCH = "fa-wrench:20";
 
     private final HBox screenshotButtons = getScreenshotInteractorBar();
     private final StringProperty pattern = new SimpleStringProperty(this, "pattern", "");
@@ -134,8 +137,7 @@ public class Screenshot extends ChartPlugin {
         final Separator separator = new Separator();
         separator.setOrientation(Orientation.VERTICAL);
         SplitMenuButton button = new SplitMenuButton();
-        button.setGraphic(new HBox(0.1, new Glyph(FONT_AWESOME, FontAwesome.Glyph.CAMERA).size(FONT_SIZE),
-                new Glyph(FONT_AWESOME, FontAwesome.Glyph.CLIPBOARD).size(FONT_SIZE - 8.0)));
+        button.setGraphic(new HBox(0.1, new FontIcon(ICON_CAMERA), new FontIcon(ICON_CLIPBOARD_SMALL)));
         button.setOnAction(evt -> {
             if (toFile) {
                 screenshotToFile(true);
@@ -143,24 +145,21 @@ public class Screenshot extends ChartPlugin {
                 screenshotToClipboard();
             }
         });
-        MenuItem toClipMenu = new MenuItem("Screenshot to clipboard",
-                new Glyph(FONT_AWESOME, FontAwesome.Glyph.CLIPBOARD));
+        MenuItem toClipMenu = new MenuItem("Screenshot to clipboard", new FontIcon(ICON_CLIPBOARD));
         toClipMenu.setOnAction(evt -> {
             toFile = false;
-            button.setGraphic(new HBox(0.1, new Glyph(FONT_AWESOME, FontAwesome.Glyph.CAMERA).size(FONT_SIZE),
-                    new Glyph(FONT_AWESOME, FontAwesome.Glyph.CLIPBOARD).size(FONT_SIZE - 8.8)));
+            button.setGraphic(new HBox(0.1, new FontIcon(ICON_CAMERA), new FontIcon(ICON_CLIPBOARD_SMALL)));
             button.setTooltip(new Tooltip("Copy screenshot of plot to Clipboard"));
             screenshotToClipboard();
         });
-        MenuItem toFileMenu = new MenuItem("Screenshot to file", new Glyph(FONT_AWESOME, FontAwesome.Glyph.FILE));
+        MenuItem toFileMenu = new MenuItem("Screenshot to file", new FontIcon(ICON_FILE));
         toFileMenu.setOnAction(evt -> {
             toFile = true;
-            button.setGraphic(new HBox(0.1, new Glyph(FONT_AWESOME, FontAwesome.Glyph.CAMERA).size(FONT_SIZE),
-                    new Glyph(FONT_AWESOME, FontAwesome.Glyph.FILE).size(FONT_SIZE - 8.0)));
+            button.setGraphic(new HBox(0.1, new FontIcon(ICON_CAMERA), new FontIcon(ICON_FILE_SMALL)));
             button.setTooltip(new Tooltip("Save plot as image"));
             screenshotToFile(true);
         });
-        MenuItem settingsMenu = new MenuItem("Screenshot settings", new Glyph(FONT_AWESOME, FontAwesome.Glyph.WRENCH));
+        MenuItem settingsMenu = new MenuItem("Screenshot settings", new FontIcon(ICON_WRENCH));
         settingsMenu.setOnAction(evt -> {
             ScreenshotDialog alert = new ScreenshotDialog();
             alert.showAndWait() //

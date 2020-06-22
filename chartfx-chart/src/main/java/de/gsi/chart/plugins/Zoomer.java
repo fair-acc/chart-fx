@@ -38,7 +38,7 @@ import javafx.scene.shape.Rectangle;
 import javafx.util.Duration;
 
 import org.controlsfx.control.RangeSlider;
-import org.controlsfx.glyphfont.Glyph;
+import org.kordamp.ikonli.javafx.FontIcon;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -72,14 +72,17 @@ import de.gsi.chart.ui.geometry.Side;
  */
 public class Zoomer extends ChartPlugin {
     private static final Logger LOGGER = LoggerFactory.getLogger(Zoomer.class);
-    private static final String FONT_AWESOME = "FontAwesome";
     public static final String ZOOMER_OMIT_AXIS = "OmitAxisZoom";
     public static final String STYLE_CLASS_ZOOM_RECT = "chart-zoom-rect";
     private static final int ZOOM_RECT_MIN_SIZE = 5;
     private static final Duration DEFAULT_ZOOM_DURATION = Duration.millis(500);
     private static final int DEFAULT_AUTO_ZOOM_THRESHOLD = 15; // [pixels]
     private static final int DEFAULT_FLICKER_THRESHOLD = 3; // [pixels]
-    private static final int FONT_SIZE = 20;
+    private static final int FONT_SIZE = 22;
+    private static final String ICON_ZOOM_OUT = "fa-arrows-alt:" + FONT_SIZE;
+    private static final String ICON_ZOOM_HV = "fa-arrows:" + FONT_SIZE;
+    private static final String ICON_ZOOM_H = "fa-arrows-h:" + FONT_SIZE;
+    private static final String ICON_ZOOM_V = "fa-arrows-v:" + FONT_SIZE;
 
     /**
      * Default pan mouse filter passing on left mouse button with {@link MouseEvent#isControlDown() control key down}.
@@ -416,16 +419,16 @@ public class Zoomer extends ChartPlugin {
         separator.setOrientation(Orientation.VERTICAL);
         final HBox buttonBar = new HBox();
         buttonBar.setPadding(new Insets(1, 1, 1, 1));
-        final Button zoomOut = new Button(null, new Glyph(FONT_AWESOME, "\uf0b2").size(FONT_SIZE));
+        final Button zoomOut = new Button(null, new FontIcon(ICON_ZOOM_OUT));
         zoomOut.setPadding(new Insets(3, 3, 3, 3));
         zoomOut.setTooltip(new Tooltip("zooms to origin and enables auto-ranging"));
-        final Button zoomModeXY = new Button(null, new Glyph(FONT_AWESOME, "\uf047").size(FONT_SIZE));
+        final Button zoomModeXY = new Button(null, new FontIcon(ICON_ZOOM_HV));
         zoomModeXY.setPadding(new Insets(3, 3, 3, 3));
         zoomModeXY.setTooltip(new Tooltip("set zoom-mode to X & Y range (N.B. disables auto-ranging)"));
-        final Button zoomModeX = new Button(null, new Glyph(FONT_AWESOME, "\uf07e").size(FONT_SIZE));
+        final Button zoomModeX = new Button(null, new FontIcon(ICON_ZOOM_H));
         zoomModeX.setPadding(new Insets(3, 3, 3, 3));
         zoomModeX.setTooltip(new Tooltip("set zoom-mode to X range (N.B. disables auto-ranging)"));
-        final Button zoomModeY = new Button(null, new Glyph(FONT_AWESOME, "\uf07d").size(FONT_SIZE));
+        final Button zoomModeY = new Button(null, new FontIcon(ICON_ZOOM_V));
         zoomModeY.setPadding(new Insets(3, 3, 3, 3));
         zoomModeY.setTooltip(new Tooltip("set zoom-mode to Y range (N.B. disables auto-ranging)"));
 

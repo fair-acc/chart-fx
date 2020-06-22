@@ -16,7 +16,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 
 import org.controlsfx.control.BreadCrumbBar;
-import org.controlsfx.glyphfont.Glyph;
+import org.kordamp.ikonli.javafx.FontIcon;
 
 import de.gsi.chart.utils.SimplePerformanceMeter;
 
@@ -34,9 +34,8 @@ public class ProfilerInfoBox extends BreadCrumbBar<VBox> {
     private static final double LEVEL_ERROR = 30.0; // FPS threshold to show red chevron
     private static final String FONT_MONO_SPACE = "Monospaced";
     private static final String FONT_AWESOME = "FontAwesome";
-    private static final int FONT_SIZE = 11;
-    private static final char TOOLBUTTON_CHEVRON = '\uf2ca'; // thermometer-quarter
-    private final Glyph chevronIcon = new Glyph(FONT_AWESOME, TOOLBUTTON_CHEVRON).size(2.0 * FONT_SIZE);
+    private static final int FONT_SIZE = 9;
+    private final FontIcon chevronIcon = new FontIcon("fa-thermometer-quarter:" + (2 * FONT_SIZE));
     private final ObjectProperty<DebugLevel> debugLevel = new SimpleObjectProperty<>(this, "debugLevel", DebugLevel.NONE);
     private final TreeItem<VBox> treeRoot;
     private SimplePerformanceMeter meter;
@@ -89,11 +88,11 @@ public class ProfilerInfoBox extends BreadCrumbBar<VBox> {
             final String cpuSystem = String.format("%5.1f", meter.getSystemCpuLoad());
 
             if (meter.getFxFrameRate() < LEVEL_ERROR) {
-                chevronIcon.setColor(Color.RED);
+                chevronIcon.setFill(Color.RED);
             } else if (meter.getFxFrameRate() < LEVEL_WARNING) {
-                chevronIcon.setColor(Color.DARKORANGE);
+                chevronIcon.setFill(Color.DARKORANGE);
             } else {
-                chevronIcon.setColor(Color.BLACK);
+                chevronIcon.setFill(Color.BLACK);
             }
 
             fxFPS.setTextFiltered(String.format("%6s: %4s %s", "FX", fxRate, "FPS"));
@@ -189,7 +188,7 @@ public class ProfilerInfoBox extends BreadCrumbBar<VBox> {
         NONE,
         FRAMES_PER_SECOND,
         CPU_LOAD,
-        VERSION;
+        VERSION
     }
 
     protected static class CustomBreadCrumbButton extends BreadCrumbBarSkin.BreadCrumbButton {

@@ -22,7 +22,7 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
-import org.controlsfx.glyphfont.Glyph;
+import org.kordamp.ikonli.javafx.FontIcon;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,10 +44,9 @@ import de.gsi.dataset.spi.TransposedDataSet;
  */
 public class TransposedDataSetSample extends Application {
     private static final Logger LOGGER = LoggerFactory.getLogger(TransposedDataSetSample.class);
-    protected static final String FONT_AWESOME = "FontAwesome";
     protected static final int FONT_SIZE = 20;
-    protected static final char FONT_SYMBOL_TRANSPOSE = '\uf021'; // sync symbol
-    protected static final char FONT_SYMBOL_CHECK = '\uf058'; // check symbol
+    protected static final String FONT_SYMBOL_TRANSPOSE = "fas-sync:" + FONT_SIZE; // sync symbol
+    protected static final String FONT_SYMBOL_CHECK = "fa-check-circle:" + FONT_SIZE; // check symbol
     private static final int N_SAMPLES = 1000; // default number of data points
     private static final int N_TURNS = 20; // default number of data points
 
@@ -80,8 +79,8 @@ public class TransposedDataSetSample extends Application {
         final TextField textPermutation = new TextField("0,1,2");
         textPermutation.setPrefWidth(100);
         cbTransposed.setTooltip(new Tooltip("press to transpose DataSet"));
-        cbTransposed.setGraphic(new Glyph(FONT_AWESOME, FONT_SYMBOL_TRANSPOSE).size(FONT_SIZE));
-        final Button bApplyPermutation = new Button(null, new Glyph(FONT_AWESOME, FONT_SYMBOL_CHECK).size(FONT_SIZE));
+        cbTransposed.setGraphic(new FontIcon(FONT_SYMBOL_TRANSPOSE));
+        final Button bApplyPermutation = new Button(null, new FontIcon(FONT_SYMBOL_CHECK));
         bApplyPermutation.setTooltip(new Tooltip("press to apply permutation"));
 
         // flipping method #1: via 'setTransposed(boolean)' - flips only first two axes

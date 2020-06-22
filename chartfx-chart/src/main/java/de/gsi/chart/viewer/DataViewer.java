@@ -27,8 +27,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 
-import org.controlsfx.glyphfont.FontAwesome;
-import org.controlsfx.glyphfont.Glyph;
+import org.kordamp.ikonli.javafx.FontIcon;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -73,13 +72,13 @@ public class DataViewer extends BorderPane {
     protected static final int FONT_SIZE = 20;
     private final ObjectProperty<WindowDecoration> windowDecoration = new SimpleObjectProperty<>(this, "windowDecoration", WindowDecoration.BAR);
     private final BooleanProperty detachableWindow = new SimpleBooleanProperty(this, "detachableWindow", true);
-    private final Glyph rootGlyph = new Glyph(FONT_AWESOME, "\uf698").size(FONT_SIZE);
-    private final DataView dataViewRoot = new DataView("root", rootGlyph, null);
+    private final FontIcon rootIcon = new FontIcon("fas-square-root-alt:" + FONT_SIZE);
+    private final DataView dataViewRoot = new DataView("root", rootIcon, null);
     private final HBox viewList = new HBox();
     private final Separator separator1 = new Separator(Orientation.HORIZONTAL);
     private final Separator separator2 = new Separator(Orientation.HORIZONTAL);
     private final ToolBar toolBar;
-    private final ObservableList<Node> userToolBarItems = FXCollections.observableList(new NoDuplicatesList<Node>());
+    private final ObservableList<Node> userToolBarItems = FXCollections.observableList(new NoDuplicatesList<>());
     private final BooleanProperty showListStyleDataViews = new SimpleBooleanProperty(this, "listStyleViews", false);
     // private final VisibleViewerPane visibleViewerPane = new VisibleViewerPane();
     // private final VBox viewerPane;
@@ -314,7 +313,7 @@ public class DataViewer extends BorderPane {
             final Node icon = view.getIcon();
             final Button viewButton;
             if (icon == null && name == null) {
-                viewButton = new Button(null, new Glyph(FONT_AWESOME, FontAwesome.Glyph.QUESTION)); // NOPMD - allocation within loop ok in this context
+                viewButton = new Button(null, new FontIcon("fa-question")); // NOPMD - allocation within loop ok in this context
             } else if (icon == null) {
                 viewButton = new Button(name, null); // NOPMD - allocation within loop ok in this context
             } else {
@@ -329,7 +328,7 @@ public class DataViewer extends BorderPane {
         }
         // menu style list
         if (showListStyleDataViewProperty().get()) {
-            Menu rootMenu = new Menu(null, new Glyph(FONT_AWESOME, FontAwesome.Glyph.LIST_UL));
+            Menu rootMenu = new Menu(null, new FontIcon("fas-list-ul"));
             MenuBar menuButton = new MenuBar(rootMenu);
             updateMenuButton(rootMenu, dataViewRoot);
             if (!rootMenu.getItems().isEmpty()) {
@@ -344,7 +343,7 @@ public class DataViewer extends BorderPane {
 
         toolBar.getItems().add(separator2);
 
-        final Button sortButton = new SquareButton(null, new Glyph(FONT_AWESOME, FontAwesome.Glyph.SORT_ALPHA_ASC));
+        final Button sortButton = new SquareButton(null, new FontIcon("fa-sort-alpha-asc"));
         sortButton.setTooltip(new Tooltip("sort children"));
 
         sortButton.setOnAction(evt -> getSelectedView().getActiveView().sort());
