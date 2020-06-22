@@ -36,6 +36,8 @@ public class StylishFloatProperty extends SimpleStyleableFloatProperty {
 
     @Override
     protected void invalidated() {
-        invalidateAction.run();
+        if (invalidateAction != null) {
+            invalidateAction.run();
+        }
     }
 }

@@ -35,6 +35,8 @@ public class StylishStringProperty extends SimpleStyleableStringProperty {
 
     @Override
     protected void invalidated() {
-        invalidateAction.run();
+        if (invalidateAction != null) {
+            invalidateAction.run();
+        }
     }
 }

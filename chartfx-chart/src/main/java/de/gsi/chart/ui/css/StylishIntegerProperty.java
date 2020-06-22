@@ -6,14 +6,11 @@ import javafx.css.SimpleStyleableIntegerProperty;
 import javafx.css.Styleable;
 
 /**
- * 
  * Short-hand to reduce boiler-plate type code of customisation of SimpleStyleableIntegerProperty to always include an
  * axis re-layout.
- * 
  * N.B. Also, the warning of inheriting more than 'n' generations is thrown only once this way.
  * 
  * @author rstein
- *
  */
 public class StylishIntegerProperty extends SimpleStyleableIntegerProperty {
     protected Runnable invalidateAction;
@@ -27,15 +24,16 @@ public class StylishIntegerProperty extends SimpleStyleableIntegerProperty {
      * @param initialValue the initial value of the wrapped {@code Object}
      * @param invalidateAction lambda expression executed in invalidated
      */
-    public StylishIntegerProperty(@NamedArg("cssMetaData") CssMetaData<? extends Styleable, Number> cssMetaData,
-            @NamedArg("bean") Object bean, @NamedArg("name") String name,
-            @NamedArg("initialValue") Integer initialValue, Runnable invalidateAction) {
+    public StylishIntegerProperty(@NamedArg("cssMetaData") CssMetaData<? extends Styleable, Number> cssMetaData, @NamedArg("bean") Object bean,
+            @NamedArg("name") String name, @NamedArg("initialValue") Integer initialValue, Runnable invalidateAction) {
         super(cssMetaData, bean, name, initialValue);
         this.invalidateAction = invalidateAction;
     }
 
     @Override
     protected void invalidated() {
-        invalidateAction.run();
+        if (invalidateAction != null) {
+            invalidateAction.run();
+        }
     }
 }
