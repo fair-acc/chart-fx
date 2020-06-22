@@ -2,16 +2,17 @@ package de.gsi.chart.renderer.spi;
 
 import java.security.InvalidParameterException;
 
-import de.gsi.chart.renderer.spi.utils.ChartIconFactory;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import javafx.scene.image.Image;
+import javafx.scene.Node;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
+
+import de.gsi.chart.renderer.spi.utils.ChartIconFactory;
 
 public abstract class AbstractMetaDataRendererParameter<R extends AbstractMetaDataRendererParameter<R>> {
     protected static final String STYLE_CLASS_LABELLED_MARKER = "chart-meta-data";
@@ -24,11 +25,10 @@ public abstract class AbstractMetaDataRendererParameter<R extends AbstractMetaDa
     protected Paint strokeColorMarker = AbstractMetaDataRendererParameter.DEFAULT_GRID_LINE_COLOR;
     protected double strokeLineWidthMarker = AbstractMetaDataRendererParameter.DEFAULT_GRID_LINE_WIDTH;
     protected double[] strokeDashPattern = AbstractMetaDataRendererParameter.DEFAULT_GRID_DASH_PATTERM;
-    protected Image imgIconInfo = ChartIconFactory.getInfoIcon();
-    protected Image imgIconWarning = ChartIconFactory.getWarningIcon();
-    protected Image imgIconError = ChartIconFactory.getErrorIcon();
+    protected Node iconInfo = ChartIconFactory.getInfoIcon();
+    protected Node iconWarning = ChartIconFactory.getWarningIcon();
+    protected Node iconError = ChartIconFactory.getErrorIcon();
     protected final DoubleProperty iconSize = new SimpleDoubleProperty(this, "drawOnPane", 10.0) {
-
         @Override
         public void set(double newSize) {
             if (newSize <= 0) {
@@ -36,9 +36,9 @@ public abstract class AbstractMetaDataRendererParameter<R extends AbstractMetaDa
             }
             super.set(newSize);
 
-            imgIconInfo = ChartIconFactory.getInfoIcon(newSize, newSize);
-            imgIconWarning = ChartIconFactory.getWarningIcon(newSize, newSize);
-            imgIconError = ChartIconFactory.getErrorIcon(newSize, newSize);
+            iconInfo = ChartIconFactory.getInfoIcon(newSize);
+            iconWarning = ChartIconFactory.getWarningIcon(newSize);
+            iconError = ChartIconFactory.getErrorIcon(newSize);
         }
     };
     protected final BooleanProperty showInfoMessages = new SimpleBooleanProperty(this, "showInfoMessages", true);
@@ -115,5 +115,4 @@ public abstract class AbstractMetaDataRendererParameter<R extends AbstractMetaDa
 
         return getThis();
     }
-
 }

@@ -1,63 +1,82 @@
 package de.gsi.chart.renderer.spi.utils;
 
-import de.codecentric.centerdevice.javafxsvg.SvgImageLoaderFactory;
-import de.gsi.chart.XYChart;
-import javafx.scene.image.Image;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
 
-public final class ChartIconFactory { // NOPMD
+import javafx.scene.Group;
+import javafx.scene.Node;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
+import javafx.scene.text.Text;
 
-    private static final String ICON_INFO = XYChart.class.getResource("icons/info_icon.svg").toString();
-    private static final String ICON_WARN = XYChart.class.getResource("icons/warn_icon.svg").toString();
-    private static final String ICON_ERROR = XYChart.class.getResource("icons/error_icon.svg").toString();
+import de.gsi.chart.Chart;
 
-    private static final int MIN_WIDTH = 10;
-    private static final int MIN_HEIGHT = 10;
-    private static final int DEFAULT_WIDTH = 32;
+public final class ChartIconFactory { // NOPMD - nomen est omen
+
+    private static final String ICON_INFO = "I";
+    private static final String ICON_WARN = "W";
+    private static final String ICON_ERROR = "E";
+    private static final Map<String, Color[]> colourMap = new HashMap<>();
+
     private static final int DEFAULT_HEIGHT = 32;
-    private static final int MAX_WIDTH = 100;
-    private static final int MAX_HEIGHT = 100;
-
+    public static Font iconFont;
     static {
-        SvgImageLoaderFactory.install();
-        // SvgImageLoaderFactory.install(new PrimitiveDimensionProvider());
+        try {
+            try (InputStream fontStream = Chart.class.getResourceAsStream("fonts/fair-chart-icons.ttf")) {
+                iconFont = Font.loadFont(fontStream, DEFAULT_HEIGHT);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        colourMap.put(ICON_INFO, new Color[] { Color.rgb(0, 0, 200), Color.WHITE });
+        colourMap.put(ICON_WARN, new Color[] { Color.rgb(255, 215, 0), Color.BLACK });
+        colourMap.put(ICON_ERROR, new Color[] { Color.rgb(237, 28, 36), Color.WHITE });
     }
 
     private ChartIconFactory() {
         // private constructor
     }
-
-    public static Image getErrorIcon() {
+    public static Node getErrorIcon() {
         return ChartIconFactory.getIcon(ChartIconFactory.ICON_ERROR);
     }
 
-    public static Image getErrorIcon(double width, double height) {
-        return new Image(ChartIconFactory.ICON_ERROR, width, height, true, false);
+    public static Node getErrorIcon(double size) {
+        return getIcon(ChartIconFactory.ICON_ERROR, size);
     }
 
-    private static Image getIcon(String file) {
-        return new Image(file, ChartIconFactory.DEFAULT_WIDTH, ChartIconFactory.DEFAULT_HEIGHT, true, false);
+    private static Node getIcon(String iconString) {
+        return getIcon(iconString, ChartIconFactory.DEFAULT_HEIGHT);
     }
 
-    public static Image getIcon(String file, double width, double height) {
-        final double w = Math.min(Math.max(width, ChartIconFactory.MIN_WIDTH), ChartIconFactory.MAX_WIDTH);
-        final double h = Math.min(Math.max(height, ChartIconFactory.MIN_HEIGHT), ChartIconFactory.MAX_HEIGHT);
-        return new Image(file, w, h, true, false);
+    public static Node getIcon(String iconString, double size) {
+        final Group group = new Group();
+        final Text text1 = new Text(iconString);
+        text1.setFont(Font.font("fair-chart-icons", size));
+        text1.setFill(colourMap.get(iconString)[0]);
+
+        final Text text2 = new Text(Character.toString(iconString.charAt(0) + 1));
+        text2.setFont(Font.font("fair-chart-icons", size));
+        text2.setFill(colourMap.get(iconString)[1]);
+
+        group.getChildren().addAll(text1, text2);
+        return group;
     }
 
-    public static Image getInfoIcon() {
+    public static Node getInfoIcon() {
         return ChartIconFactory.getIcon(ChartIconFactory.ICON_INFO);
     }
 
-    public static Image getInfoIcon(double width, double height) {
-        return new Image(ChartIconFactory.ICON_INFO, width, height, true, false);
+    public static Node getInfoIcon(double size) {
+        return getIcon(ChartIconFactory.ICON_INFO, size);
     }
 
-    public static Image getWarningIcon() {
+    public static Node getWarningIcon() {
         return ChartIconFactory.getIcon(ChartIconFactory.ICON_WARN);
     }
 
-    public static Image getWarningIcon(double width, double height) {
-        return new Image(ChartIconFactory.ICON_WARN, width, height, true, false);
+    public static Node getWarningIcon(double size) {
+        return getIcon(ChartIconFactory.ICON_WARN, size);
     }
-
 }
