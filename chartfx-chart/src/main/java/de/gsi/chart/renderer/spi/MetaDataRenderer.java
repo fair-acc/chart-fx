@@ -4,13 +4,6 @@ import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.List;
 
-import de.gsi.chart.Chart;
-import de.gsi.chart.axes.Axis;
-import de.gsi.chart.renderer.Renderer;
-import de.gsi.chart.ui.geometry.Side;
-import de.gsi.dataset.DataSet;
-import de.gsi.dataset.DataSetMetaData;
-import de.gsi.dataset.utils.ProcessingProfiler;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -24,11 +17,18 @@ import javafx.scene.Node;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Label;
-import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+
+import de.gsi.chart.Chart;
+import de.gsi.chart.axes.Axis;
+import de.gsi.chart.renderer.Renderer;
+import de.gsi.chart.ui.geometry.Side;
+import de.gsi.dataset.DataSet;
+import de.gsi.dataset.DataSetMetaData;
+import de.gsi.dataset.utils.ProcessingProfiler;
 
 public class MetaDataRenderer extends AbstractMetaDataRendererParameter<MetaDataRenderer> implements Renderer {
     protected BorderPane borderPane = new BorderPane();
@@ -57,7 +57,7 @@ public class MetaDataRenderer extends AbstractMetaDataRendererParameter<MetaData
         }
     };
 
-    protected final ObjectProperty<Side> infoBoxSide = new SimpleObjectProperty<Side>(this, "infoBoxSide", Side.TOP) {
+    protected final ObjectProperty<Side> infoBoxSide = new SimpleObjectProperty<>(this, "infoBoxSide", Side.TOP) {
         Side oldSide = null;
 
         @Override
@@ -88,16 +88,12 @@ public class MetaDataRenderer extends AbstractMetaDataRendererParameter<MetaData
         // VBox.setVgrow(messageBox, Priority.SOMETIMES);
 
         chart.getCanvasForeground().getChildren().add(borderPane);
-        final ChangeListener<Number> canvasChange = (ch, oldVal, newVal) -> borderPane
-                .setPrefSize(chart.getCanvasForeground().getWidth(), chart.getCanvas().getHeight());
+        final ChangeListener<Number> canvasChange = (ch, oldVal, newVal) -> borderPane.setPrefSize(chart.getCanvasForeground().getWidth(), chart.getCanvas().getHeight());
 
         chart.getCanvas().widthProperty().addListener(canvasChange);
         chart.getCanvas().heightProperty().addListener(canvasChange);
 
         setInfoBoxSide(Side.TOP); // NOPMD by rstein on 13/06/19 14:25
-
-        // SvgImageLoaderFactory.install();
-        // // SvgImageLoaderFactory.install(new PrimitiveDimensionProvider());
     }
 
     @Override
@@ -251,20 +247,20 @@ public class MetaDataRenderer extends AbstractMetaDataRendererParameter<MetaData
         final List<DataSet> metaDataSets = getDataSetsWithMetaData(allDataSets);
 
         final List<String> infoMessages = isShowInfoMessages() ? extractMessages(metaDataSets, singleDS, MsgType.INFO)
-                : new ArrayList<>();
+                                                               : new ArrayList<>();
         final List<String> warningMessages = isShowWarningMessages()
-                ? extractMessages(metaDataSets, singleDS, MsgType.WARNING)
-                : new ArrayList<>();
+                                                     ? extractMessages(metaDataSets, singleDS, MsgType.WARNING)
+                                                     : new ArrayList<>();
         final List<String> errorMessages = isShowErrorMessages()
-                ? extractMessages(metaDataSets, singleDS, MsgType.ERROR)
-                : new ArrayList<>();
+                                                   ? extractMessages(metaDataSets, singleDS, MsgType.ERROR)
+                                                   : new ArrayList<>();
 
         if (!infoMessages.equals(oldInfoMessages)) {
             oldInfoMessages = infoMessages;
             infoBox.getChildren().clear();
             if (!infoMessages.isEmpty()) {
                 final VBox msgs = new VBox();
-                infoBox.getChildren().addAll(new ImageView(imgIconInfo), msgs);
+                infoBox.getChildren().addAll(iconInfo, msgs);
 
                 for (final String text : infoMessages) {
                     final MetaLabel info = new MetaLabel(text);
@@ -278,7 +274,7 @@ public class MetaDataRenderer extends AbstractMetaDataRendererParameter<MetaData
             warningBox.getChildren().clear();
             if (!warningMessages.isEmpty()) {
                 final VBox msgs = new VBox();
-                warningBox.getChildren().addAll(new ImageView(imgIconWarning), msgs);
+                warningBox.getChildren().addAll(iconWarning, msgs);
 
                 for (final String text : warningMessages) {
                     final MetaLabel info = new MetaLabel(text);
@@ -295,7 +291,7 @@ public class MetaDataRenderer extends AbstractMetaDataRendererParameter<MetaData
                     final MetaLabel info = new MetaLabel(text);
                     msgs.getChildren().add(info);
                 }
-                errorBox.getChildren().setAll(new ImageView(imgIconError), msgs);
+                errorBox.getChildren().setAll(iconError, msgs);
             } else {
                 errorBox.getChildren().clear();
             }
@@ -394,17 +390,17 @@ public class MetaDataRenderer extends AbstractMetaDataRendererParameter<MetaData
     }
 
     protected class MetaLabel extends Label {
-
         public MetaLabel(final String text) {
             super(text);
             setMouseTransparent(true);
             setMinSize(100, 20);
             setCache(true);
         }
-
     }
 
     protected enum MsgType {
-        INFO, WARNING, ERROR;
+        INFO,
+        WARNING,
+        ERROR
     }
 }
