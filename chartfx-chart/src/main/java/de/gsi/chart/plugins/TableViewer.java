@@ -9,12 +9,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.List;
-import java.util.Map;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.TreeMap;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
@@ -45,8 +40,7 @@ import javafx.scene.layout.HBox;
 import javafx.stage.FileChooser;
 import javafx.util.converter.DoubleStringConverter;
 
-import org.controlsfx.glyphfont.FontAwesome;
-import org.controlsfx.glyphfont.Glyph;
+import org.kordamp.ikonli.javafx.FontIcon;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -70,22 +64,20 @@ import de.gsi.dataset.event.UpdateEvent;
  */
 public class TableViewer extends ChartPlugin {
     private static final Logger LOGGER = LoggerFactory.getLogger(TableViewer.class);
-
-    protected static final String FONT_AWESOME = "FontAwesome";
     // prevent allocating an infinite number of columns in case something goes wrong
     private static final int MAX_DATASETS_IN_TABLE = 100;
-    protected static final int FONT_SIZE = 20;
+    protected static final int FONT_SIZE = 22;
 
     protected static final int MIN_REFRESH_RATE_WARN = 20; // [ms] warn if refresh rate is set lower than this value
-    private final Glyph tableView = new Glyph(FONT_AWESOME, FontAwesome.Glyph.TABLE).size(FONT_SIZE);
-    private final Glyph graphView = new Glyph(FONT_AWESOME, FontAwesome.Glyph.LINE_CHART).size(FONT_SIZE);
-    private final Glyph saveIcon = new Glyph(FONT_AWESOME, "\uf0c7").size(FONT_SIZE);
-    private final Glyph clipBoardIcon = new Glyph(FONT_AWESOME, FontAwesome.Glyph.CLIPBOARD).size(FONT_SIZE);
+    private final FontIcon tableView = new FontIcon("fa-table:" + FONT_SIZE);
+    private final FontIcon graphView = new FontIcon("fa-line-chart:" + FONT_SIZE);
+    private final FontIcon saveIcon = new FontIcon("fa-save:" + FONT_SIZE);
+    private final FontIcon clipBoardIcon = new FontIcon("far-clipboard:" + FONT_SIZE);
     private final HBox interactorButtons = getInteractorBar();
     private final TableView<DataSetsRow> table = new TableView<>();
     private final DataSetsModel dsModel = new DataSetsModel();
     protected boolean editable;
-    private Timer timer = new Timer("TableViewer-update-task", true);
+    private final Timer timer = new Timer("TableViewer-update-task", true);
     private final IntegerProperty refreshRate = new SimpleIntegerProperty(this, "refreshRate", 1000) {
         @Override
         public void set(int newValue) {
@@ -208,16 +200,16 @@ public class TableViewer extends ChartPlugin {
         separator.setOrientation(Orientation.VERTICAL);
         final HBox buttonBar = new HBox();
         buttonBar.setPadding(new Insets(1, 1, 1, 1));
-        final Button switchTableView = new Button(null, tableView);
+        final Button switchTableView = new Button("", tableView);
         switchTableView.setPadding(new Insets(3, 3, 3, 3));
         switchTableView.setTooltip(new Tooltip("switches between graph and table view"));
 
-        final Button copyToClipBoard = new Button(null, clipBoardIcon);
+        final Button copyToClipBoard = new Button("", clipBoardIcon);
         copyToClipBoard.setPadding(new Insets(3, 3, 3, 3));
         copyToClipBoard.setTooltip(new Tooltip("copy selected content top system clipboard"));
         copyToClipBoard.setOnAction(e -> this.copySelectedToClipboard());
 
-        final Button saveTableView = new Button(null, saveIcon);
+        final Button saveTableView = new Button("", saveIcon);
         saveTableView.setPadding(new Insets(3, 3, 3, 3));
         saveTableView.setTooltip(new Tooltip("store actively shown content as .csv file"));
         saveTableView.setOnAction(e -> this.exportGridToCSV());
@@ -254,7 +246,7 @@ public class TableViewer extends ChartPlugin {
         boolean errorCol;
         boolean positive;
 
-        private ColumnType(final int dimIdx, final String label, final boolean errorCol, final boolean positive) {
+        ColumnType(final int dimIdx, final String label, final boolean errorCol, final boolean positive) {
             this.dimIdx = dimIdx;
             this.label = label;
             this.errorCol = errorCol;
@@ -276,7 +268,7 @@ public class TableViewer extends ChartPlugin {
         private final ObservableList<TableColumn<DataSetsRow, ?>> columns = FXCollections.observableArrayList();
 
         private long lastColumnUpdate = 0;
-        private AtomicBoolean columnUpdateScheduled = new AtomicBoolean(false);
+        private final AtomicBoolean columnUpdateScheduled = new AtomicBoolean(false);
 
         private final ListChangeListener<Renderer> rendererChangeListener = this::rendererChanged;
         private final InvalidationListener datasetChangeListener = this::datasetsChanged;
@@ -307,7 +299,7 @@ public class TableViewer extends ChartPlugin {
             }
             long now = System.currentTimeMillis();
             if (now - lastColumnUpdate > refreshRate.get()) {
-                List<DataSet> columnsUpdated = getChart().getAllDatasets().stream().sorted((a, b) -> a.getName().compareTo(b.getName())).collect(Collectors.toList());
+                List<DataSet> columnsUpdated = getChart().getAllDatasets().stream().sorted(Comparator.comparing(DataSet::getName)).collect(Collectors.toList());
                 int nRowsNew = 0;
                 for (int i = 0; i < columns.size() - 1 || i < columnsUpdated.size(); i++) {
                     if (i > MAX_DATASETS_IN_TABLE) {
@@ -401,7 +393,7 @@ public class TableViewer extends ChartPlugin {
                     dataSetNo++;
                     for (TableColumn<DataSetsRow, ?> subcol : col.getColumns()) {
                         if (subcol instanceof DataSetTableColumn && ((DataSetTableColumn) subcol).active) {
-                            sb.append(((DataSetTableColumn) subcol).getText()).append(dataSetNo).append(", ");
+                            sb.append(subcol.getText()).append(dataSetNo).append(", ");
                         }
                     }
                 }

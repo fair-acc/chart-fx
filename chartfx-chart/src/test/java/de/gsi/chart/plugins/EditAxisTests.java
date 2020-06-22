@@ -1,7 +1,6 @@
 package de.gsi.chart.plugins;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.concurrent.ExecutionException;
 
@@ -11,6 +10,7 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.function.ThrowingSupplier;
 import org.testfx.framework.junit5.ApplicationExtension;
 import org.testfx.framework.junit5.Start;
 
@@ -45,7 +45,7 @@ public class EditAxisTests {
     }
 
     @TestFx
-    public void attachChartTests() throws InterruptedException, ExecutionException {
+    public void attachChartTests() {
         assertEquals(2, chart.getAxes().size());
 
         EditAxis plugin = new EditAxis();
@@ -72,14 +72,14 @@ public class EditAxisTests {
 
     @TestFx
     public void basicEditAxisInterfaceTests() {
-        assertDoesNotThrow(() -> new EditAxis());
+        assertDoesNotThrow((ThrowingSupplier<EditAxis>) EditAxis::new);
 
         assertDoesNotThrow(() -> {
             EditAxis plugin = new EditAxis(false);
-            assertEquals(false, plugin.isAnimated());
+            assertFalse(plugin.isAnimated());
 
             plugin.setAnimated(true);
-            assertEquals(true, plugin.isAnimated());
+            assertTrue(plugin.isAnimated());
 
             plugin.setZoomDuration(Duration.millis(100));
             assertEquals(Duration.millis(100), plugin.getZoomDuration());
@@ -101,7 +101,7 @@ public class EditAxisTests {
     }
 
     @TestFx
-    public void changeAxisRangeTests() throws InterruptedException, ExecutionException {
+    public void changeAxisRangeTests() {
         assertEquals(2, chart.getAxes().size());
 
         EditAxis plugin = new EditAxis();
@@ -109,7 +109,7 @@ public class EditAxisTests {
         chart.getPlugins().add(plugin);
         assertEquals(2, plugin.popUpList.size());
 
-        AxisEditor xEditor = plugin.new AxisEditor(xAxis, true);
+        AxisEditor xEditor = new AxisEditor(xAxis, true);
 
         assertEquals(+100, xAxis.getMax());
         assertEquals(-100, xAxis.getMin());

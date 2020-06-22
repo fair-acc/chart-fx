@@ -35,8 +35,7 @@ import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
-import org.controlsfx.glyphfont.FontAwesome;
-import org.controlsfx.glyphfont.Glyph;
+import org.kordamp.ikonli.javafx.FontIcon;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,8 +46,8 @@ import de.gsi.chart.plugins.TableViewer;
 import de.gsi.chart.plugins.Zoomer;
 import de.gsi.chart.renderer.ErrorStyle;
 import de.gsi.chart.renderer.spi.ErrorDataSetRenderer;
+import de.gsi.chart.ui.ProfilerInfoBox;
 import de.gsi.chart.ui.geometry.Side;
-import de.gsi.chart.utils.GlyphFactory;
 import de.gsi.chart.viewer.DataView;
 import de.gsi.chart.viewer.DataViewWindow;
 import de.gsi.chart.viewer.DataViewWindow.WindowDecoration;
@@ -72,7 +71,7 @@ public class DataViewerSample extends Application {
     private static final Logger LOGGER = LoggerFactory.getLogger(DataViewerSample.class);
     private static final String TITLE = DataViewerSample.class.getSimpleName();
     protected static final String FONT_AWESOME = "FontAwesome";
-    protected static final int FONT_SIZE = 20;
+    protected static final int FONT_SIZE = 22;
     private static final int NUMBER_OF_POINTS = 10_000; // default: 32000
     private static final int UPDATE_PERIOD = 1000; // [ms]
 
@@ -87,7 +86,7 @@ public class DataViewerSample extends Application {
         }
 
         if (evt instanceof WindowClosedEvent) {
-            LOGGER.atInfo().addArgument(((WindowClosedEvent) evt).getSource()).log("window {} closed");
+            LOGGER.atInfo().addArgument(evt.getSource()).log("window {} closed");
         }
     };
 
@@ -97,10 +96,10 @@ public class DataViewerSample extends Application {
         primaryStage.setTitle(DataViewerSample.TITLE);
 
         // the new JavaFX Chart Dataviewer
-        final Glyph chartIcon = new Glyph(FONT_AWESOME, FontAwesome.Glyph.LINE_CHART).size(FONT_SIZE);
+        final FontIcon chartIcon = new FontIcon("fa-line-chart:" + FONT_SIZE);
         final DataView view1 = new DataView("ChartViews", chartIcon);
 
-        final Glyph customViewIcon = new Glyph(FONT_AWESOME, FontAwesome.Glyph.USERS).size(FONT_SIZE);
+        final FontIcon customViewIcon = new FontIcon("fa-users:" + FONT_SIZE);
         final DataView view2 = new DataView("Custom View", customViewIcon, getDemoPane());
 
         final DataViewer viewer = new DataViewer();
@@ -131,7 +130,7 @@ public class DataViewerSample extends Application {
         logStatePropertyChanges(jDataViewerPane.getName(), jDataViewerPane);
 
         final DataViewWindow energyView = new DataViewWindow("Energy", energyChart);
-        energyView.setGraphic(GlyphFactory.create(FontAwesome.Glyph.ADJUST));
+        energyView.setGraphic(new FontIcon("fa-adjust"));
         energyView.addListener(dataWindowEventListener);
         logStatePropertyChanges(energyView.getName(), energyView);
         view1.getVisibleChildren().addAll(energyView, currentView, jDataViewerPane);
@@ -145,7 +144,7 @@ public class DataViewerSample extends Application {
         //        viewer.setSelectedView(view2);
         // set user default interactors
         final CheckBox listView = new CheckBox();
-        listView.setGraphic(new Glyph(FONT_AWESOME, '\uf022').size(FONT_SIZE));
+        listView.setGraphic(new FontIcon("fa-list-alt:" + FONT_SIZE));
         listView.setTooltip(new Tooltip("click to switch between button and list-style DataView selection"));
         listView.setSelected(viewer.showListStyleDataViewProperty().get());
         listView.selectedProperty().bindBidirectional(viewer.showListStyleDataViewProperty());
@@ -162,7 +161,7 @@ public class DataViewerSample extends Application {
         detachable.setSelected(viewer.isDetachableWindow());
         detachable.selectedProperty().bindBidirectional(viewer.detachableWindowProperty());
 
-        final Button newView = new Button(null, new HBox(new Glyph(FONT_AWESOME, FontAwesome.Glyph.PLUS).size(FONT_SIZE), new Glyph(FONT_AWESOME, FontAwesome.Glyph.LINE_CHART).size(FONT_SIZE)));
+        final Button newView = new Button(null, new HBox(new FontIcon("fa-plus:" + FONT_SIZE), new FontIcon("fa-line-chart:" + FONT_SIZE)));
         newView.setTooltip(new Tooltip("add new view"));
         newView.setOnAction(evt -> {
             final int count = view1.getVisibleChildren().size() + view1.getMinimisedChildren().size();
@@ -214,9 +213,9 @@ public class DataViewerSample extends Application {
 
         final Label focusedOwner = new Label();
 
-        viewer.getUserToolBarItems().addAll(newView, initialWindowState, new Label("Win-Decor:"), windowDecoration, detachableBox, listView);
+        viewer.getUserToolBarItems().addAll(new ProfilerInfoBox(), newView, initialWindowState, new Label("Win-Decor:"), windowDecoration, detachableBox, listView);
         final Scene scene = new Scene(
-                new VBox(viewer.getToolBar(), viewer, new HBox(new Label("focus on: "), focusedOwner)), 800, 600);
+                new VBox(viewer.getToolBar(), viewer, new HBox(new Label("focus on: "), focusedOwner)), 1000, 600);
         scene.focusOwnerProperty().addListener((ch, o, n) -> {
             if (n == null) {
                 focusedOwner.setText(null);
@@ -330,7 +329,7 @@ public class DataViewerSample extends Application {
     private enum InitialWindowState {
         VISIBLE,
         MINIMISED,
-        DETACHED;
+        DETACHED
     }
 
     private class TestChart extends XYChart {

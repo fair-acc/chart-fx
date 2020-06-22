@@ -28,7 +28,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 
-import org.controlsfx.glyphfont.Glyph;
+import org.kordamp.ikonli.javafx.FontIcon;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,8 +56,8 @@ public class SnowFlakeSample extends Application {
     private static final Logger LOGGER = LoggerFactory.getLogger(SnowFlakeSample.class);
     protected static final String FONT_AWESOME = "FontAwesome";
     protected static final int FONT_SIZE = 20;
-    protected static final char FONT_SYMBOL_TRANSPOSE = '\uf021'; // sync symbol
-    protected static final char FONT_SYMBOL_SNOW = '\uf2dc'; // snow symbol
+    protected static final String FONT_SYMBOL_TRANSPOSE = "fas-sync:" + FONT_SIZE; // sync symbol
+    protected static final String FONT_SYMBOL_SNOW = "fa-snowflake-o:" + FONT_SIZE; // snow symbol
     private static final int WIDTH = 1200;
     private static final int HEIGHT = 600;
 
@@ -78,12 +78,12 @@ public class SnowFlakeSample extends Application {
 
         final CheckBox cbTransposed = new CheckBox("flip tree");
         cbTransposed.setTooltip(new Tooltip("press to flip tree"));
-        cbTransposed.setGraphic(new Glyph(FONT_AWESOME, FONT_SYMBOL_TRANSPOSE).size(FONT_SIZE));
+        cbTransposed.setGraphic(new FontIcon(FONT_SYMBOL_TRANSPOSE));
         cbTransposed.selectedProperty().bindBidirectional(flipProperty);
 
         final CheckBox cbSnow = new CheckBox("snow");
         cbSnow.setTooltip(new Tooltip("press to switch on/off snow"));
-        cbSnow.setGraphic(new Glyph(FONT_AWESOME, FONT_SYMBOL_SNOW).size(FONT_SIZE));
+        cbSnow.setGraphic(new FontIcon(FONT_SYMBOL_SNOW));
         cbSnow.selectedProperty().bindBidirectional(snowProperty);
 
         Slider nFlakeSpeed = new Slider(0.0, 2, velocityProperty.get());
@@ -155,7 +155,7 @@ public class SnowFlakeSample extends Application {
         chart.setLegendVisible(false);
 
         chart.setTitle((inverted ? "Y" : "X") + "-mas tree");
-        flipProperty.addListener((ch, o, n) -> chart.setTitle((inverted ^ n.booleanValue() ? "Y" : "X") + "-mas tree"));
+        flipProperty.addListener((ch, o, n) -> chart.setTitle((inverted ^ n ? "Y" : "X") + "-mas tree"));
 
         final ErrorDataSetRenderer renderer1 = (ErrorDataSetRenderer) chart.getRenderers().get(0);
         renderer1.setAssumeSortedData(false);
@@ -174,9 +174,9 @@ public class SnowFlakeSample extends Application {
         renderer2.getDatasets().add(transposeOrnaments);
 
         flipProperty.addListener((ch, o, n) -> {
-            transposeStump.setTransposed(inverted ^ n.booleanValue());
-            transposeTree.setTransposed(inverted ^ n.booleanValue());
-            transposeOrnaments.setTransposed(inverted ^ n.booleanValue());
+            transposeStump.setTransposed(inverted ^ n);
+            transposeTree.setTransposed(inverted ^ n);
+            transposeOrnaments.setTransposed(inverted ^ n);
         });
 
         return chart;

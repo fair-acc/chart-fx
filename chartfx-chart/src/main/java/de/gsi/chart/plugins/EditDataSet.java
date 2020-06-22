@@ -44,8 +44,7 @@ import javafx.scene.shape.Rectangle;
 import javafx.stage.Popup;
 import javafx.util.Pair;
 
-import org.controlsfx.glyphfont.FontAwesome;
-import org.controlsfx.glyphfont.Glyph;
+import org.kordamp.ikonli.javafx.FontIcon;
 
 import de.gsi.chart.Chart;
 import de.gsi.chart.XYChart;
@@ -133,7 +132,6 @@ public class EditDataSet extends TableViewer {
             } else {
                 popup.showPopup(event, null);
                 event.consume();
-                return;
             }
         }
     };
@@ -405,7 +403,7 @@ public class EditDataSet extends TableViewer {
     enum ShiftConstraint {
         SHIFTXY,
         SHIFTX,
-        SHIFTY;
+        SHIFTY
     }
 
     class ShiftConstraintListCell extends ListCell<ShiftConstraint> {
@@ -421,30 +419,29 @@ public class EditDataSet extends TableViewer {
                 setGraphic(null);
                 return;
             }
-            Glyph result;
+            FontIcon result;
             Tooltip tooltip = new Tooltip();
             switch (shiftConstraint) {
             case SHIFTX:
-                result = new Glyph(FONT_AWESOME, FontAwesome.Glyph.ARROWS_H).size(FONT_SIZE_COMBO);
-                tooltip.setText("Allow to modify the x value of the points");
+                result = new FontIcon("fa-arrows-h:" + FONT_SIZE_COMBO);
+                tooltip.setText("Allow to modify the points's x values");
                 setText("shift x");
                 break;
             case SHIFTXY:
-                result = new Glyph(FONT_AWESOME, FontAwesome.Glyph.ARROWS).size(FONT_SIZE_COMBO);
-                tooltip.setText("Allow to modify the the points freely");
+                result = new FontIcon("fa-arrows:" + FONT_SIZE_COMBO);
+                tooltip.setText("Allow to modify the points freely");
                 setText("shift xy");
                 break;
             case SHIFTY:
-                result = new Glyph(FONT_AWESOME, FontAwesome.Glyph.ARROWS_V).size(FONT_SIZE_COMBO);
-                tooltip.setText("Allow to modify the x value of the points");
+                result = new FontIcon("fa-arrows-v:" + FONT_SIZE_COMBO);
+                tooltip.setText("Allow to modify the point's y values");
                 setText("shift y");
                 break;
             default:
-                result = new Glyph(FONT_AWESOME, FontAwesome.Glyph.QUESTION_CIRCLE).size(FONT_SIZE_COMBO);
+                result = new FontIcon("fa-question-circle-o:" + FONT_SIZE_COMBO);
                 setText("-");
             }
-            result.setTextFill(Color.DARKBLUE);
-            result.setPadding(Insets.EMPTY);
+            result.setFill(Color.DARKBLUE);
             setGraphic(result);
         }
     }
@@ -453,11 +450,11 @@ public class EditDataSet extends TableViewer {
     protected HBox getInteractorBar() {
         final HBox interactorBar = super.getInteractorBar();
 
-        final Glyph editGlyph = new Glyph(FONT_AWESOME, FontAwesome.Glyph.EDIT).size(FONT_SIZE);
-        final Glyph addGlyph = new Glyph(FONT_AWESOME, FontAwesome.Glyph.PLUS_CIRCLE).size(FONT_SIZE);
-        final Glyph removeGlyph = new Glyph(FONT_AWESOME, FontAwesome.Glyph.MINUS_CIRCLE).size(FONT_SIZE);
+        final FontIcon editIcon = new FontIcon("fa-edit:" + FONT_SIZE);
+        final FontIcon addIcon = new FontIcon("fa-plus-circle:" + FONT_SIZE);
+        final FontIcon removeIcon = new FontIcon("fa-minus-circle:" + FONT_SIZE);
 
-        final Button editButton = new Button(null, editGlyph);
+        final Button editButton = new Button(null, editIcon);
         editButton.setPadding(new Insets(3, 3, 3, 3));
         editButton.setTooltip(new Tooltip("enables edit interactor"));
         interactorBar.getChildren().add(editButton);
@@ -465,14 +462,14 @@ public class EditDataSet extends TableViewer {
         // editEnable.set(!editEnable.get());
         // });
 
-        final Button addButton = new Button(null, addGlyph);
-        addGlyph.setTextFill(Color.DARKGREEN);
+        final Button addButton = new Button(null, addIcon);
+        addIcon.setFill(Color.DARKGREEN);
         addButton.setPadding(new Insets(3, 3, 3, 3));
         addButton.setTooltip(new Tooltip("add data point"));
         interactorBar.getChildren().add(addButton);
 
-        final Button removeButton = new Button(null, removeGlyph);
-        removeGlyph.setTextFill(Color.DARKRED);
+        final Button removeButton = new Button(null, removeIcon);
+        removeIcon.setFill(Color.DARKRED);
         removeButton.setPadding(new Insets(3, 3, 3, 3));
         removeButton.setTooltip(new Tooltip("remove data point"));
         interactorBar.getChildren().add(removeButton);
@@ -603,11 +600,7 @@ public class EditDataSet extends TableViewer {
                     rend.getDatasets());
         }
 
-        if (markedPoints.isEmpty()) {
-            editEnable.set(false);
-        } else {
-            editEnable.set(true);
-        }
+        editEnable.set(!markedPoints.isEmpty());
 
         updateMarker();
     }
