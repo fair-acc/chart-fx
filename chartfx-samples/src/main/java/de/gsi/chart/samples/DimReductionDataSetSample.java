@@ -41,10 +41,11 @@ import de.gsi.math.spectra.wavelet.ContinuousWavelet;
 public class DimReductionDataSetSample extends Application {
     private static final Logger LOGGER = LoggerFactory.getLogger(DimReductionDataSetSample.class);
     private static DataSet tempDataSet; // only needed as temporary storage
-    private final DataSet waveletScalogram = createDataSet();
+    private DataSet waveletScalogram;
 
     @Override
     public void start(final Stage primaryStage) {
+        waveletScalogram = createDataSet();
         final XYChart waveletChart1 = getChart(true);
         waveletChart1.getDatasets().add(waveletScalogram);
 
@@ -148,12 +149,7 @@ public class DimReductionDataSetSample extends Application {
         // the wavelet scalogram computation
         final ContinuousWavelet wtrafo = new ContinuousWavelet();
 
-        new Thread() {
-            @Override
-            public void run() {
-                tempDataSet = wtrafo.getScalogram(yValues, nQuantx, nQuanty, nu, fmin, fmax);
-            }
-        }.start();
+        new Thread(() -> tempDataSet = wtrafo.getScalogram(yValues, nQuantx, nQuanty, nu, fmin, fmax)).start();
 
         do {
             sleep(100);
