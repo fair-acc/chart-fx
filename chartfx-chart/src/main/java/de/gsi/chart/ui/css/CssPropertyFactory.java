@@ -6,7 +6,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BinaryOperator;
+import java.util.function.DoubleBinaryOperator;
 import java.util.function.Function;
+import java.util.function.IntBinaryOperator;
+import java.util.function.LongBinaryOperator;
 import java.util.function.UnaryOperator;
 
 import javafx.beans.property.ObjectProperty;
@@ -87,10 +90,11 @@ public class CssPropertyFactory<S extends Styleable> {
      * @return a StyleableProperty created with initial value and inherit flag
      */
     public final StyleableDoubleProperty createDoubleProperty(S styleable, String propertyName, String cssProperty,
-            Function<S, StyleableProperty<Number>> function, double initialValue, boolean inherits, BinaryOperator<Double> filter,
+            Function<S, StyleableProperty<Number>> function, double initialValue, boolean inherits, DoubleBinaryOperator filter,
             Runnable... invalidateActions) {
         final CssMetaData<S, Number> cssMetaData = (CssMetaData<S, Number>) metaDataSet.computeIfAbsent(cssProperty, cssProp -> {
-            final SimpleCssMetaData<S, Number> newData = new SimpleCssMetaData<>(cssProp, StyleConverter.getSizeConverter(), initialValue, inherits, null, function);
+            final SimpleCssMetaData<S, Number> newData = new SimpleCssMetaData<>(cssProp, StyleConverter.getSizeConverter(), initialValue, inherits, null,
+                    function);
             metaData.add(newData);
             return newData;
         });
@@ -107,26 +111,19 @@ public class CssPropertyFactory<S extends Styleable> {
      *            call.
      * @param initialValue The initial value of the property. CSS may reset the property to this value.
      * @param inherits Whether or not the CSS style can be inherited by child nodes
-     * @param invalidateAction Runnable to be executed on invalidation of the property
      * @param filter A filter to apply to updated data
+     * @param invalidateActions Runnables to be executed on invalidation of the property
      * @return a StyleableProperty created with initial value and inherit flag
      */
     public final StyleableIntegerProperty createIntegerProperty(S styleable, String propertyName, String cssProperty,
-            Function<S, StyleableProperty<Number>> function, int initialValue, boolean inherits, Runnable invalidateAction, UnaryOperator<Integer> filter) {
+            Function<S, StyleableProperty<Number>> function, int initialValue, boolean inherits, IntBinaryOperator filter, Runnable... invalidateActions) {
         final CssMetaData<S, Number> cssMetaData = (CssMetaData<S, Number>) metaDataSet.computeIfAbsent(cssProperty, cssProp -> {
-            final SimpleCssMetaData<S, Number> newData = new SimpleCssMetaData<>(cssProp, StyleConverter.getSizeConverter(), initialValue, inherits, null, function);
+            final SimpleCssMetaData<S, Number> newData = new SimpleCssMetaData<>(cssProp, StyleConverter.getSizeConverter(), initialValue, inherits, null,
+                    function);
             metaData.add(newData);
             return newData;
         });
-        if (filter != null) {
-            return new StylishIntegerProperty(cssMetaData, styleable, propertyName, initialValue, invalidateAction) {
-                @Override
-                public void set(final int value) {
-                    super.set(filter.apply(value));
-                }
-            };
-        }
-        return new StylishIntegerProperty(cssMetaData, styleable, propertyName, initialValue, invalidateAction);
+        return new StylishIntegerProperty(cssMetaData, styleable, propertyName, initialValue, filter, invalidateActions);
     }
 
     /**
@@ -139,26 +136,19 @@ public class CssPropertyFactory<S extends Styleable> {
      *            call.
      * @param initialValue The initial value of the property. CSS may reset the property to this value.
      * @param inherits Whether or not the CSS style can be inherited by child nodes
-     * @param invalidateAction Runnable to be executed on invalidation of the property
      * @param filter A filter to apply to updated data
+     * @param invalidateActions Runnables to be executed on invalidation of the property
      * @return a StyleableProperty created with initial value and inherit flag
      */
-    public final StyleableLongProperty createLongProperty(S styleable, String propertyName, String cssProperty,
-            Function<S, StyleableProperty<Number>> function, long initialValue, boolean inherits, Runnable invalidateAction, UnaryOperator<Long> filter) {
+    public final StyleableLongProperty createLongProperty(S styleable, String propertyName, String cssProperty, Function<S, StyleableProperty<Number>> function,
+            long initialValue, boolean inherits, LongBinaryOperator filter, Runnable... invalidateActions) {
         final CssMetaData<S, Number> cssMetaData = (CssMetaData<S, Number>) metaDataSet.computeIfAbsent(cssProperty, cssProp -> {
-            final SimpleCssMetaData<S, Number> newData = new SimpleCssMetaData<>(cssProp, StyleConverter.getSizeConverter(), initialValue, inherits, null, function);
+            final SimpleCssMetaData<S, Number> newData = new SimpleCssMetaData<>(cssProp, StyleConverter.getSizeConverter(), initialValue, inherits, null,
+                    function);
             metaData.add(newData);
             return newData;
         });
-        if (filter != null) {
-            return new StylishLongProperty(cssMetaData, styleable, propertyName, initialValue, invalidateAction) {
-                @Override
-                public void set(final long value) {
-                    super.set(filter.apply(value));
-                }
-            };
-        }
-        return new StylishLongProperty(cssMetaData, styleable, propertyName, initialValue, invalidateAction);
+        return new StylishLongProperty(cssMetaData, styleable, propertyName, initialValue, filter, invalidateActions);
     }
 
     /**
@@ -171,26 +161,19 @@ public class CssPropertyFactory<S extends Styleable> {
      *            call.
      * @param initialValue The initial value of the property. CSS may reset the property to this value.
      * @param inherits Whether or not the CSS style can be inherited by child nodes
-     * @param invalidateAction Runnable to be executed on invalidation of the property
      * @param filter A filter to apply to updated data
+     * @param invalidateActions Runnables to be executed on invalidation of the property
      * @return a StyleableProperty created with initial value and inherit flag
      */
     public final StyleableFloatProperty createFloatProperty(S styleable, String propertyName, String cssProperty,
-            Function<S, StyleableProperty<Number>> function, float initialValue, boolean inherits, Runnable invalidateAction, UnaryOperator<Float> filter) {
+            Function<S, StyleableProperty<Number>> function, float initialValue, boolean inherits, BinaryOperator<Float> filter, Runnable... invalidateActions) {
         final CssMetaData<S, Number> cssMetaData = (CssMetaData<S, Number>) metaDataSet.computeIfAbsent(cssProperty, cssProp -> {
-            final SimpleCssMetaData<S, Number> newData = new SimpleCssMetaData<>(cssProp, StyleConverter.getSizeConverter(), initialValue, inherits, null, function);
+            final SimpleCssMetaData<S, Number> newData = new SimpleCssMetaData<>(cssProp, StyleConverter.getSizeConverter(), initialValue, inherits, null,
+                    function);
             metaData.add(newData);
             return newData;
         });
-        if (filter != null) {
-            return new StylishFloatProperty(cssMetaData, styleable, propertyName, initialValue, invalidateAction) {
-                @Override
-                public void set(final float value) {
-                    super.set(filter.apply(value));
-                }
-            };
-        }
-        return new StylishFloatProperty(cssMetaData, styleable, propertyName, initialValue, invalidateAction);
+        return new StylishFloatProperty(cssMetaData, styleable, propertyName, initialValue, filter, invalidateActions);
     }
 
     /**
@@ -203,28 +186,20 @@ public class CssPropertyFactory<S extends Styleable> {
      *            call.
      * @param initialValue The initial value of the property. CSS may reset the property to this value.
      * @param inherits Whether or not the CSS style can be inherited by child nodes
-     * @param invalidateAction Runnable to be executed on invalidation of the property
      * @param filter A filter to apply to updated data
+     * @param invalidateActions Runnables to be executed on invalidation of the property
      * @return a StyleableProperty created with initial value and inherit flag
      */
     public final StyleableBooleanProperty createBooleanProperty(S styleable, String propertyName, String cssProperty,
-            Function<S, StyleableProperty<Boolean>> function, boolean initialValue, boolean inherits, Runnable invalidateAction,
-            UnaryOperator<Boolean> filter) {
+            Function<S, StyleableProperty<Boolean>> function, boolean initialValue, boolean inherits, BinaryOperator<Boolean> filter,
+            Runnable... invalidateActions) {
         final CssMetaData<S, Boolean> cssMetaData = (CssMetaData<S, Boolean>) metaDataSet.computeIfAbsent(cssProperty, cssProp -> {
             final SimpleCssMetaData<S, Boolean> newData = new SimpleCssMetaData<>(cssProp, StyleConverter.getBooleanConverter(), initialValue, inherits, null,
                     function);
             metaData.add(newData);
             return newData;
         });
-        if (filter != null) {
-            return new StylishBooleanProperty(cssMetaData, styleable, propertyName, initialValue, invalidateAction) {
-                @Override
-                public void set(final boolean value) {
-                    super.set(filter.apply(value));
-                }
-            };
-        }
-        return new StylishBooleanProperty(cssMetaData, styleable, propertyName, initialValue, invalidateAction);
+        return new StylishBooleanProperty(cssMetaData, styleable, propertyName, initialValue, filter, invalidateActions);
     }
 
     /**
@@ -237,28 +212,20 @@ public class CssPropertyFactory<S extends Styleable> {
      * @param function A function that returns the StyleableProperty&lt;Boolean&gt; that was created by this method call.
      * @param initialValue The initial value of the property. CSS may reset the property to this value.
      * @param inherits Whether or not the CSS style can be inherited by child nodes
-     * @param invalidateAction Runnable to be executed on invalidation of the property
      * @param filter A filter to apply to updated data
+     * @param invalidateActions Runnables to be executed on invalidation of the property
      * @param converter The style converter to convert the style to the object
      * @return a StyleableProperty created with initial value and inherit flag
      */
     public final <T> StyleableObjectProperty<T> createObjectProperty(S styleable, String propertyName, String cssProperty,
-            Function<S, StyleableProperty<T>> function, T initialValue, boolean inherits, Runnable invalidateAction, UnaryOperator<T> filter,
-            StyleConverter<?, T> converter) {
+            Function<S, StyleableProperty<T>> function, T initialValue, boolean inherits, StyleConverter<?, T> converter, BinaryOperator<T> filter,
+            Runnable... invalidateActions) {
         final CssMetaData<S, T> cssMetaData = (CssMetaData<S, T>) metaDataSet.computeIfAbsent(cssProperty, cssProp -> {
             final SimpleCssMetaData<S, T> newData = new SimpleCssMetaData<>(cssProp, converter, initialValue, inherits, null, function);
             metaData.add(newData);
             return newData;
         });
-        if (filter != null) {
-            return new StylishObjectProperty<>(cssMetaData, styleable, propertyName, initialValue, invalidateAction) {
-                @Override
-                public void set(final T value) {
-                    super.set(filter.apply(value));
-                }
-            };
-        }
-        return new StylishObjectProperty<>(cssMetaData, styleable, propertyName, initialValue, invalidateAction);
+        return new StylishObjectProperty<>(cssMetaData, styleable, propertyName, initialValue, filter, invalidateActions);
     }
 
     /**
@@ -271,27 +238,19 @@ public class CssPropertyFactory<S extends Styleable> {
      *            call.
      * @param initialValue The initial value of the property. CSS may reset the property to this value.
      * @param inherits Whether or not the CSS style can be inherited by child nodes
-     * @param invalidateAction Runnable to be executed on invalidation of the property
      * @param filter A filter to apply to updated data
+     * @param invalidateActions Runnables to be executed on invalidation of the property
      * @return a StyleableProperty created with initial value and inherit flag
      */
     public final StyleableStringProperty createStringProperty(S styleable, String propertyName, String cssProperty,
-            Function<S, StyleableProperty<String>> function, String initialValue, boolean inherits, Runnable invalidateAction, UnaryOperator<String> filter) {
+            Function<S, StyleableProperty<String>> function, String initialValue, boolean inherits, BinaryOperator<String> filter, Runnable... invalidateActions) {
         final CssMetaData<S, String> cssMetaData = (CssMetaData<S, String>) metaDataSet.computeIfAbsent(cssProperty, cssProp -> {
             final SimpleCssMetaData<S, String> newData = new SimpleCssMetaData<>(cssProp, StyleConverter.getStringConverter(), initialValue, inherits, null,
                     function);
             metaData.add(newData);
             return newData;
         });
-        if (filter != null) {
-            return new StylishStringProperty(cssMetaData, styleable, propertyName, initialValue, invalidateAction) {
-                @Override
-                public void set(final String value) {
-                    super.set(filter.apply(value));
-                }
-            };
-        }
-        return new StylishStringProperty(cssMetaData, styleable, propertyName, initialValue, invalidateAction);
+        return new StylishStringProperty(cssMetaData, styleable, propertyName, initialValue, filter, invalidateActions);
     }
 
     /**
@@ -305,14 +264,13 @@ public class CssPropertyFactory<S extends Styleable> {
      *            call.
      * @param initialValue The initial value of the property. CSS may reset the property to this value.
      * @param inherits Whether or not the CSS style can be inherited by child nodes
-     * @param invalidateAction Runnable to be executed on invalidation of the property
      * @param filter A filter to apply to updated data
+     * @param invalidateActions Runnables to be executed on invalidation of the property
      * @param enumClass The type of enum to read
      * @return a StyleableProperty created with initial value and inherit flag
      */
     public <T extends Enum<T>> ObjectProperty<T> createEnumPropertyWithPseudoclasses(Styleable styleable, String propertyName, String cssProperty,
-            Function<S, StyleableProperty<T>> function, T initialValue, boolean inherits, Runnable invalidateAction, UnaryOperator<T> filter,
-            Class<T> enumClass) {
+            Function<S, StyleableProperty<T>> function, T initialValue, boolean inherits, Class<T> enumClass, BinaryOperator<T> filter, Runnable... invalidateActions) {
         final CssMetaData<S, T> cssMetaData = (CssMetaData<S, T>) metaDataSet.computeIfAbsent(cssProperty, cssProp -> {
             final SimpleCssMetaData<S, T> newData = new SimpleCssMetaData<>(cssProp, StyleConverter.getEnumConverter(enumClass), initialValue, inherits, null,
                     function);
@@ -325,21 +283,19 @@ public class CssPropertyFactory<S extends Styleable> {
             // Add pseudo classes for boolean functions in Enum? e.g. isHorizontal() -> "horizontal" pseudo class?
             return newData;
         });
+        // set initial pseudo class style
         ((Node) styleable).pseudoClassStateChanged(pseudoClasses.get(initialValue.toString().toLowerCase().replace('_', '-')), true);
-        return new StylishObjectProperty<>(cssMetaData, styleable, propertyName, initialValue, invalidateAction) {
-            @Override
-            public void set(final T value) {
-                // update pseudo class
-                ((Node) styleable).pseudoClassStateChanged(pseudoClasses.get(get().toString().toLowerCase().replace('_', '-')), false);
-                ((Node) styleable).pseudoClassStateChanged(pseudoClasses.get(value.toString().toLowerCase().replace('_', '-')), true);
-                // apply filter
-                if (filter != null) {
-                    super.set(filter.apply(value));
-                } else {
-                    super.set(value);
-                }
+        BinaryOperator<T> pseudoClassUpdatingFilter = (oldVal, newVal) -> {
+            // update pseudo class
+            ((Node) styleable).pseudoClassStateChanged(pseudoClasses.get(oldVal.toString().toLowerCase().replace('_', '-')), false);
+            ((Node) styleable).pseudoClassStateChanged(pseudoClasses.get(newVal.toString().toLowerCase().replace('_', '-')), true);
+            // apply filter
+            if (filter != null) {
+                return filter.apply(oldVal, newVal);
             }
+            return newVal;
         };
+        return new StylishObjectProperty<>(cssMetaData, styleable, propertyName, initialValue, pseudoClassUpdatingFilter, invalidateActions);
     }
 
     public static class SimpleCssMetaData<S extends Styleable, T> extends CssMetaData<S, T> {

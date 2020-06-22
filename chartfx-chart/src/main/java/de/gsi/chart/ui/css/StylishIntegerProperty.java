@@ -1,39 +1,51 @@
 package de.gsi.chart.ui.css;
 
+import java.util.function.IntBinaryOperator;
+
 import javafx.beans.NamedArg;
 import javafx.css.CssMetaData;
 import javafx.css.SimpleStyleableIntegerProperty;
 import javafx.css.Styleable;
 
-/**
- * Short-hand to reduce boiler-plate type code of customisation of SimpleStyleableIntegerProperty to always include an
- * axis re-layout.
- * N.B. Also, the warning of inheriting more than 'n' generations is thrown only once this way.
- * 
- * @author rstein
- */
 public class StylishIntegerProperty extends SimpleStyleableIntegerProperty {
-    protected Runnable invalidateAction;
+    protected final Runnable preInvalidateAction;
+    protected final Runnable postInvalidateAction;
+    protected final IntBinaryOperator filter;
 
     /**
      * The constructor of the {@code StylishIntegerProperty}.
      *
-     * @param cssMetaData the CssMetaData associated with this {@code StyleableProperty}
-     * @param bean the bean of this {@code BooleanProperty}
-     * @param name the name of this {@code BooleanProperty}
+     * @param cssMetaData the CssMetaData associated with this {@code StylishIntegerProperty}
+     * @param bean the bean of this {@code IntegerProperty}
+     * @param name the name of this {@code IntegerProperty}
      * @param initialValue the initial value of the wrapped {@code Object}
-     * @param invalidateAction lambda expression executed in invalidated
+     * @param filter Possibility to modify the new value based on old and updated value
+     * @param invalidateActions lambda expressions executed after and before invalidation
      */
     public StylishIntegerProperty(@NamedArg("cssMetaData") CssMetaData<? extends Styleable, Number> cssMetaData, @NamedArg("bean") Object bean,
-            @NamedArg("name") String name, @NamedArg("initialValue") Integer initialValue, Runnable invalidateAction) {
+            @NamedArg("name") String name, @NamedArg("initialValue") int initialValue, IntBinaryOperator filter,
+            Runnable... invalidateActions) {
         super(cssMetaData, bean, name, initialValue);
-        this.invalidateAction = invalidateAction;
+        this.filter = filter;
+        if (invalidateActions.length > 2) {
+            throw new IllegalArgumentException("Only post- and pre invalidation actions allowed, but more than two actions supplied");
+        }
+        this.postInvalidateAction = invalidateActions.length > 0 ? invalidateActions[0] : null;
+        this.preInvalidateAction = invalidateActions.length > 1 ? invalidateActions[0] : null;
     }
 
     @Override
-    protected void invalidated() {
-        if (invalidateAction != null) {
-            invalidateAction.run();
+    public void set(int v) {
+        if (preInvalidateAction != null) {
+            preInvalidateAction.run();
+        }
+        if (filter == null) {
+            super.set(v);
+        } else {
+            super.set(filter.applyAsInt(get(), v));
+        }
+        if (postInvalidateAction != null) {
+            postInvalidateAction.run();
         }
     }
 }
