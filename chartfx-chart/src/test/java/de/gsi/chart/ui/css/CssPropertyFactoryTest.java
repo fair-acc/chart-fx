@@ -35,8 +35,6 @@ import javafx.stage.Stage;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.testfx.api.FxRobot;
 import org.testfx.framework.junit5.ApplicationExtension;
 import org.testfx.framework.junit5.Start;
@@ -108,21 +106,21 @@ public class CssPropertyFactoryTest {
 
         // float
         private final FloatProperty testFloat = CSS.createFloatProperty(this, "testFloat", "-fx-test-float",
-                s -> (StyleableFloatProperty) s.getTestFloat(), 1.337f, true, null, null);
+                s -> (StyleableFloatProperty) s.getTestFloat(), 1.337f, true, null);
 
         public FloatProperty getTestFloat() {
             return testFloat;
         }
 
         // int
-        private final IntegerProperty testInt = CSS.createIntegerProperty(this, "testInt", "-fx-test-int", s -> (StyleableIntegerProperty) s.getTestInt(), 42, true, null, null);
+        private final IntegerProperty testInt = CSS.createIntegerProperty(this, "testInt", "-fx-test-int", s -> (StyleableIntegerProperty) s.getTestInt(), 42, true, null);
 
         public IntegerProperty getTestInt() {
             return testInt;
         }
 
         // long
-        private final LongProperty testLong = CSS.createLongProperty(this, "testLong", "-fx-test-long", s -> (StyleableLongProperty) s.getTestLong(), 123456789123456789l, true, null, null);
+        private final LongProperty testLong = CSS.createLongProperty(this, "testLong", "-fx-test-long", s -> (StyleableLongProperty) s.getTestLong(), 123456789123456789l, true, null);
 
         public LongProperty getTestLong() {
             return testLong;
@@ -130,14 +128,14 @@ public class CssPropertyFactoryTest {
 
         // string
         private final StringProperty testString = CSS.createStringProperty(this, "testString", "-fx-test-string",
-                s -> (StyleableStringProperty) s.getTestString(), "test", true, null, null);
+                s -> (StyleableStringProperty) s.getTestString(), "test", true, null);
 
         public StringProperty getTestString() {
             return testString;
         }
 
         // boolean
-        private final BooleanProperty testBool = CSS.createBooleanProperty(this, "testBool", "-fx-test-bool", s -> (StyleableBooleanProperty) s.getTestBool(), false, true, null, null);
+        private final BooleanProperty testBool = CSS.createBooleanProperty(this, "testBool", "-fx-test-bool", s -> (StyleableBooleanProperty) s.getTestBool(), false, true, null);
 
         public BooleanProperty getTestBool() {
             return testBool;
@@ -145,7 +143,7 @@ public class CssPropertyFactoryTest {
 
         // object
         private final ObjectProperty<Paint> testObject = CSS.createObjectProperty(this, "testObject", "-fx-test-object",
-                s -> (StyleableProperty<Paint>) s.getTestObject(), Color.PINK, true, null, null, StyleConverter.getPaintConverter());
+                s -> (StyleableProperty<Paint>) s.getTestObject(), Color.PINK, true, StyleConverter.getPaintConverter(), null);
 
         public ObjectProperty<Paint> getTestObject() {
             return testObject;
@@ -153,7 +151,7 @@ public class CssPropertyFactoryTest {
 
         // enum
         private final ObjectProperty<TestEnum> testEnum = CSS.createObjectProperty(this, "testEnum", "-fx-test-enum",
-                s -> (StyleableProperty<TestEnum>) s.getTestEnum(), TestEnum.ENABLED, true, null, null, StyleConverter.getEnumConverter(TestEnum.class));
+                s -> (StyleableProperty<TestEnum>) s.getTestEnum(), TestEnum.ENABLED, true, StyleConverter.getEnumConverter(TestEnum.class), null);
 
         public ObjectProperty<TestEnum> getTestEnum() {
             return testEnum;
@@ -161,7 +159,7 @@ public class CssPropertyFactoryTest {
 
         // enum with pseudoclass
         private final ObjectProperty<TestEnum> testEnumP = CSS.createEnumPropertyWithPseudoclasses(this, "testEnumP", "-fx-test-enum-p",
-                s -> (StyleableProperty<TestEnum>) s.getTestEnumP(), TestEnum.DISABLED, true, null, null, TestEnum.class);
+                s -> (StyleableProperty<TestEnum>) s.getTestEnumP(), TestEnum.DISABLED, true, TestEnum.class, null);
 
         public ObjectProperty<TestEnum> getTestEnumP() {
             return testEnumP;
