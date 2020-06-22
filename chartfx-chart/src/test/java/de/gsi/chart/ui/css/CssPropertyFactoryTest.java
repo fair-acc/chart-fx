@@ -9,7 +9,9 @@ import java.util.List;
 
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.FloatProperty;
 import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.LongProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.StringProperty;
 import javafx.css.CssMetaData;
@@ -18,11 +20,12 @@ import javafx.css.StyleConverter;
 import javafx.css.Styleable;
 import javafx.css.StyleableBooleanProperty;
 import javafx.css.StyleableDoubleProperty;
+import javafx.css.StyleableFloatProperty;
 import javafx.css.StyleableIntegerProperty;
+import javafx.css.StyleableLongProperty;
 import javafx.css.StyleableProperty;
 import javafx.css.StyleableStringProperty;
 import javafx.scene.Scene;
-import javafx.scene.effect.BlendMode;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -48,7 +51,6 @@ import de.gsi.chart.ui.utils.JavaFXInterceptorUtils.SelectiveJavaFxInterceptor;
 @ExtendWith(ApplicationExtension.class)
 @ExtendWith(SelectiveJavaFxInterceptor.class)
 public class CssPropertyFactoryTest {
-    private static final Logger LOGGER = LoggerFactory.getLogger(CssPropertyFactoryTest.class);
     private final TestStyleable styleable = new TestStyleable();
 
     @Start
@@ -104,11 +106,26 @@ public class CssPropertyFactoryTest {
             return testDouble;
         }
 
+        // float
+        private final FloatProperty testFloat = CSS.createFloatProperty(this, "testFloat", "-fx-test-float",
+                s -> (StyleableFloatProperty) s.getTestFloat(), 1.337f, true, null, null);
+
+        public FloatProperty getTestFloat() {
+            return testFloat;
+        }
+
         // int
         private final IntegerProperty testInt = CSS.createIntegerProperty(this, "testInt", "-fx-test-int", s -> (StyleableIntegerProperty) s.getTestInt(), 42, true, null, null);
 
         public IntegerProperty getTestInt() {
             return testInt;
+        }
+
+        // long
+        private final LongProperty testLong = CSS.createLongProperty(this, "testLong", "-fx-test-long", s -> (StyleableLongProperty) s.getTestLong(), 123456789123456789l, true, null, null);
+
+        public LongProperty getTestLong() {
+            return testLong;
         }
 
         // string

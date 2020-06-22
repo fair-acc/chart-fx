@@ -17,7 +17,9 @@ import javafx.css.StyleConverter;
 import javafx.css.Styleable;
 import javafx.css.StyleableBooleanProperty;
 import javafx.css.StyleableDoubleProperty;
+import javafx.css.StyleableFloatProperty;
 import javafx.css.StyleableIntegerProperty;
+import javafx.css.StyleableLongProperty;
 import javafx.css.StyleableObjectProperty;
 import javafx.css.StyleableProperty;
 import javafx.css.StyleableStringProperty;
@@ -71,7 +73,7 @@ public class CssPropertyFactory<S extends Styleable> {
     }
 
     /**
-     * Create a StyleableProperty&lt;Boolean&gt; with initial value and inherit flag.
+     * Create a StyleableProperty&lt;Double&gt; with initial value and inherit flag.
      * 
      * @param styleable The <code>this</code> reference of the returned property. This is also the property bean.
      * @param propertyName The field name of the StyleableProperty&lt;Boolean&gt;
@@ -125,6 +127,70 @@ public class CssPropertyFactory<S extends Styleable> {
             };
         }
         return new StylishIntegerProperty(cssMetaData, styleable, propertyName, initialValue, invalidateAction);
+    }
+
+    /**
+     * Create a StyleableProperty&lt;Long&gt; with initial value and inherit flag.
+     * 
+     * @param styleable The <code>this</code> reference of the returned property. This is also the property bean.
+     * @param propertyName The field name of the StyleableProperty&lt;Boolean&gt;
+     * @param cssProperty The CSS property name
+     * @param function A function that returns the StyleableProperty&lt;Boolean&gt; that was created by this method
+     *            call.
+     * @param initialValue The initial value of the property. CSS may reset the property to this value.
+     * @param inherits Whether or not the CSS style can be inherited by child nodes
+     * @param invalidateAction Runnable to be executed on invalidation of the property
+     * @param filter A filter to apply to updated data
+     * @return a StyleableProperty created with initial value and inherit flag
+     */
+    public final StyleableLongProperty createLongProperty(S styleable, String propertyName, String cssProperty,
+            Function<S, StyleableProperty<Number>> function, long initialValue, boolean inherits, Runnable invalidateAction, UnaryOperator<Long> filter) {
+        final CssMetaData<S, Number> cssMetaData = (CssMetaData<S, Number>) metaDataSet.computeIfAbsent(cssProperty, cssProp -> {
+            final SimpleCssMetaData<S, Number> newData = new SimpleCssMetaData<>(cssProp, StyleConverter.getSizeConverter(), initialValue, inherits, null, function);
+            metaData.add(newData);
+            return newData;
+        });
+        if (filter != null) {
+            return new StylishLongProperty(cssMetaData, styleable, propertyName, initialValue, invalidateAction) {
+                @Override
+                public void set(final long value) {
+                    super.set(filter.apply(value));
+                }
+            };
+        }
+        return new StylishLongProperty(cssMetaData, styleable, propertyName, initialValue, invalidateAction);
+    }
+
+    /**
+     * Create a StyleableProperty&lt;Float&gt; with initial value and inherit flag.
+     * 
+     * @param styleable The <code>this</code> reference of the returned property. This is also the property bean.
+     * @param propertyName The field name of the StyleableProperty&lt;Boolean&gt;
+     * @param cssProperty The CSS property name
+     * @param function A function that returns the StyleableProperty&lt;Boolean&gt; that was created by this method
+     *            call.
+     * @param initialValue The initial value of the property. CSS may reset the property to this value.
+     * @param inherits Whether or not the CSS style can be inherited by child nodes
+     * @param invalidateAction Runnable to be executed on invalidation of the property
+     * @param filter A filter to apply to updated data
+     * @return a StyleableProperty created with initial value and inherit flag
+     */
+    public final StyleableFloatProperty createFloatProperty(S styleable, String propertyName, String cssProperty,
+            Function<S, StyleableProperty<Number>> function, float initialValue, boolean inherits, Runnable invalidateAction, UnaryOperator<Float> filter) {
+        final CssMetaData<S, Number> cssMetaData = (CssMetaData<S, Number>) metaDataSet.computeIfAbsent(cssProperty, cssProp -> {
+            final SimpleCssMetaData<S, Number> newData = new SimpleCssMetaData<>(cssProp, StyleConverter.getSizeConverter(), initialValue, inherits, null, function);
+            metaData.add(newData);
+            return newData;
+        });
+        if (filter != null) {
+            return new StylishFloatProperty(cssMetaData, styleable, propertyName, initialValue, invalidateAction) {
+                @Override
+                public void set(final float value) {
+                    super.set(filter.apply(value));
+                }
+            };
+        }
+        return new StylishFloatProperty(cssMetaData, styleable, propertyName, initialValue, invalidateAction);
     }
 
     /**
