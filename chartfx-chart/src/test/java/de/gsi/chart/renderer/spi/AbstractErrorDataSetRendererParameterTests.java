@@ -5,6 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.List;
+
 import javafx.collections.ObservableList;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
@@ -26,7 +28,7 @@ import de.gsi.dataset.DataSet;
 public class AbstractErrorDataSetRendererParameterTests {
     @Test
     public void basicGetterSetterTests() {
-        assertDoesNotThrow(() -> new TestErrorDataSetRendererParameter());
+        assertDoesNotThrow(TestErrorDataSetRendererParameter::new);
 
         final TestErrorDataSetRendererParameter renderer = new TestErrorDataSetRendererParameter();
 
@@ -110,7 +112,7 @@ public class AbstractErrorDataSetRendererParameterTests {
         renderer2.getAxes().add(test);
         assertEquals(test, renderer2.getAxes().get(0));
 
-        assertDoesNotThrow(() -> renderer2.unbind());
+        assertDoesNotThrow(renderer2::unbind);
     }
 
     /**
@@ -123,7 +125,7 @@ public class AbstractErrorDataSetRendererParameterTests {
         }
 
         @Override
-        public void render(GraphicsContext gc, Chart chart, int dataSetOffset, ObservableList<DataSet> datasets) {
+        public List<DataSet> render(GraphicsContext gc, Chart chart, int dataSetOffset, ObservableList<DataSet> datasets) {
             throw new UnsupportedOperationException();
         }
 

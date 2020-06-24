@@ -2,6 +2,7 @@ package de.gsi.chart.renderer.spi;
 
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -88,7 +89,7 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
 
         final int dsLayoutIndexOffset = layoutOffset == null ? 0 : layoutOffset; // TODO: rationalise
 
-        final int plotingIndex = dsLayoutIndexOffset + (dsIndexLocal == null ? dsIndex : dsIndexLocal.intValue());
+        final int plotingIndex = dsLayoutIndexOffset + (dsIndexLocal == null ? dsIndex : dsIndexLocal);
 
         gc.save();
 
@@ -132,7 +133,7 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
     }
 
     @Override
-    public void render(final GraphicsContext gc, final Chart chart, final int dataSetOffset,
+    public List<DataSet> render(final GraphicsContext gc, final Chart chart, final int dataSetOffset,
             final ObservableList<DataSet> datasets) {
         if (!(chart instanceof XYChart)) {
             throw new InvalidParameterException("must be derivative of XYChart for renderer - " + this.getClass().getSimpleName());
@@ -144,7 +145,7 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
 
         // If there are no data sets
         if (localDataSetList.isEmpty()) {
-            return;
+            return Collections.emptyList();
         }
 
         Axis xAxisTemp = getFirstAxis(Orientation.HORIZONTAL);
@@ -166,6 +167,7 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
             ProcessingProfiler.getTimeDiff(start, "init");
         }
 
+        List<DataSet> drawnDataSet = new ArrayList<>(localDataSetList.size());
         for (int dataSetIndex = localDataSetList.size() - 1; dataSetIndex >= 0; dataSetIndex--) {
             final int ldataSetIndex = dataSetIndex;
             stopStamp = ProcessingProfiler.getTimeStamp();
@@ -237,6 +239,7 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
                 return Optional.of(localCachedPoints);
             });
 
+            drawnDataSet.add(dataSet);
             cachedPoints.ifPresent(value -> {
                 // invoke data reduction algorithm
                 value.reduce(rendererDataReducerProperty().get(), isReducePoints(),
@@ -255,6 +258,8 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
             }
         } // end of 'dataSetIndex' loop
         ProcessingProfiler.getTimeDiff(start);
+
+        return drawnDataSet;
     }
 
     /**
@@ -275,7 +280,7 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
             return;
         }
 
-        final int xOffset = localCachedPoints.dataSetIndex >= 0 ? localCachedPoints.dataSetIndex : 0;
+        final int xOffset = Math.max(localCachedPoints.dataSetIndex, 0);
         final int minRequiredWidth = Math.max(getDashSize(), localCachedPoints.minDistanceX);
 
         final double barWPercentage = getBarWidthPercentage();
@@ -386,11 +391,10 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
             }
         } else { // NO ERROR
             for (int i = 0; i < localCachedPoints.actualDataCount; i++) {
-                final double radius = minSize;
-                final double x = localCachedPoints.xValues[i] - radius;
-                final double y = localCachedPoints.yValues[i] - radius;
+                final double x = localCachedPoints.xValues[i] - minSize;
+                final double y = localCachedPoints.yValues[i] - minSize;
 
-                gc.fillOval(x, y, 2 * radius, 2 * radius);
+                gc.fillOval(x, y, 2 * minSize, 2 * minSize);
             }
         }
 
@@ -669,36 +673,26 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
         final String markerType = map.get(XYChartCss.MARKER_TYPE.toLowerCase(Locale.UK));
         if (markerType != null) {
             try {
-                final Marker tempType = DefaultMarker.get(markerType);
-                defaultMarker = tempType;
+                defaultMarker = DefaultMarker.get(markerType);
             } catch (final IllegalArgumentException ex) {
-                if (LOGGER.isErrorEnabled()) {
-                    LOGGER.error(new StringBuilder().append("could not parse marker type description for '").append(XYChartCss.MARKER_TYPE).append("'='").append(markerType).append("'").toString(), ex);
-                }
+                LOGGER.error("could not parse marker type description for '" + XYChartCss.MARKER_TYPE + "'='" + markerType + "'", ex);
             }
         }
         final String markerSize = map.get(XYChartCss.MARKER_SIZE.toLowerCase(Locale.UK));
         if (markerSize != null) {
             try {
-                final double tempSize = Double.parseDouble(markerSize);
-                defaultMarkerSize = tempSize;
+                defaultMarkerSize = Double.parseDouble(markerSize);
             } catch (final NumberFormatException ex) {
-                if (LOGGER.isErrorEnabled()) {
-                    LOGGER.error(new StringBuilder().append("could not parse marker size description for '").append(XYChartCss.MARKER_SIZE).append("'='").append(markerSize).append("'").toString(), ex);
-                }
+                LOGGER.error("could not parse marker size description for '" + XYChartCss.MARKER_SIZE + "'='" + markerSize + "'", ex);
             }
         }
 
         final String markerColor = map.get(XYChartCss.MARKER_COLOR.toLowerCase(Locale.UK));
         if (markerColor != null) {
             try {
-                final Color tempColor = Color.web(markerColor);
-                defaultMarkerColor = tempColor;
+                defaultMarkerColor = Color.web(markerColor);
             } catch (final IllegalArgumentException ex) {
-                if (LOGGER.isErrorEnabled()) {
-                    LOGGER.error(new StringBuilder().append("could not parse marker color description for '").append(XYChartCss.MARKER_COLOR).append("'='").append(markerColor).append("'").toString(),
-                            ex);
-                }
+                LOGGER.error("could not parse marker color description for '" + XYChartCss.MARKER_COLOR + "'='" + markerColor + "'", ex);
             }
         }
 
@@ -1018,9 +1012,8 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
     }
 
     private static void compactVector(final double[] input, final int stopIndex) {
-        final int xend = input.length - 0;
-        for (int i = 0; i < stopIndex; i++) {
-            input[stopIndex + i] = input[xend - stopIndex + i];
+        if (stopIndex >= 0) {
+            System.arraycopy(input, input.length - stopIndex, input, stopIndex, stopIndex);
         }
     }
 }

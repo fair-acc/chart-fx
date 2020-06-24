@@ -71,7 +71,7 @@ public class MountainRangeRenderer extends ErrorDataSetRenderer implements Rende
     }
 
     @Override
-    public void render(final GraphicsContext gc, final Chart chart, final int dataSetOffset,
+    public List<DataSet> render(final GraphicsContext gc, final Chart chart, final int dataSetOffset,
             final ObservableList<DataSet> datasets) {
         if (!(chart instanceof XYChart)) {
             throw new InvalidParameterException(
@@ -80,9 +80,6 @@ public class MountainRangeRenderer extends ErrorDataSetRenderer implements Rende
         final long start = ProcessingProfiler.getTimeStamp(); // NOPMD - time keeping needs to be defined here
         final XYChart xyChart = (XYChart) chart;
 
-        if (!(xyChart.getYAxis() instanceof Axis)) {
-            throw new InvalidParameterException("y Axis not a Axis derivative, yAxis = " + xyChart.getYAxis());
-        }
         final Axis yAxis = xyChart.getYAxis();
 
         // make local copy and add renderer specific data sets
@@ -93,6 +90,7 @@ public class MountainRangeRenderer extends ErrorDataSetRenderer implements Rende
         final double zRangeMax = localDataSetList.stream().mapToDouble(ds -> ds.getAxisDescription(DIM_Z).getMax()).max().orElse(+1.0);
 
         // render in reverse order
+        List<DataSet> drawnDataSet = new ArrayList<>(localDataSetList.size());
         for (int dataSetIndex = localDataSetList.size() - 1; dataSetIndex >= 0; dataSetIndex--) {
             final DataSet dataSet = localDataSetList.get(dataSetIndex);
 
@@ -108,19 +106,19 @@ public class MountainRangeRenderer extends ErrorDataSetRenderer implements Rende
                 continue;
             }
 
+            drawnDataSet.add(dataSet);
             dataSet.lock().readLockGuardOptimistic(() -> {
                 xWeakIndexMap.clear();
                 yWeakIndexMap.clear();
                 mountainRangeExtra = getMountainRangeOffset();
 
-                final double min = zRangeMin;
                 final double max = zRangeMax * (1.0 + mountainRangeExtra);
                 final boolean autoRange = yAxis.isAutoRanging();
-                if (autoRange && (min != yAxis.getMin() || max != yAxis.getMax())) {
+                if (autoRange && (zRangeMin != yAxis.getMin() || max != yAxis.getMax())) {
                     yAxis.setAutoRanging(false);
-                    yAxis.setMin(min);
+                    yAxis.setMin(zRangeMin);
                     yAxis.setMax(max);
-                    yAxis.setTickUnit(Math.abs(max - min) / 10.0);
+                    yAxis.setTickUnit(Math.abs(max - zRangeMin) / 10.0);
                     yAxis.forceRedraw();
                 }
                 yAxis.setAutoRanging(autoRange);
@@ -129,13 +127,14 @@ public class MountainRangeRenderer extends ErrorDataSetRenderer implements Rende
                 checkAndRecreateRenderer(yCountMax);
 
                 for (int index = yCountMax - 1; index >= 0; index--) {
-                    renderers.get(index).getDatasets().setAll(new Demux3dTo2dDataSet(dataSet, index, min, max)); // NOPMD -- new necessary here
+                    renderers.get(index).getDatasets().setAll(new Demux3dTo2dDataSet(dataSet, index, zRangeMin, max)); // NOPMD -- new necessary here
                     renderers.get(index).render(gc, chart, 0, empty);
                 }
             });
         }
 
         ProcessingProfiler.getTimeDiff(start);
+        return drawnDataSet;
     }
 
     /**

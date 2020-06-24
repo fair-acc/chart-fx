@@ -1,5 +1,8 @@
 package de.gsi.chart.samples;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
@@ -39,7 +42,7 @@ public class CustomFragmentedRendererSample extends Application {
         VBox.setVgrow(chart, Priority.ALWAYS);
         ErrorDataSetRenderer renderer = new ErrorDataSetRenderer() {
             @Override
-            public void render(final GraphicsContext gc, final Chart renderChart, final int dataSetOffset,
+            public List<DataSet> render(final GraphicsContext gc, final Chart renderChart, final int dataSetOffset,
                     final ObservableList<DataSet> datasets) {
                 ObservableList<DataSet> filteredDataSets = FXCollections.observableArrayList();
                 int dsIndex = 0;
@@ -47,16 +50,18 @@ public class CustomFragmentedRendererSample extends Application {
                     if (ds instanceof FragmentedDataSet) {
                         final FragmentedDataSet fragDataSet = (FragmentedDataSet) ds;
                         for (DataSet innerDataSet : fragDataSet.getDatasets()) {
-                            innerDataSet.setStyle(XYChartCss.DATASET_INDEX + '=' + Integer.toString(dsIndex));
+                            innerDataSet.setStyle(XYChartCss.DATASET_INDEX + '=' + dsIndex);
                             filteredDataSets.add(innerDataSet);
                         }
                     } else {
-                        ds.setStyle(XYChartCss.DATASET_INDEX + '=' + Integer.toString(dsIndex));
+                        ds.setStyle(XYChartCss.DATASET_INDEX + '=' + dsIndex);
                         filteredDataSets.add(ds);
                     }
                     dsIndex++;
                 }
                 super.render(gc, renderChart, dataSetOffset, filteredDataSets);
+
+                return filteredDataSets;
             }
         };
         chart.getRenderers().clear();
