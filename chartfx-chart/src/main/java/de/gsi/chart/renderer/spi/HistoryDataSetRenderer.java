@@ -151,7 +151,7 @@ public class HistoryDataSetRenderer extends ErrorDataSetRenderer implements Rend
     }
 
     @Override
-    public void render(final GraphicsContext gc, final Chart chart, final int dataSetOffset,
+    public List<DataSet> render(final GraphicsContext gc, final Chart chart, final int dataSetOffset,
             final ObservableList<DataSet> datasets) {
         final long start = ProcessingProfiler.getTimeStamp();
         if (!(chart instanceof XYChart)) {
@@ -169,9 +169,11 @@ public class HistoryDataSetRenderer extends ErrorDataSetRenderer implements Rend
         getDatasets().addAll(localList);
 
         int dsIndex = 0;
+        List<DataSet> drawnDataSet = new ArrayList<>(super.getDatasets().size());
         for (final DataSet ds : super.getDatasets()) {
             // add index if missing
             modifyStyle(ds, dataSetOffset + dsIndex);
+            drawnDataSet.add(ds);
             dsIndex++;
         }
 
@@ -185,6 +187,7 @@ public class HistoryDataSetRenderer extends ErrorDataSetRenderer implements Rend
         super.render(gc, chart, dataSetOffset, emptyList);
 
         ProcessingProfiler.getTimeDiff(start);
+        return drawnDataSet;
     }
 
     public void shiftHistory() {

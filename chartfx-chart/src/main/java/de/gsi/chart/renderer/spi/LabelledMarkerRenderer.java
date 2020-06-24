@@ -2,7 +2,9 @@ package de.gsi.chart.renderer.spi;
 
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -211,7 +213,7 @@ public class LabelledMarkerRenderer extends AbstractDataSetManagement<LabelledMa
     }
 
     @Override
-    public void render(final GraphicsContext gc, final Chart chart, final int dataSetOffset,
+    public List<DataSet> render(final GraphicsContext gc, final Chart chart, final int dataSetOffset,
             final ObservableList<DataSet> datasets) {
         final long start = ProcessingProfiler.getTimeStamp();
         if (!(chart instanceof XYChart)) {
@@ -228,7 +230,7 @@ public class LabelledMarkerRenderer extends AbstractDataSetManagement<LabelledMa
 
         // If there are no data sets
         if (localDataSetList.isEmpty()) {
-            return;
+            return Collections.emptyList();
         }
 
         Axis xAxis = this.getFirstAxis(Orientation.HORIZONTAL);
@@ -239,7 +241,7 @@ public class LabelledMarkerRenderer extends AbstractDataSetManagement<LabelledMa
             if (LOGGER.isWarnEnabled()) {
                 LOGGER.atWarn().addArgument(LabelledMarkerRenderer.class.getSimpleName()).log("{}::render(...) getFirstAxis(HORIZONTAL) returned null skip plotting");
             }
-            return;
+            return Collections.emptyList();
         }
         final double xAxisWidth = xAxis.getWidth();
         final double xMin = xAxis.getValueForDisplay(0);
@@ -248,6 +250,7 @@ public class LabelledMarkerRenderer extends AbstractDataSetManagement<LabelledMa
         // N.B. importance of reverse order: start with last index, so that
         // most(-like) important DataSet is drawn on top of the others
 
+        List<DataSet> drawnDataSet = new ArrayList<>(localDataSetList.size());
         for (int dataSetIndex = localDataSetList.size() - 1; dataSetIndex >= 0; dataSetIndex--) {
             final DataSet dataSet = localDataSetList.get(dataSetIndex);
             dataSet.lock().readLockGuard(() -> {
@@ -261,6 +264,7 @@ public class LabelledMarkerRenderer extends AbstractDataSetManagement<LabelledMa
                     return;
                 }
 
+                drawnDataSet.add(dataSet);
                 if (isHorizontalMarker()) {
                     // draw horizontal marker
                     drawHorizontalLabelledMarker(gc, xyChart, dataSet, indexMin, indexMax);
@@ -275,6 +279,7 @@ public class LabelledMarkerRenderer extends AbstractDataSetManagement<LabelledMa
         } // end of 'dataSetIndex' loop
 
         ProcessingProfiler.getTimeDiff(start);
+        return drawnDataSet;
     }
 
     protected void setGraphicsContextAttributes(final GraphicsContext gc, final String style) {
@@ -293,11 +298,7 @@ public class LabelledMarkerRenderer extends AbstractDataSetManagement<LabelledMa
         }
 
         final Double strokeWidth = StyleParser.getFloatingDecimalPropertyValue(style, XYChartCss.STROKE_WIDTH);
-        if (strokeWidth == null) {
-            gc.setLineWidth(strokeLineWidthMarker);
-        } else {
-            gc.setLineWidth(strokeWidth);
-        }
+        gc.setLineWidth(Objects.requireNonNullElseGet(strokeWidth, () -> strokeLineWidthMarker));
 
         final Font font = StyleParser.getFontPropertyValue(style);
         if (font == null) {

@@ -58,7 +58,7 @@ public class LegendTests {
 
     @Start
     public void start(Stage stage) {
-        assertDoesNotThrow(() -> new DefaultLegend());
+        assertDoesNotThrow(DefaultLegend::new);
 
         chart = new XYChart(new DefaultNumericAxis(), new DefaultNumericAxis());
         chart.getRenderers().setAll(testRenderer);
@@ -88,7 +88,7 @@ public class LegendTests {
 
     @TestFx
     public void testLegendPositioning() {
-        assertDoesNotThrow(() -> new DefaultLegend());
+        assertDoesNotThrow(DefaultLegend::new);
 
         final DefaultLegend legend = new DefaultLegend();
 
@@ -127,7 +127,7 @@ public class LegendTests {
 
     @TestFx
     public void testSetterGetter() {
-        assertDoesNotThrow(() -> new DefaultLegend());
+        assertDoesNotThrow(DefaultLegend::new);
         final DefaultLegend legend = new DefaultLegend();
 
         assertEquals(legend, legend.getNode());
@@ -220,9 +220,10 @@ public class LegendTests {
         }
 
         @Override
-        public void render(GraphicsContext gc, Chart chart, int dataSetOffset, ObservableList<DataSet> datasets) {
+        public List<DataSet> render(GraphicsContext gc, Chart chart, int dataSetOffset, ObservableList<DataSet> datasets) {
             // not (yet) needed in this test case -- only Legend aspects are considered
             //TODO: add DataSet reference counting once 'void renderer(...)' is changed to 'int renderer(...)'
+            return Collections.emptyList();
         }
 
         @Override

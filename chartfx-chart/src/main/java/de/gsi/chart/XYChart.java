@@ -318,9 +318,9 @@ public class XYChart extends Chart {
 
                 final Side side = axis.getSide();
                 if (side == null) {
-                    throw new InvalidParameterException(new StringBuilder().append("axis '").append(axis.getName()).append("' has 'null' as side being set").toString());
+                    throw new InvalidParameterException("axis '" + axis.getName() + "' has 'null' as side being set");
                 }
-                if (!getAxesPane(axis.getSide()).getChildren().contains((Node) axis)) {
+                if (!getAxesPane(axis.getSide()).getChildren().contains(axis)) {
                     getAxesPane(axis.getSide()).getChildren().add((Node) axis);
                 }
 
@@ -344,7 +344,7 @@ public class XYChart extends Chart {
             }
 
             // check if axis is in correct pane
-            if (getAxesPane(axis.getSide()).getChildren().contains((Node) axis)) {
+            if (getAxesPane(axis.getSide()).getChildren().contains(axis)) {
                 // yes, it is continue with next axis
                 continue;
             }
@@ -436,8 +436,8 @@ public class XYChart extends Chart {
             // check for and add required axes
             checkRendererForRequiredAxes(renderer);
 
-            renderer.render(gc, this, dataSetOffset, getDatasets());
-            dataSetOffset += getDatasets().size() + renderer.getDatasets().size();
+            final List<DataSet> drawnDataSets = renderer.render(gc, this, dataSetOffset, getDatasets());
+            dataSetOffset += drawnDataSets.size();
         }
 
         if (gridRenderer.isDrawOnTop()) {
