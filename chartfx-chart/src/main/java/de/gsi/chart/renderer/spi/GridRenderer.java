@@ -1,16 +1,9 @@
 package de.gsi.chart.renderer.spi;
 
 import java.security.InvalidParameterException;
+import java.util.Collections;
 import java.util.List;
 
-import de.gsi.chart.Chart;
-import de.gsi.chart.XYChart;
-import de.gsi.chart.axes.Axis;
-import de.gsi.chart.axes.spi.TickMark;
-import de.gsi.chart.renderer.Renderer;
-import de.gsi.chart.renderer.spi.utils.DashPatternStyle;
-import de.gsi.dataset.DataSet;
-import de.gsi.dataset.utils.NoDuplicatesList;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
@@ -29,9 +22,17 @@ import javafx.scene.layout.Pane;
 import javafx.scene.shape.Line;
 import javafx.scene.text.TextAlignment;
 
+import de.gsi.chart.Chart;
+import de.gsi.chart.XYChart;
+import de.gsi.chart.axes.Axis;
+import de.gsi.chart.axes.spi.TickMark;
+import de.gsi.chart.renderer.Renderer;
+import de.gsi.chart.renderer.spi.utils.DashPatternStyle;
+import de.gsi.dataset.DataSet;
+import de.gsi.dataset.utils.NoDuplicatesList;
+
 @SuppressWarnings("PMD.GodClass")
 public class GridRenderer extends Pane implements Renderer {
-
     private static final double DEG_TO_RAD = Math.PI / 180.0;
     private static final String CHART_CSS = Chart.class.getResource("chart.css").toExternalForm();
     private static final String STYLE_CLASS_GRID_RENDERER = "grid-renderer";
@@ -54,7 +55,7 @@ public class GridRenderer extends Pane implements Renderer {
     private final Line verMinorGridStyleNode;
     private final Line drawGridOnTopNode;
     private final Group gridStyleNodes = new Group();
-    protected final ObservableList<Axis> axesList = FXCollections.observableList(new NoDuplicatesList<Axis>());
+    protected final ObservableList<Axis> axesList = FXCollections.observableList(new NoDuplicatesList<>());
 
     public GridRenderer() {
         super();
@@ -139,8 +140,8 @@ public class GridRenderer extends Pane implements Renderer {
         final double zeroSnapped = snap(0);
         applyGraphicsStyleFromLineStyle(gc, horMajorGridStyleNode);
         ObservableList<TickMark> tickMarks = yAxis.getTickMarks();
-        for (int i = 0; i < tickMarks.size(); i++) {
-            double y = snap(yAxis.getDisplayPosition(tickMarks.get(i).getValue()));
+        for (TickMark tickMark : tickMarks) {
+            double y = snap(yAxis.getDisplayPosition(tickMark.getValue()));
             if (y >= 0 && y < yAxisHeight) {
                 // gc.strokeLine(zeroSnapped, y, xAxisWidthSnapped, y);
                 DashPatternStyle.strokeDashedLine(gc, zeroSnapped, y, xAxisWidthSnapped, y);
@@ -156,8 +157,8 @@ public class GridRenderer extends Pane implements Renderer {
         final double zeroSnapped = snap(0);
         applyGraphicsStyleFromLineStyle(gc, horMinorGridStyleNode);
         ObservableList<TickMark> tickMarks = yAxis.getMinorTickMarks();
-        for (int i = 0; i < tickMarks.size(); i++) {
-            double y = snap(yAxis.getDisplayPosition(tickMarks.get(i).getValue()));
+        for (TickMark tickMark : tickMarks) {
+            double y = snap(yAxis.getDisplayPosition(tickMark.getValue()));
             if (y >= 0 && y < yAxisHeight) {
                 // gc.strokeLine(zeroSnapped, y, xAxisWidthSnapped, y);
                 DashPatternStyle.strokeDashedLine(gc, zeroSnapped, y, xAxisWidthSnapped, y);
@@ -203,7 +204,7 @@ public class GridRenderer extends Pane implements Renderer {
                 gc.save();
                 gc.setFont(yAxis.getTickLabelFont());
                 gc.setStroke(yAxis.getTickLabelFill());
-                gc.setLineDashes(null);
+                gc.setLineDashes((double[]) null);
                 gc.setTextBaseline(VPos.CENTER);
                 gc.strokeText(label, xCentre + (int) yAxis.getTickLabelGap(), yCentre - yNorm);
                 gc.restore();
@@ -252,7 +253,7 @@ public class GridRenderer extends Pane implements Renderer {
                 gc.save();
                 gc.setFont(yAxis.getTickLabelFont());
                 gc.setStroke(yAxis.getTickLabelFill());
-                gc.setLineDashes(null);
+                gc.setLineDashes((double[]) null);
                 gc.setTextBaseline(VPos.CENTER);
                 if (phi < 350) {
                     if (phi < 20) {
@@ -267,7 +268,6 @@ public class GridRenderer extends Pane implements Renderer {
                     gc.strokeText(String.valueOf(phi), xl, yl);
                 }
                 gc.restore();
-
             }
 
             if (xAxis.isLogAxis() || verMinorGridStyleNode.isVisible()) {
@@ -293,8 +293,8 @@ public class GridRenderer extends Pane implements Renderer {
         final double zeroSnapped = snap(0);
         applyGraphicsStyleFromLineStyle(gc, verMajorGridStyleNode);
         ObservableList<TickMark> tickMarks = xAxis.getTickMarks();
-        for (int i = 0; i < tickMarks.size(); i++) {
-            double x = snap(xAxis.getDisplayPosition(tickMarks.get(i).getValue()));
+        for (TickMark tickMark : tickMarks) {
+            double x = snap(xAxis.getDisplayPosition(tickMark.getValue()));
             if (x > 0 && x <= xAxisWidth) {
                 // gc.strokeLine(x, zeroSnapped, x, yAxisHeightSnapped);
                 DashPatternStyle.strokeDashedLine(gc, x, zeroSnapped, x, yAxisHeightSnapped);
@@ -310,8 +310,8 @@ public class GridRenderer extends Pane implements Renderer {
         final double zeroSnapped = snap(0);
         applyGraphicsStyleFromLineStyle(gc, verMinorGridStyleNode);
         ObservableList<TickMark> tickMarks = xAxis.getMinorTickMarks();
-        for (int i = 0; i < tickMarks.size(); i++) {
-            double x = snap(xAxis.getDisplayPosition(tickMarks.get(i).getValue()));
+        for (TickMark tickMark : tickMarks) {
+            double x = snap(xAxis.getDisplayPosition(tickMark.getValue()));
             if (x > 0 && x <= xAxisWidth) {
                 // gc.strokeLine(x, zeroSnapped, x, yAxisHeightSnapped);
                 DashPatternStyle.strokeDashedLine(gc, x, zeroSnapped, x, yAxisHeightSnapped);
@@ -406,7 +406,7 @@ public class GridRenderer extends Pane implements Renderer {
     }
 
     @Override
-    public void render(final GraphicsContext gc, final Chart chart, final int dataSetOffset,
+    public List<DataSet> render(final GraphicsContext gc, final Chart chart, final int dataSetOffset,
             final ObservableList<DataSet> datasets) {
         if (!(chart instanceof XYChart)) {
             throw new InvalidParameterException(
@@ -420,6 +420,7 @@ public class GridRenderer extends Pane implements Renderer {
             drawEuclideanGrid(gc, xyChart);
         }
 
+        return Collections.emptyList();
     }
 
     /**
@@ -478,5 +479,4 @@ public class GridRenderer extends Pane implements Renderer {
     private static double snap(final double value) {
         return (int) value + 0.5;
     }
-
 }

@@ -7,6 +7,7 @@ import static de.gsi.dataset.DataSet.DIM_Y;
 
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
@@ -422,7 +423,7 @@ public class ContourDataSetRenderer extends AbstractContourDataSetRendererParame
 
                 hex.setStroke(color);
                 hex.setFill(Color.TRANSPARENT);
-                hex.setUserData(Double.valueOf(quant));
+                hex.setUserData(quant);
             }
         }
 
@@ -442,21 +443,21 @@ public class ContourDataSetRenderer extends AbstractContourDataSetRendererParame
             gc.setStroke(stroke);
             gc.setLineWidth(hexagon.getStrokeWidth());
             gc.setFill(hexagon.getFill());
-            final double z = ((Double) hexagon.getUserData()).doubleValue();
+            final double z = (Double) hexagon.getUserData();
             final List<Direction> list = new ArrayList<>();
             for (final Direction direction : Direction.values()) {
                 final Hexagon neighbour = hexagon.getNeighbour(direction);
                 if (neighbour == null) {
                     continue;
                 }
-                final double neighbourZ = ((Double) neighbour.getUserData()).doubleValue();
+                final double neighbourZ = (Double) neighbour.getUserData();
 
                 if (stroke != null && z > neighbourZ) {
                     list.add(direction);
                 }
             }
 
-            hexagon.drawHexagon(gc, list.toArray(new Direction[list.size()]));
+            hexagon.drawHexagon(gc, list.toArray(new Direction[0]));
 
             gc.restore();
         }
@@ -585,7 +586,7 @@ public class ContourDataSetRenderer extends AbstractContourDataSetRendererParame
     }
 
     @Override
-    public void render(final GraphicsContext gc, final Chart chart, final int dataSetOffset,
+    public List<DataSet> render(final GraphicsContext gc, final Chart chart, final int dataSetOffset,
             final ObservableList<DataSet> datasets) {
         final long start = ProcessingProfiler.getTimeStamp();
         if (!(chart instanceof XYChart)) {
@@ -599,7 +600,7 @@ public class ContourDataSetRenderer extends AbstractContourDataSetRendererParame
 
         // If there are no data sets
         if (localDataSetList.isEmpty()) {
-            return;
+            return Collections.emptyList();
         }
 
         final XYChart xyChart = (XYChart) chart;
@@ -607,6 +608,8 @@ public class ContourDataSetRenderer extends AbstractContourDataSetRendererParame
         // N.B. importance of reverse order: start with last index, so that
         // most(-like) important DataSet is drawn on
         // top of the others
+
+        List<DataSet> drawnDataSet = new ArrayList<>(localDataSetList.size());
         for (int dataSetIndex = localDataSetList.size() - 1; dataSetIndex >= 0; dataSetIndex--) {
             final DataSet dataSet = localDataSetList.get(dataSetIndex);
             if (dataSet.getDimension() <= 2) {
@@ -634,7 +637,7 @@ public class ContourDataSetRenderer extends AbstractContourDataSetRendererParame
                 layoutZAxis(getZAxis());
                 // data reduction algorithm here
                 paintCanvas(gc);
-
+                drawnDataSet.add(dataSet);
                 localCache.releaseCachedVariables();
             }
 
@@ -643,6 +646,8 @@ public class ContourDataSetRenderer extends AbstractContourDataSetRendererParame
         } // end of 'dataSetIndex' loop
 
         ProcessingProfiler.getTimeDiff(start);
+
+        return drawnDataSet;
     }
 
     public void shiftZAxisToLeft() {
@@ -746,9 +751,6 @@ public class ContourDataSetRenderer extends AbstractContourDataSetRendererParame
                     gY[i][j] = 0.0 * input[i][j - 1] - 1.0 * input[i][j] + 0.0 * input[i][j + 1];
                     gY[i][j] += 1.0 * input[i][j - 1] - 0.0 * input[i][j] + 0.0 * input[i + 1][j + 1];
 
-                    double zNorm = Math.abs(gX[i][j]) + Math.abs(gY[i][j]);
-                    // - zMin) / (zMax - zMin);
-
                     pixelMatrix[0][0] = input[i - 1][j - 1] > level ? 1.0 : 0.0;
                     pixelMatrix[0][1] = input[i - 1][j] > level ? 1.0 : 0.0;
                     pixelMatrix[0][2] = input[i - 1][j + 1] > level ? 1.0 : 0.0;
@@ -758,8 +760,7 @@ public class ContourDataSetRenderer extends AbstractContourDataSetRendererParame
                     pixelMatrix[2][1] = input[i + 1][j] > level ? 1.0 : 0.0;
                     pixelMatrix[2][2] = input[i + 1][j + 1] > level ? 1.0 : 0.0;
 
-                    zNorm = ContourDataSetRenderer.convolution(pixelMatrix);
-                    output[i][j] = zNorm; // > level ? 1.0 : 0.0;
+                    output[i][j] = ContourDataSetRenderer.convolution(pixelMatrix); // > level ? 1.0 : 0.0;
 
                     // output[i][j] = zNorm;
                 }

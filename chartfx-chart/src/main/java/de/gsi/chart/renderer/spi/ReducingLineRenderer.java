@@ -8,6 +8,10 @@ import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.List;
 
+import javafx.collections.ObservableList;
+import javafx.scene.canvas.Canvas;
+import javafx.scene.canvas.GraphicsContext;
+
 import de.gsi.chart.Chart;
 import de.gsi.chart.XYChart;
 import de.gsi.chart.axes.Axis;
@@ -17,9 +21,6 @@ import de.gsi.chart.renderer.spi.utils.DefaultRenderColorScheme;
 import de.gsi.dataset.DataSet;
 import de.gsi.dataset.DataSet2D;
 import de.gsi.dataset.utils.ProcessingProfiler;
-import javafx.collections.ObservableList;
-import javafx.scene.canvas.Canvas;
-import javafx.scene.canvas.GraphicsContext;
 
 /**
  * Simple, uncomplicated reducing line renderer
@@ -27,7 +28,6 @@ import javafx.scene.canvas.GraphicsContext;
  * @author braeun
  */
 public class ReducingLineRenderer extends AbstractDataSetManagement<ReducingLineRenderer> implements Renderer {
-
     private int maxPoints;
 
     // static private final Color[] COLORS = { Color.BLACK, Color.BLUE, Color.GREEN, Color.RED };
@@ -59,7 +59,7 @@ public class ReducingLineRenderer extends AbstractDataSetManagement<ReducingLine
     }
 
     @Override
-    public void render(final GraphicsContext gc, final Chart chart, final int dataSetOffset,
+    public List<DataSet> render(final GraphicsContext gc, final Chart chart, final int dataSetOffset,
             final ObservableList<DataSet> datasets) {
         if (!(chart instanceof XYChart)) {
             throw new InvalidParameterException(
@@ -79,10 +79,12 @@ public class ReducingLineRenderer extends AbstractDataSetManagement<ReducingLine
         final double xmin = xAxis.getValueForDisplay(0);
         final double xmax = xAxis.getValueForDisplay(xAxisWidth);
         int index = 0;
+        List<DataSet> drawnDataSet = new ArrayList<>(localDataSetList.size());
         for (final DataSet ds : localDataSetList) {
             if (!(ds instanceof DataSet2D)) {
                 continue;
             }
+            drawnDataSet.add(ds);
             final DataSet2D dataset = (DataSet2D) ds;
             final int lindex = index;
             dataset.lock().readLockGuardOptimistic(() -> {
@@ -163,6 +165,8 @@ public class ReducingLineRenderer extends AbstractDataSetManagement<ReducingLine
             index++;
         }
         ProcessingProfiler.getTimeDiff(start);
+
+        return drawnDataSet;
     }
 
     public void setMaxPoints(final int maxPoints) {

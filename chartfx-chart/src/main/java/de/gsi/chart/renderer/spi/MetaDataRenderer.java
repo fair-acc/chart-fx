@@ -2,6 +2,7 @@ package de.gsi.chart.renderer.spi;
 
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javafx.beans.property.BooleanProperty;
@@ -238,7 +239,7 @@ public class MetaDataRenderer extends AbstractMetaDataRendererParameter<MetaData
     }
 
     @Override
-    public void render(final GraphicsContext gc, final Chart chart, final int dataSetOffset,
+    public List<DataSet> render(final GraphicsContext gc, final Chart chart, final int dataSetOffset,
             final ObservableList<DataSet> datasets) {
         final long start = ProcessingProfiler.getTimeStamp();
 
@@ -298,6 +299,7 @@ public class MetaDataRenderer extends AbstractMetaDataRendererParameter<MetaData
         }
 
         ProcessingProfiler.getTimeDiff(start);
+        return Collections.emptyList();
     }
 
     public void setDrawOnCanvas(boolean state) {
