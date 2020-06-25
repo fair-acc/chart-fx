@@ -1,20 +1,5 @@
 package de.gsi.chart.axes.spi;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.SortedSet;
-import java.util.TreeSet;
-
-import javafx.beans.property.DoubleProperty;
-import javafx.css.CssMetaData;
-import javafx.css.Styleable;
-import javafx.css.StyleableDoubleProperty;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import de.gsi.chart.axes.Axis;
 import de.gsi.chart.axes.AxisTransform;
 import de.gsi.chart.axes.LogAxisType;
@@ -23,6 +8,14 @@ import de.gsi.chart.axes.spi.format.DefaultTickUnitSupplier;
 import de.gsi.chart.axes.spi.transforms.DefaultAxisTransform;
 import de.gsi.chart.ui.css.CssPropertyFactory;
 import de.gsi.dataset.spi.DataRange;
+import javafx.beans.property.DoubleProperty;
+import javafx.css.CssMetaData;
+import javafx.css.Styleable;
+import javafx.css.StyleableDoubleProperty;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.*;
 
 /**
  * Implements an Oscilloscope-like axis with a default of 10 divisions (tick marks) and fixed zero (or offset) screen
@@ -55,10 +48,8 @@ public class OscilloscopeAxis extends AbstractAxis implements Axis {
 
     private final DataRange minRange = new DataRange();
     private final DataRange maxRange = new DataRange();
-    private final DoubleProperty axisZeroPosition = CSS.createDoubleProperty(this, "centerAxisPosition", "-fx-centre-axis-zero-position",
-            s -> (StyleableDoubleProperty) s.centerAxisZeroPositionProperty(), 0.5, true, (oldVal, newVal) -> Math.max(0.0, Math.min(newVal, 1.0)), this::requestAxisLayout);
-    private final DoubleProperty axisZeroValue = CSS.createDoubleProperty(this, "axisZeroValue", "-fx-centre-axis-zero-value",
-            s -> (StyleableDoubleProperty) s.axisZeroValueProperty(), 0.0, true, null, this::requestAxisLayout);
+    private final StyleableDoubleProperty axisZeroPosition = CSS.createDoubleProperty(this, "axisZeroPosition", "-fx-centre-axis-zero-position", 0.5, true, (oldVal, newVal) -> Math.max(0.0, Math.min(newVal, 1.0)), this::requestAxisLayout);
+    private final StyleableDoubleProperty axisZeroValue = CSS.createDoubleProperty(this, "axisZeroValue", "-fx-centre-axis-zero-value", 0.0, true, null, this::requestAxisLayout);
     private final Cache cache = new Cache();
     private double offset;
     protected boolean isUpdating = true;
@@ -138,12 +129,10 @@ public class OscilloscopeAxis extends AbstractAxis implements Axis {
             final double relTickCount2 = (1.0 - relCentre) * TICK_COUNT; // top half
             final double rawTickUnit1 = getEffectiveRange(clamped.getMin(), centre) / relTickCount1;
             final double rawTickUnit2 = getEffectiveRange(centre, clamped.getMax()) / relTickCount2;
-            rawTickUnit = rawTickUnit1 > rawTickUnit2 ? rawTickUnit1 : rawTickUnit2;
+            rawTickUnit = Math.max(rawTickUnit1, rawTickUnit2);
         }
 
-        final double majorUnit = tickUnitSupplier.computeTickUnit(rawTickUnit);
-
-        return majorUnit;
+        return tickUnitSupplier.computeTickUnit(rawTickUnit);
     }
 
     @Override
@@ -244,7 +233,7 @@ public class OscilloscopeAxis extends AbstractAxis implements Axis {
     protected List<Double> calculateMajorTickValues(double length, AxisRange axisRange) {
         final List<Double> tickValues = new ArrayList<>();
         if (axisRange.getMin() == axisRange.getMax() || axisRange.getTickUnit() <= 0) {
-            return Arrays.asList(axisRange.getMin());
+            return Collections.singletonList(axisRange.getMin());
         }
 
         final double firstTick = Math.ceil(axisRange.getMin() / axisRange.getTickUnit()) * axisRange.getTickUnit();

@@ -8,7 +8,7 @@
 }
 
 .axis-label {
-    -fx-font-size: 13.0;
+    -fx-font-size: 30.0;
     -fx-font-weight: normal;    
     /*-fx-stroke: derive(-fx-background,-30%);*/
     -fx-stroke: rgb(255, 0, 0);
