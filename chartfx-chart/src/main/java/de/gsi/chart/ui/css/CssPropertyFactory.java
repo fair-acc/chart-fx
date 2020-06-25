@@ -30,17 +30,17 @@ public class CssPropertyFactory<S extends Styleable> {
 
     /**
      * Create a property factory without any properties from the parent class.
-     * Only use this, if the parent class does not provide any styleable properties.
+     * Only use this, if the parent class does not provide any styleableBean properties.
      */
     public CssPropertyFactory() {
         this(null);
     }
 
     /**
-     * Create a property factory which also provides the styleable properties of the parent class.
+     * Create a property factory which also provides the styleableBean properties of the parent class.
      * {@code private static final CssPropertyFactory<MyStyleable> CSS = new CssPropertyFactory<>(Parent.getClassCssMetaData()}
      * 
-     * @param parentCss List containing all styleable properties of the parent class
+     * @param parentCss List containing all styleableBean properties of the parent class
      */
     public CssPropertyFactory(List<CssMetaData<? extends Styleable, ?>> parentCss) {
         if (parentCss != null) {
@@ -71,14 +71,14 @@ public class CssPropertyFactory<S extends Styleable> {
     }
 
     /**
-     * @return all styleable properties added via the factory and the ones for the parents.
+     * @return all styleableBean properties added via the factory and the ones for the parents.
      */
     public final List<CssMetaData<? extends Styleable, ?>> getCssMetaData() {
         return unmodifiableList;
     }
 
     /**
-     * @return all styleable properties added via the factory and the ones for the parents (modifiable).
+     * @return all styleableBean properties added via the factory and the ones for the parents (modifiable).
      */
     public final List<CssMetaData<? extends Styleable, ?>> getCssMetaDataModifyable() {
         return metaData;
@@ -103,20 +103,20 @@ public class CssPropertyFactory<S extends Styleable> {
     /**
      * Create a StyleableProperty&lt;Double&gt; with initial value and inherit flag.
      *
-     * @param styleable the {@code this} reference of the returned property. This is also the property bean.
+     * @param styleableBean the {@code this} reference of the returned property. This is also the property bean.
      * @param propertyName the field name of the StyleableProperty&lt;Boolean&gt;
      * @param initialValue the initial value of the property. CSS may reset the property to this value.
      * @param invalidateActions zero, one or two Runnables (vararg) first one will be executed before and second one after invalidation
      * @return a #StyleableDoubleProperty created with initial value and inherit flag
      */
-    public final StyleableDoubleProperty createDoubleProperty(S styleable, String propertyName, double initialValue, Runnable... invalidateActions) {
-        return createDoubleProperty(styleable, propertyName, initialValue, true, null, invalidateActions);
+    public final StyleableDoubleProperty createDoubleProperty(S styleableBean, String propertyName, double initialValue, Runnable... invalidateActions) {
+        return createDoubleProperty(styleableBean, propertyName, initialValue, true, null, invalidateActions);
     }
 
     /**
      * Create a StyleableProperty&lt;Boolean&gt; with initial value and inherit flag.
      *
-     * @param styleable the {@code this} reference of the returned property. This is also the property bean.
+     * @param styleableBean the {@code this} reference of the returned property. This is also the property bean.
      * @param propertyName the field name of the StyleableProperty&lt;Boolean&gt;
      * @param initialValue the initial value of the property. CSS may reset the property to this value.
      * @param inherits whether or not the CSS style can be inherited by child nodes
@@ -124,27 +124,27 @@ public class CssPropertyFactory<S extends Styleable> {
      * @param invalidateActions zero, one or two Runnables (vararg) first one will be executed before and second one after invalidation
      * @return a #StyleableIntegerProperty created with initial value and inherit flag
      */
-    public final StyleableIntegerProperty createIntegerProperty(S styleable, String propertyName, int initialValue, boolean inherits, IntBinaryOperator filter, Runnable... invalidateActions) {
-        return new StylishIntegerProperty(styleable, propertyName, initialValue, inherits, filter, invalidateActions);
+    public final StyleableIntegerProperty createIntegerProperty(S styleableBean, String propertyName, int initialValue, boolean inherits, IntBinaryOperator filter, Runnable... invalidateActions) {
+        return new StylishIntegerProperty(styleableBean, propertyName, initialValue, inherits, filter, invalidateActions);
     }
 
     /**
      * Create a StyleableProperty&lt;Boolean&gt; with initial value and inherit flag.
      *
-     * @param styleable the {@code this} reference of the returned property. This is also the property bean.
+     * @param styleableBean the {@code this} reference of the returned property. This is also the property bean.
      * @param propertyName the field name of the StyleableProperty&lt;Boolean&gt;
      * @param initialValue the initial value of the property. CSS may reset the property to this value.
      * @param invalidateActions zero, one or two Runnables (vararg) first one will be executed before and second one after invalidation
      * @return a #StyleableIntegerProperty created with initial value and inherit flag
      */
-    public final StyleableIntegerProperty createIntegerProperty(S styleable, String propertyName, int initialValue, Runnable... invalidateActions) {
-        return createIntegerProperty(styleable, propertyName, initialValue, true, null, invalidateActions);
+    public final StyleableIntegerProperty createIntegerProperty(S styleableBean, String propertyName, int initialValue, Runnable... invalidateActions) {
+        return createIntegerProperty(styleableBean, propertyName, initialValue, true, null, invalidateActions);
     }
 
     /**
      * Create a StyleableProperty&lt;Long&gt; with initial value and inherit flag.
      *
-     * @param styleable the {@code this} reference of the returned property. This is also the property bean.
+     * @param styleableBean the {@code this} reference of the returned property. This is also the property bean.
      * @param propertyName the field name of the StyleableProperty&lt;Boolean&gt;
      * @param initialValue the initial value of the property. CSS may reset the property to this value.
      * @param inherits whether or not the CSS style can be inherited by child nodes
@@ -152,27 +152,27 @@ public class CssPropertyFactory<S extends Styleable> {
      * @param invalidateActions zero, one or two Runnables (vararg) first one will be executed before and second one after invalidation
      * @return a #StyleableLongProperty created with initial value and inherit flag
      */
-    public final StyleableLongProperty createLongProperty(S styleable, String propertyName, long initialValue, boolean inherits, LongBinaryOperator filter, Runnable... invalidateActions) {
-        return new StylishLongProperty(styleable, propertyName, initialValue, inherits, filter, invalidateActions);
+    public final StyleableLongProperty createLongProperty(S styleableBean, String propertyName, long initialValue, boolean inherits, LongBinaryOperator filter, Runnable... invalidateActions) {
+        return new StylishLongProperty(styleableBean, propertyName, initialValue, inherits, filter, invalidateActions);
     }
 
     /**
      * Create a StyleableProperty&lt;Long&gt; with initial value and inherit flag.
      *
-     * @param styleable the {@code this} reference of the returned property. This is also the property bean.
+     * @param styleableBean the {@code this} reference of the returned property. This is also the property bean.
      * @param propertyName the field name of the StyleableProperty&lt;Boolean&gt;
      * @param initialValue the initial value of the property. CSS may reset the property to this value.
      * @param invalidateActions zero, one or two {@code Runnable}s (vararg) first one will be executed before and second one after invalidation
      * @return a #StyleableLongProperty created with initial value and inherit flag
      */
-    public final StyleableLongProperty createLongProperty(S styleable, String propertyName, long initialValue, Runnable... invalidateActions) {
-        return createLongProperty(styleable, propertyName, initialValue, true, null, invalidateActions);
+    public final StyleableLongProperty createLongProperty(S styleableBean, String propertyName, long initialValue, Runnable... invalidateActions) {
+        return createLongProperty(styleableBean, propertyName, initialValue, true, null, invalidateActions);
     }
 
     /**
      * Create a StyleableProperty&lt;Float&gt; with initial value and inherit flag.
      *
-     * @param styleable the {@code this} reference of the returned property. This is also the property bean.
+     * @param styleableBean the {@code this} reference of the returned property. This is also the property bean.
      * @param propertyName the field name of the StyleableProperty&lt;Boolean&gt;
      * @param initialValue the initial value of the property. CSS may reset the property to this value.
      * @param inherits whether or not the CSS style can be inherited by child nodes
@@ -180,27 +180,27 @@ public class CssPropertyFactory<S extends Styleable> {
      * @param invalidateActions zero, one or two {@code Runnable}s (vararg) first one will be executed before and second one after invalidation
      * @return a #StyleableFloatProperty created with initial value and inherit flag
      */
-    public final StyleableFloatProperty createFloatProperty(S styleable, String propertyName, float initialValue, boolean inherits, BinaryOperator<Float> filter, Runnable... invalidateActions) {
-        return new StylishFloatProperty(styleable, propertyName, initialValue, inherits, filter, invalidateActions);
+    public final StyleableFloatProperty createFloatProperty(S styleableBean, String propertyName, float initialValue, boolean inherits, BinaryOperator<Float> filter, Runnable... invalidateActions) {
+        return new StylishFloatProperty(styleableBean, propertyName, initialValue, inherits, filter, invalidateActions);
     }
 
     /**
      * Create a StyleableProperty&lt;Float&gt; with initial value and inherit flag.
      *
-     * @param styleable the {@code this} reference of the returned property. This is also the property bean.
+     * @param styleableBean the {@code this} reference of the returned property. This is also the property bean.
      * @param propertyName the field name of the StyleableProperty&lt;Boolean&gt;
      * @param initialValue the initial value of the property. CSS may reset the property to this value.
      * @param invalidateActions zero, one or two {@code Runnable}s (vararg) first one will be executed before and second one after invalidation
      * @return a #StyleableFloatProperty created with initial value and inherit flag
      */
-    public final StyleableFloatProperty createFloatProperty(S styleable, String propertyName, float initialValue, Runnable... invalidateActions) {
-        return createFloatProperty(styleable, propertyName, initialValue, true, null, invalidateActions);
+    public final StyleableFloatProperty createFloatProperty(S styleableBean, String propertyName, float initialValue, Runnable... invalidateActions) {
+        return createFloatProperty(styleableBean, propertyName, initialValue, true, null, invalidateActions);
     }
 
     /**
      * Create a StyleableProperty&lt;Boolean&gt; with initial value and inherit flag.
      *
-     * @param styleable the {@code this} reference of the returned property. This is also the property bean.
+     * @param styleableBean the {@code this} reference of the returned property. This is also the property bean.
      * @param propertyName the field name of the StyleableProperty&lt;Boolean&gt;
      * @param initialValue the initial value of the property. CSS may reset the property to this value.
      * @param inherits whether or not the CSS style can be inherited by child nodes
@@ -208,27 +208,27 @@ public class CssPropertyFactory<S extends Styleable> {
      * @param invalidateActions zero, one or two {@code Runnable}s (vararg) first one will be executed before and second one after invalidation
      * @return a StyleableProperty created with initial value and inherit flag
      */
-    public final StyleableBooleanProperty createBooleanProperty(S styleable, String propertyName, boolean initialValue, boolean inherits, BinaryOperator<Boolean> filter, Runnable... invalidateActions) {
-        return new StylishBooleanProperty(styleable, propertyName, initialValue, inherits, filter, invalidateActions);
+    public final StyleableBooleanProperty createBooleanProperty(S styleableBean, String propertyName, boolean initialValue, boolean inherits, BinaryOperator<Boolean> filter, Runnable... invalidateActions) {
+        return new StylishBooleanProperty(styleableBean, propertyName, initialValue, inherits, filter, invalidateActions);
     }
 
     /**
      * Create a StyleableProperty&lt;Boolean&gt; with initial value and inherit flag.
      *
-     * @param styleable the {@code this} reference of the returned property. This is also the property bean.
+     * @param styleableBean the {@code this} reference of the returned property. This is also the property bean.
      * @param propertyName the field name of the StyleableProperty&lt;Boolean&gt;
      * @param initialValue the initial value of the property. CSS may reset the property to this value.
      * @param invalidateActions zero, one or two {@code Runnable}s (vararg) first one will be executed before and second one after invalidation
      * @return a StyleableProperty created with initial value and inherit flag
      */
-    public final StyleableBooleanProperty createBooleanProperty(S styleable, String propertyName, boolean initialValue, Runnable... invalidateActions) {
-        return createBooleanProperty(styleable, propertyName, initialValue, true, null, invalidateActions);
+    public final StyleableBooleanProperty createBooleanProperty(S styleableBean, String propertyName, boolean initialValue, Runnable... invalidateActions) {
+        return createBooleanProperty(styleableBean, propertyName, initialValue, true, null, invalidateActions);
     }
 
     /**
      * Create a StyleableProperty&lt;Boolean&gt; with initial value and inherit flag.
      *
-     * @param styleable the {@code this} reference of the returned property. This is also the property bean.
+     * @param styleableBean the {@code this} reference of the returned property. This is also the property bean.
      * @param propertyName the field name of the StyleableProperty&lt;Boolean&gt;
      * @param initialValue the initial value of the property. CSS may reset the property to this value.
      * @param inherits whether or not the CSS style can be inherited by child nodes
@@ -238,15 +238,15 @@ public class CssPropertyFactory<S extends Styleable> {
      * @return a StyleableProperty created with initial value and inherit flag
      * @param <T> Type of the Property
      */
-    public final <T> StyleableObjectProperty<T> createObjectProperty(S styleable, String propertyName, T initialValue,
+    public final <T> StyleableObjectProperty<T> createObjectProperty(S styleableBean, String propertyName, T initialValue,
             boolean inherits, StyleConverter<?, T> converter, BinaryOperator<T> filter, Runnable... invalidateActions) {
-        return new StylishObjectProperty<>(styleable, propertyName, initialValue, inherits, converter, filter, invalidateActions);
+        return new StylishObjectProperty<>(styleableBean, propertyName, initialValue, inherits, converter, filter, invalidateActions);
     }
 
     /**
      * Create a StyleableProperty&lt;Boolean&gt; with initial value and inherit flag.
      *
-     * @param styleable the {@code this} reference of the returned property. This is also the property bean.
+     * @param styleableBean the {@code this} reference of the returned property. This is also the property bean.
      * @param propertyName the field name of the StyleableProperty&lt;Boolean&gt;
      * @param initialValue the initial value of the property. CSS may reset the property to this value.
      * @param converter the style converter to convert the style to the object
@@ -254,14 +254,14 @@ public class CssPropertyFactory<S extends Styleable> {
      * @return a StyleableProperty created with initial value and inherit flag
      * @param <T> Type of the Property
      */
-    public final <T> StyleableObjectProperty<T> createObjectProperty(S styleable, String propertyName, T initialValue, StyleConverter<?, T> converter, Runnable... invalidateActions) {
-        return createObjectProperty(styleable, propertyName, initialValue, true, converter, null, invalidateActions);
+    public final <T> StyleableObjectProperty<T> createObjectProperty(S styleableBean, String propertyName, T initialValue, StyleConverter<?, T> converter, Runnable... invalidateActions) {
+        return createObjectProperty(styleableBean, propertyName, initialValue, true, converter, null, invalidateActions);
     }
 
     /**
      * Create a StyleableProperty&lt;Boolean&gt; with initial value and inherit flag.
      *
-     * @param styleable the {@code this} reference of the returned property. This is also the property bean.
+     * @param styleableBean the {@code this} reference of the returned property. This is also the property bean.
      * @param propertyName the field name of the StyleableProperty&lt;Boolean&gt;
      * @param initialValue the initial value of the property. CSS may reset the property to this value.
      * @param inherits whether or not the CSS style can be inherited by child nodes
@@ -269,28 +269,28 @@ public class CssPropertyFactory<S extends Styleable> {
      * @param invalidateActions zero, one or two {@code Runnable}s (vararg) first one will be executed before and second one after invalidation
      * @return a StyleableProperty created with initial value and inherit flag
      */
-    public final StyleableStringProperty createStringProperty(S styleable, String propertyName, String initialValue, boolean inherits, BinaryOperator<String> filter, Runnable... invalidateActions) {
-        return new StylishStringProperty(styleable, propertyName, initialValue, inherits, filter, invalidateActions);
+    public final StyleableStringProperty createStringProperty(S styleableBean, String propertyName, String initialValue, boolean inherits, BinaryOperator<String> filter, Runnable... invalidateActions) {
+        return new StylishStringProperty(styleableBean, propertyName, initialValue, inherits, filter, invalidateActions);
     }
 
     /**
      * Create a StyleableProperty&lt;Boolean&gt; with initial value and inherit flag.
      *
-     * @param styleable the {@code this} reference of the returned property. This is also the property bean.
+     * @param styleableBean the {@code this} reference of the returned property. This is also the property bean.
      * @param propertyName the field name of the StyleableProperty&lt;Boolean&gt;
      * @param initialValue the initial value of the property. CSS may reset the property to this value.
      * @param invalidateActions zero, one or two {@code Runnable}s (vararg) first one will be executed before and second one after invalidation
      * @return a StyleableProperty created with initial value and inherit flag
      */
-    public final StyleableStringProperty createStringProperty(S styleable, String propertyName, String initialValue, Runnable... invalidateActions) {
-        return createStringProperty(styleable, propertyName, initialValue, true, null, invalidateActions);
+    public final StyleableStringProperty createStringProperty(S styleableBean, String propertyName, String initialValue, Runnable... invalidateActions) {
+        return createStringProperty(styleableBean, propertyName, initialValue, true, null, invalidateActions);
     }
 
     /**
      * Create a StyleableProperty&lt;Boolean&gt; with initial value and inherit flag.
      * This also creates pseudoclasses for each enum value and keeps them up to date with the property.
      *
-     * @param styleable the {@code this} reference of the returned property. This is also the property bean.
+     * @param styleableBean the {@code this} reference of the returned property. This is also the property bean.
      * @param propertyName the field name of the StyleableProperty&lt;Boolean&gt;
      * @param initialValue the initial value of the property. CSS may reset the property to this value.
      * @param inherits whether or not the CSS style can be inherited by child nodes
@@ -300,15 +300,15 @@ public class CssPropertyFactory<S extends Styleable> {
      * @return a StyleableProperty created with initial value and inherit flag
      * @param <T> Type of the Property
      */
-    public <T extends Enum<T>> StyleableObjectProperty<T> createEnumPropertyWithPseudoclasses(Styleable styleable, String propertyName, T initialValue,
+    public <T extends Enum<T>> StyleableObjectProperty<T> createEnumPropertyWithPseudoclasses(Styleable styleableBean, String propertyName, T initialValue,
             boolean inherits, Class<T> enumClass, BinaryOperator<T> filter, Runnable... invalidateActions) {
         BinaryOperator<T> pseudoClassUpdatingFilter = (oldVal, newVal) -> {
             // update pseudo class
             if (oldVal != null) {
-                ((Node) styleable).pseudoClassStateChanged(pseudoClasses.get(oldVal.toString().toLowerCase().replace('_', '-')), false);
+                ((Node) styleableBean).pseudoClassStateChanged(pseudoClasses.get(oldVal.toString().toLowerCase().replace('_', '-')), false);
             }
             if (newVal != null) {
-                ((Node) styleable).pseudoClassStateChanged(pseudoClasses.get(newVal.toString().toLowerCase().replace('_', '-')), true);
+                ((Node) styleableBean).pseudoClassStateChanged(pseudoClasses.get(newVal.toString().toLowerCase().replace('_', '-')), true);
             }
             // apply filter
             if (filter != null) {
@@ -316,9 +316,9 @@ public class CssPropertyFactory<S extends Styleable> {
             }
             return newVal;
         };
-        final StylishEnumProperty<T> newProperty = new StylishEnumProperty<>(styleable, propertyName, initialValue, inherits, enumClass, pseudoClassUpdatingFilter, invalidateActions);
+        final StylishEnumProperty<T> newProperty = new StylishEnumProperty<>(styleableBean, propertyName, initialValue, inherits, enumClass, pseudoClassUpdatingFilter, invalidateActions);
         // set initial pseudo class style
-        ((Node) styleable).pseudoClassStateChanged(pseudoClasses.get(initialValue.toString().toLowerCase().replace('_', '-')), true);
+        ((Node) styleableBean).pseudoClassStateChanged(pseudoClasses.get(initialValue.toString().toLowerCase().replace('_', '-')), true);
 
         return newProperty;
     }
@@ -327,7 +327,7 @@ public class CssPropertyFactory<S extends Styleable> {
      * Create a StyleableProperty&lt;Boolean&gt; with initial value and inherit flag.
      * This also creates pseudoclasses for each enum value and keeps them up to date with the property.
      *
-     * @param styleable the {@code this} reference of the returned property. This is also the property bean.
+     * @param styleableBean the {@code this} reference of the returned property. This is also the property bean.
      * @param propertyName the field name of the StyleableProperty&lt;Boolean&gt;
      * @param initialValue the initial value of the property. CSS may reset the property to this value.
      * @param enumClass the type of enum to read
@@ -335,8 +335,8 @@ public class CssPropertyFactory<S extends Styleable> {
      * @return a StyleableProperty created with initial value and inherit flag
      * @param <T> Type of the Property
      */
-    public <T extends Enum<T>> StyleableObjectProperty<T> createEnumPropertyWithPseudoclasses(Styleable styleable, String propertyName, T initialValue, Class<T> enumClass, Runnable... invalidateActions) {
-        return createEnumPropertyWithPseudoclasses(styleable, propertyName, initialValue, true, enumClass, null, invalidateActions);
+    public <T extends Enum<T>> StyleableObjectProperty<T> createEnumPropertyWithPseudoclasses(Styleable styleableBean, String propertyName, T initialValue, Class<T> enumClass, Runnable... invalidateActions) {
+        return createEnumPropertyWithPseudoclasses(styleableBean, propertyName, initialValue, true, enumClass, null, invalidateActions);
     }
 
     private void checkPropertyConsistency(final Styleable styleableBean, final String propertyName, final Runnable... invalidateActions) {
@@ -371,7 +371,7 @@ public class CssPropertyFactory<S extends Styleable> {
         private final Function<S, StyleableProperty<T>> function;
 
         /**
-         * @param styleableBean the styleable bean/class the property is declared in
+         * @param styleableBean the styleableBean bean/class the property is declared in
          * @param propertyName FX property name (ie. "myFavouriteProperty")
          * @param cssPropertyName CSS property name (ie. "-fx-my-favourite-property")
          * @param converter style converter to interpret styles
