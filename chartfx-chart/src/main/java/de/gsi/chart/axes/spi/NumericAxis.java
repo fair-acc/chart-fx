@@ -4,15 +4,16 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import javafx.beans.property.*;
+import javafx.css.CssMetaData;
+import javafx.css.Styleable;
+import javafx.css.StyleableDoubleProperty;
+
 import de.gsi.chart.axes.AxisTransform;
 import de.gsi.chart.axes.LogAxisType;
 import de.gsi.chart.axes.TickUnitSupplier;
 import de.gsi.chart.axes.spi.format.DefaultTickUnitSupplier;
 import de.gsi.chart.ui.css.CssPropertyFactory;
-import javafx.beans.property.*;
-import javafx.css.CssMetaData;
-import javafx.css.Styleable;
-import javafx.css.StyleableDoubleProperty;
 
 /**
  * A axis class that plots a range of numbers with major tick marks every "tickUnit". You can use any Number type with
