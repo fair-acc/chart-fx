@@ -84,7 +84,7 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
     /**
      * When true the chart will display a legend if the chart implementation supports a legend.
      */
-    private final StyleableBooleanProperty legendVisible = CSS.createBooleanProperty(this, "legendVisible",  true, () -> {
+    private final StyleableBooleanProperty legendVisible = CSS.createBooleanProperty(this, "legendVisible", true, () -> {
         updateLegend(getDatasets(), getRenderers());
         requestLayout();
     });
