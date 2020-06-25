@@ -1,5 +1,9 @@
 package de.gsi.chart.axes.spi;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import de.gsi.chart.axes.AxisTransform;
 import de.gsi.chart.axes.LogAxisType;
 import de.gsi.chart.axes.TickUnitSupplier;
@@ -9,10 +13,6 @@ import javafx.beans.property.*;
 import javafx.css.CssMetaData;
 import javafx.css.Styleable;
 import javafx.css.StyleableDoubleProperty;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 /**
  * A axis class that plots a range of numbers with major tick marks every "tickUnit". You can use any Number type with
@@ -51,7 +51,7 @@ public final class NumericAxis extends AbstractAxis {
 
     private final DoubleProperty autoRangePadding = new SimpleDoubleProperty(0);
 
-    private final StyleableDoubleProperty tickUnit = CSS.createDoubleProperty(this, "tickUnit", "-fx-tick-unit", 5.0, () -> {
+    private final StyleableDoubleProperty tickUnit = CSS.createDoubleProperty(this, "tickUnit", 5.0, () -> {
         if (!isAutoRanging()) {
             invalidate();
             requestAxisLayout();
