@@ -84,7 +84,7 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
     /**
      * When true the chart will display a legend if the chart implementation supports a legend.
      */
-    private final StyleableBooleanProperty legendVisible = CSS.createBooleanProperty(this, "legendVisible", "-fx-legend-visible", true, () -> {
+    private final StyleableBooleanProperty legendVisible = CSS.createBooleanProperty(this, "legendVisible",  true, () -> {
         updateLegend(getDatasets(), getRenderers());
         requestLayout();
     });
@@ -204,7 +204,7 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
     /**
      * The side of the chart where the title is displayed default Side.TOP
      */
-    private final StyleableObjectProperty<Side> titleSide = CSS.createObjectProperty(this, "titleSide", "-fx-title-side", Side.TOP, false, StyleConverter.getEnumConverter(Side.class), (oldVal, newVal) -> {
+    private final StyleableObjectProperty<Side> titleSide = CSS.createObjectProperty(this, "titleSide", Side.TOP, false, StyleConverter.getEnumConverter(Side.class), (oldVal, newVal) -> {
         AssertUtils.notNull("Side must not be null", newVal);
 
         for (final Side s : Side.values()) {
@@ -217,7 +217,7 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
     /**
      * The side of the chart where the title is displayed default Side.TOP
      */
-    private final StyleableObjectProperty<Side> measurementBarSide = CSS.createObjectProperty(this, "measurementBarSide", "-fx-measurement-bar-side", Side.RIGHT, false, StyleConverter.getEnumConverter(Side.class), (oldVal, newVal) -> {
+    private final StyleableObjectProperty<Side> measurementBarSide = CSS.createObjectProperty(this, "measurementBarSide", Side.RIGHT, false, StyleConverter.getEnumConverter(Side.class), (oldVal, newVal) -> {
         AssertUtils.notNull("Side must not be null", newVal);
         return newVal;
     }, this::requestLayout);
@@ -225,7 +225,7 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
     /**
      * The side of the chart where the legend should be displayed default value Side.BOTTOM
      */
-    private final StyleableObjectProperty<Side> legendSide = CSS.createObjectProperty(this, "legendSide", "-fx-legend-side", Side.BOTTOM, false, StyleConverter.getEnumConverter(Side.class), (oldVal, newVal) -> {
+    private final StyleableObjectProperty<Side> legendSide = CSS.createObjectProperty(this, "legendSide", Side.BOTTOM, false, StyleConverter.getEnumConverter(Side.class), (oldVal, newVal) -> {
         AssertUtils.notNull("Side must not be null", newVal);
 
         final Legend legend = getLegend();
@@ -273,7 +273,7 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
         }
     };
 
-    private final StyleableObjectProperty<Side> toolBarSide = CSS.createObjectProperty(this, "toolBarSide", "-fx-toolbar-side", Side.TOP, false, StyleConverter.getEnumConverter(Side.class), (oldVal, newVal) -> {
+    private final StyleableObjectProperty<Side> toolBarSide = CSS.createObjectProperty(this, "toolBarSide", Side.TOP, false, StyleConverter.getEnumConverter(Side.class), (oldVal, newVal) -> {
         AssertUtils.notNull("Side must not be null", newVal);
         // remove tool bar from potential other chart side pane locations
         Chart.this.setTop(null);

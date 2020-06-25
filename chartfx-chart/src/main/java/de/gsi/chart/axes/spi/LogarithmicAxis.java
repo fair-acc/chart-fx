@@ -1,10 +1,10 @@
 package de.gsi.chart.axes.spi;
 
-import de.gsi.chart.axes.AxisTransform;
-import de.gsi.chart.axes.LogAxisType;
-import de.gsi.chart.axes.TickUnitSupplier;
-import de.gsi.chart.axes.spi.format.DefaultTickUnitSupplier;
-import de.gsi.chart.ui.css.CssPropertyFactory;
+import java.security.InvalidParameterException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleDoubleProperty;
@@ -13,10 +13,11 @@ import javafx.css.CssMetaData;
 import javafx.css.Styleable;
 import javafx.css.StyleableDoubleProperty;
 
-import java.security.InvalidParameterException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import de.gsi.chart.axes.AxisTransform;
+import de.gsi.chart.axes.LogAxisType;
+import de.gsi.chart.axes.TickUnitSupplier;
+import de.gsi.chart.axes.spi.format.DefaultTickUnitSupplier;
+import de.gsi.chart.ui.css.CssPropertyFactory;
 
 /**
  * @author rstein
@@ -37,7 +38,7 @@ public class LogarithmicAxis extends AbstractAxis {
 
     private boolean isUpdating = true;
 
-    private final StyleableDoubleProperty tickUnit = CSS.createDoubleProperty(this, "tickUnit", "-fx-tick-unit", 5d, true, null, () -> {
+    private final StyleableDoubleProperty tickUnit = CSS.createDoubleProperty(this, "tickUnit", 5d, true, null, () -> {
         if (!isAutoRanging()) {
             invalidate();
             requestAxisLayout();

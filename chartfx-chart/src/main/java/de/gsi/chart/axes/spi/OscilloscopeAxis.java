@@ -1,5 +1,15 @@
 package de.gsi.chart.axes.spi;
 
+import java.util.*;
+
+import javafx.beans.property.DoubleProperty;
+import javafx.css.CssMetaData;
+import javafx.css.Styleable;
+import javafx.css.StyleableDoubleProperty;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.gsi.chart.axes.Axis;
 import de.gsi.chart.axes.AxisTransform;
 import de.gsi.chart.axes.LogAxisType;
@@ -8,14 +18,6 @@ import de.gsi.chart.axes.spi.format.DefaultTickUnitSupplier;
 import de.gsi.chart.axes.spi.transforms.DefaultAxisTransform;
 import de.gsi.chart.ui.css.CssPropertyFactory;
 import de.gsi.dataset.spi.DataRange;
-import javafx.beans.property.DoubleProperty;
-import javafx.css.CssMetaData;
-import javafx.css.Styleable;
-import javafx.css.StyleableDoubleProperty;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.*;
 
 /**
  * Implements an Oscilloscope-like axis with a default of 10 divisions (tick marks) and fixed zero (or offset) screen
@@ -48,8 +50,8 @@ public class OscilloscopeAxis extends AbstractAxis implements Axis {
 
     private final DataRange minRange = new DataRange();
     private final DataRange maxRange = new DataRange();
-    private final StyleableDoubleProperty axisZeroPosition = CSS.createDoubleProperty(this, "axisZeroPosition", "-fx-centre-axis-zero-position", 0.5, true, (oldVal, newVal) -> Math.max(0.0, Math.min(newVal, 1.0)), this::requestAxisLayout);
-    private final StyleableDoubleProperty axisZeroValue = CSS.createDoubleProperty(this, "axisZeroValue", "-fx-centre-axis-zero-value", 0.0, true, null, this::requestAxisLayout);
+    private final StyleableDoubleProperty axisZeroPosition = CSS.createDoubleProperty(this, "axisZeroPosition", 0.5, true, (oldVal, newVal) -> Math.max(0.0, Math.min(newVal, 1.0)), this::requestAxisLayout);
+    private final StyleableDoubleProperty axisZeroValue = CSS.createDoubleProperty(this, "axisZeroValue", 0.0, true, null, this::requestAxisLayout);
     private final Cache cache = new Cache();
     private double offset;
     protected boolean isUpdating = true;

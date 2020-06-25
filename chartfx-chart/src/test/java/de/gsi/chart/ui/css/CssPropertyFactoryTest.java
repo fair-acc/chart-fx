@@ -72,9 +72,9 @@ public class CssPropertyFactoryTest {
 
         // test error cases
         // double - erroneous (propertyName-variable-field mismatch)
-        assertThrows(IllegalArgumentException.class, () -> styleable.testDouble2 = TestStyleable.CSS.createDoubleProperty(styleable, "testDouble", "-fx-test-double", 4.2, true, null));
-        assertThrows(IllegalArgumentException.class, () -> styleable.testDouble3 = TestStyleable.CSS.createDoubleProperty(styleable, "testDouble1", "-fx-test-double", 4.2, true, null));
-        assertThrows(IllegalArgumentException.class, () -> styleable.testDouble3 = TestStyleable.CSS.createDoubleProperty(null, "testDouble1", "-fx-test-double", 4.2, true, null));
+        assertThrows(IllegalArgumentException.class, () -> styleable.testDouble2 = TestStyleable.CSS.createDoubleProperty(styleable, "testDouble", 4.2, true, null));
+        assertThrows(IllegalArgumentException.class, () -> styleable.testDouble3 = TestStyleable.CSS.createDoubleProperty(styleable, "testDouble1", 4.2, true, null));
+        assertThrows(IllegalArgumentException.class, () -> styleable.testDouble3 = TestStyleable.CSS.createDoubleProperty(null, "testDouble1", 4.2, true, null));
 
         assertEquals("-fx-test-property-name", TestStyleable.CSS.getCssPropertyName("testPropertyName"));
         assertEquals("-fx-test-property-name2", TestStyleable.CSS.getCssPropertyName("testPropertyName2"));
@@ -86,23 +86,23 @@ public class CssPropertyFactoryTest {
     public static class TestStyleable extends Region {
         private static final CssPropertyFactory<TestStyleable> CSS = new CssPropertyFactory<>(Region.getClassCssMetaData());
         // double
-        private final StyleableDoubleProperty testDouble = CSS.createDoubleProperty(this, "testDouble", "-fx-test-double", 4.2, true, null);
+        private final StyleableDoubleProperty testDouble = CSS.createDoubleProperty(this, "testDouble", 4.2, true, null);
         // float
-        private final StyleableFloatProperty testFloat = CSS.createFloatProperty(this, "testFloat", "-fx-test-float", 1.337f, true, null);
+        private final StyleableFloatProperty testFloat = CSS.createFloatProperty(this, "testFloat", 1.337f, true, null);
         // int
-        private final StyleableIntegerProperty testInt = CSS.createIntegerProperty(this, "testInt", "-fx-test-int", 42, true, null);
+        private final StyleableIntegerProperty testInt = CSS.createIntegerProperty(this, "testInt", 42, true, null);
         // long
-        private final StyleableLongProperty testLong = CSS.createLongProperty(this, "testLong", "-fx-test-long", 123456789123456789L, true, null);
+        private final StyleableLongProperty testLong = CSS.createLongProperty(this, "testLong", 123456789123456789L, true, null);
         // string
-        private final StyleableStringProperty testString = CSS.createStringProperty(this, "testString", "-fx-test-string", "test", true, null);
+        private final StyleableStringProperty testString = CSS.createStringProperty(this, "testString", "test", true, null);
         // boolean
-        private final StyleableBooleanProperty testBool = CSS.createBooleanProperty(this, "testBool", "-fx-test-bool", false, true, null);
+        private final StyleableBooleanProperty testBool = CSS.createBooleanProperty(this, "testBool", false, true, null);
         // object
-        private final StyleableObjectProperty<Paint> testObject = CSS.createObjectProperty(this, "testObject", "-fx-test-object", Color.PINK, true, StyleConverter.getPaintConverter(), null);
+        private final StyleableObjectProperty<Paint> testObject = CSS.createObjectProperty(this, "testObject", Color.PINK, true, StyleConverter.getPaintConverter(), null);
         // enum
-        private final StyleableObjectProperty<TestEnum> testEnum = CSS.createObjectProperty(this, "testEnum", "-fx-test-enum", TestEnum.ENABLED, true, StyleConverter.getEnumConverter(TestEnum.class), null);
+        private final StyleableObjectProperty<TestEnum> testEnum = CSS.createObjectProperty(this, "testEnum", TestEnum.ENABLED, true, StyleConverter.getEnumConverter(TestEnum.class), null);
         // enum with pseudoclass
-        private final StyleableObjectProperty<TestEnum> testEnumP = CSS.createEnumPropertyWithPseudoclasses(this, "testEnumP", "-fx-test-enum-p", TestEnum.DISABLED, true, TestEnum.class, null);
+        private final StyleableObjectProperty<TestEnum> testEnumP = CSS.createEnumPropertyWithPseudoclasses(this, "testEnumP", TestEnum.DISABLED, true, TestEnum.class, null);
         // double - erroneous (propertyName-variable-field mismatch)
         protected StyleableDoubleProperty testDouble2;
         protected StyleableDoubleProperty testDouble3;

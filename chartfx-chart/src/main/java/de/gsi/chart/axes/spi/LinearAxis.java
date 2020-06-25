@@ -1,19 +1,20 @@
 package de.gsi.chart.axes.spi;
 
-import de.gsi.chart.axes.AxisTransform;
-import de.gsi.chart.axes.LogAxisType;
-import de.gsi.chart.axes.TickUnitSupplier;
-import de.gsi.chart.axes.spi.format.DefaultTickUnitSupplier;
-import de.gsi.chart.ui.css.CssPropertyFactory;
+import java.security.InvalidParameterException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import javafx.beans.property.*;
 import javafx.css.CssMetaData;
 import javafx.css.Styleable;
 import javafx.css.StyleableDoubleProperty;
 
-import java.security.InvalidParameterException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import de.gsi.chart.axes.AxisTransform;
+import de.gsi.chart.axes.LogAxisType;
+import de.gsi.chart.axes.TickUnitSupplier;
+import de.gsi.chart.axes.spi.format.DefaultTickUnitSupplier;
+import de.gsi.chart.ui.css.CssPropertyFactory;
 
 /**
  * @author rstein
@@ -42,7 +43,7 @@ public class LinearAxis extends AbstractAxis {
         }
     };
 
-    private final StyleableDoubleProperty tickUnit = CSS.createDoubleProperty(this, "tickUnit", "-fx-tick-unit", 5d, () -> {
+    private final StyleableDoubleProperty tickUnit = CSS.createDoubleProperty(this, "tickUnit", 5d, () -> {
         if (!isAutoRanging() || isAutoGrowRanging()) {
             invalidate();
             requestAxisLayout();

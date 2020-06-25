@@ -86,28 +86,28 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
      * The side of the plot which this axis is being drawn on default axis orientation is BOTTOM, can be set latter to
      * another side
      */
-    private final StyleableObjectProperty<Side> side = CSS.createEnumPropertyWithPseudoclasses(this, "side", "-fx-side", Side.BOTTOM, false, Side.class, null, () -> invokeListener(new AxisChangeEvent(AbstractAxisParameter.this)));
+    private final StyleableObjectProperty<Side> side = CSS.createEnumPropertyWithPseudoclasses(this, "side", Side.BOTTOM, false, Side.class, null, () -> invokeListener(new AxisChangeEvent(AbstractAxisParameter.this)));
 
     /** The side of the plot which this axis is being drawn on */
-    private final StyleableObjectProperty<AxisLabelOverlapPolicy> overlapPolicy = CSS.createObjectProperty(this, "overlapPolicy", "-fx-overlap-policy", AxisLabelOverlapPolicy.SKIP_ALT, StyleConverter.getEnumConverter(AxisLabelOverlapPolicy.class), () -> invokeListener(new AxisChangeEvent(AbstractAxisParameter.this)));
+    private final StyleableObjectProperty<AxisLabelOverlapPolicy> overlapPolicy = CSS.createObjectProperty(this, "overlapPolicy", AxisLabelOverlapPolicy.SKIP_ALT, StyleConverter.getEnumConverter(AxisLabelOverlapPolicy.class), () -> invokeListener(new AxisChangeEvent(AbstractAxisParameter.this)));
 
     /**
      * The relative alignment (N.B. clamped to [0.0,1.0]) of the axis if drawn on top of the main canvas (N.B. side ==
      * CENTER_HOR or CENTER_VER
      */
-    private final StyleableDoubleProperty axisCenterPosition = CSS.createDoubleProperty(this, "axisCenterPosition", "-fx-centre-axis-position", 0.5, true, (oldVal, newVal) -> Math.max(0.0, Math.min(newVal, 1.0)), this::requestAxisLayout);
+    private final StyleableDoubleProperty axisCenterPosition = CSS.createDoubleProperty(this, "axisCenterPosition", 0.5, true, (oldVal, newVal) -> Math.max(0.0, Math.min(newVal, 1.0)), this::requestAxisLayout);
 
     /** axis label alignment */
-    private final StyleableObjectProperty<TextAlignment> axisLabelTextAlignment = CSS.createObjectProperty(this, "axisLabelTextAlignment", "-fx-axis-label-alignment", TextAlignment.CENTER, StyleConverter.getEnumConverter(TextAlignment.class), this::requestAxisLayout);
+    private final StyleableObjectProperty<TextAlignment> axisLabelTextAlignment = CSS.createObjectProperty(this, "axisLabelTextAlignment", TextAlignment.CENTER, StyleConverter.getEnumConverter(TextAlignment.class), this::requestAxisLayout);
 
     /** The axis label */
-    private final StyleableStringProperty axisName = CSS.createStringProperty(this, "axisName", "-fx-axis-label", "label", this::requestAxisLayout);
+    private final StyleableStringProperty axisName = CSS.createStringProperty(this, "axisName", "-fx-axis-label", this::requestAxisLayout);
 
     /** true if tick marks should be displayed */
-    private final StyleableBooleanProperty tickMarkVisible = CSS.createBooleanProperty(this, "tickMarkVisible", "-fx-tick-mark-visible", true, this::requestAxisLayout);
+    private final StyleableBooleanProperty tickMarkVisible = CSS.createBooleanProperty(this, "tickMarkVisible", true, this::requestAxisLayout);
 
     /** true if tick mark labels should be displayed */
-    private final StyleableBooleanProperty tickLabelsVisible = CSS.createBooleanProperty(this, "tickLabelsVisible", "-fx-tick-labels-visible", true, () -> {
+    private final StyleableBooleanProperty tickLabelsVisible = CSS.createBooleanProperty(this, "tickLabelsVisible", true, () -> {
         for (final TickMark tick : getTickMarks()) {
             tick.setVisible(AbstractAxisParameter.this.tickLabelsVisible.get());
         }
@@ -116,18 +116,18 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     });
 
     /** The length of tick mark lines */
-    private final StyleableDoubleProperty axisPadding = CSS.createDoubleProperty(this, "axisPadding", "-fx-axis-padding", 15.0, this::requestAxisLayout);
+    private final StyleableDoubleProperty axisPadding = CSS.createDoubleProperty(this, "axisPadding", 15.0, this::requestAxisLayout);
 
     /** The length of tick mark lines */
-    private final StyleableDoubleProperty tickLength = CSS.createDoubleProperty(this, "tickLength", "-fx-tick-length", 8.0, this::requestAxisLayout);
+    private final StyleableDoubleProperty tickLength = CSS.createDoubleProperty(this, "tickLength", 8.0, this::requestAxisLayout);
 
     /**
      * This is true when the axis determines its range from the data automatically
      */
-    private final StyleableBooleanProperty autoRanging = CSS.createBooleanProperty(this, "autoRanging", "-fx-auto-ranging", true, this::requestAxisLayout);
+    private final StyleableBooleanProperty autoRanging = CSS.createBooleanProperty(this, "autoRanging", true, this::requestAxisLayout);
 
     /** The font for all tick labels */
-    private final StyleableObjectProperty<Font> tickLabelFont = CSS.createObjectProperty(this, "tickLabelFont", "-fx-tick-label-font", Font.font("System", 8), false, StyleConverter.getFontConverter(), null, () -> {
+    private final StyleableObjectProperty<Font> tickLabelFont = CSS.createObjectProperty(this, "tickLabelFont", Font.font("System", 8), false, StyleConverter.getFontConverter(), null, () -> {
         // TODO: remove once verified that measure isn't needed anymore
         final Font f = tickLabelFontProperty().get();
         for (final TickMark tm : getTickMarks()) {
@@ -138,22 +138,22 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     });
 
     /** The fill for all tick labels */
-    private final StyleableObjectProperty<Paint> tickLabelFill = CSS.createObjectProperty(this, "tickLabelFill", "-fx-tick-label-fill", Color.BLACK, StyleConverter.getPaintConverter());
+    private final StyleableObjectProperty<Paint> tickLabelFill = CSS.createObjectProperty(this, "tickLabelFill", Color.BLACK, StyleConverter.getPaintConverter());
 
     /** The gap between tick labels and the tick mark lines */
-    private final StyleableDoubleProperty tickLabelGap = CSS.createDoubleProperty(this, "tickLabelGap", "-fx-tick-label-gap", 3.0, this::requestAxisLayout);
+    private final StyleableDoubleProperty tickLabelGap = CSS.createDoubleProperty(this, "tickLabelGap", 3.0, this::requestAxisLayout);
 
     /** The minimum gap between tick labels */
-    private final StyleableDoubleProperty tickLabelSpacing = CSS.createDoubleProperty(this, "tickLabelSpacing", "-fx-tick-label-spacing", 3.0, this::requestAxisLayout);
+    private final StyleableDoubleProperty tickLabelSpacing = CSS.createDoubleProperty(this, "tickLabelSpacing", 3.0, this::requestAxisLayout);
 
     /** The gap between tick labels and the axis label */
-    private final StyleableDoubleProperty axisLabelGap = CSS.createDoubleProperty(this, "axisLabelGap", "-fx-axis-label-gap", 3.0, this::requestAxisLayout);
+    private final StyleableDoubleProperty axisLabelGap = CSS.createDoubleProperty(this, "axisLabelGap", 3.0, this::requestAxisLayout);
 
     /** The animation duration in MS */
-    private final StyleableIntegerProperty animationDuration = CSS.createIntegerProperty(this, "animationDuration", "-fx-axis-animation-duration", 250, this::requestAxisLayout);
+    private final StyleableIntegerProperty animationDuration = CSS.createIntegerProperty(this, "animationDuration", 250, this::requestAxisLayout);
 
     /** The maximum number of ticks */
-    private final StyleableIntegerProperty maxMajorTickLabelCount = CSS.createIntegerProperty(this, "maxMajorTickLabelCount", "-fx-axis-max-major-tick-label-count", MAX_TICK_COUNT, this::requestAxisLayout);
+    private final StyleableIntegerProperty maxMajorTickLabelCount = CSS.createIntegerProperty(this, "maxMajorTickLabelCount", MAX_TICK_COUNT, this::requestAxisLayout);
 
     /**
      * When true any changes to the axis and its range will be animated.
@@ -163,10 +163,10 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     /**
      * Rotation in degrees of tick mark labels from their normal horizontal.
      */
-    protected final StyleableDoubleProperty tickLabelRotation = CSS.createDoubleProperty(this, "tickLabelRotation", "-fx-tick-rotation", 0.0, this::requestAxisLayout);
+    protected final StyleableDoubleProperty tickLabelRotation = CSS.createDoubleProperty(this, "tickLabelRotation", 0.0, this::requestAxisLayout);
 
     /** true if minor tick marks should be displayed */
-    private final StyleableBooleanProperty minorTickVisible = CSS.createBooleanProperty(this, "minorTickVisible", "-fx-minor-tick-visible", true, this::requestAxisLayout);
+    private final StyleableBooleanProperty minorTickVisible = CSS.createBooleanProperty(this, "minorTickVisible", true, this::requestAxisLayout);
 
     /** The scale factor from data units to visual units */
     private final ReadOnlyDoubleWrapper scale = new ReadOnlyDoubleWrapper(this, "scale", 1) {
@@ -229,14 +229,14 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     /**
      * The length of minor tick mark lines. Set to 0 to not display minor tick marks.
      */
-    private final StyleableDoubleProperty minorTickLength = CSS.createDoubleProperty(this, "minorTickLength", "-fx-minor-tick-length", 5.0, this::requestAxisLayout);
+    private final StyleableDoubleProperty minorTickLength = CSS.createDoubleProperty(this, "minorTickLength", 5.0, this::requestAxisLayout);
 
     /**
      * The number of minor tick divisions to be displayed between each major tick mark. The number of actual minor tick
      * marks will be one less than this. N.B. number of divisions, minor tick mark is not drawn if minorTickMark ==
      * majorTickMark
      */
-    private final StyleableIntegerProperty minorTickCount = CSS.createIntegerProperty(this, "minorTickCount", "-fx-minor-tick-count", 10, this::requestAxisLayout);
+    private final StyleableIntegerProperty minorTickCount = CSS.createIntegerProperty(this, "minorTickCount", 10, this::requestAxisLayout);
     /**
      * Used to update scale property in AbstractAxisParameter (that is read-only) TODO: remove is possible
      */
@@ -247,7 +247,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
         }
     };
 
-    private final StyleableBooleanProperty autoGrowRanging = CSS.createBooleanProperty(this, "autoGrowRanging", "-fx-auto-grow-ranging", false, this::requestAxisLayout);
+    private final StyleableBooleanProperty autoGrowRanging = CSS.createBooleanProperty(this, "autoGrowRanging", false, this::requestAxisLayout);
 
     protected boolean isInvertedAxis = false; // internal use (for performance reason)
     private final BooleanProperty invertAxis = new SimpleBooleanProperty(this, "invertAxis", false) {
@@ -278,12 +278,12 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
         }
     };
 
-    private final StyleableBooleanProperty autoRangeRounding = CSS.createBooleanProperty(this, "autoRangeRounding", "-fx-auto-range-rounding", false, this::requestAxisLayout);
+    private final StyleableBooleanProperty autoRangeRounding = CSS.createBooleanProperty(this, "autoRangeRounding", false, this::requestAxisLayout);
 
     private final DoubleProperty autoRangePadding = new SimpleDoubleProperty(0);
 
     /** The axis unit label */
-    private final StyleableStringProperty axisUnit = CSS.createStringProperty(this, "axisUnit", "-fx-axis-unit", "", () -> {
+    private final StyleableStringProperty axisUnit = CSS.createStringProperty(this, "axisUnit", "", () -> {
         updateAxisLabelAndUnit();
         requestAxisLayout();
     });
@@ -306,7 +306,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
         }
     };
 
-    protected final StyleableDoubleProperty tickUnit = CSS.createDoubleProperty(this, "tickUnit", "-fx-tick-unit", DEFAULT_TICK_UNIT, () -> {
+    protected final StyleableDoubleProperty tickUnit = CSS.createDoubleProperty(this, "tickUnit", DEFAULT_TICK_UNIT, () -> {
         if (isAutoRanging() || isAutoGrowRanging()) {
             return;
         }
