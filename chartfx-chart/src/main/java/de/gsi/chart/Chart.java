@@ -1,11 +1,6 @@
 package de.gsi.chart;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -17,46 +12,21 @@ import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.ReadOnlyBooleanProperty;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.StringProperty;
-import javafx.beans.property.StringPropertyBase;
+import javafx.beans.property.*;
 import javafx.beans.value.ChangeListener;
-import javafx.beans.value.WritableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
-import javafx.css.CssMetaData;
-import javafx.css.Styleable;
-import javafx.css.StyleableObjectProperty;
-import javafx.css.StyleableProperty;
-import javafx.css.converter.BooleanConverter;
-import javafx.css.converter.EnumConverter;
-import javafx.geometry.Bounds;
-import javafx.geometry.Insets;
-import javafx.geometry.Orientation;
-import javafx.geometry.Point2D;
-import javafx.geometry.Pos;
+import javafx.css.*;
+import javafx.geometry.*;
 import javafx.scene.CacheHint;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
+import javafx.scene.control.Control;
 import javafx.scene.control.Label;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.ColumnConstraints;
-import javafx.scene.layout.FlowPane;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.Region;
-import javafx.scene.layout.RowConstraints;
-import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.stage.Window;
 import javafx.util.Duration;
 
@@ -74,8 +44,7 @@ import de.gsi.chart.ui.ChartLayoutAnimator;
 import de.gsi.chart.ui.HiddenSidesPane;
 import de.gsi.chart.ui.ResizableCanvas;
 import de.gsi.chart.ui.ToolBarFlowPane;
-import de.gsi.chart.ui.css.StylishBooleanProperty;
-import de.gsi.chart.ui.css.StylishObjectProperty;
+import de.gsi.chart.ui.css.CssPropertyFactory;
 import de.gsi.chart.ui.geometry.Corner;
 import de.gsi.chart.ui.geometry.Side;
 import de.gsi.chart.utils.FXUtils;
@@ -99,6 +68,7 @@ import de.gsi.dataset.utils.ProcessingProfiler;
 public abstract class Chart extends HiddenSidesPane implements Observable {
     private static final Logger LOGGER = LoggerFactory.getLogger(Chart.class);
     private static final String CHART_CSS = Chart.class.getResource("chart.css").toExternalForm();
+    private static final CssPropertyFactory<Chart> CSS = new CssPropertyFactory<>(Control.getClassCssMetaData());
     private static final int DEFAULT_TRIGGER_DISTANCE = 50;
     protected static final boolean DEBUG = false; // for more verbose debugging
 
@@ -110,20 +80,20 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
     // TODO: Check whether 'this' or chart contents need to be added
     /** Animator for animating stuff on the chart */
     protected final ChartLayoutAnimator animator = new ChartLayoutAnimator(this);
+
     /**
      * When true the chart will display a legend if the chart implementation supports a legend.
      */
-    private final BooleanProperty legendVisible = new StylishBooleanProperty(StyleableProperties.LEGEND_VISIBLE, this,
-            "legendVisible", true, () -> {
-                updateLegend(getDatasets(), getRenderers());
-                requestLayout();
-            });
+    private final StyleableBooleanProperty legendVisible = CSS.createBooleanProperty(this, "legendVisible", "-fx-legend-visible", true, () -> {
+        updateLegend(getDatasets(), getRenderers());
+        requestLayout();
+    });
 
     // isCanvasChangeRequested is a recursion guard to update canvas only once
     protected boolean isCanvasChangeRequested;
     // layoutOngoing is a recursion guard to update canvas only once
     protected boolean layoutOngoing;
-    protected final ObservableList<Axis> axesList = FXCollections.observableList(new NoDuplicatesList<Axis>());
+    protected final ObservableList<Axis> axesList = FXCollections.observableList(new NoDuplicatesList<>());
     private final Map<ChartPlugin, Group> pluginGroups = new ConcurrentHashMap<>();
     private final ObservableList<ChartPlugin> plugins = FXCollections.observableList(new LinkedList<>());
     private final ObservableList<DataSet> datasets = FXCollections.observableArrayList();
@@ -234,73 +204,42 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
     /**
      * The side of the chart where the title is displayed default Side.TOP
      */
-    private final ObjectProperty<Side> titleSide = new StylishObjectProperty<Side>(StyleableProperties.TITLE_SIDE, this,
-            "titleSide", Side.TOP, this::requestLayout) {
-        @Override
-        public void set(final Side side) {
-            AssertUtils.notNull("Side must not be null", side);
+    private final StyleableObjectProperty<Side> titleSide = CSS.createObjectProperty(this, "titleSide", "-fx-title-side", Side.TOP, false, StyleConverter.getEnumConverter(Side.class), (oldVal, newVal) -> {
+        AssertUtils.notNull("Side must not be null", newVal);
 
-            for (final Side s : Side.values()) {
-                getTitleLegendPane(s).getChildren().remove(titleLabel);
-            }
-            getTitleLegendPane(side).getChildren().add(titleLabel);
-            super.set(side);
+        for (final Side s : Side.values()) {
+            getTitleLegendPane(s).getChildren().remove(titleLabel);
         }
-    };
+        getTitleLegendPane(newVal).getChildren().add(titleLabel);
+        return (newVal);
+    }, this::requestLayout);
 
     /**
      * The side of the chart where the title is displayed default Side.TOP
      */
-    private final ObjectProperty<Side> measurementBarSide = new StyleableObjectProperty<>(Side.RIGHT) {
-        @Override
-        public Object getBean() {
-            return Chart.this;
-        }
-
-        @Override
-        public CssMetaData<Chart, Side> getCssMetaData() {
-            return StyleableProperties.MEASUREMENT_SIDE_BAR;
-        }
-
-        @Override
-        public String getName() {
-            return "measurementBarSide";
-        }
-
-        @Override
-        public void set(final Side side) {
-            AssertUtils.notNull("Side must not be null", side);
-            super.set(side);
-        }
-
-        @Override
-        protected void invalidated() {
-            requestLayout();
-        }
-    };
+    private final StyleableObjectProperty<Side> measurementBarSide = CSS.createObjectProperty(this, "measurementBarSide", "-fx-measurement-bar-side", Side.RIGHT, false, StyleConverter.getEnumConverter(Side.class), (oldVal, newVal) -> {
+        AssertUtils.notNull("Side must not be null", newVal);
+        return newVal;
+    }, this::requestLayout);
 
     /**
      * The side of the chart where the legend should be displayed default value Side.BOTTOM
      */
-    private final ObjectProperty<Side> legendSide = new StylishObjectProperty<>(StyleableProperties.LEGEND_SIDE, this,
-            "legendSide", Side.BOTTOM, this::requestLayout) {
-        @Override
-        public void set(final Side side) {
-            AssertUtils.notNull("Side must not be null", side);
+    private final StyleableObjectProperty<Side> legendSide = CSS.createObjectProperty(this, "legendSide", "-fx-legend-side", Side.BOTTOM, false, StyleConverter.getEnumConverter(Side.class), (oldVal, newVal) -> {
+        AssertUtils.notNull("Side must not be null", newVal);
 
-            final Legend legend = getLegend();
-            if (legend == null) {
-                super.set(side);
-                return;
-            }
-            for (final Side s : Side.values()) {
-                getTitleLegendPane(s).getChildren().remove(legend.getNode());
-            }
-            getTitleLegendPane(side).getChildren().add(legend.getNode());
-            legend.setVertical(side.isVertical());
-            super.set(side);
+        final Legend legend = getLegend();
+        if (legend == null) {
+            return newVal;
         }
-    };
+        for (final Side s : Side.values()) {
+            getTitleLegendPane(s).getChildren().remove(legend.getNode());
+        }
+        getTitleLegendPane(newVal).getChildren().add(legend.getNode());
+        legend.setVertical(newVal.isVertical());
+
+        return newVal;
+    }, this::requestLayout);
 
     /**
      * The node to display as the Legend. Subclasses can set a node here to be displayed on a side as the legend. If no
@@ -334,58 +273,34 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
         }
     };
 
-    private final ObjectProperty<Side> toolBarSide = new StyleableObjectProperty<Side>(Side.TOP) {
-        @Override
-        public Object getBean() {
-            return Chart.this;
+    private final StyleableObjectProperty<Side> toolBarSide = CSS.createObjectProperty(this, "toolBarSide", "-fx-toolbar-side", Side.TOP, false, StyleConverter.getEnumConverter(Side.class), (oldVal, newVal) -> {
+        AssertUtils.notNull("Side must not be null", newVal);
+        // remove tool bar from potential other chart side pane locations
+        Chart.this.setTop(null);
+        Chart.this.setBottom(null);
+        Chart.this.setLeft(null);
+        Chart.this.setRight(null);
+        switch (newVal) {
+        case LEFT:
+            getToolBar().setOrientation(Orientation.VERTICAL);
+            Chart.this.setLeft(getToolBar());
+            break;
+        case RIGHT:
+            getToolBar().setOrientation(Orientation.VERTICAL);
+            Chart.this.setRight(getToolBar());
+            break;
+        case BOTTOM:
+            getToolBar().setOrientation(Orientation.HORIZONTAL);
+            Chart.this.setBottom(getToolBar());
+            break;
+        case TOP:
+        default:
+            getToolBar().setOrientation(Orientation.HORIZONTAL);
+            Chart.this.setTop(getToolBar());
+            break;
         }
-
-        @Override
-        public CssMetaData<Chart, Side> getCssMetaData() {
-            return StyleableProperties.TOOLBAR_SIDE;
-        }
-
-        @Override
-        public String getName() {
-            return "titleSide";
-        }
-
-        @Override
-        public void set(final Side side) {
-            AssertUtils.notNull("Side must not be null", side);
-
-            // remove tool bar from potential other chart side pane locations
-            Chart.this.setTop(null);
-            Chart.this.setBottom(null);
-            Chart.this.setLeft(null);
-            Chart.this.setRight(null);
-            switch (side) {
-            case LEFT:
-                getToolBar().setOrientation(Orientation.VERTICAL);
-                Chart.this.setLeft(getToolBar());
-                break;
-            case RIGHT:
-                getToolBar().setOrientation(Orientation.VERTICAL);
-                Chart.this.setRight(getToolBar());
-                break;
-            case BOTTOM:
-                getToolBar().setOrientation(Orientation.HORIZONTAL);
-                Chart.this.setBottom(getToolBar());
-                break;
-            case TOP:
-            default:
-                getToolBar().setOrientation(Orientation.HORIZONTAL);
-                Chart.this.setTop(getToolBar());
-                break;
-            }
-            super.set(side);
-        }
-
-        @Override
-        protected void invalidated() {
-            requestLayout();
-        }
-    };
+        return (newVal);
+    }, this::requestLayout);
 
     /**
      * Creates a new default Chart instance.
@@ -433,9 +348,6 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
         // canvas.heightProperty().bind(stackPane.heightProperty());
         getCanvasForeground().setManaged(false);
         final ChangeListener<Number> canvasSizeChangeListener = (ch, o, n) -> {
-            if (n == o) {
-                return;
-            }
             final double width = getCanvas().getWidth();
             final double height = getCanvas().getHeight();
 
@@ -756,8 +668,12 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
         return toolBar;
     }
 
+    public final ObjectProperty<Side> getToolBarSideProperty() {
+        return toolBarSide;
+    }
+
     public final Side getToolBarSide() {
-        return toolBarSide.get();
+        return toolBarSideProperty().get();
     }
 
     /**
@@ -1125,9 +1041,6 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
         sceneProperty().addListener(scenePropertyListener);
 
         showing.addListener((ch, o, n) -> {
-            if (n.equals(n)) {
-                return;
-            }
             if (Boolean.TRUE.equals(n)) {
                 // requestLayout();
 
@@ -1192,7 +1105,7 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
      * @since JavaFX 8.0
      */
     public static List<CssMetaData<? extends Styleable, ?>> getClassCssMetaData() {
-        return StyleableProperties.STYLEABLES;
+        return CSS.getCssMetaData();
     }
 
     protected static Group createChildGroup() {
@@ -1203,93 +1116,13 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
         return group;
     }
 
-    private static class StyleableProperties {
-        private static final CssMetaData<Chart, Side> TITLE_SIDE = new CssMetaData<Chart, Side>("-fx-title-side",
-                new EnumConverter<>(Side.class), Side.TOP) {
-            @Override
-            public StyleableProperty<Side> getStyleableProperty(final Chart node) {
-                return (StyleableProperty<Side>) (WritableValue<Side>) node.titleSideProperty();
-            }
-
-            @Override
-            public boolean isSettable(final Chart node) {
-                return node != null && !node.titleSide.isBound();
-            }
-        };
-
-        private static final CssMetaData<Chart, Side> MEASUREMENT_SIDE_BAR = new CssMetaData<Chart, Side>(
-                "-fx-measurement-bar-side", new EnumConverter<>(Side.class), Side.RIGHT) {
-            @Override
-            public StyleableProperty<Side> getStyleableProperty(final Chart node) {
-                return (StyleableProperty<Side>) (WritableValue<Side>) node.measurementBarSideProperty();
-            }
-
-            @Override
-            public boolean isSettable(final Chart node) {
-                return node != null && !node.measurementBarSide.isBound();
-            }
-        };
-
-        private static final CssMetaData<Chart, Side> TOOLBAR_SIDE = new CssMetaData<Chart, Side>("-fx-toolbar-side",
-                new EnumConverter<>(Side.class), Side.TOP) {
-            @Override
-            public StyleableProperty<Side> getStyleableProperty(final Chart node) {
-                return (StyleableProperty<Side>) (WritableValue<Side>) node.toolBarSideProperty();
-            }
-
-            @Override
-            public boolean isSettable(final Chart node) {
-                return node != null && !node.toolBarSide.isBound();
-            }
-        };
-
-        private static final CssMetaData<Chart, Side> LEGEND_SIDE = new CssMetaData<Chart, Side>("-fx-legend-side",
-                new EnumConverter<>(Side.class), Side.BOTTOM) {
-            @Override
-            public StyleableProperty<Side> getStyleableProperty(final Chart node) {
-                return (StyleableProperty<Side>) (WritableValue<Side>) node.legendSideProperty();
-            }
-
-            @Override
-            public boolean isSettable(final Chart node) {
-                return node != null && !node.legendSide.isBound();
-            }
-        };
-
-        private static final CssMetaData<Chart, Boolean> LEGEND_VISIBLE = new CssMetaData<Chart, Boolean>(
-                "-fx-legend-visible", BooleanConverter.getInstance(), Boolean.TRUE) {
-            @SuppressWarnings("unchecked")
-            @Override
-            public StyleableProperty<Boolean> getStyleableProperty(final Chart node) {
-                return (StyleableProperty<Boolean>) node.legendVisibleProperty();
-            }
-
-            @Override
-            public boolean isSettable(final Chart node) {
-                return node != null && !node.legendVisible.isBound();
-            }
-        };
-
-        private static final List<CssMetaData<? extends Styleable, ?>> STYLEABLES;
-        static {
-            final List<CssMetaData<? extends Styleable, ?>> styleables = new ArrayList<>(Region.getClassCssMetaData());
-            styleables.add(StyleableProperties.TITLE_SIDE);
-            styleables.add(StyleableProperties.MEASUREMENT_SIDE_BAR);
-            styleables.add(StyleableProperties.TOOLBAR_SIDE);
-            styleables.add(StyleableProperties.LEGEND_SIDE);
-            styleables.add(StyleableProperties.LEGEND_VISIBLE);
-
-            STYLEABLES = Collections.unmodifiableList(styleables);
-        }
-    }
-
     protected class ChartHBox extends HBox {
         public ChartHBox(Node... nodes) {
             super();
             setAlignment(Pos.CENTER);
             setPrefSize(Region.USE_COMPUTED_SIZE, Region.USE_COMPUTED_SIZE);
             getChildren().addAll(nodes);
-            visibleProperty().addListener((obs, o, n) -> getChildren().stream().forEach(node -> node.setVisible(n)));
+            visibleProperty().addListener((obs, o, n) -> getChildren().forEach(node -> node.setVisible(n)));
         }
 
         public ChartHBox(final boolean fill) {
@@ -1304,7 +1137,7 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
             setAlignment(Pos.CENTER);
             setPrefSize(Region.USE_COMPUTED_SIZE, Region.USE_COMPUTED_SIZE);
             getChildren().addAll(nodes);
-            visibleProperty().addListener((obs, o, n) -> getChildren().stream().forEach(node -> node.setVisible(n)));
+            visibleProperty().addListener((obs, o, n) -> getChildren().forEach(node -> node.setVisible(n)));
         }
 
         public ChartVBox(final boolean fill) {
