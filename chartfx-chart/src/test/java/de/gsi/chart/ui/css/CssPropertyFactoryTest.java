@@ -1,8 +1,7 @@
 package de.gsi.chart.ui.css;
 
 import static org.hamcrest.Matchers.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.testfx.api.FxAssert.verifyThat;
 
 import java.util.List;
@@ -17,6 +16,7 @@ import javafx.stage.Stage;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.function.ThrowingSupplier;
 import org.testfx.api.FxRobot;
 import org.testfx.framework.junit5.ApplicationExtension;
 import org.testfx.framework.junit5.Start;
@@ -44,6 +44,11 @@ public class CssPropertyFactoryTest {
 
     @Test
     public void testApplyingStyle(FxRobot fxRobot) {
+        assertDoesNotThrow((ThrowingSupplier<?>) CssPropertyFactory::new);
+        verifyThat(TestStyleable.CSS.getCssMetaData(), notNullValue());
+        verifyThat(styleable.getCssMetaData(), notNullValue());
+        verifyThat(TestStyleable.CSS.getCssMetaDataModifyable(), notNullValue());
+
         verifyThat(styleable.getMinHeight(), equalTo(-1.0)); // parent property
         verifyThat(styleable.getTestDouble(), equalTo(4.2));
         verifyThat(styleable.getTestFloat(), equalTo(1.337f));
