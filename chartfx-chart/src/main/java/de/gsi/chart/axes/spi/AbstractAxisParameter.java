@@ -101,7 +101,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     private final StyleableObjectProperty<TextAlignment> axisLabelTextAlignment = CSS.createObjectProperty(this, "axisLabelTextAlignment", TextAlignment.CENTER, StyleConverter.getEnumConverter(TextAlignment.class), this::requestAxisLayout);
 
     /** The axis label */
-    private final StyleableStringProperty axisName = CSS.createStringProperty(this, "axisName", "-fx-axis-label", this::requestAxisLayout);
+    private final StyleableStringProperty axisName = CSS.createStringProperty(this, "axisName", "", this::requestAxisLayout);
 
     /** true if tick marks should be displayed */
     private final StyleableBooleanProperty tickMarkVisible = CSS.createBooleanProperty(this, "tickMarkVisible", true, this::requestAxisLayout);
