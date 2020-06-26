@@ -445,8 +445,8 @@ public class DataSetBuilderTests {
 
         @Override
         public List<AxisDescription> getAxisDescriptions() {
-            return List.of(new DefaultAxisDescription(this, "x Axis", "", 0.0, 9.0),
-                    new DefaultAxisDescription(this, "y Axis", "", 0.0, 90.0));
+            return List.of(new DefaultAxisDescription(this, DIM_X, "x Axis", "", 0.0, 9.0),
+                    new DefaultAxisDescription(this, DIM_Y, "y Axis", "", 0.0, 90.0));
         }
 
         @Override

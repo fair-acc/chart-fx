@@ -364,7 +364,7 @@ public class DataSetBuilder {
         if (dimIndex < 0) {
             throw new UnsupportedOperationException("axis dimension cannot be negative]: " + dimIndex);
         }
-        return axisDescriptions.computeIfAbsent(dimIndex, key -> new DefaultAxisDescription());
+        return axisDescriptions.computeIfAbsent(dimIndex, DefaultAxisDescription::new);
     }
 
     public DataSetBuilder setAxisMax(final int dimension, final double value) {
