@@ -1,10 +1,8 @@
 package de.gsi.chart.axes.spi;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
+
+import static de.gsi.dataset.DataSet.DIM_X;
 
 import java.util.List;
 
@@ -187,6 +185,11 @@ public class AbstractAxisParameterTests {
 
         // style definitions must be non-null
         assertNotNull(axis.getCssMetaData());
+
+        // dimIndex
+        assertEquals(-1, axis.getDimIndex());
+        assertDoesNotThrow(() -> axis.setDimIndex(DIM_X));
+        assertEquals(DIM_X, axis.getDimIndex());
     }
 
     @Test

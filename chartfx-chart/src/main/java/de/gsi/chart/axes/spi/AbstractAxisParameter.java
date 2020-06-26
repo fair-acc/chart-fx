@@ -51,6 +51,8 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
 
     private final transient AtomicBoolean autoNotification = new AtomicBoolean(true);
     private final List<EventListener> updateListeners = Collections.synchronizedList(new LinkedList<>());
+
+    private final StyleableIntegerProperty dimIndex = CSS.createIntegerProperty(this, "dimIndex", -1, this::requestAxisLayout);
     /**
      * Paths used for css-type styling. Not used for actual drawing. Used as a storage contained for the settings
      * applied to GraphicsContext which allow much faster (and less complex) drawing routines but do no not allow
@@ -401,10 +403,10 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     }
 
     @Override
-    public boolean add(final double[] values, final int nlength) {
+    public boolean add(final double[] values, final int length) {
         boolean changed = false;
         final boolean oldState = autoNotification().getAndSet(false);
-        for (int i = 0; i < nlength; i++) {
+        for (int i = 0; i < length; i++) {
             changed |= add(values[i]);
         }
         autoNotification().set(oldState);
@@ -548,6 +550,19 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     @Override
     public List<CssMetaData<? extends Styleable, ?>> getCssMetaData() {
         return AbstractAxisParameter.getClassCssMetaData();
+    }
+
+    public IntegerProperty dimIndexProperty() {
+        return dimIndex;
+    }
+
+    public void setDimIndex(final int dimIndex) {
+        dimIndexProperty().set(dimIndex);
+    }
+
+    @Override
+    public int getDimIndex() {
+        return dimIndexProperty().get();
     }
 
     /**
