@@ -2,31 +2,25 @@ package de.gsi.chart.axes.spi;
 
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.DoubleProperty;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.*;
 import javafx.css.CssMetaData;
-import javafx.css.SimpleStyleableDoubleProperty;
 import javafx.css.Styleable;
-import javafx.css.StyleableProperty;
-import javafx.css.converter.SizeConverter;
-import javafx.scene.chart.ValueAxis;
+import javafx.css.StyleableDoubleProperty;
 
 import de.gsi.chart.axes.AxisTransform;
 import de.gsi.chart.axes.LogAxisType;
 import de.gsi.chart.axes.TickUnitSupplier;
 import de.gsi.chart.axes.spi.format.DefaultTickUnitSupplier;
+import de.gsi.chart.ui.css.CssPropertyFactory;
 
 /**
  * @author rstein
  */
 public class LinearAxis extends AbstractAxis {
+    private static final CssPropertyFactory<LinearAxis> CSS = new CssPropertyFactory<>(AbstractAxisParameter.getClassCssMetaData());
     private static final int DEFAULT_TICK_COUNT = 9;
 
     private static final int TICK_MARK_GAP = 6;
@@ -49,16 +43,12 @@ public class LinearAxis extends AbstractAxis {
         }
     };
 
-    private final SimpleStyleableDoubleProperty tickUnit = new SimpleStyleableDoubleProperty(
-            StyleableProperties.TICK_UNIT, this, "tickUnit", 5d) {
-        @Override
-        protected void invalidated() {
-            if (!(isAutoRanging() || isAutoGrowRanging())) {
-                invalidate();
-                requestAxisLayout();
-            }
+    private final StyleableDoubleProperty tickUnit = CSS.createDoubleProperty(this, "tickUnit", 5d, () -> {
+        if (!isAutoRanging() || isAutoGrowRanging()) {
+            invalidate();
+            requestAxisLayout();
         }
-    };
+    });
 
     private final ObjectProperty<TickUnitSupplier> tickUnitSupplier = new SimpleObjectProperty<>(this,
             "tickUnitSupplier", LinearAxis.DEFAULT_TICK_UNIT_SUPPLIER);
@@ -439,25 +429,18 @@ public class LinearAxis extends AbstractAxis {
 
     @Override
     protected List<Double> calculateMajorTickValues(final double axisLength, final AxisRange range) {
-        // if (range == null) {
-        // final ArrayList<Number> nullInit = new ArrayList<>();
-        // nullInit.add(0.0);
-        // nullInit.add(1.0);
-        // return nullInit;
-        // }
-        if (!(range instanceof AxisRange)) {
-            throw new InvalidParameterException("unknown range class:" + range.getClass().getCanonicalName());
+        if (range == null) {
+            throw new InvalidParameterException("range is null");
         }
-        final AxisRange rangeImpl = range;
 
         final List<Double> tickValues = new ArrayList<>();
 
-        if (rangeImpl.getLowerBound() == rangeImpl.getUpperBound() || rangeImpl.getTickUnit() <= 0) {
-            return Arrays.asList(rangeImpl.getLowerBound());
+        if (range.getLowerBound() == range.getUpperBound() || range.getTickUnit() <= 0) {
+            return Collections.singletonList(range.getLowerBound());
         }
 
-        final double firstTick = LinearAxis.computeFistMajorTick(rangeImpl.getLowerBound(), rangeImpl.getTickUnit());
-        for (double major = firstTick; major <= rangeImpl.getUpperBound(); major += rangeImpl.getTickUnit()) {
+        final double firstTick = LinearAxis.computeFistMajorTick(range.getLowerBound(), range.getTickUnit());
+        for (double major = firstTick; major <= range.getUpperBound(); major += range.getTickUnit()) {
             tickValues.add(major);
         }
         return tickValues;
@@ -519,7 +502,7 @@ public class LinearAxis extends AbstractAxis {
     // ------------------------------------------------------------------------------
 
     public static List<CssMetaData<? extends Styleable, ?>> getClassCssMetaData() {
-        return StyleableProperties.STYLEABLES;
+        return CSS.getCssMetaData();
     }
 
     /**
@@ -546,31 +529,6 @@ public class LinearAxis extends AbstractAxis {
             effectiveRange = min == 0 ? LinearAxis.DEFAULT_RANGE_LENGTH : Math.abs(min);
         }
         return effectiveRange;
-    }
-
-    private static class StyleableProperties {
-        private static final CssMetaData<LinearAxis, Number> TICK_UNIT = new CssMetaData<LinearAxis, Number>(
-                "-fx-tick-unit", SizeConverter.getInstance(), 5.0) {
-            @SuppressWarnings("unchecked")
-            @Override
-            public StyleableProperty<Number> getStyleableProperty(final LinearAxis axis) {
-                return (StyleableProperty<Number>) axis.tickUnitProperty();
-            }
-
-            @Override
-            public boolean isSettable(final LinearAxis axis) {
-                return axis != null && !axis.tickUnit.isBound();
-            }
-        };
-
-        private static final List<CssMetaData<? extends Styleable, ?>> STYLEABLES;
-
-        static {
-            final List<CssMetaData<? extends Styleable, ?>> styleables = new ArrayList<>(
-                    ValueAxis.getClassCssMetaData());
-            styleables.add(StyleableProperties.TICK_UNIT);
-            STYLEABLES = Collections.unmodifiableList(styleables);
-        }
     }
 
     protected class Cache {

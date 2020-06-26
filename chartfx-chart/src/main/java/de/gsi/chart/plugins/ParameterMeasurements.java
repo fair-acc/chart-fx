@@ -19,7 +19,6 @@ import de.gsi.chart.viewer.DataView;
 
 /**
  * Plugin to implement simple measurements and valueTextField indicators such as
- * <p>
  * <ul>
  * <li> value at horizontal/vertical marker position with coloured indication if min/max thresholds are exceeded,
  * <li> min/max/rms/median/... values of functions

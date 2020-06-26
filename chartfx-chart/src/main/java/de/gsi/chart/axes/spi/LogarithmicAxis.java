@@ -2,7 +2,6 @@ package de.gsi.chart.axes.spi;
 
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -11,21 +10,20 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.css.CssMetaData;
-import javafx.css.SimpleStyleableDoubleProperty;
 import javafx.css.Styleable;
-import javafx.css.StyleableProperty;
-import javafx.css.converter.SizeConverter;
-import javafx.scene.chart.ValueAxis;
+import javafx.css.StyleableDoubleProperty;
 
 import de.gsi.chart.axes.AxisTransform;
 import de.gsi.chart.axes.LogAxisType;
 import de.gsi.chart.axes.TickUnitSupplier;
 import de.gsi.chart.axes.spi.format.DefaultTickUnitSupplier;
+import de.gsi.chart.ui.css.CssPropertyFactory;
 
 /**
  * @author rstein
  */
 public class LogarithmicAxis extends AbstractAxis {
+    private static final CssPropertyFactory<LogarithmicAxis> CSS = new CssPropertyFactory<>(AbstractAxisParameter.getClassCssMetaData());
     public static final double DEFAULT_LOGARITHM_BASE = 10;
     public static final double DEFAULT_LOG_MIN_VALUE = 1e-6;
     public static final double DB20_LOGARITHM_BASE = Math.exp(Math.log10(10) / 20.0);
@@ -40,16 +38,12 @@ public class LogarithmicAxis extends AbstractAxis {
 
     private boolean isUpdating = true;
 
-    private final SimpleStyleableDoubleProperty tickUnit = new SimpleStyleableDoubleProperty(
-            StyleableProperties.TICK_UNIT, this, "tickUnit", 5d) {
-        @Override
-        protected void invalidated() {
-            if (!(isAutoRanging() || isAutoGrowRanging())) {
-                invalidate();
-                requestAxisLayout();
-            }
+    private final StyleableDoubleProperty tickUnit = CSS.createDoubleProperty(this, "tickUnit", 5d, true, null, () -> {
+        if (!isAutoRanging()) {
+            invalidate();
+            requestAxisLayout();
         }
-    };
+    });
 
     private final ObjectProperty<TickUnitSupplier> tickUnitSupplier = new SimpleObjectProperty<>(this,
             "tickUnitSupplier", LogarithmicAxis.DEFAULT_TICK_UNIT_SUPPLIER);
@@ -319,7 +313,6 @@ public class LogarithmicAxis extends AbstractAxis {
     protected AxisRange autoRange(final double minValue, final double maxValue, final double length,
             final double labelSize) {
         double min = minValue;
-        final double max = maxValue;
 
         // sanitise range if < 0
         if (min <= 0) {
@@ -331,24 +324,23 @@ public class LogarithmicAxis extends AbstractAxis {
 
         final double paddingScale = 1.0 + getAutoRangePadding();
         final double paddedMin = min / paddingScale;
-        final double paddedMax = max * paddingScale;
+        final double paddedMax = maxValue * paddingScale;
 
         return computeRange(paddedMin, paddedMax, length, labelSize);
     }
 
     @Override
     protected List<Double> calculateMajorTickValues(final double axisLength, final AxisRange range) {
-        if (!(range instanceof AxisRange)) {
-            throw new InvalidParameterException("unknown range class:" + range.getClass().getCanonicalName());
+        if (range == null) {
+            throw new InvalidParameterException("range is null");
         }
-        final AxisRange rangeImpl = range;
 
         final List<Double> tickValues = new ArrayList<>();
-        if (rangeImpl.getLowerBound() >= rangeImpl.getUpperBound()) {
-            return Arrays.asList(rangeImpl.getLowerBound());
+        if (range.getLowerBound() >= range.getUpperBound()) {
+            return Collections.singletonList(range.getLowerBound());
         }
-        double exp = Math.ceil(log(rangeImpl.getLowerBound()));
-        for (double tickValue = pow(exp); tickValue <= rangeImpl.getUpperBound(); tickValue = pow(++exp)) {
+        double exp = Math.ceil(log(range.getLowerBound()));
+        for (double tickValue = pow(exp); tickValue <= range.getUpperBound(); tickValue = pow(++exp)) {
             tickValues.add(tickValue);
         }
         return tickValues;
@@ -402,35 +394,7 @@ public class LogarithmicAxis extends AbstractAxis {
     }
 
     public static List<CssMetaData<? extends Styleable, ?>> getClassCssMetaData() {
-        return StyleableProperties.STYLEABLES;
-    }
-
-    private static class StyleableProperties {
-        private static final CssMetaData<LogarithmicAxis, Number> TICK_UNIT = new CssMetaData<LogarithmicAxis, Number>(
-                "-fx-tick-unit", SizeConverter.getInstance(), 5.0) {
-            @SuppressWarnings("unchecked")
-            @Override
-            public StyleableProperty<Number> getStyleableProperty(final LogarithmicAxis axis) {
-                return (StyleableProperty<Number>) axis.tickUnitProperty();
-            }
-
-            @Override
-            public boolean isSettable(final LogarithmicAxis axis) {
-                return axis != null && !axis.tickUnit.isBound();
-            }
-        };
-
-        private static final List<CssMetaData<? extends Styleable, ?>> STYLEABLES;
-
-        static {
-            final List<CssMetaData<? extends Styleable, ?>> styleables = new ArrayList<>(
-                    ValueAxis.getClassCssMetaData());
-            styleables.add(StyleableProperties.TICK_UNIT);
-            STYLEABLES = Collections.unmodifiableList(styleables);
-        }
-
-        private StyleableProperties() {
-        }
+        return CSS.getCssMetaData();
     }
 
     protected class Cache {
