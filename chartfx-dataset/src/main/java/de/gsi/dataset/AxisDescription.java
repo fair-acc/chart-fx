@@ -1,5 +1,7 @@
 package de.gsi.dataset;
 
+import de.gsi.dataset.event.EventSource;
+
 /**
  * Axis description containing the axis name, its unit as well as its minimum and maximum range.
  * <p>
@@ -13,8 +15,7 @@ package de.gsi.dataset;
  * @author akrimm
  * @author rstein
  */
-public interface AxisDescription {
-
+public interface AxisDescription extends EventSource {
     /**
      * Adds value to this range.
      *
@@ -37,10 +38,10 @@ public interface AxisDescription {
      * Adds values to this range.
      *
      * @param values values to be added
-     * @param nlength the maximum array length that should be taken into account
+     * @param length the maximum array length that should be taken into account
      * @return <code>true</code> if the value becomes <code>min</code> or <code>max</code>.
      */
-    public boolean add(final double[] values, final int nlength);
+    boolean add(final double[] values, final int length);
 
     /**
      * Empties this DataRange. After calling this method this data range becomes undefined.
@@ -48,11 +49,17 @@ public interface AxisDescription {
      * @return <code>true</code> if the values were valid before
      * @see #isDefined()
      */
-    public boolean clear();
+    boolean clear();
 
-    public boolean contains(final double value);
+    boolean contains(final double value);
 
-    public double getLength();
+    /**
+     *
+     * @return numeric dimension index this AxisDescription refers to (e.g. for a euclidean system '0: x-axis', '1: y-axis', ...)
+     */
+    int getDimIndex();
+
+    double getLength();
 
     /**
      * @return maximum value of the axis or DataSet

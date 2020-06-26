@@ -27,7 +27,7 @@ public class DataSetEqualityTests {
     public void testDataSetEquality() {
         // check for helper classes
         assertEquals(new DataRange(), new DataRange());
-        assertEquals(new DefaultAxisDescription("default"), new DefaultAxisDescription("default"));
+        assertEquals(new DefaultAxisDescription(DIM_X, "default"), new DefaultAxisDescription(DIM_X, "default"));
 
         // common DataSet implementations
         assertEquals(new DoubleDataSet("default"), new DoubleDataSet("default"));
@@ -77,9 +77,9 @@ public class DataSetEqualityTests {
         final DoubleErrorDataSet ds2 = new DoubleErrorDataSet("default");
 
         assertEquals(ds1, ds1);
-        assertNotEquals(ds1, null);
+        assertNotEquals(null, ds1);
         assertNotEquals(ds1, new OneDimDataSet());
-        assertNotEquals(ds1, "");
+        assertNotEquals("", ds1);
         assertEquals(ds1, ds2);
 
         ds1.setName(null);

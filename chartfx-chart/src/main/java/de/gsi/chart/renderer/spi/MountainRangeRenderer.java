@@ -189,8 +189,8 @@ public class MountainRangeRenderer extends ErrorDataSetRenderer implements Rende
         private final double yShift;
         private final transient List<EventListener> updateListener = new ArrayList<>();
         private final transient List<AxisDescription> axesDescriptions = new ArrayList<>(Arrays.asList( //
-                new DefaultAxisDescription("x-Axis", "a.u."), //
-                new DefaultAxisDescription("y-Axis", "a.u.")));
+                new DefaultAxisDescription(DIM_X, "x-Axis", "a.u."), //
+                new DefaultAxisDescription(DIM_Y, "y-Axis", "a.u.")));
 
         public Demux3dTo2dDataSet(final DataSet sourceDataSet, final int selectedYIndex, final double zMin,
                 final double zMax) {

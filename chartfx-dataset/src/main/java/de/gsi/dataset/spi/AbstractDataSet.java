@@ -1,22 +1,10 @@
 package de.gsi.dataset.spi;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import de.gsi.dataset.AxisDescription;
-import de.gsi.dataset.DataSet;
-import de.gsi.dataset.DataSetError;
-import de.gsi.dataset.DataSetMetaData;
-import de.gsi.dataset.EditConstraints;
-import de.gsi.dataset.EditableDataSet;
+import de.gsi.dataset.*;
 import de.gsi.dataset.event.EventListener;
 import de.gsi.dataset.event.UpdateEvent;
 import de.gsi.dataset.event.UpdatedMetaDataEvent;
@@ -43,8 +31,6 @@ import de.gsi.dataset.utils.AssertUtils;
 public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends AbstractStylable<D>
         implements DataSet, DataSetMetaData {
     private static final long serialVersionUID = -7612136495756923417L;
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractDataSet.class);
 
     private static final String[] DEFAULT_AXES_NAME = { "x-Axis", "y-Axis", "z-Axis" };
     private final transient AtomicBoolean autoNotification = new AtomicBoolean(true);
@@ -74,7 +60,7 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
         this.dimension = dimension;
         for (int i = 0; i < this.dimension; i++) {
             final String axisName = i < DEFAULT_AXES_NAME.length ? DEFAULT_AXES_NAME[i] : "dim" + (i + 1) + "-Axis";
-            axesDescriptions.add(new DefaultAxisDescription(this, axisName, "a.u."));
+            axesDescriptions.add(new DefaultAxisDescription(this, i, axisName, "a.u."));
         }
     }
 
@@ -393,14 +379,6 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
      */
     @Override
     public String getDataLabel(final int index) {
-        // old implementation: caused issue/unnecessary copying of data
-        // moved to DataPointToolTip (better place)
-        // final String dataLabel = dataLabels.get(index);
-        // if (dataLabel != null) {
-        // return dataLabel;
-        // }
-        //
-        // return getDefaultDataLabel(index);
         return dataLabels.get(index);
     }
 
@@ -528,12 +506,10 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
         final double a = get(DIM_X, indexMin);
         final double b = get(DIM_X, indexMax);
         final String eq = a < b ? " < " : " > ";
-        LOGGER.error("- new searchIndex  getX(indexMin)= " + a + eq + " getX(indexMax)= " + b);
 
         for (int i = indexMin; i <= indexMax; i++) {
             final double valX = get(DIM_X, i);
             if (!Double.isFinite(valX)) {
-                LOGGER.error("non-finite value - autsch = " + valX + " index = " + i);
                 throw new IllegalStateException("check");
                 // continue;
             }
@@ -545,8 +521,6 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
                 minAbsDiff = absDiff;
             }
         }
-        LOGGER.error("- new searchIndex Range = " + indexMin + " for " + indexMax);
-        LOGGER.error("- new searchIndex = " + searchIndex + " for " + minAbsDiff);
 
         return searchIndex;
     }

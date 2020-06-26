@@ -1,10 +1,16 @@
 package de.gsi.dataset.spi;
 
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import de.gsi.dataset.AxisDescription;
 import de.gsi.dataset.DataSet;
 import de.gsi.dataset.event.AxisChangeEvent;
 import de.gsi.dataset.event.AxisNameChangeEvent;
 import de.gsi.dataset.event.AxisRangeChangeEvent;
+import de.gsi.dataset.event.EventListener;
 import de.gsi.dataset.spi.utils.MathUtils;
 
 /**
@@ -13,15 +19,20 @@ import de.gsi.dataset.spi.utils.MathUtils;
  * @author rstein
  */
 public class DefaultAxisDescription extends DataRange implements AxisDescription {
+    private final transient AtomicBoolean autoNotification = new AtomicBoolean(true);
+    private final List<EventListener> updateListeners = Collections.synchronizedList(new LinkedList<>());
     private final DataSet dataSet;
+    private final int dimIndex;
     private String name;
     private String unit;
 
     /**
-     * Default
+     * default constructor
+     * @param dimIndex numeric dimension index this AxisDescription refers to (e.g. for a euclidean system '0: x-axis', '1: y-axis', ...)
      */
-    public DefaultAxisDescription() {
+    public DefaultAxisDescription(final int dimIndex) {
         super();
+        this.dimIndex = dimIndex;
         dataSet = null;
         name = "unknown axis";
         unit = "a.u.";
@@ -35,41 +46,51 @@ public class DefaultAxisDescription extends DataRange implements AxisDescription
      */
     public DefaultAxisDescription(final DataSet dataSet, final AxisDescription axisDesc) {
         super();
+        this.dimIndex = axisDesc.getDimIndex();
         this.dataSet = dataSet;
         this.set(axisDesc.getName(), axisDesc.getUnit(), axisDesc.getMin(), axisDesc.getMax());
     }
 
     /**
      * @param dataSet for which the update events shall be registered
+     * @param dimIndex numeric dimension index this AxisDescription refers to (e.g. for a euclidean system '0: x-axis', '1: y-axis', ...)
      * @param axisName the new axis name
      * @param axisUnit the new axis unit
      */
-    public DefaultAxisDescription(final DataSet dataSet, final String axisName, final String... axisUnit) {
+    public DefaultAxisDescription(final DataSet dataSet, final int dimIndex, final String axisName, final String... axisUnit) {
         super();
         this.dataSet = dataSet;
+        this.dimIndex = dimIndex;
         this.set(axisName, axisUnit);
     }
 
     /**
      * @param dataSet for which the update events shall be registered
+     * @param dimIndex numeric dimension index this AxisDescription refers to (e.g. for a euclidean system '0: x-axis', '1: y-axis', ...)
      * @param axisName the new axis name
      * @param axisUnit the new axis unit
      * @param rangeMin the user-provided new minimum value of the DataSet/Axis range
      * @param rangeMax the user-provided new maximum value of the DataSet/Axis range
      */
-    public DefaultAxisDescription(final DataSet dataSet, final String axisName, final String axisUnit,
+    public DefaultAxisDescription(final DataSet dataSet, final int dimIndex, final String axisName, final String axisUnit,
             final double rangeMin, final double rangeMax) {
         super();
         this.dataSet = dataSet;
+        this.dimIndex = dimIndex;
         this.set(axisName, axisUnit, rangeMin, rangeMax);
     }
 
     /**
+     * @param dimIndex numeric dimension index this AxisDescription refers to (e.g. for a euclidean system '0: x-axis', '1: y-axis', ...)
      * @param axisName the new axis name
      * @param axisUnit the new axis unit
      */
-    public DefaultAxisDescription(final String axisName, final String... axisUnit) {
-        this(null, axisName, axisUnit);
+    public DefaultAxisDescription(final int dimIndex, final String axisName, final String... axisUnit) {
+        this(null, dimIndex, axisName, axisUnit);
+    }
+
+    private static boolean strEqual(final String str1, final String str2) {
+        return ((str1 == str2) || ((str1 != null) && str1.equals(str2))); // NOPMD pointer address check is intended
     }
 
     /**
@@ -92,12 +113,12 @@ public class DefaultAxisDescription extends DataRange implements AxisDescription
      * Adds values to this range.
      *
      * @param values values to be added
-     * @param nlength the maximum array length that should be taken into account
+     * @param length the maximum array length that should be taken into account
      * @return <code>true</code> if the value becomes <code>min</code> or <code>max</code>.
      */
     @Override
-    public boolean add(final double[] values, final int nlength) {
-        if (!super.add(values, nlength)) {
+    public boolean add(final double[] values, final int length) {
+        if (!super.add(values, length)) {
             return false;
         }
 
@@ -105,19 +126,16 @@ public class DefaultAxisDescription extends DataRange implements AxisDescription
         return true;
     }
 
-    /**
-     * Empties this DataRange. After calling this method this data range becomes undefined.
-     * 
-     * @return <code>true</code> if the values were valid before
-     * @see #isDefined()
-     */
     @Override
-    public boolean clear() {
-        return super.clear();
+    public AtomicBoolean autoNotification() {
+        return autoNotification;
     }
 
     @Override
     public boolean equals(final Object obj) {
+        if (!(obj instanceof AxisDescription)) {
+            return false;
+        }
         return equals(obj, 1e-6); // always fuzzy comparisons
     }
 
@@ -163,19 +181,18 @@ public class DefaultAxisDescription extends DataRange implements AxisDescription
             if (getMin() != other.getMin()) {
                 return false;
             }
-            if (getMax() != other.getMax()) {
-                return false;
-            }
+            return getMax() == other.getMax();
         } else {
             if (!MathUtils.nearlyEqual(getMin(), other.getMin(), epsilon)) {
                 return false;
             }
-
-            if (!MathUtils.nearlyEqual(getMax(), other.getMax(), epsilon)) {
-                return false;
-            }
+            return MathUtils.nearlyEqual(getMax(), other.getMax(), epsilon);
         }
-        return true;
+    }
+
+    @Override
+    public final int getDimIndex() {
+        return dimIndex;
     }
 
     @Override
@@ -257,14 +274,14 @@ public class DefaultAxisDescription extends DataRange implements AxisDescription
         return result;
     }
 
-    private final void notifyFullChange() {
+    private void notifyFullChange() {
         if (dataSet == null || !dataSet.autoNotification().get()) {
             return;
         }
         dataSet.invokeListener(new AxisChangeEvent(dataSet, "updated axis for '" + name + "' '[" + unit + "]'", -1));
     }
 
-    private final void notifyNameChange() {
+    private void notifyNameChange() {
         if (dataSet == null || !dataSet.autoNotification().get()) {
             return;
         }
@@ -272,7 +289,7 @@ public class DefaultAxisDescription extends DataRange implements AxisDescription
                 new AxisNameChangeEvent(dataSet, "updated axis names for '" + name + "' '[" + unit + "]'", -1));
     }
 
-    private final void notifyRangeChange() {
+    private void notifyRangeChange() {
         if (dataSet == null || !dataSet.autoNotification().get()) {
             return;
         }
@@ -365,7 +382,8 @@ public class DefaultAxisDescription extends DataRange implements AxisDescription
         return super.toString() + ", axisName = '" + this.getName() + "', axisUnit = '" + this.getUnit() + "'";
     }
 
-    private static boolean strEqual(final String str1, final String str2) {
-        return ((str1 == str2) || ((str1 != null) && str1.equals(str2))); // NOPMD pointer address check is intended
+    @Override
+    public List<EventListener> updateEventListener() {
+        return updateListeners;
     }
 }
