@@ -596,7 +596,7 @@ public class DataSetUtils extends DataSetUtilsHelper {
             ((DataSetMetaData) dataSet).getErrorList().addAll(error);
             dataSet.getAxisDescriptions().clear();
             for (AxisDescription a : axisDesc) {
-                dataSet.getAxisDescriptions().add(new DefaultAxisDescription(dataSet, a));
+                dataSet.getAxisDescriptions().add(new DefaultAxisDescription(a));
             }
 
             // automatically closing reader connection
