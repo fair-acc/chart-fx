@@ -247,7 +247,7 @@ public class XYChart extends Chart {
         // check that all registered data sets have proper ranges defined
         dataSets.parallelStream().forEach(dataset -> dataset.getAxisDescriptions().parallelStream().filter(axisD -> !axisD.isDefined()).forEach(axisDescription -> {
             dataset.lock().writeLockGuard(() -> {
-                dataset.recomputeLimits(dataset.getAxisDescriptions().indexOf(axisDescription));
+                dataset.recomputeLimits(axisDescription.getDimIndex());
             });
         }));
 
@@ -478,11 +478,18 @@ public class XYChart extends Chart {
         axis.getAutoRange().clear();
         dataSets.forEach(dataset -> {
             if (dataset.getDimension() > 2 && (side == Side.RIGHT || side == Side.TOP)) {
+                if (!dataset.getAxisDescription(DataSet.DIM_Z).isDefined()) {
+                    dataset.recomputeLimits(DataSet.DIM_Z);
+                }
                 axis.getAutoRange().add(dataset.getAxisDescription(DataSet.DIM_Z).getMin());
                 axis.getAutoRange().add(dataset.getAxisDescription(DataSet.DIM_Z).getMax());
             } else {
-                axis.getAutoRange().add(dataset.getAxisDescription(isHorizontal ? DataSet.DIM_X : DataSet.DIM_Y).getMin());
-                axis.getAutoRange().add(dataset.getAxisDescription(isHorizontal ? DataSet.DIM_X : DataSet.DIM_Y).getMax());
+                final int nDim = isHorizontal ? DataSet.DIM_X : DataSet.DIM_Y;
+                if (!dataset.getAxisDescription(nDim).isDefined()) {
+                    dataset.recomputeLimits(nDim);
+                }
+                axis.getAutoRange().add(dataset.getAxisDescription(nDim).getMin());
+                axis.getAutoRange().add(dataset.getAxisDescription(nDim).getMax());
             }
         });
         axis.getAutoRange().setAxisLength(axis.getLength() == 0 ? 1 : axis.getLength(), side);

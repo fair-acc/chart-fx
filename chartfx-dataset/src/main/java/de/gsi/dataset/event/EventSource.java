@@ -76,15 +76,13 @@ public interface EventSource {
      */
     @SuppressWarnings("PMD.NPathComplexity") // cannot be further split w/o adding unwanted further public default implementations (N.B. 'private default' ... is forbidden)
     default void invokeListener(final UpdateEvent updateEvent, final boolean executeParallel) {
-        if (updateEventListener() == null) {
+        if (updateEventListener() == null || !isAutoNotification()) {
             return;
         }
         List<EventListener> eventListener;
         synchronized (updateEventListener()) {
-            synchronized (autoNotification()) {
-                if (!isAutoNotification() || updateEventListener().isEmpty()) {
-                    return;
-                }
+            if (!isAutoNotification() || updateEventListener() == null || updateEventListener().isEmpty()) {
+                return;
             }
             eventListener = new ArrayList<>(updateEventListener());
         }
