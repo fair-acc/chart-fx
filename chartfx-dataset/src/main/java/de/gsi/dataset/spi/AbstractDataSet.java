@@ -1,10 +1,22 @@
 package de.gsi.dataset.spi;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import de.gsi.dataset.*;
+import de.gsi.dataset.AxisDescription;
+import de.gsi.dataset.DataSet;
+import de.gsi.dataset.DataSetError;
+import de.gsi.dataset.DataSetMetaData;
+import de.gsi.dataset.EditConstraints;
+import de.gsi.dataset.EditableDataSet;
+import de.gsi.dataset.event.AxisChangeEvent;
+import de.gsi.dataset.event.AxisRangeChangeEvent;
+import de.gsi.dataset.event.AxisRecomputationEvent;
 import de.gsi.dataset.event.EventListener;
 import de.gsi.dataset.event.UpdateEvent;
 import de.gsi.dataset.event.UpdatedMetaDataEvent;
@@ -46,6 +58,29 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
     protected List<String> errorList = new ArrayList<>();
     private EditConstraints editConstraints;
     private final Map<String, String> metaInfoMap = new ConcurrentHashMap<>();
+    private final AtomicBoolean axisUpdating = new AtomicBoolean(false);
+    protected final EventListener axisListener = e -> {
+        if (!isAutoNotification() || !(e instanceof AxisChangeEvent) || axisUpdating.get()) {
+            return;
+        }
+
+        axisUpdating.set(true);
+        final AxisChangeEvent evt = (AxisChangeEvent) e;
+        final int axisDim = evt.getDimension();
+        AxisDescription axisdescription = getAxisDescription(axisDim);
+
+        if (!axisdescription.isDefined() && evt instanceof AxisRecomputationEvent) {
+            recomputeLimits(axisDim);
+
+            invokeListener(new AxisRangeChangeEvent(this, "updated axis range for '" + axisdescription.getName() + "' '[" + axisdescription.getUnit() + "]'", axisDim));
+            axisUpdating.set(false);
+            return;
+        }
+
+        // forward axis description event to DataSet listener
+        invokeListener(e);
+        axisUpdating.set(false);
+    };
 
     /**
      * default constructor
@@ -60,7 +95,10 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
         this.dimension = dimension;
         for (int i = 0; i < this.dimension; i++) {
             final String axisName = i < DEFAULT_AXES_NAME.length ? DEFAULT_AXES_NAME[i] : "dim" + (i + 1) + "-Axis";
-            axesDescriptions.add(new DefaultAxisDescription(this, i, axisName, "a.u."));
+            final AxisDescription axisDescription = new DefaultAxisDescription(i, axisName, "a.u.");
+            axisDescription.autoNotification().set(false);
+            axisDescription.addListener(axisListener);
+            axesDescriptions.add(axisDescription);
         }
     }
 
@@ -539,6 +577,7 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
         for (int i = 0; i < dataCount; i++) {
             newRange.add(get(dimIndex, i));
         }
+
         // set to new computed one and trigger notify event if different to old limits
         getAxisDescription(dimIndex).set(newRange.getMin(), newRange.getMax());
         return getThis();

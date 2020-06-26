@@ -129,12 +129,8 @@ public class DataSetBuilderTests {
         assertEquals(ErrorType.NO_ERROR, errordataset3.getErrorType(DIM_X));
         assertEquals(ErrorType.ASYMMETRIC, errordataset3.getErrorType(DIM_Y));
         // unsupported X errors
-        assertThrows(UnsupportedOperationException.class, () -> {
-            new DataSetBuilder().setPosError(DIM_X, new double[] { 0.0, 3 }).setNegError(DIM_X, new double[] { 1, 2 }).setDimension(2).build();
-        });
-        assertThrows(UnsupportedOperationException.class, () -> {
-            new DataSetBuilder().setPosErrorNoCopy(DIM_X, new double[] { 0.0, 3 }).setNegErrorNoCopy(DIM_X, new double[] { 1, 2 }).setDimension(2).build();
-        });
+        assertThrows(UnsupportedOperationException.class, () -> new DataSetBuilder().setPosError(DIM_X, new double[] { 0.0, 3 }).setNegError(DIM_X, new double[] { 1, 2 }).setDimension(2).build());
+        assertThrows(UnsupportedOperationException.class, () -> new DataSetBuilder().setPosErrorNoCopy(DIM_X, new double[] { 0.0, 3 }).setNegErrorNoCopy(DIM_X, new double[] { 1, 2 }).setDimension(2).build());
 
         // 3D
         final DataSet dataset2 = new DataSetBuilder() //
@@ -361,42 +357,22 @@ public class DataSetBuilderTests {
     @Test
     public void testExceptions() {
         // provide z-data for 2 dim dataSet
-        assertThrows(UnsupportedOperationException.class, () -> {
-            new DataSetBuilder().setValues(DIM_Z, new double[] { 0.0, 3 }).setDimension(2).build();
-        });
+        assertThrows(UnsupportedOperationException.class, () -> new DataSetBuilder().setValues(DIM_Z, new double[] { 0.0, 3 }).setDimension(2).build());
         // Provide X Errors
-        assertThrows(UnsupportedOperationException.class, () -> {
-            new DataSetBuilder().setNegError(DIM_X, new float[] { 0.0f, 3f }).setInitalCapacity(2).setDimension(2).build();
-        });
-        assertThrows(UnsupportedOperationException.class, () -> {
-            new DataSetBuilder().setNegError(DIM_X, new double[] { 0.0, 3 }).setInitalCapacity(2).setDimension(2).build();
-        });
+        assertThrows(UnsupportedOperationException.class, () -> new DataSetBuilder().setNegError(DIM_X, new float[] { 0.0f, 3f }).setInitalCapacity(2).setDimension(2).build());
+        assertThrows(UnsupportedOperationException.class, () -> new DataSetBuilder().setNegError(DIM_X, new double[] { 0.0, 3 }).setInitalCapacity(2).setDimension(2).build());
         // Provide negative dimIndex for axisDescriptions
-        assertThrows(UnsupportedOperationException.class, () -> {
-            new DataSetBuilder().setAxisMax(-5, 12).build();
-        });
+        assertThrows(UnsupportedOperationException.class, () -> new DataSetBuilder().setAxisMax(-5, 12).build());
         // request float error data set
-        assertThrows(UnsupportedOperationException.class, () -> {
-            new DataSetBuilder().setUseFloat(true).setEnableErrors(true).build();
-        });
+        assertThrows(UnsupportedOperationException.class, () -> new DataSetBuilder().setUseFloat(true).setEnableErrors(true).build());
         // request errors for multi dim data set
-        assertThrows(UnsupportedOperationException.class, () -> {
-            new DataSetBuilder().setDimension(3).setEnableErrors(true).build();
-        });
+        assertThrows(UnsupportedOperationException.class, () -> new DataSetBuilder().setDimension(3).setEnableErrors(true).build());
         // request float multi dim data set
-        assertThrows(UnsupportedOperationException.class, () -> {
-            new DataSetBuilder().setDimension(3).setUseFloat(true).build();
-        });
+        assertThrows(UnsupportedOperationException.class, () -> new DataSetBuilder().setDimension(3).setUseFloat(true).build());
         // request type without errors but add errors
-        assertThrows(UnsupportedOperationException.class, () -> {
-            new DataSetBuilder().setNegError(DIM_Y, new float[] { 1, 2 }).build(DefaultDataSet.class);
-        });
+        assertThrows(UnsupportedOperationException.class, () -> new DataSetBuilder().setNegError(DIM_Y, new float[] { 1, 2 }).build(DefaultDataSet.class));
         // request Editable Data Set
-        assertThrows(UnsupportedOperationException.class, () -> {
-            new DataSetBuilder() //
-                    .setValues(DIM_Y, new float[] { 1, 2 }) //
-                    .build(DoubleErrorDataSet.class);
-        });
+        assertThrows(UnsupportedOperationException.class, () -> new DataSetBuilder().setValues(DIM_Y, new float[] { 1, 2 }).build(DoubleErrorDataSet.class));
     }
 
     @Test
@@ -445,8 +421,8 @@ public class DataSetBuilderTests {
 
         @Override
         public List<AxisDescription> getAxisDescriptions() {
-            return List.of(new DefaultAxisDescription(this, DIM_X, "x Axis", "", 0.0, 9.0),
-                    new DefaultAxisDescription(this, DIM_Y, "y Axis", "", 0.0, 90.0));
+            return List.of(new DefaultAxisDescription(DIM_X, "x Axis", "", 0.0, 9.0),
+                    new DefaultAxisDescription(DIM_Y, "y Axis", "", 0.0, 90.0));
         }
 
         @Override

@@ -6,10 +6,10 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import de.gsi.dataset.AxisDescription;
-import de.gsi.dataset.DataSet;
 import de.gsi.dataset.event.AxisChangeEvent;
 import de.gsi.dataset.event.AxisNameChangeEvent;
 import de.gsi.dataset.event.AxisRangeChangeEvent;
+import de.gsi.dataset.event.AxisRecomputationEvent;
 import de.gsi.dataset.event.EventListener;
 import de.gsi.dataset.spi.utils.MathUtils;
 
@@ -21,7 +21,6 @@ import de.gsi.dataset.spi.utils.MathUtils;
 public class DefaultAxisDescription extends DataRange implements AxisDescription {
     private final transient AtomicBoolean autoNotification = new AtomicBoolean(true);
     private final List<EventListener> updateListeners = Collections.synchronizedList(new LinkedList<>());
-    private final DataSet dataSet;
     private final int dimIndex;
     private String name;
     private String unit;
@@ -33,51 +32,19 @@ public class DefaultAxisDescription extends DataRange implements AxisDescription
     public DefaultAxisDescription(final int dimIndex) {
         super();
         this.dimIndex = dimIndex;
-        dataSet = null;
         name = "unknown axis";
         unit = "a.u.";
     }
 
     /**
      * Copy constructor to generate axisDescriptions for datasets from existing Axis Descriptions
-     * 
-     * @param dataSet for which the update events shall be registered
+     *
      * @param axisDesc axis Description to copy all data except dataSet from
      */
-    public DefaultAxisDescription(final DataSet dataSet, final AxisDescription axisDesc) {
+    public DefaultAxisDescription(final AxisDescription axisDesc) {
         super();
         this.dimIndex = axisDesc.getDimIndex();
-        this.dataSet = dataSet;
         this.set(axisDesc.getName(), axisDesc.getUnit(), axisDesc.getMin(), axisDesc.getMax());
-    }
-
-    /**
-     * @param dataSet for which the update events shall be registered
-     * @param dimIndex numeric dimension index this AxisDescription refers to (e.g. for a euclidean system '0: x-axis', '1: y-axis', ...)
-     * @param axisName the new axis name
-     * @param axisUnit the new axis unit
-     */
-    public DefaultAxisDescription(final DataSet dataSet, final int dimIndex, final String axisName, final String... axisUnit) {
-        super();
-        this.dataSet = dataSet;
-        this.dimIndex = dimIndex;
-        this.set(axisName, axisUnit);
-    }
-
-    /**
-     * @param dataSet for which the update events shall be registered
-     * @param dimIndex numeric dimension index this AxisDescription refers to (e.g. for a euclidean system '0: x-axis', '1: y-axis', ...)
-     * @param axisName the new axis name
-     * @param axisUnit the new axis unit
-     * @param rangeMin the user-provided new minimum value of the DataSet/Axis range
-     * @param rangeMax the user-provided new maximum value of the DataSet/Axis range
-     */
-    public DefaultAxisDescription(final DataSet dataSet, final int dimIndex, final String axisName, final String axisUnit,
-            final double rangeMin, final double rangeMax) {
-        super();
-        this.dataSet = dataSet;
-        this.dimIndex = dimIndex;
-        this.set(axisName, axisUnit, rangeMin, rangeMax);
     }
 
     /**
@@ -86,7 +53,23 @@ public class DefaultAxisDescription extends DataRange implements AxisDescription
      * @param axisUnit the new axis unit
      */
     public DefaultAxisDescription(final int dimIndex, final String axisName, final String... axisUnit) {
-        this(null, dimIndex, axisName, axisUnit);
+        super();
+        this.dimIndex = dimIndex;
+        this.set(axisName, axisUnit);
+    }
+
+    /**
+     * @param dimIndex numeric dimension index this AxisDescription refers to (e.g. for a euclidean system '0: x-axis', '1: y-axis', ...)
+     * @param axisName the new axis name
+     * @param axisUnit the new axis unit
+     * @param rangeMin the user-provided new minimum value of the DataSet/Axis range
+     * @param rangeMax the user-provided new maximum value of the DataSet/Axis range
+     */
+    public DefaultAxisDescription(final int dimIndex, final String axisName, final String axisUnit,
+            final double rangeMin, final double rangeMax) {
+        super();
+        this.dimIndex = dimIndex;
+        this.set(axisName, axisUnit, rangeMin, rangeMax);
     }
 
     private static boolean strEqual(final String str1, final String str2) {
@@ -203,23 +186,9 @@ public class DefaultAxisDescription extends DataRange implements AxisDescription
         // axis range min value is invalid -- attempt to recompute
         // the recomputeLimits is usually recomputed when validating the axis,
         // this function is called in case e.g. a point has been modified and range invalidated
-
-        if (dataSet != null && dataSet.getDataCount() > 0) {
-            boolean notify = false;
-            for (int dim = 0; dim < dataSet.getDimension(); dim++) {
-                if (dim >= dataSet.getAxisDescriptions().size()) {
-                    break;
-                }
-                if (dataSet.getAxisDescription(dim).isDefined()) {
-                    continue;
-                }
-                dataSet.recomputeLimits(dim);
-                notify = true;
-            }
-            if (notify) {
-                notifyRangeChange();
-            }
-        }
+        final boolean oldNotifyState = autoNotification.getAndSet(true);
+        invokeListener(new AxisRecomputationEvent(this, "updated axis range for '" + name + "' '[" + unit + "]'", getDimIndex()), false);
+        autoNotification.getAndSet(oldNotifyState);
 
         return super.getMax();
     }
@@ -232,23 +201,9 @@ public class DefaultAxisDescription extends DataRange implements AxisDescription
         // axis range min value is invalid -- attempt to recompute
         // the recomputeLimits is usually recomputed when validating the axis,
         // this function is called in case e.g. a point has been modified and range invalidated
-
-        if (dataSet != null && dataSet.getDataCount() > 0) {
-            boolean notify = false;
-            for (int dim = 0; dim < dataSet.getDimension(); dim++) {
-                if (dim >= dataSet.getAxisDescriptions().size()) {
-                    break;
-                }
-                if (dataSet.getAxisDescription(dim).isDefined()) {
-                    continue;
-                }
-                dataSet.recomputeLimits(dim);
-                notify = true;
-            }
-            if (notify) {
-                notifyRangeChange();
-            }
-        }
+        final boolean oldNotifyState = autoNotification.getAndSet(true);
+        invokeListener(new AxisRecomputationEvent(this, "updated axis range for '" + name + "' '[" + unit + "]'", getDimIndex()), false);
+        autoNotification.getAndSet(oldNotifyState);
 
         return super.getMin();
     }
@@ -275,26 +230,15 @@ public class DefaultAxisDescription extends DataRange implements AxisDescription
     }
 
     private void notifyFullChange() {
-        if (dataSet == null || !dataSet.autoNotification().get()) {
-            return;
-        }
-        dataSet.invokeListener(new AxisChangeEvent(dataSet, "updated axis for '" + name + "' '[" + unit + "]'", -1));
+        invokeListener(new AxisChangeEvent(this, "updated axis for '" + name + "' '[" + unit + "]'", getDimIndex()));
     }
 
     private void notifyNameChange() {
-        if (dataSet == null || !dataSet.autoNotification().get()) {
-            return;
-        }
-        dataSet.invokeListener(
-                new AxisNameChangeEvent(dataSet, "updated axis names for '" + name + "' '[" + unit + "]'", -1));
+        invokeListener(new AxisNameChangeEvent(this, "updated axis names for '" + name + "' '[" + unit + "]'", getDimIndex()));
     }
 
     private void notifyRangeChange() {
-        if (dataSet == null || !dataSet.autoNotification().get()) {
-            return;
-        }
-        dataSet.invokeListener(
-                new AxisRangeChangeEvent(dataSet, "updated axis range for '" + name + "' '[" + unit + "]'", -1));
+        invokeListener(new AxisRangeChangeEvent(this, "updated axis range for '" + name + "' '[" + unit + "]'", getDimIndex()));
     }
 
     @Override
