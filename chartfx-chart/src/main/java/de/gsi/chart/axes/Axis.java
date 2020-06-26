@@ -20,7 +20,7 @@ import de.gsi.dataset.AxisDescription;
 import de.gsi.dataset.event.EventSource;
 import de.gsi.dataset.event.UpdateEvent;
 
-public interface Axis extends AxisDescription, EventSource {
+public interface Axis extends AxisDescription {
     /**
      * This is true when the axis determines its range from the data automatically
      *
@@ -202,7 +202,7 @@ public interface Axis extends AxisDescription, EventSource {
     @Override
     default void invokeListener(final UpdateEvent updateEvent, final boolean executeParallel) {
         // implemented for forwarding purposes
-        EventSource.super.invokeListener(updateEvent, executeParallel);
+        AxisDescription.super.invokeListener(updateEvent, executeParallel);
     }
 
     /**

@@ -38,8 +38,7 @@ public class FieldListAxisDescription extends IoBufferFieldSerialiser {
             BinarySerialiser.getFieldHeader(ioBuffer);
             final byte startMarker = ioBuffer.getByte();
             if (startMarker != DataType.START_MARKER.getAsByte()) {
-                throw new IllegalStateException("corrupt start marker, value is " + startMarker + " vs. should "
-                                                + DataType.START_MARKER.getAsByte());
+                throw new IllegalStateException("corrupt start marker, value is " + startMarker + " vs. should " + DataType.START_MARKER.getAsByte());
             }
 
             BinarySerialiser.getFieldHeader(ioBuffer);
@@ -51,7 +50,7 @@ public class FieldListAxisDescription extends IoBufferFieldSerialiser {
             BinarySerialiser.getFieldHeader(ioBuffer);
             double max = ioBuffer.getDouble();
 
-            DefaultAxisDescription ad = new DefaultAxisDescription(null, axisName, axisUnit, min, max); // NOPMD
+            DefaultAxisDescription ad = new DefaultAxisDescription(null, i, axisName, axisUnit, min, max); // NOPMD
             // N.B. PMD - unavoidable in-loop instantiation
 
             BinarySerialiser.getFieldHeader(ioBuffer);
