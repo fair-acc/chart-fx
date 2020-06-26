@@ -50,7 +50,7 @@ public class FieldListAxisDescription extends IoBufferFieldSerialiser {
             BinarySerialiser.getFieldHeader(ioBuffer);
             double max = ioBuffer.getDouble();
 
-            DefaultAxisDescription ad = new DefaultAxisDescription(null, i, axisName, axisUnit, min, max); // NOPMD
+            DefaultAxisDescription ad = new DefaultAxisDescription(i, axisName, axisUnit, min, max); // NOPMD
             // N.B. PMD - unavoidable in-loop instantiation
 
             BinarySerialiser.getFieldHeader(ioBuffer);

@@ -5,9 +5,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import de.gsi.dataset.*;
+import de.gsi.dataset.event.*;
 import de.gsi.dataset.event.EventListener;
-import de.gsi.dataset.event.UpdateEvent;
-import de.gsi.dataset.event.UpdatedMetaDataEvent;
 import de.gsi.dataset.locks.DataSetLock;
 import de.gsi.dataset.locks.DefaultDataSetLock;
 import de.gsi.dataset.spi.utils.MathUtils;
@@ -46,6 +45,28 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
     protected List<String> errorList = new ArrayList<>();
     private EditConstraints editConstraints;
     private final Map<String, String> metaInfoMap = new ConcurrentHashMap<>();
+    private final AtomicBoolean axisUpdating = new AtomicBoolean(false);
+    protected final EventListener axisListener = e -> {
+        if (!(e instanceof AxisChangeEvent) || axisUpdating.get()) {
+            return;
+        }
+        axisUpdating.set(true);
+        final AxisChangeEvent evt = (AxisChangeEvent) e;
+        final int axisDim = evt.getDimension();
+        AxisDescription axisdescription = getAxisDescription(axisDim);
+
+        if (!axisdescription.isDefined() && evt instanceof AxisRecomputationEvent) {
+            recomputeLimits(axisDim);
+
+            invokeListener(new AxisRangeChangeEvent(this, "updated axis range for '" + axisdescription.getName() + "' '[" + axisdescription.getUnit() + "]'", axisDim));
+            axisUpdating.set(false);
+            return;
+        }
+
+        // forward axis description event to DataSet listener
+        invokeListener(e);
+        axisUpdating.set(false);
+    };
 
     /**
      * default constructor
@@ -60,7 +81,9 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
         this.dimension = dimension;
         for (int i = 0; i < this.dimension; i++) {
             final String axisName = i < DEFAULT_AXES_NAME.length ? DEFAULT_AXES_NAME[i] : "dim" + (i + 1) + "-Axis";
-            axesDescriptions.add(new DefaultAxisDescription(this, i, axisName, "a.u."));
+            final AxisDescription axisDescription = new DefaultAxisDescription(i, axisName, "a.u.");
+            axisDescription.addListener(axisListener);
+            axesDescriptions.add(axisDescription);
         }
     }
 
