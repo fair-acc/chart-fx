@@ -1,27 +1,19 @@
 package de.gsi.chart.axes.spi;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.DoubleProperty;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleDoubleProperty;
-import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.*;
 import javafx.css.CssMetaData;
-import javafx.css.SimpleStyleableDoubleProperty;
 import javafx.css.Styleable;
-import javafx.css.StyleableProperty;
-import javafx.css.converter.SizeConverter;
-import javafx.scene.layout.Region;
+import javafx.css.StyleableDoubleProperty;
 
 import de.gsi.chart.axes.AxisTransform;
 import de.gsi.chart.axes.LogAxisType;
 import de.gsi.chart.axes.TickUnitSupplier;
 import de.gsi.chart.axes.spi.format.DefaultTickUnitSupplier;
+import de.gsi.chart.ui.css.CssPropertyFactory;
 
 /**
  * A axis class that plots a range of numbers with major tick marks every "tickUnit". You can use any Number type with
@@ -36,6 +28,7 @@ import de.gsi.chart.axes.spi.format.DefaultTickUnitSupplier;
  * </ul>
  */
 public final class NumericAxis extends AbstractAxis {
+    private static final CssPropertyFactory<NumericAxis> CSS = new CssPropertyFactory<>(AbstractAxisParameter.getClassCssMetaData());
     private static final int TICK_MARK_GAP = 6;
     private static final double NEXT_TICK_UNIT_FACTOR = 1.01;
     private static final int MAX_TICK_COUNT = 20;
@@ -59,19 +52,15 @@ public final class NumericAxis extends AbstractAxis {
 
     private final DoubleProperty autoRangePadding = new SimpleDoubleProperty(0);
 
-    private final SimpleStyleableDoubleProperty tickUnit = new SimpleStyleableDoubleProperty(
-            StyleableProperties.TICK_UNIT, this, "tickUnit", 5d) {
-        @Override
-        protected void invalidated() {
-            if (!isAutoRanging()) {
-                invalidate();
-                requestAxisLayout();
-            }
+    private final StyleableDoubleProperty tickUnit = CSS.createDoubleProperty(this, "tickUnit", 5.0, () -> {
+        if (!isAutoRanging()) {
+            invalidate();
+            requestAxisLayout();
         }
-    };
+    });
 
-    private final ObjectProperty<TickUnitSupplier> tickUnitSupplier = new SimpleObjectProperty<>(this,
-            "tickUnitSupplier", NumericAxis.DEFAULT_TICK_UNIT_SUPPLIER);
+    private final ObjectProperty<TickUnitSupplier> tickUnitSupplier = new SimpleObjectProperty<>(this, "tickUnitSupplier",
+            NumericAxis.DEFAULT_TICK_UNIT_SUPPLIER);
 
     /**
      * Creates an {@link #autoRangingProperty() auto-ranging} Axis.
@@ -112,8 +101,7 @@ public final class NumericAxis extends AbstractAxis {
      * @param upperBound the {@link #maxProperty() upper bound} of the axis
      * @param tickUnit the tick unit, i.e. space between tick marks
      */
-    public NumericAxis(final String axisLabel, final double lowerBound, final double upperBound,
-            final double tickUnit) {
+    public NumericAxis(final String axisLabel, final double lowerBound, final double upperBound, final double tickUnit) {
         super(lowerBound, upperBound);
         this.setName(axisLabel);
         setTickUnit(tickUnit);
@@ -192,8 +180,7 @@ public final class NumericAxis extends AbstractAxis {
                 if (major == firstMajorTick) {
                     halfOfLastTickSize = tickMarkSize / 2;
                 } else {
-                    maxReqTickGap = Math.max(maxReqTickGap,
-                            halfOfLastTickSize + NumericAxis.TICK_MARK_GAP + tickMarkSize / 2);
+                    maxReqTickGap = Math.max(maxReqTickGap, halfOfLastTickSize + NumericAxis.TICK_MARK_GAP + tickMarkSize / 2);
                 }
             }
             reqLength = (ticksCount - 1) * maxReqTickGap;
@@ -291,7 +278,6 @@ public final class NumericAxis extends AbstractAxis {
         if (0 < getMin() || 0 > getMax()) {
             return Double.NaN;
         }
-        // noinspection unchecked
         return getDisplayPosition(0);
     }
 
@@ -381,8 +367,7 @@ public final class NumericAxis extends AbstractAxis {
         return tickUnitSupplier;
     }
 
-    private AxisRange computeRangeImpl(final double min, final double max, final double axisLength,
-            final double labelSize) {
+    private AxisRange computeRangeImpl(final double min, final double max, final double axisLength, final double labelSize) {
         final int numOfFittingLabels = (int) Math.floor(axisLength / labelSize);
         final int numOfTickMarks = Math.max(Math.min(numOfFittingLabels, NumericAxis.MAX_TICK_COUNT), 2);
 
@@ -431,8 +416,7 @@ public final class NumericAxis extends AbstractAxis {
                 if (major == firstMajorTick) {
                     halfOfLastTickSize = tickMarkSize / 2;
                 } else {
-                    maxReqTickGap = Math.max(maxReqTickGap,
-                            halfOfLastTickSize + NumericAxis.TICK_MARK_GAP + tickMarkSize / 2);
+                    maxReqTickGap = Math.max(maxReqTickGap, halfOfLastTickSize + NumericAxis.TICK_MARK_GAP + tickMarkSize / 2);
                 }
             }
             reqLength = (ticksCount - 1) * maxReqTickGap;
@@ -450,15 +434,14 @@ public final class NumericAxis extends AbstractAxis {
         }
         final double majorUnit = unitSupplier.computeTickUnit(rawTickUnit);
         if (majorUnit <= 0) {
-            throw new IllegalArgumentException("The " + unitSupplier.getClass().getName()
-                                               + " computed illegal unit value [" + majorUnit + "] for argument " + rawTickUnit);
+            throw new IllegalArgumentException(
+                    "The " + unitSupplier.getClass().getName() + " computed illegal unit value [" + majorUnit + "] for argument " + rawTickUnit);
         }
         return majorUnit;
     }
 
     @Override
-    protected AxisRange autoRange(final double minValue, final double maxValue, final double length,
-            final double labelSize) {
+    protected AxisRange autoRange(final double minValue, final double maxValue, final double length, final double labelSize) {
         final double min = minValue > 0 && isForceZeroInRange() ? 0 : minValue;
         final double max = maxValue < 0 && isForceZeroInRange() ? 0 : maxValue;
         final double padding = NumericAxis.getEffectiveRange(min, max) * getAutoRangePadding();
@@ -470,13 +453,12 @@ public final class NumericAxis extends AbstractAxis {
 
     @Override
     protected List<Double> calculateMajorTickValues(final double axisLength, final AxisRange range) {
-        final AxisRange rangeImpl = range;
-        if (rangeImpl.getLowerBound() == rangeImpl.getUpperBound() || rangeImpl.getTickUnit() <= 0) {
-            return Arrays.asList(rangeImpl.getLowerBound());
+        if (range.getLowerBound() == range.getUpperBound() || range.getTickUnit() <= 0) {
+            return Collections.singletonList(range.getLowerBound());
         }
         final List<Double> tickValues = new ArrayList<>();
-        final double firstTick = NumericAxis.computeFistMajorTick(rangeImpl.getLowerBound(), rangeImpl.getTickUnit());
-        for (double major = firstTick; major <= rangeImpl.getUpperBound(); major += rangeImpl.getTickUnit()) {
+        final double firstTick = NumericAxis.computeFistMajorTick(range.getLowerBound(), range.getTickUnit());
+        for (double major = firstTick; major <= range.getUpperBound(); major += range.getTickUnit()) {
             tickValues.add(major);
         }
         return tickValues;
@@ -508,13 +490,11 @@ public final class NumericAxis extends AbstractAxis {
     }
 
     @Override
-    protected AxisRange computeRange(final double min, final double max, final double axisLength,
-            final double labelSize) {
+    protected AxisRange computeRange(final double min, final double max, final double axisLength, final double labelSize) {
         double minValue = min;
         double maxValue = max;
         if (max - min == 0) {
-            final double padding = getAutoRangePadding() == 0 ? NumericAxis.DEFAULT_RANGE_PADDING
-                                                              : getAutoRangePadding();
+            final double padding = getAutoRangePadding() == 0 ? NumericAxis.DEFAULT_RANGE_PADDING : getAutoRangePadding();
             final double paddedRange = NumericAxis.getEffectiveRange(min, max) * padding;
             minValue = min - paddedRange / 2;
             maxValue = max + paddedRange / 2;
@@ -542,7 +522,7 @@ public final class NumericAxis extends AbstractAxis {
     }
 
     public static List<CssMetaData<? extends Styleable, ?>> getClassCssMetaData() {
-        return StyleableProperties.STYLEABLES;
+        return CSS.getCssMetaData();
     }
 
     /**
@@ -590,29 +570,5 @@ public final class NumericAxis extends AbstractAxis {
             effectiveRange = min == 0 ? NumericAxis.DEFAULT_RANGE_LENGTH : Math.abs(min);
         }
         return effectiveRange;
-    }
-
-    private static class StyleableProperties {
-        private static final CssMetaData<NumericAxis, Number> TICK_UNIT = new CssMetaData<NumericAxis, Number>(
-                "-fx-tick-unit", SizeConverter.getInstance(), 5.0) {
-            @SuppressWarnings("unchecked")
-            @Override
-            public StyleableProperty<Number> getStyleableProperty(final NumericAxis axis) {
-                return (StyleableProperty<Number>) axis.tickUnitProperty();
-            }
-
-            @Override
-            public boolean isSettable(final NumericAxis axis) {
-                return axis != null && !axis.tickUnit.isBound();
-            }
-        };
-
-        private static final List<CssMetaData<? extends Styleable, ?>> STYLEABLES;
-
-        static {
-            final List<CssMetaData<? extends Styleable, ?>> styleables = new ArrayList<>(Region.getClassCssMetaData());
-            styleables.add(StyleableProperties.TICK_UNIT);
-            STYLEABLES = Collections.unmodifiableList(styleables);
-        }
     }
 }
