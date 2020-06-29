@@ -5,17 +5,19 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
+import de.gsi.dataset.DataSet2D;
 import de.gsi.dataset.DataSetMetaData;
 import de.gsi.dataset.Histogram1D;
 import de.gsi.dataset.event.AddedDataEvent;
 import de.gsi.dataset.event.UpdatedDataEvent;
+import de.gsi.dataset.utils.AssertUtils;
 
 /**
  * Class implements simple one dimensional binned histogram backed internally by double arrays
  *
  * @author rstein
  */
-public class Histogram extends AbstractHistogram implements Histogram1D {
+public class Histogram extends AbstractHistogram implements Histogram1D, DataSet2D {
     private static final long serialVersionUID = -8609726961834745312L;
     protected final boolean isHorizontal;
 
@@ -114,12 +116,12 @@ public class Histogram extends AbstractHistogram implements Histogram1D {
             if (x < getAxisDescription(dimIndex).getMin()) {
                 return 0; // underflow bin
             }
-            return getDataCount(dimIndex) - 1; // overflow bin
+            return getDataCount() - 1; // overflow bin
         }
         if (isEquiDistant()) {
             final double diff = x - getAxisDescription(dimIndex).getMin();
             final double len = getAxisDescription(dimIndex).getLength();
-            final int count = getDataCount(dimIndex);
+            final int count = getDataCount();
             final double delta = len / count;
             return (int) Math.round(diff / delta);
         }
@@ -144,8 +146,9 @@ public class Histogram extends AbstractHistogram implements Histogram1D {
     }
 
     @Override
-    public int getIndex(int dimIndex, double value) {
-        return findBin(dimIndex, value) - 1;
+    public int getIndex(int dimIndex, double... value) {
+        AssertUtils.checkArrayDimension("value", value, 1);
+        return findBin(dimIndex, value[0]) - 1;
     }
 
     @Override
@@ -153,7 +156,7 @@ public class Histogram extends AbstractHistogram implements Histogram1D {
         return Collections.<String>emptyList();
     }
 
-    @Override
+    //    @Override
     public double getValue(int dimIndex, double x) {
         final int index1 = getIndex(DIM_X, x);
         final double x1 = get(DIM_X, index1);

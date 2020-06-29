@@ -9,7 +9,9 @@ import java.util.Arrays;
 import org.jtransforms.fft.DoubleFFT_1D;
 
 import de.gsi.dataset.DataSet;
+import de.gsi.dataset.GridDataSet;
 import de.gsi.dataset.spi.DataSetBuilder;
+import de.gsi.dataset.spi.DoubleGridDataSet;
 import de.gsi.dataset.spi.MultiDimDoubleDataSet;
 import de.gsi.dataset.utils.AssertUtils;
 import de.gsi.dataset.utils.DoubleArrayCache;
@@ -66,8 +68,8 @@ public class ShortTimeFourierTransform {
      * @param truncateDCNy {@code true} to interpolate the DC- and Nyquist-bins to their respective nearest neighbours
      * @return the spectrogram, a DataSet3D with dimensions [nf = nQuantx x nY = nQuantt]
      */
-    public static DataSet complex(final DataSet input, final DataSet output, final int nFFT, final int step,
-            final Apodization apodization, final Padding padding, final boolean dbScale, final boolean truncateDCNy) {
+    public static GridDataSet complex(final DataSet input, final GridDataSet output, final int nFFT, final int step, final Apodization apodization,
+            final Padding padding, final boolean dbScale, final boolean truncateDCNy) {
         // validate input data
         AssertUtils.notNull("input", input);
         AssertUtils.gtThanZero("nFFT", nFFT);
@@ -75,18 +77,15 @@ public class ShortTimeFourierTransform {
         AssertUtils.notNull("apodization", apodization);
         AssertUtils.notNull("padding", padding);
         AssertUtils.gtOrEqual("input.getDimension()", 3, input.getDimension());
-        if (input.getDataCount(DIM_X) != input.getDataCount(DIM_Y)
-                || input.getDataCount(DIM_X) != input.getDataCount(DIM_Z)) {
-            throw new IllegalArgumentException("The first 3 dimensions must have equal number of points");
-        }
         // early returns for trivial cases
         if (input.getDataCount() == 0) {
-            if (output instanceof MultiDimDoubleDataSet) {
-                ((MultiDimDoubleDataSet) output).clearData();
-                ((MultiDimDoubleDataSet) output).clearMetaInfo();
+            if (output instanceof DoubleGridDataSet) {
+                ((DoubleGridDataSet) output).clearData();
+                ((DoubleGridDataSet) output).clearMetaInfo();
                 return output;
             }
-            return new DataSetBuilder("STFT(" + input.getName() + ")").setInitalCapacity(0).setDimension(3).build();
+            // return new DataSetBuilder("STFT(" + input.getName() + ")").setInitalCapacity(0).setInitalCapacity(0,0,0).setDimension(3).build(GridDataSet.class);
+            return new DoubleGridDataSet("STFT(" + input.getName() + ")", new double[2][0], new double[0]);
         }
         // get data from dataSet
         final int nSamples = input.getDataCount();
@@ -97,56 +96,39 @@ public class ShortTimeFourierTransform {
         final double[] timeAxis = getTimeAxis(dt, nSamples, step, oldTimeAxis);
         final double[] oldFrequencyAxis = output == null ? null : output.getValues(DIM_Y);
         final double[] frequencyAxis = getFrequencyAxisComplex(dt, nFFT, oldFrequencyAxis);
-        final double[] oldAmplitudeData = output instanceof MultiDimDoubleDataSet
-                                                  ? output.getValues(DIM_Z)
-                                                  : null;
-        final double[] amplitudeData = complex(real, imag, oldAmplitudeData, nFFT, step, apodization, padding, dbScale,
-                truncateDCNy);
+        final double[] oldAmplitudeData = output instanceof MultiDimDoubleDataSet ? output.getValues(DIM_Z) : null;
+        final double[] amplitudeData = complex(real, imag, oldAmplitudeData, nFFT, step, apodization, padding, dbScale, truncateDCNy);
 
         // initialize result dataset
-        MultiDimDoubleDataSet result;
-        if (output instanceof MultiDimDoubleDataSet) {
-            result = (MultiDimDoubleDataSet) output;
+        DoubleGridDataSet result;
+        if (output instanceof DoubleGridDataSet) {
+            result = (DoubleGridDataSet) output;
         } else {
-            result = (MultiDimDoubleDataSet) new DataSetBuilder("STFT(" + input.getName() + ")")
-                             .setValues(DIM_X, frequencyAxis)
-                             .setValues(DIM_Y, timeAxis)
-                             .setValues(DIM_Z, amplitudeData)
-                             .build();
+            result = new DataSetBuilder("STFT(" + input.getName() + ")").setValues(DIM_X, frequencyAxis).setValues(DIM_Y, timeAxis).setValues(DIM_Z, amplitudeData).build(DoubleGridDataSet.class);
         }
-        result.lock().writeLockGuard(() ->
+        result.lock().writeLockGuard(() -> {
+            // only update data arrays if at least one array was newly allocated
+            if (oldTimeAxis != timeAxis || oldFrequencyAxis != frequencyAxis || oldAmplitudeData != amplitudeData) {
+                result.set(new double[][] { frequencyAxis, timeAxis }, amplitudeData);
+            }
 
-                {
-                    // only update data arrays if at least one array was newly allocated
-                    if (oldTimeAxis != timeAxis) {
-                        result.setValues(DIM_X, frequencyAxis, false);
-                    }
-                    if (oldFrequencyAxis != frequencyAxis) {
-                        result.setValues(DIM_Y, timeAxis, false);
-                    }
-                    if (oldAmplitudeData != amplitudeData) {
-                        result.setValues(DIM_Z, amplitudeData, false);
-                    }
+            result.getMetaInfo().put("ComplexSTFT-nFFT", Integer.toString(nFFT));
+            result.getMetaInfo().put("ComplexSTFT-step", Integer.toString(step));
 
-                    result.getMetaInfo().put("ComplexSTFT-nFFT", Integer.toString(nFFT));
-                    result.getMetaInfo().put("ComplexSTFT-step", Integer.toString(step));
-
-                    // Set Axis Labels and Units
-                    final String timeUnit = input.getAxisDescription(DIM_X).getUnit();
-                    final String freqUnit = timeUnit.equals("s") ? "Hz" : "1/" + timeUnit;
-                    result.getAxisDescription(DIM_X).set("Frequency", freqUnit, frequencyAxis[0],
-                            frequencyAxis[frequencyAxis.length - 1]);
-                    result.getAxisDescription(DIM_Y).set("Time", timeUnit, timeAxis[0], timeAxis[timeAxis.length - 1]);
-                    result.getAxisDescription(DIM_Z).set("Magnitude", input.getAxisDescription(DIM_Y).getUnit());
-                    result.recomputeLimits(DIM_Z);
-                });
+            // Set Axis Labels and Units
+            final String timeUnit = input.getAxisDescription(DIM_X).getUnit();
+            final String freqUnit = timeUnit.equals("s") ? "Hz" : "1/" + timeUnit;
+            result.getAxisDescription(DIM_X).set("Frequency", freqUnit, frequencyAxis[0], frequencyAxis[frequencyAxis.length - 1]);
+            result.getAxisDescription(DIM_Y).set("Time", timeUnit, timeAxis[0], timeAxis[timeAxis.length - 1]);
+            result.getAxisDescription(DIM_Z).set("Magnitude", input.getAxisDescription(DIM_Y).getUnit());
+            result.recomputeLimits(DIM_Z);
+        });
 
         return result;
     }
 
-    public static double[] complex(final double[] real, final double[] imag, final double[] output, final int nFFT,
-            final int step, final Apodization apodization, final Padding padding, final boolean dbScale,
-            final boolean truncateDCNy) {
+    public static double[] complex(final double[] real, final double[] imag, final double[] output, final int nFFT, final int step,
+            final Apodization apodization, final Padding padding, final boolean dbScale, final boolean truncateDCNy) {
         AssertUtils.equalDoubleArrays(real, imag); // check for same length
         final int nT = ceilDiv(real.length, step); // number of time steps
         final double[] amplitudeData = output == null || output.length != nFFT * nT ? new double[nFFT * nT] : output; // output array
@@ -200,8 +182,8 @@ public class ShortTimeFourierTransform {
         return amplitudeData;
     }
 
-    public static double[] complex(final double[] complexInput, final double[] output, final int nFFT, final int step,
-            final Apodization apodization, final Padding padding, final boolean dbScale, final boolean truncateDCNy) {
+    public static double[] complex(final double[] complexInput, final double[] output, final int nFFT, final int step, final Apodization apodization,
+            final Padding padding, final boolean dbScale, final boolean truncateDCNy) {
         final int nT = ceilDiv(complexInput.length, 2 * step); // number of time steps
         final double[] amplitudeData = output == null || output.length != nFFT * nT ? new double[nFFT * nT] : output; // output array
         final double[] currentMagnitudeData = DoubleArrayCache.getInstance().getArray(nFFT);
@@ -284,8 +266,8 @@ public class ShortTimeFourierTransform {
         return timeAxis;
     }
 
-    public static DataSet real(final DataSet input, final DataSet output, final int nFFT, final int step,
-            final Apodization apodization, final Padding padding, final boolean dbScale, final boolean truncateDCNy) {
+    public static GridDataSet real(final DataSet input, final GridDataSet output, final int nFFT, final int step, final Apodization apodization,
+            final Padding padding, final boolean dbScale, final boolean truncateDCNy) {
         // validate input data
         AssertUtils.notNull("input", input);
         AssertUtils.gtThanZero("nFFT", nFFT);
@@ -293,17 +275,15 @@ public class ShortTimeFourierTransform {
         AssertUtils.notNull("apodization", apodization);
         AssertUtils.notNull("padding", padding);
         AssertUtils.gtOrEqual("input.getDimension()", 2, input.getDimension());
-        if (input.getDataCount(DIM_X) != input.getDataCount(DIM_Y)) {
-            throw new IllegalArgumentException("The X and Y dimensions must have equal number of points");
-        }
         // early returns for trivial cases
         if (input.getDataCount() == 0) {
-            if (output instanceof MultiDimDoubleDataSet) {
-                ((MultiDimDoubleDataSet) output).clearData();
-                ((MultiDimDoubleDataSet) output).clearMetaInfo();
+            if (output instanceof DoubleGridDataSet) {
+                ((DoubleGridDataSet) output).clearData();
+                ((DoubleGridDataSet) output).clearMetaInfo();
                 return output;
             }
-            return new DataSetBuilder("STFT(" + input.getName() + ")").setInitalCapacity(0).setDimension(3).build();
+            // return new DataSetBuilder("STFT(" + input.getName() + ")").setInitalCapacity(0).setDimension(3).build(GridDataSet.class);
+            return new DoubleGridDataSet("STFT(" + input.getName() + ")", new double[2][0], new double[0]);
         }
         // get data from dataSet
         final int nSamples = input.getDataCount();
@@ -313,58 +293,41 @@ public class ShortTimeFourierTransform {
         final double[] timeAxis = getTimeAxis(dt, nSamples, step, oldTimeAxis);
         final double[] oldFrequencyAxis = output == null ? null : output.getValues(DIM_Y);
         final double[] frequencyAxis = getFrequencyAxisReal(dt, nFFT, oldFrequencyAxis);
-        final double[] oldAmplitudeData = output instanceof MultiDimDoubleDataSet
-                                                  ? output.getValues(DIM_Z)
-                                                  : null;
-        final double[] amplitudeData = real(yData, oldAmplitudeData, nFFT, step, apodization, padding, dbScale,
-                truncateDCNy);
+        final double[] oldAmplitudeData = output instanceof MultiDimDoubleDataSet ? output.getValues(DIM_Z) : null;
+        final double[] amplitudeData = real(yData, oldAmplitudeData, nFFT, step, apodization, padding, dbScale, truncateDCNy);
 
         // initialize result dataset
-        MultiDimDoubleDataSet result;
-        if (output instanceof MultiDimDoubleDataSet) {
-            result = (MultiDimDoubleDataSet) output;
+        DoubleGridDataSet result;
+        if (output instanceof DoubleGridDataSet) {
+            result = (DoubleGridDataSet) output;
         } else {
-            result = (MultiDimDoubleDataSet) new DataSetBuilder("STFT(" + input.getName() + ")")
-                             .setValues(DIM_X, frequencyAxis)
-                             .setValues(DIM_Y, timeAxis)
-                             .setValues(DIM_Z, amplitudeData)
-                             .build();
+            result = new DataSetBuilder("STFT(" + input.getName() + ")").setValues(DIM_X, frequencyAxis).setValues(DIM_Y, timeAxis).setValues(DIM_Z, amplitudeData).build(DoubleGridDataSet.class);
         }
-        result.lock().writeLockGuard(() ->
+        result.lock().writeLockGuard(() -> {
+            // only update data arrays if at least one array was newly allocated
+            if (oldTimeAxis != timeAxis || oldFrequencyAxis != frequencyAxis || oldAmplitudeData != amplitudeData) {
+                result.set(new double[][] { frequencyAxis, timeAxis }, amplitudeData);
+            }
 
-                {
-                    // only update data arrays if at least one array was newly allocated
-                    if (oldFrequencyAxis != frequencyAxis) {
-                        result.setValues(DIM_X, frequencyAxis, false);
-                    }
-                    if (oldTimeAxis != timeAxis) {
-                        result.setValues(DIM_Y, timeAxis, false);
-                    }
-                    if (oldAmplitudeData != amplitudeData) {
-                        result.setValues(DIM_Z, amplitudeData, false);
-                    }
+            result.getMetaInfo().put("RealSTFT-nFFT", Integer.toString(nFFT));
+            result.getMetaInfo().put("RealSTFT-step", Integer.toString(step));
 
-                    result.getMetaInfo().put("RealSTFT-nFFT", Integer.toString(nFFT));
-                    result.getMetaInfo().put("RealSTFT-step", Integer.toString(step));
-
-                    // Set Axis Labels and Units
-                    final String timeUnit = input.getAxisDescription(DIM_X).getUnit();
-                    final String freqUnit = timeUnit.equals("s") ? "Hz" : "1/" + timeUnit;
-                    result.getAxisDescription(DIM_X).set("Frequency", freqUnit, frequencyAxis[0],
-                            frequencyAxis[frequencyAxis.length - 1]);
-                    result.getAxisDescription(DIM_Y).set("Time", timeUnit, timeAxis[0], timeAxis[timeAxis.length - 1]);
-                    result.getAxisDescription(DIM_Z).set("Magnitude", input.getAxisDescription(DIM_Y).getUnit());
-                    result.recomputeLimits(DIM_Z);
-                });
+            // Set Axis Labels and Units
+            final String timeUnit = input.getAxisDescription(DIM_X).getUnit();
+            final String freqUnit = timeUnit.equals("s") ? "Hz" : "1/" + timeUnit;
+            result.getAxisDescription(DIM_X).set("Frequency", freqUnit, frequencyAxis[0], frequencyAxis[frequencyAxis.length - 1]);
+            result.getAxisDescription(DIM_Y).set("Time", timeUnit, timeAxis[0], timeAxis[timeAxis.length - 1]);
+            result.getAxisDescription(DIM_Z).set("Magnitude", input.getAxisDescription(DIM_Y).getUnit());
+            result.recomputeLimits(DIM_Z);
+        });
 
         return result;
     }
 
-    public static double[] real(final double[] input, final double[] output, final int nFFT, final int step,
-            final Apodization apodization, final Padding padding, final boolean dbScale, final boolean truncateDCNy) {
+    public static double[] real(final double[] input, final double[] output, final int nFFT, final int step, final Apodization apodization,
+            final Padding padding, final boolean dbScale, final boolean truncateDCNy) {
         final int nT = ceilDiv(input.length, step); // number of time steps
-        final double[] amplitudeData = output == null || output.length != nFFT / 2 * nT ? new double[nFFT / 2 * nT]
-                                                                                        : output; // output array
+        final double[] amplitudeData = output == null || output.length != nFFT / 2 * nT ? new double[nFFT / 2 * nT] : output; // output array
         final double[] currentMagnitudeData = DoubleArrayCache.getInstance().getArray(nFFT / 2);
         // calculate spectrogram
         final DoubleFFT_1D fastFourierTrafo = new DoubleFFT_1D(nFFT);

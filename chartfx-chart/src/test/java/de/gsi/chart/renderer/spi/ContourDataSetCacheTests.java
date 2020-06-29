@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Test;
 
 import de.gsi.chart.axes.AxisTransform;
 import de.gsi.dataset.DataSet;
+import de.gsi.dataset.GridDataSet;
 import de.gsi.dataset.spi.DataRange;
 import de.gsi.dataset.spi.DataSetBuilder;
 import de.gsi.math.ArrayUtils;
@@ -59,23 +60,19 @@ public class ContourDataSetCacheTests {
 
     @Test
     public void testDataSet() {
-        DataSet dataSet = new DataSetBuilder().setValues(DIM_X, TEST_DATA_X).setValues(DIM_Y, TEST_DATA_Y).setValues(DIM_Z, TEST_DATA_Z).build();
+        GridDataSet dataSet = new DataSetBuilder().setValues(DIM_X, TEST_DATA_X).setValues(DIM_Y, TEST_DATA_Y).setValues(DIM_Z, TEST_DATA_Z).build(GridDataSet.class);
 
-        assertEquals(TEST_DATA_X.length, dataSet.getDataCount(DIM_X));
-        assertEquals(TEST_DATA_Y.length, dataSet.getDataCount(DIM_Y));
-        assertEquals(TEST_DATA_Z.length, dataSet.getDataCount(DIM_Z));
+        assertArrayEquals(new int[] { TEST_DATA_X.length, TEST_DATA_Y.length }, dataSet.getShape());
+        assertEquals(TEST_DATA_Z.length, dataSet.getDataCount());
 
-        for (int i = 0; i < dataSet.getDataCount(DIM_X); i++) {
-            assertEquals(TEST_DATA_X[i], dataSet.get(DIM_X, i));
+        for (int i = 0; i < dataSet.getShape()[DIM_X]; i++) {
+            assertEquals(TEST_DATA_X[i], dataSet.getGrid(DIM_X, i));
         }
-        for (int i = 0; i < dataSet.getDataCount(DIM_Y); i++) {
-            assertEquals(TEST_DATA_Y[i], dataSet.get(DIM_Y, i));
+        for (int i = 0; i < dataSet.getShape()[DIM_Y]; i++) {
+            assertEquals(TEST_DATA_Y[i], dataSet.getGrid(DIM_Y, i));
         }
-        for (int i = 0; i < dataSet.getDataCount(DIM_Z); i++) {
+        for (int i = 0; i < dataSet.getDataCount(); i++) {
             assertEquals(TEST_DATA_Z[i], dataSet.get(DIM_Z, i));
-        }
-        for (int i = 0; i < dataSet.getDataCount(DIM_Z); i++) {
-            assertEquals(dataSet.get(DIM_Z, i), dataSet.get(DIM_Z, i));
         }
     }
 
@@ -159,13 +156,13 @@ public class ContourDataSetCacheTests {
 
     @Test
     public void testDataTransform() {
-        DataSet dataSet = new DataSetBuilder().setValues(DIM_X, TEST_DATA_X).setValues(DIM_Y, TEST_DATA_Y).setValues(DIM_Z, TEST_DATA_Z).build();
+        GridDataSet dataSet = new DataSetBuilder().setValues(DIM_X, TEST_DATA_X).setValues(DIM_Y, TEST_DATA_Y).setValues(DIM_Z, TEST_DATA_Z).build(GridDataSet.class);
 
-        assertEquals(TEST_DATA_X.length, dataSet.getDataCount(DIM_X), "data vector x length");
-        assertEquals(TEST_DATA_Y.length, dataSet.getDataCount(DIM_Y), "data vector x length");
-        assertEquals(TEST_DATA_Z.length, dataSet.getDataCount(DIM_Z), "data vector x length");
+        assertEquals(TEST_DATA_X.length, dataSet.getShape()[DIM_X], "data vector x length");
+        assertEquals(TEST_DATA_Y.length, dataSet.getShape()[DIM_Y], "data vector y length");
+        assertEquals(TEST_DATA_Z.length, dataSet.getDataCount(), "data vector z length");
 
-        final double[] dataBuffer = new double[dataSet.getDataCount(DIM_Z)];
+        final double[] dataBuffer = new double[dataSet.getDataCount()];
         ArrayUtils.fillArray(dataBuffer, -1);
         assertEquals(TEST_DATA_Z.length, dataBuffer.length, "data buffer length");
 

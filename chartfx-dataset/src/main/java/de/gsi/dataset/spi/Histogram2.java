@@ -11,6 +11,7 @@ import de.gsi.dataset.DataSetMetaData;
 import de.gsi.dataset.Histogram1D;
 import de.gsi.dataset.Histogram2D;
 import de.gsi.dataset.event.UpdatedDataEvent;
+import de.gsi.dataset.utils.AssertUtils;
 
 /**
  * @author rstein
@@ -31,8 +32,7 @@ public class Histogram2 extends AbstractHistogram implements Histogram2D {
      * @param minY minimum of vertical range
      * @param maxY maximum of vertical range
      */
-    public Histogram2(String name, int nBinsX, double minX, double maxX, final int nBinsY, final double minY,
-            final double maxY) {
+    public Histogram2(String name, int nBinsX, double minX, double maxX, final int nBinsY, final double minY, final double maxY) {
         super(name, nBinsX, minX, maxX, nBinsY, minY, maxY);
         xProjection = new Histogram(name + "-Proj-X", nBinsX, minX, maxX, true);
         yProjection = new Histogram(name + "-Proj-Y", nBinsY, minY, maxY, false);
@@ -90,8 +90,9 @@ public class Histogram2 extends AbstractHistogram implements Histogram2D {
     }
 
     @Override
-    public int getIndex(int dimIndex, double value) {
-        return findBin(dimIndex, value);
+    public int getIndex(int dimIndex, double... value) {
+        AssertUtils.checkArrayDimension("value", value, 1);
+        return findBin(dimIndex, value[0]);
     }
 
     @Override
@@ -115,29 +116,21 @@ public class Histogram2 extends AbstractHistogram implements Histogram2D {
 
     protected double getSum(final int dimIndex, int bin) {
         double sum = 0.0;
-        if (dimIndex == DIM_X) {
-            for (int i = 0; i < getDataCount(dimIndex); i++) {
-                sum += getZ(i - 1, bin - 1);
-            }
-        } else {
-            for (int i = 0; i < getDataCount(DIM_Y); i++) {
-                sum += getZ(bin - 1, i - 1);
+        for (int i = 0; i < getShape()[dimIndex]; i++) {
+            if (dimIndex == DIM_X) {
+                sum += get(DIM_Z, i, bin);
+            } else {
+                sum += get(DIM_Z, bin, i);
             }
         }
         return sum;
     }
 
     @Override
-    public double getValue(int dimIndex, double x) {
-        // TODO Auto-generated method stub
-        return 0;
-    }
-
-    @Override
     public List<String> getWarningList() {
         final String[] axisPrefix = { "-x", "-y", "-z" };
         final List<String> retVal = new LinkedList<>(super.getWarningList());
-        for (int dim = 0; dim < this.getDimension(); dim++) {
+        for (int dim = 0; dim < this.getShape().length; dim++) {
             final String axisName = dim < axisPrefix.length ? axisPrefix[dim] : "-dim" + (dim + 1);
             if (getSum(dim, 0) > 0) {
                 retVal.add(DataSetMetaData.TAG_UNDERSHOOT + axisName);
@@ -150,15 +143,19 @@ public class Histogram2 extends AbstractHistogram implements Histogram2D {
         return retVal;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see de.gsi.dataset.DataSet3D#getZ(int, int)
-     */
     @Override
-    public double getZ(int xIndex, int yIndex) {
-        final int bin = (yIndex + 1) * getDataCount() + xIndex + 1;
-        return super.getBinContent(bin);
+    public double get(int dimIndex, int... indices) {
+        switch (dimIndex) {
+        case DIM_X:
+            return xProjection.get(dimIndex, indices[DIM_X]);
+        case DIM_Y:
+            return yProjection.get(dimIndex, indices[DIM_Y]);
+        case DIM_Z:
+            final int bin = (indices[1]) * getShape()[DIM_X] + indices[0];
+            return super.getBinContent(bin);
+        default:
+            throw new IndexOutOfBoundsException("dimIndex out of bounds");
+        }
     }
 
     @Override
@@ -166,5 +163,22 @@ public class Histogram2 extends AbstractHistogram implements Histogram2D {
         xProjection.reset();
         yProjection.reset();
         super.reset();
+    }
+
+    @Override
+    public int[] getShape() {
+        return new int[] { xProjection.getDataCount(), yProjection.getDataCount() };
+    }
+
+    @Override
+    public double getGrid(int dimIndex, int index) {
+        switch (dimIndex) {
+        case DIM_X:
+            return xProjection.get(DIM_X, index);
+        case DIM_Y:
+            return yProjection.get(DIM_X, index);
+        default:
+            throw new IndexOutOfBoundsException("dim Index out of bound 2");
+        }
     }
 }

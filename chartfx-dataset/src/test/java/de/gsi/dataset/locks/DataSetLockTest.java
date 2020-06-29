@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.concurrent.TimeUnit;
 
+import org.awaitility.Awaitility;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
@@ -202,10 +203,9 @@ public class DataSetLockTest {
             assertTrue(testState);
         }
 
-        sleep(1000);
-        assertEquals(0, myLockImpl.getReaderCount());
-        assertEquals(0, myLockImpl.getWriterCount());
-        assertTrue(dataSet.isAutoNotification());
+        Awaitility.await().atMost(1, TimeUnit.SECONDS).until(() -> myLockImpl.getReaderCount() == 0);
+        Awaitility.await().atMost(1, TimeUnit.SECONDS).until(() -> myLockImpl.getWriterCount() == 0);
+        Awaitility.await().atMost(1, TimeUnit.SECONDS).until(() -> dataSet.isAutoNotification());
 
         if (LOGGER.isDebugEnabled()) {
             LOGGER.atDebug().log("finished - testDataSetLock()");

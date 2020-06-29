@@ -11,6 +11,7 @@ import de.gsi.dataset.spi.AbstractDataSet;
 import de.gsi.dataset.spi.DefaultErrorDataSet;
 import de.gsi.dataset.spi.DoubleDataSet;
 import de.gsi.dataset.spi.DoubleErrorDataSet;
+import de.gsi.dataset.spi.DoubleGridDataSet;
 import de.gsi.dataset.spi.MultiDimDoubleDataSet;
 import de.gsi.dataset.testdata.spi.TriangleFunction;
 
@@ -21,8 +22,8 @@ public class DataSetSerialiserTests {
     @Test
     public void testDataSetFloatError() {
         boolean asFloat32 = true;
-        final DefaultErrorDataSet original = new DefaultErrorDataSet("test", new double[] { 1f, 2f, 3f },
-                new double[] { 6f, 7f, 8f }, new double[] { 7f, 8f, 9f }, new double[] { 7f, 8f, 9f }, 3, false);
+        final DefaultErrorDataSet original = new DefaultErrorDataSet("test", new double[] { 1f, 2f, 3f }, new double[] { 6f, 7f, 8f },
+                new double[] { 7f, 8f, 9f }, new double[] { 7f, 8f, 9f }, 3, false);
         addMetaData(original, true);
 
         final FastByteBuffer byteBuffer = new FastByteBuffer();
@@ -49,8 +50,8 @@ public class DataSetSerialiserTests {
     public void testDataSetErrorSymmetric() {
         boolean asFloat32 = false;
 
-        final DefaultErrorDataSet original = new DefaultErrorDataSet("test", new double[] { 1, 2, 3 },
-                new double[] { 6, 7, 8 }, new double[] { 7, 8, 9 }, new double[] { 7, 8, 9 }, 3, false) {
+        final DefaultErrorDataSet original = new DefaultErrorDataSet("test", new double[] { 1, 2, 3 }, new double[] { 6, 7, 8 }, new double[] { 7, 8, 9 },
+                new double[] { 7, 8, 9 }, 3, false) {
             private static final long serialVersionUID = 1L;
 
             @Override
@@ -66,8 +67,7 @@ public class DataSetSerialiserTests {
         final FastByteBuffer byteBuffer = new FastByteBuffer();
         DataSetSerialiser.writeDataSetToByteArray(original, byteBuffer, asFloat32);
         byteBuffer.reset(); // reset to read position (==0)
-        final DefaultErrorDataSet restored = (DefaultErrorDataSet) DataSetSerialiser
-                                                     .readDataSetFromByteArray(byteBuffer);
+        final DefaultErrorDataSet restored = (DefaultErrorDataSet) DataSetSerialiser.readDataSetFromByteArray(byteBuffer);
 
         assertEquals(new DefaultErrorDataSet(original), new DefaultErrorDataSet(restored));
     }
@@ -76,8 +76,8 @@ public class DataSetSerialiserTests {
     public void testDataSetFloatErrorSymmetric() {
         boolean asFloat32 = true;
 
-        final DefaultErrorDataSet original = new DefaultErrorDataSet("test", new double[] { 1f, 2f, 3f },
-                new double[] { 6f, 7f, 8f }, new double[] { 7f, 8f, 9f }, new double[] { 7f, 8f, 9f }, 3, false) {
+        final DefaultErrorDataSet original = new DefaultErrorDataSet("test", new double[] { 1f, 2f, 3f }, new double[] { 6f, 7f, 8f },
+                new double[] { 7f, 8f, 9f }, new double[] { 7f, 8f, 9f }, 3, false) {
             private static final long serialVersionUID = 1L;
 
             @Override
@@ -94,8 +94,7 @@ public class DataSetSerialiserTests {
 
         DataSetSerialiser.writeDataSetToByteArray(original, byteBuffer, asFloat32);
         byteBuffer.reset(); // reset to read position (==0)
-        final DefaultErrorDataSet restored = (DefaultErrorDataSet) DataSetSerialiser
-                                                     .readDataSetFromByteArray(byteBuffer);
+        final DefaultErrorDataSet restored = (DefaultErrorDataSet) DataSetSerialiser.readDataSetFromByteArray(byteBuffer);
 
         assertEquals(new DefaultErrorDataSet(original), new DefaultErrorDataSet(restored));
     }
@@ -133,8 +132,7 @@ public class DataSetSerialiserTests {
     @Test
     public void testMultiDimDataSet() {
         boolean asFloat32 = false;
-        final MultiDimDoubleDataSet original = new MultiDimDoubleDataSet("test", false,
-                new double[][] { { 1, 2, 3 }, { 10, 20 }, { 0.5, 1, 1.5, 2, 2.5, 3 } });
+        final DoubleGridDataSet original = new DoubleGridDataSet("test", new double[][] { { 1, 2, 3 }, { 10, 20 } }, new double[] { 0.5, 1, 1.5, 2, 2.5, 3 });
         // Labels and styles are not correctly handled by multi dim data set because it is not really defined on which
         // dimension the label index is defined
         addMetaData(original, false);
@@ -151,8 +149,7 @@ public class DataSetSerialiserTests {
     @Test
     public void testMultiDimDataSetFloatNoMetaDataAndLabels() {
         boolean asFloat32 = true;
-        final MultiDimDoubleDataSet original = new MultiDimDoubleDataSet("test", false,
-                new double[][] { { 1, 2, 3 }, { 10, 20 }, { 0.5, 1, 1.5, 2, 2.5, 3 } });
+        final DoubleGridDataSet original = new DoubleGridDataSet("test", new double[][] { { 1, 2, 3 }, { 10, 20 } }, new double[] { 0.5, 1, 1.5, 2, 2.5, 3 });
         addMetaData(original, false);
 
         final FastByteBuffer byteBuffer = new FastByteBuffer();

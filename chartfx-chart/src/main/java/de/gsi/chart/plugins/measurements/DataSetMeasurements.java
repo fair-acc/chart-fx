@@ -58,6 +58,7 @@ import de.gsi.chart.ui.geometry.Side;
 import de.gsi.chart.utils.DragResizerUtil;
 import de.gsi.chart.utils.FXUtils;
 import de.gsi.dataset.DataSet;
+import de.gsi.dataset.GridDataSet;
 import de.gsi.dataset.event.EventListener;
 import de.gsi.dataset.event.EventRateLimiter.UpdateStrategy;
 import de.gsi.dataset.event.UpdateEvent;
@@ -618,7 +619,7 @@ public class DataSetMeasurements extends AbstractChartMeasurement {
                 }
                 FXUtils.runFX(() -> xAxis.set(firstDataSet.getAxisDescription(DataSet.DIM_X)));
                 FXUtils.runFX(() -> yAxis.set(firstDataSet.getAxisDescription(DataSet.DIM_Z)));
-                MultiDimDataSetMath.computeSlice(firstDataSet, outputDataSet, DataSet.DIM_X, newValueMarker1);
+                MultiDimDataSetMath.computeSlice((GridDataSet) firstDataSet, outputDataSet, DataSet.DIM_X, newValueMarker1);
                 break;
             case DATASET_SLICE_Y:
                 if (firstDataSet.getDimension() <= 2) {
@@ -626,7 +627,7 @@ public class DataSetMeasurements extends AbstractChartMeasurement {
                 }
                 FXUtils.runFX(() -> xAxis.set(firstDataSet.getAxisDescription(DataSet.DIM_Y)));
                 FXUtils.runFX(() -> yAxis.set(firstDataSet.getAxisDescription(DataSet.DIM_Z)));
-                MultiDimDataSetMath.computeSlice(firstDataSet, outputDataSet, DataSet.DIM_Y, newValueMarker1);
+                MultiDimDataSetMath.computeSlice((GridDataSet) firstDataSet, outputDataSet, DataSet.DIM_Y, newValueMarker1);
                 break;
             case DATASET_MEAN_X:
                 if (firstDataSet.getDimension() <= 2) {
@@ -634,7 +635,7 @@ public class DataSetMeasurements extends AbstractChartMeasurement {
                 }
                 FXUtils.runFX(() -> xAxis.set(firstDataSet.getAxisDescription(DataSet.DIM_Y)));
                 FXUtils.runFX(() -> yAxis.set(firstDataSet.getAxisDescription(DataSet.DIM_Z)));
-                MultiDimDataSetMath.computeMean(firstDataSet, outputDataSet, DataSet.DIM_X, newValueMarker1, newValueMarker2);
+                MultiDimDataSetMath.computeMean((GridDataSet) firstDataSet, outputDataSet, DataSet.DIM_X, newValueMarker1, newValueMarker2);
                 break;
             case DATASET_MEAN_Y:
                 if (firstDataSet.getDimension() <= 2) {
@@ -642,7 +643,7 @@ public class DataSetMeasurements extends AbstractChartMeasurement {
                 }
                 FXUtils.runFX(() -> xAxis.set(firstDataSet.getAxisDescription(DataSet.DIM_Y)));
                 FXUtils.runFX(() -> yAxis.set(firstDataSet.getAxisDescription(DataSet.DIM_Z)));
-                MultiDimDataSetMath.computeMean(firstDataSet, outputDataSet, DataSet.DIM_Y, newValueMarker1, newValueMarker2);
+                MultiDimDataSetMath.computeMean((GridDataSet) firstDataSet, outputDataSet, DataSet.DIM_Y, newValueMarker1, newValueMarker2);
                 break;
             case DATASET_MIN_X:
                 if (firstDataSet.getDimension() <= 2) {
@@ -650,7 +651,7 @@ public class DataSetMeasurements extends AbstractChartMeasurement {
                 }
                 FXUtils.runFX(() -> xAxis.set(firstDataSet.getAxisDescription(DataSet.DIM_Y)));
                 FXUtils.runFX(() -> yAxis.set(firstDataSet.getAxisDescription(DataSet.DIM_Z)));
-                MultiDimDataSetMath.computeMin(firstDataSet, outputDataSet, DataSet.DIM_X, newValueMarker1, newValueMarker2);
+                MultiDimDataSetMath.computeMin((GridDataSet) firstDataSet, outputDataSet, DataSet.DIM_X, newValueMarker1, newValueMarker2);
                 break;
             case DATASET_MIN_Y:
                 if (firstDataSet.getDimension() <= 2) {
@@ -658,7 +659,7 @@ public class DataSetMeasurements extends AbstractChartMeasurement {
                 }
                 FXUtils.runFX(() -> xAxis.set(firstDataSet.getAxisDescription(DataSet.DIM_Y)));
                 FXUtils.runFX(() -> yAxis.set(firstDataSet.getAxisDescription(DataSet.DIM_Z)));
-                MultiDimDataSetMath.computeMin(firstDataSet, outputDataSet, DataSet.DIM_Y, newValueMarker1, newValueMarker2);
+                MultiDimDataSetMath.computeMin((GridDataSet) firstDataSet, outputDataSet, DataSet.DIM_Y, newValueMarker1, newValueMarker2);
                 break;
             case DATASET_MAX_X:
                 if (firstDataSet.getDimension() <= 2) {
@@ -666,7 +667,7 @@ public class DataSetMeasurements extends AbstractChartMeasurement {
                 }
                 FXUtils.runFX(() -> xAxis.set(firstDataSet.getAxisDescription(DataSet.DIM_Y)));
                 FXUtils.runFX(() -> yAxis.set(firstDataSet.getAxisDescription(DataSet.DIM_Z)));
-                MultiDimDataSetMath.computeMax(firstDataSet, outputDataSet, DataSet.DIM_X, newValueMarker1, newValueMarker2);
+                MultiDimDataSetMath.computeMax((GridDataSet) firstDataSet, outputDataSet, DataSet.DIM_X, newValueMarker1, newValueMarker2);
                 break;
             case DATASET_MAX_Y:
                 if (firstDataSet.getDimension() <= 2) {
@@ -674,7 +675,7 @@ public class DataSetMeasurements extends AbstractChartMeasurement {
                 }
                 FXUtils.runFX(() -> xAxis.set(firstDataSet.getAxisDescription(DataSet.DIM_Y)));
                 FXUtils.runFX(() -> yAxis.set(firstDataSet.getAxisDescription(DataSet.DIM_Z)));
-                MultiDimDataSetMath.computeMax(firstDataSet, outputDataSet, DataSet.DIM_Y, newValueMarker1, newValueMarker2);
+                MultiDimDataSetMath.computeMax((GridDataSet) firstDataSet, outputDataSet, DataSet.DIM_Y, newValueMarker1, newValueMarker2);
                 break;
             case DATASET_INTEGRAL_X:
                 if (firstDataSet.getDimension() <= 2) {
@@ -682,7 +683,7 @@ public class DataSetMeasurements extends AbstractChartMeasurement {
                 }
                 FXUtils.runFX(() -> xAxis.set(firstDataSet.getAxisDescription(DataSet.DIM_Y)));
                 FXUtils.runFX(() -> yAxis.set(firstDataSet.getAxisDescription(DataSet.DIM_Z)));
-                MultiDimDataSetMath.computeIntegral(firstDataSet, outputDataSet, DataSet.DIM_X, newValueMarker1, newValueMarker2);
+                MultiDimDataSetMath.computeIntegral((GridDataSet) firstDataSet, outputDataSet, DataSet.DIM_X, newValueMarker1, newValueMarker2);
                 break;
             case DATASET_INTEGRAL_Y:
                 if (firstDataSet.getDimension() <= 2) {
@@ -690,7 +691,7 @@ public class DataSetMeasurements extends AbstractChartMeasurement {
                 }
                 FXUtils.runFX(() -> xAxis.set(firstDataSet.getAxisDescription(DataSet.DIM_Y)));
                 FXUtils.runFX(() -> yAxis.set(firstDataSet.getAxisDescription(DataSet.DIM_Z)));
-                MultiDimDataSetMath.computeIntegral(firstDataSet, outputDataSet, DataSet.DIM_Y, newValueMarker1, newValueMarker2);
+                MultiDimDataSetMath.computeIntegral((GridDataSet) firstDataSet, outputDataSet, DataSet.DIM_Y, newValueMarker1, newValueMarker2);
                 break;
 
             // Fourier transforms

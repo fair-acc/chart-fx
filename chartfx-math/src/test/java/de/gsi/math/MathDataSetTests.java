@@ -41,8 +41,8 @@ public class MathDataSetTests {
             // identity function
             System.arraycopy(input, 0, output, 0, length);
         }, -1, null, rawDataSetRef);
-        assertArrayEquals(rawDataSetRef.getXValues(), identityDataSet.getXValues());
-        assertArrayEquals(rawDataSetRef.getYValues(), identityDataSet.getYValues());
+        assertArrayEquals(rawDataSetRef.getValues(DataSet.DIM_X), identityDataSet.getValues(DataSet.DIM_X));
+        assertArrayEquals(rawDataSetRef.getValues(DataSet.DIM_Y), identityDataSet.getValues(DataSet.DIM_Y));
         assertArrayEquals(yErrorNeg, identityDataSet.getErrorsNegative(DataSet.DIM_Y));
         assertArrayEquals(yErrorPos, identityDataSet.getErrorsPositive(DataSet.DIM_Y));
     }
@@ -89,13 +89,13 @@ public class MathDataSetTests {
             assertEquals(nBins, dataSets.getDataCount());
             return DataSetMath.magnitudeSpectrumDecibel(dataSets);
         }, rawDataSetRef);
-        assertArrayEquals(magDataSetRef.getYValues(), magDataSet.getYValues());
+        assertArrayEquals(magDataSetRef.getValues(DataSet.DIM_Y), magDataSet.getValues(DataSet.DIM_Y));
 
         magDataSet = new MathDataSet(null, dataSets -> {
             assertEquals(nBins, dataSets.getDataCount());
             return DataSetMath.magnitudeSpectrumDecibel(dataSets);
         }, rawDataSetRef);
-        assertArrayEquals(magDataSetRef.getYValues(), magDataSet.getYValues());
+        assertArrayEquals(magDataSetRef.getValues(DataSet.DIM_Y), magDataSet.getValues(DataSet.DIM_Y));
     }
 
     @Test
@@ -107,22 +107,22 @@ public class MathDataSetTests {
         MathDataSet identityDataSet = new MathDataSet("I", (input, output, length) -> {
             assertEquals(nBins, input.length);
             assertEquals(nBins, length);
-            assertArrayEquals(rawDataSetRef.getYValues(), input, "yValue input equality with source");
+            assertArrayEquals(rawDataSetRef.getValues(DataSet.DIM_Y), input, "yValue input equality with source");
 
             // identity function
             System.arraycopy(input, 0, output, 0, length);
         }, rawDataSetRef);
-        assertArrayEquals(rawDataSetRef.getYValues(), identityDataSet.getYValues());
+        assertArrayEquals(rawDataSetRef.getValues(DataSet.DIM_Y), identityDataSet.getValues(DataSet.DIM_Y));
 
         identityDataSet = new MathDataSet(null, (input, output, length) -> {
             assertEquals(nBins, input.length);
             assertEquals(nBins, length);
-            assertArrayEquals(rawDataSetRef.getYValues(), input, "yValue input equality with source");
+            assertArrayEquals(rawDataSetRef.getValues(DataSet.DIM_Y), input, "yValue input equality with source");
 
             // identity function
             System.arraycopy(input, 0, output, 0, length);
         }, rawDataSetRef);
-        assertArrayEquals(rawDataSetRef.getYValues(), identityDataSet.getYValues());
+        assertArrayEquals(rawDataSetRef.getValues(DataSet.DIM_Y), identityDataSet.getValues(DataSet.DIM_Y));
     }
 
     @Test
@@ -137,7 +137,7 @@ public class MathDataSetTests {
             // identity function
             System.arraycopy(input, 0, output, 0, length);
         }, -1, null, rawDataSetRef);
-        assertArrayEquals(rawDataSetRef.getYValues(), identityDataSet.getYValues());
+        assertArrayEquals(rawDataSetRef.getValues(DataSet.DIM_Y), identityDataSet.getValues(DataSet.DIM_Y));
         identityDataSet.addListener(evt -> counter2.incrementAndGet());
 
         // has been initialised once during construction

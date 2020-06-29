@@ -243,7 +243,7 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
     }
 
     @Override
-    public int getDataCount(final int dimIndex) {
+    public int getDataCount() {
         return Math.min(xValues.size(), yValues.size());
     }
 
@@ -378,7 +378,7 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
      * @return itself
      */
     public DoubleDataSet set(final double[] xValues, final double[] yValues, final boolean copy) {
-        return set(xValues, yValues, -1, true);
+        return set(xValues, yValues, -1, copy);
     }
 
     /**

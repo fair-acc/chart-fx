@@ -8,7 +8,7 @@ package de.gsi.dataset;
  * @deprecated No need to implement this anymore as the DataSet interface was generalized to multiple dimensions.
  */
 @Deprecated(since = "11.1.4", forRemoval = true)
-public interface DataSet3D extends DataSet2D {
+public interface DataSet3D extends GridDataSet {
     @Override
     default int getDimension() {
         return 3;
@@ -21,5 +21,7 @@ public interface DataSet3D extends DataSet2D {
      * @param yIndex index of Y coordinate
      * @return Z coordinate
      */
-    double getZ(int xIndex, int yIndex);
+    default double getZ(int xIndex, int yIndex) {
+        return this.get(DIM_Z, xIndex, yIndex);
+    }
 }

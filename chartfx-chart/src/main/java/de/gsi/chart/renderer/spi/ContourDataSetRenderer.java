@@ -23,7 +23,6 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.LinearGradient;
-import javafx.scene.paint.Paint;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.StrokeType;
 
@@ -39,18 +38,16 @@ import de.gsi.chart.plugins.Zoomer;
 import de.gsi.chart.renderer.Renderer;
 import de.gsi.chart.renderer.spi.hexagon.Hexagon;
 import de.gsi.chart.renderer.spi.hexagon.HexagonMap;
-import de.gsi.chart.renderer.spi.hexagon.HexagonMap.Direction;
 import de.gsi.chart.renderer.spi.marchingsquares.GeneralPath;
 import de.gsi.chart.renderer.spi.marchingsquares.MarchingSquares;
 import de.gsi.chart.renderer.spi.utils.ColorGradient;
 import de.gsi.chart.ui.geometry.Side;
 import de.gsi.dataset.DataSet;
-import de.gsi.dataset.DataSet3D;
+import de.gsi.dataset.GridDataSet;
 import de.gsi.dataset.utils.ProcessingProfiler;
 
 /**
  * Default renderer for the display of 3D surface-type DataSets.
- * 
  * The following drawing options controlled via {@link #setContourType(de.gsi.chart.renderer.ContourType)} are provided:
  * <ul>
  * <li>CONTOUR: marching-square based contour plotting algorithm, see e.g.
@@ -60,34 +57,26 @@ import de.gsi.dataset.utils.ProcessingProfiler;
  * <li>HEATMAP: an 2D orthogonal projection based plotting algorithm
  * <li>HEATMAP_HEXAGON: an 2D orthogonal hexagon-projection based plotting algorithm.
  * </ul>
- * 
  * Most of the internal processing algorithm are parallelised which can be controlled via
  * {@link #setParallelImplementation(boolean)}. A data reduction is performed in case the number of data points exceed
  * the the underlying number Canvas pixels number in order to improve efficiency and required texture GPU buffer. This
  * data reduction is controlled via {@link #setPointReduction(boolean)} and the reduction type (MIN, MAX, AVERAGE,
  * DOWN_SAMPLE) via {@link #setReductionType}, and the {@link #setReductionFactorX(int)} and
  * {@link #setReductionFactorY(int)} functions.
- * 
  * N.B. Regarding implementation of user-level DataSet interfaces: While the DataSet3D::getZ(int) and
  * DataSet::get(DIM_Z, int) routines should match, the DataSet3D is considered a convenience interface primarily to be
  * used for external user-level code.
- * 
  * This renderer primarily relies for performance reasons internally on the more generic DataSet::get(DIM_Z, int index)
  * interface. DataSet::get(DIM_Z, int index) is assumed to be a row-major ordered matrix with the (0, 0) coordinate (ie.
  * first index get(DIM_Z, 0)) being drawn at the bottom left corner of the canvas for non-inverted axes.
  *
  * @author rstein
  */
-public class ContourDataSetRenderer extends AbstractContourDataSetRendererParameter<ContourDataSetRenderer>
-        implements Renderer {
+public class ContourDataSetRenderer extends AbstractContourDataSetRendererParameter<ContourDataSetRenderer> implements Renderer {
     private static final Logger LOGGER = LoggerFactory.getLogger(ContourDataSetRenderer.class);
     private ContourDataSetCache localCache;
     private Axis zAxis;
     protected final Rectangle gradientRect = new Rectangle();
-
-    private int clamp(int value, int range) {
-        return Math.max(Math.min(value, range), 0);
-    }
 
     private void drawContour(final GraphicsContext gc, final ContourDataSetCache lCache) {
         final double[] levels = new double[getNumberQuantisationLevels()];
@@ -127,8 +116,7 @@ public class ContourDataSetRenderer extends AbstractContourDataSetRendererParame
                     levelCount++;
                     continue;
                 }
-                final Color color = lCache.zInverted ? colorGradient.getColor(1 - levels[levelCount++])
-                                                     : colorGradient.getColor(levels[levelCount++]);
+                final Color color = lCache.zInverted ? colorGradient.getColor(1 - levels[levelCount++]) : colorGradient.getColor(levels[levelCount++]);
                 gc.setStroke(color);
                 gc.setLineDashes(1.0);
                 gc.setMiterLimit(10);
@@ -145,8 +133,7 @@ public class ContourDataSetRenderer extends AbstractContourDataSetRendererParame
         }
     }
 
-    private void drawContourFast(final GraphicsContext gc, final AxisTransform axisTransform,
-            final ContourDataSetCache lCache) {
+    private void drawContourFast(final GraphicsContext gc, final AxisTransform axisTransform, final ContourDataSetCache lCache) {
         final long start = ProcessingProfiler.getTimeStamp();
         final int xSize = lCache.xSize;
         final int ySize = lCache.ySize;
@@ -227,61 +214,6 @@ public class ContourDataSetRenderer extends AbstractContourDataSetRendererParame
         ProcessingProfiler.getTimeDiff(start, "drawHeatMap");
     }
 
-    private void drawHeatMapOld(final GraphicsContext gc, final AxisTransform axisTransform,
-            final ContourDataSetCache lCache) {
-        if (!(lCache.dataSet instanceof DataSet3D)) {
-            if (LOGGER.isWarnEnabled()) {
-                LOGGER.atWarn().addArgument(lCache.dataSet).log("dataSet {} is not of type DataSet3D -> early return");
-            }
-            return;
-        }
-        final long start = ProcessingProfiler.getTimeStamp();
-
-        final int scaleX = isSmooth() ? 1 : Math.max((int) lCache.xAxisWidth / lCache.xSize, 1);
-        final int scaleY = isSmooth() ? 1 : Math.max((int) lCache.yAxisHeight / lCache.ySize, 1);
-
-        final double zMin = axisTransform.forward(lCache.zMin);
-        final double zMax = axisTransform.forward(lCache.zMax);
-        final int indexXMin = lCache.indexXMin;
-        final int indexXMax = lCache.indexXMax;
-        final int indexYMin = lCache.indexYMin;
-        final int indexYMax = lCache.indexYMax;
-        final DataSet3D dataSet = (DataSet3D) lCache.dataSet;
-        final int xSize = Math.abs(indexXMax - indexXMin) + 1;
-        final int ySize = Math.abs(indexYMax - indexYMin) + 1;
-
-        final int nQuant = getNumberQuantisationLevels();
-        final ColorGradient colorGradient = getColorGradient();
-        final WritableImage image = localCache.getImage(xSize * scaleX, ySize * scaleY);
-
-        final PixelWriter pixelWriter = image.getPixelWriter();
-        if (pixelWriter == null) {
-            if (LOGGER.isErrorEnabled()) {
-                LOGGER.atError().log("Could not get PixelWriter for image");
-            }
-            return;
-        }
-        for (int xIndex = 0; xIndex < xSize; xIndex++) {
-            for (int yIndex = 0; yIndex < ySize; yIndex++) {
-                final double z = dataSet.getZ(xIndex + indexXMin, yIndex + indexYMin);
-                final double offset = (axisTransform.forward(z) - zMin) / (zMax - zMin);
-                final Color color = lCache.zInverted ? colorGradient.getColor(quantize(1 - offset, nQuant))
-                                                     : colorGradient.getColor(quantize(offset, nQuant));
-
-                final int x = xIndex * scaleX;
-                final int y = (ySize - 1 - yIndex) * scaleY;
-                for (int dx = 0; dx < scaleX; dx++) {
-                    for (int dy = 0; dy < scaleY; dy++) {
-                        pixelWriter.setColor(x + dx, y + dy, color);
-                    }
-                }
-            }
-        }
-
-        gc.drawImage(image, lCache.xDataPixelMin, lCache.yDataPixelMin, lCache.xDataPixelRange, lCache.yDataPixelRange);
-        ProcessingProfiler.getTimeDiff(start, "drawHeatMap");
-    }
-
     private void drawHexagonHeatMap(final GraphicsContext gc, final ContourDataSetCache lCache) {
         final long start = ProcessingProfiler.getTimeStamp();
 
@@ -311,9 +243,6 @@ public class ContourDataSetRenderer extends AbstractContourDataSetRendererParame
 
         map2.render(gc.getCanvas());
         gc.restore();
-
-        // gc.drawImage(image, lCache.xDataPixelMin, lCache.yDataPixelMin, lCache.xDataPixelRange,
-        // lCache.yDataPixelRange);
 
         ProcessingProfiler.getTimeDiff(start, "drawHexagonMap");
     }
@@ -351,125 +280,9 @@ public class ContourDataSetRenderer extends AbstractContourDataSetRendererParame
         ProcessingProfiler.getTimeDiff(start, "drawHexagonMapContour");
     }
 
-    private void drawHexagonMapContourAlt(final GraphicsContext gc, final AxisTransform axisTransform,
-            final ContourDataSetCache lCache) {
-        if (!(lCache.dataSet instanceof DataSet3D)) {
-            if (LOGGER.isWarnEnabled()) {
-                LOGGER.atWarn().addArgument(lCache.dataSet).log("dataSet {} is not of type DataSet3D -> early return");
-            }
-            return;
-        }
-        final long start = ProcessingProfiler.getTimeStamp();
-
-        final double zMin = axisTransform.forward(lCache.zMin);
-        final double zMax = axisTransform.forward(lCache.zMax);
-        final int indexXMin = lCache.indexXMin;
-        final int indexXMax = lCache.indexXMax;
-        final int indexYMin = lCache.indexYMin;
-        final int indexYMax = lCache.indexYMax;
-        final DataSet3D dataSet = (DataSet3D) lCache.dataSet;
-        final int xSize = Math.abs(indexXMax - indexXMin) + 1;
-        final int ySize = Math.abs(indexYMax - indexYMin) + 1;
-
-        final int nQuant = getNumberQuantisationLevels();
-
-        final double imageWidth = lCache.xAxisWidth;
-        final double imageHeight = lCache.yAxisHeight;
-        final int tileSize = Math.max(getMinHexTileSizeProperty(), (int) lCache.xAxisWidth / lCache.xSize);
-
-        final HexagonMap map = new HexagonMap(tileSize);
-
-        final double w = map.getGraphicsHorizontalDistanceBetweenHexagons();
-        final double h = map.getGraphicsverticalDistanceBetweenHexagons();
-        final int mapWidth = (int) (lCache.xAxisWidth / w) + 1;
-        final double hexagonMapWidthInPixels = map.getGraphicsHorizontalDistanceBetweenHexagons() * mapWidth;
-
-        final double horizontalRelation = imageWidth / hexagonMapWidthInPixels;
-        final double estimatedHexMapHeightInPixels = imageHeight / horizontalRelation;
-
-        final int mapHeight = (int) (estimatedHexMapHeightInPixels / map.getGraphicsverticalDistanceBetweenHexagons())
-                              + 1;
-        final ColorGradient colorGradient = getColorGradient();
-        for (int x = 0; x < mapWidth; x++) {
-            for (int y = 0; y < mapHeight; y++) {
-                final int axialQ = x - (y - (y & 1)) / 2;
-                final int axialR = y;
-                final Hexagon hex = new Hexagon(axialQ, axialR);
-                map.addHexagon(hex);
-
-                final int xMin = (int) ((hex.getGraphicsXoffset() - map.getPaddingX() - w / 2) / imageWidth * xSize);
-                final int xMax = (int) ((hex.getGraphicsXoffset() - map.getPaddingX() + w / 2) / imageWidth * xSize);
-                final int yMin = (int) ((hex.getGraphicsYoffset() - map.getPaddingY() - h / 2) / imageHeight * ySize);
-                final int yMax = (int) ((hex.getGraphicsYoffset() - map.getPaddingY() + h / 2) / imageHeight * ySize);
-
-                int count = 0;
-                double z = 0;
-                // integrate over pixels covered by hexagon (ie. square
-                // approximation)
-                for (int i = xMin; i < xMax; i++) {
-                    for (int j = yMin; j < yMax; j++) {
-                        z += dataSet.getZ(indexXMin + clamp(i, xSize - 1), indexYMax - clamp(j, ySize - 1));
-                        count++;
-                    }
-                }
-                if (count > 0) {
-                    z /= count;
-                }
-
-                final double offset = (axisTransform.forward(z) - zMin) / (zMax - zMin);
-                final double quant = lCache.zInverted ? ContourDataSetRenderer.quantize(1 - offset, nQuant)
-                                                      : ContourDataSetRenderer.quantize(offset, nQuant);
-                final Color color = colorGradient.getColor(quant);
-
-                hex.setStroke(color);
-                hex.setFill(Color.TRANSPARENT);
-                hex.setUserData(quant);
-            }
-        }
-
-        ProcessingProfiler.getTimeDiff(start, "drawHexagonMapContour - prepare");
-
-        final double scaleX = lCache.xDataPixelRange / lCache.xAxisWidth;
-        final double scaleY = lCache.yDataPixelRange / lCache.yAxisHeight;
-        gc.save();
-        gc.translate(lCache.xDataPixelMin, lCache.yDataPixelMin);
-        gc.scale(scaleX, scaleY);
-
-        // draw contour
-        for (final Hexagon hexagon : map.getAllHexagons()) {
-            // draw hexagon contour according to Node specifications
-            gc.save();
-            final Paint stroke = hexagon.getStroke();
-            gc.setStroke(stroke);
-            gc.setLineWidth(hexagon.getStrokeWidth());
-            gc.setFill(hexagon.getFill());
-            final double z = (Double) hexagon.getUserData();
-            final List<Direction> list = new ArrayList<>();
-            for (final Direction direction : Direction.values()) {
-                final Hexagon neighbour = hexagon.getNeighbour(direction);
-                if (neighbour == null) {
-                    continue;
-                }
-                final double neighbourZ = (Double) neighbour.getUserData();
-
-                if (stroke != null && z > neighbourZ) {
-                    list.add(direction);
-                }
-            }
-
-            hexagon.drawHexagon(gc, list.toArray(new Direction[0]));
-
-            gc.restore();
-        }
-        gc.restore();
-
-        ProcessingProfiler.getTimeDiff(start, "drawHexagonMapContour");
-    }
-
     @Override
     public Canvas drawLegendSymbol(DataSet dataSet, int dsIndex, int width, int height) {
-        // TODO: implement
-        return null;
+        return null; // TODO: implement
     }
 
     /**
@@ -501,17 +314,17 @@ public class ContourDataSetRenderer extends AbstractContourDataSetRendererParame
         return zAxis;
     }
 
-    protected void layoutZAxis(final Axis zAxis) {
-        if (zAxis.getSide() == null || !(zAxis instanceof Node)) {
+    protected void layoutZAxis(final Axis localZAxis) {
+        if (localZAxis.getSide() == null || !(localZAxis instanceof Node)) {
             return;
         }
-        Node zAxisNode = (Node) zAxis;
+        Node zAxisNode = (Node) localZAxis;
         zAxisNode.getProperties().put(Zoomer.ZOOMER_OMIT_AXIS, Boolean.TRUE);
 
-        if (zAxis.getSide().isHorizontal()) {
+        if (localZAxis.getSide().isHorizontal()) {
             zAxisNode.setLayoutX(50);
             gradientRect.setX(0);
-            gradientRect.setWidth(zAxis.getWidth());
+            gradientRect.setWidth(localZAxis.getWidth());
             gradientRect.setHeight(20);
             zAxisNode.setLayoutX(0);
             gradientRect.setFill(new LinearGradient(0, 0, 1, 0, true, NO_CYCLE, getColorGradient().getStops()));
@@ -526,7 +339,7 @@ public class ContourDataSetRenderer extends AbstractContourDataSetRendererParame
         } else {
             zAxisNode.setLayoutY(50);
             gradientRect.setWidth(20);
-            gradientRect.setHeight(zAxis.getHeight());
+            gradientRect.setHeight(localZAxis.getHeight());
             gradientRect.setFill(new LinearGradient(0, 1, 0, 0, true, NO_CYCLE, getColorGradient().getStops()));
             gradientRect.setLayoutX(10);
 
@@ -539,7 +352,7 @@ public class ContourDataSetRenderer extends AbstractContourDataSetRendererParame
             }
         }
 
-        if (zAxis instanceof Region) {
+        if (localZAxis instanceof Region) {
             ((Region) zAxisNode).requestLayout();
         }
     }
@@ -549,11 +362,11 @@ public class ContourDataSetRenderer extends AbstractContourDataSetRendererParame
             return;
         }
 
-        final Axis zAxis = getZAxis();
-        if (zAxis == null) {
+        final Axis localZAxis = getZAxis();
+        if (localZAxis == null) {
             return;
         }
-        final AxisTransform axisTransform = zAxis.getAxisTransform();
+        final AxisTransform axisTransform = localZAxis.getAxisTransform();
         if (axisTransform == null) {
             return;
         }
@@ -565,22 +378,14 @@ public class ContourDataSetRenderer extends AbstractContourDataSetRendererParame
             drawContourFast(gc, axisTransform, localCache);
             break;
         case CONTOUR_HEXAGON:
-            if (isAltImplementation()) {
-                drawHexagonMapContourAlt(gc, axisTransform, localCache);
-            } else {
-                drawHexagonMapContour(gc, localCache);
-            }
+            drawHexagonMapContour(gc, localCache);
             break;
         case HEATMAP_HEXAGON:
             drawHexagonHeatMap(gc, localCache);
             break;
         case HEATMAP:
         default:
-            if (isAltImplementation()) {
-                drawHeatMapOld(gc, axisTransform, localCache);
-            } else {
-                drawHeatMap(gc, localCache);
-            }
+            drawHeatMap(gc, localCache);
             break;
         }
     }
@@ -590,8 +395,7 @@ public class ContourDataSetRenderer extends AbstractContourDataSetRendererParame
             final ObservableList<DataSet> datasets) {
         final long start = ProcessingProfiler.getTimeStamp();
         if (!(chart instanceof XYChart)) {
-            throw new InvalidParameterException(
-                    "must be derivative of XYChart for renderer - " + this.getClass().getSimpleName());
+            throw new InvalidParameterException("must be derivative of XYChart for renderer - " + this.getClass().getSimpleName());
         }
 
         // make local copy and add renderer specific data sets
@@ -612,23 +416,19 @@ public class ContourDataSetRenderer extends AbstractContourDataSetRendererParame
         List<DataSet> drawnDataSet = new ArrayList<>(localDataSetList.size());
         for (int dataSetIndex = localDataSetList.size() - 1; dataSetIndex >= 0; dataSetIndex--) {
             final DataSet dataSet = localDataSetList.get(dataSetIndex);
-            if (dataSet.getDimension() <= 2) {
+            if (!(dataSet instanceof GridDataSet) || dataSet.getDimension() <= 2) {
                 // minimum dimension criteria not met
-                continue;
-            }
-            if (dataSet.getDataCount(DataSet.DIM_Z) != dataSet.getDataCount(DIM_X) * dataSet.getDataCount(DIM_Y)) {
-                // dataSet does not have grid Topology
                 continue;
             }
 
             final boolean result = dataSet.lock().readLockGuard(() -> {
                 long stop = ProcessingProfiler.getTimeDiff(mid, "dataSet.lock()");
 
-                if (dataSet.getDataCount(DIM_X) == 0 || dataSet.getDataCount(DIM_Y) == 0) {
+                if (dataSet.getDataCount() == 0) {
                     return false;
                 }
 
-                localCache = new ContourDataSetCache(xyChart, this, dataSet); // NOPMD
+                localCache = new ContourDataSetCache(xyChart, this, (GridDataSet) dataSet); // NOPMD
                 ProcessingProfiler.getTimeDiff(stop, "updateCachedVariables");
                 return true;
             });
@@ -665,10 +465,10 @@ public class ContourDataSetRenderer extends AbstractContourDataSetRendererParame
     }
 
     public static double convolution(final double[][] pixelMatrix) {
-        final double gy = pixelMatrix[0][0] * -1 + pixelMatrix[0][1] * -2 + pixelMatrix[0][2] * -1 + pixelMatrix[2][0]
-                          + pixelMatrix[2][1] * 2 + pixelMatrix[2][2] * 1;
-        final double gx = pixelMatrix[0][0] + pixelMatrix[0][2] * -1 + pixelMatrix[1][0] * 2 + pixelMatrix[1][2] * -2
-                          + pixelMatrix[2][0] + pixelMatrix[2][2] * -1;
+        final double gy = pixelMatrix[0][0] * -1 + pixelMatrix[0][1] * -2 + pixelMatrix[0][2] * -1 + pixelMatrix[2][0] + pixelMatrix[2][1] * 2
+                          + pixelMatrix[2][2] * 1;
+        final double gx = pixelMatrix[0][0] + pixelMatrix[0][2] * -1 + pixelMatrix[1][0] * 2 + pixelMatrix[1][2] * -2 + pixelMatrix[2][0]
+                          + pixelMatrix[2][2] * -1;
         return Math.sqrt(Math.pow(gy, 2) + Math.pow(gx, 2));
     }
 
@@ -686,8 +486,7 @@ public class ContourDataSetRenderer extends AbstractContourDataSetRendererParame
         return sum;
     }
 
-    private static void erosionOperator(final double[][] input, final double[][] output, final double zMin,
-            final double zMax, final double level) {
+    private static void erosionOperator(final double[][] input, final double[][] output, final double zMin, final double zMax, final double level) {
         final int width = input.length;
         final int height = input[0].length;
         final double[][] gX = new double[width][height];
@@ -710,8 +509,6 @@ public class ContourDataSetRenderer extends AbstractContourDataSetRendererParame
 
                     final double zNorm = ContourDataSetRenderer.erosionConvolution(pixelMatrix);
                     output[i][j] = zNorm > 4 ? 1.0 : 0.0;
-
-                    // output[i][j] = zNorm;
                 }
             }
         }
@@ -722,8 +519,7 @@ public class ContourDataSetRenderer extends AbstractContourDataSetRendererParame
         // original: return Math.round(value * nLevels) / (double) nLevels;
     }
 
-    private static void sobelOperator(final double[][] input, final double[][] output, final double zMin,
-            final double zMax, final double level) {
+    private static void sobelOperator(final double[][] input, final double[][] output, final double zMin, final double zMax, final double level) {
         final int width = input.length;
         final int height = input[0].length;
         final double[][] gX = new double[width][height];
@@ -735,21 +531,14 @@ public class ContourDataSetRenderer extends AbstractContourDataSetRendererParame
                 if (i == 0 || i == width - 1 || j == 0 || j == height - 1) {
                     gX[i][j] = gY[i][j] = output[i][j] = 0;
                 } else {
-                    // Gx[i][j] = input[i + 1][j - 1] + 2 * input[i + 1][j] +
-                    // input[i + 1][j + 1];
-                    // Gx[i][j] -= input[i - 1][j - 1] + 2 * input[i - 1][j] +
-                    // input[i - 1][j + 1];
-                    // Gy[i][j] = input[i - 1][j + 1] + 2 * input[i][j + 1] +
-                    // input[i + 1][j + 1];
-                    // Gy[i][j] -= input[i - 1][j - 1] + 2 * input[i][j - 1] +
-                    // input[i + 1][j - 1];
-
                     // Roberts Cross
-                    gX[i][j] = -1.0 * input[i][j - 1] - 0.0 * input[i][j] + 0.0 * input[i][j + 1];
-                    gX[i][j] += 0.0 * input[i][j - 1] + 1.0 * input[i][j] + 0.0 * input[i + 1][j + 1];
-
-                    gY[i][j] = 0.0 * input[i][j - 1] - 1.0 * input[i][j] + 0.0 * input[i][j + 1];
-                    gY[i][j] += 1.0 * input[i][j - 1] - 0.0 * input[i][j] + 0.0 * input[i + 1][j + 1];
+                    // gX[i][j] = -1.0 * input[i][j - 1] - 0.0 * input[i][j] + 0.0 * input[i][j + 1];
+                    // gX[i][j] += 0.0 * input[i][j - 1] + 1.0 * input[i][j] + 0.0 * input[i + 1][j + 1];
+                    //
+                    // gY[i][j] = 0.0 * input[i][j - 1] - 1.0 * input[i][j] + 0.0 * input[i][j + 1];
+                    // gY[i][j] += 1.0 * input[i][j - 1] - 0.0 * input[i][j] + 0.0 * input[i + 1][j + 1];
+                    //
+                    // double zNorm = Math.abs(gX[i][j]) + Math.abs(gY[i][j]);
 
                     pixelMatrix[0][0] = input[i - 1][j - 1] > level ? 1.0 : 0.0;
                     pixelMatrix[0][1] = input[i - 1][j] > level ? 1.0 : 0.0;
@@ -761,8 +550,6 @@ public class ContourDataSetRenderer extends AbstractContourDataSetRendererParame
                     pixelMatrix[2][2] = input[i + 1][j + 1] > level ? 1.0 : 0.0;
 
                     output[i][j] = ContourDataSetRenderer.convolution(pixelMatrix); // > level ? 1.0 : 0.0;
-
-                    // output[i][j] = zNorm;
                 }
             }
         }

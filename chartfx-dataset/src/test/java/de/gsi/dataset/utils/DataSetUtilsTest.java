@@ -89,18 +89,17 @@ public class DataSetUtilsTest {
         DataSet dataSetRead = DataSetUtils.readDataSetFromByteArray(byteBuffer.toByteArray());
         // assert that DataSet was written and read correctly
         assertEquals(dataSet, dataSetRead);
+        assertEquals(dataSet.getDataCount(), dataSetRead.getDataCount());
         assertTrue(dataSetRead instanceof DoubleErrorDataSet);
         for (int dim = 0; dim < dataSet.getDimension(); dim++) {
             final String msg = "Dimension#" + dim;
-            assertEquals(dataSet.getDataCount(dim), dataSetRead.getDataCount(dim), msg);
             assertEquals(dataSet.getName(), dataSetRead.getName(), msg);
-            int dataCount = dataSet.getDataCount(dim);
+            int dataCount = dataSet.getDataCount();
             assertArrayEquals( //
                     Arrays.copyOfRange(dataSet.getValues(dim), 0, dataCount), //
                     Arrays.copyOfRange(dataSetRead.getValues(dim), 0, dataCount), //
                     EPSILON, msg);
-            if (dataSet instanceof DataSetError
-                    && ((DataSetError) dataSet).getErrorType(dim) != de.gsi.dataset.DataSetError.ErrorType.NO_ERROR) {
+            if (dataSet instanceof DataSetError && ((DataSetError) dataSet).getErrorType(dim) != de.gsi.dataset.DataSetError.ErrorType.NO_ERROR) {
                 assertArrayEquals( //
                         Arrays.copyOfRange(((DataSetError) dataSet).getErrorsPositive(dim), 0, dataCount), //
                         Arrays.copyOfRange(((DataSetError) dataSetRead).getErrorsPositive(dim), 0, dataCount), //
@@ -151,11 +150,11 @@ public class DataSetUtilsTest {
         DataSet dataSetRead = DataSetUtils.readDataSetFromFile(tmpdir.toAbsolutePath().toString() + '/' + filename);
         // assert that DataSet was written and read correctly
         assertTrue(dataSetRead instanceof DoubleErrorDataSet);
+        assertEquals(dataSet.getDataCount(), dataSetRead.getDataCount());
         for (int dim = 0; dim < dataSet.getDimension(); dim++) {
             final String msg = "Dimension#" + dim;
-            assertEquals(dataSet.getDataCount(dim), dataSetRead.getDataCount(dim), msg);
             assertEquals(dataSet.getName(), dataSetRead.getName(), msg);
-            int dataCount = dataSet.getDataCount(dim);
+            int dataCount = dataSet.getDataCount();
             assertArrayEquals( //
                     Arrays.copyOfRange(dataSet.getValues(dim), 0, dataCount), //
                     Arrays.copyOfRange(dataSetRead.getValues(dim), 0, dataCount), //
@@ -175,12 +174,9 @@ public class DataSetUtilsTest {
         assertThrows(IllegalArgumentException.class, () -> DataSetUtils.readDataSetFromByteArray(null));
         assertThrows(IllegalArgumentException.class, () -> DataSetUtils.readDataSetFromByteArray(new byte[0]));
         assertThrows(IllegalArgumentException.class, () -> DataSetUtils.writeDataSetToFile(null, null, null));
-        assertThrows(IllegalArgumentException.class,
-                () -> DataSetUtils.writeDataSetToFile(new DefaultDataSet("test"), null, null));
-        assertThrows(IllegalArgumentException.class,
-                () -> DataSetUtils.writeDataSetToFile(new DefaultDataSet("test"), Path.of("/tmp"), ""));
-        assertThrows(IllegalArgumentException.class,
-                () -> DataSetUtils.writeDataSetToFile(new DefaultDataSet("test"), Path.of("/tmp"), null));
+        assertThrows(IllegalArgumentException.class, () -> DataSetUtils.writeDataSetToFile(new DefaultDataSet("test"), null, null));
+        assertThrows(IllegalArgumentException.class, () -> DataSetUtils.writeDataSetToFile(new DefaultDataSet("test"), Path.of("/tmp"), ""));
+        assertThrows(IllegalArgumentException.class, () -> DataSetUtils.writeDataSetToFile(new DefaultDataSet("test"), Path.of("/tmp"), null));
     }
 
     @Test
@@ -203,8 +199,7 @@ public class DataSetUtilsTest {
     @Test
     public void testSplitCharByteInputStream() throws IOException {
         final byte[] byteArray = new byte[] { 'a', 'b', 'c', SplitCharByteInputStream.MARKER, 120, 96 };
-        SplitCharByteInputStream scbiStream = new SplitCharByteInputStream(
-                new PushbackInputStream(new ByteArrayInputStream(byteArray)));
+        SplitCharByteInputStream scbiStream = new SplitCharByteInputStream(new PushbackInputStream(new ByteArrayInputStream(byteArray)));
         // single byte method
         assertEquals(false, scbiStream.reachedSplit());
         assertEquals('a', scbiStream.read());
@@ -260,8 +255,8 @@ public class DataSetUtilsTest {
         final DataSet dataSet = new DataSetBuilder("dsName") //
                                         .setValuesNoCopy(DIM_X, new double[] { 1, 2, 3 }) //
                                         .setValuesNoCopy(DIM_Y, new double[] { 9, 7, 8 }) //
-                                        .setMetaInfoMap(Map.of("metaInt", "1337", "metaString", "testMetaInfo", "metaDouble", "1.337",
-                                                "metaEng", "1.33e-7", "acqStamp", Long.toString(acqStamp)))
+                                        .setMetaInfoMap(Map.of("metaInt", "1337", "metaString", "testMetaInfo", "metaDouble", "1.337", "metaEng", "1.33e-7", "acqStamp",
+                                                Long.toString(acqStamp)))
                                         .build();
         assertEquals("file.bin.gz", DataSetUtils.getFileName(dataSet, "file.bin.gz"));
         assertEquals("file_metaDataFieldMissing.bin.gz", DataSetUtils.getFileName(dataSet, "file_{}.bin.gz"));
@@ -284,12 +279,9 @@ public class DataSetUtilsTest {
         assertEquals("1.3", DataSetUtils.getFileName(dataSet, "{metaDouble;float;%.1f}"));
         assertEquals(0.000000133, Double.parseDouble(DataSetUtils.getFileName(dataSet, "{metaEng;float}")));
         assertEquals(acqStamp, Long.parseLong(DataSetUtils.getFileName(dataSet, "{acqStamp}")));
-        assertEquals(DataSetUtils.getISODate(acqStamp, "yyyyMMdd_HHmmss"),
-                DataSetUtils.getFileName(dataSet, "{acqStamp;date}"));
-        assertEquals(DataSetUtils.getISODate(acqStamp, "mmss"),
-                DataSetUtils.getFileName(dataSet, "{acqStamp;date;mmss}"));
-        assertThrows(IllegalArgumentException.class,
-                () -> DataSetUtils.getFileName(dataSet, "{metaInt;nonexistentType}"));
+        assertEquals(DataSetUtils.getISODate(acqStamp, "yyyyMMdd_HHmmss"), DataSetUtils.getFileName(dataSet, "{acqStamp;date}"));
+        assertEquals(DataSetUtils.getISODate(acqStamp, "mmss"), DataSetUtils.getFileName(dataSet, "{acqStamp;date;mmss}"));
+        assertThrows(IllegalArgumentException.class, () -> DataSetUtils.getFileName(dataSet, "{metaInt;nonexistentType}"));
     }
 
     @BeforeAll

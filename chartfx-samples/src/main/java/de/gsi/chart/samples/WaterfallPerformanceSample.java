@@ -255,11 +255,11 @@ public class WaterfallPerformanceSample extends Application {
         final Label dataSetDimension = new Label();
 
         dataSetDimension.setText(
-                dataSet.getDataCount(DataSet.DIM_X) + " x " + dataSet.getDataCount(DataSet.DIM_Y) + " data points");
+                dataSet.getShape(DataSet.DIM_X) + " x " + dataSet.getShape(DataSet.DIM_Y) + " data points");
 
         dataSet.addListener(evt -> {
-            final int dimX = dataSet.getDataCount(DataSet.DIM_X);
-            final int dimY = dataSet.getDataCount(DataSet.DIM_Y);
+            final int dimX = dataSet.getShape(DataSet.DIM_X);
+            final int dimY = dataSet.getShape(DataSet.DIM_Y);
             Platform.runLater(() -> {
                 dataSetDimension.setText(dimX + " x " + dimY + " data points");
                 canvasDimension.setText(
@@ -283,7 +283,7 @@ public class WaterfallPerformanceSample extends Application {
         return dataSetToolBar;
     }
 
-    private ToolBar getTestToolBar(final Scene scene) {
+    private ToolBar getTestToolBar() {
         ToolBar testVariableToolBar = new ToolBar();
         final Button fillDataSet = new Button("fill");
         fillDataSet.setTooltip(new Tooltip("update data set with demo data"));
@@ -323,7 +323,7 @@ public class WaterfallPerformanceSample extends Application {
         primaryStage.show();
         primaryStage.setOnCloseRequest(this::closeDemo);
 
-        ToolBar testVariableToolBar = getTestToolBar(scene);
+        ToolBar testVariableToolBar = getTestToolBar();
 
         final XYChart chart = getChartPane(ContourType.HEATMAP);
         VBox.setVgrow(chart, Priority.SOMETIMES);

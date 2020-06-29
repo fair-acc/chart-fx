@@ -14,9 +14,9 @@ import org.jtransforms.fft.DoubleFFT_1D;
 
 import de.gsi.dataset.AxisDescription;
 import de.gsi.dataset.DataSet;
-import de.gsi.dataset.DataSet2D;
 import de.gsi.dataset.DataSetError;
 import de.gsi.dataset.EditableDataSet;
+import de.gsi.dataset.GridDataSet;
 import de.gsi.dataset.spi.DoubleDataSet;
 import de.gsi.dataset.spi.DoubleErrorDataSet;
 import de.gsi.dataset.spi.utils.DoublePointError;
@@ -35,7 +35,6 @@ public final class DataSetMath { // NOPMD - nomen est omen
     private static final char DIFFERENTIAL_SYMBOL = 0x2202;
     private static final char MULTIPLICATION_SYMBOL = 0x00B7;
     private static final String DIFFERENTIAL = DIFFERENTIAL_SYMBOL + "/" + DIFFERENTIAL_SYMBOL + "x";
-    private static final TRandom random = new TRandom(System.currentTimeMillis());
 
     /**
      *
@@ -58,7 +57,7 @@ public final class DataSetMath { // NOPMD - nomen est omen
 
         for (int i = 0; i < nLength; i++) {
             final double x = function.get(DIM_X, i);
-            final double y = function.get(DIM_Y, i) + random.Gaus(0, sigma);
+            final double y = function.get(DIM_Y, i) + TRandom.Gaus(0, sigma);
             ret.add(x, y, sigma, sigma);
         }
 
@@ -74,12 +73,12 @@ public final class DataSetMath { // NOPMD - nomen est omen
         if (dataSets.size() <= 1) {
             final DataSet newFunction = dataSets.get(0);
             if (newFunction instanceof DataSetError) {
-                return new DoubleErrorDataSet(functionName, values(DIM_X, newFunction), values(DIM_Y, newFunction),
+                return new DoubleErrorDataSet(functionName, newFunction.getValues(DIM_X), newFunction.getValues(DIM_Y),
                         errors(newFunction, EYN), errors(newFunction, EYP), newFunction.getDataCount(), true);
             }
 
             final int ncount = newFunction.getDataCount();
-            return new DoubleErrorDataSet(functionName, values(DIM_X, newFunction), values(DIM_Y, newFunction),
+            return new DoubleErrorDataSet(functionName, newFunction.getValues(DIM_X), newFunction.getValues(DIM_Y),
                     new double[ncount], new double[ncount], ncount, true);
         }
 
@@ -132,25 +131,25 @@ public final class DataSetMath { // NOPMD - nomen est omen
         final String functionName = "LP(" + newDataSet.getName() + ", IIR)";
         if (prevAverage == null || prevAverage2 == null || prevAverage.getDataCount() == 0
                 || prevAverage2.getDataCount() == 0) {
-            final double[] yValues = values(DIM_Y, newDataSet);
+            final double[] yValues = newDataSet.getValues(DIM_Y);
             final double[] eyn = errors(newDataSet, EYN);
             final double[] eyp = errors(newDataSet, EYP);
             if (prevAverage2 instanceof DoubleErrorDataSet) {
-                ((DoubleErrorDataSet) prevAverage2).set(values(DIM_X, newDataSet), ArrayMath.sqr(yValues), ArrayMath.sqr(eyn), ArrayMath.sqr(eyp));
+                ((DoubleErrorDataSet) prevAverage2).set(newDataSet.getValues(DIM_X), ArrayMath.sqr(yValues), ArrayMath.sqr(eyn), ArrayMath.sqr(eyp));
             } else if (prevAverage2 instanceof DoubleDataSet) {
-                ((DoubleDataSet) prevAverage2).set(values(DIM_X, newDataSet), ArrayMath.sqr(yValues));
+                ((DoubleDataSet) prevAverage2).set(newDataSet.getValues(DIM_X), ArrayMath.sqr(yValues));
             }
 
-            return new DoubleErrorDataSet(functionName, values(DIM_X, newDataSet), yValues, eyn, eyp,
+            return new DoubleErrorDataSet(functionName, newDataSet.getValues(DIM_X), yValues, eyn, eyp,
                     newDataSet.getDataCount(), true);
         }
         final int dataCount1 = prevAverage.getDataCount();
         final int dataCount2 = prevAverage2.getDataCount();
 
         final DoubleErrorDataSet retFunction = dataCount1 == 0
-                                                       ? new DoubleErrorDataSet(functionName, values(DIM_X, newDataSet), values(DIM_Y, newDataSet),
+                                                       ? new DoubleErrorDataSet(functionName, newDataSet.getValues(DIM_X), newDataSet.getValues(DIM_Y),
                                                                errors(newDataSet, EYN), errors(newDataSet, EYP), newDataSet.getDataCount(), true)
-                                                       : new DoubleErrorDataSet(prevAverage.getName(), values(DIM_X, prevAverage), values(DIM_Y, prevAverage),
+                                                       : new DoubleErrorDataSet(prevAverage.getName(), prevAverage.getValues(DIM_X), prevAverage.getValues(DIM_Y),
                                                                errors(prevAverage, EYN), errors(prevAverage, EYP), newDataSet.getDataCount(), true);
 
         final double alpha = 1.0 / (1.0 + nUpdates);
@@ -386,8 +385,8 @@ public final class DataSetMath { // NOPMD - nomen est omen
         final double[] subArrayYn = new double[n];
         final double[] subArrayYp = new double[n];
 
-        final double[] xValues = values(DIM_X, function);
-        final double[] yValues = values(DIM_Y, function);
+        final double[] xValues = function.getValues(DIM_X);
+        final double[] yValues = function.getValues(DIM_Y);
         final double[] yen = errors(function, EYN);
         final double[] yep = errors(function, EYN);
 
@@ -470,11 +469,11 @@ public final class DataSetMath { // NOPMD - nomen est omen
         final DoubleErrorDataSet filteredFunction = new DoubleErrorDataSet(
                 "iir" + Filter.MEAN.getTag() + "(" + function.getName() + "," + Double.toString(width) + ")", n);
         if (n <= 1) {
-            if (function instanceof DataSet2D) {
-                filteredFunction.set((DataSet2D) function);
+            if (!(function instanceof GridDataSet)) {
+                filteredFunction.set(function);
                 return filteredFunction;
             }
-            filteredFunction.set(values(DIM_X, function), values(DIM_Y, function), errors(function, EYN),
+            filteredFunction.set(function.getValues(DIM_X), function.getValues(DIM_Y), errors(function, EYN),
                     errors(function, EYP));
             for (int index = 0; index < function.getDataCount(); index++) {
                 final String label = function.getDataLabel(index);
@@ -491,8 +490,8 @@ public final class DataSetMath { // NOPMD - nomen est omen
             filteredFunction.setStyle(function.getStyle());
             return filteredFunction;
         }
-        final double[] xValues = values(DIM_X, function);
-        final double[] yValues = values(DIM_Y, function);
+        final double[] xValues = function.getValues(DIM_X);
+        final double[] yValues = function.getValues(DIM_Y);
         final double[] yen = errors(function, EYN);
         final double[] yep = errors(function, EYN);
 
@@ -611,13 +610,13 @@ public final class DataSetMath { // NOPMD - nomen est omen
         final String functionName = function.getName();
         String newName = INTEGRAL_SYMBOL + "(" + functionName + ")dyn";
         if (nLength <= 0) {
-            if (function instanceof DataSet2D) {
+            if (!(function instanceof GridDataSet) || function.getDimension() > 2) {
                 final int ncount = function.getDataCount();
                 final double[] emptyVector = new double[ncount];
-                return new DoubleErrorDataSet(functionName, values(DIM_X, function), emptyVector, emptyVector,
+                return new DoubleErrorDataSet(functionName, function.getValues(DIM_X), emptyVector, emptyVector,
                         emptyVector, ncount, true);
             }
-            throw new IllegalStateException("not yet implemented -- not a DataSet2D");
+            throw new IllegalStateException("not yet implemented for non 2D dataSets");
         }
 
         if (!function.getAxisDescription(DIM_X).isDefined()) {
@@ -905,62 +904,62 @@ public final class DataSetMath { // NOPMD - nomen est omen
 
     public static DataSet mathFunction(final DataSet function, final double value, final MathOp op) {
         final String functionName = op.getTag() + "(" + function.getName() + ")";
-        final double[] y = values(DIM_Y, function);
+        final double[] y = function.getValues(DIM_Y);
         final double[] eyn = Arrays.copyOf(errors(function, EYN), y.length);
         final double[] eyp = Arrays.copyOf(errors(function, EYP), y.length);
 
         final int ncount = function.getDataCount();
         switch (op) {
         case ADD:
-            return new DoubleErrorDataSet(functionName, values(DIM_X, function), ArrayMath.add(y, value), eyn, eyp,
+            return new DoubleErrorDataSet(functionName, function.getValues(DIM_X), ArrayMath.add(y, value), eyn, eyp,
                     ncount, true);
         case SUBTRACT:
-            return new DoubleErrorDataSet(functionName, values(DIM_X, function), ArrayMath.subtract(y, value), eyn, eyp,
+            return new DoubleErrorDataSet(functionName, function.getValues(DIM_X), ArrayMath.subtract(y, value), eyn, eyp,
                     ncount, true);
         case MULTIPLY:
-            return new DoubleErrorDataSet(functionName, values(DIM_X, function), ArrayMath.multiply(y, value),
+            return new DoubleErrorDataSet(functionName, function.getValues(DIM_X), ArrayMath.multiply(y, value),
                     ArrayMath.multiply(eyn, value), ArrayMath.multiply(eyp, value), ncount, true);
         case DIVIDE:
-            return new DoubleErrorDataSet(functionName, values(DIM_X, function), ArrayMath.divide(y, value),
+            return new DoubleErrorDataSet(functionName, function.getValues(DIM_X), ArrayMath.divide(y, value),
                     ArrayMath.divide(eyn, value), ArrayMath.divide(eyp, value), ncount, true);
         case SQR:
             for (int i = 0; i < eyn.length; i++) {
                 eyn[i] = 2 * Math.abs(y[i]) * eyn[i];
                 eyp[i] = 2 * Math.abs(y[i]) * eyp[i];
             }
-            return new DoubleErrorDataSet(functionName, values(DIM_X, function), ArrayMath.sqr(y), eyn, eyp, ncount,
+            return new DoubleErrorDataSet(functionName, function.getValues(DIM_X), ArrayMath.sqr(y), eyn, eyp, ncount,
                     true);
         case SQRT:
             for (int i = 0; i < eyn.length; i++) {
                 eyn[i] = Math.sqrt(Math.abs(y[i])) * eyn[i];
                 eyp[i] = Math.sqrt(Math.abs(y[i])) * eyp[i];
             }
-            return new DoubleErrorDataSet(functionName, values(DIM_X, function), ArrayMath.sqrt(y), eyn, eyp, ncount,
+            return new DoubleErrorDataSet(functionName, function.getValues(DIM_X), ArrayMath.sqrt(y), eyn, eyp, ncount,
                     true);
         case LOG10:
             for (int i = 0; i < eyn.length; i++) {
                 eyn[i] = 0.0; // 0.0 as a work-around
                 eyp[i] = 0.0;
             }
-            return new DoubleErrorDataSet(functionName, values(DIM_X, function), ArrayMath.tenLog10(y), eyn, eyp,
+            return new DoubleErrorDataSet(functionName, function.getValues(DIM_X), ArrayMath.tenLog10(y), eyn, eyp,
                     ncount, true);
         case DB:
             for (int i = 0; i < eyn.length; i++) {
                 eyn[i] = 0.0; // 0.0 as a work-around
                 eyp[i] = 0.0;
             }
-            return new DoubleErrorDataSet(functionName, values(DIM_X, function), ArrayMath.decibel(y), eyn, eyp, ncount,
+            return new DoubleErrorDataSet(functionName, function.getValues(DIM_X), ArrayMath.decibel(y), eyn, eyp, ncount,
                     true);
         case INV_DB:
             for (int i = 0; i < eyn.length; i++) {
                 eyn[i] = 0.0; // 0.0 as a work-around
                 eyp[i] = 0.0;
             }
-            return new DoubleErrorDataSet(functionName, values(DIM_X, function), ArrayMath.inverseDecibel(y), eyn, eyp,
+            return new DoubleErrorDataSet(functionName, function.getValues(DIM_X), ArrayMath.inverseDecibel(y), eyn, eyp,
                     ncount, true);
         default:
             // return copy if nothing else matches
-            return new DoubleErrorDataSet(functionName, values(DIM_X, function), values(DIM_Y, function),
+            return new DoubleErrorDataSet(functionName, function.getValues(DIM_X), function.getValues(DIM_Y),
                     errors(function, EYN), errors(function, EYP), ncount, true);
         }
     }
@@ -996,11 +995,11 @@ public final class DataSetMath { // NOPMD - nomen est omen
         // final double integralErr = complexInt.getErrorY() / requiredIntegral;
         // TODO: add error propagation to normalised function error estimate
         if (integral == 0) {
-            return new DoubleErrorDataSet(function.getName(), values(DIM_X, function), new double[ncount],
+            return new DoubleErrorDataSet(function.getName(), function.getValues(DIM_X), new double[ncount],
                     new double[ncount], new double[ncount], ncount, true);
         }
-        final double[] xValues = values(DIM_X, function);
-        final double[] yValues = ArrayMath.divide(values(DIM_Y, function), integral);
+        final double[] xValues = function.getValues(DIM_X);
+        final double[] yValues = ArrayMath.divide(function.getValues(DIM_Y), integral);
         final double[] eyp = ArrayMath.divide(errors(function, EYN), integral);
         final double[] eyn = ArrayMath.divide(errors(function, EYP), integral);
 
@@ -1068,34 +1067,6 @@ public final class DataSetMath { // NOPMD - nomen est omen
 
     public static DataSet subtractFunction(final DataSet function, final double value) {
         return mathFunction(function, value, MathOp.SUBTRACT);
-    }
-
-    /**
-     * convenience short-hand notation for getting value array
-     *
-     * @param dimIndex the dimension index
-     * @param dataSet the source data set
-     * @return the given value vector
-     */
-    public static final double[] values(final int dimIndex, final DataSet dataSet) {
-        if (dataSet instanceof DoubleDataSet) {
-            return ((DoubleDataSet) dataSet).getValues(dimIndex);
-        }
-        if (dataSet instanceof DoubleErrorDataSet) {
-            return ((DoubleErrorDataSet) dataSet).getValues(dimIndex);
-        }
-        if (dataSet instanceof DataSet2D) {
-            return ((DataSet2D) dataSet).getValues(dimIndex);
-        }
-        // less performing fall-back for non-array-based datasets -> need to loop through indices
-        return dataSet.lock().readLockGuard(() -> {
-            final int count = dataSet.getDataCount(dimIndex);
-            final double[] retValues = new double[count];
-            for (int index = 0; index < count; index++) {
-                retValues[index] = dataSet.get(dimIndex, index);
-            }
-            return retValues;
-        });
     }
 
     public enum ErrType {

@@ -24,7 +24,7 @@ import de.gsi.chart.XYChart;
 import de.gsi.chart.axes.Axis;
 import de.gsi.chart.axes.spi.DefaultNumericAxis;
 import de.gsi.chart.plugins.EditAxis;
-import de.gsi.chart.plugins.UpdateAxisLabels;
+//import de.gsi.chart.plugins.UpdateAxisLabels;
 import de.gsi.chart.plugins.Zoomer;
 import de.gsi.chart.renderer.spi.ContourDataSetRenderer;
 import de.gsi.chart.renderer.spi.MetaDataRenderer;
@@ -32,7 +32,9 @@ import de.gsi.chart.ui.geometry.Side;
 import de.gsi.chart.utils.AxisSynchronizer;
 import de.gsi.dataset.DataSet;
 import de.gsi.dataset.DataSetMetaData;
+import de.gsi.dataset.GridDataSet;
 import de.gsi.dataset.spi.DataSetBuilder;
+import de.gsi.dataset.spi.DoubleGridDataSet;
 import de.gsi.dataset.spi.MultiDimDoubleDataSet;
 import de.gsi.dataset.spi.TransposedDataSet;
 import de.gsi.math.TMathConstants;
@@ -95,12 +97,11 @@ public class ShortTimeFourierTransformSample extends AbstractDemoApplication {
 
     // DataSets
     private final MultiDimDoubleDataSet rawData = new MultiDimDoubleDataSet("rawTimeData", 3);
-    private final MultiDimDoubleDataSet stftData = (MultiDimDoubleDataSet) new DataSetBuilder(
-            "ShortTimeFourierTransform")
-                                                           .setDimension(3)
-                                                           .setInitalCapacity(0)
-                                                           .build();
-    private final DataSet waveletData = new DataSetBuilder("WaveletTransform").setDimension(3).setInitalCapacity(0).build();
+    private final DoubleGridDataSet stftData = new DataSetBuilder("ShortTimeFourierTransform")
+                                                       .setDimension(3)
+                                                       .setInitalCapacity(0)
+                                                       .build(DoubleGridDataSet.class);
+    private final DoubleGridDataSet waveletData = new DataSetBuilder("WaveletTransform").setDimension(3).setInitalCapacity(0).build(DoubleGridDataSet.class);
 
     /**
      * Override default constructor to increase window size
@@ -114,7 +115,7 @@ public class ShortTimeFourierTransformSample extends AbstractDemoApplication {
         // rawData chart
         chart3 = new XYChart();
         chart3.getXAxis().setAutoUnitScaling(true);
-        chart3.getPlugins().add(new UpdateAxisLabels());
+//        chart3.getPlugins().add(new UpdateAxisLabels());
         chart3.getPlugins().add(new Zoomer());
         chart3.getPlugins().add(new EditAxis());
         chart3.getRenderers().add(new MetaDataRenderer(chart3));
@@ -137,7 +138,7 @@ public class ShortTimeFourierTransformSample extends AbstractDemoApplication {
         zAxis1.setUnit("dB");
         chart1.getAxes().addAll(xAxis1, yAxis1, zAxis1);
         // Add plugins after all axes are correctly set up
-        chart1.getPlugins().add(new UpdateAxisLabels());
+//        chart1.getPlugins().add(new UpdateAxisLabels());
         chart1.getPlugins().add(new Zoomer());
         chart1.getPlugins().add(new EditAxis());
         chart1.getDatasets().add(TransposedDataSet.transpose(stftData, true));
@@ -158,7 +159,7 @@ public class ShortTimeFourierTransformSample extends AbstractDemoApplication {
         zAxis2.setUnit("dB");
         chart2.getAxes().addAll(xAxis2, yAxis2, zAxis2);
         chart2.getRenderers().add(new MetaDataRenderer(chart2));
-        chart2.getPlugins().add(new UpdateAxisLabels());
+//        chart2.getPlugins().add(new UpdateAxisLabels());
         chart2.getPlugins().add(new Zoomer());
         chart2.getPlugins().add(new EditAxis());
         chart2.getDatasets().add(waveletData);
@@ -205,22 +206,20 @@ public class ShortTimeFourierTransformSample extends AbstractDemoApplication {
         return gridPane;
     }
 
-    private void stft(final DataSet inputData, final MultiDimDoubleDataSet outputData) {
+    private void stft(final DataSet inputData, final DoubleGridDataSet outputData) {
         try {
-            MultiDimDoubleDataSet newData;
+            DoubleGridDataSet newData;
             if (complex.isSelected()) {
-                newData = (MultiDimDoubleDataSet) ShortTimeFourierTransform.complex(inputData, outputData,
+                newData = (DoubleGridDataSet) ShortTimeFourierTransform.complex(inputData, outputData,
                         nFFT.getValue(), step.getValue(), apodizationWindow.getValue(), padding.getValue(),
                         dbScale.isSelected(), truncDCNyq.isSelected());
             } else {
-                newData = (MultiDimDoubleDataSet) ShortTimeFourierTransform.real(inputData, outputData, nFFT.getValue(),
+                newData = (DoubleGridDataSet) ShortTimeFourierTransform.real(inputData, outputData, nFFT.getValue(),
                         step.getValue(), apodizationWindow.getValue(), padding.getValue(), dbScale.isSelected(),
                         truncDCNyq.isSelected());
             }
             if (newData != outputData) {
-                outputData.setValues(DataSet.DIM_X, newData.getValues(DataSet.DIM_X), false);
-                outputData.setValues(DataSet.DIM_Y, newData.getValues(DataSet.DIM_Y), false);
-                outputData.setValues(DataSet.DIM_Z, newData.getValues(DataSet.DIM_Z), false);
+                outputData.set(newData);
                 outputData.getAxisDescription(DataSet.DIM_X).set(newData.getAxisDescription(DataSet.DIM_X));
                 outputData.getAxisDescription(DataSet.DIM_Y).set(newData.getAxisDescription(DataSet.DIM_Y));
                 outputData.getAxisDescription(DataSet.DIM_Z).set(newData.getAxisDescription(DataSet.DIM_Z));
@@ -299,30 +298,27 @@ public class ShortTimeFourierTransformSample extends AbstractDemoApplication {
         dataSetToUpdate.getAxisDescription(DataSet.DIM_Y).set("amplitude", "V");
     }
 
-    private void wavelet(final DataSet inputData, final DataSet outputData) {
+    private void wavelet(final DataSet inputData, final DoubleGridDataSet outputData) {
         try {
             ((DataSetMetaData) outputData).getErrorList().clear();
             final ContinuousWavelet wtrafo = new ContinuousWavelet();
-            final DataSet newData = wtrafo.getScalogram(inputData.getValues(DataSet.DIM_Y), quantx.getValue(),
+            final GridDataSet newData = wtrafo.getScalogram(inputData.getValues(DataSet.DIM_Y), quantx.getValue(),
                     quanty.getValue(), nu.getValue(), waveletFMin.getValue(), waveletFMax.getValue());
+            outputData.set(newData);
             outputData.getAxisDescription(DataSet.DIM_X).set(inputData.getAxisDescription(DataSet.DIM_X).getName(), inputData.getAxisDescription(DataSet.DIM_X).getUnit());
             outputData.getAxisDescription(DataSet.DIM_Y).set("frequency", "Hz");
             outputData.getAxisDescription(DataSet.DIM_Z).set("Amplitude", inputData.getAxisDescription(DataSet.DIM_Y).getUnit());
             // rescale axes to show actual data instead of normalized values
-            final double[] yValues = newData.getValues(DataSet.DIM_Y);
+            final double[] yValues = newData.getGridValues(DataSet.DIM_Y);
             final double fs = sampleRate.getValue();
             for (int i = 0; i < yValues.length; i++) {
                 yValues[i] *= fs;
             }
-            final double[] xValues = newData.getValues(DataSet.DIM_X);
+            final double[] xValues = newData.getGridValues(DataSet.DIM_X);
             final double dt = 1 / fs;
             for (int i = 0; i < xValues.length; i++) {
                 xValues[i] *= dt;
             }
-            MultiDimDoubleDataSet outputMultiDimData = (MultiDimDoubleDataSet) outputData;
-            outputMultiDimData.setValues(DataSet.DIM_X, xValues, false);
-            outputMultiDimData.setValues(DataSet.DIM_Y, yValues, false);
-            outputMultiDimData.setValues(DataSet.DIM_Z, newData.getValues(DataSet.DIM_Z), false);
             outputData.recomputeLimits(DataSet.DIM_X);
             outputData.recomputeLimits(DataSet.DIM_Y);
             outputData.recomputeLimits(DataSet.DIM_Z);
