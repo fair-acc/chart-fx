@@ -5,7 +5,16 @@ import static de.gsi.dataset.serializer.spi.FastByteBuffer.SIZE_OF_INT;
 
 import java.lang.reflect.Method;
 import java.security.InvalidParameterException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.PriorityQueue;
+import java.util.Queue;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -94,6 +103,51 @@ public class BinarySerialiser implements IoSerialiser { // NOPMD - omen est omen
     public static final byte VERSION_MAJOR = 1;
     public static final byte VERSION_MINOR = 0;
     public static final byte VERSION_MICRO = 0;
+    private static final DataType[] byteToDataType = new DataType[256];
+    private static final Byte[] dataTypeToByte = new Byte[256];
+    static {
+        byteToDataType[0] = DataType.START_MARKER;
+
+        byteToDataType[1] = DataType.BOOL;
+        byteToDataType[2] = DataType.BYTE;
+        byteToDataType[3] = DataType.SHORT;
+        byteToDataType[4] = DataType.INT;
+        byteToDataType[5] = DataType.LONG;
+        byteToDataType[6] = DataType.FLOAT;
+        byteToDataType[7] = DataType.DOUBLE;
+        byteToDataType[8] = DataType.CHAR;
+        byteToDataType[9] = DataType.STRING;
+
+        byteToDataType[101] = DataType.BOOL_ARRAY;
+        byteToDataType[102] = DataType.BYTE_ARRAY;
+        byteToDataType[103] = DataType.SHORT_ARRAY;
+        byteToDataType[104] = DataType.INT_ARRAY;
+        byteToDataType[105] = DataType.LONG_ARRAY;
+        byteToDataType[106] = DataType.FLOAT_ARRAY;
+        byteToDataType[107] = DataType.DOUBLE_ARRAY;
+        byteToDataType[108] = DataType.CHAR_ARRAY;
+        byteToDataType[109] = DataType.STRING_ARRAY;
+
+        byteToDataType[200] = DataType.COLLECTION;
+        byteToDataType[201] = DataType.ENUM;
+        byteToDataType[202] = DataType.LIST;
+        byteToDataType[203] = DataType.MAP;
+        byteToDataType[204] = DataType.QUEUE;
+        byteToDataType[205] = DataType.SET;
+
+        byteToDataType[0xFD] = DataType.OTHER;
+        byteToDataType[0xFE] = DataType.END_MARKER;
+
+        int count = 0;
+        for (int i = 0; i < byteToDataType.length; i++) {
+            if (byteToDataType[i] == null) {
+                continue;
+            }
+            final int id = byteToDataType[i].getID();
+            dataTypeToByte[id] = (byte) i;
+        }
+    }
+
     protected final HeaderInfo headerInfo = new HeaderInfo(BinarySerialiser.class.getCanonicalName(), VERSION_MAJOR, VERSION_MINOR, VERSION_MICRO);
     private static int bufferIncrements;
     private IoBuffer buffer;
@@ -132,9 +186,9 @@ public class BinarySerialiser implements IoSerialiser { // NOPMD - omen est omen
         AssertUtils.notNull("buffer", buffer);
         final FieldHeader headerStartField = getFieldHeader();
         final byte startMarker = buffer.getByte();
-        if (startMarker != DataType.START_MARKER.getAsByte()) {
+        if (startMarker != getDataType(DataType.START_MARKER)) {
             // TODO: replace with (new to be written) custom SerializerFormatException(..)
-            throw new InvalidParameterException("header does not start with a START_MARKER('" + DataType.START_MARKER.getAsByte() + "') DataType but " + startMarker + " fieldName = " + headerStartField.getFieldName());
+            throw new InvalidParameterException("header does not start with a START_MARKER('" + getDataType(DataType.START_MARKER) + "') DataType but " + startMarker + " fieldName = " + headerStartField.getFieldName());
         }
         buffer.getString(); // should read "#file producer : "
         // -- but not explicitly checked
@@ -213,7 +267,7 @@ public class BinarySerialiser implements IoSerialiser { // NOPMD - omen est omen
 
     @Override
     public <E> Collection<E> getCollection(final Collection<E> collection) {
-        final DataType valueDataType = DataType.fromByte(buffer.getByte());
+        final DataType valueDataType = getDataType(buffer.getByte());
 
         // read value vector
         final Object[] values = getGenericArrayAsBoxedPrimitive(valueDataType);
@@ -313,7 +367,7 @@ public class BinarySerialiser implements IoSerialiser { // NOPMD - omen est omen
     public FieldHeader getFieldHeader() {
         final String fieldName = buffer.getString();
         final byte dataTypeByte = buffer.getByte();
-        final DataType dataType = DataType.fromByte(dataTypeByte);
+        final DataType dataType = getDataType(dataTypeByte);
 
         if (dataType.isScalar()) {
             final long pos = buffer.position();
@@ -407,7 +461,7 @@ public class BinarySerialiser implements IoSerialiser { // NOPMD - omen est omen
 
     @Override
     public <E> List<E> getList(final List<E> collection) {
-        final DataType valueDataType = DataType.fromByte(buffer.getByte());
+        final DataType valueDataType = getDataType(buffer.getByte());
 
         // read value vector
         final Object[] values = getGenericArrayAsBoxedPrimitive(valueDataType);
@@ -440,8 +494,8 @@ public class BinarySerialiser implements IoSerialiser { // NOPMD - omen est omen
     public <K, V> Map<K, V> getMap(final Map<K, V> map) {
         // convert into two linear arrays one of K and the other for V streamer encoding as
         // <1 (int)><n_map (int)><type K (byte)<type V (byte)> <Length, [K_0,...,K_length]> <Length, [V_0, ..., V_length]>
-        final DataType keyDataType = DataType.fromByte(buffer.getByte());
-        final DataType valueDataType = DataType.fromByte(buffer.getByte());
+        final DataType keyDataType = getDataType(buffer.getByte());
+        final DataType valueDataType = getDataType(buffer.getByte());
 
         // read key and value vector
         final Object[] keys = getGenericArrayAsBoxedPrimitive(keyDataType);
@@ -465,7 +519,7 @@ public class BinarySerialiser implements IoSerialiser { // NOPMD - omen est omen
 
     @Override
     public <E> Queue<E> getQueue(final Queue<E> collection) {
-        final DataType valueDataType = DataType.fromByte(buffer.getByte());
+        final DataType valueDataType = getDataType(buffer.getByte());
 
         // read value vector
         final Object[] values = getGenericArrayAsBoxedPrimitive(valueDataType);
@@ -480,7 +534,7 @@ public class BinarySerialiser implements IoSerialiser { // NOPMD - omen est omen
 
     @Override
     public <E> Set<E> getSet(final Set<E> collection) {
-        final DataType valueDataType = DataType.fromByte(buffer.getByte());
+        final DataType valueDataType = getDataType(buffer.getByte());
 
         // read value vector
         final Object[] values = getGenericArrayAsBoxedPrimitive(valueDataType);
@@ -548,8 +602,8 @@ public class BinarySerialiser implements IoSerialiser { // NOPMD - omen est omen
                 // reached end of (sub-)class - check marker value and close nested hierarchy
                 final byte markerValue = buffer.getByte();
                 final Optional<FieldHeader> superParent = fieldRoot.getParent();
-                if (DataType.END_MARKER.getAsByte() != markerValue) {
-                    throw new IllegalStateException("reached end marker, mismatched value '" + markerValue + "' vs. should '" + DataType.END_MARKER.getAsByte() + "'");
+                if (getDataType(DataType.END_MARKER) != markerValue) {
+                    throw new IllegalStateException("reached end marker, mismatched value '" + markerValue + "' vs. should '" + getDataType(DataType.END_MARKER) + "'");
                 }
 
                 if (superParent.isEmpty()) {
@@ -578,8 +632,8 @@ public class BinarySerialiser implements IoSerialiser { // NOPMD - omen est omen
                 // detected sub-class start marker
                 // check marker value
                 final byte markerValue = buffer.getByte();
-                if (DataType.START_MARKER.getAsByte() != markerValue) {
-                    throw new IllegalStateException("reached start marker, mismatched value '" + markerValue + "' vs. should '" + DataType.START_MARKER.getAsByte() + "'");
+                if (getDataType(DataType.START_MARKER) != markerValue) {
+                    throw new IllegalStateException("reached start marker, mismatched value '" + markerValue + "' vs. should '" + getDataType(DataType.START_MARKER) + "'");
                 }
 
                 parseIoStream(fieldHeader, recursionDepth + 1);
@@ -675,7 +729,7 @@ public class BinarySerialiser implements IoSerialiser { // NOPMD - omen est omen
         final long sizeMarkerStart = putArrayHeader(fieldName, dataType, new int[] { nElements },
                 (nElements * entrySize) + 9);
 
-        buffer.putByte(valueDataType.getAsByte()); // write value element type
+        buffer.putByte(getDataType(valueDataType)); // write value element type
         putGenericArrayAsPrimitive(valueDataType, values, nElements);
 
         adjustDataByteSizeBlock(sizeMarkerStart);
@@ -815,8 +869,8 @@ public class BinarySerialiser implements IoSerialiser { // NOPMD - omen est omen
         final long sizeMarkerStart = putArrayHeader(fieldName, DataType.MAP, new int[] { nElements },
                 (nElements * entrySize) + 9);
 
-        buffer.putByte(keyDataType.getAsByte()); // write key element type
-        buffer.putByte(valueDataType.getAsByte()); // write value element type
+        buffer.putByte(getDataType(keyDataType)); // write key element type
+        buffer.putByte(getDataType(valueDataType)); // write value element type
         putGenericArrayAsPrimitive(keyDataType, keySet, nElements);
         putGenericArrayAsPrimitive(valueDataType, valueSet, nElements);
 
@@ -893,7 +947,7 @@ public class BinarySerialiser implements IoSerialiser { // NOPMD - omen est omen
     @Override
     public void putEndMarker(final String markerName) {
         putFieldHeader(markerName, DataType.END_MARKER);
-        buffer.putByte(DataType.END_MARKER.getAsByte());
+        buffer.putByte(getDataType(DataType.END_MARKER));
     }
 
     @Override
@@ -910,7 +964,7 @@ public class BinarySerialiser implements IoSerialiser { // NOPMD - omen est omen
                                  + dataType.getPrimitiveSize() + additionalSize;
         buffer.ensureAdditionalCapacity(addCapacity);
         buffer.putString(fieldName);
-        buffer.putByte(dataType.getAsByte());
+        buffer.putByte(getDataType(dataType));
     }
 
     public void putGenericArrayAsPrimitive(final DataType dataType, final Object[] data,
@@ -965,7 +1019,7 @@ public class BinarySerialiser implements IoSerialiser { // NOPMD - omen est omen
     @Override
     public void putStartMarker(final String markerName) {
         putFieldHeader(markerName, DataType.START_MARKER);
-        buffer.putByte(DataType.START_MARKER.getAsByte());
+        buffer.putByte(getDataType(DataType.START_MARKER));
     }
 
     public void setBufferIncrements(final int bufferIncrements) {
@@ -1125,5 +1179,22 @@ public class BinarySerialiser implements IoSerialiser { // NOPMD - omen est omen
         public String toString() {
             return super.toString() + String.format(" serialiser: %s-v%d.%d.%d", getProducerName(), getVersionMajor(), getVersionMinor(), getVersionMicro());
         }
+    }
+
+    public static byte getDataType(final DataType dataType) {
+        final int id = dataType.getID();
+        if (dataTypeToByte[id] != null) {
+            return dataTypeToByte[id];
+        }
+
+        throw new IllegalArgumentException("DataType " + dataType + " not mapped to specific byte");
+    }
+
+    public static DataType getDataType(final byte byteValue) {
+        if (dataTypeToByte[byteValue & 0xFF] != null) {
+            return byteToDataType[byteValue & 0xFF];
+        }
+
+        throw new IllegalArgumentException("DataType byteValue=" + byteValue + " rawByteValue=" + (byteValue & 0xFF) + "not mapped");
     }
 }
