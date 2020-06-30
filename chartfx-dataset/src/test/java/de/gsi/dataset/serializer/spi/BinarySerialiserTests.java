@@ -424,7 +424,7 @@ public class BinarySerialiserTests {
         assertEquals(positionBefore.removeFirst(), buffer.position());
         header = ioSerialiser.getFieldHeader();
         assertEquals("StartMarker", header.getFieldName(), "StartMarker type retrieval");
-        assertEquals(DataType.START_MARKER.getAsByte(), buffer.getByte(), "StartMarker retrieval");
+        assertEquals(BinarySerialiser.getDataType(DataType.START_MARKER), buffer.getByte(), "StartMarker retrieval");
         assertEquals(positionAfter.removeFirst(), buffer.position());
 
         // header info
@@ -436,9 +436,9 @@ public class BinarySerialiserTests {
         assertFalse(headerInfo.equals(new Object())); // silly comparison for coverage reasons
         assertNotNull(headerInfo);
         assertEquals(BinarySerialiser.class.getCanonicalName(), headerInfo.getProducerName());
-        assertEquals(ioSerialiser.VERSION_MAJOR, headerInfo.getVersionMajor());
-        assertEquals(ioSerialiser.VERSION_MINOR, headerInfo.getVersionMinor());
-        assertEquals(ioSerialiser.VERSION_MICRO, headerInfo.getVersionMicro());
+        assertEquals(BinarySerialiser.VERSION_MAJOR, headerInfo.getVersionMajor());
+        assertEquals(BinarySerialiser.VERSION_MINOR, headerInfo.getVersionMinor());
+        assertEquals(BinarySerialiser.VERSION_MICRO, headerInfo.getVersionMicro());
         assertEquals(positionAfter.removeFirst(), buffer.position());
 
         // Collections - List
@@ -538,7 +538,7 @@ public class BinarySerialiserTests {
         assertEquals(positionBefore.removeFirst(), buffer.position());
         header = ioSerialiser.getFieldHeader();
         assertEquals("EndMarker", header.getFieldName(), "EndMarker type retrieval");
-        assertEquals(DataType.END_MARKER.getAsByte(), buffer.getByte(), "EndMarker retrieval");
+        assertEquals(BinarySerialiser.getDataType(DataType.END_MARKER), buffer.getByte(), "EndMarker retrieval");
         assertEquals(positionAfter.removeFirst(), buffer.position());
     }
 
