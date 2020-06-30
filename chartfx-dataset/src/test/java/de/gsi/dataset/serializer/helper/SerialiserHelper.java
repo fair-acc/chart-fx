@@ -2,6 +2,7 @@ package de.gsi.dataset.serializer.helper;
 
 import de.gsi.dataset.serializer.DataType;
 import de.gsi.dataset.serializer.IoSerialiser;
+import de.gsi.dataset.serializer.spi.BinarySerialiser;
 import de.gsi.dataset.serializer.spi.FieldHeader;
 
 @SuppressWarnings("PMD") // complexity is part of the very large use-case surface that is being tested
@@ -163,7 +164,8 @@ public final class SerialiserHelper {
         field = getFieldHeader(ioSerialiser);
         if (field.getDataType().equals(de.gsi.dataset.serializer.DataType.START_MARKER)) {
             final byte byteMarker = ioSerialiser.getByte();
-            if (!field.getDataType().equals(de.gsi.dataset.serializer.DataType.START_MARKER) || DataType.START_MARKER.getAsByte() != byteMarker) {
+
+            if (!field.getDataType().equals(de.gsi.dataset.serializer.DataType.START_MARKER) || BinarySerialiser.getDataType(DataType.START_MARKER) != byteMarker) {
                 throw new IllegalStateException("format error tag with START_MARKER data type = " + field.getDataType() + " markerByte = " + byteMarker + " field name = " + field.getFieldName());
             }
 
@@ -174,7 +176,7 @@ public final class SerialiserHelper {
 
         } else if (field.getDataType().equals(de.gsi.dataset.serializer.DataType.END_MARKER)) {
             final byte byteMarker = ioSerialiser.getByte();
-            if (!field.getDataType().equals(de.gsi.dataset.serializer.DataType.END_MARKER) || DataType.END_MARKER.getAsByte() != byteMarker) {
+            if (!field.getDataType().equals(de.gsi.dataset.serializer.DataType.END_MARKER) || BinarySerialiser.getDataType(DataType.END_MARKER) != byteMarker) {
                 throw new IllegalStateException("format error tag with END_MARKER data type = " + field.getDataType() + " markerByte = " + byteMarker + " field name = " + field.getFieldName());
             }
         } else {

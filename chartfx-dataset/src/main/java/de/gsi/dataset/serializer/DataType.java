@@ -66,7 +66,7 @@ public enum DataType {
     // clang-format on
     // @formatter:on
 
-    private final byte uniqueType;
+    private final int uniqueID;
     private final long primitiveSize;
     private final String stringValue;
     private final String javaName;
@@ -75,9 +75,9 @@ public enum DataType {
     private final boolean array;
     private final boolean object;
 
-    DataType(final int uniqueType, final String stringValue, final String javaName, final long primitiveSize,
+    DataType(final int uniqueID, final String stringValue, final String javaName, final long primitiveSize,
             final Cat type, final Class<?>... classType) {
-        this.uniqueType = (byte) uniqueType;
+        this.uniqueID = uniqueID;
         this.stringValue = stringValue;
         this.javaName = javaName;
         this.primitiveSize = primitiveSize;
@@ -88,12 +88,12 @@ public enum DataType {
     }
 
     /**
-     * Returns the byte representation of the data type.
+     * Returns the uniqueID representation of the data type.
      *
-     * @return the byte representation
+     * @return the uniqueID representation
      */
-    public byte getAsByte() {
-        return uniqueType;
+    public int getID() {
+        return uniqueID;
     }
 
     /**
@@ -140,14 +140,15 @@ public enum DataType {
     }
 
     /**
-     * Returns the data type matching the given byte representation, if any.
+     * Returns the data type matching the given uniqueID representation, if any.
      *
      * @param value the value to be searched
      * @return the matching data type
      */
     public static DataType fromByte(final byte value) {
+        final int unsignedByte = (value & 0xFF);
         for (final DataType type : DataType.values()) {
-            if (type.uniqueType == value) {
+            if (type.uniqueID == unsignedByte) {
                 return type;
             }
         }

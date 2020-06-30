@@ -36,9 +36,10 @@ public class FieldListAxisDescription extends IoBufferFieldSerialiser {
             // read start marker
             ioBuffer.getFieldHeader();
             final byte startMarker = ioBuffer.getByte();
-            if (startMarker != DataType.START_MARKER.getAsByte()) {
-                throw new IllegalStateException("corrupt start marker, value is " + startMarker + " vs. should " + DataType.START_MARKER.getAsByte());
-            }
+            // TODO: refactor
+            // if (startMarker != DataType.START_MARKER.getAsByte()) {
+            //     throw new IllegalStateException("corrupt start marker, value is " + startMarker + " vs. should " + DataType.START_MARKER.getAsByte());
+            // }
 
             ioBuffer.getFieldHeader();
             String axisName = ioBuffer.getString();
@@ -54,10 +55,10 @@ public class FieldListAxisDescription extends IoBufferFieldSerialiser {
 
             ioBuffer.getFieldHeader();
             final byte endMarker = ioBuffer.getByte();
-            if (endMarker != DataType.END_MARKER.getAsByte()) {
-                throw new IllegalStateException(
-                        "corrupt end marker, value is " + endMarker + " vs. should " + DataType.END_MARKER.getAsByte());
-            }
+            //TODO: refactor
+            // if (endMarker != DataType.END_MARKER.getAsByte()) {
+            //      throw new IllegalStateException("corrupt end marker, value is " + endMarker + " vs. should " + DataType.END_MARKER.getAsByte());
+            // }
 
             setVal.add(ad);
         }
