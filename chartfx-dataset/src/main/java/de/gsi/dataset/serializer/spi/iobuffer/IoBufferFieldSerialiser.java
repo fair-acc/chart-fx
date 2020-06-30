@@ -1,6 +1,6 @@
 package de.gsi.dataset.serializer.spi.iobuffer;
 
-import de.gsi.dataset.serializer.IoBuffer;
+import de.gsi.dataset.serializer.IoSerialiser;
 import de.gsi.dataset.serializer.spi.FieldSerialiser;
 
 /**
@@ -9,7 +9,7 @@ import de.gsi.dataset.serializer.spi.FieldSerialiser;
  *
  */
 public class IoBufferFieldSerialiser extends FieldSerialiser {
-    protected final IoBuffer ioBuffer;
+    protected final IoSerialiser ioBuffer;
 
     /**
      * 
@@ -21,7 +21,7 @@ public class IoBufferFieldSerialiser extends FieldSerialiser {
      * @param classGenericArguments applicable generics definition (e.g. 'String.class' for List&lt;String&gt; or
      *        'Integer.class, String.class' resp.)
      */
-    public IoBufferFieldSerialiser(final IoBuffer buffer, final FieldSerialiserFunction reader,
+    public IoBufferFieldSerialiser(final IoSerialiser buffer, final FieldSerialiserFunction reader,
             final FieldSerialiserFunction writer, final Class<?> classPrototype,
             final Class<?>... classGenericArguments) {
         super(reader, writer, classPrototype, classGenericArguments);
@@ -33,9 +33,9 @@ public class IoBufferFieldSerialiser extends FieldSerialiser {
 
     /**
      * 
-     * @return the ioBuffer object used by this serialiser
+     * @return the IoSerialiser object used by this serialiser
      */
-    public IoBuffer getBuffer() {
+    public IoSerialiser getBuffer() {
         return ioBuffer;
     }
 }

@@ -20,6 +20,7 @@ import org.junit.jupiter.params.provider.ArgumentsSource;
 
 import de.gsi.dataset.serializer.helper.SerialiserHelper;
 import de.gsi.dataset.serializer.helper.TestDataClass;
+import de.gsi.dataset.serializer.spi.BinarySerialiser;
 import de.gsi.dataset.serializer.spi.ByteBuffer;
 import de.gsi.dataset.serializer.spi.FastByteBuffer;
 import de.gsi.dataset.serializer.spi.helper.MyGenericClass;
@@ -40,7 +41,9 @@ public class IoSerialiserTests {
         assertEquals(inputObject, outputObject1);
 
         final IoBuffer buffer = new FastByteBuffer(1000000);
-        final IoBufferSerialiser serialiser = new IoBufferSerialiser(buffer);
+        final BinarySerialiser ioSerialiser = new BinarySerialiser(buffer); // TODO: generalise to IoBuffer
+
+        final IoBufferSerialiser serialiser = new IoBufferSerialiser(ioSerialiser);
         serialiser.serialiseObject(inputObject);
 
         buffer.reset();
@@ -75,15 +78,16 @@ public class IoSerialiserTests {
         assertNotNull(bufferClass, "bufferClass being not null");
         assertNotNull(bufferClass.getConstructor(int.class), "Constructor(Integer) present");
         final IoBuffer buffer = bufferClass.getConstructor(int.class).newInstance(BUFFER_SIZE);
+        final BinarySerialiser ioSerialiser = new BinarySerialiser(buffer); // TODO: generalise to IoBuffer
 
         final TestDataClass inputObject = new TestDataClass(10, 100, hierarchyLevel);
         final TestDataClass outputObject = new TestDataClass(-1, -1, 0);
 
         buffer.reset();
-        SerialiserHelper.serialiseCustom(buffer, inputObject);
+        SerialiserHelper.serialiseCustom(ioSerialiser, inputObject);
 
         buffer.reset();
-        SerialiserHelper.deserialiseCustom(buffer, outputObject);
+        SerialiserHelper.deserialiseCustom(ioSerialiser, outputObject);
 
         // second test - both vectors should have the same initial values after serialise/deserialise
         assertArrayEquals(inputObject.stringArray, outputObject.stringArray);
@@ -94,7 +98,8 @@ public class IoSerialiserTests {
     @Test
     public void testIdentityDoubleDataSet() throws IllegalAccessException {
         final IoBuffer buffer = new FastByteBuffer();
-        final IoBufferSerialiser serialiser = new IoBufferSerialiser(buffer);
+        final BinarySerialiser ioSerialiser = new BinarySerialiser(buffer); // TODO: generalise to IoBuffer
+        final IoBufferSerialiser serialiser = new IoBufferSerialiser(ioSerialiser);
 
         final DoubleDataSet inputObject = new DoubleDataSet("inputObject");
         DoubleDataSet outputObject = new DoubleDataSet("outputObject");
@@ -136,16 +141,17 @@ public class IoSerialiserTests {
         assertNotNull(bufferClass, "bufferClass being not null");
         assertNotNull(bufferClass.getConstructor(int.class), "Constructor(Integer) present");
         final IoBuffer buffer = bufferClass.getConstructor(int.class).newInstance(BUFFER_SIZE);
+        final BinarySerialiser ioSerialiser = new BinarySerialiser(buffer); // TODO: generalise to IoBuffer
 
-        final IoBufferSerialiser ioSerialiser = new IoBufferSerialiser(buffer);
+        final IoBufferSerialiser ioClassSerialiser = new IoBufferSerialiser(ioSerialiser);
         final TestDataClass inputObject = new TestDataClass(10, 100, hierarchyLevel);
         final TestDataClass outputObject = new TestDataClass(-1, -1, 0);
 
         buffer.reset();
-        ioSerialiser.serialiseObject(inputObject);
+        ioClassSerialiser.serialiseObject(inputObject);
 
         buffer.reset();
-        ioSerialiser.deserialiseObject(outputObject);
+        ioClassSerialiser.deserialiseObject(outputObject);
 
         // second test - both vectors should have the same initial values after serialise/deserialise
         assertArrayEquals(inputObject.stringArray, outputObject.stringArray);

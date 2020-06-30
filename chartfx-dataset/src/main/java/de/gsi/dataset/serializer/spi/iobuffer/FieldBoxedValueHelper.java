@@ -1,8 +1,7 @@
 package de.gsi.dataset.serializer.spi.iobuffer;
 
-import de.gsi.dataset.serializer.IoBuffer;
+import de.gsi.dataset.serializer.IoSerialiser;
 import de.gsi.dataset.serializer.spi.AbstractSerialiser;
-import de.gsi.dataset.serializer.spi.BinarySerialiser;
 
 /**
  * helper class to register default serialiser for boxed primitive types (ie. Boolean, Byte, Short, ..., double) w/o
@@ -22,43 +21,41 @@ public final class FieldBoxedValueHelper {
      * @param serialiser for which the field serialisers should be registered
      * @param ioBuffer reference to the IoBuffer back-ends
      */
-    public static void register(final AbstractSerialiser serialiser, final IoBuffer ioBuffer) {
+    public static void register(final AbstractSerialiser serialiser, final IoSerialiser ioBuffer) {
         serialiser.addClassDefinition(new IoBufferFieldSerialiser(ioBuffer, //
                 (obj, field) -> field.getField().set(obj, ioBuffer.getBoolean()), // reader
-                (obj, field) -> BinarySerialiser.put(ioBuffer, field.getFieldName(),
-                                     (Boolean) field.getField().get(obj)), // writer
+                (obj, field) -> ioBuffer.put(field.getFieldName(), (Boolean) field.getField().get(obj)), // writer
                 Boolean.class));
 
         serialiser.addClassDefinition(new IoBufferFieldSerialiser(ioBuffer, //
                 (obj, field) -> field.getField().set(obj, ioBuffer.getByte()), // reader
-                (obj, field) -> BinarySerialiser.put(ioBuffer, field.getFieldName(), (Byte) field.getField().get(obj)), // writer
+                (obj, field) -> ioBuffer.put(field.getFieldName(), (Byte) field.getField().get(obj)), // writer
                 Byte.class));
 
         serialiser.addClassDefinition(new IoBufferFieldSerialiser(ioBuffer, //
                 (obj, field) -> field.getField().set(obj, ioBuffer.getShort()), // reader
-                (obj, field) -> BinarySerialiser.put(ioBuffer, field.getFieldName(), (Short) field.getField().get(obj)), // writer
+                (obj, field) -> ioBuffer.put(field.getFieldName(), (Short) field.getField().get(obj)), // writer
                 Short.class));
 
         serialiser.addClassDefinition(new IoBufferFieldSerialiser(ioBuffer, //
-                (obj, field) -> field.getField().set(obj, ioBuffer.getInt()), // reader
-                (obj, field) -> BinarySerialiser.put(ioBuffer, field.getFieldName(),
+                (obj, field) -> field.getField().set(obj, ioBuffer.getInteger()), // reader
+                (obj, field) -> ioBuffer.put(field.getFieldName(),
                                      (Integer) field.getField().get(obj)), // writer
                 Integer.class));
 
         serialiser.addClassDefinition(new IoBufferFieldSerialiser(ioBuffer, //
                 (obj, field) -> field.getField().set(obj, ioBuffer.getLong()), // reader
-                (obj, field) -> BinarySerialiser.put(ioBuffer, field.getFieldName(), (Long) field.getField().get(obj)), // writer
+                (obj, field) -> ioBuffer.put(field.getFieldName(), (Long) field.getField().get(obj)), // writer
                 Long.class));
 
         serialiser.addClassDefinition(new IoBufferFieldSerialiser(ioBuffer, //
                 (obj, field) -> field.getField().set(obj, ioBuffer.getFloat()), // reader
-                (obj, field) -> BinarySerialiser.put(ioBuffer, field.getFieldName(), (Float) field.getField().get(obj)), // writer
+                (obj, field) -> ioBuffer.put(field.getFieldName(), (Float) field.getField().get(obj)), // writer
                 Float.class));
 
         serialiser.addClassDefinition(new IoBufferFieldSerialiser(ioBuffer, //
                 (obj, field) -> field.getField().set(obj, ioBuffer.getDouble()), // reader
-                (obj, field) -> BinarySerialiser.put(ioBuffer, field.getFieldName(),
-                                     (Double) field.getField().get(obj)), // writer
+                (obj, field) -> ioBuffer.put(field.getFieldName(), (Double) field.getField().get(obj)), // writer
                 Double.class));
 
         //        serialiser.addClassDefinition(new IoBufferFieldSerialiser(ioBuffer, //

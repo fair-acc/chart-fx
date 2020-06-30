@@ -14,6 +14,8 @@ import de.gsi.dataset.DataSet2D;
 import de.gsi.dataset.DataSetError;
 import de.gsi.dataset.DataSetError.ErrorType;
 import de.gsi.dataset.DataSetMetaData;
+import de.gsi.dataset.serializer.IoSerialiser;
+import de.gsi.dataset.serializer.spi.BinarySerialiser;
 import de.gsi.dataset.serializer.spi.ClassDescriptions;
 import de.gsi.dataset.serializer.spi.FastByteBuffer;
 import de.gsi.dataset.serializer.spi.iobuffer.DataSetSerialiser;
@@ -29,6 +31,8 @@ public class DataSetToByteArraySample {
     private final DoubleErrorDataSet original = new DoubleErrorDataSet("init", N_SAMPLES);
     private final ByteArrayOutputStream byteOutput = new ByteArrayOutputStream();
     private final FastByteBuffer byteBuffer = new FastByteBuffer();
+    private final IoSerialiser binarySerialiser = new BinarySerialiser(byteBuffer);
+    private final DataSetSerialiser dataSetSerialiser = new DataSetSerialiser(binarySerialiser);
 
     public DataSetToByteArraySample() {
         LOGGER.atInfo().log(DataSetToByteArraySample.class.getSimpleName() + " - init");
@@ -44,7 +48,7 @@ public class DataSetToByteArraySample {
         DataSetUtils.writeDataSetToByteArray(original, byteOutput, true, false);
         LOGGER.atInfo().addArgument(encodingBits(false)).addArgument(encodingBinary(true)).addArgument(humanReadableByteCount(byteOutput.size(), true)).log("byte buffer array length with {} {} encoding =  = {}");
 
-        byteBuffer.ensureCapacity(byteOutput.size() + 1000l);
+        byteBuffer.ensureCapacity(byteOutput.size() + 1000L);
     }
 
     public void clearGarbage() {
@@ -53,11 +57,11 @@ public class DataSetToByteArraySample {
         LOGGER.atInfo().log("");
     }
 
-    private static final String encodingBinary(final boolean isBinaryEncoding) {
+    private static String encodingBinary(final boolean isBinaryEncoding) {
         return isBinaryEncoding ? "binary-based" : "string-based";
     }
 
-    private static final String encodingBits(final boolean is32BitEncoding) {
+    private static String encodingBits(final boolean is32BitEncoding) {
         return is32BitEncoding ? "32-bit" : "64-bit";
     }
 
@@ -74,12 +78,11 @@ public class DataSetToByteArraySample {
         dataSet.setName("data set name" + System.currentTimeMillis());
         double oldY = 0;
         for (int n = 0; n < N_SAMPLES; n++) {
-            final double x = n;
             oldY += RandomDataGenerator.random() - 0.5;
             final double y = oldY;
             final double eyNeg = 0.1;
             final double eyPos = 10;
-            dataSet.set(n, x, y, eyNeg, eyPos);
+            dataSet.set(n, n, y, eyNeg, eyPos);
 
             if (n == 5000) {
                 dataSet.getDataLabelMap().put(n, "special outlier");
@@ -99,13 +102,13 @@ public class DataSetToByteArraySample {
     }
 
     public void testDataSetSerialiserIdentity(final boolean withMetaData, final boolean asFloat32) {
-        DataSetSerialiser.setMetaDataSerialised(true);
-        DataSetSerialiser.setDataLablesSerialised(true);
+        dataSetSerialiser.setMetaDataSerialised(true);
+        dataSetSerialiser.setDataLablesSerialised(true);
 
         byteBuffer.reset(); // '0' writing at start of buffer
-        DataSetSerialiser.writeDataSetToByteArray(original, byteBuffer, asFloat32);
+        dataSetSerialiser.writeDataSetToByteArray(original, asFloat32);
         byteBuffer.reset(); // reset to read position (==0)
-        final DoubleErrorDataSet dataSet = (DoubleErrorDataSet) DataSetSerialiser.readDataSetFromByteArray(byteBuffer);
+        final DoubleErrorDataSet dataSet = (DoubleErrorDataSet) dataSetSerialiser.readDataSetFromByteArray();
 
         testIdentityCore(true, asFloat32, original, dataSet);
         testIdentityLabelsAndStyles(true, asFloat32, original, dataSet);
@@ -135,7 +138,7 @@ public class DataSetToByteArraySample {
     }
 
     public void testGenericSerialiserIdentity(final boolean asFloat32) {
-        IoBufferSerialiser serialiser = new IoBufferSerialiser(byteBuffer);
+        IoBufferSerialiser serialiser = new IoBufferSerialiser(binarySerialiser);
         DataSetWrapper dsOrig = new DataSetWrapper();
         dsOrig.source = original;
         DataSetWrapper cpOrig = new DataSetWrapper();
@@ -168,7 +171,7 @@ public class DataSetToByteArraySample {
 
     public void testGenericSerializerPerformance(final int iterations, final boolean withMetaInfos,
             final boolean asFloat32) {
-        IoBufferSerialiser serialiser = new IoBufferSerialiser(byteBuffer);
+        IoBufferSerialiser serialiser = new IoBufferSerialiser(binarySerialiser);
         byteBuffer.reset(); // reset to read position (==0)
         final DoubleErrorDataSet copy = new DoubleErrorDataSet("init", N_SAMPLES);
         copy.setErrorType(DIM_X, ErrorType.NO_ERROR);
@@ -328,17 +331,17 @@ public class DataSetToByteArraySample {
     }
 
     public void testSerializerPerformance(final int iterations, final boolean withMetaInfos, final boolean asFloat32) {
-        DataSetSerialiser.setMetaDataSerialised(withMetaInfos);
-        DataSetSerialiser.setDataLablesSerialised(withMetaInfos);
+        dataSetSerialiser.setMetaDataSerialised(withMetaInfos);
+        dataSetSerialiser.setDataLablesSerialised(withMetaInfos);
 
         final long startTime = ProcessingProfiler.getTimeStamp();
 
         byteBuffer.reset(); // reset to read position (==0)
         for (int i = 0; i < iterations; i++) {
             byteBuffer.reset(); // '0' writing at start of buffer
-            DataSetSerialiser.writeDataSetToByteArray(original, byteBuffer, asFloat32);
+            dataSetSerialiser.writeDataSetToByteArray(original, asFloat32);
             byteBuffer.reset(); // reset to read position (==0)
-            final DataSet dataSet = DataSetSerialiser.readDataSetFromByteArray(byteBuffer);
+            final DataSet dataSet = dataSetSerialiser.readDataSetFromByteArray();
 
             if (!original.getName().equals(dataSet.getName())) {
                 LOGGER.atError().log("ERROR data set does not match -> potential streaming error at index = " + i);
