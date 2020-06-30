@@ -9,18 +9,15 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.WeakHashMap;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import de.gsi.dataset.serializer.IoBuffer;
+import de.gsi.dataset.serializer.IoSerialiser;
 import de.gsi.dataset.serializer.spi.AbstractSerialiser;
-import de.gsi.dataset.serializer.spi.BinarySerialiser;
-import de.gsi.dataset.serializer.spi.BinarySerialiser.HeaderInfo;
 import de.gsi.dataset.serializer.spi.ClassDescriptions;
 import de.gsi.dataset.serializer.spi.ClassFieldDescription;
 import de.gsi.dataset.serializer.spi.FieldHeader;
 import de.gsi.dataset.serializer.spi.FieldSerialiser;
 import de.gsi.dataset.serializer.spi.FieldSerialiser.FieldSerialiserFunction;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * reference implementation for streaming arbitrary object to and from a IoBuffer-based byte-buffer
@@ -30,68 +27,68 @@ import de.gsi.dataset.serializer.spi.FieldSerialiser.FieldSerialiserFunction;
 public class IoBufferSerialiser extends AbstractSerialiser {
     private static final Logger LOGGER = LoggerFactory.getLogger(IoBufferSerialiser.class);
     private final Map<Integer, WeakHashMap<String, ClassFieldDescription>> fieldToClassFieldDescription = new HashMap<>();
-    private final IoBuffer ioBuffer;
+    private final IoSerialiser ioSerialiser;
 
     /**
      * Initialises new IoBuffer-backed object serialiser
      *
-     * @param buffer the backing IoBuffer (see e.g. {@link de.gsi.dataset.serializer.spi.FastByteBuffer} or
-     *        {@link de.gsi.dataset.serializer.spi.ByteBuffer}
+     * @param ioSerialiser the backing IoSerialiser (see e.g. {@link de.gsi.dataset.serializer.IoSerialiser}
+     * TODO: add links to reference implementations
      */
-    public IoBufferSerialiser(final IoBuffer buffer) {
+    public IoBufferSerialiser(final IoSerialiser ioSerialiser) {
         super();
-        if (buffer == null) {
+        if (ioSerialiser == null) {
             throw new IllegalArgumentException("buffer must not be null");
         }
-        ioBuffer = buffer;
-        startMarkerFunction = subClassName -> BinarySerialiser.putStartMarker(ioBuffer, subClassName);
-        endMarkerFunction = subClassName -> BinarySerialiser.putEndMarker(ioBuffer, subClassName);
+        this.ioSerialiser = ioSerialiser;
+        startMarkerFunction = ioSerialiser::putStartMarker;
+        endMarkerFunction = ioSerialiser::putEndMarker;
 
         // register primitive and boxed data type handlers
-        FieldPrimitiveValueHelper.register(this, ioBuffer);
-        FieldPrimitveValueArrayHelper.register(this, ioBuffer);
-        FieldBoxedValueHelper.register(this, ioBuffer);
-        FieldBoxedValueArrayHelper.register(this, ioBuffer);
+        FieldPrimitiveValueHelper.register(this, ioSerialiser);
+        FieldPrimitveValueArrayHelper.register(this, ioSerialiser);
+        FieldBoxedValueHelper.register(this, ioSerialiser);
+        FieldBoxedValueArrayHelper.register(this, ioSerialiser);
 
         // Collection serialiser mapper to IoBuffer
         final FieldSerialiserFunction collectionReader = (obj, field) -> {
             final Collection<?> origCollection = (Collection<?>) field.getField().get(obj);
             origCollection.clear();
 
-            final Collection<?> setVal = BinarySerialiser.getCollection(ioBuffer, origCollection);
+            final Collection<?> setVal = ioSerialiser.getCollection(origCollection);
             field.getField().set(obj, setVal);
         }; // reader
         final FieldSerialiserFunction collectionWriter = (obj, field) -> {
             final Collection<?> retVal = (Collection<?>) field.getField().get(obj);
-            BinarySerialiser.put(ioBuffer, field.getFieldName(), retVal); // writer
+            ioSerialiser.put(field.getFieldName(), retVal); // writer
         };
-        addClassDefinition(new IoBufferFieldSerialiser(ioBuffer, collectionReader, collectionWriter, Collection.class));
-        addClassDefinition(new IoBufferFieldSerialiser(ioBuffer, collectionReader, collectionWriter, List.class));
-        addClassDefinition(new IoBufferFieldSerialiser(ioBuffer, collectionReader, collectionWriter, Queue.class));
-        addClassDefinition(new IoBufferFieldSerialiser(ioBuffer, collectionReader, collectionWriter, Set.class));
+        addClassDefinition(new IoBufferFieldSerialiser(ioSerialiser, collectionReader, collectionWriter, Collection.class));
+        addClassDefinition(new IoBufferFieldSerialiser(ioSerialiser, collectionReader, collectionWriter, List.class));
+        addClassDefinition(new IoBufferFieldSerialiser(ioSerialiser, collectionReader, collectionWriter, Queue.class));
+        addClassDefinition(new IoBufferFieldSerialiser(ioSerialiser, collectionReader, collectionWriter, Set.class));
 
         // Enum serialiser mapper to IoBuffer
-        addClassDefinition(new IoBufferFieldSerialiser(ioBuffer, //
-                (obj, field) -> field.getField().set(obj, BinarySerialiser.getEnum(ioBuffer, (Enum<?>) field.getField().get(obj))), // reader
-                (obj, field) -> BinarySerialiser.put(ioBuffer, field.getFieldName(), (Enum<?>) field.getField().get(obj)), // writer
+        addClassDefinition(new IoBufferFieldSerialiser(ioSerialiser, //
+                (obj, field) -> field.getField().set(obj, ioSerialiser.getEnum((Enum<?>) field.getField().get(obj))), // reader
+                (obj, field) -> ioSerialiser.put(field.getFieldName(), (Enum<?>) field.getField().get(obj)), // writer
                 Enum.class));
 
         // Map serialiser mapper to IoBuffer
-        addClassDefinition(new IoBufferFieldSerialiser(ioBuffer, //
+        addClassDefinition(new IoBufferFieldSerialiser(ioSerialiser, //
                 (obj, field) -> { // reader
                     final Map<?, ?> origMap = (Map<?, ?>) field.getField().get(obj);
                     origMap.clear();
-                    final Map<?, ?> setVal = BinarySerialiser.getMap(ioBuffer, origMap);
+                    final Map<?, ?> setVal = ioSerialiser.getMap(origMap);
 
                     field.getField().set(obj, setVal);
                 }, // writer
                 (obj, field) -> {
                     final Map<?, ?> retVal = (Map<?, ?>) field.getField().get(obj);
-                    BinarySerialiser.put(ioBuffer, field.getFieldName(), retVal);
+                    ioSerialiser.put(field.getFieldName(), retVal);
                 },
                 Map.class));
 
-        FieldDataSetHelper.register(this, ioBuffer);
+        FieldDataSetHelper.register(this, ioSerialiser);
 
         // addClassDefinition(null, StringHashMapList.class);
     }
@@ -148,7 +145,7 @@ public class IoBufferSerialiser extends AbstractSerialiser {
             return;
         }
 
-        ioBuffer.position(fieldRoot.getDataBufferPosition());
+        ioSerialiser.getBuffer().position(fieldRoot.getDataBufferPosition());
         serialiser.get().getReaderFunction().exec(obj, classFieldDescription);
     }
 
@@ -158,14 +155,14 @@ public class IoBufferSerialiser extends AbstractSerialiser {
             throw new IllegalArgumentException("obj must not be null (yet)");
         }
 
-        final long startPosition = ioBuffer.position();
-        final HeaderInfo bufferHeader = BinarySerialiser.checkHeaderInfo(ioBuffer);
+        final long startPosition = ioSerialiser.getBuffer().position();
+        // final HeaderInfo bufferHeader = ioSerialiser.checkHeaderInfo();
 
         // match field header with class field description
         final ClassFieldDescription classFieldDescription = ClassDescriptions.get(obj.getClass());
 
-        ioBuffer.position(startPosition);
-        final FieldHeader fieldRoot = BinarySerialiser.parseIoStream(ioBuffer);
+        ioSerialiser.getBuffer().position(startPosition);
+        final FieldHeader fieldRoot = ioSerialiser.parseIoStream();
         // deserialise into object
         for (final FieldHeader child : fieldRoot.getChildren()) {
             deserialise(obj, child, classFieldDescription, 0);
@@ -174,16 +171,12 @@ public class IoBufferSerialiser extends AbstractSerialiser {
         return obj;
     }
 
-    public IoBuffer getBuffer() {
-        return ioBuffer;
-    }
-
     @Override
     public void serialiseObject(final Object obj) throws IllegalAccessException {
-        BinarySerialiser.putHeaderInfo(ioBuffer);
+        ioSerialiser.putHeaderInfo();
 
         super.serialiseObject(obj);
 
-        BinarySerialiser.putEndMarker(ioBuffer, "OBJ_ROOT_END");
+        ioSerialiser.putEndMarker("OBJ_ROOT_END");
     }
 }

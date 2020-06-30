@@ -15,6 +15,7 @@ import de.gsi.chart.XYChart;
 import de.gsi.chart.axes.spi.DefaultNumericAxis;
 import de.gsi.chart.utils.PeriodicScreenCapture;
 import de.gsi.dataset.DataSet;
+import de.gsi.dataset.serializer.spi.BinarySerialiser;
 import de.gsi.dataset.serializer.spi.FastByteBuffer;
 import de.gsi.dataset.serializer.spi.iobuffer.DataSetSerialiser;
 import de.gsi.dataset.spi.DoubleDataSet;
@@ -38,6 +39,7 @@ public class WriteDataSetToFileSample extends Application {
     private static DoubleDataSet dataSet1;
     private static DoubleDataSet dataSet2;
     private static FastByteBuffer fastByteBuffer = new FastByteBuffer();
+    private static DataSetSerialiser dataSetSerialiser = new DataSetSerialiser(new BinarySerialiser(fastByteBuffer));
 
     @Override
     public void start(final Stage primaryStage) {
@@ -67,7 +69,6 @@ public class WriteDataSetToFileSample extends Application {
 
         LOGGER.atInfo().log("userHome = " + userHome);
         final Path path = Paths.get(userHome + "/ChartSamples");
-        final String fileName = PNG_FILE_NAME;
 
         final boolean addDateTimeToFileName = true;
 
@@ -77,7 +78,7 @@ public class WriteDataSetToFileSample extends Application {
         DataSetUtils.writeDataSetToFile(dataSet2, path, CSV_FILE_NAME_SYSTEMTIME, false);
 
         // start periodic screen capture
-        final PeriodicScreenCapture screenCapture = new PeriodicScreenCapture(path, fileName, scene, DEFAULT_DELAY,
+        final PeriodicScreenCapture screenCapture = new PeriodicScreenCapture(path, PNG_FILE_NAME, scene, DEFAULT_DELAY,
                 DEFAULT_PERIOD, addDateTimeToFileName);
 
         screenCapture.addListener(obs -> {
@@ -99,7 +100,7 @@ public class WriteDataSetToFileSample extends Application {
             // DataSetSerialiser.setDataLablesSerialised(false); // uncomment
             boolean asFloat = true;
             fastByteBuffer.reset(); // '0' writing at start of buffer
-            DataSetSerialiser.writeDataSetToByteArray(dataSet2, fastByteBuffer, asFloat);
+            dataSetSerialiser.writeDataSetToByteArray(dataSet2, asFloat);
             LOGGER.atInfo().log("written bytes to byte buffer = " + fastByteBuffer.position());
             fastByteBuffer.reset(); // return read position to '0'
 
@@ -110,7 +111,7 @@ public class WriteDataSetToFileSample extends Application {
             // recover written data sets
             final DataSet recoveredDataSet1 = DataSetUtils.readDataSetFromFile(actualFileName1);
             final DataSet recoveredDataSet2 = DataSetUtils.readDataSetFromFile(actualFileName2);
-            final DataSet recoveredDataSet3 = DataSetSerialiser.readDataSetFromByteArray(fastByteBuffer);
+            final DataSet recoveredDataSet3 = dataSetSerialiser.readDataSetFromByteArray();
 
             chart2.getDatasets().clear();
             if (recoveredDataSet1 != null) {

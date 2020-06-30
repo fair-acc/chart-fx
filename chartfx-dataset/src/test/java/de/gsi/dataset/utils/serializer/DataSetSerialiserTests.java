@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
 
 import de.gsi.dataset.DataSet;
+import de.gsi.dataset.serializer.spi.BinarySerialiser;
 import de.gsi.dataset.serializer.spi.FastByteBuffer;
 import de.gsi.dataset.serializer.spi.iobuffer.DataSetSerialiser;
 import de.gsi.dataset.spi.AbstractDataSet;
@@ -26,10 +27,11 @@ public class DataSetSerialiserTests {
         addMetaData(original, true);
 
         final FastByteBuffer byteBuffer = new FastByteBuffer();
+        final DataSetSerialiser ioSerialiser = new DataSetSerialiser(new BinarySerialiser(byteBuffer));
 
-        DataSetSerialiser.writeDataSetToByteArray(original, byteBuffer, asFloat32);
+        ioSerialiser.writeDataSetToByteArray(original, asFloat32);
         byteBuffer.reset(); // reset to read position (==0)
-        final DataSet restored = DataSetSerialiser.readDataSetFromByteArray(byteBuffer);
+        final DataSet restored = ioSerialiser.readDataSetFromByteArray();
 
         assertEquals(original, restored);
     }
@@ -64,10 +66,10 @@ public class DataSetSerialiserTests {
         addMetaData(original, true);
 
         final FastByteBuffer byteBuffer = new FastByteBuffer();
-        DataSetSerialiser.writeDataSetToByteArray(original, byteBuffer, asFloat32);
+        final DataSetSerialiser ioSerialiser = new DataSetSerialiser(new BinarySerialiser(byteBuffer));
+        ioSerialiser.writeDataSetToByteArray(original, asFloat32);
         byteBuffer.reset(); // reset to read position (==0)
-        final DefaultErrorDataSet restored = (DefaultErrorDataSet) DataSetSerialiser
-                                                     .readDataSetFromByteArray(byteBuffer);
+        final DefaultErrorDataSet restored = (DefaultErrorDataSet) ioSerialiser.readDataSetFromByteArray();
 
         assertEquals(new DefaultErrorDataSet(original), new DefaultErrorDataSet(restored));
     }
@@ -91,11 +93,11 @@ public class DataSetSerialiserTests {
         addMetaData(original, true);
 
         final FastByteBuffer byteBuffer = new FastByteBuffer();
+        final DataSetSerialiser ioSerialiser = new DataSetSerialiser(new BinarySerialiser(byteBuffer));
 
-        DataSetSerialiser.writeDataSetToByteArray(original, byteBuffer, asFloat32);
+        ioSerialiser.writeDataSetToByteArray(original, asFloat32);
         byteBuffer.reset(); // reset to read position (==0)
-        final DefaultErrorDataSet restored = (DefaultErrorDataSet) DataSetSerialiser
-                                                     .readDataSetFromByteArray(byteBuffer);
+        final DefaultErrorDataSet restored = (DefaultErrorDataSet) ioSerialiser.readDataSetFromByteArray();
 
         assertEquals(new DefaultErrorDataSet(original), new DefaultErrorDataSet(restored));
     }
@@ -107,10 +109,11 @@ public class DataSetSerialiserTests {
         addMetaData(original, true);
 
         final FastByteBuffer byteBuffer = new FastByteBuffer();
+        final DataSetSerialiser ioSerialiser = new DataSetSerialiser(new BinarySerialiser(byteBuffer));
 
-        DataSetSerialiser.writeDataSetToByteArray(original, byteBuffer, asFloat32);
+        ioSerialiser.writeDataSetToByteArray(original, asFloat32);
         byteBuffer.reset(); // reset to read position (==0)
-        final DataSet restored = DataSetSerialiser.readDataSetFromByteArray(byteBuffer);
+        final DataSet restored = ioSerialiser.readDataSetFromByteArray();
 
         assertEquals(original, restored);
     }
@@ -122,10 +125,11 @@ public class DataSetSerialiserTests {
         addMetaData(original, true);
 
         final FastByteBuffer byteBuffer = new FastByteBuffer();
+        final DataSetSerialiser ioSerialiser = new DataSetSerialiser(new BinarySerialiser(byteBuffer));
 
-        DataSetSerialiser.writeDataSetToByteArray(original, byteBuffer, asFloat32);
+        ioSerialiser.writeDataSetToByteArray(original, asFloat32);
         byteBuffer.reset(); // reset to read position (==0)
-        final DataSet restored = DataSetSerialiser.readDataSetFromByteArray(byteBuffer);
+        final DataSet restored = ioSerialiser.readDataSetFromByteArray();
 
         assertEquals(original, restored);
     }
@@ -140,10 +144,11 @@ public class DataSetSerialiserTests {
         addMetaData(original, false);
 
         final FastByteBuffer byteBuffer = new FastByteBuffer();
+        final DataSetSerialiser ioSerialiser = new DataSetSerialiser(new BinarySerialiser(byteBuffer));
 
-        DataSetSerialiser.writeDataSetToByteArray(original, byteBuffer, asFloat32);
+        ioSerialiser.writeDataSetToByteArray(original, asFloat32);
         byteBuffer.reset(); // reset to read position (==0)
-        final DataSet restored = DataSetSerialiser.readDataSetFromByteArray(byteBuffer);
+        final DataSet restored = ioSerialiser.readDataSetFromByteArray();
 
         assertEquals(original, restored);
     }
@@ -156,14 +161,15 @@ public class DataSetSerialiserTests {
         addMetaData(original, false);
 
         final FastByteBuffer byteBuffer = new FastByteBuffer();
+        final DataSetSerialiser ioSerialiser = new DataSetSerialiser(new BinarySerialiser(byteBuffer));
 
-        DataSetSerialiser.setDataLablesSerialised(false);
-        DataSetSerialiser.setMetaDataSerialised(false);
-        DataSetSerialiser.writeDataSetToByteArray(original, byteBuffer, asFloat32);
-        DataSetSerialiser.setDataLablesSerialised(true);
-        DataSetSerialiser.setMetaDataSerialised(true);
+        ioSerialiser.setDataLablesSerialised(false);
+        ioSerialiser.setMetaDataSerialised(false);
+        ioSerialiser.writeDataSetToByteArray(original, asFloat32);
+        ioSerialiser.setDataLablesSerialised(true);
+        ioSerialiser.setMetaDataSerialised(true);
         byteBuffer.reset(); // reset to read position (==0)
-        final DataSet restored = DataSetSerialiser.readDataSetFromByteArray(byteBuffer);
+        final DataSet restored = ioSerialiser.readDataSetFromByteArray();
 
         MultiDimDoubleDataSet originalNoMetaData = new MultiDimDoubleDataSet(original);
         original.getMetaInfo().clear();

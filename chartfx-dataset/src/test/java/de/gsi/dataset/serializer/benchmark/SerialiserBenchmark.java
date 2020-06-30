@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import de.gsi.dataset.serializer.IoBuffer;
 import de.gsi.dataset.serializer.helper.SerialiserHelper;
 import de.gsi.dataset.serializer.helper.TestDataClass;
+import de.gsi.dataset.serializer.spi.BinarySerialiser;
 import de.gsi.dataset.serializer.spi.FastByteBuffer;
 import de.gsi.dataset.serializer.spi.iobuffer.IoBufferSerialiser;
 
@@ -24,7 +25,8 @@ public class SerialiserBenchmark { // NOPMD - nomen est omen
     // private static final Data sourceData = createData();
     private static final IoBuffer byteBuffer = new FastByteBuffer(20000);
     // private static final IoBuffer byteBuffer = new ByteBuffer(20000);
-    private static final IoBufferSerialiser ioSerialiser = new IoBufferSerialiser(byteBuffer);
+    private static final BinarySerialiser binarySerialiser = new BinarySerialiser(byteBuffer);
+    private static final IoBufferSerialiser ioSerialiser = new IoBufferSerialiser(binarySerialiser);
     private static final TestDataClass inputObject = new TestDataClass(10, 100, 1);
     private static TestDataClass outputObject = new TestDataClass(-1, -1, 0);
     private static int nBytesCMW;
@@ -69,7 +71,7 @@ public class SerialiserBenchmark { // NOPMD - nomen est omen
 
     public static void checkCustomSerialiserIdentity() {
         byteBuffer.reset();
-        SerialiserHelper.serialiseCustom(byteBuffer, inputObject);
+        SerialiserHelper.serialiseCustom(binarySerialiser, inputObject);
         nBytesIO = (int) byteBuffer.position();
         LOGGER.atInfo().addArgument(nBytesIO).log("custom serialiser nBytes = {}");
 
@@ -79,7 +81,7 @@ public class SerialiserBenchmark { // NOPMD - nomen est omen
         // fieldRoot.printFieldStructure();
 
         byteBuffer.reset();
-        SerialiserHelper.deserialiseCustom(byteBuffer, outputObject);
+        SerialiserHelper.deserialiseCustom(binarySerialiser, outputObject);
 
         // second test - both vectors should have the same initial values after serialise/deserialise
         assertArrayEquals(inputObject.stringArray, outputObject.stringArray);
@@ -166,9 +168,9 @@ public class SerialiserBenchmark { // NOPMD - nomen est omen
 
         for (int i = 0; i < iterations; i++) {
             byteBuffer.reset();
-            SerialiserHelper.serialiseCustom(byteBuffer, inputObject);
+            SerialiserHelper.serialiseCustom(binarySerialiser, inputObject);
             byteBuffer.reset();
-            SerialiserHelper.deserialiseMap(byteBuffer);
+            SerialiserHelper.deserialiseMap(binarySerialiser);
 
             if (!inputObject.string1.contentEquals(outputObject.string1)) {
                 // quick check necessary so that the above is not optimised by the Java JIT compiler to NOP
@@ -226,10 +228,10 @@ public class SerialiserBenchmark { // NOPMD - nomen est omen
 
         for (int i = 0; i < iterations; i++) {
             byteBuffer.reset();
-            SerialiserHelper.serialiseCustom(byteBuffer, inputObject);
+            SerialiserHelper.serialiseCustom(binarySerialiser, inputObject);
 
             byteBuffer.reset();
-            SerialiserHelper.deserialiseCustom(byteBuffer, outputObject);
+            SerialiserHelper.deserialiseCustom(binarySerialiser, outputObject);
 
             if (!inputObject.string1.contentEquals(outputObject.string1)) {
                 // quick check necessary so that the above is not optimised by the Java JIT compiler to NOP
