@@ -585,24 +585,24 @@ public class BinarySerialiserTests {
         final BinarySerialiser ioSerialiser = new BinarySerialiser(buffer); // TODO: generalise to IoBuffer
 
         // check out-of-bound handling for primitives
-        assertThrows(IndexOutOfBoundsException.class, () -> ioSerialiser.getBoolean());
-        assertThrows(IndexOutOfBoundsException.class, () -> ioSerialiser.getByte());
-        assertThrows(IndexOutOfBoundsException.class, () -> ioSerialiser.getShort());
-        assertThrows(IndexOutOfBoundsException.class, () -> ioSerialiser.getInteger());
-        assertThrows(IndexOutOfBoundsException.class, () -> ioSerialiser.getLong());
-        assertThrows(IndexOutOfBoundsException.class, () -> ioSerialiser.getFloat());
-        assertThrows(IndexOutOfBoundsException.class, () -> ioSerialiser.getDouble());
-        assertThrows(IndexOutOfBoundsException.class, () -> ioSerialiser.getString());
+        assertThrows(IndexOutOfBoundsException.class, ioSerialiser::getBoolean);
+        assertThrows(IndexOutOfBoundsException.class, ioSerialiser::getByte);
+        assertThrows(IndexOutOfBoundsException.class, ioSerialiser::getShort);
+        assertThrows(IndexOutOfBoundsException.class, ioSerialiser::getInteger);
+        assertThrows(IndexOutOfBoundsException.class, ioSerialiser::getLong);
+        assertThrows(IndexOutOfBoundsException.class, ioSerialiser::getFloat);
+        assertThrows(IndexOutOfBoundsException.class, ioSerialiser::getDouble);
+        assertThrows(IndexOutOfBoundsException.class, ioSerialiser::getString);
 
         // check out-of-bound handling for primitive arrays
-        assertThrows(IndexOutOfBoundsException.class, () -> ioSerialiser.getBooleanArray());
-        assertThrows(IndexOutOfBoundsException.class, () -> ioSerialiser.getByteArray());
-        assertThrows(IndexOutOfBoundsException.class, () -> ioSerialiser.getShortArray());
-        assertThrows(IndexOutOfBoundsException.class, () -> ioSerialiser.getIntArray());
-        assertThrows(IndexOutOfBoundsException.class, () -> ioSerialiser.getLongArray());
-        assertThrows(IndexOutOfBoundsException.class, () -> ioSerialiser.getFloatArray());
-        assertThrows(IndexOutOfBoundsException.class, () -> ioSerialiser.getDoubleArray());
-        assertThrows(IndexOutOfBoundsException.class, () -> ioSerialiser.getStringArray());
+        assertThrows(IndexOutOfBoundsException.class, ioSerialiser::getBooleanArray);
+        assertThrows(IndexOutOfBoundsException.class, ioSerialiser::getByteArray);
+        assertThrows(IndexOutOfBoundsException.class, ioSerialiser::getShortArray);
+        assertThrows(IndexOutOfBoundsException.class, ioSerialiser::getIntArray);
+        assertThrows(IndexOutOfBoundsException.class, ioSerialiser::getLongArray);
+        assertThrows(IndexOutOfBoundsException.class, ioSerialiser::getFloatArray);
+        assertThrows(IndexOutOfBoundsException.class, ioSerialiser::getDoubleArray);
+        assertThrows(IndexOutOfBoundsException.class, ioSerialiser::getStringArray);
     }
 
     @DisplayName("basic primitive array writer tests")
@@ -648,7 +648,7 @@ public class BinarySerialiserTests {
         ioSerialiser.put("queue", queue); // add Collection - Queue<E>
 
         final Map<Integer, String> map = new HashMap<>();
-        list.stream().forEach(item -> map.put(item, "Item#" + item.toString()));
+        list.forEach(item -> map.put(item, "Item#" + item.toString()));
         ioSerialiser.put("map", map); // add Map
 
         ioSerialiser.put("enum", DataType.ENUM); // add Enum
@@ -677,19 +677,6 @@ public class BinarySerialiserTests {
             buffer.position(field.getDataBufferPosition());
             ioSerialiser.swallowRest(field);
         }
-    }
-
-    @Test
-    public void testGenericHelper() {
-        final BinarySerialiser ioSerialiser = new BinarySerialiser(new FastByteBuffer(1000)); // TODO: generalise to IoBuffer
-        assertArrayEquals(new double[] { 1.0, 0.0, 1.0 }, ioSerialiser.toDoubles(new boolean[] { true, false, true }));
-        assertArrayEquals(new double[] { 1.0, 0.0, 2.0 }, ioSerialiser.toDoubles(new byte[] { (byte) 1, (byte) 0, (byte) 2 }));
-        assertArrayEquals(new double[] { 1.0, 0.0, 2.0 }, ioSerialiser.toDoubles(new char[] { (char) 1, (char) 0, (char) 2 }));
-        assertArrayEquals(new double[] { 1.0, 0.0, 2.0 }, ioSerialiser.toDoubles(new short[] { (short) 1, (short) 0, (short) 2 }));
-        assertArrayEquals(new double[] { 1.0, 0.0, 2.0 }, ioSerialiser.toDoubles(new int[] { (int) 1, (int) 0, (int) 2 }));
-        assertArrayEquals(new double[] { 1.0, 0.0, 2.0 }, ioSerialiser.toDoubles(new long[] { (long) 1, (long) 0, (long) 2 }));
-        assertArrayEquals(new double[] { 1.0, 0.0, 2.0 }, ioSerialiser.toDoubles(new float[] { (float) 1, (float) 0, (float) 2 }));
-        assertArrayEquals(new double[] { 1.0, 0.0, 2.0 }, ioSerialiser.toDoubles(new String[] { "1.0", "0.0", "2.0" }));
     }
 
     @DisplayName("test getDoubleArray([boolean[], byte[], ..., String[]) helper method")
@@ -767,7 +754,7 @@ public class BinarySerialiserTests {
         ioSerialiser.setBufferIncrements(bufferIncrements + 1);
         assertEquals(bufferIncrements + 1, ioSerialiser.getBufferIncrements());
 
-        assertDoesNotThrow(() -> ioSerialiser.getNumberOfElements(new int[] { 1, 2, 3 }));
-        assertEquals(1000, ioSerialiser.getNumberOfElements(new int[] { 10, 10, 10 }));
+        assertDoesNotThrow(() -> BinarySerialiser.getNumberOfElements(new int[] { 1, 2, 3 }));
+        assertEquals(1000, BinarySerialiser.getNumberOfElements(new int[] { 10, 10, 10 }));
     }
 }
