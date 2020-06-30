@@ -5,8 +5,7 @@ import java.util.List;
 
 import de.gsi.dataset.AxisDescription;
 import de.gsi.dataset.serializer.DataType;
-import de.gsi.dataset.serializer.IoBuffer;
-import de.gsi.dataset.serializer.spi.BinarySerialiser;
+import de.gsi.dataset.serializer.IoSerialiser;
 import de.gsi.dataset.serializer.spi.ClassFieldDescription;
 import de.gsi.dataset.spi.DefaultAxisDescription;
 
@@ -22,7 +21,7 @@ public class FieldListAxisDescription extends IoBufferFieldSerialiser {
      * @param buffer the backing IoBuffer
      * 
      */
-    public FieldListAxisDescription(IoBuffer buffer) {
+    public FieldListAxisDescription(IoSerialiser buffer) {
         super(buffer, (obj, field) -> {}, (obj, field) -> {}, List.class, AxisDescription.class);
         readerFunction = this::execFieldReader;
         writerFunction = this::execFieldWriter;
@@ -32,28 +31,28 @@ public class FieldListAxisDescription extends IoBufferFieldSerialiser {
         Collection<AxisDescription> setVal = (Collection<AxisDescription>) field.getField().get(obj); // NOPMD
         // N.B. cast should fail at runtime (points to lib inconsistency)
         setVal.clear();
-        final int nElements = ioBuffer.getInt(); // number of elements
+        final int nElements = ioBuffer.getBuffer().getInt(); // number of elements
         for (int i = 0; i < nElements; i++) {
             // read start marker
-            BinarySerialiser.getFieldHeader(ioBuffer);
+            ioBuffer.getFieldHeader();
             final byte startMarker = ioBuffer.getByte();
             if (startMarker != DataType.START_MARKER.getAsByte()) {
                 throw new IllegalStateException("corrupt start marker, value is " + startMarker + " vs. should " + DataType.START_MARKER.getAsByte());
             }
 
-            BinarySerialiser.getFieldHeader(ioBuffer);
+            ioBuffer.getFieldHeader();
             String axisName = ioBuffer.getString();
-            BinarySerialiser.getFieldHeader(ioBuffer);
+            ioBuffer.getFieldHeader();
             String axisUnit = ioBuffer.getString();
-            BinarySerialiser.getFieldHeader(ioBuffer);
+            ioBuffer.getFieldHeader();
             double min = ioBuffer.getDouble();
-            BinarySerialiser.getFieldHeader(ioBuffer);
+            ioBuffer.getFieldHeader();
             double max = ioBuffer.getDouble();
 
             DefaultAxisDescription ad = new DefaultAxisDescription(i, axisName, axisUnit, min, max); // NOPMD
             // N.B. PMD - unavoidable in-loop instantiation
 
-            BinarySerialiser.getFieldHeader(ioBuffer);
+            ioBuffer.getFieldHeader();
             final byte endMarker = ioBuffer.getByte();
             if (endMarker != DataType.END_MARKER.getAsByte()) {
                 throw new IllegalStateException(
@@ -74,17 +73,17 @@ public class FieldListAxisDescription extends IoBufferFieldSerialiser {
         final int nElements = axisDescriptions.size();
         final int entrySize = 50; // as an initial estimate
 
-        final long sizeMarkerStart = BinarySerialiser.putArrayHeader(ioBuffer, fieldName, DataType.LIST,
+        final long sizeMarkerStart = ioBuffer.putArrayHeader(fieldName, DataType.LIST,
                 new int[] { nElements }, (nElements * entrySize) + 9);
-        ioBuffer.putInt(nElements); // number of elements
+        ioBuffer.getBuffer().putInt(nElements); // number of elements
         for (AxisDescription axis : axisDescriptions) {
-            BinarySerialiser.putStartMarker(ioBuffer, axis.getName());
-            BinarySerialiser.put(ioBuffer, fieldName, axis.getName());
-            BinarySerialiser.put(ioBuffer, fieldName, axis.getUnit());
-            BinarySerialiser.put(ioBuffer, fieldName, axis.getMin());
-            BinarySerialiser.put(ioBuffer, fieldName, axis.getMax());
-            BinarySerialiser.putEndMarker(ioBuffer, axis.getName());
+            ioBuffer.putStartMarker(axis.getName());
+            ioBuffer.put(fieldName, axis.getName());
+            ioBuffer.put(fieldName, axis.getUnit());
+            ioBuffer.put(fieldName, axis.getMin());
+            ioBuffer.put(fieldName, axis.getMax());
+            ioBuffer.putEndMarker(axis.getName());
         }
-        BinarySerialiser.adjustDataByteSizeBlock(ioBuffer, sizeMarkerStart);
+        ioBuffer.adjustDataByteSizeBlock(sizeMarkerStart);
     }
 }

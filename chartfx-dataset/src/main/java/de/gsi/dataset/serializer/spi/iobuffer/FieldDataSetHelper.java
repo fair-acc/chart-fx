@@ -2,9 +2,8 @@ package de.gsi.dataset.serializer.spi.iobuffer;
 
 import de.gsi.dataset.DataSet;
 import de.gsi.dataset.serializer.DataType;
-import de.gsi.dataset.serializer.IoBuffer;
+import de.gsi.dataset.serializer.IoSerialiser;
 import de.gsi.dataset.serializer.spi.AbstractSerialiser;
-import de.gsi.dataset.serializer.spi.BinarySerialiser;
 
 import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
 
@@ -19,15 +18,13 @@ public final class FieldDataSetHelper {
      * @param serialiser for which the field serialisers should be registered
      * @param ioBuffer reference to the IoBuffer back-ends
      */
-    public static void register(final AbstractSerialiser serialiser, final IoBuffer ioBuffer) {
+    public static void register(final AbstractSerialiser serialiser, final IoSerialiser ioBuffer) {
         // DoubleArrayList serialiser mapper to IoBuffer
         serialiser.addClassDefinition(new IoBufferFieldSerialiser(ioBuffer, //
-                (obj, field) -> field.getField().set(obj,
-                                     DoubleArrayList.wrap(BinarySerialiser.getDoubleArray(ioBuffer))), // reader
+                (obj, field) -> field.getField().set(obj, DoubleArrayList.wrap(ioBuffer.getDoubleArray())), // reader
                 (obj, field) -> {
                     final DoubleArrayList retVal = (DoubleArrayList) field.getField().get(obj);
-                    BinarySerialiser.put(ioBuffer, field.getFieldName(), retVal.elements(),
-                            new int[] { retVal.size() });
+                    ioBuffer.put(field.getFieldName(), retVal.elements(), new int[] { retVal.size() });
                 }, // writer
                 DoubleArrayList.class));
 
@@ -38,16 +35,16 @@ public final class FieldDataSetHelper {
                         throw new IllegalArgumentException("unknown DataSet type = " + dataSetType);
                     }
 
-                    field.getField().set(obj, DataSetSerialiser.readDataSetFromByteArray(ioBuffer));
+                    field.getField().set(obj, new DataSetSerialiser(ioBuffer).readDataSetFromByteArray());
                 }, // reader
                 (obj, field) -> {
                     final DataSet retVal = (DataSet) (field.getField() == null ? obj : field.getField().get(obj));
-                    final long sizeMarkerStart = BinarySerialiser.putArrayHeader(ioBuffer, field.getFieldName(),
+                    final long sizeMarkerStart = ioBuffer.putArrayHeader(field.getFieldName(),
                             DataType.OTHER, new int[] { 1 }, 1);
 
-                    ioBuffer.putString(DataSet.class.getName());
-                    DataSetSerialiser.writeDataSetToByteArray(retVal, ioBuffer, false);
-                    BinarySerialiser.adjustDataByteSizeBlock(ioBuffer, sizeMarkerStart);
+                    ioBuffer.getBuffer().putString(DataSet.class.getName());
+                    new DataSetSerialiser(ioBuffer).writeDataSetToByteArray(retVal, false);
+                    ioBuffer.adjustDataByteSizeBlock(sizeMarkerStart);
                 }, // writer
                 DataSet.class));
 

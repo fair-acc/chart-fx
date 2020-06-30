@@ -8,12 +8,11 @@ import de.gsi.dataset.serializer.IoBuffer;
  * @author rstein
  */
 public class BinaryArrayFactory extends BinarySerialiser {
-
-    protected BinaryArrayFactory() {
-        super();
+    public BinaryArrayFactory(final IoBuffer buffer) {
+        super(buffer);
     }
 
-    public static void put(final FastByteBuffer buffer, final String fieldName, final double[][] matrix) {
+    public void put(final String fieldName, final double[][] matrix) {
         if ((matrix == null) || (matrix.length == 0) || (matrix[0].length == 0)) {
             return;
         }
@@ -24,10 +23,10 @@ public class BinaryArrayFactory extends BinarySerialiser {
                 serialisedMatrix[(i * dims[1]) + j] = matrix[i][j];
             }
         }
-        BinarySerialiser.put(buffer, fieldName, serialisedMatrix, dims);
+        put(fieldName, serialisedMatrix, dims);
     }
 
-    public static double[][] readDoubleMatrix(final IoBuffer buffer, final FieldHeader fieldHeader) {
+    public double[][] readDoubleMatrix(final IoBuffer buffer, final FieldHeader fieldHeader) {
         if (fieldHeader.getDataDimension() != 2) {
             throw new IllegalArgumentException(
                     "2-dim array required, field is for n-dim=" + fieldHeader.getDataDimension());
