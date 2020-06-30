@@ -1,5 +1,5 @@
-.x-value-indicator-line0{
-    -fx-stroke-width: 4;
-    -fx-stroke: red;
-    -fx-stroke-dash-array: 8;
+.x-value-indicator-line0 {
+  -fx-stroke-width: 4;
+  -fx-stroke: red;
+  -fx-stroke-dash-array: 8;
 }
