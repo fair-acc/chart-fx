@@ -2,7 +2,7 @@ package de.gsi.dataset.serializer.spi.iobuffer;
 
 import de.gsi.dataset.serializer.IoSerialiser;
 import de.gsi.dataset.serializer.spi.AbstractSerialiser;
-import de.gsi.dataset.serializer.spi.GenericsHelper;
+import de.gsi.dataset.utils.GenericsHelper;
 
 /**
  * helper class to register default serialiser for boxed array primitive types (ie. Boolean[], Byte[], Short[], ...,

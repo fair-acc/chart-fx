@@ -16,6 +16,7 @@ import de.gsi.dataset.serializer.DataType;
 import de.gsi.dataset.serializer.IoBuffer;
 import de.gsi.dataset.serializer.IoSerialiser;
 import de.gsi.dataset.utils.AssertUtils;
+import de.gsi.dataset.utils.GenericsHelper;
 
 /**
  * Generic binary serialiser aimed at efficiently transferring data between server/client and in particular between
@@ -245,23 +246,23 @@ public class BinarySerialiser implements IoSerialiser { // NOPMD - omen est omen
     public double[] getDoubleArray(final DataType dataType) {
         switch (dataType) {
         case BOOL_ARRAY:
-            return toDoubles(getBooleanArray());
+            return GenericsHelper.toDoublePrimitive(getBooleanArray());
         case BYTE_ARRAY:
-            return toDoubles(getByteArray());
+            return GenericsHelper.toDoublePrimitive(getByteArray());
         case SHORT_ARRAY:
-            return toDoubles(getShortArray());
+            return GenericsHelper.toDoublePrimitive(getShortArray());
         case INT_ARRAY:
-            return toDoubles(getIntArray());
+            return GenericsHelper.toDoublePrimitive(getIntArray());
         case LONG_ARRAY:
-            return toDoubles(getLongArray());
+            return GenericsHelper.toDoublePrimitive(getLongArray());
         case FLOAT_ARRAY:
-            return toDoubles(getFloatArray());
+            return GenericsHelper.toDoublePrimitive(getFloatArray());
         case DOUBLE_ARRAY:
             return getDoubleArray();
         case CHAR_ARRAY:
-            return toDoubles(getCharArray());
+            return GenericsHelper.toDoublePrimitive(getCharArray());
         case STRING_ARRAY:
-            return toDoubles(getStringArray());
+            return GenericsHelper.toDoublePrimitive(getStringArray());
         default:
             throw new IllegalArgumentException("dataType '" + dataType + "' is not an array");
         }
@@ -1060,78 +1061,6 @@ public class BinarySerialiser implements IoSerialiser { // NOPMD - omen est omen
         }
 
         LOGGER.atTrace().addArgument(fieldHeader).addArgument(leftOver).addArgument(size).log("swallowed unused element '{}'='{}' size = {}");
-    }
-
-    @Deprecated // to be refactored into generics helper class
-    protected double[] toDoubles(final boolean[] input) {
-        final double[] doubleArray = new double[input.length];
-        for (int i = 0; i < input.length; i++) { // NOPMD
-            doubleArray[i] = input[i] ? 1.0 : 0.0;
-        }
-        return doubleArray;
-    }
-
-    @Deprecated // to be refactored into generics helper class
-    protected double[] toDoubles(final byte[] input) {
-        final double[] doubleArray = new double[input.length];
-        for (int i = 0; i < input.length; i++) { // NOPMD
-            doubleArray[i] = input[i];
-        }
-        return doubleArray;
-    }
-
-    @Deprecated // to be refactored into generics helper class
-    protected double[] toDoubles(final char[] input) {
-        final double[] doubleArray = new double[input.length];
-        for (int i = 0; i < input.length; i++) { // NOPMD
-            doubleArray[i] = input[i];
-        }
-        return doubleArray;
-    }
-
-    @Deprecated // to be refactored into generics helper class
-    protected double[] toDoubles(final float[] input) {
-        final double[] doubleArray = new double[input.length];
-        for (int i = 0; i < input.length; i++) { // NOPMD
-            doubleArray[i] = input[i];
-        }
-        return doubleArray;
-    }
-
-    @Deprecated // to be refactored into generics helper class
-    protected double[] toDoubles(final int[] input) {
-        final double[] doubleArray = new double[input.length];
-        for (int i = 0; i < input.length; i++) { // NOPMD
-            doubleArray[i] = input[i];
-        }
-        return doubleArray;
-    }
-
-    @Deprecated // to be refactored into generics helper class
-    protected double[] toDoubles(final long[] input) {
-        final double[] doubleArray = new double[input.length];
-        for (int i = 0; i < input.length; i++) { // NOPMD
-            doubleArray[i] = input[i];
-        }
-        return doubleArray;
-    }
-
-    @Deprecated // to be refactored into generics helper class
-    protected double[] toDoubles(final short[] input) { // NOPMD
-        final double[] doubleArray = new double[input.length];
-        for (int i = 0; i < input.length; i++) { // NOPMD
-            doubleArray[i] = input[i];
-        }
-        return doubleArray;
-    }
-
-    @Deprecated // to be refactored into generics helper class
-    protected double[] toDoubles(final String[] input) {
-        final double[] doubleArray = new double[input.length];
-        for (int i = 0; i < input.length; i++) { // NOPMD
-            doubleArray[i] = input[i] == null ? Double.NaN : Double.parseDouble(input[i]);
-        }
-        return doubleArray;
     }
 
     public static class HeaderInfo extends FieldHeader {
