@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory;
 import de.gsi.dataset.serializer.IoSerialiser;
 import de.gsi.dataset.serializer.spi.BinarySerialiser;
 import de.gsi.dataset.serializer.spi.FastByteBuffer;
-import de.gsi.dataset.serializer.spi.FieldHeader;
+import de.gsi.dataset.serializer.spi.WireDataFieldDescription;
 
 /**
  * @author rstein
@@ -30,7 +30,7 @@ public class BinarySerialiserTests {
         ioSerialiser.put("long", (long) 45);
 
         buffer.reset();
-        FieldHeader header;
+        WireDataFieldDescription header;
         header = ioSerialiser.getFieldHeader();
         assertEquals("boolean", header.getFieldName(), "byte type retrieval");
         assertTrue(buffer.getBoolean(), "byte retrieval");

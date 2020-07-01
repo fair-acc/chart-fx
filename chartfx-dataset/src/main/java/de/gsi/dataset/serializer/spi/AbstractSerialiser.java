@@ -14,6 +14,8 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import de.gsi.dataset.serializer.FieldDescription;
+
 /**
  * @author rstein
  */
@@ -70,7 +72,9 @@ public abstract class AbstractSerialiser {
                     objList.add(fieldType);
                 }
             } else {
-                field.getChildren().forEach((final ClassFieldDescription child) -> checkSerialiserAvailability(objList, child));
+                for (FieldDescription child : field.getChildren()) {
+                    checkSerialiserAvailability(objList, (ClassFieldDescription) child);
+                }
             }
         }
     }
@@ -99,7 +103,7 @@ public abstract class AbstractSerialiser {
         // did not find FieldSerialiser entry by specific class -> search for assignable interface definitions
 
         final List<Class<?>> potentialMatchingKeys = this.knownClasses().keySet().stream().filter(k -> k.isAssignableFrom(clazz)).collect(Collectors.toList());
-        if (potentialMatchingKeys == null || potentialMatchingKeys.isEmpty()) {
+        if (potentialMatchingKeys.isEmpty()) {
             // did not find any matching clazz/interface FieldSerialiser entries
             return Optional.empty();
         }
@@ -124,7 +128,7 @@ public abstract class AbstractSerialiser {
         // could not match with generics arguments
 
         // find generic serialiser entry w/o generics parameter requirements
-        return interfaceMatchList.stream().filter(entry -> entry.getGenericsPrototypes().isEmpty()).findFirst().map(Optional::of).orElse(Optional.empty());
+        return interfaceMatchList.stream().filter(entry -> entry.getGenericsPrototypes().isEmpty()).findFirst();
     }
 
     public boolean isClassKnown(Class<?> clazz, List<Class<?>> classGenericArguments) {
@@ -169,7 +173,8 @@ public abstract class AbstractSerialiser {
         }
 
         final Object newRoot = root.getField() == null ? rootObj : root.getField().get(rootObj);
-        for (final ClassFieldDescription field : root.getChildren()) {
+        for (final FieldDescription fieldDescription : root.getChildren()) {
+            ClassFieldDescription field = (ClassFieldDescription) fieldDescription;
             final Object reference = field.getField().get(newRoot);
             if (reference == null) {
                 // only follow and serialise non-null references of sub-classes

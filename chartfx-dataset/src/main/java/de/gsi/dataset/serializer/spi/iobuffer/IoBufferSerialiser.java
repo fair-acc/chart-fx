@@ -9,15 +9,17 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.WeakHashMap;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import de.gsi.dataset.serializer.FieldDescription;
 import de.gsi.dataset.serializer.IoSerialiser;
 import de.gsi.dataset.serializer.spi.AbstractSerialiser;
 import de.gsi.dataset.serializer.spi.ClassDescriptions;
 import de.gsi.dataset.serializer.spi.ClassFieldDescription;
-import de.gsi.dataset.serializer.spi.FieldHeader;
 import de.gsi.dataset.serializer.spi.FieldSerialiser;
 import de.gsi.dataset.serializer.spi.FieldSerialiser.FieldSerialiserFunction;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import de.gsi.dataset.serializer.spi.WireDataFieldDescription;
 
 /**
  * reference implementation for streaming arbitrary object to and from a IoBuffer-based byte-buffer
@@ -93,22 +95,23 @@ public class IoBufferSerialiser extends AbstractSerialiser {
         // addClassDefinition(null, StringHashMapList.class);
     }
 
-    protected void deserialise(final Object obj, final FieldHeader fieldRoot, final ClassFieldDescription classFieldDescription, final int recursionDepth) throws IllegalAccessException {
+    protected void deserialise(final Object obj, final FieldDescription fieldRoot, final ClassFieldDescription classFieldDescription, final int recursionDepth) throws IllegalAccessException {
         final String ioName = fieldRoot.getFieldName();
 
-        if (!ioName.equals(classFieldDescription.getFieldName())) {
+        if (fieldRoot.hashCode() != classFieldDescription.hashCode() || !ioName.equals(classFieldDescription.getFieldName())) {
             // did not find matching (sub-)field in class
             if (fieldRoot.getChildren().isEmpty()) {
                 return;
             }
             // check for potential inner fields
-            for (final FieldHeader fieldHeader : fieldRoot.getChildren()) {
-                final String fieldName = fieldHeader.getFieldName();
+            for (final FieldDescription fieldDescription : fieldRoot.getChildren()) {
+                final String fieldName = fieldDescription.getFieldName();
                 Map<String, ClassFieldDescription> rMap = fieldToClassFieldDescription.computeIfAbsent(recursionDepth, depth -> new WeakHashMap<>());
-                final ClassFieldDescription subFieldDescription = rMap.computeIfAbsent(fieldName, name -> classFieldDescription.getChildren().stream().filter(e -> e.getFieldName().equals(fieldName)).findFirst().get());
+
+                final ClassFieldDescription subFieldDescription = rMap.computeIfAbsent(fieldName, name -> (ClassFieldDescription) classFieldDescription.findChildField(name).get());
 
                 if (subFieldDescription != null) {
-                    deserialise(obj, fieldHeader, subFieldDescription, recursionDepth + 1);
+                    deserialise(obj, fieldDescription, subFieldDescription, recursionDepth + 1);
                 }
             }
             return;
@@ -133,13 +136,13 @@ public class IoBufferSerialiser extends AbstractSerialiser {
             }
 
             // no specific deserialiser present check for potential inner fields
-            for (final FieldHeader fieldHeader : fieldRoot.getChildren()) {
-                final String fieldName = fieldHeader.getFieldName();
+            for (final FieldDescription fieldDescription : fieldRoot.getChildren()) {
+                final String fieldName = fieldDescription.getFieldName();
                 Map<String, ClassFieldDescription> rMap = fieldToClassFieldDescription.computeIfAbsent(recursionDepth, depth -> new WeakHashMap<>());
-                final ClassFieldDescription subFieldDescription = rMap.computeIfAbsent(fieldName, name -> classFieldDescription.getChildren().stream().filter(e -> e.getFieldName().equals(fieldName)).findFirst().get());
+                final ClassFieldDescription subFieldDescription = rMap.computeIfAbsent(fieldName, name -> (ClassFieldDescription) classFieldDescription.findChildField(fieldName).get());
 
                 if (subFieldDescription != null) {
-                    deserialise(subRef, fieldHeader, subFieldDescription, recursionDepth + 1);
+                    deserialise(subRef, fieldDescription, subFieldDescription, recursionDepth + 1);
                 }
             }
             return;
@@ -156,15 +159,15 @@ public class IoBufferSerialiser extends AbstractSerialiser {
         }
 
         final long startPosition = ioSerialiser.getBuffer().position();
-        // final HeaderInfo bufferHeader = ioSerialiser.checkHeaderInfo();
+        // final ProtocolInfo bufferHeader = ioSerialiser.checkHeaderInfo();
 
         // match field header with class field description
         final ClassFieldDescription classFieldDescription = ClassDescriptions.get(obj.getClass());
 
         ioSerialiser.getBuffer().position(startPosition);
-        final FieldHeader fieldRoot = ioSerialiser.parseIoStream();
+        final WireDataFieldDescription fieldRoot = ioSerialiser.parseIoStream();
         // deserialise into object
-        for (final FieldHeader child : fieldRoot.getChildren()) {
+        for (final FieldDescription child : fieldRoot.getChildren()) {
             deserialise(obj, child, classFieldDescription, 0);
         }
 

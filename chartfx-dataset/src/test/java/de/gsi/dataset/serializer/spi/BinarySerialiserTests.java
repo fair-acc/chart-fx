@@ -26,8 +26,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import de.gsi.dataset.serializer.DataType;
+import de.gsi.dataset.serializer.FieldDescription;
 import de.gsi.dataset.serializer.IoBuffer;
-import de.gsi.dataset.serializer.spi.BinarySerialiser.HeaderInfo;
 import de.gsi.dataset.serializer.spi.helper.MyGenericClass;
 import de.gsi.dataset.utils.AssertUtils;
 
@@ -85,7 +85,7 @@ public class BinarySerialiserTests {
         ioSerialiser.put("string", new String[] { "test", "test" });
         positionAfter.add(buffer.position());
 
-        FieldHeader header;
+        WireDataFieldDescription header;
         int positionAfterFieldHeader;
         int skipNBytes;
         int[] dims;
@@ -275,7 +275,7 @@ public class BinarySerialiserTests {
         ioSerialiser.put("string", (String) null);
         positionAfter.add(buffer.position());
 
-        FieldHeader header;
+        WireDataFieldDescription header;
         // check primitive types
         buffer.reset();
         assertEquals(0, buffer.position(), "initial buffer position");
@@ -397,7 +397,7 @@ public class BinarySerialiserTests {
 
         // add Map
         final Map<Integer, String> map = new HashMap<>();
-        list.stream().forEach(item -> map.put(item, "Item#" + item.toString()));
+        list.forEach(item -> map.put(item, "Item#" + item.toString()));
         positionBefore.add(buffer.position());
         ioSerialiser.put("map", map);
         positionAfter.add(buffer.position());
@@ -414,7 +414,7 @@ public class BinarySerialiserTests {
 
         buffer.reset();
 
-        FieldHeader header;
+        WireDataFieldDescription header;
         int positionAfterFieldHeader;
         int skipNBytes;
         // check types
@@ -429,7 +429,7 @@ public class BinarySerialiserTests {
 
         // header info
         assertEquals(positionBefore.removeFirst(), buffer.position());
-        HeaderInfo headerInfo = ioSerialiser.checkHeaderInfo();
+        ProtocolInfo headerInfo = ioSerialiser.checkHeaderInfo();
         assertEquals(ioSerialiser.headerInfo, headerInfo);
         assertNotNull(ioSerialiser.headerInfo.toString());
         assertEquals(ioSerialiser.headerInfo.hashCode(), headerInfo.hashCode());
@@ -666,14 +666,14 @@ public class BinarySerialiserTests {
         buffer.reset();
 
         // and read back streamed items
-        final FieldHeader objectRoot = ioSerialiser.parseIoStream();
+        final WireDataFieldDescription objectRoot = ioSerialiser.parseIoStream();
         assertNotNull(objectRoot);
 
         buffer.reset();
         // check agnostic parsing of buffer
-        final HeaderInfo bufferHeader2 = ioSerialiser.checkHeaderInfo();
+        final ProtocolInfo bufferHeader2 = ioSerialiser.checkHeaderInfo();
         assertNotNull(bufferHeader2);
-        for (FieldHeader field : objectRoot.getChildren()) {
+        for (FieldDescription field : objectRoot.getChildren()) {
             buffer.position(field.getDataBufferPosition());
             ioSerialiser.swallowRest(field);
         }
