@@ -53,7 +53,7 @@ public class SerialiserBenchmark { // NOPMD - nomen est omen
 
         // keep: checks serialised data structure
         // byteBuffer.reset();
-        // final FieldHeader fieldRoot = SerialiserHelper.deserialiseMap(byteBuffer);
+        // final WireDataFieldDescription fieldRoot = SerialiserHelper.deserialiseMap(byteBuffer);
         // fieldRoot.printFieldStructure();
 
         byteBuffer.reset();
@@ -77,7 +77,7 @@ public class SerialiserBenchmark { // NOPMD - nomen est omen
 
         // keep: checks serialised data structure
         // byteBuffer.reset();
-        // final FieldHeader fieldRoot = SerialiserHelper.deserialiseMap(byteBuffer);
+        // final WireDataFieldDescription fieldRoot = SerialiserHelper.deserialiseMap(byteBuffer);
         // fieldRoot.printFieldStructure();
 
         byteBuffer.reset();

@@ -6,23 +6,22 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.nio.CharBuffer;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.gsi.dataset.serializer.DataType;
+import de.gsi.dataset.serializer.FieldDescription;
 
 /**
  * @author rstein
  */
-public class ClassFieldDescription {
+public class ClassFieldDescription implements FieldDescription {
     private static final Logger LOGGER = LoggerFactory.getLogger(ClassFieldDescription.class);
     private static final int WILDCARD_EXTENDS_LENGTH = "? extends ".length();
     /**
@@ -32,12 +31,12 @@ public class ClassFieldDescription {
     public static int maxRecursionLevel = 10;
     private String toStringName; // computed on demand and cached
     private final int hierarchyDepth;
+    private final int hashCode;
     private final Field field; // since we cannot derive from 'final class Field'
     private final String fieldName;
     private final String fieldNameRelative;
-    private final Optional<ClassFieldDescription> parent;
-    private final List<ClassFieldDescription> children = new ArrayList<>();
-    private final Map<String, ClassFieldDescription> hashMap = new ConcurrentHashMap<>();
+    private final Optional<FieldDescription> parent;
+    private final List<FieldDescription> children = new ArrayList<>();
 
     private final Class<?> classType;
     private final DataType dataType;
@@ -70,9 +69,6 @@ public class ClassFieldDescription {
     private final boolean isEnum;
 
     private final boolean serializable;
-    // access counter (N.B. to check if data has been modified)
-    private final AtomicInteger readCount = new AtomicInteger();
-    private final AtomicInteger writeCount = new AtomicInteger();
 
     /**
      * This should be called only once with the root class as an argument
@@ -105,20 +101,17 @@ public class ClassFieldDescription {
             }
             this.field = field;
             classType = field.getType();
+            hashCode = field.getName().hashCode();
             fieldName = field.getName();
-            if (this.parent.isPresent()) {
-                final String relativeName = this.parent.get().isRoot() ? "" : (this.parent.get().getFieldNameRelative() + ".");
-                fieldNameRelative = relativeName + fieldName;
-            } else {
-                fieldNameRelative = fieldName;
-            }
+            fieldNameRelative = this.parent.map(fieldDescription -> fieldDescription.getFieldNameRelative() + "." + fieldName).orElse(fieldName);
 
             modifierID = field.getModifiers();
         } else {
             this.field = null; // it's a root, no field definition available
             classType = referenceClass;
+            hashCode = classType.getName().hashCode();
             fieldName = classType.getName();
-            fieldNameRelative = "";
+            fieldNameRelative = fieldName;
 
             modifierID = classType.getModifiers();
         }
@@ -171,7 +164,7 @@ public class ClassFieldDescription {
         // add child to parent if it serializable or if a full scan is requested
         if (this.parent.isPresent() && (serializable || fullScan)) {
             this.parent.get().getChildren().add(this);
-            this.parent.get().getFieldMap().put(fieldName, this);
+            //TODO: check if continues to be necessary this.parent.get().getFieldMap().put(fieldName, this);
         }
     }
 
@@ -195,6 +188,21 @@ public class ClassFieldDescription {
             LOGGER.atError().setCause(e).log("error initialising inner class object");
         }
         return null;
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof FieldDescription)) {
+            return false;
+        }
+        if (this.hashCode() != obj.hashCode()) {
+            return false;
+        }
+
+        return this.getFieldName().equals(((FieldDescription) obj).getFieldName());
     }
 
     /**
@@ -232,11 +240,44 @@ public class ClassFieldDescription {
         return genericTypeList;
     }
 
+    @Override
+    public Optional<FieldDescription> findChildField(final String fieldName) {
+        final int hashCode = fieldName.hashCode();
+        //return fieldDescriptionList.stream().filter(p -> p.hashCode() == hashCode && p.getFieldName().equals(fieldName)).findFirst();
+        for (int i = 0; i < children.size(); i++) {
+            final FieldDescription field = children.get(i);
+            final String name = field.getFieldName();
+            if (name == fieldName) { // NOPMD early return if the same String object reference
+                return Optional.of(field);
+            }
+            if (field.hashCode() == hashCode && name.equals(fieldName)) {
+                return Optional.of(field);
+            }
+        }
+        return Optional.empty();
+    }
+
     /**
      * @return the children (if any) from the super classes
      */
-    public List<ClassFieldDescription> getChildren() {
+    @Override
+    public List<FieldDescription> getChildren() {
         return children;
+    }
+
+    @Override
+    public long getDataBufferPosition() {
+        return 0;
+    }
+
+    @Override
+    public int getDataDimension() {
+        return 0;
+    }
+
+    @Override
+    public int[] getDataDimensions() {
+        return new int[0];
     }
 
     /**
@@ -247,18 +288,16 @@ public class ClassFieldDescription {
         return dataType;
     }
 
+    @Override
+    public long getExpectedNumberOfDataBytes() {
+        return 0;
+    }
+
     /**
      * @return the underlying Field type or {@code null} if it's a root node
      */
     public Field getField() {
         return field;
-    }
-
-    /**
-     * @return the hashMap containing the child references by field name
-     */
-    public Map<String, ClassFieldDescription> getFieldMap() {
-        return hashMap;
     }
 
     /**
@@ -331,8 +370,36 @@ public class ClassFieldDescription {
     /**
      * @return the parent
      */
-    public Optional<ClassFieldDescription> getParent() {
+    public Optional<FieldDescription> getParent() {
         return parent;
+    }
+
+    @Override
+    public int hashCode() {
+        return hashCode;
+    }
+
+    @Override
+    public void printFieldStructure() {
+        printClassStructure(this, true, 0);
+    }
+
+    public static void printClassStructure(final ClassFieldDescription field, final boolean fullView, final int recursionLevel) {
+        final String enumOrClass = field.isEnum() ? "Enum " : "class ";
+        final String typeCategorgy = (field.isInterface() ? "interface " : (field.isPrimitive() ? "" : enumOrClass));
+        final String typeName = field.getTypeName() + field.getGenericFieldTypeString();
+        final String mspace = spaces((recursionLevel + 1) * indentationNumerOfSpace);
+        final boolean isSerialisable = field.isSerializable();
+
+        if (isSerialisable || fullView) {
+            LOGGER.atInfo().addArgument(mspace).addArgument(isSerialisable ? "  " : "//").addArgument(field.getModifierString()).addArgument(typeCategorgy).addArgument(typeName).addArgument(field.getFieldNameRelative()).log("{} {} {} {}{} {}");
+
+            field.getChildren().forEach(f -> printClassStructure((ClassFieldDescription) f, fullView, recursionLevel + 1));
+        }
+    }
+
+    private static String spaces(final int spaces) {
+        return CharBuffer.allocate(spaces).toString().replace('\0', ' ');
     }
 
     /**
@@ -341,7 +408,7 @@ public class ClassFieldDescription {
      *        the parent etc.)
      * @return the parent field reference description for the provided field
      */
-    public ClassFieldDescription getParent(final ClassFieldDescription field, final int hierarchyLevel) {
+    public FieldDescription getParent(final FieldDescription field, final int hierarchyLevel) {
         if (field == null) {
             throw new IllegalArgumentException("field is null at hierarchyLevel = " + hierarchyLevel);
         }
@@ -354,6 +421,7 @@ public class ClassFieldDescription {
     /**
      * @return field class type
      */
+    @Override
     public Class<?> getType() {
         return classType;
     }
@@ -485,37 +553,6 @@ public class ClassFieldDescription {
         return modVolatile;
     }
 
-    /**
-     * @return the readCount
-     */
-    public AtomicInteger readCount() {
-        return readCount;
-    }
-
-    /**
-     * resets read and write count
-     */
-    public void reset() {
-        resetReadCount();
-        resetWriteCount();
-    }
-
-    /**
-     * resets the read counter
-     */
-    public void resetReadCount() {
-        readCount.set(0);
-        getChildren().forEach(ClassFieldDescription::resetReadCount);
-    }
-
-    /**
-     * resets the write counter
-     */
-    public void resetWriteCount() {
-        writeCount.set(0);
-        getChildren().forEach(ClassFieldDescription::resetWriteCount);
-    }
-
     @Override
     public String toString() {
         if (toStringName == null) {
@@ -523,13 +560,6 @@ public class ClassFieldDescription {
                            + getTypeName() + " " + getFieldNameRelative() + " (hierarchyDepth = " + getHierarchyDepth() + ")";
         }
         return toStringName;
-    }
-
-    /**
-     * @return the writeCount
-     */
-    public AtomicInteger writeCount() {
-        return writeCount;
     }
 
     /**
@@ -573,7 +603,7 @@ public class ClassFieldDescription {
 
         // loop over member fields and inner classes
         for (final Field pfield : classType.getDeclaredFields()) {
-            final Optional<ClassFieldDescription> localParent = parent.getParent();
+            final Optional<FieldDescription> localParent = parent.getParent();
             if ((localParent.isPresent() && pfield.getType().equals(localParent.get().getType()) && recursionLevel >= maxRecursionLevel) || pfield.getName().startsWith("this$")) {
                 // inner classes contain parent as part of declared fields
                 continue;
