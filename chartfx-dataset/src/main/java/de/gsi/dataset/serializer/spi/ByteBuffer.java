@@ -10,7 +10,6 @@ import de.gsi.dataset.serializer.IoBuffer;
  * @author rstein
  */
 public class ByteBuffer implements IoBuffer {
-    private static final int DEFAULT_INITIAL_CAPACITY = 1000;
     public static final long SIZE_OF_BOOLEAN = 1;
     public static final long SIZE_OF_BYTE = 1;
     public static final long SIZE_OF_SHORT = 2;
@@ -19,8 +18,10 @@ public class ByteBuffer implements IoBuffer {
     public static final long SIZE_OF_LONG = 8;
     public static final long SIZE_OF_FLOAT = 4;
     public static final long SIZE_OF_DOUBLE = 8;
+    private static final int DEFAULT_INITIAL_CAPACITY = 1000;
     private final ReadWriteLock lock = new ReentrantReadWriteLock();
     private final java.nio.ByteBuffer nioByteBuffer;
+    private boolean enforceSimpleStringEncoding = false;
 
     /**
      * construct new java.nio.ByteBuffer-based ByteBuffer with DEFAULT_INITIAL_CAPACITY
@@ -211,7 +212,7 @@ public class ByteBuffer implements IoBuffer {
         final byte[] values = new byte[arraySize];
         nioByteBuffer.get(values, 0, arraySize);
         getByte(); // For C++ zero terminated string
-        return new String(values, 0, arraySize, StandardCharsets.ISO_8859_1);
+        return new String(values, 0, arraySize, StandardCharsets.UTF_8);
     }
 
     @Override
@@ -226,8 +227,22 @@ public class ByteBuffer implements IoBuffer {
     }
 
     @Override
+    public String getStringISO8859() {
+        final int arraySize = getInt() - 1; // for C++ zero terminated string
+        final byte[] values = new byte[arraySize];
+        nioByteBuffer.get(values, 0, arraySize);
+        getByte(); // For C++ zero terminated string
+        return new String(values, 0, arraySize, StandardCharsets.ISO_8859_1);
+    }
+
+    @Override
     public boolean hasRemaining() {
         return nioByteBuffer.hasRemaining();
+    }
+
+    @Override
+    public boolean isEnforceSimpleStringEncoding() {
+        return enforceSimpleStringEncoding;
     }
 
     @Override
@@ -397,11 +412,19 @@ public class ByteBuffer implements IoBuffer {
 
     @Override
     public IoBuffer putString(final String string) {
-        final int strLength = string == null ? 0 : string.length();
-        putInt(strLength + 1); // for C++ zero terminated string$
-        for (int i = 0; i < strLength; ++i) {
-            putByte((byte) (string.charAt(i) & 0xFF)); // ISO-8859-1 encoding
+        if (isEnforceSimpleStringEncoding()) {
+            return this.putStringISO8859(string);
         }
+
+        if (string == null) {
+            putInt(1); // for C++ zero terminated string$
+            putByte((byte) 0); // For C++ zero terminated string
+            return this;
+        }
+
+        final byte[] bytes = string.getBytes(StandardCharsets.UTF_8);
+        putInt(bytes.length + 1); // for C++ zero terminated string$
+        nioByteBuffer.put(bytes, 0, bytes.length);
         putByte((byte) 0); // For C++ zero terminated string
         return this;
     }
@@ -410,9 +433,26 @@ public class ByteBuffer implements IoBuffer {
     public IoBuffer putStringArray(final String[] src, final long offset, final int nToCopy) {
         final int nElements = nToCopy > 0 ? Math.min(nToCopy, src.length) : src.length;
         putInt(nElements);
+        if (isEnforceSimpleStringEncoding()) {
+            for (int k = 0; k < nElements; k++) {
+                putStringISO8859(src[k + (int) offset]);
+            }
+            return this;
+        }
         for (int k = 0; k < nElements; k++) {
             putString(src[k + (int) offset]);
         }
+        return this;
+    }
+
+    @Override
+    public IoBuffer putStringISO8859(final String string) {
+        final int strLength = string == null ? 0 : string.length();
+        putInt(strLength + 1); // for C++ zero terminated string$
+        for (int i = 0; i < strLength; ++i) {
+            putByte((byte) (string.charAt(i) & 0xFF)); // ISO-8859-1 encoding
+        }
+        putByte((byte) 0); // For C++ zero terminated string
         return this;
     }
 
@@ -426,6 +466,11 @@ public class ByteBuffer implements IoBuffer {
         nioByteBuffer.reset();
         nioByteBuffer.mark();
         return this;
+    }
+
+    @Override
+    public void setEnforceSimpleStringEncoding(final boolean state) {
+        this.enforceSimpleStringEncoding = state;
     }
 
     @Override

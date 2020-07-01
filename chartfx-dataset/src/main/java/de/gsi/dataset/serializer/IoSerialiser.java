@@ -133,8 +133,7 @@ public interface IoSerialiser {
 
     void put(String fieldName, String[] arrayValue, int[] dims);
 
-    long putArrayHeader(String fieldName, DataType dataType,
-            int[] dims, int nElements);
+    long putArrayHeader(String fieldName, DataType dataType, int[] dims, int nElements);
 
     void putEndMarker(String markerName);
 
