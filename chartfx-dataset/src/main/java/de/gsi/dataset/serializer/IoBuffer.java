@@ -116,6 +116,13 @@ public interface IoBuffer extends IoBufferHeader<IoBuffer> {
 
     String[] getStringArray(final String[] dst, final long offset, final int length);
 
+    String getStringISO8859();
+
+    /**
+     * @return {@code true} the ISO-8859-1 character encoding is being enforced for data fields (better performance), otherwise UTF-8 is being used (more generic encoding)
+     */
+    boolean isEnforceSimpleStringEncoding();
+
     IoBuffer putBoolean(boolean value);
 
     default IoBuffer putBooleanArray(final boolean[] src) {
@@ -223,4 +230,11 @@ public interface IoBuffer extends IoBufferHeader<IoBuffer> {
     }
 
     IoBuffer putStringArray(final String[] src, final long offset, final int nToCopy);
+
+    IoBuffer putStringISO8859(String string);
+
+    /**
+     * @param state, {@code true} the ISO-8859-1 character encoding is being enforced for data fields (better performance), otherwise UTF-8 is being used (more generic encoding)
+     */
+    void setEnforceSimpleStringEncoding(boolean state);
 }

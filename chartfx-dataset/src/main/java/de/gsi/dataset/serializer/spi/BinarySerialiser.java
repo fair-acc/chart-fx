@@ -99,11 +99,11 @@ import de.gsi.dataset.utils.GenericsHelper;
  */
 @SuppressWarnings({ "PMD.CommentSize", "PMD.ExcessivePublicCount", "PMD.PrematureDeclaration", "unused" }) // variables need to be read from stream
 public class BinarySerialiser implements IoSerialiser { // NOPMD - omen est omen
-    private static final Logger LOGGER = LoggerFactory.getLogger(BinarySerialiser.class);
-    private static final String READ_POSITION_AT_BUFFER_END = "read position at buffer end";
     public static final byte VERSION_MAJOR = 1;
     public static final byte VERSION_MINOR = 0;
     public static final byte VERSION_MICRO = 0;
+    private static final Logger LOGGER = LoggerFactory.getLogger(BinarySerialiser.class);
+    private static final String READ_POSITION_AT_BUFFER_END = "read position at buffer end";
     private static final DataType[] byteToDataType = new DataType[256];
     private static final Byte[] dataTypeToByte = new Byte[256];
     static {
@@ -150,7 +150,7 @@ public class BinarySerialiser implements IoSerialiser { // NOPMD - omen est omen
     }
 
     protected final ProtocolInfo headerInfo = new ProtocolInfo(BinarySerialiser.class.getCanonicalName(), VERSION_MAJOR, VERSION_MINOR, VERSION_MICRO);
-    private static int bufferIncrements;
+    private int bufferIncrements;
     private IoBuffer buffer;
 
     /**
@@ -234,6 +234,11 @@ public class BinarySerialiser implements IoSerialiser { // NOPMD - omen est omen
 
     public int getBufferIncrements() {
         return bufferIncrements;
+    }
+
+    public void setBufferIncrements(final int bufferIncrements) {
+        AssertUtils.gtEqThanZero("bufferIncrements", bufferIncrements);
+        this.bufferIncrements = bufferIncrements;
     }
 
     @Override
@@ -405,44 +410,6 @@ public class BinarySerialiser implements IoSerialiser { // NOPMD - omen est omen
         throw new IndexOutOfBoundsException(READ_POSITION_AT_BUFFER_END);
     }
 
-    protected Object[] getGenericArrayAsBoxedPrimitive(final DataType dataType) {
-        final Object[] retVal;
-        // @formatter:off
-        switch (dataType) {
-        case BOOL:
-            retVal = GenericsHelper.toObject(buffer.getBooleanArray());
-            break;
-        case BYTE:
-            retVal = GenericsHelper.toObject(buffer.getByteArray());
-            break;
-        case CHAR:
-            retVal = GenericsHelper.toObject(buffer.getCharArray());
-            break;
-        case SHORT:
-            retVal = GenericsHelper.toObject(buffer.getShortArray());
-            break;
-        case INT:
-            retVal = GenericsHelper.toObject(buffer.getIntArray());
-            break;
-        case LONG:
-            retVal = GenericsHelper.toObject(buffer.getLongArray());
-            break;
-        case FLOAT:
-            retVal = GenericsHelper.toObject(buffer.getFloatArray());
-            break;
-        case DOUBLE:
-            retVal = GenericsHelper.toObject(buffer.getDoubleArray());
-            break;
-        case STRING:
-            retVal = buffer.getStringArray();
-            break;
-        // @formatter:on
-        default:
-            throw new IllegalArgumentException("type not implemented - " + dataType);
-        }
-        return retVal;
-    }
-
     @Override
     public int[] getIntArray() {
         if (buffer.hasRemaining()) {
@@ -508,15 +475,6 @@ public class BinarySerialiser implements IoSerialiser { // NOPMD - omen est omen
         return retMap;
     }
 
-    protected static int getNumberOfElements(final int[] dimensions) {
-        AssertUtils.notNull("dimensions", dimensions);
-        int ret = 1;
-        for (int dim : dimensions) {
-            ret *= dim;
-        }
-        return ret;
-    }
-
     @Override
     public <E> Queue<E> getQueue(final Queue<E> collection) {
         final DataType valueDataType = getDataType(buffer.getByte());
@@ -579,6 +537,21 @@ public class BinarySerialiser implements IoSerialiser { // NOPMD - omen est omen
         throw new IndexOutOfBoundsException(READ_POSITION_AT_BUFFER_END);
     }
 
+    /**
+     * @return {@code true} the ISO-8859-1 character encoding is being enforced for data fields (better performance), otherwise UTF-8 is being used (more generic encoding)
+     */
+    public boolean isEnforceSimpleStringEncoding() {
+        return buffer.isEnforceSimpleStringEncoding();
+    }
+
+    /**
+     *
+     * @param state, {@code true} the ISO-8859-1 character encoding is being enforced for data fields (better performance), otherwise UTF-8 is being used (more generic encoding)
+     */
+    public void setEnforceSimpleStringEncoding(final boolean state) {
+        buffer.setEnforceSimpleStringEncoding(state);
+    }
+
     @Override
     public WireDataFieldDescription parseIoStream() {
         final WireDataFieldDescription fieldRoot = new WireDataFieldDescription("ROOT", DataType.OTHER, new int[] { 0 }, buffer.position(), 100);
@@ -588,57 +561,6 @@ public class BinarySerialiser implements IoSerialiser { // NOPMD - omen est omen
 
         parseIoStream(headerRoot, 0);
         return fieldRoot;
-    }
-
-    protected void parseIoStream(final WireDataFieldDescription fieldRoot, final int recursionDepth) {
-        WireDataFieldDescription fieldDescription;
-        while ((fieldDescription = getFieldHeader()) != null) {
-            final long bytesToSkip = fieldDescription.getExpectedNumberOfDataBytes();
-            final long skipPosition = buffer.position() + bytesToSkip;
-            fieldDescription.setParent(fieldRoot);
-
-            // reached end of (sub-)class - check marker value and close nested hierarchy
-            if (fieldDescription.getDataType() == DataType.END_MARKER) {
-                // reached end of (sub-)class - check marker value and close nested hierarchy
-                final byte markerValue = buffer.getByte();
-                final Optional<FieldDescription> superParent = fieldRoot.getParent();
-                if (getDataType(DataType.END_MARKER) != markerValue) {
-                    throw new IllegalStateException("reached end marker, mismatched value '" + markerValue + "' vs. should '" + getDataType(DataType.END_MARKER) + "'");
-                }
-
-                if (superParent.isEmpty()) {
-                    fieldRoot.getChildren().add(fieldDescription);
-                } else {
-                    superParent.get().getChildren().add(fieldDescription);
-                }
-                break;
-            }
-
-            fieldRoot.getChildren().add(fieldDescription);
-
-            if (bytesToSkip < 0) {
-                LOGGER.atWarn().addArgument(fieldDescription.getFieldName()).addArgument(fieldDescription.getDataType()).addArgument(bytesToSkip).log("WireDataFieldDescription for '{}' type '{}' has bytesToSkip '{} <= 0'");
-
-                // fall-back option in case of
-                swallowRest(fieldDescription);
-            } else {
-                buffer.position(skipPosition);
-            }
-
-            // detected sub-class start marker
-            // check marker value
-            if (fieldDescription.getDataType() == DataType.START_MARKER) {
-                buffer.position(fieldDescription.getDataBufferPosition());
-                // detected sub-class start marker
-                // check marker value
-                final byte markerValue = buffer.getByte();
-                if (getDataType(DataType.START_MARKER) != markerValue) {
-                    throw new IllegalStateException("reached start marker, mismatched value '" + markerValue + "' vs. should '" + getDataType(DataType.START_MARKER) + "'");
-                }
-
-                parseIoStream(fieldDescription, recursionDepth + 1);
-            }
-        }
     }
 
     @Override
@@ -777,10 +699,10 @@ public class BinarySerialiser implements IoSerialiser { // NOPMD - omen est omen
         final long sizeMarkerStart = putArrayHeader(fieldName, DataType.ENUM, new int[] { 1 },
                 (nElements * entrySize) + 9);
         final String typeList = Arrays.stream(clazz.getEnumConstants()).map(Object::toString).collect(Collectors.joining(", ", "[", "]"));
-        buffer.putString(clazz.getSimpleName());
-        buffer.putString(enumeration.getClass().getName());
-        buffer.putString(typeList);
-        buffer.putString(enumeration.name());
+        buffer.putStringISO8859(clazz.getSimpleName());
+        buffer.putStringISO8859(enumeration.getClass().getName());
+        buffer.putStringISO8859(typeList);
+        buffer.putStringISO8859(enumeration.name());
         buffer.putInt(enumeration.ordinal());
 
         adjustDataByteSizeBlock(sizeMarkerStart);
@@ -962,7 +884,7 @@ public class BinarySerialiser implements IoSerialiser { // NOPMD - omen est omen
         final long addCapacity = ((fieldName.length() + 1 + 4 + 1) * SIZE_OF_BYTE) + bufferIncrements
                                  + dataType.getPrimitiveSize() + additionalSize;
         buffer.ensureAdditionalCapacity(addCapacity);
-        buffer.putString(fieldName);
+        buffer.putStringISO8859(fieldName);
         buffer.putByte(getDataType(dataType));
     }
 
@@ -1006,9 +928,9 @@ public class BinarySerialiser implements IoSerialiser { // NOPMD - omen est omen
         final long addCapacity = 20 + "OBJ_ROOT_START".length() + "#file producer : ".length() + BinarySerialiser.class.getCanonicalName().length();
         buffer.ensureAdditionalCapacity(addCapacity);
         putStartMarker("OBJ_ROOT_START");
-        buffer.putString("#file producer : ");
-        buffer.putString(BinarySerialiser.class.getCanonicalName());
-        buffer.putString("\n");
+        buffer.putStringISO8859("#file producer : ");
+        buffer.putStringISO8859(BinarySerialiser.class.getCanonicalName());
+        buffer.putStringISO8859("\n");
         buffer.putByte(VERSION_MAJOR);
         buffer.putByte(VERSION_MINOR);
         buffer.putByte(VERSION_MICRO);
@@ -1020,9 +942,102 @@ public class BinarySerialiser implements IoSerialiser { // NOPMD - omen est omen
         buffer.putByte(getDataType(DataType.START_MARKER));
     }
 
-    public void setBufferIncrements(final int bufferIncrements) {
-        AssertUtils.gtEqThanZero("bufferIncrements", bufferIncrements);
-        BinarySerialiser.bufferIncrements = bufferIncrements;
+    protected Object[] getGenericArrayAsBoxedPrimitive(final DataType dataType) {
+        final Object[] retVal;
+        // @formatter:off
+        switch (dataType) {
+        case BOOL:
+            retVal = GenericsHelper.toObject(buffer.getBooleanArray());
+            break;
+        case BYTE:
+            retVal = GenericsHelper.toObject(buffer.getByteArray());
+            break;
+        case CHAR:
+            retVal = GenericsHelper.toObject(buffer.getCharArray());
+            break;
+        case SHORT:
+            retVal = GenericsHelper.toObject(buffer.getShortArray());
+            break;
+        case INT:
+            retVal = GenericsHelper.toObject(buffer.getIntArray());
+            break;
+        case LONG:
+            retVal = GenericsHelper.toObject(buffer.getLongArray());
+            break;
+        case FLOAT:
+            retVal = GenericsHelper.toObject(buffer.getFloatArray());
+            break;
+        case DOUBLE:
+            retVal = GenericsHelper.toObject(buffer.getDoubleArray());
+            break;
+        case STRING:
+            retVal = buffer.getStringArray();
+            break;
+        // @formatter:on
+        default:
+            throw new IllegalArgumentException("type not implemented - " + dataType);
+        }
+        return retVal;
+    }
+
+    protected static int getNumberOfElements(final int[] dimensions) {
+        AssertUtils.notNull("dimensions", dimensions);
+        int ret = 1;
+        for (int dim : dimensions) {
+            ret *= dim;
+        }
+        return ret;
+    }
+
+    protected void parseIoStream(final WireDataFieldDescription fieldRoot, final int recursionDepth) {
+        WireDataFieldDescription fieldDescription;
+        while ((fieldDescription = getFieldHeader()) != null) {
+            final long bytesToSkip = fieldDescription.getExpectedNumberOfDataBytes();
+            final long skipPosition = buffer.position() + bytesToSkip;
+            fieldDescription.setParent(fieldRoot);
+
+            // reached end of (sub-)class - check marker value and close nested hierarchy
+            if (fieldDescription.getDataType() == DataType.END_MARKER) {
+                // reached end of (sub-)class - check marker value and close nested hierarchy
+                final byte markerValue = buffer.getByte();
+                final Optional<FieldDescription> superParent = fieldRoot.getParent();
+                if (getDataType(DataType.END_MARKER) != markerValue) {
+                    throw new IllegalStateException("reached end marker, mismatched value '" + markerValue + "' vs. should '" + getDataType(DataType.END_MARKER) + "'");
+                }
+
+                if (superParent.isEmpty()) {
+                    fieldRoot.getChildren().add(fieldDescription);
+                } else {
+                    superParent.get().getChildren().add(fieldDescription);
+                }
+                break;
+            }
+
+            fieldRoot.getChildren().add(fieldDescription);
+
+            if (bytesToSkip < 0) {
+                LOGGER.atWarn().addArgument(fieldDescription.getFieldName()).addArgument(fieldDescription.getDataType()).addArgument(bytesToSkip).log("WireDataFieldDescription for '{}' type '{}' has bytesToSkip '{} <= 0'");
+
+                // fall-back option in case of
+                swallowRest(fieldDescription);
+            } else {
+                buffer.position(skipPosition);
+            }
+
+            // detected sub-class start marker
+            // check marker value
+            if (fieldDescription.getDataType() == DataType.START_MARKER) {
+                buffer.position(fieldDescription.getDataBufferPosition());
+                // detected sub-class start marker
+                // check marker value
+                final byte markerValue = buffer.getByte();
+                if (getDataType(DataType.START_MARKER) != markerValue) {
+                    throw new IllegalStateException("reached start marker, mismatched value '" + markerValue + "' vs. should '" + getDataType(DataType.START_MARKER) + "'");
+                }
+
+                parseIoStream(fieldDescription, recursionDepth + 1);
+            }
+        }
     }
 
     @SuppressWarnings("PMD.NcssCount")
