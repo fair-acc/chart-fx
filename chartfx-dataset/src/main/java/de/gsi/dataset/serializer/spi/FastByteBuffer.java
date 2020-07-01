@@ -52,10 +52,9 @@ public class FastByteBuffer implements IoBuffer {
     }
 
     private long position;
-
     private long limit;
-
     private byte[] buffer;
+    private boolean enforceSimpleStringEncoding = false;
 
     private final ReadWriteLock lock = new ReentrantReadWriteLock();
 
@@ -321,6 +320,17 @@ public class FastByteBuffer implements IoBuffer {
 
     @Override
     public String getString() {
+        if (isEnforceSimpleStringEncoding()) {
+            return this.getStringISO8859();
+        }
+        final int arraySize = getInt(); // for C++ zero terminated string
+        final String str = new String(buffer, (int) (position), arraySize - 1, StandardCharsets.UTF_8);
+        position += arraySize; // N.B. +1 larger to be compatible with C++ zero terminated string
+        return str;
+    }
+
+    @Override
+    public String getStringISO8859() {
         final int arraySize = getInt(); // for C++ zero terminated string
         final String str = new String(buffer, (int) (position), arraySize - 1, StandardCharsets.ISO_8859_1);
         position += arraySize; // N.B. +1 larger to be compatible with C++ zero terminated string
@@ -349,6 +359,11 @@ public class FastByteBuffer implements IoBuffer {
     }
 
     @Override
+    public boolean isEnforceSimpleStringEncoding() {
+        return enforceSimpleStringEncoding;
+    }
+
+    @Override
     public long limit() {
         return limit;
     }
@@ -369,6 +384,11 @@ public class FastByteBuffer implements IoBuffer {
     @Override
     public ReadWriteLock lock() {
         return lock;
+    }
+
+    @Override
+    public void setEnforceSimpleStringEncoding(final boolean state) {
+        this.enforceSimpleStringEncoding = state;
     }
 
     @Override
@@ -544,6 +564,26 @@ public class FastByteBuffer implements IoBuffer {
 
     @Override
     public IoBuffer putString(final String string) {
+        if (isEnforceSimpleStringEncoding()) {
+            return this.putStringISO8859(string);
+        }
+        final long initialPos = position;
+        position += SIZE_OF_INT;
+        // write string-to-byte (in-place)
+        final int strLength = encodeUTF8(string, buffer, ARRAY_BYTE_BASE_OFFSET, position, 3 * string.length());
+        final long endPos = position + strLength;
+
+        // write length of string byte representation
+        position = initialPos;
+        putInt(strLength + 1);
+        position = endPos;
+
+        putByte((byte) 0); // For C++ zero terminated string
+        return getSelf();
+    }
+
+    @Override
+    public IoBuffer putStringISO8859(final String string) {
         final long initialPos = position;
         position += SIZE_OF_INT;
         // write string-to-byte (in-place)
@@ -563,6 +603,12 @@ public class FastByteBuffer implements IoBuffer {
     public IoBuffer putStringArray(final String[] values, final long offset, final int nToCopy) {
         final int nElements = nToCopy > 0 ? Math.min(nToCopy, values.length) : values.length;
         putInt(nElements);
+        if (isEnforceSimpleStringEncoding()) {
+            for (int k = 0; k < nElements; k++) {
+                putStringISO8859(values[k + (int) offset]);
+            }
+            return getSelf();
+        }
         for (int k = 0; k < nElements; k++) {
             putString(values[k + (int) offset]);
         }
@@ -657,5 +703,48 @@ public class FastByteBuffer implements IoBuffer {
             unsafe.putByte(bytes, j + i, (byte) (sequence.charAt(i) & 0xFF));
         }
         return utf16Length;
+    }
+
+    protected static int encodeUTF8(final CharSequence sequence, final byte[] bytes, final long baseOffset, final long offset, final int length) {
+        int utf16Length = sequence.length();
+        long j = baseOffset + offset;
+        int i = 0;
+        long limit = baseOffset + offset + length;
+        // Designed to take advantage of https://wiki.openjdk.java.net/display/HotSpot/RangeCheckElimination
+        for (char c; i < utf16Length && i + j < limit && (c = sequence.charAt(i)) < 0x80; i++) {
+            unsafe.putByte(bytes, j + i, (byte) c);
+        }
+        if (i == utf16Length) {
+            return utf16Length;
+        }
+        j += i;
+        for (char c; i < utf16Length; i++) {
+            c = sequence.charAt(i);
+            if (c < 0x80 && j < limit) {
+                unsafe.putByte(bytes, j++, (byte) c);
+            } else if (c < 0x800 && j <= limit - 2) { // 11 bits, two UTF-8 bytes
+                unsafe.putByte(bytes, j++, (byte) ((0xF << 6) | (c >>> 6)));
+                unsafe.putByte(bytes, j++, (byte) (0x80 | (0x3F & c)));
+            } else if ((c < Character.MIN_SURROGATE || Character.MAX_SURROGATE < c) && j <= limit - 3) {
+                // Maximum single-char code point is 0xFFFF, 16 bits, three UTF-8 bytes
+                unsafe.putByte(bytes, j++, (byte) ((0xF << 5) | (c >>> 12)));
+                unsafe.putByte(bytes, j++, (byte) (0x80 | (0x3F & (c >>> 6))));
+                unsafe.putByte(bytes, j++, (byte) (0x80 | (0x3F & c)));
+            } else if (j <= limit - 4) {
+                // Minimum code point represented by a surrogate pair is 0x10000, 17 bits, four UTF-8 bytes
+                final char low;
+                if (i + 1 == sequence.length() || !Character.isSurrogatePair(c, (low = sequence.charAt(++i)))) {
+                    throw new IllegalArgumentException("Unpaired surrogate at index " + (i - 1));
+                }
+                int codePoint = Character.toCodePoint(c, low);
+                unsafe.putByte(bytes, j++, (byte) ((0xF << 4) | (codePoint >>> 18)));
+                unsafe.putByte(bytes, j++, (byte) (0x80 | (0x3F & (codePoint >>> 12))));
+                unsafe.putByte(bytes, j++, (byte) (0x80 | (0x3F & (codePoint >>> 6))));
+                unsafe.putByte(bytes, j++, (byte) (0x80 | (0x3F & codePoint)));
+            } else {
+                throw new ArrayIndexOutOfBoundsException("Failed writing " + c + " at index " + j);
+            }
+        }
+        return (int) (j - baseOffset - offset);
     }
 }

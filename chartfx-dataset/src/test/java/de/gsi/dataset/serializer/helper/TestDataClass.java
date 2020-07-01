@@ -350,8 +350,7 @@ public class TestDataClass {
             double2 = -600.6;
 
             string1 = "Hello World!";
-            string2 = "boring old test case";
-            // exciting new UTF-8 test case: string2 = "Γειά σου Κόσμε!";
+            string2 = "Γειά σου Κόσμε!";
 
             // allocate 1-dim arrays
             boolArray = getBooleanEnumeration(0, nSizePrimitives);
@@ -412,7 +411,7 @@ public class TestDataClass {
     private static double[] getDoubleEnumeration(final int from, final int to) {
         final double[] ret = new double[to - from];
         for (int i = from; i < to; i++) {
-            ret[i - from] = i / 10;
+            ret[i - from] = i / 10f;
         }
         return ret;
     }
@@ -420,7 +419,7 @@ public class TestDataClass {
     private static float[] getFloatEnumeration(final int from, final int to) {
         final float[] ret = new float[to - from];
         for (int i = from; i < to; i++) {
-            ret[i - from] = i / 10;
+            ret[i - from] = i / 10f;
         }
         return ret;
     }
