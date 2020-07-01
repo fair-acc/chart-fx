@@ -10,25 +10,26 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.gsi.dataset.serializer.DataType;
+import de.gsi.dataset.serializer.FieldDescription;
 
 /**
  * Field header descriptor
  * 
  * @author rstein
  */
-public class FieldHeader {
-    private static final Logger LOGGER = LoggerFactory.getLogger(FieldHeader.class);
-    public static int indentationNumerOfSpace = 4;
-
+public class WireDataFieldDescription implements FieldDescription {
+    private static final Logger LOGGER = LoggerFactory.getLogger(WireDataFieldDescription.class);
+    private final int hashCode;
     private final String fieldName;
+    private final String fieldNameRelative;
     private final DataType dataType;
     private final int[] dimensions;
     private final long positionBuffer;
     private final long expectedNumberOfBytes;
 
-    private Optional<FieldHeader> parent; // N.B. was 'final' TODO: investigate to keep last root once BinarySerialiser is refactored to a non-static class
+    private Optional<FieldDescription> parent; // N.B. was 'final' TODO: investigate to keep last root once BinarySerialiser is refactored to a non-static class
 
-    private final List<FieldHeader> children = new ArrayList<>();
+    private final List<FieldDescription> children = new ArrayList<>();
 
     /**
      * Constructs new serializer field header
@@ -40,13 +41,16 @@ public class FieldHeader {
      * @param positionBuffer the position from which the actual data can be parsed onwards
      * @param expectedNumberOfBytes the expected number of bytes to skip the data block
      */
-    public FieldHeader(final FieldHeader parent, final String fieldName, final DataType dataType, final int[] dims, final long positionBuffer, final long expectedNumberOfBytes) {
+    public WireDataFieldDescription(final WireDataFieldDescription parent, final String fieldName, final DataType dataType, final int[] dims, final long positionBuffer, final long expectedNumberOfBytes) {
         this.parent = parent == null ? Optional.empty() : Optional.of(parent);
+        this.hashCode = fieldName.hashCode();
         this.fieldName = fieldName;
         this.dataType = dataType;
         dimensions = Arrays.copyOf(dims, dims.length);
         this.positionBuffer = positionBuffer;
         this.expectedNumberOfBytes = expectedNumberOfBytes;
+
+        fieldNameRelative = this.parent.map(fieldDescription -> fieldDescription.getFieldNameRelative() + "." + fieldName).orElse(fieldName);
     }
 
     /**
@@ -58,42 +62,93 @@ public class FieldHeader {
      * @param positionBuffer the position from which the actual data can be parsed onwards
      * @param expectedNumberOfBytes the expected number of bytes to skip the data block
      */
-    public FieldHeader(final String fieldName, final DataType dataType, final int[] dims, final long positionBuffer, final long expectedNumberOfBytes) {
+    public WireDataFieldDescription(final String fieldName, final DataType dataType, final int[] dims, final long positionBuffer, final long expectedNumberOfBytes) {
         this(null, fieldName, dataType, dims, positionBuffer, expectedNumberOfBytes);
     }
 
-    public List<FieldHeader> getChildren() {
+    @Override
+    public boolean equals(final Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof FieldDescription)) {
+            return false;
+        }
+        if (this.hashCode() != obj.hashCode()) {
+            return false;
+        }
+
+        return this.getFieldName().equals(((FieldDescription) obj).getFieldName());
+    }
+
+    @Override
+    public Optional<FieldDescription> findChildField(String fieldName) {
+        final int hashCode = fieldName.hashCode();
+        //return fieldDescriptionList.stream().filter(p -> p.hashCode() == hashCode && p.getFieldName().equals(fieldName)).findFirst();
+        for (int i = 0; i < children.size(); i++) {
+            final FieldDescription field = children.get(i);
+            final String name = field.getFieldName();
+            if (name == fieldName) { // NOPMD early return if the same String object reference
+                return Optional.of(field);
+            }
+            if (field.hashCode() == hashCode && name.equals(fieldName)) {
+                return Optional.of(field);
+            }
+        }
+        return Optional.empty();
+    }
+
+    @Override
+    public List<FieldDescription> getChildren() {
         return children;
     }
 
+    @Override
     public long getDataBufferPosition() {
         return positionBuffer;
     }
 
+    @Override
     public int getDataDimension() {
         return dimensions.length;
     }
 
+    @Override
     public int[] getDataDimensions() {
         return dimensions;
     }
 
+    @Override
     public DataType getDataType() {
         return dataType;
     }
 
+    @Override
     public long getExpectedNumberOfDataBytes() {
         return expectedNumberOfBytes;
     }
 
+    @Override
     public String getFieldName() {
         return fieldName;
     }
 
-    public Optional<FieldHeader> getParent() {
+    @Override
+    public String getFieldNameRelative() {
+        return fieldNameRelative;
+    }
+
+    @Override
+    public Optional<FieldDescription> getParent() {
         return parent;
     }
 
+    @Override
+    public int hashCode() {
+        return hashCode;
+    }
+
+    @Override
     public void printFieldStructure() {
         if (parent.isPresent()) {
             LOGGER.atInfo().addArgument(parent.get()).log("FielHeader structure (parent: {}):");
@@ -122,18 +177,19 @@ public class FieldHeader {
         return builder.toString();
     }
 
-    void setParent(final FieldHeader parent) { // NOPMD - explicitly package private -> TODO: will be refactored
+    @Override
+    public Class<?> getType() {
+        return dataType.getClassTypes().get(0);
+    }
+
+    void setParent(final WireDataFieldDescription parent) { // NOPMD - explicitly package private -> TODO: will be refactored
         this.parent = Optional.of(parent);
     }
 
-    public static Optional<FieldHeader> findHeaderFor(final List<FieldHeader> fieldHeaderList, final String fieldName) {
-        return fieldHeaderList.stream().filter(p -> p.getFieldName().equals(fieldName)).findFirst();
-    }
-
-    protected static void printFieldStructure(final FieldHeader field, final int recursionLevel) {
+    protected static void printFieldStructure(final FieldDescription field, final int recursionLevel) {
         final String mspace = spaces((recursionLevel) *indentationNumerOfSpace);
         LOGGER.atInfo().addArgument(mspace).addArgument(field.toString()).log("{}{}");
-        field.getChildren().stream().forEach(f -> printFieldStructure(f, recursionLevel + 1));
+        field.getChildren().forEach(f -> printFieldStructure(f, recursionLevel + 1));
     }
 
     private static String spaces(final int spaces) {

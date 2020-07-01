@@ -3,7 +3,7 @@ package de.gsi.dataset.serializer.helper;
 import de.gsi.dataset.serializer.DataType;
 import de.gsi.dataset.serializer.IoSerialiser;
 import de.gsi.dataset.serializer.spi.BinarySerialiser;
-import de.gsi.dataset.serializer.spi.FieldHeader;
+import de.gsi.dataset.serializer.spi.WireDataFieldDescription;
 
 @SuppressWarnings("PMD") // complexity is part of the very large use-case surface that is being tested
 public final class SerialiserHelper {
@@ -76,7 +76,7 @@ public final class SerialiserHelper {
         if (header) {
             ioSerialiser.checkHeaderInfo();
         }
-        FieldHeader field;
+        WireDataFieldDescription field;
 
         field = getFieldHeader(ioSerialiser);
         pojo.bool1 = ioSerialiser.getBoolean();
@@ -184,13 +184,13 @@ public final class SerialiserHelper {
         }
     }
 
-    private static FieldHeader getFieldHeader(IoSerialiser ioSerialiser) {
-        FieldHeader field = ioSerialiser.getFieldHeader();
+    private static WireDataFieldDescription getFieldHeader(IoSerialiser ioSerialiser) {
+        WireDataFieldDescription field = ioSerialiser.getFieldHeader();
         ioSerialiser.getBuffer().position(field.getDataBufferPosition());
         return field;
     }
 
-    public static FieldHeader deserialiseMap(IoSerialiser ioSerialiser) {
+    public static WireDataFieldDescription deserialiseMap(IoSerialiser ioSerialiser) {
         return ioSerialiser.parseIoStream();
     }
 }

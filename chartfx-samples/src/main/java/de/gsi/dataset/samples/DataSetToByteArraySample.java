@@ -390,7 +390,7 @@ public class DataSetToByteArraySample {
         sample.clearGarbage();
 
         // parse and print class structure
-        ClassDescriptions.printClassStructure(ClassDescriptions.get(DoubleErrorDataSet.class));
+        ClassDescriptions.get(DoubleErrorDataSet.class).printFieldStructure();
 
         // string based performance
         // N.B. loops only once, since this serialiser is relatively slow (~30

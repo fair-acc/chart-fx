@@ -4,13 +4,14 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.nio.CharBuffer;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import de.gsi.dataset.serializer.FieldDescription;
 
 /**
  * @author rstein
@@ -26,8 +27,7 @@ public final class ClassDescriptions { // NOPMD - nomen est omen
         // empty constructor
     }
 
-    @SafeVarargs
-    private static int computeHashCode(final Class<?> classPrototype, final Class<? extends Object>... classArguments) {
+    private static int computeHashCode(final Class<?> classPrototype, final Class<?>... classArguments) {
         final int prime = 31;
         int result = 1;
         result = (prime * result) + ((classPrototype == null) ? 0 : classPrototype.getName().hashCode());
@@ -35,16 +35,14 @@ public final class ClassDescriptions { // NOPMD - nomen est omen
             return result;
         }
 
-        for (final Class<? extends Object> clazz : Arrays.asList(classArguments)) {
+        for (final Class<?> clazz : classArguments) {
             result = (prime * result) + clazz.hashCode();
         }
 
         return result;
     }
 
-    @SafeVarargs
-    public static ClassFieldDescription get(final Class<? extends Object> clazz,
-            final Class<? extends Object>... classArguments) {
+    public static ClassFieldDescription get(final Class<?> clazz, final Class<?>... classArguments) {
         if (clazz == null) {
             throw new IllegalArgumentException("object must not be null");
         }
@@ -104,7 +102,8 @@ public final class ClassDescriptions { // NOPMD - nomen est omen
             throw new IllegalArgumentException("rootObject must not be null");
         }
         Object localRoot = rootObject;
-        for (final ClassFieldDescription field : fieldRoot.getChildren()) {
+        for (final FieldDescription child : fieldRoot.getChildren()) {
+            ClassFieldDescription field = (ClassFieldDescription) child;
             if (!field.getType().isMemberClass()) {
                 continue;
             }
@@ -133,56 +132,32 @@ public final class ClassDescriptions { // NOPMD - nomen est omen
         }
     }
 
-    public static void printClassStructure(final ClassFieldDescription field) {
-        printClassStructure(field, false, 0);
-    }
-
-    public static void printClassStructure(final ClassFieldDescription field, final boolean fullView,
-            final int recursionLevel) {
-        final String enumOrClass = field.isEnum() ? "Enum " : "class ";
-        final String typeCategorgy = (field.isInterface() ? "interface " : (field.isPrimitive() ? "" : enumOrClass));
-        final String typeName = field.getTypeName() + field.getGenericFieldTypeString();
-        final String mspace = spaces((recursionLevel + 1) * indentationNumerOfSpace);
-        final boolean isSerialisable = field.isSerializable();
-
-        if (isSerialisable || fullView) {
-            LOGGER.atInfo().addArgument(mspace).addArgument(isSerialisable ? "  " : "//").addArgument(field.getModifierString()).addArgument(typeCategorgy).addArgument(typeName).addArgument(field.getFieldNameRelative()).log("{} {} {} {}{} {}");
-
-            field.getChildren().stream().forEach(f -> printClassStructure(f, fullView, recursionLevel + 1));
-        }
-    }
-
-    public static void printFullClassStructure(final ClassFieldDescription field) {
-        printClassStructure(field, true, 0);
-    }
-
     private static String spaces(final int spaces) {
         return CharBuffer.allocate(spaces).toString().replace('\0', ' ');
     }
 
     public static String translateClassName(final String name) {
-        final String retName = name;
-        if (retName.startsWith("[Z")) {
+        if (name.startsWith("[Z")) {
             return boolean[].class.getName();
-        } else if (retName.startsWith("[B")) {
+        } else if (name.startsWith("[B")) {
             return byte[].class.getName();
-        } else if (retName.startsWith("[S")) {
+        } else if (name.startsWith("[S")) {
             return short[].class.getName();
-        } else if (retName.startsWith("[I")) {
+        } else if (name.startsWith("[I")) {
             return int[].class.getName();
-        } else if (retName.startsWith("[J")) {
+        } else if (name.startsWith("[J")) {
             return long[].class.getName();
-        } else if (retName.startsWith("[F")) {
+        } else if (name.startsWith("[F")) {
             return float[].class.getName();
-        } else if (retName.startsWith("[D")) {
+        } else if (name.startsWith("[D")) {
             return double[].class.getName();
-        } else if (retName.startsWith("[L")) {
-            return retName.substring(2, retName.length() - 1) + "[]";
+        } else if (name.startsWith("[L")) {
+            return name.substring(2, name.length() - 1) + "[]";
         }
         // else if (retName.startsWith("\\? extends ")) {
         // return retName.substring(WILDCARD_EXTENDS_LENGTH, retName.length() - 1);
         // }
 
-        return retName;
+        return name;
     }
 }

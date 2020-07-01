@@ -2,8 +2,8 @@ package de.gsi.dataset.serializer;
 
 import java.util.*;
 
-import de.gsi.dataset.serializer.spi.BinarySerialiser;
-import de.gsi.dataset.serializer.spi.FieldHeader;
+import de.gsi.dataset.serializer.spi.ProtocolInfo;
+import de.gsi.dataset.serializer.spi.WireDataFieldDescription;
 
 public interface IoSerialiser {
     // TODO: needs to be modified/simplified
@@ -13,7 +13,7 @@ public interface IoSerialiser {
 
     void setBuffer(final IoBuffer buffer);
 
-    BinarySerialiser.HeaderInfo checkHeaderInfo();
+    ProtocolInfo checkHeaderInfo();
 
     boolean getBoolean();
 
@@ -39,7 +39,7 @@ public interface IoSerialiser {
 
     String getEnumTypeList();
 
-    FieldHeader getFieldHeader();
+    WireDataFieldDescription getFieldHeader();
 
     float getFloat();
 
@@ -69,7 +69,7 @@ public interface IoSerialiser {
 
     String[] getStringArray();
 
-    FieldHeader parseIoStream();
+    WireDataFieldDescription parseIoStream();
 
     void put(String fieldName, boolean value);
 
