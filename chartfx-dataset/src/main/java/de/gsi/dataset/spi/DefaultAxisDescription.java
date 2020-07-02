@@ -187,7 +187,7 @@ public class DefaultAxisDescription extends DataRange implements AxisDescription
         // the recomputeLimits is usually recomputed when validating the axis,
         // this function is called in case e.g. a point has been modified and range invalidated
         final boolean oldNotifyState = autoNotification.getAndSet(true);
-        invokeListener(new AxisRecomputationEvent(this, "updated axis range for '" + name + "' '[" + unit + "]'", getDimIndex()), false);
+        invokeListener(new AxisRecomputationEvent(this, "updated axis range for '" + name + "' '[" + unit + "]'", getDimIndex()));
         autoNotification.getAndSet(oldNotifyState);
 
         return super.getMax();
@@ -202,7 +202,7 @@ public class DefaultAxisDescription extends DataRange implements AxisDescription
         // the recomputeLimits is usually recomputed when validating the axis,
         // this function is called in case e.g. a point has been modified and range invalidated
         final boolean oldNotifyState = autoNotification.getAndSet(true);
-        invokeListener(new AxisRecomputationEvent(this, "updated axis range for '" + name + "' '[" + unit + "]'", getDimIndex()), false);
+        invokeListener(new AxisRecomputationEvent(this, "updated axis range for '" + name + "' '[" + unit + "]'", getDimIndex()));
         autoNotification.getAndSet(oldNotifyState);
 
         return super.getMin();

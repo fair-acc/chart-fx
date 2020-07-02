@@ -40,8 +40,7 @@ import de.gsi.dataset.utils.AssertUtils;
  * 
  * @param <D> java generics handling of DataSet for derived classes (needed for fluent design)
  */
-public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends AbstractStylable<D>
-        implements DataSet, DataSetMetaData {
+public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends AbstractStylable<D> implements DataSet, DataSetMetaData {
     private static final long serialVersionUID = -7612136495756923417L;
 
     private static final String[] DEFAULT_AXES_NAME = { "x-Axis", "y-Axis", "z-Axis" };
@@ -56,10 +55,10 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
     protected List<String> infoList = new ArrayList<>();
     protected List<String> warningList = new ArrayList<>();
     protected List<String> errorList = new ArrayList<>();
-    private EditConstraints editConstraints;
+    private transient EditConstraints editConstraints;
     private final Map<String, String> metaInfoMap = new ConcurrentHashMap<>();
-    private final AtomicBoolean axisUpdating = new AtomicBoolean(false);
-    protected final EventListener axisListener = e -> {
+    private transient final AtomicBoolean axisUpdating = new AtomicBoolean(false);
+    protected transient final EventListener axisListener = e -> {
         if (!isAutoNotification() || !(e instanceof AxisChangeEvent) || axisUpdating.get()) {
             return;
         }
@@ -177,7 +176,7 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
             for (int index = 0; index < getDataCount(); index++) {
                 final String label1 = this.getDataLabel(index);
                 final String label2 = other.getDataLabel(index);
-                if (label1 == label2) {
+                if (label1 == label2) { // NOPMD -- early return if reference is identical
                     continue;
                 }
                 if (label1 == null && label2 != null) {
