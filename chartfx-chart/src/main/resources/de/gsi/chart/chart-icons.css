@@ -2,8 +2,9 @@
   font-family: 'fair-chart-icons';
   src: url('fonts/fair-chart-icons.eot?yr8ymj');
   src: url('fonts/fair-chart-icons.eot?yr8ymj#iefix') format('embedded-opentype'),
-    url('fonts/fair-chart-icons.ttf?yr8ymj') format('truetype'), url('fonts/fair-chart-icons.woff?yr8ymj')
-    format('woff'), url('fonts/fair-chart-icons.svg?yr8ymj#fair-chart-icons') format('svg');
+    url('fonts/fair-chart-icons.ttf?yr8ymj') format('truetype'),
+    url('fonts/fair-chart-icons.woff?yr8ymj') format('woff'),
+    url('fonts/fair-chart-icons.svg?yr8ymj#fair-chart-icons') format('svg');
   font-weight: normal;
   font-style: normal;
   font-display: block;
@@ -19,6 +20,7 @@
   font-variant: normal;
   text-transform: none;
   line-height: 1;
+
   /* Better Font Rendering =========== */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
