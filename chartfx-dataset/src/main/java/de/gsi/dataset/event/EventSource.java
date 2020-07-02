@@ -3,8 +3,6 @@ package de.gsi.dataset.event;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -86,7 +84,7 @@ public interface EventSource {
             }
             eventListener = new ArrayList<>(updateEventListener());
         }
-        if (!executeParallel) {
+        if (!executeParallel || eventListener.size() == 1) {
             // alt implementation:
             final AggregateException exceptions = new AggregateException(
                     EventSource.class.getSimpleName() + "(NonParallel)");
@@ -103,12 +101,14 @@ public interface EventSource {
             return;
         }
 
+        // execute event listeners in parallel
         final UpdateEvent event = updateEvent == null ? new UpdateEvent(this) : updateEvent;
         final AggregateException exceptions = new AggregateException(
                 EventSource.class.getSimpleName() + "(Parallel)");
-        final List<Callable<Boolean>> workers = new ArrayList<>();
+        final ExecutorService es = EventThreadHelper.getExecutorService();
+        final List<Future<Boolean>> jobs = new ArrayList<>(eventListener.size());
         for (EventListener listener : eventListener) {
-            workers.add(() -> {
+            jobs.add(es.submit(() -> {
                 try {
                     listener.handle(event);
                     return Boolean.TRUE;
@@ -117,22 +117,18 @@ public interface EventSource {
                     exceptions.fillInStackTrace();
                 }
                 return Boolean.FALSE;
-            });
+            }));
         }
 
         try {
-            ExecutorService es = EventThreadHelper.getExecutorService();
-            final List<Future<Boolean>> jobs = new ArrayList<>();
-            for (Callable<Boolean> worker : workers) {
-                jobs.add(es.submit(worker));
-            }
-            // submitted tasks
+            // wait for submitted tasks to complete
             for (final Future<Boolean> future : jobs) {
                 future.get();
             }
-        } catch (final InterruptedException | ExecutionException e) {
+        } catch (final Exception e) { // NOPMD -- necessary since these are forwarded
             exceptions.add(new IllegalStateException("one parallel worker thread finished execution with error", e));
         }
+        // all submitted tasks are completed
         if (!exceptions.isEmpty()) {
             throw exceptions;
         }
