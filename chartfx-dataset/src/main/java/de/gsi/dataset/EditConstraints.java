@@ -7,7 +7,6 @@ package de.gsi.dataset;
  *
  */
 public interface EditConstraints {
-
     /**
      * @param index data set point index
      * @return true: if a new data point can be added at the specified data point.
@@ -39,7 +38,7 @@ public interface EditConstraints {
      * @param newValue coordinate list of the considered point
      * @return <code>true</code> if the point is acceptable by the data set, <code>false</code> otherwise
      */
-    default boolean isAcceptable(int index, double ...newValue) {
+    default boolean isAcceptable(int index, double... newValue) {
         return true;
     }
 
@@ -48,5 +47,4 @@ public interface EditConstraints {
      * @return true: if the horizontal values can be modified
      */
     boolean isEditable(final int dimIndex);
-
 }
