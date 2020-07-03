@@ -7,7 +7,6 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import javafx.application.Application;
-import javafx.application.ConditionalFeature;
 import javafx.application.Platform;
 import javafx.collections.ListChangeListener;
 import javafx.scene.Scene;
@@ -22,7 +21,6 @@ import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.gsi.chart.Chart;
 import de.gsi.chart.XYChart;
 import de.gsi.chart.axes.spi.DefaultNumericAxis;
 import de.gsi.chart.plugins.DataPointTooltip;
@@ -80,10 +78,6 @@ public class MetaDataRendererSample extends Application {
 
     @Override
     public void start(final Stage primaryStage) {
-        if (Platform.isSupported(ConditionalFeature.TRANSPARENT_WINDOW)) {
-            Application.setUserAgentStylesheet(Chart.class.getResource("solid-pick.css").toExternalForm());
-        }
-
         ProcessingProfiler.setVerboseOutputState(true);
         ProcessingProfiler.setLoggerOutputState(true);
         ProcessingProfiler.setDebugState(false);
