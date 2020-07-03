@@ -32,7 +32,9 @@ import de.gsi.chart.ui.geometry.Side;
 import de.gsi.chart.utils.AxisSynchronizer;
 import de.gsi.dataset.DataSet;
 import de.gsi.dataset.DataSetMetaData;
+import de.gsi.dataset.GridDataSet;
 import de.gsi.dataset.spi.DataSetBuilder;
+import de.gsi.dataset.spi.DoubleGridDataSet;
 import de.gsi.dataset.spi.MultiDimDoubleDataSet;
 import de.gsi.dataset.spi.TransposedDataSet;
 import de.gsi.math.TMathConstants;
@@ -57,26 +59,17 @@ public class ShortTimeFourierTransformSample extends AbstractDemoApplication {
     protected XYChart chart3;
 
     // rawData controls
-    private final Spinner<Integer> nSamples = new Spinner<>(
-            new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 10_000, 4000, 500));
-    private final Spinner<Double> sampleRate = new Spinner<>(
-            new SpinnerValueFactory.DoubleSpinnerValueFactory(0, 1e6, 1e6, 1e5));
-    private final Spinner<Double> toneFreq = new Spinner<>(
-            new SpinnerValueFactory.DoubleSpinnerValueFactory(0, 1e6, 50e3, 1e3));
-    private final Spinner<Double> toneAmplitude = new Spinner<>(
-            new SpinnerValueFactory.DoubleSpinnerValueFactory(0, 10, 1.0, 0.5));
-    private final Spinner<Double> toneStart = new Spinner<>(
-            new SpinnerValueFactory.DoubleSpinnerValueFactory(0, 100, 0.1, 0.1));
-    private final Spinner<Double> toneStop = new Spinner<>(
-            new SpinnerValueFactory.DoubleSpinnerValueFactory(0, 100, 0.9, 0.1));
+    private final Spinner<Integer> nSamples = new Spinner<>(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 10_000, 4000, 500));
+    private final Spinner<Double> sampleRate = new Spinner<>(new SpinnerValueFactory.DoubleSpinnerValueFactory(0, 1e6, 1e6, 1e5));
+    private final Spinner<Double> toneFreq = new Spinner<>(new SpinnerValueFactory.DoubleSpinnerValueFactory(0, 1e6, 50e3, 1e3));
+    private final Spinner<Double> toneAmplitude = new Spinner<>(new SpinnerValueFactory.DoubleSpinnerValueFactory(0, 10, 1.0, 0.5));
+    private final Spinner<Double> toneStart = new Spinner<>(new SpinnerValueFactory.DoubleSpinnerValueFactory(0, 100, 0.1, 0.1));
+    private final Spinner<Double> toneStop = new Spinner<>(new SpinnerValueFactory.DoubleSpinnerValueFactory(0, 100, 0.9, 0.1));
 
     // short time Fourier transform controls
-    private final Spinner<Integer> nFFT = new Spinner<>(
-            new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 10_000, 128, 32));
-    private final Spinner<Integer> step = new Spinner<>(
-            new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 10_000, 10, 10));
-    private final ComboBox<Apodization> apodizationWindow = new ComboBox<>(
-            FXCollections.observableArrayList(Apodization.values()));
+    private final Spinner<Integer> nFFT = new Spinner<>(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 10_000, 128, 32));
+    private final Spinner<Integer> step = new Spinner<>(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 10_000, 10, 10));
+    private final ComboBox<Apodization> apodizationWindow = new ComboBox<>(FXCollections.observableArrayList(Apodization.values()));
     private final ComboBox<Padding> padding = new ComboBox<>(FXCollections.observableArrayList(Padding.values()));
     private final CheckBox dbScale = new CheckBox("dB Scale");
     private final CheckBox truncDCNyq = new CheckBox("truncate DC and Nyquist");
@@ -84,23 +77,16 @@ public class ShortTimeFourierTransformSample extends AbstractDemoApplication {
 
     // wavelet controls
     private final Spinner<Double> nu = new Spinner<>(new SpinnerValueFactory.DoubleSpinnerValueFactory(0, 200, 30, 10));
-    private final Spinner<Double> waveletFMin = new Spinner<>(
-            new SpinnerValueFactory.DoubleSpinnerValueFactory(0, 0.5, 0.0, 0.05));
-    private final Spinner<Double> waveletFMax = new Spinner<>(
-            new SpinnerValueFactory.DoubleSpinnerValueFactory(0, 0.5, 0.5, 0.05));
-    private final Spinner<Integer> quantx = new Spinner<>(
-            new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 10_000, 512, 32));
-    private final Spinner<Integer> quanty = new Spinner<>(
-            new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 10_000, 128, 32));
+    private final Spinner<Double> waveletFMin = new Spinner<>(new SpinnerValueFactory.DoubleSpinnerValueFactory(0, 0.5, 0.0, 0.05));
+    private final Spinner<Double> waveletFMax = new Spinner<>(new SpinnerValueFactory.DoubleSpinnerValueFactory(0, 0.5, 0.5, 0.05));
+    private final Spinner<Integer> quantx = new Spinner<>(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 10_000, 512, 32));
+    private final Spinner<Integer> quanty = new Spinner<>(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 10_000, 128, 32));
 
     // DataSets
     private final MultiDimDoubleDataSet rawData = new MultiDimDoubleDataSet("rawTimeData", 3);
-    private final MultiDimDoubleDataSet stftData = (MultiDimDoubleDataSet) new DataSetBuilder(
-            "ShortTimeFourierTransform")
-                                                           .setDimension(3)
-                                                           .setInitalCapacity(0)
-                                                           .build();
-    private final DataSet waveletData = new DataSetBuilder("WaveletTransform").setDimension(3).setInitalCapacity(0).build();
+    private final DoubleGridDataSet stftData = new DataSetBuilder("ShortTimeFourierTransform").setDimension(3).setInitalCapacity(0)
+            .build(DoubleGridDataSet.class);
+    private final DoubleGridDataSet waveletData = new DataSetBuilder("WaveletTransform").setDimension(3).setInitalCapacity(0).build(DoubleGridDataSet.class);
 
     /**
      * Override default constructor to increase window size
@@ -171,8 +157,7 @@ public class ShortTimeFourierTransformSample extends AbstractDemoApplication {
         synFreq.add(yAxis1);
         synFreq.add(yAxis2);
 
-        final Node content = new VBox(5, chart3, new HBox(5, chart1, chart2),
-                new HBox(20, rawDataSettingsPane(), stftSettingsPane(), waveletSettingsPane()));
+        final Node content = new VBox(5, chart3, new HBox(5, chart1, chart2), new HBox(20, rawDataSettingsPane(), stftSettingsPane(), waveletSettingsPane()));
 
         HBox.setHgrow(chart1, Priority.ALWAYS);
         HBox.setHgrow(chart2, Priority.ALWAYS);
@@ -201,26 +186,23 @@ public class ShortTimeFourierTransformSample extends AbstractDemoApplication {
         toneStart.setEditable(true);
         gridPane.addRow(5, new Label("ToneStop"), toneStop, new Label("[s]"));
         toneStop.setEditable(true);
-        installEventHandlers((evt) -> updateRawData(rawData), nSamples.valueProperty(), sampleRate.valueProperty(), toneFreq.valueProperty(), toneAmplitude.valueProperty(), toneStart.valueProperty(), toneStop.valueProperty());
+        installEventHandlers((evt) -> updateRawData(rawData), nSamples.valueProperty(), sampleRate.valueProperty(), toneFreq.valueProperty(),
+                toneAmplitude.valueProperty(), toneStart.valueProperty(), toneStop.valueProperty());
         return gridPane;
     }
 
-    private void stft(final DataSet inputData, final MultiDimDoubleDataSet outputData) {
+    private void stft(final DataSet inputData, final DoubleGridDataSet outputData) {
         try {
-            MultiDimDoubleDataSet newData;
+            DoubleGridDataSet newData;
             if (complex.isSelected()) {
-                newData = (MultiDimDoubleDataSet) ShortTimeFourierTransform.complex(inputData, outputData,
-                        nFFT.getValue(), step.getValue(), apodizationWindow.getValue(), padding.getValue(),
-                        dbScale.isSelected(), truncDCNyq.isSelected());
+                newData = (DoubleGridDataSet) ShortTimeFourierTransform.complex(inputData, outputData, nFFT.getValue(), step.getValue(),
+                        apodizationWindow.getValue(), padding.getValue(), dbScale.isSelected(), truncDCNyq.isSelected());
             } else {
-                newData = (MultiDimDoubleDataSet) ShortTimeFourierTransform.real(inputData, outputData, nFFT.getValue(),
-                        step.getValue(), apodizationWindow.getValue(), padding.getValue(), dbScale.isSelected(),
-                        truncDCNyq.isSelected());
+                newData = (DoubleGridDataSet) ShortTimeFourierTransform.real(inputData, outputData, nFFT.getValue(), step.getValue(),
+                        apodizationWindow.getValue(), padding.getValue(), dbScale.isSelected(), truncDCNyq.isSelected());
             }
             if (newData != outputData) {
-                outputData.setValues(DataSet.DIM_X, newData.getValues(DataSet.DIM_X), false);
-                outputData.setValues(DataSet.DIM_Y, newData.getValues(DataSet.DIM_Y), false);
-                outputData.setValues(DataSet.DIM_Z, newData.getValues(DataSet.DIM_Z), false);
+                outputData.set(newData);
                 outputData.getAxisDescription(DataSet.DIM_X).set(newData.getAxisDescription(DataSet.DIM_X));
                 outputData.getAxisDescription(DataSet.DIM_Y).set(newData.getAxisDescription(DataSet.DIM_Y));
                 outputData.getAxisDescription(DataSet.DIM_Z).set(newData.getAxisDescription(DataSet.DIM_Z));
@@ -251,7 +233,8 @@ public class ShortTimeFourierTransformSample extends AbstractDemoApplication {
         gridPane.add(truncDCNyq, 0, 5, 3, 1);
         complex.setSelected(false);
         gridPane.add(complex, 0, 6, 3, 1);
-        installEventHandlers((evt) -> stft(rawData, stftData), nFFT.valueProperty(), step.valueProperty(), apodizationWindow.valueProperty(), padding.valueProperty(), dbScale.selectedProperty(), truncDCNyq.selectedProperty(), complex.selectedProperty());
+        installEventHandlers((evt) -> stft(rawData, stftData), nFFT.valueProperty(), step.valueProperty(), apodizationWindow.valueProperty(),
+                padding.valueProperty(), dbScale.selectedProperty(), truncDCNyq.selectedProperty(), complex.selectedProperty());
         return gridPane;
     }
 
@@ -269,20 +252,16 @@ public class ShortTimeFourierTransformSample extends AbstractDemoApplication {
 
             // linear chirp with discontinuity
             offset = (i > 0.5 * maxPoints) ? -20e3 : 0;
-            yModel[i] = (i > 0.2 * maxPoints && i < 0.9 * maxPoints)
-                                ? 0.7 * Math.sin(TMathConstants.TwoPi() * 30e3 * x * (2e3 * x + offset))
-                                : 0;
+            yModel[i] = (i > 0.2 * maxPoints && i < 0.9 * maxPoints) ? 0.7 * Math.sin(TMathConstants.TwoPi() * 30e3 * x * (2e3 * x + offset)) : 0;
 
             // single tone
             yModel[i] += (i > toneStart.getValue() * maxPoints && i < toneStop.getValue() * maxPoints)
-                                 ? toneAmplitude.getValue() * Math.sin(TMathConstants.TwoPi() * toneFreq.getValue() * x)
-                                 : 0;
+                    ? toneAmplitude.getValue() * Math.sin(TMathConstants.TwoPi() * toneFreq.getValue() * x)
+                    : 0;
 
             // modulation around 0.4
             final double mod = Math.cos(TMathConstants.TwoPi() * 0.01e6 * x);
-            yModel[i] += (i > 0.3 * maxPoints && i < 0.9 * maxPoints)
-                                 ? 1.0 * Math.sin(TMathConstants.TwoPi() * (0.4 - 5e-4 * mod) * 45e4 * x)
-                                 : 0;
+            yModel[i] += (i > 0.3 * maxPoints && i < 0.9 * maxPoints) ? 1.0 * Math.sin(TMathConstants.TwoPi() * (0.4 - 5e-4 * mod) * 45e4 * x) : 0;
 
             // quadratic chirp starting at 0.1
             yModel[i] += 0.5 * Math.sin(TMathConstants.TwoPi() * ((0.1 + 5e3 * x * x) * 1e6 * x));
@@ -299,30 +278,28 @@ public class ShortTimeFourierTransformSample extends AbstractDemoApplication {
         dataSetToUpdate.getAxisDescription(DataSet.DIM_Y).set("amplitude", "V");
     }
 
-    private void wavelet(final DataSet inputData, final DataSet outputData) {
+    private void wavelet(final DataSet inputData, final DoubleGridDataSet outputData) {
         try {
             ((DataSetMetaData) outputData).getErrorList().clear();
             final ContinuousWavelet wtrafo = new ContinuousWavelet();
-            final DataSet newData = wtrafo.getScalogram(inputData.getValues(DataSet.DIM_Y), quantx.getValue(),
-                    quanty.getValue(), nu.getValue(), waveletFMin.getValue(), waveletFMax.getValue());
-            outputData.getAxisDescription(DataSet.DIM_X).set(inputData.getAxisDescription(DataSet.DIM_X).getName(), inputData.getAxisDescription(DataSet.DIM_X).getUnit());
+            final GridDataSet newData = wtrafo.getScalogram(inputData.getValues(DataSet.DIM_Y), quantx.getValue(), quanty.getValue(), nu.getValue(),
+                    waveletFMin.getValue(), waveletFMax.getValue());
+            outputData.set(newData);
+            outputData.getAxisDescription(DataSet.DIM_X).set(inputData.getAxisDescription(DataSet.DIM_X).getName(),
+                    inputData.getAxisDescription(DataSet.DIM_X).getUnit());
             outputData.getAxisDescription(DataSet.DIM_Y).set("frequency", "Hz");
             outputData.getAxisDescription(DataSet.DIM_Z).set("Amplitude", inputData.getAxisDescription(DataSet.DIM_Y).getUnit());
             // rescale axes to show actual data instead of normalized values
-            final double[] yValues = newData.getValues(DataSet.DIM_Y);
+            final double[] yValues = newData.getGridValues(DataSet.DIM_Y);
             final double fs = sampleRate.getValue();
             for (int i = 0; i < yValues.length; i++) {
                 yValues[i] *= fs;
             }
-            final double[] xValues = newData.getValues(DataSet.DIM_X);
+            final double[] xValues = newData.getGridValues(DataSet.DIM_X);
             final double dt = 1 / fs;
             for (int i = 0; i < xValues.length; i++) {
                 xValues[i] *= dt;
             }
-            MultiDimDoubleDataSet outputMultiDimData = (MultiDimDoubleDataSet) outputData;
-            outputMultiDimData.setValues(DataSet.DIM_X, xValues, false);
-            outputMultiDimData.setValues(DataSet.DIM_Y, yValues, false);
-            outputMultiDimData.setValues(DataSet.DIM_Z, newData.getValues(DataSet.DIM_Z), false);
             outputData.recomputeLimits(DataSet.DIM_X);
             outputData.recomputeLimits(DataSet.DIM_Y);
             outputData.recomputeLimits(DataSet.DIM_Z);
@@ -347,7 +324,8 @@ public class ShortTimeFourierTransformSample extends AbstractDemoApplication {
         quantx.setEditable(true);
         gridPane.addRow(4, new Label("quantY"), quanty, new Label("[samples]"));
         quanty.setEditable(true);
-        installEventHandlers((evt) -> wavelet(rawData, waveletData), nu.valueProperty(), waveletFMin.valueProperty(), waveletFMax.valueProperty(), quantx.valueProperty(), quanty.valueProperty());
+        installEventHandlers((evt) -> wavelet(rawData, waveletData), nu.valueProperty(), waveletFMin.valueProperty(), waveletFMax.valueProperty(),
+                quantx.valueProperty(), quanty.valueProperty());
         return gridPane;
     }
 

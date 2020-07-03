@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.gsi.chart.Chart;
+import de.gsi.chart.XYChart;
 import de.gsi.chart.axes.Axis;
 import de.gsi.chart.axes.spi.ColorGradientAxis;
 import de.gsi.chart.renderer.Renderer;
@@ -50,6 +51,7 @@ public class UpdateAxisLabels extends ChartPlugin {
                         }
                         dataSetsChanged(dataSetsChange, renderer);
                     };
+                    renderer.getDatasets().forEach(ds -> dataSetChange(new AxisChangeEvent(ds, -1), renderer));
                     renderer.getDatasets().addListener(dataSetsListener);
                     renderersListeners.put(renderer, dataSetsListener);
                     if (LOGGER.isDebugEnabled()) {
@@ -121,11 +123,11 @@ public class UpdateAxisLabels extends ChartPlugin {
         } else { // dataset was added to / is registered at renderer
             if (renderer.getDatasets().size() == 1) {
                 if (dim == -1 || dim == DataSet.DIM_X) {
-                    Optional<Axis> oldAxis = renderer.getAxes().stream().filter(axis -> axis.getSide().isHorizontal()).findFirst();
+                    Optional<Axis> oldAxis = renderer.getAxes().stream().filter(axis -> axis.getSide().isHorizontal()).findFirst().or(() -> Optional.of(((XYChart) getChart()).getXAxis()));
                     oldAxis.ifPresent(a -> a.set(dataSet.getAxisDescription(DataSet.DIM_X).getName(), dataSet.getAxisDescription(DataSet.DIM_X).getUnit()));
                 }
                 if (dim == -1 || dim == DataSet.DIM_Y) {
-                    Optional<Axis> oldAxis = renderer.getAxes().stream().filter(axis -> axis.getSide().isVertical()).findFirst();
+                    Optional<Axis> oldAxis = renderer.getAxes().stream().filter(axis -> axis.getSide().isVertical()).findFirst().or(() -> Optional.of(((XYChart) getChart()).getYAxis()));
                     oldAxis.ifPresent(a -> a.set(dataSet.getAxisDescription(DataSet.DIM_Y).getName(), dataSet.getAxisDescription(DataSet.DIM_Y).getUnit()));
                 }
                 if ((dim == -1 || dim == DataSet.DIM_Z) && dataSet.getDimension() >= 3) {

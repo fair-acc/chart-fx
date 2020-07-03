@@ -77,7 +77,7 @@ public class FragmentedDataSet extends AbstractDataSet<FragmentedDataSet> implem
     }
 
     @Override
-    public int getDataCount(final int dimIndex) {
+    public int getDataCount() {
         return dataCount;
     }
 
@@ -119,149 +119,16 @@ public class FragmentedDataSet extends AbstractDataSet<FragmentedDataSet> implem
     }
 
     @Override
-    public int getXIndex(double x) {
-        return lock().readLockGuard(() -> {
-            if (x < getAxisDescription(DIM_X).getMin()) {
-                return 0;
-            }
-            int index = 0;
-            for (final DataSet dataset : list) {
-                if (x >= dataset.getAxisDescription(DIM_X).getMin() && x <= dataset.getAxisDescription(DIM_X).getMax()) {
-                    return index + dataset.getIndex(DIM_X, x);
-                }
-                index += dataset.getDataCount();
-            }
-            return getDataCount();
-        });
-    }
-
-    @Override
-    public double[] getXValues() {
+    public double[] getValues(final int dimIndex) {
         return lock().readLockGuard(() -> {
             final double[] tmp = new double[dataCount];
             int index = 0;
             for (final DataSet dataset : list) {
                 for (int i = 0; i < dataset.getDataCount(); i++) {
-                    tmp[index++] = dataset.get(DIM_X, i);
+                    tmp[index++] = dataset.get(dimIndex, i);
                 }
             }
             return tmp;
         });
     }
-
-    @Override
-    public double[] getYValues() {
-        return lock().readLockGuard(() -> {
-            final double[] tmp = new double[dataCount];
-            int index = 0;
-            for (final DataSet dataset : list) {
-                for (int i = 0; i < dataset.getDataCount(); i++) {
-                    tmp[index++] = dataset.get(DIM_Y, i);
-                }
-            }
-            return tmp;
-        });
-    }
-
-    // @Override
-    // public void opScale(double f)
-    // {
-    // lock();
-    // try
-    // {
-    // for (AbstractTraceDataSet ds : list) ds.opScale(f);
-    // updateLimits();
-    // fireInvalidated();
-    // }
-    // finally
-    // {
-    // unlock();
-    // }
-    // }
-    //
-    // @Override
-    // public void opAdd(AbstractTraceDataSet ds)
-    // {
-    // if (!isCompatible(ds)) throw new IllegalArgumentException("Datasets do
-    // not match");
-    // lock();
-    // try
-    // {
-    // FragmentedDataSet fds = (FragmentedDataSet)ds;
-    // for (int i=0;i<list.size();i++) list.get(i).opAdd(fds.list.get(i));
-    // updateLimits();
-    // fireInvalidated();
-    // }
-    // finally
-    // {
-    // unlock();
-    // }
-    // }
-    //
-    // @Override
-    // public void opSub(AbstractTraceDataSet ds)
-    // {
-    // if (!isCompatible(ds)) throw new IllegalArgumentException("Datasets do
-    // not match");
-    // lock();
-    // try
-    // {
-    // FragmentedDataSet fds = (FragmentedDataSet)ds;
-    // for (int i=0;i<list.size();i++) list.get(i).opSub(fds.list.get(i));
-    // updateLimits();
-    // fireInvalidated();
-    // }
-    // finally
-    // {
-    // unlock();
-    // }
-    // }
-
-    // public AbstractDataSet subset(int from)
-    // {
-    // FragmentedDataSet d = new FragmentedDataSet(getName());
-    // d.dataCount = 0;
-    //// d.setXOffset(getXOffset()+from*getXScale());
-    //// d.setXScale(getXScale());
-    // d.xmin = xmin;
-    // d.xmax = xmax;
-    // d.ymin = ymin;
-    // d.ymax = ymax;
-    // for (AbstractDataSet set : list)
-    // {
-    // if (set.getDataCount() < from)
-    // {
-    // from -= set.getDataCount();
-    // }
-    // else
-    // {
-    // AbstractTraceDataSet ds = set.deepCopy();
-    // if (from > 0)
-    // {
-    // ds = (AbstractTraceDataSet)ds.subset(from);
-    // from = 0;
-    // }
-    // d.list.add(ds);
-    // d.dataCount += set.getDataCount();
-    // }
-    // }
-    // d.computeLimits();
-    // return d;
-    // }
-
-    // public boolean isCompatible(AbstractDataSet ds)
-    // {
-    // if (!(ds instanceof FragmentedDataSet)) return false;
-    // lock();
-    // try
-    // {
-    // FragmentedDataSet fds = (FragmentedDataSet)ds;
-    // if (list.size() != fds.list.size()) return false;
-    // return true;
-    // }
-    // finally
-    // {
-    // unlock();
-    // }
-    // }
 }

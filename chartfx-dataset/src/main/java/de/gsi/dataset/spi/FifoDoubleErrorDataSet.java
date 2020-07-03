@@ -17,10 +17,10 @@ import de.gsi.dataset.utils.LimitedQueue;
  * Maximum number of samples and maximum horizontal span are configurable
  * @author rstein
  */
-public class FifoDoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet> implements DataSet2D, DataSetError {
+public class FifoDoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet> implements DataSetError, DataSet2D {
     private static final int SAFE_BET = 1;
     private static final long serialVersionUID = -7153702141838930486L;
-    protected final LimitedQueue<DataBlob> data;
+    protected final transient LimitedQueue<DataBlob> data;
     protected double maxDistance = Double.MAX_VALUE;
 
     /**
@@ -150,7 +150,7 @@ public class FifoDoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorData
                 }
             }
 
-            if (toRemoveList.size() > 0) {
+            if (!toRemoveList.isEmpty()) {
                 // remove elements and invalidate ranges if necessary
                 data.removeAll(toRemoveList);
                 getAxisDescriptions().forEach(AxisDescription::clear);
@@ -176,7 +176,7 @@ public class FifoDoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorData
     }
 
     @Override
-    public int getDataCount(final int dimIndex) {
+    public int getDataCount() {
         return data.size();
     }
 

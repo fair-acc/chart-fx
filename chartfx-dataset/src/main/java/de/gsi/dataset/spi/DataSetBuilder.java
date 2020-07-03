@@ -29,6 +29,7 @@ import de.gsi.dataset.utils.AssertUtils;
  * <li>dim:2, useFloat=false, errors=true: {@link DefaultErrorDataSet}
  * <li>dim:2, useFloat=true, errors=false: {@link FloatDataSet}
  * <li>dim:3+, useFloat=false, errors=false: {@link MultiDimDoubleDataSet}
+ * <li>dim:3+, useFloat=false, errors=false: {@link DoubleGridDataSet}
  * <li>All other combinations throw a {@code UnsupportedOperationException}
  * </ul>
  * 
@@ -152,6 +153,8 @@ public class DataSetBuilder {
             result = buildDefaultDataSetFloat(dsName, dataCount);
         } else if (clazz.isAssignableFrom(MultiDimDoubleDataSet.class) && !useErrors && !useFloat) {
             result = buildMultiDimDataSet(dsName, size);
+        } else if (clazz.isAssignableFrom(DoubleGridDataSet.class) && !useErrors && !useFloat) {
+            result = buildGridDataSet(dsName, size);
         } else if (EditableDataSet.class.isAssignableFrom(clazz) && !useErrors) {
             // try {
             //     result = clazz.getConstructor(String.class).newInstance(name);
@@ -165,8 +168,7 @@ public class DataSetBuilder {
             // }
             throw new UnsupportedOperationException("Instantiation of generic editable DataSet not implemented yet");
         } else {
-            throw new UnsupportedOperationException(
-                    "Return type not supported for DataSet Builder: " + clazz.getCanonicalName());
+            throw new UnsupportedOperationException("Return type not supported for DataSet Builder: " + clazz.getCanonicalName());
         }
 
         // add meta data
@@ -247,7 +249,7 @@ public class DataSetBuilder {
             for (int i = 0; i < dim; i++) {
                 dataCount = Math.max(dataCount, size[i]);
             }
-            if (errorsNeg.size() == 0 && errorsPos.size() == 0 && !this.useErrors) {
+            if (errorsNeg.size() == 0 && errorsPos.size() == 0 && errorsNegFloat.size() == 0 && errorsPosFloat.size() == 0 && !this.useErrors) {
                 if (useFloat) {
                     return buildDefaultDataSetFloat(dsName, dataCount);
                 }
@@ -261,7 +263,13 @@ public class DataSetBuilder {
             if (useFloat) {
                 throw new UnsupportedOperationException("Float DataSet Not implemented for nDims > 2");
             }
-            return buildMultiDimDataSet(dsName, size);
+            if (errorsNeg.size() != 0 || errorsPos.size() != 0 || errorsNegFloat.size() != 0 || errorsPosFloat.size() != 0 || this.useErrors) {
+                throw new UnsupportedOperationException("Error DataSet Not implemented for nDims > 2");
+            }
+            if (IntStream.of(size).allMatch(i -> (i == size[0]) || i == -1)) {
+                return buildMultiDimDataSet(dsName, size);
+            }
+            return buildGridDataSet(dsName, size);
         }
     }
 
@@ -280,8 +288,8 @@ public class DataSetBuilder {
     private DataSet buildDefaultErrorDataSet(final String dsName, final int size) {
         double[] xvalues = getValues(DataSet.DIM_X, size);
         double[] yvalues = getValues(DataSet.DIM_Y, size);
-        if (errorsNeg.containsKey(DataSet.DIM_X) || errorsPos.containsKey(DataSet.DIM_X)
-                || errorsNegFloat.containsKey(DataSet.DIM_X) || errorsPosFloat.containsKey(DataSet.DIM_X)) {
+        if (errorsNeg.containsKey(DataSet.DIM_X) || errorsPos.containsKey(DataSet.DIM_X) || errorsNegFloat.containsKey(DataSet.DIM_X)
+                || errorsPosFloat.containsKey(DataSet.DIM_X)) {
             throw new UnsupportedOperationException("DataSetBuilder: X Errors not implemented for 2D DataSetBuilder");
         }
         double[] yen = getErrors(DataSet.DIM_Y, size, false);
@@ -301,6 +309,41 @@ public class DataSetBuilder {
             }
         }
         return new MultiDimDoubleDataSet(dsName, false, inputValues);
+    }
+
+    /**
+     * @param dsName name for the dataset
+     * @param size array of sizes for the dimensions
+     * @return the DoubleGridDataSet
+     */
+    private DataSet buildGridDataSet(String dsName, int[] size) {
+        final int nDims = size.length;
+        if (size[nDims - 1] == 0) {
+            return new DoubleGridDataSet(dsName, nDims, new int[nDims - 1]);
+        }
+        int nGrid = 0;
+        int validateDataCount = 1;
+        for (int i = 0; i < size.length; i++) {
+            if (size[i] != size[size.length - 1]) {
+                nGrid = i + 1;
+                validateDataCount *= size[i];
+            } else if (size[i] != validateDataCount) {
+                throw new IllegalArgumentException("Dimension Mismatch");
+            }
+        }
+        final double[][] gridValues = new double[nGrid][];
+        final double[][] inputValues = new double[nDims - nGrid][];
+        for (int dimIndex = 0; dimIndex < nDims; dimIndex++) {
+            if (dimIndex < nGrid) {
+                gridValues[dimIndex] = getValues(dimIndex, size[dimIndex]);
+            } else {
+                inputValues[dimIndex - nGrid] = getValues(dimIndex, size[dimIndex]);
+            }
+            if (errorsNeg.containsKey(dimIndex) || errorsPos.containsKey(dimIndex) || useErrors) {
+                throw new UnsupportedOperationException("DataSetBuilder: Errors not implemented for MultiDimDataSet");
+            }
+        }
+        return new DoubleGridDataSet(dsName, false, gridValues, inputValues);
     }
 
     private double[] getValues(final int dimIndex, final int size) {

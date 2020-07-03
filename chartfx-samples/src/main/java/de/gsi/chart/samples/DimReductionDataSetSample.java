@@ -33,6 +33,7 @@ import de.gsi.chart.plugins.Zoomer;
 import de.gsi.chart.renderer.spi.ContourDataSetRenderer;
 import de.gsi.chart.utils.AxisSynchronizer;
 import de.gsi.dataset.DataSet;
+import de.gsi.dataset.GridDataSet;
 import de.gsi.dataset.spi.DimReductionDataSet;
 import de.gsi.dataset.spi.DimReductionDataSet.Option;
 import de.gsi.math.samples.EMDSample;
@@ -40,8 +41,8 @@ import de.gsi.math.spectra.wavelet.ContinuousWavelet;
 
 public class DimReductionDataSetSample extends Application {
     private static final Logger LOGGER = LoggerFactory.getLogger(DimReductionDataSetSample.class);
-    private static DataSet tempDataSet; // only needed as temporary storage
-    private DataSet waveletScalogram;
+    private static GridDataSet tempDataSet; // only needed as temporary storage
+    private GridDataSet waveletScalogram;
 
     @Override
     public void start(final Stage primaryStage) {
@@ -130,7 +131,7 @@ public class DimReductionDataSetSample extends Application {
         primaryStage.setOnCloseRequest(evt -> Platform.exit());
     }
 
-    private static DataSet createDataSet() {
+    private static GridDataSet createDataSet() {
         final double nu = 2.0 * 25.0;
         final int nQuantx = 512;
         final int nQuanty = 1024;
@@ -162,13 +163,13 @@ public class DimReductionDataSetSample extends Application {
         fft.realForward(fftSpectra);
         final double[] frequency1 = wtrafo.getScalogramFrequencyAxis(nQuantx, nQuanty, nu, fmin, fmax);
         final double[] magWavelet = new double[frequency1.length];
-        final int nboundary = tempDataSet.getDataCount(DataSet.DIM_X) / 20;
+        final int nboundary = tempDataSet.getShape(DataSet.DIM_X) / 20;
 
-        for (int i = 0; i < tempDataSet.getDataCount(DataSet.DIM_Y); i++) {
+        for (int i = 0; i < tempDataSet.getShape(DataSet.DIM_Y); i++) {
             double val = 0.0;
             double count = 0.0;
 
-            for (int j = nboundary; j < tempDataSet.getDataCount(DataSet.DIM_X) - nboundary; j++) {
+            for (int j = nboundary; j < tempDataSet.getShape(DataSet.DIM_X) - nboundary; j++) {
                 //val += tempDataSet.get(DataSet.DIM_Z, i * tempDataSet.getDataCount(DataSet.DIM_X) + j);
                 count += 1.0;
             }

@@ -2,9 +2,12 @@ package de.gsi.dataset;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.function.IntToDoubleFunction;
 
 import de.gsi.dataset.event.EventSource;
 import de.gsi.dataset.locks.DataSetLock;
+import de.gsi.dataset.spi.DataRange;
+import de.gsi.dataset.utils.AssertUtils;
 
 /**
  * Basic interface for observable data sets.
@@ -43,22 +46,11 @@ public interface DataSet extends EventSource, Serializable {
     List<AxisDescription> getAxisDescriptions();
 
     /**
-     * Get the number of data points in the data set. The default implementation is the number of points in the highest
-     * dimension.
+     * Get the number of data points in the data set.
      *
      * @return the number of data points
      */
-    default int getDataCount() {
-        return getDataCount(getDimension() - 1);
-    }
-
-    /**
-     * Get the number of data points in the data set for a specific dimension.
-     * 
-     * @param dimIndex the dimension index (ie. '0' equals 'X', '1' equals 'Y')
-     * @return the number of data points
-     */
-    int getDataCount(final int dimIndex);
+    int getDataCount();
 
     /**
      * Returns label of a data point specified by the index. The label can be used as a category name if
@@ -81,10 +73,34 @@ public interface DataSet extends EventSource, Serializable {
      * data set.
      *
      * @param dimIndex the dimension index (ie. '0' equals 'X', '1' equals 'Y')
-     * @param value the data point coordinate to search for
+     * @param x the data point coordinates to search for
      * @return the index of the data point
      */
-    int getIndex(final int dimIndex, final double value);
+    public default int getIndex(final int dimIndex, final double... x) {
+        AssertUtils.checkArrayDimension("x", x, 1);
+        if (this.getDataCount() == 0) {
+            return 0;
+        }
+
+        if (!Double.isFinite(x[0])) {
+            return 0;
+        }
+
+        final double min = this.getAxisDescription(dimIndex).getMin();
+        final double max = this.getAxisDescription(dimIndex).getMax();
+
+        if ((Double.isFinite(min) && x[0] <= min) || x[0] <= get(dimIndex, 0)) {
+            return 0;
+        }
+
+        final int lastIndex = getDataCount() - 1;
+        if ((Double.isFinite(max) && x[0] >= max) || x[0] >= get(dimIndex, getDataCount() - 1)) {
+            return lastIndex;
+        }
+
+        // binary closest search -- assumes sorted data set
+        return binarySearch(x[0], 0, lastIndex, val -> get(dimIndex, val));
+    }
 
     /**
      * Gets the name of the data set.
@@ -112,20 +128,11 @@ public interface DataSet extends EventSource, Serializable {
     String getStyle(int index);
 
     /**
-     * Gets the interpolated y value of the data point for given x coordinate
-     *
-     * @param dimIndex the dimension index (ie. '0' equals 'X', '1' equals 'Y')
-     * @param x the new x coordinate
-     * @return the y value
-     */
-    double getValue(final int dimIndex, final double x);
-
-    /**
      * @param dimIndex the dimension index (ie. '0' equals 'X', '1' equals 'Y')
      * @return the x value array
      */
     default double[] getValues(final int dimIndex) {
-        final int n = getDataCount(dimIndex);
+        final int n = getDataCount();
         final double[] retValues = new double[n];
         for (int i = 0; i < n; i++) {
             retValues[i] = get(dimIndex, i);
@@ -140,7 +147,17 @@ public interface DataSet extends EventSource, Serializable {
      */
     <D extends DataSet> DataSetLock<D> lock();
 
-    DataSet recomputeLimits(final int dimension);
+    default DataSet recomputeLimits(final int dimIndex) {
+        // first compute range (does not trigger notify events)
+        DataRange newRange = new DataRange();
+        final int dataCount = getDataCount();
+        for (int i = 0; i < dataCount; i++) {
+            newRange.add(get(dimIndex, i));
+        }
+        // set to new computed one and trigger notify event if different to old limits
+        getAxisDescription(dimIndex).set(newRange.getMin(), newRange.getMax());
+        return this;
+    }
 
     /**
      * A string representation of the CSS style associated with this specific {@code DataSet}. This is analogous to the
@@ -152,4 +169,54 @@ public interface DataSet extends EventSource, Serializable {
      */
     DataSet setStyle(String style);
 
+    /**
+     * Returns the value along the 'dimIndex' axis of a point specified by the <code>x</code> coordinate.
+     *
+     * @param dimIndex the dimension index (ie. '0' equals 'X', '1' equals 'Y')
+     * @param x horizontal 'dimIndex' coordinate
+     * @return 'dimIndex' value
+     */
+    default double getValue(final int dimIndex, final double... x) {
+        AssertUtils.checkArrayDimension("x", x, 1);
+        final int index1 = getIndex(DIM_X, x);
+        final double x1 = get(DIM_X, index1);
+        final double y1 = get(dimIndex, index1);
+        int index2 = x1 < x[0] ? index1 + 1 : index1 - 1;
+        index2 = Math.max(0, Math.min(index2, this.getDataCount() - 1));
+        final double y2 = get(dimIndex, index2);
+
+        if (Double.isNaN(y1) || Double.isNaN(y2)) {
+            // case where the function has a gap (y-coordinate equals to NaN
+            return Double.NaN;
+        }
+
+        final double x2 = get(DIM_X, index2);
+        if (x1 == x2) {
+            return get(dimIndex, index1);
+        }
+
+        final double de1 = get(dimIndex, index1);
+        return de1 + (get(dimIndex, index2) - de1) * (x[0] - x1) / (x2 - x1);
+    }
+
+    static int binarySearch(final double search, final int indexMin, final int indexMax, IntToDoubleFunction getter) {
+        if (indexMin == indexMax) {
+            return indexMin;
+        }
+        if (indexMax - indexMin == 1) {
+            if (Math.abs(getter.applyAsDouble(indexMin) - search) < Math.abs(getter.applyAsDouble(indexMax) - search)) {
+                return indexMin;
+            }
+            return indexMax;
+        }
+        final int middle = (indexMax + indexMin) / 2;
+        final double valMiddle = getter.applyAsDouble(middle);
+        if (valMiddle == search) {
+            return middle;
+        }
+        if (search < valMiddle) {
+            return binarySearch(search, indexMin, middle, getter);
+        }
+        return binarySearch(search, middle, indexMax, getter);
+    }
 }

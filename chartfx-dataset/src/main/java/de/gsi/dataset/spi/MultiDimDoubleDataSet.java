@@ -18,7 +18,6 @@ import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
  * @author akrimm
  */
 @SuppressWarnings({
-        //
         "PMD.TooManyMethods" // part of the flexible class nature
         ,
         "java:S2160" // equals is still valid because of DataSet interface
@@ -80,27 +79,17 @@ public class MultiDimDoubleDataSet extends AbstractDataSet<MultiDimDoubleDataSet
      *
      * @param name name of this DataSet.
      * @param nDims the number of dimensions
-     * @param initialSizes initial capacity of buffer. If multiple sizes are supplied, they are used to after one
-     *            another
-     *            and afterwards the product of all sizes is used, e.g. nDims=3 and initialSizes=4,5 results in a
-     *            three-dimensional dataset with 4 points in x, 5 points in y and 20 points in z direction.
+     * @param initialSize initial size of the dataset
      * @throws IllegalArgumentException if {@code name} is {@code null}
      */
-    public MultiDimDoubleDataSet(final String name, final int nDims, final int... initialSizes) {
+    public MultiDimDoubleDataSet(final String name, final int nDims, final int initialSize) {
         super(name, nDims);
         AssertUtils.gtThanZero("nDims", nDims);
-        AssertUtils.nonEmptyArray("initialSizes", initialSizes);
+        AssertUtils.gtEqThanZero("initialSize", initialSize);
         values = new DoubleArrayList[nDims];
-        int acumulatedSize = 1;
         for (int i = 0; i < nDims; i++) {
-            if (initialSizes.length > i) {
-                values[i] = new DoubleArrayList(initialSizes[i]);
-                values[i].size(initialSizes[i]);
-                acumulatedSize *= initialSizes[i];
-            } else {
-                values[i] = new DoubleArrayList(acumulatedSize);
-                values[i].size(acumulatedSize);
-            }
+            values[i] = new DoubleArrayList(initialSize);
+            values[i].size(initialSize);
         }
     }
 
@@ -299,7 +288,7 @@ public class MultiDimDoubleDataSet extends AbstractDataSet<MultiDimDoubleDataSet
             AssertUtils.indexOrder(fromIndex, "fromIndex", toIndex, "toIndex");
 
             for (int i = 0; i < this.values.length; i++) {
-                this.values[i].removeElements(fromIndex, toIndex);
+                values[i].removeElements(fromIndex, toIndex);
             }
 
             // remove old label and style keys
@@ -504,14 +493,11 @@ public class MultiDimDoubleDataSet extends AbstractDataSet<MultiDimDoubleDataSet
     }
 
     @Override
-    public int getDataCount(int dimIndex) {
-        if (values.length <= dimIndex) {
-            return 0;
-        }
-        return values[dimIndex].size();
+    public int getDataCount() {
+        return values[0].size();
     }
 
-    @Override
+    //    @Override
     public double getValue(int dimIndex, double x) {
         final int index1 = getIndex(DIM_X, x);
         final double x1 = get(DIM_X, index1);

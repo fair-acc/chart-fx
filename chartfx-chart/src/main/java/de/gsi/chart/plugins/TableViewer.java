@@ -462,7 +462,7 @@ public class TableViewer extends ChartPlugin {
         }
 
         public double getValue(final int row, final DataSet ds, final ColumnType type) {
-            if (ds == null || row >= ds.getDataCount(DIM_X)) {
+            if (ds == null || row >= ds.getDataCount()) {
                 return 0.0;
             }
             if (!type.errorCol) {

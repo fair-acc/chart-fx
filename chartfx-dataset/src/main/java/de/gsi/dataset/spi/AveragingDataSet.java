@@ -3,7 +3,6 @@ package de.gsi.dataset.spi;
 import java.util.ArrayDeque;
 
 import de.gsi.dataset.DataSet;
-import de.gsi.dataset.DataSet2D;
 import de.gsi.dataset.event.AddedDataEvent;
 
 /**
@@ -11,36 +10,35 @@ import de.gsi.dataset.event.AddedDataEvent;
  * 
  * @author braeun
  */
-public class AveragingDataSet extends AbstractDataSet<AveragingDataSet> implements DataSet2D {
+public class AveragingDataSet extends AbstractDataSet<AveragingDataSet> implements DataSet {
     private static final long serialVersionUID = 1L;
     private int averageSize = 1;
     private int fuzzyCount = 0;
     private InternalDataSet dataset;
-    private final ArrayDeque<DataSet2D> deque = new ArrayDeque<>();
+    private final ArrayDeque<DataSet> deque = new ArrayDeque<>();
 
     /**
-     * 
      * @param name data set name
+     * @param nDims number of dimensions
      */
-    public AveragingDataSet(String name) {
-        super(name, 2);
+    public AveragingDataSet(final String name, final int nDims) {
+        this(name, nDims, 0);
     }
 
     /**
-     * 
      * @param name data set name
+     * @param nDims number of dimensions
      * @param fuzzyCount binning accuracy @see #setFuzzyCount
      */
-    public AveragingDataSet(String name, int fuzzyCount) {
-        super(name, 2);
+    public AveragingDataSet(String name, final int nDims, int fuzzyCount) {
+        super(name, nDims);
         this.fuzzyCount = fuzzyCount;
     }
 
     /**
-     * 
      * @param ds new DataSet to be added to average
      */
-    public void add(DataSet2D ds) {
+    public void add(DataSet ds) {
         if (averageSize == 1) {
             dataset = new InternalDataSet(ds);
         } else if (dataset == null || deque.isEmpty()) {
@@ -73,7 +71,6 @@ public class AveragingDataSet extends AbstractDataSet<AveragingDataSet> implemen
     }
 
     /**
-     * 
      * @return number of data sets that have been averaged
      */
     public int getAverageCount() {
@@ -84,7 +81,6 @@ public class AveragingDataSet extends AbstractDataSet<AveragingDataSet> implemen
     }
 
     /**
-     * 
      * @return number of data sets that are supposed to be averaged
      */
     public int getAverageSize() {
@@ -92,11 +88,8 @@ public class AveragingDataSet extends AbstractDataSet<AveragingDataSet> implemen
     }
 
     @Override
-    public int getDataCount(final int dimIndex) {
-        if (dataset == null) {
-            return 0;
-        }
-        return dataset.getDataCount(dimIndex);
+    public int getDataCount() {
+        return dataset == null ? 0 : dataset.getDataCount();
     }
 
     /**
@@ -121,27 +114,10 @@ public class AveragingDataSet extends AbstractDataSet<AveragingDataSet> implemen
         if (dataset == null) {
             return Double.NaN;
         }
-        return dimIndex == DataSet.DIM_X ? dataset.getX(index) : dataset.getY(index);
-    }
-
-    @Override
-    public int getXIndex(double x) {
-        if (dataset == null) {
-            return 0;
-        }
-        return dataset.getXIndex(x);
-    }
-
-    @Override
-    public double[] getYValues() {
-        if (dataset == null) {
-            return new double[0];
-        }
-        return dataset.getYValues();
+        return dataset.get(dimIndex, index);
     }
 
     /**
-     * 
      * @param avgCount number of data sets that are supposed to be averaged
      */
     public void setAverageSize(int avgCount) {
@@ -166,33 +142,26 @@ public class AveragingDataSet extends AbstractDataSet<AveragingDataSet> implemen
         this.fuzzyCount = fuzzyCount;
     }
 
-    private class InternalDataSet extends DoubleDataSet {
+    private class InternalDataSet extends DoubleErrorDataSet {
         private static final long serialVersionUID = 1L;
 
-        public InternalDataSet(DataSet2D ds) {
-            super(ds.getName(), ds.getValues(DataSet.DIM_X), ds.getValues(DataSet.DIM_Y), ds.getDataCount(), true);
-            // xValues = new double[ds.getDataCount()];
-            // yValues = new double[ds.getDataCount()];
-            // for (int i=0;i<yValues.length;i++)
-            // {
-            // xValues[i] = ds.getX(i);
-            // yValues[i] = ds.getY(i);
-            // }
-            // dataMaxIndex = ds.getDataCount();
+        public InternalDataSet(DataSet ds) {
+            super(ds.getName(), ds.getValues(DataSet.DIM_X), ds.getValues(DataSet.DIM_Y), new double[ds.getDataCount()], new double[ds.getDataCount()],
+                    ds.getDataCount(), true);
         }
 
-        public boolean isCompatible(DataSet2D d) {
+        public boolean isCompatible(DataSet d) {
             return Math.abs(super.getDataCount() - d.getDataCount()) <= fuzzyCount;
         }
 
-        public void opAdd(DataSet2D d) {
+        public void opAdd(DataSet d) {
             if (!isCompatible(d)) {
                 throw new IllegalArgumentException("Datasets do not match");
             }
 
             yValues.size(d.getDataCount());
             for (int i = 0; i < yValues.size(); i++) {
-                yValues.elements()[i] += d.getY(i);
+                yValues.elements()[i] += d.get(DataSet.DIM_Y, i);
             }
         }
 
@@ -202,14 +171,19 @@ public class AveragingDataSet extends AbstractDataSet<AveragingDataSet> implemen
             }
         }
 
-        public void opSub(DataSet2D d) {
+        public void opSub(DataSet d) {
             if (!isCompatible(d)) {
                 throw new IllegalArgumentException("Datasets do not match");
             }
             yValues.size(d.getDataCount());
             for (int i = 0; i < yValues.size(); i++) {
-                yValues.elements()[i] -= d.getY(i);
+                yValues.elements()[i] -= d.get(DataSet.DIM_Y, i);
             }
         }
+    }
+
+    @Override
+    public double getValue(int dimIndex, double... x) {
+        return get(dimIndex, getIndex(DIM_X, x[0]));
     }
 }
