@@ -1,6 +1,7 @@
 package de.gsi.dataset.spi;
 
 import de.gsi.dataset.AxisDescription;
+import de.gsi.dataset.DataSet;
 import de.gsi.dataset.DataSet2D;
 import de.gsi.dataset.EditableDataSet;
 import de.gsi.dataset.event.AddedDataEvent;
@@ -19,7 +20,7 @@ import it.unimi.dsi.fastutil.floats.FloatArrayList;
  * @see DoubleErrorDataSet for an equivalent implementation with asymmetric errors in Y
  * @author rstein
  */
-public class FloatDataSet extends AbstractDataSet<FloatDataSet> implements EditableDataSet, DataSet2D {
+public class FloatDataSet extends AbstractDataSet<FloatDataSet> implements DataSet2D, EditableDataSet {
     private static final long serialVersionUID = 7625465583757088697L;
     protected FloatArrayList xValues; // faster compared to java default
     protected FloatArrayList yValues; // faster compared to java default
@@ -29,7 +30,7 @@ public class FloatDataSet extends AbstractDataSet<FloatDataSet> implements Edita
      *
      * @param another name of this DataSet.
      */
-    public FloatDataSet(final DataSet2D another) {
+    public FloatDataSet(final DataSet another) {
         super(another.getName(), another.getDimension());
         this.set(another); // NOPMD by rstein on 25/06/19 07:42
     }
@@ -60,8 +61,7 @@ public class FloatDataSet extends AbstractDataSet<FloatDataSet> implements Edita
      * @throws IllegalArgumentException if any of parameters is <code>null</code> or if arrays with coordinates have
      *             different lengths
      */
-    public FloatDataSet(final String name, final float[] xValues, final float[] yValues, final int initalSize,
-            final boolean deepCopy) {
+    public FloatDataSet(final String name, final float[] xValues, final float[] yValues, final int initalSize, final boolean deepCopy) {
         this(name);
         set(xValues, yValues, initalSize, deepCopy); // NOPMD
     }
@@ -250,26 +250,8 @@ public class FloatDataSet extends AbstractDataSet<FloatDataSet> implements Edita
     }
 
     @Override
-    public int getDataCount(final int dimIndex) {
+    public int getDataCount() {
         return Math.min(xValues.size(), yValues.size());
-    }
-
-    public float[] getXFloatValues() {
-        return xValues.elements();
-    }
-
-    @Override
-    public double[] getXValues() {
-        return toDoubles(xValues.elements());
-    }
-
-    public float[] getYFloatValues() {
-        return yValues.elements();
-    }
-
-    @Override
-    public double[] getYValues() {
-        return toDoubles(yValues.elements());
     }
 
     /**
@@ -343,35 +325,33 @@ public class FloatDataSet extends AbstractDataSet<FloatDataSet> implements Edita
      * @param other the source data set
      * @return itself (fluent design)
      */
-    public FloatDataSet set(final DataSet2D other) {
-        lock().writeLockGuard(() -> {
-            other.lock().writeLockGuard(() -> {
-                // copy data
-                this.set(toFloats(other.getXValues()), toFloats(other.getYValues()), other.getDataCount(), true);
+    public FloatDataSet set(final DataSet other) {
+        lock().writeLockGuard(() -> other.lock().writeLockGuard(() -> {
+            // copy data
+            this.set(toFloats(other.getValues(DIM_X)), toFloats(other.getValues(DIM_Y)), other.getDataCount(), true);
 
-                // deep copy data point labels and styles
-                getDataLabelMap().clear();
-                for (int index = 0; index < other.getDataCount(); index++) {
-                    final String label = other.getDataLabel(index);
-                    if (label != null && !label.isEmpty()) {
-                        this.addDataLabel(index, label);
-                    }
+            // deep copy data point labels and styles
+            getDataLabelMap().clear();
+            for (int index = 0; index < other.getDataCount(); index++) {
+                final String label = other.getDataLabel(index);
+                if (label != null && !label.isEmpty()) {
+                    this.addDataLabel(index, label);
                 }
-                getDataStyleMap().clear();
-                for (int index = 0; index < other.getDataCount(); index++) {
-                    final String style = other.getStyle(index);
-                    if (style != null && !style.isEmpty()) {
-                        this.addDataStyle(index, style);
-                    }
+            }
+            getDataStyleMap().clear();
+            for (int index = 0; index < other.getDataCount(); index++) {
+                final String style = other.getStyle(index);
+                if (style != null && !style.isEmpty()) {
+                    this.addDataStyle(index, style);
                 }
-                this.setStyle(other.getStyle());
+            }
+            this.setStyle(other.getStyle());
 
-                // synchronise axis description
-                for (int dimIndex = 0; dimIndex < getDimension(); dimIndex++) {
-                    this.getAxisDescription(dimIndex).set(other.getAxisDescription(dimIndex));
-                }
-            });
-        });
+            // synchronise axis description
+            for (int dimIndex = 0; dimIndex < getDimension(); dimIndex++) {
+                this.getAxisDescription(dimIndex).set(other.getAxisDescription(dimIndex));
+            }
+        }));
         return fireInvalidated(new UpdatedDataEvent(this));
     }
 
@@ -401,7 +381,7 @@ public class FloatDataSet extends AbstractDataSet<FloatDataSet> implements Edita
      * @return itself
      */
     public FloatDataSet set(final float[] xValues, final float[] yValues, final boolean copy) {
-        return set(xValues, yValues, -1, true);
+        return set(xValues, yValues, -1, copy);
     }
 
     /**
@@ -521,5 +501,30 @@ public class FloatDataSet extends AbstractDataSet<FloatDataSet> implements Edita
             floatArray[i] = (float) input[i];
         }
         return floatArray;
+    }
+
+    /**
+     * @param dimIndex Dimension to get values for
+     * @return the float array with the values
+     */
+    public float[] getFloatValues(int dimIndex) {
+        return dimIndex == DIM_X ? xValues.elements() : yValues.elements();
+    }
+
+    /**
+     * @param dimIndex Dimension to get values for
+     * @return the double array with the values
+     */
+    @Override
+    public double[] getValues(int dimIndex) {
+        return dimIndex == DIM_X ? toDoubles(xValues.elements()) : toDoubles(yValues.elements());
+    }
+
+    public float[] getXFloatValues() {
+        return getFloatValues(DIM_X);
+    }
+
+    public float[] getYFloatValues() {
+        return getFloatValues(DIM_Y);
     }
 }

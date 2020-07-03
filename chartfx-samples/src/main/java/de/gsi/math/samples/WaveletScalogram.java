@@ -17,6 +17,7 @@ import de.gsi.chart.renderer.spi.ContourDataSetRenderer;
 import de.gsi.chart.renderer.spi.utils.ColorGradient;
 import de.gsi.chart.utils.AxisSynchronizer;
 import de.gsi.dataset.DataSet;
+import de.gsi.dataset.GridDataSet;
 import de.gsi.dataset.spi.DefaultDataSet;
 import de.gsi.math.TMath;
 import de.gsi.math.samples.utils.AbstractDemoApplication;
@@ -33,7 +34,7 @@ public class WaveletScalogram extends AbstractDemoApplication {
     private static final Logger LOGGER = LoggerFactory.getLogger(WaveletScalogram.class);
     private static final int MAX_POINTS = 1024;
     public static final boolean LOAD_EXAMPLE_DATA = true;
-    private DataSet fdataset;
+    private GridDataSet fdataset;
     private DefaultDataSet fwavelet;
     private DefaultDataSet ffourier;
     private double[] yValues;
@@ -84,14 +85,14 @@ public class WaveletScalogram extends AbstractDemoApplication {
         fft.realForward(fftSpectra);
         final double[] frequency1 = wtrafo.getScalogramFrequencyAxis(nQuantx, nQuanty, nu, fmin, fmax);
         final double[] magWavelet = new double[frequency1.length];
-        final int nboundary = fdataset.getDataCount(DataSet.DIM_X) / 20;
+        final int nboundary = fdataset.getShape(DataSet.DIM_X) / 20;
 
-        for (int i = 0; i < fdataset.getDataCount(DataSet.DIM_Y); i++) {
+        for (int i = 0; i < fdataset.getShape(DataSet.DIM_Y); i++) {
             double val = 0.0;
             int count = 0;
 
-            for (int j = nboundary; j < fdataset.getDataCount(DataSet.DIM_X) - nboundary; j++) {
-                val += fdataset.get(DataSet.DIM_Z, i * fdataset.getDataCount(DataSet.DIM_X) + j);
+            for (int j = nboundary; j < fdataset.getShape(DataSet.DIM_X) - nboundary; j++) {
+                val += fdataset.get(DataSet.DIM_Z, i * fdataset.getShape(DataSet.DIM_X) + j);
                 count++;
             }
             if (count > 0) {

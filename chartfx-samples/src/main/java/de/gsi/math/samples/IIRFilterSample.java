@@ -80,9 +80,9 @@ public class IIRFilterSample extends AbstractDemoApplication {
         if (fraw2 == null) {
             throw new IllegalStateException("fraw2 is null");
         }
-        LOGGER.atInfo().log("length 0 = " + fraw.getDataCount(DataSet.DIM_X));
-        LOGGER.atInfo().log("length 1 = " + fraw1.getDataCount(DataSet.DIM_X));
-        LOGGER.atInfo().log("length 2 = " + fraw2.getDataCount(DataSet.DIM_X));
+        LOGGER.atInfo().log("length 0 = " + fraw.getDataCount());
+        LOGGER.atInfo().log("length 1 = " + fraw1.getDataCount());
+        LOGGER.atInfo().log("length 2 = " + fraw2.getDataCount());
 
         fspectra = DataSetMath.magnitudeSpectrumDecibel(fraw);
         fspectra1 = DataSetMath.magnitudeSpectrumDecibel(fraw1);

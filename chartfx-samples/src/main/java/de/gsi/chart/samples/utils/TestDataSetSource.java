@@ -16,8 +16,9 @@ import org.jtransforms.fft.FloatFFT_1D;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import de.gsi.dataset.GridDataSet;
 import de.gsi.dataset.event.AddedDataEvent;
-import de.gsi.dataset.spi.AbstractDataSet3D;
+import de.gsi.dataset.spi.AbstractDataSet;
 import de.gsi.dataset.utils.ByteArrayCache;
 import de.gsi.dataset.utils.DoubleCircularBuffer;
 import de.gsi.math.ArrayUtils;
@@ -31,7 +32,7 @@ import it.unimi.dsi.fastutil.floats.FloatArrayList;
  *
  * @author rstein
  */
-public class TestDataSetSource extends AbstractDataSet3D<TestDataSetSource> {
+public class TestDataSetSource extends AbstractDataSet<TestDataSetSource> implements GridDataSet {
     private static final long serialVersionUID = 5374805363297317245L;
     private static final Logger LOGGER = LoggerFactory.getLogger(TestDataSetSource.class);
     private static final String DATA_SOURCE_FILE = "../testdata/alla-turca.mid";
@@ -66,13 +67,13 @@ public class TestDataSetSource extends AbstractDataSet3D<TestDataSetSource> {
     protected transient Timer updateTimer;
     protected transient Timer audioTimer;
     protected transient TimerTask traskAudioIO;
-    protected transient TimerTask traskDataUpdate;
+    protected transient TimerTask taskDataUpdate;
 
     public TestDataSetSource() {
         // ToDo: add Enum to select
         // * RAW, FFT, MAG data
         // * initial sampling, binning, history depth
-        super(TestDataSetSource.class.getSimpleName());
+        super(TestDataSetSource.class.getSimpleName(), 3);
 
         reinitializeData(); // NOPMD
 
@@ -112,14 +113,14 @@ public class TestDataSetSource extends AbstractDataSet3D<TestDataSetSource> {
     @Override
     public double get(final int dimIndex, final int index) {
         if (dimIndex <= DIM_Y) {
-            return history[dimIndex].elements()[index];
+            return history[dimIndex].getFloat(dimIndex == DIM_X ? index % frameSize : index / frameSize);
         }
-        return history[dimIndex].elements()[(index + circIndex) % (frameSize * frameCount)];
+        return history[dimIndex].getFloat((index + circIndex) % (frameSize * frameCount));
     }
 
     @Override
-    public int getDataCount(final int dimIndex) {
-        return history[dimIndex].size();
+    public int getDataCount() {
+        return frameCount * frameSize;
     }
 
     public int getFrameCount() {
@@ -143,15 +144,8 @@ public class TestDataSetSource extends AbstractDataSet3D<TestDataSetSource> {
     }
 
     @Override
-    public double getValue(final int dimIndex, final double x) {
+    public double getValue(final int dimIndex, final double... x) {
         return 0;
-    }
-
-    @Override
-    public double getZ(final int xIndex, final int yIndex) {
-        // TODO: remove mandatory getZ interface from CountourDataSet renderer
-        final int index = (yIndex * frameSize) + xIndex;
-        return history[DIM_Z].elements()[(index + circIndex) % (frameSize * frameCount)];
     }
 
     public boolean isOutputMuted() {
@@ -233,8 +227,8 @@ public class TestDataSetSource extends AbstractDataSet3D<TestDataSetSource> {
         audioTimer.schedule(traskAudioIO, 0);
 
         updateTimer = new Timer(TestDataSetSource.class.getSimpleName() + "-Data", true);
-        traskDataUpdate = getDataUpdateTask();
-        updateTimer.scheduleAtFixedRate(traskDataUpdate, updatePeriod, updatePeriod);
+        taskDataUpdate = getDataUpdateTask();
+        updateTimer.scheduleAtFixedRate(taskDataUpdate, updatePeriod, updatePeriod);
     }
 
     public void step() {
@@ -370,7 +364,7 @@ public class TestDataSetSource extends AbstractDataSet3D<TestDataSetSource> {
         synth.setBufferLength(2 * frameSize);
         lineBuffer = new DoubleCircularBuffer(2 * frameSize);
 
-        if (traskDataUpdate != null) {
+        if (taskDataUpdate != null) {
             start();
         }
     }
@@ -389,5 +383,28 @@ public class TestDataSetSource extends AbstractDataSet3D<TestDataSetSource> {
         BOTH,
         MIDI,
         LINE;
+    }
+
+    @Override
+    public int[] getShape() {
+        return new int[] { frameSize, frameCount };
+    }
+
+    @Override
+    public double getGrid(int dimIndex, int index) {
+        return history[dimIndex].getFloat(index);
+    }
+
+    @Override
+    public double get(int dimIndex, int... indices) {
+        switch (dimIndex) {
+        case DIM_X:
+        case DIM_Y:
+            return history[dimIndex].getFloat(indices[dimIndex]);
+        case DIM_Z:
+            return history[DIM_Z].getFloat(((indices[DIM_X] + frameSize * indices[DIM_Y]) + circIndex) % (frameSize * frameCount));
+        default:
+            throw new IndexOutOfBoundsException("dimIndex out of bound 3");
+        }
     }
 }
