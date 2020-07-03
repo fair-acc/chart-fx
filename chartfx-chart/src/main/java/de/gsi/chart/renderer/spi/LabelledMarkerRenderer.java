@@ -257,7 +257,7 @@ public class LabelledMarkerRenderer extends AbstractDataSetManagement<LabelledMa
                 // check for potentially reduced data range we are supposed to plot
                 final int indexMin = Math.max(0, dataSet.getIndex(DataSet.DIM_X, xMin));
                 final int indexMax = Math.min(dataSet.getIndex(DataSet.DIM_X, xMax) + 1,
-                        dataSet.getDataCount(DataSet.DIM_X));
+                        dataSet.getDataCount());
 
                 // return if zero length data set
                 if (indexMax - indexMin <= 0) {

@@ -70,8 +70,8 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
 
         if (!axisdescription.isDefined() && evt instanceof AxisRecomputationEvent) {
             recomputeLimits(axisDim);
-
-            invokeListener(new AxisRangeChangeEvent(this, "updated axis range for '" + axisdescription.getName() + "' '[" + axisdescription.getUnit() + "]'", axisDim));
+            // do not invoke this listener as there is no actual update to the data
+            // invokeListener(new AxisRangeChangeEvent(this, "updated axis range for '" + axisdescription.getName() + "' '[" + axisdescription.getUnit() + "]'", axisDim));
             axisUpdating.set(false);
             return;
         }
@@ -172,19 +172,12 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
         if (other instanceof AbstractDataSet) {
             AbstractDataSet<?> otherAbsDs = (AbstractDataSet<?>) other;
             return getDataLabelMap().equals(otherAbsDs.getDataLabelMap());
-        } else {
-            for (int index = 0; index < getDataCount(); index++) {
-                final String label1 = this.getDataLabel(index);
-                final String label2 = other.getDataLabel(index);
-                if (label1 == label2) { // NOPMD -- early return if reference is identical
-                    continue;
-                }
-                if (label1 == null && label2 != null) {
-                    return false;
-                }
-                if (label1 == null || !label1.equals(label2)) {
-                    return false;
-                }
+        }
+        for (int index = 0; index < getDataCount(); index++) {
+            final String label1 = this.getDataLabel(index);
+            final String label2 = other.getDataLabel(index);
+            if (label1 != label2 && (label1 == null || !label1.equals(label2))) { // NOPMD -- early return if reference is identical
+                return false;
             }
         }
         return true;
@@ -232,7 +225,7 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
 
         if (epsilon <= 0.0) {
             for (int dimIndex = 0; dimIndex < this.getDimension(); dimIndex++) {
-                for (int index = 0; index < this.getDataCount(dimIndex); index++) {
+                for (int index = 0; index < this.getDataCount(); index++) {
                     if (thisErrorDs.getErrorNegative(dimIndex, index) != otherErrorDs.getErrorNegative(dimIndex, index)) {
                         return false;
                     }
@@ -243,13 +236,11 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
             }
         } else {
             for (int dimIndex = 0; dimIndex < this.getDimension(); dimIndex++) {
-                for (int index = 0; index < this.getDataCount(dimIndex); index++) {
-                    if (!MathUtils.nearlyEqual(thisErrorDs.getErrorNegative(dimIndex, index),
-                                otherErrorDs.getErrorNegative(dimIndex, index), epsilon)) {
+                for (int index = 0; index < this.getDataCount(); index++) {
+                    if (!MathUtils.nearlyEqual(thisErrorDs.getErrorNegative(dimIndex, index), otherErrorDs.getErrorNegative(dimIndex, index), epsilon)) {
                         return false;
                     }
-                    if (!MathUtils.nearlyEqual(thisErrorDs.getErrorPositive(dimIndex, index),
-                                otherErrorDs.getErrorPositive(dimIndex, index), epsilon)) {
+                    if (!MathUtils.nearlyEqual(thisErrorDs.getErrorPositive(dimIndex, index), otherErrorDs.getErrorPositive(dimIndex, index), epsilon)) {
                         return false;
                     }
                 }
@@ -321,11 +312,6 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
         if (this.getDataCount() != other.getDataCount()) {
             return false;
         }
-        for (int dimIndex = 0; dimIndex < this.getDimension(); dimIndex++) {
-            if (this.getDataCount(dimIndex) != other.getDataCount(dimIndex)) {
-                return false;
-            }
-        }
 
         // check names
         final String name1 = this.getName();
@@ -376,7 +362,7 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
     protected boolean equalValues(final DataSet other, final double epsilon) {
         if (epsilon <= 0.0) {
             for (int dimIndex = 0; dimIndex < this.getDimension(); dimIndex++) {
-                for (int index = 0; index < this.getDataCount(dimIndex); index++) {
+                for (int index = 0; index < this.getDataCount(); index++) {
                     if (get(dimIndex, index) != other.get(dimIndex, index)) {
                         return false;
                     }
@@ -384,7 +370,7 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
             }
         } else {
             for (int dimIndex = 0; dimIndex < this.getDimension(); dimIndex++) {
-                for (int index = 0; index < this.getDataCount(dimIndex); index++) {
+                for (int index = 0; index < this.getDataCount(); index++) {
                     if (!MathUtils.nearlyEqual(get(dimIndex, index), other.get(dimIndex, index), epsilon)) {
                         return false;
                     }
@@ -490,37 +476,6 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
         return warningList;
     }
 
-    /**
-     * Gets the index of the data point closest to the given x coordinate.
-     * If the x coordinate lies outside the range of the data set, the index of the first/last point is returned.
-     *
-     * @param dimIndex the dimension index
-     * @param x the x position of the data point
-     * @return the index of the data point
-     */
-    @Override
-    public int getIndex(final int dimIndex, final double x) {
-        if (this.getDataCount() == 0) {
-            return 0;
-        }
-
-        if (!Double.isFinite(x)) {
-            return 0;
-        }
-
-        if (x <= this.getAxisDescription(dimIndex).getMin()) {
-            return 0;
-        }
-
-        final int lastIndex = getDataCount(dimIndex) - 1;
-        if (x >= this.getAxisDescription(dimIndex).getMax()) {
-            return lastIndex;
-        }
-
-        // binary closest search -- assumes sorted data set
-        return binarySearch(dimIndex, x, 0, lastIndex);
-    }
-
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -540,26 +495,6 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
     @Override
     public DataSetLock<? extends DataSet> lock() {
         return lock;
-    }
-
-    /**
-     * Computes limits (ranges) of this DataSet.
-     * 
-     * @param dimIndex the chosen dimension
-     * @return itself (fluent design)
-     */
-    @Override
-    public D recomputeLimits(final int dimIndex) {
-        // first compute range (does not trigger notify events)
-        DataRange newRange = new DataRange();
-        final int dataCount = getDataCount(dimIndex);
-        for (int i = 0; i < dataCount; i++) {
-            newRange.add(get(dimIndex, i));
-        }
-
-        // set to new computed one and trigger notify event if different to old limits
-        getAxisDescription(dimIndex).set(newRange.getMin(), newRange.getMax());
-        return getThis();
     }
 
     /**
@@ -607,8 +542,7 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append(getClass().getName()).append(" [name=").append(getName()).append(", dim=").append(getDimension()).append(',');
-        builder.append(" dataCount=").append(this.getDataCount(DIM_X)).append(',');
+        builder.append(getClass().getName()).append(" [dim=").append(getDimension()).append(',').append(" dataCount=").append(this.getDataCount()).append(',');
         for (int i = 0; i < this.getDimension(); i++) {
             final AxisDescription desc = getAxisDescription(i);
             final boolean isDefined = desc.isDefined();

@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 
 import de.gsi.dataset.AxisDescription;
-import de.gsi.dataset.DataSet2D;
+import de.gsi.dataset.DataSet;
 import de.gsi.dataset.event.AddedDataEvent;
 import de.gsi.dataset.event.RemovedDataEvent;
 import de.gsi.dataset.event.UpdatedDataEvent;
@@ -23,9 +23,9 @@ import de.gsi.dataset.utils.trees.IndexedTreeSet;
  * @see de.gsi.dataset.DataSetError
  * @author rstein
  */
-public class LimitedIndexedTreeDataSet extends AbstractErrorDataSet<LimitedIndexedTreeDataSet> implements DataSet2D {
+public class LimitedIndexedTreeDataSet extends AbstractErrorDataSet<LimitedIndexedTreeDataSet> implements DataSet {
     private static final long serialVersionUID = -6372417982869679455L;
-    protected IndexedNavigableSet<DataAtom> data = new IndexedTreeSet<>();
+    protected transient IndexedNavigableSet<DataAtom> data = new IndexedTreeSet<>();
     protected int maxQueueSize = Integer.MAX_VALUE;
     protected double maxLength = Double.MAX_VALUE;
     protected boolean subtractOffset = false;
@@ -215,7 +215,14 @@ public class LimitedIndexedTreeDataSet extends AbstractErrorDataSet<LimitedIndex
 
     @Override
     public double get(final int dimIndex, final int i) {
-        return dimIndex == DIM_X ? (subtractOffset ? data.get(i).getX() - data.get(data.size() - 1).getX() : data.get(i).getX()) : data.get(i).getY();
+        switch (dimIndex) {
+        case DIM_X:
+            return subtractOffset ? data.get(i).getX() - data.get(data.size() - 1).getX() : data.get(i).getX();
+        case DIM_Y:
+            return data.get(i).getY();
+        default:
+            throw new IndexOutOfBoundsException("dimIndex out of bound 2");
+        }
     }
 
     /**
@@ -226,7 +233,7 @@ public class LimitedIndexedTreeDataSet extends AbstractErrorDataSet<LimitedIndex
     }
 
     @Override
-    public int getDataCount(final int dimIndex) {
+    public int getDataCount() {
         return data.size();
     }
 
@@ -550,6 +557,22 @@ public class LimitedIndexedTreeDataSet extends AbstractErrorDataSet<LimitedIndex
                 return +1;
             }
             return 0;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (!(obj instanceof DataAtom)) {
+                return false;
+            }
+            if (obj == this) {
+                return true;
+            }
+            return ((DataAtom) obj).getX() == this.getX();
+        }
+
+        @Override
+        public int hashCode() {
+            return Double.hashCode(this.getX());
         }
 
         protected double getErrorX() {

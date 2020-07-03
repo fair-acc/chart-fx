@@ -115,7 +115,7 @@ public class DoubleDataSetTests extends EditableDataSetTests {
 
         if (testCase <= 1) {
             //TODO capacity increases beyond size due to DoubleArrayList's grow(capacity) implementation that increases the capacity by
-            // by Min(size + 0.5* size, capacity) ... need to find a work around
+            // Min(size + 0.5* size, capacity) ... need to find a work around
             assertEquals(dataSet.getDataCount(), dataSet.getCapacity(),
                     "check '" + dsType + "' capacity data count match , test case = " + testCase);
         }
@@ -156,8 +156,8 @@ public class DoubleDataSetTests extends EditableDataSetTests {
     public void getterTests() {
         final DoubleDataSet dataSet = new DoubleDataSet("test", testCoordinate[0], testCoordinate[1], n, true);
 
-        assertEquals(dataSet.getXValues(), dataSet.getValues(DIM_X));
-        assertEquals(dataSet.getYValues(), dataSet.getValues(DIM_Y));
+        assertEquals(dataSet.getValues(DIM_X), dataSet.getValues(DIM_X));
+        assertEquals(dataSet.getValues(DIM_Y), dataSet.getValues(DIM_Y));
 
         for (int dimIndex = 0; dimIndex < dataSet.getDimension(); dimIndex++) {
             final double[] values = dataSet.getValues(dimIndex);
@@ -166,7 +166,7 @@ public class DoubleDataSetTests extends EditableDataSetTests {
                 assertEquals(testCoordinate[dimIndex][i], dataSet.get(dimIndex, i),
                         "test1(" + dimIndex + ", " + i + ")");
                 assertEquals(testCoordinate[dimIndex][i], values[i], "test2(" + dimIndex + ", " + i + ")");
-                assertEquals(testCoordinate[dimIndex][i], dimIndex == DIM_X ? dataSet.getX(i) : dataSet.getY(i),
+                assertEquals(testCoordinate[dimIndex][i], dimIndex == DIM_X ? dataSet.get(DIM_X, i) : dataSet.get(DIM_Y, i),
                         "test3(" + dimIndex + ", " + i + ")");
             }
         }

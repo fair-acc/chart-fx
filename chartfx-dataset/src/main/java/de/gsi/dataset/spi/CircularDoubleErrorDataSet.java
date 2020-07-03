@@ -13,8 +13,7 @@ import de.gsi.dataset.utils.DoubleCircularBuffer;
 /**
  * @author rstein
  */
-public class CircularDoubleErrorDataSet extends AbstractErrorDataSet<CircularDoubleErrorDataSet>
-        implements DataSet2D, DataSetError {
+public class CircularDoubleErrorDataSet extends AbstractErrorDataSet<CircularDoubleErrorDataSet> implements DataSetError, DataSet2D {
     private static final long serialVersionUID = -8010355203980379253L;
     protected DoubleCircularBuffer xValues;
     protected DoubleCircularBuffer yValues;
@@ -50,8 +49,7 @@ public class CircularDoubleErrorDataSet extends AbstractErrorDataSet<CircularDou
      * @param yErrorPos the -dy error
      * @return itself
      */
-    public CircularDoubleErrorDataSet add(final double x, final double y, final double yErrorNeg,
-            final double yErrorPos) {
+    public CircularDoubleErrorDataSet add(final double x, final double y, final double yErrorNeg, final double yErrorPos) {
         return add(x, y, yErrorNeg, yErrorPos, null);
     }
 
@@ -65,8 +63,7 @@ public class CircularDoubleErrorDataSet extends AbstractErrorDataSet<CircularDou
      * @param label the data label
      * @return itself
      */
-    public CircularDoubleErrorDataSet add(final double x, final double y, final double yErrorNeg,
-            final double yErrorPos, final String label) {
+    public CircularDoubleErrorDataSet add(final double x, final double y, final double yErrorNeg, final double yErrorPos, final String label) {
         return add(x, y, yErrorNeg, yErrorPos, label, null);
     }
 
@@ -81,8 +78,8 @@ public class CircularDoubleErrorDataSet extends AbstractErrorDataSet<CircularDou
      * @param style the data style string
      * @return itself
      */
-    public CircularDoubleErrorDataSet add(final double x, final double y, final double yErrorNeg,
-            final double yErrorPos, final String label, final String style) {
+    public CircularDoubleErrorDataSet add(final double x, final double y, final double yErrorNeg, final double yErrorPos, final String label,
+            final String style) {
         lock().writeLockGuard(() -> {
             xValues.put(x);
             yValues.put(y);
@@ -110,8 +107,7 @@ public class CircularDoubleErrorDataSet extends AbstractErrorDataSet<CircularDou
      * @param yErrPos the -dy errors
      * @return itself
      */
-    public CircularDoubleErrorDataSet add(final double[] xVals, final double[] yVals, final double[] yErrNeg,
-            final double[] yErrPos) {
+    public CircularDoubleErrorDataSet add(final double[] xVals, final double[] yVals, final double[] yErrNeg, final double[] yErrPos) {
         AssertUtils.notNull("X coordinates", xVals);
         AssertUtils.notNull("Y coordinates", yVals);
         AssertUtils.notNull("Y error neg", yErrNeg);
@@ -139,7 +135,7 @@ public class CircularDoubleErrorDataSet extends AbstractErrorDataSet<CircularDou
     }
 
     @Override
-    public int getDataCount(final int dimIndex) {
+    public int getDataCount() {
         return xValues.available();
     }
 
