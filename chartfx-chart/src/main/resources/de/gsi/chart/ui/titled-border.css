@@ -1,4 +1,3 @@
-
 .bordered-titled-title {
   -fx-padding: 0 2 0 2;
   -fx-font-size: 14px;
@@ -17,3 +16,4 @@
 .bordered-titled-content {
   -fx-padding: 10 5 5 5;
 }
+
