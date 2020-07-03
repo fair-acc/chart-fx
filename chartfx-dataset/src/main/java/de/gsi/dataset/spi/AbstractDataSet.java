@@ -176,7 +176,7 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
         for (int index = 0; index < getDataCount(); index++) {
             final String label1 = this.getDataLabel(index);
             final String label2 = other.getDataLabel(index);
-            if (label1 != label2 && (label1 == null || !label1.equals(label2))) {// NOPMD -- early return if reference is identical
+            if (label1 != label2 && (label1 == null || !label1.equals(label2))) { // NOPMD -- early return if reference is identical
                 return false;
             }
         }
@@ -540,10 +540,14 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
             final AxisDescription desc = getAxisDescription(i);
             final boolean isDefined = desc.isDefined();
             builder.append(" axisName ='").append(desc.getName()).append("',") //
-                    .append(" axisUnit = '").append(desc.getUnit()).append("',") //
+                    .append(" axisUnit = '")
+                    .append(desc.getUnit())
+                    .append("',") //
                     .append(" axisRange = ") //
-                    .append(" [min=").append(isDefined ? desc.getMin() : "NotDefined") //
-                    .append(", max=").append(isDefined ? desc.getMax() : "NotDefined") //
+                    .append(" [min=")
+                    .append(isDefined ? desc.getMin() : "NotDefined") //
+                    .append(", max=")
+                    .append(isDefined ? desc.getMax() : "NotDefined") //
                     .append("],");
         }
         builder.append(']');

@@ -315,7 +315,7 @@ public class DataSetBuilder {
     private DataSet buildGridDataSet(String dsName, int[] size) {
         final int nDims = size.length;
         if (size[nDims - 1] == 0) {
-            return new DoubleGridDataSet(dsName, nDims, new int[nDims-1]);
+            return new DoubleGridDataSet(dsName, nDims, new int[nDims - 1]);
         }
         int nGrid = 0;
         int validateDataCount = 1;

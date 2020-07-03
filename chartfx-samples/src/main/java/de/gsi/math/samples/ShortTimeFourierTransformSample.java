@@ -115,7 +115,7 @@ public class ShortTimeFourierTransformSample extends AbstractDemoApplication {
         // rawData chart
         chart3 = new XYChart();
         chart3.getXAxis().setAutoUnitScaling(true);
-//        chart3.getPlugins().add(new UpdateAxisLabels());
+        //        chart3.getPlugins().add(new UpdateAxisLabels());
         chart3.getPlugins().add(new Zoomer());
         chart3.getPlugins().add(new EditAxis());
         chart3.getRenderers().add(new MetaDataRenderer(chart3));
@@ -138,7 +138,7 @@ public class ShortTimeFourierTransformSample extends AbstractDemoApplication {
         zAxis1.setUnit("dB");
         chart1.getAxes().addAll(xAxis1, yAxis1, zAxis1);
         // Add plugins after all axes are correctly set up
-//        chart1.getPlugins().add(new UpdateAxisLabels());
+        //        chart1.getPlugins().add(new UpdateAxisLabels());
         chart1.getPlugins().add(new Zoomer());
         chart1.getPlugins().add(new EditAxis());
         chart1.getDatasets().add(TransposedDataSet.transpose(stftData, true));
@@ -159,7 +159,7 @@ public class ShortTimeFourierTransformSample extends AbstractDemoApplication {
         zAxis2.setUnit("dB");
         chart2.getAxes().addAll(xAxis2, yAxis2, zAxis2);
         chart2.getRenderers().add(new MetaDataRenderer(chart2));
-//        chart2.getPlugins().add(new UpdateAxisLabels());
+        //        chart2.getPlugins().add(new UpdateAxisLabels());
         chart2.getPlugins().add(new Zoomer());
         chart2.getPlugins().add(new EditAxis());
         chart2.getDatasets().add(waveletData);

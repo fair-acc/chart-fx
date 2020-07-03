@@ -273,7 +273,7 @@ public class TransposedDataSetTest {
         assertDoesNotThrow(() -> datasetTransposed.recomputeLimits(DIM_Z));
         assertThrows(IndexOutOfBoundsException.class, () -> datasetTransposed.recomputeLimits(3));
         assertThrows(IndexOutOfBoundsException.class, () -> gridDatasetTransposed.getGrid(DIM_Y, 4));
-        assertThrows(IndexOutOfBoundsException.class, () -> gridDatasetTransposed.get(DIM_Z, 5,1));
+        assertThrows(IndexOutOfBoundsException.class, () -> gridDatasetTransposed.get(DIM_Z, 5, 1));
         assertThrows(IndexOutOfBoundsException.class, () -> gridDatasetTransposed.get(DIM_Z, 0, 4));
         // untranspose and check indexing again
         datasetTransposed.setTransposed(false);
