@@ -24,11 +24,6 @@ class MultiDimDoubleDataSetTests {
         assertEquals(3, dataset.get(2, 0));
         assertEquals(4, dataset.getDimension());
         assertEquals(4, dataset.getDataCount());
-        assertEquals(4, dataset.getDataCount(DataSet.DIM_X));
-        assertEquals(4, dataset.getDataCount(DataSet.DIM_Y));
-        assertEquals(4, dataset.getDataCount(DataSet.DIM_Z));
-        assertEquals(4, dataset.getDataCount(3));
-        assertEquals(0, dataset.getDataCount(4));
 
         // Add points (single)
         dataset.add(2, 14, 15, 16, 17); // single Point
@@ -48,7 +43,7 @@ class MultiDimDoubleDataSetTests {
         dataset.add(new double[][] { { 11, 12 }, { 21, 22 }, { 31, 32 }, { 41, 42 } });
         dataset.add(1, new double[][] { { 51, 52 }, { 61, 62 }, { 71, 72 }, { 81, 82 } });
         assertArrayEquals(new double[] { 2, 61, 62, 4, 15, 6, 8, 15, 21, 22 },
-                trimArray(dataset.getValues(DataSet.DIM_Y), dataset.getDataCount(DataSet.DIM_Y)));
+                trimArray(dataset.getValues(DataSet.DIM_Y), dataset.getDataCount()));
 
         // set point (single)
         dataset.set(3, 4, 4, 4, 4);
@@ -57,19 +52,19 @@ class MultiDimDoubleDataSetTests {
         // set multiple points
         dataset.set(5, new double[][] { { -1, -2 }, { -3, -4 }, { -5, -6 }, { -7, -8 } });
         assertArrayEquals(new double[] { 2, 61, 62, 4, 15, -3, -4, 15, 21, 22 },
-                trimArray(dataset.getValues(DataSet.DIM_Y), dataset.getDataCount(DataSet.DIM_Y)));
+                trimArray(dataset.getValues(DataSet.DIM_Y), dataset.getDataCount()));
 
         // remove point
         dataset.remove(4);
         assertEquals(9, dataset.getDataCount());
         assertArrayEquals(new double[] { 2, 61, 62, 4, -3, -4, 15, 21, 22 },
-                trimArray(dataset.getValues(DataSet.DIM_Y), dataset.getDataCount(DataSet.DIM_Y)));
+                trimArray(dataset.getValues(DataSet.DIM_Y), dataset.getDataCount()));
 
         // remove points
         dataset.remove(6, 8);
         assertEquals(7, dataset.getDataCount());
         assertArrayEquals(new double[] { 2, 61, 62, 4, -3, -4, 22 },
-                trimArray(dataset.getValues(DataSet.DIM_Y), dataset.getDataCount(DataSet.DIM_Y)));
+                trimArray(dataset.getValues(DataSet.DIM_Y), dataset.getDataCount()));
 
         // set all points
         dataset.set(new double[][] { { -1, -2 }, { -3, -4 }, { -5, -6 }, { -7, -8 } });
@@ -85,15 +80,15 @@ class MultiDimDoubleDataSetTests {
         dataset.clearData();
         assertEquals(0, dataset.getDataCount());
         assertArrayEquals(new double[] {},
-                trimArray(dataset.getValues(DataSet.DIM_Z), dataset.getDataCount(DataSet.DIM_Z)));
+                trimArray(dataset.getValues(DataSet.DIM_Z), dataset.getDataCount()));
 
         // setValues
         dataset.setValues(DataSet.DIM_X, new double[] { 1, 2, 3 }, false);
         dataset.setValues(DataSet.DIM_Y, new double[] { 6, 7, 8, 9 }, true);
         assertArrayEquals(new double[] { 1, 2, 3 },
-                trimArray(dataset.getValues(DataSet.DIM_X), dataset.getDataCount(DataSet.DIM_X)));
-        assertArrayEquals(new double[] { 6, 7, 8, 9 },
-                trimArray(dataset.getValues(DataSet.DIM_Y), dataset.getDataCount(DataSet.DIM_Y)));
+                trimArray(dataset.getValues(DataSet.DIM_X), dataset.getDataCount()));
+        assertArrayEquals(new double[] { 6, 7, 8 },
+                trimArray(dataset.getValues(DataSet.DIM_Y), dataset.getDataCount()));
     }
 
     private static double[] trimArray(final double[] values, final int dataCount) {
@@ -130,9 +125,9 @@ class MultiDimDoubleDataSetTests {
     public void testInterpolation() {
         MultiDimDoubleDataSet dataset = new MultiDimDoubleDataSet("Test Dataset", false,
                 new double[][] { { 1, 2, 3, 4 }, { 2, 4, Double.NaN, 8 }, { 3, 3, 6, 8 }, { 1, 5, 7, 1 } });
-        assertEquals(3, dataset.getValue(1, 1.5));
-        assertEquals(Double.NaN, dataset.getValue(1, 3.3));
-        assertEquals(Double.NaN, dataset.getValue(1, 2.4));
-        assertEquals(2, dataset.getValue(1, 0.5));
+        assertEquals(3, dataset.getValue(DataSet.DIM_Y, 1.5));
+        assertEquals(Double.NaN, dataset.getValue(DataSet.DIM_Y, 3.3));
+        assertEquals(4.5, dataset.getValue(DataSet.DIM_Z, 2.5));
+        assertEquals(2, dataset.getValue(DataSet.DIM_Y, 0.5));
     }
 }

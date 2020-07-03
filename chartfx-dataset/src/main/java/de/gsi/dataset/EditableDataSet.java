@@ -2,10 +2,8 @@ package de.gsi.dataset;
 
 /**
  * @author rstein
- *
  */
 public interface EditableDataSet extends DataSet {
-
     /**
      * add point to the data set
      *
@@ -13,7 +11,7 @@ public interface EditableDataSet extends DataSet {
      * @param newValue new data point coordinate
      * @return itself (fluent design)
      */
-    EditableDataSet add(final int index, final double ...newValue);
+    EditableDataSet add(final int index, final double... newValue);
 
     /**
      * 
@@ -36,7 +34,7 @@ public interface EditableDataSet extends DataSet {
      * @param newValue new data point coordinate
      * @return itself (fluent design)
      */
-    EditableDataSet set(final int index, final double ...newValue);
+    EditableDataSet set(final int index, final double... newValue);
 
     /**
      * 
@@ -51,4 +49,9 @@ public interface EditableDataSet extends DataSet {
      */
     EditableDataSet setName(final String name);
 
+    /**
+     * @param other Other DataSet to copy into this DataSet
+     * @return itself (fluent design)
+     */
+    EditableDataSet set(final DataSet other);
 }

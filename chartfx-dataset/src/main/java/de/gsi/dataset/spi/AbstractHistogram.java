@@ -112,7 +112,7 @@ public abstract class AbstractHistogram extends AbstractDataSet<AbstractHistogra
         final int indexX = findBin(DIM_X, x);
         final int indexY = findBin(DIM_Y, y);
         final int indexZ = findBin(DIM_Z, z);
-        return (getDataCount() * (indexY + (getDataCount(DIM_Z) * indexZ))) + indexX;
+        return (getDataCount() * (indexY + (getDataCount() * indexZ))) + indexX;
     }
 
     @Override
@@ -124,11 +124,11 @@ public abstract class AbstractHistogram extends AbstractDataSet<AbstractHistogra
             if (x < getAxisDescription(dimIndex).getMin()) {
                 return 0; // underflow bin
             }
-            return getDataCount(dimIndex) - 1; // overflow bin
+            return getDataCount() - 1; // overflow bin
         }
         if (isEquiDistant()) {
             final double diff = x - getAxisDescription(dimIndex).getMin();
-            final double delta = getAxisDescription(dimIndex).getLength() / (getDataCount(dimIndex) - 2);
+            final double delta = getAxisDescription(dimIndex).getLength() / (getDataCount() - 2);
             return (int) Math.round(diff / delta);
         }
 
@@ -156,7 +156,7 @@ public abstract class AbstractHistogram extends AbstractDataSet<AbstractHistogra
         }
 
         if (isEquiDistant()) {
-            final double delta = getAxisDescription(dimIndex).getLength() / (getDataCount(dimIndex));
+            final double delta = getAxisDescription(dimIndex).getLength() / (getDataCount());
             return getAxisDescription(dimIndex).getMin() + ((binIndex - 1) * delta);
         }
 
@@ -170,12 +170,7 @@ public abstract class AbstractHistogram extends AbstractDataSet<AbstractHistogra
 
     @Override
     public int getDataCount() {
-        return getDataCount(DIM_X);
-    }
-
-    @Override
-    public int getDataCount(final int dimIndex) {
-        return nAxisBins[dimIndex] - 2;
+        return nAxisBins[0] - 2;
     }
 
     @Override

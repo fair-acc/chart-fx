@@ -1,6 +1,6 @@
 package de.gsi.dataset.spi;
 
-import de.gsi.dataset.DataSet2D;
+import de.gsi.dataset.DataSet;
 
 /**
  * Redirect to the reference implementation declared as 'default'.
@@ -14,7 +14,6 @@ import de.gsi.dataset.DataSet2D;
  * @author rstein
  */
 public class DefaultDataSet extends DoubleDataSet {
-
     private static final long serialVersionUID = 1L;
 
     /**
@@ -22,7 +21,7 @@ public class DefaultDataSet extends DoubleDataSet {
      *
      * @param another name of this DataSet.
      */
-    public DefaultDataSet(final DataSet2D another) {
+    public DefaultDataSet(final DataSet another) {
         super(another);
     }
 
@@ -67,5 +66,4 @@ public class DefaultDataSet extends DoubleDataSet {
     public DefaultDataSet(final String name, final int initalSize) {
         super(name, initalSize);
     }
-
 }

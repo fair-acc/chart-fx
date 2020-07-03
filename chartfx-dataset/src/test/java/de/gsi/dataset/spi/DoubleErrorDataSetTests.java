@@ -167,8 +167,8 @@ public class DoubleErrorDataSetTests extends EditableDataSetTests {
         final DoubleErrorDataSet dataSet = new DoubleErrorDataSet("test", testCoordinate[0], testCoordinate[1], testEYN,
                 testEYP, testEYN.length, true);
 
-        assertEquals(dataSet.getXValues(), dataSet.getValues(DIM_X));
-        assertEquals(dataSet.getYValues(), dataSet.getValues(DIM_Y));
+        assertEquals(dataSet.getValues(DIM_X), dataSet.getValues(DIM_X));
+        assertEquals(dataSet.getValues(DIM_Y), dataSet.getValues(DIM_Y));
 
         for (int dimIndex = 0; dimIndex < dataSet.getDimension(); dimIndex++) {
             final double[] values = dataSet.getValues(dimIndex);
@@ -179,7 +179,7 @@ public class DoubleErrorDataSetTests extends EditableDataSetTests {
                 assertEquals(testCoordinate[dimIndex][i], dataSet.get(dimIndex, i),
                         "test1(" + dimIndex + ", " + i + ")");
                 assertEquals(testCoordinate[dimIndex][i], values[i], "test2(" + dimIndex + ", " + i + ")");
-                assertEquals(testCoordinate[dimIndex][i], dimIndex == DIM_X ? dataSet.getX(i) : dataSet.getY(i),
+                assertEquals(testCoordinate[dimIndex][i], dimIndex == DIM_X ? dataSet.get(DIM_X, i) : dataSet.get(DIM_Y, i),
                         "test3(" + dimIndex + ", " + i + ")");
 
                 if (dimIndex == DIM_X) {

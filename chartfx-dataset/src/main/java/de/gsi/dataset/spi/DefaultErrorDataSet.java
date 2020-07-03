@@ -1,6 +1,6 @@
 package de.gsi.dataset.spi;
 
-import de.gsi.dataset.DataSet2D;
+import de.gsi.dataset.DataSet;
 
 /**
  * Redirect to the reference implementation declared as 'default'.
@@ -21,7 +21,7 @@ public class DefaultErrorDataSet extends DoubleErrorDataSet {
      *
      * @param another name of this DataSet.
      */
-    public DefaultErrorDataSet(final DataSet2D another) {
+    public DefaultErrorDataSet(final DataSet another) {
         super(another);
     }
 
@@ -64,5 +64,4 @@ public class DefaultErrorDataSet extends DoubleErrorDataSet {
     public DefaultErrorDataSet(final String name, final int initalSize) {
         super(name, initalSize);
     }
-
 }

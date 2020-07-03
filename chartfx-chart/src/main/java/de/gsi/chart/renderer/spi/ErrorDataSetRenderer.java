@@ -196,10 +196,10 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
                 int indexMax; /* indexMax is excluded in the drawing */
                 if (isAssumeSortedData()) {
                     indexMin = Math.max(0, dataSet.getIndex(DataSet.DIM_X, xMin) - 1);
-                    indexMax = Math.min(dataSet.getIndex(DataSet.DIM_X, xMax) + 2, dataSet.getDataCount(DataSet.DIM_X));
+                    indexMax = Math.min(dataSet.getIndex(DataSet.DIM_X, xMax) + 2, dataSet.getDataCount());
                 } else {
                     indexMin = 0;
-                    indexMax = dataSet.getDataCount(DataSet.DIM_X);
+                    indexMax = dataSet.getDataCount();
                 }
                 if (xAxis.isInvertedAxis()) {
                     final int temp = indexMin;
@@ -218,7 +218,7 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
                 }
 
                 final CachedDataPoints localCachedPoints = new CachedDataPoints(indexMin, indexMax,
-                        dataSet.getDataCount(DataSet.DIM_X), true);
+                        dataSet.getDataCount(), true);
                 if (ProcessingProfiler.getDebugState()) {
                     stopStamp = ProcessingProfiler.getTimeDiff(stopStamp, "get CachedPoints");
                 }

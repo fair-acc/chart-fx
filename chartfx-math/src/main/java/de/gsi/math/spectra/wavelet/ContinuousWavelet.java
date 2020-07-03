@@ -6,6 +6,7 @@ import java.util.concurrent.Future;
 import org.apache.commons.math3.complex.Complex;
 
 import de.gsi.dataset.DataSet;
+import de.gsi.dataset.GridDataSet;
 import de.gsi.dataset.spi.DataSetBuilder;
 import de.gsi.math.TMath;
 import de.gsi.math.TMathConstants;
@@ -30,7 +31,7 @@ public class ContinuousWavelet {
      * @param fmax maximum scalogram frequency range
      * @return the complex scalogram spectrum
      */
-    public DataSet getScalogram(final double[] data, final int nQuantx, final int nQuanty, final double nu,
+    public GridDataSet getScalogram(final double[] data, final int nQuantx, final int nQuanty, final double nu,
             final double fmin, final double fmax) {
         if (data == null || data.length == 0) {
             throw new InvalidParameterException(
@@ -52,7 +53,7 @@ public class ContinuousWavelet {
                 .setValues(DataSet.DIM_X, getScalogramTimeAxis(data, nQuantx, nQuanty, nu, fmin, fmax)) //
                 .setValues(DataSet.DIM_Y, getScalogramFrequencyAxis(nQuantx, nQuanty, nu, fmin, fmax)) //
                 .setValues(DataSet.DIM_Z, getScalogramArrayFourier(data, nQuantx, nQuanty, nu, fmin, fmax)) //
-                .build();
+                .build(GridDataSet.class);
     }
 
     /**

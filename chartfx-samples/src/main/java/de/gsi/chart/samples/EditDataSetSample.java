@@ -18,6 +18,7 @@ import de.gsi.chart.plugins.UpdateAxisLabels;
 import de.gsi.chart.plugins.Zoomer;
 import de.gsi.chart.renderer.Renderer;
 import de.gsi.chart.renderer.spi.ErrorDataSetRenderer;
+import de.gsi.chart.ui.geometry.Side;
 import de.gsi.dataset.EditConstraints;
 import de.gsi.dataset.spi.DoubleDataSet;
 
@@ -53,6 +54,10 @@ public class EditDataSetSample extends Application {
         // Add data Sets to different Renderers to allow automatic axis names and units
         Renderer renderer1 = new ErrorDataSetRenderer();
         Renderer renderer2 = new ErrorDataSetRenderer();
+        DefaultNumericAxis currentAxis = new DefaultNumericAxis();
+        currentAxis.setSide(Side.RIGHT);
+        currentAxis.setDimIndex(DIM_Y);
+        renderer2.getAxes().addAll(chart.getXAxis(), currentAxis);
         renderer1.getDatasets().add(dataSet1);
         chart.getRenderers().addAll(renderer1, renderer2);
         renderer2.getDatasets().add(dataSet2);

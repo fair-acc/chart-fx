@@ -69,8 +69,8 @@ public class TransposedDataSetSample extends Application {
         chart2.getRenderers().setAll(contourRenderer);
 
         final DataSet dataSet2 = createTestData();
-        dataSet2.getAxisDescription(DIM_X).set("x-axis", "x-unit");
-        dataSet2.getAxisDescription(DIM_Y).set("y-axis", "y-unit");
+        dataSet2.getAxisDescription(DIM_X).set("time", "s");
+        dataSet2.getAxisDescription(DIM_Y).set("position", "m");
         final TransposedDataSet transposedDataSet2 = TransposedDataSet.transpose(dataSet2, false);
         contourRenderer.getDatasets().add(transposedDataSet2);
 
@@ -190,8 +190,8 @@ public class TransposedDataSetSample extends Application {
                    + (pert * Math.sin(i * omega * 0.777) * Math.cos(i * omega));
         }
         final DataSet dataSet = new DataSetBuilder().setName("non-sorted 2D DataSet").setValues(DIM_X, x).setValues(DIM_Y, y).build();
-        dataSet.getAxisDescription(DIM_X).set("x-axis", "x-unit");
-        dataSet.getAxisDescription(DIM_Y).set("y-axis", "y-unit");
+        dataSet.getAxisDescription(DIM_X).set("position", "m");
+        dataSet.getAxisDescription(DIM_Y).set("velocity", "m/s");
 
         return dataSet;
     }

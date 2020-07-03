@@ -1,6 +1,5 @@
 package de.gsi.dataset.testdata.spi;
 
-import de.gsi.dataset.DataSet2D;
 import de.gsi.dataset.event.UpdatedDataEvent;
 import de.gsi.dataset.spi.AbstractErrorDataSet;
 import de.gsi.dataset.testdata.TestDataSet;
@@ -12,7 +11,7 @@ import de.gsi.dataset.testdata.TestDataSet;
  * @param <D> generics for fluent design
  */
 public abstract class AbstractTestFunction<D extends AbstractTestFunction<D>> extends AbstractErrorDataSet<D>
-        implements DataSet2D, TestDataSet<D> {
+        implements TestDataSet<D> {
     private static final long serialVersionUID = 3145097895719258628L;
     private double[] data;
 
@@ -42,18 +41,18 @@ public abstract class AbstractTestFunction<D extends AbstractTestFunction<D>> ex
     }
 
     @Override
-    public int getDataCount(int dimIndex) {
+    public int getDataCount() {
         return data.length;
     }
 
     @Override
     public final double getErrorNegative(final int dimIndex, final int index) {
-        return dimIndex == DIM_X ? AbstractTestFunction.getXError() : AbstractTestFunction.getYError();
+        return 0.1;
     }
 
     @Override
     public final double getErrorPositive(final int dimIndex, final int index) {
-        return dimIndex == DIM_X ? AbstractTestFunction.getXError() : AbstractTestFunction.getYError();
+        return 0.1;
     }
 
     @Override
@@ -73,22 +72,6 @@ public abstract class AbstractTestFunction<D extends AbstractTestFunction<D>> ex
     }
 
     @Override
-    public double getX(final int index) {
-        // returns the i-th index as horizontal X axis value
-        return index;
-    }
-
-    @Override
-    public double getY(final int index) {
-        // include for example dimension sanity checks
-        if (index < 0 || index >= getDataCount()) {
-            return Double.NaN;
-        }
-
-        return data[index];
-    }
-
-    @Override
     public D update() {
         lock().writeLockGuard(() -> {
             data = generateY(data.length);
@@ -96,13 +79,5 @@ public abstract class AbstractTestFunction<D extends AbstractTestFunction<D>> ex
             recomputeLimits(DIM_Y);
         });
         return fireInvalidated(new UpdatedDataEvent(this));
-    }
-
-    private static double getXError() {
-        return 0.1;
-    }
-
-    private static double getYError() {
-        return 0.1;
     }
 }

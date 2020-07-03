@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import de.gsi.dataset.AxisDescription;
-import de.gsi.dataset.DataSet2D;
+import de.gsi.dataset.DataSet;
 import de.gsi.dataset.event.EventListener;
 import de.gsi.dataset.event.UpdatedDataEvent;
 
@@ -21,10 +21,10 @@ import de.gsi.dataset.event.UpdatedDataEvent;
  *
  * @author braeun
  */
-public class WrappedDataSet extends AbstractDataSet<WrappedDataSet> implements DataSet2D {
+public class WrappedDataSet extends AbstractDataSet<WrappedDataSet> implements DataSet {
     private static final long serialVersionUID = -2324840899629186284L;
-    private DataSet2D dataset;
-    private final EventListener listener = s -> datasetInvalidated();
+    private DataSet dataset;
+    private final transient EventListener listener = s -> datasetInvalidated();
 
     /**
      * @param name data set name
@@ -41,7 +41,7 @@ public class WrappedDataSet extends AbstractDataSet<WrappedDataSet> implements D
 
     @Override
     public double get(int dimIndex, int index) {
-        return dimIndex == DIM_X ? getX(index) : getY(index);
+        return dataset == null ? 0.0 : dataset.get(dimIndex, index);
     }
 
     @Override
@@ -50,14 +50,14 @@ public class WrappedDataSet extends AbstractDataSet<WrappedDataSet> implements D
     }
 
     @Override
-    public int getDataCount(final int dimIndex) {
+    public int getDataCount() {
         return dataset == null ? 0 : dataset.getDataCount();
     }
 
     /**
      * @return wrapped internal data set
      */
-    public DataSet2D getDataset() {
+    public DataSet getDataset() {
         return dataset;
     }
 
@@ -79,27 +79,12 @@ public class WrappedDataSet extends AbstractDataSet<WrappedDataSet> implements D
         return dataset == null ? null : dataset.getStyle(index);
     }
 
-    @Override
-    public double getX(final int i) {
-        return dataset == null ? 0 : dataset.getX(i);
-    }
-
-    @Override
-    public int getXIndex(final double x) {
-        return dataset == null ? 0 : dataset.getXIndex(x);
-    }
-
-    @Override
-    public double getY(final int i) {
-        return dataset == null ? 0 : dataset.getY(i);
-    }
-
     /**
      * update/overwrite internal data set with content from other data set
      * 
      * @param dataset new data set
      */
-    public void setDataset(final DataSet2D dataset) {
+    public void setDataset(final DataSet dataset) {
         if (this.dataset != null) {
             this.dataset.removeListener(listener);
         }
@@ -107,8 +92,6 @@ public class WrappedDataSet extends AbstractDataSet<WrappedDataSet> implements D
         if (this.dataset != null) {
             this.dataset.addListener(listener);
         }
-        // xRange.setMax(Double.NaN);
-        // yRange.setMax(Double.NaN);
         fireInvalidated(new UpdatedDataEvent(this));
     }
 }

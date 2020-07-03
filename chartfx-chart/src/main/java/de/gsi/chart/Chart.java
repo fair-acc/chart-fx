@@ -34,6 +34,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.gsi.chart.axes.Axis;
+import de.gsi.chart.axes.spi.AbstractAxis;
 import de.gsi.chart.axes.spi.DefaultNumericAxis;
 import de.gsi.chart.legend.Legend;
 import de.gsi.chart.legend.spi.DefaultLegend;
@@ -204,42 +205,45 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
     /**
      * The side of the chart where the title is displayed default Side.TOP
      */
-    private final StyleableObjectProperty<Side> titleSide = CSS.createObjectProperty(this, "titleSide", Side.TOP, false, StyleConverter.getEnumConverter(Side.class), (oldVal, newVal) -> {
-        AssertUtils.notNull("Side must not be null", newVal);
+    private final StyleableObjectProperty<Side> titleSide = CSS.createObjectProperty(this, "titleSide", Side.TOP, false,
+            StyleConverter.getEnumConverter(Side.class), (oldVal, newVal) -> {
+                AssertUtils.notNull("Side must not be null", newVal);
 
-        for (final Side s : Side.values()) {
-            getTitleLegendPane(s).getChildren().remove(titleLabel);
-        }
-        getTitleLegendPane(newVal).getChildren().add(titleLabel);
-        return (newVal);
-    }, this::requestLayout);
+                for (final Side s : Side.values()) {
+                    getTitleLegendPane(s).getChildren().remove(titleLabel);
+                }
+                getTitleLegendPane(newVal).getChildren().add(titleLabel);
+                return (newVal);
+            }, this::requestLayout);
 
     /**
      * The side of the chart where the title is displayed default Side.TOP
      */
-    private final StyleableObjectProperty<Side> measurementBarSide = CSS.createObjectProperty(this, "measurementBarSide", Side.RIGHT, false, StyleConverter.getEnumConverter(Side.class), (oldVal, newVal) -> {
-        AssertUtils.notNull("Side must not be null", newVal);
-        return newVal;
-    }, this::requestLayout);
+    private final StyleableObjectProperty<Side> measurementBarSide = CSS.createObjectProperty(this, "measurementBarSide", Side.RIGHT, false,
+            StyleConverter.getEnumConverter(Side.class), (oldVal, newVal) -> {
+                AssertUtils.notNull("Side must not be null", newVal);
+                return newVal;
+            }, this::requestLayout);
 
     /**
      * The side of the chart where the legend should be displayed default value Side.BOTTOM
      */
-    private final StyleableObjectProperty<Side> legendSide = CSS.createObjectProperty(this, "legendSide", Side.BOTTOM, false, StyleConverter.getEnumConverter(Side.class), (oldVal, newVal) -> {
-        AssertUtils.notNull("Side must not be null", newVal);
+    private final StyleableObjectProperty<Side> legendSide = CSS.createObjectProperty(this, "legendSide", Side.BOTTOM, false,
+            StyleConverter.getEnumConverter(Side.class), (oldVal, newVal) -> {
+                AssertUtils.notNull("Side must not be null", newVal);
 
-        final Legend legend = getLegend();
-        if (legend == null) {
-            return newVal;
-        }
-        for (final Side s : Side.values()) {
-            getTitleLegendPane(s).getChildren().remove(legend.getNode());
-        }
-        getTitleLegendPane(newVal).getChildren().add(legend.getNode());
-        legend.setVertical(newVal.isVertical());
+                final Legend legend = getLegend();
+                if (legend == null) {
+                    return newVal;
+                }
+                for (final Side s : Side.values()) {
+                    getTitleLegendPane(s).getChildren().remove(legend.getNode());
+                }
+                getTitleLegendPane(newVal).getChildren().add(legend.getNode());
+                legend.setVertical(newVal.isVertical());
 
-        return newVal;
-    }, this::requestLayout);
+                return newVal;
+            }, this::requestLayout);
 
     /**
      * The node to display as the Legend. Subclasses can set a node here to be displayed on a side as the legend. If no
@@ -273,40 +277,53 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
         }
     };
 
-    private final StyleableObjectProperty<Side> toolBarSide = CSS.createObjectProperty(this, "toolBarSide", Side.TOP, false, StyleConverter.getEnumConverter(Side.class), (oldVal, newVal) -> {
-        AssertUtils.notNull("Side must not be null", newVal);
-        // remove tool bar from potential other chart side pane locations
-        Chart.this.setTop(null);
-        Chart.this.setBottom(null);
-        Chart.this.setLeft(null);
-        Chart.this.setRight(null);
-        switch (newVal) {
-        case LEFT:
-            getToolBar().setOrientation(Orientation.VERTICAL);
-            Chart.this.setLeft(getToolBar());
-            break;
-        case RIGHT:
-            getToolBar().setOrientation(Orientation.VERTICAL);
-            Chart.this.setRight(getToolBar());
-            break;
-        case BOTTOM:
-            getToolBar().setOrientation(Orientation.HORIZONTAL);
-            Chart.this.setBottom(getToolBar());
-            break;
-        case TOP:
-        default:
-            getToolBar().setOrientation(Orientation.HORIZONTAL);
-            Chart.this.setTop(getToolBar());
-            break;
-        }
-        return (newVal);
-    }, this::requestLayout);
+    private final StyleableObjectProperty<Side> toolBarSide = CSS.createObjectProperty(this, "toolBarSide", Side.TOP, false,
+            StyleConverter.getEnumConverter(Side.class), (oldVal, newVal) -> {
+                AssertUtils.notNull("Side must not be null", newVal);
+                // remove tool bar from potential other chart side pane locations
+                Chart.this.setTop(null);
+                Chart.this.setBottom(null);
+                Chart.this.setLeft(null);
+                Chart.this.setRight(null);
+                switch (newVal) {
+                case LEFT:
+                    getToolBar().setOrientation(Orientation.VERTICAL);
+                    Chart.this.setLeft(getToolBar());
+                    break;
+                case RIGHT:
+                    getToolBar().setOrientation(Orientation.VERTICAL);
+                    Chart.this.setRight(getToolBar());
+                    break;
+                case BOTTOM:
+                    getToolBar().setOrientation(Orientation.HORIZONTAL);
+                    Chart.this.setBottom(getToolBar());
+                    break;
+                case TOP:
+                default:
+                    getToolBar().setOrientation(Orientation.HORIZONTAL);
+                    Chart.this.setTop(getToolBar());
+                    break;
+                }
+                return (newVal);
+            }, this::requestLayout);
 
     /**
      * Creates a new default Chart instance.
+     * 
+     * @param axes axes to be added to the chart
      */
-    public Chart() {
-        super();
+    public Chart(Axis... axes) {
+        for (int dim = 0; dim < axes.length; dim++) {
+            final Axis axis = axes[dim];
+            if (!(axis instanceof AbstractAxis)) {
+                continue;
+            }
+            final AbstractAxis abstractAxis = (AbstractAxis) axis;
+            if (abstractAxis.getDimIndex() < 0) {
+                abstractAxis.setDimIndex(dim);
+            }
+        }
+
         getStylesheets().add(Chart.CHART_CSS);
 
         setTriggerDistance(Chart.DEFAULT_TRIGGER_DISTANCE);
@@ -591,14 +608,16 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
         // Add default axis if no suitable axis is available
         switch (orientation) {
         case HORIZONTAL:
-            Axis newXAxis = new DefaultNumericAxis("x-Axis");
+            DefaultNumericAxis newXAxis = new DefaultNumericAxis("x-Axis");
             newXAxis.setSide(Side.BOTTOM);
+            newXAxis.setDimIndex(DataSet.DIM_X);
             getAxes().add(newXAxis);
             return newXAxis;
         case VERTICAL:
         default:
-            Axis newYAxis = new DefaultNumericAxis("y-Axis");
+            DefaultNumericAxis newYAxis = new DefaultNumericAxis("y-Axis");
             newYAxis.setSide(Side.LEFT);
+            newYAxis.setDimIndex(DataSet.DIM_Y);
             getAxes().add(newYAxis);
             return newYAxis;
         }

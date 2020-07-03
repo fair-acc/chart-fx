@@ -7,14 +7,12 @@ import java.util.Optional;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
-import javafx.geometry.Orientation;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.gsi.chart.Chart;
 import de.gsi.chart.axes.Axis;
-import de.gsi.chart.axes.spi.ColorGradientAxis;
 import de.gsi.chart.renderer.Renderer;
 import de.gsi.chart.utils.FXUtils;
 import de.gsi.dataset.DataSet;
@@ -50,6 +48,7 @@ public class UpdateAxisLabels extends ChartPlugin {
                         }
                         dataSetsChanged(dataSetsChange, renderer);
                     };
+                    renderer.getDatasets().forEach(ds -> dataSetChange(new AxisChangeEvent(ds, -1), renderer));
                     renderer.getDatasets().addListener(dataSetsListener);
                     renderersListeners.put(renderer, dataSetsListener);
                     if (LOGGER.isDebugEnabled()) {
@@ -103,14 +102,15 @@ public class UpdateAxisLabels extends ChartPlugin {
         DataSet dataSet = (DataSet) axisDataUpdate.getSource();
         if (renderer == null) { // dataset was added to / is registered at chart
             if (getChart().getDatasets().size() == 1) {
-                if (dim == -1 || dim == DataSet.DIM_X) {
-                    getChart().getFirstAxis(Orientation.HORIZONTAL).set(dataSet.getAxisDescription(DataSet.DIM_X).getName(), dataSet.getAxisDescription(DataSet.DIM_X).getUnit());
-                }
-                if (dim == -1 || dim == DataSet.DIM_Y) {
-                    getChart().getFirstAxis(Orientation.VERTICAL).set(dataSet.getAxisDescription(DataSet.DIM_Y).getName(), dataSet.getAxisDescription(DataSet.DIM_Y).getUnit());
-                }
-                if ((dim == -1 || dim == DataSet.DIM_Z) && dataSet.getDimension() >= 3) {
-                    getChart().getAxes().stream().filter(axis -> axis instanceof ColorGradientAxis).findFirst().ifPresent(axis -> axis.set(dataSet.getAxisDescription(DataSet.DIM_Z).getName(), dataSet.getAxisDescription(DataSet.DIM_Z).getUnit()));
+                if (dim == -1) { // update labels for all axes
+                    for (int dimIdx = 0; dimIdx < dataSet.getDimension(); dimIdx++) {
+                        final int dimIndex = dimIdx;
+                        Optional<Axis> oldAxis = getChart().getAxes().stream().filter(axis -> axis.getDimIndex() == dimIndex).findFirst();
+                        oldAxis.ifPresent(a -> a.set(dataSet.getAxisDescription(dimIndex).getName(), dataSet.getAxisDescription(dimIndex).getUnit()));
+                    }
+                } else { // update label for requested axis
+                    Optional<Axis> oldAxis = getChart().getAxes().stream().filter(axis -> axis.getDimIndex() == dim).findFirst();
+                    oldAxis.ifPresent(a -> a.set(dataSet.getAxisDescription(dim).getName(), dataSet.getAxisDescription(dim).getUnit()));
                 }
             } else {
                 if (LOGGER.isWarnEnabled()) {
@@ -120,16 +120,17 @@ public class UpdateAxisLabels extends ChartPlugin {
             }
         } else { // dataset was added to / is registered at renderer
             if (renderer.getDatasets().size() == 1) {
-                if (dim == -1 || dim == DataSet.DIM_X) {
-                    Optional<Axis> oldAxis = renderer.getAxes().stream().filter(axis -> axis.getSide().isHorizontal()).findFirst();
-                    oldAxis.ifPresent(a -> a.set(dataSet.getAxisDescription(DataSet.DIM_X).getName(), dataSet.getAxisDescription(DataSet.DIM_X).getUnit()));
-                }
-                if (dim == -1 || dim == DataSet.DIM_Y) {
-                    Optional<Axis> oldAxis = renderer.getAxes().stream().filter(axis -> axis.getSide().isVertical()).findFirst();
-                    oldAxis.ifPresent(a -> a.set(dataSet.getAxisDescription(DataSet.DIM_Y).getName(), dataSet.getAxisDescription(DataSet.DIM_Y).getUnit()));
-                }
-                if ((dim == -1 || dim == DataSet.DIM_Z) && dataSet.getDimension() >= 3) {
-                    renderer.getAxes().stream().filter(axis -> axis instanceof ColorGradientAxis).findFirst().ifPresent(axis -> axis.set(dataSet.getAxisDescription(DataSet.DIM_Z).getName(), dataSet.getAxisDescription(DataSet.DIM_Z).getUnit()));
+                if (dim == -1) { // update labels for all axes
+                    for (int dimIdx = 0; dimIdx < dataSet.getDimension(); dimIdx++) {
+                        final int dimIndex = dimIdx;
+                        Optional<Axis> oldAxis = renderer.getAxes().stream().filter(axis -> axis.getDimIndex() == dimIndex).findFirst() //
+                                                         .or(() -> getChart().getAxes().stream().filter(axis -> axis.getDimIndex() == dimIndex).findFirst());
+                        oldAxis.ifPresent(a -> a.set(dataSet.getAxisDescription(dimIndex).getName(), dataSet.getAxisDescription(dimIndex).getUnit()));
+                    }
+                } else { // update label for requested axis
+                    Optional<Axis> oldAxis = renderer.getAxes().stream().filter(axis -> axis.getDimIndex() == dim).findFirst() //
+                                                     .or(() -> getChart().getAxes().stream().filter(axis -> axis.getDimIndex() == dim).findFirst());
+                    oldAxis.ifPresent(a -> a.set(dataSet.getAxisDescription(dim).getName(), dataSet.getAxisDescription(dim).getUnit()));
                 }
             } else {
                 if (LOGGER.isWarnEnabled()) {

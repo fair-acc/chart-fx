@@ -1,6 +1,6 @@
 package de.gsi.dataset.testdata;
 
-import de.gsi.dataset.DataSet;
+import de.gsi.dataset.DataSet2D;
 import de.gsi.dataset.event.UpdateEvent;
 
 /**
@@ -9,8 +9,7 @@ import de.gsi.dataset.event.UpdateEvent;
  * @author rstein
  * @param <D> generics for fluent design
  */
-public interface TestDataSet<D extends TestDataSet<D>> extends DataSet {
-
+public interface TestDataSet<D extends TestDataSet<D>> extends DataSet2D {
     /**
      * notify listener with given event that the data set has changed
      * 
