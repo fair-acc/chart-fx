@@ -71,7 +71,7 @@ public abstract class AbstractErrorDataSet<D extends AbstractErrorDataSet<D>> ex
     public D recomputeLimits(final int dimIndex) {
         // first compute range (does not trigger notify events)
         DataRange newRange = new DataRange();
-        final int dataCount = getDataCount(dimIndex);
+        final int dataCount = getDataCount();
         switch (getErrorType(dimIndex)) {
         case NO_ERROR:
             super.recomputeLimits(dimIndex);

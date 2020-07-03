@@ -12,14 +12,17 @@ import de.gsi.dataset.utils.AssertUtils;
  * length) - it corresponds to C++ implementation, where 1D array is used as well (to support static multi-dimensional
  * arrays)
  * <p>
+ * The data is stored in row-major in a flat double array.
+ * <p>
+ * <pre><code>
  * exemplary use: double[] rawDouble = new double[10*20]; [..] int[] rawDouble = new int[]{10,20}; // here: 2-dim array
- * MultiArrayImpl<double[]> a = MultiArrayImpl<>(rawDouble, dims); double val = a.getDouble(new int[]{2,3});
- *
+ * MultiArrayImpl&lt;double[]&gt; a = MultiArrayImpl&lt;&gt;(rawDouble, dims); double val = a.getDouble(new int[]{2,3});
+ * </code></pre>
  * @author Ilia Yastrebov, CERN
  * @author rstein
  * @param <T> generics for primitive array (ie. double[], float[], int[] ...)
  */
-class MultiArrayImpl<T> implements MultiArray<T> {
+public class MultiArrayImpl<T> implements MultiArray<T> {
     private final T elements; // Array of all elements
     private final int elementCount;
 
@@ -36,6 +39,7 @@ class MultiArrayImpl<T> implements MultiArray<T> {
 
     /** Dimensions */
     private final int[] dimensions;
+    private final int[] strides;
 
     /**
      * Constructor (implicitly assumes assumes 1-dim array)
@@ -52,7 +56,7 @@ class MultiArrayImpl<T> implements MultiArray<T> {
      * @param elements Elements of the array
      * @param dimensions Dimensions vector
      */
-    MultiArrayImpl(final T elements, final int[] dimensions) {
+    public MultiArrayImpl(final T elements, final int[] dimensions) {
         AssertUtils.notNull("elements", elements);
         AssertUtils.notNull("dimensions", dimensions);
         this.elements = elements;
@@ -60,6 +64,11 @@ class MultiArrayImpl<T> implements MultiArray<T> {
         AssertUtils.gtEqThanZero("elements.length", elementCount);
 
         this.dimensions = dimensions;
+        strides = new int[dimensions.length];
+        strides[0] = 1;
+        for (int i = 1; i < dimensions.length; i++) {
+            strides[i] = strides[i - 1] * dimensions[i - 1];
+        }
 
         initPrimitiveArrays();
     }
@@ -125,8 +134,18 @@ class MultiArrayImpl<T> implements MultiArray<T> {
     }
 
     @Override
+    public boolean getBoolean(final int index) {
+        return elementBoolean[index];
+    }
+
+    @Override
     public boolean getBoolean(final int[] indices) {
         return elementBoolean[getIndex(indices)];
+    }
+
+    @Override
+    public byte getByte(final int index) {
+        return elementByte[index];
     }
 
     @Override
@@ -140,8 +159,23 @@ class MultiArrayImpl<T> implements MultiArray<T> {
     }
 
     @Override
+    public double getDouble(final int index) {
+        return elementDouble[index];
+    }
+
+    @Override
     public double getDouble(final int[] indices) {
         return elementDouble[getIndex(indices)];
+    }
+
+    @Override
+    public void set(final double value, final int index) {
+        elementDouble[index] = value;
+    }
+
+    @Override
+    public void set(final double value, final int[] indices) {
+        elementDouble[getIndex(indices)] = value;
     }
 
     @Override
@@ -155,6 +189,11 @@ class MultiArrayImpl<T> implements MultiArray<T> {
     }
 
     @Override
+    public float getFloat(final int index) {
+        return elementFloat[index];
+    }
+
+    @Override
     public float getFloat(final int[] indices) {
         return elementFloat[getIndex(indices)];
     }
@@ -162,13 +201,18 @@ class MultiArrayImpl<T> implements MultiArray<T> {
     @Override
     public int getIndex(final int[] indices) {
         int index = 0;
-        int multiplier = 1;
-
-        for (int i = indices.length - 1; i >= 0; i--) {
-            index += indices[i] * multiplier;
-            multiplier *= getDimensions()[i];
+        for (int i = 0; i < dimensions.length; i++) {
+            if (indices[i] >= dimensions[i]) {
+                throw new IndexOutOfBoundsException("Index " + indices[i] + " for dimension " + i + " out of bounds " + dimensions[i]);
+            }
+            index += indices[i] * strides[i];
         }
         return index;
+    }
+
+    @Override
+    public int getInt(final int index) {
+        return elementInt[index];
     }
 
     @Override
@@ -177,13 +221,28 @@ class MultiArrayImpl<T> implements MultiArray<T> {
     }
 
     @Override
+    public long getLong(final int index) {
+        return elementLong[index];
+    }
+
+    @Override
     public long getLong(final int[] indices) {
         return elementLong[getIndex(indices)];
     }
 
     @Override
+    public short getShort(final int index) { // NOPMD
+        return elementShort[index];
+    }
+
+    @Override
     public short getShort(final int[] indices) { // NOPMD
         return elementShort[getIndex(indices)];
+    }
+
+    @Override
+    public String getString(final int index) {
+        return elementString[index];
     }
 
     @Override
@@ -202,14 +261,12 @@ class MultiArrayImpl<T> implements MultiArray<T> {
 
     @Override
     public String toString() {
-        return String.format("MultiArray [dimensions = %s, elements = %s]", Arrays.asList(this.dimensions).toString(),
-                Arrays.asList(this.elements).toString());
+        return String.format("MultiArray [dimensions = %s, elements = %s]", Arrays.asList(this.dimensions).toString(), Arrays.asList(this.elements).toString());
     }
 
     private void initPrimitiveArrays() { // NOPMD by rstein on 19/07/19 10:47
         // statically cast to primitive if possible
-        // this adds the overhead of casting only once and subsequent double
-        // get(..) calls are fast
+        // this adds the overhead of casting only once and subsequent double get(..) calls are fast
         if (elements.getClass() == Object[].class) {
             elementObject = (Object[]) elements;
         } else if (elements.getClass() == boolean[].class) {
@@ -229,5 +286,22 @@ class MultiArrayImpl<T> implements MultiArray<T> {
         } else if (elements.getClass() == String[].class) {
             elementString = (String[]) elements;
         }
+    }
+
+    @Override
+    public int[] getIndices(final int index) {
+        if (index == 0) {
+            return new int[dimensions.length];
+        }
+        final int[] indices = new int[dimensions.length];
+        int ind = index;
+        for (int i = dimensions.length - 1; i >= 0; i--) {
+            if (dimensions[i] == 0) {
+                throw new IndexOutOfBoundsException();
+            }
+            indices[i] = ind / strides[i];
+            ind = ind % strides[i];
+        }
+        return indices;
     }
 }

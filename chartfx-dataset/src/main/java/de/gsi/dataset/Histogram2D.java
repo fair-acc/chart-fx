@@ -4,8 +4,7 @@ package de.gsi.dataset;
  * @author rstein
  *
  */
-public interface Histogram2D {
-
+public interface Histogram2D extends GridDataSet {
     /**
      * Increment bin with abscissa X, Y, and Z by 1.
      *
@@ -55,6 +54,7 @@ public interface Histogram2D {
      * @param yIndex index of Y coordinate
      * @return Z coordinate
      */
-    double getZ(int xIndex, int yIndex);
-
+    default double getZ(int xIndex, int yIndex) {
+        return get(DIM_Z, xIndex, yIndex);
+    }
 }

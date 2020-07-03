@@ -86,7 +86,6 @@ public abstract class AbstractDataSetManagement<R extends Renderer> implements R
      * Returns the first axis for a specific orientation and falls back to the first axis
      * of the chart if no such axis exists. The chart will automatically return a default
      * axis in case no axis is present.
-     *
      * Because this code adds axes automatically, it should not be called during chart setup
      * but only inside of rendering routines. Otherwise there is risk of duplicate axes if
      * things are called in the wrong order.
@@ -145,26 +144,22 @@ public abstract class AbstractDataSetManagement<R extends Renderer> implements R
     }
 
     protected static final DoubleDataSet getDataSetCopy(final DataSet dataSet) {
-        final int nLength = dataSet.getDataCount(DIM_X); // TODO: expand to n-dimensional DataSet
+        final int nLength = dataSet.getDataCount(); // TODO: expand to n-dimensional DataSet
         final DoubleDataSet ret = new DoubleDataSet(dataSet.getName(), nLength);
 
         dataSet.lock().writeLockGuard(() -> {
+            final double[] xValues = dataSet.getValues(DIM_X);
+            final double[] yValues = dataSet.getValues(DIM_Y);
+            ret.set(xValues, yValues);
             if (dataSet instanceof DoubleDataSet) {
                 final DoubleDataSet doubleDataSet = (DoubleDataSet) dataSet;
                 // known data set implementation, may use faster array copy
-
-                final double[] xValues = doubleDataSet.getXValues();
-                final double[] yValues = doubleDataSet.getYValues();
-                ret.set(xValues, yValues);
-
                 ret.getDataLabelMap().putAll(doubleDataSet.getDataLabelMap());
                 ret.getDataStyleMap().putAll(doubleDataSet.getDataStyleMap());
             } else {
                 // generic implementation that works with all DataSetError
                 // implementation
                 for (int i = 0; i < nLength; i++) {
-                    ret.set(i, dataSet.get(DIM_X, i), dataSet.get(DIM_Y, i));
-
                     final String label = dataSet.getDataLabel(i);
                     if (label != null) {
                         ret.getDataLabelMap().put(i, label);
@@ -182,19 +177,18 @@ public abstract class AbstractDataSetManagement<R extends Renderer> implements R
     }
 
     protected static final DoubleErrorDataSet getErrorDataSetCopy(final DataSetError dataSet) {
-        final int nLength = dataSet.getDataCount(DIM_X);
-        final DoubleErrorDataSet ret = new DoubleErrorDataSet(dataSet.getName(), nLength);
+        final int nLength = dataSet.getDataCount();
+        final DoubleErrorDataSet ret = new DoubleErrorDataSet(dataSet.getName());
 
         dataSet.lock().writeLockGuard(() -> {
+            final double[] xValues = dataSet.getValues(DIM_Y);
+            final double[] yValues = dataSet.getValues(DIM_Y);
+            final double[] yErrorsNeg = dataSet.getErrorsNegative(DIM_Y);
+            final double[] yErrorsPos = dataSet.getErrorsPositive(DIM_Y);
+            ret.set(xValues, yValues, yErrorsNeg, yErrorsPos);
             if (dataSet instanceof DoubleErrorDataSet) {
                 final DoubleErrorDataSet doubleErrorDataSet = (DoubleErrorDataSet) dataSet;
                 // known data set implementation, may use faster array copy
-
-                final double[] xValues = doubleErrorDataSet.getXValues();
-                final double[] yValues = doubleErrorDataSet.getYValues();
-                final double[] yErrorsNeg = doubleErrorDataSet.getErrorsNegative(DIM_Y);
-                final double[] yErrorsPos = doubleErrorDataSet.getErrorsPositive(DIM_Y);
-                ret.set(xValues, yValues, yErrorsNeg, yErrorsPos);
 
                 ret.getDataLabelMap().putAll(doubleErrorDataSet.getDataLabelMap());
                 ret.getDataStyleMap().putAll(doubleErrorDataSet.getDataStyleMap());
@@ -202,8 +196,7 @@ public abstract class AbstractDataSetManagement<R extends Renderer> implements R
                 // generic implementation that works with all DataSetError
                 // implementation
                 for (int i = 0; i < nLength; i++) {
-                    ret.set(i, dataSet.get(DIM_X, i), dataSet.get(DIM_Y, i), dataSet.getErrorNegative(DIM_Y, i),
-                            dataSet.getErrorPositive(DIM_Y, i));
+                    ret.set(i, dataSet.get(DIM_X, i), dataSet.get(DIM_Y, i), dataSet.getErrorNegative(DIM_Y, i), dataSet.getErrorPositive(DIM_Y, i));
                     final String label = ret.getDataLabel(i);
                     if (label != null) {
                         ret.getDataLabelMap().put(i, label);

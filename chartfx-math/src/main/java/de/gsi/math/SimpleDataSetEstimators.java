@@ -24,7 +24,7 @@ public final class SimpleDataSetEstimators { // NOPMD name is as is (ie. no Help
      * @return centre of mass
      */
     public static double computeCentreOfMass(DataSet dataSet) {
-        return computeCentreOfMass(dataSet, 0, dataSet.getDataCount(DIM_X));
+        return computeCentreOfMass(dataSet, 0, dataSet.getDataCount());
     }
 
     /**

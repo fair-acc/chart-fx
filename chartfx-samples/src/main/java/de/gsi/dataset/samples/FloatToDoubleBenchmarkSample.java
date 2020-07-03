@@ -9,10 +9,11 @@ import de.gsi.dataset.spi.DoubleDataSet;
 import de.gsi.dataset.spi.FloatDataSet;
 import de.gsi.dataset.utils.ProcessingProfiler;
 import de.gsi.math.TRandom;
+
 import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
 
 @SuppressWarnings("PMD") // this class tests possible performance bottle-necks
-                         // not code style/readability
+// not code style/readability
 public class FloatToDoubleBenchmarkSample {
     private static final Logger LOGGER = LoggerFactory.getLogger(FloatToDoubleBenchmarkSample.class);
     private static final int N_DIM = 2000;
@@ -60,7 +61,6 @@ public class FloatToDoubleBenchmarkSample {
             dataSet2.add(i, val); // NOPMD
             dataSet3.add(i, (float) val);
         }
-
     }
 
     public void testDoubleArrayList1(final int nIterations) {
@@ -403,7 +403,5 @@ public class FloatToDoubleBenchmarkSample {
         benchmark.testDoubleDataSetNew2(nMul * nIterations, false);
         benchmark.testFloatDataSetNew1(nMul * nIterations, false);
         benchmark.testFloatDataSetNew2(nMul * nIterations, false);
-
     }
-
 }

@@ -1,7 +1,5 @@
 package de.gsi.dataset.serializer.spi.iobuffer;
 
-import static de.gsi.dataset.DataSet.DIM_X;
-
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.InputMismatchException;
@@ -9,13 +7,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import de.gsi.dataset.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.gsi.dataset.AxisDescription;
-import de.gsi.dataset.DataSet;
-import de.gsi.dataset.DataSetError;
-import de.gsi.dataset.DataSetMetaData;
 import de.gsi.dataset.serializer.DataType;
 import de.gsi.dataset.serializer.FieldDescription;
 import de.gsi.dataset.serializer.IoSerialiser;
@@ -294,8 +289,8 @@ public class DataSetSerialiser { // NOPMD
             return;
         }
 
-        final int dataCount = dataSet.getDataCount(DIM_X);
-        final Map<Integer, String> labelMap = new HashMap<>();
+        final int dataCount = dataSet.getDataCount();
+        final Map<Integer, String> labelMap = new ConcurrentHashMap<>();
         for (int index = 0; index < dataCount; index++) {
             final String label = dataSet.getDataLabel(index);
             if ((label != null) && !label.isEmpty()) {
@@ -396,8 +391,19 @@ public class DataSetSerialiser { // NOPMD
      */
     protected void writeNumericBinaryDataToBufferFloat(final DataSet dataSet) {
         final int nDim = dataSet.getDimension();
+        if (dataSet instanceof GridDataSet) {
+            GridDataSet gridDataSet = (GridDataSet) dataSet;
+            for (int dimIndex = 0; dimIndex < nDim; dimIndex++) {
+                final boolean gridDimension = dimIndex < gridDataSet.getNGrid();
+                final int nsamples = gridDimension ? gridDataSet.getShape(dimIndex) : dataSet.getDataCount();
+                ioSerialiser.putFieldHeader(ARRAY_PREFIX + dimIndex, DataType.FLOAT_ARRAY);
+                final float[] values = toFloats(gridDimension ? gridDataSet.getGridValues(dimIndex) : dataSet.getValues(dimIndex));
+                ioSerialiser.getBuffer().putFloatArray(values, 0, nsamples);
+            }
+            return; // GridDataSet does not provide errors
+        }
         for (int dimIndex = 0; dimIndex < nDim; dimIndex++) {
-            final int nsamples = dataSet.getDataCount(dimIndex);
+            final int nsamples = dataSet.getDataCount();
             ioSerialiser.put(ARRAY_PREFIX + dimIndex, toFloats(dataSet.getValues(dimIndex)), nsamples);
         }
 
@@ -407,7 +413,7 @@ public class DataSetSerialiser { // NOPMD
 
         final DataSetError ds = (DataSetError) dataSet;
         for (int dimIndex = 0; dimIndex < nDim; dimIndex++) {
-            final int nsamples = dataSet.getDataCount(dimIndex);
+            final int nsamples = dataSet.getDataCount();
             switch (ds.getErrorType(dimIndex)) {
             default:
             case NO_ERROR:
@@ -428,8 +434,19 @@ public class DataSetSerialiser { // NOPMD
      */
     protected void writeNumericBinaryDataToBufferDouble(final DataSet dataSet) {
         final int nDim = dataSet.getDimension();
+        if (dataSet instanceof GridDataSet) {
+            GridDataSet gridDataSet = (GridDataSet) dataSet;
+            for (int dimIndex = 0; dimIndex < nDim; dimIndex++) {
+                final boolean gridDimension = dimIndex < gridDataSet.getNGrid();
+                final int nsamples = gridDimension ? gridDataSet.getShape(dimIndex) : dataSet.getDataCount();
+                ioSerialiser.putFieldHeader(ARRAY_PREFIX + dimIndex, DataType.DOUBLE_ARRAY);
+                final double[] values = gridDimension ? gridDataSet.getGridValues(dimIndex) : dataSet.getValues(dimIndex);
+                ioSerialiser.getBuffer().putDoubleArray(values, 0, nsamples);
+            }
+            return; // GridDataSet does not provide errors
+        }
         for (int dimIndex = 0; dimIndex < nDim; dimIndex++) {
-            final int nsamples = dataSet.getDataCount(dimIndex);
+            final int nsamples = dataSet.getDataCount();
             ioSerialiser.put(ARRAY_PREFIX + dimIndex, dataSet.getValues(dimIndex), nsamples);
         }
         if (!(dataSet instanceof DataSetError)) {
@@ -437,7 +454,7 @@ public class DataSetSerialiser { // NOPMD
         }
         final DataSetError ds = (DataSetError) dataSet;
         for (int dimIndex = 0; dimIndex < nDim; dimIndex++) {
-            final int nsamples = dataSet.getDataCount(dimIndex);
+            final int nsamples = dataSet.getDataCount();
             switch (ds.getErrorType(dimIndex)) {
             case SYMMETRIC:
                 ioSerialiser.put(EP_PREFIX + dimIndex, ds.getErrorsPositive(dimIndex), nsamples);

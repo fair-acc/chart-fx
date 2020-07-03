@@ -354,7 +354,7 @@ public class EditDataSet extends TableViewer {
         double prevX = Double.MIN_VALUE;
         double nextX = Double.MAX_VALUE;
 
-        for (int i = 0; i < dataSet.getDataCount(DataSet.DIM_X); i++) {
+        for (int i = 0; i < dataSet.getDataCount(); i++) {
             final double currentX = dataSet.get(DataSet.DIM_X, i);
 
             if (currentX <= searchedX) {

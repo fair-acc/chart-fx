@@ -160,7 +160,7 @@ public final class CategoryAxis extends DefaultNumericAxis {
      * Update the categories based on the data labels attached to the DataSet values
      *
      * @param dataSet data set from which the data labels are used as category
-     * @return true is categories were modified, false, false otherwise
+     * @return true is categories were modified, false otherwise
      */
     public boolean updateCategories(final DataSet dataSet) {
         if (dataSet == null || forceAxisCategories) {
@@ -170,7 +170,7 @@ public final class CategoryAxis extends DefaultNumericAxis {
         final List<String> newCategoryList = new ArrayList<>();
         final boolean result = dataSet.lock().readLockGuard(() -> {
             boolean zeroDataLabels = true;
-            for (int i = 0; i < dataSet.getDataCount(DataSet.DIM_X); i++) {
+            for (int i = 0; i < dataSet.getDataCount(); i++) {
                 final String dataLabel = dataSet.getDataLabel(i);
                 String sanitizedLabel;
                 if (dataLabel == null) {
