@@ -20,35 +20,7 @@ public interface DataSet2D extends DataSet {
      * @return the y value
      */
     default double getValue(final double x) {
-        final int index1 = getXIndex(x);
-        final double x1 = getX(index1);
-        final double y1 = getY(index1);
-        int index2 = x1 < x ? index1 + 1 : index1 - 1;
-        index2 = Math.max(0, Math.min(index2, this.getDataCount() - 1));
-        final double y2 = getY(index2);
-        if (Double.isNaN(y1) || Double.isNaN(y2)) {
-            // case where the function has a gap (y-coordinate equals to NaN
-            return Double.NaN;
-        }
-
-        final double x2 = getX(index2);
-        if (x1 == x2) {
-            return y1;
-        }
-
-        return y1 + (((y2 - y1) * (x - x1)) / (x2 - x1));
-    }
-
-    /**
-     * Gets the interpolated y value of the data point for given x coordinate
-     *
-     * @param dimIndex the dimension index (ie. '0' equals 'X', '1' equals 'Y')
-     * @param x the new x coordinate
-     * @return the y value
-     */
-    @Override
-    default double getValue(final int dimIndex, final double x) {
-        return getValue(x);
+        return getValue(DIM_Y, x);
     }
 
     /**

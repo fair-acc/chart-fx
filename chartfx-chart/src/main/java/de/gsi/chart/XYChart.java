@@ -60,31 +60,31 @@ public class XYChart extends Chart {
     private boolean callCanvasUpdateLater;
     private final ChangeListener<Side> axisSideChangeListener = this::axisSideChanged;
 
-    public XYChart() {
-        this(null, null);
-    }
-
     /**
      * Construct a new XYChart with the given axes.
      *
-     * @param xAxis the axis to use as primary x-Axis
-     * @param yAxis the axis to use as primary y-Axis
+     * @param axes All axes to be added to the chart
      */
-    public XYChart(final Axis xAxis, final Axis yAxis) {
-        super();
+    public XYChart(final Axis... axes) {
+        super(axes);
 
-        if (xAxis != null) {
-            if (xAxis.getSide() == null || !xAxis.getSide().isHorizontal()) {
-                xAxis.setSide(Side.BOTTOM);
+        for (int dim = 0; dim < axes.length; dim++) {
+            final Axis axis = axes[dim];
+            if (axis == null) {
+                continue;
             }
-            getAxes().add(xAxis);
-        }
-
-        if (yAxis != null) {
-            if (yAxis.getSide() == null || !yAxis.getSide().isVertical()) {
-                yAxis.setSide(Side.LEFT);
+            switch (dim) {
+            case DataSet.DIM_X:
+                axis.setSide(Side.BOTTOM);
+                break;
+            case DataSet.DIM_Y:
+                axis.setSide(Side.LEFT);
+                break;
+            default:
+                axis.setSide(Side.RIGHT);
+                break;
             }
-            getAxes().add(yAxis);
+            getAxes().add(axis);
         }
 
         gridRenderer.horizontalGridLinesVisibleProperty().addListener(gridLineVisibilitychange);
@@ -245,11 +245,12 @@ public class XYChart extends Chart {
         // lock datasets to prevent writes while updating the axes
         ObservableList<DataSet> dataSets = this.getAllDatasets();
         // check that all registered data sets have proper ranges defined
-        dataSets.parallelStream().forEach(dataset -> dataset.getAxisDescriptions().parallelStream().filter(axisD -> !axisD.isDefined()).forEach(axisDescription -> {
-            dataset.lock().writeLockGuard(() -> {
-                dataset.recomputeLimits(axisDescription.getDimIndex());
-            });
-        }));
+        dataSets.parallelStream()
+                .forEach(dataset -> dataset.getAxisDescriptions().parallelStream().filter(axisD -> !axisD.isDefined()).forEach(axisDescription -> {
+                    dataset.lock().writeLockGuard(() -> {
+                        dataset.recomputeLimits(axisDescription.getDimIndex());
+                    });
+                }));
 
         // N.B. possible race condition on this line -> for the future to solve
         // recomputeLimits holds a writeLock the following sections need a read lock (for allowing parallel axis)
@@ -331,8 +332,7 @@ public class XYChart extends Chart {
         requestLayout();
     }
 
-    protected void axisSideChanged(final ObservableValue<? extends Side> change, final Side oldValue,
-            final Side newValue) {
+    protected void axisSideChanged(final ObservableValue<? extends Side> change, final Side oldValue, final Side newValue) {
         if (newValue != null && newValue.equals(oldValue)) {
             return;
         }
@@ -417,8 +417,7 @@ public class XYChart extends Chart {
         }
         if (DEBUG && LOGGER.isDebugEnabled()) {
             LOGGER.debug("   xychart redrawCanvas() - executing");
-            LOGGER.debug("   xychart redrawCanvas() - canvas size = {}",
-                    String.format("%fx%f", canvas.getWidth(), canvas.getHeight()));
+            LOGGER.debug("   xychart redrawCanvas() - canvas size = {}", String.format("%fx%f", canvas.getWidth(), canvas.getHeight()));
         }
 
         lastCanvasUpdate = now;

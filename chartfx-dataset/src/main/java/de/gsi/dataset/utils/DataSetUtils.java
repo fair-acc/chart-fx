@@ -47,9 +47,9 @@ import org.slf4j.LoggerFactory;
 
 import de.gsi.dataset.AxisDescription;
 import de.gsi.dataset.DataSet;
-import de.gsi.dataset.DataSet2D;
 import de.gsi.dataset.DataSetError;
 import de.gsi.dataset.DataSetMetaData;
+import de.gsi.dataset.GridDataSet;
 import de.gsi.dataset.spi.AbstractDataSet;
 import de.gsi.dataset.spi.DataSetBuilder;
 import de.gsi.dataset.spi.DefaultAxisDescription;
@@ -90,7 +90,7 @@ public class DataSetUtils extends DataSetUtilsHelper {
      * @param ds data set to be copied
      * @return deep copy of data set
      */
-    public static AbstractDataSet<?> copyDataSet(final DataSet2D ds) {
+    public static AbstractDataSet<?> copyDataSet(final DataSet ds) {
         final DefaultDataSet d = new DefaultDataSet(ds.getName());
         d.set(ds);
         return d;
@@ -190,7 +190,7 @@ public class DataSetUtils extends DataSetUtilsHelper {
      * @return the given error array (cropped to data set length if necessary)
      */
     public static double[] errors(final DataSet dataSet, final ErrType eType) {
-        final int nDim = dataSet.getDataCount(DIM_X);
+        final int nDim = dataSet.getDataCount();
         if (!(dataSet instanceof DataSetError)) {
             // data set does not have any error definition
             return new double[nDim];
@@ -1005,17 +1005,20 @@ public class DataSetUtils extends DataSetUtilsHelper {
 
         buffer.append("$binary\n");
         final String dataType = asFloat ? "float32[]" : "float64[]";
-        boolean is3D = dataSet.getDimension() > 2
-                       && dataSet.getDataCount(DIM_X) * dataSet.getDataCount(DIM_Y) == dataSet.getDataCount(DIM_Z);
+        boolean is3D = dataSet instanceof GridDataSet;
         if (is3D) {
-            buffer.append("$x;").append(dataType).append(';').append(dataSet.getDataCount(DIM_X));
-            buffer.append("\n$y;").append(dataType).append(';').append(dataSet.getDataCount(DIM_Y));
-            buffer.append("\n$z;").append(dataType).append(';').append(dataSet.getDataCount(DIM_Z)).append('\n');
+            int[] shape = ((GridDataSet) dataSet).getShape();
+            if (shape.length != 2 || dataSet.getDimension() != 3) {
+                throw new IllegalArgumentException("Only 3D DataSets implemented yet");
+            }
+            buffer.append("$x;").append(dataType).append(';').append(shape[DIM_X]);
+            buffer.append("\n$y;").append(dataType).append(';').append(shape[DIM_Y]);
+            buffer.append("\n$z;").append(dataType).append(';').append(dataSet.getDataCount()).append('\n');
         } else {
-            buffer.append("$x;").append(dataType).append(';').append(dataSet.getDataCount(DIM_X));
-            buffer.append("\n$y;").append(dataType).append(';').append(dataSet.getDataCount(DIM_Y));
-            buffer.append("\n$eyn;").append(dataType).append(';').append(dataSet.getDataCount(DIM_X));
-            buffer.append("\n$eyp;").append(dataType).append(';').append(dataSet.getDataCount(DIM_Y)).append('\n');
+            buffer.append("$x;").append(dataType).append(';').append(dataSet.getDataCount());
+            buffer.append("\n$y;").append(dataType).append(';').append(dataSet.getDataCount());
+            buffer.append("\n$eyn;").append(dataType).append(';').append(dataSet.getDataCount());
+            buffer.append("\n$eyp;").append(dataType).append(';').append(dataSet.getDataCount()).append('\n');
         }
         try {
             outputStream.write(buffer.toString().getBytes());
@@ -1032,7 +1035,7 @@ public class DataSetUtils extends DataSetUtilsHelper {
             outputStream.write(SWITCH_TO_BINARY_KEY); // magic byte to switch to
             // binary data
             if (asFloat && !is3D) {
-                final int nSamples = dataSet.getDataCount(DIM_X);
+                final int nSamples = dataSet.getDataCount();
                 final ByteBuffer byteBuffer = getCachedDoubleArray(CACHED_WRITE_BYTE_BUFFER, Float.BYTES * nSamples);
                 writeDoubleArrayAsFloatToByteBuffer(byteBuffer, dataSet.getValues(DIM_X), nSamples);
                 outputStream.write(byteBuffer.array());
@@ -1055,36 +1058,38 @@ public class DataSetUtils extends DataSetUtilsHelper {
                 writeDoubleArrayToByteBuffer(byteBuffer, errors(dataSet, EYP), nSamples);
                 outputStream.write(byteBuffer.array());
                 release(CACHED_WRITE_BYTE_BUFFER, byteBuffer);
-            } else if (asFloat) { // && !is3D
-                int nX = dataSet.getDataCount(DIM_X);
-                int nY = dataSet.getDataCount(DIM_Y);
-                int nZ = dataSet.getDataCount(DIM_Z);
+            } else if (asFloat) { // && is3D
+                int[] shape = ((GridDataSet) dataSet).getShape();
+                int nX = shape[DIM_X];
+                int nY = shape[DIM_Y];
+                int nZ = dataSet.getDataCount();
 
                 final ByteBuffer byteBuffer = getCachedDoubleArray(CACHED_WRITE_BYTE_BUFFER,
                         Float.BYTES * (nX + nY + nZ));
                 for (int ix = 0; ix < nX; ix++) {
-                    byteBuffer.putFloat((float) dataSet.get(DIM_X, ix));
+                    byteBuffer.putFloat((float) ((GridDataSet) dataSet).getGrid(DIM_X, ix));
                 }
                 for (int iy = 0; iy < nY; iy++) {
-                    byteBuffer.putFloat((float) dataSet.get(DIM_Y, iy));
+                    byteBuffer.putFloat((float) ((GridDataSet) dataSet).getGrid(DIM_Y, iy));
                 }
                 for (int iz = 0; iz < nZ; iz++) {
                     byteBuffer.putFloat((float) dataSet.get(DIM_Z, iz));
                 }
                 outputStream.write(byteBuffer.array());
                 release(CACHED_WRITE_BYTE_BUFFER, byteBuffer);
-            } else { // !asFloat && !is3D
-                int nX = dataSet.getDataCount(DIM_X);
-                int nY = dataSet.getDataCount(DIM_Y);
-                int nZ = dataSet.getDataCount(DIM_Z);
+            } else { // !asFloat && is3D
+                int[] shape = ((GridDataSet) dataSet).getShape();
+                int nX = shape[DIM_X];
+                int nY = shape[DIM_Y];
+                int nZ = dataSet.getDataCount();
 
                 final ByteBuffer byteBuffer = getCachedDoubleArray(CACHED_WRITE_BYTE_BUFFER,
                         Double.BYTES * (nX + nY + nZ));
                 for (int ix = 0; ix < nX; ix++) {
-                    byteBuffer.putDouble(dataSet.get(DIM_X, ix));
+                    byteBuffer.putDouble(((GridDataSet) dataSet).getGrid(DIM_X, ix));
                 }
                 for (int iy = 0; iy < nY; iy++) {
-                    byteBuffer.putDouble(dataSet.get(DIM_Y, iy));
+                    byteBuffer.putDouble(((GridDataSet) dataSet).getGrid(DIM_Y, iy));
                 }
                 for (int iz = 0; iz < nZ; iz++) {
                     byteBuffer.putDouble(dataSet.get(DIM_Z, iz));
@@ -1100,12 +1105,15 @@ public class DataSetUtils extends DataSetUtilsHelper {
     protected static void writeNumericDataToStream(final OutputStream outputFile, final DataSet dataSet) {
         try {
             // formatter definition, we always write the y errors to file
-            boolean is3D = dataSet.getDimension() == 3
-                           && dataSet.getDataCount(DIM_X) * dataSet.getDataCount(DIM_Y) == dataSet.getDataCount(DIM_Z);
+            boolean is3D = dataSet instanceof GridDataSet;
             if (is3D) {
-                int nX = dataSet.getDataCount(DIM_X);
-                int nY = dataSet.getDataCount(DIM_Y);
-                int nZ = dataSet.getDataCount(DIM_Z);
+                int[] shape = ((GridDataSet) dataSet).getShape();
+                if (shape.length != 2 || dataSet.getDimension() != 3) {
+                    throw new IllegalArgumentException("Only 3D DataSets implemented yet");
+                }
+                int nX = shape[DIM_X];
+                int nY = shape[DIM_Y];
+                int nZ = dataSet.getDataCount();
                 final StringBuilder buffer = getCachedStringBuilder(CACHED_STRING_BUILDER, Math.max(100, nZ * 45));
                 buffer.append("#nSamples : ").append(nZ)
                         // use '$' sign as special indicator that from now on only numeric
@@ -1116,9 +1124,9 @@ public class DataSetUtils extends DataSetUtilsHelper {
                     for (int iX = 0; iX < nX; iX++) {
                         buffer.append(iY * nX + iX); // data index
                         buffer.append(',');
-                        buffer.append(dataSet.get(DIM_X, iX)); // x-coordinate
+                        buffer.append(((GridDataSet) dataSet).getGrid(DIM_X, iX)); // x-coordinate
                         buffer.append(',');
-                        buffer.append(dataSet.get(DIM_Y, iY)); // y-coordinate
+                        buffer.append(((GridDataSet) dataSet).getGrid(DIM_Y, iY)); // y-coordinate
                         buffer.append(',');
                         buffer.append(dataSet.get(DIM_Z, iX + iY * nX)); // negative error in y
                         buffer.append('\n');
@@ -1126,7 +1134,7 @@ public class DataSetUtils extends DataSetUtilsHelper {
                 }
                 outputFile.write(buffer.toString().getBytes());
             } else {
-                final int nSamples = dataSet.getDataCount(DIM_X);
+                final int nSamples = dataSet.getDataCount();
                 final StringBuilder buffer = getCachedStringBuilder(CACHED_STRING_BUILDER,
                         Math.max(100, nSamples * 45));
                 buffer.append("#nSamples : ").append(nSamples)

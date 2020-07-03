@@ -111,7 +111,7 @@ public class RollingDataSet extends FragmentedDataSet {
         public void shift(double value) {
             lock().writeLockGuard(() -> {
                 for (int i = 0; i < xValues.size(); i++) {
-                    this.getXValues()[i] += value;
+                    this.getValues(DIM_X)[i] += value;
                 }
             });
             fireInvalidated(new UpdatedDataEvent(this));

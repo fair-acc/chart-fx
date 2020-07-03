@@ -21,15 +21,15 @@ import de.gsi.dataset.spi.utils.DoublePoint;
 import de.gsi.dataset.utils.AssertUtils;
 
 /**
- * Minor extension to <code>DefaultDataSet</code> to easier handle labelled markers.
+ * Minor extension to <code>DefaultDataSet</code> to easier handle labeled markers.
  * 
  * @author braeun
  */
 public class LabelledMarkerDataSet extends AbstractDataSet<LabelledMarkerDataSet> implements DataSet2D {
     private static final long serialVersionUID = -3267447868117053651L;
-    protected ArrayList<String> dataLabels = new ArrayList<>();
-    protected ArrayList<String> dataStyles = new ArrayList<>();
-    protected ArrayList<DoublePoint> data = new ArrayList<>();
+    protected final ArrayList<String> dataLabels = new ArrayList<>();
+    protected final ArrayList<String> dataStyles = new ArrayList<>();
+    protected final transient ArrayList<DoublePoint> data = new ArrayList<>();
 
     /**
      * @param name data set name
@@ -47,7 +47,6 @@ public class LabelledMarkerDataSet extends AbstractDataSet<LabelledMarkerDataSet
         lock().writeLockGuard(() -> {
             data.add(new DoublePoint(marker.getX(), marker.getY()));
             getAxisDescription(DIM_X).add(marker.getX());
-            // yRange.add(marker.getY());
             dataLabels.add(marker.getLabel());
             dataStyles.add(marker.getStyle());
         });
@@ -84,12 +83,6 @@ public class LabelledMarkerDataSet extends AbstractDataSet<LabelledMarkerDataSet
     @Override
     public int getDataCount() {
         return data.size();
-    }
-
-    @Override
-    public int getDataCount(int dimIndex) {
-        // TODO Auto-generated method stub
-        return dataLabels.size();
     }
 
     /**
@@ -169,7 +162,6 @@ public class LabelledMarkerDataSet extends AbstractDataSet<LabelledMarkerDataSet
         lock().writeLockGuard(() -> {
             data.get(index).set(marker.getX(), marker.getY());
             getAxisDescription(DIM_X).add(marker.getX());
-            // yRange.add(marker.getY());
             dataLabels.set(index, marker.getLabel());
             dataStyles.set(index, marker.getStyle());
         });
@@ -206,7 +198,6 @@ public class LabelledMarkerDataSet extends AbstractDataSet<LabelledMarkerDataSet
                 final double y = marker.getY();
                 data.add(new DoublePoint(x, y));
                 getAxisDescription(DIM_X).add(x);
-                // yRange.add(y);
                 dataLabels.add(marker.getLabel());
                 dataStyles.add(marker.getStyle());
             }
@@ -214,25 +205,4 @@ public class LabelledMarkerDataSet extends AbstractDataSet<LabelledMarkerDataSet
         fireInvalidated(new UpdatedDataEvent(this, "fill"));
         return this;
     }
-
-    // /**
-    // * Computes limits (ranges) of this DataSet.
-    // *
-    // * @return itself (fluent design)
-    // */
-    // @Override
-    // protected LabelledMarkerDataSet computeLimits() {
-    // lock();
-    // // Clear previous ranges
-    // getAxisDescriptions().forEach(AxisDescription::empty);
-    //
-    // final int dataCount = getDataCount();
-    //
-    // for (int i = 0; i < dataCount; i++) {
-    // getAxisDescription(DIM_X).add(getX(i));
-    // // getAxisDescription(DIM_Y).add(getY(i));
-    // }
-    //
-    // return unlock();
-    // }
 }

@@ -58,10 +58,10 @@ public class IirFilterTests {
         }
 
         final DataSet magBandPass = filterAndGetMagnitudeSpectrum(iirBandPass, demoDataSet);
-        assertThat("band-pass cut-off (low)", magBandPass.getValue(DIM_X, F_BAND_START), lessThan(EPSILON_DB));
-        assertThat("band-pass cut-off (high)", magBandPass.getValue(DIM_X, F_BAND_STOP), lessThan(EPSILON_DB));
-        assertThat("band-pass rejection (low)", magBandPass.getValue(DIM_X, 0.1 * F_BAND_START), lessThan(3.0 + EPSILON_DB - 10 * filterOrder));
-        assertThat("band-pass rejection (high)", magBandPass.getValue(DIM_X, 10 * F_BAND_STOP), lessThan(3.0 + EPSILON_DB - 10 * filterOrder));
+        assertThat("band-pass cut-off (low)", magBandPass.getValue(DIM_Y, F_BAND_START), lessThan(EPSILON_DB));
+        assertThat("band-pass cut-off (high)", magBandPass.getValue(DIM_Y, F_BAND_STOP), lessThan(EPSILON_DB));
+        assertThat("band-pass rejection (low)", magBandPass.getValue(DIM_Y, 0.1 * F_BAND_START), lessThan(3.0 + EPSILON_DB - 10 * filterOrder));
+        assertThat("band-pass rejection (high)", magBandPass.getValue(DIM_Y, 10 * F_BAND_STOP), lessThan(3.0 + EPSILON_DB - 10 * filterOrder));
         final double rangePassBand = getRange(magBandPass,
                 magBandPass.getIndex(DIM_X, (F_BAND_CENTRE - 0.1 * F_BAND_WIDTH)),
                 magBandPass.getIndex(DIM_X, (F_BAND_CENTRE + 0.1 * F_BAND_WIDTH)));
@@ -87,8 +87,8 @@ public class IirFilterTests {
         }
 
         final DataSet magBandStop = filterAndGetMagnitudeSpectrum(iirBandStop, demoDataSet);
-        assertThat("band-stop cut-off (low)", magBandStop.getValue(DIM_X, F_BAND_START), lessThan(EPSILON_DB));
-        assertThat("band-stop cut-off (high)", magBandStop.getValue(DIM_X, F_BAND_STOP), lessThan(EPSILON_DB));
+        assertThat("band-stop cut-off (low)", magBandStop.getValue(DIM_Y, F_BAND_START), lessThan(EPSILON_DB));
+        assertThat("band-stop cut-off (high)", magBandStop.getValue(DIM_Y, F_BAND_STOP), lessThan(EPSILON_DB));
         assertThat("band-pass pass-band (low)", getRange(magBandStop, 0, magBandStop.getIndex(DIM_X, F_BAND_START * 0.1)), lessThan(EPSILON_DB));
         assertThat("band-pass pass-band (high)", getRange(magBandStop, (int) (N_SAMPLES_FFT * 0.95), N_SAMPLES_FFT), lessThan(EPSILON_DB));
         final double rangeStopBand = getMaximum(magBandStop,
@@ -116,8 +116,8 @@ public class IirFilterTests {
         }
 
         final DataSet magHighPass = filterAndGetMagnitudeSpectrum(iirHighPass, demoDataSet);
-        assertThat("high-pass cut-off", magHighPass.getValue(DIM_X, F_CUT_HIGH), lessThan(EPSILON_DB));
-        assertThat("high-pass rejection", magHighPass.getValue(DIM_X, 0.1 * F_CUT_HIGH), lessThan(3.0 + EPSILON_DB - 10 * filterOrder));
+        assertThat("high-pass cut-off", magHighPass.getValue(DIM_Y, F_CUT_HIGH), lessThan(EPSILON_DB));
+        assertThat("high-pass rejection", magHighPass.getValue(DIM_Y, 0.1 * F_CUT_HIGH), lessThan(3.0 + EPSILON_DB - 10 * filterOrder));
         assertThat("high-pass pass-band ripple", getRange(magHighPass, (int) (N_SAMPLES_FFT * 0.95), N_SAMPLES_FFT), lessThan(2 * EPSILON_DB));
     }
     @DisplayName("Bessel - Low-Pass")
@@ -138,8 +138,8 @@ public class IirFilterTests {
             break;
         }
         final DataSet magLowPass = filterAndGetMagnitudeSpectrum(iirLowPass, demoDataSet);
-        assertThat("low-pass cut-off", magLowPass.getValue(DIM_X, F_CUT_LOW), lessThan(EPSILON_DB));
-        assertThat("low-pass rejection", magLowPass.getValue(DIM_X, 10 * F_CUT_LOW), lessThan(-3.0 + EPSILON_DB - 10 * filterOrder));
+        assertThat("low-pass cut-off", magLowPass.getValue(DIM_Y, F_CUT_LOW), lessThan(EPSILON_DB));
+        assertThat("low-pass rejection", magLowPass.getValue(DIM_Y, 10 * F_CUT_LOW), lessThan(-3.0 + EPSILON_DB - 10 * filterOrder));
         assertThat("low-pass pass-band ripple", getRange(magLowPass, 0, magLowPass.getIndex(DIM_X, F_CUT_LOW * 0.1)), lessThan(EPSILON_DB));
     }
 
@@ -162,10 +162,10 @@ public class IirFilterTests {
         }
 
         final DataSet magBandPass = filterAndGetMagnitudeSpectrum(iirBandPass, demoDataSet);
-        assertThat("band-pass cut-off (low)", magBandPass.getValue(DIM_X, F_BAND_START), lessThan(-3.0 + EPSILON_DB));
-        assertThat("band-pass cut-off (high)", magBandPass.getValue(DIM_X, F_BAND_STOP), lessThan(-3.0 + EPSILON_DB));
-        assertThat("band-pass rejection (low)", magBandPass.getValue(DIM_X, 0.1 * F_BAND_START), lessThan(-3.0 + EPSILON_DB - 20 * filterOrder));
-        assertThat("band-pass rejection (high)", magBandPass.getValue(DIM_X, 10 * F_BAND_STOP), lessThan(-3.0 + EPSILON_DB - 20 * filterOrder));
+        assertThat("band-pass cut-off (low)", magBandPass.getValue(DIM_Y, F_BAND_START), lessThan(-3.0 + EPSILON_DB));
+        assertThat("band-pass cut-off (high)", magBandPass.getValue(DIM_Y, F_BAND_STOP), lessThan(-3.0 + EPSILON_DB));
+        assertThat("band-pass rejection (low)", magBandPass.getValue(DIM_Y, 0.1 * F_BAND_START), lessThan(-3.0 + EPSILON_DB - 20 * filterOrder));
+        assertThat("band-pass rejection (high)", magBandPass.getValue(DIM_Y, 10 * F_BAND_STOP), lessThan(-3.0 + EPSILON_DB - 20 * filterOrder));
         final double rangePassBand = getRange(magBandPass,
                 magBandPass.getIndex(DIM_X, (F_BAND_CENTRE - 0.1 * F_BAND_WIDTH)),
                 magBandPass.getIndex(DIM_X, (F_BAND_CENTRE + 0.1 * F_BAND_WIDTH)));
@@ -191,8 +191,8 @@ public class IirFilterTests {
         }
 
         final DataSet magBandStop = filterAndGetMagnitudeSpectrum(iirBandStop, demoDataSet);
-        assertThat("band-stop cut-off (low)", magBandStop.getValue(DIM_X, F_BAND_START), lessThan(-3.0 + EPSILON_DB));
-        assertThat("band-stop cut-off (high)", magBandStop.getValue(DIM_X, F_BAND_STOP), lessThan(-3.0 + EPSILON_DB));
+        assertThat("band-stop cut-off (low)", magBandStop.getValue(DIM_Y, F_BAND_START), lessThan(-3.0 + EPSILON_DB));
+        assertThat("band-stop cut-off (high)", magBandStop.getValue(DIM_Y, F_BAND_STOP), lessThan(-3.0 + EPSILON_DB));
         assertThat("band-pass pass-band (low)", getRange(magBandStop, 0, magBandStop.getIndex(DIM_X, F_BAND_START * 0.1)), lessThan(EPSILON_DB));
         assertThat("band-pass pass-band (high)", getRange(magBandStop, (int) (N_SAMPLES_FFT * 0.95), N_SAMPLES_FFT), lessThan(EPSILON_DB));
         final double rangeStopBand = getMaximum(magBandStop,
@@ -220,8 +220,8 @@ public class IirFilterTests {
         }
 
         final DataSet magHighPass = filterAndGetMagnitudeSpectrum(iirHighPass, demoDataSet);
-        assertThat("high-pass cut-off", magHighPass.getValue(DIM_X, F_CUT_HIGH), lessThan(-3.0 + EPSILON_DB));
-        assertThat("high-pass rejection", magHighPass.getValue(DIM_X, 0.1 * F_CUT_HIGH), lessThan(-3.0 + EPSILON_DB - 20 * filterOrder));
+        assertThat("high-pass cut-off", magHighPass.getValue(DIM_Y, F_CUT_HIGH), lessThan(-3.0 + EPSILON_DB));
+        assertThat("high-pass rejection", magHighPass.getValue(DIM_Y, 0.1 * F_CUT_HIGH), lessThan(-3.0 + EPSILON_DB - 20 * filterOrder));
         assertThat("high-pass pass-band ripple", getRange(magHighPass, (int) (N_SAMPLES_FFT * 0.95), N_SAMPLES_FFT), lessThan(EPSILON_DB));
     }
 
@@ -243,8 +243,8 @@ public class IirFilterTests {
             break;
         }
         final DataSet magLowPass = filterAndGetMagnitudeSpectrum(iirLowPass, demoDataSet);
-        assertThat("low-pass cut-off", magLowPass.getValue(DIM_X, F_CUT_LOW), lessThan(-3.0 + EPSILON_DB));
-        assertThat("low-pass rejection", magLowPass.getValue(DIM_X, 10 * F_CUT_LOW), lessThan(-3.0 + EPSILON_DB - 20 * filterOrder));
+        assertThat("low-pass cut-off", magLowPass.getValue(DIM_Y, F_CUT_LOW), lessThan(-3.0 + EPSILON_DB));
+        assertThat("low-pass rejection", magLowPass.getValue(DIM_Y, 10 * F_CUT_LOW), lessThan(-3.0 + EPSILON_DB - 20 * filterOrder));
         assertThat("low-pass pass-band ripple", getRange(magLowPass, 0, magLowPass.getIndex(DIM_X, F_CUT_LOW * 0.1)), lessThan(EPSILON_DB));
     }
 
@@ -254,8 +254,8 @@ public class IirFilterTests {
         final Butterworth iirLowPass = new Butterworth();
         iirLowPass.lowPass(filterOrder, 1.0, F_CUT_LOW);
         final DataSet magLowPass = filterAndGetMagnitudeSpectrum(iirLowPass, demoDataSet);
-        assertThat("low-pass cut-off", magLowPass.getValue(DIM_X, F_CUT_LOW), lessThan(-3.0 + EPSILON_DB));
-        assertThat("low-pass rejection", magLowPass.getValue(DIM_X, 10 * F_CUT_LOW), lessThan(-3.0 + EPSILON_DB - 20 * filterOrder));
+        assertThat("low-pass cut-off", magLowPass.getValue(DIM_Y, F_CUT_LOW), lessThan(-3.0 + EPSILON_DB));
+        assertThat("low-pass rejection", magLowPass.getValue(DIM_Y, 10 * F_CUT_LOW), lessThan(-3.0 + EPSILON_DB - 20 * filterOrder));
         assertThat("low-pass pass-band ripple", getRange(magLowPass, 0, magLowPass.getIndex(DIM_X, F_CUT_LOW * 0.1)), lessThan(EPSILON_DB));
 
         // response
@@ -287,10 +287,10 @@ public class IirFilterTests {
         }
 
         final DataSet magBandPass = filterAndGetMagnitudeSpectrum(iirBandPass, demoDataSet);
-        assertThat("band-pass cut-off (low)", magBandPass.getValue(DIM_X, F_BAND_START), lessThan(-3.0 + EPSILON_DB));
-        assertThat("band-pass cut-off (high)", magBandPass.getValue(DIM_X, F_BAND_STOP), lessThan(-3.0 + EPSILON_DB));
-        assertThat("band-pass rejection (low)", magBandPass.getValue(DIM_X, 0.1 * F_BAND_START), lessThan(-3.0 + EPSILON_DB - 20 * filterOrder));
-        assertThat("band-pass rejection (high)", magBandPass.getValue(DIM_X, 10 * F_BAND_STOP), lessThan(-3.0 + EPSILON_DB - 20 * filterOrder));
+        assertThat("band-pass cut-off (low)", magBandPass.getValue(DIM_Y, F_BAND_START), lessThan(-3.0 + EPSILON_DB));
+        assertThat("band-pass cut-off (high)", magBandPass.getValue(DIM_Y, F_BAND_STOP), lessThan(-3.0 + EPSILON_DB));
+        assertThat("band-pass rejection (low)", magBandPass.getValue(DIM_Y, 0.1 * F_BAND_START), lessThan(-3.0 + EPSILON_DB - 20 * filterOrder));
+        assertThat("band-pass rejection (high)", magBandPass.getValue(DIM_Y, 10 * F_BAND_STOP), lessThan(-3.0 + EPSILON_DB - 20 * filterOrder));
         final double rangePassBand = getRange(magBandPass,
                 magBandPass.getIndex(DIM_X, (F_BAND_CENTRE - 0.1 * F_BAND_WIDTH)),
                 magBandPass.getIndex(DIM_X, (F_BAND_CENTRE + 0.1 * F_BAND_WIDTH)));
@@ -315,8 +315,8 @@ public class IirFilterTests {
         }
 
         final DataSet magBandStop = filterAndGetMagnitudeSpectrum(iirBandStop, demoDataSet);
-        assertThat("band-stop cut-off (low)", magBandStop.getValue(DIM_X, F_BAND_START), lessThan(-3.0 + EPSILON_DB));
-        assertThat("band-stop cut-off (high)", magBandStop.getValue(DIM_X, F_BAND_STOP), lessThan(-3.0 + EPSILON_DB));
+        assertThat("band-stop cut-off (low)", magBandStop.getValue(DIM_Y, F_BAND_START), lessThan(-3.0 + EPSILON_DB));
+        assertThat("band-stop cut-off (high)", magBandStop.getValue(DIM_Y, F_BAND_STOP), lessThan(-3.0 + EPSILON_DB));
         assertThat("band-pass pass-band (low)", getRange(magBandStop, 0, magBandStop.getIndex(DIM_X, F_BAND_START * 0.1)), lessThan(ALLOWED_IN_BAND_RIPPLE_DB + EPSILON_DB));
         assertThat("band-pass pass-band (high)", getRange(magBandStop, (int) (N_SAMPLES_FFT * 0.95), N_SAMPLES_FFT), lessThan(ALLOWED_IN_BAND_RIPPLE_DB + EPSILON_DB));
         final double rangeStopBand = getMaximum(magBandStop,
@@ -343,8 +343,8 @@ public class IirFilterTests {
         }
 
         final DataSet magHighPass = filterAndGetMagnitudeSpectrum(iirHighPass, demoDataSet);
-        assertThat("high-pass cut-off", magHighPass.getValue(DIM_X, F_CUT_HIGH), lessThan(-3.0 + EPSILON_DB));
-        assertThat("high-pass rejection", magHighPass.getValue(DIM_X, 0.1 * F_CUT_HIGH), lessThan(-3.0 + EPSILON_DB - 20 * filterOrder));
+        assertThat("high-pass cut-off", magHighPass.getValue(DIM_Y, F_CUT_HIGH), lessThan(-3.0 + EPSILON_DB));
+        assertThat("high-pass rejection", magHighPass.getValue(DIM_Y, 0.1 * F_CUT_HIGH), lessThan(-3.0 + EPSILON_DB - 20 * filterOrder));
         assertThat("high-pass pass-band ripple", getRange(magHighPass, (int) (N_SAMPLES_FFT * 0.95), N_SAMPLES_FFT), lessThan(ALLOWED_IN_BAND_RIPPLE_DB + EPSILON_DB));
     }
 
@@ -367,10 +367,10 @@ public class IirFilterTests {
         }
 
         final DataSet magBandPass = filterAndGetMagnitudeSpectrum(iirBandPass, demoDataSet);
-        assertThat("band-pass cut-off (low)", magBandPass.getValue(DIM_X, F_BAND_START), lessThan(ALLOWED_OUT_OF_BAND_RIPPLE_DB + EPSILON_DB));
-        assertThat("band-pass cut-off (high)", magBandPass.getValue(DIM_X, F_BAND_STOP), lessThan(ALLOWED_OUT_OF_BAND_RIPPLE_DB + EPSILON_DB));
-        assertThat("band-pass rejection (low)", magBandPass.getValue(DIM_X, 0.1 * F_BAND_START), lessThan(ALLOWED_OUT_OF_BAND_RIPPLE_DB + EPSILON_DB));
-        assertThat("band-pass rejection (high)", magBandPass.getValue(DIM_X, 10 * F_BAND_STOP), lessThan(ALLOWED_OUT_OF_BAND_RIPPLE_DB + EPSILON_DB));
+        assertThat("band-pass cut-off (low)", magBandPass.getValue(DIM_Y, F_BAND_START), lessThan(ALLOWED_OUT_OF_BAND_RIPPLE_DB + EPSILON_DB));
+        assertThat("band-pass cut-off (high)", magBandPass.getValue(DIM_Y, F_BAND_STOP), lessThan(ALLOWED_OUT_OF_BAND_RIPPLE_DB + EPSILON_DB));
+        assertThat("band-pass rejection (low)", magBandPass.getValue(DIM_Y, 0.1 * F_BAND_START), lessThan(ALLOWED_OUT_OF_BAND_RIPPLE_DB + EPSILON_DB));
+        assertThat("band-pass rejection (high)", magBandPass.getValue(DIM_Y, 10 * F_BAND_STOP), lessThan(ALLOWED_OUT_OF_BAND_RIPPLE_DB + EPSILON_DB));
         final double rangePassBand = getRange(magBandPass,
                 magBandPass.getIndex(DIM_X, (F_BAND_CENTRE - 0.1 * F_BAND_WIDTH)),
                 magBandPass.getIndex(DIM_X, (F_BAND_CENTRE + 0.1 * F_BAND_WIDTH)));
@@ -396,8 +396,8 @@ public class IirFilterTests {
         }
 
         final DataSet magBandStop = filterAndGetMagnitudeSpectrum(iirBandStop, demoDataSet);
-        assertThat("band-stop cut-off (low)", magBandStop.getValue(DIM_X, F_BAND_START), lessThan(ALLOWED_OUT_OF_BAND_RIPPLE_DB + EPSILON_DB));
-        assertThat("band-stop cut-off (high)", magBandStop.getValue(DIM_X, F_BAND_STOP), lessThan(ALLOWED_OUT_OF_BAND_RIPPLE_DB + EPSILON_DB));
+        assertThat("band-stop cut-off (low)", magBandStop.getValue(DIM_Y, F_BAND_START), lessThan(ALLOWED_OUT_OF_BAND_RIPPLE_DB + EPSILON_DB));
+        assertThat("band-stop cut-off (high)", magBandStop.getValue(DIM_Y, F_BAND_STOP), lessThan(ALLOWED_OUT_OF_BAND_RIPPLE_DB + EPSILON_DB));
         assertThat("band-pass pass-band (low)", getRange(magBandStop, 0, magBandStop.getIndex(DIM_X, F_BAND_START * 0.1)), lessThan(ALLOWED_IN_BAND_RIPPLE_DB + EPSILON_DB));
         assertThat("band-pass pass-band (high)", getRange(magBandStop, (int) (N_SAMPLES_FFT * 0.95), N_SAMPLES_FFT), lessThan(ALLOWED_IN_BAND_RIPPLE_DB + EPSILON_DB));
         final double rangeStopBand = getMaximum(magBandStop,
@@ -425,7 +425,7 @@ public class IirFilterTests {
         }
 
         final DataSet magHighPass = filterAndGetMagnitudeSpectrum(iirHighPass, demoDataSet);
-        assertThat("high-pass cut-off", magHighPass.getValue(DIM_X, F_CUT_HIGH), lessThan(ALLOWED_OUT_OF_BAND_RIPPLE_DB + EPSILON_DB));
+        assertThat("high-pass cut-off", magHighPass.getValue(DIM_Y, F_CUT_HIGH), lessThan(ALLOWED_OUT_OF_BAND_RIPPLE_DB + EPSILON_DB));
         assertThat("high-pass rejection", getMaximum(magHighPass, 0, magHighPass.getIndex(DIM_X, 0.8 * F_CUT_HIGH)), lessThan(ALLOWED_OUT_OF_BAND_RIPPLE_DB + EPSILON_DB));
         assertThat("high-pass pass-band ripple", getRange(magHighPass, (int) (N_SAMPLES_FFT * 0.95), N_SAMPLES_FFT), lessThan(ALLOWED_IN_BAND_RIPPLE_DB + EPSILON_DB));
     }
@@ -448,7 +448,7 @@ public class IirFilterTests {
             break;
         }
         final DataSet magLowPass = filterAndGetMagnitudeSpectrum(iirLowPass, demoDataSet);
-        assertThat("low-pass cut-off", magLowPass.getValue(DIM_X, F_CUT_LOW), lessThan(ALLOWED_OUT_OF_BAND_RIPPLE_DB + EPSILON_DB));
+        assertThat("low-pass cut-off", magLowPass.getValue(DIM_Y, F_CUT_LOW), lessThan(ALLOWED_OUT_OF_BAND_RIPPLE_DB + EPSILON_DB));
         assertThat("low-pass rejection", getMaximum(magLowPass, magLowPass.getIndex(DIM_X, 2 * F_CUT_LOW), N_SAMPLES_FFT), lessThan(ALLOWED_OUT_OF_BAND_RIPPLE_DB + EPSILON_DB));
         assertThat("low-pass pass-band ripple", getRange(magLowPass, 0, magLowPass.getIndex(DIM_X, F_CUT_LOW * 0.1)), lessThan(EPSILON_DB));
     }
@@ -471,8 +471,8 @@ public class IirFilterTests {
             break;
         }
         final DataSet magLowPass = filterAndGetMagnitudeSpectrum(iirLowPass, demoDataSet);
-        assertThat("low-pass cut-off", magLowPass.getValue(DIM_X, F_CUT_LOW), lessThan(-3.0 + EPSILON_DB));
-        assertThat("low-pass rejection", magLowPass.getValue(DIM_X, 10 * F_CUT_LOW), lessThan(-3.0 + EPSILON_DB - 20 * filterOrder));
+        assertThat("low-pass cut-off", magLowPass.getValue(DIM_Y, F_CUT_LOW), lessThan(-3.0 + EPSILON_DB));
+        assertThat("low-pass rejection", magLowPass.getValue(DIM_Y, 10 * F_CUT_LOW), lessThan(-3.0 + EPSILON_DB - 20 * filterOrder));
         assertThat("low-pass pass-band ripple", getRange(magLowPass, 0, magLowPass.getIndex(DIM_X, F_CUT_LOW * 0.1)), lessThan(ALLOWED_IN_BAND_RIPPLE_DB + EPSILON_DB));
     }
 

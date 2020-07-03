@@ -23,6 +23,7 @@ import de.gsi.chart.plugins.Panner;
 import de.gsi.chart.plugins.Zoomer;
 import de.gsi.chart.renderer.spi.MountainRangeRenderer;
 import de.gsi.dataset.DataSet;
+import de.gsi.dataset.GridDataSet;
 import de.gsi.dataset.spi.AbstractDataSet;
 
 /**
@@ -54,8 +55,7 @@ public class MountainRangeRendererSample extends Application {
         chart.getPlugins().add(new Panner());
         chart.getPlugins().add(new EditAxis());
 
-        final Spinner<Double> mountainRangeOffset = new Spinner<>(0.0, 10.0, mountainRangeRenderer.getMountainRangeOffset(),
-                0.1);
+        final Spinner<Double> mountainRangeOffset = new Spinner<>(0.0, 10.0, mountainRangeRenderer.getMountainRangeOffset(), 0.1);
         mountainRangeRenderer.mountainRangeOffsetProperty().bind(mountainRangeOffset.valueProperty());
         mountainRangeOffset.valueProperty().addListener((ch, o, n) -> {
             if (n.equals(o)) {
@@ -64,8 +64,7 @@ public class MountainRangeRendererSample extends Application {
             chart.requestLayout();
         });
 
-        final Scene scene = new Scene(
-                new BorderPane(chart, new ToolBar(new Label(""), mountainRangeOffset), null, null, null), 1200, 800);
+        final Scene scene = new Scene(new BorderPane(chart, new ToolBar(new Label(""), mountainRangeOffset), null, null, null), 1200, 800);
         primaryStage.setScene(scene);
         primaryStage.show();
         primaryStage.setOnCloseRequest(evt -> Platform.exit());
@@ -112,10 +111,8 @@ public class MountainRangeRendererSample extends Application {
                 final double width1 = 2 * (1 - yRel);
                 final double width4 = 0.2 + 0.05 * Math.sin(5 * Math.PI * yRel);
                 final double y1 = MountainRangeRendererSample.gaussian(t, mean1 + peakOffset, width1);
-                final double y2 = MountainRangeRendererSample.gaussian(t,
-                        mean2 + peakOffset + 0.3 * Math.sin(2.5 * Math.PI * yRel), 0.2);
-                final double y3 = MountainRangeRendererSample.gaussian(t,
-                        mean3 + peakOffset + 0.3 * Math.sin(2.5 * Math.PI * yRel), 0.2);
+                final double y2 = MountainRangeRendererSample.gaussian(t, mean2 + peakOffset + 0.3 * Math.sin(2.5 * Math.PI * yRel), 0.2);
+                final double y3 = MountainRangeRendererSample.gaussian(t, mean3 + peakOffset + 0.3 * Math.sin(2.5 * Math.PI * yRel), 0.2);
                 final double y4 = MountainRangeRendererSample.gaussian(t, mean4 + peakOffset, width4);
                 z[i++] = y1 + y2 + y3 + y4;
             }
@@ -125,11 +122,10 @@ public class MountainRangeRendererSample extends Application {
     }
 
     protected DataSet readImage() {
-        try (final BufferedReader reader = new BufferedReader(
-                     new InputStreamReader(ContourChartSample.class.getResourceAsStream("./testdata/image.txt")))) {
+        try (final BufferedReader reader = new BufferedReader(new InputStreamReader(ContourChartSample.class.getResourceAsStream("./testdata/image.txt")))) {
             @SuppressWarnings("unused")
             String skipLine; // NOPMD variable is needed to skip/check line that contains the dimension of the following
-                    // line to be read which we derive from the data itself
+            // line to be read which we derive from the data itself
             if ((skipLine = reader.readLine()) == null) {
                 throw new IllegalStateException(EXPECTED_NON_NULL_LINE);
             }
@@ -186,7 +182,7 @@ public class MountainRangeRendererSample extends Application {
         return numberValues;
     }
 
-    public class DefaultData extends AbstractDataSet<DefaultData> {
+    public class DefaultData extends AbstractDataSet<DefaultData> implements GridDataSet {
         private static final long serialVersionUID = 2094218221674496366L;
         private final double[] xValues;
         private final double[] yValues;
@@ -203,28 +199,24 @@ public class MountainRangeRendererSample extends Application {
         public final double get(final int dimIndex, final int index) {
             switch (dimIndex) {
             case DataSet.DIM_X:
-                return xValues[index];
+                return xValues[index % xValues.length];
             case DataSet.DIM_Y:
-                return yValues[index];
+                return yValues[index / xValues.length];
             case DataSet.DIM_Z:
                 return zValues[index];
             default:
-                throw new IllegalArgumentException("dinIndex " + dimIndex + " not defined");
+                throw new IllegalArgumentException("dimIndex " + dimIndex + " not defined");
             }
         }
 
         @Override
-        public int getDataCount(final int dimIndex) {
-            switch (dimIndex) {
-            case DataSet.DIM_X:
-                return xValues.length;
-            case DataSet.DIM_Y:
-                return yValues.length;
-            case DataSet.DIM_Z:
-                return xValues.length * yValues.length;
-            default:
-                throw new IllegalArgumentException("dinIndex " + dimIndex + " not defined");
-            }
+        public int[] getShape() {
+            return new int[] { xValues.length, yValues.length };
+        }
+
+        @Override
+        public int getDataCount() {
+            return xValues.length * yValues.length;
         }
 
         @Override
@@ -233,8 +225,34 @@ public class MountainRangeRendererSample extends Application {
         }
 
         @Override
-        public double getValue(int dimIndex, double x) {
+        public double getValue(int dimIndex, double... x) {
             return 0;
+        }
+
+        @Override
+        public double getGrid(int dimIndex, int index) {
+            switch (dimIndex) {
+            case DataSet.DIM_X:
+                return xValues[index];
+            case DataSet.DIM_Y:
+                return yValues[index];
+            default:
+                throw new IndexOutOfBoundsException("Dim index out of bounds 2 for 2d grid");
+            }
+        }
+
+        @Override
+        public double get(int dimIndex, int... indices) {
+            switch (dimIndex) {
+            case DataSet.DIM_X:
+                return xValues[indices[DataSet.DIM_X]];
+            case DataSet.DIM_Y:
+                return yValues[indices[DataSet.DIM_Y]];
+            case DataSet.DIM_Z:
+                return zValues[indices[DataSet.DIM_X] + xValues.length * indices[DataSet.DIM_Y]];
+            default:
+                throw new IndexOutOfBoundsException("Dim index out of bounds 3 for 2d grid");
+            }
         }
     }
 }

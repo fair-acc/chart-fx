@@ -13,8 +13,8 @@ import java.util.Arrays;
 import org.jtransforms.fft.DoubleFFT_1D;
 import org.junit.jupiter.api.Test;
 
-import de.gsi.dataset.DataSet;
 import de.gsi.dataset.DataSetMetaData;
+import de.gsi.dataset.GridDataSet;
 import de.gsi.dataset.spi.DataSetBuilder;
 import de.gsi.dataset.spi.DoubleDataSet;
 import de.gsi.dataset.spi.DoubleErrorDataSet;
@@ -44,12 +44,10 @@ class ShortTimeFourierTransformTest {
         sine.getAxisDescription(DIM_X).set("Time", "s");
         sine.getAxisDescription(DIM_Y).set("Voltage", "V");
 
-        final DataSet sineSpectrogram = ShortTimeFourierTransform.real(sine, null, nFft, step, Apodization.Hann,
-                Padding.ZERO, false, true);
+        final GridDataSet sineSpectrogram = ShortTimeFourierTransform.real(sine, null, nFft, step, Apodization.Hann, Padding.ZERO, false, true);
         // check dimensions
-        assertEquals(6, sineSpectrogram.getDataCount(DIM_Y));
-        assertEquals(nFft / 2, sineSpectrogram.getDataCount(DIM_X));
-        assertEquals(nFft / 2 * 6, sineSpectrogram.getDataCount(DIM_Z));
+        assertArrayEquals(new int[] { nFft / 2, 6 }, sineSpectrogram.getShape());
+        assertEquals(nFft / 2 * 6, sineSpectrogram.getDataCount());
 
         // check metadata
         assertEquals("STFT(" + sine.getName() + ")", sineSpectrogram.getName());
@@ -71,37 +69,35 @@ class ShortTimeFourierTransformTest {
         assertEquals(sine.getAxisDescription(DIM_Y).getUnit(), sineSpectrogram.getAxisDescription(DIM_Z).getUnit());
 
         // check spectrogram
-        assertArrayEquals(new double[] { 0, 1 * step * dt, 2 * step * dt, 3 * step * dt, 4 * step * dt, 5 * step * dt },
-                sineSpectrogram.getValues(DIM_Y), dt);
+        assertArrayEquals(new double[] { 0, 1 * step * dt, 2 * step * dt, 3 * step * dt, 4 * step * dt, 5 * step * dt }, sineSpectrogram.getGridValues(DIM_Y), dt);
         // get spectrogram raw data
         final double[][] zValues = getDataAsNestedArray(sineSpectrogram);
         final DoubleFFT_1D fastFourierTrafo = new DoubleFFT_1D(nFft);
         // compare to transform t = 0
-        final double[] vals1ref = Arrays.copyOfRange(sine.getYValues(), 0, nFft);
+        final double[] vals1ref = Arrays.copyOfRange(sine.getValues(DIM_Y), 0, nFft);
         Apodization.Hann.apodize(vals1ref);
         fastFourierTrafo.realForward(vals1ref);
         final double[] vals1refMag = SpectrumTools.computeMagnitudeSpectrum(vals1ref, true);
         assertArrayEquals(vals1refMag, zValues[0]);
         // compare to transform t = 2 * step * dt
-        final double[] vals2ref = Arrays.copyOfRange(sine.getYValues(), 2 * step, 2 * step + nFft);
+        final double[] vals2ref = Arrays.copyOfRange(sine.getValues(DIM_Y), 2 * step, 2 * step + nFft);
         Apodization.Hann.apodize(vals2ref);
         fastFourierTrafo.realForward(vals2ref);
         final double[] vals2refMag = SpectrumTools.computeMagnitudeSpectrum(vals2ref, true);
         assertArrayEquals(vals2refMag, zValues[2]);
         // compare to transform t = 5*step*dt
         final double[] vals3ref = new double[nFft];
-        System.arraycopy(sine.getYValues(), 5 * step, vals3ref, 0, nFft - 32 - step);
+        System.arraycopy(sine.getValues(DIM_Y), 5 * step, vals3ref, 0, nFft - 32 - step);
         Apodization.Hann.apodize(vals3ref);
         fastFourierTrafo.realForward(vals3ref);
         final double[] vals3refMag = SpectrumTools.computeMagnitudeSpectrum(vals3ref, true);
         assertArrayEquals(vals3refMag, zValues[5]);
 
         // compare to transform t = 5*step*dt with ZOH
-        ShortTimeFourierTransform.real(sine, sineSpectrogram, nFft, step, Apodization.Hamming, Padding.ZOH, false,
-                true);
+        ShortTimeFourierTransform.real(sine, sineSpectrogram, nFft, step, Apodization.Hamming, Padding.ZOH, false, true);
         final double[][] zValuesZOH = getDataAsNestedArray(sineSpectrogram);
         final double[] vals3refZOH = new double[nFft];
-        System.arraycopy(sine.getYValues(), 5 * step, vals3refZOH, 0, nFft - 32 - step);
+        System.arraycopy(sine.getValues(DIM_Y), 5 * step, vals3refZOH, 0, nFft - 32 - step);
         Arrays.fill(vals3refZOH, nFft - 32 - step, nFft, vals3refZOH[nFft - 32 - step - 1]);
         Apodization.Hamming.apodize(vals3refZOH);
         fastFourierTrafo.realForward(vals3refZOH);
@@ -109,13 +105,12 @@ class ShortTimeFourierTransformTest {
         assertArrayEquals(zValuesZOH[5], vals3refMagZOH);
 
         // compare to transform t = 5*step*dt with ZOH
-        final DataSet sineSpectrogramMirror = ShortTimeFourierTransform.real(sine, null, nFft, step,
-                Apodization.Rectangular, Padding.MIRROR, true, false);
+        final GridDataSet sineSpectrogramMirror = ShortTimeFourierTransform.real(sine, null, nFft, step, Apodization.Rectangular, Padding.MIRROR, true, false);
         final double[][] zValuesMirror = getDataAsNestedArray(sineSpectrogramMirror);
         final double[] vals3refMirror = new double[nFft];
-        System.arraycopy(sine.getYValues(), 5 * step, vals3refMirror, 0, nFft - 32 - step);
+        System.arraycopy(sine.getValues(DIM_Y), 5 * step, vals3refMirror, 0, nFft - 32 - step);
         for (int i = 0; i < vals3refMirror.length - nFft + 32 + step; i++) {
-            vals3refMirror[nFft - 32 - step + i] = sine.getYValues()[5 * step + nFft - 32 - step - i - 1];
+            vals3refMirror[nFft - 32 - step + i] = sine.getValues(DIM_Y)[5 * step + nFft - 32 - step - i - 1];
         }
         Apodization.Rectangular.apodize(vals2ref);
         fastFourierTrafo.realForward(vals3refMirror);
@@ -123,25 +118,18 @@ class ShortTimeFourierTransformTest {
         assertArrayEquals(zValuesMirror[5], vals3refMagMirror);
 
         // perform different sized Transforms
-        ShortTimeFourierTransform.real(sine, sineSpectrogram, nFft, 2 * step, Apodization.Rectangular, Padding.MIRROR,
-                true, false);
-        assertEquals(3, sineSpectrogram.getDataCount(DIM_Y));
-        assertEquals(nFft / 2, sineSpectrogram.getDataCount(DIM_X));
+        ShortTimeFourierTransform.real(sine, sineSpectrogram, nFft, 2 * step, Apodization.Rectangular, Padding.MIRROR, true, false);
+        assertArrayEquals(new int[] { nFft / 2, 3 }, sineSpectrogram.getShape());
 
-        ShortTimeFourierTransform.real(sine, sineSpectrogram, 2 * nFft, 2 * step, Apodization.Rectangular,
-                Padding.MIRROR, true, false);
-        assertEquals(3, sineSpectrogram.getDataCount(DIM_Y));
-        assertEquals(nFft, sineSpectrogram.getDataCount(DIM_X));
+        ShortTimeFourierTransform.real(sine, sineSpectrogram, 2 * nFft, 2 * step, Apodization.Rectangular, Padding.MIRROR, true, false);
+        assertArrayEquals(new int[] { nFft, 3 }, sineSpectrogram.getShape());
 
         // test empty input dataSet (inplace and non-inplace)
-        ShortTimeFourierTransform.real(new DoubleDataSet("empty"), sineSpectrogram, 2 * nFft, 2 * step,
-                Apodization.Rectangular, Padding.MIRROR, true, false);
-        assertEquals(0, sineSpectrogram.getDataCount(DIM_Y));
-        assertEquals(0, sineSpectrogram.getDataCount(DIM_X));
-        final DataSet emptySpectrogram = ShortTimeFourierTransform.real(new DoubleDataSet("empty"), null, 2 * nFft,
-                2 * step, Apodization.Rectangular, Padding.MIRROR, true, false);
-        assertEquals(0, emptySpectrogram.getDataCount(DIM_Y));
-        assertEquals(0, emptySpectrogram.getDataCount(DIM_X));
+        ShortTimeFourierTransform.real(new DoubleDataSet("empty"), sineSpectrogram, 2 * nFft, 2 * step, Apodization.Rectangular, Padding.MIRROR, true, false);
+        assertArrayEquals(new int[] { 0, 0 }, sineSpectrogram.getShape());
+        final GridDataSet emptySpectrogram = ShortTimeFourierTransform.real(new DoubleDataSet("empty"), null, 2 * nFft, 2 * step, Apodization.Rectangular,
+                Padding.MIRROR, true, false);
+        assertArrayEquals(new int[] { 0, 0 }, emptySpectrogram.getShape());
 
         // test unconforming dataSets
         assertThrows(IllegalArgumentException.class,
@@ -154,12 +142,12 @@ class ShortTimeFourierTransformTest {
      * @param input A 3 dimensional DataSet
      * @return the transposed array content
      */
-    private static double[][] getDataAsNestedArray(final DataSet input) {
+    private static double[][] getDataAsNestedArray(final GridDataSet input) {
         if (input == null || input.getDataCount() == 0) {
             return new double[0][0];
         }
-        int nx = input.getDataCount(DIM_X);
-        int ny = input.getDataCount(DIM_Y);
+        int nx = input.getShape(DIM_X);
+        int ny = input.getShape(DIM_Y);
         final double[][] output = new double[ny][nx];
         for (int i = 0; i < nx; i++) {
             for (int j = 0; j < ny; j++) {
@@ -191,12 +179,10 @@ class ShortTimeFourierTransformTest {
         sine.getAxisDescription(DIM_X).set("Time", "s");
         sine.getAxisDescription(DIM_Y).set("Voltage", "V");
 
-        final DataSet sineSpectrogram = ShortTimeFourierTransform.complex(sine, null, nFft, step, apodization,
-                padding, false, true);
+        final GridDataSet sineSpectrogram = ShortTimeFourierTransform.complex(sine, null, nFft, step, apodization, padding, false, true);
         // check dimensions
-        assertEquals(6, sineSpectrogram.getDataCount(DIM_Y));
-        assertEquals(nFft, sineSpectrogram.getDataCount(DIM_X));
-        assertEquals(nFft * 6, sineSpectrogram.getDataCount(DIM_Z));
+        assertArrayEquals(new int[] { nFft, 6 }, sineSpectrogram.getShape());
+        assertEquals(nFft * 6, sineSpectrogram.getDataCount());
 
         // check metadata
         assertEquals("STFT(" + sine.getName() + ")", sineSpectrogram.getName());
@@ -216,8 +202,7 @@ class ShortTimeFourierTransformTest {
         assertEquals(sine.getAxisDescription(DIM_Y).getUnit(), sineSpectrogram.getAxisDescription(DIM_Z).getUnit());
 
         // check spectrogram
-        assertArrayEquals(new double[] { 0, 1 * step * dt, 2 * step * dt, 3 * step * dt, 4 * step * dt, 5 * step * dt },
-                sineSpectrogram.getValues(DIM_Y), dt);
+        assertArrayEquals(new double[] { 0, 1 * step * dt, 2 * step * dt, 3 * step * dt, 4 * step * dt, 5 * step * dt }, sineSpectrogram.getGridValues(DIM_Y), dt);
         // get spectrogram raw data
         final double[][] zValues = getDataAsNestedArray(sineSpectrogram);
         final DoubleFFT_1D fastFourierTrafo = new DoubleFFT_1D(nFft);
@@ -228,15 +213,13 @@ class ShortTimeFourierTransformTest {
         final double[] vals1refMag = alignSpectrum(SpectrumTools.computeMagnitudeSpectrum(vals1ref, true));
         assertArrayEquals(vals1refMag, zValues[0]);
         // compare to transform t = 2 * step * dt
-        final double[] vals2ref = getStridedComplex(sine.getValues(DIM_Y), sine.getValues(DIM_Z), 2 * step,
-                2 * step + nFft);
+        final double[] vals2ref = getStridedComplex(sine.getValues(DIM_Y), sine.getValues(DIM_Z), 2 * step, 2 * step + nFft);
         ShortTimeFourierTransform.apodizeComplex(vals2ref, Apodization.Hann);
         fastFourierTrafo.complexForward(vals2ref);
         final double[] vals2refMag = alignSpectrum(SpectrumTools.computeMagnitudeSpectrum(vals2ref, true));
         assertArrayEquals(vals2refMag, zValues[2]);
         // compare to transform t = d5 * step * dt
-        final double[] vals3refstart = getStridedComplex(sine.getValues(DIM_Y), sine.getValues(DIM_Z), 5 * step,
-                sine.getDataCount());
+        final double[] vals3refstart = getStridedComplex(sine.getValues(DIM_Y), sine.getValues(DIM_Z), 5 * step, sine.getDataCount());
         final double[] vals3ref = new double[nFft * 2];
         System.arraycopy(vals3refstart, 0, vals3ref, 0, vals3refstart.length);
         ShortTimeFourierTransform.apodizeComplex(vals3ref, Apodization.Hann);
@@ -245,8 +228,7 @@ class ShortTimeFourierTransformTest {
         assertArrayEquals(vals3refMag, zValues[5]);
 
         // compare to transform t = 5*step*dt with ZOH
-        ShortTimeFourierTransform.complex(sine, sineSpectrogram, nFft, step, Apodization.Hamming, Padding.ZOH, false,
-                true);
+        ShortTimeFourierTransform.complex(sine, sineSpectrogram, nFft, step, Apodization.Hamming, Padding.ZOH, false, true);
         final double[][] zValuesZOH = getDataAsNestedArray(sineSpectrogram);
 
         final double[] vals3refZOH = new double[nFft * 2];
@@ -263,8 +245,7 @@ class ShortTimeFourierTransformTest {
         assertArrayEquals(zValuesZOH[5], vals3refMagZOH);
 
         // compare to transform t = 5*step*dt with ZOH
-        final DataSet sineSpectrogramMirror = ShortTimeFourierTransform.complex(sine, null, nFft, step,
-                Apodization.Rectangular, Padding.MIRROR, true, false);
+        final GridDataSet sineSpectrogramMirror = ShortTimeFourierTransform.complex(sine, null, nFft, step, Apodization.Rectangular, Padding.MIRROR, true, false);
         final double[][] zValuesMirror = getDataAsNestedArray(sineSpectrogramMirror);
         final double[] vals3refMirror = new double[nFft * 2];
         System.arraycopy(vals3refstart, 0, vals3refMirror, 0, vals3refstart.length);
@@ -274,30 +255,23 @@ class ShortTimeFourierTransformTest {
         }
         ShortTimeFourierTransform.apodizeComplex(vals3refMirror, Apodization.Rectangular);
         fastFourierTrafo.complexForward(vals3refMirror);
-        final double[] vals3refMagMirror = alignSpectrum(
-                SpectrumTools.computeMagnitudeSpectrum_dB(vals3refMirror, false));
+        final double[] vals3refMagMirror = alignSpectrum(SpectrumTools.computeMagnitudeSpectrum_dB(vals3refMirror, false));
         assertArrayEquals(zValuesMirror[5], vals3refMagMirror);
 
         // perform different sized Transforms
-        ShortTimeFourierTransform.complex(sine, sineSpectrogram, nFft, 2 * step, Apodization.Rectangular,
-                Padding.MIRROR, true, false);
-        assertEquals(3, sineSpectrogram.getDataCount(DIM_Y));
-        assertEquals(nFft, sineSpectrogram.getDataCount(DIM_X));
+        ShortTimeFourierTransform.complex(sine, sineSpectrogram, nFft, 2 * step, Apodization.Rectangular, Padding.MIRROR, true, false);
+        assertArrayEquals(new int[] { nFft, 3 }, sineSpectrogram.getShape());
 
-        ShortTimeFourierTransform.complex(sine, sineSpectrogram, 2 * nFft, 2 * step, Apodization.Rectangular,
-                Padding.MIRROR, true, false);
-        assertEquals(3, sineSpectrogram.getDataCount(DIM_Y));
-        assertEquals(nFft * 2, sineSpectrogram.getDataCount(DIM_X));
+        ShortTimeFourierTransform.complex(sine, sineSpectrogram, 2 * nFft, 2 * step, Apodization.Rectangular, Padding.MIRROR, true, false);
+        assertArrayEquals(new int[] { nFft * 2, 3 }, sineSpectrogram.getShape());
 
         // test empty input dataSet (inplace and non-inplace)
-        ShortTimeFourierTransform.complex(new MultiDimDoubleDataSet("empty", 3), sineSpectrogram, 2 * nFft, 2 * step,
+        ShortTimeFourierTransform.complex(new MultiDimDoubleDataSet("empty", 3), sineSpectrogram, 2 * nFft, 2 * step, Apodization.Rectangular, Padding.MIRROR,
+                true, false);
+        assertArrayEquals(new int[] { 0, 0 }, sineSpectrogram.getShape());
+        final GridDataSet emptySpectrogram = ShortTimeFourierTransform.complex(new MultiDimDoubleDataSet("empty", 3), null, 2 * nFft, 2 * step,
                 Apodization.Rectangular, Padding.MIRROR, true, false);
-        assertEquals(0, sineSpectrogram.getDataCount(DIM_Y));
-        assertEquals(0, sineSpectrogram.getDataCount(DIM_X));
-        final DataSet emptySpectrogram = ShortTimeFourierTransform.complex(new MultiDimDoubleDataSet("empty", 3), null,
-                2 * nFft, 2 * step, Apodization.Rectangular, Padding.MIRROR, true, false);
-        assertEquals(0, emptySpectrogram.getDataCount(DIM_Y));
-        assertEquals(0, emptySpectrogram.getDataCount(DIM_X));
+        assertArrayEquals(new int[] { 0, 0 }, emptySpectrogram.getShape());
 
         // test non-conforming dataSets
         assertThrows(IllegalArgumentException.class, () -> ShortTimeFourierTransform.complex( //
@@ -311,13 +285,21 @@ class ShortTimeFourierTransformTest {
         // test strided complex low-level method
         double[] real = sine.getValues(DIM_Y);
         double[] imag = sine.getValues(DIM_Z);
-        assertArrayEquals(ShortTimeFourierTransform.complex(getStridedComplex(real, imag, 0, real.length), null, nFft, step, apodization, Padding.MIRROR, dbScale, truncateDCNy), //
+        assertArrayEquals(
+                ShortTimeFourierTransform.complex(getStridedComplex(real, imag, 0, real.length), null, nFft, step, apodization, Padding.MIRROR, dbScale,
+                        truncateDCNy), //
                 ShortTimeFourierTransform.complex(real, imag, null, nFft, step, apodization, Padding.MIRROR, dbScale, truncateDCNy));
-        assertArrayEquals(ShortTimeFourierTransform.complex(getStridedComplex(real, imag, 0, real.length), null, nFft, step, apodization, Padding.ZERO, dbScale, truncateDCNy), //
+        assertArrayEquals(
+                ShortTimeFourierTransform.complex(getStridedComplex(real, imag, 0, real.length), null, nFft, step, apodization, Padding.ZERO, dbScale,
+                        truncateDCNy), //
                 ShortTimeFourierTransform.complex(real, imag, null, nFft, step, apodization, Padding.ZERO, dbScale, truncateDCNy));
-        assertArrayEquals(ShortTimeFourierTransform.complex(getStridedComplex(real, imag, 0, real.length), null, nFft, step, apodization, Padding.ZOH, dbScale, truncateDCNy), //
+        assertArrayEquals(
+                ShortTimeFourierTransform.complex(getStridedComplex(real, imag, 0, real.length), null, nFft, step, apodization, Padding.ZOH, dbScale,
+                        truncateDCNy), //
                 ShortTimeFourierTransform.complex(real, imag, null, nFft, step, apodization, Padding.ZOH, dbScale, truncateDCNy));
-        assertArrayEquals(ShortTimeFourierTransform.complex(getStridedComplex(real, imag, 0, real.length), null, nFft, step, apodization, Padding.ZOH, true, truncateDCNy), //
+        assertArrayEquals(
+                ShortTimeFourierTransform.complex(getStridedComplex(real, imag, 0, real.length), null, nFft, step, apodization, Padding.ZOH, true,
+                        truncateDCNy), //
                 ShortTimeFourierTransform.complex(real, imag, null, nFft, step, apodization, Padding.ZOH, true, truncateDCNy));
     }
 
@@ -331,8 +313,7 @@ class ShortTimeFourierTransformTest {
         return result;
     }
 
-    private static double[] getStridedComplex(final double[] real, final double[] imag, final int start,
-            final int end) {
+    private static double[] getStridedComplex(final double[] real, final double[] imag, final int start, final int end) {
         final int len = end - start;
         final double[] res = new double[len * 2];
         for (int i = 0; i < len; i++) {
