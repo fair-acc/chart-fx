@@ -1,4 +1,4 @@
-package de.gsi.dataset.utils.serializer;
+package de.gsi.dataset.serializer.spi.iobuffer;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Test;
 import de.gsi.dataset.DataSet;
 import de.gsi.dataset.serializer.spi.BinarySerialiser;
 import de.gsi.dataset.serializer.spi.FastByteBuffer;
-import de.gsi.dataset.serializer.spi.iobuffer.DataSetSerialiser;
 import de.gsi.dataset.spi.AbstractDataSet;
 import de.gsi.dataset.spi.DefaultErrorDataSet;
 import de.gsi.dataset.spi.DoubleDataSet;

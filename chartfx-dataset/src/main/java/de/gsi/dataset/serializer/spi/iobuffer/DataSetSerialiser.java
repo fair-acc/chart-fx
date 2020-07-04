@@ -78,7 +78,7 @@ public class DataSetSerialiser { // NOPMD
             throw new InputMismatchException(fieldName + " is type " + fieldHeader.get().getDataType() + " vs. required type " + Arrays.asList(requireDataTypes).toString());
         }
 
-        final long dataPosition = fieldHeader.get().getDataBufferPosition();
+        final long dataPosition = fieldHeader.get().getDataStartOffset();
         ioSerialiser.getBuffer().position(dataPosition);
         return fieldHeader;
     }
@@ -135,7 +135,7 @@ public class DataSetSerialiser { // NOPMD
         if (dimension < 0) {
             return; // couldn't parse dimIndex
         }
-        ioSerialiser.getBuffer().position(fieldDescription.getDataBufferPosition());
+        ioSerialiser.getBuffer().position(fieldDescription.getDataStartOffset());
         switch (parsed[1]) {
         case MIN:
             builder.setAxisMin(dimension, ioSerialiser.getDouble());
@@ -196,7 +196,7 @@ public class DataSetSerialiser { // NOPMD
             final String fieldName) {
         int dimIndex = getDimIndex(fieldName, ARRAY_PREFIX);
         if (dimIndex >= 0) {
-            ioSerialiser.getBuffer().position(fieldDescription.getDataBufferPosition());
+            ioSerialiser.getBuffer().position(fieldDescription.getDataStartOffset());
             builder.setValues(dimIndex, ioSerialiser.getDoubleArray(fieldDescription.getDataType()));
         }
     }
@@ -204,7 +204,7 @@ public class DataSetSerialiser { // NOPMD
     private void readNegError(final IoSerialiser ioSerialiser, final DataSetBuilder builder, FieldDescription fieldDescription, final String fieldName) {
         int dimIndex = getDimIndex(fieldName, EP_PREFIX);
         if (dimIndex >= 0) {
-            ioSerialiser.getBuffer().position(fieldDescription.getDataBufferPosition());
+            ioSerialiser.getBuffer().position(fieldDescription.getDataStartOffset());
             builder.setNegError(dimIndex, ioSerialiser.getDoubleArray(fieldDescription.getDataType()));
         }
     }
@@ -213,7 +213,7 @@ public class DataSetSerialiser { // NOPMD
             final String fieldName) {
         int dimIndex = getDimIndex(fieldName, EN_PREFIX);
         if (dimIndex >= 0) {
-            ioSerialiser.getBuffer().position(fieldDescription.getDataBufferPosition());
+            ioSerialiser.getBuffer().position(fieldDescription.getDataStartOffset());
             builder.setPosError(dimIndex, ioSerialiser.getDoubleArray(fieldDescription.getDataType()));
         }
     }
@@ -286,7 +286,8 @@ public class DataSetSerialiser { // NOPMD
             }
         }
         if (!labelMap.isEmpty()) {
-            ioSerialiser.put(DATA_LABELS, labelMap);
+            ioSerialiser.putFieldHeader(DATA_LABELS, DataType.MAP);
+            ioSerialiser.put(labelMap);
         }
 
         final Map<Integer, String> styleMap = new ConcurrentHashMap<>();
@@ -297,7 +298,8 @@ public class DataSetSerialiser { // NOPMD
             }
         }
         if (!styleMap.isEmpty()) {
-            ioSerialiser.put(DATA_STYLES, styleMap);
+            ioSerialiser.putFieldHeader(DATA_STYLES, DataType.MAP);
+            ioSerialiser.put(styleMap);
         }
     }
 
@@ -338,8 +340,10 @@ public class DataSetSerialiser { // NOPMD
 
     protected void writeHeaderDataToStream(final DataSet dataSet) {
         // common header data
-        ioSerialiser.put(DATA_SET_NAME, dataSet.getName());
-        ioSerialiser.put(DIMENSIONS, dataSet.getDimension());
+        ioSerialiser.putFieldHeader(DATA_SET_NAME, DataType.STRING);
+        ioSerialiser.put(dataSet.getName());
+        ioSerialiser.putFieldHeader(DIMENSIONS, DataType.INT);
+        ioSerialiser.put(dataSet.getDimension());
         final List<AxisDescription> axisDescriptions = dataSet.getAxisDescriptions();
         StringBuilder builder = new StringBuilder(60);
         for (int i = 0; i < axisDescriptions.size(); i++) {
@@ -354,10 +358,14 @@ public class DataSetSerialiser { // NOPMD
             builder.setLength(0);
             final String maxName = builder.append(prefix).append(MAX).toString();
 
-            ioSerialiser.put(name, dataSet.getAxisDescription(i).getName());
-            ioSerialiser.put(unit, dataSet.getAxisDescription(i).getUnit());
-            ioSerialiser.put(minName, dataSet.getAxisDescription(i).getMin());
-            ioSerialiser.put(maxName, dataSet.getAxisDescription(i).getMax());
+            ioSerialiser.putFieldHeader(name, DataType.STRING);
+            ioSerialiser.put(dataSet.getAxisDescription(i).getName());
+            ioSerialiser.putFieldHeader(unit, DataType.STRING);
+            ioSerialiser.put(dataSet.getAxisDescription(i).getUnit());
+            ioSerialiser.putFieldHeader(minName, DataType.DOUBLE);
+            ioSerialiser.put(dataSet.getAxisDescription(i).getMin());
+            ioSerialiser.putFieldHeader(maxName, DataType.DOUBLE);
+            ioSerialiser.put(dataSet.getAxisDescription(i).getMax());
         }
     }
 
@@ -367,10 +375,14 @@ public class DataSetSerialiser { // NOPMD
         }
         final DataSetMetaData metaDataSet = (DataSetMetaData) dataSet;
 
-        ioSerialiser.put(INFO_LIST, metaDataSet.getInfoList().toArray(new String[0]));
-        ioSerialiser.put(WARNING_LIST, metaDataSet.getWarningList().toArray(new String[0]));
-        ioSerialiser.put(ERROR_LIST, metaDataSet.getErrorList().toArray(new String[0]));
-        ioSerialiser.put(META_INFO, metaDataSet.getMetaInfo());
+        ioSerialiser.putFieldHeader(INFO_LIST, DataType.STRING_ARRAY);
+        ioSerialiser.put(metaDataSet.getInfoList().toArray(new String[0]));
+        ioSerialiser.putFieldHeader(WARNING_LIST, DataType.STRING_ARRAY);
+        ioSerialiser.put(metaDataSet.getWarningList().toArray(new String[0]));
+        ioSerialiser.putFieldHeader(ERROR_LIST, DataType.STRING_ARRAY);
+        ioSerialiser.put(metaDataSet.getErrorList().toArray(new String[0]));
+        ioSerialiser.putFieldHeader(META_INFO, DataType.MAP);
+        ioSerialiser.put(metaDataSet.getMetaInfo());
     }
 
     /**
@@ -380,7 +392,8 @@ public class DataSetSerialiser { // NOPMD
         final int nDim = dataSet.getDimension();
         for (int dimIndex = 0; dimIndex < nDim; dimIndex++) {
             final int nsamples = dataSet.getDataCount(dimIndex);
-            ioSerialiser.put(ARRAY_PREFIX + dimIndex, toFloats(dataSet.getValues(dimIndex)), new int[] { nsamples });
+            ioSerialiser.putFieldHeader(ARRAY_PREFIX + dimIndex, DataType.FLOAT_ARRAY);
+            ioSerialiser.put(toFloats(dataSet.getValues(dimIndex)), new int[] { nsamples });
         }
 
         if (!(dataSet instanceof DataSetError)) {
@@ -395,11 +408,14 @@ public class DataSetSerialiser { // NOPMD
             case NO_ERROR:
                 break;
             case SYMMETRIC:
-                ioSerialiser.put(EP_PREFIX + dimIndex, toFloats(ds.getErrorsPositive(dimIndex)), new int[] { nsamples });
+                ioSerialiser.putFieldHeader(EP_PREFIX + dimIndex, DataType.FLOAT_ARRAY);
+                ioSerialiser.put(toFloats(ds.getErrorsPositive(dimIndex)), new int[] { nsamples });
                 break;
             case ASYMMETRIC:
-                ioSerialiser.put(EN_PREFIX + dimIndex, toFloats(ds.getErrorsNegative(dimIndex)), new int[] { nsamples });
-                ioSerialiser.put(EP_PREFIX + dimIndex, toFloats(ds.getErrorsPositive(dimIndex)), new int[] { nsamples });
+                ioSerialiser.putFieldHeader(EN_PREFIX + dimIndex, DataType.FLOAT_ARRAY);
+                ioSerialiser.put(toFloats(ds.getErrorsNegative(dimIndex)), new int[] { nsamples });
+                ioSerialiser.putFieldHeader(EP_PREFIX + dimIndex, DataType.FLOAT_ARRAY);
+                ioSerialiser.put(toFloats(ds.getErrorsPositive(dimIndex)), new int[] { nsamples });
                 break;
             }
         }
@@ -412,7 +428,8 @@ public class DataSetSerialiser { // NOPMD
         final int nDim = dataSet.getDimension();
         for (int dimIndex = 0; dimIndex < nDim; dimIndex++) {
             final int nsamples = dataSet.getDataCount(dimIndex);
-            ioSerialiser.put(ARRAY_PREFIX + dimIndex, dataSet.getValues(dimIndex), new int[] { nsamples });
+            ioSerialiser.putFieldHeader(ARRAY_PREFIX + dimIndex, DataType.DOUBLE_ARRAY);
+            ioSerialiser.put(dataSet.getValues(dimIndex), new int[] { nsamples });
         }
         if (!(dataSet instanceof DataSetError)) {
             return; // data set does not have any error definition
@@ -422,14 +439,14 @@ public class DataSetSerialiser { // NOPMD
             final int nsamples = dataSet.getDataCount(dimIndex);
             switch (ds.getErrorType(dimIndex)) {
             case SYMMETRIC:
-                ioSerialiser.put(EP_PREFIX + dimIndex, ds.getErrorsPositive(dimIndex),
-                        new int[] { nsamples });
+                ioSerialiser.putFieldHeader(EP_PREFIX + dimIndex, DataType.DOUBLE_ARRAY);
+                ioSerialiser.put(ds.getErrorsPositive(dimIndex), new int[] { nsamples });
                 break;
             case ASYMMETRIC:
-                ioSerialiser.put(EN_PREFIX + dimIndex, ds.getErrorsNegative(dimIndex),
-                        new int[] { nsamples });
-                ioSerialiser.put(EP_PREFIX + dimIndex, ds.getErrorsPositive(dimIndex),
-                        new int[] { nsamples });
+                ioSerialiser.putFieldHeader(EN_PREFIX + dimIndex, DataType.DOUBLE_ARRAY);
+                ioSerialiser.put(ds.getErrorsNegative(dimIndex), new int[] { nsamples });
+                ioSerialiser.putFieldHeader(EP_PREFIX + dimIndex, DataType.DOUBLE_ARRAY);
+                ioSerialiser.put(ds.getErrorsPositive(dimIndex), new int[] { nsamples });
                 break;
             case NO_ERROR:
             default:

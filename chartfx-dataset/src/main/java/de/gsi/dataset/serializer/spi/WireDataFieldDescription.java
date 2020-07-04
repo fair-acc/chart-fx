@@ -2,7 +2,6 @@ package de.gsi.dataset.serializer.spi;
 
 import java.nio.CharBuffer;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -23,47 +22,32 @@ public class WireDataFieldDescription implements FieldDescription {
     private final String fieldName;
     private final String fieldNameRelative;
     private final DataType dataType;
-    private final int[] dimensions;
-    private final long positionBuffer;
-    private final long expectedNumberOfBytes;
-
-    private Optional<FieldDescription> parent; // N.B. was 'final' TODO: investigate to keep last root once BinarySerialiser is refactored to a non-static class
-
+    private final long dataStartOffset;
+    private final long dataSize;
     private final List<FieldDescription> children = new ArrayList<>();
+    private FieldDescription parent; // N.B. was 'final' TODO: investigate to keep last root once BinarySerialiser is refactored to a non-static class
 
     /**
      * Constructs new serializer field header
      * 
      * @param parent the optional parent field header (for cascaded objects)
+     * @param fieldNameHashCode the fairly-unique hash-code of the field name,
+     *                         N.B. checked during 1st iteration against fieldName, if no collisions are present then
+     *                         this check is being suppressed
      * @param fieldName the clear text field name description
      * @param dataType the data type of that field
-     * @param dims array with length indicating the number-of-dimensions and indices the length of each dimension
-     * @param positionBuffer the position from which the actual data can be parsed onwards
-     * @param expectedNumberOfBytes the expected number of bytes to skip the data block
+     * @param dataStartOffset the position from which the actual data can be parsed onwards
+     * @param dataSize the expected number of bytes to skip the data block
      */
-    public WireDataFieldDescription(final WireDataFieldDescription parent, final String fieldName, final DataType dataType, final int[] dims, final long positionBuffer, final long expectedNumberOfBytes) {
-        this.parent = parent == null ? Optional.empty() : Optional.of(parent);
-        this.hashCode = fieldName.hashCode();
+    public WireDataFieldDescription(final WireDataFieldDescription parent, final int fieldNameHashCode, final String fieldName, final DataType dataType, final long dataStartOffset, final long dataSize) {
+        this.parent = parent;
+        this.hashCode = fieldNameHashCode;
         this.fieldName = fieldName;
         this.dataType = dataType;
-        dimensions = Arrays.copyOf(dims, dims.length);
-        this.positionBuffer = positionBuffer;
-        this.expectedNumberOfBytes = expectedNumberOfBytes;
+        this.dataStartOffset = dataStartOffset;
+        this.dataSize = dataSize;
 
-        fieldNameRelative = this.parent.map(fieldDescription -> fieldDescription.getFieldNameRelative() + "." + fieldName).orElse(fieldName);
-    }
-
-    /**
-     * Constructs new serializer field header
-     * 
-     * @param fieldName the clear text field name description
-     * @param dataType the data type of that field
-     * @param dims array with length indicating the number-of-dimensions and indices the length of each dimension
-     * @param positionBuffer the position from which the actual data can be parsed onwards
-     * @param expectedNumberOfBytes the expected number of bytes to skip the data block
-     */
-    public WireDataFieldDescription(final String fieldName, final DataType dataType, final int[] dims, final long positionBuffer, final long expectedNumberOfBytes) {
-        this(null, fieldName, dataType, dims, positionBuffer, expectedNumberOfBytes);
+        fieldNameRelative = this.parent == null ? fieldName : parent.getFieldNameRelative() + "." + fieldName;
     }
 
     @Override
@@ -83,15 +67,14 @@ public class WireDataFieldDescription implements FieldDescription {
 
     @Override
     public Optional<FieldDescription> findChildField(String fieldName) {
-        final int hashCode = fieldName.hashCode();
-        //return fieldDescriptionList.stream().filter(p -> p.hashCode() == hashCode && p.getFieldName().equals(fieldName)).findFirst();
+        final int childHashCode = fieldName.hashCode();
         for (int i = 0; i < children.size(); i++) {
             final FieldDescription field = children.get(i);
             final String name = field.getFieldName();
             if (name == fieldName) { // NOPMD early return if the same String object reference
                 return Optional.of(field);
             }
-            if (field.hashCode() == hashCode && name.equals(fieldName)) {
+            if (field.hashCode() == childHashCode && name.equals(fieldName)) {
                 return Optional.of(field);
             }
         }
@@ -104,28 +87,18 @@ public class WireDataFieldDescription implements FieldDescription {
     }
 
     @Override
-    public long getDataBufferPosition() {
-        return positionBuffer;
+    public long getDataSize() {
+        return dataSize;
     }
 
     @Override
-    public int getDataDimension() {
-        return dimensions.length;
-    }
-
-    @Override
-    public int[] getDataDimensions() {
-        return dimensions;
+    public long getDataStartOffset() {
+        return dataStartOffset;
     }
 
     @Override
     public DataType getDataType() {
         return dataType;
-    }
-
-    @Override
-    public long getExpectedNumberOfDataBytes() {
-        return expectedNumberOfBytes;
     }
 
     @Override
@@ -139,8 +112,17 @@ public class WireDataFieldDescription implements FieldDescription {
     }
 
     @Override
-    public Optional<FieldDescription> getParent() {
+    public FieldDescription getParent() {
         return parent;
+    }
+
+    void setParent(final WireDataFieldDescription parent) { // NOPMD - explicitly package private -> TODO: will be refactored
+        this.parent = parent;
+    }
+
+    @Override
+    public Class<?> getType() {
+        return dataType.getClassTypes().get(0);
     }
 
     @Override
@@ -150,8 +132,8 @@ public class WireDataFieldDescription implements FieldDescription {
 
     @Override
     public void printFieldStructure() {
-        if (parent.isPresent()) {
-            LOGGER.atInfo().addArgument(parent.get()).log("FielHeader structure (parent: {}):");
+        if (parent != null) {
+            LOGGER.atInfo().addArgument(parent).log("FielHeader structure (parent: {}):");
             printFieldStructure(this, 0);
         } else {
             LOGGER.atInfo().log("FielHeader structure (no parent):");
@@ -161,33 +143,11 @@ public class WireDataFieldDescription implements FieldDescription {
 
     @Override
     public String toString() {
-        if ((dimensions.length == 1) && (dimensions[0] == 1)) {
-            return String.format("[fieldName=%s, fieldType=%s]", fieldName, dataType.getAsString());
-        }
-
-        final StringBuilder builder = new StringBuilder(27);
-        builder.append("[fieldName=").append(fieldName).append(", fieldType=").append(dataType.getAsString()).append('[');
-        for (int i = 0; i < dimensions.length; i++) {
-            builder.append(dimensions[i]);
-            if (i < (dimensions.length - 1)) {
-                builder.append(',');
-            }
-        }
-        builder.append("]]");
-        return builder.toString();
-    }
-
-    @Override
-    public Class<?> getType() {
-        return dataType.getClassTypes().get(0);
-    }
-
-    void setParent(final WireDataFieldDescription parent) { // NOPMD - explicitly package private -> TODO: will be refactored
-        this.parent = Optional.of(parent);
+        return String.format("[fieldName=%s, fieldType=%s]", fieldName, dataType.getAsString());
     }
 
     protected static void printFieldStructure(final FieldDescription field, final int recursionLevel) {
-        final String mspace = spaces((recursionLevel) *indentationNumerOfSpace);
+        final String mspace = spaces((recursionLevel) *INDENTATION_NUMER_OF_SPACE);
         LOGGER.atInfo().addArgument(mspace).addArgument(field.toString()).log("{}{}");
         field.getChildren().forEach(f -> printFieldStructure(f, recursionLevel + 1));
     }

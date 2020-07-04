@@ -6,26 +6,23 @@ import de.gsi.dataset.serializer.spi.ProtocolInfo;
 import de.gsi.dataset.serializer.spi.WireDataFieldDescription;
 
 public interface IoSerialiser {
-    // TODO: needs to be modified/simplified
-    void adjustDataByteSizeBlock(final long sizeMarkerStart);
-
-    IoBuffer getBuffer();
-
-    void setBuffer(final IoBuffer buffer);
-
     ProtocolInfo checkHeaderInfo();
 
     boolean getBoolean();
 
     boolean[] getBooleanArray();
 
+    IoBuffer getBuffer();
+
+    void setBuffer(final IoBuffer buffer);
+
     byte getByte();
 
     byte[] getByteArray();
 
-    char getCharacter();
-
     char[] getCharArray();
+
+    char getCharacter();
 
     <E> Collection<E> getCollection(Collection<E> collection);
 
@@ -71,75 +68,74 @@ public interface IoSerialiser {
 
     WireDataFieldDescription parseIoStream();
 
-    void put(String fieldName, boolean value);
+    void put(boolean value);
 
-    void put(String fieldName, boolean[] arrayValue);
+    void put(boolean[] arrayValue);
 
-    void put(String fieldName, boolean[] arrayValue,
+    void put(boolean[] arrayValue, int[] dims);
+
+    void put(byte value);
+
+    void put(byte[] arrayValue);
+
+    void put(byte[] arrayValue, int[] dims);
+
+    void put(char value);
+
+    void put(char[] arrayValue);
+
+    void put(char[] arrayValue, int[] dims);
+
+    <E> void put(Collection<E> collection);
+
+    void put(double value);
+
+    void put(double[] arrayValue);
+
+    void put(double[] arrayValue, int[] dims);
+
+    void put(Enum<?> enumeration);
+
+    void put(float value);
+
+    void put(float[] arrayValue);
+
+    void put(float[] arrayValue, int[] dims);
+
+    void put(int value);
+
+    void put(int[] arrayValue);
+
+    void put(int[] arrayValue, int[] dims);
+
+    void put(long value);
+
+    void put(long[] arrayValue);
+
+    void put(long[] arrayValue, int[] dims);
+
+    <K, V> void put(Map<K, V> map);
+
+    void put(short value);
+
+    void put(short[] arrayValue);
+
+    void put(short[] arrayValue, // NOPMD
             int[] dims);
 
-    void put(String fieldName, byte value);
+    void put(String value);
 
-    void put(String fieldName, byte[] arrayValue);
+    void put(String[] arrayValue);
 
-    void put(String fieldName, byte[] arrayValue, int[] dims);
-
-    void put(String fieldName, char value);
-
-    void put(String fieldName, char[] arrayValue);
-
-    void put(String fieldName, char[] arrayValue, int[] dims);
-
-    <E> void put(String fieldName, Collection<E> collection);
-
-    void put(String fieldName, double value);
-
-    void put(String fieldName, double[] arrayValue);
-
-    void put(String fieldName, double[] arrayValue, int[] dims);
-
-    void put(String fieldName, Enum<?> enumeration);
-
-    void put(String fieldName, float value);
-
-    void put(String fieldName, float[] arrayValue);
-
-    void put(String fieldName, float[] arrayValue, int[] dims);
-
-    void put(String fieldName, int value);
-
-    void put(String fieldName, int[] arrayValue);
-
-    void put(String fieldName, int[] arrayValue, int[] dims);
-
-    void put(String fieldName, long value);
-
-    void put(String fieldName, long[] arrayValue);
-
-    void put(String fieldName, long[] arrayValue, int[] dims);
-
-    <K, V> void put(String fieldName, Map<K, V> map);
-
-    void put(String fieldName, short value);
-
-    void put(String fieldName, short[] arrayValue);
-
-    void put(String fieldName, short[] arrayValue, // NOPMD
-            int[] dims);
-
-    void put(String fieldName, String value);
-
-    void put(String fieldName, String[] arrayValue);
-
-    void put(String fieldName, String[] arrayValue, int[] dims);
-
-    long putArrayHeader(String fieldName, DataType dataType, int[] dims, int nElements);
+    void put(String[] arrayValue, int[] dims);
 
     void putEndMarker(String markerName);
 
-    void putFieldHeader(String fieldName, DataType dataType);
+    void putFieldHeader(final FieldDescription fieldDescription);
 
-    void putFieldHeader(String fieldName, DataType dataType, int additionalSize);
+    void putFieldHeader(final String fieldName, DataType dataType);
+
+    void putFieldHeader(final String fieldName, DataType dataType, int additionalSize);
 
     /**
      * Adds header and version information
@@ -147,4 +143,6 @@ public interface IoSerialiser {
     void putHeaderInfo();
 
     void putStartMarker(String markerName);
+
+    void updateDataEndMarker();
 }

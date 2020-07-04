@@ -52,11 +52,12 @@ public enum DataType {
     STRING_ARRAY(109, "string_array", "[java.lang.String", 1, Cat.ARRAY, String[].class),
 
     // complex objects
-    COLLECTION(200, "collection", "", 1, Cat.ARRAY, Collection.class),
     ENUM(201, "enum", "java.lang.Enum", 4, Cat.ARRAY, Enum.class),
     LIST(202, "list", "", 1, Cat.ARRAY, List.class),
-    MAP(203, "map", "", 1, Cat.ARRAY, Map.class), QUEUE(204, "queue", "", 1, Cat.ARRAY, Queue.class),
+    MAP(203, "map", "", 1, Cat.ARRAY, Map.class),
+    QUEUE(204, "queue", "", 1, Cat.ARRAY, Queue.class),
     SET(205, "set", "", 1, Cat.ARRAY, Set.class),
+    COLLECTION(200, "collection", "", 1, Cat.ARRAY, Collection.class),
 
     /** default for any other complex or object-type custom data structure, usually followed/refined 
      * by an additional user-provided custom type ID */
@@ -67,7 +68,7 @@ public enum DataType {
     // @formatter:on
 
     private final int uniqueID;
-    private final long primitiveSize;
+    private final int primitiveSize;
     private final String stringValue;
     private final String javaName;
     private final List<Class<?>> classTypes;
@@ -75,7 +76,7 @@ public enum DataType {
     private final boolean array;
     private final boolean object;
 
-    DataType(final int uniqueID, final String stringValue, final String javaName, final long primitiveSize,
+    DataType(final int uniqueID, final String stringValue, final String javaName, final int primitiveSize,
             final Cat type, final Class<?>... classType) {
         this.uniqueID = uniqueID;
         this.stringValue = stringValue;
@@ -123,7 +124,7 @@ public enum DataType {
         return javaName;
     }
 
-    public long getPrimitiveSize() {
+    public int getPrimitiveSize() {
         return primitiveSize;
     }
 
@@ -162,11 +163,16 @@ public enum DataType {
      * @return the matching data type
      */
     public static DataType fromClassType(final Class<?> classType) {
-        for (final DataType type : DataType.values()) {
-            if (type.getClassTypes().contains(classType)) {
-                return type;
+        for (final DataType dataType : DataType.values()) {
+            for (Class type : dataType.getClassTypes()) {
+                if (type.isAssignableFrom(classType)) {
+                    return dataType;
+                }
             }
         }
+
+        // unknown data type returning generic 'OTHER'
+        // return DataType.OTHER;
 
         throw new IllegalArgumentException("data type not implemented " + classType.getSimpleName());
     }

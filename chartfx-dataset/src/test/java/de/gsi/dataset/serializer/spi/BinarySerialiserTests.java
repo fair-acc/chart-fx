@@ -37,7 +37,7 @@ import de.gsi.dataset.utils.AssertUtils;
  */
 @SuppressWarnings("PMD.ExcessiveMethodLength")
 public class BinarySerialiserTests {
-    private static final int BUFFER_SIZE = 1000;
+    private static final int BUFFER_SIZE = 2000;
     private static final int ARRAY_DIM_1D = 1; // array dimension
 
     @DisplayName("basic primitive array writer tests")
@@ -54,40 +54,48 @@ public class BinarySerialiserTests {
 
         // add primitive array types
         positionBefore.add(buffer.position());
-        ioSerialiser.put("boolean", new boolean[] { true, false });
+        ioSerialiser.putFieldHeader("boolean", DataType.BOOL_ARRAY);
+        ioSerialiser.put(new boolean[] { true, false });
         positionAfter.add(buffer.position());
 
         positionBefore.add(buffer.position());
-        ioSerialiser.put("byte", new byte[] { (byte) 42, (byte) 42 });
+        ioSerialiser.putFieldHeader("byte", DataType.BYTE_ARRAY);
+        ioSerialiser.put(new byte[] { (byte) 42, (byte) 42 });
         positionAfter.add(buffer.position());
 
         positionBefore.add(buffer.position());
-        ioSerialiser.put("short", new short[] { (short) 43, (short) 43 });
+        ioSerialiser.putFieldHeader("short", DataType.SHORT_ARRAY);
+        ioSerialiser.put(new short[] { (short) 43, (short) 43 });
         positionAfter.add(buffer.position());
 
         positionBefore.add(buffer.position());
-        ioSerialiser.put("int", new int[] { 44, 44 });
+        ioSerialiser.putFieldHeader("int", DataType.INT_ARRAY);
+        ioSerialiser.put(new int[] { 44, 44 });
         positionAfter.add(buffer.position());
 
         positionBefore.add(buffer.position());
-        ioSerialiser.put("long", new long[] { (long) 45, (long) 45 });
+        ioSerialiser.putFieldHeader("long", DataType.LONG_ARRAY);
+        ioSerialiser.put(new long[] { (long) 45, (long) 45 });
         positionAfter.add(buffer.position());
 
         positionBefore.add(buffer.position());
-        ioSerialiser.put("float", new float[] { 1.0f, 1.0f });
+        ioSerialiser.putFieldHeader("float", DataType.FLOAT_ARRAY);
+        ioSerialiser.put(new float[] { 1.0f, 1.0f });
         positionAfter.add(buffer.position());
 
         positionBefore.add(buffer.position());
-        ioSerialiser.put("double", new double[] { 3.0, 3.0 });
+        ioSerialiser.putFieldHeader("double", DataType.DOUBLE_ARRAY);
+        ioSerialiser.put(new double[] { 3.0, 3.0 });
         positionAfter.add(buffer.position());
 
         positionBefore.add(buffer.position());
-        ioSerialiser.put("string", new String[] { "test", "test" });
+        ioSerialiser.putFieldHeader("string", DataType.STRING_ARRAY);
+        ioSerialiser.put(new String[] { "test", "test" });
         positionAfter.add(buffer.position());
 
         WireDataFieldDescription header;
         int positionAfterFieldHeader;
-        int skipNBytes;
+        long skipNBytes;
         int[] dims;
         // check primitive types
         buffer.reset();
@@ -98,13 +106,15 @@ public class BinarySerialiserTests {
         header = ioSerialiser.getFieldHeader();
         assertEquals("boolean", header.getFieldName(), "boolean field name retrieval");
         positionAfterFieldHeader = (int) buffer.position(); // actual buffer position after having read the field header
-        skipNBytes = ioSerialiser.getInteger(); // number of bytes to be skipped till end of this data chunk
-        assertEquals(positionAfter.peekFirst() - positionAfterFieldHeader, skipNBytes, "buffer skip address");
-        dims = ioSerialiser.getArrayDimensions();
+        assertEquals(positionAfterFieldHeader, header.getDataStartOffset(), "data start position");
+        assertEquals(positionAfter.peekFirst(), header.getDataStartOffset() + header.getDataSize(), "data end skip address");
+        dims = ioSerialiser.getBuffer().getArraySizeDescriptor();
         assertEquals(ARRAY_DIM_1D, dims.length, "dimension");
         assertEquals(2, dims[0], "array size");
+        buffer.position(header.getDataStartOffset()); // return to original data start
         final boolean[] booleanArray = ioSerialiser.getBooleanArray();
         assertArrayEquals(new boolean[] { true, false }, booleanArray);
+        skipNBytes = header.getDataSize(); // number of bytes to be skipped till end of this data chunk
         assertEquals(skipNBytes, buffer.position() - positionAfterFieldHeader, "actual numer of bytes skipped");
         assertEquals(positionAfter.removeFirst(), buffer.position());
 
@@ -113,13 +123,15 @@ public class BinarySerialiserTests {
         header = ioSerialiser.getFieldHeader();
         assertEquals("byte", header.getFieldName(), "byte field name retrieval");
         positionAfterFieldHeader = (int) buffer.position(); // actual buffer position after having read the field header
-        skipNBytes = ioSerialiser.getInteger(); // number of bytes to be skipped till end of this data chunk
-        assertEquals(positionAfter.peekFirst() - positionAfterFieldHeader, skipNBytes, "buffer skip address");
-        dims = ioSerialiser.getArrayDimensions();
+        assertEquals(positionAfterFieldHeader, header.getDataStartOffset(), "data start position");
+        assertEquals(positionAfter.peekFirst(), header.getDataStartOffset() + header.getDataSize(), "data end skip address");
+        dims = ioSerialiser.getBuffer().getArraySizeDescriptor();
         assertEquals(ARRAY_DIM_1D, dims.length, "dimension");
         assertEquals(2, dims[0], "array size");
+        buffer.position(header.getDataStartOffset()); // return to original data start
         final byte[] byteArray = ioSerialiser.getByteArray();
         assertArrayEquals(new byte[] { (byte) 42, (byte) 42 }, byteArray);
+        skipNBytes = header.getDataSize(); // number of bytes to be skipped till end of this data chunk
         assertEquals(skipNBytes, buffer.position() - positionAfterFieldHeader, "actual numer of bytes skipped");
         assertEquals(positionAfter.removeFirst(), buffer.position());
 
@@ -128,13 +140,15 @@ public class BinarySerialiserTests {
         header = ioSerialiser.getFieldHeader();
         assertEquals("short", header.getFieldName(), "short field name retrieval");
         positionAfterFieldHeader = (int) buffer.position(); // actual buffer position after having read the field header
-        skipNBytes = ioSerialiser.getInteger(); // number of bytes to be skipped till end of this data chunk
-        assertEquals(positionAfter.peekFirst() - positionAfterFieldHeader, skipNBytes, "buffer skip address");
-        dims = ioSerialiser.getArrayDimensions();
+        assertEquals(positionAfterFieldHeader, header.getDataStartOffset(), "data start position");
+        assertEquals(positionAfter.peekFirst(), header.getDataStartOffset() + header.getDataSize(), "data end skip address");
+        dims = ioSerialiser.getBuffer().getArraySizeDescriptor();
         assertEquals(ARRAY_DIM_1D, dims.length, "dimension");
         assertEquals(2, dims[0], "array size");
+        buffer.position(header.getDataStartOffset()); // return to original data start
         final short[] shortArray = ioSerialiser.getShortArray();
         assertArrayEquals(new short[] { (short) 43, (short) 43 }, shortArray);
+        skipNBytes = header.getDataSize(); // number of bytes to be skipped till end of this data chunk
         assertEquals(skipNBytes, buffer.position() - positionAfterFieldHeader, "actual numer of bytes skipped");
         assertEquals(positionAfter.removeFirst(), buffer.position());
 
@@ -143,14 +157,16 @@ public class BinarySerialiserTests {
         header = ioSerialiser.getFieldHeader();
         assertEquals("int", header.getFieldName(), "int field name retrieval");
         positionAfterFieldHeader = (int) buffer.position(); // actual buffer position after having read the field header
-        skipNBytes = ioSerialiser.getInteger(); // number of bytes to be skipped till end of this data chunk
-        assertEquals(positionAfter.peekFirst() - positionAfterFieldHeader, skipNBytes, "buffer skip address");
-        dims = ioSerialiser.getArrayDimensions();
+        assertEquals(positionAfterFieldHeader, header.getDataStartOffset(), "data start position");
+        assertEquals(positionAfter.peekFirst(), header.getDataStartOffset() + header.getDataSize(), "data end skip address");
+        dims = ioSerialiser.getBuffer().getArraySizeDescriptor();
         assertEquals(ARRAY_DIM_1D, dims.length, "dimension");
         assertEquals(2, dims[0], "array size");
+        buffer.position(header.getDataStartOffset()); // return to original data start
         final int[] intArray = ioSerialiser.getIntArray();
         assertNotNull(intArray);
         assertArrayEquals(new int[] { 44, 44 }, intArray);
+        skipNBytes = header.getDataSize(); // number of bytes to be skipped till end of this data chunk
         assertEquals(skipNBytes, buffer.position() - positionAfterFieldHeader, "actual numer of bytes skipped");
         assertEquals(positionAfter.removeFirst(), buffer.position());
 
@@ -159,14 +175,16 @@ public class BinarySerialiserTests {
         header = ioSerialiser.getFieldHeader();
         assertEquals("long", header.getFieldName(), "long field name retrieval");
         positionAfterFieldHeader = (int) buffer.position(); // actual buffer position after having read the field header
-        skipNBytes = ioSerialiser.getInteger(); // number of bytes to be skipped till end of this data chunk
-        assertEquals(positionAfter.peekFirst() - positionAfterFieldHeader, skipNBytes, "buffer skip address");
-        dims = ioSerialiser.getArrayDimensions();
+        assertEquals(positionAfterFieldHeader, header.getDataStartOffset(), "data start position");
+        assertEquals(positionAfter.peekFirst(), header.getDataStartOffset() + header.getDataSize(), "data end skip address");
+        dims = ioSerialiser.getBuffer().getArraySizeDescriptor();
         assertEquals(ARRAY_DIM_1D, dims.length, "dimension");
         assertEquals(2, dims[0], "array size");
+        buffer.position(header.getDataStartOffset()); // return to original data start
         final long[] longArray = ioSerialiser.getLongArray();
         assertNotNull(longArray);
         assertArrayEquals(new long[] { 45, 45 }, longArray);
+        skipNBytes = header.getDataSize(); // number of bytes to be skipped till end of this data chunk
         assertEquals(skipNBytes, buffer.position() - positionAfterFieldHeader, "actual numer of bytes skipped");
         assertEquals(positionAfter.removeFirst(), buffer.position());
 
@@ -175,14 +193,16 @@ public class BinarySerialiserTests {
         header = ioSerialiser.getFieldHeader();
         assertEquals("float", header.getFieldName(), "float field name retrieval");
         positionAfterFieldHeader = (int) buffer.position(); // actual buffer position after having read the field header
-        skipNBytes = ioSerialiser.getInteger(); // number of bytes to be skipped till end of this data chunk
-        assertEquals(positionAfter.peekFirst() - positionAfterFieldHeader, skipNBytes, "buffer skip address");
-        dims = ioSerialiser.getArrayDimensions();
+        assertEquals(positionAfterFieldHeader, header.getDataStartOffset(), "data start position");
+        assertEquals(positionAfter.peekFirst(), header.getDataStartOffset() + header.getDataSize(), "data end skip address");
+        dims = ioSerialiser.getBuffer().getArraySizeDescriptor();
         assertEquals(ARRAY_DIM_1D, dims.length, "dimension");
         assertEquals(2, dims[0], "array size");
+        buffer.position(header.getDataStartOffset()); // return to original data start
         final float[] floatArray = ioSerialiser.getFloatArray();
         assertNotNull(floatArray);
         assertArrayEquals(new float[] { 1.0f, 1.0f }, floatArray);
+        skipNBytes = header.getDataSize(); // number of bytes to be skipped till end of this data chunk
         assertEquals(skipNBytes, buffer.position() - positionAfterFieldHeader, "actual numer of bytes skipped");
         assertEquals(positionAfter.removeFirst(), buffer.position());
 
@@ -191,14 +211,16 @@ public class BinarySerialiserTests {
         header = ioSerialiser.getFieldHeader();
         assertEquals("double", header.getFieldName(), "double field name retrieval");
         positionAfterFieldHeader = (int) buffer.position(); // actual buffer position after having read the field header
-        skipNBytes = ioSerialiser.getInteger(); // number of bytes to be skipped till end of this data chunk
-        assertEquals(positionAfter.peekFirst() - positionAfterFieldHeader, skipNBytes, "buffer skip address");
-        dims = ioSerialiser.getArrayDimensions();
+        assertEquals(positionAfterFieldHeader, header.getDataStartOffset(), "data start position");
+        assertEquals(positionAfter.peekFirst(), header.getDataStartOffset() + header.getDataSize(), "data end skip address");
+        dims = ioSerialiser.getBuffer().getArraySizeDescriptor();
         assertEquals(ARRAY_DIM_1D, dims.length, "dimension");
         assertEquals(2, dims[0], "array size");
+        buffer.position(header.getDataStartOffset()); // return to original data start
         final double[] doubleArray = ioSerialiser.getDoubleArray();
         assertNotNull(doubleArray);
         assertArrayEquals(new double[] { 3.0, 3.0 }, doubleArray);
+        skipNBytes = header.getDataSize(); // number of bytes to be skipped till end of this data chunk
         assertEquals(skipNBytes, buffer.position() - positionAfterFieldHeader, "actual numer of bytes skipped");
         assertEquals(positionAfter.removeFirst(), buffer.position());
 
@@ -207,14 +229,16 @@ public class BinarySerialiserTests {
         header = ioSerialiser.getFieldHeader();
         assertEquals("string", header.getFieldName(), "string field name retrieval");
         positionAfterFieldHeader = (int) buffer.position(); // actual buffer position after having read the field header
-        skipNBytes = ioSerialiser.getInteger(); // number of bytes to be skipped till end of this data chunk
-        assertEquals(positionAfter.peekFirst() - positionAfterFieldHeader, skipNBytes, "buffer skip address");
-        dims = ioSerialiser.getArrayDimensions();
+        assertEquals(positionAfterFieldHeader, header.getDataStartOffset(), "data start position");
+        assertEquals(positionAfter.peekFirst(), header.getDataStartOffset() + header.getDataSize(), "data end skip address");
+        dims = ioSerialiser.getBuffer().getArraySizeDescriptor();
         assertEquals(ARRAY_DIM_1D, dims.length, "dimension");
         assertEquals(2, dims[0], "array size");
+        buffer.position(header.getDataStartOffset()); // return to original data start
         final String[] stringArray = ioSerialiser.getStringArray();
         assertNotNull(stringArray);
         assertArrayEquals(new String[] { "test", "test" }, stringArray);
+        skipNBytes = header.getDataSize(); // number of bytes to be skipped till end of this data chunk
         assertEquals(skipNBytes, buffer.position() - positionAfterFieldHeader, "actual numer of bytes skipped");
         assertEquals(positionAfter.removeFirst(), buffer.position());
     }
@@ -233,46 +257,57 @@ public class BinarySerialiserTests {
 
         // add primitive types
         positionBefore.add(buffer.position());
-        ioSerialiser.put("boolean", true);
+        ioSerialiser.putFieldHeader("boolean", DataType.BOOL);
+        ioSerialiser.put(true);
         positionAfter.add(buffer.position());
         positionBefore.add(buffer.position());
-        ioSerialiser.put("boolean", false);
-        positionAfter.add(buffer.position());
-
-        positionBefore.add(buffer.position());
-        ioSerialiser.put("byte", (byte) 42);
+        ioSerialiser.putFieldHeader("boolean", DataType.BOOL);
+        ioSerialiser.put(false);
         positionAfter.add(buffer.position());
 
         positionBefore.add(buffer.position());
-        ioSerialiser.put("short", (short) 43);
+        ioSerialiser.putFieldHeader("byte", DataType.BYTE);
+        ioSerialiser.put((byte) 42);
         positionAfter.add(buffer.position());
 
         positionBefore.add(buffer.position());
-        ioSerialiser.put("int", 44);
+        ioSerialiser.putFieldHeader("short", DataType.SHORT);
+        ioSerialiser.put((short) 43);
         positionAfter.add(buffer.position());
 
         positionBefore.add(buffer.position());
-        ioSerialiser.put("long", (long) 45);
+        ioSerialiser.putFieldHeader("int", DataType.INT);
+        ioSerialiser.put(44);
         positionAfter.add(buffer.position());
 
         positionBefore.add(buffer.position());
-        ioSerialiser.put("float", 1.0f);
+        ioSerialiser.putFieldHeader("long", DataType.LONG);
+        ioSerialiser.put((long) 45);
         positionAfter.add(buffer.position());
 
         positionBefore.add(buffer.position());
-        ioSerialiser.put("double", 3.0);
+        ioSerialiser.putFieldHeader("float", DataType.FLOAT);
+        ioSerialiser.put(1.0f);
         positionAfter.add(buffer.position());
 
         positionBefore.add(buffer.position());
-        ioSerialiser.put("string", "test");
+        ioSerialiser.putFieldHeader("double", DataType.DOUBLE);
+        ioSerialiser.put(3.0);
         positionAfter.add(buffer.position());
 
         positionBefore.add(buffer.position());
-        ioSerialiser.put("string", "");
+        ioSerialiser.putFieldHeader("string", DataType.STRING);
+        ioSerialiser.put("test");
         positionAfter.add(buffer.position());
 
         positionBefore.add(buffer.position());
-        ioSerialiser.put("string", (String) null);
+        ioSerialiser.putFieldHeader("string", DataType.STRING);
+        ioSerialiser.put("");
+        positionAfter.add(buffer.position());
+
+        positionBefore.add(buffer.position());
+        ioSerialiser.putFieldHeader("string", DataType.STRING);
+        ioSerialiser.put((String) null);
         positionAfter.add(buffer.position());
 
         WireDataFieldDescription header;
@@ -380,31 +415,36 @@ public class BinarySerialiserTests {
         // add Collection - List<E>
         final List<Integer> list = Arrays.asList(1, 2, 3);
         positionBefore.add(buffer.position());
-        ioSerialiser.put("collection", list);
+        ioSerialiser.putFieldHeader("collection", DataType.COLLECTION);
+        ioSerialiser.put(list);
         positionAfter.add(buffer.position());
 
         // add Collection - Set<E>
         final Set<Integer> set = Set.of(1, 2, 3);
         positionBefore.add(buffer.position());
-        ioSerialiser.put("set", set);
+        ioSerialiser.putFieldHeader("set", DataType.SET);
+        ioSerialiser.put(set);
         positionAfter.add(buffer.position());
 
         // add Collection - Queue<E>
         final Queue<Integer> queue = new LinkedList<>(Arrays.asList(1, 2, 3));
         positionBefore.add(buffer.position());
-        ioSerialiser.put("queue", queue);
+        ioSerialiser.putFieldHeader("queue", DataType.QUEUE);
+        ioSerialiser.put(queue);
         positionAfter.add(buffer.position());
 
         // add Map
         final Map<Integer, String> map = new HashMap<>();
         list.forEach(item -> map.put(item, "Item#" + item.toString()));
         positionBefore.add(buffer.position());
-        ioSerialiser.put("map", map);
+        ioSerialiser.putFieldHeader("map", DataType.MAP);
+        ioSerialiser.put(map);
         positionAfter.add(buffer.position());
 
         // add Enum
         positionBefore.add(buffer.position());
-        ioSerialiser.put("enum", DataType.ENUM);
+        ioSerialiser.putFieldHeader("enum", DataType.ENUM);
+        ioSerialiser.put(DataType.ENUM);
         positionAfter.add(buffer.position());
 
         // add end marker
@@ -416,7 +456,7 @@ public class BinarySerialiserTests {
 
         WireDataFieldDescription header;
         int positionAfterFieldHeader;
-        int skipNBytes;
+        long skipNBytes;
         // check types
         assertEquals(0, buffer.position(), "initial buffer position");
 
@@ -433,7 +473,7 @@ public class BinarySerialiserTests {
         assertEquals(ioSerialiser.headerInfo, headerInfo);
         assertNotNull(ioSerialiser.headerInfo.toString());
         assertEquals(ioSerialiser.headerInfo.hashCode(), headerInfo.hashCode());
-        assertFalse(headerInfo.equals(new Object())); // silly comparison for coverage reasons
+        assertNotEquals(headerInfo, new Object()); // silly comparison for coverage reasons
         assertNotNull(headerInfo);
         assertEquals(BinarySerialiser.class.getCanonicalName(), headerInfo.getProducerName());
         assertEquals(BinarySerialiser.VERSION_MAJOR, headerInfo.getVersionMajor());
@@ -445,22 +485,22 @@ public class BinarySerialiserTests {
         assertEquals(positionBefore.removeFirst(), buffer.position());
         header = ioSerialiser.getFieldHeader();
         assertEquals("collection", header.getFieldName(), "Collection<E> field name");
-        assertEquals(DataType.LIST, header.getDataType(), "Collection<E> - type ID");
+        assertEquals(DataType.COLLECTION, header.getDataType(), "Collection<E> - type ID");
         positionAfterFieldHeader = (int) buffer.position(); // actual buffer position after having read the field header
-        skipNBytes = ioSerialiser.getInteger(); // number of bytes to be skipped till end of this data chunk
+        skipNBytes = header.getDataSize(); // number of bytes to be skipped till end of this data chunk
         assertEquals(positionAfter.peekFirst() - positionAfterFieldHeader, skipNBytes, "buffer skip address");
         assertFalse(header.getDataType().isScalar());
-        assertEquals(1, header.getDataDimension(), "List Dimension");
-        assertEquals(3, header.getDataDimensions()[0], "List size");
         assertEquals(ARRAY_DIM_1D, ioSerialiser.getInteger(), "dimension");
         assertEquals(3, ioSerialiser.getInteger(), "array size");
+        buffer.position(header.getDataStartOffset());
         final long readPosition = buffer.position();
-        Collection<Integer> retrievedCollection = ioSerialiser.getCollection((Collection<Integer>) null);
+        Collection<Integer> retrievedCollection = ioSerialiser.getCollection(null);
         assertNotNull(retrievedCollection, "retrieved collection not null");
         assertEquals(list, retrievedCollection);
+        assertEquals(buffer.position(), header.getDataStartOffset() + header.getDataSize(), "buffer position data end");
         // check for specific List interface
         buffer.position(readPosition);
-        List<Integer> retrievedList = ioSerialiser.getList((List<Integer>) null);
+        List<Integer> retrievedList = ioSerialiser.getList(null);
         assertNotNull(retrievedList, "retrieved collection List not null");
         assertEquals(list, retrievedList);
         assertEquals(positionAfter.removeFirst(), buffer.position());
@@ -471,14 +511,13 @@ public class BinarySerialiserTests {
         assertEquals("set", header.getFieldName(), "Set<E> field name");
         assertEquals(DataType.SET, header.getDataType(), "Set<E> - type ID");
         positionAfterFieldHeader = (int) buffer.position(); // actual buffer position after having read the field header
-        skipNBytes = ioSerialiser.getInteger(); // number of bytes to be skipped till end of this data chunk
+        skipNBytes = header.getDataSize(); // number of bytes to be skipped till end of this data chunk
         assertEquals(positionAfter.peekFirst() - positionAfterFieldHeader, skipNBytes, "buffer skip address");
         assertFalse(header.getDataType().isScalar());
-        assertEquals(1, header.getDataDimension(), "Set<E> Dimension");
-        assertEquals(3, header.getDataDimensions()[0], "Set<E> size");
         assertEquals(ARRAY_DIM_1D, ioSerialiser.getInteger(), "dimension");
         assertEquals(3, ioSerialiser.getInteger(), "array size");
-        Collection<Integer> retrievedSet = ioSerialiser.getSet((Set<Integer>) null);
+        buffer.position(header.getDataStartOffset());
+        Collection<Integer> retrievedSet = ioSerialiser.getSet(null);
         assertNotNull(retrievedSet, "retrieved set not null");
         assertEquals(set, retrievedSet);
         assertEquals(positionAfter.removeFirst(), buffer.position());
@@ -489,14 +528,13 @@ public class BinarySerialiserTests {
         assertEquals("queue", header.getFieldName(), "Queue<E> field name");
         assertEquals(DataType.QUEUE, header.getDataType(), "Queue<E> - type ID");
         positionAfterFieldHeader = (int) buffer.position(); // actual buffer position after having read the field header
-        skipNBytes = ioSerialiser.getInteger(); // number of bytes to be skipped till end of this data chunk
+        skipNBytes = header.getDataSize(); // number of bytes to be skipped till end of this data chunk
         assertEquals(positionAfter.peekFirst() - positionAfterFieldHeader, skipNBytes, "buffer skip address");
         assertFalse(header.getDataType().isScalar());
-        assertEquals(1, header.getDataDimension(), "Queue<E> Dimension");
-        assertEquals(3, header.getDataDimensions()[0], "Queue<E> size");
         assertEquals(ARRAY_DIM_1D, ioSerialiser.getInteger(), "dimension");
         assertEquals(3, ioSerialiser.getInteger(), "array size");
-        Queue<Integer> retrievedQueue = ioSerialiser.getQueue((Queue<Integer>) null);
+        buffer.position(header.getDataStartOffset());
+        Queue<Integer> retrievedQueue = ioSerialiser.getQueue(null);
         assertNotNull(retrievedQueue, "retrieved set not null");
         // assertEquals(queue, retrievedQueue); // N.B. no direct comparison possible -> only partial Queue interface overlapp
         while (!queue.isEmpty() && !retrievedQueue.isEmpty()) {
@@ -512,14 +550,13 @@ public class BinarySerialiserTests {
         assertEquals("map", header.getFieldName(), "Map<K,V> field name");
         assertEquals(DataType.MAP, header.getDataType(), "Map<K,V> - type ID");
         positionAfterFieldHeader = (int) buffer.position(); // actual buffer position after having read the field header
-        skipNBytes = ioSerialiser.getInteger(); // number of bytes to be skipped till end of this data chunk
+        skipNBytes = header.getDataSize(); // number of bytes to be skipped till end of this data chunk
         assertEquals(positionAfter.peekFirst() - positionAfterFieldHeader, skipNBytes, "buffer skip address");
         assertFalse(header.getDataType().isScalar());
-        assertEquals(1, header.getDataDimension(), "Map<K,V> Dimension");
-        assertEquals(3, header.getDataDimensions()[0], "Map<K,V> size");
         assertEquals(ARRAY_DIM_1D, ioSerialiser.getInteger(), "dimension");
         assertEquals(3, ioSerialiser.getInteger(), "array size");
-        Map<Integer, String> retrievedMap = ioSerialiser.getMap((Map<Integer, String>) null);
+        buffer.position(header.getDataStartOffset());
+        Map<Integer, String> retrievedMap = ioSerialiser.getMap(null);
         assertNotNull(retrievedMap, "retrieved set not null");
         assertEquals(map, retrievedMap); // N.B. no direct comparison possible -> only partial Queue interface overlapp
         assertEquals(positionAfter.removeFirst(), buffer.position());
@@ -528,9 +565,9 @@ public class BinarySerialiserTests {
         assertEquals(positionBefore.removeFirst(), buffer.position());
         header = ioSerialiser.getFieldHeader();
         assertEquals("enum", header.getFieldName(), "enum type retrieval");
-        buffer.position(header.getDataBufferPosition());
-        assertDoesNotThrow(() -> ioSerialiser.getEnumTypeList()); //skips enum info
-        buffer.position(header.getDataBufferPosition());
+        buffer.position(header.getDataStartOffset());
+        assertDoesNotThrow(ioSerialiser::getEnumTypeList); //skips enum info
+        buffer.position(header.getDataStartOffset());
         assertEquals(DataType.ENUM, ioSerialiser.getEnum(DataType.OTHER), "enum retrieval");
         assertEquals(positionAfter.removeFirst(), buffer.position());
 
@@ -617,46 +654,70 @@ public class BinarySerialiserTests {
         ioSerialiser.putHeaderInfo(); // add header info
 
         // add some primitives
-        ioSerialiser.put("boolean", true);
-        ioSerialiser.put("byte", (byte) 42);
-        ioSerialiser.put("short", (short) 42);
-        ioSerialiser.put("int", (int) 42);
-        ioSerialiser.put("long", (long) 42);
-        ioSerialiser.put("float", (float) 42);
-        ioSerialiser.put("double", (double) 42);
-        ioSerialiser.put("string", "string");
+        ioSerialiser.putFieldHeader("boolean", DataType.BOOL);
+        ioSerialiser.put(true);
+        ioSerialiser.putFieldHeader("byte", DataType.BYTE);
+        ioSerialiser.put((byte) 42);
+        ioSerialiser.putFieldHeader("short", DataType.SHORT);
+        ioSerialiser.put((short) 42);
+        ioSerialiser.putFieldHeader("int", DataType.INT);
+        ioSerialiser.put(42);
+        ioSerialiser.putFieldHeader("long", DataType.LONG);
+        ioSerialiser.put(42L);
+        ioSerialiser.putFieldHeader("float", DataType.FLOAT);
+        ioSerialiser.put((float) 42);
+        ioSerialiser.putFieldHeader("double", DataType.DOUBLE);
+        ioSerialiser.put((double) 42);
+        ioSerialiser.putFieldHeader("string", DataType.STRING);
+        ioSerialiser.put("string");
 
-        ioSerialiser.put("boolean[]", new boolean[] { true });
-        ioSerialiser.put("byte[]", new byte[] { (byte) 42 });
-        ioSerialiser.put("short[]", new short[] { (short) 42 });
-        ioSerialiser.put("int[]", new int[] { (int) 42 });
-        ioSerialiser.put("long[]", new long[] { (long) 42 });
-        ioSerialiser.put("float[]", new float[] { (float) 42 });
-        ioSerialiser.put("double[]", new double[] { (double) 42 });
-        ioSerialiser.put("string[]", new String[] { "string" });
+        ioSerialiser.putFieldHeader("boolean[]", DataType.BOOL_ARRAY);
+        ioSerialiser.put(new boolean[] { true });
+        ioSerialiser.putFieldHeader("byte[]", DataType.BYTE_ARRAY);
+        ioSerialiser.put(new byte[] { (byte) 42 });
+        ioSerialiser.putFieldHeader("short[]", DataType.SHORT_ARRAY);
+        ioSerialiser.put(new short[] { (short) 42 });
+        ioSerialiser.putFieldHeader("int[]", DataType.INT_ARRAY);
+        ioSerialiser.put(new int[] { 42 });
+        ioSerialiser.putFieldHeader("long[]", DataType.LONG_ARRAY);
+        ioSerialiser.put(new long[] { 42L });
+        ioSerialiser.putFieldHeader("float[]", DataType.FLOAT_ARRAY);
+        ioSerialiser.put(new float[] { (float) 42 });
+        ioSerialiser.putFieldHeader("double[]", DataType.DOUBLE_ARRAY);
+        ioSerialiser.put(new double[] { (double) 42 });
+        ioSerialiser.putFieldHeader("string[]", DataType.STRING_ARRAY);
+        ioSerialiser.put(new String[] { "string" });
 
         final Collection<Integer> collection = Arrays.asList(1, 2, 3);
-        ioSerialiser.put("collection", collection); // add Collection - List<E>
+        ioSerialiser.putFieldHeader("collection", DataType.COLLECTION);
+        ioSerialiser.put(collection); // add Collection - List<E>
 
         final List<Integer> list = Arrays.asList(1, 2, 3);
-        ioSerialiser.put("list", list); // add Collection - List<E>
+        ioSerialiser.putFieldHeader("list", DataType.LIST);
+        ioSerialiser.put(list); // add Collection - List<E>
 
         final Set<Integer> set = Set.of(1, 2, 3);
-        ioSerialiser.put("set", set); // add Collection - Set<E>
+        ioSerialiser.putFieldHeader("set", DataType.SET);
+        ioSerialiser.put(set); // add Collection - Set<E>
 
         final Queue<Integer> queue = new LinkedList<>(Arrays.asList(1, 2, 3));
-        ioSerialiser.put("queue", queue); // add Collection - Queue<E>
+        ioSerialiser.putFieldHeader("queue", DataType.QUEUE);
+        ioSerialiser.put(queue); // add Collection - Queue<E>
 
         final Map<Integer, String> map = new HashMap<>();
         list.forEach(item -> map.put(item, "Item#" + item.toString()));
-        ioSerialiser.put("map", map); // add Map
+        ioSerialiser.putFieldHeader("map", DataType.MAP);
+        ioSerialiser.put(map); // add Map
 
-        ioSerialiser.put("enum", DataType.ENUM); // add Enum
+        ioSerialiser.putFieldHeader("enum", DataType.ENUM);
+        ioSerialiser.put(DataType.ENUM); // add Enum
 
         // start nested data
         ioSerialiser.putStartMarker("nested context"); // add end marker
-        ioSerialiser.put("boolean", new boolean[] { true });
-        ioSerialiser.put("byte", new byte[] { (byte) 0x42 });
+        ioSerialiser.putFieldHeader("boolean", DataType.BOOL_ARRAY);
+        ioSerialiser.put(new boolean[] { true });
+        ioSerialiser.putFieldHeader("byte", DataType.BYTE_ARRAY);
+        ioSerialiser.put(new byte[] { (byte) 0x42 });
 
         ioSerialiser.putEndMarker("nested context"); // add end marker
         // end nested data
@@ -674,7 +735,7 @@ public class BinarySerialiserTests {
         final ProtocolInfo bufferHeader2 = ioSerialiser.checkHeaderInfo();
         assertNotNull(bufferHeader2);
         for (FieldDescription field : objectRoot.getChildren()) {
-            buffer.position(field.getDataBufferPosition());
+            buffer.position(field.getDataStartOffset());
             ioSerialiser.swallowRest(field);
         }
     }
@@ -719,7 +780,7 @@ public class BinarySerialiserTests {
         buffer.reset();
 
         // test conversion to double array
-        assertThrows(IllegalArgumentException.class, () -> ioSerialiser.getGenericArrayAsBoxedPrimitive(DataType.OTHER));
+        //TODO: follow-up w.r.t. serialiser lib: assertThrows(IllegalArgumentException.class, () -> ioSerialiser.getGenericArrayAsBoxedPrimitive(DataType.OTHER));
 
         assertArrayEquals(new Boolean[] { true, false, true }, ioSerialiser.getGenericArrayAsBoxedPrimitive(DataType.BOOL));
         assertArrayEquals(new Byte[] { (byte) 1.0, (byte) 0.0, (byte) 2.0 }, ioSerialiser.getGenericArrayAsBoxedPrimitive(DataType.BYTE));
@@ -733,17 +794,17 @@ public class BinarySerialiserTests {
     }
 
     private void putGenericTestArrays(final BinarySerialiser ioSerialiser) {
-        assertThrows(IllegalArgumentException.class, () -> ioSerialiser.putGenericArrayAsPrimitive(DataType.OTHER, new Object[] { new Object() }, 1));
+        //TODO: follow-up w.r.t. serialiser lib: assertThrows(IllegalArgumentException.class, () -> ioSerialiser.putGenericArrayAsPrimitive(DataType.OTHER, new Object[] { new Object() }, 1));
 
-        ioSerialiser.putGenericArrayAsPrimitive(DataType.BOOL, new Boolean[] { true, false, true }, 3);
-        ioSerialiser.putGenericArrayAsPrimitive(DataType.BYTE, new Byte[] { (byte) 1, (byte) 0, (byte) 2 }, 3);
-        ioSerialiser.putGenericArrayAsPrimitive(DataType.CHAR, new Character[] { (char) 1, (char) 0, (char) 2 }, 3);
-        ioSerialiser.putGenericArrayAsPrimitive(DataType.SHORT, new Short[] { (short) 1, (short) 0, (short) 2 }, 3);
-        ioSerialiser.putGenericArrayAsPrimitive(DataType.INT, new Integer[] { (int) 1, (int) 0, (int) 2 }, 3);
-        ioSerialiser.putGenericArrayAsPrimitive(DataType.LONG, new Long[] { (long) 1, (long) 0, (long) 2 }, 3);
-        ioSerialiser.putGenericArrayAsPrimitive(DataType.FLOAT, new Float[] { (float) 1, (float) 0, (float) 2 }, 3);
-        ioSerialiser.putGenericArrayAsPrimitive(DataType.DOUBLE, new Double[] { (double) 1, (double) 0, (double) 2 }, 3);
-        ioSerialiser.putGenericArrayAsPrimitive(DataType.STRING, new String[] { "1.0", "0.0", "2.0" }, 3);
+        ioSerialiser.putGenericArrayAsPrimitive(DataType.BOOL, new Boolean[] { true, false, true }, 0, 3);
+        ioSerialiser.putGenericArrayAsPrimitive(DataType.BYTE, new Byte[] { (byte) 1, (byte) 0, (byte) 2 }, 0, 3);
+        ioSerialiser.putGenericArrayAsPrimitive(DataType.CHAR, new Character[] { (char) 1, (char) 0, (char) 2 }, 0, 3);
+        ioSerialiser.putGenericArrayAsPrimitive(DataType.SHORT, new Short[] { (short) 1, (short) 0, (short) 2 }, 0, 3);
+        ioSerialiser.putGenericArrayAsPrimitive(DataType.INT, new Integer[] { 1, 0, 2 }, 0, 3);
+        ioSerialiser.putGenericArrayAsPrimitive(DataType.LONG, new Long[] { 1L, 0L, 2L }, 0, 3);
+        ioSerialiser.putGenericArrayAsPrimitive(DataType.FLOAT, new Float[] { (float) 1, (float) 0, (float) 2 }, 0, 3);
+        ioSerialiser.putGenericArrayAsPrimitive(DataType.DOUBLE, new Double[] { (double) 1, (double) 0, (double) 2 }, 0, 3);
+        ioSerialiser.putGenericArrayAsPrimitive(DataType.STRING, new String[] { "1.0", "0.0", "2.0" }, 0, 3);
     }
 
     @Test
