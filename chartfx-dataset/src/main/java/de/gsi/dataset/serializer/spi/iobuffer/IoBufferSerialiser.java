@@ -1,13 +1,6 @@
 package de.gsi.dataset.serializer.spi.iobuffer;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Queue;
-import java.util.Set;
-import java.util.WeakHashMap;
+import java.util.*;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,7 +12,6 @@ import de.gsi.dataset.serializer.spi.ClassDescriptions;
 import de.gsi.dataset.serializer.spi.ClassFieldDescription;
 import de.gsi.dataset.serializer.spi.FieldSerialiser;
 import de.gsi.dataset.serializer.spi.FieldSerialiser.FieldSerialiserFunction;
-import de.gsi.dataset.serializer.spi.WireDataFieldDescription;
 
 /**
  * reference implementation for streaming arbitrary object to and from a IoBuffer-based byte-buffer
@@ -29,7 +21,6 @@ import de.gsi.dataset.serializer.spi.WireDataFieldDescription;
 public class IoBufferSerialiser extends AbstractSerialiser {
     private static final Logger LOGGER = LoggerFactory.getLogger(IoBufferSerialiser.class);
     private final Map<Integer, WeakHashMap<String, ClassFieldDescription>> fieldToClassFieldDescription = new HashMap<>();
-    private final IoSerialiser ioSerialiser;
 
     /**
      * Initialises new IoBuffer-backed object serialiser
@@ -38,11 +29,7 @@ public class IoBufferSerialiser extends AbstractSerialiser {
      * TODO: add links to reference implementations
      */
     public IoBufferSerialiser(final IoSerialiser ioSerialiser) {
-        super();
-        if (ioSerialiser == null) {
-            throw new IllegalArgumentException("buffer must not be null");
-        }
-        this.ioSerialiser = ioSerialiser;
+        super(ioSerialiser);
         startMarkerFunction = ioSerialiser::putStartMarker;
         endMarkerFunction = ioSerialiser::putEndMarker;
 
@@ -60,10 +47,8 @@ public class IoBufferSerialiser extends AbstractSerialiser {
             final Collection<?> setVal = ioSerialiser.getCollection(origCollection);
             field.getField().set(obj, setVal);
         }; // reader
-        final FieldSerialiserFunction collectionWriter = (obj, field) -> {
-            final Collection<?> retVal = (Collection<?>) field.getField().get(obj);
-            ioSerialiser.put(field.getFieldName(), retVal); // writer
-        };
+        final FieldSerialiserFunction collectionWriter = (obj, field) -> ioSerialiser.put((Collection<?>) field.getField().get(obj)); // writer
+
         addClassDefinition(new IoBufferFieldSerialiser(ioSerialiser, collectionReader, collectionWriter, Collection.class));
         addClassDefinition(new IoBufferFieldSerialiser(ioSerialiser, collectionReader, collectionWriter, List.class));
         addClassDefinition(new IoBufferFieldSerialiser(ioSerialiser, collectionReader, collectionWriter, Queue.class));
@@ -72,7 +57,7 @@ public class IoBufferSerialiser extends AbstractSerialiser {
         // Enum serialiser mapper to IoBuffer
         addClassDefinition(new IoBufferFieldSerialiser(ioSerialiser, //
                 (obj, field) -> field.getField().set(obj, ioSerialiser.getEnum((Enum<?>) field.getField().get(obj))), // reader
-                (obj, field) -> ioSerialiser.put(field.getFieldName(), (Enum<?>) field.getField().get(obj)), // writer
+                (obj, field) -> ioSerialiser.put((Enum<?>) field.getField().get(obj)), // writer
                 Enum.class));
 
         // Map serialiser mapper to IoBuffer
@@ -81,13 +66,9 @@ public class IoBufferSerialiser extends AbstractSerialiser {
                     final Map<?, ?> origMap = (Map<?, ?>) field.getField().get(obj);
                     origMap.clear();
                     final Map<?, ?> setVal = ioSerialiser.getMap(origMap);
-
                     field.getField().set(obj, setVal);
                 }, // writer
-                (obj, field) -> {
-                    final Map<?, ?> retVal = (Map<?, ?>) field.getField().get(obj);
-                    ioSerialiser.put(field.getFieldName(), retVal);
-                },
+                (obj, field) -> ioSerialiser.put((Map<?, ?>) field.getField().get(obj)), // writer
                 Map.class));
 
         FieldDataSetHelper.register(this, ioSerialiser);
@@ -148,7 +129,7 @@ public class IoBufferSerialiser extends AbstractSerialiser {
             return;
         }
 
-        ioSerialiser.getBuffer().position(fieldRoot.getDataBufferPosition());
+        ioSerialiser.getBuffer().position(fieldRoot.getDataStartOffset());
         serialiser.get().getReaderFunction().exec(obj, classFieldDescription);
     }
 
@@ -165,7 +146,7 @@ public class IoBufferSerialiser extends AbstractSerialiser {
         final ClassFieldDescription classFieldDescription = ClassDescriptions.get(obj.getClass());
 
         ioSerialiser.getBuffer().position(startPosition);
-        final WireDataFieldDescription fieldRoot = ioSerialiser.parseIoStream();
+        final FieldDescription fieldRoot = ioSerialiser.parseIoStream();
         // deserialise into object
         for (final FieldDescription child : fieldRoot.getChildren()) {
             deserialise(obj, child, classFieldDescription, 0);

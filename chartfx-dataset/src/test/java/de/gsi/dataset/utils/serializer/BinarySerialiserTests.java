@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import de.gsi.dataset.serializer.DataType;
 import de.gsi.dataset.serializer.IoSerialiser;
 import de.gsi.dataset.serializer.spi.BinarySerialiser;
 import de.gsi.dataset.serializer.spi.FastByteBuffer;
@@ -23,11 +24,16 @@ public class BinarySerialiserTests {
         FastByteBuffer buffer = new FastByteBuffer();
         IoSerialiser ioSerialiser = new BinarySerialiser(buffer);
 
-        ioSerialiser.put("boolean", true);
-        ioSerialiser.put("byte", (byte) 42);
-        ioSerialiser.put("short", (short) 43);
-        ioSerialiser.put("int", 44);
-        ioSerialiser.put("long", (long) 45);
+        ioSerialiser.putFieldHeader("boolean", DataType.BOOL);
+        ioSerialiser.put(true);
+        ioSerialiser.putFieldHeader("byte", DataType.BYTE);
+        ioSerialiser.put((byte) 42);
+        ioSerialiser.putFieldHeader("short", DataType.SHORT);
+        ioSerialiser.put((short) 43);
+        ioSerialiser.putFieldHeader("int", DataType.INT);
+        ioSerialiser.put(44);
+        ioSerialiser.putFieldHeader("long", DataType.LONG);
+        ioSerialiser.put((long) 45);
 
         buffer.reset();
         WireDataFieldDescription header;

@@ -105,6 +105,7 @@ public class SerialiserBenchmark { // NOPMD - nomen est omen
         checkCustomSerialiserIdentity();
         checkIoBufferSerialiserIdentity();
         LOGGER.atInfo().addArgument(nBytesCMW).addArgument(nBytesIO).log("bytes CMW: {} bytes IO: {}");
+        // binarySerialiser.setEnforceSimpleStringEncoding(true);
 
         final int nIterations = 100000;
         for (int i = 0; i < 10; i++) {

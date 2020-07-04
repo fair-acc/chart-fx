@@ -4,29 +4,25 @@ import java.util.List;
 import java.util.Optional;
 
 public interface FieldDescription {
-    int indentationNumerOfSpace = 4;
+    int INDENTATION_NUMER_OF_SPACE = 4;
 
     Optional<FieldDescription> findChildField(String fieldName);
 
     List<FieldDescription> getChildren();
 
-    long getDataBufferPosition();
+    long getDataSize();
 
-    int getDataDimension();
-
-    int[] getDataDimensions();
+    long getDataStartOffset();
 
     DataType getDataType();
-
-    long getExpectedNumberOfDataBytes();
 
     String getFieldName();
 
     String getFieldNameRelative();
 
-    Optional<FieldDescription> getParent();
-
-    void printFieldStructure();
+    FieldDescription getParent();
 
     Class<?> getType();
+
+    void printFieldStructure();
 }

@@ -9,11 +9,11 @@ import de.gsi.dataset.serializer.spi.FieldSerialiser;
  *
  */
 public class IoBufferFieldSerialiser extends FieldSerialiser {
-    protected final IoSerialiser ioBuffer;
+    protected final IoSerialiser ioSerialiser;
 
     /**
      * 
-     * @param buffer reference to the IoBuffer to be used. The reseting/rewinding has to be done in the user-level code
+     * @param ioSerialiser reference to the IoBuffer to be used. The reseting/rewinding has to be done in the user-level code
      * @param reader consumer executed when reading from the back-end serialiser implementation
      * @param writer consumer executed when writing to the back-end serialiser implementation
      * @param classPrototype applicable class/interface prototype reference for which the consumers are applicable (e.g.
@@ -21,14 +21,14 @@ public class IoBufferFieldSerialiser extends FieldSerialiser {
      * @param classGenericArguments applicable generics definition (e.g. 'String.class' for List&lt;String&gt; or
      *        'Integer.class, String.class' resp.)
      */
-    public IoBufferFieldSerialiser(final IoSerialiser buffer, final FieldSerialiserFunction reader,
+    public IoBufferFieldSerialiser(final IoSerialiser ioSerialiser, final FieldSerialiserFunction reader,
             final FieldSerialiserFunction writer, final Class<?> classPrototype,
             final Class<?>... classGenericArguments) {
         super(reader, writer, classPrototype, classGenericArguments);
-        if (buffer == null) {
-            throw new IllegalArgumentException("buffer must not be null");
+        if (ioSerialiser == null) {
+            throw new IllegalArgumentException("ioSerialiser must not be null");
         }
-        ioBuffer = buffer;
+        this.ioSerialiser = ioSerialiser;
     }
 
     /**
@@ -36,6 +36,6 @@ public class IoBufferFieldSerialiser extends FieldSerialiser {
      * @return the IoSerialiser object used by this serialiser
      */
     public IoSerialiser getBuffer() {
-        return ioBuffer;
+        return ioSerialiser;
     }
 }

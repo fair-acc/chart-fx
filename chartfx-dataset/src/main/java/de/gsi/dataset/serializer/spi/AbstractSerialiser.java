@@ -2,11 +2,7 @@ package de.gsi.dataset.serializer.spi;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -15,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.gsi.dataset.serializer.FieldDescription;
+import de.gsi.dataset.serializer.IoSerialiser;
 
 /**
  * @author rstein
@@ -23,8 +20,16 @@ public abstract class AbstractSerialiser {
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractSerialiser.class);
     private static final Map<String, Constructor<Object>> CLASS_CONSTRUCTOR_MAP = new ConcurrentHashMap<>();
     private final Map<Class<?>, List<FieldSerialiser>> classMap = new ConcurrentHashMap<>();
+    protected final IoSerialiser ioSerialiser;
     protected Consumer<String> startMarkerFunction;
     protected Consumer<String> endMarkerFunction;
+
+    public AbstractSerialiser(final IoSerialiser ioSerialiser) {
+        if (ioSerialiser == null) {
+            throw new IllegalArgumentException("buffer must not be null");
+        }
+        this.ioSerialiser = ioSerialiser;
+    }
 
     public void addClassDefinition(FieldSerialiser serialiser) {
         if (serialiser == null) {
@@ -156,6 +161,8 @@ public abstract class AbstractSerialiser {
                 throw new IllegalStateException("should not happen -- cannot serialise field - " + root.getFieldNameRelative() + " - class type = " + root.getTypeName());
             }
 
+            // write field header
+            ioSerialiser.putFieldHeader(root);
             serialiser.get().getWriterFunction().exec(rootObj, root);
             return;
         }

@@ -8,6 +8,12 @@ package de.gsi.dataset.serializer;
  */
 @SuppressWarnings("PMD.TooManyMethods") // NOPMD - these are short-hand convenience methods
 public interface IoBuffer extends IoBufferHeader<IoBuffer> {
+    int[] getArraySizeDescriptor();
+
+    int putArraySizeDescriptor(int n);
+
+    int putArraySizeDescriptor(int[] dims);
+
     boolean getBoolean(); // NOPMD by rstein
 
     default boolean[] getBooleanArray() {
@@ -123,118 +129,64 @@ public interface IoBuffer extends IoBufferHeader<IoBuffer> {
      */
     boolean isEnforceSimpleStringEncoding();
 
-    IoBuffer putBoolean(boolean value);
-
-    default IoBuffer putBooleanArray(final boolean[] src) {
-        return putBooleanArray(src, 0, src.length);
-    }
-
-    default IoBuffer putBooleanArray(final boolean[] src, final int nToCopy) {
-        return putBooleanArray(src, 0, nToCopy);
-    }
-
-    IoBuffer putBooleanArray(final boolean[] src, final long offset, final int nToCopy);
-
-    IoBuffer putByte(final byte b);
-
-    default IoBuffer putByteArray(final byte[] src) {
-        return putByteArray(src, src.length);
-    }
-
-    default IoBuffer putByteArray(final byte[] src, final int nToCopy) {
-        return putByteArray(src, 0, nToCopy);
-    }
-
-    IoBuffer putByteArray(byte[] src, final long offset, final int nToCopy);
-
-    IoBuffer putChar(char value);
-
-    default IoBuffer putCharArray(final char[] src) {
-        return putCharArray(src, src.length);
-    }
-
-    default IoBuffer putCharArray(final char[] src, final int nToCopy) {
-        return putCharArray(src, 0, nToCopy);
-    }
-
-    IoBuffer putCharArray(final char[] src, final long offset, final int nToCopy);
-
-    IoBuffer putDouble(double value);
-
-    default IoBuffer putDoubleArray(final double[] src) {
-        return putDoubleArray(src, src.length);
-    }
-
-    default IoBuffer putDoubleArray(final double[] src, final int nToCopy) {
-        return putDoubleArray(src, 0, nToCopy);
-    }
-
-    IoBuffer putDoubleArray(final double[] src, final long offset, final int nToCopy);
-
-    IoBuffer putFloat(float value);
-
-    default IoBuffer putFloatArray(final float[] src) {
-        return putFloatArray(src, src.length);
-    }
-
-    default IoBuffer putFloatArray(final float[] src, final int nToCopy) {
-        return putFloatArray(src, 0, nToCopy);
-    }
-
-    IoBuffer putFloatArray(final float[] src, final long offset, final int nToCopy);
-
-    IoBuffer putInt(int value);
-
-    default IoBuffer putIntArray(final int[] src) {
-        return putIntArray(src, src.length);
-    }
-
-    default IoBuffer putIntArray(final int[] src, final int nToCopy) {
-        return putIntArray(src, 0, nToCopy);
-    }
-
-    IoBuffer putIntArray(final int[] src, final long offset, final int nToCopy);
-
-    IoBuffer putLong(long value);
-
-    default IoBuffer putLongArray(final long[] src) {
-        return putLongArray(src, src.length);
-    }
-
-    default IoBuffer putLongArray(final long[] src, final int nToCopy) {
-        return putLongArray(src, 0, nToCopy);
-    }
-
-    IoBuffer putLongArray(final long[] src, final long offset, final int nToCopy);
-
-    IoBuffer putShort(short value); // NOPMD by rstein
-
-    default IoBuffer putShortArray(final short[] src) { // NOPMD by rstein
-        return putShortArray(src, src.length);
-    }
-
-    default IoBuffer putShortArray(final short[] src, final int nToCopy) { // NOPMD by rstein
-        return putShortArray(src, 0, nToCopy);
-    }
-
-    IoBuffer putShortArray(final short[] src, final long offset, final int nToCopy); // NOPMD by rstein
-
-    IoBuffer putString(String string);
-
-    default IoBuffer putStringArray(final String[] src) {
-        return putStringArray(src, src.length);
-    }
-
-    default IoBuffer putStringArray(final String[] src, final int nToCopy) {
-        return putStringArray(src, 0, nToCopy);
-    }
-
-    IoBuffer putStringArray(final String[] src, final long offset, final int nToCopy);
-
-    IoBuffer putStringISO8859(String string);
-
     /**
      * @param state, {@code true} the ISO-8859-1 character encoding is being enforced for data fields (better performance), otherwise UTF-8 is being used (more generic encoding)
      */
     void setEnforceSimpleStringEncoding(boolean state);
+
+    IoBuffer putBoolean(boolean value);
+
+    IoBuffer putBooleanArray(final boolean[] src, final long offset, final int n);
+
+    IoBuffer putBooleanArray(final boolean[] src, final long offset, final int[] dims);
+
+    IoBuffer putByte(final byte b);
+
+    IoBuffer putByteArray(final byte[] src, final long offset, final int n);
+
+    IoBuffer putByteArray(final byte[] src, final long offset, final int[] dims);
+
+    IoBuffer putChar(char value);
+
+    IoBuffer putCharArray(final char[] src, final long offset, final int n);
+
+    IoBuffer putCharArray(final char[] src, final long offset, final int[] dims);
+
+    IoBuffer putDouble(double value);
+
+    IoBuffer putDoubleArray(final double[] src, final long offset, final int n);
+
+    IoBuffer putDoubleArray(final double[] src, final long offset, final int[] dims);
+
+    IoBuffer putFloat(float value);
+
+    IoBuffer putFloatArray(final float[] src, final long offset, final int n);
+
+    IoBuffer putFloatArray(final float[] src, final long offset, final int[] dims);
+
+    IoBuffer putInt(int value);
+
+    IoBuffer putIntArray(final int[] src, final long offset, final int n);
+
+    IoBuffer putIntArray(final int[] src, final long offset, final int[] dims);
+
+    IoBuffer putLong(long value);
+
+    IoBuffer putLongArray(final long[] src, final long offset, final int n);
+
+    IoBuffer putLongArray(final long[] src, final long offset, final int[] dims);
+
+    IoBuffer putShort(short value); // NOPMD
+
+    IoBuffer putShortArray(final short[] src, final long offset, final int n); // NOPMD
+
+    IoBuffer putShortArray(final short[] src, final long offset, final int[] dims); // NOPMD
+
+    IoBuffer putString(String string);
+
+    IoBuffer putStringArray(final String[] src, final long offset, final int n); // NOPMD
+
+    IoBuffer putStringArray(final String[] src, final long offset, final int[] dims); // NOPMD
+
+    IoBuffer putStringISO8859(String string);
 }
