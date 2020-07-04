@@ -2,8 +2,15 @@ package de.gsi.dataset.serializer.benchmark;
 
 import java.nio.charset.StandardCharsets;
 
-import org.openjdk.jmh.annotations.*;
+import org.openjdk.jmh.annotations.Benchmark;
+import org.openjdk.jmh.annotations.Fork;
+import org.openjdk.jmh.annotations.Scope;
+import org.openjdk.jmh.annotations.Setup;
+import org.openjdk.jmh.annotations.State;
+import org.openjdk.jmh.annotations.Warmup;
 import org.openjdk.jmh.infra.Blackhole;
+
+import de.gsi.dataset.serializer.spi.FastByteBuffer;
 
 /**
  * Benchmark to compare, test and rationalise some assumptions that went into the serialiser refactoring
@@ -31,6 +38,8 @@ import org.openjdk.jmh.infra.Blackhole;
  */
 @State(Scope.Benchmark)
 public class SerialiserAssumptionsBenchmark {
+    private final FastByteBuffer.FastStringBuilder fastStringBuilder = new FastByteBuffer.FastStringBuilder();
+
     @Setup()
     public void initialize() {
         // add variables to initialise here
@@ -83,6 +92,27 @@ public class SerialiserAssumptionsBenchmark {
     @Fork(value = 2, warmups = 2)
     public String stringAllocationWithOutCharsetISO8859(final MyData data) {
         return new String(data.byteISO8859, 0, data.byteISO8859.length);
+    }
+
+    @Benchmark
+    @Warmup(iterations = 1)
+    @Fork(value = 2, warmups = 2)
+    public String stringAllocationWithOutCharsetISO8859_V2(final MyData data) {
+        return fastStringBuilder.iso8859BytesToString(data.byteISO8859, 0, data.byteISO8859.length);
+    }
+
+    @Benchmark
+    @Warmup(iterations = 1)
+    @Fork(value = 2, warmups = 2)
+    public String stringAllocationWithOutCharsetISO8859_V3(final MyData data) {
+        return FastByteBuffer.FastStringBuilder.iso8859BytesToString2(data.byteISO8859, 0, data.byteISO8859.length);
+    }
+
+    @Benchmark
+    @Warmup(iterations = 1)
+    @Fork(value = 2, warmups = 2)
+    public String stringAllocationWithOutCharsetISO8859_V4(final MyData data) {
+        return FastByteBuffer.FastStringBuilder.iso8859BytesToString3(data.byteISO8859, 0, data.byteISO8859.length);
     }
 
     @Benchmark

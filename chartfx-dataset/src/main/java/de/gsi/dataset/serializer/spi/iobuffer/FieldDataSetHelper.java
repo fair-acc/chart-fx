@@ -1,7 +1,6 @@
 package de.gsi.dataset.serializer.spi.iobuffer;
 
 import de.gsi.dataset.DataSet;
-import de.gsi.dataset.serializer.DataType;
 import de.gsi.dataset.serializer.IoSerialiser;
 import de.gsi.dataset.serializer.spi.AbstractSerialiser;
 
@@ -24,7 +23,7 @@ public final class FieldDataSetHelper {
                 (obj, field) -> field.getField().set(obj, DoubleArrayList.wrap(ioBuffer.getDoubleArray())), // reader
                 (obj, field) -> {
                     final DoubleArrayList retVal = (DoubleArrayList) field.getField().get(obj);
-                    ioBuffer.put(field.getFieldName(), retVal.elements(), new int[] { retVal.size() });
+                    ioBuffer.put(retVal.elements(), new int[] { retVal.size() });
                 }, // writer
                 DoubleArrayList.class));
 
@@ -39,12 +38,10 @@ public final class FieldDataSetHelper {
                 }, // reader
                 (obj, field) -> {
                     final DataSet retVal = (DataSet) (field.getField() == null ? obj : field.getField().get(obj));
-                    final long sizeMarkerStart = ioBuffer.putArrayHeader(field.getFieldName(),
-                            DataType.OTHER, new int[] { 1 }, 1);
 
                     ioBuffer.getBuffer().putString(DataSet.class.getName());
                     new DataSetSerialiser(ioBuffer).writeDataSetToByteArray(retVal, false);
-                    ioBuffer.adjustDataByteSizeBlock(sizeMarkerStart);
+                    ioBuffer.updateDataEndMarker();
                 }, // writer
                 DataSet.class));
 

@@ -28,7 +28,7 @@ import de.gsi.dataset.serializer.spi.iobuffer.IoBufferSerialiser;
 import de.gsi.dataset.spi.DoubleDataSet;
 
 public class IoSerialiserTests {
-    private static final int BUFFER_SIZE = 20000;
+    private static final int BUFFER_SIZE = 40000;
 
     @Test
     public void simpleStreamerTest() throws IllegalAccessException {

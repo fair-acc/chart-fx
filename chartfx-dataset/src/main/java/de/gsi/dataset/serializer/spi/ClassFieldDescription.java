@@ -29,29 +29,19 @@ public class ClassFieldDescription implements FieldDescription {
      * infinite recursion
      */
     public static int maxRecursionLevel = 10;
-    private String toStringName; // computed on demand and cached
     private final int hierarchyDepth;
     private final int hashCode;
     private final Field field; // since we cannot derive from 'final class Field'
     private final String fieldName;
     private final String fieldNameRelative;
-    private final Optional<FieldDescription> parent;
+    private final FieldDescription parent;
     private final List<FieldDescription> children = new ArrayList<>();
-
     private final Class<?> classType;
     private final DataType dataType;
     private final String typeName;
-    private Type genericType; // computed on demand and cached
-    private List<Class<?>> genericTypeList; // computed on demand and cached
-
-    private List<String> genericTypeNameList; // computed on demand and cached
-    private String genericTypeNames; // computed on demand and cached
     private final int modifierID;
-    private String modifierStr; // computed on demand and cached
-
     private final boolean modPublic;
     private final boolean modProtected;
-
     private final boolean modPrivate;
     // field modifier in canonical order
     private final boolean modAbstract;
@@ -67,8 +57,13 @@ public class ClassFieldDescription implements FieldDescription {
     private final boolean isprimitive;
     private final boolean isclass;
     private final boolean isEnum;
-
     private final boolean serializable;
+    private String toStringName; // computed on demand and cached
+    private Type genericType; // computed on demand and cached
+    private List<Class<?>> genericTypeList; // computed on demand and cached
+    private List<String> genericTypeNameList; // computed on demand and cached
+    private String genericTypeNames; // computed on demand and cached
+    private String modifierStr; // computed on demand and cached
 
     /**
      * This should be called only once with the root class as an argument
@@ -93,7 +88,7 @@ public class ClassFieldDescription implements FieldDescription {
             final ClassFieldDescription parent, final int recursionLevel) {
         super();
         hierarchyDepth = recursionLevel;
-        this.parent = parent == null ? Optional.empty() : Optional.of(parent);
+        this.parent = parent;
 
         if (referenceClass == null) {
             if (field == null) {
@@ -103,7 +98,7 @@ public class ClassFieldDescription implements FieldDescription {
             classType = field.getType();
             hashCode = field.getName().hashCode();
             fieldName = field.getName();
-            fieldNameRelative = this.parent.map(fieldDescription -> fieldDescription.getFieldNameRelative() + "." + fieldName).orElse(fieldName);
+            fieldNameRelative = this.parent == null ? fieldName : parent.getFieldNameRelative() + "." + fieldName;
 
             modifierID = field.getModifiers();
         } else {
@@ -116,7 +111,7 @@ public class ClassFieldDescription implements FieldDescription {
             modifierID = classType.getModifiers();
         }
 
-        dataType = dataTypeFomClassType(classType);
+        dataType = DataType.fromClassType(classType);
         typeName = ClassDescriptions.translateClassName(classType.getTypeName());
 
         modPublic = Modifier.isPublic(modifierID);
@@ -162,8 +157,8 @@ public class ClassFieldDescription implements FieldDescription {
         }
 
         // add child to parent if it serializable or if a full scan is requested
-        if (this.parent.isPresent() && (serializable || fullScan)) {
-            this.parent.get().getChildren().add(this);
+        if (this.parent != null && (serializable || fullScan)) {
+            this.parent.getChildren().add(this);
             //TODO: check if continues to be necessary this.parent.get().getFieldMap().put(fieldName, this);
         }
     }
@@ -205,6 +200,22 @@ public class ClassFieldDescription implements FieldDescription {
         return this.getFieldName().equals(((FieldDescription) obj).getFieldName());
     }
 
+    @Override
+    public Optional<FieldDescription> findChildField(final String fieldName) {
+        final int fieldNameHashCode = fieldName.hashCode();
+        for (int i = 0; i < children.size(); i++) {
+            final FieldDescription child = children.get(i);
+            final String name = child.getFieldName();
+            if (name == fieldName) { // NOPMD early return if the same String object reference
+                return Optional.of(child);
+            }
+            if (child.hashCode() == fieldNameHashCode && name.equals(fieldName)) {
+                return Optional.of(child);
+            }
+        }
+        return Optional.empty();
+    }
+
     /**
      * @return generic type argument name of the class (e.g. for List&lt;String&gt; this would return
      *         'java.lang.String')
@@ -240,23 +251,6 @@ public class ClassFieldDescription implements FieldDescription {
         return genericTypeList;
     }
 
-    @Override
-    public Optional<FieldDescription> findChildField(final String fieldName) {
-        final int hashCode = fieldName.hashCode();
-        //return fieldDescriptionList.stream().filter(p -> p.hashCode() == hashCode && p.getFieldName().equals(fieldName)).findFirst();
-        for (int i = 0; i < children.size(); i++) {
-            final FieldDescription field = children.get(i);
-            final String name = field.getFieldName();
-            if (name == fieldName) { // NOPMD early return if the same String object reference
-                return Optional.of(field);
-            }
-            if (field.hashCode() == hashCode && name.equals(fieldName)) {
-                return Optional.of(field);
-            }
-        }
-        return Optional.empty();
-    }
-
     /**
      * @return the children (if any) from the super classes
      */
@@ -266,18 +260,13 @@ public class ClassFieldDescription implements FieldDescription {
     }
 
     @Override
-    public long getDataBufferPosition() {
+    public long getDataSize() {
         return 0;
     }
 
     @Override
-    public int getDataDimension() {
+    public long getDataStartOffset() {
         return 0;
-    }
-
-    @Override
-    public int[] getDataDimensions() {
-        return new int[0];
     }
 
     /**
@@ -286,11 +275,6 @@ public class ClassFieldDescription implements FieldDescription {
      */
     public DataType getDataType() {
         return dataType;
-    }
-
-    @Override
-    public long getExpectedNumberOfDataBytes() {
-        return 0;
     }
 
     /**
@@ -370,36 +354,9 @@ public class ClassFieldDescription implements FieldDescription {
     /**
      * @return the parent
      */
-    public Optional<FieldDescription> getParent() {
+    @Override
+    public FieldDescription getParent() {
         return parent;
-    }
-
-    @Override
-    public int hashCode() {
-        return hashCode;
-    }
-
-    @Override
-    public void printFieldStructure() {
-        printClassStructure(this, true, 0);
-    }
-
-    public static void printClassStructure(final ClassFieldDescription field, final boolean fullView, final int recursionLevel) {
-        final String enumOrClass = field.isEnum() ? "Enum " : "class ";
-        final String typeCategorgy = (field.isInterface() ? "interface " : (field.isPrimitive() ? "" : enumOrClass));
-        final String typeName = field.getTypeName() + field.getGenericFieldTypeString();
-        final String mspace = spaces((recursionLevel + 1) * indentationNumerOfSpace);
-        final boolean isSerialisable = field.isSerializable();
-
-        if (isSerialisable || fullView) {
-            LOGGER.atInfo().addArgument(mspace).addArgument(isSerialisable ? "  " : "//").addArgument(field.getModifierString()).addArgument(typeCategorgy).addArgument(typeName).addArgument(field.getFieldNameRelative()).log("{} {} {} {}{} {}");
-
-            field.getChildren().forEach(f -> printClassStructure((ClassFieldDescription) f, fullView, recursionLevel + 1));
-        }
-    }
-
-    private static String spaces(final int spaces) {
-        return CharBuffer.allocate(spaces).toString().replace('\0', ' ');
     }
 
     /**
@@ -412,10 +369,10 @@ public class ClassFieldDescription implements FieldDescription {
         if (field == null) {
             throw new IllegalArgumentException("field is null at hierarchyLevel = " + hierarchyLevel);
         }
-        if ((hierarchyLevel == 0) || field.getParent().isEmpty()) {
+        if ((hierarchyLevel == 0) || field.getParent() == null) {
             return field;
         }
-        return getParent(field.getParent().orElse(null), hierarchyLevel - 1);
+        return getParent(field.getParent(), hierarchyLevel - 1);
     }
 
     /**
@@ -431,6 +388,11 @@ public class ClassFieldDescription implements FieldDescription {
      */
     public String getTypeName() {
         return typeName;
+    }
+
+    @Override
+    public int hashCode() {
+        return hashCode;
     }
 
     /**
@@ -554,6 +516,11 @@ public class ClassFieldDescription implements FieldDescription {
     }
 
     @Override
+    public void printFieldStructure() {
+        printClassStructure(this, true, 0);
+    }
+
+    @Override
     public String toString() {
         if (toStringName == null) {
             toStringName = ClassFieldDescription.class.getSimpleName() + " for: " + getModifierString() + " "
@@ -562,21 +529,18 @@ public class ClassFieldDescription implements FieldDescription {
         return toStringName;
     }
 
-    /**
-     * Returns the data type matching the given java class type, if any.
-     *
-     * @param classType the value to be searched
-     * @return the matching data type
-     */
-    protected static DataType dataTypeFomClassType(final Class<?> classType) {
-        for (final DataType type : DataType.values()) {
-            if (type.getClassTypes().contains(classType)) {
-                return type;
-            }
-        }
+    public static void printClassStructure(final ClassFieldDescription field, final boolean fullView, final int recursionLevel) {
+        final String enumOrClass = field.isEnum() ? "Enum " : "class ";
+        final String typeCategorgy = (field.isInterface() ? "interface " : (field.isPrimitive() ? "" : enumOrClass));
+        final String typeName = field.getTypeName() + field.getGenericFieldTypeString();
+        final String mspace = spaces((recursionLevel + 1) * INDENTATION_NUMER_OF_SPACE);
+        final boolean isSerialisable = field.isSerializable();
 
-        // unknown data type returning generic 'OTHER'
-        return DataType.OTHER;
+        if (isSerialisable || fullView) {
+            LOGGER.atInfo().addArgument(mspace).addArgument(isSerialisable ? "  " : "//").addArgument(field.getModifierString()).addArgument(typeCategorgy).addArgument(typeName).addArgument(field.getFieldNameRelative()).log("{} {} {} {}{} {}");
+
+            field.getChildren().forEach(f -> printClassStructure((ClassFieldDescription) f, fullView, recursionLevel + 1));
+        }
     }
 
     protected static void exploreClass(final Class<?> classType, final ClassFieldDescription parent, final int recursionLevel, final boolean fullScan) {
@@ -603,20 +567,17 @@ public class ClassFieldDescription implements FieldDescription {
 
         // loop over member fields and inner classes
         for (final Field pfield : classType.getDeclaredFields()) {
-            final Optional<FieldDescription> localParent = parent.getParent();
-            if ((localParent.isPresent() && pfield.getType().equals(localParent.get().getType()) && recursionLevel >= maxRecursionLevel) || pfield.getName().startsWith("this$")) {
+            final FieldDescription localParent = parent.getParent();
+            if ((localParent != null && pfield.getType().equals(localParent.getType()) && recursionLevel >= maxRecursionLevel) || pfield.getName().startsWith("this$")) {
                 // inner classes contain parent as part of declared fields
                 continue;
             }
             final ClassFieldDescription field = new ClassFieldDescription(pfield, parent, recursionLevel + 1, fullScan); // NOPMD
             // N.B. unavoidable in-loop object generation
 
-            // N.B. omitting field.isSerializable() (static or transient modifier) is
-            // essential
-            // as they often indicate class dependencies that are prone to infinite
-            // dependency loops
-            // (e.g. for classes with static references to themselves or
-            // maps-of-maps-of-maps-....)
+            // N.B. omitting field.isSerializable() (static or transient modifier) is essential
+            // as they often indicate class dependencies that are prone to infinite dependency loops
+            // (e.g. for classes with static references to themselves or maps-of-maps-of-maps-....)
             final boolean isClassAndNotObjectOrEnmum = field.isClass() && (!field.getType().equals(Object.class) || !field.getType().equals(Enum.class));
             if (field.isSerializable() && (isClassAndNotObjectOrEnmum || field.isInterface())
                     && field.getDataType().equals(DataType.OTHER)) {
@@ -625,5 +586,9 @@ public class ClassFieldDescription implements FieldDescription {
                 exploreClass(field.getType(), field, recursionLevel + 1, fullScan);
             }
         }
+    }
+
+    private static String spaces(final int spaces) {
+        return CharBuffer.allocate(spaces).toString().replace('\0', ' ');
     }
 }
