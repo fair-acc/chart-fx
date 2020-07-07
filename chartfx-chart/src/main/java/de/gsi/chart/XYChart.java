@@ -28,7 +28,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.gsi.chart.axes.Axis;
-import de.gsi.chart.axes.spi.AbstractAxis;
 import de.gsi.chart.renderer.PolarTickStep;
 import de.gsi.chart.renderer.Renderer;
 import de.gsi.chart.renderer.spi.ErrorDataSetRenderer;
@@ -83,6 +82,7 @@ public class XYChart extends Chart {
                 break;
             default:
                 axis.setSide(Side.RIGHT);
+                break;
             }
             getAxes().add(axis);
         }

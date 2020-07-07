@@ -76,7 +76,7 @@ public interface GridDataSet extends DataSet {
      * @return the number of grid dimensions
      */
     public default int getNGrid() {
-        return getNGrid();
+        return getShape().length;
     }
 
     /**
