@@ -173,33 +173,20 @@ public class MyGenericClass {
 
     @Override
     public String toString() {
-        return new StringBuilder() //
-                .append("[dummyBoolean=")
-                .append(dummyBoolean) //
-                .append(", dummyByte=")
-                .append(dummyByte) //
-                .append(", dummyShort=")
-                .append(dummyShort) //
-                .append(", dummyInt=")
-                .append(dummyInt) //
-                .append(", dummyFloat=")
-                .append(dummyFloat) //
-                .append(", dummyDouble=")
-                .append(dummyDouble) //
-                .append(", dummyString=")
-                .append(dummyString) //
-                .append(", arrayListInteger=")
-                .append(arrayListInteger) //
-                .append(", arrayListString=")
-                .append(arrayListString) //
-                .append(", hash(boxedPrimitives)=")
-                .append(boxedPrimitives.hashCode()) //
-                .append(", hash(arrays)=")
-                .append(arrays.hashCode()) //
-                .append(", hash(objArrays)=")
-                .append(objArrays.hashCode()) //
-                .append(']')
-                .toString();
+        return //
+                "[dummyBoolean=" + dummyBoolean + //
+                ", dummyByte=" + dummyByte + //
+                ", dummyShort=" + dummyShort + //
+                ", dummyInt=" + dummyInt + //
+                ", dummyFloat=" + dummyFloat + //
+                ", dummyDouble=" + dummyDouble + //
+                ", dummyString=" + dummyString + //
+                ", arrayListInteger=" + arrayListInteger + //
+                ", arrayListString=" + arrayListString + //
+                ", hash(boxedPrimitives)=" + boxedPrimitives.hashCode() + //
+                ", hash(arrays)=" + arrays.hashCode() + //
+                ", hash(objArrays)=" + objArrays.hashCode() + //
+                ']';
     }
 
     public static boolean isExtendedTestCase() {
@@ -226,6 +213,7 @@ public class MyGenericClass {
         protected boolean[] dummyBooleanArray = new boolean[2];
         protected byte[] dummyByteArray = new byte[2];
         protected short[] dummyShortArray = new short[2];
+        protected char[] dummyCharArray = new char[2];
         protected int[] dummyIntArray = new int[2];
         protected long[] dummyLongArray = new long[2];
         protected float[] dummyFloatArray = new float[2];
@@ -259,6 +247,10 @@ public class MyGenericClass {
             }
             if (!Arrays.equals(dummyShortArray, other.dummyShortArray)) {
                 logBackEnd().addArgument(this.getClass().getSimpleName()).addArgument(dummyShortArray).addArgument(other.dummyShortArray).log("{} - dummyShortArray is not equal: this '{}' vs. other '{}'");
+                state = false;
+            }
+            if (!Arrays.equals(dummyCharArray, other.dummyCharArray)) {
+                logBackEnd().addArgument(this.getClass().getSimpleName()).addArgument(dummyCharArray).addArgument(other.dummyCharArray).log("{} - dummyCharArray is not equal: this '{}' vs. other '{}'");
                 state = false;
             }
             if (!Arrays.equals(dummyIntArray, other.dummyIntArray)) {
@@ -296,6 +288,7 @@ public class MyGenericClass {
             result = prime * result + Arrays.hashCode(dummyIntArray);
             result = prime * result + Arrays.hashCode(dummyLongArray);
             result = prime * result + Arrays.hashCode(dummyShortArray);
+            result = prime * result + Arrays.hashCode(dummyCharArray);
             result = prime * result + Arrays.hashCode(dummyStringArray);
             return result;
         }
@@ -304,8 +297,9 @@ public class MyGenericClass {
             dummyBooleanArray[0] = !dummyBooleanArray[0];
             dummyByteArray[0] = (byte) (dummyByteArray[0] + (byte) 1);
             dummyShortArray[0] = (short) (dummyShortArray[0] + (short) 1);
+            dummyCharArray[0] = (char) (dummyCharArray[0] + (char) 1);
             dummyIntArray[0] = dummyIntArray[0] + 1;
-            dummyLongArray[0] = dummyLongArray[0] + 1l;
+            dummyLongArray[0] = dummyLongArray[0] + 1L;
             dummyFloatArray[0] = dummyFloatArray[0] + 0.5f;
             dummyDoubleArray[0] = dummyDoubleArray[0] + 1.5;
             dummyStringArray[0] = MODIFIED + dummyStringArray[0];
@@ -316,8 +310,9 @@ public class MyGenericClass {
         protected Boolean[] dummyBoxedBooleanArray = { false, false };
         protected Byte[] dummyBoxedByteArray = { 0, 0 };
         protected Short[] dummyBoxedShortArray = { 0, 0 };
+        protected Character[] dummyBoxedCharArray = { 0, 0 };
         protected Integer[] dummyBoxedIntArray = { 0, 0 };
-        protected Long[] dummyBoxedLongArray = { 0l, 0l };
+        protected Long[] dummyBoxedLongArray = { 0L, 0L };
         protected Float[] dummyBoxedFloatArray = { 0.0f, 0.0f };
         protected Double[] dummyBoxedDoubleArray = { 0.0, 0.0 };
         protected String[] dummyBoxedStringArray = { "TestString#2", "TestString#2" };
@@ -366,6 +361,10 @@ public class MyGenericClass {
                 logBackEnd().addArgument(this.getClass().getSimpleName()).addArgument(dummyBoxedShortArray).addArgument(other.dummyBoxedShortArray).log("{} - dummyBoxedShortArray is not equal: this '{}' vs. other '{}'");
                 state = false;
             }
+            if (!Arrays.equals(dummyBoxedCharArray, other.dummyBoxedCharArray)) {
+                logBackEnd().addArgument(this.getClass().getSimpleName()).addArgument(dummyBoxedCharArray).addArgument(other.dummyBoxedCharArray).log("{} - dummyBoxedCharArray is not equal: this '{}' vs. other '{}'");
+                state = false;
+            }
             if (!Arrays.equals(dummyBoxedStringArray, other.dummyBoxedStringArray)) {
                 logBackEnd().addArgument(this.getClass().getSimpleName()).addArgument(dummyBoxedStringArray).addArgument(other.dummyBoxedStringArray).log("{} - dummyBoxedStringArray is not equal: this '{}' vs. other '{}'");
                 state = false;
@@ -393,8 +392,9 @@ public class MyGenericClass {
             dummyBoxedBooleanArray[0] = !dummyBoxedBooleanArray[0];
             dummyBoxedByteArray[0] = (byte) (dummyBoxedByteArray[0] + (byte) 1);
             dummyBoxedShortArray[0] = (short) (dummyBoxedShortArray[0] + (short) 1);
+            dummyBoxedCharArray[0] = (char) (dummyBoxedCharArray[0] + (char) 1);
             dummyBoxedIntArray[0] = dummyBoxedIntArray[0] + 1;
-            dummyBoxedLongArray[0] = dummyBoxedLongArray[0] + 1l;
+            dummyBoxedLongArray[0] = dummyBoxedLongArray[0] + 1L;
             dummyBoxedFloatArray[0] = dummyBoxedFloatArray[0] + 0.5f;
             dummyBoxedDoubleArray[0] = dummyBoxedDoubleArray[0] + 1.5;
             dummyBoxedStringArray[0] = MODIFIED + dummyBoxedStringArray[0];
@@ -403,12 +403,12 @@ public class MyGenericClass {
 
     public class BoxedPrimitivesSubClass {
         protected Boolean dummyBoxedBoolean = Boolean.FALSE;
-        protected Byte dummyBoxedByte = Byte.valueOf((byte) 0);
-        protected Short dummyBoxedShort = Short.valueOf((short) 0);
-        protected Integer dummyBoxedInt = Integer.valueOf(0);
-        protected Long dummyBoxedLong = Long.valueOf(0l);
-        protected Float dummyBoxedFloat = Float.valueOf(0f);
-        protected Double dummyBoxedDouble = Double.valueOf(0.0);
+        protected Byte dummyBoxedByte = (byte) 0;
+        protected Short dummyBoxedShort = (short) 0;
+        protected Integer dummyBoxedInt = 0;
+        protected Long dummyBoxedLong = 0L;
+        protected Float dummyBoxedFloat = 0f;
+        protected Double dummyBoxedDouble = 0.0;
         protected String dummyBoxedString = "Test";
 
         protected BoxedPrimitivesSubSubClass boxedPrimitivesSubSubClass = new BoxedPrimitivesSubSubClass();
@@ -496,34 +496,26 @@ public class MyGenericClass {
 
         @Override
         public String toString() {
-            return new StringBuilder() //
-                    .append("[dummyBoxedBoolean=")
-                    .append(dummyBoxedBoolean) //
-                    .append(", dummyBoxedByte=")
-                    .append(dummyBoxedByte) //
-                    .append(", dummyBoxedShort=")
-                    .append(dummyBoxedShort) //
-                    .append(", dummyBoxedInt=")
-                    .append(dummyBoxedInt) //
-                    .append(", dummyBoxedFloat=")
-                    .append(dummyBoxedFloat) //
-                    .append(", dummyBoxedDouble=")
-                    .append(dummyBoxedDouble) //
-                    .append(", dummyBoxedString=")
-                    .append(dummyBoxedString) //
-                    .append(']')
-                    .toString();
+            return //
+                    "[dummyBoxedBoolean=" + dummyBoxedBoolean + //
+                    ", dummyBoxedByte=" + dummyBoxedByte + //
+                    ", dummyBoxedShort=" + dummyBoxedShort + //
+                    ", dummyBoxedInt=" + dummyBoxedInt + //
+                    ", dummyBoxedFloat=" + dummyBoxedFloat + //
+                    ", dummyBoxedDouble=" + dummyBoxedDouble + //
+                    ", dummyBoxedString=" + dummyBoxedString + //
+                    ']';
         }
 
         @SuppressWarnings("hiding")
         public class BoxedPrimitivesSubSubClass {
             protected Boolean dummyBoxedBooleanL2 = true;
-            protected Byte dummyBoxedByteL2 = Byte.valueOf((byte) 0);
-            protected Short dummyBoxedShortL2 = Short.valueOf((short) 0);
-            protected Integer dummyBoxedIntL2 = Integer.valueOf(0);
-            protected Long dummyBoxedLongL2 = Long.valueOf(0l);
-            protected Float dummyBoxedFloatL2 = Float.valueOf(0f);
-            protected Double dummyBoxedDoubleL2 = Double.valueOf(0.0);
+            protected Byte dummyBoxedByteL2 = (byte) 0;
+            protected Short dummyBoxedShortL2 = (short) 0;
+            protected Integer dummyBoxedIntL2 = 0;
+            protected Long dummyBoxedLongL2 = 0L;
+            protected Float dummyBoxedFloatL2 = 0f;
+            protected Double dummyBoxedDoubleL2 = 0.0;
             protected String dummyBoxedStringL2 = "Test";
 
             public BoxedPrimitivesSubSubSubClass boxedPrimitivesSubSubSubClass = new BoxedPrimitivesSubSubSubClass();
@@ -532,12 +524,12 @@ public class MyGenericClass {
             @SuppressWarnings("hiding")
             public class BoxedPrimitivesSubSubSubClass {
                 protected Boolean dummyBoxedBooleanL3 = false;
-                protected Byte dummyBoxedByteL3 = Byte.valueOf((byte) 0);
-                protected Short dummyBoxedShortL3 = Short.valueOf((short) 0);
-                protected Integer dummyBoxedIntL3 = Integer.valueOf(0);
-                protected Long dummyBoxedLongL3 = Long.valueOf(0l);
-                protected Float dummyBoxedFloatL3 = Float.valueOf(0f);
-                protected Double dummyBoxedDoubleL3 = Double.valueOf(0.0);
+                protected Byte dummyBoxedByteL3 = (byte) 0;
+                protected Short dummyBoxedShortL3 = (short) 0;
+                protected Integer dummyBoxedIntL3 = 0;
+                protected Long dummyBoxedLongL3 = 0L;
+                protected Float dummyBoxedFloatL3 = 0f;
+                protected Double dummyBoxedDoubleL3 = 0.0;
                 protected String dummyBoxedStringL3 = "Test";
             }
         }
@@ -547,6 +539,6 @@ public class MyGenericClass {
         TEST_CASE_1,
         TEST_CASE_2,
         TEST_CASE_3,
-        TEST_CASE_4;
+        TEST_CASE_4
     }
 }

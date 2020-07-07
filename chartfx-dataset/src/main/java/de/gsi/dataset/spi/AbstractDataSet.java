@@ -313,7 +313,6 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
             return false;
         }
         final DataSet other = (DataSet) obj;
-        // N.B. some complication equals can be invoked from both reader as well as writer threads
 
         // check dimension and data counts
         if (this.getDimension() != other.getDimension()) {

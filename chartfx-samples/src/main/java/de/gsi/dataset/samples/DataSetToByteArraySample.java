@@ -5,6 +5,8 @@ import static de.gsi.dataset.DataSet.DIM_Y;
 
 import java.io.ByteArrayOutputStream;
 import java.util.concurrent.TimeUnit;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,12 +16,12 @@ import de.gsi.dataset.DataSet2D;
 import de.gsi.dataset.DataSetError;
 import de.gsi.dataset.DataSetError.ErrorType;
 import de.gsi.dataset.DataSetMetaData;
+import de.gsi.dataset.serializer.IoClassSerialiser;
 import de.gsi.dataset.serializer.IoSerialiser;
 import de.gsi.dataset.serializer.spi.BinarySerialiser;
-import de.gsi.dataset.serializer.spi.ClassDescriptions;
 import de.gsi.dataset.serializer.spi.FastByteBuffer;
 import de.gsi.dataset.serializer.spi.iobuffer.DataSetSerialiser;
-import de.gsi.dataset.serializer.spi.iobuffer.IoBufferSerialiser;
+import de.gsi.dataset.serializer.utils.ClassUtils;
 import de.gsi.dataset.spi.DoubleErrorDataSet;
 import de.gsi.dataset.testdata.spi.RandomDataGenerator;
 import de.gsi.dataset.utils.DataSetUtils;
@@ -27,7 +29,7 @@ import de.gsi.dataset.utils.ProcessingProfiler;
 
 public class DataSetToByteArraySample {
     private static final Logger LOGGER = LoggerFactory.getLogger(DataSetToByteArraySample.class);
-    private static final int N_SAMPLES = 10_000; // default: 100_000
+    private static final int N_SAMPLES = 10_000; // default: 10_000
     private final DoubleErrorDataSet original = new DoubleErrorDataSet("init", N_SAMPLES);
     private final ByteArrayOutputStream byteOutput = new ByteArrayOutputStream();
     private final FastByteBuffer byteBuffer = new FastByteBuffer();
@@ -48,57 +50,14 @@ public class DataSetToByteArraySample {
         DataSetUtils.writeDataSetToByteArray(original, byteOutput, true, false);
         LOGGER.atInfo().addArgument(encodingBits(false)).addArgument(encodingBinary(true)).addArgument(humanReadableByteCount(byteOutput.size(), true)).log("byte buffer array length with {} {} encoding =  = {}");
 
-        byteBuffer.ensureCapacity(byteOutput.size() + 1000L);
+        byteBuffer.ensureCapacity(byteOutput.size() + 1000);
     }
 
     public void clearGarbage() {
-        System.gc();
-        System.gc();
+        // N.B. call gc to allow for light-weight performance comparisons... real benchmarking should be done with e.g. JMH
+        System.gc(); //NOSONAR //NOPMD
+        System.gc(); //NOSONAR //NOPMD
         LOGGER.atInfo().log("");
-    }
-
-    private static String encodingBinary(final boolean isBinaryEncoding) {
-        return isBinaryEncoding ? "binary-based" : "string-based";
-    }
-
-    private static String encodingBits(final boolean is32BitEncoding) {
-        return is32BitEncoding ? "32-bit" : "64-bit";
-    }
-
-    protected boolean floatIdentity(double a, double b) {
-        // 32-bit float uses 23-bit for the mantissa
-        return Math.abs((float) a - (float) b) <= 2 / Math.pow(2, 23);
-    }
-
-    private static void generateData(final DoubleErrorDataSet dataSet) {
-        final long startTime = ProcessingProfiler.getTimeStamp();
-
-        dataSet.autoNotification().set(false);
-        dataSet.clearData();
-        dataSet.setName("data set name" + System.currentTimeMillis());
-        double oldY = 0;
-        for (int n = 0; n < N_SAMPLES; n++) {
-            oldY += RandomDataGenerator.random() - 0.5;
-            final double y = oldY;
-            final double eyNeg = 0.1;
-            final double eyPos = 10;
-            dataSet.set(n, n, y, eyNeg, eyPos);
-
-            if (n == 5000) {
-                dataSet.getDataLabelMap().put(n, "special outlier");
-                dataSet.getDataStyleMap().put(n, "-stroke-color=red");
-            }
-        }
-        dataSet.getInfoList().add("standard info1");
-        dataSet.getInfoList().add("standard info2");
-        dataSet.getWarningList().add("standard warning");
-        dataSet.getErrorList().add("standard error");
-        dataSet.getMetaInfo().put("metaKey#1", "metaValue#1");
-        dataSet.getMetaInfo().put("metaKey#2", "metaValue#2");
-        dataSet.getMetaInfo().put("metaKey#3", "metaValue#3");
-
-        dataSet.autoNotification().set(true);
-        ProcessingProfiler.getTimeDiff(startTime, "generating data DataSet");
     }
 
     public void testDataSetSerialiserIdentity(final boolean withMetaData, final boolean asFloat32) {
@@ -111,8 +70,8 @@ public class DataSetToByteArraySample {
         final DoubleErrorDataSet dataSet = (DoubleErrorDataSet) dataSetSerialiser.readDataSetFromByteArray();
 
         testIdentityCore(true, asFloat32, original, dataSet);
-        testIdentityLabelsAndStyles(true, asFloat32, original, dataSet);
-        testIdentityMetaData(true, asFloat32, original, dataSet);
+        testIdentityLabelsAndStyles(true, original, dataSet);
+        testIdentityMetaData(true, original, dataSet);
 
         LOGGER.atInfo().addArgument(encodingBits(asFloat32)).addArgument(encodingBinary(true)).addArgument(withMetaData ? "with" : "w/o").log("testDataSetSerialiserIdentity passed for {} {} encoding {} meta-data");
     }
@@ -129,30 +88,21 @@ public class DataSetToByteArraySample {
         testIdentityCore(binary, asFloat32, original, (DoubleErrorDataSet) dataSet);
         // following is not (yet) implemented in DataSetUtils
         // testIdentityLabelsAndStyles(true, asFloat32, original, dataSet);
-
-        if (dataSet instanceof DataSetMetaData) {
-            testIdentityMetaData(binary, asFloat32, original, (DataSetMetaData) dataSet);
-        }
+        testIdentityMetaData(binary, original, (DataSetMetaData) dataSet);
 
         LOGGER.atInfo().addArgument(encodingBits(asFloat32)).addArgument(encodingBinary(binary)).log("testDataSetUtilsIdentity passed for {} {} encoding with partial meta-data");
     }
 
     public void testGenericSerialiserIdentity(final boolean asFloat32) {
-        IoBufferSerialiser serialiser = new IoBufferSerialiser(binarySerialiser);
+        IoClassSerialiser serialiser = new IoClassSerialiser(binarySerialiser);
         DataSetWrapper dsOrig = new DataSetWrapper();
         dsOrig.source = original;
         DataSetWrapper cpOrig = new DataSetWrapper();
 
-        try {
-            byteBuffer.reset(); // '0' writing at start of buffer
-            serialiser.serialiseObject(dsOrig);
-            byteBuffer.reset(); // reset to read position (==0)
-            serialiser.deserialiseObject(cpOrig);
-        } catch (IllegalAccessException e) {
-            if (LOGGER.isErrorEnabled()) {
-                LOGGER.atError().setCause(e).log("access error");
-            }
-        }
+        byteBuffer.reset(); // '0' writing at start of buffer
+        serialiser.serialiseObject(dsOrig);
+        byteBuffer.reset(); // reset to read position (==0)
+        serialiser.deserialiseObject(cpOrig);
 
         if (!(cpOrig.source instanceof DoubleErrorDataSet)) {
             throw new IllegalStateException(
@@ -160,18 +110,17 @@ public class DataSetToByteArraySample {
         }
 
         testIdentityCore(true, asFloat32, original, (DoubleErrorDataSet) cpOrig.source);
-        testIdentityLabelsAndStyles(true, asFloat32, original, cpOrig.source);
+        testIdentityLabelsAndStyles(true, original, cpOrig.source);
 
         if (cpOrig.source instanceof DataSetMetaData) {
-            testIdentityMetaData(true, asFloat32, original, (DataSetMetaData) cpOrig.source);
+            testIdentityMetaData(true, original, (DataSetMetaData) cpOrig.source);
         }
 
         LOGGER.atInfo().addArgument(encodingBits(asFloat32)).addArgument(encodingBinary(true)).log("testGenericSerialiserIdentity passed for {} {} encoding with partial meta-data");
     }
 
-    public void testGenericSerializerPerformance(final int iterations, final boolean withMetaInfos,
-            final boolean asFloat32) {
-        IoBufferSerialiser serialiser = new IoBufferSerialiser(binarySerialiser);
+    public void testGenericSerializerPerformance(final int iterations, final boolean asFloat32) {
+        IoClassSerialiser serialiser = new IoClassSerialiser(binarySerialiser);
         byteBuffer.reset(); // reset to read position (==0)
         final DoubleErrorDataSet copy = new DoubleErrorDataSet("init", N_SAMPLES);
         copy.setErrorType(DIM_X, ErrorType.NO_ERROR);
@@ -182,36 +131,39 @@ public class DataSetToByteArraySample {
         DataSetWrapper cpOrig = new DataSetWrapper();
         cpOrig.source = new DoubleErrorDataSet("test", 10);
 
+        binarySerialiser.setPutFieldMetaData(true);
         final long startTime = ProcessingProfiler.getTimeStamp();
         for (int i = 0; i < iterations; i++) {
+            if (i == 1) {
+                binarySerialiser.setPutFieldMetaData(false);
+            }
+            original.setName("data set name " + System.currentTimeMillis());
             byteBuffer.reset(); // '0' writing at start of buffer
-            try {
-                serialiser.serialiseObject(original);
-            } catch (IllegalAccessException e) {
-                if (LOGGER.isErrorEnabled()) {
-                    LOGGER.atError().setCause(e).log("access error");
-                }
-            }
-            byteBuffer.reset(); // reset to read position (==0)
-            try {
-                serialiser.deserialiseObject(cpOrig.source);
-            } catch (IllegalAccessException e) {
-                if (LOGGER.isErrorEnabled()) {
-                    LOGGER.atError().setCause(e).log("access error");
-                }
-            }
+            serialiser.serialiseObject(dsOrig);
 
-            if (!dsOrig.source.getName().equals(cpOrig.source.getName()) || !dsOrig.source.equals(cpOrig.source)) {
-                LOGGER.atError().log("ERROR data set does not match -> potential streaming error at index = " + i);
+            byteBuffer.reset(); // reset to read position (==0)
+            serialiser.deserialiseObject(cpOrig);
+
+            if (!dsOrig.source.getName().equals(cpOrig.source.getName())) {
+                LOGGER.atError().addArgument(dsOrig.source.getName()).addArgument(cpOrig.source.getName()).log("ERROR DataSet '{}' does not match '{}' -> potential streaming error at index = " + i);
+                if (!dsOrig.source.equals(cpOrig.source)) {
+                    throw new IllegalStateException("DataSet mismatch");
+                }
                 break;
             }
         }
 
-        final long stopTime = ProcessingProfiler.getTimeDiff(startTime, "generating data DataSet");
+        final long stopTime = ProcessingProfiler.getTimeDiff(startTime, "testGenericSerializerPerformance");
 
+        binarySerialiser.setPutFieldMetaData(true);
         final double diffMillis = TimeUnit.NANOSECONDS.toMillis(stopTime - startTime);
         final double byteCount = iterations * ((byteBuffer.position() / diffMillis) * 1e3);
-        LOGGER.atInfo().addArgument(encodingBits(asFloat32)).addArgument(encodingBinary(true)).addArgument(withMetaInfos ? "with" : "w/o").addArgument(humanReadableByteCount((long) byteCount, true)).log("average {} {} IoBufferSerialiser throughput {} meta infos = {}/s");
+        LOGGER.atInfo().addArgument(encodingBits(asFloat32)) //
+                .addArgument(encodingBinary(true))
+                .addArgument("with")
+                .addArgument(humanReadableByteCount((long) byteCount, true))
+                .addArgument(diffMillis / (double) iterations)
+                .log("average {} {} IoClassSerialiser throughput {} meta infos = {}/s - time: {} ms per DataSet round-trip");
     }
 
     public void testIdentityCore(final boolean binary, final boolean asFloat32, final DataSetError originalDS,
@@ -272,7 +224,7 @@ public class DataSetToByteArraySample {
         }
     }
 
-    public void testIdentityLabelsAndStyles(final boolean binary, final boolean asFloat32, final DataSet2D originalDS,
+    public void testIdentityLabelsAndStyles(final boolean binary, final DataSet2D originalDS,
             final DataSet testDS) {
         // check for labels & styles
         for (int i = 0; i < originalDS.getDataCount(); i++) {
@@ -299,7 +251,7 @@ public class DataSetToByteArraySample {
         }
     }
 
-    public void testIdentityMetaData(final boolean binary, final boolean asFloat32, final DataSetMetaData originalDS,
+    public void testIdentityMetaData(final boolean binary, final DataSetMetaData originalDS,
             final DataSetMetaData testDS) {
         // check for meta data and meta messages
         if (!originalDS.getInfoList().equals(testDS.getInfoList())) {
@@ -327,7 +279,12 @@ public class DataSetToByteArraySample {
 
         final double diffMillis = TimeUnit.NANOSECONDS.toMillis(stopTime - startTime);
         final double byteCount = iterations * ((byteOutput.size() / diffMillis) * 1e3);
-        LOGGER.atInfo().addArgument(encodingBits(asFloat32)).addArgument(encodingBinary(binary)).addArgument(withMetaInfos ? "with" : "w/o").addArgument(humanReadableByteCount((long) byteCount, true)).log("average {} {} DataSetUtils throughput {} meta infos = {}/s");
+        LOGGER.atInfo().addArgument(encodingBits(asFloat32)) //
+                .addArgument(encodingBinary(binary))
+                .addArgument(withMetaInfos ? "with" : "w/o")
+                .addArgument(humanReadableByteCount((long) byteCount, true))
+                .addArgument(diffMillis / (double) iterations)
+                .log("average {} {} DataSetUtils throughput {} meta infos = {}/s - time: {} ms per DataSet round-trip");
     }
 
     public void testSerializerPerformance(final int iterations, final boolean withMetaInfos, final boolean asFloat32) {
@@ -349,11 +306,38 @@ public class DataSetToByteArraySample {
             }
         }
 
-        final long stopTime = ProcessingProfiler.getTimeDiff(startTime, "generating data DataSet");
+        final long stopTime = ProcessingProfiler.getTimeDiff(startTime, "testSerializerPerformance");
 
         final double diffMillis = TimeUnit.NANOSECONDS.toMillis(stopTime - startTime);
         final double byteCount = iterations * ((byteBuffer.position() / diffMillis) * 1e3);
-        LOGGER.atInfo().addArgument(encodingBits(asFloat32)).addArgument(encodingBinary(true)).addArgument(withMetaInfos ? "with" : "w/o").addArgument(humanReadableByteCount((long) byteCount, true)).log("average {} {} DataSetSerialiser throughput {} meta infos = {}/s");
+        LOGGER.atInfo().addArgument(encodingBits(asFloat32)) //
+                .addArgument(encodingBinary(true))
+                .addArgument(withMetaInfos ? "with" : "w/o")
+                .addArgument(humanReadableByteCount((long) byteCount, true))
+                .addArgument(diffMillis / (double) iterations)
+                .log("average {} {} DataSetSerialiser throughput {} meta infos = {}/s - time: {} ms per DataSet round-trip");
+    }
+
+    protected boolean floatIdentity(double a, double b) {
+        // 32-bit float uses 23-bit for the mantissa
+        return Math.abs((float) a - (float) b) <= 2 / Math.pow(2, 23);
+    }
+
+    private void performIdentityChecks() {
+        // some identity checks
+        for (boolean bit32 : new Boolean[] { true, false }) {
+            for (boolean binary : new Boolean[] { false, true }) {
+                testDataSetUtilsIdentity(binary, bit32);
+            }
+            testGenericSerialiserIdentity(bit32);
+        }
+        clearGarbage();
+        for (boolean bit32 : new Boolean[] { true, false }) {
+            for (boolean withMetaData : new Boolean[] { false, true }) {
+                testDataSetSerialiserIdentity(withMetaData, bit32);
+            }
+        }
+        clearGarbage();
     }
 
     public static String humanReadableByteCount(final long bytes, final boolean si) {
@@ -374,65 +358,80 @@ public class DataSetToByteArraySample {
         ProcessingProfiler.setDebugState(true);
 
         final DataSetToByteArraySample sample = new DataSetToByteArraySample();
-        // some identity checks
-        for (boolean bit32 : new Boolean[] { true, false }) {
-            for (boolean binary : new Boolean[] { false, true }) {
-                sample.testDataSetUtilsIdentity(binary, bit32);
-            }
-            sample.testGenericSerialiserIdentity(bit32);
-        }
-        sample.clearGarbage();
-        for (boolean bit32 : new Boolean[] { true, false }) {
-            for (boolean withMetaData : new Boolean[] { false, true }) {
-                sample.testDataSetSerialiserIdentity(withMetaData, bit32);
-            }
-        }
-        sample.clearGarbage();
+
+        sample.performIdentityChecks();
 
         // parse and print class structure
-        ClassDescriptions.get(DoubleErrorDataSet.class).printFieldStructure();
+        ClassUtils.getFieldDescription(DoubleErrorDataSet.class).printFieldStructure();
 
         // string based performance
-        // N.B. loops only once, since this serialiser is relatively slow (~30
-        // MB/s)
+        // N.B. loops only once, since this serialiser is relatively slow (~30 MB/s)
         sample.testPerformance(100, true, false, true);
         sample.testPerformance(100, true, false, false);
         sample.clearGarbage();
 
         final int iterations = 4;
+        final Consumer<BiConsumer<Boolean, Boolean>> loopFunction = func -> {
+            for (boolean bit32 : new Boolean[] { true, false }) {
+                for (boolean header : new Boolean[] { true, false }) {
+                    for (int i = 0; i < iterations; i++) {
+                        func.accept(bit32, header);
+                    }
+                    sample.clearGarbage();
+                }
+            }
+        };
+
         final int nLoops = 2000;
-        for (boolean bit32 : new Boolean[] { true, false }) {
-            for (boolean header : new Boolean[] { true, false }) {
-                for (int i = 0; i < iterations; i++) {
-                    sample.testPerformance(nLoops, header, true, bit32);
-                }
-                sample.clearGarbage();
-            }
-        }
-
-        for (boolean bit32 : new Boolean[] { true, false }) {
-            for (boolean header : new Boolean[] { true, false }) {
-                for (int i = 0; i < iterations; i++) {
-                    sample.testSerializerPerformance(nLoops, header, bit32);
-                }
-                sample.clearGarbage();
-            }
-        }
-
-        for (boolean bit32 : new Boolean[] { false }) {
-            for (boolean header : new Boolean[] { true }) {
-                for (int i = 0; i < 3 * iterations; i++) {
-                    sample.testGenericSerializerPerformance(nLoops, header, bit32);
-                }
-                sample.clearGarbage();
-            }
-        }
+        loopFunction.accept((bit32, header) -> sample.testPerformance(nLoops, header, true, bit32));
+        loopFunction.accept((bit32, header) -> sample.testSerializerPerformance(nLoops, header, bit32));
+        loopFunction.accept((bit32, header) -> sample.testGenericSerializerPerformance(nLoops, false));
 
         // infinite loop for performance tracking
-        // sample.testSerializerPerformance(Integer.MAX_VALUE, true, false);
+        // enable if necessary sample.testSerializerPerformance(Integer.MAX_VALUE, true, false)
+        // enable if necessary sample.testGenericSerializerPerformance(Integer.MAX_VALUE, false)
     }
 
-    public class DataSetWrapper {
-        public DataSet source;
+    private static String encodingBinary(final boolean isBinaryEncoding) {
+        return isBinaryEncoding ? "binary-based" : "string-based";
+    }
+
+    private static String encodingBits(final boolean is32BitEncoding) {
+        return is32BitEncoding ? "32-bit" : "64-bit";
+    }
+
+    private static void generateData(final DoubleErrorDataSet dataSet) {
+        final long startTime = ProcessingProfiler.getTimeStamp();
+
+        dataSet.autoNotification().set(false);
+        dataSet.clearData();
+        dataSet.setName("data set name " + System.currentTimeMillis());
+        double oldY = 0;
+        for (int n = 0; n < N_SAMPLES; n++) {
+            oldY += RandomDataGenerator.random() - 0.5;
+            final double y = oldY;
+            final double eyNeg = 0.1;
+            final double eyPos = 10;
+            dataSet.set(n, n, y, eyNeg, eyPos);
+
+            if (n == 5000) {
+                dataSet.getDataLabelMap().put(n, "special outlier");
+                dataSet.getDataStyleMap().put(n, "-stroke-color=red");
+            }
+        }
+        dataSet.getInfoList().add("standard info1");
+        dataSet.getInfoList().add("standard info2");
+        dataSet.getWarningList().add("standard warning");
+        dataSet.getErrorList().add("standard error");
+        dataSet.getMetaInfo().put("metaKey#1", "metaValue#1");
+        dataSet.getMetaInfo().put("metaKey#2", "metaValue#2");
+        dataSet.getMetaInfo().put("metaKey#3", "metaValue#3");
+
+        dataSet.autoNotification().set(true);
+        ProcessingProfiler.getTimeDiff(startTime, "generating data DataSet");
+    }
+
+    private class DataSetWrapper {
+        private DataSet source;
     }
 }

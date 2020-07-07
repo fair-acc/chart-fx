@@ -13,12 +13,12 @@ import com.google.flatbuffers.ArrayReadWriteBuf;
 import com.google.flatbuffers.FlexBuffersBuilder;
 
 import de.gsi.dataset.serializer.IoBuffer;
+import de.gsi.dataset.serializer.IoClassSerialiser;
 import de.gsi.dataset.serializer.helper.FlatBuffersHelper;
 import de.gsi.dataset.serializer.helper.SerialiserHelper;
 import de.gsi.dataset.serializer.helper.TestDataClass;
 import de.gsi.dataset.serializer.spi.BinarySerialiser;
 import de.gsi.dataset.serializer.spi.FastByteBuffer;
-import de.gsi.dataset.serializer.spi.iobuffer.IoBufferSerialiser;
 
 //import cern.cmw.data.Data;
 //import cern.cmw.data.DataFactory;
@@ -31,7 +31,7 @@ public class SerialiserBenchmark { // NOPMD - nomen est omen
     private static final IoBuffer byteBuffer = new FastByteBuffer(20000);
     // private static final IoBuffer byteBuffer = new ByteBuffer(20000);
     private static final BinarySerialiser binarySerialiser = new BinarySerialiser(byteBuffer);
-    private static final IoBufferSerialiser ioSerialiser = new IoBufferSerialiser(binarySerialiser);
+    private static final IoClassSerialiser ioSerialiser = new IoClassSerialiser(binarySerialiser);
     private static final TestDataClass inputObject = new TestDataClass(10, 100, 1);
     private static TestDataClass outputObject = new TestDataClass(-1, -1, 0);
     private static byte[] rawByteBuffer = new byte[20000];
@@ -49,13 +49,11 @@ public class SerialiserBenchmark { // NOPMD - nomen est omen
 
     public static void checkIoBufferSerialiserIdentity() {
         byteBuffer.reset();
-        try {
-            ioSerialiser.serialiseObject(inputObject);
-        } catch (IllegalAccessException e) {
-            LOGGER.atError().setCause(e).log("caught serialisation error");
-        }
+
+        ioSerialiser.serialiseObject(inputObject);
+
         // SerialiserHelper.serialiseCustom(byteBuffer, inputObject);
-        nBytesIO = (int) byteBuffer.position();
+        nBytesIO = byteBuffer.position();
         LOGGER.atInfo().addArgument(nBytesIO).log("custom serialiser nBytes = {}");
 
         // keep: checks serialised data structure
@@ -64,11 +62,7 @@ public class SerialiserBenchmark { // NOPMD - nomen est omen
         // fieldRoot.printFieldStructure();
 
         byteBuffer.reset();
-        try {
-            outputObject = (TestDataClass) ioSerialiser.deserialiseObject(outputObject);
-        } catch (IllegalAccessException e) {
-            LOGGER.atError().setCause(e).log("caught serialisation error");
-        }
+        outputObject = (TestDataClass) ioSerialiser.deserialiseObject(outputObject);
 
         // second test - both vectors should have the same initial values after serialise/deserialise
         assertArrayEquals(inputObject.stringArray, outputObject.stringArray);
@@ -79,7 +73,7 @@ public class SerialiserBenchmark { // NOPMD - nomen est omen
     public static void checkCustomSerialiserIdentity() {
         byteBuffer.reset();
         SerialiserHelper.serialiseCustom(binarySerialiser, inputObject);
-        nBytesIO = (int) byteBuffer.position();
+        nBytesIO = byteBuffer.position();
         LOGGER.atInfo().addArgument(nBytesIO).log("custom serialiser nBytes = {}");
 
         // keep: checks serialised data structure
@@ -218,19 +212,11 @@ public class SerialiserBenchmark { // NOPMD - nomen est omen
 
         for (int i = 0; i < iterations; i++) {
             byteBuffer.reset();
-            try {
-                ioSerialiser.serialiseObject(inputObject);
-            } catch (IllegalAccessException e) {
-                LOGGER.atError().setCause(e).log("caught serialisation error");
-            }
+            ioSerialiser.serialiseObject(inputObject);
 
             byteBuffer.reset();
 
-            try {
-                outputObject = (TestDataClass) ioSerialiser.deserialiseObject(outputObject);
-            } catch (IllegalAccessException e) {
-                LOGGER.atError().setCause(e).log("caught serialisation error");
-            }
+            outputObject = (TestDataClass) ioSerialiser.deserialiseObject(outputObject);
 
             if (!inputObject.string1.contentEquals(outputObject.string1)) {
                 // quick check necessary so that the above is not optimised by the Java JIT compiler to NOP
