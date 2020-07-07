@@ -56,6 +56,7 @@ public class EditDataSetSample extends Application {
         Renderer renderer2 = new ErrorDataSetRenderer();
         DefaultNumericAxis currentAxis = new DefaultNumericAxis();
         currentAxis.setSide(Side.RIGHT);
+        currentAxis.setDimIndex(DIM_Y);
         renderer2.getAxes().addAll(chart.getXAxis(), currentAxis);
         renderer1.getDatasets().add(dataSet1);
         chart.getRenderers().addAll(renderer1, renderer2);
