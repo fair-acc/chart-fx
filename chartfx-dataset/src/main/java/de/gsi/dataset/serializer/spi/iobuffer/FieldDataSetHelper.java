@@ -1,8 +1,8 @@
 package de.gsi.dataset.serializer.spi.iobuffer;
 
 import de.gsi.dataset.DataSet;
-import de.gsi.dataset.serializer.IoSerialiser;
-import de.gsi.dataset.serializer.spi.AbstractSerialiser;
+import de.gsi.dataset.serializer.FieldSerialiser;
+import de.gsi.dataset.serializer.IoClassSerialiser;
 
 import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
 
@@ -15,37 +15,30 @@ public final class FieldDataSetHelper {
      * registers default DataSet interface and related helper methods
      * 
      * @param serialiser for which the field serialisers should be registered
-     * @param ioBuffer reference to the IoBuffer back-ends
      */
-    public static void register(final AbstractSerialiser serialiser, final IoSerialiser ioBuffer) {
+    public static void register(final IoClassSerialiser serialiser) {
         // DoubleArrayList serialiser mapper to IoBuffer
-        serialiser.addClassDefinition(new IoBufferFieldSerialiser(ioBuffer, //
-                (obj, field) -> field.getField().set(obj, DoubleArrayList.wrap(ioBuffer.getDoubleArray())), // reader
-                (obj, field) -> {
+        serialiser.addClassDefinition(new FieldSerialiser<>( //
+                (io, obj, field) -> field.getField().set(obj, DoubleArrayList.wrap(io.getBuffer().getDoubleArray())), // reader
+                (io, obj, field) -> DoubleArrayList.wrap(io.getBuffer().getDoubleArray()), // return
+                (io, obj, field) -> {
                     final DoubleArrayList retVal = (DoubleArrayList) field.getField().get(obj);
-                    ioBuffer.put(retVal.elements(), new int[] { retVal.size() });
+                    io.getBuffer().putDoubleArray(retVal.elements(), 0, retVal.size());
                 }, // writer
                 DoubleArrayList.class));
 
-        serialiser.addClassDefinition(new IoBufferFieldSerialiser(ioBuffer, //
-                (obj, field) -> {
-                    final String dataSetType = ioBuffer.getString();
-                    if (!DataSet.class.getName().equals(dataSetType)) {
-                        throw new IllegalArgumentException("unknown DataSet type = " + dataSetType);
-                    }
-
-                    field.getField().set(obj, new DataSetSerialiser(ioBuffer).readDataSetFromByteArray());
-                }, // reader
-                (obj, field) -> {
-                    final DataSet retVal = (DataSet) (field.getField() == null ? obj : field.getField().get(obj));
-
-                    ioBuffer.getBuffer().putString(DataSet.class.getName());
-                    new DataSetSerialiser(ioBuffer).writeDataSetToByteArray(retVal, false);
-                    ioBuffer.updateDataEndMarker();
+        serialiser.addClassDefinition(new FieldSerialiser<>( //
+                (io, obj, field) ->
+                // short form: FieldSerialiser.this.getReturnObjectFunction().andThen(io, obj, field) -- not possible inside a constructor
+                field.getField().set(obj, new DataSetSerialiser(io).readDataSetFromByteArray()), // reader
+                (io, obj, field) -> new DataSetSerialiser(io).readDataSetFromByteArray(), // return object function
+                (io, obj, field) -> {
+                    final DataSet retVal = (DataSet) (field == null || field.getField() == null ? obj : field.getField().get(obj));
+                    new DataSetSerialiser(io).writeDataSetToByteArray(retVal, false);
                 }, // writer
                 DataSet.class));
 
         // List<AxisDescription> serialiser mapper to IoBuffer
-        serialiser.addClassDefinition(new FieldListAxisDescription(ioBuffer));
+        serialiser.addClassDefinition(new FieldListAxisDescription());
     }
 }

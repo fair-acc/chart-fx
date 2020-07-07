@@ -1,5 +1,6 @@
-package de.gsi.dataset.serializer.spi;
+package de.gsi.dataset.serializer;
 
+import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -7,57 +8,62 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import de.gsi.dataset.serializer.spi.ClassFieldDescription;
+
 /**
  * default field serialiser implementation. The user needs to provide the reader and writer consumer lambdas to connect
  * to the given serialiser back-end implementation.
- * 
+ * @param <R> function return type
  * @author rstein
  */
-public class FieldSerialiser {
+public class FieldSerialiser<R> {
     private static final Logger LOGGER = LoggerFactory.getLogger(FieldSerialiser.class);
     private final Class<?> classPrototype;
-    private final List<Class<?>> classGenericArguments;
+    private final List<Type> classGenericArguments;
     private final String name;
     private final String canonicalName;
     private final String simpleName;
     private final int cachedHashCode;
-    protected FieldSerialiserFunction readerFunction;
-    protected FieldSerialiserFunction writerFunction;
+    protected TriConsumer readerFunction;
+    protected TriConsumer writerFunction;
+    protected TriFunction<R> returnFunction;
 
     /**
-     * 
+     *
      * @param reader consumer executed when reading from the back-end serialiser implementation
+     * @param returnFunction function that is being executed for returning a new object to the back-end serialiser implementation
      * @param writer consumer executed when writing to the back-end serialiser implementation
      * @param classPrototype applicable class/interface prototype reference for which the consumers are applicable (e.g.
      *        example 1: 'List.class' for List&lt;String&gt; or example 2: 'Map.class' for Map&lt;Integer, String&gt;)
      * @param classGenericArguments applicable generics definition (e.g. 'String.class' for List&lt;String&gt; or
      *        'Integer.class, String.class' resp.)
      */
-    public FieldSerialiser(final FieldSerialiserFunction reader, final FieldSerialiserFunction writer,
-            final Class<?> classPrototype, Class<?>... classGenericArguments) {
-        if ((reader == null || writer == null)) {
-            LOGGER.atDebug().addArgument(reader).addArgument(writer).log("caution: reader {} or writer {} is null");
+    public FieldSerialiser(final TriConsumer reader, final TriFunction<R> returnFunction, final TriConsumer writer, final Class<?> classPrototype, Class<?>... classGenericArguments) {
+        if ((reader == null || returnFunction == null || writer == null)) {
+            LOGGER.atWarn().addArgument(reader).addArgument(writer).log("caution: reader {}, return {} or writer {} is null");
         }
         if (classPrototype == null) {
             throw new IllegalArgumentException("classPrototype must not be null");
         }
         this.readerFunction = reader;
+        this.returnFunction = returnFunction;
         this.writerFunction = writer;
         this.classPrototype = classPrototype;
         this.classGenericArguments = Arrays.asList(classGenericArguments);
-        cachedHashCode = AbstractSerialiser.computeHashCode(classPrototype, this.classGenericArguments);
+        cachedHashCode = IoClassSerialiser.computeHashCode(classPrototype, this.classGenericArguments);
 
-        String genericFieldString = this.classGenericArguments.isEmpty() ? ""
-                                                                         : this.classGenericArguments.stream().map(Class::getName).collect(Collectors.joining(", ", "<", ">"));
+        String genericFieldString = this.classGenericArguments.isEmpty() ? "" : this.classGenericArguments.stream().map(Type::getTypeName).collect(Collectors.joining(", ", "<", ">"));
 
         canonicalName = classPrototype.getCanonicalName() + genericFieldString;
-        simpleName = classPrototype.getSimpleName()
-                     + AbstractSerialiser.getGenericFieldSimpleTypeString(this.classGenericArguments);
+        simpleName = classPrototype.getSimpleName() + IoClassSerialiser.getGenericFieldSimpleTypeString(this.classGenericArguments);
         name = "Serialiser for " + canonicalName;
     }
 
     @Override
     public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
         if (obj == null || getClass() != obj.getClass()) {
             return false;
         }
@@ -84,7 +90,7 @@ public class FieldSerialiser {
      * 
      * @return class reference to generics arguments
      */
-    public List<Class<?>> getGenericsPrototypes() {
+    public List<Type> getGenericsPrototypes() {
         return classGenericArguments;
     }
 
@@ -92,7 +98,7 @@ public class FieldSerialiser {
      * 
      * @return consumer that is being executed for reading from the back-end serialiser implementation
      */
-    public FieldSerialiserFunction getReaderFunction() {
+    public TriConsumer getReaderFunction() {
         return readerFunction;
     }
 
@@ -108,8 +114,16 @@ public class FieldSerialiser {
      * 
      * @return consumer that is being executed for writing to the back-end serialiser implementation
      */
-    public FieldSerialiserFunction getWriterFunction() {
+    public TriConsumer getWriterFunction() {
         return writerFunction;
+    }
+
+    /**
+     *
+     * @return function that is being executed for returning a new object to the back-end serialiser implementation
+     */
+    public TriFunction<R> getReturnObjectFunction() {
+        return returnFunction;
     }
 
     @Override
@@ -123,19 +137,35 @@ public class FieldSerialiser {
     }
 
     /**
-     * used as lambda expression for user-level code to read/write data into the given serialiser back-end
-     * implementation
-     * 
+     * used as lambda expression for user-level code to read/write data into the given serialiser back-end implementation
+     *
      * @author rstein
      */
-    public interface FieldSerialiserFunction {
+    public interface TriConsumer {
         /**
          * Performs this operation on the given arguments.
          *
-         * @param t the specific object reference for the given field
-         * @param u the description for the given class member
-         * @throws IllegalAccessException in case a forbidden field is being accessed
+         * @param ioSerialiser the reference to the calling IoSerialiser
+         * @param rootObj the specific root object reference the given field is part of
+         * @param field the description for the given class member, if null then rootObj is written/read directly
          */
-        public void exec(Object t, ClassFieldDescription u) throws IllegalAccessException;
+        void accept(IoSerialiser ioSerialiser, Object rootObj, ClassFieldDescription field);
+    }
+
+    /**
+     * used as lambda expression for user-level code to return new object data (read-case) from the given serialiser back-end implementation
+     *
+     * @author rstein
+     * @param <R> generic return type
+     */
+    public interface TriFunction<R> {
+        /**
+         * Performs this operation on the given arguments.
+         *
+         * @param ioSerialiser the reference to the calling IoSerialiser
+         * @param rootObj the specific root object reference the given field is part of
+         * @param field the description for the given class member, if null then rootObj is written/read directly
+         */
+        R apply(IoSerialiser ioSerialiser, Object rootObj, ClassFieldDescription field);
     }
 }

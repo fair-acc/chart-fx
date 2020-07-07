@@ -3,10 +3,10 @@ package de.gsi.dataset.serializer.spi.iobuffer;
 import static de.gsi.dataset.DataSet.DIM_X;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.InputMismatchException;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
@@ -19,17 +19,19 @@ import de.gsi.dataset.DataSetMetaData;
 import de.gsi.dataset.serializer.DataType;
 import de.gsi.dataset.serializer.FieldDescription;
 import de.gsi.dataset.serializer.IoSerialiser;
-import de.gsi.dataset.serializer.spi.ProtocolInfo;
+import de.gsi.dataset.serializer.spi.WireDataFieldDescription;
+import de.gsi.dataset.spi.AbstractDataSet;
 import de.gsi.dataset.spi.DataSetBuilder;
+import de.gsi.dataset.spi.utils.StringHashMapList;
 import de.gsi.dataset.utils.AssertUtils;
+import de.gsi.dataset.utils.GenericsHelper;
 
 /**
  * Class to efficiently serialise and de-serialise DataSet objects into binary byte arrays. The performance can be tuned
  * through:
  * <ul>
  * <li>using floats (ie. memory-IO vs network-IO bound serialisation), or</li>
- * <li>via {@link #setDataLablesSerialised(boolean)} (default: false) to control whether data labels and styles shall be
- * processed</li>
+ * <li>via {@link #setDataLablesSerialised(boolean)} (default: true) to control whether data labels and styles shall be processed</li>
  * <li>via {@link #setMetaDataSerialised(boolean)} (default: true) to control whether meta data shall be processed</li>
  * </ul>
  *
@@ -61,25 +63,24 @@ public class DataSetSerialiser { // NOPMD
         this.ioSerialiser = ioSerialiser;
     }
 
-    protected Optional<FieldDescription> checkFieldCompatibility(final FieldDescription rootField, final String fieldName, final DataType... requireDataTypes) {
-        Optional<FieldDescription> fieldHeader = rootField.findChildField(fieldName);
-        if (fieldHeader.isEmpty()) {
-            return Optional.empty();
+    protected FieldDescription checkFieldCompatibility(final FieldDescription rootField, final int fieldNameHashCode, final String fieldName, final DataType... requireDataTypes) {
+        FieldDescription fieldHeader = rootField.findChildField(fieldNameHashCode, fieldName);
+        if (fieldHeader == null) {
+            return null;
         }
 
         boolean foundMatchingDataType = false;
         for (DataType dataType : requireDataTypes) {
-            if (fieldHeader.get().getDataType().equals(dataType)) {
+            if (fieldHeader.getDataType().equals(dataType)) {
                 foundMatchingDataType = true;
                 break;
             }
         }
         if (!foundMatchingDataType) {
-            throw new InputMismatchException(fieldName + " is type " + fieldHeader.get().getDataType() + " vs. required type " + Arrays.asList(requireDataTypes).toString());
+            throw new InputMismatchException(fieldName + " is type " + fieldHeader.getDataType() + " vs. required type " + Arrays.asList(requireDataTypes).toString());
         }
 
-        final long dataPosition = fieldHeader.get().getDataStartOffset();
-        ioSerialiser.getBuffer().position(dataPosition);
+        ioSerialiser.getBuffer().position(fieldHeader.getDataStartPosition());
         return fieldHeader;
     }
 
@@ -92,28 +93,27 @@ public class DataSetSerialiser { // NOPMD
     }
 
     protected void parseDataLabels(final DataSetBuilder builder, final FieldDescription fieldRoot) {
-        if (checkFieldCompatibility(fieldRoot, DATA_LABELS, DataType.MAP).isPresent()) {
+        if (checkFieldCompatibility(fieldRoot, DATA_LABELS.hashCode(), DATA_LABELS, DataType.MAP) != null) {
             Map<Integer, String> map = new ConcurrentHashMap<>();
-            map = ioSerialiser.getMap(map);
+            map = ioSerialiser.getMap(map, null);
             builder.setDataLabelMap(map);
         }
 
-        if (checkFieldCompatibility(fieldRoot, DATA_STYLES, DataType.MAP).isPresent()) {
+        if (checkFieldCompatibility(fieldRoot, DATA_STYLES.hashCode(), DATA_STYLES, DataType.MAP) != null) {
             Map<Integer, String> map = new ConcurrentHashMap<>();
-            map = ioSerialiser.getMap(map);
+            map = ioSerialiser.getMap(map, null);
             builder.setDataStyleMap(map);
         }
     }
 
-    protected void parseHeaders(final IoSerialiser ioSerialiser, final DataSetBuilder builder,
-            final FieldDescription fieldRoot) {
+    protected void parseHeaders(final IoSerialiser ioSerialiser, final DataSetBuilder builder, final FieldDescription fieldRoot) {
         // read strings
-        if (checkFieldCompatibility(fieldRoot, DATA_SET_NAME, DataType.STRING).isPresent()) {
-            builder.setName(ioSerialiser.getString());
+        if (checkFieldCompatibility(fieldRoot, DATA_SET_NAME.hashCode(), DATA_SET_NAME, DataType.STRING) != null) {
+            builder.setName(ioSerialiser.getBuffer().getString());
         }
 
-        if (checkFieldCompatibility(fieldRoot, DIMENSIONS, DataType.INT).isPresent()) {
-            builder.setDimension(ioSerialiser.getInteger());
+        if (checkFieldCompatibility(fieldRoot, DIMENSIONS.hashCode(), DIMENSIONS, DataType.INT) != null) {
+            builder.setDimension(ioSerialiser.getBuffer().getInt());
         }
 
         // check for axis descriptions (all fields starting with AXIS)
@@ -135,19 +135,19 @@ public class DataSetSerialiser { // NOPMD
         if (dimension < 0) {
             return; // couldn't parse dimIndex
         }
-        ioSerialiser.getBuffer().position(fieldDescription.getDataStartOffset());
+        ioSerialiser.getBuffer().position(fieldDescription.getDataStartPosition());
         switch (parsed[1]) {
         case MIN:
-            builder.setAxisMin(dimension, ioSerialiser.getDouble());
+            builder.setAxisMin(dimension, ioSerialiser.getBuffer().getDouble());
             break;
         case MAX:
-            builder.setAxisMax(dimension, ioSerialiser.getDouble());
+            builder.setAxisMax(dimension, ioSerialiser.getBuffer().getDouble());
             break;
         case NAME:
-            builder.setAxisName(dimension, ioSerialiser.getString());
+            builder.setAxisName(dimension, ioSerialiser.getBuffer().getString());
             break;
         case UNIT:
-            builder.setAxisUnit(dimension, ioSerialiser.getString());
+            builder.setAxisUnit(dimension, ioSerialiser.getBuffer().getString());
             break;
         default:
             LOGGER.atWarn().addArgument(parsed[1]).log("parseHeader(): encountered unknown tag {} - ignore");
@@ -156,21 +156,21 @@ public class DataSetSerialiser { // NOPMD
     }
 
     protected void parseMetaData(final IoSerialiser ioSerialiser, final DataSetBuilder builder, final FieldDescription rootField) {
-        if (checkFieldCompatibility(rootField, INFO_LIST, DataType.STRING_ARRAY).isPresent()) {
-            builder.setMetaInfoList(ioSerialiser.getStringArray());
+        if (checkFieldCompatibility(rootField, INFO_LIST.hashCode(), INFO_LIST, DataType.STRING_ARRAY) != null) {
+            builder.setMetaInfoList(ioSerialiser.getBuffer().getStringArray());
         }
 
-        if (checkFieldCompatibility(rootField, WARNING_LIST, DataType.STRING_ARRAY).isPresent()) {
-            builder.setMetaWarningList(ioSerialiser.getStringArray());
+        if (checkFieldCompatibility(rootField, WARNING_LIST.hashCode(), WARNING_LIST, DataType.STRING_ARRAY) != null) {
+            builder.setMetaWarningList(ioSerialiser.getBuffer().getStringArray());
         }
 
-        if (checkFieldCompatibility(rootField, ERROR_LIST, DataType.STRING_ARRAY).isPresent()) {
-            builder.setMetaErrorList(ioSerialiser.getStringArray());
+        if (checkFieldCompatibility(rootField, ERROR_LIST.hashCode(), ERROR_LIST, DataType.STRING_ARRAY) != null) {
+            builder.setMetaErrorList(ioSerialiser.getBuffer().getStringArray());
         }
 
-        if (checkFieldCompatibility(rootField, META_INFO, DataType.MAP).isPresent()) {
+        if (checkFieldCompatibility(rootField, META_INFO.hashCode(), META_INFO, DataType.MAP) != null) {
             Map<String, String> map = new ConcurrentHashMap<>();
-            map = ioSerialiser.getMap(map);
+            map = ioSerialiser.getMap(map, null);
             builder.setMetaInfoMap(map);
         }
     }
@@ -196,29 +196,29 @@ public class DataSetSerialiser { // NOPMD
             final String fieldName) {
         int dimIndex = getDimIndex(fieldName, ARRAY_PREFIX);
         if (dimIndex >= 0) {
-            ioSerialiser.getBuffer().position(fieldDescription.getDataStartOffset());
-            builder.setValues(dimIndex, ioSerialiser.getDoubleArray(fieldDescription.getDataType()));
+            ioSerialiser.getBuffer().position(fieldDescription.getDataStartPosition());
+            builder.setValuesNoCopy(dimIndex, getDoubleArray(ioSerialiser, fieldDescription.getDataType()));
         }
     }
 
     private void readNegError(final IoSerialiser ioSerialiser, final DataSetBuilder builder, FieldDescription fieldDescription, final String fieldName) {
-        int dimIndex = getDimIndex(fieldName, EP_PREFIX);
+        int dimIndex = getDimIndex(fieldName, EN_PREFIX);
         if (dimIndex >= 0) {
-            ioSerialiser.getBuffer().position(fieldDescription.getDataStartOffset());
-            builder.setNegError(dimIndex, ioSerialiser.getDoubleArray(fieldDescription.getDataType()));
+            ioSerialiser.getBuffer().position(fieldDescription.getDataStartPosition());
+            builder.setNegErrorNoCopy(dimIndex, getDoubleArray(ioSerialiser, fieldDescription.getDataType()));
         }
     }
 
     private void readPosError(final IoSerialiser ioSerialiser, final DataSetBuilder builder, FieldDescription fieldDescription,
             final String fieldName) {
-        int dimIndex = getDimIndex(fieldName, EN_PREFIX);
+        int dimIndex = getDimIndex(fieldName, EP_PREFIX);
         if (dimIndex >= 0) {
-            ioSerialiser.getBuffer().position(fieldDescription.getDataStartOffset());
-            builder.setPosError(dimIndex, ioSerialiser.getDoubleArray(fieldDescription.getDataType()));
+            ioSerialiser.getBuffer().position(fieldDescription.getDataStartPosition());
+            builder.setPosErrorNoCopy(dimIndex, getDoubleArray(ioSerialiser, fieldDescription.getDataType()));
         }
     }
 
-    private int getDimIndex(String fieldName, String prefix) {
+    protected static int getDimIndex(String fieldName, String prefix) {
         try {
             return Integer.parseInt(fieldName.substring(prefix.length()));
         } catch (NumberFormatException | IndexOutOfBoundsException e) {
@@ -236,13 +236,8 @@ public class DataSetSerialiser { // NOPMD
      */
     public DataSet readDataSetFromByteArray() { // NOPMD
         final DataSetBuilder builder = new DataSetBuilder();
-        final long initialPosition = ioSerialiser.getBuffer().position();
-        final ProtocolInfo bufferHeader = ioSerialiser.checkHeaderInfo();
-        LOGGER.atTrace().addArgument(bufferHeader).log("read header = {}");
-
-        ioSerialiser.getBuffer().position(initialPosition);
-        FieldDescription fieldRoot = ioSerialiser.parseIoStream();
-        fieldRoot = fieldRoot.getChildren().get(0); // N.B. old convention did not have a ROOT object
+        FieldDescription root = ioSerialiser.parseIoStream(false);
+        final FieldDescription fieldRoot = root.getChildren().get(0);
         // parsed until end of buffer
 
         parseHeaders(ioSerialiser, builder, fieldRoot);
@@ -257,6 +252,16 @@ public class DataSetSerialiser { // NOPMD
 
         parseNumericData(ioSerialiser, builder, fieldRoot);
 
+        if (root.getChildren().size() != 2) {
+            throw new IllegalArgumentException("fieldRoot children-count != 2: " + fieldRoot.getChildren().size());
+        }
+        final FieldDescription endMarker = root.getChildren().get(1);
+        if (endMarker.getDataType() != DataType.END_MARKER) {
+            throw new IllegalArgumentException("fieldRoot END_MARKER expected but found: " + endMarker);
+        }
+        // move read position to after end marker
+        ioSerialiser.getBuffer().position(endMarker.getDataStartPosition());
+        ioSerialiser.updateDataEndMarker((WireDataFieldDescription) endMarker);
         return builder.build();
     }
 
@@ -277,8 +282,22 @@ public class DataSetSerialiser { // NOPMD
     }
 
     protected void writeDataLabelsToStream(final DataSet dataSet) {
+        if (dataSet instanceof AbstractDataSet) {
+            final StringHashMapList labelMap = ((AbstractDataSet<?>) dataSet).getDataLabelMap();
+            if (!labelMap.isEmpty()) {
+                ioSerialiser.putFieldHeader(DATA_LABELS, DataType.MAP);
+                ioSerialiser.put(labelMap, Integer.class, String.class, null);
+            }
+            final StringHashMapList stlyeMap = ((AbstractDataSet<?>) dataSet).getDataStyleMap();
+            if (!stlyeMap.isEmpty()) {
+                ioSerialiser.putFieldHeader(DATA_STYLES, DataType.MAP);
+                ioSerialiser.put(stlyeMap, Integer.class, String.class, null);
+            }
+            return;
+        }
+
         final int dataCount = dataSet.getDataCount(DIM_X);
-        final Map<Integer, String> labelMap = new ConcurrentHashMap<>();
+        final Map<Integer, String> labelMap = new HashMap<>();
         for (int index = 0; index < dataCount; index++) {
             final String label = dataSet.getDataLabel(index);
             if ((label != null) && !label.isEmpty()) {
@@ -287,10 +306,10 @@ public class DataSetSerialiser { // NOPMD
         }
         if (!labelMap.isEmpty()) {
             ioSerialiser.putFieldHeader(DATA_LABELS, DataType.MAP);
-            ioSerialiser.put(labelMap);
+            ioSerialiser.put(labelMap, Integer.class, String.class, null);
         }
 
-        final Map<Integer, String> styleMap = new ConcurrentHashMap<>();
+        final Map<Integer, String> styleMap = new HashMap<>();
         for (int index = 0; index < dataCount; index++) {
             final String style = dataSet.getStyle(index);
             if ((style != null) && !style.isEmpty()) {
@@ -299,7 +318,7 @@ public class DataSetSerialiser { // NOPMD
         }
         if (!styleMap.isEmpty()) {
             ioSerialiser.putFieldHeader(DATA_STYLES, DataType.MAP);
-            ioSerialiser.put(styleMap);
+            ioSerialiser.put(styleMap, Integer.class, String.class, null);
         }
     }
 
@@ -313,10 +332,7 @@ public class DataSetSerialiser { // NOPMD
     public void writeDataSetToByteArray(final DataSet dataSet, final boolean asFloat) {
         AssertUtils.notNull("dataSet", dataSet);
         AssertUtils.notNull("ioSerialiser", ioSerialiser);
-
-        dataSet.lock();
-
-        ioSerialiser.putHeaderInfo();
+        ioSerialiser.putStartMarker("START_MARKER_DATASET:" + dataSet.getName());
 
         writeHeaderDataToStream(dataSet);
 
@@ -335,15 +351,15 @@ public class DataSetSerialiser { // NOPMD
             writeNumericBinaryDataToBufferDouble(dataSet);
         }
 
-        ioSerialiser.putEndMarker("OBJ_ROOT_END");
+        ioSerialiser.putEndMarker("END_MARKER_DATASET:" + dataSet.getName());
     }
 
     protected void writeHeaderDataToStream(final DataSet dataSet) {
         // common header data
         ioSerialiser.putFieldHeader(DATA_SET_NAME, DataType.STRING);
-        ioSerialiser.put(dataSet.getName());
+        ioSerialiser.getBuffer().putString(dataSet.getName());
         ioSerialiser.putFieldHeader(DIMENSIONS, DataType.INT);
-        ioSerialiser.put(dataSet.getDimension());
+        ioSerialiser.getBuffer().putInt(dataSet.getDimension());
         final List<AxisDescription> axisDescriptions = dataSet.getAxisDescriptions();
         StringBuilder builder = new StringBuilder(60);
         for (int i = 0; i < axisDescriptions.size(); i++) {
@@ -359,13 +375,13 @@ public class DataSetSerialiser { // NOPMD
             final String maxName = builder.append(prefix).append(MAX).toString();
 
             ioSerialiser.putFieldHeader(name, DataType.STRING);
-            ioSerialiser.put(dataSet.getAxisDescription(i).getName());
+            ioSerialiser.getBuffer().putString(dataSet.getAxisDescription(i).getName());
             ioSerialiser.putFieldHeader(unit, DataType.STRING);
-            ioSerialiser.put(dataSet.getAxisDescription(i).getUnit());
+            ioSerialiser.getBuffer().putString(dataSet.getAxisDescription(i).getUnit());
             ioSerialiser.putFieldHeader(minName, DataType.DOUBLE);
-            ioSerialiser.put(dataSet.getAxisDescription(i).getMin());
+            ioSerialiser.getBuffer().putDouble(dataSet.getAxisDescription(i).getMin());
             ioSerialiser.putFieldHeader(maxName, DataType.DOUBLE);
-            ioSerialiser.put(dataSet.getAxisDescription(i).getMax());
+            ioSerialiser.getBuffer().putDouble(dataSet.getAxisDescription(i).getMax());
         }
     }
 
@@ -376,13 +392,13 @@ public class DataSetSerialiser { // NOPMD
         final DataSetMetaData metaDataSet = (DataSetMetaData) dataSet;
 
         ioSerialiser.putFieldHeader(INFO_LIST, DataType.STRING_ARRAY);
-        ioSerialiser.put(metaDataSet.getInfoList().toArray(new String[0]));
+        ioSerialiser.getBuffer().putStringArray(metaDataSet.getInfoList().toArray(new String[0]));
         ioSerialiser.putFieldHeader(WARNING_LIST, DataType.STRING_ARRAY);
-        ioSerialiser.put(metaDataSet.getWarningList().toArray(new String[0]));
+        ioSerialiser.getBuffer().putStringArray(metaDataSet.getWarningList().toArray(new String[0]));
         ioSerialiser.putFieldHeader(ERROR_LIST, DataType.STRING_ARRAY);
-        ioSerialiser.put(metaDataSet.getErrorList().toArray(new String[0]));
+        ioSerialiser.getBuffer().putStringArray(metaDataSet.getErrorList().toArray(new String[0]));
         ioSerialiser.putFieldHeader(META_INFO, DataType.MAP);
-        ioSerialiser.put(metaDataSet.getMetaInfo());
+        ioSerialiser.put(metaDataSet.getMetaInfo(), String.class, String.class, null);
     }
 
     /**
@@ -393,7 +409,7 @@ public class DataSetSerialiser { // NOPMD
         for (int dimIndex = 0; dimIndex < nDim; dimIndex++) {
             final int nsamples = dataSet.getDataCount(dimIndex);
             ioSerialiser.putFieldHeader(ARRAY_PREFIX + dimIndex, DataType.FLOAT_ARRAY);
-            ioSerialiser.put(toFloats(dataSet.getValues(dimIndex)), new int[] { nsamples });
+            ioSerialiser.getBuffer().putFloatArray(toFloats(dataSet.getValues(dimIndex)), 0, nsamples);
         }
 
         if (!(dataSet instanceof DataSetError)) {
@@ -409,13 +425,13 @@ public class DataSetSerialiser { // NOPMD
                 break;
             case SYMMETRIC:
                 ioSerialiser.putFieldHeader(EP_PREFIX + dimIndex, DataType.FLOAT_ARRAY);
-                ioSerialiser.put(toFloats(ds.getErrorsPositive(dimIndex)), new int[] { nsamples });
+                ioSerialiser.getBuffer().putFloatArray(toFloats(ds.getErrorsPositive(dimIndex)), 0, nsamples);
                 break;
             case ASYMMETRIC:
                 ioSerialiser.putFieldHeader(EN_PREFIX + dimIndex, DataType.FLOAT_ARRAY);
-                ioSerialiser.put(toFloats(ds.getErrorsNegative(dimIndex)), new int[] { nsamples });
+                ioSerialiser.getBuffer().putFloatArray(toFloats(ds.getErrorsNegative(dimIndex)), 0, nsamples);
                 ioSerialiser.putFieldHeader(EP_PREFIX + dimIndex, DataType.FLOAT_ARRAY);
-                ioSerialiser.put(toFloats(ds.getErrorsPositive(dimIndex)), new int[] { nsamples });
+                ioSerialiser.getBuffer().putFloatArray(toFloats(ds.getErrorsPositive(dimIndex)), 0, nsamples);
                 break;
             }
         }
@@ -429,7 +445,7 @@ public class DataSetSerialiser { // NOPMD
         for (int dimIndex = 0; dimIndex < nDim; dimIndex++) {
             final int nsamples = dataSet.getDataCount(dimIndex);
             ioSerialiser.putFieldHeader(ARRAY_PREFIX + dimIndex, DataType.DOUBLE_ARRAY);
-            ioSerialiser.put(dataSet.getValues(dimIndex), new int[] { nsamples });
+            ioSerialiser.getBuffer().putDoubleArray(dataSet.getValues(dimIndex), 0, nsamples);
         }
         if (!(dataSet instanceof DataSetError)) {
             return; // data set does not have any error definition
@@ -440,18 +456,43 @@ public class DataSetSerialiser { // NOPMD
             switch (ds.getErrorType(dimIndex)) {
             case SYMMETRIC:
                 ioSerialiser.putFieldHeader(EP_PREFIX + dimIndex, DataType.DOUBLE_ARRAY);
-                ioSerialiser.put(ds.getErrorsPositive(dimIndex), new int[] { nsamples });
+                ioSerialiser.getBuffer().putDoubleArray(ds.getErrorsPositive(dimIndex), 0, nsamples);
                 break;
             case ASYMMETRIC:
                 ioSerialiser.putFieldHeader(EN_PREFIX + dimIndex, DataType.DOUBLE_ARRAY);
-                ioSerialiser.put(ds.getErrorsNegative(dimIndex), new int[] { nsamples });
+                ioSerialiser.getBuffer().putDoubleArray(ds.getErrorsNegative(dimIndex), 0, nsamples);
                 ioSerialiser.putFieldHeader(EP_PREFIX + dimIndex, DataType.DOUBLE_ARRAY);
-                ioSerialiser.put(ds.getErrorsPositive(dimIndex), new int[] { nsamples });
+                ioSerialiser.getBuffer().putDoubleArray(ds.getErrorsPositive(dimIndex), 0, nsamples);
                 break;
             case NO_ERROR:
             default:
                 break;
             }
+        }
+    }
+
+    protected static double[] getDoubleArray(IoSerialiser ioSerialiser, final DataType dataType) {
+        switch (dataType) {
+        case BOOL_ARRAY:
+            return GenericsHelper.toDoublePrimitive(ioSerialiser.getBuffer().getBooleanArray());
+        case BYTE_ARRAY:
+            return GenericsHelper.toDoublePrimitive(ioSerialiser.getBuffer().getByteArray());
+        case SHORT_ARRAY:
+            return GenericsHelper.toDoublePrimitive(ioSerialiser.getBuffer().getShortArray());
+        case INT_ARRAY:
+            return GenericsHelper.toDoublePrimitive(ioSerialiser.getBuffer().getIntArray());
+        case LONG_ARRAY:
+            return GenericsHelper.toDoublePrimitive(ioSerialiser.getBuffer().getLongArray());
+        case FLOAT_ARRAY:
+            return GenericsHelper.toDoublePrimitive(ioSerialiser.getBuffer().getFloatArray());
+        case DOUBLE_ARRAY:
+            return ioSerialiser.getBuffer().getDoubleArray();
+        case CHAR_ARRAY:
+            return GenericsHelper.toDoublePrimitive(ioSerialiser.getBuffer().getCharArray());
+        case STRING_ARRAY:
+            return GenericsHelper.toDoublePrimitive(ioSerialiser.getBuffer().getStringArray());
+        default:
+            throw new IllegalArgumentException("dataType '" + dataType + "' is not an array");
         }
     }
 }

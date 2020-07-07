@@ -28,11 +28,9 @@ import java.util.concurrent.locks.ReadWriteLock;
  * <i>position</i> {@code <=} <i>limit</i> {@code <=} <i>capacity</i> </blockquote>
  *
  * @author rstein
- * @param <C> generic type for inheriting self (fluent-design)
  */
 @SuppressWarnings("PMD.TooManyMethods") // NOPMD - these are short-hand convenience methods
-public interface IoBufferHeader<C extends IoBufferHeader<C>> {
-
+public interface IoBufferHeader {
     /**
      * @return the capacity of this buffer
      */
@@ -54,14 +52,12 @@ public interface IoBufferHeader<C extends IoBufferHeader<C>> {
      * This method does not actually erase the data in the buffer, but it is named as if it did because it will most
      * often be used in situations in which that might as well be the case.
      * </p>
-     *
-     * @return itself (fluent design)
      */
-    C clear();
+    void clear();
 
-    C ensureAdditionalCapacity(final long capacity);
+    void ensureAdditionalCapacity(final int capacity);
 
-    C ensureCapacity(final long capacity);
+    void ensureCapacity(final int capacity);
 
     /**
      * Forces buffer to contain the given number of entries, preserving just a part of the array.
@@ -69,9 +65,8 @@ public interface IoBufferHeader<C extends IoBufferHeader<C>> {
      * @param length the new minimum length for this array.
      * @param preserve the number of elements of the old buffer that shall be preserved in case a new allocation is
      *        necessary.
-     * @return itself (fluent design)
      */
-    C forceCapacity(final long length, final long preserve);
+    void forceCapacity(final int length, final int preserve);
 
     /**
      * @return {@code true} if, and only if, there is at least one element remaining in this buffer
@@ -86,16 +81,15 @@ public interface IoBufferHeader<C extends IoBufferHeader<C>> {
     /**
      * @return the limit of this buffer
      */
-    long limit();
+    int limit();
 
     /**
      * Sets this buffer's limit. If the position is larger than the new limit then it is set to the new limit. If the
      * mark is defined and larger than the new limit then it is discarded.
      *
      * @param newLimit the new limit value; must be non-negative and no larger than this buffer's capacity
-     * @return itself (fluent design)
      */
-    C limit(final int newLimit);
+    void limit(final int newLimit);
 
     /**
      * For efficiency/performance reasons the buffer implementation is not required to safe-guard each put/get method
@@ -108,35 +102,31 @@ public interface IoBufferHeader<C extends IoBufferHeader<C>> {
     /**
      * @return the position of this buffer
      */
-    long position();
+    int position();
 
     /**
      * Sets this buffer's position. If the mark is defined and larger than the new position then it is discarded.
      *
      * @param newPosition the new position value; must be non-negative and no larger than the current limit
-     * @return itself (fluent design)
      */
-    C position(final long newPosition);
+    void position(final int newPosition);
 
     /**
      * @return the number of elements remaining in this buffer
      */
-    long remaining();
+    int remaining();
 
     /**
      * resets the buffer read/write position to zero
-     *
-     * @return itself (fluent design)
      */
-    C reset();
+    void reset();
 
     /**
      * Trims the internal buffer array so that the capacity is equal to the size.
      *
      * @see java.util.ArrayList#trimToSize()
-     * @return itself (fluent design)
      */
-    C trim();
+    void trim();
 
     /**
      * Trims the internal buffer array if it is too large. If the current array length is smaller than or equal to
@@ -148,8 +138,6 @@ public interface IoBufferHeader<C extends IoBufferHeader<C>> {
      * around a very large array just because of a few large transient lists.
      *
      * @param requestedCapacity the threshold for the trimming.
-     * @return itself (fluent design)
      */
-    C trim(final int requestedCapacity);
-
+    void trim(final int requestedCapacity);
 }

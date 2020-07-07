@@ -45,7 +45,7 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.shape.Rectangle;
 import javafx.util.Duration;
 
-import de.gsi.dataset.serializer.spi.ClassDescriptions;
+import de.gsi.dataset.serializer.utils.ClassUtils;
 
 public class HiddenSidesPaneSkin extends SkinBase<HiddenSidesPane> {
     private final StackPane stackPane;
@@ -189,7 +189,7 @@ public class HiddenSidesPaneSkin extends SkinBase<HiddenSidesPane> {
             return true;
         }
         try {
-            Method showingMethod = ClassDescriptions.getMethod(n.getClass(), "isShowing");
+            Method showingMethod = ClassUtils.getMethod(n.getClass(), "isShowing");
             if (showingMethod != null && (Boolean) showingMethod.invoke(n)) {
                 lastHideBlockingNode = n;
                 return true;
@@ -239,7 +239,7 @@ public class HiddenSidesPaneSkin extends SkinBase<HiddenSidesPane> {
 
         // collapse open menus/comboboxes before hiding side pane
         if (hasShowingChild(lastHideBlockingNode)) {
-            Method closeMethod = ClassDescriptions.getMethod(lastHideBlockingNode.getClass(), "hide");
+            Method closeMethod = ClassUtils.getMethod(lastHideBlockingNode.getClass(), "hide");
             if (closeMethod != null) {
                 try {
                     closeMethod.invoke(lastHideBlockingNode);

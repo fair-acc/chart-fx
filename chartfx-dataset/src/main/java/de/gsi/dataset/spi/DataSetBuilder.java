@@ -356,8 +356,8 @@ public class DataSetBuilder {
         } else {
             // mixed double/float case
             String mixed = String.format("ep(double)=%s, en(double)=%s, ep(float)=%s, en(float)=%s", //
-                    errorsPos.get(dimIndex), errorsNeg.get(dimIndex), //NOSONAR //NOPMD
-                    errorsPosFloat.get(dimIndex), errorsNegFloat.get(dimIndex)); //NOSONAR //NOPMD
+                    Arrays.toString(errorsPos.get(dimIndex)), Arrays.toString(errorsNeg.get(dimIndex)),
+                    Arrays.toString(errorsPosFloat.get(dimIndex)), Arrays.toString(errorsNegFloat.get(dimIndex)));
             throw new UnsupportedOperationException("mixed double/float error vectors for dimIndex " + dimIndex + " not supported: " + mixed);
         }
 

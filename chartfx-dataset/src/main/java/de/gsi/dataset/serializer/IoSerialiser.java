@@ -1,36 +1,29 @@
 package de.gsi.dataset.serializer;
 
-import java.util.*;
+import java.lang.reflect.Type;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Queue;
+import java.util.Set;
+import java.util.function.BiFunction;
 
 import de.gsi.dataset.serializer.spi.ProtocolInfo;
 import de.gsi.dataset.serializer.spi.WireDataFieldDescription;
 
 public interface IoSerialiser {
+    /**
+     * Reads and checks protocol header information.
+     * @return ProtocolInfo info Object (extends FieldHeader)
+     * @throws IllegalStateException in case the format is incompatible with this serialiser
+     */
     ProtocolInfo checkHeaderInfo();
-
-    boolean getBoolean();
-
-    boolean[] getBooleanArray();
 
     IoBuffer getBuffer();
 
-    void setBuffer(final IoBuffer buffer);
+    <E> Collection<E> getCollection(Collection<E> collection, BiFunction<Type, Type[], FieldSerialiser<E>> serialiserLookup);
 
-    byte getByte();
-
-    byte[] getByteArray();
-
-    char[] getCharArray();
-
-    char getCharacter();
-
-    <E> Collection<E> getCollection(Collection<E> collection);
-
-    double getDouble();
-
-    double[] getDoubleArray();
-
-    double[] getDoubleArray(DataType dataType);
+    <E> E getCustomData(FieldSerialiser<E> serialiser);
 
     <E extends Enum<E>> Enum<E> getEnum(Enum<E> enumeration);
 
@@ -38,111 +31,47 @@ public interface IoSerialiser {
 
     WireDataFieldDescription getFieldHeader();
 
-    float getFloat();
+    <E> List<E> getList(List<E> collection, BiFunction<Type, Type[], FieldSerialiser<E>> serialiserLookup);
 
-    float[] getFloatArray();
+    <K, V, E> Map<K, V> getMap(Map<K, V> map, BiFunction<Type, Type[], FieldSerialiser<E>> serialiserLookup);
 
-    int[] getIntArray();
+    WireDataFieldDescription getParent();
 
-    int getInteger();
+    <E> Queue<E> getQueue(Queue<E> collection, BiFunction<Type, Type[], FieldSerialiser<E>> serialiserLookup);
 
-    <E> List<E> getList(List<E> collection);
+    <E> Set<E> getSet(Set<E> collection, BiFunction<Type, Type[], FieldSerialiser<E>> serialiserLookup);
 
-    long getLong();
+    boolean isPutFieldMetaData();
 
-    long[] getLongArray();
+    WireDataFieldDescription parseIoStream(boolean readHeader);
 
-    <K, V> Map<K, V> getMap(Map<K, V> map);
-
-    <E> Queue<E> getQueue(Queue<E> collection);
-
-    <E> Set<E> getSet(Set<E> collection);
-
-    short getShort();
-
-    short[] getShortArray();
-
-    String getString();
-
-    String[] getStringArray();
-
-    WireDataFieldDescription parseIoStream();
-
-    void put(boolean value);
-
-    void put(boolean[] arrayValue);
-
-    void put(boolean[] arrayValue, int[] dims);
-
-    void put(byte value);
-
-    void put(byte[] arrayValue);
-
-    void put(byte[] arrayValue, int[] dims);
-
-    void put(char value);
-
-    void put(char[] arrayValue);
-
-    void put(char[] arrayValue, int[] dims);
-
-    <E> void put(Collection<E> collection);
-
-    void put(double value);
-
-    void put(double[] arrayValue);
-
-    void put(double[] arrayValue, int[] dims);
+    <E> void put(Collection<E> collection, Type valueType, BiFunction<Type, Type[], FieldSerialiser<E>> serialiserLookup);
 
     void put(Enum<?> enumeration);
 
-    void put(float value);
+    <K, V, E> void put(Map<K, V> map, Type keyType, Type valueType, BiFunction<Type, Type[], FieldSerialiser<E>> serialiserLookup);
 
-    void put(float[] arrayValue);
-
-    void put(float[] arrayValue, int[] dims);
-
-    void put(int value);
-
-    void put(int[] arrayValue);
-
-    void put(int[] arrayValue, int[] dims);
-
-    void put(long value);
-
-    void put(long[] arrayValue);
-
-    void put(long[] arrayValue, int[] dims);
-
-    <K, V> void put(Map<K, V> map);
-
-    void put(short value);
-
-    void put(short[] arrayValue);
-
-    void put(short[] arrayValue, // NOPMD
-            int[] dims);
-
-    void put(String value);
-
-    void put(String[] arrayValue);
-
-    void put(String[] arrayValue, int[] dims);
+    <E> WireDataFieldDescription putCustomData(FieldDescription fieldDescription, E obj, Class<? extends E> type, FieldSerialiser<E> serialiser);
 
     void putEndMarker(String markerName);
 
-    void putFieldHeader(final FieldDescription fieldDescription);
+    WireDataFieldDescription putFieldHeader(FieldDescription fieldDescription);
 
-    void putFieldHeader(final String fieldName, DataType dataType);
-
-    void putFieldHeader(final String fieldName, DataType dataType, int additionalSize);
+    WireDataFieldDescription putFieldHeader(String fieldName, DataType dataType);
 
     /**
      * Adds header and version information
+     * @param field optional FieldDescription (ie. to allow to attach MetaData to the start/stop marker)
      */
-    void putHeaderInfo();
+    void putHeaderInfo(FieldDescription... field);
 
     void putStartMarker(String markerName);
 
-    void updateDataEndMarker();
+    void putStartMarker(FieldDescription fieldDescription);
+
+    void setBuffer(IoBuffer buffer);
+
+    void setPutFieldMetaData(boolean putFieldMetaData);
+
+    void updateDataEndMarker(WireDataFieldDescription fieldHeader);
 }
