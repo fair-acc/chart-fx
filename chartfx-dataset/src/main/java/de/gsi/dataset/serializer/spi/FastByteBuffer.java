@@ -10,13 +10,8 @@ import static sun.misc.Unsafe.ARRAY_LONG_BASE_OFFSET;
 import static sun.misc.Unsafe.ARRAY_SHORT_BASE_OFFSET;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
-import java.nio.charset.StandardCharsets;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import de.gsi.dataset.serializer.IoBuffer;
 import de.gsi.dataset.utils.AssertUtils;
@@ -34,36 +29,42 @@ import sun.misc.Unsafe;
  */
 @SuppressWarnings("restriction")
 public class FastByteBuffer implements IoBuffer {
-    public static final long SIZE_OF_BOOLEAN = 1;
-    public static final long SIZE_OF_BYTE = 1;
-    public static final long SIZE_OF_SHORT = 2;
-    public static final long SIZE_OF_CHAR = 2;
-    public static final long SIZE_OF_INT = 4;
-    public static final long SIZE_OF_LONG = 8;
-    public static final long SIZE_OF_FLOAT = 4;
-    public static final long SIZE_OF_DOUBLE = 8;
+    public static final int SIZE_OF_BOOLEAN = 1;
+    public static final int SIZE_OF_BYTE = 1;
+    public static final int SIZE_OF_SHORT = 2;
+    public static final int SIZE_OF_CHAR = 2;
+    public static final int SIZE_OF_INT = 4;
+    public static final int SIZE_OF_LONG = 8;
+    public static final int SIZE_OF_FLOAT = 4;
+    public static final int SIZE_OF_DOUBLE = 8;
+    public static final String INVALID_UTF_8 = "Invalid UTF-8";
     private static final int DEFAULT_INITIAL_CAPACITY = 1 << 10;
     private static final int DEFAULT_MIN_CAPACITY_INCREASE = 1 << 10;
     private static final int DEFAULT_MAX_CAPACITY_INCREASE = 100 * (1 << 10);
     private static final Unsafe unsafe; // NOPMD
-
     static {
         // get an instance of the otherwise private 'Unsafe' class
-        disableUnsafeWarning();
         try {
+            Class<?> cls = Class.forName("jdk.internal.module.IllegalAccessLogger");
+            Field logger = cls.getDeclaredField("logger");
+
             final Field field = Unsafe.class.getDeclaredField("theUnsafe");
-            field.setAccessible(true);
+            field.setAccessible(true); //NOSONAR
             unsafe = (Unsafe) field.get(null);
-        } catch (NoSuchFieldException | SecurityException | IllegalAccessException e) {
+            unsafe.putObjectVolatile(cls, unsafe.staticFieldOffset(logger), null);
+
+        } catch (NoSuchFieldException | SecurityException | IllegalAccessException | ClassNotFoundException e) {
             throw new SecurityException(e); // NOPMD
         }
     }
 
     private final ReadWriteLock lock = new ReentrantReadWriteLock();
-    private long position;
-    private long limit;
+    private final StringBuilder builder = new StringBuilder(100);
+    private int position;
+    private int limit;
     private byte[] buffer;
     private boolean enforceSimpleStringEncoding = false;
+    private Runnable callBackFunction = () -> {};
 
     /**
      * construct new FastByteBuffer
@@ -106,10 +107,9 @@ public class FastByteBuffer implements IoBuffer {
     }
 
     @Override
-    public IoBuffer clear() {
+    public void clear() {
         position = 0;
         limit = capacity();
-        return getSelf();
     }
 
     public byte[] elements() {
@@ -117,45 +117,45 @@ public class FastByteBuffer implements IoBuffer {
     }
 
     @Override
-    public IoBuffer ensureAdditionalCapacity(final long capacity) {
-        if ((this.position() + capacity) <= capacity()) {
-            return getSelf();
+    public void ensureAdditionalCapacity(final int capacity) {
+        final int neededTotalCapacity = this.position() + capacity;
+        if (neededTotalCapacity < capacity()) {
+            return;
+        }
+        if (position > capacity()) {
+            throw new IllegalStateException("position " + position + " is beyond buffer capacity " + capacity());
         }
         //TODO: add smarter enlarging algorithm (ie. increase fast for small arrays, + n% for medium sized arrays, byte-by-byte for large arrays)
-        final long minNewSize = this.position() + (int) capacity;
-        final int addCapacity = (int) Math.min(Math.max(DEFAULT_MIN_CAPACITY_INCREASE, minNewSize >> 3), DEFAULT_MAX_CAPACITY_INCREASE);
-        forceCapacity(minNewSize + addCapacity, capacity());
-        return getSelf();
+        final int addCapacity = Math.min(Math.max(DEFAULT_MIN_CAPACITY_INCREASE, neededTotalCapacity >> 3), DEFAULT_MAX_CAPACITY_INCREASE);
+        forceCapacity(neededTotalCapacity + addCapacity, capacity());
     }
 
     @Override
-    public IoBuffer ensureCapacity(final long newCapacity) {
+    public void ensureCapacity(final int newCapacity) {
         if (newCapacity <= capacity()) {
-            return getSelf();
+            return;
         }
         forceCapacity(newCapacity, capacity());
-        return getSelf();
     }
 
     /**
-     * Forces FastByteBUffer to contain the given number of entries, preserving just a part of the array.
+     * Forces FastByteBuffer to contain the given number of entries, preserving just a part of the array.
      *
      * @param length the new minimum length for this array.
      * @param preserve the number of elements of the old buffer that shall be preserved in case a new allocation is
      *        necessary.
      */
     @Override
-    public IoBuffer forceCapacity(final long length, final long preserve) {
+    public void forceCapacity(final int length, final int preserve) {
         if (length == capacity()) {
-            return getSelf();
+            return;
         }
-        final byte[] newBuffer = new byte[(int) length];
-        final long bytesToCopy = preserve * SIZE_OF_BYTE;
+        final byte[] newBuffer = new byte[length];
+        final int bytesToCopy = preserve * SIZE_OF_BYTE;
         copyMemory(buffer, ARRAY_BYTE_BASE_OFFSET, newBuffer, ARRAY_BYTE_BASE_OFFSET, bytesToCopy);
         position = (position < newBuffer.length) ? position : newBuffer.length - 1;
         buffer = newBuffer;
         limit = buffer.length;
-        return getSelf();
     }
 
     @Override
@@ -170,19 +170,20 @@ public class FastByteBuffer implements IoBuffer {
 
     @Override
     public boolean getBoolean() { // NOPMD by rstein
-        final boolean value = unsafe.getBoolean(buffer, ARRAY_BYTE_BASE_OFFSET + position);
+        final boolean value = unsafe.getBoolean(buffer, (long) ARRAY_BYTE_BASE_OFFSET + position);
         position += SIZE_OF_BOOLEAN;
 
         return value;
     }
 
     @Override
-    public boolean[] getBooleanArray(final boolean[] dst, final long offset, final int length) {
+    public boolean[] getBooleanArray(final boolean[] dst, final int offset, final int length) {
         getArraySizeDescriptor();
         final int arraySize = getInt(); // strided-array size
-        final boolean[] values = dst == null ? new boolean[arraySize + (int) offset] : dst;
+        final boolean initNeeded = dst == null || length < 0;
+        final boolean[] values = initNeeded ? new boolean[arraySize + offset] : dst;
 
-        final long bytesToCopy = (dst == null ? arraySize : Math.min(arraySize, length));
+        final int bytesToCopy = initNeeded ? arraySize : Math.min(arraySize, length);
         copyMemory(buffer, ARRAY_BYTE_BASE_OFFSET + position, values, ARRAY_BOOLEAN_BASE_OFFSET + offset, bytesToCopy);
         position += bytesToCopy;
 
@@ -191,19 +192,20 @@ public class FastByteBuffer implements IoBuffer {
 
     @Override
     public byte getByte() {
-        final byte value = unsafe.getByte(buffer, ARRAY_BYTE_BASE_OFFSET + position);
+        final byte value = unsafe.getByte(buffer, (long) ARRAY_BYTE_BASE_OFFSET + position);
         position += SIZE_OF_BYTE;
 
         return value;
     }
 
     @Override
-    public byte[] getByteArray(final byte[] dst, final long offset, final int length) {
+    public byte[] getByteArray(final byte[] dst, final int offset, final int length) {
         getArraySizeDescriptor();
         final int arraySize = getInt(); // strided-array size
-        final byte[] values = dst == null ? new byte[arraySize + (int) offset] : dst;
+        final boolean initNeeded = dst == null || length < 0;
+        final byte[] values = initNeeded ? new byte[arraySize + offset] : dst;
 
-        final long bytesToCopy = (dst == null ? arraySize : Math.min(arraySize, length));
+        final int bytesToCopy = (initNeeded ? arraySize : Math.min(arraySize, length));
         copyMemory(buffer, ARRAY_BYTE_BASE_OFFSET + position, values, ARRAY_BYTE_BASE_OFFSET + offset, bytesToCopy);
         position += bytesToCopy;
 
@@ -211,20 +213,26 @@ public class FastByteBuffer implements IoBuffer {
     }
 
     @Override
+    public Runnable getCallBackFunction() {
+        return callBackFunction;
+    }
+
+    @Override
     public char getChar() {
-        final char value = unsafe.getChar(buffer, ARRAY_CHAR_BASE_OFFSET + position);
+        final char value = unsafe.getChar(buffer, (long) ARRAY_CHAR_BASE_OFFSET + position);
         position += SIZE_OF_CHAR;
 
         return value;
     }
 
     @Override
-    public char[] getCharArray(final char[] dst, final long offset, final int length) {
+    public char[] getCharArray(final char[] dst, final int offset, final int length) {
         getArraySizeDescriptor();
         final int arraySize = getInt(); // strided-array size
-        final char[] values = dst == null ? new char[arraySize + (int) offset] : dst;
+        final boolean initNeeded = dst == null || length < 0;
+        final char[] values = initNeeded ? new char[arraySize + offset] : dst;
 
-        final long bytesToCopy = (dst == null ? arraySize : Math.min(arraySize, length)) * SIZE_OF_CHAR;
+        final int bytesToCopy = (initNeeded ? arraySize : Math.min(arraySize, length)) * SIZE_OF_CHAR;
         copyMemory(buffer, ARRAY_BYTE_BASE_OFFSET + position, values, ARRAY_SHORT_BASE_OFFSET + (offset * SIZE_OF_CHAR),
                 bytesToCopy);
         position += bytesToCopy;
@@ -234,19 +242,20 @@ public class FastByteBuffer implements IoBuffer {
 
     @Override
     public double getDouble() {
-        final double value = unsafe.getDouble(buffer, ARRAY_BYTE_BASE_OFFSET + position);
+        final double value = unsafe.getDouble(buffer, (long) ARRAY_BYTE_BASE_OFFSET + position);
         position += SIZE_OF_DOUBLE;
 
         return value;
     }
 
     @Override
-    public double[] getDoubleArray(final double[] dst, final long offset, final int length) {
+    public double[] getDoubleArray(final double[] dst, final int offset, final int length) {
         getArraySizeDescriptor();
         final int arraySize = getInt(); // strided-array size
-        final double[] values = dst == null ? new double[arraySize + (int) offset] : dst;
+        final boolean initNeeded = dst == null || length < 0;
+        final double[] values = initNeeded ? new double[arraySize + offset] : dst;
 
-        final long bytesToCopy = (dst == null ? arraySize : Math.min(arraySize, length)) * SIZE_OF_DOUBLE;
+        final int bytesToCopy = (initNeeded ? arraySize : Math.min(arraySize, length)) * SIZE_OF_DOUBLE;
         copyMemory(buffer, ARRAY_BYTE_BASE_OFFSET + position, values,
                 ARRAY_DOUBLE_BASE_OFFSET + (offset * SIZE_OF_DOUBLE), bytesToCopy);
         position += bytesToCopy;
@@ -256,19 +265,20 @@ public class FastByteBuffer implements IoBuffer {
 
     @Override
     public float getFloat() {
-        final float value = unsafe.getFloat(buffer, ARRAY_BYTE_BASE_OFFSET + position);
+        final float value = unsafe.getFloat(buffer, (long) ARRAY_BYTE_BASE_OFFSET + position);
         position += SIZE_OF_FLOAT;
 
         return value;
     }
 
     @Override
-    public float[] getFloatArray(final float[] dst, final long offset, final int length) {
+    public float[] getFloatArray(final float[] dst, final int offset, final int length) {
         getArraySizeDescriptor();
         final int arraySize = getInt(); // strided-array size
-        final float[] values = dst == null ? new float[arraySize + (int) offset] : dst;
+        final boolean initNeeded = dst == null || length < 0;
+        final float[] values = initNeeded ? new float[arraySize + offset] : dst;
 
-        final long bytesToCopy = (dst == null ? arraySize : Math.min(arraySize, length)) * SIZE_OF_FLOAT;
+        final int bytesToCopy = (initNeeded ? arraySize : Math.min(arraySize, length)) * SIZE_OF_FLOAT;
         copyMemory(buffer, ARRAY_BYTE_BASE_OFFSET + position, values,
                 ARRAY_FLOAT_BASE_OFFSET + (offset * SIZE_OF_FLOAT), bytesToCopy);
         position += bytesToCopy;
@@ -278,19 +288,20 @@ public class FastByteBuffer implements IoBuffer {
 
     @Override
     public int getInt() {
-        final int value = unsafe.getInt(buffer, ARRAY_BYTE_BASE_OFFSET + position);
+        final int value = unsafe.getInt(buffer, (long) ARRAY_BYTE_BASE_OFFSET + position);
         position += SIZE_OF_INT;
 
         return value;
     }
 
     @Override
-    public int[] getIntArray(final int[] dst, final long offset, final int length) {
+    public int[] getIntArray(final int[] dst, final int offset, final int length) {
         getArraySizeDescriptor();
         final int arraySize = getInt(); // strided-array size
-        final int[] values = dst == null ? new int[arraySize + (int) offset] : dst;
+        final boolean initNeeded = dst == null || length < 0;
+        final int[] values = initNeeded ? new int[arraySize + offset] : dst;
 
-        final long bytesToCopy = (dst == null ? arraySize : Math.min(arraySize, length)) * SIZE_OF_INT;
+        final int bytesToCopy = (initNeeded ? arraySize : Math.min(arraySize, length)) * SIZE_OF_INT;
         copyMemory(buffer, ARRAY_BYTE_BASE_OFFSET + position, values, ARRAY_INT_BASE_OFFSET + (offset * SIZE_OF_INT),
                 bytesToCopy);
         position += bytesToCopy;
@@ -300,19 +311,20 @@ public class FastByteBuffer implements IoBuffer {
 
     @Override
     public long getLong() {
-        final long value = unsafe.getLong(buffer, ARRAY_BYTE_BASE_OFFSET + position);
+        final long value = unsafe.getLong(buffer, (long) ARRAY_BYTE_BASE_OFFSET + position);
         position += SIZE_OF_LONG;
 
         return value;
     }
 
     @Override
-    public long[] getLongArray(final long[] dst, final long offset, final int length) {
+    public long[] getLongArray(final long[] dst, final int offset, final int length) {
         getArraySizeDescriptor();
         final int arraySize = getInt(); // strided-array size
-        final long[] values = dst == null ? new long[arraySize + (int) offset] : dst;
+        final boolean initNeeded = dst == null || length < 0;
+        final long[] values = initNeeded ? new long[arraySize + offset] : dst;
 
-        final long bytesToCopy = (dst == null ? arraySize : Math.min(arraySize, length)) * SIZE_OF_LONG;
+        final int bytesToCopy = (initNeeded ? arraySize : Math.min(arraySize, length)) * SIZE_OF_LONG;
         copyMemory(buffer, ARRAY_BYTE_BASE_OFFSET + position, values, ARRAY_LONG_BASE_OFFSET + (offset * SIZE_OF_LONG),
                 bytesToCopy);
         position += bytesToCopy;
@@ -322,19 +334,20 @@ public class FastByteBuffer implements IoBuffer {
 
     @Override
     public short getShort() { // NOPMD by rstein
-        final short value = unsafe.getShort(buffer, ARRAY_BYTE_BASE_OFFSET + position); // NOPMD
+        final short value = unsafe.getShort(buffer, (long) ARRAY_BYTE_BASE_OFFSET + position); // NOPMD
         position += SIZE_OF_SHORT;
 
         return value;
     }
 
     @Override
-    public short[] getShortArray(final short[] dst, final long offset, final int length) { // NOPMD by rstein
+    public short[] getShortArray(final short[] dst, final int offset, final int length) { // NOPMD by rstein
         getArraySizeDescriptor();
         final int arraySize = getInt(); // strided-array size
-        final short[] values = dst == null ? new short[arraySize + (int) offset] : dst; // NOPMD by rstein
+        final boolean initNeeded = dst == null || length < 0;
+        final short[] values = initNeeded ? new short[arraySize + offset] : dst; // NOPMD by rstein
 
-        final long bytesToCopy = (dst == null ? arraySize : Math.min(arraySize, length)) * SIZE_OF_SHORT;
+        final int bytesToCopy = (initNeeded ? arraySize : Math.min(arraySize, length)) * SIZE_OF_SHORT;
         copyMemory(buffer, ARRAY_BYTE_BASE_OFFSET + position, values,
                 ARRAY_SHORT_BASE_OFFSET + (offset * SIZE_OF_SHORT), bytesToCopy);
         position += bytesToCopy;
@@ -348,19 +361,23 @@ public class FastByteBuffer implements IoBuffer {
             return this.getStringISO8859();
         }
         final int arraySize = getInt(); // for C++ zero terminated string
-        final String str = new String(buffer, (int) (position), arraySize - 1, StandardCharsets.UTF_8);
+        // alt: final String str = new String(buffer, position, arraySize - 1, StandardCharsets.UTF_8)
+        decodeUTF8(buffer, position, arraySize - 1, builder);
+
         position += arraySize; // N.B. +1 larger to be compatible with C++ zero terminated string
-        return str;
+        // alt: return str
+        return builder.toString();
     }
 
     @Override
-    public String[] getStringArray(final String[] dst, final long offset, final int length) {
+    public String[] getStringArray(final String[] dst, final int offset, final int length) {
         getArraySizeDescriptor();
         final int arraySize = getInt(); // strided-array size
-        final String[] ret = dst == null ? new String[arraySize + (int) offset] : dst;
-        final int size = dst == null ? arraySize : Math.min(arraySize, length);
+        final boolean initNeeded = dst == null || length < 0;
+        final String[] ret = initNeeded ? new String[arraySize + offset] : dst;
+        final int size = initNeeded ? arraySize : Math.min(arraySize, length);
         for (int k = 0; k < size; k++) {
-            ret[k + (int) offset] = getString();
+            ret[k + offset] = getString();
         }
         return ret;
     }
@@ -368,8 +385,9 @@ public class FastByteBuffer implements IoBuffer {
     @Override
     public String getStringISO8859() {
         final int arraySize = getInt(); // for C++ zero terminated string
-        //alt safe-fallback final String str = new String(buffer, (int) (position), arraySize - 1, StandardCharsets.ISO_8859_1);
-        final String str = FastStringBuilder.iso8859BytesToString3(buffer, (int) (position), arraySize - 1);
+        //alt safe-fallback final String str = new String(buffer,  position, arraySize - 1, StandardCharsets.ISO_8859_1)
+        final String str = new String(buffer, 0, position, arraySize - 1); //NOSONAR //NOPMD fastest alternative that is public API
+        // final String str = FastStringBuilder.iso8859BytesToString(buffer, position, arraySize - 1)
         position += arraySize; // N.B. +1 larger to be compatible with C++ zero terminated string
         return str;
     }
@@ -385,22 +403,17 @@ public class FastByteBuffer implements IoBuffer {
     }
 
     @Override
-    public void setEnforceSimpleStringEncoding(final boolean state) {
-        this.enforceSimpleStringEncoding = state;
-    }
-
-    @Override
     public boolean isReadOnly() {
         return false;
     }
 
     @Override
-    public long limit() {
+    public int limit() {
         return limit;
     }
 
     @Override
-    public IoBuffer limit(final int newLimit) {
+    public void limit(final int newLimit) {
         if ((newLimit > capacity()) || (newLimit < 0)) {
             throw new IllegalArgumentException(String.format("invalid newLimit: [0, position: %d, newLimit:%d, %d]",
                     position, newLimit, capacity()));
@@ -409,7 +422,6 @@ public class FastByteBuffer implements IoBuffer {
         if (position > limit) {
             position = limit;
         }
-        return getSelf();
     }
 
     @Override
@@ -418,17 +430,16 @@ public class FastByteBuffer implements IoBuffer {
     }
 
     @Override
-    public long position() {
+    public int position() {
         return position;
     }
 
     @Override
-    public IoBuffer position(final long newPosition) {
+    public void position(final int newPosition) {
         if ((newPosition > limit) || (newPosition < 0) || (newPosition >= capacity())) {
             throw new IllegalArgumentException(String.format("invalid newPosition: %d vs. [0, position=%d, limit:%d, capacity:%d]", newPosition, position, limit, capacity()));
         }
         position = newPosition;
-        return getSelf();
     }
 
     @Override
@@ -452,241 +463,258 @@ public class FastByteBuffer implements IoBuffer {
     }
 
     @Override
-    public IoBuffer putBoolean(final boolean value) {
-        unsafe.putBoolean(buffer, ARRAY_BYTE_BASE_OFFSET + position, value);
+    public void putBoolean(final boolean value) {
+        unsafe.putBoolean(buffer, (long) ARRAY_BYTE_BASE_OFFSET + position, value);
         position += SIZE_OF_BOOLEAN;
-        return getSelf();
     }
 
     @Override
-    public IoBuffer putBooleanArray(final boolean[] values, final long offset, final int n) {
-        final long bytesToCopy = putArraySizeDescriptor(n > 0 ? Math.min(n, values.length) : values.length);
+    public void putBooleanArray(final boolean[] values, final int offset, final int n) {
+        final int valuesSize = values == null ? 0 : values.length;
+        final int bytesToCopy = putArraySizeDescriptor(n >= 0 ? Math.min(n, valuesSize) : valuesSize);
         ensureAdditionalCapacity(bytesToCopy);
         copyMemory(values, ARRAY_BOOLEAN_BASE_OFFSET + offset, buffer, ARRAY_BYTE_BASE_OFFSET + position, bytesToCopy);
         position += bytesToCopy;
-        return getSelf();
+        callBackFunction.run();
     }
 
     @Override
-    public IoBuffer putBooleanArray(final boolean[] values, final long offset, final int[] dims) {
-        final long bytesToCopy = putArraySizeDescriptor(dims);
+    public void putBooleanArray(final boolean[] values, final int offset, final int[] dims) {
+        final int bytesToCopy = putArraySizeDescriptor(dims);
         ensureAdditionalCapacity(bytesToCopy);
         copyMemory(values, ARRAY_BOOLEAN_BASE_OFFSET + offset, buffer, ARRAY_BYTE_BASE_OFFSET + position, bytesToCopy);
         position += bytesToCopy;
-        return getSelf();
+        callBackFunction.run();
     }
 
     @Override
-    public IoBuffer putByte(final byte value) {
-        unsafe.putByte(buffer, ARRAY_BYTE_BASE_OFFSET + position, value);
+    public void putByte(final byte value) {
+        unsafe.putByte(buffer, (long) ARRAY_BYTE_BASE_OFFSET + position, value);
         position += SIZE_OF_BYTE;
-        return getSelf();
     }
 
     @Override
-    public IoBuffer putByteArray(final byte[] values, final long offset, final int n) {
-        final long bytesToCopy = putArraySizeDescriptor(n > 0 ? Math.min(n, values.length) : values.length);
+    public void putByteArray(final byte[] values, final int offset, final int n) {
+        final int valuesSize = values == null ? 0 : values.length;
+        final int bytesToCopy = putArraySizeDescriptor(n >= 0 ? Math.min(n, valuesSize) : valuesSize);
         ensureAdditionalCapacity(bytesToCopy);
         copyMemory(values, ARRAY_BOOLEAN_BASE_OFFSET + offset, buffer, ARRAY_BYTE_BASE_OFFSET + position, bytesToCopy);
         position += bytesToCopy;
-        return getSelf();
+        callBackFunction.run();
     }
 
     @Override
-    public IoBuffer putByteArray(final byte[] values, final long offset, final int[] dims) {
-        final long bytesToCopy = putArraySizeDescriptor(dims);
+    public void putByteArray(final byte[] values, final int offset, final int[] dims) {
+        final int bytesToCopy = putArraySizeDescriptor(dims);
         ensureAdditionalCapacity(bytesToCopy);
         copyMemory(values, ARRAY_BOOLEAN_BASE_OFFSET + offset, buffer, ARRAY_BYTE_BASE_OFFSET + position, bytesToCopy);
         position += bytesToCopy;
-        return getSelf();
+        callBackFunction.run();
     }
 
     @Override
-    public IoBuffer putChar(final char value) {
-        unsafe.putChar(buffer, ARRAY_BYTE_BASE_OFFSET + position, value);
+    public void putChar(final char value) {
+        unsafe.putChar(buffer, (long) ARRAY_BYTE_BASE_OFFSET + position, value);
         position += SIZE_OF_CHAR;
-        return getSelf();
     }
 
     @Override
-    public IoBuffer putCharArray(final char[] values, final long offset, final int n) {
-        final long arrayOffset = ARRAY_CHAR_BASE_OFFSET;
-        final long primitiveSize = SIZE_OF_CHAR;
-        final long nBytesToCopy = putArraySizeDescriptor(n > 0 ? Math.min(n, values.length) : values.length) * primitiveSize;
+    public void putCharArray(final char[] values, final int offset, final int n) {
+        final int arrayOffset = ARRAY_CHAR_BASE_OFFSET;
+        final int primitiveSize = SIZE_OF_CHAR;
+        final int valuesSize = values == null ? 0 : values.length;
+        final int bytesToCopy = putArraySizeDescriptor(n >= 0 ? Math.min(n, valuesSize) : valuesSize) * primitiveSize;
+        ensureAdditionalCapacity(bytesToCopy);
+        copyMemory(values, arrayOffset + offset * primitiveSize, buffer, arrayOffset + position, bytesToCopy);
+        position += bytesToCopy;
+        callBackFunction.run();
+    }
+
+    @Override
+    public void putCharArray(final char[] values, final int offset, final int[] dims) {
+        final int arrayOffset = ARRAY_CHAR_BASE_OFFSET;
+        final int primitiveSize = SIZE_OF_CHAR;
+        final int nBytesToCopy = putArraySizeDescriptor(dims) * primitiveSize;
         ensureAdditionalCapacity(nBytesToCopy);
         copyMemory(values, arrayOffset + offset * primitiveSize, buffer, arrayOffset + position, nBytesToCopy);
         position += nBytesToCopy;
-        return getSelf();
+        callBackFunction.run();
     }
 
     @Override
-    public IoBuffer putCharArray(final char[] values, final long offset, final int[] dims) {
-        final long arrayOffset = ARRAY_CHAR_BASE_OFFSET;
-        final long primitiveSize = SIZE_OF_CHAR;
-        final long nBytesToCopy = putArraySizeDescriptor(dims) * primitiveSize;
-        ensureAdditionalCapacity(nBytesToCopy);
-        copyMemory(values, arrayOffset + offset * primitiveSize, buffer, arrayOffset + position, nBytesToCopy);
-        position += nBytesToCopy;
-        return getSelf();
-    }
-
-    @Override
-    public IoBuffer putDouble(final double value) {
-        unsafe.putDouble(buffer, ARRAY_BYTE_BASE_OFFSET + position, value);
+    public void putDouble(final double value) {
+        unsafe.putDouble(buffer, (long) ARRAY_BYTE_BASE_OFFSET + position, value);
         position += SIZE_OF_DOUBLE;
-        return getSelf();
     }
 
     @Override
-    public IoBuffer putDoubleArray(final double[] values, final long offset, final int n) {
-        final long arrayOffset = ARRAY_DOUBLE_BASE_OFFSET;
-        final long primitiveSize = SIZE_OF_DOUBLE;
-        final long nBytesToCopy = putArraySizeDescriptor(n > 0 ? Math.min(n, values.length) : values.length) * primitiveSize;
+    public void putDoubleArray(final double[] values, final int offset, final int n) {
+        final int arrayOffset = ARRAY_DOUBLE_BASE_OFFSET;
+        final int primitiveSize = SIZE_OF_DOUBLE;
+        final int valuesSize = values == null ? 0 : values.length;
+        final int bytesToCopy = putArraySizeDescriptor(n >= 0 ? Math.min(n, valuesSize) : valuesSize) * primitiveSize;
+        ensureAdditionalCapacity(bytesToCopy);
+        copyMemory(values, arrayOffset + offset * primitiveSize, buffer, arrayOffset + position, bytesToCopy);
+        position += bytesToCopy;
+        callBackFunction.run();
+    }
+
+    @Override
+    public void putDoubleArray(final double[] values, final int offset, final int[] dims) {
+        final int arrayOffset = ARRAY_DOUBLE_BASE_OFFSET;
+        final int primitiveSize = SIZE_OF_DOUBLE;
+        final int nBytesToCopy = putArraySizeDescriptor(dims) * primitiveSize;
         ensureAdditionalCapacity(nBytesToCopy);
         copyMemory(values, arrayOffset + offset * primitiveSize, buffer, arrayOffset + position, nBytesToCopy);
         position += nBytesToCopy;
-        return getSelf();
+        callBackFunction.run();
     }
 
     @Override
-    public IoBuffer putDoubleArray(final double[] values, final long offset, final int[] dims) {
-        final long arrayOffset = ARRAY_DOUBLE_BASE_OFFSET;
-        final long primitiveSize = SIZE_OF_DOUBLE;
-        final long nBytesToCopy = putArraySizeDescriptor(dims) * primitiveSize;
-        ensureAdditionalCapacity(nBytesToCopy);
-        copyMemory(values, arrayOffset + offset * primitiveSize, buffer, arrayOffset + position, nBytesToCopy);
-        position += nBytesToCopy;
-        return getSelf();
+    public void putEndMarker(final String markerName) {
+        // empty implementation
     }
 
     @Override
-    public IoBuffer putFloat(final float value) {
-        unsafe.putFloat(buffer, ARRAY_BYTE_BASE_OFFSET + position, value);
+    public void putFloat(final float value) {
+        unsafe.putFloat(buffer, (long) ARRAY_BYTE_BASE_OFFSET + position, value);
         position += SIZE_OF_FLOAT;
-        return getSelf();
     }
 
     @Override
-    public IoBuffer putFloatArray(final float[] values, final long offset, final int n) {
-        final long arrayOffset = ARRAY_FLOAT_BASE_OFFSET;
-        final long primitiveSize = SIZE_OF_FLOAT;
-        final long nBytesToCopy = putArraySizeDescriptor(n > 0 ? Math.min(n, values.length) : values.length) * primitiveSize;
+    public void putFloatArray(final float[] values, final int offset, final int n) {
+        final int arrayOffset = ARRAY_FLOAT_BASE_OFFSET;
+        final int primitiveSize = SIZE_OF_FLOAT;
+        final int valuesSize = values == null ? 0 : values.length;
+        final int bytesToCopy = putArraySizeDescriptor(n >= 0 ? Math.min(n, valuesSize) : valuesSize) * primitiveSize;
+        ensureAdditionalCapacity(bytesToCopy);
+        copyMemory(values, arrayOffset + offset * primitiveSize, buffer, arrayOffset + position, bytesToCopy);
+        position += bytesToCopy;
+        callBackFunction.run();
+    }
+
+    @Override
+    public void putFloatArray(final float[] values, final int offset, final int[] dims) {
+        final int arrayOffset = ARRAY_FLOAT_BASE_OFFSET;
+        final int primitiveSize = SIZE_OF_FLOAT;
+        final int nBytesToCopy = putArraySizeDescriptor(dims) * primitiveSize;
         ensureAdditionalCapacity(nBytesToCopy);
         copyMemory(values, arrayOffset + offset * primitiveSize, buffer, arrayOffset + position, nBytesToCopy);
         position += nBytesToCopy;
-        return getSelf();
+        callBackFunction.run();
     }
 
     @Override
-    public IoBuffer putFloatArray(final float[] values, final long offset, final int[] dims) {
-        final long arrayOffset = ARRAY_FLOAT_BASE_OFFSET;
-        final long primitiveSize = SIZE_OF_FLOAT;
-        final long nBytesToCopy = putArraySizeDescriptor(dims) * primitiveSize;
-        ensureAdditionalCapacity(nBytesToCopy);
-        copyMemory(values, arrayOffset + offset * primitiveSize, buffer, arrayOffset + position, nBytesToCopy);
-        position += nBytesToCopy;
-        return getSelf();
-    }
-
-    @Override
-    public IoBuffer putInt(final int value) {
-        unsafe.putInt(buffer, ARRAY_BYTE_BASE_OFFSET + position, value);
+    public void putInt(final int value) {
+        unsafe.putInt(buffer, (long) ARRAY_BYTE_BASE_OFFSET + position, value);
         position += SIZE_OF_INT;
-        return getSelf();
     }
 
     @Override
-    public IoBuffer putIntArray(final int[] values, final long offset, final int n) {
-        final long arrayOffset = ARRAY_INT_BASE_OFFSET;
-        final long primitiveSize = SIZE_OF_INT;
-        final long nBytesToCopy = putArraySizeDescriptor(n > 0 ? Math.min(n, values.length) : values.length) * primitiveSize;
+    public void putIntArray(final int[] values, final int offset, final int n) {
+        final int arrayOffset = ARRAY_INT_BASE_OFFSET;
+        final int primitiveSize = SIZE_OF_INT;
+        final int valuesSize = values == null ? 0 : values.length;
+        final int bytesToCopy = putArraySizeDescriptor(n >= 0 ? Math.min(n, valuesSize) : valuesSize) * primitiveSize;
+        ensureAdditionalCapacity(bytesToCopy);
+        copyMemory(values, arrayOffset + offset * primitiveSize, buffer, arrayOffset + position, bytesToCopy);
+        position += bytesToCopy;
+        callBackFunction.run();
+    }
+
+    @Override
+    public void putIntArray(final int[] values, final int offset, final int[] dims) {
+        final int arrayOffset = ARRAY_INT_BASE_OFFSET;
+        final int primitiveSize = SIZE_OF_INT;
+        final int nBytesToCopy = putArraySizeDescriptor(dims) * primitiveSize;
         ensureAdditionalCapacity(nBytesToCopy);
         copyMemory(values, arrayOffset + offset * primitiveSize, buffer, arrayOffset + position, nBytesToCopy);
         position += nBytesToCopy;
-        return getSelf();
+        callBackFunction.run();
     }
 
     @Override
-    public IoBuffer putIntArray(final int[] values, final long offset, final int[] dims) {
-        final long arrayOffset = ARRAY_INT_BASE_OFFSET;
-        final long primitiveSize = SIZE_OF_INT;
-        final long nBytesToCopy = putArraySizeDescriptor(dims) * primitiveSize;
-        ensureAdditionalCapacity(nBytesToCopy);
-        copyMemory(values, arrayOffset + offset * primitiveSize, buffer, arrayOffset + position, nBytesToCopy);
-        position += nBytesToCopy;
-        return getSelf();
-    }
-
-    @Override
-    public IoBuffer putLong(final long value) {
-        unsafe.putLong(buffer, ARRAY_BYTE_BASE_OFFSET + position, value);
+    public void putLong(final long value) {
+        unsafe.putLong(buffer, (long) ARRAY_BYTE_BASE_OFFSET + position, value);
         position += SIZE_OF_LONG;
-        return getSelf();
     }
 
     @Override
-    public IoBuffer putLongArray(final long[] values, final long offset, final int n) {
-        final long arrayOffset = ARRAY_LONG_BASE_OFFSET;
-        final long primitiveSize = SIZE_OF_LONG;
-        final long nBytesToCopy = putArraySizeDescriptor(n > 0 ? Math.min(n, values.length) : values.length) * primitiveSize;
+    public void putLongArray(final long[] values, final int offset, final int n) {
+        final int arrayOffset = ARRAY_LONG_BASE_OFFSET;
+        final int primitiveSize = SIZE_OF_LONG;
+        final int valuesSize = values == null ? 0 : values.length;
+        final int bytesToCopy = putArraySizeDescriptor(n >= 0 ? Math.min(n, valuesSize) : valuesSize) * primitiveSize;
+        ensureAdditionalCapacity(bytesToCopy);
+        copyMemory(values, arrayOffset + offset * primitiveSize, buffer, arrayOffset + position, bytesToCopy);
+        position += bytesToCopy;
+        callBackFunction.run();
+    }
+
+    @Override
+    public void putLongArray(final long[] values, final int offset, final int[] dims) {
+        final int arrayOffset = ARRAY_LONG_BASE_OFFSET;
+        final int primitiveSize = SIZE_OF_LONG;
+        final int nBytesToCopy = putArraySizeDescriptor(dims) * primitiveSize;
         ensureAdditionalCapacity(nBytesToCopy);
         copyMemory(values, arrayOffset + offset * primitiveSize, buffer, arrayOffset + position, nBytesToCopy);
         position += nBytesToCopy;
-        return getSelf();
+        callBackFunction.run();
     }
 
     @Override
-    public IoBuffer putLongArray(final long[] values, final long offset, final int[] dims) {
-        final long arrayOffset = ARRAY_LONG_BASE_OFFSET;
-        final long primitiveSize = SIZE_OF_LONG;
-        final long nBytesToCopy = putArraySizeDescriptor(dims) * primitiveSize;
-        ensureAdditionalCapacity(nBytesToCopy);
-        copyMemory(values, arrayOffset + offset * primitiveSize, buffer, arrayOffset + position, nBytesToCopy);
-        position += nBytesToCopy;
-        return getSelf();
-    }
-
-    @Override
-    public IoBuffer putShort(final short value) { // NOPMD by rstein
-        unsafe.putShort(buffer, ARRAY_BYTE_BASE_OFFSET + position, value);
+    public void putShort(final short value) { // NOPMD by rstein
+        unsafe.putShort(buffer, (long) ARRAY_BYTE_BASE_OFFSET + position, value);
         position += SIZE_OF_SHORT;
-        return getSelf();
     }
 
     @Override
-    public IoBuffer putShortArray(final short[] values, final long offset, final int n) { // NOPMD by rstein
-        final long arrayOffset = ARRAY_SHORT_BASE_OFFSET;
-        final long primitiveSize = SIZE_OF_SHORT;
-        final long nBytesToCopy = putArraySizeDescriptor(n > 0 ? Math.min(n, values.length) : values.length) * primitiveSize;
+    public void putShortArray(final short[] values, final int offset, final int n) { // NOPMD by rstein
+        final int arrayOffset = ARRAY_SHORT_BASE_OFFSET;
+        final int primitiveSize = SIZE_OF_SHORT;
+        final int valuesSize = values == null ? 0 : values.length;
+        final int bytesToCopy = putArraySizeDescriptor(n >= 0 ? Math.min(n, valuesSize) : valuesSize) * primitiveSize;
+        ensureAdditionalCapacity(bytesToCopy);
+        copyMemory(values, arrayOffset + offset * primitiveSize, buffer, arrayOffset + position, bytesToCopy);
+        position += bytesToCopy;
+        callBackFunction.run();
+    }
+
+    @Override
+    public void putShortArray(final short[] values, final int offset, final int[] dims) { // NOPMD by rstein
+        final int arrayOffset = ARRAY_SHORT_BASE_OFFSET;
+        final int primitiveSize = SIZE_OF_SHORT;
+        final int nBytesToCopy = putArraySizeDescriptor(dims) * primitiveSize;
         ensureAdditionalCapacity(nBytesToCopy);
         copyMemory(values, arrayOffset + offset * primitiveSize, buffer, arrayOffset + position, nBytesToCopy);
         position += nBytesToCopy;
-        return getSelf();
+        callBackFunction.run();
     }
 
     @Override
-    public IoBuffer putShortArray(final short[] values, final long offset, final int[] dims) { // NOPMD by rstein
-        final long arrayOffset = ARRAY_SHORT_BASE_OFFSET;
-        final long primitiveSize = SIZE_OF_SHORT;
-        final long nBytesToCopy = putArraySizeDescriptor(dims) * primitiveSize;
-        ensureAdditionalCapacity(nBytesToCopy);
-        copyMemory(values, arrayOffset + offset * primitiveSize, buffer, arrayOffset + position, nBytesToCopy);
-        position += nBytesToCopy;
-        return getSelf();
+    public void putStartMarker(final String markerName) {
+        // empty implementation
     }
 
     @Override
-    public IoBuffer putString(final String string) {
+    public void putString(final String string) {
+        if (string == null) {
+            putString("");
+            callBackFunction.run();
+            return;
+        }
         if (isEnforceSimpleStringEncoding()) {
-            return this.putStringISO8859(string);
+            putStringISO8859(string);
+            callBackFunction.run();
+            return;
         }
         final int utf16StringLength = string.length();
-        final long initialPos = position;
+        final int initialPos = position;
         position += SIZE_OF_INT;
         // write string-to-byte (in-place)
-        ensureAdditionalCapacity(3 * utf16StringLength + 1L);
-        final int strLength = encodeUTF8(string, buffer, ARRAY_BYTE_BASE_OFFSET, position, 3 * utf16StringLength);
-        final long endPos = position + strLength;
+        ensureAdditionalCapacity(3 * utf16StringLength + 1);
+        final int strLength = encodeUTF8(string, buffer, position, 3 * utf16StringLength);
+        final int endPos = position + strLength;
 
         // write length of string byte representation
         position = initialPos;
@@ -694,48 +722,69 @@ public class FastByteBuffer implements IoBuffer {
         position = endPos;
 
         putByte((byte) 0); // For C++ zero terminated string
-        return getSelf();
+        callBackFunction.run();
     }
 
     @Override
-    public IoBuffer putStringArray(final String[] values, final long offset, final int n) {
-        final int nElements = n > 0 ? Math.min(n, values.length) : values.length;
+    public void putStringArray(final String[] values, final int offset, final int n) {
+        final int valuesSize = values == null ? 0 : values.length;
+        final int nElements = n >= 0 ? Math.min(n, valuesSize) : valuesSize;
         ensureAdditionalCapacity(putArraySizeDescriptor(nElements));
+        if (values == null) {
+            callBackFunction.run();
+            return;
+        }
+
+        final Runnable oldRunnable = callBackFunction;
+        setCallBackFunction(null);
         if (isEnforceSimpleStringEncoding()) {
             for (int k = 0; k < nElements; k++) {
-                putStringISO8859(values[k + (int) offset]);
+                putStringISO8859(values[k + offset]);
             }
-            return getSelf();
+            setCallBackFunction(oldRunnable);
+            callBackFunction.run();
+            return;
         }
         for (int k = 0; k < nElements; k++) {
-            putString(values[k + (int) offset]);
+            putString(values[k + offset]);
         }
-        return getSelf();
+        setCallBackFunction(oldRunnable);
+        callBackFunction.run();
     }
 
     @Override
-    public IoBuffer putStringArray(final String[] values, final long offset, final int[] dims) {
-        final long nElements = putArraySizeDescriptor(dims);
+    public void putStringArray(final String[] values, final int offset, final int[] dims) {
+        final int nElements = putArraySizeDescriptor(dims);
         ensureAdditionalCapacity(nElements);
+        final Runnable oldRunnable = callBackFunction;
+        setCallBackFunction(null);
         if (isEnforceSimpleStringEncoding()) {
             for (int k = 0; k < nElements; k++) {
-                putStringISO8859(values[k + (int) offset]);
+                putStringISO8859(values[k + offset]);
             }
-            return getSelf();
+            setCallBackFunction(oldRunnable);
+            callBackFunction.run();
+            return;
         }
         for (int k = 0; k < nElements; k++) {
-            putString(values[k + (int) offset]);
+            putString(values[k + offset]);
         }
-        return getSelf();
+        setCallBackFunction(oldRunnable);
+        callBackFunction.run();
     }
 
     @Override
-    public IoBuffer putStringISO8859(final String string) {
-        final long initialPos = position;
+    public void putStringISO8859(final String string) {
+        if (string == null) {
+            putStringISO8859("");
+            callBackFunction.run();
+            return;
+        }
+        final int initialPos = position;
         position += SIZE_OF_INT;
         // write string-to-byte (in-place)
-        final int strLength = encodeISO8859(string, buffer, ARRAY_BYTE_BASE_OFFSET, position, string.length());
-        final long endPos = position + strLength;
+        final int strLength = encodeISO8859(string, buffer, position, string.length());
+        final int endPos = position + strLength;
 
         // write length of string byte representation
         position = initialPos;
@@ -743,19 +792,32 @@ public class FastByteBuffer implements IoBuffer {
         position = endPos;
 
         putByte((byte) 0); // For C++ zero terminated string
-        return getSelf();
+        callBackFunction.run();
     }
 
     @Override
-    public long remaining() {
+    public int remaining() {
         return limit - position;
     }
 
     @Override
-    public IoBuffer reset() {
+    public void reset() {
         position = 0;
         limit = buffer.length;
-        return getSelf();
+    }
+
+    @Override
+    public void setCallBackFunction(final Runnable runnable) {
+        if (runnable == null) {
+            callBackFunction = () -> {};
+            return;
+        }
+        callBackFunction = runnable;
+    }
+
+    @Override
+    public void setEnforceSimpleStringEncoding(final boolean state) {
+        this.enforceSimpleStringEncoding = state;
     }
 
     @Override
@@ -769,9 +831,8 @@ public class FastByteBuffer implements IoBuffer {
      * @see java.util.ArrayList#trimToSize()
      */
     @Override
-    public IoBuffer trim() {
-        trim((int) position());
-        return getSelf();
+    public void trim() {
+        trim(position());
     }
 
     /**
@@ -786,25 +847,15 @@ public class FastByteBuffer implements IoBuffer {
      * @param requestedCapacity the threshold for the trimming.
      */
     @Override
-    public IoBuffer trim(final int requestedCapacity) {
+    public void trim(final int requestedCapacity) {
         if ((requestedCapacity >= capacity()) || (this.position() > requestedCapacity)) {
-            return getSelf();
+            return;
         }
-        final long bytesToCopy = Math.min(Math.max(requestedCapacity, position()), capacity()) * SIZE_OF_BYTE;
-        final byte[] newBuffer = new byte[(int) bytesToCopy];
+        final int bytesToCopy = Math.min(Math.max(requestedCapacity, position()), capacity()) * SIZE_OF_BYTE;
+        final byte[] newBuffer = new byte[bytesToCopy];
         copyMemory(buffer, ARRAY_BYTE_BASE_OFFSET, newBuffer, ARRAY_BYTE_BASE_OFFSET, bytesToCopy);
         buffer = newBuffer;
         limit = newBuffer.length;
-        return getSelf();
-    }
-
-    private IoBuffer getSelf() {
-        return this;
-    }
-
-    public static void copyMemory(final Object srcBase, final long srcOffset, final Object destBase,
-            final long destOffset, final long nBytes) {
-        unsafe.copyMemory(srcBase, srcOffset, destBase, destOffset, nBytes);
     }
 
     /**
@@ -832,137 +883,177 @@ public class FastByteBuffer implements IoBuffer {
         return new FastByteBuffer(byteArray, length);
     }
 
-    protected static int encodeISO8859(final String string, final byte[] bytes, final long baseOffset, final long offset, final int length) {
+    private static void copyMemory(final Object srcBase, final int srcOffset, final Object destBase, final int destOffset, final int nBytes) {
+        unsafe.copyMemory(srcBase, srcOffset, destBase, destOffset, nBytes);
+    }
+
+    // Fast UTF-8 byte-array to String(Builder) decode - code originally based on Google's PrototBuffer implementation and since modified
+    @SuppressWarnings("PMD")
+    private static void decodeUTF8(byte[] bytes, int offset, int size, StringBuilder result) { //NOSONAR
+        // Bitwise OR combines the sign bits so any negative value fails the check.
+        // N.B. many code snippets are in-lined for performance reasons (~10% performance improvement) ... this is a JIT hot spot.
+        if ((offset | size | bytes.length - offset - size) < 0) {
+            throw new ArrayIndexOutOfBoundsException(String.format("buffer length=%d, offset=%d, size=%d", bytes.length, offset, size));
+        }
+
+        // The longest possible resulting String is the same as the number of input bytes, when it is
+        // all ASCII. For other cases, this over-allocates and we will truncate in the end.
+        result.setLength(size);
+
+        // keep separate int/long counters so we don't have to convert types at every call
+        int remaining = size;
+        long readPos = (long) ARRAY_BYTE_BASE_OFFSET + offset;
+        int resultPos = 0;
+
+        // Optimize for 100% ASCII (Hotspot loves small simple top-level loops like this).
+        // This simple loop stops when we encounter a byte >= 0x80 (i.e. non-ASCII).
+        while (remaining > 0) {
+            final byte byte1 = unsafe.getByte(bytes, readPos);
+            if (byte1 < 0) {
+                // is more than one byte ie. non-ASCII (unsigned byte value larger > 127 <-> negative number for signed byte
+                break;
+            }
+            readPos++;
+            remaining--;
+            result.setCharAt(resultPos++, (char) byte1);
+        }
+
+        while (remaining > 0) {
+            final byte byte1 = unsafe.getByte(bytes, readPos++);
+            remaining--;
+            if (byte1 >= 0) { // is one byte (ie. ASCII-type encoding)
+                result.setCharAt(resultPos++, (char) byte1);
+                // It's common for there to be multiple ASCII characters in a run mixed in, so add an extra optimized loop to take care of these runs.
+                while (remaining > 0) {
+                    final byte b = unsafe.getByte(bytes, readPos);
+                    if (b < 0) { // is not one byte
+                        break;
+                    }
+                    readPos++;
+                    remaining--;
+                    result.setCharAt(resultPos++, (char) b);
+                }
+            } else if (byte1 < (byte) 0xE0) { // is two bytes
+                if (remaining < 1) {
+                    throw new IllegalArgumentException(INVALID_UTF_8);
+                }
+                final byte byte2 = unsafe.getByte(bytes, readPos++);
+                remaining--;
+                final int resultPos1 = resultPos++;
+                // Simultaneously checks for illegal trailing-byte in leading position (<= '11000000') and overlong 2-byte, '11000001'.
+                if (byte1 < (byte) 0xC2) {
+                    throw new IllegalArgumentException(INVALID_UTF_8 + ": Illegal leading byte in 2 bytes UTF");
+                }
+                if (byte2 > (byte) 0xBF) { // is not trailing byte
+                    throw new IllegalArgumentException(INVALID_UTF_8 + ": Illegal trailing byte in 2 bytes UTF");
+                }
+                result.setCharAt(resultPos1, (char) (((byte1 & 0x1F) << 6) | byte2 & 0x3F));
+            } else if (byte1 < (byte) 0xF0) { // is three bytes
+                if (remaining < 2) {
+                    throw new IllegalArgumentException(INVALID_UTF_8);
+                }
+                /* byte2 */
+                /* byte3 */
+                final byte byte2 = unsafe.getByte(bytes, readPos++);
+                final byte byte3 = unsafe.getByte(bytes, readPos++);
+                final int resultPos1 = resultPos++;
+                if (byte2 > (byte) 0xBF // is not trailing byte
+                        // overlong? 5 most significant bits must not all be zero
+                        || (byte1 == (byte) 0xE0 && byte2 < (byte) 0xA0)
+                        // check for illegal surrogate codepoints
+                        || (byte1 == (byte) 0xED && byte2 >= (byte) 0xA0)
+                        || byte3 > (byte) 0xBF) { // is not trailing byte
+                    throw new IllegalArgumentException(INVALID_UTF_8);
+                }
+                result.setCharAt(resultPos1, (char) (((byte1 & 0x0F) << 12) | ((byte2 & 0x3F) << 6) | byte3 & 0x3F));
+                remaining -= 2;
+            } else { // is four bytes
+                if (remaining < 3) {
+                    throw new IllegalArgumentException(INVALID_UTF_8);
+                }
+                // handle four byte UTF
+                /* byte2 */
+                /* byte3 */
+                /* byte4 */
+                final byte byte2 = unsafe.getByte(bytes, readPos++);
+                final byte byte3 = unsafe.getByte(bytes, readPos++);
+                final byte byte4 = unsafe.getByte(bytes, readPos++);
+                final int resultPos1 = resultPos++;
+                if (byte2 > (byte) 0xBF
+                        // Check that 1 <= plane <= 16.  Tricky optimized form of:
+                        //   valid 4-byte leading byte?
+                        // if (byte1 > (byte) 0xF4 ||
+                        //   overlong? 4 most significant bits must not all be zero
+                        //     byte1 == (byte) 0xF0 && byte2 < (byte) 0x90 ||
+                        //   codepoint larger than the highest code point (U+10FFFF)? byte1 == (byte) 0xF4 && byte2 > (byte) 0x8F)
+                        || (((byte1 << 28) + (byte2 - (byte) 0x90)) >> 30) != 0
+                        || byte3 > (byte) 0xBF
+                        || byte4 > (byte) 0xBF) {
+                    throw new IllegalArgumentException(INVALID_UTF_8);
+                }
+                final int codepoint = ((byte1 & 0x07) << 18) | ((byte2 & 0x3F) << 12) | ((byte3 & 0x3F) << 6) | byte4 & 0x3F;
+                result.setCharAt(resultPos1, (char) ((Character.MIN_HIGH_SURROGATE - (Character.MIN_SUPPLEMENTARY_CODE_POINT >>> 10)) + (codepoint >>> 10)));
+                result.setCharAt(resultPos1 + 1, (char) (Character.MIN_LOW_SURROGATE + (codepoint & 0x3ff)));
+                remaining -= 3;
+                // 4-byte case requires two chars.
+                resultPos++;
+            }
+        }
+
+        result.setLength(resultPos);
+    }
+
+    private static int encodeISO8859(final String sequence, final byte[] bytes, final int offset, final int length) {
         // encode to ISO_8859_1
-        final byte[] byteString = FastStringBuilder.getByteValue(string);
-        final long j = baseOffset + offset;
+        final int base = ARRAY_BYTE_BASE_OFFSET + offset;
         for (int i = 0; i < length; i++) {
-            //unsafe.putByte(bytes, j + i, (byte) (sequence.charAt(i) & 0xFF));
-            unsafe.putByte(bytes, j + i, (byte) (byteString[i] & 0xFF));
+            unsafe.putByte(bytes, (long) base + i, (byte) (sequence.charAt(i) & 0xFF));
         }
         return length;
     }
 
-    protected static int encodeUTF8(final CharSequence sequence, final byte[] bytes, final long baseOffset, final long offset, final int length) {
+    // Fast UTF-8 String (CharSequence) to byte-array encoder - code originally based on Google's PrototBuffer implementation and since modified
+    @SuppressWarnings("PMD")
+    private static int encodeUTF8(final CharSequence sequence, final byte[] bytes, final int offset, final int length) { //NOSONAR
         int utf16Length = sequence.length();
-        long j = baseOffset + offset;
+        int base = ARRAY_BYTE_BASE_OFFSET + offset;
         int i = 0;
-        long limit = baseOffset + offset + length;
+        int limit = base + length;
         // Designed to take advantage of https://wiki.openjdk.java.net/display/HotSpot/RangeCheckElimination
-        for (char c; i < utf16Length && i + j < limit && (c = sequence.charAt(i)) < 0x80; i++) {
-            unsafe.putByte(bytes, j + i, (byte) c);
+        for (char c; i < utf16Length && base + i < limit && (c = sequence.charAt(i)) < 0x80; i++) {
+            unsafe.putByte(bytes, (long) base + i, (byte) c);
         }
         if (i == utf16Length) {
             return utf16Length;
         }
-        j += i;
+        base += i;
         for (; i < utf16Length; i++) {
             final char c = sequence.charAt(i);
-            if (c < 0x80 && j < limit) {
-                unsafe.putByte(bytes, j++, (byte) c);
-            } else if (c < 0x800 && j <= limit - 2) { // 11 bits, two UTF-8 bytes
-                unsafe.putByte(bytes, j++, (byte) ((0xF << 6) | (c >>> 6)));
-                unsafe.putByte(bytes, j++, (byte) (0x80 | (0x3F & c)));
-            } else if ((c < Character.MIN_SURROGATE || Character.MAX_SURROGATE < c) && j <= limit - 3) {
+            if (c < 0x80 && base < limit) {
+                unsafe.putByte(bytes, base++, (byte) c);
+            } else if (c < 0x800 && base <= limit - 2) { // 11 bits, two UTF-8 bytes
+                unsafe.putByte(bytes, base++, (byte) ((0xF << 6) | (c >>> 6)));
+                unsafe.putByte(bytes, base++, (byte) (0x80 | (0x3F & c)));
+            } else if ((c < Character.MIN_SURROGATE || Character.MAX_SURROGATE < c) && base <= limit - 3) {
                 // Maximum single-char code point is 0xFFFF, 16 bits, three UTF-8 bytes
-                unsafe.putByte(bytes, j++, (byte) ((0xF << 5) | (c >>> 12)));
-                unsafe.putByte(bytes, j++, (byte) (0x80 | (0x3F & (c >>> 6))));
-                unsafe.putByte(bytes, j++, (byte) (0x80 | (0x3F & c)));
-            } else if (j <= limit - 4) {
+                unsafe.putByte(bytes, base++, (byte) ((0xF << 5) | (c >>> 12)));
+                unsafe.putByte(bytes, base++, (byte) (0x80 | (0x3F & (c >>> 6))));
+                unsafe.putByte(bytes, base++, (byte) (0x80 | (0x3F & c)));
+            } else if (base <= limit - 4) {
                 // Minimum code point represented by a surrogate pair is 0x10000, 17 bits, four UTF-8 bytes
                 final char low;
                 if (i + 1 == sequence.length() || !Character.isSurrogatePair(c, (low = sequence.charAt(++i)))) {
                     throw new IllegalArgumentException("Unpaired surrogate at index " + (i - 1));
                 }
-                int codePoint = Character.toCodePoint(c, low);
-                unsafe.putByte(bytes, j++, (byte) ((0xF << 4) | (codePoint >>> 18)));
-                unsafe.putByte(bytes, j++, (byte) (0x80 | (0x3F & (codePoint >>> 12))));
-                unsafe.putByte(bytes, j++, (byte) (0x80 | (0x3F & (codePoint >>> 6))));
-                unsafe.putByte(bytes, j++, (byte) (0x80 | (0x3F & codePoint)));
+                final int codePoint = Character.toCodePoint(c, low);
+                unsafe.putByte(bytes, base++, (byte) ((0xF << 4) | (codePoint >>> 18)));
+                unsafe.putByte(bytes, base++, (byte) (0x80 | (0x3F & (codePoint >>> 12))));
+                unsafe.putByte(bytes, base++, (byte) (0x80 | (0x3F & (codePoint >>> 6))));
+                unsafe.putByte(bytes, base++, (byte) (0x80 | (0x3F & codePoint)));
             } else {
-                throw new ArrayIndexOutOfBoundsException("Failed writing " + c + " at index " + j);
+                throw new ArrayIndexOutOfBoundsException("Failed writing " + c + " at index " + base);
             }
         }
-        return (int) (j - baseOffset - offset);
-    }
-
-    private static void disableUnsafeWarning() {
-        try {
-            Field theUnsafe = Unsafe.class.getDeclaredField("theUnsafe");
-            theUnsafe.setAccessible(true);
-            Unsafe u = (Unsafe) theUnsafe.get(null);
-
-            Class cls = Class.forName("jdk.internal.module.IllegalAccessLogger");
-            Field logger = cls.getDeclaredField("logger");
-            u.putObjectVolatile(cls, u.staticFieldOffset(logger), null);
-        } catch (Exception e) {
-            // ignore
-        }
-    }
-
-    /**
-     * Simple helper class to generate (a little bit) faster Strings from byte arrays ;-)
-     * N.B. bypassing some of the redundant (null-pointer, byte array size, etc.) safety checks gains up to about 80% performance.
-     *
-     * @author rstein
-     */
-    public static class FastStringBuilder {
-        private static final Logger LOGGER = LoggerFactory.getLogger(FastStringBuilder.class);
-        private static final Field fieldValue;
-        private static final long fieldValueOffset;
-
-        static {
-            Field tempVal = null;
-            long offset = 0;
-            try {
-                tempVal = String.class.getDeclaredField("value");
-                tempVal.setAccessible(true);
-
-                final Field modifiersField = Field.class.getDeclaredField("modifiers");
-                modifiersField.setAccessible(true);
-                modifiersField.setInt(tempVal, tempVal.getModifiers() & ~Modifier.FINAL);
-                offset = unsafe.objectFieldOffset(tempVal);
-            } catch (NoSuchFieldException | IllegalAccessException e) {
-                LOGGER.atError().setCause(e).log("could not initialise String field references");
-            } finally {
-                fieldValue = tempVal;
-                fieldValueOffset = offset;
-            }
-        }
-        private char[] tempCharBuffer = new char[1000];
-
-        public String iso8859BytesToString(final byte[] ba, final int offset, final int length) {
-            if (tempCharBuffer.length < length) {
-                tempCharBuffer = new char[length];
-            }
-            for (int i = 0; i < length; i++) {
-                tempCharBuffer[i] = (char) (ba[offset + i] & 0xFF);
-            }
-            return new String(tempCharBuffer, 0, length);
-        }
-
-        public static String iso8859BytesToString2(final byte[] ba, final int offset, final int length) {
-            final String retVal = new String(); // NOPMD - on purpose allocating new object
-            final byte[] array = new byte[length];
-            System.arraycopy(ba, offset, array, 0, length);
-            try {
-                fieldValue.set(retVal, array);
-            } catch (Exception e) {
-                LOGGER.atError().setCause(e).log("could not access String internal value array");
-            }
-            return retVal;
-        }
-
-        public static String iso8859BytesToString3(final byte[] ba, final int offset, final int length) {
-            final String retVal = new String(); // NOPMD - on purpose allocating new object
-            final byte[] array = new byte[length];
-            System.arraycopy(ba, offset, array, 0, length);
-            unsafe.putObject(retVal, fieldValueOffset, array);
-            return retVal;
-        }
-
-        public static byte[] getByteValue(final String string) {
-            return (byte[]) unsafe.getObject(string, fieldValueOffset);
-        }
+        return base - ARRAY_BYTE_BASE_OFFSET - offset;
     }
 }

@@ -11,27 +11,32 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.ArgumentsProvider;
 import org.junit.jupiter.params.provider.ArgumentsSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
+import de.gsi.dataset.DataSet;
 import de.gsi.dataset.serializer.helper.SerialiserHelper;
 import de.gsi.dataset.serializer.helper.TestDataClass;
 import de.gsi.dataset.serializer.spi.BinarySerialiser;
 import de.gsi.dataset.serializer.spi.ByteBuffer;
 import de.gsi.dataset.serializer.spi.FastByteBuffer;
 import de.gsi.dataset.serializer.spi.helper.MyGenericClass;
-import de.gsi.dataset.serializer.spi.iobuffer.IoBufferSerialiser;
 import de.gsi.dataset.spi.DoubleDataSet;
 
-public class IoSerialiserTests {
-    private static final int BUFFER_SIZE = 40000;
+class IoSerialiserTests {
+    private static final int BUFFER_SIZE = 50000;
 
-    @Test
-    public void simpleStreamerTest() throws IllegalAccessException {
+    @ParameterizedTest
+    @ValueSource(classes = { ByteBuffer.class, FastByteBuffer.class })
+    void simpleStreamerTest(final Class<? extends IoBuffer> bufferClass) throws NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+        assertNotNull(bufferClass, "bufferClass being not null");
+        assertNotNull(bufferClass.getConstructor(int.class), "Constructor(Integer) present");
+        final IoBuffer buffer = bufferClass.getConstructor(int.class).newInstance(1000000);
+
         // check reading/writing
         final MyGenericClass inputObject = new MyGenericClass();
         MyGenericClass outputObject1 = new MyGenericClass();
@@ -40,10 +45,10 @@ public class IoSerialiserTests {
         // first test - check for equal initialisation -- this should be trivial
         assertEquals(inputObject, outputObject1);
 
-        final IoBuffer buffer = new FastByteBuffer(1000000);
-        final BinarySerialiser ioSerialiser = new BinarySerialiser(buffer); // TODO: generalise to IoBuffer
+        //final IoBuffer buffer = new FastByteBuffer(1000000);
+        final BinarySerialiser ioSerialiser = new BinarySerialiser(buffer);
 
-        final IoBufferSerialiser serialiser = new IoBufferSerialiser(ioSerialiser);
+        final IoClassSerialiser serialiser = new IoClassSerialiser(ioSerialiser);
         serialiser.serialiseObject(inputObject);
 
         buffer.reset();
@@ -74,7 +79,7 @@ public class IoSerialiserTests {
     @DisplayName("basic custom serialisation/deserialisation identity")
     @ParameterizedTest(name = "IoBuffer class - {0} recursion level {1}")
     @ArgumentsSource(IoBufferHierarchyArgumentProvider.class)
-    public void testCustomSerialiserIdentity(final Class<? extends IoBuffer> bufferClass, final int hierarchyLevel) throws NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+    void testCustomSerialiserIdentity(final Class<? extends IoBuffer> bufferClass, final int hierarchyLevel) throws NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
         assertNotNull(bufferClass, "bufferClass being not null");
         assertNotNull(bufferClass.getConstructor(int.class), "Constructor(Integer) present");
         final IoBuffer buffer = bufferClass.getConstructor(int.class).newInstance(BUFFER_SIZE);
@@ -95,20 +100,27 @@ public class IoSerialiserTests {
         assertEquals(inputObject, outputObject, "TestDataClass input-output equality");
     }
 
-    @Test
-    public void testIdentityDoubleDataSet() throws IllegalAccessException {
-        final IoBuffer buffer = new FastByteBuffer();
-        final BinarySerialiser ioSerialiser = new BinarySerialiser(buffer); // TODO: generalise to IoBuffer
-        final IoBufferSerialiser serialiser = new IoBufferSerialiser(ioSerialiser);
+    @ParameterizedTest
+    @DisplayName("basic DataSet serialisation/deserialisation identity")
+    @ValueSource(classes = { ByteBuffer.class, FastByteBuffer.class })
+    void testCustomDataSetSerialiserIdentity(final Class<? extends IoBuffer> bufferClass) throws NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+        assertNotNull(bufferClass, "bufferClass being not null");
+        assertNotNull(bufferClass.getConstructor(int.class), "Constructor(Integer) present");
+        final IoBuffer buffer = bufferClass.getConstructor(int.class).newInstance(BUFFER_SIZE);
+
+        final BinarySerialiser ioSerialiser = new BinarySerialiser(buffer);
+        final IoClassSerialiser serialiser = new IoClassSerialiser(ioSerialiser);
+        assertEquals(bufferClass, buffer.getClass());
+        assertEquals(bufferClass, ioSerialiser.getBuffer().getClass());
 
         final DoubleDataSet inputObject = new DoubleDataSet("inputObject");
-        DoubleDataSet outputObject = new DoubleDataSet("outputObject");
+        DataSet outputObject = new DoubleDataSet("outputObject");
         assertNotEquals(inputObject, outputObject);
 
         buffer.reset();
         serialiser.serialiseObject(inputObject);
         buffer.reset();
-        outputObject = (DoubleDataSet) serialiser.deserialiseObject(outputObject);
+        outputObject = (DataSet) serialiser.deserialiseObject(outputObject);
 
         assertEquals(inputObject, outputObject);
 
@@ -118,7 +130,7 @@ public class IoSerialiserTests {
         buffer.reset();
         serialiser.serialiseObject(inputObject);
         buffer.reset();
-        outputObject = (DoubleDataSet) serialiser.deserialiseObject(outputObject);
+        outputObject = (DataSet) serialiser.deserialiseObject(outputObject);
 
         assertEquals(inputObject, outputObject);
 
@@ -137,13 +149,13 @@ public class IoSerialiserTests {
     @DisplayName("basic POJO serialisation/deserialisation identity")
     @ParameterizedTest(name = "IoBuffer class - {0} recursion level {1}")
     @ArgumentsSource(IoBufferHierarchyArgumentProvider.class)
-    public void testIoBufferSerialiserIdentity(final Class<? extends IoBuffer> bufferClass, final int hierarchyLevel) throws IllegalAccessException, InstantiationException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
+    void testIoBufferSerialiserIdentity(final Class<? extends IoBuffer> bufferClass, final int hierarchyLevel) throws IllegalAccessException, InstantiationException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
         assertNotNull(bufferClass, "bufferClass being not null");
         assertNotNull(bufferClass.getConstructor(int.class), "Constructor(Integer) present");
         final IoBuffer buffer = bufferClass.getConstructor(int.class).newInstance(BUFFER_SIZE);
         final BinarySerialiser ioSerialiser = new BinarySerialiser(buffer); // TODO: generalise to IoBuffer
 
-        final IoBufferSerialiser ioClassSerialiser = new IoBufferSerialiser(ioSerialiser);
+        final IoClassSerialiser ioClassSerialiser = new IoClassSerialiser(ioSerialiser);
         final TestDataClass inputObject = new TestDataClass(10, 100, hierarchyLevel);
         final TestDataClass outputObject = new TestDataClass(-1, -1, 0);
 
@@ -163,18 +175,18 @@ public class IoSerialiserTests {
         @Override
         public Stream<? extends Arguments> provideArguments(ExtensionContext context) {
             return Stream.of(
-                    Arguments.of(FastByteBuffer.class, 0),
-                    Arguments.of(FastByteBuffer.class, 1),
-                    Arguments.of(FastByteBuffer.class, 2),
-                    Arguments.of(FastByteBuffer.class, 3),
-                    Arguments.of(FastByteBuffer.class, 4),
-                    Arguments.of(FastByteBuffer.class, 5),
                     Arguments.of(ByteBuffer.class, 0),
                     Arguments.of(ByteBuffer.class, 1),
                     Arguments.of(ByteBuffer.class, 2),
                     Arguments.of(ByteBuffer.class, 3),
                     Arguments.of(ByteBuffer.class, 4),
-                    Arguments.of(ByteBuffer.class, 5));
+                    Arguments.of(ByteBuffer.class, 5),
+                    Arguments.of(FastByteBuffer.class, 0),
+                    Arguments.of(FastByteBuffer.class, 1),
+                    Arguments.of(FastByteBuffer.class, 2),
+                    Arguments.of(FastByteBuffer.class, 3),
+                    Arguments.of(FastByteBuffer.class, 4),
+                    Arguments.of(FastByteBuffer.class, 5));
         }
     }
 }

@@ -1,7 +1,7 @@
 package de.gsi.dataset.serializer.spi.iobuffer;
 
-import de.gsi.dataset.serializer.IoSerialiser;
-import de.gsi.dataset.serializer.spi.AbstractSerialiser;
+import de.gsi.dataset.serializer.FieldSerialiser;
+import de.gsi.dataset.serializer.IoClassSerialiser;
 import de.gsi.dataset.utils.GenericsHelper;
 
 /**
@@ -19,47 +19,54 @@ public final class FieldBoxedValueArrayHelper {
      * registers default serialiser for boxed array primitive types (ie. Boolean[], Byte[], Short[], ..., Double[])
      * 
      * @param serialiser for which the field serialisers should be registered
-     * @param ioBuffer reference to the IoBuffer back-ends
      */
-    public static void register(final AbstractSerialiser serialiser, final IoSerialiser ioBuffer) {
-        serialiser.addClassDefinition(new IoBufferFieldSerialiser(ioBuffer, //
-                (obj, field) -> field.getField().set(obj, GenericsHelper.toObject(ioBuffer.getBooleanArray())), // reader
-                (obj, field) -> ioBuffer.put(GenericsHelper.toBoolPrimitive((Boolean[]) field.getField().get(obj))), // writer
+    public static void register(final IoClassSerialiser serialiser) {
+        serialiser.addClassDefinition(new FieldSerialiser<>( //
+                (io, obj, field) -> field.getField().set(obj, GenericsHelper.toObject(io.getBuffer().getBooleanArray())), // reader
+                (io, obj, field) -> (Boolean[]) field.getField().get(obj), // return
+                (io, obj, field) -> io.getBuffer().putBooleanArray(GenericsHelper.toBoolPrimitive((Boolean[]) field.getField().get(obj))), // writer
                 Boolean[].class));
 
-        serialiser.addClassDefinition(new IoBufferFieldSerialiser(ioBuffer, //
-                (obj, field) -> field.getField().set(obj, GenericsHelper.toObject(ioBuffer.getByteArray())), // reader
-                (obj, field) -> ioBuffer.put(GenericsHelper.toBytePrimitive((Byte[]) field.getField().get(obj))), // writer
+        serialiser.addClassDefinition(new FieldSerialiser<>( //
+                (io, obj, field) -> field.getField().set(obj, GenericsHelper.toObject(io.getBuffer().getByteArray())), // reader
+                (io, obj, field) -> (Byte[]) field.getField().get(obj), // return
+                (io, obj, field) -> io.getBuffer().putByteArray(GenericsHelper.toBytePrimitive((Byte[]) field.getField().get(obj))), // writer
                 Byte[].class));
 
-        serialiser.addClassDefinition(new IoBufferFieldSerialiser(ioBuffer, //
-                (obj, field) -> field.getField().set(obj, GenericsHelper.toObject(ioBuffer.getCharArray())), // reader
-                (obj, field) -> ioBuffer.put(GenericsHelper.toCharPrimitive((Byte[]) field.getField().get(obj))), // writer
+        serialiser.addClassDefinition(new FieldSerialiser<>( //
+                (io, obj, field) -> field.getField().set(obj, GenericsHelper.toObject(io.getBuffer().getCharArray())), // reader
+                (io, obj, field) -> (Character[]) field.getField().get(obj), // return
+                (io, obj, field) -> io.getBuffer().putCharArray(GenericsHelper.toCharPrimitive((Character[]) field.getField().get(obj))), // writer
                 Character[].class));
 
-        serialiser.addClassDefinition(new IoBufferFieldSerialiser(ioBuffer, //
-                (obj, field) -> field.getField().set(obj, GenericsHelper.toObject(ioBuffer.getShortArray())), // reader
-                (obj, field) -> ioBuffer.put(GenericsHelper.toShortPrimitive((Short[]) field.getField().get(obj))), // writer
+        serialiser.addClassDefinition(new FieldSerialiser<>( //
+                (io, obj, field) -> field.getField().set(obj, GenericsHelper.toObject(io.getBuffer().getShortArray())), // reader
+                (io, obj, field) -> (Short[]) field.getField().get(obj), // return
+                (io, obj, field) -> io.getBuffer().putShortArray(GenericsHelper.toShortPrimitive((Short[]) field.getField().get(obj))), // writer
                 Short[].class));
 
-        serialiser.addClassDefinition(new IoBufferFieldSerialiser(ioBuffer, //
-                (obj, field) -> field.getField().set(obj, GenericsHelper.toObject(ioBuffer.getIntArray())), // reader
-                (obj, field) -> ioBuffer.put(GenericsHelper.toIntegerPrimitive((Integer[]) field.getField().get(obj))), // writer
+        serialiser.addClassDefinition(new FieldSerialiser<>( //
+                (io, obj, field) -> field.getField().set(obj, GenericsHelper.toObject(io.getBuffer().getIntArray())), // reader
+                (io, obj, field) -> (Integer[]) field.getField().get(obj), // return
+                (io, obj, field) -> io.getBuffer().putIntArray(GenericsHelper.toIntegerPrimitive((Integer[]) field.getField().get(obj))), // writer
                 Integer[].class));
 
-        serialiser.addClassDefinition(new IoBufferFieldSerialiser(ioBuffer, //
-                (obj, field) -> field.getField().set(obj, GenericsHelper.toObject(ioBuffer.getLongArray())), // reader
-                (obj, field) -> ioBuffer.put(GenericsHelper.toLongPrimitive((Long[]) field.getField().get(obj))), // writer
+        serialiser.addClassDefinition(new FieldSerialiser<>( //
+                (io, obj, field) -> field.getField().set(obj, GenericsHelper.toObject(io.getBuffer().getLongArray())), // reader
+                (io, obj, field) -> (Long[]) field.getField().get(obj), // return
+                (io, obj, field) -> io.getBuffer().putLongArray(GenericsHelper.toLongPrimitive((Long[]) field.getField().get(obj))), // writer
                 Long[].class));
 
-        serialiser.addClassDefinition(new IoBufferFieldSerialiser(ioBuffer, //
-                (obj, field) -> field.getField().set(obj, GenericsHelper.toObject(ioBuffer.getFloatArray())), // reader
-                (obj, field) -> ioBuffer.put(GenericsHelper.toFloatPrimitive((Float[]) field.getField().get(obj))), // writer
+        serialiser.addClassDefinition(new FieldSerialiser<>( //
+                (io, obj, field) -> field.getField().set(obj, GenericsHelper.toObject(io.getBuffer().getFloatArray())), // reader
+                (io, obj, field) -> (Float[]) field.getField().get(obj), // return
+                (io, obj, field) -> io.getBuffer().putFloatArray(GenericsHelper.toFloatPrimitive((Float[]) field.getField().get(obj))), // writer
                 Float[].class));
 
-        serialiser.addClassDefinition(new IoBufferFieldSerialiser(ioBuffer, //
-                (obj, field) -> field.getField().set(obj, GenericsHelper.toObject(ioBuffer.getDoubleArray())), // reader
-                (obj, field) -> ioBuffer.put(GenericsHelper.toDoublePrimitive((Double[]) field.getField().get(obj))), // writer
+        serialiser.addClassDefinition(new FieldSerialiser<>( //
+                (io, obj, field) -> field.getField().set(obj, GenericsHelper.toObject(io.getBuffer().getDoubleArray())), // reader
+                (io, obj, field) -> (Double[]) field.getField().get(obj), // return
+                (io, obj, field) -> io.getBuffer().putDoubleArray(GenericsHelper.toDoublePrimitive((Double[]) field.getField().get(obj))), // writer
                 Double[].class));
     }
 }

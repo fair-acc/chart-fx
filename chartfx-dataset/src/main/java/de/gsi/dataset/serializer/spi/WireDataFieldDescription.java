@@ -3,13 +3,13 @@ package de.gsi.dataset.serializer.spi;
 import java.nio.CharBuffer;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.gsi.dataset.serializer.DataType;
 import de.gsi.dataset.serializer.FieldDescription;
+import de.gsi.dataset.serializer.utils.ClassUtils;
 
 /**
  * Field header descriptor
@@ -18,14 +18,18 @@ import de.gsi.dataset.serializer.FieldDescription;
  */
 public class WireDataFieldDescription implements FieldDescription {
     private static final Logger LOGGER = LoggerFactory.getLogger(WireDataFieldDescription.class);
-    private final int hashCode;
     private final String fieldName;
-    private final String fieldNameRelative;
+    private final int fieldNameHashCode;
     private final DataType dataType;
-    private final long dataStartOffset;
-    private final long dataSize;
     private final List<FieldDescription> children = new ArrayList<>();
-    private FieldDescription parent; // N.B. was 'final' TODO: investigate to keep last root once BinarySerialiser is refactored to a non-static class
+    private final FieldDescription parent;
+    private String fieldUnit;
+    private String fieldDescription;
+    private String fieldDirection;
+    private List<String> fieldGroups;
+    private int fieldStart;
+    private int dataStartOffset;
+    private int dataSize;
 
     /**
      * Constructs new serializer field header
@@ -36,18 +40,23 @@ public class WireDataFieldDescription implements FieldDescription {
      *                         this check is being suppressed
      * @param fieldName the clear text field name description
      * @param dataType the data type of that field
+     * @param fieldStart the absolute buffer position from which the field header can be parsed
      * @param dataStartOffset the position from which the actual data can be parsed onwards
      * @param dataSize the expected number of bytes to skip the data block
      */
-    public WireDataFieldDescription(final WireDataFieldDescription parent, final int fieldNameHashCode, final String fieldName, final DataType dataType, final long dataStartOffset, final long dataSize) {
+    public WireDataFieldDescription(final FieldDescription parent, final int fieldNameHashCode, final String fieldName, final DataType dataType, //
+            final int fieldStart, final int dataStartOffset, final int dataSize) {
         this.parent = parent;
-        this.hashCode = fieldNameHashCode;
+        this.fieldNameHashCode = fieldNameHashCode;
         this.fieldName = fieldName;
         this.dataType = dataType;
+        this.fieldStart = fieldStart;
         this.dataStartOffset = dataStartOffset;
         this.dataSize = dataSize;
 
-        fieldNameRelative = this.parent == null ? fieldName : parent.getFieldNameRelative() + "." + fieldName;
+        if (this.parent != null /*&& !this.parent.getChildren().contains(this)*/) {
+            this.parent.getChildren().add(this);
+        }
     }
 
     @Override
@@ -58,27 +67,36 @@ public class WireDataFieldDescription implements FieldDescription {
         if (!(obj instanceof FieldDescription)) {
             return false;
         }
-        if (this.hashCode() != obj.hashCode()) {
+        FieldDescription other = (FieldDescription) obj;
+        if (this.getFieldNameHashCode() != other.getFieldNameHashCode()) {
             return false;
         }
 
-        return this.getFieldName().equals(((FieldDescription) obj).getFieldName());
+        if (this.getDataType() != other.getDataType()) {
+            return false;
+        }
+
+        return this.getFieldName().equals(other.getFieldName());
     }
 
     @Override
-    public Optional<FieldDescription> findChildField(String fieldName) {
-        final int childHashCode = fieldName.hashCode();
-        for (int i = 0; i < children.size(); i++) {
+    public boolean isAnnotationPresent() {
+        return fieldUnit != null || fieldDescription != null || fieldDirection != null || (fieldGroups != null && !fieldGroups.isEmpty());
+    }
+
+    @Override
+    public FieldDescription findChildField(final int fieldNameHashCode, final String fieldName) {
+        for (int i = 0; i < children.size(); i++) { //NOSONAR
             final FieldDescription field = children.get(i);
             final String name = field.getFieldName();
-            if (name == fieldName) { // NOPMD early return if the same String object reference
-                return Optional.of(field);
+            if (name == fieldName) { //NOSONAR //NOPMD early return if the same String object reference
+                return field;
             }
-            if (field.hashCode() == childHashCode && name.equals(fieldName)) {
-                return Optional.of(field);
+            if (field.hashCode() == fieldNameHashCode && name.equals(fieldName)) {
+                return field;
             }
         }
-        return Optional.empty();
+        return null;
     }
 
     @Override
@@ -87,13 +105,18 @@ public class WireDataFieldDescription implements FieldDescription {
     }
 
     @Override
-    public long getDataSize() {
+    public int getDataSize() {
         return dataSize;
     }
 
     @Override
-    public long getDataStartOffset() {
+    public int getDataStartOffset() {
         return dataStartOffset;
+    }
+
+    @Override
+    public int getDataStartPosition() {
+        return fieldStart + dataStartOffset;
     }
 
     @Override
@@ -102,22 +125,43 @@ public class WireDataFieldDescription implements FieldDescription {
     }
 
     @Override
+    public String getFieldDescription() {
+        return fieldDescription;
+    }
+
+    @Override
+    public String getFieldDirection() {
+        return fieldDirection;
+    }
+
+    @Override
+    public List<String> getFieldGroups() {
+        return fieldGroups;
+    }
+
+    @Override
     public String getFieldName() {
         return fieldName;
     }
 
     @Override
-    public String getFieldNameRelative() {
-        return fieldNameRelative;
+    public int getFieldNameHashCode() {
+        return fieldNameHashCode;
+    }
+
+    @Override
+    public int getFieldStart() {
+        return fieldStart;
+    }
+
+    @Override
+    public String getFieldUnit() {
+        return fieldUnit;
     }
 
     @Override
     public FieldDescription getParent() {
         return parent;
-    }
-
-    void setParent(final WireDataFieldDescription parent) { // NOPMD - explicitly package private -> TODO: will be refactored
-        this.parent = parent;
     }
 
     @Override
@@ -127,7 +171,7 @@ public class WireDataFieldDescription implements FieldDescription {
 
     @Override
     public int hashCode() {
-        return hashCode;
+        return fieldNameHashCode;
     }
 
     @Override
@@ -141,14 +185,50 @@ public class WireDataFieldDescription implements FieldDescription {
         printFieldStructure(this, 0);
     }
 
+    public void setDataSize(final int size) {
+        dataSize = size;
+    }
+
+    public void setDataStartOffset(final int offset) {
+        dataStartOffset = offset;
+    }
+
+    public void setFieldDescription(final String fieldDescription) {
+        this.fieldDescription = fieldDescription;
+    }
+
+    public void setFieldDirection(final String fieldDirection) {
+        this.fieldDirection = fieldDirection;
+    }
+
+    public void setFieldGroups(final List<String> fieldGroups) {
+        this.fieldGroups = fieldGroups;
+    }
+
+    public void setFieldStart(final int position) {
+        fieldStart = position;
+    }
+
+    public void setFieldUnit(final String fieldUnit) {
+        this.fieldUnit = fieldUnit;
+    }
+
     @Override
     public String toString() {
         return String.format("[fieldName=%s, fieldType=%s]", fieldName, dataType.getAsString());
     }
 
     protected static void printFieldStructure(final FieldDescription field, final int recursionLevel) {
-        final String mspace = spaces((recursionLevel) *INDENTATION_NUMER_OF_SPACE);
+        final String mspace = spaces((recursionLevel) *ClassUtils.getIndentationNumberOfSpace());
         LOGGER.atInfo().addArgument(mspace).addArgument(field.toString()).log("{}{}");
+        if (field.isAnnotationPresent()) {
+            LOGGER.atInfo().addArgument(mspace) //
+                    .addArgument(field.getFieldUnit())
+                    .addArgument(field.getFieldDescription())
+                    .addArgument(field.getFieldDirection())
+                    .addArgument(field.getFieldGroups())
+                    .log("{}     <meta-info: unit:'{}' description:'{}' direction:'{}' groups:'{}'>");
+        }
         field.getChildren().forEach(f -> printFieldStructure(f, recursionLevel + 1));
     }
 

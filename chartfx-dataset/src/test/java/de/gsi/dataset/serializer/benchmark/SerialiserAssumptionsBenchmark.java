@@ -1,5 +1,7 @@
 package de.gsi.dataset.serializer.benchmark;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.nio.charset.StandardCharsets;
 
 import org.openjdk.jmh.annotations.Benchmark;
@@ -9,40 +11,44 @@ import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.annotations.Warmup;
 import org.openjdk.jmh.infra.Blackhole;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import de.gsi.dataset.serializer.spi.FastByteBuffer;
+import sun.misc.Unsafe;
 
 /**
  * Benchmark to compare, test and rationalise some assumptions that went into the serialiser refactoring
  *
- * last test output (openjdk 11.0.7 2020-04-14, took ~1h):
- * Benchmark                                                                Mode  Cnt          Score          Error  Units
- * SerialiserAssumptionsBenchmark.fluentDesignVoid                         thrpt   10  230298150.273 ±  4082235.267  ops/s
- * SerialiserAssumptionsBenchmark.fluentDesignWithReturn                   thrpt   10  138134170.838 ±  3874643.746  ops/s
- * SerialiserAssumptionsBenchmark.fluentDesignWithoutReturn                thrpt   10  233540863.904 ±  5848782.229  ops/s
- * SerialiserAssumptionsBenchmark.functionWithArray                        thrpt   10  119407139.243 ±   954648.274  ops/s
- * SerialiserAssumptionsBenchmark.functionWithSingleArgument               thrpt   10  134763881.849 ±  7212086.612  ops/s
- * SerialiserAssumptionsBenchmark.functionWithVarargsArrayArgument         thrpt   10  120926946.058 ±  1936232.377  ops/s
- * SerialiserAssumptionsBenchmark.functionWithVarargsMultiArguments        thrpt   10   87328244.337 ±  8601542.697  ops/s
- * SerialiserAssumptionsBenchmark.functionWithVarargsSingleArgument        thrpt   10   95367263.670 ± 10049207.665  ops/s
- * SerialiserAssumptionsBenchmark.stringAllocationWithCharsetASCII         thrpt   10   26757528.275 ±   939293.565  ops/s
- * SerialiserAssumptionsBenchmark.stringAllocationWithCharsetISO8859       thrpt   10   38329051.739 ±  3654930.699  ops/s
- * SerialiserAssumptionsBenchmark.stringAllocationWithCharsetUTF8          thrpt   10   27477977.417 ±   794935.316  ops/s
- * SerialiserAssumptionsBenchmark.stringAllocationWithCharsetUTF8_UTF8     thrpt   10    9783815.790 ±   359532.249  ops/s
- * SerialiserAssumptionsBenchmark.stringAllocationWithOutCharsetASCII      thrpt   10   28191984.408 ±   731615.846  ops/s
- * SerialiserAssumptionsBenchmark.stringAllocationWithOutCharsetISO8859    thrpt   10   28086856.950 ±   715582.708  ops/s
- * SerialiserAssumptionsBenchmark.stringAllocationWithOutCharsetUTF8       thrpt   10   28223722.493 ±   600854.140  ops/s
- * SerialiserAssumptionsBenchmark.stringAllocationWithOutCharsetUTF8_UTF8  thrpt   10   10044038.711 ±   165871.370  ops/s
+ * last test output (openjdk 11.0.7 2020-04-14, took ~1:15h):
+ Benchmark                                                                 Mode  Cnt          Score          Error  Units
+ SerialiserAssumptionsBenchmark.fluentDesignVoid                          thrpt   10  471049302.874 ± 38950975.384  ops/s
+ SerialiserAssumptionsBenchmark.fluentDesignWithReturn                    thrpt   10  254339145.447 ±  5897376.654  ops/s
+ SerialiserAssumptionsBenchmark.fluentDesignWithoutReturn                 thrpt   10  476501604.954 ± 40973207.961  ops/s
+ SerialiserAssumptionsBenchmark.functionWithArray                         thrpt   10  221467425.933 ±  3002743.890  ops/s
+ SerialiserAssumptionsBenchmark.functionWithSingleArgument                thrpt   10  287031569.929 ±  5614312.539  ops/s
+ SerialiserAssumptionsBenchmark.functionWithVarargsArrayArgument          thrpt   10  218877961.349 ±  4692333.825  ops/s
+ SerialiserAssumptionsBenchmark.functionWithVarargsMultiArguments         thrpt   10  142480433.294 ± 13146238.914  ops/s
+ SerialiserAssumptionsBenchmark.functionWithVarargsSingleArgument         thrpt   10  165330552.790 ± 17698360.163  ops/s
+ SerialiserAssumptionsBenchmark.stringAllocationWithCharsetASCII          thrpt   10   40173625.939 ±   735728.322  ops/s
+ SerialiserAssumptionsBenchmark.stringAllocationWithCharsetISO8859        thrpt   10   54217550.808 ±  1318340.645  ops/s
+ SerialiserAssumptionsBenchmark.stringAllocationWithCharsetUTF8           thrpt   10   41330615.597 ±   632412.774  ops/s
+ SerialiserAssumptionsBenchmark.stringAllocationWithCharsetUTF8_UTF8      thrpt   10   13048847.527 ±    66585.989  ops/s
+ SerialiserAssumptionsBenchmark.stringAllocationWithOutCharsetASCII       thrpt   10   49542211.521 ±  2229389.418  ops/s
+ SerialiserAssumptionsBenchmark.stringAllocationWithOutCharsetISO8859     thrpt   10   49123986.088 ±  2657664.797  ops/s
+ SerialiserAssumptionsBenchmark.stringAllocationWithOutCharsetISO8859_V2  thrpt   10  100884194.645 ±  9426023.968  ops/s
+ SerialiserAssumptionsBenchmark.stringAllocationWithOutCharsetISO8859_V3  thrpt   10   71306482.793 ±  2909269.756  ops/s
+ SerialiserAssumptionsBenchmark.stringAllocationWithOutCharsetUTF8        thrpt   10   49503339.953 ±  2376939.023  ops/s
+ SerialiserAssumptionsBenchmark.stringAllocationWithOutCharsetUTF8_UTF8   thrpt   10   13860025.901 ±   244519.585  ops/s
  *
  * @author rstein
  */
 @State(Scope.Benchmark)
 public class SerialiserAssumptionsBenchmark {
-    private final FastByteBuffer.FastStringBuilder fastStringBuilder = new FastByteBuffer.FastStringBuilder();
-
-    @Setup()
-    public void initialize() {
-        // add variables to initialise here
+    @Benchmark
+    @Warmup(iterations = 1)
+    @Fork(value = 2, warmups = 2)
+    public void fluentDesignVoid(Blackhole blackhole, final MyData data) {
+        func1(blackhole, data.a);
     }
 
     @Benchmark
@@ -62,85 +68,15 @@ public class SerialiserAssumptionsBenchmark {
     @Benchmark
     @Warmup(iterations = 1)
     @Fork(value = 2, warmups = 2)
-    public void fluentDesignVoid(Blackhole blackhole, final MyData data) {
-        func1(blackhole, data.a);
+    public int[] functionWithArray(Blackhole blackhole, final MyData data) {
+        return f2(blackhole, data.dim);
     }
 
     @Benchmark
     @Warmup(iterations = 1)
     @Fork(value = 2, warmups = 2)
-    public String stringAllocationWithCharsetASCII(final MyData data) {
-        return new String(data.byteASCII, 0, data.byteASCII.length, StandardCharsets.US_ASCII);
-    }
-
-    @Benchmark
-    @Warmup(iterations = 1)
-    @Fork(value = 2, warmups = 2)
-    public String stringAllocationWithOutCharsetASCII(final MyData data) {
-        return new String(data.byteASCII, 0, data.byteASCII.length);
-    }
-
-    @Benchmark
-    @Warmup(iterations = 1)
-    @Fork(value = 2, warmups = 2)
-    public String stringAllocationWithCharsetISO8859(final MyData data) {
-        return new String(data.byteISO8859, 0, data.byteISO8859.length, StandardCharsets.ISO_8859_1);
-    }
-
-    @Benchmark
-    @Warmup(iterations = 1)
-    @Fork(value = 2, warmups = 2)
-    public String stringAllocationWithOutCharsetISO8859(final MyData data) {
-        return new String(data.byteISO8859, 0, data.byteISO8859.length);
-    }
-
-    @Benchmark
-    @Warmup(iterations = 1)
-    @Fork(value = 2, warmups = 2)
-    public String stringAllocationWithOutCharsetISO8859_V2(final MyData data) {
-        return fastStringBuilder.iso8859BytesToString(data.byteISO8859, 0, data.byteISO8859.length);
-    }
-
-    @Benchmark
-    @Warmup(iterations = 1)
-    @Fork(value = 2, warmups = 2)
-    public String stringAllocationWithOutCharsetISO8859_V3(final MyData data) {
-        return FastByteBuffer.FastStringBuilder.iso8859BytesToString2(data.byteISO8859, 0, data.byteISO8859.length);
-    }
-
-    @Benchmark
-    @Warmup(iterations = 1)
-    @Fork(value = 2, warmups = 2)
-    public String stringAllocationWithOutCharsetISO8859_V4(final MyData data) {
-        return FastByteBuffer.FastStringBuilder.iso8859BytesToString3(data.byteISO8859, 0, data.byteISO8859.length);
-    }
-
-    @Benchmark
-    @Warmup(iterations = 1)
-    @Fork(value = 2, warmups = 2)
-    public String stringAllocationWithCharsetUTF8(final MyData data) {
-        return new String(data.byteISO8859, 0, data.byteISO8859.length, StandardCharsets.UTF_8);
-    }
-
-    @Benchmark
-    @Warmup(iterations = 1)
-    @Fork(value = 2, warmups = 2)
-    public String stringAllocationWithOutCharsetUTF8(final MyData data) {
-        return new String(data.byteISO8859, 0, data.byteISO8859.length);
-    }
-
-    @Benchmark
-    @Warmup(iterations = 1)
-    @Fork(value = 2, warmups = 2)
-    public String stringAllocationWithCharsetUTF8_UTF8(final MyData data) {
-        return new String(data.byteUTF8, 0, data.byteUTF8.length, StandardCharsets.UTF_8);
-    }
-
-    @Benchmark
-    @Warmup(iterations = 1)
-    @Fork(value = 2, warmups = 2)
-    public String stringAllocationWithOutCharsetUTF8_UTF8(final MyData data) {
-        return new String(data.byteUTF8, 0, data.byteUTF8.length);
+    public int functionWithSingleArgument(Blackhole blackhole, final MyData data) {
+        return f3(blackhole, data.a);
     }
 
     @Benchmark
@@ -164,27 +100,79 @@ public class SerialiserAssumptionsBenchmark {
         return f1(blackhole, data.a);
     }
 
-    @Benchmark
-    @Warmup(iterations = 1)
-    @Fork(value = 2, warmups = 2)
-    public int functionWithSingleArgument(Blackhole blackhole, final MyData data) {
-        return f3(blackhole, data.a);
+    @Setup()
+    public void initialize() {
+        // add variables to initialise here
     }
 
     @Benchmark
     @Warmup(iterations = 1)
     @Fork(value = 2, warmups = 2)
-    public int[] functionWithArray(Blackhole blackhole, final MyData data) {
-        return f2(blackhole, data.dim);
+    public String stringAllocationWithCharsetASCII(final MyData data) {
+        return new String(data.byteASCII, 0, data.byteASCII.length, StandardCharsets.US_ASCII);
     }
 
-    private void func1(Blackhole blackhole, final double val) {
-        blackhole.consume(val);
+    @Benchmark
+    @Warmup(iterations = 1)
+    @Fork(value = 2, warmups = 2)
+    public String stringAllocationWithCharsetISO8859(final MyData data) {
+        return new String(data.byteISO8859, 0, data.byteISO8859.length, StandardCharsets.ISO_8859_1);
     }
 
-    private SerialiserAssumptionsBenchmark func2(Blackhole blackhole, final double val) {
-        blackhole.consume(val);
-        return this;
+    @Benchmark
+    @Warmup(iterations = 1)
+    @Fork(value = 2, warmups = 2)
+    public String stringAllocationWithCharsetUTF8(final MyData data) {
+        return new String(data.byteISO8859, 0, data.byteISO8859.length, StandardCharsets.UTF_8);
+    }
+
+    @Benchmark
+    @Warmup(iterations = 1)
+    @Fork(value = 2, warmups = 2)
+    public String stringAllocationWithCharsetUTF8_UTF8(final MyData data) {
+        return new String(data.byteUTF8, 0, data.byteUTF8.length, StandardCharsets.UTF_8);
+    }
+
+    @Benchmark
+    @Warmup(iterations = 1)
+    @Fork(value = 2, warmups = 2)
+    public String stringAllocationWithOutCharsetASCII(final MyData data) {
+        return new String(data.byteASCII, 0, data.byteASCII.length);
+    }
+
+    @Benchmark
+    @Warmup(iterations = 1)
+    @Fork(value = 2, warmups = 2)
+    public String stringAllocationWithOutCharsetISO8859(final MyData data) {
+        return new String(data.byteISO8859, 0, data.byteISO8859.length);
+    }
+
+    @Benchmark
+    @Warmup(iterations = 1)
+    @Fork(value = 2, warmups = 2)
+    public String stringAllocationWithOutCharsetISO8859_V2(final MyData data) {
+        return new String(data.byteISO8859, 0, 0, data.byteISO8859.length); // NOPMD NOSONAR fast implementation
+    }
+
+    @Benchmark
+    @Warmup(iterations = 1)
+    @Fork(value = 2, warmups = 2)
+    public String stringAllocationWithOutCharsetISO8859_V3(final MyData data) {
+        return FastStringBuilder.iso8859BytesToString(data.byteISO8859, 0, data.byteISO8859.length);
+    }
+
+    @Benchmark
+    @Warmup(iterations = 1)
+    @Fork(value = 2, warmups = 2)
+    public String stringAllocationWithOutCharsetUTF8(final MyData data) {
+        return new String(data.byteISO8859, 0, data.byteISO8859.length);
+    }
+
+    @Benchmark
+    @Warmup(iterations = 1)
+    @Fork(value = 2, warmups = 2)
+    public String stringAllocationWithOutCharsetUTF8_UTF8(final MyData data) {
+        return new String(data.byteUTF8, 0, data.byteUTF8.length);
     }
 
     private int[] f1(Blackhole blackhole, int... array) {
@@ -200,6 +188,15 @@ public class SerialiserAssumptionsBenchmark {
     private int f3(Blackhole blackhole, int val) {
         blackhole.consume(val);
         return val;
+    }
+
+    private void func1(Blackhole blackhole, final double val) {
+        blackhole.consume(val);
+    }
+
+    private SerialiserAssumptionsBenchmark func2(Blackhole blackhole, final double val) {
+        blackhole.consume(val);
+        return this;
     }
 
     @State(Scope.Thread)
@@ -223,6 +220,52 @@ public class SerialiserAssumptionsBenchmark {
                 arrayISO8859[i] = stringISO8859;
                 arrayUTF8[i] = stringUTF8;
             }
+        }
+    }
+
+    /**
+     * Simple helper class to generate (a little bit) faster Strings from byte arrays ;-)
+     * N.B. bypassing some of the redundant (null-pointer, byte array size, etc.) safety checks gains up to about 80% performance.
+     */
+    @SuppressWarnings("PMD")
+    public static class FastStringBuilder {
+        private static final Logger LOGGER = LoggerFactory.getLogger(FastStringBuilder.class);
+        private static final Field fieldValue;
+        private static final long FIELD_VALUE_OFFSET;
+        private static final Unsafe unsafe; // NOPMD
+        static {
+            try {
+                final Field field = Unsafe.class.getDeclaredField("theUnsafe");
+                field.setAccessible(true);
+                unsafe = (Unsafe) field.get(null);
+            } catch (NoSuchFieldException | SecurityException | IllegalAccessException e) {
+                throw new SecurityException(e); // NOPMD
+            }
+
+            Field tempVal = null;
+            long offset = 0;
+            try {
+                tempVal = String.class.getDeclaredField("value");
+                tempVal.setAccessible(true);
+
+                final Field modifiersField = Field.class.getDeclaredField("modifiers");
+                modifiersField.setAccessible(true);
+                modifiersField.setInt(tempVal, tempVal.getModifiers() & ~Modifier.FINAL);
+                offset = unsafe.objectFieldOffset(tempVal);
+            } catch (NoSuchFieldException | IllegalAccessException e) {
+                LOGGER.atError().setCause(e).log("could not initialise String field references");
+            } finally {
+                fieldValue = tempVal;
+                FIELD_VALUE_OFFSET = offset;
+            }
+        }
+
+        public static String iso8859BytesToString(final byte[] ba, final int offset, final int length) {
+            final String retVal = ""; // NOPMD - on purpose allocating new object
+            final byte[] array = new byte[length];
+            System.arraycopy(ba, offset, array, 0, length);
+            unsafe.putObject(retVal, FIELD_VALUE_OFFSET, array);
+            return retVal;
         }
     }
 }
