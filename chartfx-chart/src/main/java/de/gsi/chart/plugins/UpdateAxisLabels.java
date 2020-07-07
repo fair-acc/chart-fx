@@ -7,15 +7,12 @@ import java.util.Optional;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
-import javafx.geometry.Orientation;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.gsi.chart.Chart;
-import de.gsi.chart.XYChart;
 import de.gsi.chart.axes.Axis;
-import de.gsi.chart.axes.spi.ColorGradientAxis;
 import de.gsi.chart.renderer.Renderer;
 import de.gsi.chart.utils.FXUtils;
 import de.gsi.dataset.DataSet;
