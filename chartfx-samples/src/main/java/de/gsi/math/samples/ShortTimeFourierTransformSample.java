@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 
 import de.gsi.chart.XYChart;
 import de.gsi.chart.axes.Axis;
+import de.gsi.chart.axes.spi.AbstractAxisParameter;
 import de.gsi.chart.axes.spi.DefaultNumericAxis;
 import de.gsi.chart.plugins.EditAxis;
 import de.gsi.chart.plugins.UpdateAxisLabels;
@@ -84,8 +85,7 @@ public class ShortTimeFourierTransformSample extends AbstractDemoApplication {
 
     // DataSets
     private final MultiDimDoubleDataSet rawData = new MultiDimDoubleDataSet("rawTimeData", 3);
-    private final DoubleGridDataSet stftData = new DataSetBuilder("ShortTimeFourierTransform").setDimension(3).setInitalCapacity(0)
-            .build(DoubleGridDataSet.class);
+    private final DoubleGridDataSet stftData = new DataSetBuilder("ShortTimeFourierTransform").setDimension(3).setInitalCapacity(0).build(DoubleGridDataSet.class);
     private final DoubleGridDataSet waveletData = new DataSetBuilder("WaveletTransform").setDimension(3).setInitalCapacity(0).build(DoubleGridDataSet.class);
 
     /**
@@ -115,12 +115,15 @@ public class ShortTimeFourierTransformSample extends AbstractDemoApplication {
         final DefaultNumericAxis xAxis1 = new DefaultNumericAxis();
         xAxis1.setAutoUnitScaling(true);
         xAxis1.setSide(Side.BOTTOM);
+        xAxis1.setDimIndex(DataSet.DIM_X);
         final DefaultNumericAxis yAxis1 = new DefaultNumericAxis();
         yAxis1.setSide(Side.LEFT);
+        yAxis1.setDimIndex(DataSet.DIM_Y);
         contourChartRenderer1.getAxes().addAll(xAxis1, yAxis1);
         final Axis zAxis1 = contourChartRenderer1.getZAxis();
         zAxis1.setName("Amplitude"); // TODO: fix label updater to respect z-axis
         zAxis1.setUnit("dB");
+        ((AbstractAxisParameter) zAxis1).setDimIndex(DataSet.DIM_Z);
         chart1.getAxes().addAll(xAxis1, yAxis1, zAxis1);
         // Add plugins after all axes are correctly set up
         chart1.getPlugins().add(new UpdateAxisLabels());
@@ -136,12 +139,15 @@ public class ShortTimeFourierTransformSample extends AbstractDemoApplication {
         final DefaultNumericAxis xAxis2 = new DefaultNumericAxis();
         xAxis2.setAutoUnitScaling(true);
         xAxis2.setSide(Side.BOTTOM);
+        xAxis2.setDimIndex(DataSet.DIM_X);
         final DefaultNumericAxis yAxis2 = new DefaultNumericAxis();
         yAxis2.setSide(Side.LEFT);
+        yAxis2.setDimIndex(DataSet.DIM_Y);
         contourChartRenderer2.getAxes().addAll(xAxis2, yAxis2);
         final Axis zAxis2 = contourChartRenderer2.getZAxis();
         zAxis2.setName("Amplitude");
         zAxis2.setUnit("dB");
+        ((AbstractAxisParameter) zAxis2).setDimIndex(DataSet.DIM_Z);
         chart2.getAxes().addAll(xAxis2, yAxis2, zAxis2);
         chart2.getRenderers().add(new MetaDataRenderer(chart2));
         chart2.getPlugins().add(new UpdateAxisLabels());
@@ -186,8 +192,7 @@ public class ShortTimeFourierTransformSample extends AbstractDemoApplication {
         toneStart.setEditable(true);
         gridPane.addRow(5, new Label("ToneStop"), toneStop, new Label("[s]"));
         toneStop.setEditable(true);
-        installEventHandlers((evt) -> updateRawData(rawData), nSamples.valueProperty(), sampleRate.valueProperty(), toneFreq.valueProperty(),
-                toneAmplitude.valueProperty(), toneStart.valueProperty(), toneStop.valueProperty());
+        installEventHandlers((evt) -> updateRawData(rawData), nSamples.valueProperty(), sampleRate.valueProperty(), toneFreq.valueProperty(), toneAmplitude.valueProperty(), toneStart.valueProperty(), toneStop.valueProperty());
         return gridPane;
     }
 
@@ -233,8 +238,7 @@ public class ShortTimeFourierTransformSample extends AbstractDemoApplication {
         gridPane.add(truncDCNyq, 0, 5, 3, 1);
         complex.setSelected(false);
         gridPane.add(complex, 0, 6, 3, 1);
-        installEventHandlers((evt) -> stft(rawData, stftData), nFFT.valueProperty(), step.valueProperty(), apodizationWindow.valueProperty(),
-                padding.valueProperty(), dbScale.selectedProperty(), truncDCNyq.selectedProperty(), complex.selectedProperty());
+        installEventHandlers((evt) -> stft(rawData, stftData), nFFT.valueProperty(), step.valueProperty(), apodizationWindow.valueProperty(), padding.valueProperty(), dbScale.selectedProperty(), truncDCNyq.selectedProperty(), complex.selectedProperty());
         return gridPane;
     }
 
@@ -256,8 +260,8 @@ public class ShortTimeFourierTransformSample extends AbstractDemoApplication {
 
             // single tone
             yModel[i] += (i > toneStart.getValue() * maxPoints && i < toneStop.getValue() * maxPoints)
-                    ? toneAmplitude.getValue() * Math.sin(TMathConstants.TwoPi() * toneFreq.getValue() * x)
-                    : 0;
+                                 ? toneAmplitude.getValue() * Math.sin(TMathConstants.TwoPi() * toneFreq.getValue() * x)
+                                 : 0;
 
             // modulation around 0.4
             final double mod = Math.cos(TMathConstants.TwoPi() * 0.01e6 * x);
@@ -280,13 +284,12 @@ public class ShortTimeFourierTransformSample extends AbstractDemoApplication {
 
     private void wavelet(final DataSet inputData, final DoubleGridDataSet outputData) {
         try {
-            ((DataSetMetaData) outputData).getErrorList().clear();
+            outputData.getErrorList().clear();
             final ContinuousWavelet wtrafo = new ContinuousWavelet();
             final GridDataSet newData = wtrafo.getScalogram(inputData.getValues(DataSet.DIM_Y), quantx.getValue(), quanty.getValue(), nu.getValue(),
                     waveletFMin.getValue(), waveletFMax.getValue());
             outputData.set(newData);
-            outputData.getAxisDescription(DataSet.DIM_X).set(inputData.getAxisDescription(DataSet.DIM_X).getName(),
-                    inputData.getAxisDescription(DataSet.DIM_X).getUnit());
+            outputData.getAxisDescription(DataSet.DIM_X).set(inputData.getAxisDescription(DataSet.DIM_X).getName(), inputData.getAxisDescription(DataSet.DIM_X).getUnit());
             outputData.getAxisDescription(DataSet.DIM_Y).set("frequency", "Hz");
             outputData.getAxisDescription(DataSet.DIM_Z).set("Amplitude", inputData.getAxisDescription(DataSet.DIM_Y).getUnit());
             // rescale axes to show actual data instead of normalized values
@@ -324,8 +327,7 @@ public class ShortTimeFourierTransformSample extends AbstractDemoApplication {
         quantx.setEditable(true);
         gridPane.addRow(4, new Label("quantY"), quanty, new Label("[samples]"));
         quanty.setEditable(true);
-        installEventHandlers((evt) -> wavelet(rawData, waveletData), nu.valueProperty(), waveletFMin.valueProperty(), waveletFMax.valueProperty(),
-                quantx.valueProperty(), quanty.valueProperty());
+        installEventHandlers((evt) -> wavelet(rawData, waveletData), nu.valueProperty(), waveletFMin.valueProperty(), waveletFMax.valueProperty(), quantx.valueProperty(), quanty.valueProperty());
         return gridPane;
     }
 
