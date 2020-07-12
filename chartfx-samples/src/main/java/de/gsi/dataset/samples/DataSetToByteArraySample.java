@@ -25,7 +25,7 @@ import de.gsi.dataset.utils.ProcessingProfiler;
 
 public class DataSetToByteArraySample {
     private static final Logger LOGGER = LoggerFactory.getLogger(DataSetToByteArraySample.class);
-    private static final int N_SAMPLES = 100_000; // default: 100_000
+    private static final int N_SAMPLES = 10_000; // default: 100_000
     private final DoubleErrorDataSet original = new DoubleErrorDataSet("init", N_SAMPLES);
     private final ByteArrayOutputStream byteOutput = new ByteArrayOutputStream();
     private final FastByteBuffer byteBuffer = new FastByteBuffer();
@@ -397,7 +397,7 @@ public class DataSetToByteArraySample {
         sample.clearGarbage();
 
         final int iterations = 4;
-        final int nLoops = 200;
+        final int nLoops = 2000;
         for (boolean bit32 : new Boolean[] { true, false }) {
             for (boolean header : new Boolean[] { true, false }) {
                 for (int i = 0; i < iterations; i++) {
