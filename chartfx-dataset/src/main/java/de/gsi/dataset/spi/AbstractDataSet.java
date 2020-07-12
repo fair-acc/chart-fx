@@ -57,8 +57,8 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
     protected List<String> errorList = new ArrayList<>();
     private transient EditConstraints editConstraints;
     private final Map<String, String> metaInfoMap = new ConcurrentHashMap<>();
-    private transient final AtomicBoolean axisUpdating = new AtomicBoolean(false);
-    protected transient final EventListener axisListener = e -> {
+    private final transient AtomicBoolean axisUpdating = new AtomicBoolean(false);
+    protected final transient EventListener axisListener = e -> {
         if (!isAutoNotification() || !(e instanceof AxisChangeEvent) || axisUpdating.get()) {
             return;
         }
@@ -536,32 +536,6 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
         return lock;
     }
 
-    protected int minNeigbourSearchX(final double search, final int indexMin, final int indexMax) {
-        double minAbsDiff = Double.MAX_VALUE;
-        int searchIndex = indexMin;
-
-        final double a = get(DIM_X, indexMin);
-        final double b = get(DIM_X, indexMax);
-        final String eq = a < b ? " < " : " > ";
-
-        for (int i = indexMin; i <= indexMax; i++) {
-            final double valX = get(DIM_X, i);
-            if (!Double.isFinite(valX)) {
-                throw new IllegalStateException("check");
-                // continue;
-            }
-
-            final double absDiff = Math.abs(search - valX);
-
-            if (Double.isFinite(absDiff) && absDiff < minAbsDiff) {
-                searchIndex = i;
-                minAbsDiff = absDiff;
-            }
-        }
-
-        return searchIndex;
-    }
-
     /**
      * Computes limits (ranges) of this DataSet.
      * 
@@ -627,7 +601,7 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append(getClass().getName()).append(" [dim=").append(getDimension()).append(',');
+        builder.append(getClass().getName()).append(" [name=").append(getName()).append(", dim=").append(getDimension()).append(',');
         for (int i = 0; i < this.getDimension(); i++) {
             final AxisDescription desc = getAxisDescription(i);
             final boolean isDefined = desc.isDefined();
