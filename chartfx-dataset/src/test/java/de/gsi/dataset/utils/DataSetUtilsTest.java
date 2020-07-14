@@ -2,6 +2,7 @@ package de.gsi.dataset.utils;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -37,13 +38,13 @@ import de.gsi.dataset.utils.DataSetUtils.SplitCharByteInputStream;
 /**
  * @author akrimm
  */
-public class DataSetUtilsTest {
+class DataSetUtilsTest {
     private static final double EPSILON = 1e-6;
 
     @DisplayName("Serialize and Deserialize DataSet3D into StringBuffer and back")
     @ParameterizedTest(name = "binary: {0}, float: {1}")
     @CsvSource({ "false, false", "false, true", "true, false", "true, true" })
-    public void serializeAndDeserializeDataSet3D(boolean binary, boolean useFloat) {
+    void serializeAndDeserializeDataSet3D(boolean binary, boolean useFloat) {
         // initialize dataSet
         DataSet dataSet = new DataSetBuilder("Test 3D Dataset") //
                                   .setValues(DIM_X, new double[] { 1.0f, 2.0f, 3.0f }) //
@@ -67,13 +68,14 @@ public class DataSetUtilsTest {
     @DisplayName("Serialize and Deserialize DefaultDataSet into StringBuffer and back")
     @ParameterizedTest(name = "binary: {0}, float: {1}")
     @CsvSource({ "false, false", "false, true", "true, false", "true, true" })
-    public void serializeAndDeserializeDefaultDataSet(boolean binary, boolean useFloat) {
+    void serializeAndDeserializeDefaultDataSet(boolean binary, boolean useFloat) {
         // initialize dataSet
         DataSet dataSet = new DataSetBuilder() //
                                   .setName("TestSerialize") //
                                   .setValuesNoCopy(DIM_X, new double[] { 1.0f, 2.0f, 3.0f, 4.0f, 5.0f }) //
                                   .setValuesNoCopy(DIM_Y, new double[] { 1.3f, 3.7f, 4.2f, 2.3f, 1.8f }) //
                                   .setPosErrorNoCopy(DIM_Y, new double[] { 0.1f, 0.3f, 0.2f, 0.3f, 0.8f }) //
+                                  .setNegErrorNoCopy(DIM_Y, new double[] { 0.1f, 0.3f, 0.2f, 0.3f, 0.8f }) // DataSetUtils defaults to ASYMMETRIC
                                   .setAxisName(DIM_X, "index")
                                   .setAxisUnit(DIM_X, "") //
                                   .setAxisName(DIM_Y, "Voltage")
@@ -130,7 +132,7 @@ public class DataSetUtilsTest {
             "false, dataset.csv",
             "true, dataset.bin",
     })
-    public void
+    void
     readAndWriteDefaultDataSetToFile(boolean binary, String filename, @TempDir Path tmpdir) {
         // initialize dataSet
         DataSet dataSet = new DataSetBuilder() //
@@ -171,27 +173,26 @@ public class DataSetUtilsTest {
     }
 
     @Test
-    public void testFailureCases() {
+    void testFailureCases() {
         assertThrows(IllegalArgumentException.class, () -> DataSetUtils.readDataSetFromByteArray(null));
         assertThrows(IllegalArgumentException.class, () -> DataSetUtils.readDataSetFromByteArray(new byte[0]));
         assertThrows(IllegalArgumentException.class, () -> DataSetUtils.writeDataSetToFile(null, null, null));
-        assertThrows(IllegalArgumentException.class,
-                () -> DataSetUtils.writeDataSetToFile(new DefaultDataSet("test"), null, null));
-        assertThrows(IllegalArgumentException.class,
-                () -> DataSetUtils.writeDataSetToFile(new DefaultDataSet("test"), Path.of("/tmp"), ""));
-        assertThrows(IllegalArgumentException.class,
-                () -> DataSetUtils.writeDataSetToFile(new DefaultDataSet("test"), Path.of("/tmp"), null));
+        final DefaultDataSet dataSet = new DefaultDataSet("test");
+        assertThrows(IllegalArgumentException.class, () -> DataSetUtils.writeDataSetToFile(dataSet, null, null));
+        final Path path = Path.of("/tmp");
+        assertThrows(IllegalArgumentException.class, () -> DataSetUtils.writeDataSetToFile(dataSet, path, ""));
+        assertThrows(IllegalArgumentException.class, () -> DataSetUtils.writeDataSetToFile(dataSet, path, null));
     }
 
     @Test
-    public void testEvaluateCompression() {
+    void testEvaluateCompression() {
         assertEquals(Compression.GZIP, DataSetUtils.evaluateAutoCompression("test.bin.gz"));
         assertEquals(Compression.ZIP, DataSetUtils.evaluateAutoCompression("test.csv.zip"));
         assertEquals(Compression.NONE, DataSetUtils.evaluateAutoCompression("test.csv"));
     }
 
     @Test
-    public void testHelperFunctions() {
+    void testHelperFunctions() {
         // copyDataSets
         // cropToLength
         final double[] array = new double[] { 1, 2, 3, 4 };
@@ -201,21 +202,21 @@ public class DataSetUtilsTest {
     }
 
     @Test
-    public void testSplitCharByteInputStream() throws IOException {
+    void testSplitCharByteInputStream() throws IOException {
         final byte[] byteArray = new byte[] { 'a', 'b', 'c', SplitCharByteInputStream.MARKER, 120, 96 };
         SplitCharByteInputStream scbiStream = new SplitCharByteInputStream(
                 new PushbackInputStream(new ByteArrayInputStream(byteArray)));
         // single byte method
-        assertEquals(false, scbiStream.reachedSplit());
+        assertFalse(scbiStream.reachedSplit());
         assertEquals('a', scbiStream.read());
         assertEquals('b', scbiStream.read());
         assertEquals('c', scbiStream.read());
-        assertEquals(false, scbiStream.reachedSplit());
+        assertFalse(scbiStream.reachedSplit());
         assertEquals(-1, scbiStream.read());
-        assertEquals(true, scbiStream.reachedSplit());
+        assertTrue(scbiStream.reachedSplit());
         assertEquals(-1, scbiStream.read());
         scbiStream.switchToBinary();
-        assertEquals(false, scbiStream.reachedSplit());
+        assertFalse(scbiStream.reachedSplit());
         assertEquals(120, scbiStream.read());
         assertEquals(96, scbiStream.read());
         assertEquals(-1, scbiStream.read());
@@ -224,13 +225,13 @@ public class DataSetUtilsTest {
         byte[] output = new byte[2];
         assertEquals(2, scbiStream.read(output));
         assertArrayEquals(new byte[] { 'a', 'b' }, output);
-        assertEquals(false, scbiStream.reachedSplit());
+        assertFalse(scbiStream.reachedSplit());
         assertEquals(1, scbiStream.read(output));
         assertArrayEquals(new byte[] { 'c', SplitCharByteInputStream.MARKER }, output);
-        assertEquals(true, scbiStream.reachedSplit());
+        assertTrue(scbiStream.reachedSplit());
         assertEquals(-1, scbiStream.read(output));
         scbiStream.switchToBinary();
-        assertEquals(false, scbiStream.reachedSplit());
+        assertFalse(scbiStream.reachedSplit());
         assertEquals(2, scbiStream.read(output));
         assertArrayEquals(new byte[] { 120, 96 }, output);
         assertEquals(-1, scbiStream.read(output));
@@ -241,13 +242,13 @@ public class DataSetUtilsTest {
         assertEquals(2, scbiStream.read(output, 1, 2));
         scbiStream.switchToBinary();
         assertArrayEquals(new byte[] { 0, 'a', 'b', 0, 0, 0, 0, 0 }, output);
-        assertEquals(false, scbiStream.reachedSplit());
+        assertFalse(scbiStream.reachedSplit());
         assertEquals(1, scbiStream.read(output, 3, 2));
         assertArrayEquals(new byte[] { 0, 'a', 'b', 'c', SplitCharByteInputStream.MARKER, 0, 0, 0 }, output);
-        assertEquals(true, scbiStream.reachedSplit());
+        assertTrue(scbiStream.reachedSplit());
         assertEquals(-1, scbiStream.read(output, 4, 4));
         scbiStream.switchToBinary();
-        assertEquals(false, scbiStream.reachedSplit());
+        assertFalse(scbiStream.reachedSplit());
         assertEquals(2, scbiStream.read(output, 4, 4));
         scbiStream.switchToBinary();
         assertArrayEquals(new byte[] { 0, 'a', 'b', 'c', 120, 96, 0, 0 }, output);
@@ -255,7 +256,7 @@ public class DataSetUtilsTest {
     }
 
     @Test
-    public void testGenerateFileName() {
+    void testGenerateFileName() {
         final long acqStamp = System.currentTimeMillis();
         final DataSet dataSet = new DataSetBuilder("dsName") //
                                         .setValuesNoCopy(DIM_X, new double[] { 1, 2, 3 }) //
@@ -275,7 +276,7 @@ public class DataSetUtilsTest {
         assertEquals("noDataset", DataSetUtils.getFileName(null, "{yMin}"));
         assertEquals("9.0", DataSetUtils.getFileName(dataSet, "{yMax}"));
         assertEquals("noDataset", DataSetUtils.getFileName(null, "{yMax}"));
-        assertEquals(System.currentTimeMillis(), Long.parseLong(DataSetUtils.getFileName(null, "{systemTime}")), 1000l);
+        assertEquals(System.currentTimeMillis(), Long.parseLong(DataSetUtils.getFileName(null, "{systemTime}")), 1000L);
         assertEquals("testMetaInfo", DataSetUtils.getFileName(dataSet, "{metaString}"));
         assertEquals("metaDataMissing", DataSetUtils.getFileName(null, "{metaString}"));
         assertEquals(1337, Integer.parseInt(DataSetUtils.getFileName(dataSet, "{metaInt;int}")));
@@ -293,7 +294,7 @@ public class DataSetUtilsTest {
     }
 
     @BeforeAll
-    public static void resetLocalization() {
+    static void resetLocalization() {
         Locale.setDefault(Locale.US);
     }
 }

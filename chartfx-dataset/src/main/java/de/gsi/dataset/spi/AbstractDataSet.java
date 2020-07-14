@@ -283,6 +283,15 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
 
     @Override
     public boolean equals(final Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (!(obj instanceof DataSet)) {
+            return false;
+        }
         return equals(obj, -1);
     }
 
@@ -304,9 +313,7 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
             return false;
         }
         final DataSet other = (DataSet) obj;
-        // TODO: check whether to add a thread-safety guard
-        // N.B. some complication equals can be invoked from both reader as well as
-        // writer threads
+        // N.B. some complication equals can be invoked from both reader as well as writer threads
 
         // check dimension and data counts
         if (this.getDimension() != other.getDimension()) {
@@ -602,22 +609,26 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
     public String toString() {
         StringBuilder builder = new StringBuilder();
         builder.append(getClass().getName()).append(" [name=").append(getName()).append(", dim=").append(getDimension()).append(',');
+        builder.append(" dataCount=").append(this.getDataCount(DIM_X)).append(',');
         for (int i = 0; i < this.getDimension(); i++) {
             final AxisDescription desc = getAxisDescription(i);
             final boolean isDefined = desc.isDefined();
-            builder.append(" dataCount(").append(i).append(")=").append(this.getDataCount(i)).append(',') //
-                    .append(" axisName ='")
+            builder.append(" axisName ='")
                     .append(desc.getName())
                     .append("',") //
                     .append(" axisUnit = '")
                     .append(desc.getUnit())
                     .append("',") //
                     .append(" axisRange = ") //
-                    .append(" [min=")
+                    .append(" [")
                     .append(isDefined ? desc.getMin() : "NotDefined") //
-                    .append(", max=")
+                    .append(", ")
                     .append(isDefined ? desc.getMax() : "NotDefined") //
                     .append("],");
+            if (this instanceof DataSetError) {
+                DataSetError.ErrorType error = ((DataSetError) this).getErrorType(i);
+                builder.append(" errorType(").append(i).append(")=").append(error).append(',');
+            }
         }
         builder.append(']');
         return builder.toString();
