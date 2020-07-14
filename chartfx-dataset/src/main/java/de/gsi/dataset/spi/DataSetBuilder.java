@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.slf4j.Logger;
@@ -14,6 +13,7 @@ import org.slf4j.LoggerFactory;
 
 import de.gsi.dataset.AxisDescription;
 import de.gsi.dataset.DataSet;
+import de.gsi.dataset.DataSetError;
 import de.gsi.dataset.DataSetMetaData;
 import de.gsi.dataset.EditableDataSet;
 import de.gsi.dataset.utils.AssertUtils;
@@ -180,16 +180,13 @@ public class DataSetBuilder {
     }
 
     private int getResultDimension() {
-        int maxDim = values.keySet().stream().collect(Collectors.maxBy(Integer::compare)).orElse(-1);
-        maxDim = Math.max(maxDim, valuesFloat.keySet().stream().collect(Collectors.maxBy(Integer::compare)).orElse(-1));
-        maxDim = Math.max(maxDim, errorsNeg.keySet().stream().collect(Collectors.maxBy(Integer::compare)).orElse(-1));
-        maxDim = Math.max(maxDim,
-                errorsNegFloat.keySet().stream().collect(Collectors.maxBy(Integer::compare)).orElse(-1));
-        maxDim = Math.max(maxDim, errorsPos.keySet().stream().collect(Collectors.maxBy(Integer::compare)).orElse(-1));
-        maxDim = Math.max(maxDim,
-                errorsPosFloat.keySet().stream().collect(Collectors.maxBy(Integer::compare)).orElse(-1));
-        maxDim = Math.max(maxDim,
-                axisDescriptions.keySet().stream().collect(Collectors.maxBy(Integer::compare)).orElse(-1));
+        int maxDim = values.keySet().stream().max(Integer::compare).orElse(-1);
+        maxDim = Math.max(maxDim, valuesFloat.keySet().stream().max(Integer::compare).orElse(-1));
+        maxDim = Math.max(maxDim, errorsNeg.keySet().stream().max(Integer::compare).orElse(-1));
+        maxDim = Math.max(maxDim, errorsNegFloat.keySet().stream().max(Integer::compare).orElse(-1));
+        maxDim = Math.max(maxDim, errorsPos.keySet().stream().max(Integer::compare).orElse(-1));
+        maxDim = Math.max(maxDim, errorsPosFloat.keySet().stream().max(Integer::compare).orElse(-1));
+        maxDim = Math.max(maxDim, axisDescriptions.keySet().stream().max(Integer::compare).orElse(-1));
         if (this.dimension == -1) {
             return maxDim + 1;
         } else if (this.dimension <= maxDim) {
@@ -234,9 +231,9 @@ public class DataSetBuilder {
         }
         if (dimIndex == nDims - 1) { // labels & styles only for last dimension?
             result = Math.max(result,
-                    dataLabels.keySet().stream().collect(Collectors.maxBy(Integer::compare)).orElse(-1));
+                    dataLabels.keySet().stream().max(Integer::compare).orElse(-1));
             result = Math.max(result,
-                    dataStyles.keySet().stream().collect(Collectors.maxBy(Integer::compare)).orElse(-1));
+                    dataStyles.keySet().stream().max(Integer::compare).orElse(-1));
         }
         return result;
     }
@@ -289,7 +286,9 @@ public class DataSetBuilder {
         }
         double[] yen = getErrors(DataSet.DIM_Y, size, false);
         double[] yep = getErrors(DataSet.DIM_Y, size, true);
-        return new DefaultErrorDataSet(dsName, xvalues, yvalues, yen, yep, size, false);
+        final DefaultErrorDataSet dataSet = new DefaultErrorDataSet(dsName, xvalues, yvalues, yen, yep, size, false);
+        dataSet.setErrorType(DataSet.DIM_Y, getErrorType(DataSet.DIM_Y));
+        return dataSet;
     }
 
     private DataSet buildMultiDimDataSet(final String dsName, final int[] size) {
@@ -341,6 +340,34 @@ public class DataSetBuilder {
             }
         }
         return vals;
+    }
+
+    private DataSetError.ErrorType getErrorType(final int dimIndex) {
+        final Object ep;
+        final Object en;
+        if (errorsPos.get(dimIndex) == null && errorsNeg.get(dimIndex) == null) {
+            // dealing with float error values
+            ep = errorsPosFloat.get(dimIndex);
+            en = errorsNegFloat.get(dimIndex);
+        } else if (errorsPosFloat.get(dimIndex) == null && errorsNegFloat.get(dimIndex) == null) {
+            // dealing with double error values
+            ep = errorsPos.get(dimIndex);
+            en = errorsNeg.get(dimIndex);
+        } else {
+            // mixed double/float case
+            String mixed = String.format("ep(double)=%s, en(double)=%s, ep(float)=%s, en(float)=%s", //
+                    errorsPos.get(dimIndex), errorsNeg.get(dimIndex), //NOSONAR //NOPMD
+                    errorsPosFloat.get(dimIndex), errorsNegFloat.get(dimIndex)); //NOSONAR //NOPMD
+            throw new UnsupportedOperationException("mixed double/float error vectors for dimIndex " + dimIndex + " not supported: " + mixed);
+        }
+
+        if (ep != null && en != null) {
+            return DataSetError.ErrorType.ASYMMETRIC;
+        } else if (ep != null || en != null) {
+            return DataSetError.ErrorType.SYMMETRIC;
+        }
+
+        return DataSetError.ErrorType.NO_ERROR;
     }
 
     private double[] getErrors(final int dimIndex, final int size, final boolean pos) {
