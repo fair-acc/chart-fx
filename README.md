@@ -42,7 +42,7 @@ All chart-fx releases are deployed to maven central, for maven you can add it to
   <dependency>
     <groupId>de.gsi.chart</groupId>
     <artifactId>chartfx-chart</artifactId>
-    <version>11.1.3</version>
+    <version>11.1.5</version>
   </dependency>
 </dependencies>
 ```
@@ -50,7 +50,7 @@ All chart-fx releases are deployed to maven central, for maven you can add it to
 or your build.gradle like this:
 
 ```gradle
-implementation 'de.gsi.chart:chartfx-chart:11.1.3'
+implementation 'de.gsi.chart:chartfx-chart:11.1.5'
 ```
 
 To use different build systems or library versions, have a look at the snippets on [maven central](https://search.maven.org/search?q=g:de.gsi.chart%20AND%20a:chartfx-chart&core=gav).
@@ -158,7 +158,7 @@ pom.xml:
   <dependency>
     <groupId>de.gsi.chart</groupId>
     <artifactId>chartfx-chart</artifactId>
-    <version>11.0.0</version>
+    <version>11.1.5</version>
   </dependency>
   <dependency>
     <groupId>org.slf4j</groupId>
