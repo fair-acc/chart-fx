@@ -2,10 +2,14 @@ package de.gsi.dataset.serializer.helper;
 
 //import cern.cmw.data.Data;
 //import cern.cmw.data.DataFactory;
+//import cern.cmw.data.DataSerializer;
 //import cern.cmw.data.Entry;
 
 public final class CmwHelper {
     /*
+    private static final Logger LOGGER = LoggerFactory.getLogger(SerialiserBenchmark.class); // N.B. SerialiserBenchmark reference on purpose
+    private static final DataSerializer cmwSerializer = DataFactory.createDataSerializer();
+
     public static Data getCmwData(final TestDataClass pojo) {
         Data data = DataFactory.createData();
 
@@ -13,8 +17,8 @@ public final class CmwHelper {
         data.append("bool2", pojo.bool2);
         data.append("byte1", pojo.byte1);
         data.append("byte2", pojo.byte2);
-        data.append("char1", pojo.char1);
-        data.append("char2", pojo.char2);
+        data.append("char1", pojo.char1); // work-around storing char as ints
+        data.append("char2", pojo.char2); // work-around storing char as ints
         data.append("short1", pojo.short1);
         data.append("short2", pojo.short2);
         data.append("int1", pojo.int1);
@@ -26,7 +30,7 @@ public final class CmwHelper {
         data.append("double1", pojo.double1);
         data.append("double2", pojo.double2);
         data.append("string1", pojo.string1);
-        // data.append("string2", string2); // N.B. CMW handles only ASCII characters
+        //data.append("string2", pojo.string2); // N.B. CMW handles only ASCII characters
 
         // 1-dim array
         data.appendArray("boolArray", pojo.boolArray);
@@ -63,6 +67,8 @@ public final class CmwHelper {
         pojo.byte2 = data.getByte("byte2");
         //pojo.char1 = data.getCharacter("char1"); // not supported by CMW
         //pojo.char2 = data.getCharacter("char2"); // not supported by CMW
+        pojo.char1 = (char) data.getInt("char1"); // work-around
+        pojo.char2 = (char) data.getInt("char2"); // work-around
         pojo.short1 = data.getShort("short1");
         pojo.short2 = data.getShort("short2");
         pojo.int1 = data.getInt("int1");
@@ -105,5 +111,73 @@ public final class CmwHelper {
             applyCmwData(nestedEntry.getData(), pojo.nestedData);
         }
     }
-    */
+
+    public static void testCMWPerformanceMap(final int iterations, final TestDataClass inputObject, final TestDataClass outputObject) {
+        final Data sourceData = CmwHelper.getCmwData(inputObject);
+
+        final long startTime = System.nanoTime();
+        byte[] buffer = new byte[0];
+        for (int i = 0; i < iterations; i++) {
+            buffer = cmwSerializer.serializeToBinary(sourceData);
+            final Data retrievedData = cmwSerializer.deserializeFromBinary(buffer);
+            if (sourceData.size() != retrievedData.size()) {
+                // check necessary so that the above is not optimised by the Java JIT compiler to NOP
+                throw new IllegalStateException("data mismatch");
+            }
+        }
+        if (iterations <= 1) {
+            // JMH use-case
+            return;
+        }
+        final long stopTime = System.nanoTime();
+
+        final double diffMillis = TimeUnit.NANOSECONDS.toMillis(stopTime - startTime);
+        final double byteCount = iterations * ((buffer.length / diffMillis) * 1e3);
+        LOGGER.atInfo().addArgument(SerialiserBenchmark.humanReadableByteCount((long) byteCount, true)) //
+                .addArgument(SerialiserBenchmark.humanReadableByteCount((long) buffer.length, true))
+                .addArgument(diffMillis) //
+                .log("CMW Serializer (Map only) throughput = {}/s for {} per test run (took {} ms)");
+    }
+
+    public static void testCMWPerformancePojo(final int iterations, final TestDataClass inputObject, final TestDataClass outputObject) {
+        final long startTime = System.nanoTime();
+
+        byte[] buffer = new byte[0];
+        for (int i = 0; i < iterations; i++) {
+            buffer = cmwSerializer.serializeToBinary(CmwHelper.getCmwData(inputObject));
+            final Data retrievedData = cmwSerializer.deserializeFromBinary(buffer);
+            CmwHelper.applyCmwData(retrievedData, outputObject);
+            if (!inputObject.string1.contentEquals(outputObject.string1)) {
+                // check necessary so that the above is not optimised by the Java JIT compiler to NOP
+                throw new IllegalStateException("data mismatch");
+            }
+        }
+        if (iterations <= 1) {
+            // JMH use-case
+            return;
+        }
+        final long stopTime = System.nanoTime();
+
+        final double diffMillis = TimeUnit.NANOSECONDS.toMillis(stopTime - startTime);
+        final double byteCount = iterations * ((buffer.length / diffMillis) * 1e3);
+        LOGGER.atInfo().addArgument(SerialiserBenchmark.humanReadableByteCount((long) byteCount, true)) //
+                .addArgument(SerialiserBenchmark.humanReadableByteCount((long) buffer.length, true))
+                .addArgument(diffMillis) //
+                .log("CMW Serializer (POJO) throughput = {}/s for {} per test run (took {} ms)");
+    }
+
+    public static void checkCMWIdentity(final TestDataClass inputObject, final TestDataClass outputObject) {
+        outputObject.clear();
+        final Data sourceData = getCmwData(inputObject);
+        final byte[] buffer = cmwSerializer.serializeToBinary(sourceData);
+        final Data retrievedData = cmwSerializer.deserializeFromBinary(buffer);
+        applyCmwData(retrievedData, outputObject);
+        final int nBytes = buffer.length;
+        LOGGER.atInfo().addArgument(nBytes).log("CMW serialiser nBytes = {}");
+
+        // disabled since UTF-8 is not supported which would fail this test for 'string2' which contains UTF-8 characters
+        //assertEquals(inputObject, outputObject, "TestDataClass input-output equality");
+    }
+
+     */
 }
