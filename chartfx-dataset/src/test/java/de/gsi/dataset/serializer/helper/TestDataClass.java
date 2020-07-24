@@ -328,6 +328,8 @@ public class TestDataClass {
         longNdimArray = null;
         floatNdimArray = null;
         doubleNdimArray = null;
+
+        nestedData = null;
     }
 
     public final void init(final int nSizePrimitives, final int nSizeString) {
