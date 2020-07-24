@@ -1,11 +1,31 @@
 package de.gsi.dataset.serializer.helper;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import java.util.concurrent.TimeUnit;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.gsi.dataset.serializer.DataType;
+import de.gsi.dataset.serializer.IoBuffer;
+import de.gsi.dataset.serializer.IoClassSerialiser;
 import de.gsi.dataset.serializer.IoSerialiser;
+import de.gsi.dataset.serializer.benchmark.SerialiserBenchmark;
+import de.gsi.dataset.serializer.spi.BinarySerialiser;
+import de.gsi.dataset.serializer.spi.FastByteBuffer;
 import de.gsi.dataset.serializer.spi.WireDataFieldDescription;
 
 @SuppressWarnings("PMD") // complexity is part of the very large use-case surface that is being tested
 public final class SerialiserHelper {
+    private static final Logger LOGGER = LoggerFactory.getLogger(SerialiserBenchmark.class); // N.B. SerialiserBenchmark reference on purpose
+    private static final IoBuffer byteBuffer = new FastByteBuffer(100000);
+
+    // private static final IoBuffer byteBuffer = new ByteBuffer(20000);
+    private static final BinarySerialiser binarySerialiser = new BinarySerialiser(byteBuffer);
+    private static final IoClassSerialiser ioSerialiser = new IoClassSerialiser(binarySerialiser);
+
     public static void serialiseCustom(IoSerialiser ioSerialiser, final TestDataClass pojo) {
         serialiseCustom(ioSerialiser, pojo, true);
     }
@@ -215,5 +235,149 @@ public final class SerialiserHelper {
 
     public static WireDataFieldDescription deserialiseMap(IoSerialiser ioSerialiser) {
         return ioSerialiser.parseIoStream(true);
+    }
+
+    public static WireDataFieldDescription testIoSerialiserPerformanceMap(final int iterations, final TestDataClass inputObject) {
+        final long startTime = System.nanoTime();
+
+        WireDataFieldDescription ret = null;
+        for (int i = 0; i < iterations; i++) {
+            byteBuffer.reset();
+            SerialiserHelper.serialiseCustom(binarySerialiser, inputObject);
+            byteBuffer.reset();
+            ret = SerialiserHelper.deserialiseMap(binarySerialiser);
+
+            if (ret.getDataSize() == 0) {
+                // quick check necessary so that the above is not optimised by the Java JIT compiler to NOP
+                throw new IllegalStateException("data mismatch");
+            }
+        }
+        if (iterations <= 1) {
+            // JMH use-case
+            return ret;
+        }
+
+        final long stopTime = System.nanoTime();
+
+        final double diffMillis = TimeUnit.NANOSECONDS.toMillis(stopTime - startTime);
+        final double byteCount = iterations * ((byteBuffer.position() / diffMillis) * 1e3);
+        LOGGER.atInfo().addArgument(SerialiserBenchmark.humanReadableByteCount((long) byteCount, true)) //
+                .addArgument(SerialiserBenchmark.humanReadableByteCount(byteBuffer.position(), true)) //
+                .addArgument(diffMillis) //
+                .log("IO Serializer (Map only)  throughput = {}/s for {} per test run (took {} ms)");
+        return ret;
+    }
+
+    public static void testIoSerialiserPerformancePojo(final int iterations, final TestDataClass inputObject, TestDataClass outputObject) {
+        binarySerialiser.setPutFieldMetaData(true);
+        final long startTime = System.nanoTime();
+        for (int i = 0; i < iterations; i++) {
+            if (i == 1) {
+                // only stream meta-data the first iteration
+                binarySerialiser.setPutFieldMetaData(false);
+            }
+            byteBuffer.reset();
+            ioSerialiser.serialiseObject(inputObject);
+
+            byteBuffer.reset();
+
+            outputObject = (TestDataClass) ioSerialiser.deserialiseObject(outputObject);
+
+            if (!inputObject.string1.contentEquals(outputObject.string1)) {
+                // quick check necessary so that the above is not optimised by the Java JIT compiler to NOP
+                throw new IllegalStateException("data mismatch");
+            }
+        }
+        if (iterations <= 1) {
+            // JMH use-case
+            return;
+        }
+        final long stopTime = System.nanoTime();
+
+        final double diffMillis = TimeUnit.NANOSECONDS.toMillis(stopTime - startTime);
+        final double byteCount = iterations * ((byteBuffer.position() / diffMillis) * 1e3);
+        LOGGER.atInfo().addArgument(SerialiserBenchmark.humanReadableByteCount((long) byteCount, true)) //
+                .addArgument(SerialiserBenchmark.humanReadableByteCount(byteBuffer.position(), true)) //
+                .addArgument(diffMillis) //
+                .log("IO Serializer (POJO) throughput = {}/s for {} per test run (took {} ms)");
+    }
+
+    public static void testCustomIoSerialiserPerformance(final int iterations, final TestDataClass inputObject, final TestDataClass outputObject) {
+        final long startTime = System.nanoTime();
+
+        for (int i = 0; i < iterations; i++) {
+            byteBuffer.reset();
+            SerialiserHelper.serialiseCustom(binarySerialiser, inputObject);
+
+            byteBuffer.reset();
+            SerialiserHelper.deserialiseCustom(binarySerialiser, outputObject);
+
+            if (!inputObject.string1.contentEquals(outputObject.string1)) {
+                // quick check necessary so that the above is not optimised by the Java JIT compiler to NOP
+                throw new IllegalStateException("data mismatch");
+            }
+        }
+        if (iterations <= 1) {
+            // JMH use-case
+            return;
+        }
+
+        final long stopTime = System.nanoTime();
+
+        final double diffMillis = TimeUnit.NANOSECONDS.toMillis(stopTime - startTime);
+        final double byteCount = iterations * ((byteBuffer.position() / diffMillis) * 1e3);
+        LOGGER.atInfo().addArgument(SerialiserBenchmark.humanReadableByteCount((long) byteCount, true)) //
+                .addArgument(SerialiserBenchmark.humanReadableByteCount(byteBuffer.position(), true)) //
+                .addArgument(diffMillis) //
+                .log("IO Serializer (custom) throughput = {}/s for {} per test run (took {} ms)");
+    }
+
+    public static void checkIoBufferSerialiserIdentity(final TestDataClass inputObject, TestDataClass outputObject) {
+        outputObject.clear();
+        byteBuffer.reset();
+
+        ioSerialiser.serialiseObject(inputObject);
+
+        // SerialiserHelper.serialiseCustom(byteBuffer, inputObject);
+        final int nBytesIO = byteBuffer.position();
+        LOGGER.atInfo().addArgument(nBytesIO).log("generic serialiser nBytes = {}");
+
+        // keep: checks serialised data structure
+        // byteBuffer.reset();
+        // final WireDataFieldDescription fieldRoot = SerialiserHelper.deserialiseMap(byteBuffer);
+        // fieldRoot.printFieldStructure();
+
+        byteBuffer.reset();
+        outputObject = (TestDataClass) ioSerialiser.deserialiseObject(outputObject);
+
+        // second test - both vectors should have the same initial values after serialise/deserialise
+        assertArrayEquals(inputObject.stringArray, outputObject.stringArray);
+
+        assertEquals(inputObject, outputObject, "TestDataClass input-output equality");
+    }
+
+    public static void checkCustomSerialiserIdentity(final TestDataClass inputObject, TestDataClass outputObject) {
+        outputObject.clear();
+        byteBuffer.reset();
+        SerialiserHelper.serialiseCustom(binarySerialiser, inputObject);
+        final int nBytesIO = byteBuffer.position();
+        LOGGER.atInfo().addArgument(nBytesIO).log("custom serialiser nBytes = {}");
+
+        // keep: checks serialised data structure
+        // byteBuffer.reset();
+        // final WireDataFieldDescription fieldRoot = SerialiserHelper.deserialiseMap(byteBuffer);
+        // fieldRoot.printFieldStructure();
+
+        byteBuffer.reset();
+        SerialiserHelper.deserialiseCustom(binarySerialiser, outputObject);
+
+        // second test - both vectors should have the same initial values after serialise/deserialise
+        assertArrayEquals(inputObject.stringArray, outputObject.stringArray);
+
+        assertEquals(inputObject, outputObject, "TestDataClass input-output equality");
+    }
+
+    public static BinarySerialiser getBinarySerialiser() {
+        return binarySerialiser;
     }
 }

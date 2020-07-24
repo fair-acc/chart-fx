@@ -1,13 +1,24 @@
 package de.gsi.dataset.serializer.helper;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import java.nio.ByteBuffer;
+import java.util.concurrent.TimeUnit;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.flatbuffers.ArrayReadWriteBuf;
 import com.google.flatbuffers.FlexBuffers;
 import com.google.flatbuffers.FlexBuffersBuilder;
 
+import de.gsi.dataset.serializer.benchmark.SerialiserBenchmark;
+
 @SuppressWarnings("PMD") // complexity is part of the very large use-case surface that is being tested
 public class FlatBuffersHelper {
+    private static final Logger LOGGER = LoggerFactory.getLogger(SerialiserBenchmark.class); // N.B. SerialiserBenchmark reference on purpose
+    private static final byte[] rawByteBuffer = new byte[100000];
+
     public static ByteBuffer serialiseCustom(FlexBuffersBuilder builder, final TestDataClass pojo) {
         return serialiseCustom(builder, pojo, true);
     }
@@ -295,5 +306,48 @@ public class FlatBuffersHelper {
         if (nestedMap != null && nestedMap.size() != 0) {
             deserialiseCustom(map.get("nestedData").asMap(), pojo.nestedData, false);
         }
+    }
+
+    public static void testFlatBuffersSerialiserPerformance(final int iterations, final TestDataClass inputObject, final TestDataClass outputObject) {
+        final long startTime = System.nanoTime();
+
+        ByteBuffer retVal = FlatBuffersHelper.serialiseCustom(new FlexBuffersBuilder(new ArrayReadWriteBuf(rawByteBuffer), FlexBuffersBuilder.BUILDER_FLAG_SHARE_KEYS_AND_STRINGS), inputObject);
+        for (int i = 0; i < iterations; i++) {
+            //            retVal = FlatBuffersHelper.serialiseCustom(new FlexBuffersBuilder(new ArrayReadWriteBuf(rawByteBuffer), FlexBuffersBuilder.BUILDER_FLAG_SHARE_KEYS_AND_STRINGS), inputObject);
+            retVal = FlatBuffersHelper.serialiseCustom(new FlexBuffersBuilder(new ArrayReadWriteBuf(rawByteBuffer), FlexBuffersBuilder.BUILDER_FLAG_NONE), inputObject);
+
+            FlatBuffersHelper.deserialiseCustom(retVal, outputObject);
+
+            if (!inputObject.string1.contentEquals(outputObject.string1)) {
+                // quick check necessary so that the above is not optimised by the Java JIT compiler to NOP
+                throw new IllegalStateException("data mismatch");
+            }
+        }
+        if (iterations <= 1) {
+            // JMH use-case
+            return;
+        }
+        final long stopTime = System.nanoTime();
+
+        final double diffMillis = TimeUnit.NANOSECONDS.toMillis(stopTime - startTime);
+        final double byteCount = iterations * ((retVal.limit() / diffMillis) * 1e3);
+        LOGGER.atInfo().addArgument(SerialiserBenchmark.humanReadableByteCount((long) byteCount, true)) //
+                .addArgument(SerialiserBenchmark.humanReadableByteCount(retVal.limit(), true)) //
+                .addArgument(diffMillis) //
+                .log("FlatBuffers (custom FlexBuffers) throughput = {}/s for {} per test run (took {} ms)");
+    }
+
+    public static void checkFlatBufferSerialiserIdentity(final TestDataClass inputObject, final TestDataClass outputObject) {
+        //final FlexBuffersBuilder floatBuffersBuilder = new FlexBuffersBuilder(new ArrayReadWriteBuf(rawByteBuffer), FlexBuffersBuilder.BUILDER_FLAG_SHARE_KEYS_AND_STRINGS);
+        final FlexBuffersBuilder floatBuffersBuilder = new FlexBuffersBuilder(new ArrayReadWriteBuf(rawByteBuffer), FlexBuffersBuilder.BUILDER_FLAG_NONE);
+        final ByteBuffer retVal = FlatBuffersHelper.serialiseCustom(floatBuffersBuilder, inputObject);
+        final int nBytesFlatBuffers = retVal.limit();
+        LOGGER.atInfo().addArgument(nBytesFlatBuffers).log("flatBuffers serialiser nBytes = {}");
+        FlatBuffersHelper.deserialiseCustom(retVal, outputObject);
+
+        // second test - both vectors should have the same initial values after serialise/deserialise
+        //        assertArrayEquals(inputObject.stringArray, outputObject.stringArray);
+
+        assertEquals(inputObject, outputObject, "TestDataClass input-output equality");
     }
 }
