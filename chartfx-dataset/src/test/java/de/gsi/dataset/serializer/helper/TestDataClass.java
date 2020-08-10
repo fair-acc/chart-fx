@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 @SuppressWarnings("PMD") // complexity is part of the very large use-case surface that is being tested
 public class TestDataClass {
     private static final Logger LOGGER = LoggerFactory.getLogger(TestDataClass.class);
+    private static transient boolean cmwCompatibilityMode = false;
 
     public boolean bool1;
     public boolean bool2;
@@ -69,6 +70,52 @@ public class TestDataClass {
         }
 
         init(nSizePrimitives, nSizeString);
+    }
+
+    public final void clear() {
+        bool1 = false;
+        bool2 = false;
+        byte1 = 0;
+        byte2 = 0;
+        char1 = 0;
+        char2 = 0;
+        short1 = 0;
+        short2 = 0;
+        int1 = 0;
+        int2 = 0;
+        long1 = 0;
+        long2 = 0;
+        float1 = 0;
+        float2 = 0;
+        double1 = 0;
+        double2 = 0;
+
+        string1 = null;
+        string2 = null;
+
+        // reset 1-dim arrays
+        boolArray = null;
+        byteArray = null;
+        // charArray = null;
+        shortArray = null;
+        intArray = null;
+        longArray = null;
+        floatArray = null;
+        doubleArray = null;
+        stringArray = null;
+
+        // reset n-dim arrays
+        nDimensions = null;
+        boolNdimArray = null;
+        byteNdimArray = null;
+        //            charNdimArray = null;
+        shortNdimArray = null;
+        intNdimArray = null;
+        longNdimArray = null;
+        floatNdimArray = null;
+        doubleNdimArray = null;
+
+        nestedData = null;
     }
 
     @Override
@@ -157,10 +204,12 @@ public class TestDataClass {
                     .log("field '{}' does not match '{}' vs '{}'");
             returnState = false;
         }
-        if (string2 != other.string2 && (string2 == null || !string2.equals(other.string2))) { //NOSONAR //NOPMD null-compatible String check
-            LOGGER.atError().addArgument("string2").addArgument(this.string2).addArgument(other.string2) //
-                    .log("field '{}' does not match '{}' vs '{}'");
-            returnState = false;
+        if (!isCmwCompatibilityMode()) {
+            if (string2 != other.string2 && (string2 == null || !string2.equals(other.string2))) { //NOSONAR //NOPMD null-compatible String check
+                LOGGER.atError().addArgument("string2").addArgument(this.string2).addArgument(other.string2) //
+                        .log("field '{}' does not match '{}' vs '{}'");
+                returnState = false;
+            }
         }
 
         // test 1D-arrays
@@ -219,60 +268,62 @@ public class TestDataClass {
             returnState = false;
         }
 
-        // test n-dimensional -arrays
-        try {
-            assertArrayEquals(this.nDimensions, other.nDimensions);
-        } catch (AssertionFailedError e) {
-            LOGGER.atError().addArgument("nDimensions").addArgument(e.getMessage()).log("field '{}' does not match '{}'");
-            returnState = false;
-        }
-        try {
-            assertArrayEquals(this.boolNdimArray, other.boolNdimArray);
-        } catch (AssertionFailedError e) {
-            LOGGER.atError().addArgument("boolNdimArray").addArgument(e.getMessage()).log("field '{}' does not match '{}'");
-            returnState = false;
-        }
-        try {
-            assertArrayEquals(this.byteNdimArray, other.byteNdimArray);
-        } catch (AssertionFailedError e) {
-            LOGGER.atError().addArgument("byteNdimArray").addArgument(e.getMessage()).log("field '{}' does not match '{}'");
-            returnState = false;
-        }
-        //try {
-        //    assertArrayEquals(this.charNdimArray, other.charNdimArray);
-        //} catch(AssertionFailedError e) {
-        //    LOGGER.atError().addArgument("charNdimArray").addArgument(e.getMessage()).log("field '{}' does not match '{}'");
-        //    returnState = false;
-        //}
-        try {
-            assertArrayEquals(this.shortNdimArray, other.shortNdimArray);
-        } catch (AssertionFailedError e) {
-            LOGGER.atError().addArgument("shortNdimArray").addArgument(e.getMessage()).log("field '{}' does not match '{}'");
-            returnState = false;
-        }
-        try {
-            assertArrayEquals(this.intNdimArray, other.intNdimArray);
-        } catch (AssertionFailedError e) {
-            LOGGER.atError().addArgument("intNdimArray").addArgument(e.getMessage()).log("field '{}' does not match '{}'");
-            returnState = false;
-        }
-        try {
-            assertArrayEquals(this.longNdimArray, other.longNdimArray);
-        } catch (AssertionFailedError e) {
-            LOGGER.atError().addArgument("longNdimArray").addArgument(e.getMessage()).log("field '{}' does not match '{}'");
-            returnState = false;
-        }
-        try {
-            assertArrayEquals(this.floatNdimArray, other.floatNdimArray);
-        } catch (AssertionFailedError e) {
-            LOGGER.atError().addArgument("floatNdimArray").addArgument(e.getMessage()).log("field '{}' does not match '{}'");
-            returnState = false;
-        }
-        try {
-            assertArrayEquals(this.doubleNdimArray, other.doubleNdimArray);
-        } catch (AssertionFailedError e) {
-            LOGGER.atError().addArgument("doubleNdimArray").addArgument(e.getMessage()).log("field '{}' does not match '{}'");
-            returnState = false;
+        if (!TestDataClass.isCmwCompatibilityMode()) { // disabled since reference temporarily since CmwLight does not distinguish betwenn 1D, 2D, or nDim arrays (CMW has the same wire-format but different DataType ids for it)
+            // test n-dimensional -arrays
+            try {
+                assertArrayEquals(this.nDimensions, other.nDimensions);
+            } catch (AssertionFailedError e) {
+                LOGGER.atError().addArgument("nDimensions").addArgument(e.getMessage()).log("field '{}' does not match '{}'");
+                returnState = false;
+            }
+            try {
+                assertArrayEquals(this.boolNdimArray, other.boolNdimArray);
+            } catch (AssertionFailedError e) {
+                LOGGER.atError().addArgument("boolNdimArray").addArgument(e.getMessage()).log("field '{}' does not match '{}'");
+                returnState = false;
+            }
+            try {
+                assertArrayEquals(this.byteNdimArray, other.byteNdimArray);
+            } catch (AssertionFailedError e) {
+                LOGGER.atError().addArgument("byteNdimArray").addArgument(e.getMessage()).log("field '{}' does not match '{}'");
+                returnState = false;
+            }
+            //try {
+            //    assertArrayEquals(this.charNdimArray, other.charNdimArray);
+            //} catch(AssertionFailedError e) {
+            //    LOGGER.atError().addArgument("charNdimArray").addArgument(e.getMessage()).log("field '{}' does not match '{}'");
+            //    returnState = false;
+            //}
+            try {
+                assertArrayEquals(this.shortNdimArray, other.shortNdimArray);
+            } catch (AssertionFailedError e) {
+                LOGGER.atError().addArgument("shortNdimArray").addArgument(e.getMessage()).log("field '{}' does not match '{}'");
+                returnState = false;
+            }
+            try {
+                assertArrayEquals(this.intNdimArray, other.intNdimArray);
+            } catch (AssertionFailedError e) {
+                LOGGER.atError().addArgument("intNdimArray").addArgument(e.getMessage()).log("field '{}' does not match '{}'");
+                returnState = false;
+            }
+            try {
+                assertArrayEquals(this.longNdimArray, other.longNdimArray);
+            } catch (AssertionFailedError e) {
+                LOGGER.atError().addArgument("longNdimArray").addArgument(e.getMessage()).log("field '{}' does not match '{}'");
+                returnState = false;
+            }
+            try {
+                assertArrayEquals(this.floatNdimArray, other.floatNdimArray);
+            } catch (AssertionFailedError e) {
+                LOGGER.atError().addArgument("floatNdimArray").addArgument(e.getMessage()).log("field '{}' does not match '{}'");
+                returnState = false;
+            }
+            try {
+                assertArrayEquals(this.doubleNdimArray, other.doubleNdimArray);
+            } catch (AssertionFailedError e) {
+                LOGGER.atError().addArgument("doubleNdimArray").addArgument(e.getMessage()).log("field '{}' does not match '{}'");
+                returnState = false;
+            }
         }
 
         // check for nested data content
@@ -284,52 +335,6 @@ public class TestDataClass {
         }
 
         return returnState;
-    }
-
-    public final void clear() {
-        bool1 = false;
-        bool2 = false;
-        byte1 = 0;
-        byte2 = 0;
-        char1 = 0;
-        char2 = 0;
-        short1 = 0;
-        short2 = 0;
-        int1 = 0;
-        int2 = 0;
-        long1 = 0;
-        long2 = 0;
-        float1 = 0;
-        float2 = 0;
-        double1 = 0;
-        double2 = 0;
-
-        string1 = null;
-        string2 = null;
-
-        // reset 1-dim arrays
-        boolArray = null;
-        byteArray = null;
-        // charArray = null;
-        shortArray = null;
-        intArray = null;
-        longArray = null;
-        floatArray = null;
-        doubleArray = null;
-        stringArray = null;
-
-        // reset n-dim arrays
-        nDimensions = null;
-        boolNdimArray = null;
-        byteNdimArray = null;
-        //            charNdimArray = null;
-        shortNdimArray = null;
-        intNdimArray = null;
-        longNdimArray = null;
-        floatNdimArray = null;
-        doubleNdimArray = null;
-
-        nestedData = null;
     }
 
     public final void init(final int nSizePrimitives, final int nSizeString) {
@@ -384,6 +389,14 @@ public class TestDataClass {
                 stringArray[i] = string1;
             }
         }
+    }
+
+    public static boolean isCmwCompatibilityMode() {
+        return cmwCompatibilityMode;
+    }
+
+    public static void setCmwCompatibilityMode(final boolean cmwCompatibilityMode) {
+        TestDataClass.cmwCompatibilityMode = cmwCompatibilityMode;
     }
 
     private static boolean[] getBooleanEnumeration(final int from, final int to) {

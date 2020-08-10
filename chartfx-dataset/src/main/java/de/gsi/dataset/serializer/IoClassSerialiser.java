@@ -130,8 +130,22 @@ public class IoClassSerialiser {
             return fieldSerialiser.getReturnObjectFunction().apply(ioSerialiser, obj, clazz);
         }
         // deserialise into object
-        for (final FieldDescription child : fieldRoot.getChildren()) {
-            deserialise(obj, child, clazz, 0);
+        if (!fieldRoot.getChildren().isEmpty() && !fieldRoot.getChildren().get(0).getFieldName().isEmpty()) {
+            for (final FieldDescription child : fieldRoot.getChildren()) {
+                deserialise(obj, child, clazz, 0);
+            }
+            return obj;
+        }
+
+        // class reference is not known by name (ie. was empty) parse directly dependent children
+        final List<FieldDescription> fieldRootChildren = fieldRoot.getChildren().get(0).getChildren();
+        for (final FieldDescription fieldDescription : fieldRootChildren) {
+            Map<Integer, ClassFieldDescription> rMap = fieldToClassFieldDescription.computeIfAbsent(0, depth -> new HashMap<>());
+            final ClassFieldDescription subFieldDescription = rMap.computeIfAbsent(fieldDescription.getFieldNameHashCode(), fieldNameHashCode -> (ClassFieldDescription) clazz.findChildField(fieldNameHashCode, fieldDescription.getFieldName()));
+
+            if (subFieldDescription != null) {
+                deserialise(obj, fieldDescription, subFieldDescription, 1);
+            }
         }
 
         return obj;
@@ -315,7 +329,7 @@ public class IoClassSerialiser {
             return;
         }
 
-        if (fieldRoot.getFieldNameHashCode() != classField.getFieldNameHashCode() /*|| !fieldRoot.getFieldName().equals(classField.getFieldName())*/) {
+        if (fieldRoot.getFieldNameHashCode() != classField.getFieldNameHashCode() && !"".equals(fieldRoot.getFieldName()) /*|| !fieldRoot.getFieldName().equals(classField.getFieldName())*/) {
             // did not find matching (sub-)field in class
             if (fieldRoot.getChildren().isEmpty()) {
                 return;

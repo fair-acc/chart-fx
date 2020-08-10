@@ -17,8 +17,8 @@ public final class CmwHelper {
         data.append("bool2", pojo.bool2);
         data.append("byte1", pojo.byte1);
         data.append("byte2", pojo.byte2);
-        data.append("char1", pojo.char1); // work-around storing char as ints
-        data.append("char2", pojo.char2); // work-around storing char as ints
+        data.append("char1", (short) pojo.char1); // work-around storing char as short
+        data.append("char2", (short) pojo.char2); // work-around storing char as short
         data.append("short1", pojo.short1);
         data.append("short2", pojo.short2);
         data.append("int1", pojo.int1);
@@ -30,7 +30,7 @@ public final class CmwHelper {
         data.append("double1", pojo.double1);
         data.append("double2", pojo.double2);
         data.append("string1", pojo.string1);
-        //data.append("string2", pojo.string2); // N.B. CMW handles only ASCII characters
+        // data.append("string2", pojo.string2); // N.B. CMW handles only ASCII characters
 
         // 1-dim array
         data.appendArray("boolArray", pojo.boolArray);
@@ -43,15 +43,18 @@ public final class CmwHelper {
         data.appendArray("doubleArray", pojo.doubleArray);
         data.appendArray("stringArray", pojo.stringArray);
 
-        // multidim arrays
-        data.appendMultiArray("boolNdimArray", pojo.boolNdimArray, pojo.nDimensions);
-        data.appendMultiArray("byteNdimArray", pojo.byteNdimArray, pojo.nDimensions);
-        //data.appendMultiArray("charNdimArray", pojo.charNdimArray, pojo.nDimensions); // not supported by CMW
-        data.appendMultiArray("shortNdimArray", pojo.shortNdimArray, pojo.nDimensions);
-        data.appendMultiArray("intNdimArray", pojo.intNdimArray, pojo.nDimensions);
-        data.appendMultiArray("longNdimArray", pojo.longNdimArray, pojo.nDimensions);
-        data.appendMultiArray("floatNdimArray", pojo.floatNdimArray, pojo.nDimensions);
-        data.appendMultiArray("doubleNdimArray", pojo.doubleNdimArray, pojo.nDimensions);
+        if (!TestDataClass.isCmwCompatibilityMode()) { // disabled since reference temporarily since CmwLight does not distinguish betwenn 1D, 2D, or nDim arrays (CMW has the same wire-format but different DataType ids for it)
+            // multidim arrays
+            data.appendArray("nDimensions", pojo.nDimensions);
+            data.appendMultiArray("boolNdimArray", pojo.boolNdimArray, pojo.nDimensions);
+            data.appendMultiArray("byteNdimArray", pojo.byteNdimArray, pojo.nDimensions);
+            //data.appendMultiArray("charNdimArray", pojo.charNdimArray, pojo.nDimensions); // not supported by CMW
+            data.appendMultiArray("shortNdimArray", pojo.shortNdimArray, pojo.nDimensions);
+            data.appendMultiArray("intNdimArray", pojo.intNdimArray, pojo.nDimensions);
+            data.appendMultiArray("longNdimArray", pojo.longNdimArray, pojo.nDimensions);
+            data.appendMultiArray("floatNdimArray", pojo.floatNdimArray, pojo.nDimensions);
+            data.appendMultiArray("doubleNdimArray", pojo.doubleNdimArray, pojo.nDimensions);
+        }
 
         if (pojo.nestedData != null) {
             data.append("nestedData", getCmwData(pojo.nestedData));
@@ -65,10 +68,10 @@ public final class CmwHelper {
         pojo.bool2 = data.getBool("bool2");
         pojo.byte1 = data.getByte("byte1");
         pojo.byte2 = data.getByte("byte2");
-        //pojo.char1 = data.getCharacter("char1"); // not supported by CMW
-        //pojo.char2 = data.getCharacter("char2"); // not supported by CMW
-        pojo.char1 = (char) data.getInt("char1"); // work-around
-        pojo.char2 = (char) data.getInt("char2"); // work-around
+        // pojo.char1 = data.getCharacter("char1"); // not supported by CMW
+        // pojo.char2 = data.getCharacter("char2"); // not supported by CMW
+        pojo.char1 = (char) data.getShort("char1"); // work-around
+        pojo.char2 = (char) data.getShort("char2"); // work-around
         pojo.short1 = data.getShort("short1");
         pojo.short2 = data.getShort("short2");
         pojo.int1 = data.getInt("int1");
@@ -85,7 +88,7 @@ public final class CmwHelper {
         // 1-dim array
         pojo.boolArray = data.getBoolArray("boolArray");
         pojo.byteArray = data.getByteArray("byteArray");
-        //pojo.charArray = data.getCharacterArray("byteArray"); // not supported by CMW
+        // pojo.charArray = data.getCharacterArray("byteArray"); // not supported by CMW
         pojo.shortArray = data.getShortArray("shortArray");
         pojo.intArray = data.getIntArray("intArray");
         pojo.longArray = data.getLongArray("longArray");
@@ -93,15 +96,18 @@ public final class CmwHelper {
         pojo.doubleArray = data.getDoubleArray("doubleArray");
         pojo.stringArray = data.getStringArray("stringArray");
 
-        // multi-dim arrays
-        pojo.boolNdimArray = data.getBoolMultiArray("boolNdimArray").getElements();
-        pojo.byteNdimArray = data.getByteMultiArray("byteNdimArray").getElements();
-        //pojo.charNdimArray = data.getCharMultiArray("byteArray"); // not supported by CMW
-        pojo.shortNdimArray = data.getShortMultiArray("shortNdimArray").getElements();
-        pojo.intNdimArray = data.getIntMultiArray("intNdimArray").getElements();
-        pojo.longNdimArray = data.getLongMultiArray("longNdimArray").getElements();
-        pojo.floatNdimArray = data.getFloatMultiArray("floatNdimArray").getElements();
-        pojo.doubleNdimArray = data.getDoubleMultiArray("doubleNdimArray").getElements();
+        if (!TestDataClass.isCmwCompatibilityMode()) { // disabled since reference temporarily since CmwLight does not distinguish betwenn 1D, 2D, or nDim arrays (CMW has the same wire-format but different DataType ids for it)
+            // multi-dim arrays
+            pojo.nDimensions = data.getIntArray("nDimensions");
+            pojo.boolNdimArray = data.getBoolMultiArray("boolNdimArray").getElements();
+            pojo.byteNdimArray = data.getByteMultiArray("byteNdimArray").getElements();
+            // pojo.charNdimArray = data.getCharMultiArray("byteArray"); // not supported by CMW
+            pojo.shortNdimArray = data.getShortMultiArray("shortNdimArray").getElements();
+            pojo.intNdimArray = data.getIntMultiArray("intNdimArray").getElements();
+            pojo.longNdimArray = data.getLongMultiArray("longNdimArray").getElements();
+            pojo.floatNdimArray = data.getFloatMultiArray("floatNdimArray").getElements();
+            pojo.doubleNdimArray = data.getDoubleMultiArray("doubleNdimArray").getElements();
+        }
 
         final Entry nestedEntry = data.getEntry("nestedData");
         if (nestedEntry != null) {
@@ -112,7 +118,7 @@ public final class CmwHelper {
         }
     }
 
-    public static void testCMWPerformanceMap(final int iterations, final TestDataClass inputObject, final TestDataClass outputObject) {
+    public static void testSerialiserPerformanceMap(final int iterations, final TestDataClass inputObject, final TestDataClass outputObject) {
         final Data sourceData = CmwHelper.getCmwData(inputObject);
 
         final long startTime = System.nanoTime();
@@ -139,7 +145,7 @@ public final class CmwHelper {
                 .log("CMW Serializer (Map only) throughput = {}/s for {} per test run (took {} ms)");
     }
 
-    public static void testCMWPerformancePojo(final int iterations, final TestDataClass inputObject, final TestDataClass outputObject) {
+    public static void testPerformancePojo(final int iterations, final TestDataClass inputObject, final TestDataClass outputObject) {
         final long startTime = System.nanoTime();
 
         byte[] buffer = new byte[0];
@@ -166,7 +172,7 @@ public final class CmwHelper {
                 .log("CMW Serializer (POJO) throughput = {}/s for {} per test run (took {} ms)");
     }
 
-    public static void checkCMWIdentity(final TestDataClass inputObject, final TestDataClass outputObject) {
+    public static void checkSerialiserIdentity(final TestDataClass inputObject, final TestDataClass outputObject) {
         outputObject.clear();
         final Data sourceData = getCmwData(inputObject);
         final byte[] buffer = cmwSerializer.serializeToBinary(sourceData);

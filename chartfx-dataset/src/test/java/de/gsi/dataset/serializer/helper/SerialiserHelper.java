@@ -237,7 +237,7 @@ public final class SerialiserHelper {
         return ioSerialiser.parseIoStream(true);
     }
 
-    public static WireDataFieldDescription testIoSerialiserPerformanceMap(final int iterations, final TestDataClass inputObject) {
+    public static WireDataFieldDescription testSerialiserPerformanceMap(final int iterations, final TestDataClass inputObject) {
         final long startTime = System.nanoTime();
 
         WireDataFieldDescription ret = null;
@@ -268,7 +268,7 @@ public final class SerialiserHelper {
         return ret;
     }
 
-    public static void testIoSerialiserPerformancePojo(final int iterations, final TestDataClass inputObject, TestDataClass outputObject) {
+    public static void testPerformancePojo(final int iterations, final TestDataClass inputObject, TestDataClass outputObject) {
         binarySerialiser.setPutFieldMetaData(true);
         final long startTime = System.nanoTime();
         for (int i = 0; i < iterations; i++) {
@@ -302,7 +302,7 @@ public final class SerialiserHelper {
                 .log("IO Serializer (POJO) throughput = {}/s for {} per test run (took {} ms)");
     }
 
-    public static void testCustomIoSerialiserPerformance(final int iterations, final TestDataClass inputObject, final TestDataClass outputObject) {
+    public static void testCustomSerialiserPerformance(final int iterations, final TestDataClass inputObject, final TestDataClass outputObject) {
         final long startTime = System.nanoTime();
 
         for (int i = 0; i < iterations; i++) {
@@ -332,7 +332,7 @@ public final class SerialiserHelper {
                 .log("IO Serializer (custom) throughput = {}/s for {} per test run (took {} ms)");
     }
 
-    public static void checkIoBufferSerialiserIdentity(final TestDataClass inputObject, TestDataClass outputObject) {
+    public static void checkSerialiserIdentity(final TestDataClass inputObject, TestDataClass outputObject) {
         outputObject.clear();
         byteBuffer.reset();
 
