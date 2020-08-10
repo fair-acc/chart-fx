@@ -291,6 +291,7 @@ public class FlatBuffersHelper {
         }
 
         vector = map.get("floatNdimArray").asVector();
+        pojo.floatNdimArray = new float[vector.size()];
         for (int i = 0; i < pojo.floatNdimArray.length; i++) {
             pojo.floatNdimArray[i] = (float) vector.get(i).asFloat();
         }
@@ -308,7 +309,7 @@ public class FlatBuffersHelper {
         }
     }
 
-    public static void testFlatBuffersSerialiserPerformance(final int iterations, final TestDataClass inputObject, final TestDataClass outputObject) {
+    public static void testCustomSerialiserPerformance(final int iterations, final TestDataClass inputObject, final TestDataClass outputObject) {
         final long startTime = System.nanoTime();
 
         ByteBuffer retVal = FlatBuffersHelper.serialiseCustom(new FlexBuffersBuilder(new ArrayReadWriteBuf(rawByteBuffer), FlexBuffersBuilder.BUILDER_FLAG_SHARE_KEYS_AND_STRINGS), inputObject);
@@ -337,7 +338,7 @@ public class FlatBuffersHelper {
                 .log("FlatBuffers (custom FlexBuffers) throughput = {}/s for {} per test run (took {} ms)");
     }
 
-    public static void checkFlatBufferSerialiserIdentity(final TestDataClass inputObject, final TestDataClass outputObject) {
+    public static void checkCustomSerialiserIdentity(final TestDataClass inputObject, final TestDataClass outputObject) {
         //final FlexBuffersBuilder floatBuffersBuilder = new FlexBuffersBuilder(new ArrayReadWriteBuf(rawByteBuffer), FlexBuffersBuilder.BUILDER_FLAG_SHARE_KEYS_AND_STRINGS);
         final FlexBuffersBuilder floatBuffersBuilder = new FlexBuffersBuilder(new ArrayReadWriteBuf(rawByteBuffer), FlexBuffersBuilder.BUILDER_FLAG_NONE);
         final ByteBuffer retVal = FlatBuffersHelper.serialiseCustom(floatBuffersBuilder, inputObject);
