@@ -25,7 +25,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import de.gsi.dataset.serializer.DataType;
-import de.gsi.dataset.serializer.FieldDescription;
 import de.gsi.dataset.serializer.IoBuffer;
 import de.gsi.dataset.serializer.spi.helper.MyGenericClass;
 import de.gsi.dataset.utils.AssertUtils;
@@ -711,13 +710,6 @@ class BinarySerialiserTests {
         final WireDataFieldDescription objectRoot = ioSerialiser.parseIoStream(true);
         assertNotNull(objectRoot);
         // objectRoot.printFieldStructure();
-
-        buffer.reset();
-        // check agnostic parsing of buffer
-        for (FieldDescription field : objectRoot.getChildren()) {
-            buffer.position(field.getDataStartPosition());
-            ioSerialiser.swallowRest(field);
-        }
     }
 
     @DisplayName("test getGenericArrayAsBoxedPrimitive(...) helper method")

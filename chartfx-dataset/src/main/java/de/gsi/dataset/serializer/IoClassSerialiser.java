@@ -37,7 +37,6 @@ public class IoClassSerialiser {
     private static final Logger LOGGER = LoggerFactory.getLogger(IoClassSerialiser.class);
     private static final Map<String, Constructor<Object>> CLASS_CONSTRUCTOR_MAP = new ConcurrentHashMap<>();
     protected final IoSerialiser ioSerialiser;
-    private final Map<Integer, HashMap<Integer, ClassFieldDescription>> fieldToClassFieldDescription = new HashMap<>();
     private final Map<Type, List<FieldSerialiser<?>>> classMap = new HashMap<>();
     private final Map<FieldSerialiserKey, FieldSerialiserValue> cachedFieldMatch = new HashMap<>();
     protected Consumer<String> startMarkerFunction;
@@ -140,8 +139,7 @@ public class IoClassSerialiser {
         // class reference is not known by name (ie. was empty) parse directly dependent children
         final List<FieldDescription> fieldRootChildren = fieldRoot.getChildren().get(0).getChildren();
         for (final FieldDescription fieldDescription : fieldRootChildren) {
-            Map<Integer, ClassFieldDescription> rMap = fieldToClassFieldDescription.computeIfAbsent(0, depth -> new HashMap<>());
-            final ClassFieldDescription subFieldDescription = rMap.computeIfAbsent(fieldDescription.getFieldNameHashCode(), fieldNameHashCode -> (ClassFieldDescription) clazz.findChildField(fieldNameHashCode, fieldDescription.getFieldName()));
+            final ClassFieldDescription subFieldDescription = (ClassFieldDescription) clazz.findChildField(fieldDescription.getFieldNameHashCode(), fieldDescription.getFieldName());
 
             if (subFieldDescription != null) {
                 deserialise(obj, fieldDescription, subFieldDescription, 1);
@@ -238,7 +236,9 @@ public class IoClassSerialiser {
         final FieldSerialiser<?> fieldSerialiser = existingSerialiser == null ? cacheFindFieldSerialiser(classField.getType(), classField.getActualTypeArguments()) : existingSerialiser;
 
         if (fieldSerialiser != null && recursionDepth != 0) {
-            classField.setFieldSerialiser(fieldSerialiser);
+            if (existingSerialiser == null) {
+                classField.setFieldSerialiser(fieldSerialiser);
+            }
             // write field header
             final WireDataFieldDescription header = ioSerialiser.putFieldHeader(classField);
             fieldSerialiser.getWriterFunction().accept(ioSerialiser, rootObj, classField);
@@ -294,7 +294,7 @@ public class IoClassSerialiser {
             serialiseObject(obj, classField, 0);
             ioSerialiser.putEndMarker(classField.getFieldName());
         } else {
-            if (classField.getFieldSerialiser() == null) {
+            if (existingSerialiser == null) {
                 classField.setFieldSerialiser(fieldSerialiser);
             }
             ioSerialiser.putHeaderInfo();
@@ -323,21 +323,25 @@ public class IoClassSerialiser {
     }
 
     protected void deserialise(final Object obj, final FieldDescription fieldRoot, final ClassFieldDescription classField, final int recursionDepth) {
-        if (classField.getFieldSerialiser() != null) {
+        final FieldSerialiser existingSerialiser = classField.getFieldSerialiser();
+        final FieldSerialiser<?> fieldSerialiser = existingSerialiser == null ? cacheFindFieldSerialiser(classField.getType(), classField.getActualTypeArguments()) : existingSerialiser;
+        if (fieldSerialiser != null) {
+            if (existingSerialiser == null) {
+                classField.setFieldSerialiser(fieldSerialiser);
+            }
             ioSerialiser.getBuffer().position(fieldRoot.getDataStartPosition());
             classField.getFieldSerialiser().getReaderFunction().accept(ioSerialiser, obj, classField);
             return;
         }
 
-        if (fieldRoot.getFieldNameHashCode() != classField.getFieldNameHashCode() && !"".equals(fieldRoot.getFieldName()) /*|| !fieldRoot.getFieldName().equals(classField.getFieldName())*/) {
+        if (fieldRoot.getFieldNameHashCode() != classField.getFieldNameHashCode() /*|| !fieldRoot.getFieldName().equals(classField.getFieldName())*/) {
             // did not find matching (sub-)field in class
             if (fieldRoot.getChildren().isEmpty()) {
                 return;
             }
             // check for potential inner fields
             for (final FieldDescription fieldDescription : fieldRoot.getChildren()) {
-                Map<Integer, ClassFieldDescription> rMap = fieldToClassFieldDescription.computeIfAbsent(recursionDepth, depth -> new HashMap<>());
-                final ClassFieldDescription subFieldDescription = rMap.computeIfAbsent(fieldDescription.getFieldNameHashCode(), fieldNameHashCode -> (ClassFieldDescription) classField.findChildField(fieldNameHashCode, fieldDescription.getFieldName()));
+                final ClassFieldDescription subFieldDescription = (ClassFieldDescription) classField.findChildField(fieldDescription.getFieldNameHashCode(), fieldDescription.getFieldName());
 
                 if (subFieldDescription != null) {
                     deserialise(obj, fieldDescription, subFieldDescription, recursionDepth + 1);
@@ -353,33 +357,22 @@ public class IoClassSerialiser {
             return;
         }
 
-        final FieldSerialiser<?> existingSerialiser = classField.getFieldSerialiser();
-        final FieldSerialiser<?> fieldSerialiser = existingSerialiser == null ? cacheFindFieldSerialiser(classField.getType(), classField.getActualTypeArguments()) : existingSerialiser;
-
-        if (fieldSerialiser == null) {
-            final Object ref = classField.getField() == null ? obj : classField.getField().get(obj);
-            final Object subRef;
-            if (ref == null) {
-                subRef = classField.allocateMemberClassField(obj);
-            } else {
-                subRef = ref;
-            }
-
-            // no specific deserialiser present check for potential inner fields
-            for (final FieldDescription fieldDescription : fieldRoot.getChildren()) {
-                Map<Integer, ClassFieldDescription> rMap = fieldToClassFieldDescription.computeIfAbsent(recursionDepth, depth -> new HashMap<>());
-                final ClassFieldDescription subFieldDescription = rMap.computeIfAbsent(fieldDescription.getFieldNameHashCode(), fieldNameHashCode -> (ClassFieldDescription) classField.findChildField(fieldNameHashCode, fieldDescription.getFieldName()));
-
-                if (subFieldDescription != null) {
-                    deserialise(subRef, fieldDescription, subFieldDescription, recursionDepth + 1);
-                }
-            }
-            return;
+        final Object ref = classField.getField() == null ? obj : classField.getField().get(obj);
+        final Object subRef;
+        if (ref == null) {
+            subRef = classField.allocateMemberClassField(obj);
+        } else {
+            subRef = ref;
         }
 
-        classField.setFieldSerialiser(fieldSerialiser);
-        ioSerialiser.getBuffer().position(fieldRoot.getDataStartPosition());
-        fieldSerialiser.getReaderFunction().accept(ioSerialiser, obj, classField);
+        // no specific deserialiser present check for potential inner fields
+        for (final FieldDescription fieldDescription : fieldRoot.getChildren()) {
+            final ClassFieldDescription subFieldDescription = (ClassFieldDescription) classField.findChildField(fieldDescription.getFieldNameHashCode(), fieldDescription.getFieldName());
+
+            if (subFieldDescription != null) {
+                deserialise(subRef, fieldDescription, subFieldDescription, recursionDepth + 1);
+            }
+        }
     }
 
     public static int computeHashCode(final Class<?> classPrototype, List<Type> classGenericArguments) {
