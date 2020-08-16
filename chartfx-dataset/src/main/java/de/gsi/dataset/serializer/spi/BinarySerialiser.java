@@ -10,7 +10,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -114,6 +113,7 @@ public class BinarySerialiser implements IoSerialiser {
     public static final byte VERSION_MAJOR = 1;
     public static final byte VERSION_MINOR = 0;
     public static final byte VERSION_MICRO = 0;
+    public static final String PROTOCOL_ERROR_SERIALISER_LOOKUP_MUST_NOT_BE_NULL = "protocol error: serialiserLookup must not be null for DataType == OTHER";
     public static final String PROTOCOL_MISMATCH_N_ELEMENTS_HEADER = "protocol mismatch nElements header = ";
     public static final String NO_SERIALISER_IMP_FOUND = "no serialiser implementation found for classType = ";
     public static final String VS_ARRAY = " vs. array = ";
@@ -246,7 +246,7 @@ public class BinarySerialiser implements IoSerialiser {
             final Type classType = ClassUtils.getClassByName(classTypeName);
             final Type[] secondaryType = secondaryTypeName.isEmpty() ? new Type[0] : new Type[] { ClassUtils.getClassByName(secondaryTypeName) };
             if (serialiserLookup == null) {
-                throw new IllegalArgumentException("protocol error: serialiserLookup must not be null for DataType == OTHER");
+                throw new IllegalArgumentException(PROTOCOL_ERROR_SERIALISER_LOOKUP_MUST_NOT_BE_NULL);
             }
             final FieldSerialiser<E> serialiser = serialiserLookup.apply(classType, secondaryType);
 
@@ -341,7 +341,7 @@ public class BinarySerialiser implements IoSerialiser {
         }
 
         final DataType dataType = getDataType(dataTypeByte);
-        if (dataType == DataType.END_MARKER && parent != null && parent.getParent() != null) {
+        if (dataType == DataType.END_MARKER) {
             parent = (WireDataFieldDescription) parent.getParent();
         }
         lastFieldHeader = new WireDataFieldDescription(parent, fieldNameHashCode, fieldName, dataType, headerStart, dataStartOffset, dataSize);
@@ -415,7 +415,7 @@ public class BinarySerialiser implements IoSerialiser {
             final Type classType = ClassUtils.getClassByName(classTypeName);
             final Type[] secondaryType = secondaryTypeName.isEmpty() ? new Type[0] : new Type[] { ClassUtils.getClassByName(secondaryTypeName) };
             if (serialiserLookup == null) {
-                throw new IllegalArgumentException("protocol error: serialiserLookup must not be null for DataType == OTHER");
+                throw new IllegalArgumentException(PROTOCOL_ERROR_SERIALISER_LOOKUP_MUST_NOT_BE_NULL);
             }
             final FieldSerialiser<E> serialiser = serialiserLookup.apply(classType, secondaryType);
 
@@ -457,7 +457,7 @@ public class BinarySerialiser implements IoSerialiser {
             final Type classType = ClassUtils.getClassByName(classTypeName);
             final Type[] secondaryType = secondaryTypeName.isEmpty() ? new Type[0] : new Type[] { ClassUtils.getClassByName(secondaryTypeName) };
             if (serialiserLookup == null) {
-                throw new IllegalArgumentException("protocol error: serialiserLookup must not be null for DataType == OTHER");
+                throw new IllegalArgumentException(PROTOCOL_ERROR_SERIALISER_LOOKUP_MUST_NOT_BE_NULL);
             }
             final FieldSerialiser serialiser = serialiserLookup.apply(classType, secondaryType);
             if (serialiser == null) {
@@ -479,7 +479,7 @@ public class BinarySerialiser implements IoSerialiser {
             final Type classType = ClassUtils.getClassByName(classTypeName);
             final Type[] secondaryType = secondaryTypeName.isEmpty() ? new Type[0] : new Type[] { ClassUtils.getClassByName(secondaryTypeName) };
             if (serialiserLookup == null) {
-                throw new IllegalArgumentException("protocol error: serialiserLookup must not be null for DataType == OTHER");
+                throw new IllegalArgumentException(PROTOCOL_ERROR_SERIALISER_LOOKUP_MUST_NOT_BE_NULL);
             }
             final FieldSerialiser serialiser = serialiserLookup.apply(classType, secondaryType);
 
@@ -532,7 +532,7 @@ public class BinarySerialiser implements IoSerialiser {
             final Type classType = ClassUtils.getClassByName(classTypeName);
             final Type[] secondaryType = secondaryTypeName.isEmpty() ? new Type[0] : new Type[] { ClassUtils.getClassByName(secondaryTypeName) };
             if (serialiserLookup == null) {
-                throw new IllegalArgumentException("protocol error: serialiserLookup must not be null for DataType == OTHER");
+                throw new IllegalArgumentException(PROTOCOL_ERROR_SERIALISER_LOOKUP_MUST_NOT_BE_NULL);
             }
             final FieldSerialiser<E> serialiser = serialiserLookup.apply(classType, secondaryType);
 
@@ -579,7 +579,7 @@ public class BinarySerialiser implements IoSerialiser {
             final Type classType = ClassUtils.getClassByName(classTypeName);
             final Type[] secondaryType = secondaryTypeName.isEmpty() ? new Type[0] : new Type[] { ClassUtils.getClassByName(secondaryTypeName) };
             if (serialiserLookup == null) {
-                throw new IllegalArgumentException("protocol error: serialiserLookup must not be null for DataType == OTHER");
+                throw new IllegalArgumentException(PROTOCOL_ERROR_SERIALISER_LOOKUP_MUST_NOT_BE_NULL);
             }
             final FieldSerialiser<E> serialiser = serialiserLookup.apply(classType, secondaryType);
 
@@ -632,27 +632,24 @@ public class BinarySerialiser implements IoSerialiser {
         }
         WireDataFieldDescription field;
         while ((field = getFieldHeader()) != null) {
-            final int dataSize = field.getDataSize();
-            final int skipPosition = field.getDataStartPosition() + dataSize;
-
-            if (field.getDataType() == DataType.END_MARKER) {
+            final DataType dataType = field.getDataType();
+            if (dataType == DataType.END_MARKER) {
                 // reached end of (sub-)class - close nested hierarchy
                 break;
             }
 
-            if (field.getDataType() == DataType.START_MARKER) {
+            if (dataType == DataType.START_MARKER) {
                 // detected sub-class start marker
                 parseIoStream(field, recursionDepth + 1);
                 continue;
             }
 
+            final int dataSize = field.getDataSize();
             if (dataSize < 0) {
-                LOGGER.atWarn().addArgument(field.getFieldName()).addArgument(field.getDataType()).addArgument(dataSize).log("WireDataFieldDescription for '{}' type '{}' has bytesToSkip '{} <= 0'");
-                // fall-back option in case of undefined dataSetSize -- usually indicated an internal serialiser error
-                swallowRest(field);
-            } else {
-                buffer.position(skipPosition);
+                throw new IllegalStateException("FieldDescription for '" + field.getFieldName() + "' type '" + dataType + "' has negative dataSize = " + dataSize);
             }
+            final int skipPosition = field.getDataStartPosition() + dataSize;
+            buffer.position(skipPosition);
         }
     }
 
@@ -683,9 +680,6 @@ public class BinarySerialiser implements IoSerialiser {
         } else {
             buffer.putByte(getDataType(DataType.OTHER)); // write value element type
             final Type[] secondaryType = ClassUtils.getSecondaryType(valueType);
-            if (serialiserLookup == null) {
-                throw new IllegalArgumentException("protocol error: serialiserLookup must not be null for DataType == OTHER");
-            }
             final FieldSerialiser<E> serialiser = serialiserLookup.apply(valueType, secondaryType);
             if (serialiser == null) {
                 throw new IllegalArgumentException("could not find serialiser for class type " + valueType);
@@ -1005,10 +999,10 @@ public class BinarySerialiser implements IoSerialiser {
             throw new IllegalStateException("buffer position " + sizeMarkerEnd + " is beyond buffer capacity " + buffer.capacity());
         }
 
-        final int headerStart = fieldHeader.getFieldStart();
-        final int dataStart = headerStart + fieldHeader.getDataStartOffset();
+        final int dataStart = fieldHeader.getDataStartPosition();
         final int dataSize = sizeMarkerEnd - dataStart;
         if (fieldHeader.getDataSize() != dataSize) {
+            final int headerStart = fieldHeader.getFieldStart();
             fieldHeader.setDataSize(dataSize);
             buffer.position(headerStart + 9); // 9 bytes = 1 byte for dataType, 4 bytes for fieldNameHashCode, 4 bytes for dataOffset
             buffer.putInt(dataSize);
@@ -1052,96 +1046,6 @@ public class BinarySerialiser implements IoSerialiser {
             throw new IllegalArgumentException("type not implemented - " + dataType);
         }
         return (E[]) retVal;
-    }
-
-    @SuppressWarnings("PMD.NcssCount")
-    protected void swallowRest(final FieldDescription fieldDescription) {
-        // parse whatever is left
-        // N.B. this is/should be the only place where 'Object' is used since the JVM will perform boxing of primitive types
-        // automatically. Boxing and later un-boxing is a significant high-performance bottleneck for any serialiser
-        Object leftOver;
-        int size = -1;
-        switch (fieldDescription.getDataType()) {
-        case BOOL:
-            leftOver = buffer.getBoolean();
-            break;
-        case BYTE:
-            leftOver = buffer.getByte();
-            break;
-        case SHORT:
-            leftOver = buffer.getShort();
-            break;
-        case INT:
-            leftOver = buffer.getInt();
-            break;
-        case LONG:
-            leftOver = buffer.getLong();
-            break;
-        case FLOAT:
-            leftOver = buffer.getFloat();
-            break;
-        case DOUBLE:
-            leftOver = buffer.getDouble();
-            break;
-        case STRING:
-            leftOver = buffer.getString();
-            break;
-        case BOOL_ARRAY:
-            leftOver = buffer.getBooleanArray();
-            break;
-        case BYTE_ARRAY:
-            leftOver = buffer.getByteArray();
-            break;
-        case SHORT_ARRAY:
-            leftOver = buffer.getShortArray();
-            break;
-        case INT_ARRAY:
-            leftOver = buffer.getIntArray();
-            break;
-        case LONG_ARRAY:
-            leftOver = buffer.getLongArray();
-            break;
-        case FLOAT_ARRAY:
-            leftOver = buffer.getFloatArray();
-            break;
-        case DOUBLE_ARRAY:
-            leftOver = buffer.getDoubleArray();
-            break;
-        case STRING_ARRAY:
-            leftOver = buffer.getStringArray();
-            break;
-        case COLLECTION:
-            leftOver = getCollection(new ArrayList<>(), null);
-            break;
-        case LIST:
-            leftOver = getList(new ArrayList<>(), null);
-            break;
-        case SET:
-            leftOver = getSet(new HashSet<>(), null);
-            break;
-        case QUEUE:
-            leftOver = getQueue(new PriorityQueue<>(), null);
-            break;
-        case MAP:
-            leftOver = getMap(new ConcurrentHashMap<>(), null);
-            break;
-        case ENUM:
-            leftOver = getEnumTypeList();
-            break;
-        case START_MARKER:
-        case END_MARKER:
-            size = 1;
-            leftOver = null;
-            break;
-        default:
-            throw new IllegalArgumentException("encountered unknown format for " + fieldDescription.toString());
-        }
-
-        if (buffer.position() >= buffer.capacity()) {
-            throw new IllegalStateException("read beyond buffer capacity, position = " + buffer.position() + " vs capacity = " + buffer.capacity());
-        }
-
-        LOGGER.atTrace().addArgument(fieldDescription).addArgument(leftOver).addArgument(size).log("swallowed unused element '{}'='{}' size = {}");
     }
 
     private WireDataFieldDescription getRootElement() {
