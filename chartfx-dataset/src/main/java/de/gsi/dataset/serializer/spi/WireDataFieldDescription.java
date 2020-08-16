@@ -27,8 +27,9 @@ public class WireDataFieldDescription implements FieldDescription {
     private String fieldDescription;
     private String fieldDirection;
     private List<String> fieldGroups;
-    private int fieldStart;
-    private int dataStartOffset;
+    private final int fieldStart;
+    private final int fieldDataStart;
+    private final int dataStartOffset;
     private int dataSize;
 
     /**
@@ -53,6 +54,7 @@ public class WireDataFieldDescription implements FieldDescription {
         this.fieldStart = fieldStart;
         this.dataStartOffset = dataStartOffset;
         this.dataSize = dataSize;
+        this.fieldDataStart = fieldStart + dataStartOffset;
 
         if (this.parent != null /*&& !this.parent.getChildren().contains(this)*/) {
             this.parent.getChildren().add(this);
@@ -116,7 +118,7 @@ public class WireDataFieldDescription implements FieldDescription {
 
     @Override
     public int getDataStartPosition() {
-        return fieldStart + dataStartOffset;
+        return fieldDataStart;
     }
 
     @Override
@@ -189,10 +191,6 @@ public class WireDataFieldDescription implements FieldDescription {
         dataSize = size;
     }
 
-    public void setDataStartOffset(final int offset) {
-        dataStartOffset = offset;
-    }
-
     public void setFieldDescription(final String fieldDescription) {
         this.fieldDescription = fieldDescription;
     }
@@ -203,10 +201,6 @@ public class WireDataFieldDescription implements FieldDescription {
 
     public void setFieldGroups(final List<String> fieldGroups) {
         this.fieldGroups = fieldGroups;
-    }
-
-    public void setFieldStart(final int position) {
-        fieldStart = position;
     }
 
     public void setFieldUnit(final String fieldUnit) {
