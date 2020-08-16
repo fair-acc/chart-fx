@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import de.gsi.dataset.serializer.helper.CmwHelper;
 import de.gsi.dataset.serializer.helper.CmwLightHelper;
 import de.gsi.dataset.serializer.helper.FlatBuffersHelper;
+import de.gsi.dataset.serializer.helper.JsonHelper;
 import de.gsi.dataset.serializer.helper.SerialiserHelper;
 import de.gsi.dataset.serializer.helper.TestDataClass;
 
@@ -17,28 +18,37 @@ import de.gsi.dataset.serializer.helper.TestDataClass;
  * Example output - numbers should be compared relatively (nIterations = 100000):
  * (openjdk 11.0.7 2020-04-14, ASCII-only, nSizePrimitiveArrays = 10, nSizeString = 100, nestedClassRecursion = 1)
  * [..] more string-heavy TestDataClass
- * run 1
- *  - CMW Serializer (Map only) throughput = 129.1 MB/s for 6.3 kB per test run (took 4896.0 ms)
- *  - CmwLight Serializer (Map only)  throughput = 342.5 MB/s for 6.4 kB per test run (took 1872.0 ms)
- *  - IO Serializer (Map only)  throughput = 422.6 MB/s for 7.4 kB per test run (took 1746.0 ms)
- *  - FlatBuffers (custom FlexBuffers) throughput = 105.4 MB/s for 6.1 kB per test run (took 5826.0 ms)
- *  - CmwLight Serializer (custom) throughput = 176.9 MB/s for 6.4 kB per test run (took 3625.0 ms)
- *  - IO Serializer (custom) throughput = 216.9 MB/s for 7.3 kB per test run (took 3388.0 ms)
- *  - CMW Serializer (POJO) throughput = 102.9 MB/s for 6.3 kB per test run (took 6143.0 ms)
- *  - CmwLight Serializer (POJO) throughput = 134.7 MB/s for 6.3 kB per test run (took 4677.0 ms)
- *  - IO Serializer (POJO) throughput = 156.3 MB/s for 7.2 kB per test run (took 4632.0 ms)
+ * - run 1
+ * - JSON Serializer (Map only)  throughput = 233.8 MB/s for 5.2 kB per test run (took 2245.0 ms)
+ * - CMW Serializer (Map only) throughput = 127.3 MB/s for 6.3 kB per test run (took 4967.0 ms)
+ * - CmwLight Serializer (Map only)  throughput = 406.0 MB/s for 6.4 kB per test run (took 1573.0 ms)
+ * - IO Serializer (Map only)  throughput = 501.0 MB/s for 7.4 kB per test run (took 1468.0 ms)
+ *
+ * - FlatBuffers (custom FlexBuffers) throughput = 106.4 MB/s for 6.1 kB per test run (took 5775.0 ms)
+ * - CmwLight Serializer (custom) throughput = 289.1 MB/s for 6.4 kB per test run (took 2209.0 ms)
+ * - IO Serializer (custom) throughput = 356.8 MB/s for 7.3 kB per test run (took 2053.0 ms)
+ *
+ * - JSON Serializer (POJO) throughput = 37.0 MB/s for 5.2 kB per test run (took 14191.0 ms)
+ * - CMW Serializer (POJO) throughput = 98.9 MB/s for 6.3 kB per test run (took 6389.0 ms)
+ * - CmwLight Serializer (POJO) throughput = 187.4 MB/s for 6.3 kB per test run (took 3348.0 ms)
+ * - IO Serializer (POJO) throughput = 221.9 MB/s for 7.2 kB per test run (took 3252.0 ms)
  *
  * [..] more primitive-array-heavy TestDataClass
- * (openjdk 11.0.7 2020-04-14, ASCII-only, nSizePrimitiveArrays = 1000, nSizeString = 0, nestedClassRecursion = 0)
- *  - CMW Serializer (Map only) throughput = 876.2 MB/s for 29.2 kB per test run (took 3327.0 ms)
- *  - CmwLight Serializer (Map only)  throughput = 3.9 GB/s for 29.2 kB per test run (took 754.0 ms)
- *  - IO Serializer (Map only)  throughput = 3.8 GB/s for 29.7 kB per test run (took 786.0 ms)
- *  - FlatBuffers (custom FlexBuffers) throughput = 84.2 MB/s for 30.1 kB per test run (took 35765.0 ms)
- *  - CmwLight Serializer (custom) throughput = 2.2 GB/s for 29.2 kB per test run (took 1351.0 ms)
- *  - IO Serializer (custom) throughput = 2.2 GB/s for 29.7 kB per test run (took 1352.0 ms)
- *  - CMW Serializer (POJO) throughput = 738.2 MB/s for 29.2 kB per test run (took 3949.0 ms)
- *  - CmwLight Serializer (POJO) throughput = 1.9 GB/s for 29.1 kB per test run (took 1569.0 ms)
- *  - IO Serializer (POJO) throughput = 1.8 GB/s for 29.7 kB per test run (took 1621.0 ms)
+ * (openjdk 11.0.7 2020-04-14, UTF8, nSizePrimitiveArrays = 1000, nSizeString = 0, nestedClassRecursion = 0)
+ * - run 1
+ * - JSON Serializer (Map only)  throughput = 218.5 MB/s for 34.3 kB per test run (took 15718.0 ms)
+ * - CMW Serializer (Map only) throughput = 913.2 MB/s for 29.2 kB per test run (took 3192.0 ms)
+ * - CmwLight Serializer (Map only)  throughput = 3.9 GB/s for 29.2 kB per test run (took 749.0 ms)
+ * - IO Serializer (Map only)  throughput = 3.9 GB/s for 29.7 kB per test run (took 757.0 ms)
+ *
+ * - FlatBuffers (custom FlexBuffers) throughput = 84.4 MB/s for 30.1 kB per test run (took 35704.0 ms)
+ * - CmwLight Serializer (custom) throughput = 2.2 GB/s for 29.2 kB per test run (took 1319.0 ms)
+ * - IO Serializer (custom) throughput = 2.2 GB/s for 29.7 kB per test run (took 1346.0 ms)
+ *
+ * - JSON Serializer (POJO) throughput = 21.8 MB/s for 34.3 kB per test run (took 157691.0 ms)
+ * - CMW Serializer (POJO) throughput = 750.1 MB/s for 29.2 kB per test run (took 3886.0 ms)
+ * - CmwLight Serializer (POJO) throughput = 1.9 GB/s for 29.1 kB per test run (took 1536.0 ms)
+ * - IO Serializer (POJO) throughput = 1.9 GB/s for 29.7 kB per test run (took 1594.0 ms)
  *
  * @author rstein
  */
@@ -62,6 +72,7 @@ public class SerialiserBenchmark { // NOPMD - nomen est omen
         CmwHelper.checkSerialiserIdentity(inputObject, outputObject);
         CmwLightHelper.checkSerialiserIdentity(inputObject, outputObject);
         CmwLightHelper.checkCustomSerialiserIdentity(inputObject, outputObject);
+        JsonHelper.checkSerialiserIdentity(inputObject, outputObject);
 
         SerialiserHelper.checkSerialiserIdentity(inputObject, outputObject);
         SerialiserHelper.checkCustomSerialiserIdentity(inputObject, outputObject);
@@ -72,6 +83,7 @@ public class SerialiserBenchmark { // NOPMD - nomen est omen
         CmwLightHelper.checkCmwLightVsCmwIdentityBackward(inputObject, outputObject);
 
         // optimisation to be enabled if e.g. to protocols that do not support UTF-8 string encoding
+        // CmwLightHelper.getCmwLightSerialiser().setEnforceSimpleStringEncoding(true);
         // SerialiserHelper.getBinarySerialiser().setEnforceSimpleStringEncoding(true);
         // SerialiserHelper.getBinarySerialiser().setPutFieldMetaData(false);
 
@@ -79,6 +91,7 @@ public class SerialiserBenchmark { // NOPMD - nomen est omen
         for (int i = 0; i < 10; i++) {
             LOGGER.atInfo().addArgument(i).log("run {}");
             // map-only performance
+            JsonHelper.testSerialiserPerformanceMap(nIterations, inputObject);
             CmwHelper.testSerialiserPerformanceMap(nIterations, inputObject, outputObject);
             CmwLightHelper.testSerialiserPerformanceMap(nIterations, inputObject);
             SerialiserHelper.testSerialiserPerformanceMap(nIterations, inputObject);
@@ -89,6 +102,7 @@ public class SerialiserBenchmark { // NOPMD - nomen est omen
             SerialiserHelper.testCustomSerialiserPerformance(nIterations, inputObject, outputObject);
 
             // POJO performance
+            JsonHelper.testPerformancePojo(nIterations, inputObject, outputObject);
             CmwHelper.testPerformancePojo(nIterations, inputObject, outputObject);
             CmwLightHelper.testPerformancePojo(nIterations, inputObject, outputObject);
             SerialiserHelper.testPerformancePojo(nIterations, inputObject, outputObject);
