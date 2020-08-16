@@ -269,6 +269,10 @@ public class CmwLightHelper {
         return ioSerialiser.parseIoStream(true);
     }
 
+    public static CmwLightSerialiser getCmwLightSerialiser() {
+        return cmwLightSerialiser;
+    }
+
     public static void serialiseCustom(IoSerialiser ioSerialiser, final TestDataClass pojo) {
         serialiseCustom(ioSerialiser, pojo, true);
     }
