@@ -18,10 +18,6 @@ import de.gsi.dataset.serializer.spi.FastByteBuffer;
 import de.gsi.dataset.serializer.spi.ProtocolInfo;
 import de.gsi.dataset.serializer.spi.WireDataFieldDescription;
 
-import cern.cmw.data.Data;
-import cern.cmw.data.DataFactory;
-import cern.cmw.data.DataSerializer;
-
 public class CmwLightHelper {
     private static final Logger LOGGER = LoggerFactory.getLogger(SerialiserBenchmark.class); // N.B. SerialiserBenchmark reference on purpose
     private static final IoBuffer byteBuffer = new FastByteBuffer(100000);
@@ -29,7 +25,7 @@ public class CmwLightHelper {
     private static final CmwLightSerialiser cmwLightSerialiser = new CmwLightSerialiser(byteBuffer);
     private static final IoClassSerialiser ioSerialiser = new IoClassSerialiser(cmwLightSerialiser);
     private static int nEntries = -1;
-
+    /*
     public static void checkCmwLightVsCmwIdentityBackward(final TestDataClass inputObject, TestDataClass outputObject) {
         final DataSerializer cmwSerializer = DataFactory.createDataSerializer();
         TestDataClass.setCmwCompatibilityMode(true);
@@ -96,7 +92,7 @@ public class CmwLightHelper {
         TestDataClass.setCmwCompatibilityMode(false);
         cmwLightSerialiser.setBuffer(byteBuffer);
     }
-
+*/
     public static void checkCustomSerialiserIdentity(final TestDataClass inputObject, TestDataClass outputObject) {
         outputObject.clear();
         byteBuffer.reset();

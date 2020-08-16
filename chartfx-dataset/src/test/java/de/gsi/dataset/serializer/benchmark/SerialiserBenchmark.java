@@ -3,7 +3,6 @@ package de.gsi.dataset.serializer.benchmark;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.gsi.dataset.serializer.helper.CmwHelper;
 import de.gsi.dataset.serializer.helper.CmwLightHelper;
 import de.gsi.dataset.serializer.helper.FlatBuffersHelper;
 import de.gsi.dataset.serializer.helper.JsonHelper;
@@ -69,7 +68,7 @@ public class SerialiserBenchmark { // NOPMD - nomen est omen
     }
 
     public static void main(final String... argv) {
-        CmwHelper.checkSerialiserIdentity(inputObject, outputObject);
+        // CmwHelper.checkSerialiserIdentity(inputObject, outputObject);
         CmwLightHelper.checkSerialiserIdentity(inputObject, outputObject);
         CmwLightHelper.checkCustomSerialiserIdentity(inputObject, outputObject);
         JsonHelper.checkSerialiserIdentity(inputObject, outputObject);
@@ -79,8 +78,8 @@ public class SerialiserBenchmark { // NOPMD - nomen est omen
         FlatBuffersHelper.checkCustomSerialiserIdentity(inputObject, outputObject);
 
         // Cmw vs. CmwLight compatibility - requires CMW binary libs
-        CmwLightHelper.checkCmwLightVsCmwIdentityForward(inputObject, outputObject);
-        CmwLightHelper.checkCmwLightVsCmwIdentityBackward(inputObject, outputObject);
+        // CmwLightHelper.checkCmwLightVsCmwIdentityForward(inputObject, outputObject);
+        // CmwLightHelper.checkCmwLightVsCmwIdentityBackward(inputObject, outputObject);
 
         // optimisation to be enabled if e.g. to protocols that do not support UTF-8 string encoding
         // CmwLightHelper.getCmwLightSerialiser().setEnforceSimpleStringEncoding(true);
@@ -92,7 +91,7 @@ public class SerialiserBenchmark { // NOPMD - nomen est omen
             LOGGER.atInfo().addArgument(i).log("run {}");
             // map-only performance
             JsonHelper.testSerialiserPerformanceMap(nIterations, inputObject);
-            CmwHelper.testSerialiserPerformanceMap(nIterations, inputObject, outputObject);
+            //CmwHelper.testSerialiserPerformanceMap(nIterations, inputObject, outputObject);
             CmwLightHelper.testSerialiserPerformanceMap(nIterations, inputObject);
             SerialiserHelper.testSerialiserPerformanceMap(nIterations, inputObject);
 
@@ -103,7 +102,7 @@ public class SerialiserBenchmark { // NOPMD - nomen est omen
 
             // POJO performance
             JsonHelper.testPerformancePojo(nIterations, inputObject, outputObject);
-            CmwHelper.testPerformancePojo(nIterations, inputObject, outputObject);
+            // CmwHelper.testPerformancePojo(nIterations, inputObject, outputObject);
             CmwLightHelper.testPerformancePojo(nIterations, inputObject, outputObject);
             SerialiserHelper.testPerformancePojo(nIterations, inputObject, outputObject);
         }
