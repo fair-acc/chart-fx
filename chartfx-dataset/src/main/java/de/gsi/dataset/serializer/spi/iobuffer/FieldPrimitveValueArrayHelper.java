@@ -22,57 +22,57 @@ public final class FieldPrimitveValueArrayHelper {
      */
     public static void register(final IoClassSerialiser serialiser) {
         serialiser.addClassDefinition(new FieldSerialiser<>( //
-                (io, obj, field) -> field.getField().set(obj, io.getBuffer().getBooleanArray((boolean[]) field.getField().get(obj))), // reader
+                (io, obj, field) -> field.getField().set(obj, io.getBooleanArray((boolean[]) field.getField().get(obj))), // reader
                 (io, obj, field) -> (boolean[]) field.getField().get(obj), // return
-                (io, obj, field) -> io.getBuffer().putBooleanArray((boolean[]) field.getField().get(obj)), // writer
+                (io, obj, field) -> io.put(field, (boolean[]) field.getField().get(obj)), // writer
                 boolean[].class));
 
         serialiser.addClassDefinition(new FieldSerialiser<>( //
-                (io, obj, field) -> field.getField().set(obj, io.getBuffer().getByteArray((byte[]) field.getField().get(obj))), // reader
+                (io, obj, field) -> field.getField().set(obj, io.getByteArray((byte[]) field.getField().get(obj))), // reader
                 (io, obj, field) -> (byte[]) field.getField().get(obj), // return
-                (io, obj, field) -> io.getBuffer().putByteArray((byte[]) field.getField().get(obj)), // writer
+                (io, obj, field) -> io.put(field, (byte[]) field.getField().get(obj)), // writer
                 byte[].class));
 
         serialiser.addClassDefinition(new FieldSerialiser<>( //
-                (io, obj, field) -> field.getField().set(obj, io.getBuffer().getCharArray((char[]) field.getField().get(obj))), // reader
+                (io, obj, field) -> field.getField().set(obj, io.getCharArray((char[]) field.getField().get(obj))), // reader
                 (io, obj, field) -> (char[]) field.getField().get(obj), // return
-                (io, obj, field) -> io.getBuffer().putCharArray((char[]) field.getField().get(obj)), // writer
+                (io, obj, field) -> io.put(field, (char[]) field.getField().get(obj)), // writer
                 char[].class));
 
         serialiser.addClassDefinition(new FieldSerialiser<>( //
-                (io, obj, field) -> field.getField().set(obj, io.getBuffer().getShortArray((short[]) field.getField().get(obj))), // reader
+                (io, obj, field) -> field.getField().set(obj, io.getShortArray((short[]) field.getField().get(obj))), // reader
                 (io, obj, field) -> (short[]) field.getField().get(obj), // return
-                (io, obj, field) -> io.getBuffer().putShortArray((short[]) field.getField().get(obj)), // writer
+                (io, obj, field) -> io.put(field, (short[]) field.getField().get(obj)), // writer
                 short[].class));
 
         serialiser.addClassDefinition(new FieldSerialiser<>( //
-                (io, obj, field) -> field.getField().set(obj, io.getBuffer().getIntArray((int[]) field.getField().get(obj))), // reader
+                (io, obj, field) -> field.getField().set(obj, io.getIntArray((int[]) field.getField().get(obj))), // reader
                 (io, obj, field) -> (int[]) field.getField().get(obj), // return
-                (io, obj, field) -> io.getBuffer().putIntArray((int[]) field.getField().get(obj)), // writer
+                (io, obj, field) -> io.put(field, (int[]) field.getField().get(obj)), // writer
                 int[].class));
 
         serialiser.addClassDefinition(new FieldSerialiser<>( //
-                (io, obj, field) -> field.getField().set(obj, io.getBuffer().getLongArray((long[]) field.getField().get(obj))), // reader
+                (io, obj, field) -> field.getField().set(obj, io.getLongArray((long[]) field.getField().get(obj))), // reader
                 (io, obj, field) -> (long[]) field.getField().get(obj), // return
-                (io, obj, field) -> io.getBuffer().putLongArray((long[]) field.getField().get(obj)), // writer
+                (io, obj, field) -> io.put(field, (long[]) field.getField().get(obj)), // writer
                 long[].class));
 
         serialiser.addClassDefinition(new FieldSerialiser<>( //
-                (io, obj, field) -> field.getField().set(obj, io.getBuffer().getFloatArray((float[]) field.getField().get(obj))), // reader
+                (io, obj, field) -> field.getField().set(obj, io.getFloatArray((float[]) field.getField().get(obj))), // reader
                 (io, obj, field) -> (float[]) field.getField().get(obj), // return
-                (io, obj, field) -> io.getBuffer().putFloatArray((float[]) field.getField().get(obj)), // writer
+                (io, obj, field) -> io.put(field, (float[]) field.getField().get(obj)), // writer
                 float[].class));
 
         serialiser.addClassDefinition(new FieldSerialiser<>( //
-                (io, obj, field) -> field.getField().set(obj, io.getBuffer().getDoubleArray((double[]) field.getField().get(obj))), // reader
+                (io, obj, field) -> field.getField().set(obj, io.getDoubleArray((double[]) field.getField().get(obj))), // reader
                 (io, obj, field) -> (double[]) field.getField().get(obj), // return
-                (io, obj, field) -> io.getBuffer().putDoubleArray((double[]) field.getField().get(obj)), // writer
+                (io, obj, field) -> io.put(field, (double[]) field.getField().get(obj)), // writer
                 double[].class));
 
         serialiser.addClassDefinition(new FieldSerialiser<>( //
-                (io, obj, field) -> field.getField().set(obj, io.getBuffer().getStringArray((String[]) field.getField().get(obj))), // reader
+                (io, obj, field) -> field.getField().set(obj, io.getStringArray((String[]) field.getField().get(obj))), // reader
                 (io, obj, field) -> (String[]) field.getField().get(obj), // return
-                (io, obj, field) -> io.getBuffer().putStringArray((String[]) field.getField().get(obj)), // writer
+                (io, obj, field) -> io.put(field, (String[]) field.getField().get(obj)), // writer
                 String[].class));
     }
 }

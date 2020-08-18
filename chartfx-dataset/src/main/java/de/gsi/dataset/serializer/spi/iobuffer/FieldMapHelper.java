@@ -26,7 +26,7 @@ public class FieldMapHelper {
         serialiser.addClassDefinition(new FieldSerialiser<>( //
                 (io, obj, field) -> field.getField().set(obj, returnMapFunction.apply(io, obj, field)), // reader
                 returnMapFunction, // return
-                (io, obj, field) -> io.put((Map<?, ?>) field.getField().get(obj), field.getActualTypeArguments().get(0), field.getActualTypeArguments().get(1), serialiser.getSerialiserLookupFunction()), // writer
+                (io, obj, field) -> io.put(field, (Map<?, ?>) field.getField().get(obj), field.getActualTypeArguments().get(0), field.getActualTypeArguments().get(1), serialiser.getSerialiserLookupFunction()), // writer
                 Map.class));
     }
 }

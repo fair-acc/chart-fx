@@ -35,91 +35,59 @@ public final class SerialiserHelper {
             ioSerialiser.putHeaderInfo();
         }
 
-        ioSerialiser.putFieldHeader("bool1", DataType.BOOL);
-        ioSerialiser.getBuffer().putBoolean(pojo.bool1);
-        ioSerialiser.putFieldHeader("bool2", DataType.BOOL);
-        ioSerialiser.getBuffer().putBoolean(pojo.bool2);
-        ioSerialiser.putFieldHeader("byte1", DataType.BYTE);
-        ioSerialiser.getBuffer().putByte(pojo.byte1);
-        ioSerialiser.putFieldHeader("byte2", DataType.BYTE);
-        ioSerialiser.getBuffer().putByte(pojo.byte2);
-        ioSerialiser.putFieldHeader("char1", DataType.CHAR);
-        ioSerialiser.getBuffer().putChar(pojo.char1);
-        ioSerialiser.putFieldHeader("char2", DataType.CHAR);
-        ioSerialiser.getBuffer().putChar(pojo.char2);
-        ioSerialiser.putFieldHeader("short1", DataType.SHORT);
-        ioSerialiser.getBuffer().putShort(pojo.short1);
-        ioSerialiser.putFieldHeader("short2", DataType.SHORT);
-        ioSerialiser.getBuffer().putShort(pojo.short2);
-        ioSerialiser.putFieldHeader("int1", DataType.INT);
-        ioSerialiser.getBuffer().putInt(pojo.int1);
-        ioSerialiser.putFieldHeader("int2", DataType.INT);
-        ioSerialiser.getBuffer().putInt(pojo.int2);
-        ioSerialiser.putFieldHeader("long1", DataType.LONG);
-        ioSerialiser.getBuffer().putLong(pojo.long1);
-        ioSerialiser.putFieldHeader("long2", DataType.LONG);
-        ioSerialiser.getBuffer().putLong(pojo.long2);
-        ioSerialiser.putFieldHeader("float1", DataType.FLOAT);
-        ioSerialiser.getBuffer().putFloat(pojo.float1);
-        ioSerialiser.putFieldHeader("float2", DataType.FLOAT);
-        ioSerialiser.getBuffer().putFloat(pojo.float2);
-        ioSerialiser.putFieldHeader("double1", DataType.DOUBLE);
-        ioSerialiser.getBuffer().putDouble(pojo.double1);
-        ioSerialiser.putFieldHeader("double2", DataType.DOUBLE);
-        ioSerialiser.getBuffer().putDouble(pojo.double2);
-        ioSerialiser.putFieldHeader("string1", DataType.STRING);
-        ioSerialiser.getBuffer().putString(pojo.string1);
-        ioSerialiser.putFieldHeader("string2", DataType.STRING);
-        ioSerialiser.getBuffer().putString(pojo.string2);
+        ioSerialiser.put("bool1", pojo.bool1);
+        ioSerialiser.put("bool2", pojo.bool2);
+        ioSerialiser.put("byte1", pojo.byte1);
+        ioSerialiser.put("byte2", pojo.byte2);
+        ioSerialiser.put("char1", pojo.char1);
+        ioSerialiser.put("char2", pojo.char2);
+        ioSerialiser.put("short1", pojo.short1);
+        ioSerialiser.put("short2", pojo.short2);
+        ioSerialiser.put("int1", pojo.int1);
+        ioSerialiser.put("int2", pojo.int2);
+        ioSerialiser.put("long1", pojo.long1);
+        ioSerialiser.put("long2", pojo.long2);
+        ioSerialiser.put("float1", pojo.float1);
+        ioSerialiser.put("float2", pojo.float2);
+        ioSerialiser.put("double1", pojo.double1);
+        ioSerialiser.put("double2", pojo.double2);
+        ioSerialiser.put("string1", pojo.string1);
+        ioSerialiser.put("string2", pojo.string2);
 
         // 1D-arrays
-        ioSerialiser.putFieldHeader("boolArray", DataType.BOOL_ARRAY);
-        ioSerialiser.getBuffer().putBooleanArray(pojo.boolArray, 0, pojo.boolArray.length);
-        ioSerialiser.putFieldHeader("byteArray", DataType.BYTE_ARRAY);
-        ioSerialiser.getBuffer().putByteArray(pojo.byteArray, 0, pojo.byteArray.length);
-        //ioSerialiser.putFieldHeader("charArray", DataType.CHAR_ARRAY);
-        //ioSerialiser.getBuffer().putCharArray(pojo.charArray, 0, pojo.charArray.lenght);
-        ioSerialiser.putFieldHeader("shortArray", DataType.SHORT_ARRAY);
-        ioSerialiser.getBuffer().putShortArray(pojo.shortArray, 0, pojo.shortArray.length);
-        ioSerialiser.putFieldHeader("intArray", DataType.INT_ARRAY);
-        ioSerialiser.getBuffer().putIntArray(pojo.intArray, 0, pojo.intArray.length);
-        ioSerialiser.putFieldHeader("longArray", DataType.LONG_ARRAY);
-        ioSerialiser.getBuffer().putLongArray(pojo.longArray, 0, pojo.longArray.length);
-        ioSerialiser.putFieldHeader("floatArray", DataType.FLOAT_ARRAY);
-        ioSerialiser.getBuffer().putFloatArray(pojo.floatArray, 0, pojo.floatArray.length);
-        ioSerialiser.putFieldHeader("doubleArray", DataType.DOUBLE_ARRAY);
-        ioSerialiser.getBuffer().putDoubleArray(pojo.doubleArray, 0, pojo.doubleArray.length);
-        ioSerialiser.putFieldHeader("stringArray", DataType.STRING_ARRAY);
-        ioSerialiser.getBuffer().putStringArray(pojo.stringArray, 0, pojo.stringArray.length);
+        ioSerialiser.put("boolArray", pojo.boolArray, 0, pojo.boolArray.length);
+        ioSerialiser.put("byteArray", pojo.byteArray, 0, pojo.byteArray.length);
+        //ioSerialiser.put("charArray", pojo.charArray, 0, pojo.charArray.lenght);
+        ioSerialiser.put("shortArray", pojo.shortArray, 0, pojo.shortArray.length);
+        ioSerialiser.put("intArray", pojo.intArray, 0, pojo.intArray.length);
+        ioSerialiser.put("longArray", pojo.longArray, 0, pojo.longArray.length);
+        ioSerialiser.put("floatArray", pojo.floatArray, 0, pojo.floatArray.length);
+        ioSerialiser.put("doubleArray", pojo.doubleArray, 0, pojo.doubleArray.length);
+        ioSerialiser.put("stringArray", pojo.stringArray, 0, pojo.stringArray.length);
 
         // multi-dim case
-        ioSerialiser.putFieldHeader("nDimensions", DataType.INT_ARRAY);
-        ioSerialiser.getBuffer().putIntArray(pojo.nDimensions, 0, pojo.nDimensions.length);
-        ioSerialiser.putFieldHeader("boolNdimArray", DataType.BOOL_ARRAY);
-        ioSerialiser.getBuffer().putBooleanArray(pojo.boolNdimArray, 0, pojo.nDimensions);
-        ioSerialiser.putFieldHeader("byteNdimArray", DataType.BYTE_ARRAY);
-        ioSerialiser.getBuffer().putByteArray(pojo.byteNdimArray, 0, pojo.nDimensions);
-        //ioSerialiser.putFieldHeader("charNdimArray", DataType.CHAR_ARRAY);
-        //ioSerialiser.put(pojo.charNdimArray, pojo.nDimensions);
-        ioSerialiser.putFieldHeader("shortNdimArray", DataType.SHORT_ARRAY);
-        ioSerialiser.getBuffer().putShortArray(pojo.shortNdimArray, 0, pojo.nDimensions);
-        ioSerialiser.putFieldHeader("intNdimArray", DataType.INT_ARRAY);
-        ioSerialiser.getBuffer().putIntArray(pojo.intNdimArray, 0, pojo.nDimensions);
-        ioSerialiser.putFieldHeader("longNdimArray", DataType.LONG_ARRAY);
-        ioSerialiser.getBuffer().putLongArray(pojo.longNdimArray, 0, pojo.nDimensions);
-        ioSerialiser.putFieldHeader("floatNdimArray", DataType.FLOAT_ARRAY);
-        ioSerialiser.getBuffer().putFloatArray(pojo.floatNdimArray, 0, pojo.nDimensions);
-        ioSerialiser.putFieldHeader("doubleNdimArray", DataType.DOUBLE_ARRAY);
-        ioSerialiser.getBuffer().putDoubleArray(pojo.doubleNdimArray, 0, pojo.nDimensions);
+        ioSerialiser.put("nDimensions", pojo.nDimensions, 0, pojo.nDimensions.length);
+        ioSerialiser.put("boolNdimArray", pojo.boolNdimArray, 0, pojo.nDimensions);
+        ioSerialiser.put("byteNdimArray", pojo.byteNdimArray, 0, pojo.nDimensions);
+        //ioSerialiser.put("charNdimArray", pojo.nDimensions);
+        ioSerialiser.put("shortNdimArray", pojo.shortNdimArray, 0, pojo.nDimensions);
+        ioSerialiser.put("intNdimArray", pojo.intNdimArray, 0, pojo.nDimensions);
+        ioSerialiser.put("longNdimArray", pojo.longNdimArray, 0, pojo.nDimensions);
+        ioSerialiser.put("floatNdimArray", pojo.floatNdimArray, 0, pojo.nDimensions);
+        ioSerialiser.put("doubleNdimArray", pojo.doubleNdimArray, 0, pojo.nDimensions);
 
         if (pojo.nestedData != null) {
-            ioSerialiser.putStartMarker("nestedData");
+            final String dataStartMarkerName = "nestedData";
+            final WireDataFieldDescription nestedDataMarker = new WireDataFieldDescription(null, dataStartMarkerName.hashCode(), dataStartMarkerName, DataType.START_MARKER, -1, -1, -1);
+            ioSerialiser.putStartMarker(nestedDataMarker);
             serialiseCustom(ioSerialiser, pojo.nestedData, false);
-            ioSerialiser.putEndMarker("nestedData");
+            ioSerialiser.putEndMarker(nestedDataMarker);
         }
 
         if (header) {
-            ioSerialiser.putEndMarker("OBJ_ROOT_END");
+            final String dataEndMarkerName = "OBJ_ROOT_END";
+            final WireDataFieldDescription dataEndMarker = new WireDataFieldDescription(null, dataEndMarkerName.hashCode(), dataEndMarkerName, DataType.START_MARKER, -1, -1, -1);
+            ioSerialiser.putEndMarker(dataEndMarker);
         }
     }
 
@@ -133,87 +101,87 @@ public final class SerialiserHelper {
         }
 
         getFieldHeader(ioSerialiser);
-        pojo.bool1 = ioSerialiser.getBuffer().getBoolean();
+        pojo.bool1 = ioSerialiser.getBoolean();
         getFieldHeader(ioSerialiser);
-        pojo.bool2 = ioSerialiser.getBuffer().getBoolean();
+        pojo.bool2 = ioSerialiser.getBoolean();
 
         getFieldHeader(ioSerialiser);
-        pojo.byte1 = ioSerialiser.getBuffer().getByte();
+        pojo.byte1 = ioSerialiser.getByte();
         getFieldHeader(ioSerialiser);
-        pojo.byte2 = ioSerialiser.getBuffer().getByte();
+        pojo.byte2 = ioSerialiser.getByte();
 
         getFieldHeader(ioSerialiser);
-        pojo.char1 = ioSerialiser.getBuffer().getChar();
+        pojo.char1 = ioSerialiser.getChar();
         getFieldHeader(ioSerialiser);
-        pojo.char2 = ioSerialiser.getBuffer().getChar();
+        pojo.char2 = ioSerialiser.getChar();
 
         getFieldHeader(ioSerialiser);
-        pojo.short1 = ioSerialiser.getBuffer().getShort();
+        pojo.short1 = ioSerialiser.getShort();
         getFieldHeader(ioSerialiser);
-        pojo.short2 = ioSerialiser.getBuffer().getShort();
+        pojo.short2 = ioSerialiser.getShort();
 
         getFieldHeader(ioSerialiser);
-        pojo.int1 = ioSerialiser.getBuffer().getInt();
+        pojo.int1 = ioSerialiser.getInt();
         getFieldHeader(ioSerialiser);
-        pojo.int2 = ioSerialiser.getBuffer().getInt();
+        pojo.int2 = ioSerialiser.getInt();
 
         getFieldHeader(ioSerialiser);
-        pojo.long1 = ioSerialiser.getBuffer().getLong();
+        pojo.long1 = ioSerialiser.getLong();
         getFieldHeader(ioSerialiser);
-        pojo.long2 = ioSerialiser.getBuffer().getLong();
+        pojo.long2 = ioSerialiser.getLong();
 
         getFieldHeader(ioSerialiser);
-        pojo.float1 = ioSerialiser.getBuffer().getFloat();
+        pojo.float1 = ioSerialiser.getFloat();
         getFieldHeader(ioSerialiser);
-        pojo.float2 = ioSerialiser.getBuffer().getFloat();
+        pojo.float2 = ioSerialiser.getFloat();
 
         getFieldHeader(ioSerialiser);
-        pojo.double1 = ioSerialiser.getBuffer().getDouble();
+        pojo.double1 = ioSerialiser.getDouble();
         getFieldHeader(ioSerialiser);
-        pojo.double2 = ioSerialiser.getBuffer().getDouble();
+        pojo.double2 = ioSerialiser.getDouble();
 
         getFieldHeader(ioSerialiser);
-        pojo.string1 = ioSerialiser.getBuffer().getString();
+        pojo.string1 = ioSerialiser.getString();
         getFieldHeader(ioSerialiser);
-        pojo.string2 = ioSerialiser.getBuffer().getString();
+        pojo.string2 = ioSerialiser.getString();
 
         // 1-dim arrays
         getFieldHeader(ioSerialiser);
-        pojo.boolArray = ioSerialiser.getBuffer().getBooleanArray();
+        pojo.boolArray = ioSerialiser.getBooleanArray();
         getFieldHeader(ioSerialiser);
-        pojo.byteArray = ioSerialiser.getBuffer().getByteArray();
+        pojo.byteArray = ioSerialiser.getByteArray();
         //getFieldHeader(ioSerialiser);
-        //pojo.charArray = ioSerialiser.getBuffer().getCharArray(ioSerialiser);
+        //pojo.charArray = ioSerialiser.getCharArray(ioSerialiser);
         getFieldHeader(ioSerialiser);
-        pojo.shortArray = ioSerialiser.getBuffer().getShortArray();
+        pojo.shortArray = ioSerialiser.getShortArray();
         getFieldHeader(ioSerialiser);
-        pojo.intArray = ioSerialiser.getBuffer().getIntArray();
+        pojo.intArray = ioSerialiser.getIntArray();
         getFieldHeader(ioSerialiser);
-        pojo.longArray = ioSerialiser.getBuffer().getLongArray();
+        pojo.longArray = ioSerialiser.getLongArray();
         getFieldHeader(ioSerialiser);
-        pojo.floatArray = ioSerialiser.getBuffer().getFloatArray();
+        pojo.floatArray = ioSerialiser.getFloatArray();
         getFieldHeader(ioSerialiser);
-        pojo.doubleArray = ioSerialiser.getBuffer().getDoubleArray();
+        pojo.doubleArray = ioSerialiser.getDoubleArray();
         getFieldHeader(ioSerialiser);
-        pojo.stringArray = ioSerialiser.getBuffer().getStringArray();
+        pojo.stringArray = ioSerialiser.getStringArray();
 
         // multidim case
         getFieldHeader(ioSerialiser);
-        pojo.nDimensions = ioSerialiser.getBuffer().getIntArray();
+        pojo.nDimensions = ioSerialiser.getIntArray();
         getFieldHeader(ioSerialiser);
-        pojo.boolNdimArray = ioSerialiser.getBuffer().getBooleanArray();
+        pojo.boolNdimArray = ioSerialiser.getBooleanArray();
         getFieldHeader(ioSerialiser);
-        pojo.byteNdimArray = ioSerialiser.getBuffer().getByteArray();
+        pojo.byteNdimArray = ioSerialiser.getByteArray();
         getFieldHeader(ioSerialiser);
-        pojo.shortNdimArray = ioSerialiser.getBuffer().getShortArray();
+        pojo.shortNdimArray = ioSerialiser.getShortArray();
         getFieldHeader(ioSerialiser);
-        pojo.intNdimArray = ioSerialiser.getBuffer().getIntArray();
+        pojo.intNdimArray = ioSerialiser.getIntArray();
         getFieldHeader(ioSerialiser);
-        pojo.longNdimArray = ioSerialiser.getBuffer().getLongArray();
+        pojo.longNdimArray = ioSerialiser.getLongArray();
         getFieldHeader(ioSerialiser);
-        pojo.floatNdimArray = ioSerialiser.getBuffer().getFloatArray();
+        pojo.floatNdimArray = ioSerialiser.getFloatArray();
         getFieldHeader(ioSerialiser);
-        pojo.doubleNdimArray = ioSerialiser.getBuffer().getDoubleArray();
+        pojo.doubleNdimArray = ioSerialiser.getDoubleArray();
 
         final WireDataFieldDescription field = getFieldHeader(ioSerialiser);
         if (field.getDataType().equals(de.gsi.dataset.serializer.DataType.START_MARKER)) {

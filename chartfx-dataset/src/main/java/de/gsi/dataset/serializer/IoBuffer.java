@@ -8,7 +8,7 @@ package de.gsi.dataset.serializer;
  */
 @SuppressWarnings("PMD.TooManyMethods") // NOPMD - these are short-hand convenience methods
 public interface IoBuffer extends IoBufferHeader {
-    int[] getArraySizeDescriptor();
+    boolean getBoolean(int position);
 
     boolean getBoolean(); // NOPMD by rstein
 
@@ -22,6 +22,8 @@ public interface IoBuffer extends IoBufferHeader {
 
     boolean[] getBooleanArray(final boolean[] dst, final int offset, final int length);
 
+    byte getByte(int position);
+
     byte getByte();
 
     default byte[] getByteArray() {
@@ -34,7 +36,7 @@ public interface IoBuffer extends IoBufferHeader {
 
     byte[] getByteArray(final byte[] dst, final int offset, final int length);
 
-    Runnable getCallBackFunction();
+    char getChar(int position);
 
     char getChar();
 
@@ -48,6 +50,8 @@ public interface IoBuffer extends IoBufferHeader {
 
     char[] getCharArray(final char[] dst, final int offset, final int length);
 
+    double getDouble(int position);
+
     double getDouble();
 
     default double[] getDoubleArray() {
@@ -59,6 +63,8 @@ public interface IoBuffer extends IoBufferHeader {
     }
 
     double[] getDoubleArray(final double[] dst, final int offset, final int length);
+
+    float getFloat(int position);
 
     float getFloat();
 
@@ -72,6 +78,8 @@ public interface IoBuffer extends IoBufferHeader {
 
     float[] getFloatArray(final float[] dst, final int offset, final int length);
 
+    int getInt(int position);
+
     int getInt();
 
     default int[] getIntArray() {
@@ -83,6 +91,8 @@ public interface IoBuffer extends IoBufferHeader {
     }
 
     int[] getIntArray(final int[] dst, final int offset, final int length);
+
+    long getLong(int position);
 
     long getLong();
 
@@ -96,6 +106,8 @@ public interface IoBuffer extends IoBufferHeader {
 
     long[] getLongArray(final long[] dst, final int offset, final int length);
 
+    short getShort(int position);
+
     short getShort(); // NOPMD by rstein
 
     default short[] getShortArray() { // NOPMD by rstein
@@ -107,6 +119,8 @@ public interface IoBuffer extends IoBufferHeader {
     }
 
     short[] getShortArray(final short[] dst, final int offset, final int length); // NOPMD by rstein
+
+    String getString(int position);
 
     String getString();
 
@@ -127,110 +141,64 @@ public interface IoBuffer extends IoBufferHeader {
      */
     boolean isEnforceSimpleStringEncoding();
 
-    int putArraySizeDescriptor(int n);
-
-    int putArraySizeDescriptor(int[] dims);
-
-    void putBoolean(boolean value);
-
-    default void putBooleanArray(final boolean[] src) {
-        putBooleanArray(src, 0, -1);
-    }
-
-    void putBooleanArray(final boolean[] src, final int offset, final int n);
-
-    void putBooleanArray(final boolean[] src, final int offset, final int[] dims);
-
-    void putByte(final byte b);
-
-    default void putByteArray(final byte[] src) {
-        putByteArray(src, 0, -1);
-    }
-
-    void putByteArray(final byte[] src, final int offset, final int n);
-
-    void putByteArray(final byte[] src, final int offset, final int[] dims);
-
-    void putChar(char value);
-
-    default void putCharArray(final char[] src) {
-        putCharArray(src, 0, -1);
-    }
-
-    void putCharArray(final char[] src, final int offset, final int n);
-
-    void putCharArray(final char[] src, final int offset, final int[] dims);
-
-    void putDouble(double value);
-
-    default void putDoubleArray(final double[] src) {
-        putDoubleArray(src, 0, -1);
-    }
-
-    void putDoubleArray(final double[] src, final int offset, final int n);
-
-    void putDoubleArray(final double[] src, final int offset, final int[] dims);
-
-    void putEndMarker(String markerName);
-
-    void putFloat(float value);
-
-    default void putFloatArray(final float[] src) {
-        putFloatArray(src, 0, -1);
-    }
-
-    void putFloatArray(final float[] src, final int offset, final int n);
-
-    void putFloatArray(final float[] src, final int offset, final int[] dims);
-
-    void putInt(int value);
-
-    default void putIntArray(final int[] src) {
-        putIntArray(src, 0, -1);
-    }
-
-    void putIntArray(final int[] src, final int offset, final int n);
-
-    void putIntArray(final int[] src, final int offset, final int[] dims);
-
-    void putLong(long value);
-
-    default void putLongArray(final long[] src) {
-        putLongArray(src, 0, -1);
-    }
-
-    void putLongArray(final long[] src, final int offset, final int n);
-
-    void putLongArray(final long[] src, final int offset, final int[] dims);
-
-    void putShort(short value); // NOPMD
-
-    default void putShortArray(final short[] src) { // NOPMD
-        putShortArray(src, 0, -1);
-    }
-
-    void putShortArray(final short[] src, final int offset, final int n); // NOPMD
-
-    void putShortArray(final short[] src, final int offset, final int[] dims); // NOPMD
-
-    void putStartMarker(String markerName);
-
-    void putString(String string);
-
-    default void putStringArray(final String[] src) {
-        putStringArray(src, 0, -1);
-    }
-
-    void putStringArray(final String[] src, final int offset, final int n); // NOPMD
-
-    void putStringArray(final String[] src, final int offset, final int[] dims); // NOPMD
-
-    void putStringISO8859(String string);
-
-    void setCallBackFunction(final Runnable runnable);
-
     /**
      * @param state {@code true} the ISO-8859-1 character encoding is being enforced for data fields (better performance), otherwise UTF-8 is being used (more generic encoding)
      */
     void setEnforceSimpleStringEncoding(boolean state);
+
+    void putBoolean(int position, boolean value);
+
+    void putBoolean(boolean value);
+
+    void putBooleanArray(final boolean[] src, final int offset, final int n);
+
+    void putByte(int position, byte value);
+
+    void putByte(final byte b);
+
+    void putByteArray(final byte[] src, final int offset, final int n);
+
+    void putChar(int position, char value);
+
+    void putChar(char value);
+
+    void putCharArray(final char[] src, final int offset, final int n);
+
+    void putDouble(int position, double value);
+
+    void putDouble(double value);
+
+    void putDoubleArray(final double[] src, final int offset, final int n);
+
+    void putFloat(int position, float value);
+
+    void putFloat(float value);
+
+    void putFloatArray(final float[] src, final int offset, final int n);
+
+    void putInt(int position, int value);
+
+    void putInt(int value);
+
+    void putIntArray(final int[] src, final int offset, final int n);
+
+    void putLong(int position, long value);
+
+    void putLong(long value);
+
+    void putLongArray(final long[] src, final int offset, final int n);
+
+    void putShort(int position, short value);
+
+    void putShort(short value); // NOPMD
+
+    void putShortArray(final short[] src, final int offset, final int n); // NOPMD
+
+    void putString(int position, String value);
+
+    void putString(String string);
+
+    void putStringArray(final String[] src, final int offset, final int n); // NOPMD
+
+    void putStringISO8859(String string);
 }

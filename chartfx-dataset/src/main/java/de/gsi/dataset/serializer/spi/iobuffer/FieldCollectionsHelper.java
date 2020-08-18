@@ -32,12 +32,12 @@ public class FieldCollectionsHelper {
 
         final FieldSerialiser.TriConsumer collectionWriter = (io, obj, field) -> {
             if (field != null && !field.getActualTypeArguments().isEmpty() && ClassUtils.isPrimitiveWrapperOrString(ClassUtils.getRawType(field.getActualTypeArguments().get(0)))) {
-                io.put((Collection<?>) field.getField().get(obj), field.getActualTypeArguments().get(0), null);
+                io.put(field, (Collection<?>) field.getField().get(obj), field.getActualTypeArguments().get(0), null);
                 return;
             }
             if (field != null) {
                 // Collection<custom class> serialiser
-                io.put((Collection<?>) field.getField().get(obj), field.getActualTypeArguments().get(0), serialiser.getSerialiserLookupFunction());
+                io.put(field, (Collection<?>) field.getField().get(obj), field.getActualTypeArguments().get(0), serialiser.getSerialiserLookupFunction());
                 return;
             }
             throw new IllegalArgumentException("serialiser for obj = '" + obj + "' and type = '" + (obj == null ? "null" : obj.getClass()) + "'  not yet implemented, field = " + field);
