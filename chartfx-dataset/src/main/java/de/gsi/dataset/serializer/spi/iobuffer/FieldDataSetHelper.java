@@ -19,11 +19,11 @@ public final class FieldDataSetHelper {
     public static void register(final IoClassSerialiser serialiser) {
         // DoubleArrayList serialiser mapper to IoBuffer
         serialiser.addClassDefinition(new FieldSerialiser<>( //
-                (io, obj, field) -> field.getField().set(obj, DoubleArrayList.wrap(io.getBuffer().getDoubleArray())), // reader
-                (io, obj, field) -> DoubleArrayList.wrap(io.getBuffer().getDoubleArray()), // return
+                (io, obj, field) -> field.getField().set(obj, DoubleArrayList.wrap(io.getDoubleArray())), // reader
+                (io, obj, field) -> DoubleArrayList.wrap(io.getDoubleArray()), // return
                 (io, obj, field) -> {
                     final DoubleArrayList retVal = (DoubleArrayList) field.getField().get(obj);
-                    io.getBuffer().putDoubleArray(retVal.elements(), 0, retVal.size());
+                    io.put(field, retVal.elements(), 0, retVal.size());
                 }, // writer
                 DoubleArrayList.class));
 

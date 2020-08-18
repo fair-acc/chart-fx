@@ -26,6 +26,7 @@ import de.gsi.dataset.DataSet;
 import de.gsi.dataset.serializer.spi.BinarySerialiser;
 import de.gsi.dataset.serializer.spi.ByteBuffer;
 import de.gsi.dataset.serializer.spi.FastByteBuffer;
+import de.gsi.dataset.serializer.spi.WireDataFieldDescription;
 import de.gsi.dataset.spi.DefaultErrorDataSet;
 
 /**
@@ -56,14 +57,12 @@ class IoClassSerialiserTests {
                 throw new IllegalArgumentException("object " + obj + " is not of type CustomClass");
             }
             CustomClass customClass = (CustomClass) localObj;
-
             // place custom elements/composites etc. here - N.B. ordering is of paramount importance since
             // these raw fields are not preceded by field headers
             io.getBuffer().putDouble(customClass.testDouble);
             io.getBuffer().putInt(customClass.testInt);
             io.getBuffer().putString(customClass.testString);
             // [..] anything that can be generated with the IoSerialiser and/or IoBuffer interfaces
-
             writerCalled.getAndIncrement();
         };
 
@@ -104,6 +103,9 @@ class IoClassSerialiserTests {
         // serialise-deserialise DataSet
         buffer.reset(); // '0' writing at start of buffer
         serialiser.serialiseObject(sourceClass);
+        buffer.reset(); // reset to read position (==0)
+        final WireDataFieldDescription root = serialiser.getIoSerialiser().parseIoStream(true);
+        root.printFieldStructure();
         buffer.reset(); // reset to read position (==0)
         serialiser.deserialiseObject(destinationClass);
 
@@ -175,6 +177,9 @@ class IoClassSerialiserTests {
         assertEquals("String2", destinationClass.stringList.get(1));
 
         // assertEquals(sourceClass.emptyIntegerList, destinationClass.emptyIntegerList); cannot assure that null is serialised will map to empty list
+        // buffer.reset(); // reset to read position (==0)
+        // final WireDataFieldDescription root = serialiser.getIoSerialiser().parseIoStream(true);
+        // root.printFieldStructure();
 
         assertEquals(sourceClass.dataSet, destinationClass.dataSet);
         // assertEquals(sourceClass.nullDataSet, destinationClass.nullDataSet);

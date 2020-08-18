@@ -222,12 +222,17 @@ class DataSetSerialiserTests {
         // serialise-deserialise DataSet
         buffer.reset(); // '0' writing at start of buffer
         serialiser.serialiseObject(dsOrig);
+
+        // buffer.reset(); // reset to read position (==0)
+        // final WireDataFieldDescription root = serialiser.getIoSerialiser().parseIoStream(true);
+        // root.printFieldStructure();
+
         buffer.reset(); // reset to read position (==0)
         serialiser.deserialiseObject(cpOrig);
 
         // check DataSet for equality
         if (!(cpOrig.source instanceof DataSetError)) {
-            throw new IllegalStateException("DataSet " + cpOrig.source + " is not not instanceof DataSetError");
+            throw new IllegalStateException("DataSet '" + cpOrig.source + "' is not not instanceof DataSetError");
         }
         DataSetError test = (DataSetError) (cpOrig.source);
 

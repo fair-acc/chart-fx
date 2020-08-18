@@ -39,8 +39,8 @@ public class IoClassSerialiser {
     protected final IoSerialiser ioSerialiser;
     private final Map<Type, List<FieldSerialiser<?>>> classMap = new HashMap<>();
     private final Map<FieldSerialiserKey, FieldSerialiserValue> cachedFieldMatch = new HashMap<>();
-    protected Consumer<String> startMarkerFunction;
-    protected Consumer<String> endMarkerFunction;
+    protected Consumer<FieldDescription> startMarkerFunction;
+    protected Consumer<FieldDescription> endMarkerFunction;
 
     /**
      * Initialises new IoBuffer-backed object serialiser
@@ -67,7 +67,7 @@ public class IoClassSerialiser {
         addClassDefinition(new FieldSerialiser<>( //
                 (io, obj, field) -> field.getField().set(obj, io.getEnum((Enum<?>) field.getField().get(obj))), // reader
                 (io, obj, field) -> io.getEnum((Enum<?>) (field == null ? obj : field.getField().get(obj))), // return
-                (io, obj, field) -> io.put((Enum<?>) field.getField().get(obj)), // writer
+                (io, obj, field) -> io.put(field, (Enum<?>) field.getField().get(obj)), // writer
                 Enum.class));
 
         FieldMapHelper.register(this);
@@ -233,16 +233,20 @@ public class IoClassSerialiser {
 
     public void serialiseObject(final Object rootObj, final ClassFieldDescription classField, final int recursionDepth) {
         final FieldSerialiser<?> existingSerialiser = classField.getFieldSerialiser();
-        final FieldSerialiser<?> fieldSerialiser = existingSerialiser == null ? cacheFindFieldSerialiser(classField.getType(), classField.getActualTypeArguments()) : existingSerialiser;
+        final FieldSerialiser fieldSerialiser = existingSerialiser == null ? cacheFindFieldSerialiser(classField.getType(), classField.getActualTypeArguments()) : existingSerialiser;
 
         if (fieldSerialiser != null && recursionDepth != 0) {
             if (existingSerialiser == null) {
                 classField.setFieldSerialiser(fieldSerialiser);
             }
             // write field header
-            final WireDataFieldDescription header = ioSerialiser.putFieldHeader(classField);
-            fieldSerialiser.getWriterFunction().accept(ioSerialiser, rootObj, classField);
-            ioSerialiser.updateDataEndMarker(header);
+            if (classField.getDataType() == DataType.OTHER) {
+                final WireDataFieldDescription header = ioSerialiser.putFieldHeader(classField.getFieldName(), classField.getDataType());
+                fieldSerialiser.getWriterFunction().accept(ioSerialiser, rootObj, classField);
+                ioSerialiser.updateDataEndMarker(header);
+            } else {
+                fieldSerialiser.getWriterFunction().accept(ioSerialiser, rootObj, classField);
+            }
             return;
         }
         // cannot serialise field check whether this is a container class and contains serialisable children
@@ -253,9 +257,8 @@ public class IoClassSerialiser {
         }
 
         // dive into it's children
-        final String subClass = classField.getFieldName();
         if (recursionDepth != 0 && startMarkerFunction != null) {
-            startMarkerFunction.accept(subClass);
+            startMarkerFunction.accept(classField);
         }
 
         final Object newRoot = classField.getField() == null ? rootObj : classField.getField().get(rootObj);
@@ -273,7 +276,7 @@ public class IoClassSerialiser {
         }
 
         if (recursionDepth != 0 && endMarkerFunction != null) {
-            endMarkerFunction.accept(subClass);
+            endMarkerFunction.accept(classField);
         }
     }
 
@@ -281,7 +284,9 @@ public class IoClassSerialiser {
         if (obj == null) {
             // serialise null object
             ioSerialiser.putHeaderInfo();
-            ioSerialiser.putEndMarker("OBJ_ROOT_END");
+            final String dataEndMarkerName = "OBJ_ROOT_END";
+            final WireDataFieldDescription dataEndMarker = new WireDataFieldDescription(null, dataEndMarkerName.hashCode(), dataEndMarkerName, DataType.START_MARKER, -1, -1, -1);
+            ioSerialiser.putEndMarker(dataEndMarker);
             return;
         }
 
@@ -292,14 +297,16 @@ public class IoClassSerialiser {
         if (fieldSerialiser == null) {
             ioSerialiser.putHeaderInfo(classField);
             serialiseObject(obj, classField, 0);
-            ioSerialiser.putEndMarker(classField.getFieldName());
+            ioSerialiser.putEndMarker(classField);
         } else {
             if (existingSerialiser == null) {
                 classField.setFieldSerialiser(fieldSerialiser);
             }
             ioSerialiser.putHeaderInfo();
             ioSerialiser.putCustomData(classField, obj, obj.getClass(), fieldSerialiser);
-            ioSerialiser.putEndMarker("OBJ_ROOT_END");
+            final String dataEndMarkerName = "OBJ_ROOT_END";
+            final WireDataFieldDescription dataEndMarker = new WireDataFieldDescription(null, dataEndMarkerName.hashCode(), dataEndMarkerName, DataType.START_MARKER, -1, -1, -1);
+            ioSerialiser.putEndMarker(dataEndMarker);
         }
     }
 
@@ -325,6 +332,7 @@ public class IoClassSerialiser {
     protected void deserialise(final Object obj, final FieldDescription fieldRoot, final ClassFieldDescription classField, final int recursionDepth) {
         final FieldSerialiser existingSerialiser = classField.getFieldSerialiser();
         final FieldSerialiser<?> fieldSerialiser = existingSerialiser == null ? cacheFindFieldSerialiser(classField.getType(), classField.getActualTypeArguments()) : existingSerialiser;
+
         if (fieldSerialiser != null) {
             if (existingSerialiser == null) {
                 classField.setFieldSerialiser(fieldSerialiser);
