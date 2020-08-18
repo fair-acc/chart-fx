@@ -60,6 +60,23 @@ public interface IoBufferHeader {
     void ensureCapacity(final int capacity);
 
     /**
+     * Flips this buffer.  The limit is set to the current position and then
+     * the position is set to zero.  If the mark is defined then it is
+     * discarded.
+     *
+     * <p> After a sequence of channel-read or <i>put</i> operations, invoke
+     * this method to prepare for a sequence of channel-write or relative
+     * <i>get</i> operations.  For example:
+     *
+     * <blockquote><pre>
+     * buf.put(magic);    // Prepend header
+     * in.read(buf);      // Read data into rest of buffer
+     * buf.flip();        // Flip buffer
+     * out.write(buf);    // Write header + data to channel</pre></blockquote>
+     */
+    void flip();
+
+    /**
      * Forces buffer to contain the given number of entries, preserving just a part of the array.
      *
      * @param length the new minimum length for this array.

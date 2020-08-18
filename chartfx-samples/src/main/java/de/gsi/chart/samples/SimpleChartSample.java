@@ -1,17 +1,19 @@
 package de.gsi.chart.samples;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import de.gsi.chart.XYChart;
-import de.gsi.chart.axes.spi.DefaultNumericAxis;
-import de.gsi.chart.plugins.Zoomer;
-import de.gsi.dataset.spi.DoubleDataSet;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import de.gsi.chart.XYChart;
+import de.gsi.chart.axes.spi.DefaultNumericAxis;
+import de.gsi.chart.plugins.CrosshairIndicator;
+import de.gsi.chart.plugins.Zoomer;
+import de.gsi.dataset.spi.DoubleDataSet;
 
 /**
  * Simple example of how to use chart class
@@ -26,6 +28,7 @@ public class SimpleChartSample extends Application {
     public void start(final Stage primaryStage) {
         final XYChart chart = new XYChart(new DefaultNumericAxis(), new DefaultNumericAxis());
         chart.getPlugins().add(new Zoomer()); // standard plugin, useful for most cases
+        chart.getPlugins().add(new CrosshairIndicator());
 
         final DoubleDataSet dataSet1 = new DoubleDataSet("data set #1");
         final DoubleDataSet dataSet2 = new DoubleDataSet("data set #2");
