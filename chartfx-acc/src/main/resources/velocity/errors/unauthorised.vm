@@ -1,0 +1,4 @@
+#parse("/velocity/layout.vm")
+#@mainLayout()
+<h1>$msg.get("ERROR_401_UNAUTHORISED")</h1>
+#end

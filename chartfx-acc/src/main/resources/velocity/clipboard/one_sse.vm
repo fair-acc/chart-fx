@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="$msg.get("LOCALE")">
+<head>
+    <title>$title</title>
+    <meta charset="utf-8">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="Description" content="Clipboard Image Content">
+    <link rel="stylesheet" href="/main.css">
+    <style>
+        html, body {
+            width:  100%;
+            height: 100%;
+            margin: 0px;
+        }
+    </style>
+    <script>
+        var canvas
+        var ctx
+        
+        window.onload = function() {
+            canvas = document.getElementById("myCanvas");
+            ctx = canvas.getContext("2d");
+            updateImage();
+            var width = img.clientWidth;
+            var height = img.clientHeight;
+            canvas.width = width;
+            canvas.height = height;
+            ctx.canvas.width  = window.innerWidth;
+            ctx.canvas.height = window.innerHeight;
+            img1.src = '$imageSource';
+            ctx.drawImage(img1, 0, 0);
+        }
+        
+        // N.B. Firefox does not honour the 'Cache-Control: no-store' response header :-(
+        // idea from :https://stackoverflow.com/questions/52615025/handle-specific-image-response-by-javascript
+        async function updateImage() {
+            var myRequest = new XMLHttpRequest();
+            myRequest.open('GET', '$imageSource', true);
+            myRequest.responseType = 'blob';
+            myRequest.onreadystatechange = () => {
+                if (myRequest.readyState !== 4) {
+                    return;
+                }
+                if (myRequest.status === 200) {
+                    var blob = myRequest.response;
+                    var objectURL = URL.createObjectURL(blob);
+                    // this is the trick - generates url like blob: http://localhost/adb50c88-9468-40d9-8b0b-1f6ec8bb5a32
+                    var img1 = new Image();
+                    img1.src = objectURL;
+                    //canvas = document.getElementById("myCanvas");
+                    img1.onload = function () {
+                        //canvas.width = img1.clientWidth;
+                        //canvas.height = img1.clientHeight;
+                        ctx.canvas.width  = window.innerWidth;
+                        ctx.canvas.height = window.innerHeight;
+                        ctx.drawImage(img1, 0, 0);
+                        //console.info("drawn image");
+                    }
+                } else if (myRequest.status === 499) {
+                    console.log('... waiting for image');
+                    myRequest.send(); // retry
+                } else {
+                    console.log('image not found');
+                }
+            };
+            myRequest.send();
+        }
+
+        const evtSource = new EventSource("$imageSource", { withCredentials: true } );
+
+        evtSource.onmessage = function(event) {
+            const newElement = document.createElement("li");
+            const eventList = document.getElementById("list");
+            //console.info("message: " + event.data);
+            newElement.innerHTML = "message: " + event.data;
+            updateImage();
+            
+            //var img1 = new Image();
+            //img1.src = '$imageSource';
+            //canvas = document.getElementById("myCanvas");
+            //img1.onload = function () {
+            //    //canvas.width = img1.clientWidth;
+            //    //canvas.height = img1.clientHeight;
+            //    ctx.canvas.width  = window.innerWidth;
+            //    ctx.canvas.height = window.innerHeight;
+            //    ctx.drawImage(img1, 0, 0);
+            //    // console.info("drawn image");
+            //}
+        }
+
+        evtSource.onerror = function(err) {
+            console.error("EventSource failed:", err);
+        };
+    </script>
+</head>
+
+<body>
+    <a class="skip-link" href="#maincontent">Skip to main</a>
+    <a href="$indexRoot"> 
+    <canvas id="myCanvas">
+        <! -- Your browser does not support the HTML5 canvas tag. -->
+        <embed type="text/html" src="$imageLanding" width=100% height=100%>
+    </canvas>
+    </a>
+</body>
+</html>
+

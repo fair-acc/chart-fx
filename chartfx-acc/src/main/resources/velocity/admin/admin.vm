@@ -1,0 +1,14 @@
+#parse("/velocity/layout.vm")
+#@mainLayout()
+
+<h1>Admin Interface</h1>
+Users:
+<ul>
+#foreach($user in $users)
+    <li>$user with roles $userHandler.getUserRolesByUsername($user)</li>
+#end
+</ul>
+<br>
+Direct access: <a href="/admin/endpoints" alt="list registered end-points">/admin/endpoints</a>
+<embed type="text/html" src="/admin/endpoints" width=100% height="400">
+#end

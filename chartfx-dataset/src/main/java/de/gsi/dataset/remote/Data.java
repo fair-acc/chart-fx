@@ -20,16 +20,13 @@ public class Data implements Serializable {
 
     public Data(final String exportNameData, final String mimeType, final byte[] dataByteArray, final int dataByteArraySize) {
         if (exportNameData == null || exportNameData.isBlank()) {
-            throw new IllegalArgumentException("exportNameData must not be null or blank");
+            throw new IllegalArgumentException("exportNameData must not be blank");
         }
         if (mimeType == null || mimeType.isBlank()) {
-            throw new IllegalArgumentException("mimeType must not be null or blank");
+            throw new IllegalArgumentException("mimeType must not be blank");
         }
-        if (dataByteArray == null) {
-            throw new IllegalArgumentException("dataByteArray must not be null");
-        }
-        if (dataByteArray.length < dataByteArraySize) {
-            throw new IllegalArgumentException("dataByteArray[" + dataByteArray.length + "] must be larger than dataByteArraySize=" + dataByteArraySize);
+        if (dataByteArray == null || dataByteArray.length < dataByteArraySize) {
+            throw new IllegalArgumentException("dataByteArray[" + (dataByteArray == null ? "null" : dataByteArray.length) + "] must be larger than dataByteArraySize=" + dataByteArraySize);
         }
         this.exportNameData = exportNameData;
         this.mimeType = mimeType;
@@ -49,7 +46,7 @@ public class Data implements Serializable {
         return exportNameData;
     }
 
-    public String getMimeType() {
+    protected String getMimeType() {
         return mimeType;
     }
 }

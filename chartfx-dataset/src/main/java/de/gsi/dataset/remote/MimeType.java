@@ -5,8 +5,7 @@ import java.util.List;
 import java.util.Locale;
 
 /**
- * Definition and convenience methods for common MIME types according to RFC6838
- * & RFC4855
+ * Definition and convenience methods for common MIME types according to RFC6838 and RFC4855
  * <p>
  * Since the official list is rather and contains types we likely never
  * encounter, we chose the specific sub-selection from:

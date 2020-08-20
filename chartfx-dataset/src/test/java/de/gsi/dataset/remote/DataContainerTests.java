@@ -111,7 +111,7 @@ public class DataContainerTests {
         test.updateAccess();
         final long lastAccess2 = test.getTimeStampLastAccess();
         assertTrue(lastAccess2 > 0);
-        assertTrue(lastAccess2 > lastAccess1);
+        assertTrue(lastAccess2 >= lastAccess1);
 
         assertDoesNotThrow(() -> test.setRbacToken("rbacToken"));
         assertEquals("rbacToken", test.getRbacToken());

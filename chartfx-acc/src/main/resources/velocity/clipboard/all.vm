@@ -1,0 +1,35 @@
+#parse("/velocity/layout.vm")
+#@mainLayout()
+<h1><a href=$root alt=$msg.get("CLIPBOARD_HEADING_ALL")>$msg.get("CLIPBOARD_HEADING_ALL")</a> #if(!$category.isEmpty())- $category#end</h1>
+#if(!$categories.isEmpty())
+    <small>
+    $msg.get("CLIPBOARD_SUB_CATEGORIES"):
+        #foreach($category in $categories)
+            <a class="link" href="/clipboard$category">$category</a>
+        #end
+    </small>
+#end
+<div class="row row-3">
+    #foreach($image in $images)
+        <div class="col">
+            <a class="image" href="/clipboard/$category$image.getExportName()">
+                <div class="imageCover">
+                    #set($imgStr = "/clipboard/"+$category+$image.getExportNameData())
+                    <img src=$imgStr alt="$image.getExportNameData()">
+                </div>
+            $msg.get("CLIPBOARD_CAPTION", $image.getExportName(), $image.getTimeStampCreationString())
+            </a>
+            <small><center>(<a class="link" href="/clipboard/$category$image.getExportName()?updatePeriod=$image.getUpdatePeriod()">long-polling</a>,   <a class="link" href="/clipboard/$category$image.getExportName()?sse">SSE</a>)<center></small>
+        </div>
+    #end
+</div>
+#if(!$data.isEmpty())
+    <br><h2>$msg.get("CLIPBOARD_DATA")<h2>
+    <div>
+        #foreach($dataItem in $data)
+        #set($dataStr = "/clipboard/$category"+"$dataItem.getExportNameData()")
+            <a class="link" href=$dataStr target="_blank" rel="noopener">$dataItem.getExportNameData()</a>
+        #end
+    </div>
+#end
+#end

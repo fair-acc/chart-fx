@@ -1,0 +1,3 @@
+#!/bin/bash
+
+java -server -XX:G1HeapRegionSize=32M -Dglass.platform=Monocle -Dmonocle.platform=Headless -Dprism.order=j2d,sw -Dprism.verbose=true -DrestKeyStore=keystore.jks -DrestKeyStorePassword=keystore.pwd -DrestUserPasswordStore=DefaultRestUserPasswords.pwd -jar Clipboard.jar
