@@ -226,6 +226,11 @@ public class ClassFieldDescription implements FieldDescription {
     }
 
     @Override
+    public FieldDescription findChildField(final String fieldName) {
+        return findChildField(fieldName.hashCode(), fieldName);
+    }
+
+    @Override
     public FieldDescription findChildField(final int fieldNameHashCode, final String fieldName) {
         for (int i = 0; i < children.size(); i++) {
             final FieldDescription child = children.get(i);

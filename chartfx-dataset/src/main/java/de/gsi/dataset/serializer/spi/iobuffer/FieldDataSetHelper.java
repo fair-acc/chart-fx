@@ -23,7 +23,7 @@ public final class FieldDataSetHelper {
                 (io, obj, field) -> DoubleArrayList.wrap(io.getDoubleArray()), // return
                 (io, obj, field) -> {
                     final DoubleArrayList retVal = (DoubleArrayList) field.getField().get(obj);
-                    io.put(field, retVal.elements(), 0, retVal.size());
+                    io.put(field, retVal.elements(), retVal.size());
                 }, // writer
                 DoubleArrayList.class));
 

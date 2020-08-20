@@ -1,12 +1,13 @@
 package de.gsi.dataset.serializer.benchmark;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.gsi.dataset.serializer.helper.CmwLightHelper;
 import de.gsi.dataset.serializer.helper.FlatBuffersHelper;
 import de.gsi.dataset.serializer.helper.JsonHelper;
 import de.gsi.dataset.serializer.helper.SerialiserHelper;
 import de.gsi.dataset.serializer.helper.TestDataClass;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Simple (rough) benchmark of various internal and external serialiser protocols.
@@ -68,13 +69,14 @@ public class SerialiserBenchmark { // NOPMD - nomen est omen
 
     public static void main(final String... argv) {
         // CmwHelper.checkSerialiserIdentity(inputObject, outputObject);
-        CmwLightHelper.checkSerialiserIdentity(inputObject, outputObject);
-        CmwLightHelper.checkCustomSerialiserIdentity(inputObject, outputObject);
-        JsonHelper.checkSerialiserIdentity(inputObject, outputObject);
+        LOGGER.atInfo().addArgument(CmwLightHelper.checkSerialiserIdentity(inputObject, outputObject)).log("CmwLight serialiser nBytes = {}");
+        LOGGER.atInfo().addArgument(CmwLightHelper.checkCustomSerialiserIdentity(inputObject, outputObject)).log("CmwLight (custom) serialiser nBytes = {}");
 
-        SerialiserHelper.checkSerialiserIdentity(inputObject, outputObject);
-        SerialiserHelper.checkCustomSerialiserIdentity(inputObject, outputObject);
-        FlatBuffersHelper.checkCustomSerialiserIdentity(inputObject, outputObject);
+        LOGGER.atInfo().addArgument(JsonHelper.checkSerialiserIdentity(inputObject, outputObject)).log("JSON Serialiser serialiser nBytes = {}");
+        LOGGER.atInfo().addArgument(JsonHelper.checkCustomSerialiserIdentity(inputObject, outputObject)).log("JSON Serialiser (custom) serialiser nBytes = {}");
+        LOGGER.atInfo().addArgument(SerialiserHelper.checkSerialiserIdentity(inputObject, outputObject)).log("generic serialiser nBytes = {}");
+        LOGGER.atInfo().addArgument(SerialiserHelper.checkCustomSerialiserIdentity(inputObject, outputObject)).log("generic serialiser (custom) nBytes = {}");
+        LOGGER.atInfo().addArgument(FlatBuffersHelper.checkCustomSerialiserIdentity(inputObject, outputObject)).log("flatBuffers serialiser nBytes = {}");
 
         // Cmw vs. CmwLight compatibility - requires CMW binary libs
         // CmwLightHelper.checkCmwLightVsCmwIdentityForward(inputObject, outputObject);
@@ -95,12 +97,14 @@ public class SerialiserBenchmark { // NOPMD - nomen est omen
             SerialiserHelper.testSerialiserPerformanceMap(nIterations, inputObject);
 
             // custom serialiser performance
+            JsonHelper.testCustomSerialiserPerformance(nIterations, inputObject, outputObject);
             FlatBuffersHelper.testCustomSerialiserPerformance(nIterations, inputObject, outputObject);
             CmwLightHelper.testCustomSerialiserPerformance(nIterations, inputObject, outputObject);
             SerialiserHelper.testCustomSerialiserPerformance(nIterations, inputObject, outputObject);
 
             // POJO performance
             JsonHelper.testPerformancePojo(nIterations, inputObject, outputObject);
+            JsonHelper.testPerformancePojoCodeGen(nIterations, inputObject, outputObject);
             // CmwHelper.testPerformancePojo(nIterations, inputObject, outputObject);
             CmwLightHelper.testPerformancePojo(nIterations, inputObject, outputObject);
             SerialiserHelper.testPerformancePojo(nIterations, inputObject, outputObject);

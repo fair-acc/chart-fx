@@ -329,7 +329,7 @@ public class DataSetSerialiser { // NOPMD
         AssertUtils.notNull("dataSet", dataSet);
         AssertUtils.notNull("ioSerialiser", ioSerialiser);
         final String dataStartMarkerName = "START_MARKER_DATASET:" + dataSet.getName();
-        final WireDataFieldDescription dataStartMarker = new WireDataFieldDescription(null, dataStartMarkerName.hashCode(), dataStartMarkerName, DataType.OTHER, -1, -1, -1);
+        final WireDataFieldDescription dataStartMarker = new WireDataFieldDescription(ioSerialiser, null, dataStartMarkerName.hashCode(), dataStartMarkerName, DataType.OTHER, -1, -1, -1);
         ioSerialiser.putStartMarker(dataStartMarker);
 
         writeHeaderDataToStream(dataSet);
@@ -350,7 +350,7 @@ public class DataSetSerialiser { // NOPMD
         }
 
         final String dataEndMarkerName = "END_MARKER_DATASET:" + dataSet.getName();
-        final WireDataFieldDescription dataEndMarker = new WireDataFieldDescription(null, dataEndMarkerName.hashCode(), dataEndMarkerName, DataType.START_MARKER, -1, -1, -1);
+        final WireDataFieldDescription dataEndMarker = new WireDataFieldDescription(ioSerialiser, null, dataEndMarkerName.hashCode(), dataEndMarkerName, DataType.START_MARKER, -1, -1, -1);
         ioSerialiser.putEndMarker(dataEndMarker);
     }
 
@@ -398,7 +398,7 @@ public class DataSetSerialiser { // NOPMD
         final int nDim = dataSet.getDimension();
         for (int dimIndex = 0; dimIndex < nDim; dimIndex++) {
             final int nsamples = dataSet.getDataCount(dimIndex);
-            ioSerialiser.put(ARRAY_PREFIX + dimIndex, toFloats(dataSet.getValues(dimIndex)), 0, nsamples);
+            ioSerialiser.put(ARRAY_PREFIX + dimIndex, toFloats(dataSet.getValues(dimIndex)), nsamples);
         }
 
         if (!(dataSet instanceof DataSetError)) {
@@ -413,11 +413,11 @@ public class DataSetSerialiser { // NOPMD
             case NO_ERROR:
                 break;
             case SYMMETRIC:
-                ioSerialiser.put(EP_PREFIX + dimIndex, toFloats(ds.getErrorsPositive(dimIndex)), 0, nsamples);
+                ioSerialiser.put(EP_PREFIX + dimIndex, toFloats(ds.getErrorsPositive(dimIndex)), nsamples);
                 break;
             case ASYMMETRIC:
-                ioSerialiser.put(EN_PREFIX + dimIndex, toFloats(ds.getErrorsNegative(dimIndex)), 0, nsamples);
-                ioSerialiser.put(EP_PREFIX + dimIndex, toFloats(ds.getErrorsPositive(dimIndex)), 0, nsamples);
+                ioSerialiser.put(EN_PREFIX + dimIndex, toFloats(ds.getErrorsNegative(dimIndex)), nsamples);
+                ioSerialiser.put(EP_PREFIX + dimIndex, toFloats(ds.getErrorsPositive(dimIndex)), nsamples);
                 break;
             }
         }
@@ -430,7 +430,7 @@ public class DataSetSerialiser { // NOPMD
         final int nDim = dataSet.getDimension();
         for (int dimIndex = 0; dimIndex < nDim; dimIndex++) {
             final int nsamples = dataSet.getDataCount(dimIndex);
-            ioSerialiser.put(ARRAY_PREFIX + dimIndex, dataSet.getValues(dimIndex), 0, nsamples);
+            ioSerialiser.put(ARRAY_PREFIX + dimIndex, dataSet.getValues(dimIndex), nsamples);
         }
         if (!(dataSet instanceof DataSetError)) {
             return; // data set does not have any error definition
@@ -440,11 +440,11 @@ public class DataSetSerialiser { // NOPMD
             final int nsamples = dataSet.getDataCount(dimIndex);
             switch (ds.getErrorType(dimIndex)) {
             case SYMMETRIC:
-                ioSerialiser.put(EP_PREFIX + dimIndex, ds.getErrorsPositive(dimIndex), 0, nsamples);
+                ioSerialiser.put(EP_PREFIX + dimIndex, ds.getErrorsPositive(dimIndex), nsamples);
                 break;
             case ASYMMETRIC:
-                ioSerialiser.put(EN_PREFIX + dimIndex, ds.getErrorsNegative(dimIndex), 0, nsamples);
-                ioSerialiser.put(EP_PREFIX + dimIndex, ds.getErrorsPositive(dimIndex), 0, nsamples);
+                ioSerialiser.put(EN_PREFIX + dimIndex, ds.getErrorsNegative(dimIndex), nsamples);
+                ioSerialiser.put(EP_PREFIX + dimIndex, ds.getErrorsPositive(dimIndex), nsamples);
                 break;
             case NO_ERROR:
             default:
