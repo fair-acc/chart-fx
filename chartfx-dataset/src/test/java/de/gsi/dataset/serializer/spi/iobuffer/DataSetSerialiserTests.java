@@ -8,10 +8,14 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
+import java.util.stream.Stream;
 
+import de.gsi.dataset.spi.*;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import de.gsi.dataset.DataSet;
@@ -24,11 +28,6 @@ import de.gsi.dataset.serializer.IoClassSerialiser;
 import de.gsi.dataset.serializer.spi.BinarySerialiser;
 import de.gsi.dataset.serializer.spi.ByteBuffer;
 import de.gsi.dataset.serializer.spi.FastByteBuffer;
-import de.gsi.dataset.spi.AbstractDataSet;
-import de.gsi.dataset.spi.DefaultErrorDataSet;
-import de.gsi.dataset.spi.DoubleDataSet;
-import de.gsi.dataset.spi.DoubleErrorDataSet;
-import de.gsi.dataset.spi.MultiDimDoubleDataSet;
 import de.gsi.dataset.testdata.spi.TriangleFunction;
 
 /**
@@ -58,6 +57,35 @@ class DataSetSerialiserTests {
         final DataSet restored = ioSerialiser.readDataSetFromByteArray();
 
         assertEquals(original, restored);
+    }
+
+    @ParameterizedTest(name = "IoBuffer class - {0}, asFloat - {1}")
+    @MethodSource("buffersAndFloatParameters")
+    void testGridDataSet(final Class<? extends IoBuffer> bufferClass, final boolean asFloat32) throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
+        assertNotNull(bufferClass, "bufferClass being not null");
+        assertNotNull(bufferClass.getConstructor(int.class), "Constructor(Integer) present");
+        final IoBuffer buffer = bufferClass.getConstructor(int.class).newInstance(2 * BUFFER_SIZE);
+
+        final DoubleGridDataSet original = asFloat32 ? new DoubleGridDataSet("test", false,
+                new double[][] {{1f,2f}, {0.1f,0.2f,0.3f}}, new double[]{9.9f,8.8f,7.7f,6.6f,5.5f,4.4f})
+                : new DoubleGridDataSet("test", false,
+                new double[][] {{1.0,2.0}, {0.1,0.2,0.3}}, new double[]{9.9,8.8,7.7,6.6,5.5,4.4});
+
+        final DataSetSerialiser ioSerialiser = new DataSetSerialiser(new BinarySerialiser(buffer));
+
+        ioSerialiser.writeDataSetToByteArray(original, asFloat32);
+        buffer.reset(); // reset to read position (==0)
+        final DataSet restored = ioSerialiser.readDataSetFromByteArray();
+
+        assertEquals(original, restored);
+    }
+    static public Stream<Arguments> buffersAndFloatParameters() {
+        return Stream.of(
+                Arguments.arguments(ByteBuffer.class, true),
+                Arguments.arguments(ByteBuffer.class, false),
+                Arguments.arguments(FastByteBuffer.class, true),
+                Arguments.arguments(FastByteBuffer.class, false)
+        );
     }
 
     @ParameterizedTest(name = "IoBuffer class - {0}")
@@ -237,60 +265,6 @@ class DataSetSerialiserTests {
             testIdentityMetaData(original, (DataSetMetaData) test, true);
         }
         assertEquals(dsOrig.source, test);
-    }
-
-    @ParameterizedTest(name = "IoBuffer class - {0}")
-    @ValueSource(classes = { ByteBuffer.class, FastByteBuffer.class })
-    void testMultiDimDataSet(final Class<? extends IoBuffer> bufferClass) throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
-        assertNotNull(bufferClass, "bufferClass being not null");
-        assertNotNull(bufferClass.getConstructor(int.class), "Constructor(Integer) present");
-        final IoBuffer buffer = bufferClass.getConstructor(int.class).newInstance(2 * BUFFER_SIZE);
-
-        boolean asFloat32 = false;
-        final MultiDimDoubleDataSet original = new MultiDimDoubleDataSet("test", false,
-                new double[][] { { 1, 2, 3 }, { 10, 20 }, { 0.5, 1, 1.5, 2, 2.5, 3 } });
-        // Labels and styles are not correctly handled by multi dim data set because it is not really defined on which
-        // dimension the label index is defined
-        addMetaData(original, false);
-
-        final DataSetSerialiser ioSerialiser = new DataSetSerialiser(new BinarySerialiser(buffer));
-
-        ioSerialiser.writeDataSetToByteArray(original, asFloat32);
-        buffer.reset(); // reset to read position (==0)
-        final DataSet restored = ioSerialiser.readDataSetFromByteArray();
-
-        assertEquals(original, restored);
-    }
-
-    @ParameterizedTest(name = "IoBuffer class - {0}")
-    @ValueSource(classes = { ByteBuffer.class, FastByteBuffer.class })
-    void testMultiDimDataSetFloatNoMetaDataAndLabels(final Class<? extends IoBuffer> bufferClass) throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
-        assertNotNull(bufferClass, "bufferClass being not null");
-        assertNotNull(bufferClass.getConstructor(int.class), "Constructor(Integer) present");
-        final IoBuffer buffer = bufferClass.getConstructor(int.class).newInstance(2 * BUFFER_SIZE);
-
-        boolean asFloat32 = true;
-        final MultiDimDoubleDataSet original = new MultiDimDoubleDataSet("test", false,
-                new double[][] { { 1, 2, 3 }, { 10, 20 }, { 0.5, 1, 1.5, 2, 2.5, 3 } });
-        addMetaData(original, false);
-
-        final DataSetSerialiser ioSerialiser = new DataSetSerialiser(new BinarySerialiser(buffer));
-
-        ioSerialiser.setDataLablesSerialised(false);
-        ioSerialiser.setMetaDataSerialised(false);
-        ioSerialiser.writeDataSetToByteArray(original, asFloat32);
-        ioSerialiser.setDataLablesSerialised(true);
-        ioSerialiser.setMetaDataSerialised(true);
-        buffer.reset(); // reset to read position (==0)
-        final DataSet restored = ioSerialiser.readDataSetFromByteArray();
-
-        MultiDimDoubleDataSet originalNoMetaData = new MultiDimDoubleDataSet(original);
-        original.getMetaInfo().clear();
-        original.getErrorList().clear();
-        original.getWarningList().clear();
-        original.getInfoList().clear();
-
-        assertEquals(originalNoMetaData, restored);
     }
 
     @Test

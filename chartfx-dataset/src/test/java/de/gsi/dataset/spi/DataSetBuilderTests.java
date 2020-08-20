@@ -79,7 +79,7 @@ class DataSetBuilderTests {
         assertArrayEquals(new double[] { 0.1, 0.2, 0.1 }, errorDataSet.getErrorsPositive(DIM_Y));
         assertArrayEquals(new double[] { 0.1, 0.2, 0.1 }, errorDataSet.getErrorsNegative(DIM_Y));
         assertEquals(ErrorType.NO_ERROR, errorDataSet.getErrorType(DIM_X));
-        assertEquals(ErrorType.ASYMMETRIC, errorDataSet.getErrorType(DIM_Y));
+        assertEquals(ErrorType.SYMMETRIC, errorDataSet.getErrorType(DIM_Y));
     }
 
     @Test
