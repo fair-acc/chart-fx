@@ -111,6 +111,7 @@ public class FastByteBuffer implements IoBuffer {
         limit = capacity();
     }
 
+    @Override
     public byte[] elements() {
         return buffer;
     }
@@ -172,14 +173,13 @@ public class FastByteBuffer implements IoBuffer {
     }
 
     @Override
-    public boolean[] getBooleanArray(final boolean[] dst, final int offset, final int length) {
+    public boolean[] getBooleanArray(final boolean[] dst, final int length) {
         final int arraySize = getInt(); // strided-array size
-        final boolean initNeeded = dst == null || length < 0;
-        final boolean[] values = initNeeded ? new boolean[arraySize + offset] : dst;
+        final boolean initNeeded = dst == null || length < 0 || dst.length != arraySize;
+        final boolean[] values = initNeeded ? new boolean[arraySize] : dst;
 
-        final int bytesToCopy = initNeeded ? arraySize : Math.min(arraySize, length);
-        copyMemory(buffer, ARRAY_BYTE_BASE_OFFSET + position, values, ARRAY_BOOLEAN_BASE_OFFSET + offset, bytesToCopy);
-        position += bytesToCopy;
+        copyMemory(buffer, ARRAY_BYTE_BASE_OFFSET + position, values, ARRAY_BOOLEAN_BASE_OFFSET, arraySize);
+        position += arraySize;
 
         return values;
     }
@@ -193,14 +193,13 @@ public class FastByteBuffer implements IoBuffer {
     }
 
     @Override
-    public byte[] getByteArray(final byte[] dst, final int offset, final int length) {
+    public byte[] getByteArray(final byte[] dst, final int length) {
         final int arraySize = getInt(); // strided-array size
-        final boolean initNeeded = dst == null || length < 0;
-        final byte[] values = initNeeded ? new byte[arraySize + offset] : dst;
+        final boolean initNeeded = dst == null || length < 0 || dst.length != arraySize;
+        final byte[] values = initNeeded ? new byte[arraySize] : dst;
 
-        final int bytesToCopy = (initNeeded ? arraySize : Math.min(arraySize, length));
-        copyMemory(buffer, ARRAY_BYTE_BASE_OFFSET + position, values, ARRAY_BYTE_BASE_OFFSET + offset, bytesToCopy);
-        position += bytesToCopy;
+        copyMemory(buffer, ARRAY_BYTE_BASE_OFFSET + position, values, ARRAY_BYTE_BASE_OFFSET, arraySize);
+        position += arraySize;
 
         return values;
     }
@@ -214,14 +213,13 @@ public class FastByteBuffer implements IoBuffer {
     }
 
     @Override
-    public char[] getCharArray(final char[] dst, final int offset, final int length) {
+    public char[] getCharArray(final char[] dst, final int length) {
         final int arraySize = getInt(); // strided-array size
-        final boolean initNeeded = dst == null || length < 0;
-        final char[] values = initNeeded ? new char[arraySize + offset] : dst;
+        final boolean initNeeded = dst == null || length < 0 || dst.length != arraySize;
+        final char[] values = initNeeded ? new char[arraySize] : dst;
 
-        final int bytesToCopy = (initNeeded ? arraySize : Math.min(arraySize, length)) * SIZE_OF_CHAR;
-        copyMemory(buffer, ARRAY_BYTE_BASE_OFFSET + position, values, ARRAY_SHORT_BASE_OFFSET + (offset * SIZE_OF_CHAR),
-                bytesToCopy);
+        final int bytesToCopy = arraySize * SIZE_OF_CHAR;
+        copyMemory(buffer, ARRAY_BYTE_BASE_OFFSET + position, values, ARRAY_SHORT_BASE_OFFSET, bytesToCopy);
         position += bytesToCopy;
 
         return values;
@@ -236,14 +234,13 @@ public class FastByteBuffer implements IoBuffer {
     }
 
     @Override
-    public double[] getDoubleArray(final double[] dst, final int offset, final int length) {
+    public double[] getDoubleArray(final double[] dst, final int length) {
         final int arraySize = getInt(); // strided-array size
-        final boolean initNeeded = dst == null || length < 0;
-        final double[] values = initNeeded ? new double[arraySize + offset] : dst;
+        final boolean initNeeded = dst == null || length < 0 || dst.length != arraySize;
+        final double[] values = initNeeded ? new double[arraySize] : dst;
 
-        final int bytesToCopy = (initNeeded ? arraySize : Math.min(arraySize, length)) * SIZE_OF_DOUBLE;
-        copyMemory(buffer, ARRAY_BYTE_BASE_OFFSET + position, values,
-                ARRAY_DOUBLE_BASE_OFFSET + (offset * SIZE_OF_DOUBLE), bytesToCopy);
+        final int bytesToCopy = arraySize * SIZE_OF_DOUBLE;
+        copyMemory(buffer, ARRAY_BYTE_BASE_OFFSET + position, values, ARRAY_DOUBLE_BASE_OFFSET, bytesToCopy);
         position += bytesToCopy;
 
         return values;
@@ -258,14 +255,13 @@ public class FastByteBuffer implements IoBuffer {
     }
 
     @Override
-    public float[] getFloatArray(final float[] dst, final int offset, final int length) {
+    public float[] getFloatArray(final float[] dst, final int length) {
         final int arraySize = getInt(); // strided-array size
-        final boolean initNeeded = dst == null || length < 0;
-        final float[] values = initNeeded ? new float[arraySize + offset] : dst;
+        final boolean initNeeded = dst == null || length < 0 || dst.length != arraySize;
+        final float[] values = initNeeded ? new float[arraySize] : dst;
 
-        final int bytesToCopy = (initNeeded ? arraySize : Math.min(arraySize, length)) * SIZE_OF_FLOAT;
-        copyMemory(buffer, ARRAY_BYTE_BASE_OFFSET + position, values,
-                ARRAY_FLOAT_BASE_OFFSET + (offset * SIZE_OF_FLOAT), bytesToCopy);
+        final int bytesToCopy = arraySize * SIZE_OF_FLOAT;
+        copyMemory(buffer, ARRAY_BYTE_BASE_OFFSET + position, values, ARRAY_FLOAT_BASE_OFFSET, bytesToCopy);
         position += bytesToCopy;
 
         return values;
@@ -280,14 +276,13 @@ public class FastByteBuffer implements IoBuffer {
     }
 
     @Override
-    public int[] getIntArray(final int[] dst, final int offset, final int length) {
+    public int[] getIntArray(final int[] dst, final int length) {
         final int arraySize = getInt(); // strided-array size
-        final boolean initNeeded = dst == null || length < 0;
-        final int[] values = initNeeded ? new int[arraySize + offset] : dst;
+        final boolean initNeeded = dst == null || length < 0 || dst.length != arraySize;
+        final int[] values = initNeeded ? new int[arraySize] : dst;
 
-        final int bytesToCopy = (initNeeded ? arraySize : Math.min(arraySize, length)) * SIZE_OF_INT;
-        copyMemory(buffer, ARRAY_BYTE_BASE_OFFSET + position, values, ARRAY_INT_BASE_OFFSET + (offset * SIZE_OF_INT),
-                bytesToCopy);
+        final int bytesToCopy = arraySize * SIZE_OF_INT;
+        copyMemory(buffer, ARRAY_BYTE_BASE_OFFSET + position, values, ARRAY_INT_BASE_OFFSET, bytesToCopy);
         position += bytesToCopy;
 
         return values;
@@ -302,14 +297,13 @@ public class FastByteBuffer implements IoBuffer {
     }
 
     @Override
-    public long[] getLongArray(final long[] dst, final int offset, final int length) {
+    public long[] getLongArray(final long[] dst, final int length) {
         final int arraySize = getInt(); // strided-array size
-        final boolean initNeeded = dst == null || length < 0;
-        final long[] values = initNeeded ? new long[arraySize + offset] : dst;
+        final boolean initNeeded = dst == null || length < 0 || dst.length != arraySize;
+        final long[] values = initNeeded ? new long[arraySize] : dst;
 
-        final int bytesToCopy = (initNeeded ? arraySize : Math.min(arraySize, length)) * SIZE_OF_LONG;
-        copyMemory(buffer, ARRAY_BYTE_BASE_OFFSET + position, values, ARRAY_LONG_BASE_OFFSET + (offset * SIZE_OF_LONG),
-                bytesToCopy);
+        final int bytesToCopy = arraySize * SIZE_OF_LONG;
+        copyMemory(buffer, ARRAY_BYTE_BASE_OFFSET + position, values, ARRAY_LONG_BASE_OFFSET, bytesToCopy);
         position += bytesToCopy;
 
         return values;
@@ -324,14 +318,13 @@ public class FastByteBuffer implements IoBuffer {
     }
 
     @Override
-    public short[] getShortArray(final short[] dst, final int offset, final int length) { // NOPMD by rstein
+    public short[] getShortArray(final short[] dst, final int length) { // NOPMD by rstein
         final int arraySize = getInt(); // strided-array size
-        final boolean initNeeded = dst == null || length < 0;
-        final short[] values = initNeeded ? new short[arraySize + offset] : dst; // NOPMD by rstein
+        final boolean initNeeded = dst == null || length < 0 || dst.length != arraySize;
+        final short[] values = initNeeded ? new short[arraySize] : dst; // NOPMD by rstein
 
-        final int bytesToCopy = (initNeeded ? arraySize : Math.min(arraySize, length)) * SIZE_OF_SHORT;
-        copyMemory(buffer, ARRAY_BYTE_BASE_OFFSET + position, values,
-                ARRAY_SHORT_BASE_OFFSET + (offset * SIZE_OF_SHORT), bytesToCopy);
+        final int bytesToCopy = arraySize * SIZE_OF_SHORT;
+        copyMemory(buffer, ARRAY_BYTE_BASE_OFFSET + position, values, ARRAY_SHORT_BASE_OFFSET, bytesToCopy);
         position += bytesToCopy;
 
         return values;
@@ -352,13 +345,12 @@ public class FastByteBuffer implements IoBuffer {
     }
 
     @Override
-    public String[] getStringArray(final String[] dst, final int offset, final int length) {
+    public String[] getStringArray(final String[] dst, final int length) {
         final int arraySize = getInt(); // strided-array size
-        final boolean initNeeded = dst == null || length < 0;
-        final String[] ret = initNeeded ? new String[arraySize + offset] : dst;
-        final int size = initNeeded ? arraySize : Math.min(arraySize, length);
-        for (int k = 0; k < size; k++) {
-            ret[k + offset] = getString();
+        final boolean initNeeded = dst == null || length < 0 || dst.length != arraySize;
+        final String[] ret = initNeeded ? new String[arraySize] : dst;
+        for (int k = 0; k < arraySize; k++) {
+            ret[k] = getString();
         }
         return ret;
     }
@@ -435,12 +427,12 @@ public class FastByteBuffer implements IoBuffer {
     }
 
     @Override
-    public void putBooleanArray(final boolean[] values, final int offset, final int n) {
+    public void putBooleanArray(final boolean[] values, final int n) {
         final int valuesSize = values == null ? 0 : values.length;
         final int nElements = n >= 0 ? Math.min(n, valuesSize) : valuesSize;
         ensureAdditionalCapacity(nElements);
         putInt(nElements); // strided-array size
-        copyMemory(values, ARRAY_BOOLEAN_BASE_OFFSET + offset, buffer, ARRAY_BYTE_BASE_OFFSET + position, nElements);
+        copyMemory(values, ARRAY_BOOLEAN_BASE_OFFSET, buffer, ARRAY_BYTE_BASE_OFFSET + position, nElements);
         position += nElements;
     }
 
@@ -451,12 +443,12 @@ public class FastByteBuffer implements IoBuffer {
     }
 
     @Override
-    public void putByteArray(final byte[] values, final int offset, final int n) {
+    public void putByteArray(final byte[] values, final int n) {
         final int valuesSize = values == null ? 0 : values.length;
         final int nElements = (n >= 0 ? Math.min(n, valuesSize) : valuesSize);
         ensureAdditionalCapacity(nElements);
         putInt(nElements); // strided-array size
-        copyMemory(values, ARRAY_BOOLEAN_BASE_OFFSET + offset, buffer, ARRAY_BYTE_BASE_OFFSET + position, nElements);
+        copyMemory(values, ARRAY_BOOLEAN_BASE_OFFSET, buffer, ARRAY_BYTE_BASE_OFFSET + position, nElements);
         position += nElements;
     }
 
@@ -467,15 +459,14 @@ public class FastByteBuffer implements IoBuffer {
     }
 
     @Override
-    public void putCharArray(final char[] values, final int offset, final int n) {
+    public void putCharArray(final char[] values, final int n) {
         final int arrayOffset = ARRAY_CHAR_BASE_OFFSET;
-        final int primitiveSize = SIZE_OF_CHAR;
         final int valuesSize = values == null ? 0 : values.length;
         final int nElements = (n >= 0 ? Math.min(n, valuesSize) : valuesSize);
-        final int bytesToCopy = nElements * primitiveSize;
+        final int bytesToCopy = nElements * SIZE_OF_CHAR;
         ensureAdditionalCapacity(bytesToCopy);
         putInt(nElements); // strided-array size
-        copyMemory(values, arrayOffset + offset * primitiveSize, buffer, arrayOffset + position, bytesToCopy);
+        copyMemory(values, arrayOffset, buffer, arrayOffset + position, bytesToCopy);
         position += bytesToCopy;
     }
 
@@ -486,15 +477,14 @@ public class FastByteBuffer implements IoBuffer {
     }
 
     @Override
-    public void putDoubleArray(final double[] values, final int offset, final int n) {
+    public void putDoubleArray(final double[] values, final int n) {
         final int arrayOffset = ARRAY_DOUBLE_BASE_OFFSET;
-        final int primitiveSize = SIZE_OF_DOUBLE;
         final int valuesSize = values == null ? 0 : values.length;
         final int nElements = (n >= 0 ? Math.min(n, valuesSize) : valuesSize);
-        final int bytesToCopy = nElements * primitiveSize;
+        final int bytesToCopy = nElements * SIZE_OF_DOUBLE;
         ensureAdditionalCapacity(bytesToCopy);
         putInt(nElements); // strided-array size
-        copyMemory(values, arrayOffset + offset * primitiveSize, buffer, arrayOffset + position, bytesToCopy);
+        copyMemory(values, arrayOffset, buffer, arrayOffset + position, bytesToCopy);
         position += bytesToCopy;
     }
 
@@ -505,15 +495,14 @@ public class FastByteBuffer implements IoBuffer {
     }
 
     @Override
-    public void putFloatArray(final float[] values, final int offset, final int n) {
+    public void putFloatArray(final float[] values, final int n) {
         final int arrayOffset = ARRAY_FLOAT_BASE_OFFSET;
-        final int primitiveSize = SIZE_OF_FLOAT;
         final int valuesSize = values == null ? 0 : values.length;
         final int nElements = (n >= 0 ? Math.min(n, valuesSize) : valuesSize);
-        final int bytesToCopy = nElements * primitiveSize;
+        final int bytesToCopy = nElements * SIZE_OF_FLOAT;
         ensureAdditionalCapacity(bytesToCopy);
         putInt(nElements); // strided-array size
-        copyMemory(values, arrayOffset + offset * primitiveSize, buffer, arrayOffset + position, bytesToCopy);
+        copyMemory(values, arrayOffset, buffer, arrayOffset + position, bytesToCopy);
         position += bytesToCopy;
     }
 
@@ -524,15 +513,14 @@ public class FastByteBuffer implements IoBuffer {
     }
 
     @Override
-    public void putIntArray(final int[] values, final int offset, final int n) {
+    public void putIntArray(final int[] values, final int n) {
         final int arrayOffset = ARRAY_INT_BASE_OFFSET;
-        final int primitiveSize = SIZE_OF_INT;
         final int valuesSize = values == null ? 0 : values.length;
         final int nElements = (n >= 0 ? Math.min(n, valuesSize) : valuesSize);
-        final int bytesToCopy = nElements * primitiveSize;
+        final int bytesToCopy = nElements * SIZE_OF_INT;
         ensureAdditionalCapacity(bytesToCopy);
         putInt(nElements); // strided-array size
-        copyMemory(values, arrayOffset + offset * primitiveSize, buffer, arrayOffset + position, bytesToCopy);
+        copyMemory(values, arrayOffset, buffer, arrayOffset + position, bytesToCopy);
         position += bytesToCopy;
     }
 
@@ -543,15 +531,14 @@ public class FastByteBuffer implements IoBuffer {
     }
 
     @Override
-    public void putLongArray(final long[] values, final int offset, final int n) {
+    public void putLongArray(final long[] values, final int n) {
         final int arrayOffset = ARRAY_LONG_BASE_OFFSET;
-        final int primitiveSize = SIZE_OF_LONG;
         final int valuesSize = values == null ? 0 : values.length;
         final int nElements = (n >= 0 ? Math.min(n, valuesSize) : valuesSize);
-        final int bytesToCopy = nElements * primitiveSize;
+        final int bytesToCopy = nElements * SIZE_OF_LONG;
         ensureAdditionalCapacity(bytesToCopy);
         putInt(nElements); // strided-array size
-        copyMemory(values, arrayOffset + offset * primitiveSize, buffer, arrayOffset + position, bytesToCopy);
+        copyMemory(values, arrayOffset, buffer, arrayOffset + position, bytesToCopy);
         position += bytesToCopy;
     }
 
@@ -562,15 +549,14 @@ public class FastByteBuffer implements IoBuffer {
     }
 
     @Override
-    public void putShortArray(final short[] values, final int offset, final int n) { // NOPMD by rstein
+    public void putShortArray(final short[] values, final int n) { // NOPMD by rstein
         final int arrayOffset = ARRAY_SHORT_BASE_OFFSET;
-        final int primitiveSize = SIZE_OF_SHORT;
         final int valuesSize = values == null ? 0 : values.length;
         final int nElements = (n >= 0 ? Math.min(n, valuesSize) : valuesSize);
-        final int bytesToCopy = nElements * primitiveSize;
+        final int bytesToCopy = nElements * SIZE_OF_SHORT;
         ensureAdditionalCapacity(bytesToCopy);
         putInt(nElements); // strided-array size
-        copyMemory(values, arrayOffset + offset * primitiveSize, buffer, arrayOffset + position, bytesToCopy);
+        copyMemory(values, arrayOffset, buffer, arrayOffset + position, bytesToCopy);
         position += bytesToCopy;
     }
 
@@ -601,7 +587,7 @@ public class FastByteBuffer implements IoBuffer {
     }
 
     @Override
-    public void putStringArray(final String[] values, final int offset, final int n) {
+    public void putStringArray(final String[] values, final int n) {
         final int valuesSize = values == null ? 0 : values.length;
         final int nElements = n >= 0 ? Math.min(n, valuesSize) : valuesSize;
         ensureAdditionalCapacity(nElements);
@@ -612,12 +598,12 @@ public class FastByteBuffer implements IoBuffer {
 
         if (isEnforceSimpleStringEncoding()) {
             for (int k = 0; k < nElements; k++) {
-                putStringISO8859(values[k + offset]);
+                putStringISO8859(values[k]);
             }
             return;
         }
         for (int k = 0; k < nElements; k++) {
-            putString(values[k + offset]);
+            putString(values[k]);
         }
     }
 

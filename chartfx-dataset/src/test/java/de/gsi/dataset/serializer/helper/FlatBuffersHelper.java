@@ -338,17 +338,18 @@ public class FlatBuffersHelper {
                 .log("FlatBuffers (custom FlexBuffers) throughput = {}/s for {} per test run (took {} ms)");
     }
 
-    public static void checkCustomSerialiserIdentity(final TestDataClass inputObject, final TestDataClass outputObject) {
+    public static int checkCustomSerialiserIdentity(final TestDataClass inputObject, final TestDataClass outputObject) {
         //final FlexBuffersBuilder floatBuffersBuilder = new FlexBuffersBuilder(new ArrayReadWriteBuf(rawByteBuffer), FlexBuffersBuilder.BUILDER_FLAG_SHARE_KEYS_AND_STRINGS);
         final FlexBuffersBuilder floatBuffersBuilder = new FlexBuffersBuilder(new ArrayReadWriteBuf(rawByteBuffer), FlexBuffersBuilder.BUILDER_FLAG_NONE);
         final ByteBuffer retVal = FlatBuffersHelper.serialiseCustom(floatBuffersBuilder, inputObject);
         final int nBytesFlatBuffers = retVal.limit();
-        LOGGER.atInfo().addArgument(nBytesFlatBuffers).log("flatBuffers serialiser nBytes = {}");
+
         FlatBuffersHelper.deserialiseCustom(retVal, outputObject);
 
         // second test - both vectors should have the same initial values after serialise/deserialise
         //        assertArrayEquals(inputObject.stringArray, outputObject.stringArray);
 
         assertEquals(inputObject, outputObject, "TestDataClass input-output equality");
+        return nBytesFlatBuffers;
     }
 }

@@ -6,6 +6,8 @@ import java.util.List;
 public interface FieldDescription {
     boolean isAnnotationPresent();
 
+    FieldDescription findChildField(String fieldName);
+
     FieldDescription findChildField(final int fieldNameHashCode, final String fieldName);
 
     List<FieldDescription> getChildren();

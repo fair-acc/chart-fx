@@ -5,6 +5,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.concurrent.TimeUnit;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.gsi.dataset.serializer.DataType;
 import de.gsi.dataset.serializer.IoBuffer;
 import de.gsi.dataset.serializer.IoClassSerialiser;
@@ -14,17 +17,15 @@ import de.gsi.dataset.serializer.spi.CmwLightSerialiser;
 import de.gsi.dataset.serializer.spi.FastByteBuffer;
 import de.gsi.dataset.serializer.spi.ProtocolInfo;
 import de.gsi.dataset.serializer.spi.WireDataFieldDescription;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class CmwLightHelper {
     private static final Logger LOGGER = LoggerFactory.getLogger(SerialiserBenchmark.class); // N.B. SerialiserBenchmark reference on purpose
     private static final IoBuffer byteBuffer = new FastByteBuffer(100000);
     // private static final IoBuffer byteBuffer = new ByteBuffer(20000);
     private static final CmwLightSerialiser cmwLightSerialiser = new CmwLightSerialiser(byteBuffer);
-    private static final IoClassSerialiser ioSerialiser = new IoClassSerialiser(cmwLightSerialiser);
+    private static final IoClassSerialiser ioSerialiser = new IoClassSerialiser(byteBuffer, CmwLightSerialiser.class);
     private static int nEntries = -1;
-/*
+    /*
     public static void checkCmwLightVsCmwIdentityBackward(final TestDataClass inputObject, TestDataClass outputObject) {
         final DataSerializer cmwSerializer = DataFactory.createDataSerializer();
         TestDataClass.setCmwCompatibilityMode(true);
@@ -82,7 +83,7 @@ public class CmwLightHelper {
 
         // N.B. cannot use custom deserialiser since entry order seems to be arbitrary in CMW Data object
         wrapCmwBuffer.reset();
-        outputObject = (TestDataClass) ioSerialiser.deserialiseObject(outputObject);
+        ioSerialiser.deserialiseObject(outputObject);
 
         // second test - both vectors should have the same initial values after serialise/deserialise
         assertArrayEquals(inputObject.stringArray, outputObject.stringArray);
@@ -92,12 +93,11 @@ public class CmwLightHelper {
         cmwLightSerialiser.setBuffer(byteBuffer);
     }
 */
-    public static void checkCustomSerialiserIdentity(final TestDataClass inputObject, TestDataClass outputObject) {
+    public static int checkCustomSerialiserIdentity(final TestDataClass inputObject, TestDataClass outputObject) {
         outputObject.clear();
         byteBuffer.reset();
         CmwLightHelper.serialiseCustom(cmwLightSerialiser, inputObject);
         final int nBytesCmwLight = byteBuffer.position();
-        LOGGER.atInfo().addArgument(nBytesCmwLight).log("CmwLight serialiser nBytes = {}");
 
         // keep: checks serialised data structure
         // byteBuffer.reset();
@@ -111,9 +111,10 @@ public class CmwLightHelper {
         assertArrayEquals(inputObject.stringArray, outputObject.stringArray);
 
         assertEquals(inputObject, outputObject, "TestDataClass input-output equality");
+        return nBytesCmwLight;
     }
 
-    public static void checkSerialiserIdentity(final TestDataClass inputObject, TestDataClass outputObject) {
+    public static int checkSerialiserIdentity(final TestDataClass inputObject, TestDataClass outputObject) {
         outputObject.clear();
         byteBuffer.reset();
 
@@ -121,7 +122,6 @@ public class CmwLightHelper {
 
         // CmwLightHelper.serialiseCustom(cmwLightSerialiser, inputObject);
         final int nBytes = byteBuffer.position();
-        LOGGER.atInfo().addArgument(nBytes).log("CmwLight serialiser nBytes = {}");
 
         // keep: checks serialised data structure
         // byteBuffer.reset();
@@ -129,18 +129,20 @@ public class CmwLightHelper {
         // fieldRoot.printFieldStructure();
 
         byteBuffer.reset();
-        outputObject = (TestDataClass) ioSerialiser.deserialiseObject(outputObject);
+        ioSerialiser.deserialiseObject(outputObject);
 
         // second test - both vectors should have the same initial values after serialise/deserialise
         assertArrayEquals(inputObject.stringArray, outputObject.stringArray);
 
         assertEquals(inputObject, outputObject, "TestDataClass input-output equality");
+        return nBytes;
     }
 
     public static void deserialiseCustom(IoSerialiser ioSerialiser, final TestDataClass pojo) {
         deserialiseCustom(ioSerialiser, pojo, true);
     }
 
+    @SuppressWarnings("PMD.ExcessiveMethodLength")
     public static void deserialiseCustom(IoSerialiser ioSerialiser, final TestDataClass pojo, boolean header) {
         if (header) {
             final ProtocolInfo headerField = ioSerialiser.checkHeaderInfo();
@@ -250,7 +252,7 @@ public class CmwLightHelper {
             return;
         }
 
-        if (field.getDataType().equals(de.gsi.dataset.serializer.DataType.START_MARKER)) {
+        if (field.getDataType().equals(DataType.START_MARKER)) {
             if (pojo.nestedData == null) {
                 pojo.nestedData = new TestDataClass();
             }
@@ -303,30 +305,30 @@ public class CmwLightHelper {
         }
 
         // 1D-arrays
-        ioSerialiser.put("boolArray", pojo.boolArray, 0, pojo.boolArray.length);
-        ioSerialiser.put("byteArray", pojo.byteArray, 0, pojo.byteArray.length);
-        //ioSerialiser.put("charArray", pojo.charArray, 0, pojo.charArray.length); // not supported by CMW
-        ioSerialiser.put("shortArray", pojo.shortArray, 0, pojo.shortArray.length);
-        ioSerialiser.put("intArray", pojo.intArray, 0, pojo.intArray.length);
-        ioSerialiser.put("longArray", pojo.longArray, 0, pojo.longArray.length);
-        ioSerialiser.put("floatArray", pojo.floatArray, 0, pojo.floatArray.length);
-        ioSerialiser.put("doubleArray", pojo.doubleArray, 0, pojo.doubleArray.length);
-        ioSerialiser.put("stringArray", pojo.stringArray, 0, pojo.stringArray.length);
+        ioSerialiser.put("boolArray", pojo.boolArray, pojo.boolArray.length);
+        ioSerialiser.put("byteArray", pojo.byteArray, pojo.byteArray.length);
+        //ioSerialiser.put("charArray", pojo.charArray, pojo.charArray.length); // not supported by CMW
+        ioSerialiser.put("shortArray", pojo.shortArray, pojo.shortArray.length);
+        ioSerialiser.put("intArray", pojo.intArray, pojo.intArray.length);
+        ioSerialiser.put("longArray", pojo.longArray, pojo.longArray.length);
+        ioSerialiser.put("floatArray", pojo.floatArray, pojo.floatArray.length);
+        ioSerialiser.put("doubleArray", pojo.doubleArray, pojo.doubleArray.length);
+        ioSerialiser.put("stringArray", pojo.stringArray, pojo.stringArray.length);
 
         // multi-dim case
-        ioSerialiser.put("nDimensions", pojo.nDimensions, 0, pojo.nDimensions.length);
-        ioSerialiser.put("boolNdimArray", pojo.boolNdimArray, 0, pojo.nDimensions);
-        ioSerialiser.put("byteNdimArray", pojo.byteNdimArray, 0, pojo.nDimensions);
+        ioSerialiser.put("nDimensions", pojo.nDimensions, pojo.nDimensions.length);
+        ioSerialiser.put("boolNdimArray", pojo.boolNdimArray, pojo.nDimensions);
+        ioSerialiser.put("byteNdimArray", pojo.byteNdimArray, pojo.nDimensions);
         //ioSerialiser.put("charNdimArray", pojo.nDimensions); // not supported by CMW
-        ioSerialiser.put("shortNdimArray", pojo.shortNdimArray, 0, pojo.nDimensions);
-        ioSerialiser.put("intNdimArray", pojo.intNdimArray, 0, pojo.nDimensions);
-        ioSerialiser.put("longNdimArray", pojo.longNdimArray, 0, pojo.nDimensions);
-        ioSerialiser.put("floatNdimArray", pojo.floatNdimArray, 0, pojo.nDimensions);
-        ioSerialiser.put("doubleNdimArray", pojo.doubleNdimArray, 0, pojo.nDimensions);
+        ioSerialiser.put("shortNdimArray", pojo.shortNdimArray, pojo.nDimensions);
+        ioSerialiser.put("intNdimArray", pojo.intNdimArray, pojo.nDimensions);
+        ioSerialiser.put("longNdimArray", pojo.longNdimArray, pojo.nDimensions);
+        ioSerialiser.put("floatNdimArray", pojo.floatNdimArray, pojo.nDimensions);
+        ioSerialiser.put("doubleNdimArray", pojo.doubleNdimArray, pojo.nDimensions);
 
         if (pojo.nestedData != null) {
             final String dataStartMarkerName = "nestedData";
-            final WireDataFieldDescription nestedDataMarker = new WireDataFieldDescription(null, dataStartMarkerName.hashCode(), dataStartMarkerName, DataType.START_MARKER, -1, -1, -1);
+            final WireDataFieldDescription nestedDataMarker = new WireDataFieldDescription(ioSerialiser, null, dataStartMarkerName.hashCode(), dataStartMarkerName, DataType.START_MARKER, -1, -1, -1);
             ioSerialiser.putStartMarker(nestedDataMarker);
             serialiseCustom(ioSerialiser, pojo.nestedData, false);
             ioSerialiser.putEndMarker(nestedDataMarker);
@@ -334,7 +336,7 @@ public class CmwLightHelper {
 
         if (header) {
             final String dataEndMarkerName = "OBJ_ROOT_END";
-            final WireDataFieldDescription dataEndMarker = new WireDataFieldDescription(null, dataEndMarkerName.hashCode(), dataEndMarkerName, DataType.START_MARKER, -1, -1, -1);
+            final WireDataFieldDescription dataEndMarker = new WireDataFieldDescription(ioSerialiser, null, dataEndMarkerName.hashCode(), dataEndMarkerName, DataType.START_MARKER, -1, -1, -1);
             ioSerialiser.putEndMarker(dataEndMarker);
         }
     }
@@ -382,7 +384,7 @@ public class CmwLightHelper {
 
             byteBuffer.reset();
 
-            outputObject = (TestDataClass) ioSerialiser.deserialiseObject(outputObject);
+            ioSerialiser.deserialiseObject(outputObject);
 
             if (!inputObject.string1.contentEquals(outputObject.string1)) {
                 // quick check necessary so that the above is not optimised by the Java JIT compiler to NOP

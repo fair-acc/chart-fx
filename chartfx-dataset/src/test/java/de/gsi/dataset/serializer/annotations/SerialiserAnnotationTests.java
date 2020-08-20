@@ -58,7 +58,7 @@ class SerialiserAnnotationTests {
         assertNotNull(bufferClass.getConstructor(int.class), "Constructor(Integer) present");
         final IoBuffer buffer = bufferClass.getConstructor(int.class).newInstance(BUFFER_SIZE);
         final BinarySerialiser ioSerialiser = new BinarySerialiser(buffer);
-        final IoClassSerialiser serialiser = new IoClassSerialiser(ioSerialiser);
+        final IoClassSerialiser serialiser = new IoClassSerialiser(buffer, ioSerialiser.getClass());
 
         final AnnotatedDataClass inputObject = new AnnotatedDataClass();
 

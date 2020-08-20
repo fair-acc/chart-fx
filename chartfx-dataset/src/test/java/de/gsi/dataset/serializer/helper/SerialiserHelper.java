@@ -24,7 +24,7 @@ public final class SerialiserHelper {
 
     // private static final IoBuffer byteBuffer = new ByteBuffer(20000);
     private static final BinarySerialiser binarySerialiser = new BinarySerialiser(byteBuffer);
-    private static final IoClassSerialiser ioSerialiser = new IoClassSerialiser(binarySerialiser);
+    private static final IoClassSerialiser ioSerialiser = new IoClassSerialiser(byteBuffer, BinarySerialiser.class);
 
     public static void serialiseCustom(IoSerialiser ioSerialiser, final TestDataClass pojo) {
         serialiseCustom(ioSerialiser, pojo, true);
@@ -55,30 +55,30 @@ public final class SerialiserHelper {
         ioSerialiser.put("string2", pojo.string2);
 
         // 1D-arrays
-        ioSerialiser.put("boolArray", pojo.boolArray, 0, pojo.boolArray.length);
-        ioSerialiser.put("byteArray", pojo.byteArray, 0, pojo.byteArray.length);
-        //ioSerialiser.put("charArray", pojo.charArray, 0, pojo.charArray.lenght);
-        ioSerialiser.put("shortArray", pojo.shortArray, 0, pojo.shortArray.length);
-        ioSerialiser.put("intArray", pojo.intArray, 0, pojo.intArray.length);
-        ioSerialiser.put("longArray", pojo.longArray, 0, pojo.longArray.length);
-        ioSerialiser.put("floatArray", pojo.floatArray, 0, pojo.floatArray.length);
-        ioSerialiser.put("doubleArray", pojo.doubleArray, 0, pojo.doubleArray.length);
-        ioSerialiser.put("stringArray", pojo.stringArray, 0, pojo.stringArray.length);
+        ioSerialiser.put("boolArray", pojo.boolArray, pojo.boolArray.length);
+        ioSerialiser.put("byteArray", pojo.byteArray, pojo.byteArray.length);
+        //ioSerialiser.put("charArray", pojo.charArray,  pojo.charArray.lenght);
+        ioSerialiser.put("shortArray", pojo.shortArray, pojo.shortArray.length);
+        ioSerialiser.put("intArray", pojo.intArray, pojo.intArray.length);
+        ioSerialiser.put("longArray", pojo.longArray, pojo.longArray.length);
+        ioSerialiser.put("floatArray", pojo.floatArray, pojo.floatArray.length);
+        ioSerialiser.put("doubleArray", pojo.doubleArray, pojo.doubleArray.length);
+        ioSerialiser.put("stringArray", pojo.stringArray, pojo.stringArray.length);
 
         // multi-dim case
-        ioSerialiser.put("nDimensions", pojo.nDimensions, 0, pojo.nDimensions.length);
-        ioSerialiser.put("boolNdimArray", pojo.boolNdimArray, 0, pojo.nDimensions);
-        ioSerialiser.put("byteNdimArray", pojo.byteNdimArray, 0, pojo.nDimensions);
+        ioSerialiser.put("nDimensions", pojo.nDimensions, pojo.nDimensions.length);
+        ioSerialiser.put("boolNdimArray", pojo.boolNdimArray, pojo.nDimensions);
+        ioSerialiser.put("byteNdimArray", pojo.byteNdimArray, pojo.nDimensions);
         //ioSerialiser.put("charNdimArray", pojo.nDimensions);
-        ioSerialiser.put("shortNdimArray", pojo.shortNdimArray, 0, pojo.nDimensions);
-        ioSerialiser.put("intNdimArray", pojo.intNdimArray, 0, pojo.nDimensions);
-        ioSerialiser.put("longNdimArray", pojo.longNdimArray, 0, pojo.nDimensions);
-        ioSerialiser.put("floatNdimArray", pojo.floatNdimArray, 0, pojo.nDimensions);
-        ioSerialiser.put("doubleNdimArray", pojo.doubleNdimArray, 0, pojo.nDimensions);
+        ioSerialiser.put("shortNdimArray", pojo.shortNdimArray, pojo.nDimensions);
+        ioSerialiser.put("intNdimArray", pojo.intNdimArray, pojo.nDimensions);
+        ioSerialiser.put("longNdimArray", pojo.longNdimArray, pojo.nDimensions);
+        ioSerialiser.put("floatNdimArray", pojo.floatNdimArray, pojo.nDimensions);
+        ioSerialiser.put("doubleNdimArray", pojo.doubleNdimArray, pojo.nDimensions);
 
         if (pojo.nestedData != null) {
             final String dataStartMarkerName = "nestedData";
-            final WireDataFieldDescription nestedDataMarker = new WireDataFieldDescription(null, dataStartMarkerName.hashCode(), dataStartMarkerName, DataType.START_MARKER, -1, -1, -1);
+            final WireDataFieldDescription nestedDataMarker = new WireDataFieldDescription(ioSerialiser, null, dataStartMarkerName.hashCode(), dataStartMarkerName, DataType.START_MARKER, -1, -1, -1);
             ioSerialiser.putStartMarker(nestedDataMarker);
             serialiseCustom(ioSerialiser, pojo.nestedData, false);
             ioSerialiser.putEndMarker(nestedDataMarker);
@@ -86,7 +86,7 @@ public final class SerialiserHelper {
 
         if (header) {
             final String dataEndMarkerName = "OBJ_ROOT_END";
-            final WireDataFieldDescription dataEndMarker = new WireDataFieldDescription(null, dataEndMarkerName.hashCode(), dataEndMarkerName, DataType.START_MARKER, -1, -1, -1);
+            final WireDataFieldDescription dataEndMarker = new WireDataFieldDescription(ioSerialiser, null, dataEndMarkerName.hashCode(), dataEndMarkerName, DataType.START_MARKER, -1, -1, -1);
             ioSerialiser.putEndMarker(dataEndMarker);
         }
     }
@@ -300,49 +300,49 @@ public final class SerialiserHelper {
                 .log("IO Serializer (custom) throughput = {}/s for {} per test run (took {} ms)");
     }
 
-    public static void checkSerialiserIdentity(final TestDataClass inputObject, TestDataClass outputObject) {
+    public static int checkSerialiserIdentity(final TestDataClass inputObject, TestDataClass outputObject) {
         outputObject.clear();
         byteBuffer.reset();
 
         ioSerialiser.serialiseObject(inputObject);
 
         // SerialiserHelper.serialiseCustom(byteBuffer, inputObject);
-        final int nBytesIO = byteBuffer.position();
-        LOGGER.atInfo().addArgument(nBytesIO).log("generic serialiser nBytes = {}");
 
+        byteBuffer.flip();
         // keep: checks serialised data structure
         // byteBuffer.reset();
         // final WireDataFieldDescription fieldRoot = SerialiserHelper.deserialiseMap(byteBuffer);
         // fieldRoot.printFieldStructure();
 
-        byteBuffer.reset();
         outputObject = (TestDataClass) ioSerialiser.deserialiseObject(outputObject);
 
         // second test - both vectors should have the same initial values after serialise/deserialise
         assertArrayEquals(inputObject.stringArray, outputObject.stringArray);
 
         assertEquals(inputObject, outputObject, "TestDataClass input-output equality");
+
+        return byteBuffer.limit();
     }
 
-    public static void checkCustomSerialiserIdentity(final TestDataClass inputObject, TestDataClass outputObject) {
+    public static int checkCustomSerialiserIdentity(final TestDataClass inputObject, TestDataClass outputObject) {
         outputObject.clear();
         byteBuffer.reset();
         SerialiserHelper.serialiseCustom(binarySerialiser, inputObject);
-        final int nBytesIO = byteBuffer.position();
-        LOGGER.atInfo().addArgument(nBytesIO).log("custom serialiser nBytes = {}");
+
+        byteBuffer.flip();
 
         // keep: checks serialised data structure
         // byteBuffer.reset();
         // final WireDataFieldDescription fieldRoot = SerialiserHelper.deserialiseMap(byteBuffer);
         // fieldRoot.printFieldStructure();
 
-        byteBuffer.reset();
         SerialiserHelper.deserialiseCustom(binarySerialiser, outputObject);
 
         // second test - both vectors should have the same initial values after serialise/deserialise
         assertArrayEquals(inputObject.stringArray, outputObject.stringArray);
 
         assertEquals(inputObject, outputObject, "TestDataClass input-output equality");
+        return byteBuffer.limit();
     }
 
     public static BinarySerialiser getBinarySerialiser() {
