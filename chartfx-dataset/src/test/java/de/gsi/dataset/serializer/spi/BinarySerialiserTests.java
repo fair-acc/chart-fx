@@ -40,15 +40,15 @@ class BinarySerialiserTests {
 
     private void putGenericTestArrays(final BinarySerialiser ioSerialiser) {
         ioSerialiser.putHeaderInfo();
-        ioSerialiser.putGenericArrayAsPrimitive(DataType.BOOL, new Boolean[] { true, false, true }, 0, 3);
-        ioSerialiser.putGenericArrayAsPrimitive(DataType.BYTE, new Byte[] { (byte) 1, (byte) 0, (byte) 2 }, 0, 3);
-        ioSerialiser.putGenericArrayAsPrimitive(DataType.CHAR, new Character[] { (char) 1, (char) 0, (char) 2 }, 0, 3);
-        ioSerialiser.putGenericArrayAsPrimitive(DataType.SHORT, new Short[] { (short) 1, (short) 0, (short) 2 }, 0, 3);
-        ioSerialiser.putGenericArrayAsPrimitive(DataType.INT, new Integer[] { 1, 0, 2 }, 0, 3);
-        ioSerialiser.putGenericArrayAsPrimitive(DataType.LONG, new Long[] { 1L, 0L, 2L }, 0, 3);
-        ioSerialiser.putGenericArrayAsPrimitive(DataType.FLOAT, new Float[] { (float) 1, (float) 0, (float) 2 }, 0, 3);
-        ioSerialiser.putGenericArrayAsPrimitive(DataType.DOUBLE, new Double[] { (double) 1, (double) 0, (double) 2 }, 0, 3);
-        ioSerialiser.putGenericArrayAsPrimitive(DataType.STRING, new String[] { "1.0", "0.0", "2.0" }, 0, 3);
+        ioSerialiser.putGenericArrayAsPrimitive(DataType.BOOL, new Boolean[] { true, false, true }, 3);
+        ioSerialiser.putGenericArrayAsPrimitive(DataType.BYTE, new Byte[] { (byte) 1, (byte) 0, (byte) 2 }, 3);
+        ioSerialiser.putGenericArrayAsPrimitive(DataType.CHAR, new Character[] { (char) 1, (char) 0, (char) 2 }, 3);
+        ioSerialiser.putGenericArrayAsPrimitive(DataType.SHORT, new Short[] { (short) 1, (short) 0, (short) 2 }, 3);
+        ioSerialiser.putGenericArrayAsPrimitive(DataType.INT, new Integer[] { 1, 0, 2 }, 3);
+        ioSerialiser.putGenericArrayAsPrimitive(DataType.LONG, new Long[] { 1L, 0L, 2L }, 3);
+        ioSerialiser.putGenericArrayAsPrimitive(DataType.FLOAT, new Float[] { (float) 1, (float) 0, (float) 2 }, 3);
+        ioSerialiser.putGenericArrayAsPrimitive(DataType.DOUBLE, new Double[] { (double) 1, (double) 0, (double) 2 }, 3);
+        ioSerialiser.putGenericArrayAsPrimitive(DataType.STRING, new String[] { "1.0", "0.0", "2.0" }, 3);
     }
 
     @DisplayName("basic primitive array writer tests")
@@ -413,7 +413,7 @@ class BinarySerialiserTests {
         // add start marker
         positionBefore.add(buffer.position());
         final String dataStartMarkerName = "StartMarker";
-        final WireDataFieldDescription dataStartMarker = new WireDataFieldDescription(null, dataStartMarkerName.hashCode(), dataStartMarkerName, DataType.START_MARKER, -1, -1, -1);
+        final WireDataFieldDescription dataStartMarker = new WireDataFieldDescription(ioSerialiser, null, dataStartMarkerName.hashCode(), dataStartMarkerName, DataType.START_MARKER, -1, -1, -1);
         ioSerialiser.putStartMarker(dataStartMarker);
         positionAfter.add(buffer.position());
 
@@ -450,7 +450,7 @@ class BinarySerialiserTests {
         // add end marker
         positionBefore.add(buffer.position());
         final String dataEndMarkerName = "EndMarker";
-        final WireDataFieldDescription dataEndMarker = new WireDataFieldDescription(null, dataEndMarkerName.hashCode(), dataEndMarkerName, DataType.START_MARKER, -1, -1, -1);
+        final WireDataFieldDescription dataEndMarker = new WireDataFieldDescription(ioSerialiser, null, dataEndMarkerName.hashCode(), dataEndMarkerName, DataType.START_MARKER, -1, -1, -1);
         ioSerialiser.putEndMarker(dataEndMarker);
         positionAfter.add(buffer.position());
 
@@ -634,14 +634,14 @@ class BinarySerialiserTests {
         ioSerialiser.put("double", 42);
         ioSerialiser.put("string", "string");
 
-        ioSerialiser.put("boolean[]", new boolean[] { true }, 0, 1);
-        ioSerialiser.put("byte[]", new byte[] { (byte) 42 }, 0, 1);
-        ioSerialiser.put("short[]", new short[] { (short) 42 }, 0, 1);
-        ioSerialiser.put("int[]", new int[] { 42 }, 0, 1);
-        ioSerialiser.put("long[]", new long[] { 42L }, 0, 1);
-        ioSerialiser.put("float[]", new float[] { (float) 42 }, 0, 1);
-        ioSerialiser.put("double[]", new double[] { (double) 42 }, 0, 1);
-        ioSerialiser.put("string[]", new String[] { "string" }, 0, 1);
+        ioSerialiser.put("boolean[]", new boolean[] { true }, 1);
+        ioSerialiser.put("byte[]", new byte[] { (byte) 42 }, 1);
+        ioSerialiser.put("short[]", new short[] { (short) 42 }, 1);
+        ioSerialiser.put("int[]", new int[] { 42 }, 1);
+        ioSerialiser.put("long[]", new long[] { 42L }, 1);
+        ioSerialiser.put("float[]", new float[] { (float) 42 }, 1);
+        ioSerialiser.put("double[]", new double[] { (double) 42 }, 1);
+        ioSerialiser.put("string[]", new String[] { "string" }, 1);
 
         final Collection<Integer> collection = Arrays.asList(1, 2, 3);
         ioSerialiser.put("collection", collection, Integer.class, null); // add Collection - List<E>
@@ -663,16 +663,16 @@ class BinarySerialiserTests {
 
         // start nested data
         final String nestedContextName = "nested context";
-        final WireDataFieldDescription nestedContextMarker = new WireDataFieldDescription(null, nestedContextName.hashCode(), nestedContextName, DataType.START_MARKER, -1, -1, -1);
+        final WireDataFieldDescription nestedContextMarker = new WireDataFieldDescription(ioSerialiser, null, nestedContextName.hashCode(), nestedContextName, DataType.START_MARKER, -1, -1, -1);
         ioSerialiser.putStartMarker(nestedContextMarker); // add start marker
-        ioSerialiser.put("booleanArray", new boolean[] { true }, 0, 1);
-        ioSerialiser.put("byteArray", new byte[] { (byte) 0x42 }, 0, 1);
+        ioSerialiser.put("booleanArray", new boolean[] { true }, 1);
+        ioSerialiser.put("byteArray", new byte[] { (byte) 0x42 }, 1);
 
         ioSerialiser.putEndMarker(nestedContextMarker); // add end marker
         // end nested data
 
         final String dataEndMarkerName = "Life is good!";
-        final WireDataFieldDescription dataEndMarker = new WireDataFieldDescription(null, dataEndMarkerName.hashCode(), dataEndMarkerName, DataType.START_MARKER, -1, -1, -1);
+        final WireDataFieldDescription dataEndMarker = new WireDataFieldDescription(ioSerialiser, null, dataEndMarkerName.hashCode(), dataEndMarkerName, DataType.START_MARKER, -1, -1, -1);
         ioSerialiser.putEndMarker(dataEndMarker); // add end marker
 
         buffer.reset();

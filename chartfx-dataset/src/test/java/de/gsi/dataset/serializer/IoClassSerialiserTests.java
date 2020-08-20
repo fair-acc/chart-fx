@@ -44,7 +44,7 @@ class IoClassSerialiserTests {
         assertNotNull(bufferClass.getConstructor(int.class), "Constructor(Integer) present");
         final IoBuffer buffer = bufferClass.getConstructor(int.class).newInstance(2 * BUFFER_SIZE);
 
-        IoClassSerialiser serialiser = new IoClassSerialiser(new BinarySerialiser(buffer));
+        IoClassSerialiser serialiser = new IoClassSerialiser(buffer, BinarySerialiser.class);
 
         final AtomicInteger writerCalled = new AtomicInteger(0);
         final AtomicInteger returnCalled = new AtomicInteger(0);
@@ -104,7 +104,7 @@ class IoClassSerialiserTests {
         buffer.reset(); // '0' writing at start of buffer
         serialiser.serialiseObject(sourceClass);
         buffer.reset(); // reset to read position (==0)
-        final WireDataFieldDescription root = serialiser.getIoSerialiser().parseIoStream(true);
+        final WireDataFieldDescription root = serialiser.getMatchedIoSerialiser().parseIoStream(true);
         root.printFieldStructure();
         buffer.reset(); // reset to read position (==0)
         serialiser.deserialiseObject(destinationClass);
@@ -119,7 +119,7 @@ class IoClassSerialiserTests {
         assertNotNull(bufferClass.getConstructor(int.class), "Constructor(Integer) present");
         final IoBuffer buffer = bufferClass.getConstructor(int.class).newInstance(2 * BUFFER_SIZE);
 
-        IoClassSerialiser serialiser = new IoClassSerialiser(new BinarySerialiser(buffer));
+        IoClassSerialiser serialiser = new IoClassSerialiser(buffer, BinarySerialiser.class);
 
         TestClass sourceClass = new TestClass();
         sourceClass.integerList = new ArrayList<>();
