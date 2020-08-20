@@ -5,9 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.concurrent.TimeUnit;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import de.gsi.dataset.serializer.DataType;
 import de.gsi.dataset.serializer.IoBuffer;
 import de.gsi.dataset.serializer.IoClassSerialiser;
@@ -17,6 +14,8 @@ import de.gsi.dataset.serializer.spi.CmwLightSerialiser;
 import de.gsi.dataset.serializer.spi.FastByteBuffer;
 import de.gsi.dataset.serializer.spi.ProtocolInfo;
 import de.gsi.dataset.serializer.spi.WireDataFieldDescription;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class CmwLightHelper {
     private static final Logger LOGGER = LoggerFactory.getLogger(SerialiserBenchmark.class); // N.B. SerialiserBenchmark reference on purpose
@@ -25,7 +24,7 @@ public class CmwLightHelper {
     private static final CmwLightSerialiser cmwLightSerialiser = new CmwLightSerialiser(byteBuffer);
     private static final IoClassSerialiser ioSerialiser = new IoClassSerialiser(cmwLightSerialiser);
     private static int nEntries = -1;
-    /*
+/*
     public static void checkCmwLightVsCmwIdentityBackward(final TestDataClass inputObject, TestDataClass outputObject) {
         final DataSerializer cmwSerializer = DataFactory.createDataSerializer();
         TestDataClass.setCmwCompatibilityMode(true);
@@ -227,25 +226,23 @@ public class CmwLightHelper {
         getFieldHeader(ioSerialiser);
         pojo.stringArray = ioSerialiser.getStringArray();
 
-        if (!TestDataClass.isCmwCompatibilityMode()) { // disabled since reference temporarily since CmwLight does not distinguish betwenn 1D, 2D, or nDim arrays (CMW has the same wire-format but different DataType ids for it)
-            // multidim case
-            getFieldHeader(ioSerialiser);
-            pojo.nDimensions = ioSerialiser.getIntArray();
-            getFieldHeader(ioSerialiser);
-            pojo.boolNdimArray = ioSerialiser.getBooleanArray();
-            getFieldHeader(ioSerialiser);
-            pojo.byteNdimArray = ioSerialiser.getByteArray();
-            getFieldHeader(ioSerialiser);
-            pojo.shortNdimArray = ioSerialiser.getShortArray();
-            getFieldHeader(ioSerialiser);
-            pojo.intNdimArray = ioSerialiser.getIntArray();
-            getFieldHeader(ioSerialiser);
-            pojo.longNdimArray = ioSerialiser.getLongArray();
-            getFieldHeader(ioSerialiser);
-            pojo.floatNdimArray = ioSerialiser.getFloatArray();
-            getFieldHeader(ioSerialiser);
-            pojo.doubleNdimArray = ioSerialiser.getDoubleArray();
-        }
+        // multidim case
+        getFieldHeader(ioSerialiser);
+        pojo.nDimensions = ioSerialiser.getIntArray();
+        getFieldHeader(ioSerialiser);
+        pojo.boolNdimArray = ioSerialiser.getBooleanArray();
+        getFieldHeader(ioSerialiser);
+        pojo.byteNdimArray = ioSerialiser.getByteArray();
+        getFieldHeader(ioSerialiser);
+        pojo.shortNdimArray = ioSerialiser.getShortArray();
+        getFieldHeader(ioSerialiser);
+        pojo.intNdimArray = ioSerialiser.getIntArray();
+        getFieldHeader(ioSerialiser);
+        pojo.longNdimArray = ioSerialiser.getLongArray();
+        getFieldHeader(ioSerialiser);
+        pojo.floatNdimArray = ioSerialiser.getFloatArray();
+        getFieldHeader(ioSerialiser);
+        pojo.doubleNdimArray = ioSerialiser.getDoubleArray();
 
         final WireDataFieldDescription field = getFieldHeader(ioSerialiser);
         if (field == null) {
@@ -316,18 +313,16 @@ public class CmwLightHelper {
         ioSerialiser.put("doubleArray", pojo.doubleArray, 0, pojo.doubleArray.length);
         ioSerialiser.put("stringArray", pojo.stringArray, 0, pojo.stringArray.length);
 
-        if (!TestDataClass.isCmwCompatibilityMode()) { // disabled since reference temporarily since CmwLight does not distinguish betwenn 1D, 2D, or nDim arrays (CMW has the same wire-format but different DataType ids for it)
-            // multi-dim case
-            ioSerialiser.put("nDimensions", pojo.nDimensions, 0, pojo.nDimensions.length);
-            ioSerialiser.put("boolNdimArray", pojo.boolNdimArray, 0, pojo.nDimensions);
-            ioSerialiser.put("byteNdimArray", pojo.byteNdimArray, 0, pojo.nDimensions);
-            //ioSerialiser.put("charNdimArray", pojo.nDimensions); // not supported by CMW
-            ioSerialiser.put("shortNdimArray", pojo.shortNdimArray, 0, pojo.nDimensions);
-            ioSerialiser.put("intNdimArray", pojo.intNdimArray, 0, pojo.nDimensions);
-            ioSerialiser.put("longNdimArray", pojo.longNdimArray, 0, pojo.nDimensions);
-            ioSerialiser.put("floatNdimArray", pojo.floatNdimArray, 0, pojo.nDimensions);
-            ioSerialiser.put("doubleNdimArray", pojo.doubleNdimArray, 0, pojo.nDimensions);
-        }
+        // multi-dim case
+        ioSerialiser.put("nDimensions", pojo.nDimensions, 0, pojo.nDimensions.length);
+        ioSerialiser.put("boolNdimArray", pojo.boolNdimArray, 0, pojo.nDimensions);
+        ioSerialiser.put("byteNdimArray", pojo.byteNdimArray, 0, pojo.nDimensions);
+        //ioSerialiser.put("charNdimArray", pojo.nDimensions); // not supported by CMW
+        ioSerialiser.put("shortNdimArray", pojo.shortNdimArray, 0, pojo.nDimensions);
+        ioSerialiser.put("intNdimArray", pojo.intNdimArray, 0, pojo.nDimensions);
+        ioSerialiser.put("longNdimArray", pojo.longNdimArray, 0, pojo.nDimensions);
+        ioSerialiser.put("floatNdimArray", pojo.floatNdimArray, 0, pojo.nDimensions);
+        ioSerialiser.put("doubleNdimArray", pojo.doubleNdimArray, 0, pojo.nDimensions);
 
         if (pojo.nestedData != null) {
             final String dataStartMarkerName = "nestedData";

@@ -1,16 +1,12 @@
 package de.gsi.dataset.serializer.helper;
 
-//import cern.cmw.data.Data;
-//import cern.cmw.data.DataFactory;
-//import cern.cmw.data.DataSerializer;
-//import cern.cmw.data.Entry;
-
 public final class CmwHelper {
     /*
     private static final Logger LOGGER = LoggerFactory.getLogger(SerialiserBenchmark.class); // N.B. SerialiserBenchmark reference on purpose
     private static final DataSerializer cmwSerializer = DataFactory.createDataSerializer();
 
-    public static Data getCmwData(final TestDataClass pojo) {
+    public static Data getCmwData(final TestDataCl
+    jo) {
         Data data = DataFactory.createData();
 
         data.append("bool1", pojo.bool1);
@@ -43,18 +39,16 @@ public final class CmwHelper {
         data.appendArray("doubleArray", pojo.doubleArray);
         data.appendArray("stringArray", pojo.stringArray);
 
-        if (!TestDataClass.isCmwCompatibilityMode()) { // disabled since reference temporarily since CmwLight does not distinguish betwenn 1D, 2D, or nDim arrays (CMW has the same wire-format but different DataType ids for it)
-            // multidim arrays
-            data.appendArray("nDimensions", pojo.nDimensions);
-            data.appendMultiArray("boolNdimArray", pojo.boolNdimArray, pojo.nDimensions);
-            data.appendMultiArray("byteNdimArray", pojo.byteNdimArray, pojo.nDimensions);
-            //data.appendMultiArray("charNdimArray", pojo.charNdimArray, pojo.nDimensions); // not supported by CMW
-            data.appendMultiArray("shortNdimArray", pojo.shortNdimArray, pojo.nDimensions);
-            data.appendMultiArray("intNdimArray", pojo.intNdimArray, pojo.nDimensions);
-            data.appendMultiArray("longNdimArray", pojo.longNdimArray, pojo.nDimensions);
-            data.appendMultiArray("floatNdimArray", pojo.floatNdimArray, pojo.nDimensions);
-            data.appendMultiArray("doubleNdimArray", pojo.doubleNdimArray, pojo.nDimensions);
-        }
+        // multidim arrays
+        data.appendArray("nDimensions", pojo.nDimensions);
+        data.appendMultiArray("boolNdimArray", pojo.boolNdimArray, pojo.nDimensions);
+        data.appendMultiArray("byteNdimArray", pojo.byteNdimArray, pojo.nDimensions);
+        //data.appendMultiArray("charNdimArray", pojo.charNdimArray, pojo.nDimensions); // not supported by CMW
+        data.appendMultiArray("shortNdimArray", pojo.shortNdimArray, pojo.nDimensions);
+        data.appendMultiArray("intNdimArray", pojo.intNdimArray, pojo.nDimensions);
+        data.appendMultiArray("longNdimArray", pojo.longNdimArray, pojo.nDimensions);
+        data.appendMultiArray("floatNdimArray", pojo.floatNdimArray, pojo.nDimensions);
+        data.appendMultiArray("doubleNdimArray", pojo.doubleNdimArray, pojo.nDimensions);
 
         if (pojo.nestedData != null) {
             data.append("nestedData", getCmwData(pojo.nestedData));
@@ -96,18 +90,16 @@ public final class CmwHelper {
         pojo.doubleArray = data.getDoubleArray("doubleArray");
         pojo.stringArray = data.getStringArray("stringArray");
 
-        if (!TestDataClass.isCmwCompatibilityMode()) { // disabled since reference temporarily since CmwLight does not distinguish betwenn 1D, 2D, or nDim arrays (CMW has the same wire-format but different DataType ids for it)
-            // multi-dim arrays
-            pojo.nDimensions = data.getIntArray("nDimensions");
-            pojo.boolNdimArray = data.getBoolMultiArray("boolNdimArray").getElements();
-            pojo.byteNdimArray = data.getByteMultiArray("byteNdimArray").getElements();
-            // pojo.charNdimArray = data.getCharMultiArray("byteArray"); // not supported by CMW
-            pojo.shortNdimArray = data.getShortMultiArray("shortNdimArray").getElements();
-            pojo.intNdimArray = data.getIntMultiArray("intNdimArray").getElements();
-            pojo.longNdimArray = data.getLongMultiArray("longNdimArray").getElements();
-            pojo.floatNdimArray = data.getFloatMultiArray("floatNdimArray").getElements();
-            pojo.doubleNdimArray = data.getDoubleMultiArray("doubleNdimArray").getElements();
-        }
+        // multi-dim arrays
+        pojo.nDimensions = data.getIntArray("nDimensions");
+        pojo.boolNdimArray = data.getBoolMultiArray("boolNdimArray").getElements();
+        pojo.byteNdimArray = data.getByteMultiArray("byteNdimArray").getElements();
+        // pojo.charNdimArray = data.getCharMultiArray("byteArray"); // not supported by CMW
+        pojo.shortNdimArray = data.getShortMultiArray("shortNdimArray").getElements();
+        pojo.intNdimArray = data.getIntMultiArray("intNdimArray").getElements();
+        pojo.longNdimArray = data.getLongMultiArray("longNdimArray").getElements();
+        pojo.floatNdimArray = data.getFloatMultiArray("floatNdimArray").getElements();
+        pojo.doubleNdimArray = data.getDoubleMultiArray("doubleNdimArray").getElements();
 
         final Entry nestedEntry = data.getEntry("nestedData");
         if (nestedEntry != null) {
@@ -185,5 +177,5 @@ public final class CmwHelper {
         //assertEquals(inputObject, outputObject, "TestDataClass input-output equality");
     }
 
-     */
+ */
 }
