@@ -41,8 +41,8 @@ public class CmwLightSerialiser implements IoSerialiser {
         // N.B. CmwLightSerialiser does not implement mappings for:
         // * discreteFunction
         // * discreteFunction_list
-        // and does not distinguish between 1D, 2D, or multi-dim arrays which share the same wire-encoding anyway
-        // CMW's 'Data' object is mapped to START_MARKER also used for nested data structures
+        // * array of Data objects (N.B. 'Data' and nested 'Data' is being explicitely supported)
+        // 'Data' object is mapped to START_MARKER also used for nested data structures
 
         byteToDataType[0] = DataType.BOOL;
         byteToDataType[1] = DataType.BYTE;
@@ -671,6 +671,11 @@ public class CmwLightSerialiser implements IoSerialiser {
     @Override
     public void put(final String fieldName, final boolean[] values, final int offset, final int[] dims) {
         final WireDataFieldDescription fieldHeader = putFieldHeader(fieldName, DataType.BOOL_ARRAY);
+        if (dims.length == 2) {
+            buffer.putByte(fieldHeader.getDataStartPosition() - 1, (byte) 17);
+        } else if (dims.length > 2) {
+            buffer.putByte(fieldHeader.getDataStartPosition() - 1, (byte) 25);
+        }
         final int bytesToCopy = putArraySizeDescriptor(dims);
         buffer.putBooleanArray(values, 0, bytesToCopy);
         updateDataEndMarker(fieldHeader);
@@ -694,6 +699,11 @@ public class CmwLightSerialiser implements IoSerialiser {
     @Override
     public void put(final String fieldName, final byte[] values, final int offset, final int[] dims) {
         final WireDataFieldDescription fieldHeader = putFieldHeader(fieldName, DataType.BYTE_ARRAY);
+        if (dims.length == 2) {
+            buffer.putByte(fieldHeader.getDataStartPosition() - 1, (byte) 18);
+        } else if (dims.length > 2) {
+            buffer.putByte(fieldHeader.getDataStartPosition() - 1, (byte) 26);
+        }
         final int bytesToCopy = putArraySizeDescriptor(dims);
         buffer.putByteArray(values, 0, bytesToCopy);
         updateDataEndMarker(fieldHeader);
@@ -717,6 +727,11 @@ public class CmwLightSerialiser implements IoSerialiser {
     @Override
     public void put(final String fieldName, final char[] values, final int offset, final int[] dims) {
         final WireDataFieldDescription fieldHeader = putFieldHeader(fieldName, DataType.CHAR_ARRAY);
+        if (dims.length == 2) {
+            buffer.putByte(fieldHeader.getDataStartPosition() - 1, (byte) 203);
+        } else if (dims.length > 2) {
+            buffer.putByte(fieldHeader.getDataStartPosition() - 1, (byte) 204);
+        }
         final int bytesToCopy = putArraySizeDescriptor(dims);
         buffer.putCharArray(values, 0, bytesToCopy);
         updateDataEndMarker(fieldHeader);
@@ -740,6 +755,11 @@ public class CmwLightSerialiser implements IoSerialiser {
     @Override
     public void put(final String fieldName, final double[] values, final int offset, final int[] dims) {
         final WireDataFieldDescription fieldHeader = putFieldHeader(fieldName, DataType.DOUBLE_ARRAY);
+        if (dims.length == 2) {
+            buffer.putByte(fieldHeader.getDataStartPosition() - 1, (byte) 23);
+        } else if (dims.length > 2) {
+            buffer.putByte(fieldHeader.getDataStartPosition() - 1, (byte) 31);
+        }
         final int bytesToCopy = putArraySizeDescriptor(dims);
         buffer.putDoubleArray(values, 0, bytesToCopy);
         updateDataEndMarker(fieldHeader);
@@ -763,6 +783,11 @@ public class CmwLightSerialiser implements IoSerialiser {
     @Override
     public void put(final String fieldName, final float[] values, final int offset, final int[] dims) {
         final WireDataFieldDescription fieldHeader = putFieldHeader(fieldName, DataType.FLOAT_ARRAY);
+        if (dims.length == 2) {
+            buffer.putByte(fieldHeader.getDataStartPosition() - 1, (byte) 22);
+        } else if (dims.length > 2) {
+            buffer.putByte(fieldHeader.getDataStartPosition() - 1, (byte) 30);
+        }
         final int bytesToCopy = putArraySizeDescriptor(dims);
         buffer.putFloatArray(values, 0, bytesToCopy);
         updateDataEndMarker(fieldHeader);
@@ -786,6 +811,11 @@ public class CmwLightSerialiser implements IoSerialiser {
     @Override
     public void put(final String fieldName, final int[] values, final int offset, final int[] dims) {
         final WireDataFieldDescription fieldHeader = putFieldHeader(fieldName, DataType.INT_ARRAY);
+        if (dims.length == 2) {
+            buffer.putByte(fieldHeader.getDataStartPosition() - 1, (byte) 20);
+        } else if (dims.length > 2) {
+            buffer.putByte(fieldHeader.getDataStartPosition() - 1, (byte) 28);
+        }
         final int bytesToCopy = putArraySizeDescriptor(dims);
         buffer.putIntArray(values, 0, bytesToCopy);
         updateDataEndMarker(fieldHeader);
@@ -809,6 +839,11 @@ public class CmwLightSerialiser implements IoSerialiser {
     @Override
     public void put(final String fieldName, final long[] values, final int offset, final int[] dims) {
         final WireDataFieldDescription fieldHeader = putFieldHeader(fieldName, DataType.LONG_ARRAY);
+        if (dims.length == 2) {
+            buffer.putByte(fieldHeader.getDataStartPosition() - 1, (byte) 21);
+        } else if (dims.length > 2) {
+            buffer.putByte(fieldHeader.getDataStartPosition() - 1, (byte) 29);
+        }
         final int bytesToCopy = putArraySizeDescriptor(dims);
         buffer.putLongArray(values, 0, bytesToCopy);
         updateDataEndMarker(fieldHeader);
@@ -832,6 +867,11 @@ public class CmwLightSerialiser implements IoSerialiser {
     @Override
     public void put(final String fieldName, final short[] values, final int offset, final int[] dims) { // NOPMD by rstein
         final WireDataFieldDescription fieldHeader = putFieldHeader(fieldName, DataType.SHORT_ARRAY);
+        if (dims.length == 2) {
+            buffer.putByte(fieldHeader.getDataStartPosition() - 1, (byte) 19);
+        } else if (dims.length > 2) {
+            buffer.putByte(fieldHeader.getDataStartPosition() - 1, (byte) 27);
+        }
         final int bytesToCopy = putArraySizeDescriptor(dims);
         buffer.putShortArray(values, 0, bytesToCopy);
         updateDataEndMarker(fieldHeader);
@@ -857,6 +897,11 @@ public class CmwLightSerialiser implements IoSerialiser {
     @Override
     public void put(final String fieldName, final String[] values, final int offset, final int[] dims) {
         final WireDataFieldDescription fieldHeader = putFieldHeader(fieldName, DataType.STRING_ARRAY);
+        if (dims.length == 2) {
+            buffer.putByte(fieldHeader.getDataStartPosition() - 1, (byte) 24);
+        } else if (dims.length > 2) {
+            buffer.putByte(fieldHeader.getDataStartPosition() - 1, (byte) 32);
+        }
         final int nElements = putArraySizeDescriptor(dims);
         buffer.putStringArray(values, offset, nElements);
         updateDataEndMarker(fieldHeader);
