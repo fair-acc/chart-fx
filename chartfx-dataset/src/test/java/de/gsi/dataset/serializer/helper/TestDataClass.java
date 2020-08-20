@@ -268,62 +268,60 @@ public class TestDataClass {
             returnState = false;
         }
 
-        if (!TestDataClass.isCmwCompatibilityMode()) { // disabled since reference temporarily since CmwLight does not distinguish betwenn 1D, 2D, or nDim arrays (CMW has the same wire-format but different DataType ids for it)
-            // test n-dimensional -arrays
-            try {
-                assertArrayEquals(this.nDimensions, other.nDimensions);
-            } catch (AssertionFailedError e) {
-                LOGGER.atError().addArgument("nDimensions").addArgument(e.getMessage()).log("field '{}' does not match '{}'");
-                returnState = false;
-            }
-            try {
-                assertArrayEquals(this.boolNdimArray, other.boolNdimArray);
-            } catch (AssertionFailedError e) {
-                LOGGER.atError().addArgument("boolNdimArray").addArgument(e.getMessage()).log("field '{}' does not match '{}'");
-                returnState = false;
-            }
-            try {
-                assertArrayEquals(this.byteNdimArray, other.byteNdimArray);
-            } catch (AssertionFailedError e) {
-                LOGGER.atError().addArgument("byteNdimArray").addArgument(e.getMessage()).log("field '{}' does not match '{}'");
-                returnState = false;
-            }
-            //try {
-            //    assertArrayEquals(this.charNdimArray, other.charNdimArray);
-            //} catch(AssertionFailedError e) {
-            //    LOGGER.atError().addArgument("charNdimArray").addArgument(e.getMessage()).log("field '{}' does not match '{}'");
-            //    returnState = false;
-            //}
-            try {
-                assertArrayEquals(this.shortNdimArray, other.shortNdimArray);
-            } catch (AssertionFailedError e) {
-                LOGGER.atError().addArgument("shortNdimArray").addArgument(e.getMessage()).log("field '{}' does not match '{}'");
-                returnState = false;
-            }
-            try {
-                assertArrayEquals(this.intNdimArray, other.intNdimArray);
-            } catch (AssertionFailedError e) {
-                LOGGER.atError().addArgument("intNdimArray").addArgument(e.getMessage()).log("field '{}' does not match '{}'");
-                returnState = false;
-            }
-            try {
-                assertArrayEquals(this.longNdimArray, other.longNdimArray);
-            } catch (AssertionFailedError e) {
-                LOGGER.atError().addArgument("longNdimArray").addArgument(e.getMessage()).log("field '{}' does not match '{}'");
-                returnState = false;
-            }
-            try {
-                assertArrayEquals(this.floatNdimArray, other.floatNdimArray);
-            } catch (AssertionFailedError e) {
-                LOGGER.atError().addArgument("floatNdimArray").addArgument(e.getMessage()).log("field '{}' does not match '{}'");
-                returnState = false;
-            }
-            try {
-                assertArrayEquals(this.doubleNdimArray, other.doubleNdimArray);
-            } catch (AssertionFailedError e) {
-                LOGGER.atError().addArgument("doubleNdimArray").addArgument(e.getMessage()).log("field '{}' does not match '{}'");
-                returnState = false;
-            }
+        // test n-dimensional -arrays
+        try {
+            assertArrayEquals(this.nDimensions, other.nDimensions);
+        } catch (AssertionFailedError e) {
+            LOGGER.atError().addArgument("nDimensions").addArgument(e.getMessage()).log("field '{}' does not match '{}'");
+            returnState = false;
+        }
+        try {
+            assertArrayEquals(this.boolNdimArray, other.boolNdimArray);
+        } catch (AssertionFailedError e) {
+            LOGGER.atError().addArgument("boolNdimArray").addArgument(e.getMessage()).log("field '{}' does not match '{}'");
+            returnState = false;
+        }
+        try {
+            assertArrayEquals(this.byteNdimArray, other.byteNdimArray);
+        } catch (AssertionFailedError e) {
+            LOGGER.atError().addArgument("byteNdimArray").addArgument(e.getMessage()).log("field '{}' does not match '{}'");
+            returnState = false;
+        }
+        //try {
+        //    assertArrayEquals(this.charNdimArray, other.charNdimArray);
+        //} catch(AssertionFailedError e) {
+        //    LOGGER.atError().addArgument("charNdimArray").addArgument(e.getMessage()).log("field '{}' does not match '{}'");
+        //    returnState = false;
+        //}
+        try {
+            assertArrayEquals(this.shortNdimArray, other.shortNdimArray);
+        } catch (AssertionFailedError e) {
+            LOGGER.atError().addArgument("shortNdimArray").addArgument(e.getMessage()).log("field '{}' does not match '{}'");
+            returnState = false;
+        }
+        try {
+            assertArrayEquals(this.intNdimArray, other.intNdimArray);
+        } catch (AssertionFailedError e) {
+            LOGGER.atError().addArgument("intNdimArray").addArgument(e.getMessage()).log("field '{}' does not match '{}'");
+            returnState = false;
+        }
+        try {
+            assertArrayEquals(this.longNdimArray, other.longNdimArray);
+        } catch (AssertionFailedError e) {
+            LOGGER.atError().addArgument("longNdimArray").addArgument(e.getMessage()).log("field '{}' does not match '{}'");
+            returnState = false;
+        }
+        try {
+            assertArrayEquals(this.floatNdimArray, other.floatNdimArray);
+        } catch (AssertionFailedError e) {
+            LOGGER.atError().addArgument("floatNdimArray").addArgument(e.getMessage()).log("field '{}' does not match '{}'");
+            returnState = false;
+        }
+        try {
+            assertArrayEquals(this.doubleNdimArray, other.doubleNdimArray);
+        } catch (AssertionFailedError e) {
+            LOGGER.atError().addArgument("doubleNdimArray").addArgument(e.getMessage()).log("field '{}' does not match '{}'");
+            returnState = false;
         }
 
         // check for nested data content
