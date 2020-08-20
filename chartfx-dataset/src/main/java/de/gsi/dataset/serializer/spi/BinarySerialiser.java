@@ -107,7 +107,7 @@ import de.gsi.dataset.utils.GenericsHelper;
  * 
  * @author rstein
  */
-@SuppressWarnings({ "PMD.CommentSize", "PMD.ExcessivePublicCount", "PMD.PrematureDeclaration", "unused" }) // variables need to be read from stream
+@SuppressWarnings({ "PMD.CommentSize", "PMD.ExcessivePublicCount", "PMD.PrematureDeclaration" }) // variables need to be read from stream
 public class BinarySerialiser implements IoSerialiser {
     public static final int VERSION_MAGIC_NUMBER = 0x0000002A;
     public static final byte VERSION_MAJOR = 1;
@@ -188,7 +188,7 @@ public class BinarySerialiser implements IoSerialiser {
         final byte micro = buffer.getByte();
 
         final WireDataFieldDescription headerStartField = getFieldHeader();
-        final ProtocolInfo header = new ProtocolInfo(headerStartField, producer, major, minor, micro);
+        final ProtocolInfo header = new ProtocolInfo(this, headerStartField, producer, major, minor, micro);
 
         if (magicNumber != VERSION_MAGIC_NUMBER) {
             throw new IllegalStateException("byte buffer version magic byte incompatible: received '" + magicNumber + "' vs. should '" + VERSION_MAGIC_NUMBER + "'");
@@ -199,6 +199,14 @@ public class BinarySerialiser implements IoSerialiser {
             throw new IllegalStateException("byte buffer version incompatible: received '" + header.toString() + "' vs. should '" + thisHeader + "'");
         }
         return header;
+    }
+
+    @Override
+    public void setQueryFieldName(final String fieldName, final int dataStartPosition) {
+        if (fieldName == null || fieldName.isBlank()) {
+            throw new IllegalArgumentException("fieldName must not be null or blank: " + fieldName);
+        }
+        buffer.position(dataStartPosition);
     }
 
     @Override
@@ -217,9 +225,9 @@ public class BinarySerialiser implements IoSerialiser {
     }
 
     @Override
-    public boolean[] getBooleanArray(final boolean[] dst, final int offset, final int length) {
+    public boolean[] getBooleanArray(final boolean[] dst, final int length) {
         getArraySizeDescriptor();
-        return buffer.getBooleanArray(dst, offset, length);
+        return buffer.getBooleanArray(dst, length);
     }
 
     public IoBuffer getBuffer() {
@@ -245,9 +253,9 @@ public class BinarySerialiser implements IoSerialiser {
     }
 
     @Override
-    public byte[] getByteArray(final byte[] dst, final int offset, final int length) {
+    public byte[] getByteArray(final byte[] dst, final int length) {
         getArraySizeDescriptor();
-        return buffer.getByteArray(dst, offset, length);
+        return buffer.getByteArray(dst, length);
     }
 
     @Override
@@ -256,9 +264,9 @@ public class BinarySerialiser implements IoSerialiser {
     }
 
     @Override
-    public char[] getCharArray(final char[] dst, final int offset, final int length) {
+    public char[] getCharArray(final char[] dst, final int length) {
         getArraySizeDescriptor();
-        return buffer.getCharArray(dst, offset, length);
+        return buffer.getCharArray(dst, length);
     }
 
     @Override
@@ -338,9 +346,9 @@ public class BinarySerialiser implements IoSerialiser {
     }
 
     @Override
-    public double[] getDoubleArray(final double[] dst, final int offset, final int length) {
+    public double[] getDoubleArray(final double[] dst, final int length) {
         getArraySizeDescriptor();
-        return buffer.getDoubleArray(dst, offset, length);
+        return buffer.getDoubleArray(dst, length);
     }
 
     @Override
@@ -403,7 +411,7 @@ public class BinarySerialiser implements IoSerialiser {
         if (dataType == DataType.END_MARKER) {
             parent = (WireDataFieldDescription) parent.getParent();
         }
-        lastFieldHeader = new WireDataFieldDescription(parent, fieldNameHashCode, fieldName, dataType, headerStart, dataStartOffset, dataSize);
+        lastFieldHeader = new WireDataFieldDescription(this, parent, fieldNameHashCode, fieldName, dataType, headerStart, dataStartOffset, dataSize);
         if (dataType == DataType.START_MARKER) {
             parent = lastFieldHeader;
         }
@@ -457,9 +465,9 @@ public class BinarySerialiser implements IoSerialiser {
     }
 
     @Override
-    public float[] getFloatArray(final float[] dst, final int offset, final int length) {
+    public float[] getFloatArray(final float[] dst, final int length) {
         getArraySizeDescriptor();
-        return buffer.getFloatArray(dst, offset, length);
+        return buffer.getFloatArray(dst, length);
     }
 
     @Override
@@ -468,9 +476,9 @@ public class BinarySerialiser implements IoSerialiser {
     }
 
     @Override
-    public int[] getIntArray(final int[] dst, final int offset, final int length) {
+    public int[] getIntArray(final int[] dst, final int length) {
         getArraySizeDescriptor();
-        return buffer.getIntArray(dst, offset, length);
+        return buffer.getIntArray(dst, length);
     }
 
     @Override
@@ -526,9 +534,9 @@ public class BinarySerialiser implements IoSerialiser {
     }
 
     @Override
-    public long[] getLongArray(final long[] dst, final int offset, final int length) {
+    public long[] getLongArray(final long[] dst, final int length) {
         getArraySizeDescriptor();
-        return buffer.getLongArray(dst, offset, length);
+        return buffer.getLongArray(dst, length);
     }
 
     @Override
@@ -536,7 +544,7 @@ public class BinarySerialiser implements IoSerialiser {
         getArraySizeDescriptor();
         final int nElements = buffer.getInt();
         // convert into two linear arrays one of K and the other for V streamer encoding as
-        // <1 (int)><n_map (int)><type K (byte)<type V (byte)> <Length, [K_0,...,K_length]> <Length, [V_0, ..., V_length]>
+        // <1 (int)><n_map (int)><type K (byte)<type V (byte)> <Length, [K_0,...,K_length]> <Length, [V_..., V_length]>
 
         // read key type and key value vector
         final K[] keys;
@@ -596,7 +604,6 @@ public class BinarySerialiser implements IoSerialiser {
         return retMap;
     }
 
-    @Override
     public WireDataFieldDescription getParent() {
         return parent;
     }
@@ -701,9 +708,9 @@ public class BinarySerialiser implements IoSerialiser {
     }
 
     @Override
-    public short[] getShortArray(final short[] dst, final int offset, final int length) {
+    public short[] getShortArray(final short[] dst, final int length) {
         getArraySizeDescriptor();
-        return buffer.getShortArray(dst, offset, length);
+        return buffer.getShortArray(dst, length);
     }
 
     @Override
@@ -712,9 +719,9 @@ public class BinarySerialiser implements IoSerialiser {
     }
 
     @Override
-    public String[] getStringArray(final String[] dst, final int offset, final int length) {
+    public String[] getStringArray(final String[] dst, final int length) {
         getArraySizeDescriptor();
-        return buffer.getStringArray(dst, offset, length);
+        return buffer.getStringArray(dst, length);
     }
 
     @Override
@@ -793,7 +800,6 @@ public class BinarySerialiser implements IoSerialiser {
         final Class<?> cleanedType = ClassUtils.getRawType(valueType);
         final DataType valueDataType = DataType.fromClassType(cleanedType);
         final int entrySize = 17; // as an initial estimate
-        final WireDataFieldDescription headFieldHeader = lastFieldHeader;
         putArraySizeDescriptor(nElements);
         buffer.putInt(nElements);
 
@@ -810,7 +816,7 @@ public class BinarySerialiser implements IoSerialiser {
         if (ClassUtils.isPrimitiveWrapperOrString(cleanedType) || serialiserLookup == null) {
             buffer.ensureAdditionalCapacity((nElements * entrySize) + 9);
             buffer.putByte(getDataType(valueDataType)); // write value element type
-            putGenericArrayAsPrimitive(valueDataType, values, 0, nElements);
+            putGenericArrayAsPrimitive(valueDataType, values, nElements);
         } else {
             buffer.putByte(getDataType(DataType.OTHER)); // write value element type
             final Type[] secondaryType = ClassUtils.getSecondaryType(valueType);
@@ -868,9 +874,7 @@ public class BinarySerialiser implements IoSerialiser {
         buffer.putInt(nElements);
 
         // convert into two linear arrays one of K and the other for V streamer encoding as
-        // <1 (int)><n_map (int)><type K (byte)<type V (byte)> <Length, [K_0,...,K_length]> <Length, [V_0, ..., V_length]>
-
-        final WireDataFieldDescription oldFieldHeader = lastFieldHeader;
+        // <1 (int)><n_map (int)><type K (byte)<type V (byte)> <Length, [K_0,...,K_length]> <Length, [V_..., V_length]>
 
         final Class<?> cleanedKeyType = ClassUtils.getRawType(keyType);
         final DataType keyDataType = DataType.fromClassType(cleanedKeyType);
@@ -878,7 +882,7 @@ public class BinarySerialiser implements IoSerialiser {
             final int entrySize = 17; // as an initial estimate
             buffer.ensureAdditionalCapacity((nElements * entrySize) + 9);
             buffer.putByte(getDataType(keyDataType)); // write key element type
-            putGenericArrayAsPrimitive(keyDataType, keySet, 0, nElements);
+            putGenericArrayAsPrimitive(keyDataType, keySet, nElements);
         } else {
             // write key type
             buffer.putByte(getDataType(DataType.OTHER)); // write key element type
@@ -903,7 +907,7 @@ public class BinarySerialiser implements IoSerialiser {
             final int entrySize = 17; // as an initial estimate
             buffer.ensureAdditionalCapacity((nElements * entrySize) + 9);
             buffer.putByte(getDataType(valueDataType)); // write value element type
-            putGenericArrayAsPrimitive(valueDataType, valueSet, 0, nElements);
+            putGenericArrayAsPrimitive(valueDataType, valueSet, nElements);
         } else {
             // write value type
             buffer.putByte(getDataType(DataType.OTHER)); // write key element type
@@ -963,19 +967,19 @@ public class BinarySerialiser implements IoSerialiser {
     }
 
     @Override
-    public void put(final FieldDescription fieldDescription, final boolean[] values, final int offset, final int n) {
+    public void put(final FieldDescription fieldDescription, final boolean[] values, final int n) {
         final WireDataFieldDescription fieldHeader = putFieldHeader(fieldDescription);
         final int valuesSize = values == null ? 0 : values.length;
         final int bytesToCopy = putArraySizeDescriptor(n >= 0 ? Math.min(n, valuesSize) : valuesSize);
-        buffer.putBooleanArray(values, 0, bytesToCopy);
+        buffer.putBooleanArray(values, bytesToCopy);
         updateDataEndMarker(fieldHeader);
     }
 
     @Override
-    public void put(final FieldDescription fieldDescription, final boolean[] values, final int offset, final int[] dims) {
+    public void put(final FieldDescription fieldDescription, final boolean[] values, final int[] dims) {
         final WireDataFieldDescription fieldHeader = putFieldHeader(fieldDescription);
         final int bytesToCopy = putArraySizeDescriptor(dims);
-        buffer.putBooleanArray(values, 0, bytesToCopy);
+        buffer.putBooleanArray(values, bytesToCopy);
         updateDataEndMarker(fieldHeader);
     }
 
@@ -986,19 +990,19 @@ public class BinarySerialiser implements IoSerialiser {
     }
 
     @Override
-    public void put(final FieldDescription fieldDescription, final byte[] values, final int offset, final int n) {
+    public void put(final FieldDescription fieldDescription, final byte[] values, final int n) {
         final WireDataFieldDescription fieldHeader = putFieldHeader(fieldDescription);
         final int valuesSize = values == null ? 0 : values.length;
         final int bytesToCopy = putArraySizeDescriptor(n >= 0 ? Math.min(n, valuesSize) : valuesSize);
-        buffer.putByteArray(values, 0, bytesToCopy);
+        buffer.putByteArray(values, bytesToCopy);
         updateDataEndMarker(fieldHeader);
     }
 
     @Override
-    public void put(final FieldDescription fieldDescription, final byte[] values, final int offset, final int[] dims) {
+    public void put(final FieldDescription fieldDescription, final byte[] values, final int[] dims) {
         final WireDataFieldDescription fieldHeader = putFieldHeader(fieldDescription);
         final int bytesToCopy = putArraySizeDescriptor(dims);
-        buffer.putByteArray(values, 0, bytesToCopy);
+        buffer.putByteArray(values, bytesToCopy);
         updateDataEndMarker(fieldHeader);
     }
 
@@ -1009,19 +1013,19 @@ public class BinarySerialiser implements IoSerialiser {
     }
 
     @Override
-    public void put(final FieldDescription fieldDescription, final char[] values, final int offset, final int n) {
+    public void put(final FieldDescription fieldDescription, final char[] values, final int n) {
         final WireDataFieldDescription fieldHeader = putFieldHeader(fieldDescription);
         final int valuesSize = values == null ? 0 : values.length;
         final int bytesToCopy = putArraySizeDescriptor(n >= 0 ? Math.min(n, valuesSize) : valuesSize);
-        buffer.putCharArray(values, 0, bytesToCopy);
+        buffer.putCharArray(values, bytesToCopy);
         updateDataEndMarker(fieldHeader);
     }
 
     @Override
-    public void put(final FieldDescription fieldDescription, final char[] values, final int offset, final int[] dims) {
+    public void put(final FieldDescription fieldDescription, final char[] values, final int[] dims) {
         final WireDataFieldDescription fieldHeader = putFieldHeader(fieldDescription);
         final int bytesToCopy = putArraySizeDescriptor(dims);
-        buffer.putCharArray(values, 0, bytesToCopy);
+        buffer.putCharArray(values, bytesToCopy);
         updateDataEndMarker(fieldHeader);
     }
 
@@ -1032,19 +1036,19 @@ public class BinarySerialiser implements IoSerialiser {
     }
 
     @Override
-    public void put(final FieldDescription fieldDescription, final double[] values, final int offset, final int n) {
+    public void put(final FieldDescription fieldDescription, final double[] values, final int n) {
         final WireDataFieldDescription fieldHeader = putFieldHeader(fieldDescription);
         final int valuesSize = values == null ? 0 : values.length;
         final int bytesToCopy = putArraySizeDescriptor(n >= 0 ? Math.min(n, valuesSize) : valuesSize);
-        buffer.putDoubleArray(values, 0, bytesToCopy);
+        buffer.putDoubleArray(values, bytesToCopy);
         updateDataEndMarker(fieldHeader);
     }
 
     @Override
-    public void put(final FieldDescription fieldDescription, final double[] values, final int offset, final int[] dims) {
+    public void put(final FieldDescription fieldDescription, final double[] values, final int[] dims) {
         final WireDataFieldDescription fieldHeader = putFieldHeader(fieldDescription);
         final int bytesToCopy = putArraySizeDescriptor(dims);
-        buffer.putDoubleArray(values, 0, bytesToCopy);
+        buffer.putDoubleArray(values, bytesToCopy);
         updateDataEndMarker(fieldHeader);
     }
 
@@ -1055,19 +1059,19 @@ public class BinarySerialiser implements IoSerialiser {
     }
 
     @Override
-    public void put(final FieldDescription fieldDescription, final float[] values, final int offset, final int n) {
+    public void put(final FieldDescription fieldDescription, final float[] values, final int n) {
         final WireDataFieldDescription fieldHeader = putFieldHeader(fieldDescription);
         final int valuesSize = values == null ? 0 : values.length;
         final int bytesToCopy = putArraySizeDescriptor(n >= 0 ? Math.min(n, valuesSize) : valuesSize);
-        buffer.putFloatArray(values, 0, bytesToCopy);
+        buffer.putFloatArray(values, bytesToCopy);
         updateDataEndMarker(fieldHeader);
     }
 
     @Override
-    public void put(final FieldDescription fieldDescription, final float[] values, final int offset, final int[] dims) {
+    public void put(final FieldDescription fieldDescription, final float[] values, final int[] dims) {
         final WireDataFieldDescription fieldHeader = putFieldHeader(fieldDescription);
         final int bytesToCopy = putArraySizeDescriptor(dims);
-        buffer.putFloatArray(values, 0, bytesToCopy);
+        buffer.putFloatArray(values, bytesToCopy);
         updateDataEndMarker(fieldHeader);
     }
 
@@ -1078,19 +1082,19 @@ public class BinarySerialiser implements IoSerialiser {
     }
 
     @Override
-    public void put(final FieldDescription fieldDescription, final int[] values, final int offset, final int n) {
+    public void put(final FieldDescription fieldDescription, final int[] values, final int n) {
         final WireDataFieldDescription fieldHeader = putFieldHeader(fieldDescription);
         final int valuesSize = values == null ? 0 : values.length;
         final int bytesToCopy = putArraySizeDescriptor(n >= 0 ? Math.min(n, valuesSize) : valuesSize);
-        buffer.putIntArray(values, 0, bytesToCopy);
+        buffer.putIntArray(values, bytesToCopy);
         updateDataEndMarker(fieldHeader);
     }
 
     @Override
-    public void put(final FieldDescription fieldDescription, final int[] values, final int offset, final int[] dims) {
+    public void put(final FieldDescription fieldDescription, final int[] values, final int[] dims) {
         final WireDataFieldDescription fieldHeader = putFieldHeader(fieldDescription);
         final int bytesToCopy = putArraySizeDescriptor(dims);
-        buffer.putIntArray(values, 0, bytesToCopy);
+        buffer.putIntArray(values, bytesToCopy);
         updateDataEndMarker(fieldHeader);
     }
 
@@ -1101,19 +1105,19 @@ public class BinarySerialiser implements IoSerialiser {
     }
 
     @Override
-    public void put(final FieldDescription fieldDescription, final long[] values, final int offset, final int n) {
+    public void put(final FieldDescription fieldDescription, final long[] values, final int n) {
         final WireDataFieldDescription fieldHeader = putFieldHeader(fieldDescription);
         final int valuesSize = values == null ? 0 : values.length;
         final int bytesToCopy = putArraySizeDescriptor(n >= 0 ? Math.min(n, valuesSize) : valuesSize);
-        buffer.putLongArray(values, 0, bytesToCopy);
+        buffer.putLongArray(values, bytesToCopy);
         updateDataEndMarker(fieldHeader);
     }
 
     @Override
-    public void put(final FieldDescription fieldDescription, final long[] values, final int offset, final int[] dims) {
+    public void put(final FieldDescription fieldDescription, final long[] values, final int[] dims) {
         final WireDataFieldDescription fieldHeader = putFieldHeader(fieldDescription);
         final int bytesToCopy = putArraySizeDescriptor(dims);
-        buffer.putLongArray(values, 0, bytesToCopy);
+        buffer.putLongArray(values, bytesToCopy);
         updateDataEndMarker(fieldHeader);
     }
 
@@ -1124,19 +1128,19 @@ public class BinarySerialiser implements IoSerialiser {
     }
 
     @Override
-    public void put(final FieldDescription fieldDescription, final short[] values, final int offset, final int n) { // NOPMD by rstein
+    public void put(final FieldDescription fieldDescription, final short[] values, final int n) { // NOPMD by rstein
         final WireDataFieldDescription fieldHeader = putFieldHeader(fieldDescription);
         final int valuesSize = values == null ? 0 : values.length;
         final int bytesToCopy = putArraySizeDescriptor(n >= 0 ? Math.min(n, valuesSize) : valuesSize);
-        buffer.putShortArray(values, 0, bytesToCopy);
+        buffer.putShortArray(values, bytesToCopy);
         updateDataEndMarker(fieldHeader);
     }
 
     @Override
-    public void put(final FieldDescription fieldDescription, final short[] values, final int offset, final int[] dims) { // NOPMD by rstein
+    public void put(final FieldDescription fieldDescription, final short[] values, final int[] dims) { // NOPMD by rstein
         final WireDataFieldDescription fieldHeader = putFieldHeader(fieldDescription);
         final int bytesToCopy = putArraySizeDescriptor(dims);
-        buffer.putShortArray(values, 0, bytesToCopy);
+        buffer.putShortArray(values, bytesToCopy);
         updateDataEndMarker(fieldHeader);
     }
 
@@ -1148,22 +1152,21 @@ public class BinarySerialiser implements IoSerialiser {
     }
 
     @Override
-    public void put(final FieldDescription fieldDescription, final String[] values, final int offset, final int n) {
+    public void put(final FieldDescription fieldDescription, final String[] values, final int n) {
         final WireDataFieldDescription fieldHeader = putFieldHeader(fieldDescription);
         final int valuesSize = values == null ? 0 : values.length;
         final int nElements = n >= 0 ? Math.min(n, valuesSize) : valuesSize;
         putArraySizeDescriptor(nElements);
-        buffer.putStringArray(values, offset, nElements);
+        buffer.putStringArray(values, nElements);
         updateDataEndMarker(fieldHeader);
     }
 
     @Override
-    public void put(final FieldDescription fieldDescription, final String[] values, final int offset, final int[] dims) {
+    public void put(final FieldDescription fieldDescription, final String[] values, final int[] dims) {
         final WireDataFieldDescription fieldHeader = putFieldHeader(fieldDescription);
-        final int valuesSize = values == null ? 0 : values.length;
         final int nElements = putArraySizeDescriptor(dims);
         putArraySizeDescriptor(nElements);
-        buffer.putStringArray(values, offset, nElements);
+        buffer.putStringArray(values, nElements);
         updateDataEndMarker(fieldHeader);
     }
 
@@ -1174,19 +1177,19 @@ public class BinarySerialiser implements IoSerialiser {
     }
 
     @Override
-    public void put(final String fieldName, final boolean[] values, final int offset, final int n) {
+    public void put(final String fieldName, final boolean[] values, final int n) {
         final WireDataFieldDescription fieldHeader = putFieldHeader(fieldName, DataType.BOOL_ARRAY);
         final int valuesSize = values == null ? 0 : values.length;
         final int bytesToCopy = putArraySizeDescriptor(n >= 0 ? Math.min(n, valuesSize) : valuesSize);
-        buffer.putBooleanArray(values, 0, bytesToCopy);
+        buffer.putBooleanArray(values, bytesToCopy);
         updateDataEndMarker(fieldHeader);
     }
 
     @Override
-    public void put(final String fieldName, final boolean[] values, final int offset, final int[] dims) {
+    public void put(final String fieldName, final boolean[] values, final int[] dims) {
         final WireDataFieldDescription fieldHeader = putFieldHeader(fieldName, DataType.BOOL_ARRAY);
         final int bytesToCopy = putArraySizeDescriptor(dims);
-        buffer.putBooleanArray(values, 0, bytesToCopy);
+        buffer.putBooleanArray(values, bytesToCopy);
         updateDataEndMarker(fieldHeader);
     }
 
@@ -1197,19 +1200,19 @@ public class BinarySerialiser implements IoSerialiser {
     }
 
     @Override
-    public void put(final String fieldName, final byte[] values, final int offset, final int n) {
+    public void put(final String fieldName, final byte[] values, final int n) {
         final WireDataFieldDescription fieldHeader = putFieldHeader(fieldName, DataType.BYTE_ARRAY);
         final int valuesSize = values == null ? 0 : values.length;
         final int bytesToCopy = putArraySizeDescriptor(n >= 0 ? Math.min(n, valuesSize) : valuesSize);
-        buffer.putByteArray(values, 0, bytesToCopy);
+        buffer.putByteArray(values, bytesToCopy);
         updateDataEndMarker(fieldHeader);
     }
 
     @Override
-    public void put(final String fieldName, final byte[] values, final int offset, final int[] dims) {
+    public void put(final String fieldName, final byte[] values, final int[] dims) {
         final WireDataFieldDescription fieldHeader = putFieldHeader(fieldName, DataType.BYTE_ARRAY);
         final int bytesToCopy = putArraySizeDescriptor(dims);
-        buffer.putByteArray(values, 0, bytesToCopy);
+        buffer.putByteArray(values, bytesToCopy);
         updateDataEndMarker(fieldHeader);
     }
 
@@ -1220,19 +1223,19 @@ public class BinarySerialiser implements IoSerialiser {
     }
 
     @Override
-    public void put(final String fieldName, final char[] values, final int offset, final int n) {
+    public void put(final String fieldName, final char[] values, final int n) {
         final WireDataFieldDescription fieldHeader = putFieldHeader(fieldName, DataType.CHAR_ARRAY);
         final int valuesSize = values == null ? 0 : values.length;
         final int bytesToCopy = putArraySizeDescriptor(n >= 0 ? Math.min(n, valuesSize) : valuesSize);
-        buffer.putCharArray(values, 0, bytesToCopy);
+        buffer.putCharArray(values, bytesToCopy);
         updateDataEndMarker(fieldHeader);
     }
 
     @Override
-    public void put(final String fieldName, final char[] values, final int offset, final int[] dims) {
+    public void put(final String fieldName, final char[] values, final int[] dims) {
         final WireDataFieldDescription fieldHeader = putFieldHeader(fieldName, DataType.CHAR_ARRAY);
         final int bytesToCopy = putArraySizeDescriptor(dims);
-        buffer.putCharArray(values, 0, bytesToCopy);
+        buffer.putCharArray(values, bytesToCopy);
         updateDataEndMarker(fieldHeader);
     }
 
@@ -1243,19 +1246,19 @@ public class BinarySerialiser implements IoSerialiser {
     }
 
     @Override
-    public void put(final String fieldName, final double[] values, final int offset, final int n) {
+    public void put(final String fieldName, final double[] values, final int n) {
         final WireDataFieldDescription fieldHeader = putFieldHeader(fieldName, DataType.DOUBLE_ARRAY);
         final int valuesSize = values == null ? 0 : values.length;
         final int bytesToCopy = putArraySizeDescriptor(n >= 0 ? Math.min(n, valuesSize) : valuesSize);
-        buffer.putDoubleArray(values, 0, bytesToCopy);
+        buffer.putDoubleArray(values, bytesToCopy);
         updateDataEndMarker(fieldHeader);
     }
 
     @Override
-    public void put(final String fieldName, final double[] values, final int offset, final int[] dims) {
+    public void put(final String fieldName, final double[] values, final int[] dims) {
         final WireDataFieldDescription fieldHeader = putFieldHeader(fieldName, DataType.DOUBLE_ARRAY);
         final int bytesToCopy = putArraySizeDescriptor(dims);
-        buffer.putDoubleArray(values, 0, bytesToCopy);
+        buffer.putDoubleArray(values, bytesToCopy);
         updateDataEndMarker(fieldHeader);
     }
 
@@ -1266,19 +1269,19 @@ public class BinarySerialiser implements IoSerialiser {
     }
 
     @Override
-    public void put(final String fieldName, final float[] values, final int offset, final int n) {
+    public void put(final String fieldName, final float[] values, final int n) {
         final WireDataFieldDescription fieldHeader = putFieldHeader(fieldName, DataType.FLOAT_ARRAY);
         final int valuesSize = values == null ? 0 : values.length;
         final int bytesToCopy = putArraySizeDescriptor(n >= 0 ? Math.min(n, valuesSize) : valuesSize);
-        buffer.putFloatArray(values, 0, bytesToCopy);
+        buffer.putFloatArray(values, bytesToCopy);
         updateDataEndMarker(fieldHeader);
     }
 
     @Override
-    public void put(final String fieldName, final float[] values, final int offset, final int[] dims) {
+    public void put(final String fieldName, final float[] values, final int[] dims) {
         final WireDataFieldDescription fieldHeader = putFieldHeader(fieldName, DataType.FLOAT_ARRAY);
         final int bytesToCopy = putArraySizeDescriptor(dims);
-        buffer.putFloatArray(values, 0, bytesToCopy);
+        buffer.putFloatArray(values, bytesToCopy);
         updateDataEndMarker(fieldHeader);
     }
 
@@ -1289,19 +1292,19 @@ public class BinarySerialiser implements IoSerialiser {
     }
 
     @Override
-    public void put(final String fieldName, final int[] values, final int offset, final int n) {
+    public void put(final String fieldName, final int[] values, final int n) {
         final WireDataFieldDescription fieldHeader = putFieldHeader(fieldName, DataType.INT_ARRAY);
         final int valuesSize = values == null ? 0 : values.length;
         final int bytesToCopy = putArraySizeDescriptor(n >= 0 ? Math.min(n, valuesSize) : valuesSize);
-        buffer.putIntArray(values, 0, bytesToCopy);
+        buffer.putIntArray(values, bytesToCopy);
         updateDataEndMarker(fieldHeader);
     }
 
     @Override
-    public void put(final String fieldName, final int[] values, final int offset, final int[] dims) {
+    public void put(final String fieldName, final int[] values, final int[] dims) {
         final WireDataFieldDescription fieldHeader = putFieldHeader(fieldName, DataType.INT_ARRAY);
         final int bytesToCopy = putArraySizeDescriptor(dims);
-        buffer.putIntArray(values, 0, bytesToCopy);
+        buffer.putIntArray(values, bytesToCopy);
         updateDataEndMarker(fieldHeader);
     }
 
@@ -1312,19 +1315,19 @@ public class BinarySerialiser implements IoSerialiser {
     }
 
     @Override
-    public void put(final String fieldName, final long[] values, final int offset, final int n) {
+    public void put(final String fieldName, final long[] values, final int n) {
         final WireDataFieldDescription fieldHeader = putFieldHeader(fieldName, DataType.LONG_ARRAY);
         final int valuesSize = values == null ? 0 : values.length;
         final int bytesToCopy = putArraySizeDescriptor(n >= 0 ? Math.min(n, valuesSize) : valuesSize);
-        buffer.putLongArray(values, 0, bytesToCopy);
+        buffer.putLongArray(values, bytesToCopy);
         updateDataEndMarker(fieldHeader);
     }
 
     @Override
-    public void put(final String fieldName, final long[] values, final int offset, final int[] dims) {
+    public void put(final String fieldName, final long[] values, final int[] dims) {
         final WireDataFieldDescription fieldHeader = putFieldHeader(fieldName, DataType.LONG_ARRAY);
         final int bytesToCopy = putArraySizeDescriptor(dims);
-        buffer.putLongArray(values, 0, bytesToCopy);
+        buffer.putLongArray(values, bytesToCopy);
         updateDataEndMarker(fieldHeader);
     }
 
@@ -1335,19 +1338,19 @@ public class BinarySerialiser implements IoSerialiser {
     }
 
     @Override
-    public void put(final String fieldName, final short[] values, final int offset, final int n) { // NOPMD by rstein
+    public void put(final String fieldName, final short[] values, final int n) { // NOPMD by rstein
         final WireDataFieldDescription fieldHeader = putFieldHeader(fieldName, DataType.SHORT_ARRAY);
         final int valuesSize = values == null ? 0 : values.length;
         final int bytesToCopy = putArraySizeDescriptor(n >= 0 ? Math.min(n, valuesSize) : valuesSize);
-        buffer.putShortArray(values, 0, bytesToCopy);
+        buffer.putShortArray(values, bytesToCopy);
         updateDataEndMarker(fieldHeader);
     }
 
     @Override
-    public void put(final String fieldName, final short[] values, final int offset, final int[] dims) { // NOPMD by rstein
+    public void put(final String fieldName, final short[] values, final int[] dims) { // NOPMD by rstein
         final WireDataFieldDescription fieldHeader = putFieldHeader(fieldName, DataType.SHORT_ARRAY);
         final int bytesToCopy = putArraySizeDescriptor(dims);
-        buffer.putShortArray(values, 0, bytesToCopy);
+        buffer.putShortArray(values, bytesToCopy);
         updateDataEndMarker(fieldHeader);
     }
 
@@ -1359,22 +1362,21 @@ public class BinarySerialiser implements IoSerialiser {
     }
 
     @Override
-    public void put(final String fieldName, final String[] values, final int offset, final int n) {
+    public void put(final String fieldName, final String[] values, final int n) {
         final WireDataFieldDescription fieldHeader = putFieldHeader(fieldName, DataType.STRING_ARRAY);
         final int valuesSize = values == null ? 0 : values.length;
         final int nElements = n >= 0 ? Math.min(n, valuesSize) : valuesSize;
         putArraySizeDescriptor(nElements);
-        buffer.putStringArray(values, offset, nElements);
+        buffer.putStringArray(values, nElements);
         updateDataEndMarker(fieldHeader);
     }
 
     @Override
-    public void put(final String fieldName, final String[] values, final int offset, final int[] dims) {
+    public void put(final String fieldName, final String[] values, final int[] dims) {
         final WireDataFieldDescription fieldHeader = putFieldHeader(fieldName, DataType.STRING_ARRAY);
-        final int valuesSize = values == null ? 0 : values.length;
         final int nElements = putArraySizeDescriptor(dims);
         putArraySizeDescriptor(nElements);
-        buffer.putStringArray(values, offset, nElements);
+        buffer.putStringArray(values, nElements);
         updateDataEndMarker(fieldHeader);
     }
 
@@ -1451,7 +1453,7 @@ public class BinarySerialiser implements IoSerialiser {
             buffer.putString(fieldDescription.getFieldDescription());
             buffer.putString(fieldDescription.getFieldDirection());
             final String[] groups = fieldDescription.getFieldGroups().toArray(new String[0]);
-            buffer.putStringArray(groups, 0, groups.length);
+            buffer.putStringArray(groups, groups.length);
         }
 
         // -- offset dataStart calculations
@@ -1461,7 +1463,7 @@ public class BinarySerialiser implements IoSerialiser {
         // from hereon there are data specific structures
         buffer.ensureAdditionalCapacity(16); // allocate 16 bytes to account for potential array header (safe-bet)
 
-        lastFieldHeader = new WireDataFieldDescription(parent, fieldDescription.getFieldNameHashCode(), fieldDescription.getFieldName(), dataType, headerStart, dataStartOffset, dataSize);
+        lastFieldHeader = new WireDataFieldDescription(this, parent, fieldDescription.getFieldNameHashCode(), fieldDescription.getFieldName(), dataType, headerStart, dataStartOffset, dataSize);
         if (isPutFieldMetaData() && fieldDescription.isAnnotationPresent()) {
             lastFieldHeader.setFieldUnit(fieldDescription.getFieldUnit());
             lastFieldHeader.setFieldDescription(fieldDescription.getFieldDescription());
@@ -1496,39 +1498,39 @@ public class BinarySerialiser implements IoSerialiser {
         // from hereon there are data specific structures
         buffer.ensureAdditionalCapacity(16); // allocate 16 bytes to account for potential array header (safe-bet)
 
-        lastFieldHeader = new WireDataFieldDescription(parent, fieldName.hashCode(), fieldName, dataType, headerStart, dataStartOffset, dataSize);
+        lastFieldHeader = new WireDataFieldDescription(this, parent, fieldName.hashCode(), fieldName, dataType, headerStart, dataStartOffset, dataSize);
         return lastFieldHeader;
     }
 
-    public void putGenericArrayAsPrimitive(final DataType dataType, final Object[] data, final int offset, final int nToCopy) {
+    public void putGenericArrayAsPrimitive(final DataType dataType, final Object[] data, final int nToCopy) {
         putArraySizeDescriptor(nToCopy);
         switch (dataType) {
         case BOOL:
-            buffer.putBooleanArray(GenericsHelper.toBoolPrimitive(data), offset, nToCopy);
+            buffer.putBooleanArray(GenericsHelper.toBoolPrimitive(data), nToCopy);
             break;
         case BYTE:
-            buffer.putByteArray(GenericsHelper.toBytePrimitive(data), offset, nToCopy);
+            buffer.putByteArray(GenericsHelper.toBytePrimitive(data), nToCopy);
             break;
         case CHAR:
-            buffer.putCharArray(GenericsHelper.toCharPrimitive(data), offset, nToCopy);
+            buffer.putCharArray(GenericsHelper.toCharPrimitive(data), nToCopy);
             break;
         case SHORT:
-            buffer.putShortArray(GenericsHelper.toShortPrimitive(data), offset, nToCopy);
+            buffer.putShortArray(GenericsHelper.toShortPrimitive(data), nToCopy);
             break;
         case INT:
-            buffer.putIntArray(GenericsHelper.toIntegerPrimitive(data), offset, nToCopy);
+            buffer.putIntArray(GenericsHelper.toIntegerPrimitive(data), nToCopy);
             break;
         case LONG:
-            buffer.putLongArray(GenericsHelper.toLongPrimitive(data), offset, nToCopy);
+            buffer.putLongArray(GenericsHelper.toLongPrimitive(data), nToCopy);
             break;
         case FLOAT:
-            buffer.putFloatArray(GenericsHelper.toFloatPrimitive(data), offset, nToCopy);
+            buffer.putFloatArray(GenericsHelper.toFloatPrimitive(data), nToCopy);
             break;
         case DOUBLE:
-            buffer.putDoubleArray(GenericsHelper.toDoublePrimitive(data), offset, nToCopy);
+            buffer.putDoubleArray(GenericsHelper.toDoublePrimitive(data), nToCopy);
             break;
         case STRING:
-            buffer.putStringArray(GenericsHelper.toStringPrimitive(data), offset, nToCopy);
+            buffer.putStringArray(GenericsHelper.toStringPrimitive(data), nToCopy);
             break;
         case OTHER:
             break;
@@ -1548,7 +1550,7 @@ public class BinarySerialiser implements IoSerialiser {
         buffer.putByte(VERSION_MINOR);
         buffer.putByte(VERSION_MICRO);
         if (field.length == 0 || field[0] == null) {
-            putStartMarker(new WireDataFieldDescription(null, "OBJ_ROOT_START".hashCode(), "OBJ_ROOT_START", DataType.START_MARKER, -1, -1, -1));
+            putStartMarker(new WireDataFieldDescription(this, null, "OBJ_ROOT_START".hashCode(), "OBJ_ROOT_START", DataType.START_MARKER, -1, -1, -1));
         } else {
             putStartMarker(field[0]);
         }
@@ -1619,7 +1621,7 @@ public class BinarySerialiser implements IoSerialiser {
     }
 
     private WireDataFieldDescription getRootElement() {
-        return new WireDataFieldDescription(null, "ROOT".hashCode(), "ROOT", DataType.OTHER, buffer.position(), -1, -1);
+        return new WireDataFieldDescription(this, null, "ROOT".hashCode(), "ROOT", DataType.OTHER, buffer.position(), -1, -1);
     }
 
     public static byte getDataType(final DataType dataType) {

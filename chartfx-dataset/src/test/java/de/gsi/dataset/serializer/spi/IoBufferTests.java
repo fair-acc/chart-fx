@@ -8,7 +8,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.Arrays;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -43,138 +42,102 @@ class IoBufferTests {
 
         {
             buffer.reset();
-            assertDoesNotThrow(() -> buffer.putBooleanArray(booleanTestArrray, 0, booleanTestArrray.length));
-            assertDoesNotThrow(() -> buffer.putBooleanArray(booleanTestArrray, 0, -1));
-            assertDoesNotThrow(() -> buffer.putBooleanArray(null, 0, 5));
+            assertDoesNotThrow(() -> buffer.putBooleanArray(booleanTestArrray, booleanTestArrray.length));
+            assertDoesNotThrow(() -> buffer.putBooleanArray(booleanTestArrray, -1));
+            assertDoesNotThrow(() -> buffer.putBooleanArray(null, 5));
             buffer.reset();
             assertArrayEquals(booleanTestArrray, buffer.getBooleanArray());
             assertArrayEquals(booleanTestArrray, buffer.getBooleanArray());
             assertEquals(0, buffer.getBooleanArray().length);
-            buffer.reset();
-            final int length = booleanTestArrray.length;
-            final boolean[] arrayToBeTested = buffer.getBooleanArray(new boolean[length + 2], 2, length);
-            assertTrue(Arrays.equals(booleanTestArrray, 0, length, arrayToBeTested, 2, length + 2));
         }
 
         {
             buffer.reset();
-            assertDoesNotThrow(() -> buffer.putByteArray(byteTestArrray, 0, byteTestArrray.length));
-            assertDoesNotThrow(() -> buffer.putByteArray(byteTestArrray, 0, -1));
-            assertDoesNotThrow(() -> buffer.putByteArray(null, 0, 5));
+            assertDoesNotThrow(() -> buffer.putByteArray(byteTestArrray, byteTestArrray.length));
+            assertDoesNotThrow(() -> buffer.putByteArray(byteTestArrray, -1));
+            assertDoesNotThrow(() -> buffer.putByteArray(null, 5));
             buffer.reset();
             assertArrayEquals(byteTestArrray, buffer.getByteArray());
             assertArrayEquals(byteTestArrray, buffer.getByteArray());
             assertEquals(0, buffer.getByteArray().length);
-            buffer.reset();
-            final int length = byteTestArrray.length;
-            final byte[] arrayToBeTested = buffer.getByteArray(new byte[length + 2], 2, length);
-            assertTrue(Arrays.equals(byteTestArrray, 0, length, arrayToBeTested, 2, length + 2));
         }
 
         {
             buffer.reset();
-            assertDoesNotThrow(() -> buffer.putShortArray(shortTestArrray, 0, shortTestArrray.length));
-            assertDoesNotThrow(() -> buffer.putShortArray(shortTestArrray, 0, -1));
-            assertDoesNotThrow(() -> buffer.putShortArray(null, 0, 5));
+            assertDoesNotThrow(() -> buffer.putShortArray(shortTestArrray, shortTestArrray.length));
+            assertDoesNotThrow(() -> buffer.putShortArray(shortTestArrray, -1));
+            assertDoesNotThrow(() -> buffer.putShortArray(null, 5));
             buffer.reset();
             assertArrayEquals(shortTestArrray, buffer.getShortArray());
             assertArrayEquals(shortTestArrray, buffer.getShortArray());
             assertEquals(0, buffer.getShortArray().length);
             assertEquals(0, buffer.getShortArray().length);
-            buffer.reset();
-            final int length = shortTestArrray.length;
-            final short[] arrayToBeTested = buffer.getShortArray(new short[length + 2], 2, length);
-            assertTrue(Arrays.equals(shortTestArrray, 0, length, arrayToBeTested, 2, length + 2));
         }
 
         {
             buffer.reset();
-            assertDoesNotThrow(() -> buffer.putIntArray(intTestArrray, 0, intTestArrray.length));
-            assertDoesNotThrow(() -> buffer.putIntArray(intTestArrray, 0, -1));
-            assertDoesNotThrow(() -> buffer.putIntArray(null, 0, 5));
+            assertDoesNotThrow(() -> buffer.putIntArray(intTestArrray, intTestArrray.length));
+            assertDoesNotThrow(() -> buffer.putIntArray(intTestArrray, -1));
+            assertDoesNotThrow(() -> buffer.putIntArray(null, 5));
             buffer.reset();
             assertArrayEquals(intTestArrray, buffer.getIntArray());
             assertArrayEquals(intTestArrray, buffer.getIntArray());
             assertEquals(0, buffer.getIntArray().length);
-            buffer.reset();
-            final int length = intTestArrray.length;
-            final int[] arrayToBeTested = buffer.getIntArray(new int[length + 2], 2, length);
-            assertTrue(Arrays.equals(intTestArrray, 0, length, arrayToBeTested, 2, length + 2));
         }
 
         {
             buffer.reset();
-            assertDoesNotThrow(() -> buffer.putLongArray(longTestArrray, 0, longTestArrray.length));
-            assertDoesNotThrow(() -> buffer.putLongArray(longTestArrray, 0, -1));
-            assertDoesNotThrow(() -> buffer.putLongArray(null, 0, 5));
+            assertDoesNotThrow(() -> buffer.putLongArray(longTestArrray, longTestArrray.length));
+            assertDoesNotThrow(() -> buffer.putLongArray(longTestArrray, -1));
+            assertDoesNotThrow(() -> buffer.putLongArray(null, 5));
             buffer.reset();
             assertArrayEquals(longTestArrray, buffer.getLongArray());
             assertArrayEquals(longTestArrray, buffer.getLongArray());
             assertEquals(0, buffer.getLongArray().length);
-            buffer.reset();
-            final int length = longTestArrray.length;
-            final long[] arrayToBeTested = buffer.getLongArray(new long[length + 2], 2, length);
-            assertTrue(Arrays.equals(longTestArrray, 0, length, arrayToBeTested, 2, length + 2));
         }
 
         {
             buffer.reset();
-            assertDoesNotThrow(() -> buffer.putFloatArray(floatTestArrray, 0, floatTestArrray.length));
-            assertDoesNotThrow(() -> buffer.putFloatArray(floatTestArrray, 0, -1));
-            assertDoesNotThrow(() -> buffer.putFloatArray(null, 0, 5));
+            assertDoesNotThrow(() -> buffer.putFloatArray(floatTestArrray, floatTestArrray.length));
+            assertDoesNotThrow(() -> buffer.putFloatArray(floatTestArrray, -1));
+            assertDoesNotThrow(() -> buffer.putFloatArray(null, 5));
             buffer.reset();
             assertArrayEquals(floatTestArrray, buffer.getFloatArray());
             assertArrayEquals(floatTestArrray, buffer.getFloatArray());
             assertEquals(0, buffer.getFloatArray().length);
-            buffer.reset();
-            final int length = floatTestArrray.length;
-            final float[] arrayToBeTested = buffer.getFloatArray(new float[length + 2], 2, length);
-            assertTrue(Arrays.equals(floatTestArrray, 0, length, arrayToBeTested, 2, length + 2));
         }
 
         {
             buffer.reset();
-            assertDoesNotThrow(() -> buffer.putDoubleArray(doubleTestArrray, 0, doubleTestArrray.length));
-            assertDoesNotThrow(() -> buffer.putDoubleArray(doubleTestArrray, 0, -1));
-            assertDoesNotThrow(() -> buffer.putDoubleArray(null, 0, 5));
+            assertDoesNotThrow(() -> buffer.putDoubleArray(doubleTestArrray, doubleTestArrray.length));
+            assertDoesNotThrow(() -> buffer.putDoubleArray(doubleTestArrray, -1));
+            assertDoesNotThrow(() -> buffer.putDoubleArray(null, 5));
             buffer.reset();
             assertArrayEquals(doubleTestArrray, buffer.getDoubleArray());
             assertArrayEquals(doubleTestArrray, buffer.getDoubleArray());
             assertEquals(0, buffer.getDoubleArray().length);
-            buffer.reset();
-            final int length = doubleTestArrray.length;
-            final double[] arrayToBeTested = buffer.getDoubleArray(new double[length + 2], 2, length);
-            assertTrue(Arrays.equals(doubleTestArrray, 0, length, arrayToBeTested, 2, length + 2));
         }
 
         {
             buffer.reset();
-            assertDoesNotThrow(() -> buffer.putCharArray(charTestArrray, 0, charTestArrray.length));
-            assertDoesNotThrow(() -> buffer.putCharArray(charTestArrray, 0, -1));
-            assertDoesNotThrow(() -> buffer.putCharArray(null, 0, 5));
+            assertDoesNotThrow(() -> buffer.putCharArray(charTestArrray, charTestArrray.length));
+            assertDoesNotThrow(() -> buffer.putCharArray(charTestArrray, -1));
+            assertDoesNotThrow(() -> buffer.putCharArray(null, 5));
             buffer.reset();
             assertArrayEquals(charTestArrray, buffer.getCharArray());
             assertArrayEquals(charTestArrray, buffer.getCharArray());
             assertEquals(0, buffer.getCharArray().length);
-            buffer.reset();
-            final int length = charTestArrray.length;
-            final char[] arrayToBeTested = buffer.getCharArray(new char[length + 2], 2, length);
-            assertTrue(Arrays.equals(charTestArrray, 0, length, arrayToBeTested, 2, length + 2));
         }
 
         {
             buffer.reset();
-            assertDoesNotThrow(() -> buffer.putStringArray(stringTestArrray, 0, stringTestArrray.length));
-            assertDoesNotThrow(() -> buffer.putStringArray(stringTestArrray, 0, -1));
-            assertDoesNotThrow(() -> buffer.putStringArray(null, 0, 5));
+            assertDoesNotThrow(() -> buffer.putStringArray(stringTestArrray, stringTestArrray.length));
+            assertDoesNotThrow(() -> buffer.putStringArray(stringTestArrray, -1));
+            assertDoesNotThrow(() -> buffer.putStringArray(null, 5));
             buffer.reset();
             assertArrayEquals(stringTestArrray, buffer.getStringArray());
             assertArrayEquals(stringTestArrray, buffer.getStringArray());
             assertEquals(0, buffer.getStringArray().length);
-            buffer.reset();
-            final int length = stringTestArrray.length;
-            final String[] arrayToBeTested = buffer.getStringArray(new String[length + 2], 2, length);
-            assertTrue(Arrays.equals(stringTestArrray, 0, length, arrayToBeTested, 2, length + 2));
         }
     }
 
@@ -187,37 +150,29 @@ class IoBufferTests {
             final String fourByteCharacter = new String(chars);
             String utf8TestString = "Γειά σου Κόσμε! - " + fourByteCharacter + " 語 \u00ea \u00f1 \u00fc + some normal ASCII character";
             buffer.reset();
-            assertDoesNotThrow(() -> buffer.putStringArray(stringTestArrray, 0, stringTestArrray.length));
-            assertDoesNotThrow(() -> buffer.putStringArray(stringTestArrray, 0, -1));
-            assertDoesNotThrow(() -> buffer.putStringArray(null, 0, 5));
+            assertDoesNotThrow(() -> buffer.putStringArray(stringTestArrray, stringTestArrray.length));
+            assertDoesNotThrow(() -> buffer.putStringArray(stringTestArrray, -1));
+            assertDoesNotThrow(() -> buffer.putStringArray(null, 5));
             buffer.putString(utf8TestString);
             buffer.reset();
             assertArrayEquals(stringTestArrray, buffer.getStringArray());
             assertArrayEquals(stringTestArrray, buffer.getStringArray());
             assertEquals(0, buffer.getStringArray().length);
             assertEquals(utf8TestString, buffer.getString());
-            buffer.reset();
-            final int length = stringTestArrray.length;
-            final String[] arrayToBeTested = buffer.getStringArray(new String[length + 2], 2, length);
-            assertTrue(Arrays.equals(stringTestArrray, 0, length, arrayToBeTested, 2, length + 2));
         }
 
         buffer.setEnforceSimpleStringEncoding(true);
         {
             buffer.reset();
-            assertDoesNotThrow(() -> buffer.putStringArray(stringTestArrray, 0, stringTestArrray.length));
-            assertDoesNotThrow(() -> buffer.putStringArray(stringTestArrray, 0, -1));
-            assertDoesNotThrow(() -> buffer.putStringArray(null, 0, 5));
+            assertDoesNotThrow(() -> buffer.putStringArray(stringTestArrray, stringTestArrray.length));
+            assertDoesNotThrow(() -> buffer.putStringArray(stringTestArrray, -1));
+            assertDoesNotThrow(() -> buffer.putStringArray(null, 5));
             buffer.putString("Hello World!");
             buffer.reset();
             assertArrayEquals(stringTestArrray, buffer.getStringArray());
             assertArrayEquals(stringTestArrray, buffer.getStringArray());
             assertEquals(0, buffer.getStringArray().length);
             assertEquals("Hello World!", buffer.getString());
-            buffer.reset();
-            final int length = stringTestArrray.length;
-            final String[] arrayToBeTested = buffer.getStringArray(new String[length + 2], 2, length);
-            assertTrue(Arrays.equals(stringTestArrray, 0, length, arrayToBeTested, 2, length + 2));
         }
     }
 
@@ -412,7 +367,7 @@ class IoBufferTests {
             buffer.ensureCapacity(400);
             assertEquals(400, buffer.capacity());
 
-            buffer.putByteArray(new byte[100], 0, 100);
+            buffer.putByteArray(new byte[100], 100);
             // N.B. int (4 bytes) for array size, n*4 Bytes for actual array
             final long sizeArray = (FastByteBuffer.SIZE_OF_INT + 100 * FastByteBuffer.SIZE_OF_BYTE);
             assertEquals(104, buffer.position());

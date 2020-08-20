@@ -94,7 +94,7 @@ public class DataSetToByteArraySample {
     }
 
     public void testGenericSerialiserIdentity(final boolean asFloat32) {
-        IoClassSerialiser serialiser = new IoClassSerialiser(binarySerialiser);
+        IoClassSerialiser serialiser = new IoClassSerialiser(byteBuffer, BinarySerialiser.class);
         DataSetWrapper dsOrig = new DataSetWrapper();
         dsOrig.source = original;
         DataSetWrapper cpOrig = new DataSetWrapper();
@@ -120,7 +120,7 @@ public class DataSetToByteArraySample {
     }
 
     public void testGenericSerializerPerformance(final int iterations, final boolean asFloat32) {
-        IoClassSerialiser serialiser = new IoClassSerialiser(binarySerialiser);
+        IoClassSerialiser serialiser = new IoClassSerialiser(byteBuffer, BinarySerialiser.class);
         byteBuffer.reset(); // reset to read position (==0)
         final DoubleErrorDataSet copy = new DoubleErrorDataSet("init", N_SAMPLES);
         copy.setErrorType(DIM_X, ErrorType.NO_ERROR);
