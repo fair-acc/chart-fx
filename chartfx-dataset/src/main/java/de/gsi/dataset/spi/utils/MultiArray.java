@@ -19,6 +19,7 @@ public abstract class MultiArray<T> {
     private final int elementCount;
     private final int[] dimensions;
     private final int[] strides;
+    protected final int offset;
 
     /**
      * Creates a MultiArray of the given type and dimension if supported
@@ -27,9 +28,21 @@ public abstract class MultiArray<T> {
      * @param <TT> Type of the underlying array
      * @return A specific MultiArray implementation
      */
-    public static <TT> MultiArray<TT> of(TT elements, int[] dimensions) {
+    public static <TT> MultiArray<TT> of(final TT elements, final int[] dimensions) {
+        return of(elements, dimensions, 0);
+    }
+
+    /**
+     * Creates a MultiArray of the given type and dimension if supported
+     * @param elements Array of the data in row major storage
+     * @param dimensions int array of the dimensions
+     * @param offset where in the backing array the element data starts
+     * @param <TT> Type of the underlying array
+     * @return A specific MultiArray implementation
+     */
+    public static <TT> MultiArray<TT> of(final TT elements, final int[] dimensions, final int offset) {
         if (elements instanceof double[]) {
-            return (MultiArray<TT>) MultiArrayDouble.of((double[]) elements, dimensions);
+            return (MultiArray<TT>) MultiArrayDouble.of((double[]) elements, dimensions, offset);
         }
         throw new IllegalArgumentException("Data type not supported for MultiDimArray");
     }
@@ -40,18 +53,30 @@ public abstract class MultiArray<T> {
      * @param <TT> Type of the underlying array
      * @return A specific MultiArray implementation
      */
-    public static <TT> MultiArray<TT> of(TT elements) {
+    public static <TT> MultiArray<TT> of(final TT elements) {
+        return of(elements, 0);
+    }
+
+    /**
+     * Creates a 1D MultiArray of the given type if supported.
+     * @param elements Array of the data in row major storage
+     * @param offset where in the backing array the element data starts
+     * @param <TT> Type of the underlying array
+     * @return A specific MultiArray implementation
+     */
+    public static <TT> MultiArray<TT> of(final TT elements, final int offset) {
         if (elements instanceof double[]) {
-            return (MultiArray<TT>) MultiArrayDouble.of((double[]) elements);
+            return (MultiArray<TT>) MultiArrayDouble.of((double[]) elements, offset);
         }
         throw new IllegalArgumentException("Data type not supported for MultiDimArray");
     }
 
-    protected MultiArray(T elements, final int[] dimensions) {
+    protected MultiArray(final T elements, final int[] dimensions, final int offset) {
         AssertUtils.notNull("dimensions", dimensions);
         AssertUtils.notNull("elements", elements);
         this.dimensions = dimensions;
         this.elements = elements;
+        this.offset = offset;
         strides = new int[dimensions.length];
         strides[0] = 1;
         for (int i = 1; i < dimensions.length; i++) {
@@ -68,6 +93,13 @@ public abstract class MultiArray<T> {
     }
 
     /**
+     * @return the position in the array where the data starts
+     */
+    public int getOffset() {
+        return offset;
+    }
+
+    /**
      * @return The number of elements in the MultiArray
      */
     public int getElementsCount() {
@@ -79,7 +111,7 @@ public abstract class MultiArray<T> {
      * @return position in the strided array
      */
     public int getIndex(final int[] indices) {
-        int index = 0;
+        int index = offset;
         for (int i = 0; i < dimensions.length; i++) {
             if (indices[i] < 0 || indices[i] >= dimensions[i]) {
                 throw new IndexOutOfBoundsException("Index " + indices[i] + " for dimension " + i + " out of bounds " + dimensions[i]);
@@ -94,14 +126,14 @@ public abstract class MultiArray<T> {
      * @return indices of the given element
      */
     public int[] getIndices(final int index) {
-        if (index >= elementCount || index < 0) {
+        if (index >= elementCount + offset || index < offset) {
             throw new IndexOutOfBoundsException();
         }
-        if (index == 0) {
+        if (index == offset) {
             return new int[dimensions.length];
         }
         final int[] indices = new int[dimensions.length];
-        int ind = index;
+        int ind = index - offset;
         for (int i = dimensions.length - 1; i >= 0; i--) {
             if (dimensions[i] == 0) {
                 throw new IndexOutOfBoundsException();
