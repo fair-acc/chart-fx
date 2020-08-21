@@ -66,7 +66,7 @@ public class DoubleGridDataSet extends AbstractDataSet<DoubleGridDataSet> implem
             grid[i] = IntStream.range(0, shape[i]).asDoubleStream().toArray();
         }
         for (int i = shape.length; i < nDims; i++) {
-            values[i - shape.length] = MultiArrayDouble.of(new double[dataCount], shape);
+            values[i - shape.length] = MultiArrayDouble.of(new double[dataCount], shape, 0);
         }
     }
 
@@ -93,7 +93,7 @@ public class DoubleGridDataSet extends AbstractDataSet<DoubleGridDataSet> implem
             if (vals[i - shape.length].length != dataCount) {
                 throw new IllegalArgumentException("Dimension missmatch between grid and values");
             }
-            values[i - shape.length] = MultiArrayDouble.of(copy ? vals[i - shape.length].clone() : vals[i - shape.length], shape);
+            values[i - shape.length] = MultiArrayDouble.of(copy ? vals[i - shape.length].clone() : vals[i - shape.length], shape, 0);
         }
     }
 
@@ -184,7 +184,7 @@ public class DoubleGridDataSet extends AbstractDataSet<DoubleGridDataSet> implem
                 if (vals[i - shape.length].length != dataCount) {
                     throw new IllegalArgumentException("Dimension missmatch between grid and values");
                 }
-                values[i - shape.length] = MultiArrayDouble.of(copy ? vals[i - shape.length].clone() : vals[i - shape.length], shape);
+                values[i - shape.length] = MultiArrayDouble.of(copy ? vals[i - shape.length].clone() : vals[i - shape.length], shape, 0);
             }
         });
         fireInvalidated(new UpdatedDataEvent(this));
@@ -209,7 +209,7 @@ public class DoubleGridDataSet extends AbstractDataSet<DoubleGridDataSet> implem
                 this.grid[i] = another.getGridValues(i).clone();
             }
             for (int i = shape.length; i < nDims; i++) {
-                values[i - shape.length] = MultiArrayDouble.of(another.getValues(i).clone(), shape);
+                values[i - shape.length] = MultiArrayDouble.of(another.getValues(i).clone(), shape, 0);
             }
 
             // deep copy data point labels and styles
