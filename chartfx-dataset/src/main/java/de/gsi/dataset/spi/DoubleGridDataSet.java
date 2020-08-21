@@ -6,8 +6,8 @@ import java.util.stream.IntStream;
 import de.gsi.dataset.DataSet3D;
 import de.gsi.dataset.GridDataSet;
 import de.gsi.dataset.event.UpdatedDataEvent;
-import de.gsi.dataset.serializer.MultiArray;
-import de.gsi.dataset.serializer.spi.MultiArrayImpl;
+import de.gsi.dataset.spi.utils.MultiArray;
+import de.gsi.dataset.spi.utils.MultiArrayDouble;
 
 /**
  * Implementation of the GridDataSet. Allows data on n-dimensional Cartesian grids with m values per point.
@@ -20,7 +20,7 @@ public class DoubleGridDataSet extends AbstractDataSet<DoubleGridDataSet> implem
     private static final long serialVersionUID = -493232313124620828L;
 
     protected transient double[][] grid; // grid values
-    protected transient MultiArray<double[]>[] values; // the values on the grid
+    protected transient MultiArrayDouble[] values; // the values on the grid
     protected transient int[] shape; // the sizes of the grid for each dimension [nx, ny ...]
     protected transient int dataCount; // the number of point on the grid nx * ny * ...
 
@@ -58,7 +58,7 @@ public class DoubleGridDataSet extends AbstractDataSet<DoubleGridDataSet> implem
         }
 
         grid = new double[shape.length][];
-        values = new MultiArray[nDims - shape.length];
+        values = new MultiArrayDouble[nDims - shape.length];
 
         dataCount = 1;
         for (int i = 0; i < shape.length; i++) {
@@ -66,7 +66,7 @@ public class DoubleGridDataSet extends AbstractDataSet<DoubleGridDataSet> implem
             grid[i] = IntStream.range(0, shape[i]).asDoubleStream().toArray();
         }
         for (int i = shape.length; i < nDims; i++) {
-            values[i - shape.length] = new MultiArrayImpl<>(new double[dataCount], shape);
+            values[i - shape.length] = MultiArrayDouble.of(new double[dataCount], shape);
         }
     }
 
@@ -82,7 +82,7 @@ public class DoubleGridDataSet extends AbstractDataSet<DoubleGridDataSet> implem
         this.shape = shape.clone();
 
         grid = new double[shape.length][];
-        values = new MultiArrayImpl[vals.length];
+        values = new MultiArrayDouble[vals.length];
 
         dataCount = 1;
         for (int i = 0; i < shape.length; i++) {
@@ -93,7 +93,7 @@ public class DoubleGridDataSet extends AbstractDataSet<DoubleGridDataSet> implem
             if (vals[i - shape.length].length != dataCount) {
                 throw new IllegalArgumentException("Dimension missmatch between grid and values");
             }
-            values[i - shape.length] = new MultiArrayImpl<>(copy ? vals[i - shape.length].clone() : vals[i - shape.length], shape);
+            values[i - shape.length] = MultiArrayDouble.of(copy ? vals[i - shape.length].clone() : vals[i - shape.length], shape);
         }
     }
 
@@ -113,7 +113,7 @@ public class DoubleGridDataSet extends AbstractDataSet<DoubleGridDataSet> implem
         if (dimIndex < shape.length) {
             return grid[dimIndex][values[0].getIndices(index)[dimIndex]];
         }
-        return values[dimIndex - shape.length].getDouble(index);
+        return values[dimIndex - shape.length].getStrided(index);
     }
 
     @Override
@@ -152,13 +152,13 @@ public class DoubleGridDataSet extends AbstractDataSet<DoubleGridDataSet> implem
         if (dimIndex < shape.length) {
             return grid[dimIndex][indices[dimIndex]];
         }
-        return values[dimIndex - shape.length].getDouble(indices);
+        return values[dimIndex - shape.length].get(indices);
     }
 
     @Override
     public double[] getValues(int dimIndex) {
         if (dimIndex >= shape.length) {
-            return values[dimIndex - shape.length].getElements();
+            return values[dimIndex - shape.length].getStridedArray();
         }
         return super.getValues(dimIndex); // return new list with full coordinates
     }
@@ -179,12 +179,12 @@ public class DoubleGridDataSet extends AbstractDataSet<DoubleGridDataSet> implem
                     this.grid[i] = grid[i].clone();
                 }
             }
-            values = new MultiArray[vals.length];
+            values = new MultiArrayDouble[vals.length];
             for (int i = shape.length; i < nDims; i++) {
                 if (vals[i - shape.length].length != dataCount) {
                     throw new IllegalArgumentException("Dimension missmatch between grid and values");
                 }
-                values[i - shape.length] = new MultiArrayImpl<>(copy ? vals[i - shape.length].clone() : vals[i - shape.length], shape);
+                values[i - shape.length] = MultiArrayDouble.of(copy ? vals[i - shape.length].clone() : vals[i - shape.length], shape);
             }
         });
         fireInvalidated(new UpdatedDataEvent(this));
@@ -201,7 +201,7 @@ public class DoubleGridDataSet extends AbstractDataSet<DoubleGridDataSet> implem
             // copy data
             this.shape = another.getShape().clone();
             this.grid = new double[shape.length][];
-            this.values = new MultiArray[nDims - shape.length];
+            this.values = new MultiArrayDouble[nDims - shape.length];
 
             dataCount = 1;
             for (int i = 0; i < shape.length; i++) {
@@ -209,7 +209,7 @@ public class DoubleGridDataSet extends AbstractDataSet<DoubleGridDataSet> implem
                 this.grid[i] = another.getGridValues(i).clone();
             }
             for (int i = shape.length; i < nDims; i++) {
-                values[i - shape.length] = new MultiArrayImpl<>(another.getValues(i).clone(), shape);
+                values[i - shape.length] = MultiArrayDouble.of(another.getValues(i).clone(), shape);
             }
 
             // deep copy data point labels and styles
@@ -246,7 +246,7 @@ public class DoubleGridDataSet extends AbstractDataSet<DoubleGridDataSet> implem
      * @return itself for method chaining
      */
     public GridDataSet set(int dimIndex, int[] indices, double value) {
-        lock().writeLockGuard(() -> values[dimIndex - shape.length].set(value, indices));
+        lock().writeLockGuard(() -> values[dimIndex - shape.length].set(indices, value));
         return fireInvalidated(new UpdatedDataEvent(this, "set x_" + dimIndex + Arrays.toString(indices) + " = " + value));
     }
 
