@@ -408,6 +408,7 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
      * @param other the other data set
      * @return itself (fluent design)
      */
+    @Override
     public DoubleErrorDataSet set(final DataSet other) {
         lock().writeLockGuard(() -> other.lock().writeLockGuard(() -> {
             // copy data

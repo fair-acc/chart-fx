@@ -48,4 +48,10 @@ public interface EditableDataSet extends DataSet {
      * @return itself (fluent design)
      */
     EditableDataSet setName(final String name);
+
+    /**
+     * @param other Other DataSet to copy into this DataSet
+     * @return itself (fluent design)
+     */
+    EditableDataSet set(final DataSet other);
 }

@@ -322,6 +322,7 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
      * @param other the source data set
      * @return itself (fluent design)
      */
+    @Override
     public DoubleDataSet set(final DataSet other) {
         lock().writeLockGuard(() -> other.lock().writeLockGuard(() -> {
             // copy data
