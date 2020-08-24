@@ -3,6 +3,7 @@ package de.gsi.dataset.samples.legacy;
 import java.util.Arrays;
 
 import de.gsi.dataset.AxisDescription;
+import de.gsi.dataset.DataSet;
 import de.gsi.dataset.DataSet2D;
 import de.gsi.dataset.EditableDataSet;
 import de.gsi.dataset.event.AddedDataEvent;
@@ -432,5 +433,10 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
             getAxisDescriptions().forEach(AxisDescription::clear);
         });
         return fireInvalidated(new UpdatedDataEvent(this));
+    }
+
+    @Override
+    public EditableDataSet set(final DataSet other) {
+        throw new UnsupportedOperationException("Copy setter not implemented");
     }
 }
