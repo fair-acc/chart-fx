@@ -486,6 +486,7 @@ public class XYChart extends Chart {
             }
         });
         axis.getAutoRange().setAxisLength(axis.getLength() == 0 ? 1 : axis.getLength(), side);
+        axis.getUserRange().setAxisLength(axis.getLength() == 0 ? 1 : axis.getLength(), side);
 
         // handling of numeric axis and auto-range or auto-grow setting only
         if (!axis.isAutoRanging() && !axis.isAutoGrowRanging()) {
