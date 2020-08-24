@@ -323,6 +323,7 @@ public class MultiDimDoubleDataSet extends AbstractDataSet<MultiDimDoubleDataSet
      * @param other the source data set
      * @return itself (fluent design)
      */
+    @Override
     public MultiDimDoubleDataSet set(final DataSet other) {
         lock().writeLockGuard(() -> other.lock().writeLockGuard(() -> {
             // copy data

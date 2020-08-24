@@ -2,10 +2,7 @@ package de.gsi.dataset.samples.legacy;
 
 import java.util.Arrays;
 
-import de.gsi.dataset.AxisDescription;
-import de.gsi.dataset.DataSet2D;
-import de.gsi.dataset.DataSetError;
-import de.gsi.dataset.EditableDataSet;
+import de.gsi.dataset.*;
 import de.gsi.dataset.event.AddedDataEvent;
 import de.gsi.dataset.event.RemovedDataEvent;
 import de.gsi.dataset.event.UpdatedDataEvent;
@@ -484,5 +481,10 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
             getAxisDescription(DIM_Y).add(y + yErrorPos);
         });
         return fireInvalidated(new UpdatedDataEvent(this));
+    }
+
+    @Override
+    public EditableDataSet set(final DataSet other) {
+        throw new UnsupportedOperationException("Copy setter not implemented");
     }
 }
