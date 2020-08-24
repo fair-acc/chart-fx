@@ -20,12 +20,6 @@
 
     <dependencies>
         <dependency>
-            <groupId>de.gsi.generate</groupId>
-            <artifactId>chartfx-generate</artifactId>
-            <version>${project.version}</version>
-            <scope>compile</scope> <!-- we need it to be compiled first, but not be part of the project -->
-        </dependency>
-        <dependency>
             <groupId>de.gsi.dataset</groupId>
             <artifactId>chartfx-dataset</artifactId>
             <version>${project.version}</version>
@@ -49,49 +43,20 @@
     </dependencies>
 
     <build>
-        <!-- Call parser on input module sources and generate output -->
         <plugins>
             <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>exec-maven-plugin</artifactId>
+                <groupId>de.gsi.generate</groupId>
+                <artifactId>chartfx-generate</artifactId>
+                <version>${revision}${sha1}${changelist}</version>
                 <executions>
                     <execution>
-                        <id>codegen</id>
-                        <phase>generate-sources</phase>
+                        <id>generate-sources</id>
                         <goals>
-                            <goal>java</goal>
+                            <goal>generate-sources</goal>
                         </goals>
-                        <configuration>
-                            <mainClass>de.gsi.generate.CodeGenerator</mainClass>
-                            <skip>false</skip>
-                            <arguments>
-                                <argument>${project.build.sourceDirectory}</argument>
-                                <argument>${project.build.directory}/generated-sources/codegen</argument>
-                            </arguments>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <!-- Add generated sources to project sources -->
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>build-helper-maven-plugin</artifactId>
-                <version>3.0.0</version>
-                <executions>
-                    <execution>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>add-source</goal>
-                        </goals>
-                        <configuration>
-                            <sources>
-                                <source>${project.build.directory}/generated-sources/codegen</source>
-                            </sources>
-                        </configuration>
                     </execution>
                 </executions>
             </plugin>
         </plugins>
     </build>
-
 </project>

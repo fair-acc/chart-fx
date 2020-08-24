@@ -42,6 +42,23 @@
             <version>1.12.0</version>
             <scope>test</scope>
         </dependency>
-
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>de.gsi.generate</groupId>
+                <artifactId>chartfx-generate</artifactId>
+                <version>${revision}${sha1}${changelist}</version>
+                <executions>
+                    <execution>
+                        <id>generate-sources</id>
+                        <goals>
+                            <goal>generate-sources</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 </project>
