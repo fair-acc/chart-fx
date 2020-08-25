@@ -34,7 +34,6 @@ import de.gsi.dataset.locks.DataSetLock;
  * @author Alexander Krimm
  */
 class DataSetBuilderTests {
-
     @Test
     void testEmptyDataSet() {
         final DataSet dataset = new DataSetBuilder("testdataset").build();

@@ -13,7 +13,6 @@ import de.gsi.dataset.utils.AssertUtils;
  */
 //// === END IMPORTS ===
 class ArrayMath2GenBase {
-
     protected static final String DIVISOR = "divisor";
     protected static final String IN = "in";
     protected static final String MULTIPLICATOR = "multiplicator";
@@ -23,7 +22,7 @@ class ArrayMath2GenBase {
         throw new IllegalStateException("Utility class");
     }
 
-//// === BEGIN TEMPLATE ===
+    //// === BEGIN TEMPLATE ===
 
     public static double[] add(final double[] in, final double value) {
         return add(in, in.length, value);
@@ -60,5 +59,5 @@ class ArrayMath2GenBase {
 
         return ret;
     }
-//// === END TEMPLATE ===
+    //// === END TEMPLATE ===
 }
