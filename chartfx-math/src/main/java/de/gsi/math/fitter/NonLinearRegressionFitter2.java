@@ -694,7 +694,7 @@ public class NonLinearRegressionFitter2 {
         for (int i = 0; i < yData.getLocalStorageDim(); i++) {
             final double[] val = yData.getLocal(i);
             for (int j = 0; j < val.length; j++) {
-                yabsmean += java.lang.Math.abs(val[j]);
+                yabsmean += Math.abs(val[j]);
                 yabscount++;
             }
         }
@@ -971,7 +971,7 @@ public class NonLinearRegressionFitter2 {
                 zn = yy[i] - sumnm;
                 summnm += zn * zn;
             }
-            curMin = java.lang.Math.sqrt(summnm / np);
+            curMin = Math.sqrt(summnm / np);
 
             // test simplex sd
             switch (minTest) {
@@ -981,7 +981,7 @@ public class NonLinearRegressionFitter2 {
                 }
                 break;
             case 1:
-                if (java.lang.Math.sqrt(ynewlo / degreesOfFreedom) < yabsmean * fTol) {
+                if (Math.sqrt(ynewlo / degreesOfFreedom) < yabsmean * fTol) {
                     test = false;
                 }
                 break;
@@ -1099,8 +1099,8 @@ public class NonLinearRegressionFitter2 {
             f2 = sumSquares(regFun, f);
 
             // computes gradient around minimum
-            grad[i][0] = (fMin - f1) / java.lang.Math.abs(delta * hold0);
-            grad[i][1] = (f2 - fMin) / java.lang.Math.abs(delta * hold0);
+            grad[i][0] = (fMin - f1) / Math.abs(delta * hold0);
+            grad[i][1] = (f2 - fMin) / Math.abs(delta * hold0);
         }
 
         // second patial derivatives at the minimum
@@ -1240,9 +1240,9 @@ public class NonLinearRegressionFitter2 {
 
         // calculate pseudo errors - reduced sum of squares over second partial derivative
         for (int i = 0; i < np; i++) {
-            pseudoSd[i] = 2.0D * delta * red * java.lang.Math.abs(pmin[i]) / (grad[i][1] - grad[i][0]);
+            pseudoSd[i] = 2.0D * delta * red * Math.abs(pmin[i]) / (grad[i][1] - grad[i][0]);
             if (pseudoSd[i] >= 0.0D) {
-                pseudoSd[i] = java.lang.Math.sqrt(pseudoSd[i]);
+                pseudoSd[i] = Math.sqrt(pseudoSd[i]);
             } else {
                 pseudoSd[i] = Double.NaN;
             }
@@ -1257,7 +1257,7 @@ public class NonLinearRegressionFitter2 {
             stat[0][0] = 1.0D / stat[0][0];
             covar[0][0] = stat[0][0] * red * hold0 * hold0;
             if (covar[0][0] >= 0.0D) {
-                coeffSd[0] = java.lang.Math.sqrt(covar[0][0]);
+                coeffSd[0] = Math.sqrt(covar[0][0]);
                 corrCoeff[0][0] = 1.0D;
             } else {
                 coeffSd[0] = Double.NaN;
@@ -1298,7 +1298,7 @@ public class NonLinearRegressionFitter2 {
                         covar[j][i] = covar[i][j];
                     }
                     if (covar[i][i] >= 0.0D) {
-                        coeffSd[i] = java.lang.Math.sqrt(covar[i][i]);
+                        coeffSd[i] = Math.sqrt(covar[i][i]);
                     } else {
                         coeffSd[i] = Double.NaN;
                         posVarFlag = false;
@@ -1332,7 +1332,7 @@ public class NonLinearRegressionFitter2 {
         for (int i = 0; i < nTerms; i++) {
             bestSd[i] = coeffSd[i];
             tValues[i] = best[i] / bestSd[i];
-            final double atv = java.lang.Math.abs(tValues[i]);
+            final double atv = Math.abs(tValues[i]);
             pValues[i] = 1.0 - Math.student(atv, degreesOfFreedom);
         }
 
@@ -1948,15 +1948,15 @@ public class NonLinearRegressionFitter2 {
         int ihl = -1;
         if (imax > 0) {
             ihl = imax - 1;
-            halflow = java.lang.Math.abs(ymax - yData[ihl]);
+            halflow = Math.abs(ymax - yData[ihl]);
             for (int i = imax - 2; i >= 0; i--) {
-                temp = java.lang.Math.abs(ymax - yData[i]);
+                temp = Math.abs(ymax - yData[i]);
                 if (temp < halflow) {
                     halflow = temp;
                     ihl = i;
                 }
             }
-            halflow = java.lang.Math.abs(xData[ihl] - xData[imax]);
+            halflow = Math.abs(xData[ihl] - xData[imax]);
         }
 
         double halfhigh = -1.0D;
@@ -1964,15 +1964,15 @@ public class NonLinearRegressionFitter2 {
         int ihh = -1;
         if (imax < n - 1) {
             ihh = imax + 1;
-            halfhigh = java.lang.Math.abs(ymax - yData[ihh]);
+            halfhigh = Math.abs(ymax - yData[ihh]);
             for (int i = imax + 2; i < n; i++) {
-                temp = java.lang.Math.abs(ymax - yData[i]);
+                temp = Math.abs(ymax - yData[i]);
                 if (temp < halfhigh) {
                     halfhigh = temp;
                     ihh = i;
                 }
             }
-            halfhigh = java.lang.Math.abs(xData[ihh] - xData[imax]);
+            halfhigh = Math.abs(xData[ihh] - xData[imax]);
         }
 
         double halfw = 0.0D;
@@ -1994,7 +1994,7 @@ public class NonLinearRegressionFitter2 {
     // zero bin position provided
     public static double[][] histogramBins(final double[] data, final double binWidth, final double binZero) {
         final double dmax = Math.maximum(data);
-        int nBins = (int) java.lang.Math.ceil((dmax - binZero) / binWidth);
+        int nBins = (int) Math.ceil((dmax - binZero) / binWidth);
         if (binZero + nBins * binWidth > dmax) {
             nBins++;
         }

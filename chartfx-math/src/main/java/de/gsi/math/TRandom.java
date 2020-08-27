@@ -156,10 +156,10 @@ public class TRandom {
                     break;
                 } else {
                     x = rn * rn;
-                    if (((y + kD1) * (kD3 + x) < kD2) || (y + kHzm < java.lang.Math.exp(-(x + kPhln) / 2))) {
+                    if (((y + kD1) * (kD3 + x) < kD2) || (y + kHzm < Math.exp(-(x + kPhln) / 2))) {
                         result = rn;
                         break;
-                    } else if (kHzmp - y < java.lang.Math.exp(-(z * z + kPhln) / 2)) {
+                    } else if (kHzmp - y < Math.exp(-(z * z + kPhln) / 2)) {
                         result = z;
                         break;
                     }
@@ -178,7 +178,7 @@ public class TRandom {
                     rn = -(2 + y / x);
                 }
 
-                if (((y - kAs + x) * (kCs + x) + kBs < 0) || (y < x + kT && rn * rn < 4 * (kB - java.lang.Math.log(x)))) {
+                if (((y - kAs + x) * (kCs + x) + kBs < 0) || (y < x + kT && rn * rn < 4 * (kB - Math.log(x)))) {
                     result = rn;
                     break;
                 }

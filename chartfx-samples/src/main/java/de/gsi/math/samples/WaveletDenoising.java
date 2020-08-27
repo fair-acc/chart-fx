@@ -82,8 +82,8 @@ public class WaveletDenoising extends AbstractDemoApplication {
                 }
                 xValues[i] = x;
                 yValues[i] = func.getValue(0);
-                yModel[i] = java.lang.Math.sin(MathBase.TWO_PI * 3e-4 * x * (x + offset));
-                yModel[i] = java.lang.Math.sin(MathBase.TWO_PI * 0.05 * x);
+                yModel[i] = Math.sin(MathBase.TWO_PI * 3e-4 * x * (x + offset));
+                yModel[i] = Math.sin(MathBase.TWO_PI * 0.05 * x);
 
                 if (i < 100 || i > 400) {
                     yModel[i] = 0;
@@ -113,7 +113,7 @@ public class WaveletDenoising extends AbstractDemoApplication {
         final double[] recon = Arrays.copyOf(ySmooth, yValues.length);
         final double[] reconAbs = Arrays.copyOf(ySmooth, yValues.length);
         for (int i = 0; i < reconAbs.length; i++) {
-            reconAbs[i] = java.lang.Math.abs(recon[i]);
+            reconAbs[i] = Math.abs(recon[i]);
         }
 
         // double max = TMath.Maximum(reconAbs);

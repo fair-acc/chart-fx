@@ -1590,7 +1590,7 @@ public class MathGenBase extends MathBase {
         final double sxy = covariance(x, y, w);
         final double sx = variance(x, w);
         final double sy = variance(y, w);
-        return sxy / java.lang.Math.sqrt(sx * sy);
+        return sxy / Math.sqrt(sx * sy);
     }
 
     /**
@@ -1782,7 +1782,7 @@ public class MathGenBase extends MathBase {
      */
     public static double erfc(double x) {
         double v = 1; // The return value
-        final double z = java.lang.Math.abs(x);
+        final double z = Math.abs(x);
 
         if (z <= 0) {
             return v; // erfc(0)=1
@@ -2216,11 +2216,11 @@ public class MathGenBase extends MathBase {
             if (a[i] == 0) {
                 return 0;
             }
-            final double absa = java.lang.Math.abs(a[i]); //// codegen: skip all
-            logsum += java.lang.Math.log(absa);
+            final double absa = Math.abs(a[i]); //// codegen: skip all
+            logsum += Math.log(absa);
         }
 
-        return java.lang.Math.exp(logsum / length); //// codegen: returncast all
+        return Math.exp(logsum / length); //// codegen: returncast all
     }
 
     public static double geometricMean(double[] data) {
@@ -2716,7 +2716,7 @@ public class MathGenBase extends MathBase {
      * @return the computed result the norm of the original vector.
      */
     public static float normalize(float v[]) {
-        final float d = (float) java.lang.Math.sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
+        final float d = (float) Math.sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
         if (d != 0) {
             v[0] /= d;
             v[1] /= d;
@@ -2850,7 +2850,7 @@ public class MathGenBase extends MathBase {
      * @return peak-to-peak value of vector element
      */
     public static double peakToPeak(double[] data, int length) {
-        return java.lang.Math.abs(maximum(data, length) - minimum(data, length)); //// codegen: returncast short
+        return Math.abs(maximum(data, length) - minimum(data, length)); //// codegen: returncast short
     }
     //// end codegen
 
@@ -3018,7 +3018,7 @@ public class MathGenBase extends MathBase {
         val1 *= norm;
         val2 *= norm;
         // un-biased rms!
-        return sqrt(java.lang.Math.abs(val2 - val1 * val1)); //// codegen: returncast all
+        return sqrt(Math.abs(val2 - val1 * val1)); //// codegen: returncast all
     }
     //// end codegen
 
@@ -3355,15 +3355,15 @@ public class MathGenBase extends MathBase {
 
     /**
      * Computes quantiles of the Student's t-distribution
-     *  When the 3rd argument lower_tail is true (default)-  the algorithm returns such x0, that  P(x < x0)=p
-     *  upper tail (lower_tail is false)- the algorithm returns such x0, that  P(x > x0)=p
      *
      * the algorithm was taken from
      * G.W.Hill, "Algorithm 396, Student's t-quantiles"
      * "Communications of the ACM", 13(10), October 1970
      * @param p the probability, at which the quantile is computed
      * @param ndf the number of degrees of freedom of the
-     * @param lower_tail
+     * @param lower_tail determine whether to reurn the quantile for the upper or the lower tail
+     *                   true: the algorithm returns such x0, that P(x &lt; x0)=p
+     *                   false: the algorithm returns such x0, that  P(x &gt; x0)=p
      */
     public static double studentQuantile(double p, double ndf, boolean lower_tail) {
         if (ndf < 1 || p >= 1 || p <= 0) {

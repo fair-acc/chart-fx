@@ -31,7 +31,7 @@ public class BetaDistributionFunction extends AbstractFunction1D implements Func
             return;
         }
 
-        for (int i = 0; i < java.lang.Math.min(parameter.length, 2); i++) {
+        for (int i = 0; i < Math.min(parameter.length, 2); i++) {
             setParameterValue(i, parameter[i]);
         }
     }

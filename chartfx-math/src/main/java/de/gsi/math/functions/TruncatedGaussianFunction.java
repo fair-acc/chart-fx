@@ -46,14 +46,14 @@ public class TruncatedGaussianFunction extends AbstractFunction1D implements Fun
             return;
         }
 
-        for (int i = 0; i < java.lang.Math.min(parameter.length, 4); i++) {
+        for (int i = 0; i < Math.min(parameter.length, 4); i++) {
             setParameterValue(i, parameter[i]);
         }
     }
 
     @Override
     public double getValue(final double x) {
-        if (java.lang.Math.abs(x - fparameter[0]) < fparameter[3] * fparameter[1]) {
+        if (Math.abs(x - fparameter[0]) < fparameter[3] * fparameter[1]) {
             return fparameter[2] * Math.gauss(x, fparameter[0], fparameter[1], true);
         }
         return 0.0;
