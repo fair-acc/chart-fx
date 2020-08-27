@@ -27,7 +27,7 @@ public class PoissonFunction extends AbstractFunction1D implements Function1D {
             return;
         }
 
-        for (int i = 0; i < java.lang.Math.min(parameter.length, 1); i++) {
+        for (int i = 0; i < Math.min(parameter.length, 1); i++) {
             setParameterValue(i, parameter[i]);
         }
     }

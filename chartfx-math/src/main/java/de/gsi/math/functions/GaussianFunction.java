@@ -44,7 +44,7 @@ public class GaussianFunction extends AbstractFunction1D implements Function1D {
             return;
         }
 
-        for (int i = 0; i < java.lang.Math.min(parameter.length, 3); i++) {
+        for (int i = 0; i < Math.min(parameter.length, 3); i++) {
             setParameterValue(i, parameter[i]);
         }
     }

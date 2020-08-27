@@ -511,9 +511,9 @@ public class SpectrumTools {
         final double tresolution = 1.0 / (2.0 * data.length);
 
         if (index > 0 && index < data.length - 1) {
-            double sum = java.lang.Math.pow(data[index - 1], 1);
-            sum += java.lang.Math.pow(data[index - 0], 1);
-            sum += java.lang.Math.pow(data[index + 1], 1);
+            double sum = Math.pow(data[index - 1], 1);
+            sum += Math.pow(data[index - 0], 1);
+            sum += Math.pow(data[index + 1], 1);
 
             double val = data[index - 1] * (index - 1);
             val += data[index + 0] * (index + 0);
@@ -536,12 +536,12 @@ public class SpectrumTools {
         final double tresolution = 1.0 / (2 * data.length);
 
         if (index > 0 && index < data.length - 1) {
-            final double left = java.lang.Math.pow(data[index - 1], 1);
-            final double center = java.lang.Math.pow(data[index - 0], 1);
-            final double right = java.lang.Math.pow(data[index + 1], 1);
+            final double left = Math.pow(data[index - 1], 1);
+            final double center = Math.pow(data[index - 0], 1);
+            final double right = Math.pow(data[index + 1], 1);
 
             double val = index;
-            val += 0.5 * java.lang.Math.log(right / left) / java.lang.Math.log(java.lang.Math.pow(center, 2) / (left * right));
+            val += 0.5 * Math.log(right / left) / Math.log(Math.pow(center, 2) / (left * right));
             return val * tresolution;
         } else {
             return index * tresolution;
@@ -559,9 +559,9 @@ public class SpectrumTools {
         final double val = index / (double) (2 * data.length);
         if (index > 0 && index < data.length - 1) {
             final double pin = MathBase.PI / data.length;
-            final double left = java.lang.Math.pow(data[index - 1], 1);
-            final double center = java.lang.Math.pow(data[index - 0], 1);
-            final double right = java.lang.Math.pow(data[index + 1], 1);
+            final double left = Math.pow(data[index - 1], 1);
+            final double center = Math.pow(data[index - 0], 1);
+            final double right = Math.pow(data[index + 1], 1);
 
             if (left < right) {
                 return val + MathBase.aTan2(right * MathBase.sin(pin), center + right * MathBase.cos(pin)) / MathBase.PI;
@@ -586,9 +586,9 @@ public class SpectrumTools {
         final double tresolution = 1.0 / (2.0 * data.length);
 
         if (index > 0 && index < data.length - 1) {
-            final double left = java.lang.Math.pow(data[index - 1], 1);
-            final double center = java.lang.Math.pow(data[index - 0], 1);
-            final double right = java.lang.Math.pow(data[index + 1], 1);
+            final double left = Math.pow(data[index - 1], 1);
+            final double center = Math.pow(data[index - 0], 1);
+            final double right = Math.pow(data[index + 1], 1);
 
             return (index + 0.5 * (right - left) / (2 * center - left - right)) * tresolution;
         } else {
@@ -643,15 +643,15 @@ public class SpectrumTools {
 
         System.out.println(" ");
         System.out.printf("no interpolation                 f=%f [bins], abs. error = %e[bins]\n", (double) lmax,
-                java.lang.Math.abs(lmax - mean));
+                Math.abs(lmax - mean));
         System.out.printf("Gaussian peak frequency estimate f=%f [bins], abs. error = %e[bins]\n", interGauss,
-                java.lang.Math.abs(interGauss - mean));
+                Math.abs(interGauss - mean));
         System.out.printf("Bary-centre frequency estimate   f=%f [bins], abs. error = %e[bins]\n", interBary,
-                java.lang.Math.abs(interBary - mean));
+                Math.abs(interBary - mean));
         System.out.printf("Parabolic frequency estimate     f=%f [bins], abs. error = %e[bins]\n", interPara,
-                java.lang.Math.abs(interPara - mean));
+                Math.abs(interPara - mean));
         System.out.printf("'NAFF'/'SUSSIX'-type estimate    f=%f [bins], abs. error = %e[bins]\n", interNAFF,
-                java.lang.Math.abs(interNAFF - mean));
+                Math.abs(interNAFF - mean));
         System.out.println(" ");
     }
 }
