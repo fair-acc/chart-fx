@@ -149,21 +149,21 @@ public class EMDSample extends AbstractDemoApplication {
 
             // linear chirp with discontinuity
             offset = (i > 500) ? -20 : 0;
-            yModel[i] = (i > 100 && i < 700) ? 0.7 * java.lang.Math.sin(Math.TWO_PI * 2e-4 * x * (x + offset)) : 0;
+            yModel[i] = (i > 100 && i < 700) ? 0.7 * Math.sin(Math.TWO_PI * 2e-4 * x * (x + offset)) : 0;
 
             // single tone at 0.25
-            yModel[i] += (i > 50 && i < 500) ? 1.0 * java.lang.Math.sin(Math.TWO_PI * 0.25 * x) : 0;
+            yModel[i] += (i > 50 && i < 500) ? 1.0 * Math.sin(Math.TWO_PI * 0.25 * x) : 0;
             // yModel[i] = Math.sin(TMath.TwoPi() * 0.3* x);
 
             // modulation around 0.4
-            double mod = java.lang.Math.cos(Math.TWO_PI * 0.01 * x);
+            double mod = Math.cos(Math.TWO_PI * 0.01 * x);
             if (i < 470) {
                 mod = 0.0;
             }
-            yModel[i] += (i > 300 && i < 900) ? 1.0 * java.lang.Math.sin(Math.TWO_PI * (0.4 - 5e-4 * mod) * x) : 0;
+            yModel[i] += (i > 300 && i < 900) ? 1.0 * Math.sin(Math.TWO_PI * (0.4 - 5e-4 * mod) * x) : 0;
 
             // quadratic chirp starting at 0.1
-            yModel[i] += 0.5 * java.lang.Math.sin(Math.TWO_PI * ((0.1 + 5e-8 * x * x) * x));
+            yModel[i] += 0.5 * Math.sin(Math.TWO_PI * ((0.1 + 5e-8 * x * x) * x));
 
             yModel[i] = yModel[i] + error;
         }

@@ -87,8 +87,8 @@ public class TRandom1 extends TRandom {
         long seedlist[] = { 0, 0 };
 
         fLuxury = 3;
-        int cycle = java.lang.Math.abs(fgNumEngines / fgMaxIndex);
-        int curIndex = java.lang.Math.abs(fgNumEngines % fgMaxIndex);
+        int cycle = Math.abs(fgNumEngines / fgMaxIndex);
+        int curIndex = Math.abs(fgNumEngines % fgMaxIndex);
         fgNumEngines += 1;
         long mask = ((cycle & 0x007fffff) << 8);
         GetTableSeeds(seedlist, curIndex);

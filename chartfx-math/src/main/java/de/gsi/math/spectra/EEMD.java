@@ -26,7 +26,7 @@ public class EEMD {
         // dd=1:1:xsize;
         final double Ystd = Math.rms(data);
 
-        final int TNM = (int) java.lang.Math.floor(MathBase.log2(xsize)) - 1;
+        final int TNM = (int) Math.floor(MathBase.log2(xsize)) - 1;
         final int TNM2 = TNM + 2;
 
         final MatrixD allmode = new MatrixD(xsize, TNM2 + 1);
@@ -102,7 +102,7 @@ public class EEMD {
                     }
 
                     if (true) {
-                        if (sum_sqr == 0 || java.lang.Math.abs(nextrema - ncrossing) <= 0) {
+                        if (sum_sqr == 0 || Math.abs(nextrema - ncrossing) <= 0) {
                             System.err.printf("break (crossing) at mode %d and  iteration %d with criteria %f\n", nmode,
                                     iter, diff_sqr / sum_sqr);
                             break;
@@ -209,7 +209,7 @@ public class EEMD {
                     }
 
                     // ret[j][y_index] = Math.log(amplitude);
-                    ret[yIndex][j] = 10 * java.lang.Math.log(amplitude_filtered[j]);
+                    ret[yIndex][j] = 10 * Math.log(amplitude_filtered[j]);
                     if (ret[yIndex][j] < -10 || ret[yIndex][j] > 10) {
                         ret[yIndex][j] = Double.NaN;
                         // ret[j][y_index] = TMath.Sqr(amplitude);
