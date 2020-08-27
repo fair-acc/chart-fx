@@ -87,10 +87,10 @@ public class LombPeriodogram {
         double sum1 = 0.0;
         double sum2 = 0.0;
         for (int i = 0; i < t.length; i++) {
-            sum1 += MathBase.sin(MathBase.twoPi() * t[i]);
-            sum2 += MathBase.cos(MathBase.twoPi() * t[i]);
+            sum1 += MathBase.sin(MathBase.TWO_PI * t[i]);
+            sum2 += MathBase.cos(MathBase.TWO_PI * t[i]);
         }
-        final double tau = MathBase.aTan2(sum1, sum2) / MathBase.twoPi();
+        final double tau = MathBase.aTan2(sum1, sum2) / MathBase.TWO_PI;
 
         final int nthreads = ConcurrencyUtils.getNumberOfThreads();
         if (nthreads > 1 && n > START_THREADS) {
@@ -101,7 +101,7 @@ public class LombPeriodogram {
                 final int lastIdx = thread == nthreads - 1 ? n : firstIdx + k;
                 futures[thread] = ConcurrencyUtils.submit(() -> {
                     for (int i = firstIdx; i < lastIdx; i++) {
-                        final double omega = MathBase.twoPi() * testFrequencies[i];
+                        final double omega = MathBase.TWO_PI * testFrequencies[i];
                         double sum11 = 0.0;
                         double sum12 = 0.0;
                         double sum21 = 0.0;
@@ -127,7 +127,7 @@ public class LombPeriodogram {
 
         } else {
             for (int i = 0; i < n; i++) {
-                final double omega = MathBase.twoPi() * testFrequencies[i];
+                final double omega = MathBase.TWO_PI * testFrequencies[i];
                 double sum11 = 0.0;
                 double sum12 = 0.0;
                 double sum21 = 0.0;

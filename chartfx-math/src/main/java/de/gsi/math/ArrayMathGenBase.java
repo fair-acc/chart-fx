@@ -23,7 +23,7 @@ public class ArrayMathGenBase {
 
     //// codegen: double -> float, int, long, short
     public static double[] add(final double[] in, final double value) {
-        return add(in, 0, in.length, value);
+        return add(in, 0, value, in.length);
     }
 
     public static double[] add(final double[] in, final double[] value) {
@@ -45,7 +45,7 @@ public class ArrayMathGenBase {
         return ret;
     }
 
-    public static double[] add(final double[] in, final int offset, final int length, final double value) {
+    public static double[] add(final double[] in, final int offset, final double value, final int length) {
         AssertUtils.notNull(IN, in);
         AssertUtils.gtOrEqual(IN, length + offset, in.length);
 
@@ -366,7 +366,7 @@ public class ArrayMathGenBase {
         AssertUtils.gtOrEqual(MULTIPLICATOR, length + offsetMul, multiplicator.length);
 
         for (int i = 0; i < length; i++) {
-            in[i] *= multiplicator[i];
+            in[i + offsetIn] *= multiplicator[i + offsetMul];
         }
         return in;
     }
@@ -383,7 +383,7 @@ public class ArrayMathGenBase {
     //// end codegen
 
     //// codegen: double -> float
-    public static double[] notANumber(final int length) {
+    public static double[] notANumber(final int length) { //// codegen: subst:float:notANumber:notANumberFloat
         final double[] ret = new double[length];
         ArrayUtils.fillArray(ret, 0, length, Double.NaN);
 
@@ -398,7 +398,7 @@ public class ArrayMathGenBase {
         AssertUtils.notNull(IN, in);
         AssertUtils.gtOrEqual(IN, length + offset, in.length);
 
-        ArrayUtils.fillArray(in, offset, length, Double.NaN);
+        ArrayUtils.fillArray(in, offset, offset + length, Double.NaN);
         return in;
     }
     //// end codegen

@@ -78,7 +78,7 @@ public class DiscreteTimeFourierTransform {
                     @Override
                     public void run() {
                         for (int i = firstIdx; i < lastIdx; i++) {
-                            final double omega = MathBase.twoPi() * testFrequencies[i];
+                            final double omega = MathBase.TWO_PI * testFrequencies[i];
                             double sum1 = 0.0;
                             double sum2 = 0.0;
 
@@ -99,7 +99,7 @@ public class DiscreteTimeFourierTransform {
             double sum1 = 0.0;
             double sum2 = 0.0;
             for (int i = 0; i < n; i++) {
-                final double omega = MathBase.twoPi() * testFrequencies[i];
+                final double omega = MathBase.TWO_PI * testFrequencies[i];
                 for (int j = 0; j < t.length; j++) {
                     sum1 += val[j] * MathBase.cos(omega * t[j]);
                     sum2 += val[j] * MathBase.sin(omega * t[j]);

@@ -43,6 +43,6 @@ public class TrigCosineFunction extends AbstractFunction1D implements Function1D
 
     @Override
     public double getValue(final double x) {
-        return fparameter[0] * Math.cos(Math.twoPi() * (fparameter[1] * x + fparameter[2]));
+        return fparameter[0] * Math.cos(Math.TWO_PI * (fparameter[1] * x + fparameter[2]));
     }
 }
