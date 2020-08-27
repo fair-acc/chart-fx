@@ -7,7 +7,7 @@
  *************************************************************************/
 
 package de.gsi.math;
-
+@SuppressWarnings("PMD.UnnecessaryFullyQualifiedName") // the fully qualified name is needed, because we have our own Math class
 public class MathBaseGenBase {
     /**
      * Square root of two
