@@ -39,10 +39,10 @@ public class FourierSample extends AbstractDemoApplication {
     private double computeSignal(final double t) {
         double val = 0.0;
         final double error = rnd.Gaus(0.0, 0.2);
-        val += Math.sin(Math.twoPi() * 0.22 * t);
-        val += java.lang.Math.sin(Math.twoPi() * 3e-4 * t * t);
-        val += java.lang.Math.sin(Math.twoPi() * 0.05 * t);
-        val += 0.8 * java.lang.Math.sin(Math.twoPi() * (0.3 + 1e-3 * Math.sin(Math.twoPi() * 0.01 * t)) * t);
+        val += Math.sin(Math.TWO_PI * 0.22 * t);
+        val += java.lang.Math.sin(Math.TWO_PI * 3e-4 * t * t);
+        val += java.lang.Math.sin(Math.TWO_PI * 0.05 * t);
+        val += 0.8 * java.lang.Math.sin(Math.TWO_PI * (0.3 + 1e-3 * Math.sin(Math.TWO_PI * 0.01 * t)) * t);
         val += error;
         return val;
     }

@@ -9,6 +9,195 @@
 package de.gsi.math;
 
 public class MathBaseGenBase {
+    /**
+     * Square root of two
+     */
+    public static final double SQRT_2 = 1.4142135623730950488016887242097;
+    /**
+     * PI constant
+     */
+    public static final double PI = 3.14159265358979323846;
+    /**
+     * half PI
+     */
+    public static final double PI_OVER_2 = PI / 2.0;
+    /**
+     * quarter PI
+     */
+    public static final double PI_OVER_4 = PI / 4.0;
+    /**
+     * conversion factor for radians from degrees
+     */
+    public static final double DEG_TO_RAD = PI / 180.0;
+    /**
+     * conversion factor for degrees from radians
+     */
+    public static final double RAD_TO_DEG = 180.0 / PI;
+    /**
+     * two pi
+     */
+    public static final double TWO_PI = 2.0 * PI;
+    /**
+     * inverse of pi
+     */
+    public static final double INV_PI = 1.0 / PI;
+    /**
+     * e (base of natural log)
+     */
+    public static final double E = 2.71828182845904523536;
+    /**
+     * base-10 log of e (to convert ln to log)
+     */
+    public static final double LOG_E = 0.43429448190325182765;
+    /**
+     * base-e log of 2
+     */
+    public static final double LOG_2 = 0.201029996;
+    /**
+     * natural log of 10 (to convert log to ln)
+     */
+    public static final double LN_10 = 2.30258509299404568402;
+    /**
+     * Euler-Mascheroni Constant
+     */
+    public static final double EULER_GAMMA = 0.577215664901532860606512090082402431042;
+    /**
+     * velocity of light in [m s^-1]
+     */
+    public static final double C = 2.99792458e8;
+    /**
+     * Uncertainty of the light velocity (assumes exact value for c)
+     */
+    public static final double C_UNCERTAINTY = 0.0;
+    /**
+     * velocity of light in [cm s^-1]
+     */
+    public static final double C_CGS = 100.0 * C;
+    /**
+     * gravitational constant in [m^3 kg^-1 s^-2]
+     */
+    public static final double G = 6.673e-11;
+    /**
+     * uncertainty of the gravitational constant
+     */
+    public static final double G_UNCERTAINTY = 0.010e-11;
+    /**
+     * gravitational constant in [cm^3 g^-1 s^-2]
+     */
+    public static final double G_CGS = G / 1000.0;
+    /**
+     * G over h-bar C [(GeV/c^2)^-2]
+     */
+    public static final double GHBAR_C = 6.707e-39;
+    /**
+     * uncertainty of g over h-bar C
+     */
+    public static final double GHBAR_C_UNCERTAINTY = 0.010e-39;
+    /**
+     * standard acceleration of gravity [m s^-2]
+     */
+    public static final double GN = 9.80665;
+    /**
+     * uncertainty of the local standard acceleration
+     */
+    public static final double GN_UNCERTAINTY = 0.0; // exact
+    /**
+     * Elementary charge [C], [A s]
+     */
+    public static final double QE = 1.602176462e-19;
+    /**
+     * uncertainty of the elementary charge
+     */
+    public static final double QE_UNCERTAINTY = 0.000000063e-19;
+    /**
+     * Planck's constant [J s]
+     */
+    public static final double H = 6.62606876e-34;
+    /**
+     * h-bar (h over 2 pi) [J s]
+     */
+    public static final double H_BAR = 1.054571596e-34;
+    /**
+     * uncertainty of h-bar
+     */
+    public static final double H_BAR_UNCERTAINTY = 0.000000082e-34;
+    /**
+     * h-bar in [erg s]
+     */
+    public static final double H_BAR_CGS = 1.0e7 * H_BAR;
+    /**
+     * hc (h * c) [J m]
+     */
+    public static final double HC = H * C;
+    /**
+    * Boltzmann's constant [J K^-1]
+     */
+    public static final double K = 1.3806503e-23;
+    /**
+     * uncertainty of Boltzmann's constant
+     */
+    public static final double K_UNCERTAINTY = 0.0000024e-23;
+    /**
+     * Boltzmann's constant in  [erg K^-1]
+     */
+    public static final double K_CGS = 1.0e7 * K;
+    /**
+     * Stefan-Boltzmann constant [W m^-2 K^-4]
+     */
+    public static final double SIGMA = 5.6704e-8;
+    /**
+     * Uncertainty of Stefan-Boltzmann constant
+     */
+    public static final double SIGMA_UNCERTAINTY = 0.000040e-8;
+    /**
+     * Avogadro constant (Avogadro's Number) [mol^-1]
+     */
+    public static final double N_A = 6.02214199e+23;
+    /**
+     * Uncertainty of the Avogadro constant
+     */
+    public static final double N_A_UNCERTAINTY = 0.00000047e+23;
+    /**
+     * universal gas constant (Na * K) [J K^-1 mol^-1]
+     * http://scienceworld.wolfram.com/physics/UniversalGasConstant.html
+     */
+    public static final double R = K * N_A;
+    /**
+     * Uncertainty of the Dry Air Gas Constant
+     */
+    public static final double H_UNCERTAINTY = 0.00000052e-34;
+    /**
+     * Dry Air Gas Constant (R / MWair) [erg s]
+     * http://atmos.nmsu.edu/education_and_outreach/encyclopedia/gas_constant.htm
+     */
+    public static final double H_CGS = 1.0e7 * H;
+    /**
+     * h_cgs * c_cgs [erg cm]
+     */
+    public static final double HC_CGS = H_CGS * C_CGS;
+    /**
+     * Molecular weight of dry air [kg kmol^-1 (or gm mol^-1)]
+     *  1976 US Standard Atmosphere,
+     *  also see http://atmos.nmsu.edu/jsdap/encyclopediawork.html
+     */
+    public static final double MW_AIR = 28.9644;
+    /**
+     *  [J kg^-1 K^-1]
+     */
+    public static final double RG_AIR = (1000.0 * R) / MW_AIR;
+    /**
+     *
+     */
+    public static final double R_UNCERTAINTY = R * ((K_UNCERTAINTY / K) + (N_A_UNCERTAINTY / N_A));
+
+    public static double log(double x) {
+        return java.lang.Math.log(x);
+    }
+
+    public static double log10(double x) {
+        return java.lang.Math.log10(x);
+    }
+
     public static double aCosH(double arg0) {
         if (arg0 == 0.0)
             return 0.0;
@@ -65,23 +254,9 @@ public class MathBaseGenBase {
         else if (y == 0)
             return 0;
         else if (y > 0)
-            return pi() / 2;
+            return PI / 2;
         else
-            return -pi() / 2;
-    }
-
-    /**
-     * @return velocity of light in [m s^-1]
-     */
-    public static final double c() {
-        return 2.99792458e8;
-    }
-
-    /**
-     * @return velocity of light in [cm s^-1]
-     */
-    public static double cCgs() {
-        return 100.0 * c();
+            return -PI / 2;
     }
 
     public static double ceil(double x) {
@@ -98,26 +273,6 @@ public class MathBaseGenBase {
 
     public static double cosH(double arg0) {
         return java.lang.Math.cosh(arg0);
-    }
-
-    public static double cUncertainty() {
-        return 0.0;
-    } // exact
-
-    public static double degToRad() {
-        return pi() / 180.0;
-    }
-
-    /**
-     * @return e (base of natural log)
-     */
-    public static double e() {
-        return 2.71828182845904523536;
-    }
-
-    // Euler-Mascheroni Constant
-    public static double eulerGamma() {
-        return 0.577215664901532860606512090082402431042;
     }
 
     public static boolean even(long a) {
@@ -140,134 +295,16 @@ public class MathBaseGenBase {
         return nInt(java.lang.Math.floor(x));
     }
 
-    /**
-     * @return gravitational constant in [m^3 kg^-1 s^-2]
-     */
-    public static double g() {
-        return 6.673e-11;
-    }
-
-    /**
-     * @return gravitational constant in [cm^3 g^-1 s^-2]
-     */
-    public static double gCgs() {
-        return g() / 1000.0;
-    }
-
-    // TODO: continue documentation here
-    // G over h-bar C
-    public static final double ghbarC() {
-        return 6.707e-39;
-    } // [(GeV/c^2)^-2]
-
-    public static final double ghbarCUncertainty() {
-        return 0.010e-39;
-    }
-
-    // standard acceleration of gravity
-    public static final double gn() {
-        return 9.80665;
-    } // [m s^-2]
-
-    public static final double gnUncertainty() {
-        return 0.0;
-    } // exact
-
-    public static final double gUncertainty() {
-        return 0.010e-11;
-    }
-
-    // Planck's constant
-    public static final double h() {
-        return 6.62606876e-34;
-    } // [J s]
-
-    // h-bar (h over 2 pi)
-    public static final double hBar() {
-        return 1.054571596e-34;
-    } // [J s]
-
-    public static final double hBarCgs() {
-        return 1.0e7 * hBar();
-    } // [erg s]
-
-    public static final double hBarUncertainty() {
-        return 0.000000082e-34;
-    }
-
-    // hc (h * c)
-    public static final double hc() {
-        return h() * c();
-    } // [J m]
-
-    public static final double hcCgs() {
-        return hCgs() * cCgs();
-    } // [erg cm]
-
-    public static final double hCgs() {
-        return 1.0e7 * h();
-    } // [erg s]
-
-    public static final double hUncertainty() {
-        return 0.00000052e-34;
-    }
-
-    public static final double invPi() {
-        return 1.0 / pi();
-    }
-
     public static boolean isNaN(double x) {
         return Double.isNaN(x);
-    }
-
-    // Boltzmann's constant
-    public static final double k() {
-        return 1.3806503e-23;
-    } // [J K^-1]
-
-    public static final double kCgs() {
-        return 1.0e7 * k();
-    } // [erg K^-1]
-
-    public static final double kUncertainty() {
-        return 0.0000024e-23;
     }
 
     public static double ldExp(double x, int exp) {
         return x * java.lang.Math.pow(2, exp);
     }
 
-    /**
-     * @return natural log of 10 (to convert log to ln)
-     */
-    public static final double ln10() {
-        return 2.30258509299404568402;
-    }
-
-    public static double log(double x) {
-        return java.lang.Math.log(x);
-    }
-
-    public static double log10(double x) {
-        return java.lang.Math.log10(x);
-    }
-
-    /**
-     * @return base-e log of 2
-     */
-    public static final double log2() {
-        return 0.201029996;
-    }
-
     public static double log2(double x) {
-        return java.lang.Math.log(x) / log2();
-    }
-
-    /**
-     * @return base-10 log of e (to convert ln to log)
-     */
-    public static final double logE() {
-        return 0.43429448190325182765;
+        return java.lang.Math.log(x) / LOG_2;
     }
 
     //// codegen: double -> float, int, long, short
@@ -281,22 +318,6 @@ public class MathBaseGenBase {
         return a <= b ? a : b;
     }
     //// end codegen
-
-    // Molecular weight of dry air
-    // 1976 US Standard Atmosphere,
-    // also see http://atmos.nmsu.edu/jsdap/encyclopediawork.html
-    public static final double mwAir() {
-        return 28.9644;
-    } // [kg kmol^-1 (or gm mol^-1)]
-
-    // Avogadro constant (Avogadro's Number)
-    public static final double nA() {
-        return 6.02214199e+23;
-    } // [mol^-1]
-
-    public static final double nAUncertainty() {
-        return 0.00000047e+23;
-    }
 
     /**
      * Return next prime number after x, unless x is a prime in which case x is returned.
@@ -365,40 +386,8 @@ public class MathBaseGenBase {
         return (a & 1) != 0;
     }
 
-    // Fundamental constants
-    public static final double pi() {
-        return 3.14159265358979323846;
-    }
-
-    public static final double piOver2() {
-        return pi() / 2.0;
-    }
-
-    public static final double piOver4() {
-        return pi() / 4.0;
-    }
-
     public static double pow(double x, double y) {
         return java.lang.Math.pow(x, y);
-    }
-
-    // Elementary charge
-    public static final double qe() {
-        return 1.602176462e-19;
-    } // [C], [A s]
-
-    public static final double qeUncertainty() {
-        return 0.000000063e-19;
-    }
-
-    // universal gas constant (Na * K)
-    // http://scienceworld.wolfram.com/physics/UniversalGasConstant.html
-    public static final double R() {
-        return k() * nA();
-    } // [J K^-1 mol^-1]
-
-    public static final double radToDeg() {
-        return 180.0 / pi();
     }
 
     //// codegen: double -> int, long, short
@@ -406,25 +395,6 @@ public class MathBaseGenBase {
         return x < lb ? lb : (x > ub ? ub : x);
     }
     //// end codegen
-
-    // Dry Air Gas Constant (R / MWair)
-    // http://atmos.nmsu.edu/education_and_outreach/encyclopedia/gas_constant.htm
-    public static final double rgAir() {
-        return (1000.0 * R()) / mwAir();
-    } // [J kg^-1 K^-1]
-
-    public static final double rUncertainty() {
-        return R() * ((kUncertainty() / k()) + (nAUncertainty() / nA()));
-    }
-
-    // Stefan-Boltzmann constant
-    public static final double sigma() {
-        return 5.6704e-8;
-    } // [W m^-2 K^-4]
-
-    public static final double sigmaUncertainty() {
-        return 0.000040e-8;
-    }
 
     // codegen: double -> float, int, long, short
     public static double sign(double a, double b) {
@@ -448,17 +418,11 @@ public class MathBaseGenBase {
         return java.lang.Math.sqrt(x);
     }
 
-    static final double sqrt2 = 1.4142135623730950488016887242097;
-
     public static double tan(double arg0) {
         return java.lang.Math.tan(arg0);
     }
 
     public static double tanH(double arg0) {
         return java.lang.Math.tanh(arg0);
-    }
-
-    public static final double twoPi() {
-        return 2.0 * pi();
     }
 }

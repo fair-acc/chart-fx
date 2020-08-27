@@ -512,7 +512,7 @@ public class MathGenBase extends MathBase {
             cphi = -qs2 / sqrt(ps33);
             phi = aCos(cphi);
             phis3 = phi / 3;
-            pis3 = pi() / 3;
+            pis3 = PI / 3;
             c1 = cos(phis3);
             c2 = cos(pis3 + phis3);
             c3 = cos(pis3 - phis3);
@@ -1461,7 +1461,7 @@ public class MathGenBase extends MathBase {
      */
     public static double breitWigner(double x, double mean, double gamma) {
         final double bw = gamma / ((x - mean) * (x - mean) + gamma * gamma / 4);
-        return bw / (2 * pi());
+        return bw / (2 * PI);
     }
 
     /**
@@ -1479,7 +1479,7 @@ public class MathGenBase extends MathBase {
      */
     public static double cauchyDist(double x, double t, double s) {
         final double temp = (x - t) * (x - t) / (s * s);
-        final double result = 1 / (s * pi() * (1 + temp));
+        final double result = 1 / (s * PI * (1 + temp));
         return result;
     }
 
@@ -1663,7 +1663,7 @@ public class MathGenBase extends MathBase {
      */
     public static double diLog(double x) {
         final double hf = 0.5;
-        final double pi = pi();
+        final double pi = PI;
         final double pi2 = pi * pi;
         final double pi3 = pi2 / 3;
         final double pi6 = pi2 / 6;
@@ -2260,7 +2260,7 @@ public class MathGenBase extends MathBase {
      * @return true if point xp,yp lies inside
      */
     public static boolean isInside(double xp, double yp, int np, double x[], double y[]) {
-        double xint;
+        double xint; //// codegen: skip all
         int inter = 0;
         double xn;
         double yn;
@@ -2281,7 +2281,7 @@ public class MathGenBase extends MathBase {
             if (y[i] < yp && yn < yp) {
                 continue;
             }
-            xint = x[i] + (yp - y[i]) * (xn - x[i]) / (yn - y[i]);
+            xint = x[i] + (yp - y[i]) * (xn - x[i]) / ((yn - y[i])); //// codegen: subst:int:/ (:/ ((double)
             if (xp < xint) {
                 inter++;
             }
@@ -2289,72 +2289,7 @@ public class MathGenBase extends MathBase {
 
         return inter % 2 > 0;
     }
-
-    /**
-     * Function which returns true if point xp,yp lies inside the polygon defined by the np points in arrays x and y,
-     * false otherwise NOTE that the polygon must be a closed polygon (1st and last point must be identical).
-     * 
-     * @param xp test point coordinate x
-     * @param yp test point coordinate y
-     * @param np number of polygon edges
-     * @param x x coordinates of polygon
-     * @param y y coordinates of polygon
-     * @return true if point xp, yp lies inside the polygon defined
-     */
-    public static boolean isInside(float xp, float yp, int np, float x[], float y[]) {
-        double xint;
-        int inter = 0;
-        for (int i = 0; i < np - 1; i++) {
-            if (y[i] == y[i + 1]) {
-                continue;
-            }
-            if (yp <= y[i] && yp <= y[i + 1]) {
-                continue;
-            }
-            if (y[i] < yp && y[i + 1] < yp) {
-                continue;
-            }
-            xint = x[i] + (yp - y[i]) * (x[i + 1] - x[i]) / (y[i + 1] - y[i]);
-            if (xp < xint) {
-                inter++;
-            }
-        }
-
-        return inter % 2 > 0;
-    }
-
-    /**
-     * Function which returns true if point xp,yp lies inside the polygon defined by the np points in arrays x and y,
-     * false otherwise NOTE that the polygon must be a closed polygon (1st and last point must be identical).
-     * 
-     * @param xp test point coordinate x
-     * @param yp test point coordinate y
-     * @param np number of polygon edges
-     * @param x x coordinates of polygon
-     * @param y y coordinates of polygon
-     * @return true if point xp, yp lies inside the polygon defined
-     */
-    public static boolean isInside(int xp, int yp, int np, int x[], int y[]) {
-        double xint;
-        int inter = 0;
-        for (int i = 0; i < np - 1; i++) {
-            if (y[i] == y[i + 1]) {
-                continue;
-            }
-            if (yp <= y[i] && yp <= y[i + 1]) {
-                continue;
-            }
-            if (y[i] < yp && y[i + 1] < yp) {
-                continue;
-            }
-            xint = x[i] + (yp - y[i]) * (x[i + 1] - x[i]) / ((double) (y[i + 1] - y[i]));
-            if (xp < xint) {
-                inter++;
-            }
-        }
-
-        return inter % 2 > 0;
-    }
+    //// end codegen
 
     /**
      * The LANDAU function with mpv(most probable value) and sigma. This function has been adapted from the CERNLIB
@@ -2618,7 +2553,7 @@ public class MathGenBase extends MathBase {
         }
         final double templog2 = log((x - theta) / m) * log((x - theta) / m);
         final double temp1 = exp(-templog2 / (2 * sigma * sigma));
-        final double temp2 = (x - theta) * sigma * sqrt(2 * pi());
+        final double temp2 = (x - theta) * sigma * sqrt(2 * PI);
 
         return temp1 / temp2;
     }
@@ -3098,7 +3033,7 @@ public class MathGenBase extends MathBase {
         if (x == 0) {
             return 1.0;
         }
-        final double val = norm ? MathBase.pi() : 1.0;
+        final double val = norm ? MathBase.PI : 1.0;
         return MathBase.sin(val * x) / (val * x);
     }
 
@@ -3148,7 +3083,7 @@ public class MathGenBase extends MathBase {
             4.065681e-11, -1.091505e-11, 3.12005e-12, -9.4202e-13, 2.9848e-13, -9.872e-14, 3.394e-14, -1.208e-14,
             4.44e-15, -1.68e-15, 6.5e-16, -2.6e-16, 1.1e-16, -4e-17, 2e-17, -1e-17 };
 
-        final double c0 = 2 / pi();
+        final double c0 = 2 / PI;
 
         int i;
         final double alfa;
@@ -3211,8 +3146,8 @@ public class MathGenBase extends MathBase {
             -2.6636e-13, 7.645e-14, -2.313e-14, 7.33e-15, -2.42e-15, 8.3e-16, -3e-16, 1.1e-16, -4e-17, 2e-17,
             -1e-17 };
 
-        final double c0 = 2 / pi();
-        final double cc = 2 / (3 * pi());
+        final double c0 = 2 / PI;
+        final double cc = 2 / (3 * PI);
 
         int i;
         final int i1;
@@ -3270,7 +3205,7 @@ public class MathGenBase extends MathBase {
      * By Kirill Filimonov.
      */
     public static double struveL0(double x) {
-        final double pi = pi();
+        final double pi = PI;
 
         double s = 1.0;
         double r = 1.0;
@@ -3326,7 +3261,7 @@ public class MathGenBase extends MathBase {
      * By Kirill Filimonov.
      */
     public static double struveL1(double x) {
-        final double pi = pi();
+        final double pi = PI;
         final double a1;
         double sl1;
         double bi1;
@@ -3398,7 +3333,7 @@ public class MathGenBase extends MathBase {
         final double r = ndf;
         final double rh = 0.5 * r;
         final double rh1 = rh + 0.5;
-        final double denom = sqrt(r * pi()) * gamma(rh) * pow(1 + T * T / r, rh1);
+        final double denom = sqrt(r * PI) * gamma(rh) * pow(1 + T * T / r, rh1);
         return gamma(rh1) / denom;
     }
 
@@ -3449,7 +3384,7 @@ public class MathGenBase extends MathBase {
         }
 
         if ((ndf - 1) < 1e-8) {
-            temp = piOver2() * q;
+            temp = PI_OVER_2 * q;
             quantile = cos(temp) / sin(temp);
         } else {
             if ((ndf - 2) < 1e-8) {
@@ -3458,7 +3393,7 @@ public class MathGenBase extends MathBase {
                 final double a = 1. / (ndf - 0.5);
                 final double b = 48. / (a * a);
                 double c = ((20700 * a / b - 98) * a - 16) * a + 96.36;
-                final double d = ((94.5 / (b + c) - 3.) / b + 1) * sqrt(a * piOver2()) * ndf;
+                final double d = ((94.5 / (b + c) - 3.) / b + 1) * sqrt(a * PI_OVER_2) * ndf;
                 double x = q * d;
                 double y = pow(x, (2. / ndf));
                 if (y > 0.05 + a) {

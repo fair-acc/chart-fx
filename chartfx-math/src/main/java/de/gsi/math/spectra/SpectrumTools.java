@@ -558,17 +558,17 @@ public class SpectrumTools {
     public static double interpolateNAFF(final double[] data, final int index) {
         final double val = index / (double) (2 * data.length);
         if (index > 0 && index < data.length - 1) {
-            final double pin = MathBase.pi() / data.length;
+            final double pin = MathBase.PI / data.length;
             final double left = java.lang.Math.pow(data[index - 1], 1);
             final double center = java.lang.Math.pow(data[index - 0], 1);
             final double right = java.lang.Math.pow(data[index + 1], 1);
 
             if (left < right) {
-                return val + MathBase.aTan2(right * MathBase.sin(pin), center + right * MathBase.cos(pin)) / MathBase.pi();
+                return val + MathBase.aTan2(right * MathBase.sin(pin), center + right * MathBase.cos(pin)) / MathBase.PI;
             } else {
                 return val
                         - MathBase.aTan2(left * MathBase.sin(pin), center + left * MathBase.cos(pin))
-                                  / MathBase.pi();
+                                  / MathBase.PI;
             }
         } else {
             return val;

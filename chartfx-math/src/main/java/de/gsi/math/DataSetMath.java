@@ -428,8 +428,8 @@ public final class DataSetMath { // NOPMD - nomen est omen
                         Math.rms(subArrayYp, count));
                 break;
             case GEOMMEAN:
-                filteredFunction.add(time0, Math.geometricMean(subArrayY, count),
-                        Math.geometricMean(subArrayYn, count), Math.geometricMean(subArrayYp, count));
+                filteredFunction.add(time0, Math.geometricMean(subArrayY, 0, count),
+                        Math.geometricMean(subArrayYn, 0, count), Math.geometricMean(subArrayYp, 0, count));
                 break;
             case MEAN:
             default:

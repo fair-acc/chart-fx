@@ -35,7 +35,7 @@ public class HilbertTransform extends Convolution {
         final double[] frequency = transform(phase, filter, false);
 
         for (int i = 1; i < frequency.length - 1; i++) {
-            frequency[i] /= MathBase.twoPi();
+            frequency[i] /= MathBase.TWO_PI;
             if (frequency[i] > 0.5) {
                 frequency[i] = 1.0 - frequency[i];
             } else if (frequency[i] > 0.5) {
@@ -161,7 +161,7 @@ public class HilbertTransform extends Convolution {
         final int half = nsamples / 2;
         final double[] htransformed = new double[nsamples];
 
-        final double norm = 2.0 / MathBase.pi();
+        final double norm = 2.0 / MathBase.PI;
         for (int k = 0; k < nsamples; k++) {
             double sum = 0.0;
             if (k % 2 == 0) {
@@ -197,21 +197,21 @@ public class HilbertTransform extends Convolution {
         double window = 0.0; // range of operation
         for (int i = 0; i < phase.length - 1; i++) {
             // Phases modulo 2*pi.
-            final double p1 = modulo(phase[i], MathBase.twoPi());
-            final double p2 = modulo(phase[i + 1], MathBase.twoPi());
+            final double p1 = modulo(phase[i], MathBase.TWO_PI);
+            final double p2 = modulo(phase[i + 1], MathBase.TWO_PI);
             final double pstep = p2 - p1;
             double c = 0.0;
 
             // Locations of jumps.
-            if (pstep > +MathBase.pi()) { // 1.0
+            if (pstep > +MathBase.PI) { // 1.0
                 c = -1.0; // go one 2PI range down
-            } else if (pstep <= -MathBase.pi()) { // 2.0
+            } else if (pstep <= -MathBase.PI) { // 2.0
                 c = +1.0; // go one 2PI range up
             } else {
                 c = 0.0; // do nothing
             }
 
-            window += c * MathBase.twoPi();
+            window += c * MathBase.TWO_PI;
 
             phase[i + 1] = window + p2;
         }
@@ -221,7 +221,7 @@ public class HilbertTransform extends Convolution {
         double phase0 = phase[0];
         for (int i = 1; i < phase.length; i++) {
             // causal/physical phase-advances are _always_ positive
-            final double diff = modulo(phase[i] - phase[i - 1], MathBase.twoPi());
+            final double diff = modulo(phase[i] - phase[i - 1], MathBase.TWO_PI);
             phase0 += diff;
             phase[i] = phase0;
         }

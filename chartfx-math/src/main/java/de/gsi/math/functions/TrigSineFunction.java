@@ -43,6 +43,6 @@ public class TrigSineFunction extends AbstractFunction1D implements Function1D {
 
     @Override
     public double getValue(final double x) {
-        return fparameter[0] * Math.sin(Math.twoPi() * (fparameter[1] * x + fparameter[2]));
+        return fparameter[0] * Math.sin(Math.TWO_PI * (fparameter[1] * x + fparameter[2]));
     }
 }

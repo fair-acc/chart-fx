@@ -256,19 +256,19 @@ public class ShortTimeFourierTransformSample extends AbstractDemoApplication {
 
             // linear chirp with discontinuity
             offset = (i > 0.5 * maxPoints) ? -20e3 : 0;
-            yModel[i] = (i > 0.2 * maxPoints && i < 0.9 * maxPoints) ? 0.7 * Math.sin(MathBase.twoPi() * 30e3 * x * (2e3 * x + offset)) : 0;
+            yModel[i] = (i > 0.2 * maxPoints && i < 0.9 * maxPoints) ? 0.7 * Math.sin(MathBase.TWO_PI * 30e3 * x * (2e3 * x + offset)) : 0;
 
             // single tone
             yModel[i] += (i > toneStart.getValue() * maxPoints && i < toneStop.getValue() * maxPoints)
-                                 ? toneAmplitude.getValue() * Math.sin(MathBase.twoPi() * toneFreq.getValue() * x)
+                                 ? toneAmplitude.getValue() * Math.sin(MathBase.TWO_PI * toneFreq.getValue() * x)
                                  : 0;
 
             // modulation around 0.4
-            final double mod = Math.cos(MathBase.twoPi() * 0.01e6 * x);
-            yModel[i] += (i > 0.3 * maxPoints && i < 0.9 * maxPoints) ? 1.0 * Math.sin(MathBase.twoPi() * (0.4 - 5e-4 * mod) * 45e4 * x) : 0;
+            final double mod = Math.cos(MathBase.TWO_PI * 0.01e6 * x);
+            yModel[i] += (i > 0.3 * maxPoints && i < 0.9 * maxPoints) ? 1.0 * Math.sin(MathBase.TWO_PI * (0.4 - 5e-4 * mod) * 45e4 * x) : 0;
 
             // quadratic chirp starting at 0.1
-            yModel[i] += 0.5 * Math.sin(MathBase.twoPi() * ((0.1 + 5e3 * x * x) * 1e6 * x));
+            yModel[i] += 0.5 * Math.sin(MathBase.TWO_PI * ((0.1 + 5e3 * x * x) * 1e6 * x));
 
             yModel[i] = yModel[i] + error;
         }

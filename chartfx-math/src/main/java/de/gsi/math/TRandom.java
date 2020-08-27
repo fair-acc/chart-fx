@@ -64,7 +64,7 @@ public class TRandom {
         final double rval;
         final double displ;
         rval = 2 * Rndm() - 1;
-        displ = 0.5 * gamma * MathBase.tan(rval * MathBase.piOver2());
+        displ = 0.5 * gamma * MathBase.tan(rval * MathBase.PI_OVER_2);
 
         return (mean + displ);
     }
@@ -76,7 +76,7 @@ public class TRandom {
      * @param r   circle radius
      */
     public static void Circle(final double[] val, final double r) {
-        final double phi = Uniform(0, MathBase.twoPi());
+        final double phi = Uniform(0, MathBase.TWO_PI);
         val[0] = r * MathBase.cos(phi);
         val[1] = r * MathBase.sin(phi);
     }
@@ -329,7 +329,7 @@ public class TRandom {
             final double sq;
             final double alxm;
             final double g;
-            final double pi = MathBase.pi();
+            final double pi = MathBase.PI;
 
             sq = MathBase.sqrt(2.0 * mean);
             alxm = MathBase.log(mean);
@@ -386,7 +386,7 @@ public class TRandom {
             final double sq;
             final double alxm;
             final double g;
-            final double pi = MathBase.pi();
+            final double pi = MathBase.PI;
 
             sq = MathBase.sqrt(2.0 * mean);
             alxm = MathBase.log(mean);
