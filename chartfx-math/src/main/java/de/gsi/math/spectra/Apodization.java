@@ -74,7 +74,7 @@ public enum Apodization {
         case Hann:
             return getIndex(i, n);
         case HannExp: {
-            final double a = MathBase.twoPi() / (n - 1);
+            final double a = MathBase.TWO_PI / (n - 1);
             return 1.0 * Math.pow(Math.sin(a * i), m);
         }
         case Nuttall:
@@ -108,38 +108,38 @@ public enum Apodization {
         case Hamming: {
             // final double a = TMath.TwoPi()/(n-1);
             // the following Hamming window definition is more common
-            final double a = MathBase.twoPi() / n;
+            final double a = MathBase.TWO_PI / n;
             return 0.53836 - 0.46164 * MathBase.cos(a * i);
         }
         case Hann: {
-            final double a = MathBase.twoPi() / (n - 1);
+            final double a = MathBase.TWO_PI / (n - 1);
             return 0.5 - 0.5 * MathBase.cos(a * i);
         }
         case HannExp: {
-            final double a = MathBase.twoPi() / (n - 1);
+            final double a = MathBase.TWO_PI / (n - 1);
             return 1.0 * Math.pow(MathBase.sin(a * i), 2.0);
         }
         case Blackman: {
-            final double a = MathBase.twoPi() / (n - 1);
+            final double a = MathBase.TWO_PI / (n - 1);
             return 0.42 - 0.5 * MathBase.cos(a * i) + 0.08 * MathBase.cos(2 * a * i);
         }
         case Nuttall: {
-            final double a = MathBase.twoPi() / (n - 1);
+            final double a = MathBase.TWO_PI / (n - 1);
             return 0.355768 - 0.487396 * MathBase.cos(a * i) + 0.144232 * MathBase.cos(2 * a * i)
                     - 0.012604 * MathBase.cos(3 * a * i);
         }
         case BlackmanHarris: {
-            final double a = MathBase.twoPi() / (n - 1);
+            final double a = MathBase.TWO_PI / (n - 1);
             return 0.35875 - 0.48829 * MathBase.cos(a * i) + 0.14128 * MathBase.cos(2 * a * i)
                     - 0.01168 * MathBase.cos(3 * a * i);
         }
         case BlackmanNuttall: {
-            final double a = MathBase.twoPi() / (n - 1);
+            final double a = MathBase.TWO_PI / (n - 1);
             return 0.3635819 - 0.4891775 * MathBase.cos(a * i) + 0.1365995 * MathBase.cos(2 * a * i)
                     - 0.0106411 * MathBase.cos(3 * a * i);
         }
         case FlatTop: {
-            final double a = MathBase.twoPi() / (n - 1);
+            final double a = MathBase.TWO_PI / (n - 1);
             return 1 - 1.93 * MathBase.cos(a * i) + 1.29 * MathBase.cos(2 * a * i)
                     - 0.388 * MathBase.cos(3 * a * i) + 0.032 * MathBase.cos(4 * a * i);
         }

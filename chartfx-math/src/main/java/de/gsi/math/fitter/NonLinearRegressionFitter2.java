@@ -3,6 +3,7 @@ package de.gsi.math.fitter;
 import java.util.ArrayList;
 
 import de.gsi.math.ArrayConversion;
+import de.gsi.math.ArrayMath;
 import de.gsi.math.Math;
 import de.gsi.math.MathBase;
 import de.gsi.math.functions.Function;
@@ -1208,7 +1209,7 @@ public class NonLinearRegressionFitter2 {
         }
 
         for (int i = 0; i < yCalc.getLocalStorageDim(); i++) {
-            final double[] val = Math.difference(yCalc.getLocal(i), yData.getLocal(i));
+            final double[] val = ArrayMath.subtract(yCalc.getLocal(i), yData.getLocal(i));
             final double[] val2 = residualW.getLocal(i);
             final double[] weightLocal = weight.getLocal(i);
             residual.setLocal(i, val);

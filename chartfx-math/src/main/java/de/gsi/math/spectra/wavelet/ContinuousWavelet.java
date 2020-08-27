@@ -301,9 +301,9 @@ public class ContinuousWavelet {
      *         Signal Analysis., Geoexploration, 23:85-102, 1984
      */
     public Complex Morlet(final double x, final double nu) {
-        final double val1 = 1.0 / java.lang.Math.sqrt(MathBase.twoPi())
-                            * MathBase.exp(-2 * MathBase.sqr(MathBase.sqr(MathBase.twoPi()) * x / nu));
-        final double val2 = MathBase.twoPi() * nu * x;
+        final double val1 = 1.0 / java.lang.Math.sqrt(MathBase.TWO_PI)
+                            * MathBase.exp(-2 * MathBase.sqr(MathBase.sqr(MathBase.TWO_PI) * x / nu));
+        final double val2 = MathBase.TWO_PI * nu * x;
         final double re = val1 * java.lang.Math.sin(val2);
         final double im = val1 * java.lang.Math.cos(val2);
         return new Complex(re, im);
@@ -319,9 +319,9 @@ public class ContinuousWavelet {
      *            Analysis., Geoexploration, 23:85-102, 1984
      */
     public void Morlet(final double x, final double nu, final double[] ret) {
-        final double val1 = 1.0 / java.lang.Math.sqrt(MathBase.twoPi())
-                            * MathBase.exp(-2 * MathBase.sqr(MathBase.sqr(MathBase.twoPi()) * x / nu));
-        final double val2 = MathBase.twoPi() * nu * x;
+        final double val1 = 1.0 / java.lang.Math.sqrt(MathBase.TWO_PI)
+                            * MathBase.exp(-2 * MathBase.sqr(MathBase.sqr(MathBase.TWO_PI) * x / nu));
+        final double val2 = MathBase.TWO_PI * nu * x;
         ret[0] = val1 * java.lang.Math.cos(val2);
         ret[1] = val1 * java.lang.Math.sin(val2);
     }
@@ -335,7 +335,7 @@ public class ContinuousWavelet {
      */
     public Complex Paul(final double x, final int m) {
         final double val = java.lang.Math.pow(2, m) * Math.factorial(m)
-                           / java.lang.Math.sqrt(MathBase.pi() * Math.factorial(2 * m));
+                           / java.lang.Math.sqrt(MathBase.PI * Math.factorial(2 * m));
         Complex c1 = new Complex(1, 0);
         Complex c2 = new Complex(1, 0);
         for (int i = 0; i < m + 1; i++) {

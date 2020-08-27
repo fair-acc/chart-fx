@@ -17,6 +17,7 @@ import de.gsi.dataset.spi.DefaultDataSet;
 import de.gsi.dataset.spi.DoubleDataSet;
 import de.gsi.dataset.spi.utils.DoublePoint;
 import de.gsi.dataset.testdata.spi.GaussFunction;
+import de.gsi.math.ArrayMath;
 import de.gsi.math.ArrayUtils;
 import de.gsi.math.DataSetMath;
 import de.gsi.math.spectra.TSpectrum.Direction;
