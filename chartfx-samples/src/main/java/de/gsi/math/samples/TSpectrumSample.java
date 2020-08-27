@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.List;
 
-import de.gsi.math.ArrayMath;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
@@ -37,6 +36,7 @@ import de.gsi.dataset.DataSet2D;
 import de.gsi.dataset.event.UpdatedDataEvent;
 import de.gsi.dataset.spi.DoubleDataSet;
 import de.gsi.dataset.spi.utils.DoublePoint;
+import de.gsi.math.ArrayMath;
 import de.gsi.math.DataSetMath;
 import de.gsi.math.MathDataSet;
 import de.gsi.math.spectra.TSpectrum;
