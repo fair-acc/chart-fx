@@ -75,10 +75,10 @@ public class MathGenBase extends MathBase {
      * Methods in Experimental Physics, (North-Holland, Amsterdam 1971) 269-271) Method Improvement by Jason A Detwiler
      * (JADetwiler@lbl.gov) ----------------------------------------------------------- The nuts-and-bolts of the
      * KolmogorovTest() algorithm is a for-loop over the two sorted arrays a and b representing empirical distribution
-     * functions. The for-loop handles 3 cases: when the next points to be evaluated satisfy a>b, a<b, or a=b: for (int
-     * i=0;i<na+nb;i++) { if (a[ia-1] < b[ib-1]) { rdiff -= sa; ia++; if (ia > na) {ok = true; break;} } else if
-     * (a[ia-1] > b[ib-1]) { rdiff += sb; ib++; if (ib > nb) {ok = true; break;} } else { rdiff += sb - sa; ia++; ib++;
-     * if (ia > na) {ok = true; break;} if (ib > nb) {ok = true; break;} } rdmax = Max(rdmax,Abs(rdiff)); } For the last
+     * functions. The for-loop handles 3 cases: when the next points to be evaluated satisfy a&gt;b, a&lt;b, or a=b: for (int
+     * i=0;i&lt;na+nb;i++) { if (a[ia-1] &lt; b[ib-1]) { rdiff -= sa; ia++; if (ia &gt; na) {ok = true; break;} } else if
+     * (a[ia-1] &gt; b[ib-1]) { rdiff += sb; ib++; if (ib &gt; nb) {ok = true; break;} } else { rdiff += sb - sa; ia++; ib++;
+     * if (ia &gt; na) {ok = true; break;} if (ib &gt; nb) {ok = true; break;} } rdmax = Max(rdmax,Abs(rdiff)); } For the last
      * case, a=b, the algorithm advances each array by one index in an attempt to move through the equality. However,
      * this is incorrect when one or the other of a or b (or both) have a repeated value, call it x. For the KS
      * statistic to be computed properly, rdiff needs to be calculated after all of the a and b at x have been tallied
@@ -86,8 +86,10 @@ public class MathGenBase extends MathBase {
      * old CERNLIB method is wrong is that it implies that the function defined as the difference between a and b is
      * multi-valued at x -- besides being ugly, this would invalidate Kolmogorov's theorem). The solution is to just add
      * while-loops into the equality-case handling to perform the tally: } else { double x = a[ia-1]; while(a[ia-1] == x
-     * && ia <= na) { rdiff -= sa; ia++; } while(b[ib-1] == x && ib <= nb) { rdiff += sb; ib++; } if (ia > na) {ok =
-     * true; break;} if (ib > nb) {ok = true; break;} } NOTE1 A good description of the Kolmogorov test can be seen at:
+     * &amp;&amp; ia &lt;= na) { rdiff -= sa; ia++; } while(b[ib-1] == x &amp;&amp; ib &lt;= nb) { rdiff += sb; ib++; }
+     * if (ia &gt; na) {ok = true; break;} if (ib &gt; nb) {ok = true; break;} }
+     *
+     * NOTE1 A good description of the Kolmogorov test can be seen at:
      * http://www.itl.nist.gov/div898/handbook/eda/section3/eda35g.htm
      * 
      * @param na see above
@@ -435,8 +437,8 @@ public class MathGenBase extends MathBase {
 
     /**
      * Calculates roots of polynomial of 3rd order a*x^3 + b*x^2 + c*x + d, where a == coef[3], b == coef[2], c ==
-     * coef[1], d == coef[0] coef[3] must be different from 0 If the boolean returned by the method is false: ==> there
-     * are 3 real roots a,b,c stored in roots If the boolean returned by the method is true: ==> there is one real root
+     * coef[1], d == coef[0] coef[3] must be different from 0 If the boolean returned by the method is false: ==&gt; there
+     * are 3 real roots a,b,c stored in roots If the boolean returned by the method is true: ==&gt; there is one real root
      * a and 2 complex conjugates roots (b+i*c,b-i*c) Author: Francois-Xavier Gentit
      *
      * @param coef cubic polynomial coefficients (see above)
@@ -538,7 +540,7 @@ public class MathGenBase extends MathBase {
      * known to be the real part of Faddeeva function also called complex error function [2]. The algoritm was developed
      * by J. Humlicek [1]. This code is based on fortran code presented by R. J. Wells [2]. Translated and adapted by
      * Miha D. Puc later ported to java by R. Steinhagen To calculate the Faddeeva function with relative error less
-     * than 10^(-r). r can be set by the the user subject to the constraints 2 <= r <= 5. [1] J. Humlicek, JQSRT, 21,
+     * than 10^(-r). r can be set by the the user subject to the constraints 2 &lt;= r &lt;= 5. [1] J. Humlicek, JQSRT, 21,
      * 437 (1982). [2] R.J. Wells "Rapid Approximation to the Voigt/Faddeeva Function and its Derivatives" JQSRT 62
      * (1999), pp 29-48. http://www-atm.physics.ox.ac.uk/user/wells/voigt.html
      * 
