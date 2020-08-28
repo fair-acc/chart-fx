@@ -8,7 +8,7 @@
 
 package de.gsi.math;
 @SuppressWarnings("PMD.UnnecessaryFullyQualifiedName") // the fully qualified name is needed, because we have our own Math class
-public class MathBaseGenBase {
+public class MathBaseGen {
     /**
      * Square root of two
      */
@@ -232,9 +232,12 @@ public class MathBaseGenBase {
     //// codegen: double -> float, int, long
     public static double abs(double d) {
         return (d >= 0) ? d : -d;
-        // short: return (d >= 0) ? (short) d : (short) (-d);
     }
     //// end codegen
+
+    public static short abs(short d) {
+        return (d >= 0) ? d : ((short) -d);
+    }
 
     public static double aCos(double arg0) {
         return java.lang.Math.acos(arg0);

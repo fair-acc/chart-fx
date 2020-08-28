@@ -56,6 +56,9 @@
                         </goals>
                     </execution>
                 </executions>
+                <configuration>
+                    <input>${project.basedir}/src/main/codegen</input>
+                </configuration>
             </plugin>
         </plugins>
     </build>
