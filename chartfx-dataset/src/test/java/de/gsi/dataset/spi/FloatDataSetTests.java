@@ -1,11 +1,8 @@
 package de.gsi.dataset.spi;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import static de.gsi.dataset.DataSet.DIM_X;
 import static de.gsi.dataset.DataSet.DIM_Y;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.Arrays;
 
@@ -166,15 +163,15 @@ public class FloatDataSetTests extends EditableDataSetTests {
 
         for (int dimIndex = 0; dimIndex < dataSet.getDimension(); dimIndex++) {
             final double[] values = dataSet.getValues(dimIndex);
-            final float[] floatValues = dimIndex == DIM_X ? dataSet.getFloatValues(DIM_X) : dataSet.getFloatValues(DIM_Y);
+            final float[] floatValues = dataSet.getFloatValues(dimIndex);
+            assertArrayEquals(floatValues, dimIndex == DIM_X ? dataSet.getXFloatValues() : dataSet.getYFloatValues());
 
             for (int i = 0; i < testCoordinate[dimIndex].length; i++) {
                 assertEquals(testCoordinate[dimIndex][i], floatValues[i], "test0(" + dimIndex + ", " + i + ")");
                 assertEquals(testCoordinate[dimIndex][i], dataSet.get(dimIndex, i),
                         "test1(" + dimIndex + ", " + i + ")");
                 assertEquals(testCoordinate[dimIndex][i], values[i], "test2(" + dimIndex + ", " + i + ")");
-                assertEquals(testCoordinate[dimIndex][i], dimIndex == DIM_X ? dataSet.get(DIM_X, i) : dataSet.get(DIM_Y, i),
-                        "test3(" + dimIndex + ", " + i + ")");
+                assertEquals(testCoordinate[dimIndex][i], dataSet.get(dimIndex, i), "test3(" + dimIndex + ", " + i + ")");
             }
         }
     }
