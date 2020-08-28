@@ -46,12 +46,78 @@ public class DoubleDataSetTests extends EditableDataSetTests {
 
         checkAddPoints(firstDataSet, 4); // X, Y (via arrays and in front) but w/o label
 
+        checkAddPointsAtStart(firstDataSet, 1); // X, Y, and label
+
+        checkAddPointsAtStart(firstDataSet, 2); // X, Y, and empty label
+
+        checkAddPointsAtStart(firstDataSet, 3); // X, Y (via arrays and at the back) but w/o label
+
+        firstDataSet.addDataStyle(0, "color: red");
         final DoubleDataSet thirdDataSet = new DoubleDataSet(firstDataSet);
         assertEquals(firstDataSet, thirdDataSet, "DoubleDataSet(DataSet2D) constructor");
 
         assertNotEquals(0, firstDataSet.getDataCount(), "pre-check clear method");
         firstDataSet.clearData();
         assertEquals(0, firstDataSet.getDataCount(), "check clear method");
+    }
+
+    public static void checkAddPointsAtStart(final DoubleDataSet dataSet, final int testCase) {
+        final String dsType = dataSet.getClass().getSimpleName();
+
+        final int nDim = dataSet.getDimension();
+        final int nData = dataSet.getDataCount();
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.atDebug().addArgument(dsType).addArgument(nDim).addArgument(nData).log("info: data set '{}' with nDim = {} and nData = {}");
+        }
+
+        for (int i = 0; i < testCoordinate[0].length; i++) {
+            DoubleDataSet ret;
+
+            if (testCase == 0) {
+                // X & Y coordinates only
+                ret = dataSet.add(0, testCoordinate[0][i], testCoordinate[1][i]);
+                assertEquals(dataSet, ret, "check '" + dsType + "' return value (fluent design)");
+                assertEquals(nData + i + 1, dataSet.getDataCount(), "check '" + dsType + "' data point count");
+            } else if (testCase == 1) {
+                // X, Y, and label
+                ret = dataSet.add(0, testCoordinate[0][i], testCoordinate[1][i], "label" + i);
+                assertEquals(dataSet, ret, "check '" + dsType + "' return value (fluent design)");
+                assertEquals(nData + i + 1, dataSet.getDataCount(), "check '" + dsType + "' data point count");
+            } else if (testCase == 2) {
+                // X, Y (via arrays and at the back) but w/o label
+                ret = dataSet.add(0, testCoordinate[0][i], testCoordinate[1][i]);
+                assertEquals(dataSet, ret, "check '" + dsType + "' return value (fluent design)");
+                assertEquals(nData + i + 1, dataSet.getDataCount(), "check '" + dsType + "' data point count");
+            } else if (testCase == 3) {
+                // X, Y, error coordinates (via arrays) but w/o label
+                if (i == 0) {
+                    ret = dataSet.add(0, testCoordinate[0], testCoordinate[1]);
+                    assertEquals(dataSet, ret, "check '" + dsType + "' return value (fluent design)");
+                    assertEquals(nData + testCoordinate[0].length, dataSet.getDataCount(),
+                            "check '" + dsType + "' data point count");
+                }
+            }
+
+            if (testCase == 1) {
+                assertEquals("label" + i, dataSet.getDataLabel(0),
+                        "check '" + dsType + "' label[" + 0 + "] value");
+            }
+
+            if (testCase == 2) {
+                assertEquals(null, dataSet.getDataLabel(0),
+                        "check '" + dsType + "' label[" + 0 + "] value");
+            }
+        }
+
+        assertEquals(nData + testCoordinate[0].length, dataSet.getDataCount(),
+                "check '" + dsType + "' diff data count at end of adding");
+
+        if (testCase <= 1) {
+            //TODO capacity increases beyond size due to DoubleArrayList's grow(capacity) implementation that increases the capacity by
+            // Min(size + 0.5* size, capacity) ... need to find a work around
+            assertEquals(dataSet.getDataCount(), dataSet.getCapacity(),
+                    "check '" + dsType + "' capacity data count match , test case = " + testCase);
+        }
     }
 
     public static void checkAddPoints(final DoubleDataSet dataSet, final int testCase) {
