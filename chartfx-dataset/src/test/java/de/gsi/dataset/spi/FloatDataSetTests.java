@@ -1,8 +1,9 @@
 package de.gsi.dataset.spi;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import static de.gsi.dataset.DataSet.DIM_X;
 import static de.gsi.dataset.DataSet.DIM_Y;
-import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.Arrays;
 
