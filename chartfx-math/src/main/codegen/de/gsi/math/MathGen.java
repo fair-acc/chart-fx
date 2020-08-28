@@ -10,7 +10,7 @@ package de.gsi.math;
 
 import java.util.Locale;
 
-public class MathGenBase extends MathBase {
+public class MathGen extends MathBase {
     private static final int kWorkMax = 100;
 
     /**

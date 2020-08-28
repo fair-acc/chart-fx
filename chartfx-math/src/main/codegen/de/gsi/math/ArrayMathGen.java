@@ -11,13 +11,13 @@ import de.gsi.dataset.utils.AssertUtils;
  * @author Alexander Krimm
  * @since 07 Jun 2020
  */
-public class ArrayMathGenBase {
+public class ArrayMathGen {
     protected static final String DIVISOR = "divisor";
     protected static final String IN = "in";
     protected static final String MULTIPLICATOR = "multiplicator";
     protected static final String VALUE = "value";
 
-    ArrayMathGenBase() { // NOPMD - package private
+    ArrayMathGen() { // NOPMD - package private
         throw new IllegalStateException("Utility class");
     }
 

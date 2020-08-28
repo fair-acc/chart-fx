@@ -19,9 +19,9 @@ class MultiArrayTest {
     @Test
     void testMultiArrayDouble() {
         final MultiArray<double[]> array = MultiArray.of(new double[] { 123, 321, 213, 9, 8, 7, 6, 5, 4, 1, 2, 3, 11, 22, 33 }, 3, new int[] { 2, 3, 2 });
-        assertTrue(array instanceof MultiArrayDoubleProto);
+        assertTrue(array instanceof MultiArrayDouble);
         assertEquals(3, array.getOffset());
-        final MultiArrayDoubleProto arrayDouble = (MultiArrayDoubleProto) array;
+        final MultiArrayDouble arrayDouble = (MultiArrayDouble) array;
         assertEquals(12, arrayDouble.getElementsCount());
         assertArrayEquals(new int[] { 2, 3, 2 }, arrayDouble.getDimensions());
         assertEquals(33, arrayDouble.get(new int[] { 1, 2, 1 }));
@@ -42,13 +42,13 @@ class MultiArrayTest {
     @Test
     void testMultiArrayDouble2D() {
         final MultiArray<double[]> array = MultiArray.of(new double[] { 0, 0, 0, 0, 9, 8, 7, 6, 5, 4 }, 4, new int[] { 2, 3 });
-        assertTrue(array instanceof MultiArrayDoubleProto.MultiArray2DDoubleProto);
-        final MultiArrayDoubleProto.MultiArray2DDoubleProto array2d = (MultiArrayDoubleProto.MultiArray2DDoubleProto) array;
+        assertTrue(array instanceof MultiArrayDouble.MultiArray2DDouble);
+        final MultiArrayDouble.MultiArray2DDouble array2d = (MultiArrayDouble.MultiArray2DDouble) array;
         assertArrayEquals(new double[] { 7, 6 }, array2d.getRow(1));
         assertEquals(4, array.getOffset());
-        assertEquals(8, ((MultiArrayDoubleProto) array).get(new int[] { 1, 0 }));
+        assertEquals(8, ((MultiArrayDouble) array).get(new int[] { 1, 0 }));
         assertEquals(8, array2d.get(1, 0));
-        assertEquals(4, ((MultiArrayDoubleProto) array).get(new int[] { 1, 2 }));
+        assertEquals(4, ((MultiArrayDouble) array).get(new int[] { 1, 2 }));
         assertEquals(4, array2d.get(1, 2));
         array2d.set(1, 2, 1.337);
         assertEquals(1.337, array2d.get(1, 2));
@@ -57,12 +57,12 @@ class MultiArrayTest {
     @Test
     void testMultiArrayDouble1D() {
         final MultiArray<double[]> array = MultiArray.of(new double[] { 100, 99, 9, 8, 7, 6, 5, 4 }, 2);
-        assertTrue(array instanceof MultiArrayDoubleProto.MultiArray1DDoubleProto);
-        final MultiArrayDoubleProto.MultiArray1DDoubleProto array1d = (MultiArrayDoubleProto.MultiArray1DDoubleProto) array;
+        assertTrue(array instanceof MultiArrayDouble.MultiArray1DDouble);
+        final MultiArrayDouble.MultiArray1DDouble array1d = (MultiArrayDouble.MultiArray1DDouble) array;
         assertEquals(2, array.getOffset());
         assertEquals(7, array1d.get(2));
         assertEquals(4, array1d.get(5));
-        assertEquals(8, ((MultiArrayDoubleProto) array).get(new int[] { 1 }));
+        assertEquals(8, ((MultiArrayDouble) array).get(new int[] { 1 }));
         array1d.set(5, 1.337);
         assertEquals(1.337, array1d.get(5));
     }
