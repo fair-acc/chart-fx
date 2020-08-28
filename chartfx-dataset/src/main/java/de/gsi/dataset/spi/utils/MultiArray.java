@@ -43,7 +43,7 @@ public abstract class MultiArray<T> {
     @SuppressWarnings("unchecked")
     public static <O> MultiArray<O> of(final O elements, final int offset, final int[] dimensions) {
         if (elements instanceof double[]) {
-            return (MultiArray<O>) MultiArrayDoubleProto.wrap((double[]) elements, offset, dimensions);
+            return (MultiArray<O>) MultiArrayDouble.wrap((double[]) elements, offset, dimensions);
         } else if (elements instanceof float[]) {
             return (MultiArray<O>) MultiArrayFloat.wrap((float[]) elements, offset, dimensions);
         } else if (elements instanceof int[]) {
@@ -84,7 +84,7 @@ public abstract class MultiArray<T> {
     @SuppressWarnings("unchecked")
     public static <O> MultiArray<O> of(final O elements, final int offset) {
         if (elements instanceof double[]) {
-            return (MultiArray<O>) MultiArrayDoubleProto.wrap((double[]) elements, offset, ((double[]) elements).length);
+            return (MultiArray<O>) MultiArrayDouble.wrap((double[]) elements, offset, ((double[]) elements).length);
         } else if (elements instanceof float[]) {
             return (MultiArray<O>) MultiArrayFloat.wrap((float[]) elements, offset, ((float[]) elements).length);
         } else if (elements instanceof int[]) {
