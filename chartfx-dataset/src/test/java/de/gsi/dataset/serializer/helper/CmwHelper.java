@@ -1,7 +1,7 @@
 package de.gsi.dataset.serializer.helper;
 
 public final class CmwHelper {
-/*
+    /*
     private static final Logger LOGGER = LoggerFactory.getLogger(SerialiserBenchmark.class); // N.B. SerialiserBenchmark reference on purpose
     private static final DataSerializer cmwSerializer = DataFactory.createDataSerializer();
 
