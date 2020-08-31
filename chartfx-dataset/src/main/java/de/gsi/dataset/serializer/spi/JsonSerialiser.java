@@ -797,6 +797,11 @@ public class JsonSerialiser implements IoSerialiser {
     }
 
     @Override
+    public WireDataFieldDescription putFieldHeader(final FieldDescription fieldDescription) {
+        return putFieldHeader(fieldDescription.getFieldName(), fieldDescription.getDataType());
+    }
+
+    @Override
     public WireDataFieldDescription putFieldHeader(final String fieldName, final DataType dataType) {
         lastFieldHeader = new WireDataFieldDescription(this, parent, fieldName.hashCode(), fieldName, dataType, -1, 1, -1);
         queryFieldName = fieldName;
