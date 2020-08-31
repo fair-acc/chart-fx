@@ -1,6 +1,8 @@
 package de.gsi.dataset.spi.utils;
 
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.Objects;
 
 import de.gsi.dataset.utils.AssertUtils;
 
@@ -17,8 +19,8 @@ import de.gsi.dataset.utils.AssertUtils;
 public abstract class MultiArray<T> {
     protected final T elements;
     private final int elementCount;
-    private final int[] dimensions;
-    private final int[] strides;
+    protected final int[] dimensions;
+    protected final int[] strides;
     protected final int offset;
 
     /**
