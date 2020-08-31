@@ -25,6 +25,7 @@ import de.gsi.dataset.serializer.FieldSerialiser;
 import de.gsi.dataset.serializer.IoBuffer;
 import de.gsi.dataset.serializer.IoSerialiser;
 import de.gsi.dataset.serializer.utils.ClassUtils;
+import de.gsi.dataset.spi.utils.*;
 import de.gsi.dataset.utils.AssertUtils;
 import de.gsi.dataset.utils.GenericsHelper;
 
@@ -1428,6 +1429,7 @@ public class BinarySerialiser implements IoSerialiser {
         buffer.putByte(lastFieldHeader.getFieldStart(), getDataType(DataType.END_MARKER));
     }
 
+    @Override
     public WireDataFieldDescription putFieldHeader(final FieldDescription fieldDescription) {
         if (fieldDescription == null) {
             // early return

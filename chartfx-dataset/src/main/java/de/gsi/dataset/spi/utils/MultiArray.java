@@ -17,8 +17,8 @@ import de.gsi.dataset.utils.AssertUtils;
 public abstract class MultiArray<T> {
     protected final T elements;
     private final int elementCount;
-    private final int[] dimensions;
-    private final int[] strides;
+    protected final int[] dimensions;
+    protected final int[] strides;
     protected final int offset;
 
     /**
