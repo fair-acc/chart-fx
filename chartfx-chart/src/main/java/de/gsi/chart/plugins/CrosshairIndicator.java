@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2016 European Organisation for Nuclear Research (CERN), All Rights Reserved.
  */
 
@@ -9,6 +9,7 @@ import javafx.event.EventHandler;
 import javafx.geometry.Bounds;
 import javafx.geometry.Orientation;
 import javafx.geometry.Point2D;
+import javafx.scene.canvas.Canvas;
 import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.shape.Line;
@@ -16,9 +17,6 @@ import javafx.scene.shape.LineTo;
 import javafx.scene.shape.MoveTo;
 import javafx.scene.shape.Path;
 import javafx.scene.shape.PathElement;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import de.gsi.chart.axes.Axis;
 import de.gsi.dataset.spi.utils.Tuple;
@@ -32,30 +30,21 @@ import de.gsi.dataset.spi.utils.Tuple;
  * @author Grzegorz Kruk
  */
 public class CrosshairIndicator extends AbstractDataFormattingPlugin {
-    private static final Logger LOGGER = LoggerFactory.getLogger(CrosshairIndicator.class);
-    /**
-     * Name of the CSS class of the horizontal and vertical lines path.
-     */
     public static final String STYLE_CLASS_PATH = "chart-crosshair-path";
-
-    /**
-     * Name of the CSS class of the label displaying mouse coordinates.
-     */
     public static final String STYLE_CLASS_LABEL = "chart-crosshair-label";
-
     private static final int LABEL_X_OFFSET = 15;
     private static final int LABEL_Y_OFFSET = 5;
 
     private final Path crosshairPath = new Path();
-    private final Label coordinatesLabel = new Label();
+    protected final Label coordinatesLabel = new Label();
 
     private final EventHandler<MouseEvent> mouseMoveHandler = (final MouseEvent event) -> {
-        final Bounds plotAreaBounds = getChart().getBoundsInLocal();
-        if (!plotAreaBounds.contains(event.getX(), event.getY())) {
+        if (!isMouseEventWithinCanvas(event)) {
             getChartChildren().clear();
             return;
         }
 
+        final Bounds plotAreaBounds = getChart().getBoundsInLocal();
         updatePath(event, plotAreaBounds);
         updateLabel(event, plotAreaBounds);
 
@@ -70,10 +59,12 @@ public class CrosshairIndicator extends AbstractDataFormattingPlugin {
     public CrosshairIndicator() {
         crosshairPath.getStyleClass().add(CrosshairIndicator.STYLE_CLASS_PATH);
         crosshairPath.setManaged(false);
+        crosshairPath.setId("crosshairIndicator-Path");
         coordinatesLabel.getStyleClass().add(CrosshairIndicator.STYLE_CLASS_LABEL);
         coordinatesLabel.setManaged(false);
+        coordinatesLabel.setId("crosshairIndicator-Label");
 
-        registerInputEventHandler(MouseEvent.MOUSE_MOVED, mouseMoveHandler);
+        registerInputEventHandler(MouseEvent.ANY, mouseMoveHandler);
     }
 
     private String formatLabelText(final Point2D displayPointInPlotArea) {
@@ -84,12 +75,17 @@ public class CrosshairIndicator extends AbstractDataFormattingPlugin {
         }
         Tuple<Number, Number> tuple = toDataPoint(yAxis, displayPointInPlotArea);
         if (tuple == null) {
-            if (LOGGER.isWarnEnabled()) {
-                LOGGER.atWarn().addArgument(tuple).log("toDataPoint tupple is '{}' returning default string");
-            }
             return "unknown coordinate";
         }
         return formatData(getChart(), tuple);
+    }
+
+    private boolean isMouseEventWithinCanvas(final MouseEvent mouseEvent) {
+        final Canvas canvas = getChart().getCanvas();
+        // listen to only events within the canvas
+        final Point2D mouseLoc = new Point2D(mouseEvent.getScreenX(), mouseEvent.getScreenY());
+        final Bounds screenBounds = canvas.localToScreen(canvas.getBoundsInLocal());
+        return screenBounds.contains(mouseLoc);
     }
 
     private void updateLabel(final MouseEvent event, final Bounds plotAreaBounds) {
