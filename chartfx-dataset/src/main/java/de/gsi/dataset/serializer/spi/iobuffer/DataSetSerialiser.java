@@ -396,9 +396,8 @@ public class DataSetSerialiser { // NOPMD
             for (int dimIndex = 0; dimIndex < nDim; dimIndex++) {
                 final boolean gridDimension = dimIndex < gridDataSet.getNGrid();
                 final int nsamples = gridDimension ? gridDataSet.getShape(dimIndex) : dataSet.getDataCount();
-                ioSerialiser.putFieldHeader(ARRAY_PREFIX + dimIndex, DataType.FLOAT_ARRAY);
                 final float[] values = toFloats(gridDimension ? gridDataSet.getGridValues(dimIndex) : dataSet.getValues(dimIndex));
-                ioSerialiser.getBuffer().putFloatArray(values, 0, nsamples);
+                ioSerialiser.put(ARRAY_PREFIX + dimIndex, values, nsamples);
             }
             return; // GridDataSet does not provide errors
         }
@@ -439,9 +438,8 @@ public class DataSetSerialiser { // NOPMD
             for (int dimIndex = 0; dimIndex < nDim; dimIndex++) {
                 final boolean gridDimension = dimIndex < gridDataSet.getNGrid();
                 final int nsamples = gridDimension ? gridDataSet.getShape(dimIndex) : dataSet.getDataCount();
-                ioSerialiser.putFieldHeader(ARRAY_PREFIX + dimIndex, DataType.DOUBLE_ARRAY);
                 final double[] values = gridDimension ? gridDataSet.getGridValues(dimIndex) : dataSet.getValues(dimIndex);
-                ioSerialiser.getBuffer().putDoubleArray(values, 0, nsamples);
+                ioSerialiser.put(ARRAY_PREFIX + dimIndex, values, nsamples);
             }
             return; // GridDataSet does not provide errors
         }
