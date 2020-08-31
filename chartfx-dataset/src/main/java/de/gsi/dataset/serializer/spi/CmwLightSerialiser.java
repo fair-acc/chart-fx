@@ -964,6 +964,11 @@ public class CmwLightSerialiser implements IoSerialiser {
         }
     }
 
+    @Override
+    public WireDataFieldDescription putFieldHeader(final FieldDescription fieldDescription) {
+        return putFieldHeader(fieldDescription, fieldDescription.getDataType());
+    }
+
     public WireDataFieldDescription putFieldHeader(final FieldDescription fieldDescription, DataType customDataType) {
         final boolean isScalar = customDataType.isScalar();
 

@@ -7,6 +7,8 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
 
+import de.gsi.dataset.spi.utils.*;
+
 /**
  * Enum definition for data primitives in the context of serialisation and includes definitions for: 
  * <ul>
@@ -41,15 +43,15 @@ public enum DataType {
     STRING(9, "string", "java.lang.String", 1, Cat.ARRAY, String.class, String.class),
 
     // array of primitive types
-    BOOL_ARRAY(101, "bool_array", "[Z", 1, Cat.ARRAY, boolean[].class, Boolean[].class),
-    BYTE_ARRAY(102, "byte_array", "[B", 1, Cat.ARRAY, byte[].class, Byte[].class),
-    SHORT_ARRAY(103, "short_array", "[S", 2, Cat.ARRAY, short[].class, Short[].class),
-    INT_ARRAY(104, "int_array", "[I", 4, Cat.ARRAY, int[].class, Integer[].class),
-    LONG_ARRAY(105, "long_array", "[J", 8, Cat.ARRAY, long[].class, Long[].class),
-    FLOAT_ARRAY(106, "float_array", "[F", 4, Cat.ARRAY, float[].class, Float[].class),
-    DOUBLE_ARRAY(107, "double_array", "[D", 8, Cat.ARRAY, double[].class, Double[].class),
-    CHAR_ARRAY(108, "char_array", "[C", 2, Cat.ARRAY, char[].class, Character[].class),
-    STRING_ARRAY(109, "string_array", "[java.lang.String", 1, Cat.ARRAY, String[].class, String[].class),
+    BOOL_ARRAY(101, "bool_array", "[Z", 1, Cat.ARRAY, boolean[].class, Boolean[].class, MultiArrayBoolean.class),
+    BYTE_ARRAY(102, "byte_array", "[B", 1, Cat.ARRAY, byte[].class, Byte[].class, MultiArrayByte.class),
+    SHORT_ARRAY(103, "short_array", "[S", 2, Cat.ARRAY, short[].class, Short[].class, MultiArrayShort.class),
+    INT_ARRAY(104, "int_array", "[I", 4, Cat.ARRAY, int[].class, Integer[].class, MultiArrayInt.class),
+    LONG_ARRAY(105, "long_array", "[J", 8, Cat.ARRAY, long[].class, Long[].class, MultiArrayLong.class),
+    FLOAT_ARRAY(106, "float_array", "[F", 4, Cat.ARRAY, float[].class, Float[].class, MultiArrayFloat.class),
+    DOUBLE_ARRAY(107, "double_array", "[D", 8, Cat.ARRAY, double[].class, Double[].class, MultiArrayDouble.class),
+    CHAR_ARRAY(108, "char_array", "[C", 2, Cat.ARRAY, char[].class, Character[].class, MultiArrayChar.class),
+    STRING_ARRAY(109, "string_array", "[java.lang.String", 1, Cat.ARRAY, String[].class, String[].class, MultiArrayObject.class),
 
     // complex objects
     ENUM(201, "enum", "java.lang.Enum", 4, Cat.ARRAY, Enum.class),

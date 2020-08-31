@@ -1,9 +1,6 @@
 package de.gsi.dataset.serializer;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.parallel.ResourceAccessMode.READ_WRITE;
 
 import java.lang.reflect.InvocationTargetException;
@@ -23,11 +20,9 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import de.gsi.dataset.DataSet;
-import de.gsi.dataset.serializer.spi.BinarySerialiser;
-import de.gsi.dataset.serializer.spi.ByteBuffer;
-import de.gsi.dataset.serializer.spi.FastByteBuffer;
-import de.gsi.dataset.serializer.spi.WireDataFieldDescription;
+import de.gsi.dataset.serializer.spi.*;
 import de.gsi.dataset.spi.DefaultErrorDataSet;
+import de.gsi.dataset.spi.utils.MultiArrayDouble;
 
 /**
  * @author rstein
@@ -151,6 +146,7 @@ class IoClassSerialiserTests {
         sourceClass.dataSetStringMap = new HashMap<>();
         sourceClass.dataSetStringMap.put(keyDataSet1, "keyDataSet1");
         sourceClass.dataSetStringMap.put(keyDataSet2, "keyDataSet2");
+        sourceClass.multiArrayDouble = MultiArrayDouble.wrap(new double[] { 1, 2, 3, 4, 5, 6 }, new int[] { 2, 3 });
 
         TestClass destinationClass = new TestClass();
         destinationClass.nullIntegerList = new ArrayList<>();
@@ -203,6 +199,10 @@ class IoClassSerialiserTests {
         assertEquals(sourceClass.dataSetStringMap, destinationClass.dataSetStringMap);
         assertEquals("keyDataSet1", destinationClass.dataSetStringMap.get(keyDataSet1));
         assertEquals("keyDataSet2", destinationClass.dataSetStringMap.get(keyDataSet2));
+
+        assertEquals(sourceClass.multiArrayDouble, destinationClass.multiArrayDouble);
+        assertArrayEquals(sourceClass.multiArrayDouble.getDimensions(), destinationClass.multiArrayDouble.getDimensions());
+        assertArrayEquals(sourceClass.multiArrayDouble.elements(), destinationClass.multiArrayDouble.elements());
     }
 
     static class CustomClass {
@@ -255,5 +255,7 @@ class IoClassSerialiserTests {
 
         public Map<String, DataSet> dataSetMap;
         public Map<DataSet, String> dataSetStringMap;
+
+        public MultiArrayDouble multiArrayDouble;
     }
 }

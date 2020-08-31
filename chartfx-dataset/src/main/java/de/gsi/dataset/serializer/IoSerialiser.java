@@ -361,6 +361,8 @@ public interface IoSerialiser {
 
     void putEndMarker(FieldDescription fieldDescription);
 
+    WireDataFieldDescription putFieldHeader(FieldDescription fieldDescription);
+
     WireDataFieldDescription putFieldHeader(String fieldName, DataType dataType);
 
     /**

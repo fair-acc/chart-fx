@@ -1,4 +1,4 @@
-//// codegen container: double -> float, char, short, int, long, boolean, byte
+//// codegen container: double -> double, float, char, short, int, long, boolean, byte, U
 package de.gsi.dataset.spi.utils;
 
 import java.util.Arrays;
@@ -13,12 +13,12 @@ import de.gsi.dataset.utils.AssertUtils;
  *
  * @author Alexander Krimm
  */
-public class MultiArrayProto extends MultiArray<double[]> {
+public class MultiArrayProto extends MultiArray<double[]> { //// codegen: subst:U:Proto:Proto<U>
     /**
      * @param elements Elements for the new MultiArray
      * @return A MultiArrayDouble1D with the supplied elements
      */
-    public static MultiArrayProto wrap(final double[] elements) {
+    public static MultiArrayProto wrap(final double[] elements) { //// codegen: subst:U:U[]:T[] //// subst:U:static:static <T>
         return wrap(elements, 0, elements.length);
     }
 
@@ -28,7 +28,7 @@ public class MultiArrayProto extends MultiArray<double[]> {
      * @param length number of elements to use from the elements array
      * @return A MultiArrayDouble1D with the supplied elements
      */
-    public static MultiArrayProto wrap(final double[] elements, final int offset, final int length) {
+    public static MultiArrayProto wrap(final double[] elements, final int offset, final int length) { //// codegen: subst:U:U[]:T[] //// subst:U:static:static <T>
         return new MultiArray1DProto(elements, new int[] { length }, offset);
     }
 
@@ -37,7 +37,7 @@ public class MultiArrayProto extends MultiArray<double[]> {
      * @param elements   The element data of the MultiArrayDouble in row-major storage
      * @return A MultiArrayDouble or specialisation of it for the 1D and 2D case
      */
-    public static MultiArrayProto wrap(final double[] elements, final int[] dimensions) {
+    public static MultiArrayProto wrap(final double[] elements, final int[] dimensions) { //// codegen: subst:U:U[]:T[] //// subst:U:static:static <T>
         return wrap(elements, 0, dimensions);
     }
 
@@ -47,7 +47,7 @@ public class MultiArrayProto extends MultiArray<double[]> {
      * @param dimensions The size of the new MultiArrayDouble
      * @return A MultiArrayDouble or specialisation of it for the 1D and 2D case
      */
-    public static MultiArrayProto wrap(final double[] elements, final int offset, final int[] dimensions) {
+    public static MultiArrayProto wrap(final double[] elements, final int offset, final int[] dimensions) { //// codegen: subst:U:U[]:T[] //// subst:U:static:static <T>
         int nElements = 1;
         for (int ni : dimensions) {
             nElements *= ni;
@@ -67,22 +67,38 @@ public class MultiArrayProto extends MultiArray<double[]> {
      * @param dimensions Dimensions for the new MultiArray
      * @return A new MultiArrayDouble with a new empty backing array
      */
-    public static MultiArrayProto allocate(final int[] dimensions) {
+    public static MultiArrayProto allocate(final int[] dimensions) { //// codegen: subst:U:) {:, final Class<T[]> clazz) { //// subst:U:static:static <T>
         switch (dimensions.length) {
         case 1:
-            return new MultiArray1DProto(new double[dimensions[0]], dimensions, 0);
+            //*// try { //// codegen: subst:U://*// :
+            //*//     return new MultiArray1DProto(clazz.getConstructor(int.class).newInstance(dimensions[0]), dimensions, 0); //// codegen: subst:U://*// :
+            //*// } catch (InstantiationException | NoSuchMethodException | IllegalAccessException | java.lang.reflect.InvocationTargetException e) { //// codegen: subst:U://*// :
+            //*//     throw new IllegalArgumentException("Could not allocate array for given type", e); //// codegen: subst:U://*// :
+            //*// } //// codegen: subst:U://*// :
+            return new MultiArray1DProto(new double[dimensions[0]], dimensions, 0); //// codegen: subst:U:return://*// return
         case 2:
-            return new MultiArray2DProto(new double[dimensions[1] * dimensions[0]], dimensions, 0);
+            //*// try { //// codegen: subst:U://*// :
+            //*//     return new MultiArray2DProto(clazz.getConstructor(int.class).newInstance(dimensions[0] * dimensions[1]), dimensions, 0); //// codegen: subst:U://*// :
+            //*// } catch (InstantiationException | NoSuchMethodException | IllegalAccessException | java.lang.reflect.InvocationTargetException e) { //// codegen: subst:U://*// :
+            //*//     throw new IllegalArgumentException("Could not allocate array for given type", e); //// codegen: subst:U://*// :
+            //*// } //// codegen: subst:U://*// :
+            //*// try {
+            return new MultiArray2DProto(new double[dimensions[1] * dimensions[0]], dimensions, 0); //// codegen: subst:U:return://*// return
         default:
             int nElements = 1;
             for (int ni : dimensions) {
                 nElements *= ni;
             }
-            return new MultiArrayProto(new double[nElements], dimensions, 0);
+            //*// try { //// codegen: subst:U://*// :
+            //*//     return new MultiArrayProto(clazz.getConstructor(int.class).newInstance(nElements), dimensions, 0); //// codegen: subst:U://*// :
+            //*// } catch (InstantiationException | NoSuchMethodException | IllegalAccessException | java.lang.reflect.InvocationTargetException e) { //// codegen: subst:U://*// :
+            //*//     throw new IllegalArgumentException("Could not allocate array for given type", e); //// codegen: subst:U://*// :
+            //*// } //// codegen: subst:U://*// :
+            return new MultiArrayProto(new double[nElements], dimensions, 0); //// codegen: subst:U:return://*// return
         }
     }
 
-    protected MultiArrayProto(final double[] elements, final int[] dimensions, final int offset) {
+    protected MultiArrayProto(final double[] elements, final int[] dimensions, final int offset) { //// codegen: subst:U:double[]:U[]
         super(elements, dimensions, offset);
     }
 
@@ -93,7 +109,7 @@ public class MultiArrayProto extends MultiArray<double[]> {
      * @param index the index of the element to set
      */
     public void setStrided(final int index, final double value) {
-        elements[index + offset] = value;
+        elements[index + offset] = value; //// codegen: subst:U:double:U
     }
 
     /**
@@ -126,11 +142,33 @@ public class MultiArrayProto extends MultiArray<double[]> {
         return elements[getIndex(indices)];
     }
 
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o)
+            return true;
+        if (!(o instanceof MultiArrayDouble)) //// codegen: subst:U:MultiArrayU:MultiArrayObject
+            return false;
+        final MultiArrayDouble that = (MultiArrayDouble) o; //// codegen: subst:U:MultiArrayU:MultiArrayObject<U>
+        return Arrays.equals(dimensions, that.dimensions) && Arrays.equals(elements, offset, offset + getElementsCount(), that.elements, that.offset, that.offset + getElementsCount());
+    }
+
+    @Override
+    public int hashCode() {
+        // hash of relevant subsection of the array
+        int result = 1;
+        for (int i = offset; i < offset + getElementsCount(); i++) {
+            result = 31 * result + Double.hashCode(elements[i]); //// codegen: subst:int:Int:Integer //// subst:char:Char:Character //// subst:U:U.hashCode(elements[i]):elements[i].hashCode()
+        }
+        // hash of the dimensions
+        result = 31 * result + Arrays.hashCode(dimensions);
+        return result;
+    }
+
     /**
      * Specialisation for the 1D case to allow for easier and more efficient usage
      */
-    public static class MultiArray1DProto extends MultiArrayProto {
-        protected MultiArray1DProto(final double[] elements, final int[] dimensions, final int offset) {
+    public static class MultiArray1DProto extends MultiArrayProto { //// codegen: subst:U:Proto:Proto<U>
+        protected MultiArray1DProto(final double[] elements, final int[] dimensions, final int offset) { //// codegen: subst:U:double[]:U[]
             super(elements, dimensions, offset);
         }
 
@@ -146,10 +184,10 @@ public class MultiArrayProto extends MultiArray<double[]> {
     /**
      * Specialisation for the 2D case to allow for easier and more efficient usage
      */
-    public static class MultiArray2DProto extends MultiArrayProto {
+    public static class MultiArray2DProto extends MultiArrayProto { //// codegen: subst:U:Proto:Proto<U>
         private final int stride;
 
-        protected MultiArray2DProto(final double[] elements, final int[] dimensions, final int offset) {
+        protected MultiArray2DProto(final double[] elements, final int[] dimensions, final int offset) { //// codegen: subst:U:double[]:U[]
             super(elements, dimensions, offset);
             stride = dimensions[0];
         }
