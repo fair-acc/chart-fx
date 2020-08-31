@@ -11,14 +11,14 @@ class MultiArrayTest {
     //// Double
     @Test
     void testMultiArrayDoubleExceptions() {
-        assertThrows(IllegalArgumentException.class, () -> MultiArray.of("Foo", 0, new int[] { 1, 2, 3 })); // elements no array
-        assertThrows(IllegalArgumentException.class, () -> MultiArray.of("Foo", 0)); // elements no array
-        assertThrows(IllegalArgumentException.class, () -> MultiArray.of(new double[] { 3, 2 }, 0, new int[] { 1, 2, 3 })); // elements smaller than dimensions
+        assertThrows(IllegalArgumentException.class, () -> MultiArray.wrap("Foo", 0, new int[] { 1, 2, 3 })); // elements no array
+        assertThrows(IllegalArgumentException.class, () -> MultiArray.wrap("Foo", 0)); // elements no array
+        assertThrows(IllegalArgumentException.class, () -> MultiArray.wrap(new double[] { 3, 2 }, 0, new int[] { 1, 2, 3 })); // elements smaller than dimensions
     }
 
     @Test
     void testMultiArrayDouble() {
-        final MultiArray<double[]> array = MultiArray.of(new double[] { 123, 321, 213, 9, 8, 7, 6, 5, 4, 1, 2, 3, 11, 22, 33 }, 3, new int[] { 2, 3, 2 });
+        final MultiArray<double[]> array = MultiArray.wrap(new double[] { 123, 321, 213, 9, 8, 7, 6, 5, 4, 1, 2, 3, 11, 22, 33 }, 3, new int[] { 2, 3, 2 });
         assertTrue(array instanceof MultiArrayDouble);
         assertEquals(3, array.getOffset());
         final MultiArrayDouble arrayDouble = (MultiArrayDouble) array;
@@ -41,7 +41,7 @@ class MultiArrayTest {
 
     @Test
     void testMultiArrayDouble2D() {
-        final MultiArray<double[]> array = MultiArray.of(new double[] { 0, 0, 0, 0, 9, 8, 7, 6, 5, 4 }, 4, new int[] { 2, 3 });
+        final MultiArray<double[]> array = MultiArray.wrap(new double[] { 0, 0, 0, 0, 9, 8, 7, 6, 5, 4 }, 4, new int[] { 2, 3 });
         assertTrue(array instanceof MultiArrayDouble.MultiArray2DDouble);
         final MultiArrayDouble.MultiArray2DDouble array2d = (MultiArrayDouble.MultiArray2DDouble) array;
         assertArrayEquals(new double[] { 7, 6 }, array2d.getRow(1));
@@ -56,7 +56,7 @@ class MultiArrayTest {
 
     @Test
     void testMultiArrayDouble1D() {
-        final MultiArray<double[]> array = MultiArray.of(new double[] { 100, 99, 9, 8, 7, 6, 5, 4 }, 2);
+        final MultiArray<double[]> array = MultiArray.wrap(new double[] { 100, 99, 9, 8, 7, 6, 5, 4 }, 2);
         assertTrue(array instanceof MultiArrayDouble.MultiArray1DDouble);
         final MultiArrayDouble.MultiArray1DDouble array1d = (MultiArrayDouble.MultiArray1DDouble) array;
         assertEquals(2, array.getOffset());
@@ -71,7 +71,7 @@ class MultiArrayTest {
 
     @Test
     void testMultiArrayInt() {
-        final MultiArray<int[]> array = MultiArray.of(new int[] { 123, 321, 213, 9, 8, 7, 6, 5, 4, 1, 2, 3, 11, 22, 33 }, 3, new int[] { 2, 3, 2 });
+        final MultiArray<int[]> array = MultiArray.wrap(new int[] { 123, 321, 213, 9, 8, 7, 6, 5, 4, 1, 2, 3, 11, 22, 33 }, 3, new int[] { 2, 3, 2 });
         assertTrue(array instanceof MultiArrayInt);
         assertEquals(3, array.getOffset());
         final MultiArrayInt arrayInt = (MultiArrayInt) array;
@@ -94,7 +94,7 @@ class MultiArrayTest {
 
     @Test
     void testMultiArrayInt2D() {
-        final MultiArray<int[]> array = MultiArray.of(new int[] { 0, 0, 0, 0, 9, 8, 7, 6, 5, 4 }, 4, new int[] { 2, 3 });
+        final MultiArray<int[]> array = MultiArray.wrap(new int[] { 0, 0, 0, 0, 9, 8, 7, 6, 5, 4 }, 4, new int[] { 2, 3 });
         assertTrue(array instanceof MultiArrayInt.MultiArray2DInt);
         final MultiArrayInt.MultiArray2DInt array2d = (MultiArrayInt.MultiArray2DInt) array;
         assertArrayEquals(new int[] { 7, 6 }, array2d.getRow(1));
@@ -109,7 +109,7 @@ class MultiArrayTest {
 
     @Test
     void testMultiArrayInt1D() {
-        final MultiArray<int[]> array = MultiArray.of(new int[] { 100, 99, 9, 8, 7, 6, 5, 4 }, 2);
+        final MultiArray<int[]> array = MultiArray.wrap(new int[] { 100, 99, 9, 8, 7, 6, 5, 4 }, 2);
         assertTrue(array instanceof MultiArrayInt.MultiArray1DInt);
         final MultiArrayInt.MultiArray1DInt array1d = (MultiArrayInt.MultiArray1DInt) array;
         assertEquals(2, array.getOffset());
@@ -123,14 +123,14 @@ class MultiArrayTest {
     //// Float
     @Test
     void testMultiArrayFloatExceptions() {
-        assertThrows(IllegalArgumentException.class, () -> MultiArray.of("Foo", 0, new int[] { 1, 2, 3 })); // elements no array
-        assertThrows(IllegalArgumentException.class, () -> MultiArray.of("Foo", 0)); // elements no array
-        assertThrows(IllegalArgumentException.class, () -> MultiArray.of(new float[] { 3, 2 }, 0, new int[] { 1, 2, 3 })); // elements smaller than dimensions
+        assertThrows(IllegalArgumentException.class, () -> MultiArray.wrap("Foo", 0, new int[] { 1, 2, 3 })); // elements no array
+        assertThrows(IllegalArgumentException.class, () -> MultiArray.wrap("Foo", 0)); // elements no array
+        assertThrows(IllegalArgumentException.class, () -> MultiArray.wrap(new float[] { 3, 2 }, 0, new int[] { 1, 2, 3 })); // elements smaller than dimensions
     }
 
     @Test
     void testMultiArrayFloat() {
-        final MultiArray<float[]> array = MultiArray.of(new float[] { 123, 321, 213, 9, 8, 7, 6, 5, 4, 1, 2, 3, 11, 22, 33 }, 3, new int[] { 2, 3, 2 });
+        final MultiArray<float[]> array = MultiArray.wrap(new float[] { 123, 321, 213, 9, 8, 7, 6, 5, 4, 1, 2, 3, 11, 22, 33 }, 3, new int[] { 2, 3, 2 });
         assertTrue(array instanceof MultiArrayFloat);
         assertEquals(3, array.getOffset());
         final MultiArrayFloat arrayFloat = (MultiArrayFloat) array;
@@ -153,7 +153,7 @@ class MultiArrayTest {
 
     @Test
     void testMultiArrayFloat2D() {
-        final MultiArray<float[]> array = MultiArray.of(new float[] { 0, 0, 0, 0, 9, 8, 7, 6, 5, 4 }, 4, new int[] { 2, 3 });
+        final MultiArray<float[]> array = MultiArray.wrap(new float[] { 0, 0, 0, 0, 9, 8, 7, 6, 5, 4 }, 4, new int[] { 2, 3 });
         assertTrue(array instanceof MultiArrayFloat.MultiArray2DFloat);
         final MultiArrayFloat.MultiArray2DFloat array2d = (MultiArrayFloat.MultiArray2DFloat) array;
         assertArrayEquals(new float[] { 7, 6 }, array2d.getRow(1));
@@ -168,7 +168,7 @@ class MultiArrayTest {
 
     @Test
     void testMultiArrayFloat1D() {
-        final MultiArray<float[]> array = MultiArray.of(new float[] { 100, 99, 9, 8, 7, 6, 5, 4 }, 2);
+        final MultiArray<float[]> array = MultiArray.wrap(new float[] { 100, 99, 9, 8, 7, 6, 5, 4 }, 2);
         assertTrue(array instanceof MultiArrayFloat.MultiArray1DFloat);
         final MultiArrayFloat.MultiArray1DFloat array1d = (MultiArrayFloat.MultiArray1DFloat) array;
         assertEquals(2, array.getOffset());
@@ -182,14 +182,14 @@ class MultiArrayTest {
     //// Long
     @Test
     void testMultiArrayLongExceptions() {
-        assertThrows(IllegalArgumentException.class, () -> MultiArray.of("Foo", 0, new int[] { 1, 2, 3 })); // elements no array
-        assertThrows(IllegalArgumentException.class, () -> MultiArray.of("Foo", 0)); // elements no array
-        assertThrows(IllegalArgumentException.class, () -> MultiArray.of(new long[] { 3, 2 }, 0, new int[] { 1, 2, 3 })); // elements smaller than dimensions
+        assertThrows(IllegalArgumentException.class, () -> MultiArray.wrap("Foo", 0, new int[] { 1, 2, 3 })); // elements no array
+        assertThrows(IllegalArgumentException.class, () -> MultiArray.wrap("Foo", 0)); // elements no array
+        assertThrows(IllegalArgumentException.class, () -> MultiArray.wrap(new long[] { 3, 2 }, 0, new int[] { 1, 2, 3 })); // elements smaller than dimensions
     }
 
     @Test
     void testMultiArrayLong() {
-        final MultiArray<long[]> array = MultiArray.of(new long[] { 123, 321, 213, 9, 8, 7, 6, 5, 4, 1, 2, 3, 11, 22, 33 }, 3, new int[] { 2, 3, 2 });
+        final MultiArray<long[]> array = MultiArray.wrap(new long[] { 123, 321, 213, 9, 8, 7, 6, 5, 4, 1, 2, 3, 11, 22, 33 }, 3, new int[] { 2, 3, 2 });
         assertTrue(array instanceof MultiArrayLong);
         assertEquals(3, array.getOffset());
         final MultiArrayLong arrayLong = (MultiArrayLong) array;
@@ -212,7 +212,7 @@ class MultiArrayTest {
 
     @Test
     void testMultiArrayLong2D() {
-        final MultiArray<long[]> array = MultiArray.of(new long[] { 0, 0, 0, 0, 9, 8, 7, 6, 5, 4 }, 4, new int[] { 2, 3 });
+        final MultiArray<long[]> array = MultiArray.wrap(new long[] { 0, 0, 0, 0, 9, 8, 7, 6, 5, 4 }, 4, new int[] { 2, 3 });
         assertTrue(array instanceof MultiArrayLong.MultiArray2DLong);
         final MultiArrayLong.MultiArray2DLong array2d = (MultiArrayLong.MultiArray2DLong) array;
         assertArrayEquals(new long[] { 7, 6 }, array2d.getRow(1));
@@ -227,7 +227,7 @@ class MultiArrayTest {
 
     @Test
     void testMultiArrayLong1D() {
-        final MultiArray<long[]> array = MultiArray.of(new long[] { 100, 99, 9, 8, 7, 6, 5, 4 }, 2);
+        final MultiArray<long[]> array = MultiArray.wrap(new long[] { 100, 99, 9, 8, 7, 6, 5, 4 }, 2);
         assertTrue(array instanceof MultiArrayLong.MultiArray1DLong);
         final MultiArrayLong.MultiArray1DLong array1d = (MultiArrayLong.MultiArray1DLong) array;
         assertEquals(2, array.getOffset());
@@ -241,14 +241,14 @@ class MultiArrayTest {
     //// Object
     @Test
     void testMultiArrayObjectExceptions() {
-        assertThrows(IllegalArgumentException.class, () -> MultiArray.of("Foo", 0, new int[] { 1, 2, 3 })); // elements no array
-        assertThrows(IllegalArgumentException.class, () -> MultiArray.of("Foo", 0)); // elements no array
-        assertThrows(IllegalArgumentException.class, () -> MultiArray.of(new String[] { "a", "b" }, 0, new int[] { 1, 2, 3 })); // elements smaller than dimensions
+        assertThrows(IllegalArgumentException.class, () -> MultiArray.wrap("Foo", 0, new int[] { 1, 2, 3 })); // elements no array
+        assertThrows(IllegalArgumentException.class, () -> MultiArray.wrap("Foo", 0)); // elements no array
+        assertThrows(IllegalArgumentException.class, () -> MultiArray.wrap(new String[] { "a", "b" }, 0, new int[] { 1, 2, 3 })); // elements smaller than dimensions
     }
 
     @Test
     void testMultiArrayObject() {
-        final MultiArray<String[]> array = MultiArray.of(new String[] { "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o" }, 3, new int[] { 2, 3, 2 });
+        final MultiArray<String[]> array = MultiArray.wrap(new String[] { "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o" }, 3, new int[] { 2, 3, 2 });
         assertTrue(array instanceof MultiArrayObject);
         assertEquals(3, array.getOffset());
         final MultiArrayObject<String> arrayObject = (MultiArrayObject<String>) array;
@@ -271,7 +271,7 @@ class MultiArrayTest {
 
     @Test
     void testMultiArrayObject2D() {
-        final MultiArray<String[]> array = MultiArray.of(new String[] { "a", "b", "c", "d", "e", "f", "g", "h", "i", "j" }, 4, new int[] { 2, 3 });
+        final MultiArray<String[]> array = MultiArray.wrap(new String[] { "a", "b", "c", "d", "e", "f", "g", "h", "i", "j" }, 4, new int[] { 2, 3 });
         assertTrue(array instanceof MultiArrayObject.MultiArray2DObject);
         final MultiArrayObject.MultiArray2DObject array2d = (MultiArrayObject.MultiArray2DObject) array;
         assertArrayEquals(new String[] { "g", "h" }, array2d.getRow(1));
@@ -286,7 +286,7 @@ class MultiArrayTest {
 
     @Test
     void testMultiArrayObject1D() {
-        final MultiArray<String[]> array = MultiArray.of(new String[] { "a", "b", "c", "d", "e", "f", "g", "h", "i", "j" }, 2);
+        final MultiArray<String[]> array = MultiArray.wrap(new String[] { "a", "b", "c", "d", "e", "f", "g", "h", "i", "j" }, 2);
         assertTrue(array instanceof MultiArrayObject.MultiArray1DObject);
         final MultiArrayObject.MultiArray1DObject array1d = (MultiArrayObject.MultiArray1DObject) array;
         assertEquals(2, array.getOffset());
