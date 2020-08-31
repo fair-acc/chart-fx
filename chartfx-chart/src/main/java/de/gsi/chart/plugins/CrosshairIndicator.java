@@ -10,20 +10,20 @@ import javafx.geometry.Bounds;
 import javafx.geometry.Orientation;
 import javafx.geometry.Point2D;
 import javafx.scene.canvas.Canvas;
-import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.LineTo;
 import javafx.scene.shape.MoveTo;
 import javafx.scene.shape.Path;
 import javafx.scene.shape.PathElement;
+import javafx.scene.text.Text;
 
 import de.gsi.chart.axes.Axis;
 import de.gsi.dataset.spi.utils.Tuple;
 
 /**
  * Horizontal and vertical {@link Line} drawn on the plot area, crossing at the mouse cursor location, together with a
- * {@link Label} displaying the cursor coordinates in data units.
+ * {@link Text} displaying the cursor coordinates in data units.
  * <p>
  * CSS style class names: {@value #STYLE_CLASS_PATH} and {@value #STYLE_CLASS_LABEL}
  *
@@ -35,23 +35,8 @@ public class CrosshairIndicator extends AbstractDataFormattingPlugin {
     private static final int LABEL_X_OFFSET = 15;
     private static final int LABEL_Y_OFFSET = 5;
 
-    private final Path crosshairPath = new Path();
-    protected final Label coordinatesLabel = new Label();
-
-    private final EventHandler<MouseEvent> mouseMoveHandler = (final MouseEvent event) -> {
-        if (!isMouseEventWithinCanvas(event)) {
-            getChartChildren().clear();
-            return;
-        }
-
-        final Bounds plotAreaBounds = getChart().getBoundsInLocal();
-        updatePath(event, plotAreaBounds);
-        updateLabel(event, plotAreaBounds);
-
-        if (!getChartChildren().contains(crosshairPath)) {
-            getChartChildren().addAll(crosshairPath, coordinatesLabel);
-        }
-    };
+    protected final Path crosshairPath = new Path();
+    protected final Text coordinatesLabel = new Text();
 
     /**
      * Creates a new instance of CrosshairIndicator class.
@@ -64,6 +49,21 @@ public class CrosshairIndicator extends AbstractDataFormattingPlugin {
         coordinatesLabel.setManaged(false);
         coordinatesLabel.setId("crosshairIndicator-Label");
 
+        final EventHandler<MouseEvent> mouseMoveHandler = (final MouseEvent event) -> {
+            if (!isMouseEventWithinCanvas(event)) {
+                getChartChildren().remove(crosshairPath);
+                getChartChildren().remove(coordinatesLabel);
+                return;
+            }
+
+            final Bounds plotAreaBounds = getChart().getBoundsInLocal();
+            updatePath(event, plotAreaBounds);
+            updateLabel(event, plotAreaBounds);
+
+            if (!getChartChildren().contains(crosshairPath)) {
+                getChartChildren().addAll(crosshairPath, coordinatesLabel);
+            }
+        };
         registerInputEventHandler(MouseEvent.ANY, mouseMoveHandler);
     }
 

@@ -7,17 +7,18 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import javafx.geometry.Point2D;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
+import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.testfx.api.FxRobot;
-import org.testfx.assertions.api.Assertions;
 import org.testfx.framework.junit5.ApplicationExtension;
 import org.testfx.framework.junit5.Start;
 import org.testfx.robot.Motion;
@@ -75,19 +76,35 @@ class CrosshairIndicatorTest {
         assertDoesNotThrow(() -> FXUtils.runAndWait(() -> chart.getPlugins().add(plugin)));
         assertEquals(1, chart.getPlugins().size());
         System.err.println("pluging" + chart.getPlugins());
-        Label label = plugin.coordinatesLabel;
+        Text label = plugin.coordinatesLabel;
         assertNotNull(label, "no crosshair label found");
         assertTrue(label.getText().isBlank(), "initial label being blank");
         assertFalse(plugin.getChartChildren().contains(label));
 
         robot.moveTo(chart, Motion.DEFAULT);
         assertTrue(plugin.getChartChildren().contains(label));
-        Assertions.assertThat(robot.lookup("#crosshairIndicator-Label").queryAs(Label.class)).isNotNull();
         assertTrue(plugin.getChartChildren().contains(label));
         final String text1 = label.getText();
         assertFalse(text1.isBlank());
-        robot.moveBy(10, 10);
-        final String text2 = label.getText();
+        robot.moveBy(+200, 10);
+        String text2 = label.getText();
+        assertFalse(text2.isBlank());
+        assertNotEquals(text1, text2);
+
+        robot.moveBy(-400, 10);
+        text2 = label.getText();
+        assertFalse(text2.isBlank());
+        assertNotEquals(text1, text2);
+
+        robot.moveTo(chart, Pos.TOP_CENTER, new Point2D(0, +3), Motion.DEFAULT);
+        robot.interrupt();
+        text2 = label.getText();
+        assertFalse(text2.isBlank());
+        assertNotEquals(text1, text2);
+
+        robot.moveTo(chart, Pos.BOTTOM_CENTER, new Point2D(0, -3), Motion.DEFAULT);
+        robot.interrupt();
+        text2 = label.getText();
         assertFalse(text2.isBlank());
         assertNotEquals(text1, text2);
 
@@ -96,7 +113,9 @@ class CrosshairIndicatorTest {
         assertFalse(text3.isBlank());
         assertNotEquals(text2, text3);
 
+        robot.interrupt();
         robot.moveBy(10, 10);
+        robot.interrupt();
         final String text4 = label.getText();
         assertFalse(text4.isBlank());
         assertEquals(text3, text4);
