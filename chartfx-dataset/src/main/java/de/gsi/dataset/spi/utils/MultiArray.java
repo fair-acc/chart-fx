@@ -28,8 +28,8 @@ public abstract class MultiArray<T> {
      * @param <O> Type of the underlying array
      * @return A specific MultiArray implementation
      */
-    public static <O> MultiArray<O> of(final O elements, final int[] dimensions) {
-        return of(elements, 0, dimensions);
+    public static <O> MultiArray<O> wrap(final O elements, final int[] dimensions) {
+        return wrap(elements, 0, dimensions);
     }
 
     /**
@@ -41,7 +41,7 @@ public abstract class MultiArray<T> {
      * @return A specific MultiArray implementation
      */
     @SuppressWarnings("unchecked")
-    public static <O> MultiArray<O> of(final O elements, final int offset, final int[] dimensions) {
+    public static <O> MultiArray<O> wrap(final O elements, final int offset, final int[] dimensions) {
         if (elements instanceof double[]) {
             return (MultiArray<O>) MultiArrayDouble.wrap((double[]) elements, offset, dimensions);
         } else if (elements instanceof float[]) {
@@ -70,8 +70,8 @@ public abstract class MultiArray<T> {
      * @param <O> Type of the underlying array
      * @return A specific MultiArray implementation
      */
-    public static <O> MultiArray<O> of(final O elements) {
-        return of(elements, 0);
+    public static <O> MultiArray<O> wrap(final O elements) {
+        return wrap(elements, 0);
     }
 
     /**
@@ -82,7 +82,7 @@ public abstract class MultiArray<T> {
      * @return A specific MultiArray implementation
      */
     @SuppressWarnings("unchecked")
-    public static <O> MultiArray<O> of(final O elements, final int offset) {
+    public static <O> MultiArray<O> wrap(final O elements, final int offset) {
         if (elements instanceof double[]) {
             return (MultiArray<O>) MultiArrayDouble.wrap((double[]) elements, offset, ((double[]) elements).length);
         } else if (elements instanceof float[]) {
