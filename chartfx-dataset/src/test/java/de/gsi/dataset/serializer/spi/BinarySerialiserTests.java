@@ -101,7 +101,7 @@ class BinarySerialiserTests {
         long skipNBytes;
         int[] dims;
         // check primitive types
-        buffer.reset();
+        buffer.flip();
         assertEquals(0, buffer.position(), "initial buffer position");
 
         // boolean
@@ -315,7 +315,7 @@ class BinarySerialiserTests {
 
         WireDataFieldDescription header;
         // check primitive types
-        buffer.reset();
+        buffer.flip();
         assertEquals(0, buffer.position(), "initial buffer position");
 
         // boolean
@@ -454,7 +454,7 @@ class BinarySerialiserTests {
         ioSerialiser.putEndMarker(dataEndMarker);
         positionAfter.add(buffer.position());
 
-        buffer.reset();
+        buffer.flip();
 
         WireDataFieldDescription header;
         int positionAfterFieldHeader;
@@ -675,7 +675,7 @@ class BinarySerialiserTests {
         final WireDataFieldDescription dataEndMarker = new WireDataFieldDescription(ioSerialiser, null, dataEndMarkerName.hashCode(), dataEndMarkerName, DataType.START_MARKER, -1, -1, -1);
         ioSerialiser.putEndMarker(dataEndMarker); // add end marker
 
-        buffer.reset();
+        buffer.flip();
 
         // and read back streamed items
         final WireDataFieldDescription objectRoot = ioSerialiser.parseIoStream(true);
@@ -694,7 +694,7 @@ class BinarySerialiserTests {
 
         putGenericTestArrays(ioSerialiser);
 
-        buffer.reset();
+        buffer.flip();
 
         // test conversion to double array
         ioSerialiser.checkHeaderInfo();
