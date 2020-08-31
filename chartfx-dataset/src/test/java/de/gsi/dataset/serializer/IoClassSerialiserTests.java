@@ -18,6 +18,7 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import de.gsi.dataset.spi.utils.MultiArrayDouble;
 import org.junit.jupiter.api.parallel.ResourceLock;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -151,6 +152,7 @@ class IoClassSerialiserTests {
         sourceClass.dataSetStringMap = new HashMap<>();
         sourceClass.dataSetStringMap.put(keyDataSet1, "keyDataSet1");
         sourceClass.dataSetStringMap.put(keyDataSet2, "keyDataSet2");
+        sourceClass.multiArrayDouble = MultiArrayDouble.wrap(new double[] { 1, 2, 3, 4, 5, 6 }, new int[] { 2, 3 });
 
         TestClass destinationClass = new TestClass();
         destinationClass.nullIntegerList = new ArrayList<>();
@@ -255,5 +257,7 @@ class IoClassSerialiserTests {
 
         public Map<String, DataSet> dataSetMap;
         public Map<DataSet, String> dataSetStringMap;
+
+        public MultiArrayDouble multiArrayDouble;
     }
 }

@@ -22,14 +22,10 @@ import de.gsi.dataset.serializer.spi.ClassFieldDescription;
 import de.gsi.dataset.serializer.spi.CmwLightSerialiser;
 import de.gsi.dataset.serializer.spi.JsonSerialiser;
 import de.gsi.dataset.serializer.spi.WireDataFieldDescription;
-import de.gsi.dataset.serializer.spi.iobuffer.FieldBoxedValueArrayHelper;
-import de.gsi.dataset.serializer.spi.iobuffer.FieldBoxedValueHelper;
-import de.gsi.dataset.serializer.spi.iobuffer.FieldCollectionsHelper;
-import de.gsi.dataset.serializer.spi.iobuffer.FieldDataSetHelper;
-import de.gsi.dataset.serializer.spi.iobuffer.FieldMapHelper;
-import de.gsi.dataset.serializer.spi.iobuffer.FieldPrimitiveValueHelper;
-import de.gsi.dataset.serializer.spi.iobuffer.FieldPrimitveValueArrayHelper;
+import de.gsi.dataset.serializer.spi.iobuffer.*;
 import de.gsi.dataset.serializer.utils.ClassUtils;
+import de.gsi.dataset.spi.utils.MultiArray;
+import de.gsi.dataset.spi.utils.MultiArrayDouble;
 import de.gsi.dataset.utils.ByteArrayCache;
 
 /**
@@ -88,6 +84,8 @@ public class IoClassSerialiser {
 
         FieldMapHelper.register(this);
         FieldDataSetHelper.register(this);
+        // MultiArray handlers
+        FieldMultiArrayHelper.register(this);
     }
 
     public void addClassDefinition(FieldSerialiser<?> serialiser) {
