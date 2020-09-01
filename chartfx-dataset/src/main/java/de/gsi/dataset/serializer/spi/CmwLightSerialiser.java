@@ -8,7 +8,6 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.function.BiFunction;
 
-import de.gsi.dataset.serializer.spi.iobuffer.FieldMultiArrayHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,6 +16,7 @@ import de.gsi.dataset.serializer.FieldDescription;
 import de.gsi.dataset.serializer.FieldSerialiser;
 import de.gsi.dataset.serializer.IoBuffer;
 import de.gsi.dataset.serializer.IoSerialiser;
+import de.gsi.dataset.serializer.spi.iobuffer.FieldMultiArrayHelper;
 import de.gsi.dataset.spi.utils.MultiArray;
 
 /**

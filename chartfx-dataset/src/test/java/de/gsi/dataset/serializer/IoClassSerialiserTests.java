@@ -18,7 +18,6 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import de.gsi.dataset.spi.utils.MultiArrayDouble;
 import org.junit.jupiter.api.parallel.ResourceLock;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -29,6 +28,7 @@ import de.gsi.dataset.serializer.spi.ByteBuffer;
 import de.gsi.dataset.serializer.spi.FastByteBuffer;
 import de.gsi.dataset.serializer.spi.WireDataFieldDescription;
 import de.gsi.dataset.spi.DefaultErrorDataSet;
+import de.gsi.dataset.spi.utils.MultiArrayDouble;
 
 /**
  * @author rstein
