@@ -252,7 +252,7 @@ public class CodeGenerator extends AbstractMojo {
         if (cmdIndex >= 0) {
             String[] commands = Arrays.stream(currentLine.substring(cmdIndex + LINE_COMMAND.length() + 1).split(LINE_COMMAND_SEP))
                                         .map(String::trim)
-                                        .toArray(String[]::new);
+                                        .toArray(String[] ::new);
             for (final String command : commands) {
                 if (command.startsWith(COMMAND_SKIP)) {
                     skip = skip || command.substring(COMMAND_SKIP.length()).contains(outputType);

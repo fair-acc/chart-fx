@@ -144,8 +144,10 @@ public class MultiArrayProto extends MultiArray<double[]> { //// codegen: subst:
 
     @Override
     public boolean equals(final Object o) {
-        if (this == o) return true;
-        if (!(o instanceof MultiArrayDouble)) return false; //// codegen: subst:U:MultiArrayU:MultiArrayObject
+        if (this == o)
+            return true;
+        if (!(o instanceof MultiArrayDouble))
+            return false; //// codegen: subst:U:MultiArrayU:MultiArrayObject
         final MultiArrayDouble that = (MultiArrayDouble) o; //// codegen: subst:U:MultiArrayU:MultiArrayObject<U>
         return Arrays.equals(dimensions, that.dimensions) && Arrays.equals(elements, offset, offset + getElementsCount(), that.elements, that.offset, that.offset + getElementsCount());
     }
