@@ -414,8 +414,7 @@ public class ContourDataSetRenderer extends AbstractContourDataSetRendererParame
         for (int dataSetIndex = localDataSetList.size() - 1; dataSetIndex >= 0; dataSetIndex--) {
             final DataSet dataSet = localDataSetList.get(dataSetIndex);
             if (!(dataSet instanceof GridDataSet) || dataSet.getDimension() <= 2) {
-                // minimum dimension criteria not met
-                continue;
+                continue; // DataSet not applicable to ContourChartRenderer
             }
 
             final boolean result = dataSet.lock().readLockGuard(() -> {
@@ -425,7 +424,7 @@ public class ContourDataSetRenderer extends AbstractContourDataSetRendererParame
                     return false;
                 }
 
-                localCache = new ContourDataSetCache(xyChart, this, (GridDataSet) dataSet); // NOPMD
+                localCache = new ContourDataSetCache(xyChart, this, dataSet); // NOPMD
                 ProcessingProfiler.getTimeDiff(stop, "updateCachedVariables");
                 return true;
             });

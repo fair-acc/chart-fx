@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.InputMismatchException;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -89,13 +88,13 @@ public class DataSetSerialiser { // NOPMD
 
     protected void parseDataLabels(final DataSetBuilder builder, final FieldDescription fieldRoot) {
         if (checkFieldCompatibility(fieldRoot, DATA_LABELS.hashCode(), DATA_LABELS, DataType.MAP) != null) {
-            Map<Integer, String> map = new ConcurrentHashMap<>();
+            Map<Integer, String> map = new HashMap<>();
             map = ioSerialiser.getMap(map, null);
             builder.setDataLabelMap(map);
         }
 
         if (checkFieldCompatibility(fieldRoot, DATA_STYLES.hashCode(), DATA_STYLES, DataType.MAP) != null) {
-            Map<Integer, String> map = new ConcurrentHashMap<>();
+            Map<Integer, String> map = new HashMap<>();
             map = ioSerialiser.getMap(map, null);
             builder.setDataStyleMap(map);
         }
@@ -164,7 +163,7 @@ public class DataSetSerialiser { // NOPMD
         }
 
         if (checkFieldCompatibility(rootField, META_INFO.hashCode(), META_INFO, DataType.MAP) != null) {
-            Map<String, String> map = new ConcurrentHashMap<>();
+            Map<String, String> map = new HashMap<>();
             map = ioSerialiser.getMap(map, null);
             builder.setMetaInfoMap(map);
         }
@@ -290,7 +289,7 @@ public class DataSetSerialiser { // NOPMD
         }
 
         final int dataCount = dataSet.getDataCount();
-        final Map<Integer, String> labelMap = new ConcurrentHashMap<>();
+        final Map<Integer, String> labelMap = new HashMap<>();
         for (int index = 0; index < dataCount; index++) {
             final String label = dataSet.getDataLabel(index);
             if ((label != null) && !label.isEmpty()) {

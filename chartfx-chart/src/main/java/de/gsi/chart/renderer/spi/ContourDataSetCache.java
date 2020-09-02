@@ -82,11 +82,15 @@ class ContourDataSetCache extends WritableImageCache {
     protected double[] tempDataBuffer;
     protected final double[] reduced;
 
-    public ContourDataSetCache(final XYChart chart, final ContourDataSetRenderer renderer, final GridDataSet dataSet) {
+    public ContourDataSetCache(final XYChart chart, final ContourDataSetRenderer renderer, final DataSet dataSet) {
         if (dataSet.getDimension() < 3) {
             throw new IllegalArgumentException("dataSet needs be at least 3D but is " + dataSet.getDimension());
         }
-        if (dataSet.getNGrid() < 2) {
+        if (!(dataSet instanceof GridDataSet)) {
+            throw new IllegalArgumentException("dataSet needs be GridDataSet");
+        }
+        final GridDataSet gridDataSet = (GridDataSet) dataSet;
+        if (gridDataSet.getNGrid() < 2) {
             throw new IllegalArgumentException("Contour Renderer only supports 2D Grids");
         }
         final long start = ProcessingProfiler.getTimeStamp();
@@ -127,10 +131,10 @@ class ContourDataSetCache extends WritableImageCache {
         this.yDataPixelRange = Math.abs(this.yDataPixelMax - this.yDataPixelMin);
 
         // min/max data indices w.r.t. DataSet index binning
-        final int indexXMinTemp = Math.max(0, dataSet.getGridIndex(DIM_X, this.xMin));
-        final int indexXMaxTemp = Math.min(dataSet.getGridIndex(DIM_X, this.xMax), dataSet.getShape(DIM_X) - 1);
-        final int indexYMinTemp = Math.max(0, dataSet.getGridIndex(DIM_Y, this.yMax));
-        final int indexYMaxTemp = Math.min(dataSet.getGridIndex(DIM_Y, this.yMin), dataSet.getShape(DIM_Y) - 1);
+        final int indexXMinTemp = Math.max(0, gridDataSet.getGridIndex(DIM_X, this.xMin));
+        final int indexXMaxTemp = Math.min(gridDataSet.getGridIndex(DIM_X, this.xMax), gridDataSet.getShape(DIM_X) - 1);
+        final int indexYMinTemp = Math.max(0, gridDataSet.getGridIndex(DIM_Y, this.yMax));
+        final int indexYMaxTemp = Math.min(gridDataSet.getGridIndex(DIM_Y, this.yMin), gridDataSet.getShape(DIM_Y) - 1);
         this.indexXMin = Math.min(indexXMinTemp, indexXMaxTemp);
         this.indexXMax = Math.max(indexXMinTemp, indexXMaxTemp);
         this.indexYMin = Math.min(indexYMinTemp, indexYMaxTemp);
@@ -291,7 +295,7 @@ class ContourDataSetCache extends WritableImageCache {
         return zDataRange;
     }
 
-    protected static void copySubFrame(final GridDataSet dataSet, final double[] dataBuffer,
+    protected static void copySubFrame(final DataSet dataSet, final double[] dataBuffer,
             final boolean parallelImplementation, //
             final boolean xInverted, final int xMinIndex, final int xMaxIndex, //
             final boolean yInverted, final int yMinIndex, final int yMaxIndex) {
@@ -300,7 +304,7 @@ class ContourDataSetCache extends WritableImageCache {
         final int dataLength = width * height;
 
         if (!parallelImplementation) {
-            computeCoordinates(dataSet, dataBuffer, dataLength, xInverted, xMinIndex, xMaxIndex, yInverted, yMinIndex,
+            computeCoordinates((GridDataSet) dataSet, dataBuffer, dataLength, xInverted, xMinIndex, xMaxIndex, yInverted, yMinIndex,
                     yMaxIndex, yMinIndex);
             return;
         }
@@ -315,7 +319,7 @@ class ContourDataSetCache extends WritableImageCache {
             workers.add(() -> {
                 final int yMinLocal = start;
                 final int yMaxLocal = Math.min(start + stepSize, yMaxIndex);
-                computeCoordinates(dataSet, dataBuffer, dataLength, //
+                computeCoordinates((GridDataSet) dataSet, dataBuffer, dataLength, //
                         xInverted, xMinIndex, xMaxIndex, //
                         yInverted, yMinLocal, yMaxLocal, //
                         yMinIndex);

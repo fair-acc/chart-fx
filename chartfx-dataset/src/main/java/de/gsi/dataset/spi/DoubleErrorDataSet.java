@@ -406,18 +406,19 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
      * clear old data and overwrite with data from 'other' data set (deep copy)
      *
      * @param other the other data set
+     * @param copy true: perform a deep copy (default), false: reuse the other dataset's internal data structures (if applicable)
      * @return itself (fluent design)
      */
     @Override
-    public DoubleErrorDataSet set(final DataSet other) {
+    public DoubleErrorDataSet set(final DataSet other, final boolean copy) {
         lock().writeLockGuard(() -> other.lock().writeLockGuard(() -> {
             // copy data
             if (other instanceof DataSetError) {
                 this.set(other.getValues(DIM_X), other.getValues(DIM_Y), ((DataSetError) other).getErrorsNegative(DIM_Y),
-                        ((DataSetError) other).getErrorsPositive(DIM_Y), other.getDataCount(), true);
+                        ((DataSetError) other).getErrorsPositive(DIM_Y), other.getDataCount(), copy);
             } else {
                 final int count = other.getDataCount();
-                this.set(other.getValues(DIM_X), other.getValues(DIM_Y), new double[count], new double[count], other.getDataCount(), true);
+                this.set(other.getValues(DIM_X), other.getValues(DIM_Y), new double[count], new double[count], other.getDataCount(), copy);
             }
 
             // deep copy data point labels and styles

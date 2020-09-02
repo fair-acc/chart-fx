@@ -323,13 +323,20 @@ public class FloatDataSet extends AbstractDataSet<FloatDataSet> implements DataS
      * clear old data and overwrite with data from 'other' data set (deep copy)
      * 
      * @param other the source data set
+     * @param copy true: perform a deep copy (default), false: reuse the other dataset's internal data structures (if applicable)
      * @return itself (fluent design)
      */
     @Override
-    public FloatDataSet set(final DataSet other) {
+    public FloatDataSet set(final DataSet other, final boolean copy) {
         lock().writeLockGuard(() -> other.lock().writeLockGuard(() -> {
             // copy data
-            this.set(toFloats(other.getValues(DIM_X)), toFloats(other.getValues(DIM_Y)), other.getDataCount(), true);
+            if (other instanceof FloatDataSet) {
+                final FloatDataSet otherFloat = (FloatDataSet) other;
+                this.set((otherFloat.getFloatValues(DIM_X)), otherFloat.getFloatValues(DIM_Y), other.getDataCount(), copy);
+            } else {
+                // performs deep copy, because toFloat returns new array -> do not perform another copy on set
+                this.set(toFloats(other.getValues(DIM_X)), toFloats(other.getValues(DIM_Y)), other.getDataCount(), false);
+            }
 
             // deep copy data point labels and styles
             getDataLabelMap().clear();
