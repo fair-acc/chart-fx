@@ -279,7 +279,7 @@ public class MathBaseGen {
     }
 
     public static boolean even(long a) {
-        return !((a & 1) != 0);
+        return (a & 1) == 0;
     }
 
     public static double exp(double x) {
@@ -328,24 +328,23 @@ public class MathBaseGen {
      * @param x input
      * @return next prime number greater/equal x
      */
-    public static long nextPrime(long x) {
+    public static long nextPrime(final long x) {
         if (x <= 2)
             return 2;
         if (x == 3)
             return 3;
-        if (x % 2 == 0)
-            x++;
+        long val = (x % 2 == 0) ? x + 1 : x;
 
-        long sqr = (long) java.lang.Math.sqrt(x) + 1;
+        long sqr = (long) java.lang.Math.sqrt(val) + 1;
 
-        for (;;) {
+        while (true) {
             long n;
-            for (n = 3; (n <= sqr) && ((x % n) != 0); n += 2)
+            for (n = 3; (n <= sqr) && ((val % n) != 0); n += 2)
                 ;
             if (n > sqr) {
-                return x;
+                return val;
             }
-            x += 2;
+            val += 2;
         }
     }
 

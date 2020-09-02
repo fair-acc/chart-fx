@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author rstein
  */
+@SuppressWarnings("PMD.UnnecessaryFullyQualifiedName") // the fully qualified name is needed, because we have our own Math class
 public class FastMathTests {
     private static final Logger LOGGER = LoggerFactory.getLogger(FastMathTests.class);
 
