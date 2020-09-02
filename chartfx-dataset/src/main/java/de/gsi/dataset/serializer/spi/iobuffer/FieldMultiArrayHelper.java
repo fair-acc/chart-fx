@@ -138,5 +138,45 @@ public class FieldMultiArrayHelper {
                 (io, obj, field) -> getMultiArray(io, (MultiArray<?>) ((field == null) ? obj : field.getField().get(obj)), DataType.DOUBLE_ARRAY), // return
                 (io, obj, field) -> put(io, field, (MultiArray<?>) field.getField().get(obj)), // writer
                 MultiArrayDouble.class));
+        serialiser.addClassDefinition(new FieldSerialiser<>( //
+                (io, obj, field) -> field.getField().set(obj, getMultiArray(io, (MultiArray<?>) field.getField().get(obj), field.getDataType())), // reader
+                (io, obj, field) -> getMultiArray(io, (MultiArray<?>) ((field == null) ? obj : field.getField().get(obj)), DataType.FLOAT_ARRAY), // return
+                (io, obj, field) -> put(io, field, (MultiArray<?>) field.getField().get(obj)), // writer
+                MultiArrayFloat.class));
+        serialiser.addClassDefinition(new FieldSerialiser<>( //
+                (io, obj, field) -> field.getField().set(obj, getMultiArray(io, (MultiArray<?>) field.getField().get(obj), field.getDataType())), // reader
+                (io, obj, field) -> getMultiArray(io, (MultiArray<?>) ((field == null) ? obj : field.getField().get(obj)), DataType.INT_ARRAY), // return
+                (io, obj, field) -> put(io, field, (MultiArray<?>) field.getField().get(obj)), // writer
+                MultiArrayInt.class));
+        serialiser.addClassDefinition(new FieldSerialiser<>( //
+                (io, obj, field) -> field.getField().set(obj, getMultiArray(io, (MultiArray<?>) field.getField().get(obj), field.getDataType())), // reader
+                (io, obj, field) -> getMultiArray(io, (MultiArray<?>) ((field == null) ? obj : field.getField().get(obj)), DataType.LONG_ARRAY), // return
+                (io, obj, field) -> put(io, field, (MultiArray<?>) field.getField().get(obj)), // writer
+                MultiArrayLong.class));
+        serialiser.addClassDefinition(new FieldSerialiser<>( //
+                (io, obj, field) -> field.getField().set(obj, getMultiArray(io, (MultiArray<?>) field.getField().get(obj), field.getDataType())), // reader
+                (io, obj, field) -> getMultiArray(io, (MultiArray<?>) ((field == null) ? obj : field.getField().get(obj)), DataType.SHORT_ARRAY), // return
+                (io, obj, field) -> put(io, field, (MultiArray<?>) field.getField().get(obj)), // writer
+                MultiArrayShort.class));
+        serialiser.addClassDefinition(new FieldSerialiser<>( //
+                (io, obj, field) -> field.getField().set(obj, getMultiArray(io, (MultiArray<?>) field.getField().get(obj), field.getDataType())), // reader
+                (io, obj, field) -> getMultiArray(io, (MultiArray<?>) ((field == null) ? obj : field.getField().get(obj)), DataType.BYTE_ARRAY), // return
+                (io, obj, field) -> put(io, field, (MultiArray<?>) field.getField().get(obj)), // writer
+                MultiArrayByte.class));
+        serialiser.addClassDefinition(new FieldSerialiser<>( //
+                (io, obj, field) -> field.getField().set(obj, getMultiArray(io, (MultiArray<?>) field.getField().get(obj), field.getDataType())), // reader
+                (io, obj, field) -> getMultiArray(io, (MultiArray<?>) ((field == null) ? obj : field.getField().get(obj)), DataType.CHAR_ARRAY), // return
+                (io, obj, field) -> put(io, field, (MultiArray<?>) field.getField().get(obj)), // writer
+                MultiArrayChar.class));
+        serialiser.addClassDefinition(new FieldSerialiser<>( //
+                (io, obj, field) -> field.getField().set(obj, getMultiArray(io, (MultiArray<?>) field.getField().get(obj), field.getDataType())), // reader
+                (io, obj, field) -> getMultiArray(io, (MultiArray<?>) ((field == null) ? obj : field.getField().get(obj)), DataType.BOOL_ARRAY), // return
+                (io, obj, field) -> put(io, field, (MultiArray<?>) field.getField().get(obj)), // writer
+                MultiArrayBoolean.class));
+        serialiser.addClassDefinition(new FieldSerialiser<>( //
+                (io, obj, field) -> field.getField().set(obj, getMultiArray(io, (MultiArray<?>) field.getField().get(obj), field.getDataType())), // reader
+                (io, obj, field) -> getMultiArray(io, (MultiArray<?>) ((field == null) ? obj : field.getField().get(obj)), DataType.STRING_ARRAY), // return
+                (io, obj, field) -> put(io, field, (MultiArray<?>) field.getField().get(obj)), // writer
+                MultiArrayObject.class));
     }
 }
