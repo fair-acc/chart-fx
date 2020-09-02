@@ -2,6 +2,9 @@ package de.gsi.dataset.serializer.helper;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
+import java.util.Arrays;
+import java.util.Objects;
+
 import org.opentest4j.AssertionFailedError;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -333,6 +336,28 @@ public class TestDataClass {
         }
 
         return returnState;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = Objects.hash(bool1, bool2, byte1, byte2, char1, char2, short1, short2, int1, int2, long1, long2, float1, float2, double1, double2, string1, string2, nestedData);
+        result = 31 * result + Arrays.hashCode(boolArray);
+        result = 31 * result + Arrays.hashCode(byteArray);
+        result = 31 * result + Arrays.hashCode(shortArray);
+        result = 31 * result + Arrays.hashCode(intArray);
+        result = 31 * result + Arrays.hashCode(longArray);
+        result = 31 * result + Arrays.hashCode(floatArray);
+        result = 31 * result + Arrays.hashCode(doubleArray);
+        result = 31 * result + Arrays.hashCode(stringArray);
+        result = 31 * result + Arrays.hashCode(nDimensions);
+        result = 31 * result + Arrays.hashCode(boolNdimArray);
+        result = 31 * result + Arrays.hashCode(byteNdimArray);
+        result = 31 * result + Arrays.hashCode(shortNdimArray);
+        result = 31 * result + Arrays.hashCode(intNdimArray);
+        result = 31 * result + Arrays.hashCode(longNdimArray);
+        result = 31 * result + Arrays.hashCode(floatNdimArray);
+        result = 31 * result + Arrays.hashCode(doubleNdimArray);
+        return result;
     }
 
     public final void init(final int nSizePrimitives, final int nSizeString) {

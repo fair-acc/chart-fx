@@ -51,7 +51,16 @@ public interface EditableDataSet extends DataSet {
 
     /**
      * @param other Other DataSet to copy into this DataSet
+     * @param copy true: perform a deep copy (default), false: reuse the other dataset's internal data structures (if applicable)
      * @return itself (fluent design)
      */
-    EditableDataSet set(final DataSet other);
+    EditableDataSet set(final DataSet other, final boolean copy);
+
+    /**
+     * @param other Other DataSet to copy into this DataSet
+     * @return itself (fluent design)
+     */
+    default EditableDataSet set(final DataSet other) {
+        return set(other, true);
+    }
 }
