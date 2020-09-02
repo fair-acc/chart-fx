@@ -22,7 +22,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import de.gsi.dataset.DataSet;
 import de.gsi.dataset.serializer.spi.*;
 import de.gsi.dataset.spi.DefaultErrorDataSet;
-import de.gsi.dataset.spi.utils.MultiArrayDouble;
+import de.gsi.dataset.spi.utils.*;
 
 /**
  * @author rstein
@@ -146,7 +146,16 @@ class IoClassSerialiserTests {
         sourceClass.dataSetStringMap = new HashMap<>();
         sourceClass.dataSetStringMap.put(keyDataSet1, "keyDataSet1");
         sourceClass.dataSetStringMap.put(keyDataSet2, "keyDataSet2");
+
         sourceClass.multiArrayDouble = MultiArrayDouble.wrap(new double[] { 1, 2, 3, 4, 5, 6 }, new int[] { 2, 3 });
+        sourceClass.multiArrayFloat = MultiArrayFloat.wrap(new float[] { 1, 2, 3, 4, 5, 6 }, new int[] { 2, 3 });
+        sourceClass.multiArrayInt = MultiArrayInt.wrap(new int[] { 1, 2, 3, 4, 5, 6 }, new int[] { 2, 3 });
+        sourceClass.multiArrayLong = MultiArrayLong.wrap(new long[] { 1, 2, 3, 4, 5, 6 }, new int[] { 2, 3 });
+        sourceClass.multiArrayShort = MultiArrayShort.wrap(new short[] { 1, 2, 3, 4, 5, 6 }, new int[] { 2, 3 });
+        sourceClass.multiArrayChar = MultiArrayChar.wrap(new char[] { 1, 2, 3, 4, 5, 6 }, new int[] { 2, 3 });
+        sourceClass.multiArrayBoolean = MultiArrayBoolean.wrap(new boolean[] { true, false, false, true, true, false }, new int[] { 2, 3 });
+        sourceClass.multiArrayByte = MultiArrayByte.wrap(new byte[] { 1, 2, 3, 4, 5, 6 }, new int[] { 2, 3 });
+        sourceClass.multiArrayString = MultiArrayObject.<String>wrap(new String[] { "aa", "ba", "ab", "bb", "ac", "bc" }, new int[] { 2, 3 });
 
         TestClass destinationClass = new TestClass();
         destinationClass.nullIntegerList = new ArrayList<>();
@@ -203,6 +212,38 @@ class IoClassSerialiserTests {
         assertEquals(sourceClass.multiArrayDouble, destinationClass.multiArrayDouble);
         assertArrayEquals(sourceClass.multiArrayDouble.getDimensions(), destinationClass.multiArrayDouble.getDimensions());
         assertArrayEquals(sourceClass.multiArrayDouble.elements(), destinationClass.multiArrayDouble.elements());
+
+        assertEquals(sourceClass.multiArrayFloat, destinationClass.multiArrayFloat);
+        assertArrayEquals(sourceClass.multiArrayFloat.getDimensions(), destinationClass.multiArrayFloat.getDimensions());
+        assertArrayEquals(sourceClass.multiArrayFloat.elements(), destinationClass.multiArrayFloat.elements());
+
+        assertEquals(sourceClass.multiArrayInt, destinationClass.multiArrayInt);
+        assertArrayEquals(sourceClass.multiArrayInt.getDimensions(), destinationClass.multiArrayInt.getDimensions());
+        assertArrayEquals(sourceClass.multiArrayInt.elements(), destinationClass.multiArrayInt.elements());
+
+        assertEquals(sourceClass.multiArrayLong, destinationClass.multiArrayLong);
+        assertArrayEquals(sourceClass.multiArrayLong.getDimensions(), destinationClass.multiArrayLong.getDimensions());
+        assertArrayEquals(sourceClass.multiArrayLong.elements(), destinationClass.multiArrayLong.elements());
+
+        assertEquals(sourceClass.multiArrayShort, destinationClass.multiArrayShort);
+        assertArrayEquals(sourceClass.multiArrayShort.getDimensions(), destinationClass.multiArrayShort.getDimensions());
+        assertArrayEquals(sourceClass.multiArrayShort.elements(), destinationClass.multiArrayShort.elements());
+
+        assertEquals(sourceClass.multiArrayByte, destinationClass.multiArrayByte);
+        assertArrayEquals(sourceClass.multiArrayByte.getDimensions(), destinationClass.multiArrayByte.getDimensions());
+        assertArrayEquals(sourceClass.multiArrayByte.elements(), destinationClass.multiArrayByte.elements());
+
+        assertEquals(sourceClass.multiArrayChar, destinationClass.multiArrayChar);
+        assertArrayEquals(sourceClass.multiArrayChar.getDimensions(), destinationClass.multiArrayChar.getDimensions());
+        assertArrayEquals(sourceClass.multiArrayChar.elements(), destinationClass.multiArrayChar.elements());
+
+        assertEquals(sourceClass.multiArrayBoolean, destinationClass.multiArrayBoolean);
+        assertArrayEquals(sourceClass.multiArrayBoolean.getDimensions(), destinationClass.multiArrayBoolean.getDimensions());
+        assertArrayEquals(sourceClass.multiArrayBoolean.elements(), destinationClass.multiArrayBoolean.elements());
+
+        assertEquals(sourceClass.multiArrayString, destinationClass.multiArrayString);
+        assertArrayEquals(sourceClass.multiArrayString.getDimensions(), destinationClass.multiArrayString.getDimensions());
+        assertArrayEquals(sourceClass.multiArrayString.elements(), destinationClass.multiArrayString.elements());
     }
 
     static class CustomClass {
@@ -257,5 +298,13 @@ class IoClassSerialiserTests {
         public Map<DataSet, String> dataSetStringMap;
 
         public MultiArrayDouble multiArrayDouble;
+        public MultiArrayFloat multiArrayFloat;
+        public MultiArrayInt multiArrayInt;
+        public MultiArrayLong multiArrayLong;
+        public MultiArrayShort multiArrayShort;
+        public MultiArrayByte multiArrayByte;
+        public MultiArrayChar multiArrayChar;
+        public MultiArrayBoolean multiArrayBoolean;
+        public MultiArrayObject<String> multiArrayString;
     }
 }
