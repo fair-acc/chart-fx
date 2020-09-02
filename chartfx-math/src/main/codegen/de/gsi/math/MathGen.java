@@ -563,35 +563,22 @@ public class MathGen extends MathBase {
             return 0.39894228 / sigma * exp(-xx * xx / (2 * sigma * sigma));
         }
 
-        final double x;
-        final double y;
         double k;
-        x = xx / sigma / 1.41421356;
-        y = lg / 2 / sigma / 1.41421356;
+        final double x = xx / sigma / 1.41421356;
+        final double y = lg / 2 / sigma / 1.41421356;
 
-        final double r0;
-        final double r1;
+        final int rClamped = (r < 2) ? 2 : ((r > 5) ? 5 : r);
 
-        if (r < 2) {
-            r = 2;
-        }
-        if (r > 5) {
-            r = 5;
-        }
-
-        r0 = 1.51 * exp(1.144 * r);
-        r1 = 1.60 * exp(0.554 * r);
+        final double r0 = 1.51 * exp(1.144 * rClamped);
+        final double r1 = 1.60 * exp(0.554 * rClamped);
 
         // Constants
 
         final double rrtpi = 0.56418958; // 1/SQRT(pi)
 
-        final double y0; // for CPF12 algorithm
-        final double y0py0;
-        final double y0q;
-        y0 = 1.5;
-        y0py0 = y0 + y0;
-        y0q = y0 * y0;
+        final double y0 = 1.5; // for CPF12 algorithm
+        final double y0py0 = y0 + y0;
+        final double y0q = y0 * y0;
 
         final double c[] = { 1.0117281, -0.75197147, 0.012557727, 0.010022008, -0.00024206814, 0.00000050084806 };
         final double s[] = { 1.393237, 0.23115241, -0.15535147, 0.0062183662, 0.000091908299, -0.00000062752596 };
