@@ -88,14 +88,12 @@ public class DoubleDataSetTests extends EditableDataSetTests {
                 ret = dataSet.add(0, testCoordinate[0][i], testCoordinate[1][i]);
                 assertEquals(dataSet, ret, "check '" + dsType + "' return value (fluent design)");
                 assertEquals(nData + i + 1, dataSet.getDataCount(), "check '" + dsType + "' data point count");
-            } else if (testCase == 3) {
+            } else if (testCase == 3 && i == 0) {
                 // X, Y, error coordinates (via arrays) but w/o label
-                if (i == 0) {
-                    ret = dataSet.add(0, testCoordinate[0], testCoordinate[1]);
-                    assertEquals(dataSet, ret, "check '" + dsType + "' return value (fluent design)");
-                    assertEquals(nData + testCoordinate[0].length, dataSet.getDataCount(),
-                            "check '" + dsType + "' data point count");
-                }
+                ret = dataSet.add(0, testCoordinate[0], testCoordinate[1]);
+                assertEquals(dataSet, ret, "check '" + dsType + "' return value (fluent design)");
+                assertEquals(nData + testCoordinate[0].length, dataSet.getDataCount(),
+                        "check '" + dsType + "' data point count");
             }
 
             if (testCase == 1) {

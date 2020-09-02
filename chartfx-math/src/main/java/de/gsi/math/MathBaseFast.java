@@ -8,6 +8,7 @@ package de.gsi.math;
  *
  * @author rstein
  */
+@SuppressWarnings("PMD.UnnecessaryFullyQualifiedName") // the fully qualified name is needed, because we have our own Math class
 public class MathBaseFast extends MathBase {
     private static final int DEFAULT_TRIG_RESOLUTION = 3600; // gradations full circle (2*\pi, 360 deg resp)
     private static int precision = DEFAULT_TRIG_RESOLUTION;
@@ -69,7 +70,7 @@ public class MathBaseFast extends MathBase {
     }
 
     private static void init() {
-        modulusRad = (int) (2.0 * java.lang.Math.PI * precision);
+        modulusRad = (int) (2.0 * Math.PI * precision);
         modulusRadQuater = modulusRad >> 2;
         modulusDeg = 360 * precision;
         sinRadLookup = new float[modulusRad]; // sine lookup table [rad]
