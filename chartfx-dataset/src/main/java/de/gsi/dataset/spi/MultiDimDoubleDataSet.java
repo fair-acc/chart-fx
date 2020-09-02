@@ -18,8 +18,7 @@ import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
  * @author akrimm
  */
 @SuppressWarnings({
-        "PMD.TooManyMethods" // part of the flexible class nature
-        ,
+        "PMD.TooManyMethods", // part of the flexible class nature
         "java:S2160" // equals is still valid because of DataSet interface
 })
 public class MultiDimDoubleDataSet extends AbstractDataSet<MultiDimDoubleDataSet> implements EditableDataSet {
@@ -321,17 +320,18 @@ public class MultiDimDoubleDataSet extends AbstractDataSet<MultiDimDoubleDataSet
      * clear old data and overwrite with data from 'other' data set (deep copy)
      *
      * @param other the source data set
+     * @param copy true: perform a deep copy (default), false: reuse the other dataset's internal data structures (if applicable)
      * @return itself (fluent design)
      */
     @Override
-    public MultiDimDoubleDataSet set(final DataSet other) {
+    public MultiDimDoubleDataSet set(final DataSet other, final boolean copy) {
         lock().writeLockGuard(() -> other.lock().writeLockGuard(() -> {
             // copy data
             double[][] data = new double[other.getDimension()][];
             for (int i = 0; i < other.getDimension(); i++) {
                 data[i] = other.getValues(i);
             }
-            this.set(data, false);
+            this.set(data, copy);
             // deep copy data point labels and styles
             for (int index = 0; index < other.getDataCount(); index++) {
                 final String label = other.getDataLabel(index);

@@ -58,6 +58,24 @@ class DataSetBuilderTests {
     }
 
     @Test
+    void testErrorTypeAsymmetricFloat() {
+        final DataSet dataset = new DataSetBuilder() //
+                                        .setName("testdataset") //
+                                        .setValuesNoCopy(DIM_X, new double[] { 1, 2, 3 }) //
+                                        .setValuesNoCopy(DIM_Y, new double[] { 1.337, 23.42, 0.0 }) //
+                                        .setPosError(DIM_Y, new double[] { 0.1, 0.2, 0.1 }) //
+                                        .setEnableErrors(true) //
+                                        .build();
+        assertEquals("testdataset", dataset.getName());
+        assertEquals(3, dataset.getDataCount());
+        assertArrayEquals(new double[] { 1, 2, 3 }, dataset.getValues(DIM_X));
+        assertArrayEquals(new double[] { 1.337, 23.42, 0.0 }, dataset.getValues(DIM_Y));
+        assertEquals(2, dataset.getDimension());
+        assertTrue(dataset instanceof DataSetError);
+        DataSetError errorDataSet = (DataSetError) dataset;
+    }
+
+    @Test
     public void testYErrorDataSetNoCopy() {
         final DataSet dataset = new DataSetBuilder() //
                                         .setName("testdataset") //

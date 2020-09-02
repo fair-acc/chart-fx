@@ -317,16 +317,17 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
     }
 
     /**
-     * clear old data and overwrite with data from 'other' data set (deep copy)
+     * clear old data and overwrite with data from 'other' data set
      *
      * @param other the source data set
+     * @param copy true: perform a deep copy (default), false: reuse the other dataset's internal data structures (if applicable)
      * @return itself (fluent design)
      */
     @Override
-    public DoubleDataSet set(final DataSet other) {
+    public DoubleDataSet set(final DataSet other, final boolean copy) {
         lock().writeLockGuard(() -> other.lock().writeLockGuard(() -> {
             // copy data
-            this.set(other.getValues(DIM_X), other.getValues(DIM_Y), other.getDataCount(), true);
+            this.set(other.getValues(DIM_X), other.getValues(DIM_Y), other.getDataCount(), copy);
 
             // deep copy data point labels and styles
             getDataLabelMap().clear();
