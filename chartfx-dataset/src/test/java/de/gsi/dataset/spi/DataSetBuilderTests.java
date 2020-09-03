@@ -42,41 +42,24 @@ class DataSetBuilderTests {
     }
 
     @Test
-    void testErrorTypeAsymmetricDouble() {
+    void testYErrorAsymmetricDouble() {
         final DataSet dataset = new DataSetBuilder() //
                                         .setName("testdataset") //
-                                        .setValues(DIM_X, new double[] { 1f, 2f, 3f }) //
-                                        .setValues(DIM_Y, new double[] { 1.337f, 23.42f, 0.0f }) //
-                                        .setPosError(DIM_Y, new double[] { 0.1f, 0.2f, 0.1f }) //
-                                        .setNegError(DIM_Y, new double[] { 0.2f, 0.4f, 0.2f }) //
+                                        .setValues(DIM_X, new double[] { 1, 2, 3 }) //
+                                        .setValues(DIM_Y, new double[] { 1.337, 23.42, 0.0 }) //
+                                        .setPosError(DIM_Y, new float[] { 0.1f, 0.2f, 0.1f }) //
+                                        .setNegError(DIM_Y, new float[] { 0.2f, 0.4f, 0.2f }) //
                                         .build();
         assertTrue(dataset instanceof DataSetError);
         DataSetError errorDataSet = (DataSetError) dataset;
+        assertEquals(ErrorType.NO_ERROR, errorDataSet.getErrorType(DIM_X));
         assertEquals(ErrorType.ASYMMETRIC, errorDataSet.getErrorType(DIM_Y));
-        assertArrayEquals(new double[] { 0.1, 0.2, 0.1 }, errorDataSet.getErrorsPositive(DIM_Y), 1e-6);
-        assertArrayEquals(new double[] { 0.2, 0.4, 0.2 }, errorDataSet.getErrorsNegative(DIM_Y), 1e-6);
+        assertArrayEquals(new double[] { 0.1f, 0.2f, 0.1f }, errorDataSet.getErrorsPositive(DIM_Y));
+        assertArrayEquals(new double[] { 0.2f, 0.4f, 0.2f }, errorDataSet.getErrorsNegative(DIM_Y));
     }
 
     @Test
-    void testErrorTypeAsymmetricFloat() {
-        final DataSet dataset = new DataSetBuilder() //
-                                        .setName("testdataset") //
-                                        .setValuesNoCopy(DIM_X, new double[] { 1, 2, 3 }) //
-                                        .setValuesNoCopy(DIM_Y, new double[] { 1.337, 23.42, 0.0 }) //
-                                        .setPosError(DIM_Y, new double[] { 0.1, 0.2, 0.1 }) //
-                                        .setEnableErrors(true) //
-                                        .build();
-        assertEquals("testdataset", dataset.getName());
-        assertEquals(3, dataset.getDataCount());
-        assertArrayEquals(new double[] { 1, 2, 3 }, dataset.getValues(DIM_X));
-        assertArrayEquals(new double[] { 1.337, 23.42, 0.0 }, dataset.getValues(DIM_Y));
-        assertEquals(2, dataset.getDimension());
-        assertTrue(dataset instanceof DataSetError);
-        DataSetError errorDataSet = (DataSetError) dataset;
-    }
-
-    @Test
-    public void testYErrorDataSetNoCopy() {
+    public void testYErrorSymmetricDataSetNoCopy() {
         final DataSet dataset = new DataSetBuilder() //
                                         .setName("testdataset") //
                                         .setValuesNoCopy(DIM_X, new double[] { 1, 2, 3 }) //
@@ -121,23 +104,19 @@ class DataSetBuilderTests {
     }
 
     @Test
-    void testFloatDataSet() {
+    void testFloatDataSetImplicit() {
         final DataSet dataset = new DataSetBuilder() //
                                         .setName("testdataset") //
-                                        .setUseFloat(true) //
-                                        .setValuesNoCopy(DIM_Y, new double[] { 1.337, 23.42, 0.0 }) //
+                                        .setValuesNoCopy(DIM_X, new float[] { 1f, 2f, 3f }) //
+                                        .setValuesNoCopy(DIM_Y, new float[] { 1.337f, 23.42f, 0.0f }) //
                                         .build();
         assertEquals("testdataset", dataset.getName());
         assertEquals(3, dataset.getDataCount());
-        assertArrayEquals(new double[] {
-                                  0,
-                                  1,
-                                  2,
-                          },
-                dataset.getValues(DIM_X));
-        assertArrayEquals(new double[] { 1.337f, 23.42f, 0.0f }, dataset.getValues(DIM_Y));
         assertEquals(2, dataset.getDimension());
         assertTrue(dataset instanceof FloatDataSet);
+        final FloatDataSet floatDataSet = (FloatDataSet) dataset;
+        assertArrayEquals(new float[] { 1f, 2f, 3f }, floatDataSet.getFloatValues(DIM_X));
+        assertArrayEquals(new float[] { 1.337f, 23.42f, 0.0f }, floatDataSet.getFloatValues(DIM_Y));
     }
 
     @Test
@@ -149,14 +128,11 @@ class DataSetBuilderTests {
                                              .build(FloatDataSet.class);
         assertEquals("testdataset", dataset.getName());
         assertEquals(3, dataset.getDataCount());
-        assertArrayEquals(new double[] {
-                                  0,
-                                  1,
-                                  2,
-                          },
-                dataset.getValues(DIM_X));
-        assertArrayEquals(new double[] { 1.337f, 23.42f, 0.0f }, dataset.getValues(DIM_Y));
         assertEquals(2, dataset.getDimension());
+        assertTrue(dataset instanceof FloatDataSet);
+        final FloatDataSet floatDataSet = (FloatDataSet) dataset;
+        assertArrayEquals(new float[] { 0, 1, 2 }, floatDataSet.getFloatValues(DIM_X));
+        assertArrayEquals(new float[] { 1.337f, 23.42f, 0.0f }, floatDataSet.getFloatValues(DIM_Y));
     }
 
     @Test
@@ -202,7 +178,7 @@ class DataSetBuilderTests {
     }
 
     @Test
-    public void test3DDataSet() {
+    public void testGridDataSet() {
         final DataSet dataset = new DataSetBuilder("testdataset") //
                                         .setValues(DIM_X, new double[] { 1, 2, 3 })
                                         .setValues(DIM_Y, new float[] { 10, 100 })
