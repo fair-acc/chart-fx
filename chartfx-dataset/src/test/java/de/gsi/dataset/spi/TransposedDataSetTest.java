@@ -263,9 +263,6 @@ public class TransposedDataSetTest {
                         datasetTransposed.getDataCount() //
                         )); //
 
-        // TODO: implement GridDataSet.getValue
-        // assertEquals(dataset.getValue(DIM_X, 1.9), datasetTransposed.getValue(DIM_Y, 1.9));
-        // assertEquals(dataset.getValue(DIM_Y, 0.1), datasetTransposed.getValue(DIM_X, 0.1));
         assertEquals(3.35, datasetTransposed.getValue(DIM_Z, 1.1, 2.5), 1e-6);
 
         assertDoesNotThrow(() -> datasetTransposed.recomputeLimits(DIM_X));

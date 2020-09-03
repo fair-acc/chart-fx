@@ -13,6 +13,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import de.gsi.dataset.AxisDescription;
+import de.gsi.dataset.DataSet;
 import de.gsi.dataset.DataSet2D;
 import de.gsi.dataset.event.AddedDataEvent;
 import de.gsi.dataset.event.RemovedDataEvent;
@@ -204,5 +205,10 @@ public class LabelledMarkerDataSet extends AbstractDataSet<LabelledMarkerDataSet
         });
         fireInvalidated(new UpdatedDataEvent(this, "fill"));
         return this;
+    }
+
+    @Override
+    public DataSet set(final DataSet other, final boolean copy) {
+        throw new UnsupportedOperationException("copy setting transposed data set is not implemented");
     }
 }

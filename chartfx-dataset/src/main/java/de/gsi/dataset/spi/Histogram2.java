@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
+import de.gsi.dataset.DataSet;
 import de.gsi.dataset.DataSetMetaData;
 import de.gsi.dataset.Histogram1D;
 import de.gsi.dataset.Histogram2D;
@@ -180,5 +181,36 @@ public class Histogram2 extends AbstractHistogram implements Histogram2D {
         default:
             throw new IndexOutOfBoundsException("dim Index out of bound 2");
         }
+    }
+
+    @Override
+    public DataSet set(final DataSet other, final boolean copy) {
+        throw new UnsupportedOperationException("copy setting transposed data set is not implemented");
+    }
+
+    @Override
+    public int getGridIndex(final int dimIndex, final double x) {
+        if (dimIndex >= getNGrid()) {
+            throw new IndexOutOfBoundsException("dim index out of bounds");
+        }
+        if (getShape(dimIndex) == 0) {
+            return 0;
+        }
+
+        if (!Double.isFinite(x)) {
+            return 0;
+        }
+
+        if (x <= this.getAxisDescription(dimIndex).getMin()) {
+            return 0;
+        }
+
+        final int lastIndex = getShape(dimIndex) - 1;
+        if (x >= this.getAxisDescription(dimIndex).getMax()) {
+            return lastIndex;
+        }
+
+        // binary closest search -- assumes sorted data set
+        return binarySearch(x, 0, lastIndex, i -> getGrid(dimIndex, i));
     }
 }
