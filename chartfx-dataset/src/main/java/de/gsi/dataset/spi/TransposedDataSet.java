@@ -185,6 +185,16 @@ public class TransposedDataSet implements DataSet {
         return this.lock().writeLockGuard(() -> dataSet.setStyle(style));
     }
 
+    @Override
+    public double getValue(final int dimIndex, final double... x) {
+        return dataSet.getValue(permutation[dimIndex], dataSet.getIndex(permutation[DIM_X], x[0]));
+    }
+
+    @Override
+    public DataSet set(final DataSet other, final boolean copy) {
+        throw new UnsupportedOperationException("copy setting transposed data set is not implemented");
+    }
+
     public void setTransposed(final boolean transposed) {
         this.lock().writeLockGuard(() -> {
             if (this.transposed != transposed) {
@@ -240,7 +250,7 @@ public class TransposedDataSet implements DataSet {
 
         @Override
         public int getDataCount() {
-            return ((GridDataSet) dataSet).getDataCount();
+            return dataSet.getDataCount();
         }
 
         @Override
@@ -267,7 +277,7 @@ public class TransposedDataSet implements DataSet {
          */
         private double[] permute(double[] value) {
             final double[] ret = new double[permutation.length];
-            for (int i = 1; i < getNGrid(); i++) {
+            for (int i = 0; i < getNGrid(); i++) {
                 if (value.length > permutation[i]) {
                     ret[i] = value[permutation[i]];
                 }
@@ -291,6 +301,11 @@ public class TransposedDataSet implements DataSet {
         }
 
         @Override
+        public int getGridIndex(final int dimIndex, final double x) {
+            return ((GridDataSet) dataSet).getGridIndex(permutation[dimIndex], x);
+        }
+
+        @Override
         public double get(int dimIndex, int... indices) {
             final int[] shapeOrig = ((GridDataSet) dataSet).getShape();
             final int[] indicesPermuted = new int[shapeOrig.length];
@@ -300,6 +315,11 @@ public class TransposedDataSet implements DataSet {
                 }
             }
             return ((GridDataSet) dataSet).get(permutation[dimIndex], indicesPermuted);
+        }
+
+        @Override
+        public double getValue(final int dimIndex, final double... x) {
+            return dataSet.getValue(permutation[dimIndex], permute(x));
         }
     }
 }

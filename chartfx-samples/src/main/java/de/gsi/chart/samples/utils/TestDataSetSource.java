@@ -16,6 +16,7 @@ import org.jtransforms.fft.FloatFFT_1D;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import de.gsi.dataset.DataSet;
 import de.gsi.dataset.GridDataSet;
 import de.gsi.dataset.event.AddedDataEvent;
 import de.gsi.dataset.spi.AbstractDataSet;
@@ -382,7 +383,7 @@ public class TestDataSetSource extends AbstractDataSet<TestDataSetSource> implem
     public enum DataInput {
         BOTH,
         MIDI,
-        LINE;
+        LINE
     }
 
     @Override
@@ -396,6 +397,32 @@ public class TestDataSetSource extends AbstractDataSet<TestDataSetSource> implem
     }
 
     @Override
+    public int getGridIndex(final int dimIndex, final double x) {
+        if (dimIndex >= getNGrid()) {
+            throw new IndexOutOfBoundsException("dim index out of bounds");
+        }
+        if (getShape(dimIndex) == 0) {
+            return 0;
+        }
+
+        if (!Double.isFinite(x)) {
+            return 0;
+        }
+
+        if (x <= this.getAxisDescription(dimIndex).getMin()) {
+            return 0;
+        }
+
+        final int lastIndex = getShape(dimIndex) - 1;
+        if (x >= this.getAxisDescription(dimIndex).getMax()) {
+            return lastIndex;
+        }
+
+        // binary closest search -- assumes sorted data set
+        return binarySearch(x, 0, lastIndex, i -> getGrid(dimIndex, i));
+    }
+
+    @Override
     public double get(int dimIndex, int... indices) {
         switch (dimIndex) {
         case DIM_X:
@@ -406,5 +433,10 @@ public class TestDataSetSource extends AbstractDataSet<TestDataSetSource> implem
         default:
             throw new IndexOutOfBoundsException("dimIndex out of bound 3");
         }
+    }
+
+    @Override
+    public DataSet set(final DataSet other, final boolean copy) {
+        throw new UnsupportedOperationException("copy setting transposed data set is not implemented");
     }
 }

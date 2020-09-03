@@ -1,7 +1,5 @@
 package de.gsi.dataset;
 
-import de.gsi.dataset.spi.DataRange;
-
 /**
  * Interface for accessing data on a cartesian grid.
  * 
@@ -22,43 +20,20 @@ public interface GridDataSet extends DataSet {
      * @param index Index along the specified dimension, smaller than getShape(dimIndex)
      * @return the value for the specified index on the grid along the specified dimension
      */
-    public double getGrid(final int dimIndex, final int index);
+    double getGrid(final int dimIndex, final int index);
 
     /**
      * @param dimIndex Dimension index, smaller than getShape().size
      * @param x value along the specified axis to get the next index for
      * @return index which corresponds to the given value
      */
-    public default int getGridIndex(final int dimIndex, final double x) {
-        if (dimIndex >= getNGrid()) {
-            throw new IndexOutOfBoundsException("dim index out of bounds");
-        }
-        if (getShape(dimIndex) == 0) {
-            return 0;
-        }
-
-        if (!Double.isFinite(x)) {
-            return 0;
-        }
-
-        if (x <= this.getAxisDescription(dimIndex).getMin()) {
-            return 0;
-        }
-
-        final int lastIndex = getShape(dimIndex) - 1;
-        if (x >= this.getAxisDescription(dimIndex).getMax()) {
-            return lastIndex;
-        }
-
-        // binary closest search -- assumes sorted data set
-        return DataSet.binarySearch(x, 0, lastIndex, i -> getGrid(dimIndex, i));
-    }
+    int getGridIndex(final int dimIndex, final double x);
 
     /**
      * @param dimIndex Dimension Index, smaller than getShape().size
      * @return A double[getShape(dimIndex)] array containing all the grid values along the specified dimension
      */
-    public default double[] getGridValues(final int dimIndex) {
+    default double[] getGridValues(final int dimIndex) {
         int n = getShape(dimIndex);
         double[] result = new double[n];
         for (int i = 0; i < n; i++) {
@@ -70,12 +45,12 @@ public interface GridDataSet extends DataSet {
     /**
      * @return the shape of the grid of the data, e.g { 3, 4 } for a 3 x 4 matrix.
      */
-    public int[] getShape();
+    int[] getShape();
 
     /**
      * @return the number of grid dimensions
      */
-    public default int getNGrid() {
+    default int getNGrid() {
         return getShape().length;
     }
 
@@ -83,107 +58,7 @@ public interface GridDataSet extends DataSet {
      * @param dimIndex the dimension to get the grid shape for
      * @return the number of grid points in the given dimension
      */
-    public default int getShape(int dimIndex) {
+    default int getShape(int dimIndex) {
         return getShape()[dimIndex];
-    }
-
-    // get storage model information dimension ordering/strides/offsets + rawData access.
-    // get subset of data, eg specific tile.
-
-    /**
-     * Returns the 'dimIndex' value of a point specified by the <code>x</code> coordinate.
-     * Interpolates linearly between the grid points.
-     *
-     * @param dimIndex the dimension index (ie. '0' equals 'X', '1' equals 'Y')
-     * @param x coordinate on the grid
-     * @return 'dimIndex' value
-     */
-    @Override
-    default double getValue(final int dimIndex, final double... x) {
-        final int nGrid = getNGrid();
-        // get the lower corner of the cube containing x and the relative position of x inside it
-        final int[] indices = new int[nGrid]; // lower corner of cube containing x
-        final double[] pos = new double[nGrid]; // relative position of x inside the cube
-        for (int dim = 0; dim < nGrid; dim++) {
-            if (x[dim] < getAxisDescription(dim).getMin() || x[dim] > getAxisDescription(dim).getMax()) {
-                return Double.NaN; // x outside of data range
-            }
-            indices[dim] = getGridIndex(dim, x[dim]);
-            double x1;
-            double x2;
-            x1 = getGrid(dim, indices[dim]);
-            if (x[dim] < x1) {
-                x2 = x1;
-                indices[dim] -= 1;
-                x1 = getGrid(dim, indices[dim]);
-            } else {
-                x2 = getGrid(dim, indices[dim] + 1);
-            }
-            pos[dim] = (x2 - x[dim]) / (x2 - x1);
-        }
-        // get the values on all corners and their respective weights
-        double result = 0;
-        final int[] indicesLoc = new int[nGrid];
-        for (int cubeIdx = 0; cubeIdx < 1 << nGrid; cubeIdx++) { // loop over all nGrid^2 corners
-            System.arraycopy(indices, 0, indicesLoc, 0, nGrid);
-            double cornerWeight = 1;
-            for (int dim = 0; dim < nGrid; dim++) { // get the weight of that corner along all dimensions
-                // get weigtht of current corner
-                if (((cubeIdx >> dim) & 1) > 0) { // upper corner
-                    indicesLoc[dim]++; // add local to global coordinate
-                    cornerWeight *= 1 - pos[dim];
-                } else { // lower corner
-                    cornerWeight *= pos[dim];
-                }
-            }
-            result += cornerWeight * get(dimIndex, indicesLoc);
-        }
-        return result;
-    }
-
-    @Override
-    default DataSet recomputeLimits(final int dimIndex) {
-        // first compute range (does not trigger notify events)
-        DataRange newRange = new DataRange();
-        if (dimIndex < getNGrid()) {
-            final int dataCount = getShape(dimIndex);
-            for (int i = 0; i < dataCount; i++) {
-                newRange.add(getGrid(dimIndex, i));
-            }
-        } else {
-            final int dataCount = getDataCount();
-            for (int i = 0; i < dataCount; i++) {
-                newRange.add(get(dimIndex, i));
-            }
-        }
-        // set to new computed one and trigger notify event if different to old limits
-        getAxisDescription(dimIndex).set(newRange.getMin(), newRange.getMax());
-        return this;
-    }
-
-    /**
-     * Updates the data of the GridDataSet with the supplied data.
-     * This is an optional function and by default returns an {@link UnsupportedOperationException}.
-     * 
-     * @param copy  whether to copy the values from grid and vals
-     * @param grid values for the grid
-     * @param values values for the data
-     * @throws UnsupportedOperationException If the dataSet does not implement this setter
-     * @throws IllegalArgumentException If the data is not compatible with this dataset's dimensions
-     */
-    public default void set(final boolean copy, final double[][] grid, final double[]... values) {
-        throw new UnsupportedOperationException("This Dataset does not implement updating data");
-    }
-
-    /**
-     * Updates the data of the GridDataSet with the data from the supplied dataset.
-     * This is an optional function and by default returns an {@link UnsupportedOperationException}.
-     * 
-     * @param other dataset to copy data from.
-     * @throws UnsupportedOperationException If the dataSet does not implement this setter
-     * @throws IllegalArgumentException If the data is not compatible with this dataset's dimensions
-     */
-    public default void set(final GridDataSet other) {
-        throw new UnsupportedOperationException("This Dataset does not implement updating data");
     }
 }

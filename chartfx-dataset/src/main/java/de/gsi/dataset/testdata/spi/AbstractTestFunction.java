@@ -1,5 +1,6 @@
 package de.gsi.dataset.testdata.spi;
 
+import de.gsi.dataset.DataSet;
 import de.gsi.dataset.event.UpdatedDataEvent;
 import de.gsi.dataset.spi.AbstractErrorDataSet;
 import de.gsi.dataset.testdata.TestDataSet;
@@ -79,5 +80,10 @@ public abstract class AbstractTestFunction<D extends AbstractTestFunction<D>> ex
             recomputeLimits(DIM_Y);
         });
         return fireInvalidated(new UpdatedDataEvent(this));
+    }
+
+    @Override
+    public DataSet set(final DataSet other, final boolean copy) {
+        throw new UnsupportedOperationException("copy setting transposed data set is not implemented");
     }
 }

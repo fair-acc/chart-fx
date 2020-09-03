@@ -316,6 +316,15 @@ class DataSetBuilderTests {
         }
 
         @Override
+        public double[] getValues(final int dimIndex) {
+            final double[] result = new double[getDataCount()];
+            for (int i = 0; i < result.length; i++) {
+                result[i] = get(dimIndex, i);
+            }
+            return result;
+        }
+
+        @Override
         public <D extends DataSet> DataSetLock<D> lock() {
             return null;
         }
@@ -331,8 +340,18 @@ class DataSetBuilderTests {
         }
 
         @Override
+        public double getValue(final int dimIndex, final double... x) {
+            return 0;
+        }
+
+        @Override
         public List<EventListener> updateEventListener() {
             return Collections.emptyList();
+        }
+
+        @Override
+        public DataSet set(final DataSet other, final boolean copy) {
+            throw new UnsupportedOperationException("copy setting transposed data set is not implemented");
         }
     }
 }

@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
+import de.gsi.dataset.DataSet;
 import de.gsi.dataset.DataSet2D;
 import de.gsi.dataset.DataSetMetaData;
 import de.gsi.dataset.Histogram1D;
@@ -199,5 +200,10 @@ public class Histogram extends AbstractHistogram implements Histogram1D, DataSet
         } else {
             this.getAxisDescription(this.getDimension() - 1).clear();
         }
+    }
+
+    @Override
+    public DataSet set(final DataSet other, final boolean copy) {
+        throw new UnsupportedOperationException("copy setting transposed data set is not implemented");
     }
 }

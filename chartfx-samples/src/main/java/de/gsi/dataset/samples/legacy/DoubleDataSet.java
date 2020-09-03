@@ -436,7 +436,7 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
     }
 
     @Override
-    public EditableDataSet set(final DataSet other) {
+    public EditableDataSet set(final DataSet other, final boolean copy) {
         throw new UnsupportedOperationException("Copy setter not implemented");
     }
 }
