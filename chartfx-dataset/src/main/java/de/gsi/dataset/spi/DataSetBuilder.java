@@ -144,6 +144,9 @@ public class DataSetBuilder {
         for (int i = 0; i < nDim; i++) {
             dataCount = Math.max(dataCount, size[i]);
         }
+        if (nDim <= 2 && values.size() + errorsPos.size() + errorsNeg.size() == 0 && valuesFloat.size() > 0 && errorsNegFloat.size() + errorsPosFloat.size() == 0) {
+            useFloat = true; // use float if only floats are supplied and all values are supported
+        }
         DataSet result;
         if (clazz.isAssignableFrom(DefaultDataSet.class) && nDim <= 2 && !useErrors && !useFloat) {
             result = buildDefaultDataSet(dsName, dataCount);
@@ -248,6 +251,9 @@ public class DataSetBuilder {
             int dataCount = 0; // 2D datasets always have same number of points for x and y
             for (int i = 0; i < dim; i++) {
                 dataCount = Math.max(dataCount, size[i]);
+            }
+            if (values.size() + errorsPos.size() + errorsNeg.size() == 0 && valuesFloat.size() > 0 && errorsNegFloat.size() + errorsPosFloat.size() == 0) {
+                useFloat = true; // use float if only floats are supplied and all values are supported
             }
             if (errorsNeg.size() == 0 && errorsPos.size() == 0 && errorsNegFloat.size() == 0 && errorsPosFloat.size() == 0 && !this.useErrors) {
                 if (useFloat) {
