@@ -186,4 +186,29 @@ public class AveragingDataSet extends AbstractDataSet<AveragingDataSet> implemen
     public double getValue(int dimIndex, double... x) {
         return get(dimIndex, getIndex(DIM_X, x[0]));
     }
+
+    @Override
+    public DataSet set(final DataSet other, final boolean copy) {
+        if (other instanceof AveragingDataSet) {
+            this.fuzzyCount = ((AveragingDataSet) other).getFuzzyCount();
+            this.averageSize = ((AveragingDataSet) other).getAverageSize();
+            if (copy) {
+                this.clear();
+                ((AveragingDataSet) other).deque.forEach(ds -> this.add(new DefaultDataSet(ds)));
+            } else {
+                this.dataset = ((AveragingDataSet) other).dataset;
+                this.deque.clear();
+                this.deque.addAll(((AveragingDataSet) other).deque);
+            }
+            return this;
+        }
+        // non AveragingDataSet: add the other data set as a single data set
+        this.clear();
+        if (copy) {
+            this.add(new DefaultDataSet(other));
+        } else {
+            this.add(other);
+        }
+        return this;
+    }
 }

@@ -3,6 +3,7 @@ package de.gsi.dataset.spi;
 import java.util.Arrays;
 import java.util.stream.IntStream;
 
+import de.gsi.dataset.DataSet;
 import de.gsi.dataset.DataSet3D;
 import de.gsi.dataset.GridDataSet;
 import de.gsi.dataset.event.UpdatedDataEvent;
@@ -15,7 +16,7 @@ import de.gsi.dataset.spi.utils.MultiArrayDouble;
  * @author Alexander Krimm
  */
 @SuppressWarnings({ "java:S2160" }) // equals is still valid because of DataSet interface
-public class DoubleGridDataSet extends AbstractDataSet<DoubleGridDataSet> implements DataSet3D {
+public class DoubleGridDataSet extends AbstractGridDataSet<DoubleGridDataSet> implements DataSet3D {
     private static final long serialVersionUID = -493232313124620828L;
 
     protected transient double[][] grid; // grid values
@@ -162,14 +163,13 @@ public class DoubleGridDataSet extends AbstractDataSet<DoubleGridDataSet> implem
         return super.getValues(dimIndex); // return new list with full coordinates
     }
 
-    @Override
     public void set(final boolean copy, final double[][] grid, final double[]... vals) {
         lock().writeLockGuard(() -> {
             final int nDims = getDimension();
             if (nDims != grid.length + vals.length) {
                 throw new IllegalArgumentException("grid + value dimensions must match dataset dimensions");
             }
-            shape = IntStream.range(0, grid.length).map(i -> grid[i].length).toArray();
+            shape = Arrays.stream(grid).mapToInt(doubles -> doubles.length).toArray();
             this.grid = copy ? new double[shape.length][] : grid;
             dataCount = 1;
             for (int i = 0; i < shape.length; i++) {
@@ -190,7 +190,11 @@ public class DoubleGridDataSet extends AbstractDataSet<DoubleGridDataSet> implem
     }
 
     @Override
-    public void set(GridDataSet another) {
+    public GridDataSet set(final DataSet another, final boolean copy) {
+        if (!(another instanceof GridDataSet)) {
+            throw new UnsupportedOperationException("other data set has to be of type GridDataSEt");
+        }
+        final GridDataSet anotherGridDataSet = (GridDataSet) another;
         lock().writeLockGuard(() -> another.lock().writeLockGuard(() -> {
             final int nDims = getDimension();
             if (nDims != another.getDimension()) {
@@ -198,14 +202,14 @@ public class DoubleGridDataSet extends AbstractDataSet<DoubleGridDataSet> implem
             }
 
             // copy data
-            this.shape = another.getShape().clone();
+            this.shape = anotherGridDataSet.getShape().clone();
             this.grid = new double[shape.length][];
             this.values = new MultiArrayDouble[nDims - shape.length];
 
             dataCount = 1;
             for (int i = 0; i < shape.length; i++) {
                 dataCount *= shape[i];
-                this.grid[i] = another.getGridValues(i).clone();
+                this.grid[i] = anotherGridDataSet.getGridValues(i).clone();
             }
             for (int i = shape.length; i < nDims; i++) {
                 values[i - shape.length] = MultiArrayDouble.wrap(another.getValues(i).clone(), 0, shape);
@@ -213,27 +217,28 @@ public class DoubleGridDataSet extends AbstractDataSet<DoubleGridDataSet> implem
 
             // deep copy data point labels and styles
             getDataLabelMap().clear();
-            for (int index = 0; index < another.getDataCount(); index++) {
-                final String label = another.getDataLabel(index);
+            for (int index = 0; index < anotherGridDataSet.getDataCount(); index++) {
+                final String label = anotherGridDataSet.getDataLabel(index);
                 if (label != null) {
                     this.addDataLabel(index, label);
                 }
             }
             getDataStyleMap().clear();
-            for (int index = 0; index < another.getDataCount(); index++) {
-                final String style = another.getStyle(index);
+            for (int index = 0; index < anotherGridDataSet.getDataCount(); index++) {
+                final String style = anotherGridDataSet.getStyle(index);
                 if (style != null && !style.isEmpty()) {
                     this.addDataStyle(index, style);
                 }
             }
-            this.setStyle(another.getStyle());
+            this.setStyle(anotherGridDataSet.getStyle());
             // synchronise axis description
             for (int dimIndex = 0; dimIndex < getDimension(); dimIndex++) {
-                this.getAxisDescription(dimIndex).set(new DefaultAxisDescription(another.getAxisDescription(dimIndex)));
+                this.getAxisDescription(dimIndex).set(new DefaultAxisDescription(anotherGridDataSet.getAxisDescription(dimIndex)));
             }
         }));
 
         fireInvalidated(new UpdatedDataEvent(this));
+        return this;
     }
 
     /**

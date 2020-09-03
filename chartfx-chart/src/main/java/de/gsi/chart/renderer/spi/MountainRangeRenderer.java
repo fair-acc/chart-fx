@@ -260,6 +260,22 @@ public class MountainRangeRenderer extends ErrorDataSetRenderer implements Rende
         }
 
         @Override
+        public double[] getValues(final int dimIndex) {
+            switch (dimIndex) {
+            case DIM_X:
+                return dataSet.getGridValues(dimIndex);
+            case DIM_Y:
+                final double[] result = new double[dataSet.getShape(DIM_X)];
+                for (int i = 0; i < result.length; i++) {
+                    result[i] = dataSet.getValue(DIM_Z, i, yIndex) + yShift;
+                }
+                return result;
+            default:
+                throw new IllegalArgumentException("dinIndex " + dimIndex + " not defined");
+            }
+        }
+
+        @Override
         public boolean isAutoNotification() {
             return autoNotify.get();
         }
@@ -280,6 +296,16 @@ public class MountainRangeRenderer extends ErrorDataSetRenderer implements Rende
         @Override
         public DataSet setStyle(final String style) {
             return dataSet.setStyle(style);
+        }
+
+        @Override
+        public double getValue(final int dimIndex, final double... x) {
+            return 0;
+        }
+
+        @Override
+        public DataSet set(final DataSet other, final boolean copy) {
+            throw new UnsupportedOperationException("copy setter not implemented for Demux3dTo2dDataSet");
         }
 
         @Override

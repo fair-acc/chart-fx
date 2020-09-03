@@ -618,4 +618,9 @@ public class LimitedIndexedTreeDataSet extends AbstractErrorDataSet<LimitedIndex
             }
         }
     }
+
+    @Override
+    public DataSet set(final DataSet other, final boolean copy) {
+        throw new UnsupportedOperationException("copy setting transposed data set is not implemented");
+    }
 }

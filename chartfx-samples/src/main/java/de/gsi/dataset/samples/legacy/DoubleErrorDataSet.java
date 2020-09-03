@@ -484,7 +484,7 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
     }
 
     @Override
-    public EditableDataSet set(final DataSet other) {
+    public EditableDataSet set(final DataSet other, final boolean copy) {
         throw new UnsupportedOperationException("Copy setter not implemented");
     }
 }

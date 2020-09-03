@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.IntToDoubleFunction;
 
 import de.gsi.dataset.AxisDescription;
 import de.gsi.dataset.DataSet;
@@ -15,7 +16,6 @@ import de.gsi.dataset.DataSetMetaData;
 import de.gsi.dataset.EditConstraints;
 import de.gsi.dataset.EditableDataSet;
 import de.gsi.dataset.event.AxisChangeEvent;
-import de.gsi.dataset.event.AxisRangeChangeEvent;
 import de.gsi.dataset.event.AxisRecomputationEvent;
 import de.gsi.dataset.event.EventListener;
 import de.gsi.dataset.event.UpdateEvent;
@@ -565,6 +565,101 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
         }
         builder.append(']');
         return builder.toString();
+    }
+
+    @Override
+    public double[] getValues(final int dimIndex) {
+        final int n = getDataCount();
+        final double[] retValues = new double[n];
+        for (int i = 0; i < n; i++) {
+            retValues[i] = get(dimIndex, i);
+        }
+        return retValues;
+    }
+
+    @Override
+    public double getValue(final int dimIndex, final double... x) {
+        AssertUtils.checkArrayDimension("x", x, 1);
+        final int index1 = getIndex(DIM_X, x);
+        final double x1 = get(DIM_X, index1);
+        final double y1 = get(dimIndex, index1);
+        int index2 = x1 < x[0] ? index1 + 1 : index1 - 1;
+        index2 = Math.max(0, Math.min(index2, this.getDataCount() - 1));
+        final double y2 = get(dimIndex, index2);
+
+        if (Double.isNaN(y1) || Double.isNaN(y2)) {
+            // case where the function has a gap (y-coordinate equals to NaN
+            return Double.NaN;
+        }
+
+        final double x2 = get(DIM_X, index2);
+        if (x1 == x2) {
+            return get(dimIndex, index1);
+        }
+
+        final double de1 = get(dimIndex, index1);
+        return de1 + (get(dimIndex, index2) - de1) * (x[0] - x1) / (x2 - x1);
+    }
+
+    public static int binarySearch(final double search, final int indexMin, final int indexMax, IntToDoubleFunction getter) {
+        if (indexMin == indexMax) {
+            return indexMin;
+        }
+        if (indexMax - indexMin == 1) {
+            if (Math.abs(getter.applyAsDouble(indexMin) - search) < Math.abs(getter.applyAsDouble(indexMax) - search)) {
+                return indexMin;
+            }
+            return indexMax;
+        }
+        final int middle = (indexMax + indexMin) / 2;
+        final double valMiddle = getter.applyAsDouble(middle);
+        if (valMiddle == search) {
+            return middle;
+        }
+        if (search < valMiddle) {
+            return binarySearch(search, indexMin, middle, getter);
+        }
+        return binarySearch(search, middle, indexMax, getter);
+    }
+
+    @Override
+    public int getIndex(final int dimIndex, final double... x) {
+        AssertUtils.checkArrayDimension("x", x, 1);
+        if (this.getDataCount() == 0) {
+            return 0;
+        }
+
+        if (!Double.isFinite(x[0])) {
+            return 0;
+        }
+
+        final double min = this.getAxisDescription(dimIndex).getMin();
+        final double max = this.getAxisDescription(dimIndex).getMax();
+
+        if ((Double.isFinite(min) && x[0] <= min) || x[0] <= get(dimIndex, 0)) {
+            return 0;
+        }
+
+        final int lastIndex = getDataCount() - 1;
+        if ((Double.isFinite(max) && x[0] >= max) || x[0] >= get(dimIndex, getDataCount() - 1)) {
+            return lastIndex;
+        }
+
+        // binary closest search -- assumes sorted data set
+        return binarySearch(x[0], 0, lastIndex, val -> get(dimIndex, val));
+    }
+
+    @Override
+    public DataSet recomputeLimits(final int dimIndex) {
+        // first compute range (does not trigger notify events)
+        DataRange newRange = new DataRange();
+        final int dataCount = getDataCount();
+        for (int i = 0; i < dataCount; i++) {
+            newRange.add(get(dimIndex, i));
+        }
+        // set to new computed one and trigger notify event if different to old limits
+        getAxisDescription(dimIndex).set(newRange.getMin(), newRange.getMax());
+        return this;
     }
 
     @Override

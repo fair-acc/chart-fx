@@ -230,6 +230,11 @@ public class MountainRangeRendererSample extends Application {
         }
 
         @Override
+        public DataSet set(final DataSet other, final boolean copy) {
+            throw new UnsupportedOperationException("Copy setter not implemented");
+        }
+
+        @Override
         public double getGrid(int dimIndex, int index) {
             switch (dimIndex) {
             case DataSet.DIM_X:
@@ -239,6 +244,32 @@ public class MountainRangeRendererSample extends Application {
             default:
                 throw new IndexOutOfBoundsException("Dim index out of bounds 2 for 2d grid");
             }
+        }
+
+        @Override
+        public int getGridIndex(final int dimIndex, final double x) {
+            if (dimIndex >= getNGrid()) {
+                throw new IndexOutOfBoundsException("dim index out of bounds");
+            }
+            if (getShape(dimIndex) == 0) {
+                return 0;
+            }
+
+            if (!Double.isFinite(x)) {
+                return 0;
+            }
+
+            if (x <= this.getAxisDescription(dimIndex).getMin()) {
+                return 0;
+            }
+
+            final int lastIndex = getShape(dimIndex) - 1;
+            if (x >= this.getAxisDescription(dimIndex).getMax()) {
+                return lastIndex;
+            }
+
+            // binary closest search -- assumes sorted data set
+            return binarySearch(x, 0, lastIndex, i -> getGrid(dimIndex, i));
         }
 
         @Override
