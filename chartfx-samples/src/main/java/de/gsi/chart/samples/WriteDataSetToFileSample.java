@@ -15,11 +15,11 @@ import de.gsi.chart.XYChart;
 import de.gsi.chart.axes.spi.DefaultNumericAxis;
 import de.gsi.chart.utils.PeriodicScreenCapture;
 import de.gsi.dataset.DataSet;
-import de.gsi.dataset.serializer.spi.BinarySerialiser;
-import de.gsi.dataset.serializer.spi.FastByteBuffer;
-import de.gsi.dataset.serializer.spi.iobuffer.DataSetSerialiser;
 import de.gsi.dataset.spi.DoubleDataSet;
 import de.gsi.dataset.utils.DataSetUtils;
+import de.gsi.serializer.spi.BinarySerialiser;
+import de.gsi.serializer.spi.FastByteBuffer;
+import de.gsi.serializer.spi.iobuffer.DataSetSerialiser;
 
 /**
  * @author rstein

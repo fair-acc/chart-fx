@@ -45,8 +45,6 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.shape.Rectangle;
 import javafx.util.Duration;
 
-import de.gsi.dataset.serializer.utils.ClassUtils;
-
 public class HiddenSidesPaneSkin extends SkinBase<HiddenSidesPane> {
     private final StackPane stackPane;
     private final EventHandler<MouseEvent> exitedHandler;
@@ -189,7 +187,7 @@ public class HiddenSidesPaneSkin extends SkinBase<HiddenSidesPane> {
             return true;
         }
         try {
-            Method showingMethod = ClassUtils.getMethod(n.getClass(), "isShowing");
+            Method showingMethod = getMethod(n.getClass(), "isShowing");
             if (showingMethod != null && (Boolean) showingMethod.invoke(n)) {
                 lastHideBlockingNode = n;
                 return true;
@@ -239,7 +237,7 @@ public class HiddenSidesPaneSkin extends SkinBase<HiddenSidesPane> {
 
         // collapse open menus/comboboxes before hiding side pane
         if (hasShowingChild(lastHideBlockingNode)) {
-            Method closeMethod = ClassUtils.getMethod(lastHideBlockingNode.getClass(), "hide");
+            Method closeMethod = getMethod(lastHideBlockingNode.getClass(), "hide");
             if (closeMethod != null) {
                 try {
                     closeMethod.invoke(lastHideBlockingNode);
@@ -397,6 +395,14 @@ public class HiddenSidesPaneSkin extends SkinBase<HiddenSidesPane> {
             final double offsetX = getPrefAlignmentH(top, contentWidth);
             top.resizeRelocate(contentX + offsetX, contentY - (prefHeight - offset), contentWidth, prefHeight);
             top.setVisible(visibility[Side.TOP.ordinal()].get() > 0);
+        }
+    }
+
+    public static Method getMethod(final Class<?> clazz, final String methodName) {
+        try {
+            return clazz.getMethod(methodName);
+        } catch (NoSuchMethodException | SecurityException e) {
+            return null;
         }
     }
 }

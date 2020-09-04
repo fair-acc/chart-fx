@@ -23,6 +23,7 @@
         <module>chartfx-chart</module>
         <module>chartfx-dataset</module>
         <module>chartfx-math</module>
+        <module>microservice</module>
         <module>chartfx-samples</module>
         <module>chartfx-report</module>
         <module>chartfx-generate</module>
