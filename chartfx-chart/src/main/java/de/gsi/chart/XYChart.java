@@ -89,6 +89,8 @@ public class XYChart extends Chart {
 
         gridRenderer.horizontalGridLinesVisibleProperty().addListener(gridLineVisibilitychange);
         gridRenderer.verticalGridLinesVisibleProperty().addListener(gridLineVisibilitychange);
+        gridRenderer.getHorizontalMinorGrid().visibleProperty().addListener(gridLineVisibilitychange);
+        gridRenderer.getVerticalMinorGrid().visibleProperty().addListener(gridLineVisibilitychange);
         gridRenderer.drawOnTopProperty().addListener(gridLineVisibilitychange);
 
         this.setAnimated(false);
