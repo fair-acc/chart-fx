@@ -165,6 +165,7 @@ public class FieldSerialiser<R> {
          * @param ioSerialiser the reference to the calling IoSerialiser
          * @param rootObj the specific root object reference the given field is part of
          * @param field the description for the given class member, if null then rootObj is written/read directly
+         * @return The value of the field which is either taken from rootObj if present or compatible or newly allocated otherwise
          */
         R apply(IoSerialiser ioSerialiser, Object rootObj, ClassFieldDescription field);
     }
