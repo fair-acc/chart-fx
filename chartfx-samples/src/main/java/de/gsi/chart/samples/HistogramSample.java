@@ -1,5 +1,7 @@
 package de.gsi.chart.samples;
 
+import static de.gsi.dataset.spi.AbstractHistogram.HistogramOuterBounds.BINS_ALIGNED_WITH_BOUNDARY;
+
 import java.text.DateFormatSymbols;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -34,8 +36,8 @@ public class HistogramSample extends Application {
     private static final int N_BINS = 30;
     private final double[] xBins = { 0.0, 0.1, 0.2, 0.3, 1.0, 2.0, 3.0, 4.0, 5.0, 10.0, 15.0, 16.0, 17.0, 18.0, 19.0,
         19.7, 19.8, 19.9, 20.0 };
-    private final Histogram dataSet1 = new Histogram("myHistogram1", N_BINS, 0.0, 20.0);
-    private final Histogram dataSet2 = new Histogram("myHistogram2", N_BINS, 0.0, 20.0);
+    private final Histogram dataSet1 = new Histogram("myHistogram1", N_BINS, 0.0, 20.0, BINS_ALIGNED_WITH_BOUNDARY);
+    private final Histogram dataSet2 = new Histogram("myHistogram2", N_BINS, 0.0, 20.0, BINS_ALIGNED_WITH_BOUNDARY);
     private final Histogram dataSet3 = new Histogram("myHistogram3", xBins); // custom, non-equidistant histogram
 
     private int counter;

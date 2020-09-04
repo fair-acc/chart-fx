@@ -1,5 +1,7 @@
 package de.gsi.chart.samples;
 
+import static de.gsi.dataset.spi.AbstractHistogram.HistogramOuterBounds.BINS_ALIGNED_WITH_BOUNDARY;
+
 import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -31,8 +33,8 @@ public class Histogram2DimSample extends Application {
     private static final int N_BINS_Y = 120;
     private final Random rnd = new Random();
 
-    private final Histogram2 histogram1 = new Histogram2("hist1", N_BINS_X, 0.0, 20.0, N_BINS_Y, 0.0, 30.0);
-    private final Histogram2 histogram2 = new Histogram2("hist2", N_BINS_X, 0.0, 20.0, N_BINS_Y, 0.0, 30.0);
+    private final Histogram2 histogram1 = new Histogram2("hist1", N_BINS_X, 0.0, 20.0, N_BINS_Y, 0.0, 30.0, BINS_ALIGNED_WITH_BOUNDARY);
+    private final Histogram2 histogram2 = new Histogram2("hist2", N_BINS_X, 0.0, 20.0, N_BINS_Y, 0.0, 30.0, BINS_ALIGNED_WITH_BOUNDARY);
     private int counter;
 
     private void fillData() {

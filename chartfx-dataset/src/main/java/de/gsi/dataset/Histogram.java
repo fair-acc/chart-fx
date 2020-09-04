@@ -1,11 +1,17 @@
 package de.gsi.dataset;
 
 /**
- * @author rstein
+ * Specialized DataSet interface for storing and processing Histogram data.
  *
+ * A histogram with bins 1...N is defined by n+1 values defining the steps between the bins.
+ * The bins can be equidistant or not.
+ *
+ * The bins 0 and N+1 have a special meaning and contain the data for data which is out of range.
+ * They are not drawn by default.
+ *
+ * @author rstein
  */
 public interface Histogram extends DataSet, DataSetMetaData {
-
     /**
      * Increment bin content by 1. More...
      * 
