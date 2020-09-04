@@ -16,16 +16,16 @@ import de.gsi.dataset.DataSet2D;
 import de.gsi.dataset.DataSetError;
 import de.gsi.dataset.DataSetError.ErrorType;
 import de.gsi.dataset.DataSetMetaData;
-import de.gsi.dataset.serializer.IoClassSerialiser;
-import de.gsi.dataset.serializer.IoSerialiser;
-import de.gsi.dataset.serializer.spi.BinarySerialiser;
-import de.gsi.dataset.serializer.spi.FastByteBuffer;
-import de.gsi.dataset.serializer.spi.iobuffer.DataSetSerialiser;
-import de.gsi.dataset.serializer.utils.ClassUtils;
 import de.gsi.dataset.spi.DoubleErrorDataSet;
 import de.gsi.dataset.testdata.spi.RandomDataGenerator;
 import de.gsi.dataset.utils.DataSetUtils;
 import de.gsi.dataset.utils.ProcessingProfiler;
+import de.gsi.serializer.IoClassSerialiser;
+import de.gsi.serializer.IoSerialiser;
+import de.gsi.serializer.spi.BinarySerialiser;
+import de.gsi.serializer.spi.FastByteBuffer;
+import de.gsi.serializer.spi.iobuffer.DataSetSerialiser;
+import de.gsi.serializer.utils.ClassUtils;
 
 public class DataSetToByteArraySample {
     private static final Logger LOGGER = LoggerFactory.getLogger(DataSetToByteArraySample.class);
