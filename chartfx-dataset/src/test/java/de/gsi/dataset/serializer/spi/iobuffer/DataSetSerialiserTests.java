@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
@@ -21,13 +22,18 @@ import de.gsi.dataset.DataSet;
 import de.gsi.dataset.DataSet2D;
 import de.gsi.dataset.DataSetError;
 import de.gsi.dataset.DataSetMetaData;
+import de.gsi.dataset.event.EventListener;
 import de.gsi.dataset.serializer.DataType;
 import de.gsi.dataset.serializer.IoBuffer;
 import de.gsi.dataset.serializer.IoClassSerialiser;
 import de.gsi.dataset.serializer.spi.BinarySerialiser;
 import de.gsi.dataset.serializer.spi.ByteBuffer;
 import de.gsi.dataset.serializer.spi.FastByteBuffer;
-import de.gsi.dataset.spi.*;
+import de.gsi.dataset.spi.AbstractDataSet;
+import de.gsi.dataset.spi.DefaultErrorDataSet;
+import de.gsi.dataset.spi.DoubleDataSet;
+import de.gsi.dataset.spi.DoubleErrorDataSet;
+import de.gsi.dataset.spi.DoubleGridDataSet;
 import de.gsi.dataset.testdata.spi.TriangleFunction;
 
 /**
@@ -50,11 +56,11 @@ class DataSetSerialiserTests {
         final DoubleDataSet original = new DoubleDataSet(new TriangleFunction("test", 1009));
         addMetaData(original, true);
 
-        final DataSetSerialiser ioSerialiser = new DataSetSerialiser(new BinarySerialiser(buffer));
+        final DataSetSerialiser ioSerialiser = DataSetSerialiser.withIoSerialiser(new BinarySerialiser(buffer));
 
-        ioSerialiser.writeDataSetToByteArray(original, asFloat32);
+        ioSerialiser.write(original, asFloat32);
         buffer.reset(); // reset to read position (==0)
-        final DataSet restored = ioSerialiser.readDataSetFromByteArray();
+        final DataSet restored = ioSerialiser.read();
 
         assertEquals(original, restored);
     }
@@ -71,11 +77,11 @@ class DataSetSerialiserTests {
                                                      : new DoubleGridDataSet("test", false,
                                                              new double[][] { { 1.0, 2.0 }, { 0.1, 0.2, 0.3 } }, new double[] { 9.9, 8.8, 7.7, 6.6, 5.5, 4.4 });
 
-        final DataSetSerialiser ioSerialiser = new DataSetSerialiser(new BinarySerialiser(buffer));
+        final DataSetSerialiser ioSerialiser = DataSetSerialiser.withIoSerialiser(new BinarySerialiser(buffer));
 
-        ioSerialiser.writeDataSetToByteArray(original, asFloat32);
+        ioSerialiser.write(original, asFloat32);
         buffer.reset(); // reset to read position (==0)
-        final DataSet restored = ioSerialiser.readDataSetFromByteArray();
+        final DataSet restored = ioSerialiser.read();
 
         assertEquals(original, restored);
     }
@@ -109,10 +115,10 @@ class DataSetSerialiserTests {
         };
         addMetaData(original, true);
 
-        final DataSetSerialiser ioSerialiser = new DataSetSerialiser(new BinarySerialiser(buffer));
-        ioSerialiser.writeDataSetToByteArray(original, asFloat32);
+        final DataSetSerialiser ioSerialiser = DataSetSerialiser.withIoSerialiser(new BinarySerialiser(buffer));
+        ioSerialiser.write(original, asFloat32);
         buffer.reset(); // reset to read position (==0)
-        final DefaultErrorDataSet restored = (DefaultErrorDataSet) ioSerialiser.readDataSetFromByteArray();
+        final DefaultErrorDataSet restored = (DefaultErrorDataSet) ioSerialiser.read();
 
         assertEquals(new DefaultErrorDataSet(original), new DefaultErrorDataSet(restored));
     }
@@ -132,16 +138,16 @@ class DataSetSerialiserTests {
 
         // test conversion to double array
         ioSerialiser.checkHeaderInfo();
-        assertThrows(IllegalArgumentException.class, () -> DataSetSerialiser.getDoubleArray(ioSerialiser, DataType.OTHER));
-        assertArrayEquals(new double[] { 1.0, 0.0, 1.0 }, DataSetSerialiser.getDoubleArray(ioSerialiser, DataType.BOOL_ARRAY));
-        assertArrayEquals(new double[] { 1.0, 0.0, 2.0 }, DataSetSerialiser.getDoubleArray(ioSerialiser, DataType.BYTE_ARRAY));
-        assertArrayEquals(new double[] { 1.0, 0.0, 2.0 }, DataSetSerialiser.getDoubleArray(ioSerialiser, DataType.CHAR_ARRAY));
-        assertArrayEquals(new double[] { 1.0, 0.0, 2.0 }, DataSetSerialiser.getDoubleArray(ioSerialiser, DataType.SHORT_ARRAY));
-        assertArrayEquals(new double[] { 1.0, 0.0, 2.0 }, DataSetSerialiser.getDoubleArray(ioSerialiser, DataType.INT_ARRAY));
-        assertArrayEquals(new double[] { 1.0, 0.0, 2.0 }, DataSetSerialiser.getDoubleArray(ioSerialiser, DataType.LONG_ARRAY));
-        assertArrayEquals(new double[] { 1.0, 0.0, 2.0 }, DataSetSerialiser.getDoubleArray(ioSerialiser, DataType.FLOAT_ARRAY));
-        assertArrayEquals(new double[] { 1.0, 0.0, 2.0 }, DataSetSerialiser.getDoubleArray(ioSerialiser, DataType.DOUBLE_ARRAY));
-        assertArrayEquals(new double[] { 1.0, 0.0, 2.0 }, DataSetSerialiser.getDoubleArray(ioSerialiser, DataType.STRING_ARRAY));
+        assertThrows(IllegalArgumentException.class, () -> DataSetSerialiser.getDoubleArray(ioSerialiser, null, DataType.OTHER));
+        assertArrayEquals(new double[] { 1.0, 0.0, 1.0 }, DataSetSerialiser.getDoubleArray(ioSerialiser, null, DataType.BOOL_ARRAY));
+        assertArrayEquals(new double[] { 1.0, 0.0, 2.0 }, DataSetSerialiser.getDoubleArray(ioSerialiser, null, DataType.BYTE_ARRAY));
+        assertArrayEquals(new double[] { 1.0, 0.0, 2.0 }, DataSetSerialiser.getDoubleArray(ioSerialiser, null, DataType.CHAR_ARRAY));
+        assertArrayEquals(new double[] { 1.0, 0.0, 2.0 }, DataSetSerialiser.getDoubleArray(ioSerialiser, null, DataType.SHORT_ARRAY));
+        assertArrayEquals(new double[] { 1.0, 0.0, 2.0 }, DataSetSerialiser.getDoubleArray(ioSerialiser, null, DataType.INT_ARRAY));
+        assertArrayEquals(new double[] { 1.0, 0.0, 2.0 }, DataSetSerialiser.getDoubleArray(ioSerialiser, null, DataType.LONG_ARRAY));
+        assertArrayEquals(new double[] { 1.0, 0.0, 2.0 }, DataSetSerialiser.getDoubleArray(ioSerialiser, null, DataType.FLOAT_ARRAY));
+        assertArrayEquals(new double[] { 1.0, 0.0, 2.0 }, DataSetSerialiser.getDoubleArray(ioSerialiser, null, DataType.DOUBLE_ARRAY));
+        assertArrayEquals(new double[] { 1.0, 0.0, 2.0 }, DataSetSerialiser.getDoubleArray(ioSerialiser, null, DataType.STRING_ARRAY));
     }
 
     private static void putGenericTestArrays(final BinarySerialiser ioSerialiser) {
@@ -169,11 +175,11 @@ class DataSetSerialiserTests {
                 new double[] { 6f, 7f, 8f }, new double[] { 7f, 8f, 9f }, new double[] { 7f, 8f, 9f }, 3, false);
         addMetaData(original, true);
 
-        final DataSetSerialiser ioSerialiser = new DataSetSerialiser(new BinarySerialiser(buffer));
+        final DataSetSerialiser ioSerialiser = DataSetSerialiser.withIoSerialiser(new BinarySerialiser(buffer));
 
-        ioSerialiser.writeDataSetToByteArray(original, asFloat32);
+        ioSerialiser.write(original, asFloat32);
         buffer.reset(); // reset to read position (==0)
-        final DataSet restored = ioSerialiser.readDataSetFromByteArray();
+        final DataSet restored = ioSerialiser.read();
 
         assertEquals(original, restored);
     }
@@ -200,11 +206,11 @@ class DataSetSerialiserTests {
         };
         addMetaData(original, true);
 
-        final DataSetSerialiser ioSerialiser = new DataSetSerialiser(new BinarySerialiser(buffer));
+        final DataSetSerialiser ioSerialiser = DataSetSerialiser.withIoSerialiser(new BinarySerialiser(buffer));
 
-        ioSerialiser.writeDataSetToByteArray(original, asFloat32);
+        ioSerialiser.write(original, asFloat32);
         buffer.reset(); // reset to read position (==0)
-        final DefaultErrorDataSet restored = (DefaultErrorDataSet) ioSerialiser.readDataSetFromByteArray();
+        final DefaultErrorDataSet restored = (DefaultErrorDataSet) ioSerialiser.read();
 
         assertEquals(new DefaultErrorDataSet(original), new DefaultErrorDataSet(restored));
     }
@@ -220,11 +226,11 @@ class DataSetSerialiserTests {
         final DoubleErrorDataSet original = new DoubleErrorDataSet(new TriangleFunction("test", 1009));
         addMetaData(original, true);
 
-        final DataSetSerialiser ioSerialiser = new DataSetSerialiser(new BinarySerialiser(buffer));
+        final DataSetSerialiser ioSerialiser = DataSetSerialiser.withIoSerialiser(new BinarySerialiser(buffer));
 
-        ioSerialiser.writeDataSetToByteArray(original, asFloat32);
+        ioSerialiser.write(original, asFloat32);
         buffer.reset(); // reset to read position (==0)
-        final DataSet restored = ioSerialiser.readDataSetFromByteArray();
+        final DataSet restored = ioSerialiser.read();
 
         assertEquals(original, restored);
     }
@@ -242,6 +248,11 @@ class DataSetSerialiserTests {
                 new double[] { 1f, 2f, 3f }, new double[] { 6f, 7f, 8f }, //
                 new double[] { 0.7f, 0.8f, 0.9f }, new double[] { 7f, 8f, 9f }, 3, false);
         addMetaData(original, true);
+        final EventListener eventListener = evt -> {
+            // empty eventLister for counting
+        };
+        original.addListener(eventListener);
+        assertEquals(1, original.updateEventListener().size());
         DataSetWrapper dsOrig = new DataSetWrapper();
         dsOrig.source = original;
         DataSetWrapper cpOrig = new DataSetWrapper();
@@ -261,6 +272,7 @@ class DataSetSerialiserTests {
         if (!(cpOrig.source instanceof DataSetError)) {
             throw new IllegalStateException("DataSet '" + cpOrig.source + "' is not not instanceof DataSetError");
         }
+        assertEquals(0, cpOrig.source.updateEventListener().size());
         DataSetError test = (DataSetError) (cpOrig.source);
 
         testIdentityCore(original, test);
@@ -268,6 +280,67 @@ class DataSetSerialiserTests {
         if (test instanceof DataSetMetaData) {
             testIdentityMetaData(original, (DataSetMetaData) test, true);
         }
+        assertEquals(dsOrig.source, test);
+    }
+
+    @ParameterizedTest(name = "IoBuffer class - {0}")
+    @ValueSource(classes = { ByteBuffer.class, FastByteBuffer.class })
+    void testGenericSerialiserInplaceIdentity(final Class<? extends IoBuffer> bufferClass) throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
+        assertNotNull(bufferClass, "bufferClass being not null");
+        assertNotNull(bufferClass.getConstructor(int.class), "Constructor(Integer) present");
+        final IoBuffer buffer = bufferClass.getConstructor(int.class).newInstance(2 * BUFFER_SIZE);
+
+        IoClassSerialiser serialiser = new IoClassSerialiser(buffer, BinarySerialiser.class);
+
+        final DefaultErrorDataSet original = new DefaultErrorDataSet("test", //
+                new double[] { 1f, 2f, 3f }, new double[] { 6f, 7f, 8f }, //
+                new double[] { 0.7f, 0.8f, 0.9f }, new double[] { 7f, 8f, 9f }, 3, false);
+        addMetaData(original, true);
+        final EventListener eventListener = evt -> {
+            // empty eventLister for counting
+        };
+        original.addListener(eventListener);
+        assertEquals(1, original.updateEventListener().size());
+        DataSetWrapper dsOrig = new DataSetWrapper();
+        dsOrig.source = original;
+        DataSetWrapper cpOrig = new DataSetWrapper();
+        cpOrig.source = new DefaultErrorDataSet("copyName - to be overwritten");
+        final EventListener eventListener1 = evt -> {
+            // empty eventLister for counting
+        };
+        cpOrig.source.addListener(eventListener1);
+        final EventListener eventListener2 = evt -> {
+            // empty eventLister for counting
+        };
+        cpOrig.source.addListener(eventListener2);
+        assertEquals(2, cpOrig.source.updateEventListener().size());
+
+        // serialise-deserialise DataSet
+        buffer.reset(); // '0' writing at start of buffer
+        serialiser.serialiseObject(dsOrig);
+
+        // buffer.reset(); // reset to read position (==0)
+        // final WireDataFieldDescription root = serialiser.getIoSerialiser().parseIoStream(true);
+        // root.printFieldStructure();
+
+        buffer.reset(); // reset to read position (==0)
+        serialiser.deserialiseObject(cpOrig);
+
+        // check DataSet for equality
+        if (!(cpOrig.source instanceof DataSetError)) {
+            throw new IllegalStateException("DataSet '" + cpOrig.source + "' is not not instanceof DataSetError");
+        }
+        assertEquals(2, cpOrig.source.updateEventListener().size());
+        assertTrue(cpOrig.source.updateEventListener().contains(eventListener1));
+        assertTrue(cpOrig.source.updateEventListener().contains(eventListener2));
+        DataSetError test = (DataSetError) (cpOrig.source);
+
+        testIdentityCore(original, test);
+        testIdentityLabelsAndStyles(original, test, true);
+        if (test instanceof DataSetMetaData) {
+            testIdentityMetaData(original, (DataSetMetaData) test, true);
+        }
+
         assertEquals(dsOrig.source, test);
     }
 

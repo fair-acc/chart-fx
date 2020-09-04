@@ -1,5 +1,7 @@
 package de.gsi.dataset;
 
+import java.io.Serializable;
+
 import de.gsi.dataset.event.EventSource;
 
 /**
@@ -15,7 +17,7 @@ import de.gsi.dataset.event.EventSource;
  * @author akrimm
  * @author rstein
  */
-public interface AxisDescription extends EventSource {
+public interface AxisDescription extends EventSource, Serializable {
     /**
      * Adds value to this range.
      *

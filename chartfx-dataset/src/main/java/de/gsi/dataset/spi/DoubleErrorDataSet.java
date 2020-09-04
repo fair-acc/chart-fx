@@ -421,27 +421,9 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
                 this.set(other.getValues(DIM_X), other.getValues(DIM_Y), new double[count], new double[count], other.getDataCount(), copy);
             }
 
-            // deep copy data point labels and styles
-            getDataLabelMap().clear();
-            for (int index = 0; index < other.getDataCount(); index++) {
-                final String label = other.getDataLabel(index);
-                if (label != null && !label.isEmpty()) {
-                    this.addDataLabel(index, label);
-                }
-            }
-            getDataStyleMap().clear();
-            for (int index = 0; index < other.getDataCount(); index++) {
-                final String style = other.getStyle(index);
-                if (style != null && !style.isEmpty()) {
-                    this.addDataStyle(index, style);
-                }
-            }
-            this.setStyle(other.getStyle());
-
-            // synchronise axis description
-            for (int dimIndex = 0; dimIndex < getDimension(); dimIndex++) {
-                this.getAxisDescription(dimIndex).set(other.getAxisDescription(dimIndex));
-            }
+            copyMetaData(other);
+            copyDataLabelsAndStyles(other, copy);
+            copyAxisDescription(other);
         }));
         return getThis();
     }

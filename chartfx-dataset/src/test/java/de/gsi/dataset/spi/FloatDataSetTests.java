@@ -8,6 +8,8 @@ import java.util.Arrays;
 
 import org.junit.jupiter.api.Test;
 
+import de.gsi.dataset.spi.utils.MathUtils;
+
 /**
  * Checks for FloatDataSet interfaces and constructors.
  * 
@@ -145,7 +147,7 @@ public class FloatDataSetTests extends EditableDataSetTests {
         final FloatDataSet secondDataSet = new FloatDataSet("test", testCoordinate[0].length);
         assertNotEquals(firstDataSet, secondDataSet);
 
-        secondDataSet.set(0, FloatDataSet.toDoubles(testCoordinate[0]), FloatDataSet.toDoubles(testCoordinate[1]));
+        secondDataSet.set(0, MathUtils.toDoubles(testCoordinate[0]), MathUtils.toDoubles(testCoordinate[1]));
         assertEquals(firstDataSet, secondDataSet);
 
         final FloatDataSet thirdDataSet = new FloatDataSet("test", testCoordinate[0].length);
@@ -183,8 +185,8 @@ public class FloatDataSetTests extends EditableDataSetTests {
         dataSet1.addDataLabel(1, "label1");
         dataSet1.addDataStyle(1, "style1");
 
-        final DoubleErrorDataSet dataSet2 = new DoubleErrorDataSet("test", FloatDataSet.toDoubles(testCoordinate[0]),
-                FloatDataSet.toDoubles(testCoordinate[1]), new double[n], new double[n], n, true);
+        final DoubleErrorDataSet dataSet2 = new DoubleErrorDataSet("test", MathUtils.toDoubles(testCoordinate[0]),
+                MathUtils.toDoubles(testCoordinate[1]), new double[n], new double[n], n, true);
         dataSet2.addDataLabel(1, "label1");
         dataSet2.addDataStyle(1, "style1");
         assertEquals(dataSet1, dataSet2);

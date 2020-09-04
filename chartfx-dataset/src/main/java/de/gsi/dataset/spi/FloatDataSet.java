@@ -7,6 +7,7 @@ import de.gsi.dataset.EditableDataSet;
 import de.gsi.dataset.event.AddedDataEvent;
 import de.gsi.dataset.event.RemovedDataEvent;
 import de.gsi.dataset.event.UpdatedDataEvent;
+import de.gsi.dataset.spi.utils.MathUtils;
 import de.gsi.dataset.utils.AssertUtils;
 
 import it.unimi.dsi.fastutil.floats.FloatArrayList;
@@ -22,6 +23,8 @@ import it.unimi.dsi.fastutil.floats.FloatArrayList;
  */
 public class FloatDataSet extends AbstractDataSet<FloatDataSet> implements DataSet2D, EditableDataSet {
     private static final long serialVersionUID = 7625465583757088697L;
+    private static final String X_COORDINATES = "X coordinates";
+    private static final String Y_COORDINATES = "Y coordinates";
     protected FloatArrayList xValues; // faster compared to java default
     protected FloatArrayList yValues; // faster compared to java default
 
@@ -125,8 +128,8 @@ public class FloatDataSet extends AbstractDataSet<FloatDataSet> implements DataS
      * @return itself
      */
     public FloatDataSet add(final float[] xValuesNew, final float[] yValuesNew) {
-        AssertUtils.notNull("X coordinates", xValuesNew);
-        AssertUtils.notNull("Y coordinates", yValuesNew);
+        AssertUtils.notNull(X_COORDINATES, xValuesNew);
+        AssertUtils.notNull(Y_COORDINATES, yValuesNew);
         AssertUtils.equalFloatArrays(xValuesNew, yValuesNew);
 
         lock().writeLockGuard(() -> {
@@ -199,8 +202,8 @@ public class FloatDataSet extends AbstractDataSet<FloatDataSet> implements DataS
      * @return itself (fluent design)
      */
     public FloatDataSet add(final int index, final float[] x, final float[] y) {
-        AssertUtils.notNull("X coordinates", x);
-        AssertUtils.notNull("Y coordinates", y);
+        AssertUtils.notNull(X_COORDINATES, x);
+        AssertUtils.notNull(Y_COORDINATES, y);
         final int min = Math.min(x.length, y.length);
         AssertUtils.equalFloatArrays(x, y, min);
 
@@ -335,30 +338,12 @@ public class FloatDataSet extends AbstractDataSet<FloatDataSet> implements DataS
                 this.set((otherFloat.getFloatValues(DIM_X)), otherFloat.getFloatValues(DIM_Y), other.getDataCount(), copy);
             } else {
                 // performs deep copy, because toFloat returns new array -> do not perform another copy on set
-                this.set(toFloats(other.getValues(DIM_X)), toFloats(other.getValues(DIM_Y)), other.getDataCount(), false);
+                this.set(MathUtils.toFloats(other.getValues(DIM_X)), MathUtils.toFloats(other.getValues(DIM_Y)), other.getDataCount(), false);
             }
 
-            // deep copy data point labels and styles
-            getDataLabelMap().clear();
-            for (int index = 0; index < other.getDataCount(); index++) {
-                final String label = other.getDataLabel(index);
-                if (label != null && !label.isEmpty()) {
-                    this.addDataLabel(index, label);
-                }
-            }
-            getDataStyleMap().clear();
-            for (int index = 0; index < other.getDataCount(); index++) {
-                final String style = other.getStyle(index);
-                if (style != null && !style.isEmpty()) {
-                    this.addDataStyle(index, style);
-                }
-            }
-            this.setStyle(other.getStyle());
-
-            // synchronise axis description
-            for (int dimIndex = 0; dimIndex < getDimension(); dimIndex++) {
-                this.getAxisDescription(dimIndex).set(other.getAxisDescription(dimIndex));
-            }
+            copyMetaData(other);
+            copyDataLabelsAndStyles(other, copy);
+            copyAxisDescription(other);
         }));
         return fireInvalidated(new UpdatedDataEvent(this));
     }
@@ -405,8 +390,8 @@ public class FloatDataSet extends AbstractDataSet<FloatDataSet> implements DataS
      * @return itself
      */
     public FloatDataSet set(final float[] xValues, final float[] yValues, final int nSamples, final boolean copy) {
-        AssertUtils.notNull("X coordinates", xValues);
-        AssertUtils.notNull("Y coordinates", yValues);
+        AssertUtils.notNull(X_COORDINATES, xValues);
+        AssertUtils.notNull(Y_COORDINATES, yValues);
         AssertUtils.equalFloatArrays(xValues, yValues);
         if (nSamples >= 0) {
             AssertUtils.indexInBounds(nSamples, xValues.length + 1, "xValues bounds");
@@ -470,8 +455,8 @@ public class FloatDataSet extends AbstractDataSet<FloatDataSet> implements DataS
     public FloatDataSet set(final int index, final double[] x, final double[] y) {
         lock().writeLockGuard(() -> {
             resize(Math.max(index + x.length, xValues.size()));
-            System.arraycopy(toFloats(x), 0, xValues.elements(), index, x.length);
-            System.arraycopy(toFloats(y), 0, yValues.elements(), index, y.length);
+            System.arraycopy(MathUtils.toFloats(x), 0, xValues.elements(), index, x.length);
+            System.arraycopy(MathUtils.toFloats(y), 0, yValues.elements(), index, y.length);
             getDataLabelMap().remove(index, index + x.length);
             getDataStyleMap().remove(index, index + x.length);
 
@@ -495,22 +480,6 @@ public class FloatDataSet extends AbstractDataSet<FloatDataSet> implements DataS
         return fireInvalidated(new UpdatedDataEvent(this, "increaseCapacity()"));
     }
 
-    public static double[] toDoubles(final float[] input) {
-        double[] doubleArray = new double[input.length];
-        for (int i = 0; i < input.length; i++) {
-            doubleArray[i] = input[i];
-        }
-        return doubleArray;
-    }
-
-    public static float[] toFloats(final double[] input) {
-        float[] floatArray = new float[input.length];
-        for (int i = 0; i < input.length; i++) {
-            floatArray[i] = (float) input[i];
-        }
-        return floatArray;
-    }
-
     /**
      * @param dimIndex Dimension to get values for
      * @return the float array with the values
@@ -525,7 +494,7 @@ public class FloatDataSet extends AbstractDataSet<FloatDataSet> implements DataS
      */
     @Override
     public double[] getValues(int dimIndex) {
-        return dimIndex == DIM_X ? toDoubles(xValues.elements()) : toDoubles(yValues.elements());
+        return dimIndex == DIM_X ? MathUtils.toDoubles(xValues.elements()) : MathUtils.toDoubles(yValues.elements());
     }
 
     public float[] getXFloatValues() {

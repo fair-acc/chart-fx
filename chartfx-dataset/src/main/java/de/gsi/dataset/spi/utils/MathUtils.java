@@ -5,7 +5,12 @@ package de.gsi.dataset.spi.utils;
  * 
  * @author Michael Borgwardt
  */
-public class MathUtils {
+public final class MathUtils { // NOPMD
+
+    private MathUtils() {
+        // helper class
+    }
+
     public static boolean nearlyEqual(double a, double b) {
         return nearlyEqual(a, b, 1e-14);
     }
@@ -56,5 +61,21 @@ public class MathUtils {
 
     public static float relativeEpsilon(float a, float b) {
         return Math.max(Math.ulp(a), Math.ulp(b));
+    }
+
+    public static double[] toDoubles(final float[] input) {
+        double[] doubleArray = new double[input.length];
+        for (int i = 0; i < input.length; i++) {
+            doubleArray[i] = input[i];
+        }
+        return doubleArray;
+    }
+
+    public static float[] toFloats(final double[] input) {
+        float[] floatArray = new float[input.length];
+        for (int i = 0; i < input.length; i++) {
+            floatArray[i] = (float) input[i];
+        }
+        return floatArray;
     }
 }

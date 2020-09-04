@@ -21,6 +21,8 @@ import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
 @SuppressWarnings("PMD.TooManyMethods") // part of the flexible class nature
 public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements EditableDataSet, DataSet2D {
     private static final long serialVersionUID = -493232313124620828L;
+    private static final String X_COORDINATES = "X coordinates";
+    private static final String Y_COORDINATES = "Y coordinates";
     protected DoubleArrayList xValues; // way faster than java default lists
     protected DoubleArrayList yValues; // way faster than java default lists
 
@@ -121,8 +123,8 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
      * @return itself
      */
     public DoubleDataSet add(final double[] xValuesNew, final double[] yValuesNew) {
-        AssertUtils.notNull("X coordinates", xValuesNew);
-        AssertUtils.notNull("Y coordinates", yValuesNew);
+        AssertUtils.notNull(X_COORDINATES, xValuesNew);
+        AssertUtils.notNull(Y_COORDINATES, yValuesNew);
         AssertUtils.equalDoubleArrays(xValuesNew, yValuesNew);
 
         lock().writeLockGuard(() -> {
@@ -195,8 +197,8 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
      * @return itself (fluent design)
      */
     public DoubleDataSet add(final int index, final double[] x, final double[] y) {
-        AssertUtils.notNull("X coordinates", x);
-        AssertUtils.notNull("Y coordinates", y);
+        AssertUtils.notNull(X_COORDINATES, x);
+        AssertUtils.notNull(Y_COORDINATES, y);
         final int min = Math.min(x.length, y.length);
         AssertUtils.equalDoubleArrays(x, y, min);
 
@@ -329,27 +331,9 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
             // copy data
             this.set(other.getValues(DIM_X), other.getValues(DIM_Y), other.getDataCount(), copy);
 
-            // deep copy data point labels and styles
-            getDataLabelMap().clear();
-            for (int index = 0; index < other.getDataCount(); index++) {
-                final String label = other.getDataLabel(index);
-                if (label != null && !label.isEmpty()) {
-                    this.addDataLabel(index, label);
-                }
-            }
-            getDataStyleMap().clear();
-            for (int index = 0; index < other.getDataCount(); index++) {
-                final String style = other.getStyle(index);
-                if (style != null && !style.isEmpty()) {
-                    this.addDataStyle(index, style);
-                }
-            }
-            this.setStyle(other.getStyle());
-
-            // synchronise axis description
-            for (int dimIndex = 0; dimIndex < getDimension(); dimIndex++) {
-                this.getAxisDescription(dimIndex).set(other.getAxisDescription(dimIndex));
-            }
+            copyMetaData(other);
+            copyDataLabelsAndStyles(other, copy);
+            copyAxisDescription(other);
         }));
         return fireInvalidated(new UpdatedDataEvent(this));
     }
@@ -396,8 +380,8 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
      * @return itself
      */
     public DoubleDataSet set(final double[] xValues, final double[] yValues, final int nSamples, final boolean copy) {
-        AssertUtils.notNull("X coordinates", xValues);
-        AssertUtils.notNull("Y coordinates", yValues);
+        AssertUtils.notNull(X_COORDINATES, xValues);
+        AssertUtils.notNull(Y_COORDINATES, yValues);
         final int dataMaxIndex = Math.min(xValues.length, yValues.length);
         AssertUtils.equalDoubleArrays(xValues, yValues, dataMaxIndex);
         if (nSamples >= 0) {
