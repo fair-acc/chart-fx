@@ -141,13 +141,13 @@ public interface DataSet extends EventSource, Serializable {
     /**
      * @param other Other DataSet to copy into this DataSet
      * @param copy true: perform a deep copy (default), false: reuse the other dataset's internal data structures (if applicable)
-     * @return itself (fluent design)
+     * @return itself (fluent design) -- N.B. existing update listener are preserved
      */
     DataSet set(final DataSet other, final boolean copy);
 
     /**
      * @param other Other DataSet to copy into this DataSet
-     * @return itself (fluent design)
+     * @return itself (fluent design) -- N.B. existing update listener are preserved
      */
     default DataSet set(final DataSet other) {
         return set(other, true);

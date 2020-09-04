@@ -28,13 +28,15 @@ public final class FieldDataSetHelper {
                 DoubleArrayList.class));
 
         serialiser.addClassDefinition(new FieldSerialiser<>( //
-                (io, obj, field) ->
-                // short form: FieldSerialiser.this.getReturnObjectFunction().andThen(io, obj, field) -- not possible inside a constructor
-                field.getField().set(obj, new DataSetSerialiser(io).readDataSetFromByteArray()), // reader
-                (io, obj, field) -> new DataSetSerialiser(io).readDataSetFromByteArray(), // return object function
                 (io, obj, field) -> {
-                    final DataSet retVal = (DataSet) (field == null || field.getField() == null ? obj : field.getField().get(obj));
-                    new DataSetSerialiser(io).writeDataSetToByteArray(retVal, false);
+                    // short form: FieldSerialiser.this.getReturnObjectFunction().andThen(io, obj, field) -- not possible inside a constructor
+                    final DataSet origDataSet = (DataSet) field.getField().get(obj);
+                    field.getField().set(obj, DataSetSerialiser.withIoSerialiser(io).read(origDataSet));
+                }, // reader
+                (io, obj, field) -> DataSetSerialiser.withIoSerialiser(io).read(), // return object function
+                (io, obj, field) -> {
+                    final DataSet origDataSet = (DataSet) (field == null || field.getField() == null ? obj : field.getField().get(obj));
+                    DataSetSerialiser.withIoSerialiser(io).write(origDataSet, false);
                 }, // writer
                 DataSet.class));
 

@@ -34,7 +34,7 @@ public class DataSetToByteArraySample {
     private final ByteArrayOutputStream byteOutput = new ByteArrayOutputStream();
     private final FastByteBuffer byteBuffer = new FastByteBuffer();
     private final IoSerialiser binarySerialiser = new BinarySerialiser(byteBuffer);
-    private final DataSetSerialiser dataSetSerialiser = new DataSetSerialiser(binarySerialiser);
+    private final DataSetSerialiser dataSetSerialiser = DataSetSerialiser.withIoSerialiser(binarySerialiser);
 
     public DataSetToByteArraySample() {
         LOGGER.atInfo().log(DataSetToByteArraySample.class.getSimpleName() + " - init");
@@ -65,9 +65,9 @@ public class DataSetToByteArraySample {
         dataSetSerialiser.setDataLablesSerialised(true);
 
         byteBuffer.reset(); // '0' writing at start of buffer
-        dataSetSerialiser.writeDataSetToByteArray(original, asFloat32);
+        dataSetSerialiser.write(original, asFloat32);
         byteBuffer.reset(); // reset to read position (==0)
-        final DoubleErrorDataSet dataSet = (DoubleErrorDataSet) dataSetSerialiser.readDataSetFromByteArray();
+        final DoubleErrorDataSet dataSet = (DoubleErrorDataSet) dataSetSerialiser.read();
 
         testIdentityCore(true, asFloat32, original, dataSet);
         testIdentityLabelsAndStyles(true, original, dataSet);
@@ -296,9 +296,9 @@ public class DataSetToByteArraySample {
         byteBuffer.reset(); // reset to read position (==0)
         for (int i = 0; i < iterations; i++) {
             byteBuffer.reset(); // '0' writing at start of buffer
-            dataSetSerialiser.writeDataSetToByteArray(original, asFloat32);
+            dataSetSerialiser.write(original, asFloat32);
             byteBuffer.reset(); // reset to read position (==0)
-            final DataSet dataSet = dataSetSerialiser.readDataSetFromByteArray();
+            final DataSet dataSet = dataSetSerialiser.read();
 
             if (!original.getName().equals(dataSet.getName())) {
                 LOGGER.atError().log("ERROR data set does not match -> potential streaming error at index = " + i);

@@ -39,7 +39,7 @@ public class WriteDataSetToFileSample extends Application {
     private static DoubleDataSet dataSet1;
     private static DoubleDataSet dataSet2;
     private static FastByteBuffer fastByteBuffer = new FastByteBuffer();
-    private static DataSetSerialiser dataSetSerialiser = new DataSetSerialiser(new BinarySerialiser(fastByteBuffer));
+    private static DataSetSerialiser dataSetSerialiser = DataSetSerialiser.withIoSerialiser(new BinarySerialiser(fastByteBuffer));
 
     @Override
     public void start(final Stage primaryStage) {
@@ -100,7 +100,7 @@ public class WriteDataSetToFileSample extends Application {
             // DataSetSerialiser.setDataLablesSerialised(false); // uncomment
             boolean asFloat = true;
             fastByteBuffer.reset(); // '0' writing at start of buffer
-            dataSetSerialiser.writeDataSetToByteArray(dataSet2, asFloat);
+            dataSetSerialiser.write(dataSet2, asFloat);
             LOGGER.atInfo().log("written bytes to byte buffer = " + fastByteBuffer.position());
             fastByteBuffer.reset(); // return read position to '0'
 
@@ -111,7 +111,7 @@ public class WriteDataSetToFileSample extends Application {
             // recover written data sets
             final DataSet recoveredDataSet1 = DataSetUtils.readDataSetFromFile(actualFileName1);
             final DataSet recoveredDataSet2 = DataSetUtils.readDataSetFromFile(actualFileName2);
-            final DataSet recoveredDataSet3 = dataSetSerialiser.readDataSetFromByteArray();
+            final DataSet recoveredDataSet3 = dataSetSerialiser.read();
 
             chart2.getDatasets().clear();
             if (recoveredDataSet1 != null) {
