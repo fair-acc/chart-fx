@@ -32,6 +32,7 @@ public class Histogram2 extends AbstractHistogram implements Histogram2D {
      * @param nBinsY number of vertical bins
      * @param minY minimum of vertical range
      * @param maxY maximum of vertical range
+     * @param boundsType How the min and max value should be interpreted
      */
     public Histogram2(String name, int nBinsX, double minX, double maxX, final int nBinsY, final double minY, final double maxY, final HistogramOuterBounds boundsType) {
         super(name, nBinsX, minX, maxX, nBinsY, minY, maxY, boundsType);

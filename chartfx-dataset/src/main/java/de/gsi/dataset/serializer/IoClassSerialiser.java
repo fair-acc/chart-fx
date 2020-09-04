@@ -214,6 +214,7 @@ public class IoClassSerialiser {
      * @param type the class or interface
      * @param classGenericArguments optional generics arguments
      * @return FieldSerialiser matching the base class/interface and generics arguments
+     * @param <E> The type of the Object to (de)serialise
      */
     @SuppressWarnings("unchecked")
     public <E> FieldSerialiser<E> findFieldSerialiser(Type type, List<Type> classGenericArguments) {

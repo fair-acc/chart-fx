@@ -189,6 +189,7 @@ public class WireDataFieldDescription implements FieldDescription {
     /**
      * @return raw ioSerialiser reference this field was retrieved with the position in the underlying IoBuffer at the to be read field
      * N.B. this is a safe convenience method and not performance optimised
+     * @param overwriteType optional DataType as which the data should be interpreted
      */
     public Object data(DataType... overwriteType) {
         ioSerialiser.setQueryFieldName(fieldName, fieldDataStart);
