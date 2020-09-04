@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>de.gsi</groupId>
+        <artifactId>chartfx</artifactId>
+        <version>${revision}${sha1}${changelist}</version>
+        <relativePath>..</relativePath>
+    </parent>
+
+    <artifactId>microservice</artifactId>
+
+    <description>
+        ZeroMQ and REST-based micro-service and IoSerialiser implementation.
+    </description>
+
+    <dependencies>
+        <dependency>
+            <groupId>de.gsi.dataset</groupId>
+            <artifactId>chartfx-dataset</artifactId>
+            <version>${project.version}</version>
+            <optional>true</optional>
+        </dependency>
+        <!-- micro-benchmarking framework -->
+        <dependency>
+            <groupId>org.openjdk.jmh</groupId>
+            <artifactId>jmh-core</artifactId>
+            <version>1.23</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.openjdk.jmh</groupId>
+            <artifactId>jmh-generator-annprocess</artifactId>
+            <version>1.23</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- serialiser dependencies -->
+        <dependency>
+            <groupId>com.google.flatbuffers</groupId>
+            <artifactId>flatbuffers-java</artifactId>
+            <version>1.12.0</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.jsoniter</groupId>
+            <artifactId>jsoniter</artifactId>
+            <version>0.9.23</version>
+        </dependency>
+        <dependency>
+            <groupId>org.javassist</groupId>
+            <artifactId>javassist</artifactId>
+            <version>3.27.0-GA</version>
+        </dependency>
+        <!--        <dependency>-->
+        <!--            <groupId>cern.cmw</groupId>-->
+        <!--            <artifactId>cmw-data</artifactId>-->
+        <!--            <version>2.1.0</version>-->
+        <!--            <scope>test</scope>-->
+        <!--        </dependency>-->
+    </dependencies>
+
+</project>
