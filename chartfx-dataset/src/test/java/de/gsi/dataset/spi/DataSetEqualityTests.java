@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import static de.gsi.dataset.DataSet.DIM_X;
 import static de.gsi.dataset.DataSet.DIM_Y;
+import static de.gsi.dataset.spi.AbstractHistogram.HistogramOuterBounds.BINS_ALIGNED_WITH_BOUNDARY;
 
 import java.util.Arrays;
 
@@ -42,7 +43,7 @@ public class DataSetEqualityTests {
         assertEquals(new DoubleErrorDataSet("default"), new DoubleErrorDataSet("default"));
         assertEquals(new FifoDoubleErrorDataSet("default", 10), new FifoDoubleErrorDataSet("default", 11));
         assertEquals(new FragmentedDataSet("default"), new FragmentedDataSet("default"));
-        assertEquals(new Histogram("default", 10, 0.0, 1.0), new Histogram("default", 10, 0.0, 1.0));
+        assertEquals(new Histogram("default", 10, 0.0, 1.0, BINS_ALIGNED_WITH_BOUNDARY), new Histogram("default", 10, 0.0, 1.0, BINS_ALIGNED_WITH_BOUNDARY));
         // assertEquals(new Histogram2("default", 10, 0.0, 1.0, 10, 0.0, 1.0),
         // new Histogram2("default", 10, 0.0, 1.0, 10, 0.0, 1.0));
         assertEquals(new LabelledMarkerDataSet("default"), new LabelledMarkerDataSet("default"));

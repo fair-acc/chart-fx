@@ -51,9 +51,10 @@ public class Histogram extends AbstractHistogram implements Histogram1D, DataSet
      * @param nBins number of bins
      * @param minX minimum of range
      * @param maxX maximum of range
+     * @param boundsType How the min and max value should be interpreted
      */
-    public Histogram(String name, int nBins, double minX, double maxX) {
-        this(name, nBins, minX, maxX, true);
+    public Histogram(String name, int nBins, double minX, double maxX, final HistogramOuterBounds boundsType) {
+        this(name, nBins, minX, maxX, true, boundsType);
     }
 
     /**
@@ -64,13 +65,14 @@ public class Histogram extends AbstractHistogram implements Histogram1D, DataSet
      * @param minX minimum of range
      * @param maxX maximum of range
      * @param horizontal whether binning is performed in X
+     * @param boundsType How the min and max value should be interpreted
      */
-    public Histogram(String name, int nBins, double minX, double maxX, final boolean horizontal) {
-        super(name, nBins, minX, maxX);
+    public Histogram(String name, int nBins, double minX, double maxX, final boolean horizontal, final HistogramOuterBounds boundsType) {
+        super(name, nBins, minX, maxX, boundsType);
         isHorizontal = horizontal;
         if (!isHorizontal) {
+            getAxisDescription(DIM_Y).set(getAxisDescription(DIM_X));
             getAxisDescription(DIM_X).clear();
-            getAxisDescription(DIM_Y).set(minX, maxX);
         }
     }
 

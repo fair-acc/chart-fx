@@ -33,10 +33,10 @@ public class Histogram2 extends AbstractHistogram implements Histogram2D {
      * @param minY minimum of vertical range
      * @param maxY maximum of vertical range
      */
-    public Histogram2(String name, int nBinsX, double minX, double maxX, final int nBinsY, final double minY, final double maxY) {
-        super(name, nBinsX, minX, maxX, nBinsY, minY, maxY);
-        xProjection = new Histogram(name + "-Proj-X", nBinsX, minX, maxX, true);
-        yProjection = new Histogram(name + "-Proj-Y", nBinsY, minY, maxY, false);
+    public Histogram2(String name, int nBinsX, double minX, double maxX, final int nBinsY, final double minY, final double maxY, final HistogramOuterBounds boundsType) {
+        super(name, nBinsX, minX, maxX, nBinsY, minY, maxY, boundsType);
+        xProjection = new Histogram(name + "-Proj-X", nBinsX, minX, maxX, true, boundsType);
+        yProjection = new Histogram(name + "-Proj-Y", nBinsY, minY, maxY, false, boundsType);
     }
 
     /*
