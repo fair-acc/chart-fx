@@ -16,17 +16,52 @@ public abstract class AbstractHistogram extends AbstractDataSet<AbstractHistogra
     protected final double[] data;
 
     /**
-     * Creates histogram with name and range [minX, maxX]
-     * 
+     * Defines how the lower and upper bound of equidistant Histograms should be treated
+     */
+    public enum HistogramOuterBounds {
+        /**
+         * The min and max value defines the center of the bins
+         * <pre>
+         *     nBins = 3
+         *     ^      ___
+         *     |  ___|   |
+         *     | |   |   |___
+         *     |_|___|___|___|____
+         *         '       '
+         *        min     max
+         * </pre>
+         */
+        BINS_CENTERED_ON_BOUNDARY,
+        /**
+         * The min and max value defines the outer bounds of the bins
+         * <pre>
+         *     nBins = 3
+         *     ^       __
+         *     |    __|  |
+         *     |   |  |  |__
+         *     |___|__|__|__|____
+         *         '        '
+         *        min      max
+         * </pre>
+         */
+        BINS_ALIGNED_WITH_BOUNDARY
+    }
+
+    /**
+     * Creates a non equidistant histogram with name and range [minX, maxX]
+     * <p>
+     * NOTE: since chartfx's default ErrorDataSetRenderer cannot access the bin boundaries, it is currently unable to
+     * correctly render non equidistant Histograms.
+     * </p>
+     *
      * @param name of the data sets
-     * @param xBins the initial bin array (defines [minX, maxX] and nBins)
+     * @param xBins the bin boundary array (defines [minX, maxX] and nBins)
      */
     public AbstractHistogram(final String name, final double[] xBins) {
         super(name, 2);
-        final int nBins = xBins.length;
-        nAxisBins = new int[2];
+        final int nBins = xBins.length - 1; // NB: bin boundaries
+        nAxisBins = new int[1];
         nAxisBins[0] = nBins + 2; // N.B. one bin for underflow, one bin for overflow
-        nAxisBins[1] = nBins + 2;
         data = new double[nAxisBins[0]];
         axisBins = new double[1][];
         axisBins[0] = new double[nAxisBins[0]];
@@ -34,10 +69,8 @@ public abstract class AbstractHistogram extends AbstractDataSet<AbstractHistogra
         axisBins[0][nAxisBins[0] - 1] = +Double.MAX_VALUE;
         final double[] xBinsSorted = Arrays.copyOf(xBins, xBins.length);
         Arrays.sort(xBinsSorted);
-        for (int i = 0; i < nBins; i++) {
-            axisBins[0][i + 1] = xBinsSorted[i];
-            getAxisDescription(DIM_X).add(xBinsSorted[i]);
-        }
+        System.arraycopy(xBinsSorted, 0, axisBins[0], 1, xBinsSorted.length);
+        getAxisDescription(DIM_X).set(axisBins[0][1], axisBins[0][nBins + 1]);
         getAxisDescription(DIM_Y).clear();
         equidistant = false;
     }
@@ -49,14 +82,23 @@ public abstract class AbstractHistogram extends AbstractDataSet<AbstractHistogra
      * @param nBins number of bins
      * @param minX minimum of range
      * @param maxX maximum of range
+     * @param boundsType how the min/max value should be interpreted
      */
-    public AbstractHistogram(final String name, final int nBins, final double minX, final double maxX) {
+    public AbstractHistogram(final String name, final int nBins, final double minX, final double maxX, final HistogramOuterBounds boundsType) {
         super(name, 2);
         nAxisBins = new int[2];
         nAxisBins[0] = nBins + 2; // N.B. one bin for underflow, one bin for overflow
         nAxisBins[1] = nBins + 2;
         data = new double[nAxisBins[0]];
-        getAxisDescription(DIM_X).set(minX, maxX);
+        switch (boundsType) {
+        case BINS_CENTERED_ON_BOUNDARY:
+            final double halfBin = (maxX - minX) / ((nBins - 1) * 2);
+            getAxisDescription(DIM_X).set(minX - halfBin, maxX + halfBin);
+            break;
+        case BINS_ALIGNED_WITH_BOUNDARY:
+            getAxisDescription(DIM_X).set(minX, maxX);
+            break;
+        }
         getAxisDescription(DIM_Y).clear();
         equidistant = true;
     }
@@ -71,18 +113,29 @@ public abstract class AbstractHistogram extends AbstractDataSet<AbstractHistogra
      * @param nBinsY number of vertical bins
      * @param minY minimum of vertical range
      * @param maxY maximum of vertical range
+     * @param boundsType How the min and max value should be interpreted
      */
     public AbstractHistogram(final String name, final int nBinsX, final double minX, final double maxX,
-            final int nBinsY, final double minY, final double maxY) {
+            final int nBinsY, final double minY, final double maxY, final HistogramOuterBounds boundsType) {
         super(name, 3);
         nAxisBins = new int[3];
         nAxisBins[0] = nBinsX + 2; // N.B. one bin for underflow, one bin for overflow
         nAxisBins[1] = nBinsY + 2;
         nAxisBins[2] = nBinsX * nBinsY + 2;
         data = new double[nAxisBins[2]];
-        getAxisDescription(DIM_X).set(minX, maxX);
-        getAxisDescription(DIM_Y).set(minY, maxY);
-        getAxisDescription(2).clear();
+        switch (boundsType) {
+        case BINS_CENTERED_ON_BOUNDARY:
+            final double halfBinX = (maxX - minX) / ((nBinsX - 1) * 2);
+            getAxisDescription(DIM_X).set(minX - halfBinX, maxX + halfBinX);
+            final double halfBinY = (maxY - minY) / ((nBinsY - 1) * 2);
+            getAxisDescription(DIM_Y).set(minY - halfBinY, maxY + halfBinY);
+            break;
+        case BINS_ALIGNED_WITH_BOUNDARY:
+            getAxisDescription(DIM_X).set(minX, maxX);
+            getAxisDescription(DIM_X).set(minY, maxY);
+            break;
+        }
+        getAxisDescription(DIM_Z).clear();
         equidistant = true;
     }
 
@@ -129,7 +182,7 @@ public abstract class AbstractHistogram extends AbstractDataSet<AbstractHistogra
         if (isEquiDistant()) {
             final double diff = x - getAxisDescription(dimIndex).getMin();
             final double delta = getAxisDescription(dimIndex).getLength() / (getDataCount() - 2);
-            return (int) Math.round(diff / delta);
+            return (int) Math.floor(diff / delta);
         }
 
         return findNextLargerIndex(axisBins[dimIndex], x);
@@ -157,7 +210,7 @@ public abstract class AbstractHistogram extends AbstractDataSet<AbstractHistogra
 
         if (isEquiDistant()) {
             final double delta = getAxisDescription(dimIndex).getLength() / (getDataCount());
-            return getAxisDescription(dimIndex).getMin() + ((binIndex - 1) * delta);
+            return getAxisDescription(dimIndex).getMin() + ((binIndex - 0.5) * delta);
         }
 
         return axisBins[dimIndex][binIndex] + (0.5 * (axisBins[dimIndex][binIndex + 1] - axisBins[dimIndex][binIndex]));
