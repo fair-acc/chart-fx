@@ -54,7 +54,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
 
     private final StyleableIntegerProperty dimIndex = CSS.createIntegerProperty(this, "dimIndex", -1, this::requestAxisLayout);
     /**
-     * Paths used for css-type styling. Not used for actual drawing. Used as a storage contained for the settings
+     * Paths used for css-type styling. Not used for actual drawing. Used as a storage container for the settings
      * applied to GraphicsContext which allow much faster (and less complex) drawing routines but do no not allow
      * CSS-type styling.
      */
