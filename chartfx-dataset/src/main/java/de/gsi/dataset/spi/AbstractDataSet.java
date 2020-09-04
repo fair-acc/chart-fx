@@ -50,11 +50,11 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
     private final List<AxisDescription> axesDescriptions = new ArrayList<>();
     private final transient List<EventListener> updateListeners = Collections.synchronizedList(new LinkedList<>());
     private final transient DataSetLock<? extends DataSet> lock = new DefaultDataSetLock<>(this);
-    protected StringHashMapList dataLabels = new StringHashMapList();
-    protected StringHashMapList dataStyles = new StringHashMapList();
-    protected List<String> infoList = new ArrayList<>();
-    protected List<String> warningList = new ArrayList<>();
-    protected List<String> errorList = new ArrayList<>();
+    private StringHashMapList dataLabels = new StringHashMapList();
+    private StringHashMapList dataStyles = new StringHashMapList();
+    private List<String> infoList = new ArrayList<>();
+    private List<String> warningList = new ArrayList<>();
+    private List<String> errorList = new ArrayList<>();
     private transient EditConstraints editConstraints;
     private final Map<String, String> metaInfoMap = new ConcurrentHashMap<>();
     private final transient AtomicBoolean axisUpdating = new AtomicBoolean(false);
@@ -234,18 +234,20 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
                     }
                 }
             }
-        } else {
-            for (int dimIndex = 0; dimIndex < this.getDimension(); dimIndex++) {
-                for (int index = 0; index < this.getDataCount(); index++) {
-                    if (!MathUtils.nearlyEqual(thisErrorDs.getErrorNegative(dimIndex, index), otherErrorDs.getErrorNegative(dimIndex, index), epsilon)) {
-                        return false;
-                    }
-                    if (!MathUtils.nearlyEqual(thisErrorDs.getErrorPositive(dimIndex, index), otherErrorDs.getErrorPositive(dimIndex, index), epsilon)) {
-                        return false;
-                    }
+            return true;
+        }
+
+        for (int dimIndex = 0; dimIndex < this.getDimension(); dimIndex++) {
+            for (int index = 0; index < this.getDataCount(); index++) {
+                if (!MathUtils.nearlyEqual(thisErrorDs.getErrorNegative(dimIndex, index), otherErrorDs.getErrorNegative(dimIndex, index), epsilon)) {
+                    return false;
+                }
+                if (!MathUtils.nearlyEqual(thisErrorDs.getErrorPositive(dimIndex, index), otherErrorDs.getErrorPositive(dimIndex, index), epsilon)) {
+                    return false;
                 }
             }
         }
+
         return true;
     }
 
@@ -665,5 +667,59 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
     @Override
     public synchronized List<EventListener> updateEventListener() {
         return updateListeners;
+    }
+
+    protected boolean copyMetaData(final DataSet other) {
+        this.setName(other.getName());
+        if (!(other instanceof DataSetMetaData)) {
+            return false;
+        }
+        DataSetMetaData otherMeta = (DataSetMetaData) other;
+        infoList.clear();
+        infoList.addAll(otherMeta.getInfoList());
+        warningList.clear();
+        warningList.addAll(otherMeta.getWarningList());
+        errorList.clear();
+        errorList.addAll(otherMeta.getErrorList());
+        metaInfoMap.clear();
+        metaInfoMap.putAll(otherMeta.getMetaInfo());
+
+        return true;
+    }
+
+    protected void copyDataLabelsAndStyles(final DataSet other, final boolean copy) {
+        this.setStyle(other.getStyle());
+
+        if (copy || !(other instanceof AbstractDataSet)) {
+            // deep copy data point labels and styles
+            getDataLabelMap().clear();
+            for (int index = 0; index < other.getDataCount(); index++) {
+                final String label = other.getDataLabel(index);
+                if (label != null && !label.isEmpty()) {
+                    this.addDataLabel(index, label);
+                }
+            }
+            getDataStyleMap().clear();
+            for (int index = 0; index < other.getDataCount(); index++) {
+                final String style = other.getStyle(index);
+                if (style != null && !style.isEmpty()) {
+                    this.addDataStyle(index, style);
+                }
+            }
+            return;
+        }
+
+        var otherAbstract = (AbstractDataSet) other;
+        getDataLabelMap().clear();
+        getDataLabelMap().putAll(otherAbstract.getDataLabelMap());
+        getDataStyleMap().clear();
+        getDataStyleMap().putAll(otherAbstract.getDataStyleMap());
+    }
+
+    protected void copyAxisDescription(final DataSet other) {
+        // synchronise axis description
+        for (int dimIndex = 0; dimIndex < getDimension(); dimIndex++) {
+            this.getAxisDescription(dimIndex).set(other.getAxisDescription(dimIndex));
+        }
     }
 }

@@ -20,7 +20,7 @@ import de.gsi.dataset.spi.utils.MathUtils;
  */
 public class DefaultAxisDescription extends DataRange implements AxisDescription {
     private final transient AtomicBoolean autoNotification = new AtomicBoolean(true);
-    private final List<EventListener> updateListeners = Collections.synchronizedList(new LinkedList<>());
+    private final transient List<EventListener> updateListeners = Collections.synchronizedList(new LinkedList<>());
     private final int dimIndex;
     private String name;
     private String unit;
@@ -70,10 +70,6 @@ public class DefaultAxisDescription extends DataRange implements AxisDescription
         super();
         this.dimIndex = dimIndex;
         this.set(axisName, axisUnit, rangeMin, rangeMax);
-    }
-
-    private static boolean strEqual(final String str1, final String str2) {
-        return ((str1 == str2) || ((str1 != null) && str1.equals(str2))); // NOPMD pointer address check is intended
     }
 
     /**
@@ -144,19 +140,11 @@ public class DefaultAxisDescription extends DataRange implements AxisDescription
             return false;
         }
 
-        if (getName() != null && !getName().equals(other.getName())) {
+        if (!strEqual(getName(), other.getName())) {
             return false;
         }
 
-        if (other.getName() != null && !other.getName().equals(getName())) {
-            return false;
-        }
-
-        if (getUnit() != null && !getUnit().equals(other.getUnit())) {
-            return false;
-        }
-
-        if (other.getUnit() != null && !other.getUnit().equals(getUnit())) {
+        if (!strEqual(getUnit(), other.getUnit())) {
             return false;
         }
 
@@ -165,12 +153,11 @@ public class DefaultAxisDescription extends DataRange implements AxisDescription
                 return false;
             }
             return getMax() == other.getMax();
-        } else {
-            if (!MathUtils.nearlyEqual(getMin(), other.getMin(), epsilon)) {
-                return false;
-            }
-            return MathUtils.nearlyEqual(getMax(), other.getMax(), epsilon);
         }
+        if (!MathUtils.nearlyEqual(getMin(), other.getMin(), epsilon)) {
+            return false;
+        }
+        return MathUtils.nearlyEqual(getMax(), other.getMax(), epsilon);
     }
 
     @Override
@@ -187,7 +174,7 @@ public class DefaultAxisDescription extends DataRange implements AxisDescription
         // the recomputeLimits is usually recomputed when validating the axis,
         // this function is called in case e.g. a point has been modified and range invalidated
         final boolean oldNotifyState = autoNotification.getAndSet(true);
-        invokeListener(new AxisRecomputationEvent(this, "updated axis range for '" + name + "' '[" + unit + "]'", getDimIndex()));
+        invokeListener(new AxisRecomputationEvent(this, updateMessage(), getDimIndex()));
         autoNotification.getAndSet(oldNotifyState);
 
         return super.getMax();
@@ -202,7 +189,7 @@ public class DefaultAxisDescription extends DataRange implements AxisDescription
         // the recomputeLimits is usually recomputed when validating the axis,
         // this function is called in case e.g. a point has been modified and range invalidated
         final boolean oldNotifyState = autoNotification.getAndSet(true);
-        invokeListener(new AxisRecomputationEvent(this, "updated axis range for '" + name + "' '[" + unit + "]'", getDimIndex()));
+        invokeListener(new AxisRecomputationEvent(this, updateMessage(), getDimIndex()));
         autoNotification.getAndSet(oldNotifyState);
 
         return super.getMin();
@@ -227,18 +214,6 @@ public class DefaultAxisDescription extends DataRange implements AxisDescription
         result = (prime * result) + Double.hashCode(getMin());
         result = (prime * result) + Double.hashCode(getMax());
         return result;
-    }
-
-    private void notifyFullChange() {
-        invokeListener(new AxisChangeEvent(this, "updated axis for '" + name + "' '[" + unit + "]'", getDimIndex()));
-    }
-
-    private void notifyNameChange() {
-        invokeListener(new AxisNameChangeEvent(this, "updated axis names for '" + name + "' '[" + unit + "]'", getDimIndex()));
-    }
-
-    private void notifyRangeChange() {
-        invokeListener(new AxisRangeChangeEvent(this, "updated axis range for '" + name + "' '[" + unit + "]'", getDimIndex()));
     }
 
     @Override
@@ -329,5 +304,25 @@ public class DefaultAxisDescription extends DataRange implements AxisDescription
     @Override
     public List<EventListener> updateEventListener() {
         return updateListeners;
+    }
+
+    private void notifyFullChange() {
+        invokeListener(new AxisChangeEvent(this, "updated axis for '" + name + "' '[" + unit + "]'", getDimIndex()));
+    }
+
+    private void notifyNameChange() {
+        invokeListener(new AxisNameChangeEvent(this, "updated axis names for '" + name + "' '[" + unit + "]'", getDimIndex()));
+    }
+
+    private void notifyRangeChange() {
+        invokeListener(new AxisRangeChangeEvent(this, updateMessage(), getDimIndex()));
+    }
+
+    private String updateMessage() {
+        return "updated axis range for '" + name + "' '[" + unit + "]'";
+    }
+
+    private static boolean strEqual(final String str1, final String str2) {
+        return ((str1 == str2) || ((str1 != null) && str1.equals(str2))); // NOPMD pointer address check is intended
     }
 }
