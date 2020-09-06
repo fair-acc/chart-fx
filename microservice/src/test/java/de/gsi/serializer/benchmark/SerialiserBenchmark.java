@@ -1,7 +1,17 @@
 package de.gsi.serializer.benchmark;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.openjdk.jmh.annotations.Benchmark;
+import org.openjdk.jmh.annotations.Fork;
+import org.openjdk.jmh.annotations.Param;
+import org.openjdk.jmh.annotations.Scope;
+import org.openjdk.jmh.annotations.State;
+import org.openjdk.jmh.annotations.Warmup;
+import org.openjdk.jmh.infra.Blackhole;
+
+import com.jsoniter.JsonIterator;
+import com.jsoniter.output.EncodingMode;
+import com.jsoniter.output.JsonStream;
+import com.jsoniter.spi.DecodingMode;
 
 import de.gsi.serializer.helper.CmwLightHelper;
 import de.gsi.serializer.helper.FlatBuffersHelper;
@@ -10,104 +20,177 @@ import de.gsi.serializer.helper.SerialiserHelper;
 import de.gsi.serializer.helper.TestDataClass;
 
 /**
- * Simple (rough) benchmark of various internal and external serialiser protocols.
+ * More thorough (JMH-based)) benchmark of various internal and external serialiser protocols.
  * Test consists of a simple repeated POJO->serialised->byte[] buffer -> de-serialisation -> POJO + comparison checks.
  * N.B. this isn't as precise as the JMH tests but gives a rough idea whether the protocol degraded or needs to be improved.
  *
- * Example output - numbers should be compared relatively (nIterations = 100000):
- * (openjdk 11.0.7 2020-04-14, ASCII-only, nSizePrimitiveArrays = 10, nSizeString = 100, nestedClassRecursion = 1)
- * [..] more string-heavy TestDataClass
- * - run 1
- * - JSON Serializer (Map only)  throughput = 371.4 MB/s for 5.2 kB per test run (took 1413.0 ms)
- * - CMW Serializer (Map only) throughput = 220.2 MB/s for 6.3 kB per test run (took 2871.0 ms)
- * - CmwLight Serializer (Map only)  throughput = 683.1 MB/s for 6.4 kB per test run (took 935.0 ms)
- * - IO Serializer (Map only)  throughput = 810.0 MB/s for 7.4 kB per test run (took 908.0 ms)
- *
- * - FlatBuffers (custom FlexBuffers) throughput = 173.7 MB/s for 6.1 kB per test run (took 3536.0 ms)
- * - CmwLight Serializer (custom) throughput = 460.5 MB/s for 6.4 kB per test run (took 1387.0 ms)
- * - IO Serializer (custom) throughput = 545.0 MB/s for 7.3 kB per test run (took 1344.0 ms)
- *
- * - JSON Serializer (POJO) throughput = 53.8 MB/s for 5.2 kB per test run (took 9747.0 ms)
- * - CMW Serializer (POJO) throughput = 182.8 MB/s for 6.3 kB per test run (took 3458.0 ms)
- * - CmwLight Serializer (POJO) throughput = 329.2 MB/s for 6.3 kB per test run (took 1906.0 ms)
- * - IO Serializer (POJO) throughput = 374.9 MB/s for 7.2 kB per test run (took 1925.0 ms)
- *
- * [..] more primitive-array-heavy TestDataClass
- * (openjdk 11.0.7 2020-04-14, UTF8, nSizePrimitiveArrays = 1000, nSizeString = 0, nestedClassRecursion = 0)
- * - run 1
- * - JSON Serializer (Map only)  throughput = 350.7 MB/s for 34.3 kB per test run (took 9793.0 ms)
- * - CMW Serializer (Map only) throughput = 1.7 GB/s for 29.2 kB per test run (took 1755.0 ms)
- * - CmwLight Serializer (Map only)  throughput = 6.7 GB/s for 29.2 kB per test run (took 437.0 ms)
- * - IO Serializer (Map only)  throughput = 6.1 GB/s for 29.7 kB per test run (took 485.0 ms)
- *
- * - FlatBuffers (custom FlexBuffers) throughput = 123.1 MB/s for 30.1 kB per test run (took 24467.0 ms)
- * - CmwLight Serializer (custom) throughput = 3.9 GB/s for 29.2 kB per test run (took 751.0 ms)
- * - IO Serializer (custom) throughput = 3.8 GB/s for 29.7 kB per test run (took 782.0 ms)
- *
- * - JSON Serializer (POJO) throughput = 31.7 MB/s for 34.3 kB per test run (took 108415.0 ms)
- * - CMW Serializer (POJO) throughput = 1.5 GB/s for 29.2 kB per test run (took 1924.0 ms)
- * - CmwLight Serializer (POJO) throughput = 3.5 GB/s for 29.1 kB per test run (took 824.0 ms)
- * - IO Serializer (POJO) throughput = 3.4 GB/s for 29.7 kB per test run (took 870.0 ms)
+ * Benchmark                                     (testClassId)   Mode  Cnt       Score      Error  Units
+ * SerialiserBenchmark.customCmwLight             string-heavy  thrpt   10   49954.479 ±  560.726  ops/s
+ * SerialiserBenchmark.customCmwLight            numeric-heavy  thrpt   10   22433.828 ±  195.939  ops/s
+ * SerialiserBenchmark.customFlatBuffer           string-heavy  thrpt   10   18446.085 ±   71.311  ops/s
+ * SerialiserBenchmark.customFlatBuffer          numeric-heavy  thrpt   10     233.869 ±    7.314  ops/s
+ * SerialiserBenchmark.customIoSerialiser         string-heavy  thrpt   10   53638.035 ±  367.122  ops/s
+ * SerialiserBenchmark.customIoSerialiser        numeric-heavy  thrpt   10   24277.732 ±  200.380  ops/s
+ * SerialiserBenchmark.customIoSerialiserOptim    string-heavy  thrpt   10   79759.984 ±  799.944  ops/s
+ * SerialiserBenchmark.customIoSerialiserOptim   numeric-heavy  thrpt   10   24192.169 ±  419.019  ops/s
+ * SerialiserBenchmark.customJson                 string-heavy  thrpt   10   17619.026 ±  250.917  ops/s
+ * SerialiserBenchmark.customJson                numeric-heavy  thrpt   10     138.461 ±    2.972  ops/s
+ * SerialiserBenchmark.mapCmwLight                string-heavy  thrpt   10   79273.547 ± 2487.931  ops/s
+ * SerialiserBenchmark.mapCmwLight               numeric-heavy  thrpt   10   67374.131 ±  954.149  ops/s
+ * SerialiserBenchmark.mapIoSerialiser            string-heavy  thrpt   10   81295.197 ± 2391.616  ops/s
+ * SerialiserBenchmark.mapIoSerialiser           numeric-heavy  thrpt   10   67701.564 ± 1062.641  ops/s
+ * SerialiserBenchmark.mapIoSerialiserOptimized   string-heavy  thrpt   10  115008.285 ± 2390.426  ops/s
+ * SerialiserBenchmark.mapIoSerialiserOptimized  numeric-heavy  thrpt   10   68879.735 ± 1403.197  ops/s
+ * SerialiserBenchmark.mapJson                    string-heavy  thrpt   10   14474.142 ± 1227.165  ops/s
+ * SerialiserBenchmark.mapJson                   numeric-heavy  thrpt   10     163.928 ±    0.968  ops/s
+ * SerialiserBenchmark.pojoCmwLight               string-heavy  thrpt   10   41821.232 ±  217.594  ops/s
+ * SerialiserBenchmark.pojoCmwLight              numeric-heavy  thrpt   10   33820.451 ±  568.264  ops/s
+ * SerialiserBenchmark.pojoIoSerialiser           string-heavy  thrpt   10   41899.128 ±  940.030  ops/s
+ * SerialiserBenchmark.pojoIoSerialiser          numeric-heavy  thrpt   10   33918.815 ±  376.551  ops/s
+ * SerialiserBenchmark.pojoIoSerialiserOptim      string-heavy  thrpt   10   53811.486 ±  920.474  ops/s
+ * SerialiserBenchmark.pojoIoSerialiserOptim     numeric-heavy  thrpt   10   32463.267 ±  635.326  ops/s
+ * SerialiserBenchmark.pojoJson                   string-heavy  thrpt   10   23327.701 ±  288.871  ops/s
+ * SerialiserBenchmark.pojoJson                  numeric-heavy  thrpt   10     161.396 ±    3.040  ops/s
+ * SerialiserBenchmark.pojoJsonCodeGen            string-heavy  thrpt   10   23586.818 ±  470.233  ops/s
+ * SerialiserBenchmark.pojoJsonCodeGen           numeric-heavy  thrpt   10     163.250 ±    1.254  ops/s
  *
  * @author rstein
  */
-public class SerialiserBenchmark { // NOPMD - nomen est omen
-    private static final Logger LOGGER = LoggerFactory.getLogger(SerialiserBenchmark.class);
-    private static final TestDataClass inputObject = new TestDataClass(10, 100, 1);
+@State(Scope.Benchmark)
+public class SerialiserBenchmark {
+    private static final String INPUT_OBJECT_NAME_1 = "string-heavy";
+    private static final String INPUT_OBJECT_NAME_2 = "numeric-heavy";
+    private static final TestDataClass inputObject1 = new TestDataClass(10, 100, 1); // string-heavy
+    private static final TestDataClass inputObject2 = new TestDataClass(10000, 0, 0); // numeric-heavy
     private static final TestDataClass outputObject = new TestDataClass(-1, -1, 0);
+    @Param({ INPUT_OBJECT_NAME_1, INPUT_OBJECT_NAME_2 })
+    private String testClassId;
 
-    public static String humanReadableByteCount(final long bytes, final boolean si) {
-        final int unit = si ? 1000 : 1024;
-        if (bytes < unit) {
-            return bytes + " B";
-        }
-
-        final int exp = (int) (Math.log(bytes) / Math.log(unit));
-        final String pre = (si ? "kMGTPE" : "KMGTPE").charAt(exp - 1) + (si ? "" : "i");
-        return String.format("%.1f %sB", bytes / Math.pow(unit, exp), pre);
+    @Benchmark
+    @Warmup(iterations = 1)
+    @Fork(value = 2, warmups = 2)
+    public void mapJson(Blackhole blackhole) {
+        JsonHelper.testSerialiserPerformanceMap(1, getTestClass(testClassId));
+        blackhole.consume(getTestClass(testClassId));
     }
 
-    public static void main(final String... argv) {
-        // CmwHelper.checkSerialiserIdentity(inputObject, outputObject);
-        LOGGER.atInfo().addArgument(CmwLightHelper.checkSerialiserIdentity(inputObject, outputObject)).log("CmwLight serialiser nBytes = {}");
-        LOGGER.atInfo().addArgument(CmwLightHelper.checkCustomSerialiserIdentity(inputObject, outputObject)).log("CmwLight (custom) serialiser nBytes = {}");
+    @Benchmark
+    @Warmup(iterations = 1)
+    @Fork(value = 2, warmups = 2)
+    public void mapCmwLight(Blackhole blackhole) {
+        CmwLightHelper.testSerialiserPerformanceMap(1, getTestClass(testClassId));
+        blackhole.consume(getTestClass(testClassId));
+    }
 
-        LOGGER.atInfo().addArgument(JsonHelper.checkSerialiserIdentity(inputObject, outputObject)).log("JSON Serialiser serialiser nBytes = {}");
-        LOGGER.atInfo().addArgument(JsonHelper.checkCustomSerialiserIdentity(inputObject, outputObject)).log("JSON Serialiser (custom) serialiser nBytes = {}");
-        LOGGER.atInfo().addArgument(SerialiserHelper.checkSerialiserIdentity(inputObject, outputObject)).log("generic serialiser nBytes = {}");
-        LOGGER.atInfo().addArgument(SerialiserHelper.checkCustomSerialiserIdentity(inputObject, outputObject)).log("generic serialiser (custom) nBytes = {}");
-        LOGGER.atInfo().addArgument(FlatBuffersHelper.checkCustomSerialiserIdentity(inputObject, outputObject)).log("flatBuffers serialiser nBytes = {}");
+    @Benchmark
+    @Warmup(iterations = 1)
+    @Fork(value = 2, warmups = 2)
+    public void mapIoSerialiser(Blackhole blackhole) {
+        SerialiserHelper.testSerialiserPerformanceMap(1, getTestClass(testClassId));
+        blackhole.consume(getTestClass(testClassId));
+    }
 
-        // Cmw vs. CmwLight compatibility - requires CMW binary libs
-        // CmwLightHelper.checkCmwLightVsCmwIdentityForward(inputObject, outputObject);
-        // CmwLightHelper.checkCmwLightVsCmwIdentityBackward(inputObject, outputObject);
+    @Benchmark
+    @Warmup(iterations = 1)
+    @Fork(value = 2, warmups = 2)
+    public void mapIoSerialiserOptimized(Blackhole blackhole) {
+        SerialiserHelper.getBinarySerialiser().setEnforceSimpleStringEncoding(true);
+        SerialiserHelper.getBinarySerialiser().setPutFieldMetaData(false);
+        SerialiserHelper.testSerialiserPerformanceMap(1, getTestClass(testClassId));
+        blackhole.consume(getTestClass(testClassId));
+    }
 
-        // optimisation to be enabled if e.g. to protocols that do not support UTF-8 string encoding
-        // CmwLightHelper.getCmwLightSerialiser().setEnforceSimpleStringEncoding(true);
-        // SerialiserHelper.getBinarySerialiser().setEnforceSimpleStringEncoding(true);
-        // SerialiserHelper.getBinarySerialiser().setPutFieldMetaData(false);
+    @Benchmark
+    @Warmup(iterations = 1)
+    @Fork(value = 2, warmups = 2)
+    public void customJson(Blackhole blackhole) {
+        JsonHelper.testCustomSerialiserPerformance(1, getTestClass(testClassId), outputObject);
+        blackhole.consume(outputObject);
+    }
 
-        final int nIterations = 100000;
-        for (int i = 0; i < 10; i++) {
-            LOGGER.atInfo().addArgument(i).log("run {}");
-            // map-only performance
-            JsonHelper.testSerialiserPerformanceMap(nIterations, inputObject);
-            // CmwHelper.testSerialiserPerformanceMap(nIterations, inputObject, outputObject);
-            CmwLightHelper.testSerialiserPerformanceMap(nIterations, inputObject);
-            SerialiserHelper.testSerialiserPerformanceMap(nIterations, inputObject);
+    @Benchmark
+    @Warmup(iterations = 1)
+    @Fork(value = 2, warmups = 2)
+    public void customFlatBuffer(Blackhole blackhole) {
+        // N.B. internally FlatBuffer's FlexBuffer API is being used
+        // rationale: needed to compare libraries that allow loose coupling between server/client-side domain object definition
+        FlatBuffersHelper.testCustomSerialiserPerformance(1, getTestClass(testClassId), outputObject);
+        blackhole.consume(outputObject);
+    }
 
-            // custom serialiser performance
-            JsonHelper.testCustomSerialiserPerformance(nIterations, inputObject, outputObject);
-            FlatBuffersHelper.testCustomSerialiserPerformance(nIterations, inputObject, outputObject);
-            CmwLightHelper.testCustomSerialiserPerformance(nIterations, inputObject, outputObject);
-            SerialiserHelper.testCustomSerialiserPerformance(nIterations, inputObject, outputObject);
+    @Benchmark
+    @Warmup(iterations = 1)
+    @Fork(value = 2, warmups = 2)
+    public void customCmwLight(Blackhole blackhole) {
+        CmwLightHelper.testCustomSerialiserPerformance(1, getTestClass(testClassId), outputObject);
+        blackhole.consume(outputObject);
+    }
 
-            // POJO performance
-            JsonHelper.testPerformancePojo(nIterations, inputObject, outputObject);
-            JsonHelper.testPerformancePojoCodeGen(nIterations, inputObject, outputObject);
-            // CmwHelper.testPerformancePojo(nIterations, inputObject, outputObject);
-            CmwLightHelper.testPerformancePojo(nIterations, inputObject, outputObject);
-            SerialiserHelper.testPerformancePojo(nIterations, inputObject, outputObject);
-        }
+    @Benchmark
+    @Warmup(iterations = 1)
+    @Fork(value = 2, warmups = 2)
+    public void customIoSerialiser(Blackhole blackhole) {
+        SerialiserHelper.testCustomSerialiserPerformance(1, getTestClass(testClassId), outputObject);
+        blackhole.consume(outputObject);
+    }
+
+    @Benchmark
+    @Warmup(iterations = 1)
+    @Fork(value = 2, warmups = 2)
+    public void customIoSerialiserOptim(Blackhole blackhole) {
+        SerialiserHelper.getBinarySerialiser().setEnforceSimpleStringEncoding(true);
+        SerialiserHelper.getBinarySerialiser().setPutFieldMetaData(false);
+        SerialiserHelper.testCustomSerialiserPerformance(1, getTestClass(testClassId), outputObject);
+        blackhole.consume(outputObject);
+    }
+
+    @Benchmark
+    @Warmup(iterations = 1)
+    @Fork(value = 2, warmups = 2)
+    public void pojoJson(Blackhole blackhole) {
+        JsonStream.setMode(EncodingMode.REFLECTION_MODE);
+        JsonIterator.setMode(DecodingMode.REFLECTION_MODE);
+        JsonHelper.testPerformancePojoCodeGen(1, getTestClass(testClassId), outputObject);
+        blackhole.consume(outputObject);
+    }
+
+    @Benchmark
+    @Warmup(iterations = 1)
+    @Fork(value = 2, warmups = 2)
+    public void pojoJsonCodeGen(Blackhole blackhole) {
+        JsonStream.setMode(EncodingMode.DYNAMIC_MODE);
+        JsonIterator.setMode(DecodingMode.DYNAMIC_MODE_AND_MATCH_FIELD_WITH_HASH);
+        JsonHelper.testPerformancePojoCodeGen(1, getTestClass(testClassId), outputObject);
+        blackhole.consume(outputObject);
+    }
+
+    @Benchmark
+    @Warmup(iterations = 1)
+    @Fork(value = 2, warmups = 2)
+    public void pojoCmwLight(Blackhole blackhole) {
+        CmwLightHelper.testPerformancePojo(1, getTestClass(testClassId), outputObject);
+        blackhole.consume(outputObject);
+    }
+
+    @Benchmark
+    @Warmup(iterations = 1)
+    @Fork(value = 2, warmups = 2)
+    public void pojoIoSerialiser(Blackhole blackhole) {
+        SerialiserHelper.testPerformancePojo(1, getTestClass(testClassId), outputObject);
+        blackhole.consume(outputObject);
+    }
+
+    @Benchmark
+    @Warmup(iterations = 1)
+    @Fork(value = 2, warmups = 2)
+    public void pojoIoSerialiserOptim(Blackhole blackhole) {
+        SerialiserHelper.getBinarySerialiser().setEnforceSimpleStringEncoding(true);
+        SerialiserHelper.getBinarySerialiser().setPutFieldMetaData(false);
+        SerialiserHelper.testPerformancePojo(1, getTestClass(testClassId), outputObject);
+        blackhole.consume(outputObject);
+    }
+
+    private static TestDataClass getTestClass(final String arg) {
+        return INPUT_OBJECT_NAME_1.equals(arg) ? inputObject1 : inputObject2;
     }
 }

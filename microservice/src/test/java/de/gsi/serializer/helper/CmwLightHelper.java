@@ -12,14 +12,14 @@ import de.gsi.serializer.DataType;
 import de.gsi.serializer.IoBuffer;
 import de.gsi.serializer.IoClassSerialiser;
 import de.gsi.serializer.IoSerialiser;
-import de.gsi.serializer.benchmark.SerialiserBenchmark;
+import de.gsi.serializer.benchmark.SerialiserQuickBenchmark;
 import de.gsi.serializer.spi.CmwLightSerialiser;
 import de.gsi.serializer.spi.FastByteBuffer;
 import de.gsi.serializer.spi.ProtocolInfo;
 import de.gsi.serializer.spi.WireDataFieldDescription;
 
 public class CmwLightHelper {
-    private static final Logger LOGGER = LoggerFactory.getLogger(SerialiserBenchmark.class); // N.B. SerialiserBenchmark reference on purpose
+    private static final Logger LOGGER = LoggerFactory.getLogger(SerialiserQuickBenchmark.class); // N.B. SerialiserQuickBenchmark reference on purpose
     private static final IoBuffer byteBuffer = new FastByteBuffer(100000);
     // private static final IoBuffer byteBuffer = new ByteBuffer(20000);
     private static final CmwLightSerialiser cmwLightSerialiser = new CmwLightSerialiser(byteBuffer);
@@ -264,6 +264,10 @@ public class CmwLightHelper {
         return ioSerialiser.parseIoStream(true);
     }
 
+    public static IoBuffer getByteBuffer() {
+        return byteBuffer;
+    }
+
     public static CmwLightSerialiser getCmwLightSerialiser() {
         return cmwLightSerialiser;
     }
@@ -365,8 +369,8 @@ public class CmwLightHelper {
 
         final double diffMillis = TimeUnit.NANOSECONDS.toMillis(stopTime - startTime);
         final double byteCount = iterations * ((byteBuffer.position() / diffMillis) * 1e3);
-        LOGGER.atInfo().addArgument(SerialiserBenchmark.humanReadableByteCount((long) byteCount, true)) //
-                .addArgument(SerialiserBenchmark.humanReadableByteCount(byteBuffer.position(), true)) //
+        LOGGER.atInfo().addArgument(SerialiserQuickBenchmark.humanReadableByteCount((long) byteCount, true)) //
+                .addArgument(SerialiserQuickBenchmark.humanReadableByteCount(byteBuffer.position(), true)) //
                 .addArgument(diffMillis) //
                 .log("CmwLight Serializer (custom) throughput = {}/s for {} per test run (took {} ms)");
     }
@@ -399,8 +403,8 @@ public class CmwLightHelper {
 
         final double diffMillis = TimeUnit.NANOSECONDS.toMillis(stopTime - startTime);
         final double byteCount = iterations * ((byteBuffer.position() / diffMillis) * 1e3);
-        LOGGER.atInfo().addArgument(SerialiserBenchmark.humanReadableByteCount((long) byteCount, true)) //
-                .addArgument(SerialiserBenchmark.humanReadableByteCount(byteBuffer.position(), true)) //
+        LOGGER.atInfo().addArgument(SerialiserQuickBenchmark.humanReadableByteCount((long) byteCount, true)) //
+                .addArgument(SerialiserQuickBenchmark.humanReadableByteCount(byteBuffer.position(), true)) //
                 .addArgument(diffMillis) //
                 .log("CmwLight Serializer (POJO) throughput = {}/s for {} per test run (took {} ms)");
     }
@@ -429,8 +433,8 @@ public class CmwLightHelper {
 
         final double diffMillis = TimeUnit.NANOSECONDS.toMillis(stopTime - startTime);
         final double byteCount = iterations * ((byteBuffer.position() / diffMillis) * 1e3);
-        LOGGER.atInfo().addArgument(SerialiserBenchmark.humanReadableByteCount((long) byteCount, true)) //
-                .addArgument(SerialiserBenchmark.humanReadableByteCount(byteBuffer.position(), true)) //
+        LOGGER.atInfo().addArgument(SerialiserQuickBenchmark.humanReadableByteCount((long) byteCount, true)) //
+                .addArgument(SerialiserQuickBenchmark.humanReadableByteCount(byteBuffer.position(), true)) //
                 .addArgument(diffMillis) //
                 .log("CmwLight Serializer (Map only)  throughput = {}/s for {} per test run (took {} ms)");
         return ret;
