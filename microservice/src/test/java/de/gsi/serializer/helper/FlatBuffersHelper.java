@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.nio.ByteBuffer;
 import java.util.concurrent.TimeUnit;
 
+import de.gsi.serializer.benchmark.SerialiserQuickBenchmark;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,11 +13,9 @@ import com.google.flatbuffers.ArrayReadWriteBuf;
 import com.google.flatbuffers.FlexBuffers;
 import com.google.flatbuffers.FlexBuffersBuilder;
 
-import de.gsi.serializer.benchmark.SerialiserBenchmark;
-
 @SuppressWarnings("PMD") // complexity is part of the very large use-case surface that is being tested
 public class FlatBuffersHelper {
-    private static final Logger LOGGER = LoggerFactory.getLogger(SerialiserBenchmark.class); // N.B. SerialiserBenchmark reference on purpose
+    private static final Logger LOGGER = LoggerFactory.getLogger(SerialiserQuickBenchmark.class); // N.B. SerialiserQuickBenchmark reference on purpose
     private static final byte[] rawByteBuffer = new byte[100000];
 
     public static ByteBuffer serialiseCustom(FlexBuffersBuilder builder, final TestDataClass pojo) {
@@ -332,8 +331,8 @@ public class FlatBuffersHelper {
 
         final double diffMillis = TimeUnit.NANOSECONDS.toMillis(stopTime - startTime);
         final double byteCount = iterations * ((retVal.limit() / diffMillis) * 1e3);
-        LOGGER.atInfo().addArgument(SerialiserBenchmark.humanReadableByteCount((long) byteCount, true)) //
-                .addArgument(SerialiserBenchmark.humanReadableByteCount(retVal.limit(), true)) //
+        LOGGER.atInfo().addArgument(SerialiserQuickBenchmark.humanReadableByteCount((long) byteCount, true)) //
+                .addArgument(SerialiserQuickBenchmark.humanReadableByteCount(retVal.limit(), true)) //
                 .addArgument(diffMillis) //
                 .log("FlatBuffers (custom FlexBuffers) throughput = {}/s for {} per test run (took {} ms)");
     }

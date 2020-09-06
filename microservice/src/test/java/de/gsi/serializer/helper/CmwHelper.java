@@ -2,7 +2,7 @@ package de.gsi.serializer.helper;
 
 public final class CmwHelper {
     /*
-    private static final Logger LOGGER = LoggerFactory.getLogger(SerialiserBenchmark.class); // N.B. SerialiserBenchmark reference on purpose
+    private static final Logger LOGGER = LoggerFactory.getLogger(SerialiserQuickBenchmark.class); // N.B. SerialiserQuickBenchmark reference on purpose
     private static final DataSerializer cmwSerializer = DataFactory.createDataSerializer();
 
     public static Data getCmwData(final TestDataCl
@@ -131,8 +131,8 @@ public final class CmwHelper {
 
         final double diffMillis = TimeUnit.NANOSECONDS.toMillis(stopTime - startTime);
         final double byteCount = iterations * ((buffer.length / diffMillis) * 1e3);
-        LOGGER.atInfo().addArgument(SerialiserBenchmark.humanReadableByteCount((long) byteCount, true)) //
-                .addArgument(SerialiserBenchmark.humanReadableByteCount((long) buffer.length, true))
+        LOGGER.atInfo().addArgument(SerialiserQuickBenchmark.humanReadableByteCount((long) byteCount, true)) //
+                .addArgument(SerialiserQuickBenchmark.humanReadableByteCount((long) buffer.length, true))
                 .addArgument(diffMillis) //
                 .log("CMW Serializer (Map only) throughput = {}/s for {} per test run (took {} ms)");
     }
@@ -158,8 +158,8 @@ public final class CmwHelper {
 
         final double diffMillis = TimeUnit.NANOSECONDS.toMillis(stopTime - startTime);
         final double byteCount = iterations * ((buffer.length / diffMillis) * 1e3);
-        LOGGER.atInfo().addArgument(SerialiserBenchmark.humanReadableByteCount((long) byteCount, true)) //
-                .addArgument(SerialiserBenchmark.humanReadableByteCount((long) buffer.length, true))
+        LOGGER.atInfo().addArgument(SerialiserQuickBenchmark.humanReadableByteCount((long) byteCount, true)) //
+                .addArgument(SerialiserQuickBenchmark.humanReadableByteCount((long) buffer.length, true))
                 .addArgument(diffMillis) //
                 .log("CMW Serializer (POJO) throughput = {}/s for {} per test run (took {} ms)");
     }

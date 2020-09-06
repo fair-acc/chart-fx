@@ -1,4 +1,4 @@
-package de.gsi.serializer.spi.iobuffer;
+package de.gsi.serializer.benchmark;
 
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Fork;
