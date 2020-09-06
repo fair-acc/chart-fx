@@ -1,6 +1,7 @@
 package de.gsi.serializer;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -184,6 +185,17 @@ public class IoClassSerialiser {
             }
         }
         return obj;
+    }
+
+    public <T> T deserialiseObject(final Class<T> clazz) {
+        try {
+            final Constructor<T> constructor = clazz.getDeclaredConstructor();
+            constructor.setAccessible(true);
+            T obj = constructor.newInstance();
+            return (T) deserialiseObject(obj);
+        } catch (NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException e) {
+            throw new IllegalStateException("no public constructor for class " + clazz.getCanonicalName(), e);
+        }
     }
 
     public Object deserialiseObject(final Object obj) {

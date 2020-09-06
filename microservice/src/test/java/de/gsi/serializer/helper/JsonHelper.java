@@ -18,14 +18,14 @@ import com.jsoniter.spi.JsonException;
 import de.gsi.serializer.DataType;
 import de.gsi.serializer.IoBuffer;
 import de.gsi.serializer.IoSerialiser;
-import de.gsi.serializer.benchmark.SerialiserBenchmark;
+import de.gsi.serializer.benchmark.SerialiserQuickBenchmark;
 import de.gsi.serializer.spi.FastByteBuffer;
 import de.gsi.serializer.spi.JsonSerialiser;
 import de.gsi.serializer.spi.WireDataFieldDescription;
 
 public final class JsonHelper {
-    private static final Logger LOGGER = LoggerFactory.getLogger(SerialiserBenchmark.class); // N.B. SerialiserBenchmark reference on purpose
-    private static final IoBuffer byteBuffer = new FastByteBuffer(100000);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SerialiserQuickBenchmark.class); // N.B. SerialiserQuickBenchmark reference on purpose
+    private static final IoBuffer byteBuffer = new FastByteBuffer(1000000);
     // private static final IoBuffer byteBuffer = new ByteBuffer(20000);
     private static final JsonSerialiser jsonSerialiser = new JsonSerialiser(byteBuffer);
 
@@ -82,6 +82,10 @@ public final class JsonHelper {
 
         assertEquals(inputObject, outputObject, "TestDataClass input-output equality");
         return byteBuffer.limit();
+    }
+
+    public static IoBuffer getByteBuffer() {
+        return byteBuffer;
     }
 
     public static void serialiseCustom(IoSerialiser ioSerialiser, final TestDataClass pojo) {
@@ -173,8 +177,8 @@ public final class JsonHelper {
 
         final double diffMillis = TimeUnit.NANOSECONDS.toMillis(stopTime - startTime);
         final double byteCount = iterations * ((byteBuffer.limit() / diffMillis) * 1e3);
-        LOGGER.atInfo().addArgument(SerialiserBenchmark.humanReadableByteCount((long) byteCount, true)) //
-                .addArgument(SerialiserBenchmark.humanReadableByteCount(byteBuffer.limit(), true)) //
+        LOGGER.atInfo().addArgument(SerialiserQuickBenchmark.humanReadableByteCount((long) byteCount, true)) //
+                .addArgument(SerialiserQuickBenchmark.humanReadableByteCount(byteBuffer.limit(), true)) //
                 .addArgument(diffMillis) //
                 .log("JSON Serializer (custom) throughput = {}/s for {} per test run (took {} ms)");
     }
@@ -194,8 +198,8 @@ public final class JsonHelper {
 
         final double diffMillis = TimeUnit.NANOSECONDS.toMillis(stopTime - startTime);
         final double byteCount = iterations * ((byteBuffer.limit() / diffMillis) * 1e3);
-        LOGGER.atInfo().addArgument(SerialiserBenchmark.humanReadableByteCount((long) byteCount, true)) //
-                .addArgument(SerialiserBenchmark.humanReadableByteCount(byteBuffer.limit(), true)) //
+        LOGGER.atInfo().addArgument(SerialiserQuickBenchmark.humanReadableByteCount((long) byteCount, true)) //
+                .addArgument(SerialiserQuickBenchmark.humanReadableByteCount(byteBuffer.limit(), true)) //
                 .addArgument(diffMillis) //
                 .log("JSON Serializer (POJO, reflection-only) throughput = {}/s for {} per test run (took {} ms)");
     }
@@ -215,8 +219,8 @@ public final class JsonHelper {
 
         final double diffMillis = TimeUnit.NANOSECONDS.toMillis(stopTime - startTime);
         final double byteCount = iterations * ((byteBuffer.limit() / diffMillis) * 1e3);
-        LOGGER.atInfo().addArgument(SerialiserBenchmark.humanReadableByteCount((long) byteCount, true)) //
-                .addArgument(SerialiserBenchmark.humanReadableByteCount(byteBuffer.limit(), true)) //
+        LOGGER.atInfo().addArgument(SerialiserQuickBenchmark.humanReadableByteCount((long) byteCount, true)) //
+                .addArgument(SerialiserQuickBenchmark.humanReadableByteCount(byteBuffer.limit(), true)) //
                 .addArgument(diffMillis) //
                 .log("JSON Serializer (POJO, code-gen) throughput = {}/s for {} per test run (took {} ms)");
     }
@@ -263,8 +267,8 @@ public final class JsonHelper {
 
         final double diffMillis = TimeUnit.NANOSECONDS.toMillis(stopTime - startTime);
         final double byteCount = iterations * ((byteBuffer.limit() / diffMillis) * 1e3);
-        LOGGER.atInfo().addArgument(SerialiserBenchmark.humanReadableByteCount((long) byteCount, true)) //
-                .addArgument(SerialiserBenchmark.humanReadableByteCount(byteBuffer.limit(), true)) //
+        LOGGER.atInfo().addArgument(SerialiserQuickBenchmark.humanReadableByteCount((long) byteCount, true)) //
+                .addArgument(SerialiserQuickBenchmark.humanReadableByteCount(byteBuffer.limit(), true)) //
                 .addArgument(diffMillis) //
                 .log("JSON Serializer (Map only)  throughput = {}/s for {} per test run (took {} ms)");
     }
