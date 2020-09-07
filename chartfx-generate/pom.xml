@@ -52,6 +52,24 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin> <!-- do not clean the plugin as it is still required for cleaning dataset and math -->
+                <artifactId>maven-clean-plugin</artifactId>
+                <configuration>
+                    <skip>true</skip>
+                </configuration>
+            </plugin>
+            <plugin> <!-- Also compile the plugin at the end of the clean phase, skipping clean doesn't seem to be enough -->
+                <artifactId>maven-compiler-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>compile4clean</id>
+                        <phase>clean</phase>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 </project>
