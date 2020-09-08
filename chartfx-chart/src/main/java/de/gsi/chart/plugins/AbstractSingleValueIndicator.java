@@ -97,10 +97,17 @@ public abstract class AbstractSingleValueIndicator extends AbstractValueIndicato
         editableIndicatorProperty().addListener((ch, o, n) -> updateMouseListener(n));
         updateMouseListener(isEditable());
 
+        // remove triangle from chart foregrond when the chart is removed
+        chartProperty().addListener((p, o, n) -> {
+            if (o != null) {
+                o.getPlotForeground().getChildren().remove(triangle);
+            }
+        });
+
         // Need to add them so that at initialization of the stage the CCS is
         // applied and we can calculate label's
         // width and height
-        getChartChildren().addAll(line, triangle, label);
+        getChartChildren().addAll(line, label);
         this.value.addListener(
                 (ch, o, n) -> invokeListener(new UpdateEvent(this, "value changed to " + n + " for axis " + axis)));
     }
@@ -162,6 +169,7 @@ public abstract class AbstractSingleValueIndicator extends AbstractValueIndicato
         triangle.visibleProperty().bind(editableIndicatorProperty());
         triangle.mouseTransparentProperty().bind(editableIndicatorProperty().not());
         triangle.setPickOnBounds(true);
+        triangle.setOpacity(0.7);
         final double a = AbstractSingleValueIndicator.triangleHalfWidth;
         triangle.getPoints().setAll(-a, -a, -a, +a, +a, +a, +a, -a);
         triangle.setOnMousePressed(mouseEvent -> {
@@ -216,7 +224,6 @@ public abstract class AbstractSingleValueIndicator extends AbstractValueIndicato
 
         addChildNodeIfNotPresent(line);
         addChildNodeIfNotPresent(pickLine);
-        // pickLine.toBack();
     }
 
     /**
@@ -234,7 +241,13 @@ public abstract class AbstractSingleValueIndicator extends AbstractValueIndicato
 
         triangle.setTranslateX(startX);
         triangle.setTranslateY(startY);
-        addChildNodeIfNotPresent(triangle);
+        triangle.toFront();
+        // triangle has to be put onto the plot foreground to be able to put it on top of axes
+        // is removed when the chart is changed
+        //addChildNodeIfNotPresent(triangle);
+        if (!getChart().getPlotForeground().getChildren().contains(triangle)) {
+            getChart().getPlotForeground().getChildren().add(triangle);
+        }
     }
 
     /**

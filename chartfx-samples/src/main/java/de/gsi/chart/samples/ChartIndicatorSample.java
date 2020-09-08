@@ -11,13 +11,10 @@ import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
-import javafx.scene.layout.VBox;
-import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
 import org.slf4j.Logger;
@@ -38,25 +35,20 @@ import de.gsi.chart.plugins.Zoomer;
 import de.gsi.chart.renderer.ErrorStyle;
 import de.gsi.chart.renderer.datareduction.DefaultDataReducer;
 import de.gsi.chart.renderer.spi.ErrorDataSetRenderer;
+import de.gsi.chart.ui.ProfilerInfoBox;
 import de.gsi.chart.ui.geometry.Side;
-import de.gsi.chart.utils.SimplePerformanceMeter;
 import de.gsi.dataset.spi.FifoDoubleErrorDataSet;
 import de.gsi.dataset.testdata.spi.RandomDataGenerator;
 import de.gsi.dataset.utils.ProcessingProfiler;
 
 public class ChartIndicatorSample extends Application {
     private static final Logger LOGGER = LoggerFactory.getLogger(ChartIndicatorSample.class);
-    private static final int DEBUG_UPDATE_RATE = 1000;
-    private static final int MIN_PIXEL_DISTANCE = 0; // 0: just drop points that
-            // are drawn on the same
-            // pixel
+    private static final int MIN_PIXEL_DISTANCE = 0; // 0: just drop points that are drawn on the same pixel
     private static final int N_SAMPLES = 3000; // default: 1000000
     private static final int UPDATE_DELAY = 1000; // [ms]
     private static final int UPDATE_PERIOD = 40; // [ms]
-    private static final int BUFFER_CAPACITY = 750; // 750 samples @ 25 Hz <->
-            // 30 s
-    private static final double MAX_DISTANCE = ChartIndicatorSample.BUFFER_CAPACITY * ChartIndicatorSample.UPDATE_PERIOD
-                                               * 1e-3 * 0.90;
+    private static final int BUFFER_CAPACITY = 750; // 750 samples @ 25 Hz <-> 30 s
+    private static final double MAX_DISTANCE = ChartIndicatorSample.BUFFER_CAPACITY * ChartIndicatorSample.UPDATE_PERIOD * 1e-3 * 0.90;
 
     public final FifoDoubleErrorDataSet rollingBufferDipoleCurrent = new FifoDoubleErrorDataSet("dipole current [A]",
             ChartIndicatorSample.BUFFER_CAPACITY, ChartIndicatorSample.MAX_DISTANCE);
@@ -72,10 +64,7 @@ public class ChartIndicatorSample extends Application {
 
     private void generateData() {
         startTime = ProcessingProfiler.getTimeStamp();
-        final double now = System.currentTimeMillis() / 1000.0 + 1; // N.B. '+1'
-                // to check
-                // for
-                // resolution
+        final double now = System.currentTimeMillis() / 1000.0 + 1; // N.B. '+1' to check for resolution
 
         if (rollingBufferDipoleCurrent.getDataCount() == 0) {
             rollingBufferBeamIntensity.autoNotification().set(false);
@@ -97,21 +86,20 @@ public class ChartIndicatorSample extends Application {
             rollingSine.autoNotification().set(true);
         } else {
             rollingBufferDipoleCurrent.autoNotification().set(false);
-            final double t = now;
-            final double y = 25 * ChartIndicatorSample.rampFunctionDipoleCurrent(t);
-            final double y2 = 100 * ChartIndicatorSample.rampFunctionBeamIntensity(t);
+            final double y = 25 * ChartIndicatorSample.rampFunctionDipoleCurrent(now);
+            final double y2 = 100 * ChartIndicatorSample.rampFunctionBeamIntensity(now);
             final double ey = 1;
-            rollingBufferDipoleCurrent.add(t, y, ey, ey);
-            rollingBufferBeamIntensity.add(t, y2, ey, ey);
-            final double val = 1500 + 1000.0 * Math.sin(Math.PI * 2 * 0.1 * t);
-            rollingSine.add(t + 1, val, ey, ey);
+            rollingBufferDipoleCurrent.add(now, y, ey, ey);
+            rollingBufferBeamIntensity.add(now, y2, ey, ey);
+            final double val = 1500 + 1000.0 * Math.sin(Math.PI * 2 * 0.1 * now);
+            rollingSine.add(now + 1, val, ey, ey);
             rollingBufferDipoleCurrent.autoNotification().set(true);
         }
 
         ProcessingProfiler.getTimeDiff(startTime, "adding data into DataSet");
     }
 
-    private HBox getHeaderBar(final Scene scene, final TimerTask task) {
+    private HBox getHeaderBar(final TimerTask task) {
         final Button newDataSet = new Button("new DataSet");
         newDataSet.setOnAction(evt -> Platform.runLater(task));
 
@@ -134,32 +122,13 @@ public class ChartIndicatorSample extends Application {
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
         // JavaFX and Chart Performance metrics
-        final SimplePerformanceMeter meter = new SimplePerformanceMeter(scene, DEBUG_UPDATE_RATE);
+        final ProfilerInfoBox profiler = new ProfilerInfoBox();
+        profiler.setDebugLevel(ProfilerInfoBox.DebugLevel.VERSION);
 
-        final Label fxFPS = new Label();
-        fxFPS.setFont(Font.font("Monospaced", 12));
-        final Label chartFPS = new Label();
-        chartFPS.setFont(Font.font("Monospaced", 12));
-        final Label cpuLoadProcess = new Label();
-        cpuLoadProcess.setFont(Font.font("Monospaced", 12));
-        final Label cpuLoadSystem = new Label();
-        cpuLoadSystem.setFont(Font.font("Monospaced", 12));
-        meter.fxFrameRateProperty().addListener((ch, o, n) -> {
-            final String fxRate = String.format("%4.1f", meter.getFxFrameRate());
-            final String actualRate = String.format("%4.1f", meter.getActualFrameRate());
-            final String cpuProcess = String.format("%5.1f", meter.getProcessCpuLoad());
-            final String cpuSystem = String.format("%5.1f", meter.getSystemCpuLoad());
-            fxFPS.setText(String.format("%-6s: %4s %s", "JavaFX", fxRate, "FPS, "));
-            chartFPS.setText(String.format("%-6s: %4s %s", "Actual", actualRate, "FPS, "));
-            cpuLoadProcess.setText(String.format("%-11s: %4s %s", "Process-CPU", cpuProcess, "%"));
-            cpuLoadSystem.setText(String.format("%-11s: %4s %s", "System -CPU", cpuSystem, "%"));
-        });
-
-        return new HBox(newDataSet, startTimer, spacer, new VBox(fxFPS, chartFPS),
-                new VBox(cpuLoadProcess, cpuLoadSystem));
+        return new HBox(newDataSet, startTimer, spacer, profiler);
     }
 
-    public BorderPane initComponents(final Scene scene) {
+    public BorderPane initComponents() {
         final BorderPane root = new BorderPane();
         generateData();
         initErrorDataSetRenderer(beamIntensityRenderer);
@@ -167,16 +136,19 @@ public class ChartIndicatorSample extends Application {
 
         final DefaultNumericAxis xAxis1 = new DefaultNumericAxis();
         final DefaultNumericAxis xAxis2 = new DefaultNumericAxis();
+        xAxis2.setAnimated(false);
         final DefaultNumericAxis yAxis1 = new DefaultNumericAxis("beam intensity", "ppp");
         final DefaultNumericAxis yAxis2 = new DefaultNumericAxis("dipole current", "A");
-        xAxis2.setAnimated(false);
         yAxis2.setSide(Side.RIGHT);
         yAxis2.setAutoUnitScaling(true);
         yAxis2.setAutoRanging(true);
         yAxis2.setAnimated(false);
-        // N.B. it's important to set secondary axis on the 2nd renderer before
-        // adding the renderer to the chart
-        dipoleCurrentRenderer.getAxes().add(yAxis2);
+        final DefaultNumericAxis yAxis3 = new DefaultNumericAxis("test", 0, 1, 0.1);
+        yAxis3.setSide(Side.RIGHT);
+        final DefaultNumericAxis xAxis3 = new DefaultNumericAxis("test", 0, 1, 0.1);
+        xAxis3.setSide(Side.TOP);
+        // N.B. it's important to set secondary axis on the 2nd renderer before adding the renderer to the chart
+        dipoleCurrentRenderer.getAxes().addAll(yAxis2);
 
         final XYChart chart = new XYChart(xAxis1, yAxis1);
         chart.legendVisibleProperty().set(true);
@@ -222,14 +194,12 @@ public class ChartIndicatorSample extends Application {
 
         final XValueIndicator xValueIndicator = new XValueIndicator(xAxis1, minX + 0.5 * rangeX, "mid-range label -X");
         chart.getPlugins().add(xValueIndicator);
-        //        xValueIndicator.valueProperty().bind(xAxis1.lowerBoundProperty().add(5));
+        // xValueIndicator.valueProperty().bind(xAxis1.lowerBoundProperty().add(5));
 
-        final YValueIndicator yValueIndicator1 = new YValueIndicator(yAxis1, minY1 + 0.5 * rangeY1,
-                "mid-range label -Y1");
+        final YValueIndicator yValueIndicator1 = new YValueIndicator(yAxis1, minY1 + 0.5 * rangeY1, "mid-range label -Y1");
         chart.getPlugins().add(yValueIndicator1);
 
-        final YValueIndicator yValueIndicator2 = new YValueIndicator(yAxis2, minY2 + 0.2 * rangeY2,
-                "mid-range label -Y2");
+        final YValueIndicator yValueIndicator2 = new YValueIndicator(yAxis2, minY2 + 0.2 * rangeY2, "mid-range label -Y2");
         chart.getPlugins().add(yValueIndicator2);
 
         beamIntensityRenderer.getDatasets().add(rollingBufferBeamIntensity);
@@ -258,6 +228,10 @@ public class ChartIndicatorSample extends Application {
         yAxis1.setAutoRangeRounding(true);
         yAxis2.setAutoRangeRounding(true);
 
+        chart.getAxes().addAll(yAxis3, xAxis3);
+        chart.getPlugins().add(new YValueIndicator(yAxis3, 0.4));
+        chart.getPlugins().add(new XValueIndicator(xAxis3, 0.3));
+
         final TimerTask task = new TimerTask() {
             int updateCount = 0;
 
@@ -285,7 +259,7 @@ public class ChartIndicatorSample extends Application {
             }
         };
 
-        root.setTop(getHeaderBar(scene, task));
+        root.setTop(getHeaderBar(task));
 
         startTime = ProcessingProfiler.getTimeStamp();
         ProcessingProfiler.getTimeDiff(startTime, "adding data to chart");
@@ -300,9 +274,7 @@ public class ChartIndicatorSample extends Application {
 
     protected void initErrorDataSetRenderer(final ErrorDataSetRenderer eRenderer) {
         eRenderer.setErrorType(ErrorStyle.ERRORSURFACE);
-        eRenderer.setDashSize(ChartIndicatorSample.MIN_PIXEL_DISTANCE); // plot
-                // pixel-to-pixel
-                // distance
+        eRenderer.setDashSize(ChartIndicatorSample.MIN_PIXEL_DISTANCE); // plot pixel-to-pixel distance
         eRenderer.setDrawMarker(false);
         final DefaultDataReducer reductionAlgorithm = (DefaultDataReducer) eRenderer.getRendererDataReducer();
         reductionAlgorithm.setMinPointPixelDistance(ChartIndicatorSample.MIN_PIXEL_DISTANCE);
@@ -314,7 +286,7 @@ public class ChartIndicatorSample extends Application {
 
         final BorderPane root = new BorderPane();
         final Scene scene = new Scene(root, 1800, 400);
-        root.setCenter(initComponents(scene));
+        root.setCenter(initComponents());
 
         startTime = ProcessingProfiler.getTimeStamp();
         primaryStage.setTitle(this.getClass().getSimpleName());
