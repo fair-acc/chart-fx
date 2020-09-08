@@ -73,14 +73,12 @@ public class ValueIndicatorSelector extends GridPane {
         if (plugin.getChart() != null) {
             plugin.getChart().getPlugins().addListener(pluginsChanged);
             plugin.getChart().getPlugins().forEach(this::addNewIndicators);
-            reuseIndicators.setSelected(plugin.getChart().getAxes().size() <= 2);
         }
 
         final Label label = new Label("re-use inidcators: ");
         GridPane.setConstraints(label, 0, 0);
         GridPane.setConstraints(reuseIndicators, 1, 0);
-        reuseIndicators.selectedProperty().addListener((ch, o, n) -> indicatorListView.setDisable(!n));
-
+        indicatorListView.disableProperty().bind(reuseIndicators.selectedProperty().not());
         indicatorListView.setOrientation(Orientation.VERTICAL);
         indicatorListView.setPrefSize(-1, DEFAULT_SELECTOR_HEIGHT);
         indicatorListView.setCellFactory(list -> new DataSelectorLabel());

@@ -19,6 +19,9 @@ import javafx.geometry.VPos;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.MouseButton;
 
 import de.gsi.chart.Chart;
 import de.gsi.chart.axes.Axis;
@@ -39,6 +42,7 @@ public abstract class AbstractValueIndicator extends ChartPlugin {
     private double yOffset;
 
     protected final Label label = new Label();
+    protected final TextField labelEdit = new TextField();
     /* Difference between the mouse press position and the indicators center */
     protected final Delta dragDelta = new Delta();
 
@@ -76,19 +80,49 @@ public abstract class AbstractValueIndicator extends ChartPlugin {
         this.axis = axis;
         setText(text);
 
-        label.mouseTransparentProperty().bind(editableIndicatorProperty().not());
         label.pickOnBoundsProperty().set(true);
+        label.toFront();
 
         label.setOnMousePressed(mouseEvent -> {
-            /*
-             * Record a delta distance for the drag and drop operation. PROBLEM: At this point, we need to know the
-             * relative position of the label with respect to the indicator value.
-             */
-            Point2D c = label.sceneToLocal(mouseEvent.getSceneX(), mouseEvent.getSceneY());
-            dragDelta.x = -(c.getX() + xOffset);
-            dragDelta.y = c.getY() + yOffset;
-            label.setCursor(Cursor.MOVE);
-            mouseEvent.consume();
+            if (mouseEvent.isPrimaryButtonDown() && isEditable()) {
+                /*
+                 * Record a delta distance for the drag and drop operation. PROBLEM: At this point, we need to know the
+                 * relative position of the label with respect to the indicator value.
+                 */
+                Point2D c = label.sceneToLocal(mouseEvent.getSceneX(), mouseEvent.getSceneY());
+                dragDelta.x = -(c.getX() + xOffset);
+                dragDelta.y = c.getY() + yOffset;
+                label.setCursor(Cursor.MOVE);
+                mouseEvent.consume();
+            }
+        });
+        // mouse handler to edit the indicator on right click
+        label.setOnMouseClicked(evt -> {
+            if (evt.getButton().equals(MouseButton.SECONDARY)) {
+                label.setVisible(false);
+                getChartChildren().add(labelEdit);
+                labelEdit.requestFocus();
+                labelEdit.setLayoutX(label.getLayoutX());
+                labelEdit.setLayoutY(label.getLayoutY());
+                labelEdit.resizeRelocate(label.getLayoutX() - 20, label.getLayoutY() - 5, label.getWidth() + 40, label.getHeight() + 10);
+                // change the label on exit
+                labelEdit.setOnAction(actionEvt -> {
+                    label.setText(labelEdit.getText());
+                    getChartChildren().remove(labelEdit);
+                    label.setVisible(true);
+                });
+                labelEdit.setOnKeyPressed(keyEvt -> {
+                    // remove the indicator when pressing ctl + delete
+                    if (keyEvt.getCode().equals(KeyCode.DELETE) && keyEvt.isControlDown()) {
+                        getChart().getPlugins().remove(this);
+                    }
+                    // restore the old label when pressing esc
+                    if (keyEvt.getCode().equals(KeyCode.ESCAPE)) {
+                        getChartChildren().remove(labelEdit);
+                        label.setVisible(true);
+                    }
+                });
+            }
         });
 
         editableIndicatorProperty().addListener((ch, o, n) -> updateMouseListener(n));
@@ -116,7 +150,7 @@ public abstract class AbstractValueIndicator extends ChartPlugin {
 
     protected void addChildNodeIfNotPresent(final Node node) {
         if (!getChartChildren().contains(node)) {
-            getChartChildren().add(node);
+            getChartChildren().add(0, node); // add elements always at the bottom so they cannot steal focus
         }
     }
 
