@@ -5,6 +5,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.concurrent.TimeUnit;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.gsi.serializer.DataType;
 import de.gsi.serializer.IoBuffer;
 import de.gsi.serializer.IoClassSerialiser;
@@ -13,8 +16,6 @@ import de.gsi.serializer.benchmark.SerialiserQuickBenchmark;
 import de.gsi.serializer.spi.BinarySerialiser;
 import de.gsi.serializer.spi.FastByteBuffer;
 import de.gsi.serializer.spi.WireDataFieldDescription;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @SuppressWarnings("PMD") // complexity is part of the very large use-case surface that is being tested
 public final class SerialiserHelper {

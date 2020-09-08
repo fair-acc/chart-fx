@@ -5,13 +5,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.nio.ByteBuffer;
 import java.util.concurrent.TimeUnit;
 
-import de.gsi.serializer.benchmark.SerialiserQuickBenchmark;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.flatbuffers.ArrayReadWriteBuf;
 import com.google.flatbuffers.FlexBuffers;
 import com.google.flatbuffers.FlexBuffersBuilder;
+
+import de.gsi.serializer.benchmark.SerialiserQuickBenchmark;
 
 @SuppressWarnings("PMD") // complexity is part of the very large use-case surface that is being tested
 public class FlatBuffersHelper {
