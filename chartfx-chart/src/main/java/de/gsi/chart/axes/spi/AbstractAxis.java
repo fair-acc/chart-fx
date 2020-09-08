@@ -272,6 +272,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         return axisFormatter.get();
     }
 
+    @Override
     public Canvas getCanvas() {
         return canvas;
     }

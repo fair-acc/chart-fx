@@ -6,6 +6,7 @@ import static de.gsi.dataset.DataSet.DIM_X;
 
 import java.util.List;
 
+import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
@@ -373,6 +374,11 @@ public class AbstractAxisParameterTests {
         @Override
         public void requestAxisLayout() {
             // deliberately not implemented
+        }
+
+        @Override
+        public Canvas getCanvas() {
+            return null;
         }
     }
 }

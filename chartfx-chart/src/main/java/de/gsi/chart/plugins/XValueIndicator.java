@@ -7,6 +7,7 @@ import javafx.geometry.Point2D;
 import javafx.scene.input.MouseEvent;
 
 import de.gsi.chart.axes.Axis;
+import de.gsi.chart.ui.geometry.Side;
 import de.gsi.dataset.event.EventSource;
 
 /**
@@ -44,7 +45,6 @@ public class XValueIndicator extends AbstractSingleValueIndicator implements Eve
      */
     public XValueIndicator(final Axis axis, final double value, final String text) {
         super(axis, value, text);
-        triangle.getPoints().setAll(0.0, 0.0, -8.0, -8.0, 8.0, -8.0);
         setLabelPosition(0.04);
 
         pickLine.setOnMouseDragged(this::handleDragMouseEvent);
@@ -74,13 +74,23 @@ public class XValueIndicator extends AbstractSingleValueIndicator implements Eve
         final double maxX = plotAreaBounds.getMaxX();
         final double minY = plotAreaBounds.getMinY();
         final double maxY = plotAreaBounds.getMaxY();
-        final double xPos = minX + getChart().getFirstAxis(Orientation.HORIZONTAL).getDisplayPosition(getValue());
+        final double xPos = minX + getAxis().getDisplayPosition(getValue());
+        final double axisPos;
+        if (getAxis().getSide().equals(Side.BOTTOM)) {
+            triangle.getPoints().setAll(0.0, -8.0, -8.0, 0.0, 8.0, 0.0);
+            axisPos = getChart().getPlotForeground().sceneToLocal(getAxis().getCanvas().localToScene(0, 0)).getY() + 6;
+        } else {
+            triangle.getPoints().setAll(0.0, 0.0, -8.0, -8.0, 8.0, -8.0);
+            axisPos = getChart().getPlotForeground().sceneToLocal(getAxis().getCanvas().localToScene(0, getAxis().getHeight())).getY() - 6;
+        }
+        final double xPosGlobal = getChart().getPlotForeground().sceneToLocal(getChart().getCanvas().localToScene(xPos, 0)).getX();
 
         if (xPos < minX || xPos > maxX) {
             getChartChildren().clear();
         } else {
             layoutLine(xPos, minY, xPos, maxY);
-            layoutMarker(xPos, minY + 1.5 * AbstractSingleValueIndicator.triangleHalfWidth, xPos, maxY);
+            layoutMarker(xPosGlobal, axisPos + 4, xPos, maxY);
+
             layoutLabel(new BoundingBox(xPos, minY, 0, maxY - minY), AbstractSingleValueIndicator.MIDDLE_POSITION,
                     getLabelPosition());
         }

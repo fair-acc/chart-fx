@@ -7,6 +7,7 @@ import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.ObservableList;
+import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Paint;
 import javafx.scene.text.Font;
@@ -17,7 +18,6 @@ import de.gsi.chart.axes.spi.MetricPrefix;
 import de.gsi.chart.axes.spi.TickMark;
 import de.gsi.chart.ui.geometry.Side;
 import de.gsi.dataset.AxisDescription;
-import de.gsi.dataset.event.EventSource;
 import de.gsi.dataset.event.UpdateEvent;
 
 public interface Axis extends AxisDescription {
@@ -346,4 +346,9 @@ public interface Axis extends AxisDescription {
      * @return the primary unit label property
      */
     DoubleProperty unitScalingProperty();
+
+    /**
+     * @return the canvas of the axis
+     */
+    Canvas getCanvas();
 }
