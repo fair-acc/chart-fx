@@ -1,10 +1,11 @@
 package de.gsi.chart.plugins;
 
-import de.gsi.chart.axes.Axis;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.geometry.Bounds;
 import javafx.scene.shape.Rectangle;
+
+import de.gsi.chart.axes.Axis;
 
 /**
  * Plugin indicating a value range as a rectangle drawn on the plot area, with an optional {@link #textProperty() text
@@ -22,7 +23,6 @@ public abstract class AbstractRangeValueIndicator extends AbstractValueIndicator
     protected final Rectangle rectangle = new Rectangle(0, 0, 0, 0);
 
     private final DoubleProperty lowerBound = new SimpleDoubleProperty(this, "lowerBound") {
-
         @Override
         protected void invalidated() {
             layoutChildren();
@@ -30,7 +30,6 @@ public abstract class AbstractRangeValueIndicator extends AbstractValueIndicator
     };
 
     private final DoubleProperty upperBound = new SimpleDoubleProperty(this, "upperBound") {
-
         @Override
         protected void invalidated() {
             layoutChildren();
@@ -39,7 +38,6 @@ public abstract class AbstractRangeValueIndicator extends AbstractValueIndicator
 
     private final DoubleProperty labelHorizontalPosition = new SimpleDoubleProperty(this, "labelHorizontalPosition",
             0.5) {
-
         @Override
         protected void invalidated() {
             if (get() < 0 || get() > 1) {
@@ -50,7 +48,6 @@ public abstract class AbstractRangeValueIndicator extends AbstractValueIndicator
     };
 
     private final DoubleProperty labelVerticalPosition = new SimpleDoubleProperty(this, "labelVerticalPosition", 0.5) {
-
         @Override
         protected void invalidated() {
             if (get() < 0 || get() > 1) {
@@ -141,13 +138,13 @@ public abstract class AbstractRangeValueIndicator extends AbstractValueIndicator
      */
     protected void layout(final Bounds bounds) {
         if (bounds.intersects(getChart().getCanvas().getBoundsInLocal())) {
+            layoutLabel(bounds, getLabelHorizontalPosition(), getLabelVerticalPosition());
             rectangle.setX(bounds.getMinX());
             rectangle.setY(bounds.getMinY());
             rectangle.setWidth(bounds.getWidth());
             rectangle.setHeight(bounds.getHeight());
             addChildNodeIfNotPresent(rectangle);
 
-            layoutLabel(bounds, getLabelHorizontalPosition(), getLabelVerticalPosition());
         } else {
             getChartChildren().clear();
         }

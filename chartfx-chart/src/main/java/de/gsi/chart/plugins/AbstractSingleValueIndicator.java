@@ -153,15 +153,17 @@ public abstract class AbstractSingleValueIndicator extends AbstractValueIndicato
         pickLine.setStrokeWidth(getPickingDistance());
         pickLine.mouseTransparentProperty().bind(editableIndicatorProperty().not());
         pickLine.setOnMousePressed(mouseEvent -> {
-            /*
-             * Record a delta distance for the drag and drop operation. Because layoutLine() sets the start/end points
-             * we have to use these here. It is enough to use the start point. For X indicators, start x and end x are
-             * identical and for Y indicators start y and end y are identical.
-             */
-            dragDelta.x = pickLine.getStartX() - mouseEvent.getX();
-            dragDelta.y = pickLine.getStartY() - mouseEvent.getY();
-            pickLine.setCursor(Cursor.MOVE);
-            mouseEvent.consume();
+            if (mouseEvent.isPrimaryButtonDown()) {
+                /*
+                 * Record a delta distance for the drag and drop operation. Because layoutLine() sets the start/end points
+                 * we have to use these here. It is enough to use the start point. For X indicators, start x and end x are
+                 * identical and for Y indicators start y and end y are identical.
+                 */
+                dragDelta.x = pickLine.getStartX() - mouseEvent.getX();
+                dragDelta.y = pickLine.getStartY() - mouseEvent.getY();
+                pickLine.setCursor(Cursor.MOVE);
+                mouseEvent.consume();
+            }
         });
     }
 
@@ -222,8 +224,8 @@ public abstract class AbstractSingleValueIndicator extends AbstractValueIndicato
         pickLine.setEndX(endX);
         pickLine.setEndY(endY);
 
-        addChildNodeIfNotPresent(line);
         addChildNodeIfNotPresent(pickLine);
+        addChildNodeIfNotPresent(line);
     }
 
     /**
