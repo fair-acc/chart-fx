@@ -11,6 +11,7 @@ import javafx.geometry.Point2D;
 import javafx.scene.input.MouseEvent;
 
 import de.gsi.chart.axes.Axis;
+import de.gsi.chart.ui.geometry.Side;
 import de.gsi.dataset.event.EventSource;
 
 /**
@@ -49,7 +50,6 @@ public class YValueIndicator extends AbstractSingleValueIndicator implements Eve
      */
     public YValueIndicator(final Axis axis, final double value, final String text) {
         super(axis, value, text);
-        triangle.getPoints().setAll(0.0, 0.0, 8.0, 8.0, 8.0, -8.0);
         setLabelHorizontalAnchor(HPos.RIGHT);
         setLabelPosition(0.975);
 
@@ -81,13 +81,21 @@ public class YValueIndicator extends AbstractSingleValueIndicator implements Eve
         final double maxY = plotAreaBounds.getMaxY();
 
         final double yPos = minY + getAxis().getDisplayPosition(getValue());
+        final double axisPos;
+        if (getAxis().getSide().equals(Side.RIGHT)) {
+            axisPos = getChart().getPlotForeground().sceneToLocal(getAxis().getCanvas().localToScene(0, 0)).getX() + 2;
+            triangle.getPoints().setAll(0.0, 0.0, 8.0, 8.0, 8.0, -8.0);
+        } else {
+            axisPos = getChart().getPlotForeground().sceneToLocal(getAxis().getCanvas().localToScene(getAxis().getWidth(), 0)).getX() - 2;
+            triangle.getPoints().setAll(0.0, 0.0, -8.0, 8.0, -8.0, -8.0);
+        }
+        final double yPosGlobal = getChart().getPlotForeground().sceneToLocal(getChart().getCanvas().localToScene(0, yPos)).getY();
 
         if (yPos < minY || yPos > maxY) {
             getChartChildren().clear();
         } else {
             layoutLine(minX, yPos, maxX, yPos);
-            layoutMarker(maxX - 1.5 * AbstractSingleValueIndicator.triangleHalfWidth, yPos, minX, yPos); // +
-                    // 1.5*TRIANGLE_HALF_WIDTH
+            layoutMarker(axisPos, yPosGlobal, minX, yPos);
             layoutLabel(new BoundingBox(minX, yPos, maxX - minX, 0), getLabelPosition(),
                     AbstractSingleValueIndicator.MIDDLE_POSITION);
         }
