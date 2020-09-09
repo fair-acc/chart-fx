@@ -47,14 +47,14 @@ import de.gsi.dataset.testdata.spi.TriangleFunction;
  */
 @ExtendWith(ApplicationExtension.class)
 @ExtendWith(SelectiveJavaFxInterceptor.class)
-public class SimpleMeasurementsTests {
+class SimpleMeasurementsTests {
     private static final Logger LOGGER = LoggerFactory.getLogger(SimpleMeasurementsTests.class);
     private ParameterMeasurements plugin;
     private SimpleMeasurements field;
     private XYChart chart;
 
     @Start
-    public void start(final Stage stage) {
+    void start(final Stage stage) {
         chart = new XYChart();
         chart.getDatasets().add(new SineFunction("sine", 1000));
 
@@ -165,8 +165,6 @@ public class SimpleMeasurementsTests {
         typeResults.put(MeasurementType.FREQUENCY, Double.NaN);
 
         for (final MeasurementType type : typeResults.keySet()) {
-            LOGGER.atTrace().addArgument(type.getName()).log("testing measurement type: {}");
-
             final double minValue = type.isVerticalMeasurement() ? 2 : 0.2;
             final double maxValue = type.isVerticalMeasurement() ? 14 : 0.8;
 
@@ -192,10 +190,7 @@ public class SimpleMeasurementsTests {
 
             assertNotNull(field.getDataSet(), "DataSet is null for type = " + type);
 
-            field.getValueIndicators().forEach((final AbstractSingleValueIndicator indicator) -> {
-                LOGGER.atTrace().addArgument(indicator).addArgument(indicator.updateEventListener()).log("Indicator: {} listeners: {}");
-                assertEquals(1, indicator.updateEventListener().size(), "error for type = " + type);
-            });
+            field.getValueIndicators().forEach((final AbstractSingleValueIndicator indicator) -> assertEquals(1, indicator.updateEventListener().size(), "error for type = " + type));
             final int nXIndicators = (int) chart.getPlugins().stream().filter(p -> p instanceof XValueIndicator).count();
             assertEquals(type.isVerticalMeasurement() ? type.getRequiredSelectors() : 0, nXIndicators, "error for type = " + type);
             final int nYIndicators = (int) chart.getPlugins().stream().filter(p -> p instanceof YValueIndicator).count();
@@ -206,12 +201,10 @@ public class SimpleMeasurementsTests {
                 if (type.getRequiredSelectors() > 0) {
                     field.getValueIndicators().get(0).setValue(minValue);
                     assertEquals(minValue, field.getValueIndicators().get(0).getValue(), 1e-9, "error for type = " + type);
-                    LOGGER.atTrace().addArgument(minValue).addArgument(type).log("set minValue {} for {}");
                 }
                 if (type.getRequiredSelectors() > 1) {
                     field.getValueIndicators().get(1).setValue(maxValue);
                     assertEquals(maxValue, field.getValueIndicators().get(1).getValue(), 1e-9, "error for type = " + type);
-                    LOGGER.atTrace().addArgument(maxValue).addArgument(type).log("set minValue {} for {}");
                 }
             });
 
@@ -221,20 +214,15 @@ public class SimpleMeasurementsTests {
             //FXUtils.runAndWait(() -> field.handle(null));
             assertTrue(FXUtils.waitForFxTicks(chart.getScene(), 3, 1000), "wait for handler to update");
 
-            LOGGER.atTrace().addArgument(type).addArgument(field.getValueField().getValue()).log("{}, {}");
             assertEquals(typeResults.get(type), field.getValueField().getValue(), 1e-9, "error for type = " + type);
 
             final List<AbstractSingleValueIndicator> tmp = new ArrayList<>(field.getValueIndicators());
             FXUtils.runAndWait(field::removeAction);
 
-            tmp.forEach((final AbstractSingleValueIndicator indicator) -> {
-                LOGGER.atTrace().addArgument(indicator).addArgument(indicator.updateEventListener()).log("Indicator: {} listeners: {}");
-                assertEquals(0, indicator.updateEventListener().size());
-            });
+            tmp.forEach((final AbstractSingleValueIndicator indicator) -> assertEquals(0, indicator.updateEventListener().size()));
 
             // Assert that there are no Indicators left after removing the measurement
             assertEquals(0, chart.getPlugins().stream().filter(p -> p instanceof AbstractSingleValueIndicator).count(), "error for type = " + type);
-            LOGGER.atTrace().addArgument(chart.getPlugins()).log("plugins in chart: {}");
         }
     }
 }
