@@ -467,7 +467,7 @@ class BinarySerialiserTests {
         ProtocolInfo headerInfo = ioSerialiser.checkHeaderInfo();
         assertNotEquals(headerInfo, new Object()); // silly comparison for coverage reasons
         assertNotNull(headerInfo);
-        assertEquals(BinarySerialiser.class.getCanonicalName(), headerInfo.getProducerName());
+        assertEquals(BinarySerialiser.PROTOCOL_NAME, headerInfo.getProducerName());
         assertEquals(BinarySerialiser.VERSION_MAJOR, headerInfo.getVersionMajor());
         assertEquals(BinarySerialiser.VERSION_MINOR, headerInfo.getVersionMinor());
         assertEquals(BinarySerialiser.VERSION_MICRO, headerInfo.getVersionMicro());
