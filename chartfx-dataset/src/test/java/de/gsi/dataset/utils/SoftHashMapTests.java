@@ -18,6 +18,7 @@ import java.util.WeakHashMap;
 
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.ThrowingSupplier;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -31,7 +32,7 @@ import org.slf4j.LoggerFactory;
  * @author rstein
  */
 @Execution(ExecutionMode.SAME_THREAD)
-public class SoftHashMapTests {
+class SoftHashMapTests {
     private static final Logger LOGGER = LoggerFactory.getLogger(SoftHashMapTests.class);
     private static final int N_ENTRIES = 100;
     private static final int DEFAULT_ARRAY_SIZE = 10_000;
@@ -39,24 +40,24 @@ public class SoftHashMapTests {
     // @Test // N.B. also covered by other tests
     public void basicTests() {
         initGC();
-        testMap(new HashMap<String, byte[]>(2));
-        testMap(new WeakHashMap<String, byte[]>(2));
-        testMap(new SoftHashMap<String, byte[]>(2));
-        testMap(new SoftKeyHashMap<String, byte[]>(2));
+        testMap(new HashMap<>(2));
+        testMap(new WeakHashMap<>(2));
+        testMap(new SoftHashMap<>(2));
+        testMap(new SoftKeyHashMap<>(2));
     }
 
     @Test
     @Order(1)
-    public void constructorTests() {
+    void constructorTests() {
         final HashMap<String, byte[]> test = new HashMap<>();
         initMap(test, 2);
 
-        assertDoesNotThrow(() -> new SoftHashMap<>());
+        assertDoesNotThrow((ThrowingSupplier<SoftHashMap<Object, Object>>) SoftHashMap::new);
         assertDoesNotThrow(() -> new SoftHashMap<>(2));
         assertDoesNotThrow(() -> new SoftHashMap<>(test));
         assertDoesNotThrow(() -> new SoftHashMap<>(test, 3));
 
-        assertDoesNotThrow(() -> new SoftKeyHashMap<>());
+        assertDoesNotThrow((ThrowingSupplier<SoftKeyHashMap<Object, Object>>) SoftKeyHashMap::new);
         assertDoesNotThrow(() -> new SoftKeyHashMap<>(2));
         assertDoesNotThrow(() -> new SoftKeyHashMap<>(2, 0.9f));
     }
@@ -66,7 +67,7 @@ public class SoftHashMapTests {
      */
     @Test
     @Order(2)
-    public void dataRetentionTests() {
+    void dataRetentionTests() {
         initGC();
 
         final int retentionDepth = 10;
@@ -108,7 +109,7 @@ public class SoftHashMapTests {
     @ParameterizedTest
     @Order(3)
     @ValueSource(classes = { SoftHashMap.class, SoftKeyHashMap.class })
-    public void extendedTests(final Class<?> testClass) throws Exception {
+    void extendedTests(final Class<?> testClass) throws Exception {
         if (!Map.class.isAssignableFrom(testClass)) {
             // config error: testClass is not derived from Map
             throw new IllegalArgumentException("testClass " + testClass.getCanonicalName() + " is not derived from " + Map.class.getCanonicalName());
@@ -125,7 +126,7 @@ public class SoftHashMapTests {
         assertDoesNotThrow(() -> map.remove("key"));
         assertDoesNotThrow(() -> map.putAll(null));
         assertDoesNotThrow(() -> map.putAll(Collections.emptyMap()));
-        assertDoesNotThrow(() -> map.clear());
+        assertDoesNotThrow(map::clear);
         assertEquals(0, map.keySet().size());
         assertEquals(0, map.values().size());
         assertEquals(0, map.entrySet().size());

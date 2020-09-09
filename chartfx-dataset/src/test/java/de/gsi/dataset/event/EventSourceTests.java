@@ -1,7 +1,9 @@
 package de.gsi.dataset.event;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
@@ -18,22 +20,19 @@ import de.gsi.dataset.utils.AggregateException;
  *
  * @author rstein
  */
-public class EventSourceTests {
+class EventSourceTests {
     private static final Logger LOGGER = LoggerFactory.getLogger(EventSourceTests.class);
 
     @Test
-    public void basicTests() {
+    void basicTests() {
         final TestEventSource evtSource = new TestEventSource();
         final AtomicInteger updateCount = new AtomicInteger();
         final Object payLoad = new Object();
         final UpdateEvent updateEvent = new UpdateEvent(evtSource, "evtMsg", payLoad);
-        final EventListener specialEventListener = new EventListener() {
-            @Override
-            public void handle(UpdateEvent event) {
-                assertEquals(updateEvent, event, "event equivalency");
-                assertEquals("evtMsg", event.getMessage(), "event msg equivalency");
-                assertEquals(payLoad, event.getPayLoad(), "event payLoad equivalency");
-            }
+        final EventListener specialEventListener = event -> {
+            assertEquals(updateEvent, event, "event equivalency");
+            assertEquals("evtMsg", event.getMessage(), "event msg equivalency");
+            assertEquals(payLoad, event.getPayLoad(), "event payLoad equivalency");
         };
 
         // empty invoke listener
@@ -50,13 +49,7 @@ public class EventSourceTests {
 
         // add three anonymous listener
         for (int i = 0; i < 3; i++) {
-            final int listenerCount = i;
-            evtSource.addListener(evt -> {
-                if (LOGGER.isTraceEnabled()) {
-                    LOGGER.atTrace().addArgument(listenerCount).log("invoked listener #{}");
-                }
-                updateCount.incrementAndGet();
-            });
+            evtSource.addListener(evt -> updateCount.incrementAndGet());
         }
 
         assertEquals(3, evtSource.eventListener.size(), "event listener count");
@@ -68,9 +61,9 @@ public class EventSourceTests {
         assertEquals(6, updateCount.get(), "invokeListener()");
 
         // check autonotification
-        assertEquals(true, evtSource.isAutoNotification(), "initial autonotification()");
+        assertTrue(evtSource.isAutoNotification(), "initial autonotification()");
         evtSource.autoNotification.set(false);
-        assertEquals(false, evtSource.isAutoNotification(), "false autonotification()");
+        assertFalse(evtSource.isAutoNotification(), "false autonotification()");
         evtSource.invokeListener(updateEvent, false);
         // N.B. notification count should not increase
         assertEquals(6, updateCount.get(), "invokeListener()");
@@ -81,13 +74,9 @@ public class EventSourceTests {
         evtSource.addListener(evt -> {
             throw new IllegalStateException("bad bad exception #1");
         });
-        evtSource.addListener(evt -> {
-            exceptionThrowingFunctionA();
-        });
-        evtSource.addListener(evt -> {
-            exceptionThrowingFunctionB();
-        });
-        assertThrows(AggregateException.class, () -> evtSource.invokeListener());
+        evtSource.addListener(evt -> exceptionThrowingFunctionA());
+        evtSource.addListener(evt -> exceptionThrowingFunctionB());
+        assertThrows(AggregateException.class, evtSource::invokeListener);
         try {
             // check exception handling for parallel execution
             evtSource.invokeListener(updateEvent, true);
@@ -106,19 +95,13 @@ public class EventSourceTests {
             // check stack-trace printout
             evtSource.invokeListener(updateEvent, false);
         } catch (AggregateException e) {
-            if (LOGGER.isTraceEnabled()) {
-                e.printStackTrace();
-            }
             ByteArrayOutputStream os = new ByteArrayOutputStream();
             PrintStream ps = new PrintStream(os);
             e.printStackTrace(ps);
-            if (LOGGER.isTraceEnabled()) {
-                LOGGER.atTrace().addArgument(os.toString()).log("test-case stack trace -- ignore this -- this is valid output:\n{}");
-            }
         }
 
         // corrupt event listener list (test failure case)
-        assertEquals(true, evtSource.isAutoNotification(), "initial autonotification()");
+        assertTrue(evtSource.isAutoNotification(), "initial autonotification()");
         evtSource.eventListener = null;
         evtSource.invokeListener(updateEvent, false);
     }
