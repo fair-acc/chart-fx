@@ -8,11 +8,7 @@
 }
 
 .axis-label {
-    -fx-font-size: 13.0;
-    -fx-font-weight: normal;
-    /*-fx-stroke: derive(-fx-background,-30%);*/
     -fx-stroke: rgb(255, 0, 0);
-    /*-fx-text-alignment: center;*/
     -fx-axis-label-alignment: center;
 }
 
@@ -102,11 +98,6 @@
     -fx-fill: #416ef468;
 }
 
-/*******************************************************************************
- *                                                                             *
- * ChartPlot                                                                   *
- *                                                                             *
- ******************************************************************************/
 .chart-major-grid-lines {
     -fx-stroke: derive(-fx-background, -10%);
     -fx-stroke-dash-array: 4.5, 2.5;
@@ -126,22 +117,18 @@
 
 .chart-major-vertical-lines .chart-major-grid-lines {
     /* use this to override v-specific settings */
-    
 }
 
 .chart-major-horizontal-grid-lines .chart-major-grid-lines {
     /* use this to override h-specific settings */
-    
 }
 
 .chart-minor-vertical-grid-lines .chart-minor-grid-lines {
     /* use this to override v-specific settings */
-    
 }
 
 .chart-minor-horizontal-grid-lines .chart-minor-grid-lines {
     /* use this to override h-specific settings */
-    
 }
 
 .chart-alternative-column-fill {
@@ -156,40 +143,4 @@
 
 .chart-vertical-zero-line, .chart-horizontal-zero-line {
     -fx-stroke: derive(-fx-text-background-color, 40%);
-}
-
-.default-color0.chart-area-symbol {
-    -fx-background-color: #e9967a, #ffa07a;
-}
-
-.default-color1.chart-area-symbol {
-    -fx-background-color: #f0e68c, #fffacd;
-}
-
-.default-color2.chart-area-symbol {
-    -fx-background-color: #dda0dd, #d8bfd8;
-}
-
-.default-color0.chart-series-area-line {
-    -fx-stroke: #e9967a;
-}
-
-.default-color1.chart-series-area-line {
-    -fx-stroke: #f0e68c;
-}
-
-.default-color2.chart-series-area-line {
-    -fx-stroke: #dda0dd;
-}
-
-.default-color0.chart-series-area-fill {
-  -fx-fill: #ffa07aaa
-}
-
-.default-color1.chart-series-area-fill {
-    -fx-fill: #fffacd77;
-}
-
-.default-color2.chart-series-area-fill {
-    -fx-fill: #d8bfd833;
 }
