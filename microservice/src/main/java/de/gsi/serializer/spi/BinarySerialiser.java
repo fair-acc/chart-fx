@@ -29,8 +29,10 @@ import de.gsi.serializer.IoSerialiser;
 import de.gsi.serializer.utils.ClassUtils;
 
 /**
+ * YaS -- Yet another Serialiser implementation
+ *
  * Generic binary serialiser aimed at efficiently transferring data between server/client and in particular between
- * Java/C++/web-based programs.
+ * Java/C++/web-based programs. For rationale see IoSerialiser.md description.
  * 
  * <p>
  * There are two default backing buffer implementations ({@link FastByteBuffer FastByteBuffer} and {@link ByteBuffer ByteBuffer}),
@@ -52,7 +54,7 @@ import de.gsi.serializer.utils.ClassUtils;
  * <b>raw-byte level protocol</b>: above data items are stored as follows:
  * <pre><code>
  * * header info:   [ 4 bytes (int) = 0x0000002A] // magic number used as coarse protocol identifier - precise protocol refined by further fields below
- *                  [ clear text serialiser name: String ] + // e.g. "BinarySerialiser"
+ *                  [ clear text serialiser name: String ] + // ie. "YaS" for 'Yet another Serialiser'
  *                  [ 1 byte - major protocol version ] +
  *                  [ 1 byte - minor protocol version ] +
  *                  [ 1 byte - micro protocol version ] // micro: non API-changing bug fixes in implementation
@@ -109,11 +111,12 @@ import de.gsi.serializer.utils.ClassUtils;
  */
 @SuppressWarnings({ "PMD.CommentSize", "PMD.ExcessivePublicCount", "PMD.PrematureDeclaration" }) // variables need to be read from stream
 public class BinarySerialiser implements IoSerialiser {
-    public static final int VERSION_MAGIC_NUMBER = 0x0000002A;
+    public static final int VERSION_MAGIC_NUMBER = 0x00000000; // '0' since CmwLight cannot (usually) start with 0 length fields
+    public static final String PROTOCOL_NAME = "YaS"; // Yet another Serialiser implementation
     public static final byte VERSION_MAJOR = 1;
     public static final byte VERSION_MINOR = 0;
     public static final byte VERSION_MICRO = 0;
-    public static final String PROTOCOL_ERROR_SERIALISER_LOOKUP_MUST_NOT_BE_NULL = "protocol error: serialiserLookup must not be null for DataType == OTHER";
+    public static final String PROTOCOL_ERROR_SERIALISER_LOOKUP_MUST_NOT_BE_NULL = "protocol error: serialiser lookup must not be null for DataType == OTHER";
     public static final String PROTOCOL_MISMATCH_N_ELEMENTS_HEADER = "protocol mismatch nElements header = ";
     public static final String NO_SERIALISER_IMP_FOUND = "no serialiser implementation found for classType = ";
     public static final String VS_ARRAY = " vs. array = ";
@@ -121,6 +124,7 @@ public class BinarySerialiser implements IoSerialiser {
     private static final int ADDITIONAL_HEADER_INFO_SIZE = 1000;
     private static final DataType[] byteToDataType = new DataType[256];
     private static final Byte[] dataTypeToByte = new Byte[256];
+    public static final String VS_SHOULD_BE = "' vs. should be '";
 
     static {
         // static mapping of protocol bytes -- needed to be compatible with other wire protocols
@@ -182,7 +186,13 @@ public class BinarySerialiser implements IoSerialiser {
     @Override
     public ProtocolInfo checkHeaderInfo() {
         final int magicNumber = buffer.getInt();
+        if (magicNumber != VERSION_MAGIC_NUMBER) {
+            throw new IllegalStateException("byte buffer version magic byte incompatible: received '" + magicNumber + VS_SHOULD_BE + VERSION_MAGIC_NUMBER + "'");
+        }
         final String producer = buffer.getStringISO8859();
+        if (!PROTOCOL_NAME.equals(producer)) {
+            throw new IllegalStateException("byte buffer producer name incompatible: received '" + producer + VS_SHOULD_BE + PROTOCOL_NAME + "'");
+        }
         final byte major = buffer.getByte();
         final byte minor = buffer.getByte();
         final byte micro = buffer.getByte();
@@ -190,13 +200,9 @@ public class BinarySerialiser implements IoSerialiser {
         final WireDataFieldDescription headerStartField = getFieldHeader();
         final ProtocolInfo header = new ProtocolInfo(this, headerStartField, producer, major, minor, micro);
 
-        if (magicNumber != VERSION_MAGIC_NUMBER) {
-            throw new IllegalStateException("byte buffer version magic byte incompatible: received '" + magicNumber + "' vs. should '" + VERSION_MAGIC_NUMBER + "'");
-        }
-
         if (!header.isCompatible()) {
-            final String thisHeader = String.format(" serialiser: %s-v%d.%d.%d", BinarySerialiser.class.getCanonicalName(), VERSION_MAJOR, VERSION_MINOR, VERSION_MICRO);
-            throw new IllegalStateException("byte buffer version incompatible: received '" + header.toString() + "' vs. should '" + thisHeader + "'");
+            final String thisHeader = String.format(" serialiser: %s-v%d.%d.%d", PROTOCOL_NAME, VERSION_MAJOR, VERSION_MINOR, VERSION_MICRO);
+            throw new IllegalStateException("byte buffer version incompatible: received '" + header.toString() + VS_SHOULD_BE + thisHeader + "'");
         }
         return header;
     }
@@ -761,7 +767,7 @@ public class BinarySerialiser implements IoSerialiser {
         final WireDataFieldDescription headerRoot = readHeader ? checkHeaderInfo().getFieldHeader() : getFieldHeader();
         buffer.position(headerRoot.getDataStartPosition());
         parseIoStream(headerRoot, 0);
-        updateDataEndMarker(fieldRoot);
+        //updateDataEndMarker(fieldRoot);
         return fieldRoot;
     }
 
@@ -1546,7 +1552,7 @@ public class BinarySerialiser implements IoSerialiser {
 
         buffer.ensureAdditionalCapacity(ADDITIONAL_HEADER_INFO_SIZE);
         buffer.putInt(VERSION_MAGIC_NUMBER);
-        buffer.putStringISO8859(BinarySerialiser.class.getCanonicalName());
+        buffer.putStringISO8859(PROTOCOL_NAME);
         buffer.putByte(VERSION_MAJOR);
         buffer.putByte(VERSION_MINOR);
         buffer.putByte(VERSION_MICRO);
@@ -1622,7 +1628,8 @@ public class BinarySerialiser implements IoSerialiser {
     }
 
     private WireDataFieldDescription getRootElement() {
-        return new WireDataFieldDescription(this, null, "ROOT".hashCode(), "ROOT", DataType.OTHER, buffer.position(), -1, -1);
+        final int headerOffset = 1 + PROTOCOL_NAME.length() + 3; // unique byte + protocol length + 3 x byte for version
+        return new WireDataFieldDescription(this, null, "ROOT".hashCode(), "ROOT", DataType.OTHER, buffer.position() + headerOffset, -1, -1);
     }
 
     public static byte getDataType(final DataType dataType) {
