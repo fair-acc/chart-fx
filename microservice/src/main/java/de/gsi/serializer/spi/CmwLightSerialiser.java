@@ -100,6 +100,7 @@ public class CmwLightSerialiser implements IoSerialiser {
     private IoBuffer buffer;
     private WireDataFieldDescription parent;
     private WireDataFieldDescription lastFieldHeader;
+    private BiFunction<Type, Type[], FieldSerialiser<Object>> fieldSerialiserLookupFunction;
 
     public CmwLightSerialiser(final IoBuffer buffer) {
         super();
@@ -175,7 +176,7 @@ public class CmwLightSerialiser implements IoSerialiser {
     }
 
     @Override
-    public <E> Collection<E> getCollection(final Collection<E> collection, final BiFunction<Type, Type[], FieldSerialiser<E>> serialiserLookup) {
+    public <E> Collection<E> getCollection(final Collection<E> collection) {
         throw new UnsupportedOperationException(NOT_IMPLEMENTED);
     }
 
@@ -286,7 +287,7 @@ public class CmwLightSerialiser implements IoSerialiser {
     }
 
     @Override
-    public <E> List<E> getList(final List<E> collection, BiFunction<Type, Type[], FieldSerialiser<E>> serialiserLookup) {
+    public <E> List<E> getList(final List<E> collection) {
         throw new UnsupportedOperationException(NOT_IMPLEMENTED);
     }
 
@@ -302,7 +303,7 @@ public class CmwLightSerialiser implements IoSerialiser {
     }
 
     @Override
-    public <K, V, E> Map<K, V> getMap(final Map<K, V> map, BiFunction<Type, Type[], FieldSerialiser<E>> serialiserLookup) {
+    public <K, V, E> Map<K, V> getMap(final Map<K, V> map) {
         throw new UnsupportedOperationException(NOT_IMPLEMENTED);
     }
 
@@ -311,12 +312,12 @@ public class CmwLightSerialiser implements IoSerialiser {
     }
 
     @Override
-    public <E> Queue<E> getQueue(final Queue<E> collection, BiFunction<Type, Type[], FieldSerialiser<E>> serialiserLookup) {
+    public <E> Queue<E> getQueue(final Queue<E> collection) {
         throw new UnsupportedOperationException(NOT_IMPLEMENTED);
     }
 
     @Override
-    public <E> Set<E> getSet(final Set<E> collection, BiFunction<Type, Type[], FieldSerialiser<E>> serialiserLookup) {
+    public <E> Set<E> getSet(final Set<E> collection) {
         throw new UnsupportedOperationException(NOT_IMPLEMENTED);
     }
 
@@ -424,7 +425,7 @@ public class CmwLightSerialiser implements IoSerialiser {
     }
 
     @Override
-    public <E> void put(final FieldDescription fieldDescription, final Collection<E> collection, final Type valueType, final BiFunction<Type, Type[], FieldSerialiser<E>> serialiserLookup) {
+    public <E> void put(final FieldDescription fieldDescription, final Collection<E> collection, final Type valueType) {
         throw new UnsupportedOperationException(NOT_IMPLEMENTED);
     }
 
@@ -434,7 +435,7 @@ public class CmwLightSerialiser implements IoSerialiser {
     }
 
     @Override
-    public <K, V, E> void put(final FieldDescription fieldDescription, final Map<K, V> map, Type keyType, Type valueType, BiFunction<Type, Type[], FieldSerialiser<E>> serialiserLookup) {
+    public <K, V, E> void put(final FieldDescription fieldDescription, final Map<K, V> map, Type keyType, Type valueType) {
         throw new UnsupportedOperationException(NOT_IMPLEMENTED);
     }
 
@@ -903,7 +904,7 @@ public class CmwLightSerialiser implements IoSerialiser {
     }
 
     @Override
-    public <E> void put(final String fieldName, final Collection<E> collection, final Type valueType, final BiFunction<Type, Type[], FieldSerialiser<E>> serialiserLookup) {
+    public <E> void put(final String fieldName, final Collection<E> collection, final Type valueType) {
         final DataType dataType;
         if (collection instanceof Queue) {
             dataType = DataType.QUEUE;
@@ -916,7 +917,7 @@ public class CmwLightSerialiser implements IoSerialiser {
         }
 
         final WireDataFieldDescription fieldHeader = putFieldHeader(fieldName, dataType);
-        this.put((FieldDescription) null, collection, valueType, serialiserLookup);
+        this.put((FieldDescription) null, collection, valueType);
         this.updateDataEndMarker(fieldHeader);
     }
 
@@ -928,9 +929,9 @@ public class CmwLightSerialiser implements IoSerialiser {
     }
 
     @Override
-    public <K, V, E> void put(final String fieldName, final Map<K, V> map, final Type keyType, final Type valueType, final BiFunction<Type, Type[], FieldSerialiser<E>> serialiserLookup) {
+    public <K, V, E> void put(final String fieldName, final Map<K, V> map, final Type keyType, final Type valueType) {
         final WireDataFieldDescription fieldHeader = putFieldHeader(fieldName, DataType.MAP);
-        this.put((FieldDescription) null, map, keyType, valueType, serialiserLookup);
+        this.put((FieldDescription) null, map, keyType, valueType);
         this.updateDataEndMarker(fieldHeader);
     }
 
@@ -1096,5 +1097,15 @@ public class CmwLightSerialiser implements IoSerialiser {
         }
 
         throw new IllegalArgumentException("DataType byteValue=" + byteValue + " rawByteValue=" + (byteValue & 0xFF) + " not mapped");
+    }
+
+    @Override
+    public void setFieldSerialiserLookupFunction(final BiFunction<Type, Type[], FieldSerialiser<Object>> serialiserLookupFunction) {
+        this.fieldSerialiserLookupFunction = serialiserLookupFunction;
+    }
+
+    @Override
+    public BiFunction<Type, Type[], FieldSerialiser<Object>> getSerialiserLookupFunction() {
+        return fieldSerialiserLookupFunction;
     }
 }

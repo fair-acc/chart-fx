@@ -49,6 +49,7 @@ public class JsonSerialiser implements IoSerialiser {
     private String queryFieldName = null;
     private boolean hasFieldBefore = false;
     private String indentation = "";
+    private BiFunction<Type, Type[], FieldSerialiser<Object>> fieldSerialiserLookupFunction;
 
     /**
      * @param buffer the backing IoBuffer (see e.g. {@link FastByteBuffer} or{@link ByteBuffer}
@@ -147,7 +148,7 @@ public class JsonSerialiser implements IoSerialiser {
 
     @Override
     @SuppressWarnings("unchecked")
-    public <E> Collection<E> getCollection(final Collection<E> collection, final BiFunction<Type, Type[], FieldSerialiser<E>> serialiserLookup) {
+    public <E> Collection<E> getCollection(final Collection<E> collection) {
         return tempRoot.get(queryFieldName).as(ArrayList.class);
     }
 
@@ -204,7 +205,7 @@ public class JsonSerialiser implements IoSerialiser {
 
     @Override
     @SuppressWarnings("unchecked")
-    public <E> List<E> getList(final List<E> collection, final BiFunction<Type, Type[], FieldSerialiser<E>> serialiserLookup) {
+    public <E> List<E> getList(final List<E> collection) {
         return tempRoot.get(queryFieldName).as(List.class);
     }
 
@@ -219,7 +220,7 @@ public class JsonSerialiser implements IoSerialiser {
     }
 
     @Override
-    public <K, V, E> Map<K, V> getMap(final Map<K, V> map, final BiFunction<Type, Type[], FieldSerialiser<E>> serialiserLookup) {
+    public <K, V, E> Map<K, V> getMap(final Map<K, V> map) {
         return null;
     }
 
@@ -229,7 +230,7 @@ public class JsonSerialiser implements IoSerialiser {
 
     @Override
     @SuppressWarnings("unchecked")
-    public <E> Queue<E> getQueue(final Queue<E> collection, final BiFunction<Type, Type[], FieldSerialiser<E>> serialiserLookup) {
+    public <E> Queue<E> getQueue(final Queue<E> collection) {
         return tempRoot.get(queryFieldName).as(ArrayDeque.class);
     }
 
@@ -239,7 +240,7 @@ public class JsonSerialiser implements IoSerialiser {
 
     @Override
     @SuppressWarnings("unchecked")
-    public <E> Set<E> getSet(final Set<E> collection, final BiFunction<Type, Type[], FieldSerialiser<E>> serialiserLookup) {
+    public <E> Set<E> getSet(final Set<E> collection) {
         return tempRoot.get(queryFieldName).as(HashSet.class);
     }
 
@@ -290,8 +291,8 @@ public class JsonSerialiser implements IoSerialiser {
     }
 
     @Override
-    public <E> void put(final FieldDescription fieldDescription, final Collection<E> collection, final Type valueType, final BiFunction<Type, Type[], FieldSerialiser<E>> serialiserLookup) {
-        put(fieldDescription.getFieldName(), collection, valueType, serialiserLookup);
+    public <E> void put(final FieldDescription fieldDescription, final Collection<E> collection, final Type valueType) {
+        put(fieldDescription.getFieldName(), collection, valueType);
     }
 
     @Override
@@ -300,12 +301,12 @@ public class JsonSerialiser implements IoSerialiser {
     }
 
     @Override
-    public <K, V, E> void put(final FieldDescription fieldDescription, final Map<K, V> map, final Type keyType, final Type valueType, final BiFunction<Type, Type[], FieldSerialiser<E>> serialiserLookup) {
-        put(fieldDescription.getFieldName(), map, keyType, valueType, serialiserLookup);
+    public <K, V, E> void put(final FieldDescription fieldDescription, final Map<K, V> map, final Type keyType, final Type valueType) {
+        put(fieldDescription.getFieldName(), map, keyType, valueType);
     }
 
     @Override
-    public <E> void put(final String fieldName, final Collection<E> collection, final Type valueType, final BiFunction<Type, Type[], FieldSerialiser<E>> serialiserLookup) {
+    public <E> void put(final String fieldName, final Collection<E> collection, final Type valueType) {
         lineBreak();
         builder.append('\"').append(fieldName).append("\", ").append("[");
         if (collection == null || collection.isEmpty()) {
@@ -330,7 +331,7 @@ public class JsonSerialiser implements IoSerialiser {
     }
 
     @Override
-    public <K, V, E> void put(final String fieldName, final Map<K, V> map, final Type keyType, final Type valueType, final BiFunction<Type, Type[], FieldSerialiser<E>> serialiserLookup) {
+    public <K, V, E> void put(final String fieldName, final Map<K, V> map, final Type keyType, final Type valueType) {
         lineBreak();
         builder.append('\"').append(fieldName).append("\", ").append('{');
         if (map == null || map.isEmpty()) {
@@ -909,5 +910,15 @@ public class JsonSerialiser implements IoSerialiser {
             }
         }
         //add if necessary new WireDataFieldDescription(this, fieldRoot, fieldName.hashCode(), fieldName, DataType.END_MARKER, 0, -1, -1)
+    }
+
+    @Override
+    public void setFieldSerialiserLookupFunction(final BiFunction<Type, Type[], FieldSerialiser<Object>> serialiserLookupFunction) {
+        this.fieldSerialiserLookupFunction = serialiserLookupFunction;
+    }
+
+    @Override
+    public BiFunction<Type, Type[], FieldSerialiser<Object>> getSerialiserLookupFunction() {
+        return fieldSerialiserLookupFunction;
     }
 }

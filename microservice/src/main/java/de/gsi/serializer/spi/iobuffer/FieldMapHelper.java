@@ -20,13 +20,13 @@ public class FieldMapHelper {
 
         final FieldSerialiser.TriFunction<Map<?, ?>> returnMapFunction = (io, obj, field) -> {
             final Map<?, ?> origMap = field == null ? null : (Map<?, ?>) field.getField().get(obj);
-            return io.getMap(origMap, serialiser.getSerialiserLookupFunction());
+            return io.getMap(origMap);
         };
 
         serialiser.addClassDefinition(new FieldSerialiser<>( //
                 (io, obj, field) -> field.getField().set(obj, returnMapFunction.apply(io, obj, field)), // reader
                 returnMapFunction, // return
-                (io, obj, field) -> io.put(field, (Map<?, ?>) field.getField().get(obj), field.getActualTypeArguments().get(0), field.getActualTypeArguments().get(1), serialiser.getSerialiserLookupFunction()), // writer
+                (io, obj, field) -> io.put(field, (Map<?, ?>) field.getField().get(obj), field.getActualTypeArguments().get(0), field.getActualTypeArguments().get(1)), // writer
                 Map.class));
     }
 }

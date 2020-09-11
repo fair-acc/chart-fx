@@ -236,15 +236,15 @@ public class WireDataFieldDescription implements FieldDescription {
         case ENUM:
             return ioSerialiser.getEnum(null);
         case LIST:
-            return ioSerialiser.getList(null, null);
+            return ioSerialiser.getList(null);
         case MAP:
-            return ioSerialiser.getMap(null, null);
+            return ioSerialiser.getMap(null);
         case QUEUE:
-            return ioSerialiser.getQueue(null, null);
+            return ioSerialiser.getQueue(null);
         case SET:
-            return ioSerialiser.getSet(null, null);
+            return ioSerialiser.getSet(null);
         case COLLECTION:
-            return ioSerialiser.getCollection(null, null);
+            return ioSerialiser.getCollection(null);
         case OTHER:
             return ioSerialiser.getCustomData(null);
         default:

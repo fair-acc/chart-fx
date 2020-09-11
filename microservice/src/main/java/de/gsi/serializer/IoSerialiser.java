@@ -63,7 +63,7 @@ public interface IoSerialiser {
 
     char[] getCharArray(final char[] dst, final int length);
 
-    <E> Collection<E> getCollection(Collection<E> collection, BiFunction<Type, Type[], FieldSerialiser<E>> serialiserLookup);
+    <E> Collection<E> getCollection(Collection<E> collection);
 
     <E> E getCustomData(FieldSerialiser<E> serialiser);
 
@@ -109,7 +109,7 @@ public interface IoSerialiser {
 
     int[] getIntArray(final int[] dst, final int length);
 
-    <E> List<E> getList(List<E> collection, BiFunction<Type, Type[], FieldSerialiser<E>> serialiserLookup);
+    <E> List<E> getList(List<E> collection);
 
     long getLong();
 
@@ -123,11 +123,11 @@ public interface IoSerialiser {
 
     long[] getLongArray(final long[] dst, final int length);
 
-    <K, V, E> Map<K, V> getMap(Map<K, V> map, BiFunction<Type, Type[], FieldSerialiser<E>> serialiserLookup);
+    <K, V, E> Map<K, V> getMap(Map<K, V> map);
 
-    <E> Queue<E> getQueue(Queue<E> collection, BiFunction<Type, Type[], FieldSerialiser<E>> serialiserLookup);
+    <E> Queue<E> getQueue(Queue<E> collection);
 
-    <E> Set<E> getSet(Set<E> collection, BiFunction<Type, Type[], FieldSerialiser<E>> serialiserLookup);
+    <E> Set<E> getSet(Set<E> collection);
 
     short getShort(); // NOPMD by rstein
 
@@ -161,17 +161,17 @@ public interface IoSerialiser {
 
     WireDataFieldDescription parseIoStream(boolean readHeader);
 
-    <E> void put(FieldDescription fieldDescription, Collection<E> collection, Type valueType, BiFunction<Type, Type[], FieldSerialiser<E>> serialiserLookup);
+    <E> void put(FieldDescription fieldDescription, Collection<E> collection, Type valueType);
 
     void put(FieldDescription fieldDescription, Enum<?> enumeration);
 
-    <K, V, E> void put(FieldDescription fieldDescription, Map<K, V> map, Type keyType, Type valueType, BiFunction<Type, Type[], FieldSerialiser<E>> serialiserLookup);
+    <K, V, E> void put(FieldDescription fieldDescription, Map<K, V> map, Type keyType, Type valueType);
 
-    <E> void put(String fieldName, Collection<E> collection, Type valueType, BiFunction<Type, Type[], FieldSerialiser<E>> serialiserLookup);
+    <E> void put(String fieldName, Collection<E> collection, Type valueType);
 
     void put(String fieldName, Enum<?> enumeration);
 
-    <K, V, E> void put(String fieldName, Map<K, V> map, Type keyType, Type valueType, BiFunction<Type, Type[], FieldSerialiser<E>> serialiserLookup);
+    <K, V, E> void put(String fieldName, Map<K, V> map, Type keyType, Type valueType);
 
     default void put(FieldDescription fieldDescription, final boolean[] src) {
         put(fieldDescription, src, -1);
@@ -374,4 +374,8 @@ public interface IoSerialiser {
     void putStartMarker(FieldDescription fieldDescription);
 
     void updateDataEndMarker(WireDataFieldDescription fieldHeader);
+
+    void setFieldSerialiserLookupFunction(BiFunction<Type, Type[], FieldSerialiser<Object>> serialiserLookupFunction);
+
+    BiFunction<Type, Type[], FieldSerialiser<Object>> getSerialiserLookupFunction();
 }
