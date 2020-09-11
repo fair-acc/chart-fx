@@ -132,6 +132,8 @@ class IoClassSerialiserTests {
         IoClassSerialiser serialiser = new IoClassSerialiser(buffer, BinarySerialiser.class);
 
         TestClass sourceClass = new TestClass();
+        sourceClass.integerBoxed = Integer.valueOf(1337);
+
         sourceClass.integerList = new ArrayList<>();
         sourceClass.integerList.add(1);
         sourceClass.integerList.add(2);
@@ -182,10 +184,17 @@ class IoClassSerialiserTests {
         buffer.reset(); // '0' writing at start of buffer
         serialiser.serialiseObject(sourceClass);
         buffer.reset(); // reset to read position (==0)
+
+        final WireDataFieldDescription root = serialiser.getMatchedIoSerialiser().parseIoStream(true);
+        root.printFieldStructure();
+        assertEquals(sourceClass.integerBoxed, ((WireDataFieldDescription) root.findChildField("de.gsi.serializer.IoClassSerialiserTests$TestClass").findChildField("integerBoxed")).data());
+        buffer.reset(); // reset to read position (==0)
         serialiser.deserialiseObject(destinationClass);
 
         buffer.reset(); // reset to read position (==0)
         serialiser.deserialiseObject(destinationClass);
+
+        assertEquals(sourceClass.integerBoxed, destinationClass.integerBoxed);
 
         assertEquals(sourceClass.integerList, destinationClass.integerList);
         assertEquals(1, destinationClass.integerList.get(0));
@@ -300,6 +309,8 @@ class IoClassSerialiserTests {
      * small test class to test (de-)serialisation of wrapped and/or compound object types
      */
     static class TestClass {
+        public Integer integerBoxed;
+
         public List<Integer> integerList;
         public List<String> stringList;
         public List<Integer> nullIntegerList;

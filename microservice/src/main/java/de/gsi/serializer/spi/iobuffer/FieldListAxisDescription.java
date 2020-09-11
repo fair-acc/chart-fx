@@ -31,7 +31,7 @@ public class FieldListAxisDescription extends FieldSerialiser<List<AxisDescripti
     }
 
     protected List<AxisDescription> execFieldReturn(final IoSerialiser ioSerialiser, Object obj, ClassFieldDescription field) {
-        final Object oldObject = field.getField().get(obj);
+        final Object oldObject = field == null ? null : field.getField().get(obj);
         final boolean isListPresent = oldObject instanceof List;
 
         final int nElements = ioSerialiser.getBuffer().getInt(); // number of elements
