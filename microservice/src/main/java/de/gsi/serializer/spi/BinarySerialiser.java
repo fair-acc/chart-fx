@@ -174,6 +174,7 @@ public class BinarySerialiser implements IoSerialiser {
     private boolean putFieldMetaData = true;
     private WireDataFieldDescription parent;
     private WireDataFieldDescription lastFieldHeader;
+    private BiFunction<Type, Type[], FieldSerialiser<Object>> fieldSerialiserLookupFunction;
 
     /**
      * @param buffer the backing IoBuffer (see e.g. {@link FastByteBuffer} or{@link ByteBuffer}
@@ -276,7 +277,7 @@ public class BinarySerialiser implements IoSerialiser {
     }
 
     @Override
-    public <E> Collection<E> getCollection(final Collection<E> collection, final BiFunction<Type, Type[], FieldSerialiser<E>> serialiserLookup) {
+    public <E> Collection<E> getCollection(final Collection<E> collection) {
         getArraySizeDescriptor();
         final int nElements = buffer.getInt();
         final DataType collectionType = getDataType(buffer.getByte());
@@ -307,10 +308,11 @@ public class BinarySerialiser implements IoSerialiser {
             final String secondaryTypeName = buffer.getStringISO8859();
             final Type classType = ClassUtils.getClassByName(classTypeName);
             final Type[] secondaryType = secondaryTypeName.isEmpty() ? new Type[0] : new Type[] { ClassUtils.getClassByName(secondaryTypeName) };
+            final BiFunction<Type, Type[], FieldSerialiser<Object>> serialiserLookup = getSerialiserLookupFunction();
             if (serialiserLookup == null) {
                 throw new IllegalArgumentException(PROTOCOL_ERROR_SERIALISER_LOOKUP_MUST_NOT_BE_NULL);
             }
-            final FieldSerialiser<E> serialiser = serialiserLookup.apply(classType, secondaryType);
+            final FieldSerialiser<E> serialiser = (FieldSerialiser<E>) serialiserLookup.apply(classType, secondaryType);
 
             if (serialiser == null) {
                 throw new IllegalArgumentException(NO_SERIALISER_IMP_FOUND + classTypeName);
@@ -339,7 +341,13 @@ public class BinarySerialiser implements IoSerialiser {
         try {
             classType = buffer.getStringISO8859();
             classSecondaryType = buffer.getStringISO8859();
-            return serialiser.getReturnObjectFunction().apply(this, null, null);
+            if (serialiser == null) {
+                final Type classTypeT = ClassUtils.getClassByName(classType);
+                final Type[] secondaryTypeT = classSecondaryType.isEmpty() ? new Type[0] : new Type[] { ClassUtils.getClassByName(classSecondaryType) };
+                return (E) getSerialiserLookupFunction().apply(classTypeT, secondaryTypeT).getReturnObjectFunction().apply(this, null, null);
+            } else {
+                return serialiser.getReturnObjectFunction().apply(this, null, null);
+            }
         } catch (Exception e) { // NOPMD
             LOGGER.atError().setCause(e).addArgument(classType).addArgument(classSecondaryType).log("problems with generic classType: {} classSecondaryType: {}");
             throw e;
@@ -488,7 +496,7 @@ public class BinarySerialiser implements IoSerialiser {
     }
 
     @Override
-    public <E> List<E> getList(final List<E> collection, BiFunction<Type, Type[], FieldSerialiser<E>> serialiserLookup) {
+    public <E> List<E> getList(final List<E> collection) {
         getArraySizeDescriptor();
         final int nElements = buffer.getInt();
         final DataType listDataType = getDataType(buffer.getByte());
@@ -509,10 +517,11 @@ public class BinarySerialiser implements IoSerialiser {
             final String secondaryTypeName = buffer.getStringISO8859();
             final Type classType = ClassUtils.getClassByName(classTypeName);
             final Type[] secondaryType = secondaryTypeName.isEmpty() ? new Type[0] : new Type[] { ClassUtils.getClassByName(secondaryTypeName) };
+            final BiFunction<Type, Type[], FieldSerialiser<Object>> serialiserLookup = getSerialiserLookupFunction();
             if (serialiserLookup == null) {
                 throw new IllegalArgumentException(PROTOCOL_ERROR_SERIALISER_LOOKUP_MUST_NOT_BE_NULL);
             }
-            final FieldSerialiser<E> serialiser = serialiserLookup.apply(classType, secondaryType);
+            final FieldSerialiser<E> serialiser = (FieldSerialiser<E>) serialiserLookup.apply(classType, secondaryType);
 
             if (serialiser == null) {
                 throw new IllegalArgumentException(NO_SERIALISER_IMP_FOUND + classTypeName);
@@ -546,7 +555,7 @@ public class BinarySerialiser implements IoSerialiser {
     }
 
     @Override
-    public <K, V, E> Map<K, V> getMap(final Map<K, V> map, BiFunction<Type, Type[], FieldSerialiser<E>> serialiserLookup) {
+    public <K, V, E> Map<K, V> getMap(final Map<K, V> map) {
         getArraySizeDescriptor();
         final int nElements = buffer.getInt();
         // convert into two linear arrays one of K and the other for V streamer encoding as
@@ -555,6 +564,7 @@ public class BinarySerialiser implements IoSerialiser {
         // read key type and key value vector
         final K[] keys;
         final DataType keyDataType = getDataType(buffer.getByte());
+        final BiFunction<Type, Type[], FieldSerialiser<Object>> serialiserLookup = getSerialiserLookupFunction();
         if (keyDataType != DataType.OTHER) {
             keys = getGenericArrayAsBoxedPrimitive(keyDataType);
         } else {
@@ -615,7 +625,7 @@ public class BinarySerialiser implements IoSerialiser {
     }
 
     @Override
-    public <E> Queue<E> getQueue(final Queue<E> collection, BiFunction<Type, Type[], FieldSerialiser<E>> serialiserLookup) {
+    public <E> Queue<E> getQueue(final Queue<E> collection) {
         getArraySizeDescriptor();
         final int nElements = buffer.getInt();
         final DataType listDataType = getDataType(buffer.getByte());
@@ -636,10 +646,11 @@ public class BinarySerialiser implements IoSerialiser {
             final String secondaryTypeName = buffer.getStringISO8859();
             final Type classType = ClassUtils.getClassByName(classTypeName);
             final Type[] secondaryType = secondaryTypeName.isEmpty() ? new Type[0] : new Type[] { ClassUtils.getClassByName(secondaryTypeName) };
+            final BiFunction<Type, Type[], FieldSerialiser<Object>> serialiserLookup = getSerialiserLookupFunction();
             if (serialiserLookup == null) {
                 throw new IllegalArgumentException(PROTOCOL_ERROR_SERIALISER_LOOKUP_MUST_NOT_BE_NULL);
             }
-            final FieldSerialiser<E> serialiser = serialiserLookup.apply(classType, secondaryType);
+            final FieldSerialiser<E> serialiser = (FieldSerialiser<E>) serialiserLookup.apply(classType, secondaryType);
 
             if (serialiser == null) {
                 throw new IllegalArgumentException(NO_SERIALISER_IMP_FOUND + classTypeName);
@@ -662,7 +673,7 @@ public class BinarySerialiser implements IoSerialiser {
     }
 
     @Override
-    public <E> Set<E> getSet(final Set<E> collection, BiFunction<Type, Type[], FieldSerialiser<E>> serialiserLookup) {
+    public <E> Set<E> getSet(final Set<E> collection) {
         getArraySizeDescriptor();
         final int nElements = buffer.getInt();
         final DataType listDataType = getDataType(buffer.getByte());
@@ -679,14 +690,15 @@ public class BinarySerialiser implements IoSerialiser {
         }
 
         if (DataType.OTHER.equals(valueDataType)) {
+            final BiFunction<Type, Type[], FieldSerialiser<Object>> serialiserLookup = getSerialiserLookupFunction();
+            if (serialiserLookup == null) {
+                throw new IllegalArgumentException(PROTOCOL_ERROR_SERIALISER_LOOKUP_MUST_NOT_BE_NULL);
+            }
             final String classTypeName = buffer.getStringISO8859();
             final String secondaryTypeName = buffer.getStringISO8859();
             final Type classType = ClassUtils.getClassByName(classTypeName);
             final Type[] secondaryType = secondaryTypeName.isEmpty() ? new Type[0] : new Type[] { ClassUtils.getClassByName(secondaryTypeName) };
-            if (serialiserLookup == null) {
-                throw new IllegalArgumentException(PROTOCOL_ERROR_SERIALISER_LOOKUP_MUST_NOT_BE_NULL);
-            }
-            final FieldSerialiser<E> serialiser = serialiserLookup.apply(classType, secondaryType);
+            final FieldSerialiser<E> serialiser = (FieldSerialiser<E>) serialiserLookup.apply(classType, secondaryType);
 
             if (serialiser == null) {
                 throw new IllegalArgumentException(NO_SERIALISER_IMP_FOUND + classTypeName);
@@ -799,7 +811,7 @@ public class BinarySerialiser implements IoSerialiser {
     }
 
     @Override
-    public <E> void put(final FieldDescription fieldDescription, final Collection<E> collection, final Type valueType, final BiFunction<Type, Type[], FieldSerialiser<E>> serialiserLookup) {
+    public <E> void put(final FieldDescription fieldDescription, final Collection<E> collection, final Type valueType) {
         final WireDataFieldDescription fieldHeader = putFieldHeader(fieldDescription);
         final Object[] values = collection.toArray();
         final int nElements = collection.size();
@@ -819,6 +831,7 @@ public class BinarySerialiser implements IoSerialiser {
             buffer.putByte(getDataType(DataType.COLLECTION));
         }
 
+        final BiFunction<Type, Type[], FieldSerialiser<Object>> serialiserLookup = getSerialiserLookupFunction();
         if (ClassUtils.isPrimitiveWrapperOrString(cleanedType) || serialiserLookup == null) {
             buffer.ensureAdditionalCapacity((nElements * entrySize) + 9);
             buffer.putByte(getDataType(valueDataType)); // write value element type
@@ -826,7 +839,7 @@ public class BinarySerialiser implements IoSerialiser {
         } else {
             buffer.putByte(getDataType(DataType.OTHER)); // write value element type
             final Type[] secondaryType = ClassUtils.getSecondaryType(valueType);
-            final FieldSerialiser<E> serialiser = serialiserLookup.apply(valueType, secondaryType);
+            final FieldSerialiser<E> serialiser = (FieldSerialiser<E>) serialiserLookup.apply(valueType, secondaryType);
             if (serialiser == null) {
                 throw new IllegalArgumentException("could not find serialiser for class type " + valueType);
             }
@@ -872,7 +885,7 @@ public class BinarySerialiser implements IoSerialiser {
     }
 
     @Override
-    public <K, V, E> void put(final FieldDescription fieldDescription, final Map<K, V> map, Type keyType, Type valueType, BiFunction<Type, Type[], FieldSerialiser<E>> serialiserLookup) {
+    public <K, V, E> void put(final FieldDescription fieldDescription, final Map<K, V> map, Type keyType, Type valueType) {
         final WireDataFieldDescription fieldHeader = putFieldHeader(fieldDescription);
         final Object[] keySet = map.keySet().toArray();
         final int nElements = keySet.length;
@@ -884,6 +897,7 @@ public class BinarySerialiser implements IoSerialiser {
 
         final Class<?> cleanedKeyType = ClassUtils.getRawType(keyType);
         final DataType keyDataType = DataType.fromClassType(cleanedKeyType);
+        final BiFunction<Type, Type[], FieldSerialiser<Object>> serialiserLookup = getSerialiserLookupFunction();
         if (serialiserLookup == null || ClassUtils.isPrimitiveWrapperOrString(cleanedKeyType)) {
             final int entrySize = 17; // as an initial estimate
             buffer.ensureAdditionalCapacity((nElements * entrySize) + 9);
@@ -893,7 +907,7 @@ public class BinarySerialiser implements IoSerialiser {
             // write key type
             buffer.putByte(getDataType(DataType.OTHER)); // write key element type
             final Type[] secondaryKeyType = ClassUtils.getSecondaryType(keyType);
-            final FieldSerialiser<E> serialiserKey = serialiserLookup.apply(keyType, secondaryKeyType);
+            final FieldSerialiser<E> serialiserKey = (FieldSerialiser<E>) serialiserLookup.apply(keyType, secondaryKeyType);
             if (serialiserKey == null) {
                 throw new IllegalArgumentException("could not find serialiser for key class type " + keyType);
             }
@@ -918,7 +932,7 @@ public class BinarySerialiser implements IoSerialiser {
             // write value type
             buffer.putByte(getDataType(DataType.OTHER)); // write key element type
             final Type[] secondaryValueType = ClassUtils.getSecondaryType(valueType);
-            final FieldSerialiser<E> serialiserValue = serialiserLookup.apply(valueType, secondaryValueType);
+            final FieldSerialiser<E> serialiserValue = (FieldSerialiser<E>) serialiserLookup.apply(valueType, secondaryValueType);
             if (serialiserValue == null) {
                 throw new IllegalArgumentException("could not find serialiser for value class type " + valueType);
             }
@@ -935,7 +949,7 @@ public class BinarySerialiser implements IoSerialiser {
     }
 
     @Override
-    public <E> void put(final String fieldName, final Collection<E> collection, final Type valueType, final BiFunction<Type, Type[], FieldSerialiser<E>> serialiserLookup) {
+    public <E> void put(final String fieldName, final Collection<E> collection, final Type valueType) {
         final DataType dataType;
         if (collection instanceof Queue) {
             dataType = DataType.QUEUE;
@@ -948,7 +962,7 @@ public class BinarySerialiser implements IoSerialiser {
         }
 
         final WireDataFieldDescription fieldHeader = putFieldHeader(fieldName, dataType);
-        this.put((FieldDescription) null, collection, valueType, serialiserLookup);
+        this.put((FieldDescription) null, collection, valueType);
         this.updateDataEndMarker(fieldHeader);
     }
 
@@ -960,9 +974,9 @@ public class BinarySerialiser implements IoSerialiser {
     }
 
     @Override
-    public <K, V, E> void put(final String fieldName, final Map<K, V> map, final Type keyType, final Type valueType, final BiFunction<Type, Type[], FieldSerialiser<E>> serialiserLookup) {
+    public <K, V, E> void put(final String fieldName, final Map<K, V> map, final Type keyType, final Type valueType) {
         final WireDataFieldDescription fieldHeader = putFieldHeader(fieldName, DataType.MAP);
-        this.put((FieldDescription) null, map, keyType, valueType, serialiserLookup);
+        this.put((FieldDescription) null, map, keyType, valueType);
         this.updateDataEndMarker(fieldHeader);
     }
 
@@ -1588,6 +1602,16 @@ public class BinarySerialiser implements IoSerialiser {
             fieldHeader.setDataSize(dataSize);
             buffer.putInt(headerStart + 9, dataSize); // 9 bytes = 1 byte for dataType, 4 bytes for fieldNameHashCode, 4 bytes for dataOffset
         }
+    }
+
+    @Override
+    public void setFieldSerialiserLookupFunction(final BiFunction<Type, Type[], FieldSerialiser<Object>> serialiserLookupFunction) {
+        this.fieldSerialiserLookupFunction = serialiserLookupFunction;
+    }
+
+    @Override
+    public BiFunction<Type, Type[], FieldSerialiser<Object>> getSerialiserLookupFunction() {
+        return fieldSerialiserLookupFunction;
     }
 
     protected <E> E[] getGenericArrayAsBoxedPrimitive(final DataType dataType) {

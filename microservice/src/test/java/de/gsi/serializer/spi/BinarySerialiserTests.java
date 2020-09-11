@@ -420,26 +420,26 @@ class BinarySerialiserTests {
         // add Collection - List<E>
         final List<Integer> list = Arrays.asList(1, 2, 3);
         positionBefore.add(buffer.position());
-        ioSerialiser.put("collection", list, Integer.class, null);
+        ioSerialiser.put("collection", list, Integer.class);
         positionAfter.add(buffer.position());
 
         // add Collection - Set<E>
         final Set<Integer> set = Set.of(1, 2, 3);
         positionBefore.add(buffer.position());
-        ioSerialiser.put("set", set, Integer.class, null);
+        ioSerialiser.put("set", set, Integer.class);
         positionAfter.add(buffer.position());
 
         // add Collection - Queue<E>
         final Queue<Integer> queue = new LinkedList<>(Arrays.asList(1, 2, 3));
         positionBefore.add(buffer.position());
-        ioSerialiser.put("queue", queue, Integer.class, null);
+        ioSerialiser.put("queue", queue, Integer.class);
         positionAfter.add(buffer.position());
 
         // add Map
         final Map<Integer, String> map = new HashMap<>();
         list.forEach(item -> map.put(item, "Item#" + item.toString()));
         positionBefore.add(buffer.position());
-        ioSerialiser.put("map", map, Integer.class, String.class, null);
+        ioSerialiser.put("map", map, Integer.class, String.class);
         positionAfter.add(buffer.position());
 
         // add Enum
@@ -493,13 +493,13 @@ class BinarySerialiserTests {
         assertEquals(3, ioSerialiser.getBuffer().getInt(), "array size");
         buffer.position(header.getDataStartPosition());
         final int readPosition = buffer.position();
-        Collection<Integer> retrievedCollection = ioSerialiser.getCollection(null, null);
+        Collection<Integer> retrievedCollection = ioSerialiser.getCollection(null);
         assertNotNull(retrievedCollection, "retrieved collection not null");
         assertEquals(list, retrievedCollection);
         assertEquals(buffer.position(), header.getDataStartPosition() + header.getDataSize(), "buffer position data end");
         // check for specific List interface
         buffer.position(readPosition);
-        List<Integer> retrievedList = ioSerialiser.getList(null, null);
+        List<Integer> retrievedList = ioSerialiser.getList(null);
         assertNotNull(retrievedList, "retrieved collection List not null");
         assertEquals(list, retrievedList);
         assertEquals(positionAfter.removeFirst(), buffer.position());
@@ -517,7 +517,7 @@ class BinarySerialiserTests {
         assertEquals(ARRAY_DIM_1D, ioSerialiser.getBuffer().getInt(), "dimension");
         assertEquals(3, ioSerialiser.getBuffer().getInt(), "array size");
         buffer.position(header.getDataStartPosition());
-        Collection<Integer> retrievedSet = ioSerialiser.getSet(null, null);
+        Collection<Integer> retrievedSet = ioSerialiser.getSet(null);
         assertNotNull(retrievedSet, "retrieved set not null");
         assertEquals(set, retrievedSet);
         assertEquals(positionAfter.removeFirst(), buffer.position());
@@ -535,7 +535,7 @@ class BinarySerialiserTests {
         assertEquals(ARRAY_DIM_1D, ioSerialiser.getBuffer().getInt(), "dimension");
         assertEquals(3, ioSerialiser.getBuffer().getInt(), "array size");
         buffer.position(header.getDataStartPosition());
-        Queue<Integer> retrievedQueue = ioSerialiser.getQueue(null, null);
+        Queue<Integer> retrievedQueue = ioSerialiser.getQueue(null);
         assertNotNull(retrievedQueue, "retrieved set not null");
         // assertEquals(queue, retrievedQueue); // N.B. no direct comparison possible -> only partial Queue interface overlapp
         while (!queue.isEmpty() && !retrievedQueue.isEmpty()) {
@@ -558,7 +558,7 @@ class BinarySerialiserTests {
         assertEquals(ARRAY_DIM_1D, ioSerialiser.getBuffer().getInt(), "dimension");
         assertEquals(3, ioSerialiser.getBuffer().getInt(), "array size");
         buffer.position(header.getDataStartPosition());
-        Map<Integer, String> retrievedMap = ioSerialiser.getMap(null, null);
+        Map<Integer, String> retrievedMap = ioSerialiser.getMap(null);
         assertNotNull(retrievedMap, "retrieved set not null");
         assertEquals(map, retrievedMap); // N.B. no direct comparison possible -> only partial Queue interface overlapp
         assertEquals(positionAfter.removeFirst(), buffer.position());
@@ -644,20 +644,20 @@ class BinarySerialiserTests {
         ioSerialiser.put("string[]", new String[] { "string" }, 1);
 
         final Collection<Integer> collection = Arrays.asList(1, 2, 3);
-        ioSerialiser.put("collection", collection, Integer.class, null); // add Collection - List<E>
+        ioSerialiser.put("collection", collection, Integer.class); // add Collection - List<E>
 
         final List<Integer> list = Arrays.asList(1, 2, 3);
-        ioSerialiser.put("list", list, Integer.class, null); // add Collection - List<E>
+        ioSerialiser.put("list", list, Integer.class); // add Collection - List<E>
 
         final Set<Integer> set = Set.of(1, 2, 3);
-        ioSerialiser.put("set", set, Integer.class, null); // add Collection - Set<E>
+        ioSerialiser.put("set", set, Integer.class); // add Collection - Set<E>
 
         final Queue<Integer> queue = new LinkedList<>(Arrays.asList(1, 2, 3));
-        ioSerialiser.put("queue", queue, Integer.class, null); // add Collection - Queue<E>
+        ioSerialiser.put("queue", queue, Integer.class); // add Collection - Queue<E>
 
         final Map<Integer, String> map = new HashMap<>();
         list.forEach(item -> map.put(item, "Item#" + item.toString()));
-        ioSerialiser.put("map", map, Integer.class, String.class, null); // add Map
+        ioSerialiser.put("map", map, Integer.class, String.class); // add Map
 
         ioSerialiser.put("enum", DataType.ENUM); // add Enum
 

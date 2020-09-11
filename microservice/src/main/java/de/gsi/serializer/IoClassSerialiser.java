@@ -519,6 +519,7 @@ public class IoClassSerialiser {
     private void setMatchedIoSerialiser(final IoSerialiser matchedIoSerialiser) {
         this.matchedIoSerialiser = matchedIoSerialiser;
         this.matchedIoSerialiser.setBuffer(dataBuffer);
+        this.matchedIoSerialiser.setFieldSerialiserLookupFunction(getSerialiserLookupFunction());
         assert this.matchedIoSerialiser.getBuffer() == dataBuffer;
         startMarkerFunction = this.matchedIoSerialiser::putStartMarker;
         endMarkerFunction = this.matchedIoSerialiser::putEndMarker;

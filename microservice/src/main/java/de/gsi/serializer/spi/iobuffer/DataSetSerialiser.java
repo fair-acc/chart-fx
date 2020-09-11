@@ -225,13 +225,13 @@ public class DataSetSerialiser { // NOPMD
     protected void parseDataLabels(final DataSetBuilder builder, final FieldDescription fieldRoot) {
         if (checkFieldCompatibility(fieldRoot, DATA_LABELS.hashCode(), DATA_LABELS, DataType.MAP) != null) {
             Map<Integer, String> map = new HashMap<>();
-            map = ioSerialiser.getMap(map, null);
+            map = ioSerialiser.getMap(map);
             builder.setDataLabelMap(map);
         }
 
         if (checkFieldCompatibility(fieldRoot, DATA_STYLES.hashCode(), DATA_STYLES, DataType.MAP) != null) {
             Map<Integer, String> map = new HashMap<>();
-            map = ioSerialiser.getMap(map, null);
+            map = ioSerialiser.getMap(map);
             builder.setDataStyleMap(map);
         }
     }
@@ -267,7 +267,7 @@ public class DataSetSerialiser { // NOPMD
 
         if (checkFieldCompatibility(rootField, META_INFO.hashCode(), META_INFO, DataType.MAP) != null) {
             Map<String, String> map = new HashMap<>();
-            map = ioSerialiser.getMap(map, null);
+            map = ioSerialiser.getMap(map);
             builder.setMetaInfoMap(map);
         }
     }
@@ -293,11 +293,11 @@ public class DataSetSerialiser { // NOPMD
         if (dataSet instanceof AbstractDataSet) {
             final StringHashMapList labelMap = ((AbstractDataSet<?>) dataSet).getDataLabelMap();
             if (!labelMap.isEmpty()) {
-                ioSerialiser.put(DATA_LABELS, labelMap, Integer.class, String.class, null);
+                ioSerialiser.put(DATA_LABELS, labelMap, Integer.class, String.class);
             }
             final StringHashMapList styleMap = ((AbstractDataSet<?>) dataSet).getDataStyleMap();
             if (!styleMap.isEmpty()) {
-                ioSerialiser.put(DATA_STYLES, styleMap, Integer.class, String.class, null);
+                ioSerialiser.put(DATA_STYLES, styleMap, Integer.class, String.class);
             }
             return;
         }
@@ -311,7 +311,7 @@ public class DataSetSerialiser { // NOPMD
             }
         }
         if (!labelMap.isEmpty()) {
-            ioSerialiser.put(DATA_LABELS, labelMap, Integer.class, String.class, null);
+            ioSerialiser.put(DATA_LABELS, labelMap, Integer.class, String.class);
         }
 
         final Map<Integer, String> styleMap = new HashMap<>();
@@ -322,7 +322,7 @@ public class DataSetSerialiser { // NOPMD
             }
         }
         if (!styleMap.isEmpty()) {
-            ioSerialiser.put(DATA_STYLES, styleMap, Integer.class, String.class, null);
+            ioSerialiser.put(DATA_STYLES, styleMap, Integer.class, String.class);
         }
     }
 
@@ -360,7 +360,7 @@ public class DataSetSerialiser { // NOPMD
         ioSerialiser.put(INFO_LIST, metaDataSet.getInfoList().toArray(new String[0]));
         ioSerialiser.put(WARNING_LIST, metaDataSet.getWarningList().toArray(new String[0]));
         ioSerialiser.put(ERROR_LIST, metaDataSet.getErrorList().toArray(new String[0]));
-        ioSerialiser.put(META_INFO, metaDataSet.getMetaInfo(), String.class, String.class, null);
+        ioSerialiser.put(META_INFO, metaDataSet.getMetaInfo(), String.class, String.class);
     }
 
     /**

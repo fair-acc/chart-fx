@@ -22,22 +22,22 @@ public class FieldCollectionsHelper {
     public static void register(final IoClassSerialiser serialiser) {
         // Collection serialiser mapper to IoBuffer
         final FieldSerialiser.TriFunction<Collection<?>> returnCollection = (io, obj, field) -> //
-                io.getCollection(field == null ? null : (Collection<?>) field.getField().get(obj), serialiser.getSerialiserLookupFunction()); // return function
+                io.getCollection(field == null ? null : (Collection<?>) field.getField().get(obj)); // return function
         final FieldSerialiser.TriFunction<Collection<?>> returnList = (io, obj, field) -> //
-                io.getList(field == null ? null : (List<?>) field.getField().get(obj), serialiser.getSerialiserLookupFunction()); // return function
+                io.getList(field == null ? null : (List<?>) field.getField().get(obj)); // return function
         final FieldSerialiser.TriFunction<Collection<?>> returnQueue = (io, obj, field) -> //
-                io.getQueue(field == null ? null : (Queue<?>) field.getField().get(obj), serialiser.getSerialiserLookupFunction()); // return function
+                io.getQueue(field == null ? null : (Queue<?>) field.getField().get(obj)); // return function
         final FieldSerialiser.TriFunction<Collection<?>> returnSet = (io, obj, field) -> //
-                io.getSet(field == null ? null : (Set<?>) field.getField().get(obj), serialiser.getSerialiserLookupFunction()); // return function
+                io.getSet(field == null ? null : (Set<?>) field.getField().get(obj)); // return function
 
         final FieldSerialiser.TriConsumer collectionWriter = (io, obj, field) -> {
             if (field != null && !field.getActualTypeArguments().isEmpty() && ClassUtils.isPrimitiveWrapperOrString(ClassUtils.getRawType(field.getActualTypeArguments().get(0)))) {
-                io.put(field, (Collection<?>) field.getField().get(obj), field.getActualTypeArguments().get(0), null);
+                io.put(field, (Collection<?>) field.getField().get(obj), field.getActualTypeArguments().get(0));
                 return;
             }
             if (field != null) {
                 // Collection<custom class> serialiser
-                io.put(field, (Collection<?>) field.getField().get(obj), field.getActualTypeArguments().get(0), serialiser.getSerialiserLookupFunction());
+                io.put(field, (Collection<?>) field.getField().get(obj), field.getActualTypeArguments().get(0));
                 return;
             }
             throw new IllegalArgumentException("serialiser for obj = '" + obj + "' and type = '" + (obj == null ? "null" : obj.getClass()) + "'  not yet implemented, field = " + field);
