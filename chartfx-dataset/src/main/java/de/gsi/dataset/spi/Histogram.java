@@ -111,24 +111,24 @@ public class Histogram extends AbstractHistogram implements Histogram1D, DataSet
     }
 
     @Override
-    public int findBin(final int dimIndex, final double x) {
+    public int findBin(final int dimIndex, final double val) {
         if (getAxisDescription(dimIndex).getLength() == 0.0) {
             return 0;
         }
-        if (!getAxisDescription(dimIndex).contains(x)) {
-            if (x < getAxisDescription(dimIndex).getMin()) {
+        if (!getAxisDescription(dimIndex).contains(val)) {
+            if (val < getAxisDescription(dimIndex).getMin()) {
                 return 0; // underflow bin
             }
             return getDataCount() - 1; // overflow bin
         }
         if (isEquiDistant()) {
-            final double diff = x - getAxisDescription(dimIndex).getMin();
+            final double diff = val - getAxisDescription(dimIndex).getMin();
             final double len = getAxisDescription(dimIndex).getLength();
             final int count = getDataCount();
             final double delta = len / count;
             return (int) Math.round(diff / delta);
         }
-        return findNextLargerIndex(axisBins[0], x);
+        return findNextLargerIndex(axisBins[0], val);
     }
 
     @Override
@@ -145,7 +145,7 @@ public class Histogram extends AbstractHistogram implements Histogram1D, DataSet
 
     @Override
     public List<String> getErrorList() {
-        return Collections.<String>emptyList();
+        return Collections.emptyList();
     }
 
     @Override
@@ -156,7 +156,7 @@ public class Histogram extends AbstractHistogram implements Histogram1D, DataSet
 
     @Override
     public List<String> getInfoList() {
-        return Collections.<String>emptyList();
+        return Collections.emptyList();
     }
 
     //    @Override
