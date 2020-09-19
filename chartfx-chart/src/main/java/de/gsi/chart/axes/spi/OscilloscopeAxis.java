@@ -44,17 +44,17 @@ public class OscilloscopeAxis extends AbstractAxis implements Axis {
     public static final SortedSet<Number> DEFAULT_MULTIPLIERS1 = Collections.unmodifiableSortedSet(new TreeSet<>(Arrays.asList(1.0, 2.0, 5.0)));
     public static final SortedSet<Number> DEFAULT_MULTIPLIERS2 = Collections
                                                                          .unmodifiableSortedSet(new TreeSet<>(Arrays.asList(1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0, 6.5, 7.0, 7.5, 8.0, 8.5, 9.0, 9.5)));
-    private final DefaultAxisTransform axisTransform = new DefaultAxisTransform(this);
-    private TickUnitSupplier tickUnitSupplier = new DefaultTickUnitSupplier(DEFAULT_MULTIPLIERS1);
-    private final DataRange clampedRange = new DataRange();
+    private final transient DefaultAxisTransform axisTransform = new DefaultAxisTransform(this);
+    private transient TickUnitSupplier tickUnitSupplier = new DefaultTickUnitSupplier(DEFAULT_MULTIPLIERS1);
+    private final transient DataRange clampedRange = new DataRange();
 
-    private final DataRange minRange = new DataRange();
-    private final DataRange maxRange = new DataRange();
+    private final transient DataRange minRange = new DataRange();
+    private final transient DataRange maxRange = new DataRange();
     private final StyleableDoubleProperty axisZeroPosition = CSS.createDoubleProperty(this, "axisZeroPosition", 0.5, true, (oldVal, newVal) -> Math.max(0.0, Math.min(newVal, 1.0)), this::requestAxisLayout);
     private final StyleableDoubleProperty axisZeroValue = CSS.createDoubleProperty(this, "axisZeroValue", 0.0, true, null, this::requestAxisLayout);
-    private final Cache cache = new Cache();
+    private final transient Cache cache = new Cache();
     private double offset;
-    protected boolean isUpdating = true;
+    protected boolean isUpdating;
 
     /**
      * Creates an {@link #autoRangingProperty() auto-ranging} Axis.
@@ -323,6 +323,9 @@ public class OscilloscopeAxis extends AbstractAxis implements Axis {
 
     @Override
     protected void updateCachedVariables() {
+        if (cache == null) { // lgtm [java/useless-null-check] -- called from static initializer
+            return;
+        }
         cache.updateCachedAxisVariables();
     }
 
@@ -358,7 +361,7 @@ public class OscilloscopeAxis extends AbstractAxis implements Axis {
         private void updateCachedAxisVariables() {
             axisWidth = getWidth();
             axisHeight = getHeight();
-            localCurrentLowerBound = currentLowerBound.get();
+            localCurrentLowerBound = OscilloscopeAxis.super.getMin();
             localCurrentUpperBound = OscilloscopeAxis.super.getMax();
 
             upperBoundLog = axisTransform.forward(getMax());

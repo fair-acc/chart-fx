@@ -67,8 +67,8 @@ public final class NumericAxis extends AbstractAxis {
      */
     public NumericAxis() {
         super();
-        super.currentLowerBound.addListener((evt, o, n) -> {
-            localCurrentLowerBound = currentLowerBound.get();
+        super.minProperty().addListener((evt, o, n) -> {
+            localCurrentLowerBound = getMin();
             final double zero = super.getDisplayPosition(0);
             localOffset = zero + localCurrentLowerBound * scaleProperty().get();
         });
@@ -76,7 +76,7 @@ public final class NumericAxis extends AbstractAxis {
         super.scaleProperty().addListener((evt, o, n) -> {
             localScale = scaleProperty().get();
             final double zero = super.getDisplayPosition(0);
-            localOffset = zero + currentLowerBound.get() * localScale;
+            localOffset = zero + getMin() * localScale;
         });
     }
 
@@ -106,7 +106,7 @@ public final class NumericAxis extends AbstractAxis {
         this.setName(axisLabel);
         setTickUnit(tickUnit);
 
-        super.currentLowerBound.addListener((evt, o, n) -> localCurrentLowerBound = currentLowerBound.get());
+        super.minProperty().addListener((evt, o, n) -> localCurrentLowerBound = getMin());
         super.scaleProperty().addListener((evt, o, n) -> localScale = scaleProperty().get());
     }
 
@@ -515,12 +515,6 @@ public final class NumericAxis extends AbstractAxis {
     // -------------- STYLESHEET HANDLING
     // ------------------------------------------------------------------------------
 
-    @Override
-    protected void setRange(final AxisRange range, final boolean animate) {
-        super.setRange(range, animate);
-        setTickUnit(range.getTickUnit());
-    }
-
     public static List<CssMetaData<? extends Styleable, ?>> getClassCssMetaData() {
         return CSS.getCssMetaData();
     }
@@ -538,27 +532,6 @@ public final class NumericAxis extends AbstractAxis {
         }
         return paddedBound;
     }
-
-    // private static class NumericAxisRange extends Range {
-    // private final double tickUnit;
-    //
-    // NumericAxisRange(final Range range, final double tickUnit) {
-    // this(range.getLowerBound(), range.getUpperBound(), range.getScale(),
-    // range.getTickFormat(), tickUnit);
-    // }
-    //
-    // NumericAxisRange(final double lowerBound, final double upperBound, final
-    // double scale, final String tickFormat,
-    // final double tickUnit) {
-    // super(lowerBound, upperBound, scale, tickFormat, tickUnit, -1);
-    // this.tickUnit = tickUnit;
-    // }
-    //
-    // @Override
-    // public double getTickUnit() {
-    // return tickUnit;
-    // }
-    // }
 
     private static double computeFistMajorTick(final double lowerBound, final double tickUnit) {
         return Math.ceil(lowerBound / tickUnit) * tickUnit;

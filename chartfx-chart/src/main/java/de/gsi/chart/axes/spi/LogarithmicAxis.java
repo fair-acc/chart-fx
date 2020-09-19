@@ -34,9 +34,9 @@ public class LogarithmicAxis extends AbstractAxis {
     private static final int DEFAULT_TICK_COUNT = 9;
     private static final TickUnitSupplier DEFAULT_TICK_UNIT_SUPPLIER = new DefaultTickUnitSupplier();
 
-    private final Cache cache = new Cache();
+    private final transient Cache cache = new Cache();
 
-    private boolean isUpdating = true;
+    private boolean isUpdating;
 
     private final StyleableDoubleProperty tickUnit = CSS.createDoubleProperty(this, "tickUnit", 5d, true, null, () -> {
         if (!isAutoRanging()) {
@@ -92,12 +92,12 @@ public class LogarithmicAxis extends AbstractAxis {
             final double tickUnit) {
         super(lowerBound, upperBound);
         this.setName(axisLabel);
-        if (lowerBound >= upperBound || lowerBound == 0 && upperBound == 0) {
+        if (lowerBound >= upperBound || lowerBound == 0 || (lowerBound == 0 && upperBound == 0)) {
             setAutoRanging(true);
         }
         setTickUnit(tickUnit);
         setMinorTickCount(LogarithmicAxis.DEFAULT_TICK_COUNT);
-        super.currentLowerBound.addListener((evt, o, n) -> cache.updateCachedAxisVariables());
+        super.minProperty().addListener((evt, o, n) -> cache.updateCachedAxisVariables());
         super.maxProperty().addListener((evt, o, n) -> cache.updateCachedAxisVariables());
         super.scaleProperty().addListener((evt, o, n) -> cache.updateCachedAxisVariables());
         widthProperty().addListener((ch, o, n) -> cache.axisWidth = getWidth());
@@ -387,12 +387,6 @@ public class LogarithmicAxis extends AbstractAxis {
         return new AxisRange(minValue, maxValue, axisLength, newScale, tickUnit.get());
     }
 
-    @Override
-    protected void setRange(final AxisRange range, final boolean animate) {
-        super.setRange(range, animate);
-        setTickUnit(range.getTickUnit());
-    }
-
     public static List<CssMetaData<? extends Styleable, ?>> getClassCssMetaData() {
         return CSS.getCssMetaData();
     }
@@ -411,7 +405,7 @@ public class LogarithmicAxis extends AbstractAxis {
         protected double logBase;
 
         private void updateCachedAxisVariables() {
-            localCurrentLowerBound = currentLowerBound.get();
+            localCurrentLowerBound = LogarithmicAxis.super.getMin();
             localCurrentUpperBound = LogarithmicAxis.super.getMax();
             upperBoundLog = log(getMax());
             lowerBoundLog = log(getMin());

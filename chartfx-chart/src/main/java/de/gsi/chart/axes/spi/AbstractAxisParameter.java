@@ -50,7 +50,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     protected static final int DEFAULT_MINOR_TICK_COUNT = 10;
 
     private final transient AtomicBoolean autoNotification = new AtomicBoolean(true);
-    private final List<EventListener> updateListeners = Collections.synchronizedList(new LinkedList<>());
+    private final transient List<EventListener> updateListeners = Collections.synchronizedList(new LinkedList<>());
 
     private final StyleableIntegerProperty dimIndex = CSS.createIntegerProperty(this, "dimIndex", -1, this::requestAxisLayout);
     /**
@@ -60,7 +60,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
      */
     private final Path majorTickStyle = new Path();
     private final Path minorTickStyle = new Path();
-    private final AxisLabel axisLabel = new AxisLabel();
+    private final transient AxisLabel axisLabel = new AxisLabel();
     /**
      * This is the minimum/maximum current data value and it is used while auto ranging. Package private solely for test
      * purposes TODO: replace concept with 'actual range', 'user-defined range', 'auto-range' (+min, max range limit for
@@ -79,10 +79,10 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     protected final ObservableList<TickMark> minorTickMarks = FXCollections.observableArrayList(new NoDuplicatesList<>());
 
     /** if available (last) auto-range that has been computed */
-    private final AxisRange autoRange = new AxisRange();
+    private final transient AxisRange autoRange = new AxisRange();
 
     /** user-specified range (ie. limits based on [lower,upper]Bound) */
-    private final AxisRange userRange = new AxisRange();
+    private final transient AxisRange userRange = new AxisRange();
 
     /**
      * The side of the plot which this axis is being drawn on default axis orientation is BOTTOM, can be set latter to
@@ -94,8 +94,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     private final StyleableObjectProperty<AxisLabelOverlapPolicy> overlapPolicy = CSS.createObjectProperty(this, "overlapPolicy", AxisLabelOverlapPolicy.SKIP_ALT, StyleConverter.getEnumConverter(AxisLabelOverlapPolicy.class), () -> invokeListener(new AxisChangeEvent(AbstractAxisParameter.this)));
 
     /**
-     * The relative alignment (N.B. clamped to [0.0,1.0]) of the axis if drawn on top of the main canvas (N.B. side ==
-     * CENTER_HOR or CENTER_VER
+     * The relative alignment (N.B. clamped to [0.0,1.0]) of the axis if drawn on top of the main canvas (N.B. side == CENTER_HOR or CENTER_VER
      */
     private final StyleableDoubleProperty axisCenterPosition = CSS.createDoubleProperty(this, "axisCenterPosition", 0.5, true, (oldVal, newVal) -> Math.max(0.0, Math.min(newVal, 1.0)), this::requestAxisLayout);
 
@@ -132,9 +131,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     private final StyleableObjectProperty<Font> tickLabelFont = CSS.createObjectProperty(this, "tickLabelFont", Font.font("System", 8), false, StyleConverter.getFontConverter(), null, () -> {
         // TODO: remove once verified that measure isn't needed anymore
         final Font f = tickLabelFontProperty().get();
-        for (final TickMark tm : getTickMarks()) {
-            tm.setFont(f);
-        }
+        getTickMarks().forEach(tm -> tm.setFont(f));
         invalidate();
         invokeListener(new AxisChangeEvent(this));
     });
@@ -207,6 +204,8 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
         }
     };
 
+    protected double cachedOffset; // for caching
+
     /**
      * StringConverter used to format tick mark labels. If null a default will be used
      */
@@ -239,15 +238,6 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
      * majorTickMark
      */
     private final StyleableIntegerProperty minorTickCount = CSS.createIntegerProperty(this, "minorTickCount", 10, this::requestAxisLayout);
-    /**
-     * Used to update scale property in AbstractAxisParameter (that is read-only) TODO: remove is possible
-     */
-    protected final DoubleProperty scaleBinding = new SimpleDoubleProperty(this, "scaleBinding", getScale()) {
-        @Override
-        protected void invalidated() {
-            setScale(get());
-        }
-    };
 
     private final StyleableBooleanProperty autoGrowRanging = CSS.createBooleanProperty(this, "autoGrowRanging", false, this::requestAxisLayout);
 
@@ -257,8 +247,6 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
         protected void invalidated() {
             isInvertedAxis = get();
             invalidate();
-            // layoutChildren();
-            // layout();
             invokeListener(new AxisChangeEvent(AbstractAxisParameter.this));
         }
     };
@@ -274,8 +262,6 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
                 setMinorTickCount(AbstractAxisParameter.DEFAULT_MINOR_TICK_COUNT);
             }
             invalidate();
-            // layoutChildren();
-            // layout();
             invokeListener(new AxisChangeEvent(AbstractAxisParameter.this));
         }
     };
@@ -315,6 +301,28 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
         invalidate();
         invokeListener(new AxisChangeEvent(AbstractAxisParameter.this));
     });
+
+    protected final ChangeListener<? super Number> scaleChangeListener = (ch, o, n) -> {
+        final double axisLength = getSide().isVertical() ? getHeight() : getWidth(); // [pixel]
+        final double lowerBound = getMin();
+        final double upperBound = getMax();
+        if (!Double.isFinite(axisLength) || !Double.isFinite(lowerBound) || !Double.isFinite(upperBound)) {
+            return;
+        }
+
+        double newScale;
+        final double diff = upperBound - lowerBound;
+        if (getSide().isVertical()) {
+            newScale = diff == 0 ? -axisLength : -(axisLength / diff);
+            cachedOffset = axisLength;
+        } else { // HORIZONTAL
+            newScale = diff == 0 ? axisLength : axisLength / diff;
+            cachedOffset = 0;
+        }
+
+        setScale(newScale == 0 ? -1.0 : newScale);
+        updateCachedVariables();
+    };
 
     /**
      * Create a auto-ranging AbstractAxisParameter
@@ -362,8 +370,8 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
             getUserRange().set(getMin(), getMax());
             // axis range has been set manually -&gt; disable auto-ranging
             // TODO: enable once the new scheme checks out
-            // setAutoRanging(false);
-            // setAutoGrowRanging(false);
+            // setAutoRanging(false)
+            // setAutoGrowRanging(false)
 
             if (!isAutoRanging() && !isAutoGrowRanging()) {
                 invokeListener(new AxisChangeEvent(this));
@@ -378,6 +386,18 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
 
         widthProperty().addListener((ch, o, n) -> invalidate());
         heightProperty().addListener((ch, o, n) -> invalidate());
+
+        minProperty().addListener(scaleChangeListener);
+        maxProperty().addListener(scaleChangeListener);
+        widthProperty().addListener(scaleChangeListener);
+        heightProperty().addListener(scaleChangeListener);
+    }
+
+    /**
+     * to be overwritten by derived class that want to cache variables for efficiency reasons
+     */
+    protected void updateCachedVariables() { // NOPMD by rstein function can but does not have to be overwritten
+        // called once new axis parameters have been established
     }
 
     @Override
@@ -1252,10 +1272,6 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
         final double logRange = Math.log10(range);
         final double power3Upper = 3.0 * Math.ceil(logRange / 3.0);
         final double power3Lower = 3.0 * Math.floor(logRange / 3.0);
-        // TODO: check whether smaller to -INF or closest to '0' should be
-        // chosen
-        // System.err.println(" range = " + range + " p3U = " + power3Upper + "
-        // p3L = " + power3Lower);
         final double a = Math.min(power3Upper, power3Lower);
         final double power = Math.pow(10, a);
         final double oldPower = getUnitScaling();
