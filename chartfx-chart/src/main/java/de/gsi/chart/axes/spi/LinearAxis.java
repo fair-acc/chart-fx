@@ -29,9 +29,9 @@ public class LinearAxis extends AbstractAxis {
     private static final TickUnitSupplier DEFAULT_TICK_UNIT_SUPPLIER = new DefaultTickUnitSupplier();
 
     private static final int DEFAULT_RANGE_LENGTH = 2;
-    private final Cache cache = new Cache();
+    private final transient Cache cache = new Cache();
 
-    private boolean isUpdating = true;
+    private boolean isUpdating;
 
     private final BooleanProperty forceZeroInRange = new SimpleBooleanProperty(this, "forceZeroInRange", false) {
         @Override
@@ -84,12 +84,12 @@ public class LinearAxis extends AbstractAxis {
     public LinearAxis(final String axisLabel, final double lowerBound, final double upperBound, final double tickUnit) {
         super(lowerBound, upperBound);
         this.setName(axisLabel);
-        if (lowerBound >= upperBound || lowerBound == 0 && upperBound == 0) {
+        if (lowerBound >= upperBound || lowerBound == 0 || (lowerBound == 0 && upperBound == 0)) {
             setAutoRanging(true);
         }
         setTickUnit(tickUnit);
         setMinorTickCount(LinearAxis.DEFAULT_TICK_COUNT);
-        super.currentLowerBound.addListener((evt, o, n) -> cache.updateCachedAxisVariables());
+        super.minProperty().addListener((evt, o, n) -> cache.updateCachedAxisVariables());
         super.maxProperty().addListener((evt, o, n) -> cache.updateCachedAxisVariables());
         super.scaleProperty().addListener((evt, o, n) -> cache.updateCachedAxisVariables());
         widthProperty().addListener((ch, o, n) -> cache.axisWidth = getWidth());
@@ -492,12 +492,6 @@ public class LinearAxis extends AbstractAxis {
         return new AxisRange(lower, upper, axisLength, scale, getTickUnit());
     }
 
-    @Override
-    protected void setRange(final AxisRange range, final boolean animate) {
-        super.setRange(range, animate);
-        setTickUnit(range.getTickUnit());
-    }
-
     // -------------- STYLESHEET HANDLING
     // ------------------------------------------------------------------------------
 
@@ -541,7 +535,7 @@ public class LinearAxis extends AbstractAxis {
         protected double axisHeight;
 
         private void updateCachedAxisVariables() {
-            localCurrentLowerBound = currentLowerBound.get();
+            localCurrentLowerBound = LinearAxis.super.getMin();
             localCurrentUpperBound = LinearAxis.super.getMax();
             localScale = scaleProperty().get();
 

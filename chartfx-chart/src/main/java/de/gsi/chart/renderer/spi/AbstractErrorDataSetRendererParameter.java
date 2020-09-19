@@ -1,5 +1,7 @@
 package de.gsi.chart.renderer.spi;
 
+import java.util.Objects;
+
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.IntegerProperty;
@@ -53,7 +55,7 @@ public abstract class AbstractErrorDataSetRendererParameter<R extends AbstractEr
     private final DoubleProperty intensityFading = new SimpleDoubleProperty(this, "intensityFading",
             AbstractErrorDataSetRendererParameter.DEFAULT_HISTORY_INTENSITY_FADING);
     private final BooleanProperty drawBubbles = new SimpleBooleanProperty(this, "drawBubbles", false);
-    private final BooleanProperty allowNaNs = new SimpleBooleanProperty(this, "allowNans", false);
+    private final BooleanProperty allowNaNs = new SimpleBooleanProperty(this, "allowNaNs", false);
 
     /**
      * 
@@ -424,11 +426,7 @@ public abstract class AbstractErrorDataSetRendererParameter<R extends AbstractEr
      * @return itself (fluent design)
      */
     public R setRendererDataReducer(final RendererDataReducer algorithm) {
-        if (algorithm == null) {
-            rendererDataReducerProperty().set(new DefaultDataReducer());
-        } else {
-            rendererDataReducerProperty().set(algorithm);
-        }
+        rendererDataReducerProperty().set(Objects.requireNonNullElseGet(algorithm, DefaultDataReducer::new));
         return getThis();
     }
 

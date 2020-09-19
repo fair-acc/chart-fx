@@ -8,12 +8,9 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import javafx.animation.FadeTransition;
 import javafx.animation.KeyFrame;
-import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
-import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.ObservableList;
@@ -54,16 +51,9 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
     private final Canvas canvas = new ResizableCanvas();
     protected boolean labelOverlap;
     protected double scaleFont = 1.0;
-    protected double cachedOffset; // for caching
     protected final ReentrantLock lock = new ReentrantLock();
     protected double maxLabelHeight;
     protected double maxLabelWidth;
-
-    /**
-     * The current value for the lowerBound of this axis, ie min value. This may be the same as lowerBound or different.
-     * It is used by NumberAxis to animate the lowerBound from the old value to the new value.
-     */
-    protected final DoubleProperty currentLowerBound = new SimpleDoubleProperty(this, "currentLowerBound");
 
     private final ObjectProperty<AxisLabelFormatter> axisFormatter = new SimpleObjectProperty<>(this,
             "axisLabelFormatter", null) {
@@ -278,16 +268,9 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
     }
 
     // some protection overwrites
-    /**
-     * Get the display position along this axis for a given value. If the value is not in the current range, the
-     * returned value will be an extrapolation of the display position.
-     *
-     * @param value The data value to work out display position for
-     * @return display position
-     */
     @Override
     public double getDisplayPosition(final double value) {
-        return cachedOffset + ((value - currentLowerBound.get()) * getScale());
+        return cachedOffset + ((value - getMin()) * getScale());
     }
 
     public GraphicsContext getGraphicsContext() {
@@ -462,7 +445,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
     /**
      * This calculates the upper and lower bound based on the data provided to invalidateRange() method. This must not
      * effect the state of the axis, changing any properties of the axis. Any results of the auto-ranging should be
-     * returned in the range object. This will we passed to setRange() if it has been decided to adopt this range for
+     * returned in the range object. This will we passed to set(Range) if it has been decided to adopt this range for
      * this axis.
      *
      * @param length The length of the axis in screen coordinates
@@ -515,10 +498,8 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         final Side side = getSide();
         final double diff = upperBound - lowerBound;
         if (side.isVertical()) {
-            cachedOffset = length;
             newScale = diff == 0 ? -length : -(length / diff);
         } else { // HORIZONTAL
-            cachedOffset = 0;
             newScale = (upperBound - lowerBound) == 0 ? length : length / diff;
         }
         return newScale == 0 ? -1.0 : newScale;
@@ -549,17 +530,9 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         }
 
         // we need to first auto range as this may/will effect tick marks
-        // final AxisRange range = autoRange(width);
         // calculate max tick label height
         // calculate the new tick mark label height
         final double maxLabelHeightLocal = isTickLabelsVisible() ? maxLabelHeight : 0.0;
-        // if (isTickLabelsVisible()) {
-        // // final List<TickMark> tempMajorTickMarks = computeTickMarks(range,
-        // // true);
-        // final List<TickMark> tempMajorTickMarks = this.getTickMarks();
-        // maxLabelHeight = getMaxTickLabelHeight(tempMajorTickMarks) +
-        // getTickLabelGap();
-        // }
 
         // calculate tick mark length
         final double tickMarkLength = isTickMarkVisible() && (getTickLength() > 0) ? getTickLength() : 0;
@@ -594,18 +567,8 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
             invalidate();
         }
 
-        // we need to first auto range as this may/will effect tick marks
-        // final AxisRange range = autoRange(height);
         // calculate max tick label width
         final double maxLabelWidthLocal = isTickLabelsVisible() ? maxLabelWidth : 0.0;
-        // calculate the new tick mark label width
-        // if (isTickLabelsVisible()) {
-        // // final List<TickMark> tempMajorTickMarks = computeTickMarks(range,
-        // // true);
-        // final List<TickMark> tempMajorTickMarks = this.getTickMarks();
-        // maxLabelWidth = getMaxTickLabelWidth(tempMajorTickMarks) +
-        // getTickLabelGap();
-        // }
         // calculate tick mark length
         final double tickMarkLength = isTickMarkVisible() && (getTickLength() > 0) ? getTickLength() : 0;
         // calculate label height
@@ -1200,17 +1163,10 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         final double axisHeight = getHeight();
         final double axisLength = side.isVertical() ? axisHeight : axisWidth; // [pixel]
         // if we are not auto ranging we need to calculate the new scale
-        if (!isAutoRanging()) {
-            // calculate new scale
-            setScale(calculateNewScale(axisLength, getMin(), getMax()));
-            // update current lower bound
-            currentLowerBound.set(getMin());
-        }
+        // calculate new scale
+        setScale(calculateNewScale(axisLength, getMin(), getMax()));
 
         // we have done all auto calcs, let Axis position major tickmarks
-        final boolean isFirstPass = oldAxisLength == -1;
-        // auto range if it is not valid
-
         final double preferredTickUnit = computePreferredTickUnit(axisLength);
         final boolean tickUnitDiffers = getTickUnit() != preferredTickUnit;
         final boolean lengthDiffers = oldAxisLength != axisLength;
@@ -1225,14 +1181,12 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
                 // auto range
                 newAxisRange = autoRange(axisLength);
                 // set current range to new range
-                setRange(newAxisRange, isAnimated() && !isFirstPass);
+                set(newAxisRange.getLowerBound(), newAxisRange.getUpperBound());
+                setTickUnit(newAxisRange.getTickUnit());
             } else {
                 newAxisRange = getAxisRange();
             }
 
-            // if (isAutoRanging() || isAutoGrowRanging() || isInvertedAxis()) {
-            //    setTickUnit(computePreferredTickUnit(axisLength));
-            //}
             setTickUnit(computePreferredTickUnit(axisLength));
 
             newAxisRange.tickUnit = this.getTickUnit();
@@ -1391,25 +1345,6 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         }
     }
 
-    protected void setRange(final AxisRange range, final boolean animate) {
-        final double oldLowerBound = getMin();
-        set(range.getLowerBound(), range.getUpperBound());
-
-        if (animate) {
-            animator.stop();
-            animator.getKeyFrames()
-                    .setAll(new KeyFrame(Duration.ZERO, new KeyValue(currentLowerBound, oldLowerBound),
-                                    new KeyValue(scaleBinding, getScale())),
-                            new KeyFrame(Duration.millis(AbstractAxis.RANGE_ANIMATION_DURATION_MS),
-                                    new KeyValue(currentLowerBound, range.getLowerBound()),
-                                    new KeyValue(scaleBinding, range.getScale())));
-            animator.play();
-        } else {
-            currentLowerBound.set(range.getLowerBound());
-            setScale(range.getScale());
-        }
-    }
-
     /**
      * This is used to check if any given animation should run. It returns true if animation is enabled and the node is
      * visible and in a scene.
@@ -1425,13 +1360,6 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
      * reaction.
      */
     protected void tickMarksUpdated() { // NOPMD by rstein function can but does not have to be overwritten
-    }
-
-    /**
-     * to be overwritten by derived class that want to cache variables for efficiency reasons
-     */
-    protected void updateCachedVariables() { // NOPMD by rstein function can but does not have to be overwritten
-        // called once new axis parameters have been established
     }
 
     protected void updateCSS() {

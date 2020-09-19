@@ -40,12 +40,12 @@ public class DefaultNumericAxis extends AbstractAxis implements Axis {
     public static final double DEFAULT_LOG_MIN_VALUE = 1e-6;
     private static final int DEFAULT_RANGE_LENGTH = 2;
     private double offset;
-    private final Cache cache = new Cache();
-    private final DefaultAxisTransform linearTransform = new DefaultAxisTransform(this);
-    private final LogarithmicAxisTransform logTransform = new LogarithmicAxisTransform(this);
-    private final LogarithmicTimeAxisTransform logTimeTransform = new LogarithmicTimeAxisTransform(this);
-    private AxisTransform axisTransform = linearTransform;
-    protected boolean isUpdating = true;
+    private final transient Cache cache = new Cache();
+    private final transient DefaultAxisTransform linearTransform = new DefaultAxisTransform(this);
+    private final transient LogarithmicAxisTransform logTransform = new LogarithmicAxisTransform(this);
+    private final transient LogarithmicTimeAxisTransform logTimeTransform = new LogarithmicTimeAxisTransform(this);
+    private transient AxisTransform axisTransform = linearTransform;
+    protected boolean isUpdating;
 
     private final BooleanProperty forceZeroInRange = new SimpleBooleanProperty(this, "forceZeroInRange", false) {
         @Override
@@ -242,7 +242,6 @@ public class DefaultNumericAxis extends AbstractAxis implements Axis {
     @Override
     public double getValueForDisplay(final double displayPosition) {
         if (isInvertedAxis) {
-            // return getReverseValueForDisplayImpl(displayPosition);
             return getValueForDisplayImpl(offset - displayPosition);
         }
         return getValueForDisplayImpl(displayPosition);
@@ -293,11 +292,6 @@ public class DefaultNumericAxis extends AbstractAxis implements Axis {
      */
     @Override
     public boolean isValueOnAxis(final double value) {
-        // if (isInvertedAxis) {
-        // return value <= getLowerBound() && value >= getUpperBound();
-        // } else {
-        // return value >= getLowerBound() && value <= getUpperBound();
-        // }
         return value >= getMin() && value <= getMax();
     }
 
@@ -372,65 +366,11 @@ public class DefaultNumericAxis extends AbstractAxis implements Axis {
             rawTickUnit = 1e-3; // TODO: remove hack
         }
 
-        // double tickUnitRounded = Double.MIN_VALUE; // TODO check if not
-        // '-Double.MAX_VALUE'
+        // double tickUnitRounded = Double.MIN_VALUE; // TODO check if not '-Double.MAX_VALUE'
         final double tickUnitRounded = computeTickUnit(rawTickUnit);
         final boolean round = (isAutoRanging() || isAutoGrowRanging()) && isAutoRangeRounding();
         final double minRounded = round ? axisTransform.getRoundedMinimumRange(min) : min;
         final double maxRounded = round ? axisTransform.getRoundedMaximumRange(max) : max;
-
-        // int ticksCount;
-        // double reqLength;
-        //
-        // do {
-        // if (Double.isNaN(rawTickUnit)) {
-        // throw new IllegalArgumentException("Can't calculate axis range: data
-        // contains NaN value");
-        // }
-        // // Here we ignore the tickUnit property, so even if the tick unit
-        // // was specified and the auto-range is off
-        // // we don't use it. When narrowing the range (e.g. zoom-in) - this
-        // // is usually ok, but if one wants
-        // // explicitly change bounds while preserving the specified tickUnit,
-        // // this won't work. Perhaps the usage of
-        // // tickUnit should be independent of the auto-range so we should
-        // // introduce autoTickUnit. The other option is
-        // // to provide custom TickUnitSupplier that always returns the same
-        // // tick unit.
-        // prevTickUnitRounded = tickUnitRounded;
-        // tickUnitRounded = computeTickUnit(rawTickUnit);
-        // if (tickUnitRounded <= prevTickUnitRounded) {
-        // break;
-        // }
-        //
-        // double firstMajorTick;
-        // if ((isAutoRanging() || isAutoGrowRanging()) &&
-        // isAutoRangeRounding()) {
-        // minRounded = Math.floor(min / tickUnitRounded) * tickUnitRounded;
-        // maxRounded = Math.ceil(max / tickUnitRounded) * tickUnitRounded;
-        // firstMajorTick = minRounded;
-        // } else {
-        // firstMajorTick = Math.ceil(min / tickUnitRounded) * tickUnitRounded;
-        // }
-        //
-        // ticksCount = 0;
-        // double maxReqTickGap = 0;
-        // double halfOfLastTickSize = 0;
-        // for (double major = firstMajorTick; major <= maxRounded; major +=
-        // tickUnitRounded, ticksCount++) {
-        // final double tickMarkSize = measureTickMarkLength(major);
-        // if (major == firstMajorTick) {
-        // halfOfLastTickSize = tickMarkSize / 2;
-        // } else {
-        // maxReqTickGap = Math.max(maxReqTickGap, halfOfLastTickSize +
-        // TICK_MARK_GAP + tickMarkSize / 2);
-        // }
-        // }
-        // reqLength = (ticksCount - 1) * maxReqTickGap;
-        // rawTickUnit = tickUnitRounded * NEXT_TICK_UNIT_FACTOR;
-        // } while (numOfTickMarks > 2 && (reqLength > axisLength || ticksCount
-        // > MAX_TICK_COUNT));
-
         final double newScale = calculateNewScale(axisLength, minRounded, maxRounded);
         return new AxisRange(minRounded, maxRounded, axisLength, newScale, tickUnitRounded);
     }
@@ -445,10 +385,8 @@ public class DefaultNumericAxis extends AbstractAxis implements Axis {
             return valueLogOffset * cache.logScaleLengthInv;
         }
 
-        // default case: linear axis computation (dependent variables are being
-        // cached for performance reasons)
-        // return cache.localOffset + (value - cache.localCurrentLowerBound) *
-        // cache.localScale;
+        // default case: linear axis computation (dependent variables are being cached for performance reasons)
+        // return cache.localOffset + (value - cache.localCurrentLowerBound) * cache.localScale;
         return cache.localOffset2 + value * cache.localScale;
     }
 
@@ -456,11 +394,9 @@ public class DefaultNumericAxis extends AbstractAxis implements Axis {
         if (isLogAxis) {
             if (cache.isVerticalAxis) {
                 final double height = cache.axisHeight;
-                return axisTransform
-                        .backward(cache.lowerBoundLog + (height - displayPosition) / height * cache.logScaleLength);
+                return axisTransform.backward(cache.lowerBoundLog + (height - displayPosition) / height * cache.logScaleLength);
             }
-            return axisTransform
-                    .backward(cache.lowerBoundLog + displayPosition / cache.axisWidth * cache.logScaleLength);
+            return axisTransform.backward(cache.lowerBoundLog + displayPosition / cache.axisWidth * cache.logScaleLength);
         }
 
         return cache.localCurrentLowerBound + (displayPosition - cache.localOffset) / cache.localScale;
@@ -501,9 +437,6 @@ public class DefaultNumericAxis extends AbstractAxis implements Axis {
                     tickValue = axisTransform.backward(++exp)) {
                 tickValues.add(tickValue);
             }
-
-            // add minor tick marks to major
-            // tickValues.addAll(calculateMinorTickMarks());
 
             return tickValues;
         }
@@ -618,13 +551,10 @@ public class DefaultNumericAxis extends AbstractAxis implements Axis {
     }
 
     @Override
-    protected void setRange(final AxisRange range, final boolean animate) {
-        super.setRange(range, animate);
-        setTickUnit(range.getTickUnit());
-    }
-
-    @Override
     protected void updateCachedVariables() {
+        if (cache == null) { // lgtm [java/useless-null-check] -- called from static initializer
+            return;
+        }
         cache.updateCachedAxisVariables();
     }
 
@@ -671,7 +601,7 @@ public class DefaultNumericAxis extends AbstractAxis implements Axis {
         private void updateCachedAxisVariables() {
             axisWidth = getWidth();
             axisHeight = getHeight();
-            localCurrentLowerBound = currentLowerBound.get();
+            localCurrentLowerBound = DefaultNumericAxis.super.getMin();
             localCurrentUpperBound = DefaultNumericAxis.super.getMax();
 
             upperBoundLog = axisTransform.forward(getMax());
