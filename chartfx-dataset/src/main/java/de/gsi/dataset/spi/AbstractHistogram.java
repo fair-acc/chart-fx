@@ -2,6 +2,7 @@ package de.gsi.dataset.spi;
 
 import java.util.Arrays;
 
+import de.gsi.dataset.DataSet;
 import de.gsi.dataset.Histogram;
 import de.gsi.dataset.event.UpdatedDataEvent;
 
@@ -77,7 +78,7 @@ public abstract class AbstractHistogram extends AbstractDataSet<AbstractHistogra
 
     /**
      * Creates histogram with name and range [minX, maxX]
-     * 
+     *
      * @param name of the data sets
      * @param nBins number of bins
      * @param minX minimum of range
@@ -96,6 +97,7 @@ public abstract class AbstractHistogram extends AbstractDataSet<AbstractHistogra
             getAxisDescription(DIM_X).set(minX - halfBin, maxX + halfBin);
             break;
         case BINS_ALIGNED_WITH_BOUNDARY:
+        default:
             getAxisDescription(DIM_X).set(minX, maxX);
             break;
         }
@@ -105,7 +107,7 @@ public abstract class AbstractHistogram extends AbstractDataSet<AbstractHistogra
 
     /**
      * Creates 2D histogram with name and ranges [minX, maxX] and [minY, maxY]
-     * 
+     *
      * @param name of the data sets
      * @param nBinsX number of horizontal bins
      * @param minX minimum of horizontal range
@@ -131,8 +133,9 @@ public abstract class AbstractHistogram extends AbstractDataSet<AbstractHistogra
             getAxisDescription(DIM_Y).set(minY - halfBinY, maxY + halfBinY);
             break;
         case BINS_ALIGNED_WITH_BOUNDARY:
+        default:
             getAxisDescription(DIM_X).set(minX, maxX);
-            getAxisDescription(DIM_X).set(minY, maxY);
+            getAxisDescription(DIM_Y).set(minY, maxY);
             break;
         }
         getAxisDescription(DIM_Z).clear();
@@ -169,23 +172,23 @@ public abstract class AbstractHistogram extends AbstractDataSet<AbstractHistogra
     }
 
     @Override
-    public int findBin(final int dimIndex, final double x) {
+    public int findBin(final int dimIndex, final double val) {
         if (getAxisDescription(dimIndex).getLength() == 0.0) {
             return 0;
         }
-        if (!getAxisDescription(dimIndex).contains(x)) {
-            if (x < getAxisDescription(dimIndex).getMin()) {
+        if (!getAxisDescription(dimIndex).contains(val)) {
+            if (val < getAxisDescription(dimIndex).getMin()) {
                 return 0; // underflow bin
             }
             return getDataCount() - 1; // overflow bin
         }
         if (isEquiDistant()) {
-            final double diff = x - getAxisDescription(dimIndex).getMin();
+            final double diff = val - getAxisDescription(dimIndex).getMin();
             final double delta = getAxisDescription(dimIndex).getLength() / (getDataCount() - 2);
             return (int) Math.floor(diff / delta);
         }
 
-        return findNextLargerIndex(axisBins[dimIndex], x);
+        return findNextLargerIndex(axisBins[dimIndex], val);
     }
 
     protected int findNextLargerIndex(final double[] bin, final double value) {
@@ -229,6 +232,25 @@ public abstract class AbstractHistogram extends AbstractDataSet<AbstractHistogra
     @Override
     public boolean isEquiDistant() {
         return equidistant;
+    }
+
+    @Override
+    public DataSet recomputeLimits(final int dimIndex) {
+        // first compute range (does not trigger notify events)
+        if (dimIndex < getDimension()) {
+            // first dimensions fixed by binning -> do not recompute
+            return this;
+        }
+        DataRange newRange = new DataRange();
+
+        final int dataCount = getDataCount();
+        for (int i = 0; i < dataCount; i++) {
+            newRange.add(get(dimIndex, i));
+        }
+        // set to new computed one and trigger notify event if different to old limits
+        getAxisDescription(dimIndex).set(newRange.getMin(), newRange.getMax());
+
+        return this;
     }
 
     @Override
