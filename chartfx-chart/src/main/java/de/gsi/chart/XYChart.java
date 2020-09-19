@@ -63,6 +63,15 @@ public class XYChart extends Chart {
     /**
      * Construct a new XYChart with the given axes.
      *
+     */
+    public XYChart() {
+        this(new Axis[] {});
+        // N.B. this constructor is needed since JavaFX seems to instantiate fxml using reflection to find the corresponding constructor
+    }
+
+    /**
+     * Construct a new XYChart with the given axes.
+     *
      * @param axes All axes to be added to the chart
      */
     public XYChart(final Axis... axes) {
@@ -247,12 +256,8 @@ public class XYChart extends Chart {
         // lock datasets to prevent writes while updating the axes
         ObservableList<DataSet> dataSets = this.getAllDatasets();
         // check that all registered data sets have proper ranges defined
-        dataSets.parallelStream()
-                .forEach(dataset -> dataset.getAxisDescriptions().parallelStream().filter(axisD -> !axisD.isDefined()).forEach(axisDescription -> {
-                    dataset.lock().writeLockGuard(() -> {
-                        dataset.recomputeLimits(axisDescription.getDimIndex());
-                    });
-                }));
+        dataSets.parallelStream().forEach(dataset -> dataset.getAxisDescriptions().parallelStream().filter(axisD -> !axisD.isDefined()) //
+                                                             .forEach(axisDescription -> dataset.lock().writeLockGuard(() -> dataset.recomputeLimits(axisDescription.getDimIndex()))));
 
         // N.B. possible race condition on this line -> for the future to solve
         // recomputeLimits holds a writeLock the following sections need a read lock (for allowing parallel axis)
@@ -507,11 +512,6 @@ public class XYChart extends Chart {
 
         final List<Number> dataMinMax = new ArrayList<>();
         dataSets.forEach(dataset -> dataset.lock().readLockGuardOptimistic(() -> {
-            // for (AxisDescription axisDescription : dataset.getAxisDescriptions()) {
-            // if (!axisDescription.isDefined()) {
-            // dataset.recomputeLimits(dataset.getAxisDescriptions().indexOf(axisDescription));
-            // }
-            // }
             if (dataset.getDimension() > 2 && (side == Side.RIGHT || side == Side.TOP)) {
                 dataMinMax.add(dataset.getAxisDescription(DataSet.DIM_Z).getMin());
                 dataMinMax.add(dataset.getAxisDescription(DataSet.DIM_Z).getMax());
