@@ -1,8 +1,5 @@
 package de.gsi.chart.renderer.spi;
 
-import static de.gsi.dataset.DataSet.DIM_X;
-import static de.gsi.dataset.DataSet.DIM_Y;
-
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.FXCollections;
@@ -14,7 +11,6 @@ import de.gsi.chart.axes.Axis;
 import de.gsi.chart.renderer.Renderer;
 import de.gsi.dataset.DataSet;
 import de.gsi.dataset.DataSetError;
-import de.gsi.dataset.event.UpdatedDataEvent;
 import de.gsi.dataset.spi.DoubleDataSet;
 import de.gsi.dataset.spi.DoubleErrorDataSet;
 import de.gsi.dataset.utils.NoDuplicatesList;
@@ -28,7 +24,7 @@ public abstract class AbstractDataSetManagement<R extends Renderer> implements R
     private final ObservableList<DataSet> datasets = FXCollections.observableArrayList();
     protected BooleanProperty showInLegend = new SimpleBooleanProperty(this, "showInLegend", true);
 
-    private final ObservableList<Axis> axesList = FXCollections.observableList(new NoDuplicatesList<Axis>());
+    private final ObservableList<Axis> axesList = FXCollections.observableList(new NoDuplicatesList<>());
 
     @Override
     public ObservableList<Axis> getAxes() {
@@ -50,10 +46,9 @@ public abstract class AbstractDataSetManagement<R extends Renderer> implements R
         final ObservableList<DataSet> dataSets = FXCollections.observableArrayList();
         for (final DataSet dataSet : localDataSets) {
             if (dataSet instanceof DataSetError) {
-                final DataSetError dataSetError = (DataSetError) dataSet;
-                dataSets.add(AbstractDataSetManagement.getErrorDataSetCopy(dataSetError));
+                dataSets.add(new DoubleErrorDataSet(dataSet));
             } else {
-                dataSets.add(AbstractDataSetManagement.getDataSetCopy(dataSet));
+                dataSets.add(new DoubleDataSet(dataSet));
             }
         }
         ProcessingProfiler.getTimeDiff(start);
@@ -137,80 +132,5 @@ public abstract class AbstractDataSetManagement<R extends Renderer> implements R
     @Override
     public final BooleanProperty showInLegendProperty() {
         return showInLegend;
-    }
-
-    protected static void copyMetaData(final DataSet from, final DataSet to) {
-        to.setStyle(from.getStyle());
-    }
-
-    protected static final DoubleDataSet getDataSetCopy(final DataSet dataSet) {
-        final int nLength = dataSet.getDataCount(); // TODO: expand to n-dimensional DataSet
-        final DoubleDataSet ret = new DoubleDataSet(dataSet.getName(), nLength);
-
-        dataSet.lock().writeLockGuard(() -> {
-            final double[] xValues = dataSet.getValues(DIM_X);
-            final double[] yValues = dataSet.getValues(DIM_Y);
-            ret.set(xValues, yValues);
-            if (dataSet instanceof DoubleDataSet) {
-                final DoubleDataSet doubleDataSet = (DoubleDataSet) dataSet;
-                // known data set implementation, may use faster array copy
-                ret.getDataLabelMap().putAll(doubleDataSet.getDataLabelMap());
-                ret.getDataStyleMap().putAll(doubleDataSet.getDataStyleMap());
-            } else {
-                // generic implementation that works with all DataSetError
-                // implementation
-                for (int i = 0; i < nLength; i++) {
-                    final String label = dataSet.getDataLabel(i);
-                    if (label != null) {
-                        ret.getDataLabelMap().put(i, label);
-                    }
-                    final String style = ret.getDataLabel(i);
-                    if (style != null) {
-                        ret.getDataStyleMap().put(i, style);
-                    }
-                }
-            }
-            AbstractDataSetManagement.copyMetaData(dataSet, ret);
-        });
-        ret.fireInvalidated(new UpdatedDataEvent(dataSet, "copy"));
-        return ret;
-    }
-
-    protected static final DoubleErrorDataSet getErrorDataSetCopy(final DataSetError dataSet) {
-        final int nLength = dataSet.getDataCount();
-        final DoubleErrorDataSet ret = new DoubleErrorDataSet(dataSet.getName());
-
-        dataSet.lock().writeLockGuard(() -> {
-            final double[] xValues = dataSet.getValues(DIM_Y);
-            final double[] yValues = dataSet.getValues(DIM_Y);
-            final double[] yErrorsNeg = dataSet.getErrorsNegative(DIM_Y);
-            final double[] yErrorsPos = dataSet.getErrorsPositive(DIM_Y);
-            ret.set(xValues, yValues, yErrorsNeg, yErrorsPos);
-            if (dataSet instanceof DoubleErrorDataSet) {
-                final DoubleErrorDataSet doubleErrorDataSet = (DoubleErrorDataSet) dataSet;
-                // known data set implementation, may use faster array copy
-
-                ret.getDataLabelMap().putAll(doubleErrorDataSet.getDataLabelMap());
-                ret.getDataStyleMap().putAll(doubleErrorDataSet.getDataStyleMap());
-            } else {
-                // generic implementation that works with all DataSetError
-                // implementation
-                for (int i = 0; i < nLength; i++) {
-                    ret.set(i, dataSet.get(DIM_X, i), dataSet.get(DIM_Y, i), dataSet.getErrorNegative(DIM_Y, i), dataSet.getErrorPositive(DIM_Y, i));
-                    final String label = ret.getDataLabel(i);
-                    if (label != null) {
-                        ret.getDataLabelMap().put(i, label);
-                    }
-                    final String style = ret.getDataLabel(i);
-                    if (style != null) {
-                        ret.getDataStyleMap().put(i, style);
-                    }
-                }
-            }
-            AbstractDataSetManagement.copyMetaData(dataSet, ret);
-        });
-        ret.fireInvalidated(new UpdatedDataEvent(dataSet, "copy"));
-
-        return ret;
     }
 }
