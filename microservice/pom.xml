@@ -46,66 +46,19 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- serialiser dependencies -->
+        <!-- micro-service dependencies -->
         <dependency>
-            <groupId>com.google.flatbuffers</groupId>
-            <artifactId>flatbuffers-java</artifactId>
-            <version>1.12.0</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.jsoniter</groupId>
-            <artifactId>jsoniter</artifactId>
-            <version>0.9.23</version>
-        </dependency>
-        <dependency>
-            <groupId>org.javassist</groupId>
-            <artifactId>javassist</artifactId>
-            <version>3.27.0-GA</version>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-core</artifactId>
+            <version>${micrometer.version}</version>
         </dependency>
 
-        <!-- serialiser test dependencies for comparisons only-->
         <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-            <version>2.9.10.5</version>
-            <scope>test</scope>
+            <groupId>org.zeromq</groupId>
+            <artifactId>jeromq</artifactId>
+            <version>0.5.2</version>
         </dependency>
-        <dependency>
-            <groupId>com.google.code.gson</groupId>
-            <artifactId>gson</artifactId>
-            <version>2.8.6</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.alibaba</groupId>
-            <artifactId>fastjson</artifactId>
-            <version>1.2.73</version>
-            <scope>test</scope>
-        </dependency>
-        <!--        <dependency>-->
-        <!--            <groupId>cern.cmw</groupId>-->
-        <!--            <artifactId>cmw-data</artifactId>-->
-        <!--            <version>2.1.0</version>-->
-        <!--            <scope>test</scope>-->
-        <!--        </dependency>-->
-        <!-- Javalin dependencies -->
-        <!--         <dependency> -->
-        <!--             <groupId>io.javalin</groupId> -->
-        <!--             <artifactId>javalin</artifactId> -->
-        <!--             <version>${javalin.version}</version> -->
-        <!--         </dependency> -->
-        <!--         <dependency> -->
-        <!--             <groupId>io.javalin</groupId> -->
-        <!--             <artifactId>javalin-openapi</artifactId> -->
-        <!--             <version>${javalin.version}</version> -->
-        <!--         </dependency> -->
-        <!--         <dependency> -->
-        <!--             <groupId>com.fasterxml.jackson.core</groupId> -->
-        <!--             <artifactId>jackson-databind</artifactId> -->
-        <!--             <version>2.10.3</version> -->
-        <!--         </dependency> -->
-        <!-- for HTTP/2 -->
+
         <dependency>
             <groupId>org.eclipse.jetty.http2</groupId>
             <artifactId>http2-server</artifactId>
@@ -117,6 +70,20 @@
             <artifactId>jetty-alpn-conscrypt-server</artifactId>
             <version>${jetty.version}</version>
         </dependency>
+
+        <!-- HTTP template engine-->
+        <dependency>
+            <groupId>org.apache.velocity</groupId>
+            <artifactId>velocity-engine-core</artifactId>
+            <version>${velocity.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.mindrot</groupId>
+            <artifactId>jbcrypt</artifactId>
+            <version>0.4</version>
+        </dependency>
+
+
 
         <!-- alternate Javalin dependency injection - add all and remove those not necessary -->
         <dependency>
@@ -143,31 +110,7 @@
             </exclusions>
         </dependency>
 
-        <dependency>
-            <groupId>org.apache.velocity</groupId>
-            <artifactId>velocity-engine-core</artifactId>
-            <version>${velocity.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.mindrot</groupId>
-            <artifactId>jbcrypt</artifactId>
-            <version>0.4</version>
-        </dependency>
-
-        <dependency>
-            <groupId>io.micrometer</groupId>
-            <artifactId>micrometer-core</artifactId>
-            <version>${micrometer.version}</version>
-        </dependency>
-
-
-        <dependency>
-            <groupId>com.alibaba</groupId>
-            <artifactId>fastjson</artifactId>
-            <version>1.2.68</version>
-            <scope>test</scope>
-        </dependency>
-
+        <!-- HTTP/REST client dependencies-->
         <dependency>
             <groupId>com.squareup.okhttp3</groupId>
             <artifactId>okhttp</artifactId>
@@ -185,6 +128,43 @@
             <scope>test</scope>
         </dependency>
 
+        <!-- serialiser dependencies -->
+        <dependency>
+            <groupId>com.jsoniter</groupId>
+            <artifactId>jsoniter</artifactId>
+            <version>0.9.23</version>
+        </dependency>
+        <dependency>
+            <groupId>org.javassist</groupId>
+            <artifactId>javassist</artifactId>
+            <version>3.27.0-GA</version>
+        </dependency>
+
+        <!-- serialiser test dependencies for comparisons only-->
+        <dependency>
+            <groupId>com.google.flatbuffers</groupId>
+            <artifactId>flatbuffers-java</artifactId>
+            <version>1.12.0</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.9.10.5</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>2.8.6</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>fastjson</artifactId>
+            <version>1.2.73</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
 </project>
