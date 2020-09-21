@@ -17,6 +17,7 @@ import de.gsi.chart.axes.TickUnitSupplier;
 import de.gsi.chart.axes.spi.format.DefaultTickUnitSupplier;
 import de.gsi.chart.axes.spi.transforms.DefaultAxisTransform;
 import de.gsi.chart.ui.css.CssPropertyFactory;
+import de.gsi.dataset.AxisDescription;
 import de.gsi.dataset.spi.DataRange;
 
 /**
@@ -53,7 +54,6 @@ public class OscilloscopeAxis extends AbstractAxis implements Axis {
     private final StyleableDoubleProperty axisZeroPosition = CSS.createDoubleProperty(this, "axisZeroPosition", 0.5, true, (oldVal, newVal) -> Math.max(0.0, Math.min(newVal, 1.0)), this::requestAxisLayout);
     private final StyleableDoubleProperty axisZeroValue = CSS.createDoubleProperty(this, "axisZeroValue", 0.0, true, null, this::requestAxisLayout);
     private final transient Cache cache = new Cache();
-    private double offset;
     protected boolean isUpdating;
 
     /**
@@ -164,7 +164,7 @@ public class OscilloscopeAxis extends AbstractAxis implements Axis {
      * @return the range that is clamped to limits defined by {@link #getMinRange()} and {@link #getMaxRange()}.
      */
     public DataRange getClampedRange() {
-        recomputeClamedRange();
+        recomputeClampedRange();
         return clampedRange;
     }
 
@@ -199,7 +199,7 @@ public class OscilloscopeAxis extends AbstractAxis implements Axis {
     @Override
     public double getValueForDisplay(double displayPosition) {
         if (isInvertedAxis) {
-            return cache.localCurrentLowerBound + ((offset - displayPosition) - cache.localOffset) / cache.localScale;
+            return cache.localCurrentLowerBound + ((cache.offset - displayPosition) - cache.localOffset) / cache.localScale;
         }
         return cache.localCurrentLowerBound + (displayPosition - cache.localOffset) / cache.localScale;
     }
@@ -286,6 +286,48 @@ public class OscilloscopeAxis extends AbstractAxis implements Axis {
     }
 
     @Override
+    public boolean set(final double min, final double max) {
+        if (cache == null) { // lgtm [java/useless-null-check] -- called from static initializer
+            return super.set(min, max);
+        }
+        final AxisRange range = computeRange(min, max, getLength(), 0.0);
+        return super.set(range.getMin(), range.getMax());
+    }
+
+    @Override
+    public boolean set(final AxisDescription range) {
+        return false;
+    }
+
+    @Override
+    public boolean set(final String axisName, final String axisUnit, final double rangeMin, final double rangeMax) {
+        if (cache == null) { // lgtm [java/useless-null-check] -- called from static initializer
+            return super.set(axisName, axisUnit, rangeMin, rangeMax);
+        }
+        final AxisRange range = computeRange(rangeMin, rangeMax, getLength(), 0.0);
+
+        return super.set(axisName, axisUnit, range.getMin(), range.getMax());
+    }
+
+    @Override
+    public boolean setMax(final double value) {
+        if (cache == null) { // lgtm [java/useless-null-check] -- called from static initializer
+            return super.setMax(value);
+        }
+        final AxisRange range = computeRange(getMin(), value, getLength(), 0.0);
+        return super.set(range.getMin(), range.getMax());
+    }
+
+    @Override
+    public boolean setMin(final double value) {
+        if (cache == null) { // lgtm [java/useless-null-check] -- called from static initializer
+            return super.setMin(value);
+        }
+        final AxisRange range = computeRange(value, getMax(), getLength(), 0.0);
+        return super.set(range.getMin(), range.getMax());
+    }
+
+    @Override
     protected AxisRange computeRange(final double minValue, final double maxValue, final double axisLength, final double labelSize) {
         final double tickUnitRounded = computePreferredTickUnit(axisLength);
 
@@ -306,7 +348,7 @@ public class OscilloscopeAxis extends AbstractAxis implements Axis {
      * reinitialises clamped range based on {@link #getMin()}, {@link #getMax()}, {@link #getMinRange()} and
      * {@link #getMaxRange()}.
      */
-    protected void recomputeClamedRange() {
+    protected void recomputeClampedRange() {
         final AxisRange effectiveRange = getRange();
         clampedRange.set(getMinRange());
         if (getMaxRange().isMaxDefined()) {
@@ -344,6 +386,19 @@ public class OscilloscopeAxis extends AbstractAxis implements Axis {
         return effectiveRange;
     }
 
+    /**
+     * Get the display position along this axis for a given value. If the value is not in the current range, the
+     * returned value will be an extrapolation of the display position. -- cached double optimised version (shaves of
+     * 50% on delays)
+     *
+     * @param value The data value to work out display position for
+     * @return display position
+     */
+    @Override
+    public double getDisplayPosition(final double value) {
+        return cache.localOffset + (value - cache.localCurrentLowerBound) * cache.localScale;
+    }
+
     protected class Cache {
         protected double localScale;
         protected double localCurrentLowerBound;
@@ -357,12 +412,13 @@ public class OscilloscopeAxis extends AbstractAxis implements Axis {
         protected boolean isVerticalAxis;
         protected double axisWidth;
         protected double axisHeight;
+        protected double offset;
 
         private void updateCachedAxisVariables() {
             axisWidth = getWidth();
             axisHeight = getHeight();
-            localCurrentLowerBound = OscilloscopeAxis.super.getMin();
-            localCurrentUpperBound = OscilloscopeAxis.super.getMax();
+            localCurrentLowerBound = getMin();
+            localCurrentUpperBound = getMax();
 
             upperBoundLog = axisTransform.forward(getMax());
             lowerBoundLog = axisTransform.forward(getMin());

@@ -68,13 +68,13 @@ public final class NumericAxis extends AbstractAxis {
     public NumericAxis() {
         super();
         super.minProperty().addListener((evt, o, n) -> {
-            localCurrentLowerBound = getMin();
+            localCurrentLowerBound = n.doubleValue();
             final double zero = super.getDisplayPosition(0);
             localOffset = zero + localCurrentLowerBound * scaleProperty().get();
         });
 
         super.scaleProperty().addListener((evt, o, n) -> {
-            localScale = scaleProperty().get();
+            localScale = n.doubleValue();
             final double zero = super.getDisplayPosition(0);
             localOffset = zero + getMin() * localScale;
         });
@@ -106,8 +106,17 @@ public final class NumericAxis extends AbstractAxis {
         this.setName(axisLabel);
         setTickUnit(tickUnit);
 
-        super.minProperty().addListener((evt, o, n) -> localCurrentLowerBound = getMin());
-        super.scaleProperty().addListener((evt, o, n) -> localScale = scaleProperty().get());
+        super.minProperty().addListener((evt, o, n) -> {
+            localCurrentLowerBound = n.doubleValue();
+            final double zero = super.getDisplayPosition(0);
+            localOffset = zero + localCurrentLowerBound * scaleProperty().get();
+        });
+
+        super.scaleProperty().addListener((evt, o, n) -> {
+            localScale = n.doubleValue();
+            final double zero = super.getDisplayPosition(0);
+            localOffset = zero + getMin() * localScale;
+        });
     }
 
     /**
