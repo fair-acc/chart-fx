@@ -52,18 +52,18 @@ public class OscilloscopeAxisTests {
 
     @Test
     public void computeRangeTests() {
-        final OscilloscopeAxis axis = new OscilloscopeAxis("axis title", -1.0, 1.0, 0.1);
+        OscilloscopeAxis axis = new OscilloscopeAxis("axis title", -1.0, 1.0, 0.1);
 
         final AxisRange axisRange1 = axis.computeRange(Double.NaN, Double.NaN, 1000, 0.0);
         assertEquals(-1.0, axisRange1.getMin());
         assertEquals(+1.0, axisRange1.getMax());
 
-        axis.add(2.0);
+        axis = new OscilloscopeAxis("axis title", -1.0, 2.0, 0.1);
         final AxisRange axisRange2 = axis.computeRange(Double.NaN, Double.NaN, 1000, 0.0);
         assertEquals(-2.5, axisRange2.getMin());
         assertEquals(+2.5, axisRange2.getMax());
 
-        axis.add(-2.0);
+        axis = new OscilloscopeAxis("axis title", -2.0, 2.0, 0.1);
         final AxisRange axisRange3 = axis.computeRange(Double.NaN, Double.NaN, 1000, 0.0);
         assertEquals(-2.5, axisRange3.getMin());
         assertEquals(+2.5, axisRange3.getMax());
@@ -116,7 +116,7 @@ public class OscilloscopeAxisTests {
         assertEquals(+2.0, axis.getClampedRange().getMax());
 
         axis.getMinRange().clear();
-        axis.recomputeClamedRange();
+        axis.recomputeClampedRange();
         // should be the original min/max range again
         assertEquals(0.0, axis.getClampedRange().getMin());
         assertEquals(1.0, axis.getClampedRange().getMax());

@@ -360,12 +360,14 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
             // in order to find the maximum (positive or negative)
             dataMaxValue = -Double.MAX_VALUE;
             getAutoRange().clear();
-        }
 
-        for (final Number dataValue : data) {
-            dataMinValue = Math.min(dataMinValue, dataValue.doubleValue());
-            dataMaxValue = Math.max(dataMaxValue, dataValue.doubleValue());
-            getAutoRange().add(dataValue.doubleValue());
+            for (final Number dataValue : data) {
+                dataMinValue = Math.min(dataMinValue, dataValue.doubleValue());
+                dataMaxValue = Math.max(dataMaxValue, dataValue.doubleValue());
+            }
+
+            getAutoRange().add(dataMinValue);
+            getAutoRange().add(dataMaxValue);
         }
 
         final boolean oldState = autoNotification().getAndSet(false);
