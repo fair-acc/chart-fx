@@ -1403,7 +1403,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         final double m1End = m1.getPosition() + (m1Size / 2);
         final double m2Start = m2.getPosition() - (m2Size / 2);
         final double m2End = m2.getPosition() + (m2Size / 2);
-        return side.isVertical() && !isInverted ? (m1Start - m2End) <= gap : (m2Start - m1End) <= gap;
+        return side.isVertical() && !isInverted ? Math.abs(m1Start - m2End) <= gap : Math.abs(m2Start - m1End) <= gap;
     }
 
     protected static void drawAxisLabel(final GraphicsContext gc, final double x, final double y, final Text label) {
