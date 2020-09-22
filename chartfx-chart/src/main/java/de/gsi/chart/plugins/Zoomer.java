@@ -434,9 +434,7 @@ public class Zoomer extends ChartPlugin {
 
         zoomOut.setOnAction(evt -> {
             zoomOrigin();
-            for (final Axis axis : getChart().getAxes()) {
-                axis.setAutoRanging(true);
-            }
+            getChart().getAxes().forEach(axis -> axis.setAutoRanging(true));
         });
         zoomModeXY.setOnAction(evt -> setAxisMode(AxisMode.XY));
         zoomModeX.setOnAction(evt -> setAxisMode(AxisMode.X));
@@ -1198,8 +1196,8 @@ public class Zoomer extends ChartPlugin {
 
         private ZoomState(final double zoomRangeMin, final double zoomRangeMax, final boolean isAutoRanging,
                 final boolean isAutoGrowRanging) {
-            this.zoomRangeMin = zoomRangeMin;
-            this.zoomRangeMax = zoomRangeMax;
+            this.zoomRangeMin = Math.min(zoomRangeMin, zoomRangeMax);
+            this.zoomRangeMax = Math.max(zoomRangeMin, zoomRangeMax);
             this.wasAutoRanging = isAutoRanging;
             this.wasAutoGrowRanging = isAutoGrowRanging;
         }
