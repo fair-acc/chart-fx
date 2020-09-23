@@ -47,15 +47,14 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
     protected static final int BURST_LIMIT_CSS_MS = 3000;
     private long lastCssUpdate;
     private boolean callCssUpdater;
-    protected final Timeline animator = new Timeline();
-    private final Canvas canvas = new ResizableCanvas();
+    private final transient Canvas canvas = new ResizableCanvas();
     protected boolean labelOverlap;
     protected double scaleFont = 1.0;
     protected final ReentrantLock lock = new ReentrantLock();
     protected double maxLabelHeight;
     protected double maxLabelWidth;
 
-    private final ObjectProperty<AxisLabelFormatter> axisFormatter = new SimpleObjectProperty<>(this,
+    private final transient ObjectProperty<AxisLabelFormatter> axisFormatter = new SimpleObjectProperty<>(this,
             "axisLabelFormatter", null) {
         /**
          * default fall-back formatter in case no {@code axisFormatter} is specified (ie. 'null')
@@ -95,10 +94,10 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
     };
 
     // cache for major tick marks
-    protected WeakHashMap<String, TickMark> tickMarkStringCache = new WeakHashMap<>();
+    protected final transient WeakHashMap<String, TickMark> tickMarkStringCache = new WeakHashMap<>();
 
     // cache for minor tick marks (N.B. usually w/o string label)
-    protected WeakHashMap<Double, TickMark> tickMarkDoubleCache = new WeakHashMap<>();
+    protected final transient WeakHashMap<Double, TickMark> tickMarkDoubleCache = new WeakHashMap<>();
 
     public AbstractAxis() {
         super();
@@ -465,8 +464,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         return getAxisRange();
     }
 
-    protected AxisRange autoRange(final double minValue, final double maxValue, final double length,
-            final double labelSize) {
+    protected AxisRange autoRange(final double minValue, final double maxValue, final double length, final double labelSize) {
         return computeRange(minValue, maxValue, length, labelSize);
     }
 
@@ -1305,9 +1303,6 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
             } else {
                 labelHidden = true;
                 current.setVisible(!makeInvisible);
-                if (!makeInvisible == false) {
-                    System.err.println("mark + " + current.getValue() + " - " + !makeInvisible);
-                }
             }
         }
         return labelHidden;
@@ -1443,16 +1438,6 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         gc.fillText(tickMark.getText(), 0, 0);
         // gc.fillText(tickMark.getText(), x, y);C
         gc.restore();
-    }
-
-    protected static double getMaxTickLabelHeight(final List<TickMark> tickMarks) {
-        return (tickMarks == null) || tickMarks.isEmpty() ? 0.0
-                                                          : tickMarks.stream().mapToDouble(TickMark::getHeight).max().getAsDouble();
-    }
-
-    protected static double getMaxTickLabelWidth(final List<TickMark> tickMarks) {
-        return (tickMarks == null) || tickMarks.isEmpty() ? 0.0
-                                                          : tickMarks.stream().mapToDouble(TickMark::getWidth).max().getAsDouble();
     }
 
     /**

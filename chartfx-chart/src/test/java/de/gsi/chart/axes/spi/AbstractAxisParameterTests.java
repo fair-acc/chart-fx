@@ -25,10 +25,11 @@ import de.gsi.chart.ui.geometry.Side;
  *
  * @author rstein
  */
-public class AbstractAxisParameterTests {
+class AbstractAxisParameterTests {
     @Test
-    public void testAutoGetterSetters() {
+    void testAutoGetterSetters() {
         AbstractAxisParameter axis = new EmptyAbstractAxisParameter();
+        axis.set(0.0, 10.0);
 
         assertTrue(axis.isAutoRanging());
         assertEquals(axis.getAutoRange(), axis.getRange());
@@ -41,6 +42,7 @@ public class AbstractAxisParameterTests {
         assertTrue(axis.isAutoGrowRanging());
         assertEquals(axis.getAutoRange(), axis.getRange());
         axis.setAutoGrowRanging(false);
+        assertFalse(axis.isAutoGrowRanging());
 
         axis.setAutoRangePadding(0.2);
         assertEquals(0.2, axis.getAutoRangePadding());
@@ -55,11 +57,19 @@ public class AbstractAxisParameterTests {
         axis.setAutoUnitScaling(true);
         assertTrue(axis.isAutoUnitScaling());
         axis.setAutoUnitScaling(false);
+
+        assertFalse(axis.isAutoRanging());
+        axis.setAutoGrowRanging(true);
+        assertTrue(axis.isAutoGrowRanging());
+        axis.setAutoRanging(true);
+        assertTrue(axis.isAutoRanging());
+        assertFalse(axis.isAutoGrowRanging());
     }
 
     @Test
-    public void testBasicGetterSetters() {
+    void testBasicGetterSetters() {
         AbstractAxisParameter axis = new EmptyAbstractAxisParameter();
+        axis.set(0.0, 10.0);
 
         assertFalse(axis.isValid());
         axis.validProperty().set(true);
@@ -159,6 +169,8 @@ public class AbstractAxisParameterTests {
         axis.setUnit("test axis unit");
         assertEquals("test axis name", axis.getName());
         assertEquals("test axis unit", axis.getUnit());
+        axis.setUnit(null);
+        assertNull(axis.getUnit());
 
         axis.setUnitScaling(1000);
         assertEquals(1000, axis.getUnitScaling());
@@ -194,8 +206,9 @@ public class AbstractAxisParameterTests {
     }
 
     @Test
-    public void testPositionGetterSetters() {
+    void testPositionGetterSetters() {
         AbstractAxisParameter axis = new EmptyAbstractAxisParameter();
+        axis.set(0.0, 10.0);
 
         assertEquals(0.5, axis.getAxisCenterPosition());
         axis.setAxisCenterPosition(0.2);
@@ -215,8 +228,9 @@ public class AbstractAxisParameterTests {
     }
 
     @Test
-    public void testTickLabelGetterSetters() {
+    void testTickLabelGetterSetters() {
         AbstractAxisParameter axis = new EmptyAbstractAxisParameter();
+        axis.set(0.0, 10.0);
 
         axis.setTickLabelFill(Color.RED);
         assertEquals(Color.RED, axis.getTickLabelFill());
@@ -225,7 +239,7 @@ public class AbstractAxisParameterTests {
         axis.setTickLabelFont(font);
         assertEquals(font, axis.getTickLabelFont());
 
-        StringConverter<Number> myConverter = new StringConverter<Number>() {
+        StringConverter<Number> myConverter = new StringConverter<>() {
             @Override
             public Number fromString(String string) {
                 return null;
@@ -255,8 +269,9 @@ public class AbstractAxisParameterTests {
     }
 
     @Test
-    public void testTickMarkGetterSetters() {
+    void testTickMarkGetterSetters() {
         AbstractAxisParameter axis = new EmptyAbstractAxisParameter();
+        axis.set(0.0, 10.0);
 
         assertEquals(20, axis.getMaxMajorTickLabelCount());
         axis.setMaxMajorTickLabelCount(9);
@@ -272,6 +287,9 @@ public class AbstractAxisParameterTests {
         assertTrue(axis.setMin(-1.0));
         assertFalse(axis.setMin(-1.0));
         assertEquals(-1.0, axis.getMin());
+
+        axis.setSide(Side.LEFT);
+        axis.set(-5.0, +5.0);
 
         assertEquals(10, axis.getMinorTickCount());
         axis.setMinorTickCount(9);
