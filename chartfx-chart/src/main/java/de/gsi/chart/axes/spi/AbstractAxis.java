@@ -1305,6 +1305,9 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
             } else {
                 labelHidden = true;
                 current.setVisible(!makeInvisible);
+                if (!makeInvisible == false) {
+                    System.err.println("mark + " + current.getValue() + " - " + !makeInvisible);
+                }
             }
         }
         return labelHidden;
