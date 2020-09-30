@@ -433,7 +433,12 @@ public class CssPropertyFactory<S extends Styleable> {
          */
         public StylishBooleanProperty(Styleable styleableBean, String propertyName, boolean initialValue, boolean inherits, BinaryOperator<Boolean> filter, Runnable... invalidateActions) {
             super((CssMetaData<S, Boolean>) metaDataSet.computeIfAbsent(getCssPropertyName(propertyName), //
-                          cssProp -> new SimpleCssMetaData<>(styleableBean, propertyName, cssProp, StyleConverter.getBooleanConverter(), initialValue, inherits, null)), //
+                          new Function<String, CssMetaData<S, ?>>() {
+                            @Override
+                            public CssMetaData<S, ?> apply(String cssProp) {
+                                return new SimpleCssMetaData<>(styleableBean, propertyName, cssProp, StyleConverter.getBooleanConverter(), initialValue, inherits, null);
+                            }
+                        }), //
                     styleableBean, propertyName, initialValue);
 
             this.filter = filter;
@@ -475,7 +480,12 @@ public class CssPropertyFactory<S extends Styleable> {
         public StylishIntegerProperty(Styleable styleableBean, String propertyName, int initialValue,
                 boolean inherits, IntBinaryOperator filter, Runnable... invalidateActions) {
             super((CssMetaData<S, Number>) metaDataSet.computeIfAbsent(getCssPropertyName(propertyName), //
-                          cssProp -> new SimpleCssMetaData<>(styleableBean, propertyName, cssProp, StyleConverter.getSizeConverter(), initialValue, inherits, null)), //
+                          new Function<String, CssMetaData<S, ?>>() {
+                            @Override
+                            public CssMetaData<S, ?> apply(String cssProp) {
+                                return new SimpleCssMetaData<>(styleableBean, propertyName, cssProp, StyleConverter.getSizeConverter(), initialValue, inherits, null);
+                            }
+                        }), //
                     styleableBean, propertyName, initialValue);
 
             checkPropertyConsistency(styleableBean, propertyName, invalidateActions);
@@ -518,7 +528,12 @@ public class CssPropertyFactory<S extends Styleable> {
          * */
         public StylishLongProperty(Styleable styleableBean, String propertyName, long initialValue, boolean inherits, LongBinaryOperator filter, Runnable... invalidateActions) {
             super((CssMetaData<S, Number>) metaDataSet.computeIfAbsent(getCssPropertyName(propertyName), //
-                          cssProp -> new SimpleCssMetaData<>(styleableBean, propertyName, cssProp, StyleConverter.getSizeConverter(), initialValue, inherits, null)), //
+                          new Function<String, CssMetaData<S, ?>>() {
+                            @Override
+                            public CssMetaData<S, ?> apply(String cssProp) {
+                                return new SimpleCssMetaData<>(styleableBean, propertyName, cssProp, StyleConverter.getSizeConverter(), initialValue, inherits, null);
+                            }
+                        }), //
                     styleableBean, propertyName, initialValue);
 
             checkPropertyConsistency(styleableBean, propertyName, invalidateActions);
@@ -561,7 +576,12 @@ public class CssPropertyFactory<S extends Styleable> {
          */
         public StylishFloatProperty(Styleable styleableBean, String propertyName, float initialValue, boolean inherits, BinaryOperator<Float> filter, Runnable... invalidateActions) {
             super((CssMetaData<S, Number>) metaDataSet.computeIfAbsent(getCssPropertyName(propertyName), //
-                          cssProp -> new SimpleCssMetaData<>(styleableBean, propertyName, cssProp, StyleConverter.getSizeConverter(), initialValue, inherits, null)), //
+                          new Function<String, CssMetaData<S, ?>>() {
+                            @Override
+                            public CssMetaData<S, ?> apply(String cssProp) {
+                                return new SimpleCssMetaData<>(styleableBean, propertyName, cssProp, StyleConverter.getSizeConverter(), initialValue, inherits, null);
+                            }
+                        }), //
                     styleableBean, propertyName, initialValue);
 
             checkPropertyConsistency(styleableBean, propertyName, invalidateActions);
@@ -604,7 +624,12 @@ public class CssPropertyFactory<S extends Styleable> {
          */
         public StylishDoubleProperty(Styleable styleableBean, String propertyName, double initialValue, boolean inherits, DoubleBinaryOperator filter, Runnable... invalidateActions) {
             super((CssMetaData<S, Number>) metaDataSet.computeIfAbsent(getCssPropertyName(propertyName), //
-                          cssProp -> new SimpleCssMetaData<>(styleableBean, propertyName, cssProp, StyleConverter.getSizeConverter(), initialValue, inherits, null)), //
+                          new Function<String, CssMetaData<S, ?>>() {
+                            @Override
+                            public CssMetaData<S, ?> apply(String cssProp) {
+                                return new SimpleCssMetaData<>(styleableBean, propertyName, cssProp, StyleConverter.getSizeConverter(), initialValue, inherits, null);
+                            }
+                        }), //
                     styleableBean, propertyName, initialValue);
 
             checkPropertyConsistency(styleableBean, propertyName, invalidateActions);
@@ -648,14 +673,17 @@ public class CssPropertyFactory<S extends Styleable> {
          * @param invalidateActions lambda expressions executed after and before invalidation
          */
         public StylishEnumProperty(Styleable styleableBean, String propertyName, T initialValue, boolean inherits, Class<T> enumClass, BinaryOperator<T> filter, Runnable... invalidateActions) {
-            super((CssMetaData<S, T>) metaDataSet.computeIfAbsent(getCssPropertyName(propertyName), cssProp -> {
-                final SimpleCssMetaData<T> newMetaData = new SimpleCssMetaData<>(styleableBean, propertyName, cssProp, StyleConverter.getEnumConverter(enumClass), initialValue, inherits, null);
-                // add all existing pseudo classes
-                for (final Enum<T> e : enumClass.getEnumConstants()) {
-                    final String name = e.toString().toLowerCase().replace('_', '-');
-                    pseudoClasses.computeIfAbsent(name, PseudoClass::getPseudoClass);
+            super((CssMetaData<S, T>) metaDataSet.computeIfAbsent(getCssPropertyName(propertyName), new Function<String, CssMetaData<S, ?>>() {
+                @Override
+                public CssMetaData<S, ?> apply(String cssProp) {
+                    final SimpleCssMetaData<T> newMetaData = new SimpleCssMetaData<>(styleableBean, propertyName, cssProp, StyleConverter.getEnumConverter(enumClass), initialValue, inherits, null);
+                    // add all existing pseudo classes
+                    for (final Enum<T> e : enumClass.getEnumConstants()) {
+                        final String name = e.toString().toLowerCase().replace('_', '-');
+                        pseudoClasses.computeIfAbsent(name, PseudoClass::getPseudoClass);
+                    }
+                    return newMetaData;
                 }
-                return newMetaData;
             }), styleableBean, propertyName, initialValue);
 
             checkPropertyConsistency(styleableBean, propertyName, invalidateActions);
@@ -699,7 +727,12 @@ public class CssPropertyFactory<S extends Styleable> {
          */
         public StylishObjectProperty(Styleable styleableBean, String propertyName, T initialValue, boolean inherits, StyleConverter<?, T> converter, BinaryOperator<T> filter, Runnable... invalidateActions) {
             super((CssMetaData<S, T>) metaDataSet.computeIfAbsent(getCssPropertyName(propertyName), //
-                          cssProp -> new SimpleCssMetaData<>(styleableBean, propertyName, cssProp, converter, initialValue, inherits, null)), //
+                          new Function<String, CssMetaData<S, ?>>() {
+                            @Override
+                            public CssMetaData<S, ?> apply(String cssProp) {
+                                return new SimpleCssMetaData<>(styleableBean, propertyName, cssProp, converter, initialValue, inherits, null);
+                            }
+                        }), //
                     styleableBean, propertyName, initialValue);
 
             checkPropertyConsistency(styleableBean, propertyName, invalidateActions);
@@ -742,7 +775,12 @@ public class CssPropertyFactory<S extends Styleable> {
          */
         public StylishStringProperty(Styleable styleableBean, String propertyName, String initialValue, boolean inherits, BinaryOperator<String> filter, Runnable... invalidateActions) {
             super((CssMetaData<S, String>) metaDataSet.computeIfAbsent(getCssPropertyName(propertyName), //
-                          cssProp -> new SimpleCssMetaData<>(styleableBean, propertyName, cssProp, StyleConverter.getStringConverter(), initialValue, inherits, null)), //
+                          new Function<String, CssMetaData<S, ?>>() {
+                            @Override
+                            public CssMetaData<S, ?> apply(String cssProp) {
+                                return new SimpleCssMetaData<>(styleableBean, propertyName, cssProp, StyleConverter.getStringConverter(), initialValue, inherits, null);
+                            }
+                        }), //
                     styleableBean, propertyName, initialValue);
 
             checkPropertyConsistency(styleableBean, propertyName, invalidateActions);
