@@ -360,7 +360,6 @@ public class ErrorDataSetRendererStylingSample extends Application {
         assumeSorted.selectedProperty().addListener((ch, old, selected) -> chart.requestLayout());
         pane.addToParameterPane("Assume sorted data: ", assumeSorted);
 
-
         return pane;
     }
 
