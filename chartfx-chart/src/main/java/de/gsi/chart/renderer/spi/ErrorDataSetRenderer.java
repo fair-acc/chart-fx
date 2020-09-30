@@ -160,8 +160,9 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
         final Axis yAxis = yAxisTemp;
         final long start = ProcessingProfiler.getTimeStamp();
         final double xAxisWidth = xAxis.getWidth();
-        final double xMin = xAxis.getValueForDisplay(0);
-        final double xMax = xAxis.getValueForDisplay(xAxisWidth);
+        final boolean xAxisInverted = xAxis.isInvertedAxis();
+        final double xMin = xAxis.getValueForDisplay(xAxisInverted ? xAxisWidth : 0.0);
+        final double xMax = xAxis.getValueForDisplay(xAxisInverted ? 0.0 : xAxisWidth);
 
         if (ProcessingProfiler.getDebugState()) {
             ProcessingProfiler.getTimeDiff(start, "init");
@@ -200,11 +201,6 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
                 } else {
                     indexMin = 0;
                     indexMax = dataSet.getDataCount();
-                }
-                if (xAxis.isInvertedAxis()) {
-                    final int temp = indexMin;
-                    indexMin = indexMax - 1;
-                    indexMax = temp + 1;
                 }
 
                 if (indexMax - indexMin <= 0) {
