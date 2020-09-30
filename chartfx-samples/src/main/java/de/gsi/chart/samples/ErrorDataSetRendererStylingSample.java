@@ -354,6 +354,13 @@ public class ErrorDataSetRendererStylingSample extends Application {
         reductionDashSize.valueProperty().addListener((ch, old, value) -> chart.requestLayout());
         pane.addToParameterPane("   Red. Min Distance: ", reductionDashSize);
 
+        pane.addToParameterPane(" ", null);
+        final CheckBox assumeSorted = new CheckBox();
+        assumeSorted.selectedProperty().bindBidirectional(errorRenderer.assumeSortedDataProperty());
+        assumeSorted.selectedProperty().addListener((ch, old, selected) -> chart.requestLayout());
+        pane.addToParameterPane("Assume sorted data: ", assumeSorted);
+
+
         return pane;
     }
 
