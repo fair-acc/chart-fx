@@ -2,11 +2,12 @@ package de.gsi.chart.renderer.datareduction;
 
 import java.security.InvalidParameterException;
 
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.SimpleIntegerProperty;
+
 import de.gsi.chart.renderer.RendererDataReducer;
 import de.gsi.dataset.utils.AssertUtils;
 import de.gsi.dataset.utils.ProcessingProfiler;
-import javafx.beans.property.IntegerProperty;
-import javafx.beans.property.SimpleIntegerProperty;
 
 /**
  * Default data reduction algorithm implementation for the ErrorDataSet Renderer <br>
@@ -17,7 +18,6 @@ import javafx.beans.property.SimpleIntegerProperty;
  * @author rstein
  */
 public class DefaultDataReducer implements RendererDataReducer {
-
     protected IntegerProperty minPointPixelDistance = new SimpleIntegerProperty(this, "minPixelDistance", 6) {
         @Override
         public void set(final int value) {
@@ -218,8 +218,8 @@ public class DefaultDataReducer implements RendererDataReducer {
         yValues[count] = yValues[indexMax - 1];
         xPointErrorsNeg[count] = xPointErrorsPos[indexMax - 1];
         xPointErrorsPos[count] = xPointErrorsNeg[indexMax - 1];
-        yPointErrorsNeg[count] = yPointErrorsPos[indexMax - 1];
-        yPointErrorsPos[count] = yPointErrorsNeg[indexMax - 1];
+        yPointErrorsNeg[count] = yPointErrorsNeg[indexMax - 1];
+        yPointErrorsPos[count] = yPointErrorsPos[indexMax - 1];
         pointSelected[count] = pointSelected[indexMax - 1];
         styles[count] = styles[indexMax - 1];
         count++;
@@ -480,5 +480,4 @@ public class DefaultDataReducer implements RendererDataReducer {
     public final void setMinPointPixelDistance(final int minPixelDistance) {
         minPointPixelDistanceProperty().setValue(minPixelDistance);
     }
-
 }
