@@ -1,12 +1,7 @@
 package de.gsi.chart.renderer.spi;
 
 import java.security.InvalidParameterException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 import javafx.collections.ObservableList;
 import javafx.geometry.Orientation;
@@ -492,12 +487,6 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
             yValuesSurface[i] = localCachedPoints.errorYNeg[i];
             xValuesSurface[xend - i] = localCachedPoints.xValues[i];
             yValuesSurface[xend - i] = localCachedPoints.errorYPos[i];
-        }
-        // swap y coordinates at mid-point
-        if (nDataCount > 4) {
-            final double yTmp = yValuesSurface[nDataCount - 1];
-            yValuesSurface[nDataCount - 1] = yValuesSurface[xend - nDataCount + 1];
-            yValuesSurface[xend - nDataCount + 1] = yTmp;
         }
 
         gc.setFillRule(FillRule.EVEN_ODD);

@@ -360,6 +360,12 @@ public class ErrorDataSetRendererStylingSample extends Application {
         assumeSorted.selectedProperty().addListener((ch, old, selected) -> chart.requestLayout());
         pane.addToParameterPane("Assume sorted data: ", assumeSorted);
 
+        pane.addToParameterPane(" ", null);
+        final CheckBox cacheParallel = new CheckBox();
+        cacheParallel.selectedProperty().bindBidirectional(errorRenderer.parallelImplementationProperty());
+        cacheParallel.selectedProperty().addListener((ch, old, selected) -> chart.requestLayout());
+        pane.addToParameterPane("   Point cache parallel: ", cacheParallel);
+
         return pane;
     }
 
