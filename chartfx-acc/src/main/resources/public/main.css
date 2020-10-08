@@ -18,7 +18,10 @@ body {
   background: #f9f9f9;
 }
 
-h1, h2, h3, h4 {
+h1,
+h2,
+h3,
+h4 {
   font-family: monospace;
   font-weight: 300;
   color: #444;
@@ -31,7 +34,7 @@ small {
 header {
   background: #00599c;
   border-bottom: 5px solid #ffb446;
-  box-shadow: 0 1px 0 0 rgba(0, 0, 0, .6);
+  box-shadow: 0 1px 0 0 rgba(0, 0, 0, 0.6);
 }
 
 nav {
@@ -57,7 +60,8 @@ a {
   margin: 0 10px;
 }
 
-#menu li a, #logout {
+#menu li a,
+#logout {
   background: transparent;
   cursor: pointer;
   border: 0;
@@ -126,7 +130,8 @@ a {
   font-size: 14px;
 }
 
-nav ul, nav li {
+nav li,
+nav ul {
   margin: 0;
   padding: 0;
   list-style-type: none;
@@ -155,8 +160,8 @@ nav ul, nav li {
 
 #logout:hover::after, #logout:focus::after, #menu li a:hover::after, #menu li a:focus::after {
   opacity: 1;
-  -webkit-transform: translateY(0px);
-  transform: translateY(0px);
+  -webkit-transform: translateY(0);
+  transform: translateY(0);
 }
 
 /* Very basic grid */
@@ -165,7 +170,7 @@ nav ul, nav li {
   overflow: auto;
 }
 
-.row>* {
+.row > * {
   float: left;
 }
 
@@ -297,7 +302,7 @@ a.link:hover {
 }
 
 .bad.notification {
-  background: #bb0000;
+  background: #bb00;
 }
 
 .skip-link {

@@ -33,16 +33,24 @@ public class Property<G, S, R> {
     private final String propertyName;
     private final String htmlModelGet;
     private final String htmlModelSet;
-    private final Handler handler;
-    private final CombinedHandler restHandler;
 
     public Property(@NotNull final String propertyName, //
-            @NotNull final String htmlModelGet, @NotNull final Class<G> dataClassPrototypeGet, @NotNull final PropertyHandler userHandlerGet, //
-            @NotNull final String htmlModelSet, @NotNull final Class<S> dataClassPrototypeSet, @NotNull final PropertyHandler userHandlerSet) {
+            @NotNull final String htmlModelGet, @NotNull final Class<G> dataClassPrototypeGet, @NotNull final PropertyHandler userHandlerGet, // NOPMD NOSONAR need 'dataClassPrototypeGet handler in the future
+            @NotNull final String htmlModelSet, @NotNull final Class<S> dataClassPrototypeSet, @NotNull final PropertyHandler userHandlerSet) { // NOPMD NOSONAR need 'dataClassPrototypeSet and userHandlerSet handler in the future
         this.propertyName = propertyName;
         this.htmlModelGet = htmlModelGet;
         this.htmlModelSet = htmlModelSet;
-        this.handler = ctx -> {
+        // parse header and switch between different BINARY, JSON, HTML implementations
+        // generate MAP -> call MAP handler
+        // [..] etc.
+        // parse user form data
+        // N.B. convert here from String to binary Object types
+        // if GET/SUBSCRIBE
+        // launch binary serialiser
+        // generate MAP -> call MAP handler as above
+        // launch JSON serialiser
+        // generate MAP -> call MAP handler as above
+        final Handler handler = ctx -> {
             // parse header and switch between different BINARY, JSON, HTML implementations
             final String type = ctx.header(ACCEPT_HEADER);
             final String contentType = ctx.req.getContentType();
@@ -66,16 +74,16 @@ public class Property<G, S, R> {
                 // if GET/SUBSCRIBE
                 ctx.render(htmlModelGet, model);
 
-            } else if (type.equalsIgnoreCase(MimeType.BINARY.toString())) {
-                // launch binary serialiser
+            } else if (type.equalsIgnoreCase(MimeType.BINARY.toString())) { // NOPMD NOSONAR
+                // TODO: launch binary serialiser
                 // generate MAP -> call MAP handler as above
-            } else if (type.equalsIgnoreCase(MimeType.JSON.toString())) {
-                // launch JSON serialiser
+            } else if (type.equalsIgnoreCase(MimeType.JSON.toString())) { // NOPMD NOSONAR
+                // TODO: launch JSON serialiser
                 // generate MAP -> call MAP handler as above
             }
         };
 
-        restHandler = new CombinedHandler(this.handler);
+        final CombinedHandler restHandler = new CombinedHandler(handler);
         RestServer.getInstance().get(propertyName, restHandler); // handles GET & SUBSCRIBE
         RestServer.getInstance().post(propertyName, restHandler); // handles SET
     }
@@ -125,11 +133,11 @@ public class Property<G, S, R> {
     public enum Operation {
         GET,
         SET,
-        SUBSCRIBE;
+        SUBSCRIBE
     }
 
     public interface PropertyGetHandler<G, R> { // N.B. GET/SUBSCRIBE
-        public void handle(ComHandler<R, Void> requestFomUser, ComHandler<R, G> replyToUser) throws Exception; // N.B. more specific exception handling
+        void handle(ComHandler<R, Void> requestFomUser, ComHandler<R, G> replyToUser) throws Exception; // NOPMD NOSONAR user may throw any exception
     }
 
     /*
@@ -140,19 +148,19 @@ public class Property<G, S, R> {
      */
 
     public interface PropertyHandler {
-        public void handle(Map<String, Object> fromUser, Map<String, Object> toUser) throws Exception; // N.B. more specific exception handling
+        void handle(Map<String, Object> fromUser, Map<String, Object> toUser) throws Exception; // NOPMD NOSONAR user may throw any exception
     }
 
     public interface PropertyHandlerAlt2 {
-        public void handle(Operation op, Map<String, Object> fromUser, Map<String, Object> toUser) throws Exception; // N.B. more specific exception handling
+        void handle(Operation op, Map<String, Object> fromUser, Map<String, Object> toUser) throws Exception; // NOPMD NOSONAR user may throw any exception
     }
 
     public interface PropertyHandlerAlt3<S, G, R> { // N.B. GET/SET/NOTIFY
-        public void handle(ComHandler<R, S> requestFomUser, ComHandler<R, G> replyToUser) throws Exception; // N.B. more specific exception handling
+        void handle(ComHandler<R, S> requestFomUser, ComHandler<R, G> replyToUser) throws Exception; // NOPMD NOSONAR user may throw any exception
     }
 
     public interface PropertyHandlerAlt3Set<S, R> { // N.B. SET/NOTIFY
-        public void handle(ComHandler<R, S> requestFomUser, ComHandler<R, Void> replyToUser) throws Exception; // N.B. more specific exception handling
+        void handle(ComHandler<R, S> requestFomUser, ComHandler<R, Void> replyToUser) throws Exception; // NOPMD NOSONAR user may throw any exception
     }
 
     public interface PropertyMap<K, V> extends Map<K, V> {

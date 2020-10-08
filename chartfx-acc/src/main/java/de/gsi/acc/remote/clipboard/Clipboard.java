@@ -60,6 +60,7 @@ import de.gsi.dataset.utils.Cache;
 import de.gsi.dataset.utils.Cache.CacheBuilder;
 import de.gsi.dataset.utils.GenericsHelper;
 import de.gsi.math.Math;
+import de.gsi.math.MathBase;
 
 import ar.com.hjg.pngj.FilterType;
 import io.javalin.core.security.Role;
@@ -90,6 +91,7 @@ import io.javalin.plugin.openapi.annotations.OpenApiResponse;
  *
  */
 public class Clipboard implements EventSource, EventListener {
+    public static final String ERROR_WHILE_READING_TEST_IMAGE_FROM = "error while reading test image from '{}'";
     private static final Logger LOGGER = LoggerFactory.getLogger(Clipboard.class);
     private static final int DEFAULT_PALETTE_COLOR_COUNT = 32;
     private static final int STATISTICS_INT_COUNT = 250;
@@ -109,13 +111,10 @@ public class Clipboard implements EventSource, EventListener {
     private static final String TEMPLATE_ALL_IMAGES = "/velocity/clipboard/all.vm";
     private static final String TEMPLATE_ONE_IMAGE_LONG_POLLING = "/velocity/clipboard/one_long.vm";
     private static final String TEMPLATE_ONE_IMAGE_SSE = "/velocity/clipboard/one_sse.vm";
-
     private static final String CACHE_LIMIT = "clipboardCacheLimit";
     private static final int CACHE_LIMIT_DEFAULT = 25;
     private static final String CACHE_TIME_OUT = "clipboardCacheTimeOut"; // [minutes]
     private static final int CACHE_TIME_OUT_DEFAULT = 60;
-    public static final String ERROR_WHILE_READING_TEST_IMAGE_FROM = "error while reading test image from '{}'";
-
     // update source definitions
     private final AtomicBoolean autoNotify = new AtomicBoolean(true);
     private final List<EventListener> updateListeners = Collections.synchronizedList(new LinkedList<>());
@@ -130,6 +129,16 @@ public class Clipboard implements EventSource, EventListener {
     private final String exportRoot;
     private final String exportNameImage;
     private final Region regionToCapture;
+    private final long maxUpdatePeriod;
+    private final TimeUnit maxUpdatePeriodTimeUnit;
+    private final WritableImageCache imageCache = new WritableImageCache();
+    private final ByteArrayCache byteArrayCache = new ByteArrayCache();
+    private final EventRateLimiter eventRateLimiter;
+    private final AtomicInteger threadCount = new AtomicInteger(0);
+    private final List<Double> captureDiffs = new ArrayList<>(STATISTICS_INT_COUNT);
+    private final List<Double> processingTotal = new ArrayList<>(STATISTICS_INT_COUNT);
+    private final List<Double> sizeTotal = new ArrayList<>(STATISTICS_INT_COUNT);
+    private boolean usePalette;
     private PaletteQuantizer userPalette = null;
     private final EventListener paletteUpdateListener = evt -> {
         if (evt.getPayLoad() instanceof Image) {
@@ -137,17 +146,32 @@ public class Clipboard implements EventSource, EventListener {
         }
     };
     private EventRateLimiter paletteUpdateRateLimiter = new EventRateLimiter(paletteUpdateListener, TimeUnit.SECONDS.toMillis(20));
-    private final long maxUpdatePeriod;
-    private final TimeUnit maxUpdatePeriodTimeUnit;
 
-    private final WritableImageCache imageCache = new WritableImageCache();
-    private final ByteArrayCache byteArrayCache = new ByteArrayCache();
-    private final EventRateLimiter eventRateLimiter;
-
-    private final AtomicInteger threadCount = new AtomicInteger(0);
-    private final List<Double> captureDiffs = new ArrayList<>(STATISTICS_INT_COUNT);
-    private final List<Double> processingTotal = new ArrayList<>(STATISTICS_INT_COUNT);
-    private final List<Double> sizeTotal = new ArrayList<>(STATISTICS_INT_COUNT);
+    @OpenApi(
+            description = "endpoint to provide html form data to upload clipboard data",
+            summary = "GET",
+            tags = { "Clipboard" },
+            path = ENDPOINT_UPLOAD,
+            method = HttpMethod.GET,
+            responses = {
+                @OpenApiResponse(status = "200", content = @OpenApiContent(type = "text/html"))
+                ,
+                        @OpenApiResponse(status = "200", content = @OpenApiContent(type = "text/json"))
+            })
+    private final Handler uploadHandlerGet
+            = new CombinedHandler(ctx -> {
+                  final Map<String, Object> model = MessageBundle.baseModel(ctx);
+                  ctx.render(TEMPLATE_UPLOAD, model);
+              }) {};
+    private final Function<? super String, ? extends Cache<String, DataContainer>> categoryMappingFunction = category -> {
+        CacheBuilder<String, DataContainer> clipboardCacheBuilder = Cache.<String, DataContainer>builder().withLimit(getCacheLimit());
+        if (getCacheTimeOut() > 0) {
+            clipboardCacheBuilder.withTimeout(getCacheTimeOut(), getCacheTimeOutUnit());
+        }
+        final BiConsumer<String, DataContainer> cacheRecoverAction = (final String k, final DataContainer v) -> // too long for one line
+                RestCommonThreadPool.getCommonScheduledPool().schedule(() -> v.getData().forEach(d -> byteArrayCache.add(d.getDataByteArray())), 200, TimeUnit.MILLISECONDS);
+        return clipboardCacheBuilder.withPostListener(cacheRecoverAction).build();
+    };
 
     private final Runnable convertImage = () -> {
         final long start = System.nanoTime(); // NOPMD -- needed for time-keeping
@@ -178,11 +202,14 @@ public class Clipboard implements EventSource, EventListener {
         final int size2 = WriteFxImage.getCompressedSizeBound(width, height, true);
         final byte[] rawByteBuffer = byteArrayCache.getArray(size2);
         final ByteBuffer imageBuffer = ByteBuffer.wrap(rawByteBuffer);
-        //         WriteFxImage.encodeAlt(imageCopyOut, imageBuffer, useAlpha, Deflater.BEST_SPEED, null);
-        WriteFxImage.encode(imageCopyOut, imageBuffer, IMAGE_USE_ALPHA, Deflater.BEST_SPEED, FilterType.FILTER_NONE);
+        // WriteFxImage.encodeAlt(imageCopyOut, imageBuffer, useAlpha, Deflater.BEST_SPEED, null)
+        if (usePalette) {
+            // updatePalette(imageCopyOut)
+            WriteFxImage.encodePalette(imageCopyOut, imageBuffer, IMAGE_USE_ALPHA, Deflater.BEST_SPEED, FilterType.FILTER_NONE, userPalette);
+        } else {
+            WriteFxImage.encode(imageCopyOut, imageBuffer, IMAGE_USE_ALPHA, Deflater.BEST_SPEED, FilterType.FILTER_NONE);
+        }
 
-        // updatePalette(imageCopyOut);
-        // WriteFxImage.encodePalette(imageCopyOut, imageBuffer, useAlpha, Deflater.BEST_SPEED, FilterType.FILTER_NONE, userPalette);
         sizeTotal.add((double) imageBuffer.limit());
         imageCache.add(imageCopyIn);
         imageCache.add(imageCopyOut);
@@ -202,7 +229,6 @@ public class Clipboard implements EventSource, EventListener {
             LOGGER.atWarn().addArgument(threads).log("thread-pile-up = {}");
         }
     };
-
     @OpenApi(
             description = "clipboard root",
             summary = "My Summary",
@@ -256,33 +282,15 @@ public class Clipboard implements EventSource, EventListener {
 
                   serveImageData(ctx, category, imageDataTag);
               }) {};
-
-    @OpenApi(
-            description = "endpoint to provide html form data to upload clipboard data",
-            summary = "GET",
-            tags = { "Clipboard" },
-            path = ENDPOINT_UPLOAD,
-            method = HttpMethod.GET,
-            responses = {
-                @OpenApiResponse(status = "200", content = @OpenApiContent(type = "text/html"))
-                ,
-                        @OpenApiResponse(status = "200", content = @OpenApiContent(type = "text/json"))
-            })
-    private final Handler uploadHandlerGet
-            = new CombinedHandler(ctx -> {
-                  final Map<String, Object> model = MessageBundle.baseModel(ctx);
-                  ctx.render(TEMPLATE_UPLOAD, model);
-              }) {};
-
     @OpenApi(
             description = "endpoint for posting clipboard data",
             summary = "submit new clipboard data",
             tags = { "Clipboard" },
             path = ENDPOINT_UPLOAD,
             method = HttpMethod.POST,
-            formParams = { @OpenApiFormParam(name = "clipboarExportName", type = String.class, required = false)
+            formParams = { @OpenApiFormParam(name = "clipboarExportName")
                            ,
-                                   @OpenApiFormParam(name = "clipboarCategoryName", type = String.class, required = false) },
+                                   @OpenApiFormParam(name = "clipboarCategoryName") },
             fileUploads = { @OpenApiFileUpload(name = "clipboardData", isArray = true) },
             requestBody = @OpenApiRequestBody(content = { @OpenApiContent(type = "text/html")
                                                           ,
@@ -334,7 +342,6 @@ public class Clipboard implements EventSource, EventListener {
                   ctx.redirect(this.getExportRoot());
                   // alt: ctx.html("Upload complete")
               }) {};
-
     @OpenApi(
             description = "landing page",
             summary = "root export",
@@ -348,16 +355,6 @@ public class Clipboard implements EventSource, EventListener {
             })
     private final Handler rootHandler
             = new CombinedHandler(ctx -> serveCategoryOverview(ctx, fixPreAndPost(CLIPBOARD_ROOT))) {};
-
-    private final Function<? super String, ? extends Cache<String, DataContainer>> categoryMappingFunction = category -> {
-        CacheBuilder<String, DataContainer> clipboardCacheBuilder = Cache.<String, DataContainer>builder().withLimit(getCacheLimit());
-        if (getCacheTimeOut() > 0) {
-            clipboardCacheBuilder.withTimeout(getCacheTimeOut(), getCacheTimeOutUnit());
-        }
-        final BiConsumer<String, DataContainer> cacheRecoverAction = (final String k, final DataContainer v) -> // too long for one line
-                RestCommonThreadPool.getCommonScheduledPool().schedule(() -> v.getData().forEach(d -> byteArrayCache.add(d.getDataByteArray())), 200, TimeUnit.MILLISECONDS);
-        return clipboardCacheBuilder.withPostListener(cacheRecoverAction).build();
-    };
 
     public Clipboard(final String exportRoot, final String exportName, final Region regionToCapture, final long maxUpdatePeriod, final TimeUnit maxUpdatePeriodTimeUnit, final boolean allowUploads) {
         this.exportRoot = exportRoot;
@@ -478,8 +475,16 @@ public class Clipboard implements EventSource, EventListener {
         eventRateLimiter.handle(event);
     }
 
+    public boolean isUsePalette() {
+        return usePalette;
+    }
+
     public void setPaletteUpdateRateLimiter(final long timeOut, final TimeUnit timeUnit) {
         paletteUpdateRateLimiter = new EventRateLimiter(paletteUpdateListener, timeUnit.toMillis(timeOut));
+    }
+
+    public void setUsePalette(final boolean usePalette) {
+        this.usePalette = usePalette;
     }
 
     @Override
@@ -499,6 +504,10 @@ public class Clipboard implements EventSource, EventListener {
 
     public ReadOnlyIntegerProperty userCountSseProperty() {
         return userCountSse;
+    }
+
+    protected void updatePalette(Image imageCopyOut) {
+        paletteUpdateRateLimiter.handle(new UpdateEvent(this, "update palette", WriteFxImage.clone(imageCopyOut)));
     }
 
     private String categoryNotFound(final String category) {
@@ -545,7 +554,7 @@ public class Clipboard implements EventSource, EventListener {
 
         while (cbData.getTimeStampCreation() <= lastUpdate && isLongPolling /* && cbData.getMaxUpdatePeriod() > 0 */) {
             try {
-                final long waitPeriod = Math.max(TimeUnit.SECONDS.toMillis(1), 4 * cbData.getUpdatePeriod());
+                final long waitPeriod = MathBase.max(TimeUnit.SECONDS.toMillis(1), 4 * cbData.getUpdatePeriod());
                 clipboardLock.lock();
                 final boolean condition1 = !clipboardCondition.await(waitPeriod, TimeUnit.MILLISECONDS) && LOGGER.isInfoEnabled();
                 if (condition1) {
@@ -581,7 +590,7 @@ public class Clipboard implements EventSource, EventListener {
                         .log("could not parse 'updatePeriod'={} argument sent by client {}");
             }
         }
-        updatePeriod = Math.max(getMaxUpdatePeriod(), updatePeriod);
+        updatePeriod = MathBase.max(getMaxUpdatePeriod(), updatePeriod);
         final Map<String, Object> model = MessageBundle.baseModel(ctx);
         model.put("indexRoot", CLIPBOARD_BASE + category);
         model.put(QUERY_UPDATE_PERIOD, updatePeriod);
@@ -594,10 +603,6 @@ public class Clipboard implements EventSource, EventListener {
         } else {
             ctx.render(TEMPLATE_ONE_IMAGE_SSE, model);
         }
-    }
-
-    protected void updatePalette(Image imageCopyOut) {
-        paletteUpdateRateLimiter.handle(new UpdateEvent(this, "update palette", WriteFxImage.clone(imageCopyOut)));
     }
 
     public static int getCacheLimit() {

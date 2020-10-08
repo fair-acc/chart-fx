@@ -21,7 +21,6 @@ import io.javalin.core.security.AccessManager;
 import io.javalin.core.security.Role;
 import io.javalin.http.Context;
 import io.javalin.http.Handler;
-import io.javalin.plugin.openapi.annotations.HttpMethod;
 import io.javalin.plugin.openapi.annotations.OpenApi;
 import io.javalin.plugin.openapi.annotations.OpenApiContent;
 import io.javalin.plugin.openapi.annotations.OpenApiResponse;
@@ -67,7 +66,6 @@ public class LoginController { // NOPMD - nomen est omen
             description = "endpoint to receive password login request",
             operationId = "handleLoginPost",
             summary = "POST login command",
-            deprecated = false,
             tags = { "LoginController" },
             responses = {
                 @OpenApiResponse(status = "200", content = @OpenApiContent(type = "text/html"))
@@ -103,7 +101,6 @@ public class LoginController { // NOPMD - nomen est omen
             description = "endpoint to receive password changes",
             operationId = "handleChangePasswordPost",
             summary = "POST password change page",
-            deprecated = false,
             tags = { "LoginController" },
             responses = {
                 @OpenApiResponse(status = "200", content = @OpenApiContent(type = "text/html"))
@@ -163,7 +160,6 @@ public class LoginController { // NOPMD - nomen est omen
             description = "endpoint to receive password logout request",
             operationId = "handleLogoutPost",
             summary = "POST logout command",
-            deprecated = false,
             tags = { "LoginController" },
             responses = {
                 @OpenApiResponse(status = "200", content = @OpenApiContent(type = "text/html"))
@@ -182,7 +178,6 @@ public class LoginController { // NOPMD - nomen est omen
             description = "endpoint to serve login page",
             operationId = "serveLoginPage",
             summary = "GET serve login page (HTML-only)",
-            deprecated = false,
             tags = { "LoginController" },
 
             //            method = HttpMethod.GET,
@@ -200,7 +195,6 @@ public class LoginController { // NOPMD - nomen est omen
             description = "endpoint to serve password change page",
             operationId = "servePasswordChangePage",
             summary = "GET serve password change page (HTML-only)",
-            deprecated = false,
             tags = { "LoginController" },
             responses = {
                 @OpenApiResponse(status = "200", content = @OpenApiContent(type = "text/html"))
@@ -261,11 +255,11 @@ public class LoginController { // NOPMD - nomen est omen
     }
 
     public static String getSessionCurrentUser(final Context ctx) {
-        return (String) ctx.sessionAttribute(ATTR_CURRENT_USER);
+        return ctx.sessionAttribute(ATTR_CURRENT_USER);
     }
 
     public static String getSessionLocale(final Context ctx) {
-        return (String) ctx.sessionAttribute(ATTR_LOCALE);
+        return ctx.sessionAttribute(ATTR_LOCALE);
     }
 
     /**
@@ -274,7 +268,7 @@ public class LoginController { // NOPMD - nomen est omen
     public static void register() {
         RestServer.getInstance().config.accessManager(accessManager);
         RestServer.getInstance().routes(() -> {
-            //            before(handleLoginPost);
+            // before(handleLoginPost)
             before(handleLocaleChange);
             post(ENDPOINT_LOGIN, handleLoginPost);
             post(ENDPOINT_LOGOUT, handleLogoutPost);
