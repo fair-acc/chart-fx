@@ -234,7 +234,7 @@ public class Clipboard implements EventSource, EventListener {
                   }
 
                   final String imageDataTag = landingPage.replaceFirst(getCategoryFromPath(landingPage), "");
-                  if (imageDataTag == null || imageDataTag.isBlank() || !imageDataTag.contains(".")) {
+                  if (imageDataTag.isBlank() || !imageDataTag.contains(".")) {
                       if (imageDataTag.isBlank()) {
                           // serve overview page
                           serveCategoryOverview(ctx, category);
