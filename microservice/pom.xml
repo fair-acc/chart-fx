@@ -17,6 +17,14 @@
         ZeroMQ and REST-based micro-service and IoSerialiser implementation.
     </description>
 
+    <properties>
+        <javalin.version>3.9.0</javalin.version>
+        <jetty.version>9.4.29.v20200521</jetty.version> <!-- always update version with Javalin -->
+        <micrometer.version>1.5.1</micrometer.version>
+        <velocity.version>2.0</velocity.version>
+        <okHttp3.version>4.8.1</okHttp3.version>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>de.gsi.dataset</groupId>
@@ -81,6 +89,102 @@
         <!--            <version>2.1.0</version>-->
         <!--            <scope>test</scope>-->
         <!--        </dependency>-->
+        <!-- Javalin dependencies -->
+        <!--         <dependency> -->
+        <!--             <groupId>io.javalin</groupId> -->
+        <!--             <artifactId>javalin</artifactId> -->
+        <!--             <version>${javalin.version}</version> -->
+        <!--         </dependency> -->
+        <!--         <dependency> -->
+        <!--             <groupId>io.javalin</groupId> -->
+        <!--             <artifactId>javalin-openapi</artifactId> -->
+        <!--             <version>${javalin.version}</version> -->
+        <!--         </dependency> -->
+        <!--         <dependency> -->
+        <!--             <groupId>com.fasterxml.jackson.core</groupId> -->
+        <!--             <artifactId>jackson-databind</artifactId> -->
+        <!--             <version>2.10.3</version> -->
+        <!--         </dependency> -->
+        <!-- for HTTP/2 -->
+        <dependency>
+            <groupId>org.eclipse.jetty.http2</groupId>
+            <artifactId>http2-server</artifactId>
+            <version>${jetty.version}</version>
+        </dependency>
+        <!-- for HTTP/2 ALPN (application layer protocol negotiation) -->
+        <dependency>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-alpn-conscrypt-server</artifactId>
+            <version>${jetty.version}</version>
+        </dependency>
+
+        <!-- alternate Javalin dependency injection - add all and remove those not necessary -->
+        <dependency>
+            <groupId>io.javalin</groupId>
+            <artifactId>javalin-bundle</artifactId>
+            <version>${javalin.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.jetbrains.kotlin</groupId>
+                    <artifactId>kotlin-stdlib-jdk8</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>cc.vileda</groupId>
+                    <artifactId>kotlin-openapi3-dsl</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>io.github.classgraph</groupId>
+                    <artifactId>classgraph</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>ch.qos.logback</groupId>
+                    <artifactId>logback-classic</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.velocity</groupId>
+            <artifactId>velocity-engine-core</artifactId>
+            <version>${velocity.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.mindrot</groupId>
+            <artifactId>jbcrypt</artifactId>
+            <version>0.4</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-core</artifactId>
+            <version>${micrometer.version}</version>
+        </dependency>
+
+
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>fastjson</artifactId>
+            <version>1.2.68</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.squareup.okhttp3</groupId>
+            <artifactId>okhttp</artifactId>
+            <version>${okHttp3.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.squareup.okhttp3</groupId>
+            <artifactId>okhttp-sse</artifactId>
+            <version>${okHttp3.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.squareup.okhttp3</groupId>
+            <artifactId>mockwebserver</artifactId>
+            <version>${okHttp3.version}</version>
+            <scope>test</scope>
+        </dependency>
+
     </dependencies>
 
 </project>

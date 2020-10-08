@@ -1,0 +1,4 @@
+#parse("/velocity/layout.vm")
+#@mainLayout()
+<h1>$msg.get("ERROR_403_ACCESS_DENIED")</h1>
+#end

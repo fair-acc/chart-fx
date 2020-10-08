@@ -1,0 +1,56 @@
+#macro(mainLayout)
+<!DOCTYPE html>
+<html lang="$msg.get("LOCALE")">
+<head>
+    <title>$msg.get("COMMON_TITLE")</title>
+    <link rel="stylesheet" href="/main.css">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="Description" content="Clipboard Index">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="/"><img id="logo" src="/img/logo_w.png" alt="Chart-fx Clipboard"></a>
+            <ul id="chooseLanguage">
+                <form>
+                    <button name="locale" value="de" style="background-image: url(/img/german.png);" aria-label="de Spracheinstellungen"></button><!--
+                    --><button name="locale" value="en" style="background-image: url(/img/english.png);" aria-label="en language settings"></button>
+                </form>
+            </ul>
+            <ul id="menu">
+                #if($navContent)
+                    $navContent
+                #end
+                #set($rolesStr = ($currentRoles.toString().toUpperCase()))
+                <li><a href="/">$msg.get("COMMON_NAV_ALLIMAGES")</a></li>
+                #if($rolesStr.contains("ADMIN") || $rolesStr.contains("READ_WRITE"))
+                    <li><a href="/upload">$msg.get("COMMON_NAV_UPLOAD")</a></li>
+                #end
+                #if($rolesStr.contains("ADMIN"))
+                    <li><a href="/admin">$msg.get("COMMON_NAV_ADMIN")</a></li>
+                #end
+                #if($currentUser && $currentUser != "anonymous")
+                    <li>
+                        <form method="post" action="/logout">
+                            <button id="logout" aria-label="logout action">$msg.get("COMMON_NAV_LOGOUT")</button>
+                        </form>
+                    </li>
+                #else
+                    <li><a href="/login" alt="login action">$msg.get("COMMON_NAV_LOGIN")</a></li>
+                #end
+            </ul>
+        </nav>
+    </header>
+    <main id="main">
+        <div id="content">
+            $bodyContent
+        </div>
+    </main>
+    <footer id="footer">
+        $msg.get("COMMON_FOOTER_TEXT")
+    </footer>
+</body>
+</html>
+#end

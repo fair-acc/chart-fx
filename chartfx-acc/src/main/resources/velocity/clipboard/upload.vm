@@ -1,0 +1,18 @@
+#parse("/velocity/layout.vm")
+#@mainLayout()
+<form id="loginForm" method="post" action="/upload" enctype="multipart/form-data">
+    #if($authenticationFailed)
+        <p class="bad notification">$msg.get("LOGIN_AUTH_FAILED")</p>
+    #elseif($authenticationSucceeded)
+        <p class="good notification">$msg.get("LOGIN_AUTH_SUCCEEDED", $currentUser)</p>
+    #elseif($loggedOut)
+        <p class="notification">$msg.get("LOGIN_LOGGED_OUT")</p>
+    #end
+    <h1>$msg.get("CLIPBOARD_UPLOAD_HEADING")</h1>
+    <p>$msg.get("CLIPBOARD_UPLOAD_INSTRUCTIONS", "/index")</p>
+    <input type="text" name="clipboarExportName" placeholder="optional export name" value="">
+    <input type="text" name="clipboarCategoryName" placeholder="optional category name" value="">
+    <input type="file" name="clipboardData" required multiple>
+    <input type="submit" value="$msg.get("CLIPBOARD_UPLOAD_BUTTON")">
+</form>
+#end
