@@ -38,6 +38,11 @@
             <artifactId>chartfx-acc</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>de.gsi</groupId>
+            <artifactId>microservice</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 
     <build>
