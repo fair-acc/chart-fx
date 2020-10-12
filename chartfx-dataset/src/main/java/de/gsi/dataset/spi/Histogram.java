@@ -1,8 +1,6 @@
 package de.gsi.dataset.spi;
 
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 
 import de.gsi.dataset.DataSet;
@@ -42,6 +40,12 @@ public class Histogram extends AbstractHistogram implements Histogram1D, DataSet
     public Histogram(final String name, final double[] xBins, final boolean horizontal) {
         super(name, xBins);
         isHorizontal = horizontal;
+        if (!isHorizontal) {
+            getAxisDescription(DIM_Y).set(getAxisDescription(DIM_X));
+            getAxisDescription(DIM_X).clear();
+            binMin[DIM_Y] = xBins[0];
+            binDelta[DIM_Y] = getAxisDescription(DIM_Y).getLength() / ((double) getDataCount());
+        }
     }
 
     /**
@@ -73,13 +77,18 @@ public class Histogram extends AbstractHistogram implements Histogram1D, DataSet
         if (!isHorizontal) {
             getAxisDescription(DIM_Y).set(getAxisDescription(DIM_X));
             getAxisDescription(DIM_X).clear();
+            binMin[DIM_Y] = minX;
+            binDelta[DIM_Y] = getAxisDescription(DIM_Y).getLength() / ((double) getDataCount());
         }
     }
 
     @Override
     public void addBinContent(final int bin, final double w) {
         lock().writeLockGuard(() -> {
-            data[bin] = data[bin] + w;
+            data[bin] += w;
+            if (bin == 0 || bin == data.length - 1) {
+                return;
+            }
             if (getDimension() == 2) {
                 getAxisDescription(isHorizontal ? DIM_Y : DIM_X).add(data[bin]);
             } else {
@@ -111,82 +120,43 @@ public class Histogram extends AbstractHistogram implements Histogram1D, DataSet
     }
 
     @Override
-    public int findBin(final int dimIndex, final double val) {
-        if (getAxisDescription(dimIndex).getLength() == 0.0) {
-            return 0;
-        }
-        if (!getAxisDescription(dimIndex).contains(val)) {
-            if (val < getAxisDescription(dimIndex).getMin()) {
-                return 0; // underflow bin
-            }
-            return getDataCount() - 1; // overflow bin
-        }
-        if (isEquiDistant()) {
-            final double diff = val - getAxisDescription(dimIndex).getMin();
-            final double len = getAxisDescription(dimIndex).getLength();
-            final int count = getDataCount();
-            final double delta = len / count;
-            return (int) Math.round(diff / delta);
-        }
-        return findNextLargerIndex(axisBins[0], val);
-    }
-
-    @Override
     public double get(final int dimIndex, final int index) {
-        if (dimIndex == DIM_X) {
-            return isHorizontal ? getBinCenter(DIM_X, index + 1) : getBinContent(index + 1);
+        switch (getBoundsType()) {
+        case BINS_CENTERED_ON_BOUNDARY:
+            switch (dimIndex) {
+            case DIM_X:
+                return isHorizontal ? getBinCenter(DIM_X, index + 1) : getBinContent(index + 1);
+            case DIM_Y:
+                return isHorizontal ? getBinContent(index + 1) : getBinCenter(DIM_Y, index + 1);
+            default:
+                return dimIndex + 1 < this.getDimension() ? getBinCenter(DIM_X, index + 1) : getBinContent(index + 1);
+            }
+        case BINS_ALIGNED_WITH_BOUNDARY:
+        default:
+            switch (dimIndex) {
+            case DIM_X:
+                return isHorizontal ? getBinLimits(DIM_X, false, index + 1) : getBinContent(index + 1);
+            case DIM_Y:
+                return isHorizontal ? getBinContent(index + 1) : getBinLimits(DIM_Y, false, index + 1);
+            default:
+                return dimIndex + 1 < this.getDimension() ? getBinLimits(DIM_X, false, index + 1) : getBinContent(index + 1);
+            }
         }
-
-        if (dimIndex == DIM_Y) {
-            return isHorizontal ? getBinContent(index + 1) : getBinCenter(DIM_Y, index + 1);
-        }
-        return dimIndex + 1 < this.getDimension() ? getBinCenter(DIM_X, index + 1) : getBinContent(index + 1);
-    }
-
-    @Override
-    public List<String> getErrorList() {
-        return Collections.emptyList();
     }
 
     @Override
     public int getIndex(int dimIndex, double... value) {
         AssertUtils.checkArrayDimension("value", value, 1);
-        return findBin(dimIndex, value[0]) - 1;
-    }
-
-    @Override
-    public List<String> getInfoList() {
-        return Collections.emptyList();
-    }
-
-    //    @Override
-    public double getValue(int dimIndex, double x) {
-        final int index1 = getIndex(DIM_X, x);
-        final double x1 = get(DIM_X, index1);
-        final double y1 = get(DIM_Y, index1);
-        int index2 = x1 < x ? index1 + 1 : index1 - 1;
-        index2 = Math.max(0, Math.min(index2, this.getDataCount() - 1));
-        final double y2 = get(DIM_Y, index2);
-        if (Double.isNaN(y1) || Double.isNaN(y2)) {
-            // case where the function has a gap (y-coordinate equals to NaN
-            return Double.NaN;
-        }
-
-        final double x2 = get(DIM_X, index2);
-        if (x1 == x2) {
-            return y1;
-        }
-
-        return y1 + (((y2 - y1) * (x - x1)) / (x2 - x1));
+        return Math.max(findBin(dimIndex, value[0]) - 1, 0); // '-1' since binIndex==0 is the under-flow bin
     }
 
     @Override
     public List<String> getWarningList() {
-        final List<String> retVal = new LinkedList<>();
-        if (getBinContent(0) > 0) {
+        final List<String> retVal = super.getWarningList();
+        if (getBinContent(0) > 0 && !retVal.contains(DataSetMetaData.TAG_UNDERSHOOT)) {
             retVal.add(DataSetMetaData.TAG_UNDERSHOOT);
         }
-        if (getBinContent(getDataCount() - 1) > 0) {
+        if (getBinContent(nAxisBins[DIM_X] - 1) > 0 && !retVal.contains(DataSetMetaData.TAG_OVERSHOOT)) {
             retVal.add(DataSetMetaData.TAG_OVERSHOOT);
         }
         return retVal;
@@ -194,9 +164,12 @@ public class Histogram extends AbstractHistogram implements Histogram1D, DataSet
 
     @Override
     public void reset() {
+        super.reset();
         Arrays.fill(data, 0.0);
         getDataStyleMap().clear();
         getDataLabelMap().clear();
+        super.getWarningList().remove(DataSetMetaData.TAG_UNDERSHOOT);
+        super.getWarningList().remove(DataSetMetaData.TAG_OVERSHOOT);
         if (getDimension() == 2) {
             this.getAxisDescription(isHorizontal ? DIM_Y : DIM_X).clear();
         } else {
@@ -206,6 +179,6 @@ public class Histogram extends AbstractHistogram implements Histogram1D, DataSet
 
     @Override
     public DataSet set(final DataSet other, final boolean copy) {
-        throw new UnsupportedOperationException("copy setting transposed data set is not implemented");
+        throw new UnsupportedOperationException("set is not implemented");
     }
 }
