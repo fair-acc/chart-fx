@@ -135,11 +135,11 @@ public class Histogram extends AbstractHistogram implements Histogram1D, DataSet
         default:
             switch (dimIndex) {
             case DIM_X:
-                return isHorizontal ? getBinLimits(DIM_X, false, index + 1) : getBinContent(index + 1);
+                return isHorizontal ? getBinLimits(DIM_X, Boundary.LOWER, index + 1) : getBinContent(index + 1);
             case DIM_Y:
-                return isHorizontal ? getBinContent(index + 1) : getBinLimits(DIM_Y, false, index + 1);
+                return isHorizontal ? getBinContent(index + 1) : getBinLimits(DIM_Y, Boundary.LOWER, index + 1);
             default:
-                return dimIndex + 1 < this.getDimension() ? getBinLimits(DIM_X, false, index + 1) : getBinContent(index + 1);
+                return dimIndex + 1 < this.getDimension() ? getBinLimits(DIM_X, Boundary.LOWER, index + 1) : getBinContent(index + 1);
             }
         }
     }

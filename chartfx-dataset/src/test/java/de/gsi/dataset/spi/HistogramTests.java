@@ -9,6 +9,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import static de.gsi.dataset.DataSet.DIM_X;
 import static de.gsi.dataset.DataSet.DIM_Y;
+import static de.gsi.dataset.Histogram.Boundary.LOWER;
+import static de.gsi.dataset.Histogram.Boundary.UPPER;
 import static de.gsi.dataset.spi.AbstractHistogram.HistogramOuterBounds.BINS_ALIGNED_WITH_BOUNDARY;
 import static de.gsi.dataset.spi.AbstractHistogram.HistogramOuterBounds.BINS_CENTERED_ON_BOUNDARY;
 
@@ -73,11 +75,11 @@ class HistogramTests {
         assertEquals(Double.NaN, dataSet.getBinCenter(DIM_X, dataSet.getDataCount() + 1));
 
         for (int i = 0; i < N_BINS; i++) {
-            assertEquals(i + 0.0, dataSet.getBinLimits(DIM_X, false, i + 1));
-            assertEquals(i + 1.0, dataSet.getBinLimits(DIM_X, true, i + 1));
+            assertEquals(i + 0.0, dataSet.getBinLimits(DIM_X, LOWER, i + 1));
+            assertEquals(i + 1.0, dataSet.getBinLimits(DIM_X, UPPER, i + 1));
         }
-        assertEquals(Double.NEGATIVE_INFINITY, dataSet.getBinLimits(DIM_X, false, -1));
-        assertEquals(Double.POSITIVE_INFINITY, dataSet.getBinLimits(DIM_X, true, dataSet.getDataCount() + 1));
+        assertEquals(Double.NEGATIVE_INFINITY, dataSet.getBinLimits(DIM_X, LOWER, -1));
+        assertEquals(Double.POSITIVE_INFINITY, dataSet.getBinLimits(DIM_X, UPPER, dataSet.getDataCount() + 1));
 
         // find bin - N.B. under-flow bin starts at 0
         assertEquals(0, dataSet.findBin(DIM_X, -1));
@@ -105,11 +107,11 @@ class HistogramTests {
 
         // N.B. centred on boundary definition
         for (int i = 0; i < N_BINS; i++) {
-            assertEquals(i - 0.5, dataSet.getBinLimits(DIM_X, false, i + 1));
-            assertEquals(i + 0.5, dataSet.getBinLimits(DIM_X, true, i + 1));
+            assertEquals(i - 0.5, dataSet.getBinLimits(DIM_X, LOWER, i + 1));
+            assertEquals(i + 0.5, dataSet.getBinLimits(DIM_X, UPPER, i + 1));
         }
-        assertEquals(Double.NEGATIVE_INFINITY, dataSet.getBinLimits(DIM_X, false, -1));
-        assertEquals(Double.POSITIVE_INFINITY, dataSet.getBinLimits(DIM_X, true, dataSet.getDataCount() + 1));
+        assertEquals(Double.NEGATIVE_INFINITY, dataSet.getBinLimits(DIM_X, LOWER, -1));
+        assertEquals(Double.POSITIVE_INFINITY, dataSet.getBinLimits(DIM_X, UPPER, dataSet.getDataCount() + 1));
 
         // find bin - N.B. under-flow bin starts at 0
         assertEquals(0, dataSet.findBin(DIM_X, -1));
@@ -209,14 +211,14 @@ class HistogramTests {
         assertEquals(BINS_ALIGNED_WITH_BOUNDARY, dataSet.getBoundsType());
 
         assertEquals(4, dataSet.getDataCount());
-        assertEquals(0.0, dataSet.getBinLimits(DIM_X, false, 1));
-        assertEquals(0.1, dataSet.getBinLimits(DIM_X, true, 1));
-        assertEquals(0.1, dataSet.getBinLimits(DIM_X, false, 2));
-        assertEquals(1.0, dataSet.getBinLimits(DIM_X, true, 2));
-        assertEquals(1.0, dataSet.getBinLimits(DIM_X, false, 3));
-        assertEquals(5.0, dataSet.getBinLimits(DIM_X, true, 3));
-        assertEquals(5.0, dataSet.getBinLimits(DIM_X, false, 4));
-        assertEquals(6.0, dataSet.getBinLimits(DIM_X, true, 4));
+        assertEquals(0.0, dataSet.getBinLimits(DIM_X, LOWER, 1));
+        assertEquals(0.1, dataSet.getBinLimits(DIM_X, UPPER, 1));
+        assertEquals(0.1, dataSet.getBinLimits(DIM_X, LOWER, 2));
+        assertEquals(1.0, dataSet.getBinLimits(DIM_X, UPPER, 2));
+        assertEquals(1.0, dataSet.getBinLimits(DIM_X, LOWER, 3));
+        assertEquals(5.0, dataSet.getBinLimits(DIM_X, UPPER, 3));
+        assertEquals(5.0, dataSet.getBinLimits(DIM_X, LOWER, 4));
+        assertEquals(6.0, dataSet.getBinLimits(DIM_X, UPPER, 4));
 
         assertEquals(0.0 + 0.5 * (0.1 - 0.0), dataSet.getBinCenter(DIM_X, 1));
         assertEquals(0.1 + 0.5 * (1.0 - 0.1), dataSet.getBinCenter(DIM_X, 2));

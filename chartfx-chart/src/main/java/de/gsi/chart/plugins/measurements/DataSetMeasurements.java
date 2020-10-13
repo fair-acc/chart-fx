@@ -539,7 +539,7 @@ public class DataSetMeasurements extends AbstractChartMeasurement {
             // math functions
             case SQUARE:
                 FXUtils.runFX(() -> yAxis.set("(" + name1 + ")²", yAxisUnit));
-                outputDataSet.set(DataSetMath.sqrFunction(firstDataSet));
+                outputDataSet.set(DataSetMath.sqrFunction(firstDataSet, 0.0));
                 break;
             case SQUARE_FULL:
                 FXUtils.runFX(() -> yAxis.set("(" + name1 + ", " + name2 + ")²", yAxisUnit));
@@ -547,7 +547,7 @@ public class DataSetMeasurements extends AbstractChartMeasurement {
                 break;
             case SQUARE_ROOT:
                 FXUtils.runFX(() -> yAxis.set("√(" + name1 + ")", yAxisUnit));
-                outputDataSet.set(DataSetMath.sqrtFunction(firstDataSet));
+                outputDataSet.set(DataSetMath.sqrtFunction(firstDataSet, 0.0));
                 break;
             case SQUARE_ROOT_FULL:
                 FXUtils.runFX(() -> yAxis.set("√(" + name1 + ", " + name2 + ")", yAxisUnit));
